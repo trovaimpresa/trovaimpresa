@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edil Rossi & Figli — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --arancio2:#c45e28;
+    --arancio3:#fff3ec;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --light:   #999;
+    --bg:      #fafaf8;
+    --white:   #ffffff;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 4px 24px rgba(0,0,0,0.07);
+    --shadow2: 0 12px 48px rgba(0,0,0,0.12);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); overflow-x:hidden; }
+
+  /* ── NAV ── */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:200;
+    padding:14px 40px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(250,250,248,0.95);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+  .logo-text { font-family:'Playfair Display',serif; font-size:1.2rem; }
+  .logo-text .t { color:var(--verde); }
+  .logo-text .i { color:var(--arancio); }
+  .nav-back {
+    display:flex; align-items:center; gap:6px;
+    color:var(--mid); font-size:0.88rem; font-weight:500;
+    text-decoration:none; transition:color 0.2s;
+  }
+  .nav-back:hover { color:var(--verde); }
+
+  /* ── HERO COVER ── */
+  .cover {
+    height: 320px;
+    background: linear-gradient(135deg, #1a3a2a 0%, #2a7a4b 50%, #1f5e38 100%);
+    position: relative; overflow: hidden;
+    margin-top: 57px;
+  }
+  .cover::before {
+    content:'';
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 60% 80% at 20% 50%, rgba(232,115,58,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(255,255,255,0.04) 0%, transparent 50%);
+  }
+  /* Grid pattern */
+  .cover::after {
+    content:'';
+    position:absolute; inset:0;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .cover-content {
+    position:absolute; bottom:0; left:0; right:0;
+    padding:0 40px 0;
+    display:flex; align-items:flex-end; gap:24px;
+  }
+
+  /* ── PROFILE HEADER ── */
+  .profile-avatar {
+    width:100px; height:100px;
+    border-radius:20px;
+    background:white;
+    border:4px solid white;
+    box-shadow:var(--shadow2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:2.8rem;
+    transform:translateY(50%);
+    flex-shrink:0;
+    position:relative; z-index:10;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    max-width:1100px; margin:0 auto;
+    padding:0 40px 80px;
+    display:grid;
+    grid-template-columns:1fr 340px;
+    gap:32px;
+    margin-top:32px;
+  }
+
+  @media(max-width:768px){
+    .main { grid-template-columns:1fr; padding:0 20px 60px; }
+    .cover-content { padding:0 20px; }
+    nav { padding:14px 20px; }
+  }
+
+  /* ── PROFILE INFO ── */
+  .profile-info {
+    padding-top:60px;
+  }
+
+  .profile-name {
+    font-family:'Playfair Display',serif;
+    font-size:2rem; font-weight:700;
+    margin-bottom:8px;
+  }
+
+  .profile-meta {
+    display:flex; flex-wrap:wrap; gap:16px;
+    margin-bottom:16px;
+  }
+
+  .meta-item {
+    display:flex; align-items:center; gap:6px;
+    font-size:0.88rem; color:var(--mid); font-weight:500;
+  }
+
+  .badges {
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-bottom:24px;
+  }
+
+  .badge {
+    padding:5px 12px; border-radius:20px;
+    font-size:0.78rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .badge-green { background:var(--verde3); color:var(--verde2); }
+  .badge-orange { background:var(--arancio3); color:var(--arancio2); }
+  .badge-verified {
+    background:var(--verde); color:white;
+    display:flex; align-items:center; gap:4px;
+  }
+
+  .rating-row {
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:28px;
+  }
+  .stars { color:#f4c02e; font-size:1.2rem; letter-spacing:2px; }
+  .rating-num { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; }
+  .rating-count { font-size:0.85rem; color:var(--mid); }
+
+  /* ── CARD ── */
+  .card {
+    background:white; border-radius:18px;
+    padding:28px; box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    margin-bottom:24px;
+  }
+
+  .card-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.15rem; font-weight:700;
+    margin-bottom:18px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .card-title span { font-size:1.2rem; }
+
+  /* ── DESCRIPTION ── */
+  .desc { font-size:0.95rem; color:var(--mid); line-height:1.75; }
+
+  /* ── CATEGORIES ── */
+  .cat-grid {
+    display:flex; flex-wrap:wrap; gap:10px;
+  }
+  .cat-item {
+    display:flex; align-items:center; gap:8px;
+    background:var(--bg); border-radius:12px;
+    padding:10px 16px; font-size:0.88rem; font-weight:600;
+    border:1px solid var(--border);
+    transition:all 0.2s;
+  }
+  .cat-item:hover { border-color:var(--verde); background:var(--verde3); }
+  .cat-icon { font-size:1.2rem; }
+
+  /* ── FOTO LAVORI ── */
+  .foto-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .foto-item {
+    aspect-ratio:1;
+    border-radius:12px;
+    overflow:hidden;
+    cursor:pointer;
+    position:relative;
+    background:var(--bg);
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform 0.2s;
+  }
+  .foto-item:hover { transform:scale(1.03); }
+  .foto-item .foto-bg {
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:2.5rem;
+    flex-direction:column; gap:6px;
+  }
+  .foto-label {
+    font-size:0.7rem; font-weight:700;
+    color:var(--mid); text-align:center;
+    text-transform:uppercase; letter-spacing:0.5px;
+  }
+
+  /* Foto colorati diversi */
+  .foto-item:nth-child(1) .foto-bg { background:linear-gradient(135deg,#e8f5ee,#c8ead6); }
+  .foto-item:nth-child(2) .foto-bg { background:linear-gradient(135deg,#fff3ec,#ffe0cc); }
+  .foto-item:nth-child(3) .foto-bg { background:linear-gradient(135deg,#e8f0ff,#ccd9ff); }
+  .foto-item:nth-child(4) .foto-bg { background:linear-gradient(135deg,#fff8e8,#ffeeba); }
+  .foto-item:nth-child(5) .foto-bg { background:linear-gradient(135deg,#ffe8f0,#ffccd9); }
+  .foto-item:nth-child(6) .foto-bg { background:linear-gradient(135deg,#e8faf5,#c0f0e4); }
+
+  /* ── RECENSIONI ── */
+  .review {
+    padding:18px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .review:last-child { border-bottom:none; padding-bottom:0; }
+
+  .review-header {
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom:8px;
+  }
+  .reviewer-name { font-weight:700; font-size:0.95rem; }
+  .review-date { font-size:0.78rem; color:var(--light); }
+  .review-stars { color:#f4c02e; font-size:0.9rem; margin-bottom:6px; }
+  .review-text { font-size:0.9rem; color:var(--mid); line-height:1.6; }
+  .review-work { font-size:0.78rem; color:var(--verde); font-weight:600; margin-top:6px; }
+
+  /* Rating breakdown */
+  .rating-breakdown { margin-bottom:20px; }
+  .rb-row {
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:6px;
+  }
+  .rb-label { font-size:0.8rem; color:var(--mid); width:80px; font-weight:500; }
+  .rb-bar { flex:1; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; border:1px solid var(--border); }
+  .rb-fill { height:100%; border-radius:3px; background:var(--verde); }
+  .rb-num { font-size:0.8rem; font-weight:700; color:var(--dark); width:24px; text-align:right; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { padding-top:60px; }
+
+  .sidebar-card {
+    background:white; border-radius:18px;
+    padding:24px; box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    margin-bottom:20px;
+    position:sticky; top:80px;
+  }
+
+  .price-range {
+    text-align:center;
+    padding:16px 0 20px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:20px;
+  }
+  .price-label { font-size:0.78rem; color:var(--light); text-transform:uppercase; letter-spacing:1px; font-weight:600; margin-bottom:4px; }
+  .price-value { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:var(--verde); }
+  .price-sub { font-size:0.78rem; color:var(--light); margin-top:2px; }
+
+  .btn-preventivo {
+    display:block; width:100%;
+    background:var(--arancio); color:white;
+    border:none; border-radius:14px;
+    padding:15px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:1rem;
+    cursor:pointer; transition:all 0.2s;
+    text-align:center; text-decoration:none;
+    box-shadow:0 6px 20px rgba(232,115,58,0.35);
+    margin-bottom:12px;
+  }
+  .btn-preventivo:hover { background:var(--arancio2); transform:translateY(-2px); }
+
+  .btn-contatta {
+    display:block; width:100%;
+    background:var(--verde3); color:var(--verde2);
+    border:2px solid var(--verde);
+    border-radius:14px; padding:13px;
+    font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.95rem;
+    cursor:pointer; transition:all 0.2s;
+    text-align:center; text-decoration:none;
+    margin-bottom:20px;
+  }
+  .btn-contatta:hover { background:var(--verde); color:white; }
+
+  .contact-list { list-style:none; }
+  .contact-list li {
+    display:flex; align-items:center; gap:10px;
+    padding:9px 0; border-bottom:1px solid var(--border);
+    font-size:0.88rem;
+  }
+  .contact-list li:last-child { border-bottom:none; }
+  .contact-list .icon { font-size:1.1rem; width:24px; text-align:center; }
+  .contact-list a { color:var(--verde); text-decoration:none; font-weight:600; }
+  .contact-list a:hover { text-decoration:underline; }
+
+  /* Stats mini */
+  .mini-stats {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:12px; margin-top:16px;
+  }
+  .mini-stat {
+    background:var(--bg); border-radius:12px;
+    padding:12px; text-align:center;
+    border:1px solid var(--border);
+  }
+  .mini-stat-num {
+    font-family:'Playfair Display',serif;
+    font-size:1.3rem; font-weight:700;
+    color:var(--dark); display:block;
+  }
+  .mini-stat-label { font-size:0.72rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+
+  /* ── PREVENTIVO MODAL ── */
+  .modal-overlay {
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(0,0,0,0.5);
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+    backdrop-filter:blur(4px);
+  }
+  .modal-overlay.open { display:flex; animation:fadeIn 0.2s ease; }
+
+  .modal {
+    background:white; border-radius:24px;
+    padding:36px; max-width:520px; width:100%;
+    box-shadow:var(--shadow2);
+    animation:slideUp 0.3s ease;
+  }
+
+  .modal-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.5rem; margin-bottom:6px;
+  }
+  .modal-sub { font-size:0.9rem; color:var(--mid); margin-bottom:24px; }
+
+  .form-group { margin-bottom:16px; }
+  .form-label { font-size:0.82rem; font-weight:700; color:var(--dark); margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:0.5px; }
+  .form-input, .form-textarea, .form-select {
+    width:100%; padding:12px 14px;
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    font-family:'DM Sans',sans-serif;
+    font-size:0.92rem; color:var(--dark);
+    outline:none; transition:border 0.2s;
+    background:var(--bg);
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color:var(--verde); }
+  .form-textarea { resize:vertical; min-height:90px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .btn-submit {
+    width:100%; background:var(--arancio); color:white;
+    border:none; border-radius:14px; padding:15px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+    cursor:pointer; transition:all 0.2s;
+    box-shadow:0 6px 20px rgba(232,115,58,0.35);
+    margin-top:8px;
+  }
+  .btn-submit:hover { background:var(--arancio2); }
+
+  .modal-close {
+    position:absolute; top:16px; right:20px;
+    background:none; border:none; font-size:1.4rem;
+    cursor:pointer; color:var(--light); line-height:1;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="min-height:10px;"></nav>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-content">
+    <div class="profile-avatar">🏗️</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- COLONNA SINISTRA -->
+  <div>
+    <div class="profile-info">
+      <div class="badges">
+        <span class="badge badge-verified">✓ Verificata</span>
+        <span class="badge badge-green">Dal 1998</span>
+        <span class="badge badge-orange">Top Impresa 2024</span>
+      </div>
+      <h1 class="profile-name">Edil Rossi & Figli</h1>
+      <div class="profile-meta">
+        <span class="meta-item">📍 Milano, Lombardia</span>
+        <span class="meta-item">🏙️ Opera in tutta la provincia</span>
+        <span class="meta-item">👷 25 dipendenti</span>
+      </div>
+      <div class="rating-row">
+        <span class="stars">★★★★★</span>
+        <span class="rating-num">4.8</span>
+        <span class="rating-count">(47 recensioni)</span>
+      </div>
+    </div>
+
+    <!-- DESCRIZIONE -->
+    <div class="card">
+      <div class="card-title"><span>📋</span> Chi siamo</div>
+      <p class="desc">
+        Edil Rossi & Figli è un'impresa edile con oltre 25 anni di esperienza nel settore delle costruzioni e ristrutturazioni in Lombardia. Fondata nel 1998 da Marco Rossi, oggi l'azienda conta un team di 25 professionisti altamente qualificati.
+        <br><br>
+        Ci occupiamo di ristrutturazioni residenziali e commerciali, nuove costruzioni, impianti elettrici e idraulici, pavimentazioni e finiture di pregio. La nostra missione è realizzare ogni progetto con la massima cura, rispettando tempi e budget concordati.
+        <br><br>
+        Siamo certificati ISO 9001 e lavoriamo con i migliori materiali sul mercato. La soddisfazione del cliente è al centro di tutto quello che facciamo.
+      </p>
+    </div>
+
+    <!-- CATEGORIE -->
+    <div class="card">
+      <div class="card-title"><span>🔧</span> Specializzazioni</div>
+      <div class="cat-grid">
+        <div class="cat-item"><span class="cat-icon">🏠</span> Ristrutturazioni</div>
+        <div class="cat-item"><span class="cat-icon">🧱</span> Nuove costruzioni</div>
+        <div class="cat-item"><span class="cat-icon">⚡</span> Impianti elettrici</div>
+        <div class="cat-item"><span class="cat-icon">🚿</span> Impianti idraulici</div>
+        <div class="cat-item"><span class="cat-icon">🪟</span> Serramenti</div>
+        <div class="cat-item"><span class="cat-icon">🎨</span> Pittura e finiture</div>
+        <div class="cat-item"><span class="cat-icon">🪵</span> Pavimenti e parquet</div>
+        <div class="cat-item"><span class="cat-icon">🏗️</span> Opere strutturali</div>
+      </div>
+    </div>
+
+    <!-- FOTO LAVORI -->
+    <div class="card">
+      <div class="card-title"><span>📸</span> Foto dei lavori</div>
+      <div class="foto-grid">
+        <div class="foto-item">
+          <div class="foto-bg">🏠<span class="foto-label">Ristrutturazione<br>appartamento</span></div>
+        </div>
+        <div class="foto-item">
+          <div class="foto-bg">🍳<span class="foto-label">Cucina<br>moderna</span></div>
+        </div>
+        <div class="foto-item">
+          <div class="foto-bg">🚿<span class="foto-label">Bagno<br>completo</span></div>
+        </div>
+        <div class="foto-item">
+          <div class="foto-bg">🧱<span class="foto-label">Facciata<br>esterna</span></div>
+        </div>
+        <div class="foto-item">
+          <div class="foto-bg">🪵<span class="foto-label">Parquet<br>pregiato</span></div>
+        </div>
+        <div class="foto-item">
+          <div class="foto-bg">🏗️<span class="foto-label">Cantiere<br>in corso</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENSIONI -->
+    <div class="card">
+      <div class="card-title"><span>⭐</span> Recensioni dei clienti</div>
+
+      <!-- Rating breakdown -->
+      <div class="rating-breakdown">
+        <div class="rb-row">
+          <span class="rb-label">Qualità</span>
+          <div class="rb-bar"><div class="rb-fill" style="width:96%"></div></div>
+          <span class="rb-num">4.8</span>
+        </div>
+        <div class="rb-row">
+          <span class="rb-label">Puntualità</span>
+          <div class="rb-bar"><div class="rb-fill" style="width:90%"></div></div>
+          <span class="rb-num">4.5</span>
+        </div>
+        <div class="rb-row">
+          <span class="rb-label">Prezzo</span>
+          <div class="rb-bar"><div class="rb-fill" style="width:84%"></div></div>
+          <span class="rb-num">4.2</span>
+        </div>
+        <div class="rb-row">
+          <span class="rb-label">Pulizia</span>
+          <div class="rb-bar"><div class="rb-fill" style="width:100%"></div></div>
+          <span class="rb-num">5.0</span>
+        </div>
+      </div>
+
+      <!-- Singole recensioni -->
+      <div class="review">
+        <div class="review-header">
+          <span class="reviewer-name">Giulia M.</span>
+          <span class="review-date">Gennaio 2025</span>
+        </div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">Lavoro eccellente! Hanno ristrutturato il mio appartamento in tempi record e con una cura nei dettagli incredibile. Il team è professionale e sempre disponibile.</p>
+        <div class="review-work">✔ Ristrutturazione appartamento 90mq</div>
+      </div>
+
+      <div class="review">
+        <div class="review-header">
+          <span class="reviewer-name">Andrea T.</span>
+          <span class="review-date">Novembre 2024</span>
+        </div>
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">Ho rifatto bagno e cucina con Edil Rossi. Risultato fantastico, rispetto dei tempi e del preventivo. Li consiglio vivamente a chiunque.</p>
+        <div class="review-work">✔ Rifacimento bagno e cucina</div>
+      </div>
+
+      <div class="review">
+        <div class="review-header">
+          <span class="reviewer-name">Laura B.</span>
+          <span class="review-date">Settembre 2024</span>
+        </div>
+        <div class="review-stars">★★★★☆</div>
+        <p class="review-text">Ottima impresa, lavori di qualità. Un piccolo ritardo all'inizio ma poi hanno recuperato. Il risultato finale è perfetto.</p>
+        <div class="review-work">✔ Impianto elettrico + pittura</div>
+      </div>
+
+      <div style="text-align:center; margin-top:20px;">
+        <a href="#" style="color:var(--verde);font-weight:700;font-size:0.9rem;text-decoration:none;">Leggi tutte le 47 recensioni →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-card" style="position:sticky;top:80px">
+
+      <div class="price-range">
+        <div class="price-label">Costo medio</div>
+        <div class="price-value">€ 800 – 1.200</div>
+        <div class="price-sub">al metro quadro · varia per tipo di lavoro</div>
+      </div>
+
+      <button class="btn-preventivo" onclick="openModal()">
+        📋 Richiedi preventivo gratuito
+      </button>
+
+      <a href="tel:+390212345678" class="btn-contatta">
+        📞 Chiama ora
+      </a>
+
+      <ul class="contact-list">
+        <li><span class="icon">📍</span> Via Roma 42, Milano</li>
+        <li><span class="icon">📞</span> <a href="tel:+390212345678">02 1234 5678</a></li>
+        <li><span class="icon">✉️</span> <a href="/cdn-cgi/l/email-protection#31585f575e715455585d435e4242581f5845"><span class="__cf_email__" data-cfemail="b4dddad2dbf4d1d0ddd8c6dbc7c7dd9addc0">[email&#160;protected]</span></a></li>
+        <li><span class="icon">🌐</span> <a href="#">www.edilrossi.it</a></li>
+        <li><span class="icon">🕐</span> Lun–Ven 8:00–18:00</li>
+      </ul>
+
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <span class="mini-stat-num">25+</span>
+          <span class="mini-stat-label">Anni exp.</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-num">400+</span>
+          <span class="mini-stat-label">Progetti</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-num">47</span>
+          <span class="mini-stat-label">Recensioni</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-num" style="color:var(--arancio)">4.8⭐</span>
+          <span class="mini-stat-label">Rating</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PREVENTIVO -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Richiedi un preventivo</div>
+    <p class="modal-sub">Compila il modulo — ti risponderemo entro 24 ore, gratuitamente.</p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-input" placeholder="Il tuo nome">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cognome</label>
+        <input type="text" class="form-input" placeholder="Il tuo cognome">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" placeholder="email@esempio.it">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefono</label>
+        <input type="tel" class="form-input" placeholder="+39 000 000 0000">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Tipo di lavoro</label>
+      <select class="form-select">
+        <option value="">Seleziona...</option>
+        <option>Ristrutturazione appartamento</option>
+        <option>Nuova costruzione</option>
+        <option>Impianto elettrico</option>
+        <option>Impianto idraulico</option>
+        <option>Pavimenti e parquet</option>
+        <option>Pittura e finiture</option>
+        <option>Altro</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Descrivi il tuo progetto</label>
+      <textarea class="form-textarea" placeholder="Descrivi brevemente il lavoro che devi fare, i metri quadri, i tempi..."></textarea>
+    </div>
+
+    <button class="btn-submit" onclick="submitPreventivo()">
+      📋 Invia richiesta gratuita
+    </button>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+f

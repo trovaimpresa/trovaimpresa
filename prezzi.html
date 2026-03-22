@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piani e prezzi — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --arancio2:#c45e28;
+    --arancio3:#fff3ec;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --light:   #999;
+    --bg:      #fafaf8;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 4px 24px rgba(0,0,0,0.07);
+    --shadow2: 0 16px 60px rgba(0,0,0,0.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+
+  nav {
+    position:sticky; top:0; z-index:100;
+    background:white; border-bottom:1px solid var(--border);
+    padding:14px 32px; display:flex; align-items:center; justify-content:space-between;
+    box-shadow:0 2px 12px rgba(0,0,0,0.05);
+  }
+  .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+  .logo-text { font-family:'Playfair Display',serif; font-size:1.2rem; }
+  .logo-text .trova { color:var(--verde); }
+  .logo-text .impresa { color:var(--arancio); }
+
+  /* HERO */
+  .hero {
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    padding:80px 24px; text-align:center; color:white;
+  }
+  .hero-badge {
+    display:inline-block; background:rgba(255,255,255,0.15);
+    padding:6px 16px; border-radius:20px; font-size:0.82rem;
+    font-weight:700; margin-bottom:20px; backdrop-filter:blur(10px);
+  }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2rem,4vw,3rem); margin-bottom:16px; }
+  .hero h1 em { color:#f4c02e; font-style:normal; }
+  .hero p { font-size:1rem; opacity:0.85; max-width:500px; margin:0 auto; line-height:1.7; }
+
+  /* TOGGLE */
+  .toggle-wrap {
+    display:flex; align-items:center; justify-content:center;
+    gap:16px; padding:40px 24px 0; font-weight:600; font-size:0.9rem;
+  }
+  .toggle {
+    width:52px; height:28px; background:var(--verde); border-radius:14px;
+    cursor:pointer; position:relative; transition:all 0.3s;
+  }
+  .toggle-dot {
+    width:22px; height:22px; background:white; border-radius:50%;
+    position:absolute; top:3px; left:3px; transition:all 0.3s;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  }
+  .toggle.annuale .toggle-dot { left:27px; }
+  .risparmio {
+    background:var(--arancio3); color:var(--arancio2);
+    padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:800;
+  }
+
+  /* PIANI */
+  .piani-grid {
+    display:grid; grid-template-columns:repeat(2,1fr);
+    gap:24px; max-width:800px; margin:32px auto; padding:0 24px 80px;
+  }
+  @media(max-width:600px){ .piani-grid { grid-template-columns:1fr; } }
+
+  .piano-card {
+    background:white; border-radius:24px; padding:32px;
+    box-shadow:var(--shadow); border:2px solid var(--border);
+    position:relative; transition:all 0.3s;
+  }
+  .piano-card.pro {
+    border-color:var(--verde); background:linear-gradient(180deg,#f0faf5,white);
+    box-shadow:var(--shadow2);
+  }
+  .piano-badge {
+    position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+    background:var(--arancio); color:white; padding:5px 18px;
+    border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap;
+  }
+  .piano-icon { font-size:2.5rem; margin-bottom:12px; }
+  .piano-nome { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:4px; }
+  .piano-sub { font-size:0.82rem; color:var(--light); margin-bottom:24px; }
+
+  .piano-prezzo { margin-bottom:24px; }
+  .prezzo-num { font-family:'Playfair Display',serif; font-size:3rem; font-weight:700; line-height:1; }
+  .prezzo-num.gratis { color:var(--verde); }
+  .prezzo-periodo { font-size:0.82rem; color:var(--light); margin-top:4px; }
+  .prezzo-originale { font-size:0.82rem; color:var(--light); text-decoration:line-through; }
+
+  .piano-features { margin-bottom:28px; }
+  .feature {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:8px 0; border-bottom:1px solid var(--border);
+    font-size:0.88rem;
+  }
+  .feature:last-child { border-bottom:none; }
+  .feature-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
+  .feature-text { line-height:1.4; }
+  .feature.disab { opacity:0.4; }
+
+  .piano-btn {
+    width:100%; padding:14px; border-radius:14px; border:none;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .piano-btn.free {
+    background:var(--bg); color:var(--verde2);
+    border:2px solid var(--verde);
+  }
+  .piano-btn.free:hover { background:var(--verde3); }
+  .piano-btn.pro-btn {
+    background:var(--arancio); color:white;
+    box-shadow:0 6px 20px rgba(232,115,58,0.35);
+  }
+  .piano-btn.pro-btn:hover { background:var(--arancio2); transform:translateY(-1px); }
+
+  /* FAQ */
+  .faq { max-width:700px; margin:0 auto; padding:0 24px 80px; }
+  .faq-title { font-family:'Playfair Display',serif; font-size:1.8rem; text-align:center; margin-bottom:32px; }
+  .faq-item { background:white; border-radius:14px; margin-bottom:10px; overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--border); }
+  .faq-q {
+    padding:18px 20px; font-weight:700; font-size:0.92rem; cursor:pointer;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .faq-a { padding:0 20px 16px; font-size:0.88rem; color:var(--mid); line-height:1.7; display:none; }
+  .faq-a.open { display:block; }
+
+  /* MODAL PAGAMENTO */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    z-index:200; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.show { display:flex; }
+  .modal {
+    background:white; border-radius:24px; padding:32px;
+    max-width:480px; width:100%; box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  }
+  .modal-title { font-family:'Playfair Display',serif; font-size:1.4rem; margin-bottom:6px; }
+  .modal-sub { font-size:0.85rem; color:var(--light); margin-bottom:24px; }
+
+  .riepilogo-pay {
+    background:var(--verde3); border-radius:14px; padding:18px; margin-bottom:20px;
+  }
+  .riepilogo-row { display:flex; justify-content:space-between; font-size:0.88rem; margin-bottom:8px; }
+  .riepilogo-row:last-child { margin-bottom:0; font-weight:800; font-size:1rem; }
+
+  .form-group { margin-bottom:16px; }
+  .form-label { display:block; font-size:0.72rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .form-input {
+    width:100%; padding:12px 14px; border-radius:10px;
+    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
+    font-size:0.9rem; outline:none; transition:border 0.2s;
+  }
+  .form-input:focus { border-color:var(--verde); }
+
+  #card-element {
+    padding:12px 14px; border-radius:10px;
+    border:1.5px solid var(--border); background:white;
+    transition:border 0.2s;
+  }
+  #card-element.StripeElement--focus { border-color:var(--verde); }
+
+  .pay-btn {
+    width:100%; padding:15px; background:var(--arancio); color:white;
+    border:none; border-radius:14px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:1rem; cursor:pointer; margin-top:16px;
+    box-shadow:0 6px 20px rgba(232,115,58,0.35); transition:all 0.2s;
+  }
+  .pay-btn:hover { background:var(--arancio2); }
+  .pay-btn:disabled { background:var(--light); box-shadow:none; cursor:not-allowed; }
+
+  .stripe-logo {
+    text-align:center; margin-top:12px; font-size:0.75rem; color:var(--light);
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .pay-err { color:#e53e3e; font-size:0.82rem; margin-top:8px; display:none; }
+
+  .btn-chiudi-modal {
+    position:absolute; top:16px; right:16px; background:var(--bg);
+    border:none; border-radius:8px; padding:6px 12px; cursor:pointer;
+    font-size:0.85rem; color:var(--mid); font-weight:700;
+  }
+</style>
+</head>
+<body>
+
+<nav style="min-height:10px;"></nav>
+
+<!-- HERO -->
+<div class="hero">
+  <img src="logo.png" alt="TrovaImpresa" style="width:600px;max-width:90%;margin:0 auto 0;display:block;">
+  <div class="hero-badge">💰 Prezzi trasparenti, nessuna sorpresa</div>
+  <h1>I primi <em>3 mesi sono gratis</em></h1>
+  <p>Registrati gratis e prova tutto senza pagare. Dopo 3 mesi scegli tu: resta gratis o passa al Pro!</p>
+</div>
+
+<!-- TOGGLE MENSILE/ANNUALE -->
+<div class="toggle-wrap">
+  <span>Mensile</span>
+  <div class="toggle" id="toggle" onclick="togglePiano()">
+    <div class="toggle-dot"></div>
+  </div>
+  <span>Annuale <span class="risparmio">Risparmi 16€!</span></span>
+</div>
+
+<!-- PIANI -->
+<div class="piani-grid">
+
+  <!-- PIANO GRATUITO -->
+  <div class="piano-card">
+    <div class="piano-icon">🆓</div>
+    <div class="piano-nome">Gratuito</div>
+    <div class="piano-sub">Per iniziare senza rischi</div>
+    <div class="piano-prezzo">
+      <div class="prezzo-num gratis">€0</div>
+      <div class="prezzo-periodo">per sempre · anche dopo i 3 mesi</div>
+    </div>
+    <div class="piano-features">
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Profilo visibile nella tua città</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Fino a 3 preventivi/mese</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Raccolta recensioni</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Pannello impresa base</span></div>
+      <div class="feature disab"><span class="feature-icon">❌</span><span class="feature-text">Badge verificato</span></div>
+      <div class="feature disab"><span class="feature-icon">❌</span><span class="feature-text">Visibile in tutta Italia</span></div>
+      <div class="feature disab"><span class="feature-icon">❌</span><span class="feature-text">Preventivi illimitati</span></div>
+      <div class="feature disab"><span class="feature-icon">❌</span><span class="feature-text">Foto e portfolio lavori</span></div>
+    </div>
+    <a href="registrazione.html">
+      <button class="piano-btn free">🚀 Registrati gratis</button>
+    </a>
+  </div>
+
+  <!-- PIANO PRO -->
+  <div class="piano-card pro">
+    <div class="piano-badge">⭐ PIÙ POPOLARE</div>
+    <div class="piano-icon">🏆</div>
+    <div class="piano-nome">Pro</div>
+    <div class="piano-sub">Per crescere sul mercato</div>
+    <div class="piano-prezzo">
+      <div class="prezzo-num" id="prezzo-display">€3</div>
+      <div class="prezzo-periodo" id="periodo-display">al mese · dopo i 3 mesi gratis</div>
+      <div class="prezzo-originale" id="originale-display" style="display:none">invece di €36/anno</div>
+    </div>
+    <div class="piano-features">
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del piano gratuito</span></div>
+      <div class="feature"><span class="feature-icon">🏅</span><span class="feature-text">Badge <strong>Verificato</strong> sul profilo</span></div>
+      <div class="feature"><span class="feature-icon">🔝</span><span class="feature-text">Posizione prioritaria nei risultati</span></div>
+      <div class="feature"><span class="feature-icon">🇮🇹</span><span class="feature-text">Visibile in tutta Italia</span></div>
+      <div class="feature"><span class="feature-icon">♾️</span><span class="feature-text">Preventivi illimitati</span></div>
+      <div class="feature"><span class="feature-icon">🤖</span><span class="feature-text">AI preventivi avanzata</span></div>
+      <div class="feature"><span class="feature-icon">📊</span><span class="feature-text">Statistiche visite profilo</span></div>
+      <div class="feature"><span class="feature-icon">📢</span><span class="feature-text">Avvisi bandi di gara nella tua zona</span></div>
+      <div class="feature"><span class="feature-icon">🔔</span><span class="feature-text">Notifica immediata nuovi preventivi</span></div>
+      <div class="feature"><span class="feature-icon">📸</span><span class="feature-text">Foto e portfolio lavori</span></div>
+      <div class="feature"><span class="feature-icon">✏️</span><span class="feature-text">Descrizione estesa del profilo</span></div>
+      <div class="feature"><span class="feature-icon">🌐</span><span class="feature-text">Link al tuo sito web</span></div>
+    </div>
+    <button class="piano-btn pro-btn" onclick="apriPagamento()" id="btn-pro">
+      💳 Inizia 3 mesi gratis
+    </button>
+  </div>
+
+</div>
+
+<!-- FAQ -->
+<div class="faq">
+  <div class="faq-title">Domande frequenti</div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Quando inizia il pagamento? <span>▼</span></div>
+    <div class="faq-a">I primi 3 mesi sono completamente gratuiti. Dopo puoi scegliere liberamente: restare nel piano gratuito per sempre (con i limiti base), oppure passare al Pro per avere tutti i vantaggi.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Posso cancellare in qualsiasi momento? <span>▼</span></div>
+    <div class="faq-a">Sì, puoi cancellare l'abbonamento in qualsiasi momento dal tuo pannello impresa, senza penali né costi aggiuntivi.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Quali metodi di pagamento accettate? <span>▼</span></div>
+    <div class="faq-a">Accettiamo tutte le carte di credito e debito (Visa, Mastercard, American Express) tramite Stripe, il sistema di pagamento più sicuro al mondo.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Cosa significa "posizione prioritaria"? <span>▼</span></div>
+    <div class="faq-a">Le imprese Pro appaiono in cima ai risultati di ricerca rispetto alle imprese gratuite, aumentando notevolmente la visibilità e le richieste ricevute.</div>
+  </div>
+</div>
+
+<!-- MODAL PAGAMENTO -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)chiudiModal()">
+  <div class="modal" style="position:relative">
+    <button class="btn-chiudi-modal" onclick="chiudiModal()">✕</button>
+    <div class="modal-title">💳 Attiva piano Pro</div>
+    <div class="modal-sub">Inizia subito — il primo anno è gratis!</div>
+
+    <div class="riepilogo-pay">
+      <div class="riepilogo-row"><span>Piano Pro TrovaImpresa</span><span id="pay-piano">Mensile</span></div>
+      <div class="riepilogo-row"><span>Primi 3 mesi</span><span style="color:var(--verde)">GRATIS</span></div>
+      <div class="riepilogo-row"><span>Dopo i 3 mesi</span><span id="pay-prezzo">€3/mese</span></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Email impresa</label>
+      <input type="email" class="form-input" id="pay-email" placeholder="tua@email.com">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Dati carta</label>
+      <div id="card-element"></div>
+    </div>
+
+    <div class="pay-err" id="pay-err"></div>
+
+    <button class="pay-btn" id="pay-btn" onclick="processaPagamento()">
+      🔒 Attiva piano Pro gratis
+    </button>
+
+    <div class="stripe-logo">
+      🔒 Pagamento sicuro tramite <strong>Stripe</strong>
+    </div>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const STRIPE_KEY = 'pk_test_51TBh60PaYWKYGE1dl940APTOMGZ1ycnDgKQgtNgokucvvRtWMfbDTkO5vwN38v79aWceKhTO2x8Tdu5pjxStHnbh002LGOV6Ws';
+const stripe = Stripe(STRIPE_KEY);
+const elements = stripe.elements();
+
+let pianoAnnuale = false;
+let cardElement = null;
+
+// Inizializza prezzi corretti
+document.getElementById('prezzo-display').textContent = '€3';
+document.getElementById('periodo-display').textContent = 'al mese · dopo i 3 mesi gratis';
+
+// TOGGLE PIANO
+function togglePiano() {
+  pianoAnnuale = !pianoAnnuale;
+  const toggle = document.getElementById('toggle');
+  toggle.classList.toggle('annuale', pianoAnnuale);
+
+  if (pianoAnnuale) {
+    document.getElementById('prezzo-display').textContent = '€19.90';
+    document.getElementById('periodo-display').textContent = 'all\'anno · (€1.65/mese) · dopo i 3 mesi gratis';
+    document.getElementById('originale-display').style.display = 'block';
+    document.getElementById('pay-piano').textContent = 'Annuale';
+    document.getElementById('pay-prezzo').textContent = '€19.90/anno';
+  } else {
+    document.getElementById('prezzo-display').textContent = '€3';
+    document.getElementById('periodo-display').textContent = 'al mese · dopo i 3 mesi gratis';
+    document.getElementById('originale-display').style.display = 'none';
+    document.getElementById('pay-piano').textContent = 'Mensile';
+    document.getElementById('pay-prezzo').textContent = '€3/mese';
+  }
+}
+
+// APRI MODAL PAGAMENTO
+function apriModal() {
+  document.getElementById('modal-overlay').classList.add('show');
+
+  // Inizializza Stripe Elements
+  if (!cardElement) {
+    cardElement = elements.create('card', {
+      style: {
+        base: {
+          fontFamily: 'DM Sans, sans-serif',
+          fontSize: '16px',
+          color: '#1a1a1a',
+          '::placeholder': { color: '#999' }
+        }
+      },
+      hidePostalCode: true
+    });
+    cardElement.mount('#card-element');
+  }
+}
+
+function apriPagamento() { apriModal(); }
+
+function chiudiModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+// PROCESSA PAGAMENTO (TEST)
+async function processaPagamento() {
+  const email = document.getElementById('pay-email').value.trim();
+  if (!email) {
+    mostraErr('Inserisci la tua email!');
+    return;
+  }
+
+  const btn = document.getElementById('pay-btn');
+  btn.textContent = '⏳ Elaborazione...';
+  btn.disabled = true;
+  document.getElementById('pay-err').style.display = 'none';
+
+  // Valida carta con Stripe (solo tokenizzazione, no addebito in test)
+  const { token, error } = await stripe.createToken(cardElement, {
+    currency: 'eur'
+  });
+
+  if (error) {
+    mostraErr(error.message);
+    btn.textContent = '🔒 Attiva piano Pro gratis';
+    btn.disabled = false;
+    return;
+  }
+
+  // Successo — carta valida!
+  chiudiModal();
+  document.body.innerHTML += `
+    <div style="position:fixed;inset:0;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);display:flex;align-items:center;justify-content:center;z-index:999;color:white;text-align:center;padding:24px">
+      <div>
+        <div style="font-size:4rem;margin-bottom:16px">🎉</div>
+        <div style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:12px">Piano Pro attivato!</div>
+        <div style="font-size:1rem;opacity:0.85;margin-bottom:8px">Il tuo primo anno è <strong>completamente gratuito</strong>.</div>
+        <div style="font-size:0.88rem;opacity:0.7;margin-bottom:32px">Conferma inviata a: ${email}</div>
+        <a href="pannello-impresa.html" style="background:white;color:#1a3a2a;padding:14px 32px;border-radius:14px;font-weight:800;text-decoration:none;font-size:1rem">
+          Vai al tuo pannello →
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+function mostraErr(msg) {
+  const el = document.getElementById('pay-err');
+  el.textContent = '❌ ' + msg;
+  el.style.display = 'block';
+}
+
+// FAQ
+function toggleFaq(el) {
+  const answer = el.nextElementSibling;
+  answer.classList.toggle('open');
+  el.querySelector('span').textContent = answer.classList.contains('open') ? '▲' : '▼';
+}
+</script>
+</body>
+</html>

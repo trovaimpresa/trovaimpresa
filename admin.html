@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --arancio2:#c45e28;
+    --arancio3:#fff3ec;
+    --rosso:   #e53e3e;
+    --rosso3:  #fff5f5;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --light:   #999;
+    --bg:      #f4f6f9;
+    --white:   #ffffff;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 2px 16px rgba(0,0,0,0.07);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+
+  /* LOGIN */
+  .login-screen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+  }
+  .login-box {
+    background:white; border-radius:24px; padding:48px 40px;
+    width:100%; max-width:380px; text-align:center;
+    box-shadow:0 24px 80px rgba(0,0,0,0.2);
+  }
+  .login-logo { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:4px; }
+  .login-logo .trova { color:var(--verde); }
+  .login-logo .impresa { color:var(--arancio); }
+  .login-sub { font-size:0.85rem; color:var(--light); margin-bottom:32px; }
+  .login-box input {
+    width:100%; padding:13px 16px; border-radius:12px;
+    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
+    font-size:0.92rem; margin-bottom:12px; outline:none; transition:border 0.2s;
+  }
+  .login-box input:focus { border-color:var(--verde); }
+  .login-btn {
+    width:100%; padding:14px; background:var(--verde); color:white;
+    border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:1rem; cursor:pointer; transition:all 0.2s;
+  }
+  .login-btn:hover { background:var(--verde2); }
+  .login-err { color:var(--rosso); font-size:0.82rem; margin-top:8px; display:none; }
+
+  /* LAYOUT ADMIN */
+  .admin { display:none; min-height:100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width:240px; background:white; border-right:1px solid var(--border);
+    position:fixed; top:0; left:0; bottom:0; z-index:100;
+    display:flex; flex-direction:column;
+    box-shadow:2px 0 12px rgba(0,0,0,0.04);
+  }
+  .sidebar-logo {
+    padding:24px 20px; border-bottom:1px solid var(--border);
+    font-family:'Playfair Display',serif; font-size:1.1rem;
+  }
+  .sidebar-logo .trova { color:var(--verde); }
+  .sidebar-logo .impresa { color:var(--arancio); }
+  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+
+  .sidebar-nav { flex:1; padding:16px 12px; }
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    padding:11px 14px; border-radius:10px; cursor:pointer;
+    font-size:0.88rem; font-weight:600; color:var(--mid);
+    transition:all 0.15s; margin-bottom:4px;
+  }
+  .nav-item:hover { background:var(--bg); color:var(--dark); }
+  .nav-item.active { background:var(--verde3); color:var(--verde2); }
+  .nav-item .nav-icon { font-size:1.1rem; width:22px; text-align:center; }
+  .nav-badge {
+    margin-left:auto; background:var(--arancio); color:white;
+    font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:20px;
+  }
+
+  .sidebar-footer {
+    padding:16px; border-top:1px solid var(--border);
+    font-size:0.8rem; color:var(--light);
+  }
+  .logout-btn {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; border-radius:10px; cursor:pointer;
+    font-size:0.85rem; font-weight:600; color:var(--rosso);
+    transition:all 0.15s;
+  }
+  .logout-btn:hover { background:var(--rosso3); }
+
+  /* MAIN */
+  .main { margin-left:240px; padding:32px; min-height:100vh; }
+
+  /* TOPBAR */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:28px;
+  }
+  .topbar-title { font-family:'Playfair Display',serif; font-size:1.6rem; }
+  .topbar-right { display:flex; align-items:center; gap:12px; }
+  .admin-badge {
+    background:var(--verde3); color:var(--verde2);
+    padding:6px 14px; border-radius:20px; font-size:0.78rem; font-weight:700;
+  }
+
+  /* STAT CARDS */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+  @media(max-width:900px){ .stats-grid { grid-template-columns:repeat(2,1fr); } }
+  .stat-card {
+    background:white; border-radius:16px; padding:20px 24px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    display:flex; align-items:center; gap:16px;
+  }
+  .stat-icon {
+    width:48px; height:48px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+  }
+  .stat-icon.g { background:var(--verde3); }
+  .stat-icon.o { background:var(--arancio3); }
+  .stat-icon.r { background:var(--rosso3); }
+  .stat-icon.b { background:#e8f0ff; }
+  .stat-num { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; line-height:1; }
+  .stat-lbl { font-size:0.78rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+
+  /* SEZIONE */
+  .section { display:none; }
+  .section.active { display:block; }
+
+  /* TABELLA */
+  .table-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px; flex-wrap:wrap; gap:12px;
+  }
+  .table-title { font-family:'Playfair Display',serif; font-size:1.2rem; }
+  .table-actions { display:flex; gap:8px; }
+  .search-input {
+    padding:9px 14px; border-radius:10px; border:1.5px solid var(--border);
+    font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none;
+    transition:border 0.2s; min-width:220px;
+  }
+  .search-input:focus { border-color:var(--verde); }
+
+  .table-wrap {
+    background:white; border-radius:16px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    overflow:hidden;
+  }
+  table { width:100%; border-collapse:collapse; }
+  th {
+    padding:12px 16px; text-align:left;
+    font-size:0.72rem; font-weight:800; color:var(--light);
+    text-transform:uppercase; letter-spacing:1px;
+    background:var(--bg); border-bottom:1px solid var(--border);
+  }
+  td { padding:14px 16px; border-bottom:1px solid var(--border); font-size:0.88rem; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(42,122,75,0.02); }
+
+  .badge { padding:4px 10px; border-radius:20px; font-size:0.72rem; font-weight:800; display:inline-block; }
+  .badge-v { background:var(--verde3); color:var(--verde2); }
+  .badge-a { background:#e8f0ff; color:#3355cc; }
+  .badge-att { background:#fff3cd; color:#856404; }
+  .badge-rig { background:var(--rosso3); color:var(--rosso); }
+  .badge-art { background:var(--arancio3); color:var(--arancio2); }
+  .badge-imp { background:var(--verde3); color:var(--verde2); }
+
+  .action-btn {
+    padding:6px 12px; border-radius:8px; border:none; cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700;
+    transition:all 0.15s; margin-right:4px;
+  }
+  .btn-verifica { background:var(--verde3); color:var(--verde2); }
+  .btn-verifica:hover { background:var(--verde); color:white; }
+  .btn-rifiuta { background:var(--rosso3); color:var(--rosso); }
+  .btn-rifiuta:hover { background:var(--rosso); color:white; }
+  .btn-dettagli { background:var(--bg); color:var(--mid); }
+  .btn-dettagli:hover { background:var(--border); }
+  .btn-elimina { background:var(--rosso3); color:var(--rosso); }
+  .btn-elimina:hover { background:var(--rosso); color:white; }
+
+  /* EMPTY */
+  .empty-table { text-align:center; padding:48px; color:var(--light); }
+  .empty-table .eicon { font-size:2.5rem; margin-bottom:10px; }
+
+  /* MODAL DETTAGLIO */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
+    z-index:200; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.show { display:flex; }
+  .modal {
+    background:white; border-radius:20px; padding:32px;
+    max-width:560px; width:100%; max-height:90vh; overflow-y:auto;
+    box-shadow:0 24px 80px rgba(0,0,0,0.2);
+  }
+  .modal-title { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:20px; }
+  .modal-row { display:flex; gap:8px; margin-bottom:10px; font-size:0.88rem; }
+  .modal-key { font-weight:700; color:var(--mid); min-width:130px; }
+  .modal-val { color:var(--dark); flex:1; }
+  .modal-close {
+    float:right; background:var(--bg); border:none; border-radius:8px;
+    padding:8px 16px; cursor:pointer; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.85rem; color:var(--mid);
+  }
+
+  /* LOADING */
+  .loading { text-align:center; padding:48px; color:var(--light); font-size:0.9rem; }
+
+  /* GRAFICI SEMPLICI */
+  .charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+  @media(max-width:700px){ .charts-grid { grid-template-columns:1fr; } }
+  .chart-card {
+    background:white; border-radius:16px; padding:24px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+  }
+  .chart-title { font-family:'Playfair Display',serif; font-size:1rem; margin-bottom:16px; }
+  .bar-item { margin-bottom:10px; }
+  .bar-label { display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px; color:var(--mid); font-weight:600; }
+  .bar-track { height:8px; background:var(--bg); border-radius:4px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:4px; background:var(--verde); transition:width 0.6s ease; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></div>
+    <div class="login-sub">Pannello Amministratore</div>
+    <input type="text" id="login-user" placeholder="Username admin">
+    <input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 Accedi</button>
+    <div class="login-err" id="login-err">❌ Credenziali errate</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin" id="admin-panel">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="trova">Trova</span><span class="impresa">Impresa</span>
+      <small>Admin Panel</small>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showSection('dashboard',this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showSection('imprese',this)">
+        <span class="nav-icon">🏗️</span> Imprese
+        <span class="nav-badge" id="badge-imprese">0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('da-verificare',this)">
+        <span class="nav-icon">⏳</span> Da verificare
+        <span class="nav-badge" id="badge-daverif" style="background:var(--arancio)">0</span>
+      </div>
+      <div class="nav-item" onclick="showSection('preventivi',this)">
+        <span class="nav-icon">📋</span> Preventivi
+      </div>
+      <div class="nav-item" onclick="showSection('recensioni',this)">
+        <span class="nav-icon">⭐</span> Recensioni
+      </div>
+      <div class="nav-item" onclick="showSection('messaggi',this)">
+        <span class="nav-icon">✉️</span> Messaggi
+        <span class="nav-badge" id="badge-messaggi" style="background:#e74c3c">0</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="sec-dashboard">
+      <div class="topbar">
+        <div class="topbar-title">📊 Dashboard</div>
+        <div class="topbar-right">
+          <span class="admin-badge">👤 Admin</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon g">🏗️</div>
+          <div><div class="stat-num" id="stat-totali">–</div><div class="stat-lbl">Totale imprese</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon o">⏳</div>
+          <div><div class="stat-num" id="stat-attesa">–</div><div class="stat-lbl">In attesa verifica</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon g">✅</div>
+          <div><div class="stat-num" id="stat-verificate">–</div><div class="stat-lbl">Verificate</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon b">📋</div>
+          <div><div class="stat-num" id="stat-preventivi">–</div><div class="stat-lbl">Preventivi ricevuti</div></div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">🔨 Mestieri più richiesti</div>
+          <div id="chart-mestieri"><div class="loading">Caricamento...</div></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">📍 Città più attive</div>
+          <div id="chart-citta"><div class="loading">Caricamento...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TUTTE LE IMPRESE -->
+    <div class="section" id="sec-imprese">
+      <div class="topbar">
+        <div class="topbar-title">🏗️ Tutte le imprese</div>
+      </div>
+      <div class="table-header">
+        <div class="table-title" id="imprese-count">–</div>
+        <input class="search-input" placeholder="🔍 Cerca impresa..." oninput="filtraImprese(this.value)">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome attività</th>
+              <th>Tipo</th>
+              <th>Città</th>
+              <th>Mestieri</th>
+              <th>Stato</th>
+              <th>Data</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table-imprese"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DA VERIFICARE -->
+    <div class="section" id="sec-da-verificare">
+      <div class="topbar">
+        <div class="topbar-title">⏳ Da verificare</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome attività</th>
+              <th>Tipo</th>
+              <th>Contatto</th>
+              <th>Città</th>
+              <th>Registrato il</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table-daverif"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PREVENTIVI -->
+    <div class="section" id="sec-preventivi">
+      <div class="topbar">
+        <div class="topbar-title">📋 Preventivi ricevuti</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Email</th>
+              <th>Telefono</th>
+              <th>Tipo lavoro</th>
+              <th>Descrizione</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="table-preventivi"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RECENSIONI -->
+    <div class="section" id="sec-recensioni">
+      <div class="topbar">
+        <div class="topbar-title">⭐ Recensioni</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Voto</th>
+              <th>Lavoro</th>
+              <th>Testo</th>
+              <th>Data</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table-recensioni"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MESSAGGI -->
+    <div class="section" id="sec-messaggi">
+      <div class="topbar">
+        <div class="topbar-title">✉️ Messaggi ricevuti</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Messaggio</th>
+              <th>Data</th>
+              <th>Stato</th>
+            </tr>
+          </thead>
+          <tbody id="table-messaggi"><tr><td colspan="5" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL DETTAGLIO -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)chiudiModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Credenziali admin (semplici per ora)
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'trovaimpresa2025';
+
+let tutteImprese = [];
+
+// LOGIN
+function doLogin() {
+  const u = document.getElementById('login-user').value;
+  const p = document.getElementById('login-pass').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    caricaTutto();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('admin-panel').style.display = 'none';
+}
+
+// NAVIGAZIONE
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// CARICA TUTTO
+async function caricaTutto() {
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaMessaggi()]);
+}
+
+// CARICA IMPRESE
+async function caricaImprese() {
+  const { data, error } = await sb.from('imprese').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  tutteImprese = data || [];
+
+  const tot = tutteImprese.length;
+  const verificate = tutteImprese.filter(i => i.verificata).length;
+  const attesa = tutteImprese.filter(i => !i.verificata).length;
+
+  document.getElementById('stat-totali').textContent = tot;
+  document.getElementById('stat-verificate').textContent = verificate;
+  document.getElementById('stat-attesa').textContent = attesa;
+  document.getElementById('badge-imprese').textContent = tot;
+  document.getElementById('badge-daverif').textContent = attesa;
+  document.getElementById('imprese-count').textContent = tot + ' imprese registrate';
+
+  renderImprese(tutteImprese);
+  renderDaVerificare(tutteImprese.filter(i => !i.verificata));
+  renderCharts(tutteImprese);
+}
+
+function renderImprese(lista) {
+  const tbody = document.getElementById('table-imprese');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">🏗️</div>Nessuna impresa registrata</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = lista.map(i => `
+    <tr>
+      <td><strong>${i.nome_attivita || i.nome + ' ' + i.cognome}</strong><br><small style="color:var(--light)">${i.email}</small></td>
+      <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${i.tipo || '–'}</span></td>
+      <td>📍 ${i.citta || '–'}</td>
+      <td>${(i.mestieri||[]).slice(0,2).join(', ')}${(i.mestieri||[]).length>2?' +altri':''}</td>
+      <td><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></td>
+      <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
+      <td>
+        <button class="action-btn btn-dettagli" onclick="apriDettaglio(${i.id})">👁️ Dettagli</button>
+        <button class="action-btn btn-elimina" onclick="eliminaImpresa(${i.id},'${(i.nome_attivita||'').replace(/'/g,"\\'")}')">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderDaVerificare(lista) {
+  const tbody = document.getElementById('table-daverif');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">✅</div>Nessuna impresa in attesa di verifica!</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = lista.map(i => `
+    <tr>
+      <td><strong>${i.nome_attivita || i.nome + ' ' + i.cognome}</strong></td>
+      <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${i.tipo||'–'}</span></td>
+      <td>${i.email}<br><small style="color:var(--light)">${i.telefono||''}</small></td>
+      <td>📍 ${i.citta||'–'}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
+      <td>
+        <button class="action-btn btn-verifica" onclick="verificaImpresa(${i.id})">✅ Verifica</button>
+        <button class="action-btn btn-dettagli" onclick="apriDettaglio(${i.id})">👁️ Dettagli</button>
+        <button class="action-btn btn-rifiuta" onclick="eliminaImpresa(${i.id},'${(i.nome_attivita||'').replace(/'/g,"\\'")}')">❌ Rifiuta</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderCharts(lista) {
+  // Mestieri
+  const mestCount = {};
+  lista.forEach(i => (i.mestieri||[]).forEach(m => mestCount[m] = (mestCount[m]||0)+1));
+  const topMest = Object.entries(mestCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxM = topMest[0]?.[1] || 1;
+  document.getElementById('chart-mestieri').innerHTML = topMest.length ? topMest.map(([m,n])=>`
+    <div class="bar-item">
+      <div class="bar-label"><span>${m}</span><span>${n}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n/maxM*100).toFixed(0)}%"></div></div>
+    </div>`).join('') : '<div class="loading">Nessun dato</div>';
+
+  // Città
+  const cittaCount = {};
+  lista.forEach(i => i.citta && (cittaCount[i.citta] = (cittaCount[i.citta]||0)+1));
+  const topCitta = Object.entries(cittaCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxC = topCitta[0]?.[1] || 1;
+  document.getElementById('chart-citta').innerHTML = topCitta.length ? topCitta.map(([c,n])=>`
+    <div class="bar-item">
+      <div class="bar-label"><span>📍 ${c}</span><span>${n}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n/maxC*100).toFixed(0)}%;background:var(--arancio)"></div></div>
+    </div>`).join('') : '<div class="loading">Nessun dato</div>';
+}
+
+// CARICA PREVENTIVI
+async function caricaPreventivi() {
+  const { data, error } = await sb.from('preventivi').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  document.getElementById('stat-preventivi').textContent = data?.length || 0;
+  const tbody = document.getElementById('table-preventivi');
+  if (!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">📋</div>Nessun preventivo ancora</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td><strong>${p.nome}</strong></td>
+      <td>${p.email}</td>
+      <td>${p.telefono||'–'}</td>
+      <td>${p.tipo_lavoro||'–'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.descrizione||'–'}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${new Date(p.created_at).toLocaleDateString('it-IT')}</td>
+    </tr>`).join('');
+}
+
+// CARICA RECENSIONI
+async function caricaRecensioni() {
+  const { data, error } = await sb.from('recensioni').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  const tbody = document.getElementById('table-recensioni');
+  if (!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">⭐</div>Nessuna recensione ancora</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><strong>${r.nome_cliente}</strong></td>
+      <td>${'★'.repeat(r.voto)}${'☆'.repeat(5-r.voto)}</td>
+      <td>${r.lavoro_fatto||'–'}</td>
+      <td style="max-width:200px">${r.testo}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${new Date(r.created_at).toLocaleDateString('it-IT')}</td>
+      <td><button class="action-btn btn-elimina" onclick="eliminaRecensione(${r.id})">🗑️</button></td>
+    </tr>`).join('');
+}
+
+// CARICA MESSAGGI
+async function caricaMessaggi() {
+  const { data, error } = await sb.from('messaggi').select('*').order('created_at', { ascending: false });
+  if (error) return;
+  const nonLetti = data?.filter(m => !m.letto).length || 0;
+  document.getElementById('badge-messaggi').textContent = nonLetti;
+  const tbody = document.getElementById('table-messaggi');
+  if (!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-table"><div class="eicon">✉️</div>Nessun messaggio ancora</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(m => `
+    <tr style="${!m.letto ? 'background:#fffbf0;font-weight:600' : ''}">
+      <td><strong>${m.nome}</strong></td>
+      <td><a href="mailto:${m.email}" style="color:var(--verde)">${m.email}</a></td>
+      <td style="max-width:300px;font-weight:normal">${m.messaggio || '–'}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${new Date(m.created_at).toLocaleDateString('it-IT')}</td>
+      <td>
+        ${!m.letto ? `<button class="action-btn" style="background:#27ae60;color:white" onclick="segnaLetto(${m.id})">✅ Segna letto</button>` : '<span style="color:#aaa;font-size:0.85rem">Letto</span>'}
+        <button class="action-btn btn-elimina" onclick="eliminaMessaggio(${m.id})" style="margin-left:4px">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function segnaLetto(id) {
+  await sb.from('messaggi').update({ letto: true }).eq('id', id);
+  await caricaMessaggi();
+}
+
+async function eliminaMessaggio(id) {
+  if (!confirm('Eliminare questo messaggio?')) return;
+  await sb.from('messaggi').delete().eq('id', id);
+  await caricaMessaggi();
+}
+
+// FILTRA IMPRESE
+function filtraImprese(q) {
+  const f = tutteImprese.filter(i =>
+    (i.nome_attivita||'').toLowerCase().includes(q.toLowerCase()) ||
+    (i.citta||'').toLowerCase().includes(q.toLowerCase()) ||
+    (i.email||'').toLowerCase().includes(q.toLowerCase())
+  );
+  renderImprese(f);
+}
+
+// VERIFICA IMPRESA
+async function verificaImpresa(id) {
+  const { error } = await sb.from('imprese').update({ verificata: true }).eq('id', id);
+  if (!error) { await caricaImprese(); alert('✅ Impresa verificata!'); }
+}
+
+// ELIMINA IMPRESA
+async function eliminaImpresa(id, nome) {
+  if (!confirm(`Sei sicuro di voler eliminare "${nome}"?`)) return;
+  const { error } = await sb.from('imprese').delete().eq('id', id);
+  if (!error) { await caricaImprese(); }
+}
+
+// ELIMINA RECENSIONE
+async function eliminaRecensione(id) {
+  if (!confirm('Eliminare questa recensione?')) return;
+  const { error } = await sb.from('recensioni').delete().eq('id', id);
+  if (!error) await caricaRecensioni();
+}
+
+// DETTAGLIO IMPRESA
+function apriDettaglio(id) {
+  const i = tutteImprese.find(x => x.id === id);
+  if (!i) return;
+  document.getElementById('modal-content').innerHTML = `
+    <button class="modal-close" onclick="chiudiModal()">✕ Chiudi</button>
+    <div class="modal-title">${i.nome_attivita || i.nome + ' ' + i.cognome}</div>
+    <div class="modal-row"><span class="modal-key">Tipo:</span><span class="modal-val">${i.tipo||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Nome:</span><span class="modal-val">${i.nome} ${i.cognome}</span></div>
+    <div class="modal-row"><span class="modal-key">Email:</span><span class="modal-val">${i.email}</span></div>
+    <div class="modal-row"><span class="modal-key">Telefono:</span><span class="modal-val">${i.telefono||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">P.IVA / CF:</span><span class="modal-val">${i.partita_iva||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Città:</span><span class="modal-val">${i.citta||'–'} ${i.cap||''}</span></div>
+    <div class="modal-row"><span class="modal-key">Indirizzo:</span><span class="modal-val">${i.indirizzo||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Zone:</span><span class="modal-val">${(i.zone||[]).join(', ')||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Mestieri:</span><span class="modal-val">${(i.mestieri||[]).join(', ')||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Dipendenti:</span><span class="modal-val">${i.dipendenti||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Dal:</span><span class="modal-val">${i.anno_fondazione||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Costo:</span><span class="modal-val">${i.costo||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Descrizione:</span><span class="modal-val">${i.descrizione||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Stato:</span><span class="modal-val"><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></span></div>
+    <div class="modal-row"><span class="modal-key">Registrato:</span><span class="modal-val">${new Date(i.created_at).toLocaleString('it-IT')}</span></div>
+    ${!i.verificata ? `<br><button class="action-btn btn-verifica" style="width:100%;padding:12px;font-size:0.9rem" onclick="verificaImpresa(${i.id});chiudiModal()">✅ Verifica questa impresa</button>` : ''}
+  `;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function chiudiModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+</script>
+</body>
+</html>
