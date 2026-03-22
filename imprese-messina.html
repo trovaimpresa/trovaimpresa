@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imprese Edili e Artigiani a Messina — TrovaImpresa</title>
+<meta name="description" content="Trova imprese edili, artigiani e professionisti a Messina. Preventivi gratuiti, recensioni reali. Ristrutturazioni, idraulici, elettricisti e molto altro a Messina.">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root { --verde:#2a7a4b; --arancio:#e8733a; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:#f4f6f9; color:#1a1a1a; }
+  nav { background:white; padding:14px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.06); display:flex; align-items:center; }
+  .nav-logo { font-family:'Playfair Display',serif; font-size:1.4rem; text-decoration:none; }
+  .nav-logo .trova { color:var(--verde); }
+  .nav-logo .impresa { color:var(--arancio); }
+  .nav-btns { margin-left:auto; display:flex; gap:10px; }
+  .btn-outline { border:2px solid var(--verde); color:var(--verde); padding:8px 20px; border-radius:25px; font-weight:600; text-decoration:none; font-size:0.9rem; }
+  .btn-fill { background:var(--arancio); color:white; padding:8px 20px; border-radius:25px; font-weight:600; text-decoration:none; font-size:0.9rem; }
+  .hero { background:linear-gradient(135deg, #1a3a2a, #2a7a4b); color:white; padding:60px 24px; text-align:center; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); margin-bottom:16px; }
+  .hero p { font-size:1.1rem; opacity:0.9; max-width:600px; margin:0 auto 32px; }
+  .hero-btn { background:var(--arancio); color:white; padding:14px 32px; border-radius:30px; font-weight:700; text-decoration:none; font-size:1.1rem; }
+  .section { max-width:900px; margin:0 auto; padding:48px 24px; }
+  .section h2 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--verde); margin-bottom:16px; }
+  .section p { color:#555; line-height:1.7; margin-bottom:16px; font-size:1rem; }
+  .categorie { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin:32px 0; }
+  .cat-card { background:white; border-radius:12px; padding:20px; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,0.07); text-decoration:none; color:#1a1a1a; }
+  .cat-icon { font-size:2rem; margin-bottom:8px; }
+  .cat-name { font-weight:600; font-size:0.95rem; }
+  .cta-box { background:linear-gradient(135deg,#1a3a2a,#2a7a4b); color:white; border-radius:20px; padding:48px 32px; text-align:center; margin:40px 0; }
+  .cta-box h2 { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:12px; }
+  .cta-box p { opacity:0.9; margin-bottom:24px; }
+  footer { background:#1a1a1a; color:#999; text-align:center; padding:24px; font-size:0.85rem; }
+  footer a { color:#999; text-decoration:none; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></a>
+  <div class="nav-btns">
+    <a href="/pannello-impresa.html" class="btn-outline">Entra (Imprese)</a>
+    <a href="/registrazione.html" class="btn-fill">Registrati (Imprese)</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Imprese Edili e Artigiani a Messina</h1>
+  <p>Trova i migliori professionisti a Messina per ristrutturazioni, impianti, costruzioni e molto altro. Preventivi gratuiti e recensioni reali.</p>
+  <a href="/risultati.html" class="hero-btn">🔍 Cerca a Messina</a>
+</div>
+
+<div class="section">
+  <h2>Trova professionisti a Messina</h2>
+  <p>TrovaImpresa è la piattaforma italiana che ti mette in contatto con imprese edili e artigiani verificati a Messina e provincia. Che tu abbia bisogno di una ristrutturazione, di un impianto elettrico o di un lavoro idraulico, trovi il professionista giusto in pochi click.</p>
+  <p>Tutti i professionisti su TrovaImpresa sono verificati, con recensioni reali di clienti soddisfatti. Richiedi preventivi gratuiti e confronta le offerte direttamente online.</p>
+
+  <h2>Categorie disponibili a Messina</h2>
+  <div class="categorie">
+    <a href="/risultati.html" class="cat-card"><div class="cat-icon">🏗️</div><div class="cat-name">Imprese Edili</div></a>
+    <a href="/risultati.html" class="cat-card"><div class="cat-icon">🔧</div><div class="cat-name">Idraulici</div></a>
+    <a href="/risultati.html" class="cat-card"><div class="cat-icon">⚡</div><div class="cat-name">Elettricisti</div></a>
+    <a href="/risultati.html" class="cat-card"><div class="cat-icon">🎨</div><div class="cat-name">Pittori</div></a>
+    <a href="/risultati.html" class="cat-card"><div class="cat-icon">🪵</div><div class="cat-name">Falegnami</div></a>
+    <a href="/risultati.html" class="cat-card"><div class="cat-icon">📐</div><div class="cat-name">Geometri</div></a>
+    <a href="/risultati.html" class="cat-card"><div class="cat-icon">🏛️</div><div class="cat-name">Architetti</div></a>
+    <a href="/risultati.html" class="cat-card"><div class="cat-icon">🧱</div><div class="cat-name">Muratori</div></a>
+  </div>
+
+  <h2>Perché scegliere TrovaImpresa a Messina?</h2>
+  <p>✅ <strong>Professionisti verificati</strong> — Ogni impresa è controllata prima di essere pubblicata.</p>
+  <p>✅ <strong>Preventivi gratuiti</strong> — Ricevi più preventivi e scegli il migliore.</p>
+  <p>✅ <strong>Recensioni reali</strong> — Leggi le opinioni di chi ha già lavorato con loro.</p>
+  <p>✅ <strong>Veloce e semplice</strong> — Trova il professionista giusto in pochi minuti.</p>
+
+  <div class="cta-box">
+    <h2>Sei un artigiano o un'impresa a Messina?</h2>
+    <p>Registrati gratis su TrovaImpresa e inizia a ricevere richieste di lavoro dalla tua zona.</p>
+    <a href="/registrazione.html" style="background:#e8733a;color:white;padding:14px 32px;border-radius:30px;font-weight:700;text-decoration:none;font-size:1rem;">Registrati gratis →</a>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 TrovaImpresa — <a href="/">Home</a> | <a href="/risultati.html">Cerca imprese</a> | <a href="/registrazione.html">Registra la tua impresa</a></p>
+</footer>
+</body>
+</html>
