@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risultati ricerca — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --arancio2:#c45e28;
+    --arancio3:#fff3ec;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --light:   #999;
+    --bg:      #fafaf8;
+    --white:   #ffffff;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 4px 24px rgba(0,0,0,0.07);
+    --shadow2: 0 12px 48px rgba(0,0,0,0.12);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+
+  /* NAV */
+  nav {
+    position:sticky; top:0; z-index:100;
+    background:white; border-bottom:1px solid var(--border);
+    padding:12px 24px;
+    display:flex; align-items:center; gap:16px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  }
+  .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; flex-shrink:0; }
+  .logo-text { font-family:'Playfair Display',serif; font-size:1.2rem; }
+  .logo-text .trova { color:var(--verde); }
+  .logo-text .impresa { color:var(--arancio); }
+
+  /* Search bar in nav */
+  .nav-search {
+    flex:1; max-width:600px;
+    display:flex; align-items:center; gap:8px;
+    background:var(--bg); border-radius:12px;
+    padding:8px 8px 8px 14px;
+    border:1.5px solid var(--border);
+    transition:border 0.2s;
+  }
+  .nav-search:focus-within { border-color:var(--verde); }
+  .nav-search input {
+    flex:1; border:none; outline:none; background:transparent;
+    font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--dark);
+  }
+  .nav-search input::placeholder { color:var(--light); }
+  .nav-search-btn {
+    background:var(--verde); color:white; border:none;
+    border-radius:8px; padding:8px 16px;
+    font-family:'DM Sans',sans-serif; font-weight:700;
+    font-size:0.82rem; cursor:pointer; white-space:nowrap;
+  }
+
+  /* LAYOUT */
+  .page { display:grid; grid-template-columns:280px 1fr; min-height:calc(100vh - 57px); }
+  @media(max-width:768px){ .page { grid-template-columns:1fr; } }
+
+  /* SIDEBAR FILTRI */
+  .filtri {
+    background:white; border-right:1px solid var(--border);
+    padding:24px 20px; overflow-y:auto;
+    position:sticky; top:57px; height:calc(100vh - 57px);
+  }
+  @media(max-width:768px){ .filtri { display:none; } }
+
+  .filtri-title { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:20px; }
+
+  .filtro-group { margin-bottom:24px; }
+  .filtro-label {
+    font-size:0.72rem; font-weight:800; color:var(--light);
+    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px;
+  }
+
+  /* Tipo toggle */
+  .tipo-toggle { display:flex; flex-direction:column; gap:6px; }
+  .tipo-opt {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px; border-radius:12px;
+    border:1.5px solid var(--border); cursor:pointer;
+    transition:all 0.2s; background:white; font-size:0.88rem; font-weight:600;
+  }
+  .tipo-opt:hover { border-color:var(--verde); }
+  .tipo-opt.active { background:var(--verde3); border-color:var(--verde); color:var(--verde2); }
+  .tipo-opt .ticon { font-size:1.1rem; }
+
+  /* Mestieri filtro */
+  .mestieri-filtro { display:flex; flex-direction:column; gap:4px; max-height:220px; overflow-y:auto; }
+  .mestiere-opt {
+    display:flex; align-items:center; gap:8px;
+    padding:7px 10px; border-radius:8px;
+    cursor:pointer; font-size:0.85rem; font-weight:500;
+    transition:all 0.15s; color:var(--mid);
+  }
+  .mestiere-opt:hover { background:var(--bg); color:var(--dark); }
+  .mestiere-opt.active { background:var(--verde3); color:var(--verde2); font-weight:700; }
+
+  /* Rating filtro */
+  .rating-opts { display:flex; flex-direction:column; gap:6px; }
+  .rating-opt {
+    display:flex; align-items:center; gap:8px;
+    padding:7px 10px; border-radius:8px; cursor:pointer;
+    font-size:0.85rem; font-weight:500; transition:all 0.15s; color:var(--mid);
+  }
+  .rating-opt:hover { background:var(--bg); }
+  .rating-opt.active { background:var(--verde3); color:var(--verde2); font-weight:700; }
+  .stars-mini { color:#f4c02e; font-size:0.9rem; }
+
+  /* Range slider */
+  .slider-wrap { padding:4px 0; }
+  input[type=range] {
+    width:100%; accent-color:var(--verde);
+    margin-bottom:6px;
+  }
+  .slider-labels { display:flex; justify-content:space-between; font-size:0.78rem; color:var(--mid); }
+
+  /* Checkbox */
+  .check-opts { display:flex; flex-direction:column; gap:6px; }
+  .check-opt {
+    display:flex; align-items:center; gap:8px;
+    font-size:0.85rem; color:var(--mid); cursor:pointer;
+    padding:4px 0;
+  }
+  .check-opt input { accent-color:var(--verde); width:16px; height:16px; cursor:pointer; }
+
+  /* RISULTATI */
+  .risultati { padding:24px; }
+
+  .risultati-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:20px; flex-wrap:wrap; gap:12px;
+  }
+
+  .risultati-info { font-size:0.9rem; color:var(--mid); }
+  .risultati-info strong { color:var(--dark); font-size:1rem; }
+
+  .sort-select {
+    background:white; border:1.5px solid var(--border);
+    border-radius:10px; padding:8px 14px;
+    font-family:'DM Sans',sans-serif; font-size:0.85rem;
+    font-weight:600; color:var(--dark); cursor:pointer; outline:none;
+  }
+
+  /* Tag filtri attivi */
+  .filtri-attivi { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .filtro-tag {
+    display:flex; align-items:center; gap:6px;
+    background:var(--verde3); color:var(--verde2);
+    padding:5px 12px; border-radius:20px;
+    font-size:0.78rem; font-weight:700;
+    border:1px solid rgba(42,122,75,0.2);
+  }
+  .filtro-tag span { cursor:pointer; font-size:1rem; opacity:0.6; }
+  .filtro-tag span:hover { opacity:1; }
+
+  /* CARD RISULTATO */
+  .result-card {
+    background:white; border-radius:18px;
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
+    margin-bottom:16px;
+    transition:transform 0.2s, box-shadow 0.2s;
+    overflow:hidden;
+    display:flex;
+    cursor:pointer;
+  }
+  .result-card:hover { transform:translateY(-3px); box-shadow:var(--shadow2); border-color:rgba(42,122,75,0.2); }
+
+  .result-card-accent { width:5px; flex-shrink:0; }
+  .result-card-accent.verde { background:var(--verde); }
+  .result-card-accent.arancio { background:var(--arancio); }
+
+  .result-card-body { flex:1; padding:20px; display:flex; gap:16px; }
+  @media(max-width:500px){ .result-card-body { flex-direction:column; } }
+
+  .result-avatar {
+    width:64px; height:64px; border-radius:14px;
+    background:var(--bg); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.8rem; flex-shrink:0;
+  }
+
+  .result-info { flex:1; }
+  .result-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .result-name { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; }
+
+  .result-badges { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+  .rbadge { font-size:0.7rem; font-weight:800; padding:3px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px; }
+  .rbadge-v { background:var(--verde); color:white; }
+  .rbadge-t { background:var(--arancio3); color:var(--arancio2); }
+  .rbadge-a { background:#e8f0ff; color:#3355cc; }
+
+  .result-meta { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px; }
+  .rmeta { font-size:0.8rem; color:var(--mid); display:flex; align-items:center; gap:4px; }
+
+  .result-desc { font-size:0.85rem; color:var(--mid); line-height:1.5; margin-bottom:10px; }
+
+  .result-cats { display:flex; gap:6px; flex-wrap:wrap; }
+  .rcat { font-size:0.75rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:3px 9px; color:var(--mid); font-weight:600; }
+
+  .result-right { display:flex; flex-direction:column; align-items:flex-end; justify-content:space-between; gap:12px; flex-shrink:0; }
+  @media(max-width:500px){ .result-right { flex-direction:row; align-items:center; } }
+
+  .result-rating { text-align:right; }
+  .rating-big { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--dark); }
+  .rating-stars { color:#f4c02e; font-size:0.85rem; }
+  .rating-n { font-size:0.75rem; color:var(--light); }
+
+  .result-price { text-align:right; }
+  .price-val { font-size:0.82rem; color:var(--verde2); font-weight:700; }
+  .price-lbl { font-size:0.7rem; color:var(--light); }
+
+  .btn-profilo {
+    background:var(--arancio); color:white;
+    border:none; border-radius:10px;
+    padding:10px 18px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.82rem;
+    cursor:pointer; transition:all 0.2s; white-space:nowrap;
+    box-shadow:0 4px 12px rgba(232,115,58,0.3);
+  }
+  .btn-profilo:hover { background:var(--arancio2); }
+
+  /* MAPPA placeholder */
+  .mappa-btn {
+    display:flex; align-items:center; gap:8px;
+    background:white; border:1.5px solid var(--border);
+    border-radius:12px; padding:10px 18px;
+    font-family:'DM Sans',sans-serif; font-weight:700;
+    font-size:0.85rem; cursor:pointer; color:var(--dark);
+    transition:all 0.2s; margin-bottom:20px;
+  }
+  .mappa-btn:hover { border-color:var(--verde); color:var(--verde); }
+
+  /* Paginazione */
+  .pagination { display:flex; gap:8px; justify-content:center; margin-top:32px; flex-wrap:wrap; }
+  .page-btn {
+    width:40px; height:40px; border-radius:10px;
+    border:1.5px solid var(--border); background:white;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem;
+    cursor:pointer; transition:all 0.2s; color:var(--mid);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .page-btn:hover { border-color:var(--verde); color:var(--verde); }
+  .page-btn.active { background:var(--verde); color:white; border-color:var(--verde); box-shadow:0 4px 12px rgba(42,122,75,0.3); }
+
+  /* Nessun risultato */
+  .empty { text-align:center; padding:60px 20px; }
+  .empty-icon { font-size:3rem; margin-bottom:12px; }
+  .empty h3 { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:8px; }
+  .empty p { color:var(--mid); font-size:0.9rem; }
+
+  /* Mobile filtri button */
+  .mobile-filtri-btn {
+    display:none; align-items:center; gap:8px;
+    background:white; border:1.5px solid var(--border);
+    border-radius:12px; padding:10px 18px;
+    font-family:'DM Sans',sans-serif; font-weight:700;
+    font-size:0.85rem; cursor:pointer; margin-bottom:16px;
+  }
+  @media(max-width:768px){ .mobile-filtri-btn { display:flex; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="background:white;border-bottom:1px solid rgba(0,0,0,0.08);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+  <a href="index.html" style="text-decoration:none;font-family:'Playfair Display',serif;font-size:20px;"><span style="color:#2a7a4b;">Trova</span><span style="color:#e8733a;">Impresa</span></a>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <a href="pannello-impresa.html" style="color:#555;font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;text-decoration:none;">Entra (Imprese)</a>
+    <a href="registrazione.html" style="background:#2a7a4b;color:white;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">Registrati (Imprese)</a>
+    <a href="pubblicita.html" style="background:#e8733a;color:white;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">📢 Pubblicità</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- SIDEBAR FILTRI -->
+  <aside class="filtri">
+    <div class="filtri-title">🎛️ Filtri</div>
+
+    <div class="filtro-group">
+      <div class="filtro-label">Tipo professionista</div>
+      <div class="tipo-toggle">
+        <div class="tipo-opt active" onclick="setFiltroTipo('tutti',this)"><span class="ticon">🔍</span> Tutti</div>
+        <div class="tipo-opt" onclick="setFiltroTipo('artigiano',this)"><span class="ticon">🔨</span> Artigiano</div>
+        <div class="tipo-opt" onclick="setFiltroTipo('impresa',this)"><span class="ticon">🏗️</span> Impresa edile</div>
+      </div>
+    </div>
+
+    <div class="filtro-group">
+      <div class="filtro-label">Mestiere</div>
+      <div class="mestieri-filtro">
+        <div class="mestiere-opt active" onclick="setFiltroMestiere('Tutti',this)">Tutti i mestieri</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Muratura',this)">🧱 Muratura</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Elettricista',this)">⚡ Elettricista</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Idraulico',this)">🚿 Idraulico</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Falegname',this)">🌲 Falegname</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Pittore',this)">🎨 Pittore</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Piastrellista',this)">🟫 Piastrellista</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Parquettista',this)">🪵 Parquettista</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Serramentista',this)">🪟 Serramentista</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Vetraio',this)">🔮 Vetraio</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Fabbro',this)">🔑 Fabbro</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Carpentiere',this)">🪚 Carpentiere</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Termoidraulico',this)">🔥 Termoidraulico</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Tecnico caldaie',this)">🫙 Tecnico caldaie</div><div class="mestiere-opt" onclick="setFiltroMestiere('Stufe a pellet',this)">🔥 Stufe a pellet</div>
+<div class="mestiere-opt" onclick="setFiltroMestiere('Installatore climatizzatori',this)">❄️ Installatore climatizzatori</div>
+        
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Climatizzatore',this)">❄️ Climatizzatore</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Giardiniere',this)">🌿 Giardiniere</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Movimento terra',this)">🚜 Movimento terra</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Scavi',this)">⛏️ Scavi</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Autospurghi',this)">🪣 Autospurghi</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Cartongesso',this)">🔲 Cartongesso</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Demolizioni',this)">⛏️ Demolizioni</div>
+        <div class="mestiere-opt" onclick="setFiltroMestiere('Traslochi',this)">📦 Traslochi</div>
+      </div>
+    </div>
+
+    <div class="filtro-group">
+      <div class="filtro-label">Valutazione minima</div>
+      <div class="rating-opts">
+        <div class="rating-opt active" onclick="setFiltroRating(0,this)">Qualsiasi</div>
+        <div class="rating-opt" onclick="setFiltroRating(3,this)"><span class="stars-mini">★★★</span> 3+ stelle</div>
+        <div class="rating-opt" onclick="setFiltroRating(4,this)"><span class="stars-mini">★★★★</span> 4+ stelle</div>
+        <div class="rating-opt" onclick="setFiltroRating(4.5,this)"><span class="stars-mini">★★★★★</span> 4.5+ stelle</div>
+      </div>
+    </div>
+
+    <div class="filtro-group">
+      <div class="filtro-label">Distanza massima</div>
+      <div class="slider-wrap">
+        <input type="range" min="5" max="100" value="30" id="dist-slider" oninput="updateDistLabel(this.value)">
+        <div class="slider-labels"><span>5 km</span><span id="dist-label" style="color:var(--verde);font-weight:700">30 km</span><span>100 km</span></div>
+      </div>
+    </div>
+
+    <div class="filtro-group">
+      <div class="filtro-label">Altro</div>
+      <div class="check-opts">
+        <label class="check-opt"><input type="checkbox" checked> ✅ Solo verificati</label>
+        <label class="check-opt"><input type="checkbox"> 📸 Con foto lavori</label>
+        <label class="check-opt"><input type="checkbox"> 💬 Risponde in 24h</label>
+        <label class="check-opt"><input type="checkbox"> 📋 Preventivo online</label>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RISULTATI -->
+  <main class="risultati">
+
+    <button class="mobile-filtri-btn">🎛️ Filtri</button>
+
+    <div class="risultati-header">
+      <div class="risultati-info">
+        <strong id="risultati-count">24 professionisti</strong> trovati per
+        <span id="risultati-desc" style="color:var(--verde);font-weight:700">"Elettricista a Milano"</span>
+      </div>
+      <select class="sort-select" onchange="sortRisultati(this.value)">
+        <option value="rating">⭐ Migliore valutazione</option>
+        <option value="distanza">📍 Più vicino</option>
+        <option value="recensioni">💬 Più recensioni</option>
+        <option value="nuovo">🆕 Più recente</option>
+      </select>
+    </div>
+
+    <!-- Tag filtri attivi -->
+    <div class="filtri-attivi" id="filtri-attivi">
+      <div class="filtro-tag">🔍 Tutti <span onclick="this.parentElement.remove()">✕</span></div>
+      <div class="filtro-tag">⚡ Elettricista <span onclick="this.parentElement.remove()">✕</span></div>
+      <div class="filtro-tag">📍 Milano <span onclick="this.parentElement.remove()">✕</span></div>
+      <div class="filtro-tag">✅ Verificati <span onclick="this.parentElement.remove()">✕</span></div>
+    </div>
+
+    <button class="mappa-btn" onclick="toggleMappa()">🗺️ Mostra sulla mappa</button>
+
+    <!-- CARDS RISULTATI -->
+    <div id="results-list">
+
+      <!-- Card 1 -->
+      <div class="result-card" onclick="window.location='profilo-impresa.html'">
+        <div class="result-card-accent verde"></div>
+        <div class="result-card-body">
+          <div class="result-avatar">⚡</div>
+          <div class="result-info">
+            <div class="result-top">
+              <div class="result-name">Elettrica Bianchi</div>
+            </div>
+            <div class="result-badges">
+              <span class="rbadge rbadge-v">✓ Verificato</span>
+              <span class="rbadge rbadge-t">🔨 Artigiano</span>
+            </div>
+            <div class="result-meta">
+              <span class="rmeta">📍 Milano, 2.3 km</span>
+              <span class="rmeta">👷 1 persona</span>
+              <span class="rmeta">📅 Dal 2010</span>
+            </div>
+            <div class="result-desc">Elettricista certificato, impianti civili e industriali. Pronto intervento disponibile. Preventivo gratuito entro 24h.</div>
+            <div class="result-cats">
+              <span class="rcat">⚡ Impianti civili</span>
+              <span class="rcat">💡 Domotica</span>
+              <span class="rcat">🔌 Quadri elettrici</span>
+            </div>
+          </div>
+          <div class="result-right">
+            <div class="result-rating">
+              <div class="rating-big">4.9</div>
+              <div class="rating-stars">★★★★★</div>
+              <div class="rating-n">38 recensioni</div>
+            </div>
+            <div class="result-price">
+              <div class="price-val">€35–50/h</div>
+              <div class="price-lbl">tariffa oraria</div>
+            </div>
+            <button class="btn-profilo">Vedi profilo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="result-card" onclick="window.location='profilo-impresa.html'">
+        <div class="result-card-accent arancio"></div>
+        <div class="result-card-body">
+          <div class="result-avatar">🏗️</div>
+          <div class="result-info">
+            <div class="result-top">
+              <div class="result-name">Edil Rossi & Figli</div>
+            </div>
+            <div class="result-badges">
+              <span class="rbadge rbadge-v">✓ Verificato</span>
+              <span class="rbadge" style="background:#e8f0ff;color:#3355cc">🏗️ Impresa</span>
+              <span class="rbadge rbadge-t">🏆 Top 2024</span>
+            </div>
+            <div class="result-meta">
+              <span class="rmeta">📍 Milano, 4.1 km</span>
+              <span class="rmeta">👷 25 dipendenti</span>
+              <span class="rmeta">📅 Dal 1998</span>
+            </div>
+            <div class="result-desc">Impresa edile con 25 anni di esperienza. Ristrutturazioni, nuove costruzioni, impianti. Certificazione ISO 9001.</div>
+            <div class="result-cats">
+              <span class="rcat">🏠 Ristrutturazioni</span>
+              <span class="rcat">⚡ Impianti</span>
+              <span class="rcat">🧱 Costruzioni</span>
+            </div>
+          </div>
+          <div class="result-right">
+            <div class="result-rating">
+              <div class="rating-big">4.8</div>
+              <div class="rating-stars">★★★★★</div>
+              <div class="rating-n">47 recensioni</div>
+            </div>
+            <div class="result-price">
+              <div class="price-val">€800–1200/mq</div>
+              <div class="price-lbl">costo medio</div>
+            </div>
+            <button class="btn-profilo">Vedi profilo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="result-card" onclick="window.location='profilo-impresa.html'">
+        <div class="result-card-accent verde"></div>
+        <div class="result-card-body">
+          <div class="result-avatar">⚡</div>
+          <div class="result-info">
+            <div class="result-top">
+              <div class="result-name">Impianti Ferrari</div>
+            </div>
+            <div class="result-badges">
+              <span class="rbadge rbadge-v">✓ Verificato</span>
+              <span class="rbadge rbadge-t">🔨 Artigiano</span>
+            </div>
+            <div class="result-meta">
+              <span class="rmeta">📍 Sesto S.G., 5.8 km</span>
+              <span class="rmeta">👷 3 persone</span>
+              <span class="rmeta">📅 Dal 2005</span>
+            </div>
+            <div class="result-desc">Elettricisti specializzati in impianti fotovoltaici, domotica e impianti industriali. Certificati CEI.</div>
+            <div class="result-cats">
+              <span class="rcat">☀️ Fotovoltaico</span>
+              <span class="rcat">🏭 Industriale</span>
+              <span class="rcat">💡 Domotica</span>
+            </div>
+          </div>
+          <div class="result-right">
+            <div class="result-rating">
+              <div class="rating-big">4.7</div>
+              <div class="rating-stars">★★★★★</div>
+              <div class="rating-n">29 recensioni</div>
+            </div>
+            <div class="result-price">
+              <div class="price-val">€40–60/h</div>
+              <div class="price-lbl">tariffa oraria</div>
+            </div>
+            <button class="btn-profilo">Vedi profilo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="result-card" onclick="window.location='profilo-impresa.html'">
+        <div class="result-card-accent arancio"></div>
+        <div class="result-card-body">
+          <div class="result-avatar">⚡</div>
+          <div class="result-info">
+            <div class="result-top">
+              <div class="result-name">Tecnoelettrica SRL</div>
+            </div>
+            <div class="result-badges">
+              <span class="rbadge rbadge-v">✓ Verificato</span>
+              <span class="rbadge" style="background:#e8f0ff;color:#3355cc">🏗️ Impresa</span>
+            </div>
+            <div class="result-meta">
+              <span class="rmeta">📍 Monza, 12 km</span>
+              <span class="rmeta">👷 8 dipendenti</span>
+              <span class="rmeta">📅 Dal 2012</span>
+            </div>
+            <div class="result-desc">Società specializzata in impianti elettrici civili e commerciali. Contratti di manutenzione disponibili.</div>
+            <div class="result-cats">
+              <span class="rcat">🏢 Commerciale</span>
+              <span class="rcat">🔧 Manutenzione</span>
+              <span class="rcat">🔌 Certificazioni</span>
+            </div>
+          </div>
+          <div class="result-right">
+            <div class="result-rating">
+              <div class="rating-big">4.5</div>
+              <div class="rating-stars">★★★★½</div>
+              <div class="rating-n">21 recensioni</div>
+            </div>
+            <div class="result-price">
+              <div class="price-val">€45–70/h</div>
+              <div class="price-lbl">tariffa oraria</div>
+            </div>
+            <button class="btn-profilo">Vedi profilo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="result-card" onclick="window.location='profilo-impresa.html'">
+        <div class="result-card-accent verde"></div>
+        <div class="result-card-body">
+          <div class="result-avatar">⚡</div>
+          <div class="result-info">
+            <div class="result-top">
+              <div class="result-name">Elettro Verdi</div>
+            </div>
+            <div class="result-badges">
+              <span class="rbadge rbadge-v">✓ Verificato</span>
+              <span class="rbadge rbadge-t">🔨 Artigiano</span>
+            </div>
+            <div class="result-meta">
+              <span class="rmeta">📍 Cinisello, 8 km</span>
+              <span class="rmeta">👷 2 persone</span>
+              <span class="rmeta">📅 Dal 2018</span>
+            </div>
+            <div class="result-desc">Giovane impresa, lavori precisi e puntuali. Specializzati in ristrutturazioni e nuovi impianti residenziali.</div>
+            <div class="result-cats">
+              <span class="rcat">🏠 Residenziale</span>
+              <span class="rcat">🔌 Nuovi impianti</span>
+            </div>
+          </div>
+          <div class="result-right">
+            <div class="result-rating">
+              <div class="rating-big">4.6</div>
+              <div class="rating-stars">★★★★½</div>
+              <div class="rating-n">15 recensioni</div>
+            </div>
+            <div class="result-price">
+              <div class="price-val">€30–45/h</div>
+              <div class="price-lbl">tariffa oraria</div>
+            </div>
+            <button class="btn-profilo">Vedi profilo</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PAGINAZIONE -->
+    <div class="pagination">
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">›</button>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Carica imprese da Supabase
+async function caricaImprese() {
+  const { data, error } = await supabase
+    .from('imprese')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error(error); return; }
+
+  const list = document.getElementById('results-list');
+
+  if (!data || data.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🔍</div>
+        <h3>Nessun risultato trovato</h3>
+        <p>Non ci sono ancora imprese registrate in questa zona.<br>Prova a cambiare i filtri!</p>
+      </div>`;
+    document.getElementById('risultati-count').textContent = '0 professionisti';
+    return;
+  }
+
+  document.getElementById('risultati-count').textContent = data.length + ' professionisti';
+
+  list.innerHTML = data.map(i => `
+    <div class="result-card" onclick="window.location='profilo-impresa.html?id=${i.id}'">
+      <div class="result-card-accent ${i.tipo === 'Artigiano' ? 'verde' : 'arancio'}"></div>
+      <div class="result-card-body">
+        <div class="result-avatar">${i.tipo === 'Artigiano' ? '🔨' : '🏗️'}</div>
+        <div class="result-info">
+          <div class="result-top">
+            <div class="result-name">${i.nome_attivita || i.nome + ' ' + i.cognome}</div>
+          </div>
+          <div class="result-badges">
+            ${i.verificata ? '<span class="rbadge rbadge-v">✓ Verificato</span>' : ''}
+            <span class="rbadge rbadge-t">${i.tipo === 'Artigiano' ? '🔨' : '🏗️'} ${i.tipo}</span>
+          </div>
+          <div class="result-meta">
+            <span class="rmeta">📍 ${i.citta}</span>
+            ${i.dipendenti ? `<span class="rmeta">👷 ${i.dipendenti}</span>` : ''}
+            ${i.anno_fondazione ? `<span class="rmeta">📅 Dal ${i.anno_fondazione}</span>` : ''}
+          </div>
+          <div class="result-desc">${i.descrizione || 'Nessuna descrizione disponibile.'}</div>
+          <div class="result-cats">
+            ${(i.mestieri || []).slice(0,3).map(m => `<span class="rcat">${m}</span>`).join('')}
+          </div>
+        </div>
+        <div class="result-right">
+          <div class="result-rating">
+            <div class="rating-big">${i.rating > 0 ? i.rating.toFixed(1) : '–'}</div>
+            <div class="rating-stars">${i.rating > 0 ? '★★★★★' : '🆕 Nuovo'}</div>
+            <div class="rating-n">${i.num_recensioni || 0} recensioni</div>
+          </div>
+          ${i.costo ? `<div class="result-price"><div class="price-val">${i.costo}</div></div>` : ''}
+          <button class="btn-profilo">Vedi profilo</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Aggiorna cerca
+function aggiornaCerca() {
+  const v = document.getElementById('nav-search-input').value.trim();
+  if (v) document.getElementById('risultati-desc').textContent = '"' + v + '"';
+  caricaImprese();
+}
+
+function setFiltroTipo(tipo, el) {
+  document.querySelectorAll('.tipo-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+}
+function setFiltroMestiere(m, el) {
+  document.querySelectorAll('.mestiere-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+}
+function setFiltroRating(r, el) {
+  document.querySelectorAll('.rating-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+}
+function updateDistLabel(v) {
+  document.getElementById('dist-label').textContent = v + ' km';
+}
+function sortRisultati(v) { caricaImprese(); }
+function toggleMappa() { alert('🗺️ La mappa arriva nella prossima versione!'); }
+
+// Avvia al caricamento pagina
+window.onload = () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('q')) {
+    document.getElementById('nav-search-input').value = params.get('q');
+    document.getElementById('risultati-desc').textContent = '"' + params.get('q') + '"';
+  }
+  caricaImprese();
+};
+</script>
+
+</body>
+</html>
