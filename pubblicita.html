@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pubblicità su TrovaImpresa – Raggiungi migliaia di clienti</title>
-  <meta name="description" content="Pubblica la tua azienda su TrovaImpresa. Spazi pubblicitari a partire da €10/mese nelle principali città italiane.">
+  <meta name="description" content="Pubblica la tua azienda su TrovaImpresa. Spazi pubblicitari a partire da €8/mese nelle principali città italiane.">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -17,284 +17,295 @@
       --dark: #1a1a1a;
       --mid: #555;
       --light: #999;
-      --bg: #fafaf8;
+      --bg: #f4f6f9;
       --white: #ffffff;
       --shadow: 0 4px 24px rgba(0,0,0,0.08);
       --shadow2: 0 16px 60px rgba(0,0,0,0.12);
+      --border: rgba(0,0,0,0.08);
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--dark); }
 
     /* NAVBAR */
     .navbar {
-      background: var(--white);
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      background: var(--white); border-bottom: 1px solid var(--border);
+      padding: 0 24px; height: 64px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 100;
       box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
-    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .nav-logo-text { font-family: 'Playfair Display', serif; font-size: 22px; }
-    .nav-logo-text .trova { color: var(--verde); }
-    .nav-logo-text .impresa { color: var(--arancio); }
+    .nav-logo { text-decoration: none; font-family: 'Playfair Display', serif; font-size: 22px; }
+    .nav-logo .trova { color: var(--verde); }
+    .nav-logo .impresa { color: var(--arancio); }
     .nav-links { display: flex; gap: 12px; align-items: center; }
     .nav-link { text-decoration: none; color: var(--mid); font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 8px; transition: all 0.2s; }
     .nav-link:hover { background: var(--verde3); color: var(--verde); }
-    .nav-btn { background: var(--verde); color: white; border: none; padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; }
-    .nav-btn:hover { background: var(--verde2); }
+    .nav-btn-verde { background: var(--verde); color: white; padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .nav-btn-verde:hover { background: var(--verde2); }
+    .nav-btn-arancio { background: var(--arancio); color: white; padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .nav-btn-arancio:hover { background: var(--arancio2); }
 
     /* HERO */
     .hero {
-      background: linear-gradient(135deg, var(--verde2) 0%, var(--verde) 50%, #3a9a5e 100%);
-      padding: 80px 24px;
-      text-align: center;
-      color: white;
-      position: relative;
-      overflow: hidden;
+      background: linear-gradient(135deg, var(--verde2) 0%, var(--verde) 60%, #3a9a5e 100%);
+      padding: 64px 24px 48px; text-align: center; color: white;
     }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.08) 0%, transparent 50%);
-      pointer-events: none;
-    }
-    .hero-badge {
-      display: inline-block;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 20px;
-      letter-spacing: 0.5px;
-    }
-    .hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(32px, 5vw, 56px);
-      font-weight: 900;
-      margin-bottom: 16px;
-      line-height: 1.15;
-    }
+    .hero-badge { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px; }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 48px); font-weight: 900; margin-bottom: 12px; line-height: 1.2; }
     .hero h1 span { color: #ffd166; }
-    .hero p {
-      font-size: 18px;
-      opacity: 0.9;
-      max-width: 560px;
-      margin: 0 auto 32px;
-      line-height: 1.6;
-    }
-    .hero-stats {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-    .hero-stat { text-align: center; }
-    .hero-stat-num { font-size: 32px; font-weight: 700; color: #ffd166; font-family: 'Playfair Display', serif; }
-    .hero-stat-label { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+    .hero p { font-size: 16px; opacity: 0.9; max-width: 520px; margin: 0 auto 28px; line-height: 1.6; }
+    .hero-stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+    .hero-stat-num { font-size: 28px; font-weight: 700; color: #ffd166; font-family: 'Playfair Display', serif; }
+    .hero-stat-label { font-size: 12px; opacity: 0.85; margin-top: 2px; }
 
-    /* COME FUNZIONA */
-    .section { padding: 64px 24px; max-width: 1100px; margin: 0 auto; }
-    .section-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--dark); margin-bottom: 8px; text-align: center; }
-    .section-sub { color: var(--mid); font-size: 16px; text-align: center; margin-bottom: 48px; }
-
-    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
-    .step-card {
-      background: white;
-      border-radius: 16px;
-      padding: 28px 24px;
-      box-shadow: var(--shadow);
-      text-align: center;
-      border: 1px solid rgba(0,0,0,0.06);
-      transition: transform 0.2s;
+    /* STEP TABS */
+    .steps-nav {
+      background: white; border-bottom: 2px solid var(--border);
+      display: flex; justify-content: center; gap: 0; position: sticky; top: 64px; z-index: 90;
     }
-    .step-card:hover { transform: translateY(-4px); }
-    .step-num {
-      width: 44px; height: 44px;
-      background: var(--verde3);
-      color: var(--verde);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; font-weight: 700;
-      margin: 0 auto 16px;
-    }
-    .step-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-    .step-card p { font-size: 14px; color: var(--mid); line-height: 1.5; }
-
-    /* PACCHETTI */
-    .pacchetti-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
-    }
-    .pacchetto {
-      background: white;
-      border-radius: 20px;
-      padding: 32px 28px;
-      box-shadow: var(--shadow);
-      border: 2px solid transparent;
-      transition: all 0.2s;
-      position: relative;
-    }
-    .pacchetto:hover { border-color: var(--verde); transform: translateY(-4px); box-shadow: var(--shadow2); }
-    .pacchetto.top {
-      border-color: var(--arancio);
-      background: linear-gradient(135deg, #fff8f5 0%, white 100%);
-    }
-    .top-badge {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--arancio);
-      color: white;
-      padding: 4px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
+    .step-tab {
+      padding: 16px 28px; font-size: 14px; font-weight: 600; color: var(--light);
+      border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer;
+      display: flex; align-items: center; gap: 8px; transition: all 0.2s;
       white-space: nowrap;
     }
-    .pacchetto-icon { font-size: 36px; margin-bottom: 12px; }
-    .pacchetto h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-    .pacchetto-pos { font-size: 13px; color: var(--mid); margin-bottom: 16px; }
-    .pacchetto-price { display: flex; align-items: baseline; gap: 4px; margin-bottom: 20px; }
-    .pacchetto-price .euro { font-size: 16px; font-weight: 600; color: var(--verde); }
-    .pacchetto-price .num { font-size: 42px; font-weight: 700; color: var(--verde); font-family: 'Playfair Display', serif; line-height: 1; }
-    .pacchetto-price .mese { font-size: 14px; color: var(--mid); }
-    .pacchetto-features { list-style: none; margin-bottom: 24px; }
-    .pacchetto-features li { font-size: 14px; color: var(--mid); padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px; }
-    .pacchetto-features li:last-child { border-bottom: none; }
-    .pacchetto-features li::before { content: '✓'; color: var(--verde); font-weight: 700; font-size: 13px; }
-    .pacchetto-btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-      display: block;
-      text-align: center;
+    .step-tab.active { color: var(--verde); border-bottom-color: var(--verde); }
+    .step-tab .step-circle {
+      width: 24px; height: 24px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: var(--light);
     }
-    .btn-verde { background: var(--verde); color: white; }
-    .btn-verde:hover { background: var(--verde2); }
-    .btn-arancio { background: var(--arancio); color: white; }
-    .btn-arancio:hover { background: var(--arancio2); }
+    .step-tab.active .step-circle { background: var(--verde); color: white; }
+    .step-tab.done .step-circle { background: var(--verde3); color: var(--verde); }
+    .step-tab.done { color: var(--verde); }
 
-    /* DOVE APPARE */
-    .dove-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-    }
-    .dove-card {
-      background: white;
-      border-radius: 16px;
-      padding: 28px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(0,0,0,0.06);
-    }
-    .dove-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-    .dove-card p { font-size: 14px; color: var(--mid); line-height: 1.6; margin-bottom: 16px; }
-    .dove-tag { display: inline-block; background: var(--verde3); color: var(--verde); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin: 2px; }
+    /* CONTENUTO STEP */
+    .step-content { display: none; max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+    .step-content.active { display: block; }
 
-    /* FORM CONTATTO */
-    .form-section {
-      background: linear-gradient(135deg, var(--verde3) 0%, #f0faf5 100%);
-      padding: 64px 24px;
+    /* === STEP 1: FORMATI === */
+    .step-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .step-sub { color: var(--mid); font-size: 15px; margin-bottom: 32px; }
+
+    /* ANTEPRIMA PAGINA */
+    .anteprima-container { display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start; }
+    .anteprima-pagina {
+      background: white; border-radius: 16px; border: 2px solid var(--border);
+      overflow: hidden; box-shadow: var(--shadow);
     }
-    .form-box {
-      background: white;
-      border-radius: 24px;
-      padding: 48px;
-      max-width: 680px;
-      margin: 0 auto;
-      box-shadow: var(--shadow2);
+    .ant-browser-bar {
+      background: #f0f0f0; padding: 8px 12px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
     }
-    .form-box h2 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-    .form-box p { color: var(--mid); font-size: 15px; margin-bottom: 32px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group.full { grid-column: 1 / -1; }
-    .form-label { font-size: 13px; font-weight: 600; color: var(--dark); }
+    .ant-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .ant-url { background: white; border-radius: 4px; padding: 3px 10px; font-size: 11px; color: var(--light); flex: 1; }
+    .ant-pagina-titolo {
+      background: linear-gradient(135deg, var(--verde2), var(--verde));
+      padding: 16px; color: white; font-size: 13px; font-weight: 700; text-align: center;
+    }
+
+    /* SPAZI PUBBLICITARI NELL'ANTEPRIMA */
+    .ant-spazio {
+      margin: 10px; border-radius: 8px; padding: 12px 16px;
+      border: 2px dashed #ddd; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 12px; font-size: 13px;
+    }
+    .ant-spazio:hover, .ant-spazio.selected {
+      border-style: solid; transform: scale(1.01);
+    }
+    .ant-spazio.s1 { border-color: #f59e0b; background: #fffbeb; }
+    .ant-spazio.s1:hover, .ant-spazio.s1.selected { background: #fef3c7; box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+    .ant-spazio.s2 { border-color: var(--verde); background: var(--verde3); }
+    .ant-spazio.s2:hover, .ant-spazio.s2.selected { background: #d1fae5; box-shadow: 0 4px 16px rgba(42,122,75,0.2); }
+    .ant-spazio.s3 { border-color: #6366f1; background: #eef2ff; }
+    .ant-spazio.s3:hover, .ant-spazio.s3.selected { background: #e0e7ff; box-shadow: 0 4px 16px rgba(99,102,241,0.2); }
+
+    /* RISULTATI FINTI */
+    .ant-risultato {
+      margin: 6px 10px; background: #fafafa; border: 1px solid #eee;
+      border-radius: 8px; padding: 10px 12px; font-size: 11px; color: var(--mid);
+    }
+    .ant-ris-nome { font-weight: 700; color: var(--dark); font-size: 12px; margin-bottom: 2px; }
+
+    /* SIDEBAR ANTEPRIMA */
+    .ant-sidebar-wrap { display: grid; grid-template-columns: 1fr 80px; gap: 6px; margin: 6px 10px; }
+    .ant-sidebar-spazio {
+      background: #fff3e0; border: 2px dashed var(--arancio); border-radius: 8px;
+      padding: 20px 8px; font-size: 11px; color: var(--arancio); font-weight: 700;
+      text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .ant-sidebar-spazio:hover, .ant-sidebar-spazio.selected {
+      border-style: solid; background: #ffe0b2; box-shadow: 0 4px 16px rgba(232,115,58,0.2);
+    }
+
+    /* PANNELLO SELEZIONE */
+    .selezione-panel { display: flex; flex-direction: column; gap: 12px; }
+    .formato-card {
+      background: white; border-radius: 14px; padding: 18px 20px;
+      border: 2px solid var(--border); cursor: pointer; transition: all 0.2s;
+    }
+    .formato-card:hover { border-color: var(--verde); }
+    .formato-card.selected { border-color: var(--verde); background: var(--verde3); }
+    .formato-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .formato-nome { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+    .formato-prezzo { font-size: 18px; font-weight: 800; color: var(--verde); font-family: 'Playfair Display', serif; }
+    .formato-prezzo small { font-size: 12px; font-weight: 500; color: var(--mid); font-family: 'DM Sans', sans-serif; }
+    .formato-desc { font-size: 13px; color: var(--mid); line-height: 1.4; }
+    .formato-badge { background: #f59e0b; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+
+    /* BOTTONE AVANTI */
+    .btn-avanti {
+      width: 100%; padding: 14px; background: var(--arancio); color: white;
+      border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 8px;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-avanti:hover { background: var(--arancio2); transform: translateY(-1px); }
+    .btn-avanti:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+    .btn-indietro {
+      padding: 10px 20px; background: white; color: var(--mid);
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px;
+      cursor: pointer; transition: all 0.2s; margin-bottom: 16px;
+    }
+    .btn-indietro:hover { border-color: var(--verde); color: var(--verde); }
+
+    /* === STEP 2: CITTÀ + PERIODO === */
+    .citta-search-wrap { position: relative; margin-bottom: 16px; }
+    .citta-search {
+      width: 100%; padding: 13px 16px 13px 44px; border: 2px solid var(--border);
+      border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 15px;
+      outline: none; transition: border 0.2s; background: white;
+    }
+    .citta-search:focus { border-color: var(--verde); }
+    .citta-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+
+    .citta-selected-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; min-height: 20px; }
+    .citta-chip {
+      background: var(--verde3); color: var(--verde2); padding: 6px 12px;
+      border-radius: 20px; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; cursor: pointer;
+    }
+    .citta-chip:hover { background: #fecaca; color: var(--rosso); }
+
+    .citta-grid-sel {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px; max-height: 280px; overflow-y: auto; padding-right: 4px;
+    }
+    .citta-option {
+      background: white; border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 9px 12px; font-size: 13px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s; text-align: center;
+    }
+    .citta-option:hover { border-color: var(--verde); background: var(--verde3); color: var(--verde); }
+    .citta-option.selected { border-color: var(--verde); background: var(--verde3); color: var(--verde2); font-weight: 700; }
+
+    /* TOGGLE PERIODO */
+    .periodo-toggle {
+      background: white; border-radius: 16px; padding: 24px;
+      box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 24px;
+    }
+    .periodo-label { font-size: 13px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+    .toggle-wrap { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; gap: 4px; }
+    .toggle-opt {
+      flex: 1; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-align: center; transition: all 0.2s; color: var(--mid);
+    }
+    .toggle-opt.active { background: white; color: var(--verde); box-shadow: var(--shadow); }
+    .toggle-opt .risparmio { font-size: 11px; background: #d1fae5; color: var(--verde); padding: 2px 6px; border-radius: 6px; display: inline-block; margin-top: 2px; }
+
+    /* RIEPILOGO ORDINE */
+    .riepilogo {
+      background: white; border-radius: 16px; padding: 24px;
+      box-shadow: var(--shadow); border: 1px solid var(--border); margin-top: 24px;
+    }
+    .riepilogo-title { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 16px; }
+    .riepilogo-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .riepilogo-row:last-child { border-bottom: none; font-weight: 700; font-size: 16px; padding-top: 12px; }
+    .riepilogo-total-num { font-size: 22px; font-weight: 800; color: var(--verde); font-family: 'Playfair Display', serif; }
+
+    /* === STEP 3: DATI + PAGAMENTO === */
+    .pagamento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .pagamento-form-section h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
     .form-input, .form-select, .form-textarea {
-      padding: 12px 14px;
-      border: 1.5px solid rgba(0,0,0,0.12);
-      border-radius: 10px;
-      font-size: 14px;
-      font-family: 'DM Sans', sans-serif;
-      outline: none;
-      transition: border-color 0.2s;
-      background: #fafafa;
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      outline: none; transition: border 0.2s; background: #fafafa;
     }
     .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--verde); background: white; }
-    .form-textarea { height: 100px; resize: vertical; }
-    .form-submit {
-      width: 100%;
-      padding: 14px;
-      background: var(--arancio);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: all 0.2s;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .form-submit:hover { background: var(--arancio2); transform: translateY(-1px); }
-    .form-note { font-size: 12px; color: var(--light); text-align: center; margin-top: 12px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-    /* CITTA */
-    .citta-section { padding: 64px 24px; background: white; }
-    .citta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; max-width: 1100px; margin: 0 auto; }
-    .citta-tag {
-      background: var(--bg);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 13px;
-      font-weight: 500;
-      text-align: center;
-      transition: all 0.2s;
-      cursor: pointer;
+    /* METODO PAGAMENTO */
+    .metodo-title { font-size: 13px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+    .metodo-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .metodo-card {
+      background: white; border: 2px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 12px;
     }
-    .citta-tag:hover { background: var(--verde3); border-color: var(--verde); color: var(--verde); }
-    .citta-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px; max-width: 1100px; margin: 0 auto 8px; }
-    .citta-sub { color: var(--mid); text-align: center; margin-bottom: 32px; font-size: 15px; }
+    .metodo-card:hover { border-color: var(--verde); }
+    .metodo-card.selected { border-color: var(--verde); background: var(--verde3); }
+    .metodo-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .metodo-card.selected .metodo-radio { border-color: var(--verde); background: var(--verde); }
+    .metodo-card.selected .metodo-radio::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; }
+    .metodo-info h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .metodo-info p { font-size: 12px; color: var(--mid); }
 
-    /* FAQ */
-    .faq-list { max-width: 720px; margin: 0 auto; }
-    .faq-item { border-bottom: 1px solid rgba(0,0,0,0.08); padding: 20px 0; cursor: pointer; }
-    .faq-q { font-size: 16px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-    .faq-a { font-size: 14px; color: var(--mid); line-height: 1.6; margin-top: 12px; display: none; }
-    .faq-item.open .faq-a { display: block; }
-    .faq-item.open .faq-arrow { transform: rotate(180deg); }
-    .faq-arrow { transition: transform 0.2s; color: var(--verde); }
+    /* IBAN FIELDS */
+    .iban-fields { display: none; }
+    .iban-fields.show { display: block; }
+    .iban-box {
+      background: #f0faf5; border: 1.5px solid #a7d9b8; border-radius: 12px;
+      padding: 16px; margin-bottom: 16px;
+    }
+    .iban-box h4 { font-size: 13px; font-weight: 700; color: var(--verde2); margin-bottom: 10px; }
+    .iban-data-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; }
+    .iban-data-row span:first-child { color: var(--mid); font-weight: 600; }
+    .iban-data-row span:last-child { font-weight: 700; font-family: monospace; color: var(--dark); }
+
+    /* RIEPILOGO LATERALE */
+    .riepilogo-sidebar {
+      background: white; border-radius: 16px; padding: 24px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      position: sticky; top: 140px;
+    }
+    .riepilogo-sidebar h3 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 20px; }
+    .ric-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .ric-item:last-of-type { border-bottom: none; }
+    .ric-totale { margin-top: 12px; padding: 14px; background: var(--verde3); border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .ric-totale-label { font-size: 14px; font-weight: 700; color: var(--verde2); }
+    .ric-totale-num { font-size: 24px; font-weight: 800; color: var(--verde); font-family: 'Playfair Display', serif; }
+
+    /* FORM SUBMIT */
+    .btn-invia-ordine {
+      width: 100%; padding: 16px; background: var(--arancio); color: white;
+      border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 17px; cursor: pointer; margin-top: 20px;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-invia-ordine:hover { background: var(--arancio2); transform: translateY(-1px); }
+    .btn-invia-ordine:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+    .note-invio { font-size: 12px; color: var(--light); text-align: center; margin-top: 10px; }
+
+    /* SUCCESS */
+    .success-box {
+      background: white; border-radius: 20px; padding: 48px 32px;
+      text-align: center; box-shadow: var(--shadow2); max-width: 520px; margin: 60px auto;
+    }
+    .success-icon { font-size: 64px; margin-bottom: 20px; }
+    .success-box h2 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 10px; }
+    .success-box p { color: var(--mid); line-height: 1.6; margin-bottom: 20px; }
 
     /* FOOTER */
-    footer { background: var(--dark); color: rgba(255,255,255,0.6); padding: 32px 24px; text-align: center; font-size: 13px; }
+    footer { background: var(--dark); color: rgba(255,255,255,0.6); padding: 28px 24px; text-align: center; font-size: 13px; }
     footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
 
-    @media (max-width: 600px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .form-box { padding: 28px 20px; }
-      .hero-stats { gap: 24px; }
+    @media (max-width: 768px) {
+      .anteprima-container { grid-template-columns: 1fr; }
+      .pagamento-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .step-tab span:not(.step-circle) { display: none; }
       .nav-links { display: none; }
     }
   </style>
@@ -303,310 +314,541 @@
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <a href="index.html" class="nav-logo">
-    <span class="nav-logo-text"><span class="trova">Trova</span><span class="impresa">Impresa</span></span>
-  </a>
+  <a href="index.html" class="nav-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></a>
   <div class="nav-links">
     <a href="index.html" class="nav-link">Home</a>
     <a href="prezzi.html" class="nav-link">Prezzi imprese</a>
-    <a href="#pacchetti" class="nav-link">Pacchetti pubblicità</a>
+    <a href="pannello-impresa.html" class="nav-btn-verde">Entra (Imprese)</a>
   </div>
-  <a href="#form-contatto" class="nav-btn">Prenota uno spazio</a>
+  <a href="#" onclick="goToStep(1)" class="nav-btn-arancio">📢 Prenota uno spazio</a>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="hero-badge">📢 Spazi pubblicitari disponibili</div>
   <h1>Fai conoscere la tua azienda<br>a <span>migliaia di clienti</span></h1>
-  <p>TrovaImpresa è il marketplace italiano per trovare imprese edili e artigiani. Pubblica il tuo banner nelle città che ti interessano a partire da soli €10/mese.</p>
+  <p>Scegli il tuo spazio, seleziona le città e paga in pochi minuti. Banner live entro 24 ore.</p>
   <div class="hero-stats">
-    <div class="hero-stat">
-      <div class="hero-stat-num">106</div>
-      <div class="hero-stat-label">Città italiane</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-num">424</div>
-      <div class="hero-stat-label">Spazi disponibili</div>
-    </div>
-    <div class="hero-stat">
-      <div class="hero-stat-num">€10</div>
-      <div class="hero-stat-label">Al mese per spazio</div>
-    </div>
+    <div class="hero-stat"><div class="hero-stat-num">106</div><div class="hero-stat-label">Città italiane</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Posizioni per città</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">€8</div><div class="hero-stat-label">Al mese da</div></div>
   </div>
 </section>
 
-<!-- COME FUNZIONA -->
-<div class="section">
-  <h2 class="section-title">Come funziona</h2>
-  <p class="section-sub">Tre passi semplici per iniziare a farti vedere</p>
-  <div class="steps">
-    <div class="step-card">
-      <div class="step-num">1</div>
-      <h3>Scegli la città</h3>
-      <p>Seleziona una o più città dove vuoi che il tuo banner venga mostrato ai clienti.</p>
+<!-- STEP NAV -->
+<div class="steps-nav">
+  <div class="step-tab active" id="tab-1" onclick="goToStep(1)">
+    <span class="step-circle">1</span> <span>Scegli formato</span>
+  </div>
+  <div class="step-tab" id="tab-2" onclick="goToStep(2)">
+    <span class="step-circle">2</span> <span>Città e periodo</span>
+  </div>
+  <div class="step-tab" id="tab-3" onclick="goToStep(3)">
+    <span class="step-circle">3</span> <span>Dati e pagamento</span>
+  </div>
+</div>
+
+<!-- ===================== STEP 1 ===================== -->
+<div class="step-content active" id="step-1">
+  <h2 class="step-title">Scegli il formato pubblicitario</h2>
+  <p class="step-sub">Clicca su uno spazio nell'anteprima per vedere dove apparirà il tuo banner</p>
+
+  <div class="anteprima-container">
+
+    <!-- ANTEPRIMA PAGINA CITTÀ -->
+    <div>
+      <p style="font-size:13px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">📱 Anteprima pagina città</p>
+      <div class="anteprima-pagina">
+        <div class="ant-browser-bar">
+          <div class="ant-dot" style="background:#ff5f57"></div>
+          <div class="ant-dot" style="background:#febc2e"></div>
+          <div class="ant-dot" style="background:#28c840"></div>
+          <div class="ant-url">trovaimpresa.com/imprese-roma.html</div>
+        </div>
+        <div class="ant-pagina-titolo">🏗️ Imprese Edili a Roma — TrovaImpresa</div>
+
+        <!-- SPAZIO 1 - CIMA -->
+        <div class="ant-spazio s1" id="ant-s1" onclick="selectFormato(1)">
+          <div>🥇</div>
+          <div>
+            <div style="font-weight:700;color:#92400e">📍 SPAZIO 1 — In cima alla pagina</div>
+            <div style="font-size:11px;color:#b45309">Prima cosa che vede il cliente • €15/mese</div>
+          </div>
+          <div style="margin-left:auto;font-size:18px" id="check-s1">○</div>
+        </div>
+
+        <!-- RISULTATI FINTI + SIDEBAR -->
+        <div class="ant-sidebar-wrap">
+          <div>
+            <div class="ant-risultato">
+              <div class="ant-ris-nome">🏗️ Edilizia Rossi & C.</div>
+              <div>Muratura · Roma · ⭐⭐⭐⭐⭐</div>
+            </div>
+
+            <!-- SPAZIO 2 - METÀ -->
+            <div class="ant-spazio s2" id="ant-s2" onclick="selectFormato(2)" style="margin:6px 0">
+              <div>🥈</div>
+              <div>
+                <div style="font-weight:700;color:var(--verde2)">📍 SPAZIO 2 — A metà pagina</div>
+                <div style="font-size:11px;color:var(--verde)">Tra i risultati • €10/mese</div>
+              </div>
+              <div style="margin-left:auto;font-size:18px" id="check-s2">○</div>
+            </div>
+
+            <div class="ant-risultato">
+              <div class="ant-ris-nome">🔧 Idraulici Bianchi</div>
+              <div>Idraulica · Roma · ⭐⭐⭐⭐</div>
+            </div>
+            <div class="ant-risultato">
+              <div class="ant-ris-nome">⚡ Elettrica Sud</div>
+              <div>Impianti · Roma · ⭐⭐⭐⭐⭐</div>
+            </div>
+
+            <!-- SPAZIO 3 - FONDO -->
+            <div class="ant-spazio s3" id="ant-s3" onclick="selectFormato(3)" style="margin:6px 0">
+              <div>🥉</div>
+              <div>
+                <div style="font-weight:700;color:#4338ca">📍 SPAZIO 3 — In fondo</div>
+                <div style="font-size:11px;color:#6366f1">In fondo alla pagina • €8/mese</div>
+              </div>
+              <div style="margin-left:auto;font-size:18px" id="check-s3">○</div>
+            </div>
+          </div>
+
+          <!-- SIDEBAR -->
+          <div>
+            <div class="ant-sidebar-spazio" id="ant-s4" onclick="selectFormato(4)">
+              <div style="font-size:16px">📌</div>
+              <div style="margin-top:4px">SPAZIO 4</div>
+              <div style="font-size:9px;margin-top:2px">Sidebar</div>
+              <div style="font-size:9px;margin-top:2px">€10/mese</div>
+              <div style="margin-top:6px;font-size:14px" id="check-s4">○</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="step-card">
-      <div class="step-num">2</div>
-      <h3>Scegli la posizione</h3>
-      <p>4 spazi disponibili per ogni città: in cima, a metà pagina, in fondo o nella sidebar.</p>
-    </div>
-    <div class="step-card">
-      <div class="step-num">3</div>
-      <h3>Inviaci il tuo banner</h3>
-      <p>Mandaci il tuo logo e testo, oppure ti aiutiamo noi a creare il banner gratuitamente.</p>
-    </div>
-    <div class="step-card">
-      <div class="step-num">4</div>
-      <h3>Vai online!</h3>
-      <p>Il tuo banner è live entro 24 ore. Paghi mese per mese, senza contratti lunghi.</p>
+
+    <!-- PANNELLO SELEZIONE -->
+    <div class="selezione-panel">
+      <p style="font-size:13px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Seleziona la posizione</p>
+
+      <div class="formato-card" id="fc-1" onclick="selectFormato(1)">
+        <div class="formato-header">
+          <div class="formato-nome">🥇 In cima <span class="formato-badge">⭐ Più visto</span></div>
+          <div class="formato-prezzo">€15 <small>/mese</small></div>
+        </div>
+        <div class="formato-desc">Banner grande sopra tutti i risultati. Prima cosa che vede il cliente quando apre la pagina.</div>
+      </div>
+
+      <div class="formato-card" id="fc-2" onclick="selectFormato(2)">
+        <div class="formato-header">
+          <div class="formato-nome">🥈 A metà pagina</div>
+          <div class="formato-prezzo">€10 <small>/mese</small></div>
+        </div>
+        <div class="formato-desc">Banner tra i risultati di ricerca. Visto da chi sta scorrendo e confrontando le imprese.</div>
+      </div>
+
+      <div class="formato-card" id="fc-3" onclick="selectFormato(3)">
+        <div class="formato-header">
+          <div class="formato-nome">🥉 In fondo</div>
+          <div class="formato-prezzo">€8 <small>/mese</small></div>
+        </div>
+        <div class="formato-desc">Banner in fondo alla pagina. Il prezzo più accessibile, visto da chi legge tutta la pagina.</div>
+      </div>
+
+      <div class="formato-card" id="fc-4" onclick="selectFormato(4)">
+        <div class="formato-header">
+          <div class="formato-nome">📌 Sidebar laterale</div>
+          <div class="formato-prezzo">€10 <small>/mese</small></div>
+        </div>
+        <div class="formato-desc">Banner laterale sempre visibile mentre il cliente scorre la pagina. Formato verticale.</div>
+      </div>
+
+      <button class="btn-avanti" id="btn-step1" onclick="goToStep(2)" disabled>
+        Continua → Scegli le città
+      </button>
     </div>
   </div>
 </div>
 
-<!-- PACCHETTI -->
-<div style="background: white; padding: 64px 0;">
-<div class="section" style="padding-top: 0;" id="pacchetti">
-  <h2 class="section-title">Scegli la posizione</h2>
-  <p class="section-sub">4 spazi per ogni pagina città — più sei in alto, più ti vedono</p>
-  <div class="pacchetti-grid">
-    <div class="pacchetto top">
-      <div class="top-badge">⭐ Più richiesto</div>
-      <div class="pacchetto-icon">🥇</div>
-      <h3>Spazio 1 — In cima</h3>
-      <p class="pacchetto-pos">Banner grande sopra i risultati di ricerca</p>
-      <div class="pacchetto-price">
-        <span class="euro">€</span>
-        <span class="num">15</span>
-        <span class="mese">/mese</span>
-      </div>
-      <ul class="pacchetto-features">
-        <li>Prima cosa che vede il cliente</li>
-        <li>Massima visibilità garantita</li>
-        <li>Logo + testo + link al tuo sito</li>
-        <li>Disponibile per ogni città</li>
-      </ul>
-      <a href="#form-contatto" class="pacchetto-btn btn-arancio">Prenota questo spazio</a>
-    </div>
-    <div class="pacchetto">
-      <div class="pacchetto-icon">🥈</div>
-      <h3>Spazio 2 — A metà pagina</h3>
-      <p class="pacchetto-pos">Banner tra i risultati di ricerca</p>
-      <div class="pacchetto-price">
-        <span class="euro">€</span>
-        <span class="num">10</span>
-        <span class="mese">/mese</span>
-      </div>
-      <ul class="pacchetto-features">
-        <li>Vista da chi scorre i risultati</li>
-        <li>Ottimo rapporto qualità/prezzo</li>
-        <li>Logo + testo + link al tuo sito</li>
-        <li>Disponibile per ogni città</li>
-      </ul>
-      <a href="#form-contatto" class="pacchetto-btn btn-verde">Prenota questo spazio</a>
-    </div>
-    <div class="pacchetto">
-      <div class="pacchetto-icon">🥉</div>
-      <h3>Spazio 3 — In fondo</h3>
-      <p class="pacchetto-pos">Banner in fondo alla pagina città</p>
-      <div class="pacchetto-price">
-        <span class="euro">€</span>
-        <span class="num">8</span>
-        <span class="mese">/mese</span>
-      </div>
-      <ul class="pacchetto-features">
-        <li>Vista da chi legge tutta la pagina</li>
-        <li>Prezzo più accessibile</li>
-        <li>Logo + testo + link al tuo sito</li>
-        <li>Disponibile per ogni città</li>
-      </ul>
-      <a href="#form-contatto" class="pacchetto-btn btn-verde">Prenota questo spazio</a>
-    </div>
-    <div class="pacchetto">
-      <div class="pacchetto-icon">📌</div>
-      <h3>Spazio 4 — Sidebar</h3>
-      <p class="pacchetto-pos">Banner laterale fisso mentre si scorre</p>
-      <div class="pacchetto-price">
-        <span class="euro">€</span>
-        <span class="num">10</span>
-        <span class="mese">/mese</span>
-      </div>
-      <ul class="pacchetto-features">
-        <li>Sempre visibile mentre si scorre</li>
-        <li>Formato verticale ben visibile</li>
-        <li>Logo + testo + link al tuo sito</li>
-        <li>Disponibile per ogni città</li>
-      </ul>
-      <a href="#form-contatto" class="pacchetto-btn btn-verde">Prenota questo spazio</a>
-    </div>
-  </div>
-</div>
-</div>
+<!-- ===================== STEP 2 ===================== -->
+<div class="step-content" id="step-2">
+  <button class="btn-indietro" onclick="goToStep(1)">← Indietro</button>
+  <div style="display:grid;grid-template-columns:1fr 360px;gap:32px;align-items:start;">
+    <div>
+      <h2 class="step-title">Scegli le città</h2>
+      <p class="step-sub">Seleziona una o più città dove vuoi che il tuo banner appaia</p>
 
-<!-- DOVE APPARE -->
-<div class="section">
-  <h2 class="section-title">Dove appare il tuo banner</h2>
-  <p class="section-sub">Il tuo banner viene mostrato sulle pagine città che scegli</p>
-  <div class="dove-grid">
-    <div class="dove-card">
-      <h3>🏠 Homepage</h3>
-      <p>Banner nella pagina principale di TrovaImpresa, vista da tutti i visitatori che cercano un professionista in Italia.</p>
-      <span class="dove-tag">Visibilità nazionale</span>
-      <span class="dove-tag">Alto traffico</span>
+      <!-- Cerca città -->
+      <div class="citta-search-wrap">
+        <span class="citta-search-icon">🔍</span>
+        <input type="text" class="citta-search" id="citta-search-input" placeholder="Cerca una città..." oninput="filtraCitta()">
+      </div>
+
+      <!-- Città selezionate -->
+      <div class="citta-selected-list" id="citta-selected-list">
+        <span style="font-size:13px;color:var(--light);align-self:center">Nessuna città selezionata</span>
+      </div>
+
+      <!-- Griglia città -->
+      <div class="citta-grid-sel" id="citta-grid">
+      </div>
+
+      <p style="font-size:12px;color:var(--light);margin-top:12px">💡 Clicca su una città per selezionarla/deselezionarla</p>
     </div>
-    <div class="dove-card">
-      <h3>🔍 Pagina risultati</h3>
-      <p>Banner nella pagina dei risultati di ricerca, mostrato ai clienti che stanno cercando attivamente un professionista.</p>
-      <span class="dove-tag">Clienti attivi</span>
-      <span class="dove-tag">Alta conversione</span>
-    </div>
-    <div class="dove-card">
-      <h3>📍 Pagine città</h3>
-      <p>Banner nelle pagine dedicate alle singole città (es. imprese-roma.html). Raggiungi i clienti esattamente nella tua zona.</p>
-      <span class="dove-tag">Targeting locale</span>
-      <span class="dove-tag">106 città</span>
+
+    <div>
+      <!-- PERIODO -->
+      <div class="periodo-toggle">
+        <div class="periodo-label">Durata abbonamento</div>
+        <div class="toggle-wrap">
+          <div class="toggle-opt active" id="tog-mensile" onclick="selPeriodo('mensile')">
+            Mensile<br><small style="font-weight:500;color:var(--mid)">Paghi ogni mese</small>
+          </div>
+          <div class="toggle-opt" id="tog-annuale" onclick="selPeriodo('annuale')">
+            Annuale<br><span class="risparmio">Risparmi 2 mesi!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIEPILOGO -->
+      <div class="riepilogo">
+        <div class="riepilogo-title">📋 Riepilogo</div>
+        <div class="riepilogo-row">
+          <span>Formato</span>
+          <span id="ric-formato">—</span>
+        </div>
+        <div class="riepilogo-row">
+          <span>Prezzo per città</span>
+          <span id="ric-prezzo-citta">—</span>
+        </div>
+        <div class="riepilogo-row">
+          <span>Città selezionate</span>
+          <span id="ric-n-citta">0</span>
+        </div>
+        <div class="riepilogo-row">
+          <span>Periodo</span>
+          <span id="ric-periodo">Mensile</span>
+        </div>
+        <div class="riepilogo-row">
+          <span>Totale</span>
+          <span class="riepilogo-total-num" id="ric-totale">€0</span>
+        </div>
+      </div>
+
+      <button class="btn-avanti" id="btn-step2" onclick="goToStep(3)" disabled style="margin-top:16px">
+        Continua → Dati e pagamento
+      </button>
     </div>
   </div>
 </div>
 
-<!-- CITTÀ DISPONIBILI -->
-<div class="citta-section">
-  <h2 class="citta-title">Città disponibili</h2>
-  <p class="citta-sub">Scegli una o più città dove vuoi apparire</p>
-  <div class="citta-grid">
-    <div class="citta-tag">🏛️ Roma</div>
-    <div class="citta-tag">🌆 Milano</div>
-    <div class="citta-tag">⛵ Napoli</div>
-    <div class="citta-tag">🏭 Torino</div>
-    <div class="citta-tag">🌊 Palermo</div>
-    <div class="citta-tag">🏖️ Genova</div>
-    <div class="citta-tag">🌉 Bologna</div>
-    <div class="citta-tag">🏛️ Firenze</div>
-    <div class="citta-tag">🚢 Bari</div>
-    <div class="citta-tag">🌋 Catania</div>
-    <div class="citta-tag">⛪ Venezia</div>
-    <div class="citta-tag">🏔️ Verona</div>
-    <div class="citta-tag">🌿 Messina</div>
-    <div class="citta-tag">🏙️ Padova</div>
-    <div class="citta-tag">⚓ Trieste</div>
-    <div class="citta-tag">🌺 Taranto</div>
-    <div class="citta-tag">🏰 Brescia</div>
-    <div class="citta-tag">🌄 Prato</div>
-    <div class="citta-tag">🏟️ Modena</div>
-    <div class="citta-tag">🌳 Reggio C.</div>
-    <div class="citta-tag">🏯 Parma</div>
-    <div class="citta-tag">⛩️ Reggio E.</div>
-    <div class="citta-tag">🌁 Perugia</div>
-    <div class="citta-tag">🏝️ Cagliari</div>
-    <div class="citta-tag">🌞 Livorno</div>
-    <div class="citta-tag">🏕️ Ravenna</div>
-    <div class="citta-tag">🌻 Foggia</div>
-    <div class="citta-tag">⛰️ Salerno</div>
-    <div class="citta-tag">🏡 Rimini</div>
-    <div class="citta-tag">🌈 Ferrara</div>
-    <div class="citta-tag" style="background: var(--verde3); color: var(--verde); border-color: var(--verde); font-weight: 600;">+ altre 76 città</div>
-  </div>
-</div>
+<!-- ===================== STEP 3 ===================== -->
+<div class="step-content" id="step-3">
+  <button class="btn-indietro" onclick="goToStep(2)">← Indietro</button>
 
-<!-- FORM CONTATTO -->
-<div class="form-section" id="form-contatto">
-  <div class="form-box">
-    <h2>📢 Prenota il tuo spazio</h2>
-    <p>Compilа il modulo e ti ricontattiamo entro 24 ore per confermare la disponibilità e inviarti il link di pagamento.</p>
-    <div class="form-grid">
+  <div class="pagamento-grid">
+    <!-- FORM DATI -->
+    <div class="pagamento-form-section">
+      <h3>I tuoi dati</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome *</label>
+          <input type="text" class="form-input" id="p-nome" placeholder="Mario Rossi">
+        </div>
+        <div class="form-group">
+          <label>Azienda *</label>
+          <input type="text" class="form-input" id="p-azienda" placeholder="Nome azienda">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" class="form-input" id="p-email" placeholder="la-tua@email.it">
+        </div>
+        <div class="form-group">
+          <label>Telefono</label>
+          <input type="tel" class="form-input" id="p-tel" placeholder="+39 000 0000000">
+        </div>
+      </div>
       <div class="form-group">
-        <label class="form-label">Nome *</label>
-        <input type="text" class="form-input" placeholder="Es. Mario Rossi" id="f-nome">
+        <label>Partita IVA / Codice Fiscale</label>
+        <input type="text" class="form-input" id="p-piva" placeholder="IT12345678901">
       </div>
-      <div class="form-group">
-        <label class="form-label">Azienda *</label>
-        <input type="text" class="form-input" placeholder="Nome azienda" id="f-azienda">
+
+      <h3 style="margin-top:28px">Metodo di pagamento</h3>
+
+      <div class="metodo-title">Come vuoi pagare?</div>
+      <div class="metodo-options">
+        <div class="metodo-card selected" id="met-bonifico" onclick="selMetodo('bonifico')">
+          <div class="metodo-radio"></div>
+          <div class="metodo-info">
+            <h4>🏦 Bonifico bancario</h4>
+            <p>Ti inviamo i dati IBAN. Pagamento entro 3 giorni.</p>
+          </div>
+        </div>
+        <div class="metodo-card" id="met-stripe" onclick="selMetodo('stripe')">
+          <div class="metodo-radio"></div>
+          <div class="metodo-info">
+            <h4>💳 Carta di credito (Stripe)</h4>
+            <p>Pagamento immediato e sicuro. Presto disponibile.</p>
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Email *</label>
-        <input type="email" class="form-input" placeholder="la-tua@email.it" id="f-email">
+
+      <!-- BONIFICO INFO -->
+      <div class="iban-fields show" id="iban-fields">
+        <div class="iban-box">
+          <h4>📋 Dati per il bonifico</h4>
+          <div class="iban-data-row">
+            <span>Intestato a:</span>
+            <span>TrovaImpresa</span>
+          </div>
+          <div class="iban-data-row">
+            <span>IBAN:</span>
+            <span id="iban-display">— (inserisci sotto)</span>
+          </div>
+          <div class="iban-data-row">
+            <span>Causale:</span>
+            <span id="causale-display">Pubblicità TrovaImpresa</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Il tuo IBAN (per la ricevuta) *</label>
+          <input type="text" class="form-input" id="p-iban" placeholder="IT60 X054 2811 1010 0000 0123 456" style="font-family:monospace;font-size:13px">
+          <small style="color:var(--light);font-size:11px;margin-top:4px;display:block">Inserisci il tuo IBAN così possiamo identificare il pagamento</small>
+        </div>
+        <div class="form-group">
+          <label>Note (opzionale)</label>
+          <textarea class="form-input" id="p-note" placeholder="Es. logo allegato, preferenze grafiche, ecc." rows="3"></textarea>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Telefono</label>
-        <input type="tel" class="form-input" placeholder="+39 000 000 0000" id="f-tel">
+
+      <!-- STRIPE INFO -->
+      <div class="iban-fields" id="stripe-fields">
+        <div style="background:#fff3e0;border:1.5px solid #fdd5b8;border-radius:12px;padding:16px;font-size:14px;color:var(--mid)">
+          ⏳ Il pagamento con carta sarà disponibile a breve. Per ora usa il bonifico bancario!
+        </div>
       </div>
-      <div class="form-group full">
-        <label class="form-label">Città di interesse *</label>
-        <input type="text" class="form-input" placeholder="Es. Roma, Milano, Napoli..." id="f-citta">
+
+      <button class="btn-invia-ordine" onclick="inviaOrdine()">
+        📩 Conferma e invia ordine
+      </button>
+      <p class="note-invio">Ti risponderemo entro 24 ore con conferma e istruzioni per il pagamento</p>
+    </div>
+
+    <!-- RIEPILOGO LATERALE -->
+    <div class="riepilogo-sidebar">
+      <h3>🧾 Il tuo ordine</h3>
+      <div id="riepilogo-sidebar-content">
+        <!-- Generato da JS -->
       </div>
-      <div class="form-group full">
-        <label class="form-label">Posizione preferita *</label>
-        <select class="form-select" id="f-posizione">
-          <option value="">Seleziona...</option>
-          <option value="spazio1">🥇 Spazio 1 — In cima (€15/mese)</option>
-          <option value="spazio2">🥈 Spazio 2 — A metà pagina (€10/mese)</option>
-          <option value="spazio3">🥉 Spazio 3 — In fondo (€8/mese)</option>
-          <option value="spazio4">📌 Spazio 4 — Sidebar (€10/mese)</option>
-          <option value="piu">Più spazi / più città</option>
-        </select>
+      <div class="ric-totale">
+        <span class="ric-totale-label">Totale</span>
+        <span class="ric-totale-num" id="ric-totale-sidebar">€0</span>
       </div>
-      <div class="form-group full">
-        <label class="form-label">Messaggio</label>
-        <textarea class="form-textarea" placeholder="Hai domande o vuoi dirci qualcosa?" id="f-msg"></textarea>
+      <div style="font-size:12px;color:var(--light);margin-top:12px;line-height:1.5">
+        ✅ Nessun vincolo contrattuale<br>
+        ✅ Banner live entro 24 ore<br>
+        ✅ Disdetta in qualsiasi momento
       </div>
     </div>
-    <button class="form-submit" onclick="inviaRichiesta()">📩 Invia richiesta — ti rispondiamo entro 24h</button>
-    <p class="form-note">Nessun impegno. Ti confermiamo disponibilità e prezzi prima del pagamento.</p>
   </div>
 </div>
 
-<!-- FAQ -->
-<div class="section">
-  <h2 class="section-title">Domande frequenti</h2>
-  <p class="section-sub">Tutto quello che vuoi sapere sulla pubblicità su TrovaImpresa</p>
-  <div class="faq-list">
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Quanto dura il contratto? <span class="faq-arrow">▾</span></div>
-      <div class="faq-a">Nessun contratto lungo. Paghi mese per mese e puoi disdire quando vuoi con un semplice messaggio email.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Devo creare io il banner? <span class="faq-arrow">▾</span></div>
-      <div class="faq-a">No! Se hai già un logo e un testo, lo creiamo noi gratuitamente. Basta inviarci i materiali via email.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">In quante città posso apparire? <span class="faq-arrow">▾</span></div>
-      <div class="faq-a">In quante vuoi! Ogni città è uno spazio separato. Puoi scegliere 1 città o tutte e 106 — il prezzo si moltiplica per ogni città.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Come pago? <span class="faq-arrow">▾</span></div>
-      <div class="faq-a">Dopo aver confermato la disponibilità ti inviamo un link di pagamento sicuro tramite Stripe. Accettiamo tutte le carte di credito.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Posso cambiare città o posizione? <span class="faq-arrow">▾</span></div>
-      <div class="faq-a">Sì, puoi modificare le tue preferenze ogni mese. Basta contattarci via email prima del rinnovo.</div>
-    </div>
+<!-- SUCCESS -->
+<div class="step-content" id="step-success">
+  <div class="success-box">
+    <div class="success-icon">🎉</div>
+    <h2>Ordine ricevuto!</h2>
+    <p>Grazie <strong id="success-nome">!</strong> Abbiamo ricevuto la tua richiesta.<br>Ti contatteremo entro 24 ore all'indirizzo <strong id="success-email"></strong> con le istruzioni per completare il pagamento e attivare il tuo banner.</p>
+    <a href="index.html" style="display:inline-block;background:var(--verde);color:white;padding:12px 24px;border-radius:10px;font-weight:700;text-decoration:none;font-size:15px">Torna alla home →</a>
   </div>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <p>© 2026 TrovaImpresa — <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a> — <a href="index.html">Torna alla home</a></p>
+  <p>© 2026 TrovaImpresa — <a href="/cdn-cgi/l/email-protection#8be2e5ede4cbfff9e4fdeae2e6fbf9eef8eaa5e8e4e6"><span class="__cf_email__" data-cfemail="0d64636b624d797f627b6c64607d7f687e6c236e6260">[email&#160;protected]</span></a> — <a href="index.html">Torna alla home</a></p>
 </footer>
 
-<script>
-  function toggleFaq(el) {
-    el.classList.toggle('open');
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // === STATO ===
+  let formatoSelezionato = null;
+  let cittaSelezionate = [];
+  let periodoSelezionato = 'mensile';
+  let metodoSelezionato = 'bonifico';
+
+  const prezzi = { 1: 15, 2: 10, 3: 8, 4: 10 };
+  const nomiFormati = { 1: '🥇 In cima', 2: '🥈 A metà pagina', 3: '🥉 In fondo', 4: '📌 Sidebar' };
+
+  const tutteLeCitta = [
+    'Roma','Milano','Napoli','Torino','Palermo','Genova','Bologna','Firenze',
+    'Bari','Catania','Venezia','Verona','Messina','Padova','Trieste','Taranto',
+    'Brescia','Prato','Modena','Reggio Calabria','Parma','Reggio Emilia',
+    'Perugia','Cagliari','Livorno','Ravenna','Foggia','Salerno','Rimini',
+    'Ferrara','Sassari','Siracusa','Pescara','Monza','Bergamo','Forlì',
+    'Trento','Vicenza','Terni','Novara','Piacenza','Ancona','Lecce',
+    'Bolzano','Andria','Arezzo','Cesena','La Spezia','Udine','Pesaro',
+    'Catanzaro','Barletta','Alessandria','Mantova','Lucca','Pistoia',
+    'Brindisi','Pisa','Foggia','Busto Arsizio','Como','Marsala','Giugliano',
+    'Caserta','Ragusa','Cinisello Balsamo','Guidonia','Bagheria','Altamura',
+    'Molfetta','Caltanissetta','Potenza','Cosenza','Reggio Emilia','Latina',
+    'Ferrara','L\'Aquila','Cuneo','Asti','Varese','Sesto San Giovanni',
+    'Cremona','Savona','Treviso','Pordenone','Vicenza','Padova','Belluno',
+    'Aosta','Biella','Verbania','Vercelli','Lodi','Pavia','Sondrio',
+    'Lecco','Monza','Bergamo','Brescia','Mantova','Cremona',
+    'Rovigo','Venezia','Treviso','Macerata','Ascoli Piceno','Fermo',
+    'Rieti','Frosinone','Viterbo','Grosseto','Massa','Siena','Arezzo'
+  ].filter((v, i, a) => a.indexOf(v) === i).sort();
+
+  // === NAVIGAZIONE ===
+  function goToStep(n) {
+    document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    document.getElementById('tab-' + n)?.classList.add('active');
+    aggiornaRiepilogo();
+    if (n === 3) aggiornaRiepilogoSidebar();
+    window.scrollTo({top: 0, behavior: 'smooth'});
   }
 
-  async function inviaRichiesta() {
-    const nome = document.getElementById('f-nome').value.trim();
-    const azienda = document.getElementById('f-azienda').value.trim();
-    const email = document.getElementById('f-email').value.trim();
-    const citta = document.getElementById('f-citta').value.trim();
-    const posizione = document.getElementById('f-posizione').value;
+  // === STEP 1: FORMATO ===
+  function selectFormato(n) {
+    formatoSelezionato = n;
+    // Reset tutti
+    [1,2,3,4].forEach(i => {
+      document.getElementById('fc-' + i)?.classList.remove('selected');
+      document.getElementById('ant-s' + i)?.classList.remove('selected');
+      document.getElementById('check-s' + i).textContent = '○';
+    });
+    // Seleziona
+    document.getElementById('fc-' + n).classList.add('selected');
+    document.getElementById('ant-s' + n).classList.add('selected');
+    document.getElementById('check-s' + n).textContent = '✅';
+    document.getElementById('btn-step1').disabled = false;
+    aggiornaRiepilogo();
+  }
 
-    if (!nome || !azienda || !email || !citta || !posizione) {
-      alert('Per favore compila tutti i campi obbligatori (*)');
+  // === STEP 2: CITTÀ ===
+  function buildCittaGrid(filter = '') {
+    const grid = document.getElementById('citta-grid');
+    const lista = tutteLeCitta.filter(c => c.toLowerCase().includes(filter.toLowerCase()));
+    grid.innerHTML = lista.map(c => `
+      <div class="citta-option ${cittaSelezionate.includes(c) ? 'selected' : ''}" data-citta="${c}" onclick="toggleCitta(this.dataset.citta)">${c}</div>
+    `).join('');
+  }
+
+  function filtraCitta() {
+    buildCittaGrid(document.getElementById('citta-search-input').value);
+  }
+
+  function toggleCitta(c) {
+    if (cittaSelezionate.includes(c)) {
+      cittaSelezionate = cittaSelezionate.filter(x => x !== c);
+    } else {
+      cittaSelezionate.push(c);
+    }
+    buildCittaGrid(document.getElementById('citta-search-input').value);
+    aggiornaChipCitta();
+    aggiornaRiepilogo();
+    document.getElementById('btn-step2').disabled = cittaSelezionate.length === 0;
+  }
+
+  function aggiornaChipCitta() {
+    const wrap = document.getElementById('citta-selected-list');
+    if (cittaSelezionate.length === 0) {
+      wrap.innerHTML = '<span style="font-size:13px;color:var(--light);align-self:center">Nessuna città selezionata</span>';
+      return;
+    }
+    wrap.innerHTML = cittaSelezionate.map(c => `
+      <div class="citta-chip" data-citta='${c}' onclick="toggleCitta(this.dataset.citta)" title="Clicca per rimuovere">
+        📍 ${c} <span>✕</span>
+      </div>
+    `).join('');
+  }
+
+  // === STEP 2: PERIODO ===
+  function selPeriodo(p) {
+    periodoSelezionato = p;
+    document.getElementById('tog-mensile').classList.toggle('active', p === 'mensile');
+    document.getElementById('tog-annuale').classList.toggle('active', p === 'annuale');
+    aggiornaRiepilogo();
+  }
+
+  function calcolaTotale() {
+    if (!formatoSelezionato || cittaSelezionate.length === 0) return 0;
+    const mensile = prezzi[formatoSelezionato] * cittaSelezionate.length;
+    return periodoSelezionato === 'annuale' ? mensile * 10 : mensile;
+  }
+
+  function aggiornaRiepilogo() {
+    document.getElementById('ric-formato').textContent = formatoSelezionato ? nomiFormati[formatoSelezionato] : '—';
+    document.getElementById('ric-prezzo-citta').textContent = formatoSelezionato ? `€${prezzi[formatoSelezionato]}/mese` : '—';
+    document.getElementById('ric-n-citta').textContent = cittaSelezionate.length;
+    document.getElementById('ric-periodo').textContent = periodoSelezionato === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile';
+    const tot = calcolaTotale();
+    document.getElementById('ric-totale').textContent = tot > 0 ? `€${tot}` : '€0';
+
+    // Causale dinamica
+    if (formatoSelezionato && cittaSelezionate.length > 0) {
+      document.getElementById('causale-display').textContent = `Pub TrovaImpresa - ${nomiFormati[formatoSelezionato]} - ${cittaSelezionate.slice(0,3).join(', ')}${cittaSelezionate.length > 3 ? '...' : ''}`;
+    }
+  }
+
+  function aggiornaRiepilogoSidebar() {
+    const tot = calcolaTotale();
+    document.getElementById('ric-totale-sidebar').textContent = `€${tot}`;
+    document.getElementById('riepilogo-sidebar-content').innerHTML = `
+      <div class="ric-item"><span>Formato</span><span>${nomiFormati[formatoSelezionato] || '—'}</span></div>
+      <div class="ric-item"><span>Città</span><span>${cittaSelezionate.slice(0,3).join(', ')}${cittaSelezionate.length > 3 ? ` +${cittaSelezionate.length-3}` : ''}</span></div>
+      <div class="ric-item"><span>N° città</span><span>${cittaSelezionate.length}</span></div>
+      <div class="ric-item"><span>Periodo</span><span>${periodoSelezionato === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile'}</span></div>
+      <div class="ric-item"><span>Prezzo/città/mese</span><span>€${prezzi[formatoSelezionato] || 0}</span></div>
+    `;
+  }
+
+  // === STEP 3: METODO PAGAMENTO ===
+  function selMetodo(m) {
+    metodoSelezionato = m;
+    document.getElementById('met-bonifico').classList.toggle('selected', m === 'bonifico');
+    document.getElementById('met-stripe').classList.toggle('selected', m === 'stripe');
+    document.getElementById('iban-fields').classList.toggle('show', m === 'bonifico');
+    document.getElementById('stripe-fields').classList.toggle('show', m === 'stripe');
+  }
+
+  // === INVIA ORDINE ===
+  async function inviaOrdine() {
+    const nome = document.getElementById('p-nome').value.trim();
+    const azienda = document.getElementById('p-azienda').value.trim();
+    const email = document.getElementById('p-email').value.trim();
+    const iban = document.getElementById('p-iban').value.trim();
+
+    if (!nome || !azienda || !email) {
+      alert('Compila nome, azienda ed email!');
+      return;
+    }
+    if (metodoSelezionato === 'bonifico' && !iban) {
+      alert('Inserisci il tuo IBAN per procedere con il bonifico!');
       return;
     }
 
-    const btn = document.querySelector('.form-submit');
+    const btn = document.querySelector('.btn-invia-ordine');
     btn.textContent = '⏳ Invio in corso...';
     btn.disabled = true;
+
+    const messaggio = `[ORDINE PUBBLICITÀ]
+Formato: ${nomiFormati[formatoSelezionato]}
+Prezzo: €${prezzi[formatoSelezionato]}/mese per città
+Città (${cittaSelezionate.length}): ${cittaSelezionate.join(', ')}
+Periodo: ${periodoSelezionato === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile'}
+TOTALE: €${calcolaTotale()}
+Metodo: ${metodoSelezionato === 'bonifico' ? 'Bonifico' : 'Stripe'}
+IBAN cliente: ${iban || '—'}
+P.IVA: ${document.getElementById('p-piva').value || '—'}
+Tel: ${document.getElementById('p-tel').value || '—'}
+Note: ${document.getElementById('p-note')?.value || '—'}`;
 
     try {
       const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -622,21 +864,12 @@
         body: JSON.stringify({
           nome: nome + ' — ' + azienda,
           email: email,
-          messaggio: `[RICHIESTA PUBBLICITÀ] Città: ${citta} | Posizione: ${posizione} | Tel: ${document.getElementById('f-tel').value} | Note: ${document.getElementById('f-msg').value}`
+          messaggio: messaggio
         })
       });
 
-      btn.textContent = '✅ Richiesta inviata!';
-      btn.style.background = 'var(--verde)';
-      document.querySelector('.form-box p').textContent = 'Grazie! Ti ricontattiamo entro 24 ore all\'indirizzo ' + email;
-
-    } catch(e) {
-      btn.textContent = '📩 Invia richiesta';
-      btn.disabled = false;
-      alert('Errore nell\'invio. Scrivici direttamente a info@trovaimpresa.com');
-    }
-  }
-</script>
-
-</body>
-</html>
+      document.getElementById('success-nome').textContent = nome + '!';
+      document.getElementById('success-email').textContent = email;
+      document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-success').classList.add('active');
+      window.scrollTo({top: 0, behavior: 'smooth'});
