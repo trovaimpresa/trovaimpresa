@@ -4,326 +4,192 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pubblicità su TrovaImpresa – Raggiungi migliaia di clienti</title>
-  <meta name="description" content="Pubblica la tua azienda su TrovaImpresa. Spazi pubblicitari a partire da €8/mese nelle principali città italiane.">
+  <meta name="description" content="Pubblica la tua azienda su TrovaImpresa. Spazi pubblicitari a partire da €8/mese.">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --verde: #2a7a4b;
-      --verde2: #1f5e38;
-      --verde3: #e8f5ee;
-      --arancio: #e8733a;
-      --arancio2: #c45e28;
-      --arancio3: #fff3ec;
-      --dark: #1a1a1a;
-      --mid: #555;
-      --light: #999;
-      --bg: #f4f6f9;
-      --white: #ffffff;
-      --shadow: 0 4px 24px rgba(0,0,0,0.08);
-      --shadow2: 0 16px 60px rgba(0,0,0,0.12);
-      --border: rgba(0,0,0,0.08);
+      --verde:#2a7a4b;--verde2:#1f5e38;--verde3:#e8f5ee;
+      --arancio:#e8733a;--arancio2:#c45e28;--arancio3:#fff3ec;
+      --dark:#1a1a1a;--mid:#555;--light:#999;--bg:#f4f6f9;
+      --border:rgba(0,0,0,0.08);--shadow:0 4px 24px rgba(0,0,0,0.08);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--dark); }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);}
 
-    /* NAVBAR */
-    .navbar {
-      background: var(--white); border-bottom: 1px solid var(--border);
-      padding: 0 24px; height: 64px; display: flex; align-items: center;
-      justify-content: space-between; position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    }
-    .nav-logo { text-decoration: none; font-family: 'Playfair Display', serif; font-size: 22px; }
-    .nav-logo .trova { color: var(--verde); }
-    .nav-logo .impresa { color: var(--arancio); }
-    .nav-links { display: flex; gap: 12px; align-items: center; }
-    .nav-link { text-decoration: none; color: var(--mid); font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 8px; transition: all 0.2s; }
-    .nav-link:hover { background: var(--verde3); color: var(--verde); }
-    .nav-btn-verde { background: var(--verde); color: white; padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
-    .nav-btn-verde:hover { background: var(--verde2); }
-    .nav-btn-arancio { background: var(--arancio); color: white; padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
-    .nav-btn-arancio:hover { background: var(--arancio2); }
+    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+    .nav-logo{text-decoration:none;font-family:'Playfair Display',serif;font-size:22px;}
+    .nav-logo .trova{color:var(--verde);}
+    .nav-logo .impresa{color:var(--arancio);}
+    .nav-links{display:flex;gap:12px;align-items:center;}
+    .nav-link{text-decoration:none;color:var(--mid);font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;}
+    .nav-link:hover{background:var(--verde3);color:var(--verde);}
+    .nbtn{padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.2s;}
+    .nbtn-verde{background:var(--verde);color:#fff;}
+    .nbtn-verde:hover{background:var(--verde2);}
+    .nbtn-arancio{background:var(--arancio);color:#fff;}
+    .nbtn-arancio:hover{background:var(--arancio2);}
 
-    /* HERO */
-    .hero {
-      background: linear-gradient(135deg, var(--verde2) 0%, var(--verde) 60%, #3a9a5e 100%);
-      padding: 64px 24px 48px; text-align: center; color: white;
-    }
-    .hero-badge { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px; }
-    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 48px); font-weight: 900; margin-bottom: 12px; line-height: 1.2; }
-    .hero h1 span { color: #ffd166; }
-    .hero p { font-size: 16px; opacity: 0.9; max-width: 520px; margin: 0 auto 28px; line-height: 1.6; }
-    .hero-stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
-    .hero-stat-num { font-size: 28px; font-weight: 700; color: #ffd166; font-family: 'Playfair Display', serif; }
-    .hero-stat-label { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+    .hero{background:linear-gradient(135deg,var(--verde2),var(--verde),#3a9a5e);padding:56px 24px 40px;text-align:center;color:#fff;}
+    .hero-badge{display:inline-block;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:14px;}
+    .hero h1{font-family:'Playfair Display',serif;font-size:clamp(26px,5vw,46px);font-weight:900;margin-bottom:10px;line-height:1.2;}
+    .hero h1 span{color:#ffd166;}
+    .hero p{font-size:16px;opacity:0.9;max-width:500px;margin:0 auto 24px;line-height:1.6;}
+    .hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;}
+    .hero-stat-num{font-size:28px;font-weight:700;color:#ffd166;font-family:'Playfair Display',serif;}
+    .hero-stat-label{font-size:12px;opacity:0.85;margin-top:2px;}
 
     /* STEP TABS */
-    .steps-nav {
-      background: white; border-bottom: 2px solid var(--border);
-      display: flex; justify-content: center; gap: 0; position: sticky; top: 64px; z-index: 90;
-    }
-    .step-tab {
-      padding: 16px 28px; font-size: 14px; font-weight: 600; color: var(--light);
-      border-bottom: 3px solid transparent; margin-bottom: -2px; cursor: pointer;
-      display: flex; align-items: center; gap: 8px; transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .step-tab.active { color: var(--verde); border-bottom-color: var(--verde); }
-    .step-tab .step-circle {
-      width: 24px; height: 24px; border-radius: 50%; background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 800; color: var(--light);
-    }
-    .step-tab.active .step-circle { background: var(--verde); color: white; }
-    .step-tab.done .step-circle { background: var(--verde3); color: var(--verde); }
-    .step-tab.done { color: var(--verde); }
+    .steps-nav{background:#fff;border-bottom:2px solid var(--border);display:flex;justify-content:center;}
+    .step-tab{padding:16px 24px;font-size:14px;font-weight:600;color:var(--light);border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;}
+    .step-tab.active{color:var(--verde);border-bottom-color:var(--verde);}
+    .step-circle{width:24px;height:24px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--light);}
+    .step-tab.active .step-circle{background:var(--verde);color:#fff;}
 
-    /* CONTENUTO STEP */
-    .step-content { display: none; max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
-    .step-content.active { display: block; }
+    /* CONTENUTO */
+    .step-page{display:none;max-width:1100px;margin:0 auto;padding:40px 24px;}
+    .step-page.visible{display:block;}
+    .step-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px;}
+    .step-sub{color:var(--mid);font-size:15px;margin-bottom:28px;}
 
-    /* === STEP 1: FORMATI === */
-    .step-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
-    .step-sub { color: var(--mid); font-size: 15px; margin-bottom: 32px; }
+    /* STEP 1 - FORMATI */
+    .step1-grid{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
+    
+    /* ANTEPRIMA */
+    .preview-box{background:#fff;border-radius:16px;border:2px solid var(--border);overflow:hidden;box-shadow:var(--shadow);}
+    .preview-bar{background:#f0f0f0;padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+    .dot{width:10px;height:10px;border-radius:50%;}
+    .preview-url{background:#fff;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--light);flex:1;}
+    .preview-header{background:linear-gradient(135deg,var(--verde2),var(--verde));padding:14px;color:#fff;font-size:12px;font-weight:700;text-align:center;}
 
-    /* ANTEPRIMA PAGINA */
-    .anteprima-container { display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start; }
-    .anteprima-pagina {
-      background: white; border-radius: 16px; border: 2px solid var(--border);
-      overflow: hidden; box-shadow: var(--shadow);
-    }
-    .ant-browser-bar {
-      background: #f0f0f0; padding: 8px 12px; display: flex; align-items: center; gap: 8px;
-      border-bottom: 1px solid var(--border);
-    }
-    .ant-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .ant-url { background: white; border-radius: 4px; padding: 3px 10px; font-size: 11px; color: var(--light); flex: 1; }
-    .ant-pagina-titolo {
-      background: linear-gradient(135deg, var(--verde2), var(--verde));
-      padding: 16px; color: white; font-size: 13px; font-weight: 700; text-align: center;
-    }
+    .ad-slot{margin:8px;border-radius:8px;padding:11px 14px;border:2px dashed #ddd;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;font-size:12px;user-select:none;}
+    .ad-slot:hover{transform:scale(1.01);}
+    .ad-slot.s1{border-color:#f59e0b;background:#fffbeb;}
+    .ad-slot.s1.sel{border-style:solid;background:#fef3c7;box-shadow:0 4px 16px rgba(245,158,11,0.3);}
+    .ad-slot.s2{border-color:var(--verde);background:var(--verde3);}
+    .ad-slot.s2.sel{border-style:solid;background:#d1fae5;box-shadow:0 4px 16px rgba(42,122,75,0.2);}
+    .ad-slot.s3{border-color:#6366f1;background:#eef2ff;}
+    .ad-slot.s3.sel{border-style:solid;background:#e0e7ff;box-shadow:0 4px 16px rgba(99,102,241,0.2);}
+    .ad-slot-check{margin-left:auto;font-size:16px;min-width:20px;text-align:center;}
+    
+    .preview-mid{display:grid;grid-template-columns:1fr 72px;gap:6px;margin:0 8px;}
+    .fake-result{background:#fafafa;border:1px solid #eee;border-radius:6px;padding:8px 10px;font-size:10px;color:var(--mid);margin-bottom:5px;}
+    .fake-result-name{font-weight:700;color:var(--dark);font-size:11px;margin-bottom:1px;}
+    .sidebar-slot{background:#fff3e0;border:2px dashed var(--arancio);border-radius:8px;padding:14px 6px;font-size:10px;color:var(--arancio);font-weight:700;text-align:center;cursor:pointer;transition:all 0.2s;user-select:none;}
+    .sidebar-slot.sel{border-style:solid;background:#ffe0b2;box-shadow:0 4px 16px rgba(232,115,58,0.2);}
 
-    /* SPAZI PUBBLICITARI NELL'ANTEPRIMA */
-    .ant-spazio {
-      margin: 10px; border-radius: 8px; padding: 12px 16px;
-      border: 2px dashed #ddd; cursor: pointer; transition: all 0.2s;
-      display: flex; align-items: center; gap: 12px; font-size: 13px;
-    }
-    .ant-spazio:hover, .ant-spazio.selected {
-      border-style: solid; transform: scale(1.01);
-    }
-    .ant-spazio.s1 { border-color: #f59e0b; background: #fffbeb; }
-    .ant-spazio.s1:hover, .ant-spazio.s1.selected { background: #fef3c7; box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
-    .ant-spazio.s2 { border-color: var(--verde); background: var(--verde3); }
-    .ant-spazio.s2:hover, .ant-spazio.s2.selected { background: #d1fae5; box-shadow: 0 4px 16px rgba(42,122,75,0.2); }
-    .ant-spazio.s3 { border-color: #6366f1; background: #eef2ff; }
-    .ant-spazio.s3:hover, .ant-spazio.s3.selected { background: #e0e7ff; box-shadow: 0 4px 16px rgba(99,102,241,0.2); }
+    /* PANNELLO DESTRA */
+    .formati-panel{display:flex;flex-direction:column;gap:10px;}
+    .fmt-card{background:#fff;border-radius:14px;padding:16px 18px;border:2px solid var(--border);cursor:pointer;transition:all 0.2s;user-select:none;}
+    .fmt-card:hover{border-color:var(--verde);background:var(--verde3);}
+    .fmt-card.sel{border-color:var(--verde);background:var(--verde3);}
+    .fmt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+    .fmt-nome{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;}
+    .fmt-price{font-size:17px;font-weight:800;color:var(--verde);font-family:'Playfair Display',serif;}
+    .fmt-price small{font-size:11px;font-weight:500;color:var(--mid);font-family:'DM Sans',sans-serif;}
+    .fmt-desc{font-size:12px;color:var(--mid);line-height:1.4;}
+    .fmt-badge{background:#f59e0b;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;}
 
-    /* RISULTATI FINTI */
-    .ant-risultato {
-      margin: 6px 10px; background: #fafafa; border: 1px solid #eee;
-      border-radius: 8px; padding: 10px 12px; font-size: 11px; color: var(--mid);
-    }
-    .ant-ris-nome { font-weight: 700; color: var(--dark); font-size: 12px; margin-bottom: 2px; }
+    /* BOTTONI */
+    .btn-avanti{width:100%;padding:13px;background:var(--arancio);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-top:8px;transition:all 0.2s;}
+    .btn-avanti:hover{background:var(--arancio2);}
+    .btn-avanti:disabled{background:#ccc;cursor:not-allowed;}
+    .btn-back{padding:9px 18px;background:#fff;color:var(--mid);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;margin-bottom:20px;display:inline-block;}
+    .btn-back:hover{border-color:var(--verde);color:var(--verde);}
 
-    /* SIDEBAR ANTEPRIMA */
-    .ant-sidebar-wrap { display: grid; grid-template-columns: 1fr 80px; gap: 6px; margin: 6px 10px; }
-    .ant-sidebar-spazio {
-      background: #fff3e0; border: 2px dashed var(--arancio); border-radius: 8px;
-      padding: 20px 8px; font-size: 11px; color: var(--arancio); font-weight: 700;
-      text-align: center; cursor: pointer; transition: all 0.2s;
-    }
-    .ant-sidebar-spazio:hover, .ant-sidebar-spazio.selected {
-      border-style: solid; background: #ffe0b2; box-shadow: 0 4px 16px rgba(232,115,58,0.2);
-    }
+    /* STEP 2 */
+    .step2-grid{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
+    .citta-search-wrap{position:relative;margin-bottom:12px;}
+    .citta-search{width:100%;padding:12px 14px 12px 42px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border 0.2s;}
+    .citta-search:focus{border-color:var(--verde);}
+    .csearch-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:17px;}
+    .chips-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:16px;}
+    .chip{background:var(--verde3);color:var(--verde2);padding:5px 10px;border-radius:16px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;}
+    .chip:hover{background:#fecaca;color:#e53e3e;}
+    .citta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;max-height:260px;overflow-y:auto;}
+    .citta-opt{background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;text-align:center;user-select:none;}
+    .citta-opt:hover{border-color:var(--verde);background:var(--verde3);color:var(--verde);}
+    .citta-opt.sel{border-color:var(--verde);background:var(--verde3);color:var(--verde2);font-weight:700;}
 
-    /* PANNELLO SELEZIONE */
-    .selezione-panel { display: flex; flex-direction: column; gap: 12px; }
-    .formato-card {
-      background: white; border-radius: 14px; padding: 18px 20px;
-      border: 2px solid var(--border); cursor: pointer; transition: all 0.2s;
-    }
-    .formato-card:hover { border-color: var(--verde); }
-    .formato-card.selected { border-color: var(--verde); background: var(--verde3); }
-    .formato-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-    .formato-nome { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
-    .formato-prezzo { font-size: 18px; font-weight: 800; color: var(--verde); font-family: 'Playfair Display', serif; }
-    .formato-prezzo small { font-size: 12px; font-weight: 500; color: var(--mid); font-family: 'DM Sans', sans-serif; }
-    .formato-desc { font-size: 13px; color: var(--mid); line-height: 1.4; }
-    .formato-badge { background: #f59e0b; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+    .periodo-box{background:#fff;border-radius:14px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:16px;}
+    .periodo-label{font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;}
+    .toggle-row{display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:3px;}
+    .tog-opt{flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.2s;color:var(--mid);}
+    .tog-opt.active{background:#fff;color:var(--verde);box-shadow:var(--shadow);}
+    .risparmio-badge{font-size:10px;background:#d1fae5;color:var(--verde);padding:1px 5px;border-radius:5px;display:inline-block;margin-top:2px;}
 
-    /* BOTTONE AVANTI */
-    .btn-avanti {
-      width: 100%; padding: 14px; background: var(--arancio); color: white;
-      border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif;
-      font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 8px;
-      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-avanti:hover { background: var(--arancio2); transform: translateY(-1px); }
-    .btn-avanti:disabled { background: #ccc; cursor: not-allowed; transform: none; }
-    .btn-indietro {
-      padding: 10px 20px; background: white; color: var(--mid);
-      border: 1.5px solid var(--border); border-radius: 10px;
-      font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px;
-      cursor: pointer; transition: all 0.2s; margin-bottom: 16px;
-    }
-    .btn-indietro:hover { border-color: var(--verde); color: var(--verde); }
+    .riepilogo-box{background:#fff;border-radius:14px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+    .riepilogo-title{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:14px;}
+    .ric-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+    .ric-row:last-child{border-bottom:none;font-weight:700;font-size:15px;padding-top:10px;}
+    .ric-total{font-size:22px;font-weight:800;color:var(--verde);font-family:'Playfair Display',serif;}
 
-    /* === STEP 2: CITTÀ + PERIODO === */
-    .citta-search-wrap { position: relative; margin-bottom: 16px; }
-    .citta-search {
-      width: 100%; padding: 13px 16px 13px 44px; border: 2px solid var(--border);
-      border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 15px;
-      outline: none; transition: border 0.2s; background: white;
-    }
-    .citta-search:focus { border-color: var(--verde); }
-    .citta-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+    /* STEP 3 */
+    .step3-grid{display:grid;grid-template-columns:1fr 300px;gap:32px;align-items:start;}
+    .form-section-title{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:16px;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border 0.2s;background:#fafafa;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--verde);background:#fff;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 
-    .citta-selected-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; min-height: 20px; }
-    .citta-chip {
-      background: var(--verde3); color: var(--verde2); padding: 6px 12px;
-      border-radius: 20px; font-size: 13px; font-weight: 600;
-      display: flex; align-items: center; gap: 6px; cursor: pointer;
-    }
-    .citta-chip:hover { background: #fecaca; color: var(--rosso); }
+    .metodo-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+    .metodo-card{background:#fff;border:2px solid var(--border);border-radius:11px;padding:13px 15px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;}
+    .metodo-card:hover{border-color:var(--verde);}
+    .metodo-card.sel{border-color:var(--verde);background:var(--verde3);}
+    .mradio{width:16px;height:16px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;}
+    .metodo-card.sel .mradio{border-color:var(--verde);background:var(--verde);position:relative;}
+    .metodo-card.sel .mradio::after{content:'';position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;top:50%;left:50%;transform:translate(-50%,-50%);}
+    .minfo h4{font-size:13px;font-weight:700;margin-bottom:1px;}
+    .minfo p{font-size:11px;color:var(--mid);}
 
-    .citta-grid-sel {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 8px; max-height: 280px; overflow-y: auto; padding-right: 4px;
-    }
-    .citta-option {
-      background: white; border: 1.5px solid var(--border); border-radius: 10px;
-      padding: 9px 12px; font-size: 13px; font-weight: 500; cursor: pointer;
-      transition: all 0.2s; text-align: center;
-    }
-    .citta-option:hover { border-color: var(--verde); background: var(--verde3); color: var(--verde); }
-    .citta-option.selected { border-color: var(--verde); background: var(--verde3); color: var(--verde2); font-weight: 700; }
+    .iban-section{display:none;}
+    .iban-section.show{display:block;}
+    .iban-box{background:#f0faf5;border:1.5px solid #a7d9b8;border-radius:11px;padding:14px;margin-bottom:14px;}
+    .iban-box h4{font-size:12px;font-weight:700;color:var(--verde2);margin-bottom:8px;}
+    .iban-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
+    .iban-row span:first-child{color:var(--mid);font-weight:600;}
+    .iban-row span:last-child{font-weight:700;font-family:monospace;}
 
-    /* TOGGLE PERIODO */
-    .periodo-toggle {
-      background: white; border-radius: 16px; padding: 24px;
-      box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 24px;
-    }
-    .periodo-label { font-size: 13px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
-    .toggle-wrap { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; gap: 4px; }
-    .toggle-opt {
-      flex: 1; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600;
-      cursor: pointer; text-align: center; transition: all 0.2s; color: var(--mid);
-    }
-    .toggle-opt.active { background: white; color: var(--verde); box-shadow: var(--shadow); }
-    .toggle-opt .risparmio { font-size: 11px; background: #d1fae5; color: var(--verde); padding: 2px 6px; border-radius: 6px; display: inline-block; margin-top: 2px; }
+    .sidebar-order{background:#fff;border-radius:14px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);position:sticky;top:80px;}
+    .sidebar-order h3{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:16px;}
+    .ord-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+    .ord-total{margin-top:10px;background:var(--verde3);padding:12px;border-radius:9px;display:flex;justify-content:space-between;align-items:center;}
+    .ord-total-label{font-size:13px;font-weight:700;color:var(--verde2);}
+    .ord-total-num{font-size:22px;font-weight:800;color:var(--verde);font-family:'Playfair Display',serif;}
 
-    /* RIEPILOGO ORDINE */
-    .riepilogo {
-      background: white; border-radius: 16px; padding: 24px;
-      box-shadow: var(--shadow); border: 1px solid var(--border); margin-top: 24px;
-    }
-    .riepilogo-title { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 16px; }
-    .riepilogo-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-    .riepilogo-row:last-child { border-bottom: none; font-weight: 700; font-size: 16px; padding-top: 12px; }
-    .riepilogo-total-num { font-size: 22px; font-weight: 800; color: var(--verde); font-family: 'Playfair Display', serif; }
-
-    /* === STEP 3: DATI + PAGAMENTO === */
-    .pagamento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-    .pagamento-form-section h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 20px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
-    .form-input, .form-select, .form-textarea {
-      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
-      border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px;
-      outline: none; transition: border 0.2s; background: #fafafa;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--verde); background: white; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-    /* METODO PAGAMENTO */
-    .metodo-title { font-size: 13px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-    .metodo-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-    .metodo-card {
-      background: white; border: 2px solid var(--border); border-radius: 12px;
-      padding: 14px 16px; cursor: pointer; transition: all 0.2s;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .metodo-card:hover { border-color: var(--verde); }
-    .metodo-card.selected { border-color: var(--verde); background: var(--verde3); }
-    .metodo-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .metodo-card.selected .metodo-radio { border-color: var(--verde); background: var(--verde); }
-    .metodo-card.selected .metodo-radio::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; }
-    .metodo-info h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
-    .metodo-info p { font-size: 12px; color: var(--mid); }
-
-    /* IBAN FIELDS */
-    .iban-fields { display: none; }
-    .iban-fields.show { display: block; }
-    .iban-box {
-      background: #f0faf5; border: 1.5px solid #a7d9b8; border-radius: 12px;
-      padding: 16px; margin-bottom: 16px;
-    }
-    .iban-box h4 { font-size: 13px; font-weight: 700; color: var(--verde2); margin-bottom: 10px; }
-    .iban-data-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; }
-    .iban-data-row span:first-child { color: var(--mid); font-weight: 600; }
-    .iban-data-row span:last-child { font-weight: 700; font-family: monospace; color: var(--dark); }
-
-    /* RIEPILOGO LATERALE */
-    .riepilogo-sidebar {
-      background: white; border-radius: 16px; padding: 24px;
-      box-shadow: var(--shadow); border: 1px solid var(--border);
-      position: sticky; top: 140px;
-    }
-    .riepilogo-sidebar h3 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 20px; }
-    .ric-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-    .ric-item:last-of-type { border-bottom: none; }
-    .ric-totale { margin-top: 12px; padding: 14px; background: var(--verde3); border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .ric-totale-label { font-size: 14px; font-weight: 700; color: var(--verde2); }
-    .ric-totale-num { font-size: 24px; font-weight: 800; color: var(--verde); font-family: 'Playfair Display', serif; }
-
-    /* FORM SUBMIT */
-    .btn-invia-ordine {
-      width: 100%; padding: 16px; background: var(--arancio); color: white;
-      border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif;
-      font-weight: 700; font-size: 17px; cursor: pointer; margin-top: 20px;
-      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-invia-ordine:hover { background: var(--arancio2); transform: translateY(-1px); }
-    .btn-invia-ordine:disabled { background: #ccc; cursor: not-allowed; transform: none; }
-    .note-invio { font-size: 12px; color: var(--light); text-align: center; margin-top: 10px; }
+    .btn-ordina{width:100%;padding:14px;background:var(--arancio);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-top:16px;transition:all 0.2s;}
+    .btn-ordina:hover{background:var(--arancio2);}
+    .btn-ordina:disabled{background:#ccc;cursor:not-allowed;}
+    .note-small{font-size:11px;color:var(--light);text-align:center;margin-top:8px;}
 
     /* SUCCESS */
-    .success-box {
-      background: white; border-radius: 20px; padding: 48px 32px;
-      text-align: center; box-shadow: var(--shadow2); max-width: 520px; margin: 60px auto;
-    }
-    .success-icon { font-size: 64px; margin-bottom: 20px; }
-    .success-box h2 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 10px; }
-    .success-box p { color: var(--mid); line-height: 1.6; margin-bottom: 20px; }
+    .success-wrap{max-width:500px;margin:60px auto;text-align:center;background:#fff;padding:48px 32px;border-radius:20px;box-shadow:0 16px 60px rgba(0,0,0,0.12);}
+    .success-wrap .big-emoji{font-size:60px;margin-bottom:16px;}
+    .success-wrap h2{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:10px;}
+    .success-wrap p{color:var(--mid);line-height:1.6;margin-bottom:20px;}
 
-    /* FOOTER */
-    footer { background: var(--dark); color: rgba(255,255,255,0.6); padding: 28px 24px; text-align: center; font-size: 13px; }
-    footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+    footer{background:var(--dark);color:rgba(255,255,255,0.6);padding:24px;text-align:center;font-size:13px;}
+    footer a{color:rgba(255,255,255,0.8);text-decoration:none;}
 
-    @media (max-width: 768px) {
-      .anteprima-container { grid-template-columns: 1fr; }
-      .pagamento-grid { grid-template-columns: 1fr; }
-      .form-row { grid-template-columns: 1fr; }
-      .step-tab span:not(.step-circle) { display: none; }
-      .nav-links { display: none; }
+    @media(max-width:768px){
+      .step1-grid,.step2-grid,.step3-grid{grid-template-columns:1fr;}
+      .form-row{grid-template-columns:1fr;}
+      .nav-links{display:none;}
     }
   </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
   <a href="index.html" class="nav-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></a>
   <div class="nav-links">
     <a href="index.html" class="nav-link">Home</a>
     <a href="prezzi.html" class="nav-link">Prezzi imprese</a>
-    <a href="pannello-impresa.html" class="nav-btn-verde">Entra (Imprese)</a>
+    <a href="pannello-impresa.html" class="nbtn nbtn-verde">Entra (Imprese)</a>
   </div>
-  <a href="#" onclick="goToStep(1)" class="nav-btn-arancio">📢 Prenota uno spazio</a>
+  <a href="#" id="nav-prenota" class="nbtn nbtn-arancio">📢 Prenota uno spazio</a>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="hero-badge">📢 Spazi pubblicitari disponibili</div>
   <h1>Fai conoscere la tua azienda<br>a <span>migliaia di clienti</span></h1>
@@ -335,541 +201,352 @@
   </div>
 </section>
 
-<!-- STEP NAV -->
 <div class="steps-nav">
-  <div class="step-tab active" id="tab-1" onclick="goToStep(1)">
-    <span class="step-circle">1</span> <span>Scegli formato</span>
-  </div>
-  <div class="step-tab" id="tab-2" onclick="goToStep(2)">
-    <span class="step-circle">2</span> <span>Città e periodo</span>
-  </div>
-  <div class="step-tab" id="tab-3" onclick="goToStep(3)">
-    <span class="step-circle">3</span> <span>Dati e pagamento</span>
-  </div>
+  <div class="step-tab active" id="tab1"><span class="step-circle" id="tc1">1</span> Scegli formato</div>
+  <div class="step-tab" id="tab2"><span class="step-circle" id="tc2">2</span> Città e periodo</div>
+  <div class="step-tab" id="tab3"><span class="step-circle" id="tc3">3</span> Dati e pagamento</div>
 </div>
 
-<!-- ===================== STEP 1 ===================== -->
-<div class="step-content active" id="step-1">
+<!-- STEP 1 -->
+<div class="step-page visible" id="page1">
   <h2 class="step-title">Scegli il formato pubblicitario</h2>
-  <p class="step-sub">Clicca su uno spazio nell'anteprima per vedere dove apparirà il tuo banner</p>
-
-  <div class="anteprima-container">
-
-    <!-- ANTEPRIMA PAGINA CITTÀ -->
+  <p class="step-sub">Clicca su uno spazio nell'anteprima oppure selezionalo a destra</p>
+  <div class="step1-grid">
     <div>
-      <p style="font-size:13px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">📱 Anteprima pagina città</p>
-      <div class="anteprima-pagina">
-        <div class="ant-browser-bar">
-          <div class="ant-dot" style="background:#ff5f57"></div>
-          <div class="ant-dot" style="background:#febc2e"></div>
-          <div class="ant-dot" style="background:#28c840"></div>
-          <div class="ant-url">trovaimpresa.com/imprese-roma.html</div>
+      <p style="font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">📱 Anteprima pagina città</p>
+      <div class="preview-box">
+        <div class="preview-bar">
+          <div class="dot" style="background:#ff5f57"></div>
+          <div class="dot" style="background:#febc2e"></div>
+          <div class="dot" style="background:#28c840"></div>
+          <div class="preview-url">trovaimpresa.com/imprese-roma.html</div>
         </div>
-        <div class="ant-pagina-titolo">🏗️ Imprese Edili a Roma — TrovaImpresa</div>
-
-        <!-- SPAZIO 1 - CIMA -->
-        <div class="ant-spazio s1" id="ant-s1" onclick="selectFormato(1)">
-          <div>🥇</div>
+        <div class="preview-header">🏗️ Imprese Edili a Roma — TrovaImpresa</div>
+        <div class="ad-slot s1" id="prev-s1"><span>🥇</span><div><div style="font-weight:700;color:#92400e">SPAZIO 1 — In cima</div><div style="font-size:10px;color:#b45309">Prima cosa che vede il cliente • €15/mese</div></div><div class="ad-slot-check" id="chk1">○</div></div>
+        <div class="preview-mid">
           <div>
-            <div style="font-weight:700;color:#92400e">📍 SPAZIO 1 — In cima alla pagina</div>
-            <div style="font-size:11px;color:#b45309">Prima cosa che vede il cliente • €15/mese</div>
+            <div class="fake-result"><div class="fake-result-name">🏗️ Edilizia Rossi & C.</div>Muratura · Roma · ⭐⭐⭐⭐⭐</div>
+            <div class="ad-slot s2" id="prev-s2" style="margin:4px 0"><span>🥈</span><div><div style="font-weight:700;color:var(--verde2)">SPAZIO 2 — A metà</div><div style="font-size:10px;color:var(--verde)">Tra i risultati • €10/mese</div></div><div class="ad-slot-check" id="chk2">○</div></div>
+            <div class="fake-result"><div class="fake-result-name">🔧 Idraulici Bianchi</div>Idraulica · Roma · ⭐⭐⭐⭐</div>
+            <div class="fake-result"><div class="fake-result-name">⚡ Elettrica Sud</div>Impianti · Roma · ⭐⭐⭐⭐⭐</div>
+            <div class="ad-slot s3" id="prev-s3" style="margin:4px 0"><span>🥉</span><div><div style="font-weight:700;color:#4338ca">SPAZIO 3 — In fondo</div><div style="font-size:10px;color:#6366f1">In fondo • €8/mese</div></div><div class="ad-slot-check" id="chk3">○</div></div>
           </div>
-          <div style="margin-left:auto;font-size:18px" id="check-s1">○</div>
-        </div>
-
-        <!-- RISULTATI FINTI + SIDEBAR -->
-        <div class="ant-sidebar-wrap">
           <div>
-            <div class="ant-risultato">
-              <div class="ant-ris-nome">🏗️ Edilizia Rossi & C.</div>
-              <div>Muratura · Roma · ⭐⭐⭐⭐⭐</div>
-            </div>
-
-            <!-- SPAZIO 2 - METÀ -->
-            <div class="ant-spazio s2" id="ant-s2" onclick="selectFormato(2)" style="margin:6px 0">
-              <div>🥈</div>
-              <div>
-                <div style="font-weight:700;color:var(--verde2)">📍 SPAZIO 2 — A metà pagina</div>
-                <div style="font-size:11px;color:var(--verde)">Tra i risultati • €10/mese</div>
-              </div>
-              <div style="margin-left:auto;font-size:18px" id="check-s2">○</div>
-            </div>
-
-            <div class="ant-risultato">
-              <div class="ant-ris-nome">🔧 Idraulici Bianchi</div>
-              <div>Idraulica · Roma · ⭐⭐⭐⭐</div>
-            </div>
-            <div class="ant-risultato">
-              <div class="ant-ris-nome">⚡ Elettrica Sud</div>
-              <div>Impianti · Roma · ⭐⭐⭐⭐⭐</div>
-            </div>
-
-            <!-- SPAZIO 3 - FONDO -->
-            <div class="ant-spazio s3" id="ant-s3" onclick="selectFormato(3)" style="margin:6px 0">
-              <div>🥉</div>
-              <div>
-                <div style="font-weight:700;color:#4338ca">📍 SPAZIO 3 — In fondo</div>
-                <div style="font-size:11px;color:#6366f1">In fondo alla pagina • €8/mese</div>
-              </div>
-              <div style="margin-left:auto;font-size:18px" id="check-s3">○</div>
-            </div>
-          </div>
-
-          <!-- SIDEBAR -->
-          <div>
-            <div class="ant-sidebar-spazio" id="ant-s4" onclick="selectFormato(4)">
-              <div style="font-size:16px">📌</div>
-              <div style="margin-top:4px">SPAZIO 4</div>
-              <div style="font-size:9px;margin-top:2px">Sidebar</div>
-              <div style="font-size:9px;margin-top:2px">€10/mese</div>
-              <div style="margin-top:6px;font-size:14px" id="check-s4">○</div>
-            </div>
+            <div class="sidebar-slot" id="prev-s4">📌<br>SPAZIO 4<br>Sidebar<br>€10/mese<div class="ad-slot-check" id="chk4" style="margin-top:4px">○</div></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- PANNELLO SELEZIONE -->
-    <div class="selezione-panel">
-      <p style="font-size:13px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Seleziona la posizione</p>
-
-      <div class="formato-card" id="fc-1" onclick="selectFormato(1)">
-        <div class="formato-header">
-          <div class="formato-nome">🥇 In cima <span class="formato-badge">⭐ Più visto</span></div>
-          <div class="formato-prezzo">€15 <small>/mese</small></div>
-        </div>
-        <div class="formato-desc">Banner grande sopra tutti i risultati. Prima cosa che vede il cliente quando apre la pagina.</div>
-      </div>
-
-      <div class="formato-card" id="fc-2" onclick="selectFormato(2)">
-        <div class="formato-header">
-          <div class="formato-nome">🥈 A metà pagina</div>
-          <div class="formato-prezzo">€10 <small>/mese</small></div>
-        </div>
-        <div class="formato-desc">Banner tra i risultati di ricerca. Visto da chi sta scorrendo e confrontando le imprese.</div>
-      </div>
-
-      <div class="formato-card" id="fc-3" onclick="selectFormato(3)">
-        <div class="formato-header">
-          <div class="formato-nome">🥉 In fondo</div>
-          <div class="formato-prezzo">€8 <small>/mese</small></div>
-        </div>
-        <div class="formato-desc">Banner in fondo alla pagina. Il prezzo più accessibile, visto da chi legge tutta la pagina.</div>
-      </div>
-
-      <div class="formato-card" id="fc-4" onclick="selectFormato(4)">
-        <div class="formato-header">
-          <div class="formato-nome">📌 Sidebar laterale</div>
-          <div class="formato-prezzo">€10 <small>/mese</small></div>
-        </div>
-        <div class="formato-desc">Banner laterale sempre visibile mentre il cliente scorre la pagina. Formato verticale.</div>
-      </div>
-
-      <button class="btn-avanti" id="btn-step1" onclick="goToStep(2)" disabled>
-        Continua → Scegli le città
-      </button>
+    <div class="formati-panel">
+      <p style="font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Seleziona la posizione</p>
+      <div class="fmt-card" id="fc1"><div class="fmt-head"><div class="fmt-nome">🥇 In cima <span class="fmt-badge">⭐ Più visto</span></div><div class="fmt-price">€15 <small>/mese</small></div></div><div class="fmt-desc">Banner grande sopra tutti i risultati.</div></div>
+      <div class="fmt-card" id="fc2"><div class="fmt-head"><div class="fmt-nome">🥈 A metà pagina</div><div class="fmt-price">€10 <small>/mese</small></div></div><div class="fmt-desc">Banner tra i risultati di ricerca.</div></div>
+      <div class="fmt-card" id="fc3"><div class="fmt-head"><div class="fmt-nome">🥉 In fondo</div><div class="fmt-price">€8 <small>/mese</small></div></div><div class="fmt-desc">Banner in fondo alla pagina.</div></div>
+      <div class="fmt-card" id="fc4"><div class="fmt-head"><div class="fmt-nome">📌 Sidebar</div><div class="fmt-price">€10 <small>/mese</small></div></div><div class="fmt-desc">Banner laterale sempre visibile.</div></div>
+      <button class="btn-avanti" id="btn1" disabled>Continua → Scegli le città</button>
     </div>
   </div>
 </div>
 
-<!-- ===================== STEP 2 ===================== -->
-<div class="step-content" id="step-2">
-  <button class="btn-indietro" onclick="goToStep(1)">← Indietro</button>
-  <div style="display:grid;grid-template-columns:1fr 360px;gap:32px;align-items:start;">
+<!-- STEP 2 -->
+<div class="step-page" id="page2">
+  <button class="btn-back" id="back1">← Indietro</button>
+  <div class="step2-grid">
     <div>
       <h2 class="step-title">Scegli le città</h2>
-      <p class="step-sub">Seleziona una o più città dove vuoi che il tuo banner appaia</p>
-
-      <!-- Cerca città -->
+      <p class="step-sub">Seleziona una o più città dove vuoi apparire</p>
       <div class="citta-search-wrap">
-        <span class="citta-search-icon">🔍</span>
-        <input type="text" class="citta-search" id="citta-search-input" placeholder="Cerca una città..." oninput="filtraCitta()">
+        <span class="csearch-icon">🔍</span>
+        <input type="text" class="citta-search" id="citta-input" placeholder="Cerca una città...">
       </div>
-
-      <!-- Città selezionate -->
-      <div class="citta-selected-list" id="citta-selected-list">
-        <span style="font-size:13px;color:var(--light);align-self:center">Nessuna città selezionata</span>
-      </div>
-
-      <!-- Griglia città -->
-      <div class="citta-grid-sel" id="citta-grid">
-      </div>
-
-      <p style="font-size:12px;color:var(--light);margin-top:12px">💡 Clicca su una città per selezionarla/deselezionarla</p>
+      <div class="chips-wrap" id="chips-wrap"><span style="font-size:12px;color:var(--light)">Nessuna città selezionata</span></div>
+      <div class="citta-grid" id="citta-grid"></div>
+      <p style="font-size:11px;color:var(--light);margin-top:8px">💡 Clicca per selezionare/deselezionare</p>
     </div>
-
     <div>
-      <!-- PERIODO -->
-      <div class="periodo-toggle">
+      <div class="periodo-box">
         <div class="periodo-label">Durata abbonamento</div>
-        <div class="toggle-wrap">
-          <div class="toggle-opt active" id="tog-mensile" onclick="selPeriodo('mensile')">
-            Mensile<br><small style="font-weight:500;color:var(--mid)">Paghi ogni mese</small>
-          </div>
-          <div class="toggle-opt" id="tog-annuale" onclick="selPeriodo('annuale')">
-            Annuale<br><span class="risparmio">Risparmi 2 mesi!</span>
-          </div>
+        <div class="toggle-row">
+          <div class="tog-opt active" id="tog-m">Mensile<br><small style="font-weight:500;color:var(--mid)">Paghi ogni mese</small></div>
+          <div class="tog-opt" id="tog-a">Annuale<br><span class="risparmio-badge">Risparmi 2 mesi!</span></div>
         </div>
       </div>
-
-      <!-- RIEPILOGO -->
-      <div class="riepilogo">
+      <div class="riepilogo-box">
         <div class="riepilogo-title">📋 Riepilogo</div>
-        <div class="riepilogo-row">
-          <span>Formato</span>
-          <span id="ric-formato">—</span>
-        </div>
-        <div class="riepilogo-row">
-          <span>Prezzo per città</span>
-          <span id="ric-prezzo-citta">—</span>
-        </div>
-        <div class="riepilogo-row">
-          <span>Città selezionate</span>
-          <span id="ric-n-citta">0</span>
-        </div>
-        <div class="riepilogo-row">
-          <span>Periodo</span>
-          <span id="ric-periodo">Mensile</span>
-        </div>
-        <div class="riepilogo-row">
-          <span>Totale</span>
-          <span class="riepilogo-total-num" id="ric-totale">€0</span>
-        </div>
+        <div class="ric-row"><span>Formato</span><span id="r-formato">—</span></div>
+        <div class="ric-row"><span>Prezzo/città</span><span id="r-prezzo">—</span></div>
+        <div class="ric-row"><span>Città selezionate</span><span id="r-ncitta">0</span></div>
+        <div class="ric-row"><span>Periodo</span><span id="r-periodo">Mensile</span></div>
+        <div class="ric-row"><span>Totale</span><span class="ric-total" id="r-totale">€0</span></div>
       </div>
-
-      <button class="btn-avanti" id="btn-step2" onclick="goToStep(3)" disabled style="margin-top:16px">
-        Continua → Dati e pagamento
-      </button>
+      <button class="btn-avanti" id="btn2" disabled style="margin-top:14px">Continua → Dati e pagamento</button>
     </div>
   </div>
 </div>
 
-<!-- ===================== STEP 3 ===================== -->
-<div class="step-content" id="step-3">
-  <button class="btn-indietro" onclick="goToStep(2)">← Indietro</button>
-
-  <div class="pagamento-grid">
-    <!-- FORM DATI -->
-    <div class="pagamento-form-section">
-      <h3>I tuoi dati</h3>
-
+<!-- STEP 3 -->
+<div class="step-page" id="page3">
+  <button class="btn-back" id="back2">← Indietro</button>
+  <div class="step3-grid">
+    <div>
+      <div class="form-section-title">I tuoi dati</div>
       <div class="form-row">
-        <div class="form-group">
-          <label>Nome *</label>
-          <input type="text" class="form-input" id="p-nome" placeholder="Mario Rossi">
-        </div>
-        <div class="form-group">
-          <label>Azienda *</label>
-          <input type="text" class="form-input" id="p-azienda" placeholder="Nome azienda">
-        </div>
+        <div class="form-group"><label>Nome *</label><input type="text" id="p-nome" placeholder="Mario Rossi"></div>
+        <div class="form-group"><label>Azienda *</label><input type="text" id="p-azienda" placeholder="Nome azienda"></div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label>Email *</label>
-          <input type="email" class="form-input" id="p-email" placeholder="la-tua@email.it">
-        </div>
-        <div class="form-group">
-          <label>Telefono</label>
-          <input type="tel" class="form-input" id="p-tel" placeholder="+39 000 0000000">
-        </div>
+        <div class="form-group"><label>Email *</label><input type="email" id="p-email" placeholder="email@esempio.it"></div>
+        <div class="form-group"><label>Telefono</label><input type="tel" id="p-tel" placeholder="+39 000 0000000"></div>
       </div>
-      <div class="form-group">
-        <label>Partita IVA / Codice Fiscale</label>
-        <input type="text" class="form-input" id="p-piva" placeholder="IT12345678901">
+      <div class="form-group"><label>Partita IVA / Cod. Fiscale</label><input type="text" id="p-piva" placeholder="IT12345678901"></div>
+
+      <div class="form-section-title" style="margin-top:24px">Metodo di pagamento</div>
+      <div style="font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Come vuoi pagare?</div>
+      <div class="metodo-cards">
+        <div class="metodo-card sel" id="met-b"><div class="mradio"></div><div class="minfo"><h4>🏦 Bonifico bancario</h4><p>Ti inviamo i dati IBAN. Pagamento entro 3 giorni.</p></div></div>
+        <div class="metodo-card" id="met-s"><div class="mradio"></div><div class="minfo"><h4>💳 Carta di credito</h4><p>Presto disponibile tramite Stripe.</p></div></div>
       </div>
 
-      <h3 style="margin-top:28px">Metodo di pagamento</h3>
-
-      <div class="metodo-title">Come vuoi pagare?</div>
-      <div class="metodo-options">
-        <div class="metodo-card selected" id="met-bonifico" onclick="selMetodo('bonifico')">
-          <div class="metodo-radio"></div>
-          <div class="metodo-info">
-            <h4>🏦 Bonifico bancario</h4>
-            <p>Ti inviamo i dati IBAN. Pagamento entro 3 giorni.</p>
-          </div>
-        </div>
-        <div class="metodo-card" id="met-stripe" onclick="selMetodo('stripe')">
-          <div class="metodo-radio"></div>
-          <div class="metodo-info">
-            <h4>💳 Carta di credito (Stripe)</h4>
-            <p>Pagamento immediato e sicuro. Presto disponibile.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- BONIFICO INFO -->
-      <div class="iban-fields show" id="iban-fields">
+      <div class="iban-section show" id="iban-sec">
         <div class="iban-box">
           <h4>📋 Dati per il bonifico</h4>
-          <div class="iban-data-row">
-            <span>Intestato a:</span>
-            <span>TrovaImpresa</span>
-          </div>
-          <div class="iban-data-row">
-            <span>IBAN:</span>
-            <span id="iban-display">— (inserisci sotto)</span>
-          </div>
-          <div class="iban-data-row">
-            <span>Causale:</span>
-            <span id="causale-display">Pubblicità TrovaImpresa</span>
-          </div>
+          <div class="iban-row"><span>Intestato a:</span><span>TrovaImpresa</span></div>
+          <div class="iban-row"><span>IBAN:</span><span>Comunicato via email</span></div>
+          <div class="iban-row"><span>Causale:</span><span id="causale-txt">Pubblicità TrovaImpresa</span></div>
         </div>
-        <div class="form-group">
-          <label>Il tuo IBAN (per la ricevuta) *</label>
-          <input type="text" class="form-input" id="p-iban" placeholder="IT60 X054 2811 1010 0000 0123 456" style="font-family:monospace;font-size:13px">
-          <small style="color:var(--light);font-size:11px;margin-top:4px;display:block">Inserisci il tuo IBAN così possiamo identificare il pagamento</small>
-        </div>
-        <div class="form-group">
-          <label>Note (opzionale)</label>
-          <textarea class="form-input" id="p-note" placeholder="Es. logo allegato, preferenze grafiche, ecc." rows="3"></textarea>
-        </div>
+        <div class="form-group"><label>Il tuo IBAN (per identificarti) *</label><input type="text" id="p-iban" placeholder="IT60 X054 2811 1010 0000 0123 456" style="font-family:monospace"></div>
+        <div class="form-group"><label>Note (opzionale)</label><textarea id="p-note" rows="3" placeholder="Logo, preferenze grafiche, ecc."></textarea></div>
+      </div>
+      <div class="iban-section" id="stripe-sec">
+        <div style="background:#fff3e0;border:1.5px solid #fdd5b8;border-radius:10px;padding:14px;font-size:13px;color:var(--mid)">⏳ Il pagamento con carta sarà disponibile presto. Usa il bonifico per ora!</div>
       </div>
 
-      <!-- STRIPE INFO -->
-      <div class="iban-fields" id="stripe-fields">
-        <div style="background:#fff3e0;border:1.5px solid #fdd5b8;border-radius:12px;padding:16px;font-size:14px;color:var(--mid)">
-          ⏳ Il pagamento con carta sarà disponibile a breve. Per ora usa il bonifico bancario!
-        </div>
-      </div>
-
-      <button class="btn-invia-ordine" onclick="inviaOrdine()">
-        📩 Conferma e invia ordine
-      </button>
-      <p class="note-invio">Ti risponderemo entro 24 ore con conferma e istruzioni per il pagamento</p>
+      <button class="btn-ordina" id="btn-ordina">📩 Conferma e invia ordine</button>
+      <p class="note-small">Ti risponderemo entro 24 ore con istruzioni per il pagamento</p>
     </div>
 
-    <!-- RIEPILOGO LATERALE -->
-    <div class="riepilogo-sidebar">
+    <div class="sidebar-order">
       <h3>🧾 Il tuo ordine</h3>
-      <div id="riepilogo-sidebar-content">
-        <!-- Generato da JS -->
+      <div id="ord-rows"></div>
+      <div class="ord-total">
+        <span class="ord-total-label">Totale</span>
+        <span class="ord-total-num" id="ord-totale">€0</span>
       </div>
-      <div class="ric-totale">
-        <span class="ric-totale-label">Totale</span>
-        <span class="ric-totale-num" id="ric-totale-sidebar">€0</span>
-      </div>
-      <div style="font-size:12px;color:var(--light);margin-top:12px;line-height:1.5">
-        ✅ Nessun vincolo contrattuale<br>
-        ✅ Banner live entro 24 ore<br>
-        ✅ Disdetta in qualsiasi momento
-      </div>
+      <div style="font-size:11px;color:var(--light);margin-top:10px;line-height:1.6">✅ Nessun vincolo contrattuale<br>✅ Banner live entro 24 ore<br>✅ Disdetta in qualsiasi momento</div>
     </div>
   </div>
 </div>
 
 <!-- SUCCESS -->
-<div class="step-content" id="step-success">
-  <div class="success-box">
-    <div class="success-icon">🎉</div>
+<div class="step-page" id="page-ok">
+  <div class="success-wrap">
+    <div class="big-emoji">🎉</div>
     <h2>Ordine ricevuto!</h2>
-    <p>Grazie <strong id="success-nome">!</strong> Abbiamo ricevuto la tua richiesta.<br>Ti contatteremo entro 24 ore all'indirizzo <strong id="success-email"></strong> con le istruzioni per completare il pagamento e attivare il tuo banner.</p>
-    <a href="index.html" style="display:inline-block;background:var(--verde);color:white;padding:12px 24px;border-radius:10px;font-weight:700;text-decoration:none;font-size:15px">Torna alla home →</a>
+    <p>Grazie <strong id="ok-nome"></strong>! Abbiamo ricevuto la tua richiesta.<br>Ti contatteremo entro 24 ore all'indirizzo <strong id="ok-email"></strong> con le istruzioni per il pagamento.</p>
+    <a href="index.html" style="display:inline-block;background:var(--verde);color:#fff;padding:11px 22px;border-radius:10px;font-weight:700;text-decoration:none">Torna alla home →</a>
   </div>
 </div>
 
-<!-- FOOTER -->
 <footer>
-  <p>© 2026 TrovaImpresa — <a href="/cdn-cgi/l/email-protection#8be2e5ede4cbfff9e4fdeae2e6fbf9eef8eaa5e8e4e6"><span class="__cf_email__" data-cfemail="0d64636b624d797f627b6c64607d7f687e6c236e6260">[email&#160;protected]</span></a> — <a href="index.html">Torna alla home</a></p>
+  <p>© 2026 TrovaImpresa — info@trovaimpresa.com — <a href="index.html">Torna alla home</a></p>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  // === STATO ===
-  let formatoSelezionato = null;
-  let cittaSelezionate = [];
-  let periodoSelezionato = 'mensile';
-  let metodoSelezionato = 'bonifico';
+<script>
+var fmt = null;
+var citta = [];
+var periodo = 'mensile';
+var metodo = 'bonifico';
+var prezzi = {1:15, 2:10, 3:8, 4:10};
+var nomi = {1:'🥇 In cima', 2:'🥈 A metà pagina', 3:'🥉 In fondo', 4:'📌 Sidebar'};
+var tutteCitta = ['Agrigento','Alessandria','Ancona','Aosta','Arezzo','Ascoli Piceno','Asti','Avellino','Bari','Barletta','Belluno','Benevento','Bergamo','Biella','Bologna','Bolzano','Brescia','Brindisi','Cagliari','Caltanissetta','Campobasso','Caserta','Catania','Catanzaro','Cesena','Como','Cosenza','Cremona','Crotone','Cuneo','Ferrara','Firenze','Foggia','Frosinone','Genova','Grosseto','Imperia','La Spezia','Latina','Lecce','Lecco','Livorno','Lodi','Lucca','Macerata','Mantova','Marsala','Massa','Matera','Messina','Milano','Modena','Monza','Napoli','Novara','Nuoro','Oristano','Padova','Palermo','Parma','Pavia','Perugia','Pesaro','Pescara','Piacenza','Pisa','Pistoia','Pordenone','Potenza','Prato','Ragusa','Ravenna','Reggio Calabria','Reggio Emilia','Rieti','Rimini','Roma','Rovigo','Salerno','Sassari','Savona','Siena','Siracusa','Sondrio','Taranto','Terni','Torino','Trapani','Trento','Treviso','Trieste','Udine','Varese','Venezia','Verbania','Vercelli','Verona','Vibo Valentia','Vicenza','Viterbo'];
 
-  const prezzi = { 1: 15, 2: 10, 3: 8, 4: 10 };
-  const nomiFormati = { 1: '🥇 In cima', 2: '🥈 A metà pagina', 3: '🥉 In fondo', 4: '📌 Sidebar' };
+// Inizializzazione
+window.addEventListener('DOMContentLoaded', function() {
+  buildCitta('');
 
-  const tutteLeCitta = [
-    'Roma','Milano','Napoli','Torino','Palermo','Genova','Bologna','Firenze',
-    'Bari','Catania','Venezia','Verona','Messina','Padova','Trieste','Taranto',
-    'Brescia','Prato','Modena','Reggio Calabria','Parma','Reggio Emilia',
-    'Perugia','Cagliari','Livorno','Ravenna','Foggia','Salerno','Rimini',
-    'Ferrara','Sassari','Siracusa','Pescara','Monza','Bergamo','Forlì',
-    'Trento','Vicenza','Terni','Novara','Piacenza','Ancona','Lecce',
-    'Bolzano','Andria','Arezzo','Cesena','La Spezia','Udine','Pesaro',
-    'Catanzaro','Barletta','Alessandria','Mantova','Lucca','Pistoia',
-    'Brindisi','Pisa','Foggia','Busto Arsizio','Como','Marsala','Giugliano',
-    'Caserta','Ragusa','Cinisello Balsamo','Guidonia','Bagheria','Altamura',
-    'Molfetta','Caltanissetta','Potenza','Cosenza','Reggio Emilia','Latina',
-    'Ferrara','L\'Aquila','Cuneo','Asti','Varese','Sesto San Giovanni',
-    'Cremona','Savona','Treviso','Pordenone','Vicenza','Padova','Belluno',
-    'Aosta','Biella','Verbania','Vercelli','Lodi','Pavia','Sondrio',
-    'Lecco','Monza','Bergamo','Brescia','Mantova','Cremona',
-    'Rovigo','Venezia','Treviso','Macerata','Ascoli Piceno','Fermo',
-    'Rieti','Frosinone','Viterbo','Grosseto','Massa','Siena','Arezzo'
-  ].filter((v, i, a) => a.indexOf(v) === i).sort();
+  // Navigazione
+  document.getElementById('nav-prenota').addEventListener('click', function(e){ e.preventDefault(); showPage(1); });
+  document.getElementById('btn1').addEventListener('click', function(){ if(fmt) showPage(2); });
+  document.getElementById('btn2').addEventListener('click', function(){ if(citta.length > 0) showPage(3); });
+  document.getElementById('back1').addEventListener('click', function(){ showPage(1); });
+  document.getElementById('back2').addEventListener('click', function(){ showPage(2); });
 
-  // === NAVIGAZIONE ===
-  function goToStep(n) {
-    document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('step-' + n).classList.add('active');
-    document.getElementById('tab-' + n)?.classList.add('active');
-    aggiornaRiepilogo();
-    if (n === 3) aggiornaRiepilogoSidebar();
-    window.scrollTo({top: 0, behavior: 'smooth'});
+  // Formati - anteprima
+  document.getElementById('prev-s1').addEventListener('click', function(){ selFmt(1); });
+  document.getElementById('prev-s2').addEventListener('click', function(){ selFmt(2); });
+  document.getElementById('prev-s3').addEventListener('click', function(){ selFmt(3); });
+  document.getElementById('prev-s4').addEventListener('click', function(){ selFmt(4); });
+
+  // Formati - pannello
+  document.getElementById('fc1').addEventListener('click', function(){ selFmt(1); });
+  document.getElementById('fc2').addEventListener('click', function(){ selFmt(2); });
+  document.getElementById('fc3').addEventListener('click', function(){ selFmt(3); });
+  document.getElementById('fc4').addEventListener('click', function(){ selFmt(4); });
+
+  // Periodo
+  document.getElementById('tog-m').addEventListener('click', function(){ selPeriodo('mensile'); });
+  document.getElementById('tog-a').addEventListener('click', function(){ selPeriodo('annuale'); });
+
+  // Metodo pagamento
+  document.getElementById('met-b').addEventListener('click', function(){ selMetodo('bonifico'); });
+  document.getElementById('met-s').addEventListener('click', function(){ selMetodo('stripe'); });
+
+  // Cerca città
+  document.getElementById('citta-input').addEventListener('input', function(){ buildCitta(this.value); });
+
+  // Ordina
+  document.getElementById('btn-ordina').addEventListener('click', inviaOrdine);
+});
+
+function showPage(n) {
+  document.querySelectorAll('.step-page').forEach(function(p){ p.classList.remove('visible'); });
+  document.querySelectorAll('.step-tab').forEach(function(t){ t.classList.remove('active'); });
+  if(n <= 3) {
+    document.getElementById('page' + n).classList.add('visible');
+    document.getElementById('tab' + n).classList.add('active');
+  } else {
+    document.getElementById('page-ok').classList.add('visible');
   }
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(n === 3) aggiornaOrdine();
+}
 
-  // === STEP 1: FORMATO ===
-  function selectFormato(n) {
-    formatoSelezionato = n;
-    // Reset tutti
-    [1,2,3,4].forEach(i => {
-      document.getElementById('fc-' + i)?.classList.remove('selected');
-      document.getElementById('ant-s' + i)?.classList.remove('selected');
-      document.getElementById('check-s' + i).textContent = '○';
-    });
-    // Seleziona
-    document.getElementById('fc-' + n).classList.add('selected');
-    document.getElementById('ant-s' + n).classList.add('selected');
-    document.getElementById('check-s' + n).textContent = '✅';
-    document.getElementById('btn-step1').disabled = false;
-    aggiornaRiepilogo();
+function selFmt(n) {
+  fmt = n;
+  // Reset
+  for(var i=1; i<=4; i++) {
+    document.getElementById('prev-s' + i).classList.remove('sel');
+    document.getElementById('fc' + i).classList.remove('sel');
+    document.getElementById('chk' + i).textContent = '○';
   }
+  // Sidebar slot speciale
+  document.getElementById('prev-s4').classList.remove('sel');
+  // Seleziona
+  if(n <= 3) document.getElementById('prev-s' + n).classList.add('sel');
+  else document.getElementById('prev-s4').classList.add('sel');
+  document.getElementById('fc' + n).classList.add('sel');
+  document.getElementById('chk' + n).textContent = '✅';
+  document.getElementById('btn1').disabled = false;
+  aggiornaRiepilogo();
+}
 
-  // === STEP 2: CITTÀ ===
-  function buildCittaGrid(filter = '') {
-    const grid = document.getElementById('citta-grid');
-    const lista = tutteLeCitta.filter(c => c.toLowerCase().includes(filter.toLowerCase()));
-    grid.innerHTML = lista.map(c => `
-      <div class="citta-option ${cittaSelezionate.includes(c) ? 'selected' : ''}" data-citta="${c}" onclick="toggleCitta(this.dataset.citta)">${c}</div>
-    `).join('');
+function buildCitta(filter) {
+  var grid = document.getElementById('citta-grid');
+  var f = filter.toLowerCase();
+  var lista = tutteCitta.filter(function(c){ return c.toLowerCase().indexOf(f) >= 0; });
+  grid.innerHTML = '';
+  lista.forEach(function(c) {
+    var div = document.createElement('div');
+    div.className = 'citta-opt' + (citta.indexOf(c) >= 0 ? ' sel' : '');
+    div.textContent = c;
+    div.addEventListener('click', function(){ toggleCitta(c); });
+    grid.appendChild(div);
+  });
+}
+
+function toggleCitta(c) {
+  var idx = citta.indexOf(c);
+  if(idx >= 0) citta.splice(idx, 1);
+  else citta.push(c);
+  buildCitta(document.getElementById('citta-input').value);
+  aggiornaChips();
+  aggiornaRiepilogo();
+  document.getElementById('btn2').disabled = citta.length === 0;
+}
+
+function aggiornaChips() {
+  var wrap = document.getElementById('chips-wrap');
+  if(citta.length === 0) { wrap.innerHTML = '<span style="font-size:12px;color:var(--light)">Nessuna città selezionata</span>'; return; }
+  wrap.innerHTML = '';
+  citta.forEach(function(c) {
+    var div = document.createElement('div');
+    div.className = 'chip';
+    div.innerHTML = '📍 ' + c + ' <span>✕</span>';
+    div.addEventListener('click', function(){ toggleCitta(c); });
+    wrap.appendChild(div);
+  });
+}
+
+function selPeriodo(p) {
+  periodo = p;
+  document.getElementById('tog-m').classList.toggle('active', p === 'mensile');
+  document.getElementById('tog-a').classList.toggle('active', p === 'annuale');
+  aggiornaRiepilogo();
+}
+
+function calcolaTotale() {
+  if(!fmt || citta.length === 0) return 0;
+  var base = prezzi[fmt] * citta.length;
+  return periodo === 'annuale' ? base * 10 : base;
+}
+
+function aggiornaRiepilogo() {
+  document.getElementById('r-formato').textContent = fmt ? nomi[fmt] : '—';
+  document.getElementById('r-prezzo').textContent = fmt ? '€' + prezzi[fmt] + '/mese' : '—';
+  document.getElementById('r-ncitta').textContent = citta.length;
+  document.getElementById('r-periodo').textContent = periodo === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile';
+  var tot = calcolaTotale();
+  document.getElementById('r-totale').textContent = tot > 0 ? '€' + tot : '€0';
+  if(fmt && citta.length > 0) {
+    var c3 = citta.slice(0,3).join(', ') + (citta.length > 3 ? '...' : '');
+    document.getElementById('causale-txt').textContent = 'Pub TrovaImpresa - ' + nomi[fmt] + ' - ' + c3;
   }
+}
 
-  function filtraCitta() {
-    buildCittaGrid(document.getElementById('citta-search-input').value);
-  }
+function aggiornaOrdine() {
+  var tot = calcolaTotale();
+  document.getElementById('ord-totale').textContent = '€' + tot;
+  var rows = '';
+  rows += '<div class="ord-row"><span>Formato</span><span>' + (nomi[fmt] || '—') + '</span></div>';
+  var c3 = citta.slice(0,2).join(', ') + (citta.length > 2 ? ' +' + (citta.length-2) : '');
+  rows += '<div class="ord-row"><span>Città</span><span>' + c3 + '</span></div>';
+  rows += '<div class="ord-row"><span>N° città</span><span>' + citta.length + '</span></div>';
+  rows += '<div class="ord-row"><span>Periodo</span><span>' + (periodo === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile') + '</span></div>';
+  rows += '<div class="ord-row"><span>€/città/mese</span><span>€' + (prezzi[fmt] || 0) + '</span></div>';
+  document.getElementById('ord-rows').innerHTML = rows;
+}
 
-  function toggleCitta(c) {
-    if (cittaSelezionate.includes(c)) {
-      cittaSelezionate = cittaSelezionate.filter(x => x !== c);
-    } else {
-      cittaSelezionate.push(c);
-    }
-    buildCittaGrid(document.getElementById('citta-search-input').value);
-    aggiornaChipCitta();
-    aggiornaRiepilogo();
-    document.getElementById('btn-step2').disabled = cittaSelezionate.length === 0;
-  }
+function selMetodo(m) {
+  metodo = m;
+  document.getElementById('met-b').classList.toggle('sel', m === 'bonifico');
+  document.getElementById('met-s').classList.toggle('sel', m === 'stripe');
+  document.getElementById('iban-sec').classList.toggle('show', m === 'bonifico');
+  document.getElementById('stripe-sec').classList.toggle('show', m === 'stripe');
+}
 
-  function aggiornaChipCitta() {
-    const wrap = document.getElementById('citta-selected-list');
-    if (cittaSelezionate.length === 0) {
-      wrap.innerHTML = '<span style="font-size:13px;color:var(--light);align-self:center">Nessuna città selezionata</span>';
-      return;
-    }
-    wrap.innerHTML = cittaSelezionate.map(c => `
-      <div class="citta-chip" data-citta='${c}' onclick="toggleCitta(this.dataset.citta)" title="Clicca per rimuovere">
-        📍 ${c} <span>✕</span>
-      </div>
-    `).join('');
-  }
+function inviaOrdine() {
+  var nome = document.getElementById('p-nome').value.trim();
+  var azienda = document.getElementById('p-azienda').value.trim();
+  var email = document.getElementById('p-email').value.trim();
+  var iban = document.getElementById('p-iban').value.trim();
+  if(!nome || !azienda || !email) { alert('Compila nome, azienda ed email!'); return; }
+  if(metodo === 'bonifico' && !iban) { alert('Inserisci il tuo IBAN!'); return; }
 
-  // === STEP 2: PERIODO ===
-  function selPeriodo(p) {
-    periodoSelezionato = p;
-    document.getElementById('tog-mensile').classList.toggle('active', p === 'mensile');
-    document.getElementById('tog-annuale').classList.toggle('active', p === 'annuale');
-    aggiornaRiepilogo();
-  }
+  var btn = document.getElementById('btn-ordina');
+  btn.textContent = '⏳ Invio in corso...';
+  btn.disabled = true;
 
-  function calcolaTotale() {
-    if (!formatoSelezionato || cittaSelezionate.length === 0) return 0;
-    const mensile = prezzi[formatoSelezionato] * cittaSelezionate.length;
-    return periodoSelezionato === 'annuale' ? mensile * 10 : mensile;
-  }
+  var msg = '[ORDINE PUBBLICITA] Formato: ' + nomi[fmt] + ' | Citta (' + citta.length + '): ' + citta.join(', ') + ' | Periodo: ' + periodo + ' | Totale: €' + calcolaTotale() + ' | Metodo: ' + metodo + ' | IBAN: ' + (iban || '-') + ' | PIVA: ' + (document.getElementById('p-piva').value || '-') + ' | Tel: ' + (document.getElementById('p-tel').value || '-');
 
-  function aggiornaRiepilogo() {
-    document.getElementById('ric-formato').textContent = formatoSelezionato ? nomiFormati[formatoSelezionato] : '—';
-    document.getElementById('ric-prezzo-citta').textContent = formatoSelezionato ? `€${prezzi[formatoSelezionato]}/mese` : '—';
-    document.getElementById('ric-n-citta').textContent = cittaSelezionate.length;
-    document.getElementById('ric-periodo').textContent = periodoSelezionato === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile';
-    const tot = calcolaTotale();
-    document.getElementById('ric-totale').textContent = tot > 0 ? `€${tot}` : '€0';
-
-    // Causale dinamica
-    if (formatoSelezionato && cittaSelezionate.length > 0) {
-      document.getElementById('causale-display').textContent = `Pub TrovaImpresa - ${nomiFormati[formatoSelezionato]} - ${cittaSelezionate.slice(0,3).join(', ')}${cittaSelezionate.length > 3 ? '...' : ''}`;
-    }
-  }
-
-  function aggiornaRiepilogoSidebar() {
-    const tot = calcolaTotale();
-    document.getElementById('ric-totale-sidebar').textContent = `€${tot}`;
-    document.getElementById('riepilogo-sidebar-content').innerHTML = `
-      <div class="ric-item"><span>Formato</span><span>${nomiFormati[formatoSelezionato] || '—'}</span></div>
-      <div class="ric-item"><span>Città</span><span>${cittaSelezionate.slice(0,3).join(', ')}${cittaSelezionate.length > 3 ? ` +${cittaSelezionate.length-3}` : ''}</span></div>
-      <div class="ric-item"><span>N° città</span><span>${cittaSelezionate.length}</span></div>
-      <div class="ric-item"><span>Periodo</span><span>${periodoSelezionato === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile'}</span></div>
-      <div class="ric-item"><span>Prezzo/città/mese</span><span>€${prezzi[formatoSelezionato] || 0}</span></div>
-    `;
-  }
-
-  // === STEP 3: METODO PAGAMENTO ===
-  function selMetodo(m) {
-    metodoSelezionato = m;
-    document.getElementById('met-bonifico').classList.toggle('selected', m === 'bonifico');
-    document.getElementById('met-stripe').classList.toggle('selected', m === 'stripe');
-    document.getElementById('iban-fields').classList.toggle('show', m === 'bonifico');
-    document.getElementById('stripe-fields').classList.toggle('show', m === 'stripe');
-  }
-
-  // === INVIA ORDINE ===
-  async function inviaOrdine() {
-    const nome = document.getElementById('p-nome').value.trim();
-    const azienda = document.getElementById('p-azienda').value.trim();
-    const email = document.getElementById('p-email').value.trim();
-    const iban = document.getElementById('p-iban').value.trim();
-
-    if (!nome || !azienda || !email) {
-      alert('Compila nome, azienda ed email!');
-      return;
-    }
-    if (metodoSelezionato === 'bonifico' && !iban) {
-      alert('Inserisci il tuo IBAN per procedere con il bonifico!');
-      return;
-    }
-
-    const btn = document.querySelector('.btn-invia-ordine');
-    btn.textContent = '⏳ Invio in corso...';
-    btn.disabled = true;
-
-    const messaggio = `[ORDINE PUBBLICITÀ]
-Formato: ${nomiFormati[formatoSelezionato]}
-Prezzo: €${prezzi[formatoSelezionato]}/mese per città
-Città (${cittaSelezionate.length}): ${cittaSelezionate.join(', ')}
-Periodo: ${periodoSelezionato === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile'}
-TOTALE: €${calcolaTotale()}
-Metodo: ${metodoSelezionato === 'bonifico' ? 'Bonifico' : 'Stripe'}
-IBAN cliente: ${iban || '—'}
-P.IVA: ${document.getElementById('p-piva').value || '—'}
-Tel: ${document.getElementById('p-tel').value || '—'}
-Note: ${document.getElementById('p-note')?.value || '—'}`;
-
-    try {
-      const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
-      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-
-      await fetch(`${SUPABASE_URL}/rest/v1/messaggi`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({
-          nome: nome + ' — ' + azienda,
-          email: email,
-          messaggio: messaggio
-        })
-      });
-
-      document.getElementById('success-nome').textContent = nome + '!';
-      document.getElementById('success-email').textContent = email;
-      document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
-      document.getElementById('step-success').classList.add('active');
-      window.scrollTo({top: 0, behavior: 'smooth'});
+  fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/messaggi', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
+    },
+    body: JSON.stringify({ nome: nome + ' — ' + azienda, email: email, messaggio: msg })
+  }).then(function() {
+    document.getElementById('ok-nome').textContent = nome + '!';
+    document.getElementById('ok-email').textContent = email;
+    showPage(99);
+  }).catch(function() {
+    btn.textContent = '📩 Conferma e invia ordine';
+    btn.disabled = false;
+    alert('Errore. Scrivi a info@trovaimpresa.com');
+  });
+}
+</script>
+</body>
+</html>
