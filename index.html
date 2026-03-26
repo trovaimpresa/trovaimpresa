@@ -75,21 +75,9 @@
     border:1px solid rgba(0,0,0,0.06);
     animation:fadeUp 0.6s 0.3s ease both; margin-bottom:40px;
   }
-  .slabel {
-    font-size:0.7rem; font-weight:800; color:var(--light);
-    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px;
-  }
-  .tipo-toggle {
-    display:flex; gap:6px; margin-bottom:18px;
-    background:var(--bg); border-radius:14px;
-    padding:4px; border:1px solid rgba(0,0,0,0.07);
-  }
-  .tipo-btn {
-    flex:1; padding:10px 6px; border:none; border-radius:10px;
-    font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700;
-    cursor:pointer; transition:all 0.2s; background:transparent; color:var(--mid);
-    display:flex; align-items:center; justify-content:center; gap:6px; line-height:1.3;
-  }
+  .slabel { font-size:0.7rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
+  .tipo-toggle { display:flex; gap:6px; margin-bottom:18px; background:var(--bg); border-radius:14px; padding:4px; border:1px solid rgba(0,0,0,0.07); }
+  .tipo-btn { flex:1; padding:10px 6px; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700; cursor:pointer; transition:all 0.2s; background:transparent; color:var(--mid); display:flex; align-items:center; justify-content:center; gap:6px; line-height:1.3; }
   .tipo-icon { font-size:1.2rem; }
   .tipo-sub { font-weight:400; font-size:0.7rem; opacity:0.75; }
   .tipo-btn.active { background:white; box-shadow:0 2px 12px rgba(0,0,0,0.1); }
@@ -100,49 +88,22 @@
   .mestieri-grid { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; max-height:160px; overflow-y:auto; padding-right:4px; scrollbar-width:thin; scrollbar-color:rgba(0,0,0,0.15) transparent; }
   .mestieri-grid::-webkit-scrollbar { width:4px; }
   .mestieri-grid::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); border-radius:4px; }
-  .chip {
-    padding:7px 13px; border-radius:20px; font-size:0.82rem; font-weight:600;
-    cursor:pointer; transition:all 0.2s; border:1.5px solid rgba(0,0,0,0.08);
-    background:white; color:var(--mid);
-  }
+  .chip { padding:7px 13px; border-radius:20px; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; border:1.5px solid rgba(0,0,0,0.08); background:white; color:var(--mid); }
   .chip:hover { border-color:var(--verde); color:var(--verde); }
   .chip.active { background:var(--verde); color:white; border-color:var(--verde); box-shadow:0 3px 10px rgba(42,122,75,0.3); }
 
-  .search-row {
-    display:flex; align-items:center; gap:10px;
-    background:var(--bg); border-radius:14px;
-    padding:6px 6px 6px 14px; border:1.5px solid rgba(0,0,0,0.08);
-    transition:border 0.2s;
-  }
+  .search-row { display:flex; align-items:center; gap:10px; background:var(--bg); border-radius:14px; padding:6px 6px 6px 14px; border:1.5px solid rgba(0,0,0,0.08); transition:border 0.2s; }
   .search-row:focus-within { border-color:var(--verde); }
-  .search-row input {
-    flex:1; border:none; outline:none; background:transparent;
-    font-family:'DM Sans',sans-serif; font-size:0.92rem; color:var(--dark);
-  }
+  .search-row input { flex:1; border:none; outline:none; background:transparent; font-family:'DM Sans',sans-serif; font-size:0.92rem; color:var(--dark); }
   .search-row input::placeholder { color:var(--light); }
-  .sbtn {
-    background:var(--verde); color:white; border:none; border-radius:10px;
-    padding:11px 20px; font-family:'DM Sans',sans-serif; font-weight:700;
-    font-size:0.88rem; cursor:pointer; transition:all 0.2s; white-space:nowrap;
-  }
+  .sbtn { background:var(--verde); color:white; border:none; border-radius:10px; padding:11px 20px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.88rem; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
   .sbtn:hover { background:var(--verde2); }
-  .sbtn-geo {
-    background:var(--arancio3); color:var(--arancio); border:none; border-radius:10px;
-    padding:11px 12px; font-size:1rem; cursor:pointer; transition:all 0.2s;
-    flex-shrink:0;
-  }
+  .sbtn-geo { background:var(--arancio3); color:var(--arancio); border:none; border-radius:10px; padding:11px 12px; font-size:1rem; cursor:pointer; transition:all 0.2s; flex-shrink:0; }
   .sbtn-geo:hover { background:var(--arancio); color:white; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .search-hint {
-    margin-top:10px; font-size:0.82rem; color:var(--mid);
-    text-align:center; font-weight:500; min-height:20px;
-  }
+  .search-hint { margin-top:10px; font-size:0.82rem; color:var(--mid); text-align:center; font-weight:500; min-height:20px; }
   .search-hint strong { color:var(--verde); }
 
-  .hero-stats {
-    display:flex; gap:40px; flex-wrap:wrap; justify-content:center;
-    animation:fadeUp 0.6s 0.5s ease both;
-  }
+  .hero-stats { display:flex; gap:40px; flex-wrap:wrap; justify-content:center; animation:fadeUp 0.6s 0.5s ease both; }
   .stat { text-align:center; }
   .stat-num { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; display:block; }
   .stat-num span { color:var(--arancio); }
@@ -175,19 +136,44 @@
   .feature h3 { font-size:0.95rem; font-weight:700; margin-bottom:5px; }
   .feature p { font-size:0.86rem; color:var(--mid); line-height:1.6; }
 
+  /* CTA CANDIDATI */
   .cta-section { margin:0 auto 100px; max-width:1100px; padding:0 24px; }
-  .cta-box { background:linear-gradient(135deg,var(--verde),var(--verde2)); border-radius:28px; padding:68px 48px; text-align:center; color:white; position:relative; overflow:hidden; }
+  .cta-box {
+    background:linear-gradient(135deg,var(--verde),var(--verde2));
+    border-radius:28px; padding:60px 48px; text-align:center; color:white;
+    position:relative; overflow:hidden;
+  }
   .cta-box::before { content:''; position:absolute; top:-60px; right:-60px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,0.05); }
   .cta-box::after { content:''; position:absolute; bottom:-40px; left:-40px; width:170px; height:170px; border-radius:50%; background:rgba(232,115,58,0.15); }
-  .cta-box h2 { font-family:'Playfair Display',serif; font-size:clamp(1.7rem,3vw,2.4rem); margin-bottom:14px; position:relative; z-index:1; }
-  .cta-box p { font-size:1rem; opacity:0.85; margin-bottom:32px; position:relative; z-index:1; max-width:440px; margin-left:auto; margin-right:auto; line-height:1.7; }
-  .cta-form { display:flex; flex-direction:column; gap:12px; max-width:420px; margin:0 auto; position:relative; z-index:1; }
-  .cta-form input, .cta-form textarea { padding:13px 18px; border-radius:14px; border:none; font-size:0.97rem; font-family:inherit; outline:none; }
-  .cta-form textarea { resize:vertical; min-height:90px; }
-  .cta-form button { background:white; color:var(--verde2); padding:14px 34px; border-radius:50px; font-weight:700; font-size:1rem; border:none; cursor:pointer; transition:all 0.25s; box-shadow:0 8px 24px rgba(0,0,0,0.15); }
-  .cta-form button:hover { transform:translateY(-2px); }
+  .cta-box h2 { font-family:'Playfair Display',serif; font-size:clamp(1.7rem,3vw,2.4rem); margin-bottom:10px; position:relative; z-index:1; }
+  .cta-box > p { font-size:1rem; opacity:0.85; margin-bottom:28px; position:relative; z-index:1; max-width:480px; margin-left:auto; margin-right:auto; line-height:1.7; }
+  .cta-form { display:flex; flex-direction:column; gap:10px; max-width:480px; margin:0 auto; position:relative; z-index:1; }
+  .cta-form input,
+  .cta-form textarea,
+  .cta-form select { padding:13px 18px; border-radius:14px; border:none; font-size:0.95rem; font-family:inherit; outline:none; color:var(--dark); }
+  .cta-form textarea { resize:vertical; min-height:80px; }
+  .cta-form select { color:var(--mid); }
+  .cta-form button {
+    background:white; color:var(--verde2); padding:14px 34px;
+    border-radius:50px; font-weight:700; font-size:1rem;
+    border:none; cursor:pointer; transition:all 0.25s;
+    box-shadow:0 8px 24px rgba(0,0,0,0.15); margin-top:4px;
+  }
+  .cta-form button:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,0.2); }
   .cta-form button:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
-  .cta-msg { font-size:0.95rem; margin-top:8px; position:relative; z-index:1; }
+
+  /* Competenze chip nel form candidati */
+  .comp-chip {
+    padding:6px 12px; border-radius:20px;
+    border:1.5px solid rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.1);
+    color:white; font-size:0.8rem; font-weight:600;
+    cursor:pointer; transition:all 0.15s;
+  }
+  .comp-chip.selected {
+    background:white; color:var(--verde2);
+    border-color:white;
+  }
 
   footer { background:var(--dark); color:rgba(255,255,255,0.6); padding:36px 24px; text-align:center; }
   .footer-logo { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px; }
@@ -203,8 +189,9 @@
     nav { padding:14px 16px; }
     .hero { padding:100px 16px 60px; }
     .hero-stats { gap:20px; }
-    .cta-box { padding:44px 20px; }
+    .cta-box { padding:40px 20px; }
     .tipo-sub { display:none; }
+    .cta-form input[style*="flex:1"] { width:100%; }
   }
 </style>
 </head>
@@ -317,16 +304,68 @@
   </div>
 </section>
 
+<!-- ── SEZIONE CANDIDATI LAVORO ── -->
 <div class="cta-section">
   <div class="cta-box">
-    <h2>Hai domande? Scrivici!</h2>
-    <p>Registrati su TrovaImpresa e inizia a ricevere richieste di lavoro dalla tua zona. Semplice, veloce, gratuito per iniziare.</p>
-    <div class="cta-form">
-      <input type="text" id="cta-nome" placeholder="Il tuo nome" required />
-      <input type="email" id="cta-email" placeholder="La tua email" required />
-      <textarea id="cta-messaggio" placeholder="Scrivi un messaggio (opzionale)"></textarea>
-      <div id="cta-feedback" style="color:#ffe;font-size:0.9rem;min-height:20px;"></div>
-      <button onclick="inviaContatto()">✉️ Invia la tua domanda</button>
+    <h2 style="position:relative;z-index:1;">👷 Cerchi lavoro nell'edilizia?</h2>
+    <p style="margin-bottom:28px;">Lascia i tuoi dati e le tue competenze — le imprese della tua zona potranno contattarti direttamente. Gratis!</p>
+
+    <div class="cta-form" id="candidato-form">
+
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="c-nome" placeholder="Nome e cognome *" required style="flex:1" />
+        <input type="tel" id="c-telefono" placeholder="Telefono" style="flex:1" />
+      </div>
+      <input type="email" id="c-email" placeholder="Email *" required />
+
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="c-citta" placeholder="Città *" required style="flex:1" />
+        <input type="text" id="c-regione" placeholder="Regione *" required style="flex:1" />
+      </div>
+
+      <select id="c-esperienza">
+        <option value="">Anni di esperienza nell'edilizia...</option>
+        <option>Nessuna (prima occupazione)</option>
+        <option>1–2 anni</option>
+        <option>3–5 anni</option>
+        <option>6–10 anni</option>
+        <option>Più di 10 anni</option>
+      </select>
+
+      <!-- Chip competenze -->
+      <div style="text-align:left;">
+        <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.75);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Le tue competenze (seleziona)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Muratura">🧱 Muratura</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Elettricista">⚡ Elettricista</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Idraulico">🚿 Idraulico</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Pittore">🎨 Pittore</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Falegname">🌲 Falegname</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Piastrellista">🟫 Piastrellista</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Cartongesso">🔲 Cartongesso</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Carpentiere">🪚 Carpentiere</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Fabbro">🔑 Fabbro</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Serramentista">🪟 Serramentista</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Termoidraulico">🔥 Termoidraulico</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Coperture">🏠 Coperture/Tetti</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Giardiniere">🌿 Giardiniere</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Demolizioni">⛏️ Demolizioni</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Movimento terra">🚜 Movimento terra</div>
+          <div class="comp-chip" onclick="toggleComp(this)" data-val="Pulizie">🧹 Pulizie</div>
+        </div>
+      </div>
+
+      <textarea id="c-descrizione" placeholder="Presentati brevemente: cosa sai fare, disponibilità, zona preferita..."></textarea>
+
+      <div id="c-feedback" style="font-size:0.88rem;min-height:20px;color:#ffe;"></div>
+      <button onclick="inviaCandidatura()">👷 Invia la mia candidatura</button>
+    </div>
+
+    <!-- Messaggio successo -->
+    <div id="candidato-success" style="display:none;text-align:center;padding:30px 0;position:relative;z-index:1;">
+      <div style="font-size:3.5rem;margin-bottom:14px;">🎉</div>
+      <div style="font-size:1.4rem;font-weight:700;margin-bottom:10px;">Candidatura inviata!</div>
+      <p style="opacity:0.85;font-size:0.95rem;max-width:360px;margin:0 auto;line-height:1.6;">Le imprese edili della tua zona potranno vedere il tuo profilo e contattarti direttamente.</p>
     </div>
   </div>
 </div>
@@ -393,53 +432,56 @@ function doSearch() {
   window.location.href = 'risultati.html?' + params.toString();
 }
 
-async function inviaContatto() {
-  const nome = document.getElementById('cta-nome').value.trim();
-  const email = document.getElementById('cta-email').value.trim();
-  const messaggio = document.getElementById('cta-messaggio').value.trim();
-  const feedback = document.getElementById('cta-feedback');
-  const btn = document.querySelector('.cta-form button');
+// ── COMPETENZE CHIP ──
+function toggleComp(el) {
+  el.classList.toggle('selected');
+}
 
-  if (!nome || !email) { feedback.textContent = '⚠️ Inserisci nome ed email.'; return; }
+// ── INVIA CANDIDATURA ──
+async function inviaCandidatura() {
+  const nome = document.getElementById('c-nome').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const telefono = document.getElementById('c-telefono').value.trim();
+  const citta = document.getElementById('c-citta').value.trim();
+  const regione = document.getElementById('c-regione').value.trim();
+  const esperienza = document.getElementById('c-esperienza').value;
+  const descrizione = document.getElementById('c-descrizione').value.trim();
+  const feedback = document.getElementById('c-feedback');
+  const btn = document.querySelector('#candidato-form button');
+
+  if (!nome || !email || !citta || !regione) {
+    feedback.textContent = '⚠️ Compila i campi obbligatori: nome, email, città e regione.';
+    return;
+  }
+
+  const competenze = [...document.querySelectorAll('.comp-chip.selected')].map(c => c.dataset.val);
 
   btn.disabled = true;
-  btn.textContent = 'Invio in corso...';
+  btn.textContent = '⏳ Invio in corso...';
   feedback.textContent = '';
 
   try {
-    // 1. Salva su Supabase
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/messaggi`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/candidati_lavoro`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`
       },
-      body: JSON.stringify({ nome, email, messaggio, letto: false })
+      body: JSON.stringify({ nome, email, telefono, citta, regione, esperienza, descrizione, competenze })
     });
 
     if (res.ok || res.status === 201) {
-      // 2. Invia email di notifica a info@trovaimpresa.com
-      fetch('/.netlify/functions/invia-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, email, messaggio: messaggio || '(nessun messaggio)' })
-      }).catch(() => {}); // non bloccare anche se fallisce
-
-      feedback.textContent = '✅ Perfetto! Ti portiamo alla registrazione...';
-      feedback.style.color = '#d4edda';
-      btn.textContent = '✅ Inviato!';
-      setTimeout(() => {
-        window.location.href = `registrazione.html?nome=${encodeURIComponent(nome)}&email=${encodeURIComponent(email)}`;
-      }, 1500);
+      document.getElementById('candidato-form').style.display = 'none';
+      document.getElementById('candidato-success').style.display = 'block';
     } else {
-      throw new Error('Errore invio');
+      const err = await res.json();
+      throw new Error(err.message || 'Errore invio');
     }
   } catch(e) {
-    feedback.textContent = '❌ Errore nell\'invio. Scrivici a info@trovaimpresa.com';
-    feedback.style.color = '#ffe';
+    feedback.textContent = '❌ Errore nell\'invio: ' + e.message;
     btn.disabled = false;
-    btn.textContent = '✉️ Invia la tua domanda';
+    btn.textContent = '👷 Invia la mia candidatura';
   }
 }
 </script>
