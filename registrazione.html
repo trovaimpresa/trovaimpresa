@@ -200,15 +200,43 @@
   .upload-text { font-weight:700; font-size:0.9rem; margin-bottom:4px; }
   .upload-sub { font-size:0.78rem; color:var(--light); }
 
+  /* Upload status */
+  .upload-status {
+    margin-top:8px; font-size:0.82rem; font-weight:600;
+    min-height:20px;
+  }
+
   /* Preview foto */
   .foto-preview { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
   .foto-thumb {
     width:70px; height:70px; border-radius:10px;
-    background:var(--verde3); border:1px solid var(--border);
-    display:flex; align-items:center; justify-content:center;
-    font-size:1.5rem; position:relative;
+    object-fit:cover; border:1px solid var(--border);
+    position:relative; display:block;
   }
-  .foto-thumb .remove { position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; background:var(--arancio); color:white; font-size:0.7rem; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .foto-thumb-wrap {
+    position:relative; width:70px; height:70px;
+  }
+  .foto-thumb-wrap img {
+    width:70px; height:70px; border-radius:10px;
+    object-fit:cover; border:1px solid var(--border);
+  }
+  .foto-thumb-wrap .remove {
+    position:absolute; top:-6px; right:-6px;
+    width:20px; height:20px; border-radius:50%;
+    background:var(--arancio); color:white;
+    font-size:0.7rem; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; border:none; font-weight:700;
+  }
+
+  /* Logo preview */
+  .logo-preview-wrap {
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .logo-preview-wrap img {
+    max-width:160px; max-height:160px;
+    border-radius:12px; object-fit:contain;
+    border:1px solid var(--border); background:white; padding:8px;
+  }
 
   /* Nav bottoni */
   .form-nav { display:flex; justify-content:space-between; align-items:center; margin-top:28px; }
@@ -328,65 +356,65 @@
         <div class="tipo-desc">Hai una società strutturata con più dipendenti. Grandi lavori.</div>
       </div>
       <div class="tipo-card" onclick="selTipo(this)">
-  <span class="tipo-icon">📐</span>
-  <div class="tipo-name">Ingegnere</div>
-  <div class="tipo-desc">Progettazione strutturale, impianti, direzione lavori.</div>
-</div>
-<div class="tipo-card" onclick="selTipo(this)">
-  <span class="tipo-icon">🏛️</span>
-  <div class="tipo-name">Architetto</div>
-  <div class="tipo-desc">Progettazione architettonica, interior design, ristrutturazioni.</div>
-</div>
-<div class="tipo-card" onclick="selTipo(this)">
-  <span class="tipo-icon">📏</span>
-  <div class="tipo-name">Geometra</div>
-  <div class="tipo-desc">Pratiche catastali, rilievi, perizie, DIA e SCIA.</div>
-</div>
-<div class="tipo-card" onclick="selTipo(this)">
-  <span class="tipo-icon">🏢</span>
-  <div class="tipo-name">Amministratore di condominio</div><div class="tipo-card" onclick="selTipo(this)">
-  <span class="tipo-icon">🏪</span>
-  <div class="tipo-name">Negozio edilizia</div>
-  <div class="tipo-desc">Vendita materiali edili, ferramenta, attrezzature per cantiere.</div>
-</div>
-<div class="tipo-card" onclick="selTipo(this)">
-  <span class="tipo-icon">🎨</span>
-  <div class="tipo-name">Negozio pittura</div>
-  <div class="tipo-desc">Vendita colori, vernici, stucchi e accessori per tinteggiatura.</div>
-</div>
-  
-  <div class="tipo-desc">Gestione condominiale, assemblee, manutenzione parti comuni.</div>
-</div>
+        <span class="tipo-icon">📐</span>
+        <div class="tipo-name">Ingegnere</div>
+        <div class="tipo-desc">Progettazione strutturale, impianti, direzione lavori.</div>
+      </div>
+      <div class="tipo-card" onclick="selTipo(this)">
+        <span class="tipo-icon">🏛️</span>
+        <div class="tipo-name">Architetto</div>
+        <div class="tipo-desc">Progettazione architettonica, interior design, ristrutturazioni.</div>
+      </div>
+      <div class="tipo-card" onclick="selTipo(this)">
+        <span class="tipo-icon">📏</span>
+        <div class="tipo-name">Geometra</div>
+        <div class="tipo-desc">Pratiche catastali, rilievi, perizie, DIA e SCIA.</div>
+      </div>
+      <div class="tipo-card" onclick="selTipo(this)">
+        <span class="tipo-icon">🏢</span>
+        <div class="tipo-name">Amministratore di condominio</div>
+        <div class="tipo-desc">Gestione condominiale, assemblee, manutenzione parti comuni.</div>
+      </div>
+      <div class="tipo-card" onclick="selTipo(this)">
+        <span class="tipo-icon">🏪</span>
+        <div class="tipo-name">Negozio edilizia</div>
+        <div class="tipo-desc">Vendita materiali edili, ferramenta, attrezzature per cantiere.</div>
+      </div>
+      <div class="tipo-card" onclick="selTipo(this)">
+        <span class="tipo-icon">🎨</span>
+        <div class="tipo-name">Negozio pittura</div>
+        <div class="tipo-desc">Vendita colori, vernici, stucchi e accessori per tinteggiatura.</div>
+      </div>
     </div>
 
     <div class="form-grid">
       <div class="form-group">
         <label class="form-label">Nome <span class="req">*</span></label>
-        <input type="text" class="form-input" placeholder="Es. Mario">
+        <input type="text" id="f-nome" class="form-input" placeholder="Es. Mario">
       </div>
       <div class="form-group">
         <label class="form-label">Cognome <span class="req">*</span></label>
-        <input type="text" class="form-input" placeholder="Es. Rossi">
+        <input type="text" id="f-cognome" class="form-input" placeholder="Es. Rossi">
       </div>
       <div class="form-group">
         <label class="form-label">Nome attività / Ragione sociale <span class="req">*</span></label>
-        <input type="text" class="form-input" placeholder="Es. Edil Rossi, Elettrica Bianchi...">
+        <input type="text" id="f-nome-attivita" class="form-input" placeholder="Es. Edil Rossi, Elettrica Bianchi...">
       </div>
       <div class="form-group">
         <label class="form-label">Partita IVA / Codice fiscale <span class="req">*</span></label>
-        <input type="text" class="form-input" placeholder="Es. 12345678901">
+        <input type="text" id="f-piva" class="form-input" placeholder="Es. 12345678901">
       </div>
       <div class="form-group">
         <label class="form-label">Email <span class="req">*</span></label>
-        <input type="email" class="form-input" placeholder="la-tua@email.it">
+        <input type="email" id="f-email" class="form-input" placeholder="la-tua@email.it">
       </div>
       <div class="form-group">
         <label class="form-label">Numero di telefono <span class="req">*</span></label>
-        <input type="tel" class="form-input" placeholder="+39 000 000 0000">
+        <input type="tel" id="f-telefono" class="form-input" placeholder="+39 000 000 0000">
       </div>
       <div class="form-group form-full">
         <label class="form-label">Password <span class="req">*</span></label>
-        <input type="password" class="form-input" placeholder="Minimo 8 caratteri">
+        <input type="password" id="f-password" class="form-input" placeholder="Minimo 8 caratteri">
         <div class="form-hint">Userai questa password per accedere al tuo pannello</div>
       </div>
     </div>
@@ -408,17 +436,17 @@
     <div class="form-grid">
       <div class="form-group form-full">
         <label class="form-label">Descrizione attività <span class="req">*</span></label>
-        <textarea class="form-textarea" placeholder="Descrivi la tua attività, la tua esperienza e i tuoi punti di forza. I clienti leggono questa descrizione per sceglierti..."></textarea>
+        <textarea id="f-descrizione" class="form-textarea" placeholder="Descrivi la tua attività, la tua esperienza e i tuoi punti di forza. I clienti leggono questa descrizione per sceglierti..."></textarea>
         <div class="form-hint">Minimo 100 caratteri. Più scrivi, più i clienti si fidano!</div>
       </div>
 
       <div class="form-group">
         <label class="form-label">Anno di fondazione</label>
-        <input type="number" class="form-input" placeholder="Es. 2005" min="1950" max="2025">
+        <input type="number" id="f-anno" class="form-input" placeholder="Es. 2005" min="1950" max="2025">
       </div>
       <div class="form-group">
         <label class="form-label">Numero dipendenti / collaboratori</label>
-        <select class="form-select">
+        <select id="f-dipendenti" class="form-select">
           <option value="">Seleziona...</option>
           <option>Solo (1 persona)</option>
           <option>2-5 persone</option>
@@ -430,7 +458,7 @@
 
       <div class="form-group form-full">
         <label class="form-label">Sito web (opzionale)</label>
-        <input type="url" class="form-input" placeholder="https://www.tuosito.it">
+        <input type="url" id="f-sito" class="form-input" placeholder="https://www.tuosito.it">
       </div>
     </div>
 
@@ -452,7 +480,7 @@
         <div class="mestiere-check" onclick="toggleMestiere(this)">🔥 Termoidraulico</div>
         <div class="mestiere-check" onclick="toggleMestiere(this)">🫙 Tecnico caldaie</div>
         <div class="mestiere-check" onclick="toggleMestiere(this)">🔥 Stufe a pellet</div>
-<div class="mestiere-check" onclick="toggleMestiere(this)">❄️ Installatore climatizzatori</div>
+        <div class="mestiere-check" onclick="toggleMestiere(this)">❄️ Installatore climatizzatori</div>
         <div class="mestiere-check" onclick="toggleMestiere(this)">❄️ Climatizzatore</div>
         <div class="mestiere-check" onclick="toggleMestiere(this)">🔲 Cartongesso</div>
         <div class="mestiere-check" onclick="toggleMestiere(this)">🏠 Coperture / Tetti</div>
@@ -484,54 +512,65 @@
     <div class="form-grid">
       <div class="form-group">
         <label class="form-label">Città principale <span class="req">*</span></label>
-        <input type="text" class="form-input" placeholder="Es. Milano">
+        <input type="text" id="f-citta" class="form-input" placeholder="Es. Milano">
       </div>
       <div class="form-group">
         <label class="form-label">CAP <span class="req">*</span></label>
-        <input type="text" class="form-input" placeholder="Es. 20100">
+        <input type="text" id="f-cap" class="form-input" placeholder="Es. 20100">
       </div>
       <div class="form-group form-full">
         <label class="form-label">Indirizzo / Sede operativa</label>
-        <input type="text" class="form-input" placeholder="Es. Via Roma 42, Milano">
+        <input type="text" id="f-indirizzo" class="form-input" placeholder="Es. Via Roma 42, Milano">
       </div>
     </div>
 
     <div style="margin:24px 0 16px">
       <label class="form-label">Zone in cui operi <span class="req">*</span></label>
-      <div class="form-hint" style="margin-bottom:12px">Seleziona le province o zone dove lavori</div>
-      <div class="zone-wrap" id="zone-wrap">
-        <div class="zona-chip selected" onclick="toggleZona(this)">Milano</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Monza-Brianza</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Varese</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Como</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Lecco</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Bergamo</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Brescia</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Pavia</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Lodi</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Cremona</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Roma</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Napoli</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Torino</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Bologna</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Firenze</div>
-        <div class="zona-chip" onclick="toggleZona(this)">Tutta Italia</div>
+      <div class="form-hint" style="margin-bottom:12px">Usa la geolocalizzazione oppure scrivi città e province dove lavori</div>
+
+      <!-- Bottone geolocalizzazione -->
+      <button type="button" id="btn-geo" onclick="rilevaPosizione()" style="
+        display:flex; align-items:center; gap:8px;
+        background:var(--verde3); color:var(--verde2);
+        border:1.5px solid var(--verde); border-radius:12px;
+        padding:10px 18px; font-family:'DM Sans',sans-serif;
+        font-weight:700; font-size:0.88rem; cursor:pointer;
+        margin-bottom:14px; transition:all 0.2s;
+      ">
+        📍 Rileva la mia posizione automaticamente
+      </button>
+      <div id="geo-status" style="font-size:0.8rem;color:var(--mid);margin-bottom:10px;min-height:18px;"></div>
+
+      <!-- Input manuale zona -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" id="zona-input" class="form-input" placeholder="Es. Rieti, Viterbo, Lazio..." style="flex:1"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();aggiungiZona();}">
+        <button type="button" onclick="aggiungiZona()" style="
+          background:var(--arancio); color:white; border:none;
+          border-radius:12px; padding:10px 18px;
+          font-family:'DM Sans',sans-serif; font-weight:700;
+          font-size:0.88rem; cursor:pointer; white-space:nowrap;
+        ">+ Aggiungi</button>
       </div>
+
+      <!-- Chip dinamici -->
+      <div class="zone-wrap" id="zone-wrap"></div>
+      <div class="form-hint" style="margin-top:8px">Clicca su una zona per rimuoverla · Puoi aggiungere quante vuoi</div>
     </div>
 
     <div class="form-grid" style="margin-top:24px">
       <div class="form-group">
         <label class="form-label">Telefono pubblico</label>
-        <input type="tel" class="form-input" placeholder="+39 000 000 0000">
+        <input type="tel" id="f-telefono-pub" class="form-input" placeholder="+39 000 000 0000">
         <div class="form-hint">Visibile ai clienti sul profilo</div>
       </div>
       <div class="form-group">
         <label class="form-label">WhatsApp (opzionale)</label>
-        <input type="tel" class="form-input" placeholder="+39 000 000 0000">
+        <input type="tel" id="f-whatsapp" class="form-input" placeholder="+39 000 000 0000">
       </div>
       <div class="form-group form-full">
         <label class="form-label">Orari di disponibilità</label>
-        <input type="text" class="form-input" placeholder="Es. Lun–Ven 8:00–18:00, Sabato mattina">
+        <input type="text" id="f-orari" class="form-input" placeholder="Es. Lun–Ven 8:00–18:00, Sabato mattina">
       </div>
     </div>
 
@@ -549,46 +588,50 @@
       <div class="section-sub">Le imprese con foto ricevono 3 volte più richieste!</div>
     </div>
 
+    <!-- LOGO UPLOAD -->
     <div style="margin-bottom:24px">
       <label class="form-label">Logo / Foto profilo</label>
-      <div class="upload-area" onclick="alert('Caricamento foto — funzione attiva dopo il collegamento Supabase!')">
-        <div class="upload-icon">🖼️</div>
-        <div class="upload-text">Clicca per caricare il tuo logo</div>
-        <div class="upload-sub">PNG, JPG fino a 5MB</div>
+      <div class="upload-area" id="logo-upload-area" onclick="document.getElementById('logo-input').click()">
+        <div id="logo-preview-container">
+          <div class="upload-icon">🖼️</div>
+          <div class="upload-text">Clicca per caricare il tuo logo</div>
+          <div class="upload-sub">PNG, JPG fino a 5MB</div>
+        </div>
       </div>
+      <input type="file" id="logo-input" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" onchange="uploadLogo(this)">
+      <div class="upload-status" id="logo-status"></div>
     </div>
 
+    <!-- FOTO LAVORI UPLOAD -->
     <div style="margin-bottom:24px">
       <label class="form-label">Foto dei tuoi lavori</label>
       <div class="form-hint" style="margin-bottom:10px">Carica foto di lavori che hai realizzato — max 10 foto</div>
-      <div class="upload-area" onclick="alert('Caricamento foto — funzione attiva dopo il collegamento Supabase!')">
+      <div class="upload-area" onclick="document.getElementById('foto-input').click()">
         <div class="upload-icon">📸</div>
         <div class="upload-text">Clicca per caricare le foto dei tuoi lavori</div>
         <div class="upload-sub">PNG, JPG fino a 5MB ciascuna · Max 10 foto</div>
       </div>
-      <div class="foto-preview">
-        <div class="foto-thumb">🏠<div class="remove" onclick="this.parentElement.remove()">✕</div></div>
-        <div class="foto-thumb">🚿<div class="remove" onclick="this.parentElement.remove()">✕</div></div>
-        <div class="foto-thumb">🎨<div class="remove" onclick="this.parentElement.remove()">✕</div></div>
-      </div>
+      <input type="file" id="foto-input" accept="image/png,image/jpeg,image/jpg,image/webp" multiple style="display:none" onchange="uploadFoto(this)">
+      <div class="upload-status" id="foto-status"></div>
+      <div class="foto-preview" id="foto-grid"></div>
     </div>
 
     <div class="form-grid">
       <div class="form-group form-full">
         <label class="form-label">Costo indicativo</label>
-        <input type="text" class="form-input" placeholder="Es. €35–50/ora · oppure · €800–1200/mq">
+        <input type="text" id="f-costo" class="form-input" placeholder="Es. €35–50/ora · oppure · €800–1200/mq">
         <div class="form-hint">Aiuta i clienti a capire il tuo range di prezzi</div>
       </div>
 
       <div class="form-group form-full">
         <label class="form-label">Certificazioni e premi (opzionale)</label>
-        <input type="text" class="form-input" placeholder="Es. ISO 9001, Certificato CEI, Abilitato SOA...">
+        <input type="text" id="f-certificazioni" class="form-input" placeholder="Es. ISO 9001, Certificato CEI, Abilitato SOA...">
       </div>
     </div>
 
     <div style="margin:20px 0; padding:16px; background:var(--verde3); border-radius:12px; border:1px solid rgba(42,122,75,0.15)">
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-        <input type="checkbox" style="margin-top:3px;accent-color:var(--verde);width:16px;height:16px">
+        <input type="checkbox" id="f-termini" style="margin-top:3px;accent-color:var(--verde);width:16px;height:16px">
         <span style="font-size:0.85rem;color:var(--mid);line-height:1.6">
           Accetto i <a href="#" style="color:var(--verde);font-weight:700">Termini di servizio</a> e la 
           <a href="#" style="color:var(--verde);font-weight:700">Privacy Policy</a> di TrovaImpresa.
@@ -599,7 +642,7 @@
 
     <div class="form-nav">
       <button class="btn-prev" onclick="goStep(3)">← Indietro</button>
-      <button class="btn-submit" onclick="submitRegistrazione()">✅ Completa registrazione</button>
+      <button class="btn-submit" id="btn-submit" onclick="submitRegistrazione()">✅ Completa registrazione</button>
     </div>
   </div>
 
@@ -622,7 +665,7 @@
         <div class="ss-text"><strong>Profilo pubblicato</strong>Una volta verificato, il tuo profilo sarà visibile a tutti i clienti!</div>
       </div>
     </div>
-    <a href="trovaimpresa.html" style="display:inline-block;background:var(--verde);color:white;padding:14px 32px;border-radius:12px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(42,122,75,0.3)">
+    <a href="index.html" style="display:inline-block;background:var(--verde);color:white;padding:14px 32px;border-radius:12px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(42,122,75,0.3)">
       🏠 Torna alla home
     </a>
   </div>
@@ -631,7 +674,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase inizializzato dopo il caricamento della pagina
+// ── Supabase init ──
 let _supabase = null;
 window.addEventListener('load', function() {
   try {
@@ -642,6 +685,11 @@ window.addEventListener('load', function() {
   } catch(e) { console.warn('Supabase non disponibile'); }
 });
 
+// ── Variabili globali per gli URL delle immagini ──
+let logoUrl = '';
+let fotoUrls = [];
+
+// ── Step navigation ──
 let currentStep = 1;
 const totalSteps = 4;
 
@@ -656,10 +704,8 @@ function goStep(n) {
   document.getElementById('step-ind-' + currentStep).classList.remove('done');
   document.getElementById('step-ind-' + currentStep).classList.add('active');
 
-  // Progress bar
   const pct = (n / totalSteps) * 100;
   document.getElementById('progress').style.width = pct + '%';
-
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -668,55 +714,244 @@ function selTipo(el) {
   el.classList.add('selected');
 }
 
-function toggleMestiere(el) {
-  el.classList.toggle('selected');
+function toggleMestiere(el) { el.classList.toggle('selected'); }
+
+// ── ZONE DINAMICHE ──
+let zoneSelezionate = [];
+
+function aggiungiZona(nome) {
+  const input = document.getElementById('zona-input');
+  const valore = (nome || input.value).trim();
+  if (!valore) return;
+  if (zoneSelezionate.includes(valore)) { if(input) input.value = ''; return; }
+  zoneSelezionate.push(valore);
+  renderZone();
+  if(input) input.value = '';
 }
 
-function toggleZona(el) {
-  el.classList.toggle('selected');
+function rimuoviZona(nome) {
+  zoneSelezionate = zoneSelezionate.filter(z => z !== nome);
+  renderZone();
 }
 
+function renderZone() {
+  const wrap = document.getElementById('zone-wrap');
+  wrap.innerHTML = '';
+  zoneSelezionate.forEach(z => {
+    const chip = document.createElement('div');
+    chip.className = 'zona-chip selected';
+    chip.style.cssText = 'display:flex;align-items:center;gap:6px;';
+    const zSafe = z.replace(/'/g, "\\'");
+    chip.innerHTML = `${z} <span onclick="rimuoviZona('${zSafe}')" style="cursor:pointer;font-size:0.75rem;opacity:0.7;font-weight:900">✕</span>`;
+    wrap.appendChild(chip);
+  });
+}
+
+async function rilevaPosizione() {
+  const btn = document.getElementById('btn-geo');
+  const status = document.getElementById('geo-status');
+  if (!navigator.geolocation) {
+    status.innerHTML = '❌ Geolocalizzazione non supportata dal browser';
+    return;
+  }
+  btn.innerHTML = '⏳ Rilevamento in corso...';
+  btn.disabled = true;
+  status.innerHTML = '';
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=it`);
+      const data = await res.json();
+      const addr = data.address;
+      const città = addr.city || addr.town || addr.village || addr.municipality || '';
+      const provincia = addr.county || addr.state_district || '';
+      if (città && document.getElementById('f-citta')) document.getElementById('f-citta').value = città;
+      if (città) aggiungiZona(città);
+      if (provincia && provincia !== città) aggiungiZona(provincia);
+      status.innerHTML = `✅ Posizione rilevata: <strong>${città}${provincia ? ', ' + provincia : ''}</strong>`;
+      status.style.color = 'var(--verde)';
+    } catch(e) {
+      status.innerHTML = '⚠️ Impossibile identificare la città. Inseriscila manualmente.';
+      status.style.color = 'orange';
+    }
+    btn.innerHTML = '📍 Rileva la mia posizione automaticamente';
+    btn.disabled = false;
+  }, () => {
+    status.innerHTML = '❌ Permesso negato. Inserisci la zona manualmente.';
+    status.style.color = 'red';
+    btn.innerHTML = '📍 Rileva la mia posizione automaticamente';
+    btn.disabled = false;
+  });
+}
+
+// ── UPLOAD LOGO ──
+async function uploadLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('logo-status');
+  statusEl.innerHTML = '⏳ Caricamento logo...';
+  statusEl.style.color = '#888';
+
+  // Controllo dimensione (5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    statusEl.innerHTML = '❌ File troppo grande (max 5MB)';
+    statusEl.style.color = 'red';
+    return;
+  }
+
+  const ext = file.name.split('.').pop();
+  const fileName = 'logo_' + Date.now() + '.' + ext;
+
+  const { data, error } = await _supabase.storage
+    .from('loghi-imprese')
+    .upload(fileName, file, { upsert: true });
+
+  if (error) {
+    statusEl.innerHTML = '❌ Errore upload: ' + error.message;
+    statusEl.style.color = 'red';
+    return;
+  }
+
+  const { data: urlData } = _supabase.storage
+    .from('loghi-imprese')
+    .getPublicUrl(fileName);
+
+  logoUrl = urlData.publicUrl;
+
+  // Mostra anteprima dentro l'upload area
+  document.getElementById('logo-preview-container').innerHTML = `
+    <div class="logo-preview-wrap">
+      <img src="${logoUrl}" alt="Logo caricato">
+      <span style="font-size:0.82rem;color:var(--verde);font-weight:700">✅ Logo caricato!</span>
+      <span style="font-size:0.75rem;color:var(--light)">Clicca per cambiarlo</span>
+    </div>
+  `;
+  statusEl.innerHTML = '';
+}
+
+// ── UPLOAD FOTO LAVORI ──
+async function uploadFoto(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const statusEl = document.getElementById('foto-status');
+  const grid = document.getElementById('foto-grid');
+
+  if (fotoUrls.length + files.length > 10) {
+    statusEl.innerHTML = '⚠️ Puoi caricare massimo 10 foto in totale';
+    statusEl.style.color = 'orange';
+    return;
+  }
+
+  statusEl.innerHTML = '⏳ Caricamento ' + files.length + ' foto...';
+  statusEl.style.color = '#888';
+
+  let caricate = 0;
+
+  for (const file of files) {
+    // Controllo dimensione
+    if (file.size > 5 * 1024 * 1024) {
+      statusEl.innerHTML = '⚠️ ' + file.name + ' è troppo grande (max 5MB)';
+      statusEl.style.color = 'orange';
+      continue;
+    }
+
+    const ext = file.name.split('.').pop();
+    const fileName = 'foto_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5) + '.' + ext;
+
+    const { data, error } = await _supabase.storage
+      .from('foto-lavori')
+      .upload(fileName, file, { upsert: true });
+
+    if (error) {
+      console.error('Errore upload foto:', error);
+      continue;
+    }
+
+    const { data: urlData } = _supabase.storage
+      .from('foto-lavori')
+      .getPublicUrl(fileName);
+
+    const url = urlData.publicUrl;
+    fotoUrls.push(url);
+    caricate++;
+
+    // Aggiunge thumbnail con pulsante rimozione
+    const wrap = document.createElement('div');
+    wrap.className = 'foto-thumb-wrap';
+    wrap.dataset.url = url;
+    wrap.innerHTML = `
+      <img src="${url}" alt="Foto lavoro">
+      <button class="remove" onclick="removeFoto('${url}', this.parentElement)">✕</button>
+    `;
+    grid.appendChild(wrap);
+  }
+
+  statusEl.innerHTML = '✅ ' + fotoUrls.length + ' foto caricate';
+  statusEl.style.color = 'var(--verde)';
+  input.value = ''; // reset per permettere di ri-selezionare gli stessi file
+}
+
+function removeFoto(url, el) {
+  fotoUrls = fotoUrls.filter(u => u !== url);
+  el.remove();
+  const statusEl = document.getElementById('foto-status');
+  if (fotoUrls.length === 0) {
+    statusEl.innerHTML = '';
+  } else {
+    statusEl.innerHTML = '✅ ' + fotoUrls.length + ' foto caricate';
+    statusEl.style.color = 'var(--verde)';
+  }
+}
+
+// ── SUBMIT REGISTRAZIONE ──
 async function submitRegistrazione() {
-  const btn = document.querySelector('.btn-submit');
-  btn.textContent = '⏳ Salvataggio...';
+  const btn = document.getElementById('btn-submit');
+
+  // Controllo termini
+  if (!document.getElementById('f-termini').checked) {
+    alert('⚠️ Devi accettare i Termini di servizio per continuare.');
+    return;
+  }
+
+  btn.innerHTML = '⏳ Salvataggio...';
   btn.disabled = true;
 
-  // Raccogli tutti i dati del form
-  const inputs = document.querySelectorAll('.form-input, .form-select, .form-textarea');
   const tipo = document.querySelector('.tipo-card.selected .tipo-name')?.textContent || 'Artigiano';
   const mestieri = [...document.querySelectorAll('.mestiere-check.selected')].map(m => m.textContent.trim());
-  const zone = [...document.querySelectorAll('.zona-chip.selected')].map(z => z.textContent.trim());
 
   const dati = {
-    tipo: tipo,
-    nome: inputs[1]?.value || '',
-    cognome: inputs[2]?.value || '',
-    nome_attivita: inputs[3]?.value || '',
-    partita_iva: inputs[4]?.value || '',
-    email: inputs[5]?.value || '',
-    telefono: inputs[6]?.value || '',
-    descrizione: inputs[8]?.value || '',
-    anno_fondazione: parseInt(inputs[9]?.value) || null,
-    dipendenti: document.querySelector('.form-select')?.value || '',
-    sito_web: inputs[10]?.value || '',
-    citta: inputs[11]?.value || '',
-    cap: inputs[12]?.value || '',
-    indirizzo: inputs[13]?.value || '',
-    telefono: inputs[14]?.value || '',
-    whatsapp: inputs[15]?.value || '',
-    orari: inputs[16]?.value || '',
-    costo: inputs[17]?.value || '',
-    certificazioni: inputs[18]?.value || '',
-    mestieri: mestieri,
-    zone: zone,
-    verificata: false
+    tipo:           tipo,
+    nome:           document.getElementById('f-nome')?.value || '',
+    cognome:        document.getElementById('f-cognome')?.value || '',
+    nome_attivita:  document.getElementById('f-nome-attivita')?.value || '',
+    partita_iva:    document.getElementById('f-piva')?.value || '',
+    email:          document.getElementById('f-email')?.value || '',
+    telefono:       document.getElementById('f-telefono')?.value || '',
+    descrizione:    document.getElementById('f-descrizione')?.value || '',
+    anno_fondazione: parseInt(document.getElementById('f-anno')?.value) || null,
+    dipendenti:     document.getElementById('f-dipendenti')?.value || '',
+    sito_web:       document.getElementById('f-sito')?.value || '',
+    citta:          document.getElementById('f-citta')?.value || '',
+    cap:            document.getElementById('f-cap')?.value || '',
+    indirizzo:      document.getElementById('f-indirizzo')?.value || '',
+    telefono_pub:   document.getElementById('f-telefono-pub')?.value || '',
+    whatsapp:       document.getElementById('f-whatsapp')?.value || '',
+    orari:          document.getElementById('f-orari')?.value || '',
+    costo:          document.getElementById('f-costo')?.value || '',
+    certificazioni: document.getElementById('f-certificazioni')?.value || '',
+    mestieri:       mestieri,
+    zone:           zoneSelezionate,
+    logo_url:       logoUrl,
+    foto_urls:      fotoUrls,
+    verificata:     false
   };
 
   const { error } = await _supabase.from('imprese').insert([dati]);
 
   if (error) {
     console.error(error);
-    btn.textContent = '❌ Errore — riprova';
+    btn.innerHTML = '❌ Errore — riprova';
     btn.disabled = false;
     alert('Errore nel salvataggio: ' + error.message);
     return;
