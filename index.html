@@ -813,6 +813,26 @@
                 <div class="chip" onclick="setMestiere('Smaltimento rifiuti',this)">♻️ Smaltimento rifiuti</div>
             </div>
 
+            <div class="slabel">Professionisti - Consulenze</div>
+            <div class="mestieri-grid">
+                <div class="chip" onclick="setMestiere('Amministratore condominio',this)">🏢 Amministratore condominio</div>
+                <div class="chip" onclick="setMestiere('Ingegnere',this)">📐 Ingegnere</div>
+                <div class="chip" onclick="setMestiere('Architetto',this)">🏛️ Architetto</div>
+                <div class="chip" onclick="setMestiere('Geometra',this)">📏 Geometra</div>
+            </div>
+            <button type="button" class="sbtn" onclick="geolocalizzaProfessionisti()" style="width:100%; background:#FF6B35; margin-bottom:20px;">📍 Localizzami</button>
+
+            <div class="slabel">Negozi - Materiali Edili</div>
+            <div class="mestieri-grid">
+                <div class="chip" onclick="setMestiere('Negozio materiali edili',this)">🏪 Negozio materiali edili</div>
+                <div class="chip" onclick="setMestiere('Ferramenta',this)">🔧 Ferramenta</div>
+                <div class="chip" onclick="setMestiere('Sanitari e rubinetteria',this)">🚿 Sanitari e rubinetteria</div>
+                <div class="chip" onclick="setMestiere('Piastrelle e rivestimenti',this)">🟫 Piastrelle e rivestimenti</div>
+                <div class="chip" onclick="setMestiere('Serramenti',this)">🪟 Serramenti</div>
+                <div class="chip" onclick="setMestiere('Vernici e pitture',this)">🎨 Vernici e pitture</div>
+            </div>
+            <button type="button" class="sbtn" onclick="geolocalizzaNegozi()" style="width:100%; background:#FF6B35;">📍 Localizzami</button>
+
             <div class="slabel">Dove?</div>
             <div class="search-row">
                 <span style="font-size:1rem;flex-shrink:0">📍</span>
@@ -1236,7 +1256,45 @@
             }
         }
 
-        // CARICA DATI AL LOAD
+        // GEOLOCALIZZAZIONE PROFESSIONISTI
+        function geolocalizzaProfessionisti() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('search-input').value = city;
+                            alert('✓ Città trovata: ' + city);
+                        });
+                });
+            } else {
+                alert('⚠️ Geolocalizzazione non supportata');
+            }
+        }
+
+        // GEOLOCALIZZAZIONE NEGOZI
+        function geolocalizzaNegozi() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('search-input').value = city;
+                            alert('✓ Città trovata: ' + city);
+                        });
+                });
+            } else {
+                alert('⚠️ Geolocalizzazione non supportata');
+            }
+        }
         document.addEventListener('DOMContentLoaded', () => {
             caricaRicercheCandidato();
             caricaOfferteImpresa();
