@@ -421,12 +421,12 @@
         }
 
         .jobs-column:nth-child(1) {
-            background: linear-gradient(135deg, #f0f8f5 0%, #e8f5f0 100%);
+            background: #f0f9f5;
             border-left: 5px solid #28a745;
         }
 
         .jobs-column:nth-child(2) {
-            background: linear-gradient(135deg, #fff5f0 0%, #ffe8e0 100%);
+            background: #fff5f0;
             border-left: 5px solid #FF6B35;
         }
 
@@ -743,6 +743,22 @@
 
                     <div class="jobs-location">
                         <input type="text" id="zona-annunci" placeholder="La tua città..." style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px;">
+                        
+                        <select id="categoria-annunci" style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px; font-family: inherit;">
+                            <option value="">Categoria</option>
+                            <option value="Edile">Edile</option>
+                            <option value="Impianti">Impianti</option>
+                            <option value="Manutenzione">Manutenzione</option>
+                            <option value="Verniciatura">Verniciatura</option>
+                        </select>
+
+                        <select id="tipo-contratto" style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px; font-family: inherit;">
+                            <option value="">Tipo contratto</option>
+                            <option value="Tempo pieno">Tempo pieno</option>
+                            <option value="Tempo determinato">Tempo determinato</option>
+                            <option value="Progettuale">Progettuale</option>
+                        </select>
+
                         <button onclick="geolocalizzaAnnunci()" style="width: 100%; padding: 10px; background: #FF6B35; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">📍 Usa la mia posizione</button>
                     </div>
 
@@ -847,14 +863,10 @@
                 email: document.getElementById('email').value,
                 telefono: document.getElementById('telefono').value,
                 citta: document.getElementById('citta').value,
-                regione: document.getElementById('regione').value,
                 competenze: document.getElementById('competenze').value,
-                esperienza: document.getElementById('esperienza').value,
-                descrizione: document.getElementById('descrizione').value,
             };
 
             try {
-                // Invia a Supabase
                 const response = await fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/candidati_lavoro', {
                     method: 'POST',
                     headers: {
@@ -865,14 +877,14 @@
                 });
 
                 if (response.ok) {
-                    alert('Candidatura inviata con successo! Ti contatteremo presto.');
+                    alert('Candidatura inviata! ✅');
                     document.querySelector('.jobs-form').reset();
                 } else {
-                    alert('Errore nell\'invio della candidatura. Riprova.');
+                    alert('Errore nell\'invio. Riprova.');
                 }
             } catch (error) {
                 console.error('Errore:', error);
-                alert('Errore di connessione. Riprova.');
+                alert('Errore di connessione.');
             }
         }
 
