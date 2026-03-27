@@ -117,71 +117,138 @@
         }
 
         /* SEARCH BOX */
-        .search-container {
-            max-width: 900px;
-            margin: 0 auto;
+        .search-box {
             background: white;
-            padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto 40px;
         }
 
-        .search-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 15px;
+        .slabel {
+            font-size: 12px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .tipo-toggle {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
         }
 
-        .search-input, .search-select {
-            padding: 14px 16px;
-            border: 2px solid #e0e0e0;
+        .tipo-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
             border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 13px;
         }
 
-        .search-input:focus, .search-select:focus {
-            outline: none;
+        .tipo-btn.active {
+            background: #28a745;
+            color: white;
             border-color: #28a745;
         }
 
-        .search-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .tipo-icon {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
         }
 
-        .btn-cerca {
-            padding: 14px 30px;
+        .tipo-sub {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .mestieri-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #ddd;
+            background: white;
+            color: #333;
+        }
+
+        .chip:hover {
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .chip.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-row input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 14px;
+            padding: 5px 0;
+        }
+
+        .search-row input::placeholder {
+            color: #999;
+        }
+
+        .sbtn {
             background: #28a745;
             color: white;
             border: none;
             border-radius: 8px;
+            padding: 10px 16px;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s;
+            white-space: nowrap;
         }
 
-        .btn-cerca:hover {
+        .sbtn:hover {
             background: #228636;
         }
 
-        .btn-geo {
-            padding: 14px 30px;
-            background: #FF6B35;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-geo:hover {
-            background: #e55a2b;
+        .search-hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
         }
 
         /* SEZIONE PERCHÉ TROVAIMPRESA - COLORATA */
@@ -689,23 +756,70 @@
         <h1>Trova l'impresa adatta a te</h1>
         <p>In pochi click, l'artigiano perfetto per il tuo progetto</p>
 
-        <!-- SEARCH BOX -->
-        <div class="search-container">
+        <!-- SEARCH BOX COMPLETA -->
+        <div class="search-box">
+            <div class="slabel">Stai cercando...</div>
+            <div class="tipo-toggle">
+                <button class="tipo-btn active" onclick="setTipo('artigiano',this)">
+                    <span class="tipo-icon">🔨</span>
+                    <span>Artigiano<br><span class="tipo-sub">piccoli lavori</span></span>
+                </button>
+                <button class="tipo-btn" onclick="setTipo('impresa',this)">
+                    <span class="tipo-icon">🏗️</span>
+                    <span>Impresa edile<br><span class="tipo-sub">grandi lavori</span></span>
+                </button>
+                <button class="tipo-btn" onclick="setTipo('entrambi',this)">
+                    <span class="tipo-icon">🔍</span>
+                    <span>Tutti<br><span class="tipo-sub">artigiani + imprese</span></span>
+                </button>
+            </div>
+
+            <div class="slabel">Mestiere</div>
+            <div class="mestieri-grid">
+                <div class="chip active" onclick="setMestiere('Tutti',this)">⚡ Tutti</div>
+                <div class="chip" onclick="setMestiere('Muratura',this)">🧱 Muratura</div>
+                <div class="chip" onclick="setMestiere('Carpentiere',this)">🪚 Carpentiere</div>
+                <div class="chip" onclick="setMestiere('Cartongesso',this)">🔲 Cartongesso</div>
+                <div class="chip" onclick="setMestiere('Coperture',this)">🏠 Coperture / Tetti</div>
+                <div class="chip" onclick="setMestiere('Impermeabilizzazione',this)">💧 Impermeabilizzazione</div>
+                <div class="chip" onclick="setMestiere('Ponteggi',this)">🏗️ Ponteggi</div>
+                <div class="chip" onclick="setMestiere('Elettricista',this)">⚡ Elettricista</div>
+                <div class="chip" onclick="setMestiere('Idraulico',this)">🚿 Idraulico</div>
+                <div class="chip" onclick="setMestiere('Termoidraulico',this)">🔥 Termoidraulico</div>
+                <div class="chip" onclick="setMestiere('Tecnico caldaie',this)">🫙 Tecnico caldaie</div>
+                <div class="chip" onclick="setMestiere('Climatizzatore',this)">❄️ Climatizzatore</div>
+                <div class="chip" onclick="setMestiere('Impianto solare',this)">☀️ Impianto solare</div>
+                <div class="chip" onclick="setMestiere('Autospurghi',this)">🪣 Autospurghi</div>
+                <div class="chip" onclick="setMestiere('Pittore',this)">🎨 Pittore</div>
+                <div class="chip" onclick="setMestiere('Piastrellista',this)">🟫 Piastrellista</div>
+                <div class="chip" onclick="setMestiere('Parquettista',this)">🪵 Parquettista</div>
+                <div class="chip" onclick="setMestiere('Stuccatore',this)">🖌️ Stuccatore</div>
+                <div class="chip" onclick="setMestiere('Falegname',this)">🌲 Falegname</div>
+                <div class="chip" onclick="setMestiere('Serramentista',this)">🪟 Serramentista</div>
+                <div class="chip" onclick="setMestiere('Vetraio',this)">🪟 Vetraio</div>
+                <div class="chip" onclick="setMestiere('Fabbro',this)">🔑 Fabbro</div>
+                <div class="chip" onclick="setMestiere('Giardiniere',this)">🌿 Giardiniere</div>
+                <div class="chip" onclick="setMestiere('Paesaggista',this)">🌳 Paesaggista</div>
+                <div class="chip" onclick="setMestiere('Movimento terra',this)">🚜 Movimento terra</div>
+                <div class="chip" onclick="setMestiere('Scavi',this)">⛏️ Scavi</div>
+                <div class="chip" onclick="setMestiere('Pavimentazioni esterne',this)">🧱 Pavimentazioni esterne</div>
+                <div class="chip" onclick="setMestiere('Recinzioni',this)">🏡 Recinzioni</div>
+                <div class="chip" onclick="setMestiere('Piscine',this)">🏊 Piscine</div>
+                <div class="chip" onclick="setMestiere('Ascensorista',this)">🛗 Ascensorista</div>
+                <div class="chip" onclick="setMestiere('Antifurto',this)">🔒 Antifurto</div>
+                <div class="chip" onclick="setMestiere('Traslochi',this)">📦 Traslochi</div>
+                <div class="chip" onclick="setMestiere('Pulizie',this)">🧹 Pulizie</div>
+                <div class="chip" onclick="setMestiere('Demolizioni',this)">⛏️ Demolizioni</div>
+                <div class="chip" onclick="setMestiere('Smaltimento rifiuti',this)">♻️ Smaltimento rifiuti</div>
+            </div>
+
+            <div class="slabel">Dove?</div>
             <div class="search-row">
-                <input type="text" class="search-input" placeholder="Es: Idraulico, Elettricista, Muratore..." id="mestiere">
-                <input type="text" class="search-input" placeholder="Città o provincia..." id="zona">
-                <select class="search-select" id="categoria">
-                    <option value="">Categoria</option>
-                    <option value="edile">Edile</option>
-                    <option value="impianti">Impianti</option>
-                    <option value="manutenzione">Manutenzione</option>
-                    <option value="verniciatura">Verniciatura</option>
-                </select>
+                <span style="font-size:1rem;flex-shrink:0">📍</span>
+                <input type="text" id="search-input" placeholder="Città o CAP... es. Milano, Roma, 20100">
+                <button class="sbtn" onclick="doSearch()">🔍 Cerca</button>
             </div>
-            <div class="search-buttons">
-                <button class="btn-cerca" onclick="cercaImprese()">🔍 Cerca</button>
-                <button class="btn-geo" onclick="geolocalizza()">📍 Usa la mia posizione</button>
-            </div>
+            <div class="search-hint" id="search-hint">Seleziona il tipo di professionista, il mestiere e la zona</div>
         </div>
     </section>
 
@@ -889,22 +1003,50 @@
     </footer>
 
     <script>
-        // RICERCA IMPRESE
-        function cercaImprese() {
-            const mestiere = document.getElementById('mestiere').value;
-            const zona = document.getElementById('zona').value;
+        // VARIABILI GLOBALI RICERCA
+        let tipoScelto = 'artigiano';
+        let mestiereScelto = 'Tutti';
+
+        // IMPOSTA TIPO (Artigiano / Impresa / Tutti)
+        function setTipo(tipo, el) {
+            tipoScelto = tipo;
+            document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            aggiornaHint();
+        }
+
+        // IMPOSTA MESTIERE
+        function setMestiere(mestiere, el) {
+            mestiereScelto = mestiere;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            aggiornaHint();
+        }
+
+        // AGGIORNA HINT DI RICERCA
+        function aggiornaHint() {
+            const hint = document.getElementById('search-hint');
+            const label = {
+                'artigiano': '🔨 Artigiano',
+                'impresa': '🏗️ Impresa edile',
+                'entrambi': '🔍 Tutti i professionisti'
+            };
+            const m = mestiereScelto === 'Tutti' ? 'tutti i mestieri' : mestiereScelto;
+            hint.innerHTML = `Stai cercando: <strong>${label[tipoScelto]}</strong> · <strong>${m}</strong>`;
+        }
+
+        // FUNZIONE RICERCA
+        function doSearch() {
+            const citta = document.getElementById('search-input').value.trim();
+            const hint = document.getElementById('search-hint');
             
-            if (!mestiere && !zona) {
-                alert('Inserisci almeno un mestiere o una zona');
+            if (!citta) {
+                hint.innerHTML = '⚠️ Inserisci una città per cercare';
+                hint.style.color = '#FF6B35';
                 return;
             }
 
-            // Redirect a risultati.html con parametri
-            const params = new URLSearchParams();
-            if (mestiere) params.append('mestiere', mestiere);
-            if (zona) params.append('zona', zona);
-            
-            window.location.href = 'risultati.html?' + params.toString();
+            window.location.href = `risultati.html?tipo=${tipoScelto}&mestiere=${encodeURIComponent(mestiereScelto)}&citta=${encodeURIComponent(citta)}`;
         }
 
         // GEOLOCALIZZAZIONE
@@ -914,17 +1056,18 @@
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     
-                    // Usa reverse geocoding per trovare la città
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                         .then(response => response.json())
                         .then(data => {
                             const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('zona').value = city;
-                            alert('Posizione trovata: ' + city);
+                            document.getElementById('search-input').value = city;
+                            document.getElementById('search-hint').innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.';
+                            document.getElementById('search-hint').style.color = '#28a745';
                         });
                 });
             } else {
-                alert('Geolocalizzazione non supportata dal tuo browser');
+                document.getElementById('search-hint').innerHTML = '⚠️ Geolocalizzazione non supportata dal tuo browser';
+                document.getElementById('search-hint').style.color = '#FF6B35';
             }
         }
 
