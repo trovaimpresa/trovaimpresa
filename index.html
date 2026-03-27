@@ -418,16 +418,17 @@
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 2px solid #ddd;
         }
 
         .jobs-column:nth-child(1) {
             background: #f0f9f5;
-            border-left: 5px solid #28a745;
+            border: 2px solid #28a745;
         }
 
         .jobs-column:nth-child(2) {
             background: #fff5f0;
-            border-left: 5px solid #FF6B35;
+            border: 2px solid #FF6B35;
         }
 
         .jobs-column h3 {
@@ -759,7 +760,14 @@
                             <option value="Progettuale">Progettuale</option>
                         </select>
 
-                        <button onclick="geolocalizzaAnnunci()" style="width: 100%; padding: 10px; background: #FF6B35; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">📍 Usa la mia posizione</button>
+                        <select id="esperienza-richiesta" style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px; font-family: inherit;">
+                            <option value="">Esperienza richiesta</option>
+                            <option value="0-2">0-2 anni</option>
+                            <option value="2-5">2-5 anni</option>
+                            <option value="5+">5+ anni</option>
+                        </select>
+
+                        <button onclick="geolocalizzaAnnunci()" style="width: 100%; padding: 10px; background: #FF6B35; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">📍 Cerca annunci</button>
                     </div>
 
                     <div id="annunci-list" style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
