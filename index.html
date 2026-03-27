@@ -323,7 +323,7 @@
 
         /* SEZIONE LAVORO */
         .jobs-section {
-            padding: 80px 40px;
+            padding: 50px 40px;
             background: #f8f8f8;
         }
 
@@ -333,48 +333,49 @@
         }
 
         .jobs-section h2 {
-            font-size: 40px;
+            font-size: 32px;
             font-weight: 800;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             color: #1a472a;
         }
 
         .jobs-section > .jobs-container > p {
             text-align: center;
             color: #666;
-            margin-bottom: 40px;
-            font-size: 18px;
+            margin-bottom: 30px;
+            font-size: 16px;
         }
 
         .jobs-form {
             background: white;
-            padding: 40px;
+            padding: 25px;
             border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            max-width: 700px;
+            max-width: 650px;
             margin: 0 auto;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 600;
             color: #333;
+            font-size: 14px;
         }
 
         .form-group input,
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             font-family: inherit;
             transition: border-color 0.3s;
         }
@@ -388,7 +389,7 @@
 
         .form-group textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 70px;
         }
 
         .btn-submit {
@@ -404,9 +405,64 @@
             transition: all 0.3s;
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+        /* SEZIONE LAVORO - LAYOUT 2 COLONNE */
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .jobs-column {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .jobs-column h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a472a;
+            margin-bottom: 8px;
+        }
+
+        .jobs-column > p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .jobs-location {
+            margin-bottom: 15px;
+        }
+
+        .annuncio-card {
+            background: #f8f8f8;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #FF6B35;
+        }
+
+        .annuncio-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1a472a;
+            margin-bottom: 4px;
+        }
+
+        .annuncio-card p {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+            margin: 4px 0;
+        }
+
+        .annuncio-card .annuncio-meta {
+            font-size: 11px;
+            color: #999;
+            margin-top: 6px;
         }
 
         /* FOOTER */
@@ -527,6 +583,11 @@
                 padding: 30px 20px;
             }
 
+            .jobs-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
             .footer {
                 padding: 40px 20px 20px;
             }
@@ -553,7 +614,7 @@
 
     <!-- HERO SECTION -->
     <section class="hero">
-        <img src="trovaimpresa_logo_transparent.png" alt="TrovaImpresa Logo" style="height: 600px; width: auto; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto;">
+        <img src="trovaimpresa_logo_transparent.png" alt="TrovaImpresa Logo" style="height: 280px; width: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
         
         <h1>Trova l'impresa adatta a te</h1>
         <p>In pochi click, l'artigiano perfetto per il tuo progetto</p>
@@ -613,61 +674,73 @@
         </div>
     </section>
 
-    <!-- SEZIONE CERCHI LAVORO / CANDIDATI -->
+    <!-- SEZIONE LAVORO - 2 COLONNE -->
     <section class="jobs-section">
         <div class="jobs-container">
-            <h2>Cerchi lavoro?</h2>
-            <p>Invia la tua candidatura e connettiti con le migliori imprese</p>
+            <h2>Lavoro e opportunità</h2>
+            
+            <div class="jobs-grid">
+                <!-- SINISTRA: CHI CERCA LAVORO -->
+                <div class="jobs-column">
+                    <h3>🔍 Cerchi lavoro?</h3>
+                    <p>Invia la tua candidatura e connettiti con le imprese</p>
 
-            <form class="jobs-form" onsubmit="inviaCandidatura(event)">
-                <div class="form-group">
-                    <label for="nome">Nome completo *</label>
-                    <input type="text" id="nome" placeholder="Es: Mario Rossi" required>
+                    <form class="jobs-form" onsubmit="inviaCandidatura(event)">
+                        <div class="form-group">
+                            <label for="nome">Nome *</label>
+                            <input type="text" id="nome" placeholder="Mario Rossi" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" placeholder="tua@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefono">Telefono *</label>
+                            <input type="tel" id="telefono" placeholder="+39 3XX" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="citta">Città *</label>
+                            <input type="text" id="citta" placeholder="Roma" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="competenze">Competenze *</label>
+                            <textarea id="competenze" placeholder="Es: Idraulica, Muratura..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="esperienza">Anni esperienza *</label>
+                            <select id="esperienza" required>
+                                <option value="">Seleziona</option>
+                                <option value="0-2">0-2 anni</option>
+                                <option value="2-5">2-5 anni</option>
+                                <option value="5-10">5-10 anni</option>
+                                <option value="10+">10+ anni</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Invia candidatura</button>
+                    </form>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">Email *</label>
-                    <input type="email" id="email" placeholder="tua@email.com" required>
-                </div>
+                <!-- DESTRA: CHI CERCA OPERAI -->
+                <div class="jobs-column">
+                    <h3>🏗️ Le imprese cercano operai</h3>
+                    <p>Offerte di lavoro vicino a te</p>
 
-                <div class="form-group">
-                    <label for="telefono">Telefono *</label>
-                    <input type="tel" id="telefono" placeholder="+39 3XX XXX XXXX" required>
-                </div>
+                    <div class="jobs-location">
+                        <input type="text" id="zona-annunci" placeholder="La tua città..." style="width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px;">
+                        <button onclick="geolocalizzaAnnunci()" style="width: 100%; padding: 10px; background: #FF6B35; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">📍 Usa la mia posizione</button>
+                    </div>
 
-                <div class="form-group">
-                    <label for="citta">Città *</label>
-                    <input type="text" id="citta" placeholder="Es: Roma" required>
+                    <div id="annunci-list" style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
+                        <p style="color: #999; text-align: center; padding: 20px;">Caricamento annunci...</p>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="regione">Regione *</label>
-                    <input type="text" id="regione" placeholder="Es: Lazio" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="competenze">Competenze professionali *</label>
-                    <textarea id="competenze" placeholder="Es: Idraulica, Riscaldamento, Gas..." required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="esperienza">Anni di esperienza *</label>
-                    <select id="esperienza" required>
-                        <option value="">Seleziona</option>
-                        <option value="0-2">0-2 anni</option>
-                        <option value="2-5">2-5 anni</option>
-                        <option value="5-10">5-10 anni</option>
-                        <option value="10+">10+ anni</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="descrizione">Presentazione personale</label>
-                    <textarea id="descrizione" placeholder="Raccontaci di te e della tua esperienza..."></textarea>
-                </div>
-
-                <button type="submit" class="btn-submit">Invia candidatura</button>
-            </form>
+            </div>
         </div>
     </section>
 
@@ -793,22 +866,67 @@
             }
         }
 
-        // Invio messaggi form contatto (se esiste)
-        function inviaMessaggio(e) {
-            if (e) e.preventDefault();
-            
-            const nome = document.getElementById('cta-nome')?.value;
-            const email = document.getElementById('cta-email')?.value;
-            const messaggio = document.getElementById('cta-messaggio')?.value;
-
-            if (!nome || !email || !messaggio) {
-                alert('Compila tutti i campi');
-                return;
+        // GEOLOCALIZZAZIONE ANNUNCI
+        function geolocalizzaAnnunci() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('zona-annunci').value = city;
+                            caricaAnnunci(city);
+                        });
+                });
+            } else {
+                alert('Geolocalizzazione non supportata');
             }
-
-            // Redirect a registrazione
-            window.location.href = 'registrazione.html';
         }
+
+        // CARICA ANNUNCI DI LAVORO
+        async function caricaAnnunci(citta) {
+            try {
+                const response = await fetch(`https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/offerte_lavoro?citta=ilike.%${citta}%&limit=5`, {
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
+                    }
+                });
+
+                const annunci = await response.json();
+                const listDiv = document.getElementById('annunci-list');
+
+                if (annunci.length === 0) {
+                    listDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Nessun annuncio trovato in questa zona</p>';
+                    return;
+                }
+
+                let html = '';
+                annunci.forEach(annuncio => {
+                    html += `
+                        <div class="annuncio-card">
+                            <h4>${annuncio.titolo}</h4>
+                            <p>${annuncio.descrizione}</p>
+                            <div class="annuncio-meta">
+                                📍 ${annuncio.citta} • 💼 ${annuncio.categoria}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                listDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Errore:', error);
+                document.getElementById('annunci-list').innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">Errore nel caricamento annunci</p>';
+            }
+        }
+
+        // Carica annunci al caricamento della pagina per città generica
+        window.addEventListener('load', () => {
+            caricaAnnunci('Roma');
+        });
     </script>
 
 </body>
