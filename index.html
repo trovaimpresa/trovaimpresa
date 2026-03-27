@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrovaImpresa - Trova l'impresa adatta a te</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -13,55 +12,50 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
             color: #333;
         }
 
         /* NAVBAR */
-        nav {
+        .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 50px;
+            padding: 15px 40px;
             background: white;
-            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo {
             font-size: 24px;
-            font-weight: 700;
-            display: flex;
-            gap: 4px;
-        }
-
-        .logo-trova {
+            font-weight: 800;
             color: #28a745;
         }
 
-        .logo-impresa {
+        .logo span {
             color: #FF6B35;
         }
 
         .nav-buttons {
             display: flex;
             gap: 15px;
-        }
-
-        .nav-buttons button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            align-items: center;
         }
 
         .btn-entra {
+            padding: 10px 24px;
             border: 2px solid #28a745;
-            color: #28a745;
             background: white;
+            color: #28a745;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
         }
 
         .btn-entra:hover {
@@ -70,151 +64,393 @@
         }
 
         .btn-registrati {
+            padding: 10px 24px;
             background: #FF6B35;
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
         }
 
         .btn-registrati:hover {
-            background: #e55a25;
+            background: #e55a2b;
         }
 
         .btn-pubblicita {
-            background: #007bff;
+            padding: 10px 24px;
+            background: #0066cc;
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
         }
 
         .btn-pubblicita:hover {
-            background: #0056b3;
+            background: #0052a3;
         }
 
         /* HERO SECTION */
         .hero {
-            text-align: center;
-            padding: 80px 50px;
             background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            padding: 100px 40px;
+            text-align: center;
             color: white;
         }
 
-        .hero-content {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .hero-logo {
-            margin-bottom: 30px;
-        }
-
-        .hero-logo img {
-            height: 280px;
-            width: auto;
-        }
-
         .hero h1 {
-            font-size: 48px;
-            font-weight: 700;
+            font-size: 52px;
+            font-weight: 800;
             margin-bottom: 20px;
             line-height: 1.2;
         }
 
         .hero p {
             font-size: 20px;
-            margin-bottom: 30px;
-            opacity: 0.95;
-        }
-
-        /* PERCHÉ TROVAIMPRESA */
-        .why-section {
-            padding: 80px 50px;
-            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
-        }
-
-        .why-section h2 {
-            text-align: center;
-            color: white;
-            font-size: 36px;
             margin-bottom: 50px;
+            color: #e0f0e8;
         }
 
-        .cards-container {
+        /* SEARCH BOX */
+        .search-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input, .search-select {
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus, .search-select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .search-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-cerca {
+            padding: 14px 30px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-cerca:hover {
+            background: #228636;
+        }
+
+        .btn-geo {
+            padding: 14px 30px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-geo:hover {
+            background: #e55a2b;
+        }
+
+        /* SEZIONE PERCHÉ TROVAIMPRESA - COLORATA */
+        .why-section {
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            padding: 80px 20px;
+            margin-top: 60px;
+        }
+
+        .why-container {
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        .card {
-            padding: 40px;
-            border-radius: 12px;
+        .why-section h2 {
+            font-size: 40px;
+            font-weight: 800;
             text-align: center;
-            color: white;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-        }
-
-        .card-orange {
-            background: linear-gradient(135deg, #FF6B35 0%, #ff8555 100%);
-        }
-
-        .card-yellow {
-            background: linear-gradient(135deg, #FFB84D 0%, #ffc966 100%);
-        }
-
-        .card-blue {
-            background: linear-gradient(135deg, #007bff 0%, #0095ff 100%);
-        }
-
-        .card-emoji {
-            font-size: 56px;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
-
-        .card h3 {
-            font-size: 22px;
-            font-weight: 700;
             margin-bottom: 15px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .card p {
-            font-size: 14px;
-            line-height: 1.6;
-            opacity: 0.95;
-        }
-
-        /* LAVORO - 2 COLONNE SIMMETRICHE */
-        .lavoro-section {
-            padding: 80px 50px;
-            background: #f8f9fa;
-        }
-
-        .lavoro-section h2 {
+        .why-section > .why-container > p {
             text-align: center;
-            font-size: 36px;
+            color: #e0f0e8;
             margin-bottom: 50px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .feature-card:nth-child(1) {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            border-top: 4px solid #FF6B35;
+        }
+
+        .feature-card:nth-child(1)::before {
+            background: #FF6B35;
+        }
+
+        .feature-card:nth-child(2) {
+            background: linear-gradient(135deg, #fffaf0 0%, #fff8f0 100%);
+            border-top: 4px solid #FFB347;
+        }
+
+        .feature-card:nth-child(2)::before {
+            background: #FFB347;
+        }
+
+        .feature-card:nth-child(3) {
+            background: linear-gradient(135deg, #f0f5ff 0%, #e8f0ff 100%);
+            border-top: 4px solid #0066cc;
+        }
+
+        .feature-card:nth-child(3)::before {
+            background: #0066cc;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .feature-card h3 {
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #1a472a;
+            font-size: 20px;
+        }
+
+        .feature-card p {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* Banner info - Colorato */
+        .info-banner {
+            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+            border: none;
+        }
+
+        .info-banner p {
+            color: #ffffff;
+            font-weight: 600;
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .info-banner strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* SEZIONE LAVORO */
+        .jobs-section {
+            padding: 80px 40px;
+            background: #f8f8f8;
+        }
+
+        .jobs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .jobs-section h2 {
+            font-size: 40px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #1a472a;
+        }
+
+        .jobs-section > .jobs-container > p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+
+        .jobs-form {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: #333;
         }
 
-        .lavoro-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+        }
+
+        /* SEZIONE LAVORO SIMMETRICA - 2 COLONNE */
+        .jobs-section-symmetric {
+            padding: 80px 40px;
+            background: #f8f9fa;
+        }
+
+        .jobs-container-symmetric {
             max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* COLONNA SINISTRA - VERDE */
-        .col-candidature {
-            background: #f0f9f5;
-            border: 2px solid #28a745;
+        .jobs-container-symmetric > h2 {
+            font-size: 40px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 60px;
+            color: #333;
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .col-candidature,
+        .col-annunci {
             border-radius: 12px;
             padding: 40px;
             min-height: 650px;
             display: flex;
             flex-direction: column;
+        }
+
+        .col-candidature {
+            background: #f0f9f5;
+            border: 2px solid #28a745;
+        }
+
+        .col-annunci {
+            background: #fff5f0;
+            border: 2px solid #FF6B35;
         }
 
         .col-title {
@@ -230,57 +466,8 @@
             margin-bottom: 30px;
         }
 
-        /* FORM STYLING */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #28a745;
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 70px;
-        }
-
-        /* COLONNA DESTRA - ARANCIONE */
-        .col-annunci {
-            background: #fff5f0;
-            border: 2px solid #FF6B35;
-            border-radius: 12px;
-            padding: 40px;
-            min-height: 650px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* BOTTONI */
-        .form-group button {
+        .col-candidature .form-group button,
+        .col-annunci .form-group button {
             width: 100%;
             padding: 14px;
             background: #FF6B35;
@@ -294,11 +481,11 @@
             transition: background 0.3s ease;
         }
 
-        .form-group button:hover {
+        .col-candidature .form-group button:hover,
+        .col-annunci .form-group button:hover {
             background: #e55a25;
         }
 
-        /* RISULTATI ANNUNCI */
         .annunci-results {
             margin-top: 30px;
             flex: 1;
@@ -334,27 +521,151 @@
             font-size: 14px;
         }
 
+        /* FOOTER */
+        .footer {
+            background: #1a472a;
+            color: white;
+            padding: 60px 40px 30px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #28a745;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: #e0f0e8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #FF6B35;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 30px;
+            text-align: center;
+            color: #ccc;
+        }
+
         /* RESPONSIVE */
-        @media (max-width: 1024px) {
-            .lavoro-container {
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-buttons {
+                flex-wrap: wrap;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .btn-entra, .btn-registrati, .btn-pubblicita {
+                flex: 1;
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .search-row {
+                grid-template-columns: 1fr;
+            }
+
+            .search-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .why-section {
+                padding: 60px 20px;
+            }
+
+            .why-section h2 {
+                font-size: 28px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-banner p {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .jobs-section {
+                padding: 60px 20px;
+            }
+
+            .jobs-section h2 {
+                font-size: 28px;
+            }
+
+            .jobs-form {
+                padding: 30px 20px;
+            }
+
+            .jobs-section-symmetric {
+                padding: 60px 20px;
+            }
+
+            .jobs-container-symmetric > h2 {
+                font-size: 28px;
+            }
+
+            .jobs-grid {
                 grid-template-columns: 1fr;
                 gap: 30px;
             }
 
-            .cards-container {
+            .col-candidature,
+            .col-annunci {
+                min-height: auto;
+                padding: 30px;
+            }
+
+            .footer {
+                padding: 40px 20px 20px;
+            }
+
+            .footer-content {
                 grid-template-columns: 1fr;
-            }
-
-            nav {
-                padding: 15px 30px;
-            }
-
-            .hero {
-                padding: 50px 30px;
-            }
-
-            .lavoro-section {
-                padding: 50px 30px;
+                gap: 30px;
+                text-align: center;
             }
         }
     </style>
@@ -362,177 +673,296 @@
 <body>
 
     <!-- NAVBAR -->
-    <nav>
-        <div class="logo">
-            <span class="logo-trova">Trova</span><span class="logo-impresa">Impresa</span>
-        </div>
+    <nav class="navbar">
+        <div class="logo">Trova<span>Impresa</span></div>
         <div class="nav-buttons">
-            <button class="btn-entra">🔑 Entra (Imprese)</button>
-            <button class="btn-registrati">Registrati (Imprese)</button>
-            <button class="btn-pubblicita">📢 Pubblicità</button>
+            <a href="#" class="btn-entra">Entra (Imprese)</a>
+            <a href="registrazione.html" class="btn-registrati">Registrati (Imprese)</a>
+            <a href="pubblicita.html" class="btn-pubblicita">📢 Pubblicità</a>
         </div>
     </nav>
 
     <!-- HERO SECTION -->
-    <div class="hero">
-        <div class="hero-content">
-            <div class="hero-logo">
-                <img src="https://raw.githubusercontent.com/trovaforte/trovaimpresa/main/trovaimpresa_logo_transparent.png" alt="TrovaImpresa Logo">
-            </div>
-            <h1>Trova l'impresa adatta a te!</h1>
-            <p>Connetti i tuoi progetti con i migliori artigiani e imprese edili della tua zona</p>
-        </div>
-    </div>
-
-    <!-- PERCHÉ TROVAIMPRESA -->
-    <div class="why-section">
-        <h2>Perché TrovaImpresa?</h2>
-        <div class="cards-container">
-            <div class="card card-orange">
-                <div class="card-emoji">✓</div>
-                <h3>Imprese Verificate</h3>
-                <p>Solo professionisti certificati e affidabili</p>
-            </div>
-            <div class="card card-yellow">
-                <div class="card-emoji">⭐</div>
-                <h3>Recensioni Reali</h3>
-                <p>Vedi le esperienze dei clienti che li hanno usati</p>
-            </div>
-            <div class="card card-blue">
-                <div class="card-emoji">📍</div>
-                <h3>Ricerca Geo</h3>
-                <p>Trova le imprese più vicine a casa tua</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- LAVORO - 2 COLONNE SIMMETRICHE -->
-    <div class="lavoro-section">
-        <h2>Lavoro e Opportunità</h2>
+    <section class="hero">
+        <img src="trovaimpresa_logo_transparent.png" alt="TrovaImpresa Logo" style="height: 600px; width: auto; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto;">
         
-        <div class="lavoro-container">
-            
-            <!-- COLONNA SINISTRA: CANDIDATURE -->
-            <div class="col-candidature">
-                <div class="col-title">🔍 Cerchi lavoro?</div>
-                <div class="col-subtitle">Invia la tua candidatura e connettiti con le imprese</div>
-                
-                <form id="form-candidature" onsubmit="inviaCandidatura(event)">
-                    <div class="form-group">
-                        <label for="nome">Nome *</label>
-                        <input type="text" id="nome" name="nome" placeholder="Es. Mario Rossi" required>
-                    </div>
+        <h1>Trova l'impresa adatta a te</h1>
+        <p>In pochi click, l'artigiano perfetto per il tuo progetto</p>
 
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" name="email" placeholder="tua@email.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="telefono">Telefono *</label>
-                        <input type="tel" id="telefono" name="telefono" placeholder="+39 3XX XXX XXXX" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="citta-candidato">Città *</label>
-                        <input type="text" id="citta-candidato" name="citta" placeholder="Es. Roma" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="competenze">Competenze *</label>
-                        <textarea id="competenze" name="competenze" placeholder="Es. Idraulica, Muratura..." required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="submit">📬 Invia candidatura</button>
-                    </div>
-                </form>
+        <!-- SEARCH BOX -->
+        <div class="search-container">
+            <div class="search-row">
+                <input type="text" class="search-input" placeholder="Es: Idraulico, Elettricista, Muratore..." id="mestiere">
+                <input type="text" class="search-input" placeholder="Città o provincia..." id="zona">
+                <select class="search-select" id="categoria">
+                    <option value="">Categoria</option>
+                    <option value="edile">Edile</option>
+                    <option value="impianti">Impianti</option>
+                    <option value="manutenzione">Manutenzione</option>
+                    <option value="verniciatura">Verniciatura</option>
+                </select>
             </div>
+            <div class="search-buttons">
+                <button class="btn-cerca" onclick="cercaImprese()">🔍 Cerca</button>
+                <button class="btn-geo" onclick="geolocalizza()">📍 Usa la mia posizione</button>
+            </div>
+        </div>
+    </section>
 
-            <!-- COLONNA DESTRA: RICERCA ANNUNCI -->
-            <div class="col-annunci">
-                <div class="col-title">🏗️ Le imprese cercano operai</div>
-                <div class="col-subtitle">Offerte di lavoro vicino a te</div>
-                
-                <form id="form-ricerca" onsubmit="cercaAnnunci(event)">
-                    <div class="form-group">
-                        <label for="citta-ricerca">Città *</label>
-                        <input type="text" id="citta-ricerca" name="citta" placeholder="Es. Roma" required>
-                    </div>
+    <!-- SEZIONE PERCHÉ TROVAIMPRESA -->
+    <section class="why-section">
+        <div class="why-container">
+            <h2>Perché scegliere TrovaImpresa</h2>
+            <p>Una piattaforma sicura, trasparente e sempre con te</p>
 
-                    <div class="form-group">
-                        <label for="categoria">Categoria</label>
-                        <select id="categoria" name="categoria">
-                            <option value="">-- Tutte le categorie --</option>
-                            <option value="Edile">Edile</option>
-                            <option value="Impianti">Impianti</option>
-                            <option value="Manutenzione">Manutenzione</option>
-                            <option value="Verniciatura">Verniciatura</option>
-                        </select>
-                    </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">✓</div>
+                    <h3>Professionisti verificati</h3>
+                    <p>Ogni artigiano e impresa viene controllato prima di entrare in piattaforma. Garanzia di qualità.</p>
+                </div>
 
-                    <div class="form-group">
-                        <label for="tipo-contratto">Tipo contratto</label>
-                        <select id="tipo-contratto" name="tipo_contratto">
-                            <option value="">-- Tutti i tipi --</option>
-                            <option value="Tempo pieno">Tempo pieno</option>
-                            <option value="Determinato">Determinato</option>
-                            <option value="Progettuale">Progettuale</option>
-                        </select>
-                    </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Recensioni reali</h3>
+                    <p>Solo clienti verificati lasciano feedback autentici. Niente false opinioni, massima trasparenza.</p>
+                </div>
 
-                    <div class="form-group">
-                        <label for="esperienza">Esperienza richiesta</label>
-                        <select id="esperienza" name="esperienza">
-                            <option value="">-- Qualsiasi --</option>
-                            <option value="0-2">0-2 anni</option>
-                            <option value="2-5">2-5 anni</option>
-                            <option value="5+">5+ anni</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="submit">🔎 Cerca annunci</button>
-                    </div>
-                </form>
-
-                <div class="annunci-results" id="annunci-results">
-                    <div class="no-results">Inserisci una città e clicca "Cerca annunci"</div>
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>Geolocalizzazione</h3>
+                    <p>Trova i professionisti più vicini a te. Meno km, meno costi, più convenienza.</p>
                 </div>
             </div>
 
+            <div class="info-banner">
+                <p>
+                    <strong>✨ Per i clienti: totalmente gratuito</strong>
+                    <strong>📱 Funziona perfettamente su smartphone</strong>
+                </p>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- JAVASCRIPT -->
+    <!-- SEZIONE LAVORO - 2 COLONNE SIMMETRICHE -->
+    <section class="jobs-section-symmetric">
+        <div class="jobs-container-symmetric">
+            <h2>Lavoro e Opportunità</h2>
+            
+            <div class="jobs-grid">
+                
+                <!-- COLONNA SINISTRA: CANDIDATURE -->
+                <div class="col-candidature">
+                    <div class="col-title">🔍 Cerchi lavoro?</div>
+                    <div class="col-subtitle">Invia la tua candidatura e connettiti con le imprese</div>
+                    
+                    <form id="form-candidature" onsubmit="inviaCandidatura(event)">
+                        <div class="form-group">
+                            <label for="nome">Nome *</label>
+                            <input type="text" id="nome" name="nome" placeholder="Es. Mario Rossi" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" placeholder="tua@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefono">Telefono *</label>
+                            <input type="tel" id="telefono" name="telefono" placeholder="+39 3XX XXX XXXX" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="citta-candidato">Città *</label>
+                            <input type="text" id="citta-candidato" name="citta" placeholder="Es. Roma" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="competenze">Competenze *</label>
+                            <textarea id="competenze" name="competenze" placeholder="Es. Idraulica, Muratura..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit">📬 Invia candidatura</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- COLONNA DESTRA: RICERCA ANNUNCI -->
+                <div class="col-annunci">
+                    <div class="col-title">🏗️ Le imprese cercano operai</div>
+                    <div class="col-subtitle">Offerte di lavoro vicino a te</div>
+                    
+                    <form id="form-ricerca" onsubmit="cercaAnnunci(event)">
+                        <div class="form-group">
+                            <label for="citta-ricerca">Città *</label>
+                            <input type="text" id="citta-ricerca" name="citta" placeholder="Es. Roma" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="categoria">Categoria</label>
+                            <select id="categoria" name="categoria">
+                                <option value="">-- Tutte le categorie --</option>
+                                <option value="Edile">Edile</option>
+                                <option value="Impianti">Impianti</option>
+                                <option value="Manutenzione">Manutenzione</option>
+                                <option value="Verniciatura">Verniciatura</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tipo-contratto">Tipo contratto</label>
+                            <select id="tipo-contratto" name="tipo_contratto">
+                                <option value="">-- Tutti i tipi --</option>
+                                <option value="Tempo pieno">Tempo pieno</option>
+                                <option value="Determinato">Determinato</option>
+                                <option value="Progettuale">Progettuale</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="esperienza">Esperienza richiesta</label>
+                            <select id="esperienza" name="esperienza">
+                                <option value="">-- Qualsiasi --</option>
+                                <option value="0-2">0-2 anni</option>
+                                <option value="2-5">2-5 anni</option>
+                                <option value="5+">5+ anni</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit">🔎 Cerca annunci</button>
+                        </div>
+                    </form>
+
+                    <div class="annunci-results" id="annunci-results">
+                        <div class="no-results">Inserisci una città e clicca "Cerca annunci"</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>TrovaImpresa</h3>
+                <p style="margin-bottom: 15px; color: #e0f0e8;">La piattaforma affidabile per trovare i professionisti giusti per il tuo progetto.</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Link utili</h3>
+                <ul>
+                    <li><a href="#">Cerca imprese</a></li>
+                    <li><a href="registrazione.html">Registrati come impresa</a></li>
+                    <li><a href="prezzi.html">Piani e prezzi</a></li>
+                    <li><a href="#">Chi siamo</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Supporto</h3>
+                <ul>
+                    <li><a href="#">Centro aiuto</a></li>
+                    <li><a href="#">Contatti</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Termini di servizio</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Seguici</h3>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">LinkedIn</a></li>
+                    <li><a href="#">YouTube</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 TrovaImpresa. Tutti i diritti riservati.</p>
+        </div>
+    </footer>
+
     <script>
-        // Supabase Config
-        const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // RICERCA IMPRESE
+        function cercaImprese() {
+            const mestiere = document.getElementById('mestiere').value;
+            const zona = document.getElementById('zona').value;
+            
+            if (!mestiere && !zona) {
+                alert('Inserisci almeno un mestiere o una zona');
+                return;
+            }
 
-        // INVIA CANDIDATURA
+            // Redirect a risultati.html con parametri
+            const params = new URLSearchParams();
+            if (mestiere) params.append('mestiere', mestiere);
+            if (zona) params.append('zona', zona);
+            
+            window.location.href = 'risultati.html?' + params.toString();
+        }
+
+        // GEOLOCALIZZAZIONE
+        function geolocalizza() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Usa reverse geocoding per trovare la città
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('zona').value = city;
+                            alert('Posizione trovata: ' + city);
+                        });
+                });
+            } else {
+                alert('Geolocalizzazione non supportata dal tuo browser');
+            }
+        }
+
+        // INVIA CANDIDATURA LAVORO
         async function inviaCandidatura(e) {
             e.preventDefault();
-            
-            const nome = document.getElementById('nome').value;
-            const email = document.getElementById('email').value;
-            const telefono = document.getElementById('telefono').value;
-            const citta = document.getElementById('citta-candidato').value;
-            const competenze = document.getElementById('competenze').value;
+
+            const candidato = {
+                nome: document.getElementById('nome').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                citta: document.getElementById('citta').value,
+                regione: document.getElementById('regione').value,
+                competenze: document.getElementById('competenze').value,
+                esperienza: document.getElementById('esperienza').value,
+                descrizione: document.getElementById('descrizione').value,
+            };
 
             try {
-                const { data, error } = await supabase
-                    .from('candidati_lavoro')
-                    .insert([{ nome, email, telefono, citta, competenze }]);
+                // Invia a Supabase
+                const response = await fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/candidati_lavoro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
+                    },
+                    body: JSON.stringify(candidato)
+                });
 
-                if (error) throw error;
-
-                alert('✅ Candidatura inviata! Le imprese ti contatteranno presto.');
-                document.getElementById('form-candidature').reset();
-            } catch (err) {
-                console.error('Errore:', err);
-                alert('❌ Errore nell\'invio. Riprova.');
+                if (response.ok) {
+                    alert('Candidatura inviata con successo! Ti contatteremo presto.');
+                    document.querySelector('.jobs-form').reset();
+                } else {
+                    alert('Errore nell\'invio della candidatura. Riprova.');
+                }
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore di connessione. Riprova.');
             }
         }
 
@@ -546,29 +976,29 @@
             const esperienza = document.getElementById('esperienza').value;
 
             try {
-                let query = supabase
-                    .from('offerte_lavoro')
-                    .select('*')
-                    .eq('citta', citta)
-                    .eq('attiva', true);
+                let query = 'citta=eq.' + encodeURIComponent(citta);
+                query += '&attiva=eq.true';
+                
+                if (categoria) query += '&categoria=eq.' + encodeURIComponent(categoria);
+                if (tipo_contratto) query += '&tipo_contratto=eq.' + encodeURIComponent(tipo_contratto);
+                if (esperienza) query += '&esperienza_richiesta=eq.' + encodeURIComponent(esperienza);
 
-                if (categoria) query = query.eq('categoria', categoria);
-                if (tipo_contratto) query = query.eq('tipo_contratto', tipo_contratto);
-                if (esperienza) query = query.eq('esperienza_richiesta', esperienza);
+                const response = await fetch(`https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/offerte_lavoro?${query}`, {
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
+                    }
+                });
 
-                const { data, error } = await query;
-
-                if (error) throw error;
-
+                const annunci = await response.json();
                 const resultsDiv = document.getElementById('annunci-results');
                 
-                if (data.length === 0) {
+                if (!annunci || annunci.length === 0) {
                     resultsDiv.innerHTML = '<div class="no-results">Nessun annuncio trovato per questa ricerca 😞</div>';
                     return;
                 }
 
                 let html = '';
-                data.forEach(annuncio => {
+                annunci.forEach(annuncio => {
                     html += `
                         <div class="annuncio-card">
                             <div class="annuncio-titolo">${annuncio.titolo}</div>
@@ -587,6 +1017,23 @@
                 console.error('Errore:', err);
                 document.getElementById('annunci-results').innerHTML = '<div class="no-results">❌ Errore nella ricerca</div>';
             }
+        }
+
+        // Invio messaggi form contatto (se esiste)
+        function inviaMessaggio(e) {
+            if (e) e.preventDefault();
+            
+            const nome = document.getElementById('cta-nome')?.value;
+            const email = document.getElementById('cta-email')?.value;
+            const messaggio = document.getElementById('cta-messaggio')?.value;
+
+            if (!nome || !email || !messaggio) {
+                alert('Compila tutti i campi');
+                return;
+            }
+
+            // Redirect a registrazione
+            window.location.href = 'registrazione.html';
         }
     </script>
 
