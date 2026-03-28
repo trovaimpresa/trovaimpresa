@@ -251,7 +251,7 @@
             text-align: center;
         }
 
-        /* SEZIONE PERCHÉ TROVAIMPRESA - COLORATA */
+        /* SEZIONE PERCHÉ TROVAIMPRESA */
         .why-section {
             background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
             padding: 80px 20px;
@@ -363,7 +363,7 @@
             line-height: 1.7;
         }
 
-        /* Banner info - Colorato */
+        /* Banner info */
         .info-banner {
             background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
             padding: 30px;
@@ -388,95 +388,52 @@
             font-weight: 700;
         }
 
-        /* SEZIONE LAVORO */
-        .jobs-section {
-            padding: 40px 20px;
-            background: #f8f8f8;
+        /* SEZIONE CANDIDATI E RICERCA */
+        .lavoro-links {
+            padding: 40px;
+            background: #f9f9f9;
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        .jobs-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .jobs-section h2 {
-            font-size: 20px;
+        .lavoro-links h2 {
+            margin-bottom: 25px;
+            color: #2d5016;
+            font-size: 32px;
             font-weight: 800;
-            text-align: center;
-            margin-bottom: 8px;
-            color: #1a472a;
         }
 
-        .jobs-section > .jobs-container > p {
-            text-align: center;
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 9px;
-        }
-
-        .jobs-form {
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            max-width: 350px;
+        .lavoro-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
+        .lavoro-btn {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #28a745;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
+            padding: 30px;
+            background: linear-gradient(135deg, #4CAF50 0%, #2d5016 100%);
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+        .lavoro-btn:nth-child(2) {
+            background: linear-gradient(135deg, #2196F3 0%, #0066cc 100%);
         }
 
-        /* SEZIONE LAVORO SIMMETRICA - 2 COLONNE */
+        .lavoro-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* SEZIONE LAVORO SIMMETRICA */
         .jobs-section-symmetric {
             padding: 80px 40px;
             background: #f8f9fa;
@@ -533,18 +490,61 @@
             margin-bottom: 15px;
         }
 
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 4px;
+            color: #999;
+            font-size: 11px;
+        }
+
         .col-candidature .form-group button,
         .col-annunci .form-group button {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: #FF6B35;
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 15px;
             transition: background 0.3s ease;
         }
 
@@ -572,11 +572,11 @@
             font-weight: 700;
             color: #333;
             margin-bottom: 8px;
-            font-size: 15px;
+            font-size: 13px;
         }
 
         .annuncio-info {
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
             line-height: 1.6;
         }
@@ -585,7 +585,7 @@
             text-align: center;
             padding: 30px;
             color: #999;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         /* FOOTER */
@@ -665,18 +665,6 @@
                 font-size: 32px;
             }
 
-            .hero p {
-                font-size: 16px;
-            }
-
-            .search-row {
-                grid-template-columns: 1fr;
-            }
-
-            .search-buttons {
-                grid-template-columns: 1fr;
-            }
-
             .why-section {
                 padding: 60px 20px;
             }
@@ -694,16 +682,13 @@
                 gap: 10px;
             }
 
-            .jobs-section {
-                padding: 60px 20px;
-            }
-
-            .jobs-section h2 {
-                font-size: 28px;
-            }
-
-            .jobs-form {
+            .lavoro-links {
                 padding: 30px 20px;
+            }
+
+            .lavoro-buttons-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
             }
 
             .jobs-section-symmetric {
@@ -722,7 +707,7 @@
             .col-candidature,
             .col-annunci {
                 min-height: auto;
-                padding: 30px;
+                padding: 20px;
             }
 
             .footer {
@@ -880,30 +865,50 @@
     </section>
 
     <!-- SEZIONE CANDIDATI E RICERCA -->
-    <section class="lavoro-links" style="padding: 40px; background: #f9f9f9; text-align: center; margin-bottom: 30px;">
-        <h2 style="margin-bottom: 25px; color: #2d5016;">Lavoro - Sistema Candidati</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto;">
-            <a href="candidati-registrazione.html" style="display: block; padding: 30px; background: linear-gradient(135deg, #4CAF50 0%, #2d5016 100%); color: white; text-decoration: none; border-radius: 10px; font-size: 18px; font-weight: bold; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'">
-                🔨 Registrati come Candidato
-            </a>
-            <a href="ricerca-candidati.html" style="display: block; padding: 30px; background: linear-gradient(135deg, #2196F3 0%, #0066cc 100%); color: white; text-decoration: none; border-radius: 10px; font-size: 18px; font-weight: bold; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'">
-                🔍 Ricerca Candidati
-            </a>
+    <section class="lavoro-links">
+        <h2>🔨 Lavoro - Sistema Candidati</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="candidati-registrazione.html" class="lavoro-btn">🔨 Registrati come Candidato</a>
+            <a href="ricerca-candidati.html" class="lavoro-btn">🔍 Ricerca Candidati</a>
         </div>
     </section>
 
-    <!-- SEZIONE CANDIDATO - RICERCA E VISUALIZZA -->
+    <!-- SEZIONE CANDIDATO - LE TUE RICERCHE -->
     <section class="jobs-section-symmetric">
         <div class="jobs-container-symmetric">
             <h2>🔍 Candidato - Le tue ricerche</h2>
             
             <div class="jobs-grid">
-                <!-- COLONNA SINISTRA: INSERISCI RICERCA -->
+                <!-- COLONNA SINISTRA: INSERISCI CANDIDATURA -->
                 <div class="col-candidature">
                     <div class="col-title">Cerca lavoro</div>
-                    <div class="col-subtitle">Salva le tue ricerche</div>
+                    <div class="col-subtitle">Salva il tuo profilo</div>
                     
                     <form id="form-ricerca-candidato" onsubmit="salvaRicercaCandidato(event)">
+                        <div class="form-group">
+                            <label for="ricerca-nome">Nome *</label>
+                            <input type="text" id="ricerca-nome" placeholder="Es. Mario" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ricerca-cognome">Cognome *</label>
+                            <input type="text" id="ricerca-cognome" placeholder="Es. Rossi" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ricerca-eta">Età *</label>
+                            <input type="number" id="ricerca-eta" min="18" max="99" placeholder="Es. 35" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ricerca-sesso">Sesso *</label>
+                            <select id="ricerca-sesso" required>
+                                <option value="">-- Seleziona --</option>
+                                <option value="Uomo">Uomo</option>
+                                <option value="Donna">Donna</option>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label for="ricerca-mestiere">Mestiere *</label>
                             <input type="text" id="ricerca-mestiere" placeholder="Es. Idraulico, Muratore..." required>
@@ -915,26 +920,52 @@
                         </div>
 
                         <div class="form-group">
-                            <button type="submit">💾 Salva ricerca</button>
+                            <label for="ricerca-livello">Livello *</label>
+                            <select id="ricerca-livello" required>
+                                <option value="">-- Seleziona --</option>
+                                <option value="Apprendista">Apprendista</option>
+                                <option value="Specializzato">Specializzato</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ricerca-descrizione">Descrizione / Biografia</label>
+                            <textarea id="ricerca-descrizione" placeholder="Racconta di te, esperienza, certificati..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ricerca-foto">📷 Foto Profilo</label>
+                            <input type="file" id="ricerca-foto" accept="image/*">
+                            <small>JPG, PNG - Max 5MB</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ricerca-curriculum">📄 Curriculum (PDF)</label>
+                            <input type="file" id="ricerca-curriculum" accept=".pdf,.doc,.docx">
+                            <small>PDF, DOC, DOCX - Max 10MB</small>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit">💾 Salva profilo</button>
                         </div>
                         <button type="button" class="sbtn" onclick="geolocalizzaCandidato()" style="width:100%; margin-top:8px; background:#FF6B35; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:600;">📍 Localizzami</button>
                     </form>
                 </div>
 
-                <!-- COLONNA DESTRA: VISUALIZZA RICERCHE -->
+                <!-- COLONNA DESTRA: VISUALIZZA PROFILO -->
                 <div class="col-annunci">
-                    <div class="col-title">Le tue ricerche</div>
-                    <div class="col-subtitle">Ricerche salvate</div>
+                    <div class="col-title">Il tuo profilo</div>
+                    <div class="col-subtitle">Dati salvati</div>
                     
                     <div id="ricerche-candidato-container" style="flex: 1; overflow-y: auto;">
-                        <p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessuna ricerca salvata</p>
+                        <p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessun profilo salvato</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- SEZIONE IMPRESA - OFFERTA E VISUALIZZA -->
+    <!-- SEZIONE IMPRESA - LE TUE OFFERTE -->
     <section class="jobs-section-symmetric">
         <div class="jobs-container-symmetric">
             <h2>🏗️ Impresa - Le tue offerte</h2>
@@ -958,7 +989,7 @@
 
                         <div class="form-group">
                             <label for="offerta-descrizione">Descrizione</label>
-                            <textarea id="offerta-descrizione" placeholder="Descrivi il lavoro..." style="min-height:60px; resize:vertical;"></textarea>
+                            <textarea id="offerta-descrizione" placeholder="Descrivi il lavoro..."></textarea>
                         </div>
 
                         <div class="form-group">
@@ -1026,53 +1057,61 @@
     </footer>
 
     <script>
-        // CANDIDATO - SALVA RICERCA
+        // CANDIDATO - SALVA PROFILO
         function salvaRicercaCandidato(e) {
             e.preventDefault();
+            const nome = document.getElementById('ricerca-nome').value;
+            const cognome = document.getElementById('ricerca-cognome').value;
+            const eta = document.getElementById('ricerca-eta').value;
+            const sesso = document.getElementById('ricerca-sesso').value;
             const mestiere = document.getElementById('ricerca-mestiere').value;
             const citta = document.getElementById('ricerca-citta').value;
+            const livello = document.getElementById('ricerca-livello').value;
+            const descrizione = document.getElementById('ricerca-descrizione').value;
             
-            if (!mestiere || !citta) {
-                alert('Riempi tutti i campi');
+            if (!nome || !cognome || !eta || !sesso || !mestiere || !citta || !livello) {
+                alert('Riempi tutti i campi obbligatori');
                 return;
             }
 
-            const ricerca = {
+            const profilo = {
                 id: Date.now(),
+                nome: nome,
+                cognome: cognome,
+                eta: eta,
+                sesso: sesso,
                 mestiere: mestiere,
                 citta: citta,
+                livello: livello,
+                descrizione: descrizione,
                 data: new Date().toLocaleDateString('it-IT')
             };
 
-            let ricerche = JSON.parse(localStorage.getItem('ricerche_candidato')) || [];
-            ricerche.push(ricerca);
-            localStorage.setItem('ricerche_candidato', JSON.stringify(ricerche));
+            localStorage.setItem('profilo_candidato', JSON.stringify(profilo));
 
-            alert('✅ Ricerca salvata!');
-            document.getElementById('form-ricerca-candidato').reset();
-            caricaRicercheCandidato();
+            alert('✅ Profilo salvato!');
+            caricaProfiloCandidato();
         }
 
-        // CANDIDATO - CARICA RICERCHE
-        function caricaRicercheCandidato() {
+        // CANDIDATO - CARICA PROFILO
+        function caricaProfiloCandidato() {
             const container = document.getElementById('ricerche-candidato-container');
-            const ricerche = JSON.parse(localStorage.getItem('ricerche_candidato')) || [];
+            const profilo = JSON.parse(localStorage.getItem('profilo_candidato'));
 
-            if (ricerche.length === 0) {
-                container.innerHTML = '<p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessuna ricerca salvata</p>';
+            if (!profilo) {
+                container.innerHTML = '<p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessun profilo salvato</p>';
                 return;
             }
 
-            let html = '';
-            ricerche.forEach(ricerca => {
-                html += `
-                    <div style="padding:12px; margin-bottom:10px; background:#f0f9f5; border-left:3px solid #28a745; border-radius:5px; font-size:12px;">
-                        <strong>${ricerca.mestiere}</strong><br>
-                        📍 ${ricerca.citta}<br>
-                        <small style="color:#999;">${ricerca.data}</small>
-                    </div>
-                `;
-            });
+            let html = `
+                <div style="padding:12px; margin-bottom:10px; background:#f0f9f5; border-left:3px solid #28a745; border-radius:5px; font-size:12px;">
+                    <strong>${profilo.nome} ${profilo.cognome}</strong><br>
+                    📍 ${profilo.citta} | ${profilo.eta} anni | ${profilo.sesso}<br>
+                    🔧 ${profilo.mestiere} (${profilo.livello})<br>
+                    ${profilo.descrizione ? '<small style="color:#666; margin-top:5px; display:block;">' + profilo.descrizione.substring(0, 50) + '...</small>' : ''}
+                    <small style="color:#999; margin-top:5px; display:block;">${profilo.data}</small>
+                </div>
+            `;
 
             container.innerHTML = html;
         }
@@ -1210,15 +1249,17 @@
                 alert('⚠️ Geolocalizzazione non supportata');
             }
         }
+
         document.addEventListener('DOMContentLoaded', () => {
-            caricaRicercheCandidato();
+            caricaProfiloCandidato();
             caricaOfferteImpresa();
             aggiornaHint();
         });
+
         let tipoScelto = 'artigiano';
         let mestiereScelto = 'Tutti';
 
-        // IMPOSTA TIPO (Artigiano / Impresa / Tutti)
+        // IMPOSTA TIPO
         function setTipo(tipo, el) {
             tipoScelto = tipo;
             document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
@@ -1234,7 +1275,7 @@
             aggiornaHint();
         }
 
-        // AGGIORNA HINT DI RICERCA
+        // AGGIORNA HINT
         function aggiornaHint() {
             const hint = document.getElementById('search-hint');
             const label = {
@@ -1246,7 +1287,7 @@
             hint.innerHTML = `Stai cercando: <strong>${label[tipoScelto]}</strong> · <strong>${m}</strong>`;
         }
 
-        // FUNZIONE RICERCA
+        // RICERCA
         function doSearch() {
             const citta = document.getElementById('search-input').value.trim();
             const hint = document.getElementById('search-hint');
