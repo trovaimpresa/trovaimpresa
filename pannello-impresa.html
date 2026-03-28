@@ -299,6 +299,26 @@
   }
   .piano-info strong { color:var(--arancio); }
 
+  /* === CANDIDATI SEZIONE === */
+  .candidato-card {
+    background:white; border-radius:16px; padding:22px 24px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    margin-bottom:14px; transition:all 0.2s;
+  }
+  .candidato-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.1); transform:translateY(-1px); }
+  .candidato-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  .candidato-nome { font-family:'Playfair Display',serif; font-size:1.05rem; }
+  .candidato-livello-badge { padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; background:var(--verde3); color:var(--verde2); }
+  .candidato-info { display:flex; gap:12px; flex-wrap:wrap; font-size:0.82rem; color:var(--mid); margin-bottom:12px; }
+  .candidato-bio { font-size:0.85rem; color:var(--mid); line-height:1.5; margin-bottom:12px; }
+  .candidato-contatti { display:flex; gap:12px; flex-wrap:wrap; }
+  .btn-contatta {
+    padding:8px 16px; background:var(--arancio); color:white;
+    border:none; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.8rem; transition:all 0.15s;
+  }
+  .btn-contatta:hover { background:var(--arancio2); }
+
   @media(max-width:768px){
     .sidebar { transform:translateX(-100%); }
     .main { margin-left:0; }
@@ -340,6 +360,9 @@
       <div class="nav-item" onclick="showSection('lavoro',this)">
         <span>💼</span> Offerte di lavoro
         <span class="nav-badge" id="badge-lavoro" style="display:none"></span>
+      </div>
+      <div class="nav-item" onclick="showSection('candidati',this)">
+        <span>🔍</span> Candidati nella tua zona
       </div>
       <div class="nav-item" onclick="showSection('recensioni',this)">
         <span>⭐</span> Le mie recensioni
@@ -467,6 +490,14 @@
       </div>
     </div>
 
+    <!-- CANDIDATI NELLA ZONA -->
+    <div class="section" id="sec-candidati">
+      <div class="topbar">
+        <div class="topbar-title">🔍 Candidati nella tua zona</div>
+      </div>
+      <div id="lista-candidati"><div class="empty-state"><div class="empty-icon">🔍</div>Caricamento...</div></div>
+    </div>
+
     <!-- RECENSIONI -->
     <div class="section" id="sec-recensioni">
       <div class="topbar">
@@ -576,6 +607,7 @@ async function inizializza() {
   await caricaPreventivi();
   await caricaRecensioni();
   await caricaAnnunciLavoro();
+  await caricaCandidatiZona();
   caricaProfilo();
 }
 
@@ -614,6 +646,49 @@ async function caricaPreventivi() {
         <button class="btn-genera" onclick="event.stopPropagation();apriModal(${p.id})">
           🤖 Genera preventivo AI
         </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// CARICA CANDIDATI NELLA ZONA
+async function caricaCandidatiZona() {
+  if (!impresaCorrente.citta) {
+    document.getElementById('lista-candidati').innerHTML = '<div class="empty-state"><div class="empty-icon">📍</div>Nessuna città impostata nel profilo.</div>';
+    return;
+  }
+
+  const { data } = await sb.from('candidati_lavoro').select('*')
+    .ilike('citta', impresaCorrente.citta)
+    .order('data_registrazione', { ascending: false });
+
+  const container = document.getElementById('lista-candidati');
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div>Nessun candidato nella tua zona (${impresaCorrente.citta}).<br><small>I candidati appariranno qui man mano che si registrano!</small></div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="background:#e8f5ee;border-radius:14px;padding:16px 20px;margin-bottom:20px;font-size:0.85rem;color:var(--mid)">
+      <span style="font-weight:700;color:var(--verde)">📍 ${data.length} candidato${data.length > 1 ? 'i' : ''} trovato${data.length > 1 ? 'i' : ''}</span> nella tua zona (${impresaCorrente.citta})
+    </div>
+  ` + data.map(c => `
+    <div class="candidato-card">
+      <div class="candidato-header">
+        <div class="candidato-nome">👤 ${c.nome} ${c.cognome}</div>
+        <span class="candidato-livello-badge">${c.livello}</span>
+      </div>
+      <div class="candidato-info">
+        <span>🔧 ${c.mestiere}</span>
+        <span>📍 ${c.citta}</span>
+        ${c.eta ? `<span>🎂 ${c.eta} anni</span>` : ''}
+        ${c.sesso ? `<span>👥 ${c.sesso}</span>` : ''}
+      </div>
+      ${c.descrizione ? `<div class="candidato-bio">${c.descrizione.substring(0, 200)}${c.descrizione.length > 200 ? '...' : ''}</div>` : ''}
+      <div class="candidato-contatti">
+        ${c.telefono ? `<a href="tel:${c.telefono}" class="btn-contatta">☎️ Chiama</a>` : ''}
+        ${c.email ? `<a href="mailto:${c.email}" class="btn-contatta">📧 Email</a>` : ''}
+        ${c.telefono ? `<a href="https://wa.me/${c.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-contatta">💬 WhatsApp</a>` : ''}
       </div>
     </div>
   `).join('');
