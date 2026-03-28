@@ -838,6 +838,15 @@
         </div>
     </section>
 
+    <!-- SEZIONE OFFERTE DI LAVORO -->
+    <section class="lavoro-links">
+        <h2>💼 Lavoro - Offerte di Lavoro</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="offerte-registrazione.html" class="lavoro-btn">💼 Pubblica Offerta di Lavoro</a>
+            <a href="ricerca-offerte.html" class="lavoro-btn">🔍 Ricerca Offerte</a>
+        </div>
+    </section>
+
     <!-- SEZIONE PERCHÉ TROVAIMPRESA -->
     <section class="why-section">
         <div class="why-container">
@@ -873,52 +882,7 @@
         </div>
     </section>
 
-    <!-- SEZIONE IMPRESA - LE TUE OFFERTE -->
-    <section class="jobs-section-symmetric">
-        <div class="jobs-container-symmetric">
-            <h2>🏗️ Impresa - Le tue offerte</h2>
-            
-            <div class="jobs-grid">
-                <!-- COLONNA SINISTRA: INSERISCI OFFERTA -->
-                <div class="col-candidature">
-                    <div class="col-title">Pubblica offerta</div>
-                    <div class="col-subtitle">Cerca operai o artigiani</div>
-                    
-                    <form id="form-offerta-impresa" onsubmit="salvaOffertaImpresa(event)">
-                        <div class="form-group">
-                            <label for="offerta-mestiere">Mestiere *</label>
-                            <input type="text" id="offerta-mestiere" placeholder="Es. Muratore, Elettricista..." required>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="offerta-citta-imp">Città *</label>
-                            <input type="text" id="offerta-citta-imp" placeholder="Es. Roma" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="offerta-descrizione">Descrizione</label>
-                            <textarea id="offerta-descrizione" placeholder="Descrivi il lavoro..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit">📤 Pubblica offerta</button>
-                        </div>
-                        <button type="button" class="sbtn" onclick="geolocalizzaImpresa()" style="width:100%; margin-top:8px; background:#FF6B35; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:600;">📍 Localizzami</button>
-                    </form>
-                </div>
-
-                <!-- COLONNA DESTRA: VISUALIZZA OFFERTE -->
-                <div class="col-annunci">
-                    <div class="col-title">Le tue offerte</div>
-                    <div class="col-subtitle">Offerte pubblicate</div>
-                    
-                    <div id="offerte-impresa-container" style="flex: 1; overflow-y: auto;">
-                        <p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessuna offerta pubblicata</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- FOOTER -->
     <footer class="footer">
