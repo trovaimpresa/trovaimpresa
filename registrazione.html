@@ -1,968 +1,1053 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registra la tua impresa — TrovaImpresa</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --verde:   #2a7a4b;
-    --verde2:  #1f5e38;
-    --verde3:  #e8f5ee;
-    --arancio: #e8733a;
-    --arancio2:#c45e28;
-    --arancio3:#fff3ec;
-    --dark:    #1a1a1a;
-    --mid:     #555;
-    --light:   #999;
-    --bg:      #fafaf8;
-    --border:  rgba(0,0,0,0.09);
-    --shadow:  0 4px 24px rgba(0,0,0,0.07);
-    --shadow2: 0 12px 48px rgba(0,0,0,0.12);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrovaImpresa - Trova l'impresa adatta a te</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  /* NAV */
-  nav {
-    position:sticky; top:0; z-index:100;
-    background:white; border-bottom:1px solid var(--border);
-    padding:14px 32px; display:flex; align-items:center; justify-content:space-between;
-    box-shadow:0 2px 12px rgba(0,0,0,0.05);
-  }
-  .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
-  .logo-text { font-family:'Playfair Display',serif; font-size:1.2rem; }
-  .logo-text .trova { color:var(--verde); }
-  .logo-text .impresa { color:var(--arancio); }
-  .nav-link { font-size:0.88rem; color:var(--mid); text-decoration:none; font-weight:600; }
-  .nav-link:hover { color:var(--verde); }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
 
-  /* HERO REGISTRAZIONE */
-  .reg-hero {
-    background:linear-gradient(135deg, #1a3a2a 0%, #2a7a4b 60%, #1f5e38 100%);
-    padding:60px 24px 80px; text-align:center; position:relative; overflow:hidden;
-  }
-  .reg-hero::before {
-    content:''; position:absolute; inset:0;
-    background: radial-gradient(ellipse 60% 80% at 20% 50%, rgba(232,115,58,0.12) 0%, transparent 60%),
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: auto, 40px 40px, 40px 40px;
-    pointer-events: none;
-  }
-  .reg-hero h1 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,2.8rem); color:white; margin-bottom:12px; position:relative; z-index:1; }
-  .reg-hero h1 em { color:#ffd580; font-style:normal; }
-  .reg-hero p { font-size:1rem; color:rgba(255,255,255,0.8); max-width:480px; margin:0 auto 28px; line-height:1.7; position:relative; z-index:1; }
+        /* NAVBAR */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-  /* Benefici hero */
-  .hero-benefits {
-    display:flex; gap:20px; justify-content:center; flex-wrap:wrap;
-    position:relative; z-index:1;
-  }
-  .hbenefit {
-    display:flex; align-items:center; gap:8px;
-    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
-    border-radius:30px; padding:8px 16px;
-    color:white; font-size:0.82rem; font-weight:600;
-    backdrop-filter:blur(8px);
-  }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #28a745;
+        }
 
-  /* STEP INDICATOR */
-  .step-indicator {
-    background:white; border-bottom:1px solid var(--border);
-    padding:16px 24px;
-    display:flex; align-items:center; justify-content:center; gap:0;
-  }
-  .step-item {
-    display:flex; align-items:center; gap:8px;
-    font-size:0.82rem; font-weight:700; color:var(--light);
-  }
-  .step-item.active { color:var(--verde); }
-  .step-item.done { color:var(--verde); }
-  .step-circle {
-    width:30px; height:30px; border-radius:50%;
-    border:2px solid var(--border);
-    display:flex; align-items:center; justify-content:center;
-    font-size:0.8rem; font-weight:800; flex-shrink:0;
-    background:white; color:var(--light);
-    transition:all 0.3s;
-  }
-  .step-item.active .step-circle { border-color:var(--verde); background:var(--verde); color:white; box-shadow:0 0 0 4px rgba(42,122,75,0.15); }
-  .step-item.done .step-circle { border-color:var(--verde); background:var(--verde3); color:var(--verde); }
-  .step-line { width:40px; height:2px; background:var(--border); margin:0 4px; }
-  .step-line.done { background:var(--verde); }
-  @media(max-width:500px){ .step-item span:last-child { display:none; } .step-line { width:20px; } }
+        .logo span {
+            color: #FF6B35;
+        }
 
-  /* MAIN FORM */
-  .form-container {
-    max-width:760px; margin:0 auto; padding:40px 24px 80px;
-  }
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
 
-  /* Sezione form */
-  .form-section {
-    background:white; border-radius:20px;
-    padding:32px; box-shadow:var(--shadow);
-    border:1px solid var(--border);
-    margin-bottom:24px;
-    display:none;
-    animation:fadeIn 0.3s ease;
-  }
-  .form-section.active { display:block; position:relative; z-index:1; }
+        .btn-entra {
+            padding: 10px 24px;
+            border: 2px solid #28a745;
+            background: white;
+            color: #28a745;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
 
-  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        .btn-entra:hover {
+            background: #28a745;
+            color: white;
+        }
 
-  .section-header { margin-bottom:28px; }
-  .section-num {
-    width:36px; height:36px; border-radius:10px;
-    background:var(--verde3); color:var(--verde);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Playfair Display',serif; font-size:1rem; font-weight:700;
-    margin-bottom:10px;
-  }
-  .section-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; margin-bottom:4px; }
-  .section-sub { font-size:0.88rem; color:var(--mid); }
+        .btn-registrati {
+            padding: 10px 24px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
 
-  /* Form elements */
-  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  @media(max-width:600px){ .form-grid { grid-template-columns:1fr; } }
-  .form-full { grid-column:1/-1; }
+        .btn-registrati:hover {
+            background: #e55a2b;
+        }
 
-  .form-group { margin-bottom:0; }
-  .form-label {
-    display:block; font-size:0.78rem; font-weight:800;
-    color:var(--dark); text-transform:uppercase; letter-spacing:0.8px;
-    margin-bottom:7px;
-  }
-  .form-label .req { color:var(--arancio); margin-left:2px; }
-  .form-input, .form-select, .form-textarea {
-    width:100%; padding:12px 14px;
-    border:1.5px solid var(--border); border-radius:12px;
-    font-family:'DM Sans',sans-serif; font-size:0.92rem;
-    color:var(--dark); outline:none; transition:border 0.2s, box-shadow 0.2s;
-    background:var(--bg);
-  }
-  .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color:var(--verde); box-shadow:0 0 0 3px rgba(42,122,75,0.1);
-    background:white;
-  }
-  .form-textarea { resize:vertical; min-height:100px; }
-  .form-hint { font-size:0.76rem; color:var(--light); margin-top:5px; }
+        .btn-pubblicita {
+            padding: 10px 24px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
 
-  /* Tipo professionista */
-  .tipo-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .tipo-card {
-    border:2px solid var(--border); border-radius:14px;
-    padding:18px; cursor:pointer; transition:all 0.2s;
-    text-align:center; background:white;
-  }
-  .tipo-card:hover { border-color:var(--verde); }
-  .tipo-card.selected { border-color:var(--verde); background:var(--verde3); }
-  .tipo-card .tipo-icon { font-size:2rem; margin-bottom:8px; display:block; }
-  .tipo-card .tipo-name { font-weight:800; font-size:0.95rem; margin-bottom:4px; }
-  .tipo-card.selected .tipo-name { color:var(--verde2); }
-  .tipo-card .tipo-desc { font-size:0.78rem; color:var(--mid); line-height:1.4; }
+        .btn-pubblicita:hover {
+            background: #0052a3;
+        }
 
-  /* Mestieri checkbox grid */
-  .mestieri-check-grid {
-    display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
-  }
-  @media(max-width:500px){ .mestieri-check-grid { grid-template-columns:repeat(2,1fr); } }
-  .mestiere-check {
-    display:flex; align-items:center; gap:7px;
-    padding:8px 12px; border-radius:10px;
-    border:1.5px solid var(--border); cursor:pointer;
-    font-size:0.82rem; font-weight:600; color:var(--mid);
-    transition:all 0.15s; background:white;
-  }
-  .mestiere-check:hover { border-color:var(--verde); }
-  .mestiere-check.selected { background:var(--verde3); border-color:var(--verde); color:var(--verde2); }
-  .mestiere-check input { display:none; }
+        /* HERO SECTION */
+        .hero {
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            padding: 100px 40px;
+            text-align: center;
+            color: white;
+        }
 
-  /* Zone lavoro */
-  .zone-wrap { display:flex; flex-wrap:wrap; gap:8px; }
-  .zona-chip {
-    padding:7px 14px; border-radius:20px;
-    border:1.5px solid var(--border); background:white;
-    font-size:0.82rem; font-weight:600; color:var(--mid);
-    cursor:pointer; transition:all 0.2s;
-  }
-  .zona-chip.selected { background:var(--verde3); border-color:var(--verde); color:var(--verde2); }
+        .hero h1 {
+            font-size: 52px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
 
-  /* Upload foto */
-  .upload-area {
-    border:2px dashed var(--border); border-radius:14px;
-    padding:32px; text-align:center; cursor:pointer;
-    transition:all 0.2s; background:var(--bg);
-  }
-  .upload-area:hover { border-color:var(--verde); background:var(--verde3); }
-  .upload-icon { font-size:2.2rem; margin-bottom:8px; }
-  .upload-text { font-weight:700; font-size:0.9rem; margin-bottom:4px; }
-  .upload-sub { font-size:0.78rem; color:var(--light); }
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 50px;
+            color: #e0f0e8;
+        }
 
-  /* Upload status */
-  .upload-status {
-    margin-top:8px; font-size:0.82rem; font-weight:600;
-    min-height:20px;
-  }
+        /* SEARCH BOX */
+        .search-box {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
 
-  /* Preview foto */
-  .foto-preview { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
-  .foto-thumb {
-    width:70px; height:70px; border-radius:10px;
-    object-fit:cover; border:1px solid var(--border);
-    position:relative; display:block;
-  }
-  .foto-thumb-wrap {
-    position:relative; width:70px; height:70px;
-  }
-  .foto-thumb-wrap img {
-    width:70px; height:70px; border-radius:10px;
-    object-fit:cover; border:1px solid var(--border);
-  }
-  .foto-thumb-wrap .remove {
-    position:absolute; top:-6px; right:-6px;
-    width:20px; height:20px; border-radius:50%;
-    background:var(--arancio); color:white;
-    font-size:0.7rem; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; border:none; font-weight:700;
-  }
+        .slabel {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0066cc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+        }
 
-  /* Logo preview */
-  .logo-preview-wrap {
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-  }
-  .logo-preview-wrap img {
-    max-width:160px; max-height:160px;
-    border-radius:12px; object-fit:contain;
-    border:1px solid var(--border); background:white; padding:8px;
-  }
+        .tipo-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-  /* Nav bottoni */
-  .form-nav { display:flex; justify-content:space-between; align-items:center; margin-top:28px; }
-  .btn-prev {
-    padding:12px 24px; border-radius:12px;
-    border:1.5px solid var(--border); background:white;
-    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem;
-    cursor:pointer; color:var(--mid); transition:all 0.2s;
-  }
-  .btn-prev:hover { border-color:var(--dark); color:var(--dark); }
-  .btn-next {
-    padding:13px 28px; border-radius:12px;
-    background:var(--arancio); color:white; border:none;
-    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem;
-    cursor:pointer; transition:all 0.2s;
-    box-shadow:0 4px 14px rgba(232,115,58,0.35);
-    display:flex; align-items:center; gap:8px;
-  }
-  .btn-next:hover { background:var(--arancio2); transform:translateY(-1px); }
-  .btn-submit {
-    padding:14px 36px; border-radius:12px;
-    background:var(--verde); color:white; border:none;
-    font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
-    cursor:pointer; transition:all 0.2s;
-    box-shadow:0 6px 20px rgba(42,122,75,0.35);
-    display:flex; align-items:center; gap:8px;
-  }
-  .btn-submit:hover { background:var(--verde2); transform:translateY(-1px); }
+        .tipo-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 13px;
+        }
 
-  /* SUCCESS */
-  .success-screen {
-    display:none; text-align:center; padding:60px 20px;
-    animation:fadeIn 0.5s ease;
-  }
-  .success-screen.show { display:block; }
-  .success-icon { font-size:4rem; margin-bottom:16px; }
-  .success-title { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:12px; color:var(--verde); }
-  .success-sub { font-size:1rem; color:var(--mid); max-width:420px; margin:0 auto 32px; line-height:1.7; }
-  .success-steps { background:var(--verde3); border-radius:16px; padding:24px; max-width:420px; margin:0 auto 28px; text-align:left; }
-  .success-step { display:flex; gap:12px; align-items:flex-start; margin-bottom:14px; }
-  .success-step:last-child { margin-bottom:0; }
-  .ss-icon { width:32px; height:32px; border-radius:8px; background:var(--verde); color:white; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
-  .ss-text { font-size:0.88rem; color:var(--mid); line-height:1.5; }
-  .ss-text strong { color:var(--dark); display:block; margin-bottom:2px; }
+        .tipo-btn.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
 
-  /* Progress bar */
-  .progress-bar {
-    height:3px; background:var(--bg);
-    position:fixed; top:0; left:0; right:0; z-index:200;
-  }
-  .progress-fill { height:100%; background:var(--arancio); transition:width 0.4s ease; width:25%; }
-</style>
+        .tipo-icon {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .tipo-sub {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .mestieri-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #ddd;
+            background: white;
+            color: #333;
+        }
+
+        .chip:hover {
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .chip.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-row input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 14px;
+            padding: 5px 0;
+        }
+
+        .search-row input::placeholder {
+            color: #999;
+        }
+
+        .sbtn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .sbtn:hover {
+            background: #228636;
+        }
+
+        .search-hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        /* WHY SECTION */
+        .why-section {
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            padding: 80px 20px;
+            margin-top: 60px;
+        }
+
+        .why-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .why-section h2 {
+            font-size: 40px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .why-section > .why-container > p {
+            text-align: center;
+            color: #e0f0e8;
+            margin-bottom: 50px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .feature-card:nth-child(1) {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            border-top: 4px solid #FF6B35;
+        }
+
+        .feature-card:nth-child(1)::before {
+            background: #FF6B35;
+        }
+
+        .feature-card:nth-child(2) {
+            background: linear-gradient(135deg, #fffaf0 0%, #fff8f0 100%);
+            border-top: 4px solid #FFB347;
+        }
+
+        .feature-card:nth-child(2)::before {
+            background: #FFB347;
+        }
+
+        .feature-card:nth-child(3) {
+            background: linear-gradient(135deg, #f0f5ff 0%, #e8f0ff 100%);
+            border-top: 4px solid #0066cc;
+        }
+
+        .feature-card:nth-child(3)::before {
+            background: #0066cc;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .feature-card h3 {
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #1a472a;
+            font-size: 20px;
+        }
+
+        .feature-card p {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* INFO BANNER */
+        .info-banner {
+            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+            border: none;
+        }
+
+        .info-banner p {
+            color: #ffffff;
+            font-weight: 600;
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .info-banner strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* WORK LINKS SECTION */
+        .lavoro-links {
+            padding: 40px;
+            background: #f9f9f9;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .lavoro-links h2 {
+            margin-bottom: 25px;
+            color: #2d5016;
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .lavoro-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .lavoro-btn {
+            display: block;
+            padding: 30px;
+            background: linear-gradient(135deg, #4CAF50 0%, #2d5016 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .lavoro-btn:nth-child(2) {
+            background: linear-gradient(135deg, #2196F3 0%, #0066cc 100%);
+        }
+
+        .lavoro-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* JOBS SECTION */
+        .jobs-section-symmetric {
+            padding: 80px 40px;
+            background: #f8f9fa;
+        }
+
+        .jobs-container-symmetric {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .jobs-container-symmetric > h2 {
+            font-size: 40px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 60px;
+            color: #333;
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .col-candidature,
+        .col-annunci {
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 325px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-candidature {
+            background: #f0f9f5;
+            border: 2px solid #28a745;
+        }
+
+        .col-annunci {
+            background: #fff5f0;
+            border: 2px solid #FF6B35;
+        }
+
+        .col-title {
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #0066cc;
+        }
+
+        .col-subtitle {
+            font-size: 7px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 4px;
+            color: #999;
+            font-size: 11px;
+        }
+
+        .col-candidature .form-group button,
+        .col-annunci .form-group button {
+            width: 100%;
+            padding: 12px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+        }
+
+        .col-candidature .form-group button:hover,
+        .col-annunci .form-group button:hover {
+            background: #e55a25;
+        }
+
+        .annunci-results {
+            margin-top: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .ad-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #FF6B35;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .ad-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .ad-info {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: #1a472a;
+            color: white;
+            padding: 60px 40px 30px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #28a745;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: #e0f0e8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #FF6B35;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 30px;
+            text-align: center;
+            color: #ccc;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-buttons {
+                flex-wrap: wrap;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .btn-entra, .btn-registrati, .btn-pubblicita {
+                flex: 1;
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .why-section {
+                padding: 60px 20px;
+            }
+
+            .why-section h2 {
+                font-size: 28px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-banner p {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .lavoro-links {
+                padding: 30px 20px;
+            }
+
+            .lavoro-buttons-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .jobs-section-symmetric {
+                padding: 60px 20px;
+            }
+
+            .jobs-container-symmetric > h2 {
+                font-size: 28px;
+            }
+
+            .jobs-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .col-candidature,
+            .col-annunci {
+                min-height: auto;
+                padding: 20px;
+            }
+
+            .footer {
+                padding: 40px 20px 20px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<!-- Progress bar -->
-<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-
-<!-- NAV -->
-<nav style="min-height:10px;"></nav>
-
-<!-- HERO -->
-<div class="reg-hero">
-  <h1>Registra la tua <em>impresa</em><br>e trova nuovi clienti</h1>
-  <p>Unisciti a centinaia di professionisti già su TrovaImpresa. Ricevi richieste di lavoro direttamente nella tua zona.</p>
-  <div class="hero-benefits">
-    <div class="hbenefit">✅ Gratis per iniziare</div>
-    <div class="hbenefit">📍 Clienti vicino a te</div>
-    <div class="hbenefit">⭐ Costruisci la tua reputazione</div>
-    <div class="hbenefit">📋 Preventivi online</div>
-  </div>
-</div>
-
-<!-- STEP INDICATOR -->
-<div class="step-indicator">
-  <div class="step-item active" id="step-ind-1">
-    <div class="step-circle">1</div>
-    <span>Chi sei</span>
-  </div>
-  <div class="step-line" id="line-1"></div>
-  <div class="step-item" id="step-ind-2">
-    <div class="step-circle">2</div>
-    <span>La tua attività</span>
-  </div>
-  <div class="step-line" id="line-2"></div>
-  <div class="step-item" id="step-ind-3">
-    <div class="step-circle">3</div>
-    <span>Zona & contatti</span>
-  </div>
-  <div class="step-line" id="line-3"></div>
-  <div class="step-item" id="step-ind-4">
-    <div class="step-circle">4</div>
-    <span>Foto & profilo</span>
-  </div>
-</div>
-
-<!-- FORM CONTAINER -->
-<div class="form-container">
-
-  <!-- ── STEP 1: Chi sei ── -->
-  <div class="form-section active" id="step-1">
-    <div class="section-header">
-      <div class="section-num">1</div>
-      <div class="section-title">Chi sei?</div>
-      <div class="section-sub">Seleziona il tipo di professionista che sei</div>
-    </div>
-
-    <div class="tipo-grid" style="margin-bottom:24px">
-      <div class="tipo-card selected" onclick="selTipo(this)">
-        <span class="tipo-icon">🔨</span>
-        <div class="tipo-name">Artigiano</div>
-        <div class="tipo-desc">Lavori in proprio o con un piccolo team. Piccoli e medi lavori.</div>
-      </div>
-      <div class="tipo-card" onclick="selTipo(this)">
-        <span class="tipo-icon">🏗️</span>
-        <div class="tipo-name">Impresa edile</div>
-        <div class="tipo-desc">Hai una società strutturata con più dipendenti. Grandi lavori.</div>
-      </div>
-      <div class="tipo-card" onclick="selTipo(this)">
-        <span class="tipo-icon">📐</span>
-        <div class="tipo-name">Ingegnere</div>
-        <div class="tipo-desc">Progettazione strutturale, impianti, direzione lavori.</div>
-      </div>
-      <div class="tipo-card" onclick="selTipo(this)">
-        <span class="tipo-icon">🏛️</span>
-        <div class="tipo-name">Architetto</div>
-        <div class="tipo-desc">Progettazione architettonica, interior design, ristrutturazioni.</div>
-      </div>
-      <div class="tipo-card" onclick="selTipo(this)">
-        <span class="tipo-icon">📏</span>
-        <div class="tipo-name">Geometra</div>
-        <div class="tipo-desc">Pratiche catastali, rilievi, perizie, DIA e SCIA.</div>
-      </div>
-      <div class="tipo-card" onclick="selTipo(this)">
-        <span class="tipo-icon">🏢</span>
-        <div class="tipo-name">Amministratore di condominio</div>
-        <div class="tipo-desc">Gestione condominiale, assemblee, manutenzione parti comuni.</div>
-      </div>
-      <div class="tipo-card" onclick="selTipo(this)">
-        <span class="tipo-icon">🏪</span>
-        <div class="tipo-name">Negozio edilizia</div>
-        <div class="tipo-desc">Vendita materiali edili, ferramenta, attrezzature per cantiere.</div>
-      </div>
-      <div class="tipo-card" onclick="selTipo(this)">
-        <span class="tipo-icon">🎨</span>
-        <div class="tipo-name">Negozio pittura</div>
-        <div class="tipo-desc">Vendita colori, vernici, stucchi e accessori per tinteggiatura.</div>
-      </div>
-    </div>
-
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Nome <span class="req">*</span></label>
-        <input type="text" id="f-nome" class="form-input" placeholder="Es. Mario">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Cognome <span class="req">*</span></label>
-        <input type="text" id="f-cognome" class="form-input" placeholder="Es. Rossi">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Nome attività / Ragione sociale <span class="req">*</span></label>
-        <input type="text" id="f-nome-attivita" class="form-input" placeholder="Es. Edil Rossi, Elettrica Bianchi...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Partita IVA / Codice fiscale <span class="req">*</span></label>
-        <input type="text" id="f-piva" class="form-input" placeholder="Es. 12345678901">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Email <span class="req">*</span></label>
-        <input type="email" id="f-email" class="form-input" placeholder="la-tua@email.it">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Numero di telefono <span class="req">*</span></label>
-        <input type="tel" id="f-telefono" class="form-input" placeholder="+39 000 000 0000">
-      </div>
-      <div class="form-group form-full">
-        <label class="form-label">Password <span class="req">*</span></label>
-        <input type="password" id="f-password" class="form-input" placeholder="Minimo 8 caratteri">
-        <div class="form-hint">Userai questa password per accedere al tuo pannello</div>
-      </div>
-    </div>
-
-    <div class="form-nav">
-      <div></div>
-      <button class="btn-next" onclick="goStep(2)">Avanti → La tua attività</button>
-    </div>
-  </div>
-
-  <!-- ── STEP 2: La tua attività ── -->
-  <div class="form-section" id="step-2">
-    <div class="section-header">
-      <div class="section-num">2</div>
-      <div class="section-title">La tua attività</div>
-      <div class="section-sub">Raccontaci cosa fai — più dettagli dai, più clienti trovi</div>
-    </div>
-
-    <div class="form-grid">
-      <div class="form-group form-full">
-        <label class="form-label">Descrizione attività <span class="req">*</span></label>
-        <textarea id="f-descrizione" class="form-textarea" placeholder="Descrivi la tua attività, la tua esperienza e i tuoi punti di forza. I clienti leggono questa descrizione per sceglierti..."></textarea>
-        <div class="form-hint">Minimo 100 caratteri. Più scrivi, più i clienti si fidano!</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Anno di fondazione</label>
-        <input type="number" id="f-anno" class="form-input" placeholder="Es. 2005" min="1950" max="2025">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Numero dipendenti / collaboratori</label>
-        <select id="f-dipendenti" class="form-select">
-          <option value="">Seleziona...</option>
-          <option>Solo (1 persona)</option>
-          <option>2-5 persone</option>
-          <option>6-15 persone</option>
-          <option>16-50 persone</option>
-          <option>Più di 50</option>
-        </select>
-      </div>
-
-      <div class="form-group form-full">
-        <label class="form-label">Sito web (opzionale)</label>
-        <input type="url" id="f-sito" class="form-input" placeholder="https://www.tuosito.it">
-      </div>
-    </div>
-
-    <div style="margin-top:24px">
-      <label class="form-label">Mestieri / Specializzazioni <span class="req">*</span></label>
-      <div class="form-hint" style="margin-bottom:12px">Seleziona tutti i lavori che sai fare</div>
-      <div class="mestieri-check-grid" id="mestieri-grid">
-      </div>
-    </div>
-
-    <div class="form-nav">
-      <button class="btn-prev" onclick="goStep(1)">← Indietro</button>
-      <button class="btn-next" onclick="goStep(3)">Avanti → Zona & contatti</button>
-    </div>
-  </div>
-
-  <!-- ── STEP 3: Zona & contatti ── -->
-  <div class="form-section" id="step-3">
-    <div class="section-header">
-      <div class="section-num">3</div>
-      <div class="section-title">Zona di lavoro & contatti</div>
-      <div class="section-sub">Dove operi? I clienti cercano professionisti nella loro zona</div>
-    </div>
-
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Città principale <span class="req">*</span></label>
-        <input type="text" id="f-citta" class="form-input" placeholder="Es. Milano">
-      </div>
-      <div class="form-group">
-        <label class="form-label">CAP <span class="req">*</span></label>
-        <input type="text" id="f-cap" class="form-input" placeholder="Es. 20100">
-      </div>
-      <div class="form-group form-full">
-        <label class="form-label">Indirizzo / Sede operativa</label>
-        <input type="text" id="f-indirizzo" class="form-input" placeholder="Es. Via Roma 42, Milano">
-      </div>
-    </div>
-
-    <div style="margin:24px 0 16px">
-      <label class="form-label">Zone in cui operi <span class="req">*</span></label>
-      <div class="form-hint" style="margin-bottom:12px">Usa la geolocalizzazione oppure scrivi città e province dove lavori</div>
-
-      <!-- Bottone geolocalizzazione -->
-      <button type="button" id="btn-geo" onclick="rilevaPosizione()" style="
-        display:flex; align-items:center; gap:8px;
-        background:var(--verde3); color:var(--verde2);
-        border:1.5px solid var(--verde); border-radius:12px;
-        padding:10px 18px; font-family:'DM Sans',sans-serif;
-        font-weight:700; font-size:0.88rem; cursor:pointer;
-        margin-bottom:14px; transition:all 0.2s;
-      ">
-        📍 Rileva la mia posizione automaticamente
-      </button>
-      <div id="geo-status" style="font-size:0.8rem;color:var(--mid);margin-bottom:10px;min-height:18px;"></div>
-
-      <!-- Input manuale zona -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <input type="text" id="zona-input" class="form-input" placeholder="Es. Rieti, Viterbo, Lazio..." style="flex:1"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();aggiungiZona();}">
-        <button type="button" onclick="aggiungiZona()" style="
-          background:var(--arancio); color:white; border:none;
-          border-radius:12px; padding:10px 18px;
-          font-family:'DM Sans',sans-serif; font-weight:700;
-          font-size:0.88rem; cursor:pointer; white-space:nowrap;
-        ">+ Aggiungi</button>
-      </div>
-
-      <!-- Chip dinamici -->
-      <div class="zone-wrap" id="zone-wrap"></div>
-      <div class="form-hint" style="margin-top:8px">Clicca su una zona per rimuoverla · Puoi aggiungere quante vuoi</div>
-    </div>
-
-    <div class="form-grid" style="margin-top:24px">
-      <div class="form-group">
-        <label class="form-label">Telefono pubblico</label>
-        <input type="tel" id="f-telefono-pub" class="form-input" placeholder="+39 000 000 0000">
-        <div class="form-hint">Visibile ai clienti sul profilo</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">WhatsApp (opzionale)</label>
-        <input type="tel" id="f-whatsapp" class="form-input" placeholder="+39 000 000 0000">
-      </div>
-      <div class="form-group form-full">
-        <label class="form-label">Orari di disponibilità</label>
-        <input type="text" id="f-orari" class="form-input" placeholder="Es. Lun–Ven 8:00–18:00, Sabato mattina">
-      </div>
-    </div>
-
-    <div class="form-nav">
-      <button class="btn-prev" onclick="goStep(2)">← Indietro</button>
-      <button class="btn-next" onclick="goStep(4)">Avanti → Foto & profilo</button>
-    </div>
-  </div>
-
-  <!-- ── STEP 4: Foto & profilo ── -->
-  <div class="form-section" id="step-4">
-    <div class="section-header">
-      <div class="section-num">4</div>
-      <div class="section-title">Foto & profilo</div>
-      <div class="section-sub">Le imprese con foto ricevono 3 volte più richieste!</div>
-    </div>
-
-    <!-- LOGO UPLOAD -->
-    <div style="margin-bottom:24px">
-      <label class="form-label">Logo / Foto profilo</label>
-      <div class="upload-area" id="logo-upload-area" onclick="document.getElementById('logo-input').click()">
-        <div id="logo-preview-container">
-          <div class="upload-icon">🖼️</div>
-          <div class="upload-text">Clicca per caricare il tuo logo</div>
-          <div class="upload-sub">PNG, JPG fino a 5MB</div>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">Trova<span>Impresa</span></div>
+        <div class="nav-buttons">
         </div>
-      </div>
-      <input type="file" id="logo-input" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" onchange="uploadLogo(this)">
-      <div class="upload-status" id="logo-status"></div>
-    </div>
+    </nav>
 
-    <!-- FOTO LAVORI UPLOAD -->
-    <div style="margin-bottom:24px">
-      <label class="form-label">Foto dei tuoi lavori</label>
-      <div class="form-hint" style="margin-bottom:10px">Carica foto di lavori che hai realizzato — max 10 foto</div>
-      <div class="upload-area" onclick="document.getElementById('foto-input').click()">
-        <div class="upload-icon">📸</div>
-        <div class="upload-text">Clicca per caricare le foto dei tuoi lavori</div>
-        <div class="upload-sub">PNG, JPG fino a 5MB ciascuna · Max 10 foto</div>
-      </div>
-      <input type="file" id="foto-input" accept="image/png,image/jpeg,image/jpg,image/webp" multiple style="display:none" onchange="uploadFoto(this)">
-      <div class="upload-status" id="foto-status"></div>
-      <div class="foto-preview" id="foto-grid"></div>
-    </div>
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <img src="/trovaimpresa_logo_transparent.png" alt="Logo TrovaImpresa" style="height: 280px; width: auto; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto;">
+        
+        <h1>Il sito ideale per capire a chi affidare la tua casa!</h1>
+        <p>In pochi click, l'artigiano perfetto per il tuo progetto</p>
 
-    <div class="form-grid">
-      <div class="form-group form-full">
-        <label class="form-label">Costo indicativo</label>
-        <input type="text" id="f-costo" class="form-input" placeholder="Es. €35–50/ora · oppure · €800–1200/mq">
-        <div class="form-hint">Aiuta i clienti a capire il tuo range di prezzi</div>
-      </div>
+        <!-- SEARCH BOX -->
+        <div class="search-box">
+            <div class="slabel">Stai cercando...</div>
+            <div class="tipo-toggle">
+                <button class="tipo-btn active" onclick="setTipo('artigiano',this)">
+                    <span class="tipo-icon">🔨</span>
+                    <span>Artigiano<br><span class="tipo-sub">piccoli lavori</span></span>
+                </button>
+                <button class="tipo-btn" onclick="setTipo('impresa',this)">
+                    <span class="tipo-icon">🏗️</span>
+                    <span>Impresa edile<br><span class="tipo-sub">grandi lavori</span></span>
+                </button>
+                <button class="tipo-btn" onclick="setTipo('entrambi',this)">
+                    <span class="tipo-icon">🔍</span>
+                    <span>Tutti<br><span class="tipo-sub">artigiani + imprese</span></span>
+                </button>
+            </div>
 
-      <div class="form-group form-full">
-        <label class="form-label">Certificazioni e premi (opzionale)</label>
-        <input type="text" id="f-certificazioni" class="form-input" placeholder="Es. ISO 9001, Certificato CEI, Abilitato SOA...">
-      </div>
-    </div>
+            <div class="slabel">Mestiere</div>
+            <div class="mestieri-grid">
+                <div class="chip active" onclick="setMestiere('Tutti',this)">⚡ Tutti</div>
+                <div class="chip" onclick="setMestiere('Muratura',this)">🧱 Muratura</div>
+                <div class="chip" onclick="setMestiere('Carpentiere',this)">🪚 Carpentiere</div>
+                <div class="chip" onclick="setMestiere('Cartongesso',this)">🔲 Cartongesso</div>
+                <div class="chip" onclick="setMestiere('Coperture',this)">🏠 Coperture / Tetti</div>
+                <div class="chip" onclick="setMestiere('Impermeabilizzazione',this)">💧 Impermeabilizzazione</div>
+                <div class="chip" onclick="setMestiere('Ponteggi',this)">🏗️ Ponteggi</div>
+                <div class="chip" onclick="setMestiere('Elettricista',this)">⚡ Elettricista</div>
+                <div class="chip" onclick="setMestiere('Idraulico',this)">🚿 Idraulico</div>
+                <div class="chip" onclick="setMestiere('Termoidraulico',this)">🔥 Termoidraulico</div>
+                <div class="chip" onclick="setMestiere('Tecnico caldaie',this)">🫙 Tecnico caldaie</div>
+                <div class="chip" onclick="setMestiere('Climatizzatore',this)">❄️ Climatizzatore</div>
+                <div class="chip" onclick="setMestiere('Impianto solare',this)">☀️ Impianto solare</div>
+                <div class="chip" onclick="setMestiere('Autospurghi',this)">🪣 Autospurghi</div>
+                <div class="chip" onclick="setMestiere('Pittore',this)">🎨 Pittore</div>
+                <div class="chip" onclick="setMestiere('Piastrellista',this)">🟫 Piastrellista</div>
+                <div class="chip" onclick="setMestiere('Parquettista',this)">🪵 Parquettista</div>
+                <div class="chip" onclick="setMestiere('Stuccatore',this)">🖌️ Stuccatore</div>
+                <div class="chip" onclick="setMestiere('Falegname',this)">🌲 Falegname</div>
+                <div class="chip" onclick="setMestiere('Serramentista',this)">🪟 Serramentista</div>
+                <div class="chip" onclick="setMestiere('Vetraio',this)">🪟 Vetraio</div>
+                <div class="chip" onclick="setMestiere('Fabbro',this)">🔑 Fabbro</div>
+                <div class="chip" onclick="setMestiere('Giardiniere',this)">🌿 Giardiniere</div>
+                <div class="chip" onclick="setMestiere('Paesaggista',this)">🌳 Paesaggista</div>
+                <div class="chip" onclick="setMestiere('Movimento terra',this)">🚜 Movimento terra</div>
+                <div class="chip" onclick="setMestiere('Scavi',this)">⛏️ Scavi</div>
+                <div class="chip" onclick="setMestiere('Pavimentazioni esterne',this)">🧱 Pavimentazioni esterne</div>
+                <div class="chip" onclick="setMestiere('Recinzioni',this)">🏡 Recinzioni</div>
+                <div class="chip" onclick="setMestiere('Piscine',this)">🏊 Piscine</div>
+                <div class="chip" onclick="setMestiere('Ascensorista',this)">🛗 Ascensorista</div>
+                <div class="chip" onclick="setMestiere('Antifurto',this)">🔒 Antifurto</div>
+                <div class="chip" onclick="setMestiere('Traslochi',this)">📦 Traslochi</div>
+                <div class="chip" onclick="setMestiere('Pulizie',this)">🧹 Pulizie</div>
+                <div class="chip" onclick="setMestiere('Demolizioni',this)">⛏️ Demolizioni</div>
+                <div class="chip" onclick="setMestiere('Smaltimento rifiuti',this)">♻️ Smaltimento rifiuti</div>
+            </div>
 
-    <div style="margin:20px 0; padding:16px; background:var(--verde3); border-radius:12px; border:1px solid rgba(42,122,75,0.15)">
-      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-        <input type="checkbox" id="f-termini" style="margin-top:3px;accent-color:var(--verde);width:16px;height:16px">
-        <span style="font-size:0.85rem;color:var(--mid);line-height:1.6">
-          Accetto i <a href="#" style="color:var(--verde);font-weight:700">Termini di servizio</a> e la 
-          <a href="#" style="color:var(--verde);font-weight:700">Privacy Policy</a> di TrovaImpresa.
-          Confermo che le informazioni inserite sono veritiere. <span style="color:var(--arancio)">*</span>
-        </span>
-      </label>
-    </div>
+            <div class="slabel">Professionisti - Consulenze</div>
+            <div class="mestieri-grid">
+                <div class="chip" onclick="setMestiere('Amministratore condominio',this)">🏢 Amministratore condominio</div>
+                <div class="chip" onclick="setMestiere('Ingegnere',this)">📐 Ingegnere</div>
+                <div class="chip" onclick="setMestiere('Architetto',this)">🏛️ Architetto</div>
+                <div class="chip" onclick="setMestiere('Geometra',this)">📏 Geometra</div>
+            </div>
+            <button type="button" class="sbtn" onclick="geolocalizzaProfessionisti()" style="width:100%; background:#FF6B35; margin-bottom:20px;">📍 Localizzami</button>
 
-    <div class="form-nav">
-      <button class="btn-prev" onclick="goStep(3)">← Indietro</button>
-      <button class="btn-submit" id="btn-submit" onclick="submitRegistrazione()">✅ Completa registrazione</button>
-    </div>
-  </div>
+            <div class="slabel">Negozi - Materiali Edili</div>
+            <div class="mestieri-grid">
+                <div class="chip" onclick="setMestiere('Negozio materiali edili',this)">🏪 Negozio materiali edili</div>
+                <div class="chip" onclick="setMestiere('Ferramenta',this)">🔧 Ferramenta</div>
+                <div class="chip" onclick="setMestiere('Sanitari e rubinetteria',this)">🚿 Sanitari e rubinetteria</div>
+                <div class="chip" onclick="setMestiere('Piastrelle e rivestimenti',this)">🟫 Piastrelle e rivestimenti</div>
+                <div class="chip" onclick="setMestiere('Serramenti',this)">🪟 Serramenti</div>
+                <div class="chip" onclick="setMestiere('Vernici e pitture',this)">🎨 Vernici e pitture</div>
+            </div>
+            <button type="button" class="sbtn" onclick="geolocalizzaNegozi()" style="width:100%; background:#FF6B35;">📍 Localizzami</button>
 
-  <!-- SUCCESS -->
-  <div class="success-screen" id="success">
-    <div class="success-icon">🎉</div>
-    <div class="success-title">Registrazione completata!</div>
-    <p class="success-sub">Il tuo profilo è stato inviato. Lo verificheremo entro 24 ore e poi sarà visibile a tutti i clienti nella tua zona!</p>
-    <div class="success-steps">
-      <div class="success-step">
-        <div class="ss-icon">📧</div>
-        <div class="ss-text"><strong>Controlla la tua email</strong>Ti abbiamo inviato una email di conferma con i prossimi passi.</div>
-      </div>
-      <div class="success-step">
-        <div class="ss-icon">🔍</div>
-        <div class="ss-text"><strong>Verifica in corso</strong>Il nostro team verificherà i tuoi dati entro 24 ore lavorative.</div>
-      </div>
-      <div class="success-step">
-        <div class="ss-icon">🚀</div>
-        <div class="ss-text"><strong>Profilo pubblicato</strong>Una volta verificato, il tuo profilo sarà visibile a tutti i clienti!</div>
-      </div>
-    </div>
-    <a href="index.html" style="display:inline-block;background:var(--verde);color:white;padding:14px 32px;border-radius:12px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(42,122,75,0.3)">
-      🏠 Torna alla home
-    </a>
-  </div>
+            <div class="slabel">Dove?</div>
+            <div class="search-row">
+                <span style="font-size:1rem;flex-shrink:0">📍</span>
+                <input type="text" id="search-input" placeholder="Città o CAP... es. Milano, Roma, 20100">
+                <button class="sbtn" onclick="doSearch()">🔍 Cerca</button>
+                <button class="sbtn" style="background: #FF6B35;" onclick="geolocalizza()">📍 Localizzami</button>
+            </div>
+            <div class="search-hint" id="search-hint">Seleziona il tipo di professionista, il mestiere e la zona</div>
+        </div>
+    </section>
 
-</div>
+    <!-- REGISTRATI + PUBBLICITA SECTION -->
+    <section class="lavoro-links">
+        <h2>Registrati e pubblicizza</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="registrazione.html" class="lavoro-btn">📝 Registrati come Impresa</a>
+            <a href="pubblicita.html" class="lavoro-btn">📢 Pubblicità</a>
+        </div>
+    </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// ── Supabase init ──
-let _supabase = null;
-window.addEventListener('load', function() {
-  try {
-    _supabase = window.supabase.createClient(
-      'https://nacvrsgkyfavykxjxszu.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
-    );
-  } catch(e) { console.warn('Supabase non disponibile'); }
-});
+    <!-- CANDIDATI E RICERCA SECTION -->
+    <section class="lavoro-links">
+        <h2>🔨 Cerca Lavoro - Candidatura</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="candidati-registrazione.html" class="lavoro-btn">🔨 Registrati come Candidato</a>
+            <a href="ricerca-candidati.html" class="lavoro-btn">🔍 Ricerca Candidati</a>
+        </div>
+    </section>
 
-// ── Variabili globali ──
-let logoUrl = '';
-let fotoUrls = [];
-let tipoSelezionato = 'Artigiano';
-let currentStep = 1;
-const totalSteps = 4;
+    <!-- OFFERTE DI LAVORO SECTION -->
+    <section class="lavoro-links">
+        <h2>💼 Lavoro - Offerte di Lavoro</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="offerte-registrazione.html" class="lavoro-btn">💼 Pubblica Offerta di Lavoro</a>
+            <a href="ricerca-offerte.html" class="lavoro-btn">🔍 Ricerca Offerte</a>
+        </div>
+    </section>
 
-// ── Mapping tipo → mestieri ──
-const mesteriPerTipo = {
-  'Artigiano': ['🧱 Muratura', '⚡ Elettricista', '🚿 Idraulico', '🌲 Falegname', '🎨 Pittore', '🟫 Piastrellista', '🪵 Parquettista', '🪟 Serramentista', '🔮 Vetraio', '🔑 Fabbro', '🪚 Carpentiere', '🔥 Termoidraulico', '🫙 Tecnico caldaie', '🔥 Stufe a pellet', '❄️ Installatore climatizzatori', '❄️ Climatizzatore', '🔲 Cartongesso', '🏠 Coperture / Tetti', '💧 Impermeabilizzazione', '🌿 Giardiniere', '🚜 Movimento terra', '⛏️ Scavi', '🪣 Autospurghi', '☀️ Impianto solare', '📦 Traslochi', '🧹 Pulizie', '⛏️ Demolizioni'],
-  'Impresa edile': ['🧱 Muratura', '⚡ Elettricista', '🚿 Idraulico', '🌲 Falegname', '🎨 Pittore', '🟫 Piastrellista', '🪵 Parquettista', '🪟 Serramentista', '🔮 Vetraio', '🔑 Fabbro', '🪚 Carpentiere', '🔥 Termoidraulico', '🫙 Tecnico caldaie', '🔥 Stufe a pellet', '❄️ Installatore climatizzatori', '❄️ Climatizzatore', '🔲 Cartongesso', '🏠 Coperture / Tetti', '💧 Impermeabilizzazione', '🌿 Giardiniere', '🚜 Movimento terra', '⛏️ Scavi', '🪣 Autospurghi', '☀️ Impianto solare'],
-  'Ingegnere': ['📐 Ingegnere strutturale', '📐 Ingegnere impianti', '📐 Direzione lavori', '📐 Calcoli strutturali', '📐 Progettazione impianti', '☀️ Impianto solare', '❄️ Climatizzatore', '🔥 Termoidraulico'],
-  'Architetto': ['🏛️ Progettazione architettonica', '🏛️ Interior design', '🏛️ Ristrutturazioni', '🏛️ Design d\'interni', '🎨 Rendering', '🏛️ Consulenza design'],
-  'Geometra': ['📏 Pratiche catastali', '📏 Rilievi topografici', '📏 Perizie', '📏 DIA', '📏 SCIA', '📏 Consulenze tecniche', '🏛️ Ristrutturazioni'],
-  'Amministratore di condominio': ['🏢 Gestione condominiale', '🏢 Assemblee condominiali', '🏢 Manutenzione parti comuni', '🏢 Amministrazione'],
-  'Negozio edilizia': ['🏪 Materiali edili', '🔧 Ferramenta', '🔧 Attrezzi', '🏪 Vendita materiali'],
-  'Negozio pittura': ['🎨 Vernici', '🎨 Colori', '🎨 Stucchi', '🎨 Accessori tinteggiatura']
-};
+    <!-- WHY SECTION -->
+    <section class="why-section">
+        <div class="why-container">
+            <h2>Perché scegliere TrovaImpresa</h2>
+            <p>Una piattaforma sicura, trasparente e sempre con te</p>
 
-// ── Step navigation ──
-function goStep(n) {
-  document.getElementById('step-' + currentStep).classList.remove('active');
-  document.getElementById('step-ind-' + currentStep).classList.remove('active');
-  document.getElementById('step-ind-' + currentStep).classList.add('done');
-  if (currentStep < n) document.getElementById('line-' + currentStep).classList.add('done');
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">✓</div>
+                    <h3>Professionisti verificati</h3>
+                    <p>Ogni artigiano e impresa viene controllato prima di entrare in piattaforma. Garanzia di qualità.</p>
+                </div>
 
-  currentStep = n;
-  
-  // Se vado allo step 2, renderizza i mestieri filtrati
-  if (n === 2) renderizzaMestieri();
-  
-  document.getElementById('step-' + currentStep).classList.add('active');
-  document.getElementById('step-ind-' + currentStep).classList.remove('done');
-  document.getElementById('step-ind-' + currentStep).classList.add('active');
+                <div class="feature-card">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Recensioni reali</h3>
+                    <p>Solo i clienti verificati lasciano feedback autentici. Niente false opinioni, massima trasparenza.</p>
+                </div>
 
-  const pct = (n / totalSteps) * 100;
-  document.getElementById('progress').style.width = pct + '%';
-  window.scrollTo({top:0, behavior:'smooth'});
-}
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>Geolocalizzazione</h3>
+                    <p>Trova i professionisti più vicini a te. Meno km, meno costi, più convenienza.</p>
+                </div>
+            </div>
 
-function selTipo(el) {
-  document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  tipoSelezionato = el.querySelector('.tipo-name').textContent;
-}
+            <div class="info-banner">
+                <p>
+                    <strong>✨ Per i clienti: totalmente gratuito</strong>
+                    <strong>📱 Funziona perfettamente su smartphone</strong>
+                </p>
+            </div>
+        </div>
+    </section>
 
-function renderizzaMestieri() {
-  const grid = document.getElementById('mestieri-grid');
-  grid.innerHTML = '';
-  
-  const mestieri = mesteriPerTipo[tipoSelezionato] || [];
-  
-  mestieri.forEach((mestiere, idx) => {
-    const div = document.createElement('div');
-    div.className = 'mestiere-check' + (idx === 0 ? ' selected' : '');
-    div.textContent = mestiere;
-    div.onclick = function() { this.classList.toggle('selected'); };
-    grid.appendChild(div);
-  });
-}
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>TrovaImpresa</h3>
+                <p style="margin-bottom: 15px; color: #e0f0e8;">La piattaforma affidabile per trovare i professionisti giusti per il tuo progetto.</p>
+            </div>
 
-function toggleMestiere(el) { el.classList.toggle('selected'); }
+            <div class="footer-section">
+                <h3>Link utili</h3>
+                <ul>
+                    <li><a href="#">Cerca imprese</a></li>
+                    <li><a href="registrazione.html">Registrati come impresa</a></li>
+                    <li><a href="prezzi.html">Piani e prezzi</a></li>
+                    <li><a href="#">Chi siamo</a></li>
+                </ul>
+            </div>
 
-// ── ZONE DINAMICHE ──
-let zoneSelezionate = [];
+            <div class="footer-section">
+                <h3>Supporto</h3>
+                <ul>
+                    <li><a href="#">Centro aiuto</a></li>
+                    <li><a href="#">Contatti</a></li>
+                    <li><a href="#">Informativa sulla privacy</a></li>
+                    <li><a href="#">Termini di servizio</a></li>
+                </ul>
+            </div>
 
-function aggiungiZona(nome) {
-  const input = document.getElementById('zona-input');
-  const valore = (nome || input.value).trim();
-  if (!valore) return;
-  if (zoneSelezionate.includes(valore)) { if(input) input.value = ''; return; }
-  zoneSelezionate.push(valore);
-  renderZone();
-  if(input) input.value = '';
-}
+            <div class="footer-section">
+                <h3>Seguici</h3>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">LinkedIn</a></li>
+                    <li><a href="#">YouTube</a></li>
+                </ul>
+            </div>
+        </div>
 
-function rimuoviZona(nome) {
-  zoneSelezionate = zoneSelezionate.filter(z => z !== nome);
-  renderZone();
-}
+        <div class="footer-bottom">
+            <p>&copy; 2026 TrovaImpresa. Tutti i diritti riservati.</p>
+        </div>
+    </footer>
 
-function renderZone() {
-  const wrap = document.getElementById('zone-wrap');
-  wrap.innerHTML = '';
-  zoneSelezionate.forEach(z => {
-    const chip = document.createElement('div');
-    chip.className = 'zona-chip selected';
-    chip.style.cssText = 'display:flex;align-items:center;gap:6px;';
-    const zSafe = z.replace(/'/g, "\\'");
-    chip.innerHTML = `${z} <span onclick="rimuoviZona('${zSafe}')" style="cursor:pointer;font-size:0.75rem;opacity:0.7;font-weight:900">✕</span>`;
-    wrap.appendChild(chip);
-  });
-}
+    <script>
+        // SUPABASE CONFIG
+        const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
 
-async function rilevaPosizione() {
-  const btn = document.getElementById('btn-geo');
-  const status = document.getElementById('geo-status');
-  if (!navigator.geolocation) {
-    status.innerHTML = '❌ Geolocalizzazione non supportata dal browser';
-    return;
-  }
-  btn.innerHTML = '⏳ Rilevamento in corso...';
-  btn.disabled = true;
-  status.innerHTML = '';
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=it`);
-      const data = await res.json();
-      const addr = data.address;
-      const città = addr.city || addr.town || addr.village || addr.municipality || '';
-      const provincia = addr.county || addr.state_district || '';
-      if (città && document.getElementById('f-citta')) document.getElementById('f-citta').value = città;
-      if (città) aggiungiZona(città);
-      if (provincia && provincia !== città) aggiungiZona(provincia);
-      status.innerHTML = `✅ Posizione rilevata: <strong>${città}${provincia ? ', ' + provincia : ''}</strong>`;
-      status.style.color = 'var(--verde)';
-    } catch(e) {
-      status.innerHTML = '⚠️ Impossibile identificare la città. Inseriscila manualmente.';
-      status.style.color = 'orange';
-    }
-    btn.innerHTML = '📍 Rileva la mia posizione automaticamente';
-    btn.disabled = false;
-  }, () => {
-    status.innerHTML = '❌ Permesso negato. Inserisci la zona manualmente.';
-    status.style.color = 'red';
-    btn.innerHTML = '📍 Rileva la mia posizione automaticamente';
-    btn.disabled = false;
-  });
-}
+        let tipoScelto = 'artigiano';
+        let mestiereScelto = 'Tutti';
 
-// ── UPLOAD LOGO ──
-async function uploadLogo(input) {
-  const file = input.files[0];
-  if (!file) return;
+        // SET TYPE
+        function setTipo(tipo, el) {
+            tipoScelto = tipo;
+            document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            aggiornaHint();
+        }
 
-  const statusEl = document.getElementById('logo-status');
-  statusEl.innerHTML = '⏳ Caricamento logo...';
-  statusEl.style.color = '#888';
+        // SET MESTIERE
+        function setMestiere(mestiere, el) {
+            mestiereScelto = mestiere;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            aggiornaHint();
+        }
 
-  if (file.size > 5 * 1024 * 1024) {
-    statusEl.innerHTML = '❌ File troppo grande (max 5MB)';
-    statusEl.style.color = 'red';
-    return;
-  }
+        // UPDATE HINT
+        function aggiornaHint() {
+            const hint = document.getElementById('search-hint');
+            const label = {
+                'artigiano': '🔨 Artigiano',
+                'impresa': '🏗️ Impresa edile',
+                'entrambi': '🔍 Tutti i professionisti'
+            };
+            const m = mestiereScelto === 'Tutti' ? 'tutti i mestieri' : mestiereScelto;
+            hint.innerHTML = `Stai cercando: <strong>${label[tipoScelto]}</strong> · <strong>${m}</strong>`;
+        }
 
-  const ext = file.name.split('.').pop();
-  const fileName = 'logo_' + Date.now() + '.' + ext;
+        // SEARCH
+        function doSearch() {
+            const citta = document.getElementById('search-input').value.trim();
+            const hint = document.getElementById('search-hint');
+            
+            if (!citta) {
+                hint.innerHTML = '⚠️ Inserisci una città per cercare';
+                hint.style.color = '#FF6B35';
+                return;
+            }
 
-  const { data, error } = await _supabase.storage
-    .from('loghi-imprese')
-    .upload(fileName, file, { upsert: true });
+            window.location.href = `risultati.html?tipo=${tipoScelto}&mestiere=${encodeURIComponent(mestiereScelto)}&citta=${encodeURIComponent(citta)}`;
+        }
 
-  if (error) {
-    statusEl.innerHTML = '❌ Errore upload: ' + error.message;
-    statusEl.style.color = 'red';
-    return;
-  }
+        // GEOLOCATION
+        function geolocalizza() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('search-input').value = citta;
+                            document.getElementById('search-hint').innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.';
+                            document.getElementById('search-hint').style.color = '#28a745';
+                        });
+                });
+            } else {
+                document.getElementById('search-hint').innerHTML = '⚠️ Geolocalizzazione non supportata dal tuo browser';
+                document.getElementById('search-hint').style.color = '#FF6B35';
+            }
+        }
 
-  const { data: urlData } = _supabase.storage
-    .from('loghi-imprese')
-    .getPublicUrl(fileName);
+        // GEOLOCATION PROFESSIONISTI
+        function geolocalizzaProfessionisti() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('search-input').value = citta;
+                            alert('✓ Città trovata: ' + citta);
+                        });
+                });
+            } else {
+                alert('⚠️ Geolocalizzazione non supportata');
+            }
+        }
 
-  logoUrl = urlData.publicUrl;
+        // GEOLOCATION NEGOZI
+        function geolocalizzaNegozi() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('search-input').value = citta;
+                            alert('✓ Città trovata: ' + citta);
+                        });
+                });
+            } else {
+                alert('⚠️ Geolocalizzazione non supportata');
+            }
+        }
 
-  document.getElementById('logo-preview-container').innerHTML = `
-    <div class="logo-preview-wrap">
-      <img src="${logoUrl}" alt="Logo caricato">
-      <span style="font-size:0.82rem;color:var(--verde);font-weight:700">✅ Logo caricato!</span>
-      <span style="font-size:0.75rem;color:var(--light)">Clicca per cambiarlo</span>
-    </div>
-  `;
-  statusEl.innerHTML = '';
-}
+        document.addEventListener('DOMContentLoaded', () => {
+            aggiornaHint();
+        });
+    </script>
 
-// ── UPLOAD FOTO LAVORI ──
-async function uploadFoto(input) {
-  const files = Array.from(input.files);
-  if (!files.length) return;
-
-  const statusEl = document.getElementById('foto-status');
-  const grid = document.getElementById('foto-grid');
-
-  if (fotoUrls.length + files.length > 10) {
-    statusEl.innerHTML = '⚠️ Puoi caricare massimo 10 foto in totale';
-    statusEl.style.color = 'orange';
-    return;
-  }
-
-  statusEl.innerHTML = '⏳ Caricamento ' + files.length + ' foto...';
-  statusEl.style.color = '#888';
-
-  let caricate = 0;
-
-  for (const file of files) {
-    if (file.size > 5 * 1024 * 1024) {
-      statusEl.innerHTML = '⚠️ ' + file.name + ' è troppo grande (max 5MB)';
-      statusEl.style.color = 'orange';
-      continue;
-    }
-
-    const ext = file.name.split('.').pop();
-    const fileName = 'foto_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5) + '.' + ext;
-
-    const { data, error } = await _supabase.storage
-      .from('foto-lavori')
-      .upload(fileName, file, { upsert: true });
-
-    if (error) {
-      console.error('Errore upload foto:', error);
-      continue;
-    }
-
-    const { data: urlData } = _supabase.storage
-      .from('foto-lavori')
-      .getPublicUrl(fileName);
-
-    const url = urlData.publicUrl;
-    fotoUrls.push(url);
-    caricate++;
-
-    const wrap = document.createElement('div');
-    wrap.className = 'foto-thumb-wrap';
-    wrap.dataset.url = url;
-    wrap.innerHTML = `
-      <img src="${url}" alt="Foto lavoro">
-      <button class="remove" onclick="removeFoto('${url}', this.parentElement)">✕</button>
-    `;
-    grid.appendChild(wrap);
-  }
-
-  statusEl.innerHTML = '✅ ' + fotoUrls.length + ' foto caricate';
-  statusEl.style.color = 'var(--verde)';
-  input.value = '';
-}
-
-function removeFoto(url, el) {
-  fotoUrls = fotoUrls.filter(u => u !== url);
-  el.remove();
-  const statusEl = document.getElementById('foto-status');
-  if (fotoUrls.length === 0) {
-    statusEl.innerHTML = '';
-  } else {
-    statusEl.innerHTML = '✅ ' + fotoUrls.length + ' foto caricate';
-    statusEl.style.color = 'var(--verde)';
-  }
-}
-
-// ── SUBMIT REGISTRAZIONE ──
-async function submitRegistrazione() {
-  const btn = document.getElementById('btn-submit');
-
-  if (!document.getElementById('f-termini').checked) {
-    alert('⚠️ Devi accettare i Termini di servizio per continuare.');
-    return;
-  }
-
-  btn.innerHTML = '⏳ Salvataggio...';
-  btn.disabled = true;
-
-  const mestieri = [...document.querySelectorAll('.mestiere-check.selected')].map(m => m.textContent.trim());
-
-  const dati = {
-    tipo:           tipoSelezionato,
-    nome:           document.getElementById('f-nome')?.value || '',
-    cognome:        document.getElementById('f-cognome')?.value || '',
-    nome_attivita:  document.getElementById('f-nome-attivita')?.value || '',
-    partita_iva:    document.getElementById('f-piva')?.value || '',
-    email:          document.getElementById('f-email')?.value || '',
-    telefono:       document.getElementById('f-telefono')?.value || '',
-    descrizione:    document.getElementById('f-descrizione')?.value || '',
-    anno_fondazione: parseInt(document.getElementById('f-anno')?.value) || null,
-    dipendenti:     document.getElementById('f-dipendenti')?.value || '',
-    sito_web:       document.getElementById('f-sito')?.value || '',
-    citta:          document.getElementById('f-citta')?.value || '',
-    cap:            document.getElementById('f-cap')?.value || '',
-    indirizzo:      document.getElementById('f-indirizzo')?.value || '',
-    telefono_pub:   document.getElementById('f-telefono-pub')?.value || '',
-    whatsapp:       document.getElementById('f-whatsapp')?.value || '',
-    orari:          document.getElementById('f-orari')?.value || '',
-    costo:          document.getElementById('f-costo')?.value || '',
-    certificazioni: document.getElementById('f-certificazioni')?.value || '',
-    mestieri:       mestieri,
-    zone:           zoneSelezionate,
-    logo_url:       logoUrl,
-    foto_urls:      fotoUrls,
-    verificata:     false
-  };
-
-  const { error } = await _supabase.from('imprese').insert([dati]);
-
-  if (error) {
-    console.error(error);
-    btn.innerHTML = '❌ Errore — riprova';
-    btn.disabled = false;
-    alert('Errore nel salvataggio: ' + error.message);
-    return;
-  }
-
-  document.getElementById('step-4').classList.remove('active');
-  document.getElementById('success').classList.add('show');
-  document.getElementById('progress').style.width = '100%';
-  document.getElementById('progress').style.background = 'var(--verde)';
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-</script>
 </body>
 </html>
