@@ -433,7 +433,7 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
-        /* SEZIONE LAVORO SIMMETRICA */
+        /* SEZIONE IMPRESA - LE TUE OFFERTE */
         .jobs-section-symmetric {
             padding: 80px 40px;
             background: #f8f9fa;
@@ -829,6 +829,15 @@
         </div>
     </section>
 
+    <!-- SEZIONE CANDIDATI E RICERCA -->
+    <section class="lavoro-links">
+        <h2>🔨 Lavoro - Sistema Candidati</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="candidati-registrazione.html" class="lavoro-btn">🔨 Registrati come Candidato</a>
+            <a href="ricerca-candidati.html" class="lavoro-btn">🔍 Ricerca Candidati</a>
+        </div>
+    </section>
+
     <!-- SEZIONE PERCHÉ TROVAIMPRESA -->
     <section class="why-section">
         <div class="why-container">
@@ -860,107 +869,6 @@
                     <strong>✨ Per i clienti: totalmente gratuito</strong>
                     <strong>📱 Funziona perfettamente su smartphone</strong>
                 </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- SEZIONE CANDIDATI E RICERCA -->
-    <section class="lavoro-links">
-        <h2>🔨 Lavoro - Sistema Candidati</h2>
-        <div class="lavoro-buttons-grid">
-            <a href="candidati-registrazione.html" class="lavoro-btn">🔨 Registrati come Candidato</a>
-            <a href="ricerca-candidati.html" class="lavoro-btn">🔍 Ricerca Candidati</a>
-        </div>
-    </section>
-
-    <!-- SEZIONE CANDIDATO - LE TUE RICERCHE -->
-    <section class="jobs-section-symmetric">
-        <div class="jobs-container-symmetric">
-            <h2>🔍 Candidato - Le tue ricerche</h2>
-            
-            <div class="jobs-grid">
-                <!-- COLONNA SINISTRA: INSERISCI CANDIDATURA -->
-                <div class="col-candidature">
-                    <div class="col-title">Cerca lavoro</div>
-                    <div class="col-subtitle">Salva il tuo profilo</div>
-                    
-                    <form id="form-ricerca-candidato" onsubmit="salvaRicercaCandidato(event)">
-                        <div class="form-group">
-                            <label for="ricerca-nome">Nome *</label>
-                            <input type="text" id="ricerca-nome" placeholder="Es. Mario" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-cognome">Cognome *</label>
-                            <input type="text" id="ricerca-cognome" placeholder="Es. Rossi" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-eta">Età *</label>
-                            <input type="number" id="ricerca-eta" min="18" max="99" placeholder="Es. 35" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-sesso">Sesso *</label>
-                            <select id="ricerca-sesso" required>
-                                <option value="">-- Seleziona --</option>
-                                <option value="Uomo">Uomo</option>
-                                <option value="Donna">Donna</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-mestiere">Mestiere *</label>
-                            <input type="text" id="ricerca-mestiere" placeholder="Es. Idraulico, Muratore..." required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-citta">Città *</label>
-                            <input type="text" id="ricerca-citta" placeholder="Es. Roma" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-livello">Livello *</label>
-                            <select id="ricerca-livello" required>
-                                <option value="">-- Seleziona --</option>
-                                <option value="Apprendista">Apprendista</option>
-                                <option value="Specializzato">Specializzato</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-descrizione">Descrizione / Biografia</label>
-                            <textarea id="ricerca-descrizione" placeholder="Racconta di te, esperienza, certificati..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-foto">📷 Foto Profilo</label>
-                            <input type="file" id="ricerca-foto" accept="image/*">
-                            <small>JPG, PNG - Max 5MB</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ricerca-curriculum">📄 Curriculum (PDF)</label>
-                            <input type="file" id="ricerca-curriculum" accept=".pdf,.doc,.docx">
-                            <small>PDF, DOC, DOCX - Max 10MB</small>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit">💾 Salva profilo</button>
-                        </div>
-                        <button type="button" class="sbtn" onclick="geolocalizzaCandidato()" style="width:100%; margin-top:8px; background:#FF6B35; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:600;">📍 Localizzami</button>
-                    </form>
-                </div>
-
-                <!-- COLONNA DESTRA: VISUALIZZA PROFILO -->
-                <div class="col-annunci">
-                    <div class="col-title">Il tuo profilo</div>
-                    <div class="col-subtitle">Dati salvati</div>
-                    
-                    <div id="ricerche-candidato-container" style="flex: 1; overflow-y: auto;">
-                        <p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessun profilo salvato</p>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -1060,85 +968,6 @@
         // SUPABASE CONFIG
         const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-
-        // CANDIDATO - SALVA PROFILO SU SUPABASE
-        async function salvaRicercaCandidato(e) {
-            e.preventDefault();
-            
-            const nome = document.getElementById('ricerca-nome').value.trim();
-            const cognome = document.getElementById('ricerca-cognome').value.trim();
-            const eta = document.getElementById('ricerca-eta').value;
-            const sesso = document.getElementById('ricerca-sesso').value;
-            const mestiere = document.getElementById('ricerca-mestiere').value.trim();
-            const citta = document.getElementById('ricerca-citta').value.trim();
-            const livello = document.getElementById('ricerca-livello').value;
-            const descrizione = document.getElementById('ricerca-descrizione').value.trim();
-            
-            if (!nome || !cognome || !eta || !sesso || !mestiere || !citta || !livello) {
-                alert('⚠️ Riempi tutti i campi obbligatori');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/candidati_lavoro`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    },
-                    body: JSON.stringify({
-                        nome: nome,
-                        cognome: cognome,
-                        eta: parseInt(eta),
-                        sesso: sesso,
-                        mestiere: mestiere,
-                        citta: citta,
-                        livello: livello,
-                        descrizione: descrizione,
-                        data_registrazione: new Date().toISOString()
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Errore durante il salvataggio');
-                }
-
-                alert('✅ Profilo salvato con successo!');
-                document.getElementById('form-ricerca-candidato').reset();
-                caricaProfiloCandidato();
-
-            } catch (err) {
-                console.error(err);
-                alert('❌ Errore: ' + err.message);
-            }
-        }
-
-        // CANDIDATO - CARICA PROFILO
-        function caricaProfiloCandidato() {
-            const container = document.getElementById('ricerche-candidato-container');
-            container.innerHTML = '<p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Profilo salvato su Supabase ✓</p>';
-        }
-
-        // CANDIDATO - GEOLOCALIZZAZIONE
-        function geolocalizzaCandidato() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('ricerca-citta').value = city;
-                            alert('✓ Città trovata: ' + city);
-                        });
-                });
-            } else {
-                alert('⚠️ Geolocalizzazione non supportata');
-            }
-        }
 
         // IMPRESA - SALVA OFFERTA
         function salvaOffertaImpresa(e) {
