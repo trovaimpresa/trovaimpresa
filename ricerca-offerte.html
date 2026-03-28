@@ -1,1 +1,418 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricerca Offerte di Lavoro - TrovaImpresa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1a472a;
+        }
+        .header h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        .header p {
+            font-size: 16px;
+            color: #666;
+        }
+        .search-filters {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-group label {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #FF6B35;
+        }
+        .filter-group input,
+        .filter-group select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #FF6B35;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-cerca {
+            flex: 1;
+            padding: 12px 20px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .btn-cerca:hover {
+            background: #e55a25;
+        }
+        .btn-reset {
+            padding: 12px 20px;
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+        .results-info {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .offerte-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 20px;
+        }
+        .offerta-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            border-left: 4px solid #FF6B35;
+        }
+        .offerta-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+        .offerta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+        .offerta-azienda {
+            font-size: 16px;
+            font-weight: 800;
+            color: #333;
+        }
+        .offerta-contratto {
+            background: #FF6B35;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .offerta-titolo {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a472a;
+            margin-bottom: 10px;
+        }
+        .offerta-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #666;
+        }
+        .offerta-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .offerta-descrizione {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .offerta-contatti {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-contatta {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+        .btn-contatta:hover {
+            background: #228636;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .empty-state h2 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+            color: #666;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: #28a745;
+        }
+        .logo span {
+            color: #FF6B35;
+        }
+        .back-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">Trova<span>Impresa</span></div>
+    <a href="index.html" class="back-link">← Torna alla home</a>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1>💼 Offerte di Lavoro</h1>
+        <p>Scopri le migliori opportunità lavorative nella tua zona</p>
+    </div>
+
+    <div class="search-filters">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="tipo-offerta-filter">Tipo di Lavoro (opzionale)</label>
+                <select id="tipo-offerta-filter">
+                    <option value="">-- Tutti i tipi --</option>
+                    <option>Muratore</option>
+                    <option>Elettricista</option>
+                    <option>Idraulico</option>
+                    <option>Carpentiere</option>
+                    <option>Pittore/Imbianchino</option>
+                    <option>Piastrellista</option>
+                    <option>Operaio generico</option>
+                    <option>Geometra</option>
+                    <option>Ingegnere</option>
+                    <option>Architetto</option>
+                    <option>Gruista</option>
+                    <option>Saldatore</option>
+                    <option>Giardiniere</option>
+                    <option>Altro</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="citta-offerta-filter">Città (opzionale)</label>
+                <input type="text" id="citta-offerta-filter" placeholder="Es. Roma, Milano...">
+            </div>
+            <div class="filter-group">
+                <label for="contratto-filter">Tipo Contratto (opzionale)</label>
+                <select id="contratto-filter">
+                    <option value="">-- Tutti i contratti --</option>
+                    <option value="Tempo indeterminato">Tempo indeterminato</option>
+                    <option value="Tempo determinato">Tempo determinato</option>
+                    <option value="Partita IVA">Partita IVA</option>
+                    <option value="Stage/Apprendistato">Stage/Apprendistato</option>
+                </select>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-cerca" onclick="cercaOfferte()">🔍 Cerca Offerte</button>
+            <button class="btn-reset" onclick="resetFiltri()">🔄 Reset</button>
+        </div>
+    </div>
+
+    <div class="results-info" id="results-info">
+        <p>Compila i filtri e clicca "Cerca Offerte" per iniziare</p>
+    </div>
+
+    <div id="offerte-container">
+        <div class="empty-state">
+            <div class="empty-icon">💼</div>
+            <h2>Nessun filtro selezionato</h2>
+            <p>Usa i filtri sopra per cercare offerte di lavoro</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function cercaOfferte() {
+        const tipo = document.getElementById('tipo-offerta-filter').value.trim();
+        const citta = document.getElementById('citta-offerta-filter').value.trim();
+        const contratto = document.getElementById('contratto-filter').value.trim();
+
+        const container = document.getElementById('offerte-container');
+        container.innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
+
+        try {
+            let query = supabase.from('offerte_lavoro').select('*').eq('attiva', true);
+
+            if (tipo) {
+                query = query.ilike('tipo_offerta', `%${tipo}%`);
+            }
+            if (citta) {
+                query = query.ilike('citta', `%${citta}%`);
+            }
+            if (contratto) {
+                query = query.eq('tipo_contratto', contratto);
+            }
+
+            const { data, error } = await query.order('data_pubblicazione', { ascending: false });
+
+            if (error) {
+                throw error;
+            }
+
+            mostraOfferte(data);
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><h2>Errore</h2><p>${err.message}</p></div>`;
+        }
+    }
+
+    function mostraOfferte(offerte) {
+        const container = document.getElementById('offerte-container');
+        const resultsInfo = document.getElementById('results-info');
+
+        if (!offerte || offerte.length === 0) {
+            resultsInfo.innerHTML = '<p>❌ Nessuna offerta trovata con questi criteri</p>';
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">💼</div>
+                    <h2>Nessun risultato</h2>
+                    <p>Prova a modificare i filtri e ricerca di nuovo</p>
+                </div>
+            `;
+            return;
+        }
+
+        resultsInfo.innerHTML = `<p>✅ ${offerte.length} offerta${offerte.length > 1 ? 'e' : ''} trovata${offerte.length > 1 ? 'e' : ''}</p>`;
+
+        const html = offerte.map(o => `
+            <div class="offerta-card">
+                <div class="offerta-header">
+                    <div>
+                        <div class="offerta-azienda">🏢 ${o.nome_azienda}</div>
+                        <div class="offerta-titolo">${o.titolo}</div>
+                    </div>
+                    <span class="offerta-contratto">${o.tipo_contratto}</span>
+                </div>
+                <div class="offerta-info">
+                    ${o.tipo_offerta ? `<span>🔧 ${o.tipo_offerta}</span>` : ''}
+                    ${o.citta ? `<span>📍 ${o.citta}</span>` : ''}
+                </div>
+                ${o.descrizione ? `<div class="offerta-descrizione">${o.descrizione.substring(0, 200)}${o.descrizione.length > 200 ? '...' : ''}</div>` : ''}
+                <div class="offerta-contatti">
+                    ${o.telefono ? `<a href="tel:${o.telefono}" class="btn-contatta">☎️ Chiama</a>` : ''}
+                    ${o.email ? `<a href="mailto:${o.email}" class="btn-contatta">📧 Email</a>` : ''}
+                    ${o.telefono ? `<a href="https://wa.me/${o.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-contatta">💬 WhatsApp</a>` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        container.innerHTML = `<div class="offerte-grid">${html}</div>`;
+    }
+
+    function resetFiltri() {
+        document.getElementById('tipo-offerta-filter').value = '';
+        document.getElementById('citta-offerta-filter').value = '';
+        document.getElementById('contratto-filter').value = '';
+        document.getElementById('offerte-container').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">💼</div>
+                <h2>Nessun filtro selezionato</h2>
+                <p>Usa i filtri sopra per cercare offerte di lavoro</p>
+            </div>
+        `;
+        document.getElementById('results-info').innerHTML = '<p>Compila i filtri e clicca "Cerca Offerte" per iniziare</p>';
+    }
+</script>
+
+</body>
+</html>
 
