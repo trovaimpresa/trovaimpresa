@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricerca Candidati - TrovaImpresa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1a472a;
+        }
+        .header h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        .header p {
+            font-size: 16px;
+            color: #666;
+        }
+        .search-filters {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-group label {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #0066cc;
+        }
+        .filter-group input,
+        .filter-group select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-cerca {
+            flex: 1;
+            padding: 12px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .btn-cerca:hover {
+            background: #228636;
+        }
+        .btn-reset {
+            padding: 12px 20px;
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+        .results-info {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .candidati-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .candidato-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            border-left: 4px solid #28a745;
+        }
+        .candidato-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+        .candidato-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .candidato-nome {
+            font-size: 18px;
+            font-weight: 800;
+            color: #333;
+        }
+        .candidato-livello {
+            background: #28a745;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .candidato-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #666;
+        }
+        .candidato-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .candidato-bio {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .candidato-contatti {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-contatta {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+        .btn-contatta:hover {
+            background: #e55a25;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .empty-state h2 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+            color: #666;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            border-radius: 8px;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: #28a745;
+        }
+        .logo span {
+            color: #FF6B35;
+        }
+        .back-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">Trova<span>Impresa</span></div>
+    <a href="index.html" class="back-link">← Torna alla home</a>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1>🔍 Ricerca Candidati</h1>
+        <p>Trova i professionisti che cerchi per la tua azienda</p>
+    </div>
+
+    <div class="search-filters">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="mestiere-filter">Mestiere (opzionale)</label>
+                <input type="text" id="mestiere-filter" placeholder="Es. Muratore, Elettricista...">
+            </div>
+            <div class="filter-group">
+                <label for="citta-filter">Città (opzionale)</label>
+                <input type="text" id="citta-filter" placeholder="Es. Roma, Milano...">
+            </div>
+            <div class="filter-group">
+                <label for="livello-filter">Livello (opzionale)</label>
+                <select id="livello-filter">
+                    <option value="">-- Tutti i livelli --</option>
+                    <option value="Apprendista">Apprendista</option>
+                    <option value="Specializzato">Specializzato</option>
+                    <option value="Capo cantiere">Capo cantiere</option>
+                    <option value="Titolare azienda">Titolare azienda</option>
+                </select>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-cerca" onclick="cercaCandidati()">🔍 Cerca Candidati</button>
+            <button class="btn-reset" onclick="resetFiltri()">🔄 Reset</button>
+        </div>
+    </div>
+
+    <div class="results-info" id="results-info">
+        <p>Compila i filtri e clicca "Cerca Candidati" per iniziare</p>
+    </div>
+
+    <div id="candidati-container">
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h2>Nessun filtro selezionato</h2>
+            <p>Usa i filtri sopra per cercare candidati</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function cercaCandidati() {
+        const mestiere = document.getElementById('mestiere-filter').value.trim();
+        const citta = document.getElementById('citta-filter').value.trim();
+        const livello = document.getElementById('livello-filter').value.trim();
+
+        const container = document.getElementById('candidati-container');
+        container.innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
+
+        try {
+            let query = supabase.from('candidati_lavoro').select('*');
+
+            if (mestiere) {
+                query = query.ilike('mestiere', `%${mestiere}%`);
+            }
+            if (citta) {
+                query = query.ilike('citta', `%${citta}%`);
+            }
+            if (livello) {
+                query = query.eq('livello', livello);
+            }
+
+            const { data, error } = await query.order('data_registrazione', { ascending: false });
+
+            if (error) {
+                throw error;
+            }
+
+            mostraCandidati(data, mestiere, citta, livello);
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><h2>Errore</h2><p>${err.message}</p></div>`;
+        }
+    }
+
+    function mostraCandidati(candidati, mestiere, citta, livello) {
+        const container = document.getElementById('candidati-container');
+        const resultsInfo = document.getElementById('results-info');
+
+        if (!candidati || candidati.length === 0) {
+            resultsInfo.innerHTML = '<p>❌ Nessun candidato trovato con questi criteri</p>';
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h2>Nessun risultato</h2>
+                    <p>Prova a modificare i filtri e ricerca di nuovo</p>
+                </div>
+            `;
+            return;
+        }
+
+        resultsInfo.innerHTML = `<p>✅ ${candidati.length} candidato${candidati.length > 1 ? 'i' : ''} trovato${candidati.length > 1 ? 'i' : ''}</p>`;
+
+        const html = candidati.map(c => `
+            <div class="candidato-card">
+                <div class="candidato-header">
+                    <div class="candidato-nome">👤 ${c.nome} ${c.cognome}</div>
+                    <div class="candidato-livello">${c.livello}</div>
+                </div>
+                <div class="candidato-info">
+                    ${c.mestiere ? `<span>🔧 ${c.mestiere}</span>` : ''}
+                    ${c.citta ? `<span>📍 ${c.citta}</span>` : ''}
+                    ${c.eta ? `<span>🎂 ${c.eta} anni</span>` : ''}
+                    ${c.sesso ? `<span>👥 ${c.sesso}</span>` : ''}
+                </div>
+                ${c.descrizione ? `<div class="candidato-bio">${c.descrizione.substring(0, 200)}${c.descrizione.length > 200 ? '...' : ''}</div>` : ''}
+                <div class="candidato-contatti">
+                    ${c.telefono ? `<a href="tel:${c.telefono}" class="btn-contatta">☎️ Chiama</a>` : ''}
+                    ${c.email ? `<a href="mailto:${c.email}" class="btn-contatta">📧 Email</a>` : ''}
+                    ${c.telefono ? `<a href="https://wa.me/${c.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-contatta">💬 WhatsApp</a>` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        container.innerHTML = `<div class="candidati-grid">${html}</div>`;
+    }
+
+    function resetFiltri() {
+        document.getElementById('mestiere-filter').value = '';
+        document.getElementById('citta-filter').value = '';
+        document.getElementById('livello-filter').value = '';
+        document.getElementById('candidati-container').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h2>Nessun filtro selezionato</h2>
+                <p>Usa i filtri sopra per cercare candidati</p>
+            </div>
+        `;
+        document.getElementById('results-info').innerHTML = '<p>Compila i filtri e clicca "Cerca Candidati" per iniziare</p>';
+    }
+</script>
+
+</body>
+</html>
