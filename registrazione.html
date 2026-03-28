@@ -465,33 +465,7 @@
     <div style="margin-top:24px">
       <label class="form-label">Mestieri / Specializzazioni <span class="req">*</span></label>
       <div class="form-hint" style="margin-bottom:12px">Seleziona tutti i lavori che sai fare</div>
-      <div class="mestieri-check-grid">
-        <div class="mestiere-check selected" onclick="toggleMestiere(this)">🧱 Muratura</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">⚡ Elettricista</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🚿 Idraulico</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🌲 Falegname</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🎨 Pittore</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🟫 Piastrellista</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🪵 Parquettista</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🪟 Serramentista</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🔮 Vetraio</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🔑 Fabbro</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🪚 Carpentiere</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🔥 Termoidraulico</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🫙 Tecnico caldaie</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🔥 Stufe a pellet</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">❄️ Installatore climatizzatori</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">❄️ Climatizzatore</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🔲 Cartongesso</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🏠 Coperture / Tetti</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🌿 Giardiniere</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🚜 Movimento terra</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">⛏️ Scavi</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🪣 Autospurghi</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">☀️ Impianto solare</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">📦 Traslochi</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">🧹 Pulizie</div>
-        <div class="mestiere-check" onclick="toggleMestiere(this)">⛏️ Demolizioni</div>
+      <div class="mestieri-check-grid" id="mestieri-grid">
       </div>
     </div>
 
@@ -685,14 +659,26 @@ window.addEventListener('load', function() {
   } catch(e) { console.warn('Supabase non disponibile'); }
 });
 
-// ── Variabili globali per gli URL delle immagini ──
+// ── Variabili globali ──
 let logoUrl = '';
 let fotoUrls = [];
-
-// ── Step navigation ──
+let tipoSelezionato = 'Artigiano';
 let currentStep = 1;
 const totalSteps = 4;
 
+// ── Mapping tipo → mestieri ──
+const mesteriPerTipo = {
+  'Artigiano': ['🧱 Muratura', '⚡ Elettricista', '🚿 Idraulico', '🌲 Falegname', '🎨 Pittore', '🟫 Piastrellista', '🪵 Parquettista', '🪟 Serramentista', '🔮 Vetraio', '🔑 Fabbro', '🪚 Carpentiere', '🔥 Termoidraulico', '🫙 Tecnico caldaie', '🔥 Stufe a pellet', '❄️ Installatore climatizzatori', '❄️ Climatizzatore', '🔲 Cartongesso', '🏠 Coperture / Tetti', '💧 Impermeabilizzazione', '🌿 Giardiniere', '🚜 Movimento terra', '⛏️ Scavi', '🪣 Autospurghi', '☀️ Impianto solare', '📦 Traslochi', '🧹 Pulizie', '⛏️ Demolizioni'],
+  'Impresa edile': ['🧱 Muratura', '⚡ Elettricista', '🚿 Idraulico', '🌲 Falegname', '🎨 Pittore', '🟫 Piastrellista', '🪵 Parquettista', '🪟 Serramentista', '🔮 Vetraio', '🔑 Fabbro', '🪚 Carpentiere', '🔥 Termoidraulico', '🫙 Tecnico caldaie', '🔥 Stufe a pellet', '❄️ Installatore climatizzatori', '❄️ Climatizzatore', '🔲 Cartongesso', '🏠 Coperture / Tetti', '💧 Impermeabilizzazione', '🌿 Giardiniere', '🚜 Movimento terra', '⛏️ Scavi', '🪣 Autospurghi', '☀️ Impianto solare'],
+  'Ingegnere': ['📐 Ingegnere strutturale', '📐 Ingegnere impianti', '📐 Direzione lavori', '📐 Calcoli strutturali', '📐 Progettazione impianti', '☀️ Impianto solare', '❄️ Climatizzatore', '🔥 Termoidraulico'],
+  'Architetto': ['🏛️ Progettazione architettonica', '🏛️ Interior design', '🏛️ Ristrutturazioni', '🏛️ Design d\'interni', '🎨 Rendering', '🏛️ Consulenza design'],
+  'Geometra': ['📏 Pratiche catastali', '📏 Rilievi topografici', '📏 Perizie', '📏 DIA', '📏 SCIA', '📏 Consulenze tecniche', '🏛️ Ristrutturazioni'],
+  'Amministratore di condominio': ['🏢 Gestione condominiale', '🏢 Assemblee condominiali', '🏢 Manutenzione parti comuni', '🏢 Amministrazione'],
+  'Negozio edilizia': ['🏪 Materiali edili', '🔧 Ferramenta', '🔧 Attrezzi', '🏪 Vendita materiali'],
+  'Negozio pittura': ['🎨 Vernici', '🎨 Colori', '🎨 Stucchi', '🎨 Accessori tinteggiatura']
+};
+
+// ── Step navigation ──
 function goStep(n) {
   document.getElementById('step-' + currentStep).classList.remove('active');
   document.getElementById('step-ind-' + currentStep).classList.remove('active');
@@ -700,6 +686,10 @@ function goStep(n) {
   if (currentStep < n) document.getElementById('line-' + currentStep).classList.add('done');
 
   currentStep = n;
+  
+  // Se vado allo step 2, renderizza i mestieri filtrati
+  if (n === 2) renderizzaMestieri();
+  
   document.getElementById('step-' + currentStep).classList.add('active');
   document.getElementById('step-ind-' + currentStep).classList.remove('done');
   document.getElementById('step-ind-' + currentStep).classList.add('active');
@@ -712,6 +702,22 @@ function goStep(n) {
 function selTipo(el) {
   document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+  tipoSelezionato = el.querySelector('.tipo-name').textContent;
+}
+
+function renderizzaMestieri() {
+  const grid = document.getElementById('mestieri-grid');
+  grid.innerHTML = '';
+  
+  const mestieri = mesteriPerTipo[tipoSelezionato] || [];
+  
+  mestieri.forEach((mestiere, idx) => {
+    const div = document.createElement('div');
+    div.className = 'mestiere-check' + (idx === 0 ? ' selected' : '');
+    div.textContent = mestiere;
+    div.onclick = function() { this.classList.toggle('selected'); };
+    grid.appendChild(div);
+  });
 }
 
 function toggleMestiere(el) { el.classList.toggle('selected'); }
@@ -792,7 +798,6 @@ async function uploadLogo(input) {
   statusEl.innerHTML = '⏳ Caricamento logo...';
   statusEl.style.color = '#888';
 
-  // Controllo dimensione (5MB)
   if (file.size > 5 * 1024 * 1024) {
     statusEl.innerHTML = '❌ File troppo grande (max 5MB)';
     statusEl.style.color = 'red';
@@ -818,7 +823,6 @@ async function uploadLogo(input) {
 
   logoUrl = urlData.publicUrl;
 
-  // Mostra anteprima dentro l'upload area
   document.getElementById('logo-preview-container').innerHTML = `
     <div class="logo-preview-wrap">
       <img src="${logoUrl}" alt="Logo caricato">
@@ -849,7 +853,6 @@ async function uploadFoto(input) {
   let caricate = 0;
 
   for (const file of files) {
-    // Controllo dimensione
     if (file.size > 5 * 1024 * 1024) {
       statusEl.innerHTML = '⚠️ ' + file.name + ' è troppo grande (max 5MB)';
       statusEl.style.color = 'orange';
@@ -876,7 +879,6 @@ async function uploadFoto(input) {
     fotoUrls.push(url);
     caricate++;
 
-    // Aggiunge thumbnail con pulsante rimozione
     const wrap = document.createElement('div');
     wrap.className = 'foto-thumb-wrap';
     wrap.dataset.url = url;
@@ -889,7 +891,7 @@ async function uploadFoto(input) {
 
   statusEl.innerHTML = '✅ ' + fotoUrls.length + ' foto caricate';
   statusEl.style.color = 'var(--verde)';
-  input.value = ''; // reset per permettere di ri-selezionare gli stessi file
+  input.value = '';
 }
 
 function removeFoto(url, el) {
@@ -908,7 +910,6 @@ function removeFoto(url, el) {
 async function submitRegistrazione() {
   const btn = document.getElementById('btn-submit');
 
-  // Controllo termini
   if (!document.getElementById('f-termini').checked) {
     alert('⚠️ Devi accettare i Termini di servizio per continuare.');
     return;
@@ -917,11 +918,10 @@ async function submitRegistrazione() {
   btn.innerHTML = '⏳ Salvataggio...';
   btn.disabled = true;
 
-  const tipo = document.querySelector('.tipo-card.selected .tipo-name')?.textContent || 'Artigiano';
   const mestieri = [...document.querySelectorAll('.mestiere-check.selected')].map(m => m.textContent.trim());
 
   const dati = {
-    tipo:           tipo,
+    tipo:           tipoSelezionato,
     nome:           document.getElementById('f-nome')?.value || '',
     cognome:        document.getElementById('f-cognome')?.value || '',
     nome_attivita:  document.getElementById('f-nome-attivita')?.value || '',
@@ -957,7 +957,6 @@ async function submitRegistrazione() {
     return;
   }
 
-  // Successo!
   document.getElementById('step-4').classList.remove('active');
   document.getElementById('success').classList.add('show');
   document.getElementById('progress').style.width = '100%';
