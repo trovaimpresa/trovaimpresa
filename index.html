@@ -251,7 +251,7 @@
             text-align: center;
         }
 
-        /* SEZIONE PERCHÉ TROVAIMPRESA */
+        /* WHY SECTION */
         .why-section {
             background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
             padding: 80px 20px;
@@ -363,7 +363,7 @@
             line-height: 1.7;
         }
 
-        /* Banner info */
+        /* INFO BANNER */
         .info-banner {
             background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
             padding: 30px;
@@ -388,7 +388,7 @@
             font-weight: 700;
         }
 
-        /* SEZIONE CANDIDATI E RICERCA */
+        /* WORK LINKS SECTION */
         .lavoro-links {
             padding: 40px;
             background: #f9f9f9;
@@ -433,7 +433,7 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
 
-        /* SEZIONE IMPRESA - LE TUE OFFERTE */
+        /* JOBS SECTION */
         .jobs-section-symmetric {
             padding: 80px 40px;
             background: #f8f9fa;
@@ -559,7 +559,7 @@
             overflow-y: auto;
         }
 
-        .annuncio-card {
+        .ad-card {
             background: white;
             padding: 15px;
             border-radius: 8px;
@@ -568,14 +568,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .annuncio-titolo {
+        .ad-title {
             font-weight: 700;
             color: #333;
             margin-bottom: 8px;
             font-size: 13px;
         }
 
-        .annuncio-info {
+        .ad-info {
             font-size: 11px;
             color: #666;
             line-height: 1.6;
@@ -728,7 +728,7 @@
     <nav class="navbar">
         <div class="logo">Trova<span>Impresa</span></div>
         <div class="nav-buttons">
-            <a href="#" class="btn-entra">Entra (Imprese)</a>
+            <a href="pannello-impresa.html" class="btn-entra">Entra (Imprese)</a>
             <a href="registrazione.html" class="btn-registrati">Registrati (Imprese)</a>
             <a href="pubblicita.html" class="btn-pubblicita">📢 Pubblicità</a>
         </div>
@@ -736,12 +736,12 @@
 
     <!-- HERO SECTION -->
     <section class="hero">
-        <img  alt="TrovaImpresa Logo" style="height: 280px; width: auto; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto;">
+        <img src="/trovaimpresa_logo_transparent.png" alt="Logo TrovaImpresa" style="height: 280px; width: auto; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto;">
         
         <h1>Trova l'impresa adatta a te</h1>
         <p>In pochi click, l'artigiano perfetto per il tuo progetto</p>
 
-        <!-- SEARCH BOX COMPLETA -->
+        <!-- SEARCH BOX -->
         <div class="search-box">
             <div class="slabel">Stai cercando...</div>
             <div class="tipo-toggle">
@@ -829,16 +829,16 @@
         </div>
     </section>
 
-    <!-- SEZIONE CANDIDATI E RICERCA -->
+    <!-- CANDIDATI E RICERCA SECTION -->
     <section class="lavoro-links">
-        <h2>🔨 Cerca Lavoro - Candidature</h2>
+        <h2>🔨 Cerca Lavoro - Candidatura</h2>
         <div class="lavoro-buttons-grid">
             <a href="candidati-registrazione.html" class="lavoro-btn">🔨 Registrati come Candidato</a>
             <a href="ricerca-candidati.html" class="lavoro-btn">🔍 Ricerca Candidati</a>
         </div>
     </section>
 
-    <!-- SEZIONE OFFERTE DI LAVORO -->
+    <!-- OFFERTE DI LAVORO SECTION -->
     <section class="lavoro-links">
         <h2>💼 Lavoro - Offerte di Lavoro</h2>
         <div class="lavoro-buttons-grid">
@@ -847,7 +847,7 @@
         </div>
     </section>
 
-    <!-- SEZIONE PERCHÉ TROVAIMPRESA -->
+    <!-- WHY SECTION -->
     <section class="why-section">
         <div class="why-container">
             <h2>Perché scegliere TrovaImpresa</h2>
@@ -863,7 +863,7 @@
                 <div class="feature-card">
                     <div class="feature-icon">⭐</div>
                     <h3>Recensioni reali</h3>
-                    <p>Solo clienti verificati lasciano feedback autentici. Niente false opinioni, massima trasparenza.</p>
+                    <p>Solo i clienti verificati lasciano feedback autentici. Niente false opinioni, massima trasparenza.</p>
                 </div>
 
                 <div class="feature-card">
@@ -881,8 +881,6 @@
             </div>
         </div>
     </section>
-
-
 
     <!-- FOOTER -->
     <footer class="footer">
@@ -907,7 +905,7 @@
                 <ul>
                     <li><a href="#">Centro aiuto</a></li>
                     <li><a href="#">Contatti</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Informativa sulla privacy</a></li>
                     <li><a href="#">Termini di servizio</a></li>
                 </ul>
             </div>
@@ -933,129 +931,10 @@
         const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
 
-        // IMPRESA - SALVA OFFERTA
-        function salvaOffertaImpresa(e) {
-            e.preventDefault();
-            const mestiere = document.getElementById('offerta-mestiere').value;
-            const citta = document.getElementById('offerta-citta-imp').value;
-            const descrizione = document.getElementById('offerta-descrizione').value;
-            
-            if (!mestiere || !citta) {
-                alert('Riempi mestiere e città');
-                return;
-            }
-
-            const offerta = {
-                id: Date.now(),
-                mestiere: mestiere,
-                citta: citta,
-                descrizione: descrizione,
-                data: new Date().toLocaleDateString('it-IT')
-            };
-
-            let offerte = JSON.parse(localStorage.getItem('offerte_impresa')) || [];
-            offerte.push(offerta);
-            localStorage.setItem('offerte_impresa', JSON.stringify(offerte));
-
-            alert('✅ Offerta pubblicata!');
-            document.getElementById('form-offerta-impresa').reset();
-            caricaOfferteImpresa();
-        }
-
-        // IMPRESA - CARICA OFFERTE
-        function caricaOfferteImpresa() {
-            const container = document.getElementById('offerte-impresa-container');
-            const offerte = JSON.parse(localStorage.getItem('offerte_impresa')) || [];
-
-            if (offerte.length === 0) {
-                container.innerHTML = '<p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessuna offerta pubblicata</p>';
-                return;
-            }
-
-            let html = '';
-            offerte.forEach(offerta => {
-                html += `
-                    <div style="padding:12px; margin-bottom:10px; background:#fff5f0; border-left:3px solid #FF6B35; border-radius:5px; font-size:12px;">
-                        <strong>${offerta.mestiere}</strong><br>
-                        📍 ${offerta.citta}<br>
-                        ${offerta.descrizione ? '<small style="color:#666;">' + offerta.descrizione + '</small><br>' : ''}
-                        <small style="color:#999;">${offerta.data}</small>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // IMPRESA - GEOLOCALIZZAZIONE
-        function geolocalizzaImpresa() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('offerta-citta-imp').value = city;
-                            alert('✓ Città trovata: ' + city);
-                        });
-                });
-            } else {
-                alert('⚠️ Geolocalizzazione non supportata');
-            }
-        }
-
-        // GEOLOCALIZZAZIONE PROFESSIONISTI
-        function geolocalizzaProfessionisti() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('search-input').value = city;
-                            alert('✓ Città trovata: ' + city);
-                        });
-                });
-            } else {
-                alert('⚠️ Geolocalizzazione non supportata');
-            }
-        }
-
-        // GEOLOCALIZZAZIONE NEGOZI
-        function geolocalizzaNegozi() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('search-input').value = city;
-                            alert('✓ Città trovata: ' + city);
-                        });
-                });
-            } else {
-                alert('⚠️ Geolocalizzazione non supportata');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            caricaOfferteImpresa();
-            aggiornaHint();
-        });
-
         let tipoScelto = 'artigiano';
         let mestiereScelto = 'Tutti';
 
-        // IMPOSTA TIPO
+        // SET TYPE
         function setTipo(tipo, el) {
             tipoScelto = tipo;
             document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
@@ -1063,7 +942,7 @@
             aggiornaHint();
         }
 
-        // IMPOSTA MESTIERE
+        // SET MESTIERE
         function setMestiere(mestiere, el) {
             mestiereScelto = mestiere;
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -1071,7 +950,7 @@
             aggiornaHint();
         }
 
-        // AGGIORNA HINT
+        // UPDATE HINT
         function aggiornaHint() {
             const hint = document.getElementById('search-hint');
             const label = {
@@ -1083,7 +962,7 @@
             hint.innerHTML = `Stai cercando: <strong>${label[tipoScelto]}</strong> · <strong>${m}</strong>`;
         }
 
-        // RICERCA
+        // SEARCH
         function doSearch() {
             const citta = document.getElementById('search-input').value.trim();
             const hint = document.getElementById('search-hint');
@@ -1097,7 +976,7 @@
             window.location.href = `risultati.html?tipo=${tipoScelto}&mestiere=${encodeURIComponent(mestiereScelto)}&citta=${encodeURIComponent(citta)}`;
         }
 
-        // GEOLOCALIZZAZIONE
+        // GEOLOCATION
         function geolocalizza() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
@@ -1107,8 +986,8 @@
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                         .then(response => response.json())
                         .then(data => {
-                            const city = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('search-input').value = city;
+                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('search-input').value = citta;
                             document.getElementById('search-hint').innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.';
                             document.getElementById('search-hint').style.color = '#28a745';
                         });
@@ -1118,6 +997,50 @@
                 document.getElementById('search-hint').style.color = '#FF6B35';
             }
         }
+
+        // GEOLOCATION PROFESSIONISTI
+        function geolocalizzaProfessionisti() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('search-input').value = citta;
+                            alert('✓ Città trovata: ' + citta);
+                        });
+                });
+            } else {
+                alert('⚠️ Geolocalizzazione non supportata');
+            }
+        }
+
+        // GEOLOCATION NEGOZI
+        function geolocalizzaNegozi() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
+                            document.getElementById('search-input').value = citta;
+                            alert('✓ Città trovata: ' + citta);
+                        });
+                });
+            } else {
+                alert('⚠️ Geolocalizzazione non supportata');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            aggiornaHint();
+        });
     </script>
 
 </body>
