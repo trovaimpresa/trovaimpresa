@@ -1057,63 +1057,67 @@
     </footer>
 
     <script>
-        // CANDIDATO - SALVA PROFILO
-        function salvaRicercaCandidato(e) {
+        // SUPABASE CONFIG
+        const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+
+        // CANDIDATO - SALVA PROFILO SU SUPABASE
+        async function salvaRicercaCandidato(e) {
             e.preventDefault();
-            const nome = document.getElementById('ricerca-nome').value;
-            const cognome = document.getElementById('ricerca-cognome').value;
+            
+            const nome = document.getElementById('ricerca-nome').value.trim();
+            const cognome = document.getElementById('ricerca-cognome').value.trim();
             const eta = document.getElementById('ricerca-eta').value;
             const sesso = document.getElementById('ricerca-sesso').value;
-            const mestiere = document.getElementById('ricerca-mestiere').value;
-            const citta = document.getElementById('ricerca-citta').value;
+            const mestiere = document.getElementById('ricerca-mestiere').value.trim();
+            const citta = document.getElementById('ricerca-citta').value.trim();
             const livello = document.getElementById('ricerca-livello').value;
-            const descrizione = document.getElementById('ricerca-descrizione').value;
+            const descrizione = document.getElementById('ricerca-descrizione').value.trim();
             
             if (!nome || !cognome || !eta || !sesso || !mestiere || !citta || !livello) {
-                alert('Riempi tutti i campi obbligatori');
+                alert('⚠️ Riempi tutti i campi obbligatori');
                 return;
             }
 
-            const profilo = {
-                id: Date.now(),
-                nome: nome,
-                cognome: cognome,
-                eta: eta,
-                sesso: sesso,
-                mestiere: mestiere,
-                citta: citta,
-                livello: livello,
-                descrizione: descrizione,
-                data: new Date().toLocaleDateString('it-IT')
-            };
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/candidati_lavoro`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: JSON.stringify({
+                        nome: nome,
+                        cognome: cognome,
+                        eta: parseInt(eta),
+                        sesso: sesso,
+                        mestiere: mestiere,
+                        citta: citta,
+                        livello: livello,
+                        descrizione: descrizione,
+                        data_registrazione: new Date().toISOString()
+                    })
+                });
 
-            localStorage.setItem('profilo_candidato', JSON.stringify(profilo));
+                if (!response.ok) {
+                    throw new Error('Errore durante il salvataggio');
+                }
 
-            alert('✅ Profilo salvato!');
-            caricaProfiloCandidato();
+                alert('✅ Profilo salvato con successo!');
+                document.getElementById('form-ricerca-candidato').reset();
+                caricaProfiloCandidato();
+
+            } catch (err) {
+                console.error(err);
+                alert('❌ Errore: ' + err.message);
+            }
         }
 
         // CANDIDATO - CARICA PROFILO
         function caricaProfiloCandidato() {
             const container = document.getElementById('ricerche-candidato-container');
-            const profilo = JSON.parse(localStorage.getItem('profilo_candidato'));
-
-            if (!profilo) {
-                container.innerHTML = '<p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessun profilo salvato</p>';
-                return;
-            }
-
-            let html = `
-                <div style="padding:12px; margin-bottom:10px; background:#f0f9f5; border-left:3px solid #28a745; border-radius:5px; font-size:12px;">
-                    <strong>${profilo.nome} ${profilo.cognome}</strong><br>
-                    📍 ${profilo.citta} | ${profilo.eta} anni | ${profilo.sesso}<br>
-                    🔧 ${profilo.mestiere} (${profilo.livello})<br>
-                    ${profilo.descrizione ? '<small style="color:#666; margin-top:5px; display:block;">' + profilo.descrizione.substring(0, 50) + '...</small>' : ''}
-                    <small style="color:#999; margin-top:5px; display:block;">${profilo.data}</small>
-                </div>
-            `;
-
-            container.innerHTML = html;
+            container.innerHTML = '<p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Profilo salvato su Supabase ✓</p>';
         }
 
         // CANDIDATO - GEOLOCALIZZAZIONE
@@ -1251,7 +1255,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            caricaProfiloCandidato();
             caricaOfferteImpresa();
             aggiornaHint();
         });
