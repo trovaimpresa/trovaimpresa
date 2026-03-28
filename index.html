@@ -388,95 +388,54 @@
             font-weight: 700;
         }
 
-        /* SEZIONE LAVORO */
-        .jobs-section {
-            padding: 40px 20px;
-            background: #f8f8f8;
+        /* SEZIONE LAVORO - BOTTONI CANDIDATI E RICERCA */
+        .lavoro-links-section {
+            padding: 60px 40px;
+            background: #f9f9f9;
+            text-align: center;
         }
 
-        .jobs-container {
-            max-width: 1200px;
+        .lavoro-links-container {
+            max-width: 900px;
             margin: 0 auto;
         }
 
-        .jobs-section h2 {
-            font-size: 20px;
+        .lavoro-links-section h2 {
+            font-size: 36px;
             font-weight: 800;
-            text-align: center;
-            margin-bottom: 8px;
-            color: #1a472a;
+            margin-bottom: 40px;
+            color: #2d5016;
         }
 
-        .jobs-section > .jobs-container > p {
-            text-align: center;
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 9px;
+        .lavoro-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
         }
 
-        .jobs-form {
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            max-width: 350px;
-            margin: 0 auto;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
+        .lavoro-btn-link {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #28a745;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
+            padding: 40px 30px;
+            background: linear-gradient(135deg, #4CAF50 0%, #2d5016 100%);
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+        .lavoro-btn-link:nth-child(2) {
+            background: linear-gradient(135deg, #2196F3 0%, #0066cc 100%);
         }
 
-        /* SEZIONE LAVORO SIMMETRICA - 2 COLONNE */
+        .lavoro-btn-link:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+
+        /* SEZIONE CANDIDATO - LE TUE RICERCHE */
         .jobs-section-symmetric {
             padding: 80px 40px;
             background: #f8f9fa;
@@ -531,6 +490,41 @@
             font-size: 7px;
             color: #666;
             margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
         }
 
         .col-candidature .form-group button,
@@ -669,14 +663,6 @@
                 font-size: 16px;
             }
 
-            .search-row {
-                grid-template-columns: 1fr;
-            }
-
-            .search-buttons {
-                grid-template-columns: 1fr;
-            }
-
             .why-section {
                 padding: 60px 20px;
             }
@@ -694,16 +680,17 @@
                 gap: 10px;
             }
 
-            .jobs-section {
+            .lavoro-links-section {
                 padding: 60px 20px;
             }
 
-            .jobs-section h2 {
-                font-size: 28px;
+            .lavoro-links-section h2 {
+                font-size: 26px;
             }
 
-            .jobs-form {
-                padding: 30px 20px;
+            .lavoro-buttons-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
 
             .jobs-section-symmetric {
@@ -879,7 +866,22 @@
         </div>
     </section>
 
-    <!-- SEZIONE CANDIDATO - RICERCA E VISUALIZZA -->
+    <!-- SEZIONE LAVORO - BOTTONI CANDIDATI E RICERCA -->
+    <section class="lavoro-links-section">
+        <div class="lavoro-links-container">
+            <h2>🔨 Lavoro - Sistema Candidati</h2>
+            <div class="lavoro-buttons-grid">
+                <a href="candidati-registrazione.html" class="lavoro-btn-link">
+                    🔨 Registrati come Candidato
+                </a>
+                <a href="ricerca-candidati.html" class="lavoro-btn-link">
+                    🔍 Ricerca Candidati
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE CANDIDATO - LE TUE RICERCHE -->
     <section class="jobs-section-symmetric">
         <div class="jobs-container-symmetric">
             <h2>🔍 Candidato - Le tue ricerche</h2>
@@ -921,7 +923,7 @@
         </div>
     </section>
 
-    <!-- SEZIONE IMPRESA - OFFERTA E VISUALIZZA -->
+    <!-- SEZIONE IMPRESA - LE TUE OFFERTE -->
     <section class="jobs-section-symmetric">
         <div class="jobs-container-symmetric">
             <h2>🏗️ Impresa - Le tue offerte</h2>
@@ -964,122 +966,6 @@
                         <p style="font-size:12px; color:#999; text-align:center; margin-top:20px;">Nessuna offerta pubblicata</p>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-    <section class="jobs-section-symmetric">
-        <div class="jobs-container-symmetric">
-            <h2>Lavoro e Opportunità</h2><!-- SEZIONE CANDIDATI E RICERCA -->
-<section class="lavoro-links" style="padding: 40px; background: #f9f9f9; text-align: center; margin-bottom: 30px;">
-    <h2 style="margin-bottom: 25px; color: #2d5016;">Lavoro - Sistema Candidati</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto;">
-        <a href="candidati-registrazione.html" style="display: block; padding: 30px; background: linear-gradient(135deg, #4CAF50 0%, #2d5016 100%); color: white; text-decoration: none; border-radius: 10px; font-size: 18px; font-weight: bold; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'">
-            🔨 Registrati come Candidato
-        </a>
-        <a href="ricerca-candidati.html" style="display: block; padding: 30px; background: linear-gradient(135deg, #2196F3 0%, #0066cc 100%); color: white; text-decoration: none; border-radius: 10px; font-size: 18px; font-weight: bold; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.1)'">
-            🔍 Ricerca Candidati
-        </a>
-    </div>
-</section>
-```
-
-**PASSO 4:** Scolla in basso e clicca **"Commit changes"**
-
-**PASSO 5:** Scrivi messaggio:
-```
-28/03/2026 - Aggiunti link registrazione candidati e ricerca candidati
-            
-            <div class="jobs-grid">
-                
-                <!-- COLONNA SINISTRA: CANDIDATURE -->
-                <div class="col-candidature">
-                    <div class="col-title">🔍 Cerchi lavoro? Iscriviti</div>
-                    <div class="col-subtitle">Invia la tua candidatura e connettiti con le imprese</div>
-                    
-                    <form id="form-candidature" onsubmit="inviaCandidatura(event)">
-                        <div class="form-group">
-                            <label for="nome">Nome *</label>
-                            <input type="text" id="nome" name="nome" placeholder="Es. Mario Rossi" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" placeholder="tua@email.com" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="telefono">Telefono *</label>
-                            <input type="tel" id="telefono" name="telefono" placeholder="+39 3XX XXX XXXX" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="citta-candidato">Città *</label>
-                            <input type="text" id="citta-candidato" name="citta" placeholder="Es. Roma" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="competenze">Competenze *</label>
-                            <textarea id="competenze" name="competenze" placeholder="Es. Idraulica, Muratura..." required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit">📬 Invia candidatura</button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- COLONNA DESTRA: RICERCA ANNUNCI -->
-                <div class="col-annunci">
-                    <div class="col-title">💼 Cerchi operaio? Iscriviti</div>
-                    <div class="col-subtitle">Offerte di lavoro vicino a te</div>
-                    
-                    <form id="form-ricerca" onsubmit="cercaAnnunci(event)">
-                        <div class="form-group">
-                            <label for="citta-ricerca">Città *</label>
-                            <input type="text" id="citta-ricerca" name="citta" placeholder="Es. Roma" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="categoria">Categoria</label>
-                            <select id="categoria" name="categoria">
-                                <option value="">-- Tutte le categorie --</option>
-                                <option value="Edile">Edile</option>
-                                <option value="Impianti">Impianti</option>
-                                <option value="Manutenzione">Manutenzione</option>
-                                <option value="Verniciatura">Verniciatura</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="tipo-contratto">Tipo contratto</label>
-                            <select id="tipo-contratto" name="tipo_contratto">
-                                <option value="">-- Tutti i tipi --</option>
-                                <option value="Tempo pieno">Tempo pieno</option>
-                                <option value="Determinato">Determinato</option>
-                                <option value="Progettuale">Progettuale</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="esperienza">Esperienza richiesta</label>
-                            <select id="esperienza" name="esperienza">
-                                <option value="">-- Qualsiasi --</option>
-                                <option value="0-2">0-2 anni</option>
-                                <option value="2-5">2-5 anni</option>
-                                <option value="5+">5+ anni</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit">🔎 Cerca annunci</button>
-                        </div>
-                    </form>
-
-                    <div class="annunci-results" id="annunci-results">
-                        <div class="no-results">Inserisci una città e clicca "Cerca annunci"</div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </section>
@@ -1313,11 +1199,13 @@
                 alert('⚠️ Geolocalizzazione non supportata');
             }
         }
+
         document.addEventListener('DOMContentLoaded', () => {
             caricaRicercheCandidato();
             caricaOfferteImpresa();
             aggiornaHint();
         });
+
         let tipoScelto = 'artigiano';
         let mestiereScelto = 'Tutti';
 
@@ -1383,114 +1271,6 @@
                 document.getElementById('search-hint').innerHTML = '⚠️ Geolocalizzazione non supportata dal tuo browser';
                 document.getElementById('search-hint').style.color = '#FF6B35';
             }
-        }
-
-        // INVIA CANDIDATURA LAVORO
-        async function inviaCandidatura(e) {
-            e.preventDefault();
-
-            const candidato = {
-                nome: document.getElementById('nome').value,
-                email: document.getElementById('email').value,
-                telefono: document.getElementById('telefono').value,
-                citta: document.getElementById('citta').value,
-                regione: document.getElementById('regione').value,
-                competenze: document.getElementById('competenze').value,
-                esperienza: document.getElementById('esperienza').value,
-                descrizione: document.getElementById('descrizione').value,
-            };
-
-            try {
-                // Invia a Supabase
-                const response = await fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/candidati_lavoro', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
-                    },
-                    body: JSON.stringify(candidato)
-                });
-
-                if (response.ok) {
-                    alert('Candidatura inviata con successo! Ti contatteremo presto.');
-                    document.querySelector('.jobs-form').reset();
-                } else {
-                    alert('Errore nell\'invio della candidatura. Riprova.');
-                }
-            } catch (error) {
-                console.error('Errore:', error);
-                alert('Errore di connessione. Riprova.');
-            }
-        }
-
-        // CERCA ANNUNCI
-        async function cercaAnnunci(e) {
-            e.preventDefault();
-            
-            const citta = document.getElementById('citta-ricerca').value;
-            const categoria = document.getElementById('categoria').value;
-            const tipo_contratto = document.getElementById('tipo-contratto').value;
-            const esperienza = document.getElementById('esperienza').value;
-
-            try {
-                let query = 'citta=eq.' + encodeURIComponent(citta);
-                query += '&attiva=eq.true';
-                
-                if (categoria) query += '&categoria=eq.' + encodeURIComponent(categoria);
-                if (tipo_contratto) query += '&tipo_contratto=eq.' + encodeURIComponent(tipo_contratto);
-                if (esperienza) query += '&esperienza_richiesta=eq.' + encodeURIComponent(esperienza);
-
-                const response = await fetch(`https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/offerte_lavoro?${query}`, {
-                    headers: {
-                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
-                    }
-                });
-
-                const annunci = await response.json();
-                const resultsDiv = document.getElementById('annunci-results');
-                
-                if (!annunci || annunci.length === 0) {
-                    resultsDiv.innerHTML = '<div class="no-results">Nessun annuncio trovato per questa ricerca 😞</div>';
-                    return;
-                }
-
-                let html = '';
-                annunci.forEach(annuncio => {
-                    html += `
-                        <div class="annuncio-card">
-                            <div class="annuncio-titolo">${annuncio.titolo}</div>
-                            <div class="annuncio-info">
-                                <strong>📍 ${annuncio.citta}</strong> | 
-                                ${annuncio.categoria} | 
-                                ${annuncio.tipo_contratto}<br>
-                                <small style="color:#999;">Esperienza: ${annuncio.esperienza_richiesta || 'Non specificata'}</small>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                resultsDiv.innerHTML = html;
-            } catch (err) {
-                console.error('Errore:', err);
-                document.getElementById('annunci-results').innerHTML = '<div class="no-results">❌ Errore nella ricerca</div>';
-            }
-        }
-
-        // Invio messaggi form contatto (se esiste)
-        function inviaMessaggio(e) {
-            if (e) e.preventDefault();
-            
-            const nome = document.getElementById('cta-nome')?.value;
-            const email = document.getElementById('cta-email')?.value;
-            const messaggio = document.getElementById('cta-messaggio')?.value;
-
-            if (!nome || !email || !messaggio) {
-                alert('Compila tutti i campi');
-                return;
-            }
-
-            // Redirect a registrazione
-            window.location.href = 'registrazione.html';
         }
     </script>
 
