@@ -624,19 +624,6 @@
         <div class="foto-preview" id="foto-grid"></div>
       </div>
 
-      <div class="form-grid">
-        <div class="form-group form-full">
-          <label class="form-label">Costo indicativo</label>
-          <input type="text" class="form-input" id="f-costo" placeholder="Es. €35–50/ora · oppure · €800–1200/mq">
-          <div class="form-hint">Aiuta i clienti a capire il tuo range di prezzi</div>
-        </div>
-
-        <div class="form-group form-full">
-          <label class="form-label">Certificazioni e premi (opzionale)</label>
-          <input type="text" class="form-input" id="f-certificazioni" placeholder="Es. ISO 9001, Certificato CEI, Abilitato SOA...">
-        </div>
-      </div>
-
       <div class="checkbox-wrapper">
         <label>
           <input type="checkbox" id="f-termini">
@@ -860,8 +847,6 @@
       const telefono_pub = document.getElementById('f-telefono-pub').value || '';
       const whatsapp = document.getElementById('f-whatsapp').value || '';
       const orari = document.getElementById('f-orari').value || '';
-      const costo = document.getElementById('f-costo').value || '';
-      const certificazioni = document.getElementById('f-certificazioni').value || '';
 
       const dati = {
         tipo,
@@ -882,8 +867,6 @@
         telefono_pub,
         whatsapp,
         orari,
-        costo,
-        certificazioni,
         mestieri: mestieri.length > 0 ? JSON.stringify(mestieri) : null,
         zone: zoneSelezionate.length > 0 ? JSON.stringify(zoneSelezionate) : null,
         logo_url: logoUrl || null,
