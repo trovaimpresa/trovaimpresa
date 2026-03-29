@@ -319,7 +319,7 @@
 <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function cercaOfferte() {
         const tipo = document.getElementById('tipo-offerta-filter').value.trim();
@@ -330,7 +330,7 @@
         container.innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
 
         try {
-            let query = supabase.from('offerte_lavoro').select('*').eq('attiva', true);
+            let query = supabaseClient.from('offerte_lavoro').select('*').eq('attiva', true);
 
             if (tipo) {
                 query = query.ilike('tipo_offerta', `%${tipo}%`);
@@ -415,4 +415,3 @@
 
 </body>
 </html>
-
