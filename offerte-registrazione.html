@@ -553,7 +553,7 @@
         };
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('offerte_lavoro')
                 .insert([formData]);
 
