@@ -3,17 +3,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grazie! — TrovaImpresa</title>
+  <title>Registrazione Completata - TrovaImpresa</title>
   <style>
-    body { font-family: sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#f5f5f0; }
-    .box { background:white; border-radius:20px; padding:48px 40px; text-align:center; max-width:420px; box-shadow:0 8px 32px rgba(0,0,0,0.1); }
-    h1 { color:#2d6a4f; margin-bottom:12px; }
-    p { color:#555; line-height:1.6; }
-    a { display:inline-block; margin-top:24px; background:#2d6a4f; color:white; padding:12px 28px; border-radius:50px; text-decoration:none; font-weight:700; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 32px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .checkmark {
+      width: 80px;
+      height: 80px;
+      background: #2a7a4b;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 48px;
+      animation: bounce 0.6s ease-out;
+    }
+
+    @keyframes bounce {
+      0% {
+        transform: scale(0);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #2a7a4b;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .button {
+      display: inline-block;
+      background: #2a7a4b;
+      color: white;
+      padding: 14px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 8px;
+    }
+
+    .button:hover {
+      background: #1a4d2e;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(42, 122, 75, 0.3);
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: #2a7a4b;
+      border: 2px solid #2a7a4b;
+    }
+
+    .button.secondary:hover {
+      background: #e8f5f0;
+      border-color: #1a4d2e;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .info {
+      background: #e8f5f0;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 24px;
+      font-size: 14px;
+      color: #1a4d2e;
+      line-height: 1.6;
+    }
+
+    .info strong {
+      display: block;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="box">
-    <div style="font-size:3rem">✅</div>
-    <h1>Messaggio inviato!</h1>
-    <p>Grazie per averci scritto. Ti risponderemo il prima possibile a <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="40292e262f0034322f3621292d30322533216e232f
+  <div class="container">
+    <div class="checkmark">✓</div>
+    <h1>Registrazione Completata!</h1>
+    <p>Complimenti! La tua impresa è stata registrata su TrovaImpresa. 🎉</p>
+
+    <div class="buttons">
+      <a href="pannello-impresa.html" class="button">Accedi al Pannello</a>
+      <a href="index.html" class="button secondary">Torna alla Home</a>
+    </div>
+
+    <div class="info">
+      <strong>Cosa fare adesso?</strong>
+      Accedi al tuo pannello con le credenziali che hai utilizzato per registrarti, aggiungi le foto dei tuoi lavori e completa il tuo profilo per ricevere più richieste!
+    </div>
+  </div>
+</body>
+</html>
