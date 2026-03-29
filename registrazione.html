@@ -565,11 +565,6 @@
         </div>
 
         <div class="form-group form-full">
-          <label class="form-label">Telefono pubblico (opzionale)</label>
-          <input type="tel" class="form-input" id="f-telefono-pub" placeholder="+39 123 456 7890">
-        </div>
-
-        <div class="form-group form-full">
           <label class="form-label">WhatsApp (opzionale)</label>
           <input type="tel" class="form-input" id="f-whatsapp" placeholder="+39 123 456 7890">
         </div>
@@ -842,7 +837,6 @@
       const citta = document.getElementById('f-citta').value || '';
       const cap = document.getElementById('f-cap').value || '';
       const indirizzo = document.getElementById('f-indirizzo').value || '';
-      const telefono_pub = document.getElementById('f-telefono-pub').value || '';
       const whatsapp = document.getElementById('f-whatsapp').value || '';
       const orari = document.getElementById('f-orari').value || '';
 
@@ -862,7 +856,6 @@
         citta,
         cap,
         indirizzo,
-        telefono_pub,
         whatsapp,
         orari,
         mestieri: mestieri.length > 0 ? JSON.stringify(mestieri) : null,
