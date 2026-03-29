@@ -319,7 +319,7 @@
                 query = query.eq('livello', livello);
             }
 
-            const { data, error } = await query.order('data_registrazione', { ascending: false });
+            const { data, error } = await query.order('created_at', { ascending: false });
 
             if (error) {
                 throw error;
