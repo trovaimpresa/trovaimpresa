@@ -928,6 +928,7 @@ async function submitRegistrazione() {
     partita_iva:    document.getElementById('f-piva')?.value || '',
     email:          document.getElementById('f-email')?.value || '',
     telefono:       document.getElementById('f-telefono')?.value || '',
+    password:       document.getElementById('f-password')?.value || '',
     descrizione:    document.getElementById('f-descrizione')?.value || '',
     anno_fondazione: parseInt(document.getElementById('f-anno')?.value) || null,
     dipendenti:     document.getElementById('f-dipendenti')?.value || '',
@@ -940,28 +941,37 @@ async function submitRegistrazione() {
     orari:          document.getElementById('f-orari')?.value || '',
     costo:          document.getElementById('f-costo')?.value || '',
     certificazioni: document.getElementById('f-certificazioni')?.value || '',
-    mestieri:       mestieri,
-    zone:           zoneSelezionate,
+    mestieri:       JSON.stringify(mestieri),
+    zone:           JSON.stringify(zoneSelezionate),
     logo_url:       logoUrl,
-    foto_urls:      fotoUrls,
-    verificata:     false
+    foto_urls:      JSON.stringify(fotoUrls),
+    verificata:     false,
+    created_at:     new Date().toISOString()
   };
 
-  const { error } = await _supabase.from('imprese').insert([dati]);
+  try {
+    const { data, error } = await _supabase.from('imprese').insert([dati]);
 
-  if (error) {
-    console.error(error);
+    if (error) {
+      console.error('Errore Supabase:', error);
+      btn.innerHTML = '❌ Errore — riprova';
+      btn.disabled = false;
+      alert('❌ Errore: ' + error.message);
+      return;
+    }
+
+    document.getElementById('step-4').classList.remove('active');
+    document.getElementById('success').classList.add('show');
+    document.getElementById('progress').style.width = '100%';
+    document.getElementById('progress').style.background = 'var(--verde)';
+    window.scrollTo({top:0, behavior:'smooth'});
+
+  } catch(e) {
+    console.error('Errore registrazione:', e);
     btn.innerHTML = '❌ Errore — riprova';
     btn.disabled = false;
-    alert('Errore nel salvataggio: ' + error.message);
-    return;
+    alert('❌ Errore: ' + e.message);
   }
-
-  document.getElementById('step-4').classList.remove('active');
-  document.getElementById('success').classList.add('show');
-  document.getElementById('progress').style.width = '100%';
-  document.getElementById('progress').style.background = 'var(--verde)';
-  window.scrollTo({top:0, behavior:'smooth'});
 }
 </script>
 </body>
