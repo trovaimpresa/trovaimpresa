@@ -198,6 +198,9 @@
   .rbadge-v { background:var(--verde); color:white; }
   .rbadge-t { background:var(--arancio3); color:var(--arancio2); }
   .rbadge-a { background:#e8f0ff; color:#3355cc; }
+  .rbadge-pro { background:linear-gradient(135deg,#f6c744,#e6a817); color:#7a4f00; font-weight:900; }
+  .result-card.pro-card { border-color:#f6c744; box-shadow:0 4px 18px rgba(246,199,68,0.18); }
+  .result-card-accent.gold { background:linear-gradient(180deg,#f6c744,#e6a817); }
 
   .result-meta { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px; }
   .rmeta { font-size:0.8rem; color:var(--mid); display:flex; align-items:center; gap:4px; }
@@ -272,7 +275,14 @@
 <body>
 
 <!-- NAV -->
-<nav style="min-height:10px;"></nav>
+<nav style="background:white;border-bottom:1px solid rgba(0,0,0,0.08);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+  <a href="index.html" style="text-decoration:none;font-family:'Playfair Display',serif;font-size:20px;"><span style="color:#2a7a4b;">Trova</span><span style="color:#e8733a;">Impresa</span></a>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <a href="pannello-impresa.html" style="color:#555;font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;text-decoration:none;">Entra (Imprese)</a>
+    <a href="registrazione.html" style="background:#2a7a4b;color:white;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">Registrati (Imprese)</a>
+    <a href="pubblicita.html" style="background:#e8733a;color:white;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">📢 Pubblicità</a>
+  </div>
+</nav>
 
 <div class="page">
 
@@ -596,16 +606,28 @@
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Carica imprese da Supabase
 async function caricaImprese() {
-  const { data, error } = await supabase
+  const searchVal = (document.getElementById('nav-search-input')?.value || '').trim().toLowerCase();
+
+  let { data, error } = await supabaseClient
     .from('imprese')
     .select('*')
+    .order('piano', { ascending: true })
     .order('created_at', { ascending: false });
 
   if (error) { console.error(error); return; }
+
+  // Pro appaiono sempre, Free solo se la città corrisponde alla ricerca
+  if (data && searchVal) {
+    data = data.filter(i => {
+      if (i.piano === 'pro') return true;
+      const citta = (i.citta || '').toLowerCase();
+      return citta.includes(searchVal) || searchVal.includes(citta);
+    });
+  }
 
   const list = document.getElementById('results-list');
 
@@ -623,8 +645,8 @@ async function caricaImprese() {
   document.getElementById('risultati-count').textContent = data.length + ' professionisti';
 
   list.innerHTML = data.map(i => `
-    <div class="result-card" onclick="window.location='profilo-impresa.html?id=${i.id}'">
-      <div class="result-card-accent ${i.tipo === 'Artigiano' ? 'verde' : 'arancio'}"></div>
+    <div class="result-card ${i.piano === 'pro' ? 'pro-card' : ''}" onclick="window.location='profilo-impresa.html?id=${i.id}'">
+      <div class="result-card-accent ${i.piano === 'pro' ? 'gold' : i.tipo === 'Artigiano' ? 'verde' : 'arancio'}"></div>
       <div class="result-card-body">
         <div class="result-avatar">${i.tipo === 'Artigiano' ? '🔨' : '🏗️'}</div>
         <div class="result-info">
@@ -632,6 +654,7 @@ async function caricaImprese() {
             <div class="result-name">${i.nome_attivita || i.nome + ' ' + i.cognome}</div>
           </div>
           <div class="result-badges">
+            ${i.piano === 'pro' ? '<span class="rbadge rbadge-pro">⭐ Pro</span>' : ''}
             ${i.verificata ? '<span class="rbadge rbadge-v">✓ Verificato</span>' : ''}
             <span class="rbadge rbadge-t">${i.tipo === 'Artigiano' ? '🔨' : '🏗️'} ${i.tipo}</span>
           </div>
