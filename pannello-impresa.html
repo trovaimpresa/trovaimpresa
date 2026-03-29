@@ -402,6 +402,34 @@
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:8px">🤖 Genera preventivi con l'AI</div>
         <div style="font-size:0.88rem;opacity:0.8;line-height:1.6">Vai su <strong>Preventivi ricevuti</strong>, clicca su una richiesta e l'AI genererà automaticamente un preventivo professionale personalizzato per il cliente!</div>
       </div>
+
+      <!-- GESTIONE PIANO -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
+        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b">Free</strong></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <!-- FREE -->
+          <div id="card-free" style="border:2px solid #2a7a4b;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s">
+            <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
+            <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
+            <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
+            <div style="margin-top:12px">
+              <button onclick="impostaPiano('free')" style="width:100%;padding:10px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">✅ Attiva Free</button>
+            </div>
+          </div>
+
+          <!-- PRO -->
+          <div id="card-pro" style="border:2px solid #1a73e8;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f0f6ff,#fff)">
+            <div style="font-size:1.5rem;margin-bottom:6px">⭐</div>
+            <div style="font-weight:800;font-size:1rem;color:#1a73e8;margin-bottom:6px">Pro</div>
+            <div style="font-size:0.8rem;color:#666;line-height:1.5">Annunci illimitati<br>Badge ⭐ Pro in evidenza<br>Posizione prioritaria</div>
+            <div style="margin-top:12px">
+              <button onclick="impostaPiano('pro')" style="width:100%;padding:10px;background:#1a73e8;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">⭐ Passa a Pro</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- PREVENTIVI -->
@@ -758,6 +786,12 @@ async function caricaAnnunciLavoro() {
 
   // Aggiorna info piano
   document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
+  // Aggiorna dashboard piano
+  const dashLabel = document.getElementById('piano-dashboard-label');
+  if (dashLabel) {
+    dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free';
+    dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b';
+  }
   if (isPro) {
     document.getElementById('annunci-rimasti').textContent = 'annunci illimitati';
     document.getElementById('piano-info-lavoro').style.background = 'linear-gradient(135deg,var(--verde3),#fff)';
@@ -809,6 +843,20 @@ function mostraAnnunciLavoro() {
       </div>
     </div>
   `).join('');
+}
+
+async function impostaPiano(piano) {
+  if (!impresaCorrente) return;
+  const conferma = confirm(piano === 'pro' ? '⭐ Attivare il piano Pro?' : 'Tornare al piano Free?');
+  if (!conferma) return;
+  const { error } = await sb.from('imprese').update({ piano }).eq('id', impresaCorrente.id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  impresaCorrente.piano = piano;
+  const isPro = piano === 'pro';
+  const dashLabel = document.getElementById('piano-dashboard-label');
+  if (dashLabel) { dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free'; dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b'; }
+  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
+  alert(isPro ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
 }
 
 function apriFormAnnuncio() {
