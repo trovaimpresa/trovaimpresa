@@ -180,6 +180,9 @@
 </head>
 <body>
 
+<div id="banner-pro" style="display:none;background:linear-gradient(135deg,#f6c744,#e6a817);color:#7a4f00;text-align:center;padding:10px 20px;font-weight:700;font-size:0.9rem;">
+  ⭐ Sei un utente Pro! Hai già lo sconto del 20% applicato su tutti i prezzi.
+</div>
 <nav class="navbar">
   <a href="index.html" class="nav-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></a>
   <div class="nav-links">
@@ -349,15 +352,25 @@
 </div>
 
 <footer>
-  <p>© 2026 TrovaImpresa — info@trovaimpresa.com — <a href="index.html">Torna alla home</a></p>
+  <p>© 2026 TrovaImpresa — <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="573e3931381723253821363e3a27253224367934383a">[email&#160;protected]</a> — <a href="index.html">Torna alla home</a></p>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var fmt = null;
 var citta = [];
 var periodo = 'mensile';
 var metodo = 'bonifico';
 var prezzi = {1:15, 2:10, 3:8, 4:10};
+var prezziPro = {1:12, 2:8, 3:6, 4:8};
+
+// Controlla se l'utente è Pro (dal sessionStorage o localStorage)
+var isPro = sessionStorage.getItem('piano_scelto') === 'pro' || localStorage.getItem('piano_impresa') === 'pro';
+if (isPro) {
+  prezzi = prezziPro;
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('banner-pro').style.display = 'block';
+  });
+}
 var nomi = {1:'🥇 In cima', 2:'🥈 A metà pagina', 3:'🥉 In fondo', 4:'📌 Sidebar'};
 var tutteCitta = ['Agrigento','Alessandria','Ancona','Aosta','Arezzo','Ascoli Piceno','Asti','Avellino','Bari','Barletta','Belluno','Benevento','Bergamo','Biella','Bologna','Bolzano','Brescia','Brindisi','Cagliari','Caltanissetta','Campobasso','Caserta','Catania','Catanzaro','Cesena','Como','Cosenza','Cremona','Crotone','Cuneo','Ferrara','Firenze','Foggia','Frosinone','Genova','Grosseto','Imperia','La Spezia','Latina','Lecce','Lecco','Livorno','Lodi','Lucca','Macerata','Mantova','Marsala','Massa','Matera','Messina','Milano','Modena','Monza','Napoli','Novara','Nuoro','Oristano','Padova','Palermo','Parma','Pavia','Perugia','Pesaro','Pescara','Piacenza','Pisa','Pistoia','Pordenone','Potenza','Prato','Ragusa','Ravenna','Reggio Calabria','Reggio Emilia','Rieti','Rimini','Roma','Rovigo','Salerno','Sassari','Savona','Siena','Siracusa','Sondrio','Taranto','Terni','Torino','Trapani','Trento','Treviso','Trieste','Udine','Varese','Venezia','Verbania','Vercelli','Verona','Vibo Valentia','Vicenza','Viterbo'];
 
@@ -539,14 +552,4 @@ function inviaOrdine() {
     body: JSON.stringify({ nome: nome + ' — ' + azienda, email: email, messaggio: msg })
   }).then(function() {
     document.getElementById('ok-nome').textContent = nome + '!';
-    document.getElementById('ok-email').textContent = email;
-    showPage(99);
-  }).catch(function() {
-    btn.textContent = '📩 Conferma e invia ordine';
-    btn.disabled = false;
-    alert('Errore. Scrivi a info@trovaimpresa.com');
-  });
-}
-</script>
-</body>
-</html>
+    document.getElementById('ok-email'
