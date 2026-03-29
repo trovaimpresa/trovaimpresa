@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" style="background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%); min-height: 100vh;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,10 +11,11 @@
       box-sizing: border-box;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
+    html, body {
+      background: #1a4d2e !important;
+      background-image: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%) !important;
       min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       padding: 20px;
     }
 
@@ -156,20 +157,17 @@
       margin-top: 32px;
     }
 
-    button {
+    .btn-back {
       flex: 1;
-      padding: 12px 24px;
+      padding: 14px 24px;
       border: none;
       border-radius: 8px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .btn-back {
       background: #e0e0e0;
       color: #333;
+      transition: all 0.3s;
     }
 
     .btn-back:hover {
@@ -177,8 +175,16 @@
     }
 
     .btn-next {
+      flex: 1;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
       background: #2a7a4b;
       color: white;
+      transition: all 0.3s;
     }
 
     .btn-next:hover {
@@ -187,9 +193,10 @@
       box-shadow: 0 5px 15px rgba(42, 122, 75, 0.3);
     }
 
-    .btn-back:disabled {
-      opacity: 0.5;
+    .btn-next:disabled {
+      opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
 
     .required {
@@ -197,7 +204,8 @@
     }
   </style>
 </head>
-<body>
+<body style="background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%); min-height: 100vh; padding: 20px; margin: 0;">
+  <div style="text-align:center; color:white; font-size:11px; margin-bottom:8px; opacity:0.7;">v4</div>
   <div class="container">
     <div class="header">
       <h1>🔍 Registrazione Candidato</h1>
@@ -224,28 +232,28 @@
     </div>
 
     <div class="content">
-      <!-- STEP 1: DATI PERSONALI -->
+      <!-- STEP 1 -->
       <div class="form-section active" id="step-1">
         <h2>Dati Personali</h2>
         <div class="form-row">
           <div class="form-group">
             <label>Nome <span class="required">*</span></label>
-            <input type="text" id="nome" placeholder="Mario" required>
+            <input type="text" id="nome" placeholder="Es. Mario">
           </div>
           <div class="form-group">
             <label>Cognome <span class="required">*</span></label>
-            <input type="text" id="cognome" placeholder="Rossi" required>
+            <input type="text" id="cognome" placeholder="Es. Rossi">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Età <span class="required">*</span></label>
-            <input type="number" id="eta" placeholder="30" min="18" max="100" required>
+            <input type="number" id="eta" placeholder="Es. 35" min="18" max="100">
           </div>
           <div class="form-group">
             <label>Sesso <span class="required">*</span></label>
-            <select id="sesso" required>
-              <option value="">Seleziona</option>
+            <select id="sesso">
+              <option value="">-- Seleziona --</option>
               <option value="Uomo">Uomo</option>
               <option value="Donna">Donna</option>
               <option value="Altro">Altro</option>
@@ -254,16 +262,16 @@
         </div>
       </div>
 
-      <!-- STEP 2: PROFESSIONE -->
+      <!-- STEP 2 -->
       <div class="form-section" id="step-2">
         <h2>Professione</h2>
         <div class="form-group">
           <label>Mestiere <span class="required">*</span></label>
-          <input type="text" id="mestiere" placeholder="Es. Idraulico, Muratore, Elettricista..." required>
+          <input type="text" id="mestiere" placeholder="Es. Idraulico, Muratore, Elettricista...">
         </div>
         <div class="form-group">
           <label>Anni di Esperienza <span class="required">*</span></label>
-          <input type="number" id="anni_esperienza" placeholder="5" min="0" max="60" required>
+          <input type="number" id="anni_esperienza" placeholder="Es. 5" min="0" max="60">
         </div>
         <div class="form-group">
           <label>Descrizione Competenze</label>
@@ -271,33 +279,33 @@
         </div>
       </div>
 
-      <!-- STEP 3: CONTATTI -->
+      <!-- STEP 3 -->
       <div class="form-section" id="step-3">
         <h2>Contatti</h2>
         <div class="form-group">
           <label>Email <span class="required">*</span></label>
-          <input type="email" id="email" placeholder="mario@example.com" required>
+          <input type="email" id="email" placeholder="mario@example.com">
         </div>
         <div class="form-group">
           <label>Telefono <span class="required">*</span></label>
-          <input type="tel" id="telefono" placeholder="+39 123 456 7890" required>
+          <input type="tel" id="telefono" placeholder="+39 123 456 7890">
         </div>
         <div class="form-group">
           <label>Città <span class="required">*</span></label>
-          <input type="text" id="citta" placeholder="Roma" required>
+          <input type="text" id="citta" placeholder="Roma">
         </div>
         <div class="form-group">
           <label>Password <span class="required">*</span></label>
-          <input type="password" id="password" placeholder="almeno 8 caratteri" required>
+          <input type="password" id="password" placeholder="Almeno 8 caratteri">
         </div>
       </div>
 
-      <!-- STEP 4: DOCUMENTI -->
+      <!-- STEP 4 -->
       <div class="form-section" id="step-4">
         <h2>Documenti (Opzionale)</h2>
         <div class="form-group">
-          <label>CV / Portfolio</label>
-          <input type="text" id="cv" placeholder="Link a LinkedIn, portfolio, Google Drive...">
+          <label>Curriculum</label>
+          <textarea id="cv" placeholder="Incolla qui il tuo curriculum..." style="min-height: 150px;"></textarea>
         </div>
         <div class="form-group">
           <label>Certificazioni</label>
@@ -305,7 +313,7 @@
         </div>
         <div class="form-group">
           <label style="display: flex; gap: 8px; align-items: center; cursor: pointer;">
-            <input type="checkbox" id="termini" required style="width: auto;">
+            <input type="checkbox" id="termini" style="width: auto;">
             <span>Accetto i Termini di Servizio <span class="required">*</span></span>
           </label>
         </div>
@@ -313,8 +321,8 @@
 
       <!-- BUTTONS -->
       <div class="buttons">
-        <button class="btn-back" id="btn-back" onclick="prevStep()" style="display: none;">← Indietro</button>
-        <button class="btn-next" id="btn-next" onclick="nextStep()">Avanti →</button>
+        <button class="btn-back" id="btn-back" style="display:none;">← Indietro</button>
+        <button class="btn-next" id="btn-next">Avanti →</button>
       </div>
     </div>
   </div>
@@ -326,24 +334,16 @@
     let currentStep = 1;
 
     function goToStep(step) {
-      // Nascondi tutti gli step
       document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
 
-      // Mostra lo step attuale
-      document.getElementById(`step-${step}`).classList.add('active');
-      document.getElementById(`step-${step}-indicator`).classList.add('active');
+      document.getElementById('step-' + step).classList.add('active');
+      document.getElementById('step-' + step + '-indicator').classList.add('active');
 
-      // Mostra/nascondi bottone indietro
       document.getElementById('btn-back').style.display = step === 1 ? 'none' : 'block';
 
-      // Cambia testo bottone next
-      const btnNext = document.getElementById('btn-next');
-      if (step === 4) {
-        btnNext.textContent = '✓ Completa Registrazione';
-      } else {
-        btnNext.textContent = 'Avanti →';
-      }
+      var btnNext = document.getElementById('btn-next');
+      btnNext.textContent = step === 4 ? '✓ Completa Registrazione' : 'Avanti →';
 
       currentStep = step;
     }
@@ -362,36 +362,37 @@
       }
     }
 
+    document.getElementById('btn-next').addEventListener('click', nextStep);
+    document.getElementById('btn-back').addEventListener('click', prevStep);
+
     async function submitForm() {
-      // Validazione
       if (!document.getElementById('termini').checked) {
         alert('Devi accettare i termini di servizio!');
         return;
       }
 
-      const dati = {
+      var dati = {
         nome: document.getElementById('nome').value,
         cognome: document.getElementById('cognome').value,
-        eta: document.getElementById('eta').value,
+        eta: document.getElementById('eta').value || null,
         sesso: document.getElementById('sesso').value,
         mestiere: document.getElementById('mestiere').value,
-        anni_esperienza: document.getElementById('anni_esperienza').value,
+        anni_esperienza: document.getElementById('anni_esperienza').value || null,
         competenze: document.getElementById('competenze').value,
         email: document.getElementById('email').value,
         telefono: document.getElementById('telefono').value,
         citta: document.getElementById('citta').value,
         password: document.getElementById('password').value,
         cv: document.getElementById('cv').value,
-        certificazioni: document.getElementById('certificazioni').value,
         created_at: new Date().toISOString()
       };
 
-      const btnNext = document.getElementById('btn-next');
+      var btnNext = document.getElementById('btn-next');
       btnNext.disabled = true;
       btnNext.textContent = '⏳ Registrazione in corso...';
 
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/candidati_lavoro`, {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/candidati_lavoro', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -402,8 +403,8 @@
         });
 
         if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`Errore ${res.status}: ${errText}`);
+          var errText = await res.text();
+          throw new Error('Errore ' + res.status + ': ' + errText);
         }
 
         window.location.href = 'grazie.html';
