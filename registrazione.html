@@ -732,15 +732,13 @@
 
       const timestamp = Date.now();
       const fileName = `logo_${timestamp}.${file.name.split('.').pop()}`;
-      const formData = new FormData();
-      formData.append('file', file);
 
       try {
         document.getElementById('logo-status').textContent = '⏳ Caricamento...';
         
         const res = await fetch(`${SUPABASE_URL}/storage/v1/object/loghi-imprese/${fileName}`, {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${SUPABASE_KEY}` },
+          headers: { 'apikey': SUPABASE_KEY },
           body: file
         });
 
@@ -784,7 +782,7 @@
 
           const res = await fetch(`${SUPABASE_URL}/storage/v1/object/foto-lavori/${fileName}`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${SUPABASE_KEY}` },
+            headers: { 'apikey': SUPABASE_KEY },
             body: file
           });
 
@@ -884,7 +882,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'apikey': SUPABASE_KEY,
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify(dati)
