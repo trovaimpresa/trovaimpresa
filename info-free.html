@@ -1,1 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piano Free - TrovaImpresa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #f4f6f3; min-height: 100vh; }
+    nav {
+      background: white; padding: 0 32px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #2a7a4b; }
+    .logo span { color: #FF6B35; }
+    .back-link { color: #666; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    .back-link:hover { color: #2a7a4b; }
 
+    .hero {
+      background: linear-gradient(135deg, #1a4d2e 0%, #2a7a4b 100%);
+      color: white; text-align: center; padding: 56px 24px 48px;
+    }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 14px; }
+    .hero p { font-size: 1rem; opacity: 0.85; max-width: 480px; margin: 0 auto; line-height: 1.6; }
+
+    .content { max-width: 600px; margin: 40px auto; padding: 0 20px 60px; }
+
+    .card {
+      background: white; border-radius: 20px; padding: 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08); margin-bottom: 20px;
+      border-top: 4px solid #2a7a4b;
+    }
+    .card h2 { font-family: 'Playfair Display', serif; color: #1a4d2e; font-size: 1.3rem; margin-bottom: 20px; }
+
+    .feature {
+      display: flex; align-items: flex-start; gap: 12px;
+      margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0;
+    }
+    .feature:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .feature-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .feature-title { font-weight: 700; color: #222; margin-bottom: 3px; }
+    .feature-desc { font-size: 0.85rem; color: #777; line-height: 1.5; }
+
+    .cta-box {
+      background: linear-gradient(135deg, #1a4d2e, #2a7a4b);
+      border-radius: 20px; padding: 32px; text-align: center; color: white;
+    }
+    .cta-box h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 10px; }
+    .cta-box p { opacity: 0.85; font-size: 0.9rem; margin-bottom: 24px; line-height: 1.6; }
+    .btn-registrati {
+      display: inline-block; background: white; color: #1a4d2e;
+      padding: 14px 32px; border-radius: 10px; font-weight: 700;
+      font-size: 1rem; text-decoration: none; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-registrati:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .btn-pro {
+      display: inline-block; margin-top: 12px; color: rgba(255,255,255,0.8);
+      font-size: 0.85rem; text-decoration: none;
+    }
+    .btn-pro:hover { color: white; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Trova<span>Impresa</span></div>
+  <a href="index.html" class="back-link">← Torna alla home</a>
+</nav>
+
+<div class="hero">
+  <h1>🆓 Piano Free</h1>
+  <p>Inizia subito senza pagare nulla. Pubblica il tuo profilo e ricevi le prime richieste.</p>
+</div>
+
+<div class="content">
+
+  <div class="card">
+    <h2>Cosa include il piano Free</h2>
+
+    <div class="feature">
+      <div class="feature-icon">👤</div>
+      <div>
+        <div class="feature-title">Profilo impresa pubblico</div>
+        <div class="feature-desc">Il tuo profilo è visibile a tutti i clienti che cercano professionisti nella tua zona.</div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">🤖</div>
+      <div>
+        <div class="feature-title">Preventivi con AI</div>
+        <div class="feature-desc">Genera preventivi professionali automaticamente con l'intelligenza artificiale.</div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">⭐</div>
+      <div>
+        <div class="feature-title">Recensioni dei clienti</div>
+        <div class="feature-desc">Raccogli feedback verificati dai tuoi clienti per costruire la tua reputazione.</div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">💼</div>
+      <div>
+        <div class="feature-title">1 offerta di lavoro attiva</div>
+        <div class="feature-desc">Pubblica un annuncio di lavoro alla volta per trovare collaboratori.</div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">📍</div>
+      <div>
+        <div class="feature-title">Geolocalizzazione</div>
+        <div class="feature-desc">Appari nei risultati di ricerca nella tua città e zona.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-box">
+    <h2>Inizia gratis oggi</h2>
+    <p>Nessuna carta di credito richiesta. Registrati in 2 minuti e inizia subito a ricevere richieste.</p>
+    <a href="registrazione.html?piano=free" class="btn-registrati">📋 Registrati Free →</a>
+    <br>
+    <a href="info-pro.html" class="btn-pro">Scopri il piano Pro →</a>
+  </div>
+
+</div>
+
+</body>
+</html>
