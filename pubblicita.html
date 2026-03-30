@@ -38,23 +38,19 @@
     .hero-stat-num{font-size:28px;font-weight:700;color:#ffd166;font-family:'Playfair Display',serif;}
     .hero-stat-label{font-size:12px;opacity:0.85;margin-top:2px;}
 
-    /* STEP TABS */
     .steps-nav{background:#fff;border-bottom:2px solid var(--border);display:flex;justify-content:center;}
     .step-tab{padding:16px 24px;font-size:14px;font-weight:600;color:var(--light);border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;}
     .step-tab.active{color:var(--verde);border-bottom-color:var(--verde);}
     .step-circle{width:24px;height:24px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--light);}
     .step-tab.active .step-circle{background:var(--verde);color:#fff;}
 
-    /* CONTENUTO */
     .step-page{display:none;max-width:1100px;margin:0 auto;padding:40px 24px;}
     .step-page.visible{display:block;}
     .step-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px;}
     .step-sub{color:var(--mid);font-size:15px;margin-bottom:28px;}
 
-    /* STEP 1 - FORMATI */
     .step1-grid{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
     
-    /* ANTEPRIMA */
     .preview-box{background:#fff;border-radius:16px;border:2px solid var(--border);overflow:hidden;box-shadow:var(--shadow);}
     .preview-bar{background:#f0f0f0;padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
     .dot{width:10px;height:10px;border-radius:50%;}
@@ -77,7 +73,6 @@
     .sidebar-slot{background:#fff3e0;border:2px dashed var(--arancio);border-radius:8px;padding:14px 6px;font-size:10px;color:var(--arancio);font-weight:700;text-align:center;cursor:pointer;transition:all 0.2s;user-select:none;}
     .sidebar-slot.sel{border-style:solid;background:#ffe0b2;box-shadow:0 4px 16px rgba(232,115,58,0.2);}
 
-    /* PANNELLO DESTRA */
     .formati-panel{display:flex;flex-direction:column;gap:10px;}
     .fmt-card{background:#fff;border-radius:14px;padding:16px 18px;border:2px solid var(--border);cursor:pointer;transition:all 0.2s;user-select:none;}
     .fmt-card:hover{border-color:var(--verde);background:var(--verde3);}
@@ -89,14 +84,12 @@
     .fmt-desc{font-size:12px;color:var(--mid);line-height:1.4;}
     .fmt-badge{background:#f59e0b;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;}
 
-    /* BOTTONI */
     .btn-avanti{width:100%;padding:13px;background:var(--arancio);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-top:8px;transition:all 0.2s;}
     .btn-avanti:hover{background:var(--arancio2);}
     .btn-avanti:disabled{background:#ccc;cursor:not-allowed;}
     .btn-back{padding:9px 18px;background:#fff;color:var(--mid);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;margin-bottom:20px;display:inline-block;}
     .btn-back:hover{border-color:var(--verde);color:var(--verde);}
 
-    /* STEP 2 */
     .step2-grid{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
     .citta-search-wrap{position:relative;margin-bottom:12px;}
     .citta-search{width:100%;padding:12px 14px 12px 42px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border 0.2s;}
@@ -123,7 +116,6 @@
     .ric-row:last-child{border-bottom:none;font-weight:700;font-size:15px;padding-top:10px;}
     .ric-total{font-size:22px;font-weight:800;color:var(--verde);font-family:'Playfair Display',serif;}
 
-    /* STEP 3 */
     .step3-grid{display:grid;grid-template-columns:1fr 300px;gap:32px;align-items:start;}
     .form-section-title{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:16px;}
     .form-group{margin-bottom:14px;}
@@ -162,7 +154,6 @@
     .btn-ordina:disabled{background:#ccc;cursor:not-allowed;}
     .note-small{font-size:11px;color:var(--light);text-align:center;margin-top:8px;}
 
-    /* SUCCESS */
     .success-wrap{max-width:500px;margin:60px auto;text-align:center;background:#fff;padding:48px 32px;border-radius:20px;box-shadow:0 16px 60px rgba(0,0,0,0.12);}
     .success-wrap .big-emoji{font-size:60px;margin-bottom:16px;}
     .success-wrap h2{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:10px;}
@@ -352,10 +343,10 @@
 </div>
 
 <footer>
-  <p>© 2026 TrovaImpresa — <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="573e3931381723253821363e3a27253224367934383a">[email&#160;protected]</a> — <a href="index.html">Torna alla home</a></p>
+  <p>© 2026 TrovaImpresa — info@trovaimpresa.com — <a href="index.html">Torna alla home</a></p>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 var fmt = null;
 var citta = [];
 var periodo = 'mensile';
@@ -363,7 +354,6 @@ var metodo = 'bonifico';
 var prezzi = {1:15, 2:10, 3:8, 4:10};
 var prezziPro = {1:12, 2:8, 3:6, 4:8};
 
-// Controlla se l'utente è Pro (dal sessionStorage o localStorage)
 var isPro = sessionStorage.getItem('piano_scelto') === 'pro' || localStorage.getItem('piano_impresa') === 'pro';
 if (isPro) {
   prezzi = prezziPro;
@@ -374,41 +364,33 @@ if (isPro) {
 var nomi = {1:'🥇 In cima', 2:'🥈 A metà pagina', 3:'🥉 In fondo', 4:'📌 Sidebar'};
 var tutteCitta = ['Agrigento','Alessandria','Ancona','Aosta','Arezzo','Ascoli Piceno','Asti','Avellino','Bari','Barletta','Belluno','Benevento','Bergamo','Biella','Bologna','Bolzano','Brescia','Brindisi','Cagliari','Caltanissetta','Campobasso','Caserta','Catania','Catanzaro','Cesena','Como','Cosenza','Cremona','Crotone','Cuneo','Ferrara','Firenze','Foggia','Frosinone','Genova','Grosseto','Imperia','La Spezia','Latina','Lecce','Lecco','Livorno','Lodi','Lucca','Macerata','Mantova','Marsala','Massa','Matera','Messina','Milano','Modena','Monza','Napoli','Novara','Nuoro','Oristano','Padova','Palermo','Parma','Pavia','Perugia','Pesaro','Pescara','Piacenza','Pisa','Pistoia','Pordenone','Potenza','Prato','Ragusa','Ravenna','Reggio Calabria','Reggio Emilia','Rieti','Rimini','Roma','Rovigo','Salerno','Sassari','Savona','Siena','Siracusa','Sondrio','Taranto','Terni','Torino','Trapani','Trento','Treviso','Trieste','Udine','Varese','Venezia','Verbania','Vercelli','Verona','Vibo Valentia','Vicenza','Viterbo'];
 
-// Inizializzazione
 window.addEventListener('DOMContentLoaded', function() {
   buildCitta('');
 
-  // Navigazione
   document.getElementById('nav-prenota').addEventListener('click', function(e){ e.preventDefault(); showPage(1); });
   document.getElementById('btn1').addEventListener('click', function(){ if(fmt) showPage(2); });
   document.getElementById('btn2').addEventListener('click', function(){ if(citta.length > 0) showPage(3); });
   document.getElementById('back1').addEventListener('click', function(){ showPage(1); });
   document.getElementById('back2').addEventListener('click', function(){ showPage(2); });
 
-  // Formati - anteprima
   document.getElementById('prev-s1').addEventListener('click', function(){ selFmt(1); });
   document.getElementById('prev-s2').addEventListener('click', function(){ selFmt(2); });
   document.getElementById('prev-s3').addEventListener('click', function(){ selFmt(3); });
   document.getElementById('prev-s4').addEventListener('click', function(){ selFmt(4); });
 
-  // Formati - pannello
   document.getElementById('fc1').addEventListener('click', function(){ selFmt(1); });
   document.getElementById('fc2').addEventListener('click', function(){ selFmt(2); });
   document.getElementById('fc3').addEventListener('click', function(){ selFmt(3); });
   document.getElementById('fc4').addEventListener('click', function(){ selFmt(4); });
 
-  // Periodo
   document.getElementById('tog-m').addEventListener('click', function(){ selPeriodo('mensile'); });
   document.getElementById('tog-a').addEventListener('click', function(){ selPeriodo('annuale'); });
 
-  // Metodo pagamento
   document.getElementById('met-b').addEventListener('click', function(){ selMetodo('bonifico'); });
   document.getElementById('met-s').addEventListener('click', function(){ selMetodo('stripe'); });
 
-  // Cerca città
   document.getElementById('citta-input').addEventListener('input', function(){ buildCitta(this.value); });
 
-  // Ordina
   document.getElementById('btn-ordina').addEventListener('click', inviaOrdine);
 });
 
@@ -427,15 +409,12 @@ function showPage(n) {
 
 function selFmt(n) {
   fmt = n;
-  // Reset
   for(var i=1; i<=4; i++) {
     document.getElementById('prev-s' + i).classList.remove('sel');
     document.getElementById('fc' + i).classList.remove('sel');
     document.getElementById('chk' + i).textContent = '○';
   }
-  // Sidebar slot speciale
   document.getElementById('prev-s4').classList.remove('sel');
-  // Seleziona
   if(n <= 3) document.getElementById('prev-s' + n).classList.add('sel');
   else document.getElementById('prev-s4').classList.add('sel');
   document.getElementById('fc' + n).classList.add('sel');
@@ -552,4 +531,13 @@ function inviaOrdine() {
     body: JSON.stringify({ nome: nome + ' — ' + azienda, email: email, messaggio: msg })
   }).then(function() {
     document.getElementById('ok-nome').textContent = nome + '!';
-    document.getElementById('ok-email'
+    document.getElementById('ok-email').textContent = email;
+    showPage(4);
+  }).catch(function() {
+    btn.textContent = '❌ Errore — riprova';
+    btn.disabled = false;
+  });
+}
+</script>
+</body>
+</html>
