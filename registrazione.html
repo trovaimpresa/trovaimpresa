@@ -517,10 +517,82 @@
 
         <div class="form-group form-full">
           <label class="form-label">Mestieri / Specializzazioni <span class="required">*</span></label>
-          <div class="tag-input" id="mestieri-input">
-            <input type="text" id="mestieri-field" placeholder="Es. muratura, impianti, pintura...">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <select id="mestieri-select" class="form-select" style="flex:1">
+              <option value="">— Seleziona un mestiere —</option>
+              <optgroup label="Edilizia">
+                <option>Muratura</option>
+                <option>Carpentiere</option>
+                <option>Cartongesso</option>
+                <option>Coperture / Tetti</option>
+                <option>Impermeabilizzazione</option>
+                <option>Ponteggi</option>
+                <option>Demolizioni</option>
+                <option>Movimento terra</option>
+                <option>Scavi</option>
+                <option>Pavimentazioni esterne</option>
+                <option>Recinzioni</option>
+                <option>Restauro</option>
+              </optgroup>
+              <optgroup label="Impianti">
+                <option>Elettricista</option>
+                <option>Idraulico</option>
+                <option>Termoidraulico</option>
+                <option>Tecnico caldaie</option>
+                <option>Climatizzatore</option>
+                <option>Impianto solare</option>
+                <option>Autospurghi</option>
+                <option>Ascensorista</option>
+                <option>Antifurto</option>
+                <option>Impianti gas</option>
+                <option>Impianti fotovoltaici</option>
+              </optgroup>
+              <optgroup label="Finiture">
+                <option>Pittore / Imbianchino</option>
+                <option>Piastrellista</option>
+                <option>Parquettista</option>
+                <option>Stuccatore</option>
+                <option>Decoratore</option>
+                <option>Posatore pavimenti</option>
+              </optgroup>
+              <optgroup label="Falegnameria e infissi">
+                <option>Falegname</option>
+                <option>Serramentista</option>
+                <option>Vetraio</option>
+                <option>Fabbro</option>
+                <option>Tapparelle / Persiane</option>
+              </optgroup>
+              <optgroup label="Esterni">
+                <option>Giardiniere</option>
+                <option>Paesaggista</option>
+                <option>Piscine</option>
+                <option>Smaltimento rifiuti</option>
+              </optgroup>
+              <optgroup label="Servizi">
+                <option>Traslochi</option>
+                <option>Pulizie</option>
+                <option>Disinfestazione</option>
+                <option>Antincendio</option>
+              </optgroup>
+              <optgroup label="Professionisti">
+                <option>Ingegnere</option>
+                <option>Architetto</option>
+                <option>Geometra</option>
+                <option>Amministratore condominio</option>
+                <option>Perito edile</option>
+              </optgroup>
+              <optgroup label="Altro">
+                <option>Ristrutturazione generale</option>
+                <option>Costruzioni</option>
+                <option>Altro</option>
+              </optgroup>
+            </select>
+            <button type="button" onclick="aggiungiMestiereSelect()" style="padding:0 16px;background:var(--verde);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:18px">+</button>
           </div>
-          <div class="form-hint">Premi Enter per aggiungere. Seleziona categorie rilevanti per la tua attività.</div>
+          <div class="tag-input" id="mestieri-input">
+            <input type="text" id="mestieri-field" placeholder="Oppure scrivi un mestiere e premi Enter...">
+          </div>
+          <div class="form-hint">Seleziona dal menu e clicca + per aggiungere. Puoi aggiungere più mestieri.</div>
         </div>
       </div>
 
@@ -656,6 +728,16 @@
       
       currentStep = step;
       window.scrollTo(0, 0);
+    }
+
+    function aggiungiMestiereSelect() {
+      const sel = document.getElementById('mestieri-select');
+      const val = sel.value.trim();
+      if (val && !mestieri.includes(val)) {
+        mestieri.push(val);
+        renderMestieri();
+      }
+      sel.value = '';
     }
 
     // MESTIERI
