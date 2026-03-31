@@ -1,1 +1,108 @@
-
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cerca Negozi Edili - TrovaImpresa</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #7b1a1a; min-height: 100vh; }
+    header { background: white; padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    header a img { height: 36px; }
+    header nav a { color: #c0392b; text-decoration: none; font-weight: 600; margin-left: 16px; font-size: 13px; }
+    .hero { text-align: center; padding: 14px 20px 6px; }
+    .hero h1 { color: white; font-size: 1.4rem; font-weight: 800; margin-bottom: 2px; }
+    .hero p { color: rgba(255,255,255,0.85); font-size: 0.82rem; }
+    .search-card { background: white; border-radius: 14px; max-width: 820px; margin: 10px auto; padding: 16px 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    .section-label { text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #c0392b; margin-bottom: 8px; text-transform: uppercase; }
+    .chips-container { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; max-height: 100px; overflow-y: auto; }
+    .chips-container::-webkit-scrollbar { width: 3px; }
+    .chips-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    .chip { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border: 1.5px solid #ddd; border-radius: 14px; cursor: pointer; font-size: 11px; color: #444; background: white; transition: all 0.2s; user-select: none; }
+    .chip:hover { border-color: #c0392b; color: #c0392b; }
+    .chip.active { background: #c0392b; color: white; border-color: #c0392b; }
+    .chip.all-chip { background: #c0392b; color: white; border-color: #c0392b; font-weight: 700; }
+    .chip.all-chip.inactive { background: white; color: #444; border-color: #ddd; }
+    .btn-localize { width: 100%; background: #FF6B35; color: white; border: none; border-radius: 8px; padding: 8px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 8px 0 10px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-localize:hover { background: #e55a25; }
+    .dove-row { display: flex; gap: 7px; align-items: center; }
+    .dove-input { flex: 1; border: 2px solid #ddd; border-radius: 8px; padding: 8px 12px; font-size: 13px; outline: none; }
+    .dove-input:focus { border-color: #c0392b; }
+    .btn-cerca { background: #c0392b; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .btn-cerca:hover { background: #7b1a1a; }
+    .btn-loc-small { background: #FF6B35; color: white; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; }
+    .status-text { text-align: center; margin-top: 8px; font-size: 11px; color: #888; }
+    .status-text strong { color: #c0392b; }
+    .results-section { max-width: 820px; margin: 0 auto 30px; padding: 0 16px; }
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-top: 12px; }
+    .card { background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); transition: transform 0.2s; text-decoration: none; color: inherit; display: block; }
+    .card:hover { transform: translateY(-2px); }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .card-logo { width: 40px; height: 40px; border-radius: 7px; background: #fdecea; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .card-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
+    .card-name { font-weight: 700; font-size: 13px; color: #222; }
+    .card-tipo { font-size: 11px; color: #c0392b; font-weight: 600; }
+    .card-citta { font-size: 11px; color: #666; margin-top: 3px; }
+    .badge-pro { display: inline-block; background: gold; color: #333; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 7px; margin-left: 4px; }
+    .loading { text-align: center; color: white; padding: 24px; font-size: 14px; }
+    .no-results { text-align: center; color: white; padding: 24px; }
+    @media (max-width: 600px) { .dove-row { flex-direction: column; } .btn-cerca, .btn-loc-small { width: 100%; } }
+  </style>
+</head>
+<body>
+<header>
+  <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
+  <nav>
+    <a href="cerca-artigiani.html">Artigiani</a>
+    <a href="cerca-imprese.html">Imprese</a>
+    <a href="cerca-grandi-imprese.html">Grandi Imprese</a>
+    <a href="cerca-professionisti.html">Professionisti</a>
+  </nav>
+</header>
+<div class="hero">
+  <h1>🏪 Trova un Negozio Edile</h1>
+  <p>Materiali, ferramenta, sanitari, piastrelle — trova il negozio specializzato vicino a te</p>
+</div>
+<div class="search-card">
+  <div class="section-label">Tipo di negozio</div>
+  <div class="chips-container">
+    <div class="chip all-chip" data-tipo="tutti" onclick="selectTipo(this)">🏪 Tutti</div>
+    <div class="chip" data-tipo="Negozio materiali edili" onclick="selectTipo(this)">🧱 Materiali edili</div>
+    <div class="chip" data-tipo="Ferramenta" onclick="selectTipo(this)">🔧 Ferramenta</div>
+    <div class="chip" data-tipo="Sanitari e rubinetteria" onclick="selectTipo(this)">🚿 Sanitari</div>
+    <div class="chip" data-tipo="Piastrelle e rivestimenti" onclick="selectTipo(this)">🟫 Piastrelle</div>
+    <div class="chip" data-tipo="Serramenti" onclick="selectTipo(this)">🪟 Serramenti</div>
+    <div class="chip" data-tipo="Vernici e pitture" onclick="selectTipo(this)">🎨 Vernici</div>
+    <div class="chip" data-tipo="Legnami" onclick="selectTipo(this)">🪵 Legnami</div>
+    <div class="chip" data-tipo="Isolanti" onclick="selectTipo(this)">🧱 Isolanti</div>
+    <div class="chip" data-tipo="Elettrico e illuminazione" onclick="selectTipo(this)">💡 Elettrico</div>
+    <div class="chip" data-tipo="Utensileria" onclick="selectTipo(this)">🛠️ Utensileria</div>
+    <div class="chip" data-tipo="Giardinaggio" onclick="selectTipo(this)">🌿 Giardinaggio</div>
+  </div>
+  <button class="btn-localize" onclick="localizzami()">📍 Localizzami</button>
+  <div class="section-label">Dove?</div>
+  <div class="dove-row">
+    <input type="text" class="dove-input" id="cittaInput" placeholder="Città o CAP... es. Milano, Roma, 20100" />
+    <button class="btn-cerca" onclick="cerca()">🔍 Cerca</button>
+    <button class="btn-loc-small" onclick="localizzami()">📍</button>
+  </div>
+  <div class="status-text" id="statusText">Stai cercando: <strong>🏪 Tutti i negozi</strong></div>
+</div>
+<div class="results-section"><div id="risultati"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseClient=supabase.createClient('https://nacvrsgkyfavykxjxszu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic');
+  let tipoScelto='tutti',cittaScelta='';
+  function selectTipo(el){document.querySelectorAll('.chip').forEach(c=>{c.classList.remove('active');if(c.classList.contains('all-chip'))c.classList.add('inactive');});el.classList.add('active');el.classList.remove('inactive');tipoScelto=el.dataset.tipo;aggiornaStatus();}
+  function aggiornaStatus(){const t=tipoScelto==='tutti'?'🏪 Tutti i negozi':tipoScelto;const c=cittaScelta?` · 📍 ${cittaScelta}`:'';document.getElementById('statusText').innerHTML=`Stai cercando: <strong>${t}</strong>${c}`;}
+  function localizzami(){if(!navigator.geolocation){alert('Non supportato.');return;}navigator.geolocation.getCurrentPosition(async pos=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);const d=await r.json();const citta=d.address.city||d.address.town||d.address.village||'';document.getElementById('cittaInput').value=citta;cittaScelta=citta;aggiornaStatus();cerca();}catch(e){alert('Errore posizione.');}},()=>alert('Permesso negato.'));}
+  async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();aggiornaStatus();const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';try{let q=supabaseClient.from('negozi').select('*').order('piano',{ascending:false}).order('created_at',{ascending:false});if(tipoScelto!=='tutti')q=q.ilike('tipo',`%${tipoScelto}%`);if(cittaScelta)q=q.ilike('citta',`%${cittaScelta}%`);const{data,error}=await q.limit(50);if(error)throw error;if(!data||data.length===0){div.innerHTML='<div class="no-results"><h3>Nessun negozio trovato</h3></div>';return;}div.innerHTML=`<div style="color:white;margin-bottom:8px;font-size:12px;">Trovati <strong>${data.length}</strong> negozi</div><div class="results-grid">${data.map(i=>cardHTML(i)).join('')}</div>`;}catch(e){div.innerHTML=`<div class="no-results"><p>${e.message}</p></div>`;}}
+  function cardHTML(i){const logo=i.logo_url?`<img src="${i.logo_url}" alt="logo">`:`<div style="width:40px;height:40px;background:#fdecea;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;">🏪</div>`;const badge=i.piano==='pro'?'<span class="badge-pro">⭐ PRO</span>':'';return `<a class="card" href="#"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome_negozio||'Negozio'}${badge}</div><div class="card-tipo">🏪 ${i.tipo||''}</div></div></div><div class="card-citta">📍 ${i.citta||''}</div>${i.orari?`<div style="font-size:11px;color:#888;margin-top:3px;">🕐 ${i.orari}</div>`:''}</a>`;}
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('citta')){document.getElementById('cittaInput').value=params.get('citta');cittaScelta=params.get('citta');}
+  if(params.get('tipo')){tipoScelto=params.get('tipo');document.querySelectorAll('.chip').forEach(c=>{if(c.dataset.tipo===tipoScelto){c.classList.add('active');c.classList.remove('inactive');document.querySelector('.all-chip').classList.remove('active');document.querySelector('.all-chip').classList.add('inactive');}});}
+  if(params.get('citta')||params.get('tipo'))cerca();
+  aggiornaStatus();
+</script>
+</body>
+</html>
