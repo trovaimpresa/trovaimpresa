@@ -1025,64 +1025,62 @@
 
         // GEOLOCATION
         function geolocalizza() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('search-input').value = citta;
-                            document.getElementById('search-hint').innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.';
-                            document.getElementById('search-hint').style.color = '#28a745';
-                        });
-                });
-            } else {
+            if (!navigator.geolocation) {
                 document.getElementById('search-hint').innerHTML = '⚠️ Geolocalizzazione non supportata dal tuo browser';
                 document.getElementById('search-hint').style.color = '#FF6B35';
+                return;
             }
+            document.getElementById('search-hint').innerHTML = '⏳ Rilevamento posizione in corso...';
+            document.getElementById('search-hint').style.color = '#999';
+            navigator.geolocation.getCurrentPosition((position) => {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const citta = data.address.city || data.address.town || data.address.village || '';
+                        document.getElementById('search-input').value = citta;
+                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.';
+                        document.getElementById('search-hint').style.color = '#28a745';
+                    })
+                    .catch(() => {
+                        document.getElementById('search-hint').innerHTML = '⚠️ Errore nel recupero della città. Inseriscila manualmente.';
+                        document.getElementById('search-hint').style.color = '#FF6B35';
+                    });
+            }, () => {
+                document.getElementById('search-hint').innerHTML = '⚠️ Permesso posizione negato. Inserisci la città manualmente.';
+                document.getElementById('search-hint').style.color = '#FF6B35';
+            }, { timeout: 10000 });
         }
 
         // GEOLOCATION PROFESSIONISTI
         function geolocalizzaProfessionisti() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('search-input').value = citta;
-                            alert('✓ Città trovata: ' + citta);
-                        });
-                });
-            } else {
-                alert('⚠️ Geolocalizzazione non supportata');
-            }
+            if (!navigator.geolocation) { alert('⚠️ Geolocalizzazione non supportata'); return; }
+            navigator.geolocation.getCurrentPosition((position) => {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const citta = data.address.city || data.address.town || data.address.village || '';
+                        document.getElementById('search-input').value = citta;
+                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata: ' + citta;
+                        document.getElementById('search-hint').style.color = '#28a745';
+                    })
+                    .catch(() => alert('⚠️ Errore nel recupero della città.'));
+            }, () => alert('⚠️ Permesso posizione negato.'), { timeout: 10000 });
         }
 
         // GEOLOCATION NEGOZI
         function geolocalizzaNegozi() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                            document.getElementById('search-input').value = citta;
-                            alert('✓ Città trovata: ' + citta);
-                        });
-                });
-            } else {
-                alert('⚠️ Geolocalizzazione non supportata');
-            }
+            if (!navigator.geolocation) { alert('⚠️ Geolocalizzazione non supportata'); return; }
+            navigator.geolocation.getCurrentPosition((position) => {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const citta = data.address.city || data.address.town || data.address.village || '';
+                        document.getElementById('search-input').value = citta;
+                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata: ' + citta;
+                        document.getElementById('search-hint').style.color = '#28a745';
+                    })
+                    .catch(() => alert('⚠️ Errore nel recupero della città.'));
+            }, () => alert('⚠️ Permesso posizione negato.'), { timeout: 10000 });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
