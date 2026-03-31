@@ -48,6 +48,18 @@
     .file-selected button { background: none; border: none; color: #aaa; font-size: 18px; cursor: pointer; }
     .file-selected button:hover { color: #f44336; }
     #logo-input { display: none; }
+    .piano-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    .piano-card { border: 2px solid #ddd; border-radius: 10px; padding: 16px; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .piano-card:hover { border-color: #FF6B35; }
+    .piano-card.selected { border-color: #FF6B35; background: #fff3ee; }
+    .piano-card.selected-pro { border-color: #1a73e8; background: #e8f0fe; }
+    .piano-card .piano-icon { font-size: 28px; margin-bottom: 6px; }
+    .piano-card .piano-nome { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .piano-card .piano-prezzo { font-size: 13px; color: #888; margin-bottom: 8px; }
+    .piano-card ul { list-style: none; text-align: left; font-size: 12px; color: #555; }
+    .piano-card ul li { padding: 2px 0; }
+    .piano-card ul li::before { content: "✓ "; color: #FF6B35; font-weight: 700; }
+    .piano-card.selected-pro ul li::before { color: #1a73e8; }
   </style>
 </head>
 <body>
@@ -157,7 +169,35 @@
 
       <!-- STEP 4 -->
       <div class="form-section" id="step-4">
-        <h2>Logo (opzionale)</h2>
+        <h2>Scegli il tuo piano</h2>
+        <div class="piano-grid">
+          <div class="piano-card selected" id="card-free" onclick="selezionaPiano('free')">
+            <div class="piano-icon">🆓</div>
+            <div class="piano-nome">Free</div>
+            <div class="piano-prezzo">Gratis</div>
+            <ul>
+              <li>Visibile nella tua città</li>
+              <li>Fino a 10 foto</li>
+              <li>Max 3 preventivi/mese</li>
+              <li>1 annuncio lavoro</li>
+            </ul>
+          </div>
+          <div class="piano-card" id="card-pro" onclick="selezionaPiano('pro')">
+            <div class="piano-icon">⭐</div>
+            <div class="piano-nome" style="color:#1a73e8;">Pro</div>
+            <div class="piano-prezzo">€9/mese · €49/anno</div>
+            <ul>
+              <li>Visibile in tutta Italia</li>
+              <li>Foto illimitate</li>
+              <li>Preventivi illimitati</li>
+              <li>Badge PRO dorato</li>
+              <li>Priorità nei risultati</li>
+            </ul>
+          </div>
+        </div>
+        <input type="hidden" id="piano_scelto" value="free">
+
+        <h2 style="margin-top:20px;">Logo (opzionale)</h2>
         <div class="form-group">
           <label>Logo dell'impresa</label>
           <div class="upload-area" id="upload-area" onclick="document.getElementById('logo-input').click()">
@@ -240,6 +280,12 @@
       return SUPABASE_URL + '/storage/v1/object/public/loghi-imprese/' + fileName;
     }
 
+    function selezionaPiano(piano) {
+      document.getElementById('piano_scelto').value = piano;
+      document.getElementById('card-free').className = 'piano-card' + (piano === 'free' ? ' selected' : '');
+      document.getElementById('card-pro').className = 'piano-card' + (piano === 'pro' ? ' selected-pro' : '');
+    }
+
     async function submitForm() {
       if (!document.getElementById('termini').checked) { alert('Devi accettare i termini di servizio!'); return; }
       const nome = document.getElementById('nome').value.trim();
@@ -272,7 +318,7 @@
           sito_web: document.getElementById('sito_web').value,
           password: password,
           logo_url: logo_url,
-          piano: 'free',
+          piano: document.getElementById('piano_scelto').value,
           created_at: new Date().toISOString()
         };
         const res = await fetch(SUPABASE_URL + '/rest/v1/imprese', {
