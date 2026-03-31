@@ -1,1 +1,294 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrazione Impresa Edile - TrovaImpresa</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: linear-gradient(135deg, #FF6B35 0%, #b84a0a 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+    }
+    .container { max-width: 620px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .header { background: linear-gradient(135deg, #FF6B35 0%, #b84a0a 100%); color: white; padding: 32px 24px; text-align: center; }
+    .header h1 { font-size: 24px; margin-bottom: 8px; }
+    .header p { font-size: 14px; opacity: 0.9; }
+    .steps { display: flex; justify-content: space-between; padding: 20px 24px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+    .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #e0e0e0; color: #666; font-size: 15px; }
+    .step.active .step-circle { background: #FF6B35; color: white; }
+    .step-label { font-size: 11px; color: #999; text-align: center; }
+    .step.active .step-label { color: #FF6B35; font-weight: 600; }
+    .content { padding: 32px; }
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+    .form-section h2 { font-size: 20px; color: #333; margin-bottom: 24px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 7px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; color: #333; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #FF6B35; box-shadow: 0 0 0 3px rgba(255,107,53,0.1); }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .required { color: #ff6b6b; }
+    .buttons { display: flex; gap: 12px; margin-top: 28px; }
+    .btn-back { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #e0e0e0; color: #333; }
+    .btn-next { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #FF6B35; color: white; }
+    .btn-next:hover { background: #e55a25; }
+    .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
+    .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; background: #fafafa; }
+    .upload-area:hover { border-color: #FF6B35; background: rgba(255,107,53,0.05); }
+    .upload-area .upload-icon { font-size: 36px; margin-bottom: 8px; }
+    .upload-area p { font-size: 14px; color: #555; margin-bottom: 4px; }
+    .upload-area small { font-size: 12px; color: #aaa; }
+    .file-selected { display: none; align-items: center; gap: 10px; background: #fff3ee; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
+    .file-selected span { font-size: 13px; color: #FF6B35; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-selected button { background: none; border: none; color: #aaa; font-size: 18px; cursor: pointer; }
+    .file-selected button:hover { color: #f44336; }
+    #logo-input { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏗️ Registrazione Impresa Edile</h1>
+      <p>Entra nella rete TrovaImpresa</p>
+    </div>
 
+    <div class="steps">
+      <div class="step active" id="step-1-indicator"><div class="step-circle">1</div><div class="step-label">Impresa</div></div>
+      <div class="step" id="step-2-indicator"><div class="step-circle">2</div><div class="step-label">Lavori</div></div>
+      <div class="step" id="step-3-indicator"><div class="step-circle">3</div><div class="step-label">Contatti</div></div>
+      <div class="step" id="step-4-indicator"><div class="step-circle">4</div><div class="step-label">Logo</div></div>
+    </div>
+
+    <div class="content">
+
+      <!-- STEP 1 -->
+      <div class="form-section active" id="step-1">
+        <h2>La tua impresa</h2>
+        <div class="form-group">
+          <label>Ragione sociale <span class="required">*</span></label>
+          <input type="text" id="nome" placeholder="Es. Edilizia Rossi Srl">
+        </div>
+        <div class="form-group">
+          <label>Partita IVA <span class="required">*</span></label>
+          <input type="text" id="partita_iva" placeholder="Es. 12345678901">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Città <span class="required">*</span></label>
+            <input type="text" id="citta" placeholder="Es. Roma">
+          </div>
+          <div class="form-group">
+            <label>Provincia</label>
+            <input type="text" id="provincia" placeholder="Es. RM">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Anni di attività</label>
+          <input type="number" id="anni_esperienza" placeholder="Es. 15" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label>Descrizione impresa</label>
+          <textarea id="descrizione" placeholder="Descrivi la tua impresa, i servizi offerti e i punti di forza..."></textarea>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="form-section" id="step-2">
+        <h2>Tipologia lavori</h2>
+        <div class="form-group">
+          <label>Specializzazione principale <span class="required">*</span></label>
+          <select id="mestiere">
+            <option value="">— Seleziona —</option>
+            <option>Ristrutturazione</option>
+            <option>Muratura</option>
+            <option>Carpenteria</option>
+            <option>Coperture / Tetti</option>
+            <option>Impermeabilizzazione</option>
+            <option>Ponteggi</option>
+            <option>Impianti elettrici</option>
+            <option>Impianti idraulici</option>
+            <option>Impianti termici</option>
+            <option>Impianti solari</option>
+            <option>Pavimenti e rivestimenti</option>
+            <option>Intonaci e pitture</option>
+            <option>Serramenti e infissi</option>
+            <option>Demolizione</option>
+            <option>Movimento terra</option>
+            <option>Asfalti</option>
+            <option>Restauro</option>
+            <option>Efficienza energetica</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Altre specializzazioni</label>
+          <textarea id="specializzazioni" placeholder="Es. Ristrutturazioni complete, impianti, facciate..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Zone operative</label>
+          <input type="text" id="zone" placeholder="Es. Roma e provincia, Lazio, Centro Italia">
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="form-section" id="step-3">
+        <h2>Contatti e accesso</h2>
+        <div class="form-group">
+          <label>Email <span class="required">*</span></label>
+          <input type="email" id="email" placeholder="info@impresa.it">
+        </div>
+        <div class="form-group">
+          <label>Telefono <span class="required">*</span></label>
+          <input type="tel" id="telefono" placeholder="+39 06 1234567">
+        </div>
+        <div class="form-group">
+          <label>Sito web</label>
+          <input type="url" id="sito_web" placeholder="https://www.impresa.it">
+        </div>
+        <div class="form-group">
+          <label>Password <span class="required">*</span></label>
+          <input type="password" id="password" placeholder="Almeno 8 caratteri">
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="form-section" id="step-4">
+        <h2>Logo (opzionale)</h2>
+        <div class="form-group">
+          <label>Logo dell'impresa</label>
+          <div class="upload-area" id="upload-area" onclick="document.getElementById('logo-input').click()">
+            <div class="upload-icon">🏗️</div>
+            <p><strong>Clicca per caricare</strong> il logo</p>
+            <small>PNG, JPG — max 5MB</small>
+          </div>
+          <input type="file" id="logo-input" accept="image/*">
+          <div class="file-selected" id="file-selected">
+            <span id="file-name">logo.png</span>
+            <button onclick="removeFile(event)">✕</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer;">
+            <input type="checkbox" id="termini" style="width:auto;">
+            <span>Accetto i Termini di Servizio <span class="required">*</span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn-back" id="btn-back" style="display:none;">← Indietro</button>
+        <button class="btn-next" id="btn-next">Avanti →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    let currentStep = 1;
+    let logoFile = null;
+
+    document.getElementById('logo-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { alert('File troppo grande. Massimo 5MB.'); return; }
+      logoFile = file;
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-selected').style.display = 'flex';
+      document.getElementById('upload-area').style.borderColor = '#FF6B35';
+    });
+
+    function removeFile(e) {
+      e.stopPropagation();
+      logoFile = null;
+      document.getElementById('logo-input').value = '';
+      document.getElementById('file-selected').style.display = 'none';
+      document.getElementById('upload-area').style.borderColor = '#ddd';
+    }
+
+    function goToStep(step) {
+      document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      document.getElementById('step-' + step).classList.add('active');
+      document.getElementById('step-' + step + '-indicator').classList.add('active');
+      document.getElementById('btn-back').style.display = step === 1 ? 'none' : 'block';
+      document.getElementById('btn-next').textContent = step === 4 ? '✓ Completa Registrazione' : 'Avanti →';
+      currentStep = step;
+    }
+
+    document.getElementById('btn-next').addEventListener('click', function() {
+      if (currentStep < 4) goToStep(currentStep + 1);
+      else submitForm();
+    });
+    document.getElementById('btn-back').addEventListener('click', function() {
+      if (currentStep > 1) goToStep(currentStep - 1);
+    });
+
+    async function uploadLogo(file, email) {
+      const ext = file.name.split('.').pop();
+      const fileName = email.replace(/[^a-z0-9]/gi, '_') + '_' + Date.now() + '.' + ext;
+      const res = await fetch(SUPABASE_URL + '/storage/v1/object/loghi-imprese/' + fileName, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type || 'image/png' },
+        body: file
+      });
+      if (!res.ok) throw new Error('Errore upload logo');
+      return SUPABASE_URL + '/storage/v1/object/public/loghi-imprese/' + fileName;
+    }
+
+    async function submitForm() {
+      if (!document.getElementById('termini').checked) { alert('Devi accettare i termini di servizio!'); return; }
+      const nome = document.getElementById('nome').value.trim();
+      const mestiere = document.getElementById('mestiere').value;
+      const email = document.getElementById('email').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const citta = document.getElementById('citta').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const partita_iva = document.getElementById('partita_iva').value.trim();
+      if (!nome || !mestiere || !email || !telefono || !citta || !password || !partita_iva) { alert('Compila tutti i campi obbligatori (*)'); return; }
+      const btn = document.getElementById('btn-next');
+      btn.disabled = true;
+      try {
+        let logo_url = null;
+        if (logoFile) { btn.textContent = '⏳ Caricamento logo...'; logo_url = await uploadLogo(logoFile, email); }
+        btn.textContent = '⏳ Salvataggio...';
+        const dati = {
+          nome: nome,
+          tipo: 'impresa',
+          mestiere: mestiere,
+          specializzazioni: document.getElementById('specializzazioni').value,
+          descrizione: document.getElementById('descrizione').value,
+          anni_esperienza: parseInt(document.getElementById('anni_esperienza').value) || null,
+          partita_iva: partita_iva,
+          zone: document.getElementById('zone').value,
+          email: email,
+          telefono: telefono,
+          citta: citta,
+          provincia: document.getElementById('provincia').value,
+          sito_web: document.getElementById('sito_web').value,
+          password: password,
+          logo_url: logo_url,
+          piano: 'free',
+          created_at: new Date().toISOString()
+        };
+        const res = await fetch(SUPABASE_URL + '/rest/v1/imprese', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
+          body: JSON.stringify(dati)
+        });
+        if (!res.ok) { const errText = await res.text(); throw new Error('Errore ' + res.status + ': ' + errText); }
+        window.location.href = 'grazie.html';
+      } catch (err) {
+        console.error(err);
+        btn.disabled = false;
+        btn.textContent = '✓ Completa Registrazione';
+        alert('Errore: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
