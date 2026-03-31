@@ -252,7 +252,7 @@
             display: block;
         }
     </style>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>"> </head>
+</head>
 <body>
 
 <div class="container">
@@ -289,7 +289,18 @@
             <!-- STEP 1: Dati Azienda -->
             <div class="form-step active" id="step-1">
                 <div class="step-title">Dati Azienda</div>
-                
+
+                <div class="login-box">
+                    <h3>🔐 Sei già registrato su TrovaImpresa? Accedi per compilare automaticamente</h3>
+                    <div class="login-row">
+                        <input type="email" id="login-email" placeholder="La tua email">
+                        <input type="password" id="login-password" placeholder="Password">
+                        <button class="btn-login" onclick="accediImpresa()">Accedi</button>
+                    </div>
+                    <div class="login-msg" id="login-msg"></div>
+                    <div class="campi-compilati" id="campi-compilati">✅ Dati compilati automaticamente! Puoi procedere.</div>
+                </div>
+
                 <div class="form-group">
                     <label for="nome-azienda">Nome Attività <span class="required">*</span></label>
                     <input type="text" id="nome-azienda" placeholder="Es. Ditta Rossi s.r.l." required>
