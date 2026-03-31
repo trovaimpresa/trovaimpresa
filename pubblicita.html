@@ -213,7 +213,7 @@
   <p>Scegli il tuo spazio, seleziona le città e paga in pochi minuti. Banner live entro 24 ore.</p>
   <div class="hero-stats">
     <div class="hero-stat"><div class="hero-stat-num">106</div><div class="hero-stat-label">Città italiane</div></div>
-    <div class="hero-stat"><div class="hero-stat-num">8</div><div class="hero-stat-label">Posizioni per città</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Posizioni per città</div></div>
     <div class="hero-stat"><div class="hero-stat-num">€8</div><div class="hero-stat-label">Al mese da</div></div>
   </div>
 </section>
@@ -420,6 +420,40 @@ var prezzi = {1:15, 2:10, 3:8, 4:10};
 var nomi = {1:'🥇 In cima', 2:'🥈 A metà pagina', 3:'🥉 In fondo', 4:'📌 Sidebar'};
 var tutteCitta = ['Agrigento','Alessandria','Ancona','Aosta','Arezzo','Ascoli Piceno','Asti','Avellino','Bari','Barletta','Belluno','Benevento','Bergamo','Biella','Bologna','Bolzano','Brescia','Brindisi','Cagliari','Caltanissetta','Campobasso','Caserta','Catania','Catanzaro','Cesena','Como','Cosenza','Cremona','Crotone','Cuneo','Ferrara','Firenze','Foggia','Frosinone','Genova','Grosseto','Imperia','La Spezia','Latina','Lecce','Lecco','Livorno','Lodi','Lucca','Macerata','Mantova','Marsala','Massa','Matera','Messina','Milano','Modena','Monza','Napoli','Novara','Nuoro','Oristano','Padova','Palermo','Parma','Pavia','Perugia','Pesaro','Pescara','Piacenza','Pisa','Pistoia','Pordenone','Potenza','Prato','Ragusa','Ravenna','Reggio Calabria','Reggio Emilia','Rieti','Rimini','Roma','Rovigo','Salerno','Sassari','Savona','Siena','Siracusa','Sondrio','Taranto','Terni','Torino','Trapani','Trento','Treviso','Trieste','Udine','Varese','Venezia','Verbania','Vercelli','Verona','Vibo Valentia','Vicenza','Viterbo'];
 
+// CATEGORIA
+var categoriaScelta = '';
+function selCategoria(cat, el) {
+  categoriaScelta = cat;
+  document.querySelectorAll('.cat-card').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+  document.getElementById('btn0').disabled = false;
+}
+
+function goToStep(n) {
+  document.querySelectorAll('.step-page').forEach(function(p){ p.classList.remove('visible'); });
+  document.querySelectorAll('.step-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('page' + n).classList.add('visible');
+  document.getElementById('tab' + n).classList.add('active');
+  if(n === 1) document.getElementById('tc0').textContent = '✓';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// SPAZI PICCOLI
+var prezziSmall = {1:5, 2:5, 3:5, 4:5};
+var nomiSmall = {1:'🔹 Piccolo 1', 2:'🔹 Piccolo 2', 3:'🔹 Piccolo 3', 4:'🔹 Piccolo 4'};
+function selSmall(n, el) {
+  fmt = 'small-' + n;
+  document.querySelectorAll('.fmt-small').forEach(function(c){ c.classList.remove('sel'); });
+  document.querySelectorAll('.fmt-card').forEach(function(c){ c.classList.remove('sel'); });
+  document.querySelectorAll('.ad-slot,.sidebar-slot').forEach(function(c){ c.classList.remove('sel'); });
+  for(var i=1;i<=4;i++){ document.getElementById('chk'+i).textContent='○'; }
+  el.classList.add('sel');
+  prezzi['small-'+n] = 5;
+  nomi['small-'+n] = nomiSmall[n];
+  document.getElementById('btn1').disabled = false;
+  aggiornaRiepilogo();
+}
+
 // Inizializzazione
 window.addEventListener('DOMContentLoaded', function() {
   buildCitta('');
@@ -427,6 +461,7 @@ window.addEventListener('DOMContentLoaded', function() {
   // Navigazione
   document.getElementById('nav-prenota').addEventListener('click', function(e){ e.preventDefault(); showPage(1); });
   document.getElementById('btn1').addEventListener('click', function(){ if(fmt) showPage(2); });
+  document.getElementById('back1').addEventListener('click', function(){ goToStep(1); });
   document.getElementById('btn2').addEventListener('click', function(){ if(citta.length > 0) showPage(3); });
   document.getElementById('back1').addEventListener('click', function(){ showPage(1); });
   document.getElementById('back2').addEventListener('click', function(){ showPage(2); });
