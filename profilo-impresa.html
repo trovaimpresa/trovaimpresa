@@ -15,7 +15,7 @@
     --arancio3:#fff3ec;
     --dark:    #1a1a1a;
     --mid:     #555;
-    --light:   #999;a
+    --light:   #999;
     --bg:      #fafaf8;
     --white:   #ffffff;
     --border:  rgba(0,0,0,0.08);
@@ -383,6 +383,36 @@
   /* ── ANIMATIONS ── */
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
   @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* RECENSIONI FORM */
+    .recensione-section { margin-top: 32px; border-top: 2px solid #eee; padding-top: 28px; }
+    .recensione-section h3 { font-size: 18px; font-weight: 800; color: #1a4d2e; margin-bottom: 6px; }
+    .recensione-section p { font-size: 13px; color: #777; margin-bottom: 20px; }
+    .stelle-gruppo { margin-bottom: 16px; }
+    .stelle-gruppo label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .stelle-row { display: flex; gap: 6px; }
+    .stella { font-size: 26px; cursor: pointer; color: #ddd; transition: color 0.15s; user-select: none; }
+    .stella.attiva { color: #f5a623; }
+    .rec-input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; margin-bottom: 14px; }
+    .rec-input:focus { outline: none; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(42,122,75,0.1); }
+    .rec-textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; min-height: 100px; resize: vertical; margin-bottom: 14px; }
+    .rec-textarea:focus { outline: none; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(42,122,75,0.1); }
+    .rec-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-rec { background: var(--verde); color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; }
+    .btn-rec:hover { background: #1a4d2e; }
+    .btn-rec:disabled { opacity: 0.6; cursor: not-allowed; }
+    .rec-msg { text-align: center; font-size: 13px; margin-top: 10px; padding: 10px; border-radius: 8px; display: none; }
+    .rec-msg.ok { background: #e8f5e9; color: #2a7a4b; }
+    .rec-msg.err { background: #fdecea; color: #c0392b; }
+    /* RECENSIONI REALI */
+    .rec-reale { background: #f9f9f9; border-radius: 10px; padding: 16px; margin-bottom: 14px; border-left: 3px solid var(--verde); }
+    .rec-reale-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .rec-reale-nome { font-weight: 700; font-size: 14px; color: #222; }
+    .rec-reale-data { font-size: 12px; color: #999; }
+    .rec-reale-stelle { color: #f5a623; font-size: 14px; margin-bottom: 6px; }
+    .rec-reale-testo { font-size: 13px; color: #444; line-height: 1.5; }
+    .rec-reale-lavoro { font-size: 12px; color: #888; margin-top: 6px; }
+    .rec-categorie { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 8px; font-size: 12px; color: #555; }
 </style>
 </head>
 <body>
@@ -535,6 +565,90 @@
       <div style="text-align:center; margin-top:20px;">
         <a href="#" style="color:var(--verde);font-weight:700;font-size:0.9rem;text-decoration:none;">Leggi tutte le 47 recensioni →</a>
       </div>
+
+      <!-- FORM LASCIA RECENSIONE -->
+      <div class="recensione-section" id="rec-section">
+        <h3>⭐ Lascia una recensione</h3>
+        <p>Hai lavorato con questa impresa? Condividi la tua esperienza — puoi anche tornare a modificarla in futuro.</p>
+
+        <div id="rec-lista" style="margin-bottom:24px;"></div>
+
+        <div id="rec-form">
+          <div class="stelle-gruppo">
+            <label>⭐ Qualità del lavoro</label>
+            <div class="stelle-row" id="stelle-qualita">
+              <span class="stella" data-v="1" onclick="setStelleGruppo('qualita',1)">★</span>
+              <span class="stella" data-v="2" onclick="setStelleGruppo('qualita',2)">★</span>
+              <span class="stella" data-v="3" onclick="setStelleGruppo('qualita',3)">★</span>
+              <span class="stella" data-v="4" onclick="setStelleGruppo('qualita',4)">★</span>
+              <span class="stella" data-v="5" onclick="setStelleGruppo('qualita',5)">★</span>
+            </div>
+          </div>
+          <div class="stelle-gruppo">
+            <label>⏱️ Puntualità</label>
+            <div class="stelle-row" id="stelle-puntualita">
+              <span class="stella" data-v="1" onclick="setStelleGruppo('puntualita',1)">★</span>
+              <span class="stella" data-v="2" onclick="setStelleGruppo('puntualita',2)">★</span>
+              <span class="stella" data-v="3" onclick="setStelleGruppo('puntualita',3)">★</span>
+              <span class="stella" data-v="4" onclick="setStelleGruppo('puntualita',4)">★</span>
+              <span class="stella" data-v="5" onclick="setStelleGruppo('puntualita',5)">★</span>
+            </div>
+          </div>
+          <div class="stelle-gruppo">
+            <label>💰 Rapporto qualità/prezzo</label>
+            <div class="stelle-row" id="stelle-prezzo">
+              <span class="stella" data-v="1" onclick="setStelleGruppo('prezzo',1)">★</span>
+              <span class="stella" data-v="2" onclick="setStelleGruppo('prezzo',2)">★</span>
+              <span class="stella" data-v="3" onclick="setStelleGruppo('prezzo',3)">★</span>
+              <span class="stella" data-v="4" onclick="setStelleGruppo('prezzo',4)">★</span>
+              <span class="stella" data-v="5" onclick="setStelleGruppo('prezzo',5)">★</span>
+            </div>
+          </div>
+          <div class="stelle-gruppo">
+            <label>🤝 Professionalità</label>
+            <div class="stelle-row" id="stelle-professionalita">
+              <span class="stella" data-v="1" onclick="setStelleGruppo('professionalita',1)">★</span>
+              <span class="stella" data-v="2" onclick="setStelleGruppo('professionalita',2)">★</span>
+              <span class="stella" data-v="3" onclick="setStelleGruppo('professionalita',3)">★</span>
+              <span class="stella" data-v="4" onclick="setStelleGruppo('professionalita',4)">★</span>
+              <span class="stella" data-v="5" onclick="setStelleGruppo('professionalita',5)">★</span>
+            </div>
+          </div>
+
+          <textarea class="rec-textarea" id="rec-testo" placeholder="Descrivi la tua esperienza con questa impresa..."></textarea>
+
+          <div class="rec-row">
+            <div>
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 Mese del lavoro</label>
+              <select class="rec-input" id="rec-mese" style="margin-bottom:0;">
+                <option value="">— Mese —</option>
+                <option>Gennaio</option><option>Febbraio</option><option>Marzo</option>
+                <option>Aprile</option><option>Maggio</option><option>Giugno</option>
+                <option>Luglio</option><option>Agosto</option><option>Settembre</option>
+                <option>Ottobre</option><option>Novembre</option><option>Dicembre</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">📅 Anno</label>
+              <select class="rec-input" id="rec-anno" style="margin-bottom:0;">
+                <option value="">— Anno —</option>
+                <option>2026</option><option>2025</option><option>2024</option>
+                <option>2023</option><option>2022</option><option>2021</option><option>2020</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="rec-row" style="margin-top:14px;">
+            <input type="text" class="rec-input" id="rec-nome" placeholder="Il tuo nome *" style="margin-bottom:0;">
+            <input type="email" class="rec-input" id="rec-email" placeholder="La tua email * (per modificare)" style="margin-bottom:0;">
+          </div>
+
+          <p style="font-size:11px;color:#aaa;margin:10px 0 14px;">La tua email non sarà pubblica. Potrai usarla per modificare o aggiornare la recensione in futuro.</p>
+
+          <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
+          <div class="rec-msg" id="rec-msg"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -640,13 +754,132 @@
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-function openModal() {
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
+// RECENSIONI
+const SUPA_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const valoriStelle = { qualita: 0, puntualita: 0, prezzo: 0, professionalita: 0 };
+
+function setStelleGruppo(gruppo, val) {
+  valoriStelle[gruppo] = val;
+  const row = document.getElementById('stelle-' + gruppo);
+  row.querySelectorAll('.stella').forEach(s => {
+    s.classList.toggle('attiva', parseInt(s.dataset.v) <= val);
+  });
 }
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
+
+async function caricaRecensioni(impresaId) {
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti?impresa_id=eq.${impresaId}&order=created_at.desc&limit=10`, {
+      headers: { 'apikey': SUPA_KEY }
+    });
+    const data = await res.json();
+    const div = document.getElementById('rec-lista');
+    if (!data || data.length === 0) { div.innerHTML = ''; return; }
+    div.innerHTML = data.map(r => {
+      const media = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(Boolean);
+      const avg = media.length ? (media.reduce((a,b)=>a+b,0)/media.length).toFixed(1) : '-';
+      const stelle = '★'.repeat(Math.round(parseFloat(avg))) + '☆'.repeat(5 - Math.round(parseFloat(avg)));
+      const quando = [r.mese_lavoro, r.anno_lavoro].filter(Boolean).join(' ');
+      return `<div class="rec-reale">
+        <div class="rec-reale-header">
+          <span class="rec-reale-nome">${r.nome_cliente || 'Cliente'}</span>
+          <span class="rec-reale-data">${quando}</span>
+        </div>
+        <div class="rec-reale-stelle">${stelle} ${avg}/5</div>
+        <div class="rec-categorie">
+          ${r.stelle_qualita ? `<span>⭐ Qualità: ${r.stelle_qualita}/5</span>` : ''}
+          ${r.stelle_puntualita ? `<span>⏱️ Puntualità: ${r.stelle_puntualita}/5</span>` : ''}
+          ${r.stelle_prezzo ? `<span>💰 Prezzo: ${r.stelle_prezzo}/5</span>` : ''}
+          ${r.stelle_professionalita ? `<span>🤝 Professionalità: ${r.stelle_professionalita}/5</span>` : ''}
+        </div>
+        <p class="rec-reale-testo">${r.testo || ''}</p>
+      </div>`;
+    }).join('');
+  } catch(e) { console.error(e); }
 }
-f
+
+async function inviaRecensione() {
+  const nome = document.getElementById('rec-nome').value.trim();
+  const email = document.getElementById('rec-email').value.trim();
+  const testo = document.getElementById('rec-testo').value.trim();
+  const msg = document.getElementById('rec-msg');
+
+  if (!nome || !email) { mostraMsg('Inserisci nome e email!', 'err'); return; }
+  if (!valoriStelle.qualita) { mostraMsg('Dai almeno una valutazione sulla qualità!', 'err'); return; }
+
+  const btn = document.getElementById('btn-rec');
+  btn.disabled = true;
+  btn.textContent = '⏳ Invio in corso...';
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const impresaId = params.get('id');
+
+    // Controlla se esiste già una recensione con questa email per questa impresa
+    const checkRes = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti?impresa_id=eq.${impresaId}&email_cliente=eq.${encodeURIComponent(email)}`, {
+      headers: { 'apikey': SUPA_KEY }
+    });
+    const esistente = await checkRes.json();
+
+    const dati = {
+      impresa_id: parseInt(impresaId),
+      nome_cliente: nome,
+      email_cliente: email,
+      stelle_qualita: valoriStelle.qualita || null,
+      stelle_puntualita: valoriStelle.puntualita || null,
+      stelle_prezzo: valoriStelle.prezzo || null,
+      stelle_professionalita: valoriStelle.professionalita || null,
+      stelle: valoriStelle.qualita || null,
+      testo: testo,
+      mese_lavoro: document.getElementById('rec-mese').value,
+      anno_lavoro: parseInt(document.getElementById('rec-anno').value) || null,
+      updated_at: new Date().toISOString()
+    };
+
+    let res;
+    if (esistente && esistente.length > 0) {
+      // Aggiorna recensione esistente
+      res = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti?id=eq.${esistente[0].id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(dati)
+      });
+      mostraMsg('✅ Recensione aggiornata con successo!', 'ok');
+    } else {
+      // Nuova recensione
+      dati.created_at = new Date().toISOString();
+      res = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(dati)
+      });
+      mostraMsg('✅ Recensione pubblicata! Grazie per il tuo feedback.', 'ok');
+    }
+
+    if (!res.ok) throw new Error('Errore ' + res.status);
+    caricaRecensioni(impresaId);
+    document.getElementById('rec-form').style.opacity = '0.5';
+
+  } catch(e) {
+    mostraMsg('Errore: ' + e.message, 'err');
+  }
+  btn.disabled = false;
+  btn.textContent = '⭐ Pubblica recensione';
+}
+
+function mostraMsg(testo, tipo) {
+  const msg = document.getElementById('rec-msg');
+  msg.textContent = testo;
+  msg.className = 'rec-msg ' + tipo;
+  msg.style.display = 'block';
+}
+
+// Carica recensioni al caricamento pagina
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const impresaId = params.get('id');
+  if (impresaId) caricaRecensioni(impresaId);
+});
+
+</script>
