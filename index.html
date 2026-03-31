@@ -843,6 +843,23 @@
         <p style="color:#666; font-size:14px; margin-bottom:18px;">Descrivi il lavoro che devi fare — ti diciamo subito chi contattare</p>
         <div style="max-width:680px; margin:0 auto;">
             <textarea id="ai-descrizione" placeholder="Es: devo rifare il bagno completo... oppure: voglio costruire un capannone... oppure: cerco piastrelle per cucina..." style="width:100%; height:100px; border:2px solid #ddd; border-radius:10px; padding:14px; font-size:14px; font-family:inherit; resize:none; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#2a7a4b'" onblur="this.style.borderColor='#ddd'"></textarea>
+            <div style="margin-top:10px; text-align:left;">
+                <span style="font-size:11px; color:#999; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Oppure seleziona un esempio:</span>
+                <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:8px;">
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🚿 Rifacimento bagno</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏠 Ristrutturazione appartamento</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏢 Costruire un capannone</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">⚡ Impianto elettrico</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🔥 Sostituzione caldaia</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🎨 Tinteggiatura pareti</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🟫 Posa pavimento</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏪 Cerco materiali edili</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🪟 Sostituzione infissi</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">📐 Ho bisogno di un geometra</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">☀️ Installazione pannelli solari</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🌿 Giardino e paesaggistica</span>
+                </div>
+            </div>
             <button onclick="aiOrienta()" id="ai-btn" style="margin-top:12px; background:#2a7a4b; color:white; border:none; border-radius:10px; padding:12px 30px; font-size:15px; font-weight:700; cursor:pointer; width:100%; transition:background 0.2s;">🔍 Trovami il professionista giusto</button>
             <div id="ai-risultato" style="margin-top:16px; display:none;"></div>
         </div>
@@ -1086,6 +1103,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             aggiornaHint();
         });
+
+        // SELEZIONE ESEMPIO
+        function selezionaEsempio(el) {
+            const testo = el.textContent.replace(/^[^\w]+/, '').trim();
+            document.getElementById('ai-descrizione').value = testo;
+            document.getElementById('ai-descrizione').focus();
+        }
 
         // AI ORIENTAMENTO
         async function aiOrienta() {
