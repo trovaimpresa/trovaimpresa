@@ -997,42 +997,70 @@ Rispondi SOLO con il JSON, niente altro.`
     // SPAZI PUBBLICITARI — carica immagini da Supabase
     const PUB_BUCKET = 'https://nacvrsgkyfavykxjxszu.supabase.co/storage/v1/object/public/loghi-pubblicita/';
     const pubSlots = [
-      { id:1, nome:'🥇 Spazio In Cima', colore:'#92400e', bg:'#fffbeb', border:'#f59e0b' },
-      { id:2, nome:'🥈 Spazio A Metà', colore:'#2a7a4b', bg:'#e8f5e9', border:'#2a7a4b' },
-      { id:3, nome:'🥉 Spazio In Fondo', colore:'#4338ca', bg:'#eef2ff', border:'#6366f1' },
-      { id:4, nome:'📌 Spazio Sidebar', colore:'#FF6B35', bg:'#fff3e0', border:'#FF6B35' },
-      { id:5, nome:'🔹 Piccolo 1', colore:'#555', bg:'#f5f5f5', border:'#999' },
-      { id:6, nome:'🔹 Piccolo 2', colore:'#555', bg:'#f5f5f5', border:'#999' },
-      { id:7, nome:'🔹 Piccolo 3', colore:'#555', bg:'#f5f5f5', border:'#999' },
-      { id:8, nome:'🔹 Piccolo 4', colore:'#555', bg:'#f5f5f5', border:'#999' },
+      { id:1, nome:'🥇 Spazio In Cima',   border:'#f59e0b', w:'100%', h:'90px',  big:true },
+      { id:2, nome:'🥈 Spazio A Metà',    border:'#2a7a4b', w:'100%', h:'90px',  big:true },
+      { id:3, nome:'🥉 Spazio In Fondo',  border:'#6366f1', w:'100%', h:'90px',  big:true },
+      { id:4, nome:'📌 Spazio Sidebar',   border:'#FF6B35', w:'100%', h:'90px',  big:true },
+      { id:5, nome:'🔹 Piccolo 1',        border:'#999',    w:'100%', h:'250px', big:false },
+      { id:6, nome:'🔹 Piccolo 2',        border:'#999',    w:'100%', h:'250px', big:false },
+      { id:7, nome:'🔹 Piccolo 3',        border:'#999',    w:'100%', h:'250px', big:false },
+      { id:8, nome:'🔹 Piccolo 4',        border:'#999',    w:'100%', h:'250px', big:false },
     ];
 
     function renderPubSlots() {
       const grid = document.getElementById('grid-pub');
       grid.innerHTML = '';
+
+      // Spazi grandi: riga intera ciascuno
+      const rigaGrandi = document.createElement('div');
+      rigaGrandi.style.cssText = 'display:flex; flex-direction:column; gap:12px; margin-bottom:20px;';
+
+      // Spazi piccoli: griglia 4 colonne
+      const rigaPiccoli = document.createElement('div');
+      rigaPiccoli.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;';
+
       pubSlots.forEach(function(slot) {
         const url = PUB_BUCKET + 'locandina-slot' + slot.id + '.jpg';
-        const div = document.createElement('a');
-        div.href = 'pubblicita.html';
-        div.style.textDecoration = 'none';
-        div.innerHTML = '<div style="border:2px dashed ' + slot.border + '; border-radius:12px; overflow:hidden; background:' + slot.bg + '; cursor:pointer;" id="pub-card-' + slot.id + '">' +
-          '<div id="pub-img-' + slot.id + '" style="width:100%; height:130px; display:flex; align-items:center; justify-content:center; background:' + slot.bg + ';">' +
-            '<div style="padding:16px; text-align:center;">' +
-              '<div style="font-size:13px; font-weight:700; color:' + slot.colore + '; margin-bottom:6px;">' + slot.nome + '</div>' +
-              '<div style="background:' + slot.border + '; color:white; padding:7px 12px; border-radius:20px; font-size:11px; font-weight:700; display:inline-block;">Vuoi questo spazio? →</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-        grid.appendChild(div);
 
-        // Prova a caricare l'immagine reale
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'text-align:center;';
+
+        const link = document.createElement('a');
+        link.href = 'pubblicita.html';
+        link.style.textDecoration = 'none';
+        link.style.display = 'block';
+
+        const banner = document.createElement('div');
+        banner.id = 'pub-img-' + slot.id;
+        banner.style.cssText = 'width:' + slot.w + '; height:' + slot.h + '; border:2px dashed ' + slot.border + '; border-radius:8px; overflow:hidden; background:#f9f9f9; display:flex; align-items:center; justify-content:center;';
+        banner.innerHTML = '<span style="color:#ccc; font-size:12px;">⏳ Caricamento...</span>';
+
+        const label = document.createElement('div');
+        label.style.cssText = 'margin-top:8px; font-size:12px; color:#666;';
+        label.innerHTML = slot.nome + ' &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Vuoi questo spazio? →</a>';
+
+        link.appendChild(banner);
+        wrapper.appendChild(link);
+        wrapper.appendChild(label);
+
+        if (slot.big) rigaGrandi.appendChild(wrapper);
+        else rigaPiccoli.appendChild(wrapper);
+
+        // Carica immagine reale
         var img = new Image();
         img.onload = function() {
           var el = document.getElementById('pub-img-' + slot.id);
-          if (el) el.innerHTML = '<img src="' + url + '?t=' + Date.now() + '" style="width:100%;height:130px;object-fit:cover;">';
+          if (el) el.innerHTML = '<img src="' + url + '?t=' + Date.now() + '" style="width:100%;height:100%;object-fit:cover;">';
+        };
+        img.onerror = function() {
+          var el = document.getElementById('pub-img-' + slot.id);
+          if (el) el.innerHTML = '<span style="color:#ddd; font-size:12px;">Spazio disponibile</span>';
         };
         img.src = url + '?t=' + Date.now();
       });
+
+      grid.appendChild(rigaGrandi);
+      grid.appendChild(rigaPiccoli);
     }
 
     renderPubSlots();
