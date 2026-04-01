@@ -462,11 +462,7 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('nav-prenota').addEventListener('click', function(e){ e.preventDefault(); showPage(1); });
   document.getElementById('btn1').addEventListener('click', function(){ if(fmt) showPage(2); });
   document.getElementById('back1').addEventListener('click', function(){ goToStep(1); });
-  document.getElementById('btn2').addEventListener('click', function(){ if(citta.length > 0) showPage(3); });
-  document.getElementById('back1').addEventListener('click', function(){ showPage(1); });
-  document.getElementById('back2').addEventListener('click', function(){ showPage(2); });
-
-  // Formati - anteprima
+  document.getElementById('btn2').addEventListener('click', function(){ if(nteprima
   document.getElementById('prev-s1').addEventListener('click', function(){ selFmt(1); });
   document.getElementById('prev-s2').addEventListener('click', function(){ selFmt(2); });
   document.getElementById('prev-s3').addEventListener('click', function(){ selFmt(3); });
@@ -633,4 +629,15 @@ function inviaOrdine() {
     body: JSON.stringify({ nome: nome + ' — ' + azienda, email: email, messaggio: msg })
   }).then(function() {
     document.getElementById('ok-nome').textContent = nome + '!';
-    document.getElementById('ok-email'
+        document.getElementById('ok-nome').textContent = nome + '!';
+    document.getElementById('ok-email').textContent = email;
+    showPage(4);
+  }).catch(function() {
+    btn.textContent = '📩 Conferma e invia ordine';
+    btn.disabled = false;
+    alert('Errore invio. Riprova.');
+  });
+}
+</script>
+</body>
+</html>
