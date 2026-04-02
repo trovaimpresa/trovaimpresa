@@ -255,47 +255,53 @@
 
         /* WORK LINKS SECTION */
         .lavoro-links {
-            padding: 40px;
-            background: #FF6B35;
+            padding: 40px 20px;
+            background: #f5f5f5;
             text-align: center;
             margin-bottom: 30px;
         }
 
         .lavoro-links h2 {
             margin-bottom: 25px;
-            color: #2d5016;
-            font-size: 32px;
+            color: #1a4d2e;
+            font-size: 22px;
             font-weight: 800;
         }
 
         .lavoro-buttons-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            max-width: 800px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .lavoro-btn {
-            display: block;
-            padding: 30px;
-            background: linear-gradient(135deg, #4CAF50 0%, #2d5016 100%);
-            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 140px;
+            max-width: 160px;
+            flex: 1;
+            padding: 24px 10px;
+            background: white;
+            color: #333;
             text-decoration: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .lavoro-btn:nth-child(2) {
-            background: linear-gradient(135deg, #2196F3 0%, #0066cc 100%);
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e8e8e8;
         }
 
         .lavoro-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+            border-color: #2a7a4b;
         }
 
         /* JOBS SECTION */
@@ -614,11 +620,11 @@
     <section style="background:#f5f5f5; padding:30px 20px; text-align:center;">
         <h2 style="font-size:22px; font-weight:800; color:#1a4d2e; margin-bottom:20px;">Cosa stai cercando?</h2>
         <div style="display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:900px; margin:0 auto;">
-            <a href="cerca-artigiani.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#2a7a4b; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🔨<br>Artigiano</a>
-            <a href="cerca-imprese.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#FF6B35; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏗️<br>Impresa Edile</a>
-            <a href="cerca-grandi-imprese.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#1a5276; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏢<br>Grande Impresa</a>
-            <a href="cerca-negozi.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#c0392b; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏪<br>Negozio Edile</a>
-            <a href="cerca-professionisti.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#6c3483; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">👔<br>Professionista</a>
+            <a href="cerca-artigiani.html" style="flex:1; min-width:140px; max-width:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px 10px; background:white; color:#333; border:1px solid #e8e8e8; border-radius:14px; text-decoration:none; font-weight:600; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,0.1)';this.style.borderColor='#2a7a4b'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)';this.style.borderColor='#e8e8e8'"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
+            <a href="cerca-imprese.html" style="flex:1; min-width:140px; max-width:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px 10px; background:white; color:#333; border:1px solid #e8e8e8; border-radius:14px; text-decoration:none; font-weight:600; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,0.1)';this.style.borderColor='#2a7a4b'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)';this.style.borderColor='#e8e8e8'"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa Edile</a>
+            <a href="cerca-grandi-imprese.html" style="flex:1; min-width:140px; max-width:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px 10px; background:white; color:#333; border:1px solid #e8e8e8; border-radius:14px; text-decoration:none; font-weight:600; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,0.1)';this.style.borderColor='#2a7a4b'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)';this.style.borderColor='#e8e8e8'"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="1"/><path d="M6 6h.01M10 6h.01M14 6h.01M18 6h.01M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/></svg>Grande Impresa</a>
+            <a href="cerca-negozi.html" style="flex:1; min-width:140px; max-width:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px 10px; background:white; color:#333; border:1px solid #e8e8e8; border-radius:14px; text-decoration:none; font-weight:600; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,0.1)';this.style.borderColor='#2a7a4b'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)';this.style.borderColor='#e8e8e8'"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg>Negozio Edile</a>
+            <a href="cerca-professionisti.html" style="flex:1; min-width:140px; max-width:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px 10px; background:white; color:#333; border:1px solid #e8e8e8; border-radius:14px; text-decoration:none; font-weight:600; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,0.1)';this.style.borderColor='#2a7a4b'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)';this.style.borderColor='#e8e8e8'"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Professionista</a>
         </div>
     </section>
 
@@ -673,8 +679,8 @@
     <section class="lavoro-links">
         <h2>Registrati e pubblicizza</h2>
         <div class="lavoro-buttons-grid">
-            <a href="pannello-impresa.html" class="lavoro-btn">🔐 Accedi — Sei già registrato?</a>
-            <a href="cancella-iscrizione.html" class="lavoro-btn" style="background:#c0392b;border-color:#c0392b;">🗑️ Cancella iscrizione</a>
+            <a href="pannello-impresa.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Accedi — Sei già registrato?</a>
+            <a href="cancella-iscrizione.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg><span style="color:#c0392b;">Cancella iscrizione</span></a>
         </div>
     </section>
 
@@ -682,9 +688,9 @@
     <section class="lavoro-links">
         <h2>Informazione Piani</h2>
         <div class="lavoro-buttons-grid">
-            <a href="info-free.html" class="lavoro-btn">🆓 Piano Free — Scopri di più</a>
-            <a href="info-pro.html" class="lavoro-btn" style="background:linear-gradient(135deg,#1a73e8,#0d3b8c)">⭐ Piano Pro — Scopri di più</a>
-            <a href="pubblicita.html" class="lavoro-btn">📢 Pubblicità</a>
+            <a href="info-free.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Piano Free — Scopri di più</a>
+            <a href="info-pro.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="#FF6B35" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span style="color:#FF6B35;">Piano Pro — Scopri di più</span></a>
+            <a href="pubblicita.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>Pubblicità</a>
         </div>
     </section>
 
@@ -692,8 +698,8 @@
     <section class="lavoro-links">
         <h2>🔨 Cerca Lavoro - Candidatura</h2>
         <div class="lavoro-buttons-grid">
-            <a href="registrazione-candidato.html" class="lavoro-btn">🔨 Registrati · Invia CV</a>
-            <a href="ricerca-candidati.html" class="lavoro-btn">🔍 Ricerca Candidati</a>
+            <a href="registrazione-candidato.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Registrati · Invia CV</a>
+            <a href="ricerca-candidati.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Ricerca Candidati</a>
         </div>
     </section>
 
@@ -701,8 +707,8 @@
     <section class="lavoro-links">
         <h2>💼 Lavoro - Offerte di Lavoro</h2>
         <div class="lavoro-buttons-grid">
-            <a href="offerte-registrazione.html" class="lavoro-btn">💼 Pubblica Offerta di Lavoro</a>
-            <a href="ricerca-offerte.html" class="lavoro-btn">🔍 Ricerca Offerte</a>
+            <a href="offerte-registrazione.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Pubblica Offerta di Lavoro</a>
+            <a href="ricerca-offerte.html" class="lavoro-btn"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Ricerca Offerte</a>
         </div>
     </section>
 
@@ -722,12 +728,12 @@
     <!-- NEGOZI EDILI E PROFESSIONISTI -->
     <section class="lavoro-links">
         <h2>🏪 Registrati su TrovaImpresa</h2>
-        <div style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; max-width:900px; margin:0 auto;">
-            <a href="registrazione-artigiano.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#2a7a4b,#1a4d2e);">🔨 Artigiano</a>
-            <a href="registrazione-impresa.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#FF6B35,#b84a0a);">🏗️ Impresa</a>
-            <a href="registrazione-grande-impresa.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#1a5276,#0d2d4a);">🏢 Grande Impresa</a>
-            <a href="registrazione-negozio.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#c0392b,#7b1a1a);">🏪 Negozio Edile</a>
-            <a href="registrazione-professionista.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#6c3483,#3d1a5a);">👔 Professionista</a>
+        <div style="display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:900px; margin:0 auto;">
+            <a href="registrazione-artigiano.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:160px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
+            <a href="registrazione-impresa.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:160px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa</a>
+            <a href="registrazione-grande-impresa.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:160px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="1"/><path d="M6 6h.01M10 6h.01M14 6h.01M18 6h.01M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/></svg>Grande Impresa</a>
+            <a href="registrazione-negozio.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:160px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg>Negozio Edile</a>
+            <a href="registrazione-professionista.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:160px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Professionista</a>
         </div>
     </section>
 
