@@ -4,123 +4,583 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrovaImpresa - Trova l'impresa adatta a te</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
+        :root {
+            --green: #2ecc71;
+            --green-dark: #1a8a48;
+            --green-deep: #0d4a24;
+            --orange: #f39c12;
+            --orange-dark: #d68910;
+            --orange-bright: #ff6b35;
+            --glass-bg: rgba(255,255,255,0.10);
+            --glass-bg-strong: rgba(255,255,255,0.18);
+            --glass-border: rgba(255,255,255,0.25);
+            --glass-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            --blur: blur(16px);
+            --blur-heavy: blur(24px);
+            --text-light: rgba(255,255,255,0.92);
+            --text-muted: rgba(255,255,255,0.65);
+            --radius: 20px;
+            --radius-sm: 12px;
         }
 
-        /* NAVBAR */
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #fff;
+            background: #0d3a1a;
+            overflow-x: hidden;
+        }
+
+        /* ─── ANIMATED BACKGROUND ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 10% 20%, rgba(46,204,113,0.35) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 70% at 90% 80%, rgba(243,156,18,0.30) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,107,53,0.10) 0%, transparent 70%),
+                linear-gradient(160deg, #0a2e14 0%, #0f3d1c 30%, #1a2800 70%, #2b1a00 100%);
+            z-index: -1;
+        }
+
+        /* ─── NAVBAR ─── */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 40px;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 18px 40px;
+            background: rgba(10,40,20,0.70);
+            backdrop-filter: var(--blur-heavy);
+            -webkit-backdrop-filter: var(--blur-heavy);
+            border-bottom: 1px solid var(--glass-border);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 200;
+            transition: background 0.3s;
         }
 
         .logo {
-            font-size: 24px;
-            font-weight: 800;
-            color: #28a745;
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--green);
+            text-shadow: 0 0 20px rgba(46,204,113,0.5);
         }
 
         .logo span {
-            color: #FF6B35;
+            color: var(--orange);
+            text-shadow: 0 0 20px rgba(243,156,18,0.5);
         }
 
         .nav-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
         }
 
         .btn-entra {
-            padding: 10px 24px;
-            border: 2px solid #28a745;
-            background: white;
-            color: #28a745;
-            border-radius: 8px;
+            padding: 10px 22px;
+            border: 1.5px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            color: #fff;
+            border-radius: 10px;
             font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
             text-decoration: none;
+            display: inline-block;
         }
 
         .btn-entra:hover {
-            background: #28a745;
-            color: white;
+            background: var(--glass-bg-strong);
+            border-color: var(--green);
+            color: var(--green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(46,204,113,0.2);
         }
 
         .btn-registrati {
-            padding: 10px 24px;
-            background: #FF6B35;
-            color: white;
+            padding: 10px 22px;
+            background: linear-gradient(135deg, var(--orange), var(--orange-bright));
+            color: #fff;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
             text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 16px rgba(243,156,18,0.35);
         }
 
         .btn-registrati:hover {
-            background: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(243,156,18,0.5);
+            filter: brightness(1.1);
         }
 
         .btn-pubblicita {
-            padding: 10px 24px;
-            background: #0066cc;
-            color: white;
+            padding: 10px 22px;
+            background: linear-gradient(135deg, var(--green), var(--green-dark));
+            color: #fff;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
             text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 16px rgba(46,204,113,0.3);
         }
 
         .btn-pubblicita:hover {
-            background: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(46,204,113,0.5);
+            filter: brightness(1.1);
         }
 
-        /* HERO SECTION */
+        /* ─── HERO SECTION ─── */
         .hero {
-            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
-            padding: 100px 40px;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px 60px;
             text-align: center;
-            color: white;
+            position: relative;
         }
 
-        .hero h1 {
-            font-size: 52px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            line-height: 1.2;
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+        }
+
+        .hero img {
+            height: 480px;
+            width: auto;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 40px rgba(46,204,113,0.4));
+            animation: floatLogo 6s ease-in-out infinite;
+        }
+
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
         }
 
         .hero p {
-            font-size: 20px;
-            margin-bottom: 50px;
-            color: #e0f0e8;
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-muted);
+            max-width: 600px;
+            letter-spacing: 0.3px;
         }
 
-        /* WHY SECTION */
+        .hero p strong {
+            color: var(--orange);
+        }
+
+        /* ─── BANNER SLOT WRAPPER ─── */
+        .banner-slot {
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .banner-slot-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .banner-slot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .pub-box {
+            width: 100%;
+            max-width: 500px;
+            height: 350px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 2px dashed rgba(243,156,18,0.45);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 auto;
+            box-shadow: 0 4px 24px rgba(243,156,18,0.12);
+            transition: all 0.3s ease;
+        }
+
+        .pub-box:hover {
+            border-color: var(--orange);
+            background: var(--glass-bg-strong);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(243,156,18,0.25);
+        }
+
+        .pub-box-sm {
+            max-width: 280px;
+            height: 260px;
+        }
+
+        .pub-label {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .pub-label a {
+            color: var(--orange);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .pub-placeholder {
+            text-align: center;
+        }
+
+        .pub-placeholder .pub-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .pub-placeholder .pub-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--orange);
+            letter-spacing: 0.5px;
+        }
+
+        .pub-placeholder .pub-sub {
+            font-size: 11px;
+            color: rgba(243,156,18,0.55);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* ─── SECTION TITLES ─── */
+        .section-title {
+            font-size: 36px;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.75) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-sub {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 36px;
+        }
+
+        /* ─── CERCA CATEGORIA SECTION ─── */
+        .cerca-section {
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .cerca-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .cerca-card {
+            flex: 1;
+            min-width: 150px;
+            max-width: 175px;
+            display: block;
+            padding: 28px 12px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .cerca-card .card-emoji {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .cerca-card:hover {
+            transform: translateY(-8px) scale(1.04);
+            background: var(--glass-bg-strong);
+            border-color: rgba(255,255,255,0.45);
+            box-shadow: 0 20px 48px rgba(0,0,0,0.25);
+        }
+
+        .cerca-card.green { border-color: rgba(46,204,113,0.4); }
+        .cerca-card.green:hover { border-color: var(--green); box-shadow: 0 20px 48px rgba(46,204,113,0.25); }
+
+        .cerca-card.orange { border-color: rgba(243,156,18,0.4); }
+        .cerca-card.orange:hover { border-color: var(--orange); box-shadow: 0 20px 48px rgba(243,156,18,0.25); }
+
+        .cerca-card.blue { border-color: rgba(52,152,219,0.4); }
+        .cerca-card.blue:hover { border-color: #3498db; box-shadow: 0 20px 48px rgba(52,152,219,0.25); }
+
+        .cerca-card.red { border-color: rgba(231,76,60,0.4); }
+        .cerca-card.red:hover { border-color: #e74c3c; box-shadow: 0 20px 48px rgba(231,76,60,0.25); }
+
+        .cerca-card.purple { border-color: rgba(155,89,182,0.4); }
+        .cerca-card.purple:hover { border-color: #9b59b6; box-shadow: 0 20px 48px rgba(155,89,182,0.25); }
+
+        /* ─── AI SECTION ─── */
+        .ai-section {
+            padding: 60px 20px;
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .ai-box {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur-heavy);
+            -webkit-backdrop-filter: var(--blur-heavy);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 36px;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .ai-box textarea {
+            width: 100%;
+            height: 110px;
+            background: rgba(255,255,255,0.07);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #fff;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .ai-box textarea::placeholder {
+            color: rgba(255,255,255,0.35);
+        }
+
+        .ai-box textarea:focus {
+            border-color: var(--green);
+            background: rgba(255,255,255,0.12);
+        }
+
+        .ai-chips-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-top: 16px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .ai-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .ai-chip {
+            cursor: pointer;
+            padding: 6px 14px;
+            border: 1.5px solid var(--glass-border);
+            border-radius: 20px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.75);
+            background: rgba(255,255,255,0.06);
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .ai-chip:hover {
+            background: rgba(46,204,113,0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .ai-btn-main {
+            width: 100%;
+            margin-top: 4px;
+            background: linear-gradient(135deg, var(--green), var(--green-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 4px 20px rgba(46,204,113,0.35);
+            letter-spacing: 0.3px;
+        }
+
+        .ai-btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(46,204,113,0.5);
+            filter: brightness(1.08);
+        }
+
+        .ai-btn-main:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ─── REGISTRATI SECTION (lavoro-links) ─── */
+        .lavoro-links {
+            padding: 60px 20px;
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .lavoro-links h2 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.75) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lavoro-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+
+        .lavoro-btn {
+            display: block;
+            padding: 26px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1.5px solid var(--glass-border);
+            color: #fff;
+            text-decoration: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .lavoro-btn:hover {
+            transform: translateY(-6px) scale(1.02);
+            background: var(--glass-bg-strong);
+            border-color: rgba(255,255,255,0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        }
+
+        /* ─── REGISTER SECTION ─── */
+        .registra-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .registra-btn {
+            flex: 1;
+            min-width: 150px;
+            max-width: 175px;
+            display: block;
+            padding: 26px 12px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1.5px solid var(--glass-border);
+            color: #fff;
+            text-decoration: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .registra-btn .card-emoji {
+            font-size: 26px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .registra-btn:hover {
+            transform: translateY(-6px) scale(1.03);
+            background: var(--glass-bg-strong);
+            border-color: rgba(255,255,255,0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        }
+
+        /* ─── WHY SECTION ─── */
         .why-section {
-            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
             padding: 80px 20px;
-            margin-top: 60px;
+            border-top: 1px solid var(--glass-border);
         }
 
         .why-container {
@@ -128,36 +588,22 @@
             margin: 0 auto;
         }
 
-        .why-section h2 {
-            font-size: 40px;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 15px;
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .why-section > .why-container > p {
-            text-align: center;
-            color: #e0f0e8;
-            margin-bottom: 50px;
-            font-size: 18px;
-            font-weight: 500;
-        }
-
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 24px;
+            margin-bottom: 28px;
         }
 
         .feature-card {
-            padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
-            border: none;
+            padding: 36px;
+            border-radius: var(--radius);
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1.5px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
             position: relative;
             overflow: hidden;
         }
@@ -165,49 +611,27 @@
         .feature-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--orange), var(--green));
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        .feature-card:nth-child(1) {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-            border-top: 4px solid #FF6B35;
-        }
-
-        .feature-card:nth-child(1)::before {
-            background: #FF6B35;
-        }
-
-        .feature-card:nth-child(2) {
-            background: linear-gradient(135deg, #fffaf0 0%, #fff8f0 100%);
-            border-top: 4px solid #FFB347;
-        }
-
-        .feature-card:nth-child(2)::before {
-            background: #FFB347;
-        }
-
-        .feature-card:nth-child(3) {
-            background: linear-gradient(135deg, #f0f5ff 0%, #e8f0ff 100%);
-            border-top: 4px solid #0066cc;
-        }
-
-        .feature-card:nth-child(3)::before {
-            background: #0066cc;
-        }
+        .feature-card:hover::before { opacity: 1; }
 
         .feature-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+            transform: translateY(-10px) scale(1.02);
+            background: var(--glass-bg-strong);
+            border-color: rgba(255,255,255,0.35);
+            box-shadow: 0 24px 56px rgba(0,0,0,0.28);
         }
 
         .feature-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
+            font-size: 38px;
+            margin-bottom: 18px;
             display: inline-block;
-            animation: bounce 2s infinite;
+            animation: bounce 3s ease-in-out infinite;
         }
 
         @keyframes bounce {
@@ -218,263 +642,76 @@
         .feature-card h3 {
             font-weight: 800;
             margin-bottom: 12px;
-            color: #1a472a;
+            color: #fff;
             font-size: 20px;
         }
 
         .feature-card p {
-            color: #555;
+            color: var(--text-muted);
             font-size: 15px;
-            line-height: 1.7;
+            line-height: 1.75;
         }
 
-        /* INFO BANNER */
+        /* ─── INFO BANNER ─── */
         .info-banner {
-            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
-            border: none;
+            background: linear-gradient(135deg, rgba(243,156,18,0.25), rgba(255,107,53,0.20));
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            padding: 28px 32px;
+            border-radius: var(--radius);
+            border: 1.5px solid rgba(243,156,18,0.35);
+            box-shadow: 0 8px 32px rgba(243,156,18,0.15);
         }
 
         .info-banner p {
-            color: #ffffff;
+            color: #fff;
             font-weight: 600;
             margin: 0;
             font-size: 16px;
             display: flex;
-            gap: 30px;
+            gap: 40px;
             flex-wrap: wrap;
             align-items: center;
+            justify-content: center;
         }
 
         .info-banner strong {
-            color: #ffffff;
-            font-weight: 700;
-        }
-
-        /* WORK LINKS SECTION */
-        .lavoro-links {
-            padding: 40px;
-            background: #FF6B35;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .lavoro-links h2 {
-            margin-bottom: 25px;
-            color: #2d5016;
-            font-size: 32px;
+            color: var(--orange);
             font-weight: 800;
         }
 
-        .lavoro-buttons-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .lavoro-btn {
-            display: block;
-            padding: 30px;
-            background: linear-gradient(135deg, #4CAF50 0%, #2d5016 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .lavoro-btn:nth-child(2) {
-            background: linear-gradient(135deg, #2196F3 0%, #0066cc 100%);
-        }
-
-        .lavoro-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-
-        /* JOBS SECTION */
-        .jobs-section-symmetric {
-            padding: 80px 40px;
-            background: #f8f9fa;
-        }
-
-        .jobs-container-symmetric {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .jobs-container-symmetric > h2 {
-            font-size: 40px;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 60px;
-            color: #333;
-        }
-
-        .jobs-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .col-candidature,
-        .col-annunci {
-            border-radius: 12px;
-            padding: 20px;
-            min-height: 325px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .col-candidature {
-            background: #f0f9f5;
-            border: 2px solid #28a745;
-        }
-
-        .col-annunci {
-            background: #fff5f0;
-            border: 2px solid #FF6B35;
-        }
-
-        .col-title {
-            font-size: 11px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #0066cc;
-        }
-
-        .col-subtitle {
-            font-size: 7px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #333;
-            font-size: 13px;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 13px;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #28a745;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 70px;
-        }
-
-        .form-group small {
-            display: block;
-            margin-top: 4px;
-            color: #999;
-            font-size: 11px;
-        }
-
-        .col-candidature .form-group button,
-        .col-annunci .form-group button {
-            width: 100%;
-            padding: 12px;
-            background: #FF6B35;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.3s ease;
-        }
-
-        .col-candidature .form-group button:hover,
-        .col-annunci .form-group button:hover {
-            background: #e55a25;
-        }
-
-        .annunci-results {
-            margin-top: 30px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .ad-card {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #FF6B35;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .ad-title {
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        .ad-info {
-            font-size: 11px;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 30px;
-            color: #999;
-            font-size: 12px;
-        }
-
-        /* FOOTER */
+        /* ─── FOOTER ─── */
         .footer {
-            background: #1a472a;
-            color: white;
-            padding: 60px 40px 30px;
-            text-align: center;
+            background: rgba(5,20,10,0.85);
+            backdrop-filter: var(--blur-heavy);
+            -webkit-backdrop-filter: var(--blur-heavy);
+            border-top: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 70px 40px 32px;
         }
 
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 40px;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             text-align: left;
         }
 
         .footer-section h3 {
-            margin-bottom: 15px;
-            font-weight: 700;
-            color: #28a745;
+            margin-bottom: 18px;
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--green);
+            letter-spacing: -0.3px;
+        }
+
+        .footer-section p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 15px;
         }
 
         .footer-section ul {
@@ -482,108 +719,121 @@
         }
 
         .footer-section ul li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .footer-section a {
-            color: #e0f0e8;
+            color: var(--text-muted);
             text-decoration: none;
-            transition: color 0.3s;
+            font-size: 15px;
+            transition: color 0.2s;
         }
 
         .footer-section a:hover {
-            color: #FF6B35;
+            color: var(--orange);
         }
 
         .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 30px;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 28px;
             text-align: center;
-            color: #ccc;
+            color: rgba(255,255,255,0.35);
+            font-size: 14px;
         }
 
-        /* RESPONSIVE */
+        /* ─── AI RESULT STYLING ─── */
+        #ai-risultato > div {
+            background: var(--glass-bg-strong) !important;
+            backdrop-filter: var(--blur);
+            border-radius: var(--radius-sm) !important;
+            border: 1.5px solid var(--glass-border) !important;
+            border-left: 4px solid var(--green) !important;
+            padding: 20px !important;
+            text-align: left;
+        }
+
+        #ai-risultato a {
+            border-radius: var(--radius-sm) !important;
+            font-weight: 700 !important;
+            transition: all 0.25s !important;
+        }
+
+        #ai-risultato a:hover {
+            filter: brightness(1.15) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+        }
+
+        /* ─── RESPONSIVE ─── */
         @media (max-width: 768px) {
             .navbar {
-                padding: 15px 20px;
+                padding: 16px 20px;
                 flex-wrap: wrap;
-                gap: 10px;
+                gap: 12px;
             }
 
             .nav-buttons {
                 flex-wrap: wrap;
                 width: 100%;
-                gap: 10px;
+                gap: 8px;
             }
 
             .btn-entra, .btn-registrati, .btn-pubblicita {
                 flex: 1;
-                padding: 10px 12px;
-                font-size: 14px;
+                padding: 10px 10px;
+                font-size: 13px;
+                text-align: center;
             }
 
             .hero {
-                padding: 60px 20px;
-            }
-
-            .hero h1 {
-                font-size: 32px;
-            }
-
-            .why-section {
-                padding: 60px 20px;
-            }
-
-            .why-section h2 {
-                font-size: 28px;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .info-banner p {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .lavoro-links {
-                padding: 30px 20px;
-            }
-
-            .lavoro-buttons-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .jobs-section-symmetric {
-                padding: 60px 20px;
-            }
-
-            .jobs-container-symmetric > h2 {
-                font-size: 28px;
-            }
-
-            .jobs-grid {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            .col-candidature,
-            .col-annunci {
+                padding: 50px 20px 40px;
                 min-height: auto;
-                padding: 20px;
             }
 
-            .footer {
-                padding: 40px 20px 20px;
+            .hero img {
+                height: 280px;
             }
 
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-                text-align: center;
+            .hero p {
+                font-size: 17px;
             }
+
+            .section-title { font-size: 26px; }
+
+            .cerca-section { padding: 40px 16px; }
+            .cerca-grid { gap: 12px; }
+            .cerca-card { min-width: 130px; max-width: 160px; padding: 22px 10px; font-size: 13px; }
+
+            .banner-slot-grid { grid-template-columns: 1fr; }
+            .pub-box { height: 220px; }
+
+            .lavoro-links { padding: 40px 16px; }
+            .lavoro-links h2 { font-size: 24px; }
+            .lavoro-buttons-grid { grid-template-columns: 1fr; gap: 12px; }
+            .lavoro-btn { padding: 20px 16px; font-size: 14px; }
+
+            .registra-grid { gap: 10px; }
+            .registra-btn { min-width: 130px; max-width: 155px; padding: 20px 10px; font-size: 13px; }
+
+            .why-section { padding: 50px 16px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .feature-card { padding: 28px; }
+
+            .ai-section { padding: 40px 16px; }
+            .ai-box { padding: 24px 18px; }
+
+            .info-banner p { flex-direction: column; gap: 12px; }
+
+            .footer { padding: 50px 20px 24px; }
+            .footer-content { grid-template-columns: 1fr; gap: 28px; text-align: center; }
+
+            .banner-slot-grid.slot-3-4 { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .logo { font-size: 22px; }
+            .hero img { height: 200px; }
+            .cerca-card { min-width: 110px; max-width: 140px; font-size: 12px; }
         }
     </style>
 </head>
@@ -598,83 +848,119 @@
 
     <!-- HERO SECTION -->
     <section class="hero">
-        <img src="/trovaimpresa_logo_transparent (2).png" alt="Logo TrovaImpresa" style="height: 600px; width: auto; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto;">
-        
+        <img src="/trovaimpresa_logo_transparent (2).png" alt="Logo TrovaImpresa">
         <p>In pochi click, l'artigiano perfetto per il tuo progetto</p>
-
     </section>
 
     <!-- BANNER SLOT 1 -->
-    <div style="padding:16px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35; text-align:center;">
-        <div id="pub-img-1" style="width:100%; max-width:500px; height:350px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
-            <div style="text-align:center; margin-top:5px; font-size:11px; color:#bbb;">🥇 Spazio In Cima — Prima cosa che vede il visitatore &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota questo spazio →</a></div>
+    <div class="banner-slot">
+        <div class="banner-slot-inner">
+            <div id="pub-img-1" class="pub-box" onclick="location.href='pubblicita.html'">
+                <div class="pub-placeholder">
+                    <div class="pub-icon">📢</div>
+                    <div class="pub-title">Spazio Pubblicitario</div>
+                    <div class="pub-sub">Clicca per prenotare →</div>
+                </div>
+            </div>
+            <div class="pub-label">🥇 Spazio In Cima — Prima cosa che vede il visitatore &nbsp;·&nbsp; <a href="pubblicita.html">Prenota questo spazio →</a></div>
         </div>
     </div>
+
     <!-- CERCA PER CATEGORIA SECTION -->
-    <section style="background:#f5f5f5; padding:30px 20px; text-align:center;">
-        <h2 style="font-size:22px; font-weight:800; color:#1a4d2e; margin-bottom:20px;">Cosa stai cercando?</h2>
-        <div style="display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:900px; margin:0 auto;">
-            <a href="cerca-artigiani.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#2a7a4b; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🔨<br>Artigiano</a>
-            <a href="cerca-imprese.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#FF6B35; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏗️<br>Impresa Edile</a>
-            <a href="cerca-grandi-imprese.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#1a5276; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏢<br>Grande Impresa</a>
-            <a href="cerca-negozi.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#c0392b; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏪<br>Negozio Edile</a>
-            <a href="cerca-professionisti.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#6c3483; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">👔<br>Professionista</a>
+    <section class="cerca-section">
+        <h2 class="section-title">Cosa stai cercando?</h2>
+        <p class="section-sub">Seleziona la categoria e trova il professionista giusto</p>
+        <div class="cerca-grid">
+            <a href="cerca-artigiani.html" class="cerca-card green">
+                <span class="card-emoji">🔨</span>Artigiano
+            </a>
+            <a href="cerca-imprese.html" class="cerca-card orange">
+                <span class="card-emoji">🏗️</span>Impresa Edile
+            </a>
+            <a href="cerca-grandi-imprese.html" class="cerca-card blue">
+                <span class="card-emoji">🏢</span>Grande Impresa
+            </a>
+            <a href="cerca-negozi.html" class="cerca-card red">
+                <span class="card-emoji">🏪</span>Negozio Edile
+            </a>
+            <a href="cerca-professionisti.html" class="cerca-card purple">
+                <span class="card-emoji">👔</span>Professionista
+            </a>
         </div>
     </section>
 
     <!-- BANNER PICCOLI 5+6 -->
-    <div style="padding:12px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35;">
-        <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div class="banner-slot">
+        <div class="banner-slot-grid">
             <div>
-                <div id="pub-img-5" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
-                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">Spazio Piccolo 5 &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+                <div id="pub-img-5" class="pub-box pub-box-sm" onclick="location.href='pubblicita.html'">
+                    <div class="pub-placeholder">
+                        <div class="pub-icon">📢</div>
+                        <div class="pub-title">Spazio Pubblicitario</div>
+                        <div class="pub-sub">Clicca per prenotare →</div>
+                    </div>
+                </div>
+                <div class="pub-label">Spazio Piccolo 5 &nbsp;·&nbsp; <a href="pubblicita.html">Prenota →</a></div>
             </div>
             <div>
-                <div id="pub-img-6" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
-                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">Spazio Piccolo 6 &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+                <div id="pub-img-6" class="pub-box pub-box-sm" onclick="location.href='pubblicita.html'">
+                    <div class="pub-placeholder">
+                        <div class="pub-icon">📢</div>
+                        <div class="pub-title">Spazio Pubblicitario</div>
+                        <div class="pub-sub">Clicca per prenotare →</div>
+                    </div>
+                </div>
+                <div class="pub-label">Spazio Piccolo 6 &nbsp;·&nbsp; <a href="pubblicita.html">Prenota →</a></div>
             </div>
         </div>
     </div>
+
     <!-- AI ORIENTAMENTO SECTION -->
-    <section style="background:white; padding:30px 20px; text-align:center; border-top:3px solid #2a7a4b;">
-        <h2 style="font-size:22px; font-weight:800; color:#1a4d2e; margin-bottom:6px;">🤖 Non sai a chi rivolgerti?</h2>
-        <p style="color:#666; font-size:14px; margin-bottom:18px;">Descrivi il lavoro che devi fare — ti diciamo subito chi contattare</p>
-        <div style="max-width:680px; margin:0 auto;">
-            <textarea id="ai-descrizione" placeholder="Es: devo rifare il bagno completo... oppure: voglio costruire un capannone... oppure: cerco piastrelle per cucina..." style="width:100%; height:100px; border:2px solid #ddd; border-radius:10px; padding:14px; font-size:14px; font-family:inherit; resize:none; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#2a7a4b'" onblur="this.style.borderColor='#ddd'"></textarea>
-            <div style="margin-top:10px; text-align:left;">
-                <span style="font-size:11px; color:#999; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Oppure seleziona un esempio:</span>
-                <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:8px;">
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🚿 Rifacimento bagno</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏠 Ristrutturazione appartamento</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏢 Costruire un capannone</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">⚡ Impianto elettrico</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🔥 Sostituzione caldaia</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🎨 Tinteggiatura pareti</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🟫 Posa pavimento</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏪 Cerco materiali edili</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🪟 Sostituzione infissi</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">📐 Ho bisogno di un geometra</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">☀️ Installazione pannelli solari</span>
-                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🌿 Giardino e paesaggistica</span>
-                </div>
+    <section class="ai-section">
+        <h2 class="section-title">🤖 Non sai a chi rivolgerti?</h2>
+        <p class="section-sub">Descrivi il lavoro che devi fare — ti diciamo subito chi contattare</p>
+        <div class="ai-box">
+            <textarea id="ai-descrizione" placeholder="Es: devo rifare il bagno completo... oppure: voglio costruire un capannone... oppure: cerco piastrelle per cucina..."></textarea>
+            <div class="ai-chips-label">Oppure seleziona un esempio:</div>
+            <div class="ai-chips">
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🚿 Rifacimento bagno</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🏠 Ristrutturazione appartamento</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🏢 Costruire un capannone</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">⚡ Impianto elettrico</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🔥 Sostituzione caldaia</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🎨 Tinteggiatura pareti</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🟫 Posa pavimento</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🏪 Cerco materiali edili</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🪟 Sostituzione infissi</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">📐 Ho bisogno di un geometra</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">☀️ Installazione pannelli solari</span>
+                <span onclick="selezionaEsempio(this)" class="ai-chip">🌿 Giardino e paesaggistica</span>
             </div>
-            <button onclick="aiOrienta()" id="ai-btn" style="margin-top:12px; background:#2a7a4b; color:white; border:none; border-radius:10px; padding:12px 30px; font-size:15px; font-weight:700; cursor:pointer; width:100%; transition:background 0.2s;">🔍 Trovami il professionista giusto</button>
+            <button onclick="aiOrienta()" id="ai-btn" class="ai-btn-main">🔍 Trovami il professionista giusto</button>
             <div id="ai-risultato" style="margin-top:16px; display:none;"></div>
         </div>
     </section>
 
     <!-- BANNER SLOT 2 -->
-    <div style="padding:16px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35; text-align:center;">
-        <div id="pub-img-2" style="width:100%; max-width:500px; height:350px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
-            <div style="text-align:center; margin-top:5px; font-size:11px; color:#bbb;">🥈 Spazio A Metà — Alta visibilità &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota questo spazio →</a></div>
+    <div class="banner-slot">
+        <div class="banner-slot-inner">
+            <div id="pub-img-2" class="pub-box" onclick="location.href='pubblicita.html'">
+                <div class="pub-placeholder">
+                    <div class="pub-icon">📢</div>
+                    <div class="pub-title">Spazio Pubblicitario</div>
+                    <div class="pub-sub">Clicca per prenotare →</div>
+                </div>
+            </div>
+            <div class="pub-label">🥈 Spazio A Metà — Alta visibilità &nbsp;·&nbsp; <a href="pubblicita.html">Prenota questo spazio →</a></div>
         </div>
     </div>
+
     <!-- REGISTRATI + PUBBLICITA SECTION -->
     <section class="lavoro-links">
         <h2>Registrati e pubblicizza</h2>
         <div class="lavoro-buttons-grid">
             <a href="pannello-impresa.html" class="lavoro-btn">🔐 Accedi — Sei già registrato?</a>
-            <a href="cancella-iscrizione.html" class="lavoro-btn" style="background:#c0392b;border-color:#c0392b;">🗑️ Cancella iscrizione</a>
+            <a href="cancella-iscrizione.html" class="lavoro-btn" style="border-color:rgba(192,57,43,0.4);">🗑️ Cancella iscrizione</a>
         </div>
     </section>
 
@@ -683,7 +969,7 @@
         <h2>Informazione Piani</h2>
         <div class="lavoro-buttons-grid">
             <a href="info-free.html" class="lavoro-btn">🆓 Piano Free — Scopri di più</a>
-            <a href="info-pro.html" class="lavoro-btn" style="background:linear-gradient(135deg,#1a73e8,#0d3b8c)">⭐ Piano Pro — Scopri di più</a>
+            <a href="info-pro.html" class="lavoro-btn" style="border-color:rgba(46,204,113,0.4);">⭐ Piano Pro — Scopri di più</a>
             <a href="pubblicita.html" class="lavoro-btn">📢 Pubblicità</a>
         </div>
     </section>
@@ -707,49 +993,84 @@
     </section>
 
     <!-- BANNER PICCOLI 7+8 -->
-    <div style="padding:12px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35;">
-        <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div class="banner-slot">
+        <div class="banner-slot-grid">
             <div>
-                <div id="pub-img-7" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
-                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">Spazio Piccolo 7 &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+                <div id="pub-img-7" class="pub-box pub-box-sm" onclick="location.href='pubblicita.html'">
+                    <div class="pub-placeholder">
+                        <div class="pub-icon">📢</div>
+                        <div class="pub-title">Spazio Pubblicitario</div>
+                        <div class="pub-sub">Clicca per prenotare →</div>
+                    </div>
+                </div>
+                <div class="pub-label">Spazio Piccolo 7 &nbsp;·&nbsp; <a href="pubblicita.html">Prenota →</a></div>
             </div>
             <div>
-                <div id="pub-img-8" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
-                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">Spazio Piccolo 8 &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+                <div id="pub-img-8" class="pub-box pub-box-sm" onclick="location.href='pubblicita.html'">
+                    <div class="pub-placeholder">
+                        <div class="pub-icon">📢</div>
+                        <div class="pub-title">Spazio Pubblicitario</div>
+                        <div class="pub-sub">Clicca per prenotare →</div>
+                    </div>
+                </div>
+                <div class="pub-label">Spazio Piccolo 8 &nbsp;·&nbsp; <a href="pubblicita.html">Prenota →</a></div>
             </div>
         </div>
     </div>
-    <!-- NEGOZI EDILI E PROFESSIONISTI -->
+
+    <!-- REGISTRATI SU TROVAIMPRESA -->
     <section class="lavoro-links">
         <h2>🏪 Registrati su TrovaImpresa</h2>
-        <div style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; max-width:900px; margin:0 auto;">
-            <a href="registrazione-artigiano.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#2a7a4b,#1a4d2e);">🔨 Artigiano</a>
-            <a href="registrazione-impresa.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#FF6B35,#b84a0a);">🏗️ Impresa</a>
-            <a href="registrazione-grande-impresa.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#1a5276,#0d2d4a);">🏢 Grande Impresa</a>
-            <a href="registrazione-negozio.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#c0392b,#7b1a1a);">🏪 Negozio Edile</a>
-            <a href="registrazione-professionista.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#6c3483,#3d1a5a);">👔 Professionista</a>
+        <div class="registra-grid">
+            <a href="registrazione-artigiano.html" class="registra-btn">
+                <span class="card-emoji">🔨</span>Artigiano
+            </a>
+            <a href="registrazione-impresa.html" class="registra-btn">
+                <span class="card-emoji">🏗️</span>Impresa
+            </a>
+            <a href="registrazione-grande-impresa.html" class="registra-btn">
+                <span class="card-emoji">🏢</span>Grande Impresa
+            </a>
+            <a href="registrazione-negozio.html" class="registra-btn">
+                <span class="card-emoji">🏪</span>Negozio Edile
+            </a>
+            <a href="registrazione-professionista.html" class="registra-btn">
+                <span class="card-emoji">👔</span>Professionista
+            </a>
         </div>
     </section>
 
-
     <!-- BANNER SLOT 3+4 -->
-    <div style="padding:12px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35;">
-        <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 300px; gap:12px;">
+    <div class="banner-slot">
+        <div class="banner-slot-grid slot-3-4" style="grid-template-columns: 1fr 300px;">
             <div>
-                <div id="pub-img-3" style="width:100%; max-width:500px; height:350px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
-                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">🥉 Spazio In Fondo &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+                <div id="pub-img-3" class="pub-box" onclick="location.href='pubblicita.html'">
+                    <div class="pub-placeholder">
+                        <div class="pub-icon">📢</div>
+                        <div class="pub-title">Spazio Pubblicitario</div>
+                        <div class="pub-sub">Clicca per prenotare →</div>
+                    </div>
+                </div>
+                <div class="pub-label">🥉 Spazio In Fondo &nbsp;·&nbsp; <a href="pubblicita.html">Prenota →</a></div>
             </div>
             <div>
-                <div id="pub-img-4" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
-                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">📌 Spazio Sidebar &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+                <div id="pub-img-4" class="pub-box pub-box-sm" onclick="location.href='pubblicita.html'">
+                    <div class="pub-placeholder">
+                        <div class="pub-icon">📢</div>
+                        <div class="pub-title">Spazio Pubblicitario</div>
+                        <div class="pub-sub">Clicca per prenotare →</div>
+                    </div>
+                </div>
+                <div class="pub-label">📌 Spazio Sidebar &nbsp;·&nbsp; <a href="pubblicita.html">Prenota →</a></div>
             </div>
         </div>
     </div>
+
     <!-- WHY SECTION -->
     <section class="why-section">
         <div class="why-container">
-            <h2>Perché scegliere TrovaImpresa</h2>
-            <p>Una piattaforma sicura, trasparente e sempre con te</p>
+            <h2 class="section-title">Perché scegliere TrovaImpresa</h2>
+            <p class="section-sub">Una piattaforma sicura, trasparente e sempre con te</p>
 
             <div class="features-grid">
                 <div class="feature-card">
@@ -785,7 +1106,7 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h3>TrovaImpresa</h3>
-                <p style="margin-bottom: 15px; color: #e0f0e8;">La piattaforma affidabile per trovare i professionisti giusti per il tuo progetto.</p>
+                <p>La piattaforma affidabile per trovare i professionisti giusti per il tuo progetto.</p>
             </div>
 
             <div class="footer-section">
@@ -864,7 +1185,7 @@
         function doSearch() {
             const citta = document.getElementById('search-input').value.trim();
             const hint = document.getElementById('search-hint');
-            
+
             if (!citta) {
                 hint.innerHTML = '⚠️ Inserisci una città per cercare';
                 hint.style.color = '#FF6B35';
@@ -935,7 +1256,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            aggiornaHint();
+            if (document.getElementById('search-hint')) aggiornaHint();
         });
 
         // SELEZIONE ESEMPIO
@@ -968,7 +1289,7 @@
                         max_tokens: 1000,
                         messages: [{
                             role: 'user',
-                            content: `Sei un assistente di TrovaImpresa, marketplace italiano per edilizia. 
+                            content: `Sei un assistente di TrovaImpresa, marketplace italiano per edilizia.
 Un cliente ha scritto: "${testo}"
 
 Analizza la richiesta e rispondi SOLO con un oggetto JSON nel formato:
@@ -976,7 +1297,7 @@ Analizza la richiesta e rispondi SOLO con un oggetto JSON nel formato:
 
 Le categorie possibili sono:
 - artigiano → piccoli lavori, riparazioni, installazioni singole (idraulico, elettricista, pittore, piastrellista ecc.) → pagina: "cerca-artigiani.html"
-- impresa → ristrutturazioni medie, lavori su appartamenti/case → pagina: "cerca-imprese.html"  
+- impresa → ristrutturazioni medie, lavori su appartamenti/case → pagina: "cerca-imprese.html"
 - grande_impresa → costruzioni nuove, capannoni, opere civili, grandi appalti → pagina: "cerca-grandi-imprese.html"
 - negozio → acquisto materiali, piastrelle, sanitari, ferramenta, vernici → pagina: "cerca-negozi.html"
 - professionista → progettazione, pratiche, certificazioni, geometra, architetto, ingegnere → pagina: "cerca-professionisti.html"
@@ -1017,14 +1338,14 @@ Rispondi SOLO con il JSON, niente altro.`
                 const nome = nomi[json.categoria] || json.categoria;
 
                 risultato.innerHTML = `
-                    <div style="background:#f5f5f5; border-radius:12px; padding:18px; border-left:4px solid ${colore}; text-align:left;">
-                        <div style="font-size:13px; color:#555; margin-bottom:12px;">💡 ${json.motivo}</div>
+                    <div style="background:rgba(255,255,255,0.08); border-radius:12px; padding:18px; border-left:4px solid ${colore}; text-align:left;">
+                        <div style="font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:12px;">💡 ${json.motivo}</div>
                         <a href="${json.pagina}" style="display:inline-block; background:${colore}; color:white; padding:12px 24px; border-radius:10px; text-decoration:none; font-weight:700; font-size:15px;">${icona} Cerca un ${nome}</a>
                     </div>`;
                 risultato.style.display = 'block';
 
             } catch(e) {
-                risultato.innerHTML = `<div style="color:#c0392b; font-size:13px;">⚠️ Errore durante l'analisi. Riprova.</div>`;
+                risultato.innerHTML = `<div style="color:#e74c3c; font-size:13px;">⚠️ Errore durante l'analisi. Riprova.</div>`;
                 risultato.style.display = 'block';
             }
 
@@ -1046,7 +1367,7 @@ Rispondi SOLO con il JSON, niente altro.`
         el.innerHTML = '<img src="' + url + '?t=' + Date.now() + '" style="width:100%;height:100%;object-fit:contain;">';
       };
       img.onerror = function() {
-        el.innerHTML = '<span style="color:#ddd; font-size:11px;">Spazio disponibile</span>';
+        el.innerHTML = '<span style="color:rgba(255,255,255,0.3); font-size:11px;">Spazio disponibile</span>';
       };
       img.src = url + '?t=' + Date.now();
     }
