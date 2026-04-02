@@ -4,829 +4,835 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrovaImpresa - Trova l'impresa adatta a te</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --green: #2a7a4b;
-            --green-dark: #1a5c36;
-            --orange: #FF6B35;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --shadow: 0 2px 12px rgba(0,0,0,0.08);
-            --shadow-md: 0 6px 24px rgba(0,0,0,0.11);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f8f9fa;
-            color: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            overflow-x: hidden;
+            color: #333;
         }
 
-        /* ── NAVBAR ── */
+        /* NAVBAR */
         .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
-            z-index: 300;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            height: 60px;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 100;
         }
 
         .logo {
-            font-size: 22px;
-            font-weight: 900;
-            color: var(--green);
-            letter-spacing: -0.5px;
-            text-decoration: none;
+            font-size: 24px;
+            font-weight: 800;
+            color: #28a745;
         }
-        .logo span { color: var(--orange); }
 
-        /* Desktop nav links */
-        .nav-links {
+        .logo span {
+            color: #FF6B35;
+        }
+
+        .nav-buttons {
             display: flex;
-            gap: 6px;
+            gap: 15px;
             align-items: center;
         }
 
-        .nav-links a {
-            padding: 8px 14px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #444;
-            text-decoration: none;
+        .btn-entra {
+            padding: 10px 24px;
+            border: 2px solid #28a745;
+            background: white;
+            color: #28a745;
             border-radius: 8px;
-            transition: background 0.2s, color 0.2s;
-        }
-        .nav-links a:hover { background: #f0f0f0; color: #1a1a1a; }
-
-        .nav-links .nav-cta {
-            background: var(--green);
-            color: #fff;
-            padding: 8px 18px;
-        }
-        .nav-links .nav-cta:hover { background: var(--green-dark); color: #fff; }
-
-        /* Hamburger */
-        .hamburger {
-            display: none;
-            background: none;
-            border: none;
+            font-weight: 600;
             cursor: pointer;
-            padding: 6px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .hamburger:hover { background: #f0f0f0; }
-        .hamburger-icon {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .hamburger-icon span {
-            display: block;
-            width: 22px;
-            height: 2px;
-            background: #333;
-            border-radius: 2px;
             transition: all 0.3s;
-        }
-        .hamburger.open .hamburger-icon span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .hamburger.open .hamburger-icon span:nth-child(2) { opacity: 0; }
-        .hamburger.open .hamburger-icon span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-        /* Mobile drawer */
-        .nav-drawer {
-            display: none;
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            background: #fff;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-            z-index: 299;
-            padding: 16px;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .nav-drawer.open { display: flex; }
-        .nav-drawer a {
-            padding: 12px 16px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #333;
             text-decoration: none;
-            border-radius: 10px;
-            transition: background 0.2s;
         }
-        .nav-drawer a:hover { background: #f5f5f5; }
-        .nav-drawer .drawer-cta {
-            background: var(--green);
-            color: #fff;
-            text-align: center;
-            margin-top: 4px;
-        }
-        .nav-drawer .drawer-cta:hover { background: var(--green-dark); }
 
-        /* ── HERO ── */
+        .btn-entra:hover {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-registrati {
+            padding: 10px 24px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-registrati:hover {
+            background: #e55a2b;
+        }
+
+        .btn-pubblicita {
+            padding: 10px 24px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-pubblicita:hover {
+            background: #0052a3;
+        }
+
+        /* HERO SECTION */
         .hero {
-            background: linear-gradient(160deg, #fff 0%, #f0f7f3 60%, #fff5f0 100%);
-            border-bottom: 1px solid rgba(0,0,0,0.07);
-            padding: 60px 20px 56px;
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            padding: 100px 40px;
             text-align: center;
-        }
-
-        .hero-inner {
-            max-width: 680px;
-            margin: 0 auto;
+            color: white;
         }
 
         .hero h1 {
-            font-size: clamp(28px, 5vw, 48px);
-            font-weight: 900;
-            line-height: 1.15;
-            letter-spacing: -1px;
-            color: #1a1a1a;
-            margin-bottom: 14px;
+            font-size: 52px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
         }
 
-        .hero h1 em {
-            font-style: normal;
-            color: var(--green);
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 50px;
+            color: #e0f0e8;
         }
 
-        .hero-sub {
-            font-size: clamp(15px, 2vw, 18px);
-            color: #666;
-            margin-bottom: 32px;
-            font-weight: 400;
+        /* WHY SECTION */
+        .why-section {
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            padding: 80px 20px;
+            margin-top: 60px;
         }
 
-        .search-box {
-            background: #fff;
-            border: 1.5px solid rgba(0,0,0,0.10);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-md);
+        .why-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .why-section h2 {
+            font-size: 40px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .why-section > .why-container > p {
+            text-align: center;
+            color: #e0f0e8;
+            margin-bottom: 50px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+            border: none;
+            position: relative;
             overflow: hidden;
         }
 
-        .search-box textarea {
-            width: 100%;
-            padding: 18px 20px 14px;
-            font-size: 15px;
-            font-family: inherit;
-            color: #1a1a1a;
-            border: none;
-            outline: none;
-            resize: none;
-            min-height: 90px;
-            background: transparent;
-        }
-        .search-box textarea::placeholder { color: #aaa; }
-
-        .search-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 7px;
-            padding: 0 16px 12px;
-        }
-
-        .search-chip {
-            cursor: pointer;
-            padding: 5px 12px;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #555;
-            background: #f8f9fa;
-            transition: all 0.2s;
-            user-select: none;
-            white-space: nowrap;
-        }
-        .search-chip:hover { border-color: var(--green); color: var(--green); background: rgba(42,122,75,0.05); }
-
-        .search-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 0 16px; }
-
-        .btn-search {
-            width: calc(100% - 32px);
-            margin: 14px 16px 16px;
-            padding: 14px;
-            background: var(--green);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.2px;
-        }
-        .btn-search:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(42,122,75,0.3); }
-        .btn-search:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        #ai-risultato { margin-top: 16px; text-align: left; }
-        #ai-risultato > div {
-            background: #fff;
-            border-radius: var(--radius-sm);
-            border: 1.5px solid rgba(0,0,0,0.08);
-            border-left: 4px solid var(--green);
-            padding: 16px 18px;
-        }
-        #ai-risultato a {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 22px;
-            border-radius: var(--radius-sm);
-            color: #fff;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        #ai-risultato a:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-        /* ── BANNER SLOT ── */
-        .banner-slot {
-            padding: 16px 20px;
-            background: #fff;
-            border-top: 1px solid rgba(0,0,0,0.06);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            text-align: center;
-        }
-
-        .pub-box {
-            width: 100%;
-            max-width: 640px;
-            height: 120px;
-            background: #fff8f4;
-            border: 2px dashed rgba(255,107,53,0.3);
-            border-radius: var(--radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            margin: 0 auto;
-            transition: all 0.25s;
-            gap: 12px;
-        }
-        .pub-box:hover { border-color: var(--orange); background: #fff3ee; }
-
-        .pub-placeholder { display: flex; align-items: center; gap: 10px; }
-        .pub-icon { font-size: 22px; }
-        .pub-title { font-size: 14px; font-weight: 700; color: var(--orange); }
-        .pub-sub { font-size: 12px; color: rgba(255,107,53,0.6); }
-
-        .pub-label {
-            margin-top: 6px;
-            font-size: 11px;
-            color: #bbb;
-        }
-        .pub-label a { color: var(--orange); font-weight: 700; text-decoration: none; }
-
-        /* ── CATEGORIE ── */
-        .cerca-section {
-            padding: 52px 20px;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-        .section-header h2 {
-            font-size: clamp(22px, 3.5vw, 32px);
-            font-weight: 900;
-            color: #1a1a1a;
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
-        }
-        .section-header p { font-size: 15px; color: #777; }
-
-        .cerca-grid {
-            display: flex;
-            gap: 14px;
-            justify-content: center;
-            max-width: 900px;
-            margin: 0 auto;
-            flex-wrap: wrap;
-        }
-
-        .cerca-card {
-            flex: 1;
-            min-width: 140px;
-            max-width: 170px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 24px 12px;
-            background: #fff;
-            border: 1.5px solid rgba(0,0,0,0.08);
-            border-radius: var(--radius);
-            color: #1a1a1a;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        .cerca-card .card-emoji { font-size: 30px; margin-bottom: 10px; }
-        .cerca-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
-        .cerca-card.green:hover  { border-color: var(--green);  color: var(--green);  }
-        .cerca-card.orange:hover { border-color: var(--orange); color: var(--orange); }
-        .cerca-card.blue:hover   { border-color: #3498db; color: #3498db; }
-        .cerca-card.red:hover    { border-color: #e74c3c; color: #e74c3c; }
-        .cerca-card.purple:hover { border-color: #9b59b6; color: #9b59b6; }
-
-        /* ── COME FUNZIONA ── */
-        .how-section {
-            padding: 52px 20px;
-            background: #fff;
-            border-top: 1px solid rgba(0,0,0,0.06);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 24px;
-            max-width: 860px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        /* connector line between steps */
-        .steps-grid::before {
+        .feature-card::before {
             content: '';
             position: absolute;
-            top: 36px;
-            left: calc(16.66% + 10px);
-            right: calc(16.66% + 10px);
-            height: 2px;
-            background: linear-gradient(90deg, var(--green), var(--orange));
-            opacity: 0.25;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
         }
 
-        .step {
-            text-align: center;
-            padding: 28px 16px;
-            background: #f8f9fa;
-            border: 1.5px solid rgba(0,0,0,0.07);
-            border-radius: var(--radius);
-            transition: all 0.25s;
+        .feature-card:nth-child(1) {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            border-top: 4px solid #FF6B35;
         }
-        .step:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); background: #fff; }
 
-        .step-num {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--green);
-            color: #fff;
+        .feature-card:nth-child(1)::before {
+            background: #FF6B35;
+        }
+
+        .feature-card:nth-child(2) {
+            background: linear-gradient(135deg, #fffaf0 0%, #fff8f0 100%);
+            border-top: 4px solid #FFB347;
+        }
+
+        .feature-card:nth-child(2)::before {
+            background: #FFB347;
+        }
+
+        .feature-card:nth-child(3) {
+            background: linear-gradient(135deg, #f0f5ff 0%, #e8f0ff 100%);
+            border-top: 4px solid #0066cc;
+        }
+
+        .feature-card:nth-child(3)::before {
+            background: #0066cc;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .feature-card h3 {
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #1a472a;
             font-size: 20px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 14px;
-        }
-        .step:nth-child(2) .step-num { background: #555; }
-        .step:nth-child(3) .step-num { background: var(--orange); }
-
-        .step h3 { font-size: 16px; font-weight: 800; margin-bottom: 6px; color: #1a1a1a; }
-        .step p  { font-size: 13px; color: #777; line-height: 1.6; }
-
-        /* ── LINKS SECTION ── */
-        .links-section {
-            padding: 52px 20px;
         }
 
-        .links-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            max-width: 900px;
-            margin: 0 auto;
+        .feature-card p {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.7;
         }
 
-        .link-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 18px;
-            background: #fff;
-            border: 1.5px solid rgba(0,0,0,0.08);
-            border-radius: var(--radius-sm);
-            color: #1a1a1a;
-            text-decoration: none;
+        /* INFO BANNER */
+        .info-banner {
+            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
+            border: none;
+        }
+
+        .info-banner p {
+            color: #ffffff;
             font-weight: 600;
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .info-banner strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* WORK LINKS SECTION */
+        .lavoro-links {
+            padding: 40px;
+            background: #FF6B35;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .lavoro-links h2 {
+            margin-bottom: 25px;
+            color: #2d5016;
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .lavoro-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .lavoro-btn {
+            display: block;
+            padding: 30px;
+            background: linear-gradient(135deg, #4CAF50 0%, #2d5016 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .lavoro-btn:nth-child(2) {
+            background: linear-gradient(135deg, #2196F3 0%, #0066cc 100%);
+        }
+
+        .lavoro-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* JOBS SECTION */
+        .jobs-section-symmetric {
+            padding: 80px 40px;
+            background: #f8f9fa;
+        }
+
+        .jobs-container-symmetric {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .jobs-container-symmetric > h2 {
+            font-size: 40px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 60px;
+            color: #333;
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .col-candidature,
+        .col-annunci {
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 325px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-candidature {
+            background: #f0f9f5;
+            border: 2px solid #28a745;
+        }
+
+        .col-annunci {
+            background: #fff5f0;
+            border: 2px solid #FF6B35;
+        }
+
+        .col-title {
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #0066cc;
+        }
+
+        .col-subtitle {
+            font-size: 7px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 4px;
+            color: #999;
+            font-size: 11px;
+        }
+
+        .col-candidature .form-group button,
+        .col-annunci .form-group button {
+            width: 100%;
+            padding: 12px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
             font-size: 14px;
-            box-shadow: var(--shadow);
-            transition: all 0.2s;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s ease;
         }
-        .link-card:hover { border-color: var(--green); color: var(--green); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .link-card.accent { background: var(--green); color: #fff; border-color: var(--green); }
-        .link-card.accent:hover { background: var(--green-dark); color: #fff; border-color: var(--green-dark); }
-        .link-card.accent-orange { background: var(--orange); color: #fff; border-color: var(--orange); }
-        .link-card.accent-orange:hover { background: #e05520; color: #fff; border-color: #e05520; }
-        .link-card-icon { font-size: 20px; flex-shrink: 0; }
 
-        /* ── FOOTER ── */
+        .col-candidature .form-group button:hover,
+        .col-annunci .form-group button:hover {
+            background: #e55a25;
+        }
+
+        .annunci-results {
+            margin-top: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .ad-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #FF6B35;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .ad-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .ad-info {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* FOOTER */
         .footer {
-            background: #1a1a1a;
-            color: #fff;
-            padding: 40px 20px 24px;
-            border-top: 3px solid var(--green);
+            background: #1a472a;
+            color: white;
+            padding: 60px 40px 30px;
+            text-align: center;
         }
 
-        .footer-inner {
-            max-width: 900px;
+        .footer-content {
+            max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 32px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+            text-align: left;
         }
 
-        .footer-brand .logo { font-size: 20px; color: var(--green); display: block; margin-bottom: 8px; }
-        .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+        .footer-section h3 {
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #28a745;
+        }
 
-        .footer-col h4 { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-        .footer-col ul { list-style: none; }
-        .footer-col li { margin-bottom: 8px; }
-        .footer-col a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; transition: color 0.2s; }
-        .footer-col a:hover { color: #fff; }
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: #e0f0e8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #FF6B35;
+        }
 
         .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.08);
-            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 30px;
             text-align: center;
-            font-size: 12px;
-            color: rgba(255,255,255,0.3);
+            color: #ccc;
         }
 
-        /* ── RESPONSIVE ── */
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .hamburger { display: flex; }
-
-            .hero { padding: 40px 16px 44px; }
-
-            .cerca-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
+            .navbar {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+                gap: 10px;
             }
-            .cerca-card { max-width: 100%; min-width: 0; padding: 20px 10px; }
-            .cerca-card:last-child { grid-column: 1 / -1; max-width: 200px; margin: 0 auto; }
 
-            .steps-grid {
+            .nav-buttons {
+                flex-wrap: wrap;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .btn-entra, .btn-registrati, .btn-pubblicita {
+                flex: 1;
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .why-section {
+                padding: 60px 20px;
+            }
+
+            .why-section h2 {
+                font-size: 28px;
+            }
+
+            .features-grid {
                 grid-template-columns: 1fr;
-                gap: 12px;
             }
-            .steps-grid::before { display: none; }
 
-            .links-grid { grid-template-columns: 1fr 1fr; }
+            .info-banner p {
+                flex-direction: column;
+                gap: 10px;
+            }
 
-            .footer-inner { grid-template-columns: 1fr 1fr; gap: 24px; }
-            .footer-brand { grid-column: 1 / -1; }
-        }
+            .lavoro-links {
+                padding: 30px 20px;
+            }
 
-        @media (max-width: 480px) {
-            .links-grid { grid-template-columns: 1fr; }
-            .footer-inner { grid-template-columns: 1fr; }
+            .lavoro-buttons-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .jobs-section-symmetric {
+                padding: 60px 20px;
+            }
+
+            .jobs-container-symmetric > h2 {
+                font-size: 28px;
+            }
+
+            .jobs-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .col-candidature,
+            .col-annunci {
+                min-height: auto;
+                padding: 20px;
+            }
+
+            .footer {
+                padding: 40px 20px 20px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- ── 1. NAVBAR ── -->
+    <!-- NAVBAR -->
     <nav class="navbar">
-        <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa" style="height:50px;display:block;"></a>
-        <a href="/" class="logo">Trova<span>Impresa</span></a>
-
-        <!-- Desktop links -->
-        <div class="nav-links">
-            <a href="cerca-artigiani.html">Cerca</a>
-            <a href="prezzi.html">Piani</a>
-            <a href="pubblicita.html">Pubblicità</a>
-            <a href="pannello-impresa.html">Accedi</a>
-            <a href="registrazione-artigiano.html" class="nav-cta">Registrati</a>
+        <div class="logo">Trova<span>Impresa</span></div>
+        <div class="nav-buttons">
         </div>
-
-        <!-- Hamburger -->
-        <button class="hamburger" id="hamburger-btn" onclick="toggleMenu()" aria-label="Menu">
-            <div class="hamburger-icon">
-                <span></span><span></span><span></span>
-            </div>
-        </button>
     </nav>
 
-    <!-- Mobile drawer -->
-    <div class="nav-drawer" id="nav-drawer">
-        <a href="cerca-artigiani.html">🔨 Cerca Artigiani</a>
-        <a href="cerca-imprese.html">🏗️ Cerca Imprese</a>
-        <a href="cerca-professionisti.html">👔 Cerca Professionisti</a>
-        <a href="prezzi.html">💎 Piani e Prezzi</a>
-        <a href="pubblicita.html">📢 Pubblicità</a>
-        <a href="pannello-impresa.html">🔐 Accedi</a>
-        <a href="registrazione-artigiano.html" class="drawer-cta">Registrati gratis →</a>
-    </div>
-
-    <!-- ── 2. HERO ── -->
+    <!-- HERO SECTION -->
     <section class="hero">
-        <div class="hero-inner">
-            <h1>Trova l'<em>artigiano giusto</em><br>per te</h1>
-            <p class="hero-sub">Descrivi il lavoro che devi fare — ti indirizziamo subito verso il professionista più adatto</p>
+        <img src="/trovaimpresa_logo_transparent (2).png" alt="Logo TrovaImpresa" style="height: 600px; width: auto; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto;">
+        
+        <p>In pochi click, l'artigiano perfetto per il tuo progetto</p>
 
-            <div class="search-box">
-                <textarea id="ai-descrizione" placeholder="Es: devo rifare il bagno completo... impianto elettrico... ristrutturazione appartamento..."></textarea>
-
-                <div class="search-chips">
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🚿 Rifacimento bagno</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🏠 Ristrutturazione</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">⚡ Impianto elettrico</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🔥 Sostituzione caldaia</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🎨 Tinteggiatura</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🟫 Posa pavimento</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🪟 Sostituzione infissi</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">☀️ Pannelli solari</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">📐 Geometra / Architetto</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🏢 Costruire capannone</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🏪 Materiali edili</span>
-                    <span onclick="selezionaEsempio(this)" class="search-chip">🌿 Giardino</span>
-                </div>
-
-                <div class="search-divider"></div>
-                <button onclick="aiOrienta()" id="ai-btn" class="btn-search">🔍 Trovami il professionista giusto</button>
-            </div>
-
-            <div id="ai-risultato"></div>
-        </div>
     </section>
 
-    <!-- ── BANNER SLOT 1 ── -->
-    <div class="banner-slot" style="display:none">
-        <div id="pub-img-1" class="pub-box" style="display:none" onclick="location.href='pubblicita.html'">
-            <div class="pub-placeholder">
-                <div class="pub-icon">📢</div>
-                <div>
-                    <div class="pub-title">Spazio Pubblicitario</div>
-                    <div class="pub-sub">Clicca per prenotare →</div>
-                </div>
-            </div>
+    <!-- BANNER SLOT 1 -->
+    <div style="padding:16px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35; text-align:center;">
+        <div id="pub-img-1" style="width:100%; max-width:500px; height:350px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
+            <div style="text-align:center; margin-top:5px; font-size:11px; color:#bbb;">🥇 Spazio In Cima — Prima cosa che vede il visitatore &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota questo spazio →</a></div>
         </div>
-        <div class="pub-label">🥇 Spazio In Cima — Prima cosa che vede il visitatore &nbsp;·&nbsp; <a href="pubblicita.html">Prenota →</a></div>
     </div>
-
-    <!-- ── 3. CATEGORIE ── -->
-    <section class="cerca-section">
-        <div class="section-header">
-            <h2>Cosa stai cercando?</h2>
-            <p>Seleziona la categoria e trova il professionista giusto</p>
-        </div>
-        <div class="cerca-grid">
-            <a href="cerca-artigiani.html" class="cerca-card green">
-                <!-- Martello -->
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#2a7a4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px">
-                    <path d="M30 8 L40 18 L36 22 L26 12 Z"/>
-                    <line x1="26" y1="12" x2="12" y2="38"/>
-                    <line x1="30" y1="8" x2="36" y2="14"/>
-                    <path d="M10 40 L14 36 L18 40 L14 44 Z"/>
-                </svg>
-                Artigiano
-            </a>
-            <a href="cerca-imprese.html" class="cerca-card orange">
-                <!-- Edificio -->
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#2a7a4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px">
-                    <rect x="8" y="16" width="32" height="26"/>
-                    <polyline points="4,16 24,4 44,16"/>
-                    <rect x="18" y="28" width="12" height="14"/>
-                    <line x1="14" y1="22" x2="18" y2="22"/>
-                    <line x1="30" y1="22" x2="34" y2="22"/>
-                    <line x1="14" y1="28" x2="18" y2="28"/>
-                    <line x1="30" y1="28" x2="34" y2="28"/>
-                </svg>
-                Impresa Edile
-            </a>
-            <a href="cerca-grandi-imprese.html" class="cerca-card blue">
-                <!-- Grattacielo -->
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#2a7a4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px">
-                    <rect x="14" y="6" width="20" height="36"/>
-                    <rect x="4" y="18" width="10" height="24"/>
-                    <rect x="34" y="18" width="10" height="24"/>
-                    <line x1="19" y1="12" x2="29" y2="12"/>
-                    <line x1="19" y1="19" x2="29" y2="19"/>
-                    <line x1="19" y1="26" x2="29" y2="26"/>
-                    <rect x="20" y="34" width="8" height="8"/>
-                </svg>
-                Grande Impresa
-            </a>
-            <a href="cerca-negozi.html" class="cerca-card red">
-                <!-- Negozio -->
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#2a7a4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px">
-                    <polyline points="6,14 10,6 38,6 42,14"/>
-                    <path d="M6 14 Q6 22 14 22 Q22 22 22 14 Q22 22 26 22 Q30 22 30 14 Q30 22 34 22 Q42 22 42 14"/>
-                    <rect x="10" y="22" width="28" height="20"/>
-                    <rect x="20" y="30" width="8" height="12"/>
-                    <line x1="10" y1="29" x2="18" y2="29"/>
-                    <line x1="30" y1="29" x2="38" y2="29"/>
-                </svg>
-                Negozio Edile
-            </a>
-            <a href="cerca-professionisti.html" class="cerca-card purple">
-                <!-- Persona -->
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#2a7a4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px">
-                    <circle cx="24" cy="14" r="7"/>
-                    <path d="M8 42 C8 32 16 26 24 26 C32 26 40 32 40 42"/>
-                    <line x1="24" y1="26" x2="24" y2="34"/>
-                    <line x1="18" y1="30" x2="30" y2="30"/>
-                </svg>
-                Professionista
-            </a>
+    <!-- CERCA PER CATEGORIA SECTION -->
+    <section style="background:#f5f5f5; padding:30px 20px; text-align:center;">
+        <h2 style="font-size:22px; font-weight:800; color:#1a4d2e; margin-bottom:20px;">Cosa stai cercando?</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:900px; margin:0 auto;">
+            <a href="cerca-artigiani.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#2a7a4b; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🔨<br>Artigiano</a>
+            <a href="cerca-imprese.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#FF6B35; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏗️<br>Impresa Edile</a>
+            <a href="cerca-grandi-imprese.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#1a5276; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏢<br>Grande Impresa</a>
+            <a href="cerca-negozi.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#c0392b; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">🏪<br>Negozio Edile</a>
+            <a href="cerca-professionisti.html" style="flex:1; min-width:140px; max-width:160px; display:block; padding:20px 10px; background:#6c3483; color:white; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,0.12); transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">👔<br>Professionista</a>
         </div>
     </section>
 
-    <!-- ── BANNER SLOT 2 ── -->
-    <div class="banner-slot" style="display:none">
-        <div id="pub-img-2" class="pub-box" style="display:none" onclick="location.href='pubblicita.html'">
-            <div class="pub-placeholder">
-                <div class="pub-icon">📢</div>
-                <div>
-                    <div class="pub-title">Spazio Pubblicitario</div>
-                    <div class="pub-sub">Clicca per prenotare →</div>
+    <!-- BANNER PICCOLI 5+6 -->
+    <div style="padding:12px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35;">
+        <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+                <div id="pub-img-5" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
+                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">Spazio Piccolo 5 &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+            </div>
+            <div>
+                <div id="pub-img-6" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
+                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">Spazio Piccolo 6 &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+            </div>
+        </div>
+    </div>
+    <!-- AI ORIENTAMENTO SECTION -->
+    <section style="background:white; padding:30px 20px; text-align:center; border-top:3px solid #2a7a4b;">
+        <h2 style="font-size:22px; font-weight:800; color:#1a4d2e; margin-bottom:6px;">🤖 Non sai a chi rivolgerti?</h2>
+        <p style="color:#666; font-size:14px; margin-bottom:18px;">Descrivi il lavoro che devi fare — ti diciamo subito chi contattare</p>
+        <div style="max-width:680px; margin:0 auto;">
+            <textarea id="ai-descrizione" placeholder="Es: devo rifare il bagno completo... oppure: voglio costruire un capannone... oppure: cerco piastrelle per cucina..." style="width:100%; height:100px; border:2px solid #ddd; border-radius:10px; padding:14px; font-size:14px; font-family:inherit; resize:none; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#2a7a4b'" onblur="this.style.borderColor='#ddd'"></textarea>
+            <div style="margin-top:10px; text-align:left;">
+                <span style="font-size:11px; color:#999; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Oppure seleziona un esempio:</span>
+                <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:8px;">
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🚿 Rifacimento bagno</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏠 Ristrutturazione appartamento</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏢 Costruire un capannone</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">⚡ Impianto elettrico</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🔥 Sostituzione caldaia</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🎨 Tinteggiatura pareti</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🟫 Posa pavimento</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🏪 Cerco materiali edili</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🪟 Sostituzione infissi</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">📐 Ho bisogno di un geometra</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">☀️ Installazione pannelli solari</span>
+                    <span onclick="selezionaEsempio(this)" style="cursor:pointer; padding:5px 11px; border:1.5px solid #ddd; border-radius:14px; font-size:12px; color:#555; background:white;">🌿 Giardino e paesaggistica</span>
                 </div>
             </div>
+            <button onclick="aiOrienta()" id="ai-btn" style="margin-top:12px; background:#2a7a4b; color:white; border:none; border-radius:10px; padding:12px 30px; font-size:15px; font-weight:700; cursor:pointer; width:100%; transition:background 0.2s;">🔍 Trovami il professionista giusto</button>
+            <div id="ai-risultato" style="margin-top:16px; display:none;"></div>
         </div>
-        <div class="pub-label">🥈 Spazio A Metà — Alta visibilità &nbsp;·&nbsp; <a href="pubblicita.html">Prenota →</a></div>
+    </section>
+
+    <!-- BANNER SLOT 2 -->
+    <div style="padding:16px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35; text-align:center;">
+        <div id="pub-img-2" style="width:100%; max-width:500px; height:350px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
+            <div style="text-align:center; margin-top:5px; font-size:11px; color:#bbb;">🥈 Spazio A Metà — Alta visibilità &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota questo spazio →</a></div>
+        </div>
     </div>
-
-    <!-- ── 4. COME FUNZIONA ── -->
-    <section class="how-section">
-        <div class="section-header">
-            <h2>Come funziona</h2>
-            <p>Semplice, veloce e gratuito per i clienti</p>
+    <!-- REGISTRATI + PUBBLICITA SECTION -->
+    <section class="lavoro-links">
+        <h2>Registrati e pubblicizza</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="pannello-impresa.html" class="lavoro-btn">🔐 Accedi — Sei già registrato?</a>
+            <a href="cancella-iscrizione.html" class="lavoro-btn" style="background:#c0392b;border-color:#c0392b;">🗑️ Cancella iscrizione</a>
         </div>
-        <div class="steps-grid">
-            <div class="step">
-                <div class="step-num">1</div>
-                <h3>Descrivi il progetto</h3>
-                <p>Scrivi cosa devi fare: dal piccolo lavoro alla grande ristrutturazione</p>
+    </section>
+
+    <!-- INFORMAZIONE PIANI SECTION -->
+    <section class="lavoro-links">
+        <h2>Informazione Piani</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="info-free.html" class="lavoro-btn">🆓 Piano Free — Scopri di più</a>
+            <a href="info-pro.html" class="lavoro-btn" style="background:linear-gradient(135deg,#1a73e8,#0d3b8c)">⭐ Piano Pro — Scopri di più</a>
+            <a href="pubblicita.html" class="lavoro-btn">📢 Pubblicità</a>
+        </div>
+    </section>
+
+    <!-- CANDIDATI E RICERCA SECTION -->
+    <section class="lavoro-links">
+        <h2>🔨 Cerca Lavoro - Candidatura</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="registrazione-candidato.html" class="lavoro-btn">🔨 Registrati · Invia CV</a>
+            <a href="ricerca-candidati.html" class="lavoro-btn">🔍 Ricerca Candidati</a>
+        </div>
+    </section>
+
+    <!-- OFFERTE DI LAVORO SECTION -->
+    <section class="lavoro-links">
+        <h2>💼 Lavoro - Offerte di Lavoro</h2>
+        <div class="lavoro-buttons-grid">
+            <a href="offerte-registrazione.html" class="lavoro-btn">💼 Pubblica Offerta di Lavoro</a>
+            <a href="ricerca-offerte.html" class="lavoro-btn">🔍 Ricerca Offerte</a>
+        </div>
+    </section>
+
+    <!-- BANNER PICCOLI 7+8 -->
+    <div style="padding:12px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35;">
+        <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div>
+                <div id="pub-img-7" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
+                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">Spazio Piccolo 7 &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
             </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <h3>Trova il professionista</h3>
-                <p>Ti indirizziamo nella categoria giusta tra artigiani, imprese e professionisti</p>
+            <div>
+                <div id="pub-img-8" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
+                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">Spazio Piccolo 8 &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
             </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <h3>Contattalo direttamente</h3>
-                <p>Nessun intermediario. Contatto diretto, preventivi gratuiti</p>
+        </div>
+    </div>
+    <!-- NEGOZI EDILI E PROFESSIONISTI -->
+    <section class="lavoro-links">
+        <h2>🏪 Registrati su TrovaImpresa</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; max-width:900px; margin:0 auto;">
+            <a href="registrazione-artigiano.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#2a7a4b,#1a4d2e);">🔨 Artigiano</a>
+            <a href="registrazione-impresa.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#FF6B35,#b84a0a);">🏗️ Impresa</a>
+            <a href="registrazione-grande-impresa.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#1a5276,#0d2d4a);">🏢 Grande Impresa</a>
+            <a href="registrazione-negozio.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#c0392b,#7b1a1a);">🏪 Negozio Edile</a>
+            <a href="registrazione-professionista.html" class="lavoro-btn" style="flex:1; min-width:140px; max-width:170px; background:linear-gradient(135deg,#6c3483,#3d1a5a);">👔 Professionista</a>
+        </div>
+    </section>
+
+
+    <!-- BANNER SLOT 3+4 -->
+    <div style="padding:12px 20px; background:#fff8f0; border-top:2px dashed #FF6B35; border-bottom:2px dashed #FF6B35;">
+        <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 300px; gap:12px;">
+            <div>
+                <div id="pub-img-3" style="width:100%; max-width:500px; height:350px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
+                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">🥉 Spazio In Fondo &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+            </div>
+            <div>
+                <div id="pub-img-4" style="width:100%; max-width:280px; height:300px; background:repeating-linear-gradient(45deg,#fff3e0,#fff3e0 10px,#ffe0b2 10px,#ffe0b2 20px); border:3px dashed #FF6B35; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:0 auto; box-shadow:0 4px 16px rgba(255,107,53,0.15);" onclick="location.href='pubblicita.html'"><div style="text-align:center;"><div style="font-size:32px;margin-bottom:10px;">📢</div><div style="font-size:15px;font-weight:800;color:#FF6B35;letter-spacing:0.5px;">Spazio Pubblicitario</div><div style="font-size:12px;color:#FF6B35;opacity:0.6;margin-top:5px;font-weight:600;">Clicca per prenotare →</div></div></div>
+                <div style="text-align:center; margin-top:4px; font-size:11px; color:#bbb;">📌 Spazio Sidebar &nbsp;·&nbsp; <a href="pubblicita.html" style="color:#FF6B35; font-weight:700; text-decoration:none;">Prenota →</a></div>
+            </div>
+        </div>
+    </div>
+    <!-- WHY SECTION -->
+    <section class="why-section">
+        <div class="why-container">
+            <h2>Perché scegliere TrovaImpresa</h2>
+            <p>Una piattaforma sicura, trasparente e sempre con te</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">✓</div>
+                    <h3>Professionisti verificati</h3>
+                    <p>Ogni artigiano e impresa viene controllato prima di entrare in piattaforma. Garanzia di qualità.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Recensioni reali</h3>
+                    <p>Solo i clienti verificati lasciano feedback autentici. Niente false opinioni, massima trasparenza.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>Geolocalizzazione</h3>
+                    <p>Trova i professionisti più vicini a te. Meno km, meno costi, più convenienza.</p>
+                </div>
+            </div>
+
+            <div class="info-banner">
+                <p>
+                    <strong>✨ Per i clienti: totalmente gratuito</strong>
+                    <strong>📱 Funziona perfettamente su smartphone</strong>
+                </p>
             </div>
         </div>
     </section>
 
-    <!-- ── LINK RAPIDI ── -->
-    <section class="links-section">
-        <div class="section-header">
-            <h2>Tutto in un posto</h2>
-            <p>Accedi, registrati o pubblica in pochi secondi</p>
-        </div>
-        <div class="links-grid">
-            <a href="pannello-impresa.html" class="link-card accent">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Accedi al pannello
-            </a>
-            <a href="registrazione-artigiano.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4 L20 9 L18 11 L13 6 Z"/><line x1="13" y1="6" x2="5" y2="19"/><path d="M4 20 L6 18 L8 20 L6 22 Z"/></svg>
-                Registrati come Artigiano
-            </a>
-            <a href="registrazione-impresa.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="12"/><polyline points="1,10 12,2 23,10"/><rect x="9" y="16" width="6" height="6"/><line x1="6" y1="13" x2="8" y2="13"/><line x1="16" y1="13" x2="18" y2="13"/></svg>
-                Registrati come Impresa
-            </a>
-            <a href="registrazione-grande-impresa.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="19"/><rect x="1" y="9" width="6" height="13"/><rect x="17" y="9" width="6" height="13"/><line x1="10" y1="7" x2="14" y2="7"/><line x1="10" y1="11" x2="14" y2="11"/><rect x="10" y="17" width="4" height="5"/></svg>
-                Grande Impresa
-            </a>
-            <a href="registrazione-negozio.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7 L5 3 H19 L21 7"/><path d="M3 7 Q3 11 7 11 Q11 11 11 7 Q11 11 13 11 Q15 11 15 7 Q15 11 17 11 Q21 11 21 7"/><rect x="4" y="11" width="16" height="11"/><rect x="9" y="15" width="6" height="7"/></svg>
-                Negozio Edile
-            </a>
-            <a href="registrazione-professionista.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21 C4 16 8 13 12 13 C16 13 20 16 20 21"/></svg>
-                Professionista
-            </a>
-            <a href="info-free.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
-                Piano Free
-            </a>
-            <a href="info-pro.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="#2a7a4b" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
-                Piano Pro
-            </a>
-            <a href="pubblicita.html" class="link-card accent-orange">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 L3 13 C3 14.1 3.9 15 5 15 L5 19 L7 19 L7 15 L18 18 L18 6 L7 9 L5 9 C3.9 9 3 9.9 3 11 Z"/><path d="M21 9 Q23 12 21 15"/></svg>
-                Spazi Pubblicitari
-            </a>
-            <a href="offerte-registrazione.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-                Pubblica Offerta Lavoro
-            </a>
-            <a href="ricerca-offerte.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                Cerca Offerte Lavoro
-            </a>
-            <a href="registrazione-candidato.html" class="link-card">
-                <svg class="link-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
-                Invia CV / Candidatura
-            </a>
-        </div>
-    </section>
-
-    <!-- ── 5. FOOTER ── -->
+    <!-- FOOTER -->
     <footer class="footer">
-        <div class="footer-inner">
-            <div class="footer-brand">
-                <span class="logo">Trova<span>Impresa</span></span>
-                <p>La piattaforma italiana per trovare artigiani, imprese e professionisti dell'edilizia. Gratuita per i clienti.</p>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>TrovaImpresa</h3>
+                <p style="margin-bottom: 15px; color: #e0f0e8;">La piattaforma affidabile per trovare i professionisti giusti per il tuo progetto.</p>
             </div>
-            <div class="footer-col">
-                <h4>Cerca</h4>
+
+            <div class="footer-section">
+                <h3>Link utili</h3>
                 <ul>
-                    <li><a href="cerca-artigiani.html">Artigiani</a></li>
-                    <li><a href="cerca-imprese.html">Imprese Edili</a></li>
-                    <li><a href="cerca-grandi-imprese.html">Grandi Imprese</a></li>
-                    <li><a href="cerca-negozi.html">Negozi Edili</a></li>
-                    <li><a href="cerca-professionisti.html">Professionisti</a></li>
+                    <li><a href="#">Cerca imprese</a></li>
+                    <li><a href="registrazione-artigiano.html">Registrati come impresa</a></li>
+                    <li><a href="prezzi.html">Piani e prezzi</a></li>
+                    <li><a href="#">Chi siamo</a></li>
                 </ul>
             </div>
-            <div class="footer-col">
-                <h4>Info</h4>
+
+            <div class="footer-section">
+                <h3>Supporto</h3>
                 <ul>
-                    <li><a href="prezzi.html">Piani e prezzi</a></li>
-                    <li><a href="pubblicita.html">Pubblicità</a></li>
-                    <li><a href="cancella-iscrizione.html">Cancella iscrizione</a></li>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Termini</a></li>
+                    <li><a href="#">Centro aiuto</a></li>
+                    <li><a href="#">Contatti</a></li>
+                    <li><a href="#">Informativa sulla privacy</a></li>
+                    <li><a href="#">Termini di servizio</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Seguici</h3>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">LinkedIn</a></li>
+                    <li><a href="#">YouTube</a></li>
                 </ul>
             </div>
         </div>
+
         <div class="footer-bottom">
-            &copy; 2026 TrovaImpresa · Tutti i diritti riservati
+            <p>&copy; 2026 TrovaImpresa. Tutti i diritti riservati.</p>
         </div>
     </footer>
 
-    <!-- Banner IDs 3–8 mantenuti nel DOM per il loader JS -->
-    <div style="display:none" aria-hidden="true">
-        <div id="pub-img-3"></div>
-        <div id="pub-img-4"></div>
-        <div id="pub-img-5"></div>
-        <div id="pub-img-6"></div>
-        <div id="pub-img-7"></div>
-        <div id="pub-img-8"></div>
-    </div>
-
     <script>
-        /* ── HAMBURGER MENU ── */
-        function toggleMenu() {
-            const btn = document.getElementById('hamburger-btn');
-            const drawer = document.getElementById('nav-drawer');
-            btn.classList.toggle('open');
-            drawer.classList.toggle('open');
-        }
-
-        // Close drawer on outside click
-        document.addEventListener('click', function(e) {
-            const btn = document.getElementById('hamburger-btn');
-            const drawer = document.getElementById('nav-drawer');
-            if (!btn.contains(e.target) && !drawer.contains(e.target)) {
-                btn.classList.remove('open');
-                drawer.classList.remove('open');
-            }
-        });
-
-        /* ── SUPABASE CONFIG ── */
+        // SUPABASE CONFIG
         const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
 
         let tipoScelto = 'artigiano';
         let mestiereScelto = 'Tutti';
 
+        // SET TYPE
         function setTipo(tipo, el) {
             tipoScelto = tipo;
             document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
@@ -834,6 +840,7 @@
             aggiornaHint();
         }
 
+        // SET MESTIERE
         function setMestiere(mestiere, el) {
             mestiereScelto = mestiere;
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -841,9 +848,9 @@
             aggiornaHint();
         }
 
+        // UPDATE HINT
         function aggiornaHint() {
             const hint = document.getElementById('search-hint');
-            if (!hint) return;
             const label = {
                 'artigiano': '🔨 Artigiano',
                 'impresa': '🏗️ Impresa edile',
@@ -853,35 +860,49 @@
             hint.innerHTML = `Stai cercando: <strong>${label[tipoScelto]}</strong> · <strong>${m}</strong>`;
         }
 
+        // SEARCH
         function doSearch() {
-            const el = document.getElementById('search-input');
+            const citta = document.getElementById('search-input').value.trim();
             const hint = document.getElementById('search-hint');
-            if (!el) return;
-            const citta = el.value.trim();
+            
             if (!citta) {
-                if (hint) { hint.innerHTML = '⚠️ Inserisci una città per cercare'; hint.style.color = '#FF6B35'; }
+                hint.innerHTML = '⚠️ Inserisci una città per cercare';
+                hint.style.color = '#FF6B35';
                 return;
             }
+
             window.location.href = `risultati.html?tipo=${tipoScelto}&mestiere=${encodeURIComponent(mestiereScelto)}&citta=${encodeURIComponent(citta)}`;
         }
 
+        // GEOLOCATION
         function geolocalizza() {
-            const el = document.getElementById('search-input');
-            const hint = document.getElementById('search-hint');
-            if (!navigator.geolocation || !el) return;
-            if (hint) { hint.innerHTML = '⏳ Rilevamento posizione in corso...'; hint.style.color = '#999'; }
+            if (!navigator.geolocation) {
+                document.getElementById('search-hint').innerHTML = '⚠️ Geolocalizzazione non supportata dal tuo browser';
+                document.getElementById('search-hint').style.color = '#FF6B35';
+                return;
+            }
+            document.getElementById('search-hint').innerHTML = '⏳ Rilevamento posizione in corso...';
+            document.getElementById('search-hint').style.color = '#999';
             navigator.geolocation.getCurrentPosition((position) => {
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
                     .then(r => r.json())
                     .then(data => {
                         const citta = data.address.city || data.address.town || data.address.village || '';
-                        el.value = citta;
-                        if (hint) { hint.innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.'; hint.style.color = '#28a745'; }
+                        document.getElementById('search-input').value = citta;
+                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.';
+                        document.getElementById('search-hint').style.color = '#28a745';
                     })
-                    .catch(() => { if (hint) { hint.innerHTML = '⚠️ Errore nel recupero della città. Inseriscila manualmente.'; hint.style.color = '#FF6B35'; } });
-            }, () => { if (hint) { hint.innerHTML = '⚠️ Permesso posizione negato.'; hint.style.color = '#FF6B35'; } }, { timeout: 10000 });
+                    .catch(() => {
+                        document.getElementById('search-hint').innerHTML = '⚠️ Errore nel recupero della città. Inseriscila manualmente.';
+                        document.getElementById('search-hint').style.color = '#FF6B35';
+                    });
+            }, () => {
+                document.getElementById('search-hint').innerHTML = '⚠️ Permesso posizione negato. Inserisci la città manualmente.';
+                document.getElementById('search-hint').style.color = '#FF6B35';
+            }, { timeout: 10000 });
         }
 
+        // GEOLOCATION PROFESSIONISTI
         function geolocalizzaProfessionisti() {
             if (!navigator.geolocation) { alert('⚠️ Geolocalizzazione non supportata'); return; }
             navigator.geolocation.getCurrentPosition((position) => {
@@ -889,15 +910,15 @@
                     .then(r => r.json())
                     .then(data => {
                         const citta = data.address.city || data.address.town || data.address.village || '';
-                        const el = document.getElementById('search-input');
-                        const hint = document.getElementById('search-hint');
-                        if (el) el.value = citta;
-                        if (hint) { hint.innerHTML = '✓ Posizione trovata: ' + citta; hint.style.color = '#28a745'; }
+                        document.getElementById('search-input').value = citta;
+                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata: ' + citta;
+                        document.getElementById('search-hint').style.color = '#28a745';
                     })
                     .catch(() => alert('⚠️ Errore nel recupero della città.'));
             }, () => alert('⚠️ Permesso posizione negato.'), { timeout: 10000 });
         }
 
+        // GEOLOCATION NEGOZI
         function geolocalizzaNegozi() {
             if (!navigator.geolocation) { alert('⚠️ Geolocalizzazione non supportata'); return; }
             navigator.geolocation.getCurrentPosition((position) => {
@@ -905,23 +926,26 @@
                     .then(r => r.json())
                     .then(data => {
                         const citta = data.address.city || data.address.town || data.address.village || '';
-                        const el = document.getElementById('search-input');
-                        const hint = document.getElementById('search-hint');
-                        if (el) el.value = citta;
-                        if (hint) { hint.innerHTML = '✓ Posizione trovata: ' + citta; hint.style.color = '#28a745'; }
+                        document.getElementById('search-input').value = citta;
+                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata: ' + citta;
+                        document.getElementById('search-hint').style.color = '#28a745';
                     })
                     .catch(() => alert('⚠️ Errore nel recupero della città.'));
             }, () => alert('⚠️ Permesso posizione negato.'), { timeout: 10000 });
         }
 
-        /* ── SELEZIONE ESEMPIO ── */
+        document.addEventListener('DOMContentLoaded', () => {
+            aggiornaHint();
+        });
+
+        // SELEZIONE ESEMPIO
         function selezionaEsempio(el) {
             const testo = el.textContent.replace(/^[^\w]+/, '').trim();
             document.getElementById('ai-descrizione').value = testo;
             document.getElementById('ai-descrizione').focus();
         }
 
-        /* ── AI ORIENTAMENTO ── */
+        // AI ORIENTAMENTO
         async function aiOrienta() {
             const testo = document.getElementById('ai-descrizione').value.trim();
             if (!testo) {
@@ -944,7 +968,7 @@
                         max_tokens: 1000,
                         messages: [{
                             role: 'user',
-                            content: `Sei un assistente di TrovaImpresa, marketplace italiano per edilizia.
+                            content: `Sei un assistente di TrovaImpresa, marketplace italiano per edilizia. 
 Un cliente ha scritto: "${testo}"
 
 Analizza la richiesta e rispondi SOLO con un oggetto JSON nel formato:
@@ -952,7 +976,7 @@ Analizza la richiesta e rispondi SOLO con un oggetto JSON nel formato:
 
 Le categorie possibili sono:
 - artigiano → piccoli lavori, riparazioni, installazioni singole (idraulico, elettricista, pittore, piastrellista ecc.) → pagina: "cerca-artigiani.html"
-- impresa → ristrutturazioni medie, lavori su appartamenti/case → pagina: "cerca-imprese.html"
+- impresa → ristrutturazioni medie, lavori su appartamenti/case → pagina: "cerca-imprese.html"  
 - grande_impresa → costruzioni nuove, capannoni, opere civili, grandi appalti → pagina: "cerca-grandi-imprese.html"
 - negozio → acquisto materiali, piastrelle, sanitari, ferramenta, vernici → pagina: "cerca-negozi.html"
 - professionista → progettazione, pratiche, certificazioni, geometra, architetto, ingegnere → pagina: "cerca-professionisti.html"
@@ -966,23 +990,41 @@ Rispondi SOLO con il JSON, niente altro.`
                 const testo_risposta = data.content[0].text.trim();
                 const json = JSON.parse(testo_risposta);
 
-                const icone = { artigiano:'🔨', impresa:'🏗️', grande_impresa:'🏢', negozio:'🏪', professionista:'👔' };
-                const colori = { artigiano:'#2a7a4b', impresa:'#FF6B35', grande_impresa:'#1a5276', negozio:'#c0392b', professionista:'#6c3483' };
-                const nomi  = { artigiano:'Artigiano', impresa:'Impresa Edile', grande_impresa:'Grande Impresa', negozio:'Negozio Edile', professionista:'Professionista' };
+                const icone = {
+                    artigiano: '🔨',
+                    impresa: '🏗️',
+                    grande_impresa: '🏢',
+                    negozio: '🏪',
+                    professionista: '👔'
+                };
+                const colori = {
+                    artigiano: '#2a7a4b',
+                    impresa: '#FF6B35',
+                    grande_impresa: '#1a5276',
+                    negozio: '#c0392b',
+                    professionista: '#6c3483'
+                };
+                const nomi = {
+                    artigiano: 'Artigiano',
+                    impresa: 'Impresa Edile',
+                    grande_impresa: 'Grande Impresa',
+                    negozio: 'Negozio Edile',
+                    professionista: 'Professionista'
+                };
 
                 const colore = colori[json.categoria] || '#2a7a4b';
-                const icona  = icone[json.categoria] || '🔍';
-                const nome   = nomi[json.categoria]  || json.categoria;
+                const icona = icone[json.categoria] || '🔍';
+                const nome = nomi[json.categoria] || json.categoria;
 
                 risultato.innerHTML = `
-                    <div style="background:#fff; border-radius:10px; padding:16px 18px; border:1.5px solid rgba(0,0,0,0.08); border-left:4px solid ${colore}; text-align:left;">
+                    <div style="background:#f5f5f5; border-radius:12px; padding:18px; border-left:4px solid ${colore}; text-align:left;">
                         <div style="font-size:13px; color:#555; margin-bottom:12px;">💡 ${json.motivo}</div>
-                        <a href="${json.pagina}" style="display:inline-block; background:${colore}; color:#fff; padding:11px 22px; border-radius:10px; text-decoration:none; font-weight:700; font-size:14px;">${icona} Cerca un ${nome}</a>
+                        <a href="${json.pagina}" style="display:inline-block; background:${colore}; color:white; padding:12px 24px; border-radius:10px; text-decoration:none; font-weight:700; font-size:15px;">${icona} Cerca un ${nome}</a>
                     </div>`;
                 risultato.style.display = 'block';
 
             } catch(e) {
-                risultato.innerHTML = `<div style="color:#c0392b; font-size:13px; padding:12px; background:#fff5f5; border-radius:8px;">⚠️ Errore durante l'analisi. Riprova.</div>`;
+                risultato.innerHTML = `<div style="color:#c0392b; font-size:13px;">⚠️ Errore durante l'analisi. Riprova.</div>`;
                 risultato.style.display = 'block';
             }
 
@@ -992,19 +1034,21 @@ Rispondi SOLO con il JSON, niente altro.`
     </script>
 
     <script>
-    /* ── BANNER LOADER ── */
+    // SPAZI PUBBLICITARI — carica immagini da Supabase negli slot inline
     const PUB_BUCKET = 'https://nacvrsgkyfavykxjxszu.supabase.co/storage/v1/object/public/loghi-pubblicita/';
 
     function caricaBanner(id) {
-        var url = PUB_BUCKET + 'locandina-slot' + id + '.jpg';
-        var el = document.getElementById('pub-img-' + id);
-        if (!el) return;
-        var img = new Image();
-        img.onload = function() {
-            el.innerHTML = '<img src="' + url + '?t=' + Date.now() + '" style="width:100%;height:100%;object-fit:contain;">';
-        };
-        img.onerror = function() { /* slot rimane vuoto */ };
-        img.src = url + '?t=' + Date.now();
+      var url = PUB_BUCKET + 'locandina-slot' + id + '.jpg';
+      var el = document.getElementById('pub-img-' + id);
+      if (!el) return;
+      var img = new Image();
+      img.onload = function() {
+        el.innerHTML = '<img src="' + url + '?t=' + Date.now() + '" style="width:100%;height:100%;object-fit:contain;">';
+      };
+      img.onerror = function() {
+        el.innerHTML = '<span style="color:#ddd; font-size:11px;">Spazio disponibile</span>';
+      };
+      img.src = url + '?t=' + Date.now();
     }
 
     for (var i = 1; i <= 8; i++) caricaBanner(i);
