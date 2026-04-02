@@ -544,19 +544,28 @@
             }
 
             .hero {
-                padding: 30px 16px;
+                padding: 24px 16px;
             }
 
             .hero h1 {
-                font-size: 28px;
+                font-size: 24px;
+            }
+
+            .hero p {
+                font-size: 14px;
+            }
+
+            .hero div[style*="display:flex"] {
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .why-section {
-                padding: 60px 20px;
+                padding: 40px 16px;
             }
 
             .why-section h2 {
-                font-size: 28px;
+                font-size: 24px;
             }
 
             .features-grid {
@@ -569,12 +578,22 @@
             }
 
             .lavoro-links {
-                padding: 30px 20px;
+                padding: 16px 12px;
+            }
+
+            .sezione-card {
+                padding: 20px 16px;
             }
 
             .lavoro-buttons-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
+                gap: 10px;
+            }
+
+            .lavoro-btn {
+                min-width: calc(50% - 7px);
+                max-width: calc(50% - 7px);
+                padding: 20px 8px;
+                font-size: 12px;
             }
 
             .jobs-section-symmetric {
