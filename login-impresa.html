@@ -17,7 +17,7 @@
       justify-content: center;
       padding: 20px;
     }
-    .logo {ac
+    .logo {
       font-family: 'Playfair Display', serif;
       font-size: 1.8rem;
       color: white;
@@ -200,9 +200,11 @@
 
   <a href="index.html" class="back">← Torna alla home</a>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Entra con Invio
     document.getElementById('password').addEventListener('keydown', function(e) {
@@ -240,19 +242,10 @@
       errore.style.display = 'none';
 
       try {
-        const res = await fetch(
-          SUPABASE_URL + '/rest/v1/imprese?email=eq.' + encodeURIComponent(email) + '&password=eq.' + encodeURIComponent(password) + '&select=id,nome_attivita,piano',
-          {
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY
-            }
-          }
-        );
+        // Login con Supabase Auth (password cifrata, sicura)
+        const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-        const data = await res.json();
-
-        if (!data || data.length === 0) {
+        if (authError) {
           errore.textContent = 'Email o password non corretti.';
           errore.style.display = 'block';
           btn.disabled = false;
@@ -260,11 +253,17 @@
           return;
         }
 
-        // Salva sessione
-        const impresa = data[0];
-        localStorage.setItem('impresa_id', impresa.id);
-        localStorage.setItem('impresa_nome', impresa.nome_attivita || '');
-        localStorage.setItem('piano_impresa', impresa.piano || 'free');
+        // Recupera dati impresa dalla tabella
+        const { data: imprese } = await supabaseClient
+          .from('imprese')
+          .select('id, nome, piano')
+          .eq('user_id', authData.user.id)
+          .single();
+
+        // Salva sessione in localStorage
+        localStorage.setItem('impresa_id', imprese?.id || '');
+        localStorage.setItem('impresa_nome', imprese?.nome || '');
+        localStorage.setItem('piano_impresa', imprese?.piano || 'free');
 
         // Vai al pannello
         window.location.href = 'pannello-impresa.html';
