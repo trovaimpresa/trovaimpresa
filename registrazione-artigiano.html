@@ -60,6 +60,14 @@
     .piano-card ul li { padding: 2px 0; }
     .piano-card ul li::before { content: "✓ "; color: #2a7a4b; font-weight: 700; }
     .piano-card.selected-pro ul li::before { color: #1a73e8; }
+    .password-wrapper { position: relative; }
+    .password-wrapper input { padding-right: 44px; }
+    .toggle-pw {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #aaa;
+      padding: 0; display: flex; align-items: center; transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: #2a7a4b; }
   </style>
 </head>
 <body>
@@ -170,7 +178,12 @@
         </div>
         <div class="form-group">
           <label>Password <span class="required">*</span></label>
-          <input type="password" id="password" placeholder="Almeno 8 caratteri">
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="Almeno 8 caratteri">
+            <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -235,6 +248,20 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    function togglePassword(id, btn) {
+      const input = document.getElementById(id);
+      const svg = btn.querySelector('svg');
+      if (input.type === 'password') {
+        input.type = 'text';
+        svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+        btn.style.color = '#2a7a4b';
+      } else {
+        input.type = 'password';
+        svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        btn.style.color = '#aaa';
+      }
+    }
+
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
