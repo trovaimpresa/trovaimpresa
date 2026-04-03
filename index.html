@@ -670,23 +670,6 @@
     transition: background 0.2s, transform 0.15s;
   }
   #topBanner .btn-pro:hover { background: #EA6C0A; transform: scale(1.04); }
-  #topBanner .banner-close {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.5);
-    font-size: 18px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px 6px;
-    border-radius: 4px;
-    transition: color 0.2s;
-    font-family: sans-serif;
-  }
-  #topBanner .banner-close:hover { color: white; }
   body.banner-hidden #topBanner { display: none !important; }
 </style>
 <div id="topBanner">
@@ -694,20 +677,9 @@
     <span>TrovaImpresa è gratis per tutti — se vuoi di più</span>
     <a href="/info-pro.html" class="btn-pro">⭐ Passa al Piano Pro</a>
   </div>
-  <button class="banner-close" onclick="chiudiBanner()" title="Chiudi">✕</button>
+
 </div>
-<script>
-  (function() {
-    const chiuso = localStorage.getItem('bannerChiuso');
-    if (chiuso && Date.now() - parseInt(chiuso) < 86400000) {
-      document.body.classList.add('banner-hidden');
-    }
-  })();
-  function chiudiBanner() {
-    document.getElementById('topBanner').style.display = 'none';
-    localStorage.setItem('bannerChiuso', Date.now().toString());
-  }
-</script>
+
 <!-- FINE TOP BANNER -->
 
 <!-- BOX BANDI LATERALE DESTRO -->
