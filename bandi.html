@@ -1,1 +1,806 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bandi & Comunicazioni – TrovaImpresa</title>
+  <link rel="icon" href="/trovaimpresa_logo_transparent.png" type="image/png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --arancione: #F97316;
+      --verde: #16A34A;
+      --blu-scuro: #1E293B;
+      --grigio: #64748B;
+      --grigio-chiaro: #F1F5F9;
+      --bianco: #FFFFFF;
+      --bordo: #E2E8F0;
+      --gu-color: #DC2626;
+      --edil-color: #D97706;
+      --lp-color: #2563EB;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F8FAFC;
+      color: var(--blu-scuro);
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      background: var(--bianco);
+      border-bottom: 1px solid var(--bordo);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .navbar-brand img {
+      height: 38px;
+    }
+
+    .navbar-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--bordo);
+      background: var(--bianco);
+      color: var(--grigio);
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { background: var(--grigio-chiaro); color: var(--blu-scuro); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--blu-scuro) 0%, #2D4A6B 100%);
+      padding: 40px 24px 32px;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(249,115,22,0.2);
+      border: 1px solid rgba(249,115,22,0.4);
+      color: #FED7AA;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      font-size: 15px;
+      opacity: 0.75;
+      max-width: 500px;
+      margin: 0 auto 20px;
+    }
+
+    /* REGIONE BADGE */
+    .regione-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(22,163,74,0.2);
+      border: 1px solid rgba(22,163,74,0.4);
+      color: #BBF7D0;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 20px;
+    }
+
+    .regione-badge .dot {
+      width: 8px;
+      height: 8px;
+      background: #4ADE80;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* MAIN */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 16px 60px;
+    }
+
+    /* TABS */
+    .tabs-header {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .tabs-header::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 2px solid var(--bordo);
+      background: var(--bianco);
+      color: var(--grigio);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .tab-btn.active {
+      border-color: var(--arancione);
+      color: var(--arancione);
+      background: #FFF7ED;
+    }
+
+    .tab-btn:hover:not(.active) {
+      border-color: #CBD5E1;
+      color: var(--blu-scuro);
+      background: var(--grigio-chiaro);
+    }
+
+    .tab-btn .source-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .tab-btn .count-badge {
+      background: var(--arancione);
+      color: white;
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    /* FILTRI */
+    .filtri-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 14px;
+      border: 1px solid var(--bordo);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      background: var(--bianco);
+      color: var(--blu-scuro);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--arancione); }
+    .search-input::placeholder { color: #94A3B8; }
+
+    .filtri-info {
+      font-size: 13px;
+      color: var(--grigio);
+    }
+
+    /* CARDS */
+    .cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bando-card {
+      background: var(--bianco);
+      border: 1px solid var(--bordo);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bando-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 12px 0 0 12px;
+    }
+
+    .bando-card.gu::before { background: var(--gu-color); }
+    .bando-card.edil::before { background: var(--edil-color); }
+    .bando-card.lp::before { background: var(--lp-color); }
+    .bando-card.manuale::before { background: var(--verde); }
+
+    .bando-card:hover {
+      border-color: #CBD5E1;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transform: translateY(-1px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--blu-scuro);
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .source-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .source-tag.gu { background: #FEF2F2; color: var(--gu-color); }
+    .source-tag.edil { background: #FFFBEB; color: var(--edil-color); }
+    .source-tag.lp { background: #EFF6FF; color: var(--lp-color); }
+    .source-tag.manuale { background: #F0FDF4; color: var(--verde); }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--grigio);
+      line-height: 1.5;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-date {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #94A3B8;
+    }
+
+    .btn-leggi {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 7px;
+      background: var(--arancione);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-leggi:hover { background: #EA6C0A; }
+
+    /* LOADING / EMPTY */
+    .loading-box {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--grigio);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--bordo);
+      border-top-color: var(--arancione);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-box {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    /* GATE (non loggato) */
+    .gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .gate-icon { font-size: 56px; margin-bottom: 16px; }
+    .gate h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .gate p { color: var(--grigio); margin-bottom: 24px; font-size: 15px; }
+
+    .btn-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: var(--arancione);
+      color: white;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-login:hover { background: #EA6C0A; }
+
+    /* SEZIONE MANUALE */
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blu-scuro);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--bordo);
+    }
+
+    /* NOTIFICA AGGIORNAMENTO */
+    .update-bar {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--verde);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .hero { padding: 28px 16px 24px; }
+      .card-header { flex-direction: column; gap: 8px; }
+      .btn-leggi { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/index.html" class="navbar-brand">
+    <img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa" />
+  </a>
+  <div class="navbar-links">
+    <a href="/pannello-impresa.html" class="btn-back">
+      ← Pannello
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🏛️ Area Riservata</div>
+  <h1>Bandi & Comunicazioni</h1>
+  <p>Aggiornamenti ufficiali su appalti, gare, fiere ed eventi — filtrati per la tua regione</p>
+  <div class="regione-badge" id="regioneBadge">
+    <span class="dot"></span>
+    <span id="regioneNome">Caricamento...</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainContent">
+
+  <!-- GATE (mostrato se non loggato) -->
+  <div class="gate" id="gateBox" style="display:none;">
+    <div class="gate-icon">🔒</div>
+    <h2>Accesso Riservato</h2>
+    <p>Questa sezione è disponibile solo per le imprese registrate a TrovaImpresa.</p>
+    <a href="/login-impresa.html" class="btn-login">→ Accedi al tuo account</a>
+  </div>
+
+  <!-- CONTENUTO (mostrato se loggato) -->
+  <div id="contentBox" style="display:none;">
+
+    <div class="update-bar">
+      🔄 <span id="ultimoAggiornamento">Aggiornamento in corso...</span>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-header" id="tabsHeader">
+      <button class="tab-btn active" data-tab="tutti" onclick="switchTab('tutti', this)">
+        📋 Tutti
+        <span class="count-badge" id="count-tutti">0</span>
+      </button>
+      <button class="tab-btn" data-tab="gu" onclick="switchTab('gu', this)">
+        <span class="source-dot" style="background:var(--gu-color)"></span>
+        Gazzetta Ufficiale
+        <span class="count-badge" id="count-gu">0</span>
+      </button>
+      <button class="tab-btn" data-tab="edil" onclick="switchTab('edil', this)">
+        <span class="source-dot" style="background:var(--edil-color)"></span>
+        Edilportale
+        <span class="count-badge" id="count-edil">0</span>
+      </button>
+      <button class="tab-btn" data-tab="lp" onclick="switchTab('lp', this)">
+        <span class="source-dot" style="background:var(--lp-color)"></span>
+        Lavori Pubblici
+        <span class="count-badge" id="count-lp">0</span>
+      </button>
+      <button class="tab-btn" data-tab="manuale" onclick="switchTab('manuale', this)">
+        <span class="source-dot" style="background:var(--verde)"></span>
+        Fiere & Expo
+        <span class="count-badge" id="count-manuale">0</span>
+      </button>
+    </div>
+
+    <!-- FILTRO RICERCA -->
+    <div class="filtri-bar">
+      <input
+        type="text"
+        class="search-input"
+        id="searchInput"
+        placeholder="🔍 Cerca nei bandi..."
+        oninput="filterCards()"
+      />
+      <span class="filtri-info" id="filtriInfo"></span>
+    </div>
+
+    <!-- CARDS CONTAINER -->
+    <div id="loadingBox" class="loading-box">
+      <div class="spinner"></div>
+      <p>Recupero bandi e comunicazioni...</p>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid" style="display:none;"></div>
+
+    <div class="empty-box" id="emptyBox" style="display:none;">
+      <div class="empty-icon">📭</div>
+      <h3>Nessun risultato trovato</h3>
+      <p style="color:var(--grigio); margin-top:8px;">Prova a modificare la ricerca o seleziona un'altra categoria</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Proxy RSS → JSON (gratuito, 10k req/mese)
+  const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+  // Feed RSS
+  const FEEDS = [
+    {
+      id: 'gu',
+      nome: 'Gazzetta Ufficiale',
+      url: 'https://www.gazzettaufficiale.it/rss/attocompleto.jsp?page=1&series=5S',
+      classe: 'gu',
+      label: '🏛️ Gazzetta Ufficiale'
+    },
+    {
+      id: 'edil',
+      nome: 'Edilportale',
+      url: 'https://www.edilportale.com/news/rss',
+      classe: 'edil',
+      label: '🏗️ Edilportale'
+    },
+    {
+      id: 'lp',
+      nome: 'Lavori Pubblici',
+      url: 'https://www.lavoripubblici.it/feed/',
+      classe: 'lp',
+      label: '📐 Lavori Pubblici'
+    }
+  ];
+
+  let tuttiArticoli = [];
+  let tabCorrente = 'tutti';
+  let regioneUtente = '';
+
+  // Fiere/Expo manuali (puoi aggiornare da Supabase in futuro)
+  const FIERE_MANUALI = [
+    {
+      id: 'manuale',
+      titolo: 'MADE Expo 2026 – Architettura, Design e Edilizia',
+      descrizione: 'La fiera internazionale per il settore delle costruzioni. Milano, Fiera Milano Rho. Appuntamento imperdibile per imprese edili e professionisti.',
+      link: 'https://www.madeexpo.it',
+      data: '2026-09-16',
+      classe: 'manuale',
+      label: '🏛️ Fiera'
+    },
+    {
+      id: 'manuale',
+      titolo: 'Saie 2026 – Salone dell\'Edilizia',
+      descrizione: 'Il salone professionale dell\'edilizia italiana. Bologna Fiere. Esposizione di prodotti, materiali e tecnologie per le costruzioni.',
+      link: 'https://www.saie.bolognafiere.it',
+      data: '2026-10-08',
+      classe: 'manuale',
+      label: '🏛️ Fiera'
+    },
+    {
+      id: 'manuale',
+      titolo: 'Klimahouse 2026 – Efficienza Energetica e Sostenibilità',
+      descrizione: 'Fiera internazionale per la riqualificazione energetica degli edifici. Bolzano Fiera. Superbonus, Ecobonus, cappotti termici, fotovoltaico.',
+      link: 'https://www.klimahouse.it',
+      data: '2026-01-28',
+      classe: 'manuale',
+      label: '🏛️ Fiera'
+    }
+  ];
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+      document.getElementById('gateBox').style.display = 'flex';
+      return;
+    }
+
+    document.getElementById('contentBox').style.display = 'block';
+
+    // Recupera regione dell'impresa
+    const userId = session.user.id;
+    const { data: impresa } = await supabaseClient
+      .from('imprese')
+      .select('regione, nome')
+      .eq('user_id', userId)
+      .single();
+
+    if (impresa?.regione) {
+      regioneUtente = impresa.regione;
+      document.getElementById('regioneNome').textContent = `📍 ${regioneUtente}`;
+    } else {
+      document.getElementById('regioneNome').textContent = '📍 Tutte le regioni';
+    }
+
+    // Carica tutti i feed
+    await caricaTuttiFeed();
+  }
+
+  async function caricaTuttiFeed() {
+    tuttiArticoli = [];
+
+    // Aggiungi fiere manuali
+    FIERE_MANUALI.forEach(f => tuttiArticoli.push(f));
+
+    // Carica feed RSS in parallelo
+    const promises = FEEDS.map(feed => caricaFeed(feed));
+    await Promise.allSettled(promises);
+
+    // Ordina per data (più recenti prima)
+    tuttiArticoli.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    // Aggiorna contatori
+    aggiornaContatori();
+
+    // Mostra
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('cardsGrid').style.display = 'flex';
+
+    const ora = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('ultimoAggiornamento').textContent =
+      `Ultimo aggiornamento oggi alle ${ora} — ${tuttiArticoli.length} comunicazioni trovate`;
+
+    renderCards('tutti');
+  }
+
+  async function caricaFeed(feed) {
+    try {
+      const resp = await fetch(`${RSS2JSON}${encodeURIComponent(feed.url)}&count=30`);
+      const data = await resp.json();
+
+      if (data.status !== 'ok' || !data.items) return;
+
+      data.items.forEach(item => {
+        // Filtra per regione se disponibile
+        const testo = `${item.title} ${item.description || ''}`.toLowerCase();
+        const regioneMatch = !regioneUtente ||
+          testo.includes(regioneUtente.toLowerCase()) ||
+          feed.id !== 'gu'; // Solo GU filtra per regione, gli altri mostrano tutto
+
+        if (!regioneMatch) return;
+
+        tuttiArticoli.push({
+          id: feed.id,
+          titolo: item.title?.replace(/<[^>]*>/g, '') || 'Comunicazione',
+          descrizione: (item.description || item.content || '')
+            .replace(/<[^>]*>/g, '')
+            .substring(0, 200),
+          link: item.link || '#',
+          data: item.pubDate || new Date().toISOString(),
+          classe: feed.classe,
+          label: feed.label
+        });
+      });
+    } catch (e) {
+      console.warn(`Errore feed ${feed.nome}:`, e);
+    }
+  }
+
+  function aggiornaContatori() {
+    const contatori = { tutti: 0, gu: 0, edil: 0, lp: 0, manuale: 0 };
+    tuttiArticoli.forEach(a => {
+      contatori[a.id]++;
+      contatori.tutti++;
+    });
+    Object.keys(contatori).forEach(key => {
+      const el = document.getElementById(`count-${key}`);
+      if (el) el.textContent = contatori[key];
+    });
+  }
+
+  function renderCards(tab) {
+    const grid = document.getElementById('cardsGrid');
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+    let articoli = tab === 'tutti'
+      ? tuttiArticoli
+      : tuttiArticoli.filter(a => a.id === tab);
+
+    if (query) {
+      articoli = articoli.filter(a =>
+        a.titolo.toLowerCase().includes(query) ||
+        a.descrizione.toLowerCase().includes(query)
+      );
+    }
+
+    document.getElementById('filtriInfo').textContent =
+      `${articoli.length} comunicazion${articoli.length === 1 ? 'e' : 'i'}`;
+
+    if (articoli.length === 0) {
+      grid.style.display = 'none';
+      document.getElementById('emptyBox').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('emptyBox').style.display = 'none';
+    grid.style.display = 'flex';
+
+    grid.innerHTML = articoli.map(a => {
+      const data = a.data ? new Date(a.data).toLocaleDateString('it-IT', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      }) : '';
+
+      return `
+        <div class="bando-card ${a.classe}">
+          <div class="card-header">
+            <div class="card-title">${a.titolo}</div>
+            <span class="source-tag ${a.classe}">${a.label}</span>
+          </div>
+          ${a.descrizione ? `<p class="card-desc">${a.descrizione}</p>` : ''}
+          <div class="card-footer">
+            <span class="card-date">📅 ${data}</span>
+            ${a.link && a.link !== '#' ? `<a href="${a.link}" target="_blank" class="btn-leggi">Leggi →</a>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function switchTab(tab, btn) {
+    tabCorrente = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards(tab);
+  }
+
+  function filterCards() {
+    renderCards(tabCorrente);
+  }
+
+  init();
+</script>
+
+</body>
+</html>
