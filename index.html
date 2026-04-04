@@ -849,7 +849,7 @@
         </div>
     </div>
     <!-- CERCA PER CATEGORIA SECTION -->
-    <section class="lavoro-links">
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1400&q=80&auto=format&fit=crop)">
         <div class="sezione-card" style="border-top-color:#2a7a4b;">
         <h2>Cosa stai cercando?</h2>
         <div style="display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:900px; margin:0 auto;">
@@ -876,7 +876,7 @@
         </div>
     </div>
     <!-- AI ORIENTAMENTO SECTION -->
-    <section class="lavoro-links">
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1400&q=80&auto=format&fit=crop)">
         <div class="sezione-card" style="border-top-color:#2a7a4b;">
         <h2>🤖 Non sai a chi rivolgerti?</h2>
         <p style="color:#666; font-size:14px; margin-bottom:18px;">Descrivi il lavoro che devi fare — ti diciamo subito chi contattare</p>
@@ -948,7 +948,7 @@
         </div>
     </div>
     <!-- REGISTRATI + PUBBLICITA SECTION -->
-    <section class="lavoro-links">
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1400&q=80&auto=format&fit=crop)">
         <div class="sezione-card" style="border-top-color:#2a7a4b;">
         <h2>Accedi al tuo pannello</h2>
         <div class="lavoro-buttons-grid">
@@ -958,7 +958,7 @@
         </div>
     </section>
 
-    <section class="lavoro-links">
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1400&q=80&auto=format&fit=crop)">
         <div class="sezione-card" style="border-top-color:#FF6B35;">
         <h2>Scegli il tuo piano</h2>
         <div class="lavoro-buttons-grid">
@@ -970,7 +970,7 @@
     </section>
 
     <!-- CANDIDATI E RICERCA SECTION -->
-    <section class="lavoro-links">
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1400&q=80&auto=format&fit=crop)">
         <div class="sezione-card" style="border-top-color:#2980b9;">
         <h2>Cerca lavoro</h2>
         <div class="lavoro-buttons-grid">
@@ -981,7 +981,7 @@
     </section>
 
     <!-- OFFERTE DI LAVORO SECTION -->
-    <section class="lavoro-links">
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1400&q=80&auto=format&fit=crop)">
         <div class="sezione-card" style="border-top-color:#e67e22;">
         <h2>Offerte di lavoro</h2>
         <div class="lavoro-buttons-grid">
@@ -1005,7 +1005,7 @@
         </div>
     </div>
     <!-- NEGOZI EDILI E PROFESSIONISTI -->
-    <section class="lavoro-links">
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80&auto=format&fit=crop)">
         <div class="sezione-card" style="border-top-color:#6c3483;">
         <h2>Scegli il tuo profilo</h2>
         <div style="display:flex; flex-wrap:wrap; gap:14px; justify-content:center; max-width:900px; margin:0 auto;">
@@ -1171,7 +1171,6 @@
     document.addEventListener('DOMContentLoaded', function () {
         var BASE = 'https://images.unsplash.com/';
         document.querySelectorAll('section.lavoro-links').forEach(function (sec, i) {
-            sec.style.backgroundImage = 'url(' + BASE + FOTO_BG[Math.min(i, FOTO_BG.length-1)] + '?w=1400&q=80&auto=format&fit=crop)';
             var t = TESTI[Math.min(i, TESTI.length-1)];
             ['sx','dx'].forEach(function(lato) {
                 var d = t[lato];
