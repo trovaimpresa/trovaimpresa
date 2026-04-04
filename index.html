@@ -1238,6 +1238,7 @@
         // UPDATE HINT
         function aggiornaHint() {
             const hint = document.getElementById('search-hint');
+            if (!hint) return;
             const label = {
                 'artigiano': '🔨 Artigiano',
                 'impresa': '🏗️ Impresa edile',
@@ -1253,8 +1254,7 @@
             const hint = document.getElementById('search-hint');
             
             if (!citta) {
-                hint.innerHTML = '⚠️ Inserisci una città per cercare';
-                hint.style.color = '#FF6B35';
+                if (hint) { hint.innerHTML = '⚠️ Inserisci una città per cercare'; hint.style.color = '#FF6B35'; }
                 return;
             }
 
@@ -1264,28 +1264,28 @@
         // GEOLOCATION
         function geolocalizza() {
             if (!navigator.geolocation) {
-                document.getElementById('search-hint').innerHTML = '⚠️ Geolocalizzazione non supportata dal tuo browser';
-                document.getElementById('search-hint').style.color = '#FF6B35';
+                document.getElementById('search-hint') && (document.getElementById('search-hint').innerHTML = '⚠️ Geolocalizzazione non supportata dal tuo browser';
+                document.getElementById('search-hint') && (document.getElementById('search-hint').style.color = '#FF6B35';
                 return;
             }
-            document.getElementById('search-hint').innerHTML = '⏳ Rilevamento posizione in corso...';
-            document.getElementById('search-hint').style.color = '#999';
+            document.getElementById('search-hint') && (document.getElementById('search-hint').innerHTML = '⏳ Rilevamento posizione in corso...';
+            document.getElementById('search-hint') && (document.getElementById('search-hint').style.color = '#999';
             navigator.geolocation.getCurrentPosition((position) => {
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`)
                     .then(r => r.json())
                     .then(data => {
                         const citta = data.address.city || data.address.town || data.address.village || '';
                         document.getElementById('search-input').value = citta;
-                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.';
-                        document.getElementById('search-hint').style.color = '#28a745';
+                        document.getElementById('search-hint') && (document.getElementById('search-hint').innerHTML = '✓ Posizione trovata! Clicca "Cerca" per continuare.';
+                        document.getElementById('search-hint') && (document.getElementById('search-hint').style.color = '#28a745';
                     })
                     .catch(() => {
-                        document.getElementById('search-hint').innerHTML = '⚠️ Errore nel recupero della città. Inseriscila manualmente.';
-                        document.getElementById('search-hint').style.color = '#FF6B35';
+                        document.getElementById('search-hint') && (document.getElementById('search-hint').innerHTML = '⚠️ Errore nel recupero della città. Inseriscila manualmente.';
+                        document.getElementById('search-hint') && (document.getElementById('search-hint').style.color = '#FF6B35';
                     });
             }, () => {
-                document.getElementById('search-hint').innerHTML = '⚠️ Permesso posizione negato. Inserisci la città manualmente.';
-                document.getElementById('search-hint').style.color = '#FF6B35';
+                document.getElementById('search-hint') && (document.getElementById('search-hint').innerHTML = '⚠️ Permesso posizione negato. Inserisci la città manualmente.';
+                document.getElementById('search-hint') && (document.getElementById('search-hint').style.color = '#FF6B35';
             }, { timeout: 10000 });
         }
 
@@ -1298,8 +1298,8 @@
                     .then(data => {
                         const citta = data.address.city || data.address.town || data.address.village || '';
                         document.getElementById('search-input').value = citta;
-                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata: ' + citta;
-                        document.getElementById('search-hint').style.color = '#28a745';
+                        document.getElementById('search-hint') && (document.getElementById('search-hint').innerHTML = '✓ Posizione trovata: ' + citta;
+                        document.getElementById('search-hint') && (document.getElementById('search-hint').style.color = '#28a745';
                     })
                     .catch(() => alert('⚠️ Errore nel recupero della città.'));
             }, () => alert('⚠️ Permesso posizione negato.'), { timeout: 10000 });
@@ -1314,8 +1314,8 @@
                     .then(data => {
                         const citta = data.address.city || data.address.town || data.address.village || '';
                         document.getElementById('search-input').value = citta;
-                        document.getElementById('search-hint').innerHTML = '✓ Posizione trovata: ' + citta;
-                        document.getElementById('search-hint').style.color = '#28a745';
+                        document.getElementById('search-hint') && (document.getElementById('search-hint').innerHTML = '✓ Posizione trovata: ' + citta;
+                        document.getElementById('search-hint') && (document.getElementById('search-hint').style.color = '#28a745';
                     })
                     .catch(() => alert('⚠️ Errore nel recupero della città.'));
             }, () => alert('⚠️ Permesso posizione negato.'), { timeout: 10000 });
