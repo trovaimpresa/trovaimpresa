@@ -230,7 +230,15 @@
   .bar-label { display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px; color:var(--mid); font-weight:600; }
   .bar-track { height:8px; background:var(--bg); border-radius:4px; overflow:hidden; }
   .bar-fill { height:100%; border-radius:4px; background:var(--verde); transition:width 0.6s ease; }
-</style>
+
+    .password-wrapper { position: relative; }
+    .password-wrapper input { padding-right: 44px; }
+    .toggle-pw {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
+    }
+    .toggle-pw:hover { color: #2ecc71; }
+  </style>
 </head>
 <body>
 
@@ -240,7 +248,10 @@
     <div class="login-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></div>
     <div class="login-sub">Pannello Amministratore</div>
     <input type="text" id="login-user" placeholder="Username admin">
-    <input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="password-wrapper">
+      <input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="toggle-pw" type="button" onclick="togglePassword('login-pass', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
     <button class="login-btn" onclick="doLogin()">🔐 Accedi</button>
     <div class="login-err" id="login-err">❌ Credenziali errate</div>
   </div>

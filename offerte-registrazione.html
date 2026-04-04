@@ -251,7 +251,15 @@
         .success-message.show {
             display: block;
         }
-    </style>
+    
+    .password-wrapper { position: relative; }
+    .password-wrapper input { padding-right: 44px; }
+    .toggle-pw {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
+    }
+    .toggle-pw:hover { color: #2ecc71; }
+  </style>
 </head>
 <body>
 
@@ -294,7 +302,10 @@
                     <h3>🔐 Sei già registrato su TrovaImpresa? Accedi per compilare automaticamente</h3>
                     <div class="login-row">
                         <input type="email" id="login-email" placeholder="La tua email">
-                        <input type="password" id="login-password" placeholder="Password">
+                        <div class="password-wrapper">
+                          <input type="password" id="login-password" placeholder="Password">
+                          <button class="toggle-pw" type="button" onclick="togglePassword('login-password', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                        </div>
                         <button class="btn-login" onclick="accediImpresa()">Accedi</button>
                     </div>
                     <div class="login-msg" id="login-msg"></div>

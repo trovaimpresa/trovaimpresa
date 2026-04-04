@@ -60,6 +60,14 @@
     .piano-card ul li { padding: 2px 0; }
     .piano-card ul li::before { content: "✓ "; color: #1a5276; font-weight: 700; }
     .piano-card.selected-pro ul li::before { color: #1a73e8; }
+  
+    .password-wrapper { position: relative; }
+    .password-wrapper input { padding-right: 44px; }
+    .toggle-pw {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
+    }
+    .toggle-pw:hover { color: #2ecc71; }
   </style>
 </head>
 <body>
@@ -159,7 +167,10 @@
         </div>
         <div class="form-group">
           <label>Password <span class="required">*</span></label>
-          <input type="password" id="password" placeholder="Almeno 8 caratteri">
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="Almeno 8 caratteri">
+            <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
         </div>
       </div>
 
