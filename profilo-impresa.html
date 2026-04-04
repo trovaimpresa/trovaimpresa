@@ -864,6 +864,33 @@ function setStelleGruppo(gruppo, val) {
   });
 }
 
+// Hover preview sulle stelle
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.stelle-row').forEach(function (row) {
+    var stelle = row.querySelectorAll('.stella');
+
+    stelle.forEach(function (stella) {
+      // Anteprima al mouseover
+      stella.addEventListener('mouseover', function () {
+        var hoverVal = parseInt(this.dataset.v);
+        stelle.forEach(function (s) {
+          s.style.color = parseInt(s.dataset.v) <= hoverVal ? '#f5a623' : '#ddd';
+        });
+      });
+
+      // Ripristina al mouseout: mostra il valore selezionato
+      row.addEventListener('mouseleave', function () {
+        // Ricava il gruppo dall'id della row (es. "stelle-qualita" → "qualita")
+        var gruppo = row.id.replace('stelle-', '');
+        var selezionato = valoriStelle[gruppo] || 0;
+        stelle.forEach(function (s) {
+          s.style.color = parseInt(s.dataset.v) <= selezionato ? '#f5a623' : '#ddd';
+        });
+      });
+    });
+  });
+});
+
 async function caricaRecensioni(impresaId) {
   try {
     const res = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti?impresa_id=eq.${impresaId}&order=created_at.desc&limit=10`, {
