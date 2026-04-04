@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /c/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(python3 -c \"import sys; content=sys.stdin.read\\(\\); print\\(len\\(content\\), 'chars'\\); print\\(content[:500]\\)\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(python3 -)",
+      "Bash(ls *.html)"
+    ]
+  }
+}
