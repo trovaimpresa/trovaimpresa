@@ -1111,80 +1111,42 @@
         </div>
     </footer>
 
-    <!-- FOTO LATERALI AUTOMATICHE SU TUTTE LE SEZIONI -->
+    <!-- FOTO DI SFONDO PER OGNI SEZIONE -->
     <style>
-        .lw-wrap {
-            display: grid;
-            grid-template-columns: 200px 1fr 200px;
-            background: #f5f5f5;
-            overflow: hidden;
-            min-height: 180px;
-        }
-        .lw-photo {
+        section.lavoro-links {
             position: relative;
-            overflow: hidden;
-            min-height: 160px;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
-        .lw-photo img {
+        section.lavoro-links::before {
+            content: '';
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: transform 0.5s ease;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.52);
+            z-index: 0;
         }
-        .lw-photo:hover img { transform: scale(1.05); }
-        .lw-photo-label {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.65));
-            color: white;
-            padding: 22px 10px 10px;
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 1.4;
-        }
-        .lw-wrap > section.lavoro-links { padding: 0; }
-        @media (min-width: 1101px) {
-            .lw-wrap { margin-right: 290px; }
-        }
-        @media (max-width: 960px) {
-            .lw-wrap { grid-template-columns: 1fr; }
-            .lw-photo { display: none; }
-            .lw-wrap > section.lavoro-links { padding: 16px 12px; }
+        section.lavoro-links > * {
+            position: relative;
+            z-index: 1;
         }
     </style>
     <script>
-    const FOTO_SEZIONI = [
-        // 0: Cosa stai cercando
-        { sx: ['photo-1504307651254-35680f356dfd','Artigiani e imprese edili'],    dx: ['photo-1503387762-592deb58ef4e','Professionisti e negozi'] },
-        // 1: AI orientamento
-        { sx: ['photo-1574359411659-15573a27fd0c','Descrivi il tuo progetto'],    dx: ['photo-1558618666-fcd25c85cd64','Troviamo il professionista giusto'] },
-        // 2: Accedi al pannello
-        { sx: ['photo-1541888946425-d81bb19240f5','Gestisci il tuo profilo'],      dx: ['photo-1581578731548-c64695cc6952','Il tuo pannello di controllo'] },
-        // 3: Scegli piano
-        { sx: ['photo-1621905251189-08b45d6a269e','Più visibilità con il Pro'],    dx: ['photo-1523413555150-22e4ddb53f01','Cresci con TrovaImpresa'] },
-        // 4: Cerca lavoro
-        { sx: ['photo-1581094794329-c8112a89af12','Lavora nel settore edile'],     dx: ['photo-1524180853208-2e6b1abfa0c6','Trova il candidato ideale'] },
-        // 5+: fallback
-        { sx: ['photo-1600585154340-be6161a56a0c','Il tuo profilo professionale'], dx: ['photo-1541888946425-d81bb19240f5','Lavori di qualità'] }
+    var FOTO_BG = [
+        'photo-1504307651254-35680f356dfd',
+        'photo-1581094794329-c8112a89af12',
+        'photo-1541888946425-d81bb19240f5',
+        'photo-1621905251189-08b45d6a269e',
+        'photo-1523413555150-22e4ddb53f01',
+        'photo-1503387762-592deb58ef4e',
+        'photo-1558618666-fcd25c85cd64',
+        'photo-1600585154340-be6161a56a0c'
     ];
     document.addEventListener('DOMContentLoaded', function () {
-        const BASE = 'https://images.unsplash.com/';
+        var BASE = 'https://images.unsplash.com/';
         document.querySelectorAll('section.lavoro-links').forEach(function (sec, i) {
-            var d = FOTO_SEZIONI[Math.min(i, FOTO_SEZIONI.length - 1)];
-            var wrap = document.createElement('div');
-            wrap.className = 'lw-wrap';
-            function mkPhoto(info) {
-                var div = document.createElement('div');
-                div.className = 'lw-photo';
-                div.innerHTML = '<img src="' + BASE + info[0] + '?w=300&q=80&auto=format&fit=crop" loading="lazy" alt=""><div class="lw-photo-label">' + info[1] + '</div>';
-                return div;
-            }
-            sec.parentNode.insertBefore(wrap, sec);
-            wrap.appendChild(mkPhoto(d.sx));
-            wrap.appendChild(sec);
-            wrap.appendChild(mkPhoto(d.dx));
+            var foto = FOTO_BG[Math.min(i, FOTO_BG.length - 1)];
+            sec.style.backgroundImage = 'url(' + BASE + foto + '?w=1400&q=80&auto=format&fit=crop)';
         });
     });
     </script>
