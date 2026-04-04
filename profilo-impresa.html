@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edil Rossi & Figli — TrovaImpresa</title>
+<title id="page-title">Profilo Impresa — TrovaImpresa</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -440,10 +440,10 @@
         <span class="badge badge-green">Dal 1998</span>
         <span class="badge badge-orange">Top Impresa 2024</span>
       </div>
-      <h1 class="profile-name">Edil Rossi & Figli</h1>
+      <h1 class="profile-name" id="profile-name">Edil Rossi & Figli</h1>
       <div class="profile-meta">
-        <span class="meta-item">📍 Milano, Lombardia</span>
-        <span class="meta-item">🏙️ Opera in tutta la provincia</span>
+        <span class="meta-item" id="profile-city">📍 Milano, Lombardia</span>
+        <span class="meta-item" id="profile-categoria">🏙️ Opera in tutta la provincia</span>
         <span class="meta-item">👷 25 dipendenti</span>
       </div>
       <div class="rating-row">
@@ -456,7 +456,7 @@
     <!-- DESCRIZIONE -->
     <div class="card">
       <div class="card-title"><span>📋</span> Chi siamo</div>
-      <p class="desc">
+      <p class="desc" id="profile-desc">
         Edil Rossi & Figli è un'impresa edile con oltre 25 anni di esperienza nel settore delle costruzioni e ristrutturazioni in Lombardia. Fondata nel 1998 da Marco Rossi, oggi l'azienda conta un team di 25 professionisti altamente qualificati.
         <br><br>
         Ci occupiamo di ristrutturazioni residenziali e commerciali, nuove costruzioni, impianti elettrici e idraulici, pavimentazioni e finiture di pregio. La nostra missione è realizzare ogni progetto con la massima cura, rispettando tempi e budget concordati.
@@ -668,15 +668,15 @@
         📋 Richiedi preventivo gratuito
       </button>
 
-      <a href="tel:+390212345678" class="btn-contatta">
+      <a href="tel:+390212345678" class="btn-contatta" id="btn-tel">
         📞 Chiama ora
       </a>
 
       <ul class="contact-list">
-        <li><span class="icon">📍</span> Via Roma 42, Milano</li>
-        <li><span class="icon">📞</span> <a href="tel:+390212345678">02 1234 5678</a></li>
-        <li><span class="icon">✉️</span> <a href="/cdn-cgi/l/email-protection#31585f575e715455585d435e4242581f5845"><span class="__cf_email__" data-cfemail="b4dddad2dbf4d1d0ddd8c6dbc7c7dd9addc0">[email&#160;protected]</span></a></li>
-        <li><span class="icon">🌐</span> <a href="#">www.edilrossi.it</a></li>
+        <li id="contact-indirizzo"><span class="icon">📍</span> Via Roma 42, Milano</li>
+        <li id="contact-tel"><span class="icon">📞</span> <a href="tel:+390212345678" id="tel-link">02 1234 5678</a></li>
+        <li id="contact-email"><span class="icon">✉️</span> <a href="mailto:info@edilrossi.it" id="email-link">info@edilrossi.it</a></li>
+        <li id="contact-sito"><span class="icon">🌐</span> <a href="#" id="sito-link" target="_blank" rel="noopener">www.edilrossi.it</a></li>
         <li><span class="icon">🕐</span> Lun–Ven 8:00–18:00</li>
       </ul>
 
@@ -757,9 +757,103 @@
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
-// RECENSIONI
+// SUPABASE CONFIG
 const SUPA_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+
+// ── CARICA DATI PROFILO ──────────────────────────────────────────────────────
+async function caricaProfilo(impresaId) {
+  try {
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/imprese?id=eq.${impresaId}&select=*&limit=1`,
+      { headers: { 'apikey': SUPA_KEY, 'Accept': 'application/json' } }
+    );
+    const data = await res.json();
+    if (!data || data.length === 0) return;
+    const d = data[0];
+
+    // Titolo pagina
+    const nomeImpresa = d.nome || d.ragione_sociale || d.nome_impresa || '';
+    if (nomeImpresa) {
+      document.title = nomeImpresa + ' — TrovaImpresa';
+      const el = document.getElementById('profile-name');
+      if (el) el.textContent = nomeImpresa;
+    }
+
+    // Città / provincia
+    const cityEl = document.getElementById('profile-city');
+    if (cityEl) {
+      const luogo = [d.citta, d.provincia].filter(Boolean).join(', ');
+      if (luogo) cityEl.textContent = '📍 ' + luogo;
+    }
+
+    // Categoria
+    const catEl = document.getElementById('profile-categoria');
+    if (catEl && (d.categoria || d.tipo)) {
+      catEl.textContent = '🏙️ ' + (d.categoria || d.tipo);
+    }
+
+    // Descrizione
+    const descEl = document.getElementById('profile-desc');
+    if (descEl && d.descrizione) descEl.textContent = d.descrizione;
+
+    // Telefono — link tel:
+    const tel = d.telefono || '';
+    if (tel) {
+      // Normalizza per href: rimuove spazi e trattini, aggiunge + se non presente
+      const telHref = 'tel:' + tel.replace(/[\s\-().]/g, '');
+      const btnTel = document.getElementById('btn-tel');
+      if (btnTel) btnTel.href = telHref;
+      const telLink = document.getElementById('tel-link');
+      if (telLink) { telLink.href = telHref; telLink.textContent = tel; }
+      const contactTel = document.getElementById('contact-tel');
+      if (contactTel) contactTel.style.display = '';
+    } else {
+      const contactTel = document.getElementById('contact-tel');
+      if (contactTel) contactTel.style.display = 'none';
+      const btnTel = document.getElementById('btn-tel');
+      if (btnTel) btnTel.style.display = 'none';
+    }
+
+    // Email
+    const emailLink = document.getElementById('email-link');
+    const contactEmail = document.getElementById('contact-email');
+    if (d.email && emailLink) {
+      emailLink.href = 'mailto:' + d.email;
+      emailLink.textContent = d.email;
+      if (contactEmail) contactEmail.style.display = '';
+    } else if (contactEmail) {
+      contactEmail.style.display = 'none';
+    }
+
+    // Sito web
+    const sitoLink = document.getElementById('sito-link');
+    const contactSito = document.getElementById('contact-sito');
+    const sito = d.sito_web || d.sito || '';
+    if (sito && sitoLink) {
+      const sitoHref = sito.startsWith('http') ? sito : 'https://' + sito;
+      sitoLink.href = sitoHref;
+      sitoLink.textContent = sito.replace(/^https?:\/\//, '');
+      if (contactSito) contactSito.style.display = '';
+    } else if (contactSito) {
+      contactSito.style.display = 'none';
+    }
+
+    // Indirizzo
+    const contactIndirizzo = document.getElementById('contact-indirizzo');
+    if (contactIndirizzo) {
+      const indirizzo = d.indirizzo || d.via || '';
+      const citta = d.citta || '';
+      const luogoCompleto = [indirizzo, citta].filter(Boolean).join(', ');
+      if (luogoCompleto) {
+        contactIndirizzo.innerHTML = '<span class="icon">📍</span> ' + luogoCompleto;
+      }
+    }
+
+  } catch(e) { console.error('Errore caricamento profilo:', e); }
+}
+
+// RECENSIONI
 const valoriStelle = { qualita: 0, puntualita: 0, prezzo: 0, professionalita: 0 };
 
 function setStelleGruppo(gruppo, val) {
@@ -878,11 +972,14 @@ function mostraMsg(testo, tipo) {
   msg.style.display = 'block';
 }
 
-// Carica recensioni al caricamento pagina
+// Carica profilo e recensioni al caricamento pagina
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const impresaId = params.get('id');
-  if (impresaId) caricaRecensioni(impresaId);
+  if (impresaId) {
+    caricaProfilo(impresaId);
+    caricaRecensioni(impresaId);
+  }
 });
 
 </script>
