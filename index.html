@@ -1122,12 +1122,18 @@
         }
         .lw-photo {
             position: relative;
-            background-size: cover;
-            background-position: center;
+            overflow: hidden;
             min-height: 160px;
-            transition: background-size 0.5s ease;
         }
-        .lw-photo:hover { background-size: 108%; }
+        .lw-photo img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        .lw-photo:hover img { transform: scale(1.05); }
         .lw-photo-label {
             position: absolute;
             bottom: 0; left: 0; right: 0;
@@ -1169,8 +1175,7 @@
             function mkPhoto(info) {
                 var div = document.createElement('div');
                 div.className = 'lw-photo';
-                div.style.backgroundImage = 'url(' + BASE + info[0] + '?w=300&q=80&auto=format&fit=crop)';
-                div.innerHTML = '<div class="lw-photo-label">' + info[1] + '</div>';
+                div.innerHTML = '<img src="' + BASE + info[0] + '?w=300&q=80&auto=format&fit=crop" loading="lazy" alt=""><div class="lw-photo-label">' + info[1] + '</div>';
                 return div;
             }
             sec.parentNode.insertBefore(wrap, sec);
