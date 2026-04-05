@@ -596,8 +596,7 @@ let impresaCorrente = null;
 let preventivoCorrente = null;
 
 // Controlla sessione Supabase Auth prima di mostrare il pannello o reindirizzare
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
+async function caricaSessione(session) {
   if (session) {
     let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
     if (!data) {
@@ -606,18 +605,28 @@ sb.auth.onAuthStateChange(async (event, session) => {
     }
     if (data) {
       impresaCorrente = data;
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('pannello').style.display = 'block';
-      inizializza();
     } else {
       impresaCorrente = { email: session.user.email, id: session.user.id };
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('pannello').style.display = 'block';
-      inizializza();
     }
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('pannello').style.display = 'block';
+    inizializza();
   } else {
-    window.location.href = 'login-impresa.html';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pannello').style.display = 'none';
   }
+}
+
+// getSession() controlla la sessione esistente senza aspettare eventi asincroni
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  await caricaSessione(session);
+})();
+
+// onAuthStateChange gestisce solo i cambiamenti successivi (es. login dal form embedded)
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN') await caricaSessione(session);
+  if (event === 'SIGNED_OUT') await caricaSessione(null);
 });
 
 // LOGIN
