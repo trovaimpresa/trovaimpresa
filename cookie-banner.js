@@ -2,9 +2,18 @@
   'use strict';
 
   var STORAGE_KEY = 'cookie_consent';
+  var STORAGE_DATE_KEY = 'cookie_consent_date';
+  var EXPIRY_DAYS = 365;
 
-  // Se l'utente ha già espresso una scelta, non mostrare il banner
-  if (localStorage.getItem(STORAGE_KEY)) return;
+  // Se l'utente ha già espresso una scelta, controlla se è scaduta
+  var savedConsent = localStorage.getItem(STORAGE_KEY);
+  if (savedConsent) {
+    var savedDate = parseInt(localStorage.getItem(STORAGE_DATE_KEY) || '0', 10);
+    var daysSince = (Date.now() - savedDate) / (1000 * 60 * 60 * 24);
+    if (daysSince < EXPIRY_DAYS) return;
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_DATE_KEY);
+  }
 
   var style = document.createElement('style');
   style.textContent = [
@@ -55,6 +64,7 @@
   function saveConsent(value) {
     try {
       localStorage.setItem(STORAGE_KEY, value);
+      localStorage.setItem(STORAGE_DATE_KEY, String(Date.now()));
     } catch (e) {}
     banner.style.transition = 'opacity .3s';
     banner.style.opacity = '0';
