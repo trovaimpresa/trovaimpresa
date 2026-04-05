@@ -7,160 +7,33 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: linear-gradient(135deg, #1a4d2e 0%, #2a7a4b 100%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-      color: white;
-      margin-bottom: 32px;
-      text-align: center;
-    }
+    body { font-family: 'DM Sans', sans-serif; background: linear-gradient(135deg, #1a4d2e 0%, #2a7a4b 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: white; margin-bottom: 32px; text-align: center; }
     .logo span { color: #FF6B35; }
-
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 40px 36px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    .card h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      color: #1a4d2e;
-      margin-bottom: 6px;
-    }
-    .card p {
-      font-size: 0.9rem;
-      color: #888;
-      margin-bottom: 28px;
-    }
-
+    .card { background: white; border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .card h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #1a4d2e; margin-bottom: 6px; }
+    .card p { font-size: 0.9rem; color: #888; margin-bottom: 28px; }
     .form-group { margin-bottom: 18px; }
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 6px;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1.5px solid #ddd;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      color: #333;
-      transition: border-color 0.2s;
-    }
-    .form-group input:focus {
-      outline: none;
-      border-color: #2a7a4b;
-      box-shadow: 0 0 0 3px rgba(42,122,75,0.1);
-    }
-
-    .btn-login {
-      width: 100%;
-      padding: 14px;
-      background: #2a7a4b;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-      margin-top: 8px;
-    }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .form-group input { width: 100%; padding: 13px 14px; border: 1.5px solid #ddd; border-radius: 10px; font-size: 0.95rem; font-family: inherit; color: #333; transition: border-color 0.2s; }
+    .form-group input:focus { outline: none; border-color: #2a7a4b; box-shadow: 0 0 0 3px rgba(42,122,75,0.1); }
+    .password-wrapper { position: relative; }
+    .password-wrapper input { padding-right: 44px; }
+    .toggle-pw { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #aaa; padding: 0; display: flex; align-items: center; }
+    .toggle-pw:hover { color: #2a7a4b; }
+    .btn-login { width: 100%; padding: 14px; background: #2a7a4b; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; margin-top: 8px; }
     .btn-login:hover { background: #1a4d2e; transform: translateY(-2px); }
     .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-    .errore {
-      display: none;
-      background: #fff0f0;
-      border: 1px solid #ffcccc;
-      color: #cc0000;
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 0.85rem;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .divider {
-      text-align: center;
-      color: #bbb;
-      font-size: 0.85rem;
-      margin: 20px 0;
-      position: relative;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 42%;
-      height: 1px;
-      background: #eee;
-    }
+    .errore { display: none; background: #fff0f0; border: 1px solid #ffcccc; color: #cc0000; border-radius: 8px; padding: 12px; font-size: 0.85rem; margin-bottom: 16px; text-align: center; }
+    .divider { text-align: center; color: #bbb; font-size: 0.85rem; margin: 20px 0; position: relative; }
+    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: #eee; }
     .divider::before { left: 0; }
     .divider::after { right: 0; }
-
-    .links {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      text-align: center;
-    }
-    .links a {
-      color: #2a7a4b;
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 600;
-    }
+    .links { display: flex; flex-direction: column; gap: 10px; text-align: center; }
+    .links a { color: #2a7a4b; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
     .links a:hover { text-decoration: underline; }
-    .links .link-free { color: #2a7a4b; }
     .links .link-pro { color: #1a73e8; }
-
-    .password-wrapper {
-      position: relative;
-    }
-    .password-wrapper input {
-      padding-right: 44px;
-    }
-    .toggle-pw {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #aaa;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      transition: color 0.2s;
-    }
-    .toggle-pw:hover { color: #2a7a4b; }
-
-    .back {
-      color: rgba(255,255,255,0.7);
-      text-decoration: none;
-      font-size: 0.85rem;
-      margin-top: 20px;
-    }
+    .back { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; margin-top: 20px; }
     .back:hover { color: white; }
   </style>
 </head>
@@ -172,7 +45,7 @@
     <h1>👋 Bentornato!</h1>
     <p>Accedi al tuo pannello impresa</p>
 
-    <div class="errore" id="errore">Email o password non corretti.</div>
+    <div class="errore" id="errore"></div>
 
     <div class="form-group">
       <label>Email</label>
@@ -182,8 +55,8 @@
       <label>Password</label>
       <div class="password-wrapper">
         <input type="password" id="password" placeholder="La tua password" autocomplete="current-password">
-        <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1">
-          <svg id="eye-password" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <button class="toggle-pw" type="button" onclick="togglePassword()" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
     </div>
@@ -193,7 +66,7 @@
     <div class="divider">oppure</div>
 
     <div class="links">
-      <a href="registrazione.html?piano=free" class="link-free">🆓 Registrati Free</a>
+      <a href="registrazione.html?piano=free">🆓 Registrati Free</a>
       <a href="info-pro.html" class="link-pro">⭐ Registrati Pro</a>
     </div>
   </div>
@@ -202,13 +75,19 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabaseClient = supabase.createClient(
+      'https://nacvrsgkyfavykxjxszu.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
+    );
 
     document.getElementById('password').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') login();
     });
+
+    function togglePassword() {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
 
     async function login() {
       const btn = document.getElementById('btn-login');
@@ -219,6 +98,7 @@
       const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
       const errore = document.getElementById('errore');
+      errore.style.display = 'none';
 
       if (!email || !password) {
         errore.textContent = 'Inserisci email e password.';
@@ -228,17 +108,13 @@
         return;
       }
 
-      errore.style.display = 'none';
-
       try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
         if (error) {
-          if (error.message.includes('Email not confirmed')) {
-            errore.textContent = 'Email non ancora confermata. Controlla la tua casella email.';
-          } else {
-            errore.textContent = 'Email o password non corretti.';
-          }
+          errore.textContent = error.message.includes('Email not confirmed')
+            ? 'Email non ancora confermata. Controlla la tua casella email.'
+            : 'Email o password non corretti.';
           errore.style.display = 'block';
           btn.disabled = false;
           btn.textContent = '🔐 Accedi';
@@ -256,7 +132,6 @@
       }
     }
   </script>
-
-<script src="/cookie-banner.js"></script>
+  <script src="/cookie-banner.js"></script>
 </body>
 </html>
