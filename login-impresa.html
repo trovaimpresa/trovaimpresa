@@ -226,20 +226,23 @@
     }
 
     async function login() {
+      const btn = document.getElementById('btn-login');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = '⏳ Accesso in corso...';
       await new Promise(r => setTimeout(r, 0));
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-      const btn = document.getElementById('btn-login');
       const errore = document.getElementById('errore');
 
       if (!email || !password) {
         errore.textContent = 'Inserisci email e password.';
         errore.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '🔐 Accedi';
         return;
       }
 
-      btn.disabled = true;
-      btn.textContent = '⏳ Accesso in corso...';
       errore.style.display = 'none';
 
       try {
