@@ -373,7 +373,7 @@
           body: JSON.stringify(dati)
         });
         if (!res.ok) { const errText = await res.text(); throw new Error('Errore ' + res.status + ': ' + errText); }
-        window.location.href = 'grazie.html';
+        window.location.href = 'pannello-impresa.html';
       } catch (err) {
         console.error(err);
         btn.disabled = false;
