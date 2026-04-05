@@ -643,16 +643,11 @@ async function doLogin() {
   const pass = document.getElementById('login-pass').value.trim();
   const btn = document.querySelector('.login-btn');
   const errEl = document.getElementById('login-err');
-
-  if (!email || !pass) { errEl.style.display = 'block'; return; }
-
+  if (!email || !pass) { errEl.style.display='block'; return; }
   btn.disabled = true;
   btn.textContent = '⏳ Accesso in corso...';
   errEl.style.display = 'none';
-
   const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
-  console.log('signInWithPassword →', authData, authError);
-
   if (authError || !authData.user) {
     errEl.style.display = 'block';
     errEl.textContent = '❌ Email o password errati';
@@ -660,19 +655,7 @@ async function doLogin() {
     btn.textContent = '🔐 Accedi al pannello';
     return;
   }
-
-  let { data } = await sb.from('imprese').select('*').eq('user_id', authData.user.id).maybeSingle();
-  if (!data) {
-    const { data: byEmail } = await sb.from('imprese').select('*').eq('email', authData.user.email).maybeSingle();
-    if (byEmail) {
-      await sb.from('imprese').update({ user_id: authData.user.id }).eq('id', byEmail.id);
-      data = byEmail;
-    }
-  }
-  if (!data) {
-    const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', authData.user.id).maybeSingle();
-    data = data2;
-  }
+  let { data } = await sb.from('imprese').select('*').eq('email', authData.user.email).maybeSingle();
   if (!data) {
     errEl.style.display = 'block';
     errEl.textContent = '❌ Profilo non trovato';
@@ -680,7 +663,6 @@ async function doLogin() {
     btn.textContent = '🔐 Accedi al pannello';
     return;
   }
-
   impresaCorrente = data;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
