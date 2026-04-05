@@ -709,8 +709,9 @@
           document.getElementById('upload-area').style.borderColor = '#ddd';
         }
 
-        showSuccess('✅ Profilo aggiornato con successo!');
+        showSuccess('✅ Profilo aggiornato con successo! Reindirizzamento in corso...');
         window.scrollTo(0, 0);
+        setTimeout(() => { window.location.href = 'pannello-impresa.html'; }, 1500);
 
       } catch (err) {
         console.error('Errore salvataggio:', err);
