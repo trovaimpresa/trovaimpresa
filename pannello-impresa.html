@@ -630,13 +630,6 @@ async function caricaSessione(session) {
   await caricaSessione(session);
 })();
 
-// onAuthStateChange gestisce solo i cambiamenti successivi (es. login dal form embedded)
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN') await caricaSessione(session);
-  if (event === 'SIGNED_OUT') await caricaSessione(null);
-});
-
-
 // LOGIN
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -669,7 +662,8 @@ async function doLogin() {
   inizializza();
 }
 
-function doLogout() {
+async function doLogout() {
+  await sb.auth.signOut();
   impresaCorrente = null;
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('pannello').style.display = 'none';
