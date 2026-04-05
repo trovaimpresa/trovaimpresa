@@ -658,9 +658,9 @@ async function doLogin() {
     return;
   }
 
-  let { data } = await sb.from('imprese').select('*').eq('user_id', authData.user.id).single();
+  let { data } = await sb.from('imprese').select('*').eq('user_id', authData.user.id).maybeSingle();
   if (!data) {
-    const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', authData.user.id).single();
+    const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', authData.user.id).maybeSingle();
     data = data2;
   }
   if (!data) {
