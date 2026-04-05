@@ -226,6 +226,7 @@
     }
 
     async function login() {
+      await new Promise(r => setTimeout(r, 0));
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const btn = document.getElementById('btn-login');
