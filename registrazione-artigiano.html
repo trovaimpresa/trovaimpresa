@@ -342,6 +342,10 @@
         if (authError) throw new Error(authError.message);
         const user_id = authData.user.id;
 
+        // 1b. Autentica subito per soddisfare le RLS policy sull'insert
+        const { error: signInError } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (signInError) throw new Error(signInError.message);
+
         // 2. Carica logo se presente
         let logo_url = null;
         if (logoFile) { btn.textContent = '⏳ Caricamento logo...'; logo_url = await uploadLogo(logoFile, email); }
