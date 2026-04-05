@@ -595,6 +595,26 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let impresaCorrente = null;
 let preventivoCorrente = null;
 
+// Controlla sessione Supabase Auth prima di mostrare il pannello o reindirizzare
+let _authChecked = false;
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (_authChecked) return;
+  _authChecked = true;
+  if (session) {
+    const { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
+    if (data) {
+      impresaCorrente = data;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('pannello').style.display = 'block';
+      inizializza();
+    } else {
+      window.location.href = 'login-impresa.html';
+    }
+  } else {
+    window.location.href = 'login-impresa.html';
+  }
+});
+
 // LOGIN
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
