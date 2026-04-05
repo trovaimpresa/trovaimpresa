@@ -231,7 +231,7 @@
       btn.disabled = true;
       btn.textContent = '⏳ Accesso in corso...';
 
-      const email = document.getElementById('email').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
       const errore = document.getElementById('errore');
 
@@ -246,10 +246,21 @@
       errore.style.display = 'none';
 
       try {
-        const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 10000)
+        );
+
+        const loginCall = supabaseClient.auth.signInWithPassword({ email, password });
+        const { data: authData, error: authError } = await Promise.race([loginCall, timeout]);
 
         if (authError) {
-          errore.textContent = 'Email o password non corretti.';
+          if (authError.message.includes('Email not confirmed')) {
+            errore.textContent = 'Email non ancora confermata. Controlla la tua casella email.';
+          } else if (authError.message.includes('Invalid login')) {
+            errore.textContent = 'Email o password non corretti.';
+          } else {
+            errore.textContent = 'Errore: ' + authError.message;
+          }
           errore.style.display = 'block';
           btn.disabled = false;
           btn.textContent = '🔐 Accedi';
@@ -260,7 +271,11 @@
         window.location.href = 'pannello-impresa.html';
 
       } catch (err) {
-        errore.textContent = 'Errore di connessione. Riprova.';
+        if (err.message === 'timeout') {
+          errore.textContent = 'Connessione lenta. Riprova tra qualche secondo.';
+        } else {
+          errore.textContent = 'Errore di connessione. Riprova.';
+        }
         errore.style.display = 'block';
         btn.disabled = false;
         btn.textContent = '🔐 Accedi';
