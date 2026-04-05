@@ -367,12 +367,8 @@
           piano: document.getElementById('piano_scelto').value,
           created_at: new Date().toISOString()
         };
-        const res = await fetch(SUPABASE_URL + '/rest/v1/imprese', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
-          body: JSON.stringify(dati)
-        });
-        if (!res.ok) { const errText = await res.text(); throw new Error('Errore ' + res.status + ': ' + errText); }
+        const { error: insertError } = await supabaseClient.from('imprese').insert(dati);
+        if (insertError) throw new Error(insertError.message);
         window.location.href = 'pannello-impresa.html';
       } catch (err) {
         console.error(err);
