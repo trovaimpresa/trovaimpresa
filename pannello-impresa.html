@@ -664,6 +664,13 @@ async function doLogin() {
     data = data2;
   }
   if (!data) {
+    const { data: byEmail } = await sb.from('imprese').select('*').eq('email', authData.user.email).maybeSingle();
+    if (byEmail) {
+      await sb.from('imprese').update({ user_id: authData.user.id }).eq('id', byEmail.id);
+      data = byEmail;
+    }
+  }
+  if (!data) {
     errEl.style.display = 'block';
     errEl.textContent = '❌ Profilo non trovato';
     btn.disabled = false;
