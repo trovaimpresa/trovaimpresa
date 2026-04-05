@@ -377,7 +377,7 @@
           <div id="file-selected" style="display:none;margin-top:8px;font-size:13px;color:#2a7a4b;font-weight:600;"></div>
         </div>
 
-        <button class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
+        <button type="button" class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
         <a href="pannello-impresa.html" class="btn-back-link">← Torna al pannello</a>
         <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
           🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
@@ -614,9 +614,9 @@
       const btn = document.getElementById('btn-save');
       btn.disabled = true;
       btn.textContent = '⏳ Salvataggio...';
-      clearAlert();
 
       try {
+        clearAlert();
         let logo_url = impresaData.logo_url;
         if (logoFile) {
           btn.textContent = '⏳ Caricamento logo...';
