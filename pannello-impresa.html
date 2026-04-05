@@ -596,10 +596,8 @@ let impresaCorrente = null;
 let preventivoCorrente = null;
 
 // Controlla sessione Supabase Auth prima di mostrare il pannello o reindirizzare
-let _authChecked = false;
 sb.auth.onAuthStateChange(async (event, session) => {
-  if (_authChecked) return;
-  _authChecked = true;
+  if (event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN') return;
   if (session) {
     let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
     if (!data) {
@@ -644,8 +642,12 @@ async function doLogin() {
     return;
   }
 
-  const { data, error } = await sb.from('imprese').select('*').eq('user_id', authData.user.id).single();
-  if (error || !data) {
+  let { data } = await sb.from('imprese').select('*').eq('user_id', authData.user.id).single();
+  if (!data) {
+    const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', authData.user.id).single();
+    data = data2;
+  }
+  if (!data) {
     errEl.style.display = 'block';
     errEl.textContent = '❌ Profilo non trovato';
     btn.disabled = false;
@@ -654,13 +656,13 @@ async function doLogin() {
   }
 
   impresaCorrente = data;
-  _authChecked = true;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
   inizializza();
 }
 
-function doLogout() {
+async function doLogout() {
+  await sb.auth.signOut();
   impresaCorrente = null;
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('pannello').style.display = 'none';
