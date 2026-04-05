@@ -980,7 +980,12 @@
         console.error('Errore registrazione:', err);
         btnSubmit.disabled = false;
         btnSubmit.textContent = '❌ Errore — riprova';
-        alert('Errore durante la registrazione: ' + err.message);
+        if (err.message && err.message.includes('23505')) {
+          alert('⚠️ Questa email è già registrata su TrovaImpresa. Accedi al tuo account o usa un\'altra email.');
+          window.location.href = 'login-impresa.html';
+        } else {
+          alert('❌ Errore durante la registrazione. Riprova tra poco.');
+        }
       }
     }
   </script>
