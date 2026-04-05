@@ -621,14 +621,22 @@ async function doLogin() {
   const pass = document.getElementById('login-pass').value.trim();
   if (!email || !pass) { document.getElementById('login-err').style.display='block'; return; }
 
-  const { data, error } = await sb.from('imprese').select('*').eq('email', email).single();
+  const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (authError || !authData.user) {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('login-err').textContent = '❌ Email o password errati';
+    return;
+  }
+
+  const { data, error } = await sb.from('imprese').select('*').eq('user_id', authData.user.id).single();
   if (error || !data) {
     document.getElementById('login-err').style.display = 'block';
-    document.getElementById('login-err').textContent = '❌ Email non trovata';
+    document.getElementById('login-err').textContent = '❌ Profilo non trovato';
     return;
   }
 
   impresaCorrente = data;
+  _authChecked = true;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
   inizializza();
