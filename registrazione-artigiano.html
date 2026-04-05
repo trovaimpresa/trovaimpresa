@@ -368,7 +368,13 @@
           created_at: new Date().toISOString()
         };
         const { error: insertError } = await supabaseClient.from('imprese').insert(dati);
-        if (insertError) throw new Error(insertError.message);
+        if (insertError) {
+          if (insertError.code === '23505' || insertError.message.includes('duplicate key') || insertError.message.includes('imprese_email_key')) {
+            alert('⚠️ Questa email è già registrata. Vai al login o usa un\'altra email.');
+            return;
+          }
+          throw new Error(insertError.message);
+        }
         window.location.href = 'pannello-impresa.html';
       } catch (err) {
         console.error(err);
