@@ -230,7 +230,7 @@
       if (btn.disabled) return;
       btn.disabled = true;
       btn.textContent = '⏳ Accesso in corso...';
-      await new Promise(r => setTimeout(r, 0));
+
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const errore = document.getElementById('errore');
@@ -246,7 +246,6 @@
       errore.style.display = 'none';
 
       try {
-        // Login con Supabase Auth (password cifrata, sicura)
         const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
 
         if (authError) {
@@ -257,27 +256,7 @@
           return;
         }
 
-        // Recupera dati impresa dalla tabella
-        const { data: imprese, error: impresaError } = await supabaseClient
-          .from('imprese')
-          .select('id, nome, piano')
-          .eq('user_id', authData.user.id)
-          .single();
-
-        if (impresaError || !imprese) {
-          errore.textContent = 'Profilo impresa non trovato. Completa la registrazione.';
-          errore.style.display = 'block';
-          btn.disabled = false;
-          btn.textContent = '🔐 Accedi';
-          return;
-        }
-
-        // Salva sessione in localStorage
-        localStorage.setItem('impresa_id', imprese.id);
-        localStorage.setItem('impresa_nome', imprese.nome || '');
-        localStorage.setItem('piano_impresa', imprese.piano || 'free');
-
-        // Vai al pannello
+        localStorage.setItem('impresa_email', email);
         window.location.href = 'pannello-impresa.html';
 
       } catch (err) {
