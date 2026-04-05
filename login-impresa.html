@@ -92,7 +92,7 @@
     async function doLogin() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
-      const btn = document.querySelector('button');
+      const btn = document.getElementById('btn-login');
       btn.disabled = true;
       btn.innerHTML = '⏳ Accesso in corso...';
       try {
