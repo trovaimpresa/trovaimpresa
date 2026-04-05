@@ -6,14 +6,16 @@
   var EXPIRY_DAYS = 365;
 
   // Se l'utente ha già espresso una scelta, controlla se è scaduta
-  var savedConsent = localStorage.getItem(STORAGE_KEY);
-  if (savedConsent) {
-    var savedDate = parseInt(localStorage.getItem(STORAGE_DATE_KEY) || '0', 10);
-    var daysSince = (Date.now() - savedDate) / (1000 * 60 * 60 * 24);
-    if (daysSince < EXPIRY_DAYS) return;
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(STORAGE_DATE_KEY);
-  }
+  try {
+    var savedConsent = localStorage.getItem(STORAGE_KEY);
+    if (savedConsent) {
+      var savedDate = parseInt(localStorage.getItem(STORAGE_DATE_KEY) || '0', 10);
+      var daysSince = (Date.now() - savedDate) / (1000 * 60 * 60 * 24);
+      if (daysSince < EXPIRY_DAYS) return;
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_DATE_KEY);
+    }
+  } catch (e) { return; }
 
   var style = document.createElement('style');
   style.textContent = [
