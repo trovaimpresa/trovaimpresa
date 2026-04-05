@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modifica Profilo - TrovaImpresa</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+    }
+    .container { max-width: 620px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .header { background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%); color: white; padding: 32px 24px; text-align: center; }
+    .header h1 { font-size: 24px; margin-bottom: 8px; }
+    .header p { font-size: 14px; opacity: 0.9; }
+    .content { padding: 32px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 7px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 14px; font-family: inherit; color: #333;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: #2a7a4b; box-shadow: 0 0 0 3px rgba(42,122,75,0.1);
+    }
+    .form-group input:disabled { background: #f5f5f5; color: #999; cursor: not-allowed; }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .required { color: #ff6b6b; }
+    .section-title {
+      font-size: 15px; font-weight: 700; color: #2a7a4b;
+      margin: 28px 0 16px; padding-bottom: 8px;
+      border-bottom: 2px solid #e8f5e9;
+    }
+    .type-section { display: none; }
+    .type-section.visible { display: block; }
+    .btn-save {
+      width: 100%; padding: 14px; border: none; border-radius: 8px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      background: #2a7a4b; color: white; margin-top: 12px;
+    }
+    .btn-save:hover { background: #1a4d2e; }
+    .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-back-link {
+      display: block; text-align: center; margin-top: 14px;
+      font-size: 13px; color: #2a7a4b; text-decoration: none; font-weight: 600;
+    }
+    .btn-back-link:hover { text-decoration: underline; }
+    .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; }
+    .alert-error { background: #ffeaea; color: #c0392b; border: 1px solid #f5c6c6; }
+    .alert-success { background: #e8f5e9; color: #2a7a4b; border: 1px solid #a8d5b5; }
+    .loading { text-align: center; padding: 48px 0; color: #666; font-size: 15px; }
+    .upload-area {
+      border: 2px dashed #ddd; border-radius: 8px; padding: 20px;
+      text-align: center; cursor: pointer; background: #fafafa; transition: border-color 0.2s;
+    }
+    .upload-area:hover { border-color: #2a7a4b; background: rgba(42,122,75,0.04); }
+    .upload-area p { font-size: 14px; color: #555; margin-bottom: 4px; }
+    .upload-area small { font-size: 12px; color: #aaa; }
+    #logo-input { display: none; }
+    .logo-preview { max-width: 90px; max-height: 90px; border-radius: 8px; object-fit: cover; display: block; margin-bottom: 8px; }
+    .tag { background: #2a7a4b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+    .tag button { background: none; border: none; color: white; cursor: pointer; font-size: 16px; line-height: 1; }
+    .tag-input { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; min-height: 44px; }
+    .tag-input input { flex: 1; min-width: 120px; border: none; background: transparent; font-size: 14px; outline: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✏️ Modifica Profilo</h1>
+      <p>Aggiorna i dati della tua attività su TrovaImpresa</p>
+    </div>
+    <div class="content">
+
+      <div id="loading" class="loading">⏳ Caricamento dati in corso...</div>
+      <div id="alert-box" style="display:none;"></div>
+
+      <div id="form-wrapper" style="display:none;">
+
+        <!-- DATI BASE (sempre visibili) -->
+        <div class="section-title">📋 Dati principali</div>
+        <div class="form-group">
+          <label>Email (non modificabile)</label>
+          <input type="email" id="f-email" disabled>
+        </div>
+        <div class="form-group">
+          <label>Telefono <span class="required">*</span></label>
+          <input type="tel" id="f-telefono" placeholder="+39 06 1234567">
+        </div>
+        <div class="form-group">
+          <label>Città <span class="required">*</span></label>
+          <input type="text" id="f-citta" placeholder="Es. Roma">
+        </div>
+        <div class="form-group">
+          <label>Sito web</label>
+          <input type="url" id="f-sito_web" placeholder="https://www.miosito.it">
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <textarea id="f-descrizione" placeholder="Descrivi la tua attività..."></textarea>
+        </div>
+
+        <!-- ===== ARTIGIANO ===== -->
+        <div class="type-section" id="sec-artigiano">
+          <div class="section-title">🔨 Dati artigiano</div>
+          <div class="form-group">
+            <label>Nome / Ragione sociale <span class="required">*</span></label>
+            <input type="text" id="f-nome-artigiano" placeholder="Es. Mario Rossi Imbianchino">
+          </div>
+          <div class="form-group">
+            <label>Partita IVA / Codice Fiscale</label>
+            <input type="text" id="f-partita_iva-artigiano" placeholder="Es. 12345678901">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Provincia</label>
+              <input type="text" id="f-provincia-artigiano" placeholder="Es. RM">
+            </div>
+            <div class="form-group">
+              <label>Anni di esperienza</label>
+              <input type="number" id="f-anni_esperienza-artigiano" min="0" max="60" placeholder="Es. 10">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Mestiere principale <span class="required">*</span></label>
+            <select id="f-mestiere-artigiano">
+              <option value="">— Seleziona —</option>
+              <option>Muratura</option><option>Carpentiere</option><option>Cartongesso</option>
+              <option>Coperture / Tetti</option><option>Impermeabilizzazione</option><option>Ponteggi</option>
+              <option>Elettricista</option><option>Idraulico</option><option>Termoidraulico</option>
+              <option>Tecnico caldaie</option><option>Climatizzatore</option><option>Impianto solare</option>
+              <option>Autospurghi</option><option>Pittore</option><option>Piastrellista</option>
+              <option>Pavimentista</option><option>Intonacatore</option><option>Fabbro</option>
+              <option>Falegname</option><option>Vetraio</option><option>Giardiniere</option>
+              <option>Demolizione</option><option>Movimento terra</option><option>Asfalti</option>
+              <option>Sgomberi</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Altri mestieri / specializzazioni</label>
+            <textarea id="f-specializzazioni-artigiano" placeholder="Es. Posa pavimenti, tinteggiatura, cartongesso..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Zone di lavoro</label>
+            <input type="text" id="f-zone-artigiano" placeholder="Es. Roma e provincia, Lazio">
+          </div>
+        </div>
+
+        <!-- ===== IMPRESA EDILE ===== -->
+        <div class="type-section" id="sec-impresa">
+          <div class="section-title">🏗️ Dati impresa edile</div>
+          <div class="form-group">
+            <label>Ragione sociale <span class="required">*</span></label>
+            <input type="text" id="f-nome-impresa" placeholder="Es. Edilizia Rossi Srl">
+          </div>
+          <div class="form-group">
+            <label>Partita IVA <span class="required">*</span></label>
+            <input type="text" id="f-partita_iva-impresa" placeholder="Es. 12345678901">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Provincia</label>
+              <input type="text" id="f-provincia-impresa" placeholder="Es. RM">
+            </div>
+            <div class="form-group">
+              <label>Anni di attività</label>
+              <input type="number" id="f-anni_esperienza-impresa" min="0" max="100" placeholder="Es. 15">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Specializzazione principale <span class="required">*</span></label>
+            <select id="f-mestiere-impresa">
+              <option value="">— Seleziona —</option>
+              <option>Ristrutturazione</option><option>Muratura</option><option>Carpenteria</option>
+              <option>Coperture / Tetti</option><option>Impermeabilizzazione</option><option>Ponteggi</option>
+              <option>Impianti elettrici</option><option>Impianti idraulici</option><option>Impianti termici</option>
+              <option>Impianti solari</option><option>Pavimenti e rivestimenti</option><option>Intonaci e pitture</option>
+              <option>Serramenti e infissi</option><option>Demolizione</option><option>Movimento terra</option>
+              <option>Asfalti</option><option>Restauro</option><option>Efficienza energetica</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Altre specializzazioni</label>
+            <textarea id="f-specializzazioni-impresa" placeholder="Es. Ristrutturazioni complete, impianti, facciate..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Zone operative</label>
+            <input type="text" id="f-zone-impresa" placeholder="Es. Roma e provincia, Lazio, Centro Italia">
+          </div>
+        </div>
+
+        <!-- ===== GRANDE IMPRESA ===== -->
+        <div class="type-section" id="sec-grande_impresa">
+          <div class="section-title">🏢 Dati grande impresa</div>
+          <div class="form-group">
+            <label>Ragione sociale <span class="required">*</span></label>
+            <input type="text" id="f-nome-grande_impresa" placeholder="Es. Costruzioni Bianchi SpA">
+          </div>
+          <div class="form-group">
+            <label>Partita IVA <span class="required">*</span></label>
+            <input type="text" id="f-partita_iva-grande_impresa" placeholder="Es. 12345678901">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Provincia</label>
+              <input type="text" id="f-provincia-grande_impresa" placeholder="Es. MI">
+            </div>
+            <div class="form-group">
+              <label>Anno di fondazione</label>
+              <input type="number" id="f-anni_esperienza-grande_impresa" min="1900" max="2025" placeholder="Es. 1990">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Settore principale <span class="required">*</span></label>
+            <select id="f-mestiere-grande_impresa">
+              <option value="">— Seleziona —</option>
+              <option>Costruzione edifici</option><option>Ristrutturazione completa</option><option>Opere civili</option>
+              <option>Capannoni industriali</option><option>Opere stradali</option><option>Movimento terra</option>
+              <option>Asfalti</option><option>Consolidamento strutturale</option><option>Restauro conservativo</option>
+              <option>Opere idrauliche</option><option>Efficienza energetica</option><option>Fotovoltaico industriale</option>
+              <option>Demolizione e bonifica</option><option>General contractor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Altri settori / certificazioni</label>
+            <textarea id="f-specializzazioni-grande_impresa" placeholder="Es. ISO 9001, SOA cat. OG1, opere pubbliche..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Zone operative</label>
+            <input type="text" id="f-zone-grande_impresa" placeholder="Es. Nord Italia, Nazionale, Europa">
+          </div>
+        </div>
+
+        <!-- ===== NEGOZIO ===== -->
+        <div class="type-section" id="sec-negozio">
+          <div class="section-title">🏪 Dati negozio</div>
+          <div class="form-group">
+            <label>Nome negozio <span class="required">*</span></label>
+            <input type="text" id="f-nome_negozio" placeholder="Es. Edilizia Rossi">
+          </div>
+          <div class="form-group">
+            <label>Tipo di negozio <span class="required">*</span></label>
+            <select id="f-tipo_negozio">
+              <option value="">— Seleziona —</option>
+              <option>Materiali edili</option><option>Ferramenta</option><option>Pitture e vernici</option>
+              <option>Pavimenti e rivestimenti</option><option>Sanitari e idraulica</option>
+              <option>Elettrico e illuminazione</option><option>Legname e infissi</option>
+              <option>Macchine e attrezzature edili</option><option>Noleggio attrezzature edili</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>CAP</label>
+              <input type="text" id="f-cap-negozio" placeholder="Es. 00100">
+            </div>
+            <div class="form-group">
+              <label>Indirizzo</label>
+              <input type="text" id="f-indirizzo-negozio" placeholder="Es. Via Roma 1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Prodotti trattati</label>
+            <textarea id="f-prodotti" placeholder="Es. Cemento, mattoni, isolanti, pavimenti..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Marchi principali</label>
+            <textarea id="f-marchi" placeholder="Es. Mapei, Knauf, Weber, Bosch..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Orari di apertura</label>
+            <input type="text" id="f-orari" placeholder="Es. Lun-Ven 8:00-18:00, Sab 8:00-12:00">
+          </div>
+        </div>
+
+        <!-- ===== PROFESSIONISTA ===== -->
+        <div class="type-section" id="sec-professionista">
+          <div class="section-title">👷 Dati professionista</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nome <span class="required">*</span></label>
+              <input type="text" id="f-nome-professionista" placeholder="Mario">
+            </div>
+            <div class="form-group">
+              <label>Cognome <span class="required">*</span></label>
+              <input type="text" id="f-cognome" placeholder="Rossi">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Tipo di professionista <span class="required">*</span></label>
+            <select id="f-tipo_prof">
+              <option value="">— Seleziona —</option>
+              <option>Ingegnere civile</option><option>Ingegnere strutturale</option>
+              <option>Ingegnere impiantistico</option><option>Architetto</option>
+              <option>Geometra</option><option>Perito edile</option>
+              <option>Amministratore di condominio</option><option>Consulente energetico</option>
+              <option>Tecnico del lavoro</option><option>Altro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nome studio / attività</label>
+            <input type="text" id="f-nome_attivita" placeholder="Es. Studio Rossi Ingegneria">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Numero iscrizione albo</label>
+              <input type="text" id="f-albo" placeholder="Es. 12345">
+            </div>
+            <div class="form-group">
+              <label>Partita IVA</label>
+              <input type="text" id="f-partita_iva-professionista" placeholder="IT12345678901">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Anni di esperienza</label>
+              <input type="number" id="f-anni_esperienza-professionista" min="0" max="60" placeholder="Es. 10">
+            </div>
+            <div class="form-group">
+              <label>CAP</label>
+              <input type="text" id="f-cap-professionista" placeholder="Es. 00100">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Indirizzo studio</label>
+            <input type="text" id="f-indirizzo-professionista" placeholder="Es. Via Roma 1">
+          </div>
+          <div class="form-group">
+            <label>Specializzazioni</label>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <select id="f-spec-select" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+                <option value="">— Seleziona specializzazione —</option>
+                <optgroup label="Progettazione">
+                  <option>Progettazione architettonica</option><option>Progettazione strutturale</option>
+                  <option>Progettazione impiantistica</option><option>Progettazione urbanistica</option>
+                  <option>Interior design</option><option>Paesaggistica</option>
+                </optgroup>
+                <optgroup label="Direzione lavori">
+                  <option>Direzione lavori</option><option>Coordinatore sicurezza</option>
+                  <option>Collaudo strutturale</option><option>Certificazione energetica</option>
+                </optgroup>
+                <optgroup label="Pratiche e consulenze">
+                  <option>Pratiche catastali</option><option>Pratiche edilizie</option>
+                  <option>Consulenza sismica</option><option>Perizie e stime immobiliari</option>
+                  <option>Consulenza ambientale</option><option>Bonifica amianto</option>
+                </optgroup>
+                <optgroup label="Gestione">
+                  <option>Amministrazione condominio</option><option>Property management</option>
+                  <option>Facility management</option>
+                </optgroup>
+                <optgroup label="Altro"><option>Altro</option></optgroup>
+              </select>
+              <button type="button" onclick="aggiungiSpec()" style="padding:0 16px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:18px;">+</button>
+            </div>
+            <div class="tag-input" id="f-spec-input">
+              <input type="text" id="f-spec-field" placeholder="Oppure scrivi una specializzazione e premi Enter...">
+            </div>
+          </div>
+        </div>
+
+        <!-- LOGO -->
+        <div class="section-title">🖼️ Logo / Foto profilo</div>
+        <div class="form-group">
+          <div id="logo-current-wrap" style="display:none;margin-bottom:12px;">
+            <img id="logo-current" class="logo-preview" src="" alt="Logo attuale">
+            <span style="font-size:12px;color:#666;">Logo attuale</span>
+          </div>
+          <div class="upload-area" id="upload-area" onclick="document.getElementById('logo-input').click()">
+            <p><strong>Clicca per cambiare</strong> il logo</p>
+            <small>PNG, JPG — max 5MB</small>
+          </div>
+          <input type="file" id="logo-input" accept="image/*">
+          <div id="file-selected" style="display:none;margin-top:8px;font-size:13px;color:#2a7a4b;font-weight:600;"></div>
+        </div>
+
+        <button class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
+        <a href="pannello-impresa.html" class="btn-back-link">← Torna al pannello</a>
+        <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
+          🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
+          <a href="/privacy-policy.html" style="color:#2a7a4b;">Privacy Policy</a>
+        </p>
+
+      </div><!-- /form-wrapper -->
+    </div><!-- /content -->
+  </div><!-- /container -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let impresaData = null;
+    let logoFile = null;
+    let specializzazioni = [];
+    let tipoCategoria = null;
+
+    window.addEventListener('DOMContentLoaded', init);
+
+    async function init() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) {
+        window.location.href = 'login-impresa.html';
+        return;
+      }
+      currentUser = user;
+
+      const { data, error } = await supabaseClient
+        .from('imprese')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      document.getElementById('loading').style.display = 'none';
+
+      if (error || !data) {
+        showError('Profilo non trovato. Assicurati di aver completato la registrazione.');
+        return;
+      }
+
+      impresaData = data;
+      document.getElementById('form-wrapper').style.display = 'block';
+      popolaCampi(data);
+    }
+
+    // Determina la categoria in base al campo tipo
+    function getRealTipo(d) {
+      const t = (d.tipo || '').toLowerCase().trim();
+      if (t === 'artigiano') return 'artigiano';
+      if (t === 'impresa') return 'impresa';
+      if (t === 'grande_impresa') return 'grande_impresa';
+
+      const negozioTypes = [
+        'materiali edili', 'ferramenta', 'pitture e vernici',
+        'pavimenti e rivestimenti', 'sanitari e idraulica',
+        'elettrico e illuminazione', 'legname e infissi',
+        'macchine e attrezzature edili', 'noleggio attrezzature edili', 'altro'
+      ];
+      if (negozioTypes.includes(t) || d.nome_negozio) return 'negozio';
+
+      const profTypes = [
+        'ingegnere civile', 'ingegnere strutturale', 'ingegnere impiantistico',
+        'architetto', 'geometra', 'perito edile',
+        'amministratore di condominio', 'consulente energetico', 'tecnico del lavoro'
+      ];
+      if (profTypes.includes(t) || d.cognome) return 'professionista';
+
+      return 'artigiano'; // fallback
+    }
+
+    function popolaCampi(d) {
+      // Dati base comuni
+      document.getElementById('f-email').value = d.email || '';
+      document.getElementById('f-telefono').value = d.telefono || '';
+      document.getElementById('f-citta').value = d.citta || '';
+      document.getElementById('f-sito_web').value = d.sito_web || '';
+      document.getElementById('f-descrizione').value = d.descrizione || '';
+
+      // Logo attuale
+      if (d.logo_url) {
+        document.getElementById('logo-current').src = d.logo_url;
+        document.getElementById('logo-current-wrap').style.display = 'block';
+      }
+
+      // Mostra la sezione corretta
+      tipoCategoria = getRealTipo(d);
+      document.getElementById('sec-' + tipoCategoria).classList.add('visible');
+
+      if (tipoCategoria === 'artigiano') {
+        document.getElementById('f-nome-artigiano').value = d.nome || '';
+        document.getElementById('f-partita_iva-artigiano').value = d.partita_iva || '';
+        document.getElementById('f-provincia-artigiano').value = d.provincia || '';
+        document.getElementById('f-anni_esperienza-artigiano').value = d.anni_esperienza || '';
+        setSelectValue('f-mestiere-artigiano', d.mestiere);
+        document.getElementById('f-specializzazioni-artigiano').value = d.specializzazioni || '';
+        document.getElementById('f-zone-artigiano').value = d.zone || '';
+
+      } else if (tipoCategoria === 'impresa') {
+        document.getElementById('f-nome-impresa').value = d.nome || '';
+        document.getElementById('f-partita_iva-impresa').value = d.partita_iva || '';
+        document.getElementById('f-provincia-impresa').value = d.provincia || '';
+        document.getElementById('f-anni_esperienza-impresa').value = d.anni_esperienza || '';
+        setSelectValue('f-mestiere-impresa', d.mestiere);
+        document.getElementById('f-specializzazioni-impresa').value = d.specializzazioni || '';
+        document.getElementById('f-zone-impresa').value = d.zone || '';
+
+      } else if (tipoCategoria === 'grande_impresa') {
+        document.getElementById('f-nome-grande_impresa').value = d.nome || '';
+        document.getElementById('f-partita_iva-grande_impresa').value = d.partita_iva || '';
+        document.getElementById('f-provincia-grande_impresa').value = d.provincia || '';
+        document.getElementById('f-anni_esperienza-grande_impresa').value = d.anni_esperienza || '';
+        setSelectValue('f-mestiere-grande_impresa', d.mestiere);
+        document.getElementById('f-specializzazioni-grande_impresa').value = d.specializzazioni || '';
+        document.getElementById('f-zone-grande_impresa').value = d.zone || '';
+
+      } else if (tipoCategoria === 'negozio') {
+        document.getElementById('f-nome_negozio').value = d.nome_negozio || d.nome || '';
+        setSelectValue('f-tipo_negozio', d.tipo);
+        document.getElementById('f-cap-negozio').value = d.cap || '';
+        document.getElementById('f-indirizzo-negozio').value = d.indirizzo || '';
+        document.getElementById('f-prodotti').value = d.prodotti || '';
+        document.getElementById('f-marchi').value = d.marchi || '';
+        document.getElementById('f-orari').value = d.orari || '';
+
+      } else if (tipoCategoria === 'professionista') {
+        document.getElementById('f-nome-professionista').value = d.nome || '';
+        document.getElementById('f-cognome').value = d.cognome || '';
+        setSelectValue('f-tipo_prof', d.tipo);
+        document.getElementById('f-nome_attivita').value = d.nome_attivita || '';
+        document.getElementById('f-albo').value = d.albo || '';
+        document.getElementById('f-partita_iva-professionista').value = d.partita_iva || '';
+        document.getElementById('f-anni_esperienza-professionista').value = d.anni_esperienza || '';
+        document.getElementById('f-cap-professionista').value = d.cap || '';
+        document.getElementById('f-indirizzo-professionista').value = d.indirizzo || '';
+        // Specializzazioni (array JSON o stringa)
+        try {
+          specializzazioni = d.specializzazioni ? JSON.parse(d.specializzazioni) : [];
+          if (!Array.isArray(specializzazioni)) specializzazioni = [String(specializzazioni)];
+        } catch (e) {
+          specializzazioni = d.specializzazioni ? [d.specializzazioni] : [];
+        }
+        renderSpec();
+      }
+    }
+
+    function setSelectValue(id, value) {
+      if (!value) return;
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const v = value.toLowerCase();
+      for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value.toLowerCase() === v || sel.options[i].text.toLowerCase() === v) {
+          sel.selectedIndex = i;
+          return;
+        }
+      }
+    }
+
+    // Upload logo
+    document.getElementById('logo-input').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { alert('File troppo grande. Massimo 5MB.'); return; }
+      logoFile = file;
+      document.getElementById('file-selected').textContent = '✅ ' + file.name;
+      document.getElementById('file-selected').style.display = 'block';
+      document.getElementById('upload-area').style.borderColor = '#2a7a4b';
+    });
+
+    async function uploadLogo(file) {
+      const ext = file.name.split('.').pop();
+      const fileName = currentUser.id + '_' + Date.now() + '.' + ext;
+      const res = await fetch(SUPABASE_URL + '/storage/v1/object/loghi-imprese/' + fileName, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': file.type || 'image/png'
+        },
+        body: file
+      });
+      if (!res.ok) throw new Error('Errore upload logo');
+      return SUPABASE_URL + '/storage/v1/object/public/loghi-imprese/' + fileName;
+    }
+
+    // Specializzazioni tag (professionista)
+    function aggiungiSpec() {
+      const sel = document.getElementById('f-spec-select');
+      const val = sel.value.trim();
+      if (val && !specializzazioni.includes(val)) {
+        specializzazioni.push(val);
+        renderSpec();
+      }
+      sel.value = '';
+    }
+
+    document.getElementById('f-spec-field').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = e.target.value.trim();
+        if (val && !specializzazioni.includes(val)) {
+          specializzazioni.push(val);
+          renderSpec();
+          e.target.value = '';
+        }
+      }
+    });
+
+    function renderSpec() {
+      const container = document.getElementById('f-spec-input');
+      const input = document.getElementById('f-spec-field');
+      container.innerHTML = '';
+      specializzazioni.forEach(s => {
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = s + ' <button type="button" onclick="removeSpec(\'' + s.replace(/'/g, "\\'") + '\')">×</button>';
+        container.appendChild(tag);
+      });
+      container.appendChild(input);
+    }
+
+    function removeSpec(s) {
+      specializzazioni = specializzazioni.filter(x => x !== s);
+      renderSpec();
+    }
+
+    // Salvataggio
+    async function salvaProfilo() {
+      const btn = document.getElementById('btn-save');
+      btn.disabled = true;
+      btn.textContent = '⏳ Salvataggio...';
+      clearAlert();
+
+      try {
+        let logo_url = impresaData.logo_url;
+        if (logoFile) {
+          btn.textContent = '⏳ Caricamento logo...';
+          logo_url = await uploadLogo(logoFile);
+        }
+
+        // Campi comuni
+        const dati = {
+          telefono: document.getElementById('f-telefono').value.trim(),
+          citta: document.getElementById('f-citta').value.trim(),
+          sito_web: document.getElementById('f-sito_web').value.trim(),
+          descrizione: document.getElementById('f-descrizione').value.trim(),
+          logo_url: logo_url
+        };
+
+        // Campi specifici per tipo
+        if (tipoCategoria === 'artigiano') {
+          Object.assign(dati, {
+            nome: document.getElementById('f-nome-artigiano').value.trim(),
+            partita_iva: document.getElementById('f-partita_iva-artigiano').value.trim(),
+            provincia: document.getElementById('f-provincia-artigiano').value.trim(),
+            anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-artigiano').value) || null,
+            mestiere: document.getElementById('f-mestiere-artigiano').value,
+            specializzazioni: document.getElementById('f-specializzazioni-artigiano').value.trim(),
+            zone: document.getElementById('f-zone-artigiano').value.trim()
+          });
+
+        } else if (tipoCategoria === 'impresa') {
+          Object.assign(dati, {
+            nome: document.getElementById('f-nome-impresa').value.trim(),
+            partita_iva: document.getElementById('f-partita_iva-impresa').value.trim(),
+            provincia: document.getElementById('f-provincia-impresa').value.trim(),
+            anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-impresa').value) || null,
+            mestiere: document.getElementById('f-mestiere-impresa').value,
+            specializzazioni: document.getElementById('f-specializzazioni-impresa').value.trim(),
+            zone: document.getElementById('f-zone-impresa').value.trim()
+          });
+
+        } else if (tipoCategoria === 'grande_impresa') {
+          Object.assign(dati, {
+            nome: document.getElementById('f-nome-grande_impresa').value.trim(),
+            partita_iva: document.getElementById('f-partita_iva-grande_impresa').value.trim(),
+            provincia: document.getElementById('f-provincia-grande_impresa').value.trim(),
+            anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-grande_impresa').value) || null,
+            mestiere: document.getElementById('f-mestiere-grande_impresa').value,
+            specializzazioni: document.getElementById('f-specializzazioni-grande_impresa').value.trim(),
+            zone: document.getElementById('f-zone-grande_impresa').value.trim()
+          });
+
+        } else if (tipoCategoria === 'negozio') {
+          Object.assign(dati, {
+            nome_negozio: document.getElementById('f-nome_negozio').value.trim(),
+            tipo: document.getElementById('f-tipo_negozio').value,
+            cap: document.getElementById('f-cap-negozio').value.trim(),
+            indirizzo: document.getElementById('f-indirizzo-negozio').value.trim(),
+            prodotti: document.getElementById('f-prodotti').value.trim(),
+            marchi: document.getElementById('f-marchi').value.trim(),
+            orari: document.getElementById('f-orari').value.trim()
+          });
+
+        } else if (tipoCategoria === 'professionista') {
+          Object.assign(dati, {
+            nome: document.getElementById('f-nome-professionista').value.trim(),
+            cognome: document.getElementById('f-cognome').value.trim(),
+            tipo: document.getElementById('f-tipo_prof').value,
+            nome_attivita: document.getElementById('f-nome_attivita').value.trim(),
+            albo: document.getElementById('f-albo').value.trim(),
+            partita_iva: document.getElementById('f-partita_iva-professionista').value.trim(),
+            anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-professionista').value) || null,
+            cap: document.getElementById('f-cap-professionista').value.trim(),
+            indirizzo: document.getElementById('f-indirizzo-professionista').value.trim(),
+            specializzazioni: specializzazioni.length > 0 ? JSON.stringify(specializzazioni) : null
+          });
+        }
+
+        const { error } = await supabaseClient
+          .from('imprese')
+          .update(dati)
+          .eq('user_id', currentUser.id);
+
+        if (error) throw new Error(error.message);
+
+        // Aggiorna dati locali
+        Object.assign(impresaData, dati);
+        if (logoFile) {
+          document.getElementById('logo-current').src = logo_url;
+          document.getElementById('logo-current-wrap').style.display = 'block';
+          logoFile = null;
+          document.getElementById('file-selected').style.display = 'none';
+          document.getElementById('upload-area').style.borderColor = '#ddd';
+        }
+
+        showSuccess('✅ Profilo aggiornato con successo!');
+        window.scrollTo(0, 0);
+
+      } catch (err) {
+        console.error('Errore salvataggio:', err);
+        showError('❌ Errore durante il salvataggio: ' + err.message);
+        window.scrollTo(0, 0);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Salva modifiche';
+      }
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('alert-box');
+      box.className = 'alert alert-error';
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    function showSuccess(msg) {
+      const box = document.getElementById('alert-box');
+      box.className = 'alert alert-success';
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    function clearAlert() {
+      document.getElementById('alert-box').style.display = 'none';
+    }
+  </script>
+  <script src="/cookie-banner.js"></script>
+</body>
+</html>
