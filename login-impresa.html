@@ -188,7 +188,7 @@
       </div>
     </div>
 
-    <button class="btn-login" id="btn-login" onclick="login()">🔐 Accedi</button>
+    <button type="button" class="btn-login" id="btn-login" onclick="login()">🔐 Accedi</button>
 
     <div class="divider">oppure</div>
 
@@ -258,16 +258,24 @@
         }
 
         // Recupera dati impresa dalla tabella
-        const { data: imprese } = await supabaseClient
+        const { data: imprese, error: impresaError } = await supabaseClient
           .from('imprese')
           .select('id, nome, piano')
           .eq('user_id', authData.user.id)
           .single();
 
+        if (impresaError || !imprese) {
+          errore.textContent = 'Profilo impresa non trovato. Completa la registrazione.';
+          errore.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = '🔐 Accedi';
+          return;
+        }
+
         // Salva sessione in localStorage
-        localStorage.setItem('impresa_id', imprese?.id || '');
-        localStorage.setItem('impresa_nome', imprese?.nome || '');
-        localStorage.setItem('piano_impresa', imprese?.piano || 'free');
+        localStorage.setItem('impresa_id', imprese.id);
+        localStorage.setItem('impresa_nome', imprese.nome || '');
+        localStorage.setItem('piano_impresa', imprese.piano || 'free');
 
         // Vai al pannello
         window.location.href = 'pannello-impresa.html';
