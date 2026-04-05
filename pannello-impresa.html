@@ -595,6 +595,48 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let impresaCorrente = null;
 let preventivoCorrente = null;
 
+// Controlla sessione Supabase Auth prima di mostrare il pannello o reindirizzare
+async function caricaSessione(session) {
+  if (session) {
+    let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
+    if (!data) {
+      const { data: byEmail } = await sb.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
+      if (byEmail) {
+        await sb.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
+        data = byEmail;
+      }
+    }
+    if (!data) {
+      const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', session.user.id).maybeSingle();
+      data = data2;
+    }
+    if (data) {
+      impresaCorrente = data;
+    } else {
+      impresaCorrente = { email: session.user.email, id: session.user.id };
+    }
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('pannello').style.display = 'block';
+    inizializza();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pannello').style.display = 'none';
+  }
+}
+
+// getSession() controlla la sessione esistente senza aspettare eventi asincroni
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  await caricaSessione(session);
+})();
+
+// onAuthStateChange gestisce solo i cambiamenti successivi (es. login dal form embedded)
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN') await caricaSessione(session);
+  if (event === 'SIGNED_OUT') await caricaSessione(null);
+});
+
+
 // LOGIN
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
