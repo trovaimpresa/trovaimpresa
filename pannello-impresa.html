@@ -601,14 +601,21 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (_authChecked) return;
   _authChecked = true;
   if (session) {
-    const { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
+    let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
+    if (!data) {
+      const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', session.user.id).single();
+      data = data2;
+    }
     if (data) {
       impresaCorrente = data;
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('pannello').style.display = 'block';
       inizializza();
     } else {
-      window.location.href = 'login-impresa.html';
+      impresaCorrente = { email: session.user.email, id: session.user.id };
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('pannello').style.display = 'block';
+      inizializza();
     }
   } else {
     window.location.href = 'login-impresa.html';
