@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <button type="button" class="btn-login" id="btn-login" onclick="login()">🔐 Accedi</button>
+    <button type="button" class="btn-login" id="btn-login" onclick="doLogin()">🔐 Accedi</button>
 
     <div class="divider">oppure</div>
 
@@ -81,7 +81,7 @@
     );
 
     document.getElementById('password').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') login();
+      if (e.key === 'Enter') doLogin();
     });
 
     function togglePassword() {
@@ -89,46 +89,20 @@
       input.type = input.type === 'password' ? 'text' : 'password';
     }
 
-    async function login() {
-      const btn = document.getElementById('btn-login');
-      if (btn.disabled) return;
+    async function doLogin() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const btn = document.querySelector('button');
       btn.disabled = true;
-      btn.textContent = '⏳ Accesso in corso...';
-
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const password = document.getElementById('password').value;
-      const errore = document.getElementById('errore');
-      errore.style.display = 'none';
-
-      if (!email || !password) {
-        errore.textContent = 'Inserisci email e password.';
-        errore.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = '🔐 Accedi';
-        return;
-      }
-
+      btn.innerHTML = '⏳ Accesso in corso...';
       try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-        if (error) {
-          errore.textContent = error.message.includes('Email not confirmed')
-            ? 'Email non ancora confermata. Controlla la tua casella email.'
-            : 'Email o password non corretti.';
-          errore.style.display = 'block';
-          btn.disabled = false;
-          btn.textContent = '🔐 Accedi';
-          return;
-        }
-
-        localStorage.setItem('impresa_email', email);
+        if (error) throw error;
         window.location.href = 'pannello-impresa.html';
-
-      } catch (err) {
-        errore.textContent = 'Errore di connessione. Riprova.';
-        errore.style.display = 'block';
+      } catch(err) {
+        alert('Errore: ' + err.message);
         btn.disabled = false;
-        btn.textContent = '🔐 Accedi';
+        btn.innerHTML = '🔐 Accedi';
       }
     }
   </script>

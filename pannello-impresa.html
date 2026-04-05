@@ -600,6 +600,13 @@ async function caricaSessione(session) {
   if (session) {
     let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
     if (!data) {
+      const { data: byEmail } = await sb.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
+      if (byEmail) {
+        await sb.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
+        data = byEmail;
+      }
+    }
+    if (!data) {
       const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', session.user.id).single();
       data = data2;
     }
