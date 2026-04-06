@@ -346,6 +346,111 @@
     .form-row { grid-template-columns:1fr; }
   }
 
+  /* === NUOVA DASHBOARD === */
+  .dash-hero {
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    border-radius:20px; padding:28px 32px; color:white;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:20px; flex-wrap:wrap; gap:16px;
+  }
+  .dash-welcome { font-size:0.82rem; opacity:0.7; text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:4px; }
+  .dash-nome { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:10px; }
+  .dash-meta { display:flex; gap:10px; flex-wrap:wrap; }
+  .dash-rating-badge {
+    background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+    border-radius:20px; padding:4px 12px; font-size:0.82rem; font-weight:700;
+  }
+  .dash-piano-badge {
+    background:var(--arancio); border-radius:20px;
+    padding:4px 12px; font-size:0.82rem; font-weight:700;
+  }
+  .dash-piano-badge.pro { background:#1a73e8; }
+  .btn-ai-preventivo {
+    background:white; color:var(--verde2); border:none; border-radius:14px;
+    padding:13px 22px; font-family:'DM Sans',sans-serif; font-weight:800;
+    font-size:0.92rem; cursor:pointer; white-space:nowrap;
+    box-shadow:0 4px 16px rgba(0,0,0,0.15); transition:all 0.2s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .btn-ai-preventivo:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+
+  .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .dash-stat-card {
+    background:white; border-radius:16px; padding:20px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    text-align:center;
+  }
+  .dash-stat-icon { font-size:1.6rem; margin-bottom:8px; }
+  .dash-stat-num { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; color:var(--dark); }
+  .dash-stat-lbl { font-size:0.75rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
+
+  .dash-quick-title { font-size:0.75rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+  .dash-quick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .dash-quick-card {
+    background:white; border-radius:16px; padding:20px;
+    box-shadow:var(--shadow); border:1.5px solid var(--border);
+    cursor:pointer; transition:all 0.2s; text-align:center;
+  }
+  .dash-quick-card:hover { border-color:var(--verde); box-shadow:0 8px 24px rgba(42,122,75,0.12); transform:translateY(-2px); }
+  .dash-quick-icon { font-size:1.8rem; margin-bottom:8px; }
+  .dash-quick-label { font-weight:700; font-size:0.9rem; color:var(--dark); margin-bottom:3px; }
+  .dash-quick-sub { font-size:0.78rem; color:var(--light); }
+
+  /* === MODAL AI PREVENTIVO DASH === */
+  .modal-ai-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    z-index:300; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-ai-overlay.show { display:flex; }
+  .modal-ai {
+    background:white; border-radius:24px; width:100%; max-width:580px;
+    max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  }
+  .modal-ai-header {
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    padding:24px 28px; border-radius:24px 24px 0 0; color:white;
+    display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  .modal-ai-header h2 { font-family:'Playfair Display',serif; font-size:1.25rem; margin-bottom:3px; }
+  .modal-ai-header p { font-size:0.82rem; opacity:0.75; }
+  .modal-ai-close { background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; opacity:0.7; line-height:1; padding:0; }
+  .modal-ai-close:hover { opacity:1; }
+  .modal-ai-body { padding:24px 28px; }
+  .ai-form-group { margin-bottom:14px; }
+  .ai-form-group label { display:block; font-size:0.73rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .ai-form-group input, .ai-form-group select, .ai-form-group textarea {
+    width:100%; padding:11px 14px; border-radius:10px;
+    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
+    font-size:0.9rem; outline:none; transition:border 0.2s; background:white;
+  }
+  .ai-form-group input:focus, .ai-form-group select:focus, .ai-form-group textarea:focus { border-color:var(--verde); }
+  .ai-form-group textarea { min-height:90px; resize:vertical; }
+  .ai-form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .btn-genera-ai-dash {
+    width:100%; padding:14px; border-radius:12px; border:none;
+    background:linear-gradient(135deg,var(--verde),var(--verde2)); color:white;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    gap:8px; transition:all 0.2s; margin-top:4px;
+  }
+  .btn-genera-ai-dash:hover { opacity:0.9; }
+  .btn-genera-ai-dash:disabled { opacity:0.6; cursor:not-allowed; }
+  .ai-result-box { display:none; margin-top:20px; }
+  .ai-result-box.show { display:block; }
+  .ai-result-label { font-size:0.72rem; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+  .btn-copia {
+    padding:5px 12px; background:var(--verde3); color:var(--verde2);
+    border:1px solid #a8d5b5; border-radius:8px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.75rem; cursor:pointer; transition:all 0.15s;
+  }
+  .btn-copia:hover { background:var(--verde); color:white; }
+  .ai-result-text {
+    width:100%; min-height:260px; padding:16px; border-radius:12px;
+    border:1.5px solid var(--verde); background:var(--verde3);
+    font-family:'DM Sans',sans-serif; font-size:0.87rem; color:var(--dark);
+    line-height:1.7; resize:vertical; outline:none;
+  }
+
   /* === FOTO DEI LAVORI === */
   .foto-upload-area {
     border:2px dashed var(--border); border-radius:16px; padding:32px;
@@ -415,10 +520,7 @@
       <div class="nav-item active" onclick="showSection('dashboard',this)">
         <span>📊</span> Dashboard
       </div>
-      <div class="nav-item" onclick="showSection('preventivi',this)">
-        <span>📋</span> Preventivi ricevuti
-        <span class="nav-badge" id="badge-prev">0</span>
-      </div>
+
       <div class="nav-item" onclick="showSection('lavoro',this)">
         <span>💼</span> Offerte di lavoro
         <span class="nav-badge" id="badge-lavoro" style="display:none"></span>
@@ -445,19 +547,59 @@
 
     <!-- DASHBOARD -->
     <div class="section active" id="sec-dashboard">
-      <div class="topbar">
-        <div class="topbar-title">Benvenuto! 👋</div>
-        <span class="impresa-badge" id="impresa-nome-badge">🏗️ La tua impresa</span>
+
+      <!-- HERO HEADER -->
+      <div class="dash-hero">
+        <div>
+          <div class="dash-welcome">Pannello impresa</div>
+          <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
+          <div class="dash-meta">
+            <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
+            <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
+          </div>
+        </div>
+        <button class="btn-ai-preventivo" onclick="apriModalPreventivoDash()">
+          🤖 Genera preventivo AI
+        </button>
       </div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon b">⭐</div>
-          <div><div class="stat-num" id="stat-rating">—</div><div class="stat-lbl">Rating medio</div></div>
+
+      <!-- STATISTICHE -->
+      <div class="dash-stats">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">⭐</div>
+          <div class="dash-stat-num" id="stat-rating">—</div>
+          <div class="dash-stat-lbl">Rating medio</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">💬</div>
+          <div class="dash-stat-num" id="dash-stat-recensioni">0</div>
+          <div class="dash-stat-lbl">Recensioni</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">📷</div>
+          <div class="dash-stat-num" id="dash-stat-foto">0</div>
+          <div class="dash-stat-lbl">Foto caricate</div>
         </div>
       </div>
-      <div style="background:linear-gradient(135deg,#1a3a2a,#2a7a4b);border-radius:20px;padding:24px;color:white;margin-bottom:20px">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:8px">🤖 Genera preventivi con l'AI</div>
-        <div style="font-size:0.88rem;opacity:0.8;line-height:1.6">Vai su <strong>Preventivi ricevuti</strong>, clicca su una richiesta e l'AI genererà automaticamente un preventivo professionale personalizzato per il cliente!</div>
+
+      <!-- ACCESSI RAPIDI -->
+      <div class="dash-quick-title">Accesso rapido</div>
+      <div class="dash-quick-grid">
+        <div class="dash-quick-card" onclick="showSectionById('foto')">
+          <div class="dash-quick-icon">📷</div>
+          <div class="dash-quick-label">Foto dei lavori</div>
+          <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
+        </div>
+        <div class="dash-quick-card" onclick="showSectionById('recensioni')">
+          <div class="dash-quick-icon">⭐</div>
+          <div class="dash-quick-label">Recensioni</div>
+          <div class="dash-quick-sub">Cosa dicono i clienti</div>
+        </div>
+        <div class="dash-quick-card" onclick="showSectionById('profilo')">
+          <div class="dash-quick-icon">👤</div>
+          <div class="dash-quick-label">Il mio profilo</div>
+          <div class="dash-quick-sub">Modifica i dati impresa</div>
+        </div>
       </div>
 
       <!-- GESTIONE PIANO -->
@@ -650,6 +792,63 @@
     </div>
 
   </main>
+</div>
+
+<!-- MODAL AI PREVENTIVO DASHBOARD -->
+<div class="modal-ai-overlay" id="modal-ai-dash" onclick="if(event.target===this)chiudiModalPreventivoDash()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🤖 Genera preventivo con AI</h2>
+        <p>Compila i dati del lavoro — l'AI creerà un preventivo professionale</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalPreventivoDash()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="ai-form-group">
+        <label>Tipo di lavoro *</label>
+        <select id="ai-tipo-lavoro">
+          <option value="">— Seleziona —</option>
+          <option>Ristrutturazione appartamento</option>
+          <option>Ristrutturazione bagno</option>
+          <option>Ristrutturazione cucina</option>
+          <option>Impianto elettrico</option>
+          <option>Impianto idraulico</option>
+          <option>Pavimentazione / Parquet</option>
+          <option>Tinteggiatura / Pittura</option>
+          <option>Facciata esterna</option>
+          <option>Copertura / Tetto</option>
+          <option>Opere murarie</option>
+          <option>Serramenti / Infissi</option>
+          <option>Altro</option>
+        </select>
+      </div>
+      <div class="ai-form-group">
+        <label>Descrizione del lavoro</label>
+        <textarea id="ai-descrizione" placeholder="Descrivi il lavoro richiesto, eventuali materiali, condizioni particolari…"></textarea>
+      </div>
+      <div class="ai-form-row">
+        <div class="ai-form-group">
+          <label>Dimensioni / Superficie</label>
+          <input type="text" id="ai-dimensioni" placeholder="Es. 80 mq, 3 stanze">
+        </div>
+        <div class="ai-form-group">
+          <label>Zona / Città</label>
+          <input type="text" id="ai-zona" placeholder="Es. Roma, Milano Nord">
+        </div>
+      </div>
+      <button class="btn-genera-ai-dash" id="btn-genera-ai-dash" onclick="generaPreventivoDash()">
+        🤖 Genera preventivo
+      </button>
+      <div class="ai-result-box" id="ai-result-box">
+        <div class="ai-result-label">
+          ✨ Preventivo generato — personalizzalo a piacere
+          <button class="btn-copia" onclick="copiaPreventivoDash()">📋 Copia</button>
+        </div>
+        <textarea class="ai-result-text" id="ai-result-text"></textarea>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL 2FA -->
@@ -875,10 +1074,25 @@ function showSection(id, el) {
   el.classList.add('active');
 }
 
+function showSectionById(id) {
+  const navItem = [...document.querySelectorAll('.nav-item')].find(n => n.getAttribute('onclick')?.includes(`'${id}'`));
+  if (navItem) showSection(id, navItem);
+}
+
 async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
-  document.getElementById('impresa-nome-badge').textContent = '🏗️ ' + nome;
-  document.getElementById('stat-rating').textContent = impresaCorrente.rating || '—';
+  const isPro = impresaCorrente.piano === 'pro';
+  const rating = impresaCorrente.rating || '—';
+
+  // Header dashboard
+  document.getElementById('dash-nome-impresa').textContent = nome;
+  document.getElementById('dash-rating-badge').textContent = `⭐ ${rating}`;
+  const pianoBadge = document.getElementById('dash-piano-badge');
+  pianoBadge.textContent = isPro ? '⭐ Pro' : '🆓 Free';
+  if (isPro) pianoBadge.classList.add('pro');
+
+  // Stat rating (condiviso)
+  document.getElementById('stat-rating').textContent = rating;
 
   await caricaPreventivi();
   await caricaRecensioni();
@@ -895,9 +1109,6 @@ async function caricaPreventivi() {
     .order('created_at', { ascending: false });
 
   const lista = data || [];
-  document.getElementById('stat-prev').textContent = lista.length;
-  document.getElementById('stat-inviati').textContent = lista.filter(p => p.risposta).length;
-  document.getElementById('badge-prev').textContent = lista.filter(p => !p.risposta).length;
 
   const container = document.getElementById('lista-preventivi');
   if (!lista.length) {
@@ -976,6 +1187,8 @@ async function caricaRecensioni() {
   const { data } = await sb.from('feedback_clienti').select('*')
     .eq('impresa_id', impresaCorrente.id)
     .order('created_at', { ascending: false });
+
+  document.getElementById('dash-stat-recensioni').textContent = data?.length || 0;
 
   const container = document.getElementById('lista-recensioni');
   if (!data?.length) {
@@ -1186,6 +1399,62 @@ async function eliminaAnnuncio(id) {
 }
 
 // =====================
+// MODAL AI PREVENTIVO DASHBOARD
+// =====================
+function apriModalPreventivoDash() {
+  document.getElementById('modal-ai-dash').classList.add('show');
+  document.getElementById('ai-result-box').classList.remove('show');
+  document.getElementById('ai-result-text').value = '';
+  document.getElementById('btn-genera-ai-dash').disabled = false;
+  document.getElementById('btn-genera-ai-dash').innerHTML = '🤖 Genera preventivo';
+}
+
+function chiudiModalPreventivoDash() {
+  document.getElementById('modal-ai-dash').classList.remove('show');
+}
+
+async function generaPreventivoDash() {
+  const tipo = document.getElementById('ai-tipo-lavoro').value;
+  const descrizione = document.getElementById('ai-descrizione').value.trim();
+  const dimensioni = document.getElementById('ai-dimensioni').value.trim();
+  const zona = document.getElementById('ai-zona').value.trim();
+
+  if (!tipo) { alert('Seleziona il tipo di lavoro.'); return; }
+
+  const nomeImpresa = impresaCorrente.nome_attivita || (impresaCorrente.nome + ' ' + impresaCorrente.cognome);
+  const prompt = `Sei un esperto preventivista edile italiano. Genera un preventivo professionale completo in italiano per il seguente lavoro:\n- Tipo di lavoro: ${tipo}\n- Descrizione: ${descrizione || 'non specificata'}\n- Dimensioni/superficie: ${dimensioni || 'non specificata'}\n- Zona: ${zona || 'non specificata'}\n- Impresa: ${nomeImpresa}\n\nScrivi un preventivo professionale e formale con stima dei costi, tempistiche indicative, cosa include il servizio e garanzie. Usa il formato di una lettera commerciale italiana. Non usare JSON.`;
+
+  const btn = document.getElementById('btn-genera-ai-dash');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
+
+  try {
+    const res = await fetch('/.netlify/functions/ai-orienta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ testo: prompt })
+    });
+    const testo = await res.text();
+    document.getElementById('ai-result-text').value = testo;
+    document.getElementById('ai-result-box').classList.add('show');
+    btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
+  } catch (err) {
+    alert('Errore nella generazione. Riprova.');
+    btn.disabled = false;
+    btn.innerHTML = '🤖 Genera preventivo';
+  }
+}
+
+async function copiaPreventivoDash() {
+  const testo = document.getElementById('ai-result-text').value;
+  await navigator.clipboard.writeText(testo);
+  const btn = document.querySelector('.btn-copia');
+  const orig = btn.textContent;
+  btn.textContent = '✅ Copiato!';
+  setTimeout(() => { btn.textContent = orig; }, 2000);
+}
+
+// =====================
 // FOTO DEI LAVORI
 // =====================
 const MAX_FOTO_FREE = 10;
@@ -1196,6 +1465,7 @@ async function caricaFotoLavori() {
   const folder = String(impresaCorrente.id);
   const { data, error } = await sb.storage.from('foto-lavori').list(folder, { sortBy: { column: 'created_at', order: 'desc' } });
   fotoCaricate = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+  document.getElementById('dash-stat-foto').textContent = fotoCaricate.length;
   aggiornaBannerFoto();
   renderFotoGrid();
 }
