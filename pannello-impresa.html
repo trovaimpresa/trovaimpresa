@@ -345,6 +345,48 @@
     .stats-grid { grid-template-columns:1fr; }
     .form-row { grid-template-columns:1fr; }
   }
+
+  /* === FOTO DEI LAVORI === */
+  .foto-upload-area {
+    border:2px dashed var(--border); border-radius:16px; padding:32px;
+    text-align:center; cursor:pointer; transition:all 0.2s;
+    background:white; margin-bottom:20px;
+  }
+  .foto-upload-area:hover, .foto-upload-area.dragover {
+    border-color:var(--verde); background:var(--verde3);
+  }
+  .foto-upload-icon { font-size:2.5rem; margin-bottom:8px; }
+  .foto-upload-label { font-weight:700; color:var(--dark); margin-bottom:4px; }
+  .foto-upload-sub { font-size:0.82rem; color:var(--light); }
+  .foto-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+    gap:14px; margin-top:20px;
+  }
+  .foto-item {
+    position:relative; border-radius:12px; overflow:hidden;
+    aspect-ratio:1; background:#f0f0f0; box-shadow:var(--shadow);
+    border:1px solid var(--border);
+  }
+  .foto-item img { width:100%; height:100%; object-fit:cover; display:block; }
+  .foto-item-del {
+    position:absolute; top:6px; right:6px; width:26px; height:26px;
+    background:rgba(0,0,0,0.55); color:white; border:none; border-radius:50%;
+    cursor:pointer; font-size:0.75rem; display:flex; align-items:center;
+    justify-content:center; opacity:0; transition:opacity 0.2s;
+  }
+  .foto-item:hover .foto-item-del { opacity:1; }
+  .foto-upload-progress {
+    background:var(--verde3); border:1px solid #a8d5b5; border-radius:10px;
+    padding:10px 16px; font-size:0.85rem; color:var(--verde2); margin-bottom:14px;
+    display:none;
+  }
+  .foto-limit-bar {
+    background:white; border-radius:12px; padding:14px 18px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    font-size:0.85rem; color:var(--mid); margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .foto-limit-num { font-weight:800; color:var(--verde2); font-size:1rem; }
 </style>
 </head>
 <body>
@@ -383,6 +425,9 @@
       </div>
       <div class="nav-item" onclick="showSection('candidati',this)">
         <span>🔍</span> Candidati nella tua zona
+      </div>
+      <div class="nav-item" onclick="showSection('foto',this)">
+        <span>📷</span> Foto dei lavori
       </div>
       <div class="nav-item" onclick="showSection('recensioni',this)">
         <span>⭐</span> Le mie recensioni
@@ -544,6 +589,30 @@
         <div class="topbar-title">🔍 Candidati nella tua zona</div>
       </div>
       <div id="lista-candidati"><div class="empty-state"><div class="empty-icon">🔍</div>Caricamento...</div></div>
+    </div>
+
+    <!-- FOTO DEI LAVORI -->
+    <div class="section" id="sec-foto">
+      <div class="topbar">
+        <div class="topbar-title">📷 Foto dei lavori</div>
+      </div>
+
+      <div class="foto-limit-bar" id="foto-limit-bar">
+        <span style="font-size:1.3rem">📷</span>
+        <span id="foto-limit-testo">Caricamento...</span>
+      </div>
+
+      <div class="foto-upload-progress" id="foto-progress">⏳ Caricamento foto in corso...</div>
+
+      <div class="foto-upload-area" id="foto-upload-area" onclick="document.getElementById('foto-input').click()"
+           ondragover="fotoDragOver(event)" ondragleave="fotoDragLeave(event)" ondrop="fotoDrop(event)">
+        <input type="file" id="foto-input" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
+        <div class="foto-upload-icon">📤</div>
+        <div class="foto-upload-label">Clicca o trascina le foto qui</div>
+        <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
+      </div>
+
+      <div class="foto-grid" id="foto-grid"></div>
     </div>
 
     <!-- RECENSIONI -->
@@ -800,6 +869,7 @@ async function inizializza() {
   await caricaRecensioni();
   await caricaAnnunciLavoro();
   await caricaCandidatiZona();
+  await caricaFotoLavori();
   caricaProfilo();
 }
 
@@ -1098,6 +1168,111 @@ async function eliminaAnnuncio(id) {
   if (!confirm('Sei sicuro di voler eliminare questo annuncio?')) return;
   await sb.from('offerte_lavoro').delete().eq('id', id);
   await caricaAnnunciLavoro();
+}
+
+// =====================
+// FOTO DEI LAVORI
+// =====================
+const MAX_FOTO_FREE = 10;
+let fotoCaricate = [];
+
+async function caricaFotoLavori() {
+  if (!impresaCorrente?.id) return;
+  const folder = String(impresaCorrente.id);
+  const { data, error } = await sb.storage.from('foto-lavori').list(folder, { sortBy: { column: 'created_at', order: 'desc' } });
+  fotoCaricate = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+  aggiornaBannerFoto();
+  renderFotoGrid();
+}
+
+function aggiornaBannerFoto() {
+  const isPro = impresaCorrente.piano === 'pro';
+  const n = fotoCaricate.length;
+  const barEl = document.getElementById('foto-limit-bar');
+  const testoEl = document.getElementById('foto-limit-testo');
+  const uploadArea = document.getElementById('foto-upload-area');
+
+  if (isPro) {
+    testoEl.innerHTML = `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#1a73e8">Pro ⭐</strong> — illimitate`;
+    barEl.style.borderColor = '#1a73e8';
+    uploadArea.style.display = '';
+  } else {
+    const rimaste = Math.max(0, MAX_FOTO_FREE - n);
+    testoEl.innerHTML = `<span class="foto-limit-num">${n}/${MAX_FOTO_FREE}</span> foto caricate · Piano Free — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="prezzi.html" style="color:var(--arancio);font-weight:700">passa a Pro</a> per foto illimitate'}`;
+    uploadArea.style.display = rimaste > 0 ? '' : 'none';
+  }
+}
+
+function renderFotoGrid() {
+  const grid = document.getElementById('foto-grid');
+  if (!fotoCaricate.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessuna foto ancora. Carica i tuoi lavori!</div>';
+    return;
+  }
+  const folder = String(impresaCorrente.id);
+  grid.innerHTML = fotoCaricate.map(f => {
+    const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(`${folder}/${f.name}`);
+    return `
+      <div class="foto-item">
+        <img src="${publicUrl}" alt="${f.name}" loading="lazy">
+        <button class="foto-item-del" onclick="eliminaFoto('${f.name}')" title="Elimina foto">✕</button>
+      </div>`;
+  }).join('');
+}
+
+async function uploadFoto(files) {
+  if (!files?.length) return;
+  const isPro = impresaCorrente.piano === 'pro';
+  const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
+
+  if (!isPro && rimaste === 0) {
+    alert('Hai raggiunto il limite di 10 foto per il piano Free. Passa a Pro per foto illimitate!');
+    return;
+  }
+
+  const daCaricari = Array.from(files).slice(0, isPro ? files.length : rimaste);
+  const progress = document.getElementById('foto-progress');
+  progress.style.display = 'block';
+  progress.textContent = `⏳ Caricamento ${daCaricari.length} foto...`;
+
+  const folder = String(impresaCorrente.id);
+  let ok = 0;
+
+  for (const file of daCaricari) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert(`"${file.name}" supera i 5 MB — saltata.`);
+      continue;
+    }
+    const ext = file.name.split('.').pop();
+    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+    const { error } = await sb.storage.from('foto-lavori').upload(path, file, { upsert: false });
+    if (!error) ok++;
+  }
+
+  progress.textContent = `✅ ${ok} foto caricate con successo!`;
+  setTimeout(() => { progress.style.display = 'none'; }, 2500);
+  document.getElementById('foto-input').value = '';
+  await caricaFotoLavori();
+}
+
+async function eliminaFoto(nome) {
+  if (!confirm('Eliminare questa foto?')) return;
+  const folder = String(impresaCorrente.id);
+  await sb.storage.from('foto-lavori').remove([`${folder}/${nome}`]);
+  await caricaFotoLavori();
+}
+
+function fotoDragOver(e) {
+  e.preventDefault();
+  document.getElementById('foto-upload-area').classList.add('dragover');
+}
+function fotoDragLeave(e) {
+  document.getElementById('foto-upload-area').classList.remove('dragover');
+}
+function fotoDrop(e) {
+  e.preventDefault();
+  document.getElementById('foto-upload-area').classList.remove('dragover');
+  uploadFoto(e.dataTransfer.files);
 }
 
 // =====================
