@@ -216,13 +216,7 @@
     text-transform:uppercase; letter-spacing:0.5px;
   }
 
-  /* Foto colorati diversi */
-  .foto-item:nth-child(1) .foto-bg { background:linear-gradient(135deg,#e8f5ee,#c8ead6); }
-  .foto-item:nth-child(2) .foto-bg { background:linear-gradient(135deg,#fff3ec,#ffe0cc); }
-  .foto-item:nth-child(3) .foto-bg { background:linear-gradient(135deg,#e8f0ff,#ccd9ff); }
-  .foto-item:nth-child(4) .foto-bg { background:linear-gradient(135deg,#fff8e8,#ffeeba); }
-  .foto-item:nth-child(5) .foto-bg { background:linear-gradient(135deg,#ffe8f0,#ffccd9); }
-  .foto-item:nth-child(6) .foto-bg { background:linear-gradient(135deg,#e8faf5,#c0f0e4); }
+  .foto-item img { width:100%; height:100%; object-fit:cover; display:block; border-radius:12px; }
 
   /* ── RECENSIONI ── */
   .review {
@@ -478,25 +472,8 @@
     <!-- FOTO LAVORI -->
     <div class="card">
       <div class="card-title"><span>📸</span> Foto dei lavori</div>
-      <div class="foto-grid">
-        <div class="foto-item">
-          <div class="foto-bg">🏠<span class="foto-label">Ristrutturazione<br>appartamento</span></div>
-        </div>
-        <div class="foto-item">
-          <div class="foto-bg">🍳<span class="foto-label">Cucina<br>moderna</span></div>
-        </div>
-        <div class="foto-item">
-          <div class="foto-bg">🚿<span class="foto-label">Bagno<br>completo</span></div>
-        </div>
-        <div class="foto-item">
-          <div class="foto-bg">🧱<span class="foto-label">Facciata<br>esterna</span></div>
-        </div>
-        <div class="foto-item">
-          <div class="foto-bg">🪵<span class="foto-label">Parquet<br>pregiato</span></div>
-        </div>
-        <div class="foto-item">
-          <div class="foto-bg">🏗️<span class="foto-label">Cantiere<br>in corso</span></div>
-        </div>
+      <div class="foto-grid" id="foto-lavori-grid">
+        <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px 0;font-size:0.9rem">⏳ Caricamento foto...</div>
       </div>
     </div>
 
@@ -1063,6 +1040,28 @@ async function submitPreventivo() {
   }
 }
 
+async function caricaFotoLavori(impresaId) {
+  const grid = document.getElementById('foto-lavori-grid');
+  if (!grid) return;
+  const { data, error } = await supabaseClient.storage
+    .from('foto-lavori')
+    .list(String(impresaId), { sortBy: { column: 'created_at', order: 'desc' } });
+
+  const foto = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+
+  if (error || !foto.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px 0;font-size:0.9rem">📷 Nessuna foto caricata</div>';
+    return;
+  }
+
+  grid.innerHTML = foto.map(f => {
+    const { data: { publicUrl } } = supabaseClient.storage
+      .from('foto-lavori')
+      .getPublicUrl(`${impresaId}/${f.name}`);
+    return `<div class="foto-item"><img src="${publicUrl}" alt="Foto lavoro" loading="lazy"></div>`;
+  }).join('');
+}
+
 // Carica profilo e recensioni al caricamento pagina
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
@@ -1070,6 +1069,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (impresaId) {
     caricaProfilo(impresaId);
     caricaRecensioni(impresaId);
+    caricaFotoLavori(impresaId);
   }
   // Nascondi campi nome/email se utente loggato
   const { data: { session } } = await supabaseClient.auth.getSession();
