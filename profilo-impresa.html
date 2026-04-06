@@ -946,20 +946,20 @@ async function inviaRecensione() {
     };
 
     // Controlla se esiste già una recensione con questa email per questa impresa
-    const checkRes = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti?impresa_id=eq.${impresaId}&email_recensore=eq.${encodeURIComponent(email)}`, {
+    const checkRes = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti?impresa_id=eq.${impresaId}&email_cliente=eq.${encodeURIComponent(email)}`, {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (session ? session.access_token : SUPA_KEY) }
     });
     const esistente = await checkRes.json();
 
     const dati = {
       impresa_id: parseInt(impresaId),
-      nome_recensore: nome,
-      email_recensore: email,
+      nome_cliente: nome,
+      email_cliente: email,
       testo: testo,
-      qualita: valoriStelle.qualita || null,
-      puntualita: valoriStelle.puntualita || null,
-      rapporto_qualita_prezzo: valoriStelle.prezzo || null,
-      professionalita: valoriStelle.professionalita || null,
+      stelle_qualita: valoriStelle.qualita || null,
+      stelle_puntualita: valoriStelle.puntualita || null,
+      stelle_prezzo: valoriStelle.prezzo || null,
+      stelle_professionalita: valoriStelle.professionalita || null,
       mese_lavoro: document.getElementById('rec-mese').value || null,
       anno_lavoro: parseInt(document.getElementById('rec-anno').value) || null
     };
