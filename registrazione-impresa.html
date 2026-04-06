@@ -310,7 +310,7 @@
           user_id: user_id,
           nome: nome,
           tipo: 'impresa',
-          mestiere: mestiere,
+          mestieri: mestiere ? [mestiere] : [],
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
           anni_esperienza: parseInt(document.getElementById('anni_esperienza').value) || null,

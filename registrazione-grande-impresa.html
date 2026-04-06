@@ -251,6 +251,21 @@
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+
+    function togglePassword(id, btn) {
+      const input = document.getElementById(id);
+      const svg = btn.querySelector('svg');
+      if (input.type === 'password') {
+        input.type = 'text';
+        svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+        btn.style.color = '#2a7a4b';
+      } else {
+        input.type = 'password';
+        svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        btn.style.color = '#aaa';
+      }
+    }
+
     let currentStep = 1;
     let logoFile = null;
 
@@ -336,7 +351,7 @@
           user_id: user_id,
           nome: nome,
           tipo: 'grande_impresa',
-          mestiere: mestiere,
+          mestieri: mestiere ? [mestiere] : [],
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
           anni_esperienza: parseInt(document.getElementById('anni_esperienza').value) || null,
