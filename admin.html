@@ -287,6 +287,10 @@
       <div class="nav-item" onclick="showSection('locandine',this)">
         <span class="nav-icon">📢</span> Locandine Pub.
       </div>
+      <div class="nav-item" onclick="showSection('segnalazioni',this)">
+        <span class="nav-icon">🆘</span> Segnalazioni
+        <span class="nav-badge" id="badge-segnalazioni" style="background:var(--rosso)">0</span>
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
@@ -533,6 +537,26 @@
       </div>
     </div>
 
+    <!-- SEGNALAZIONI -->
+    <div class="section" id="sec-segnalazioni">
+      <div class="topbar">
+        <div class="topbar-title">🆘 Segnalazioni</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrizione</th>
+              <th>Stato</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table-segnalazioni"><tr><td colspan="4" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -578,6 +602,7 @@ function showSection(id, el) {
   document.getElementById('sec-' + id).classList.add('active');
   el.classList.add('active');
   if (id === 'locandine') caricaPreviewLocandine();
+  if (id === 'segnalazioni') caricaSegnalazioni();
 }
 
 // LOCANDINE
@@ -650,7 +675,7 @@ async function uploadLocandina(slot, input) {
 
 // CARICA TUTTO
 async function caricaTutto() {
-  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni()]);
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaSegnalazioni()]);
 }
 
 // CARICA IMPRESE
@@ -843,6 +868,39 @@ function apriDettaglio(id) {
 
 function chiudiModal() {
   document.getElementById('modal-overlay').classList.remove('show');
+}
+
+// SEGNALAZIONI
+async function caricaSegnalazioni() {
+  const tbody = document.getElementById('table-segnalazioni');
+  tbody.innerHTML = '<tr><td colspan="4" class="loading">Caricamento...</td></tr>';
+  const { data, error } = await sb.from('segnalazioni').select('*').order('created_at', { ascending: false });
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
+    return;
+  }
+  const aperte = (data || []).filter(s => s.stato === 'aperto').length;
+  document.getElementById('badge-segnalazioni').textContent = aperte;
+  if (!data || !data.length) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-table"><div class="eicon">🆘</div>Nessuna segnalazione</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(s => {
+    const data_fmt = new Date(s.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const isAperto = s.stato === 'aperto';
+    return `<tr>
+      <td style="white-space:nowrap">${data_fmt}</td>
+      <td style="max-width:400px;word-break:break-word">${s.descrizione || '–'}</td>
+      <td><span class="badge ${isAperto ? 'badge-att' : 'badge-v'}">${isAperto ? '🔴 Aperto' : '✅ Risolto'}</span></td>
+      <td>${isAperto ? `<button class="action-btn btn-verifica" onclick="segnalazioneRisolta('${s.id}')">Segna come risolto</button>` : '–'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function segnalazioneRisolta(id) {
+  const { error } = await sb.from('segnalazioni').update({ stato: 'risolto' }).eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaSegnalazioni();
 }
 </script>
 <script src="/cookie-banner.js"></script>
