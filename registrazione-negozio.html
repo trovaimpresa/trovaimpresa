@@ -357,6 +357,14 @@
       btn.disabled = true;
 
       try {
+        btn.textContent = '⏳ Creazione account...';
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
+        if (authError) throw new Error(authError.message);
+        const user_id = authData.user.id;
+
+        const { error: signInError } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (signInError) throw new Error(signInError.message);
+
         let logo_url = null;
         if (logoFile) {
           btn.textContent = '⏳ Caricamento logo...';
@@ -366,6 +374,7 @@
         btn.textContent = '⏳ Salvataggio...';
 
         const dati = {
+          user_id: user_id,
           nome_negozio: nome,
           tipo: tipo,
           email: email,
@@ -376,28 +385,21 @@
           marchi: document.getElementById('marchi').value,
           orari: document.getElementById('orari').value,
           sito_web: document.getElementById('sito_web').value,
-          password: password,
           piano: document.getElementById('piano_scelto').value,
           logo_url: logo_url,
           created_at: new Date().toISOString()
         };
 
-        const res = await fetch(SUPABASE_URL + '/rest/v1/negozi', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY,
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify(dati)
-        });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error('Errore ' + res.status + ': ' + errText);
+        const { error: insertError } = await supabaseClient.from('imprese').insert(dati);
+        if (insertError) {
+          if (insertError.code === '23505' || insertError.message.includes('duplicate key') || insertError.message.includes('imprese_email_key')) {
+            alert('⚠️ Questa email è già registrata. Vai al login o usa un\'altra email.');
+            return;
+          }
+          throw new Error(insertError.message);
         }
 
-        window.location.href = 'grazie.html';
+        window.location.href = 'pannello-impresa.html';
       } catch (err) {
         console.error(err);
         btn.disabled = false;
