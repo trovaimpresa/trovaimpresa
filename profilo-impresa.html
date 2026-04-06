@@ -701,28 +701,28 @@
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Nome</label>
-        <input type="text" class="form-input" placeholder="Il tuo nome">
+        <input type="text" class="form-input" id="prev-nome" placeholder="Il tuo nome">
       </div>
       <div class="form-group">
         <label class="form-label">Cognome</label>
-        <input type="text" class="form-input" placeholder="Il tuo cognome">
+        <input type="text" class="form-input" id="prev-cognome" placeholder="Il tuo cognome">
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Email</label>
-        <input type="email" class="form-input" placeholder="email@esempio.it">
+        <input type="email" class="form-input" id="prev-email" placeholder="email@esempio.it">
       </div>
       <div class="form-group">
         <label class="form-label">Telefono</label>
-        <input type="tel" class="form-input" placeholder="+39 000 000 0000">
+        <input type="tel" class="form-input" id="prev-telefono" placeholder="+39 000 000 0000">
       </div>
     </div>
 
     <div class="form-group">
       <label class="form-label">Tipo di lavoro</label>
-      <select class="form-select">
+      <select class="form-select" id="prev-tipo">
         <option value="">Seleziona...</option>
         <option>Ristrutturazione appartamento</option>
         <option>Nuova costruzione</option>
@@ -736,10 +736,12 @@
 
     <div class="form-group">
       <label class="form-label">Descrivi il tuo progetto</label>
-      <textarea class="form-textarea" placeholder="Descrivi brevemente il lavoro che devi fare, i metri quadri, i tempi..."></textarea>
+      <textarea class="form-textarea" id="prev-descrizione" placeholder="Descrivi brevemente il lavoro che devi fare, i metri quadri, i tempi..."></textarea>
     </div>
 
-    <button class="btn-submit" onclick="submitPreventivo()">
+    <div id="prev-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;"></div>
+
+    <button class="btn-submit" id="prev-btn" onclick="submitPreventivo()">
       📋 Invia richiesta gratuita
     </button>
   </div>
@@ -1024,6 +1026,55 @@ function closeModal() {
 
 function closeModalOutside(e) {
   if (e.target === document.getElementById('modal')) closeModal();
+}
+
+async function submitPreventivo() {
+  const nome = document.getElementById('prev-nome').value.trim();
+  const cognome = document.getElementById('prev-cognome').value.trim();
+  const email = document.getElementById('prev-email').value.trim();
+  const telefono = document.getElementById('prev-telefono').value.trim();
+  const tipo_lavoro = document.getElementById('prev-tipo').value;
+  const descrizione = document.getElementById('prev-descrizione').value.trim();
+  const msgEl = document.getElementById('prev-msg');
+  const btn = document.getElementById('prev-btn');
+
+  if (!nome || !email) {
+    msgEl.textContent = 'Inserisci almeno nome e email.';
+    msgEl.style.cssText = 'display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#fff0f0;color:#c0392b;';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Invio in corso...';
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const impresaId = parseInt(params.get('id'));
+
+    const { error } = await supabaseClient.from('preventivi').insert({
+      impresa_id: impresaId,
+      nome,
+      cognome,
+      email,
+      telefono,
+      tipo_lavoro,
+      descrizione,
+      created_at: new Date().toISOString()
+    });
+
+    if (error) throw error;
+
+    msgEl.textContent = '✅ Richiesta inviata! Ti risponderemo entro 24 ore.';
+    msgEl.style.cssText = 'display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#e8f5ee;color:#2a7a4b;';
+    btn.textContent = '✅ Inviato';
+    setTimeout(() => closeModal(), 2000);
+
+  } catch(e) {
+    msgEl.textContent = 'Errore: ' + e.message;
+    msgEl.style.cssText = 'display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#fff0f0;color:#c0392b;';
+    btn.disabled = false;
+    btn.textContent = '📋 Invia richiesta gratuita';
+  }
 }
 
 // Carica profilo e recensioni al caricamento pagina
