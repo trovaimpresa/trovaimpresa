@@ -15,7 +15,7 @@
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_DATE_KEY);
     }
-  } catch (e) { return; }
+  } catch (e) { /* localStorage non disponibile — mostra il banner comunque */ }
 
   var style = document.createElement('style');
   style.textContent = [
