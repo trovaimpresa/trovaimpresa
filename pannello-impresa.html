@@ -888,7 +888,7 @@ async function caricaCandidatiZona() {
 
 // CARICA RECENSIONI
 async function caricaRecensioni() {
-  const { data } = await sb.from('recensioni').select('*')
+  const { data } = await sb.from('feedback_clienti').select('*')
     .eq('impresa_id', impresaCorrente.id)
     .order('created_at', { ascending: false });
 
