@@ -60,6 +60,9 @@
         </button>
       </div>
     </div>
+    <div style="text-align:right;margin-top:6px;">
+      <a href="#" onclick="resetPassword(event)" style="font-size:0.82rem;color:#2a7a4b;font-weight:600;text-decoration:none;">Hai dimenticato la password?</a>
+    </div>
 
     <button type="button" class="btn-login" id="btn-login" onclick="doLogin()">🔐 Accedi</button>
 
@@ -83,6 +86,15 @@
     document.getElementById('password').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') doLogin();
     });
+
+    async function resetPassword(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) { alert('Inserisci la tua email nel campo sopra.'); return; }
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+      if (error) { alert('Errore: ' + error.message); }
+      else { alert('Email di reset inviata! Controlla la tua casella di posta.'); }
+    }
 
     function togglePassword() {
       const input = document.getElementById('password');
