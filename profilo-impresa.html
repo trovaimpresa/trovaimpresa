@@ -144,6 +144,21 @@
     background:var(--verde); color:white;
     display:flex; align-items:center; gap:4px;
   }
+  .badge-anno { background:var(--verde3); color:var(--verde2); }
+
+  /* TAB RECENSIONI */
+  .rec-tabs {
+    display:flex; gap:0; border-bottom:2px solid var(--border);
+    margin-bottom:20px;
+  }
+  .rec-tab {
+    padding:10px 20px; border:none; background:none; cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.85rem;
+    color:var(--light); border-bottom:2px solid transparent;
+    margin-bottom:-2px; transition:all 0.15s;
+  }
+  .rec-tab:hover { color:var(--dark); }
+  .rec-tab.active { color:var(--verde2); border-bottom-color:var(--verde); }
 
   .rating-row {
     display:flex; align-items:center; gap:12px;
@@ -458,6 +473,12 @@
       </div>
     </div>
 
+    <!-- MAPPA POSIZIONE -->
+    <div class="card" id="card-mappa-profilo" style="display:none;">
+      <div class="card-title"><span>📍</span> Dove siamo</div>
+      <div id="mappa-profilo" style="height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--border);"></div>
+    </div>
+
     <!-- FOTO LAVORI -->
     <div class="card">
       <div class="card-title"><span>📸</span> Foto dei lavori</div>
@@ -470,64 +491,27 @@
     <div class="card">
       <div class="card-title"><span>⭐</span> Recensioni dei clienti</div>
 
-      <!-- Rating breakdown -->
-      <div class="rating-breakdown">
-        <div class="rb-row">
-          <span class="rb-label">Qualità</span>
-          <div class="rb-bar"><div class="rb-fill" style="width:96%"></div></div>
-          <span class="rb-num">4.8</span>
-        </div>
-        <div class="rb-row">
-          <span class="rb-label">Puntualità</span>
-          <div class="rb-bar"><div class="rb-fill" style="width:90%"></div></div>
-          <span class="rb-num">4.5</span>
-        </div>
-        <div class="rb-row">
-          <span class="rb-label">Prezzo</span>
-          <div class="rb-bar"><div class="rb-fill" style="width:84%"></div></div>
-          <span class="rb-num">4.2</span>
-        </div>
-        <div class="rb-row">
-          <span class="rb-label">Pulizia</span>
-          <div class="rb-bar"><div class="rb-fill" style="width:100%"></div></div>
-          <span class="rb-num">5.0</span>
-        </div>
+      <!-- TAB BUTTONS -->
+      <div class="rec-tabs">
+        <button class="rec-tab active" id="tab-btn-lista" onclick="showRecTab('lista',this)">
+          ⭐ Recensioni (<span id="rec-count">0</span>)
+        </button>
+        <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">
+          ✍️ Lascia una recensione
+        </button>
       </div>
 
-      <!-- Singole recensioni -->
-      <div class="review">
-        <div class="review-header">
-          <span class="reviewer-name">Giulia M.</span>
-          <span class="review-date">Gennaio 2025</span>
-        </div>
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">Lavoro eccellente! Hanno ristrutturato il mio appartamento in tempi record e con una cura nei dettagli incredibile. Il team è professionale e sempre disponibile.</p>
-        <div class="review-work">✔ Ristrutturazione appartamento 90mq</div>
+      <!-- TAB: RECENSIONI REALI -->
+      <div id="rec-tab-lista">
+        <div id="rec-lista"></div>
       </div>
 
+      <!-- TAB: FORM -->
+      <div id="rec-tab-form" style="display:none;">
+        <div class="recensione-section" id="rec-section">
+          <p style="font-size:0.88rem;color:var(--mid);margin-bottom:16px;">Hai lavorato con questa impresa? Condividi la tua esperienza — puoi anche tornare a modificarla in futuro.</p>
 
-      <div class="review">
-        <div class="review-header">
-          <span class="reviewer-name">Laura B.</span>
-          <span class="review-date">Settembre 2024</span>
-        </div>
-        <div class="review-stars">★★★★☆</div>
-        <p class="review-text">Ottima impresa, lavori di qualità. Un piccolo ritardo all'inizio ma poi hanno recuperato. Il risultato finale è perfetto.</p>
-        <div class="review-work">✔ Impianto elettrico + pittura</div>
-      </div>
-
-      <div style="text-align:center; margin-top:20px;">
-        <a href="#" style="color:var(--verde);font-weight:700;font-size:0.9rem;text-decoration:none;">Leggi tutte le 47 recensioni →</a>
-      </div>
-
-      <!-- FORM LASCIA RECENSIONE -->
-      <div class="recensione-section" id="rec-section">
-        <h3>⭐ Lascia una recensione</h3>
-        <p>Hai lavorato con questa impresa? Condividi la tua esperienza — puoi anche tornare a modificarla in futuro.</p>
-
-        <div id="rec-lista" style="margin-bottom:24px;"></div>
-
-        <div id="rec-form">
+          <div id="rec-form">
           <div class="stelle-gruppo">
             <label>⭐ Qualità del lavoro</label>
             <div class="stelle-row" id="stelle-qualita">
@@ -603,9 +587,10 @@
           <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
           <div class="rec-msg" id="rec-msg"></div>
         </div>
-      </div>
-    </div>
-  </div>
+        </div><!-- /rec-section -->
+      </div><!-- /rec-tab-form -->
+    </div><!-- /card recensioni -->
+  </div><!-- /colonna sinistra -->
 
   <!-- SIDEBAR -->
   <div class="sidebar">
@@ -726,6 +711,48 @@ async function caricaProfilo(impresaId) {
       if (el) el.textContent = nomeImpresa;
     }
 
+    // Badges dinamici
+    const badgesEl = document.getElementById('profile-badges');
+    if (badgesEl) {
+      const parts = [];
+      if (d.verificata) parts.push('<span class="badge badge-verified">✓ Verificata</span>');
+      const anno = d.anno_fondazione || (d.tipo === 'grande_impresa' ? d.anni_esperienza : null);
+      if (anno && anno > 1900) parts.push(`<span class="badge badge-anno">Dal ${anno}</span>`);
+      badgesEl.innerHTML = parts.join('');
+    }
+
+    // Specializzazioni da mestieri[] + specializzazioni
+    const mestGrid = document.getElementById('profile-mestieri');
+    if (mestGrid) {
+      const iconMap = {
+        'ristrutturazione': '🏠', 'muratura': '🧱', 'carpenteria': '🪵', 'carpentiere': '🪵',
+        'impianti elettrici': '⚡', 'elettricista': '⚡', 'impianti idraulici': '🚿', 'idraulico': '🚿',
+        'impianti termici': '🔥', 'termoidraulico': '🔥', 'pittura': '🎨', 'pittore': '🎨',
+        'pavimenti': '🪵', 'piastrellista': '🪵', 'serramenti': '🪟', 'infissi': '🪟',
+        'demolizione': '⛏️', 'opere strutturali': '🏗️', 'costruzione': '🏗️',
+        'coperture': '🏘️', 'tetti': '🏘️', 'giardiniere': '🌿', 'paesaggistica': '🌿',
+        'restauro': '🏛️', 'efficienza energetica': '♻️', 'fotovoltaico': '☀️',
+        'fabbro': '🔩', 'falegname': '🪚', 'sgomberi': '📦',
+      };
+      const voci = [];
+      const mestieri = Array.isArray(d.mestieri) ? d.mestieri : (d.mestieri ? [d.mestieri] : []);
+      if (d.mestiere) mestieri.unshift(d.mestiere);
+      mestieri.forEach(m => { if (m) voci.push(m); });
+      if (d.specializzazioni) {
+        String(d.specializzazioni).split(/[,;\n]+/).forEach(s => { const t = s.trim(); if (t) voci.push(t); });
+      }
+      const uniq = [...new Set(voci.filter(Boolean))];
+      if (uniq.length) {
+        mestGrid.innerHTML = uniq.map(v => {
+          const key = Object.keys(iconMap).find(k => v.toLowerCase().includes(k));
+          const icon = iconMap[key] || '🔧';
+          return `<div class="cat-item"><span class="cat-icon">${icon}</span> ${v}</div>`;
+        }).join('');
+      } else {
+        mestGrid.innerHTML = '<div style="color:#aaa;font-size:0.85rem;grid-column:1/-1;text-align:center;padding:8px">Nessuna specializzazione indicata</div>';
+      }
+    }
+
     // Città / provincia
     const cityEl = document.getElementById('profile-city');
     if (cityEl) {
@@ -796,16 +823,25 @@ async function caricaProfilo(impresaId) {
       }
     }
 
-    // Mappa posizione
+    // Mappa sidebar
     if (d.lat && d.lng) {
       const mappaEl = document.getElementById('mappa-impresa');
-      mappaEl.style.display = 'block';
-      const mappa = L.map('mappa-impresa', { zoomControl: true, scrollWheelZoom: false }).setView([d.lat, d.lng], 15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(mappa);
-      L.marker([d.lat, d.lng]).addTo(mappa);
-      setTimeout(() => mappa.invalidateSize(), 200);
+      if (mappaEl) {
+        mappaEl.style.display = 'block';
+        const mappaSidebar = L.map('mappa-impresa', { zoomControl: false, scrollWheelZoom: false }).setView([d.lat, d.lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(mappaSidebar);
+        L.marker([d.lat, d.lng]).addTo(mappaSidebar);
+        setTimeout(() => mappaSidebar.invalidateSize(), 200);
+      }
+      // Mappa principale nel contenuto
+      const cardMappa = document.getElementById('card-mappa-profilo');
+      if (cardMappa) {
+        cardMappa.style.display = '';
+        const mappaMain = L.map('mappa-profilo', { zoomControl: true, scrollWheelZoom: false }).setView([d.lat, d.lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(mappaMain);
+        L.marker([d.lat, d.lng]).addTo(mappaMain);
+        setTimeout(() => mappaMain.invalidateSize(), 300);
+      }
     }
 
   } catch(e) { console.error('Errore caricamento profilo:', e); }
@@ -856,7 +892,12 @@ async function caricaRecensioni(impresaId) {
     });
     const data = await res.json();
     const div = document.getElementById('rec-lista');
-    if (!data || data.length === 0) { div.innerHTML = ''; return; }
+    const countEl = document.getElementById('rec-count');
+    if (countEl) countEl.textContent = data?.length || 0;
+    if (!data || data.length === 0) {
+      div.innerHTML = '<div style="text-align:center;color:#aaa;padding:24px 0;font-size:0.9rem">Nessuna recensione ancora. Sii il primo!</div>';
+      return;
+    }
     div.innerHTML = data.map(r => {
       const media = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(Boolean);
       const avg = media.length ? (media.reduce((a,b)=>a+b,0)/media.length).toFixed(1) : '-';
@@ -1049,6 +1090,13 @@ async function caricaFotoLavori(impresaId) {
       .getPublicUrl(`${impresaId}/${f.name}`);
     return `<div class="foto-item"><img src="${publicUrl}" alt="Foto lavoro" loading="lazy"></div>`;
   }).join('');
+}
+
+function showRecTab(id, btn) {
+  document.querySelectorAll('.rec-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rec-tab-lista').style.display = id === 'lista' ? '' : 'none';
+  document.getElementById('rec-tab-form').style.display  = id === 'form'  ? '' : 'none';
 }
 
 // Carica profilo e recensioni al caricamento pagina

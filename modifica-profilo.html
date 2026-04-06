@@ -140,6 +140,10 @@
             </div>
           </div>
           <div class="form-group">
+            <label>Anno di fondazione / inizio attività</label>
+            <input type="number" id="f-anno_fondazione-artigiano" min="1900" max="2026" placeholder="Es. 2005">
+          </div>
+          <div class="form-group">
             <label>Mestiere principale <span class="required">*</span></label>
             <select id="f-mestiere-artigiano">
               <option value="">— Seleziona —</option>
@@ -186,6 +190,10 @@
             </div>
           </div>
           <div class="form-group">
+            <label>Anno di fondazione</label>
+            <input type="number" id="f-anno_fondazione-impresa" min="1900" max="2026" placeholder="Es. 1998">
+          </div>
+          <div class="form-group">
             <label>Specializzazione principale <span class="required">*</span></label>
             <select id="f-mestiere-impresa">
               <option value="">— Seleziona —</option>
@@ -225,7 +233,7 @@
             </div>
             <div class="form-group">
               <label>Anno di fondazione</label>
-              <input type="number" id="f-anni_esperienza-grande_impresa" min="1900" max="2025" placeholder="Es. 1990">
+              <input type="number" id="f-anno_fondazione-grande_impresa" min="1900" max="2026" placeholder="Es. 1990">
             </div>
           </div>
           <div class="form-group">
@@ -537,6 +545,7 @@
         document.getElementById('f-partita_iva-artigiano').value = d.partita_iva || '';
         document.getElementById('f-provincia-artigiano').value = d.provincia || '';
         document.getElementById('f-anni_esperienza-artigiano').value = d.anni_esperienza || '';
+        document.getElementById('f-anno_fondazione-artigiano').value = d.anno_fondazione || '';
         setSelectValue('f-mestiere-artigiano', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-artigiano').value = d.specializzazioni || '';
         document.getElementById('f-zone-artigiano').value = d.zone || '';
@@ -546,6 +555,7 @@
         document.getElementById('f-partita_iva-impresa').value = d.partita_iva || '';
         document.getElementById('f-provincia-impresa').value = d.provincia || '';
         document.getElementById('f-anni_esperienza-impresa').value = d.anni_esperienza || '';
+        document.getElementById('f-anno_fondazione-impresa').value = d.anno_fondazione || '';
         setSelectValue('f-mestiere-impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-impresa').value = d.specializzazioni || '';
         document.getElementById('f-zone-impresa').value = d.zone || '';
@@ -554,7 +564,7 @@
         document.getElementById('f-nome-grande_impresa').value = d.nome || '';
         document.getElementById('f-partita_iva-grande_impresa').value = d.partita_iva || '';
         document.getElementById('f-provincia-grande_impresa').value = d.provincia || '';
-        document.getElementById('f-anni_esperienza-grande_impresa').value = d.anni_esperienza || '';
+        document.getElementById('f-anno_fondazione-grande_impresa').value = d.anno_fondazione || d.anni_esperienza || '';
         setSelectValue('f-mestiere-grande_impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-grande_impresa').value = d.specializzazioni || '';
         document.getElementById('f-zone-grande_impresa').value = d.zone || '';
@@ -702,6 +712,7 @@
             partita_iva: document.getElementById('f-partita_iva-artigiano').value.trim(),
             provincia: document.getElementById('f-provincia-artigiano').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-artigiano').value) || null,
+            anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-artigiano').value) || null,
             mestieri: document.getElementById('f-mestiere-artigiano').value ? [document.getElementById('f-mestiere-artigiano').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-artigiano').value.trim(),
             zone: document.getElementById('f-zone-artigiano').value.trim()
@@ -713,6 +724,7 @@
             partita_iva: document.getElementById('f-partita_iva-impresa').value.trim(),
             provincia: document.getElementById('f-provincia-impresa').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-impresa').value) || null,
+            anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-impresa').value) || null,
             mestieri: document.getElementById('f-mestiere-impresa').value ? [document.getElementById('f-mestiere-impresa').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-impresa').value.trim(),
             zone: document.getElementById('f-zone-impresa').value.trim()
@@ -723,7 +735,7 @@
             nome: document.getElementById('f-nome-grande_impresa').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-grande_impresa').value.trim(),
             provincia: document.getElementById('f-provincia-grande_impresa').value.trim(),
-            anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-grande_impresa').value) || null,
+            anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-grande_impresa').value) || null,
             mestieri: document.getElementById('f-mestiere-grande_impresa').value ? [document.getElementById('f-mestiere-grande_impresa').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-grande_impresa').value.trim(),
             zone: document.getElementById('f-zone-grande_impresa').value.trim()
