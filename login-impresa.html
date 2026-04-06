@@ -91,7 +91,9 @@
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
       if (!email) { alert('Inserisci la tua email nel campo sopra.'); return; }
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password.html'
+      });
       if (error) { alert('Errore: ' + error.message); }
       else { alert('Email di reset inviata! Controlla la tua casella di posta.'); }
     }
