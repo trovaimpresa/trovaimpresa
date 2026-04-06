@@ -66,7 +66,11 @@
     .tag button { background: none; border: none; color: white; cursor: pointer; font-size: 16px; line-height: 1; }
     .tag-input { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; min-height: 44px; }
     .tag-input input { flex: 1; min-width: 120px; border: none; background: transparent; font-size: 14px; outline: none; }
+    .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #333; border-bottom: 1px solid #f0f0f0; }
+    .map-dd-item:hover { background: #e8f5e9; }
+    .map-dd-item:last-child { border-bottom: none; }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
   <div class="container">
@@ -95,7 +99,17 @@
           <label>Città <span class="required">*</span></label>
           <input type="text" id="f-citta" placeholder="Es. Roma">
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Posizione sulla mappa <span style="font-weight:400;color:#aaa;">(opzionale)</span></label>
+          <div style="position:relative;">
+            <input type="text" id="map-search" placeholder="Cerca indirizzo o città..." autocomplete="off" oninput="nominatimSearch(this.value)" style="border-radius:8px 8px 0 0;">
+            <div id="map-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;z-index:1000;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+          </div>
+          <div id="mappa" style="height:200px;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;"></div>
+        </div>
+        <input type="hidden" id="f-lat">
+        <input type="hidden" id="f-lng">
+        <div class="form-group" style="margin-top:18px;">
           <label>Sito web</label>
           <input type="url" id="f-sito_web" placeholder="https://www.miosito.it">
         </div>
@@ -388,6 +402,7 @@
     </div><!-- /content -->
   </div><!-- /container -->
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -399,6 +414,41 @@
     let logoFile = null;
     let specializzazioni = [];
     let tipoCategoria = null;
+
+    // ===== MAPPA OPENSTREETMAP =====
+    let mappa = null, mapMarker = null, nomTimer = null;
+    (function initMappa() {
+      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initMappa); return; }
+      mappa = L.map('mappa').setView([41.9, 12.5], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(mappa);
+      new ResizeObserver(() => { mappa.invalidateSize(); }).observe(document.getElementById('mappa'));
+    })();
+    function nominatimSearch(q) {
+      clearTimeout(nomTimer);
+      const dd = document.getElementById('map-dropdown');
+      if (q.length < 3) { dd.style.display = 'none'; return; }
+      nomTimer = setTimeout(async () => {
+        try {
+          const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=it&q=' + encodeURIComponent(q), { headers: { 'Accept-Language': 'it' } });
+          const results = await r.json();
+          if (!results.length) { dd.style.display = 'none'; return; }
+          dd.innerHTML = results.map(x => '<div class="map-dd-item" onclick="selezionaLuogo(' + x.lat + ',' + x.lon + ',' + JSON.stringify(x.display_name) + ')">' + x.display_name + '</div>').join('');
+          dd.style.display = 'block';
+        } catch(e) { dd.style.display = 'none'; }
+      }, 400);
+    }
+    function selezionaLuogo(lat, lon, nome) {
+      document.getElementById('f-lat').value = lat;
+      document.getElementById('f-lng').value = lon;
+      document.getElementById('map-search').value = nome;
+      document.getElementById('map-dropdown').style.display = 'none';
+      mappa.setView([lat, lon], 14);
+      if (mapMarker) mapMarker.setLatLng([lat, lon]); else mapMarker = L.marker([lat, lon]).addTo(mappa);
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#map-search') && !e.target.closest('#map-dropdown')) { var dd = document.getElementById('map-dropdown'); if (dd) dd.style.display = 'none'; }
+    });
+    // ===========================
 
     window.addEventListener('DOMContentLoaded', init);
 
@@ -460,6 +510,17 @@
       document.getElementById('f-citta').value = d.citta || '';
       document.getElementById('f-sito_web').value = d.sito_web || '';
       document.getElementById('f-descrizione').value = d.descrizione || '';
+
+      // Posizione mappa
+      if (d.lat && d.lng) {
+        document.getElementById('f-lat').value = d.lat;
+        document.getElementById('f-lng').value = d.lng;
+        if (mappa) {
+          mappa.setView([d.lat, d.lng], 14);
+          if (mapMarker) mapMarker.setLatLng([d.lat, d.lng]);
+          else mapMarker = L.marker([d.lat, d.lng]).addTo(mappa);
+        }
+      }
 
       // Logo attuale
       if (d.logo_url) {
@@ -629,7 +690,9 @@
           citta: document.getElementById('f-citta').value.trim(),
           sito_web: document.getElementById('f-sito_web').value.trim(),
           descrizione: document.getElementById('f-descrizione').value.trim(),
-          logo_url: logo_url
+          logo_url: logo_url,
+          lat: parseFloat(document.getElementById('f-lat').value) || null,
+          lng: parseFloat(document.getElementById('f-lng').value) || null
         };
 
         // Campi specifici per tipo
