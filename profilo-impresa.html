@@ -947,27 +947,24 @@ async function inviaRecensione() {
       updated_at: new Date().toISOString()
     };
 
+    const authHeaders = { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Prefer': 'return=minimal' };
     let res;
     if (esistente && esistente.length > 0) {
       // Aggiorna recensione esistente
       res = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti?id=eq.${esistente[0].id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Prefer': 'return=minimal' },
-        body: JSON.stringify(dati)
+        method: 'PATCH', headers: authHeaders, body: JSON.stringify(dati)
       });
+      if (!res.ok) throw new Error('Errore ' + res.status);
       mostraMsg('✅ Recensione aggiornata con successo!', 'ok');
     } else {
       // Nuova recensione
       dati.created_at = new Date().toISOString();
       res = await fetch(`${SUPA_URL}/rest/v1/feedback_clienti`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Prefer': 'return=minimal' },
-        body: JSON.stringify(dati)
+        method: 'POST', headers: authHeaders, body: JSON.stringify(dati)
       });
+      if (!res.ok) throw new Error('Errore ' + res.status);
       mostraMsg('✅ Recensione pubblicata! Grazie per il tuo feedback.', 'ok');
     }
-
-    if (!res.ok) throw new Error('Errore ' + res.status);
     caricaRecensioni(impresaId);
     document.getElementById('rec-form').style.opacity = '0.5';
 
