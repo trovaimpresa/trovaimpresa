@@ -476,7 +476,7 @@
         document.getElementById('f-partita_iva-artigiano').value = d.partita_iva || '';
         document.getElementById('f-provincia-artigiano').value = d.provincia || '';
         document.getElementById('f-anni_esperienza-artigiano').value = d.anni_esperienza || '';
-        setSelectValue('f-mestiere-artigiano', d.mestiere);
+        setSelectValue('f-mestiere-artigiano', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-artigiano').value = d.specializzazioni || '';
         document.getElementById('f-zone-artigiano').value = d.zone || '';
 
@@ -485,7 +485,7 @@
         document.getElementById('f-partita_iva-impresa').value = d.partita_iva || '';
         document.getElementById('f-provincia-impresa').value = d.provincia || '';
         document.getElementById('f-anni_esperienza-impresa').value = d.anni_esperienza || '';
-        setSelectValue('f-mestiere-impresa', d.mestiere);
+        setSelectValue('f-mestiere-impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-impresa').value = d.specializzazioni || '';
         document.getElementById('f-zone-impresa').value = d.zone || '';
 
@@ -494,7 +494,7 @@
         document.getElementById('f-partita_iva-grande_impresa').value = d.partita_iva || '';
         document.getElementById('f-provincia-grande_impresa').value = d.provincia || '';
         document.getElementById('f-anni_esperienza-grande_impresa').value = d.anni_esperienza || '';
-        setSelectValue('f-mestiere-grande_impresa', d.mestiere);
+        setSelectValue('f-mestiere-grande_impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-grande_impresa').value = d.specializzazioni || '';
         document.getElementById('f-zone-grande_impresa').value = d.zone || '';
 
@@ -639,7 +639,7 @@
             partita_iva: document.getElementById('f-partita_iva-artigiano').value.trim(),
             provincia: document.getElementById('f-provincia-artigiano').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-artigiano').value) || null,
-            mestiere: document.getElementById('f-mestiere-artigiano').value,
+            mestieri: document.getElementById('f-mestiere-artigiano').value ? [document.getElementById('f-mestiere-artigiano').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-artigiano').value.trim(),
             zone: document.getElementById('f-zone-artigiano').value.trim()
           });
@@ -650,7 +650,7 @@
             partita_iva: document.getElementById('f-partita_iva-impresa').value.trim(),
             provincia: document.getElementById('f-provincia-impresa').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-impresa').value) || null,
-            mestiere: document.getElementById('f-mestiere-impresa').value,
+            mestieri: document.getElementById('f-mestiere-impresa').value ? [document.getElementById('f-mestiere-impresa').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-impresa').value.trim(),
             zone: document.getElementById('f-zone-impresa').value.trim()
           });
@@ -661,7 +661,7 @@
             partita_iva: document.getElementById('f-partita_iva-grande_impresa').value.trim(),
             provincia: document.getElementById('f-provincia-grande_impresa').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-grande_impresa').value) || null,
-            mestiere: document.getElementById('f-mestiere-grande_impresa').value,
+            mestieri: document.getElementById('f-mestiere-grande_impresa').value ? [document.getElementById('f-mestiere-grande_impresa').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-grande_impresa').value.trim(),
             zone: document.getElementById('f-zone-grande_impresa').value.trim()
           });
