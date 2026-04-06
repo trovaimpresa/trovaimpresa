@@ -222,6 +222,26 @@
   .profilo-row:last-child { border-bottom:none; }
   .profilo-key { color:var(--mid); font-weight:600; }
 
+  /* === 2FA MODAL === */
+  .mfa-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:999; align-items:center; justify-content:center; padding:20px; }
+  .mfa-overlay.open { display:flex; }
+  .mfa-box { background:white; border-radius:20px; padding:36px 32px; width:100%; max-width:440px; box-shadow:0 24px 80px rgba(0,0,0,0.25); }
+  .mfa-box h2 { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--dark); margin-bottom:6px; }
+  .mfa-box p { font-size:0.85rem; color:var(--mid); margin-bottom:20px; line-height:1.5; }
+  .mfa-qr { text-align:center; margin:16px 0; }
+  .mfa-qr svg { max-width:180px; border:1px solid var(--border); border-radius:8px; padding:8px; }
+  .mfa-secret { font-size:0.75rem; color:var(--mid); text-align:center; margin-bottom:16px; word-break:break-all; }
+  .mfa-input { width:100%; padding:13px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:1.1rem; font-family:inherit; text-align:center; letter-spacing:4px; outline:none; margin-bottom:14px; }
+  .mfa-input:focus { border-color:var(--verde); box-shadow:0 0 0 3px rgba(42,122,75,0.1); }
+  .mfa-btn { width:100%; padding:13px; background:var(--verde); color:white; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
+  .mfa-btn:hover { background:var(--verde2); }
+  .mfa-btn:disabled { opacity:0.6; cursor:not-allowed; }
+  .mfa-cancel { display:block; text-align:center; margin-top:12px; font-size:0.83rem; color:var(--mid); cursor:pointer; }
+  .mfa-cancel:hover { color:var(--dark); }
+  .mfa-alert { padding:10px 14px; border-radius:8px; font-size:0.83rem; margin-bottom:14px; }
+  .mfa-alert-error { background:#fff0f0; border:1px solid #ffcccc; color:#cc0000; }
+  .mfa-alert-success { background:var(--verde3); border:1px solid #a8d5b5; color:var(--verde2); }
+
   /* === LAVORO SECTION === */
   .lavoro-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
   .btn-nuovo-annuncio {
@@ -548,6 +568,23 @@
   </main>
 </div>
 
+<!-- MODAL 2FA -->
+<div class="mfa-overlay" id="mfa-overlay">
+  <div class="mfa-box">
+    <h2 id="mfa-title">🔐 Attiva verifica in due passaggi</h2>
+    <p id="mfa-desc">Scansiona il QR code con Google Authenticator o un'app compatibile, poi inserisci il codice per confermare l'attivazione.</p>
+    <div id="mfa-alert-box" style="display:none;" class="mfa-alert"></div>
+    <div id="mfa-step-qr">
+      <div class="mfa-qr" id="mfa-qr-wrap"></div>
+      <div class="mfa-secret" id="mfa-secret"></div>
+      <p style="font-size:0.82rem;color:var(--mid);margin-bottom:12px;text-align:center;">Dopo aver scansionato, inserisci il codice a 6 cifre:</p>
+      <input type="text" class="mfa-input" id="mfa-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+      <button class="mfa-btn" id="mfa-btn" onclick="confermaMFA()">✅ Attiva 2FA</button>
+    </div>
+    <span class="mfa-cancel" onclick="chiudiMFA()">Annulla</span>
+  </div>
+</div>
+
 <!-- MODAL AI PREVENTIVO -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)chiudiModal()">
   <div class="modal">
@@ -667,6 +704,84 @@ async function doLogout() {
   impresaCorrente = null;
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('pannello').style.display = 'none';
+}
+
+// =====================
+// 2FA (TOTP)
+// =====================
+let mfa2faFactorId = null;
+let mfa2faChallengeId = null;
+
+async function avviaMFA(e) {
+  e.preventDefault();
+  mfaShowAlert('', '');
+  document.getElementById('mfa-code').value = '';
+  document.getElementById('mfa-overlay').classList.add('open');
+  document.getElementById('mfa-btn').disabled = true;
+  document.getElementById('mfa-btn').textContent = '⏳ Caricamento...';
+
+  const { data, error } = await sb.auth.mfa.enroll({ factorType: 'totp' });
+  if (error) {
+    mfaShowAlert('Errore: ' + error.message, 'error');
+    document.getElementById('mfa-btn').textContent = '✅ Attiva 2FA';
+    return;
+  }
+  mfa2faFactorId = data.id;
+
+  // Mostra QR code (SVG fornito da Supabase)
+  document.getElementById('mfa-qr-wrap').innerHTML = data.totp.qr_code;
+  document.getElementById('mfa-secret').textContent = 'Codice manuale: ' + data.totp.secret;
+  document.getElementById('mfa-btn').disabled = false;
+  document.getElementById('mfa-btn').textContent = '✅ Attiva 2FA';
+
+  // Avvia subito la challenge
+  const { data: ch, error: chErr } = await sb.auth.mfa.challenge({ factorId: mfa2faFactorId });
+  if (chErr) { mfaShowAlert('Errore challenge: ' + chErr.message, 'error'); return; }
+  mfa2faChallengeId = ch.id;
+}
+
+async function confermaMFA() {
+  const code = document.getElementById('mfa-code').value.trim();
+  if (code.length !== 6) { mfaShowAlert('Inserisci un codice a 6 cifre.', 'error'); return; }
+  const btn = document.getElementById('mfa-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Verifica...';
+  mfaShowAlert('', '');
+
+  const { error } = await sb.auth.mfa.verify({
+    factorId: mfa2faFactorId,
+    challengeId: mfa2faChallengeId,
+    code
+  });
+
+  if (error) {
+    mfaShowAlert('❌ Codice non valido o scaduto. Riprova.', 'error');
+    btn.disabled = false;
+    btn.textContent = '✅ Attiva 2FA';
+    return;
+  }
+
+  mfaShowAlert('✅ 2FA attivato con successo!', 'success');
+  btn.style.display = 'none';
+  document.getElementById('mfa-qr-wrap').style.display = 'none';
+  document.getElementById('mfa-secret').style.display = 'none';
+  document.querySelector('#mfa-step-qr p').style.display = 'none';
+  document.getElementById('mfa-code').style.display = 'none';
+  document.getElementById('mfa-title').textContent = '🔐 2FA attivato!';
+  document.getElementById('mfa-desc').textContent = 'Da ora ti verrà chiesto il codice ad ogni accesso.';
+  setTimeout(chiudiMFA, 2500);
+}
+
+function chiudiMFA() {
+  document.getElementById('mfa-overlay').classList.remove('open');
+}
+
+function mfaShowAlert(msg, type) {
+  const box = document.getElementById('mfa-alert-box');
+  if (!msg) { box.style.display = 'none'; return; }
+  box.className = 'mfa-alert mfa-alert-' + type;
+  box.textContent = msg;
+  box.style.display = 'block';
 }
 
 function showSection(id, el) {
@@ -816,6 +931,8 @@ function caricaProfilo() {
     <div class="profilo-row"><span class="profilo-key">Stato</span><span>${i.verificata ? '✅ Verificata' : '⏳ In attesa di verifica'}</span></div>
     <br>
     <a href="modifica-profilo.html" style="color:var(--verde);font-weight:700;font-size:0.88rem">✏️ Modifica profilo →</a>
+    &nbsp;&nbsp;
+    <a href="#" onclick="avviaMFA(event)" style="color:var(--arancio);font-weight:700;font-size:0.88rem" id="link-2fa">🔐 Attiva 2FA →</a>
   `;
 }
 

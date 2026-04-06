@@ -47,21 +47,31 @@
 
     <div class="errore" id="errore"></div>
 
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="email" placeholder="mario@example.com" autocomplete="email">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <div class="password-wrapper">
-        <input type="password" id="password" placeholder="La tua password" autocomplete="current-password">
-        <button class="toggle-pw" type="button" onclick="togglePassword()" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
+    <div id="step-login">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="mario@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" placeholder="La tua password" autocomplete="current-password">
+          <button class="toggle-pw" type="button" onclick="togglePassword()" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div style="text-align:right;margin-top:6px;">
+        <a href="#" onclick="resetPassword(event)" style="font-size:0.82rem;color:#2a7a4b;font-weight:600;text-decoration:none;">Hai dimenticato la password?</a>
       </div>
     </div>
-    <div style="text-align:right;margin-top:6px;">
-      <a href="#" onclick="resetPassword(event)" style="font-size:0.82rem;color:#2a7a4b;font-weight:600;text-decoration:none;">Hai dimenticato la password?</a>
+
+    <div id="step-2fa" style="display:none;">
+      <p style="font-size:0.85rem;color:#555;margin-bottom:16px;line-height:1.5;">🔐 Il tuo account ha la verifica in due passaggi attiva.<br>Inserisci il codice a 6 cifre dall'app authenticator.</p>
+      <div class="form-group">
+        <label>Codice di verifica</label>
+        <input type="text" id="totp-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="letter-spacing:4px;font-size:1.2rem;text-align:center;">
+      </div>
     </div>
 
     <button type="button" class="btn-login" id="btn-login" onclick="doLogin()">🔐 Accedi</button>
@@ -83,8 +93,15 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
     );
 
+    let mfaFactorId = null;
+    let mfaChallengeId = null;
+
     document.getElementById('password').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') doLogin();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && document.getElementById('step-2fa').style.display !== 'none') doVerify2FA();
     });
 
     async function resetPassword(e) {
@@ -103,20 +120,72 @@
       input.type = input.type === 'password' ? 'text' : 'password';
     }
 
+    function showError(msg) {
+      const el = document.getElementById('errore');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
     async function doLogin() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const btn = document.getElementById('btn-login');
       btn.disabled = true;
       btn.innerHTML = '⏳ Accesso in corso...';
+      document.getElementById('errore').style.display = 'none';
       try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        window.location.href = 'pannello-impresa.html';
+
+        // Controlla se il 2FA è richiesto
+        const { data: aal } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal.nextLevel === 'aal2' && aal.nextLevel !== aal.currentLevel) {
+          // MFA attivo: recupera il fattore TOTP e avvia la challenge
+          const { data: factors } = await supabaseClient.auth.mfa.listFactors();
+          const totp = factors.totp[0];
+          if (!totp) throw new Error('Nessun fattore TOTP trovato.');
+          mfaFactorId = totp.id;
+          const { data: ch, error: chErr } = await supabaseClient.auth.mfa.challenge({ factorId: mfaFactorId });
+          if (chErr) throw chErr;
+          mfaChallengeId = ch.id;
+
+          // Mostra step 2FA
+          document.getElementById('step-login').style.display = 'none';
+          document.getElementById('step-2fa').style.display = 'block';
+          document.querySelector('.card h1').textContent = '🔐 Verifica identità';
+          document.querySelector('.card p').textContent = 'Secondo passaggio di accesso';
+          btn.onclick = doVerify2FA;
+          btn.innerHTML = '✅ Verifica codice';
+          btn.disabled = false;
+        } else {
+          window.location.href = 'pannello-impresa.html';
+        }
       } catch(err) {
-        alert('Errore: ' + err.message);
+        showError('❌ ' + err.message);
         btn.disabled = false;
         btn.innerHTML = '🔐 Accedi';
+      }
+    }
+
+    async function doVerify2FA() {
+      const code = document.getElementById('totp-code').value.trim();
+      if (code.length !== 6) { showError('Inserisci un codice a 6 cifre.'); return; }
+      const btn = document.getElementById('btn-login');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Verifica in corso...';
+      document.getElementById('errore').style.display = 'none';
+      try {
+        const { error } = await supabaseClient.auth.mfa.verify({
+          factorId: mfaFactorId,
+          challengeId: mfaChallengeId,
+          code
+        });
+        if (error) throw error;
+        window.location.href = 'pannello-impresa.html';
+      } catch(err) {
+        showError('❌ Codice non valido o scaduto.');
+        btn.disabled = false;
+        btn.innerHTML = '✅ Verifica codice';
       }
     }
   </script>
