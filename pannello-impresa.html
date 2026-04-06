@@ -805,7 +805,14 @@ function caricaProfilo() {
     <div class="profilo-row"><span class="profilo-key">Email</span><span>${i.email}</span></div>
     <div class="profilo-row"><span class="profilo-key">Telefono</span><span>${i.telefono || '—'}</span></div>
     <div class="profilo-row"><span class="profilo-key">Città</span><span>${i.citta || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Provincia</span><span>${i.provincia || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Partita IVA</span><span>${i.partita_iva || '—'}</span></div>
     <div class="profilo-row"><span class="profilo-key">Mestieri</span><span>${(i.mestieri || []).join(', ') || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Specializzazioni</span><span>${i.specializzazioni || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Zone</span><span>${i.zone || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Anni esperienza</span><span>${i.anni_esperienza || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Sito web</span><span>${i.sito_web || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Descrizione</span><span>${i.descrizione || '—'}</span></div>
     <div class="profilo-row"><span class="profilo-key">Stato</span><span>${i.verificata ? '✅ Verificata' : '⏳ In attesa di verifica'}</span></div>
     <br>
     <a href="modifica-profilo.html" style="color:var(--verde);font-weight:700;font-size:0.88rem">✏️ Modifica profilo →</a>
