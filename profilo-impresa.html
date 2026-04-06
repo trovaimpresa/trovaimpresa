@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="page-title">Profilo Impresa — TrovaImpresa</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   :root {
     --verde:   #2a7a4b;
@@ -666,6 +667,8 @@
         <li><span class="icon">🕐</span> Lun–Ven 8:00–18:00</li>
       </ul>
 
+      <div id="mappa-impresa" style="display:none;height:180px;border-radius:12px;overflow:hidden;margin-top:12px;border:1px solid var(--border);"></div>
+
       <div class="mini-stats">
         <div class="mini-stat">
           <span class="mini-stat-num">25+</span>
@@ -742,6 +745,7 @@
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // SUPABASE CONFIG
@@ -836,6 +840,17 @@ async function caricaProfilo(impresaId) {
       if (luogoCompleto) {
         contactIndirizzo.innerHTML = '<span class="icon">📍</span> ' + luogoCompleto;
       }
+    }
+
+    // Mappa posizione
+    if (d.lat && d.lng) {
+      const mappaEl = document.getElementById('mappa-impresa');
+      mappaEl.style.display = 'block';
+      const mappa = L.map('mappa-impresa', { zoomControl: true, scrollWheelZoom: false }).setView([d.lat, d.lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(mappa);
+      L.marker([d.lat, d.lng]).addTo(mappa);
     }
 
   } catch(e) { console.error('Errore caricamento profilo:', e); }
