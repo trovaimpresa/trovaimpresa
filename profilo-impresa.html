@@ -851,6 +851,7 @@ async function caricaProfilo(impresaId) {
         attribution: '© OpenStreetMap'
       }).addTo(mappa);
       L.marker([d.lat, d.lng]).addTo(mappa);
+      setTimeout(() => mappa.invalidateSize(), 200);
     }
 
   } catch(e) { console.error('Errore caricamento profilo:', e); }
@@ -1009,6 +1010,20 @@ function mostraMsg(testo, tipo) {
   msg.textContent = testo;
   msg.className = 'rec-msg ' + tipo;
   msg.style.display = 'block';
+}
+
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
 }
 
 // Carica profilo e recensioni al caricamento pagina
