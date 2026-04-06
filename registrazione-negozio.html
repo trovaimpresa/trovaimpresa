@@ -448,6 +448,7 @@
       mappa = L.map('mappa').setView([41.9, 12.5], 5);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(mappa);
       new ResizeObserver(() => { mappa.invalidateSize(); }).observe(document.getElementById('mappa'));
+      setTimeout(function() { mappa.invalidateSize(); }, 200);
     })();
     function nominatimSearch(q) {
       clearTimeout(nomTimer);
