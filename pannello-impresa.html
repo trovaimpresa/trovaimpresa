@@ -539,6 +539,7 @@
       </div>
     </nav>
     <div class="sidebar-footer">
+      <button onclick="apriModalSegnalazione()" style="width:100%;padding:10px;background:#fff3cd;color:#7b4f00;border:1px solid #ffc107;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;">🆘 Segnala problema</button>
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
     </div>
   </aside>
@@ -846,6 +847,33 @@
           <button class="btn-copia" onclick="copiaPreventivoDash()">📋 Copia</button>
         </div>
         <textarea class="ai-result-text" id="ai-result-text"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SEGNALAZIONE -->
+<div class="modal-ai-overlay" id="modal-segnalazione" onclick="if(event.target===this)chiudiModalSegnalazione()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🆘 Segnala un problema</h2>
+        <p>Il tuo messaggio verrà ricevuto dal team TrovaImpresa</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalSegnalazione()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="segnalazione-form">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Descrivi il problema</label>
+          <textarea id="segnalazione-testo" rows="5" placeholder="Descrivi il problema che hai riscontrato..." style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+        <button id="btn-invia-segnalazione" onclick="inviaSegnalazione()" style="width:100%;padding:13px;background:var(--verde);color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Invia</button>
+      </div>
+      <div id="segnalazione-success" style="display:none;text-align:center;padding:20px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">✅</div>
+        <p style="font-size:15px;font-weight:600;color:#2a7a4b;margin-bottom:6px;">Segnalazione inviata!</p>
+        <p style="font-size:13px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
       </div>
     </div>
   </div>
@@ -1709,6 +1737,38 @@ async function inviaPreventivo() {
   btn.textContent = '✅ Preventivo inviato!';
   await caricaPreventivi();
   setTimeout(() => chiudiModal(), 1500);
+}
+
+function apriModalSegnalazione() {
+  document.getElementById('segnalazione-testo').value = '';
+  document.getElementById('segnalazione-form').style.display = '';
+  document.getElementById('segnalazione-success').style.display = 'none';
+  const btn = document.getElementById('btn-invia-segnalazione');
+  btn.disabled = false;
+  btn.textContent = 'Invia';
+  document.getElementById('modal-segnalazione').classList.add('show');
+}
+function chiudiModalSegnalazione() {
+  document.getElementById('modal-segnalazione').classList.remove('show');
+}
+async function inviaSegnalazione() {
+  const descrizione = document.getElementById('segnalazione-testo').value.trim();
+  if (!descrizione) { alert('Descrivi il problema prima di inviare.'); return; }
+  const btn = document.getElementById('btn-invia-segnalazione');
+  btn.disabled = true;
+  btn.textContent = '⏳ Invio in corso...';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const user_id = session ? session.user.id : null;
+    const { error } = await sb.from('segnalazioni').insert({ user_id, descrizione, stato: 'aperto' });
+    if (error) throw error;
+    document.getElementById('segnalazione-form').style.display = 'none';
+    document.getElementById('segnalazione-success').style.display = '';
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Invia';
+    alert('Errore durante l\'invio: ' + err.message);
+  }
 }
 </script>
 <div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
