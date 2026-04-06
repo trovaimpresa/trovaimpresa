@@ -1213,7 +1213,9 @@
                 });
 
                 const testo_risposta = await response.text();
+                if (!response.ok) throw new Error(testo_risposta);
                 const json = JSON.parse(testo_risposta);
+                if (!json.categoria) throw new Error('Risposta non valida dal server.');
 
                 const icone = {
                     artigiano: '🔨',
