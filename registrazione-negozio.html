@@ -404,21 +404,15 @@
         const dati = {
           user_id: user_id,
           nome: nome,
-          tipo: tipo,
           email: email,
           telefono: telefono,
           citta: citta,
-          cap: document.getElementById('cap').value,
           indirizzo: document.getElementById('indirizzo').value,
           lat: parseFloat(document.getElementById('lat').value) || null,
           lng: parseFloat(document.getElementById('lng').value) || null,
-          prodotti: document.getElementById('prodotti').value,
-          marchi: document.getElementById('marchi').value,
-          orari: document.getElementById('orari').value,
           sito_web: document.getElementById('sito_web').value,
           piano: document.getElementById('piano_scelto').value,
-          logo_url: logo_url,
-          created_at: new Date().toISOString()
+          logo_url: logo_url
         };
 
         const { error: insertError } = await supabaseClient.from('imprese').insert(dati);

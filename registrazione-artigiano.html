@@ -405,7 +405,6 @@
         const dati = {
           user_id: user_id,
           nome: nome,
-          tipo: 'artigiano',
           mestieri: mestiere ? [mestiere] : [],
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
@@ -420,8 +419,7 @@
           lng: parseFloat(document.getElementById('lng').value) || null,
           sito_web: document.getElementById('sito_web').value,
           logo_url: logo_url,
-          piano: document.getElementById('piano_scelto').value,
-          created_at: new Date().toISOString()
+          piano: document.getElementById('piano_scelto').value
         };
         const { error: insertError } = await supabaseClient.from('imprese').insert(dati);
         if (insertError) {

@@ -512,10 +512,6 @@
         const dati = {
           user_id,
           nome,
-          cognome,
-          tipo,
-          nome_attivita: document.getElementById('nome_attivita').value,
-          albo: document.getElementById('albo').value,
           partita_iva: document.getElementById('partita_iva').value,
           specializzazioni: specializzazioni.length > 0 ? JSON.stringify(specializzazioni) : null,
           descrizione: document.getElementById('descrizione').value,
@@ -523,14 +519,12 @@
           email,
           telefono,
           citta,
-          cap: document.getElementById('cap').value,
           indirizzo: document.getElementById('indirizzo').value,
           lat: parseFloat(document.getElementById('lat').value) || null,
           lng: parseFloat(document.getElementById('lng').value) || null,
           sito_web: document.getElementById('sito_web').value,
           piano: document.getElementById('piano_scelto').value,
-          logo_url,
-          created_at: new Date().toISOString()
+          logo_url
         };
 
         const { error: insertError } = await supabaseClient.from('imprese').insert(dati);
