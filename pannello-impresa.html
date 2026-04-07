@@ -1162,7 +1162,7 @@ async function doLogout() {
   impresaCorrente = null;
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('pannello').style.display = 'none';
-  window.location.href = 'login-impresa.html';
+  window.location.replace(window.location.href);
 }
 
 // =====================
