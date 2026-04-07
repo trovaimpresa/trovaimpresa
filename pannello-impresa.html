@@ -639,36 +639,6 @@
         </div>
       </div>
 
-      <!-- CALENDARIO & ORARIO -->
-      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
-
-        <!-- Orologio digitale -->
-        <div id="orologio-digitale" style="font-family:'Playfair Display',serif;font-size:2.4rem;color:#2a7a4b;text-align:center;letter-spacing:4px;margin-bottom:20px;font-weight:700"></div>
-
-        <!-- Calendario -->
-        <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;overflow:hidden">
-          <!-- Header navigazione mese -->
-          <div style="display:flex;align-items:center;justify-content:space-between;background:#2a7a4b;padding:12px 16px">
-            <button onclick="calMesePrecedente()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;line-height:1;padding:0 6px">&#8249;</button>
-            <div id="cal-mese-label" style="color:white;font-weight:700;font-size:0.95rem;text-transform:capitalize"></div>
-            <button onclick="calMeseSuccessivo()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;line-height:1;padding:0 6px">&#8250;</button>
-          </div>
-          <!-- Giorni settimana -->
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#e8f5ee">
-            <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#2a7a4b;padding:8px 0">Lun</div>
-            <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#2a7a4b;padding:8px 0">Mar</div>
-            <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#2a7a4b;padding:8px 0">Mer</div>
-            <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#2a7a4b;padding:8px 0">Gio</div>
-            <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#2a7a4b;padding:8px 0">Ven</div>
-            <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#2a7a4b;padding:8px 0">Sab</div>
-            <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#2a7a4b;padding:8px 0">Dom</div>
-          </div>
-          <!-- Griglia giorni -->
-          <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
-        </div>
-      </div>
-
       <!-- FOTO DEI LAVORI (dashboard) -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📷 Foto dei lavori</div>
@@ -1806,65 +1776,6 @@ async function inviaSegnalazione() {
     alert('Errore durante l\'invio: ' + err.message);
   }
 }
-
-// =====================
-// OROLOGIO & CALENDARIO
-// =====================
-(function() {
-  // Orologio
-  function aggiornaOrologio() {
-    const el = document.getElementById('orologio-digitale');
-    if (!el) return;
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    el.textContent = `${hh}:${mm}:${ss}`;
-  }
-  setInterval(aggiornaOrologio, 1000);
-  aggiornaOrologio();
-
-  // Calendario
-  const mesiIT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-  const oggi = new Date();
-  let calAnno = oggi.getFullYear();
-  let calMese = oggi.getMonth();
-
-  function renderCalendario() {
-    const label = document.getElementById('cal-mese-label');
-    const griglia = document.getElementById('cal-griglia');
-    if (!label || !griglia) return;
-
-    label.textContent = `${mesiIT[calMese]} ${calAnno}`;
-
-    const primoGiorno = new Date(calAnno, calMese, 1);
-    // Lunedì=0 … Domenica=6
-    let offset = primoGiorno.getDay() - 1;
-    if (offset < 0) offset = 6;
-
-    const giorniNelMese = new Date(calAnno, calMese + 1, 0).getDate();
-
-    let html = '';
-    for (let i = 0; i < offset; i++) {
-      html += '<div style="background:white;padding:8px 0"></div>';
-    }
-    for (let g = 1; g <= giorniNelMese; g++) {
-      const isOggi = g === oggi.getDate() && calMese === oggi.getMonth() && calAnno === oggi.getFullYear();
-      html += `<div style="background:white;text-align:center;padding:8px 0;font-size:0.85rem;font-weight:${isOggi?'800':'400'};color:${isOggi?'white':'#1a1a1a'};background:${isOggi?'#2a7a4b':'white'};border-radius:${isOggi?'50%':'0'};margin:${isOggi?'2px auto':'0'};width:${isOggi?'30px':'auto'};height:${isOggi?'30px':'auto'};line-height:${isOggi?'30px':'normal'};display:${isOggi?'flex':'block'};align-items:${isOggi?'center':'initial'};justify-content:${isOggi?'center':'initial'}">${g}</div>`;
-    }
-    griglia.innerHTML = html;
-  }
-
-  window.calMesePrecedente = function() { calMese--; if (calMese < 0) { calMese = 11; calAnno--; } renderCalendario(); };
-  window.calMeseSuccessivo = function() { calMese++; if (calMese > 11) { calMese = 0; calAnno++; } renderCalendario(); };
-
-  // Render iniziale (dopo che il DOM è pronto)
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', renderCalendario);
-  } else {
-    renderCalendario();
-  }
-})();
 </script>
 <div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
   <a href="disdetta.html" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
