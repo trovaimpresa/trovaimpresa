@@ -1082,46 +1082,22 @@ function mostraLogin() {
 }
 
 (async () => {
-  const giàAutenticato = sessionStorage.getItem('trovaimpresa_autenticato');
-
-  if (giàAutenticato) {
-    const { data: { session } } = await sb.auth.getSession();
-    document.getElementById('spinner-avvio').style.display = 'none';
-    if (session) {
-      caricaSessioneConDati(session);
-      return;
-    }
-    sessionStorage.removeItem('trovaimpresa_autenticato');
-  }
-
-  await new Promise(resolve => setTimeout(resolve, 300));
   const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    window.location.replace('login-impresa.html');
+    return;
+  }
+  const { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
+  if (!data) {
+    window.location.replace('login-impresa.html');
+    return;
+  }
+  impresaCorrente = data;
   document.getElementById('spinner-avvio').style.display = 'none';
-  if (session) {
-    sessionStorage.setItem('trovaimpresa_autenticato', '1');
-    caricaSessioneConDati(session);
-  } else {
-    mostraLogin();
-  }
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pannello').style.display = 'block';
+  inizializza();
 })();
-
-window.addEventListener('pageshow', (event) => {
-  if (event.persisted) {
-    sb.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        caricaSessioneConDati(session);
-      } else {
-        mostraLogin();
-      }
-    });
-  }
-});
-
-sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    caricaSessioneConDati(session);
-  }
-});
 
 // LOGIN
 async function doLogin() {
@@ -1157,12 +1133,8 @@ async function doLogin() {
 }
 
 async function doLogout() {
-  localStorage.removeItem('ti_logged');
   await sb.auth.signOut();
-  impresaCorrente = null;
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('pannello').style.display = 'none';
-  window.location.replace(window.location.href);
+  window.location.replace('login-impresa.html');
 }
 
 // =====================
