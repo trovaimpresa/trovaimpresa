@@ -472,6 +472,13 @@
     });
     // ===========================
 
+    (async () => {
+      const { data: { session: initialSession } } = await supabaseClient.auth.getSession();
+      if (!initialSession) {
+        window.location.href = 'login-impresa.html';
+      }
+    })();
+
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (!session) {
         window.location.href = 'login-impresa.html';
