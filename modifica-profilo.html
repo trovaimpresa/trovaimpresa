@@ -798,9 +798,11 @@
           document.getElementById('upload-area').style.borderColor = '#ddd';
         }
 
-        showSuccess('✅ Profilo aggiornato con successo! Reindirizzamento in corso...');
+        showSuccess('✅ Profilo aggiornato con successo!');
         window.scrollTo(0, 0);
-        setTimeout(() => { window.location.href = 'pannello-impresa.html'; }, 1500);
+        setTimeout(() => {
+          if (window.chiudiModalProfilo) { window.chiudiModalProfilo(); } else { window.location.href = 'pannello-impresa.html'; }
+        }, 1500);
 
       } catch (err) {
         console.error('Errore salvataggio:', err);
@@ -830,10 +832,12 @@
       document.getElementById('alert-box').style.display = 'none';
     }
 
-    history.pushState(null, '', location.href);
-    window.addEventListener('popstate', function() {
-      window.location.href = 'pannello-impresa.html';
-    });
+    if (!window.chiudiModalProfilo) {
+      history.pushState(null, '', location.href);
+      window.addEventListener('popstate', function() {
+        if (window.chiudiModalProfilo) { window.chiudiModalProfilo(); } else { window.location.href = 'pannello-impresa.html'; }
+      });
+    }
   </script>
   <script src="/cookie-banner.js"></script>
 <footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a></footer>
