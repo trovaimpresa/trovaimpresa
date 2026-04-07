@@ -815,6 +815,11 @@
     function clearAlert() {
       document.getElementById('alert-box').style.display = 'none';
     }
+
+    history.pushState(null, '', location.href);
+    window.addEventListener('popstate', function() {
+      window.location.href = 'pannello-impresa.html';
+    });
   </script>
   <script src="/cookie-banner.js"></script>
 </body>
