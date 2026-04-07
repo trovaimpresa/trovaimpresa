@@ -1830,11 +1830,6 @@ async function inviaSegnalazione() {
     alert('Errore durante l\'invio: ' + err.message);
   }
 }
-
-history.pushState(null, '', location.href);
-window.addEventListener('popstate', function() {
-  history.pushState(null, '', location.href);
-});
 </script>
 <!-- MODAL MODIFICA PROFILO -->
 <div id="modal-profilo-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center">
