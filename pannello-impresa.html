@@ -1090,6 +1090,13 @@ function mostraLogin() {
   }
 })();
 
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session && document.getElementById('pannello').style.display !== 'block') {
+    document.getElementById('spinner-avvio').style.display = 'none';
+    await caricaSessioneConDati(session);
+  }
+});
+
 // LOGIN
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
