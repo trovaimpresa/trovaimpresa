@@ -1910,20 +1910,27 @@ async function inviaSegnalazione() {
 
   async function caricaMeteo(lat, lon) {
     try {
-      const res  = await fetchConRetry(`https://wttr.in/${lat},${lon}?format=j1`);
-      const data = await res.json();
+      const meteoRes = await fetchConRetry(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=auto`
+      );
+      const meteo = await meteoRes.json();
 
-      const cur    = data.current_condition[0];
-      const area   = data.nearest_area?.[0];
-      const temp   = cur.temp_C;
-      const desc   = cur.weatherDesc?.[0]?.value ?? '';
-      const codice = parseInt(cur.weatherCode, 10);
-      const citta  = area?.areaName?.[0]?.value || `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+      let citta = `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+      try {
+        const geoRes = await fetchConRetry(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+        );
+        const geo = await geoRes.json();
+        citta = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.county || citta;
+      } catch (_) { /* usa coordinate come fallback */ }
+
+      const temp   = Math.round(meteo.current.temperature_2m);
+      const codice = meteo.current.weathercode;
 
       document.getElementById('meteo-icona').textContent      = WMO_ICONA[codice] ?? '🌡️';
       document.getElementById('meteo-citta').textContent      = citta;
       document.getElementById('meteo-temp').textContent       = `${temp}°C`;
-      document.getElementById('meteo-condizione').textContent = WMO[codice] ?? desc;
+      document.getElementById('meteo-condizione').textContent = WMO[codice] ?? '';
     } catch (e) {
       document.getElementById('meteo-citta').textContent = 'Meteo non disponibile';
       document.getElementById('meteo-icona').textContent = '❌';
