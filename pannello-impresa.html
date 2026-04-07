@@ -501,8 +501,8 @@
   <div class="login-box">
     <div class="login-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></div>
     <div class="login-sub">🏗️ Accesso Imprese</div>
-    <input type="email" id="login-email" placeholder="La tua email" onkeydown="if(event.key==='Enter')doLogin()">
-    <input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="email" id="login-email" placeholder="La tua email" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" id="login-pass" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">🔐 Accedi al pannello</button>
     <div class="login-err" id="login-err">❌ Email o password errati</div>
     <div class="login-reg">Non sei ancora registrato? <a href="registrazione.html">Registra la tua impresa →</a></div>
