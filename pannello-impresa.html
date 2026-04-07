@@ -667,16 +667,6 @@
           <!-- Griglia giorni -->
           <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
         </div>
-
-        <!-- Meteo -->
-        <div id="meteo-widget" style="margin-top:20px;border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:16px;min-height:72px">
-          <div id="meteo-icona" style="font-size:2.2rem;line-height:1">⏳</div>
-          <div>
-            <div id="meteo-citta" style="font-weight:700;font-size:0.95rem;color:#1a3a2a">Rilevamento posizione...</div>
-            <div id="meteo-temp" style="font-size:1.5rem;font-family:'Playfair Display',serif;color:#2a7a4b;font-weight:700"></div>
-            <div id="meteo-condizione" style="font-size:0.8rem;color:#999;margin-top:2px"></div>
-          </div>
-        </div>
       </div>
 
       <!-- FOTO DEI LAVORI (dashboard) -->
@@ -1873,61 +1863,6 @@ async function inviaSegnalazione() {
     document.addEventListener('DOMContentLoaded', renderCalendario);
   } else {
     renderCalendario();
-  }
-
-  // Meteo via open-meteo.com (no API key)
-  const WMO = {
-    0:'Sereno', 1:'Prevalentemente sereno', 2:'Parzialmente nuvoloso', 3:'Nuvoloso',
-    45:'Nebbia', 48:'Nebbia con brina',
-    51:'Pioggerella leggera', 53:'Pioggerella', 55:'Pioggerella intensa',
-    61:'Pioggia leggera', 63:'Pioggia', 65:'Pioggia intensa',
-    71:'Neve leggera', 73:'Neve', 75:'Neve intensa',
-    80:'Rovesci leggeri', 81:'Rovesci', 82:'Rovesci intensi',
-    95:'Temporale', 96:'Temporale con grandine', 99:'Temporale forte'
-  };
-  const WMO_ICONA = {
-    0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
-    45:'🌫️', 48:'🌫️',
-    51:'🌦️', 53:'🌦️', 55:'🌧️',
-    61:'🌧️', 63:'🌧️', 65:'🌧️',
-    71:'🌨️', 73:'❄️', 75:'❄️',
-    80:'🌦️', 81:'🌧️', 82:'⛈️',
-    95:'⛈️', 96:'⛈️', 99:'⛈️'
-  };
-
-  async function caricaMeteo(lat, lon) {
-    try {
-      const [meteoRes, geoRes] = await Promise.all([
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=auto`),
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
-      ]);
-      const meteo = await meteoRes.json();
-      const geo   = await geoRes.json();
-
-      const temp   = Math.round(meteo.current.temperature_2m);
-      const codice = meteo.current.weathercode;
-      const citta  = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.county || 'Posizione rilevata';
-
-      document.getElementById('meteo-icona').textContent     = WMO_ICONA[codice] ?? '🌡️';
-      document.getElementById('meteo-citta').textContent     = citta;
-      document.getElementById('meteo-temp').textContent      = `${temp}°C`;
-      document.getElementById('meteo-condizione').textContent = WMO[codice] ?? '';
-    } catch (e) {
-      document.getElementById('meteo-citta').textContent = 'Meteo non disponibile';
-      document.getElementById('meteo-icona').textContent = '❌';
-    }
-  }
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      pos => caricaMeteo(pos.coords.latitude, pos.coords.longitude),
-      ()  => {
-        document.getElementById('meteo-icona').textContent = '📍';
-        document.getElementById('meteo-citta').textContent = 'Posizione non autorizzata';
-      }
-    );
-  } else {
-    document.getElementById('meteo-citta').textContent = 'Geolocalizzazione non supportata';
   }
 })();
 </script>
