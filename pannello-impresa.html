@@ -951,35 +951,40 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let impresaCorrente = null;
 let preventivoCorrente = null;
 
-// Avvio: mostra spinner, poi controlla sessione con getSession()
+async function caricaSessioneConDati(session) {
+  let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (!data) {
+    const { data: byEmail } = await sb.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
+    if (byEmail) {
+      await sb.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
+      data = byEmail;
+    }
+  }
+  if (!data) {
+    const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', session.user.id).maybeSingle();
+    data = data2;
+  }
+  impresaCorrente = data || { email: session.user.email, id: session.user.id };
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pannello').style.display = 'block';
+  inizializza();
+}
+
+function mostraLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pannello').style.display = 'none';
+}
+
+// Avvio: mostra spinner, poi controlla sessione
 (async () => {
-  let { data: { session } } = await sb.auth.getSession();
-  if (!session && localStorage.getItem('ti_logged') === '1') {
-    const { data: refreshed } = await sb.auth.refreshSession();
-    session = refreshed?.session ?? null;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    const { data: { session: s2 } } = await sb.auth.refreshSession();
+    if (s2) { await caricaSessioneConDati(s2); } else { mostraLogin(); }
+  } else {
+    await caricaSessioneConDati(session);
   }
   document.getElementById('spinner-avvio').style.display = 'none';
-  if (session) {
-    let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
-    if (!data) {
-      const { data: byEmail } = await sb.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
-      if (byEmail) {
-        await sb.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
-        data = byEmail;
-      }
-    }
-    if (!data) {
-      const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', session.user.id).maybeSingle();
-      data = data2;
-    }
-    impresaCorrente = data || { email: session.user.email, id: session.user.id };
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('pannello').style.display = 'block';
-    inizializza();
-  } else {
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('pannello').style.display = 'none';
-  }
 })();
 
 // LOGIN
