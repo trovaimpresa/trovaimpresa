@@ -472,14 +472,12 @@
     });
     // ===========================
 
-    window.addEventListener('DOMContentLoaded', init);
-
-    async function init() {
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      if (!user) {
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (!session) {
         window.location.href = 'login-impresa.html';
         return;
       }
+      const user = session.user;
       currentUser = user;
 
       const { data, error } = await supabaseClient
@@ -498,7 +496,7 @@
       impresaData = data;
       document.getElementById('form-wrapper').style.display = 'block';
       popolaCampi(data);
-    }
+    });
 
     // Determina la categoria in base al campo tipo
     function getRealTipo(d) {
