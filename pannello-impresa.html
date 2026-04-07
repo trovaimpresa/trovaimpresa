@@ -1078,85 +1078,44 @@ function mostraLogin() {
   document.getElementById('pannello').style.display = 'none';
 }
 
-(async () => {
-  const giàAutenticato = sessionStorage.getItem('trovaimpresa_autenticato');
-
-  if (giàAutenticato) {
-    const { data: { session } } = await sb.auth.getSession();
-    document.getElementById('spinner-avvio').style.display = 'none';
-    if (session) {
-      caricaSessioneConDati(session);
-      return;
+(function() {
+  const saved = sessionStorage.getItem('ti_impresa');
+  if (saved) {
+    try {
+      impresaCorrente = JSON.parse(saved);
+      document.getElementById('spinner-avvio').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('pannello').style.display = 'block';
+      inizializza();
+    } catch(e) {
+      sessionStorage.removeItem('ti_impresa');
     }
-    sessionStorage.removeItem('trovaimpresa_autenticato');
-  }
-
-  await new Promise(resolve => setTimeout(resolve, 300));
-  const { data: { session } } = await sb.auth.getSession();
-  document.getElementById('spinner-avvio').style.display = 'none';
-  if (session) {
-    sessionStorage.setItem('trovaimpresa_autenticato', '1');
-    caricaSessioneConDati(session);
   } else {
-    mostraLogin();
+    document.getElementById('spinner-avvio').style.display = 'none';
   }
 })();
-
-window.addEventListener('pageshow', (event) => {
-  if (event.persisted) {
-    sb.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        caricaSessioneConDati(session);
-      } else {
-        mostraLogin();
-      }
-    });
-  }
-});
-
-sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    caricaSessioneConDati(session);
-  }
-});
 
 // LOGIN
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value.trim();
-  const btn = document.querySelector('.login-btn');
-  const errEl = document.getElementById('login-err');
-  if (!email || !pass) { errEl.style.display='block'; return; }
-  btn.disabled = true;
-  btn.textContent = '⏳ Accesso in corso...';
-  errEl.style.display = 'none';
-  const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (authError || !authData.user) {
-    errEl.style.display = 'block';
-    errEl.textContent = '❌ Email o password errati';
-    btn.disabled = false;
-    btn.textContent = '🔐 Accedi al pannello';
-    return;
-  }
-  let { data } = await sb.from('imprese').select('*').eq('email', authData.user.email).maybeSingle();
-  if (!data) {
-    errEl.style.display = 'block';
-    errEl.textContent = '❌ Profilo non trovato';
-    btn.disabled = false;
-    btn.textContent = '🔐 Accedi al pannello';
+  if (!email || !pass) { document.getElementById('login-err').style.display='block'; return; }
+  const { data, error } = await sb.from('imprese').select('*').eq('email', email).single();
+  if (error || !data) {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('login-err').textContent = '❌ Email non trovata';
     return;
   }
   impresaCorrente = data;
-  localStorage.setItem('ti_logged', '1');
+  sessionStorage.setItem('ti_impresa', JSON.stringify(data));
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
   inizializza();
 }
 
-async function doLogout() {
-  localStorage.removeItem('ti_logged');
-  await sb.auth.signOut();
+function doLogout() {
   impresaCorrente = null;
+  sessionStorage.removeItem('ti_impresa');
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('pannello').style.display = 'none';
 }
