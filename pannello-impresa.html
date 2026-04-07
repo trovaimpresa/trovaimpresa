@@ -1016,6 +1016,7 @@ async function caricaSessioneConDati(session) {
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
+  history.replaceState(null, '', 'pannello-impresa.html');
   inizializza();
 }
 
