@@ -983,8 +983,9 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let impresaCorrente = null;
 let preventivoCorrente = null;
 
-// Controlla sessione Supabase Auth prima di mostrare il pannello o reindirizzare
-async function caricaSessione(session) {
+// Avvio: controlla sessione esistente con getSession()
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
   if (session) {
     let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
     if (!data) {
@@ -998,11 +999,7 @@ async function caricaSessione(session) {
       const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', session.user.id).maybeSingle();
       data = data2;
     }
-    if (data) {
-      impresaCorrente = data;
-    } else {
-      impresaCorrente = { email: session.user.email, id: session.user.id };
-    }
+    impresaCorrente = data || { email: session.user.email, id: session.user.id };
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('pannello').style.display = 'block';
     inizializza();
@@ -1010,17 +1007,7 @@ async function caricaSessione(session) {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('pannello').style.display = 'none';
   }
-}
-
-// onAuthStateChange gestisce sessione iniziale e redirect da altre pagine
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-    if (session) await caricaSessione(session);
-    else caricaSessione(null);
-  } else if (event === 'SIGNED_OUT') {
-    caricaSessione(null);
-  }
-});
+})();
 
 // LOGIN
 async function doLogin() {
