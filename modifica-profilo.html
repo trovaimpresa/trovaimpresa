@@ -71,6 +71,20 @@
     .map-dd-item:last-child { border-bottom: none; }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    html, body { overflow-x: hidden; }
+    @media (max-width: 768px) {
+      body { padding: 10px !important; }
+      .container { margin: 12px auto !important; border-radius: 10px !important; }
+      .header { padding: 20px 16px !important; }
+      .header h1 { font-size: 1.2rem !important; }
+      .header p  { font-size: 0.82rem !important; }
+      .content { padding: 16px !important; }
+      .form-row { grid-template-columns: 1fr !important; }
+      .form-section-title { font-size: 0.95rem !important; margin: 18px 0 10px !important; }
+      .btn-back-link { font-size: 0.82rem !important; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
