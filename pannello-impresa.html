@@ -1079,7 +1079,17 @@ function mostraLogin() {
 }
 
 (async () => {
-  await new Promise(resolve => setTimeout(resolve, 800));
+  // Controlla subito localStorage per evitare flash del login
+  const storageKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+  const tokenInStorage = storageKey ? localStorage.getItem(storageKey) : null;
+
+  if (!tokenInStorage) {
+    document.getElementById('spinner-avvio').style.display = 'none';
+    mostraLogin();
+    return;
+  }
+
+  await new Promise(resolve => setTimeout(resolve, 300));
   const { data: { session } } = await sb.auth.getSession();
   document.getElementById('spinner-avvio').style.display = 'none';
   if (session) {
