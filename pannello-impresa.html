@@ -1830,6 +1830,11 @@ async function inviaSegnalazione() {
     alert('Errore durante l\'invio: ' + err.message);
   }
 }
+
+history.pushState(null, '', location.href);
+window.addEventListener('popstate', function() {
+  history.pushState(null, '', location.href);
+});
 </script>
 <div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
   <a href="disdetta.html" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
