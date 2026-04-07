@@ -1024,16 +1024,15 @@ function mostraLogin() {
   document.getElementById('pannello').style.display = 'none';
 }
 
-// Avvio: mostra spinner, poi controlla sessione
 (async () => {
+  await new Promise(resolve => setTimeout(resolve, 300));
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    const { data: { session: s2 } } = await sb.auth.refreshSession();
-    if (s2) { await caricaSessioneConDati(s2); } else { mostraLogin(); }
-  } else {
-    await caricaSessioneConDati(session);
-  }
   document.getElementById('spinner-avvio').style.display = 'none';
+  if (session) {
+    await caricaSessioneConDati(session);
+  } else {
+    mostraLogin();
+  }
 })();
 
 // LOGIN
