@@ -1084,12 +1084,12 @@ function mostraLogin() {
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
-    window.location.replace('login-impresa.html');
+    window.location.href = 'login-impresa.html';
     return;
   }
   const { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
   if (!data) {
-    window.location.replace('login-impresa.html');
+    window.location.href = 'login-impresa.html';
     return;
   }
   impresaCorrente = data;
