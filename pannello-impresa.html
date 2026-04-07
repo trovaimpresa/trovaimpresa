@@ -1102,6 +1102,18 @@ function mostraLogin() {
   }
 })();
 
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        caricaSessioneConDati(session);
+      } else {
+        mostraLogin();
+      }
+    });
+  }
+});
+
 sb.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) {
     caricaSessioneConDati(session);
