@@ -492,6 +492,58 @@
     display:flex; align-items:center; gap:10px;
   }
   .foto-limit-num { font-weight:800; color:var(--verde2); font-size:1rem; }
+
+  /* ===== MOBILE ===== */
+  html, body { overflow-x: hidden; }
+
+  @media (max-width: 768px) {
+    /* Hamburger button */
+    .mob-menu-btn {
+      display: flex !important;
+      position: fixed; top: 12px; left: 12px; z-index: 201;
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--verde); color: white; border: none;
+      font-size: 1.2rem; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Sidebar: nascosta di default, scorre da sinistra */
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      z-index: 200;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    /* Overlay scuro dietro sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 199;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    /* Main: occupa tutto lo schermo */
+    .main { margin-left: 0 !important; padding: 16px !important; padding-top: 64px !important; }
+
+    /* Stats su 1 colonna */
+    .stats-grid { grid-template-columns: 1fr !important; }
+
+    /* Accesso rapido su 1 colonna */
+    .dash-quick-grid { grid-template-columns: 1fr 1fr !important; }
+
+    /* Titoli ridotti */
+    .topbar-title { font-size: 1.2rem !important; }
+    .dash-stat-num { font-size: 1.5rem !important; }
+
+    /* Modal fullscreen su mobile */
+    .modal { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; height: 100vh !important; max-height: 100vh !important; }
+
+    /* Piano grid 1 col */
+    #card-free, #card-pro { width: 100% !important; }
+
+    /* Calendario 2x2 su mobile: 1 col */
+    #cal-orologio { font-size: 1.5rem !important; }
+  }
 </style>
 </head>
 <body>
@@ -519,7 +571,9 @@
 
 <!-- PANNELLO -->
 <div class="pannello" id="pannello">
-  <aside class="sidebar">
+  <button class="mob-menu-btn" style="display:none" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar-el">
     <div class="sidebar-logo">
       <span class="trova">Trova</span><span class="impresa">Impresa</span>
       <small>Pannello Impresa</small>
@@ -1845,6 +1899,10 @@ async function inviaSegnalazione() {
 <footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a></footer>
 </body>
 <script>
+function toggleSidebar() {
+  document.getElementById('sidebar-el').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
 function apriModalProfilo() {
   var overlay = document.getElementById('modal-profilo-overlay');
   var iframe  = document.getElementById('iframe-modifica-profilo');
