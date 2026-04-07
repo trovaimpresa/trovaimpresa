@@ -497,7 +497,15 @@
 <body>
 
 <!-- LOGIN -->
-<div class="login-screen" id="login-screen">
+<div id="spinner-avvio" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a2a,#2a7a4b)">
+  <div style="text-align:center;color:white">
+    <div style="font-size:2.5rem;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
+    <div style="font-size:1rem;opacity:0.85;font-weight:600">Caricamento...</div>
+  </div>
+</div>
+<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+
+<div class="login-screen" id="login-screen" style="display:none">
   <div class="login-box">
     <div class="login-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></div>
     <div class="login-sub">🏗️ Accesso Imprese</div>
@@ -983,9 +991,10 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let impresaCorrente = null;
 let preventivoCorrente = null;
 
-// Avvio: controlla sessione esistente con getSession()
+// Avvio: mostra spinner, poi controlla sessione con getSession()
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
+  document.getElementById('spinner-avvio').style.display = 'none';
   if (session) {
     let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
     if (!data) {
