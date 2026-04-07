@@ -993,7 +993,11 @@ let preventivoCorrente = null;
 
 // Avvio: mostra spinner, poi controlla sessione con getSession()
 (async () => {
-  const { data: { session } } = await sb.auth.getSession();
+  let { data: { session } } = await sb.auth.getSession();
+  if (!session && localStorage.getItem('ti_logged') === '1') {
+    const { data: refreshed } = await sb.auth.refreshSession();
+    session = refreshed?.session ?? null;
+  }
   document.getElementById('spinner-avvio').style.display = 'none';
   if (session) {
     let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
@@ -1045,6 +1049,7 @@ async function doLogin() {
     return;
   }
   impresaCorrente = data;
+  localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
   inizializza();
