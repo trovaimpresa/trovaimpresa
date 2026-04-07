@@ -656,6 +656,70 @@
             }
         }
     </style>
+    <!-- MOBILE FIX -->
+    <style>
+      html, body { overflow-x: hidden; }
+
+      @media (max-width: 768px) {
+        /* Top banner */
+        #topBanner { font-size: 14px !important; padding: 8px 12px !important; }
+        #topBanner .btn-pro { font-size: 11px !important; padding: 4px 10px !important; }
+
+        /* Navbar */
+        .navbar { padding: 10px 12px !important; flex-wrap: nowrap !important; gap: 6px !important; }
+        .nav-buttons { flex-wrap: nowrap !important; width: auto !important; gap: 6px !important; }
+        .btn-entra, .btn-registrati, .btn-pubblicita {
+          flex: none !important; padding: 8px 10px !important;
+          font-size: 12px !important; white-space: nowrap !important;
+        }
+
+        /* Hero logo */
+        .hero-logo { max-height: 150px !important; height: auto !important; width: auto !important; }
+
+        /* Hero tagline */
+        .hero-tagline { font-size: 16px !important; }
+
+        /* Card categoria: 2 colonne */
+        .lavoro-buttons-grid,
+        .sezione-card > div[style*="flex-wrap"] {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          gap: 10px !important;
+        }
+        .sezione-card a[style*="min-width"],
+        .sezione-card > div[style*="flex-wrap"] > a {
+          min-width: unset !important; max-width: 100% !important;
+          flex: none !important; width: 100% !important;
+        }
+
+        /* Banner pubblicitari su 1 colonna */
+        div[style*="grid-template-columns:1fr 1fr"],
+        div[style*="grid-template-columns: 1fr 1fr"] {
+          grid-template-columns: 1fr !important;
+        }
+
+        /* Esempi AI: 2 colonne, rimuovi min-width */
+        .lavoro-btn { min-width: unset !important; max-width: 100% !important; flex: 1 1 calc(50% - 5px) !important; }
+      }
+
+      @media (max-width: 375px) {
+        /* Top banner ancora più compatto */
+        #topBanner { font-size: 12px !important; }
+
+        /* Navbar: logo + bottoni su stessa riga, bottoni più piccoli */
+        .btn-entra, .btn-registrati, .btn-pubblicita { font-size: 11px !important; padding: 7px 8px !important; }
+
+        /* Hero logo */
+        .hero-logo { max-height: 120px !important; }
+
+        /* Card categoria: padding ridotto */
+        .sezione-card a[style*="padding"] { padding: 16px 8px !important; }
+
+        /* Testi sezione */
+        .sezione-card h2 { font-size: 18px !important; }
+        .sezione-card p  { font-size: 13px !important; }
+      }
+    </style>
 </head>
 <body>
 
