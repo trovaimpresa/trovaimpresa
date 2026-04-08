@@ -1020,6 +1020,13 @@ async function aggiungiLead() {
   document.getElementById('lead-citta').value = '';
   document.getElementById('lead-nota').value = '';
   await caricaLead();
+  if (email) {
+    fetch('/.netlify/functions/invia-email-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, citta })
+    });
+  }
   setTimeout(() => { msg.textContent = ''; }, 3000);
 }
 </script>
