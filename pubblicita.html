@@ -436,6 +436,7 @@ function goToStep(n) {
   document.getElementById('tab' + n).classList.add('active');
   if(n === 1) document.getElementById('tc0').textContent = '✓';
   window.scrollTo({top:0, behavior:'smooth'});
+  history.pushState({step: n}, '');
 }
 
 // SPAZI PICCOLI
@@ -493,7 +494,7 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('btn-ordina').addEventListener('click', inviaOrdine);
 });
 
-function showPage(n) {
+function showPage(n, fromPopstate) {
   document.querySelectorAll('.step-page').forEach(function(p){ p.classList.remove('visible'); });
   document.querySelectorAll('.step-tab').forEach(function(t){ t.classList.remove('active'); });
   if(n <= 3) {
@@ -504,6 +505,7 @@ function showPage(n) {
   }
   window.scrollTo({top:0, behavior:'smooth'});
   if(n === 3) aggiornaOrdine();
+  if(!fromPopstate) history.pushState({step: n}, '');
 }
 
 function selFmt(n) {
@@ -608,6 +610,13 @@ function selMetodo(m) {
   document.getElementById('iban-sec').classList.toggle('show', m === 'bonifico');
   document.getElementById('stripe-sec').classList.toggle('show', m === 'stripe');
 }
+
+history.replaceState({step: 0}, '');
+window.onpopstate = function(e) {
+  if (e.state && typeof e.state.step !== 'undefined') {
+    showPage(e.state.step, true);
+  }
+};
 
 function inviaOrdine() {
   var nome = document.getElementById('p-nome').value.trim();
