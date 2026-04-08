@@ -736,16 +736,24 @@
     let logoUrl = '';
     let fotoUrls = [];
 
-    function goStep(step) {
+    function goStep(step, fromPopstate) {
       document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
       document.getElementById(`step-${step}`).classList.add('active');
-      
+
       document.querySelectorAll('.step-circle').forEach(el => el.classList.remove('active'));
       document.getElementById(`circle-${step}`).classList.add('active');
-      
+
       currentStep = step;
       window.scrollTo(0, 0);
+      if (!fromPopstate) history.pushState({step: step}, '');
     }
+
+    history.replaceState({step: 1}, '');
+    window.onpopstate = function(e) {
+      if (e.state && typeof e.state.step !== 'undefined') {
+        goStep(e.state.step, true);
+      }
+    };
 
     function aggiungiMestiereSelect() {
       const sel = document.getElementById('mestieri-select');

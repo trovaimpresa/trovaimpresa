@@ -447,7 +447,7 @@
     }
 
     // NAVIGAZIONE
-    function goToStep(step) {
+    function goToStep(step, fromPopstate) {
       document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
       document.getElementById('step-' + step).classList.add('active');
@@ -456,6 +456,7 @@
       document.getElementById('btn-next').textContent = step === 4 ? '✓ Completa Registrazione' : 'Avanti →';
       currentStep = step;
       window.scrollTo(0, 0);
+      if (!fromPopstate) history.pushState({step: step}, '');
     }
 
     document.getElementById('btn-next').addEventListener('click', function() {
@@ -465,6 +466,13 @@
     document.getElementById('btn-back').addEventListener('click', function() {
       if (currentStep > 1) goToStep(currentStep - 1);
     });
+
+    history.replaceState({step: 1}, '');
+    window.onpopstate = function(e) {
+      if (e.state && typeof e.state.step !== 'undefined') {
+        goToStep(e.state.step, true);
+      }
+    };
 
     async function uploadLogo(file, email) {
       const ext = file.name.split('.').pop();
