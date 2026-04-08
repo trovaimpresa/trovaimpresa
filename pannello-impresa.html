@@ -1215,17 +1215,25 @@ function mfaShowAlert(msg, type) {
   box.style.display = 'block';
 }
 
-function showSection(id, el) {
+function showSection(id, el, fromPopstate) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   el.classList.add('active');
+  if (!fromPopstate) history.pushState({section: id}, '');
 }
 
-function showSectionById(id) {
+function showSectionById(id, fromPopstate) {
   const navItem = [...document.querySelectorAll('.nav-item')].find(n => n.getAttribute('onclick')?.includes(`'${id}'`));
-  if (navItem) showSection(id, navItem);
+  if (navItem) showSection(id, navItem, fromPopstate);
 }
+
+history.replaceState({section: 'dashboard'}, '');
+window.onpopstate = function(e) {
+  if (e.state && e.state.section) {
+    showSectionById(e.state.section, true);
+  }
+};
 
 async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
