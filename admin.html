@@ -291,6 +291,9 @@
         <span class="nav-icon">🆘</span> Segnalazioni
         <span class="nav-badge" id="badge-segnalazioni" style="background:var(--rosso)">0</span>
       </div>
+      <div class="nav-item" onclick="showSection('lead',this)">
+        <span class="nav-icon">👥</span> Lead
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
@@ -557,6 +560,57 @@
       </div>
     </div>
 
+    <!-- LEAD -->
+    <div class="section" id="sec-lead">
+      <div class="topbar">
+        <div class="topbar-title">👥 Lead</div>
+      </div>
+      <div style="padding:24px; max-width:700px;">
+        <div style="background:white; border-radius:16px; padding:24px; box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:28px;">
+          <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:18px;">➕ Aggiungi lead manualmente</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:0.72rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px;">Nome attività *</label>
+              <input type="text" id="lead-nome" class="search-input" style="width:100%" placeholder="Es. Edilcasa Rossi">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px;">Email</label>
+              <input type="email" id="lead-email" class="search-input" style="width:100%" placeholder="info@esempio.it">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px;">Telefono</label>
+              <input type="tel" id="lead-telefono" class="search-input" style="width:100%" placeholder="+39 000 0000000">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px;">Città</label>
+              <input type="text" id="lead-citta" class="search-input" style="width:100%" placeholder="Es. Roma">
+            </div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:0.72rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:5px;">Nota</label>
+            <textarea id="lead-nota" class="search-input" style="width:100%; height:80px; resize:vertical;" placeholder="Appunti, provenienza del lead..."></textarea>
+          </div>
+          <button onclick="aggiungiLead()" style="background:var(--verde); color:white; border:none; border-radius:10px; padding:11px 24px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer;">➕ Aggiungi Lead</button>
+          <span id="lead-msg" style="font-size:0.85rem; margin-left:14px;"></span>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin:0 24px 24px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome attività</th>
+              <th>Email</th>
+              <th>Telefono</th>
+              <th>Città</th>
+              <th>Stato</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="table-lead"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -603,6 +657,7 @@ function showSection(id, el, fromPopstate) {
   el.classList.add('active');
   if (id === 'locandine') caricaPreviewLocandine();
   if (id === 'segnalazioni') caricaSegnalazioni();
+  if (id === 'lead') caricaLead();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -910,6 +965,62 @@ async function segnalazioneRisolta(id) {
   const { error } = await sb.from('segnalazioni').update({ stato: 'risolto' }).eq('id', id);
   if (error) { alert('Errore: ' + error.message); return; }
   await caricaSegnalazioni();
+}
+
+// LEAD
+async function caricaLead() {
+  const tbody = document.getElementById('table-lead');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">Caricamento...</td></tr>';
+  const { data, error } = await sb.from('lead_imprese').select('*').order('created_at', { ascending: false });
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
+    return;
+  }
+  if (!data || !data.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">👥</div>Nessun lead</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(l => {
+    const data_fmt = new Date(l.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const statoBadge = l.stato === 'in_attesa' ? '<span class="badge badge-att">⏳ In attesa</span>' :
+                       l.stato === 'contattato' ? '<span class="badge badge-a">📞 Contattato</span>' :
+                       `<span class="badge">${l.stato}</span>`;
+    return `<tr>
+      <td style="font-weight:600">${l.nome_attivita || '–'}</td>
+      <td>${l.email || '–'}</td>
+      <td>${l.telefono || '–'}</td>
+      <td>${l.citta || '–'}</td>
+      <td>${statoBadge}</td>
+      <td style="white-space:nowrap">${data_fmt}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function aggiungiLead() {
+  const nome = document.getElementById('lead-nome').value.trim();
+  const email = document.getElementById('lead-email').value.trim();
+  const telefono = document.getElementById('lead-telefono').value.trim();
+  const citta = document.getElementById('lead-citta').value.trim();
+  const nota = document.getElementById('lead-nota').value.trim();
+  const msg = document.getElementById('lead-msg');
+  if (!nome) { msg.style.color = 'var(--rosso)'; msg.textContent = '⚠️ Il nome attività è obbligatorio.'; return; }
+  msg.textContent = '⏳ Salvataggio...';
+  msg.style.color = 'var(--mid)';
+  const { error } = await sb.from('lead_imprese').insert({ nome_attivita: nome, email, telefono, citta, nota, stato: 'in_attesa' });
+  if (error) {
+    msg.style.color = 'var(--rosso)';
+    msg.textContent = '❌ Errore: ' + error.message;
+    return;
+  }
+  msg.style.color = 'var(--verde)';
+  msg.textContent = '✅ Lead aggiunto!';
+  document.getElementById('lead-nome').value = '';
+  document.getElementById('lead-email').value = '';
+  document.getElementById('lead-telefono').value = '';
+  document.getElementById('lead-citta').value = '';
+  document.getElementById('lead-nota').value = '';
+  await caricaLead();
+  setTimeout(() => { msg.textContent = ''; }, 3000);
 }
 </script>
 <script src="/cookie-banner.js"></script>
