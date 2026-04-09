@@ -1067,7 +1067,7 @@ async function caricaSessioneConDati(session) {
     }
   }
   if (!data) {
-    const { data: data2 } = await sb.from('artigiani').select('*').eq('user_id', session.user.id).maybeSingle();
+    const { data: data2 } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
     data = data2;
   }
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
