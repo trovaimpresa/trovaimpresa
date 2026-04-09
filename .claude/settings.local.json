@@ -9,7 +9,20 @@
       "Bash(git commit -m ':*)",
       "Bash(python3 -)",
       "Bash(ls *.html)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(xargs wc:*)",
+      "Bash(grep -rn \"mestier\\\\|mestieri\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(grep -rn \"\\\\.from\\('\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(grep -rh \"href=['\\\\\"]\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(grep -roh \"href='[^'#http][^']*'\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(sed \"s/href='//\")",
+      "Bash(sed \"s/'//\")",
+      "Bash(grep -n \"invia-email\\\\b\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(grep -rn \"invia-email\\\\b\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(grep -rn \"\\\\.netlify/functions/invia-email'\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(grep -rn \"netlify/functions\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(grep -rn \"background:#1a3a2a\" C:/Users/Utente/Downloads/trovaimpresa/*.html)",
+      "Bash(grep -rl \"background:#1a3a2a\" C:/Users/Utente/Downloads/trovaimpresa/*.html)"
     ]
   }
 }

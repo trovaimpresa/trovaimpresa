@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contatti — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --arancio2:#c45e28;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --bg:      #fafaf8;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 4px 24px rgba(0,0,0,0.07);
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+
+  nav {
+    position:sticky; top:0; z-index:100;
+    background:white; border-bottom:1px solid var(--border);
+    padding:14px 32px; display:flex; align-items:center; justify-content:space-between;
+    box-shadow:0 2px 12px rgba(0,0,0,0.05);
+  }
+  .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+  .logo-text { font-family:'Playfair Display',serif; font-size:1.2rem; }
+  .logo-text .trova { color:var(--verde); }
+  .logo-text .impresa { color:var(--arancio); }
+  .nav-back { color:var(--verde); text-decoration:none; font-size:0.9rem; font-weight:600; }
+  .nav-back:hover { text-decoration:underline; }
+
+  .hero {
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    padding:60px 24px; text-align:center; color:white;
+  }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,2.6rem); margin-bottom:12px; }
+  .hero p { font-size:1rem; opacity:0.85; max-width:480px; margin:0 auto; line-height:1.7; }
+
+  .container {
+    max-width:640px; margin:56px auto; padding:0 24px 80px;
+  }
+
+  .card {
+    background:white; border-radius:20px; padding:40px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+  }
+
+  .form-group { margin-bottom:20px; }
+  .form-group label {
+    display:block; font-size:0.85rem; font-weight:600;
+    color:var(--dark); margin-bottom:6px;
+  }
+  .form-group input,
+  .form-group textarea {
+    width:100%; padding:13px 14px;
+    border:1.5px solid #ddd; border-radius:10px;
+    font-size:0.95rem; font-family:inherit; color:var(--dark);
+    transition:border-color 0.2s; resize:vertical;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline:none; border-color:var(--verde);
+    box-shadow:0 0 0 3px rgba(42,122,75,0.1);
+  }
+  .form-group textarea { min-height:130px; }
+
+  .required { color:var(--arancio); margin-left:2px; }
+
+  .btn-submit {
+    width:100%; padding:15px;
+    background:var(--verde); color:white;
+    border:none; border-radius:10px;
+    font-size:1rem; font-weight:700;
+    font-family:inherit; cursor:pointer;
+    transition:all 0.2s; margin-top:4px;
+  }
+  .btn-submit:hover:not(:disabled) { background:var(--verde2); transform:translateY(-2px); }
+  .btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+  .msg {
+    display:none; padding:14px 18px; border-radius:10px;
+    font-size:0.9rem; font-weight:600; margin-bottom:20px;
+    text-align:center;
+  }
+  .msg.success { background:#e8f5ee; color:var(--verde); border:1px solid #b3dfc6; }
+  .msg.error   { background:#fff0f0; color:#cc0000;       border:1px solid #ffcccc; }
+
+  .info-box {
+    background:var(--verde3); border-radius:16px;
+    padding:28px 32px; margin-top:32px;
+  }
+  .info-box h2 { font-size:1rem; font-weight:700; margin-bottom:16px; color:var(--verde); }
+  .info-item { display:flex; gap:12px; align-items:flex-start; margin-bottom:14px; font-size:0.9rem; color:var(--mid); }
+  .info-item:last-child { margin-bottom:0; }
+  .info-item .icon { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
+  .info-item a { color:var(--verde); font-weight:600; text-decoration:none; }
+  .info-item a:hover { text-decoration:underline; }
+
+  @media(max-width:600px) {
+    nav { padding:12px 16px; }
+    .card { padding:28px 20px; }
+    .info-box { padding:20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">
+    <span class="logo-text"><span class="trova">Trova</span><span class="impresa">Impresa</span></span>
+  </a>
+  <a class="nav-back" href="/">← Torna alla home</a>
+</nav>
+
+<div class="hero">
+  <h1>✉️ Contattaci</h1>
+  <p>Hai domande, suggerimenti o bisogno di supporto? Scrivici, ti risponderemo il prima possibile.</p>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="msg success" id="msg-success">✅ Messaggio inviato! Ti risponderemo presto.</div>
+    <div class="msg error"   id="msg-error">❌ Errore nell'invio. Riprova o scrivi direttamente a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.</div>
+
+    <div class="form-group">
+      <label for="nome">Nome<span class="required">*</span></label>
+      <input type="text" id="nome" placeholder="Il tuo nome" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label for="email">Email<span class="required">*</span></label>
+      <input type="email" id="email" placeholder="La tua email" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label for="messaggio">Messaggio<span class="required">*</span></label>
+      <textarea id="messaggio" placeholder="Scrivi qui il tuo messaggio..."></textarea>
+    </div>
+
+    <button class="btn-submit" id="btn-submit" onclick="inviaMessaggio()">📩 Invia messaggio</button>
+  </div>
+
+  <div class="info-box">
+    <h2>📌 Altri modi per contattarci</h2>
+    <div class="info-item">
+      <span class="icon">📧</span>
+      <span>Email: <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a></span>
+    </div>
+    <div class="info-item">
+      <span class="icon">📍</span>
+      <span>Rieti (RI) — Italia</span>
+    </div>
+    <div class="info-item">
+      <span class="icon">🕐</span>
+      <span>Rispondiamo entro 24 ore nei giorni lavorativi</span>
+    </div>
+  </div>
+</div>
+
+<script>
+async function inviaMessaggio() {
+  const nome     = document.getElementById('nome').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const messaggio = document.getElementById('messaggio').value.trim();
+
+  const msgSuccess = document.getElementById('msg-success');
+  const msgError   = document.getElementById('msg-error');
+  msgSuccess.style.display = 'none';
+  msgError.style.display   = 'none';
+
+  if (!nome || !email || !messaggio) {
+    alert('Compila tutti i campi obbligatori.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Invio in corso...';
+
+  try {
+    const res = await fetch('/.netlify/functions/invia-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, messaggio })
+    });
+
+    if (res.ok) {
+      msgSuccess.style.display = 'block';
+      document.getElementById('nome').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('messaggio').value = '';
+    } else {
+      msgError.style.display = 'block';
+    }
+  } catch {
+    msgError.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📩 Invia messaggio';
+  }
+}
+</script>
+<script src="/cookie-banner.js"></script>
+<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+</body>
+</html>
