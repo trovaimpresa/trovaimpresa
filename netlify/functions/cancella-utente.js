@@ -48,7 +48,38 @@ exports.handler = async function(event) {
     });
     console.log('[cancella-utente] DELETE imprese status:', delImprese.status);
 
-    // 3. Delete user from Supabase Auth
+    // 3. Delete files from storage bucket foto-lavori/{userId}/
+    const listRes = await fetch(`${SUPABASE_URL}/storage/v1/object/list/foto-lavori`, {
+      method: 'POST',
+      headers: {
+        'apikey': SERVICE_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ prefix: `${userId}/`, limit: 1000 })
+    });
+    if (listRes.ok) {
+      const files = await listRes.json();
+      const paths = (files || [])
+        .filter(f => f.name !== '.emptyFolderPlaceholder')
+        .map(f => `${userId}/${f.name}`);
+      if (paths.length > 0) {
+        await fetch(`${SUPABASE_URL}/storage/v1/object/foto-lavori`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SERVICE_KEY,
+            'Authorization': `Bearer ${SERVICE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ prefixes: paths })
+        });
+        console.log('[cancella-utente] File storage eliminati:', paths.length);
+      }
+    } else {
+      console.warn('[cancella-utente] Impossibile listare storage (non bloccante):', listRes.status);
+    }
+
+    // 4. Delete user from Supabase Auth
     const deleteRes = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${userId}`, {
       method: 'DELETE',
       headers: {

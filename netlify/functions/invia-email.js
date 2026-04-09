@@ -30,9 +30,18 @@ exports.handler = async function(event) {
         'Content-Length': Buffer.byteLength(data)
       }
     }, (res) => {
-      resolve({ statusCode: 200, body: 'OK' });
+      const chunks = [];
+      res.on('data', chunk => chunks.push(chunk));
+      res.on('end', () => {
+        const body = Buffer.concat(chunks).toString();
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({ statusCode: 200, body: 'OK' });
+        } else {
+          resolve({ statusCode: 500, body: 'Errore Resend: ' + body });
+        }
+      });
     });
-    req.on('error', () => resolve({ statusCode: 500, body: 'Errore' }));
+    req.on('error', (err) => resolve({ statusCode: 500, body: 'Errore: ' + err.message }));
     req.write(data);
     req.end();
   });
