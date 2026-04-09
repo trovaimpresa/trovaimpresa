@@ -625,21 +625,27 @@ const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Credenziali admin (semplici per ora)
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'trovaimpresa2025';
-
 let tutteImprese = [];
 
 // LOGIN
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('login-user').value;
   const p = document.getElementById('login-pass').value;
-  if (u === ADMIN_USER && p === ADMIN_PASS) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'block';
-    caricaTutto();
-  } else {
+  try {
+    const res = await fetch('/.netlify/functions/admin-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u, p })
+    });
+    const { ok } = await res.json();
+    if (ok) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      caricaTutto();
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+    }
+  } catch {
     document.getElementById('login-err').style.display = 'block';
   }
 }
