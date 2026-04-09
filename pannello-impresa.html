@@ -1228,10 +1228,13 @@ function showSectionById(id, fromPopstate) {
   if (navItem) showSection(id, navItem, fromPopstate);
 }
 
-history.replaceState({section: 'dashboard'}, '');
+history.replaceState({goHome: true}, '');
+history.pushState({section: 'dashboard'}, '');
 window.onpopstate = function(e) {
   if (e.state && e.state.section) {
     showSectionById(e.state.section, true);
+  } else {
+    window.location.href = 'index.html';
   }
 };
 
