@@ -335,7 +335,6 @@
       tuttiRisultati = data || [];
       paginaCorrente = 1;
       mostraPagina(1);
-      if (document.getElementById('mappaContainer').classList.contains('visible')) aggiornaMappa();
     } catch(e) {
       document.getElementById('risultati').innerHTML = `<div class="no-results"><p>Errore: ${e.message}</p></div>`;
     }
