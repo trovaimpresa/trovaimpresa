@@ -143,16 +143,6 @@
           <label>Provincia</label>
           <input type="text" id="provincia" placeholder="Es. RM">
         </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label>Cerca posizione <span style="font-weight:400;color:#aaa;">(opzionale)</span></label>
-          <div style="position:relative;">
-            <input type="text" id="map-search" placeholder="Es. Via Roma 1, Roma" autocomplete="off" oninput="nominatimSearch(this.value)" style="border-radius:8px 8px 0 0;">
-            <div id="map-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;z-index:1000;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
-          </div>
-          <div id="mappa" style="height:200px;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;"></div>
-        </div>
-        <input type="hidden" id="lat">
-        <input type="hidden" id="lng">
         <div class="form-group">
           <label>Descrizione breve</label>
           <textarea id="descrizione" placeholder="Descrivi la tua attività e i servizi che offri..."></textarea>
@@ -293,7 +283,6 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     function togglePassword(id, btn) {
@@ -316,44 +305,6 @@
     let currentStep = 1;
     let logoFile = null;
 
-    // ===== MAPPA OPENSTREETMAP =====
-    let mappa = null, mapMarker = null, nomTimer = null;
-    (function initMappa() {
-      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initMappa); return; }
-      mappa = L.map('mappa').setView([41.9, 12.5], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(mappa);
-      new ResizeObserver(() => { mappa.invalidateSize(); }).observe(document.getElementById('mappa'));
-    })();
-    function nominatimSearch(q) {
-      clearTimeout(nomTimer);
-      const dd = document.getElementById('map-dropdown');
-      if (q.length < 3) { dd.style.display = 'none'; return; }
-      nomTimer = setTimeout(async () => {
-        try {
-          const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=it&q=' + encodeURIComponent(q), { headers: { 'Accept-Language': 'it' } });
-          const results = await r.json();
-          if (!results.length) { dd.style.display = 'none'; return; }
-          if (results.length === 1 || parseFloat(results[0].importance) >= 0.6) {
-            selezionaLuogo(results[0].lat, results[0].lon, results[0].display_name);
-            return;
-          }
-          dd.innerHTML = results.map(x => '<div class="map-dd-item" onclick="selezionaLuogo(' + x.lat + ',' + x.lon + ',' + JSON.stringify(x.display_name) + ')">' + x.display_name + '</div>').join('');
-          dd.style.display = 'block';
-        } catch(e) { dd.style.display = 'none'; }
-      }, 400);
-    }
-    function selezionaLuogo(lat, lon, nome) {
-      document.getElementById('lat').value = lat;
-      document.getElementById('lng').value = lon;
-      document.getElementById('map-search').value = nome;
-      document.getElementById('map-dropdown').style.display = 'none';
-      mappa.setView([lat, lon], 14);
-      if (mapMarker) mapMarker.setLatLng([lat, lon]); else mapMarker = L.marker([lat, lon]).addTo(mappa);
-    }
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('#map-search') && !e.target.closest('#map-dropdown')) { var dd = document.getElementById('map-dropdown'); if (dd) dd.style.display = 'none'; }
-    });
-    // ===========================
 
     document.getElementById('logo-input').addEventListener('change', function(e) {
       const file = e.target.files[0];
@@ -444,7 +395,17 @@
         let logo_url = null;
         if (logoFile) { btn.textContent = '⏳ Caricamento logo...'; logo_url = await uploadLogo(logoFile, email); }
 
-        // 3. Salva i dati dell'impresa (senza password)
+        // 3. Geocoding automatico da indirizzo
+        btn.textContent = '⏳ Geocoding...';
+        let lat = null, lng = null;
+        try {
+          const indirizzoQ = [document.getElementById('indirizzo').value, document.getElementById('civico').value, document.getElementById('cap').value, citta].filter(Boolean).join(' ');
+          const geoR = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=it&q=' + encodeURIComponent(indirizzoQ), { headers: { 'Accept-Language': 'it' } });
+          const geoResults = await geoR.json();
+          if (geoResults.length) { lat = parseFloat(geoResults[0].lat); lng = parseFloat(geoResults[0].lon); }
+        } catch(e) {}
+
+        // 4. Salva i dati dell'impresa (senza password)
         btn.textContent = '⏳ Salvataggio...';
         const dati = {
           user_id: user_id,
@@ -462,8 +423,8 @@
           telefono: telefono,
           citta: citta,
           provincia: document.getElementById('provincia').value,
-          lat: parseFloat(document.getElementById('lat').value) || null,
-          lng: parseFloat(document.getElementById('lng').value) || null,
+          lat: lat,
+          lng: lng,
           sito_web: document.getElementById('sito_web').value,
           logo_url: logo_url,
           piano: document.getElementById('piano_scelto').value,
