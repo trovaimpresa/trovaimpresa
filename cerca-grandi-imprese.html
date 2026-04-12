@@ -30,7 +30,11 @@
     .sidebar::-webkit-scrollbar { width: 4px; }
     .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
     .sidebar-title { font-size: 22px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-    .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #555; text-transform: uppercase; margin: 20px 0 10px; }
+    .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #555; text-transform: uppercase; margin: 0 0 10px; }
+    .filter-group { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-top: 4px solid #2e7d32; padding: 16px; margin-bottom: 12px; }
+    .filter-group:nth-child(2) { border-top-color: #2e7d32; }
+    .filter-group:nth-child(3) { border-top-color: #e65100; }
+    .filter-group:nth-child(4) { border-top-color: #1565c0; }
     .sidebar-divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
     .mestieri-scroll { max-height: 320px; overflow-y: auto; overflow-x: hidden; }
     .mestieri-scroll::-webkit-scrollbar { width: 3px; }
@@ -102,6 +106,7 @@
   <div class="sidebar">
     <div class="sidebar-title">⚙️ Filtri</div>
 
+    <div class="filter-group">
     <div class="filter-label">Tipologia lavori</div>
     <div class="mestieri-scroll">
       <div class="chip all-chip" data-mestiere="tutti" onclick="selectMestiere(this)">🏢 Tutte</div>
@@ -117,6 +122,7 @@
       <div class="chip" data-mestiere="Fotovoltaico industriale" onclick="selectMestiere(this)">☀️ Fotovoltaico</div>
       <div class="chip" data-mestiere="Demolizione e bonifica" onclick="selectMestiere(this)">🔨 Demolizione</div>
       <div class="chip" data-mestiere="General contractor" onclick="selectMestiere(this)">📋 General contractor</div>
+    </div>
     </div>
   </div>
 
