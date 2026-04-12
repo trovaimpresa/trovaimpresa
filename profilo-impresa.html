@@ -86,12 +86,11 @@ nav img{height:36px}
   margin:16px 16px 0;
   background:var(--w);border-radius:14px;
   border:1px solid var(--br);box-shadow:var(--sh);
-  display:grid;grid-template-columns:repeat(3,1fr);
-  overflow:hidden;
+  display:flex;flex-wrap:wrap;overflow:hidden;
+  width:fit-content;
 }
-@media(min-width:600px){.stats{grid-template-columns:repeat(5,1fr)}}
 .stat{
-  padding:16px 10px;text-align:center;
+  padding:16px 28px;text-align:center;
   border-right:1px solid var(--br);
 }
 .stat:last-child{border-right:none}
