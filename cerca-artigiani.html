@@ -50,7 +50,11 @@
     .check-option:hover { background: #f0f9f4; padding-left: 8px; }
     .check-option input[type=checkbox] { accent-color: #2a7a4b; width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
 
-    .results-col { flex: 1; min-width: 0; }
+    .tipo-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; color: #444; border: 1.5px solid #eee; margin-bottom: 6px; transition: all 0.15s; background: white; }
+    .tipo-btn:hover { border-color: #2a7a4b; color: #2a7a4b; }
+    .tipo-btn.active { background: #e8f5ec; color: #2a7a4b; border-color: #2a7a4b; font-weight: 700; }
+    .btn-mappa { display: flex; align-items: center; gap: 6px; background: white; border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #444; cursor: pointer; margin-bottom: 12px; transition: all 0.15s; }
+    .btn-mappa:hover { border-color: #2a7a4b; color: #2a7a4b; }
     .active-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .filter-chip { display: inline-flex; align-items: center; gap: 5px; background: #f0f9f4; border: 1.5px solid #c3e6d0; color: #2a7a4b; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
     .filter-chip:hover { background: #ffe8e0; border-color: #FF6B35; color: #FF6B35; }
@@ -128,8 +132,15 @@
   <div class="sidebar">
     <div class="sidebar-title">⚙️ Filtri</div>
 
+    <div class="filter-label">Tipo professionista</div>
+    <div class="tipo-btn active">🔍 Tutti</div>
+    <div class="tipo-btn">🔧 Artigiano</div>
+    <div class="tipo-btn">🏗️ Impresa edile</div>
+
+    <hr class="sidebar-divider">
+
     <div class="filter-label">Mestiere</div>
-    <div id="mestieri-list">
+    <div id="mestieri-list" style="max-height:220px;overflow-y:auto;padding-right:2px;">
       <div class="filter-btn active" data-mestiere="tutti" onclick="selectMestiere(this)"><span class="filter-icon">🔧</span> Tutti i mestieri</div>
       <div class="filter-btn" data-mestiere="Muratura" onclick="selectMestiere(this)"><span class="filter-icon">🧱</span> Muratura</div>
       <div class="filter-btn" data-mestiere="Elettricista" onclick="selectMestiere(this)"><span class="filter-icon">⚡</span> Elettricista</div>
@@ -190,6 +201,7 @@
 
   <div class="results-col">
     <div id="activeFilters" class="active-filters"></div>
+    <button class="btn-mappa" id="btnMappa" onclick="alert('Mappa in arrivo!')">🗺️ Mostra sulla mappa</button>
     <div class="results-header">
       <div class="results-count" id="risultatiCount">Ricerca artigiani...</div>
       <select class="sort-select" onchange="cambiaSorting(this.value)">
