@@ -399,11 +399,20 @@
         btn.textContent = '⏳ Geocoding...';
         let lat = null, lng = null;
         try {
-          const indirizzoQ = [document.getElementById('indirizzo').value, document.getElementById('civico').value, document.getElementById('cap').value, citta].filter(Boolean).join(' ');
-          const geoR = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=it&q=' + encodeURIComponent(indirizzoQ), { headers: { 'Accept-Language': 'it' } });
+          const indirizzo = document.getElementById('indirizzo').value.trim();
+          const civico = document.getElementById('civico').value.trim();
+          const cap = document.getElementById('cap').value.trim();
+          const cittaVal = document.getElementById('citta').value.trim();
+          const query = [indirizzo, civico, cap, cittaVal, 'Italia'].filter(Boolean).join(', ');
+          const geoR = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query), { headers: { 'Accept-Language': 'it' } });
           const geoResults = await geoR.json();
           if (geoResults.length) { lat = parseFloat(geoResults[0].lat); lng = parseFloat(geoResults[0].lon); }
-        } catch(e) {}
+          if (!lat) {
+            const geoR2 = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(cittaVal + ', Italia'), { headers: { 'Accept-Language': 'it' } });
+            const geoResults2 = await geoR2.json();
+            if (geoResults2.length) { lat = parseFloat(geoResults2[0].lat); lng = parseFloat(geoResults2[0].lon); }
+          }
+        } catch(e) { console.warn('Geocoding fallito:', e); }
 
         // 4. Salva i dati dell'impresa (senza password)
         btn.textContent = '⏳ Salvataggio...';
