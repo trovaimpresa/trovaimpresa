@@ -4,381 +4,363 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="page-title">Profilo Impresa — TrovaImpresa</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --v:#2a7a4b;--v2:#1f5e38;--v3:#e8f5ee;
-  --a:#e8733a;--a2:#c45e28;--a3:#fff3ec;
-  --dk:#111827;--md:#374151;--lt:#6b7280;
-  --bg:#f3f4f6;--w:#fff;
-  --br:rgba(0,0,0,0.1);
-  --sh:0 2px 16px rgba(0,0,0,0.08);
+  --verde:#2a7a4b;--verde2:#1f5e38;--verde3:#e8f5ee;
+  --arancio:#e8733a;--arancio2:#c45e28;--arancio3:#fff3ec;
+  --dark:#1a1a1a;--mid:#555;--light:#999;
+  --bg:#f4f6f9;--border:rgba(0,0,0,0.08);
+  --shadow:0 2px 16px rgba(0,0,0,0.07);
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--dk);font-size:16px;line-height:1.5}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);font-size:15px}
 
 /* NAV */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:200;
-  padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--br);
+  padding:12px 32px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
 }
 nav img{height:36px}
 .nav-back{
-  font-size:0.9rem;font-weight:600;color:var(--md);text-decoration:none;
-  background:var(--bg);border:1.5px solid var(--br);padding:8px 16px;border-radius:20px;
+  font-size:0.88rem;font-weight:600;color:var(--mid);text-decoration:none;
+  background:var(--bg);border:1.5px solid var(--border);
+  padding:8px 18px;border-radius:20px;transition:all 0.2s;
 }
+.nav-back:hover{color:var(--verde);border-color:var(--verde)}
 
-/* HERO */
+/* HERO - stesso stile dash-hero del pannello */
 .hero{
-  margin-top:60px;height:180px;
-  background:linear-gradient(135deg,#0a1f12 0%,#1a4d2e 50%,#2a7a4b 85%,#3d9e62 100%);
+  margin-top:60px;
+  background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+  padding:32px 40px 80px;
   position:relative;overflow:hidden;
 }
 .hero::before{
   content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 60% 120% at 85% 50%,rgba(232,115,58,0.35) 0%,transparent 65%);
+  background:radial-gradient(ellipse 50% 120% at 85% 50%,rgba(232,115,58,0.25) 0%,transparent 60%);
 }
 .hero-dots{
   position:absolute;inset:0;
-  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,0.12) 1px,transparent 0);
-  background-size:24px 24px;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,0.06) 1px,transparent 0);
+  background-size:28px 28px;
 }
-.hero-fade{position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to top,var(--bg),transparent)}
+.hero-content{position:relative;z-index:1;color:white}
+.hero-tipo{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:0.7;margin-bottom:6px}
+.hero-nome{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:8px;line-height:1.2}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.hero-meta span{font-size:0.85rem;opacity:0.85;font-weight:500}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px}
+.badge{padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.badge-v{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.35)}
+.badge-a{background:var(--arancio);color:white}
+.badge-g{background:rgba(255,255,255,0.15);color:white}
 
-/* PROFILE HEADER */
+/* AVATAR che sporge dall'hero */
 .profile-header{
-  padding:0 16px;display:flex;align-items:flex-end;gap:16px;
+  padding:0 40px;
+  display:flex;align-items:flex-end;gap:20px;
   margin-top:-56px;position:relative;z-index:10;
+  margin-bottom:20px;
 }
 .avatar{
   width:100px;height:100px;border-radius:18px;
-  background:var(--w);border:4px solid var(--w);
+  background:white;border:4px solid white;
   box-shadow:0 8px 32px rgba(0,0,0,0.2);
   display:flex;align-items:center;justify-content:center;
   font-size:3rem;flex-shrink:0;overflow:hidden;
 }
 .avatar img{width:100%;height:100%;object-fit:cover}
-.profile-info{padding-bottom:4px;flex:1;min-width:0}
-.tipo-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  background:rgba(42,122,75,0.12);color:var(--v2);
-  border:1px solid rgba(42,122,75,0.25);
-  padding:4px 12px;border-radius:20px;
-  font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;
-  margin-bottom:6px;
-}
-.profile-name{
-  font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;
-  color:var(--dk);margin-bottom:4px;line-height:1.1;
-}
-.profile-loc{font-size:0.9rem;color:var(--md);font-weight:600}
-.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.badge{padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
-.badge-v{background:var(--v);color:#fff}
-.badge-a{background:var(--a3);color:var(--a2)}
-.badge-g{background:var(--v3);color:var(--v2)}
 
-/* STATS */
-.stats{
-  margin:16px 16px 0;
-  background:var(--w);border-radius:14px;
-  border:1px solid var(--br);box-shadow:var(--sh);
-  display:flex;flex-wrap:wrap;overflow:hidden;
-  width:fit-content;
+/* STATS - stesso stile dash-stats */
+.stats-row{
+  padding:0 40px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  margin-bottom:28px;
 }
-.stat{
-  padding:16px 28px;text-align:center;
-  border-right:1px solid var(--br);
+.stat-card{
+  background:white;border-radius:16px;padding:20px;
+  box-shadow:var(--shadow);border:1px solid var(--border);
+  text-align:center;
 }
-.stat:last-child{border-right:none}
-.stat-n{
-  font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;
-  color:var(--dk);display:block;line-height:1;
-}
-.stat-n.org{color:var(--a)}
-.stat-l{font-size:0.68rem;color:var(--md);font-weight:700;text-transform:uppercase;letter-spacing:0.7px;margin-top:4px;display:block}
-.stat-stars{color:#f5a623;font-size:0.75rem;display:block;margin-top:2px}
+.stat-icon{font-size:1.6rem;margin-bottom:8px}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;line-height:1;color:var(--dark)}
+.stat-num.org{color:var(--arancio)}
+.stat-lbl{font-size:0.72rem;color:var(--light);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px}
 
 /* LAYOUT */
-.page{
-  padding:16px;
-  display:flex;flex-direction:column;gap:16px;
-}
-@media(min-width:900px){
-  .page{flex-direction:row;align-items:flex-start;padding:20px 32px}
-  .col-left{flex:1;min-width:0}
-  .col-right{width:340px;flex-shrink:0;position:sticky;top:76px}
+.main{
+  padding:0 40px 60px;
+  display:grid;grid-template-columns:1fr 320px;gap:24px;
 }
 
-/* CARD */
+/* CARD - identiche al pannello */
 .card{
-  background:var(--w);border-radius:16px;
-  padding:20px;box-shadow:var(--sh);
-  border:1px solid var(--br);margin-bottom:16px;
+  background:white;border-radius:16px;padding:24px;
+  box-shadow:var(--shadow);border:1px solid var(--border);
+  margin-bottom:20px;
 }
 .card-title{
-  font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--dk);
-  margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--br);
-  display:flex;align-items:center;gap:10px;
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+  margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
 }
-.ct-icon{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--v3);color:var(--v);
-  display:flex;align-items:center;justify-content:center;font-size:1rem;
-}
-.desc{font-size:0.95rem;color:var(--md);line-height:1.75}
+.desc{font-size:0.92rem;color:var(--mid);line-height:1.75}
 
 /* CATS */
-.cats{display:flex;flex-wrap:wrap;gap:8px}
+.cats{display:flex;flex-wrap:wrap;gap:10px}
 .cat{
-  display:flex;align-items:center;gap:7px;
-  background:var(--bg);border-radius:10px;
-  padding:10px 14px;font-size:0.9rem;font-weight:600;color:var(--dk);
-  border:1px solid var(--br);
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg);border-radius:12px;
+  padding:10px 16px;font-size:0.88rem;font-weight:600;color:var(--dark);
+  border:1px solid var(--border);transition:all 0.2s;
 }
+.cat:hover{border-color:var(--verde);background:var(--verde3)}
 
 /* FOTO */
-.foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.foto-item{
-  aspect-ratio:1;border-radius:10px;overflow:hidden;
-  cursor:pointer;background:var(--bg);border:1px solid var(--br);
-}
+.foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.foto-item{aspect-ratio:1;border-radius:12px;overflow:hidden;cursor:pointer;background:var(--bg);border:1px solid var(--border)}
 .foto-item img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* MAPPA */
-#mappa-profilo{height:220px;border-radius:10px;overflow:hidden;border:1px solid var(--br)}
+#mappa-profilo{height:240px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
 
 /* RECENSIONI */
-.rec-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.rec-tabs{display:flex;gap:6px;margin-bottom:16px}
 .rec-tab{
-  padding:10px 18px;border:1.5px solid var(--br);background:var(--bg);
-  cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;
-  color:var(--md);border-radius:10px;transition:all 0.15s;
+  padding:9px 18px;border:1.5px solid var(--border);background:var(--bg);
+  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;
+  color:var(--mid);border-radius:10px;transition:all 0.15s;
 }
-.rec-tab.active{color:var(--v2);border-color:var(--v);background:var(--v3)}
+.rec-tab.active{color:var(--verde2);border-color:var(--verde);background:var(--verde3)}
 .rec-item{
   background:var(--bg);border-radius:12px;padding:16px;margin-bottom:12px;
-  border:1px solid var(--br);border-left:4px solid var(--v);
+  border:1px solid var(--border);border-left:3px solid var(--verde);
 }
 .rec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.rec-nome{font-weight:700;font-size:0.95rem;color:var(--dk)}
-.rec-data{font-size:0.8rem;color:var(--lt)}
-.rec-stelle{color:#f5a623;font-size:0.95rem;margin-bottom:6px}
-.rec-testo{font-size:0.9rem;color:var(--md);line-height:1.6}
-.rec-cats{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:6px;font-size:0.8rem;color:var(--md)}
+.rec-nome{font-weight:700;font-size:0.92rem;color:var(--dark)}
+.rec-data{font-size:0.78rem;color:var(--light)}
+.rec-stelle{color:#f4c02e;font-size:0.92rem;margin-bottom:6px}
+.rec-testo{font-size:0.88rem;color:var(--mid);line-height:1.6}
+.rec-cats{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:6px;font-size:0.8rem;color:var(--mid)}
 
 /* FORM REC */
 .st-gruppo{margin-bottom:14px}
-.st-gruppo label{display:block;font-size:0.9rem;font-weight:700;color:var(--dk);margin-bottom:5px}
+.st-gruppo label{display:block;font-size:0.85rem;font-weight:600;color:var(--dark);margin-bottom:5px}
 .st-row{display:flex;gap:5px}
-.stella{font-size:30px;cursor:pointer;color:#ddd;transition:color 0.15s;user-select:none}
-.stella.attiva{color:#f5a623}
+.stella{font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;user-select:none}
+.stella.attiva{color:#f4c02e}
 .rec-input{
-  width:100%;padding:12px 14px;border:1.5px solid var(--br);
-  border-radius:10px;font-size:0.95rem;font-family:inherit;
-  margin-bottom:12px;color:var(--dk);background:var(--bg);
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);
+  border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;
+  margin-bottom:12px;color:var(--dark);background:white;
 }
-.rec-input:focus{outline:none;border-color:var(--v);background:var(--w)}
+.rec-input:focus{outline:none;border-color:var(--verde)}
 .rec-textarea{
-  width:100%;padding:12px 14px;border:1.5px solid var(--br);
-  border-radius:10px;font-size:0.95rem;font-family:inherit;
-  min-height:100px;resize:vertical;margin-bottom:12px;
-  color:var(--dk);background:var(--bg);
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);
+  border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;
+  min-height:100px;resize:vertical;margin-bottom:12px;color:var(--dark);background:white;
 }
-.rec-textarea:focus{outline:none;border-color:var(--v);background:var(--w)}
+.rec-textarea:focus{outline:none;border-color:var(--verde)}
 .rec-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn-rec{
-  width:100%;background:var(--v);color:#fff;border:none;
-  border-radius:12px;padding:14px;font-size:1rem;font-weight:700;
-  cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;
+  width:100%;background:var(--verde);color:white;border:none;
+  border-radius:12px;padding:13px;font-size:0.95rem;font-weight:700;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;
 }
-.btn-rec:hover{background:var(--v2)}
+.btn-rec:hover{background:var(--verde2)}
 .btn-rec:disabled{opacity:0.6;cursor:not-allowed}
-.rec-msg{text-align:center;font-size:0.9rem;margin-top:10px;padding:10px;border-radius:8px;display:none}
+.rec-msg{text-align:center;font-size:0.85rem;margin-top:10px;padding:10px;border-radius:8px;display:none}
 .rec-msg.ok{background:#e8f5e9;color:#2a7a4b}
 .rec-msg.err{background:#fdecea;color:#c0392b}
 
 /* SIDEBAR */
-.trust{
-  background:linear-gradient(135deg,var(--v3),#d0f0e0);
-  border-radius:14px;padding:16px;border:1px solid rgba(42,122,75,0.15);
-  display:flex;align-items:center;gap:12px;margin-bottom:14px;
+.sidebar-top{
+  background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+  border-radius:16px;padding:20px;color:white;margin-bottom:16px;
+  display:flex;align-items:center;gap:12px;
 }
-.trust-icon{font-size:1.6rem}
-.trust-text{font-size:0.9rem;color:var(--v2);font-weight:700;line-height:1.4}
-.btn-prev{
-  display:block;width:100%;background:var(--a);color:#fff;
-  border:none;border-radius:14px;padding:16px;
-  font-family:'Inter',sans-serif;font-weight:700;font-size:1.05rem;
+.trust-icon{font-size:1.8rem}
+.trust-text{font-size:0.9rem;font-weight:700;line-height:1.4;opacity:0.95}
+
+.btn-preventivo{
+  display:block;width:100%;background:var(--arancio);color:white;
+  border:none;border-radius:14px;padding:15px;
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;
   cursor:pointer;text-align:center;text-decoration:none;
-  box-shadow:0 4px 20px rgba(232,115,58,0.35);margin-bottom:10px;
+  box-shadow:0 6px 20px rgba(232,115,58,0.35);margin-bottom:12px;
   transition:all 0.2s;
 }
-.btn-prev:hover{background:var(--a2);transform:translateY(-2px)}
-.btn-call{
+.btn-preventivo:hover{background:var(--arancio2);transform:translateY(-2px)}
+.btn-chiama{
   display:flex;width:100%;align-items:center;justify-content:center;gap:8px;
-  background:var(--v3);color:var(--v2);border:2px solid var(--v3);
-  border-radius:14px;padding:14px;font-family:'Inter',sans-serif;
-  font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;
-  margin-bottom:16px;transition:all 0.2s;
+  background:var(--verde3);color:var(--verde2);border:2px solid var(--verde3);
+  border-radius:14px;padding:13px;font-family:'DM Sans',sans-serif;
+  font-weight:700;font-size:0.95rem;cursor:pointer;text-decoration:none;
+  margin-bottom:20px;transition:all 0.2s;
 }
-.btn-call:hover{background:var(--v);color:#fff;border-color:var(--v)}
+.btn-chiama:hover{background:var(--verde);color:white;border-color:var(--verde)}
 .contacts{list-style:none}
 .contacts li{
   display:flex;align-items:center;gap:10px;
-  padding:10px 0;border-bottom:1px solid var(--br);
-  font-size:0.95rem;color:var(--dk);font-weight:500;
+  padding:10px 0;border-bottom:1px solid var(--border);
+  font-size:0.88rem;color:var(--dark);font-weight:500;
 }
 .contacts li:last-child{border-bottom:none}
 .c-icon{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--bg);border:1px solid var(--br);
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.9rem;flex-shrink:0;
+  width:30px;height:30px;border-radius:8px;
+  background:var(--bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;
 }
-.contacts a{color:var(--v2);font-weight:700;text-decoration:none}
+.contacts a{color:var(--verde);font-weight:700;text-decoration:none}
 .contacts a:hover{text-decoration:underline}
-#mappa-impresa{height:170px;border-radius:12px;overflow:hidden;margin-top:12px;border:1px solid var(--br);display:none}
-.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.ms{background:var(--bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--br)}
-.ms-n{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--dk);display:block}
-.ms-l{font-size:0.7rem;color:var(--md);font-weight:700;text-transform:uppercase;letter-spacing:0.6px}
+#mappa-impresa{height:160px;border-radius:12px;overflow:hidden;margin-top:12px;border:1px solid var(--border);display:none}
+.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.ms{background:var(--bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border)}
+.ms-n{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--dark);display:block}
+.ms-l{font-size:0.68rem;color:var(--light);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
 
 /* MODAL */
 .modal-overlay{
-  position:fixed;inset:0;z-index:1000;
-  background:rgba(0,0,0,0.55);
+  position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.6);
   display:none;align-items:center;justify-content:center;
-  padding:16px;backdrop-filter:blur(6px);
+  padding:20px;backdrop-filter:blur(4px);
 }
 .modal-overlay.open{display:flex;animation:fadeIn 0.2s ease}
 .modal{
-  background:var(--w);border-radius:20px;
-  padding:28px;max-width:500px;width:100%;
-  box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:slideUp 0.3s ease;
-  position:relative;max-height:90vh;overflow-y:auto;
+  background:white;border-radius:24px;padding:36px;
+  max-width:520px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  animation:slideUp 0.3s ease;position:relative;max-height:90vh;overflow-y:auto;
 }
-.modal-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:6px}
-.modal-sub{font-size:0.9rem;color:var(--lt);margin-bottom:22px}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:6px}
+.modal-sub{font-size:0.88rem;color:var(--mid);margin-bottom:24px}
 .fg{margin-bottom:14px}
-.fl{font-size:0.78rem;font-weight:700;color:var(--dk);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:0.5px}
+.fl{font-size:0.75rem;font-weight:700;color:var(--dark);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:0.5px}
 .fi,.ft,.fs{
-  width:100%;padding:12px 13px;border:1.5px solid var(--br);border-radius:10px;
-  font-family:'Inter',sans-serif;font-size:0.95rem;color:var(--dk);
+  width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:0.92rem;color:var(--dark);
   outline:none;background:var(--bg);transition:border 0.2s;
 }
-.fi:focus,.ft:focus,.fs:focus{border-color:var(--v);background:var(--w)}
+.fi:focus,.ft:focus,.fs:focus{border-color:var(--verde)}
 .ft{resize:vertical;min-height:80px}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .btn-sub{
-  width:100%;background:var(--a);color:#fff;border:none;
-  border-radius:12px;padding:15px;font-family:'Inter',sans-serif;
-  font-weight:700;font-size:1rem;cursor:pointer;margin-top:8px;
-  transition:all 0.2s;
+  width:100%;background:var(--arancio);color:white;border:none;
+  border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;
+  font-weight:700;font-size:1rem;cursor:pointer;
+  box-shadow:0 6px 20px rgba(232,115,58,0.35);margin-top:8px;
 }
-.btn-sub:hover{background:var(--a2)}
+.btn-sub:hover{background:var(--arancio2)}
 .modal-close{
-  position:absolute;top:14px;right:14px;
-  background:var(--bg);border:1px solid var(--br);
-  width:32px;height:32px;border-radius:50%;
-  font-size:1rem;cursor:pointer;color:var(--lt);
-  display:flex;align-items:center;justify-content:center;
+  position:absolute;top:16px;right:20px;
+  background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--light);
 }
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* MOBILE */
+html,body{overflow-x:hidden}
+@media(max-width:768px){
+  .hero{padding:24px 20px 70px}
+  .hero-nome{font-size:1.5rem}
+  .profile-header{padding:0 16px;margin-top:-50px}
+  .stats-row{padding:0 16px;grid-template-columns:1fr 1fr;gap:10px}
+  .main{padding:0 16px 40px;grid-template-columns:1fr}
+  .sidebar{order:-1}
+  nav{padding:10px 16px}
+}
 </style>
 </head>
 <body>
 
 <nav>
-  <a href="index.html" class="nav-logo"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
-  <a href="javascript:history.back()" class="nav-back">← Risultati</a>
+  <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
+  <a href="javascript:history.back()" class="nav-back">← Torna ai risultati</a>
 </nav>
 
+<!-- HERO -->
 <div class="hero">
   <div class="hero-dots"></div>
-  <div class="hero-fade"></div>
+  <div class="hero-content">
+    <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
+    <div class="hero-nome" id="profile-name">Caricamento...</div>
+    <div class="hero-meta">
+      <span id="profile-city">📍 —</span>
+      <span id="profile-categoria" style="display:none"></span>
+    </div>
+    <div class="hero-badges" id="profile-badges"></div>
+  </div>
 </div>
 
+<!-- AVATAR -->
 <div class="profile-header">
   <div class="avatar" id="avatar-wrap">🏗️</div>
-  <div class="profile-info">
-    <div class="tipo-badge" id="profile-tipo-badge">🔧 Artigiano</div>
-    <h1 class="profile-name" id="profile-name">Caricamento...</h1>
-    <div class="profile-loc" id="profile-city">📍 —</div>
-    <div class="badges" id="profile-badges"></div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon">⭐</div>
+    <div class="stat-num" id="stat-rating">—</div>
+    <div class="stat-lbl">Valutazione</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">💬</div>
+    <div class="stat-num" id="stat-recensioni">0</div>
+    <div class="stat-lbl">Recensioni</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🏆</div>
+    <div class="stat-num" id="stat-anni">—</div>
+    <div class="stat-lbl">Anni esp.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">👥</div>
+    <div class="stat-num org" id="stat-piano">Free</div>
+    <div class="stat-lbl">Piano</div>
   </div>
 </div>
 
-<div class="stats">
-  <div class="stat">
-    <span class="stat-n" id="stat-rating">—</span>
-    <span class="stat-stars" id="stat-stars"></span>
-    <span class="stat-l">Voto</span>
-  </div>
-  <div class="stat">
-    <span class="stat-n" id="stat-recensioni">0</span>
-    <span class="stat-l">Recensioni</span>
-  </div>
-  <div class="stat">
-    <span class="stat-n" id="stat-anni">—</span>
-    <span class="stat-l">Anni esp.</span>
-  </div>
-  <div class="stat" style="display:none" class="stat-md">
-    <span class="stat-n" id="stat-dipendenti">—</span>
-    <span class="stat-l">Dipendenti</span>
-  </div>
-  <div class="stat">
-    <span class="stat-n org" id="stat-piano">Free</span>
-    <span class="stat-l">Piano</span>
-  </div>
-</div>
-
-<div class="page">
+<!-- MAIN -->
+<div class="main">
   <div class="col-left">
 
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-      <span style="color:#f5a623;font-size:1.3rem;letter-spacing:2px" id="rating-stars-main"></span>
-      <span style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800" id="rating-num-main"></span>
-      <span style="font-size:0.95rem;color:var(--lt)" id="rating-count-main"></span>
-    </div>
-
     <div class="card">
-      <div class="card-title"><div class="ct-icon">📋</div> Chi siamo</div>
+      <div class="card-title">📋 Chi siamo</div>
       <p class="desc" id="profile-desc">Nessuna descrizione disponibile.</p>
     </div>
 
     <div class="card">
-      <div class="card-title"><div class="ct-icon">🔧</div> Specializzazioni</div>
+      <div class="card-title">🔧 Specializzazioni</div>
       <div class="cats" id="profile-mestieri">
-        <div style="color:#aaa;font-size:0.9rem">⏳ Caricamento...</div>
+        <div style="color:#aaa;font-size:0.88rem">⏳ Caricamento...</div>
       </div>
     </div>
 
     <div class="card" id="card-mappa-profilo" style="display:none">
-      <div class="card-title"><div class="ct-icon">📍</div> Dove siamo</div>
+      <div class="card-title">📍 Dove siamo</div>
       <div id="mappa-profilo"></div>
     </div>
 
     <div class="card">
-      <div class="card-title"><div class="ct-icon">📸</div> Foto dei lavori</div>
+      <div class="card-title">📸 Foto dei lavori</div>
       <div class="foto-grid" id="foto-lavori-grid">
-        <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px 0;font-size:0.9rem">📷 Nessuna foto caricata</div>
+        <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px 0;font-size:0.88rem">📷 Nessuna foto caricata</div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title"><div class="ct-icon">⭐</div> Recensioni</div>
+      <div class="card-title">⭐ Recensioni dei clienti</div>
       <div class="rec-tabs">
         <button class="rec-tab active" id="tab-btn-lista" onclick="showRecTab('lista',this)">⭐ Recensioni (<span id="rec-count">0</span>)</button>
-        <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">✍️ Scrivi una recensione</button>
+        <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">✍️ Lascia una recensione</button>
       </div>
       <div id="rec-tab-lista"><div id="rec-lista"></div></div>
       <div id="rec-tab-form" style="display:none">
-        <p style="font-size:0.9rem;color:var(--lt);margin-bottom:16px">Hai lavorato con questa impresa? Condividi la tua esperienza.</p>
+        <p style="font-size:0.88rem;color:var(--mid);margin-bottom:16px">Hai lavorato con questa impresa? Condividi la tua esperienza.</p>
         <div id="rec-form">
           <div class="st-gruppo"><label>⭐ Qualità del lavoro</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setStelleGruppo('qualita',1)">★</span><span class="stella" data-v="2" onclick="setStelleGruppo('qualita',2)">★</span><span class="stella" data-v="3" onclick="setStelleGruppo('qualita',3)">★</span><span class="stella" data-v="4" onclick="setStelleGruppo('qualita',4)">★</span><span class="stella" data-v="5" onclick="setStelleGruppo('qualita',5)">★</span></div></div>
           <div class="st-gruppo"><label>⏱️ Puntualità</label><div class="st-row" id="stelle-puntualita"><span class="stella" data-v="1" onclick="setStelleGruppo('puntualita',1)">★</span><span class="stella" data-v="2" onclick="setStelleGruppo('puntualita',2)">★</span><span class="stella" data-v="3" onclick="setStelleGruppo('puntualita',3)">★</span><span class="stella" data-v="4" onclick="setStelleGruppo('puntualita',4)">★</span><span class="stella" data-v="5" onclick="setStelleGruppo('puntualita',5)">★</span></div></div>
@@ -386,15 +368,15 @@ nav img{height:36px}
           <div class="st-gruppo"><label>🤝 Professionalità</label><div class="st-row" id="stelle-professionalita"><span class="stella" data-v="1" onclick="setStelleGruppo('professionalita',1)">★</span><span class="stella" data-v="2" onclick="setStelleGruppo('professionalita',2)">★</span><span class="stella" data-v="3" onclick="setStelleGruppo('professionalita',3)">★</span><span class="stella" data-v="4" onclick="setStelleGruppo('professionalita',4)">★</span><span class="stella" data-v="5" onclick="setStelleGruppo('professionalita',5)">★</span></div></div>
           <textarea class="rec-textarea" id="rec-testo" placeholder="Descrivi la tua esperienza..."></textarea>
           <div class="rec-row">
-            <div><label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:5px">📅 Mese</label><select class="rec-input" id="rec-mese" style="margin-bottom:0"><option value="">— Mese —</option><option>Gennaio</option><option>Febbraio</option><option>Marzo</option><option>Aprile</option><option>Maggio</option><option>Giugno</option><option>Luglio</option><option>Agosto</option><option>Settembre</option><option>Ottobre</option><option>Novembre</option><option>Dicembre</option></select></div>
-            <div><label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:5px">📅 Anno</label><select class="rec-input" id="rec-anno" style="margin-bottom:0"><option value="">— Anno —</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></div>
+            <div><label style="font-size:0.78rem;font-weight:700;display:block;margin-bottom:5px">📅 Mese</label><select class="rec-input" id="rec-mese" style="margin-bottom:0"><option value="">— Mese —</option><option>Gennaio</option><option>Febbraio</option><option>Marzo</option><option>Aprile</option><option>Maggio</option><option>Giugno</option><option>Luglio</option><option>Agosto</option><option>Settembre</option><option>Ottobre</option><option>Novembre</option><option>Dicembre</option></select></div>
+            <div><label style="font-size:0.78rem;font-weight:700;display:block;margin-bottom:5px">📅 Anno</label><select class="rec-input" id="rec-anno" style="margin-bottom:0"><option value="">— Anno —</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></div>
           </div>
           <div id="rec-nome-email-wrapper">
             <div class="rec-row" style="margin-top:10px">
               <input type="text" class="rec-input" id="rec-nome" placeholder="Il tuo nome *" style="margin-bottom:0">
               <input type="email" class="rec-input" id="rec-email" placeholder="Email * (privata)" style="margin-bottom:0">
             </div>
-            <p style="font-size:0.78rem;color:#aaa;margin:8px 0 12px">L'email non sarà pubblica.</p>
+            <p style="font-size:0.75rem;color:#aaa;margin:8px 0 12px">L'email non sarà pubblica.</p>
           </div>
           <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
           <div class="rec-msg" id="rec-msg"></div>
@@ -404,14 +386,14 @@ nav img{height:36px}
 
   </div>
 
-  <div class="col-right">
-    <div class="trust">
+  <div class="sidebar">
+    <div class="sidebar-top">
       <div class="trust-icon">🛡️</div>
       <div class="trust-text">Preventivo gratuito<br>Risposta entro 24 ore</div>
     </div>
     <div class="card">
-      <button class="btn-prev" onclick="openModal()">📋 Richiedi preventivo gratuito</button>
-      <a class="btn-call" id="btn-tel" href="#">📞 Chiama ora</a>
+      <button class="btn-preventivo" onclick="openModal()">📋 Richiedi preventivo gratuito</button>
+      <a class="btn-chiama" id="btn-tel" href="#">📞 Chiama ora</a>
       <ul class="contacts">
         <li id="contact-indirizzo"><div class="c-icon">📍</div><span>—</span></li>
         <li id="contact-tel"><div class="c-icon">📞</div><a href="#" id="tel-link">—</a></li>
@@ -421,10 +403,10 @@ nav img{height:36px}
       </ul>
       <div id="mappa-impresa"></div>
       <div class="mini-stats">
-        <div class="ms"><span class="ms-n" id="sidebar-anni">—</span><span class="ms-l">Anni exp.</span></div>
+        <div class="ms"><span class="ms-n" id="sidebar-anni">—</span><span class="ms-l">Anni esp.</span></div>
         <div class="ms"><span class="ms-n" id="sidebar-dipendenti">—</span><span class="ms-l">Dipendenti</span></div>
         <div class="ms"><span class="ms-n" id="sidebar-recensioni">0</span><span class="ms-l">Recensioni</span></div>
-        <div class="ms"><span class="ms-n" id="sidebar-rating" style="color:var(--a)">—</span><span class="ms-l">Rating ⭐</span></div>
+        <div class="ms"><span class="ms-n" id="sidebar-rating" style="color:var(--arancio)">—</span><span class="ms-l">Rating ⭐</span></div>
       </div>
     </div>
   </div>
@@ -434,13 +416,13 @@ nav img{height:36px}
 <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">Richiedi preventivo</div>
-    <p class="modal-sub">Gratuito — risposta entro 24 ore.</p>
+    <div class="modal-title">Richiedi un preventivo</div>
+    <p class="modal-sub">Compila il modulo — ti risponderemo entro 24 ore, gratuitamente.</p>
     <div class="fr"><div class="fg"><label class="fl">Nome</label><input type="text" class="fi" id="prev-nome" placeholder="Il tuo nome"></div><div class="fg"><label class="fl">Cognome</label><input type="text" class="fi" id="prev-cognome" placeholder="Cognome"></div></div>
     <div class="fr"><div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="prev-email" placeholder="email@esempio.it"></div><div class="fg"><label class="fl">Telefono</label><input type="tel" class="fi" id="prev-telefono" placeholder="+39 000 000 0000"></div></div>
     <div class="fg"><label class="fl">Tipo di lavoro</label><select class="fs" id="prev-tipo"><option value="">Seleziona...</option><option>Ristrutturazione appartamento</option><option>Nuova costruzione</option><option>Impianto elettrico</option><option>Impianto idraulico</option><option>Pavimenti e parquet</option><option>Pittura e finiture</option><option>Altro</option></select></div>
     <div class="fg"><label class="fl">Descrivi il progetto</label><textarea class="ft" id="prev-descrizione" placeholder="Descrivi brevemente il lavoro..."></textarea></div>
-    <div id="prev-msg" style="display:none;padding:10px;border-radius:8px;font-size:0.9rem;margin-bottom:10px"></div>
+    <div id="prev-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px"></div>
     <button class="btn-sub" id="prev-btn" onclick="submitPreventivo()">📋 Invia richiesta gratuita</button>
   </div>
 </div>
@@ -479,22 +461,17 @@ async function caricaProfilo(id){
     const uniq=[...new Set(voci.filter(Boolean))];
     const mg=document.getElementById('profile-mestieri');
     if(uniq.length){mg.innerHTML=uniq.map(v=>{const k=Object.keys(iconMap).find(k=>v.toLowerCase().includes(k));return`<div class="cat"><span>${iconMap[k]||'🔧'}</span> ${v}</div>`}).join('')}
-    else{mg.innerHTML='<div style="color:#aaa;font-size:0.9rem">Nessuna specializzazione indicata</div>'}
+    else{mg.innerHTML='<div style="color:#aaa;font-size:0.88rem">Nessuna specializzazione indicata</div>'}
     const voto=d.rating?parseFloat(d.rating):(d.valutazione_media?parseFloat(d.valutazione_media):null);
     const nr=d.num_recensioni||0;
     if(voto){
-      const st='★'.repeat(Math.round(voto))+'☆'.repeat(5-Math.round(voto));
       document.getElementById('stat-rating').textContent=voto.toFixed(1);
-      document.getElementById('stat-stars').textContent=st;
-      document.getElementById('rating-stars-main').textContent=st;
-      document.getElementById('rating-num-main').textContent=voto.toFixed(1);
-      document.getElementById('rating-count-main').textContent='('+nr+' recensioni)';
       document.getElementById('sidebar-rating').textContent=voto.toFixed(1)+'⭐';
     }
     document.getElementById('stat-recensioni').textContent=nr;
     document.getElementById('sidebar-recensioni').textContent=nr;
     if(d.anni_esperienza){document.getElementById('stat-anni').textContent=d.anni_esperienza+'+';document.getElementById('sidebar-anni').textContent=d.anni_esperienza+'+'}
-    if(d.num_dipendenti){document.getElementById('stat-dipendenti').textContent=d.num_dipendenti;document.getElementById('sidebar-dipendenti').textContent=d.num_dipendenti}
+    if(d.num_dipendenti){document.getElementById('sidebar-dipendenti').textContent=d.num_dipendenti}
     if(d.piano)document.getElementById('stat-piano').textContent=d.piano.toUpperCase();
     const tel=d.telefono||'';
     if(tel){
@@ -528,8 +505,8 @@ document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.st-row').forEach(function(row){
     var stelle=row.querySelectorAll('.stella');
     stelle.forEach(function(s){
-      s.addEventListener('mouseover',function(){var h=parseInt(this.dataset.v);stelle.forEach(function(s){s.style.color=parseInt(s.dataset.v)<=h?'#f5a623':'#ddd'})});
-      row.addEventListener('mouseleave',function(){var g=row.id.replace('stelle-','');var sel=vS[g]||0;stelle.forEach(function(s){s.style.color=parseInt(s.dataset.v)<=sel?'#f5a623':'#ddd'})});
+      s.addEventListener('mouseover',function(){var h=parseInt(this.dataset.v);stelle.forEach(function(s){s.style.color=parseInt(s.dataset.v)<=h?'#f4c02e':'#ddd'})});
+      row.addEventListener('mouseleave',function(){var g=row.id.replace('stelle-','');var sel=vS[g]||0;stelle.forEach(function(s){s.style.color=parseInt(s.dataset.v)<=sel?'#f4c02e':'#ddd'})});
     });
   });
 });
@@ -540,13 +517,13 @@ async function caricaRecensioni(id){
     const data=await r.json();
     const div=document.getElementById('rec-lista');
     const ce=document.getElementById('rec-count');if(ce)ce.textContent=data?.length||0;
-    if(!data||!data.length){div.innerHTML='<div style="text-align:center;color:#aaa;padding:24px 0;font-size:0.9rem">Nessuna recensione ancora. Sii il primo!</div>';return}
+    if(!data||!data.length){div.innerHTML='<div style="text-align:center;color:#aaa;padding:24px 0;font-size:0.88rem">Nessuna recensione ancora. Sii il primo!</div>';return}
     div.innerHTML=data.map(r=>{
       const media=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
       const avg=media.length?(media.reduce((a,b)=>a+b,0)/media.length).toFixed(1):'-';
       const st='★'.repeat(Math.round(parseFloat(avg)))+'☆'.repeat(5-Math.round(parseFloat(avg)));
       const quando=[r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' ');
-      return`<div class="rec-item"><div class="rec-header"><span class="rec-nome">${r.nome_cliente||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-cats">${r.stelle_qualita?`<span>⭐ Qualità: ${r.stelle_qualita}/5</span>`:''} ${r.stelle_puntualita?`<span>⏱️ Puntualità: ${r.stelle_puntualita}/5</span>`:''} ${r.stelle_prezzo?`<span>💰 Prezzo: ${r.stelle_prezzo}/5</span>`:''} ${r.stelle_professionalita?`<span>🤝 Prof.: ${r.stelle_professionalita}/5</span>`:''}</div><p class="rec-testo">${r.testo||''}</p>${r.risposta_impresa?`<div style="background:var(--v3);border-left:4px solid var(--v);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:10px;font-size:0.88rem;color:var(--v2)"><strong>🏗️ Risposta:</strong> ${r.risposta_impresa}</div>`:''}</div>`;
+      return`<div class="rec-item"><div class="rec-header"><span class="rec-nome">${r.nome_cliente||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-cats">${r.stelle_qualita?`<span>⭐ Qualità: ${r.stelle_qualita}/5</span>`:''} ${r.stelle_puntualita?`<span>⏱️ Puntualità: ${r.stelle_puntualita}/5</span>`:''} ${r.stelle_prezzo?`<span>💰 Prezzo: ${r.stelle_prezzo}/5</span>`:''} ${r.stelle_professionalita?`<span>🤝 Prof.: ${r.stelle_professionalita}/5</span>`:''}</div><p class="rec-testo">${r.testo||''}</p>${r.risposta_impresa?`<div style="background:var(--verde3);border-left:3px solid var(--verde);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:0.85rem;color:var(--verde2)"><strong>🏗️ Risposta:</strong> ${r.risposta_impresa}</div>`:''}</div>`;
     }).join('');
   }catch(e){console.error(e)}
 }
@@ -582,22 +559,22 @@ async function submitPreventivo(){
   const nome=document.getElementById('prev-nome').value.trim();
   const email=document.getElementById('prev-email').value.trim();
   const me=document.getElementById('prev-msg');const btn=document.getElementById('prev-btn');
-  if(!nome||!email){me.textContent='Inserisci almeno nome e email.';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:0.9rem;margin-bottom:10px;background:#fff0f0;color:#c0392b;';return}
+  if(!nome||!email){me.textContent='Inserisci almeno nome e email.';me.style.cssText='display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#fff0f0;color:#c0392b;';return}
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
     const p=new URLSearchParams(window.location.search);const iid=parseInt(p.get('id'));
     const {error}=await supabaseClient.from('preventivi').insert({impresa_id:iid,nome,cognome:document.getElementById('prev-cognome').value.trim(),email,telefono:document.getElementById('prev-telefono').value.trim(),tipo_lavoro:document.getElementById('prev-tipo').value,descrizione:document.getElementById('prev-descrizione').value.trim(),created_at:new Date().toISOString()});
     if(error)throw error;
-    me.textContent='✅ Richiesta inviata! Ti risponderemo entro 24 ore.';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:0.9rem;margin-bottom:10px;background:#e8f5ee;color:#2a7a4b;';
+    me.textContent='✅ Richiesta inviata! Ti risponderemo entro 24 ore.';me.style.cssText='display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#e8f5ee;color:#2a7a4b;';
     btn.textContent='✅ Inviato';setTimeout(()=>closeModal(),2000);
-  }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:0.9rem;margin-bottom:10px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}
+  }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}
 }
 
 async function caricaFotoLavori(id){
   const grid=document.getElementById('foto-lavori-grid');if(!grid)return;
   const {data,error}=await supabaseClient.storage.from('foto-lavori').list(String(id),{sortBy:{column:'created_at',order:'desc'}});
   const foto=(data||[]).filter(f=>f.name!=='.emptyFolderPlaceholder');
-  if(error||!foto.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px 0;font-size:0.9rem">📷 Nessuna foto caricata</div>';return}
+  if(error||!foto.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px 0;font-size:0.88rem">📷 Nessuna foto caricata</div>';return}
   grid.innerHTML=foto.map(f=>{const {data:{publicUrl}}=supabaseClient.storage.from('foto-lavori').getPublicUrl(`${id}/${f.name}`);return`<div class="foto-item"><img src="${publicUrl}" alt="Foto lavoro" loading="lazy"></div>`}).join('');
 }
 
@@ -615,13 +592,13 @@ document.addEventListener('DOMContentLoaded',async()=>{
 });
 </script>
 <script src="/cookie-banner.js"></script>
-<footer style="background:#0f1a14;color:rgba(255,255,255,0.7);font-size:0.85rem;padding:20px;text-align:center;border-top:1px solid rgba(255,255,255,0.06)">
+<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">
   © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) –
-  <a href="mailto:info@trovaimpresa.com" style="color:#6ec995">info@trovaimpresa.com</a> |
-  <a href="/termini-condizioni.html" style="color:#6ec995">Termini</a> |
-  <a href="/cookie-policy.html" style="color:#6ec995">Cookie Policy</a> |
-  <a href="/privacy-policy.html" style="color:#6ec995">Privacy</a> |
-  <a href="/contatti.html" style="color:#6ec995">Contatti</a>
+  <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> |
+  <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> |
+  <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> |
+  <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> |
+  <a href="/contatti.html" style="color:#a0d8b3">Contatti</a>
 </footer>
 </body>
 </html>
