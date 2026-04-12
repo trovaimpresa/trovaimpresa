@@ -430,7 +430,10 @@
         btn.textContent = '⏳ Salvataggio...';
         const dati = {
           user_id: user_id,
+          tipo: 'artigiano',
           nome: nome,
+          nome_attivita: nome,
+          mestiere: mestiere,
           mestieri: mestiere ? [mestiere] : [],
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
@@ -445,7 +448,10 @@
           lng: parseFloat(document.getElementById('lng').value) || null,
           sito_web: document.getElementById('sito_web').value,
           logo_url: logo_url,
-          piano: document.getElementById('piano_scelto').value
+          piano: document.getElementById('piano_scelto').value,
+          verificata: false,
+          rating: 0,
+          num_recensioni: 0
         };
         const { error: insertError } = await supabaseClient.from('imprese').insert(dati);
         if (insertError) {
