@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cerca Artigiani - TrovaImpresa</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; font-size: 18px; }
@@ -59,6 +60,9 @@
     .filter-chip:hover { background: #ffe8e0; border-color: #FF6B35; color: #FF6B35; }
     .btn-mappa { display: inline-flex; align-items: center; gap: 8px; background: white; border: 1.5px solid #ddd; border-radius: 10px; padding: 10px 20px; font-size: 16px; font-weight: 600; color: #111; cursor: pointer; margin-bottom: 16px; }
     .btn-mappa:hover { border-color: #2a7a4b; color: #2a7a4b; }
+    .btn-mappa.active { background: #e8f5ec; border-color: #2a7a4b; color: #2a7a4b; }
+    #mappaContainer { display: none; width: 100%; height: 440px; border-radius: 14px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+    #mappaContainer.visible { display: block; }
     .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .results-count { font-size: 17px; color: #333; }
     .results-count strong { color: #222; font-weight: 700; }
@@ -195,7 +199,8 @@
 
   <div class="results-col">
     <div id="activeFilters" class="active-filters"></div>
-    <button class="btn-mappa" onclick="alert('Mappa in arrivo!')">🗺️ Mostra sulla mappa</button>
+    <button class="btn-mappa" id="btnMappa" onclick="toggleMappa()">🗺️ Mostra sulla mappa</button>
+    <div id="mappaContainer"><div id="mappa" style="width:100%;height:100%;"></div></div>
     <div class="results-header">
       <div class="results-count" id="risultatiCount">Ricerca in corso...</div>
       <select class="sort-select" onchange="cambiaSorting(this.value)">
@@ -212,6 +217,48 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  let mappaLeaflet = null;
+
+  function toggleMappa() {
+    const container = document.getElementById('mappaContainer');
+    const btn = document.getElementById('btnMappa');
+    const aperta = container.classList.toggle('visible');
+    btn.classList.toggle('active', aperta);
+    btn.textContent = aperta ? '🗺️ Nascondi mappa' : '🗺️ Mostra sulla mappa';
+    if (aperta) aggiornaMappa();
+  }
+
+  function aggiornaMappa() {
+    const conCoordinate = tuttiRisultati.filter(i => i.lat && i.lng);
+    if (!conCoordinate.length) {
+      document.getElementById('mappa').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:16px;color:#888;">Nessun artigiano con coordinate disponibile</div>';
+      return;
+    }
+    if (!mappaLeaflet) {
+      mappaLeaflet = L.map('mappa').setView([41.9, 12.5], 6);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(mappaLeaflet);
+    } else {
+      mappaLeaflet.eachLayer(l => { if (l instanceof L.Marker) mappaLeaflet.removeLayer(l); });
+    }
+    const bounds = [];
+    conCoordinate.forEach(i => {
+      const marker = L.marker([i.lat, i.lng]).addTo(mappaLeaflet);
+      marker.bindPopup(`
+        <div style="font-size:14px;min-width:160px;">
+          <strong style="font-size:16px;">${i.nome || 'Artigiano'}</strong><br>
+          📍 ${i.citta || ''}<br>
+          🔧 ${Array.isArray(i.mestieri) ? i.mestieri[0] : (i.mestieri||'').split(',')[0] || ''}<br>
+          <a href="profilo-impresa.html?id=${i.id}" style="display:inline-block;margin-top:8px;background:#FF6B35;color:white;padding:6px 14px;border-radius:8px;text-decoration:none;font-weight:700;">Vedi profilo</a>
+        </div>
+      `);
+      bounds.push([i.lat, i.lng]);
+    });
+    if (bounds.length) mappaLeaflet.fitBounds(bounds, { padding: [40, 40] });
+    setTimeout(() => mappaLeaflet.invalidateSize(), 100);
+  }
+
   const supabaseClient = supabase.createClient(
     'https://nacvrsgkyfavykxjxszu.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
@@ -290,6 +337,7 @@
       tuttiRisultati = data || [];
       paginaCorrente = 1;
       mostraPagina(1);
+      if (document.getElementById('mappaContainer').classList.contains('visible')) aggiornaMappa();
     } catch(e) {
       document.getElementById('risultati').innerHTML = `<div class="no-results"><p>Errore: ${e.message}</p></div>`;
     }
