@@ -10,86 +10,84 @@
 
     header { background: white; padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
     header a img { height: 36px; }
-    header nav a { color: #2a7a4b; text-decoration: none; font-weight: 600; margin-left: 16px; font-size: 13px; }
-    header nav a:hover { text-decoration: underline; }
+    header nav a { color: #2a7a4b; text-decoration: none; font-weight: 600; margin-left: 16px; font-size: 16px; }
 
-    .top-bar { background: #1a4d2e; padding: 28px 40px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .top-bar h1 { color: white; font-size: 2.2rem; font-weight: 800; white-space: nowrap; }
-    .top-search { flex: 1; display: flex; gap: 8px; min-width: 200px; }
-    .top-search input { flex: 1; border: none; border-radius: 8px; padding: 16px 20px; font-size: 18px; outline: none; }
-    .top-search input:focus { box-shadow: 0 0 0 2px #FF6B35; }
-    .btn-cerca { background: #FF6B35; color: white; border: none; border-radius: 8px; padding: 16px 32px; font-size: 18px; font-weight: 700; cursor: pointer; }
+    .top-bar { background: #1a4d2e; padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
+    .top-bar h1 { color: white; font-size: 1.8rem; font-weight: 800; white-space: nowrap; }
+    .top-search { flex: 1; display: flex; gap: 8px; }
+    .top-search input { flex: 1; border: none; border-radius: 8px; padding: 10px 16px; font-size: 17px; outline: none; }
+    .btn-cerca { background: #FF6B35; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 17px; font-weight: 700; cursor: pointer; }
     .btn-cerca:hover { background: #e55a25; }
-    .btn-loc { background: rgba(255,255,255,0.2); color: white; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 8px; padding: 16px 18px; font-size: 18px; cursor: pointer; }
-    .btn-loc:hover { background: rgba(255,255,255,0.3); }
+    .btn-loc { background: rgba(255,255,255,0.2); color: white; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 8px; padding: 10px 14px; font-size: 17px; cursor: pointer; }
 
-    .page-body { display: flex; width: 100%; margin: 0; padding: 16px 0 16px 0; gap: 16px; align-items: flex-start; }
-    .results-col { flex: 1; min-width: 0; padding-right: 24px; }
+    .page-body { display: flex; width: 100%; margin: 0; padding: 0; gap: 0; align-items: flex-start; }
 
-    .sidebar { width: 520px; flex-shrink: 0; background: white; border-radius: 0 12px 12px 0; padding: 28px; box-shadow: 2px 2px 12px rgba(0,0,0,0.08); position: sticky; top: 60px; max-height: calc(100vh - 80px); overflow-y: auto; overflow-x: hidden; }
+    /* SIDEBAR */
+    .sidebar { width: 240px; flex-shrink: 0; background: white; padding: 16px; box-shadow: 2px 0 8px rgba(0,0,0,0.06); min-height: calc(100vh - 110px); overflow-y: auto; overflow-x: hidden; }
     .sidebar::-webkit-scrollbar { width: 3px; }
     .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
-    .sidebar-title { font-size: 20px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
-    .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #999; text-transform: uppercase; margin: 20px 0 10px; }
-    .filter-btn { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 15px; color: #444; transition: all 0.15s; margin-bottom: 4px; white-space: nowrap; overflow: hidden; }
+    .sidebar-title { font-size: 20px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+    .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #999; text-transform: uppercase; margin: 16px 0 8px; }
+    .tipo-btn { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; color: #444; border: 1.5px solid #eee; margin-bottom: 6px; transition: all 0.15s; background: white; }
+    .tipo-btn:hover { border-color: #2a7a4b; color: #2a7a4b; }
+    .tipo-btn.active { background: #e8f5ec; color: #2a7a4b; border-color: #2a7a4b; }
+    .sidebar-divider { border: none; border-top: 1px solid #eee; margin: 14px 0; }
+    .mestieri-scroll { max-height: 220px; overflow-y: auto; overflow-x: hidden; }
+    .mestieri-scroll::-webkit-scrollbar { width: 3px; }
+    .mestieri-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+    .filter-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 16px; color: #444; transition: all 0.15s; margin-bottom: 2px; }
     .filter-btn:hover { background: #f0f9f4; color: #2a7a4b; }
     .filter-btn.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
-    .filter-icon { font-size: 15px; width: 22px; text-align: center; }
-    .sidebar-divider { border: none; border-top: 1px solid #eee; margin: 12px 0; }
-
-    .star-option { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; color: #555; transition: all 0.15s; margin-bottom: 2px; }
+    .filter-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+    .star-option { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 16px; color: #555; transition: all 0.15s; margin-bottom: 3px; }
     .star-option:hover { background: #f0f9f4; }
     .star-option.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
     .star-option .s { color: #f5a623; }
-
     .slider-wrap { padding: 0 4px; }
     .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 4px; }
     .slider-value { text-align: center; font-size: 13px; font-weight: 700; color: #2a7a4b; margin-bottom: 6px; }
     input[type=range] { width: 100%; accent-color: #2a7a4b; cursor: pointer; }
-
-    .check-option { display: flex; align-items: center; gap: 8px; padding: 7px 4px; font-size: 12px; color: #444; cursor: pointer; border-radius: 6px; transition: background 0.15s; }
-    .check-option:hover { background: #f0f9f4; padding-left: 8px; }
+    .check-option { display: flex; align-items: center; gap: 8px; padding: 7px 4px; font-size: 13px; color: #444; cursor: pointer; border-radius: 6px; }
+    .check-option:hover { background: #f0f9f4; }
     .check-option input[type=checkbox] { accent-color: #2a7a4b; width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
 
-    .tipo-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; color: #444; border: 1.5px solid #eee; margin-bottom: 6px; transition: all 0.15s; background: white; }
-    .tipo-btn:hover { border-color: #2a7a4b; color: #2a7a4b; }
-    .tipo-btn.active { background: #e8f5ec; color: #2a7a4b; border-color: #2a7a4b; font-weight: 700; }
-    .btn-mappa { display: flex; align-items: center; gap: 6px; background: white; border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #444; cursor: pointer; margin-bottom: 12px; transition: all 0.15s; }
-    .btn-mappa:hover { border-color: #2a7a4b; color: #2a7a4b; }
-    .active-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-    .filter-chip { display: inline-flex; align-items: center; gap: 5px; background: #f0f9f4; border: 1.5px solid #c3e6d0; color: #2a7a4b; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    /* RESULTS */
+    .results-col { flex: 1; min-width: 0; padding: 16px 24px; }
+    .active-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .filter-chip { display: inline-flex; align-items: center; gap: 5px; background: #f0f9f4; border: 1.5px solid #c3e6d0; color: #2a7a4b; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
     .filter-chip:hover { background: #ffe8e0; border-color: #FF6B35; color: #FF6B35; }
-    .filter-chip .x { font-size: 14px; font-weight: 700; }
-    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-    .results-count { font-size: 13px; color: #666; }
+    .btn-mappa { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; margin-bottom: 14px; }
+    .btn-mappa:hover { border-color: #2a7a4b; color: #2a7a4b; }
+    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .results-count { font-size: 16px; color: #666; }
     .results-count strong { color: #222; font-weight: 700; }
-    .sort-select { font-size: 12px; border: 1.5px solid #ddd; border-radius: 6px; padding: 5px 10px; color: #444; outline: none; cursor: pointer; }
+    .sort-select { font-size: 13px; border: 1.5px solid #ddd; border-radius: 6px; padding: 6px 12px; color: #444; outline: none; cursor: pointer; }
 
-    .card { background: white; border-radius: 12px; padding: 28px 32px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 16px; display: flex; gap: 24px; border-left: 5px solid #e0e0e0; transition: box-shadow 0.2s, transform 0.15s; text-decoration: none; color: inherit; width: 100%; min-height: 160px; }
+    /* CARD */
+    .card { background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 14px; display: flex; gap: 20px; border-left: 4px solid #e0e0e0; transition: box-shadow 0.2s, transform 0.15s; text-decoration: none; color: inherit; }
     .card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-1px); border-left-color: #2a7a4b; }
     .card.pro { border-left-color: #FF6B35; }
-    .card-logo { width: 90px; height: 90px; border-radius: 14px; background: #f0f9f4; display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; overflow: hidden; border: 1.5px solid #eee; }
+    .card-logo { width: 70px; height: 70px; border-radius: 12px; background: #f0f9f4; display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0; overflow: hidden; border: 1.5px solid #eee; }
     .card-logo img { width: 100%; height: 100%; object-fit: cover; }
     .card-body { flex: 1; min-width: 0; }
-    .card-name { font-size: 17px; font-weight: 800; color: #1a1a1a; margin-bottom: 6px; }
+    .card-name { font-size: 20px; font-weight: 800; color: #1a1a1a; margin-bottom: 6px; }
     .card-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
-    .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+    .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
     .badge-verificato { background: #e8f5ec; color: #2a7a4b; }
     .badge-pro { background: #fff3ee; color: #FF6B35; }
     .badge-tipo { background: #eef3ff; color: #3b5bdb; }
-    .card-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #666; margin-bottom: 7px; }
-    .card-meta span { display: flex; align-items: center; gap: 3px; }
-    .card-desc { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-    .tag { background: #f4f6f8; color: #555; font-size: 11px; padding: 4px 10px; border-radius: 6px; }
-    .card-right { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; flex-shrink: 0; min-width: 110px; gap: 6px; }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 15px; color: #666; margin-bottom: 8px; }
+    .card-desc { font-size: 15px; color: #555; line-height: 1.55; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { background: #f4f6f8; color: #555; font-size: 14px; padding: 5px 12px; border-radius: 6px; }
+    .card-right { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; flex-shrink: 0; min-width: 120px; gap: 8px; }
     .card-rating { text-align: right; }
-    .rating-score { font-size: 22px; font-weight: 800; color: #1a1a1a; line-height: 1; }
-    .stars { color: #f5a623; font-size: 12px; }
+    .rating-score { font-size: 24px; font-weight: 800; color: #1a1a1a; line-height: 1; }
+    .stars { color: #f5a623; font-size: 16px; }
     .rating-count { font-size: 11px; color: #999; }
     .card-price { text-align: right; font-size: 12px; color: #888; line-height: 1.5; }
-    .card-price strong { display: block; color: #2a7a4b; font-weight: 700; font-size: 13px; }
-    .btn-profilo { background: #FF6B35; color: white; border: none; border-radius: 8px; padding: 9px 16px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .card-price strong { display: block; color: #2a7a4b; font-weight: 700; font-size: 14px; }
+    .btn-profilo { background: #FF6B35; color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
     .btn-profilo:hover { background: #e55a25; }
 
     .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 24px; padding-bottom: 30px; }
@@ -124,7 +122,7 @@
   <div class="top-search">
     <input type="text" id="cittaInput" placeholder="Città o CAP... es. Milano, Roma" />
     <button class="btn-cerca" onclick="cerca()">🔍 Cerca</button>
-    <button class="btn-loc" onclick="localizzami()" title="Usa posizione">📍</button>
+    <button class="btn-loc" onclick="localizzami()">📍</button>
   </div>
 </div>
 
@@ -141,29 +139,31 @@
     <hr class="sidebar-divider">
 
     <div class="filter-label">Mestiere</div>
-    <div id="mestieri-list" style="max-height:200px;overflow-y:auto;overflow-x:hidden;padding-right:2px;">
-      <div class="filter-btn active" data-mestiere="tutti" onclick="selectMestiere(this)"><span class="filter-icon">🔧</span> Tutti i mestieri</div>
-      <div class="filter-btn" data-mestiere="Muratura" onclick="selectMestiere(this)"><span class="filter-icon">🧱</span> Muratura</div>
-      <div class="filter-btn" data-mestiere="Elettricista" onclick="selectMestiere(this)"><span class="filter-icon">⚡</span> Elettricista</div>
-      <div class="filter-btn" data-mestiere="Idraulico" onclick="selectMestiere(this)"><span class="filter-icon">🚿</span> Idraulico</div>
-      <div class="filter-btn" data-mestiere="Falegname" onclick="selectMestiere(this)"><span class="filter-icon">🪚</span> Falegname</div>
-      <div class="filter-btn" data-mestiere="Pittore" onclick="selectMestiere(this)"><span class="filter-icon">🎨</span> Pittore</div>
-      <div class="filter-btn" data-mestiere="Piastrellista" onclick="selectMestiere(this)"><span class="filter-icon">🟫</span> Piastrellista</div>
-      <div class="filter-btn" data-mestiere="Carpentiere" onclick="selectMestiere(this)"><span class="filter-icon">🪵</span> Carpentiere</div>
-      <div class="filter-btn" data-mestiere="Cartongesso" onclick="selectMestiere(this)"><span class="filter-icon">📦</span> Cartongesso</div>
-      <div class="filter-btn" data-mestiere="Fabbro" onclick="selectMestiere(this)"><span class="filter-icon">⚙️</span> Fabbro</div>
-      <div class="filter-btn" data-mestiere="Termoidraulico" onclick="selectMestiere(this)"><span class="filter-icon">🔥</span> Termoidraulico</div>
-      <div class="filter-btn" data-mestiere="Giardiniere" onclick="selectMestiere(this)"><span class="filter-icon">🌿</span> Giardiniere</div>
-      <div class="filter-btn" data-mestiere="Impermeabilizzazione" onclick="selectMestiere(this)"><span class="filter-icon">💧</span> Impermeabilizzazione</div>
-      <div class="filter-btn" data-mestiere="Intonacatore" onclick="selectMestiere(this)"><span class="filter-icon">🏚️</span> Intonacatore</div>
-      <div class="filter-btn" data-mestiere="Pavimentista" onclick="selectMestiere(this)"><span class="filter-icon">🪨</span> Pavimentista</div>
-      <div class="filter-btn" data-mestiere="Vetraio" onclick="selectMestiere(this)"><span class="filter-icon">🪟</span> Vetraio</div>
-      <div class="filter-btn" data-mestiere="Impianto solare" onclick="selectMestiere(this)"><span class="filter-icon">☀️</span> Impianto solare</div>
-      <div class="filter-btn" data-mestiere="Climatizzatore" onclick="selectMestiere(this)"><span class="filter-icon">❄️</span> Climatizzatore</div>
-      <div class="filter-btn" data-mestiere="Tecnico caldaie" onclick="selectMestiere(this)"><span class="filter-icon">🌡️</span> Tecnico caldaie</div>
-      <div class="filter-btn" data-mestiere="Ponteggi" onclick="selectMestiere(this)"><span class="filter-icon">🏗️</span> Ponteggi</div>
-      <div class="filter-btn" data-mestiere="Demolizione" onclick="selectMestiere(this)"><span class="filter-icon">🔨</span> Demolizione</div>
-      <div class="filter-btn" data-mestiere="Sgomberi" onclick="selectMestiere(this)"><span class="filter-icon">🚛</span> Sgomberi</div>
+    <div class="mestieri-scroll">
+      <div id="mestieri-list">
+        <div class="filter-btn active" data-mestiere="tutti" onclick="selectMestiere(this)"><span class="filter-icon">🔧</span> Tutti i mestieri</div>
+        <div class="filter-btn" data-mestiere="Muratura" onclick="selectMestiere(this)"><span class="filter-icon">🧱</span> Muratura</div>
+        <div class="filter-btn" data-mestiere="Elettricista" onclick="selectMestiere(this)"><span class="filter-icon">⚡</span> Elettricista</div>
+        <div class="filter-btn" data-mestiere="Idraulico" onclick="selectMestiere(this)"><span class="filter-icon">🚿</span> Idraulico</div>
+        <div class="filter-btn" data-mestiere="Falegname" onclick="selectMestiere(this)"><span class="filter-icon">🪚</span> Falegname</div>
+        <div class="filter-btn" data-mestiere="Pittore" onclick="selectMestiere(this)"><span class="filter-icon">🎨</span> Pittore</div>
+        <div class="filter-btn" data-mestiere="Piastrellista" onclick="selectMestiere(this)"><span class="filter-icon">🟫</span> Piastrellista</div>
+        <div class="filter-btn" data-mestiere="Carpentiere" onclick="selectMestiere(this)"><span class="filter-icon">🪵</span> Carpentiere</div>
+        <div class="filter-btn" data-mestiere="Cartongesso" onclick="selectMestiere(this)"><span class="filter-icon">📦</span> Cartongesso</div>
+        <div class="filter-btn" data-mestiere="Fabbro" onclick="selectMestiere(this)"><span class="filter-icon">⚙️</span> Fabbro</div>
+        <div class="filter-btn" data-mestiere="Termoidraulico" onclick="selectMestiere(this)"><span class="filter-icon">🔥</span> Termoidraulico</div>
+        <div class="filter-btn" data-mestiere="Giardiniere" onclick="selectMestiere(this)"><span class="filter-icon">🌿</span> Giardiniere</div>
+        <div class="filter-btn" data-mestiere="Impermeabilizzazione" onclick="selectMestiere(this)"><span class="filter-icon">💧</span> Impermeabilizzazione</div>
+        <div class="filter-btn" data-mestiere="Intonacatore" onclick="selectMestiere(this)"><span class="filter-icon">🏚️</span> Intonacatore</div>
+        <div class="filter-btn" data-mestiere="Pavimentista" onclick="selectMestiere(this)"><span class="filter-icon">🪨</span> Pavimentista</div>
+        <div class="filter-btn" data-mestiere="Vetraio" onclick="selectMestiere(this)"><span class="filter-icon">🪟</span> Vetraio</div>
+        <div class="filter-btn" data-mestiere="Impianto solare" onclick="selectMestiere(this)"><span class="filter-icon">☀️</span> Impianto solare</div>
+        <div class="filter-btn" data-mestiere="Climatizzatore" onclick="selectMestiere(this)"><span class="filter-icon">❄️</span> Climatizzatore</div>
+        <div class="filter-btn" data-mestiere="Tecnico caldaie" onclick="selectMestiere(this)"><span class="filter-icon">🌡️</span> Tecnico caldaie</div>
+        <div class="filter-btn" data-mestiere="Ponteggi" onclick="selectMestiere(this)"><span class="filter-icon">🏗️</span> Ponteggi</div>
+        <div class="filter-btn" data-mestiere="Demolizione" onclick="selectMestiere(this)"><span class="filter-icon">🔨</span> Demolizione</div>
+        <div class="filter-btn" data-mestiere="Sgomberi" onclick="selectMestiere(this)"><span class="filter-icon">🚛</span> Sgomberi</div>
+      </div>
     </div>
 
     <hr class="sidebar-divider">
@@ -186,25 +186,17 @@
     <hr class="sidebar-divider">
 
     <div class="filter-label">Altro</div>
-    <label class="check-option">
-      <input type="checkbox" id="soloVerificati" onchange="cerca()"> Solo verificati
-    </label>
-    <label class="check-option">
-      <input type="checkbox" id="conFoto" onchange="cerca()"> Con foto lavori
-    </label>
-    <label class="check-option">
-      <input type="checkbox" id="rispondeIn24h" onchange="cerca()"> Risponde in 24h
-    </label>
-    <label class="check-option">
-      <input type="checkbox" id="preventivoOnline" onchange="cerca()"> Preventivo online
-    </label>
+    <label class="check-option"><input type="checkbox" id="soloVerificati" onchange="cerca()"> Solo verificati</label>
+    <label class="check-option"><input type="checkbox" id="conFoto" onchange="cerca()"> Con foto lavori</label>
+    <label class="check-option"><input type="checkbox" id="rispondeIn24h" onchange="cerca()"> Risponde in 24h</label>
+    <label class="check-option"><input type="checkbox" id="preventivoOnline" onchange="cerca()"> Preventivo online</label>
   </div>
 
   <div class="results-col">
     <div id="activeFilters" class="active-filters"></div>
-    <button class="btn-mappa" id="btnMappa" onclick="alert('Mappa in arrivo!')">🗺️ Mostra sulla mappa</button>
+    <button class="btn-mappa" onclick="alert('Mappa in arrivo!')">🗺️ Mostra sulla mappa</button>
     <div class="results-header">
-      <div class="results-count" id="risultatiCount">Ricerca artigiani...</div>
+      <div class="results-count" id="risultatiCount">Ricerca in corso...</div>
       <select class="sort-select" onchange="cambiaSorting(this.value)">
         <option value="piano">Ordina: Rilevanza</option>
         <option value="valutazione">Ordina: Valutazione</option>
@@ -247,11 +239,7 @@
     cerca();
   }
 
-  function cambiaSorting(val) {
-    sortBy = val;
-    paginaCorrente = 1;
-    cerca();
-  }
+  function cambiaSorting(val) { sortBy = val; paginaCorrente = 1; cerca(); }
 
   function aggiornaDistanza(val) {
     document.getElementById('distanzaVal').textContent = val >= 100 ? 'Qualsiasi' : val + ' km';
@@ -260,96 +248,82 @@
   }
 
   function localizzami() {
-    if (!navigator.geolocation) { alert('Geolocalizzazione non supportata.'); return; }
+    if (!navigator.geolocation) { alert('Non supportato.'); return; }
     navigator.geolocation.getCurrentPosition(async pos => {
       try {
         const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
         const d = await r.json();
-        const citta = d.address.city || d.address.town || d.address.village || '';
-        document.getElementById('cittaInput').value = citta;
+        document.getElementById('cittaInput').value = d.address.city || d.address.town || d.address.village || '';
         cerca();
-      } catch(e) { alert('Errore nella geolocalizzazione.'); }
+      } catch(e) { alert('Errore geolocalizzazione.'); }
     }, () => alert('Permesso negato.'));
   }
 
   function aggiornaChipAttivi() {
-    const cittaScelta = document.getElementById('cittaInput').value.trim();
-    const soloVerificati = document.getElementById('soloVerificati').checked;
+    const citta = document.getElementById('cittaInput').value.trim();
+    const verificati = document.getElementById('soloVerificati').checked;
     const chips = [];
-    if (mestiereScelto !== 'tutti') chips.push({ label: mestiereScelto, reset: () => { document.querySelector('#mestieri-list .filter-btn[data-mestiere="tutti"]').click(); } });
-    if (cittaScelta) chips.push({ label: '📍 ' + cittaScelta, reset: () => { document.getElementById('cittaInput').value = ''; cerca(); } });
-    if (valutazioneMin > 0) chips.push({ label: '★ ' + valutazioneMin + '+ stelle', reset: () => { document.querySelector('.star-option[data-min="0"]').click(); } });
-    if (soloVerificati) chips.push({ label: '✔ Solo verificati', reset: () => { document.getElementById('soloVerificati').checked = false; cerca(); } });
-    const container = document.getElementById('activeFilters');
-    container.innerHTML = chips.map((c, i) => `<span class="filter-chip" onclick="chipReset(${i})">🔍 ${c.label} <span class="x">×</span></span>`).join('');
+    if (mestiereScelto !== 'tutti') chips.push({ label: mestiereScelto, reset: () => document.querySelector('#mestieri-list .filter-btn[data-mestiere="tutti"]').click() });
+    if (citta) chips.push({ label: '📍 ' + citta, reset: () => { document.getElementById('cittaInput').value = ''; cerca(); } });
+    if (valutazioneMin > 0) chips.push({ label: '★ ' + valutazioneMin + '+', reset: () => document.querySelector('.star-option[data-min="0"]').click() });
+    if (verificati) chips.push({ label: '✔ Verificati', reset: () => { document.getElementById('soloVerificati').checked = false; cerca(); } });
     window._chipResets = chips.map(c => c.reset);
+    document.getElementById('activeFilters').innerHTML = chips.map((c, i) =>
+      `<span class="filter-chip" onclick="window._chipResets[${i}]()">🔍 ${c.label} ×</span>`).join('');
   }
-  function chipReset(i) { window._chipResets[i](); }
 
   async function cerca() {
-    const cittaScelta = document.getElementById('cittaInput').value.trim();
+    const citta = document.getElementById('cittaInput').value.trim();
     const soloVerificati = document.getElementById('soloVerificati').checked;
     const conFoto = document.getElementById('conFoto').checked;
     aggiornaChipAttivi();
-    const div = document.getElementById('risultati');
-    div.innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
+    document.getElementById('risultati').innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
     document.getElementById('risultatiCount').textContent = 'Ricerca in corso...';
     document.getElementById('pagination').innerHTML = '';
 
     try {
       let q = supabaseClient.from('imprese').select('*').eq('tipo', 'artigiano');
-
       if (mestiereScelto !== 'tutti') q = q.ilike('mestieri', `%${mestiereScelto}%`);
-      if (cittaScelta) q = q.ilike('citta', `%${cittaScelta}%`);
+      if (citta) q = q.ilike('citta', `%${citta}%`);
       if (valutazioneMin > 0) q = q.gte('valutazione_media', valutazioneMin);
       if (soloVerificati) q = q.eq('verificato', true);
       if (conFoto) q = q.not('foto_lavori', 'is', null);
-
       if (sortBy === 'valutazione') q = q.order('valutazione_media', { ascending: false });
       else if (sortBy === 'recenti') q = q.order('created_at', { ascending: false });
       else q = q.order('piano', { ascending: false }).order('created_at', { ascending: false });
-
       const { data, error } = await q.limit(200);
       if (error) throw error;
-
       tuttiRisultati = data || [];
       paginaCorrente = 1;
       mostraPagina(1);
     } catch(e) {
-      div.innerHTML = `<div class="no-results"><p>Errore: ${e.message}</p></div>`;
+      document.getElementById('risultati').innerHTML = `<div class="no-results"><p>Errore: ${e.message}</p></div>`;
     }
   }
 
   function mostraPagina(pagina) {
     paginaCorrente = pagina;
     const div = document.getElementById('risultati');
-
     if (!tuttiRisultati.length) {
       document.getElementById('risultatiCount').textContent = 'Nessun risultato';
       div.innerHTML = '<div class="no-results"><h3>😕 Nessun artigiano trovato</h3><p>Prova a cambiare città o mestiere</p></div>';
       document.getElementById('pagination').innerHTML = '';
       return;
     }
-
     const totale = tuttiRisultati.length;
     const totPagine = Math.ceil(totale / PER_PAGE);
-    const inizio = (pagina - 1) * PER_PAGE;
-    const slice = tuttiRisultati.slice(inizio, inizio + PER_PAGE);
-
+    const slice = tuttiRisultati.slice((pagina - 1) * PER_PAGE, pagina * PER_PAGE);
     document.getElementById('risultatiCount').innerHTML = `Trovati <strong>${totale}</strong> artigiani`;
     div.innerHTML = slice.map(i => cardHTML(i)).join('');
-
-    // Paginazione
     const pag = document.getElementById('pagination');
     if (totPagine <= 1) { pag.innerHTML = ''; return; }
     let html = '';
     if (pagina > 1) html += `<button class="page-btn" onclick="mostraPagina(${pagina-1})">‹</button>`;
     for (let p = 1; p <= totPagine; p++) {
-      if (p === 1 || p === totPagine || Math.abs(p - pagina) <= 1) {
+      if (p === 1 || p === totPagine || Math.abs(p - pagina) <= 1)
         html += `<button class="page-btn${p===pagina?' active':''}" onclick="mostraPagina(${p})">${p}</button>`;
-      } else if (Math.abs(p - pagina) === 2) {
+      else if (Math.abs(p - pagina) === 2)
         html += `<span style="color:#999;padding:0 2px">…</span>`;
-      }
     }
     if (pagina < totPagine) html += `<button class="page-btn" onclick="mostraPagina(${pagina+1})">›</button>`;
     pag.innerHTML = html;
@@ -359,58 +333,29 @@
   function cardHTML(i) {
     const logo = i.logo_url ? `<img src="${i.logo_url}" alt="logo">` : `🔨`;
     const isPro = i.piano === 'pro';
-
-    const badges = [
-      `<span class="badge badge-verificato">✔ VERIFICATO</span>`,
-      `<span class="badge badge-tipo">🔧 ARTIGIANO</span>`,
-      isPro ? `<span class="badge badge-pro">⭐ PRO</span>` : ''
-    ].join('');
-
+    const badges = `<span class="badge badge-verificato">✔ VERIFICATO</span><span class="badge badge-tipo">🔧 ARTIGIANO</span>${isPro ? '<span class="badge badge-pro">⭐ PRO</span>' : ''}`;
     const voto = i.valutazione_media ? parseFloat(i.valutazione_media) : null;
-    const stelle = voto ? '★'.repeat(Math.round(voto)) + '☆'.repeat(5 - Math.round(voto)) : '';
-    const ratingBlock = voto
-      ? `<div class="card-rating">
-           <div class="rating-score">${voto.toFixed(1)}</div>
-           <div class="stars">${stelle}</div>
-           <div class="rating-count">${i.num_recensioni ? i.num_recensioni + ' rec.' : ''}</div>
-         </div>`
-      : '<div></div>';
-
+    const ratingBlock = voto ? `<div class="card-rating"><div class="rating-score">${voto.toFixed(1)}</div><div class="stars">${'★'.repeat(Math.round(voto))}${'☆'.repeat(5-Math.round(voto))}</div><div class="rating-count">${i.num_recensioni ? i.num_recensioni+' rec.' : ''}</div></div>` : '<div></div>';
     const meta = [];
     if (i.citta) meta.push(`<span>📍 ${i.citta}</span>`);
     if (i.num_dipendenti) meta.push(`<span>👥 ${i.num_dipendenti} pers.</span>`);
     if (i.anno_fondazione) meta.push(`<span>📅 Dal ${i.anno_fondazione}</span>`);
-
     const desc = i.descrizione ? `<div class="card-desc">${i.descrizione}</div>` : '';
-
-    const mestieri = i.mestieri
-      ? (Array.isArray(i.mestieri) ? i.mestieri : i.mestieri.split(','))
-          .slice(0, 3).map(m => `<span class="tag">🔧 ${m.trim()}</span>`).join('')
-      : '';
-
-    const prezzoBlock = i.costo_medio
-      ? `<div class="card-price"><strong>${i.costo_medio}</strong>costo medio</div>`
-      : '<div></div>';
-
-    return `
-      <a class="card${isPro ? ' pro' : ''}" href="profilo-impresa.html?id=${i.id}">
-        <div class="card-logo">${logo}</div>
-        <div class="card-body">
-          <div class="card-name">${i.nome || 'Artigiano'}</div>
-          <div class="card-badges">${badges}</div>
-          <div class="card-meta">${meta.join('')}</div>
-          ${desc}
-          ${mestieri ? `<div class="card-tags">${mestieri}</div>` : ''}
-        </div>
-        <div class="card-right">
-          ${ratingBlock}
-          ${prezzoBlock}
-          <button class="btn-profilo">Vedi profilo</button>
-        </div>
-      </a>`;
+    const mestieri = i.mestieri ? (Array.isArray(i.mestieri) ? i.mestieri : i.mestieri.split(',')).slice(0,3).map(m => `<span class="tag">🔧 ${m.trim()}</span>`).join('') : '';
+    const prezzoBlock = i.costo_medio ? `<div class="card-price"><strong>${i.costo_medio}</strong>costo medio</div>` : '<div></div>';
+    return `<a class="card${isPro?' pro':''}" href="profilo-impresa.html?id=${i.id}">
+      <div class="card-logo">${logo}</div>
+      <div class="card-body">
+        <div class="card-name">${i.nome||'Artigiano'}</div>
+        <div class="card-badges">${badges}</div>
+        <div class="card-meta">${meta.join('')}</div>
+        ${desc}
+        ${mestieri?`<div class="card-tags">${mestieri}</div>`:''}
+      </div>
+      <div class="card-right">${ratingBlock}${prezzoBlock}<button class="btn-profilo">Vedi profilo</button></div>
+    </a>`;
   }
 
-  // Parametri URL
   const params = new URLSearchParams(window.location.search);
   if (params.get('citta')) document.getElementById('cittaInput').value = params.get('citta');
   if (params.get('mestiere')) {
