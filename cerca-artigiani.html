@@ -25,7 +25,7 @@
 
     .page-body { display: flex; max-width: 1200px; margin: 0 auto; padding: 20px 16px; gap: 20px; align-items: flex-start; }
 
-    .sidebar { width: 230px; flex-shrink: 0; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); position: sticky; top: 70px; max-height: calc(100vh - 90px); overflow-y: auto; }
+    .sidebar { width: 190px; flex-shrink: 0; background: white; border-radius: 12px; padding: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); position: sticky; top: 70px; max-height: calc(100vh - 90px); overflow-y: auto; }
     .sidebar::-webkit-scrollbar { width: 3px; }
     .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
     .sidebar-title { font-size: 13px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
@@ -51,6 +51,10 @@
     .check-option input[type=checkbox] { accent-color: #2a7a4b; width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
 
     .results-col { flex: 1; min-width: 0; }
+    .active-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .filter-chip { display: inline-flex; align-items: center; gap: 5px; background: #f0f9f4; border: 1.5px solid #c3e6d0; color: #2a7a4b; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .filter-chip:hover { background: #ffe8e0; border-color: #FF6B35; color: #FF6B35; }
+    .filter-chip .x { font-size: 14px; font-weight: 700; }
     .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
     .results-count { font-size: 13px; color: #666; }
     .results-count strong { color: #222; font-weight: 700; }
@@ -185,6 +189,7 @@
   </div>
 
   <div class="results-col">
+    <div id="activeFilters" class="active-filters"></div>
     <div class="results-header">
       <div class="results-count" id="risultatiCount">Ricerca artigiani...</div>
       <select class="sort-select" onchange="cambiaSorting(this.value)">
@@ -254,10 +259,25 @@
     }, () => alert('Permesso negato.'));
   }
 
+  function aggiornaChipAttivi() {
+    const cittaScelta = document.getElementById('cittaInput').value.trim();
+    const soloVerificati = document.getElementById('soloVerificati').checked;
+    const chips = [];
+    if (mestiereScelto !== 'tutti') chips.push({ label: mestiereScelto, reset: () => { document.querySelector('#mestieri-list .filter-btn[data-mestiere="tutti"]').click(); } });
+    if (cittaScelta) chips.push({ label: '📍 ' + cittaScelta, reset: () => { document.getElementById('cittaInput').value = ''; cerca(); } });
+    if (valutazioneMin > 0) chips.push({ label: '★ ' + valutazioneMin + '+ stelle', reset: () => { document.querySelector('.star-option[data-min="0"]').click(); } });
+    if (soloVerificati) chips.push({ label: '✔ Solo verificati', reset: () => { document.getElementById('soloVerificati').checked = false; cerca(); } });
+    const container = document.getElementById('activeFilters');
+    container.innerHTML = chips.map((c, i) => `<span class="filter-chip" onclick="chipReset(${i})">🔍 ${c.label} <span class="x">×</span></span>`).join('');
+    window._chipResets = chips.map(c => c.reset);
+  }
+  function chipReset(i) { window._chipResets[i](); }
+
   async function cerca() {
     const cittaScelta = document.getElementById('cittaInput').value.trim();
     const soloVerificati = document.getElementById('soloVerificati').checked;
     const conFoto = document.getElementById('conFoto').checked;
+    aggiornaChipAttivi();
     const div = document.getElementById('risultati');
     div.innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
     document.getElementById('risultatiCount').textContent = 'Ricerca in corso...';
