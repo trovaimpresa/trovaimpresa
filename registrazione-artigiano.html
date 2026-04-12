@@ -6,6 +6,7 @@
   <title>Registrazione Artigiano - TrovaImpresa</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { color: #111; }
     html, body {
       background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
       min-height: 100vh;
@@ -18,30 +19,30 @@
     .header p { font-size: 14px; opacity: 0.9; }
     .steps { display: flex; justify-content: space-between; padding: 20px 24px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
     .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
-    .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #e0e0e0; color: #666; font-size: 15px; }
+    .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #e0e0e0; color: #333; font-size: 15px; }
     .step.active .step-circle { background: #2a7a4b; color: white; }
     .step-label { font-size: 11px; color: #999; text-align: center; }
     .step.active .step-label { color: #2a7a4b; font-weight: 600; }
     .content { padding: 32px; }
     .form-section { display: none; }
     .form-section.active { display: block; }
-    .form-section h2 { font-size: 20px; color: #333; margin-bottom: 24px; }
+    .form-section h2 { font-size: 20px; color: #111; margin-bottom: 24px; }
     .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 7px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; color: #333; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #111; margin-bottom: 7px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2a7a4b; box-shadow: 0 0 0 3px rgba(42,122,75,0.1); }
     .form-group textarea { resize: vertical; min-height: 90px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .required { color: #ff6b6b; }
     .buttons { display: flex; gap: 12px; margin-top: 28px; }
-    .btn-back { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #e0e0e0; color: #333; }
+    .btn-back { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #e0e0e0; color: #111; }
     .btn-next { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #2a7a4b; color: white; }
     .btn-next:hover { background: #1a4d2e; }
     .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
     .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; background: #fafafa; }
     .upload-area:hover { border-color: #2a7a4b; background: rgba(42,122,75,0.05); }
     .upload-area .upload-icon { font-size: 36px; margin-bottom: 8px; }
-    .upload-area p { font-size: 14px; color: #555; margin-bottom: 4px; }
+    .upload-area p { font-size: 14px; color: #222; margin-bottom: 4px; }
     .upload-area small { font-size: 12px; color: #aaa; }
     .file-selected { display: none; align-items: center; gap: 10px; background: #e8f5e9; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
     .file-selected span { font-size: 13px; color: #2a7a4b; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -56,7 +57,7 @@
     .piano-card .piano-icon { font-size: 28px; margin-bottom: 6px; }
     .piano-card .piano-nome { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
     .piano-card .piano-prezzo { font-size: 13px; color: #888; margin-bottom: 8px; }
-    .piano-card ul { list-style: none; text-align: left; font-size: 12px; color: #555; }
+    .piano-card ul { list-style: none; text-align: left; font-size: 12px; color: #222; }
     .piano-card ul li { padding: 2px 0; }
     .piano-card ul li::before { content: "✓ "; color: #2a7a4b; font-weight: 700; }
     .piano-card.selected-pro ul li::before { color: #1a73e8; }
@@ -68,7 +69,7 @@
       padding: 0; display: flex; align-items: center; transition: color 0.2s;
     }
     .toggle-pw:hover { color: #2a7a4b; }
-    .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #333; border-bottom: 1px solid #f0f0f0; }
+    .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #111; border-bottom: 1px solid #f0f0f0; }
     .map-dd-item:hover { background: #e8f5e9; }
     .map-dd-item:last-child { border-bottom: none; }
   </style>
