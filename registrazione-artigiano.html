@@ -119,12 +119,18 @@
           <label>Partita IVA / Codice Fiscale</label>
           <input type="text" id="partita_iva" placeholder="Es. 12345678901">
         </div>
-        <div class="form-group">
-          <label>Indirizzo <span style="font-weight:400;color:#aaa;">(Via/Piazza e numero civico)</span></label>
-          <input type="text" id="indirizzo" placeholder="Es. Via Roma 1">
-        </div>
         <div class="form-row">
           <div class="form-group">
+            <label>Indirizzo</label>
+            <input type="text" id="indirizzo" placeholder="Es. Via Roma 42">
+          </div>
+          <div class="form-group" style="max-width:100px;">
+            <label>Civico</label>
+            <input type="text" id="civico" placeholder="Es. 1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="max-width:110px;">
             <label>CAP</label>
             <input type="text" id="cap" placeholder="Es. 00100" maxlength="5">
           </div>
@@ -134,8 +140,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Provincia / Regione</label>
-          <input type="text" id="provincia" placeholder="Es. Roma, Lazio">
+          <label>Provincia</label>
+          <input type="text" id="provincia" placeholder="Es. RM">
         </div>
         <div class="form-group" style="margin-bottom:0;">
           <label>Cerca posizione <span style="font-weight:400;color:#aaa;">(opzionale)</span></label>
@@ -461,6 +467,9 @@
           sito_web: document.getElementById('sito_web').value,
           logo_url: logo_url,
           piano: document.getElementById('piano_scelto').value,
+          indirizzo: document.getElementById('indirizzo').value,
+          civico: document.getElementById('civico').value,
+          cap: document.getElementById('cap').value,
           verificata: false,
           rating: 0,
           num_recensioni: 0
