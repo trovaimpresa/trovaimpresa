@@ -140,10 +140,6 @@
         <input type="hidden" id="lat">
         <input type="hidden" id="lng">
         <div class="form-group">
-          <label>Anni di esperienza</label>
-          <input type="number" id="anni_esperienza" placeholder="Es. 10" min="0" max="60">
-        </div>
-        <div class="form-group">
           <label>Descrizione breve</label>
           <textarea id="descrizione" placeholder="Descrivi la tua attività e i servizi che offri..."></textarea>
         </div>
@@ -190,6 +186,10 @@
         <div class="form-group">
           <label>Zone di lavoro</label>
           <input type="text" id="zone" placeholder="Es. Roma e provincia, Lazio">
+        </div>
+        <div class="form-group">
+          <label>Anni di esperienza</label>
+          <input type="number" id="anni_esperienza" placeholder="Es. 10" min="0" max="60">
         </div>
       </div>
 
@@ -319,6 +319,10 @@
           const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=it&q=' + encodeURIComponent(q), { headers: { 'Accept-Language': 'it' } });
           const results = await r.json();
           if (!results.length) { dd.style.display = 'none'; return; }
+          if (results.length === 1 || parseFloat(results[0].importance) >= 0.6) {
+            selezionaLuogo(results[0].lat, results[0].lon, results[0].display_name);
+            return;
+          }
           dd.innerHTML = results.map(x => '<div class="map-dd-item" onclick="selezionaLuogo(' + x.lat + ',' + x.lon + ',' + JSON.stringify(x.display_name) + ')">' + x.display_name + '</div>').join('');
           dd.style.display = 'block';
         } catch(e) { dd.style.display = 'none'; }
