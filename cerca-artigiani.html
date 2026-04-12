@@ -6,97 +6,98 @@
   <title>Cerca Artigiani - TrovaImpresa</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; font-size: 18px; }
 
-    header { background: white; padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-    header a img { height: 36px; }
-    header nav a { color: #2a7a4b; text-decoration: none; font-weight: 600; margin-left: 16px; font-size: 16px; }
+    header { background: white; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+    header a img { height: 44px; }
+    header nav a { color: #2a7a4b; text-decoration: none; font-weight: 600; margin-left: 20px; font-size: 17px; }
 
-    .top-bar { background: #1a4d2e; padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
-    .top-bar h1 { color: white; font-size: 1.8rem; font-weight: 800; white-space: nowrap; }
-    .top-search { flex: 1; display: flex; gap: 8px; }
-    .top-search input { flex: 1; border: none; border-radius: 8px; padding: 10px 16px; font-size: 17px; outline: none; }
-    .btn-cerca { background: #FF6B35; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 17px; font-weight: 700; cursor: pointer; }
+    .top-bar { background: #1a4d2e; padding: 18px 28px; display: flex; align-items: center; gap: 14px; }
+    .top-bar h1 { color: white; font-size: 2rem; font-weight: 800; white-space: nowrap; }
+    .top-search { flex: 1; display: flex; gap: 10px; }
+    .top-search input { flex: 1; border: none; border-radius: 10px; padding: 14px 20px; font-size: 18px; outline: none; }
+    .top-search input:focus { box-shadow: 0 0 0 3px #FF6B35; }
+    .btn-cerca { background: #FF6B35; color: white; border: none; border-radius: 10px; padding: 14px 28px; font-size: 18px; font-weight: 700; cursor: pointer; }
     .btn-cerca:hover { background: #e55a25; }
-    .btn-loc { background: rgba(255,255,255,0.2); color: white; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 8px; padding: 10px 14px; font-size: 17px; cursor: pointer; }
+    .btn-loc { background: rgba(255,255,255,0.2); color: white; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 10px; padding: 14px 18px; font-size: 18px; cursor: pointer; }
 
     .page-body { display: flex; width: 100%; margin: 0; padding: 0; gap: 0; align-items: flex-start; }
 
     /* SIDEBAR */
-    .sidebar { width: 240px; flex-shrink: 0; background: white; padding: 16px; box-shadow: 2px 0 8px rgba(0,0,0,0.06); min-height: calc(100vh - 110px); overflow-y: auto; overflow-x: hidden; }
-    .sidebar::-webkit-scrollbar { width: 3px; }
-    .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
-    .sidebar-title { font-size: 20px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
-    .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #999; text-transform: uppercase; margin: 16px 0 8px; }
-    .tipo-btn { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; color: #444; border: 1.5px solid #eee; margin-bottom: 6px; transition: all 0.15s; background: white; }
+    .sidebar { width: 320px; flex-shrink: 0; background: white; padding: 22px; box-shadow: 2px 0 8px rgba(0,0,0,0.06); min-height: calc(100vh - 120px); overflow-y: auto; overflow-x: hidden; }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+    .sidebar-title { font-size: 22px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+    .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #999; text-transform: uppercase; margin: 20px 0 10px; }
+    .tipo-btn { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; cursor: pointer; font-size: 17px; font-weight: 600; color: #444; border: 1.5px solid #eee; margin-bottom: 8px; transition: all 0.15s; background: white; }
     .tipo-btn:hover { border-color: #2a7a4b; color: #2a7a4b; }
     .tipo-btn.active { background: #e8f5ec; color: #2a7a4b; border-color: #2a7a4b; }
-    .sidebar-divider { border: none; border-top: 1px solid #eee; margin: 14px 0; }
-    .mestieri-scroll { max-height: 220px; overflow-y: auto; overflow-x: hidden; }
+    .sidebar-divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
+    .mestieri-scroll { max-height: 260px; overflow-y: auto; overflow-x: hidden; }
     .mestieri-scroll::-webkit-scrollbar { width: 3px; }
     .mestieri-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
-    .filter-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 16px; color: #444; transition: all 0.15s; margin-bottom: 2px; }
+    .filter-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #444; transition: all 0.15s; margin-bottom: 4px; }
     .filter-btn:hover { background: #f0f9f4; color: #2a7a4b; }
     .filter-btn.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
-    .filter-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
-    .star-option { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 16px; color: #555; transition: all 0.15s; margin-bottom: 3px; }
+    .filter-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+    .star-option { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #555; transition: all 0.15s; margin-bottom: 4px; }
     .star-option:hover { background: #f0f9f4; }
     .star-option.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
-    .star-option .s { color: #f5a623; }
+    .star-option .s { color: #f5a623; font-size: 18px; }
     .slider-wrap { padding: 0 4px; }
-    .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 4px; }
-    .slider-value { text-align: center; font-size: 13px; font-weight: 700; color: #2a7a4b; margin-bottom: 6px; }
-    input[type=range] { width: 100%; accent-color: #2a7a4b; cursor: pointer; }
-    .check-option { display: flex; align-items: center; gap: 8px; padding: 7px 4px; font-size: 13px; color: #444; cursor: pointer; border-radius: 6px; }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 14px; color: #999; margin-top: 6px; }
+    .slider-value { text-align: center; font-size: 17px; font-weight: 700; color: #2a7a4b; margin-bottom: 8px; }
+    input[type=range] { width: 100%; accent-color: #2a7a4b; cursor: pointer; height: 6px; }
+    .check-option { display: flex; align-items: center; gap: 10px; padding: 9px 4px; font-size: 17px; color: #444; cursor: pointer; border-radius: 8px; }
     .check-option:hover { background: #f0f9f4; }
-    .check-option input[type=checkbox] { accent-color: #2a7a4b; width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+    .check-option input[type=checkbox] { accent-color: #2a7a4b; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
 
     /* RESULTS */
-    .results-col { flex: 1; min-width: 0; padding: 16px 24px; }
-    .active-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-    .filter-chip { display: inline-flex; align-items: center; gap: 5px; background: #f0f9f4; border: 1.5px solid #c3e6d0; color: #2a7a4b; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .results-col { flex: 1; min-width: 0; padding: 20px 28px; }
+    .active-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .filter-chip { display: inline-flex; align-items: center; gap: 6px; background: #f0f9f4; border: 1.5px solid #c3e6d0; color: #2a7a4b; border-radius: 20px; padding: 6px 16px; font-size: 15px; font-weight: 600; cursor: pointer; }
     .filter-chip:hover { background: #ffe8e0; border-color: #FF6B35; color: #FF6B35; }
-    .btn-mappa { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; margin-bottom: 14px; }
+    .btn-mappa { display: inline-flex; align-items: center; gap: 8px; background: white; border: 1.5px solid #ddd; border-radius: 10px; padding: 10px 20px; font-size: 16px; font-weight: 600; color: #444; cursor: pointer; margin-bottom: 16px; }
     .btn-mappa:hover { border-color: #2a7a4b; color: #2a7a4b; }
-    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .results-count { font-size: 16px; color: #666; }
+    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .results-count { font-size: 17px; color: #666; }
     .results-count strong { color: #222; font-weight: 700; }
-    .sort-select { font-size: 13px; border: 1.5px solid #ddd; border-radius: 6px; padding: 6px 12px; color: #444; outline: none; cursor: pointer; }
+    .sort-select { font-size: 16px; border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 14px; color: #444; outline: none; cursor: pointer; }
 
     /* CARD */
-    .card { background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 14px; display: flex; gap: 20px; border-left: 4px solid #e0e0e0; transition: box-shadow 0.2s, transform 0.15s; text-decoration: none; color: inherit; }
-    .card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-1px); border-left-color: #2a7a4b; }
+    .card { background: white; border-radius: 14px; padding: 24px 28px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 16px; display: flex; gap: 22px; border-left: 5px solid #e0e0e0; transition: box-shadow 0.2s, transform 0.15s; text-decoration: none; color: inherit; }
+    .card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-2px); border-left-color: #2a7a4b; }
     .card.pro { border-left-color: #FF6B35; }
-    .card-logo { width: 70px; height: 70px; border-radius: 12px; background: #f0f9f4; display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0; overflow: hidden; border: 1.5px solid #eee; }
+    .card-logo { width: 80px; height: 80px; border-radius: 14px; background: #f0f9f4; display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0; overflow: hidden; border: 1.5px solid #eee; }
     .card-logo img { width: 100%; height: 100%; object-fit: cover; }
     .card-body { flex: 1; min-width: 0; }
-    .card-name { font-size: 20px; font-weight: 800; color: #1a1a1a; margin-bottom: 6px; }
-    .card-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
-    .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+    .card-name { font-size: 22px; font-weight: 800; color: #1a1a1a; margin-bottom: 8px; }
+    .card-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
     .badge-verificato { background: #e8f5ec; color: #2a7a4b; }
     .badge-pro { background: #fff3ee; color: #FF6B35; }
     .badge-tipo { background: #eef3ff; color: #3b5bdb; }
-    .card-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 15px; color: #666; margin-bottom: 8px; }
-    .card-desc { font-size: 15px; color: #555; line-height: 1.55; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { background: #f4f6f8; color: #555; font-size: 14px; padding: 5px 12px; border-radius: 6px; }
-    .card-right { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; flex-shrink: 0; min-width: 120px; gap: 8px; }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 16px; color: #666; margin-bottom: 10px; }
+    .card-desc { font-size: 16px; color: #555; line-height: 1.6; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { background: #f4f6f8; color: #555; font-size: 15px; padding: 5px 14px; border-radius: 8px; }
+    .card-right { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; flex-shrink: 0; min-width: 130px; gap: 10px; }
     .card-rating { text-align: right; }
-    .rating-score { font-size: 24px; font-weight: 800; color: #1a1a1a; line-height: 1; }
+    .rating-score { font-size: 28px; font-weight: 800; color: #1a1a1a; line-height: 1; }
     .stars { color: #f5a623; font-size: 16px; }
-    .rating-count { font-size: 11px; color: #999; }
-    .card-price { text-align: right; font-size: 12px; color: #888; line-height: 1.5; }
-    .card-price strong { display: block; color: #2a7a4b; font-weight: 700; font-size: 14px; }
-    .btn-profilo { background: #FF6B35; color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .rating-count { font-size: 14px; color: #999; }
+    .card-price { text-align: right; font-size: 14px; color: #888; line-height: 1.5; }
+    .card-price strong { display: block; color: #2a7a4b; font-weight: 700; font-size: 17px; }
+    .btn-profilo { background: #FF6B35; color: white; border: none; border-radius: 10px; padding: 12px 20px; font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
     .btn-profilo:hover { background: #e55a25; }
 
-    .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 24px; padding-bottom: 30px; }
-    .page-btn { width: 38px; height: 38px; border: 1.5px solid #ddd; background: white; border-radius: 8px; font-size: 14px; font-weight: 600; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 28px; padding-bottom: 32px; }
+    .page-btn { width: 44px; height: 44px; border: 1.5px solid #ddd; background: white; border-radius: 10px; font-size: 17px; font-weight: 600; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
     .page-btn:hover { border-color: #2a7a4b; color: #2a7a4b; }
     .page-btn.active { background: #2a7a4b; color: white; border-color: #2a7a4b; }
 
-    .loading, .no-results { text-align: center; padding: 40px; color: #888; background: white; border-radius: 12px; }
-    .no-results h3 { font-size: 16px; color: #444; margin-bottom: 8px; }
+    .loading, .no-results { text-align: center; padding: 50px; color: #888; background: white; border-radius: 14px; font-size: 18px; }
+    .no-results h3 { font-size: 20px; color: #444; margin-bottom: 10px; }
 
     @media (max-width: 700px) {
       .sidebar { display: none; }
@@ -217,34 +218,28 @@
   );
 
   const PER_PAGE = 10;
-  let mestiereScelto = 'tutti';
-  let valutazioneMin = 0;
-  let sortBy = 'piano';
-  let tuttiRisultati = [];
-  let paginaCorrente = 1;
+  let mestiereScelto = 'tutti', valutazioneMin = 0, sortBy = 'piano';
+  let tuttiRisultati = [], paginaCorrente = 1;
 
   function selectMestiere(el) {
     document.querySelectorAll('#mestieri-list .filter-btn').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
     mestiereScelto = el.dataset.mestiere;
-    paginaCorrente = 1;
-    cerca();
+    paginaCorrente = 1; cerca();
   }
 
   function selectValutazione(el) {
     document.querySelectorAll('.star-option').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
     valutazioneMin = parseFloat(el.dataset.min);
-    paginaCorrente = 1;
-    cerca();
+    paginaCorrente = 1; cerca();
   }
 
   function cambiaSorting(val) { sortBy = val; paginaCorrente = 1; cerca(); }
 
   function aggiornaDistanza(val) {
     document.getElementById('distanzaVal').textContent = val >= 100 ? 'Qualsiasi' : val + ' km';
-    paginaCorrente = 1;
-    cerca();
+    paginaCorrente = 1; cerca();
   }
 
   function localizzami() {
@@ -280,7 +275,6 @@
     document.getElementById('risultati').innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
     document.getElementById('risultatiCount').textContent = 'Ricerca in corso...';
     document.getElementById('pagination').innerHTML = '';
-
     try {
       let q = supabaseClient.from('imprese').select('*').eq('tipo', 'artigiano');
       if (mestiereScelto !== 'tutti') q = q.ilike('mestieri', `%${mestiereScelto}%`);
@@ -307,8 +301,7 @@
     if (!tuttiRisultati.length) {
       document.getElementById('risultatiCount').textContent = 'Nessun risultato';
       div.innerHTML = '<div class="no-results"><h3>😕 Nessun artigiano trovato</h3><p>Prova a cambiare città o mestiere</p></div>';
-      document.getElementById('pagination').innerHTML = '';
-      return;
+      document.getElementById('pagination').innerHTML = ''; return;
     }
     const totale = tuttiRisultati.length;
     const totPagine = Math.ceil(totale / PER_PAGE);
@@ -333,15 +326,15 @@
   function cardHTML(i) {
     const logo = i.logo_url ? `<img src="${i.logo_url}" alt="logo">` : `🔨`;
     const isPro = i.piano === 'pro';
-    const badges = `<span class="badge badge-verificato">✔ VERIFICATO</span><span class="badge badge-tipo">🔧 ARTIGIANO</span>${isPro ? '<span class="badge badge-pro">⭐ PRO</span>' : ''}`;
+    const badges = `<span class="badge badge-verificato">✔ VERIFICATO</span><span class="badge badge-tipo">🔧 ARTIGIANO</span>${isPro?'<span class="badge badge-pro">⭐ PRO</span>':''}`;
     const voto = i.valutazione_media ? parseFloat(i.valutazione_media) : null;
-    const ratingBlock = voto ? `<div class="card-rating"><div class="rating-score">${voto.toFixed(1)}</div><div class="stars">${'★'.repeat(Math.round(voto))}${'☆'.repeat(5-Math.round(voto))}</div><div class="rating-count">${i.num_recensioni ? i.num_recensioni+' rec.' : ''}</div></div>` : '<div></div>';
+    const ratingBlock = voto ? `<div class="card-rating"><div class="rating-score">${voto.toFixed(1)}</div><div class="stars">${'★'.repeat(Math.round(voto))}${'☆'.repeat(5-Math.round(voto))}</div><div class="rating-count">${i.num_recensioni?i.num_recensioni+' rec.':''}</div></div>` : '<div></div>';
     const meta = [];
     if (i.citta) meta.push(`<span>📍 ${i.citta}</span>`);
     if (i.num_dipendenti) meta.push(`<span>👥 ${i.num_dipendenti} pers.</span>`);
     if (i.anno_fondazione) meta.push(`<span>📅 Dal ${i.anno_fondazione}</span>`);
     const desc = i.descrizione ? `<div class="card-desc">${i.descrizione}</div>` : '';
-    const mestieri = i.mestieri ? (Array.isArray(i.mestieri) ? i.mestieri : i.mestieri.split(',')).slice(0,3).map(m => `<span class="tag">🔧 ${m.trim()}</span>`).join('') : '';
+    const mestieri = i.mestieri ? (Array.isArray(i.mestieri)?i.mestieri:i.mestieri.split(',')).slice(0,3).map(m=>`<span class="tag">🔧 ${m.trim()}</span>`).join('') : '';
     const prezzoBlock = i.costo_medio ? `<div class="card-price"><strong>${i.costo_medio}</strong>costo medio</div>` : '<div></div>';
     return `<a class="card${isPro?' pro':''}" href="profilo-impresa.html?id=${i.id}">
       <div class="card-logo">${logo}</div>
@@ -368,7 +361,7 @@
   cerca();
 </script>
 <script src="/cookie-banner.js"></script>
-<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">
+<footer style="background:#1a3a2a;color:white;font-size:0.9rem;padding:18px;text-align:center">
   © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) –
   <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> |
   <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> |
