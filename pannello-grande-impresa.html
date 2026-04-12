@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Pannello Grande Impresa — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --arancio2:#c45e28;
+    --arancio3:#fff3ec;
+    --rosso:   #e53e3e;
+    --rosso3:  #fff5f5;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --light:   #999;
+    --bg:      #f4f6f9;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 2px 16px rgba(0,0,0,0.07);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+
+  .login-screen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b); padding:20px;
+  }
+  .login-box {
+    background:white; border-radius:24px; padding:48px 40px;
+    width:100%; max-width:400px; text-align:center;
+    box-shadow:0 24px 80px rgba(0,0,0,0.2);
+  }
+  .login-logo { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:4px; }
+  .login-logo .trova { color:var(--verde); }
+  .login-logo .impresa { color:var(--arancio); }
+  .login-sub { font-size:0.85rem; color:var(--light); margin-bottom:32px; }
+  .login-box input {
+    width:100%; padding:13px 16px; border-radius:12px;
+    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
+    font-size:0.92rem; margin-bottom:12px; outline:none; transition:border 0.2s;
+  }
+  .login-box input:focus { border-color:var(--verde); }
+  .login-btn {
+    width:100%; padding:14px; background:var(--verde); color:white;
+    border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:1rem; cursor:pointer; margin-top:4px;
+  }
+  .login-err { color:var(--rosso); font-size:0.82rem; margin-top:8px; display:none; }
+  .login-reg { margin-top:16px; font-size:0.82rem; color:var(--light); }
+  .login-reg a { color:var(--verde); font-weight:700; text-decoration:none; }
+
+  .pannello { display:none; }
+
+  .sidebar {
+    width:240px; background:white; border-right:1px solid var(--border);
+    position:fixed; top:0; left:0; bottom:0; z-index:100;
+    display:flex; flex-direction:column;
+  }
+  .sidebar-logo {
+    padding:24px 20px; border-bottom:1px solid var(--border);
+    font-family:'Playfair Display',serif; font-size:1.1rem;
+  }
+  .sidebar-logo .trova { color:var(--verde); }
+  .sidebar-logo .impresa { color:var(--arancio); }
+  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+  .sidebar-nav { flex:1; padding:16px 12px; overflow-y:auto; }
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    padding:11px 14px; border-radius:10px; cursor:pointer;
+    font-size:0.88rem; font-weight:600; color:var(--dark);
+    transition:all 0.15s; margin-bottom:6px;
+    background:white; box-shadow:0 2px 8px rgba(0,0,0,0.07);
+    border-top:4px solid #2e7d32;
+  }
+  .nav-item:nth-child(1) { border-top-color:#2e7d32; }
+  .nav-item:nth-child(2) { border-top-color:#e65100; }
+  .nav-item:nth-child(3) { border-top-color:#1565c0; }
+  .nav-item:nth-child(4) { border-top-color:#2e7d32; }
+  .nav-item:nth-child(5) { border-top-color:#e65100; }
+  .nav-item:nth-child(6) { border-top-color:#1565c0; }
+  .nav-item:hover { box-shadow:0 4px 14px rgba(0,0,0,0.13); transform:translateY(-1px); color:var(--dark); }
+  .nav-item.active { box-shadow:0 4px 14px rgba(0,0,0,0.13); color:var(--dark); opacity:1; font-weight:800; }
+  .nav-badge {
+    margin-left:auto; background:var(--arancio); color:white;
+    font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:20px;
+  }
+  .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
+  .logout-btn {
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    border-radius:10px; cursor:pointer; font-size:0.85rem;
+    font-weight:600; color:var(--rosso); transition:all 0.15s;
+  }
+  .logout-btn:hover { background:var(--rosso3); }
+
+  .main { margin-left:240px; padding:32px; min-height:100vh; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+  .topbar-title { font-family:'Playfair Display',serif; font-size:1.6rem; }
+  .impresa-badge {
+    background:var(--verde3); color:var(--verde2);
+    padding:6px 14px; border-radius:20px; font-size:0.78rem; font-weight:700;
+  }
+
+  .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
+  .stat-card {
+    background:white; border-radius:16px; padding:20px 24px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    display:flex; align-items:center; gap:16px;
+  }
+  .stat-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+  .stat-icon.g { background:var(--verde3); }
+  .stat-icon.o { background:var(--arancio3); }
+  .stat-icon.b { background:#e8f0ff; }
+  .stat-num { font-family:'Playfair Display',serif; font-size:1.8rem; line-height:1; }
+  .stat-lbl { font-size:0.78rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+
+  .section { display:none; }
+  .section.active { display:block; }
+
+  .prev-card {
+    background:white; border-radius:16px; padding:24px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    margin-bottom:16px; cursor:pointer; transition:all 0.2s;
+  }
+  .prev-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.1); transform:translateY(-1px); }
+  .prev-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .prev-nome { font-family:'Playfair Display',serif; font-size:1.05rem; }
+  .prev-badge { padding:4px 10px; border-radius:20px; font-size:0.72rem; font-weight:800; }
+  .badge-nuovo { background:#e8f0ff; color:#3355cc; }
+  .badge-inviato { background:var(--verde3); color:var(--verde2); }
+  .prev-info { display:flex; gap:16px; flex-wrap:wrap; font-size:0.82rem; color:var(--mid); margin-bottom:10px; }
+  .prev-desc { font-size:0.85rem; color:var(--mid); line-height:1.5; }
+  .prev-footer { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+  .prev-data { font-size:0.75rem; color:var(--light); }
+  .btn-genera {
+    padding:8px 18px; background:linear-gradient(135deg,var(--verde),var(--verde2));
+    color:white; border:none; border-radius:10px; cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.82rem;
+    display:flex; align-items:center; gap:6px; transition:all 0.15s;
+  }
+  .btn-genera:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(42,122,75,0.3); }
+
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    z-index:200; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.show { display:flex; }
+  .modal {
+    background:white; border-radius:24px; padding:0;
+    max-width:640px; width:100%; max-height:90vh; overflow-y:auto;
+    box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  }
+  .modal-header {
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    padding:24px 28px; border-radius:24px 24px 0 0; color:white;
+  }
+  .modal-header h2 { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:4px; }
+  .modal-header p { font-size:0.82rem; opacity:0.75; }
+  .modal-body { padding:28px; }
+
+  .richiesta-box {
+    background:var(--bg); border-radius:14px; padding:18px; margin-bottom:20px;
+  }
+  .ric-title { font-size:0.72rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .ric-row { display:flex; gap:8px; margin-bottom:6px; font-size:0.85rem; }
+  .ric-key { color:var(--mid); font-weight:600; min-width:100px; }
+
+  .ai-genera-box { margin-bottom:20px; }
+  .ai-genera-btn {
+    width:100%; padding:14px; border-radius:14px; border:none;
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b); color:white;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    gap:8px; transition:all 0.2s;
+  }
+  .ai-genera-btn:hover { opacity:0.9; transform:translateY(-1px); }
+  .ai-genera-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+  .ai-spinner-btn {
+    display:inline-block; width:16px; height:16px;
+    border:2px solid rgba(255,255,255,0.4);
+    border-top-color:white; border-radius:50%;
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .prev-generato { display:none; }
+  .prev-generato.show { display:block; }
+  .prev-gen-label { font-size:0.72rem; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .prev-textarea {
+    width:100%; min-height:280px; padding:16px; border-radius:14px;
+    border:1.5px solid var(--verde); background:var(--verde3);
+    font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--dark);
+    line-height:1.7; resize:vertical; outline:none;
+  }
+  .prev-prezzo-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+  .prev-input-wrap label { display:block; font-size:0.72rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .prev-input {
+    width:100%; padding:10px 14px; border-radius:10px;
+    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
+    font-size:0.9rem; outline:none;
+  }
+  .prev-input:focus { border-color:var(--verde); }
+
+  .modal-footer { padding:0 28px 28px; display:flex; gap:12px; }
+  .btn-chiudi {
+    padding:12px 24px; border-radius:12px; border:1.5px solid var(--border);
+    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
+    font-size:0.9rem; cursor:pointer; color:var(--mid);
+  }
+  .btn-invia-prev {
+    flex:1; padding:12px; border-radius:12px; border:none;
+    background:var(--arancio); color:white; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.95rem; cursor:pointer;
+    box-shadow:0 4px 16px rgba(232,115,58,0.3);
+  }
+  .btn-invia-prev:hover { background:var(--arancio2); }
+
+  .empty-state { text-align:center; padding:48px; color:var(--light); }
+  .empty-icon { font-size:3rem; margin-bottom:12px; }
+
+  .profilo-card {
+    background:white; border-radius:16px; padding:28px;
+    box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:16px;
+  }
+  .profilo-title { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .profilo-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:0.88rem; }
+  .profilo-row:last-child { border-bottom:none; }
+  .profilo-key { color:var(--mid); font-weight:600; }
+
+  /* === 2FA MODAL === */
+  .mfa-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:999; align-items:center; justify-content:center; padding:20px; }
+  .mfa-overlay.open { display:flex; }
+  .mfa-box { background:white; border-radius:20px; padding:36px 32px; width:100%; max-width:440px; box-shadow:0 24px 80px rgba(0,0,0,0.25); }
+  .mfa-box h2 { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--dark); margin-bottom:6px; }
+  .mfa-box p { font-size:0.85rem; color:var(--mid); margin-bottom:20px; line-height:1.5; }
+  .mfa-qr { text-align:center; margin:16px 0; }
+  .mfa-qr svg { max-width:180px; border:1px solid var(--border); border-radius:8px; padding:8px; }
+  .mfa-secret { font-size:0.75rem; color:var(--mid); text-align:center; margin-bottom:16px; word-break:break-all; }
+  .mfa-input { width:100%; padding:13px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:1.1rem; font-family:inherit; text-align:center; letter-spacing:4px; outline:none; margin-bottom:14px; }
+  .mfa-input:focus { border-color:var(--verde); box-shadow:0 0 0 3px rgba(42,122,75,0.1); }
+  .mfa-btn { width:100%; padding:13px; background:var(--verde); color:white; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
+  .mfa-btn:hover { background:var(--verde2); }
+  .mfa-btn:disabled { opacity:0.6; cursor:not-allowed; }
+  .mfa-cancel { display:block; text-align:center; margin-top:12px; font-size:0.83rem; color:var(--mid); cursor:pointer; }
+  .mfa-cancel:hover { color:var(--dark); }
+  .mfa-alert { padding:10px 14px; border-radius:8px; font-size:0.83rem; margin-bottom:14px; }
+  .mfa-alert-error { background:#fff0f0; border:1px solid #ffcccc; color:#cc0000; }
+  .mfa-alert-success { background:var(--verde3); border:1px solid #a8d5b5; color:var(--verde2); }
+
+  /* === LAVORO SECTION === */
+  .lavoro-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+  .btn-nuovo-annuncio {
+    padding:10px 20px; background:var(--arancio); color:white;
+    border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.88rem; cursor:pointer; transition:all 0.15s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .btn-nuovo-annuncio:hover { background:var(--arancio2); transform:translateY(-1px); }
+
+  .lavoro-card {
+    background:white; border-radius:16px; padding:22px 24px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    margin-bottom:14px; transition:all 0.2s;
+  }
+  .lavoro-card-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
+  .lavoro-titolo { font-family:'Playfair Display',serif; font-size:1.05rem; margin-bottom:4px; }
+  .lavoro-meta { display:flex; gap:14px; flex-wrap:wrap; font-size:0.8rem; color:var(--mid); margin-bottom:10px; }
+  .lavoro-desc { font-size:0.85rem; color:var(--mid); line-height:1.5; }
+  .lavoro-badge {
+    padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; white-space:nowrap;
+  }
+  .badge-attivo { background:var(--verde3); color:var(--verde2); }
+  .badge-disattivo { background:#f0f0f0; color:#888; }
+  .lavoro-actions { display:flex; gap:8px; margin-top:14px; }
+  .btn-toggle-annuncio {
+    padding:7px 16px; border-radius:10px; border:1.5px solid var(--border);
+    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
+    font-size:0.8rem; cursor:pointer; color:var(--mid); transition:all 0.15s;
+  }
+  .btn-toggle-annuncio:hover { border-color:var(--verde); color:var(--verde); }
+  .btn-elimina-annuncio {
+    padding:7px 16px; border-radius:10px; border:1.5px solid #fecaca;
+    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
+    font-size:0.8rem; cursor:pointer; color:var(--rosso); transition:all 0.15s;
+  }
+  .btn-elimina-annuncio:hover { background:var(--rosso3); }
+
+  /* FORM NUOVO ANNUNCIO */
+  .form-annuncio {
+    background:white; border-radius:16px; padding:28px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    margin-bottom:24px; display:none;
+  }
+  .form-annuncio.show { display:block; }
+  .form-annuncio h3 { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:20px; }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; font-size:0.75rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width:100%; padding:11px 14px; border-radius:10px;
+    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
+    font-size:0.9rem; outline:none; transition:border 0.2s; background:white;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--verde); }
+  .form-group textarea { min-height:100px; resize:vertical; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .btn-salva-annuncio {
+    padding:12px 28px; background:var(--verde); color:white;
+    border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.15s;
+  }
+  .btn-salva-annuncio:hover { background:var(--verde2); }
+  .btn-annulla-form {
+    padding:12px 20px; background:white; color:var(--mid);
+    border:1.5px solid var(--border); border-radius:12px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.9rem; cursor:pointer; margin-left:10px;
+  }
+
+  /* INFO PIANO */
+  .piano-info {
+    background:linear-gradient(135deg,var(--arancio3),#fff);
+    border:1.5px solid #fdd5b8; border-radius:14px; padding:16px 20px;
+    font-size:0.85rem; color:var(--mid); margin-bottom:20px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .piano-info strong { color:var(--arancio); }
+
+  /* === CANDIDATI SEZIONE === */
+  .candidato-card {
+    background:white; border-radius:16px; padding:22px 24px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    margin-bottom:14px; transition:all 0.2s;
+  }
+  .candidato-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.1); transform:translateY(-1px); }
+  .candidato-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  .candidato-nome { font-family:'Playfair Display',serif; font-size:1.05rem; }
+  .candidato-livello-badge { padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; background:var(--verde3); color:var(--verde2); }
+  .candidato-info { display:flex; gap:12px; flex-wrap:wrap; font-size:0.82rem; color:var(--mid); margin-bottom:12px; }
+  .candidato-bio { font-size:0.85rem; color:var(--mid); line-height:1.5; margin-bottom:12px; }
+  .candidato-contatti { display:flex; gap:12px; flex-wrap:wrap; }
+  .btn-contatta {
+    padding:8px 16px; background:var(--arancio); color:white;
+    border:none; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.8rem; transition:all 0.15s;
+  }
+  .btn-contatta:hover { background:var(--arancio2); }
+
+  @media(max-width:768px){
+    .sidebar { transform:translateX(-100%); }
+    .main { margin-left:0; }
+    .stats-grid { grid-template-columns:1fr; }
+    .form-row { grid-template-columns:1fr; }
+  }
+
+  /* === NUOVA DASHBOARD === */
+  .dash-hero {
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    border-radius:20px; padding:28px 32px; color:white;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:20px; flex-wrap:wrap; gap:16px;
+  }
+  .dash-welcome { font-size:0.82rem; opacity:0.7; text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:4px; }
+  .dash-nome { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:10px; }
+  .dash-meta { display:flex; gap:10px; flex-wrap:wrap; }
+  .dash-rating-badge {
+    background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+    border-radius:20px; padding:4px 12px; font-size:0.82rem; font-weight:700;
+  }
+  .dash-piano-badge {
+    background:var(--arancio); border-radius:20px;
+    padding:4px 12px; font-size:0.82rem; font-weight:700;
+  }
+  .dash-piano-badge.pro { background:#1a73e8; }
+  .btn-ai-preventivo {
+    background:white; color:var(--verde2); border:none; border-radius:14px;
+    padding:13px 22px; font-family:'DM Sans',sans-serif; font-weight:800;
+    font-size:0.92rem; cursor:pointer; white-space:nowrap;
+    box-shadow:0 4px 16px rgba(0,0,0,0.15); transition:all 0.2s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .btn-ai-preventivo:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+
+  .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .dash-stat-card {
+    background:white; border-radius:16px; padding:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e7d32;
+    text-align:center;
+  }
+  .dash-stat-card:nth-child(2) { border-top-color:#e65100; }
+  .dash-stat-card:nth-child(3) { border-top-color:#1565c0; }
+  .dash-stat-icon { font-size:1.6rem; margin-bottom:8px; }
+  .dash-stat-num { font-family:'Playfair Display',serif; font-size:2rem; line-height:1; color:var(--dark); }
+  .dash-stat-lbl { font-size:0.75rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
+
+  .dash-quick-title { font-size:0.75rem; font-weight:800; color:var(--light); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+  .dash-quick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .dash-quick-card {
+    background:white; border-radius:16px; padding:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e7d32;
+    cursor:pointer; transition:all 0.2s; text-align:center;
+  }
+  .dash-quick-card:nth-child(2) { border-top-color:#e65100; }
+  .dash-quick-card:nth-child(3) { border-top-color:#1565c0; }
+  .dash-quick-card:hover { box-shadow:0 8px 24px rgba(42,122,75,0.12); transform:translateY(-2px); }
+  .dash-quick-icon { font-size:1.8rem; margin-bottom:8px; }
+  .dash-quick-label { font-weight:700; font-size:0.9rem; color:var(--dark); margin-bottom:3px; }
+  .dash-quick-sub { font-size:0.78rem; color:var(--light); }
+
+  /* === MODAL AI PREVENTIVO DASH === */
+  .modal-ai-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    z-index:300; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-ai-overlay.show { display:flex; }
+  .modal-ai {
+    background:white; border-radius:24px; width:100%; max-width:580px;
+    max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  }
+  .modal-ai-header {
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    padding:24px 28px; border-radius:24px 24px 0 0; color:white;
+    display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  .modal-ai-header h2 { font-family:'Playfair Display',serif; font-size:1.25rem; margin-bottom:3px; }
+  .modal-ai-header p { font-size:0.82rem; opacity:0.75; }
+  .modal-ai-close { background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; opacity:0.7; line-height:1; padding:0; }
+  .modal-ai-close:hover { opacity:1; }
+  .modal-ai-body { padding:24px 28px; }
+  .ai-form-group { margin-bottom:14px; }
+  .ai-form-group label { display:block; font-size:0.73rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+  .ai-form-group input, .ai-form-group select, .ai-form-group textarea {
+    width:100%; padding:11px 14px; border-radius:10px;
+    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
+    font-size:0.9rem; outline:none; transition:border 0.2s; background:white;
+  }
+  .ai-form-group input:focus, .ai-form-group select:focus, .ai-form-group textarea:focus { border-color:var(--verde); }
+  .ai-form-group textarea { min-height:90px; resize:vertical; }
+  .ai-form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .btn-genera-ai-dash {
+    width:100%; padding:14px; border-radius:12px; border:none;
+    background:linear-gradient(135deg,var(--verde),var(--verde2)); color:white;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    gap:8px; transition:all 0.2s; margin-top:4px;
+  }
+  .btn-genera-ai-dash:hover { opacity:0.9; }
+  .btn-genera-ai-dash:disabled { opacity:0.6; cursor:not-allowed; }
+  .ai-result-box { display:none; margin-top:20px; }
+  .ai-result-box.show { display:block; }
+  .ai-result-label { font-size:0.72rem; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+  .btn-copia {
+    padding:5px 12px; background:var(--verde3); color:var(--verde2);
+    border:1px solid #a8d5b5; border-radius:8px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.75rem; cursor:pointer; transition:all 0.15s;
+  }
+  .btn-copia:hover { background:var(--verde); color:white; }
+  .ai-result-text {
+    width:100%; min-height:260px; padding:16px; border-radius:12px;
+    border:1.5px solid var(--verde); background:var(--verde3);
+    font-family:'DM Sans',sans-serif; font-size:0.87rem; color:var(--dark);
+    line-height:1.7; resize:vertical; outline:none;
+  }
+
+  /* === FOTO DEI LAVORI === */
+  .foto-upload-area {
+    border:2px dashed var(--border); border-radius:16px; padding:32px;
+    text-align:center; cursor:pointer; transition:all 0.2s;
+    background:white; margin-bottom:20px;
+  }
+  .foto-upload-area:hover, .foto-upload-area.dragover {
+    border-color:var(--verde); background:var(--verde3);
+  }
+  .foto-upload-icon { font-size:2.5rem; margin-bottom:8px; }
+  .foto-upload-label { font-weight:700; color:var(--dark); margin-bottom:4px; }
+  .foto-upload-sub { font-size:0.82rem; color:var(--light); }
+  .foto-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+    gap:14px; margin-top:20px;
+  }
+  .foto-item {
+    position:relative; border-radius:12px; overflow:hidden;
+    aspect-ratio:1; background:#f0f0f0; box-shadow:var(--shadow);
+    border:1px solid var(--border);
+  }
+  .foto-item img { width:100%; height:100%; object-fit:cover; display:block; }
+  .foto-item-del {
+    position:absolute; top:6px; right:6px; width:26px; height:26px;
+    background:rgba(0,0,0,0.55); color:white; border:none; border-radius:50%;
+    cursor:pointer; font-size:0.75rem; display:flex; align-items:center;
+    justify-content:center; opacity:0; transition:opacity 0.2s;
+  }
+  .foto-item:hover .foto-item-del { opacity:1; }
+  .foto-upload-progress {
+    background:var(--verde3); border:1px solid #a8d5b5; border-radius:10px;
+    padding:10px 16px; font-size:0.85rem; color:var(--verde2); margin-bottom:14px;
+    display:none;
+  }
+  .foto-limit-bar {
+    background:white; border-radius:12px; padding:14px 18px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    font-size:0.85rem; color:var(--mid); margin-bottom:16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .foto-limit-num { font-weight:800; color:var(--verde2); font-size:1rem; }
+
+  /* ===== MOBILE ===== */
+  html, body { overflow-x: hidden; }
+
+  @media (max-width: 768px) {
+    /* Hamburger button */
+    .mob-menu-btn {
+      display: flex !important;
+      position: fixed; top: 12px; left: 12px; z-index: 201;
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--verde); color: white; border: none;
+      font-size: 1.2rem; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Sidebar: nascosta di default, scorre da sinistra */
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      z-index: 200;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    /* Overlay scuro dietro sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 199;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    /* Main: occupa tutto lo schermo */
+    .main { margin-left: 0 !important; padding: 16px !important; padding-top: 64px !important; }
+
+    /* Stats su 1 colonna */
+    .stats-grid { grid-template-columns: 1fr !important; }
+
+    /* Accesso rapido su 1 colonna */
+    .dash-quick-grid { grid-template-columns: 1fr 1fr !important; }
+
+    /* Titoli ridotti */
+    .topbar-title { font-size: 1.2rem !important; }
+    .dash-stat-num { font-size: 1.5rem !important; }
+
+    /* Modal fullscreen su mobile */
+    .modal { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; height: 100vh !important; max-height: 100vh !important; }
+
+    /* Piano grid 1 col */
+    #card-free, #card-pro { width: 100% !important; }
+
+    /* Calendario 2x2 su mobile: 1 col */
+    #cal-orologio { font-size: 1.5rem !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="spinner-avvio" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a2a,#2a7a4b)">
+  <div style="text-align:center;color:white">
+    <div style="font-size:2.5rem;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
+    <div style="font-size:1rem;opacity:0.85;font-weight:600">Caricamento...</div>
+  </div>
+</div>
+<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+
+<div class="login-screen" id="login-screen" style="display:none">
+  <div class="login-box">
+    <div class="login-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></div>
+    <div class="login-sub">🏢 Accesso Grandi Imprese</div>
+    <input type="email" id="login-email" placeholder="La tua email" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" id="login-pass" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 Accedi al pannello</button>
+    <div class="login-err" id="login-err">❌ Email o password errati</div>
+    <div class="login-reg">Non sei ancora registrato? <a href="registrazione.html">Registra la tua impresa →</a></div>
+  </div>
+</div>
+
+<!-- PANNELLO -->
+<div class="pannello" id="pannello">
+  <button class="mob-menu-btn" style="display:none" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar-el">
+    <div class="sidebar-logo">
+      <span class="trova">Trova</span><span class="impresa">Impresa</span>
+      <small>Pannello Grande Impresa</small>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showSection('dashboard',this)">
+        <span>📊</span> Dashboard
+      </div>
+
+      <div class="nav-item" onclick="showSection('lavoro',this)">
+        <span>💼</span> Offerte di lavoro
+        <span class="nav-badge" id="badge-lavoro" style="display:none"></span>
+      </div>
+      <div class="nav-item" onclick="showSection('candidati',this)">
+        <span>🔍</span> Candidati nella tua zona
+      </div>
+      <div class="nav-item" onclick="showSection('foto',this)">
+        <span>📷</span> Foto dei lavori
+      </div>
+      <div class="nav-item" onclick="showSection('recensioni',this)">
+        <span>⭐</span> Le mie recensioni
+      </div>
+      <div class="nav-item" onclick="showSection('profilo',this)">
+        <span>👤</span> Il mio profilo
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button onclick="apriModalSegnalazione()" style="width:100%;padding:10px;background:#fff3cd;color:#7b4f00;border:1px solid #ffc107;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;">🆘 Segnala problema</button>
+      <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="sec-dashboard">
+
+      <!-- HERO HEADER -->
+      <div class="dash-hero">
+        <div>
+          <div class="dash-welcome">Pannello grande impresa</div>
+          <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
+          <div class="dash-meta">
+            <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
+            <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
+          </div>
+        </div>
+        <button class="btn-ai-preventivo" onclick="apriModalPreventivoDash()">
+          🤖 Genera preventivo AI
+        </button>
+      </div>
+
+      <!-- STATISTICHE -->
+      <div class="dash-stats">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">⭐</div>
+          <div class="dash-stat-num" id="stat-rating">—</div>
+          <div class="dash-stat-lbl">Rating medio</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">💬</div>
+          <div class="dash-stat-num" id="dash-stat-recensioni">0</div>
+          <div class="dash-stat-lbl">Recensioni</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">📷</div>
+          <div class="dash-stat-num" id="dash-stat-foto">0</div>
+          <div class="dash-stat-lbl">Foto caricate</div>
+        </div>
+      </div>
+
+      <!-- ACCESSI RAPIDI -->
+      <div class="dash-quick-title">Accesso rapido</div>
+      <div class="dash-quick-grid">
+        <div class="dash-quick-card" onclick="showSectionById('foto')">
+          <div class="dash-quick-icon">📷</div>
+          <div class="dash-quick-label">Foto dei lavori</div>
+          <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
+        </div>
+        <div class="dash-quick-card" onclick="showSectionById('recensioni')">
+          <div class="dash-quick-icon">⭐</div>
+          <div class="dash-quick-label">Recensioni</div>
+          <div class="dash-quick-sub">Cosa dicono i clienti</div>
+        </div>
+        <div class="dash-quick-card" onclick="showSectionById('profilo')">
+          <div class="dash-quick-icon">👤</div>
+          <div class="dash-quick-label">Il mio profilo</div>
+          <div class="dash-quick-sub">Modifica i dati impresa</div>
+        </div>
+      </div>
+
+      <!-- GESTIONE PIANO -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
+        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b">Free</strong></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <!-- FREE -->
+          <div id="card-free" style="border:2px solid #2a7a4b;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s">
+            <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
+            <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
+            <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
+            <div style="margin-top:12px">
+              <button onclick="impostaPiano('free')" style="width:100%;padding:10px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">✅ Attiva Free</button>
+            </div>
+          </div>
+
+          <!-- PRO -->
+          <div id="card-pro" style="border:2px solid #1a73e8;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f0f6ff,#fff)">
+            <div style="font-size:1.5rem;margin-bottom:6px">⭐</div>
+            <div style="font-weight:800;font-size:1rem;color:#1a73e8;margin-bottom:6px">Pro</div>
+            <div style="font-size:0.8rem;color:#666;line-height:1.5">Annunci illimitati<br>Badge ⭐ Pro in evidenza<br>Posizione prioritaria</div>
+            <div style="margin-top:12px">
+              <button onclick="window.location.href='prezzi.html'" style="width:100%;padding:10px;background:#1a73e8;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">⭐ Passa a Pro</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDARIO & ORARIO -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:14px">
+
+          <!-- [A] Orologio (alto sx) -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:center">
+            <div id="cal-orologio" style="font-family:'Playfair Display',serif;font-size:2rem;color:#2a7a4b;letter-spacing:4px;font-weight:700;text-align:center"></div>
+          </div>
+
+          <!-- [B] Meteo (alto dx) -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:14px">
+            <div id="meteo-icona" style="font-size:2.2rem;line-height:1">⏳</div>
+            <div>
+              <div id="meteo-citta" style="font-weight:700;font-size:0.9rem;color:#1a3a2a">Rilevamento...</div>
+              <div id="meteo-temp" style="font-size:1.4rem;font-family:'Playfair Display',serif;color:#2a7a4b;font-weight:700"></div>
+              <div id="meteo-condizione" style="font-size:0.78rem;color:#999;margin-top:2px"></div>
+            </div>
+          </div>
+
+          <!-- [C] Calendario (basso sx) -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#2a7a4b;padding:10px 14px">
+              <button onclick="calPrev()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8249;</button>
+              <div id="cal-label" style="color:white;font-weight:700;font-size:0.85rem;text-transform:capitalize"></div>
+              <button onclick="calNext()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8250;</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#e8f5ee">
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Lun</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Mar</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Mer</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Gio</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Ven</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Sab</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Dom</div>
+            </div>
+            <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
+          </div>
+
+          <!-- [D] Note (basso dx) -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
+            <textarea id="widget-note" placeholder="Scrivi i tuoi appunti..." style="flex:1;resize:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:140px;background:transparent" oninput="localStorage.setItem('ti_note',this.value)"></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FOTO DEI LAVORI (dashboard) -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📷 Foto dei lavori</div>
+
+        <div class="foto-limit-bar" id="foto-limit-bar-dash">
+          <span style="font-size:1.3rem">📷</span>
+          <span id="foto-limit-testo-dash">Caricamento...</span>
+        </div>
+
+        <div class="foto-upload-progress" id="foto-progress-dash">⏳ Caricamento foto in corso...</div>
+
+        <div class="foto-upload-area" id="foto-upload-area-dash"
+             onclick="document.getElementById('foto-input-dash').click()"
+             ondragover="fotoDragOverDash(event)" ondragleave="fotoDragLeaveDash(event)" ondrop="fotoDrop(event)">
+          <input type="file" id="foto-input-dash" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
+          <div class="foto-upload-icon">📤</div>
+          <div class="foto-upload-label">Clicca o trascina le foto qui</div>
+          <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
+        </div>
+
+        <div class="foto-grid" id="foto-grid-dash"></div>
+      </div>
+    </div>
+
+    <!-- PREVENTIVI -->
+    <div class="section" id="sec-preventivi">
+      <div class="topbar">
+        <div class="topbar-title">📋 Preventivi ricevuti</div>
+      </div>
+      <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
+    </div>
+
+    <!-- OFFERTE DI LAVORO -->
+    <div class="section" id="sec-lavoro">
+      <div class="topbar">
+        <div class="topbar-title">💼 Offerte di lavoro</div>
+      </div>
+
+      <!-- Info piano -->
+      <div class="piano-info" id="piano-info-lavoro">
+        <span style="font-size:1.4rem">💡</span>
+        <div>Piano <strong id="piano-label">Free</strong>: puoi pubblicare <strong id="annunci-rimasti">1 annuncio</strong>. 
+        Passa al <strong><a href="prezzi.html" style="color:var(--arancio)">piano Pro</a></strong> per annunci illimitati e posizione in evidenza!</div>
+      </div>
+
+      <!-- Form nuovo annuncio -->
+      <div class="form-annuncio" id="form-annuncio">
+        <h3>➕ Pubblica nuovo annuncio</h3>
+        <div class="form-group">
+          <label>Titolo annuncio *</label>
+          <input type="text" id="ann-titolo" placeholder="Es. Cerco muratore esperienza 5+ anni">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoria / Ruolo *</label>
+            <select id="ann-categoria">
+              <option value="">— Seleziona —</option>
+              <option>Muratore</option>
+              <option>Elettricista</option>
+              <option>Idraulico</option>
+              <option>Carpentiere</option>
+              <option>Pittore/Imbianchino</option>
+              <option>Piastrellista</option>
+              <option>Operaio generico</option>
+              <option>Geometra</option>
+              <option>Ingegnere</option>
+              <option>Architetto</option>
+              <option>Gruista</option>
+              <option>Saldatore</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tipo contratto *</label>
+            <select id="ann-contratto">
+              <option value="">— Seleziona —</option>
+              <option>Tempo indeterminato</option>
+              <option>Tempo determinato</option>
+              <option>Partita IVA</option>
+              <option>Stage/Apprendistato</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Città *</label>
+          <input type="text" id="ann-citta" placeholder="Es. Roma">
+        </div>
+        <div class="form-group">
+          <label>Descrizione del lavoro</label>
+          <textarea id="ann-descrizione" placeholder="Descrivi il lavoro, i requisiti richiesti, orari, ecc."></textarea>
+        </div>
+        <div>
+          <button class="btn-salva-annuncio" onclick="salvaAnnuncio()">💾 Pubblica annuncio</button>
+          <button class="btn-annulla-form" onclick="chiudiFormAnnuncio()">Annulla</button>
+        </div>
+      </div>
+
+      <!-- Bottone apri form -->
+      <div class="lavoro-topbar">
+        <div style="font-size:0.88rem;color:var(--mid)">I tuoi annunci pubblicati su <a href="lavoro.html" target="_blank" style="color:var(--verde);font-weight:700">TrovaImpresa/lavoro</a></div>
+        <button class="btn-nuovo-annuncio" id="btn-apri-form" onclick="apriFormAnnuncio()">
+          ➕ Pubblica annuncio
+        </button>
+      </div>
+
+      <div id="lista-annunci-lavoro">
+        <div class="empty-state"><div class="empty-icon">💼</div>Caricamento...</div>
+      </div>
+    </div>
+
+    <!-- CANDIDATI NELLA ZONA -->
+    <div class="section" id="sec-candidati">
+      <div class="topbar">
+        <div class="topbar-title">🔍 Candidati nella tua zona</div>
+      </div>
+      <div id="lista-candidati"><div class="empty-state"><div class="empty-icon">🔍</div>Caricamento...</div></div>
+    </div>
+
+    <!-- FOTO DEI LAVORI -->
+    <div class="section" id="sec-foto">
+      <div class="topbar">
+        <div class="topbar-title">📷 Foto dei lavori</div>
+      </div>
+
+      <div class="foto-limit-bar" id="foto-limit-bar">
+        <span style="font-size:1.3rem">📷</span>
+        <span id="foto-limit-testo">Caricamento...</span>
+      </div>
+
+      <div class="foto-upload-progress" id="foto-progress">⏳ Caricamento foto in corso...</div>
+
+      <div class="foto-upload-area" id="foto-upload-area" onclick="document.getElementById('foto-input').click()"
+           ondragover="fotoDragOver(event)" ondragleave="fotoDragLeave(event)" ondrop="fotoDrop(event)">
+        <input type="file" id="foto-input" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
+        <div class="foto-upload-icon">📤</div>
+        <div class="foto-upload-label">Clicca o trascina le foto qui</div>
+        <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
+      </div>
+
+      <div class="foto-grid" id="foto-grid"></div>
+    </div>
+
+    <!-- RECENSIONI -->
+    <div class="section" id="sec-recensioni">
+      <div class="topbar">
+        <div class="topbar-title">⭐ Le mie recensioni</div>
+      </div>
+      <div id="lista-recensioni"><div class="empty-state"><div class="empty-icon">⭐</div>Caricamento...</div></div>
+    </div>
+
+    <!-- PROFILO -->
+    <div class="section" id="sec-profilo">
+      <div class="topbar">
+        <div class="topbar-title">👤 Il mio profilo</div>
+      </div>
+      <div class="profilo-card" id="profilo-dati">
+        <div class="profilo-title">Dati impresa</div>
+        <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL AI PREVENTIVO DASHBOARD -->
+<div class="modal-ai-overlay" id="modal-ai-dash" onclick="if(event.target===this)chiudiModalPreventivoDash()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🤖 Genera preventivo con AI</h2>
+        <p>Compila i dati del lavoro — l'AI creerà un preventivo professionale</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalPreventivoDash()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="ai-form-group">
+        <label>Tipo di lavoro *</label>
+        <select id="ai-tipo-lavoro">
+          <option value="">— Seleziona —</option>
+          <option>Ristrutturazione appartamento</option>
+          <option>Ristrutturazione bagno</option>
+          <option>Ristrutturazione cucina</option>
+          <option>Impianto elettrico</option>
+          <option>Impianto idraulico</option>
+          <option>Pavimentazione / Parquet</option>
+          <option>Tinteggiatura / Pittura</option>
+          <option>Facciata esterna</option>
+          <option>Copertura / Tetto</option>
+          <option>Opere murarie</option>
+          <option>Serramenti / Infissi</option>
+          <option>Altro</option>
+        </select>
+      </div>
+      <div class="ai-form-group">
+        <label>Descrizione del lavoro</label>
+        <textarea id="ai-descrizione" placeholder="Descrivi il lavoro richiesto, eventuali materiali, condizioni particolari…"></textarea>
+      </div>
+      <div class="ai-form-row">
+        <div class="ai-form-group">
+          <label>Dimensioni / Superficie</label>
+          <input type="text" id="ai-dimensioni" placeholder="Es. 80 mq, 3 stanze">
+        </div>
+        <div class="ai-form-group">
+          <label>Zona / Città</label>
+          <input type="text" id="ai-zona" placeholder="Es. Roma, Milano Nord">
+        </div>
+      </div>
+      <button class="btn-genera-ai-dash" id="btn-genera-ai-dash" onclick="generaPreventivoDash()">
+        🤖 Genera preventivo
+      </button>
+      <div class="ai-result-box" id="ai-result-box">
+        <div class="ai-result-label">
+          ✨ Preventivo generato — personalizzalo a piacere
+          <button class="btn-copia" onclick="copiaPreventivoDash()">📋 Copia</button>
+        </div>
+        <textarea class="ai-result-text" id="ai-result-text"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SEGNALAZIONE -->
+<div class="modal-ai-overlay" id="modal-segnalazione" onclick="if(event.target===this)chiudiModalSegnalazione()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🆘 Segnala un problema</h2>
+        <p>Il tuo messaggio verrà ricevuto dal team TrovaImpresa</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalSegnalazione()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="segnalazione-form">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Descrivi il problema</label>
+          <textarea id="segnalazione-testo" rows="5" placeholder="Descrivi il problema che hai riscontrato..." style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+        <button id="btn-invia-segnalazione" onclick="inviaSegnalazione()" style="width:100%;padding:13px;background:var(--verde);color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Invia</button>
+      </div>
+      <div id="segnalazione-success" style="display:none;text-align:center;padding:20px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">✅</div>
+        <p style="font-size:15px;font-weight:600;color:#2a7a4b;margin-bottom:6px;">Segnalazione inviata!</p>
+        <p style="font-size:13px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2FA -->
+<div class="mfa-overlay" id="mfa-overlay">
+  <div class="mfa-box">
+    <h2 id="mfa-title">🔐 Attiva verifica in due passaggi</h2>
+    <p id="mfa-desc">Scansiona il QR code con Google Authenticator o un'app compatibile, poi inserisci il codice per confermare l'attivazione.</p>
+    <div id="mfa-alert-box" style="display:none;" class="mfa-alert"></div>
+    <div id="mfa-step-qr">
+      <div class="mfa-qr" id="mfa-qr-wrap"></div>
+      <div class="mfa-secret" id="mfa-secret"></div>
+      <p style="font-size:0.82rem;color:var(--mid);margin-bottom:12px;text-align:center;">Dopo aver scansionato, inserisci il codice a 6 cifre:</p>
+      <input type="text" class="mfa-input" id="mfa-code" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+      <button class="mfa-btn" id="mfa-btn" onclick="confermaMFA()">✅ Attiva 2FA</button>
+    </div>
+    <span class="mfa-cancel" onclick="chiudiMFA()">Annulla</span>
+  </div>
+</div>
+
+<!-- MODAL AI PREVENTIVO -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)chiudiModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🤖 Genera preventivo con AI</h2>
+      <p>L'AI analizzerà la richiesta e creerà un preventivo professionale</p>
+    </div>
+    <div class="modal-body">
+      <div class="richiesta-box" id="modal-richiesta"></div>
+      <div class="ai-genera-box">
+        <button class="ai-genera-btn" id="btn-genera-ai" onclick="generaConAI()">
+          🤖 Genera preventivo con AI
+        </button>
+      </div>
+      <div class="prev-generato" id="prev-generato">
+        <div class="prev-gen-label">✨ Preventivo generato dall'AI — personalizzalo a piacere</div>
+        <textarea class="prev-textarea" id="prev-testo"></textarea>
+        <div class="prev-prezzo-row">
+          <div class="prev-input-wrap">
+            <label>💶 Prezzo minimo (€)</label>
+            <input type="number" class="prev-input" id="prev-min" placeholder="Es. 1500">
+          </div>
+          <div class="prev-input-wrap">
+            <label>💶 Prezzo massimo (€)</label>
+            <input type="number" class="prev-input" id="prev-max" placeholder="Es. 2500">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-chiudi" onclick="chiudiModal()">✕ Chiudi</button>
+      <button class="btn-invia-prev" id="btn-invia-prev" onclick="inviaPreventivo()" style="display:none">
+        📤 Invia preventivo al cliente
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let impresaCorrente = null;
+let preventivoCorrente = null;
+
+async function caricaSessioneConDati(session) {
+  let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (!data) {
+    const { data: byEmail } = await sb.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
+    if (byEmail) {
+      await sb.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
+      data = byEmail;
+    }
+  }
+  if (!data) {
+    const { data: data2 } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
+    data = data2;
+  }
+  impresaCorrente = data || { email: session.user.email, id: session.user.id };
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pannello').style.display = 'block';
+  inizializza();
+}
+
+function mostraLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pannello').style.display = 'none';
+}
+
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    window.location.replace('login-impresa.html');
+    return;
+  }
+  const { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
+  if (!data) {
+    window.location.replace('login-impresa.html');
+    return;
+  }
+  impresaCorrente = data;
+  document.getElementById('spinner-avvio').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pannello').style.display = 'block';
+  inizializza();
+})();
+
+// LOGIN
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  const btn = document.querySelector('.login-btn');
+  const errEl = document.getElementById('login-err');
+  if (!email || !pass) { errEl.style.display='block'; return; }
+  btn.disabled = true;
+  btn.textContent = '⏳ Accesso in corso...';
+  errEl.style.display = 'none';
+  const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (authError || !authData.user) {
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ Email o password errati';
+    btn.disabled = false;
+    btn.textContent = '🔐 Accedi al pannello';
+    return;
+  }
+  let { data } = await sb.from('imprese').select('*').eq('email', authData.user.email).maybeSingle();
+  if (!data) {
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ Profilo non trovato';
+    btn.disabled = false;
+    btn.textContent = '🔐 Accedi al pannello';
+    return;
+  }
+  impresaCorrente = data;
+  localStorage.setItem('ti_logged', '1');
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pannello').style.display = 'block';
+  inizializza();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  window.location.replace('login-impresa.html');
+}
+
+// =====================
+// 2FA (TOTP)
+// =====================
+let mfa2faFactorId = null;
+let mfa2faChallengeId = null;
+
+async function avviaMFA(e) {
+  e.preventDefault();
+  mfaShowAlert('', '');
+  document.getElementById('mfa-code').value = '';
+  document.getElementById('mfa-overlay').classList.add('open');
+  document.getElementById('mfa-btn').disabled = true;
+  document.getElementById('mfa-btn').textContent = '⏳ Caricamento...';
+
+  const { data, error } = await sb.auth.mfa.enroll({ factorType: 'totp' });
+  if (error) {
+    mfaShowAlert('Errore: ' + error.message, 'error');
+    document.getElementById('mfa-btn').textContent = '✅ Attiva 2FA';
+    return;
+  }
+  mfa2faFactorId = data.id;
+
+  // Mostra QR code (SVG fornito da Supabase)
+  document.getElementById('mfa-qr-wrap').innerHTML = data.totp.qr_code;
+  document.getElementById('mfa-secret').textContent = 'Codice manuale: ' + data.totp.secret;
+  document.getElementById('mfa-btn').disabled = false;
+  document.getElementById('mfa-btn').textContent = '✅ Attiva 2FA';
+
+  // Avvia subito la challenge
+  const { data: ch, error: chErr } = await sb.auth.mfa.challenge({ factorId: mfa2faFactorId });
+  if (chErr) { mfaShowAlert('Errore challenge: ' + chErr.message, 'error'); return; }
+  mfa2faChallengeId = ch.id;
+}
+
+async function confermaMFA() {
+  const code = document.getElementById('mfa-code').value.trim();
+  if (code.length !== 6) { mfaShowAlert('Inserisci un codice a 6 cifre.', 'error'); return; }
+  const btn = document.getElementById('mfa-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Verifica...';
+  mfaShowAlert('', '');
+
+  const { error } = await sb.auth.mfa.verify({
+    factorId: mfa2faFactorId,
+    challengeId: mfa2faChallengeId,
+    code
+  });
+
+  if (error) {
+    mfaShowAlert('❌ Codice non valido o scaduto. Riprova.', 'error');
+    btn.disabled = false;
+    btn.textContent = '✅ Attiva 2FA';
+    return;
+  }
+
+  mfaShowAlert('✅ 2FA attivato con successo!', 'success');
+  btn.style.display = 'none';
+  document.getElementById('mfa-qr-wrap').style.display = 'none';
+  document.getElementById('mfa-secret').style.display = 'none';
+  document.querySelector('#mfa-step-qr p').style.display = 'none';
+  document.getElementById('mfa-code').style.display = 'none';
+  document.getElementById('mfa-title').textContent = '🔐 2FA attivato!';
+  document.getElementById('mfa-desc').textContent = 'Da ora ti verrà chiesto il codice ad ogni accesso.';
+  setTimeout(chiudiMFA, 2500);
+}
+
+function chiudiMFA() {
+  document.getElementById('mfa-overlay').classList.remove('open');
+}
+
+function mfaShowAlert(msg, type) {
+  const box = document.getElementById('mfa-alert-box');
+  if (!msg) { box.style.display = 'none'; return; }
+  box.className = 'mfa-alert mfa-alert-' + type;
+  box.textContent = msg;
+  box.style.display = 'block';
+}
+
+function showSection(id, el, fromPopstate) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  el.classList.add('active');
+  if (!fromPopstate) history.pushState({section: id}, '');
+}
+
+function showSectionById(id, fromPopstate) {
+  const navItem = [...document.querySelectorAll('.nav-item')].find(n => n.getAttribute('onclick')?.includes(`'${id}'`));
+  if (navItem) showSection(id, navItem, fromPopstate);
+}
+
+history.replaceState({goHome: true}, '');
+history.pushState({section: 'dashboard'}, '');
+window.onpopstate = function(e) {
+  if (e.state && e.state.section) {
+    showSectionById(e.state.section, true);
+  } else {
+    window.location.href = 'index.html';
+  }
+};
+
+async function inizializza() {
+  const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
+  const isPro = impresaCorrente.piano === 'pro';
+  const rating = impresaCorrente.rating || '—';
+
+  // Header dashboard
+  document.getElementById('dash-nome-impresa').textContent = nome;
+  document.getElementById('dash-rating-badge').textContent = `⭐ ${rating}`;
+  const pianoBadge = document.getElementById('dash-piano-badge');
+  pianoBadge.textContent = isPro ? '⭐ Pro' : '🆓 Free';
+  if (isPro) pianoBadge.classList.add('pro');
+
+  // Stat rating (condiviso)
+  document.getElementById('stat-rating').textContent = rating;
+
+  await caricaPreventivi();
+  await caricaRecensioni();
+  await caricaAnnunciLavoro();
+  await caricaCandidatiZona();
+  await caricaFotoLavori();
+  caricaProfilo();
+}
+
+// CARICA PREVENTIVI
+async function caricaPreventivi() {
+  const { data } = await sb.from('preventivi').select('*')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
+
+  const lista = data || [];
+
+  const container = document.getElementById('lista-preventivi');
+  if (!lista.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>Nessuna richiesta ancora.<br><small>Le richieste dei clienti appariranno qui!</small></div>';
+    return;
+  }
+
+  container.innerHTML = lista.map(p => `
+    <div class="prev-card" onclick="apriModal(${p.id})">
+      <div class="prev-header">
+        <div class="prev-nome">👤 ${p.nome}</div>
+        <span class="prev-badge ${p.risposta ? 'badge-inviato' : 'badge-nuovo'}">${p.risposta ? '✅ Risposto' : '🆕 Nuovo'}</span>
+      </div>
+      <div class="prev-info">
+        <span>🔨 ${p.tipo_lavoro || '—'}</span>
+        <span>📍 ${p.indirizzo || '—'}</span>
+        <span>⏰ ${p.urgenza || '—'}</span>
+        ${p.budget ? `<span>💶 ${p.budget}</span>` : ''}
+      </div>
+      <div class="prev-desc">${(p.descrizione || '').substring(0, 150)}${p.descrizione?.length > 150 ? '...' : ''}</div>
+      <div class="prev-footer">
+        <span class="prev-data">${new Date(p.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</span>
+        <button class="btn-genera" onclick="event.stopPropagation();apriModal(${p.id})">
+          🤖 Genera preventivo AI
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// CARICA CANDIDATI NELLA ZONA
+async function caricaCandidatiZona() {
+  if (!impresaCorrente.citta) {
+    document.getElementById('lista-candidati').innerHTML = '<div class="empty-state"><div class="empty-icon">📍</div>Nessuna città impostata nel profilo.</div>';
+    return;
+  }
+
+  const { data } = await sb.from('candidati_lavoro').select('*')
+    .ilike('citta', impresaCorrente.citta)
+    .order('created_at', { ascending: false });
+
+  const container = document.getElementById('lista-candidati');
+  if (!data?.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div>Nessun candidato nella tua zona (${impresaCorrente.citta}).<br><small>I candidati appariranno qui man mano che si registrano!</small></div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="background:#e8f5ee;border-radius:14px;padding:16px 20px;margin-bottom:20px;font-size:0.85rem;color:var(--mid)">
+      <span style="font-weight:700;color:var(--verde)">📍 ${data.length} candidato${data.length > 1 ? 'i' : ''} trovato${data.length > 1 ? 'i' : ''}</span> nella tua zona (${impresaCorrente.citta})
+    </div>
+  ` + data.map(c => `
+    <div class="candidato-card">
+      <div class="candidato-header">
+        <div class="candidato-nome">👤 ${c.nome} ${c.cognome}</div>
+        <span class="candidato-livello-badge">${c.livello}</span>
+      </div>
+      <div class="candidato-info">
+        <span>🔧 ${c.mestiere}</span>
+        <span>📍 ${c.citta}</span>
+        ${c.eta ? `<span>🎂 ${c.eta} anni</span>` : ''}
+        ${c.sesso ? `<span>👥 ${c.sesso}</span>` : ''}
+      </div>
+      ${c.descrizione ? `<div class="candidato-bio">${c.descrizione.substring(0, 200)}${c.descrizione.length > 200 ? '...' : ''}</div>` : ''}
+      <div class="candidato-contatti">
+        ${c.telefono ? `<a href="tel:${c.telefono}" class="btn-contatta">☎️ Chiama</a>` : ''}
+        ${c.email ? `<a href="mailto:${c.email}" class="btn-contatta">📧 Email</a>` : ''}
+        ${c.telefono ? `<a href="https://wa.me/${c.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-contatta">💬 WhatsApp</a>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// CARICA RECENSIONI
+async function caricaRecensioni() {
+  const { data } = await sb.from('feedback_clienti').select('*')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
+
+  document.getElementById('dash-stat-recensioni').textContent = data?.length || 0;
+
+  const container = document.getElementById('lista-recensioni');
+  if (!data?.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">⭐</div>Nessuna recensione ancora.</div>';
+    return;
+  }
+  container.innerHTML = data.map(r => `
+    <div style="background:white;border-radius:16px;padding:20px 24px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <strong>${r.nome_cliente}</strong>
+        <span style="color:#f4c02e">${'★'.repeat(r.voto)}${'☆'.repeat(5-r.voto)}</span>
+      </div>
+      ${r.lavoro_fatto ? `<div style="font-size:0.78rem;color:var(--light);margin-bottom:6px">${r.lavoro_fatto}</div>` : ''}
+      <div style="font-size:0.88rem;color:var(--mid)">${r.testo}</div>
+      <div style="font-size:0.75rem;color:var(--light);margin-top:8px">${new Date(r.created_at).toLocaleDateString('it-IT')}</div>
+    </div>
+  `).join('');
+}
+
+// PROFILO
+function caricaProfilo() {
+  const i = impresaCorrente;
+  document.getElementById('profilo-dati').innerHTML = `
+    <div class="profilo-title">Dati impresa</div>
+    <div class="profilo-row"><span class="profilo-key">Nome attività</span><span>${i.nome_attivita || i.nome + ' ' + i.cognome}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Tipo</span><span>${i.tipo || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Email</span><span>${i.email}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Telefono</span><span>${i.telefono || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Città</span><span>${i.citta || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Provincia</span><span>${i.provincia || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Partita IVA</span><span>${i.partita_iva || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Mestieri</span><span>${(i.mestieri || []).join(', ') || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Specializzazioni</span><span>${i.specializzazioni || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Zone</span><span>${i.zone || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Anni esperienza</span><span>${i.anni_esperienza || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Sito web</span><span>${i.sito_web || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Descrizione</span><span>${i.descrizione || '—'}</span></div>
+    <div class="profilo-row"><span class="profilo-key">Stato</span><span>${i.verificata ? '✅ Verificata' : '⏳ In attesa di verifica'}</span></div>
+    <br>
+    <a href="modifica-profilo.html" target="_blank" style="color:var(--verde);font-weight:700;font-size:0.88rem">✏️ Modifica profilo →</a>
+    &nbsp;&nbsp;
+    <a href="#" onclick="avviaMFA(event)" style="color:var(--arancio);font-weight:700;font-size:0.88rem" id="link-2fa">🔐 Attiva 2FA →</a>
+  `;
+}
+
+// =====================
+// OFFERTE DI LAVORO
+// =====================
+let annunciLavoro = [];
+
+async function caricaAnnunciLavoro() {
+  const { data } = await sb.from('offerte_lavoro').select('*')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
+
+  annunciLavoro = data || [];
+  const isPro = impresaCorrente.piano === 'pro';
+  const maxAnnunci = isPro ? Infinity : 1;
+  const attivi = annunciLavoro.filter(a => a.attiva).length;
+
+  // Aggiorna badge sidebar
+  if (attivi > 0) {
+    document.getElementById('badge-lavoro').textContent = attivi;
+    document.getElementById('badge-lavoro').style.display = '';
+  }
+
+  // Aggiorna info piano
+  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
+  // Aggiorna dashboard piano
+  const dashLabel = document.getElementById('piano-dashboard-label');
+  if (dashLabel) {
+    dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free';
+    dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b';
+  }
+  if (isPro) {
+    document.getElementById('annunci-rimasti').textContent = 'annunci illimitati';
+    document.getElementById('piano-info-lavoro').style.background = 'linear-gradient(135deg,var(--verde3),#fff)';
+    document.getElementById('piano-info-lavoro').style.borderColor = '#a8d5b5';
+  } else {
+    const rimasti = Math.max(0, maxAnnunci - attivi);
+    document.getElementById('annunci-rimasti').textContent = rimasti > 0 ? `${rimasti} annuncio disponibile` : '0 annunci disponibili (limite raggiunto)';
+  }
+
+  // Mostra/nascondi bottone
+  const pubbPossibile = isPro || attivi < 1;
+  document.getElementById('btn-apri-form').style.display = pubbPossibile ? '' : 'none';
+
+  mostraAnnunciLavoro();
+}
+
+function mostraAnnunciLavoro() {
+  const container = document.getElementById('lista-annunci-lavoro');
+  if (!annunciLavoro.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">💼</div>
+        <div>Nessun annuncio pubblicato ancora.</div>
+        <div style="margin-top:8px;font-size:0.85rem">Clicca <strong>"Pubblica annuncio"</strong> per iniziare!</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = annunciLavoro.map(a => `
+    <div class="lavoro-card">
+      <div class="lavoro-card-header">
+        <div>
+          <div class="lavoro-titolo">${a.titolo}</div>
+        </div>
+        <span class="lavoro-badge ${a.attiva ? 'badge-attivo' : 'badge-disattivo'}">${a.attiva ? '✅ Attivo' : '⏸ Disattivo'}</span>
+      </div>
+      <div class="lavoro-meta">
+        ${a.categoria ? `<span>🔧 ${a.categoria}</span>` : ''}
+        ${a.citta ? `<span>📍 ${a.citta}</span>` : ''}
+        ${a.tipo_contratto ? `<span>📋 ${a.tipo_contratto}</span>` : ''}
+        <span>📅 ${new Date(a.created_at).toLocaleDateString('it-IT')}</span>
+      </div>
+      ${a.descrizione ? `<div class="lavoro-desc">${a.descrizione.substring(0,180)}${a.descrizione.length>180?'...':''}</div>` : ''}
+      <div class="lavoro-actions">
+        <button class="btn-toggle-annuncio" onclick="toggleAnnuncio('${a.id}', ${a.attiva})">
+          ${a.attiva ? '⏸ Disattiva' : '▶️ Riattiva'}
+        </button>
+        <button class="btn-elimina-annuncio" onclick="eliminaAnnuncio('${a.id}')">🗑️ Elimina</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function impostaPiano(piano) {
+  if (!impresaCorrente) return;
+  const conferma = confirm(piano === 'pro' ? '⭐ Attivare il piano Pro?' : 'Tornare al piano Free?');
+  if (!conferma) return;
+  const { error } = await sb.from('imprese').update({ piano }).eq('id', impresaCorrente.id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  impresaCorrente.piano = piano;
+  const isPro = piano === 'pro';
+  const dashLabel = document.getElementById('piano-dashboard-label');
+  if (dashLabel) { dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free'; dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b'; }
+  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
+  alert(isPro ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
+}
+
+function apriFormAnnuncio() {
+  document.getElementById('form-annuncio').classList.add('show');
+  document.getElementById('btn-apri-form').style.display = 'none';
+  // Pre-compila città
+  document.getElementById('ann-citta').value = impresaCorrente.citta || '';
+  document.getElementById('ann-titolo').focus();
+}
+
+function chiudiFormAnnuncio() {
+  document.getElementById('form-annuncio').classList.remove('show');
+  document.getElementById('btn-apri-form').style.display = '';
+  // Reset form
+  document.getElementById('ann-titolo').value = '';
+  document.getElementById('ann-categoria').value = '';
+  document.getElementById('ann-contratto').value = '';
+  document.getElementById('ann-descrizione').value = '';
+}
+
+async function salvaAnnuncio() {
+  const titolo = document.getElementById('ann-titolo').value.trim();
+  const categoria = document.getElementById('ann-categoria').value;
+  const contratto = document.getElementById('ann-contratto').value;
+  const citta = document.getElementById('ann-citta').value.trim();
+  const descrizione = document.getElementById('ann-descrizione').value.trim();
+
+  if (!titolo || !categoria || !contratto || !citta) {
+    alert('Compila tutti i campi obbligatori (*)');
+    return;
+  }
+
+  const btn = document.querySelector('.btn-salva-annuncio');
+  btn.textContent = '⏳ Pubblicazione...';
+  btn.disabled = true;
+
+  const { error } = await sb.from('offerte_lavoro').insert({
+    impresa_id: impresaCorrente.id,
+    titolo,
+    categoria,
+    tipo_contratto: contratto,
+    citta,
+    descrizione,
+    attiva: true
+  });
+
+  if (error) {
+    alert('Errore nella pubblicazione. Riprova.');
+    btn.textContent = '💾 Pubblica annuncio';
+    btn.disabled = false;
+    return;
+  }
+
+  btn.textContent = '💾 Pubblica annuncio';
+  btn.disabled = false;
+  chiudiFormAnnuncio();
+  await caricaAnnunciLavoro();
+}
+
+async function toggleAnnuncio(id, attivaCorrente) {
+  await sb.from('offerte_lavoro').update({ attiva: !attivaCorrente }).eq('id', id);
+  await caricaAnnunciLavoro();
+}
+
+async function eliminaAnnuncio(id) {
+  if (!confirm('Sei sicuro di voler eliminare questo annuncio?')) return;
+  await sb.from('offerte_lavoro').delete().eq('id', id);
+  await caricaAnnunciLavoro();
+}
+
+// =====================
+// MODAL AI PREVENTIVO DASHBOARD
+// =====================
+function apriModalPreventivoDash() {
+  document.getElementById('modal-ai-dash').classList.add('show');
+  document.getElementById('ai-result-box').classList.remove('show');
+  document.getElementById('ai-result-text').value = '';
+  document.getElementById('btn-genera-ai-dash').disabled = false;
+  document.getElementById('btn-genera-ai-dash').innerHTML = '🤖 Genera preventivo';
+}
+
+function chiudiModalPreventivoDash() {
+  document.getElementById('modal-ai-dash').classList.remove('show');
+}
+
+async function generaPreventivoDash() {
+  const tipo = document.getElementById('ai-tipo-lavoro').value;
+  const descrizione = document.getElementById('ai-descrizione').value.trim();
+  const dimensioni = document.getElementById('ai-dimensioni').value.trim();
+  const zona = document.getElementById('ai-zona').value.trim();
+
+  if (!tipo) { alert('Seleziona il tipo di lavoro.'); return; }
+
+  const nomeImpresa = impresaCorrente.nome_attivita || (impresaCorrente.nome + ' ' + impresaCorrente.cognome);
+  const prompt = `Sei un esperto preventivista edile italiano. Genera un preventivo professionale completo in italiano per il seguente lavoro:\n- Tipo di lavoro: ${tipo}\n- Descrizione: ${descrizione || 'non specificata'}\n- Dimensioni/superficie: ${dimensioni || 'non specificata'}\n- Zona: ${zona || 'non specificata'}\n- Impresa: ${nomeImpresa}\n\nScrivi un preventivo professionale e formale con stima dei costi, tempistiche indicative, cosa include il servizio e garanzie. Usa il formato di una lettera commerciale italiana. Non usare JSON.`;
+
+  const btn = document.getElementById('btn-genera-ai-dash');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
+
+  try {
+    const res = await fetch('/.netlify/functions/ai-orienta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ testo: prompt })
+    });
+    const testo = await res.text();
+    document.getElementById('ai-result-text').value = testo;
+    document.getElementById('ai-result-box').classList.add('show');
+    btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
+  } catch (err) {
+    alert('Errore nella generazione. Riprova.');
+    btn.disabled = false;
+    btn.innerHTML = '🤖 Genera preventivo';
+  }
+}
+
+async function copiaPreventivoDash() {
+  const testo = document.getElementById('ai-result-text').value;
+  await navigator.clipboard.writeText(testo);
+  const btn = document.querySelector('.btn-copia');
+  const orig = btn.textContent;
+  btn.textContent = '✅ Copiato!';
+  setTimeout(() => { btn.textContent = orig; }, 2000);
+}
+
+// =====================
+// FOTO DEI LAVORI
+// =====================
+const MAX_FOTO_FREE = 10;
+let fotoCaricate = [];
+
+async function caricaFotoLavori() {
+  if (!impresaCorrente?.id) return;
+  const folder = String(impresaCorrente.id);
+  const { data, error } = await sb.storage.from('foto-lavori').list(folder, { sortBy: { column: 'created_at', order: 'desc' } });
+  fotoCaricate = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+  document.getElementById('dash-stat-foto').textContent = fotoCaricate.length;
+  aggiornaBannerFoto();
+  renderFotoGrid();
+}
+
+function aggiornaBannerFoto() {
+  const isPro = impresaCorrente.piano === 'pro';
+  const n = fotoCaricate.length;
+  const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - n);
+  const testoHTML = isPro
+    ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#1a73e8">Pro ⭐</strong> — illimitate`
+    : `<span class="foto-limit-num">${n}/${MAX_FOTO_FREE}</span> foto caricate · Piano Free — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="prezzi.html" style="color:var(--arancio);font-weight:700">passa a Pro</a> per foto illimitate'}`;
+
+  for (const suffix of ['', '-dash']) {
+    const barEl = document.getElementById('foto-limit-bar' + suffix);
+    const testoEl = document.getElementById('foto-limit-testo' + suffix);
+    const uploadArea = document.getElementById('foto-upload-area' + suffix);
+    if (!barEl) continue;
+    testoEl.innerHTML = testoHTML;
+    barEl.style.borderColor = isPro ? '#1a73e8' : '';
+    uploadArea.style.display = (isPro || rimaste > 0) ? '' : 'none';
+  }
+}
+
+function renderFotoGrid() {
+  const folder = String(impresaCorrente.id);
+  const emptyHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessuna foto ancora. Carica i tuoi lavori!</div>';
+  const fotoHTML = fotoCaricate.map(f => {
+    const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(`${folder}/${f.name}`);
+    return `<div class="foto-item"><img src="${publicUrl}" alt="${f.name}" loading="lazy"><button class="foto-item-del" onclick="eliminaFoto('${f.name}')" title="Elimina foto">✕</button></div>`;
+  }).join('');
+
+  for (const id of ['foto-grid', 'foto-grid-dash']) {
+    const grid = document.getElementById(id);
+    if (grid) grid.innerHTML = fotoCaricate.length ? fotoHTML : emptyHTML;
+  }
+}
+
+async function uploadFoto(files) {
+  if (!files?.length) return;
+  const isPro = impresaCorrente.piano === 'pro';
+  const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
+
+  if (!isPro && rimaste === 0) {
+    alert('Hai raggiunto il limite di 10 foto per il piano Free. Passa a Pro per foto illimitate!');
+    return;
+  }
+
+  const daCaricari = Array.from(files).slice(0, isPro ? files.length : rimaste);
+  const allProgress = ['foto-progress', 'foto-progress-dash'].map(id => document.getElementById(id)).filter(Boolean);
+  allProgress.forEach(p => { p.style.display = 'block'; p.textContent = `⏳ Caricamento ${daCaricari.length} foto...`; });
+
+  const folder = String(impresaCorrente.id);
+  let ok = 0;
+
+  for (const file of daCaricari) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert(`"${file.name}" supera i 5 MB — saltata.`);
+      continue;
+    }
+    const ext = file.name.split('.').pop();
+    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+    const { error } = await sb.storage.from('foto-lavori').upload(path, file, { upsert: false });
+    if (!error) ok++;
+  }
+
+  allProgress.forEach(p => { p.textContent = `✅ ${ok} foto caricate con successo!`; });
+  setTimeout(() => { allProgress.forEach(p => { p.style.display = 'none'; }); }, 2500);
+  ['foto-input', 'foto-input-dash'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  await caricaFotoLavori();
+}
+
+async function eliminaFoto(nome) {
+  if (!confirm('Eliminare questa foto?')) return;
+  const folder = String(impresaCorrente.id);
+  await sb.storage.from('foto-lavori').remove([`${folder}/${nome}`]);
+  await caricaFotoLavori();
+}
+
+function fotoDragOver(e) {
+  e.preventDefault();
+  document.getElementById('foto-upload-area').classList.add('dragover');
+}
+function fotoDragLeave(e) {
+  document.getElementById('foto-upload-area').classList.remove('dragover');
+}
+function fotoDrop(e) {
+  e.preventDefault();
+  ['foto-upload-area', 'foto-upload-area-dash'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('dragover'); });
+  uploadFoto(e.dataTransfer.files);
+}
+function fotoDragOverDash(e) {
+  e.preventDefault();
+  document.getElementById('foto-upload-area-dash').classList.add('dragover');
+}
+function fotoDragLeaveDash(e) {
+  document.getElementById('foto-upload-area-dash').classList.remove('dragover');
+}
+
+// =====================
+// MODAL AI PREVENTIVO
+// =====================
+async function apriModal(prevId) {
+  const { data } = await sb.from('preventivi').select('*').eq('id', prevId).single();
+  if (!data) return;
+  preventivoCorrente = data;
+
+  document.getElementById('modal-richiesta').innerHTML = `
+    <div class="ric-title">📋 Richiesta del cliente</div>
+    <div class="ric-row"><span class="ric-key">Nome:</span><span>${data.nome}</span></div>
+    <div class="ric-row"><span class="ric-key">Lavoro:</span><span>${data.tipo_lavoro || '—'}</span></div>
+    <div class="ric-row"><span class="ric-key">Descrizione:</span><span>${data.descrizione || '—'}</span></div>
+    <div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${data.indirizzo || '—'}</span></div>
+    <div class="ric-row"><span class="ric-key">Urgenza:</span><span>${data.urgenza || '—'}</span></div>
+    <div class="ric-row"><span class="ric-key">Budget:</span><span>${data.budget || '—'}</span></div>
+    ${data.superficie ? `<div class="ric-row"><span class="ric-key">Superficie:</span><span>${data.superficie} mq</span></div>` : ''}
+    <div class="ric-row"><span class="ric-key">Contatto:</span><span>${data.email} · ${data.telefono}</span></div>
+  `;
+
+  document.getElementById('prev-generato').classList.remove('show');
+  document.getElementById('btn-invia-prev').style.display = 'none';
+  document.getElementById('btn-genera-ai').disabled = false;
+  document.getElementById('btn-genera-ai').innerHTML = '🤖 Genera preventivo con AI';
+
+  if (data.risposta) {
+    document.getElementById('prev-testo').value = data.risposta;
+    document.getElementById('prev-min').value = data.prezzo_min || '';
+    document.getElementById('prev-max').value = data.prezzo_max || '';
+    document.getElementById('prev-generato').classList.add('show');
+    document.getElementById('btn-invia-prev').style.display = 'block';
+    document.getElementById('btn-invia-prev').textContent = '✅ Già inviato — Reinvia';
+  }
+
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function chiudiModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+async function generaConAI() {
+  const btn = document.getElementById('btn-genera-ai');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
+
+  const p = preventivoCorrente;
+  const imp = impresaCorrente;
+  const nomeImp = imp.nome_attivita || imp.nome + ' ' + imp.cognome;
+
+  await new Promise(r => setTimeout(r, 2000));
+
+  const testo = generaTestoPreventivo(p, imp, nomeImp);
+  const { min, max } = calcolaPrezzo(p);
+
+  document.getElementById('prev-testo').value = testo;
+  document.getElementById('prev-min').value = min;
+  document.getElementById('prev-max').value = max;
+  document.getElementById('prev-generato').classList.add('show');
+  document.getElementById('btn-invia-prev').style.display = 'block';
+
+  btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
+}
+
+function generaTestoPreventivo(p, imp, nomeImp) {
+  const oggi = new Date().toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'});
+  const { min, max } = calcolaPrezzo(p);
+  return `Gentile ${p.nome.split(' ')[0]},
+
+grazie per aver contattato ${nomeImp} tramite TrovaImpresa.
+
+Abbiamo analizzato la sua richiesta riguardante: ${p.tipo_lavoro || 'il lavoro richiesto'}${p.indirizzo ? ` presso ${p.indirizzo}` : ''}.
+
+DESCRIZIONE LAVORO
+${p.descrizione || 'Come da richiesta.'}
+
+PREVENTIVO INDICATIVO
+• Costo manodopera e materiali: €${min.toLocaleString('it-IT')} – €${max.toLocaleString('it-IT')}
+• Tempistiche: da definire dopo sopralluogo
+• Inizio lavori: da concordare secondo disponibilità
+
+COSA INCLUDE
+✓ Sopralluogo gratuito senza impegno
+✓ Manodopera qualificata e assicurata
+✓ Materiali di prima qualità
+✓ Pulizia area lavoro al termine
+✓ Garanzia sulla lavorazione
+
+PROSSIMI PASSI
+Per un preventivo definitivo e vincolante, proponiamo un sopralluogo gratuito presso la sua abitazione. La contatteremo entro 24 ore per concordare data e orario.
+
+Cordiali saluti,
+${nomeImp}
+${imp.telefono || ''}
+${imp.email}
+
+---
+Preventivo generato il ${oggi} tramite TrovaImpresa`;
+}
+
+function calcolaPrezzo(p) {
+  const prezzi = {
+    'muratura': [800,2500], 'elettricista': [500,1800], 'idraulico': [400,1500],
+    'tinteggiatura': [300,900], 'parquet': [600,1800], 'piastrelle': [500,1500],
+    'ristrutturazione': [15000,60000], 'climatizzatore': [800,2500], 'caldaia': [1200,3500],
+    'giardinaggio': [200,800], 'serramenti': [600,2500], 'fabbro': [200,800]
+  };
+  const lavoro = (p.tipo_lavoro || '').toLowerCase();
+  let [min, max] = [800, 2000];
+  for (const [k, v] of Object.entries(prezzi)) {
+    if (lavoro.includes(k)) { [min, max] = v; break; }
+  }
+  const sup = parseInt(p.superficie) || 0;
+  if (sup > 20) { min = Math.round(min * (1 + sup/100)); max = Math.round(max * (1 + sup/100)); }
+  if (p.urgenza === 'urgente') { min = Math.round(min * 1.2); max = Math.round(max * 1.3); }
+  return { min: Math.round(min/50)*50, max: Math.round(max/50)*50 };
+}
+
+async function inviaPreventivo() {
+  const testo = document.getElementById('prev-testo').value.trim();
+  const min = document.getElementById('prev-min').value;
+  const max = document.getElementById('prev-max').value;
+
+  if (!testo) { alert('Il preventivo è vuoto!'); return; }
+
+  const btn = document.getElementById('btn-invia-prev');
+  btn.textContent = '⏳ Invio in corso...';
+  btn.disabled = true;
+
+  const { error } = await sb.from('preventivi').update({
+    risposta: testo,
+    prezzo_min: min ? parseInt(min) : null,
+    prezzo_max: max ? parseInt(max) : null,
+    risposta_at: new Date().toISOString()
+  }).eq('id', preventivoCorrente.id);
+
+  if (error) {
+    btn.textContent = '❌ Errore — riprova';
+    btn.disabled = false;
+    return;
+  }
+
+  btn.textContent = '✅ Preventivo inviato!';
+  await caricaPreventivi();
+  setTimeout(() => chiudiModal(), 1500);
+}
+
+function apriModalSegnalazione() {
+  document.getElementById('segnalazione-testo').value = '';
+  document.getElementById('segnalazione-form').style.display = '';
+  document.getElementById('segnalazione-success').style.display = 'none';
+  const btn = document.getElementById('btn-invia-segnalazione');
+  btn.disabled = false;
+  btn.textContent = 'Invia';
+  document.getElementById('modal-segnalazione').classList.add('show');
+}
+function chiudiModalSegnalazione() {
+  document.getElementById('modal-segnalazione').classList.remove('show');
+}
+async function inviaSegnalazione() {
+  const descrizione = document.getElementById('segnalazione-testo').value.trim();
+  if (!descrizione) { alert('Descrivi il problema prima di inviare.'); return; }
+  const btn = document.getElementById('btn-invia-segnalazione');
+  btn.disabled = true;
+  btn.textContent = '⏳ Invio in corso...';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const user_id = session ? session.user.id : null;
+    const { error } = await sb.from('segnalazioni').insert({ user_id, descrizione, stato: 'aperto' });
+    if (error) throw error;
+    document.getElementById('segnalazione-form').style.display = 'none';
+    document.getElementById('segnalazione-success').style.display = '';
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Invia';
+    alert('Errore durante l\'invio: ' + err.message);
+  }
+}
+</script>
+<!-- MODAL MODIFICA PROFILO -->
+<div id="modal-profilo-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center">
+  <div style="position:relative;width:100%;height:100%;max-width:860px;margin:auto;display:flex;flex-direction:column">
+    <button onclick="chiudiModalProfilo()" style="position:absolute;top:12px;right:12px;z-index:10000;background:white;border:none;border-radius:50%;width:40px;height:40px;font-size:1.3rem;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    <iframe id="iframe-modifica-profilo" src="" style="width:100%;height:100%;border:none;border-radius:0"></iframe>
+  </div>
+</div>
+
+<div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
+  <a href="disdetta.html" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
+</div>
+<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+<script>
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
+</script>
+</body>
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar-el').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function apriModalProfilo() {
+  var overlay = document.getElementById('modal-profilo-overlay');
+  var iframe  = document.getElementById('iframe-modifica-profilo');
+  iframe.src  = 'modifica-profilo.html';
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function chiudiModalProfilo() {
+  var overlay = document.getElementById('modal-profilo-overlay');
+  var iframe  = document.getElementById('iframe-modifica-profilo');
+  overlay.style.display = 'none';
+  iframe.src  = '';
+  document.body.style.overflow = '';
+}
+</script>
+<script>
+/* ============================================================
+   CALENDARIO & ORARIO & METEO — script separato
+   ============================================================ */
+(function () {
+  /* --- OROLOGIO --- */
+  function tick() {
+    var el = document.getElementById('cal-orologio');
+    if (!el) return;
+    var n = new Date();
+    el.textContent =
+      String(n.getHours()).padStart(2,'0') + ':' +
+      String(n.getMinutes()).padStart(2,'0') + ':' +
+      String(n.getSeconds()).padStart(2,'0');
+  }
+  setInterval(tick, 1000);
+  tick();
+
+  /* --- CALENDARIO --- */
+  var MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+              'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  var oggi = new Date();
+  var cAnno = oggi.getFullYear();
+  var cMese = oggi.getMonth();
+
+  function renderCal() {
+    var label   = document.getElementById('cal-label');
+    var griglia = document.getElementById('cal-griglia');
+    if (!label || !griglia) return;
+    label.textContent = MESI[cMese] + ' ' + cAnno;
+    var primo  = new Date(cAnno, cMese, 1);
+    var offset = primo.getDay() - 1; if (offset < 0) offset = 6;
+    var giorni = new Date(cAnno, cMese + 1, 0).getDate();
+    var html = '';
+    for (var i = 0; i < offset; i++) html += '<div style="background:white;padding:8px 0"></div>';
+    for (var g = 1; g <= giorni; g++) {
+      var isOggi = g === oggi.getDate() && cMese === oggi.getMonth() && cAnno === oggi.getFullYear();
+      html += isOggi
+        ? '<div style="background:white;display:flex;align-items:center;justify-content:center;padding:4px 0"><div style="width:30px;height:30px;border-radius:50%;background:#2a7a4b;color:white;font-weight:800;font-size:0.85rem;display:flex;align-items:center;justify-content:center">' + g + '</div></div>'
+        : '<div style="background:white;text-align:center;padding:8px 0;font-size:0.85rem;color:#1a1a1a">' + g + '</div>';
+    }
+    griglia.innerHTML = html;
+  }
+
+  window.calPrev = function () { cMese--; if (cMese < 0) { cMese = 11; cAnno--; } renderCal(); };
+  window.calNext = function () { cMese++; if (cMese > 11) { cMese = 0; cAnno++; } renderCal(); };
+  renderCal();
+
+  /* --- NOTE --- */
+  var noteEl = document.getElementById('widget-note');
+  if (noteEl) noteEl.value = localStorage.getItem('ti_note') || '';
+
+  /* --- METEO (wttr.in, no API key) --- */
+  var WMO_ICONA = {
+    113:'☀️',116:'⛅',119:'☁️',122:'☁️',143:'🌫️',176:'🌦️',179:'🌨️',
+    182:'🌧️',185:'🌧️',200:'⛈️',227:'❄️',230:'❄️',248:'🌫️',260:'🌫️',
+    263:'🌦️',266:'🌦️',281:'🌧️',284:'🌧️',293:'🌧️',296:'🌧️',299:'🌧️',
+    302:'🌧️',305:'🌧️',308:'🌧️',311:'🌧️',314:'🌧️',317:'🌧️',320:'🌨️',
+    323:'🌨️',326:'🌨️',329:'❄️',332:'❄️',335:'❄️',338:'❄️',350:'🌧️',
+    353:'🌦️',356:'🌧️',359:'🌧️',362:'🌧️',365:'🌧️',368:'🌨️',371:'❄️',
+    374:'🌧️',377:'🌧️',386:'⛈️',389:'⛈️',392:'⛈️',395:'❄️'
+  };
+
+  function setMeteo(icona, citta, temp, cond) {
+    document.getElementById('meteo-icona').textContent      = icona;
+    document.getElementById('meteo-citta').textContent      = citta;
+    document.getElementById('meteo-temp').textContent       = temp;
+    document.getElementById('meteo-condizione').textContent = cond;
+  }
+
+  async function fetchRetry(url, n) {
+    for (var i = 0; i < n; i++) {
+      try {
+        var r = await fetch(url);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r;
+      } catch(e) {
+        if (i < n - 1) await new Promise(function(res){ setTimeout(res, 2000); });
+        else throw e;
+      }
+    }
+  }
+
+  async function caricaMeteo(lat, lon) {
+    try {
+      var r    = await fetchRetry('https://wttr.in/' + lat + ',' + lon + '?format=j1', 3);
+      var d    = await r.json();
+      var cur  = d.current_condition[0];
+      var area = d.nearest_area && d.nearest_area[0];
+      var temp = cur.temp_C + '°C';
+      var desc = cur.weatherDesc && cur.weatherDesc[0] && cur.weatherDesc[0].value || '';
+      var cod  = parseInt(cur.weatherCode, 10);
+      var citta = (area && area.areaName && area.areaName[0] && area.areaName[0].value) ||
+                  (lat.toFixed(2) + ', ' + lon.toFixed(2));
+      setMeteo(WMO_ICONA[cod] || '🌡️', citta, temp, desc);
+    } catch(e) {
+      setMeteo('❌', 'Meteo non disponibile', '', '');
+    }
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(pos) { caricaMeteo(pos.coords.latitude, pos.coords.longitude); },
+      function()    { setMeteo('📍', 'Posizione non autorizzata', '', ''); }
+    );
+  } else {
+    setMeteo('📍', 'Geolocalizzazione non supportata', '', '');
+  }
+})();
+</script>
+</html>
