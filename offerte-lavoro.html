@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offerte di Lavoro — TrovaImpresa</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; font-size: 18px; }
+
+    header { background: white; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+    header a img { height: 44px; }
+    header nav a { color: #2a7a4b; text-decoration: none; font-weight: 600; margin-left: 20px; font-size: 17px; }
+
+    .top-bar { background: #1a4d2e; padding: 18px 28px; display: flex; align-items: center; gap: 14px; }
+    .top-bar h1 { color: white; font-size: 2rem; font-weight: 800; white-space: nowrap; }
+    .top-search { flex: 1; display: flex; gap: 10px; }
+    .top-search input { flex: 1; border: none; border-radius: 10px; padding: 14px 20px; font-size: 18px; outline: none; }
+    .top-search input:focus { box-shadow: 0 0 0 3px #FF6B35; }
+    .btn-cerca { background: #FF6B35; color: white; border: none; border-radius: 10px; padding: 14px 28px; font-size: 18px; font-weight: 700; cursor: pointer; }
+    .btn-cerca:hover { background: #e55a25; }
+
+    .page-body { display: flex; width: 100%; margin: 0; padding: 0; gap: 0; align-items: flex-start; }
+
+    /* SIDEBAR */
+    .sidebar { width: 320px; flex-shrink: 0; background: white; padding: 22px; box-shadow: 2px 0 8px rgba(0,0,0,0.06); min-height: calc(100vh - 120px); overflow-y: auto; overflow-x: hidden; }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+    .sidebar-title { font-size: 22px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+    .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #555; text-transform: uppercase; margin: 0 0 10px; }
+    .filter-group { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-top: 4px solid #2e7d32; padding: 16px; margin-bottom: 16px; }
+    .filter-group:nth-child(2) { border-top-color: #2e7d32; }
+    .filter-group:nth-child(3) { border-top-color: #e65100; }
+    .filter-group:nth-child(4) { border-top-color: #1565c0; }
+    .filter-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #111; transition: all 0.15s; margin-bottom: 4px; }
+    .filter-btn:hover { background: #f0f9f4; color: #2a7a4b; }
+    .filter-btn.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
+    .filter-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+    .mestieri-scroll { max-height: 260px; overflow-y: auto; overflow-x: hidden; }
+    .mestieri-scroll::-webkit-scrollbar { width: 3px; }
+    .mestieri-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+    /* RESULTS */
+    .results-col { flex: 1; min-width: 0; padding: 20px 28px; }
+    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .results-count { font-size: 17px; color: #333; }
+    .results-count strong { color: #222; font-weight: 700; }
+    .sort-select { font-size: 16px; border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 14px; color: #111; outline: none; cursor: pointer; }
+
+    /* CARD OFFERTA */
+    .card-offerta { background: white; border-radius: 14px; padding: 22px 26px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 16px; border-left: 5px solid #e0e0e0; transition: box-shadow 0.2s, transform 0.15s; }
+    .card-offerta:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-2px); border-left-color: #2a7a4b; }
+    .card-offerta-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+    .card-offerta-titolo { font-size: 21px; font-weight: 800; color: #1a1a1a; }
+    .card-offerta-azienda { font-size: 15px; color: #555; margin-top: 4px; }
+    .card-offerta-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+    .badge-tipo { background: #eef3ff; color: #3b5bdb; }
+    .badge-contratto { background: #fff3ee; color: #FF6B35; }
+    .badge-citta { background: #e8f5ec; color: #2a7a4b; }
+    .card-offerta-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 15px; color: #555; margin-bottom: 14px; }
+    .btn-candidati { background: #FF6B35; color: white; border: none; border-radius: 10px; padding: 12px 24px; font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
+    .btn-candidati:hover { background: #e55a25; }
+
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 28px; padding-bottom: 32px; }
+    .page-btn { width: 44px; height: 44px; border: 1.5px solid #ddd; background: white; border-radius: 10px; font-size: 17px; font-weight: 600; color: #222; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .page-btn:hover { border-color: #2a7a4b; color: #2a7a4b; }
+    .page-btn.active { background: #2a7a4b; color: white; border-color: #2a7a4b; }
+
+    .loading, .no-results { text-align: center; padding: 50px; color: #111; background: white; border-radius: 14px; font-size: 18px; }
+    .no-results h3 { font-size: 20px; color: #111; margin-bottom: 10px; }
+
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .card-offerta-header { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
+  <nav>
+    <a href="cerca-imprese.html">Imprese</a>
+    <a href="cerca-grandi-imprese.html">Grandi Imprese</a>
+    <a href="cerca-negozi.html">Negozi</a>
+    <a href="cerca-professionisti.html">Professionisti</a>
+  </nav>
+</header>
+
+<div class="top-bar">
+  <h1>💼 Offerte di Lavoro</h1>
+  <div class="top-search">
+    <input type="text" id="cittaInput" placeholder="Cerca per città... es. Roma, Milano">
+    <button class="btn-cerca" onclick="cerca()">🔍 Cerca</button>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <div class="sidebar">
+    <div class="sidebar-title">⚙️ Filtri</div>
+
+    <div class="filter-group">
+      <div class="filter-label">Tipo di lavoro</div>
+      <div class="mestieri-scroll">
+        <div class="filter-btn active" data-tipo="tutti" onclick="selectTipo(this)"><span class="filter-icon">🔍</span> Tutti</div>
+        <div class="filter-btn" data-tipo="Muratura" onclick="selectTipo(this)"><span class="filter-icon">🧱</span> Muratura</div>
+        <div class="filter-btn" data-tipo="Elettricista" onclick="selectTipo(this)"><span class="filter-icon">⚡</span> Elettricista</div>
+        <div class="filter-btn" data-tipo="Idraulico" onclick="selectTipo(this)"><span class="filter-icon">🚿</span> Idraulico</div>
+        <div class="filter-btn" data-tipo="Falegname" onclick="selectTipo(this)"><span class="filter-icon">🪚</span> Falegname</div>
+        <div class="filter-btn" data-tipo="Pittore" onclick="selectTipo(this)"><span class="filter-icon">🎨</span> Pittore</div>
+        <div class="filter-btn" data-tipo="Piastrellista" onclick="selectTipo(this)"><span class="filter-icon">🟫</span> Piastrellista</div>
+        <div class="filter-btn" data-tipo="Carpentiere" onclick="selectTipo(this)"><span class="filter-icon">🪵</span> Carpentiere</div>
+        <div class="filter-btn" data-tipo="Cartongesso" onclick="selectTipo(this)"><span class="filter-icon">📦</span> Cartongesso</div>
+        <div class="filter-btn" data-tipo="Fabbro" onclick="selectTipo(this)"><span class="filter-icon">⚙️</span> Fabbro</div>
+        <div class="filter-btn" data-tipo="Termoidraulico" onclick="selectTipo(this)"><span class="filter-icon">🔥</span> Termoidraulico</div>
+        <div class="filter-btn" data-tipo="Giardiniere" onclick="selectTipo(this)"><span class="filter-icon">🌿</span> Giardiniere</div>
+        <div class="filter-btn" data-tipo="Intonacatore" onclick="selectTipo(this)"><span class="filter-icon">🏚️</span> Intonacatore</div>
+        <div class="filter-btn" data-tipo="Pavimentista" onclick="selectTipo(this)"><span class="filter-icon">🪨</span> Pavimentista</div>
+        <div class="filter-btn" data-tipo="Ponteggi" onclick="selectTipo(this)"><span class="filter-icon">🏗️</span> Ponteggi</div>
+        <div class="filter-btn" data-tipo="Demolizione" onclick="selectTipo(this)"><span class="filter-icon">🔨</span> Demolizione</div>
+        <div class="filter-btn" data-tipo="Impianto solare" onclick="selectTipo(this)"><span class="filter-icon">☀️</span> Impianto solare</div>
+        <div class="filter-btn" data-tipo="Climatizzatore" onclick="selectTipo(this)"><span class="filter-icon">❄️</span> Climatizzatore</div>
+        <div class="filter-btn" data-tipo="Tecnico caldaie" onclick="selectTipo(this)"><span class="filter-icon">🌡️</span> Tecnico caldaie</div>
+        <div class="filter-btn" data-tipo="Generico" onclick="selectTipo(this)"><span class="filter-icon">🏢</span> Generico</div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Tipo di contratto</div>
+      <div class="filter-btn active" data-contratto="tutti" onclick="selectContratto(this)"><span class="filter-icon">📋</span> Tutti</div>
+      <div class="filter-btn" data-contratto="Tempo indeterminato" onclick="selectContratto(this)"><span class="filter-icon">🔒</span> Tempo indeterminato</div>
+      <div class="filter-btn" data-contratto="Tempo determinato" onclick="selectContratto(this)"><span class="filter-icon">📅</span> Tempo determinato</div>
+      <div class="filter-btn" data-contratto="Apprendistato" onclick="selectContratto(this)"><span class="filter-icon">🎓</span> Apprendistato</div>
+      <div class="filter-btn" data-contratto="Partita IVA" onclick="selectContratto(this)"><span class="filter-icon">💼</span> Partita IVA</div>
+      <div class="filter-btn" data-contratto="Occasionale" onclick="selectContratto(this)"><span class="filter-icon">🔧</span> Occasionale</div>
+    </div>
+
+  </div>
+
+  <div class="results-col">
+    <div class="results-header">
+      <div class="results-count" id="risultatiCount">Ricerca in corso...</div>
+      <select class="sort-select" onchange="cambiaSorting(this.value)">
+        <option value="recenti">Ordina: Più recenti</option>
+        <option value="az">Ordina: A → Z</option>
+      </select>
+    </div>
+    <div id="risultati"><div class="loading">⏳ Caricamento...</div></div>
+    <div id="pagination" class="pagination"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseClient = supabase.createClient(
+    'https://nacvrsgkyfavykxjxszu.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
+  );
+
+  const PER_PAGE = 10;
+  let tipoScelto = 'tutti', contrattoScelto = 'tutti', sortBy = 'recenti';
+  let tuttiRisultati = [], paginaCorrente = 1;
+
+  function selectTipo(el) {
+    document.querySelectorAll('[data-tipo]').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    tipoScelto = el.dataset.tipo;
+    paginaCorrente = 1; cerca();
+  }
+
+  function selectContratto(el) {
+    document.querySelectorAll('[data-contratto]').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    contrattoScelto = el.dataset.contratto;
+    paginaCorrente = 1; cerca();
+  }
+
+  function cambiaSorting(val) { sortBy = val; paginaCorrente = 1; cerca(); }
+
+  async function cerca() {
+    const citta = document.getElementById('cittaInput').value.trim();
+    document.getElementById('risultati').innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
+    document.getElementById('risultatiCount').textContent = 'Ricerca in corso...';
+    document.getElementById('pagination').innerHTML = '';
+    try {
+      let q = supabaseClient.from('offerte_lavoro').select('*').eq('attiva', true);
+      if (tipoScelto !== 'tutti') q = q.ilike('tipo_offerta', `%${tipoScelto}%`);
+      if (contrattoScelto !== 'tutti') q = q.eq('tipo_contratto', contrattoScelto);
+      if (citta) q = q.ilike('citta', `%${citta}%`);
+      if (sortBy === 'az') q = q.order('titolo', { ascending: true });
+      else q = q.order('data_pubblicazione', { ascending: false });
+      const { data, error } = await q.limit(200);
+      if (error) throw error;
+      tuttiRisultati = data || [];
+      paginaCorrente = 1;
+      mostraPagina(1);
+    } catch(e) {
+      document.getElementById('risultati').innerHTML = `<div class="no-results"><p>Errore: ${e.message}</p></div>`;
+    }
+  }
+
+  function mostraPagina(pagina) {
+    paginaCorrente = pagina;
+    const div = document.getElementById('risultati');
+    if (!tuttiRisultati.length) {
+      document.getElementById('risultatiCount').textContent = 'Nessun risultato';
+      div.innerHTML = '<div class="no-results"><h3>😕 Nessuna offerta trovata</h3><p>Prova a cambiare i filtri o la città</p></div>';
+      document.getElementById('pagination').innerHTML = ''; return;
+    }
+    const totale = tuttiRisultati.length;
+    const totPagine = Math.ceil(totale / PER_PAGE);
+    const slice = tuttiRisultati.slice((pagina - 1) * PER_PAGE, pagina * PER_PAGE);
+    document.getElementById('risultatiCount').innerHTML = `Trovate <strong>${totale}</strong> offerte`;
+    div.innerHTML = slice.map(o => cardHTML(o)).join('');
+    const pag = document.getElementById('pagination');
+    if (totPagine <= 1) { pag.innerHTML = ''; return; }
+    let html = '';
+    if (pagina > 1) html += `<button class="page-btn" onclick="mostraPagina(${pagina-1})">‹</button>`;
+    for (let p = 1; p <= totPagine; p++) {
+      if (p === 1 || p === totPagine || Math.abs(p - pagina) <= 1)
+        html += `<button class="page-btn${p===pagina?' active':''}" onclick="mostraPagina(${p})">${p}</button>`;
+      else if (Math.abs(p - pagina) === 2)
+        html += `<span style="color:#999;padding:0 2px">…</span>`;
+    }
+    if (pagina < totPagine) html += `<button class="page-btn" onclick="mostraPagina(${pagina+1})">›</button>`;
+    pag.innerHTML = html;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cardHTML(o) {
+    const data = o.data_pubblicazione ? new Date(o.data_pubblicazione).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    return `<div class="card-offerta">
+      <div class="card-offerta-header">
+        <div>
+          <div class="card-offerta-titolo">${o.titolo || 'Offerta di lavoro'}</div>
+          <div class="card-offerta-azienda">🏢 ${o.nome_azienda || ''}</div>
+        </div>
+        <a class="btn-candidati" href="registrazione-candidato.html?id=${o.id}">Candidati</a>
+      </div>
+      <div class="card-offerta-badges">
+        ${o.tipo_offerta ? `<span class="badge badge-tipo">🔧 ${o.tipo_offerta}</span>` : ''}
+        ${o.tipo_contratto ? `<span class="badge badge-contratto">📋 ${o.tipo_contratto}</span>` : ''}
+        ${o.citta ? `<span class="badge badge-citta">📍 ${o.citta}</span>` : ''}
+      </div>
+      <div class="card-offerta-meta">
+        ${o.citta ? `<span>📍 ${o.citta}</span>` : ''}
+        ${data ? `<span>📅 ${data}</span>` : ''}
+      </div>
+    </div>`;
+  }
+
+  cerca();
+</script>
+<script src="/cookie-banner.js"></script>
+<footer style="background:#1a3a2a;color:white;font-size:0.9rem;padding:18px;text-align:center">
+  © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a>
+</footer>
+</body>
+</html>
