@@ -3,274 +3,240 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="page-title">Profilo Impresa — TrovaImpresa</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title id="page-title">Profilo — TrovaImpresa</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-:root{
-  --verde:#2a7a4b;--verde2:#1f5e38;--verde3:#e8f5ee;
-  --arancio:#e8733a;--arancio2:#c45e28;--arancio3:#fff3ec;
-  --dark:#1a1a1a;--mid:#555;--light:#999;
-  --bg:#f4f6f9;--border:rgba(0,0,0,0.08);
-  --shadow:0 2px 16px rgba(0,0,0,0.07);
-}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);font-size:13px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;color:#333;line-height:1.6}
 
 /* NAV */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
-  padding:12px 32px;display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-}
+nav{display:flex;align-items:center;justify-content:space-between;padding:12px 32px;
+  background:white;box-shadow:0 2px 8px rgba(0,0,0,0.1);position:sticky;top:0;z-index:100}
 nav img{height:36px}
-.nav-back{
-  font-size:0.88rem;font-weight:600;color:var(--mid);text-decoration:none;
-  background:var(--bg);border:1.5px solid var(--border);
-  padding:8px 18px;border-radius:20px;transition:all 0.2s;
-}
-.nav-back:hover{color:var(--verde);border-color:var(--verde)}
+.nav-back{padding:9px 20px;border:2px solid #28a745;background:white;color:#28a745;
+  border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;font-size:14px;transition:all 0.3s}
+.nav-back:hover{background:#28a745;color:white}
 
-/* HERO - stesso stile dash-hero del pannello */
-.hero{
-  margin-top:60px;
-  background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
-  padding:20px 32px 60px;
-  position:relative;overflow:hidden;
-}
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 50% 120% at 85% 50%,rgba(232,115,58,0.25) 0%,transparent 60%);
-}
-.hero-dots{
-  position:absolute;inset:0;
-  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,0.06) 1px,transparent 0);
-  background-size:28px 28px;
-}
-.hero-content{position:relative;z-index:1;color:white}
-.hero-tipo{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:0.7;margin-bottom:6px}
-.hero-nome{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:8px;line-height:1.2}
-.hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
-.hero-meta span{font-size:0.85rem;opacity:0.85;font-weight:500}
-.hero-badges{display:flex;flex-wrap:wrap;gap:8px}
-.badge{padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
-.badge-v{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.35)}
-.badge-a{background:var(--arancio);color:white}
-.badge-g{background:rgba(255,255,255,0.15);color:white}
+/* HERO - stile homepage */
+.hero{background:#111;
+  background-image:url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&q=80&auto=format&fit=crop');
+  background-size:cover;background-position:center;
+  padding:48px 32px 36px;text-align:center;color:#fff;position:relative}
+.hero::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.5) 100%);z-index:0}
+.hero>*{position:relative;z-index:1}
+.hero-avatar{width:100px;height:100px;border-radius:16px;background:white;
+  border:4px solid white;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+  margin:0 auto 16px;overflow:hidden}
+.hero-avatar img{width:100%;height:100%;object-fit:cover}
+.hero-tipo{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  color:rgba(255,255,255,0.65);margin-bottom:6px}
+.hero-nome{font-size:2.2rem;font-weight:800;margin-bottom:8px;line-height:1.1}
+.hero-loc{font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:12px}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.hb{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.hb-v{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3)}
+.hb-o{background:#FF6B35;color:white}
+.hb-g{background:rgba(255,255,255,0.15);color:white}
 
-/* AVATAR che sporge dall'hero */
-.profile-header{
-  padding:0 40px;
-  display:flex;align-items:flex-end;gap:20px;
-  margin-top:-56px;position:relative;z-index:10;
-  margin-bottom:20px;
-}
-.avatar{
-  width:100px;height:100px;border-radius:18px;
-  background:white;border:4px solid white;
-  box-shadow:0 8px 32px rgba(0,0,0,0.2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:3rem;flex-shrink:0;overflow:hidden;
-}
-.avatar img{width:100%;height:100%;object-fit:cover}
+/* STATS - stesso stile lavoro-btn homepage */
+.stats-row{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;
+  padding:20px 32px;background:#f5f5f5}
+.sc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  min-width:130px;flex:1;max-width:160px;padding:22px 16px;
+  background:white;color:#1a472a;border-radius:16px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);border-top:6px solid #2a7a4b;
+  transition:transform 0.3s,box-shadow 0.3s}
+.sc:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.12)}
+.sc-icon{font-size:28px}
+.sc-num{font-size:1.6rem;font-weight:800;color:#333;line-height:1}
+.sc-num.org{color:#FF6B35}
+.sc-lbl{font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
 
-/* STATS - stesso stile dash-stats */
-.stats-row{
-  padding:0 40px;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
-  margin-bottom:28px;
-}
-.stat-card{
-  background:white;border-radius:16px;padding:12px;
-  box-shadow:var(--shadow);border:1px solid var(--border);
-  text-align:center;
-}
-.stat-icon{font-size:1.6rem;margin-bottom:8px}
-.stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;line-height:1;color:var(--dark)}
-.stat-num.org{color:var(--arancio)}
-.stat-lbl{font-size:0.72rem;color:var(--light);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px}
+/* SECTION CARDS - stile sezione-card homepage */
+.page-section{background-image:url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1400&q=80&auto=format&fit=crop');
+  background-size:cover;background-position:center;
+  padding:20px;position:relative}
+.page-section::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.52);z-index:0}
+.page-section>.inner{position:relative;z-index:1}
 
-/* LAYOUT */
-.main{
-  padding:0 24px 30px;
-  display:grid;grid-template-columns:1fr 320px;gap:24px;
-}
+.sezione-card{background:white;border-radius:16px;
+  border-top:6px solid #2a7a4b;box-shadow:0 8px 24px rgba(0,0,0,0.08);
+  padding:24px;max-width:1100px;margin:0 auto;
+  transition:transform 0.3s,box-shadow 0.3s}
+.sezione-card:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,0.12)}
+.sezione-card h2{font-size:18px;font-weight:800;color:#1a4d2e;margin-bottom:16px}
 
-/* CARD - identiche al pannello */
-.card{
-  background:white;border-radius:16px;padding:14px;
-  box-shadow:var(--shadow);border:1px solid var(--border);
-  margin-bottom:10px;
-}
-.card-title{
-  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
-  margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:8px;
-}
-.desc{font-size:0.92rem;color:var(--mid);line-height:1.75}
+/* LAYOUT PRINCIPALE */
+.main-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;
+  max-width:1100px;margin:0 auto;padding:20px}
+
+/* CARD CONTENUTO */
+.card{background:white;border-radius:16px;border-top:6px solid #2a7a4b;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);padding:24px;margin-bottom:16px;
+  transition:transform 0.3s,box-shadow 0.3s}
+.card:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,0.12)}
+.card:last-child{margin-bottom:0}
+.card-title{font-size:16px;font-weight:800;color:#1a4d2e;margin-bottom:14px;
+  padding-bottom:10px;border-bottom:1px solid #eee}
+.desc{font-size:14px;color:#555;line-height:1.75}
 
 /* CATS */
 .cats{display:flex;flex-wrap:wrap;gap:10px}
-.cat{
-  display:flex;align-items:center;gap:8px;
-  background:var(--bg);border-radius:12px;
-  padding:10px 16px;font-size:0.88rem;font-weight:600;color:var(--dark);
-  border:1px solid var(--border);transition:all 0.2s;
-}
-.cat:hover{border-color:var(--verde);background:var(--verde3)}
+.cat{display:flex;align-items:center;gap:8px;background:#f5f5f5;
+  border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;
+  color:#1a472a;border:1px solid #ddd;transition:all 0.2s}
+.cat:hover{background:#e8f5ee;border-color:#2a7a4b}
 
 /* FOTO */
-.foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.foto-item{aspect-ratio:1;border-radius:12px;overflow:hidden;cursor:pointer;background:var(--bg);border:1px solid var(--border)}
-.foto-item img{width:100%;height:100%;object-fit:cover;display:block}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fi{aspect-ratio:1;border-radius:10px;overflow:hidden;background:#f5f5f5;border:1px solid #ddd}
+.fi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.3s}
+.fi:hover img{transform:scale(1.05)}
 
 /* MAPPA */
-#mappa-profilo{height:240px;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+#mappa-profilo{height:220px;border-radius:10px;overflow:hidden;border:1px solid #ddd}
+
+/* CALENDARIO WIDGET */
+.cal-grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cw{background:#f5f5f5;border-radius:12px;padding:14px;border:1px solid #eee}
+.orologio{font-size:1.8rem;font-weight:800;color:#2a7a4b;letter-spacing:2px;
+  text-align:center;display:flex;align-items:center;justify-content:center;height:100%;min-height:60px}
+.meteo-inner{display:flex;align-items:center;gap:10px}
+.meteo-icon{font-size:1.8rem}
+.meteo-citta{font-weight:700;font-size:13px;color:#333}
+.meteo-temp{font-size:1.3rem;font-weight:800;color:#2a7a4b}
+.meteo-cond{font-size:11px;color:#888}
+.cal-head{display:flex;align-items:center;justify-content:space-between;
+  background:#2a7a4b;border-radius:8px;padding:7px 10px;margin-bottom:8px}
+.cal-head button{background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer}
+.cal-head button:hover{color:white}
+.cal-head span{color:white;font-weight:700;font-size:13px}
+.cal-days-row{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px}
+.cdh{text-align:center;font-size:9px;font-weight:700;color:#888;padding:2px 0}
+.cal-cells{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.cd{text-align:center;padding:4px 2px;font-size:12px;color:#555}
+.cd.oggi{background:#2a7a4b;color:white;border-radius:50%;
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  margin:0 auto;font-weight:700;font-size:11px}
+.note-ta{font-family:inherit;font-size:13px;color:#333;resize:none;
+  border:none;outline:none;width:100%;background:transparent;min-height:70px;line-height:1.5}
 
 /* RECENSIONI */
-.rec-tabs{display:flex;gap:6px;margin-bottom:16px}
-.rec-tab{
-  padding:9px 18px;border:1.5px solid var(--border);background:var(--bg);
-  cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;
-  color:var(--mid);border-radius:10px;transition:all 0.15s;
-}
-.rec-tab.active{color:var(--verde2);border-color:var(--verde);background:var(--verde3)}
-.rec-item{
-  background:var(--bg);border-radius:12px;padding:16px;margin-bottom:12px;
-  border:1px solid var(--border);border-left:3px solid var(--verde);
-}
-.rec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.rec-nome{font-weight:700;font-size:0.92rem;color:var(--dark)}
-.rec-data{font-size:0.78rem;color:var(--light)}
-.rec-stelle{color:#f4c02e;font-size:0.92rem;margin-bottom:6px}
-.rec-testo{font-size:0.88rem;color:var(--mid);line-height:1.6}
-.rec-cats{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:6px;font-size:0.8rem;color:var(--mid)}
-
-/* FORM REC */
-.st-gruppo{margin-bottom:14px}
-.st-gruppo label{display:block;font-size:0.85rem;font-weight:600;color:var(--dark);margin-bottom:5px}
-.st-row{display:flex;gap:5px}
-.stella{font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;user-select:none}
+.rec-tabs{display:flex;gap:8px;margin-bottom:14px}
+.rec-tab{padding:8px 16px;border:2px solid #ddd;background:white;
+  cursor:pointer;font-weight:700;font-size:13px;color:#888;border-radius:8px;transition:all 0.2s}
+.rec-tab.active{color:#28a745;border-color:#28a745;background:#f0fff4}
+.rec-item{border-bottom:1px solid #eee;padding:14px 0}
+.rec-item:first-child{padding-top:0}
+.rec-item:last-child{border-bottom:none;padding-bottom:0}
+.rec-nome{font-weight:700;font-size:13px;color:#333}
+.rec-data{font-size:11px;color:#888}
+.rec-stelle{color:#f4c02e;font-size:13px;margin:4px 0}
+.rec-testo{font-size:13px;color:#555;line-height:1.6}
+.st-gruppo{margin-bottom:12px}
+.st-gruppo label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:4px}
+.st-row{display:flex;gap:3px}
+.stella{font-size:22px;cursor:pointer;color:#ddd;user-select:none}
 .stella.attiva{color:#f4c02e}
-.rec-input{
-  width:100%;padding:11px 14px;border:1.5px solid var(--border);
-  border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;
-  margin-bottom:12px;color:var(--dark);background:white;
-}
-.rec-input:focus{outline:none;border-color:var(--verde)}
-.rec-textarea{
-  width:100%;padding:11px 14px;border:1.5px solid var(--border);
-  border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;
-  min-height:100px;resize:vertical;margin-bottom:12px;color:var(--dark);background:white;
-}
-.rec-textarea:focus{outline:none;border-color:var(--verde)}
-.rec-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn-rec{
-  width:100%;background:var(--verde);color:white;border:none;
-  border-radius:12px;padding:13px;font-size:0.95rem;font-weight:700;
-  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;
-}
-.btn-rec:hover{background:var(--verde2)}
-.btn-rec:disabled{opacity:0.6;cursor:not-allowed}
-.rec-msg{text-align:center;font-size:0.85rem;margin-top:10px;padding:10px;border-radius:8px;display:none}
+.ri{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;
+  font-size:13px;font-family:inherit;margin-bottom:10px;outline:none;transition:border 0.2s}
+.ri:focus{border-color:#28a745}
+.rta{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;
+  font-size:13px;font-family:inherit;min-height:90px;resize:vertical;
+  margin-bottom:10px;outline:none;transition:border 0.2s}
+.rta:focus{border-color:#28a745}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-rec{width:100%;background:#28a745;color:white;border:none;border-radius:8px;
+  padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.3s}
+.btn-rec:hover{background:#218838}
+.rec-msg{text-align:center;font-size:13px;margin-top:8px;padding:8px;border-radius:8px;display:none}
 .rec-msg.ok{background:#e8f5e9;color:#2a7a4b}
 .rec-msg.err{background:#fdecea;color:#c0392b}
 
 /* SIDEBAR */
-.sidebar-top{
-  background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
-  border-radius:16px;padding:20px;color:white;margin-bottom:16px;
-  display:flex;align-items:center;gap:12px;
-}
-.trust-icon{font-size:1.8rem}
-.trust-text{font-size:0.9rem;font-weight:700;line-height:1.4;opacity:0.95}
+.sidebar-trust{background:linear-gradient(135deg,#1a472a,#28a745);border-radius:16px;
+  padding:18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;
+  border-top:6px solid #FF6B35}
+.st-icon{font-size:1.8rem}
+.st-text strong{display:block;color:white;font-size:15px;font-weight:700}
+.st-text span{color:rgba(255,255,255,0.75);font-size:13px}
 
-.btn-preventivo{
-  display:block;width:100%;background:var(--arancio);color:white;
-  border:none;border-radius:14px;padding:15px;
-  font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;
-  cursor:pointer;text-align:center;text-decoration:none;
-  box-shadow:0 6px 20px rgba(232,115,58,0.35);margin-bottom:12px;
-  transition:all 0.2s;
-}
-.btn-preventivo:hover{background:var(--arancio2);transform:translateY(-2px)}
-.btn-chiama{
-  display:flex;width:100%;align-items:center;justify-content:center;gap:8px;
-  background:var(--verde3);color:var(--verde2);border:2px solid var(--verde3);
-  border-radius:14px;padding:13px;font-family:'DM Sans',sans-serif;
-  font-weight:700;font-size:0.95rem;cursor:pointer;text-decoration:none;
-  margin-bottom:20px;transition:all 0.2s;
-}
-.btn-chiama:hover{background:var(--verde);color:white;border-color:var(--verde)}
+/* BOTTONI AZIONE - stile lavoro-btn homepage */
+.btn-prev{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  width:100%;background:white;color:#1a472a;border:none;border-radius:16px;
+  padding:22px 16px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);border-top:6px solid #FF6B35;
+  margin-bottom:10px;transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;text-align:center}
+.btn-prev:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.15)}
+.btn-prev span{color:#FF6B35}
+.btn-call{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  width:100%;background:white;color:#1a472a;border:none;border-radius:16px;
+  padding:22px 16px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);border-top:6px solid #28a745;
+  margin-bottom:14px;transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;text-align:center}
+.btn-call:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.15)}
+
+/* CONTATTI */
+.contacts-card{background:white;border-radius:16px;border-top:6px solid #1a5276;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:14px}
 .contacts{list-style:none}
-.contacts li{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 0;border-bottom:1px solid var(--border);
-  font-size:0.88rem;color:var(--dark);font-weight:500;
-}
+.contacts li{display:flex;align-items:center;gap:10px;padding:11px 16px;
+  border-bottom:1px solid #eee;font-size:13px;color:#333;transition:background 0.15s}
 .contacts li:last-child{border-bottom:none}
-.c-icon{
-  width:30px;height:30px;border-radius:8px;
-  background:var(--bg);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;
-}
-.contacts a{color:var(--verde);font-weight:700;text-decoration:none}
-.contacts a:hover{text-decoration:underline}
-#mappa-impresa{height:160px;border-radius:12px;overflow:hidden;margin-top:12px;border:1px solid var(--border);display:none}
-.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.ms{background:var(--bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border)}
-.ms-n{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--dark);display:block}
-.ms-l{font-size:0.68rem;color:var(--light);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.contacts li:hover{background:#fafafa}
+.ci{width:28px;height:28px;border-radius:8px;background:#f5f5f5;border:1px solid #eee;
+  display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.contacts a{color:#28a745;font-weight:700;text-decoration:none}
+
+#mappa-impresa{height:150px;border-radius:12px;overflow:hidden;
+  border:1px solid #ddd;margin-bottom:14px;display:none}
+
+/* MINI STATS SIDEBAR */
+.mini-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ms{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:18px 12px;background:white;border-radius:16px;text-align:center;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);border-top:6px solid #2a7a4b;
+  transition:transform 0.3s}
+.ms:hover{transform:translateY(-2px)}
+.ms-n{font-size:1.4rem;font-weight:800;color:#333;display:block}
+.ms-l{font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
 
 /* MODAL */
-.modal-overlay{
-  position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.6);
-  display:none;align-items:center;justify-content:center;
-  padding:20px;backdrop-filter:blur(4px);
-}
-.modal-overlay.open{display:flex;animation:fadeIn 0.2s ease}
-.modal{
-  background:white;border-radius:24px;padding:36px;
-  max-width:520px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.25);
-  animation:slideUp 0.3s ease;position:relative;max-height:90vh;overflow-y:auto;
-}
-.modal-title{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:6px}
-.modal-sub{font-size:0.88rem;color:var(--mid);margin-bottom:24px}
-.fg{margin-bottom:14px}
-.fl{font-size:0.75rem;font-weight:700;color:var(--dark);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:0.5px}
-.fi,.ft,.fs{
-  width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;
-  font-family:'DM Sans',sans-serif;font-size:0.92rem;color:var(--dark);
-  outline:none;background:var(--bg);transition:border 0.2s;
-}
-.fi:focus,.ft:focus,.fs:focus{border-color:var(--verde)}
-.ft{resize:vertical;min-height:80px}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.btn-sub{
-  width:100%;background:var(--arancio);color:white;border:none;
-  border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;
-  font-weight:700;font-size:1rem;cursor:pointer;
-  box-shadow:0 6px 20px rgba(232,115,58,0.35);margin-top:8px;
-}
-.btn-sub:hover{background:var(--arancio2)}
-.modal-close{
-  position:absolute;top:16px;right:20px;
-  background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--light);
-}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.6);
+  display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:16px;padding:28px;max-width:480px;width:100%;
+  border-top:6px solid #FF6B35;box-shadow:0 16px 48px rgba(0,0,0,0.25);
+  position:relative;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:20px;font-weight:800;color:#1a4d2e;margin-bottom:4px}
+.modal-sub{font-size:13px;color:#888;margin-bottom:20px}
+.fg{margin-bottom:12px}
+.fl{font-size:11px;font-weight:700;color:#555;margin-bottom:4px;display:block;
+  text-transform:uppercase;letter-spacing:0.5px}
+.fi2,.ft,.fs{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;
+  font-family:inherit;font-size:13px;color:#333;outline:none;transition:border 0.2s}
+.fi2:focus,.ft:focus,.fs:focus{border-color:#28a745}
+.ft{resize:vertical;min-height:70px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-sub{width:100%;background:#FF6B35;color:white;border:none;border-radius:8px;
+  padding:13px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;
+  margin-top:6px;transition:background 0.3s}
+.btn-sub:hover{background:#e55a2b}
+.modal-close{position:absolute;top:14px;right:16px;background:#f5f5f5;border:1px solid #ddd;
+  width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;color:#888;
+  display:flex;align-items:center;justify-content:center}
 
-/* MOBILE */
-html,body{overflow-x:hidden}
 @media(max-width:768px){
-  .hero{padding:24px 20px 70px}
-  .hero-nome{font-size:1.5rem}
-  .profile-header{padding:0 16px;margin-top:-50px}
-  .stats-row{padding:0 16px;grid-template-columns:1fr 1fr;gap:10px}
-  .main{padding:0 16px 40px;grid-template-columns:1fr}
-  .sidebar{order:-1}
+  .main-layout{grid-template-columns:1fr;padding:12px}
+  .stats-row{gap:10px;padding:16px}
+  .sc{min-width:calc(50% - 5px);max-width:none}
+  .hero{padding:32px 16px 24px}
+  .hero-nome{font-size:1.6rem}
   nav{padding:10px 16px}
+  .cal-grid-2x2{grid-template-columns:1fr}
+  .mini-stats-grid{gap:8px}
 }
 </style>
 </head>
@@ -283,179 +249,164 @@ html,body{overflow-x:hidden}
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-dots"></div>
-  <div class="hero-content">
-    <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
-    <div class="hero-nome" id="profile-name">Caricamento...</div>
-    <div class="hero-meta">
-      <span id="profile-city">📍 —</span>
-      <span id="profile-categoria" style="display:none"></span>
-    </div>
-    <div class="hero-badges" id="profile-badges"></div>
-  </div>
-</div>
-
-<!-- AVATAR -->
-<div class="profile-header">
-  <div class="avatar" id="avatar-wrap">🏗️</div>
+  <div class="hero-avatar" id="avatar-wrap">🏗️</div>
+  <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
+  <div class="hero-nome" id="profile-name">Caricamento...</div>
+  <div class="hero-loc" id="profile-city">📍 —</div>
+  <div class="hero-badges" id="profile-badges"></div>
 </div>
 
 <!-- STATS -->
 <div class="stats-row">
-  <div class="stat-card">
-    <div class="stat-icon">⭐</div>
-    <div class="stat-num" id="stat-rating">—</div>
-    <div class="stat-lbl">Valutazione</div>
+  <div class="sc">
+    <div class="sc-icon">⭐</div>
+    <div class="sc-num" id="stat-rating">—</div>
+    <div class="sc-lbl">Valutazione</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon">💬</div>
-    <div class="stat-num" id="stat-recensioni">0</div>
-    <div class="stat-lbl">Recensioni</div>
+  <div class="sc" style="border-top-color:#FF6B35">
+    <div class="sc-icon">💬</div>
+    <div class="sc-num" id="stat-recensioni">0</div>
+    <div class="sc-lbl">Recensioni</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon">🏆</div>
-    <div class="stat-num" id="stat-anni">—</div>
-    <div class="stat-lbl">Anni esp.</div>
+  <div class="sc" style="border-top-color:#1a5276">
+    <div class="sc-icon">🏆</div>
+    <div class="sc-num" id="stat-anni">—</div>
+    <div class="sc-lbl">Anni esp.</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon">👥</div>
-    <div class="stat-num org" id="stat-piano">Free</div>
-    <div class="stat-lbl">Piano</div>
+  <div class="sc" style="border-top-color:#6c3483">
+    <div class="sc-icon">🎯</div>
+    <div class="sc-num org" id="stat-piano">Free</div>
+    <div class="sc-lbl">Piano</div>
   </div>
 </div>
 
 <!-- MAIN -->
-<div class="main">
-  <div class="col-left">
+<div class="main-layout">
+  <div>
 
+    <!-- CALENDARIO -->
+    <div class="card">
+      <div class="card-title">📅 Calendario & Orario</div>
+      <div class="cal-grid-2x2">
+        <div class="cw"><div class="orologio" id="cal-orologio">--:--:--</div></div>
+        <div class="cw">
+          <div class="meteo-inner">
+            <div class="meteo-icon" id="meteo-icona">⏳</div>
+            <div>
+              <div class="meteo-citta" id="meteo-citta">Rilevamento...</div>
+              <div class="meteo-temp" id="meteo-temp"></div>
+              <div class="meteo-cond" id="meteo-condizione"></div>
+            </div>
+          </div>
+        </div>
+        <div class="cw">
+          <div class="cal-head">
+            <button onclick="calPrev()">‹</button>
+            <span id="cal-label"></span>
+            <button onclick="calNext()">›</button>
+          </div>
+          <div class="cal-days-row">
+            <div class="cdh">L</div><div class="cdh">M</div><div class="cdh">M</div>
+            <div class="cdh">G</div><div class="cdh">V</div><div class="cdh">S</div><div class="cdh">D</div>
+          </div>
+          <div class="cal-cells" id="cal-griglia"></div>
+        </div>
+        <div class="cw" style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:10px;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:1px">📝 Note</div>
+          <textarea class="note-ta" id="widget-note" placeholder="Scrivi i tuoi appunti..." oninput="localStorage.setItem('ti_note',this.value)"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHI SIAMO -->
     <div class="card">
       <div class="card-title">📋 Chi siamo</div>
       <p class="desc" id="profile-desc">Nessuna descrizione disponibile.</p>
     </div>
 
-    <div class="card">
+    <!-- SPECIALIZZAZIONI -->
+    <div class="card" style="border-top-color:#FF6B35">
       <div class="card-title">🔧 Specializzazioni</div>
-      <div class="cats" id="profile-mestieri">
-        <div style="color:#aaa;font-size:0.88rem">⏳ Caricamento...</div>
-      </div>
+      <div class="cats" id="profile-mestieri"><div style="color:#aaa;font-size:13px">⏳ Caricamento...</div></div>
     </div>
 
-    <div class="card" id="card-mappa-profilo" style="display:none">
+    <!-- MAPPA -->
+    <div class="card" id="card-mappa-profilo" style="display:none;border-top-color:#1a5276">
       <div class="card-title">📍 Dove siamo</div>
       <div id="mappa-profilo"></div>
     </div>
 
-    <div class="card">
-      <div class="card-title">📸 Foto dei lavori</div>
-      <div class="foto-grid" id="foto-lavori-grid">
-        <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px 0;font-size:0.88rem">📷 Nessuna foto caricata</div>
+    <!-- FOTO -->
+    <div class="card" style="border-top-color:#e67e22;padding:0;overflow:hidden">
+      <div style="padding:20px 24px 12px">
+        <div class="card-title" style="border-bottom:none;margin-bottom:0">📸 Foto dei lavori</div>
+      </div>
+      <div class="fgrid" id="foto-lavori-grid">
+        <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px;font-size:13px">📷 Nessuna foto caricata</div>
       </div>
     </div>
 
-    <div class="card">
+    <!-- RECENSIONI -->
+    <div class="card" style="border-top-color:#6c3483">
       <div class="card-title">⭐ Recensioni dei clienti</div>
       <div class="rec-tabs">
         <button class="rec-tab active" id="tab-btn-lista" onclick="showRecTab('lista',this)">⭐ Recensioni (<span id="rec-count">0</span>)</button>
-        <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">✍️ Lascia una recensione</button>
+        <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">✍️ Lascia recensione</button>
       </div>
       <div id="rec-tab-lista"><div id="rec-lista"></div></div>
       <div id="rec-tab-form" style="display:none">
-        <p style="font-size:0.88rem;color:var(--mid);margin-bottom:16px">Hai lavorato con questa impresa? Condividi la tua esperienza.</p>
-        <div id="rec-form">
-          <div class="st-gruppo"><label>⭐ Qualità del lavoro</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setStelleGruppo('qualita',1)">★</span><span class="stella" data-v="2" onclick="setStelleGruppo('qualita',2)">★</span><span class="stella" data-v="3" onclick="setStelleGruppo('qualita',3)">★</span><span class="stella" data-v="4" onclick="setStelleGruppo('qualita',4)">★</span><span class="stella" data-v="5" onclick="setStelleGruppo('qualita',5)">★</span></div></div>
-          <div class="st-gruppo"><label>⏱️ Puntualità</label><div class="st-row" id="stelle-puntualita"><span class="stella" data-v="1" onclick="setStelleGruppo('puntualita',1)">★</span><span class="stella" data-v="2" onclick="setStelleGruppo('puntualita',2)">★</span><span class="stella" data-v="3" onclick="setStelleGruppo('puntualita',3)">★</span><span class="stella" data-v="4" onclick="setStelleGruppo('puntualita',4)">★</span><span class="stella" data-v="5" onclick="setStelleGruppo('puntualita',5)">★</span></div></div>
-          <div class="st-gruppo"><label>💰 Qualità/prezzo</label><div class="st-row" id="stelle-prezzo"><span class="stella" data-v="1" onclick="setStelleGruppo('prezzo',1)">★</span><span class="stella" data-v="2" onclick="setStelleGruppo('prezzo',2)">★</span><span class="stella" data-v="3" onclick="setStelleGruppo('prezzo',3)">★</span><span class="stella" data-v="4" onclick="setStelleGruppo('prezzo',4)">★</span><span class="stella" data-v="5" onclick="setStelleGruppo('prezzo',5)">★</span></div></div>
-          <div class="st-gruppo"><label>🤝 Professionalità</label><div class="st-row" id="stelle-professionalita"><span class="stella" data-v="1" onclick="setStelleGruppo('professionalita',1)">★</span><span class="stella" data-v="2" onclick="setStelleGruppo('professionalita',2)">★</span><span class="stella" data-v="3" onclick="setStelleGruppo('professionalita',3)">★</span><span class="stella" data-v="4" onclick="setStelleGruppo('professionalita',4)">★</span><span class="stella" data-v="5" onclick="setStelleGruppo('professionalita',5)">★</span></div></div>
-          <textarea class="rec-textarea" id="rec-testo" placeholder="Descrivi la tua esperienza..."></textarea>
-          <div class="rec-row">
-            <div><label style="font-size:0.78rem;font-weight:700;display:block;margin-bottom:5px">📅 Mese</label><select class="rec-input" id="rec-mese" style="margin-bottom:0"><option value="">— Mese —</option><option>Gennaio</option><option>Febbraio</option><option>Marzo</option><option>Aprile</option><option>Maggio</option><option>Giugno</option><option>Luglio</option><option>Agosto</option><option>Settembre</option><option>Ottobre</option><option>Novembre</option><option>Dicembre</option></select></div>
-            <div><label style="font-size:0.78rem;font-weight:700;display:block;margin-bottom:5px">📅 Anno</label><select class="rec-input" id="rec-anno" style="margin-bottom:0"><option value="">— Anno —</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></div>
-          </div>
-          <div id="rec-nome-email-wrapper">
-            <div class="rec-row" style="margin-top:10px">
-              <input type="text" class="rec-input" id="rec-nome" placeholder="Il tuo nome *" style="margin-bottom:0">
-              <input type="email" class="rec-input" id="rec-email" placeholder="Email * (privata)" style="margin-bottom:0">
-            </div>
-            <p style="font-size:0.75rem;color:#aaa;margin:8px 0 12px">L'email non sarà pubblica.</p>
-          </div>
-          <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
-          <div class="rec-msg" id="rec-msg"></div>
+        <div class="st-gruppo"><label>⭐ Qualità</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setSG('qualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('qualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('qualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('qualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('qualita',5)">★</span></div></div>
+        <div class="st-gruppo"><label>⏱️ Puntualità</label><div class="st-row" id="stelle-puntualita"><span class="stella" data-v="1" onclick="setSG('puntualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('puntualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('puntualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('puntualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('puntualita',5)">★</span></div></div>
+        <div class="st-gruppo"><label>💰 Prezzo</label><div class="st-row" id="stelle-prezzo"><span class="stella" data-v="1" onclick="setSG('prezzo',1)">★</span><span class="stella" data-v="2" onclick="setSG('prezzo',2)">★</span><span class="stella" data-v="3" onclick="setSG('prezzo',3)">★</span><span class="stella" data-v="4" onclick="setSG('prezzo',4)">★</span><span class="stella" data-v="5" onclick="setSG('prezzo',5)">★</span></div></div>
+        <div class="st-gruppo"><label>🤝 Professionalità</label><div class="st-row" id="stelle-professionalita"><span class="stella" data-v="1" onclick="setSG('professionalita',1)">★</span><span class="stella" data-v="2" onclick="setSG('professionalita',2)">★</span><span class="stella" data-v="3" onclick="setSG('professionalita',3)">★</span><span class="stella" data-v="4" onclick="setSG('professionalita',4)">★</span><span class="stella" data-v="5" onclick="setSG('professionalita',5)">★</span></div></div>
+        <textarea class="rta" id="rec-testo" placeholder="Descrivi la tua esperienza..."></textarea>
+        <div class="r2" style="margin-bottom:10px">
+          <div><label style="font-size:11px;font-weight:700;display:block;margin-bottom:4px">Mese</label><select class="ri" id="rec-mese" style="margin-bottom:0"><option value="">—</option><option>Gennaio</option><option>Febbraio</option><option>Marzo</option><option>Aprile</option><option>Maggio</option><option>Giugno</option><option>Luglio</option><option>Agosto</option><option>Settembre</option><option>Ottobre</option><option>Novembre</option><option>Dicembre</option></select></div>
+          <div><label style="font-size:11px;font-weight:700;display:block;margin-bottom:4px">Anno</label><select class="ri" id="rec-anno" style="margin-bottom:0"><option value="">—</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></div>
         </div>
+        <div id="rec-nome-email-wrapper">
+          <div class="r2"><input type="text" class="ri" id="rec-nome" placeholder="Il tuo nome *" style="margin-bottom:0"><input type="email" class="ri" id="rec-email" placeholder="Email * (privata)" style="margin-bottom:0"></div>
+          <p style="font-size:11px;color:#aaa;margin:6px 0 10px">L'email non sarà pubblica.</p>
+        </div>
+        <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
+        <div class="rec-msg" id="rec-msg"></div>
       </div>
     </div>
 
   </div>
 
-  <div class="sidebar">
-    <div class="sidebar-top">
-      <div class="trust-icon">🛡️</div>
-      <div class="trust-text">Preventivo gratuito<br>Risposta entro 24 ore</div>
+  <!-- SIDEBAR -->
+  <div>
+    <div class="sidebar-trust">
+      <div class="st-icon">🛡️</div>
+      <div class="st-text"><strong>Preventivo gratuito</strong><span>Risposta entro 24 ore</span></div>
     </div>
-    <div class="card">
-      <button class="btn-preventivo" onclick="openModal()">📋 Richiedi preventivo gratuito</button>
-      <a class="btn-chiama" id="btn-tel" href="#">📞 Chiama ora</a>
-      <ul class="contacts">
-        <li id="contact-indirizzo"><div class="c-icon">📍</div><span>—</span></li>
-        <li id="contact-tel"><div class="c-icon">📞</div><a href="#" id="tel-link">—</a></li>
-        <li id="contact-email"><div class="c-icon">✉️</div><a href="#" id="email-link">—</a></li>
-        <li id="contact-sito" style="display:none"><div class="c-icon">🌐</div><a href="#" id="sito-link" target="_blank" rel="noopener">—</a></li>
-        <li><div class="c-icon">🕐</div><span>Lun–Ven 8:00–18:00</span></li>
-      </ul>
-      <div id="mappa-impresa"></div>
-      <div class="mini-stats">
-        <div class="ms"><span class="ms-n" id="sidebar-anni">—</span><span class="ms-l">Anni esp.</span></div>
-        <div class="ms"><span class="ms-n" id="sidebar-dipendenti">—</span><span class="ms-l">Dipendenti</span></div>
-        <div class="ms"><span class="ms-n" id="sidebar-recensioni">0</span><span class="ms-l">Recensioni</span></div>
-        <div class="ms"><span class="ms-n" id="sidebar-rating" style="color:var(--arancio)">—</span><span class="ms-l">Rating ⭐</span></div>
-      </div>
 
-      <!-- CALENDARIO & ORARIO -->
-      <div style="margin-top:20px;background:white;border-radius:16px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:12px">
+    <a class="btn-prev" onclick="openModal()">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>📋 Richiedi preventivo gratuito</span>
+    </a>
 
-          <!-- [A] Orologio -->
-          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:center">
-            <div id="cal-orologio" style="font-family:'Playfair Display',serif;font-size:1.6rem;color:#2a7a4b;letter-spacing:4px;font-weight:700;text-align:center"></div>
-          </div>
+    <a class="btn-call" id="btn-tel" href="#">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#28a745" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.67 3.44 2 2 0 0 1 3.64 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      📞 Chiama ora
+    </a>
 
-          <!-- [B] Meteo -->
-          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px">
-            <div id="meteo-icona" style="font-size:1.8rem;line-height:1">⏳</div>
-            <div>
-              <div id="meteo-citta" style="font-weight:700;font-size:0.82rem;color:#1a3a2a">Rilevamento...</div>
-              <div id="meteo-temp" style="font-size:1.2rem;font-family:'Playfair Display',serif;color:#2a7a4b;font-weight:700"></div>
-              <div id="meteo-condizione" style="font-size:0.72rem;color:#999;margin-top:2px"></div>
-            </div>
-          </div>
+    <ul class="contacts contacts-card">
+      <li id="contact-indirizzo"><div class="ci">📍</div><span>—</span></li>
+      <li id="contact-tel"><div class="ci">📞</div><a href="#" id="tel-link">—</a></li>
+      <li id="contact-email"><div class="ci">✉️</div><a href="#" id="email-link">—</a></li>
+      <li id="contact-sito" style="display:none"><div class="ci">🌐</div><a href="#" id="sito-link" target="_blank">—</a></li>
+      <li><div class="ci">🕐</div><span>Lun–Ven 8:00–18:00</span></li>
+    </ul>
 
-          <!-- [C] Calendario -->
-          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;overflow:hidden">
-            <div style="display:flex;align-items:center;justify-content:space-between;background:#2a7a4b;padding:8px 12px">
-              <button onclick="calPrev()" style="background:none;border:none;color:white;font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1">&#8249;</button>
-              <div id="cal-label" style="color:white;font-weight:700;font-size:0.8rem;text-transform:capitalize"></div>
-              <button onclick="calNext()" style="background:none;border:none;color:white;font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1">&#8250;</button>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#e8f5ee">
-              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Lun</div>
-              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Mar</div>
-              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Mer</div>
-              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Gio</div>
-              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Ven</div>
-              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Sab</div>
-              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Dom</div>
-            </div>
-            <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
-          </div>
+    <div id="mappa-impresa"></div>
 
-          <!-- [D] Note -->
-          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px">
-            <div style="font-size:0.72rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
-            <textarea id="widget-note" placeholder="Scrivi i tuoi appunti..." style="flex:1;resize:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:#1a1a1a;line-height:1.5;min-height:120px;background:transparent" oninput="localStorage.setItem('ti_note',this.value)"></textarea>
-          </div>
-
-        </div>
-      </div>
+    <div class="mini-stats-grid">
+      <div class="ms"><span class="ms-n" id="sidebar-anni">—</span><span class="ms-l">Anni esp.</span></div>
+      <div class="ms" style="border-top-color:#FF6B35"><span class="ms-n" id="sidebar-dipendenti">—</span><span class="ms-l">Dipendenti</span></div>
+      <div class="ms" style="border-top-color:#1a5276"><span class="ms-n" id="sidebar-recensioni">0</span><span class="ms-l">Recensioni</span></div>
+      <div class="ms" style="border-top-color:#6c3483"><span class="ms-n" id="sidebar-rating" style="color:#FF6B35">—</span><span class="ms-l">Rating ⭐</span></div>
     </div>
   </div>
 </div>
@@ -464,14 +415,14 @@ html,body{overflow-x:hidden}
 <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">Richiedi un preventivo</div>
-    <p class="modal-sub">Compila il modulo — ti risponderemo entro 24 ore, gratuitamente.</p>
-    <div class="fr"><div class="fg"><label class="fl">Nome</label><input type="text" class="fi" id="prev-nome" placeholder="Il tuo nome"></div><div class="fg"><label class="fl">Cognome</label><input type="text" class="fi" id="prev-cognome" placeholder="Cognome"></div></div>
-    <div class="fr"><div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="prev-email" placeholder="email@esempio.it"></div><div class="fg"><label class="fl">Telefono</label><input type="tel" class="fi" id="prev-telefono" placeholder="+39 000 000 0000"></div></div>
-    <div class="fg"><label class="fl">Tipo di lavoro</label><select class="fs" id="prev-tipo"><option value="">Seleziona...</option><option>Ristrutturazione appartamento</option><option>Nuova costruzione</option><option>Impianto elettrico</option><option>Impianto idraulico</option><option>Pavimenti e parquet</option><option>Pittura e finiture</option><option>Altro</option></select></div>
-    <div class="fg"><label class="fl">Descrivi il progetto</label><textarea class="ft" id="prev-descrizione" placeholder="Descrivi brevemente il lavoro..."></textarea></div>
-    <div id="prev-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px"></div>
-    <button class="btn-sub" id="prev-btn" onclick="submitPreventivo()">📋 Invia richiesta gratuita</button>
+    <div class="modal-title">Richiedi preventivo</div>
+    <p class="modal-sub">Gratuito, senza impegno — risposta entro 24 ore.</p>
+    <div class="fr2"><div class="fg"><label class="fl">Nome</label><input type="text" class="fi2" id="prev-nome" placeholder="Nome"></div><div class="fg"><label class="fl">Cognome</label><input type="text" class="fi2" id="prev-cognome" placeholder="Cognome"></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Email</label><input type="email" class="fi2" id="prev-email" placeholder="email@esempio.it"></div><div class="fg"><label class="fl">Telefono</label><input type="tel" class="fi2" id="prev-telefono" placeholder="+39 000 000 0000"></div></div>
+    <div class="fg"><label class="fl">Tipo di lavoro</label><select class="fs" id="prev-tipo"><option value="">Seleziona...</option><option>Ristrutturazione</option><option>Nuova costruzione</option><option>Impianto elettrico</option><option>Impianto idraulico</option><option>Pavimenti</option><option>Pittura</option><option>Altro</option></select></div>
+    <div class="fg"><label class="fl">Descrizione</label><textarea class="ft" id="prev-descrizione" placeholder="Descrivi il lavoro..."></textarea></div>
+    <div id="prev-msg" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px"></div>
+    <button class="btn-sub" onclick="submitPreventivo()">📋 Invia richiesta gratuita</button>
   </div>
 </div>
 
@@ -480,74 +431,64 @@ html,body{overflow-x:hidden}
 <script>
 const SU='https://nacvrsgkyfavykxjxszu.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-const supabaseClient=window.supabase.createClient(SU,SK);
+const sc=window.supabase.createClient(SU,SK);
 
 async function caricaProfilo(id){
   try{
-    const r=await fetch(`${SU}/rest/v1/imprese?id=eq.${id}&select=*&limit=1`,{headers:{'apikey':SK,'Accept':'application/json'}});
-    const data=await r.json();
-    if(!data||!data.length)return;
-    const d=data[0];
-    const nome=d.nome||d.ragione_sociale||'';
+    const r=await fetch(`${SU}/rest/v1/imprese?id=eq.${id}&select=*&limit=1`,{headers:{'apikey':SK}});
+    const data=await r.json();if(!data||!data.length)return;const d=data[0];
+    const nome=d.nome||'';
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
-    if(d.tipo){document.getElementById('profile-tipo-badge').textContent='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1)}
-    if(d.logo_url){document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo">`}
-    const badges=[];
-    if(d.verificata)badges.push('<span class="badge badge-v">✓ Verificata</span>');
-    if(d.anno_fondazione&&d.anno_fondazione>1900)badges.push(`<span class="badge badge-g">Dal ${d.anno_fondazione}</span>`);
-    if(d.piano==='pro')badges.push('<span class="badge badge-a">⭐ PRO</span>');
-    document.getElementById('profile-badges').innerHTML=badges.join('');
+    if(d.tipo)document.getElementById('profile-tipo-badge').textContent='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1);
+    if(d.logo_url)document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo">`;
+    const b=[];
+    if(d.verificata)b.push('<span class="hb hb-v">✓ Verificata</span>');
+    if(d.anno_fondazione&&d.anno_fondazione>1900)b.push(`<span class="hb hb-g">Dal ${d.anno_fondazione}</span>`);
+    if(d.piano==='pro')b.push('<span class="hb hb-o">⭐ PRO</span>');
+    document.getElementById('profile-badges').innerHTML=b.join('');
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;
     if(d.descrizione)document.getElementById('profile-desc').textContent=d.descrizione;
-    const iconMap={'muratura':'🧱','carpentiere':'🪵','elettricista':'⚡','idraulico':'🚿','termoidraulico':'🔥','pittore':'🎨','piastrellista':'🟫','falegname':'🪚','fabbro':'🔩','giardiniere':'🌿','demolizione':'⛏️','sgomberi':'📦','fotovoltaico':'☀️'};
-    const voci=[];
-    const mestieri=Array.isArray(d.mestieri)?d.mestieri:(d.mestieri?[d.mestieri]:[]);
-    if(d.mestiere)mestieri.unshift(d.mestiere);
-    mestieri.forEach(m=>{if(m)voci.push(m)});
+    const im={'muratura':'🧱','carpentiere':'🪵','elettricista':'⚡','idraulico':'🚿','termoidraulico':'🔥','pittore':'🎨','piastrellista':'🟫','falegname':'🪚','fabbro':'🔩','giardiniere':'🌿','demolizione':'⛏️','fotovoltaico':'☀️'};
+    const voci=[];const mestieri=Array.isArray(d.mestieri)?d.mestieri:(d.mestieri?[d.mestieri]:[]);
+    if(d.mestiere)mestieri.unshift(d.mestiere);mestieri.forEach(m=>{if(m)voci.push(m)});
     if(d.specializzazioni)String(d.specializzazioni).split(/[,;\n]+/).forEach(s=>{const t=s.trim();if(t)voci.push(t)});
     const uniq=[...new Set(voci.filter(Boolean))];
     const mg=document.getElementById('profile-mestieri');
-    if(uniq.length){mg.innerHTML=uniq.map(v=>{const k=Object.keys(iconMap).find(k=>v.toLowerCase().includes(k));return`<div class="cat"><span>${iconMap[k]||'🔧'}</span> ${v}</div>`}).join('')}
-    else{mg.innerHTML='<div style="color:#aaa;font-size:0.88rem">Nessuna specializzazione indicata</div>'}
+    if(uniq.length)mg.innerHTML=uniq.map(v=>{const k=Object.keys(im).find(k=>v.toLowerCase().includes(k));return`<div class="cat"><span>${im[k]||'🔧'}</span> ${v}</div>`}).join('');
+    else mg.innerHTML='<div style="color:#aaa;font-size:13px">Nessuna specializzazione</div>';
     const voto=d.rating?parseFloat(d.rating):(d.valutazione_media?parseFloat(d.valutazione_media):null);
     const nr=d.num_recensioni||0;
-    if(voto){
-      document.getElementById('stat-rating').textContent=voto.toFixed(1);
-      document.getElementById('sidebar-rating').textContent=voto.toFixed(1)+'⭐';
-    }
-    document.getElementById('stat-recensioni').textContent=nr;
-    document.getElementById('sidebar-recensioni').textContent=nr;
+    if(voto){document.getElementById('stat-rating').textContent=voto.toFixed(1);document.getElementById('sidebar-rating').textContent=voto.toFixed(1)+'⭐'}
+    document.getElementById('stat-recensioni').textContent=nr;document.getElementById('sidebar-recensioni').textContent=nr;
     if(d.anni_esperienza){document.getElementById('stat-anni').textContent=d.anni_esperienza+'+';document.getElementById('sidebar-anni').textContent=d.anni_esperienza+'+'}
-    if(d.num_dipendenti){document.getElementById('sidebar-dipendenti').textContent=d.num_dipendenti}
+    if(d.num_dipendenti)document.getElementById('sidebar-dipendenti').textContent=d.num_dipendenti;
     if(d.piano)document.getElementById('stat-piano').textContent=d.piano.toUpperCase();
     const tel=d.telefono||'';
-    if(tel){
-      const th='tel:'+tel.replace(/[\s\-().]/g,'');
-      document.getElementById('btn-tel').href=th;
-      const tl=document.getElementById('tel-link');if(tl){tl.href=th;tl.textContent=tel}
-    }else{
-      const bt=document.getElementById('btn-tel');if(bt)bt.style.display='none';
-      const ct=document.getElementById('contact-tel');if(ct)ct.style.display='none';
-    }
-    const el=document.getElementById('email-link');const ce=document.getElementById('contact-email');
-    if(d.email&&el){el.href='mailto:'+d.email;el.textContent=d.email}else if(ce)ce.style.display='none';
+    if(tel){const th='tel:'+tel.replace(/[\s\-().]/g,'');document.getElementById('btn-tel').href=th;const tl=document.getElementById('tel-link');if(tl){tl.href=th;tl.textContent=tel}}
+    else{document.getElementById('btn-tel').style.display='none';document.getElementById('contact-tel').style.display='none'}
+    const el=document.getElementById('email-link');
+    if(d.email&&el){el.href='mailto:'+d.email;el.textContent=d.email}else document.getElementById('contact-email').style.display='none';
     const sl=document.getElementById('sito-link');const cs=document.getElementById('contact-sito');
-    const sito=d.sito_web||d.sito||'';
+    const sito=d.sito_web||'';
     if(sito&&sl){sl.href=sito.startsWith('http')?sito:'https://'+sito;sl.textContent=sito.replace(/^https?:\/\//,'');if(cs)cs.style.display=''}
     const ci=document.getElementById('contact-indirizzo');
-    if(ci){const lc=[d.indirizzo,d.citta].filter(Boolean).join(', ');if(lc)ci.innerHTML=`<div class="c-icon">📍</div><span>${lc}</span>`}
+    if(ci){const lc=[d.indirizzo,d.citta].filter(Boolean).join(', ');if(lc)ci.innerHTML=`<div class="ci">📍</div><span>${lc}</span>`}
     if(d.lat&&d.lng){
-      const me=document.getElementById('mappa-impresa');
-      if(me){me.style.display='block';const ms=L.map('mappa-impresa',{zoomControl:false,scrollWheelZoom:false}).setView([d.lat,d.lng],15);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(ms);L.marker([d.lat,d.lng]).addTo(ms);setTimeout(()=>ms.invalidateSize(),200)}
-      const cm=document.getElementById('card-mappa-profilo');
-      if(cm){cm.style.display='';const mm=L.map('mappa-profilo',{zoomControl:true,scrollWheelZoom:false}).setView([d.lat,d.lng],15);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(mm);L.marker([d.lat,d.lng]).addTo(mm);setTimeout(()=>mm.invalidateSize(),300)}
+      document.getElementById('mappa-impresa').style.display='block';
+      const ms=L.map('mappa-impresa',{zoomControl:false,scrollWheelZoom:false}).setView([d.lat,d.lng],15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(ms);
+      L.marker([d.lat,d.lng]).addTo(ms);setTimeout(()=>ms.invalidateSize(),200);
+      document.getElementById('card-mappa-profilo').style.display='';
+      const mm=L.map('mappa-profilo',{zoomControl:true,scrollWheelZoom:false}).setView([d.lat,d.lng],15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(mm);
+      L.marker([d.lat,d.lng]).addTo(mm);setTimeout(()=>mm.invalidateSize(),300);
     }
   }catch(e){console.error(e)}
 }
 
 const vS={qualita:0,puntualita:0,prezzo:0,professionalita:0};
-function setStelleGruppo(g,v){vS[g]=v;document.getElementById('stelle-'+g).querySelectorAll('.stella').forEach(s=>{s.classList.toggle('attiva',parseInt(s.dataset.v)<=v)})}
+function setSG(g,v){vS[g]=v;document.getElementById('stelle-'+g).querySelectorAll('.stella').forEach(s=>{s.classList.toggle('attiva',parseInt(s.dataset.v)<=v)})}
 
 document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.st-row').forEach(function(row){
@@ -562,38 +503,34 @@ document.addEventListener('DOMContentLoaded',function(){
 async function caricaRecensioni(id){
   try{
     const r=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&order=created_at.desc&limit=10`,{headers:{'apikey':SK}});
-    const data=await r.json();
-    const div=document.getElementById('rec-lista');
+    const data=await r.json();const div=document.getElementById('rec-lista');
     const ce=document.getElementById('rec-count');if(ce)ce.textContent=data?.length||0;
-    if(!data||!data.length){div.innerHTML='<div style="text-align:center;color:#aaa;padding:24px 0;font-size:0.88rem">Nessuna recensione ancora. Sii il primo!</div>';return}
+    if(!data||!data.length){div.innerHTML='<p style="color:#aaa;font-size:13px;padding:14px 0">Nessuna recensione ancora. Sii il primo!</p>';return}
     div.innerHTML=data.map(r=>{
       const media=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
       const avg=media.length?(media.reduce((a,b)=>a+b,0)/media.length).toFixed(1):'-';
       const st='★'.repeat(Math.round(parseFloat(avg)))+'☆'.repeat(5-Math.round(parseFloat(avg)));
       const quando=[r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' ');
-      return`<div class="rec-item"><div class="rec-header"><span class="rec-nome">${r.nome_cliente||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-cats">${r.stelle_qualita?`<span>⭐ Qualità: ${r.stelle_qualita}/5</span>`:''} ${r.stelle_puntualita?`<span>⏱️ Puntualità: ${r.stelle_puntualita}/5</span>`:''} ${r.stelle_prezzo?`<span>💰 Prezzo: ${r.stelle_prezzo}/5</span>`:''} ${r.stelle_professionalita?`<span>🤝 Prof.: ${r.stelle_professionalita}/5</span>`:''}</div><p class="rec-testo">${r.testo||''}</p>${r.risposta_impresa?`<div style="background:var(--verde3);border-left:3px solid var(--verde);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:0.85rem;color:var(--verde2)"><strong>🏗️ Risposta:</strong> ${r.risposta_impresa}</div>`:''}</div>`;
+      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${r.nome_cliente||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><p class="rec-testo">${r.testo||''}</p></div>`;
     }).join('');
   }catch(e){console.error(e)}
 }
 
 async function inviaRecensione(){
   const btn=document.getElementById('btn-rec');
-  const {data:{session}}=await supabaseClient.auth.getSession();
+  const {data:{session}}=await sc.auth.getSession();
   let nome,email;
   if(session){email=session.user.email;nome=session.user.user_metadata?.nome||email.split('@')[0];document.getElementById('rec-nome-email-wrapper').style.display='none'}
   else{nome=document.getElementById('rec-nome').value.trim();email=document.getElementById('rec-email').value.trim();if(!nome||!email){mostraMsg('Inserisci nome e email!','err');return}}
-  if(!vS.qualita){mostraMsg('Dai almeno una valutazione sulla qualità!','err');return}
+  if(!vS.qualita){mostraMsg('Dai almeno una valutazione!','err');return}
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
     const p=new URLSearchParams(window.location.search);const iid=p.get('id');
     const ah={'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+(session?session.access_token:SK),'Prefer':'return=minimal'};
-    const ch=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${iid}&email_cliente=eq.${encodeURIComponent(email)}`,{headers:{'apikey':SK,'Authorization':'Bearer '+(session?session.access_token:SK)}});
-    const es=await ch.json();
-    const dati={impresa_id:parseInt(iid),nome_cliente:nome,email_cliente:email,testo:document.getElementById('rec-testo').value.trim(),stelle_qualita:vS.qualita||null,stelle_puntualita:vS.puntualita||null,stelle_prezzo:vS.prezzo||null,stelle_professionalita:vS.professionalita||null,mese_lavoro:document.getElementById('rec-mese').value||null,anno_lavoro:parseInt(document.getElementById('rec-anno').value)||null};
-    let res;
-    if(es&&es.length>0){res=await fetch(`${SU}/rest/v1/feedback_clienti?id=eq.${es[0].id}`,{method:'PATCH',headers:ah,body:JSON.stringify(dati)});if(!res.ok)throw new Error('Errore '+res.status);mostraMsg('✅ Recensione aggiornata!','ok')}
-    else{dati.created_at=new Date().toISOString();res=await fetch(`${SU}/rest/v1/feedback_clienti`,{method:'POST',headers:ah,body:JSON.stringify(dati)});if(!res.ok)throw new Error('Errore '+res.status);mostraMsg('✅ Recensione pubblicata!','ok')}
-    caricaRecensioni(iid);document.getElementById('rec-form').style.opacity='0.5';
+    const dati={impresa_id:parseInt(iid),nome_cliente:nome,email_cliente:email,testo:document.getElementById('rec-testo').value.trim(),stelle_qualita:vS.qualita||null,stelle_puntualita:vS.puntualita||null,stelle_prezzo:vS.prezzo||null,stelle_professionalita:vS.professionalita||null,mese_lavoro:document.getElementById('rec-mese').value||null,anno_lavoro:parseInt(document.getElementById('rec-anno').value)||null,created_at:new Date().toISOString()};
+    const res=await fetch(`${SU}/rest/v1/feedback_clienti`,{method:'POST',headers:ah,body:JSON.stringify(dati)});
+    if(!res.ok)throw new Error('Errore '+res.status);
+    mostraMsg('✅ Recensione pubblicata!','ok');caricaRecensioni(iid);
   }catch(e){mostraMsg('Errore: '+e.message,'err')}
   btn.disabled=false;btn.textContent='⭐ Pubblica recensione';
 }
@@ -604,26 +541,25 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 function closeModalOutside(e){if(e.target===document.getElementById('modal'))closeModal()}
 
 async function submitPreventivo(){
-  const nome=document.getElementById('prev-nome').value.trim();
-  const email=document.getElementById('prev-email').value.trim();
-  const me=document.getElementById('prev-msg');const btn=document.getElementById('prev-btn');
-  if(!nome||!email){me.textContent='Inserisci almeno nome e email.';me.style.cssText='display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#fff0f0;color:#c0392b;';return}
+  const nome=document.getElementById('prev-nome').value.trim();const email=document.getElementById('prev-email').value.trim();
+  const me=document.getElementById('prev-msg');const btn=document.querySelector('.btn-sub');
+  if(!nome||!email){me.textContent='Inserisci almeno nome e email.';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';return}
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
     const p=new URLSearchParams(window.location.search);const iid=parseInt(p.get('id'));
-    const {error}=await supabaseClient.from('preventivi').insert({impresa_id:iid,nome,cognome:document.getElementById('prev-cognome').value.trim(),email,telefono:document.getElementById('prev-telefono').value.trim(),tipo_lavoro:document.getElementById('prev-tipo').value,descrizione:document.getElementById('prev-descrizione').value.trim(),created_at:new Date().toISOString()});
+    const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,cognome:document.getElementById('prev-cognome').value.trim(),email,telefono:document.getElementById('prev-telefono').value.trim(),tipo_lavoro:document.getElementById('prev-tipo').value,descrizione:document.getElementById('prev-descrizione').value.trim(),created_at:new Date().toISOString()});
     if(error)throw error;
-    me.textContent='✅ Richiesta inviata! Ti risponderemo entro 24 ore.';me.style.cssText='display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#e8f5ee;color:#2a7a4b;';
+    me.textContent='✅ Richiesta inviata!';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#e8f5ee;color:#2a7a4b;';
     btn.textContent='✅ Inviato';setTimeout(()=>closeModal(),2000);
-  }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px 14px;border-radius:8px;font-size:0.9rem;margin-bottom:12px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}
+  }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}
 }
 
 async function caricaFotoLavori(id){
   const grid=document.getElementById('foto-lavori-grid');if(!grid)return;
-  const {data,error}=await supabaseClient.storage.from('foto-lavori').list(String(id),{sortBy:{column:'created_at',order:'desc'}});
+  const {data,error}=await sc.storage.from('foto-lavori').list(String(id),{sortBy:{column:'created_at',order:'desc'}});
   const foto=(data||[]).filter(f=>f.name!=='.emptyFolderPlaceholder');
-  if(error||!foto.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:24px 0;font-size:0.88rem">📷 Nessuna foto caricata</div>';return}
-  grid.innerHTML=foto.map(f=>{const {data:{publicUrl}}=supabaseClient.storage.from('foto-lavori').getPublicUrl(`${id}/${f.name}`);return`<div class="foto-item"><img src="${publicUrl}" alt="Foto lavoro" loading="lazy"></div>`}).join('');
+  if(error||!foto.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px;font-size:13px">📷 Nessuna foto caricata</div>';return}
+  grid.innerHTML=foto.map(f=>{const {data:{publicUrl}}=sc.storage.from('foto-lavori').getPublicUrl(`${id}/${f.name}`);return`<div class="fi"><img src="${publicUrl}" alt="Foto" loading="lazy"></div>`}).join('');
 }
 
 function showRecTab(id,btn){
@@ -632,129 +568,42 @@ function showRecTab(id,btn){
   document.getElementById('rec-tab-form').style.display=id==='form'?'':'none';
 }
 
+(function(){
+  function tick(){var el=document.getElementById('cal-orologio');if(!el)return;var n=new Date();el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0')}
+  setInterval(tick,1000);tick();
+  var MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  var oggi=new Date();var cA=oggi.getFullYear();var cM=oggi.getMonth();
+  function renderCal(){
+    var label=document.getElementById('cal-label');var griglia=document.getElementById('cal-griglia');if(!label||!griglia)return;
+    label.textContent=MESI[cM].slice(0,3)+' '+cA;
+    var primo=new Date(cA,cM,1);var offset=primo.getDay()-1;if(offset<0)offset=6;
+    var giorni=new Date(cA,cM+1,0).getDate();var html='';
+    for(var i=0;i<offset;i++)html+='<div class="cd"></div>';
+    for(var g=1;g<=giorni;g++){var isO=g===oggi.getDate()&&cM===oggi.getMonth()&&cA===oggi.getFullYear();html+=isO?`<div class="cd"><div class="cd oggi">${g}</div></div>`:`<div class="cd">${g}</div>`}
+    griglia.innerHTML=html;
+  }
+  window.calPrev=function(){cM--;if(cM<0){cM=11;cA--}renderCal()};
+  window.calNext=function(){cM++;if(cM>11){cM=0;cA++}renderCal()};
+  renderCal();
+  var noteEl=document.getElementById('widget-note');if(noteEl)noteEl.value=localStorage.getItem('ti_note')||'';
+  var WMO={113:'☀️',116:'⛅',119:'☁️',176:'🌦️',200:'⛈️',227:'❄️',263:'🌦️',293:'🌧️',353:'🌦️',386:'⛈️'};
+  async function caricaMeteo(lat,lon){
+    try{var r=await fetch('https://wttr.in/'+lat+','+lon+'?format=j1');var d=await r.json();var cur=d.current_condition[0];var area=d.nearest_area&&d.nearest_area[0];var citta=(area&&area.areaName&&area.areaName[0]&&area.areaName[0].value)||'';document.getElementById('meteo-icona').textContent=WMO[parseInt(cur.weatherCode,10)]||'🌡️';document.getElementById('meteo-citta').textContent=citta;document.getElementById('meteo-temp').textContent=cur.temp_C+'°C';document.getElementById('meteo-condizione').textContent=cur.weatherDesc&&cur.weatherDesc[0]&&cur.weatherDesc[0].value||''}catch(e){document.getElementById('meteo-icona').textContent='❌'}
+  }
+  if(navigator.geolocation)navigator.geolocation.getCurrentPosition(function(pos){caricaMeteo(pos.coords.latitude,pos.coords.longitude)},function(){document.getElementById('meteo-citta').textContent='Non disponibile'});
+})();
+
 document.addEventListener('DOMContentLoaded',async()=>{
   const p=new URLSearchParams(window.location.search);const id=p.get('id');
   if(id){caricaProfilo(id);caricaRecensioni(id);caricaFotoLavori(id)}
-  const {data:{session}}=await supabaseClient.auth.getSession();
+  const {data:{session}}=await sc.auth.getSession();
   if(session)document.getElementById('rec-nome-email-wrapper').style.display='none';
 });
 </script>
-<script>
-/* ============================================================
-   CALENDARIO & ORARIO & METEO
-   ============================================================ */
-(function () {
-  /* --- OROLOGIO --- */
-  function tick() {
-    var el = document.getElementById('cal-orologio');
-    if (!el) return;
-    var n = new Date();
-    el.textContent =
-      String(n.getHours()).padStart(2,'0') + ':' +
-      String(n.getMinutes()).padStart(2,'0') + ':' +
-      String(n.getSeconds()).padStart(2,'0');
-  }
-  setInterval(tick, 1000);
-  tick();
-
-  /* --- CALENDARIO --- */
-  var MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
-              'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-  var oggi = new Date();
-  var cAnno = oggi.getFullYear();
-  var cMese = oggi.getMonth();
-
-  function renderCal() {
-    var label   = document.getElementById('cal-label');
-    var griglia = document.getElementById('cal-griglia');
-    if (!label || !griglia) return;
-    label.textContent = MESI[cMese] + ' ' + cAnno;
-    var primo  = new Date(cAnno, cMese, 1);
-    var offset = primo.getDay() - 1; if (offset < 0) offset = 6;
-    var giorni = new Date(cAnno, cMese + 1, 0).getDate();
-    var html = '';
-    for (var i = 0; i < offset; i++) html += '<div style="background:white;padding:8px 0"></div>';
-    for (var g = 1; g <= giorni; g++) {
-      var isOggi = g === oggi.getDate() && cMese === oggi.getMonth() && cAnno === oggi.getFullYear();
-      html += isOggi
-        ? '<div style="background:white;display:flex;align-items:center;justify-content:center;padding:4px 0"><div style="width:26px;height:26px;border-radius:50%;background:#2a7a4b;color:white;font-weight:800;font-size:0.8rem;display:flex;align-items:center;justify-content:center">' + g + '</div></div>'
-        : '<div style="background:white;text-align:center;padding:7px 0;font-size:0.8rem;color:#1a1a1a">' + g + '</div>';
-    }
-    griglia.innerHTML = html;
-  }
-
-  window.calPrev = function () { cMese--; if (cMese < 0) { cMese = 11; cAnno--; } renderCal(); };
-  window.calNext = function () { cMese++; if (cMese > 11) { cMese = 0; cAnno++; } renderCal(); };
-  renderCal();
-
-  /* --- NOTE --- */
-  var noteEl = document.getElementById('widget-note');
-  if (noteEl) noteEl.value = localStorage.getItem('ti_note') || '';
-
-  /* --- METEO (wttr.in, no API key) --- */
-  var WMO_ICONA = {
-    113:'☀️',116:'⛅',119:'☁️',122:'☁️',143:'🌫️',176:'🌦️',179:'🌨️',
-    182:'🌧️',185:'🌧️',200:'⛈️',227:'❄️',230:'❄️',248:'🌫️',260:'🌫️',
-    263:'🌦️',266:'🌦️',281:'🌧️',284:'🌧️',293:'🌧️',296:'🌧️',299:'🌧️',
-    302:'🌧️',305:'🌧️',308:'🌧️',311:'🌧️',314:'🌧️',317:'🌧️',320:'🌨️',
-    323:'🌨️',326:'🌨️',329:'❄️',332:'❄️',335:'❄️',338:'❄️',350:'🌧️',
-    353:'🌦️',356:'🌧️',359:'🌧️',362:'🌧️',365:'🌧️',368:'🌨️',371:'❄️',
-    374:'🌧️',377:'🌧️',386:'⛈️',389:'⛈️',392:'⛈️',395:'❄️'
-  };
-
-  function setMeteo(icona, citta, temp, cond) {
-    document.getElementById('meteo-icona').textContent      = icona;
-    document.getElementById('meteo-citta').textContent      = citta;
-    document.getElementById('meteo-temp').textContent       = temp;
-    document.getElementById('meteo-condizione').textContent = cond;
-  }
-
-  async function fetchRetry(url, n) {
-    for (var i = 0; i < n; i++) {
-      try {
-        var r = await fetch(url);
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r;
-      } catch(e) {
-        if (i < n - 1) await new Promise(function(res){ setTimeout(res, 2000); });
-        else throw e;
-      }
-    }
-  }
-
-  async function caricaMeteo(lat, lon) {
-    try {
-      var r    = await fetchRetry('https://wttr.in/' + lat + ',' + lon + '?format=j1', 3);
-      var d    = await r.json();
-      var cur  = d.current_condition[0];
-      var area = d.nearest_area && d.nearest_area[0];
-      var temp = cur.temp_C + '°C';
-      var desc = cur.weatherDesc && cur.weatherDesc[0] && cur.weatherDesc[0].value || '';
-      var cod  = parseInt(cur.weatherCode, 10);
-      var citta = (area && area.areaName && area.areaName[0] && area.areaName[0].value) ||
-                  (lat.toFixed(2) + ', ' + lon.toFixed(2));
-      setMeteo(WMO_ICONA[cod] || '🌡️', citta, temp, desc);
-    } catch(e) {
-      setMeteo('❌', 'Meteo non disponibile', '', '');
-    }
-  }
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function(pos) { caricaMeteo(pos.coords.latitude, pos.coords.longitude); },
-      function()    { setMeteo('📍', 'Posizione non autorizzata', '', ''); }
-    );
-  } else {
-    setMeteo('📍', 'Geolocalizzazione non supportata', '', '');
-  }
-})();
-</script>
 <script src="/cookie-banner.js"></script>
-<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">
-  © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) –
-  <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> |
+<footer style="background:#1a472a;color:white;font-size:13px;padding:15px;text-align:center">
+  © 2026 TrovaImpresa – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> |
   <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> |
-  <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> |
   <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> |
   <a href="/contatti.html" style="color:#a0d8b3">Contatti</a>
 </footer>
