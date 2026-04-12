@@ -131,6 +131,7 @@
         input[type="text"],
         input[type="email"],
         input[type="tel"],
+        input[type="password"],
         select,
         textarea {
             width: 100%;
@@ -606,6 +607,11 @@
             alert('❌ Errore sconosciuto. Riprova.');
         }
     });
+
+    function togglePassword(id, btn) {
+        const input = document.getElementById(id);
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
 </script>
 
 <script src="/cookie-banner.js"></script>
