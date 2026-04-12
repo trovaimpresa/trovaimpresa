@@ -3,80 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registrazione Negozio Edile - TrovaImpresa</title>
+  <title>Registrazione Negozio - TrovaImpresa</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { color: #111; }
     html, body {
       background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       padding: 20px;
     }
-    .container {
-      max-width: 620px; margin: 40px auto; background: white;
-      border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    .header {
-      background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
-      color: white; padding: 32px 24px; text-align: center;
-    }
+    .container { max-width: 620px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .header { background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%); color: white; padding: 32px 24px; text-align: center; }
     .header h1 { font-size: 24px; margin-bottom: 8px; }
     .header p { font-size: 14px; opacity: 0.9; }
-    .steps {
-      display: flex; justify-content: space-between;
-      padding: 20px 24px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0;
-    }
+    .steps { display: flex; justify-content: space-between; padding: 20px 24px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
     .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
-    .step-circle {
-      width: 36px; height: 36px; border-radius: 50%; display: flex;
-      align-items: center; justify-content: center; font-weight: 700;
-      background: #e0e0e0; color: #666; font-size: 15px;
-    }
+    .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #e0e0e0; color: #333; font-size: 15px; }
     .step.active .step-circle { background: #2a7a4b; color: white; }
     .step-label { font-size: 11px; color: #999; text-align: center; }
     .step.active .step-label { color: #2a7a4b; font-weight: 600; }
     .content { padding: 32px; }
     .form-section { display: none; }
     .form-section.active { display: block; }
-    .form-section h2 { font-size: 20px; color: #333; margin-bottom: 24px; }
+    .form-section h2 { font-size: 20px; color: #111; margin-bottom: 24px; }
     .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 7px; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;
-      font-size: 14px; font-family: inherit; color: #333;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      outline: none; border-color: #2a7a4b; box-shadow: 0 0 0 3px rgba(42,122,75,0.1);
-    }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #111; margin-bottom: 7px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2a7a4b; box-shadow: 0 0 0 3px rgba(42,122,75,0.1); }
     .form-group textarea { resize: vertical; min-height: 90px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .required { color: #ff6b6b; }
     .buttons { display: flex; gap: 12px; margin-top: 28px; }
-    .btn-back {
-      flex: 1; padding: 13px 24px; border: none; border-radius: 8px;
-      font-size: 14px; font-weight: 600; cursor: pointer;
-      background: #e0e0e0; color: #333;
-    }
-    .btn-next {
-      flex: 1; padding: 13px 24px; border: none; border-radius: 8px;
-      font-size: 14px; font-weight: 600; cursor: pointer;
-      background: #2a7a4b; color: white;
-    }
+    .btn-back { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #e0e0e0; color: #111; }
+    .btn-next { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #2a7a4b; color: white; }
     .btn-next:hover { background: #1a4d2e; }
     .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .upload-area {
-      border: 2px dashed #ddd; border-radius: 8px; padding: 24px;
-      text-align: center; cursor: pointer; background: #fafafa;
-    }
+    .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; background: #fafafa; }
     .upload-area:hover { border-color: #2a7a4b; background: rgba(42,122,75,0.05); }
     .upload-area .upload-icon { font-size: 36px; margin-bottom: 8px; }
-    .upload-area p { font-size: 14px; color: #555; margin-bottom: 4px; }
+    .upload-area p { font-size: 14px; color: #222; margin-bottom: 4px; }
     .upload-area small { font-size: 12px; color: #aaa; }
-    .file-selected {
-      display: none; align-items: center; gap: 10px;
-      background: #e8f5e9; border-radius: 8px; padding: 10px 14px; margin-top: 10px;
-    }
+    .file-selected { display: none; align-items: center; gap: 10px; background: #e8f5e9; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
     .file-selected span { font-size: 13px; color: #2a7a4b; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .file-selected button { background: none; border: none; color: #aaa; font-size: 18px; cursor: pointer; }
     .file-selected button:hover { color: #f44336; }
@@ -89,19 +57,19 @@
     .piano-card .piano-icon { font-size: 28px; margin-bottom: 6px; }
     .piano-card .piano-nome { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
     .piano-card .piano-prezzo { font-size: 13px; color: #888; margin-bottom: 8px; }
-    .piano-card ul { list-style: none; text-align: left; font-size: 12px; color: #555; }
+    .piano-card ul { list-style: none; text-align: left; font-size: 12px; color: #222; }
     .piano-card ul li { padding: 2px 0; }
     .piano-card ul li::before { content: "✓ "; color: #2a7a4b; font-weight: 700; }
     .piano-card.selected-pro ul li::before { color: #1a73e8; }
-  
     .password-wrapper { position: relative; }
     .password-wrapper input { padding-right: 44px; }
     .toggle-pw {
-      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #aaa;
+      padding: 0; display: flex; align-items: center; transition: color 0.2s;
     }
-    .toggle-pw:hover { color: #2ecc71; }
-    .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #333; border-bottom: 1px solid #f0f0f0; }
+    .toggle-pw:hover { color: #2a7a4b; }
+    .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #111; border-bottom: 1px solid #f0f0f0; }
     .map-dd-item:hover { background: #e8f5e9; }
     .map-dd-item:last-child { border-bottom: none; }
   </style>
@@ -128,27 +96,15 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>🏪 Registrazione Negozio Edile</h1>
+      <h1>🏪 Registrazione Negozio</h1>
       <p>Entra nella rete TrovaImpresa</p>
     </div>
 
     <div class="steps">
-      <div class="step active" id="step-1-indicator">
-        <div class="step-circle">1</div>
-        <div class="step-label">Negozio</div>
-      </div>
-      <div class="step" id="step-2-indicator">
-        <div class="step-circle">2</div>
-        <div class="step-label">Prodotti</div>
-      </div>
-      <div class="step" id="step-3-indicator">
-        <div class="step-circle">3</div>
-        <div class="step-label">Contatti</div>
-      </div>
-      <div class="step" id="step-4-indicator">
-        <div class="step-circle">4</div>
-        <div class="step-label">Logo</div>
-      </div>
+      <div class="step active" id="step-1-indicator"><div class="step-circle">1</div><div class="step-label">Anagrafica</div></div>
+      <div class="step" id="step-2-indicator"><div class="step-circle">2</div><div class="step-label">Categoria</div></div>
+      <div class="step" id="step-3-indicator"><div class="step-circle">3</div><div class="step-label">Contatti</div></div>
+      <div class="step" id="step-4-indicator"><div class="step-circle">4</div><div class="step-label">Logo</div></div>
     </div>
 
     <div class="content">
@@ -157,69 +113,92 @@
       <div class="form-section active" id="step-1">
         <h2>Il tuo negozio</h2>
         <div class="form-group">
-          <label>Nome negozio <span class="required">*</span></label>
-          <input type="text" id="nome_negozio" placeholder="Es. Edilizia Rossi">
+          <label>Nome / Ragione sociale <span class="required">*</span></label>
+          <input type="text" id="nome" placeholder="Es. Ferramenta Rossi">
         </div>
         <div class="form-group">
-          <label>Tipo di negozio <span class="required">*</span></label>
-          <select id="tipo">
-            <option value="">— Seleziona —</option>
-            <option>Materiali edili</option>
-            <option>Ferramenta</option>
-            <option>Pitture e vernici</option>
-            <option>Pavimenti e rivestimenti</option>
-            <option>Sanitari e idraulica</option>
-            <option>Elettrico e illuminazione</option>
-            <option>Legname e infissi</option>
-            <option>Macchine e attrezzature edili</option>
-            <option>Noleggio attrezzature edili</option>
-            <option>Altro</option>
-          </select>
+          <label>Partita IVA / Codice Fiscale</label>
+          <input type="text" id="partita_iva" placeholder="Es. 12345678901">
         </div>
         <div class="form-row">
+          <div class="form-group">
+            <label>Indirizzo</label>
+            <input type="text" id="indirizzo" placeholder="Es. Via Roma 42">
+          </div>
+          <div class="form-group" style="max-width:100px;">
+            <label>Civico</label>
+            <input type="text" id="civico" placeholder="Es. 1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="max-width:110px;">
+            <label>CAP</label>
+            <input type="text" id="cap" placeholder="Es. 00100" maxlength="5">
+          </div>
           <div class="form-group">
             <label>Città <span class="required">*</span></label>
             <input type="text" id="citta" placeholder="Es. Roma">
           </div>
+        </div>
+        <div class="form-group">
+          <label>Provincia</label>
+          <input type="text" id="provincia" placeholder="Es. RM">
+        </div>
+        <div class="form-group">
+          <label>Descrizione breve</label>
+          <textarea id="descrizione" placeholder="Descrivi il tuo negozio e i prodotti che vendi..."></textarea>
+        </div>
+        <div class="form-row">
           <div class="form-group">
-            <label>CAP</label>
-            <input type="text" id="cap" placeholder="Es. 00100">
+            <label>Anno di fondazione</label>
+            <input type="number" id="anno_fondazione" placeholder="Es. 2005" min="1900" max="2100">
+          </div>
+          <div class="form-group">
+            <label>Numero dipendenti</label>
+            <input type="number" id="dipendenti" placeholder="Es. 3" min="0">
           </div>
         </div>
         <div class="form-group">
-          <label>Indirizzo</label>
-          <input type="text" id="indirizzo" placeholder="Es. Via Roma 1">
+          <label>WhatsApp</label>
+          <input type="tel" id="whatsapp" placeholder="Es. +39 333 1234567">
         </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label>Cerca posizione <span style="font-weight:400;color:#aaa;">(opzionale)</span></label>
-          <div style="position:relative;">
-            <input type="text" id="map-search" placeholder="Es. Via Roma 1, Roma" autocomplete="off" oninput="nominatimSearch(this.value)" style="border-radius:8px 8px 0 0;">
-            <div id="map-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;z-index:1000;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
-          </div>
-          <div id="mappa" style="height:200px;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;"></div>
-        </div>
-        <input type="hidden" id="lat">
-        <input type="hidden" id="lng">
       </div>
 
       <!-- STEP 2 -->
       <div class="form-section" id="step-2">
-        <h2>Prodotti e marchi</h2>
+        <h2>Categoria merceologica</h2>
         <div class="form-group">
-          <label>Prodotti trattati</label>
-          <textarea id="prodotti" placeholder="Es. Cemento, mattoni, isolanti, pavimenti, sanitari..."></textarea>
+          <label>Categoria principale <span class="required">*</span></label>
+          <select id="mestiere">
+            <option value="">— Seleziona —</option>
+            <option>Materiali edili</option>
+            <option>Ferramenta</option>
+            <option>Pavimenti e rivestimenti</option>
+            <option>Infissi e serramenti</option>
+            <option>Sanitari e ceramiche</option>
+            <option>Impianti elettrici</option>
+            <option>Idraulica e termoidraulica</option>
+            <option>Pitture e vernici</option>
+            <option>Legname e derivati</option>
+            <option>Attrezzature edili</option>
+            <option>Noleggio attrezzature</option>
+            <option>Illuminazione</option>
+            <option>Isolanti e impermeabilizzanti</option>
+            <option>Porte e finestre</option>
+            <option>Arredo bagno</option>
+          </select>
         </div>
         <div class="form-group">
-          <label>Marchi principali</label>
-          <textarea id="marchi" placeholder="Es. Mapei, Knauf, Weber, Bosch..."></textarea>
+          <label>Altri prodotti / categorie</label>
+          <textarea id="specializzazioni" placeholder="Es. Vendita online, consegna a domicilio, consulenza tecnica..."></textarea>
         </div>
         <div class="form-group">
-          <label>Orari di apertura</label>
-          <input type="text" id="orari" placeholder="Es. Lun-Ven 8:00-18:00, Sab 8:00-12:00">
+          <label>Zone di consegna / servizio</label>
+          <input type="text" id="zone" placeholder="Es. Roma e provincia, Lazio">
         </div>
         <div class="form-group">
-          <label>Sito web</label>
-          <input type="url" id="sito_web" placeholder="https://www.negozio.it">
+          <label>Anni di attività</label>
+          <input type="number" id="anni_esperienza" placeholder="Es. 10" min="0" max="60">
         </div>
       </div>
 
@@ -235,10 +214,16 @@
           <input type="tel" id="telefono" placeholder="+39 06 1234567">
         </div>
         <div class="form-group">
+          <label>Sito web</label>
+          <input type="url" id="sito_web" placeholder="https://www.miosito.it">
+        </div>
+        <div class="form-group">
           <label>Password <span class="required">*</span></label>
           <div class="password-wrapper">
             <input type="password" id="password" placeholder="Almeno 8 caratteri">
-            <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -254,7 +239,8 @@
             <ul>
               <li>Visibile nella tua città</li>
               <li>Fino a 10 foto</li>
-              <li>Profilo base</li>
+              <li>Max 3 preventivi/mese</li>
+              <li>1 annuncio lavoro</li>
             </ul>
           </div>
           <div class="piano-card" id="card-pro" onclick="selezionaPiano('pro')">
@@ -264,6 +250,7 @@
             <ul>
               <li>Visibile in tutta Italia</li>
               <li>Foto illimitate</li>
+              <li>Preventivi illimitati</li>
               <li>Badge PRO dorato</li>
               <li>Priorità nei risultati</li>
             </ul>
@@ -273,7 +260,7 @@
 
         <h2 style="margin-top:20px;">Logo (opzionale)</h2>
         <div class="form-group">
-          <label>Logo del negozio</label>
+          <label>Logo / Foto profilo</label>
           <div class="upload-area" id="upload-area" onclick="document.getElementById('logo-input').click()">
             <div class="upload-icon">🏪</div>
             <p><strong>Clicca per caricare</strong> il logo</p>
@@ -293,7 +280,6 @@
         </div>
       </div>
 
-      <!-- BUTTONS -->
       <div class="buttons">
         <button class="btn-back" id="btn-back" style="display:none;">← Indietro</button>
         <button class="btn-next" id="btn-next">Avanti →</button>
@@ -302,10 +288,8 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-
     function togglePassword(id, btn) {
       const input = document.getElementById(id);
       const svg = btn.querySelector('svg');
@@ -320,8 +304,12 @@
       }
     }
 
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let currentStep = 1;
     let logoFile = null;
+
 
     document.getElementById('logo-input').addEventListener('change', function(e) {
       const file = e.target.files[0];
@@ -372,11 +360,7 @@
       const fileName = email.replace(/[^a-z0-9]/gi, '_') + '_' + Date.now() + '.' + ext;
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/loghi-imprese/' + fileName, {
         method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Content-Type': file.type || 'image/png'
-        },
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type || 'image/png' },
         body: file
       });
       if (!res.ok) throw new Error('Errore upload logo');
@@ -390,26 +374,17 @@
     }
 
     async function submitForm() {
-      if (!document.getElementById('termini').checked) {
-        alert('Devi accettare i termini di servizio!');
-        return;
-      }
-
-      const nome = document.getElementById('nome_negozio').value.trim();
-      const tipo = document.getElementById('tipo').value;
+      if (!document.getElementById('termini').checked) { alert('Devi accettare i termini di servizio!'); return; }
+      const nome = document.getElementById('nome').value.trim();
+      const mestiere = document.getElementById('mestiere').value;
       const email = document.getElementById('email').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const citta = document.getElementById('citta').value.trim();
       const password = document.getElementById('password').value.trim();
-
-      if (!nome || !tipo || !email || !telefono || !citta || !password) {
-        alert('Compila tutti i campi obbligatori (*)');
-        return;
-      }
-
+      if (!nome || !mestiere || !email || !telefono || !citta || !password) { alert('Compila tutti i campi obbligatori (*)'); return; }
+      if (password.length < 8) { alert('La password deve essere di almeno 8 caratteri.'); return; }
       const btn = document.getElementById('btn-next');
       btn.disabled = true;
-
       try {
         btn.textContent = '⏳ Creazione account...';
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({ email, password });
@@ -420,28 +395,57 @@
         if (signInError) throw new Error(signInError.message);
 
         let logo_url = null;
-        if (logoFile) {
-          btn.textContent = '⏳ Caricamento logo...';
-          logo_url = await uploadLogo(logoFile, email);
-        }
+        if (logoFile) { btn.textContent = '⏳ Caricamento logo...'; logo_url = await uploadLogo(logoFile, email); }
+
+        btn.textContent = '⏳ Geocoding...';
+        let lat = null, lng = null;
+        try {
+          const indirizzo = document.getElementById('indirizzo').value.trim();
+          const civico = document.getElementById('civico').value.trim();
+          const cap = document.getElementById('cap').value.trim();
+          const cittaVal = document.getElementById('citta').value.trim();
+          const query = [indirizzo, civico, cap, cittaVal, 'Italia'].filter(Boolean).join(', ');
+          const geoR = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query), { headers: { 'Accept-Language': 'it' } });
+          const geoResults = await geoR.json();
+          if (geoResults.length) { lat = parseFloat(geoResults[0].lat); lng = parseFloat(geoResults[0].lon); }
+          if (!lat) {
+            const geoR2 = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(cittaVal + ', Italia'), { headers: { 'Accept-Language': 'it' } });
+            const geoResults2 = await geoR2.json();
+            if (geoResults2.length) { lat = parseFloat(geoResults2[0].lat); lng = parseFloat(geoResults2[0].lon); }
+          }
+        } catch(e) { console.warn('Geocoding fallito:', e); }
 
         btn.textContent = '⏳ Salvataggio...';
-
         const dati = {
           user_id: user_id,
+          tipo: 'negozio',
           nome: nome,
-          tipo: tipo,
+          nome_attivita: nome,
+          mestiere: mestiere,
+          mestieri: mestiere ? [mestiere] : [],
+          specializzazioni: document.getElementById('specializzazioni').value,
+          descrizione: document.getElementById('descrizione').value,
+          anni_esperienza: parseInt(document.getElementById('anni_esperienza').value) || null,
+          partita_iva: document.getElementById('partita_iva').value,
+          zone: document.getElementById('zone').value,
           email: email,
           telefono: telefono,
           citta: citta,
-          indirizzo: document.getElementById('indirizzo').value,
-          lat: parseFloat(document.getElementById('lat').value) || null,
-          lng: parseFloat(document.getElementById('lng').value) || null,
+          provincia: document.getElementById('provincia').value,
+          lat: lat,
+          lng: lng,
           sito_web: document.getElementById('sito_web').value,
+          logo_url: logo_url,
           piano: document.getElementById('piano_scelto').value,
-          logo_url: logo_url
+          indirizzo: (document.getElementById('indirizzo').value + ' ' + document.getElementById('civico').value).trim(),
+          cap: document.getElementById('cap').value,
+          anno_fondazione: parseInt(document.getElementById('anno_fondazione').value) || null,
+          dipendenti: document.getElementById('dipendenti').value || null,
+          whatsapp: document.getElementById('whatsapp').value || null,
+          verificata: false,
+          rating: 0,
+          num_recensioni: 0
         };
-
         const { error: insertError } = await supabaseClient.from('imprese').insert(dati);
         if (insertError) {
           if (insertError.code === '23505' || insertError.message.includes('duplicate key') || insertError.message.includes('imprese_email_key')) {
@@ -450,7 +454,6 @@
           }
           throw new Error(insertError.message);
         }
-
         window.location.href = 'pannello-impresa.html';
       } catch (err) {
         console.error(err);
@@ -465,44 +468,6 @@
       }
     }
   </script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let mappa = null, mapMarker = null, nomTimer = null;
-    (function initMappa() {
-      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initMappa); return; }
-      mappa = L.map('mappa').setView([41.9, 12.5], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(mappa);
-      new ResizeObserver(() => { mappa.invalidateSize(); }).observe(document.getElementById('mappa'));
-      setTimeout(function() { mappa.invalidateSize(); }, 200);
-    })();
-    function nominatimSearch(q) {
-      clearTimeout(nomTimer);
-      const dd = document.getElementById('map-dropdown');
-      if (q.length < 3) { dd.style.display = 'none'; return; }
-      nomTimer = setTimeout(async () => {
-        try {
-          const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=it&q=' + encodeURIComponent(q), { headers: { 'Accept-Language': 'it' } });
-          const results = await r.json();
-          if (!results.length) { dd.style.display = 'none'; return; }
-          dd.innerHTML = results.map(x => '<div class="map-dd-item" onclick="selezionaLuogo(' + x.lat + ',' + x.lon + ',' + JSON.stringify(x.display_name) + ')">' + x.display_name + '</div>').join('');
-          dd.style.display = 'block';
-        } catch(e) { dd.style.display = 'none'; }
-      }, 400);
-    }
-    function selezionaLuogo(lat, lon, nome) {
-      document.getElementById('lat').value = lat;
-      document.getElementById('lng').value = lon;
-      document.getElementById('map-search').value = nome;
-      document.getElementById('map-dropdown').style.display = 'none';
-      mappa.setView([lat, lon], 14);
-      if (mapMarker) mapMarker.setLatLng([lat, lon]); else mapMarker = L.marker([lat, lon]).addTo(mappa);
-    }
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('#map-search') && !e.target.closest('#map-dropdown')) { var dd = document.getElementById('map-dropdown'); if (dd) dd.style.display = 'none'; }
-    });
-</script>
 <script src="/cookie-banner.js"></script>
 <footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
 </body>
