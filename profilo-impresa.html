@@ -408,6 +408,54 @@ html,body{overflow-x:hidden}
         <div class="ms"><span class="ms-n" id="sidebar-recensioni">0</span><span class="ms-l">Recensioni</span></div>
         <div class="ms"><span class="ms-n" id="sidebar-rating" style="color:var(--arancio)">—</span><span class="ms-l">Rating ⭐</span></div>
       </div>
+
+      <!-- CALENDARIO & ORARIO -->
+      <div style="margin-top:20px;background:white;border-radius:16px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:14px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:12px">
+
+          <!-- [A] Orologio -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:center">
+            <div id="cal-orologio" style="font-family:'Playfair Display',serif;font-size:1.6rem;color:#2a7a4b;letter-spacing:4px;font-weight:700;text-align:center"></div>
+          </div>
+
+          <!-- [B] Meteo -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px">
+            <div id="meteo-icona" style="font-size:1.8rem;line-height:1">⏳</div>
+            <div>
+              <div id="meteo-citta" style="font-weight:700;font-size:0.82rem;color:#1a3a2a">Rilevamento...</div>
+              <div id="meteo-temp" style="font-size:1.2rem;font-family:'Playfair Display',serif;color:#2a7a4b;font-weight:700"></div>
+              <div id="meteo-condizione" style="font-size:0.72rem;color:#999;margin-top:2px"></div>
+            </div>
+          </div>
+
+          <!-- [C] Calendario -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#2a7a4b;padding:8px 12px">
+              <button onclick="calPrev()" style="background:none;border:none;color:white;font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1">&#8249;</button>
+              <div id="cal-label" style="color:white;font-weight:700;font-size:0.8rem;text-transform:capitalize"></div>
+              <button onclick="calNext()" style="background:none;border:none;color:white;font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1">&#8250;</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#e8f5ee">
+              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Lun</div>
+              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Mar</div>
+              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Mer</div>
+              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Gio</div>
+              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Ven</div>
+              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Sab</div>
+              <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#2a7a4b;padding:5px 0">Dom</div>
+            </div>
+            <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
+          </div>
+
+          <!-- [D] Note -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:0.72rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
+            <textarea id="widget-note" placeholder="Scrivi i tuoi appunti..." style="flex:1;resize:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:#1a1a1a;line-height:1.5;min-height:120px;background:transparent" oninput="localStorage.setItem('ti_note',this.value)"></textarea>
+          </div>
+
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -590,6 +638,116 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const {data:{session}}=await supabaseClient.auth.getSession();
   if(session)document.getElementById('rec-nome-email-wrapper').style.display='none';
 });
+</script>
+<script>
+/* ============================================================
+   CALENDARIO & ORARIO & METEO
+   ============================================================ */
+(function () {
+  /* --- OROLOGIO --- */
+  function tick() {
+    var el = document.getElementById('cal-orologio');
+    if (!el) return;
+    var n = new Date();
+    el.textContent =
+      String(n.getHours()).padStart(2,'0') + ':' +
+      String(n.getMinutes()).padStart(2,'0') + ':' +
+      String(n.getSeconds()).padStart(2,'0');
+  }
+  setInterval(tick, 1000);
+  tick();
+
+  /* --- CALENDARIO --- */
+  var MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+              'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  var oggi = new Date();
+  var cAnno = oggi.getFullYear();
+  var cMese = oggi.getMonth();
+
+  function renderCal() {
+    var label   = document.getElementById('cal-label');
+    var griglia = document.getElementById('cal-griglia');
+    if (!label || !griglia) return;
+    label.textContent = MESI[cMese] + ' ' + cAnno;
+    var primo  = new Date(cAnno, cMese, 1);
+    var offset = primo.getDay() - 1; if (offset < 0) offset = 6;
+    var giorni = new Date(cAnno, cMese + 1, 0).getDate();
+    var html = '';
+    for (var i = 0; i < offset; i++) html += '<div style="background:white;padding:8px 0"></div>';
+    for (var g = 1; g <= giorni; g++) {
+      var isOggi = g === oggi.getDate() && cMese === oggi.getMonth() && cAnno === oggi.getFullYear();
+      html += isOggi
+        ? '<div style="background:white;display:flex;align-items:center;justify-content:center;padding:4px 0"><div style="width:26px;height:26px;border-radius:50%;background:#2a7a4b;color:white;font-weight:800;font-size:0.8rem;display:flex;align-items:center;justify-content:center">' + g + '</div></div>'
+        : '<div style="background:white;text-align:center;padding:7px 0;font-size:0.8rem;color:#1a1a1a">' + g + '</div>';
+    }
+    griglia.innerHTML = html;
+  }
+
+  window.calPrev = function () { cMese--; if (cMese < 0) { cMese = 11; cAnno--; } renderCal(); };
+  window.calNext = function () { cMese++; if (cMese > 11) { cMese = 0; cAnno++; } renderCal(); };
+  renderCal();
+
+  /* --- NOTE --- */
+  var noteEl = document.getElementById('widget-note');
+  if (noteEl) noteEl.value = localStorage.getItem('ti_note') || '';
+
+  /* --- METEO (wttr.in, no API key) --- */
+  var WMO_ICONA = {
+    113:'☀️',116:'⛅',119:'☁️',122:'☁️',143:'🌫️',176:'🌦️',179:'🌨️',
+    182:'🌧️',185:'🌧️',200:'⛈️',227:'❄️',230:'❄️',248:'🌫️',260:'🌫️',
+    263:'🌦️',266:'🌦️',281:'🌧️',284:'🌧️',293:'🌧️',296:'🌧️',299:'🌧️',
+    302:'🌧️',305:'🌧️',308:'🌧️',311:'🌧️',314:'🌧️',317:'🌧️',320:'🌨️',
+    323:'🌨️',326:'🌨️',329:'❄️',332:'❄️',335:'❄️',338:'❄️',350:'🌧️',
+    353:'🌦️',356:'🌧️',359:'🌧️',362:'🌧️',365:'🌧️',368:'🌨️',371:'❄️',
+    374:'🌧️',377:'🌧️',386:'⛈️',389:'⛈️',392:'⛈️',395:'❄️'
+  };
+
+  function setMeteo(icona, citta, temp, cond) {
+    document.getElementById('meteo-icona').textContent      = icona;
+    document.getElementById('meteo-citta').textContent      = citta;
+    document.getElementById('meteo-temp').textContent       = temp;
+    document.getElementById('meteo-condizione').textContent = cond;
+  }
+
+  async function fetchRetry(url, n) {
+    for (var i = 0; i < n; i++) {
+      try {
+        var r = await fetch(url);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r;
+      } catch(e) {
+        if (i < n - 1) await new Promise(function(res){ setTimeout(res, 2000); });
+        else throw e;
+      }
+    }
+  }
+
+  async function caricaMeteo(lat, lon) {
+    try {
+      var r    = await fetchRetry('https://wttr.in/' + lat + ',' + lon + '?format=j1', 3);
+      var d    = await r.json();
+      var cur  = d.current_condition[0];
+      var area = d.nearest_area && d.nearest_area[0];
+      var temp = cur.temp_C + '°C';
+      var desc = cur.weatherDesc && cur.weatherDesc[0] && cur.weatherDesc[0].value || '';
+      var cod  = parseInt(cur.weatherCode, 10);
+      var citta = (area && area.areaName && area.areaName[0] && area.areaName[0].value) ||
+                  (lat.toFixed(2) + ', ' + lon.toFixed(2));
+      setMeteo(WMO_ICONA[cod] || '🌡️', citta, temp, desc);
+    } catch(e) {
+      setMeteo('❌', 'Meteo non disponibile', '', '');
+    }
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(pos) { caricaMeteo(pos.coords.latitude, pos.coords.longitude); },
+      function()    { setMeteo('📍', 'Posizione non autorizzata', '', ''); }
+    );
+  } else {
+    setMeteo('📍', 'Geolocalizzazione non supportata', '', '');
+  }
+})();
 </script>
 <script src="/cookie-banner.js"></script>
 <footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">
