@@ -242,6 +242,10 @@ nav img{height:36px}
   width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;color:#888;
   display:flex;align-items:center;justify-content:center}
 
+/* COVER FOTO */
+#cover-foto{display:none;width:100%;max-height:280px;overflow:hidden;background:#111}
+#cover-foto img{width:100%;height:280px;object-fit:cover;display:block}
+
 @media(max-width:768px){
   .main-layout{grid-template-columns:1fr;padding:12px}
   .stats-row{gap:10px;padding:16px}
@@ -251,6 +255,7 @@ nav img{height:36px}
   nav{padding:10px 16px}
   .cal-grid-2x2{grid-template-columns:1fr}
   .mini-stats-grid{gap:8px}
+  #cover-foto img{height:160px}
 }
 </style>
 </head>
@@ -261,8 +266,11 @@ nav img{height:36px}
   <a href="javascript:history.back()" class="nav-back">← Torna ai risultati</a>
 </nav>
 
+<!-- COVER FOTO -->
+<div id="cover-foto"><img id="cover-foto-img" src="" alt="Foto di copertina"></div>
+
 <!-- HERO -->
-<div class="hero">
+<div class="hero" id="hero-section">
   <div class="hero-avatar" id="avatar-wrap">🏗️</div>
   <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
   <div class="hero-nome" id="profile-name">Caricamento...</div>
@@ -333,9 +341,9 @@ nav img{height:36px}
     </div>
 
     <!-- CHI SIAMO -->
-    <div class="card">
+    <div class="card" id="card-chi-siamo" style="display:none">
       <div class="card-title">📋 Chi siamo</div>
-      <p class="desc" id="profile-desc">Nessuna descrizione disponibile.</p>
+      <p class="desc" id="profile-desc"></p>
     </div>
 
     <!-- SPECIALIZZAZIONI -->
@@ -455,6 +463,8 @@ async function caricaProfilo(id){
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
     if(d.tipo)document.getElementById('profile-tipo-badge').textContent='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1);
     if(d.logo_url)document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo">`;
+    if(d.colore_header){const h=document.getElementById('hero-section');h.style.backgroundImage='none';h.style.background=d.colore_header}
+    if(d.foto_copertina_url){document.getElementById('cover-foto-img').src=d.foto_copertina_url;document.getElementById('cover-foto').style.display='block'}
     const b=[];
     if(d.verificata)b.push('<span class="hb hb-v">✓ Verificata</span>');
     if(d.anno_fondazione&&d.anno_fondazione>1900)b.push(`<span class="hb hb-g">Dal ${d.anno_fondazione}</span>`);
@@ -462,7 +472,7 @@ async function caricaProfilo(id){
     document.getElementById('profile-badges').innerHTML=b.join('');
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;
-    if(d.descrizione)document.getElementById('profile-desc').textContent=d.descrizione;
+    if(d.descrizione){document.getElementById('profile-desc').textContent=d.descrizione;document.getElementById('card-chi-siamo').style.display='block'}
     const im={'muratura':'🧱','carpentiere':'🪵','elettricista':'⚡','idraulico':'🚿','termoidraulico':'🔥','pittore':'🎨','piastrellista':'🟫','falegname':'🪚','fabbro':'🔩','giardiniere':'🌿','demolizione':'⛏️','fotovoltaico':'☀️'};
     const voci=[];const mestieri=Array.isArray(d.mestieri)?d.mestieri:(d.mestieri?[d.mestieri]:[]);
     if(d.mestiere)mestieri.unshift(d.mestiere);mestieri.forEach(m=>{if(m)voci.push(m)});
