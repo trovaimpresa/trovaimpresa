@@ -338,10 +338,11 @@
       if (conFoto) q = q.not('foto_lavori', 'is', null);
       if (sortBy === 'valutazione') q = q.order('valutazione_media', { ascending: false });
       else if (sortBy === 'recenti') q = q.order('created_at', { ascending: false });
-      else q = q.order('piano', { ascending: false }).order('created_at', { ascending: false });
+      else q = q.order('created_at', { ascending: false });
       const { data, error } = await q.limit(200);
       if (error) throw error;
       tuttiRisultati = data || [];
+      if (sortBy === 'piano') { const pp=p=>p==='premium'?3:p==='pro'?2:1; tuttiRisultati.sort((a,b)=>pp(b.piano)-pp(a.piano)); }
       paginaCorrente = 1;
       mostraPagina(1);
     } catch(e) {

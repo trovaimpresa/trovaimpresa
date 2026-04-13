@@ -71,10 +71,24 @@
 
   /* PIANI */
   .piani-grid {
-    display:grid; grid-template-columns:repeat(2,1fr);
-    gap:24px; max-width:800px; margin:32px auto; padding:0 24px 80px;
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:24px; max-width:1100px; margin:32px auto; padding:0 24px 80px;
   }
+  @media(max-width:900px){ .piani-grid { grid-template-columns:repeat(2,1fr); } }
   @media(max-width:600px){ .piani-grid { grid-template-columns:1fr; } }
+
+  .piano-card.premium {
+    border-color:#7b2fbe; background:linear-gradient(180deg,#f8f0ff,white);
+    box-shadow:var(--shadow2);
+  }
+  .piano-btn.premium-btn {
+    width:100%; padding:14px; border-radius:14px; border:none;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem;
+    cursor:pointer; transition:all 0.2s;
+    background:linear-gradient(135deg,#7b2fbe,#9b4dca); color:white;
+    box-shadow:0 6px 20px rgba(123,47,190,0.35);
+  }
+  .piano-btn.premium-btn:hover { background:linear-gradient(135deg,#6a1fa8,#8a3db8); transform:translateY(-1px); }
 
   .piano-card {
     background:white; border-radius:24px; padding:32px;
@@ -213,7 +227,7 @@
   <div class="toggle" id="toggle" onclick="togglePiano()">
     <div class="toggle-dot"></div>
   </div>
-  <span>Annuale <span class="risparmio">Risparmi 16€!</span></span>
+  <span>Annuale <span class="risparmio">Risparmi fino a €11!</span></span>
 </div>
 
 <!-- PIANI -->
@@ -271,6 +285,32 @@
     <button class="piano-btn pro-btn" onclick="apriPagamento()" id="btn-pro">
       💳 Inizia 3 mesi gratis
     </button>
+  </div>
+
+  <!-- PIANO PREMIUM -->
+  <div class="piano-card premium">
+    <div class="piano-badge" style="background:linear-gradient(135deg,#7b2fbe,#f4c02e);">💎 ESCLUSIVO</div>
+    <div class="piano-icon">💎</div>
+    <div class="piano-nome">Premium</div>
+    <div class="piano-sub">Per dominare il mercato</div>
+    <div class="piano-prezzo">
+      <div class="prezzo-num" id="prezzo-display-premium">€5</div>
+      <div class="prezzo-periodo" id="periodo-display-premium">al mese · dopo i 3 mesi gratis</div>
+      <div class="prezzo-originale" id="originale-display-premium" style="display:none">invece di €60/anno</div>
+    </div>
+    <div class="piano-features">
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del piano Pro</span></div>
+      <div class="feature"><span class="feature-icon">🥇</span><span class="feature-text">Posizione <strong>#1</strong> nei risultati (sopra i Pro)</span></div>
+      <div class="feature"><span class="feature-icon">🤖</span><span class="feature-text">AI integrata nel profilo</span></div>
+      <div class="feature"><span class="feature-icon">🎨</span><span class="feature-text">Colore header personalizzato</span></div>
+      <div class="feature"><span class="feature-icon">🖼️</span><span class="feature-text">Foto di copertina profilo</span></div>
+      <div class="feature"><span class="feature-icon">📸</span><span class="feature-text">Galleria foto illimitata</span></div>
+      <div class="feature"><span class="feature-icon">🎬</span><span class="feature-text">Video dei tuoi lavori</span></div>
+      <div class="feature"><span class="feature-icon">💎</span><span class="feature-text">Badge <strong>Premium</strong> esclusivo</span></div>
+    </div>
+    <a href="info-premium.html">
+      <button class="piano-btn premium-btn">💎 Scopri Premium</button>
+    </a>
   </div>
 
 </div>
@@ -351,17 +391,23 @@ function togglePiano() {
   toggle.classList.toggle('annuale', pianoAnnuale);
 
   if (pianoAnnuale) {
-    document.getElementById('prezzo-display').textContent = '€19.90';
-    document.getElementById('periodo-display').textContent = 'all\'anno · (€1.65/mese) · dopo i 3 mesi gratis';
+    document.getElementById('prezzo-display').textContent = '€29';
+    document.getElementById('periodo-display').textContent = 'all\'anno · (€2.42/mese) · dopo i 3 mesi gratis';
     document.getElementById('originale-display').style.display = 'block';
     document.getElementById('pay-piano').textContent = 'Annuale';
-    document.getElementById('pay-prezzo').textContent = '€19.90/anno';
+    document.getElementById('pay-prezzo').textContent = '€29/anno';
+    document.getElementById('prezzo-display-premium').textContent = '€49';
+    document.getElementById('periodo-display-premium').textContent = 'all\'anno · (€4.08/mese) · dopo i 3 mesi gratis';
+    document.getElementById('originale-display-premium').style.display = 'block';
   } else {
     document.getElementById('prezzo-display').textContent = '€3';
     document.getElementById('periodo-display').textContent = 'al mese · dopo i 3 mesi gratis';
     document.getElementById('originale-display').style.display = 'none';
     document.getElementById('pay-piano').textContent = 'Mensile';
     document.getElementById('pay-prezzo').textContent = '€3/mese';
+    document.getElementById('prezzo-display-premium').textContent = '€5';
+    document.getElementById('periodo-display-premium').textContent = 'al mese · dopo i 3 mesi gratis';
+    document.getElementById('originale-display-premium').style.display = 'none';
   }
 }
 

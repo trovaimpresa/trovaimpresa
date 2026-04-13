@@ -423,7 +423,6 @@ async function caricaImprese() {
   let { data, error } = await supabaseClient
     .from('imprese')
     .select('*')
-    .order('piano', { ascending: true })
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -432,14 +431,16 @@ async function caricaImprese() {
     return;
   }
 
-  // Pro appaiono sempre, Free solo se la città corrisponde alla ricerca
+  // Premium e Pro appaiono sempre, Free solo se la città corrisponde alla ricerca
   if (data && searchVal) {
     data = data.filter(i => {
-      if (i.piano === 'pro') return true;
+      if (i.piano === 'premium' || i.piano === 'pro') return true;
       const citta = (i.citta || '').toLowerCase();
       return citta.includes(searchVal) || searchVal.includes(citta);
     });
   }
+
+  if (data) { const pp=p=>p==='premium'?3:p==='pro'?2:1; data.sort((a,b)=>pp(b.piano)-pp(a.piano)); }
 
   const list = document.getElementById('results-list');
 
