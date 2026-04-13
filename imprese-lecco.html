@@ -50,6 +50,8 @@
   <a href="/cerca-imprese.html?citta=Lecco" class="hero-btn">🔍 Cerca a Lecco</a>
 </div>
 
+<div id="annunci-citta" style="max-width:900px;margin:0 auto;padding:16px 24px 0;"></div>
+
 <div class="section">
   <h2>Trova professionisti a Lecco</h2>
   <p>TrovaImpresa è la piattaforma italiana che ti mette in contatto con imprese edili e artigiani verificati a Lecco e provincia. Che tu abbia bisogno di una ristrutturazione, di un impianto elettrico o di un lavoro idraulico, trovi il professionista giusto in pochi click.</p>
@@ -83,6 +85,36 @@
 <footer>
   <p>© 2026 TrovaImpresa — <a href="/">Home</a> | <a href="/cerca-imprese.html">Cerca imprese</a> | <a href="/registrazione.html">Registra la tua impresa</a></p>
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  const _SU= + SUPABASE_URL + ,_SK= + SUPABASE_KEY + ;
+  const sb=supabase.createClient(_SU,_SK);
+  async function loadAnnunciCitta(){
+    const container=document.getElementById('annunci-citta');
+    if(!container)return;
+    const link=document.querySelector('a[href*="citta="]');
+    if(!link)return;
+    const citta=new URL(link.href,location.origin).searchParams.get('citta');
+    if(!citta)return;
+    const ora=new Date().toISOString();
+    const{data:annunci}=await sb.from('annunci_pubblicitari').select('*').eq('attivo',true).eq('posizione','citta').gt('data_fine',ora).contains('citta',[citta]);
+    if(!annunci||!annunci.length)return;
+    const cards=await Promise.all(annunci.map(async(ann)=>{
+      const{data:imp}=await sb.from('imprese').select('id,nome,citta,tipo,logo_url,mestiere').eq('id',ann.impresa_id).maybeSingle();
+      if(!imp)return'';
+      const logo=imp.logo_url
+        ?`<img src="${imp.logo_url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+        :`<div style="width:40px;height:40px;border-radius:50%;background:#fff3ee;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏗️</div>`;
+      return`<a href="/profilo-impresa.html?id=${imp.id}" style="display:flex;align-items:center;gap:14px;background:white;border-radius:14px;padding:16px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.07);text-decoration:none;color:inherit;border-left:4px solid #FF6B35;transition:box-shadow 0.2s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 10px rgba(0,0,0,0.07)';this.style.transform='translateY(0)'">${logo}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-weight:800;font-size:15px;color:#1a1a1a;">${imp.nome||'Impresa'}</span><span style="background:#FF6B35;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">Sponsorizzato</span></div><div style="font-size:13px;color:#555;">${imp.mestiere||imp.tipo||''}</div></div></a>`;
+    }));
+    const valide=cards.filter(Boolean);
+    if(!valide.length)return;
+    container.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;">${valide.join('')}</div>`;
+  }
+  document.addEventListener('DOMContentLoaded',loadAnnunciCitta);
+})();
+</script>
 <script src="/cookie-banner.js"></script>
 </body>
 </html>
