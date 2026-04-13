@@ -265,8 +265,8 @@
     <div class="piano-sub">Per crescere sul mercato</div>
     <div class="piano-prezzo">
       <div class="prezzo-num" id="prezzo-display">€3</div>
-      <div class="prezzo-periodo" id="periodo-display">al mese · dopo i 3 mesi gratis</div>
-      <div class="prezzo-originale" id="originale-display" style="display:none">invece di €36/anno</div>
+      <div class="prezzo-periodo">al mese &nbsp;·&nbsp; oppure <strong>€29/anno</strong></div>
+      <div class="prezzo-periodo" style="margin-top:2px;">dopo i 3 mesi gratis</div>
     </div>
     <div class="piano-features">
       <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del piano gratuito</span></div>
@@ -295,8 +295,8 @@
     <div class="piano-sub">Per dominare il mercato</div>
     <div class="piano-prezzo">
       <div class="prezzo-num" id="prezzo-display-premium">€5</div>
-      <div class="prezzo-periodo" id="periodo-display-premium">al mese · dopo i 3 mesi gratis</div>
-      <div class="prezzo-originale" id="originale-display-premium" style="display:none">invece di €60/anno</div>
+      <div class="prezzo-periodo">al mese &nbsp;·&nbsp; oppure <strong>€49/anno</strong></div>
+      <div class="prezzo-periodo" style="margin-top:2px;">dopo i 3 mesi gratis</div>
     </div>
     <div class="piano-features">
       <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del piano Pro</span></div>
@@ -380,10 +380,6 @@ const elements = stripe.elements();
 let pianoAnnuale = false;
 let cardElement = null;
 
-// Inizializza prezzi corretti
-document.getElementById('prezzo-display').textContent = '€3';
-document.getElementById('periodo-display').textContent = 'al mese · dopo i 3 mesi gratis';
-
 // TOGGLE PIANO
 function togglePiano() {
   pianoAnnuale = !pianoAnnuale;
@@ -392,22 +388,14 @@ function togglePiano() {
 
   if (pianoAnnuale) {
     document.getElementById('prezzo-display').textContent = '€29';
-    document.getElementById('periodo-display').textContent = 'all\'anno · (€2.42/mese) · dopo i 3 mesi gratis';
-    document.getElementById('originale-display').style.display = 'block';
     document.getElementById('pay-piano').textContent = 'Annuale';
     document.getElementById('pay-prezzo').textContent = '€29/anno';
     document.getElementById('prezzo-display-premium').textContent = '€49';
-    document.getElementById('periodo-display-premium').textContent = 'all\'anno · (€4.08/mese) · dopo i 3 mesi gratis';
-    document.getElementById('originale-display-premium').style.display = 'block';
   } else {
     document.getElementById('prezzo-display').textContent = '€3';
-    document.getElementById('periodo-display').textContent = 'al mese · dopo i 3 mesi gratis';
-    document.getElementById('originale-display').style.display = 'none';
     document.getElementById('pay-piano').textContent = 'Mensile';
     document.getElementById('pay-prezzo').textContent = '€3/mese';
     document.getElementById('prezzo-display-premium').textContent = '€5';
-    document.getElementById('periodo-display-premium').textContent = 'al mese · dopo i 3 mesi gratis';
-    document.getElementById('originale-display-premium').style.display = 'none';
   }
 }
 
