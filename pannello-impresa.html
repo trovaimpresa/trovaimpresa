@@ -678,6 +678,11 @@
           <div class="dash-quick-label">Il mio profilo</div>
           <div class="dash-quick-sub">Modifica i dati impresa</div>
         </div>
+        <div class="dash-quick-card" onclick="apriModalPub()" style="border-top-color:#FF6B35">
+          <div class="dash-quick-icon">🚀</div>
+          <div class="dash-quick-label">Promuovi la tua impresa</div>
+          <div class="dash-quick-sub">Acquista uno spazio pubblicitario</div>
+        </div>
       </div>
 
       <!-- GESTIONE PIANO -->
@@ -1932,7 +1937,61 @@ window.addEventListener('pageshow', function(event) {
     window.location.reload();
   }
 });
+
+// MODAL PUBBLICITA
+function apriModalPub() {
+  document.getElementById('modal-pub-overlay').classList.add('show');
+}
+function chiudiModalPub() {
+  document.getElementById('modal-pub-overlay').classList.remove('show');
+}
+async function avviaCheckoutPub() {
+  const citta = document.getElementById('pub-citta').value.trim();
+  const posizione = document.getElementById('pub-posizione').value;
+  if (!citta) { alert('Inserisci almeno una città.'); return; }
+  const btn = document.getElementById('pub-btn-paga');
+  btn.disabled = true; btn.textContent = '⏳ Attendere...';
+  try {
+    const res = await fetch('/.netlify/functions/crea-checkout-pubblicita', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ impresa_id: impresaCorrente.id, citta: [citta], posizione })
+    });
+    const { url } = await res.json();
+    window.location.href = url;
+  } catch (e) {
+    alert('Errore: ' + e.message);
+    btn.disabled = false; btn.textContent = '💳 Vai al pagamento';
+  }
+}
 </script>
+
+<!-- MODAL PUBBLICITA -->
+<div class="modal-overlay" id="modal-pub-overlay" onclick="if(event.target===this)chiudiModalPub()">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h2>🚀 Promuovi la tua impresa</h2>
+      <p>Scegli dove e come apparire su TrovaImpresa</p>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:18px">
+        <label style="display:block;font-weight:700;font-size:0.88rem;margin-bottom:6px;color:#333">Città</label>
+        <input id="pub-citta" type="text" placeholder="Es: Milano" style="width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:0.95rem;outline:none">
+      </div>
+      <div style="margin-bottom:24px">
+        <label style="display:block;font-weight:700;font-size:0.88rem;margin-bottom:6px;color:#333">Posizione annuncio</label>
+        <select id="pub-posizione" style="width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:0.95rem;outline:none;background:white">
+          <option value="homepage">Homepage</option>
+          <option value="categoria">Pagina categoria</option>
+          <option value="citta">Pagina città</option>
+        </select>
+      </div>
+      <button id="pub-btn-paga" onclick="avviaCheckoutPub()" style="width:100%;padding:13px;background:#FF6B35;color:white;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer">💳 Vai al pagamento</button>
+      <button onclick="chiudiModalPub()" style="width:100%;padding:11px;background:none;border:none;color:#888;font-size:0.9rem;cursor:pointer;margin-top:8px">Annulla</button>
+    </div>
+  </div>
+</div>
+
 </body>
 <script>
 function toggleSidebar() {
