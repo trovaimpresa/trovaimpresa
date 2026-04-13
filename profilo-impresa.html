@@ -615,7 +615,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
 });
 
 // LOGO LIGHTBOX
-(function(){
+document.addEventListener('DOMContentLoaded',function(){
   var lb=document.getElementById('logo-lightbox');
   var lbImg=document.getElementById('logo-lightbox-img');
   var lbClose=document.getElementById('logo-lightbox-close');
@@ -627,7 +627,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   lbClose.addEventListener('click',closeLb);
   lb.addEventListener('click',function(e){if(e.target===lb)closeLb()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb()});
-})();
+});
 </script>
 <script src="/cookie-banner.js"></script>
 <footer style="background:#1a472a;color:white;font-size:13px;padding:15px;text-align:center">
