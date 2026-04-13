@@ -554,7 +554,7 @@
     .modal { width: 100% !important; max-width: 100% !important; border-radius: 0 !important; height: 100vh !important; max-height: 100vh !important; }
 
     /* Piano grid 1 col */
-    #card-free, #card-pro { width: 100% !important; }
+    #card-free, #card-pro, #card-premium { width: 100% !important; }
 
     /* Calendario 2x2 su mobile: 1 col */
     #cal-orologio { font-size: 1.5rem !important; }
@@ -700,7 +700,7 @@
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
         <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b">Free</strong></div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
           <!-- FREE -->
           <div id="card-free" style="border:2px solid #2a7a4b;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s">
             <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
@@ -718,6 +718,17 @@
             <div style="font-size:0.8rem;color:#666;line-height:1.5">Annunci illimitati<br>Badge ⭐ Pro in evidenza<br>Posizione prioritaria</div>
             <div style="margin-top:12px">
               <button onclick="window.location.href='prezzi.html'" style="width:100%;padding:10px;background:#1a73e8;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">⭐ Passa a Pro</button>
+            </div>
+          </div>
+
+          <!-- PREMIUM -->
+          <div id="card-premium" style="border:2px solid #7b2fbe;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f8f0ff,#fff)">
+            <div style="font-size:1.5rem;margin-bottom:6px">💎</div>
+            <div style="font-weight:800;font-size:1rem;color:#7b2fbe;margin-bottom:4px">Premium</div>
+            <div style="font-size:0.75rem;color:#7b2fbe;font-weight:700;margin-bottom:6px">€5/mese · €49/anno</div>
+            <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto il Pro<br>AI integrata<br>Personalizzazione avanzata<br>Posizione #1 nei risultati</div>
+            <div style="margin-top:12px">
+              <button onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#7b2fbe;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">💎 Passa a Premium</button>
             </div>
           </div>
         </div>
