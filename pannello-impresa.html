@@ -693,25 +693,10 @@
           <div class="dash-quick-label">Il mio profilo</div>
           <div class="dash-quick-sub">Modifica i dati impresa</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7b1fa2;position:relative;cursor:default;">
-          <div class="dash-quick-icon">🎨</div>
-          <div class="dash-quick-label">Colore header</div>
-          <div class="dash-quick-sub">Personalizza l'header del profilo</div>
-          <div id="overlay-header-premium" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;">
-            <div style="font-size:1.6rem;margin-bottom:6px;">🔒</div>
-            <div style="font-weight:700;font-size:0.88rem;color:#1a1a1a;margin-bottom:10px;">Funzionalità Premium</div>
-            <a href="info-premium.html" style="display:inline-block;padding:8px 16px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.82rem;">Passa al Premium →</a>
-          </div>
-        </div>
-        <div class="dash-quick-card" onclick="apriModalPub()" style="border-top-color:#FF6B35;position:relative;">
+        <div class="dash-quick-card" onclick="apriModalPub()" style="border-top-color:#FF6B35;">
           <div class="dash-quick-icon">🚀</div>
           <div class="dash-quick-label">Promuovi la tua impresa</div>
           <div class="dash-quick-sub">Acquista uno spazio pubblicitario</div>
-          <div id="overlay-promuovi" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;">
-            <div style="font-size:1.6rem;margin-bottom:6px;">🔒</div>
-            <div style="font-weight:700;font-size:0.88rem;color:#1a1a1a;margin-bottom:10px;">Funzionalità Pro</div>
-            <a href="info-pro.html" style="display:inline-block;padding:8px 16px;background:#e65100;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.82rem;">Passa al Pro →</a>
-          </div>
         </div>
       </div>
 
@@ -1325,15 +1310,7 @@ async function inizializza() {
 
   // Overlay funzionalità Pro per utenti Free
   if (impresaCorrente.piano === 'free') {
-    ['overlay-ai-prev', 'overlay-promuovi'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'flex';
-    });
-  }
-
-  // Overlay funzionalità Premium per utenti non-Premium
-  if (impresaCorrente.piano !== 'premium') {
-    ['overlay-header-premium'].forEach(id => {
+    ['overlay-ai-prev'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = 'flex';
     });
