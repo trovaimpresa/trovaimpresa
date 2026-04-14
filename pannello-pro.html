@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Pannello Impresa — TrovaImpresa</title>
+<title>Pannello Pro — TrovaImpresa</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -648,11 +648,6 @@
           <img id="foto-presentazione" src="" style="width:200px;height:150px;background:#ccc;border-radius:10px;object-fit:cover;display:block;" alt="">
           <div style="font-size:0.75rem;opacity:0.7;margin-top:4px;">Foto presentazione</div>
         </div>
-        <div id="overlay-ai-prev" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:20px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
-          <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-          <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Pro</div>
-          <a href="info-pro.html" style="display:inline-block;padding:10px 20px;background:#e65100;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Pro →</a>
-        </div>
       </div>
 
       <!-- STATISTICHE -->
@@ -1115,11 +1110,7 @@ async function caricaSessioneConDati(session) {
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
   if (impresaCorrente.id) {
     const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
-    if (pianoFresco) {
-      impresaCorrente.piano = pianoFresco.piano;
-      if (pianoFresco.piano === 'premium') { window.location.replace('pannello-premium.html'); return; }
-      if (pianoFresco.piano === 'pro') { window.location.replace('pannello-pro.html'); return; }
-    }
+    if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
   }
   console.log('piano:', impresaCorrente.piano);
   document.getElementById('login-screen').style.display = 'none';
@@ -1145,11 +1136,7 @@ async function caricaAvvio() {
   }
   impresaCorrente = data;
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
-  if (pianoFresco) {
-    impresaCorrente.piano = pianoFresco.piano;
-    if (pianoFresco.piano === 'premium') { window.location.replace('pannello-premium.html'); return; }
-    if (pianoFresco.piano === 'pro') { window.location.replace('pannello-pro.html'); return; }
-  }
+  if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
   aggiornaBadgeEOverlay();
   console.log('piano:', impresaCorrente.piano);
   document.getElementById('spinner-avvio').style.display = 'none';
@@ -1187,11 +1174,7 @@ async function doLogin() {
   }
   impresaCorrente = data;
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
-  if (pianoFresco) {
-    impresaCorrente.piano = pianoFresco.piano;
-    if (pianoFresco.piano === 'premium') { window.location.replace('pannello-premium.html'); return; }
-    if (pianoFresco.piano === 'pro') { window.location.replace('pannello-pro.html'); return; }
-  }
+  if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
   aggiornaBadgeEOverlay();
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
@@ -1313,12 +1296,6 @@ function aggiornaBadgeEOverlay() {
     pianoBadge.textContent = piano === 'premium' ? '💎 Premium' : piano === 'pro' ? '⭐ Pro' : '🆓 Free';
     if (piano === 'pro') pianoBadge.classList.add('pro');
     if (piano === 'premium') pianoBadge.classList.add('premium');
-  }
-  if (piano === 'free') {
-    ['overlay-ai-prev'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'flex';
-    });
   }
   const lbl = document.getElementById('piano-attuale-label');
   if(lbl) lbl.textContent = impresaCorrente.piano;
