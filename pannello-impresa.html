@@ -376,6 +376,7 @@
     padding:4px 12px; font-size:0.82rem; font-weight:700;
   }
   .dash-piano-badge.pro { background:#1a73e8; }
+  .dash-piano-badge.premium { background:#0288d1; }
   .btn-ai-preventivo {
     background:white; color:var(--verde2); border:none; border-radius:14px;
     padding:13px 22px; font-family:'DM Sans',sans-serif; font-weight:800;
@@ -628,17 +629,25 @@
 
       <!-- HERO HEADER -->
       <div class="dash-hero">
-        <div style="display:none">
+        <!-- SINISTRA: logo -->
+        <div id="dash-logo-wrap" style="width:64px;height:64px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;overflow:hidden;">🏢</div>
+        <!-- CENTRO: nome + info + AI -->
+        <div style="flex:1;min-width:0;padding:0 16px;">
           <div class="dash-welcome">Pannello impresa</div>
           <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
-          <div class="dash-meta">
+          <div class="dash-meta" style="margin-bottom:12px;">
             <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
             <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
           </div>
+          <button class="btn-ai-preventivo" onclick="apriModalPreventivoDash()">
+            🤖 Genera preventivo AI
+          </button>
         </div>
-        <button class="btn-ai-preventivo" onclick="apriModalPreventivoDash()">
-          🤖 Genera preventivo AI
-        </button>
+        <!-- DESTRA: foto presentazione -->
+        <div style="flex-shrink:0;text-align:center;">
+          <img id="foto-presentazione" src="" style="width:200px;height:150px;background:#ccc;border-radius:10px;object-fit:cover;display:block;" alt="">
+          <div style="font-size:0.75rem;opacity:0.7;margin-top:4px;">Foto presentazione</div>
+        </div>
         <div id="overlay-ai-prev" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:20px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
           <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
           <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Pro</div>
@@ -1295,14 +1304,19 @@ window.onpopstate = function(e) {
 async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const isPro = impresaCorrente.piano === 'pro';
+  const isPremium = impresaCorrente.piano === 'premium';
   const rating = impresaCorrente.rating || '—';
 
   // Header dashboard
   document.getElementById('dash-nome-impresa').textContent = nome;
   document.getElementById('dash-rating-badge').textContent = `⭐ ${rating}`;
   const pianoBadge = document.getElementById('dash-piano-badge');
-  pianoBadge.textContent = isPro ? '⭐ Pro' : '🆓 Free';
+  pianoBadge.classList.remove('pro', 'premium');
+  pianoBadge.textContent = isPremium ? '💎 Premium' : isPro ? '⭐ Pro' : '🆓 Free';
   if (isPro) pianoBadge.classList.add('pro');
+  if (isPremium) pianoBadge.classList.add('premium');
+  const dashLogoWrap = document.getElementById('dash-logo-wrap');
+  if (dashLogoWrap && impresaCorrente.logo_url) dashLogoWrap.innerHTML = `<img src="${impresaCorrente.logo_url}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
 
   // Anteprima profilo pubblico
   const prevNome = document.getElementById('prev-nome');
