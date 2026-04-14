@@ -1129,7 +1129,7 @@ function mostraLogin() {
   document.getElementById('pannello').style.display = 'none';
 }
 
-(async () => {
+async function caricaAvvio() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
     window.location.replace('login-impresa.html');
@@ -1148,7 +1148,8 @@ function mostraLogin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
   inizializza();
-})();
+}
+caricaAvvio();
 
 // LOGIN
 async function doLogin() {
