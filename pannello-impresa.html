@@ -1178,6 +1178,8 @@ async function doLogin() {
     return;
   }
   impresaCorrente = data;
+  const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
+  if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
