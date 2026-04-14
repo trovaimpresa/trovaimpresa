@@ -1114,6 +1114,11 @@ async function caricaSessioneConDati(session) {
     data = data2;
   }
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
+  if (impresaCorrente.id) {
+    const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
+    if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
+  }
+  console.log('piano:', impresaCorrente.piano);
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
   inizializza();
@@ -1136,6 +1141,9 @@ function mostraLogin() {
     return;
   }
   impresaCorrente = data;
+  const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
+  if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
+  console.log('piano:', impresaCorrente.piano);
   document.getElementById('spinner-avvio').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
