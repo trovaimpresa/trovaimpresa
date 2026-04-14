@@ -158,7 +158,10 @@
           btn.innerHTML = '✅ Verifica codice';
           btn.disabled = false;
         } else {
-          window.location.href = 'pannello-impresa.html';
+          const redirect = new URLSearchParams(window.location.search).get('redirect');
+          if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
+          else if (redirect === 'pro') window.location.href = 'prezzi.html?piano=pro';
+          else window.location.href = 'pannello-impresa.html';
         }
       } catch(err) {
         showError('❌ ' + err.message);
@@ -181,7 +184,10 @@
           code
         });
         if (error) throw error;
-        window.location.href = 'pannello-impresa.html';
+        const redirect = new URLSearchParams(window.location.search).get('redirect');
+        if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
+        else if (redirect === 'pro') window.location.href = 'prezzi.html?piano=pro';
+        else window.location.href = 'pannello-impresa.html';
       } catch(err) {
         showError('❌ Codice non valido o scaduto.');
         btn.disabled = false;
