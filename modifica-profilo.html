@@ -414,33 +414,76 @@
           <div id="file-selected" style="display:none;margin-top:8px;font-size:13px;color:#2a7a4b;font-weight:600;"></div>
         </div>
 
-        <!-- FOTO COPERTINA (PRO) -->
-        <div class="section-title">🖼️ Foto di copertina <span style="font-size:11px;font-weight:600;background:#e8733a;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PRO</span></div>
-        <div class="form-group">
-          <div id="wrap-copertina-pro">
-            <div id="copertina-current-wrap" style="display:none;margin-bottom:12px;">
-              <img id="copertina-current" style="max-width:100%;border-radius:8px;max-height:160px;object-fit:cover;" src="" alt="Copertina attuale">
-              <div style="font-size:12px;color:#666;margin-top:4px;">Foto di copertina attuale</div>
+        <!-- FOTO COPERTINA (PREMIUM) -->
+        <div style="position:relative;">
+          <div class="section-title">🖼️ Foto di copertina <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
+          <div class="form-group">
+            <div id="wrap-copertina-pro">
+              <div id="copertina-current-wrap" style="display:none;margin-bottom:12px;">
+                <img id="copertina-current" style="max-width:100%;border-radius:8px;max-height:160px;object-fit:cover;" src="" alt="Copertina attuale">
+                <div style="font-size:12px;color:#666;margin-top:4px;">Foto di copertina attuale</div>
+              </div>
+              <div class="upload-area" onclick="document.getElementById('copertina-input').click()">
+                <p><strong>Clicca per caricare</strong> la foto di copertina</p>
+                <small>PNG, JPG — max 5MB — consigliata 1200×400px</small>
+              </div>
+              <input type="file" id="copertina-input" accept="image/*" style="display:none;">
+              <div id="copertina-file-selected" style="display:none;margin-top:8px;font-size:13px;color:#2a7a4b;font-weight:600;"></div>
             </div>
-            <div class="upload-area" onclick="document.getElementById('copertina-input').click()">
-              <p><strong>Clicca per caricare</strong> la foto di copertina</p>
-              <small>PNG, JPG — max 5MB — consigliata 1200×400px</small>
-            </div>
-            <input type="file" id="copertina-input" accept="image/*" style="display:none;">
-            <div id="copertina-file-selected" style="display:none;margin-top:8px;font-size:13px;color:#2a7a4b;font-weight:600;"></div>
           </div>
-          <div id="wrap-copertina-free" style="display:none;background:#fff8f0;border:1px solid #f0c070;border-radius:8px;padding:14px;text-align:center;font-size:13px;color:#7a4a00;">🔒 Funzione Pro — <a href="pannello-impresa.html" style="color:#e8733a;font-weight:700;">Passa a Pro →</a></div>
+          <div id="overlay-copertina" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
+            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
+            <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Premium</div>
+            <a href="info-premium.html" style="display:inline-block;padding:10px 20px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Premium →</a>
+          </div>
         </div>
 
-        <!-- COLORE HEADER (PRO) -->
-        <div class="section-title">🎨 Colore header profilo <span style="font-size:11px;font-weight:600;background:#e8733a;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PRO</span></div>
-        <div class="form-group">
-          <div id="wrap-colore-pro">
-            <label style="font-size:12px;color:#555;margin-bottom:8px;display:block;">Colore di sfondo dell'header nel tuo profilo pubblico</label>
-            <input type="color" id="f-colore_header" value="#1a3a2a" style="width:80px;height:40px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:4px;">
-            <span style="font-size:12px;color:#888;margin-left:10px;">Default: verde TrovaImpresa</span>
+        <!-- COLORE HEADER (PREMIUM) -->
+        <div style="position:relative;">
+          <div class="section-title">🎨 Colore header profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
+          <div class="form-group">
+            <div id="wrap-colore-pro">
+              <label style="font-size:12px;color:#555;margin-bottom:8px;display:block;">Colore di sfondo dell'header nel tuo profilo pubblico</label>
+              <input type="color" id="f-colore_header" value="#1a3a2a" style="width:80px;height:40px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:4px;">
+              <span style="font-size:12px;color:#888;margin-left:10px;">Default: verde TrovaImpresa</span>
+            </div>
           </div>
-          <div id="wrap-colore-free" style="display:none;background:#fff8f0;border:1px solid #f0c070;border-radius:8px;padding:14px;text-align:center;font-size:13px;color:#7a4a00;">🔒 Funzione Pro — <a href="pannello-impresa.html" style="color:#e8733a;font-weight:700;">Passa a Pro →</a></div>
+          <div id="overlay-colore" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
+            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
+            <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Premium</div>
+            <a href="info-premium.html" style="display:inline-block;padding:10px 20px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Premium →</a>
+          </div>
+        </div>
+
+        <!-- VIDEO PROFILO (PREMIUM) -->
+        <div style="position:relative;">
+          <div class="section-title">🎬 Video profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
+          <div class="form-group">
+            <div class="upload-area">
+              <p><strong>Clicca per caricare</strong> un video di presentazione</p>
+              <small>MP4, MOV — max 50MB — max 60 secondi</small>
+            </div>
+          </div>
+          <div id="overlay-video" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
+            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
+            <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Premium</div>
+            <a href="info-premium.html" style="display:inline-block;padding:10px 20px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Premium →</a>
+          </div>
+        </div>
+
+        <!-- AI INTEGRATA (PREMIUM) -->
+        <div style="position:relative;">
+          <div class="section-title">🤖 AI integrata nel profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
+          <div class="form-group">
+            <div style="background:#f9f5ff;border:1px solid #e0d0f0;border-radius:8px;padding:14px;font-size:13px;color:#555;line-height:1.6;">
+              L'AI analizza il tuo profilo e risponde automaticamente alle domande dei clienti, suggerisce miglioramenti e genera descrizioni ottimizzate.
+            </div>
+          </div>
+          <div id="overlay-ai-profilo" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
+            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
+            <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Premium</div>
+            <a href="info-premium.html" style="display:inline-block;padding:10px 20px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Premium →</a>
+          </div>
         </div>
 
         <button type="button" class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
@@ -583,14 +626,15 @@
         document.getElementById('logo-current-wrap').style.display = 'block';
       }
 
-      // Campi Pro
-      const isPro = d.piano === 'pro';
-      document.getElementById('wrap-copertina-pro').style.display = isPro ? 'block' : 'none';
-      document.getElementById('wrap-copertina-free').style.display = isPro ? 'none' : 'block';
-      document.getElementById('wrap-colore-pro').style.display = isPro ? 'block' : 'none';
-      document.getElementById('wrap-colore-free').style.display = isPro ? 'none' : 'block';
-
-      if (isPro) {
+      // Campi Premium
+      const isPremium = d.piano === 'premium';
+      if (!isPremium) {
+        ['overlay-copertina', 'overlay-colore', 'overlay-video', 'overlay-ai-profilo'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'flex';
+        });
+      }
+      if (isPremium) {
         if (d.foto_copertina_url) {
           document.getElementById('copertina-current').src = d.foto_copertina_url;
           document.getElementById('copertina-current-wrap').style.display = 'block';
@@ -777,7 +821,7 @@
 
       try {
         clearAlert();
-        const isPro = impresaData.piano === 'pro';
+        const isPremium = impresaData.piano === 'premium';
         let logo_url = impresaData.logo_url;
         if (logoFile) {
           btn.textContent = '⏳ Caricamento logo...';
@@ -785,7 +829,7 @@
         }
 
         let foto_copertina_url = impresaData.foto_copertina_url || null;
-        if (copFile && isPro) {
+        if (copFile && isPremium) {
           btn.textContent = '⏳ Caricamento copertina...';
           foto_copertina_url = await uploadFotoCopertina(copFile);
         }
@@ -799,8 +843,8 @@
           logo_url: logo_url,
           lat: parseFloat(document.getElementById('f-lat').value) || null,
           lng: parseFloat(document.getElementById('f-lng').value) || null,
-          foto_copertina_url: isPro ? foto_copertina_url : undefined,
-          colore_header: isPro ? document.getElementById('f-colore_header').value : undefined
+          foto_copertina_url: isPremium ? foto_copertina_url : undefined,
+          colore_header: isPremium ? document.getElementById('f-colore_header').value : undefined
         };
 
         // Campi specifici per tipo
