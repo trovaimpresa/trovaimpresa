@@ -52,7 +52,13 @@
   /* TOGGLE */
   .toggle-wrap {
     display:flex; align-items:center; justify-content:center;
-    gap:16px; padding:40px 24px 0; font-weight:600; font-size:0.9rem;
+    gap:16px; padding:40px 24px 0; font-weight:600; font-size:1.1rem;
+  }
+  .toggle-wrap > span { font-weight:700; }
+  .toggle-wrap > span .risparmio { font-size:0.75rem; }
+  .toggle-inner {
+    display:flex; align-items:center; gap:16px;
+    background:#f5f5f5; border-radius:50px; padding:12px 24px;
   }
   .toggle {
     width:52px; height:28px; background:var(--verde); border-radius:14px;
@@ -220,11 +226,13 @@
 
 <!-- TOGGLE MENSILE/ANNUALE -->
 <div class="toggle-wrap">
-  <span>Mensile</span>
-  <div class="toggle" id="toggle" onclick="togglePiano()">
-    <div class="toggle-dot"></div>
+  <div class="toggle-inner">
+    <span>Mensile</span>
+    <div class="toggle" id="toggle" onclick="togglePiano()">
+      <div class="toggle-dot"></div>
+    </div>
+    <span>Annuale <span class="risparmio">Risparmi fino a €11!</span></span>
   </div>
-  <span>Annuale <span class="risparmio">Risparmi fino a €11!</span></span>
 </div>
 
 <!-- PIANI -->
