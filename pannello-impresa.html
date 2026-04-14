@@ -702,7 +702,7 @@
       <!-- GESTIONE PIANO -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
-        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b">Free</strong></div>
+        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b"><span id="piano-attuale-label">Free</span></strong></div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:stretch">
           <!-- FREE -->
@@ -1308,6 +1308,8 @@ function aggiornaBadgeEOverlay() {
       if (el) el.style.display = 'flex';
     });
   }
+  const lbl = document.getElementById('piano-attuale-label');
+  if(lbl) lbl.textContent = impresaCorrente.piano;
 }
 
 async function inizializza() {
