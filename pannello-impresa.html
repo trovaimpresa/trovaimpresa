@@ -1152,6 +1152,7 @@ async function caricaAvvio() {
   impresaCorrente = data;
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
+  aggiornaBadgeEOverlay();
   console.log('piano:', impresaCorrente.piano);
   document.getElementById('spinner-avvio').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
@@ -1189,6 +1190,7 @@ async function doLogin() {
   impresaCorrente = data;
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
+  aggiornaBadgeEOverlay();
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
@@ -1301,20 +1303,31 @@ window.onpopstate = function(e) {
   }
 };
 
+function aggiornaBadgeEOverlay() {
+  const piano = impresaCorrente ? impresaCorrente.piano : '';
+  const pianoBadge = document.getElementById('dash-piano-badge');
+  if (pianoBadge) {
+    pianoBadge.classList.remove('pro', 'premium');
+    pianoBadge.textContent = piano === 'premium' ? '💎 Premium' : piano === 'pro' ? '⭐ Pro' : '🆓 Free';
+    if (piano === 'pro') pianoBadge.classList.add('pro');
+    if (piano === 'premium') pianoBadge.classList.add('premium');
+  }
+  if (piano === 'free') {
+    ['overlay-ai-prev'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'flex';
+    });
+  }
+}
+
 async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const isPro = impresaCorrente.piano === 'pro';
-  const isPremium = impresaCorrente.piano === 'premium';
   const rating = impresaCorrente.rating || '—';
 
   // Header dashboard
   document.getElementById('dash-nome-impresa').textContent = nome;
   document.getElementById('dash-rating-badge').textContent = `⭐ ${rating}`;
-  const pianoBadge = document.getElementById('dash-piano-badge');
-  pianoBadge.classList.remove('pro', 'premium');
-  pianoBadge.textContent = isPremium ? '💎 Premium' : isPro ? '⭐ Pro' : '🆓 Free';
-  if (isPro) pianoBadge.classList.add('pro');
-  if (isPremium) pianoBadge.classList.add('premium');
   const dashLogoWrap = document.getElementById('dash-logo-wrap');
   if (dashLogoWrap && impresaCorrente.logo_url) dashLogoWrap.innerHTML = `<img src="${impresaCorrente.logo_url}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
 
@@ -1332,14 +1345,6 @@ async function inizializza() {
 
   // Stat rating (condiviso)
   document.getElementById('stat-rating').textContent = rating;
-
-  // Overlay funzionalità Pro per utenti Free
-  if (impresaCorrente.piano === 'free') {
-    ['overlay-ai-prev'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'flex';
-    });
-  }
 
   await caricaPreventivi();
   await caricaRecensioni();
