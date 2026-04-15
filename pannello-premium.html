@@ -947,6 +947,76 @@
       </div>
     </div>
 
+    <!-- STATISTICHE -->
+    <div class="section" id="sec-statistiche" style="display:none">
+      <div class="topbar">
+        <div class="topbar-title">📊 Statistiche</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+        <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,0.07);text-align:center;border-top:4px solid #2a7a4b;">
+          <div style="font-size:1.6rem;margin-bottom:6px;">📋</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#2a7a4b;" id="stat-preventivi">—</div>
+          <div style="font-size:0.75rem;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Preventivi ricevuti</div>
+        </div>
+        <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,0.07);text-align:center;border-top:4px solid #f5a800;">
+          <div style="font-size:1.6rem;margin-bottom:6px;">⭐</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#f5a800;" id="stat-recensioni">—</div>
+          <div style="font-size:0.75rem;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Media recensioni</div>
+        </div>
+        <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,0.07);text-align:center;border-top:4px solid #7b1fa2;">
+          <div style="font-size:1.6rem;margin-bottom:6px;">👤</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#7b1fa2;" id="stat-candidature">—</div>
+          <div style="font-size:0.75rem;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Candidature ricevute</div>
+        </div>
+        <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 2px 12px rgba(0,0,0,0.07);text-align:center;border-top:4px solid #1a73e8;">
+          <div style="font-size:1.6rem;margin-bottom:6px;">👁️</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#1a73e8;" id="stat-visite">0</div>
+          <div style="font-size:0.75rem;color:#999;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Visite profilo</div>
+        </div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:16px;">🕐 Ultime attività</div>
+        <div id="lista-attivita"><div class="empty-state"><div class="empty-icon">⏳</div>Caricamento...</div></div>
+      </div>
+    </div>
+
+    <!-- NOTIFICHE -->
+    <div class="section" id="sec-notifiche" style="display:none">
+      <div class="topbar">
+        <div class="topbar-title">🔔 Notifiche</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;border-bottom:2px solid rgba(0,0,0,0.08);padding-bottom:0;">
+        <button class="notif-tab-btn active" onclick="mostraTabNotifiche('preventivi',this)" style="padding:9px 16px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;color:#2a7a4b;cursor:pointer;border-bottom:3px solid #2a7a4b;margin-bottom:-2px;">📋 Preventivi</button>
+        <button class="notif-tab-btn" onclick="mostraTabNotifiche('recensioni',this)" style="padding:9px 16px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;color:#555;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;">⭐ Recensioni</button>
+        <button class="notif-tab-btn" onclick="mostraTabNotifiche('messaggi',this)" style="padding:9px 16px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;color:#555;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;">💬 Messaggi</button>
+        <button class="notif-tab-btn" onclick="mostraTabNotifiche('candidature',this)" style="padding:9px 16px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;color:#555;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;">👤 Candidature</button>
+      </div>
+      <div id="lista-notifiche"><div class="empty-state"><div class="empty-icon">⏳</div>Caricamento...</div></div>
+    </div>
+
+    <!-- AI PROFILO -->
+    <div class="section" id="sec-ai-profilo" style="display:none">
+      <div class="topbar">
+        <div class="topbar-title">🤖 AI Profilo</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:16px;">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:14px;">👤 Il tuo profilo</div>
+        <div style="font-size:0.82rem;color:#555;margin-bottom:4px;font-weight:600;">Nome attività</div>
+        <div id="ai-pf-nome" style="font-size:0.95rem;color:#1a1a1a;padding:8px 12px;background:#f4f6f9;border-radius:8px;margin-bottom:10px;">—</div>
+        <div style="font-size:0.82rem;color:#555;margin-bottom:4px;font-weight:600;">Descrizione attuale</div>
+        <div id="ai-pf-desc" style="font-size:0.9rem;color:#1a1a1a;padding:8px 12px;background:#f4f6f9;border-radius:8px;min-height:40px;line-height:1.5;">—</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:16px;">⚡ Strumenti AI</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button onclick="aiProfiloPlaceholder(this)" style="width:100%;padding:14px 18px;background:#f4f6f9;border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;color:#1a1a1a;cursor:pointer;text-align:left;transition:background 0.15s;">🎯 Genera bio professionale</button>
+          <button onclick="aiProfiloPlaceholder(this)" style="width:100%;padding:14px 18px;background:#f4f6f9;border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;color:#1a1a1a;cursor:pointer;text-align:left;transition:background 0.15s;">💡 Suggerimenti profilo</button>
+          <button onclick="aiProfiloPlaceholder(this)" style="width:100%;padding:14px 18px;background:#f4f6f9;border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;color:#1a1a1a;cursor:pointer;text-align:left;transition:background 0.15s;">🔍 Parole chiave SEO</button>
+        </div>
+        <div id="ai-profilo-placeholder" style="display:none;margin-top:16px;padding:14px;background:#f3e5f5;border-radius:10px;font-size:0.88rem;color:#7b1fa2;font-weight:600;text-align:center;">⏳ Disponibile dopo attivazione API</div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -2183,5 +2253,118 @@ function chiudiModalProfilo() {
     setMeteo('📍', 'Geolocalizzazione non supportata', '', '');
   }
 })();
+</script>
+
+<script>
+// ── STATISTICHE ───────────────────────────────────────────────────────────────
+async function caricaStatistiche() {
+  if (!impresaCorrente) return;
+  const id = impresaCorrente.id;
+
+  const { count: cPreventivi } = await sb.from('preventivi').select('*', { count:'exact', head:true }).eq('impresa_id', id);
+  document.getElementById('stat-preventivi').textContent = cPreventivi ?? 0;
+
+  const { count: cCandidature } = await sb.from('candidati_lavoro').select('*', { count:'exact', head:true }).eq('impresa_id', id);
+  document.getElementById('stat-candidature').textContent = cCandidature ?? 0;
+
+  const { data: recensioni } = await sb.from('feedback_clienti').select('voto,rating,stelle').eq('impresa_id', id);
+  if (recensioni && recensioni.length) {
+    const vals = recensioni.map(r => parseFloat(r.voto || r.rating || r.stelle || 0)).filter(v => v > 0);
+    document.getElementById('stat-recensioni').textContent = vals.length ? (vals.reduce((a,b) => a+b,0)/vals.length).toFixed(1) : '—';
+  } else {
+    document.getElementById('stat-recensioni').textContent = '—';
+  }
+
+  const [{ data: p }, { data: rec }, { data: msg }, { data: cand }] = await Promise.all([
+    sb.from('preventivi').select('created_at,descrizione,tipo_lavoro,nome_cliente').eq('impresa_id', id).order('created_at',{ascending:false}).limit(5),
+    sb.from('feedback_clienti').select('created_at,testo,commento,nome_cliente,autore').eq('impresa_id', id).order('created_at',{ascending:false}).limit(5),
+    sb.from('messaggi').select('created_at,testo,messaggio,nome_mittente').eq('impresa_id', id).order('created_at',{ascending:false}).limit(5),
+    sb.from('candidati_lavoro').select('created_at,messaggio,nome,nome_candidato,ruolo').eq('impresa_id', id).order('created_at',{ascending:false}).limit(5),
+  ]);
+  const eventi = [
+    ...(p||[]).map(r=>({tipo:'📋 Preventivo', testo:r.descrizione||r.tipo_lavoro||r.nome_cliente||'Preventivo ricevuto', data:r.created_at})),
+    ...(rec||[]).map(r=>({tipo:'⭐ Recensione', testo:r.testo||r.commento||r.nome_cliente||r.autore||'Nuova recensione', data:r.created_at})),
+    ...(msg||[]).map(r=>({tipo:'💬 Messaggio', testo:r.testo||r.messaggio||r.nome_mittente||'Nuovo messaggio', data:r.created_at})),
+    ...(cand||[]).map(r=>({tipo:'👤 Candidatura', testo:r.messaggio||r.ruolo||r.nome||r.nome_candidato||'Nuova candidatura', data:r.created_at})),
+  ].sort((a,b)=>new Date(b.data)-new Date(a.data)).slice(0,12);
+
+  const el = document.getElementById('lista-attivita');
+  if (!eventi.length) { el.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Nessuna attività</div>'; return; }
+  el.innerHTML = eventi.map(e=>`
+    <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.06);">
+      <div style="font-size:0.75rem;font-weight:700;color:#999;text-transform:uppercase;min-width:110px;padding-top:2px;">${e.tipo}</div>
+      <div style="flex:1;font-size:0.9rem;color:#1a1a1a;">${e.testo}</div>
+      <div style="font-size:0.78rem;color:#bbb;white-space:nowrap;">${e.data ? new Date(e.data).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) : '—'}</div>
+    </div>`).join('');
+}
+
+// ── NOTIFICHE ─────────────────────────────────────────────────────────────────
+let _notifTab = 'preventivi';
+let _notifCache = {};
+
+async function caricaNotifiche() {
+  if (!impresaCorrente) return;
+  await caricaTabNotifiche(_notifTab);
+}
+
+async function mostraTabNotifiche(tab, btn) {
+  _notifTab = tab;
+  document.querySelectorAll('.notif-tab-btn').forEach(b => {
+    b.style.color = '#555'; b.style.borderBottomColor = 'transparent';
+  });
+  if (btn) { btn.style.color = '#2a7a4b'; btn.style.borderBottomColor = '#2a7a4b'; }
+  await caricaTabNotifiche(tab);
+}
+
+async function caricaTabNotifiche(tab) {
+  const id = impresaCorrente.id;
+  const el = document.getElementById('lista-notifiche');
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div>Caricamento...</div>';
+
+  const tabMap = {
+    preventivi:  { table:'preventivi',      mittente:'nome_cliente,email_cliente', testo:'descrizione,tipo_lavoro' },
+    recensioni:  { table:'feedback_clienti', mittente:'nome_cliente,autore',        testo:'testo,commento' },
+    messaggi:    { table:'messaggi',         mittente:'nome_mittente,mittente',      testo:'testo,messaggio' },
+    candidature: { table:'candidati_lavoro', mittente:'nome,nome_candidato',         testo:'messaggio,ruolo' },
+  };
+  const cfg = tabMap[tab];
+  if (!cfg) return;
+
+  const fields = ['id','created_at','letto', cfg.mittente, cfg.testo].join(',');
+  const { data } = await sb.from(cfg.table).select(fields).eq('impresa_id', id).order('created_at',{ascending:false}).limit(30);
+
+  if (!data || !data.length) { el.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Nessuna notifica</div>'; return; }
+
+  const mitKeys = cfg.mittente.split(',');
+  const testoKeys = cfg.testo.split(',');
+  el.innerHTML = data.map(r => {
+    const mitt = mitKeys.map(k=>r[k]).find(v=>v) || '—';
+    const txt  = testoKeys.map(k=>r[k]).find(v=>v) || '—';
+    const letto = r.letto;
+    const data_ = r.created_at ? new Date(r.created_at).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    return `<div style="background:${letto?'white':'#f3e5f5'};border-radius:12px;padding:14px 16px;margin-bottom:10px;border-left:4px solid ${letto?'rgba(0,0,0,0.08)':'#7b1fa2'};">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;">
+        <span style="font-weight:700;font-size:0.92rem;">${mitt}</span>
+        <span style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:10px;background:${letto?'#e0e0e0':'#7b1fa2'};color:${letto?'#666':'white'};">${letto?'Letto':'Nuovo'}</span>
+      </div>
+      <div style="font-size:0.87rem;color:#555;">${txt}</div>
+      <div style="font-size:0.75rem;color:#bbb;margin-top:4px;">${data_}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── AI PROFILO PLACEHOLDER ────────────────────────────────────────────────────
+function aiProfiloPlaceholder(btn) {
+  document.getElementById('ai-profilo-placeholder').style.display = 'block';
+}
+
+function inizializzaAIProfilo() {
+  if (!impresaCorrente) return;
+  const d = impresaCorrente;
+  const nome = document.getElementById('ai-pf-nome');
+  const desc = document.getElementById('ai-pf-desc');
+  if (nome) nome.textContent = d.nome_attivita || (d.nome + ' ' + (d.cognome||'')) || '—';
+  if (desc) desc.textContent = d.descrizione || '(nessuna descrizione)';
+}
 </script>
 </html>
