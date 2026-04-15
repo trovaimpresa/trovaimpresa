@@ -456,7 +456,20 @@
                 <div id="preview-colore_header" style="flex:1;min-width:80px;height:40px;border-radius:8px;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);border:1px solid #ddd;"></div>
               </div>
               <input type="hidden" id="colore_header" value="linear-gradient(135deg,#1a3a2a,#2a7a4b)">
-              <script>function aggiornaGradiente(){var d=document.getElementById('f-colore_header_dir').value,c1=document.getElementById('f-colore_header').value,c2=document.getElementById('f-colore_header2').value,g='linear-gradient('+d+','+c1+','+c2+')';document.getElementById('colore_header').value=g;document.getElementById('preview-colore_header').style.background=g;}</script>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#1a3a2a,#2a7a4b)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);"></div>
+                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#0d3b8c,#1a73e8)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#0d3b8c,#1a73e8);"></div>
+                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#3a0a6e,#7b2fbe)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#3a0a6e,#7b2fbe);"></div>
+                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#b71c1c,#e53935)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#b71c1c,#e53935);"></div>
+                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#e65100,#ff9800)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#e65100,#ff9800);"></div>
+                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#1a237e,#00bcd4)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#1a237e,#00bcd4);"></div>
+                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#212121,#616161)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#212121,#616161);"></div>
+                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#880e4f,#e91e63)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#880e4f,#e91e63);"></div>
+              </div>
+              <script>
+                function aggiornaGradiente(){var d=document.getElementById('f-colore_header_dir').value,c1=document.getElementById('f-colore_header').value,c2=document.getElementById('f-colore_header2').value,g='linear-gradient('+d+','+c1+','+c2+')';document.getElementById('colore_header').value=g;document.getElementById('preview-colore_header').style.background=g;}
+                function selezionaPreset(el,g){document.getElementById('colore_header').value=g;document.getElementById('preview-colore_header').style.background=g;document.querySelectorAll('.preset-grad-card').forEach(function(c){c.style.border='2px solid #ddd';});el.style.border='3px solid #333';}
+              </script>
             </div>
           </div>
           <div id="overlay-colore" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
