@@ -298,26 +298,10 @@ async function caricaStatistiche() {
     .from('candidati_lavoro').select('*', { count:'exact', head:true }).eq('impresa_id', id);
   document.getElementById('stat-candidature').textContent = cCandidature ?? 0;
 
-  // ── Visite totali + ultimi 7 giorni
-  const { data: visite, count: cVisite } = await supabaseClient
-    .from('visite_profilo').select('created_at', { count:'exact' }).eq('impresa_id', id);
-  document.getElementById('stat-visite').textContent = cVisite ?? 0;
-
-  // Grafico ultimi 7 giorni
-  const oggi = new Date();
-  const giorni = Array.from({ length:7 }, (_, i) => {
-    const d = new Date(oggi);
-    d.setDate(oggi.getDate() - (6 - i));
-    return { date: d.toISOString().slice(0,10), label: dataBreve(d), n: 0 };
-  });
-  if (visite) {
-    visite.forEach(v => {
-      const g = v.created_at ? v.created_at.slice(0,10) : null;
-      const slot = giorni.find(d => d.date === g);
-      if (slot) slot.n++;
-    });
-  }
-  renderGrafico(giorni);
+  // ── Visite totali + grafico — tabella visite_profilo non ancora disponibile
+  document.getElementById('stat-visite').textContent = 0;
+  document.getElementById('chart-bars').innerHTML = '<div style="color:var(--light);font-size:0.9rem;padding:20px 0;">Dati non ancora disponibili</div>';
+  document.getElementById('chart-labels').innerHTML = '';
 
   // ── Ultime attività (preventivi + recensioni + messaggi)
   const [{ data: ultPreventivi }, { data: ultRecensioni }, { data: ultMessaggi }, { data: ultCandidature }] = await Promise.all([
