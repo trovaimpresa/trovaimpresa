@@ -1207,18 +1207,18 @@ function mostraLogin() {
 }
 
 async function caricaAvvio() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
+  const { data: { session } } = await sb.auth.getSession();
   if (!session) {
     window.location.replace('login-impresa.html');
     return;
   }
-  const { data } = await supabaseClient.from('imprese').select('*').eq('user_id', session.user.id).single();
+  const { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
   if (!data) {
     window.location.replace('login-impresa.html');
     return;
   }
   impresaCorrente = data;
-  const { data: pianoFresco } = await supabaseClient.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
+  const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
   aggiornaBadgeEOverlay();
   console.log('piano:', impresaCorrente.piano);
