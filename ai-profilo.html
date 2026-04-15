@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<title>AI Profilo — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --light:   #999;
+    --bg:      #f4f6f9;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 2px 16px rgba(0,0,0,0.07);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); min-height:100vh; }
+
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  #spinner-avvio {
+    display:flex; min-height:100vh; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+  }
+
+  /* HEADER */
+  .page-header {
+    background:linear-gradient(135deg,#1a3a2a 0%,#2a7a4b 100%);
+    color:white; padding:20px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .page-header h1 { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; }
+  .badge-premium {
+    display:inline-block; background:#7b1fa2; color:white;
+    font-size:0.7rem; font-weight:700; padding:3px 10px;
+    border-radius:20px; letter-spacing:0.5px; vertical-align:middle; margin-left:8px;
+  }
+  .header-sub { font-size:0.82rem; opacity:0.75; margin-top:2px; }
+  .btn-torna {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.15); color:white;
+    border:1px solid rgba(255,255,255,0.3); border-radius:10px;
+    padding:9px 18px; font-size:0.88rem; font-weight:600;
+    cursor:pointer; text-decoration:none; transition:background 0.2s; white-space:nowrap;
+  }
+  .btn-torna:hover { background:rgba(255,255,255,0.25); }
+
+  /* LAYOUT */
+  .content { max-width:860px; margin:0 auto; padding:28px 20px 60px; }
+
+  .section-card {
+    background:white; border-radius:16px; padding:24px 28px;
+    box-shadow:var(--shadow); margin-bottom:24px;
+  }
+  .section-title {
+    font-family:'Playfair Display',serif; font-size:1.1rem;
+    color:var(--dark); margin-bottom:18px; font-weight:700;
+    display:flex; align-items:center; gap:10px;
+  }
+
+  /* PROFILO ATTUALE */
+  .profilo-field { margin-bottom:14px; }
+  .profilo-field label { font-size:0.78rem; font-weight:700; color:var(--light); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px; }
+  .profilo-field-val { font-size:0.95rem; color:var(--dark); line-height:1.5; padding:10px 14px; background:var(--bg); border-radius:8px; min-height:36px; }
+
+  /* STRUMENTI AI */
+  .tool-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:600px) { .tool-grid { grid-template-columns:1fr; } }
+
+  .tool-card {
+    border:1.5px solid var(--border); border-radius:14px; padding:18px 20px;
+    cursor:pointer; transition:all 0.15s;
+  }
+  .tool-card:hover { border-color:var(--verde); box-shadow:0 4px 16px rgba(42,122,75,0.1); }
+  .tool-card.active { border-color:var(--verde); background:var(--verde3); }
+  .tool-icon { font-size:1.6rem; margin-bottom:8px; }
+  .tool-name { font-weight:700; font-size:0.95rem; color:var(--dark); margin-bottom:4px; }
+  .tool-desc { font-size:0.8rem; color:var(--light); line-height:1.4; }
+
+  /* AREA GENERAZIONE */
+  #area-genera { display:none; }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; font-size:0.82rem; font-weight:600; color:var(--mid); margin-bottom:6px; }
+  .form-group textarea, .form-group input {
+    width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--dark);
+    outline:none; transition:border 0.2s; resize:vertical;
+  }
+  .form-group textarea:focus, .form-group input:focus { border-color:var(--verde); }
+
+  .btn-genera {
+    width:100%; padding:14px; background:linear-gradient(135deg,var(--verde),var(--verde2));
+    color:white; border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
+    font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.2s;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn-genera:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 20px rgba(42,122,75,0.3); }
+  .btn-genera:disabled { opacity:0.65; cursor:not-allowed; transform:none; }
+
+  /* RISULTATO */
+  .result-box { display:none; margin-top:20px; }
+  .result-box.show { display:block; }
+  .result-label {
+    font-size:0.8rem; font-weight:700; color:var(--verde); text-transform:uppercase;
+    letter-spacing:0.5px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .result-text {
+    width:100%; padding:14px; border:1.5px solid #c8e6c9; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:0.9rem; color:var(--dark);
+    background:#f6fff8; min-height:140px; resize:vertical; outline:none;
+    line-height:1.6;
+  }
+  .result-actions { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  .btn-action {
+    flex:1; min-width:120px; padding:11px 16px; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:600;
+    cursor:pointer; border:none; transition:all 0.15s;
+  }
+  .btn-copia { background:#e8f0fe; color:#1a73e8; }
+  .btn-copia:hover { background:#d2e3fc; }
+  .btn-salva { background:var(--verde); color:white; }
+  .btn-salva:hover { background:var(--verde2); }
+  .btn-salva:disabled { opacity:0.6; cursor:not-allowed; }
+
+  .spinner-inline {
+    width:16px; height:16px; border:2px solid rgba(255,255,255,0.4);
+    border-top-color:white; border-radius:50%;
+    animation:spin 0.7s linear infinite; display:inline-block;
+  }
+
+  .toast {
+    position:fixed; bottom:24px; right:24px; background:#1a3a2a; color:white;
+    padding:12px 20px; border-radius:12px; font-size:0.88rem; font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2); z-index:9999;
+    transform:translateY(80px); opacity:0; transition:all 0.3s;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- SPINNER -->
+<div id="spinner-avvio">
+  <div style="text-align:center;color:white">
+    <div style="font-size:2.5rem;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
+    <div style="font-size:1rem;opacity:0.85;font-weight:600">Caricamento...</div>
+  </div>
+</div>
+
+<!-- PAGINA -->
+<div id="pagina" style="display:none;">
+
+  <div class="page-header">
+    <div>
+      <h1>🤖 AI Profilo <span class="badge-premium">PREMIUM</span></h1>
+      <div class="header-sub" id="header-nome-impresa">—</div>
+    </div>
+    <a href="pannello-premium.html" class="btn-torna">← Torna al pannello</a>
+  </div>
+
+  <div class="content">
+
+    <!-- PROFILO ATTUALE -->
+    <div class="section-card">
+      <div class="section-title">👤 Il tuo profilo attuale</div>
+      <div class="profilo-field">
+        <label>Nome attività</label>
+        <div class="profilo-field-val" id="pf-nome">—</div>
+      </div>
+      <div class="profilo-field">
+        <label>Settore / Tipo</label>
+        <div class="profilo-field-val" id="pf-tipo">—</div>
+      </div>
+      <div class="profilo-field">
+        <label>Descrizione attuale</label>
+        <div class="profilo-field-val" id="pf-descrizione" style="white-space:pre-wrap;">—</div>
+      </div>
+    </div>
+
+    <!-- STRUMENTI AI -->
+    <div class="section-card">
+      <div class="section-title">⚡ Scegli uno strumento AI</div>
+      <div class="tool-grid" id="tool-grid">
+        <div class="tool-card" onclick="selezionaStrumento('descrizione',this)">
+          <div class="tool-icon">✍️</div>
+          <div class="tool-name">Ottimizza descrizione</div>
+          <div class="tool-desc">Rendi la tua descrizione più professionale e convincente per i clienti.</div>
+        </div>
+        <div class="tool-card" onclick="selezionaStrumento('bio',this)">
+          <div class="tool-icon">🎯</div>
+          <div class="tool-name">Genera bio professionale</div>
+          <div class="tool-desc">Crea una presentazione breve e incisiva della tua impresa.</div>
+        </div>
+        <div class="tool-card" onclick="selezionaStrumento('keywords',this)">
+          <div class="tool-icon">🔍</div>
+          <div class="tool-name">Parole chiave SEO</div>
+          <div class="tool-desc">Scopri le parole chiave migliori per farti trovare dai clienti.</div>
+        </div>
+        <div class="tool-card" onclick="selezionaStrumento('punti_forza',this)">
+          <div class="tool-icon">💪</div>
+          <div class="tool-name">Punti di forza</div>
+          <div class="tool-desc">Identifica e valorizza i punti di forza della tua impresa.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AREA GENERAZIONE -->
+    <div class="section-card" id="area-genera">
+      <div class="section-title" id="genera-title">✍️ Ottimizza descrizione</div>
+
+      <div class="form-group" id="fg-note">
+        <label id="fg-note-label">Note aggiuntive (opzionale)</label>
+        <textarea id="input-note" rows="3" placeholder="Es. voglio enfatizzare l'esperienza trentennale e i lavori chiavi in mano..."></textarea>
+      </div>
+
+      <button class="btn-genera" id="btn-genera" onclick="generaConAI()">
+        🤖 Genera con AI
+      </button>
+
+      <div class="result-box" id="result-box">
+        <div class="result-label">
+          <span>✨ Testo generato — puoi modificarlo</span>
+        </div>
+        <textarea class="result-text" id="result-text" rows="8"></textarea>
+        <div class="result-actions">
+          <button class="btn-action btn-copia" onclick="copiaRisultato()">📋 Copia</button>
+          <button class="btn-action btn-salva" id="btn-salva" onclick="salvaDescrizione()">💾 Salva come descrizione profilo</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/cookie-banner.js"></script>
+<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+
+<script>
+const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let impresaCorrente = null;
+let strumentoAttivo = null;
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if (!session) { window.location.replace('login-impresa.html'); return; }
+  if (impresaCorrente) return;
+
+  let { data } = await supabaseClient.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (!data) {
+    const { data: byEmail } = await supabaseClient.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
+    if (byEmail) {
+      await supabaseClient.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
+      data = byEmail;
+    }
+  }
+  if (!data) { window.location.replace('login-impresa.html'); return; }
+
+  impresaCorrente = data;
+  document.getElementById('spinner-avvio').style.display = 'none';
+  document.getElementById('pagina').style.display = 'block';
+  popolaProfilo();
+});
+
+// ── POPOLA PROFILO ────────────────────────────────────────────────────────────
+function popolaProfilo() {
+  const d = impresaCorrente;
+  document.getElementById('header-nome-impresa').textContent = d.nome_attivita || d.email || '';
+  document.getElementById('pf-nome').textContent = d.nome_attivita || (d.nome + ' ' + (d.cognome || '')) || '—';
+  document.getElementById('pf-tipo').textContent = [d.tipo, d.mestieri ? JSON.parse(d.mestieri).join(', ') : ''].filter(Boolean).join(' · ') || '—';
+  document.getElementById('pf-descrizione').textContent = d.descrizione || '(nessuna descrizione)';
+}
+
+// ── SELEZIONE STRUMENTO ───────────────────────────────────────────────────────
+const config = {
+  descrizione: {
+    title: '✍️ Ottimizza descrizione',
+    noteLabel: 'Cosa vuoi enfatizzare? (opzionale)',
+    notePlaceholder: 'Es. esperienza trentennale, lavori chiavi in mano, preventivi gratuiti...',
+    salvaLabel: '💾 Salva come descrizione profilo',
+    mostraSalva: true,
+  },
+  bio: {
+    title: '🎯 Genera bio professionale',
+    noteLabel: 'Tono e focus desiderato (opzionale)',
+    notePlaceholder: 'Es. professionale e diretto, punta sulla qualità e affidabilità...',
+    salvaLabel: '💾 Salva come descrizione profilo',
+    mostraSalva: true,
+  },
+  keywords: {
+    title: '🔍 Parole chiave SEO',
+    noteLabel: 'Zona geografica target (opzionale)',
+    notePlaceholder: 'Es. Roma Nord, provincia di Milano...',
+    salvaLabel: null,
+    mostraSalva: false,
+  },
+  punti_forza: {
+    title: '💪 Punti di forza',
+    noteLabel: 'Aspetti da valorizzare (opzionale)',
+    notePlaceholder: 'Es. certificazioni, materiali premium, garanzia decennale...',
+    salvaLabel: null,
+    mostraSalva: false,
+  },
+};
+
+function selezionaStrumento(id, el) {
+  strumentoAttivo = id;
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+
+  const cfg = config[id];
+  document.getElementById('genera-title').textContent = cfg.title;
+  document.getElementById('fg-note-label').textContent = cfg.noteLabel;
+  document.getElementById('input-note').placeholder = cfg.notePlaceholder;
+  document.getElementById('input-note').value = '';
+  document.getElementById('result-box').classList.remove('show');
+  document.getElementById('result-text').value = '';
+  document.getElementById('btn-genera').innerHTML = '🤖 Genera con AI';
+  document.getElementById('btn-genera').disabled = false;
+
+  const btnSalva = document.getElementById('btn-salva');
+  if (cfg.mostraSalva) {
+    btnSalva.style.display = 'flex';
+    btnSalva.textContent = cfg.salvaLabel;
+  } else {
+    btnSalva.style.display = 'none';
+  }
+
+  const area = document.getElementById('area-genera');
+  area.style.display = 'block';
+  area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── GENERA CON AI ─────────────────────────────────────────────────────────────
+async function generaConAI() {
+  if (!strumentoAttivo) return;
+  const d = impresaCorrente;
+  const note = document.getElementById('input-note').value.trim();
+  const nome = d.nome_attivita || (d.nome + ' ' + (d.cognome || ''));
+  const tipo = d.tipo || '';
+  const mestieri = d.mestieri ? JSON.parse(d.mestieri).join(', ') : '';
+  const citta = d.citta || '';
+  const descrizioneAttuale = d.descrizione || '';
+  const anniAttivita = d.anno_fondazione ? (new Date().getFullYear() - parseInt(d.anno_fondazione)) + ' anni di attività' : '';
+
+  const contesto = `Impresa: ${nome}${tipo ? ' · ' + tipo : ''}${mestieri ? ' · ' + mestieri : ''}${citta ? ' · ' + citta : ''}${anniAttivita ? ' · ' + anniAttivita : ''}`;
+
+  const prompts = {
+    descrizione: `Sei un esperto di marketing per imprese edili italiane. Ottimizza la seguente descrizione di profilo rendendola più professionale, convincente e orientata ai clienti. Scrivi in italiano, tono professionale ma accessibile, 3-5 frasi.\n\nImpresa: ${contesto}\nDescrizione attuale: "${descrizioneAttuale || 'non presente'}"${note ? '\nNote: ' + note : ''}\n\nScrivi solo il testo ottimizzato, senza titoli o introduzioni.`,
+    bio: `Sei un copywriter esperto. Crea una bio professionale breve (2-3 frasi) per questa impresa italiana. Deve essere incisiva, credibile e orientata a conquistare nuovi clienti.\n\nImpresa: ${contesto}${note ? '\nFocus: ' + note : ''}\n\nScrivi solo la bio, senza titoli o spiegazioni.`,
+    keywords: `Sei un esperto SEO per imprese locali italiane. Elenca le 15 parole chiave e frasi di ricerca più efficaci per questa impresa, che i potenziali clienti userebbero su Google.\n\nImpresa: ${contesto}${note ? '\nZona target: ' + note : ''}\n\nFormato: una parola chiave per riga, dalla più importante alla meno importante.`,
+    punti_forza: `Sei un consulente di business. Analizza questa impresa e proponi 5 punti di forza da comunicare ai potenziali clienti nel profilo, con una breve spiegazione di come valorizzarli.\n\nImpresa: ${contesto}\nDescrizione: "${descrizioneAttuale || 'non presente'}"${note ? '\nAspetti da valorizzare: ' + note : ''}\n\nFormato: lista numerata con punto di forza e breve spiegazione su come comunicarlo.`,
+  };
+
+  const btn = document.getElementById('btn-genera');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-inline"></span> L\'AI sta elaborando...';
+
+  try {
+    const res = await fetch('/.netlify/functions/ai-orienta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ testo: prompts[strumentoAttivo] })
+    });
+    if (!res.ok) throw new Error('Errore server ' + res.status);
+    const testo = await res.text();
+    document.getElementById('result-text').value = testo.trim();
+    document.getElementById('result-box').classList.add('show');
+    btn.innerHTML = '✅ Generato — puoi rigenerare';
+    btn.disabled = false;
+    document.getElementById('result-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
+    alert('Errore nella generazione. Riprova tra poco.');
+    btn.disabled = false;
+    btn.innerHTML = '🤖 Genera con AI';
+  }
+}
+
+// ── COPIA ─────────────────────────────────────────────────────────────────────
+async function copiaRisultato() {
+  const testo = document.getElementById('result-text').value;
+  try {
+    await navigator.clipboard.writeText(testo);
+    mostraToast('✅ Copiato negli appunti');
+  } catch {
+    mostraToast('⚠️ Copia manuale: seleziona il testo e premi Ctrl+C');
+  }
+}
+
+// ── SALVA DESCRIZIONE ─────────────────────────────────────────────────────────
+async function salvaDescrizione() {
+  const testo = document.getElementById('result-text').value.trim();
+  if (!testo) return;
+  const btn = document.getElementById('btn-salva');
+  btn.disabled = true;
+  btn.textContent = '⏳ Salvataggio...';
+  try {
+    const { error } = await supabaseClient
+      .from('imprese').update({ descrizione: testo }).eq('id', impresaCorrente.id);
+    if (error) throw error;
+    impresaCorrente.descrizione = testo;
+    document.getElementById('pf-descrizione').textContent = testo;
+    mostraToast('✅ Descrizione salvata sul profilo!');
+    btn.textContent = '✅ Salvato!';
+    setTimeout(() => { btn.disabled = false; btn.textContent = config[strumentoAttivo].salvaLabel; }, 2500);
+  } catch (err) {
+    mostraToast('❌ Errore nel salvataggio. Riprova.');
+    btn.disabled = false;
+    btn.textContent = config[strumentoAttivo].salvaLabel;
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function mostraToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
