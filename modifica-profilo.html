@@ -444,10 +444,19 @@
           <div class="form-group">
             <div id="wrap-colore-pro">
               <label style="font-size:12px;color:#555;margin-bottom:8px;display:block;">Colore di sfondo dell'header nel tuo profilo pubblico</label>
-              <input type="color" id="f-colore_header" value="#1a3a2a" style="width:80px;height:40px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:4px;"
-                oninput="document.getElementById('colore_header').value=this.value;document.getElementById('preview-colore_header').style.background=this.value;">
-              <input type="hidden" id="colore_header" value="#1a3a2a">
-              <div id="preview-colore_header" style="display:inline-block;vertical-align:middle;margin-left:10px;width:120px;height:40px;border-radius:8px;background:#1a3a2a;border:1px solid #ddd;"></div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <input type="color" id="f-colore_header" value="#1a3a2a" style="width:60px;height:40px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:4px;" oninput="aggiornaGradiente()">
+                <input type="color" id="f-colore_header2" value="#2a7a4b" style="width:60px;height:40px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:4px;" oninput="aggiornaGradiente()">
+                <select id="f-colore_header_dir" style="height:40px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:13px;cursor:pointer;" onchange="aggiornaGradiente()">
+                  <option value="135deg">↗ 135°</option>
+                  <option value="90deg">↑ 90°</option>
+                  <option value="180deg">↓ 180°</option>
+                  <option value="45deg">→ 45°</option>
+                </select>
+                <div id="preview-colore_header" style="flex:1;min-width:80px;height:40px;border-radius:8px;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);border:1px solid #ddd;"></div>
+              </div>
+              <input type="hidden" id="colore_header" value="linear-gradient(135deg,#1a3a2a,#2a7a4b)">
+              <script>function aggiornaGradiente(){var d=document.getElementById('f-colore_header_dir').value,c1=document.getElementById('f-colore_header').value,c2=document.getElementById('f-colore_header2').value,g='linear-gradient('+d+','+c1+','+c2+')';document.getElementById('colore_header').value=g;document.getElementById('preview-colore_header').style.background=g;}</script>
             </div>
           </div>
           <div id="overlay-colore" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
