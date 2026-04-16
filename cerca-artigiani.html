@@ -74,32 +74,21 @@
     .results-count strong { color: #222; font-weight: 700; }
     .sort-select { font-size: 16px; border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 14px; color: #111; outline: none; cursor: pointer; }
 
+    /* Compact result grid */
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-top: 4px; }
+
     /* CARD */
-    .card { background: white; border-radius: 14px; padding: 24px 28px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 16px; display: flex; gap: 22px; border-left: 5px solid #e0e0e0; transition: box-shadow 0.2s, transform 0.15s; text-decoration: none; color: inherit; }
+    .card { background: white; border-radius: 14px; padding: 24px 28px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 16px; display: flex; gap: 22px; border-left: 5px solid #e0e0e0; transition: box-shadow 0.2s, transform 0.15s; text-decoration: none; color: inherit; align-items: center; }
     .card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-2px); border-left-color: #2a7a4b; }
     .card.pro { border-left-color: #FF6B35; }
     .card-logo { width: 40px; height: 40px; border-radius: 50%; background: #f0f9f4; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; overflow: hidden; border: 1.5px solid #eee; }
-    .card-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .card-body { flex: 1; min-width: 0; }
-    .card-name { font-size: 22px; font-weight: 800; color: #1a1a1a; margin-bottom: 8px; }
-    .card-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
-    .badge-verificato { background: #e8f5ec; color: #2a7a4b; }
-    .badge-pro { background: #fff3ee; color: #FF6B35; }
-    .badge-tipo { background: #eef3ff; color: #3b5bdb; }
-    .card-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 16px; color: #333; margin-bottom: 10px; }
-    .card-desc { font-size: 14px; color: #666; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 12px; }
-    .card-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-    .tag { background: #f4f6f8; color: #222; font-size: 15px; padding: 5px 14px; border-radius: 8px; }
-    .card-right { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; flex-shrink: 0; min-width: 130px; gap: 10px; }
-    .card-rating { text-align: right; }
-    .rating-score { font-size: 28px; font-weight: 800; color: #1a1a1a; line-height: 1; }
-    .stars { color: #f5a623; font-size: 16px; }
-    .rating-count { font-size: 14px; color: #555; }
-    .card-price { text-align: right; font-size: 14px; color: #111; line-height: 1.5; }
-    .card-price strong { display: block; color: #2a7a4b; font-weight: 700; font-size: 17px; }
-    .btn-profilo { background: #FF6B35; color: white; border: none; border-radius: 10px; padding: 12px 20px; font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-    .btn-profilo:hover { background: #e55a25; }
+    .card-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .card-header { flex: 1; min-width: 0; }
+    .card-name { font-size: 22px; font-weight: 800; color: #1a1a1a; margin-bottom: 6px; }
+    .card-desc { font-size: 14px; color: #666; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .card-tipo { font-size: 15px; color: #2a7a4b; font-weight: 600; margin-bottom: 4px; }
+    .card-citta { font-size: 15px; color: #555; }
+    .badge-pro { display: inline-flex; align-items: center; gap: 4px; background: #fff3ee; color: #FF6B35; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-left: 6px; }
 
     .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 28px; padding-bottom: 32px; }
     .page-btn { width: 44px; height: 44px; border: 1.5px solid #ddd; background: white; border-radius: 10px; font-size: 17px; font-weight: 600; color: #222; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
@@ -111,8 +100,8 @@
 
     @media (max-width: 700px) {
       .sidebar { display: none; }
-      .card { flex-direction: column; }
-      .card-right { flex-direction: row; align-items: center; min-width: unset; }
+      .results-col { padding: 16px; }
+      .results-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -362,7 +351,7 @@
     const totPagine = Math.ceil(totale / PER_PAGE);
     const slice = tuttiRisultati.slice((pagina - 1) * PER_PAGE, pagina * PER_PAGE);
     document.getElementById('risultatiCount').innerHTML = `Trovati <strong>${totale}</strong> artigiani`;
-    div.innerHTML = slice.map(i => cardHTML(i)).join('');
+    div.innerHTML = `<div class="results-grid">${slice.map(i => cardHTML(i)).join('')}</div>`;
     const pag = document.getElementById('pagination');
     if (totPagine <= 1) { pag.innerHTML = ''; return; }
     let html = '';
@@ -380,28 +369,9 @@
 
   function cardHTML(i) {
     const logo = i.logo_url ? `<img src="${i.logo_url}" alt="logo">` : `🔨`;
-    const isPro = i.piano === 'pro';
-    const badges = `<span class="badge badge-verificato">✔ VERIFICATO</span><span class="badge badge-tipo">🔧 ARTIGIANO</span>${isPro?'<span class="badge badge-pro">⭐ PRO</span>':''}`;
-    const voto = i.valutazione_media ? parseFloat(i.valutazione_media) : null;
-    const ratingBlock = voto ? `<div class="card-rating"><div class="rating-score">${voto.toFixed(1)}</div><div class="stars">${'★'.repeat(Math.round(voto))}${'☆'.repeat(5-Math.round(voto))}</div><div class="rating-count">${i.num_recensioni?i.num_recensioni+' rec.':''}</div></div>` : '<div></div>';
-    const meta = [];
-    if (i.citta) meta.push(`<span>📍 ${i.citta}</span>`);
-    if (i.num_dipendenti) meta.push(`<span>👥 ${i.num_dipendenti} pers.</span>`);
-    if (i.anno_fondazione) meta.push(`<span>📅 Dal ${i.anno_fondazione}</span>`);
+    const badge = i.piano === 'pro' ? '<span class="badge-pro">⭐ PRO</span>' : '';
     const desc = i.descrizione ? `<div class="card-desc">${i.descrizione}</div>` : '';
-    const mestieri = i.mestieri ? (Array.isArray(i.mestieri)?i.mestieri:i.mestieri.split(',')).slice(0,3).map(m=>`<span class="tag">🔧 ${m.trim()}</span>`).join('') : '';
-    const prezzoBlock = i.costo_medio ? `<div class="card-price"><strong>${i.costo_medio}</strong>costo medio</div>` : '<div></div>';
-    return `<a class="card${isPro?' pro':''}" href="profilo-impresa.html?id=${i.id}">
-      <div class="card-logo">${logo}</div>
-      <div class="card-body">
-        <div class="card-name">${i.nome||'Artigiano'}</div>
-        <div class="card-badges">${badges}</div>
-        <div class="card-meta">${meta.join('')}</div>
-        ${desc}
-        ${mestieri?`<div class="card-tags">${mestieri}</div>`:''}
-      </div>
-      <div class="card-right">${ratingBlock}${prezzoBlock}<button class="btn-profilo">Vedi profilo</button></div>
-    </a>`;
+    return `<a class="card${i.piano==='pro'?' pro':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}</div></a>`;
   }
 
   const params = new URLSearchParams(window.location.search);
