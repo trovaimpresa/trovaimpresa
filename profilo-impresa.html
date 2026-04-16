@@ -21,15 +21,18 @@ nav img{height:36px}
 .hero{background:#111;
   background-image:url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&q=80&auto=format&fit=crop');
   background-size:cover;background-position:center;
-  padding:48px 32px 36px;text-align:center;color:#fff;position:relative}
+  padding:48px 32px 36px;text-align:left;color:#fff;position:relative;
+  display:flex;flex-direction:row;align-items:stretch;gap:20px}
 .hero::before{content:'';position:absolute;inset:0;
   background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.5) 100%);z-index:0}
 .hero>*{position:relative;z-index:1}
-.hero-avatar{width:120px;height:120px;border-radius:16px;background:white;
-  border:3px solid white;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+.hero-left-col{flex:1;display:flex;flex-direction:column;justify-content:center}
+.hero-right-col{flex:2;display:flex;align-items:center;justify-content:center}
+.hero-avatar{width:100%;max-height:180px;border-radius:0;background:transparent;
+  border:none;box-shadow:none;
   display:flex;align-items:center;justify-content:center;font-size:3rem;
-  margin:0 auto 16px;overflow:hidden;cursor:pointer}
-.hero-avatar img{width:100%;height:100%;object-fit:cover}
+  overflow:hidden;cursor:pointer}
+.hero-avatar img{max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;background:transparent}
 
 /* LOGO LIGHTBOX */
 #logo-lightbox{display:none;position:fixed;inset:0;z-index:9999;
@@ -47,7 +50,7 @@ nav img{height:36px}
   color:rgba(255,255,255,0.65);margin-bottom:6px}
 .hero-nome{font-size:2.2rem;font-weight:800;margin-bottom:8px;line-height:1.1}
 .hero-loc{font-size:14px;color:rgba(255,255,255,0.8);margin-bottom:12px}
-.hero-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.hero-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
 .hb{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
 .hb-v{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3)}
 .hb-o{background:#FF6B35;color:white}
@@ -271,11 +274,15 @@ nav img{height:36px}
 
 <!-- HERO -->
 <div class="hero" id="hero-section">
-  <div class="hero-avatar" id="avatar-wrap">🏗️</div>
-  <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
-  <div class="hero-nome" id="profile-name">Caricamento...</div>
-  <div class="hero-loc" id="profile-city">📍 —</div>
-  <div class="hero-badges" id="profile-badges"></div>
+  <div class="hero-left-col">
+    <div class="hero-tipo" id="profile-tipo-badge">🔧 Artigiano</div>
+    <div class="hero-nome" id="profile-name">Caricamento...</div>
+    <div class="hero-loc" id="profile-city">📍 —</div>
+    <div class="hero-badges" id="profile-badges"></div>
+  </div>
+  <div class="hero-right-col">
+    <div class="hero-avatar" id="avatar-wrap">🏗️</div>
+  </div>
 </div>
 
 <!-- STATS -->
