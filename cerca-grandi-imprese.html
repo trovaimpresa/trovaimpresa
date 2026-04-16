@@ -23,7 +23,7 @@
     .btn-cerca:hover { background: #e55a25; }
     .btn-loc { background: rgba(255,255,255,0.2); color: white; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 10px; padding: 14px 18px; font-size: 18px; cursor: pointer; }
 
-    .page-body { display: flex; width: 100%; margin: 0; padding: 0; gap: 0; align-items: flex-start; }
+    .page-body { display: flex; width: 100%; margin: 0; padding: 0; gap: 0; align-items: flex-start; height: calc(100vh - 60px); overflow: hidden; }
 
     /* SIDEBAR */
     .sidebar { width: 320px; flex-shrink: 0; background: white; padding: 22px; box-shadow: 2px 0 8px rgba(0,0,0,0.06); min-height: calc(100vh - 120px); overflow-y: auto; overflow-x: hidden; }
@@ -48,7 +48,7 @@
     .chip.all-chip.inactive { background: white; color: #111; border-color: #eee; font-weight: 600; }
 
     /* RESULTS */
-    .results-col { flex: 1; min-width: 0; padding: 20px 28px; }
+    .results-col { flex: 1; min-width: 0; padding: 20px 28px; overflow-y: auto; height: 100%; }
     .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .results-count { font-size: 17px; color: #333; }
     .results-count strong { color: #222; font-weight: 700; }
