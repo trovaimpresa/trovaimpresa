@@ -133,7 +133,7 @@
   <div class="col col-left" id="col-cerca">
     <div class="col-title">🔍 Cerco Subappaltatori</div>
     <div class="col-sub">Imprese che cercano subappaltatori per i loro cantieri</div>
-    <button class="btn-pubblica" onclick="apriModal('cerca')">+ Pubblica annuncio</button>
+    <button class="btn-pubblica" onclick="apriModal('cerca')">📋 Pubblica richiesta</button>
     <div id="lista-cerca"><div class="loading-state">⏳ Caricamento...</div></div>
   </div>
 
@@ -141,7 +141,7 @@
   <div class="col col-right" id="col-offre">
     <div class="col-title">🏗️ Sono Subappaltatore</div>
     <div class="col-sub">Imprese disponibili a lavorare in subappalto</div>
-    <button class="btn-pubblica" onclick="apriModal('offre')">+ Registrati come subappaltatore</button>
+    <button class="btn-pubblica" onclick="apriModal('offre')">🙋 Offri disponibilità</button>
     <div id="lista-offre"><div class="loading-state">⏳ Caricamento...</div></div>
   </div>
 
@@ -151,7 +151,7 @@
 <div class="modal-overlay" id="modal-cerca" onclick="if(event.target===this)chiudiModal('cerca')">
   <div class="modal">
     <div class="modal-header">
-      <h2>🔍 Pubblica annuncio — Cerco Subappaltatori</h2>
+      <h2>📋 Pubblica richiesta subappalto</h2>
       <button class="modal-close" onclick="chiudiModal('cerca')">✕</button>
     </div>
     <div class="modal-body">
@@ -160,12 +160,20 @@
         <input class="form-input" id="cerca-nome" placeholder="Es. Edil Rossi Srl" type="text">
       </div>
       <div class="form-group">
-        <label class="form-label">Descrizione del lavoro *</label>
-        <textarea class="form-textarea" id="cerca-desc" placeholder="Es. Cerco subappaltatore per posa pavimenti in 3 appartamenti a Roma..."></textarea>
+        <label class="form-label">Tipo lavoro richiesto *</label>
+        <input class="form-input" id="cerca-tipo-lavoro" placeholder="Es. Posa pavimenti, impianto elettrico..." type="text">
       </div>
       <div class="form-group">
-        <label class="form-label">Città *</label>
-        <input class="form-input" id="cerca-citta" placeholder="Es. Roma" type="text">
+        <label class="form-label">Zona cantiere *</label>
+        <input class="form-input" id="cerca-zona" placeholder="Es. Roma Nord, provincia di Milano..." type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Periodo lavori</label>
+        <input class="form-input" id="cerca-periodo" placeholder="Es. Maggio–Giugno 2026" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Budget indicativo</label>
+        <input class="form-input" id="cerca-budget" placeholder="Es. 15.000 €" type="text">
       </div>
       <div class="form-group">
         <label class="form-label">Telefono</label>
@@ -175,7 +183,7 @@
         <label class="form-label">Email</label>
         <input class="form-input" id="cerca-email" placeholder="info@tuaimpresa.it" type="email">
       </div>
-      <button class="btn-submit" onclick="salva('cerca')">📤 Pubblica annuncio</button>
+      <button class="btn-submit" onclick="salva('cerca')">📋 Pubblica richiesta</button>
       <div class="form-msg" id="msg-cerca"></div>
     </div>
   </div>
@@ -185,7 +193,7 @@
 <div class="modal-overlay" id="modal-offre" onclick="if(event.target===this)chiudiModal('offre')">
   <div class="modal">
     <div class="modal-header offre">
-      <h2>🏗️ Registrati come Subappaltatore</h2>
+      <h2>🙋 Offri disponibilità come subappaltatore</h2>
       <button class="modal-close" onclick="chiudiModal('offre')">✕</button>
     </div>
     <div class="modal-body">
@@ -195,11 +203,15 @@
       </div>
       <div class="form-group">
         <label class="form-label">Specializzazione *</label>
-        <textarea class="form-textarea" id="offre-desc" placeholder="Es. Specializzati in posa pavimenti, rivestimenti e massetti su tutto il Lazio..."></textarea>
+        <input class="form-input" id="offre-spec" placeholder="Es. Pavimentazioni, impianti idraulici..." type="text">
       </div>
       <div class="form-group">
-        <label class="form-label">Città *</label>
-        <input class="form-input" id="offre-citta" placeholder="Es. Milano" type="text">
+        <label class="form-label">Zone coperte *</label>
+        <input class="form-input" id="offre-zone" placeholder="Es. Lazio, Umbria, Toscana" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Anni esperienza</label>
+        <input class="form-input" id="offre-esperienza" placeholder="Es. 15" type="number" min="0" max="99">
       </div>
       <div class="form-group">
         <label class="form-label">Telefono</label>
@@ -209,7 +221,7 @@
         <label class="form-label">Email</label>
         <input class="form-input" id="offre-email" placeholder="info@tuaimpresa.it" type="email">
       </div>
-      <button class="btn-submit offre" onclick="salva('offre')">📤 Registrati</button>
+      <button class="btn-submit offre" onclick="salva('offre')">🙋 Offri disponibilità</button>
       <div class="form-msg" id="msg-offre"></div>
     </div>
   </div>
@@ -267,37 +279,65 @@
 
   async function salva(tipo) {
     const nome = document.getElementById(tipo + '-nome').value.trim();
-    const desc = document.getElementById(tipo + '-desc').value.trim();
-    const citta = document.getElementById(tipo + '-citta').value.trim();
     const tel = document.getElementById(tipo + '-tel').value.trim();
     const email = document.getElementById(tipo + '-email').value.trim();
     const msg = document.getElementById('msg-' + tipo);
 
-    if (!nome || !desc || !citta) {
-      mostraMsg(tipo, 'Compila i campi obbligatori (nome, descrizione, città).', 'err');
-      return;
-    }
-
-    const payload = {
+    let payload = {
       tipo,
       nome_impresa: nome,
-      citta,
       telefono: tel || null,
       email: email || null,
       created_at: new Date().toISOString()
     };
-    if (tipo === 'cerca') payload.descrizione = desc;
-    else payload.specializzazione = desc;
+
+    if (tipo === 'cerca') {
+      const tipoLavoro = document.getElementById('cerca-tipo-lavoro').value.trim();
+      const zona = document.getElementById('cerca-zona').value.trim();
+      const periodo = document.getElementById('cerca-periodo').value.trim();
+      const budget = document.getElementById('cerca-budget').value.trim();
+      if (!nome || !tipoLavoro || !zona) {
+        mostraMsg(tipo, 'Compila i campi obbligatori (nome, tipo lavoro, zona).', 'err');
+        return;
+      }
+      let descrizione = tipoLavoro;
+      if (periodo) descrizione += ' | Periodo: ' + periodo;
+      if (budget) descrizione += ' | Budget: ' + budget;
+      payload.descrizione = descrizione;
+      payload.citta = zona;
+    } else {
+      const spec = document.getElementById('offre-spec').value.trim();
+      const zone = document.getElementById('offre-zone').value.trim();
+      const esperienza = document.getElementById('offre-esperienza').value.trim();
+      if (!nome || !spec || !zone) {
+        mostraMsg(tipo, 'Compila i campi obbligatori (nome, specializzazione, zone coperte).', 'err');
+        return;
+      }
+      let specializzazione = spec;
+      if (esperienza) specializzazione += ' | Anni esperienza: ' + esperienza;
+      payload.specializzazione = specializzazione;
+      payload.citta = zone;
+    }
 
     try {
       const { error } = await supabaseClient.from('subappalti').insert(payload);
       if (error) throw error;
       mostraMsg(tipo, '✅ Pubblicato con successo!', 'ok');
       // reset form
-      ['nome','desc','citta','tel','email'].forEach(f => {
-        const el = document.getElementById(tipo + '-' + f);
-        if (el) el.value = '';
-      });
+      document.getElementById(tipo + '-nome').value = '';
+      document.getElementById(tipo + '-tel').value = '';
+      document.getElementById(tipo + '-email').value = '';
+      if (tipo === 'cerca') {
+        ['tipo-lavoro','zona','periodo','budget'].forEach(f => {
+          const el = document.getElementById('cerca-' + f);
+          if (el) el.value = '';
+        });
+      } else {
+        ['spec','zone','esperienza'].forEach(f => {
+          const el = document.getElementById('offre-' + f);
+          if (el) el.value = '';
+        });
+      }
       setTimeout(() => { chiudiModal(tipo); caricaLista(tipo); msg.style.display = 'none'; }, 1800);
     } catch(e) {
       mostraMsg(tipo, '⚠️ Errore: ' + e.message, 'err');
