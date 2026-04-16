@@ -25,7 +25,7 @@
     .page-body { display: flex; width: 100%; margin: 0; padding: 0; gap: 0; align-items: flex-start; }
 
     /* SIDEBAR */
-    .sidebar { width: 320px; flex-shrink: 0; background: white; padding: 22px; box-shadow: 2px 0 8px rgba(0,0,0,0.06); min-height: calc(100vh - 120px); overflow-y: auto; overflow-x: hidden; }
+    .sidebar { width: 320px; flex-shrink: 0; background: white; padding: 22px; box-shadow: 2px 0 8px rgba(0,0,0,0.06); min-height: calc(100vh - 120px); overflow-y: auto; overflow-x: hidden; position: sticky; top: 20px; max-height: calc(100vh - 40px); }
     .sidebar::-webkit-scrollbar { width: 4px; }
     .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
     .sidebar-title { font-size: 22px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
