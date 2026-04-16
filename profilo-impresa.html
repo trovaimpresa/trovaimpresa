@@ -461,7 +461,7 @@ async function caricaProfilo(id){
     const data=await r.json();if(!data||!data.length)return;const d=data[0];
     const nome=d.nome||'';
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
-    if(d.tipo)document.getElementById('profile-tipo-badge').textContent='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1);
+    if(d.tipo)document.getElementById('profile-tipo-badge').textContent='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase();
     if(d.logo_url)document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo">`;
     if(d.colore_header){const h=document.getElementById('hero-section');h.style.backgroundImage='none';h.style.background=d.colore_header}
     if(d.foto_copertina_url){document.getElementById('cover-foto-img').src=d.foto_copertina_url;document.getElementById('cover-foto').style.display='block'}
