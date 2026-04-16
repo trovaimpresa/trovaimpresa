@@ -365,11 +365,16 @@
     margin-bottom:20px; gap:20px; position:relative;
   }
   .dash-hero-logo-col {
-    flex:2; background:rgba(255,255,255,0.12); border:2px dashed rgba(255,255,255,0.5);
+    flex:2; background:transparent; border:none;
     border-radius:14px; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; min-height:160px; overflow:hidden; transition:background 0.2s;
+    cursor:pointer; min-height:160px; overflow:hidden; position:relative;
   }
-  .dash-hero-logo-col:hover { background:rgba(255,255,255,0.18); }
+  .dash-hero-logo-col:hover .dash-logo-upload-hint { background:rgba(0,0,0,0.55); }
+  .dash-logo-upload-hint {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px; background:rgba(0,0,0,0.38); border-radius:12px;
+    padding:24px 32px; transition:background 0.2s; pointer-events:none;
+  }
   .dash-hero-info-col { flex:1; display:flex; flex-direction:column; justify-content:center; padding-right:8px; }
   .dash-welcome { font-size:0.82rem; opacity:0.7; text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:4px; }
   .dash-nome { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:10px; }
@@ -668,10 +673,10 @@
         <!-- DESTRA: area caricamento logo (2/3) -->
         <div class="dash-hero-logo-col" onclick="document.getElementById('input-logo-impresa').click()">
           <input type="file" id="input-logo-impresa" accept="image/*" style="display:none" onchange="caricaLogoImpresa(event)">
-          <img id="dash-logo-img" src="" alt="Logo impresa" style="display:none;max-width:100%;max-height:160px;object-fit:contain;border-radius:8px;">
-          <div id="dash-logo-placeholder" style="text-align:center;padding:20px;">
-            <div style="font-size:2.5rem;margin-bottom:8px;">⬆️</div>
-            <div style="font-size:0.9rem;font-weight:600;opacity:0.9;">Clicca per caricare il logo</div>
+          <img id="dash-logo-img" src="" alt="Logo impresa" style="display:none;width:100%;height:160px;object-fit:contain;background:transparent;">
+          <div id="dash-logo-placeholder" class="dash-logo-upload-hint">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+            <span style="color:white;font-size:0.88rem;font-weight:600;">Carica logo</span>
           </div>
         </div>
       </div>
