@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sono Subappaltatore | TrovaImpresa</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f4f6f8; min-height:100vh; color:#1a1a1a; }
@@ -117,6 +118,7 @@
 <div class="page-body">
   <button class="btn-pubblica" onclick="apriModal()">🙋 Offri disponibilità</button>
   <div id="lista-imprese"><div class="loading-state">⏳ Caricamento...</div></div>
+  <div id="mappa-offre" style="height:420px;border-radius:16px;margin-top:28px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.10);"></div>
 </div>
 
 <!-- MODAL -->
@@ -181,11 +183,72 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   const supabaseClient = supabase.createClient(
     'https://nacvrsgkyfavykxjxszu.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
   );
+
+  // ── MAPPA ──
+  let map, markersLayer;
+  const geoCache = {};
+
+  function inizializzaMappa() {
+    map = L.map('mappa-offre').setView([41.9, 12.5], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+  }
+
+  function creaIcona() {
+    return L.divIcon({
+      className: '',
+      html: `<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#d4a017"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>`,
+      iconSize: [22, 30], iconAnchor: [11, 30], popupAnchor: [0, -30]
+    });
+  }
+
+  async function geocodifica(query) {
+    const key = query.toLowerCase().trim();
+    if (geoCache[key]) return geoCache[key];
+    try {
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ', Italia')}&format=json&limit=1`,
+        { headers: { 'Accept-Language': 'it' } }
+      );
+      const data = await r.json();
+      if (data && data[0]) {
+        const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        geoCache[key] = coords;
+        return coords;
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  async function aggiungiMarker(records) {
+    if (!map || !markersLayer) return;
+    markersLayer.clearLayers();
+    for (const r of records) {
+      if (!r.citta) continue;
+      let coords;
+      if (r.lat && r.lng) {
+        coords = [r.lat, r.lng];
+      } else {
+        const key = r.citta.toLowerCase().trim();
+        if (!geoCache[key]) await new Promise(res => setTimeout(res, 1100));
+        coords = await geocodifica(r.citta);
+      }
+      if (!coords) continue;
+      const lines = (r.specializzazione || '').split('\n');
+      const spec = lines[0] || '';
+      L.marker(coords, { icon: creaIcona() })
+        .addTo(markersLayer)
+        .bindPopup(`<b>${r.nome_impresa || '—'}</b><br>${spec ? '🔧 ' + spec + '<br>' : ''}🗺️ ${r.citta}`);
+    }
+  }
 
   async function caricaLista() {
     const div = document.getElementById('lista-imprese');
@@ -199,6 +262,7 @@
       if (error) throw error;
       if (!data || !data.length) {
         div.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🙋</div>Nessun subappaltatore ancora.<br>Sii il primo a pubblicare!</div>';
+        aggiungiMarker([]);
         return;
       }
       div.innerHTML = data.map(r => {
@@ -223,6 +287,7 @@
           </div>
         </div>`;
       }).join('');
+      aggiungiMarker(data);
     } catch(e) {
       div.innerHTML = `<div class="empty-state">⚠️ Errore caricamento: ${e.message}</div>`;
     }
@@ -288,6 +353,7 @@
     msg.style.display = 'block';
   }
 
+  inizializzaMappa();
   caricaLista();
 </script>
 <script src="/cookie-banner.js"></script>
