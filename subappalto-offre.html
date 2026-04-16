@@ -136,6 +136,10 @@
         <input class="form-input" id="f-spec" placeholder="Es. Pavimentazioni industriali, impianti idraulici..." type="text">
       </div>
       <div class="form-group">
+        <label class="form-label">Descrizione della tua impresa</label>
+        <textarea class="form-textarea" id="f-desc" placeholder="Descrivi la tua impresa, i lavori che fai, la tua esperienza..."></textarea>
+      </div>
+      <div class="form-group">
         <label class="form-label">Zone coperte Italia *</label>
         <input class="form-input" id="f-zone" placeholder="Es. Lazio, Umbria, Toscana — tutto il Centro Italia" type="text">
       </div>
@@ -146,12 +150,18 @@
       <div class="form-group">
         <label class="form-label">Certificazioni possedute</label>
         <div class="checkbox-grid">
-          <label class="checkbox-item"><input type="checkbox" id="cert-soa" value="SOA"> SOA</label>
-          <label class="checkbox-item"><input type="checkbox" id="cert-iso9001" value="ISO 9001"> ISO 9001</label>
-          <label class="checkbox-item"><input type="checkbox" id="cert-iso14001" value="ISO 14001"> ISO 14001</label>
-          <label class="checkbox-item"><input type="checkbox" id="cert-iso45001" value="ISO 45001"> ISO 45001</label>
-          <label class="checkbox-item"><input type="checkbox" id="cert-durc" value="DURC regolare"> DURC regolare</label>
-          <label class="checkbox-item"><input type="checkbox" id="cert-altro" value="Altro"> Altro</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-durc" value="DURC in regola"> DURC in regola</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-visura" value="Visura camerale"> Visura camerale</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-dvr" value="DVR"> DVR</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-rc" value="Assicurazione RC"> Assicurazione RC</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-cassa" value="Iscrizione Cassa Edile"> Iscrizione Cassa Edile</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-pimus" value="Corso ponteggi PiMUS"> Corso ponteggi PiMUS</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-ple" value="Corso piattaforme PLE"> Corso piattaforme PLE</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-primo-soccorso" value="Corso primo soccorso"> Corso primo soccorso</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-antincendio" value="Corso antincendio"> Corso antincendio</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-rspp" value="Addetto sicurezza RSPP/ASPP"> Addetto RSPP/ASPP</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-quota" value="Corso lavori in quota"> Corso lavori in quota</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-spazi" value="Corso spazi confinati"> Corso spazi confinati</label>
         </div>
       </div>
       <div class="form-row">
@@ -241,10 +251,12 @@
       return;
     }
 
-    const certIds = ['cert-soa','cert-iso9001','cert-iso14001','cert-iso45001','cert-durc','cert-altro'];
+    const desc = document.getElementById('f-desc').value.trim();
+    const certIds = ['cert-durc','cert-visura','cert-dvr','cert-rc','cert-cassa','cert-pimus','cert-ple','cert-primo-soccorso','cert-antincendio','cert-rspp','cert-quota','cert-spazi'];
     const certs = certIds.map(id => document.getElementById(id)).filter(el => el.checked).map(el => el.value);
 
     let specializzazione = spec;
+    if (desc) specializzazione += '\n' + desc;
     if (esperienza) specializzazione += '\n' + esperienza + ' anni di esperienza';
     if (certs.length) specializzazione += '\nCertificazioni: ' + certs.join(', ');
 
@@ -260,7 +272,7 @@
       });
       if (error) throw error;
       mostraMsg('✅ Disponibilità pubblicata con successo!', 'ok');
-      ['f-nome','f-spec','f-zone','f-esperienza','f-tel','f-email']
+      ['f-nome','f-spec','f-desc','f-zone','f-esperienza','f-tel','f-email']
         .forEach(id => { document.getElementById(id).value = ''; });
       certIds.forEach(id => { document.getElementById(id).checked = false; });
       setTimeout(() => { chiudiModal(); caricaLista(); document.getElementById('form-msg').style.display = 'none'; }, 1800);
