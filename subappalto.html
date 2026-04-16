@@ -102,6 +102,11 @@
     .form-msg { margin-top:10px; padding:10px 14px; border-radius:8px; font-size:0.88rem; font-weight:600; display:none; }
     .form-msg.ok { background:#e8f5ec; color:#2a7a4b; }
     .form-msg.err { background:#fdecea; color:#c0392b; }
+    .checkbox-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-top:6px; }
+    .checkbox-item { display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#333; cursor:pointer; }
+    .checkbox-item input[type=checkbox] { width:16px; height:16px; accent-color:#d4a017; cursor:pointer; flex-shrink:0; }
+    .annuncio-tag { display:inline-block; background:#e8f5ec; color:#1a5e35; border-radius:6px; padding:2px 8px; font-size:0.78rem; font-weight:700; margin-bottom:6px; }
+    .col-right .annuncio-tag { background:#fff3cd; color:#7a5200; }
 
     @media (max-width:768px) {
       .page-body { flex-direction:column; }
@@ -164,6 +169,10 @@
         <input class="form-input" id="cerca-tipo-lavoro" placeholder="Es. Posa pavimenti, impianto elettrico..." type="text">
       </div>
       <div class="form-group">
+        <label class="form-label">Descrizione del lavoro</label>
+        <textarea class="form-textarea" id="cerca-desc" placeholder="Descrivi il lavoro nel dettaglio: quantità, materiali, modalità di esecuzione..."></textarea>
+      </div>
+      <div class="form-group">
         <label class="form-label">Zona cantiere *</label>
         <input class="form-input" id="cerca-zona" placeholder="Es. Roma Nord, provincia di Milano..." type="text">
       </div>
@@ -176,6 +185,10 @@
         <input class="form-input" id="cerca-budget" placeholder="Es. 15.000 €" type="text">
       </div>
       <div class="form-group">
+        <label class="form-label">Requisiti richiesti</label>
+        <textarea class="form-textarea" id="cerca-requisiti" placeholder="Es. Iscrizione alla Camera di Commercio, SOA cat. OG2, esperienza minima 5 anni..." style="min-height:70px;"></textarea>
+      </div>
+      <div class="form-group">
         <label class="form-label">Telefono</label>
         <input class="form-input" id="cerca-tel" placeholder="Es. 333 1234567" type="tel">
       </div>
@@ -183,7 +196,7 @@
         <label class="form-label">Email</label>
         <input class="form-input" id="cerca-email" placeholder="info@tuaimpresa.it" type="email">
       </div>
-      <button class="btn-submit" onclick="salva('cerca')">📋 Pubblica richiesta</button>
+      <button class="btn-submit" onclick="salvaCerca()">📋 Pubblica richiesta</button>
       <div class="form-msg" id="msg-cerca"></div>
     </div>
   </div>
@@ -199,19 +212,30 @@
     <div class="modal-body">
       <div class="form-group">
         <label class="form-label">Nome impresa *</label>
-        <input class="form-input" id="offre-nome" placeholder="Es. Posa Pavimenti Bianchi" type="text">
+        <input class="form-input" id="offre-nome" placeholder="Es. Posa Pavimenti Bianchi Srl" type="text">
       </div>
       <div class="form-group">
         <label class="form-label">Specializzazione *</label>
-        <input class="form-input" id="offre-spec" placeholder="Es. Pavimentazioni, impianti idraulici..." type="text">
+        <input class="form-input" id="offre-spec" placeholder="Es. Pavimentazioni industriali, impianti idraulici..." type="text">
       </div>
       <div class="form-group">
-        <label class="form-label">Zone coperte *</label>
-        <input class="form-input" id="offre-zone" placeholder="Es. Lazio, Umbria, Toscana" type="text">
+        <label class="form-label">Zone coperte Italia *</label>
+        <input class="form-input" id="offre-zone" placeholder="Es. Lazio, Umbria, Toscana — tutto il Centro Italia" type="text">
       </div>
       <div class="form-group">
         <label class="form-label">Anni esperienza</label>
         <input class="form-input" id="offre-esperienza" placeholder="Es. 15" type="number" min="0" max="99">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Certificazioni possedute</label>
+        <div class="checkbox-grid">
+          <label class="checkbox-item"><input type="checkbox" id="cert-soa" value="SOA"> SOA</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-iso9001" value="ISO 9001"> ISO 9001</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-iso14001" value="ISO 14001"> ISO 14001</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-iso45001" value="ISO 45001"> ISO 45001</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-durc" value="DURC regolare"> DURC regolare</label>
+          <label class="checkbox-item"><input type="checkbox" id="cert-altro" value="Altro"> Altro</label>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Telefono</label>
@@ -221,7 +245,7 @@
         <label class="form-label">Email</label>
         <input class="form-input" id="offre-email" placeholder="info@tuaimpresa.it" type="email">
       </div>
-      <button class="btn-submit offre" onclick="salva('offre')">🙋 Offri disponibilità</button>
+      <button class="btn-submit offre" onclick="salvaOffre()">🙋 Offri disponibilità</button>
       <div class="form-msg" id="msg-offre"></div>
     </div>
   </div>
@@ -246,22 +270,45 @@
         .limit(50);
       if (error) throw error;
       if (!data || !data.length) {
-        const label = tipo === 'cerca' ? 'annunci' : 'subappaltatori';
-        div.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${tipo === 'cerca' ? '🔍' : '🏗️'}</div>Nessun ${label} ancora.<br>Sii il primo a pubblicare!</div>`;
+        const label = tipo === 'cerca' ? 'richieste' : 'subappaltatori';
+        div.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${tipo === 'cerca' ? '📋' : '🙋'}</div>Nessun${tipo === 'cerca' ? 'a' : ''} ${label} ancora.<br>Sii il primo a pubblicare!</div>`;
         return;
       }
-      div.innerHTML = data.map(r => {
-        const descLabel = tipo === 'cerca' ? r.descrizione : r.specializzazione;
-        return `<div class="annuncio-card">
-          <div class="annuncio-nome">${r.nome_impresa || '—'}</div>
-          ${descLabel ? `<div class="annuncio-desc">${descLabel}</div>` : ''}
-          <div class="annuncio-meta">
-            ${r.citta ? `<span>📍 ${r.citta}</span>` : ''}
-            ${r.telefono ? `<span>📞 <a href="tel:${r.telefono}" style="color:#2a7a4b;text-decoration:none;">${r.telefono}</a></span>` : ''}
-            ${r.email ? `<span>✉️ <a href="mailto:${r.email}" style="color:#2a7a4b;text-decoration:none;">${r.email}</a></span>` : ''}
-          </div>
-        </div>`;
-      }).join('');
+      if (tipo === 'cerca') {
+        div.innerHTML = data.map(r => {
+          const lines = (r.descrizione || '').split('\n');
+          const tipoLavoro = lines[0] || '';
+          const resto = lines.slice(1).join(' · ');
+          return `<div class="annuncio-card">
+            <div class="annuncio-tag">📋 Cerca subappaltatore</div>
+            <div class="annuncio-nome">${r.nome_impresa || '—'}</div>
+            ${tipoLavoro ? `<div class="annuncio-desc" style="font-weight:600;color:#1a3a2a;">${tipoLavoro}</div>` : ''}
+            ${resto ? `<div class="annuncio-desc">${resto}</div>` : ''}
+            <div class="annuncio-meta">
+              ${r.citta ? `<span>📍 ${r.citta}</span>` : ''}
+              ${r.telefono ? `<span>📞 <a href="tel:${r.telefono}" style="color:#2a7a4b;text-decoration:none;">${r.telefono}</a></span>` : ''}
+              ${r.email ? `<span>✉️ <a href="mailto:${r.email}" style="color:#2a7a4b;text-decoration:none;">${r.email}</a></span>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        div.innerHTML = data.map(r => {
+          const lines = (r.specializzazione || '').split('\n');
+          const spec = lines[0] || '';
+          const extra = lines.slice(1).join(' · ');
+          return `<div class="annuncio-card">
+            <div class="annuncio-tag">🙋 Disponibile</div>
+            <div class="annuncio-nome">${r.nome_impresa || '—'}</div>
+            ${spec ? `<div class="annuncio-desc" style="font-weight:600;color:#7a5200;">${spec}</div>` : ''}
+            ${extra ? `<div class="annuncio-desc">${extra}</div>` : ''}
+            <div class="annuncio-meta">
+              ${r.citta ? `<span>🗺️ ${r.citta}</span>` : ''}
+              ${r.telefono ? `<span>📞 <a href="tel:${r.telefono}" style="color:#d4a017;text-decoration:none;">${r.telefono}</a></span>` : ''}
+              ${r.email ? `<span>✉️ <a href="mailto:${r.email}" style="color:#d4a017;text-decoration:none;">${r.email}</a></span>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+      }
     } catch(e) {
       div.innerHTML = `<div class="empty-state">⚠️ Errore caricamento: ${e.message}</div>`;
     }
@@ -277,70 +324,86 @@
     document.body.style.overflow = '';
   }
 
-  async function salva(tipo) {
-    const nome = document.getElementById(tipo + '-nome').value.trim();
-    const tel = document.getElementById(tipo + '-tel').value.trim();
-    const email = document.getElementById(tipo + '-email').value.trim();
-    const msg = document.getElementById('msg-' + tipo);
+  async function salvaCerca() {
+    const nome = document.getElementById('cerca-nome').value.trim();
+    const tipoLavoro = document.getElementById('cerca-tipo-lavoro').value.trim();
+    const desc = document.getElementById('cerca-desc').value.trim();
+    const zona = document.getElementById('cerca-zona').value.trim();
+    const periodo = document.getElementById('cerca-periodo').value.trim();
+    const budget = document.getElementById('cerca-budget').value.trim();
+    const requisiti = document.getElementById('cerca-requisiti').value.trim();
+    const tel = document.getElementById('cerca-tel').value.trim();
+    const email = document.getElementById('cerca-email').value.trim();
 
-    let payload = {
-      tipo,
-      nome_impresa: nome,
-      telefono: tel || null,
-      email: email || null,
-      created_at: new Date().toISOString()
-    };
-
-    if (tipo === 'cerca') {
-      const tipoLavoro = document.getElementById('cerca-tipo-lavoro').value.trim();
-      const zona = document.getElementById('cerca-zona').value.trim();
-      const periodo = document.getElementById('cerca-periodo').value.trim();
-      const budget = document.getElementById('cerca-budget').value.trim();
-      if (!nome || !tipoLavoro || !zona) {
-        mostraMsg(tipo, 'Compila i campi obbligatori (nome, tipo lavoro, zona).', 'err');
-        return;
-      }
-      let descrizione = tipoLavoro;
-      if (periodo) descrizione += ' | Periodo: ' + periodo;
-      if (budget) descrizione += ' | Budget: ' + budget;
-      payload.descrizione = descrizione;
-      payload.citta = zona;
-    } else {
-      const spec = document.getElementById('offre-spec').value.trim();
-      const zone = document.getElementById('offre-zone').value.trim();
-      const esperienza = document.getElementById('offre-esperienza').value.trim();
-      if (!nome || !spec || !zone) {
-        mostraMsg(tipo, 'Compila i campi obbligatori (nome, specializzazione, zone coperte).', 'err');
-        return;
-      }
-      let specializzazione = spec;
-      if (esperienza) specializzazione += ' | Anni esperienza: ' + esperienza;
-      payload.specializzazione = specializzazione;
-      payload.citta = zone;
+    if (!nome || !tipoLavoro || !zona) {
+      mostraMsg('cerca', 'Compila i campi obbligatori (nome impresa, tipo lavoro, zona).', 'err');
+      return;
     }
 
+    let descrizione = tipoLavoro;
+    if (desc) descrizione += '\n' + desc;
+    if (periodo) descrizione += '\nPeriodo: ' + periodo;
+    if (budget) descrizione += '\nBudget: ' + budget;
+    if (requisiti) descrizione += '\nRequisiti: ' + requisiti;
+
     try {
-      const { error } = await supabaseClient.from('subappalti').insert(payload);
+      const { error } = await supabaseClient.from('subappalti').insert({
+        tipo: 'cerca',
+        nome_impresa: nome,
+        descrizione,
+        citta: zona,
+        telefono: tel || null,
+        email: email || null,
+        created_at: new Date().toISOString()
+      });
       if (error) throw error;
-      mostraMsg(tipo, '✅ Pubblicato con successo!', 'ok');
-      // reset form
-      document.getElementById(tipo + '-nome').value = '';
-      document.getElementById(tipo + '-tel').value = '';
-      document.getElementById(tipo + '-email').value = '';
-      if (tipo === 'cerca') {
-        ['tipo-lavoro','zona','periodo','budget'].forEach(f => {
-          const el = document.getElementById('cerca-' + f);
-          if (el) el.value = '';
-        });
-      } else {
-        ['spec','zone','esperienza'].forEach(f => {
-          const el = document.getElementById('offre-' + f);
-          if (el) el.value = '';
-        });
-      }
-      setTimeout(() => { chiudiModal(tipo); caricaLista(tipo); msg.style.display = 'none'; }, 1800);
+      mostraMsg('cerca', '✅ Richiesta pubblicata con successo!', 'ok');
+      ['cerca-nome','cerca-tipo-lavoro','cerca-desc','cerca-zona','cerca-periodo','cerca-budget','cerca-requisiti','cerca-tel','cerca-email']
+        .forEach(id => { document.getElementById(id).value = ''; });
+      setTimeout(() => { chiudiModal('cerca'); caricaLista('cerca'); document.getElementById('msg-cerca').style.display = 'none'; }, 1800);
     } catch(e) {
-      mostraMsg(tipo, '⚠️ Errore: ' + e.message, 'err');
+      mostraMsg('cerca', '⚠️ Errore: ' + e.message, 'err');
+    }
+  }
+
+  async function salvaOffre() {
+    const nome = document.getElementById('offre-nome').value.trim();
+    const spec = document.getElementById('offre-spec').value.trim();
+    const zone = document.getElementById('offre-zone').value.trim();
+    const esperienza = document.getElementById('offre-esperienza').value.trim();
+    const tel = document.getElementById('offre-tel').value.trim();
+    const email = document.getElementById('offre-email').value.trim();
+
+    if (!nome || !spec || !zone) {
+      mostraMsg('offre', 'Compila i campi obbligatori (nome impresa, specializzazione, zone coperte).', 'err');
+      return;
+    }
+
+    const certIds = ['cert-soa','cert-iso9001','cert-iso14001','cert-iso45001','cert-durc','cert-altro'];
+    const certs = certIds.map(id => document.getElementById(id)).filter(el => el.checked).map(el => el.value);
+
+    let specializzazione = spec;
+    if (esperienza) specializzazione += '\n' + esperienza + ' anni di esperienza';
+    if (certs.length) specializzazione += '\nCertificazioni: ' + certs.join(', ');
+
+    try {
+      const { error } = await supabaseClient.from('subappalti').insert({
+        tipo: 'offre',
+        nome_impresa: nome,
+        specializzazione,
+        citta: zone,
+        telefono: tel || null,
+        email: email || null,
+        created_at: new Date().toISOString()
+      });
+      if (error) throw error;
+      mostraMsg('offre', '✅ Disponibilità pubblicata con successo!', 'ok');
+      ['offre-nome','offre-spec','offre-zone','offre-esperienza','offre-tel','offre-email']
+        .forEach(id => { document.getElementById(id).value = ''; });
+      certIds.forEach(id => { document.getElementById(id).checked = false; });
+      setTimeout(() => { chiudiModal('offre'); caricaLista('offre'); document.getElementById('msg-offre').style.display = 'none'; }, 1800);
+    } catch(e) {
+      mostraMsg('offre', '⚠️ Errore: ' + e.message, 'err');
     }
   }
 
