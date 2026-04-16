@@ -136,8 +136,8 @@
         <input class="form-input" id="f-tipo-lavoro" placeholder="Es. Posa pavimenti, impianto elettrico..." type="text">
       </div>
       <div class="form-group">
-        <label class="form-label">Descrizione del lavoro</label>
-        <textarea class="form-textarea" id="f-desc" placeholder="Descrivi nel dettaglio il lavoro: quantità, materiali, condizioni particolari..."></textarea>
+        <label class="form-label">Descrizione dettagliata lavoro</label>
+        <textarea class="form-textarea" id="f-desc" placeholder="Descrivi nel dettaglio il lavoro richiesto..."></textarea>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -156,12 +156,18 @@
       <div class="form-group">
         <label class="form-label">Requisiti richiesti al subappaltatore</label>
         <div class="checkbox-grid">
-          <label class="checkbox-item"><input type="checkbox" id="req-durc" value="DURC regolare"> DURC regolare</label>
-          <label class="checkbox-item"><input type="checkbox" id="req-cciaa" value="Iscrizione CCIAA"> Iscrizione CCIAA</label>
-          <label class="checkbox-item"><input type="checkbox" id="req-soa" value="Attestazione SOA"> Attestazione SOA</label>
-          <label class="checkbox-item"><input type="checkbox" id="req-iso9001" value="ISO 9001"> ISO 9001</label>
-          <label class="checkbox-item"><input type="checkbox" id="req-rc" value="Polizza RC"> Polizza RC</label>
-          <label class="checkbox-item"><input type="checkbox" id="req-esp5" value="Esperienza min. 5 anni"> Esperienza min. 5 anni</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-durc" value="DURC in regola"> DURC in regola</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-visura" value="Visura camerale"> Visura camerale</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-dvr" value="DVR"> DVR</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-rc" value="Assicurazione RC"> Assicurazione RC</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-cassa" value="Iscrizione Cassa Edile"> Iscrizione Cassa Edile</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-pimus" value="Corso ponteggi PiMUS"> Corso ponteggi PiMUS</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-ple" value="Corso piattaforme PLE"> Corso piattaforme PLE</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-primo-soccorso" value="Corso primo soccorso"> Corso primo soccorso</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-antincendio" value="Corso antincendio"> Corso antincendio</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-rspp" value="Addetto sicurezza RSPP/ASPP"> Addetto RSPP/ASPP</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-quota" value="Corso lavori in quota"> Corso lavori in quota</label>
+          <label class="checkbox-item"><input type="checkbox" id="req-spazi" value="Corso spazi confinati"> Corso spazi confinati</label>
         </div>
       </div>
       <div class="form-row">
@@ -253,7 +259,7 @@
       return;
     }
 
-    const reqIds = ['req-durc','req-cciaa','req-soa','req-iso9001','req-rc','req-esp5'];
+    const reqIds = ['req-durc','req-visura','req-dvr','req-rc','req-cassa','req-pimus','req-ple','req-primo-soccorso','req-antincendio','req-rspp','req-quota','req-spazi'];
     const requisiti = reqIds.map(id => document.getElementById(id)).filter(el => el.checked).map(el => el.value);
 
     let descrizione = tipoLavoro;
