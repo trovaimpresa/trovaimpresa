@@ -2130,11 +2130,11 @@ async function caricaLogoImpresa(event) {
   if (!file) return;
   const userId = impresaCorrente.user_id;
   const path = `${userId}/logo.png`;
-  const { error: upErr } = await supabaseClient.storage.from('loghi-imprese').upload(path, file, { upsert: true, contentType: file.type });
+  const { error: upErr } = await sb.storage.from('loghi-imprese').upload(path, file, { upsert: true, contentType: file.type });
   if (upErr) { alert('Errore caricamento logo: ' + upErr.message); return; }
-  const { data: urlData } = supabaseClient.storage.from('loghi-imprese').getPublicUrl(path);
+  const { data: urlData } = sb.storage.from('loghi-imprese').getPublicUrl(path);
   const logoUrl = urlData.publicUrl;
-  await supabaseClient.from('imprese').update({ logo_url: logoUrl }).eq('id', impresaCorrente.id);
+  await sb.from('imprese').update({ logo_url: logoUrl }).eq('id', impresaCorrente.id);
   impresaCorrente.logo_url = logoUrl;
   const img = document.getElementById('dash-logo-img');
   const placeholder = document.getElementById('dash-logo-placeholder');
@@ -2143,7 +2143,7 @@ async function caricaLogoImpresa(event) {
 }
 
 async function salvaColoreHeader(valore) {
-  await supabaseClient.from('imprese').update({ colore_header: valore }).eq('id', impresaCorrente.id);
+  await sb.from('imprese').update({ colore_header: valore }).eq('id', impresaCorrente.id);
   impresaCorrente.colore_header = valore;
 }
 
@@ -2201,7 +2201,7 @@ function aggiornaPianoCards(piano) {
 // CERTIFICAZIONI
 // =====================
 async function caricaCertificazioni() {
-  const { data } = await supabaseClient.from('imprese').select('certificazioni').eq('id', impresaCorrente.id).single();
+  const { data } = await sb.from('imprese').select('certificazioni').eq('id', impresaCorrente.id).single();
   const certs = data?.certificazioni || [];
   impresaCorrente.certificazioni = certs;
   renderCertificazioni(certs);
@@ -2237,15 +2237,15 @@ async function aggiungiCertificazione() {
     const userId = impresaCorrente.user_id;
     const ext = file.name.split('.').pop();
     const path = `${userId}/${Date.now()}-${nome.replace(/\s+/g,'_').substring(0,40)}.${ext}`;
-    const { error: upErr } = await supabaseClient.storage.from('certificazioni').upload(path, file, { upsert: false, contentType: file.type });
+    const { error: upErr } = await sb.storage.from('certificazioni').upload(path, file, { upsert: false, contentType: file.type });
     if (upErr) { alert('Errore caricamento file: ' + upErr.message); return; }
-    const { data: urlData } = supabaseClient.storage.from('certificazioni').getPublicUrl(path);
+    const { data: urlData } = sb.storage.from('certificazioni').getPublicUrl(path);
     file_url = urlData.publicUrl;
   }
 
   const nuovaCert = { nome, scadenza, file_url };
   const certs = [...(impresaCorrente.certificazioni || []), nuovaCert];
-  const { error } = await supabaseClient.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
+  const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
   if (error) { alert('Errore salvataggio: ' + error.message); return; }
 
   impresaCorrente.certificazioni = certs;
@@ -2259,7 +2259,7 @@ async function eliminaCertificazione(index) {
   if (!confirm('Rimuovere questa certificazione?')) return;
   const certs = [...(impresaCorrente.certificazioni || [])];
   certs.splice(index, 1);
-  const { error } = await supabaseClient.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
+  const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
   if (error) { alert('Errore: ' + error.message); return; }
   impresaCorrente.certificazioni = certs;
   renderCertificazioni(certs);
