@@ -1321,7 +1321,7 @@ function showSection(id, el, fromPopstate) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   el.classList.add('active');
-  if (!fromPopstate) history.pushState({section: id}, '');
+  if (!fromPopstate) history.pushState({ section: id }, '', '#' + id);
 }
 
 function showSectionById(id, fromPopstate) {
@@ -1329,8 +1329,17 @@ function showSectionById(id, fromPopstate) {
   if (navItem) showSection(id, navItem, fromPopstate);
 }
 
-history.replaceState({goHome: true}, '');
-history.pushState({section: 'dashboard'}, '');
+// Inizializzazione: se c'è un hash valido nell'URL, apri quella sezione
+(function() {
+  const hash = window.location.hash.replace('#', '');
+  const sezioniValide = ['dashboard','lavoro','candidati','foto','recensioni','certificazioni','profilo'];
+  if (hash && sezioniValide.includes(hash)) {
+    history.replaceState({ section: hash }, '', '#' + hash);
+  } else {
+    history.replaceState({ section: 'dashboard' }, '', '#dashboard');
+  }
+})();
+
 window.onpopstate = function(e) {
   if (e.state && e.state.section) {
     showSectionById(e.state.section, true);
@@ -1403,6 +1412,13 @@ async function inizializza() {
   await caricaFotoLavori();
   await caricaCertificazioni();
   caricaProfilo();
+
+  // Apri la sezione indicata dall'hash (se presente e valida)
+  const hashIniziale = window.location.hash.replace('#', '');
+  const sezioniValide = ['dashboard','lavoro','candidati','foto','recensioni','certificazioni','profilo'];
+  if (hashIniziale && sezioniValide.includes(hashIniziale) && hashIniziale !== 'dashboard') {
+    showSectionById(hashIniziale, true);
+  }
 }
 
 function aggiornaBadgeEOverlay() {
