@@ -361,9 +361,21 @@
   .dash-hero {
     background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
     border-radius:20px; padding:28px 32px; color:white;
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:20px; flex-wrap:wrap; gap:16px;
+    display:flex; align-items:stretch; justify-content:space-between;
+    margin-bottom:20px; gap:20px; position:relative;
   }
+  .dash-hero-logo-col {
+    flex:2; background:transparent; border:none;
+    border-radius:14px; display:flex; align-items:center; justify-content:center;
+    min-height:160px; overflow:hidden; position:relative;
+  }
+  .dash-logo-upload-hint {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px; background:rgba(0,0,0,0.38); border-radius:12px;
+    padding:24px 32px; transition:background 0.2s; pointer-events:none;
+  }
+  .dash-hero-logo-col:hover .dash-logo-upload-hint { background:rgba(0,0,0,0.55); }
+  .dash-hero-info-col { flex:1; display:flex; flex-direction:column; justify-content:center; padding-right:8px; }
   .dash-welcome { font-size:0.82rem; opacity:0.7; text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:4px; }
   .dash-nome { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:10px; }
   .dash-meta { display:flex; gap:10px; flex-wrap:wrap; }
@@ -376,6 +388,7 @@
     padding:4px 12px; font-size:0.82rem; font-weight:700;
   }
   .dash-piano-badge.pro { background:#1a73e8; }
+  .dash-piano-badge.premium { background:#7b1fa2; }
   .btn-ai-preventivo {
     background:white; color:var(--verde2); border:none; border-radius:14px;
     padding:13px 22px; font-family:'DM Sans',sans-serif; font-weight:800;
@@ -384,6 +397,20 @@
     display:flex; align-items:center; gap:8px;
   }
   .btn-ai-preventivo:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+  /* Certificazioni */
+  .cert-item {
+    background:white; border-radius:14px; padding:16px 20px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .cert-nome { font-weight:700; font-size:0.92rem; color:var(--dark); }
+  .cert-meta { font-size:0.78rem; color:var(--light); margin-top:3px; }
+  .btn-elimina-cert {
+    padding:6px 14px; border-radius:8px; border:1.5px solid #fecaca;
+    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
+    font-size:0.78rem; cursor:pointer; color:var(--rosso); transition:all 0.15s; white-space:nowrap;
+  }
+  .btn-elimina-cert:hover { background:var(--rosso3); }
 
   .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
@@ -611,6 +638,10 @@
       <div class="nav-item" onclick="showSection('recensioni',this)">
         <span>⭐</span> Le mie recensioni
       </div>
+      <div class="nav-item" onclick="showSection('certificazioni',this)">
+        <span>📜</span> Certificazioni
+        <span style="margin-left:auto;background:#f0f0f0;color:#888;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:10px">Opz.</span>
+      </div>
       <div class="nav-item" onclick="showSection('profilo',this)">
         <span>👤</span> Il mio profilo
       </div>
@@ -627,18 +658,31 @@
     <div class="section active" id="sec-dashboard">
 
       <!-- HERO HEADER -->
-      <div class="dash-hero">
-        <div>
+      <div class="dash-hero" id="dash-hero">
+        <!-- SINISTRA: info + badge piano (1/3) -->
+        <div class="dash-hero-info-col">
           <div class="dash-welcome">Pannello artigiano</div>
           <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
           <div class="dash-meta">
             <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
             <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
           </div>
+          <!-- Colore header: visibile solo Pro/Premium, impostato da JS -->
+          <div id="header-color-controls" style="display:none;margin-top:12px;">
+            <div style="font-size:0.72rem;opacity:0.7;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Colore header</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <input type="color" id="header-color-picker" value="#2a7a4b" title="Colore personalizzato"
+                style="width:30px;height:30px;border:2px solid rgba(255,255,255,0.5);border-radius:6px;cursor:pointer;padding:2px;background:transparent;"
+                onchange="applicaColoreHeader(this.value)">
+              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#1a3a2a,#2a7a4b)')" title="Verde (default)" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);"></button>
+              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#1a237e,#1565c0)')" title="Blu" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#1a237e,#1565c0);"></button>
+              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#4a148c,#7b1fa2)')" title="Viola" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#4a148c,#7b1fa2);"></button>
+              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#b71c1c,#e53935)')" title="Rosso" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#b71c1c,#e53935);"></button>
+            </div>
+          </div>
         </div>
-        <button class="btn-ai-preventivo" onclick="apriModalPreventivoDash()">
-          🤖 Genera preventivo AI
-        </button>
+        <!-- DESTRA: area logo (2/3) — contenuto impostato da JS in base al piano -->
+        <div class="dash-hero-logo-col" id="dash-hero-logo-col"></div>
       </div>
 
       <!-- STATISTICHE -->
@@ -907,6 +951,34 @@
       <div id="lista-recensioni"><div class="empty-state"><div class="empty-icon">⭐</div>Caricamento...</div></div>
     </div>
 
+    <!-- CERTIFICAZIONI -->
+    <div class="section" id="sec-certificazioni">
+      <div class="topbar">
+        <div class="topbar-title">📜 Certificazioni <span style="font-size:0.75rem;background:#f0f0f0;color:#888;border-radius:10px;padding:3px 10px;font-family:'DM Sans',sans-serif;font-weight:700;margin-left:8px;">Opzionale</span></div>
+      </div>
+
+      <div style="background:white;border-radius:16px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:16px;">Aggiungi certificazione</div>
+        <div class="form-group">
+          <label>Nome certificazione *</label>
+          <input type="text" id="cert-nome-input" placeholder="Es. SOA, ISO 9001, Patentino gas…">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Scadenza (opzionale)</label>
+            <input type="date" id="cert-scadenza-input">
+          </div>
+          <div class="form-group">
+            <label>File (PDF/immagine)</label>
+            <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
+          </div>
+        </div>
+        <button style="padding:13px 24px;background:var(--verde);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;border-radius:8px;" onclick="aggiungiCertificazione()">+ Aggiungi</button>
+      </div>
+
+      <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
+    </div>
+
     <!-- PROFILO -->
     <div class="section" id="sec-profilo">
       <div class="topbar">
@@ -1105,6 +1177,8 @@ function mostraLogin() {
     return;
   }
   impresaCorrente = data;
+  const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
+  if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
   document.getElementById('spinner-avvio').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
@@ -1252,15 +1326,57 @@ window.onpopstate = function(e) {
 
 async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
-  const isPro = impresaCorrente.piano === 'pro';
+  const piano = impresaCorrente.piano || 'free';
+  const isPro = piano === 'pro' || piano === 'premium';
   const rating = impresaCorrente.rating || '—';
 
-  // Header dashboard
+  // Badge piano
   document.getElementById('dash-nome-impresa').textContent = nome;
   document.getElementById('dash-rating-badge').textContent = `⭐ ${rating}`;
-  const pianoBadge = document.getElementById('dash-piano-badge');
-  pianoBadge.textContent = isPro ? '⭐ Pro' : '🆓 Free';
-  if (isPro) pianoBadge.classList.add('pro');
+  aggiornaBadgeEOverlay();
+
+  // Colore header (Pro/Premium)
+  if (isPro) {
+    const ctrl = document.getElementById('header-color-controls');
+    if (ctrl) ctrl.style.display = '';
+    if (impresaCorrente.colore_header) {
+      const hero = document.getElementById('dash-hero');
+      if (hero) hero.style.background = impresaCorrente.colore_header;
+    }
+  }
+
+  // Area logo in base al piano
+  const logoCol = document.getElementById('dash-hero-logo-col');
+  if (logoCol) {
+    if (!isPro) {
+      logoCol.style.cursor = 'default';
+      logoCol.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,0.35);border-radius:12px;padding:28px 32px;text-align:center;">
+          <div style="font-size:2.5rem">🔒</div>
+          <div style="color:white;font-size:0.88rem;font-weight:600;">Carica il tuo logo</div>
+          <div style="color:rgba(255,255,255,0.75);font-size:0.8rem;">Disponibile dal piano Pro</div>
+          <a href="info-pro.html" style="color:white;background:#1a73e8;padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:700;text-decoration:none;margin-top:4px;">Scopri il piano Pro →</a>
+        </div>`;
+    } else {
+      logoCol.style.cursor = 'pointer';
+      logoCol.onclick = () => document.getElementById('input-logo-impresa').click();
+      logoCol.innerHTML = `
+        <input type="file" id="input-logo-impresa" accept="image/*" style="display:none" onchange="caricaLogoImpresa(event)">
+        <img id="dash-logo-img" src="" alt="Logo impresa" style="display:none;width:100%;height:160px;object-fit:contain;background:transparent;">
+        <div id="dash-logo-placeholder" class="dash-logo-upload-hint">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+          <span style="color:white;font-size:0.88rem;font-weight:600;">Carica logo</span>
+        </div>`;
+      if (impresaCorrente.logo_url) {
+        setTimeout(() => {
+          const img = document.getElementById('dash-logo-img');
+          const ph = document.getElementById('dash-logo-placeholder');
+          if (img) { img.src = impresaCorrente.logo_url; img.style.display = 'block'; }
+          if (ph) ph.style.display = 'none';
+        }, 0);
+      }
+    }
+  }
 
   // Stat rating (condiviso)
   document.getElementById('stat-rating').textContent = rating;
@@ -1270,7 +1386,59 @@ async function inizializza() {
   await caricaAnnunciLavoro();
   await caricaCandidatiZona();
   await caricaFotoLavori();
+  await caricaCertificazioni();
   caricaProfilo();
+}
+
+function aggiornaBadgeEOverlay() {
+  const piano = impresaCorrente ? (impresaCorrente.piano || 'free') : 'free';
+  const pianoBadge = document.getElementById('dash-piano-badge');
+  if (pianoBadge) {
+    pianoBadge.classList.remove('pro', 'premium');
+    if (piano === 'premium') {
+      pianoBadge.textContent = '💎 Premium';
+      pianoBadge.classList.add('premium');
+    } else if (piano === 'pro') {
+      pianoBadge.textContent = '⭐ Pro';
+      pianoBadge.classList.add('pro');
+    } else {
+      pianoBadge.textContent = '🆓 Free';
+    }
+  }
+}
+
+async function caricaLogoImpresa(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const userId = impresaCorrente.user_id;
+  const path = `${userId}/logo.png`;
+  const { error: upErr } = await sb.storage.from('loghi-imprese').upload(path, file, { upsert: true, contentType: file.type });
+  if (upErr) { alert('Errore caricamento logo: ' + upErr.message); return; }
+  const { data: urlData } = sb.storage.from('loghi-imprese').getPublicUrl(path);
+  const logoUrl = urlData.publicUrl;
+  await sb.from('imprese').update({ logo_url: logoUrl }).eq('id', impresaCorrente.id);
+  impresaCorrente.logo_url = logoUrl;
+  const img = document.getElementById('dash-logo-img');
+  const placeholder = document.getElementById('dash-logo-placeholder');
+  if (img) { img.src = logoUrl; img.style.display = 'block'; }
+  if (placeholder) placeholder.style.display = 'none';
+}
+
+async function salvaColoreHeader(valore) {
+  await sb.from('imprese').update({ colore_header: valore }).eq('id', impresaCorrente.id);
+  impresaCorrente.colore_header = valore;
+}
+
+function applicaColoreHeader(colore) {
+  const hero = document.getElementById('dash-hero');
+  if (hero) hero.style.background = colore;
+  salvaColoreHeader(colore);
+}
+
+function applicaGradienteHeader(gradiente) {
+  const hero = document.getElementById('dash-hero');
+  if (hero) hero.style.background = gradiente;
+  salvaColoreHeader(gradiente);
 }
 
 // CARICA PREVENTIVI
@@ -1416,7 +1584,7 @@ async function caricaAnnunciLavoro() {
     .order('created_at', { ascending: false });
 
   annunciLavoro = data || [];
-  const isPro = impresaCorrente.piano === 'pro';
+  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
   const maxAnnunci = isPro ? Infinity : 1;
   const attivi = annunciLavoro.filter(a => a.attiva).length;
 
@@ -1628,7 +1796,7 @@ async function copiaPreventivoDash() {
 // =====================
 // FOTO DEI LAVORI
 // =====================
-const MAX_FOTO_FREE = 10;
+const MAX_FOTO_FREE = 5;
 let fotoCaricate = [];
 
 async function caricaFotoLavori() {
@@ -1642,7 +1810,7 @@ async function caricaFotoLavori() {
 }
 
 function aggiornaBannerFoto() {
-  const isPro = impresaCorrente.piano === 'pro';
+  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
   const n = fotoCaricate.length;
   const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - n);
   const testoHTML = isPro
@@ -1676,7 +1844,7 @@ function renderFotoGrid() {
 
 async function uploadFoto(files) {
   if (!files?.length) return;
-  const isPro = impresaCorrente.piano === 'pro';
+  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
   const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
 
   if (!isPro && rimaste === 0) {
@@ -1880,6 +2048,74 @@ async function inviaPreventivo() {
   btn.textContent = '✅ Preventivo inviato!';
   await caricaPreventivi();
   setTimeout(() => chiudiModal(), 1500);
+}
+
+// =====================
+// CERTIFICAZIONI
+// =====================
+async function caricaCertificazioni() {
+  const { data } = await sb.from('imprese').select('certificazioni').eq('id', impresaCorrente.id).single();
+  const certs = data?.certificazioni || [];
+  impresaCorrente.certificazioni = certs;
+  renderCertificazioni(certs);
+}
+
+function renderCertificazioni(certs) {
+  const container = document.getElementById('lista-certificazioni');
+  if (!container) return;
+  if (!certs.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📜</div>Nessuna certificazione aggiunta.</div>';
+    return;
+  }
+  container.innerHTML = certs.map((c, i) => `
+    <div class="cert-item">
+      <div>
+        <div class="cert-nome">${c.nome}</div>
+        <div class="cert-meta">${c.scadenza ? '📅 Scade: ' + c.scadenza : ''}${c.file_url ? (c.scadenza ? ' · ' : '') + '<a href="' + c.file_url + '" target="_blank" style="color:var(--verde);font-weight:700;">📎 Visualizza file</a>' : ''}</div>
+      </div>
+      <button class="btn-elimina-cert" onclick="eliminaCertificazione(${i})">🗑️ Rimuovi</button>
+    </div>
+  `).join('');
+}
+
+async function aggiungiCertificazione() {
+  const nome = document.getElementById('cert-nome-input').value.trim();
+  if (!nome) { alert('Inserisci il nome della certificazione.'); return; }
+  const scadenza = document.getElementById('cert-scadenza-input').value || null;
+  const fileInput = document.getElementById('cert-file-input');
+  const file = fileInput.files[0];
+  let file_url = null;
+
+  if (file) {
+    const userId = impresaCorrente.user_id;
+    const ext = file.name.split('.').pop();
+    const path = `${userId}/${Date.now()}-${nome.replace(/\s+/g,'_').substring(0,40)}.${ext}`;
+    const { error: upErr } = await sb.storage.from('certificazioni').upload(path, file, { upsert: false, contentType: file.type });
+    if (upErr) { alert('Errore caricamento file: ' + upErr.message); return; }
+    const { data: urlData } = sb.storage.from('certificazioni').getPublicUrl(path);
+    file_url = urlData.publicUrl;
+  }
+
+  const nuovaCert = { nome, scadenza, file_url };
+  const certs = [...(impresaCorrente.certificazioni || []), nuovaCert];
+  const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
+  if (error) { alert('Errore salvataggio: ' + error.message); return; }
+
+  impresaCorrente.certificazioni = certs;
+  renderCertificazioni(certs);
+  document.getElementById('cert-nome-input').value = '';
+  document.getElementById('cert-scadenza-input').value = '';
+  fileInput.value = '';
+}
+
+async function eliminaCertificazione(index) {
+  if (!confirm('Rimuovere questa certificazione?')) return;
+  const certs = [...(impresaCorrente.certificazioni || [])];
+  certs.splice(index, 1);
+  const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  impresaCorrente.certificazioni = certs;
+  renderCertificazioni(certs);
 }
 
 function apriModalSegnalazione() {
