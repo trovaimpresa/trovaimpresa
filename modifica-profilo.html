@@ -7,16 +7,27 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       padding: 20px;
     }
-    .container { max-width: 100%; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-    .header { background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%); color: white; padding: 32px 24px; text-align: center; }
+    .container { max-width: 100%; margin: 40px auto; background: transparent; border-radius: 0; overflow: visible; box-shadow: none; }
+    .header { background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%); color: white; padding: 32px 24px; text-align: center; border-radius: 16px; margin-bottom: 0; max-width: 860px; margin-left: auto; margin-right: auto; }
     .header h1 { font-size: 24px; margin-bottom: 8px; }
     .header p { font-size: 14px; opacity: 0.9; }
-    .content { padding: 32px; }
+    .content { padding: 24px 0; background: transparent; }
+    .form-card {
+      background: white;
+      border-top: 4px solid #2e7d32;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .form-card.fc-arancio { border-top-color: #e65100; }
+    .form-card.fc-blu     { border-top-color: #1565c0; }
+    .form-card .section-title { margin-top: 0; }
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 7px; }
     .form-group input, .form-group select, .form-group textarea {
@@ -75,13 +86,12 @@
     html, body { overflow-x: hidden; }
     @media (max-width: 768px) {
       body { padding: 10px !important; }
-      .container { margin: 12px auto !important; border-radius: 10px !important; }
-      .header { padding: 20px 16px !important; }
+      .header { border-radius: 10px !important; padding: 20px 16px !important; }
       .header h1 { font-size: 1.2rem !important; }
       .header p  { font-size: 0.82rem !important; }
-      .content { padding: 16px !important; }
+      .content { padding: 12px 0 !important; }
       .form-row { grid-template-columns: 1fr !important; }
-      .form-section-title { font-size: 0.95rem !important; margin: 18px 0 10px !important; }
+      .form-card { padding: 16px !important; }
       .btn-back-link { font-size: 0.82rem !important; }
     }
   </style>
@@ -99,6 +109,7 @@
 
       <div id="form-wrapper" style="display:none;max-width:800px;margin:0 auto;">
 
+        <div class="form-card">
         <!-- DATI BASE (sempre visibili) -->
         <div class="section-title">📋 Dati principali</div>
         <div class="form-group">
@@ -132,9 +143,10 @@
           <textarea id="f-descrizione" placeholder="Chi siete, cosa fate, i vostri punti di forza..." maxlength="500" style="min-height:100px;" oninput="document.getElementById('desc-counter').textContent=this.value.length+' / 500'"></textarea>
           <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0 / 500</div>
         </div>
+        </div><!-- /card Dati principali -->
 
         <!-- ===== ARTIGIANO ===== -->
-        <div class="type-section" id="sec-artigiano">
+        <div class="type-section form-card fc-arancio" id="sec-artigiano">
           <div class="section-title">🔨 Dati artigiano</div>
           <div class="form-group">
             <label>Nome / Ragione sociale <span class="required">*</span></label>
@@ -184,7 +196,7 @@
         </div>
 
         <!-- ===== IMPRESA EDILE ===== -->
-        <div class="type-section" id="sec-impresa">
+        <div class="type-section form-card fc-arancio" id="sec-impresa">
           <div class="section-title">🏗️ Dati impresa edile</div>
           <div class="form-group">
             <label>Ragione sociale <span class="required">*</span></label>
@@ -231,7 +243,7 @@
         </div>
 
         <!-- ===== GRANDE IMPRESA ===== -->
-        <div class="type-section" id="sec-grande_impresa">
+        <div class="type-section form-card fc-arancio" id="sec-grande_impresa">
           <div class="section-title">🏢 Dati grande impresa</div>
           <div class="form-group">
             <label>Ragione sociale <span class="required">*</span></label>
@@ -273,7 +285,7 @@
         </div>
 
         <!-- ===== NEGOZIO ===== -->
-        <div class="type-section" id="sec-negozio">
+        <div class="type-section form-card fc-arancio" id="sec-negozio">
           <div class="section-title">🏪 Dati negozio</div>
           <div class="form-group">
             <label>Nome negozio <span class="required">*</span></label>
@@ -315,7 +327,7 @@
         </div>
 
         <!-- ===== PROFESSIONISTA ===== -->
-        <div class="type-section" id="sec-professionista">
+        <div class="type-section form-card fc-arancio" id="sec-professionista">
           <div class="section-title">👷 Dati professionista</div>
           <div class="form-row">
             <div class="form-group">
@@ -400,6 +412,7 @@
         </div>
 
         <!-- LOGO -->
+        <div class="form-card fc-blu">
         <div class="section-title">🖼️ Logo / Foto profilo</div>
         <div class="form-group">
           <div id="logo-current-wrap" style="display:none;margin-bottom:12px;">
@@ -413,9 +426,10 @@
           <input type="file" id="logo-input" accept="image/*">
           <div id="file-selected" style="display:none;margin-top:8px;font-size:13px;color:#2a7a4b;font-weight:600;"></div>
         </div>
+        </div><!-- /card Logo -->
 
         <!-- FOTO COPERTINA (PREMIUM) -->
-        <div style="position:relative;">
+        <div class="form-card" style="position:relative;">
           <div class="section-title">🖼️ Foto di copertina <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
           <div class="form-group">
             <div id="wrap-copertina-pro">
@@ -439,7 +453,7 @@
         </div>
 
         <!-- COLORE HEADER (PREMIUM) -->
-        <div style="position:relative;">
+        <div class="form-card fc-arancio" style="position:relative;">
           <div class="section-title">🎨 Colore header profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
           <div class="form-group">
             <div id="wrap-colore-pro">
@@ -480,7 +494,7 @@
         </div>
 
         <!-- VIDEO PROFILO (PREMIUM) -->
-        <div style="position:relative;">
+        <div class="form-card fc-blu" style="position:relative;">
           <div class="section-title">🎬 Video profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
           <div class="form-group">
             <div class="upload-area">
@@ -496,7 +510,7 @@
         </div>
 
         <!-- AI INTEGRATA (PREMIUM) -->
-        <div style="position:relative;">
+        <div class="form-card" style="position:relative;">
           <div class="section-title">🤖 AI integrata nel profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
           <div class="form-group">
             <div style="background:#f9f5ff;border:1px solid #e0d0f0;border-radius:8px;padding:14px;font-size:13px;color:#555;line-height:1.6;">
@@ -510,12 +524,14 @@
           </div>
         </div>
 
-        <button type="button" class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
-        <a href="pannello-impresa.html" class="btn-back-link">← Torna al pannello</a>
-        <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
-          🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
-          <a href="/privacy-policy.html" style="color:#2a7a4b;">Privacy Policy</a>
-        </p>
+        <div class="form-card fc-arancio">
+          <button type="button" class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
+          <a href="pannello-impresa.html" class="btn-back-link">← Torna al pannello</a>
+          <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
+            🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
+            <a href="/privacy-policy.html" style="color:#2a7a4b;">Privacy Policy</a>
+          </p>
+        </div><!-- /card save -->
 
       </div><!-- /form-wrapper -->
     </div><!-- /content -->
