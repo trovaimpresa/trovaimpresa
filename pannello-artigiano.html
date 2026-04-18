@@ -1411,13 +1411,7 @@ async function inizializza() {
   if (logoCol) {
     if (!isPro) {
       logoCol.style.cursor = 'default';
-      logoCol.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,0.35);border-radius:12px;padding:28px 32px;text-align:center;">
-          <div style="font-size:2.5rem">🔒</div>
-          <div style="color:white;font-size:0.88rem;font-weight:600;">Carica il tuo logo</div>
-          <div style="color:rgba(255,255,255,0.75);font-size:0.8rem;">Disponibile dal piano Pro</div>
-          <a href="info-pro.html" style="color:white;background:#1a73e8;padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:700;text-decoration:none;margin-top:4px;">Scopri il piano Pro →</a>
-        </div>`;
+      logoCol.innerHTML = '';
     } else {
       logoCol.style.cursor = 'pointer';
       logoCol.onclick = () => document.getElementById('input-logo-impresa').click();
@@ -1506,7 +1500,7 @@ function aggiornaPianoCards(piano) {
       btn.disabled = true;
       btn.onclick = null;
     } else {
-      btn.textContent = `Passa a ${p.label}`;
+      btn.textContent = `🔒 Passa a ${p.label}`;
       btn.style.background = 'white';
       btn.style.color = p.colore;
       btn.style.cursor = 'pointer';
