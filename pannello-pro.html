@@ -1160,8 +1160,8 @@ function mostraLogin() {
   document.getElementById('pannello').style.display = 'none';
 }
 
-async function caricaAvvio() {
-  const { data: { session } } = await sb.auth.getSession();
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event !== 'INITIAL_SESSION') return;
   if (!session) {
     window.location.replace('login-impresa.html');
     return;
@@ -1180,8 +1180,7 @@ async function caricaAvvio() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
   inizializza();
-}
-caricaAvvio();
+});
 
 // LOGIN
 async function doLogin() {
@@ -2042,8 +2041,7 @@ async function inviaSegnalazione() {
   btn.disabled = true;
   btn.textContent = '⏳ Invio in corso...';
   try {
-    const { data: { session } } = await sb.auth.getSession();
-    const user_id = session ? session.user.id : null;
+    const user_id = impresaCorrente ? impresaCorrente.user_id : null;
     const { error } = await sb.from('segnalazioni').insert({ user_id, descrizione, stato: 'aperto' });
     if (error) throw error;
     document.getElementById('segnalazione-form').style.display = 'none';

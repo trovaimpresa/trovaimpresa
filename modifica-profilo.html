@@ -639,8 +639,8 @@
     });
     // ===========================
 
-    (async () => {
-      const { data: { session } } = await supabaseClient.auth.getSession();
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (event !== 'INITIAL_SESSION') return;
       if (!session) {
         window.location.href = 'login-impresa.html';
         return;
@@ -664,7 +664,7 @@
       impresaData = data;
       document.getElementById('form-wrapper').style.display = 'block';
       popolaCampi(data);
-    })();
+    });
 
     // Determina la categoria in base al campo tipo
     function getRealTipo(d) {
