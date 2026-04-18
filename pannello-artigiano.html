@@ -408,11 +408,14 @@
   .cert-nome { font-weight:700; font-size:0.92rem; color:var(--dark); }
   .cert-meta { font-size:0.78rem; color:var(--light); margin-top:3px; }
   .btn-elimina-cert {
-    padding:6px 14px; border-radius:8px; border:1.5px solid #fecaca;
-    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
-    font-size:0.78rem; cursor:pointer; color:var(--rosso); transition:all 0.15s; white-space:nowrap;
+    background:white; border:1px solid rgba(0,0,0,0.08); border-top:4px solid #e65100;
+    border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    padding:10px 16px; color:#1a1a1a; font-weight:600;
+    font-family:'DM Sans',sans-serif; font-size:0.82rem;
+    display:inline-flex; align-items:center; gap:6px;
+    cursor:pointer; white-space:nowrap; transition:all 0.2s;
   }
-  .btn-elimina-cert:hover { background:var(--rosso3); }
+  .btn-elimina-cert:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.13); }
 
   .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
@@ -495,9 +498,39 @@
     line-height:1.7; resize:vertical; outline:none;
   }
 
+  /* === BOTTONE AZIONE UNIFORME === */
+  .btn-az {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-top: 4px solid #2e7d32;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 12px 20px;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-az:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.13);
+    text-decoration: none;
+    color: #1a1a1a;
+  }
+  .btn-az.arancio { border-top-color: #e65100; }
+  .btn-az.blu     { border-top-color: #1565c0; }
+  .btn-az:disabled { opacity: 0.7; cursor: default; transform: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
   /* === FOTO DEI LAVORI === */
   .foto-upload-area {
-    border:2px dashed var(--border); border-radius:16px; padding:32px;
+    border:2px dashed var(--border); border-top:4px solid #2e7d32;
+    border-radius:16px; padding:32px;
     text-align:center; cursor:pointer; transition:all 0.2s;
     background:white; margin-bottom:20px;
   }
@@ -518,12 +551,16 @@
   }
   .foto-item img { width:100%; height:100%; object-fit:cover; display:block; }
   .foto-item-del {
-    position:absolute; top:6px; right:6px; width:26px; height:26px;
-    background:rgba(0,0,0,0.55); color:white; border:none; border-radius:50%;
-    cursor:pointer; font-size:0.75rem; display:flex; align-items:center;
-    justify-content:center; opacity:0; transition:opacity 0.2s;
+    position:absolute; top:6px; right:6px;
+    background:white; color:#e65100; border:none; border-top:3px solid #e65100;
+    border-radius:8px; padding:3px 8px;
+    cursor:pointer; font-size:0.72rem; font-weight:700;
+    display:flex; align-items:center; gap:3px;
+    opacity:0; transition:all 0.2s;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
   }
   .foto-item:hover .foto-item-del { opacity:1; }
+  .foto-item-del:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.2); }
   .foto-upload-progress {
     background:var(--verde3); border:1px solid #a8d5b5; border-radius:10px;
     padding:10px 16px; font-size:0.85rem; color:var(--verde2); margin-bottom:14px;
@@ -985,7 +1022,7 @@
             <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
           </div>
         </div>
-        <button style="padding:13px 24px;background:var(--verde);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;border-radius:8px;" onclick="aggiungiCertificazione()">+ Aggiungi</button>
+        <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
       </div>
 
       <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
@@ -1457,15 +1494,21 @@ function aggiornaPianoCards(piano) {
     const attivo = piano === p.id;
     card.style.border = attivo ? `2px solid ${p.colore}` : '2px solid #e0e0e0';
     card.style.boxShadow = attivo ? `0 0 0 3px ${p.colore}22` : '';
+    btn.className = 'btn-az';
+    btn.style.width = '100%';
+    btn.style.justifyContent = 'center';
+    btn.style.borderTopColor = p.colore;
     if (attivo) {
       btn.textContent = '✅ Attivo';
       btn.style.background = p.colore;
+      btn.style.color = 'white';
       btn.style.cursor = 'default';
       btn.disabled = true;
       btn.onclick = null;
     } else {
       btn.textContent = `Passa a ${p.label}`;
-      btn.style.background = p.colore;
+      btn.style.background = 'white';
+      btn.style.color = p.colore;
       btn.style.cursor = 'pointer';
       btn.disabled = false;
       btn.onclick = p.href ? () => window.location.href = p.href : null;
@@ -1634,10 +1677,10 @@ function caricaProfilo() {
     <div class="profilo-row"><span class="profilo-key">Sito web</span><span>${i.sito_web || '—'}</span></div>
     <div class="profilo-row"><span class="profilo-key">Descrizione</span><span>${i.descrizione || '—'}</span></div>
     <div class="profilo-row"><span class="profilo-key">Stato</span><span>${i.verificata ? '✅ Verificata' : '⏳ In attesa di verifica'}</span></div>
-    <br>
-    <a href="modifica-profilo.html" target="_blank" style="color:var(--verde);font-weight:700;font-size:0.88rem">✏️ Modifica profilo →</a>
-    &nbsp;&nbsp;
-    <a href="#" onclick="avviaMFA(event)" style="color:var(--arancio);font-weight:700;font-size:0.88rem" id="link-2fa">🔐 Attiva 2FA →</a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+      <a href="modifica-profilo.html" target="_blank" class="btn-az">✏️ Modifica profilo</a>
+      <a href="#" onclick="avviaMFA(event)" class="btn-az arancio" id="link-2fa">🔐 Attiva 2FA</a>
+    </div>
   `;
   inizializzaMappaProfilo(i);
 }
@@ -1926,7 +1969,7 @@ function renderFotoGrid() {
   const emptyHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessuna foto ancora. Carica i tuoi lavori!</div>';
   const fotoHTML = fotoCaricate.map(f => {
     const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(`${folder}/${f.name}`);
-    return `<div class="foto-item"><img src="${publicUrl}" alt="${f.name}" loading="lazy"><button class="foto-item-del" onclick="eliminaFoto('${f.name}')" title="Elimina foto">✕</button></div>`;
+    return `<div class="foto-item"><img src="${publicUrl}" alt="${f.name}" loading="lazy"><button class="foto-item-del" onclick="eliminaFoto('${f.name}')" title="Elimina foto">✕ Elimina</button></div>`;
   }).join('');
 
   for (const id of ['foto-grid', 'foto-grid-dash']) {
@@ -2166,7 +2209,7 @@ function renderCertificazioni(certs) {
         <div class="cert-nome">${c.nome}</div>
         <div class="cert-meta">${c.scadenza ? '📅 Scade: ' + c.scadenza : ''}${c.file_url ? (c.scadenza ? ' · ' : '') + '<a href="' + c.file_url + '" target="_blank" style="color:var(--verde);font-weight:700;">📎 Visualizza file</a>' : ''}</div>
       </div>
-      <button class="btn-elimina-cert" onclick="eliminaCertificazione(${i})">🗑️ Rimuovi</button>
+      <button class="btn-az arancio" style="padding:10px 16px;font-size:0.82rem;" onclick="eliminaCertificazione(${i})">🗑️ Rimuovi</button>
     </div>
   `).join('');
 }
