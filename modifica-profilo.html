@@ -7,7 +7,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      background: #f5f7fa;
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       padding: 20px;
@@ -20,14 +20,22 @@
     .form-card {
       background: white;
       border-top: 4px solid #2e7d32;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      padding: 24px;
-      margin-bottom: 20px;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 20px 24px;
+      margin-bottom: 16px;
     }
     .form-card.fc-arancio { border-top-color: #e65100; }
     .form-card.fc-blu     { border-top-color: #1565c0; }
-    .form-card .section-title { margin-top: 0; }
+    .form-card .section-title { display: none; }
+    .card-header {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 14px; color: #2e7d32;
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .card-header.arancio { color: #e65100; }
+    .card-header.blu     { color: #1565c0; }
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 7px; }
     .form-group input, .form-group select, .form-group textarea {
@@ -109,311 +117,355 @@
 
       <div id="form-wrapper" style="display:none;max-width:800px;margin:0 auto;">
 
+        <!-- Card 1: Dati di contatto -->
         <div class="form-card">
-        <!-- DATI BASE (sempre visibili) -->
-        <div class="section-title">📋 Dati principali</div>
-        <div class="form-group">
-          <label>Email (non modificabile)</label>
-          <input type="email" id="f-email" disabled>
+          <div class="card-header">📋 Dati di contatto</div>
+          <div class="form-group">
+            <label>Email (non modificabile)</label>
+            <input type="email" id="f-email" disabled>
+          </div>
+          <div class="form-group">
+            <label>Telefono <span class="required">*</span></label>
+            <input type="tel" id="f-telefono" placeholder="+39 06 1234567">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Città <span class="required">*</span></label>
+            <input type="text" id="f-citta" placeholder="Es. Roma">
+          </div>
         </div>
-        <div class="form-group">
-          <label>Telefono <span class="required">*</span></label>
-          <input type="tel" id="f-telefono" placeholder="+39 06 1234567">
-        </div>
-        <div class="form-group">
-          <label>Città <span class="required">*</span></label>
-          <input type="text" id="f-citta" placeholder="Es. Roma">
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label>Posizione sulla mappa <span style="font-weight:400;color:#aaa;">(opzionale)</span></label>
+
+        <!-- Card 2: Posizione sulla mappa -->
+        <div class="form-card fc-arancio">
+          <div class="card-header arancio">🗺️ Posizione sulla mappa <span style="font-weight:400;font-size:12px;color:#aaa;">(opzionale)</span></div>
           <div style="position:relative;">
-            <input type="text" id="map-search" placeholder="Cerca indirizzo o città..." autocomplete="off" oninput="nominatimSearch(this.value)" style="border-radius:8px 8px 0 0;">
+            <input type="text" id="map-search" placeholder="Cerca indirizzo o città..." autocomplete="off" oninput="nominatimSearch(this.value)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px 8px 0 0;font-size:14px;font-family:inherit;color:#333;outline:none;">
             <div id="map-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;z-index:1000;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
           </div>
           <div id="mappa" style="height:300px;width:100%;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;"></div>
+          <input type="hidden" id="f-lat">
+          <input type="hidden" id="f-lng">
         </div>
-        <input type="hidden" id="f-lat">
-        <input type="hidden" id="f-lng">
-        <div class="form-group" style="margin-top:18px;">
-          <label>Sito web</label>
-          <input type="url" id="f-sito_web" placeholder="https://www.miosito.it">
+
+        <!-- Card 3: Presentazione -->
+        <div class="form-card fc-blu">
+          <div class="card-header blu">📝 Presentazione</div>
+          <div class="form-group">
+            <label>Sito web</label>
+            <input type="url" id="f-sito_web" placeholder="https://www.miosito.it">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Descrizione <span style="font-weight:400;color:#888;">(max 500 caratteri)</span></label>
+            <textarea id="f-descrizione" placeholder="Chi siete, cosa fate, i vostri punti di forza..." maxlength="500" style="min-height:100px;" oninput="document.getElementById('desc-counter').textContent=this.value.length+' / 500'"></textarea>
+            <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0 / 500</div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Descrizione <span style="font-weight:400;color:#888;">(max 500 caratteri)</span></label>
-          <textarea id="f-descrizione" placeholder="Chi siete, cosa fate, i vostri punti di forza..." maxlength="500" style="min-height:100px;" oninput="document.getElementById('desc-counter').textContent=this.value.length+' / 500'"></textarea>
-          <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0 / 500</div>
-        </div>
-        </div><!-- /card Dati principali -->
 
         <!-- ===== ARTIGIANO ===== -->
-        <div class="type-section form-card fc-arancio" id="sec-artigiano">
-          <div class="section-title">🔨 Dati artigiano</div>
-          <div class="form-group">
-            <label>Nome / Ragione sociale <span class="required">*</span></label>
-            <input type="text" id="f-nome-artigiano" placeholder="Es. Mario Rossi Imbianchino">
-          </div>
-          <div class="form-group">
-            <label>Partita IVA / Codice Fiscale</label>
-            <input type="text" id="f-partita_iva-artigiano" placeholder="Es. 12345678901">
-          </div>
-          <div class="form-row">
+        <div class="type-section" id="sec-artigiano">
+          <div class="form-card">
+            <div class="card-header">🔨 Dati artigiano</div>
             <div class="form-group">
-              <label>Provincia</label>
-              <input type="text" id="f-provincia-artigiano" placeholder="Es. RM">
+              <label>Nome / Ragione sociale <span class="required">*</span></label>
+              <input type="text" id="f-nome-artigiano" placeholder="Es. Mario Rossi Imbianchino">
             </div>
             <div class="form-group">
-              <label>Anni di esperienza</label>
-              <input type="number" id="f-anni_esperienza-artigiano" min="0" max="60" placeholder="Es. 10">
+              <label>Partita IVA / Codice Fiscale</label>
+              <input type="text" id="f-partita_iva-artigiano" placeholder="Es. 12345678901">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Provincia</label>
+                <input type="text" id="f-provincia-artigiano" placeholder="Es. RM">
+              </div>
+              <div class="form-group">
+                <label>Anni di esperienza</label>
+                <input type="number" id="f-anni_esperienza-artigiano" min="0" max="60" placeholder="Es. 10">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Anno di fondazione / inizio attività</label>
+              <input type="number" id="f-anno_fondazione-artigiano" min="1900" max="2026" placeholder="Es. 2005">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Mestiere principale <span class="required">*</span></label>
+              <select id="f-mestiere-artigiano">
+                <option value="">— Seleziona —</option>
+                <option>Muratura</option><option>Carpentiere</option><option>Cartongesso</option>
+                <option>Coperture / Tetti</option><option>Impermeabilizzazione</option><option>Ponteggi</option>
+                <option>Elettricista</option><option>Idraulico</option><option>Termoidraulico</option>
+                <option>Tecnico caldaie</option><option>Climatizzatore</option><option>Impianto solare</option>
+                <option>Autospurghi</option><option>Pittore</option><option>Piastrellista</option>
+                <option>Pavimentista</option><option>Intonacatore</option><option>Fabbro</option>
+                <option>Falegname</option><option>Vetraio</option><option>Giardiniere</option>
+                <option>Demolizione</option><option>Movimento terra</option><option>Asfalti</option>
+                <option>Sgomberi</option>
+              </select>
             </div>
           </div>
-          <div class="form-group">
-            <label>Anno di fondazione / inizio attività</label>
-            <input type="number" id="f-anno_fondazione-artigiano" min="1900" max="2026" placeholder="Es. 2005">
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">📝 Specializzazioni</div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Altri mestieri / specializzazioni</label>
+              <textarea id="f-specializzazioni-artigiano" placeholder="Es. Posa pavimenti, tinteggiatura, cartongesso..."></textarea>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Mestiere principale <span class="required">*</span></label>
-            <select id="f-mestiere-artigiano">
-              <option value="">— Seleziona —</option>
-              <option>Muratura</option><option>Carpentiere</option><option>Cartongesso</option>
-              <option>Coperture / Tetti</option><option>Impermeabilizzazione</option><option>Ponteggi</option>
-              <option>Elettricista</option><option>Idraulico</option><option>Termoidraulico</option>
-              <option>Tecnico caldaie</option><option>Climatizzatore</option><option>Impianto solare</option>
-              <option>Autospurghi</option><option>Pittore</option><option>Piastrellista</option>
-              <option>Pavimentista</option><option>Intonacatore</option><option>Fabbro</option>
-              <option>Falegname</option><option>Vetraio</option><option>Giardiniere</option>
-              <option>Demolizione</option><option>Movimento terra</option><option>Asfalti</option>
-              <option>Sgomberi</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Altri mestieri / specializzazioni</label>
-            <textarea id="f-specializzazioni-artigiano" placeholder="Es. Posa pavimenti, tinteggiatura, cartongesso..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Zone di lavoro</label>
-            <input type="text" id="f-zone-artigiano" placeholder="Es. Roma e provincia, Lazio">
+          <div class="form-card fc-blu">
+            <div class="card-header blu">📍 Zone di lavoro</div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Zone di lavoro</label>
+              <input type="text" id="f-zone-artigiano" placeholder="Es. Roma e provincia, Lazio">
+            </div>
           </div>
         </div>
 
         <!-- ===== IMPRESA EDILE ===== -->
-        <div class="type-section form-card fc-arancio" id="sec-impresa">
-          <div class="section-title">🏗️ Dati impresa edile</div>
-          <div class="form-group">
-            <label>Ragione sociale <span class="required">*</span></label>
-            <input type="text" id="f-nome-impresa" placeholder="Es. Edilizia Rossi Srl">
-          </div>
-          <div class="form-group">
-            <label>Partita IVA <span class="required">*</span></label>
-            <input type="text" id="f-partita_iva-impresa" placeholder="Es. 12345678901">
-          </div>
-          <div class="form-row">
+        <div class="type-section" id="sec-impresa">
+          <div class="form-card">
+            <div class="card-header">🏗️ Dati impresa edile</div>
             <div class="form-group">
-              <label>Provincia</label>
-              <input type="text" id="f-provincia-impresa" placeholder="Es. RM">
+              <label>Ragione sociale <span class="required">*</span></label>
+              <input type="text" id="f-nome-impresa" placeholder="Es. Edilizia Rossi Srl">
             </div>
             <div class="form-group">
-              <label>Anni di attività</label>
-              <input type="number" id="f-anni_esperienza-impresa" min="0" max="100" placeholder="Es. 15">
+              <label>Partita IVA <span class="required">*</span></label>
+              <input type="text" id="f-partita_iva-impresa" placeholder="Es. 12345678901">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Provincia</label>
+                <input type="text" id="f-provincia-impresa" placeholder="Es. RM">
+              </div>
+              <div class="form-group">
+                <label>Anni di attività</label>
+                <input type="number" id="f-anni_esperienza-impresa" min="0" max="100" placeholder="Es. 15">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Anno di fondazione</label>
+              <input type="number" id="f-anno_fondazione-impresa" min="1900" max="2026" placeholder="Es. 1998">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Specializzazione principale <span class="required">*</span></label>
+              <select id="f-mestiere-impresa">
+                <option value="">— Seleziona —</option>
+                <option>Ristrutturazione</option><option>Muratura</option><option>Carpenteria</option>
+                <option>Coperture / Tetti</option><option>Impermeabilizzazione</option><option>Ponteggi</option>
+                <option>Impianti elettrici</option><option>Impianti idraulici</option><option>Impianti termici</option>
+                <option>Impianti solari</option><option>Pavimenti e rivestimenti</option><option>Intonaci e pitture</option>
+                <option>Serramenti e infissi</option><option>Demolizione</option><option>Movimento terra</option>
+                <option>Asfalti</option><option>Restauro</option><option>Efficienza energetica</option>
+              </select>
             </div>
           </div>
-          <div class="form-group">
-            <label>Anno di fondazione</label>
-            <input type="number" id="f-anno_fondazione-impresa" min="1900" max="2026" placeholder="Es. 1998">
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">📝 Specializzazioni</div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Altre specializzazioni</label>
+              <textarea id="f-specializzazioni-impresa" placeholder="Es. Ristrutturazioni complete, impianti, facciate..."></textarea>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Specializzazione principale <span class="required">*</span></label>
-            <select id="f-mestiere-impresa">
-              <option value="">— Seleziona —</option>
-              <option>Ristrutturazione</option><option>Muratura</option><option>Carpenteria</option>
-              <option>Coperture / Tetti</option><option>Impermeabilizzazione</option><option>Ponteggi</option>
-              <option>Impianti elettrici</option><option>Impianti idraulici</option><option>Impianti termici</option>
-              <option>Impianti solari</option><option>Pavimenti e rivestimenti</option><option>Intonaci e pitture</option>
-              <option>Serramenti e infissi</option><option>Demolizione</option><option>Movimento terra</option>
-              <option>Asfalti</option><option>Restauro</option><option>Efficienza energetica</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Altre specializzazioni</label>
-            <textarea id="f-specializzazioni-impresa" placeholder="Es. Ristrutturazioni complete, impianti, facciate..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Zone operative</label>
-            <input type="text" id="f-zone-impresa" placeholder="Es. Roma e provincia, Lazio, Centro Italia">
+          <div class="form-card fc-blu">
+            <div class="card-header blu">📍 Zone operative</div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Zone operative</label>
+              <input type="text" id="f-zone-impresa" placeholder="Es. Roma e provincia, Lazio, Centro Italia">
+            </div>
           </div>
         </div>
 
         <!-- ===== GRANDE IMPRESA ===== -->
-        <div class="type-section form-card fc-arancio" id="sec-grande_impresa">
-          <div class="section-title">🏢 Dati grande impresa</div>
-          <div class="form-group">
-            <label>Ragione sociale <span class="required">*</span></label>
-            <input type="text" id="f-nome-grande_impresa" placeholder="Es. Costruzioni Bianchi SpA">
-          </div>
-          <div class="form-group">
-            <label>Partita IVA <span class="required">*</span></label>
-            <input type="text" id="f-partita_iva-grande_impresa" placeholder="Es. 12345678901">
-          </div>
-          <div class="form-row">
+        <div class="type-section" id="sec-grande_impresa">
+          <div class="form-card">
+            <div class="card-header">🏢 Dati grande impresa</div>
             <div class="form-group">
-              <label>Provincia</label>
-              <input type="text" id="f-provincia-grande_impresa" placeholder="Es. MI">
+              <label>Ragione sociale <span class="required">*</span></label>
+              <input type="text" id="f-nome-grande_impresa" placeholder="Es. Costruzioni Bianchi SpA">
             </div>
             <div class="form-group">
-              <label>Anno di fondazione</label>
-              <input type="number" id="f-anno_fondazione-grande_impresa" min="1900" max="2026" placeholder="Es. 1990">
+              <label>Partita IVA <span class="required">*</span></label>
+              <input type="text" id="f-partita_iva-grande_impresa" placeholder="Es. 12345678901">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Provincia</label>
+                <input type="text" id="f-provincia-grande_impresa" placeholder="Es. MI">
+              </div>
+              <div class="form-group">
+                <label>Anno di fondazione</label>
+                <input type="number" id="f-anno_fondazione-grande_impresa" min="1900" max="2026" placeholder="Es. 1990">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Settore principale <span class="required">*</span></label>
+              <select id="f-mestiere-grande_impresa">
+                <option value="">— Seleziona —</option>
+                <option>Costruzione edifici</option><option>Ristrutturazione completa</option><option>Opere civili</option>
+                <option>Capannoni industriali</option><option>Opere stradali</option><option>Movimento terra</option>
+                <option>Asfalti</option><option>Consolidamento strutturale</option><option>Restauro conservativo</option>
+                <option>Opere idrauliche</option><option>Efficienza energetica</option><option>Fotovoltaico industriale</option>
+                <option>Demolizione e bonifica</option><option>General contractor</option>
+              </select>
             </div>
           </div>
-          <div class="form-group">
-            <label>Settore principale <span class="required">*</span></label>
-            <select id="f-mestiere-grande_impresa">
-              <option value="">— Seleziona —</option>
-              <option>Costruzione edifici</option><option>Ristrutturazione completa</option><option>Opere civili</option>
-              <option>Capannoni industriali</option><option>Opere stradali</option><option>Movimento terra</option>
-              <option>Asfalti</option><option>Consolidamento strutturale</option><option>Restauro conservativo</option>
-              <option>Opere idrauliche</option><option>Efficienza energetica</option><option>Fotovoltaico industriale</option>
-              <option>Demolizione e bonifica</option><option>General contractor</option>
-            </select>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">📋 Certificazioni e settori</div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Altri settori / certificazioni</label>
+              <textarea id="f-specializzazioni-grande_impresa" placeholder="Es. ISO 9001, SOA cat. OG1, opere pubbliche..."></textarea>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Altri settori / certificazioni</label>
-            <textarea id="f-specializzazioni-grande_impresa" placeholder="Es. ISO 9001, SOA cat. OG1, opere pubbliche..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Zone operative</label>
-            <input type="text" id="f-zone-grande_impresa" placeholder="Es. Nord Italia, Nazionale, Europa">
+          <div class="form-card fc-blu">
+            <div class="card-header blu">📍 Zone operative</div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Zone operative</label>
+              <input type="text" id="f-zone-grande_impresa" placeholder="Es. Nord Italia, Nazionale, Europa">
+            </div>
           </div>
         </div>
 
         <!-- ===== NEGOZIO ===== -->
-        <div class="type-section form-card fc-arancio" id="sec-negozio">
-          <div class="section-title">🏪 Dati negozio</div>
-          <div class="form-group">
-            <label>Nome negozio <span class="required">*</span></label>
-            <input type="text" id="f-nome_negozio" placeholder="Es. Edilizia Rossi">
-          </div>
-          <div class="form-group">
-            <label>Tipo di negozio <span class="required">*</span></label>
-            <select id="f-tipo_negozio">
-              <option value="">— Seleziona —</option>
-              <option>Materiali edili</option><option>Ferramenta</option><option>Pitture e vernici</option>
-              <option>Pavimenti e rivestimenti</option><option>Sanitari e idraulica</option>
-              <option>Elettrico e illuminazione</option><option>Legname e infissi</option>
-              <option>Macchine e attrezzature edili</option><option>Noleggio attrezzature edili</option>
-              <option>Altro</option>
-            </select>
-          </div>
-          <div class="form-row">
+        <div class="type-section" id="sec-negozio">
+          <div class="form-card">
+            <div class="card-header">🏪 Dati negozio</div>
             <div class="form-group">
-              <label>CAP</label>
-              <input type="text" id="f-cap-negozio" placeholder="Es. 00100">
+              <label>Nome negozio <span class="required">*</span></label>
+              <input type="text" id="f-nome_negozio" placeholder="Es. Edilizia Rossi">
             </div>
             <div class="form-group">
-              <label>Indirizzo</label>
-              <input type="text" id="f-indirizzo-negozio" placeholder="Es. Via Roma 1">
+              <label>Tipo di negozio <span class="required">*</span></label>
+              <select id="f-tipo_negozio">
+                <option value="">— Seleziona —</option>
+                <option>Materiali edili</option><option>Ferramenta</option><option>Pitture e vernici</option>
+                <option>Pavimenti e rivestimenti</option><option>Sanitari e idraulica</option>
+                <option>Elettrico e illuminazione</option><option>Legname e infissi</option>
+                <option>Macchine e attrezzature edili</option><option>Noleggio attrezzature edili</option>
+                <option>Altro</option>
+              </select>
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>CAP</label>
+                <input type="text" id="f-cap-negozio" placeholder="Es. 00100">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Indirizzo</label>
+                <input type="text" id="f-indirizzo-negozio" placeholder="Es. Via Roma 1">
+              </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Prodotti trattati</label>
-            <textarea id="f-prodotti" placeholder="Es. Cemento, mattoni, isolanti, pavimenti..."></textarea>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">📦 Prodotti e marchi</div>
+            <div class="form-group">
+              <label>Prodotti trattati</label>
+              <textarea id="f-prodotti" placeholder="Es. Cemento, mattoni, isolanti, pavimenti..."></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Marchi principali</label>
+              <textarea id="f-marchi" placeholder="Es. Mapei, Knauf, Weber, Bosch..."></textarea>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Marchi principali</label>
-            <textarea id="f-marchi" placeholder="Es. Mapei, Knauf, Weber, Bosch..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Orari di apertura</label>
-            <input type="text" id="f-orari" placeholder="Es. Lun-Ven 8:00-18:00, Sab 8:00-12:00">
+          <div class="form-card fc-blu">
+            <div class="card-header blu">🕐 Orari di apertura</div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Orari di apertura</label>
+              <input type="text" id="f-orari" placeholder="Es. Lun-Ven 8:00-18:00, Sab 8:00-12:00">
+            </div>
           </div>
         </div>
 
         <!-- ===== PROFESSIONISTA ===== -->
-        <div class="type-section form-card fc-arancio" id="sec-professionista">
-          <div class="section-title">👷 Dati professionista</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Nome <span class="required">*</span></label>
-              <input type="text" id="f-nome-professionista" placeholder="Mario">
+        <div class="type-section" id="sec-professionista">
+          <div class="form-card">
+            <div class="card-header">👷 Dati professionista</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nome <span class="required">*</span></label>
+                <input type="text" id="f-nome-professionista" placeholder="Mario">
+              </div>
+              <div class="form-group">
+                <label>Cognome <span class="required">*</span></label>
+                <input type="text" id="f-cognome" placeholder="Rossi">
+              </div>
             </div>
             <div class="form-group">
-              <label>Cognome <span class="required">*</span></label>
-              <input type="text" id="f-cognome" placeholder="Rossi">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Tipo di professionista <span class="required">*</span></label>
-            <select id="f-tipo_prof">
-              <option value="">— Seleziona —</option>
-              <option>Ingegnere civile</option><option>Ingegnere strutturale</option>
-              <option>Ingegnere impiantistico</option><option>Architetto</option>
-              <option>Geometra</option><option>Perito edile</option>
-              <option>Amministratore di condominio</option><option>Consulente energetico</option>
-              <option>Tecnico del lavoro</option><option>Altro</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Nome studio / attività</label>
-            <input type="text" id="f-nome_attivita" placeholder="Es. Studio Rossi Ingegneria">
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Numero iscrizione albo</label>
-              <input type="text" id="f-albo" placeholder="Es. 12345">
-            </div>
-            <div class="form-group">
-              <label>Partita IVA</label>
-              <input type="text" id="f-partita_iva-professionista" placeholder="IT12345678901">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Anni di esperienza</label>
-              <input type="number" id="f-anni_esperienza-professionista" min="0" max="60" placeholder="Es. 10">
-            </div>
-            <div class="form-group">
-              <label>CAP</label>
-              <input type="text" id="f-cap-professionista" placeholder="Es. 00100">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Indirizzo studio</label>
-            <input type="text" id="f-indirizzo-professionista" placeholder="Es. Via Roma 1">
-          </div>
-          <div class="form-group">
-            <label>Specializzazioni</label>
-            <div style="display:flex;gap:8px;margin-bottom:8px;">
-              <select id="f-spec-select" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
-                <option value="">— Seleziona specializzazione —</option>
-                <optgroup label="Progettazione">
-                  <option>Progettazione architettonica</option><option>Progettazione strutturale</option>
-                  <option>Progettazione impiantistica</option><option>Progettazione urbanistica</option>
-                  <option>Interior design</option><option>Paesaggistica</option>
-                </optgroup>
-                <optgroup label="Direzione lavori">
-                  <option>Direzione lavori</option><option>Coordinatore sicurezza</option>
-                  <option>Collaudo strutturale</option><option>Certificazione energetica</option>
-                </optgroup>
-                <optgroup label="Pratiche e consulenze">
-                  <option>Pratiche catastali</option><option>Pratiche edilizie</option>
-                  <option>Consulenza sismica</option><option>Perizie e stime immobiliari</option>
-                  <option>Consulenza ambientale</option><option>Bonifica amianto</option>
-                </optgroup>
-                <optgroup label="Gestione">
-                  <option>Amministrazione condominio</option><option>Property management</option>
-                  <option>Facility management</option>
-                </optgroup>
-                <optgroup label="Altro"><option>Altro</option></optgroup>
+              <label>Tipo di professionista <span class="required">*</span></label>
+              <select id="f-tipo_prof">
+                <option value="">— Seleziona —</option>
+                <option>Ingegnere civile</option><option>Ingegnere strutturale</option>
+                <option>Ingegnere impiantistico</option><option>Architetto</option>
+                <option>Geometra</option><option>Perito edile</option>
+                <option>Amministratore di condominio</option><option>Consulente energetico</option>
+                <option>Tecnico del lavoro</option><option>Altro</option>
               </select>
-              <button type="button" onclick="aggiungiSpec()" style="padding:0 16px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:18px;">+</button>
             </div>
-            <div class="tag-input" id="f-spec-input">
-              <input type="text" id="f-spec-field" placeholder="Oppure scrivi una specializzazione e premi Enter...">
+            <div class="form-group">
+              <label>Nome studio / attività</label>
+              <input type="text" id="f-nome_attivita" placeholder="Es. Studio Rossi Ingegneria">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Numero iscrizione albo</label>
+                <input type="text" id="f-albo" placeholder="Es. 12345">
+              </div>
+              <div class="form-group">
+                <label>Partita IVA</label>
+                <input type="text" id="f-partita_iva-professionista" placeholder="IT12345678901">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Anni di esperienza</label>
+                <input type="number" id="f-anni_esperienza-professionista" min="0" max="60" placeholder="Es. 10">
+              </div>
+              <div class="form-group">
+                <label>CAP</label>
+                <input type="text" id="f-cap-professionista" placeholder="Es. 00100">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Indirizzo studio</label>
+              <input type="text" id="f-indirizzo-professionista" placeholder="Es. Via Roma 1">
+            </div>
+          </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">📝 Specializzazioni</div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Specializzazioni</label>
+              <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <select id="f-spec-select" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;">
+                  <option value="">— Seleziona specializzazione —</option>
+                  <optgroup label="Progettazione">
+                    <option>Progettazione architettonica</option><option>Progettazione strutturale</option>
+                    <option>Progettazione impiantistica</option><option>Progettazione urbanistica</option>
+                    <option>Interior design</option><option>Paesaggistica</option>
+                  </optgroup>
+                  <optgroup label="Direzione lavori">
+                    <option>Direzione lavori</option><option>Coordinatore sicurezza</option>
+                    <option>Collaudo strutturale</option><option>Certificazione energetica</option>
+                  </optgroup>
+                  <optgroup label="Pratiche e consulenze">
+                    <option>Pratiche catastali</option><option>Pratiche edilizie</option>
+                    <option>Consulenza sismica</option><option>Perizie e stime immobiliari</option>
+                    <option>Consulenza ambientale</option><option>Bonifica amianto</option>
+                  </optgroup>
+                  <optgroup label="Gestione">
+                    <option>Amministrazione condominio</option><option>Property management</option>
+                    <option>Facility management</option>
+                  </optgroup>
+                  <optgroup label="Altro"><option>Altro</option></optgroup>
+                </select>
+                <button type="button" onclick="aggiungiSpec()" style="padding:0 16px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:18px;">+</button>
+              </div>
+              <div class="tag-input" id="f-spec-input">
+                <input type="text" id="f-spec-field" placeholder="Oppure scrivi una specializzazione e premi Enter...">
+              </div>
             </div>
           </div>
         </div>
 
         <!-- LOGO -->
         <div class="form-card fc-blu">
-        <div class="section-title">🖼️ Logo / Foto profilo</div>
+        <div class="card-header blu">🖼️ Logo / Foto profilo</div>
         <div class="form-group">
           <div id="logo-current-wrap" style="display:none;margin-bottom:12px;">
             <img id="logo-current" class="logo-preview" src="" alt="Logo attuale">
@@ -430,7 +482,7 @@
 
         <!-- FOTO COPERTINA (PREMIUM) -->
         <div class="form-card" style="position:relative;">
-          <div class="section-title">🖼️ Foto di copertina <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
+          <div class="card-header">🖼️ Foto di copertina <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
           <div class="form-group">
             <div id="wrap-copertina-pro">
               <div id="copertina-current-wrap" style="display:none;margin-bottom:12px;">
@@ -454,7 +506,7 @@
 
         <!-- COLORE HEADER (PREMIUM) -->
         <div class="form-card fc-arancio" style="position:relative;">
-          <div class="section-title">🎨 Colore header profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
+          <div class="card-header arancio">🎨 Colore header profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
           <div class="form-group">
             <div id="wrap-colore-pro">
               <label style="font-size:12px;color:#555;margin-bottom:8px;display:block;">Colore di sfondo dell'header nel tuo profilo pubblico</label>
@@ -495,7 +547,7 @@
 
         <!-- VIDEO PROFILO (PREMIUM) -->
         <div class="form-card fc-blu" style="position:relative;">
-          <div class="section-title">🎬 Video profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
+          <div class="card-header blu">🎬 Video profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
           <div class="form-group">
             <div class="upload-area">
               <p><strong>Clicca per caricare</strong> un video di presentazione</p>
@@ -511,7 +563,7 @@
 
         <!-- AI INTEGRATA (PREMIUM) -->
         <div class="form-card" style="position:relative;">
-          <div class="section-title">🤖 AI integrata nel profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;">PREMIUM</span></div>
+          <div class="card-header">🤖 AI integrata nel profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
           <div class="form-group">
             <div style="background:#f9f5ff;border:1px solid #e0d0f0;border-radius:8px;padding:14px;font-size:13px;color:#555;line-height:1.6;">
               L'AI analizza il tuo profilo e risponde automaticamente alle domande dei clienti, suggerisce miglioramenti e genera descrizioni ottimizzate.
@@ -525,6 +577,7 @@
         </div>
 
         <div class="form-card fc-arancio">
+          <div class="card-header arancio">💾 Salva profilo</div>
           <button type="button" class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
           <a href="pannello-impresa.html" class="btn-back-link">← Torna al pannello</a>
           <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
