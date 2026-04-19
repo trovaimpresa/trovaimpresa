@@ -360,26 +360,11 @@
       </div>
       <div class="form-group"><label>Partita IVA / Cod. Fiscale</label><input type="text" id="p-piva" placeholder="IT12345678901"></div>
 
-      <div class="form-section-title" style="margin-top:24px">Metodo di pagamento</div>
-      <div style="font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Come vuoi pagare?</div>
-      <div class="metodo-cards">
-        <div class="metodo-card sel" id="met-b"><div class="mradio"></div><div class="minfo"><h4>🏦 Bonifico bancario</h4><p>Ti inviamo i dati IBAN. Pagamento entro 3 giorni.</p></div></div>
-        <div class="metodo-card" id="met-s"><div class="mradio"></div><div class="minfo"><h4>💳 Carta di credito</h4><p>Presto disponibile tramite Stripe.</p></div></div>
+      <div style="background:#e8f5ee;border:1.5px solid #a7d9b8;border-radius:12px;padding:16px 18px;margin-top:24px;">
+        <div style="font-weight:700;font-size:14px;color:#1f5e38;margin-bottom:6px;">ℹ️ Pagamento</div>
+        <div style="font-size:13px;color:#2a7a4b;line-height:1.6;">Riceverai una email con le istruzioni per il pagamento. Ti contatteremo entro 24 ore per completare l'attivazione dell'annuncio.</div>
       </div>
-
-      <div class="iban-section show" id="iban-sec">
-        <div class="iban-box">
-          <h4>📋 Dati per il bonifico</h4>
-          <div class="iban-row"><span>Intestato a:</span><span>TrovaImpresa</span></div>
-          <div class="iban-row"><span>IBAN:</span><span>Comunicato via email</span></div>
-          <div class="iban-row"><span>Causale:</span><span id="causale-txt">Pubblicità TrovaImpresa</span></div>
-        </div>
-        <div class="form-group"><label>Il tuo IBAN (per identificarti) *</label><input type="text" id="p-iban" placeholder="IT60 X054 2811 1010 0000 0123 456" style="font-family:monospace"></div>
-        <div class="form-group"><label>Note (opzionale)</label><textarea id="p-note" rows="3" placeholder="Logo, preferenze grafiche, ecc."></textarea></div>
-      </div>
-      <div class="iban-section" id="stripe-sec">
-        <div style="background:#fff3e0;border:1.5px solid #fdd5b8;border-radius:10px;padding:14px;font-size:13px;color:var(--mid)">⏳ Il pagamento con carta sarà disponibile presto. Usa il bonifico per ora!</div>
-      </div>
+      <div class="form-group" style="margin-top:14px;"><label>Note (opzionale)</label><textarea id="p-note" rows="3" placeholder="Logo, preferenze grafiche, ecc."></textarea></div>
 
       <button class="btn-ordina" id="btn-ordina">📩 Conferma e invia ordine</button>
       <p class="note-small">Ti risponderemo entro 24 ore con istruzioni per il pagamento</p>
@@ -649,15 +634,13 @@ function inviaOrdine() {
   var nome = document.getElementById('p-nome').value.trim();
   var azienda = document.getElementById('p-azienda').value.trim();
   var email = document.getElementById('p-email').value.trim();
-  var iban = document.getElementById('p-iban').value.trim();
   if(!nome || !azienda || !email) { alert('Compila nome, azienda ed email!'); return; }
-  if(metodo === 'bonifico' && !iban) { alert('Inserisci il tuo IBAN!'); return; }
 
   var btn = document.getElementById('btn-ordina');
   btn.textContent = '⏳ Invio in corso...';
   btn.disabled = true;
 
-  var msg = '[ORDINE PUBBLICITA] Formato: ' + nomi[fmt] + ' | Citta (' + citta.length + '): ' + citta.join(', ') + ' | Periodo: ' + periodo + ' | Totale: €' + calcolaTotale() + ' | Metodo: ' + metodo + ' | IBAN: ' + (iban || '-') + ' | PIVA: ' + (document.getElementById('p-piva').value || '-') + ' | Tel: ' + (document.getElementById('p-tel').value || '-') + ' | user_id: ' + (currentUser ? currentUser.id : '-');
+  var msg = '[ORDINE PUBBLICITA] Formato: ' + nomi[fmt] + ' | Citta (' + citta.length + '): ' + citta.join(', ') + ' | Periodo: ' + periodo + ' | Totale: €' + calcolaTotale() + ' | PIVA: ' + (document.getElementById('p-piva').value || '-') + ' | Tel: ' + (document.getElementById('p-tel').value || '-') + ' | user_id: ' + (currentUser ? currentUser.id : '-');
 
   fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/messaggi', {
     method: 'POST',
