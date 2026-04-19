@@ -366,6 +366,12 @@
       </div>
       <div class="form-group" style="margin-top:14px;"><label>Note (opzionale)</label><textarea id="p-note" rows="3" placeholder="Logo, preferenze grafiche, ecc."></textarea></div>
 
+      <div class="form-group" style="margin-top:14px;">
+        <label>Logo aziendale (opzionale) — PNG/JPG, max 2MB</label>
+        <input type="file" id="p-logo" accept="image/png, image/jpeg">
+        <p class="note-small" style="margin-top:6px;">Se non carichi il logo useremo quello del profilo impresa.</p>
+      </div>
+
       <button class="btn-ordina" id="btn-ordina">📩 Conferma e invia ordine</button>
       <p class="note-small">Ti risponderemo entro 24 ore con istruzioni per il pagamento</p>
     </div>
@@ -630,7 +636,7 @@ window.onpopstate = function(e) {
   }
 };
 
-function inviaOrdine() {
+async function inviaOrdine() {
   var nome = document.getElementById('p-nome').value.trim();
   var azienda = document.getElementById('p-azienda').value.trim();
   var email = document.getElementById('p-email').value.trim();
@@ -640,7 +646,29 @@ function inviaOrdine() {
   btn.textContent = '⏳ Invio in corso...';
   btn.disabled = true;
 
-  var msg = '[ORDINE PUBBLICITA] Formato: ' + nomi[fmt] + ' | Citta (' + citta.length + '): ' + citta.join(', ') + ' | Periodo: ' + periodo + ' | Totale: €' + calcolaTotale() + ' | PIVA: ' + (document.getElementById('p-piva').value || '-') + ' | Tel: ' + (document.getElementById('p-tel').value || '-') + ' | user_id: ' + (currentUser ? currentUser.id : '-');
+  var logoUrl = null;
+  var logoFile = document.getElementById('p-logo').files[0];
+  if (logoFile) {
+    if (logoFile.size > 2 * 1024 * 1024) {
+      alert('Il logo supera i 2MB. Carica un file più piccolo.');
+      btn.textContent = '📩 Conferma e invia ordine';
+      btn.disabled = false;
+      return;
+    }
+    var ext = logoFile.name.split('.').pop();
+    var path = currentUser.id + '/logo_' + Date.now() + '.' + ext;
+    var uploadRes = await supabaseClient.storage.from('loghi-pubblicita').upload(path, logoFile, { contentType: logoFile.type });
+    if (uploadRes.error) {
+      alert('Errore upload logo: ' + uploadRes.error.message);
+      btn.textContent = '📩 Conferma e invia ordine';
+      btn.disabled = false;
+      return;
+    }
+    var pubRes = supabaseClient.storage.from('loghi-pubblicita').getPublicUrl(path);
+    logoUrl = pubRes.data.publicUrl;
+  }
+
+  var msg = '[ORDINE PUBBLICITA] Formato: ' + nomi[fmt] + ' | Citta (' + citta.length + '): ' + citta.join(', ') + ' | Periodo: ' + periodo + ' | Totale: €' + calcolaTotale() + ' | PIVA: ' + (document.getElementById('p-piva').value || '-') + ' | Tel: ' + (document.getElementById('p-tel').value || '-') + ' | user_id: ' + (currentUser ? currentUser.id : '-') + ' | logo: ' + (logoUrl || '-');
 
   fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/messaggi', {
     method: 'POST',
