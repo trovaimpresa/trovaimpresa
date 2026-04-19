@@ -127,35 +127,35 @@
       <div class="filter-label">Tipo negozio</div>
       <div class="mestieri-scroll">
         <div class="chip all-chip" data-tipo="tutti" onclick="selectTipo(this)">🏪 Tutti</div>
-        <div class="chip" data-tipo="Negozio materiali edili" onclick="selectTipo(this)">🧱 Materiali edili</div>
-        <div class="chip" data-tipo="Ferramenta" onclick="selectTipo(this)">🔧 Ferramenta</div>
-        <div class="chip" data-tipo="Termoidraulica" onclick="selectTipo(this)">🚿 Termoidraulica</div>
-        <div class="chip" data-tipo="Elettrico e illuminazione" onclick="selectTipo(this)">💡 Elettrico</div>
-        <div class="chip" data-tipo="Ceramiche e bagno" onclick="selectTipo(this)">🛁 Ceramiche e bagno</div>
-        <div class="chip" data-tipo="Piastrelle e rivestimenti" onclick="selectTipo(this)">🟫 Pavimenti e rivestimenti</div>
-        <div class="chip" data-tipo="Vernici e pitture" onclick="selectTipo(this)">🎨 Colorificio</div>
-        <div class="chip" data-tipo="Legnami" onclick="selectTipo(this)">🪵 Legname</div>
+        <div class="chip" data-tipo="materiali_edili" onclick="selectTipo(this)">🧱 Materiali edili</div>
+        <div class="chip" data-tipo="ferramenta" onclick="selectTipo(this)">🔧 Ferramenta</div>
+        <div class="chip" data-tipo="termoidraulica" onclick="selectTipo(this)">🚿 Termoidraulica</div>
+        <div class="chip" data-tipo="elettrico" onclick="selectTipo(this)">💡 Elettrico</div>
+        <div class="chip" data-tipo="ceramiche" onclick="selectTipo(this)">🛁 Ceramiche e bagno</div>
+        <div class="chip" data-tipo="pavimenti" onclick="selectTipo(this)">🟫 Pavimenti e rivestimenti</div>
+        <div class="chip" data-tipo="colorificio" onclick="selectTipo(this)">🎨 Colorificio</div>
+        <div class="chip" data-tipo="legname" onclick="selectTipo(this)">🪵 Legname</div>
       </div>
     </div>
 
     <div class="filter-group">
       <div class="filter-label">Servizi</div>
       <div class="mestieri-scroll">
-        <div class="chip all-chip" data-servizio="tutti">🏪 Tutti</div>
-        <div class="chip" data-servizio="Consegna a domicilio">🚚 Consegna a domicilio</div>
-        <div class="chip" data-servizio="Ritiro in negozio">🛍️ Ritiro in negozio</div>
-        <div class="chip" data-servizio="E-commerce">🛒 E-commerce</div>
-        <div class="chip" data-servizio="Noleggio attrezzi">🏗️ Noleggio attrezzi</div>
-        <div class="chip" data-servizio="Taglio materiali su misura">✂️ Taglio su misura</div>
+        <div class="chip all-chip" data-servizio="tutti" onclick="toggleServizio(this)">🏪 Tutti</div>
+        <div class="chip" data-servizio="consegna_domicilio" onclick="toggleServizio(this)">🚚 Consegna a domicilio</div>
+        <div class="chip" data-servizio="ritiro_in_negozio" onclick="toggleServizio(this)">🛍️ Ritiro in negozio</div>
+        <div class="chip" data-servizio="ecommerce" onclick="toggleServizio(this)">🛒 E-commerce</div>
+        <div class="chip" data-servizio="noleggio_attrezzi" onclick="toggleServizio(this)">🏗️ Noleggio attrezzi</div>
+        <div class="chip" data-servizio="taglio_su_misura" onclick="toggleServizio(this)">✂️ Taglio su misura</div>
       </div>
     </div>
 
     <div class="filter-group">
       <div class="filter-label">Valutazione minima</div>
-      <div class="star-option active" data-min="0">Qualsiasi</div>
-      <div class="star-option" data-min="3"><span class="s">★★★</span> 3+ stelle</div>
-      <div class="star-option" data-min="4"><span class="s">★★★★</span> 4+ stelle</div>
-      <div class="star-option" data-min="4.5"><span class="s">★★★★★</span> 4.5+ stelle</div>
+      <div class="star-option active" data-min="0" onclick="selectValutazione(this)">Qualsiasi</div>
+      <div class="star-option" data-min="3" onclick="selectValutazione(this)"><span class="s">★★★</span> 3+ stelle</div>
+      <div class="star-option" data-min="4" onclick="selectValutazione(this)"><span class="s">★★★★</span> 4+ stelle</div>
+      <div class="star-option" data-min="4.5" onclick="selectValutazione(this)"><span class="s">★★★★★</span> 4.5+ stelle</div>
     </div>
 
     <div class="filter-group">
@@ -169,11 +169,11 @@
 
     <div class="filter-group">
       <div class="filter-label">Altro</div>
-      <label class="check-option"><input type="checkbox" id="soloVerificati"> Solo verificati</label>
-      <label class="check-option"><input type="checkbox" id="conFoto"> Con foto negozio</label>
-      <label class="check-option"><input type="checkbox" id="apertoSabato"> Aperto sabato</label>
-      <label class="check-option"><input type="checkbox" id="parcheggioCliente"> Parcheggio cliente</label>
-      <label class="check-option"><input type="checkbox" id="preventiviOnline"> Preventivi online</label>
+      <label class="check-option"><input type="checkbox" id="soloVerificati" onchange="cerca()"> Solo verificati</label>
+      <label class="check-option"><input type="checkbox" id="conFoto" onchange="cerca()"> Con foto negozio</label>
+      <label class="check-option"><input type="checkbox" id="apertoSabato" onchange="cerca()"> Aperto sabato</label>
+      <label class="check-option"><input type="checkbox" id="parcheggioCliente" onchange="cerca()"> Parcheggio cliente</label>
+      <label class="check-option"><input type="checkbox" id="preventiviOnline" onchange="cerca()"> Preventivi online</label>
     </div>
   </div>
 
@@ -194,13 +194,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const supabaseClient=supabase.createClient('https://nacvrsgkyfavykxjxszu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic');
-  let tipoScelto='tutti',cittaScelta='';
+  let tipoScelto='tutti',cittaScelta='',valutazioneMin=0;
   let cittaLat=null,cittaLng=null,cittaGeocoded='';
   function haversine(lat1,lng1,lat2,lng2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-  function selectTipo(el){document.querySelectorAll('.chip').forEach(c=>{c.classList.remove('active');if(c.classList.contains('all-chip'))c.classList.add('inactive');});el.classList.add('active');el.classList.remove('inactive');tipoScelto=el.dataset.tipo;aggiornaStatus();}
+  function selectValutazione(el){document.querySelectorAll('.star-option').forEach(b=>b.classList.remove('active'));el.classList.add('active');valutazioneMin=parseFloat(el.dataset.min);cerca();}
+  function selectTipo(el){document.querySelectorAll('.chip[data-tipo]').forEach(c=>{c.classList.remove('active');if(c.classList.contains('all-chip'))c.classList.add('inactive');});el.classList.add('active');el.classList.remove('inactive');tipoScelto=el.dataset.tipo;cerca();}
+  function toggleServizio(el){if(el.dataset.servizio==='tutti'){document.querySelectorAll('.chip[data-servizio]').forEach(c=>c.classList.remove('active'));}else{el.classList.toggle('active');}cerca();}
   function aggiornaStatus(){const t=tipoScelto==='tutti'?'🏪 Tutti i negozi':tipoScelto;const c=cittaScelta?` · 📍 ${cittaScelta}`:'';document.getElementById('statusText').innerHTML=`Stai cercando: <strong>${t}</strong>${c}`;}
   function localizzami(){if(!navigator.geolocation){alert('Non supportato.');return;}navigator.geolocation.getCurrentPosition(async pos=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);const d=await r.json();const citta=d.address.city||d.address.town||d.address.village||'';document.getElementById('cittaInput').value=citta;cittaScelta=citta;aggiornaStatus();cerca();}catch(e){alert('Errore posizione.');}},()=>alert('Permesso negato.'));}
-  async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();aggiornaStatus();if(cittaScelta&&cittaScelta!==cittaGeocoded){cittaGeocoded=cittaScelta;cittaLat=null;cittaLng=null;try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cittaScelta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const gd=await gr.json();if(gd&&gd[0]){cittaLat=parseFloat(gd[0].lat);cittaLng=parseFloat(gd[0].lon);}}catch(e){}}else if(!cittaScelta){cittaGeocoded='';cittaLat=null;cittaLng=null;}const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';try{let q=supabaseClient.from('imprese').select('*').eq('tipo','negozio').order('created_at',{ascending:false});if(tipoScelto!=='tutti')q=q.ilike('tipo',`%${tipoScelto}%`);if(cittaScelta)q=q.ilike('citta',`%${cittaScelta}%`);const{data,error}=await q.limit(50);if(error)throw error;if(data)data.sort((a,b)=>{const pp=p=>p==='premium'?3:p==='pro'?2:1;return pp(b.piano)-pp(a.piano);});const distanzaMax=parseInt(document.getElementById('distanzaSlider').value);(data||[]).forEach(i=>{i._distKm=(cittaLat!==null&&i.lat&&i.lng)?Math.round(haversine(cittaLat,cittaLng,i.lat,i.lng)):null;});const risultati=distanzaMax<100&&cittaLat!==null?(data||[]).filter(i=>i._distKm===null||i._distKm<=distanzaMax):(data||[]);if(!risultati.length){div.innerHTML='<div class="no-results"><h3>😕 Nessun negozio trovato</h3><p>Prova a cambiare città o tipo</p></div>';aggiornaMappaRis([]);return;}div.innerHTML=`<div style="color:white;margin-bottom:8px;font-size:12px;">Trovati <strong>${risultati.length}</strong> negozi</div><div class="results-grid">${risultati.map(i=>cardHTML(i)).join('')}</div>`;aggiornaMappaRis(risultati);}catch(e){div.innerHTML=`<div class="no-results"><p>${e.message}</p></div>`;}}
+  async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();const soloVerificati=document.getElementById('soloVerificati').checked;const conFoto=document.getElementById('conFoto').checked;const apertoSabato=document.getElementById('apertoSabato').checked;const parcheggioCliente=document.getElementById('parcheggioCliente').checked;const preventiviOnline=document.getElementById('preventiviOnline').checked;const serviziAttivi=[...document.querySelectorAll('.chip[data-servizio].active')].map(c=>c.dataset.servizio);aggiornaStatus();if(cittaScelta&&cittaScelta!==cittaGeocoded){cittaGeocoded=cittaScelta;cittaLat=null;cittaLng=null;try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cittaScelta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const gd=await gr.json();if(gd&&gd[0]){cittaLat=parseFloat(gd[0].lat);cittaLng=parseFloat(gd[0].lon);}}catch(e){}}else if(!cittaScelta){cittaGeocoded='';cittaLat=null;cittaLng=null;}const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';try{let q=supabaseClient.from('imprese').select('*').eq('tipo','negozio').order('created_at',{ascending:false});if(tipoScelto!=='tutti')q=q.eq('tipo_negozio',tipoScelto);if(cittaScelta)q=q.ilike('citta',`%${cittaScelta}%`);if(valutazioneMin>0)q=q.gte('valutazione_media',valutazioneMin);if(soloVerificati)q=q.eq('verificato',true);if(conFoto)q=q.not('foto_lavori','is',null);if(apertoSabato)q=q.eq('aperto_sabato',true);if(parcheggioCliente)q=q.eq('parcheggio',true);if(preventiviOnline)q=q.eq('preventivi_online',true);serviziAttivi.forEach(s=>q=q.eq(s,true));const{data,error}=await q.limit(50);if(error)throw error;if(data)data.sort((a,b)=>{const pp=p=>p==='premium'?3:p==='pro'?2:1;return pp(b.piano)-pp(a.piano);});const distanzaMax=parseInt(document.getElementById('distanzaSlider').value);(data||[]).forEach(i=>{i._distKm=(cittaLat!==null&&i.lat&&i.lng)?Math.round(haversine(cittaLat,cittaLng,i.lat,i.lng)):null;});const risultati=distanzaMax<100&&cittaLat!==null?(data||[]).filter(i=>i._distKm===null||i._distKm<=distanzaMax):(data||[]);if(!risultati.length){div.innerHTML='<div class="no-results"><h3>😕 Nessun negozio trovato</h3><p>Prova a cambiare città o tipo</p></div>';aggiornaMappaRis([]);return;}div.innerHTML=`<div style="color:white;margin-bottom:8px;font-size:12px;">Trovati <strong>${risultati.length}</strong> negozi</div><div class="results-grid">${risultati.map(i=>cardHTML(i)).join('')}</div>`;aggiornaMappaRis(risultati);}catch(e){div.innerHTML=`<div class="no-results"><p>${e.message}</p></div>`;}}
   function cardHTML(i){const logo=i.logo_url?`<img src="${i.logo_url}" alt="logo">`:`🏪`;const badge=i.piano==='pro'?'<span class="badge-pro">⭐ PRO</span>':'';const desc=i.descrizione?`<div class="card-desc">${i.descrizione}</div>`:'';const distBadge=i._distKm!==null?`<span style="display:inline-block;background:#e8f5ec;color:#2a7a4b;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>`:'';return `<a class="card${i.piano==='pro'?' pro':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome_negozio||'Negozio'}${badge}</div>${desc}<div class="card-tipo">🏪 ${i.tipo||''}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}</div>${i.orari?`<div style="font-size:11px;color:#888;margin-top:3px;">🕐 ${i.orari}</div>`:''}</a>`;}
   const params=new URLSearchParams(window.location.search);
   if(params.get('citta')){document.getElementById('cittaInput').value=params.get('citta');cittaScelta=params.get('citta');}
