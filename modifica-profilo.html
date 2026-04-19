@@ -592,6 +592,45 @@
               </div>
             </div>
           </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">⚙️ Qualifica e servizi</div>
+            <div class="form-group">
+              <label>Tipo professionista</label>
+              <select id="f-tipo_professionista-professionista" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
+                <option value="">— Seleziona —</option>
+                <option value="architetto">Architetto</option>
+                <option value="ingegnere">Ingegnere</option>
+                <option value="geometra">Geometra</option>
+                <option value="perito">Perito</option>
+                <option value="consulente_sicurezza">Consulente sicurezza</option>
+                <option value="amministratore_condominio">Amministratore condominio</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="iscritto_albo-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Iscritto all'albo
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="consulenza_online-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Consulenza online
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="sopralluogo_gratuito-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Sopralluogo gratuito
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="risponde_24h-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Risponde entro 24h
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- LOGO -->
@@ -938,6 +977,11 @@
         document.getElementById('f-anni_esperienza-professionista').value = d.anni_esperienza || '';
         document.getElementById('f-cap-professionista').value = d.cap || '';
         document.getElementById('f-indirizzo-professionista').value = d.indirizzo || '';
+        setSelectValue('f-tipo_professionista-professionista', d.tipo_professionista);
+        document.getElementById('iscritto_albo-professionista').checked = !!d.iscritto_albo;
+        document.getElementById('consulenza_online-professionista').checked = !!d.consulenza_online;
+        document.getElementById('sopralluogo_gratuito-professionista').checked = !!d.sopralluogo_gratuito;
+        document.getElementById('risponde_24h-professionista').checked = !!d.risponde_24h;
         // Specializzazioni (array JSON o stringa)
         try {
           specializzazioni = d.specializzazioni ? JSON.parse(d.specializzazioni) : [];
@@ -1165,7 +1209,12 @@
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-professionista').value) || null,
             cap: document.getElementById('f-cap-professionista').value.trim(),
             indirizzo: document.getElementById('f-indirizzo-professionista').value.trim(),
-            specializzazioni: specializzazioni.length > 0 ? JSON.stringify(specializzazioni) : null
+            specializzazioni: specializzazioni.length > 0 ? JSON.stringify(specializzazioni) : null,
+            tipo_professionista: document.getElementById('f-tipo_professionista-professionista').value || null,
+            iscritto_albo: document.getElementById('iscritto_albo-professionista').checked,
+            consulenza_online: document.getElementById('consulenza_online-professionista').checked,
+            sopralluogo_gratuito: document.getElementById('sopralluogo_gratuito-professionista').checked,
+            risponde_24h: document.getElementById('risponde_24h-professionista').checked
           });
         }
 
