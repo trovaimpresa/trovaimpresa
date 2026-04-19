@@ -286,6 +286,27 @@
               <input type="text" id="f-zone-impresa" placeholder="Es. Roma e provincia, Lazio, Centro Italia">
             </div>
           </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">⚙️ Certificazioni e contatto</div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="risponde_24h-impresa" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Risponde entro 24h
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="preventivo_online-impresa" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Preventivo online
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="soa_certificata-impresa" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                SOA certificata
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- ===== GRANDE IMPRESA ===== -->
@@ -777,6 +798,9 @@
         setSelectValue('f-mestiere-impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-impresa').value = d.specializzazioni || '';
         document.getElementById('f-zone-impresa').value = d.zone || '';
+        document.getElementById('risponde_24h-impresa').checked = !!d.risponde_24h;
+        document.getElementById('preventivo_online-impresa').checked = !!d.preventivo_online;
+        document.getElementById('soa_certificata-impresa').checked = !!d.soa_certificata;
 
       } else if (tipoCategoria === 'grande_impresa') {
         document.getElementById('f-nome-grande_impresa').value = d.nome || '';
@@ -981,7 +1005,10 @@
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-impresa').value) || null,
             mestieri: document.getElementById('f-mestiere-impresa').value ? [document.getElementById('f-mestiere-impresa').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-impresa').value.trim(),
-            zone: document.getElementById('f-zone-impresa').value.trim()
+            zone: document.getElementById('f-zone-impresa').value.trim(),
+            risponde_24h: document.getElementById('risponde_24h-impresa').checked,
+            preventivo_online: document.getElementById('preventivo_online-impresa').checked,
+            soa_certificata: document.getElementById('soa_certificata-impresa').checked
           });
 
         } else if (tipoCategoria === 'grande_impresa') {
