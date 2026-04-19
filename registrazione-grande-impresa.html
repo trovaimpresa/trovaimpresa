@@ -143,6 +143,32 @@
           </div>
         </div>
         <div class="form-group">
+          <label>Regione <span class="required">*</span></label>
+          <select id="regione">
+            <option value="">-- Seleziona regione --</option>
+            <option value="Abruzzo">Abruzzo</option>
+            <option value="Basilicata">Basilicata</option>
+            <option value="Calabria">Calabria</option>
+            <option value="Campania">Campania</option>
+            <option value="Emilia-Romagna">Emilia-Romagna</option>
+            <option value="Friuli-Venezia Giulia">Friuli-Venezia Giulia</option>
+            <option value="Lazio">Lazio</option>
+            <option value="Liguria">Liguria</option>
+            <option value="Lombardia">Lombardia</option>
+            <option value="Marche">Marche</option>
+            <option value="Molise">Molise</option>
+            <option value="Piemonte">Piemonte</option>
+            <option value="Puglia">Puglia</option>
+            <option value="Sardegna">Sardegna</option>
+            <option value="Sicilia">Sicilia</option>
+            <option value="Toscana">Toscana</option>
+            <option value="Trentino-Alto Adige">Trentino-Alto Adige</option>
+            <option value="Umbria">Umbria</option>
+            <option value="Valle d'Aosta">Valle d'Aosta</option>
+            <option value="Veneto">Veneto</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Provincia</label>
           <input type="text" id="provincia" placeholder="Es. RM">
         </div>
@@ -403,8 +429,9 @@
       const email = document.getElementById('email').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const citta = document.getElementById('citta').value.trim();
+      const regione = document.getElementById('regione').value;
       const password = document.getElementById('password').value.trim();
-      if (!nome || !mestiere || !email || !telefono || !citta || !password) { alert('Compila tutti i campi obbligatori (*)'); return; }
+      if (!nome || !mestiere || !email || !telefono || !citta || !regione || !password) { alert('Compila tutti i campi obbligatori (*)'); return; }
       if (password.length < 8) { alert('La password deve essere di almeno 8 caratteri.'); return; }
       const btn = document.getElementById('btn-next');
       btn.disabled = true;
@@ -455,6 +482,7 @@
           email: email,
           telefono: telefono,
           citta: citta,
+          regione: regione,
           provincia: document.getElementById('provincia').value,
           lat: lat,
           lng: lng,
