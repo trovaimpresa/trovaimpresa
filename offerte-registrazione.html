@@ -570,7 +570,20 @@
                         <li><strong id="recap-offerta">Tipo di lavoro:</strong> --</li>
                         <li><strong id="recap-contratto">Contratto:</strong> --</li>
                         <li><strong id="recap-citta">Città:</strong> --</li>
+                        <li id="recap-regione-li" style="display:none"><strong>Regione:</strong> <span id="recap-regione"></span></li>
+                        <li id="recap-mestiere-li" style="display:none"><strong>Mestiere:</strong> <span id="recap-mestiere"></span></li>
+                        <li id="recap-esperienza-li" style="display:none"><strong>Esperienza richiesta:</strong> <span id="recap-esperienza"></span></li>
+                        <li id="recap-orario-li" style="display:none"><strong>Orario:</strong> <span id="recap-orario"></span></li>
+                        <li id="recap-posti-li" style="display:none"><strong>Posti disponibili:</strong> <span id="recap-posti"></span></li>
+                        <li id="recap-stipendio-li" style="display:none"><strong>Stipendio:</strong> <span id="recap-stipendio"></span></li>
+                        <li id="recap-scadenza-li" style="display:none"><strong>Scadenza annuncio:</strong> <span id="recap-scadenza"></span></li>
+                        <li id="recap-patenti-li" style="display:none"><strong>Patenti richieste:</strong> <span id="recap-patenti"></span></li>
+                        <li id="recap-certificazioni-li" style="display:none"><strong>Certificazioni:</strong> <span id="recap-certificazioni"></span></li>
+                        <li id="recap-competenze-li" style="display:none"><strong>Competenze:</strong> <span id="recap-competenze"></span></li>
                         <li><strong id="recap-titolo">Titolo:</strong> --</li>
+                        <li><strong>Auto propria:</strong> <span id="recap-auto"></span></li>
+                        <li><strong>Trasferte:</strong> <span id="recap-trasferte"></span></li>
+                        <li><strong>Mezzi forniti:</strong> <span id="recap-mezzi"></span></li>
                     </ul>
                 </div>
 
@@ -692,6 +705,37 @@
         document.getElementById('recap-contratto').innerHTML = `<strong>Contratto:</strong> ${document.getElementById('tipo-contratto').value}`;
         document.getElementById('recap-citta').innerHTML = `<strong>Città:</strong> ${document.getElementById('citta-offerta').value}`;
         document.getElementById('recap-titolo').innerHTML = `<strong>Titolo:</strong> ${document.getElementById('titolo-offerta').value}`;
+
+        const mostraSeValido = (liId, spanId, val) => {
+            const v = (val || '').toString().trim();
+            document.getElementById(liId).style.display = v ? 'list-item' : 'none';
+            if (v) document.getElementById(spanId).textContent = v;
+        };
+
+        mostraSeValido('recap-regione-li', 'recap-regione', document.getElementById('regione').value);
+        mostraSeValido('recap-mestiere-li', 'recap-mestiere', document.getElementById('mestiere').value);
+        mostraSeValido('recap-esperienza-li', 'recap-esperienza', document.getElementById('livello-esperienza').value);
+        mostraSeValido('recap-orario-li', 'recap-orario', document.getElementById('orario').value);
+        mostraSeValido('recap-posti-li', 'recap-posti', document.getElementById('posti-disponibili').value);
+        mostraSeValido('recap-stipendio-li', 'recap-stipendio', document.getElementById('stipendio').value);
+
+        const dataRaw = document.getElementById('data-scadenza-annuncio').value;
+        if (dataRaw) {
+            const [y, m, d] = dataRaw.split('-');
+            mostraSeValido('recap-scadenza-li', 'recap-scadenza', `${d}/${m}/${y}`);
+        } else {
+            document.getElementById('recap-scadenza-li').style.display = 'none';
+        }
+
+        const patenti = ['A','B','C','CE','D','DE'].filter(p => document.getElementById('patente-' + p).checked);
+        mostraSeValido('recap-patenti-li', 'recap-patenti', patenti.join(', '));
+
+        mostraSeValido('recap-certificazioni-li', 'recap-certificazioni', document.getElementById('certificazioni-list').value);
+        mostraSeValido('recap-competenze-li', 'recap-competenze', document.getElementById('competenze-list').value);
+
+        document.getElementById('recap-auto').textContent = document.getElementById('auto-propria').checked ? 'Sì' : 'No';
+        document.getElementById('recap-trasferte').textContent = document.getElementById('disponibilita-trasferte').checked ? 'Sì' : 'No';
+        document.getElementById('recap-mezzi').textContent = document.getElementById('mezzi-forniti').checked ? 'Sì' : 'No';
     }
 
     // Geolocalizzazione
