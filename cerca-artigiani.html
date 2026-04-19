@@ -326,6 +326,8 @@
     const citta = document.getElementById('cittaInput').value.trim();
     const soloVerificati = document.getElementById('soloVerificati').checked;
     const conFoto = document.getElementById('conFoto').checked;
+    const rispondeIn24h = document.getElementById('rispondeIn24h').checked;
+    const preventivoOnline = document.getElementById('preventivoOnline').checked;
     aggiornaChipAttivi();
     if (citta && citta !== cittaGeocoded) {
       cittaGeocoded = citta; cittaLat = null; cittaLng = null;
@@ -345,6 +347,8 @@
       if (valutazioneMin > 0) q = q.gte('valutazione_media', valutazioneMin);
       if (soloVerificati) q = q.eq('verificato', true);
       if (conFoto) q = q.not('foto_lavori', 'is', null);
+      if (rispondeIn24h) q = q.eq('risponde_24h', true);
+      if (preventivoOnline) q = q.eq('preventivo_online', true);
       if (sortBy === 'valutazione') q = q.order('valutazione_media', { ascending: false });
       else if (sortBy === 'recenti') q = q.order('created_at', { ascending: false });
       else q = q.order('created_at', { ascending: false });
