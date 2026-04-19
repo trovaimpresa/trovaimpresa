@@ -387,6 +387,152 @@
                     <button type="button" class="geo-button" id="geoBtn" onclick="geolocalizzaOfferta()">📍 Localizzami</button>
                 </div>
 
+                <div class="form-group">
+                    <label for="regione">Regione <span class="required">*</span></label>
+                    <select id="regione" required>
+                        <option value="">-- Seleziona --</option>
+                        <option value="Abruzzo">Abruzzo</option>
+                        <option value="Basilicata">Basilicata</option>
+                        <option value="Calabria">Calabria</option>
+                        <option value="Campania">Campania</option>
+                        <option value="Emilia-Romagna">Emilia-Romagna</option>
+                        <option value="Friuli-Venezia Giulia">Friuli-Venezia Giulia</option>
+                        <option value="Lazio">Lazio</option>
+                        <option value="Liguria">Liguria</option>
+                        <option value="Lombardia">Lombardia</option>
+                        <option value="Marche">Marche</option>
+                        <option value="Molise">Molise</option>
+                        <option value="Piemonte">Piemonte</option>
+                        <option value="Puglia">Puglia</option>
+                        <option value="Sardegna">Sardegna</option>
+                        <option value="Sicilia">Sicilia</option>
+                        <option value="Toscana">Toscana</option>
+                        <option value="Trentino-Alto Adige">Trentino-Alto Adige</option>
+                        <option value="Umbria">Umbria</option>
+                        <option value="Valle d'Aosta">Valle d'Aosta</option>
+                        <option value="Veneto">Veneto</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mestiere">Mestiere <span class="required">*</span></label>
+                    <select id="mestiere" required>
+                        <option value="">-- Seleziona --</option>
+                        <option>Muratura</option>
+                        <option>Carpentiere</option>
+                        <option>Cartongesso</option>
+                        <option>Coperture / Tetti</option>
+                        <option>Impermeabilizzazione</option>
+                        <option>Ponteggi</option>
+                        <option>Elettricista</option>
+                        <option>Idraulico</option>
+                        <option>Termoidraulico</option>
+                        <option>Tecnico caldaie</option>
+                        <option>Climatizzatore</option>
+                        <option>Impianto solare</option>
+                        <option>Autospurghi</option>
+                        <option>Pittore</option>
+                        <option>Piastrellista</option>
+                        <option>Pavimentista</option>
+                        <option>Intonacatore</option>
+                        <option>Fabbro</option>
+                        <option>Falegname</option>
+                        <option>Vetraio</option>
+                        <option>Giardiniere</option>
+                        <option>Demolizione</option>
+                        <option>Movimento terra</option>
+                        <option>Asfalti</option>
+                        <option>Sgomberi</option>
+                        <option>Cottimisti</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="livello-esperienza">Livello Esperienza <span class="required">*</span></label>
+                    <select id="livello-esperienza" required>
+                        <option value="">-- Seleziona --</option>
+                        <option value="Junior 0-2 anni">Junior 0-2 anni</option>
+                        <option value="Intermedio 3-5 anni">Intermedio 3-5 anni</option>
+                        <option value="Senior 5+ anni">Senior 5+ anni</option>
+                        <option value="Indifferente">Indifferente</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="orario">Orario <span class="required">*</span></label>
+                    <select id="orario" required>
+                        <option value="">-- Seleziona --</option>
+                        <option value="Full time">Full time</option>
+                        <option value="Part time">Part time</option>
+                        <option value="Flessibile">Flessibile</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="posti-disponibili">Posti Disponibili <span class="required">*</span></label>
+                    <input type="number" id="posti-disponibili" value="1" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="stipendio">Stipendio (opzionale)</label>
+                    <input type="text" id="stipendio" placeholder="Es. 1500-2000€/mese">
+                </div>
+
+                <div class="form-group">
+                    <label for="data-scadenza-annuncio">Data Scadenza Annuncio <span class="required">*</span></label>
+                    <input type="date" id="data-scadenza-annuncio" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Patenti Richieste</label>
+                    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:4px;">
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-A" value="A"> A</label>
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-B" value="B"> B</label>
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-C" value="C"> C</label>
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-CE" value="CE"> CE</label>
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-D" value="D"> D</label>
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="patente-DE" value="DE"> DE</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="certificazioni-input">Certificazioni Richieste</label>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="certificazioni-input" placeholder="Es. RSPP, PES, PAV..." style="flex:1;">
+                        <button type="button" class="btn btn-next" style="flex:none;padding:0 16px;font-size:13px;" onclick="aggiungiChip('certificazioni-input','certificazioni-chips','certificazioni-list')">+ Aggiungi</button>
+                    </div>
+                    <div id="certificazioni-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+                    <input type="hidden" id="certificazioni-list">
+                </div>
+
+                <div class="form-group">
+                    <label for="competenze-input">Competenze Richieste</label>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="competenze-input" placeholder="Es. AutoCAD, saldatura TIG..." style="flex:1;">
+                        <button type="button" class="btn btn-next" style="flex:none;padding:0 16px;font-size:13px;" onclick="aggiungiChip('competenze-input','competenze-chips','competenze-list')">+ Aggiungi</button>
+                    </div>
+                    <div id="competenze-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+                    <input type="hidden" id="competenze-list">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="auto-propria"> Auto propria richiesta
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="disponibilita-trasferte"> Disponibilità a trasferte
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="mezzi-forniti"> Mezzi di lavoro forniti
+                    </label>
+                </div>
+
                 <div class="buttons">
                     <button type="button" class="btn btn-prev" onclick="prevStep()">← Indietro</button>
                     <button type="button" class="btn btn-next" onclick="nextStep()">Avanti →</button>
@@ -524,9 +670,15 @@
                    document.getElementById('email-azienda').value && 
                    document.getElementById('telefono-azienda').value;
         } else if (step === 2) {
-            return document.getElementById('tipo-offerta').value && 
-                   document.getElementById('tipo-contratto').value && 
-                   document.getElementById('citta-offerta').value;
+            return document.getElementById('tipo-offerta').value &&
+                   document.getElementById('tipo-contratto').value &&
+                   document.getElementById('citta-offerta').value &&
+                   document.getElementById('regione').value &&
+                   document.getElementById('mestiere').value &&
+                   document.getElementById('livello-esperienza').value &&
+                   document.getElementById('orario').value &&
+                   document.getElementById('posti-disponibili').value &&
+                   document.getElementById('data-scadenza-annuncio').value;
         } else if (step === 3) {
             return document.getElementById('titolo-offerta').value && 
                    document.getElementById('descrizione-offerta').value;
@@ -630,6 +782,28 @@
             alert('❌ Errore sconosciuto. Riprova.');
         }
     });
+
+    function aggiungiChip(inputId, chipsId, listId) {
+        const input = document.getElementById(inputId);
+        const val = input.value.trim();
+        if (!val) return;
+        const wrap = document.getElementById(chipsId);
+        const chip = document.createElement('span');
+        chip.style.cssText = 'background:#fff0e8;border:1.5px solid #FF6B35;color:#FF6B35;border-radius:16px;padding:4px 10px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:5px;cursor:pointer;';
+        chip.innerHTML = val + ' <span style="font-size:15px;line-height:1;">×</span>';
+        chip.querySelector('span').onclick = () => {
+            chip.remove();
+            aggiornaListaChip(chipsId, listId);
+        };
+        wrap.appendChild(chip);
+        input.value = '';
+        aggiornaListaChip(chipsId, listId);
+    }
+
+    function aggiornaListaChip(chipsId, listId) {
+        const chips = document.getElementById(chipsId).querySelectorAll('span');
+        document.getElementById(listId).value = Array.from(chips).map(c => c.textContent.slice(0, -2).trim()).join(', ');
+    }
 
     function togglePassword(id, btn) {
         const input = document.getElementById(id);
