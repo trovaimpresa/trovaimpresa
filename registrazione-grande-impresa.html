@@ -189,6 +189,15 @@
           </select>
         </div>
         <div class="form-group">
+          <label>Tipologia <span class="required">*</span></label>
+          <select id="tipologia_grande_impresa">
+            <option value="">— Seleziona tipologia —</option>
+            <option value="general_contractor">General Contractor</option>
+            <option value="consorzio">Consorzio</option>
+            <option value="societa_costruzioni">Società di costruzioni</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Altri settori / specializzazioni</label>
           <textarea id="specializzazioni" placeholder="Es. Gestione cantieri, subappalto, project management..."></textarea>
         </div>
@@ -437,6 +446,7 @@
           nome_attivita: nome,
           mestiere: mestiere,
           mestieri: mestiere ? [mestiere] : [],
+          tipologia_grande_impresa: document.getElementById('tipologia_grande_impresa').value || null,
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
           anni_esperienza: parseInt(document.getElementById('anni_esperienza').value) || null,
