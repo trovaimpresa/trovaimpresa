@@ -266,6 +266,15 @@
   const PER_PAGE = 10;
   let mestiereScelto = 'tutti', valutazioneMin = 0, sortBy = 'piano';
   let tuttiRisultati = [], paginaCorrente = 1;
+  let cittaLat = null, cittaLng = null, cittaGeocoded = '';
+
+  function haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
 
   function selectMestiere(el) {
     document.querySelectorAll('#mestieri-list .filter-btn').forEach(b => b.classList.remove('active'));
@@ -318,6 +327,14 @@
     const soloVerificati = document.getElementById('soloVerificati').checked;
     const conFoto = document.getElementById('conFoto').checked;
     aggiornaChipAttivi();
+    if (citta && citta !== cittaGeocoded) {
+      cittaGeocoded = citta; cittaLat = null; cittaLng = null;
+      try {
+        const gr = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(citta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});
+        const gd = await gr.json();
+        if (gd && gd[0]) { cittaLat = parseFloat(gd[0].lat); cittaLng = parseFloat(gd[0].lon); }
+      } catch(e) {}
+    } else if (!citta) { cittaGeocoded = ''; cittaLat = null; cittaLng = null; }
     document.getElementById('risultati').innerHTML = '<div class="loading">⏳ Ricerca in corso...</div>';
     document.getElementById('risultatiCount').textContent = 'Ricerca in corso...';
     document.getElementById('pagination').innerHTML = '';
@@ -334,6 +351,13 @@
       const { data, error } = await q.limit(200);
       if (error) throw error;
       tuttiRisultati = data || [];
+      const distanzaMax = parseInt(document.getElementById('distanzaSlider').value);
+      tuttiRisultati.forEach(i => {
+        i._distKm = (cittaLat !== null && i.lat && i.lng) ? Math.round(haversine(cittaLat, cittaLng, i.lat, i.lng)) : null;
+      });
+      if (distanzaMax < 100 && cittaLat !== null) {
+        tuttiRisultati = tuttiRisultati.filter(i => i._distKm === null || i._distKm <= distanzaMax);
+      }
       if (sortBy === 'piano') { const pp=p=>p==='premium'?3:p==='pro'?2:1; tuttiRisultati.sort((a,b)=>pp(b.piano)-pp(a.piano)); }
       paginaCorrente = 1;
       mostraPagina(1);
@@ -375,7 +399,8 @@
     const logo = i.logo_url ? `<img src="${i.logo_url}" alt="logo">` : `🔨`;
     const badge = i.piano === 'pro' ? '<span class="badge-pro">⭐ PRO</span>' : '';
     const desc = i.descrizione ? `<div class="card-desc">${i.descrizione}</div>` : '';
-    return `<a class="card${i.piano==='pro'?' pro':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}</div></a>`;
+    const distBadge = i._distKm !== null ? `<span style="display:inline-block;background:#e8f5ec;color:#2a7a4b;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>` : '';
+    return `<a class="card${i.piano==='pro'?' pro':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}</div></a>`;
   }
 
   const params = new URLSearchParams(window.location.search);
