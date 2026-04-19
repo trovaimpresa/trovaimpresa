@@ -750,6 +750,14 @@
     document.getElementById('offerteForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const patenti = ['A','B','C','CE','D','DE']
+            .filter(p => document.getElementById('patente-' + p).checked);
+
+        const csvToArray = id => {
+            const v = document.getElementById(id).value;
+            return v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
+        };
+
         const formData = {
             nome_azienda: document.getElementById('nome-azienda').value,
             email: document.getElementById('email-azienda').value,
@@ -760,7 +768,20 @@
             citta: document.getElementById('citta-offerta').value,
             descrizione: document.getElementById('descrizione-offerta').value,
             data_pubblicazione: new Date().toISOString(),
-            attiva: true
+            attiva: true,
+            regione: document.getElementById('regione').value,
+            mestiere: document.getElementById('mestiere').value,
+            livello_esperienza: document.getElementById('livello-esperienza').value,
+            orario: document.getElementById('orario').value,
+            posti_disponibili: parseInt(document.getElementById('posti-disponibili').value) || 1,
+            stipendio: document.getElementById('stipendio').value || null,
+            data_scadenza_annuncio: document.getElementById('data-scadenza-annuncio').value || null,
+            patenti_richieste: patenti,
+            certificazioni_richieste: csvToArray('certificazioni-list'),
+            competenze_richieste: csvToArray('competenze-list'),
+            auto_propria: document.getElementById('auto-propria').checked,
+            disponibilita_trasferte: document.getElementById('disponibilita-trasferte').checked,
+            mezzi_forniti: document.getElementById('mezzi-forniti').checked
         };
 
         try {
