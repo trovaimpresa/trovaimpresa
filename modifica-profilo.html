@@ -216,6 +216,21 @@
               <input type="text" id="f-zone-artigiano" placeholder="Es. Roma e provincia, Lazio">
             </div>
           </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">⚙️ Preferenze di contatto</div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="risponde_24h" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Risponde entro 24h
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="preventivo_online" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Preventivo online
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- ===== IMPRESA EDILE ===== -->
@@ -750,6 +765,8 @@
         setSelectValue('f-mestiere-artigiano', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-artigiano').value = d.specializzazioni || '';
         document.getElementById('f-zone-artigiano').value = d.zone || '';
+        document.getElementById('risponde_24h').checked = !!d.risponde_24h;
+        document.getElementById('preventivo_online').checked = !!d.preventivo_online;
 
       } else if (tipoCategoria === 'impresa') {
         document.getElementById('f-nome-impresa').value = d.nome || '';
@@ -950,7 +967,9 @@
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-artigiano').value) || null,
             mestieri: document.getElementById('f-mestiere-artigiano').value ? [document.getElementById('f-mestiere-artigiano').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-artigiano').value.trim(),
-            zone: document.getElementById('f-zone-artigiano').value.trim()
+            zone: document.getElementById('f-zone-artigiano').value.trim(),
+            risponde_24h: document.getElementById('risponde_24h').checked,
+            preventivo_online: document.getElementById('preventivo_online').checked
           });
 
         } else if (tipoCategoria === 'impresa') {
