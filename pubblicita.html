@@ -411,7 +411,32 @@
   <p>© 2026 TrovaImpresa — info@trovaimpresa.com — <a href="index.html">Torna alla home</a></p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentImpresa = null;
+
+supabaseClient.auth.onAuthStateChange(async function(event, session) {
+  if (event !== 'INITIAL_SESSION') return;
+  if (!session) { window.location.href = 'login-impresa.html'; return; }
+  currentUser = session.user;
+  const { data } = await supabaseClient.from('imprese').select('nome,nome_attivita,email,telefono,partita_iva,citta').eq('user_id', currentUser.id).single();
+  if (data) {
+    currentImpresa = data;
+    const nomeAz = data.nome_attivita || data.nome || '';
+    document.getElementById('p-nome').value = nomeAz;
+    document.getElementById('p-azienda').value = nomeAz;
+    document.getElementById('p-email').value = data.email || '';
+    document.getElementById('p-tel').value = data.telefono || '';
+    document.getElementById('p-piva').value = data.partita_iva || '';
+    ['p-nome','p-azienda','p-email','p-tel','p-piva'].forEach(function(id){ var el=document.getElementById(id); if(el) el.readOnly=true; });
+  }
+});
+
 var fmt = null;
 var citta = [];
 var periodo = 'mensile';
@@ -630,7 +655,7 @@ function inviaOrdine() {
   btn.textContent = '⏳ Invio in corso...';
   btn.disabled = true;
 
-  var msg = '[ORDINE PUBBLICITA] Formato: ' + nomi[fmt] + ' | Citta (' + citta.length + '): ' + citta.join(', ') + ' | Periodo: ' + periodo + ' | Totale: €' + calcolaTotale() + ' | Metodo: ' + metodo + ' | IBAN: ' + (iban || '-') + ' | PIVA: ' + (document.getElementById('p-piva').value || '-') + ' | Tel: ' + (document.getElementById('p-tel').value || '-');
+  var msg = '[ORDINE PUBBLICITA] Formato: ' + nomi[fmt] + ' | Citta (' + citta.length + '): ' + citta.join(', ') + ' | Periodo: ' + periodo + ' | Totale: €' + calcolaTotale() + ' | Metodo: ' + metodo + ' | IBAN: ' + (iban || '-') + ' | PIVA: ' + (document.getElementById('p-piva').value || '-') + ' | Tel: ' + (document.getElementById('p-tel').value || '-') + ' | user_id: ' + (currentUser ? currentUser.id : '-');
 
   fetch('https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/messaggi', {
     method: 'POST',
