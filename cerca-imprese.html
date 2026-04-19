@@ -31,21 +31,37 @@
     .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
     .sidebar-title { font-size: 22px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
     .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #555; text-transform: uppercase; margin: 0 0 10px; }
-    .filter-group { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-top: 4px solid #2e7d32; padding: 16px; margin-bottom: 16px; }
-    .filter-group:nth-child(2) { border-top-color: #2e7d32; }
-    .filter-group:nth-child(3) { border-top-color: #e65100; }
-    .filter-group:nth-child(4) { border-top-color: #1565c0; }
+    .filter-group { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-left: 5px solid #2e7d32; padding: 16px; margin-bottom: 16px; }
+    .filter-group:nth-child(2) { border-left-color: #2e7d32; }
+    .filter-group:nth-child(3) { border-left-color: #e65100; }
+    .filter-group:nth-child(4) { border-left-color: #1565c0; }
+    .filter-group:nth-child(5) { border-left-color: #2e7d32; }
+    .filter-group:nth-child(6) { border-left-color: #e65100; }
     .sidebar-divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
-    .mestieri-scroll { max-height: 320px; overflow-y: auto; overflow-x: hidden; }
+    .mestieri-scroll { max-height: 260px; overflow-y: auto; overflow-x: hidden; }
     .mestieri-scroll::-webkit-scrollbar { width: 3px; }
     .mestieri-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+    .tipo-btn { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; cursor: pointer; font-size: 17px; font-weight: 600; color: #111; border: 1.5px solid #eee; margin-bottom: 8px; transition: all 0.15s; background: white; }
+    .tipo-btn:hover { border-color: #2a7a4b; color: #2a7a4b; }
+    .tipo-btn.active { background: #e8f5ec; color: #2a7a4b; border-color: #2a7a4b; }
 
     /* Chips styled as sidebar filter buttons */
-    .chip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #111; transition: all 0.15s; margin-bottom: 6px; border: 1.5px solid #eee; background: white; user-select: none; }
-    .chip:hover { background: #f0f9f4; color: #2a7a4b; border-color: #2a7a4b; }
-    .chip.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; border-color: #2a7a4b; }
-    .chip.all-chip { background: #e8f5ec; color: #2a7a4b; border-color: #2a7a4b; font-weight: 700; }
-    .chip.all-chip.inactive { background: white; color: #111; border-color: #eee; font-weight: 600; }
+    .chip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #111; transition: all 0.15s; margin-bottom: 4px; }
+    .chip:hover { background: #f0f9f4; color: #2a7a4b; }
+    .chip.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
+    .chip.all-chip { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
+    .chip.all-chip.inactive { background: white; color: #111; font-weight: 600; }
+    .star-option { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #222; transition: all 0.15s; margin-bottom: 4px; }
+    .star-option:hover { background: #f0f9f4; }
+    .star-option.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
+    .star-option .s { color: #f5a623; font-size: 18px; }
+    .slider-wrap { padding: 0 4px; }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 14px; color: #555; margin-top: 6px; }
+    .slider-value { text-align: center; font-size: 17px; font-weight: 700; color: #2a7a4b; margin-bottom: 8px; }
+    input[type=range] { width: 100%; accent-color: #2a7a4b; cursor: pointer; height: 6px; }
+    .check-option { display: flex; align-items: center; gap: 10px; padding: 9px 4px; font-size: 17px; color: #111; cursor: pointer; border-radius: 8px; }
+    .check-option:hover { background: #f0f9f4; }
+    .check-option input[type=checkbox] { accent-color: #2a7a4b; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
 
     /* RESULTS */
     .results-col { flex: 1; min-width: 0; padding: 20px 28px; overflow-y: auto; height: 100%; }
@@ -109,27 +125,51 @@
     <div class="sidebar-title">⚙️ Filtri</div>
 
     <div class="filter-group">
-    <div class="filter-label">Specializzazione</div>
-    <div class="mestieri-scroll">
-      <div class="chip all-chip" data-mestiere="tutti" onclick="selectMestiere(this)">🏗️ Tutte</div>
-      <div class="chip" data-mestiere="Ristrutturazione" onclick="selectMestiere(this)">🏠 Ristrutturazione</div>
-      <div class="chip" data-mestiere="Muratura" onclick="selectMestiere(this)">🧱 Muratura</div>
-      <div class="chip" data-mestiere="Carpenteria" onclick="selectMestiere(this)">🪵 Carpenteria</div>
-      <div class="chip" data-mestiere="Coperture / Tetti" onclick="selectMestiere(this)">🏠 Coperture</div>
-      <div class="chip" data-mestiere="Impermeabilizzazione" onclick="selectMestiere(this)">💧 Impermeabilizzazione</div>
-      <div class="chip" data-mestiere="Ponteggi" onclick="selectMestiere(this)">🏗️ Ponteggi</div>
-      <div class="chip" data-mestiere="Impianti elettrici" onclick="selectMestiere(this)">⚡ Impianti elettrici</div>
-      <div class="chip" data-mestiere="Impianti idraulici" onclick="selectMestiere(this)">🚿 Impianti idraulici</div>
-      <div class="chip" data-mestiere="Impianti termici" onclick="selectMestiere(this)">🔥 Impianti termici</div>
-      <div class="chip" data-mestiere="Impianti solari" onclick="selectMestiere(this)">☀️ Impianti solari</div>
-      <div class="chip" data-mestiere="Pavimenti e rivestimenti" onclick="selectMestiere(this)">🟫 Pavimenti</div>
-      <div class="chip" data-mestiere="Intonaci e pitture" onclick="selectMestiere(this)">🎨 Intonaci</div>
-      <div class="chip" data-mestiere="Serramenti e infissi" onclick="selectMestiere(this)">🪟 Serramenti</div>
-      <div class="chip" data-mestiere="Demolizione" onclick="selectMestiere(this)">🔨 Demolizione</div>
-      <div class="chip" data-mestiere="Restauro" onclick="selectMestiere(this)">🏛️ Restauro</div>
-      <div class="chip" data-mestiere="Efficienza energetica" onclick="selectMestiere(this)">🌿 Efficienza energetica</div>
-      <div class="chip" data-mestiere="Cottimisti" onclick="selectMestiere(this)">👷 Cottimisti</div>
+      <div class="filter-label">Tipo impresa</div>
+      <div class="tipo-btn active">🏗️ Tutte</div>
+      <div class="tipo-btn">🏢 Piccola (1-10 dip.)</div>
+      <div class="tipo-btn">🏛️ Media (11-50 dip.)</div>
     </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Specializzazione</div>
+      <div class="mestieri-scroll">
+        <div class="chip all-chip" data-mestiere="tutti" onclick="selectMestiere(this)">🏗️ Tutte</div>
+        <div class="chip" data-mestiere="Ristrutturazione completa" onclick="selectMestiere(this)">🏠 Ristrutturazione completa</div>
+        <div class="chip" data-mestiere="Muratura" onclick="selectMestiere(this)">🧱 Muratura</div>
+        <div class="chip" data-mestiere="Carpenteria" onclick="selectMestiere(this)">🪵 Carpenteria</div>
+        <div class="chip" data-mestiere="Coperture e tetti" onclick="selectMestiere(this)">🏠 Coperture e tetti</div>
+        <div class="chip" data-mestiere="Impermeabilizzazione" onclick="selectMestiere(this)">💧 Impermeabilizzazione</div>
+        <div class="chip" data-mestiere="Demolizioni" onclick="selectMestiere(this)">🔨 Demolizioni</div>
+        <div class="chip" data-mestiere="Scavi e movimenti terra" onclick="selectMestiere(this)">⛏️ Scavi e movimenti terra</div>
+        <div class="chip" data-mestiere="Costruzione nuovo" onclick="selectMestiere(this)">🏗️ Costruzione nuovo</div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Valutazione minima</div>
+      <div class="star-option active" data-min="0">Qualsiasi</div>
+      <div class="star-option" data-min="3"><span class="s">★★★</span> 3+ stelle</div>
+      <div class="star-option" data-min="4"><span class="s">★★★★</span> 4+ stelle</div>
+      <div class="star-option" data-min="4.5"><span class="s">★★★★★</span> 4.5+ stelle</div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Distanza massima</div>
+      <div class="slider-wrap">
+        <div class="slider-value" id="distanzaVal">Qualsiasi</div>
+        <input type="range" id="distanzaSlider" min="5" max="100" value="100" step="5" oninput="document.getElementById('distanzaVal').textContent=this.value>=100?'Qualsiasi':this.value+' km'">
+        <div class="slider-labels"><span>5 km</span><span>100 km</span></div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Altro</div>
+      <label class="check-option"><input type="checkbox" id="soloVerificati"> Solo verificati</label>
+      <label class="check-option"><input type="checkbox" id="conFoto"> Con foto lavori</label>
+      <label class="check-option"><input type="checkbox" id="rispondeIn24h"> Risponde in 24h</label>
+      <label class="check-option"><input type="checkbox" id="preventivoOnline"> Preventivo online</label>
+      <label class="check-option"><input type="checkbox" id="soaCertificata"> SOA certificata</label>
     </div>
   </div>
 
