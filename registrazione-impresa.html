@@ -157,7 +157,7 @@
           </div>
           <div class="form-group">
             <label>Numero dipendenti</label>
-            <input type="number" id="dipendenti" placeholder="Es. 5" min="0">
+            <input type="number" id="dipendenti" placeholder="Es. 5" min="0" max="50">
           </div>
         </div>
         <div class="form-group">
@@ -456,7 +456,7 @@
           indirizzo: (document.getElementById('indirizzo').value + ' ' + document.getElementById('civico').value).trim(),
           cap: document.getElementById('cap').value,
           anno_fondazione: parseInt(document.getElementById('anno_fondazione').value) || null,
-          dipendenti: document.getElementById('dipendenti').value || null,
+          dipendenti: parseInt(document.getElementById('dipendenti').value) || null,
           whatsapp: document.getElementById('whatsapp').value || null,
           verificata: false,
           rating: 0,
