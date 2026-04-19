@@ -925,8 +925,8 @@
         document.getElementById('noleggio_attrezzi-negozio').checked = !!d.noleggio_attrezzi;
         document.getElementById('taglio_su_misura-negozio').checked = !!d.taglio_su_misura;
         document.getElementById('aperto_sabato-negozio').checked = !!d.aperto_sabato;
-        document.getElementById('parcheggio_cliente-negozio').checked = !!d.parcheggio;
-        document.getElementById('preventivo_online-negozio').checked = !!d.preventivi_online;
+        document.getElementById('parcheggio_cliente-negozio').checked = !!d.parcheggio_cliente;
+        document.getElementById('preventivo_online-negozio').checked = !!d.preventivo_online;
 
       } else if (tipoCategoria === 'professionista') {
         document.getElementById('f-nome-professionista').value = d.nome || '';
@@ -1150,8 +1150,8 @@
             noleggio_attrezzi: document.getElementById('noleggio_attrezzi-negozio').checked,
             taglio_su_misura: document.getElementById('taglio_su_misura-negozio').checked,
             aperto_sabato: document.getElementById('aperto_sabato-negozio').checked,
-            parcheggio: document.getElementById('parcheggio_cliente-negozio').checked,
-            preventivi_online: document.getElementById('preventivo_online-negozio').checked
+            parcheggio_cliente: document.getElementById('parcheggio_cliente-negozio').checked,
+            preventivo_online: document.getElementById('preventivo_online-negozio').checked
           });
 
         } else if (tipoCategoria === 'professionista') {
