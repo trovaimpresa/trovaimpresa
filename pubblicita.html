@@ -599,7 +599,9 @@ function selPeriodo(p) {
 function calcolaTotale() {
   if(!fmt || citta.length === 0) return 0;
   var base = prezzi[fmt] * citta.length;
-  return periodo === 'annuale' ? base * 10 : base;
+  if (periodo === 'annuale') return base * 10;
+  if (periodo === 'trimestrale') return Math.round(base * 2.7);
+  return base;
 }
 
 function aggiornaRiepilogo() {
