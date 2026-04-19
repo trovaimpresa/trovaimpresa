@@ -192,6 +192,20 @@
           </select>
         </div>
         <div class="form-group">
+          <label>Tipo negozio <span class="required">*</span></label>
+          <select id="tipo_negozio">
+            <option value="">— Seleziona tipo negozio —</option>
+            <option value="materiali_edili">Materiali edili</option>
+            <option value="ferramenta">Ferramenta</option>
+            <option value="termoidraulica">Termoidraulica</option>
+            <option value="elettrico">Elettrico</option>
+            <option value="ceramiche">Ceramiche e bagno</option>
+            <option value="pavimenti">Pavimenti e rivestimenti</option>
+            <option value="colorificio">Colorificio</option>
+            <option value="legname">Legname</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Altri prodotti / categorie</label>
           <textarea id="specializzazioni" placeholder="Es. Vendita online, consegna a domicilio, consulenza tecnica..."></textarea>
         </div>
@@ -440,6 +454,7 @@
           nome_attivita: nome,
           mestiere: mestiere,
           mestieri: mestiere ? [mestiere] : [],
+          tipo_negozio: document.getElementById('tipo_negozio').value || null,
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
           anni_esperienza: parseInt(document.getElementById('anni_esperienza').value) || null,
