@@ -756,6 +756,15 @@
           </p>
         </div><!-- /card save -->
 
+        <div class="form-card fc-arancio" id="card-disdetta" style="display:none;margin-top:16px;">
+          <div class="card-header arancio">⚠️ Gestione abbonamento</div>
+          <button type="button" id="btn-disdici" onclick="disdiciAbbonamento()"
+            style="background:#e65100;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;width:100%;">
+            Disdici abbonamento
+          </button>
+          <p id="info-disdetta" style="text-align:center;font-size:12px;color:#888;margin-top:10px;margin-bottom:0;"></p>
+        </div>
+
       </div><!-- /form-wrapper -->
     </div><!-- /content -->
   </div><!-- /container -->
@@ -887,6 +896,19 @@
       if (d.logo_url) {
         document.getElementById('logo-current').src = d.logo_url;
         document.getElementById('logo-current-wrap').style.display = 'block';
+      }
+
+      // Gestione abbonamento
+      if (d.piano && d.piano !== 'free') {
+        document.getElementById('card-disdetta').style.display = 'block';
+        if (d.rinnovo_auto_piano === false) {
+          const btnDisdici = document.getElementById('btn-disdici');
+          btnDisdici.disabled = true;
+          btnDisdici.style.opacity = '0.5';
+          btnDisdici.style.cursor = 'not-allowed';
+          const scadenza = d.data_scadenza_piano ? new Date(d.data_scadenza_piano).toLocaleDateString('it-IT') : '—';
+          document.getElementById('info-disdetta').textContent = 'Attivo fino al ' + scadenza + '. Dopo tornerai al piano Free.';
+        }
       }
 
       // Campi Premium
@@ -1271,6 +1293,17 @@
 
     function clearAlert() {
       document.getElementById('alert-box').style.display = 'none';
+    }
+
+    async function disdiciAbbonamento() {
+      if (!confirm('Sei sicuro di voler disdire l\'abbonamento? Il piano resterà attivo fino alla scadenza, poi tornerai al piano Free.')) return;
+      const { error } = await supabaseClient
+        .from('imprese')
+        .update({ rinnovo_auto_piano: false, disdetto_piano_il: new Date().toISOString() })
+        .eq('user_id', currentUser.id);
+      if (error) { alert('Errore: ' + error.message); return; }
+      alert('Abbonamento disdetto. Resterai sul piano attuale fino alla scadenza.');
+      location.reload();
     }
 
     history.pushState(null, '', location.href);
