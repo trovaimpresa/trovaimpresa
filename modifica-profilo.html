@@ -437,6 +437,71 @@
               <input type="text" id="f-orari" placeholder="Es. Lun-Ven 8:00-18:00, Sab 8:00-12:00">
             </div>
           </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">⚙️ Servizi e caratteristiche</div>
+            <div class="form-group">
+              <label>Tipo negozio</label>
+              <select id="f-tipo_negozio-negozio" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
+                <option value="">— Seleziona —</option>
+                <option value="materiali_edili">Materiali edili</option>
+                <option value="ferramenta">Ferramenta</option>
+                <option value="termoidraulica">Termoidraulica</option>
+                <option value="elettrico">Elettrico</option>
+                <option value="ceramiche">Ceramiche e bagno</option>
+                <option value="pavimenti">Pavimenti e rivestimenti</option>
+                <option value="colorificio">Colorificio</option>
+                <option value="legname">Legname</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="consegna_domicilio-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Consegna a domicilio
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="ritiro_in_negozio-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Ritiro in negozio
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="ecommerce-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                E-commerce
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="noleggio_attrezzi-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Noleggio attrezzi
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="taglio_su_misura-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Taglio su misura
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="aperto_sabato-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Aperto sabato
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="parcheggio_cliente-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Parcheggio cliente
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="preventivo_online-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                Preventivi online
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- ===== PROFESSIONISTA ===== -->
@@ -853,6 +918,15 @@
         document.getElementById('f-prodotti').value = d.prodotti || '';
         document.getElementById('f-marchi').value = d.marchi || '';
         document.getElementById('f-orari').value = d.orari || '';
+        setSelectValue('f-tipo_negozio-negozio', d.tipo_negozio);
+        document.getElementById('consegna_domicilio-negozio').checked = !!d.consegna_domicilio;
+        document.getElementById('ritiro_in_negozio-negozio').checked = !!d.ritiro_in_negozio;
+        document.getElementById('ecommerce-negozio').checked = !!d.ecommerce;
+        document.getElementById('noleggio_attrezzi-negozio').checked = !!d.noleggio_attrezzi;
+        document.getElementById('taglio_su_misura-negozio').checked = !!d.taglio_su_misura;
+        document.getElementById('aperto_sabato-negozio').checked = !!d.aperto_sabato;
+        document.getElementById('parcheggio_cliente-negozio').checked = !!d.parcheggio;
+        document.getElementById('preventivo_online-negozio').checked = !!d.preventivi_online;
 
       } else if (tipoCategoria === 'professionista') {
         document.getElementById('f-nome-professionista').value = d.nome || '';
@@ -1068,7 +1142,16 @@
             indirizzo: document.getElementById('f-indirizzo-negozio').value.trim(),
             prodotti: document.getElementById('f-prodotti').value.trim(),
             marchi: document.getElementById('f-marchi').value.trim(),
-            orari: document.getElementById('f-orari').value.trim()
+            orari: document.getElementById('f-orari').value.trim(),
+            tipo_negozio: document.getElementById('f-tipo_negozio-negozio').value || null,
+            consegna_domicilio: document.getElementById('consegna_domicilio-negozio').checked,
+            ritiro_in_negozio: document.getElementById('ritiro_in_negozio-negozio').checked,
+            ecommerce: document.getElementById('ecommerce-negozio').checked,
+            noleggio_attrezzi: document.getElementById('noleggio_attrezzi-negozio').checked,
+            taglio_su_misura: document.getElementById('taglio_su_misura-negozio').checked,
+            aperto_sabato: document.getElementById('aperto_sabato-negozio').checked,
+            parcheggio: document.getElementById('parcheggio_cliente-negozio').checked,
+            preventivi_online: document.getElementById('preventivo_online-negozio').checked
           });
 
         } else if (tipoCategoria === 'professionista') {
