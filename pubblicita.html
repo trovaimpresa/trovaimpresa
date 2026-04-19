@@ -668,7 +668,7 @@ async function inviaOrdine() {
     logoUrl = pubRes.data.publicUrl;
   }
 
-  const { error: insertError } = await supabaseClient.from('annunci_pubblicitari').insert({
+  const { data: insertData, error: insertError } = await supabaseClient.from('annunci_pubblicitari').insert({
     impresa_id: currentUser.id,
     stato: 'pending',
     attivo: false,
@@ -679,7 +679,7 @@ async function inviaOrdine() {
     durata: periodo,
     logo_url: logoUrl || null,
     prezzo_pagato: calcolaTotale()
-  });
+  }).select('id').single();
 
   if (insertError) {
     alert('Errore durante l\'invio: ' + insertError.message);
@@ -691,6 +691,21 @@ async function inviaOrdine() {
   document.getElementById('ok-nome').textContent = nome + '!';
   document.getElementById('ok-email').textContent = email;
   showPage(4);
+
+  fetch('/.netlify/functions/notifica-pubblicita', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      impresa: currentImpresa ? (currentImpresa.nome_attivita || currentImpresa.nome) : nome,
+      email: currentImpresa ? currentImpresa.email : email,
+      telefono: currentImpresa ? (currentImpresa.telefono || '') : '',
+      formato: fmt,
+      durata: periodo,
+      citta: citta.join(', '),
+      totale: calcolaTotale(),
+      annuncio_id: insertData ? insertData.id : null
+    })
+  }).catch(function(e) { console.error('Notifica email fallita:', e); });
 }
 </script>
 <script src="/cookie-banner.js"></script>
