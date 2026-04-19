@@ -191,6 +191,18 @@
           </select>
         </div>
         <div class="form-group">
+          <label>Tipologia <span class="required">*</span></label>
+          <select id="tipo_professionista">
+            <option value="">— Seleziona tipologia —</option>
+            <option value="architetto">Architetto</option>
+            <option value="ingegnere">Ingegnere</option>
+            <option value="geometra">Geometra</option>
+            <option value="perito">Perito</option>
+            <option value="consulente_sicurezza">Consulente sicurezza</option>
+            <option value="amministratore_condominio">Amministratore condominio</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Altre competenze / specializzazioni</label>
           <textarea id="specializzazioni" placeholder="Es. Pratiche catastali, APE, progettazione BIM, perizie..."></textarea>
         </div>
@@ -439,6 +451,7 @@
           nome_attivita: nome,
           mestiere: mestiere,
           mestieri: mestiere ? [mestiere] : [],
+          tipo_professionista: document.getElementById('tipo_professionista').value || null,
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
           anni_esperienza: parseInt(document.getElementById('anni_esperienza').value) || null,
