@@ -357,6 +357,36 @@
               <input type="text" id="f-zone-grande_impresa" placeholder="Es. Nord Italia, Nazionale, Europa">
             </div>
           </div>
+          <div class="form-card fc-arancio">
+            <div class="card-header arancio">⚙️ Certificazioni</div>
+            <div class="form-group">
+              <label>Tipologia</label>
+              <select id="f-tipologia_grande" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
+                <option value="">— Seleziona —</option>
+                <option value="general_contractor">General Contractor</option>
+                <option value="consorzio">Consorzio</option>
+                <option value="societa_costruzioni">Società di costruzioni</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="soa_certificata-grande" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                SOA certificata
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="iso_9001-grande" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                ISO 9001
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="white_list_antimafia-grande" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                White list antimafia
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- ===== NEGOZIO ===== -->
@@ -810,6 +840,10 @@
         setSelectValue('f-mestiere-grande_impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-grande_impresa').value = d.specializzazioni || '';
         document.getElementById('f-zone-grande_impresa').value = d.zone || '';
+        setSelectValue('f-tipologia_grande', d.tipologia_grande_impresa);
+        document.getElementById('soa_certificata-grande').checked = !!d.soa_certificata;
+        document.getElementById('iso_9001-grande').checked = !!d.iso_9001;
+        document.getElementById('white_list_antimafia-grande').checked = !!d.white_list_antimafia;
 
       } else if (tipoCategoria === 'negozio') {
         document.getElementById('f-nome_negozio').value = d.nome_negozio || d.nome || '';
@@ -1019,7 +1053,11 @@
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-grande_impresa').value) || null,
             mestieri: document.getElementById('f-mestiere-grande_impresa').value ? [document.getElementById('f-mestiere-grande_impresa').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-grande_impresa').value.trim(),
-            zone: document.getElementById('f-zone-grande_impresa').value.trim()
+            zone: document.getElementById('f-zone-grande_impresa').value.trim(),
+            tipologia_grande_impresa: document.getElementById('f-tipologia_grande').value || null,
+            soa_certificata: document.getElementById('soa_certificata-grande').checked,
+            iso_9001: document.getElementById('iso_9001-grande').checked,
+            white_list_antimafia: document.getElementById('white_list_antimafia-grande').checked
           });
 
         } else if (tipoCategoria === 'negozio') {
