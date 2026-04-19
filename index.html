@@ -290,6 +290,28 @@
             background: #f5f5f5;
             text-align: center;
             margin-bottom: 0;
+            max-height: 600px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #2a7a4b #e0e0e0;
+        }
+
+        .lavoro-links::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .lavoro-links::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .lavoro-links::-webkit-scrollbar-thumb {
+            background: #2a7a4b;
+            border-radius: 4px;
+        }
+
+        .lavoro-links::-webkit-scrollbar-thumb:hover {
+            background: #1a5c35;
         }
 
         .sezione-card {
@@ -659,10 +681,10 @@
                 text-align: center;
             }
         }
-        .grid-esempi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+        .grid-esempi{display:grid;grid-template-columns:repeat(5,minmax(0,210px));gap:10px;margin-top:12px;justify-content:center}
         .grid-esempi .lavoro-btn{min-width:0;max-width:none}
-        @media(max-width:900px){.grid-esempi{grid-template-columns:repeat(3,1fr)}}
-        @media(max-width:600px){.grid-esempi{grid-template-columns:repeat(2,1fr)}}
+        @media(max-width:900px){.grid-esempi{grid-template-columns:repeat(3,minmax(0,210px))}}
+        @media(max-width:600px){.grid-esempi{grid-template-columns:repeat(2,minmax(0,210px))}}
     </style>
     <!-- MOBILE FIX -->
     <style>
