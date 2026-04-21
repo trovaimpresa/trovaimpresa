@@ -346,16 +346,34 @@
       const btnNext = document.getElementById('btn-next');
       btnNext.disabled = true;
 
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
       try {
+        // 1. Supabase Auth signUp
+        btnNext.textContent = '⏳ Creazione account...';
+        const signUpRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ email, password })
+        });
+        const signUpData = await signUpRes.json();
+        if (!signUpRes.ok || !signUpData.user) {
+          throw new Error(signUpData.msg || signUpData.error_description || signUpData.message || 'Errore registrazione account.');
+        }
+        const userId = signUpData.user.id;
+
+        // 2. Upload CV (se presente)
         let cvUrl = null;
         if (cvFile) {
           btnNext.textContent = '⏳ Caricamento CV...';
-          cvUrl = await uploadCV(cvFile, document.getElementById('email').value);
+          cvUrl = await uploadCV(cvFile, email);
         }
 
+        // 3. INSERT su candidati_lavoro (senza password, con user_id)
         btnNext.textContent = '⏳ Salvataggio dati...';
-
         const dati = {
+          user_id: userId,
           nome: document.getElementById('nome').value,
           cognome: document.getElementById('cognome').value,
           eta: document.getElementById('eta').value || null,
@@ -363,30 +381,42 @@
           mestiere: document.getElementById('mestiere').value,
           anni_esperienza: document.getElementById('anni_esperienza').value || null,
           competenze: document.getElementById('competenze').value,
-          email: document.getElementById('email').value,
+          email: email,
           telefono: document.getElementById('telefono').value,
           citta: document.getElementById('citta').value,
-          password: document.getElementById('password').value,
           cv: cvUrl,
           created_at: new Date().toISOString()
         };
 
-        const res = await fetch(SUPABASE_URL + '/rest/v1/candidati_lavoro', {
+        const insertRes = await fetch(SUPABASE_URL + '/rest/v1/candidati_lavoro', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + signUpData.session?.access_token,
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify(dati)
         });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error('Errore ' + res.status + ': ' + errText);
+        if (!insertRes.ok) {
+          const errText = await insertRes.text();
+          throw new Error('Errore salvataggio dati: ' + errText);
         }
 
-        window.location.href = 'grazie.html';
+        // 4. signInWithPassword per sessione immediata
+        btnNext.textContent = '⏳ Accesso in corso...';
+        const signInRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ email, password })
+        });
+        const signInData = await signInRes.json();
+        if (signInData.access_token) {
+          localStorage.setItem('sb-access-token', signInData.access_token);
+          localStorage.setItem('sb-refresh-token', signInData.refresh_token);
+        }
+
+        window.location.href = 'index.html';
       } catch (err) {
         console.error('Errore:', err);
         btnNext.disabled = false;
