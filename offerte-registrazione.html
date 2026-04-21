@@ -479,8 +479,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="data-scadenza-annuncio">Data Scadenza Annuncio <span class="required">*</span></label>
-                    <input type="date" id="data-scadenza-annuncio" required>
+                    <label>Data Scadenza Annuncio <span class="required">*</span></label>
+                    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scadenza-radio" value="30" checked onchange="aggiornaScadenza(this)"> 30 giorni</label>
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scadenza-radio" value="60" onchange="aggiornaScadenza(this)"> 60 giorni</label>
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scadenza-radio" value="90" onchange="aggiornaScadenza(this)"> 90 giorni</label>
+                        <label style="font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="radio" name="scadenza-radio" value="custom" onchange="aggiornaScadenza(this)"> Personalizzata</label>
+                    </div>
+                    <input type="date" id="data-scadenza-custom" style="display:none;border:1.5px solid #ddd;border-radius:8px;padding:7px 10px;font-size:14px;" onchange="document.getElementById('data-scadenza-annuncio').value=this.value">
+                    <input type="hidden" id="data-scadenza-annuncio">
                 </div>
 
                 <div class="form-group">
@@ -879,6 +886,22 @@
         input.value = '';
         aggiornaListaChip(chipsId, listId);
     }
+
+    function aggiornaScadenza(radio) {
+        const custom = document.getElementById('data-scadenza-custom');
+        const hidden = document.getElementById('data-scadenza-annuncio');
+        if (radio.value === 'custom') {
+            custom.style.display = '';
+            hidden.value = custom.value;
+        } else {
+            custom.style.display = 'none';
+            const d = new Date();
+            d.setDate(d.getDate() + parseInt(radio.value));
+            hidden.value = d.toISOString().slice(0, 10);
+        }
+    }
+    // Imposta default 30 giorni al caricamento
+    aggiornaScadenza(document.querySelector('input[name="scadenza-radio"][value="30"]'));
 
     function aggiungiChipDaSelect(selectId, chipsId, listId) {
         const select = document.getElementById(selectId);
