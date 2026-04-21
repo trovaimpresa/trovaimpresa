@@ -526,13 +526,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="competenze-input">Competenze Richieste</label>
-                    <div style="display:flex;gap:8px;">
-                        <input type="text" id="competenze-input" placeholder="Es. AutoCAD, saldatura TIG..." style="flex:1;">
-                        <button type="button" class="btn btn-next" style="flex:none;padding:0 16px;font-size:13px;" onclick="aggiungiChip('competenze-input','competenze-chips','competenze-list')">+ Aggiungi</button>
-                    </div>
-                    <div id="competenze-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
-                    <input type="hidden" id="competenze-list">
+                    <label for="note_aggiuntive">Note Aggiuntive (opzionale)</label>
+                    <textarea id="note_aggiuntive" rows="3" maxlength="500" placeholder="Informazioni aggiuntive sull'offerta..." style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 10px;font-size:14px;resize:vertical;"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -599,7 +594,7 @@
                         <li id="recap-scadenza-li" style="display:none"><strong>Scadenza annuncio:</strong> <span id="recap-scadenza"></span></li>
                         <li id="recap-patenti-li" style="display:none"><strong>Patenti richieste:</strong> <span id="recap-patenti"></span></li>
                         <li id="recap-certificazioni-li" style="display:none"><strong>Certificazioni:</strong> <span id="recap-certificazioni"></span></li>
-                        <li id="recap-competenze-li" style="display:none"><strong>Competenze:</strong> <span id="recap-competenze"></span></li>
+                        <li id="recap-note-li" style="display:none"><strong>Note:</strong> <span id="recap-note"></span></li>
                         <li><strong id="recap-titolo">Titolo:</strong> --</li>
                         <li><strong>Auto propria:</strong> <span id="recap-auto"></span></li>
                         <li><strong>Trasferte:</strong> <span id="recap-trasferte"></span></li>
@@ -751,7 +746,7 @@
         mostraSeValido('recap-patenti-li', 'recap-patenti', patenti.join(', '));
 
         mostraSeValido('recap-certificazioni-li', 'recap-certificazioni', document.getElementById('certificazioni-list').value);
-        mostraSeValido('recap-competenze-li', 'recap-competenze', document.getElementById('competenze-list').value);
+        mostraSeValido('recap-note-li', 'recap-note', document.getElementById('note_aggiuntive').value);
 
         document.getElementById('recap-auto').textContent = document.getElementById('auto-propria').checked ? 'Sì' : 'No';
         document.getElementById('recap-trasferte').textContent = document.getElementById('disponibilita-trasferte').checked ? 'Sì' : 'No';
@@ -842,7 +837,7 @@
             data_scadenza_annuncio: document.getElementById('data-scadenza-annuncio').value || null,
             patenti_richieste: patenti,
             certificazioni_richieste: csvToArray('certificazioni-list'),
-            competenze_richieste: csvToArray('competenze-list'),
+            note_aggiuntive: document.getElementById('note_aggiuntive').value || null,
             auto_propria: document.getElementById('auto-propria').checked,
             disponibilita_trasferte: document.getElementById('disponibilita-trasferte').checked,
             mezzi_forniti: document.getElementById('mezzi-forniti').checked
