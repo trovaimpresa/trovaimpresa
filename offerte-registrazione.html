@@ -496,9 +496,29 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="certificazioni-input">Certificazioni Richieste</label>
-                    <div style="display:flex;gap:8px;">
-                        <input type="text" id="certificazioni-input" placeholder="Es. RSPP, PES, PAV..." style="flex:1;">
+                    <label>Certificazioni Richieste</label>
+                    <select multiple id="certificazioni-select" style="width:100%;min-height:130px;border:1.5px solid #ddd;border-radius:8px;padding:6px;font-size:14px;">
+                        <option value="RSPP">RSPP – Responsabile Servizio Prevenzione e Protezione</option>
+                        <option value="ASPP">ASPP – Addetto Servizio Prevenzione e Protezione</option>
+                        <option value="PES">PES – Persona Esperta</option>
+                        <option value="PAV">PAV – Persona Avvertita</option>
+                        <option value="PEI">PEI – Persona Istruita</option>
+                        <option value="Antincendio rischio basso">Antincendio – Rischio Basso</option>
+                        <option value="Antincendio rischio medio">Antincendio – Rischio Medio</option>
+                        <option value="Antincendio rischio alto">Antincendio – Rischio Alto</option>
+                        <option value="Primo Soccorso">Primo Soccorso</option>
+                        <option value="HACCP">HACCP – Sicurezza Alimentare</option>
+                        <option value="Lavori in quota">Lavori in Quota</option>
+                        <option value="Patentino muletto">Patentino Muletto</option>
+                        <option value="Ponteggiatore">Ponteggiatore</option>
+                        <option value="ISO 9001">ISO 9001 – Sistema Qualità</option>
+                    </select>
+                    <small style="color:#888;font-size:12px;margin-top:4px;display:block;">Tieni premuto Ctrl (o Cmd su Mac) per selezionare più voci, poi clicca Aggiungi.</small>
+                    <div style="display:flex;gap:8px;margin-top:6px;">
+                        <button type="button" class="btn btn-next" style="flex:none;padding:0 16px;font-size:13px;" onclick="aggiungiChipDaSelect('certificazioni-select','certificazioni-chips','certificazioni-list')">+ Aggiungi selezionate</button>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <input type="text" id="certificazioni-input" placeholder="Altra certificazione..." style="flex:1;">
                         <button type="button" class="btn btn-next" style="flex:none;padding:0 16px;font-size:13px;" onclick="aggiungiChip('certificazioni-input','certificazioni-chips','certificazioni-list')">+ Aggiungi</button>
                     </div>
                     <div id="certificazioni-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
@@ -862,6 +882,26 @@
         };
         wrap.appendChild(chip);
         input.value = '';
+        aggiornaListaChip(chipsId, listId);
+    }
+
+    function aggiungiChipDaSelect(selectId, chipsId, listId) {
+        const select = document.getElementById(selectId);
+        const selected = Array.from(select.selectedOptions).map(o => o.value);
+        if (!selected.length) return;
+        const existing = Array.from(document.getElementById(chipsId).querySelectorAll('span'))
+            .map(c => c.textContent.slice(0, -2).trim());
+        selected.forEach(val => {
+            if (existing.includes(val)) return;
+            const wrap = document.getElementById(chipsId);
+            const chip = document.createElement('span');
+            chip.style.cssText = 'background:#fff0e8;border:1.5px solid #FF6B35;color:#FF6B35;border-radius:16px;padding:4px 10px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:5px;cursor:pointer;';
+            chip.innerHTML = val + ' <span style="font-size:15px;line-height:1;">×</span>';
+            chip.querySelector('span').onclick = () => { chip.remove(); aggiornaListaChip(chipsId, listId); };
+            wrap.appendChild(chip);
+            existing.push(val);
+        });
+        Array.from(select.options).forEach(o => o.selected = false);
         aggiornaListaChip(chipsId, listId);
     }
 
