@@ -206,18 +206,26 @@
           <label>Città <span class="required">*</span></label>
           <input type="text" id="citta" placeholder="Roma">
         </div>
-        <div class="form-group">
-          <label>Password <span class="required">*</span></label>
-          <div class="password-wrapper">
-            <input type="password" id="password" placeholder="Almeno 8 caratteri">
-            <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-          </div>
-        </div>
       </div>
 
       <!-- STEP 4 -->
       <div class="form-section" id="step-4">
-        <h2>Documenti (Opzionale)</h2>
+        <h2>Password e Documenti</h2>
+
+        <div class="form-group">
+          <label>Crea password <span class="required">*</span></label>
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="Almeno 6 caratteri" minlength="6" required>
+            <button class="toggle-pw" type="button" onclick="togglePw('password', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Conferma password <span class="required">*</span></label>
+          <div class="password-wrapper">
+            <input type="password" id="password-conferma" placeholder="Ripeti la password" minlength="6" required>
+            <button class="toggle-pw" type="button" onclick="togglePw('password-conferma', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+        </div>
 
         <div class="form-group">
           <label>Curriculum (PDF o Word)</label>
@@ -337,7 +345,22 @@
       return SUPABASE_URL + '/storage/v1/object/public/cv-candidati/' + fileName;
     }
 
+    function togglePw(id, btn) {
+      const input = document.getElementById(id);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
     async function submitForm() {
+      const pw = document.getElementById('password').value;
+      const pwConf = document.getElementById('password-conferma').value;
+      if (pw.length < 6) {
+        alert('La password deve essere di almeno 6 caratteri.');
+        return;
+      }
+      if (pw !== pwConf) {
+        alert('Le password non coincidono.');
+        return;
+      }
       if (!document.getElementById('termini').checked) {
         alert('Devi accettare i termini di servizio!');
         return;
