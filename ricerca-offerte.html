@@ -320,6 +320,7 @@
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sb = supabaseClient;
 
     async function cercaOfferte() {
         const tipo = document.getElementById('tipo-offerta-filter').value.trim();
@@ -391,11 +392,75 @@
                     ${o.telefono ? `<a href="tel:${o.telefono}" class="btn-contatta">☎️ Chiama</a>` : ''}
                     ${o.email ? `<a href="mailto:${o.email}" class="btn-contatta">📧 Email</a>` : ''}
                     ${o.telefono ? `<a href="https://wa.me/${o.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-contatta">💬 WhatsApp</a>` : ''}
+                    <button onclick="inviaCandidatura('${o.id}', '${o.impresa_id}', '${o.titolo}')" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:600;cursor:pointer;">📝 Invia candidatura</button>
                 </div>
             </div>
         `).join('');
 
         container.innerHTML = `<div class="offerte-grid">${html}</div>`;
+    }
+
+    async function inviaCandidatura(offertaId, impresaId, titolo) {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) {
+            window.location.href = 'login-candidato.html?redirect=ricerca-offerte.html';
+            return;
+        }
+        document.getElementById('modale-titolo').textContent = 'Invia candidatura per ' + titolo;
+        document.getElementById('modale-offerta-id').value = offertaId;
+        document.getElementById('modale-impresa-id').value = impresaId;
+        document.getElementById('modale-messaggio').value = '';
+        document.getElementById('modale-candidatura').style.display = 'flex';
+    }
+
+    function chiudiModaleCandidatura() {
+        document.getElementById('modale-candidatura').style.display = 'none';
+    }
+
+    async function submitCandidatura() {
+        const offertaId = document.getElementById('modale-offerta-id').value;
+        const impresaId = document.getElementById('modale-impresa-id').value;
+        const messaggio = document.getElementById('modale-messaggio').value.trim();
+        const btnInvia = document.getElementById('btn-invia-candidatura');
+
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) {
+            window.location.href = 'login-candidato.html?redirect=ricerca-offerte.html';
+            return;
+        }
+
+        const { data: candidato, error: errCandidato } = await sb.from('candidati_lavoro')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+
+        if (errCandidato || !candidato) {
+            alert('Completa prima il tuo profilo candidato.');
+            return;
+        }
+
+        btnInvia.disabled = true;
+        btnInvia.textContent = '⏳ Invio...';
+
+        const { error } = await sb.from('candidature').insert({
+            offerta_id: offertaId,
+            candidato_id: candidato.id,
+            impresa_id: impresaId,
+            messaggio: messaggio || null,
+            stato: 'pending',
+            data_candidatura: new Date().toISOString()
+        });
+
+        btnInvia.disabled = false;
+        btnInvia.textContent = 'Invia';
+
+        if (error) {
+            alert('Errore: ' + error.message);
+            return;
+        }
+
+        alert('Candidatura inviata!');
+        chiudiModaleCandidatura();
     }
 
     function resetFiltri() {
@@ -412,6 +477,19 @@
         document.getElementById('results-info').innerHTML = '<p>Compila i filtri e clicca "Cerca Offerte" per iniziare</p>';
     }
 </script>
+
+<div id="modale-candidatura" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:36px;width:100%;max-width:480px;margin:20px;">
+    <h2 id="modale-titolo" style="font-size:1.1rem;color:#1a4d2e;margin-bottom:20px;"></h2>
+    <input type="hidden" id="modale-offerta-id">
+    <input type="hidden" id="modale-impresa-id">
+    <textarea id="modale-messaggio" placeholder="Scrivi perché sei interessato..." maxlength="500" style="width:100%;height:120px;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.9rem;resize:vertical;margin-bottom:20px;"></textarea>
+    <div style="display:flex;gap:12px;justify-content:flex-end;">
+      <button onclick="chiudiModaleCandidatura()" style="padding:10px 20px;border:1.5px solid #ccc;background:white;border-radius:8px;cursor:pointer;font-weight:600;">Annulla</button>
+      <button id="btn-invia-candidatura" onclick="submitCandidatura()" style="padding:10px 20px;background:#2a7a4b;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Invia</button>
+    </div>
+  </div>
+</div>
 
 <script src="/cookie-banner.js"></script>
 <footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
