@@ -386,14 +386,27 @@
         }
         const userId = signUpData.user.id;
 
-        // 2. Upload CV (se presente)
+        // 2. signInWithPassword per sessione immediata
+        btnNext.textContent = '⏳ Accesso in corso...';
+        const signInRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ email, password })
+        });
+        const signInData = await signInRes.json();
+        if (signInData.access_token) {
+          localStorage.setItem('sb-access-token', signInData.access_token);
+          localStorage.setItem('sb-refresh-token', signInData.refresh_token);
+        }
+
+        // 3. Upload CV (se presente)
         let cvUrl = null;
         if (cvFile) {
           btnNext.textContent = '⏳ Caricamento CV...';
           cvUrl = await uploadCV(cvFile, email);
         }
 
-        // 3. INSERT su candidati_lavoro (senza password, con user_id)
+        // 4. INSERT su candidati_lavoro (senza password, con user_id)
         btnNext.textContent = '⏳ Salvataggio dati...';
         const dati = {
           user_id: userId,
@@ -416,7 +429,7 @@
           headers: {
             'Content-Type': 'application/json',
             'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + signUpData.session?.access_token,
+            'Authorization': 'Bearer ' + signInData.access_token,
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify(dati)
@@ -424,19 +437,6 @@
         if (!insertRes.ok) {
           const errText = await insertRes.text();
           throw new Error('Errore salvataggio dati: ' + errText);
-        }
-
-        // 4. signInWithPassword per sessione immediata
-        btnNext.textContent = '⏳ Accesso in corso...';
-        const signInRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-          body: JSON.stringify({ email, password })
-        });
-        const signInData = await signInRes.json();
-        if (signInData.access_token) {
-          localStorage.setItem('sb-access-token', signInData.access_token);
-          localStorage.setItem('sb-refresh-token', signInData.refresh_token);
         }
 
         window.location.href = 'index.html';
