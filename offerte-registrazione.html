@@ -824,7 +824,19 @@
             return v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
         };
 
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        let impresaId = null;
+        if (user) {
+            const { data: impresa } = await supabaseClient
+                .from('imprese')
+                .select('id')
+                .eq('email', user.email)
+                .single();
+            if (impresa) impresaId = impresa.id;
+        }
+
         const formData = {
+            impresa_id: impresaId,
             nome_azienda: document.getElementById('nome-azienda').value,
             email: document.getElementById('email-azienda').value,
             telefono: document.getElementById('telefono-azienda').value,
