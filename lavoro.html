@@ -576,16 +576,13 @@
     }
   }
 
-  function candidati(id) {
-    const a = tuttiAnnunci.find(x => x.id === id);
-    if (!a) return;
-    const impresaNome = a.imprese?.nome || 'questa impresa';
-    // Reindirizza al profilo impresa
-    if (a.impresa_id) {
-      window.location.href = `profilo-impresa.html?id=${a.impresa_id}`;
-    } else {
-      alert(`Per candidarti, contatta direttamente ${impresaNome} visitando il loro profilo su TrovaImpresa.`);
+  async function candidati(id) {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) {
+      window.location.href = 'login-candidato.html?redirect=lavoro.html';
+      return;
     }
+    console.log('TODO modale candidatura per offerta', id);
   }
 
   caricaAnnunci();
