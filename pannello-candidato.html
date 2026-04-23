@@ -121,6 +121,29 @@
   .stato-accettata  { background:var(--verde3);  color:var(--verde2); }
   .stato-rifiutata  { background:var(--rosso3);  color:var(--rosso); }
 
+  /* === PROFILO CARD === */
+  .profilo-card {
+    background:white; border-radius:16px; padding:28px;
+    box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:16px;
+  }
+  .profilo-title {
+    font-family:'Playfair Display',serif; font-size:1.1rem;
+    margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border);
+  }
+  .profilo-row {
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:10px 0; border-bottom:1px solid var(--border); font-size:0.88rem; gap:16px;
+  }
+  .profilo-row:last-child { border-bottom:none; }
+  .profilo-key { color:var(--mid); font-weight:600; min-width:140px; flex-shrink:0; }
+  .profilo-val { color:var(--dark); text-align:right; }
+  .btn-cv {
+    display:inline-block; padding:8px 18px; background:var(--verde); color:white;
+    border-radius:10px; font-size:0.82rem; font-weight:700; text-decoration:none;
+    transition:background 0.15s;
+  }
+  .btn-cv:hover { background:var(--verde2); }
+
   /* === EMPTY STATE === */
   .empty-state { text-align:center; padding:60px 24px; color:var(--light); }
   .empty-icon  { font-size:3rem; margin-bottom:12px; }
@@ -153,8 +176,11 @@
       <small>Pannello Candidato</small>
     </div>
     <nav class="sidebar-nav">
-      <div class="nav-item active">
+      <div class="nav-item active" onclick="showSection('candidature', this)">
         <span>📋</span> Le mie candidature
+      </div>
+      <div class="nav-item" onclick="showSection('profilo', this)">
+        <span>👤</span> Il mio profilo
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -178,6 +204,11 @@
           <div>Caricamento...</div>
         </div>
       </div>
+    </div>
+
+    <!-- SEZIONE: IL MIO PROFILO -->
+    <div class="section" id="sec-profilo">
+      <div id="profilo-contenuto"></div>
     </div>
 
   </main>
@@ -217,6 +248,7 @@
     document.getElementById('pannello').style.display = 'block';
 
     caricaCandidature();
+    renderProfilo();
   });
 
   async function caricaCandidature() {
@@ -283,6 +315,49 @@
           </div>
         </div>`;
     }).join('');
+  }
+
+  function showSection(id, navEl) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + id).classList.add('active');
+    navEl.classList.add('active');
+  }
+
+  function renderProfilo() {
+    const c = candidatoCorrente;
+    const rows = [
+      ['Nome',             c.nome || '—'],
+      ['Cognome',          c.cognome || '—'],
+      ['Età',              c.eta || '—'],
+      ['Sesso',            c.sesso || '—'],
+      ['Mestiere',         c.mestiere || '—'],
+      ['Anni esperienza',  c.anni_esperienza != null ? c.anni_esperienza + ' anni' : '—'],
+      ['Competenze',       c.competenze || '—'],
+      ['Email',            c.email || '—'],
+      ['Telefono',         c.telefono || '—'],
+      ['Città',            c.citta || '—'],
+      ['Certificazioni',   c.certificazioni || '—'],
+    ];
+
+    const righe = rows.map(([k, v]) => `
+      <div class="profilo-row">
+        <span class="profilo-key">${k}</span>
+        <span class="profilo-val">${v}</span>
+      </div>`).join('');
+
+    const cv = c.cv
+      ? `<div class="profilo-row">
+           <span class="profilo-key">Curriculum</span>
+           <span class="profilo-val"><a class="btn-cv" href="${c.cv}" target="_blank" rel="noopener">📄 Scarica CV</a></span>
+         </div>`
+      : '';
+
+    document.getElementById('profilo-contenuto').innerHTML = `
+      <div class="profilo-card">
+        <div class="profilo-title">👤 Dati personali e professionali</div>
+        ${righe}${cv}
+      </div>`;
   }
 
   async function doLogout() {
