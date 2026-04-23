@@ -124,6 +124,13 @@
       el.style.display = 'block';
     }
 
+    function getRedirectUrl() {
+      const redirect = new URLSearchParams(window.location.search).get('redirect');
+      if (redirect === 'premium') return 'prezzi.html?piano=premium';
+      if (redirect === 'pro') return 'prezzi.html?piano=pro';
+      return redirect || 'ricerca-offerte.html';
+    }
+
     async function doLogin() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -156,10 +163,7 @@
           btn.innerHTML = '✅ Verifica codice';
           btn.disabled = false;
         } else {
-          const redirect = new URLSearchParams(window.location.search).get('redirect');
-          if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
-          else if (redirect === 'pro') window.location.href = 'prezzi.html?piano=pro';
-          else window.location.href = 'lavoro.html';
+          window.location.href = getRedirectUrl();
         }
       } catch(err) {
         showError('❌ ' + err.message);
@@ -182,10 +186,7 @@
           code
         });
         if (error) throw error;
-        const redirect = new URLSearchParams(window.location.search).get('redirect');
-        if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
-        else if (redirect === 'pro') window.location.href = 'prezzi.html?piano=pro';
-        else window.location.href = 'lavoro.html';
+        window.location.href = getRedirectUrl();
       } catch(err) {
         showError('❌ Codice non valido o scaduto.');
         btn.disabled = false;
