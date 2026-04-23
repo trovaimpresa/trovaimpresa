@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Pannello Candidato — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --arancio2:#c45e28;
+    --arancio3:#fff3ec;
+    --rosso:   #e53e3e;
+    --rosso3:  #fff5f5;
+    --blu:     #3355cc;
+    --blu3:    #e8f0ff;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --light:   #999;
+    --bg:      #f4f6f9;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 2px 16px rgba(0,0,0,0.07);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .pannello { display:none; }
+
+  /* === SIDEBAR === */
+  .sidebar {
+    width:240px; background:white; border-right:1px solid var(--border);
+    position:fixed; top:0; left:0; bottom:0; z-index:100;
+    display:flex; flex-direction:column;
+  }
+  .sidebar-logo {
+    padding:24px 20px; border-bottom:1px solid var(--border);
+    font-family:'Playfair Display',serif; font-size:1.1rem;
+  }
+  .sidebar-logo .trova  { color:var(--verde); }
+  .sidebar-logo .impresa{ color:var(--arancio); }
+  .sidebar-logo small {
+    display:block; font-family:'DM Sans',sans-serif; font-size:0.7rem;
+    color:var(--light); font-weight:600; text-transform:uppercase;
+    letter-spacing:1px; margin-top:2px;
+  }
+  .sidebar-nav { flex:1; padding:16px 12px; overflow-y:auto; }
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    padding:11px 14px; border-radius:10px; cursor:pointer;
+    font-size:0.88rem; font-weight:600; color:var(--dark);
+    transition:all 0.15s; margin-bottom:6px;
+    background:white; box-shadow:0 2px 8px rgba(0,0,0,0.07);
+    border-top:4px solid var(--verde);
+  }
+  .nav-item:hover, .nav-item.active {
+    box-shadow:0 4px 14px rgba(0,0,0,0.13); transform:translateY(-1px); font-weight:800;
+  }
+  .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
+  .logout-btn {
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    border-radius:10px; cursor:pointer; font-size:0.85rem;
+    font-weight:600; color:var(--rosso); transition:all 0.15s;
+  }
+  .logout-btn:hover { background:var(--rosso3); }
+
+  /* === MAIN === */
+  .main { margin-left:240px; padding:32px; min-height:100vh; }
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:28px; flex-wrap:wrap; gap:12px;
+  }
+  .topbar-title { font-family:'Playfair Display',serif; font-size:1.6rem; }
+  .candidato-badge {
+    background:var(--verde3); color:var(--verde2);
+    padding:6px 14px; border-radius:20px; font-size:0.78rem; font-weight:700;
+  }
+
+  /* === SECTION === */
+  .section { display:none; }
+  .section.active { display:block; }
+
+  /* === CANDIDATURA CARD === */
+  .candidatura-card {
+    background:white; border-radius:16px; padding:22px 24px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    margin-bottom:14px; transition:all 0.2s;
+    border-left:4px solid var(--verde);
+  }
+  .candidatura-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.1); transform:translateY(-1px); }
+  .candidatura-header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:12px; margin-bottom:10px;
+  }
+  .candidatura-titolo { font-family:'Playfair Display',serif; font-size:1.05rem; margin-bottom:4px; }
+  .candidatura-azienda { font-size:0.88rem; color:var(--mid); font-weight:600; }
+  .candidatura-meta {
+    display:flex; gap:14px; flex-wrap:wrap;
+    font-size:0.82rem; color:var(--mid); margin-top:10px;
+  }
+  .candidatura-footer {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:14px; flex-wrap:wrap; gap:8px;
+  }
+  .candidatura-data { font-size:0.75rem; color:var(--light); }
+
+  /* === STATO BADGE === */
+  .stato-badge {
+    padding:4px 12px; border-radius:20px;
+    font-size:0.72rem; font-weight:800; white-space:nowrap;
+  }
+  .stato-inviata    { background:var(--blu3);   color:var(--blu);   }
+  .stato-vista      { background:var(--arancio3);color:var(--arancio2); }
+  .stato-accettata  { background:var(--verde3);  color:var(--verde2); }
+  .stato-rifiutata  { background:var(--rosso3);  color:var(--rosso); }
+
+  /* === EMPTY STATE === */
+  .empty-state { text-align:center; padding:60px 24px; color:var(--light); }
+  .empty-icon  { font-size:3rem; margin-bottom:12px; }
+  .empty-state a { color:var(--verde); font-weight:700; text-decoration:none; }
+  .empty-state a:hover { text-decoration:underline; }
+
+  @media(max-width:768px){
+    .sidebar { transform:translateX(-100%); }
+    .main { margin-left:0; padding:16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPINNER DI AVVIO -->
+<div id="spinner-avvio" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a2a,#2a7a4b)">
+  <div style="text-align:center;color:white">
+    <div style="font-size:2.5rem;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
+    <div style="font-size:1rem;opacity:0.85;font-weight:600">Caricamento...</div>
+  </div>
+</div>
+<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+
+<!-- PANNELLO -->
+<div class="pannello" id="pannello">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="trova">Trova</span><span class="impresa">Impresa</span>
+      <small>Pannello Candidato</small>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active">
+        <span>📋</span> Le mie candidature
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-title" id="header-nome">Il mio pannello</div>
+      <span class="candidato-badge">👤 Candidato</span>
+    </div>
+
+    <!-- SEZIONE: LE MIE CANDIDATURE -->
+    <div class="section active" id="sec-candidature">
+      <div id="lista-candidature">
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <div>Caricamento...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let candidatoCorrente = null;
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event !== 'INITIAL_SESSION') return;
+
+    if (!session) {
+      window.location.replace('login-candidato.html');
+      return;
+    }
+
+    const { data: candidato } = await sb.from('candidati_lavoro')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    if (!candidato) {
+      alert('Completa prima il tuo profilo candidato.');
+      window.location.replace('registrazione-candidato.html');
+      return;
+    }
+
+    candidatoCorrente = candidato;
+    document.getElementById('header-nome').textContent =
+      candidato.nome + ' ' + candidato.cognome;
+    document.getElementById('spinner-avvio').style.display = 'none';
+    document.getElementById('pannello').style.display = 'block';
+
+    caricaCandidature();
+  });
+
+  async function caricaCandidature() {
+    const { data, error } = await sb.from('candidature')
+      .select('*, offerte_lavoro(titolo, nome_azienda, citta, tipo_contratto)')
+      .eq('candidato_id', candidatoCorrente.id)
+      .order('data_candidatura', { ascending: false });
+
+    const container = document.getElementById('lista-candidature');
+
+    if (error) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><div>${error.message}</div></div>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div style="font-size:1rem;font-weight:700;color:var(--mid);margin-bottom:8px">
+            Nessuna candidatura inviata ancora
+          </div>
+          <div style="font-size:0.88rem;margin-bottom:20px">
+            Trova offerte di lavoro e invia la tua candidatura!
+          </div>
+          <a href="ricerca-offerte.html">🔍 Cerca offerte di lavoro →</a>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = data.map(c => {
+      const o = c.offerte_lavoro || {};
+      const statoClass = {
+        inviata:   'stato-inviata',
+        vista:     'stato-vista',
+        accettata: 'stato-accettata',
+        rifiutata: 'stato-rifiutata'
+      }[c.stato] || 'stato-inviata';
+      const statoLabel = {
+        inviata:   '📤 Inviata',
+        vista:     '👁️ Vista',
+        accettata: '✅ Accettata',
+        rifiutata: '❌ Rifiutata'
+      }[c.stato] || c.stato;
+      const data_fmt = c.data_candidatura
+        ? new Date(c.data_candidatura).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' })
+        : '—';
+      return `
+        <div class="candidatura-card">
+          <div class="candidatura-header">
+            <div>
+              <div class="candidatura-titolo">${o.titolo || '—'}</div>
+              <div class="candidatura-azienda">🏢 ${o.nome_azienda || '—'}</div>
+            </div>
+            <span class="stato-badge ${statoClass}">${statoLabel}</span>
+          </div>
+          <div class="candidatura-meta">
+            ${o.citta         ? `<span>📍 ${o.citta}</span>`           : ''}
+            ${o.tipo_contratto? `<span>📋 ${o.tipo_contratto}</span>`   : ''}
+            ${c.messaggio     ? `<span>💬 Messaggio inviato</span>`      : ''}
+          </div>
+          <div class="candidatura-footer">
+            <span class="candidatura-data">Inviata il ${data_fmt}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function doLogout() {
+    await sb.auth.signOut();
+    window.location.replace('login-candidato.html');
+  }
+</script>
+<script src="/cookie-banner.js"></script>
+<footer style="margin-left:240px;background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">
+  © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) –
+  <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> |
+  <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> |
+  <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> |
+  <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> |
+  <a href="/contatti.html" style="color:#a0d8b3">Contatti</a>
+</footer>
+</body>
+</html>
