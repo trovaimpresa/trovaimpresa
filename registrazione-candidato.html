@@ -377,21 +377,7 @@
         return;
       }
 
-      // Precompila step 1
-      document.getElementById('nome').value = c.nome || '';
-      document.getElementById('cognome').value = c.cognome || '';
-      if (c.eta) document.getElementById('eta').value = c.eta;
-      if (c.sesso) document.getElementById('sesso').value = c.sesso;
-      // Precompila step 2
-      document.getElementById('mestiere').value = c.mestiere || '';
-      if (c.anni_esperienza) document.getElementById('anni_esperienza').value = c.anni_esperienza;
-      document.getElementById('competenze').value = c.competenze || '';
-      // Precompila step 3
-      document.getElementById('email').value = c.email || email;
-      document.getElementById('telefono').value = c.telefono || '';
-      document.getElementById('citta').value = c.citta || '';
-
-      compilatiEl.style.display = 'block';
+      window.location.href = 'pannello-candidato.html';
     }
 
     let currentStep = 1;
