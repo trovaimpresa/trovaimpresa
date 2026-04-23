@@ -459,6 +459,12 @@
             return;
         }
 
+        fetch('/.netlify/functions/notifica-candidatura', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ offerta_id: offertaId, candidato_id: candidato.id })
+        }).catch(() => {});
+
         alert('Candidatura inviata!');
         chiudiModaleCandidatura();
     }
