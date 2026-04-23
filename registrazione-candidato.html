@@ -96,6 +96,53 @@
       background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
     }
     .toggle-pw:hover { color: #2ecc71; }
+
+  .login-box {
+    background: #f0faf4;
+    border: 1.5px solid #a8d5b5;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .login-box h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a4d2e;
+    margin-bottom: 14px;
+  }
+  .login-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .login-row > input, .login-row > .password-wrapper { flex: 1; min-width: 140px; }
+  .btn-login {
+    padding: 12px 20px;
+    background: #2a7a4b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .btn-login:hover { background: #1a4d2e; }
+  .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+  .login-msg { margin-top: 8px; font-size: 0.82rem; }
+  .campi-compilati {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #d4edda;
+    color: #155724;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
   </style>
 <style>
   /* MOBILE */
@@ -144,6 +191,22 @@
     </div>
 
     <div class="content">
+
+      <!-- BLOCCO LOGIN VELOCE -->
+      <div class="login-box">
+        <h3>🔐 Sei già registrato su TrovaImpresa? Accedi per compilare automaticamente</h3>
+        <div class="login-row">
+          <input type="email" id="login-email" placeholder="La tua email">
+          <div class="password-wrapper">
+            <input type="password" id="login-password" placeholder="Password">
+            <button class="toggle-pw" type="button" onclick="togglePw('login-password', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+          <button class="btn-login" id="btn-login-veloce" onclick="accediCandidato()">Accedi</button>
+        </div>
+        <div class="login-msg" id="login-msg"></div>
+        <div class="campi-compilati" id="campi-compilati">✅ Dati compilati automaticamente! Puoi procedere.</div>
+      </div>
+
       <!-- STEP 1 -->
       <div class="form-section active" id="step-1">
         <h2>Dati Personali</h2>
@@ -261,6 +324,72 @@
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+
+    async function accediCandidato() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('btn-login-veloce');
+      const msgEl = document.getElementById('login-msg');
+      const compilatiEl = document.getElementById('campi-compilati');
+
+      msgEl.textContent = '';
+      msgEl.style.color = '#cc0000';
+      compilatiEl.style.display = 'none';
+
+      if (!email || !password) {
+        msgEl.textContent = '❌ Inserisci email e password.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳...';
+
+      const signInRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email, password })
+      });
+      const signInData = await signInRes.json();
+
+      btn.disabled = false;
+      btn.textContent = 'Accedi';
+
+      if (!signInRes.ok || !signInData.access_token) {
+        msgEl.textContent = '❌ Credenziali non valide.';
+        return;
+      }
+
+      const userId = signInData.user.id;
+      const qRes = await fetch(
+        SUPABASE_URL + '/rest/v1/candidati_lavoro?user_id=eq.' + userId + '&select=*&limit=1',
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + signInData.access_token } }
+      );
+      const candidati = await qRes.json();
+      const c = candidati[0];
+
+      if (!c) {
+        document.getElementById('email').value = email;
+        msgEl.style.color = '#888';
+        msgEl.textContent = 'ℹ️ Nessun profilo trovato. Compila i campi per registrarti.';
+        return;
+      }
+
+      // Precompila step 1
+      document.getElementById('nome').value = c.nome || '';
+      document.getElementById('cognome').value = c.cognome || '';
+      if (c.eta) document.getElementById('eta').value = c.eta;
+      if (c.sesso) document.getElementById('sesso').value = c.sesso;
+      // Precompila step 2
+      document.getElementById('mestiere').value = c.mestiere || '';
+      if (c.anni_esperienza) document.getElementById('anni_esperienza').value = c.anni_esperienza;
+      document.getElementById('competenze').value = c.competenze || '';
+      // Precompila step 3
+      document.getElementById('email').value = c.email || email;
+      document.getElementById('telefono').value = c.telefono || '';
+      document.getElementById('citta').value = c.citta || '';
+
+      compilatiEl.style.display = 'block';
+    }
 
     let currentStep = 1;
     let cvFile = null;
