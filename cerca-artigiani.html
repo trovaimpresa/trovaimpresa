@@ -180,7 +180,7 @@
 
     <div class="filter-group">
       <div class="filter-label">Regione</div>
-      <select id="regioneSelect" onchange="paginaCorrente=1;cerca()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
+      <select id="regioneSelect" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
         <option value="">Tutte le regioni</option>
         <option value="Abruzzo">Abruzzo</option>
         <option value="Basilicata">Basilicata</option>
@@ -202,6 +202,14 @@
         <option value="Umbria">Umbria</option>
         <option value="Valle d'Aosta">Valle d'Aosta</option>
         <option value="Veneto">Veneto</option>
+      </select>
+      <div class="filter-label" style="margin-top:14px;">Provincia</div>
+      <select id="provincia" disabled style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
+        <option value="">Tutte le province</option>
+      </select>
+      <div class="filter-label" style="margin-top:14px;">Città</div>
+      <select id="citta" disabled style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
+        <option value="">Tutte le città</option>
       </select>
     </div>
 
@@ -242,6 +250,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/geo-italia.js"></script>
 <script>
   let mappaLeaflet = null;
 
@@ -371,10 +380,14 @@
     document.getElementById('pagination').innerHTML = '';
     try {
       const regione = document.getElementById('regioneSelect').value;
+      const provinciaSel = document.getElementById('provincia').value;
+      const cittaSel = document.getElementById('citta').value;
       let q = supabaseClient.from('imprese').select('*').eq('tipo', 'artigiano');
       if (mestiereScelto !== 'tutti') q = q.ilike('mestieri', `%${mestiereScelto}%`);
       if (citta) q = q.ilike('citta', `%${citta}%`);
       if (regione) q = q.eq('regione', regione);
+      if (provinciaSel) q = q.eq('provincia', provinciaSel);
+      if (cittaSel) q = q.eq('citta', cittaSel);
       if (valutazioneMin > 0) q = q.gte('valutazione_media', valutazioneMin);
       if (soloVerificati) q = q.eq('verificato', true);
       if (conFoto) q = q.not('foto_lavori', 'is', null);
@@ -437,6 +450,50 @@
     const distBadge = i._distKm !== null ? `<span style="display:inline-block;background:#e8f5ec;color:#2a7a4b;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>` : '';
     return `<a class="card${i.piano==='pro'?' pro':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}</div></a>`;
   }
+
+  // Cascata Regione → Provincia → Città
+  (function initCascade() {
+    const geo = window.GEO_ITALIA || {};
+    const regSel = document.getElementById('regioneSelect');
+    const provSel = document.getElementById('provincia');
+    const cittaSel = document.getElementById('citta');
+    function resetSelect(sel, placeholder) {
+      sel.innerHTML = '<option value="">' + placeholder + '</option>';
+    }
+    regSel.addEventListener('change', function() {
+      resetSelect(provSel, 'Tutte le province');
+      resetSelect(cittaSel, 'Tutte le città');
+      cittaSel.disabled = true;
+      const province = geo[regSel.value];
+      if (!province) { provSel.disabled = true; }
+      else {
+        Object.keys(province).sort((a, b) => a.localeCompare(b, 'it')).forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p; opt.textContent = p;
+          provSel.appendChild(opt);
+        });
+        provSel.disabled = false;
+      }
+      paginaCorrente = 1; cerca();
+    });
+    provSel.addEventListener('change', function() {
+      resetSelect(cittaSel, 'Tutte le città');
+      const cittaList = (geo[regSel.value] || {})[provSel.value];
+      if (!cittaList) { cittaSel.disabled = true; }
+      else {
+        cittaList.slice().sort((a, b) => a.localeCompare(b, 'it')).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c; opt.textContent = c;
+          cittaSel.appendChild(opt);
+        });
+        cittaSel.disabled = false;
+      }
+      paginaCorrente = 1; cerca();
+    });
+    cittaSel.addEventListener('change', function() {
+      paginaCorrente = 1; cerca();
+    });
+  })();
 
   const params = new URLSearchParams(window.location.search);
   if (params.get('citta')) document.getElementById('cittaInput').value = params.get('citta');
