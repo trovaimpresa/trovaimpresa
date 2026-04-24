@@ -315,6 +315,14 @@
     <div>
       <h2 class="step-title">Scegli le città</h2>
       <p class="step-sub">Seleziona una o più città dove vuoi apparire</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <select id="regione-filtro" style="padding:11px 13px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:#fff;">
+          <option value="">-- Tutte le regioni --</option>
+        </select>
+        <select id="provincia-filtro" disabled style="padding:11px 13px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:#fff;">
+          <option value="">-- Tutte le province --</option>
+        </select>
+      </div>
       <div class="citta-search-wrap">
         <span class="csearch-icon">🔍</span>
         <input type="text" class="citta-search" id="citta-input" placeholder="Cerca una città...">
@@ -403,6 +411,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/geo-italia.js"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
@@ -473,6 +482,7 @@ function selSmall(n, el) {
 
 // Inizializzazione
 window.addEventListener('DOMContentLoaded', function() {
+  initFiltriGeo();
   buildCitta('');
 
   // Navigazione
@@ -546,7 +556,23 @@ function selFmt(n) {
 function buildCitta(filter) {
   var grid = document.getElementById('citta-grid');
   var f = filter.toLowerCase();
-  var lista = tutteCitta.filter(function(c){ return c.toLowerCase().indexOf(f) >= 0; });
+  var regEl = document.getElementById('regione-filtro');
+  var provEl = document.getElementById('provincia-filtro');
+  var regione = regEl ? regEl.value : '';
+  var provincia = provEl ? provEl.value : '';
+  var geo = window.GEO_ITALIA || {};
+  var whitelist = null;
+  if (regione && provincia) {
+    whitelist = (geo[regione] && geo[regione][provincia]) || [];
+  } else if (regione) {
+    whitelist = [];
+    var provs = geo[regione] || {};
+    Object.keys(provs).forEach(function(p){ whitelist = whitelist.concat(provs[p]); });
+  }
+  var lista = tutteCitta.filter(function(c){
+    if (whitelist && whitelist.indexOf(c) < 0) return false;
+    return c.toLowerCase().indexOf(f) >= 0;
+  });
   grid.innerHTML = '';
   lista.forEach(function(c) {
     var div = document.createElement('div');
@@ -554,6 +580,34 @@ function buildCitta(filter) {
     div.textContent = c;
     div.addEventListener('click', function(){ toggleCitta(c); });
     grid.appendChild(div);
+  });
+}
+
+function initFiltriGeo() {
+  var geo = window.GEO_ITALIA || {};
+  var regFiltro = document.getElementById('regione-filtro');
+  var provFiltro = document.getElementById('provincia-filtro');
+  Object.keys(geo).sort(function(a,b){ return a.localeCompare(b,'it'); }).forEach(function(r){
+    var opt = document.createElement('option');
+    opt.value = r; opt.textContent = r;
+    regFiltro.appendChild(opt);
+  });
+  regFiltro.addEventListener('change', function(){
+    provFiltro.innerHTML = '<option value="">-- Tutte le province --</option>';
+    var province = geo[regFiltro.value];
+    if (!province) { provFiltro.disabled = true; }
+    else {
+      Object.keys(province).sort(function(a,b){ return a.localeCompare(b,'it'); }).forEach(function(p){
+        var opt = document.createElement('option');
+        opt.value = p; opt.textContent = p;
+        provFiltro.appendChild(opt);
+      });
+      provFiltro.disabled = false;
+    }
+    buildCitta(document.getElementById('citta-input').value);
+  });
+  provFiltro.addEventListener('change', function(){
+    buildCitta(document.getElementById('citta-input').value);
   });
 }
 
@@ -674,6 +728,8 @@ async function inviaOrdine() {
     attivo: false,
     posizione: 'citta',
     citta: citta.join(','),
+    regione: document.getElementById('regione-filtro').value || null,
+    provincia: document.getElementById('provincia-filtro').value || null,
     categoria: currentImpresa ? currentImpresa.tipo : null,
     formato: fmt,
     durata: periodo,
