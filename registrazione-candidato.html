@@ -269,8 +269,22 @@
           <input type="tel" id="telefono" placeholder="+39 123 456 7890">
         </div>
         <div class="form-group">
+          <label>Regione <span class="required">*</span></label>
+          <select id="regione">
+            <option value="">-- Seleziona regione --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Provincia <span class="required">*</span></label>
+          <select id="provincia" disabled>
+            <option value="">-- Seleziona provincia --</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Città <span class="required">*</span></label>
-          <input type="text" id="citta" placeholder="Roma">
+          <select id="citta" disabled>
+            <option value="">-- Seleziona città --</option>
+          </select>
         </div>
       </div>
 
@@ -324,6 +338,7 @@
     </div>
   </div>
 
+  <script src="js/geo-italia.js"></script>
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
@@ -382,6 +397,50 @@
 
     let currentStep = 1;
     let cvFile = null;
+
+    // Popola cascata Regione → Provincia → Città
+    (function initGeo() {
+      const regSel = document.getElementById('regione');
+      const provSel = document.getElementById('provincia');
+      const cittaSel = document.getElementById('citta');
+      const geo = window.GEO_ITALIA || {};
+
+      Object.keys(geo).sort((a, b) => a.localeCompare(b, 'it')).forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r; opt.textContent = r;
+        regSel.appendChild(opt);
+      });
+
+      function resetSelect(sel, placeholder) {
+        sel.innerHTML = '<option value="">' + placeholder + '</option>';
+      }
+
+      regSel.addEventListener('change', function() {
+        resetSelect(provSel, '-- Seleziona provincia --');
+        resetSelect(cittaSel, '-- Seleziona città --');
+        cittaSel.disabled = true;
+        const province = geo[regSel.value];
+        if (!province) { provSel.disabled = true; return; }
+        Object.keys(province).sort((a, b) => a.localeCompare(b, 'it')).forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p; opt.textContent = p;
+          provSel.appendChild(opt);
+        });
+        provSel.disabled = false;
+      });
+
+      provSel.addEventListener('change', function() {
+        resetSelect(cittaSel, '-- Seleziona città --');
+        const citta = (geo[regSel.value] || {})[provSel.value];
+        if (!citta) { cittaSel.disabled = true; return; }
+        citta.slice().sort((a, b) => a.localeCompare(b, 'it')).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c; opt.textContent = c;
+          cittaSel.appendChild(opt);
+        });
+        cittaSel.disabled = false;
+      });
+    })();
 
     // Selezione file
     document.getElementById('cv-input').addEventListener('change', function(e) {
@@ -537,6 +596,8 @@
           competenze: document.getElementById('competenze').value,
           email: email,
           telefono: document.getElementById('telefono').value,
+          regione: document.getElementById('regione').value,
+          provincia: document.getElementById('provincia').value,
           citta: document.getElementById('citta').value,
           cv: cvUrl,
           created_at: new Date().toISOString()
