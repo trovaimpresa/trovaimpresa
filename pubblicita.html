@@ -510,8 +510,10 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('tog-a').addEventListener('click', function(){ selPeriodo('annuale'); });
 
   // Metodo pagamento
-  document.getElementById('met-b').addEventListener('click', function(){ selMetodo('bonifico'); });
-  document.getElementById('met-s').addEventListener('click', function(){ selMetodo('stripe'); });
+  var metB = document.getElementById('met-b');
+  var metS = document.getElementById('met-s');
+  if (metB) metB.addEventListener('click', function(){ selMetodo('bonifico'); });
+  if (metS) metS.addEventListener('click', function(){ selMetodo('stripe'); });
 
   // Cerca città
   document.getElementById('citta-input').addEventListener('input', function(){ buildCitta(this.value); });
@@ -658,7 +660,8 @@ function aggiornaRiepilogo() {
   document.getElementById('r-totale').textContent = tot > 0 ? '€' + tot : '€0';
   if(fmt && citta.length > 0) {
     var c3 = citta.slice(0,3).join(', ') + (citta.length > 3 ? '...' : '');
-    document.getElementById('causale-txt').textContent = 'Pub TrovaImpresa - ' + nomi[fmt] + ' - ' + c3;
+    var causEl = document.getElementById('causale-txt');
+    if (causEl) causEl.textContent = 'Pub TrovaImpresa - ' + nomi[fmt] + ' - ' + c3;
   }
 }
 
@@ -677,10 +680,14 @@ function aggiornaOrdine() {
 
 function selMetodo(m) {
   metodo = m;
-  document.getElementById('met-b').classList.toggle('sel', m === 'bonifico');
-  document.getElementById('met-s').classList.toggle('sel', m === 'stripe');
-  document.getElementById('iban-sec').classList.toggle('show', m === 'bonifico');
-  document.getElementById('stripe-sec').classList.toggle('show', m === 'stripe');
+  var metB = document.getElementById('met-b');
+  var metS = document.getElementById('met-s');
+  var ibanSec = document.getElementById('iban-sec');
+  var stripeSec = document.getElementById('stripe-sec');
+  if (metB) metB.classList.toggle('sel', m === 'bonifico');
+  if (metS) metS.classList.toggle('sel', m === 'stripe');
+  if (ibanSec) ibanSec.classList.toggle('show', m === 'bonifico');
+  if (stripeSec) stripeSec.classList.toggle('show', m === 'stripe');
 }
 
 history.replaceState({step: 0}, '');
