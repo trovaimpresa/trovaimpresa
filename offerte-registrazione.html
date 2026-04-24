@@ -382,36 +382,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="citta-offerta">Città <span class="required">*</span></label>
-                    <input type="text" id="citta-offerta" placeholder="Es. Roma" required>
-                    <button type="button" class="geo-button" id="geoBtn" onclick="geolocalizzaOfferta()">📍 Localizzami</button>
+                    <label for="regione">Regione <span class="required">*</span></label>
+                    <select id="regione" required>
+                        <option value="">-- Seleziona regione --</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="regione">Regione <span class="required">*</span></label>
-                    <select id="regione" required>
-                        <option value="">-- Seleziona --</option>
-                        <option value="Abruzzo">Abruzzo</option>
-                        <option value="Basilicata">Basilicata</option>
-                        <option value="Calabria">Calabria</option>
-                        <option value="Campania">Campania</option>
-                        <option value="Emilia-Romagna">Emilia-Romagna</option>
-                        <option value="Friuli-Venezia Giulia">Friuli-Venezia Giulia</option>
-                        <option value="Lazio">Lazio</option>
-                        <option value="Liguria">Liguria</option>
-                        <option value="Lombardia">Lombardia</option>
-                        <option value="Marche">Marche</option>
-                        <option value="Molise">Molise</option>
-                        <option value="Piemonte">Piemonte</option>
-                        <option value="Puglia">Puglia</option>
-                        <option value="Sardegna">Sardegna</option>
-                        <option value="Sicilia">Sicilia</option>
-                        <option value="Toscana">Toscana</option>
-                        <option value="Trentino-Alto Adige">Trentino-Alto Adige</option>
-                        <option value="Umbria">Umbria</option>
-                        <option value="Valle d'Aosta">Valle d'Aosta</option>
-                        <option value="Veneto">Veneto</option>
+                    <label for="provincia">Provincia <span class="required">*</span></label>
+                    <select id="provincia" disabled required>
+                        <option value="">-- Seleziona provincia --</option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="citta-offerta">Città <span class="required">*</span></label>
+                    <select id="citta-offerta" disabled required>
+                        <option value="">-- Seleziona città --</option>
+                    </select>
+                    <button type="button" class="geo-button" id="geoBtn" onclick="geolocalizzaOfferta()">📍 Localizzami</button>
                 </div>
 
                 <div class="form-group">
@@ -623,11 +612,70 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/geo-italia.js"></script>
 <script>
     const { createClient } = window.supabase;
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Popola cascata Regione → Provincia → Città
+    (function initGeo() {
+      const regSel = document.getElementById('regione');
+      const provSel = document.getElementById('provincia');
+      const cittaSel = document.getElementById('citta-offerta');
+      const geo = window.GEO_ITALIA || {};
+
+      Object.keys(geo).sort((a, b) => a.localeCompare(b, 'it')).forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r; opt.textContent = r;
+        regSel.appendChild(opt);
+      });
+
+      function resetSelect(sel, placeholder) {
+        sel.innerHTML = '<option value="">' + placeholder + '</option>';
+      }
+
+      regSel.addEventListener('change', function() {
+        resetSelect(provSel, '-- Seleziona provincia --');
+        resetSelect(cittaSel, '-- Seleziona città --');
+        cittaSel.disabled = true;
+        const province = geo[regSel.value];
+        if (!province) { provSel.disabled = true; return; }
+        Object.keys(province).sort((a, b) => a.localeCompare(b, 'it')).forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p; opt.textContent = p;
+          provSel.appendChild(opt);
+        });
+        provSel.disabled = false;
+      });
+
+      provSel.addEventListener('change', function() {
+        resetSelect(cittaSel, '-- Seleziona città --');
+        const citta = (geo[regSel.value] || {})[provSel.value];
+        if (!citta) { cittaSel.disabled = true; return; }
+        citta.slice().sort((a, b) => a.localeCompare(b, 'it')).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c; opt.textContent = c;
+          cittaSel.appendChild(opt);
+        });
+        cittaSel.disabled = false;
+      });
+    })();
+
+    function findCityInGeo(cityName) {
+      const geo = window.GEO_ITALIA || {};
+      const lower = (cityName || '').toLowerCase().trim();
+      if (!lower) return null;
+      for (const r of Object.keys(geo)) {
+        for (const p of Object.keys(geo[r])) {
+          for (const c of geo[r][p]) {
+            if (c.toLowerCase() === lower) return { regione: r, provincia: p, citta: c };
+          }
+        }
+      }
+      return null;
+    }
 
     async function accediImpresa() {
         const email = document.getElementById('login-email').value;
@@ -783,9 +831,22 @@
                         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
                     );
                     const data = await response.json();
-                    const citta = data.address.city || data.address.town || data.address.village || 'Sconosciuto';
-                    document.getElementById('citta-offerta').value = citta;
-                    btn.innerText = '✅ Localizzato!';
+                    const citta = data.address.city || data.address.town || data.address.village || '';
+                    const match = findCityInGeo(citta);
+                    if (match) {
+                        const regSel = document.getElementById('regione');
+                        const provSel = document.getElementById('provincia');
+                        const cittaSel = document.getElementById('citta-offerta');
+                        regSel.value = match.regione;
+                        regSel.dispatchEvent(new Event('change'));
+                        provSel.value = match.provincia;
+                        provSel.dispatchEvent(new Event('change'));
+                        cittaSel.value = match.citta;
+                        btn.innerText = '✅ Localizzato!';
+                    } else {
+                        alert('Città "' + citta + '" non in elenco. Selezionala manualmente.');
+                        btn.innerText = '📍 Localizzami';
+                    }
                     setTimeout(() => {
                         btn.disabled = false;
                         btn.innerText = '📍 Localizzami';
@@ -848,6 +909,7 @@
             data_pubblicazione: new Date().toISOString(),
             attiva: true,
             regione: document.getElementById('regione').value,
+            provincia: document.getElementById('provincia').value,
             mestiere: document.getElementById('mestiere').value,
             livello_esperienza: document.getElementById('livello-esperienza').value,
             orario: document.getElementById('orario').value,
