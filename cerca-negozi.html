@@ -160,7 +160,7 @@
 
     <div class="filter-group">
       <div class="filter-label">Regione</div>
-      <select id="regioneSelect" onchange="cerca()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
+      <select id="regioneSelect" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
         <option value="">Tutte le regioni</option>
         <option value="Abruzzo">Abruzzo</option>
         <option value="Basilicata">Basilicata</option>
@@ -182,6 +182,14 @@
         <option value="Umbria">Umbria</option>
         <option value="Valle d'Aosta">Valle d'Aosta</option>
         <option value="Veneto">Veneto</option>
+      </select>
+      <div class="filter-label" style="margin-top:14px;">Provincia</div>
+      <select id="provincia" disabled style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
+        <option value="">Tutte le province</option>
+      </select>
+      <div class="filter-label" style="margin-top:14px;">Città</div>
+      <select id="citta" disabled style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
+        <option value="">Tutte le città</option>
       </select>
     </div>
 
@@ -219,6 +227,7 @@
 <div id="statusText" style="display:none"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/geo-italia.js"></script>
 <script>
   const supabaseClient=supabase.createClient('https://nacvrsgkyfavykxjxszu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic');
   let tipoScelto='tutti',cittaScelta='',valutazioneMin=0;
@@ -229,8 +238,48 @@
   function toggleServizio(el){if(el.dataset.servizio==='tutti'){document.querySelectorAll('.chip[data-servizio]').forEach(c=>c.classList.remove('active'));}else{el.classList.toggle('active');}cerca();}
   function aggiornaStatus(){const t=tipoScelto==='tutti'?'🏪 Tutti i negozi':tipoScelto;const c=cittaScelta?` · 📍 ${cittaScelta}`:'';document.getElementById('statusText').innerHTML=`Stai cercando: <strong>${t}</strong>${c}`;}
   function localizzami(){if(!navigator.geolocation){alert('Non supportato.');return;}navigator.geolocation.getCurrentPosition(async pos=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);const d=await r.json();const citta=d.address.city||d.address.town||d.address.village||'';document.getElementById('cittaInput').value=citta;cittaScelta=citta;aggiornaStatus();cerca();}catch(e){alert('Errore posizione.');}},()=>alert('Permesso negato.'));}
-  async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();const soloVerificati=document.getElementById('soloVerificati').checked;const conFoto=document.getElementById('conFoto').checked;const apertoSabato=document.getElementById('apertoSabato').checked;const parcheggioCliente=document.getElementById('parcheggioCliente').checked;const preventiviOnline=document.getElementById('preventiviOnline').checked;const serviziAttivi=[...document.querySelectorAll('.chip[data-servizio].active')].map(c=>c.dataset.servizio);aggiornaStatus();if(cittaScelta&&cittaScelta!==cittaGeocoded){cittaGeocoded=cittaScelta;cittaLat=null;cittaLng=null;try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cittaScelta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const gd=await gr.json();if(gd&&gd[0]){cittaLat=parseFloat(gd[0].lat);cittaLng=parseFloat(gd[0].lon);}}catch(e){}}else if(!cittaScelta){cittaGeocoded='';cittaLat=null;cittaLng=null;}const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';try{let q=supabaseClient.from('imprese').select('*').eq('tipo','negozio').order('created_at',{ascending:false});if(tipoScelto!=='tutti')q=q.eq('tipo_negozio',tipoScelto);if(cittaScelta)q=q.ilike('citta',`%${cittaScelta}%`);const regione=document.getElementById('regioneSelect').value;if(regione)q=q.eq('regione',regione);if(valutazioneMin>0)q=q.gte('valutazione_media',valutazioneMin);if(soloVerificati)q=q.eq('verificato',true);if(conFoto)q=q.not('foto_lavori','is',null);if(apertoSabato)q=q.eq('aperto_sabato',true);if(parcheggioCliente)q=q.eq('parcheggio_cliente',true);if(preventiviOnline)q=q.eq('preventivo_online',true);serviziAttivi.forEach(s=>q=q.eq(s,true));const{data,error}=await q.limit(50);if(error)throw error;if(data)data.sort((a,b)=>{const pp=p=>p==='premium'?3:p==='pro'?2:1;return pp(b.piano)-pp(a.piano);});const distanzaMax=parseInt(document.getElementById('distanzaSlider').value);(data||[]).forEach(i=>{i._distKm=(cittaLat!==null&&i.lat&&i.lng)?Math.round(haversine(cittaLat,cittaLng,i.lat,i.lng)):null;});const risultati=distanzaMax<100&&cittaLat!==null?(data||[]).filter(i=>i._distKm===null||i._distKm<=distanzaMax):(data||[]);if(!risultati.length){div.innerHTML='<div class="no-results"><h3>😕 Nessun negozio trovato</h3><p>Prova a cambiare città o tipo</p></div>';aggiornaMappaRis([]);return;}div.innerHTML=`<div style="color:white;margin-bottom:8px;font-size:12px;">Trovati <strong>${risultati.length}</strong> negozi</div><div class="results-grid">${risultati.map(i=>cardHTML(i)).join('')}</div>`;aggiornaMappaRis(risultati);}catch(e){div.innerHTML=`<div class="no-results"><p>${e.message}</p></div>`;}}
+  async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();const soloVerificati=document.getElementById('soloVerificati').checked;const conFoto=document.getElementById('conFoto').checked;const apertoSabato=document.getElementById('apertoSabato').checked;const parcheggioCliente=document.getElementById('parcheggioCliente').checked;const preventiviOnline=document.getElementById('preventiviOnline').checked;const serviziAttivi=[...document.querySelectorAll('.chip[data-servizio].active')].map(c=>c.dataset.servizio);aggiornaStatus();if(cittaScelta&&cittaScelta!==cittaGeocoded){cittaGeocoded=cittaScelta;cittaLat=null;cittaLng=null;try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cittaScelta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const gd=await gr.json();if(gd&&gd[0]){cittaLat=parseFloat(gd[0].lat);cittaLng=parseFloat(gd[0].lon);}}catch(e){}}else if(!cittaScelta){cittaGeocoded='';cittaLat=null;cittaLng=null;}const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';try{let q=supabaseClient.from('imprese').select('*').eq('tipo','negozio').order('created_at',{ascending:false});if(tipoScelto!=='tutti')q=q.eq('tipo_negozio',tipoScelto);if(cittaScelta)q=q.ilike('citta',`%${cittaScelta}%`);const regione=document.getElementById('regioneSelect').value;const provinciaSel=document.getElementById('provincia').value;const cittaSel=document.getElementById('citta').value;if(regione)q=q.eq('regione',regione);if(provinciaSel)q=q.eq('provincia',provinciaSel);if(cittaSel)q=q.eq('citta',cittaSel);if(valutazioneMin>0)q=q.gte('valutazione_media',valutazioneMin);if(soloVerificati)q=q.eq('verificato',true);if(conFoto)q=q.not('foto_lavori','is',null);if(apertoSabato)q=q.eq('aperto_sabato',true);if(parcheggioCliente)q=q.eq('parcheggio_cliente',true);if(preventiviOnline)q=q.eq('preventivo_online',true);serviziAttivi.forEach(s=>q=q.eq(s,true));const{data,error}=await q.limit(50);if(error)throw error;if(data)data.sort((a,b)=>{const pp=p=>p==='premium'?3:p==='pro'?2:1;return pp(b.piano)-pp(a.piano);});const distanzaMax=parseInt(document.getElementById('distanzaSlider').value);(data||[]).forEach(i=>{i._distKm=(cittaLat!==null&&i.lat&&i.lng)?Math.round(haversine(cittaLat,cittaLng,i.lat,i.lng)):null;});const risultati=distanzaMax<100&&cittaLat!==null?(data||[]).filter(i=>i._distKm===null||i._distKm<=distanzaMax):(data||[]);if(!risultati.length){div.innerHTML='<div class="no-results"><h3>😕 Nessun negozio trovato</h3><p>Prova a cambiare città o tipo</p></div>';aggiornaMappaRis([]);return;}div.innerHTML=`<div style="color:white;margin-bottom:8px;font-size:12px;">Trovati <strong>${risultati.length}</strong> negozi</div><div class="results-grid">${risultati.map(i=>cardHTML(i)).join('')}</div>`;aggiornaMappaRis(risultati);}catch(e){div.innerHTML=`<div class="no-results"><p>${e.message}</p></div>`;}}
   function cardHTML(i){const logo=i.logo_url?`<img src="${i.logo_url}" alt="logo">`:`🏪`;const badge=i.piano==='pro'?'<span class="badge-pro">⭐ PRO</span>':'';const desc=i.descrizione?`<div class="card-desc">${i.descrizione}</div>`:'';const distBadge=i._distKm!==null?`<span style="display:inline-block;background:#e8f5ec;color:#2a7a4b;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>`:'';return `<a class="card${i.piano==='pro'?' pro':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome_negozio||'Negozio'}${badge}</div>${desc}<div class="card-tipo">🏪 ${i.tipo||''}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}</div>${i.orari?`<div style="font-size:11px;color:#888;margin-top:3px;">🕐 ${i.orari}</div>`:''}</a>`;}
+  // Cascata Regione → Provincia → Città
+  (function initCascade(){
+    const geo=window.GEO_ITALIA||{};
+    const regSel=document.getElementById('regioneSelect');
+    const provSel=document.getElementById('provincia');
+    const cittaSel=document.getElementById('citta');
+    function resetSelect(sel,placeholder){sel.innerHTML='<option value="">'+placeholder+'</option>';}
+    regSel.addEventListener('change',function(){
+      resetSelect(provSel,'Tutte le province');
+      resetSelect(cittaSel,'Tutte le città');
+      cittaSel.disabled=true;
+      const province=geo[regSel.value];
+      if(!province){provSel.disabled=true;}
+      else{
+        Object.keys(province).sort((a,b)=>a.localeCompare(b,'it')).forEach(p=>{
+          const opt=document.createElement('option');
+          opt.value=p;opt.textContent=p;
+          provSel.appendChild(opt);
+        });
+        provSel.disabled=false;
+      }
+      cerca();
+    });
+    provSel.addEventListener('change',function(){
+      resetSelect(cittaSel,'Tutte le città');
+      const cittaList=(geo[regSel.value]||{})[provSel.value];
+      if(!cittaList){cittaSel.disabled=true;}
+      else{
+        cittaList.slice().sort((a,b)=>a.localeCompare(b,'it')).forEach(c=>{
+          const opt=document.createElement('option');
+          opt.value=c;opt.textContent=c;
+          cittaSel.appendChild(opt);
+        });
+        cittaSel.disabled=false;
+      }
+      cerca();
+    });
+    cittaSel.addEventListener('change',function(){cerca();});
+  })();
+
   const params=new URLSearchParams(window.location.search);
   if(params.get('citta')){document.getElementById('cittaInput').value=params.get('citta');cittaScelta=params.get('citta');}
   if(params.get('tipo')){tipoScelto=params.get('tipo');document.querySelectorAll('.chip').forEach(c=>{if(c.dataset.tipo===tipoScelto){c.classList.add('active');c.classList.remove('inactive');document.querySelector('.all-chip').classList.remove('active');document.querySelector('.all-chip').classList.add('inactive');}});}
