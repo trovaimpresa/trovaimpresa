@@ -28,34 +28,6 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
 
-  .login-screen {
-    min-height:100vh; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(135deg,#1a3a2a,#2a7a4b); padding:20px;
-  }
-  .login-box {
-    background:white; border-radius:24px; padding:48px 40px;
-    width:100%; max-width:400px; text-align:center;
-    box-shadow:0 24px 80px rgba(0,0,0,0.2);
-  }
-  .login-logo { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:4px; }
-  .login-logo .trova { color:var(--verde); }
-  .login-logo .impresa { color:var(--arancio); }
-  .login-sub { font-size:0.85rem; color:var(--light); margin-bottom:32px; }
-  .login-box input {
-    width:100%; padding:13px 16px; border-radius:12px;
-    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
-    font-size:0.92rem; margin-bottom:12px; outline:none; transition:border 0.2s;
-  }
-  .login-box input:focus { border-color:var(--verde); }
-  .login-btn {
-    width:100%; padding:14px; background:var(--verde); color:white;
-    border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:1rem; cursor:pointer; margin-top:4px;
-  }
-  .login-err { color:var(--rosso); font-size:0.82rem; margin-top:8px; display:none; }
-  .login-reg { margin-top:16px; font-size:0.82rem; color:var(--light); }
-  .login-reg a { color:var(--verde); font-weight:700; text-decoration:none; }
-
   .pannello { display:none; }
 
   .sidebar {
@@ -107,11 +79,11 @@
   .paywall-text { font-size:0.92rem; color:var(--mid); line-height:1.6; margin-bottom:28px; }
   .paywall-btn {
     display:inline-block; padding:14px 28px;
-    background:linear-gradient(135deg,var(--verde),var(--verde2));
+    background:linear-gradient(135deg,var(--arancio),var(--arancio2));
     color:white; border-radius:12px; font-weight:700; font-size:0.95rem;
     text-decoration:none; transition:all 0.15s;
   }
-  .paywall-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(42,122,75,0.3); }
+  .paywall-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(232,115,58,0.3); }
 
   /* CARD SEZIONE BANDI */
   .bandi-card {
@@ -160,19 +132,6 @@
 </div>
 <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
 
-<!-- LOGIN -->
-<div class="login-screen" id="login-screen" style="display:none">
-  <div class="login-box">
-    <div class="login-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></div>
-    <div class="login-sub">📢 Bandi & Opportunità</div>
-    <input type="email" id="login-email" placeholder="La tua email" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
-    <input type="password" id="login-pass" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="login-btn" onclick="doLogin()">🔐 Accedi al pannello</button>
-    <div class="login-err" id="login-err">❌ Email o password errati</div>
-    <div class="login-reg">Non sei ancora registrato? <a href="registrazione.html">Registra la tua impresa →</a></div>
-  </div>
-</div>
-
 <!-- PANNELLO -->
 <div class="pannello" id="pannello">
   <button class="mob-menu-btn" style="display:none" onclick="toggleSidebar()" aria-label="Menu">☰</button>
@@ -204,27 +163,17 @@
     <div id="paywall" class="paywall-wrap" style="display:none">
       <div class="paywall-box">
         <div class="paywall-icon">💎</div>
-        <div class="paywall-title">Accesso riservato ai piani Premium</div>
-        <div class="paywall-text">Bandi pubblici, prestiti & contributi e Gazzetta Ufficiale sono disponibili solo per gli utenti del piano Premium.</div>
-        <a class="paywall-btn" href="modifica-profilo.html#card-piano">Passa a Premium →</a>
+        <div class="paywall-title">Servizio riservato agli iscritti Premium</div>
+        <div class="paywall-text">La dashboard Bandi &amp; Opportunità è disponibile solo per gli iscritti con piano Premium.</div>
+        <a class="paywall-btn" href="bandi-info.html">Torna a bandi-info →</a>
       </div>
     </div>
 
     <!-- CONTENUTO PREMIUM -->
     <div id="bandi-content" style="display:none">
-      <section class="bandi-card">
-        <h2>📜 Bandi pubblici</h2>
-        <div class="bandi-placeholder">Nessuna voce ancora disponibile</div>
-      </section>
-
-      <section class="bandi-card">
-        <h2>💶 Prestiti & contributi</h2>
-        <div class="bandi-placeholder">Nessuna voce ancora disponibile</div>
-      </section>
-
-      <section class="bandi-card">
-        <h2>📰 Gazzetta Ufficiale</h2>
-        <div class="bandi-placeholder">Nessuna voce ancora disponibile</div>
+      <section class="bandi-card" style="text-align:center; max-width:560px; margin:60px auto; padding:48px 40px;">
+        <h2>Dashboard Bandi &amp; Opportunità</h2>
+        <p class="bandi-placeholder" style="margin-top:14px; font-size:1rem;">In via di attivazione, presto qui troverai i bandi della tua zona</p>
       </section>
     </div>
   </main>
@@ -246,7 +195,6 @@ function applicaGate(piano) {
 
 function mostraPannello() {
   document.getElementById('spinner-avvio').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
 }
 
@@ -280,26 +228,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
   }
   await caricaImpresaEGate(session);
 });
-
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value.trim();
-  const btn = document.querySelector('.login-btn');
-  const errEl = document.getElementById('login-err');
-  if (!email || !pass) { errEl.style.display='block'; return; }
-  btn.disabled = true;
-  btn.textContent = '⏳ Accesso in corso...';
-  errEl.style.display = 'none';
-  const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (authError || !authData.user) {
-    errEl.style.display = 'block';
-    errEl.textContent = '❌ Email o password errati';
-    btn.disabled = false;
-    btn.textContent = '🔐 Accedi al pannello';
-    return;
-  }
-  await caricaImpresaEGate({ user: authData.user });
-}
 
 async function doLogout() {
   await sb.auth.signOut();
