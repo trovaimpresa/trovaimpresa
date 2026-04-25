@@ -216,7 +216,7 @@
 <!-- CTA FINALE -->
 <section class="cta-block">
   <p class="micro-top">Pronto a non perdere più una sola opportunità?</p>
-  <a href="login-impresa.html" class="btn-cta">Accedi al servizio Premium →</a>
+  <a id="cta-bandi" href="login-impresa.html" class="btn-cta">Accedi al servizio Premium →</a>
   <p class="micro-bottom">Riservato agli iscritti Premium — attivabile in pochi minuti.</p>
 </section>
 
@@ -288,5 +288,35 @@
 </footer>
 
 <script src="/cookie-banner.js"></script>
+
+<!-- AUTH-GATE su CTA Premium -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const ctaBandi = document.getElementById('cta-bandi');
+
+  function setCtaBandi(text, href) {
+    if (!ctaBandi) return;
+    ctaBandi.textContent = text;
+    ctaBandi.setAttribute('href', href);
+  }
+
+  sb.auth.onAuthStateChange(async (_event, session) => {
+    if (!session) {
+      setCtaBandi('Accedi al servizio Premium →', 'login-impresa.html');
+      return;
+    }
+    const { data } = await sb.from('imprese').select('piano').eq('user_id', session.user.id).maybeSingle();
+    const piano = data && data.piano;
+    if (piano === 'premium') {
+      setCtaBandi('Apri la tua dashboard Bandi →', 'pannello-impresa.html#bandi');
+    } else {
+      setCtaBandi('Passa a Premium per accedere →', 'pannello-impresa.html#piano');
+    }
+  });
+</script>
 </body>
 </html>
