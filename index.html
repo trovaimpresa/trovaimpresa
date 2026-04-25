@@ -1272,18 +1272,12 @@
         'photo-1558618666-fcd25c85cd64',
         'photo-1600585154340-be6161a56a0c'
     ];
-    var TESTI = [
-        { sx: { title: 'Artigiani qualificati nella tua città' },                    dx: { title: 'Professionisti e negozi edili a portata di click' } },
-        { sx: { title: 'Descrivi il lavoro, pensiamo noi al resto' },               dx: { title: 'La risposta giusta in pochi secondi' } },
-        { sx: { title: 'Gestisci il tuo profilo in qualsiasi momento' },            dx: { title: 'Aggiorna i tuoi servizi e rimani visibile' } },
-        { sx: { title: 'Inizia gratis, senza vincoli' },                             dx: { title: 'Vuoi più visibilità? Passa al Pro' } },
-        { sx: { title: 'Cerchi lavoro nel settore edile? Registrati' },             dx: { title: 'Stai assumendo? Trova il candidato giusto' } },
-        { sx: { title: 'Professionisti verificati e valutati dai clienti' },        dx: { title: 'Recensioni reali per scegliere con fiducia' } }
-    ];
+    var TESTI = [];
     document.addEventListener('DOMContentLoaded', function () {
         var BASE = 'https://images.unsplash.com/';
         document.querySelectorAll('section.lavoro-links').forEach(function (sec, i) {
             var t = TESTI[Math.min(i, TESTI.length-1)];
+            if (!t) return;
             ['sx','dx'].forEach(function(lato) {
                 var d = t[lato];
                 var div = document.createElement('div');
