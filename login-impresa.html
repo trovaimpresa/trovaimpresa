@@ -95,6 +95,7 @@
 
     let mfaFactorId = null;
     let mfaChallengeId = null;
+    let pannelloUtente = 'pannello-impresa.html';
 
     document.getElementById('password').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') doLogin();
@@ -137,6 +138,17 @@
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
+        // Dispatch in base al tipo dell'utente (tabella imprese)
+        const { data: imp } = await supabaseClient.from('imprese').select('tipo').ilike('email', email).maybeSingle();
+        const PANNELLI = {
+          artigiano: 'pannello-artigiano.html',
+          impresa: 'pannello-impresa.html',
+          grande_impresa: 'pannello-grande-impresa.html',
+          negozio: 'pannello-negozio.html',
+          professionista: 'pannello-professionisti.html'
+        };
+        pannelloUtente = (imp && PANNELLI[imp.tipo]) || 'pannello-impresa.html';
+
         // Controlla se il 2FA è richiesto
         const { data: aal } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aal.nextLevel === 'aal2' && aal.nextLevel !== aal.currentLevel) {
@@ -161,7 +173,7 @@
           const redirect = new URLSearchParams(window.location.search).get('redirect');
           if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
           else if (redirect === 'pro') window.location.href = 'prezzi.html?piano=pro';
-          else window.location.href = 'pannello-impresa.html';
+          else window.location.href = pannelloUtente;
         }
       } catch(err) {
         showError('❌ ' + err.message);
@@ -187,7 +199,7 @@
         const redirect = new URLSearchParams(window.location.search).get('redirect');
         if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
         else if (redirect === 'pro') window.location.href = 'prezzi.html?piano=pro';
-        else window.location.href = 'pannello-impresa.html';
+        else window.location.href = pannelloUtente;
       } catch(err) {
         showError('❌ Codice non valido o scaduto.');
         btn.disabled = false;
