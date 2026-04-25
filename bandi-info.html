@@ -6,139 +6,285 @@
   <title>Bandi & Opportunità per imprese edili – TrovaImpresa</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fff; color: #222; line-height: 1.55; font-size: 16px; }
+    a { color: #2a7a4b; }
 
-    nav {
-      background: #fff;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-    .logo { font-size: 1.4rem; font-weight: 700; }
-    .logo span:first-child { color: #2ecc71; }
-    .logo span:last-child { color: #e67e22; }
-    nav a { color: #555; text-decoration: none; font-size: 0.9rem; }
-    nav a:hover { color: #2ecc71; }
+    /* HEADER */
+    header.site-header { background: white; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+    header.site-header a img { height: 44px; display: block; }
+    header.site-header nav a { color: #2a7a4b; text-decoration: none; font-weight: 600; margin-left: 20px; font-size: 17px; }
+    header.site-header nav a:hover { color: #1a4d2e; }
 
-    .hero {
-      background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
-      color: #fff;
-      text-align: center;
-      padding: 64px 24px 56px;
-    }
-    .hero h1 { font-size: 2.1rem; margin-bottom: 12px; line-height: 1.25; }
-    .hero p { font-size: 1.05rem; opacity: 0.92; max-width: 720px; margin: 0 auto; line-height: 1.5; }
+    /* HERO */
+    .hero { background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%); color: #fff; padding: 70px 24px; text-align: center; }
+    .hero h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 14px; line-height: 1.2; }
+    .hero p { font-size: 1.15rem; max-width: 820px; margin: 0 auto; opacity: 0.95; }
 
-    .container {
-      max-width: 1080px;
-      margin: -32px auto 56px;
-      padding: 0 24px;
-    }
+    /* SECTIONS */
+    section.block { padding: 64px 24px; }
+    section.block.alt { background: #f5f5f5; }
+    .block-inner { max-width: 1100px; margin: 0 auto; }
+    .block h2.section-title { font-size: 1.8rem; color: #1a4d2e; text-align: center; margin-bottom: 12px; font-weight: 800; }
+    .block p.section-sub { text-align: center; color: #555; max-width: 780px; margin: 0 auto 36px; }
 
-    .servizi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 22px;
-    }
+    /* COSA TROVI - 4 card grid */
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .card-feature { background: #fff; border-radius: 14px; border-top: 4px solid #2a7a4b; padding: 24px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; }
+    .card-feature:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
+    .card-feature .icona { font-size: 2.2rem; margin-bottom: 12px; }
+    .card-feature h3 { font-size: 1.05rem; color: #1a4d2e; margin-bottom: 10px; line-height: 1.3; }
+    .card-feature p { font-size: 0.93rem; color: #444; }
 
-    .servizio-card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      border-top: 4px solid #2a7a4b;
-      padding: 24px;
-    }
-    .servizio-card .icona { font-size: 2rem; margin-bottom: 12px; }
-    .servizio-card h2 {
-      font-size: 1.15rem;
-      color: #1a4d2e;
-      margin-bottom: 10px;
-      font-weight: 700;
-      line-height: 1.35;
-    }
-    .servizio-card p {
-      color: #555;
-      font-size: 0.96rem;
-      line-height: 1.65;
-    }
+    /* ESEMPI - 3 card */
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .card-esempio { background: #fff; border-radius: 14px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-left: 5px solid #e65100; }
+    .card-esempio .tag { display: inline-block; background: #fff5ec; color: #e65100; border: 1px solid #e65100; border-radius: 999px; padding: 4px 12px; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px; }
+    .card-esempio h3 { font-size: 1.05rem; color: #1a4d2e; margin-bottom: 10px; line-height: 1.3; }
+    .card-esempio p { font-size: 0.93rem; color: #444; }
+    .esempi-disclaimer { text-align: center; color: #777; font-size: 0.85rem; font-style: italic; margin-top: 24px; }
 
-    .nota {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0 24px 48px;
-      text-align: center;
-      color: #888;
-      font-size: 0.9rem;
-      line-height: 1.6;
-    }
+    /* COME FUNZIONA - 3 step */
+    .step-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .step { background: #fff; border-radius: 14px; padding: 28px 22px; text-align: center; border: 1px solid #e8e8e8; }
+    .step .num { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: #2a7a4b; color: #fff; font-weight: 800; font-size: 1.15rem; border-radius: 50%; margin-bottom: 14px; }
+    .step h3 { font-size: 1.05rem; color: #1a4d2e; margin-bottom: 10px; line-height: 1.3; }
+    .step p { font-size: 0.93rem; color: #444; }
 
-    footer {
-      text-align: center;
-      padding: 30px;
-      color: #aaa;
-      font-size: 0.85rem;
-    }
-    footer a { color: #2ecc71; text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    /* DISCLAIMER box giallo */
+    .disclaimer-box { background: #fff8e1; border: 2px solid #ffb300; border-radius: 12px; padding: 22px 24px; max-width: 900px; margin: 0 auto; color: #5a4500; font-size: 1rem; }
+    .disclaimer-box strong { color: #b35900; }
 
-    @media (max-width: 720px) {
-      .hero { padding: 44px 18px 40px; }
-      .hero h1 { font-size: 1.55rem; }
-      .hero p { font-size: 0.98rem; }
-      .container { margin-top: -22px; padding: 0 14px; }
-      .servizi-grid { grid-template-columns: 1fr; gap: 16px; }
-      .servizio-card { padding: 20px; }
-      .servizio-card h2 { font-size: 1.05rem; }
-      .servizio-card p { font-size: 0.93rem; }
+    /* CTA finale */
+    .cta-block { text-align: center; padding: 70px 24px; background: #fff; }
+    .cta-block .micro-top { color: #555; font-size: 1.05rem; margin-bottom: 18px; }
+    .cta-block .btn-cta { display: inline-block; background: #e65100; color: #fff; padding: 18px 40px; border-radius: 12px; font-size: 1.15rem; font-weight: 800; text-decoration: none; box-shadow: 0 6px 20px rgba(230, 81, 0, 0.30); transition: background 0.2s, transform 0.2s; }
+    .cta-block .btn-cta:hover { background: #b33d00; transform: translateY(-2px); }
+    .cta-block .micro-bottom { color: #777; font-size: 0.88rem; font-style: italic; margin-top: 16px; }
+
+    /* FAQ */
+    .faq-list { max-width: 880px; margin: 0 auto; }
+    .faq-list details { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; transition: border-color 0.2s; }
+    .faq-list details[open] { border-color: #2a7a4b; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .faq-list summary { cursor: pointer; font-weight: 700; color: #1a4d2e; font-size: 1.02rem; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    .faq-list summary::after { content: '+'; font-size: 1.4rem; color: #2a7a4b; font-weight: 400; }
+    .faq-list details[open] summary::after { content: '−'; }
+    .faq-list summary::-webkit-details-marker { display: none; }
+    .faq-list details p { margin-top: 12px; color: #444; font-size: 0.95rem; }
+
+    /* FOOTER */
+    .footer { background: #1a472a; color: white; padding: 60px 40px 30px; text-align: center; }
+    .footer-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px; text-align: left; }
+    .footer-section h3 { margin-bottom: 15px; font-weight: 700; color: #28a745; }
+    .footer-section p { color: #e0f0e8; }
+    .footer-section ul { list-style: none; }
+    .footer-section ul li { margin-bottom: 10px; }
+    .footer-section a { color: #e0f0e8; text-decoration: none; transition: color 0.3s; }
+    .footer-section a:hover { color: #FF6B35; }
+    .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 30px; text-align: center; color: #ccc; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      header.site-header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+      header.site-header nav a { margin-left: 12px; font-size: 15px; }
+
+      .hero { padding: 50px 18px; }
+      .hero h1 { font-size: 1.7rem; }
+      .hero p { font-size: 1rem; }
+
+      section.block { padding: 44px 16px; }
+      .block h2.section-title { font-size: 1.4rem; }
+      .block p.section-sub { font-size: 0.95rem; margin-bottom: 26px; }
+
+      .grid-4, .grid-3, .step-row { grid-template-columns: 1fr; gap: 14px; }
+
+      .cta-block { padding: 50px 18px; }
+      .cta-block .btn-cta { padding: 16px 28px; font-size: 1rem; }
+
+      .footer { padding: 40px 20px 20px; }
+      .footer-content { grid-template-columns: 1fr; gap: 30px; text-align: center; }
+
+      .disclaimer-box { padding: 18px 16px; font-size: 0.95rem; }
     }
   </style>
 </head>
 <body>
 
-<nav>
-  <div class="logo">
-    <span>Trova</span><span>Impresa</span>
-  </div>
-  <a href="/index.html">← Torna alla Home</a>
-</nav>
+<!-- HEADER -->
+<header class="site-header">
+  <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
+  <nav>
+    <a href="cerca-artigiani.html">Artigiani</a>
+    <a href="cerca-grandi-imprese.html">Grandi Imprese</a>
+    <a href="cerca-negozi.html">Negozi</a>
+    <a href="cerca-professionisti.html">Professionisti</a>
+  </nav>
+</header>
 
+<!-- HERO -->
 <section class="hero">
   <h1>📋 Bandi &amp; Opportunità per imprese edili</h1>
-  <p>I servizi informativi che ti aiutano a cogliere ogni occasione del settore.</p>
+  <p>Bandi pubblici, contributi a fondo perduto, novità della Gazzetta Ufficiale e news del settore edile — tutto in un'unica dashboard, riservata agli iscritti Premium.</p>
 </section>
 
-<div class="container">
-  <div class="servizi-grid">
-
-    <div class="servizio-card">
-      <div class="icona">🏛️</div>
-      <h2>Bandi di gara pubblici locali e nazionali</h2>
-      <p>Aggiornamenti su bandi indetti da Comuni, Province, Regioni ed enti nazionali per lavori edili, manutenzioni e opere pubbliche. Trovi le opportunità rilevanti per la tua impresa, filtrate per area geografica.</p>
+<!-- COSA TROVI -->
+<section class="block">
+  <div class="block-inner">
+    <h2 class="section-title">Cosa trovi nel servizio</h2>
+    <div class="grid-4">
+      <div class="card-feature">
+        <div class="icona">🏛️</div>
+        <h3>Bandi di gara pubblici locali e nazionali</h3>
+        <p>Aggiornamenti su bandi indetti da Comuni, Province, Regioni ed enti nazionali per lavori edili, manutenzioni e opere pubbliche. Trovi le opportunità rilevanti per la tua impresa, filtrate per area geografica.</p>
+      </div>
+      <div class="card-feature">
+        <div class="icona">💶</div>
+        <h3>Prestiti a fondo perduto e contributi pubblici</h3>
+        <p>Panoramica su contributi a fondo perduto, finanziamenti agevolati e bandi rivolti alle imprese edili: fondi regionali, misure PNRR, programmi europei. Scadenze e requisiti riassunti in modo chiaro.</p>
+      </div>
+      <div class="card-feature">
+        <div class="icona">📰</div>
+        <h3>Pubblicazioni Gazzetta Ufficiale</h3>
+        <p>Selezione delle pubblicazioni della Gazzetta Ufficiale rilevanti per il settore edile: nuove normative, aggiornamenti tecnici, decreti, scadenze. Riassunti leggibili senza linguaggio burocratico.</p>
+      </div>
+      <div class="card-feature">
+        <div class="icona">📊</div>
+        <h3>News del settore edile</h3>
+        <p>Notizie e approfondimenti su mercato delle costruzioni, materiali, prezzi, normative tecniche, bonus edilizi e principali eventi del settore. Selezionati per chi lavora nell'edilizia, senza rumore.</p>
+      </div>
     </div>
-
-    <div class="servizio-card">
-      <div class="icona">💶</div>
-      <h2>Prestiti a fondo perduto e contributi pubblici</h2>
-      <p>Panoramica su contributi a fondo perduto, finanziamenti agevolati e bandi rivolti alle imprese edili: fondi regionali, misure PNRR, programmi europei. Scadenze e requisiti riassunti in modo chiaro.</p>
-    </div>
-
-    <div class="servizio-card">
-      <div class="icona">📰</div>
-      <h2>Pubblicazioni Gazzetta Ufficiale</h2>
-      <p>Selezione delle pubblicazioni della Gazzetta Ufficiale rilevanti per il settore edile: nuove normative, aggiornamenti tecnici, decreti, scadenze. Riassunti leggibili senza linguaggio burocratico.</p>
-    </div>
-
   </div>
-</div>
+</section>
 
-<p class="nota">
-  Pagina puramente informativa. I servizi descritti sono in via di attivazione: nessun account, nessun pagamento richiesto.
-</p>
+<!-- ESEMPI ILLUSTRATIVI -->
+<section class="block alt">
+  <div class="block-inner">
+    <h2 class="section-title">Esempi illustrativi del tipo di opportunità che riceverai</h2>
+    <div class="grid-3">
+      <div class="card-esempio">
+        <span class="tag">🏗️ Bando di gara</span>
+        <h3>Riqualificazione energetica edifici comunali</h3>
+        <p>Comune di esempio — gara per lavori di riqualificazione energetica su 4 edifici scolastici. Importo a base d'asta: €820.000. Categoria OG1+OG11. Scadenza presentazione offerte: 45 giorni dalla pubblicazione.</p>
+      </div>
+      <div class="card-esempio">
+        <span class="tag">💰 Contributo PNRR</span>
+        <h3>Contributo a fondo perduto efficienza energetica PMI</h3>
+        <p>Misura PNRR M2C2 — contributo fino al 50% delle spese ammissibili per interventi di efficientamento energetico in PMI del settore costruzioni. Massimale €200.000 per impresa. Domande tramite portale GSE.</p>
+      </div>
+      <div class="card-esempio">
+        <span class="tag">🌱 Bando regionale</span>
+        <h3>Bando regionale efficienza energetica nelle imprese</h3>
+        <p>Regione di esempio — contributi a fondo perduto fino al 60% per coibentazione, sostituzione impianti termici, fotovoltaico aziendale. Riservato a imprese con sede operativa in regione. Sportello a graduatoria.</p>
+      </div>
+    </div>
+    <p class="esempi-disclaimer">Esempi indicativi — i bandi reali variano per area, periodo e tipologia di impresa.</p>
+  </div>
+</section>
 
-<footer>
-  <p>© 2026 TrovaImpresa – <a href="/privacy-policy.html">Privacy Policy</a> – <a href="/cookie-policy.html">Cookie Policy</a> – <a href="/termini-condizioni.html">Termini e Condizioni</a> – <a href="/index.html">Home</a></p>
+<!-- COME FUNZIONA -->
+<section class="block">
+  <div class="block-inner">
+    <h2 class="section-title">Come funziona</h2>
+    <div class="step-row">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>🔓 Attiva il Premium</h3>
+        <p>Sottoscrivi il piano Premium (€5/mese o €49/anno) e accedi alla dashboard Bandi.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>🎯 Imposta i tuoi filtri</h3>
+        <p>Scegli regione, provincia e settori, categorie OG/OS, tipologia (gara pubblica, contributo, normativa) e fascia di importo.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>📬 Ricevi solo opportunità rilevanti</h3>
+        <p>Notifiche e digest periodico con bandi, contributi e news filtrati sui tuoi criteri. Niente spam, niente bandi fuori target.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCLAIMER -->
+<section class="block alt">
+  <div class="block-inner">
+    <div class="disclaimer-box">
+      ⚠️ <strong>Servizio in via di attivazione</strong> — Questa pagina descrive un servizio attualmente in fase di lancio. La dashboard e i contenuti saranno disponibili a breve per gli iscritti Premium. Nessun pagamento è richiesto in questa fase.
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINALE -->
+<section class="cta-block">
+  <p class="micro-top">Pronto a non perdere più una sola opportunità?</p>
+  <a href="login-impresa.html" class="btn-cta">Accedi al servizio Premium →</a>
+  <p class="micro-bottom">Riservato agli iscritti Premium — attivabile in pochi minuti.</p>
+</section>
+
+<!-- FAQ -->
+<section class="block alt">
+  <div class="block-inner">
+    <h2 class="section-title">Domande frequenti</h2>
+    <div class="faq-list">
+      <details>
+        <summary>Chi può accedere al servizio Bandi?</summary>
+        <p>Il servizio è riservato agli iscritti con piano Premium. Gli iscritti Free e Pro non hanno accesso alla dashboard Bandi.</p>
+      </details>
+      <details>
+        <summary>Quando sarà attivo?</summary>
+        <p>Stiamo finalizzando le ultime integrazioni con le fonti pubbliche (portali bandi, Gazzetta Ufficiale, fonti regionali). Comunicheremo l'attivazione via email a tutti gli iscritti Premium.</p>
+      </details>
+      <details>
+        <summary>Quanto costa?</summary>
+        <p>Il servizio è incluso nel piano Premium TrovaImpresa: €5/mese o €49/anno. Nessun costo aggiuntivo.</p>
+      </details>
+      <details>
+        <summary>Posso annullare?</summary>
+        <p>Sì, in qualsiasi momento dal pannello impresa. La cancellazione è immediata e senza penali; mantieni l'accesso fino alla fine del periodo già pagato.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>TrovaImpresa</h3>
+      <p>La piattaforma affidabile per trovare i professionisti giusti per il tuo progetto.</p>
+    </div>
+    <div class="footer-section">
+      <h3>Link utili</h3>
+      <ul>
+        <li><a href="index.html">Cerca imprese</a></li>
+        <li><a href="registrazione-artigiano.html">Registrati come impresa</a></li>
+        <li><a href="prezzi.html">Piani e prezzi</a></li>
+        <li><a href="mappa.html">Mappa delle imprese</a></li>
+        <li><a href="index.html">Chi siamo</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>Supporto</h3>
+      <ul>
+        <li><a href="index.html">Centro aiuto</a></li>
+        <li><a href="/contatti.html">Contatti</a></li>
+        <li><a href="/privacy-policy.html">Informativa sulla privacy</a></li>
+        <li><a href="/cookie-policy.html">Cookie Policy</a></li>
+        <li><a href="/termini-servizio.html">Termini di servizio</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>Seguici</h3>
+      <ul>
+        <li><a href="#">Facebook</a></li>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">YouTube</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 TrovaImpresa. Tutti i diritti riservati.</p>
+  </div>
 </footer>
 
 <script src="/cookie-banner.js"></script>
