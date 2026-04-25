@@ -304,17 +304,11 @@
     ctaBandi.setAttribute('href', href);
   }
 
-  sb.auth.onAuthStateChange(async (_event, session) => {
+  sb.auth.onAuthStateChange((_event, session) => {
     if (!session) {
       setCtaBandi('Accedi al servizio Premium →', 'login-impresa.html');
-      return;
-    }
-    const { data } = await sb.from('imprese').select('piano').eq('user_id', session.user.id).maybeSingle();
-    const piano = data && data.piano;
-    if (piano === 'premium') {
-      setCtaBandi('Apri la tua dashboard Bandi →', 'pannello-impresa.html#bandi');
     } else {
-      setCtaBandi('Passa a Premium per accedere →', 'pannello-impresa.html#piano');
+      setCtaBandi('Apri la dashboard Bandi →', 'pannello-bandi.html');
     }
   });
 </script>
