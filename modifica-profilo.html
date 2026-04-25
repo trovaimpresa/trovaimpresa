@@ -129,8 +129,16 @@
             <input type="tel" id="f-telefono" placeholder="+39 06 1234567">
           </div>
           <div class="form-group" style="margin-bottom:0;">
+            <label>Regione <span class="required">*</span></label>
+            <select id="f-regione" required></select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Provincia <span class="required">*</span></label>
+            <select id="f-provincia" required disabled></select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
             <label>Città <span class="required">*</span></label>
-            <input type="text" id="f-citta" placeholder="Es. Roma">
+            <select id="f-citta" required disabled></select>
           </div>
         </div>
 
@@ -173,10 +181,6 @@
               <input type="text" id="f-partita_iva-artigiano" placeholder="Es. 12345678901">
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label>Provincia</label>
-                <input type="text" id="f-provincia-artigiano" placeholder="Es. RM">
-              </div>
               <div class="form-group">
                 <label>Anni di esperienza</label>
                 <input type="number" id="f-anni_esperienza-artigiano" min="0" max="60" placeholder="Es. 10">
@@ -246,10 +250,6 @@
               <input type="text" id="f-partita_iva-impresa" placeholder="Es. 12345678901">
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label>Provincia</label>
-                <input type="text" id="f-provincia-impresa" placeholder="Es. RM">
-              </div>
               <div class="form-group">
                 <label>Anni di attività</label>
                 <input type="number" id="f-anni_esperienza-impresa" min="0" max="100" placeholder="Es. 15">
@@ -322,10 +322,6 @@
               <input type="text" id="f-partita_iva-grande_impresa" placeholder="Es. 12345678901">
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label>Provincia</label>
-                <input type="text" id="f-provincia-grande_impresa" placeholder="Es. MI">
-              </div>
               <div class="form-group">
                 <label>Anno di fondazione</label>
                 <input type="number" id="f-anno_fondazione-grande_impresa" min="1900" max="2026" placeholder="Es. 1990">
@@ -780,6 +776,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/geo-italia.js"></script>
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
@@ -826,6 +823,63 @@
       if (!e.target.closest('#map-search') && !e.target.closest('#map-dropdown')) { var dd = document.getElementById('map-dropdown'); if (dd) dd.style.display = 'none'; }
     });
     // ===========================
+
+    // Cascata Regione → Provincia → Città
+    function initCascataGeo() {
+      const geo = window.GEO_ITALIA || {};
+      const regSel = document.getElementById('f-regione');
+      const provSel = document.getElementById('f-provincia');
+      const cittaSel = document.getElementById('f-citta');
+      if (!regSel || !provSel || !cittaSel) return;
+
+      function resetSelect(sel, placeholder) {
+        sel.innerHTML = '<option value="">' + placeholder + '</option>';
+      }
+
+      resetSelect(regSel, 'Seleziona regione');
+      Object.keys(geo).sort((a, b) => a.localeCompare(b, 'it')).forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r; opt.textContent = r;
+        regSel.appendChild(opt);
+      });
+
+      regSel.addEventListener('change', function() {
+        resetSelect(provSel, 'Seleziona provincia');
+        resetSelect(cittaSel, 'Seleziona città');
+        cittaSel.disabled = true;
+        const province = geo[regSel.value];
+        if (!province) {
+          provSel.disabled = true;
+          return;
+        }
+        Object.keys(province).sort((a, b) => a.localeCompare(b, 'it')).forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p; opt.textContent = p;
+          provSel.appendChild(opt);
+        });
+        provSel.disabled = false;
+      });
+
+      provSel.addEventListener('change', function() {
+        resetSelect(cittaSel, 'Seleziona città');
+        const cittaList = (geo[regSel.value] || {})[provSel.value];
+        if (!cittaList) {
+          cittaSel.disabled = true;
+          return;
+        }
+        cittaList.slice().sort((a, b) => a.localeCompare(b, 'it')).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c; opt.textContent = c;
+          cittaSel.appendChild(opt);
+        });
+        cittaSel.disabled = false;
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCascataGeo);
+    } else {
+      initCascataGeo();
+    }
 
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (event !== 'INITIAL_SESSION') return;
@@ -883,9 +937,23 @@
       // Dati base comuni
       document.getElementById('f-email').value = d.email || '';
       document.getElementById('f-telefono').value = d.telefono || '';
-      document.getElementById('f-citta').value = d.citta || '';
       document.getElementById('f-sito_web').value = d.sito_web || '';
       document.getElementById('f-descrizione').value = d.descrizione || '';
+
+      // Cascata Regione → Provincia → Città
+      if (d.regione) {
+        const regSel = document.getElementById('f-regione');
+        regSel.value = d.regione;
+        regSel.dispatchEvent(new Event('change'));
+        if (d.provincia) {
+          const provSel = document.getElementById('f-provincia');
+          provSel.value = d.provincia;
+          provSel.dispatchEvent(new Event('change'));
+          if (d.citta) {
+            document.getElementById('f-citta').value = d.citta;
+          }
+        }
+      }
 
       // Posizione mappa
       if (d.lat && d.lng) {
@@ -945,7 +1013,6 @@
       if (tipoCategoria === 'artigiano') {
         document.getElementById('f-nome-artigiano').value = d.nome || '';
         document.getElementById('f-partita_iva-artigiano').value = d.partita_iva || '';
-        document.getElementById('f-provincia-artigiano').value = d.provincia || '';
         document.getElementById('f-anni_esperienza-artigiano').value = d.anni_esperienza || '';
         document.getElementById('f-anno_fondazione-artigiano').value = d.anno_fondazione || '';
         setSelectValue('f-mestiere-artigiano', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
@@ -957,7 +1024,6 @@
       } else if (tipoCategoria === 'impresa') {
         document.getElementById('f-nome-impresa').value = d.nome || '';
         document.getElementById('f-partita_iva-impresa').value = d.partita_iva || '';
-        document.getElementById('f-provincia-impresa').value = d.provincia || '';
         document.getElementById('f-anni_esperienza-impresa').value = d.anni_esperienza || '';
         document.getElementById('f-anno_fondazione-impresa').value = d.anno_fondazione || '';
         setSelectValue('f-mestiere-impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
@@ -970,7 +1036,6 @@
       } else if (tipoCategoria === 'grande_impresa') {
         document.getElementById('f-nome-grande_impresa').value = d.nome || '';
         document.getElementById('f-partita_iva-grande_impresa').value = d.partita_iva || '';
-        document.getElementById('f-provincia-grande_impresa').value = d.provincia || '';
         document.getElementById('f-anno_fondazione-grande_impresa').value = d.anno_fondazione || d.anni_esperienza || '';
         setSelectValue('f-mestiere-grande_impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
         document.getElementById('f-specializzazioni-grande_impresa').value = d.specializzazioni || '';
@@ -1154,6 +1219,8 @@
         // Campi comuni
         const dati = {
           telefono: document.getElementById('f-telefono').value.trim(),
+          regione: document.getElementById('f-regione').value,
+          provincia: document.getElementById('f-provincia').value,
           citta: document.getElementById('f-citta').value.trim(),
           sito_web: document.getElementById('f-sito_web').value.trim(),
           descrizione: document.getElementById('f-descrizione').value.trim(),
@@ -1169,7 +1236,6 @@
           Object.assign(dati, {
             nome: document.getElementById('f-nome-artigiano').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-artigiano').value.trim(),
-            provincia: document.getElementById('f-provincia-artigiano').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-artigiano').value) || null,
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-artigiano').value) || null,
             mestieri: document.getElementById('f-mestiere-artigiano').value ? [document.getElementById('f-mestiere-artigiano').value] : [],
@@ -1183,7 +1249,6 @@
           Object.assign(dati, {
             nome: document.getElementById('f-nome-impresa').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-impresa').value.trim(),
-            provincia: document.getElementById('f-provincia-impresa').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-impresa').value) || null,
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-impresa').value) || null,
             mestieri: document.getElementById('f-mestiere-impresa').value ? [document.getElementById('f-mestiere-impresa').value] : [],
@@ -1198,7 +1263,6 @@
           Object.assign(dati, {
             nome: document.getElementById('f-nome-grande_impresa').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-grande_impresa').value.trim(),
-            provincia: document.getElementById('f-provincia-grande_impresa').value.trim(),
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-grande_impresa').value) || null,
             mestieri: document.getElementById('f-mestiere-grande_impresa').value ? [document.getElementById('f-mestiere-grande_impresa').value] : [],
             specializzazioni: document.getElementById('f-specializzazioni-grande_impresa').value.trim(),
