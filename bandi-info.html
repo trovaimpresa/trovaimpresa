@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bandi & Opportunità per imprese edili – TrovaImpresa</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
+
+    nav {
+      background: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; }
+    .logo span:first-child { color: #2ecc71; }
+    .logo span:last-child { color: #e67e22; }
+    nav a { color: #555; text-decoration: none; font-size: 0.9rem; }
+    nav a:hover { color: #2ecc71; }
+
+    .hero {
+      background: linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%);
+      color: #fff;
+      text-align: center;
+      padding: 64px 24px 56px;
+    }
+    .hero h1 { font-size: 2.1rem; margin-bottom: 12px; line-height: 1.25; }
+    .hero p { font-size: 1.05rem; opacity: 0.92; max-width: 720px; margin: 0 auto; line-height: 1.5; }
+
+    .container {
+      max-width: 1080px;
+      margin: -32px auto 56px;
+      padding: 0 24px;
+    }
+
+    .servizi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+
+    .servizio-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      border-top: 4px solid #2a7a4b;
+      padding: 24px;
+    }
+    .servizio-card .icona { font-size: 2rem; margin-bottom: 12px; }
+    .servizio-card h2 {
+      font-size: 1.15rem;
+      color: #1a4d2e;
+      margin-bottom: 10px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+    .servizio-card p {
+      color: #555;
+      font-size: 0.96rem;
+      line-height: 1.65;
+    }
+
+    .nota {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #aaa;
+      font-size: 0.85rem;
+    }
+    footer a { color: #2ecc71; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 720px) {
+      .hero { padding: 44px 18px 40px; }
+      .hero h1 { font-size: 1.55rem; }
+      .hero p { font-size: 0.98rem; }
+      .container { margin-top: -22px; padding: 0 14px; }
+      .servizi-grid { grid-template-columns: 1fr; gap: 16px; }
+      .servizio-card { padding: 20px; }
+      .servizio-card h2 { font-size: 1.05rem; }
+      .servizio-card p { font-size: 0.93rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <span>Trova</span><span>Impresa</span>
+  </div>
+  <a href="/index.html">← Torna alla Home</a>
+</nav>
+
+<section class="hero">
+  <h1>📋 Bandi &amp; Opportunità per imprese edili</h1>
+  <p>I servizi informativi che ti aiutano a cogliere ogni occasione del settore.</p>
+</section>
+
+<div class="container">
+  <div class="servizi-grid">
+
+    <div class="servizio-card">
+      <div class="icona">🏛️</div>
+      <h2>Bandi di gara pubblici locali e nazionali</h2>
+      <p>Aggiornamenti su bandi indetti da Comuni, Province, Regioni ed enti nazionali per lavori edili, manutenzioni e opere pubbliche. Trovi le opportunità rilevanti per la tua impresa, filtrate per area geografica.</p>
+    </div>
+
+    <div class="servizio-card">
+      <div class="icona">💶</div>
+      <h2>Prestiti a fondo perduto e contributi pubblici</h2>
+      <p>Panoramica su contributi a fondo perduto, finanziamenti agevolati e bandi rivolti alle imprese edili: fondi regionali, misure PNRR, programmi europei. Scadenze e requisiti riassunti in modo chiaro.</p>
+    </div>
+
+    <div class="servizio-card">
+      <div class="icona">📰</div>
+      <h2>Pubblicazioni Gazzetta Ufficiale</h2>
+      <p>Selezione delle pubblicazioni della Gazzetta Ufficiale rilevanti per il settore edile: nuove normative, aggiornamenti tecnici, decreti, scadenze. Riassunti leggibili senza linguaggio burocratico.</p>
+    </div>
+
+    <div class="servizio-card">
+      <div class="icona">📈</div>
+      <h2>Notizie settore edile (Sole 24 Ore)</h2>
+      <p>Le ultime notizie del settore edile selezionate dal Sole 24 Ore: andamento del mercato, normativa, casi di studio, anticipazioni. Per restare aggiornato sulle dinamiche del settore.</p>
+    </div>
+
+  </div>
+</div>
+
+<p class="nota">
+  Pagina puramente informativa. I servizi descritti sono in via di attivazione: nessun account, nessun pagamento richiesto.
+</p>
+
+<footer>
+  <p>© 2026 TrovaImpresa – <a href="/privacy-policy.html">Privacy Policy</a> – <a href="/cookie-policy.html">Cookie Policy</a> – <a href="/termini-condizioni.html">Termini e Condizioni</a> – <a href="/index.html">Home</a></p>
+</footer>
+
+<script src="/cookie-banner.js"></script>
+</body>
+</html>
