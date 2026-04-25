@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Bandi & Opportunità — TrovaImpresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde:   #2a7a4b;
+    --verde2:  #1f5e38;
+    --verde3:  #e8f5ee;
+    --arancio: #e8733a;
+    --arancio2:#c45e28;
+    --arancio3:#fff3ec;
+    --rosso:   #e53e3e;
+    --rosso3:  #fff5f5;
+    --dark:    #1a1a1a;
+    --mid:     #555;
+    --light:   #999;
+    --bg:      #f4f6f9;
+    --border:  rgba(0,0,0,0.08);
+    --shadow:  0 2px 16px rgba(0,0,0,0.07);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); }
+
+  .login-screen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#1a3a2a,#2a7a4b); padding:20px;
+  }
+  .login-box {
+    background:white; border-radius:24px; padding:48px 40px;
+    width:100%; max-width:400px; text-align:center;
+    box-shadow:0 24px 80px rgba(0,0,0,0.2);
+  }
+  .login-logo { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:4px; }
+  .login-logo .trova { color:var(--verde); }
+  .login-logo .impresa { color:var(--arancio); }
+  .login-sub { font-size:0.85rem; color:var(--light); margin-bottom:32px; }
+  .login-box input {
+    width:100%; padding:13px 16px; border-radius:12px;
+    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
+    font-size:0.92rem; margin-bottom:12px; outline:none; transition:border 0.2s;
+  }
+  .login-box input:focus { border-color:var(--verde); }
+  .login-btn {
+    width:100%; padding:14px; background:var(--verde); color:white;
+    border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:1rem; cursor:pointer; margin-top:4px;
+  }
+  .login-err { color:var(--rosso); font-size:0.82rem; margin-top:8px; display:none; }
+  .login-reg { margin-top:16px; font-size:0.82rem; color:var(--light); }
+  .login-reg a { color:var(--verde); font-weight:700; text-decoration:none; }
+
+  .pannello { display:none; }
+
+  .sidebar {
+    width:300px; background:white; border-right:1px solid var(--border);
+    position:fixed; top:0; left:0; bottom:0; z-index:100;
+    display:flex; flex-direction:column;
+  }
+  .sidebar-logo {
+    padding:24px 20px; border-bottom:1px solid var(--border);
+    font-family:'Playfair Display',serif; font-size:1.1rem;
+  }
+  .sidebar-logo .trova { color:var(--verde); }
+  .sidebar-logo .impresa { color:var(--arancio); }
+  .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+  .sidebar-nav { flex:1; padding:16px 12px; overflow-y:auto; }
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    padding:14px; border-radius:10px; cursor:pointer;
+    font-size:0.88rem; font-weight:600; color:var(--dark);
+    transition:all 0.15s; margin-bottom:10px;
+    background:white; box-shadow:0 2px 8px rgba(0,0,0,0.07);
+    border-top:4px solid var(--verde); text-decoration:none;
+  }
+  .nav-item:hover { box-shadow:0 4px 14px rgba(0,0,0,0.13); transform:translateY(-1px); color:var(--dark); }
+  .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
+  .logout-btn {
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    border-radius:10px; cursor:pointer; font-size:0.85rem;
+    font-weight:600; color:var(--rosso); transition:all 0.15s;
+  }
+  .logout-btn:hover { background:var(--rosso3); }
+
+  .main { margin-left:300px; padding:32px; min-height:100vh; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+  .topbar-title { font-family:'Playfair Display',serif; font-size:1.6rem; }
+
+  /* PAYWALL */
+  .paywall-wrap {
+    min-height:calc(100vh - 64px);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .paywall-box {
+    background:white; border-radius:20px; padding:48px 40px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    max-width:480px; width:100%; text-align:center;
+  }
+  .paywall-icon { font-size:3rem; margin-bottom:16px; }
+  .paywall-title { font-family:'Playfair Display',serif; font-size:1.4rem; margin-bottom:12px; color:var(--dark); }
+  .paywall-text { font-size:0.92rem; color:var(--mid); line-height:1.6; margin-bottom:28px; }
+  .paywall-btn {
+    display:inline-block; padding:14px 28px;
+    background:linear-gradient(135deg,var(--verde),var(--verde2));
+    color:white; border-radius:12px; font-weight:700; font-size:0.95rem;
+    text-decoration:none; transition:all 0.15s;
+  }
+  .paywall-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(42,122,75,0.3); }
+
+  /* CARD SEZIONE BANDI */
+  .bandi-card {
+    background:white;
+    padding:24px;
+    border-radius:16px;
+    border-top:4px solid #2a7a4b;
+    margin-bottom:24px;
+    box-shadow:var(--shadow);
+    border-left:1px solid var(--border);
+    border-right:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+  }
+  .bandi-card h2 { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:14px; color:var(--dark); }
+  .bandi-placeholder { font-size:0.9rem; color:var(--light); font-style:italic; }
+
+  html, body { overflow-x:hidden; }
+
+  @media (max-width: 768px) {
+    .mob-menu-btn {
+      display:flex !important;
+      position:fixed; top:12px; left:12px; z-index:201;
+      width:40px; height:40px; border-radius:10px;
+      background:var(--verde); color:white; border:none;
+      font-size:1.2rem; align-items:center; justify-content:center;
+      cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,0.2);
+    }
+    .sidebar { transform:translateX(-100%); transition:transform 0.25s ease; z-index:200; }
+    .sidebar.open { transform:translateX(0); }
+    .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:199; }
+    .sidebar-overlay.open { display:block; }
+    .main { margin-left:0 !important; padding:16px !important; padding-top:64px !important; }
+    .topbar-title { font-size:1.2rem !important; }
+    .paywall-box { padding:32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPINNER AVVIO -->
+<div id="spinner-avvio" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a2a,#2a7a4b)">
+  <div style="text-align:center;color:white">
+    <div style="font-size:2.5rem;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
+    <div style="font-size:1rem;opacity:0.85;font-weight:600">Caricamento...</div>
+  </div>
+</div>
+<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen" style="display:none">
+  <div class="login-box">
+    <div class="login-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></div>
+    <div class="login-sub">📢 Bandi & Opportunità</div>
+    <input type="email" id="login-email" placeholder="La tua email" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" id="login-pass" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 Accedi al pannello</button>
+    <div class="login-err" id="login-err">❌ Email o password errati</div>
+    <div class="login-reg">Non sei ancora registrato? <a href="registrazione.html">Registra la tua impresa →</a></div>
+  </div>
+</div>
+
+<!-- PANNELLO -->
+<div class="pannello" id="pannello">
+  <button class="mob-menu-btn" style="display:none" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar-el">
+    <div class="sidebar-logo">
+      <span class="trova">Trova</span><span class="impresa">Impresa</span>
+      <small>Bandi & Opportunità</small>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#" onclick="history.back();return false">
+        <span>⬅️</span> Indietro
+      </a>
+      <a class="nav-item" href="modifica-profilo.html">
+        <span>👤</span> Il mio profilo
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">📢 Bandi & Opportunità</div>
+    </div>
+
+    <!-- PAYWALL: piano !== premium -->
+    <div id="paywall" class="paywall-wrap" style="display:none">
+      <div class="paywall-box">
+        <div class="paywall-icon">💎</div>
+        <div class="paywall-title">Accesso riservato ai piani Premium</div>
+        <div class="paywall-text">Bandi pubblici, prestiti & contributi e Gazzetta Ufficiale sono disponibili solo per gli utenti del piano Premium.</div>
+        <a class="paywall-btn" href="modifica-profilo.html#card-piano">Passa a Premium →</a>
+      </div>
+    </div>
+
+    <!-- CONTENUTO PREMIUM -->
+    <div id="bandi-content" style="display:none">
+      <section class="bandi-card">
+        <h2>📜 Bandi pubblici</h2>
+        <div class="bandi-placeholder">Nessuna voce ancora disponibile</div>
+      </section>
+
+      <section class="bandi-card">
+        <h2>💶 Prestiti & contributi</h2>
+        <div class="bandi-placeholder">Nessuna voce ancora disponibile</div>
+      </section>
+
+      <section class="bandi-card">
+        <h2>📰 Gazzetta Ufficiale</h2>
+        <div class="bandi-placeholder">Nessuna voce ancora disponibile</div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let impresaCorrente = null;
+
+function applicaGate(piano) {
+  const isPremium = piano === 'premium';
+  document.getElementById('paywall').style.display = isPremium ? 'none' : 'flex';
+  document.getElementById('bandi-content').style.display = isPremium ? 'block' : 'none';
+}
+
+function mostraPannello() {
+  document.getElementById('spinner-avvio').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('pannello').style.display = 'block';
+}
+
+async function caricaImpresaEGate(session) {
+  let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (!data) {
+    const { data: byEmail } = await sb.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
+    if (byEmail) {
+      await sb.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
+      data = byEmail;
+    }
+  }
+  if (!data) {
+    window.location.replace('login-impresa.html');
+    return;
+  }
+  impresaCorrente = data;
+  const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
+  const piano = (pianoFresco && pianoFresco.piano) || impresaCorrente.piano || 'free';
+  impresaCorrente.piano = piano;
+  console.log('piano:', piano);
+  mostraPannello();
+  applicaGate(piano);
+}
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event !== 'INITIAL_SESSION') return;
+  if (!session) {
+    window.location.replace('login-impresa.html');
+    return;
+  }
+  await caricaImpresaEGate(session);
+});
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  const btn = document.querySelector('.login-btn');
+  const errEl = document.getElementById('login-err');
+  if (!email || !pass) { errEl.style.display='block'; return; }
+  btn.disabled = true;
+  btn.textContent = '⏳ Accesso in corso...';
+  errEl.style.display = 'none';
+  const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (authError || !authData.user) {
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ Email o password errati';
+    btn.disabled = false;
+    btn.textContent = '🔐 Accedi al pannello';
+    return;
+  }
+  await caricaImpresaEGate({ user: authData.user });
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  window.location.replace('login-impresa.html');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar-el').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>
