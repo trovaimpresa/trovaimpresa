@@ -462,7 +462,7 @@ sc.auth.onAuthStateChange((event, session) => { sessioneUtente = session; });
 async function caricaProfilo(id){
   try{
     const r=await fetch(`${SU}/rest/v1/imprese?id=eq.${id}&select=*&limit=1`,{headers:{'apikey':SK}});
-    const data=await r.json();if(!data||!data.length)return;const d=data[0];
+    const data=await r.json();if(!data||!data.length)return;const d=data[0];window._pianoImpresa=(d.piano||'free').toLowerCase();
     const nome=d.nome||'';
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
     if(d.tipo)document.getElementById('profile-tipo-badge').textContent='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase();
@@ -534,13 +534,17 @@ async function caricaRecensioni(id){
     const data=await r.json();const div=document.getElementById('rec-lista');
     const ce=document.getElementById('rec-count');if(ce)ce.textContent=data?.length||0;
     if(!data||!data.length){div.innerHTML='<p style="color:#aaa;font-size:13px;padding:14px 0">Nessuna recensione ancora. Sii il primo!</p>';return}
-    div.innerHTML=data.map(r=>{
+    const piano=(window._pianoImpresa||'free').toLowerCase();
+    const isFree=piano==='free';
+    const visibili=isFree?data.slice(0,3):data;
+    div.innerHTML=visibili.map(r=>{
       const media=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
       const avg=media.length?(media.reduce((a,b)=>a+b,0)/media.length).toFixed(1):'-';
       const st='★'.repeat(Math.round(parseFloat(avg)))+'☆'.repeat(5-Math.round(parseFloat(avg)));
       const quando=[r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' ');
       return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${r.nome_cliente||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><p class="rec-testo">${r.testo||''}</p></div>`;
     }).join('');
+    if(isFree&&data.length>3){div.innerHTML+=`<div style="margin-top:14px;padding:12px 14px;background:#fff8e1;border-left:3px solid #f5a623;border-radius:6px;font-size:13px;color:#666">📌 ${data.length} recensioni totali, solo le 3 più recenti sono visibili sul piano Free</div>`;}
   }catch(e){console.error(e)}
 }
 
@@ -623,7 +627,7 @@ function showRecTab(id,btn){
 
 document.addEventListener('DOMContentLoaded',async()=>{
   const p=new URLSearchParams(window.location.search);const id=p.get('id');
-  if(id){caricaProfilo(id);caricaRecensioni(id);caricaFotoLavori(id)}
+  if(id){caricaProfilo(id).finally(()=>caricaRecensioni(id));caricaFotoLavori(id)}
   if(sessioneUtente)document.getElementById('rec-nome-email-wrapper').style.display='none';
 });
 
