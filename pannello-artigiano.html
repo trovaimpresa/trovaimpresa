@@ -1237,7 +1237,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
   impresaCorrente = data;
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
-  if (impresaCorrente?.piano === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
+  if ((impresaCorrente?.piano || '').toLowerCase() === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
   document.getElementById('spinner-avvio').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
@@ -1271,7 +1271,7 @@ async function doLogin() {
     return;
   }
   impresaCorrente = data;
-  if (impresaCorrente?.piano === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
+  if ((impresaCorrente?.piano || '').toLowerCase() === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
@@ -1395,7 +1395,7 @@ window.onpopstate = function(e) {
 
 async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
-  const piano = impresaCorrente.piano || 'free';
+  const piano = (impresaCorrente.piano || 'free').toLowerCase();
   const isPro = piano === 'pro' || piano === 'premium';
   const rating = impresaCorrente.rating || '—';
 
@@ -1461,7 +1461,7 @@ async function inizializza() {
 }
 
 function aggiornaBadgeEOverlay() {
-  const piano = impresaCorrente ? (impresaCorrente.piano || 'free') : 'free';
+  const piano = (impresaCorrente ? (impresaCorrente.piano || 'free') : 'free').toLowerCase();
   const pianoBadge = document.getElementById('dash-piano-badge');
   if (pianoBadge) {
     pianoBadge.classList.remove('pro', 'premium');
@@ -1723,7 +1723,7 @@ async function caricaAnnunciLavoro() {
     .order('created_at', { ascending: false });
 
   annunciLavoro = data || [];
-  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
+  const isPro = (impresaCorrente.piano || '').toLowerCase() === 'pro' || (impresaCorrente.piano || '').toLowerCase() === 'premium';
   const maxAnnunci = isPro ? Infinity : 1;
   const attivi = annunciLavoro.filter(a => a.attiva).length;
 
@@ -1796,6 +1796,7 @@ function mostraAnnunciLavoro() {
 
 async function impostaPiano(piano) {
   if (!impresaCorrente) return;
+  piano = (piano || '').toLowerCase();
   const conferma = confirm(piano === 'pro' ? '⭐ Attivare il piano Pro?' : 'Tornare al piano Free?');
   if (!conferma) return;
   const { error } = await sb.from('imprese').update({ piano }).eq('id', impresaCorrente.id);
@@ -1949,7 +1950,7 @@ async function caricaFotoLavori() {
 }
 
 function aggiornaBannerFoto() {
-  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
+  const isPro = (impresaCorrente.piano || '').toLowerCase() === 'pro' || (impresaCorrente.piano || '').toLowerCase() === 'premium';
   const n = fotoCaricate.length;
   const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - n);
   const testoHTML = isPro
@@ -1983,7 +1984,7 @@ function renderFotoGrid() {
 
 async function uploadFoto(files) {
   if (!files?.length) return;
-  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
+  const isPro = (impresaCorrente.piano || '').toLowerCase() === 'pro' || (impresaCorrente.piano || '').toLowerCase() === 'premium';
   const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
 
   if (!isPro && rimaste === 0) {
