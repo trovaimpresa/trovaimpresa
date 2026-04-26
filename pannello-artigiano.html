@@ -850,6 +850,13 @@
         </div>
       </div>
 
+      <!-- BANDI & OPPORTUNITÀ (Premium) -->
+      <div id="card-bandi-premium" style="display:none;background:white;border-top:4px solid #e65100;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:8px;color:#1a3a2a">📜 Bandi &amp; Opportunità</div>
+        <div style="font-size:0.9rem;color:#555;margin-bottom:16px;line-height:1.5">Servizio Premium dedicato a bandi pubblici, contributi e opportunità di finanziamento per la tua impresa.</div>
+        <a href="pannello-bandi.html" style="display:inline-block;background:#e65100;color:white;padding:10px 20px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none">Apri la dashboard Bandi →</a>
+      </div>
+
       <!-- FOTO DEI LAVORI (dashboard) -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📷 Foto dei lavori</div>
@@ -1230,6 +1237,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
   impresaCorrente = data;
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
+  if (impresaCorrente?.piano === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
   document.getElementById('spinner-avvio').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
@@ -1263,6 +1271,7 @@ async function doLogin() {
     return;
   }
   impresaCorrente = data;
+  if (impresaCorrente?.piano === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
