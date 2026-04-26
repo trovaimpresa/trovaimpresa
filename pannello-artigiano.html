@@ -963,13 +963,6 @@
       <!-- Contatore offerte del mese -->
       <div id="contatore-offerte-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
 
-      <!-- Info piano -->
-      <div class="piano-info" id="piano-info-lavoro">
-        <span style="font-size:1.4rem">💡</span>
-        <div>Piano <strong id="piano-label">Free</strong>: puoi pubblicare <strong id="annunci-rimasti">1 annuncio</strong>. 
-        Passa al <strong><a href="prezzi.html" style="color:var(--arancio)">piano Pro</a></strong> per annunci illimitati e posizione in evidenza!</div>
-      </div>
-
       <!-- Form nuovo annuncio -->
       <div class="form-annuncio" id="form-annuncio">
         <h3>➕ Pubblica nuovo annuncio</h3>
@@ -1791,8 +1784,6 @@ async function caricaAnnunciLavoro() {
     .order('created_at', { ascending: false });
 
   annunciLavoro = data || [];
-  const isPro = (impresaCorrente.piano || '').toLowerCase() === 'pro' || (impresaCorrente.piano || '').toLowerCase() === 'premium';
-  const maxAnnunci = isPro ? Infinity : 1;
   const attivi = annunciLavoro.filter(a => a.attiva).length;
 
   // Conteggio offerte del mese corrente (Free=1, Pro=3, Premium=∞)
@@ -1818,17 +1809,6 @@ async function caricaAnnunciLavoro() {
   if (attivi > 0) {
     document.getElementById('badge-lavoro').textContent = attivi;
     document.getElementById('badge-lavoro').style.display = '';
-  }
-
-  // Aggiorna info piano
-  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
-  if (isPro) {
-    document.getElementById('annunci-rimasti').textContent = 'annunci illimitati';
-    document.getElementById('piano-info-lavoro').style.background = 'linear-gradient(135deg,var(--verde3),#fff)';
-    document.getElementById('piano-info-lavoro').style.borderColor = '#a8d5b5';
-  } else {
-    const rimasti = Math.max(0, maxAnnunci - attivi);
-    document.getElementById('annunci-rimasti').textContent = rimasti > 0 ? `${rimasti} annuncio disponibile` : '0 annunci disponibili (limite raggiunto)';
   }
 
   // Mostra/nascondi bottone (gating mensile)
@@ -1885,7 +1865,6 @@ async function impostaPiano(piano) {
   const isPro = piano === 'pro';
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) { dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free'; dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b'; }
-  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
   alert(isPro ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
 }
 
