@@ -1735,12 +1735,6 @@ async function caricaAnnunciLavoro() {
 
   // Aggiorna info piano
   document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
-  // Aggiorna dashboard piano
-  const dashLabel = document.getElementById('piano-dashboard-label');
-  if (dashLabel) {
-    dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free';
-    dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b';
-  }
   if (isPro) {
     document.getElementById('annunci-rimasti').textContent = 'annunci illimitati';
     document.getElementById('piano-info-lavoro').style.background = 'linear-gradient(135deg,var(--verde3),#fff)';
