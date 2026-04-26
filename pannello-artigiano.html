@@ -1237,7 +1237,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
   impresaCorrente = data;
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
-  console.log('piano gate 1 (caricaSessione):', impresaCorrente?.piano);
   if ((impresaCorrente?.piano || '').toLowerCase() === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
   document.getElementById('spinner-avvio').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
@@ -1272,7 +1271,6 @@ async function doLogin() {
     return;
   }
   impresaCorrente = data;
-  console.log('piano gate 2 (doLogin):', impresaCorrente?.piano);
   if ((impresaCorrente?.piano || '').toLowerCase() === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
