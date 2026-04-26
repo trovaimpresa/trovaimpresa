@@ -2016,7 +2016,7 @@ function aggiornaBannerFoto() {
   const n = fotoCaricate.length;
   const rimaste = isPremium ? Infinity : isPro ? Math.max(0, MAX_FOTO_PRO - n) : Math.max(0, MAX_FOTO_FREE - n);
   const testoHTML = isPremium
-    ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#1a73e8">Pro ⭐</strong> — illimitate`
+    ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7c3aed">Premium 💎</strong> — illimitate`
     : isPro
     ? `<span class="foto-limit-num">${n}/${MAX_FOTO_PRO}</span> foto caricate · Piano <strong style="color:#1a73e8">Pro ⭐</strong> — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="info-premium.html" style="color:var(--arancio);font-weight:700">passa a Premium</a> per foto illimitate'}`
     : `<span class="foto-limit-num">${n}/${MAX_FOTO_FREE}</span> foto caricate · Piano Free — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="prezzi.html" style="color:var(--arancio);font-weight:700">passa a Pro</a> per foto illimitate'}`;
@@ -2057,7 +2057,7 @@ async function uploadFoto(files) {
     if (isPro) {
       alert('Hai raggiunto il limite di 20 foto del piano Pro. Passa a Premium per foto illimitate.');
     } else {
-      alert('Hai raggiunto il limite di 10 foto per il piano Free. Passa a Pro per foto illimitate!');
+      alert('Hai raggiunto il limite di 5 foto per il piano Free. Passa a Pro per foto illimitate!');
     }
     return;
   }
