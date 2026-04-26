@@ -787,8 +787,10 @@
     <!-- PREVENTIVI -->
     <div class="section" id="sec-preventivi">
       <div class="topbar">
-        <div class="topbar-title">📋 Preventivi ricevuti</div>
+        <div class="topbar-title">📋 Richieste preventivo ricevute</div>
       </div>
+      <!-- Contatore preventivi del mese -->
+      <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
       <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
     </div>
 
@@ -1282,6 +1284,22 @@ async function caricaPreventivi() {
     .order('created_at', { ascending: false });
 
   const lista = data || [];
+
+  // Contatore richieste preventivo del mese (Free=3, Pro=10, Premium=∞)
+  const _pianoPrev = (impresaCorrente.piano || 'free').toLowerCase();
+  const _maxPrev = _pianoPrev === 'premium' ? Infinity : _pianoPrev === 'pro' ? 10 : 3;
+  const _inizioMesePrev = new Date(); _inizioMesePrev.setDate(1); _inizioMesePrev.setHours(0,0,0,0);
+  const _prevMese = lista.filter(p => new Date(p.created_at) >= _inizioMesePrev).length;
+  const _atLimitPrev = _maxPrev !== Infinity && _prevMese >= _maxPrev;
+  const _contPrevEl = document.getElementById('contatore-preventivi-mese');
+  if (_contPrevEl) {
+    _contPrevEl.innerHTML = _pianoPrev === 'free'
+      ? `📊 Richieste preventivo questo mese: <strong>${_prevMese}/3</strong> (piano Free) — <a href="info-pro.html" style="color:var(--arancio);font-weight:700">Passa a Pro</a> per 10/mese`
+      : _pianoPrev === 'pro'
+      ? `📊 Richieste preventivo questo mese: <strong>${_prevMese}/10</strong> (piano Pro) — <a href="info-premium.html" style="color:#7c3aed;font-weight:700">Passa a Premium</a> per illimitate`
+      : `📊 Richieste preventivo questo mese: <strong>${_prevMese}</strong> (illimitate)`;
+    _contPrevEl.style.borderLeftColor = _atLimitPrev ? '#c0392b' : (_pianoPrev === 'premium' ? '#7c3aed' : _pianoPrev === 'pro' ? '#1a73e8' : '#2a7a4b');
+  }
 
   const container = document.getElementById('lista-preventivi');
   if (!lista.length) {
@@ -1857,6 +1875,23 @@ function calcolaPrezzo(p) {
 }
 
 async function inviaPreventivo() {
+  // Gating mensile (Free=3, Pro=10, Premium=∞)
+  const _pianoInv = (impresaCorrente.piano || 'free').toLowerCase();
+  const _maxInv = _pianoInv === 'premium' ? Infinity : _pianoInv === 'pro' ? 10 : 3;
+  if (_maxInv !== Infinity) {
+    const { data: _prevList } = await sb.from('preventivi').select('id,created_at').eq('impresa_id', impresaCorrente.id);
+    const _inizioMeseInv = new Date(); _inizioMeseInv.setDate(1); _inizioMeseInv.setHours(0,0,0,0);
+    const _prevMeseInv = (_prevList || []).filter(p => new Date(p.created_at) >= _inizioMeseInv).length;
+    if (_prevMeseInv >= _maxInv) {
+      if (_pianoInv === 'free') {
+        alert('Hai raggiunto il limite di 3 richieste preventivo mensili del piano Free. Passa a Pro per 10/mese.');
+      } else {
+        alert('Hai raggiunto il limite di 10 richieste preventivo mensili del piano Pro. Passa a Premium per richieste illimitate.');
+      }
+      return;
+    }
+  }
+
   const testo = document.getElementById('prev-testo').value.trim();
   const min = document.getElementById('prev-min').value;
   const max = document.getElementById('prev-max').value;
