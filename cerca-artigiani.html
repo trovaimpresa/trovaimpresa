@@ -395,6 +395,7 @@
       if (conFoto) q = q.not('foto_lavori', 'is', null);
       if (rispondeIn24h) q = q.eq('risponde_24h', true);
       if (preventivoOnline) q = q.eq('preventivo_online', true);
+      q = q.order('piano_ordine', { ascending: false });
       if (sortBy === 'valutazione') q = q.order('valutazione_media', { ascending: false });
       else if (sortBy === 'recenti') q = q.order('created_at', { ascending: false });
       else q = q.order('created_at', { ascending: false });
