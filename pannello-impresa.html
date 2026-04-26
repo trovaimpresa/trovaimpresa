@@ -1209,8 +1209,6 @@ async function caricaSessioneConDati(session) {
     const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
     if (pianoFresco) {
       impresaCorrente.piano = pianoFresco.piano;
-      if (pianoFresco.piano === 'premium') { window.location.replace('pannello-premium.html'); return; }
-      if (pianoFresco.piano === 'pro') { window.location.replace('pannello-pro.html'); return; }
     }
   }
   console.log('piano:', impresaCorrente.piano);
@@ -1239,8 +1237,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) {
     impresaCorrente.piano = pianoFresco.piano;
-    if (pianoFresco.piano === 'premium') { window.location.replace('pannello-premium.html'); return; }
-    if (pianoFresco.piano === 'pro') { window.location.replace('pannello-pro.html'); return; }
   }
   aggiornaBadgeEOverlay();
   console.log('piano:', impresaCorrente.piano);
@@ -1280,8 +1276,6 @@ async function doLogin() {
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) {
     impresaCorrente.piano = pianoFresco.piano;
-    if (pianoFresco.piano === 'premium') { window.location.replace('pannello-premium.html'); return; }
-    if (pianoFresco.piano === 'pro') { window.location.replace('pannello-pro.html'); return; }
   }
   aggiornaBadgeEOverlay();
   localStorage.setItem('ti_logged', '1');
