@@ -162,8 +162,8 @@
             <input type="url" id="f-sito_web" placeholder="https://www.miosito.it">
           </div>
           <div class="form-group" style="margin-bottom:0;">
-            <label>Descrizione <span style="font-weight:400;color:#888;">(max 500 caratteri)</span></label>
-            <textarea id="f-descrizione" placeholder="Chi siete, cosa fate, i vostri punti di forza..." maxlength="500" style="min-height:100px;" oninput="document.getElementById('desc-counter').textContent=this.value.length+' / 500'"></textarea>
+            <label>Descrizione <span id="desc-limit-label" style="font-weight:400;color:#888;">(max 500 caratteri)</span></label>
+            <textarea id="f-descrizione" placeholder="Chi siete, cosa fate, i vostri punti di forza..." maxlength="500" style="min-height:100px;" oninput="aggiornaDescCounter()"></textarea>
             <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0 / 500</div>
           </div>
         </div>
@@ -933,6 +933,13 @@
       return 'artigiano'; // fallback
     }
 
+    function aggiornaDescCounter() {
+      const el = document.getElementById('f-descrizione');
+      const counter = document.getElementById('desc-counter');
+      const max = el.getAttribute('maxlength');
+      counter.textContent = el.value.length + (max ? ' / ' + max : '');
+    }
+
     function popolaCampi(d) {
       // Dati base comuni
       document.getElementById('f-email').value = d.email || '';
@@ -966,8 +973,18 @@
         }
       }
 
-      // Contatore descrizione
-      document.getElementById('desc-counter').textContent = (d.descrizione || '').length + ' / 500';
+      // Limite descrizione in base al piano (Free: 200, Pro/Premium: illimitato)
+      const _pianoDesc = (d.piano || 'free').toLowerCase();
+      const _descEl = document.getElementById('f-descrizione');
+      const _descLabel = document.getElementById('desc-limit-label');
+      if (_pianoDesc === 'free') {
+        _descEl.maxLength = 200;
+        _descLabel.textContent = '(max 200 caratteri – piano Free)';
+      } else {
+        _descEl.removeAttribute('maxlength');
+        _descLabel.textContent = '(illimitata – piano ' + _pianoDesc.charAt(0).toUpperCase() + _pianoDesc.slice(1) + ')';
+      }
+      aggiornaDescCounter();
 
       // Logo attuale
       if (d.logo_url) {
@@ -1197,6 +1214,13 @@
 
     // Salvataggio
     async function salvaProfilo() {
+      // Validazione descrizione (limite 200 caratteri per piano Free)
+      const _pianoSave = (impresaData.piano || 'free').toLowerCase();
+      const _descrSave = document.getElementById('f-descrizione').value.trim();
+      if (_pianoSave === 'free' && _descrSave.length > 200) {
+        alert('La descrizione può essere max 200 caratteri sul piano Free. Passa a Pro per descrizione illimitata.');
+        return;
+      }
       const btn = document.getElementById('btn-save');
       btn.disabled = true;
       btn.textContent = '⏳ Salvataggio...';
