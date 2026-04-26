@@ -1043,10 +1043,7 @@
           throw new Error(`Errore ${res.status}: ${errText}`);
         }
 
-        const piano = document.getElementById('piano-selezionato').value || 'free';
-        if (piano === 'pro') window.location.href = 'pannello-pro.html';
-        else if (piano === 'premium') window.location.href = 'pannello-premium.html';
-        else window.location.href = 'pannello-impresa.html';
+        window.location.href = 'pannello-impresa.html';
       } catch (err) {
         console.error('Errore registrazione:', err);
         btnSubmit.disabled = false;
