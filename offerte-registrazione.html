@@ -887,13 +887,31 @@
 
         const { data: { user } } = await supabaseClient.auth.getUser();
         let impresaId = null;
+        let impresaPiano = 'free';
         if (user) {
             const { data: impresa } = await supabaseClient
                 .from('imprese')
-                .select('id')
+                .select('id,piano')
                 .eq('email', user.email)
                 .single();
-            if (impresa) impresaId = impresa.id;
+            if (impresa) { impresaId = impresa.id; impresaPiano = (impresa.piano || 'free').toLowerCase(); }
+        }
+
+        // Gating mensile (Free=1, Pro=3, Premium=∞) — sicurezza per accesso URL diretto
+        if (impresaId) {
+            const _maxMese = impresaPiano === 'premium' ? Infinity : impresaPiano === 'pro' ? 3 : 1;
+            if (_maxMese !== Infinity) {
+                const _inizioMese = new Date(); _inizioMese.setDate(1); _inizioMese.setHours(0,0,0,0);
+                const { count } = await supabaseClient
+                    .from('offerte_lavoro')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('impresa_id', impresaId)
+                    .gte('created_at', _inizioMese.toISOString());
+                if ((count || 0) >= _maxMese) {
+                    alert(`Hai raggiunto il limite di ${_maxMese} offerta/e al mese del piano ${impresaPiano.charAt(0).toUpperCase()+impresaPiano.slice(1)}. Passa a un piano superiore per pubblicarne di più.`);
+                    return;
+                }
+            }
         }
 
         const formData = {
