@@ -168,10 +168,10 @@
         const accessToken = authData.session.access_token;
 
         // 2. Chiama la funzione serverless che elimina riga da imprese + account Auth
-        const res = await fetch('/.netlify/functions/cancella-utente', {
+        const res = await fetch('/.netlify/functions/elimina-account', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accessToken })
+          body: JSON.stringify({ access_token: accessToken })
         });
 
         if (!res.ok) {
