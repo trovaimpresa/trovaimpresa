@@ -1649,7 +1649,8 @@ async function copiaPreventivoDash() {
 // =====================
 // FOTO DEI LAVORI
 // =====================
-const MAX_FOTO_FREE = 10;
+const MAX_FOTO_FREE = 5;
+const MAX_FOTO_PRO = 20;
 let fotoCaricate = [];
 
 async function caricaFotoLavori() {
@@ -1663,11 +1664,15 @@ async function caricaFotoLavori() {
 }
 
 function aggiornaBannerFoto() {
-  const isPro = impresaCorrente.piano === 'pro';
+  const piano = (impresaCorrente.piano || '').toLowerCase();
+  const isPremium = piano === 'premium';
+  const isPro = piano === 'pro';
   const n = fotoCaricate.length;
-  const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - n);
-  const testoHTML = isPro
-    ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#1a73e8">Pro ⭐</strong> — illimitate`
+  const rimaste = isPremium ? Infinity : isPro ? Math.max(0, MAX_FOTO_PRO - n) : Math.max(0, MAX_FOTO_FREE - n);
+  const testoHTML = isPremium
+    ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7c3aed">Premium 💎</strong> — illimitate`
+    : isPro
+    ? `<span class="foto-limit-num">${n}/${MAX_FOTO_PRO}</span> foto caricate · Piano <strong style="color:#1a73e8">Pro ⭐</strong> — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="info-premium.html" style="color:var(--arancio);font-weight:700">passa a Premium</a> per foto illimitate'}`
     : `<span class="foto-limit-num">${n}/${MAX_FOTO_FREE}</span> foto caricate · Piano Free — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="prezzi.html" style="color:var(--arancio);font-weight:700">passa a Pro</a> per foto illimitate'}`;
 
   for (const suffix of ['', '-dash']) {
@@ -1676,8 +1681,8 @@ function aggiornaBannerFoto() {
     const uploadArea = document.getElementById('foto-upload-area' + suffix);
     if (!barEl) continue;
     testoEl.innerHTML = testoHTML;
-    barEl.style.borderColor = isPro ? '#1a73e8' : '';
-    uploadArea.style.display = (isPro || rimaste > 0) ? '' : 'none';
+    barEl.style.borderColor = (isPremium || isPro) ? '#1a73e8' : '';
+    uploadArea.style.display = (isPremium || rimaste > 0) ? '' : 'none';
   }
 }
 
@@ -1697,15 +1702,21 @@ function renderFotoGrid() {
 
 async function uploadFoto(files) {
   if (!files?.length) return;
-  const isPro = impresaCorrente.piano === 'pro';
-  const rimaste = isPro ? Infinity : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
+  const piano = (impresaCorrente.piano || '').toLowerCase();
+  const isPremium = piano === 'premium';
+  const isPro = piano === 'pro';
+  const rimaste = isPremium ? Infinity : isPro ? Math.max(0, MAX_FOTO_PRO - fotoCaricate.length) : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
 
-  if (!isPro && rimaste === 0) {
-    alert('Hai raggiunto il limite di 10 foto per il piano Free. Passa a Pro per foto illimitate!');
+  if (!isPremium && rimaste === 0) {
+    if (isPro) {
+      alert('Hai raggiunto il limite di 20 foto del piano Pro. Passa a Premium per foto illimitate.');
+    } else {
+      alert('Hai raggiunto il limite di 5 foto per il piano Free. Passa a Pro per foto illimitate!');
+    }
     return;
   }
 
-  const daCaricari = Array.from(files).slice(0, isPro ? files.length : rimaste);
+  const daCaricari = Array.from(files).slice(0, isPremium ? files.length : rimaste);
   const allProgress = ['foto-progress', 'foto-progress-dash'].map(id => document.getElementById(id)).filter(Boolean);
   allProgress.forEach(p => { p.style.display = 'block'; p.textContent = `⏳ Caricamento ${daCaricari.length} foto...`; });
 
