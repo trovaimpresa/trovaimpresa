@@ -797,12 +797,8 @@
         <div class="topbar-title">💼 Offerte di lavoro</div>
       </div>
 
-      <!-- Info piano -->
-      <div class="piano-info" id="piano-info-lavoro">
-        <span style="font-size:1.4rem">💡</span>
-        <div>Piano <strong id="piano-label">Free</strong>: puoi pubblicare <strong id="annunci-rimasti">1 annuncio</strong>. 
-        Passa al <strong><a href="prezzi.html" style="color:var(--arancio)">piano Pro</a></strong> per annunci illimitati e posizione in evidenza!</div>
-      </div>
+      <!-- Contatore offerte del mese -->
+      <div id="contatore-offerte-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
 
       <!-- Form nuovo annuncio -->
       <div class="form-annuncio" id="form-annuncio">
@@ -1435,8 +1431,26 @@ async function caricaAnnunciLavoro() {
 
   annunciLavoro = data || [];
   const isPro = impresaCorrente.piano === 'pro';
-  const maxAnnunci = isPro ? Infinity : 1;
   const attivi = annunciLavoro.filter(a => a.attiva).length;
+
+  // Conteggio offerte del mese corrente (Free=1, Pro=3, Premium=∞)
+  const _piano = (impresaCorrente.piano || 'free').toLowerCase();
+  const _maxMese = _piano === 'premium' ? Infinity : _piano === 'pro' ? 3 : 1;
+  const _inizioMese = new Date(); _inizioMese.setDate(1); _inizioMese.setHours(0,0,0,0);
+  const _offerteMese = annunciLavoro.filter(a => new Date(a.created_at) >= _inizioMese).length;
+  const _atLimit = _offerteMese >= _maxMese;
+  const _pianoLabel = _piano.charAt(0).toUpperCase() + _piano.slice(1);
+  const _limiteStr = _maxMese === Infinity ? '∞' : _maxMese;
+  const _upsell = _piano === 'free'
+    ? ' — <a href="info-pro.html" style="color:var(--arancio);font-weight:700">Passa a Pro</a> per 3/mese'
+    : _piano === 'pro'
+    ? ' — <a href="info-premium.html" style="color:#7c3aed;font-weight:700">Passa a Premium</a> per offerte illimitate'
+    : '';
+  const _contEl = document.getElementById('contatore-offerte-mese');
+  if (_contEl) {
+    _contEl.innerHTML = `📊 Offerte questo mese: <strong>${_offerteMese}/${_limiteStr}</strong> (Piano ${_pianoLabel})${_upsell}`;
+    _contEl.style.borderLeftColor = _atLimit ? '#c0392b' : (_piano === 'premium' ? '#7c3aed' : _piano === 'pro' ? '#1a73e8' : '#2a7a4b');
+  }
 
   // Aggiorna badge sidebar
   if (attivi > 0) {
@@ -1444,26 +1458,15 @@ async function caricaAnnunciLavoro() {
     document.getElementById('badge-lavoro').style.display = '';
   }
 
-  // Aggiorna info piano
-  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
   // Aggiorna dashboard piano
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
     dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free';
     dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b';
   }
-  if (isPro) {
-    document.getElementById('annunci-rimasti').textContent = 'annunci illimitati';
-    document.getElementById('piano-info-lavoro').style.background = 'linear-gradient(135deg,var(--verde3),#fff)';
-    document.getElementById('piano-info-lavoro').style.borderColor = '#a8d5b5';
-  } else {
-    const rimasti = Math.max(0, maxAnnunci - attivi);
-    document.getElementById('annunci-rimasti').textContent = rimasti > 0 ? `${rimasti} annuncio disponibile` : '0 annunci disponibili (limite raggiunto)';
-  }
 
-  // Mostra/nascondi bottone
-  const pubbPossibile = isPro || attivi < 1;
-  document.getElementById('btn-apri-form').style.display = pubbPossibile ? '' : 'none';
+  // Mostra/nascondi bottone (gating mensile)
+  document.getElementById('btn-apri-form').style.display = _atLimit ? 'none' : '';
 
   mostraAnnunciLavoro();
 }
@@ -1515,7 +1518,6 @@ async function impostaPiano(piano) {
   const isPro = piano === 'pro';
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) { dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free'; dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b'; }
-  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
   alert(isPro ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
 }
 
@@ -1538,6 +1540,16 @@ function chiudiFormAnnuncio() {
 }
 
 async function salvaAnnuncio() {
+  // Gating mensile (Free=1, Pro=3, Premium=∞)
+  const _pianoSav = (impresaCorrente.piano || 'free').toLowerCase();
+  const _maxMeseSav = _pianoSav === 'premium' ? Infinity : _pianoSav === 'pro' ? 3 : 1;
+  const _inizioMeseSav = new Date(); _inizioMeseSav.setDate(1); _inizioMeseSav.setHours(0,0,0,0);
+  const _offerteMeseSav = annunciLavoro.filter(a => new Date(a.created_at) >= _inizioMeseSav).length;
+  if (_offerteMeseSav >= _maxMeseSav) {
+    alert(`Hai raggiunto il limite di ${_maxMeseSav} offerta/e al mese del piano ${_pianoSav.charAt(0).toUpperCase()+_pianoSav.slice(1)}. Passa a un piano superiore per pubblicarne di più.`);
+    return;
+  }
+
   const titolo = document.getElementById('ann-titolo').value.trim();
   const categoria = document.getElementById('ann-categoria').value;
   const contratto = document.getElementById('ann-contratto').value;
