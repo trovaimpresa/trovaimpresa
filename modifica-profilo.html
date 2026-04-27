@@ -1396,13 +1396,31 @@
       const input = prompt('Per confermare digita: ELIMINA');
       if (input !== 'ELIMINA') return;
       if (!confirm('ULTIMA CONFERMA: tutti i tuoi dati verranno persi per sempre. Procedere?')) return;
-      const { error: delError } = await supabaseClient
-        .from('imprese')
-        .delete()
-        .eq('user_id', currentUser.id);
-      if (delError) { alert('Errore eliminazione: ' + delError.message); return; }
-      await supabaseClient.auth.signOut();
-      window.location.href = '/index.html';
+
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        alert('Sessione scaduta, rifai login');
+        return;
+      }
+
+      const res = await fetch('/.netlify/functions/elimina-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: session.access_token })
+      });
+
+      if (res.ok) {
+        alert('Account eliminato con successo');
+        await supabaseClient.auth.signOut();
+        window.location.href = '/index.html';
+      } else {
+        let msg = 'Errore eliminazione account';
+        try {
+          const j = await res.json();
+          if (j?.error) msg = j.error;
+        } catch {}
+        alert(msg);
+      }
     }
 
     async function disdiciAbbonamento() {
