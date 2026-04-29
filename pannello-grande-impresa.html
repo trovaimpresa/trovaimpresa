@@ -1548,8 +1548,8 @@ async function caricaAnnunciLavoro() {
   // Aggiorna dashboard piano
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
-    dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free';
-    dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b';
+    dashLabel.textContent = impresaCorrente.piano === 'premium' ? 'Premium 👑' : isPro ? 'Pro ⭐' : 'Free';
+    dashLabel.style.color = impresaCorrente.piano === 'premium' ? '#7c3aed' : isPro ? '#1565c0' : '#2a7a4b';
   }
 
   // Mostra/nascondi bottone (gating mensile)
