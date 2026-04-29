@@ -384,7 +384,7 @@
       const regione = document.getElementById('regioneSelect').value;
       const provinciaSel = document.getElementById('provincia').value;
       const cittaSel = document.getElementById('citta').value;
-      let q = supabaseClient.from('imprese').select('*').eq('tipo', 'artigiano');
+      let q = supabaseClient.from('imprese').select('*').or('tipo.eq.artigiano,tipo_secondario.eq.artigiano');
       if (mestiereScelto !== 'tutti') q = q.ilike('mestieri', `%${mestiereScelto}%`);
       if (citta) q = q.ilike('citta', `%${citta}%`);
       if (regione) q = q.eq('regione', regione);
