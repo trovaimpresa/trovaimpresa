@@ -652,6 +652,7 @@
 
 <!-- PANNELLO -->
 <div class="pannello" id="pannello">
+  <div id="pannello-tabs" style="display:none"></div>
   <button class="mob-menu-btn" style="display:none" onclick="toggleSidebar()" aria-label="Menu">☰</button>
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
   <aside class="sidebar" id="sidebar-el">
@@ -1477,7 +1478,10 @@ window.onpopstate = function(e) {
   }
 };
 
+function renderTabs() {}
+
 async function inizializza() {
+  renderTabs();
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const piano = (impresaCorrente.piano || 'free').toLowerCase();
   const isPro = piano === 'pro' || piano === 'premium';
