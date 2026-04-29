@@ -1458,7 +1458,8 @@ function renderTabs() {
     professionista: { label: 'Professionista', url: 'pannello-professionisti.html' }
   };
   const corrente = MAPPA[PANNELLO_CORRENTE];
-  const secondaria = MAPPA[impresaCorrente.tipo_secondario];
+  const altra = (impresaCorrente.tipo === PANNELLO_CORRENTE) ? impresaCorrente.tipo_secondario : impresaCorrente.tipo;
+  const secondaria = MAPPA[altra];
   const baseStyle = 'color:white;padding:14px 32px;border-radius:8px 8px 0 0;font-weight:700;font-size:16px;text-decoration:none';
   const tabAttiva = `<span style="${baseStyle};background:#1a4d2e">${corrente.label}</span>`;
   const tabInattiva = `<a href="${secondaria.url}" style="${baseStyle};background:#2a7a4b" onmouseover="this.style.background='#1a4d2e'" onmouseout="this.style.background='#2a7a4b'">${secondaria.label}</a>`;
