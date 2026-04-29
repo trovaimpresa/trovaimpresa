@@ -688,6 +688,7 @@
   </aside>
 
   <main class="main">
+    <div id="pannello-tabs" style="display:none"></div>
 
     <!-- DASHBOARD -->
     <div class="section active" id="sec-dashboard">
@@ -1446,7 +1447,30 @@ function aggiornaBadgeEOverlay() {
   aggiornaPianoCards(piano);
 }
 
+function renderTabs() {
+  const PANNELLO_CORRENTE = 'impresa';
+  if (!impresaCorrente?.tipo_secondario) return;
+  const MAPPA = {
+    artigiano: { label: 'Artigiano', url: 'pannello-artigiano.html' },
+    impresa: { label: 'Impresa', url: 'pannello-impresa.html' },
+    grande_impresa: { label: 'Grande Impresa', url: 'pannello-grande-impresa.html' },
+    negozio: { label: 'Negozio', url: 'pannello-negozio.html' },
+    professionista: { label: 'Professionista', url: 'pannello-professionisti.html' }
+  };
+  const corrente = MAPPA[PANNELLO_CORRENTE];
+  const secondaria = MAPPA[impresaCorrente.tipo_secondario];
+  const baseStyle = 'color:white;padding:14px 32px;border-radius:8px 8px 0 0;font-weight:700;font-size:16px;text-decoration:none';
+  const tabAttiva = `<span style="${baseStyle};background:#1a4d2e">${corrente.label}</span>`;
+  const tabInattiva = `<a href="${secondaria.url}" style="${baseStyle};background:#2a7a4b" onmouseover="this.style.background='#1a4d2e'" onmouseout="this.style.background='#2a7a4b'">${secondaria.label}</a>`;
+  const container = document.getElementById('pannello-tabs');
+  container.innerHTML = tabAttiva + tabInattiva;
+  container.style.display = 'flex';
+  container.style.gap = '4px';
+  container.style.padding = '12px 16px 0 16px';
+}
+
 async function inizializza() {
+  renderTabs();
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const piano = impresaCorrente.piano || 'free';
   const isPro = piano === 'pro' || piano === 'premium';
