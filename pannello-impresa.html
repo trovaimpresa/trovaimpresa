@@ -1838,8 +1838,11 @@ async function impostaPiano(piano) {
   impresaCorrente.piano = piano;
   const isPro = piano === 'pro';
   const dashLabel = document.getElementById('piano-dashboard-label');
-  if (dashLabel) { dashLabel.textContent = isPro ? 'Pro ⭐' : 'Free'; dashLabel.style.color = isPro ? '#e6a817' : '#2a7a4b'; }
-  alert(isPro ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
+  if (dashLabel) {
+    dashLabel.textContent = piano === 'premium' ? 'Premium 👑' : piano === 'pro' ? 'Pro ⭐' : 'Free';
+    dashLabel.style.color = piano === 'premium' ? '#7c3aed' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
+  }
+  alert(piano === 'premium' ? '✅ Piano Premium attivato! Ora sei al top dei risultati.' : piano === 'pro' ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
 }
 
 function apriFormAnnuncio() {
