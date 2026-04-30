@@ -1303,7 +1303,7 @@ function renderTabs() {
 async function inizializza() {
   renderTabs();
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
-  const isPro = impresaCorrente.piano === 'pro';
+  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
   const rating = impresaCorrente.rating || '—';
 
   // Header dashboard
@@ -1534,7 +1534,7 @@ async function caricaAnnunciLavoro() {
     .order('created_at', { ascending: false });
 
   annunciLavoro = data || [];
-  const isPro = impresaCorrente.piano === 'pro';
+  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
   const maxAnnunci = isPro ? Infinity : 1;
   const attivi = annunciLavoro.filter(a => a.attiva).length;
 
@@ -1545,7 +1545,7 @@ async function caricaAnnunciLavoro() {
   }
 
   // Aggiorna info piano
-  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
+  document.getElementById('piano-label').textContent = impresaCorrente.piano === 'premium' ? '💎 Premium' : impresaCorrente.piano === 'pro' ? 'Pro ⭐' : 'Free';
   // Aggiorna dashboard piano
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
@@ -1612,7 +1612,7 @@ async function impostaPiano(piano) {
   const { error } = await sb.from('imprese').update({ piano }).eq('id', impresaCorrente.id);
   if (error) { alert('Errore: ' + error.message); return; }
   impresaCorrente.piano = piano;
-  const isPro = piano === 'pro';
+  const isPro = piano === 'pro' || piano === 'premium';
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
     dashLabel.textContent = piano === 'premium' ? 'Premium 👑' : piano === 'pro' ? 'Pro ⭐' : 'Free';
@@ -1767,7 +1767,7 @@ async function caricaFotoLavori() {
 function aggiornaBannerFoto() {
   const piano = (impresaCorrente.piano || '').toLowerCase();
   const isPremium = piano === 'premium';
-  const isPro = piano === 'pro';
+  const isPro = piano === 'pro' || piano === 'premium';
   const n = fotoCaricate.length;
   const rimaste = isPremium ? Infinity : isPro ? Math.max(0, MAX_FOTO_PRO - n) : Math.max(0, MAX_FOTO_FREE - n);
   const testoHTML = isPremium
@@ -1805,7 +1805,7 @@ async function uploadFoto(files) {
   if (!files?.length) return;
   const piano = (impresaCorrente.piano || '').toLowerCase();
   const isPremium = piano === 'premium';
-  const isPro = piano === 'pro';
+  const isPro = piano === 'pro' || piano === 'premium';
   const rimaste = isPremium ? Infinity : isPro ? Math.max(0, MAX_FOTO_PRO - fotoCaricate.length) : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
 
   if (!isPremium && rimaste === 0) {
