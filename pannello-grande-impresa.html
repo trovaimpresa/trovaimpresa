@@ -1296,7 +1296,7 @@ function renderTabs() {
 async function inizializza() {
   renderTabs();
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
-  const isPro = impresaCorrente.piano === 'pro';
+  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
   const rating = impresaCorrente.rating || '—';
 
   // Header dashboard
