@@ -376,6 +376,7 @@
     padding:4px 12px; font-size:0.82rem; font-weight:700;
   }
   .dash-piano-badge.pro { background:#1a73e8; }
+  .dash-piano-badge.premium { background:#7b1fa2; color:white; }
   .btn-ai-preventivo {
     background:white; color:var(--verde2); border:none; border-radius:14px;
     padding:13px 22px; font-family:'DM Sans',sans-serif; font-weight:800;
@@ -1306,8 +1307,17 @@ async function inizializza() {
   document.getElementById('dash-nome-impresa').textContent = nome;
   document.getElementById('dash-rating-badge').textContent = `⭐ ${rating}`;
   const pianoBadge = document.getElementById('dash-piano-badge');
-  pianoBadge.textContent = isPro ? '⭐ Pro' : '🆓 Free';
-  if (isPro) pianoBadge.classList.add('pro');
+  pianoBadge.classList.remove('pro', 'premium');
+  const piano = (impresaCorrente ? (impresaCorrente.piano || 'free') : 'free').toLowerCase();
+  if (piano === 'premium') {
+    pianoBadge.textContent = '💎 Premium';
+    pianoBadge.classList.add('premium');
+  } else if (piano === 'pro') {
+    pianoBadge.textContent = '⭐ Pro';
+    pianoBadge.classList.add('pro');
+  } else {
+    pianoBadge.textContent = '🆓 Free';
+  }
 
   // Stat rating (condiviso)
   document.getElementById('stat-rating').textContent = rating;
