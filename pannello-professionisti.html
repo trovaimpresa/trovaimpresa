@@ -1300,7 +1300,7 @@ function renderTabs() {
 async function inizializza() {
   renderTabs();
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
-  const isPro = impresaCorrente.piano === 'pro';
+  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
   const rating = impresaCorrente.rating || '—';
 
   // Header dashboard
@@ -1531,7 +1531,7 @@ async function caricaAnnunciLavoro() {
     .order('created_at', { ascending: false });
 
   annunciLavoro = data || [];
-  const isPro = impresaCorrente.piano === 'pro';
+  const isPro = impresaCorrente.piano === 'pro' || impresaCorrente.piano === 'premium';
   const maxAnnunci = isPro ? Infinity : 1;
   const attivi = annunciLavoro.filter(a => a.attiva).length;
 
@@ -1542,7 +1542,7 @@ async function caricaAnnunciLavoro() {
   }
 
   // Aggiorna info piano
-  document.getElementById('piano-label').textContent = isPro ? 'Pro ⭐' : 'Free';
+  document.getElementById('piano-label').textContent = impresaCorrente.piano === 'premium' ? '💎 Premium' : impresaCorrente.piano === 'pro' ? 'Pro ⭐' : 'Free';
   // Aggiorna dashboard piano
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
