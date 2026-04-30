@@ -765,7 +765,7 @@
       </div>
 
       <!-- GESTIONE PIANO -->
-      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+      <div id="sezione-il-tuo-piano" style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
         <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b">Free</strong></div>
 
@@ -1478,8 +1478,9 @@ window.onpopstate = function(e) {
   }
 };
 
+const PANNELLO_CORRENTE = 'artigiano';
+
 function renderTabs() {
-  const PANNELLO_CORRENTE = 'artigiano';
   if (!impresaCorrente?.tipo_secondario) return;
   const MAPPA = {
     artigiano: { label: 'Artigiano', url: 'pannello-artigiano.html' },
@@ -1630,7 +1631,11 @@ function aggiornaBadgeEOverlay() {
     lbl.textContent = piano === 'premium' ? 'Premium 👑' : piano === 'pro' ? 'Pro ⭐' : 'Free';
     lbl.style.color = piano === 'premium' ? '#7c3aed' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
   }
-  aggiornaPianoCards(piano);
+  if (impresaCorrente.tipo === PANNELLO_CORRENTE) {
+    aggiornaPianoCards(piano);
+  } else {
+    document.getElementById('sezione-il-tuo-piano').style.display = 'none';
+  }
 }
 
 function aggiornaPianoCards(piano) {
