@@ -690,9 +690,9 @@
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
         <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b">Free</strong></div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div id="piano-cards-grid" style="display:flex;gap:12px;flex-wrap:wrap;">
           <!-- FREE -->
-          <div id="card-free" style="border:2px solid #2a7a4b;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s">
+          <div id="card-free" style="flex:1;min-width:180px;border:2px solid #2a7a4b;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s">
             <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
             <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
             <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
@@ -702,12 +702,22 @@
           </div>
 
           <!-- PRO -->
-          <div id="card-pro" style="border:2px solid #1a73e8;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f0f6ff,#fff)">
+          <div id="card-pro" style="flex:1;min-width:180px;border:2px solid #1a73e8;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f0f6ff,#fff)">
             <div style="font-size:1.5rem;margin-bottom:6px">⭐</div>
             <div style="font-weight:800;font-size:1rem;color:#1a73e8;margin-bottom:6px">Pro</div>
             <div style="font-size:0.8rem;color:#666;line-height:1.5">Annunci illimitati<br>Badge ⭐ Pro in evidenza<br>Posizione prioritaria</div>
             <div style="margin-top:12px">
               <button onclick="window.location.href='prezzi.html'" style="width:100%;padding:10px;background:#1a73e8;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">⭐ Passa a Pro</button>
+            </div>
+          </div>
+
+          <!-- PREMIUM -->
+          <div id="card-premium" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
+            <div style="font-size:1.5rem;margin-bottom:6px">👑</div>
+            <div style="font-weight:800;font-size:1rem;color:#7c3aed;margin-bottom:6px">Premium</div>
+            <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto di Pro +<br>Logo personalizzato<br>Colore header personalizzato<br>Assistenza prioritaria</div>
+            <div style="margin-top:12px">
+              <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#ccc;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">Passa a Premium</button>
             </div>
           </div>
         </div>
@@ -1386,6 +1396,7 @@ async function inizializza() {
   } else {
     pianoBadge.textContent = '🆓 Free';
   }
+  aggiornaPianoCards(piano);
 
   // Stat rating (condiviso)
   document.getElementById('stat-rating').textContent = rating;
@@ -1685,7 +1696,43 @@ async function impostaPiano(piano) {
   }
   document.getElementById('piano-label').textContent = piano === 'premium' ? 'Premium 👑' : piano === 'pro' ? 'Pro ⭐' : 'Free';
   document.getElementById('piano-label').style.color = piano === 'premium' ? '#7c3aed' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
+  aggiornaPianoCards(piano);
   alert(piano === 'premium' ? '✅ Piano Premium attivato! Ora sei al top dei risultati.' : piano === 'pro' ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
+}
+
+function aggiornaPianoCards(piano) {
+  const piani = [
+    { id: 'free',    cardId: 'card-free',    btnId: 'btn-piano-free',    colore: '#2a7a4b', href: null,                label: 'Free' },
+    { id: 'pro',     cardId: 'card-pro',     btnId: 'btn-piano-pro',     colore: '#1565c0', href: 'info-pro.html',     label: 'Pro' },
+    { id: 'premium', cardId: 'card-premium', btnId: 'btn-piano-premium', colore: '#7c3aed', href: 'info-premium.html', label: 'Premium' },
+  ];
+  piani.forEach(p => {
+    const card = document.getElementById(p.cardId);
+    const btn  = document.getElementById(p.btnId);
+    if (!card || !btn) return;
+    const attivo = piano === p.id;
+    card.style.border = attivo ? `2px solid ${p.colore}` : '2px solid #e0e0e0';
+    card.style.boxShadow = attivo ? `0 0 0 3px ${p.colore}22` : '';
+    btn.className = 'btn-az';
+    btn.style.width = '100%';
+    btn.style.justifyContent = 'center';
+    btn.style.borderTopColor = p.colore;
+    if (attivo) {
+      btn.textContent = '✅ Attivo';
+      btn.style.background = p.colore;
+      btn.style.color = 'white';
+      btn.style.cursor = 'default';
+      btn.disabled = true;
+      btn.onclick = null;
+    } else {
+      btn.textContent = `🔒 Passa a ${p.label}`;
+      btn.style.background = 'white';
+      btn.style.color = p.colore;
+      btn.style.cursor = 'pointer';
+      btn.disabled = false;
+      btn.onclick = p.href ? () => window.location.href = p.href : null;
+    }
+  });
 }
 
 function apriFormAnnuncio() {
