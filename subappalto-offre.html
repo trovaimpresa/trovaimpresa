@@ -134,6 +134,56 @@
         <input class="form-input" id="f-nome" placeholder="Es. Posa Pavimenti Bianchi Srl" type="text">
       </div>
       <div class="form-group">
+        <label class="form-label">Categoria *</label>
+        <select class="form-input" id="f-categoria" onchange="toggleMestiere()">
+          <option value="">— Seleziona —</option>
+          <option value="subappalto">Subappalto</option>
+          <option value="cottimisti">Cottimisti</option>
+        </select>
+      </div>
+      <div class="form-group" id="wrap-mestiere" style="display:none;">
+        <label class="form-label">Mestiere *</label>
+        <select class="form-input" id="f-mestiere">
+          <option value="">— Seleziona —</option>
+          <option value="piastrellista">Piastrellista</option>
+          <option value="pittore">Pittore</option>
+          <option value="intonacatore">Intonacatore</option>
+          <option value="muratore">Muratore</option>
+          <option value="cartongessista">Cartongessista</option>
+          <option value="posatore_parquet">Posatore parquet</option>
+          <option value="marmista">Marmista</option>
+          <option value="stuccatore">Stuccatore</option>
+          <option value="isolatore_cappotto">Isolatore cappotto</option>
+          <option value="altro">Altro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Regione *</label>
+        <select class="form-input" id="f-regione">
+          <option value="">— Seleziona —</option>
+          <option value="abruzzo">Abruzzo</option>
+          <option value="basilicata">Basilicata</option>
+          <option value="calabria">Calabria</option>
+          <option value="campania">Campania</option>
+          <option value="emilia-romagna">Emilia-Romagna</option>
+          <option value="friuli-venezia-giulia">Friuli-Venezia Giulia</option>
+          <option value="lazio">Lazio</option>
+          <option value="liguria">Liguria</option>
+          <option value="lombardia">Lombardia</option>
+          <option value="marche">Marche</option>
+          <option value="molise">Molise</option>
+          <option value="piemonte">Piemonte</option>
+          <option value="puglia">Puglia</option>
+          <option value="sardegna">Sardegna</option>
+          <option value="sicilia">Sicilia</option>
+          <option value="toscana">Toscana</option>
+          <option value="trentino-alto-adige">Trentino-Alto Adige</option>
+          <option value="umbria">Umbria</option>
+          <option value="valle-aosta">Valle d'Aosta</option>
+          <option value="veneto">Veneto</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label class="form-label">Specializzazione *</label>
         <input class="form-input" id="f-spec" placeholder="Es. Pavimentazioni industriali, impianti idraulici..." type="text">
       </div>
@@ -303,16 +353,34 @@
     document.body.style.overflow = '';
   }
 
+  function toggleMestiere() {
+    const cat = document.getElementById('f-categoria').value;
+    const wrap = document.getElementById('wrap-mestiere');
+    if (cat === 'cottimisti') {
+      wrap.style.display = '';
+    } else {
+      wrap.style.display = 'none';
+      document.getElementById('f-mestiere').value = '';
+    }
+  }
+
   async function salva() {
     const nome = document.getElementById('f-nome').value.trim();
+    const categoria = document.getElementById('f-categoria').value;
+    const mestiere = document.getElementById('f-mestiere').value;
+    const regione = document.getElementById('f-regione').value;
     const spec = document.getElementById('f-spec').value.trim();
     const zone = document.getElementById('f-zone').value.trim();
     const esperienza = document.getElementById('f-esperienza').value.trim();
     const tel = document.getElementById('f-tel').value.trim();
     const email = document.getElementById('f-email').value.trim();
 
-    if (!nome || !spec || !zone) {
-      mostraMsg('Compila i campi obbligatori (nome impresa, specializzazione, zone coperte).', 'err');
+    if (!nome || !categoria || !regione || !spec || !zone) {
+      mostraMsg('Compila i campi obbligatori (nome impresa, categoria, regione, specializzazione, zone coperte).', 'err');
+      return;
+    }
+    if (categoria === 'cottimisti' && !mestiere) {
+      mostraMsg('Seleziona il mestiere.', 'err');
       return;
     }
 
@@ -329,6 +397,9 @@
       const { error } = await supabaseClient.from('subappalti').insert({
         tipo: 'offre',
         nome_impresa: nome,
+        categoria,
+        mestiere: categoria === 'cottimisti' ? mestiere : null,
+        regione,
         specializzazione,
         citta: zone,
         telefono: tel || null,
@@ -337,9 +408,10 @@
       });
       if (error) throw error;
       mostraMsg('✅ Disponibilità pubblicata con successo!', 'ok');
-      ['f-nome','f-spec','f-desc','f-zone','f-esperienza','f-tel','f-email']
+      ['f-nome','f-categoria','f-mestiere','f-regione','f-spec','f-desc','f-zone','f-esperienza','f-tel','f-email']
         .forEach(id => { document.getElementById(id).value = ''; });
       certIds.forEach(id => { document.getElementById(id).checked = false; });
+      document.getElementById('wrap-mestiere').style.display = 'none';
       setTimeout(() => { chiudiModal(); caricaLista(); document.getElementById('form-msg').style.display = 'none'; }, 1800);
     } catch(e) {
       mostraMsg('⚠️ Errore: ' + e.message, 'err');
