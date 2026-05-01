@@ -780,7 +780,7 @@
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
     let impresaData = null;
@@ -881,7 +881,7 @@
       initCascataGeo();
     }
 
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    sb.auth.onAuthStateChange(async (event, session) => {
       if (event !== 'INITIAL_SESSION') return;
       if (!session) {
         window.location.href = 'login-impresa.html';
@@ -890,7 +890,7 @@
       const user = session.user;
       currentUser = user;
 
-      const { data, error } = await supabaseClient
+      const { data, error } = await sb
         .from('imprese')
         .select('*')
         .eq('user_id', user.id)
@@ -1337,7 +1337,7 @@
           });
         }
 
-        const { error } = await supabaseClient
+        const { error } = await sb
           .from('imprese')
           .update(dati)
           .eq('user_id', currentUser.id);
@@ -1397,7 +1397,7 @@
       if (input !== 'ELIMINA') return;
       if (!confirm('ULTIMA CONFERMA: tutti i tuoi dati verranno persi per sempre. Procedere?')) return;
 
-      const { data: { session } } = await supabaseClient.auth.getSession();
+      const { data: { session } } = await sb.auth.getSession();
       if (!session) {
         alert('Sessione scaduta, rifai login');
         return;
@@ -1411,7 +1411,7 @@
 
       if (res.ok) {
         alert('Account eliminato con successo');
-        await supabaseClient.auth.signOut();
+        await sb.auth.signOut();
         window.location.href = '/index.html';
       } else {
         let msg = 'Errore eliminazione account';
@@ -1425,7 +1425,7 @@
 
     async function disdiciAbbonamento() {
       if (!confirm('Sei sicuro di voler disdire l\'abbonamento? Il piano resterà attivo fino alla scadenza, poi tornerai al piano Free.')) return;
-      const { error } = await supabaseClient
+      const { error } = await sb
         .from('imprese')
         .update({ rinnovo_auto_piano: false, disdetto_piano_il: new Date().toISOString() })
         .eq('user_id', currentUser.id);
