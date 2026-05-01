@@ -117,6 +117,58 @@
 
 <div class="page-body">
   <button class="btn-pubblica" onclick="apriModal()">📋 Pubblica richiesta</button>
+  <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+    <div class="form-group" style="margin:0; flex:1; min-width:160px;">
+      <label class="form-label">Filtra per categoria</label>
+      <select class="form-input" id="f-categoria-filtro" onchange="cambiaFiltroCategoria()">
+        <option value="">Tutti</option>
+        <option value="subappalto">Subappalto</option>
+        <option value="cottimisti">Cottimisti</option>
+      </select>
+    </div>
+    <div class="form-group" id="wrap-mestiere-filtro" style="margin:0; flex:1; min-width:160px; display:none;">
+      <label class="form-label">Filtra per mestiere</label>
+      <select class="form-input" id="f-mestiere-filtro" onchange="caricaLista()">
+        <option value="">Tutti</option>
+        <option value="piastrellista">Piastrellista</option>
+        <option value="pittore">Pittore</option>
+        <option value="intonacatore">Intonacatore</option>
+        <option value="muratore">Muratore</option>
+        <option value="cartongessista">Cartongessista</option>
+        <option value="posatore_parquet">Posatore parquet</option>
+        <option value="marmista">Marmista</option>
+        <option value="stuccatore">Stuccatore</option>
+        <option value="isolatore_cappotto">Isolatore cappotto</option>
+        <option value="altro">Altro</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin:0; flex:1; min-width:160px;">
+      <label class="form-label">Filtra per regione</label>
+      <select class="form-input" id="f-regione-filtro" onchange="caricaLista()">
+        <option value="">Tutti</option>
+        <option value="abruzzo">Abruzzo</option>
+        <option value="basilicata">Basilicata</option>
+        <option value="calabria">Calabria</option>
+        <option value="campania">Campania</option>
+        <option value="emilia-romagna">Emilia-Romagna</option>
+        <option value="friuli-venezia-giulia">Friuli-Venezia Giulia</option>
+        <option value="lazio">Lazio</option>
+        <option value="liguria">Liguria</option>
+        <option value="lombardia">Lombardia</option>
+        <option value="marche">Marche</option>
+        <option value="molise">Molise</option>
+        <option value="piemonte">Piemonte</option>
+        <option value="puglia">Puglia</option>
+        <option value="sardegna">Sardegna</option>
+        <option value="sicilia">Sicilia</option>
+        <option value="toscana">Toscana</option>
+        <option value="trentino-alto-adige">Trentino-Alto Adige</option>
+        <option value="umbria">Umbria</option>
+        <option value="valle-aosta">Valle d'Aosta</option>
+        <option value="veneto">Veneto</option>
+      </select>
+    </div>
+  </div>
   <div id="lista-annunci"><div class="loading-state">⏳ Caricamento annunci...</div></div>
   <div id="mappa-cerca" style="height:420px;border-radius:16px;margin-top:28px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.10);position:relative;z-index:0;"></div>
 </div>
@@ -132,6 +184,56 @@
       <div class="form-group">
         <label class="form-label">Nome impresa *</label>
         <input class="form-input" id="f-nome" placeholder="Es. Edil Rossi Srl" type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria *</label>
+        <select class="form-input" id="f-categoria" onchange="toggleMestiere()">
+          <option value="">— Seleziona —</option>
+          <option value="subappalto">Subappalto</option>
+          <option value="cottimisti">Cottimisti</option>
+        </select>
+      </div>
+      <div class="form-group" id="wrap-mestiere" style="display:none;">
+        <label class="form-label">Mestiere *</label>
+        <select class="form-input" id="f-mestiere">
+          <option value="">— Seleziona —</option>
+          <option value="piastrellista">Piastrellista</option>
+          <option value="pittore">Pittore</option>
+          <option value="intonacatore">Intonacatore</option>
+          <option value="muratore">Muratore</option>
+          <option value="cartongessista">Cartongessista</option>
+          <option value="posatore_parquet">Posatore parquet</option>
+          <option value="marmista">Marmista</option>
+          <option value="stuccatore">Stuccatore</option>
+          <option value="isolatore_cappotto">Isolatore cappotto</option>
+          <option value="altro">Altro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Regione *</label>
+        <select class="form-input" id="f-regione">
+          <option value="">— Seleziona —</option>
+          <option value="abruzzo">Abruzzo</option>
+          <option value="basilicata">Basilicata</option>
+          <option value="calabria">Calabria</option>
+          <option value="campania">Campania</option>
+          <option value="emilia-romagna">Emilia-Romagna</option>
+          <option value="friuli-venezia-giulia">Friuli-Venezia Giulia</option>
+          <option value="lazio">Lazio</option>
+          <option value="liguria">Liguria</option>
+          <option value="lombardia">Lombardia</option>
+          <option value="marche">Marche</option>
+          <option value="molise">Molise</option>
+          <option value="piemonte">Piemonte</option>
+          <option value="puglia">Puglia</option>
+          <option value="sardegna">Sardegna</option>
+          <option value="sicilia">Sicilia</option>
+          <option value="toscana">Toscana</option>
+          <option value="trentino-alto-adige">Trentino-Alto Adige</option>
+          <option value="umbria">Umbria</option>
+          <option value="valle-aosta">Valle d'Aosta</option>
+          <option value="veneto">Veneto</option>
+        </select>
       </div>
       <div class="form-group">
         <label class="form-label">Tipo lavoro richiesto *</label>
@@ -258,11 +360,18 @@
 
   async function caricaLista() {
     const div = document.getElementById('lista-annunci');
+    const fCat = document.getElementById('f-categoria-filtro').value;
+    const fMest = document.getElementById('f-mestiere-filtro').value;
+    const fReg = document.getElementById('f-regione-filtro').value;
     try {
-      const { data, error } = await supabaseClient
+      let q = supabaseClient
         .from('subappalti')
         .select('*')
-        .eq('tipo', 'cerca')
+        .eq('tipo', 'cerca');
+      if (fCat) q = q.eq('categoria', fCat);
+      if (fMest) q = q.eq('mestiere', fMest);
+      if (fReg) q = q.eq('regione', fReg);
+      const { data, error } = await q
         .order('created_at', { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -309,8 +418,34 @@
     document.body.style.overflow = '';
   }
 
+  function toggleMestiere() {
+    const cat = document.getElementById('f-categoria').value;
+    const wrap = document.getElementById('wrap-mestiere');
+    if (cat === 'cottimisti') {
+      wrap.style.display = '';
+    } else {
+      wrap.style.display = 'none';
+      document.getElementById('f-mestiere').value = '';
+    }
+  }
+
+  function cambiaFiltroCategoria() {
+    const cat = document.getElementById('f-categoria-filtro').value;
+    const wrap = document.getElementById('wrap-mestiere-filtro');
+    if (cat === 'cottimisti') {
+      wrap.style.display = '';
+    } else {
+      wrap.style.display = 'none';
+      document.getElementById('f-mestiere-filtro').value = '';
+    }
+    caricaLista();
+  }
+
   async function salva() {
     const nome = document.getElementById('f-nome').value.trim();
+    const categoria = document.getElementById('f-categoria').value;
+    const mestiere = document.getElementById('f-mestiere').value;
+    const regione = document.getElementById('f-regione').value;
     const tipoLavoro = document.getElementById('f-tipo-lavoro').value.trim();
     const desc = document.getElementById('f-desc').value.trim();
     const zona = document.getElementById('f-zona').value.trim();
@@ -319,8 +454,12 @@
     const tel = document.getElementById('f-tel').value.trim();
     const email = document.getElementById('f-email').value.trim();
 
-    if (!nome || !tipoLavoro || !zona) {
-      mostraMsg('Compila i campi obbligatori (nome impresa, tipo lavoro, zona cantiere).', 'err');
+    if (!nome || !categoria || !regione || !tipoLavoro || !zona) {
+      mostraMsg('Compila i campi obbligatori (nome impresa, categoria, regione, tipo lavoro, zona cantiere).', 'err');
+      return;
+    }
+    if (categoria === 'cottimisti' && !mestiere) {
+      mostraMsg('Seleziona il mestiere.', 'err');
       return;
     }
 
@@ -337,6 +476,9 @@
       const { error } = await supabaseClient.from('subappalti').insert({
         tipo: 'cerca',
         nome_impresa: nome,
+        categoria,
+        mestiere: categoria === 'cottimisti' ? mestiere : null,
+        regione,
         descrizione,
         citta: zona,
         telefono: tel || null,
@@ -345,9 +487,10 @@
       });
       if (error) throw error;
       mostraMsg('✅ Richiesta pubblicata con successo!', 'ok');
-      ['f-nome','f-tipo-lavoro','f-desc','f-zona','f-periodo','f-budget','f-tel','f-email']
+      ['f-nome','f-categoria','f-mestiere','f-regione','f-tipo-lavoro','f-desc','f-zona','f-periodo','f-budget','f-tel','f-email']
         .forEach(id => { document.getElementById(id).value = ''; });
       reqIds.forEach(id => { document.getElementById(id).checked = false; });
+      document.getElementById('wrap-mestiere').style.display = 'none';
       setTimeout(() => { chiudiModal(); caricaLista(); document.getElementById('form-msg').style.display = 'none'; }, 1800);
     } catch(e) {
       mostraMsg('⚠️ Errore: ' + e.message, 'err');
