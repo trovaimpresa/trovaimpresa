@@ -376,7 +376,7 @@
     padding:4px 12px; font-size:0.82rem; font-weight:700;
   }
   .dash-piano-badge.pro { background:#1a73e8; }
-  .dash-piano-badge.premium { background:#0288d1; }
+  .dash-piano-badge.premium { background:#7b1fa2; }
 
   .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
@@ -784,13 +784,13 @@
           </div>
 
           <!-- PREMIUM -->
-          <div id="card-premium" style="border:2px solid #0288d1;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f8f0ff,#fff);min-height:200px;display:flex;flex-direction:column;justify-content:space-between">
+          <div id="card-premium" style="border:2px solid #7b1fa2;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f8f0ff,#fff);min-height:200px;display:flex;flex-direction:column;justify-content:space-between">
             <div style="font-size:1.5rem;margin-bottom:6px">💎</div>
-            <div style="font-weight:800;font-size:1rem;color:#0288d1;margin-bottom:4px">Premium</div>
-            <div style="font-size:0.75rem;color:#0288d1;font-weight:700;margin-bottom:6px">€5/mese · €49/anno</div>
+            <div style="font-weight:800;font-size:1rem;color:#7b1fa2;margin-bottom:4px">Premium</div>
+            <div style="font-size:0.75rem;color:#7b1fa2;font-weight:700;margin-bottom:6px">€5/mese · €49/anno</div>
             <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto il Pro<br>AI integrata<br>Personalizzazione avanzata<br>Posizione #1 nei risultati</div>
             <div style="margin-top:12px">
-              <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#0288d1;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">💎 Passa a Premium</button>
+              <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#7b1fa2;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">💎 Passa a Premium</button>
             </div>
           </div>
         </div>
@@ -798,7 +798,7 @@
 
       <!-- CARD: Tipo secondario (Premium) -->
       <div id="card-tipo-secondario-wrapper" style="position:relative;margin-bottom:20px">
-        <div id="card-tipo-secondario" style="background:white;border-radius:16px;border-top:4px solid #7c3aed;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div id="card-tipo-secondario" style="background:white;border-radius:16px;border-top:4px solid #7b1fa2;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
           <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#1a3a2a;margin-bottom:6px">🏷️ Visibile in 2 categorie</div>
           <div style="font-size:0.9rem;color:#555;margin-bottom:16px;line-height:1.5">Aggiungi una seconda categoria al tuo profilo per essere trovato anche al di fuori della tua categoria principale.</div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -809,7 +809,7 @@
               <option value="negozio">Negozi</option>
               <option value="professionista">Professionisti</option>
             </select>
-            <button id="tipo-secondario-save" onclick="salvaTipoSecondario()" style="padding:10px 22px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer">Salva</button>
+            <button id="tipo-secondario-save" onclick="salvaTipoSecondario()" style="padding:10px 22px;background:#7b1fa2;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer">Salva</button>
           </div>
         </div>
         <div id="card-tipo-secondario-lock" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;cursor:pointer;border-radius:16px;z-index:2" onclick="alert('Funzione disponibile solo per Premium')">
@@ -1434,7 +1434,7 @@ function aggiornaBadgeEOverlay() {
   const lbl = document.getElementById('piano-dashboard-label');
   if (lbl) {
     lbl.textContent = piano === 'premium' ? 'Premium 👑' : piano === 'pro' ? 'Pro ⭐' : 'Free';
-    lbl.style.color = piano === 'premium' ? '#7c3aed' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
+    lbl.style.color = piano === 'premium' ? '#7b1fa2' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
   }
   if (impresaCorrente.tipo === PANNELLO_CORRENTE) {
     aggiornaPianoCards(piano);
@@ -1607,9 +1607,9 @@ async function caricaPreventivi() {
     _contPrevEl.innerHTML = _pianoPrev === 'free'
       ? `📊 Richieste preventivo questo mese: <strong>${_prevMese}/3</strong> (piano Free) — <a href="info-pro.html" style="color:var(--arancio);font-weight:700">Passa a Pro</a> per 10/mese`
       : _pianoPrev === 'pro'
-      ? `📊 Richieste preventivo questo mese: <strong>${_prevMese}/10</strong> (piano Pro) — <a href="info-premium.html" style="color:#7c3aed;font-weight:700">Passa a Premium</a> per illimitate`
+      ? `📊 Richieste preventivo questo mese: <strong>${_prevMese}/10</strong> (piano Pro) — <a href="info-premium.html" style="color:#7b1fa2;font-weight:700">Passa a Premium</a> per illimitate`
       : `📊 Richieste preventivo questo mese: <strong>${_prevMese}</strong> (illimitate)`;
-    _contPrevEl.style.borderLeftColor = _atLimitPrev ? '#c0392b' : (_pianoPrev === 'premium' ? '#7c3aed' : _pianoPrev === 'pro' ? '#1a73e8' : '#2a7a4b');
+    _contPrevEl.style.borderLeftColor = _atLimitPrev ? '#c0392b' : (_pianoPrev === 'premium' ? '#7b1fa2' : _pianoPrev === 'pro' ? '#1a73e8' : '#2a7a4b');
   }
 
   const container = document.getElementById('lista-preventivi');
@@ -1762,12 +1762,12 @@ async function caricaAnnunciLavoro() {
   const _upsell = _piano === 'free'
     ? ' — <a href="info-pro.html" style="color:var(--arancio);font-weight:700">Passa a Pro</a> per 3/mese'
     : _piano === 'pro'
-    ? ' — <a href="info-premium.html" style="color:#7c3aed;font-weight:700">Passa a Premium</a> per offerte illimitate'
+    ? ' — <a href="info-premium.html" style="color:#7b1fa2;font-weight:700">Passa a Premium</a> per offerte illimitate'
     : '';
   const _contEl = document.getElementById('contatore-offerte-mese');
   if (_contEl) {
     _contEl.innerHTML = `📊 Offerte questo mese: <strong>${_offerteMese}/${_limiteStr}</strong> (Piano ${_pianoLabel})${_upsell}`;
-    _contEl.style.borderLeftColor = _atLimit ? '#c0392b' : (_piano === 'premium' ? '#7c3aed' : _piano === 'pro' ? '#1a73e8' : '#2a7a4b');
+    _contEl.style.borderLeftColor = _atLimit ? '#c0392b' : (_piano === 'premium' ? '#7b1fa2' : _piano === 'pro' ? '#1a73e8' : '#2a7a4b');
   }
 
   // Aggiorna badge sidebar
@@ -1780,7 +1780,7 @@ async function caricaAnnunciLavoro() {
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
     dashLabel.textContent = impresaCorrente.piano === 'premium' ? 'Premium 👑' : isPro ? 'Pro ⭐' : 'Free';
-    dashLabel.style.color = impresaCorrente.piano === 'premium' ? '#7c3aed' : isPro ? '#1565c0' : '#2a7a4b';
+    dashLabel.style.color = impresaCorrente.piano === 'premium' ? '#7b1fa2' : isPro ? '#1565c0' : '#2a7a4b';
   }
 
   // Mostra/nascondi bottone (gating mensile)
@@ -1837,7 +1837,7 @@ async function impostaPiano(piano) {
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
     dashLabel.textContent = piano === 'premium' ? 'Premium 👑' : piano === 'pro' ? 'Pro ⭐' : 'Free';
-    dashLabel.style.color = piano === 'premium' ? '#7c3aed' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
+    dashLabel.style.color = piano === 'premium' ? '#7b1fa2' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
   }
   alert(piano === 'premium' ? '✅ Piano Premium attivato! Ora sei al top dei risultati.' : piano === 'pro' ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
 }
@@ -2000,7 +2000,7 @@ function aggiornaBannerFoto() {
   const n = fotoCaricate.length;
   const rimaste = isPremium ? Infinity : isPro ? Math.max(0, MAX_FOTO_PRO - n) : Math.max(0, MAX_FOTO_FREE - n);
   const testoHTML = isPremium
-    ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7c3aed">Premium 💎</strong> — illimitate`
+    ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7b1fa2">Premium 💎</strong> — illimitate`
     : isPro
     ? `<span class="foto-limit-num">${n}/${MAX_FOTO_PRO}</span> foto caricate · Piano <strong style="color:#1a73e8">Pro ⭐</strong> — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="info-premium.html" style="color:var(--arancio);font-weight:700">passa a Premium</a> per foto illimitate'}`
     : `<span class="foto-limit-num">${n}/${MAX_FOTO_FREE}</span> foto caricate · Piano Free — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="prezzi.html" style="color:var(--arancio);font-weight:700">passa a Pro</a> per foto illimitate'}`;
@@ -2305,7 +2305,7 @@ function aggiornaPianoCards(piano) {
   const piani = [
     { id: 'free',    cardId: 'card-free',    btnId: 'btn-piano-free',    colore: '#2a7a4b', href: null,                label: 'Free' },
     { id: 'pro',     cardId: 'card-pro',     btnId: 'btn-piano-pro',     colore: '#1565c0', href: 'info-pro.html',     label: 'Pro' },
-    { id: 'premium', cardId: 'card-premium', btnId: 'btn-piano-premium', colore: '#7c3aed', href: 'info-premium.html', label: 'Premium' },
+    { id: 'premium', cardId: 'card-premium', btnId: 'btn-piano-premium', colore: '#7b1fa2', href: 'info-premium.html', label: 'Premium' },
   ];
   piani.forEach(p => {
     const card = document.getElementById(p.cardId);
