@@ -640,13 +640,26 @@
     <div class="section active" id="sec-dashboard">
 
       <!-- HERO HEADER -->
-      <div class="dash-hero">
+      <div class="dash-hero" id="dash-hero">
         <div>
           <div class="dash-welcome">Pannello grande impresa</div>
           <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
           <div class="dash-meta">
             <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
             <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
+          </div>
+          <!-- Colore header: visibile solo Premium, impostato da JS -->
+          <div id="header-color-controls" style="display:none;margin-top:12px;">
+            <div style="font-size:0.72rem;opacity:0.7;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Colore header</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <input type="color" id="header-color-picker" value="#2a7a4b" title="Colore personalizzato"
+                style="width:30px;height:30px;border:2px solid rgba(255,255,255,0.5);border-radius:6px;cursor:pointer;padding:2px;background:transparent;"
+                onchange="applicaColoreHeader(this.value)">
+              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#1a3a2a,#2a7a4b)')" title="Verde (default)" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);"></button>
+              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#1a237e,#1565c0)')" title="Blu" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#1a237e,#1565c0);"></button>
+              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#4a148c,#7b1fa2)')" title="Viola" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#4a148c,#7b1fa2);"></button>
+              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#b71c1c,#e53935)')" title="Rosso" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#b71c1c,#e53935);"></button>
+            </div>
           </div>
         </div>
         <button class="btn-ai-preventivo" onclick="apriModalPreventivoDash()">
@@ -1344,6 +1357,16 @@ async function inizializza() {
     document.getElementById('sezione-il-tuo-piano').style.display = 'none';
   }
 
+  // Colore header: visibile solo per piano Premium
+  if (piano === 'premium') {
+    const ctrl = document.getElementById('header-color-controls');
+    if (ctrl) ctrl.style.display = '';
+    if (impresaCorrente.colore_header) {
+      const hero = document.getElementById('dash-hero');
+      if (hero) hero.style.background = impresaCorrente.colore_header;
+    }
+  }
+
   // Area logo: visibile solo per piano Premium
   const logoCol = document.getElementById('dash-hero-logo-col');
   if (logoCol) {
@@ -1734,6 +1757,23 @@ async function caricaLogoImpresa(event) {
   const placeholder = document.getElementById('dash-logo-placeholder');
   if (img) { img.src = logoUrl; img.style.display = 'block'; }
   if (placeholder) placeholder.style.display = 'none';
+}
+
+async function salvaColoreHeader(valore) {
+  await sb.from('imprese').update({ colore_header: valore }).eq('id', impresaCorrente.id);
+  impresaCorrente.colore_header = valore;
+}
+
+function applicaColoreHeader(colore) {
+  const hero = document.getElementById('dash-hero');
+  if (hero) hero.style.background = colore;
+  salvaColoreHeader(colore);
+}
+
+function applicaGradienteHeader(gradiente) {
+  const hero = document.getElementById('dash-hero');
+  if (hero) hero.style.background = gradiente;
+  salvaColoreHeader(gradiente);
 }
 
 function apriFormAnnuncio() {
