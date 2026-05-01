@@ -522,17 +522,31 @@
         btnInvia.textContent = 'Invia';
 
         if (error) {
+            if (error.code === '23505') {
+                alert("Hai già inviato una candidatura per questa offerta.");
+                return;
+            }
             alert('Errore: ' + error.message);
             return;
         }
 
-        fetch('/.netlify/functions/notifica-candidatura', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ offerta_id: offertaId, candidato_id: candidato.id })
-        }).catch(() => {});
+        let emailOk = true;
+        try {
+            const res = await fetch('/.netlify/functions/notifica-candidatura', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ offerta_id: offertaId, candidato_id: candidato.id })
+            });
+            if (!res.ok) emailOk = false;
+        } catch {
+            emailOk = false;
+        }
 
-        alert('Candidatura inviata!');
+        if (emailOk) {
+            alert('Candidatura inviata!');
+        } else {
+            alert("Candidatura inviata correttamente, ma c'è stato un problema con l'email di notifica all'impresa. L'impresa vedrà comunque la candidatura sul suo pannello.");
+        }
         chiudiModaleCandidatura();
     }
 
