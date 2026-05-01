@@ -39,7 +39,7 @@ exports.handler = async function(event) {
     if (!offerta) return { statusCode: 404, body: 'Offerta non trovata' };
     if (!candidato) return { statusCode: 404, body: 'Candidato non trovato' };
 
-    const impresaRes = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${offerta.impresa_id}&select=nome,email`, { headers: sbHeaders });
+    const impresaRes = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${offerta.impresa_id}&select=nome,nome_attivita,email`, { headers: sbHeaders });
     const imprese = await impresaRes.json();
     const impresa = imprese[0];
 
@@ -115,6 +115,51 @@ exports.handler = async function(event) {
     if (!res.ok) {
       const errBody = await res.text();
       return { statusCode: 500, body: 'Errore Resend: ' + errBody };
+    }
+
+    const html2 = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
+        <div style="background:linear-gradient(135deg,#1a4d2e,#2a7a4b);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+          <h1 style="color:white;margin:0;font-size:22px">Candidatura inviata</h1>
+        </div>
+        <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
+          <p style="font-size:15px;margin-bottom:20px">Ciao <strong>${candidato.nome}</strong>,</p>
+          <p style="font-size:14px;line-height:1.6;margin-bottom:24px">
+            Hai inviato candidatura per «<strong>${offerta.titolo}</strong>» pubblicata da <strong>${impresa.nome_attivita || impresa.nome}</strong>.
+          </p>
+          <div style="text-align:center;margin-bottom:28px">
+            <a href="https://trovaimpresa.com/pannello-candidato.html"
+               style="display:inline-block;background:#2a7a4b;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
+              Vedi le tue candidature
+            </a>
+          </div>
+          <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
+            Ricevi questa email perché ti sei candidato a un'offerta su TrovaImpresa.
+          </p>
+        </div>
+        <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">
+          TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a>
+        </p>
+      </div>
+    `;
+
+    const res2 = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'TrovaImpresa <info@trovaimpresa.com>',
+        to: [candidato.email],
+        subject: `Candidatura inviata per "${offerta.titolo}"`,
+        html: html2
+      })
+    });
+
+    if (!res2.ok) {
+      const errBody2 = await res2.text();
+      console.error('Errore email candidato Resend: ' + errBody2);
     }
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
