@@ -292,7 +292,7 @@
         coords = await geocodifica(r.citta);
       }
       if (!coords) continue;
-      const lines = (r.specializzazione || '').split('\n');
+      const lines = (r.lavoro || '').split('\n');
       const spec = lines[0] || '';
       L.marker(coords, { icon: creaIcona() })
         .addTo(markersLayer)
@@ -316,7 +316,7 @@
         return;
       }
       div.innerHTML = data.map(r => {
-        const lines = (r.specializzazione || '').split('\n');
+        const lines = (r.lavoro || '').split('\n');
         const spec = lines[0] || '';
         const extra = lines.slice(1);
         const espLine = extra.find(l => l.includes('anni di esperienza'));
