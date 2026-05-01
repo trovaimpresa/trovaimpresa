@@ -364,6 +364,17 @@
     display:flex; align-items:center; justify-content:space-between;
     margin-bottom:20px; flex-wrap:wrap; gap:16px;
   }
+  .dash-hero-logo-col {
+    flex:2; background:transparent; border:none;
+    border-radius:14px; display:flex; align-items:center; justify-content:center;
+    min-height:160px; overflow:hidden; position:relative;
+  }
+  .dash-logo-upload-hint {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px; background:rgba(0,0,0,0.38); border-radius:12px;
+    padding:24px 32px; transition:background 0.2s; pointer-events:none;
+  }
+  .dash-hero-logo-col:hover .dash-logo-upload-hint { background:rgba(0,0,0,0.55); }
   .dash-welcome { font-size:0.82rem; opacity:0.7; text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:4px; }
   .dash-nome { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:10px; }
   .dash-meta { display:flex; gap:10px; flex-wrap:wrap; }
@@ -644,6 +655,8 @@
         <button class="btn-ai-preventivo" onclick="apriModalPreventivoDash()">
           🤖 Genera preventivo AI
         </button>
+        <!-- DESTRA: area logo (visibile solo Premium) — contenuto impostato da JS -->
+        <div class="dash-hero-logo-col" id="dash-hero-logo-col" style="display:none"></div>
       </div>
 
       <!-- STATISTICHE -->
@@ -1402,6 +1415,35 @@ async function inizializza() {
     document.getElementById('sezione-il-tuo-piano').style.display = 'none';
   }
 
+  // Area logo: visibile solo per piano Premium
+  const logoCol = document.getElementById('dash-hero-logo-col');
+  if (logoCol) {
+    if (piano !== 'premium') {
+      logoCol.style.display = 'none';
+      logoCol.style.cursor = 'default';
+      logoCol.innerHTML = '';
+    } else {
+      logoCol.style.display = '';
+      logoCol.style.cursor = 'pointer';
+      logoCol.onclick = () => document.getElementById('input-logo-impresa').click();
+      logoCol.innerHTML = `
+        <input type="file" id="input-logo-impresa" accept="image/*" style="display:none" onchange="caricaLogoImpresa(event)">
+        <img id="dash-logo-img" src="" alt="Logo impresa" style="display:none;width:100%;height:160px;object-fit:contain;background:transparent;">
+        <div id="dash-logo-placeholder" class="dash-logo-upload-hint">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+          <span style="color:white;font-size:0.88rem;font-weight:600;">Carica logo</span>
+        </div>`;
+      if (impresaCorrente.logo_url) {
+        setTimeout(() => {
+          const img = document.getElementById('dash-logo-img');
+          const ph = document.getElementById('dash-logo-placeholder');
+          if (img) { img.src = impresaCorrente.logo_url; img.style.display = 'block'; }
+          if (ph) ph.style.display = 'none';
+        }, 0);
+      }
+    }
+  }
+
   // Stat rating (condiviso)
   document.getElementById('stat-rating').textContent = rating;
 
@@ -1737,6 +1779,23 @@ function aggiornaPianoCards(piano) {
       btn.onclick = p.href ? () => window.location.href = p.href : null;
     }
   });
+}
+
+async function caricaLogoImpresa(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const userId = impresaCorrente.user_id;
+  const path = `${userId}/logo.png`;
+  const { error: upErr } = await sb.storage.from('loghi-imprese').upload(path, file, { upsert: true, contentType: file.type });
+  if (upErr) { alert('Errore caricamento logo: ' + upErr.message); return; }
+  const { data: urlData } = sb.storage.from('loghi-imprese').getPublicUrl(path);
+  const logoUrl = urlData.publicUrl;
+  await sb.from('imprese').update({ logo_url: logoUrl }).eq('id', impresaCorrente.id);
+  impresaCorrente.logo_url = logoUrl;
+  const img = document.getElementById('dash-logo-img');
+  const placeholder = document.getElementById('dash-logo-placeholder');
+  if (img) { img.src = logoUrl; img.style.display = 'block'; }
+  if (placeholder) placeholder.style.display = 'none';
 }
 
 function apriFormAnnuncio() {
