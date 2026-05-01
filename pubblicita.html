@@ -424,7 +424,7 @@ supabaseClient.auth.onAuthStateChange(async function(event, session) {
   if (event !== 'INITIAL_SESSION') return;
   if (!session) { window.location.href = 'login-impresa.html'; return; }
   currentUser = session.user;
-  const { data } = await supabaseClient.from('imprese').select('nome,nome_attivita,email,telefono,partita_iva,citta').eq('user_id', currentUser.id).single();
+  const { data } = await supabaseClient.from('imprese').select('id,tipo,nome,nome_attivita,email,telefono,partita_iva,citta').eq('user_id', currentUser.id).single();
   if (data) {
     currentImpresa = data;
     const nomeAz = data.nome_attivita || data.nome || '';
@@ -703,6 +703,11 @@ async function inviaOrdine() {
   var email = document.getElementById('p-email').value.trim();
   if(!nome || !azienda || !email) { alert('Compila nome, azienda ed email!'); return; }
 
+  if (!currentImpresa || !currentImpresa.id) {
+    alert("Devi prima registrarti come impresa per pubblicare annunci.");
+    return;
+  }
+
   var btn = document.getElementById('btn-ordina');
   btn.textContent = '⏳ Invio in corso...';
   btn.disabled = true;
@@ -730,14 +735,14 @@ async function inviaOrdine() {
   }
 
   const { data: insertData, error: insertError } = await supabaseClient.from('annunci_pubblicitari').insert({
-    impresa_id: currentUser.id,
+    impresa_id: currentImpresa.id,
     stato: 'pending',
     attivo: false,
     posizione: 'citta',
     citta: citta.join(','),
     regione: document.getElementById('regione-filtro').value || null,
     provincia: document.getElementById('provincia-filtro').value || null,
-    categoria: currentImpresa ? currentImpresa.tipo : null,
+    categoria: currentImpresa.tipo,
     formato: fmt,
     durata: periodo,
     logo_url: logoUrl || null,
