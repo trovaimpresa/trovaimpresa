@@ -684,8 +684,6 @@
   </aside>
 
   <main class="main">
-    <div id="pannello-tabs" style="display:none"></div>
-
     <!-- DASHBOARD -->
     <div class="section active" id="sec-dashboard">
 
@@ -866,27 +864,6 @@
             <div class="dash-quick-icon">🏗️</div>
             <div class="dash-quick-label">Sono Subappaltatore</div>
           </a>
-        </div>
-      </div>
-
-      <!-- CARD: Tipo secondario (Premium) -->
-      <div id="card-tipo-secondario-wrapper" style="position:relative;margin-bottom:20px">
-        <div id="card-tipo-secondario" style="background:white;border-radius:16px;border-top:4px solid #7c3aed;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#1a3a2a;margin-bottom:6px">🏷️ Visibile in 2 categorie</div>
-          <div style="font-size:0.9rem;color:#555;margin-bottom:16px;line-height:1.5">Aggiungi una seconda categoria al tuo profilo per essere trovato anche al di fuori della tua categoria principale.</div>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <select id="tipo-secondario-select" style="flex:1;min-width:200px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.9rem;color:#111;background:white">
-              <option value="">— nessuna —</option>
-              <option value="impresa">Imprese</option>
-              <option value="grande_impresa">Grandi imprese</option>
-              <option value="negozio">Negozi</option>
-              <option value="professionista">Professionisti</option>
-            </select>
-            <button id="tipo-secondario-save" onclick="salvaTipoSecondario()" style="padding:10px 22px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;font-size:0.9rem;cursor:pointer">Salva</button>
-          </div>
-        </div>
-        <div id="card-tipo-secondario-lock" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;cursor:pointer;border-radius:16px;z-index:2" onclick="alert('Funzione disponibile solo per Premium')">
-          <div style="background:white;border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.2);font-size:1.8rem">🔒</div>
         </div>
       </div>
 
@@ -1482,30 +1459,7 @@ window.onpopstate = function(e) {
 
 const PANNELLO_CORRENTE = 'artigiano';
 
-function renderTabs() {
-  if (!impresaCorrente?.tipo_secondario) return;
-  const MAPPA = {
-    artigiano: { label: 'Artigiano', url: 'pannello-artigiano.html' },
-    impresa: { label: 'Impresa', url: 'pannello-impresa.html' },
-    grande_impresa: { label: 'Grande Impresa', url: 'pannello-grande-impresa.html' },
-    negozio: { label: 'Negozio', url: 'pannello-negozio.html' },
-    professionista: { label: 'Professionista', url: 'pannello-professionisti.html' }
-  };
-  const corrente = MAPPA[PANNELLO_CORRENTE];
-  const altra = (impresaCorrente.tipo === PANNELLO_CORRENTE) ? impresaCorrente.tipo_secondario : impresaCorrente.tipo;
-  const secondaria = MAPPA[altra];
-  const baseStyle = 'color:white;padding:14px 32px;border-radius:8px 8px 0 0;font-weight:700;font-size:16px;text-decoration:none';
-  const tabAttiva = `<span style="${baseStyle};background:#1a4d2e">${corrente.label}</span>`;
-  const tabInattiva = `<a href="${secondaria.url}" style="${baseStyle};background:#2a7a4b" onmouseover="this.style.background='#1a4d2e'" onmouseout="this.style.background='#2a7a4b'">${secondaria.label}</a>`;
-  const container = document.getElementById('pannello-tabs');
-  container.innerHTML = tabAttiva + tabInattiva;
-  container.style.display = 'flex';
-  container.style.gap = '4px';
-  container.style.padding = '12px 16px 0 16px';
-}
-
 async function inizializza() {
-  renderTabs();
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const piano = (impresaCorrente.piano || 'free').toLowerCase();
   const isPro = piano === 'pro' || piano === 'premium';
@@ -1563,7 +1517,6 @@ async function inizializza() {
   await caricaFotoLavori();
   await caricaCertificazioni();
   caricaProfilo();
-  await caricaTipoSecondario();
 
   // Apri la sezione indicata dall'hash (se presente e valida)
   const hashIniziale = window.location.hash.replace('#', '');
@@ -1571,46 +1524,6 @@ async function inizializza() {
   if (hashIniziale && sezioniValide.includes(hashIniziale) && hashIniziale !== 'dashboard') {
     showSectionById(hashIniziale, true);
   }
-}
-
-async function caricaTipoSecondario() {
-  const card = document.getElementById('card-tipo-secondario');
-  const lock = document.getElementById('card-tipo-secondario-lock');
-  const select = document.getElementById('tipo-secondario-select');
-  if (!card || !lock || !select) return;
-
-  const piano = (impresaCorrente?.piano || 'free').toLowerCase();
-  const isPremium = piano === 'premium';
-  if (isPremium) {
-    card.style.filter = '';
-    card.style.opacity = '';
-    card.style.pointerEvents = '';
-    lock.style.display = 'none';
-  } else {
-    card.style.filter = 'blur(3px)';
-    card.style.opacity = '0.6';
-    card.style.pointerEvents = 'none';
-    lock.style.display = 'flex';
-  }
-
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return;
-  const { data } = await sb.from('imprese').select('tipo_secondario').eq('user_id', user.id).maybeSingle();
-  if (data && data.tipo_secondario) select.value = data.tipo_secondario;
-}
-
-async function salvaTipoSecondario() {
-  const select = document.getElementById('tipo-secondario-select');
-  if (!select) return;
-  const valore = select.value;
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return;
-  const { error } = await sb.from('imprese').update({ tipo_secondario: valore || null }).eq('user_id', user.id);
-  if (error) {
-    alert('Errore: ' + error.message);
-    return;
-  }
-  alert('Salvato!');
 }
 
 function aggiornaBadgeEOverlay() {
