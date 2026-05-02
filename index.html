@@ -684,10 +684,36 @@
                 text-align: center;
             }
         }
-        .grid-esempi{display:grid;grid-template-columns:repeat(5,minmax(0,210px));gap:10px;margin-top:12px;justify-content:center}
-        .grid-esempi .lavoro-btn{min-width:0;max-width:none}
-        @media(max-width:900px){.grid-esempi{grid-template-columns:repeat(3,minmax(0,210px))}}
-        @media(max-width:600px){.grid-esempi{grid-template-columns:repeat(2,minmax(0,210px))}}
+        /* ASIDE LATERALI ESEMPI */
+        .aside-esempi {
+            position: fixed;
+            top: 80px;
+            bottom: 0;
+            width: 230px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 12px;
+            overflow-y: auto;
+            z-index: 100;
+            background: rgba(255,255,255,0.92);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .aside-esempi-left { left: 0; }
+        .aside-esempi-right { right: 0; }
+        .aside-esempi .lavoro-btn {
+            min-width: 0 !important;
+            max-width: none !important;
+            padding: 14px 6px !important;
+            font-size: 11px !important;
+            flex: none !important;
+            gap: 8px !important;
+            text-align: center;
+        }
+        .aside-esempi .lavoro-btn svg { width: 24px; height: 24px; }
+        @media (max-width: 768px) {
+            .aside-esempi { display: none !important; }
+        }
     </style>
     <!-- MOBILE FIX -->
     <style>
@@ -755,102 +781,7 @@
     </style>
 </head>
 <body>
-
-<!-- TOP BANNER -->
-<style>
-  #topBanner {
-    background: #111111;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 24px;
-    font-weight: 600;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    position: relative;
-    z-index: 200;
-    flex-wrap: wrap;
-    text-align: center;
-    color: #28a745;
-  }
-  #topBanner .banner-text {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  #topBanner .banner-divider { opacity: 0.3; font-size: 16px; }
-  #topBanner .btn-pro {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: #F97316;
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 5px 14px;
-    border-radius: 20px;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: background 0.2s, transform 0.15s;
-  }
-  #topBanner .btn-pro:hover { background: #EA6C0A; transform: scale(1.04); }
-  body.banner-hidden #topBanner { display: none !important; }
-</style>
-<div id="topBanner">
-  <div class="banner-text">
-    <span>TrovaImpresa è gratis per tutti — se vuoi di più</span>
-    <a href="/info-pro.html" class="btn-pro">⭐ Passa al Piano Pro</a>
-  </div>
-
-</div>
-
-<!-- FINE TOP BANNER -->
-
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <div class="logo">Trova<span>Impresa</span></div>
-        <div class="nav-buttons">
-            <a href="/login-impresa.html" class="btn-entra">Entra</a>
-            <a href="/registrazione.html" class="btn-registrati">Registrati</a>
-        </div>
-    </nav>
-
-    <!-- HERO SECTION -->
-    <section class="hero">
-        <img src="logo_1.png" alt="Logo TrovaImpresa" class="hero-logo">
-        <p class="hero-tagline">In pochi click, l'artigiano perfetto per il tuo progetto</p>
-    </section>
-
-    <!-- ANNUNCI SPONSORIZZATI HOMEPAGE -->
-    <div id="annunci-sponsorizzati" style="background:#fff8f4;padding:20px 0 8px;"></div>
-
-    <!-- CERCA PER CATEGORIA SECTION -->
-    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1400&q=80&auto=format&fit=crop)">
-        <div class="sezione-card" style="border-top-color:#2a7a4b;">
-        <h2>Cosa stai cercando?</h2>
-        <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; max-width:900px; margin:0 auto;">
-            <a href="cerca-artigiani.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #2a7a4b; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
-            <a href="cerca-imprese.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #FF6B35; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa Edile</a>
-            <a href="cerca-grandi-imprese.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #1a5276; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a5276" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="1"/><path d="M6 6h.01M10 6h.01M14 6h.01M18 6h.01M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/></svg>Grande Impresa</a>
-            <a href="cerca-negozi.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #c0392b; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg>Negozio Edile</a>
-            <a href="cerca-professionisti.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #6c3483; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c3483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Professionista</a>
-        </div>
-        </div>
-    </section>
-
-    <!-- AI ORIENTAMENTO SECTION -->
-    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1400&q=80&auto=format&fit=crop)">
-        <div class="sezione-card" style="border-top-color:#2a7a4b;">
-        <h2>🤖 Non sai a chi rivolgerti?</h2>
-        <p style="color:#666; font-size:14px; margin-bottom:18px;">Descrivi il lavoro che devi fare — ti diciamo subito chi contattare</p>
-        <div style="max-width:720px; margin:0 auto; text-align:left;">
-            <textarea id="ai-descrizione" placeholder="Es: devo rifare il bagno completo... oppure: voglio costruire un capannone... oppure: cerco piastrelle per cucina..." style="width:100%; height:100px; border:2px solid #ddd; border-radius:10px; padding:14px; font-size:14px; font-family:inherit; resize:none; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#2a7a4b'" onblur="this.style.borderColor='#ddd'"></textarea>
-            <div style="margin-top:16px;">
-                <span style="font-size:11px; color:#999; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Oppure seleziona un esempio:</span>
-                <div class="grid-esempi">
+    <aside class="aside-esempi aside-esempi-left">
                     <span onclick="selezionaEsempio(this)" class="lavoro-btn" style="flex:1; min-width:185px; max-width:210px; padding:36px 22px; border-top-color:#2980b9; cursor:pointer;">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a8 8 0 0 1-8-8c0-4 8-12 8-12s8 8 8 12a8 8 0 0 1-8 8z"/></svg>
                         Rifacimento bagno
@@ -959,6 +890,8 @@
                         <span style="font-size:28px; line-height:1;">🔥</span>
                         Tecnico caldaie
                     </span>
+    </aside>
+    <aside class="aside-esempi aside-esempi-right">
                     <span onclick="selezionaEsempio(this)" class="lavoro-btn" style="flex:1; min-width:185px; max-width:210px; padding:36px 22px; border-top-color:#2c3e50; cursor:pointer;">
                         <span style="font-size:28px; line-height:1;">🏛️</span>
                         Ingegnere strutturale
@@ -1063,8 +996,101 @@
                         <span style="font-size:28px; line-height:1;">🪛</span>
                         Negozio utensileria
                     </span>
-                </div>
-            </div>
+    </aside>
+
+
+<!-- TOP BANNER -->
+<style>
+  #topBanner {
+    background: #111111;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    z-index: 200;
+    flex-wrap: wrap;
+    text-align: center;
+    color: #28a745;
+  }
+  #topBanner .banner-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  #topBanner .banner-divider { opacity: 0.3; font-size: 16px; }
+  #topBanner .btn-pro {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #F97316;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.15s;
+  }
+  #topBanner .btn-pro:hover { background: #EA6C0A; transform: scale(1.04); }
+  body.banner-hidden #topBanner { display: none !important; }
+</style>
+<div id="topBanner">
+  <div class="banner-text">
+    <span>TrovaImpresa è gratis per tutti — se vuoi di più</span>
+    <a href="/info-pro.html" class="btn-pro">⭐ Passa al Piano Pro</a>
+  </div>
+
+</div>
+
+<!-- FINE TOP BANNER -->
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">Trova<span>Impresa</span></div>
+        <div class="nav-buttons">
+            <a href="/login-impresa.html" class="btn-entra">Entra</a>
+            <a href="/registrazione.html" class="btn-registrati">Registrati</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <img src="logo_1.png" alt="Logo TrovaImpresa" class="hero-logo">
+        <p class="hero-tagline">In pochi click, l'artigiano perfetto per il tuo progetto</p>
+    </section>
+
+    <!-- ANNUNCI SPONSORIZZATI HOMEPAGE -->
+    <div id="annunci-sponsorizzati" style="background:#fff8f4;padding:20px 0 8px;"></div>
+
+    <!-- CERCA PER CATEGORIA SECTION -->
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1400&q=80&auto=format&fit=crop)">
+        <div class="sezione-card" style="border-top-color:#2a7a4b;">
+        <h2>Cosa stai cercando?</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; max-width:900px; margin:0 auto;">
+            <a href="cerca-artigiani.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #2a7a4b; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2a7a4b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
+            <a href="cerca-imprese.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #FF6B35; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa Edile</a>
+            <a href="cerca-grandi-imprese.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #1a5276; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1a5276" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="1"/><path d="M6 6h.01M10 6h.01M14 6h.01M18 6h.01M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/></svg>Grande Impresa</a>
+            <a href="cerca-negozi.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #c0392b; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg>Negozio Edile</a>
+            <a href="cerca-professionisti.html" class="cat-card" style="flex:1; min-width:185px; max-width:210px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px 22px; background:white; color:#1a472a; border-top:4px solid #6c3483; border-radius:16px; text-decoration:none; font-weight:700; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,0.08);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c3483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Professionista</a>
+        </div>
+        </div>
+    </section>
+
+    <!-- AI ORIENTAMENTO SECTION -->
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1400&q=80&auto=format&fit=crop)">
+        <div class="sezione-card" style="border-top-color:#2a7a4b;">
+        <h2>🤖 Non sai a chi rivolgerti?</h2>
+        <p style="color:#666; font-size:14px; margin-bottom:18px;">Descrivi il lavoro che devi fare — ti diciamo subito chi contattare</p>
+        <div style="max-width:720px; margin:0 auto; text-align:left;">
+            <textarea id="ai-descrizione" placeholder="Es: devo rifare il bagno completo... oppure: voglio costruire un capannone... oppure: cerco piastrelle per cucina..." style="width:100%; height:100px; border:2px solid #ddd; border-radius:10px; padding:14px; font-size:14px; font-family:inherit; resize:none; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#2a7a4b'" onblur="this.style.borderColor='#ddd'"></textarea>
             <button onclick="aiOrienta()" id="ai-btn" style="margin-top:16px; background:#2a7a4b; color:white; border:none; border-radius:10px; padding:12px 30px; font-size:15px; font-weight:700; cursor:pointer; width:100%; transition:background 0.2s;">🔍 Trovami il professionista giusto</button>
             <div id="ai-risultato" style="margin-top:16px; display:none;"></div>
         </div>
