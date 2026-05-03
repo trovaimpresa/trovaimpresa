@@ -309,82 +309,6 @@
           </div>
         </div>
 
-        <!-- ===== GRANDE IMPRESA ===== -->
-        <div class="type-section" id="sec-grande_impresa">
-          <div class="form-card">
-            <div class="card-header">🏢 Dati grande impresa</div>
-            <div class="form-group">
-              <label>Ragione sociale <span class="required">*</span></label>
-              <input type="text" id="f-nome-grande_impresa" placeholder="Es. Costruzioni Bianchi SpA">
-            </div>
-            <div class="form-group">
-              <label>Partita IVA <span class="required">*</span></label>
-              <input type="text" id="f-partita_iva-grande_impresa" placeholder="Es. 12345678901">
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Anno di fondazione</label>
-                <input type="number" id="f-anno_fondazione-grande_impresa" min="1900" max="2026" placeholder="Es. 1990">
-              </div>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Settore principale <span class="required">*</span></label>
-              <select id="f-mestiere-grande_impresa">
-                <option value="">— Seleziona —</option>
-                <option>Costruzione edifici</option><option>Ristrutturazione completa</option><option>Opere civili</option>
-                <option>Capannoni industriali</option><option>Opere stradali</option><option>Movimento terra</option>
-                <option>Asfalti</option><option>Consolidamento strutturale</option><option>Restauro conservativo</option>
-                <option>Opere idrauliche</option><option>Efficienza energetica</option><option>Fotovoltaico industriale</option>
-                <option>Demolizione e bonifica</option><option>General contractor</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-card fc-arancio">
-            <div class="card-header arancio">📋 Certificazioni e settori</div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Altri settori / certificazioni</label>
-              <textarea id="f-specializzazioni-grande_impresa" placeholder="Es. ISO 9001, SOA cat. OG1, opere pubbliche..."></textarea>
-            </div>
-          </div>
-          <div class="form-card fc-blu">
-            <div class="card-header blu">📍 Zone operative</div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Zone operative</label>
-              <input type="text" id="f-zone-grande_impresa" placeholder="Es. Nord Italia, Nazionale, Europa">
-            </div>
-          </div>
-          <div class="form-card fc-arancio">
-            <div class="card-header arancio">⚙️ Certificazioni</div>
-            <div class="form-group">
-              <label>Tipologia</label>
-              <select id="f-tipologia_grande" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
-                <option value="">— Seleziona —</option>
-                <option value="general_contractor">General Contractor</option>
-                <option value="consorzio">Consorzio</option>
-                <option value="societa_costruzioni">Società di costruzioni</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:8px;">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="soa_certificata-grande" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
-                SOA certificata
-              </label>
-            </div>
-            <div class="form-group" style="margin-bottom:8px;">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="iso_9001-grande" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
-                ISO 9001
-              </label>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="white_list_antimafia-grande" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
-                White list antimafia
-              </label>
-            </div>
-          </div>
-        </div>
-
         <!-- ===== NEGOZIO ===== -->
         <div class="type-section" id="sec-negozio">
           <div class="form-card">
@@ -913,7 +837,6 @@
       const t = (d.tipo || '').toLowerCase().trim();
       if (t === 'artigiano') return 'artigiano';
       if (t === 'impresa') return 'impresa';
-      if (t === 'grande_impresa') return 'grande_impresa';
 
       const negozioTypes = [
         'materiali edili', 'ferramenta', 'pitture e vernici',
@@ -1049,18 +972,6 @@
         document.getElementById('risponde_24h-impresa').checked = !!d.risponde_24h;
         document.getElementById('preventivo_online-impresa').checked = !!d.preventivo_online;
         document.getElementById('soa_certificata-impresa').checked = !!d.soa_certificata;
-
-      } else if (tipoCategoria === 'grande_impresa') {
-        document.getElementById('f-nome-grande_impresa').value = d.nome || '';
-        document.getElementById('f-partita_iva-grande_impresa').value = d.partita_iva || '';
-        document.getElementById('f-anno_fondazione-grande_impresa').value = d.anno_fondazione || d.anni_esperienza || '';
-        setSelectValue('f-mestiere-grande_impresa', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
-        document.getElementById('f-specializzazioni-grande_impresa').value = d.specializzazioni || '';
-        document.getElementById('f-zone-grande_impresa').value = d.zone || '';
-        setSelectValue('f-tipologia_grande', d.tipologia_grande_impresa);
-        document.getElementById('soa_certificata-grande').checked = !!d.soa_certificata;
-        document.getElementById('iso_9001-grande').checked = !!d.iso_9001;
-        document.getElementById('white_list_antimafia-grande').checked = !!d.white_list_antimafia;
 
       } else if (tipoCategoria === 'negozio') {
         document.getElementById('f-nome_negozio').value = d.nome_negozio || d.nome || '';
@@ -1281,20 +1192,6 @@
             risponde_24h: document.getElementById('risponde_24h-impresa').checked,
             preventivo_online: document.getElementById('preventivo_online-impresa').checked,
             soa_certificata: document.getElementById('soa_certificata-impresa').checked
-          });
-
-        } else if (tipoCategoria === 'grande_impresa') {
-          Object.assign(dati, {
-            nome: document.getElementById('f-nome-grande_impresa').value.trim(),
-            partita_iva: document.getElementById('f-partita_iva-grande_impresa').value.trim(),
-            anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-grande_impresa').value) || null,
-            mestieri: document.getElementById('f-mestiere-grande_impresa').value ? [document.getElementById('f-mestiere-grande_impresa').value] : [],
-            specializzazioni: document.getElementById('f-specializzazioni-grande_impresa').value.trim(),
-            zone: document.getElementById('f-zone-grande_impresa').value.trim(),
-            tipologia_grande_impresa: document.getElementById('f-tipologia_grande').value || null,
-            soa_certificata: document.getElementById('soa_certificata-grande').checked,
-            iso_9001: document.getElementById('iso_9001-grande').checked,
-            white_list_antimafia: document.getElementById('white_list_antimafia-grande').checked
           });
 
         } else if (tipoCategoria === 'negozio') {
