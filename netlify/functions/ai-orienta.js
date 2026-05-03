@@ -14,7 +14,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         model: 'claude-opus-4-5',
         max_tokens: 1000,
-        messages: [{ role: 'user', content: 'Sei un assistente di TrovaImpresa. Un cliente ha scritto: "' + testo + '". Rispondi SOLO con JSON: {"categoria": "artigiano|impresa|grande_impresa|negozio|professionista", "motivo": "spiegazione breve", "pagina": "cerca-artigiani.html|cerca-imprese.html|cerca-grandi-imprese.html|cerca-negozi.html|cerca-professionisti.html"}' }]
+        messages: [{ role: 'user', content: 'Sei un assistente di TrovaImpresa. Un cliente ha scritto: "' + testo + '". Rispondi SOLO con JSON: {"categoria": "artigiano|impresa|negozio|professionista", "motivo": "spiegazione breve", "pagina": "cerca-artigiani.html|cerca-imprese.html|cerca-negozi.html|cerca-professionisti.html"}' }]
       })
     });
     const data = await response.json();
