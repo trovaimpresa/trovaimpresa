@@ -742,9 +742,9 @@
           <div class="dash-quick-icon">🔝</div>
           <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">🇮🇹</div>
-          <div class="dash-quick-label">Visibile in tutta Italia</div>
+        <div id="card-visibile" class="dash-quick-card" style="cursor:pointer" onclick="apriModalVisibile()">
+          <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
+          <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
         <div class="dash-quick-card" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">✅</div>
@@ -1715,6 +1715,7 @@ function aggiornaPianoCards(piano) {
       btn.onclick = p.href ? () => window.location.href = p.href : null;
     }
   });
+  aggiornaCardVisibile(piano);
 }
 
 async function caricaLogoImpresa(event) {
@@ -2241,6 +2242,61 @@ async function calcolaPrioritaNegozio() {
   const idxSenza = senza.findIndex(x => x.id === impresaCorrente.id);
   const posSenza = idxSenza >= 0 ? idxSenza + 1 : senza.length;
   return { posUtente, totale: lista.length, posSenza, citta };
+}
+
+function aggiornaCardVisibile(piano) {
+  const card = document.getElementById('card-visibile');
+  const icon = document.getElementById('card-visibile-icon');
+  const label = document.getElementById('card-visibile-label');
+  if (!card || !icon || !label) return;
+  if (piano === 'premium') {
+    card.style.borderTopColor = '#7c3aed';
+    icon.textContent = '🌍';
+    label.textContent = 'Visibile in tutta la regione';
+  } else {
+    card.style.borderTopColor = '#2a7a4b';
+    icon.textContent = '📍';
+    label.textContent = 'Visibile nella tua città';
+  }
+}
+
+async function apriModalVisibile() {
+  if(!impresaCorrente)return;
+  const piano=impresaCorrente.piano||'free';
+  const citta=impresaCorrente.citta||'la tua città';
+  const regione=impresaCorrente.regione||'la tua regione';
+  const tipo=impresaCorrente.tipo||'negozio';
+  const{count:nCitta}=await sb.from('imprese').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('citta',citta);
+  const{count:nRegione}=await sb.from('imprese').select('id',{count:'exact',head:true}).eq('tipo',tipo).eq('regione',regione);
+  const cercaPageMap={impresa:'cerca-imprese.html',artigiano:'cerca-artigiani.html',negozio:'cerca-negozi.html',professionista:'cerca-professionisti.html'};
+  const cercaPage=cercaPageMap[tipo]||'cerca-imprese.html';
+  const isPremium=piano==='premium';
+  document.body.insertAdjacentHTML('beforeend',renderModalVisibile({isPremium,citta,regione,nCitta:nCitta||0,nRegione:nRegione||0,cercaPage}));
+}
+function ctaPremium(d,piuUtenti) {
+  return `<p style="color:#666;font-size:14px">Senza Premium saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> grazie al Premium.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
+}
+function ctaFree(d,piuUtenti) {
+  return `<p style="color:#666;font-size:14px">Con Premium saresti visibile in tutta ${d.regione} (${d.nRegione} utenti, <strong>${piuUtenti} in più</strong>).</p><button onclick="window.location.href='prezzi.html'" style="background:#2a7a4b;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Passa a Premium</button>`;
+}
+function renderModalVisibile(d) {
+  const titolo=d.isPremium?'🌍 Visibile in tutta la regione':'📍 Visibile nella tua città';
+  const bgBox=d.isPremium?'#e8f5e9':'#fff3e0';
+  const colorBox=d.isPremium?'#2e7d32':'#e65100';
+  const numero=d.isPremium?d.nRegione:d.nCitta;
+  const dove=d.isPremium?'utenti in tutta la regione '+d.regione:'utenti a '+d.citta;
+  const piuUtenti=d.nRegione-d.nCitta;
+  let h='<div id="modalVisibileOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="document.getElementById(\'modalVisibileOverlay\').remove()">';
+  h+='<div style="background:white;border-radius:16px;padding:24px;max-width:500px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.2)" onclick="event.stopPropagation()">';
+  h+=`<h2 style="margin:0 0 16px">${titolo}</h2>`;
+  h+=`<div style="background:${bgBox};padding:16px;border-radius:8px;margin-bottom:16px">`;
+  h+=`<strong style="color:${colorBox}">✓ ATTIVO</strong>`;
+  h+=`<p style="margin:8px 0 0">Stai raggiungendo <strong>${numero}</strong> ${dove}.</p>`;
+  h+='</div>';
+  h+=d.isPremium?ctaPremium(d,piuUtenti):ctaFree(d,piuUtenti);
+  h+='<button onclick="document.getElementById(\'modalVisibileOverlay\').remove()" style="background:transparent;border:1px solid #ddd;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px">Chiudi</button>';
+  h+='</div></div>';
+  return h;
 }
 </script>
 <!-- MODAL MODIFICA PROFILO -->
