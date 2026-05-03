@@ -363,6 +363,7 @@
 
   async function cerca() {
     const citta = document.getElementById('cittaInput').value.trim();
+    const cittaSafe = citta.replace(/[,()]/g, '').trim();
     const soloVerificati = document.getElementById('soloVerificati').checked;
     const conFoto = document.getElementById('conFoto').checked;
     const rispondeIn24h = document.getElementById('rispondeIn24h').checked;
@@ -383,12 +384,30 @@
       const regione = document.getElementById('regioneSelect').value;
       const provinciaSel = document.getElementById('provincia').value;
       const cittaSel = document.getElementById('citta').value;
+      if (!citta && !cittaSel && !regione) {
+        const div = document.getElementById('risultati');
+        div.innerHTML = '<div class="no-results"><h3>📍 Inserisci una città o regione</h3><p>Per vedere gli artigiani, indica dove stai cercando</p></div>';
+        aggiornaMappaRis([]);
+        return;
+      }
       let q = supabaseClient.from('imprese').select('*').eq('tipo', 'artigiano');
       if (mestiereScelto !== 'tutti') q = q.ilike('mestieri', `%${mestiereScelto}%`);
-      if (citta) q = q.ilike('citta', `%${citta}%`);
+      if (citta) {
+        if (regione) {
+          q = q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${regione})`);
+        } else {
+          q = q.ilike('citta', `%${cittaSafe}%`);
+        }
+      }
       if (regione) q = q.eq('regione', regione);
       if (provinciaSel) q = q.eq('provincia', provinciaSel);
-      if (cittaSel) q = q.eq('citta', cittaSel);
+      if (cittaSel) {
+        if (regione) {
+          q = q.or(`citta.eq.${cittaSel},and(piano.eq.premium,regione.eq.${regione})`);
+        } else {
+          q = q.eq('citta', cittaSel);
+        }
+      }
       if (valutazioneMin > 0) q = q.gte('valutazione_media', valutazioneMin);
       if (soloVerificati) q = q.eq('verificato', true);
       if (conFoto) q = q.not('foto_lavori', 'is', null);
