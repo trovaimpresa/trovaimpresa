@@ -278,6 +278,13 @@
   })();
 
   const params=new URLSearchParams(window.location.search);
+  if(params.get('regione')){
+    const regSel=document.getElementById('regioneSelect');
+    if(regSel){
+      regSel.value=params.get('regione');
+      regSel.dispatchEvent(new Event('change'));
+    }
+  }
   if(params.get('citta')){document.getElementById('cittaInput').value=params.get('citta');cittaScelta=params.get('citta');}
   if(params.get('mestiere')){mestiereScelto=params.get('mestiere');document.querySelectorAll('.chip').forEach(c=>{if(c.dataset.mestiere===mestiereScelto){c.classList.add('active');c.classList.remove('inactive');document.querySelector('.all-chip').classList.remove('active');document.querySelector('.all-chip').classList.add('inactive');}});}
   if(params.get('citta')||params.get('mestiere'))cerca();
