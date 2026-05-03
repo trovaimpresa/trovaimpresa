@@ -758,7 +758,7 @@
       <!-- FUNZIONI PREMIUM -->
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
           <div class="dash-quick-icon">🔝</div>
           <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
@@ -1182,6 +1182,24 @@
         <div style="font-size:48px;margin-bottom:12px;">✅</div>
         <p style="font-size:15px;font-weight:600;color:#2a7a4b;margin-bottom:6px;">Segnalazione inviata!</p>
         <p style="font-size:13px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PRIORITÀ NEI RISULTATI -->
+<div class="modal-ai-overlay" id="modalPriorita" onclick="if(event.target===this)chiudiModalPriorita()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🔝 Priorità nei risultati</h2>
+        <p>La tua posizione nella ricerca imprese per la tua città</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalPriorita()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="priorita-content">
+        <div style="text-align:center;padding:40px 0;color:#999;">⏳ Calcolo in corso…</div>
       </div>
     </div>
   </div>
@@ -2417,6 +2435,58 @@ async function inviaSegnalazione() {
     btn.textContent = 'Invia';
     alert('Errore durante l\'invio: ' + err.message);
   }
+}
+
+function chiudiModalPriorita() {
+  document.getElementById('modalPriorita').classList.remove('show');
+}
+async function apriModalPriorita() {
+  document.getElementById('modalPriorita').classList.add('show');
+  const content = document.getElementById('priorita-content');
+  content.innerHTML = '<div style="text-align:center;padding:40px 0;color:#999;">⏳ Calcolo in corso…</div>';
+  try {
+    const res = await calcolaPrioritaImpresa();
+    if (!res) {
+      content.innerHTML = '<div style="text-align:center;padding:30px 0;color:#666;">⚠️ Imposta la tua città nel profilo per visualizzare la priorità.</div>';
+      return;
+    }
+    const { posUtente, totale, posSenza, citta } = res;
+    const cittaUrl = encodeURIComponent(citta);
+    content.innerHTML = `
+      <div style="display:flex;justify-content:center;margin-bottom:18px;">
+        <span style="background:#22c55e;color:white;font-weight:800;font-size:0.78rem;padding:6px 14px;border-radius:999px;letter-spacing:0.6px;">✓ ATTIVO</span>
+      </div>
+      <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;">
+        <div style="font-size:0.75rem;color:#15803d;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Posizione attuale</div>
+        <div style="font-size:1.05rem;font-weight:800;color:#15803d;line-height:1.4;">Sei in posizione ${posUtente} su ${totale} imprese a ${citta}</div>
+      </div>
+      <div style="background:#fff7ed;border:1.5px solid #f59e0b;border-radius:14px;padding:18px;text-align:center;margin-bottom:18px;">
+        <div style="font-size:0.75rem;color:#92400e;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Senza Premium</div>
+        <div style="font-size:0.95rem;color:#78350f;">Saresti in posizione <strong>${posSenza}</strong></div>
+      </div>
+      <button onclick="window.location.href='cerca-imprese.html?citta=${cittaUrl}'" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">🔍 Vedi risultati live</button>
+    `;
+  } catch (err) {
+    content.innerHTML = '<div style="text-align:center;padding:30px 0;color:#c0392b;">Errore: ' + err.message + '</div>';
+  }
+}
+async function calcolaPrioritaImpresa() {
+  if (!impresaCorrente || !impresaCorrente.citta) return null;
+  const citta = impresaCorrente.citta;
+  const { data, error } = await sb.from('imprese').select('id,piano').eq('tipo','impresa').eq('citta', citta);
+  if (error) throw error;
+  const lista = data || [];
+  const ord = { premium: 0, pro: 1, free: 2 };
+  const rank = (p) => ord[(p || 'free').toLowerCase()] ?? 2;
+  const sorted = lista.slice().sort((a, b) => rank(a.piano) - rank(b.piano));
+  const idxAttuale = sorted.findIndex(x => x.id === impresaCorrente.id);
+  const posUtente = idxAttuale >= 0 ? idxAttuale + 1 : sorted.length;
+  const senza = lista
+    .map(x => x.id === impresaCorrente.id ? { id: x.id, piano: 'free' } : x)
+    .sort((a, b) => rank(a.piano) - rank(b.piano));
+  const idxSenza = senza.findIndex(x => x.id === impresaCorrente.id);
+  const posSenza = idxSenza >= 0 ? idxSenza + 1 : senza.length;
+  return { posUtente, totale: lista.length, posSenza, citta };
 }
 </script>
 <!-- MODAL MODIFICA PROFILO -->
