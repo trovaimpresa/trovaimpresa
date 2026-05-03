@@ -896,7 +896,7 @@
         }
       }
 
-      // Limite descrizione in base al piano (Free: 200, Pro/Premium: illimitato)
+      // Limite descrizione in base al piano (Free: 200, Premium: illimitato)
       const _pianoDesc = (d.piano || 'free').toLowerCase();
       const _descEl = document.getElementById('f-descrizione');
       const _descLabel = document.getElementById('desc-limit-label');
@@ -1129,7 +1129,7 @@
       const _pianoSave = (impresaData.piano || 'free').toLowerCase();
       const _descrSave = document.getElementById('f-descrizione').value.trim();
       if (_pianoSave === 'free' && _descrSave.length > 200) {
-        alert('La descrizione può essere max 200 caratteri sul piano Free. Passa a Pro per descrizione illimitata.');
+        alert('La descrizione può essere max 200 caratteri sul piano Free. Passa a Premium per descrizione illimitata.');
         return;
       }
       const btn = document.getElementById('btn-save');
