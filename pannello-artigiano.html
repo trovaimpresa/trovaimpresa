@@ -783,7 +783,6 @@
       </div>
 
       <!-- FUNZIONI PREMIUM -->
-      <div id="sezione-funzioni-premium">
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
         <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
@@ -852,7 +851,6 @@
             <div class="dash-quick-label">Sono Subappaltatore</div>
           </a>
         </div>
-      </div>
       </div>
 
       <!-- CALENDARIO & ORARIO -->
@@ -1591,7 +1589,6 @@ function aggiornaPianoCards(piano) {
       btn.onclick = p.href ? () => window.location.href = p.href : null;
     }
   });
-  document.getElementById('sezione-funzioni-premium').style.display = (piano === 'premium') ? 'block' : 'none';
 }
 
 async function caricaLogoImpresa(event) {
