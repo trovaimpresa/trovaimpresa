@@ -2473,8 +2473,7 @@ async function calcolaPrioritaArtigiano() {
   const idxAttuale = sorted.findIndex(x => x.id === impresaCorrente.id);
   const posUtente = idxAttuale >= 0 ? idxAttuale + 1 : sorted.length;
   const senza = lista
-    .filter(x => x.id === impresaCorrente.id || (x.piano || 'free').toLowerCase() !== 'premium')
-    .map(x => x.id === impresaCorrente.id ? { id: x.id, piano: 'pro' } : x)
+    .map(x => x.id === impresaCorrente.id ? { id: x.id, piano: 'free' } : x)
     .sort((a, b) => rank(a.piano) - rank(b.piano));
   const idxSenza = senza.findIndex(x => x.id === impresaCorrente.id);
   const posSenza = idxSenza >= 0 ? idxSenza + 1 : senza.length;
