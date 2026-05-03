@@ -127,7 +127,6 @@
     function getRedirectUrl() {
       const redirect = new URLSearchParams(window.location.search).get('redirect');
       if (redirect === 'premium') return 'prezzi.html?piano=premium';
-      if (redirect === 'pro') return 'prezzi.html?piano=pro';
       return redirect || 'pannello-candidato.html';
     }
 

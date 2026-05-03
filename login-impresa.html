@@ -32,7 +32,6 @@
     .links { display: flex; flex-direction: column; gap: 10px; text-align: center; }
     .links a { color: #2a7a4b; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
     .links a:hover { text-decoration: underline; }
-    .links .link-pro { color: #1a73e8; }
     .back { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; margin-top: 20px; }
     .back:hover { color: white; }
   </style>
@@ -80,7 +79,6 @@
 
     <div class="links">
       <a href="registrazione.html?piano=free">🆓 Registrati Free</a>
-      <a href="info-pro.html" class="link-pro">⭐ Registrati Pro</a>
     </div>
   </div>
 
@@ -171,7 +169,6 @@
         } else {
           const redirect = new URLSearchParams(window.location.search).get('redirect');
           if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
-          else if (redirect === 'pro') window.location.href = 'prezzi.html?piano=pro';
           else window.location.href = pannelloUtente;
         }
       } catch(err) {
@@ -197,7 +194,6 @@
         if (error) throw error;
         const redirect = new URLSearchParams(window.location.search).get('redirect');
         if (redirect === 'premium') window.location.href = 'prezzi.html?piano=premium';
-        else if (redirect === 'pro') window.location.href = 'prezzi.html?piano=pro';
         else window.location.href = pannelloUtente;
       } catch(err) {
         showError('❌ Codice non valido o scaduto.');
