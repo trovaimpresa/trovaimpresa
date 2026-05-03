@@ -899,7 +899,7 @@
 
         // Gating mensile (Free=1, Pro=3, Premium=∞) — sicurezza per accesso URL diretto
         if (impresaId) {
-            const _maxMese = impresaPiano === 'premium' ? Infinity : impresaPiano === 'pro' ? 3 : 1;
+            const _maxMese = (impresaPiano === 'premium') ? 999 : 1;
             if (_maxMese !== Infinity) {
                 const _inizioMese = new Date(); _inizioMese.setDate(1); _inizioMese.setHours(0,0,0,0);
                 const { count } = await supabaseClient
