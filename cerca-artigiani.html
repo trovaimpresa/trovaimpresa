@@ -469,7 +469,7 @@
     const badge = i.piano === 'pro' ? '<span class="badge-pro">⭐ PRO</span>' : i.piano === 'premium' ? '<span class="badge-premium">💎 PREMIUM</span>' : '';
     const desc = i.descrizione ? `<div class="card-desc">${i.descrizione}</div>` : '';
     const distBadge = i._distKm !== null ? `<span style="display:inline-block;background:#e8f5ec;color:#2a7a4b;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>` : '';
-    return `<a class="card${i.piano==='pro'?' pro':i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}</div></a>`;
+    return `<a class="card${i.piano==='pro'?' pro':i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}</div><button onclick="event.stopPropagation();event.preventDefault();apriModalRecensione(${i.id}, '${(i.nome_attivita||i.nome||'').replace(/'/g,"\\'")}')" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:13px;">⭐ Scrivi recensione</button></a>`;
   }
 
   // Cascata Regione → Provincia → Città
@@ -533,6 +533,93 @@
   async function geocodificaRis(q){const k=q.toLowerCase().trim();if(geoCacheRis[k])return geoCacheRis[k];await new Promise(r=>setTimeout(r,1100));try{const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const d=await res.json();if(d&&d[0]){const c=[parseFloat(d[0].lat),parseFloat(d[0].lon)];geoCacheRis[k]=c;return c;}}catch(e){}return null;}
   async function aggiornaMappaRis(records){if(!mappaRis||!markersRis)return;markersRis.clearLayers();for(const r of records){if(!r.citta)continue;let c=r.lat&&r.lng?[r.lat,r.lng]:await geocodificaRis(r.citta);if(!c)continue;const nome=r.nome_attivita||r.nome_negozio||r.nome||'—';const tipo=r.mestiere||r.tipo||'';L.marker(c,{icon:iconaVerde}).addTo(markersRis).bindPopup(`<b>${nome}</b><br>${tipo?tipo+'<br>':''}📍 ${r.citta}<br><a href="profilo-impresa.html?id=${r.id}" style="color:#2a7a4b;font-weight:700;">Vedi profilo →</a>`);}}
   inizializzaMappaRis();
+
+  // === SISTEMA RECENSIONI (Step 2b TrovaImpresa) ===
+  let _votoRecensione = 0;
+
+  async function apriModalRecensione(id, nome) {
+    if (document.getElementById('modalRecensione')) return;
+    _votoRecensione = 0;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'modalRecensione';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:16px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,.2);border-top:4px solid #2e7d32">
+        <div style="padding:24px 24px 12px">
+          <h2 style="margin:0 0 6px;font-size:1.4rem;color:#1a4d2e">⭐ Scrivi una recensione</h2>
+          <p style="margin:0;color:#666;font-size:.95rem">Per <strong>${nome}</strong></p>
+        </div>
+        <div style="padding:0 24px 24px">
+          <label style="display:block;margin:14px 0 6px;font-weight:600;font-size:.9rem">Il tuo nome *</label>
+          <input id="recNome" type="text" placeholder="Es. Mario Rossi" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:1rem;box-sizing:border-box">
+
+          <label style="display:block;margin:14px 0 6px;font-weight:600;font-size:.9rem">La tua email *</label>
+          <input id="recEmail" type="email" placeholder="email@esempio.it" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:1rem;box-sizing:border-box">
+
+          <label style="display:block;margin:14px 0 6px;font-weight:600;font-size:.9rem">Il tuo voto *</label>
+          <div id="recStelle" style="display:flex;gap:6px;font-size:2rem;cursor:pointer;user-select:none">
+            ${[1,2,3,4,5].map(v => `<span data-v="${v}" style="color:#ddd;transition:color .15s">★</span>`).join('')}
+          </div>
+
+          <label style="display:block;margin:14px 0 6px;font-weight:600;font-size:.9rem">Lavoro svolto *</label>
+          <input id="recLavoro" type="text" placeholder="Es. Ristrutturazione bagno" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:1rem;box-sizing:border-box">
+
+          <label style="display:block;margin:14px 0 6px;font-weight:600;font-size:.9rem">La tua esperienza *</label>
+          <textarea id="recTesto" rows="4" placeholder="Racconta come è andata..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:1rem;box-sizing:border-box;resize:vertical;font-family:inherit"></textarea>
+
+          <div style="display:flex;gap:10px;margin-top:20px">
+            <button onclick="document.getElementById('modalRecensione').remove()" style="flex:1;padding:12px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:.95rem">Annulla</button>
+            <button onclick="inviaRecensione(${id})" style="flex:2;padding:12px;background:#2a7a4b;color:#fff;border:0;border-radius:8px;cursor:pointer;font-weight:600;font-size:.95rem">📤 Invia recensione</button>
+          </div>
+          <p style="margin:14px 0 0;color:#888;font-size:.8rem;text-align:center">La recensione sarà pubblica dopo la verifica</p>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const stelle = overlay.querySelectorAll('#recStelle span');
+    stelle.forEach(s => {
+      s.onclick = () => {
+        _votoRecensione = parseInt(s.dataset.v);
+        stelle.forEach(x => x.style.color = parseInt(x.dataset.v) <= _votoRecensione ? '#f5b50a' : '#ddd');
+      };
+    });
+  }
+
+  async function inviaRecensione(impresaId) {
+    const nome = document.getElementById('recNome').value.trim();
+    const email = document.getElementById('recEmail').value.trim();
+    const lavoro = document.getElementById('recLavoro').value.trim();
+    const testo = document.getElementById('recTesto').value.trim();
+
+    if (!nome || !email || !lavoro || !testo) { alert('⚠️ Compila tutti i campi obbligatori'); return; }
+    if (_votoRecensione < 1 || _votoRecensione > 5) { alert('⚠️ Seleziona un voto da 1 a 5 stelle'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('⚠️ Email non valida'); return; }
+
+    const { error } = await supabaseClient.from('recensioni').insert({
+      impresa_id: impresaId,
+      nome_cliente: nome,
+      email: email,
+      voto: _votoRecensione,
+      lavoro_fatto: lavoro,
+      testo: testo,
+      verificata: false
+    });
+
+    if (error) { alert('❌ Errore invio: ' + error.message); return; }
+
+    document.getElementById('modalRecensione').innerHTML = `
+      <div style="background:#fff;border-radius:16px;max-width:400px;padding:30px;text-align:center;border-top:4px solid #2e7d32;box-shadow:0 4px 24px rgba(0,0,0,.2)">
+        <div style="font-size:3rem">✅</div>
+        <h2 style="margin:10px 0;color:#1a4d2e">Grazie!</h2>
+        <p style="color:#666">La tua recensione è stata inviata e sarà pubblica dopo la verifica.</p>
+        <button onclick="document.getElementById('modalRecensione').remove()" style="margin-top:14px;padding:10px 24px;background:#2a7a4b;color:#fff;border:0;border-radius:8px;cursor:pointer;font-weight:600">Chiudi</button>
+      </div>
+    `;
+  }
 </script>
 <script src="/cookie-banner.js"></script>
 <footer style="background:#1a3a2a;color:white;font-size:0.9rem;padding:18px;text-align:center">
