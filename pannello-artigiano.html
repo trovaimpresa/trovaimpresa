@@ -666,9 +666,6 @@
       <div class="nav-item" onclick="showSection('foto',this)">
         <span>📷</span> Foto dei lavori
       </div>
-      <div class="nav-item" onclick="showSection('recensioni',this)">
-        <span>⭐</span> Le mie recensioni
-      </div>
       <div class="nav-item" onclick="showSection('certificazioni',this)">
         <span>📜</span> Certificazioni
         <span style="margin-left:auto;background:#f0f0f0;color:#888;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:10px">Opz.</span>
@@ -741,11 +738,6 @@
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
-        </div>
-        <div class="dash-quick-card" onclick="showSectionById('recensioni')">
-          <div class="dash-quick-icon">⭐</div>
-          <div class="dash-quick-label">Recensioni</div>
-          <div class="dash-quick-sub">Cosa dicono i clienti</div>
         </div>
         <div class="dash-quick-card" onclick="showSectionById('profilo')">
           <div class="dash-quick-icon">👤</div>
@@ -1046,14 +1038,6 @@
       </div>
 
       <div class="foto-grid" id="foto-grid"></div>
-    </div>
-
-    <!-- RECENSIONI -->
-    <div class="section" id="sec-recensioni">
-      <div class="topbar">
-        <div class="topbar-title">⭐ Le mie recensioni</div>
-      </div>
-      <div id="lista-recensioni"><div class="empty-state"><div class="empty-icon">⭐</div>Caricamento...</div></div>
     </div>
 
     <!-- CERTIFICAZIONI -->
@@ -1445,7 +1429,7 @@ function showSectionById(id, fromPopstate) {
 // Inizializzazione: se c'è un hash valido nell'URL, apri quella sezione
 (function() {
   const hash = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','lavoro','candidati','foto','recensioni','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','lavoro','candidati','foto','certificazioni','profilo'];
   if (hash && sezioniValide.includes(hash)) {
     history.replaceState({ section: hash }, '', '#' + hash);
   } else {
@@ -1524,7 +1508,7 @@ async function inizializza() {
 
   // Apri la sezione indicata dall'hash (se presente e valida)
   const hashIniziale = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','lavoro','candidati','foto','recensioni','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','lavoro','candidati','foto','certificazioni','profilo'];
   if (hashIniziale && sezioniValide.includes(hashIniziale) && hashIniziale !== 'dashboard') {
     showSectionById(hashIniziale, true);
   }
@@ -1722,30 +1706,11 @@ async function caricaCandidatiZona() {
   `).join('');
 }
 
-// CARICA RECENSIONI
+// CONTATORE RECENSIONI (statistica dashboard)
 async function caricaRecensioni() {
-  const { data } = await sb.from('feedback_clienti').select('*')
-    .eq('impresa_id', impresaCorrente.id)
-    .order('created_at', { ascending: false });
-
-  document.getElementById('dash-stat-recensioni').textContent = data?.length || 0;
-
-  const container = document.getElementById('lista-recensioni');
-  if (!data?.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">⭐</div>Nessuna recensione ancora.</div>';
-    return;
-  }
-  container.innerHTML = data.map(r => `
-    <div style="background:white;border-radius:16px;padding:20px 24px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <strong>${r.nome_cliente}</strong>
-        <span style="color:#f4c02e">${'★'.repeat(r.voto)}${'☆'.repeat(5-r.voto)}</span>
-      </div>
-      ${r.lavoro_fatto ? `<div style="font-size:0.78rem;color:var(--light);margin-bottom:6px">${r.lavoro_fatto}</div>` : ''}
-      <div style="font-size:0.88rem;color:var(--mid)">${r.testo}</div>
-      <div style="font-size:0.75rem;color:var(--light);margin-top:8px">${new Date(r.created_at).toLocaleDateString('it-IT')}</div>
-    </div>
-  `).join('');
+  const { count } = await sb.from('feedback_clienti').select('id', { count: 'exact', head: true })
+    .eq('impresa_id', impresaCorrente.id);
+  document.getElementById('dash-stat-recensioni').textContent = count || 0;
 }
 
 // PROFILO
