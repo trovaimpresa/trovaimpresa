@@ -425,13 +425,12 @@
             <tr>
               <th>Cliente</th>
               <th>Voto</th>
-              <th>Lavoro</th>
               <th>Testo</th>
               <th>Data</th>
               <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="table-recensioni"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-recensioni"><tr><td colspan="5" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -861,22 +860,26 @@ async function caricaPreventivi() {
 
 // CARICA RECENSIONI
 async function caricaRecensioni() {
-  const { data, error } = await sb.from('recensioni').select('*').order('created_at', { ascending: false });
+  const { data, error } = await sb.from('feedback_clienti').select('*').order('created_at', { ascending: false });
   if (error) return;
   const tbody = document.getElementById('table-recensioni');
   if (!data?.length) {
-    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">⭐</div>Nessuna recensione ancora</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-table"><div class="eicon">⭐</div>Nessuna recensione ancora</div></td></tr>';
     return;
   }
-  tbody.innerHTML = data.map(r => `
+  tbody.innerHTML = data.map(r => {
+    const sub = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(s => s != null);
+    const voto = r.stelle ?? (sub.length ? Math.round(sub.reduce((a,b)=>a+b,0)/sub.length) : 0);
+    const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#2a7a4b;font-size:11px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
+    return `
     <tr>
-      <td><strong>${r.nome_cliente}</strong></td>
-      <td>${'★'.repeat(r.voto)}${'☆'.repeat(5-r.voto)}</td>
-      <td>${r.lavoro_fatto||'–'}</td>
-      <td style="max-width:200px">${r.testo}</td>
+      <td><strong>${r.nome_cliente}</strong>${badge}</td>
+      <td>${'★'.repeat(voto)}${'☆'.repeat(5-voto)}</td>
+      <td style="max-width:200px">${r.testo||''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(r.created_at).toLocaleDateString('it-IT')}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaRecensione(${r.id})">🗑️</button></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 // FILTRA IMPRESE
@@ -905,7 +908,7 @@ async function eliminaImpresa(id, nome) {
 // ELIMINA RECENSIONE
 async function eliminaRecensione(id) {
   if (!confirm('Eliminare questa recensione?')) return;
-  const { error } = await sb.from('recensioni').delete().eq('id', id);
+  const { error } = await sb.from('feedback_clienti').delete().eq('id', id);
   if (!error) await caricaRecensioni();
 }
 
