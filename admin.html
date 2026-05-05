@@ -871,16 +871,13 @@ async function caricaRecensioni() {
     const sub = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(s => s != null);
     const voto = r.stelle ?? (sub.length ? Math.round(sub.reduce((a,b)=>a+b,0)/sub.length) : 0);
     const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#2a7a4b;font-size:11px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
-    const btnVerifica = r.verificata
-      ? `<button class="action-btn" style="background:#fff3cd;color:#856404;border:1px solid #ffc107" onclick="revocaRecensione(${r.id})">❌ Revoca</button>`
-      : `<button class="action-btn" style="background:#e8f5ee;color:#2a7a4b;border:1px solid #2a7a4b" onclick="approvaRecensione(${r.id})">✅ Approva</button>`;
     return `
     <tr>
       <td><strong>${r.nome_cliente}</strong>${badge}</td>
       <td>${'★'.repeat(voto)}${'☆'.repeat(5-voto)}</td>
       <td style="max-width:200px">${r.testo||''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(r.created_at).toLocaleDateString('it-IT')}</td>
-      <td style="white-space:nowrap">${btnVerifica} <button class="action-btn btn-elimina" onclick="eliminaRecensione(${r.id})">🗑️</button></td>
+      <td><button class="action-btn btn-elimina" onclick="eliminaRecensione(${r.id})">🗑️</button></td>
     </tr>`;
   }).join('');
 }
@@ -912,16 +909,6 @@ async function eliminaImpresa(id, nome) {
 async function eliminaRecensione(id) {
   if (!confirm('Eliminare questa recensione?')) return;
   const { error } = await sb.from('feedback_clienti').delete().eq('id', id);
-  if (!error) await caricaRecensioni();
-}
-
-// APPROVA / REVOCA RECENSIONE
-async function approvaRecensione(id) {
-  const { error } = await sb.from('feedback_clienti').update({ verificata: true }).eq('id', id);
-  if (!error) await caricaRecensioni();
-}
-async function revocaRecensione(id) {
-  const { error } = await sb.from('feedback_clienti').update({ verificata: false }).eq('id', id);
   if (!error) await caricaRecensioni();
 }
 
