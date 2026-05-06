@@ -436,13 +436,6 @@ nav img{height:36px}
     </ul>
 
     <div id="mappa-impresa"></div>
-
-    <div class="mini-stats-grid">
-      <div class="ms"><span class="ms-n" id="sidebar-anni">—</span><span class="ms-l">Anni esp.</span></div>
-      <div class="ms" style="border-top-color:#FF6B35"><span class="ms-n" id="sidebar-dipendenti">—</span><span class="ms-l">Dipendenti</span></div>
-      <div class="ms" style="border-top-color:#1a5276"><span class="ms-n" id="sidebar-recensioni">0</span><span class="ms-l">Recensioni</span></div>
-      <div class="ms" style="border-top-color:#6c3483"><span class="ms-n" id="sidebar-rating" style="color:#FF6B35">—</span><span class="ms-l">Rating ⭐</span></div>
-    </div>
   </div>
 </div>
 
@@ -511,11 +504,8 @@ async function caricaProfilo(id){
     const nr=Array.isArray(recs)?recs.length:0;
     const voto=stelle.length?stelle.reduce((a,b)=>a+b,0)/stelle.length:null;
     document.getElementById('stat-rating').textContent=voto!=null?voto.toFixed(1):'—';
-    document.getElementById('sidebar-rating').textContent=voto!=null?voto.toFixed(1)+'⭐':'—';
     document.getElementById('stat-recensioni').textContent=nr;
-    document.getElementById('sidebar-recensioni').textContent=nr;
-    if(d.anni_esperienza){document.getElementById('stat-anni').textContent=d.anni_esperienza+'+';document.getElementById('sidebar-anni').textContent=d.anni_esperienza+'+'}
-    if(d.num_dipendenti)document.getElementById('sidebar-dipendenti').textContent=d.num_dipendenti;
+    if(d.anni_esperienza){document.getElementById('stat-anni').textContent=d.anni_esperienza+'+'}
     if(d.piano)document.getElementById('stat-piano').textContent=d.piano.toUpperCase();
     const tel=d.telefono||'';
     if(tel){const th='tel:'+tel.replace(/[\s\-().]/g,'');document.getElementById('btn-tel').href=th;const tl=document.getElementById('tel-link');if(tl){tl.href=th;tl.textContent=tel}}
