@@ -797,7 +797,8 @@
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Video lavori illimitati</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('preventivi', this)">
+        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="showSection('preventivi', this)">
+          <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Preventivi illimitati</div>
         </div>
@@ -1617,6 +1618,14 @@ async function caricaPreventivi() {
     .order('created_at', { ascending: false });
 
   const lista = data || [];
+
+  // Badge "non risposti" sulla card Funzioni Premium
+  const _nonRisposti = lista.filter(p => p.risposta == null).length;
+  const _badgePrev = document.getElementById('badge-prev-card');
+  if (_badgePrev) {
+    _badgePrev.textContent = _nonRisposti;
+    _badgePrev.style.display = _nonRisposti > 0 ? 'inline-block' : 'none';
+  }
 
   // Contatore richieste preventivo del mese (Free=3, Pro=10, Premium=∞)
   const _pianoPrev = (impresaCorrente.piano || 'free').toLowerCase();
