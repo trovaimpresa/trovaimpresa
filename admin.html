@@ -907,9 +907,11 @@ async function eliminaImpresa(id, nome) {
 
 // ELIMINA RECENSIONE
 async function eliminaRecensione(id) {
+  console.log('eliminaRecensione id:', id);
   if (!confirm('Eliminare questa recensione?')) return;
   const { error } = await sb.from('feedback_clienti').delete().eq('id', id);
-  if (!error) await caricaRecensioni();
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaRecensioni();
 }
 
 // DETTAGLIO IMPRESA
