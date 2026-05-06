@@ -92,7 +92,7 @@ exports.handler = async function(event) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'TrovaImpresa <noreply@trovaimpresa.com>',
+        from: 'TrovaImpresa <info@trovaimpresa.com>',
         to: [impresa.email],
         subject: 'Nuova richiesta di preventivo — TrovaImpresa',
         html
