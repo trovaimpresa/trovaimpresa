@@ -486,10 +486,16 @@ async function caricaProfilo(id){
     const mg=document.getElementById('profile-mestieri');
     if(uniq.length)mg.innerHTML=uniq.map(v=>{const k=Object.keys(im).find(k=>v.toLowerCase().includes(k));return`<div class="cat"><span>${im[k]||'🔧'}</span> ${v}</div>`}).join('');
     else mg.innerHTML='<div style="color:#aaa;font-size:13px">Nessuna specializzazione</div>';
-    const voto=d.rating?parseFloat(d.rating):(d.valutazione_media?parseFloat(d.valutazione_media):null);
-    const nr=d.num_recensioni||0;
-    if(voto){document.getElementById('stat-rating').textContent=voto.toFixed(1);document.getElementById('sidebar-rating').textContent=voto.toFixed(1)+'⭐'}
-    document.getElementById('stat-recensioni').textContent=nr;document.getElementById('sidebar-recensioni').textContent=nr;
+    // VALUTAZIONE + RECENSIONI: query live su feedback_clienti verificate
+    const rRev=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&verificata=eq.true&select=stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita`,{headers:{'apikey':SK}});
+    const recs=await rRev.json();
+    const stelle=(Array.isArray(recs)?recs:[]).flatMap(r=>[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita]).filter(s=>s!=null);
+    const nr=Array.isArray(recs)?recs.length:0;
+    const voto=stelle.length?stelle.reduce((a,b)=>a+b,0)/stelle.length:null;
+    document.getElementById('stat-rating').textContent=voto!=null?voto.toFixed(1):'—';
+    document.getElementById('sidebar-rating').textContent=voto!=null?voto.toFixed(1)+'⭐':'—';
+    document.getElementById('stat-recensioni').textContent=nr;
+    document.getElementById('sidebar-recensioni').textContent=nr;
     if(d.anni_esperienza){document.getElementById('stat-anni').textContent=d.anni_esperienza+'+';document.getElementById('sidebar-anni').textContent=d.anni_esperienza+'+'}
     if(d.num_dipendenti)document.getElementById('sidebar-dipendenti').textContent=d.num_dipendenti;
     if(d.piano)document.getElementById('stat-piano').textContent=d.piano.toUpperCase();
