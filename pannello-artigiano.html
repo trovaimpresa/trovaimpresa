@@ -1660,9 +1660,6 @@ async function caricaPreventivi() {
       <div class="prev-desc">${(p.descrizione || '').substring(0, 150)}${p.descrizione?.length > 150 ? '...' : ''}</div>
       <div class="prev-footer">
         <span class="prev-data">${new Date(p.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</span>
-        <button class="btn-genera" onclick="event.stopPropagation();apriModal(${p.id})">
-          🤖 Genera preventivo AI
-        </button>
       </div>
     </div>
   `).join('');
@@ -1969,38 +1966,6 @@ function apriModalPreventivoDash() {
 
 function chiudiModalPreventivoDash() {
   document.getElementById('modal-ai-dash').classList.remove('show');
-}
-
-async function generaPreventivoDash() {
-  const tipo = document.getElementById('ai-tipo-lavoro').value;
-  const descrizione = document.getElementById('ai-descrizione').value.trim();
-  const dimensioni = document.getElementById('ai-dimensioni').value.trim();
-  const zona = document.getElementById('ai-zona').value.trim();
-
-  if (!tipo) { alert('Seleziona il tipo di lavoro.'); return; }
-
-  const nomeImpresa = impresaCorrente.nome_attivita || (impresaCorrente.nome + ' ' + impresaCorrente.cognome);
-  const prompt = `Sei un esperto preventivista edile italiano. Genera un preventivo professionale completo in italiano per il seguente lavoro:\n- Tipo di lavoro: ${tipo}\n- Descrizione: ${descrizione || 'non specificata'}\n- Dimensioni/superficie: ${dimensioni || 'non specificata'}\n- Zona: ${zona || 'non specificata'}\n- Impresa: ${nomeImpresa}\n\nScrivi un preventivo professionale e formale con stima dei costi, tempistiche indicative, cosa include il servizio e garanzie. Usa il formato di una lettera commerciale italiana. Non usare JSON.`;
-
-  const btn = document.getElementById('btn-genera-ai-dash');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
-
-  try {
-    const res = await fetch('/.netlify/functions/ai-orienta', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ testo: prompt })
-    });
-    const testo = await res.text();
-    document.getElementById('ai-result-text').value = testo;
-    document.getElementById('ai-result-box').classList.add('show');
-    btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
-  } catch (err) {
-    alert('Errore nella generazione. Riprova.');
-    btn.disabled = false;
-    btn.innerHTML = '🤖 Genera preventivo';
-  }
 }
 
 async function copiaPreventivoDash() {
