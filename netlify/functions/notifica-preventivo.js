@@ -3,12 +3,15 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let impresa_id, nome, cognome, email_cliente, telefono, tipo_lavoro, descrizione;
+  let impresa_id, nome, cognome, email_cliente, telefono, tipo_lavoro, descrizione, citta, via, piano, mq, categoria_lavoro;
   try {
-    ({ impresa_id, nome, cognome, email_cliente, telefono, tipo_lavoro, descrizione } = JSON.parse(event.body));
+    ({ impresa_id, nome, cognome, email_cliente, telefono, tipo_lavoro, descrizione, citta, via, piano, mq, categoria_lavoro } = JSON.parse(event.body));
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
+
+  const pianoLabels = { 0: 'Piano terra', 1: 'Primo piano', 2: 'Secondo', 3: 'Terzo', 4: 'Quarto+', 99: 'Attico' };
+  const pianoLabel = pianoLabels[piano] != null ? pianoLabels[piano] : '—';
 
   if (!impresa_id || !nome || !email_cliente) {
     return { statusCode: 400, body: 'Parametri mancanti: impresa_id, nome e email_cliente sono obbligatori' };
@@ -64,6 +67,22 @@ exports.handler = async function(event) {
                 <td style="padding:10px 0;color:#666">Tipo lavoro</td>
                 <td style="padding:10px 0">${tipo_lavoro}</td>
               </tr>` : ''}
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Categoria</td>
+                <td style="padding:10px 0">${categoria_lavoro || '—'}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Indirizzo</td>
+                <td style="padding:10px 0">${via || '—'}, ${citta || '—'}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Piano</td>
+                <td style="padding:10px 0">${pianoLabel}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Metri quadri</td>
+                <td style="padding:10px 0">${mq ? mq + ' mq' : '—'}</td>
+              </tr>
               ${descrizione ? `
               <tr>
                 <td style="padding:10px 0;color:#666;vertical-align:top">Descrizione</td>
