@@ -1650,10 +1650,11 @@ async function caricaPreventivi() {
   }
 
   container.innerHTML = lista.map(p => `
-    <div class="prev-card" onclick="apriModal(${p.id})">
+    <div class="prev-card" style="position:relative" onclick="apriModal(${p.id})">
+      <button onclick="event.stopPropagation();eliminaPreventivo(${p.id})" title="Elimina preventivo" style="position:absolute;top:10px;right:10px;background:#fdecec;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:4px 8px;font-size:0.72rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">🗑️ Elimina</button>
       <div class="prev-header">
         <div class="prev-nome">👤 ${p.nome}</div>
-        <span class="prev-badge ${p.risposta ? 'badge-inviato' : 'badge-nuovo'}">${p.risposta ? '✅ Risposto' : '🆕 Nuovo'}</span>
+        <span class="prev-badge ${p.risposta ? 'badge-inviato' : 'badge-nuovo'}" style="margin-right:80px">${p.risposta ? '✅ Risposto' : '🆕 Nuovo'}</span>
       </div>
       <div class="prev-info">
         <span>🔨 ${p.tipo_lavoro || '—'}</span>
@@ -1670,6 +1671,14 @@ async function caricaPreventivi() {
       </div>
     </div>
   `).join('');
+}
+
+// ELIMINA PREVENTIVO
+async function eliminaPreventivo(preventivoId) {
+  if (!confirm('Eliminare questo preventivo? L\'azione è irreversibile.')) return;
+  const { error } = await sb.from('preventivi').delete().eq('id', preventivoId);
+  if (error) { alert('Errore eliminazione: ' + error.message); return; }
+  await caricaPreventivi();
 }
 
 // CARICA CANDIDATI NELLA ZONA
