@@ -2141,14 +2141,16 @@ async function apriModal(prevId) {
   if (!data) return;
   preventivoCorrente = data;
 
+  const pianoLabels = { 0: 'Piano terra', 1: 'Primo piano', 2: 'Secondo', 3: 'Terzo', 4: 'Quarto+', 99: 'Attico' };
   document.getElementById('modal-richiesta').innerHTML = `
     <div class="ric-title">📋 Richiesta del cliente</div>
     <div class="ric-row"><span class="ric-key">Nome:</span><span>${data.nome}</span></div>
     <div class="ric-row"><span class="ric-key">Lavoro:</span><span>${data.tipo_lavoro || '—'}</span></div>
+    <div class="ric-row"><span class="ric-key">Categoria:</span><span>${preventivoCorrente.categoria_lavoro || '—'}</span></div>
+    <div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${preventivoCorrente.via || '—'}, ${preventivoCorrente.citta || '—'}</span></div>
+    <div class="ric-row"><span class="ric-key">Piano:</span><span>${pianoLabels[preventivoCorrente.piano] ?? '—'}</span></div>
+    <div class="ric-row"><span class="ric-key">Metri quadri:</span><span>${preventivoCorrente.mq ? preventivoCorrente.mq + ' mq' : '—'}</span></div>
     <div class="ric-row"><span class="ric-key">Descrizione:</span><span>${data.descrizione || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${data.indirizzo || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Urgenza:</span><span>${data.urgenza || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Budget:</span><span>${data.budget || '—'}</span></div>
     ${data.superficie ? `<div class="ric-row"><span class="ric-key">Superficie:</span><span>${data.superficie} mq</span></div>` : ''}
     <div class="ric-row"><span class="ric-key">Contatto:</span><span>${data.email} · ${data.telefono}</span></div>
   `;
