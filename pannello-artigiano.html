@@ -2288,7 +2288,8 @@ async function inviaPreventivo() {
     risposta: testo,
     prezzo_min: min ? parseInt(min) : null,
     prezzo_max: max ? parseInt(max) : null,
-    risposta_at: new Date().toISOString()
+    risposta_at: new Date().toISOString(),
+    stato: 'risposto'
   }).eq('id', preventivoCorrente.id);
 
   if (error) {
