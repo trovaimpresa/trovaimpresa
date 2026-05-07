@@ -49,6 +49,11 @@ exports.handler = async function(event) {
       </div>
     `;
 
+    console.log('[DEBUG] RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'presente' : 'MANCANTE');
+    const fromAddr = 'TrovaImpresa <info@trovaimpresa.com>';
+    const toAddr = email_cliente;
+    console.log('[DEBUG] Resend pre-fetch — from:', fromAddr, '| to:', toAddr);
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -56,20 +61,24 @@ exports.handler = async function(event) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'TrovaImpresa <info@trovaimpresa.com>',
-        to: [email_cliente],
+        from: fromAddr,
+        to: [toAddr],
         subject: `Hai ricevuto un preventivo da ${impresa_nome} — TrovaImpresa`,
         html
       })
     });
 
+    const respText = await res.text();
+    console.log('[DEBUG] Resend post-fetch — status:', res.status, '| body:', respText);
+
     if (!res.ok) {
-      const errBody = await res.text();
-      return { statusCode: 500, body: 'Errore Resend: ' + errBody };
+      return { statusCode: 500, body: 'Errore Resend: ' + respText };
     }
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
   } catch (err) {
+    console.error('[DEBUG] Errore notifica-risposta-preventivo:', err.message);
+    console.error('[DEBUG] Stack:', err.stack);
     return { statusCode: 500, body: 'Errore: ' + err.message };
   }
 };
