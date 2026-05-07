@@ -41,38 +41,40 @@ exports.handler = async function(event) {
         </div>
         <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
           <p style="font-size:15px;margin-bottom:20px">Ciao <strong>${impresa.nome_attivita || impresa.nome}</strong>!</p>
-          <p style="font-size:14px;line-height:1.6;margin-bottom:24px">
+          <p style="font-size:14px;line-height:1.6;margin-bottom:20px">
             Hai ricevuto una nuova richiesta di preventivo su TrovaImpresa.
           </p>
-          <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
-            <tr style="border-bottom:1px solid #eee">
-              <td style="padding:10px 0;color:#666;width:140px">Cliente</td>
-              <td style="padding:10px 0;font-weight:700">${nome}${cognome ? ' ' + cognome : ''}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #eee">
-              <td style="padding:10px 0;color:#666">Email</td>
-              <td style="padding:10px 0"><a href="mailto:${email_cliente}" style="color:#2a7a4b">${email_cliente}</a></td>
-            </tr>
-            ${telefono ? `
-            <tr style="border-bottom:1px solid #eee">
-              <td style="padding:10px 0;color:#666">Telefono</td>
-              <td style="padding:10px 0"><a href="tel:${telefono}" style="color:#2a7a4b">${telefono}</a></td>
-            </tr>` : ''}
-            ${tipo_lavoro ? `
-            <tr style="border-bottom:1px solid #eee">
-              <td style="padding:10px 0;color:#666">Tipo lavoro</td>
-              <td style="padding:10px 0">${tipo_lavoro}</td>
-            </tr>` : ''}
-            ${descrizione ? `
-            <tr>
-              <td style="padding:10px 0;color:#666;vertical-align:top">Descrizione</td>
-              <td style="padding:10px 0;white-space:pre-wrap">${descrizione}</td>
-            </tr>` : ''}
-          </table>
+          <div style="background:#f5f5f5;border-radius:8px;padding:8px 20px;margin-bottom:24px">
+            <table style="width:100%;border-collapse:collapse;font-size:14px">
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666;width:140px">Cliente</td>
+                <td style="padding:10px 0;font-weight:700">${nome}${cognome ? ' ' + cognome : ''}</td>
+              </tr>
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Email</td>
+                <td style="padding:10px 0"><a href="mailto:${email_cliente}" style="color:#2a7a4b">${email_cliente}</a></td>
+              </tr>
+              ${telefono ? `
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Telefono</td>
+                <td style="padding:10px 0"><a href="tel:${telefono}" style="color:#2a7a4b">${telefono}</a></td>
+              </tr>` : ''}
+              ${tipo_lavoro ? `
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Tipo lavoro</td>
+                <td style="padding:10px 0">${tipo_lavoro}</td>
+              </tr>` : ''}
+              ${descrizione ? `
+              <tr>
+                <td style="padding:10px 0;color:#666;vertical-align:top">Descrizione</td>
+                <td style="padding:10px 0;white-space:pre-wrap">${descrizione}</td>
+              </tr>` : ''}
+            </table>
+          </div>
           <div style="text-align:center;margin-bottom:28px">
             <a href="https://trovaimpresa.com/pannello-artigiano.html"
-               style="display:inline-block;background:#2a7a4b;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
-              📋 Apri pannello artigiano →
+               style="display:inline-block;background:#2a7a4b;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
+              Apri il pannello →
             </a>
           </div>
           <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
