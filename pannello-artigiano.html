@@ -1214,14 +1214,9 @@
     </div>
     <div class="modal-body">
       <div class="richiesta-box" id="modal-richiesta"></div>
-      <div class="ai-genera-box">
-        <button class="ai-genera-btn" id="btn-genera-ai" onclick="generaConAI()">
-          🤖 Genera preventivo con AI
-        </button>
-      </div>
-      <div class="prev-generato" id="prev-generato">
-        <div class="prev-gen-label">✨ Preventivo generato dall'AI — personalizzalo a piacere</div>
-        <textarea class="prev-textarea" id="prev-testo"></textarea>
+      <div class="prev-generato show" id="prev-generato">
+        <div class="prev-gen-label">✏️ Compila il preventivo</div>
+        <textarea class="prev-textarea" id="prev-testo" placeholder="Descrivi i lavori da fare, tempi previsti, materiali e condizioni di pagamento..."></textarea>
         <div class="prev-prezzo-row">
           <div class="prev-input-wrap">
             <label>💶 Prezzo minimo (€)</label>
@@ -2158,17 +2153,16 @@ async function apriModal(prevId) {
     <div class="ric-row"><span class="ric-key">Contatto:</span><span>${data.email} · ${data.telefono}</span></div>
   `;
 
-  document.getElementById('prev-generato').classList.remove('show');
-  document.getElementById('btn-invia-prev').style.display = 'none';
-  document.getElementById('btn-genera-ai').disabled = false;
-  document.getElementById('btn-genera-ai').innerHTML = '🤖 Genera preventivo con AI';
+  document.getElementById('prev-testo').value = '';
+  document.getElementById('prev-min').value = '';
+  document.getElementById('prev-max').value = '';
+  document.getElementById('btn-invia-prev').style.display = 'block';
+  document.getElementById('btn-invia-prev').textContent = '📤 Invia preventivo al cliente';
 
   if (data.risposta) {
     document.getElementById('prev-testo').value = data.risposta;
     document.getElementById('prev-min').value = data.prezzo_min || '';
     document.getElementById('prev-max').value = data.prezzo_max || '';
-    document.getElementById('prev-generato').classList.add('show');
-    document.getElementById('btn-invia-prev').style.display = 'block';
     document.getElementById('btn-invia-prev').textContent = '✅ Già inviato — Reinvia';
   }
 
@@ -2177,83 +2171,6 @@ async function apriModal(prevId) {
 
 function chiudiModal() {
   document.getElementById('modal-overlay').classList.remove('show');
-}
-
-async function generaConAI() {
-  const btn = document.getElementById('btn-genera-ai');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
-
-  const p = preventivoCorrente;
-  const imp = impresaCorrente;
-  const nomeImp = imp.nome_attivita || imp.nome + ' ' + imp.cognome;
-
-  await new Promise(r => setTimeout(r, 2000));
-
-  const testo = generaTestoPreventivo(p, imp, nomeImp);
-  const { min, max } = calcolaPrezzo(p);
-
-  document.getElementById('prev-testo').value = testo;
-  document.getElementById('prev-min').value = min;
-  document.getElementById('prev-max').value = max;
-  document.getElementById('prev-generato').classList.add('show');
-  document.getElementById('btn-invia-prev').style.display = 'block';
-
-  btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
-}
-
-function generaTestoPreventivo(p, imp, nomeImp) {
-  const oggi = new Date().toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'});
-  const { min, max } = calcolaPrezzo(p);
-  return `Gentile ${p.nome.split(' ')[0]},
-
-grazie per aver contattato ${nomeImp} tramite TrovaImpresa.
-
-Abbiamo analizzato la sua richiesta riguardante: ${p.tipo_lavoro || 'il lavoro richiesto'}${p.indirizzo ? ` presso ${p.indirizzo}` : ''}.
-
-DESCRIZIONE LAVORO
-${p.descrizione || 'Come da richiesta.'}
-
-PREVENTIVO INDICATIVO
-• Costo manodopera e materiali: €${min.toLocaleString('it-IT')} – €${max.toLocaleString('it-IT')}
-• Tempistiche: da definire dopo sopralluogo
-• Inizio lavori: da concordare secondo disponibilità
-
-COSA INCLUDE
-✓ Sopralluogo gratuito senza impegno
-✓ Manodopera qualificata e assicurata
-✓ Materiali di prima qualità
-✓ Pulizia area lavoro al termine
-✓ Garanzia sulla lavorazione
-
-PROSSIMI PASSI
-Per un preventivo definitivo e vincolante, proponiamo un sopralluogo gratuito presso la sua abitazione. La contatteremo entro 24 ore per concordare data e orario.
-
-Cordiali saluti,
-${nomeImp}
-${imp.telefono || ''}
-${imp.email}
-
----
-Preventivo generato il ${oggi} tramite TrovaImpresa`;
-}
-
-function calcolaPrezzo(p) {
-  const prezzi = {
-    'muratura': [800,2500], 'elettricista': [500,1800], 'idraulico': [400,1500],
-    'tinteggiatura': [300,900], 'parquet': [600,1800], 'piastrelle': [500,1500],
-    'ristrutturazione': [15000,60000], 'climatizzatore': [800,2500], 'caldaia': [1200,3500],
-    'giardinaggio': [200,800], 'serramenti': [600,2500], 'fabbro': [200,800]
-  };
-  const lavoro = (p.tipo_lavoro || '').toLowerCase();
-  let [min, max] = [800, 2000];
-  for (const [k, v] of Object.entries(prezzi)) {
-    if (lavoro.includes(k)) { [min, max] = v; break; }
-  }
-  const sup = parseInt(p.superficie) || 0;
-  if (sup > 20) { min = Math.round(min * (1 + sup/100)); max = Math.round(max * (1 + sup/100)); }
-  if (p.urgenza === 'urgente') { min = Math.round(min * 1.2); max = Math.round(max * 1.3); }
-  return { min: Math.round(min/50)*50, max: Math.round(max/50)*50 };
 }
 
 async function inviaPreventivo() {
