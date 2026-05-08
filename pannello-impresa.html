@@ -826,35 +826,6 @@
         </div>
       </div>
 
-      <!-- GESTIONE PIANO -->
-      <div id="sezione-il-tuo-piano" style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
-        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b"><span id="piano-attuale-label">Free</span></strong></div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:stretch">
-          <!-- FREE -->
-          <div id="card-free" style="border:2px solid #2a7a4b;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;min-height:200px;display:flex;flex-direction:column;justify-content:space-between">
-            <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
-            <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
-            <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
-            <div style="margin-top:12px">
-              <button id="btn-piano-free" onclick="impostaPiano('free')" style="width:100%;padding:10px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">✅ Attiva Free</button>
-            </div>
-          </div>
-
-          <!-- PREMIUM -->
-          <div id="card-premium" style="border:2px solid #7b1fa2;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f8f0ff,#fff);min-height:200px;display:flex;flex-direction:column;justify-content:space-between">
-            <div style="font-size:1.5rem;margin-bottom:6px">💎</div>
-            <div style="font-weight:800;font-size:1rem;color:#7b1fa2;margin-bottom:4px">Premium</div>
-            <div style="font-size:0.75rem;color:#7b1fa2;font-weight:700;margin-bottom:6px">€5/mese · €49/anno</div>
-            <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto il Pro<br>AI integrata<br>Personalizzazione avanzata<br>Posizione #1 nei risultati</div>
-            <div style="margin-top:12px">
-              <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#7b1fa2;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">💎 Passa a Premium</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- CALENDARIO & ORARIO -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
@@ -1087,6 +1058,35 @@
       <div class="profilo-card" id="profilo-dati">
         <div class="profilo-title">Dati impresa</div>
         <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
+      </div>
+    </div>
+
+    <!-- GESTIONE PIANO -->
+    <div id="sezione-il-tuo-piano" style="background:white;border-radius:20px;padding:24px;margin:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
+      <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b"><span id="piano-attuale-label">Free</span></strong></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:stretch">
+        <!-- FREE -->
+        <div id="card-free" style="border:2px solid #2a7a4b;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;min-height:200px;display:flex;flex-direction:column;justify-content:space-between">
+          <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
+          <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
+          <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
+          <div style="margin-top:12px">
+            <button id="btn-piano-free" onclick="impostaPiano('free')" style="width:100%;padding:10px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">✅ Attiva Free</button>
+          </div>
+        </div>
+
+        <!-- PREMIUM -->
+        <div id="card-premium" style="border:2px solid #7b1fa2;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f8f0ff,#fff);min-height:200px;display:flex;flex-direction:column;justify-content:space-between">
+          <div style="font-size:1.5rem;margin-bottom:6px">💎</div>
+          <div style="font-weight:800;font-size:1rem;color:#7b1fa2;margin-bottom:4px">Premium</div>
+          <div style="font-size:0.75rem;color:#7b1fa2;font-weight:700;margin-bottom:6px">€5/mese · €49/anno</div>
+          <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto il Pro<br>AI integrata<br>Personalizzazione avanzata<br>Posizione #1 nei risultati</div>
+          <div style="margin-top:12px">
+            <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#7b1fa2;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">💎 Passa a Premium</button>
+          </div>
+        </div>
       </div>
     </div>
 
