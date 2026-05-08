@@ -2107,14 +2107,20 @@ async function apriModal(prevId) {
   preventivoCorrente = data;
 
   const pianoLabels = { 0: 'Piano terra', 1: 'Primo piano', 2: 'Secondo', 3: 'Terzo', 4: 'Quarto+', 99: 'Attico' };
+  const telPulito = (data.telefono || '').replace(/[\s\-+]/g, '').replace(/^39/, '');
+  const waUrl = telPulito ? `https://wa.me/39${telPulito}` : '';
+  const indirizzo = preventivoCorrente.via
+    ? (preventivoCorrente.citta ? `${preventivoCorrente.via}, ${preventivoCorrente.citta}` : preventivoCorrente.via)
+    : (preventivoCorrente.citta || '');
   document.getElementById('modal-richiesta').innerHTML = `
     <div class="ric-title">📋 Richiesta del cliente</div>
     <div class="ric-row"><span class="ric-key">Nome:</span><span>${data.nome}</span></div>
+    ${waUrl ? `<div class="ric-row"><a href="${waUrl}" target="_blank" style="display:inline-block;background:#25D366;color:white;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">📱 Contatta su WhatsApp</a></div>` : ''}
     <div class="ric-row"><span class="ric-key">Lavoro:</span><span>${data.tipo_lavoro || '—'}</span></div>
     <div class="ric-row"><span class="ric-key">Categoria:</span><span>${preventivoCorrente.categoria_lavoro || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${preventivoCorrente.via || '—'}, ${preventivoCorrente.citta || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Piano:</span><span>${pianoLabels[preventivoCorrente.piano] ?? '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Metri quadri:</span><span>${preventivoCorrente.mq ? preventivoCorrente.mq + ' mq' : '—'}</span></div>
+    ${indirizzo ? `<div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${indirizzo}</span></div>` : ''}
+    ${preventivoCorrente.piano != null ? `<div class="ric-row"><span class="ric-key">Piano:</span><span>${pianoLabels[preventivoCorrente.piano] ?? '—'}</span></div>` : ''}
+    ${preventivoCorrente.mq != null ? `<div class="ric-row"><span class="ric-key">Metri quadri:</span><span>${preventivoCorrente.mq} mq</span></div>` : ''}
     <div class="ric-row"><span class="ric-key">Descrizione:</span><span>${data.descrizione || '—'}</span></div>
     ${data.superficie ? `<div class="ric-row"><span class="ric-key">Superficie:</span><span>${data.superficie} mq</span></div>` : ''}
     <div class="ric-row"><span class="ric-key">Contatto:</span><span>${data.email} · ${data.telefono}</span></div>
