@@ -3,19 +3,19 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let impresa_id, nome, cognome, email_cliente, telefono, tipo_lavoro, descrizione, citta, via, piano, mq, categoria_lavoro;
+  let impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro;
   try {
-    ({ impresa_id, nome, cognome, email_cliente, telefono, tipo_lavoro, descrizione, citta, via, piano, mq, categoria_lavoro } = JSON.parse(event.body));
+    ({ impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro } = JSON.parse(event.body));
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
 
-  const pianoLabels = { 0: 'Piano terra', 1: 'Primo piano', 2: 'Secondo', 3: 'Terzo', 4: 'Quarto+', 99: 'Attico' };
-  const pianoLabel = pianoLabels[piano] != null ? pianoLabels[piano] : '—';
-
   if (!impresa_id || !nome || !email_cliente) {
     return { statusCode: 400, body: 'Parametri mancanti: impresa_id, nome e email_cliente sono obbligatori' };
   }
+
+  const telefonoPulito = telefono ? telefono.replace(/[\s\-+]/g, '') : '';
+  const waUrl = telefonoPulito ? `https://wa.me/39${telefonoPulito}` : '';
 
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -48,40 +48,19 @@ exports.handler = async function(event) {
             Hai ricevuto una nuova richiesta di preventivo su TrovaImpresa.
           </p>
           <div style="background:#f5f5f5;border-radius:8px;padding:8px 20px;margin-bottom:24px">
+            <h3 style="font-size:13px;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:1px;margin:12px 0 4px">Richiesta del cliente</h3>
             <table style="width:100%;border-collapse:collapse;font-size:14px">
               <tr style="border-bottom:1px solid #e5e5e5">
-                <td style="padding:10px 0;color:#666;width:140px">Cliente</td>
-                <td style="padding:10px 0;font-weight:700">${nome}${cognome ? ' ' + cognome : ''}</td>
+                <td style="padding:10px 0;color:#666;width:140px">Nome</td>
+                <td style="padding:10px 0;font-weight:700">${nome}</td>
               </tr>
-              <tr style="border-bottom:1px solid #e5e5e5">
-                <td style="padding:10px 0;color:#666">Email</td>
-                <td style="padding:10px 0"><a href="mailto:${email_cliente}" style="color:#2a7a4b">${email_cliente}</a></td>
-              </tr>
-              ${telefono ? `
-              <tr style="border-bottom:1px solid #e5e5e5">
-                <td style="padding:10px 0;color:#666">Telefono</td>
-                <td style="padding:10px 0"><a href="tel:${telefono}" style="color:#2a7a4b">${telefono}</a></td>
-              </tr>` : ''}
-              ${tipo_lavoro ? `
-              <tr style="border-bottom:1px solid #e5e5e5">
-                <td style="padding:10px 0;color:#666">Tipo lavoro</td>
-                <td style="padding:10px 0">${tipo_lavoro}</td>
-              </tr>` : ''}
               <tr style="border-bottom:1px solid #e5e5e5">
                 <td style="padding:10px 0;color:#666">Categoria</td>
                 <td style="padding:10px 0">${categoria_lavoro || '—'}</td>
               </tr>
               <tr style="border-bottom:1px solid #e5e5e5">
-                <td style="padding:10px 0;color:#666">Indirizzo</td>
-                <td style="padding:10px 0">${via || '—'}, ${citta || '—'}</td>
-              </tr>
-              <tr style="border-bottom:1px solid #e5e5e5">
-                <td style="padding:10px 0;color:#666">Piano</td>
-                <td style="padding:10px 0">${pianoLabel}</td>
-              </tr>
-              <tr style="border-bottom:1px solid #e5e5e5">
-                <td style="padding:10px 0;color:#666">Metri quadri</td>
-                <td style="padding:10px 0">${mq ? mq + ' mq' : '—'}</td>
+                <td style="padding:10px 0;color:#666">Città</td>
+                <td style="padding:10px 0">${citta || '—'}</td>
               </tr>
               ${descrizione ? `
               <tr>
@@ -90,6 +69,13 @@ exports.handler = async function(event) {
               </tr>` : ''}
             </table>
           </div>
+          ${waUrl ? `
+          <div style="text-align:center;margin-bottom:14px">
+            <a href="${waUrl}"
+               style="display:inline-block;background:#25D366;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
+              📱 Contatta su WhatsApp
+            </a>
+          </div>` : ''}
           <div style="text-align:center;margin-bottom:28px">
             <a href="https://trovaimpresa.com/pannello-artigiano.html"
                style="display:inline-block;background:#2a7a4b;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
@@ -120,7 +106,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         from: fromAddr,
         to: [toAddr],
-        subject: 'Nuova richiesta di preventivo — TrovaImpresa',
+        subject: `🔔 Richiesta sopralluogo da ${nome} – ${categoria_lavoro || ''}`,
         html
       })
     });
