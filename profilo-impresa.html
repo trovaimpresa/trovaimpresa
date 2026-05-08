@@ -478,7 +478,7 @@ async function caricaProfilo(id){
     const data=await r.json();if(!data||!data.length)return;const d=data[0];window._pianoImpresa=(d.piano||'free').toLowerCase();
     const nome=d.nome||'';
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
-    if(d.tipo)document.getElementById('profile-tipo-badge').textContent='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase();
+    if(d.tipo){const tipoFmt='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase();const mestieriArr=Array.isArray(d.mestieri)?d.mestieri.filter(Boolean):[];document.getElementById('profile-tipo-badge').textContent=mestieriArr.length?tipoFmt+' • '+mestieriArr.join(' · '):tipoFmt;}
     if(d.logo_url)document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;
     if(d.colore_header){const h=document.getElementById('hero-section');if(!d.colore_header.includes('gradient'))h.style.backgroundImage='none';h.style.background=d.colore_header}
     if(d.foto_copertina_url){document.getElementById('cover-foto-img').src=d.foto_copertina_url;document.getElementById('cover-foto').style.display='block'}
