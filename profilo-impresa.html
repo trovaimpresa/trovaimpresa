@@ -381,6 +381,14 @@ nav img{height:36px}
       </div>
     </div>
 
+    <!-- VIDEO -->
+    <div class="card" id="card-video-lavori" style="display:none;border-top-color:#7c3aed;padding:0;overflow:hidden">
+      <div style="padding:20px 24px 12px">
+        <div class="card-title" style="border-bottom:none;margin-bottom:0">📹 Galleria video</div>
+      </div>
+      <div id="video-lavori-grid" style="display:flex;flex-direction:column;gap:16px;padding:0 20px 20px"></div>
+    </div>
+
     <!-- RECENSIONI -->
     <div class="card" style="border-top-color:#6c3483">
       <div class="card-title">⭐ Recensioni dei clienti</div>
@@ -606,6 +614,49 @@ async function submitPreventivo(){
   }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}
 }
 
+function estraiVideoEmbed(url){
+  try{
+    const u=new URL(url);
+    const host=u.hostname.replace(/^www\./,'');
+    if(host==='youtu.be'){
+      const id=u.pathname.slice(1).split('/')[0];
+      return /^[A-Za-z0-9_-]{6,}$/.test(id)?'https://www.youtube.com/embed/'+id:null;
+    }
+    if(host==='youtube.com'||host==='m.youtube.com'||host==='music.youtube.com'){
+      const id=u.searchParams.get('v');
+      return id&&/^[A-Za-z0-9_-]{6,}$/.test(id)?'https://www.youtube.com/embed/'+id:null;
+    }
+    if(host==='vimeo.com'||host==='player.vimeo.com'){
+      const parts=u.pathname.split('/').filter(Boolean);
+      const id=parts.find(p=>/^\d+$/.test(p));
+      return id?'https://player.vimeo.com/video/'+id:null;
+    }
+  }catch(_){}
+  return null;
+}
+
+async function caricaVideoLavori(id){
+  const card=document.getElementById('card-video-lavori');
+  const grid=document.getElementById('video-lavori-grid');
+  if(!card||!grid)return;
+  try{
+    const {data,error}=await sc.from('video_lavori').select('*').eq('impresa_id',id).order('created_at',{ascending:false});
+    if(error||!Array.isArray(data)||!data.length)return;
+    const items=data.map(v=>{
+      const embed=estraiVideoEmbed(v.video_url);
+      if(!embed)return '';
+      const desc=String(v.descrizione||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<div style="background:#f5f5f5;border-radius:10px;overflow:hidden">
+        <div style="aspect-ratio:16/9;background:#000"><iframe src="${embed}" style="width:100%;height:100%;border:0;display:block" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+        ${desc?`<div style="padding:12px 16px;font-size:13px;color:#555;line-height:1.5">${desc}</div>`:''}
+      </div>`;
+    }).filter(Boolean);
+    if(!items.length)return;
+    grid.innerHTML=items.join('');
+    card.style.display='';
+  }catch(e){console.error(e)}
+}
+
 async function caricaFotoLavori(id){
   const grid=document.getElementById('foto-lavori-grid');if(!grid)return;
   const {data,error}=await sc.storage.from('foto-lavori').list(String(id),{sortBy:{column:'created_at',order:'desc'}});
@@ -671,7 +722,7 @@ function showRecTab(id,btn){
 
 document.addEventListener('DOMContentLoaded',async()=>{
   const p=new URLSearchParams(window.location.search);const id=p.get('id');
-  if(id){caricaProfilo(id).finally(()=>caricaRecensioni(id));caricaFotoLavori(id)}
+  if(id){caricaProfilo(id).finally(()=>caricaRecensioni(id));caricaFotoLavori(id);caricaVideoLavori(id)}
   if(sessioneUtente)document.getElementById('rec-nome-email-wrapper').style.display='none';
 });
 
