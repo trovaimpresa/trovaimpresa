@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galleria Video - TrovaImpresa</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      background:#f5f7fa;
+      min-height:100vh;
+      font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding:20px;
+    }
+    .container { max-width:860px; margin:40px auto; }
+    .header { background:linear-gradient(135deg, #2a7a4b 0%, #1a4d2e 100%); color:white; padding:32px 24px; text-align:center; border-radius:16px; margin-bottom:20px; }
+    .header h1 { font-size:24px; margin-bottom:8px; }
+    .header p { font-size:14px; opacity:0.9; }
+    .card { background:white; border-top:4px solid #2e7d32; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,0.08); padding:20px 24px; margin-bottom:16px; }
+    .card-title { font-weight:700; font-size:14px; color:#2e7d32; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:8px; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:13px; font-weight:600; color:#333; margin-bottom:7px; }
+    .form-group input, .form-group textarea { width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:14px; font-family:inherit; color:#333; }
+    .form-group input:focus, .form-group textarea:focus { outline:none; border-color:#2a7a4b; box-shadow:0 0 0 3px rgba(42,122,75,0.1); }
+    .form-group textarea { resize:vertical; min-height:80px; }
+    .btn-save { width:100%; padding:14px; border:none; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; background:#2a7a4b; color:white; }
+    .btn-save:hover { background:#1a4d2e; }
+    .btn-save:disabled { opacity:0.6; cursor:not-allowed; }
+    .video-row { display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid #f0f0f0; }
+    .video-row:last-child { border-bottom:none; }
+    .video-iframe-wrap { flex:0 0 240px; aspect-ratio:16/9; background:#000; border-radius:8px; overflow:hidden; }
+    .video-iframe-wrap iframe { width:100%; height:100%; border:0; display:block; }
+    .video-info { flex:1; min-width:0; }
+    .video-info p { font-size:14px; color:#333; line-height:1.5; word-break:break-word; }
+    .btn-del { background:#fff0f0; color:#c0392b; border:1px solid #f5c6c6; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px; flex-shrink:0; }
+    .btn-del:hover { background:#ffe5e5; }
+    .empty { text-align:center; padding:32px 0; color:#888; font-size:14px; }
+    .loading { text-align:center; padding:48px 0; color:#666; font-size:15px; }
+    .alert { padding:12px 16px; border-radius:8px; font-size:14px; margin-bottom:14px; display:none; }
+    .alert.error { background:#ffeaea; color:#c0392b; border:1px solid #f5c6c6; }
+    .alert.success { background:#e8f5e9; color:#2a7a4b; border:1px solid #a8d5b5; }
+    .btn-back-link { display:block; text-align:center; margin-top:14px; font-size:13px; color:#2a7a4b; text-decoration:none; font-weight:600; }
+    .btn-back-link:hover { text-decoration:underline; }
+    @media (max-width: 768px) {
+      body { padding:10px !important; }
+      .header { padding:20px 16px !important; }
+      .header h1 { font-size:1.2rem !important; }
+      .video-row { flex-direction:column; }
+      .video-iframe-wrap { flex:0 0 auto; width:100%; }
+      .btn-del { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎬 Fai conoscere la tua azienda</h1>
+      <p>Carica i video dei tuoi lavori per mostrare cosa sai fare</p>
+    </div>
+
+    <div id="loading" class="loading">⏳ Caricamento...</div>
+
+    <div id="content-wrapper" style="display:none">
+      <div id="alert-box" class="alert"></div>
+
+      <div class="card">
+        <div class="card-title">➕ Aggiungi un video</div>
+        <div class="form-group">
+          <label>URL video (YouTube o Vimeo)</label>
+          <input type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=...  oppure  https://vimeo.com/...">
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <textarea id="video-desc" placeholder="Descrivi brevemente il lavoro mostrato..."></textarea>
+        </div>
+        <button class="btn-save" id="btn-salva" onclick="salvaVideo()">💾 Salva video</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎬 Video caricati</div>
+        <div id="lista-video"><div class="empty">Caricamento...</div></div>
+      </div>
+
+      <a href="javascript:history.back()" class="btn-back-link">← Torna al pannello</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let impresaCorrente = null;
+
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showAlert(msg, type) {
+      const a = document.getElementById('alert-box');
+      a.textContent = msg;
+      a.className = 'alert ' + type;
+      a.style.display = 'block';
+      if (type === 'success') setTimeout(() => { a.style.display = 'none'; }, 4000);
+    }
+
+    function urlValido(url) {
+      const lower = (url || '').toLowerCase();
+      return lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com');
+    }
+
+    function estraiVideoEmbed(url) {
+      try {
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, '');
+        if (host === 'youtu.be') {
+          const id = u.pathname.slice(1).split('/')[0];
+          return /^[A-Za-z0-9_-]{6,}$/.test(id) ? 'https://www.youtube.com/embed/' + id : null;
+        }
+        if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+          const id = u.searchParams.get('v');
+          return id && /^[A-Za-z0-9_-]{6,}$/.test(id) ? 'https://www.youtube.com/embed/' + id : null;
+        }
+        if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+          const parts = u.pathname.split('/').filter(Boolean);
+          const id = parts.find(p => /^\d+$/.test(p));
+          return id ? 'https://player.vimeo.com/video/' + id : null;
+        }
+      } catch (_) {}
+      return null;
+    }
+
+    async function caricaVideo() {
+      const lista = document.getElementById('lista-video');
+      const { data, error } = await sb
+        .from('video_lavori')
+        .select('*')
+        .eq('impresa_id', impresaCorrente.id)
+        .order('created_at', { ascending: false });
+      if (error) { lista.innerHTML = '<div class="empty">Errore caricamento video.</div>'; return; }
+      if (!data || !data.length) {
+        lista.innerHTML = '<div class="empty">Nessun video caricato. Aggiungi il primo qui sopra.</div>';
+        return;
+      }
+      lista.innerHTML = data.map(v => {
+        const embed = estraiVideoEmbed(v.video_url);
+        const iframe = embed
+          ? '<iframe src="' + esc(embed) + '" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
+          : '<div style="padding:20px;color:#fff;font-size:13px">URL non valido</div>';
+        const desc = v.descrizione ? esc(v.descrizione) : '<em style="color:#888">Nessuna descrizione</em>';
+        return '<div class="video-row">' +
+          '<div class="video-iframe-wrap">' + iframe + '</div>' +
+          '<div class="video-info"><p>' + desc + '</p></div>' +
+          '<button class="btn-del" onclick="eliminaVideo(' + v.id + ')">🗑️ Elimina</button>' +
+        '</div>';
+      }).join('');
+    }
+
+    async function salvaVideo() {
+      const url = document.getElementById('video-url').value.trim();
+      const desc = document.getElementById('video-desc').value.trim();
+      if (!url) { alert('Inserisci un URL video.'); return; }
+      if (!urlValido(url)) {
+        alert('URL non valido. Sono ammessi solo link YouTube (youtube.com, youtu.be) o Vimeo (vimeo.com).');
+        return;
+      }
+      const btn = document.getElementById('btn-salva');
+      btn.disabled = true; btn.textContent = '⏳ Salvataggio...';
+      const { error } = await sb.from('video_lavori').insert({
+        impresa_id: impresaCorrente.id,
+        video_url: url,
+        descrizione: desc
+      });
+      btn.disabled = false; btn.textContent = '💾 Salva video';
+      if (error) { showAlert('Errore: ' + error.message, 'error'); return; }
+      document.getElementById('video-url').value = '';
+      document.getElementById('video-desc').value = '';
+      showAlert('✅ Video salvato!', 'success');
+      caricaVideo();
+    }
+
+    async function eliminaVideo(id) {
+      if (!confirm('Eliminare questo video?')) return;
+      const { error } = await sb.from('video_lavori').delete().eq('id', id);
+      if (error) { showAlert('Errore: ' + error.message, 'error'); return; }
+      caricaVideo();
+    }
+
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if (event !== 'INITIAL_SESSION') return;
+      if (!session) { window.location.href = 'login-impresa.html'; return; }
+      const { data, error } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
+      if (error || !data) {
+        document.getElementById('loading').textContent = '❌ Profilo non trovato.';
+        return;
+      }
+      const piano = (data.piano || '').toLowerCase();
+      if (piano !== 'premium') {
+        window.location.href = 'info-premium.html';
+        return;
+      }
+      impresaCorrente = data;
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content-wrapper').style.display = 'block';
+      caricaVideo();
+    });
+  </script>
+  <script src="/cookie-banner.js"></script>
+</body>
+</html>
