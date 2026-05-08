@@ -181,34 +181,89 @@
         <h2>Mestieri e specializzazioni</h2>
         <div class="form-group">
           <label>Mestiere principale <span class="required">*</span></label>
-          <select id="mestiere">
+          <select id="mestiere" required>
             <option value="">— Seleziona —</option>
-            <option>Muratura</option>
-            <option>Carpentiere</option>
+            <option>Edilizia / Muratura</option>
+            <option>Ristrutturazione completa</option>
             <option>Cartongesso</option>
+            <option>Pittura e tinteggiatura</option>
+            <option>Pavimenti e piastrelle</option>
+            <option>Falegnameria</option>
+            <option>Serramenti / Infissi</option>
+            <option>Idraulica</option>
+            <option>Impianti elettrici</option>
+            <option>Climatizzazione / Caldaie</option>
+            <option>Fotovoltaico / Pannelli solari</option>
+            <option>Antennista / Allarmi</option>
             <option>Coperture / Tetti</option>
-            <option>Impermeabilizzazione</option>
-            <option>Ponteggi</option>
-            <option>Elettricista</option>
-            <option>Idraulico</option>
-            <option>Termoidraulico</option>
-            <option>Tecnico caldaie</option>
-            <option>Climatizzatore</option>
-            <option>Impianto solare</option>
-            <option>Autospurghi</option>
-            <option>Pittore</option>
-            <option>Piastrellista</option>
-            <option>Pavimentista</option>
-            <option>Intonacatore</option>
-            <option>Fabbro</option>
-            <option>Falegname</option>
+            <option>Cappotti termici / Isolamento</option>
+            <option>Fabbro / Cancelli / Recinzioni</option>
+            <option>Marmi e pietre</option>
             <option>Vetraio</option>
-            <option>Giardiniere</option>
-            <option>Demolizione</option>
-            <option>Movimento terra</option>
-            <option>Asfalti</option>
-            <option>Sgomberi</option>
-            <option>Cottimisti</option>
+            <option>Tende da sole / Zanzariere</option>
+            <option>Giardinaggio / Esterni</option>
+            <option>Spurghi / Spazzacamino</option>
+            <option>Pulizie / Disinfestazioni</option>
+            <option>Sgomberi / Traslochi</option>
+            <option>Altro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mestiere secondario</label>
+          <select id="mestiere2">
+            <option value="">— Seleziona —</option>
+            <option>Edilizia / Muratura</option>
+            <option>Ristrutturazione completa</option>
+            <option>Cartongesso</option>
+            <option>Pittura e tinteggiatura</option>
+            <option>Pavimenti e piastrelle</option>
+            <option>Falegnameria</option>
+            <option>Serramenti / Infissi</option>
+            <option>Idraulica</option>
+            <option>Impianti elettrici</option>
+            <option>Climatizzazione / Caldaie</option>
+            <option>Fotovoltaico / Pannelli solari</option>
+            <option>Antennista / Allarmi</option>
+            <option>Coperture / Tetti</option>
+            <option>Cappotti termici / Isolamento</option>
+            <option>Fabbro / Cancelli / Recinzioni</option>
+            <option>Marmi e pietre</option>
+            <option>Vetraio</option>
+            <option>Tende da sole / Zanzariere</option>
+            <option>Giardinaggio / Esterni</option>
+            <option>Spurghi / Spazzacamino</option>
+            <option>Pulizie / Disinfestazioni</option>
+            <option>Sgomberi / Traslochi</option>
+            <option>Altro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Terzo mestiere</label>
+          <select id="mestiere3">
+            <option value="">— Seleziona —</option>
+            <option>Edilizia / Muratura</option>
+            <option>Ristrutturazione completa</option>
+            <option>Cartongesso</option>
+            <option>Pittura e tinteggiatura</option>
+            <option>Pavimenti e piastrelle</option>
+            <option>Falegnameria</option>
+            <option>Serramenti / Infissi</option>
+            <option>Idraulica</option>
+            <option>Impianti elettrici</option>
+            <option>Climatizzazione / Caldaie</option>
+            <option>Fotovoltaico / Pannelli solari</option>
+            <option>Antennista / Allarmi</option>
+            <option>Coperture / Tetti</option>
+            <option>Cappotti termici / Isolamento</option>
+            <option>Fabbro / Cancelli / Recinzioni</option>
+            <option>Marmi e pietre</option>
+            <option>Vetraio</option>
+            <option>Tende da sole / Zanzariere</option>
+            <option>Giardinaggio / Esterni</option>
+            <option>Spurghi / Spazzacamino</option>
+            <option>Pulizie / Disinfestazioni</option>
+            <option>Sgomberi / Traslochi</option>
+            <option>Altro</option>
           </select>
         </div>
         <div class="form-group">
@@ -446,12 +501,18 @@
       if (!document.getElementById('termini').checked) { alert('Devi accettare i termini di servizio!'); return; }
       const nome = document.getElementById('nome').value.trim();
       const mestiere = document.getElementById('mestiere').value;
+      const mestiere2 = document.getElementById('mestiere2').value;
+      const mestiere3 = document.getElementById('mestiere3').value;
       const email = document.getElementById('email').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const citta = document.getElementById('citta').value.trim();
       const regione = document.getElementById('regione').value;
       const password = document.getElementById('password').value.trim();
       if (!nome || !mestiere || !email || !telefono || !citta || !regione || !password) { alert('Compila tutti i campi obbligatori (*)'); return; }
+      if ((mestiere2 && mestiere2 === mestiere) || (mestiere3 && (mestiere3 === mestiere || mestiere3 === mestiere2))) {
+        alert('Mestiere secondario e terzo non possono coincidere con il principale né tra loro.');
+        return;
+      }
       if (password.length < 8) { alert('La password deve essere di almeno 8 caratteri.'); return; }
       const btn = document.getElementById('btn-next');
       btn.disabled = true;
@@ -497,7 +558,7 @@
           nome: nome,
           nome_attivita: nome,
           mestiere: mestiere,
-          mestieri: mestiere ? [mestiere] : [],
+          mestieri: [...new Set([mestiere, mestiere2, mestiere3].filter(Boolean))],
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
           anni_esperienza: parseInt(document.getElementById('anni_esperienza').value) || null,
