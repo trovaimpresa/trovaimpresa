@@ -1306,6 +1306,9 @@
         <option value="'Playfair Display', serif">Playfair Display</option>
         <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
       </select>
+      <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin:16px 0 8px;">Logo personalizzato</label>
+      <div id="pers-pannello-logo-preview" style="margin-bottom:8px;"></div>
+      <input type="file" id="pers-pannello-logo-file" accept="image/*" style="font-family:'DM Sans',sans-serif;font-size:0.85rem;">
     </div>
     <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
       <button onclick="chiudiModalPersonalizzaPannello()" style="padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;color:var(--mid);">Annulla</button>
@@ -1621,6 +1624,15 @@ async function inizializza() {
   if (fontPers) {
     const heroFont = document.getElementById('dash-hero');
     if (heroFont) heroFont.style.fontFamily = fontPers;
+  }
+  const logoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.logo_url;
+  if (logoPers) {
+    const sidebarLogo = document.querySelector('.sidebar-logo');
+    if (sidebarLogo) {
+      const small = sidebarLogo.querySelector('small');
+      const smallHtml = small ? small.outerHTML : '';
+      sidebarLogo.innerHTML = `<img src="${logoPers}" style="max-height:40px;width:auto">${smallHtml}`;
+    }
   }
 
   // Area logo in base al piano
@@ -2497,6 +2509,7 @@ let _persPannelloHeroBgTemp = null;
 let _persPannelloBodyBgTemp = null;
 let _persPannelloNomeTemp = null;
 let _persPannelloFontTemp = null;
+let _persPannelloLogoTemp = null;
 function apriModalPersonalizzaPannello() {
   const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
   document.getElementById('pers-pannello-colore-header').value = pers.colore_header || '#2a7a4b';
@@ -2504,11 +2517,20 @@ function apriModalPersonalizzaPannello() {
   const welcomeEl = document.getElementById('dash-welcome');
   document.getElementById('pers-pannello-nome').value = pers.nome_pannello || (welcomeEl ? welcomeEl.textContent : '');
   document.getElementById('pers-pannello-font').value = pers.font_pannello || '';
+  const logoPreviewEl = document.getElementById('pers-pannello-logo-preview');
+  if (logoPreviewEl) {
+    logoPreviewEl.innerHTML = pers.logo_url
+      ? `<img src="${pers.logo_url}" style="max-height:40px;width:auto;">`
+      : '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
+  }
+  document.getElementById('pers-pannello-logo-file').value = '';
   const hero = document.getElementById('dash-hero');
+  const sidebarLogoEl = document.querySelector('.sidebar-logo');
   _persPannelloHeroBgTemp = hero ? hero.style.background : '';
   _persPannelloBodyBgTemp = document.body.style.background;
   _persPannelloNomeTemp = welcomeEl ? welcomeEl.textContent : '';
   _persPannelloFontTemp = hero ? hero.style.fontFamily : '';
+  _persPannelloLogoTemp = sidebarLogoEl ? sidebarLogoEl.innerHTML : null;
   document.getElementById('pers-pannello-colore-header').oninput = (e) => {
     const c = e.target.value;
     const h = document.getElementById('dash-hero');
@@ -2524,6 +2546,20 @@ function apriModalPersonalizzaPannello() {
   document.getElementById('pers-pannello-font').onchange = (e) => {
     const h = document.getElementById('dash-hero');
     if (h) h.style.fontFamily = e.target.value;
+  };
+  document.getElementById('pers-pannello-logo-file').onchange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const sl = document.querySelector('.sidebar-logo');
+      if (sl) {
+        const sm = sl.querySelector('small');
+        const smHtml = sm ? sm.outerHTML : '';
+        sl.innerHTML = `<img src="${ev.target.result}" style="max-height:40px;width:auto">${smHtml}`;
+      }
+    };
+    reader.readAsDataURL(f);
   };
   document.getElementById('modal-personalizza-pannello').style.display = 'flex';
 }
@@ -2543,10 +2579,15 @@ function chiudiModalPersonalizzaPannello() {
     const h = document.getElementById('dash-hero');
     if (h) h.style.fontFamily = _persPannelloFontTemp;
   }
+  if (_persPannelloLogoTemp !== null) {
+    const sl = document.querySelector('.sidebar-logo');
+    if (sl) sl.innerHTML = _persPannelloLogoTemp;
+  }
   _persPannelloHeroBgTemp = null;
   _persPannelloBodyBgTemp = null;
   _persPannelloNomeTemp = null;
   _persPannelloFontTemp = null;
+  _persPannelloLogoTemp = null;
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
 }
 async function salvaPersonalizzaPannello() {
@@ -2555,12 +2596,23 @@ async function salvaPersonalizzaPannello() {
   const nome_pannello = document.getElementById('pers-pannello-nome').value;
   const font_pannello = document.getElementById('pers-pannello-font').value;
   const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header, colore_sfondo, nome_pannello, font_pannello };
+  const fileInput = document.getElementById('pers-pannello-logo-file');
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const parts = file.name.split('.');
+    const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'png';
+    const path = `${impresaCorrente.id}/logo.${ext}`;
+    await sb.storage.from('loghi-personalizzati').upload(path, file, { upsert: true });
+    const { data: pub } = sb.storage.from('loghi-personalizzati').getPublicUrl(path);
+    if (pub && pub.publicUrl) personalizzazione.logo_url = pub.publicUrl;
+  }
   await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
   impresaCorrente.personalizzazione = personalizzazione;
   _persPannelloHeroBgTemp = null;
   _persPannelloBodyBgTemp = null;
   _persPannelloNomeTemp = null;
   _persPannelloFontTemp = null;
+  _persPannelloLogoTemp = null;
   chiudiModalPersonalizzaPannello();
 }
 async function apriModalPriorita() {
