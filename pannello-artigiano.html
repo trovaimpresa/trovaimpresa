@@ -702,6 +702,9 @@
   #modal-personalizza-pannello input[type="checkbox"] {
     width:20px; height:20px; accent-color:#7c3aed; cursor:pointer;
   }
+  #modal-personalizza-pannello input[type="range"] {
+    width:100%; cursor:pointer; accent-color:#7c3aed;
+  }
   #modal-personalizza-pannello .mpp-footer {
     padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:12px;
     background:white; margin-top:auto;
@@ -1405,6 +1408,14 @@
         </select>
       </div>
       <div class="mpp-section">
+        <label class="mpp-label">Colore testo header</label>
+        <input type="color" id="pers-pannello-colore-testo" value="#ffffff">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Grandezza testo <span id="pers-pannello-size-label">1.0x</span></label>
+        <input type="range" id="pers-pannello-size-testo" min="0.7" max="1.5" step="0.05" value="1">
+      </div>
+      <div class="mpp-section">
         <label class="mpp-label">Logo personalizzato</label>
         <div id="pers-pannello-logo-preview" style="margin-bottom:8px;"></div>
         <input type="file" id="pers-pannello-logo-file" accept="image/*">
@@ -1719,6 +1730,14 @@ async function inizializza() {
   const fontPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.font_pannello;
   if (fontPers) {
     applicaFontHero(fontPers);
+  }
+  const colTestoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_testo_header;
+  if (colTestoPers) {
+    applicaColoreTestoHero(colTestoPers);
+  }
+  const sizeTestoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.size_testo_header;
+  if (sizeTestoPers) {
+    applicaSizeTestoHero(sizeTestoPers);
   }
   const logoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.logo_url;
   if (logoPers) {
@@ -2612,12 +2631,32 @@ function applicaFontHero(font) {
     el.style.fontFamily = font || '';
   });
 }
+function applicaColoreTestoHero(colore) {
+  const hero = document.getElementById('dash-hero');
+  if (!hero) return;
+  hero.style.color = colore || '';
+  hero.querySelectorAll('.dash-welcome, .dash-nome').forEach(el => {
+    el.style.color = colore || '';
+  });
+}
+function applicaSizeTestoHero(size) {
+  const nome = document.querySelector('#dash-hero .dash-nome');
+  if (!nome) return;
+  const n = parseFloat(size);
+  if (n && n !== 1) {
+    nome.style.fontSize = `calc(1.6rem * ${n})`;
+  } else {
+    nome.style.fontSize = '';
+  }
+}
 let _persPannelloHeroBgTemp = null;
 let _persPannelloBodyBgTemp = null;
 let _persPannelloNomeTemp = null;
 let _persPannelloFontTemp = null;
 let _persPannelloLogoTemp = null;
 let _persPannelloTemaTemp = null;
+let _persPannelloColoreTestoTemp = null;
+let _persPannelloSizeTestoTemp = null;
 function apriModalPersonalizzaPannello() {
   const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
   document.getElementById('pers-pannello-colore-header').value = pers.colore_header || '#2a7a4b';
@@ -2633,14 +2672,21 @@ function apriModalPersonalizzaPannello() {
   }
   document.getElementById('pers-pannello-logo-file').value = '';
   document.getElementById('pers-pannello-tema-scuro').checked = pers.tema_scuro === true;
+  document.getElementById('pers-pannello-colore-testo').value = pers.colore_testo_header || '#ffffff';
+  const sizeVal = pers.size_testo_header || 1;
+  document.getElementById('pers-pannello-size-testo').value = sizeVal;
+  document.getElementById('pers-pannello-size-label').textContent = parseFloat(sizeVal).toFixed(1) + 'x';
   const hero = document.getElementById('dash-hero');
   const sidebarLogoEl = document.querySelector('.sidebar-logo');
+  const nomeHeroEl = document.querySelector('#dash-hero .dash-nome');
   _persPannelloHeroBgTemp = hero ? hero.style.background : '';
   _persPannelloBodyBgTemp = document.body.style.background;
   _persPannelloNomeTemp = welcomeEl ? welcomeEl.textContent : '';
   _persPannelloFontTemp = hero ? hero.style.fontFamily : '';
   _persPannelloLogoTemp = sidebarLogoEl ? sidebarLogoEl.innerHTML : null;
   _persPannelloTemaTemp = document.body.classList.contains('theme-dark');
+  _persPannelloColoreTestoTemp = hero ? hero.style.color : '';
+  _persPannelloSizeTestoTemp = nomeHeroEl ? nomeHeroEl.style.fontSize : '';
   document.getElementById('pers-pannello-colore-header').oninput = (e) => {
     const c = e.target.value;
     const h = document.getElementById('dash-hero');
@@ -2674,6 +2720,13 @@ function apriModalPersonalizzaPannello() {
     if (e.target.checked) document.body.classList.add('theme-dark');
     else document.body.classList.remove('theme-dark');
   };
+  document.getElementById('pers-pannello-colore-testo').oninput = (e) => {
+    applicaColoreTestoHero(e.target.value);
+  };
+  document.getElementById('pers-pannello-size-testo').oninput = (e) => {
+    applicaSizeTestoHero(e.target.value);
+    document.getElementById('pers-pannello-size-label').textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+  };
   document.getElementById('modal-personalizza-pannello').style.display = 'flex';
 }
 function chiudiModalPersonalizzaPannello() {
@@ -2699,12 +2752,21 @@ function chiudiModalPersonalizzaPannello() {
     if (_persPannelloTemaTemp) document.body.classList.add('theme-dark');
     else document.body.classList.remove('theme-dark');
   }
+  if (_persPannelloColoreTestoTemp !== null) {
+    applicaColoreTestoHero(_persPannelloColoreTestoTemp);
+  }
+  if (_persPannelloSizeTestoTemp !== null) {
+    const nome = document.querySelector('#dash-hero .dash-nome');
+    if (nome) nome.style.fontSize = _persPannelloSizeTestoTemp;
+  }
   _persPannelloHeroBgTemp = null;
   _persPannelloBodyBgTemp = null;
   _persPannelloNomeTemp = null;
   _persPannelloFontTemp = null;
   _persPannelloLogoTemp = null;
   _persPannelloTemaTemp = null;
+  _persPannelloColoreTestoTemp = null;
+  _persPannelloSizeTestoTemp = null;
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
 }
 async function salvaCardOrdine() {
@@ -2719,7 +2781,9 @@ async function salvaPersonalizzaPannello() {
   const nome_pannello = document.getElementById('pers-pannello-nome').value;
   const font_pannello = document.getElementById('pers-pannello-font').value;
   const tema_scuro = document.getElementById('pers-pannello-tema-scuro').checked;
-  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header, colore_sfondo, nome_pannello, font_pannello, tema_scuro };
+  const colore_testo_header = document.getElementById('pers-pannello-colore-testo').value;
+  const size_testo_header = parseFloat(document.getElementById('pers-pannello-size-testo').value);
+  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header, colore_sfondo, nome_pannello, font_pannello, tema_scuro, colore_testo_header, size_testo_header };
   const fileInput = document.getElementById('pers-pannello-logo-file');
   if (fileInput && fileInput.files && fileInput.files[0]) {
     const file = fileInput.files[0];
@@ -2738,6 +2802,8 @@ async function salvaPersonalizzaPannello() {
   _persPannelloFontTemp = null;
   _persPannelloLogoTemp = null;
   _persPannelloTemaTemp = null;
+  _persPannelloColoreTestoTemp = null;
+  _persPannelloSizeTestoTemp = null;
   chiudiModalPersonalizzaPannello();
 }
 async function apriModalPriorita() {
