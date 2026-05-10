@@ -536,6 +536,34 @@ async function caricaProfilo(id){
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(mm);
       L.marker([d.lat,d.lng]).addTo(mm);setTimeout(()=>mm.invalidateSize(),300);
     }
+    // Personalizzazione (JSONB) — applica solo le 5 chiavi header
+    const pers = d.personalizzazione || {};
+    const heroEl = document.getElementById('hero-section');
+    const titleEl = document.getElementById('profile-name');
+    const subEl = document.getElementById('profile-tipo-badge');
+    if (pers.colore_header && heroEl) {
+      heroEl.style.backgroundImage = 'none';
+      heroEl.style.background = `linear-gradient(135deg, ${pers.colore_header}, color-mix(in srgb, ${pers.colore_header} 60%, black))`;
+    }
+    if (pers.logo_url) {
+      const av = document.getElementById('avatar-wrap');
+      if (av) av.innerHTML = `<img src="${pers.logo_url}" alt="logo" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;
+    }
+    if (pers.font_pannello) {
+      if (titleEl) titleEl.style.setProperty('font-family', pers.font_pannello, 'important');
+      if (subEl) subEl.style.setProperty('font-family', pers.font_pannello, 'important');
+    }
+    if (pers.colore_testo_header) {
+      if (titleEl) titleEl.style.setProperty('color', pers.colore_testo_header, 'important');
+      if (subEl) subEl.style.setProperty('color', pers.colore_testo_header, 'important');
+    }
+    if (pers.size_testo_header && titleEl) {
+      const n = parseFloat(pers.size_testo_header);
+      if (n && n !== 1) {
+        const cur = parseFloat(window.getComputedStyle(titleEl).fontSize);
+        if (cur) titleEl.style.fontSize = (cur * n) + 'px';
+      }
+    }
   }catch(e){console.error(e)}
 }
 
