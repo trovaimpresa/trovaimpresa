@@ -1421,6 +1421,11 @@
         <input type="file" id="pers-pannello-logo-file" accept="image/*">
       </div>
       <div class="mpp-section">
+        <label class="mpp-label">Banner copertina</label>
+        <div id="pers-pannello-banner-preview" style="margin-bottom:8px;"></div>
+        <input type="file" id="pers-pannello-banner-file" accept="image/*">
+      </div>
+      <div class="mpp-section">
         <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--dark);cursor:pointer;margin:0;">
           <input type="checkbox" id="pers-pannello-tema-scuro">
           Tema scuro
@@ -1738,6 +1743,10 @@ async function inizializza() {
   const sizeTestoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.size_testo_header;
   if (sizeTestoPers) {
     applicaSizeTestoHero(sizeTestoPers);
+  }
+  const bannerPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.banner_url;
+  if (bannerPers) {
+    applicaBannerHero(bannerPers);
   }
   const logoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.logo_url;
   if (logoPers) {
@@ -2649,6 +2658,19 @@ function applicaSizeTestoHero(size) {
     nome.style.fontSize = '';
   }
 }
+function applicaBannerHero(url) {
+  const col = document.getElementById('dash-hero-logo-col');
+  if (!col) return;
+  if (url) {
+    col.style.backgroundImage = `url("${url}")`;
+    col.style.backgroundSize = 'cover';
+    col.style.backgroundPosition = 'center';
+  } else {
+    col.style.backgroundImage = '';
+    col.style.backgroundSize = '';
+    col.style.backgroundPosition = '';
+  }
+}
 let _persPannelloHeroBgTemp = null;
 let _persPannelloBodyBgTemp = null;
 let _persPannelloNomeTemp = null;
@@ -2657,6 +2679,7 @@ let _persPannelloLogoTemp = null;
 let _persPannelloTemaTemp = null;
 let _persPannelloColoreTestoTemp = null;
 let _persPannelloSizeTestoTemp = null;
+let _persPannelloBannerTemp = null;
 function apriModalPersonalizzaPannello() {
   const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
   document.getElementById('pers-pannello-colore-header').value = pers.colore_header || '#2a7a4b';
@@ -2671,6 +2694,13 @@ function apriModalPersonalizzaPannello() {
       : '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
   }
   document.getElementById('pers-pannello-logo-file').value = '';
+  const bannerPreviewEl = document.getElementById('pers-pannello-banner-preview');
+  if (bannerPreviewEl) {
+    bannerPreviewEl.innerHTML = pers.banner_url
+      ? `<img src="${pers.banner_url}" style="max-height:60px;max-width:100%;object-fit:cover;border-radius:6px;">`
+      : '<span style="font-size:0.78rem;color:var(--light);">Nessun banner</span>';
+  }
+  document.getElementById('pers-pannello-banner-file').value = '';
   document.getElementById('pers-pannello-tema-scuro').checked = pers.tema_scuro === true;
   document.getElementById('pers-pannello-colore-testo').value = pers.colore_testo_header || '#ffffff';
   const sizeVal = pers.size_testo_header || 1;
@@ -2687,6 +2717,7 @@ function apriModalPersonalizzaPannello() {
   _persPannelloTemaTemp = document.body.classList.contains('theme-dark');
   _persPannelloColoreTestoTemp = hero ? hero.style.color : '';
   _persPannelloSizeTestoTemp = nomeHeroEl ? nomeHeroEl.style.fontSize : '';
+  _persPannelloBannerTemp = pers.banner_url || '';
   document.getElementById('pers-pannello-colore-header').oninput = (e) => {
     const c = e.target.value;
     const h = document.getElementById('dash-hero');
@@ -2727,6 +2758,15 @@ function apriModalPersonalizzaPannello() {
     applicaSizeTestoHero(e.target.value);
     document.getElementById('pers-pannello-size-label').textContent = parseFloat(e.target.value).toFixed(1) + 'x';
   };
+  document.getElementById('pers-pannello-banner-file').onchange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      applicaBannerHero(ev.target.result);
+    };
+    reader.readAsDataURL(f);
+  };
   document.getElementById('modal-personalizza-pannello').style.display = 'flex';
 }
 function chiudiModalPersonalizzaPannello() {
@@ -2759,6 +2799,9 @@ function chiudiModalPersonalizzaPannello() {
     const nome = document.querySelector('#dash-hero .dash-nome');
     if (nome) nome.style.fontSize = _persPannelloSizeTestoTemp;
   }
+  if (_persPannelloBannerTemp !== null) {
+    applicaBannerHero(_persPannelloBannerTemp);
+  }
   _persPannelloHeroBgTemp = null;
   _persPannelloBodyBgTemp = null;
   _persPannelloNomeTemp = null;
@@ -2767,6 +2810,7 @@ function chiudiModalPersonalizzaPannello() {
   _persPannelloTemaTemp = null;
   _persPannelloColoreTestoTemp = null;
   _persPannelloSizeTestoTemp = null;
+  _persPannelloBannerTemp = null;
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
 }
 async function salvaCardOrdine() {
@@ -2794,6 +2838,16 @@ async function salvaPersonalizzaPannello() {
     const { data: pub } = sb.storage.from('loghi-personalizzati').getPublicUrl(path);
     if (pub && pub.publicUrl) personalizzazione.logo_url = pub.publicUrl;
   }
+  const bannerInput = document.getElementById('pers-pannello-banner-file');
+  if (bannerInput && bannerInput.files && bannerInput.files[0]) {
+    const file = bannerInput.files[0];
+    const parts = file.name.split('.');
+    const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'png';
+    const path = `${impresaCorrente.id}/banner.${ext}`;
+    await sb.storage.from('banner-personalizzati').upload(path, file, { upsert: true });
+    const { data: pub } = sb.storage.from('banner-personalizzati').getPublicUrl(path);
+    if (pub && pub.publicUrl) personalizzazione.banner_url = pub.publicUrl;
+  }
   await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
   impresaCorrente.personalizzazione = personalizzazione;
   _persPannelloHeroBgTemp = null;
@@ -2804,6 +2858,7 @@ async function salvaPersonalizzaPannello() {
   _persPannelloTemaTemp = null;
   _persPannelloColoreTestoTemp = null;
   _persPannelloSizeTestoTemp = null;
+  _persPannelloBannerTemp = null;
   chiudiModalPersonalizzaPannello();
 }
 async function apriModalPriorita() {
