@@ -2471,13 +2471,35 @@ async function inviaSegnalazione() {
 function chiudiModalPriorita() {
   document.getElementById('modalPriorita').classList.remove('show');
 }
+let _persPannelloHeroBgTemp = null;
+let _persPannelloBodyBgTemp = null;
 function apriModalPersonalizzaPannello() {
   const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
   document.getElementById('pers-pannello-colore-header').value = pers.colore_header || '#2a7a4b';
   document.getElementById('pers-pannello-colore-sfondo').value = pers.colore_sfondo || '#f5f5f5';
+  const hero = document.getElementById('dash-hero');
+  _persPannelloHeroBgTemp = hero ? hero.style.background : '';
+  _persPannelloBodyBgTemp = document.body.style.background;
+  document.getElementById('pers-pannello-colore-header').oninput = (e) => {
+    const c = e.target.value;
+    const h = document.getElementById('dash-hero');
+    if (h) h.style.background = `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 60%, black))`;
+  };
+  document.getElementById('pers-pannello-colore-sfondo').oninput = (e) => {
+    document.body.style.background = e.target.value;
+  };
   document.getElementById('modal-personalizza-pannello').style.display = 'flex';
 }
 function chiudiModalPersonalizzaPannello() {
+  if (_persPannelloHeroBgTemp !== null) {
+    const hero = document.getElementById('dash-hero');
+    if (hero) hero.style.background = _persPannelloHeroBgTemp;
+  }
+  if (_persPannelloBodyBgTemp !== null) {
+    document.body.style.background = _persPannelloBodyBgTemp;
+  }
+  _persPannelloHeroBgTemp = null;
+  _persPannelloBodyBgTemp = null;
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
 }
 async function salvaPersonalizzaPannello() {
@@ -2486,6 +2508,8 @@ async function salvaPersonalizzaPannello() {
   const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header, colore_sfondo };
   await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
   impresaCorrente.personalizzazione = personalizzazione;
+  _persPannelloHeroBgTemp = null;
+  _persPannelloBodyBgTemp = null;
   chiudiModalPersonalizzaPannello();
 }
 async function apriModalPriorita() {
