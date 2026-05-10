@@ -1541,7 +1541,12 @@ async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const piano = (impresaCorrente.piano || 'free').toLowerCase();
   const isPro = piano === 'pro' || piano === 'premium';
-  const rating = impresaCorrente.rating || '—';
+  const { data: recsRating } = await sb.from('feedback_clienti')
+    .select('stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita')
+    .eq('impresa_id', impresaCorrente.id)
+    .eq('verificata', true);
+  const stelleRating = (recsRating || []).flatMap(r => [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita]).filter(s => s != null);
+  const rating = stelleRating.length ? (stelleRating.reduce((a, b) => a + b, 0) / stelleRating.length).toFixed(1) : '—';
 
   // Badge piano
   document.getElementById('dash-nome-impresa').textContent = nome;
