@@ -2626,9 +2626,9 @@ function chiudiModalPriorita() {
 function applicaFontHero(font) {
   const hero = document.getElementById('dash-hero');
   if (!hero) return;
-  hero.style.fontFamily = font || '';
   hero.querySelectorAll('.dash-welcome, .dash-nome').forEach(el => {
-    el.style.fontFamily = font || '';
+    if (font) el.style.setProperty('font-family', font, 'important');
+    else el.style.removeProperty('font-family');
   });
 }
 function applicaColoreTestoHero(colore) {
@@ -2682,7 +2682,7 @@ function apriModalPersonalizzaPannello() {
   _persPannelloHeroBgTemp = hero ? hero.style.background : '';
   _persPannelloBodyBgTemp = document.body.style.background;
   _persPannelloNomeTemp = welcomeEl ? welcomeEl.textContent : '';
-  _persPannelloFontTemp = hero ? hero.style.fontFamily : '';
+  _persPannelloFontTemp = nomeHeroEl ? nomeHeroEl.style.fontFamily : '';
   _persPannelloLogoTemp = sidebarLogoEl ? sidebarLogoEl.innerHTML : null;
   _persPannelloTemaTemp = document.body.classList.contains('theme-dark');
   _persPannelloColoreTestoTemp = hero ? hero.style.color : '';
