@@ -546,8 +546,8 @@ async function caricaProfilo(id){
       heroEl.style.background = `linear-gradient(135deg, ${pers.colore_header}, color-mix(in srgb, ${pers.colore_header} 60%, black))`;
     }
     if (pers.logo_url) {
-      const av = document.getElementById('avatar-wrap');
-      if (av) av.innerHTML = `<img src="${pers.logo_url}" alt="logo" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;
+      const navLogo = document.querySelector('nav img[alt="TrovaImpresa"]');
+      if (navLogo) navLogo.src = pers.logo_url;
     }
     if (pers.font_pannello) {
       if (titleEl) titleEl.style.setProperty('font-family', pers.font_pannello, 'important');
