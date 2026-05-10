@@ -9,6 +9,7 @@
 <title>Pannello Artigiano — TrovaImpresa</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -758,12 +759,12 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" onclick="showSectionById('foto')">
+        <div class="dash-quick-card" data-card-id="foto-lavori" onclick="showSectionById('foto')">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
         </div>
-        <div class="dash-quick-card" onclick="showSectionById('profilo')">
+        <div class="dash-quick-card" data-card-id="mio-profilo" onclick="showSectionById('profilo')">
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Il mio profilo</div>
           <div class="dash-quick-sub">Modifica i dati impresa</div>
@@ -773,64 +774,64 @@
       <!-- FUNZIONI PREMIUM -->
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
+        <div class="dash-quick-card" data-card-id="priorita" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
           <div class="dash-quick-icon">🔝</div>
           <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
-        <div id="card-visibile" class="dash-quick-card" style="cursor:pointer" onclick="apriModalVisibile()">
+        <div id="card-visibile" class="dash-quick-card" data-card-id="visibile" style="cursor:pointer" onclick="apriModalVisibile()">
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
           <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
+        <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
+        <div class="dash-quick-card" data-card-id="foto-illimitate" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto illimitate</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
+        <div class="dash-quick-card" data-card-id="video-azienda" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="showSection('preventivi', this)">
+        <div class="dash-quick-card" data-card-id="preventivi-illimitati" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="showSection('preventivi', this)">
           <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Preventivi illimitati</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="offerte-lavoro" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">💼</div>
           <div class="dash-quick-label">Offerte di lavoro illimitate</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="personalizza-profilo" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Personalizza profilo</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
+        <div class="dash-quick-card" data-card-id="personalizza-pannello" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="statistiche" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">📊</div>
           <div class="dash-quick-label">Statistiche profilo</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="notifiche" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">🔔</div>
           <div class="dash-quick-label">Notifiche real-time</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="ai-preventivi" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">🤖</div>
           <div class="dash-quick-label">AI preventivi</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="bandi" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">📜</div>
           <div class="dash-quick-label">Card Bandi &amp; Opportunità</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="logo-header" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">👑</div>
           <div class="dash-quick-label">Logo + colore header</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+        <div class="dash-quick-card" data-card-id="subappalto" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
             <div class="dash-quick-icon">🔍</div>
             <div class="dash-quick-label">Cerco Subappaltatori</div>
@@ -1664,6 +1665,23 @@ async function inizializza() {
   const temaPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.tema_scuro;
   if (temaPers === true) {
     document.body.classList.add('theme-dark');
+  }
+  const cardOrd = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.card_ordine;
+  if (Array.isArray(cardOrd) && cardOrd.length) {
+    document.querySelectorAll('.dash-quick-grid').forEach(grid => {
+      const cards = Array.from(grid.querySelectorAll('[data-card-id]'));
+      cards.sort((a, b) => {
+        const ia = cardOrd.indexOf(a.dataset.cardId);
+        const ib = cardOrd.indexOf(b.dataset.cardId);
+        return (ia === -1 ? Infinity : ia) - (ib === -1 ? Infinity : ib);
+      });
+      cards.forEach(c => grid.appendChild(c));
+    });
+  }
+  if (piano === 'premium' && window.Sortable) {
+    document.querySelectorAll('.dash-quick-grid').forEach(grid => {
+      new Sortable(grid, { animation: 150, onUpdate: salvaCardOrdine });
+    });
   }
 
   // Area logo in base al piano
@@ -2632,6 +2650,12 @@ function chiudiModalPersonalizzaPannello() {
   _persPannelloLogoTemp = null;
   _persPannelloTemaTemp = null;
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
+}
+async function salvaCardOrdine() {
+  const card_ordine = Array.from(document.querySelectorAll('.dash-quick-grid [data-card-id]')).map(el => el.dataset.cardId);
+  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), card_ordine };
+  await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
+  impresaCorrente.personalizzazione = personalizzazione;
 }
 async function salvaPersonalizzaPannello() {
   const colore_header = document.getElementById('pers-pannello-colore-header').value;
