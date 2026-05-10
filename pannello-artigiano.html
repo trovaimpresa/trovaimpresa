@@ -1289,7 +1289,10 @@
       <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;margin:0;">🎨 Personalizza pannello</h2>
       <button onclick="chiudiModalPersonalizzaPannello()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--mid);line-height:1;padding:4px 8px;">✕</button>
     </div>
-    <div id="personalizza-pannello-body" style="padding:24px;"></div>
+    <div id="personalizza-pannello-body" style="padding:24px;">
+      <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Colore header</label>
+      <input type="color" id="pers-pannello-colore-header" value="#2a7a4b" style="width:60px;height:40px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px;background:white;">
+    </div>
     <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
       <button onclick="chiudiModalPersonalizzaPannello()" style="padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;color:var(--mid);">Annulla</button>
       <button onclick="salvaPersonalizzaPannello()" style="padding:10px 22px;border-radius:10px;border:none;background:#7c3aed;color:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Salva</button>
@@ -1583,6 +1586,13 @@ async function inizializza() {
       const hero = document.getElementById('dash-hero');
       if (hero) hero.style.background = impresaCorrente.colore_header;
     }
+  }
+
+  // Colore header da personalizzazione (JSONB)
+  const colorePers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_header;
+  if (colorePers) {
+    const hero = document.getElementById('dash-hero');
+    if (hero) hero.style.background = `linear-gradient(135deg, ${colorePers}, color-mix(in srgb, ${colorePers} 60%, black))`;
   }
 
   // Area logo in base al piano
@@ -2456,12 +2466,18 @@ function chiudiModalPriorita() {
   document.getElementById('modalPriorita').classList.remove('show');
 }
 function apriModalPersonalizzaPannello() {
+  const colore = (impresaCorrente && impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_header) || '#2a7a4b';
+  document.getElementById('pers-pannello-colore-header').value = colore;
   document.getElementById('modal-personalizza-pannello').style.display = 'flex';
 }
 function chiudiModalPersonalizzaPannello() {
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
 }
-function salvaPersonalizzaPannello() {
+async function salvaPersonalizzaPannello() {
+  const colore = document.getElementById('pers-pannello-colore-header').value;
+  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header: colore };
+  await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
+  impresaCorrente.personalizzazione = personalizzazione;
   chiudiModalPersonalizzaPannello();
 }
 async function apriModalPriorita() {
