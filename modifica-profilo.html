@@ -553,88 +553,6 @@
           </div>
         </div>
 
-        <!-- LOGO -->
-        <div class="form-card fc-blu">
-        <div class="card-header blu">🖼️ Logo / Foto profilo</div>
-        <div class="form-group">
-          <div id="logo-current-wrap" style="display:none;margin-bottom:12px;">
-            <img id="logo-current" class="logo-preview" src="" alt="Logo attuale">
-            <span style="font-size:12px;color:#666;">Logo attuale</span>
-          </div>
-          <div class="upload-area" id="upload-area" onclick="document.getElementById('logo-input').click()">
-            <p><strong>Clicca per cambiare</strong> il logo</p>
-            <small>PNG, JPG — max 5MB</small>
-          </div>
-          <input type="file" id="logo-input" accept="image/*">
-          <div id="file-selected" style="display:none;margin-top:8px;font-size:13px;color:#2a7a4b;font-weight:600;"></div>
-        </div>
-        </div><!-- /card Logo -->
-
-        <!-- FOTO COPERTINA (PREMIUM) -->
-        <div class="form-card" style="position:relative;">
-          <div class="card-header">🖼️ Foto di copertina <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
-          <div class="form-group">
-            <div id="wrap-copertina-pro">
-              <div id="copertina-current-wrap" style="display:none;margin-bottom:12px;">
-                <img id="copertina-current" style="max-width:100%;border-radius:8px;max-height:160px;object-fit:cover;" src="" alt="Copertina attuale">
-                <div style="font-size:12px;color:#666;margin-top:4px;">Foto di copertina attuale</div>
-              </div>
-              <div class="upload-area" onclick="document.getElementById('copertina-input').click()">
-                <p><strong>Clicca per caricare</strong> la foto di copertina</p>
-                <small>PNG, JPG — max 5MB — consigliata 1200×400px</small>
-              </div>
-              <input type="file" id="copertina-input" accept="image/*" style="display:none;">
-              <div id="copertina-file-selected" style="display:none;margin-top:8px;font-size:13px;color:#2a7a4b;font-weight:600;"></div>
-            </div>
-          </div>
-          <div id="overlay-copertina" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
-            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-            <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Premium</div>
-            <a href="info-premium.html" style="display:inline-block;padding:10px 20px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Premium →</a>
-          </div>
-        </div>
-
-        <!-- COLORE HEADER (PREMIUM) -->
-        <div class="form-card fc-arancio" style="position:relative;">
-          <div class="card-header arancio">🎨 Colore header profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
-          <div class="form-group">
-            <div id="wrap-colore-pro">
-              <label style="font-size:12px;color:#555;margin-bottom:8px;display:block;">Colore di sfondo dell'header nel tuo profilo pubblico</label>
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                <input type="color" id="f-colore_header" value="#1a3a2a" style="width:60px;height:40px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:4px;" oninput="aggiornaGradiente()">
-                <input type="color" id="f-colore_header2" value="#2a7a4b" style="width:60px;height:40px;border:1px solid #ddd;border-radius:8px;cursor:pointer;padding:4px;" oninput="aggiornaGradiente()">
-                <select id="f-colore_header_dir" style="height:40px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:13px;cursor:pointer;" onchange="aggiornaGradiente()">
-                  <option value="135deg">↗ 135°</option>
-                  <option value="90deg">↑ 90°</option>
-                  <option value="180deg">↓ 180°</option>
-                  <option value="45deg">→ 45°</option>
-                </select>
-                <div id="preview-colore_header" style="flex:1;min-width:80px;height:40px;border-radius:8px;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);border:1px solid #ddd;"></div>
-              </div>
-              <input type="hidden" id="colore_header" value="linear-gradient(135deg,#1a3a2a,#2a7a4b)">
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#1a3a2a,#2a7a4b)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);"></div>
-                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#0d3b8c,#1a73e8)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#0d3b8c,#1a73e8);"></div>
-                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#3a0a6e,#7b2fbe)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#3a0a6e,#7b2fbe);"></div>
-                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#b71c1c,#e53935)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#b71c1c,#e53935);"></div>
-                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#e65100,#ff9800)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#e65100,#ff9800);"></div>
-                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#1a237e,#00bcd4)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#1a237e,#00bcd4);"></div>
-                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#212121,#616161)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#212121,#616161);"></div>
-                <div class="preset-grad-card" onclick="selezionaPreset(this,'linear-gradient(135deg,#880e4f,#e91e63)')" style="width:48px;height:32px;border-radius:6px;cursor:pointer;border:2px solid #ddd;background:linear-gradient(135deg,#880e4f,#e91e63);"></div>
-              </div>
-              <script>
-                function aggiornaGradiente(){var d=document.getElementById('f-colore_header_dir').value,c1=document.getElementById('f-colore_header').value,c2=document.getElementById('f-colore_header2').value,g='linear-gradient('+d+','+c1+','+c2+')';document.getElementById('colore_header').value=g;document.getElementById('preview-colore_header').style.background=g;}
-                function selezionaPreset(el,g){document.getElementById('colore_header').value=g;document.getElementById('preview-colore_header').style.background=g;document.querySelectorAll('.preset-grad-card').forEach(function(c){c.style.border='2px solid #ddd';});el.style.border='3px solid #333';}
-              </script>
-            </div>
-          </div>
-          <div id="overlay-colore" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);border-radius:16px;z-index:10;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
-            <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-            <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:12px;">Funzionalità Premium</div>
-            <a href="info-premium.html" style="display:inline-block;padding:10px 20px;background:#7b1fa2;color:white;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Passa al Premium →</a>
-          </div>
-        </div>
-
         <!-- VIDEO PROFILO (PREMIUM) -->
         <div class="form-card fc-blu" style="position:relative;">
           <div class="card-header blu">🎬 Video profilo <span style="font-size:11px;font-weight:600;background:#7b1fa2;color:white;padding:2px 8px;border-radius:10px;margin-left:6px;">PREMIUM</span></div>
@@ -708,8 +626,6 @@
 
     let currentUser = null;
     let impresaData = null;
-    let logoFile = null;
-    let copFile = null;
     let specializzazioni = [];
     let tipoCategoria = null;
 
@@ -909,12 +825,6 @@
       }
       aggiornaDescCounter();
 
-      // Logo attuale
-      if (d.logo_url) {
-        document.getElementById('logo-current').src = d.logo_url;
-        document.getElementById('logo-current-wrap').style.display = 'block';
-      }
-
       // Gestione abbonamento
       if (d.piano && d.piano !== 'free') {
         document.getElementById('card-disdetta').style.display = 'block';
@@ -931,19 +841,10 @@
       // Campi Premium
       const isPremium = d.piano === 'premium';
       if (!isPremium) {
-        ['overlay-copertina', 'overlay-colore', 'overlay-video', 'overlay-ai-profilo'].forEach(id => {
+        ['overlay-video', 'overlay-ai-profilo'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.style.display = 'flex';
         });
-      }
-      if (isPremium) {
-        if (d.foto_copertina_url) {
-          document.getElementById('copertina-current').src = d.foto_copertina_url;
-          document.getElementById('copertina-current-wrap').style.display = 'block';
-        }
-        if (d.colore_header) {
-          document.getElementById('f-colore_header').value = d.colore_header;
-        }
       }
 
       // Mostra la sezione corretta
@@ -1030,58 +931,6 @@
       }
     }
 
-    // Upload logo
-    document.getElementById('logo-input').addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { alert('File troppo grande. Massimo 5MB.'); return; }
-      logoFile = file;
-      document.getElementById('file-selected').textContent = '✅ ' + file.name;
-      document.getElementById('file-selected').style.display = 'block';
-      document.getElementById('upload-area').style.borderColor = '#2a7a4b';
-    });
-
-    document.getElementById('copertina-input').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { alert('File troppo grande. Massimo 5MB.'); return; }
-      copFile = file;
-      document.getElementById('copertina-file-selected').textContent = '✅ ' + file.name;
-      document.getElementById('copertina-file-selected').style.display = 'block';
-    });
-
-    async function uploadLogo(file) {
-      const ext = file.name.split('.').pop();
-      const fileName = currentUser.id + '_' + Date.now() + '.' + ext;
-      const res = await fetch(SUPABASE_URL + '/storage/v1/object/loghi-imprese/' + fileName, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Content-Type': file.type || 'image/png'
-        },
-        body: file
-      });
-      if (!res.ok) throw new Error('Errore upload logo');
-      return SUPABASE_URL + '/storage/v1/object/public/loghi-imprese/' + fileName;
-    }
-
-    async function uploadFotoCopertina(file) {
-      const ext = file.name.split('.').pop();
-      const fileName = 'copertina_' + currentUser.id + '_' + Date.now() + '.' + ext;
-      const res = await fetch(SUPABASE_URL + '/storage/v1/object/loghi-imprese/' + fileName, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Content-Type': file.type || 'image/png'
-        },
-        body: file
-      });
-      if (!res.ok) throw new Error('Errore upload foto copertina');
-      return SUPABASE_URL + '/storage/v1/object/public/loghi-imprese/' + fileName;
-    }
-
     // Specializzazioni tag (professionista)
     function aggiungiSpec() {
       const sel = document.getElementById('f-spec-select');
@@ -1138,18 +987,6 @@
 
       try {
         clearAlert();
-        const isPremium = impresaData.piano === 'premium';
-        let logo_url = impresaData.logo_url;
-        if (logoFile) {
-          btn.textContent = '⏳ Caricamento logo...';
-          logo_url = await uploadLogo(logoFile);
-        }
-
-        let foto_copertina_url = impresaData.foto_copertina_url || null;
-        if (copFile && isPremium) {
-          btn.textContent = '⏳ Caricamento copertina...';
-          foto_copertina_url = await uploadFotoCopertina(copFile);
-        }
 
         // Campi comuni
         const dati = {
@@ -1159,11 +996,8 @@
           citta: document.getElementById('f-citta').value.trim(),
           sito_web: document.getElementById('f-sito_web').value.trim(),
           descrizione: document.getElementById('f-descrizione').value.trim(),
-          logo_url: logo_url,
           lat: parseFloat(document.getElementById('f-lat').value) || null,
-          lng: parseFloat(document.getElementById('f-lng').value) || null,
-          foto_copertina_url: isPremium ? foto_copertina_url : undefined,
-          colore_header: isPremium ? document.getElementById('f-colore_header').value : undefined
+          lng: parseFloat(document.getElementById('f-lng').value) || null
         };
 
         // Campi specifici per tipo
@@ -1243,19 +1077,6 @@
 
         // Aggiorna dati locali
         Object.assign(impresaData, dati);
-        if (logoFile) {
-          document.getElementById('logo-current').src = logo_url;
-          document.getElementById('logo-current-wrap').style.display = 'block';
-          logoFile = null;
-          document.getElementById('file-selected').style.display = 'none';
-          document.getElementById('upload-area').style.borderColor = '#ddd';
-        }
-        if (copFile) {
-          document.getElementById('copertina-current').src = foto_copertina_url;
-          document.getElementById('copertina-current-wrap').style.display = 'block';
-          copFile = null;
-          document.getElementById('copertina-file-selected').style.display = 'none';
-        }
 
         showSuccess('✅ Profilo aggiornato con successo! Reindirizzamento in corso...');
         window.scrollTo(0, 0);
