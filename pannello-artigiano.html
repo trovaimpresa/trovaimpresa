@@ -642,6 +642,62 @@
   body.theme-dark .profilo-key { color:#aaa; }
   body.theme-dark .profilo-row,
   body.theme-dark .profilo-title { border-bottom-color:rgba(255,255,255,0.08); }
+
+  /* === Modal Personalizza pannello === */
+  #modal-personalizza-pannello .mpp-box {
+    background:white; border-radius:20px; width:100%; max-width:600px;
+    max-height:90vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  }
+  #modal-personalizza-pannello .mpp-header {
+    background:linear-gradient(135deg,#7c3aed,#6d28d9); padding:24px;
+    color:white; display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  #modal-personalizza-pannello .mpp-header h2 {
+    font-family:'Playfair Display',serif; font-size:1.3rem; margin:0 0 4px; color:white;
+  }
+  #modal-personalizza-pannello .mpp-header p { margin:0; font-size:0.85rem; opacity:0.85; }
+  #modal-personalizza-pannello .mpp-close {
+    background:none; border:none; color:white; font-size:1.3rem; cursor:pointer;
+    opacity:0.85; line-height:1; padding:0;
+  }
+  #modal-personalizza-pannello .mpp-close:hover { opacity:1; }
+  #modal-personalizza-pannello .mpp-body {
+    padding:24px; overflow-y:auto; max-height:calc(90vh - 180px);
+  }
+  #modal-personalizza-pannello .mpp-section {
+    background:#f9f9fb; border-radius:12px; padding:14px 16px; margin-bottom:12px;
+  }
+  #modal-personalizza-pannello .mpp-section:last-child { margin-bottom:0; }
+  #modal-personalizza-pannello .mpp-label {
+    display:block; font-size:0.73rem; font-weight:800; color:var(--mid);
+    text-transform:uppercase; letter-spacing:0.8px; margin:0 0 8px;
+  }
+  #modal-personalizza-pannello input[type="color"] {
+    width:50px; height:50px; border:1.5px solid var(--border); border-radius:50%;
+    cursor:pointer; padding:2px; background:white;
+  }
+  #modal-personalizza-pannello input[type="text"],
+  #modal-personalizza-pannello select {
+    width:100%; padding:10px; border:1.5px solid var(--border); border-radius:8px;
+    font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none;
+    background:white; box-sizing:border-box;
+  }
+  #modal-personalizza-pannello .mpp-footer {
+    padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:12px;
+    background:white; margin-top:auto;
+  }
+  #modal-personalizza-pannello .mpp-footer button {
+    flex:1; padding:12px; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer;
+  }
+  #modal-personalizza-pannello .mpp-btn-cancel {
+    border:1.5px solid var(--border); background:white; color:var(--mid);
+  }
+  #modal-personalizza-pannello .mpp-btn-save {
+    border:none; background:#7c3aed; color:white;
+  }
+  #modal-personalizza-pannello .mpp-btn-save:hover { background:#6d28d9; }
 </style>
 </head>
 <body>
@@ -1309,38 +1365,53 @@
 
 <!-- MODAL PERSONALIZZA PANNELLO -->
 <div id="modal-personalizza-pannello" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)chiudiModalPersonalizzaPannello()">
-  <div style="background:white;border-radius:16px;border-top:4px solid #7c3aed;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.25);">
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-      <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;margin:0;">🎨 Personalizza pannello</h2>
-      <button onclick="chiudiModalPersonalizzaPannello()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--mid);line-height:1;padding:4px 8px;">✕</button>
+  <div class="mpp-box">
+    <div class="mpp-header">
+      <div>
+        <h2>🎨 Personalizza pannello</h2>
+        <p>Personalizza la tua esperienza</p>
+      </div>
+      <button class="mpp-close" onclick="chiudiModalPersonalizzaPannello()">✕</button>
     </div>
-    <div id="personalizza-pannello-body" style="padding:24px;">
-      <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Colore header</label>
-      <input type="color" id="pers-pannello-colore-header" value="#2a7a4b" style="width:60px;height:40px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px;background:white;">
-      <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin:16px 0 8px;">Sfondo pagina</label>
-      <input type="color" id="pers-pannello-colore-sfondo" value="#f5f5f5" style="width:60px;height:40px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px;background:white;">
-      <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin:16px 0 8px;">Nome pannello</label>
-      <input type="text" id="pers-pannello-nome" maxlength="30" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;box-sizing:border-box;">
-      <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin:16px 0 8px;">Font header</label>
-      <select id="pers-pannello-font" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;background:white;box-sizing:border-box;">
-        <option value="">Predefinito</option>
-        <option value="'Inter', sans-serif">Inter (moderno, pulito)</option>
-        <option value="'Poppins', sans-serif">Poppins (rotondo, friendly)</option>
-        <option value="'Montserrat', sans-serif">Montserrat (elegante)</option>
-        <option value="'Playfair Display', serif">Playfair Display (classico, serif)</option>
-        <option value="'Bebas Neue', sans-serif">Bebas Neue (bold, titoli)</option>
-      </select>
-      <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin:16px 0 8px;">Logo personalizzato</label>
-      <div id="pers-pannello-logo-preview" style="margin-bottom:8px;"></div>
-      <input type="file" id="pers-pannello-logo-file" accept="image/*" style="font-family:'DM Sans',sans-serif;font-size:0.85rem;">
-      <label style="display:flex;align-items:center;gap:8px;margin-top:16px;font-size:0.9rem;color:var(--dark);cursor:pointer;">
-        <input type="checkbox" id="pers-pannello-tema-scuro" style="width:18px;height:18px;cursor:pointer;">
-        Tema scuro
-      </label>
+    <div id="personalizza-pannello-body" class="mpp-body">
+      <div class="mpp-section">
+        <label class="mpp-label">Colore header</label>
+        <input type="color" id="pers-pannello-colore-header" value="#2a7a4b">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Sfondo pagina</label>
+        <input type="color" id="pers-pannello-colore-sfondo" value="#f5f5f5">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Nome pannello</label>
+        <input type="text" id="pers-pannello-nome" maxlength="30">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Font header</label>
+        <select id="pers-pannello-font">
+          <option value="">Predefinito</option>
+          <option value="'Inter', sans-serif">Inter (moderno, pulito)</option>
+          <option value="'Poppins', sans-serif">Poppins (rotondo, friendly)</option>
+          <option value="'Montserrat', sans-serif">Montserrat (elegante)</option>
+          <option value="'Playfair Display', serif">Playfair Display (classico, serif)</option>
+          <option value="'Bebas Neue', sans-serif">Bebas Neue (bold, titoli)</option>
+        </select>
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Logo personalizzato</label>
+        <div id="pers-pannello-logo-preview" style="margin-bottom:8px;"></div>
+        <input type="file" id="pers-pannello-logo-file" accept="image/*" style="font-family:'DM Sans',sans-serif;font-size:0.85rem;">
+      </div>
+      <div class="mpp-section">
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--dark);cursor:pointer;margin:0;">
+          <input type="checkbox" id="pers-pannello-tema-scuro" style="width:18px;height:18px;cursor:pointer;">
+          Tema scuro
+        </label>
+      </div>
     </div>
-    <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
-      <button onclick="chiudiModalPersonalizzaPannello()" style="padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;color:var(--mid);">Annulla</button>
-      <button onclick="salvaPersonalizzaPannello()" style="padding:10px 22px;border-radius:10px;border:none;background:#7c3aed;color:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Salva</button>
+    <div class="mpp-footer">
+      <button class="mpp-btn-cancel" onclick="chiudiModalPersonalizzaPannello()">Annulla</button>
+      <button class="mpp-btn-save" onclick="salvaPersonalizzaPannello()">Salva</button>
     </div>
   </div>
 </div>
