@@ -564,6 +564,14 @@ async function caricaProfilo(id){
         if (cur) titleEl.style.fontSize = (cur * n) + 'px';
       }
     }
+    if (pers.banner_url) {
+      const rightCol = document.querySelector('#hero-section .hero-right-col');
+      if (rightCol) {
+        rightCol.style.backgroundImage = `url("${pers.banner_url}")`;
+        rightCol.style.backgroundSize = 'cover';
+        rightCol.style.backgroundPosition = 'center';
+      }
+    }
   }catch(e){console.error(e)}
 }
 
