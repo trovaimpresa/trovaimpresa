@@ -782,7 +782,7 @@
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Personalizza profilo</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
@@ -1278,6 +1278,21 @@
       <div id="priorita-content">
         <div style="text-align:center;padding:40px 0;color:#999;">⏳ Calcolo in corso…</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERSONALIZZA PANNELLO -->
+<div id="modal-personalizza-pannello" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)chiudiModalPersonalizzaPannello()">
+  <div style="background:white;border-radius:16px;border-top:4px solid #7c3aed;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.25);">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;margin:0;">🎨 Personalizza pannello</h2>
+      <button onclick="chiudiModalPersonalizzaPannello()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--mid);line-height:1;padding:4px 8px;">✕</button>
+    </div>
+    <div id="personalizza-pannello-body" style="padding:24px;"></div>
+    <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="chiudiModalPersonalizzaPannello()" style="padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;color:var(--mid);">Annulla</button>
+      <button onclick="salvaPersonalizzaPannello()" style="padding:10px 22px;border-radius:10px;border:none;background:#7c3aed;color:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Salva</button>
     </div>
   </div>
 </div>
@@ -2439,6 +2454,15 @@ async function inviaSegnalazione() {
 
 function chiudiModalPriorita() {
   document.getElementById('modalPriorita').classList.remove('show');
+}
+function apriModalPersonalizzaPannello() {
+  document.getElementById('modal-personalizza-pannello').style.display = 'flex';
+}
+function chiudiModalPersonalizzaPannello() {
+  document.getElementById('modal-personalizza-pannello').style.display = 'none';
+}
+function salvaPersonalizzaPannello() {
+  chiudiModalPersonalizzaPannello();
 }
 async function apriModalPriorita() {
   document.getElementById('modalPriorita').classList.add('show');
