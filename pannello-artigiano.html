@@ -8,6 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Pannello Artigiano — TrovaImpresa</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -1296,6 +1297,15 @@
       <input type="color" id="pers-pannello-colore-sfondo" value="#f5f5f5" style="width:60px;height:40px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px;background:white;">
       <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin:16px 0 8px;">Nome pannello</label>
       <input type="text" id="pers-pannello-nome" maxlength="30" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;box-sizing:border-box;">
+      <label style="display:block;font-size:0.73rem;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin:16px 0 8px;">Font header</label>
+      <select id="pers-pannello-font" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;background:white;box-sizing:border-box;">
+        <option value="">Default</option>
+        <option value="'Inter', sans-serif">Inter</option>
+        <option value="'Poppins', sans-serif">Poppins</option>
+        <option value="'Montserrat', sans-serif">Montserrat</option>
+        <option value="'Playfair Display', serif">Playfair Display</option>
+        <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+      </select>
     </div>
     <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
       <button onclick="chiudiModalPersonalizzaPannello()" style="padding:10px 18px;border-radius:10px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;color:var(--mid);">Annulla</button>
@@ -1606,6 +1616,11 @@ async function inizializza() {
   if (nomePers) {
     const welcomeNomeEl = document.getElementById('dash-welcome');
     if (welcomeNomeEl) welcomeNomeEl.textContent = nomePers;
+  }
+  const fontPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.font_pannello;
+  if (fontPers) {
+    const heroFont = document.getElementById('dash-hero');
+    if (heroFont) heroFont.style.fontFamily = fontPers;
   }
 
   // Area logo in base al piano
@@ -2481,16 +2496,19 @@ function chiudiModalPriorita() {
 let _persPannelloHeroBgTemp = null;
 let _persPannelloBodyBgTemp = null;
 let _persPannelloNomeTemp = null;
+let _persPannelloFontTemp = null;
 function apriModalPersonalizzaPannello() {
   const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
   document.getElementById('pers-pannello-colore-header').value = pers.colore_header || '#2a7a4b';
   document.getElementById('pers-pannello-colore-sfondo').value = pers.colore_sfondo || '#f5f5f5';
   const welcomeEl = document.getElementById('dash-welcome');
   document.getElementById('pers-pannello-nome').value = pers.nome_pannello || (welcomeEl ? welcomeEl.textContent : '');
+  document.getElementById('pers-pannello-font').value = pers.font_pannello || '';
   const hero = document.getElementById('dash-hero');
   _persPannelloHeroBgTemp = hero ? hero.style.background : '';
   _persPannelloBodyBgTemp = document.body.style.background;
   _persPannelloNomeTemp = welcomeEl ? welcomeEl.textContent : '';
+  _persPannelloFontTemp = hero ? hero.style.fontFamily : '';
   document.getElementById('pers-pannello-colore-header').oninput = (e) => {
     const c = e.target.value;
     const h = document.getElementById('dash-hero');
@@ -2502,6 +2520,10 @@ function apriModalPersonalizzaPannello() {
   document.getElementById('pers-pannello-nome').oninput = (e) => {
     const w = document.getElementById('dash-welcome');
     if (w) w.textContent = e.target.value;
+  };
+  document.getElementById('pers-pannello-font').onchange = (e) => {
+    const h = document.getElementById('dash-hero');
+    if (h) h.style.fontFamily = e.target.value;
   };
   document.getElementById('modal-personalizza-pannello').style.display = 'flex';
 }
@@ -2517,21 +2539,28 @@ function chiudiModalPersonalizzaPannello() {
     const w = document.getElementById('dash-welcome');
     if (w) w.textContent = _persPannelloNomeTemp;
   }
+  if (_persPannelloFontTemp !== null) {
+    const h = document.getElementById('dash-hero');
+    if (h) h.style.fontFamily = _persPannelloFontTemp;
+  }
   _persPannelloHeroBgTemp = null;
   _persPannelloBodyBgTemp = null;
   _persPannelloNomeTemp = null;
+  _persPannelloFontTemp = null;
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
 }
 async function salvaPersonalizzaPannello() {
   const colore_header = document.getElementById('pers-pannello-colore-header').value;
   const colore_sfondo = document.getElementById('pers-pannello-colore-sfondo').value;
   const nome_pannello = document.getElementById('pers-pannello-nome').value;
-  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header, colore_sfondo, nome_pannello };
+  const font_pannello = document.getElementById('pers-pannello-font').value;
+  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header, colore_sfondo, nome_pannello, font_pannello };
   await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
   impresaCorrente.personalizzazione = personalizzazione;
   _persPannelloHeroBgTemp = null;
   _persPannelloBodyBgTemp = null;
   _persPannelloNomeTemp = null;
+  _persPannelloFontTemp = null;
   chiudiModalPersonalizzaPannello();
 }
 async function apriModalPriorita() {
