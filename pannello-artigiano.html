@@ -1718,8 +1718,7 @@ async function inizializza() {
   }
   const fontPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.font_pannello;
   if (fontPers) {
-    const heroFont = document.getElementById('dash-hero');
-    if (heroFont) heroFont.style.fontFamily = fontPers;
+    applicaFontHero(fontPers);
   }
   const logoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.logo_url;
   if (logoPers) {
@@ -2605,6 +2604,14 @@ async function inviaSegnalazione() {
 function chiudiModalPriorita() {
   document.getElementById('modalPriorita').classList.remove('show');
 }
+function applicaFontHero(font) {
+  const hero = document.getElementById('dash-hero');
+  if (!hero) return;
+  hero.style.fontFamily = font || '';
+  hero.querySelectorAll('.dash-welcome, .dash-nome').forEach(el => {
+    el.style.fontFamily = font || '';
+  });
+}
 let _persPannelloHeroBgTemp = null;
 let _persPannelloBodyBgTemp = null;
 let _persPannelloNomeTemp = null;
@@ -2647,8 +2654,7 @@ function apriModalPersonalizzaPannello() {
     if (w) w.textContent = e.target.value;
   };
   document.getElementById('pers-pannello-font').onchange = (e) => {
-    const h = document.getElementById('dash-hero');
-    if (h) h.style.fontFamily = e.target.value;
+    applicaFontHero(e.target.value);
   };
   document.getElementById('pers-pannello-logo-file').onchange = (e) => {
     const f = e.target.files && e.target.files[0];
@@ -2683,8 +2689,7 @@ function chiudiModalPersonalizzaPannello() {
     if (w) w.textContent = _persPannelloNomeTemp;
   }
   if (_persPannelloFontTemp !== null) {
-    const h = document.getElementById('dash-hero');
-    if (h) h.style.fontFamily = _persPannelloFontTemp;
+    applicaFontHero(_persPannelloFontTemp);
   }
   if (_persPannelloLogoTemp !== null) {
     const sl = document.querySelector('.sidebar-logo');
