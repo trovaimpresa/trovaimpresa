@@ -1419,6 +1419,7 @@
         <label class="mpp-label">Logo personalizzato</label>
         <div id="pers-pannello-logo-preview" style="margin-bottom:8px;"></div>
         <input type="file" id="pers-pannello-logo-file" accept="image/*">
+        <button type="button" id="pers-pannello-logo-remove" onclick="rimuoviLogoPersonalizzato()" style="display:none;margin-top:10px;padding:8px 16px;border:1.5px solid #dc2626;background:white;color:#dc2626;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.15s;">Rimuovi logo</button>
       </div>
       <div class="mpp-section">
         <label class="mpp-label">Banner copertina</label>
@@ -2694,6 +2695,8 @@ function apriModalPersonalizzaPannello() {
       : '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
   }
   document.getElementById('pers-pannello-logo-file').value = '';
+  const logoRemoveBtn = document.getElementById('pers-pannello-logo-remove');
+  if (logoRemoveBtn) logoRemoveBtn.style.display = pers.logo_url ? '' : 'none';
   const bannerPreviewEl = document.getElementById('pers-pannello-banner-preview');
   if (bannerPreviewEl) {
     bannerPreviewEl.innerHTML = pers.banner_url
@@ -2812,6 +2815,22 @@ function chiudiModalPersonalizzaPannello() {
   _persPannelloSizeTestoTemp = null;
   _persPannelloBannerTemp = null;
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
+}
+async function rimuoviLogoPersonalizzato() {
+  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), logo_url: null };
+  await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
+  impresaCorrente.personalizzazione = personalizzazione;
+  const previewEl = document.getElementById('pers-pannello-logo-preview');
+  if (previewEl) previewEl.innerHTML = '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
+  const sidebarLogo = document.querySelector('.sidebar-logo');
+  if (sidebarLogo) {
+    const small = sidebarLogo.querySelector('small');
+    const smallHtml = small ? small.outerHTML : '';
+    sidebarLogo.innerHTML = `<span class="trova">Trova</span><span class="impresa">Impresa</span>${smallHtml}`;
+  }
+  const removeBtn = document.getElementById('pers-pannello-logo-remove');
+  if (removeBtn) removeBtn.style.display = 'none';
+  if (sidebarLogo) _persPannelloLogoTemp = sidebarLogo.innerHTML;
 }
 async function salvaCardOrdine() {
   const card_ordine = Array.from(document.querySelectorAll('.dash-quick-grid [data-card-id]')).map(el => el.dataset.cardId);
