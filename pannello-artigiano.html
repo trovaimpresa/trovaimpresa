@@ -1772,13 +1772,15 @@ async function inizializza() {
   if (bannerPers) {
     applicaBannerHero(bannerPers);
   }
-  const sidebarLogoUrl = impresaCorrente.logo_url || '/img/logo.png';
   {
     const sidebarLogo = document.querySelector('.sidebar-logo');
     if (sidebarLogo) {
       const small = sidebarLogo.querySelector('small');
       const smallHtml = small ? small.outerHTML : '';
-      sidebarLogo.innerHTML = `<img src="${sidebarLogoUrl}" style="max-height:40px;width:auto">${smallHtml}`;
+      const haCustomLogo = impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png';
+      sidebarLogo.innerHTML = haCustomLogo
+        ? `<img src="${impresaCorrente.logo_url}" style="max-height:40px;width:auto">${smallHtml}`
+        : smallHtml;
     }
   }
   const temaPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.tema_scuro;
