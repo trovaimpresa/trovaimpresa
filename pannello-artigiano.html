@@ -899,6 +899,10 @@
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Il mio profilo</div>
         </div>
+        <div class="dash-quick-card" data-card-id="qr-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalQRCode()">
+          <div class="dash-quick-icon">🔲</div>
+          <div class="dash-quick-label">QR Code profilo</div>
+        </div>
       </div>
 
       <!-- CALENDARIO & ORARIO -->
@@ -1361,6 +1365,28 @@
       <div id="priorita-content">
         <div style="text-align:center;padding:40px 0;color:#999;">⏳ Calcolo in corso…</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL QR CODE PROFILO -->
+<div class="modal-ai-overlay" id="modalQRCode" onclick="if(event.target===this)chiudiModalQRCode()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🔲 QR Code profilo</h2>
+        <p>Condividi il tuo profilo TrovaImpresa con un QR Code personalizzato</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalQRCode()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="qr-code-container" style="display:flex;justify-content:center;align-items:center;min-height:280px;padding:16px;background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:14px;"></div>
+      <div id="qr-url-line" style="font-size:0.75rem;color:#666;text-align:center;margin-bottom:16px;word-break:break-all;"></div>
+      <div class="ai-form-group">
+        <label>Colore QR Code</label>
+        <input type="color" id="qr-color-picker" value="#000000" oninput="aggiornaColoreQRCode(this.value)" style="width:100%;height:42px;padding:4px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:white;">
+      </div>
+      <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">⬇️ Scarica PNG 1024×1024</button>
     </div>
   </div>
 </div>
@@ -2624,6 +2650,95 @@ async function inviaSegnalazione() {
 
 function chiudiModalPriorita() {
   document.getElementById('modalPriorita').classList.remove('show');
+}
+
+let _qrCodeInstance = null;
+let _qrCodeCurrentColor = '#000000';
+let _qrCodeLibPromise = null;
+function _caricaQRCodeStylingLib() {
+  if (_qrCodeLibPromise) return _qrCodeLibPromise;
+  _qrCodeLibPromise = new Promise((resolve, reject) => {
+    if (window.QRCodeStyling) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js';
+    s.onload = () => resolve();
+    s.onerror = () => { _qrCodeLibPromise = null; reject(new Error('Impossibile caricare la libreria QR Code')); };
+    document.head.appendChild(s);
+  });
+  return _qrCodeLibPromise;
+}
+function _qrTargetUrl() {
+  return `https://trovaimpresa.com/profilo-impresa.html?id=${impresaCorrente.id}`;
+}
+function _qrLogoUrl() {
+  const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
+  return pers.logo_url || '/img/logo.png';
+}
+function _qrColorDefault() {
+  const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
+  return pers.colore_header || '#000000';
+}
+function _qrConfig(size, color) {
+  return {
+    width: size,
+    height: size,
+    type: 'canvas',
+    data: _qrTargetUrl(),
+    image: _qrLogoUrl(),
+    dotsOptions: { color: color, type: 'rounded' },
+    backgroundOptions: { color: '#ffffff' },
+    imageOptions: { crossOrigin: 'anonymous', margin: 6, imageSize: 0.25 },
+    cornersSquareOptions: { color: color, type: 'extra-rounded' },
+    cornersDotOptions: { color: color }
+  };
+}
+async function apriModalQRCode() {
+  if (!impresaCorrente) return;
+  const piano = (impresaCorrente.piano || '').toLowerCase();
+  if (piano !== 'premium') {
+    if (confirm('🔲 QR Code profilo è una funzione Premium. Vuoi scoprire di più?')) {
+      window.location.href = 'info-premium.html';
+    }
+    return;
+  }
+  document.getElementById('modalQRCode').classList.add('show');
+  document.getElementById('qr-url-line').textContent = _qrTargetUrl();
+  const colore = _qrColorDefault();
+  _qrCodeCurrentColor = colore;
+  const colorInput = document.getElementById('qr-color-picker');
+  if (colorInput) colorInput.value = colore;
+  const container = document.getElementById('qr-code-container');
+  container.innerHTML = '<div style="color:#999;padding:40px 0;">⏳ Generazione QR Code…</div>';
+  try {
+    await _caricaQRCodeStylingLib();
+    container.innerHTML = '';
+    _qrCodeInstance = new QRCodeStyling(_qrConfig(280, colore));
+    _qrCodeInstance.append(container);
+  } catch (err) {
+    container.innerHTML = '<div style="color:#c0392b;padding:20px 0;text-align:center;">Errore: ' + err.message + '</div>';
+  }
+}
+function aggiornaColoreQRCode(nuovoColore) {
+  _qrCodeCurrentColor = nuovoColore;
+  if (!_qrCodeInstance) return;
+  _qrCodeInstance.update({
+    dotsOptions: { color: nuovoColore, type: 'rounded' },
+    cornersSquareOptions: { color: nuovoColore, type: 'extra-rounded' },
+    cornersDotOptions: { color: nuovoColore }
+  });
+}
+function chiudiModalQRCode() {
+  document.getElementById('modalQRCode').classList.remove('show');
+}
+async function scaricaQRCodePNG() {
+  if (!impresaCorrente) return;
+  try {
+    await _caricaQRCodeStylingLib();
+    const qrDownload = new QRCodeStyling(_qrConfig(1024, _qrCodeCurrentColor));
+    await qrDownload.download({ name: `qr-trovaimpresa-${impresaCorrente.id}`, extension: 'png' });
+  } catch (err) {
+    alert('Errore durante il download: ' + err.message);
+  }
 }
 function applicaFontHero(font) {
   const hero = document.getElementById('dash-hero');
