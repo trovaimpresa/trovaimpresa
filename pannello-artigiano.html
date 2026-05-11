@@ -1772,13 +1772,13 @@ async function inizializza() {
   if (bannerPers) {
     applicaBannerHero(bannerPers);
   }
-  const logoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.logo_url;
-  if (logoPers) {
+  const sidebarLogoUrl = impresaCorrente.logo_url || '/img/logo.png';
+  {
     const sidebarLogo = document.querySelector('.sidebar-logo');
     if (sidebarLogo) {
       const small = sidebarLogo.querySelector('small');
       const smallHtml = small ? small.outerHTML : '';
-      sidebarLogo.innerHTML = `<img src="${logoPers}" style="max-height:40px;width:auto">${smallHtml}`;
+      sidebarLogo.innerHTML = `<img src="${sidebarLogoUrl}" style="max-height:40px;width:auto">${smallHtml}`;
     }
   }
   const temaPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.tema_scuro;
@@ -2676,8 +2676,7 @@ function _qrTargetUrl() {
   return `https://trovaimpresa.com/profilo-impresa.html?id=${impresaCorrente.id}`;
 }
 function _qrLogoUrl() {
-  const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
-  return pers.logo_url || '/img/logo.png';
+  return (impresaCorrente && impresaCorrente.logo_url) || '/img/logo.png';
 }
 function _qrColorDefault() {
   const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
@@ -2806,13 +2805,12 @@ function apriModalPersonalizzaPannello() {
   document.getElementById('pers-pannello-font').value = pers.font_pannello || '';
   const logoPreviewEl = document.getElementById('pers-pannello-logo-preview');
   if (logoPreviewEl) {
-    logoPreviewEl.innerHTML = pers.logo_url
-      ? `<img src="${pers.logo_url}" style="max-height:40px;width:auto;">`
-      : '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
+    const logoUrl = impresaCorrente.logo_url || '/img/logo.png';
+    logoPreviewEl.innerHTML = `<img src="${logoUrl}" style="max-height:40px;width:auto;">`;
   }
   document.getElementById('pers-pannello-logo-file').value = '';
   const logoRemoveBtn = document.getElementById('pers-pannello-logo-remove');
-  if (logoRemoveBtn) logoRemoveBtn.style.display = pers.logo_url ? '' : 'none';
+  if (logoRemoveBtn) logoRemoveBtn.style.display = impresaCorrente.logo_url ? '' : 'none';
   const bannerPreviewEl = document.getElementById('pers-pannello-banner-preview');
   if (bannerPreviewEl) {
     bannerPreviewEl.innerHTML = pers.banner_url
@@ -2933,16 +2931,15 @@ function chiudiModalPersonalizzaPannello() {
   document.getElementById('modal-personalizza-pannello').style.display = 'none';
 }
 async function rimuoviLogoPersonalizzato() {
-  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), logo_url: null };
-  await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
-  impresaCorrente.personalizzazione = personalizzazione;
+  await sb.from('imprese').update({ logo_url: null }).eq('id', impresaCorrente.id);
+  impresaCorrente.logo_url = null;
   const previewEl = document.getElementById('pers-pannello-logo-preview');
-  if (previewEl) previewEl.innerHTML = '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
+  if (previewEl) previewEl.innerHTML = '<img src="/img/logo.png" style="max-height:40px;width:auto;">';
   const sidebarLogo = document.querySelector('.sidebar-logo');
   if (sidebarLogo) {
     const small = sidebarLogo.querySelector('small');
     const smallHtml = small ? small.outerHTML : '';
-    sidebarLogo.innerHTML = `<span class="trova">Trova</span><span class="impresa">Impresa</span>${smallHtml}`;
+    sidebarLogo.innerHTML = `<img src="/img/logo.png" style="max-height:40px;width:auto">${smallHtml}`;
   }
   const removeBtn = document.getElementById('pers-pannello-logo-remove');
   if (removeBtn) removeBtn.style.display = 'none';
@@ -2963,6 +2960,7 @@ async function salvaPersonalizzaPannello() {
   const colore_testo_header = document.getElementById('pers-pannello-colore-testo').value;
   const size_testo_header = parseFloat(document.getElementById('pers-pannello-size-testo').value);
   const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header, colore_sfondo, nome_pannello, font_pannello, tema_scuro, colore_testo_header, size_testo_header };
+  const updateData = { personalizzazione };
   const fileInput = document.getElementById('pers-pannello-logo-file');
   if (fileInput && fileInput.files && fileInput.files[0]) {
     const file = fileInput.files[0];
@@ -2971,7 +2969,7 @@ async function salvaPersonalizzaPannello() {
     const path = `${impresaCorrente.id}/logo.${ext}`;
     await sb.storage.from('loghi-personalizzati').upload(path, file, { upsert: true });
     const { data: pub } = sb.storage.from('loghi-personalizzati').getPublicUrl(path);
-    if (pub && pub.publicUrl) personalizzazione.logo_url = pub.publicUrl;
+    if (pub && pub.publicUrl) updateData.logo_url = pub.publicUrl;
   }
   const bannerInput = document.getElementById('pers-pannello-banner-file');
   if (bannerInput && bannerInput.files && bannerInput.files[0]) {
@@ -2983,8 +2981,9 @@ async function salvaPersonalizzaPannello() {
     const { data: pub } = sb.storage.from('banner-personalizzati').getPublicUrl(path);
     if (pub && pub.publicUrl) personalizzazione.banner_url = pub.publicUrl;
   }
-  await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
+  await sb.from('imprese').update(updateData).eq('id', impresaCorrente.id);
   impresaCorrente.personalizzazione = personalizzazione;
+  if (updateData.logo_url) impresaCorrente.logo_url = updateData.logo_url;
   _persPannelloHeroBgTemp = null;
   _persPannelloBodyBgTemp = null;
   _persPannelloNomeTemp = null;
