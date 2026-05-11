@@ -1819,7 +1819,7 @@ async function inizializza() {
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
           <span style="color:white;font-size:0.88rem;font-weight:600;">Carica logo</span>
         </div>`;
-      if (impresaCorrente.logo_url) {
+      if (impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png') {
         setTimeout(() => {
           const img = document.getElementById('dash-logo-img');
           const ph = document.getElementById('dash-logo-placeholder');
@@ -2803,14 +2803,16 @@ function apriModalPersonalizzaPannello() {
   const welcomeEl = document.getElementById('dash-welcome');
   document.getElementById('pers-pannello-nome').value = pers.nome_pannello || (welcomeEl ? welcomeEl.textContent : '');
   document.getElementById('pers-pannello-font').value = pers.font_pannello || '';
+  const haCustomLogo = impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png';
   const logoPreviewEl = document.getElementById('pers-pannello-logo-preview');
   if (logoPreviewEl) {
-    const logoUrl = impresaCorrente.logo_url || '/img/logo.png';
-    logoPreviewEl.innerHTML = `<img src="${logoUrl}" style="max-height:40px;width:auto;">`;
+    logoPreviewEl.innerHTML = haCustomLogo
+      ? `<img src="${impresaCorrente.logo_url}" style="max-height:40px;width:auto;">`
+      : '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
   }
   document.getElementById('pers-pannello-logo-file').value = '';
   const logoRemoveBtn = document.getElementById('pers-pannello-logo-remove');
-  if (logoRemoveBtn) logoRemoveBtn.style.display = impresaCorrente.logo_url ? '' : 'none';
+  if (logoRemoveBtn) logoRemoveBtn.style.display = haCustomLogo ? '' : 'none';
   const bannerPreviewEl = document.getElementById('pers-pannello-banner-preview');
   if (bannerPreviewEl) {
     bannerPreviewEl.innerHTML = pers.banner_url
@@ -2934,7 +2936,7 @@ async function rimuoviLogoPersonalizzato() {
   await sb.from('imprese').update({ logo_url: null }).eq('id', impresaCorrente.id);
   impresaCorrente.logo_url = null;
   const previewEl = document.getElementById('pers-pannello-logo-preview');
-  if (previewEl) previewEl.innerHTML = '<img src="/img/logo.png" style="max-height:40px;width:auto;">';
+  if (previewEl) previewEl.innerHTML = '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
   const sidebarLogo = document.querySelector('.sidebar-logo');
   if (sidebarLogo) {
     const small = sidebarLogo.querySelector('small');
