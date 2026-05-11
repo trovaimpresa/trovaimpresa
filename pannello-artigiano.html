@@ -1387,6 +1387,11 @@
         <input type="color" id="qr-color-picker" value="#000000" oninput="aggiornaColoreQRCode(this.value)" style="width:100%;height:42px;padding:4px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:white;">
       </div>
       <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">⬇️ Scarica PNG 1024×1024</button>
+      <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:#1a3a2a;">
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px;">✅ Scaricato!</div>
+        <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
+        <div style="font-size:13px;color:#2a7a4b;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
+      </div>
     </div>
   </div>
 </div>
@@ -2729,6 +2734,8 @@ function aggiornaColoreQRCode(nuovoColore) {
 }
 function chiudiModalQRCode() {
   document.getElementById('modalQRCode').classList.remove('show');
+  const box = document.getElementById('qrSuccessBox');
+  if (box) box.style.display = 'none';
 }
 async function scaricaQRCodePNG() {
   if (!impresaCorrente) return;
@@ -2736,6 +2743,8 @@ async function scaricaQRCodePNG() {
     await _caricaQRCodeStylingLib();
     const qrDownload = new QRCodeStyling(_qrConfig(1024, _qrCodeCurrentColor));
     await qrDownload.download({ name: `qr-trovaimpresa-${impresaCorrente.id}`, extension: 'png' });
+    const box = document.getElementById('qrSuccessBox');
+    if (box) box.style.display = 'block';
   } catch (err) {
     alert('Errore durante il download: ' + err.message);
   }
