@@ -2966,8 +2966,12 @@ async function salvaPersonalizzaPannello() {
     const file = fileInput.files[0];
     const parts = file.name.split('.');
     const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'png';
-    const path = `${impresaCorrente.id}/logo.${ext}`;
-    await sb.storage.from('loghi-personalizzati').upload(path, file, { upsert: true });
+    const path = `${impresaCorrente.user_id}/logo.${ext}`;
+    const { error: upErr } = await sb.storage.from('loghi-personalizzati').upload(path, file, { upsert: true });
+    if (upErr) {
+      alert('Errore caricamento logo: ' + upErr.message);
+      return;
+    }
     const { data: pub } = sb.storage.from('loghi-personalizzati').getPublicUrl(path);
     if (pub && pub.publicUrl) updateData.logo_url = pub.publicUrl;
   }
@@ -2977,11 +2981,19 @@ async function salvaPersonalizzaPannello() {
     const parts = file.name.split('.');
     const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'png';
     const path = `${impresaCorrente.id}/banner.${ext}`;
-    await sb.storage.from('banner-personalizzati').upload(path, file, { upsert: true });
+    const { error: bnErr } = await sb.storage.from('banner-personalizzati').upload(path, file, { upsert: true });
+    if (bnErr) {
+      alert('Errore caricamento banner: ' + bnErr.message);
+      return;
+    }
     const { data: pub } = sb.storage.from('banner-personalizzati').getPublicUrl(path);
     if (pub && pub.publicUrl) personalizzazione.banner_url = pub.publicUrl;
   }
-  await sb.from('imprese').update(updateData).eq('id', impresaCorrente.id);
+  const { error: updErr } = await sb.from('imprese').update(updateData).eq('id', impresaCorrente.id);
+  if (updErr) {
+    alert('Errore salvataggio: ' + updErr.message);
+    return;
+  }
   impresaCorrente.personalizzazione = personalizzazione;
   if (updateData.logo_url) impresaCorrente.logo_url = updateData.logo_url;
   _persPannelloHeroBgTemp = null;
