@@ -1191,7 +1191,8 @@ async function caricaSessioneConDati(session) {
   }
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'negozio') {
-    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
+    window.location.href = file;
     return;
   }
   document.getElementById('login-screen').style.display = 'none';
@@ -1217,7 +1218,8 @@ sb.auth.onAuthStateChange(async (event, session) => {
   }
   impresaCorrente = data;
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'negozio') {
-    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
+    window.location.href = file;
     return;
   }
   document.getElementById('spinner-avvio').style.display = 'none';
@@ -1254,7 +1256,8 @@ async function doLogin() {
   }
   impresaCorrente = data;
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'negozio') {
-    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
+    window.location.href = file;
     return;
   }
   localStorage.setItem('ti_logged', '1');
