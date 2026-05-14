@@ -1536,6 +1536,10 @@ async function caricaSessioneConDati(session) {
     data = data2;
   }
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
+  if (impresaCorrente.tipo && impresaCorrente.tipo !== 'artigiano') {
+    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    return;
+  }
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
   inizializza();
@@ -1558,6 +1562,10 @@ sb.auth.onAuthStateChange(async (event, session) => {
     return;
   }
   impresaCorrente = data;
+  if (impresaCorrente.tipo && impresaCorrente.tipo !== 'artigiano') {
+    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    return;
+  }
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) impresaCorrente.piano = pianoFresco.piano;
   if ((impresaCorrente?.piano || '').toLowerCase() === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
@@ -1594,6 +1602,10 @@ async function doLogin() {
     return;
   }
   impresaCorrente = data;
+  if (impresaCorrente.tipo && impresaCorrente.tipo !== 'artigiano') {
+    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    return;
+  }
   if ((impresaCorrente?.piano || '').toLowerCase() === 'premium') document.getElementById('card-bandi-premium').style.display = 'block';
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
