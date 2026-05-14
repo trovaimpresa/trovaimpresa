@@ -1274,7 +1274,8 @@ async function caricaSessioneConDati(session) {
   }
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
-    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
+    window.location.href = file;
     return;
   }
   if (impresaCorrente.id) {
@@ -1307,7 +1308,8 @@ sb.auth.onAuthStateChange(async (event, session) => {
   }
   impresaCorrente = data;
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
-    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
+    window.location.href = file;
     return;
   }
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
@@ -1350,7 +1352,8 @@ async function doLogin() {
   }
   impresaCorrente = data;
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
-    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
+    window.location.href = file;
     return;
   }
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
