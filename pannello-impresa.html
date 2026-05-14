@@ -1273,6 +1273,10 @@ async function caricaSessioneConDati(session) {
     data = data2;
   }
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
+  if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
+    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    return;
+  }
   if (impresaCorrente.id) {
     const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
     if (pianoFresco) {
@@ -1302,6 +1306,10 @@ sb.auth.onAuthStateChange(async (event, session) => {
     return;
   }
   impresaCorrente = data;
+  if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
+    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    return;
+  }
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) {
     impresaCorrente.piano = pianoFresco.piano;
@@ -1341,6 +1349,10 @@ async function doLogin() {
     return;
   }
   impresaCorrente = data;
+  if (impresaCorrente.tipo && impresaCorrente.tipo !== 'impresa') {
+    window.location.href = `pannello-${impresaCorrente.tipo}.html`;
+    return;
+  }
   const { data: pianoFresco } = await sb.from('imprese').select('piano').eq('id', impresaCorrente.id).single();
   if (pianoFresco) {
     impresaCorrente.piano = pianoFresco.piano;
