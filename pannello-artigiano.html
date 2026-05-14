@@ -756,19 +756,8 @@
       <small>Pannello Artigiano</small>
     </div>
     <nav class="sidebar-nav">
-      <div class="nav-item active" onclick="showSection('dashboard',this)">
-        <span>📊</span> Dashboard
-      </div>
-
-      <div class="nav-item" onclick="showSection('lavoro',this)">
-        <span>💼</span> Offerte di lavoro
-        <span class="nav-badge" id="badge-lavoro" style="display:none"></span>
-      </div>
       <div class="nav-item" onclick="showSection('candidati',this)">
         <span>🔍</span> Candidati nella tua zona
-      </div>
-      <div class="nav-item" onclick="showSection('foto',this)">
-        <span>📷</span> Foto dei lavori
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -2176,8 +2165,8 @@ async function caricaAnnunciLavoro() {
 
   // Aggiorna badge sidebar
   if (attivi > 0) {
-    document.getElementById('badge-lavoro').textContent = attivi;
-    document.getElementById('badge-lavoro').style.display = '';
+    const el = document.getElementById('badge-lavoro');
+    if (el) { el.textContent = attivi; el.style.display = ''; }
   }
 
   // Mostra/nascondi bottone (gating mensile)
