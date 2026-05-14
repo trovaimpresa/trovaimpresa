@@ -2264,13 +2264,15 @@ async function caricaLogoImpresa(event) {
   const { error: upErr } = await sb.storage.from('loghi-imprese').upload(path, file, { upsert: true, contentType: file.type });
   if (upErr) { alert('Errore caricamento logo: ' + upErr.message); return; }
   const { data: urlData } = sb.storage.from('loghi-imprese').getPublicUrl(path);
-  const logoUrl = urlData.publicUrl;
+  const logoUrl = urlData.publicUrl + '?v=' + Date.now();
   await sb.from('imprese').update({ logo_url: logoUrl }).eq('id', impresaCorrente.id);
   impresaCorrente.logo_url = logoUrl;
   const img = document.getElementById('dash-logo-img');
   const placeholder = document.getElementById('dash-logo-placeholder');
   if (img) { img.src = logoUrl; img.style.display = 'block'; }
   if (placeholder) placeholder.style.display = 'none';
+  const prevLogoWrap = document.getElementById('prev-logo-wrap');
+  if (prevLogoWrap) prevLogoWrap.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
 }
 
 async function salvaColoreHeader(valore) {
