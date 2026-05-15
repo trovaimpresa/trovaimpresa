@@ -496,6 +496,34 @@
     line-height:1.7; resize:vertical; outline:none;
   }
 
+  /* === FAQ ACCORDION === */
+  .faq-list { display:flex; flex-direction:column; gap:8px; }
+  .faq-item { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:white; }
+  .faq-domanda {
+    padding:12px 16px; font-size:0.92rem; font-weight:600; color:var(--dark);
+    cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+    gap:12px; user-select:none; transition:background 0.15s;
+  }
+  .faq-domanda:hover { background:#f8f8f8; }
+  .faq-domanda::after {
+    content:'+'; font-size:1.3rem; font-weight:700; color:var(--verde);
+    transition:transform 0.2s; flex-shrink:0; line-height:1;
+  }
+  .faq-item.open .faq-domanda::after { transform:rotate(45deg); }
+  .faq-risposta {
+    display:none; padding:0 16px 14px; font-size:0.88rem;
+    color:var(--mid); line-height:1.55;
+  }
+  .faq-item.open .faq-risposta { display:block; }
+  .faq-cta-help { margin-top:18px; padding-top:18px; border-top:1px solid var(--border); }
+  .faq-cta-help button {
+    width:100%; padding:13px; background:#fff3cd; color:#7b4f00;
+    border:1px solid #ffc107; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:0.92rem; font-weight:700;
+    cursor:pointer; transition:background 0.15s;
+  }
+  .faq-cta-help button:hover { background:#ffec99; }
+
   /* === BOTTONE AZIONE UNIFORME === */
   .btn-az {
     background: white;
@@ -870,9 +898,9 @@
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
-        <div class="dash-quick-card" data-card-id="statistiche" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">📊</div>
-          <div class="dash-quick-label">Statistiche profilo</div>
+        <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
+          <div class="dash-quick-icon">🛠️</div>
+          <div class="dash-quick-label">Risoluzione problemi</div>
         </div>
         <div class="dash-quick-card" data-card-id="ai-preventivi" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">🤖</div>
@@ -1345,6 +1373,25 @@
         <div style="font-size:48px;margin-bottom:12px;">✅</div>
         <p style="font-size:15px;font-weight:600;color:#2a7a4b;margin-bottom:6px;">Segnalazione inviata!</p>
         <p style="font-size:13px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RISOLUZIONE PROBLEMI (FAQ) -->
+<div class="modal-ai-overlay" id="modalRisoluzione" onclick="if(event.target===this)chiudiModalRisoluzione()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🛠️ Risoluzione problemi</h2>
+        <p>Domande frequenti e soluzioni rapide</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalRisoluzione()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="faq-list" id="faq-list"></div>
+      <div class="faq-cta-help">
+        <button onclick="chiudiModalRisoluzione();apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
       </div>
     </div>
   </div>
@@ -2717,6 +2764,40 @@ async function inviaSegnalazione() {
 
 function chiudiModalPriorita() {
   document.getElementById('modalPriorita').classList.remove('show');
+}
+
+// === RISOLUZIONE PROBLEMI (FAQ) ===
+const FAQS_LIST = [
+  { domanda: 'Domanda 1 — placeholder', risposta: 'Risposta 1 — placeholder' },
+  { domanda: 'Domanda 2 — placeholder', risposta: 'Risposta 2 — placeholder' },
+  { domanda: 'Domanda 3 — placeholder', risposta: 'Risposta 3 — placeholder' },
+  { domanda: 'Domanda 4 — placeholder', risposta: 'Risposta 4 — placeholder' },
+  { domanda: 'Domanda 5 — placeholder', risposta: 'Risposta 5 — placeholder' },
+  { domanda: 'Domanda 6 — placeholder', risposta: 'Risposta 6 — placeholder' },
+  { domanda: 'Domanda 7 — placeholder', risposta: 'Risposta 7 — placeholder' },
+  { domanda: 'Domanda 8 — placeholder', risposta: 'Risposta 8 — placeholder' },
+  { domanda: 'Domanda 9 — placeholder', risposta: 'Risposta 9 — placeholder' },
+  { domanda: 'Domanda 10 — placeholder', risposta: 'Risposta 10 — placeholder' }
+];
+
+function apriModalRisoluzione() {
+  const lista = document.getElementById('faq-list');
+  if (!lista) return;
+  lista.innerHTML = FAQS_LIST.map(f => `
+    <div class="faq-item">
+      <div class="faq-domanda" onclick="toggleFaq(this)">${f.domanda}</div>
+      <div class="faq-risposta">${f.risposta}</div>
+    </div>
+  `).join('');
+  document.getElementById('modalRisoluzione').classList.add('show');
+}
+
+function chiudiModalRisoluzione() {
+  document.getElementById('modalRisoluzione').classList.remove('show');
+}
+
+function toggleFaq(headerEl) {
+  headerEl.parentElement.classList.toggle('open');
 }
 
 let _qrCodeInstance = null;
