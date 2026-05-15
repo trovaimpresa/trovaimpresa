@@ -77,6 +77,7 @@
   .sidebar-logo .impresa { color:var(--arancio); }
   .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
   .sidebar-nav { flex:1; padding:16px 12px; overflow-y:auto; }
+  .sidebar-nav:empty { display:none; }
   .nav-item {
     display:flex; align-items:center; gap:10px;
     padding:11px 14px; border-radius:10px; cursor:pointer;
@@ -97,7 +98,7 @@
     margin-left:auto; background:var(--arancio); color:white;
     font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:20px;
   }
-  #sidebar-map { flex:1; min-height:300px; width:100%; border-radius:12px; margin:16px 0; }
+  #sidebar-map { flex:1; min-height:300px; width:100%; border-radius:12px; margin:0 0 16px; }
   .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
   .logout-btn {
     display:flex; align-items:center; gap:8px; padding:10px 14px;
