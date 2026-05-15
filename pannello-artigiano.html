@@ -929,7 +929,9 @@
           <!-- [D] Note (basso dx) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px">
             <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
-            <textarea id="widget-note" placeholder="Scrivi i tuoi appunti..." style="flex:1;resize:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:140px;background:transparent" oninput="localStorage.setItem('ti_note',this.value)"></textarea>
+            <textarea id="widget-note" placeholder="Scrivi un appunto..." style="resize:none;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:8px;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:60px;background:white"></textarea>
+            <button onclick="aggiungiNota()" style="padding:8px 12px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;align-self:flex-start">+ Aggiungi nota</button>
+            <div class="lista-note" id="lista-note" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
           </div>
 
         </div>
@@ -1840,6 +1842,7 @@ async function inizializza() {
   await caricaCandidatiZona();
   await caricaFotoLavori();
   await caricaCertificazioni();
+  await caricaNote();
   caricaProfilo();
 
   // Apri la sezione indicata dall'hash (se presente e valida)
@@ -1994,6 +1997,48 @@ async function eliminaPreventivo(preventivoId) {
   const { error } = await sb.from('preventivi').delete().eq('id', preventivoId);
   if (error) { alert('Errore eliminazione: ' + error.message); return; }
   await caricaPreventivi();
+}
+
+// NOTE PERSONALI
+async function caricaNote() {
+  const { data } = await sb.from('note_personali').select('*')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
+  const container = document.getElementById('lista-note');
+  if (!container) return;
+  const lista = data || [];
+  if (!lista.length) {
+    container.innerHTML = '<div style="font-size:0.78rem;color:#888;text-align:center;padding:6px">Nessuna nota</div>';
+    return;
+  }
+  container.innerHTML = lista.map(n => {
+    const testoSafe = (n.testo || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const dataFmt = new Date(n.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    return `
+    <div style="background:#fffbea;border:1px solid #f0e3a0;border-radius:8px;padding:8px 10px;position:relative;font-size:0.82rem;color:#1a1a1a;line-height:1.4">
+      <button onclick="eliminaNota('${n.id}')" title="Elimina nota" style="position:absolute;top:4px;right:4px;background:transparent;border:none;cursor:pointer;font-size:0.9rem;color:#c0392b;padding:2px 4px;line-height:1">🗑️</button>
+      <div style="white-space:pre-wrap;word-break:break-word;margin-right:20px">${testoSafe}</div>
+      <div style="font-size:0.7rem;color:#888;margin-top:4px">${dataFmt}</div>
+    </div>`;
+  }).join('');
+}
+
+async function aggiungiNota() {
+  const ta = document.getElementById('widget-note');
+  if (!ta) return;
+  const testo = ta.value.trim();
+  if (!testo) return;
+  const { error } = await sb.from('note_personali').insert({ impresa_id: impresaCorrente.id, testo });
+  if (error) { alert('Errore: ' + error.message); return; }
+  ta.value = '';
+  await caricaNote();
+}
+
+async function eliminaNota(id) {
+  if (!confirm('Eliminare questa nota?')) return;
+  const { error } = await sb.from('note_personali').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaNote();
 }
 
 // CARICA CANDIDATI NELLA ZONA
@@ -3238,10 +3283,6 @@ function chiudiModalProfilo() {
   window.calPrev = function () { cMese--; if (cMese < 0) { cMese = 11; cAnno--; } renderCal(); };
   window.calNext = function () { cMese++; if (cMese > 11) { cMese = 0; cAnno++; } renderCal(); };
   renderCal();
-
-  /* --- NOTE --- */
-  var noteEl = document.getElementById('widget-note');
-  if (noteEl) noteEl.value = localStorage.getItem('ti_note') || '';
 
   /* --- METEO (wttr.in, no API key) --- */
   var WMO_ICONA = {
