@@ -407,9 +407,10 @@
               <th>Tipo lavoro</th>
               <th>Descrizione</th>
               <th>Data</th>
+              <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="table-preventivi"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-preventivi"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -603,9 +604,10 @@
               <th>Città</th>
               <th>Stato</th>
               <th>Data</th>
+              <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="table-lead"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-lead"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -844,7 +846,7 @@ async function caricaPreventivi() {
   document.getElementById('stat-preventivi').textContent = data?.length || 0;
   const tbody = document.getElementById('table-preventivi');
   if (!data?.length) {
-    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">📋</div>Nessun preventivo ancora</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">📋</div>Nessun preventivo ancora</div></td></tr>';
     return;
   }
   tbody.innerHTML = data.map(p => `
@@ -855,6 +857,7 @@ async function caricaPreventivi() {
       <td>${p.tipo_lavoro||'–'}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.descrizione||'–'}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(p.created_at).toLocaleDateString('it-IT')}</td>
+      <td><button class="action-btn btn-elimina" onclick="eliminaPreventivo(${p.id})">🗑️</button></td>
     </tr>`).join('');
 }
 
@@ -914,6 +917,30 @@ async function eliminaRecensione(id) {
   await caricaRecensioni();
 }
 
+// ELIMINA PREVENTIVO
+async function eliminaPreventivo(id) {
+  if (!confirm('Eliminare questo preventivo?')) return;
+  const { error } = await sb.from('preventivi').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaPreventivi();
+}
+
+// ELIMINA SEGNALAZIONE
+async function eliminaSegnalazione(id) {
+  if (!confirm('Eliminare questa segnalazione?')) return;
+  const { error } = await sb.from('segnalazioni').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaSegnalazioni();
+}
+
+// ELIMINA LEAD
+async function eliminaLead(id) {
+  if (!confirm('Eliminare questo lead?')) return;
+  const { error } = await sb.from('lead_imprese').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaLead();
+}
+
 // DETTAGLIO IMPRESA
 function apriDettaglio(id) {
   const i = tutteImprese.find(x => x.id === id);
@@ -967,7 +994,7 @@ async function caricaSegnalazioni() {
       <td style="white-space:nowrap">${data_fmt}</td>
       <td style="max-width:400px;word-break:break-word">${s.descrizione || '–'}</td>
       <td><span class="badge ${isAperto ? 'badge-att' : 'badge-v'}">${isAperto ? '🔴 Aperto' : '✅ Risolto'}</span></td>
-      <td>${isAperto ? `<button class="action-btn btn-verifica" onclick="segnalazioneRisolta('${s.id}')">Segna come risolto</button>` : '–'}</td>
+      <td>${isAperto ? `<button class="action-btn btn-verifica" onclick="segnalazioneRisolta('${s.id}')">Segna come risolto</button> ` : ''}<button class="action-btn btn-elimina" onclick="eliminaSegnalazione('${s.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
 }
@@ -981,14 +1008,14 @@ async function segnalazioneRisolta(id) {
 // LEAD
 async function caricaLead() {
   const tbody = document.getElementById('table-lead');
-  tbody.innerHTML = '<tr><td colspan="6" class="loading">Caricamento...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
   const { data, error } = await sb.from('lead_imprese').select('*').order('created_at', { ascending: false });
   if (error) {
-    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
     return;
   }
   if (!data || !data.length) {
-    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">👥</div>Nessun lead</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">👥</div>Nessun lead</div></td></tr>';
     return;
   }
   tbody.innerHTML = data.map(l => {
@@ -1003,6 +1030,7 @@ async function caricaLead() {
       <td>${l.citta || '–'}</td>
       <td>${statoBadge}</td>
       <td style="white-space:nowrap">${data_fmt}</td>
+      <td><button class="action-btn btn-elimina" onclick="eliminaLead('${l.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
 }
