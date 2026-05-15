@@ -97,6 +97,7 @@
     margin-left:auto; background:var(--arancio); color:white;
     font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:20px;
   }
+  #sidebar-map { flex:1; min-height:300px; width:100%; border-radius:12px; margin:16px 0; }
   .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
   .logout-btn {
     display:flex; align-items:center; gap:8px; padding:10px 14px;
@@ -757,6 +758,7 @@
     </div>
     <nav class="sidebar-nav">
     </nav>
+    <div id="sidebar-map"></div>
     <div class="sidebar-footer">
       <button onclick="apriModalSegnalazione()" style="width:100%;padding:10px;background:#fff3cd;color:#7b4f00;border:1px solid #ffc107;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;">🆘 Segnala problema</button>
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
@@ -1521,6 +1523,7 @@ async function caricaSessioneConDati(session) {
   }
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
+  if (typeof sidebarMap !== 'undefined' && sidebarMap) sidebarMap.invalidateSize();
   inizializza();
 }
 
@@ -1552,6 +1555,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
   document.getElementById('spinner-avvio').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
+  if (typeof sidebarMap !== 'undefined' && sidebarMap) sidebarMap.invalidateSize();
   inizializza();
 });
 
@@ -1591,6 +1595,7 @@ async function doLogin() {
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
+  if (typeof sidebarMap !== 'undefined' && sidebarMap) sidebarMap.invalidateSize();
   inizializza();
 }
 
@@ -3154,6 +3159,15 @@ window.addEventListener('pageshow', function(event) {
     window.location.reload();
   }
 });
+</script>
+<script>
+var sidebarMap = null;
+(function() {
+  var el = document.getElementById('sidebar-map');
+  if (!el || typeof L === 'undefined') return;
+  sidebarMap = L.map('sidebar-map', { zoomControl: false, attributionControl: false }).setView([41.9, 12.5], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(sidebarMap);
+})();
 </script>
 </body>
 <script>
