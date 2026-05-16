@@ -550,12 +550,14 @@
           <thead>
             <tr>
               <th>Data</th>
+              <th>Impresa</th>
+              <th>Email</th>
               <th>Descrizione</th>
               <th>Stato</th>
               <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="table-segnalazioni"><tr><td colspan="4" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-segnalazioni"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -975,23 +977,37 @@ function chiudiModal() {
 // SEGNALAZIONI
 async function caricaSegnalazioni() {
   const tbody = document.getElementById('table-segnalazioni');
-  tbody.innerHTML = '<tr><td colspan="4" class="loading">Caricamento...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">Caricamento...</td></tr>';
   const { data, error } = await sb.from('segnalazioni').select('*').order('created_at', { ascending: false });
   if (error) {
-    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
     return;
   }
   const aperte = (data || []).filter(s => s.stato === 'aperto').length;
   document.getElementById('badge-segnalazioni').textContent = aperte;
   if (!data || !data.length) {
-    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-table"><div class="eicon">🆘</div>Nessuna segnalazione</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">🆘</div>Nessuna segnalazione</div></td></tr>';
     return;
+  }
+  const userIds = [...new Set(data.map(s => s.user_id).filter(Boolean))];
+  const impreseMap = new Map();
+  if (userIds.length) {
+    const { data: imprese } = await sb.from('imprese').select('user_id, nome_attivita, nome, cognome, email').in('user_id', userIds);
+    (imprese || []).forEach(i => {
+      const nome = i.nome_attivita || ((i.nome || i.cognome) ? `${i.nome || ''} ${i.cognome || ''}`.trim() : null);
+      impreseMap.set(i.user_id, { nome, email: i.email });
+    });
   }
   tbody.innerHTML = data.map(s => {
     const data_fmt = new Date(s.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
     const isAperto = s.stato === 'aperto';
+    const imp = impreseMap.get(s.user_id) || {};
+    const nomeCell = imp.nome || '—';
+    const emailCell = imp.email ? `<a href="mailto:${imp.email}">${imp.email}</a>` : '—';
     return `<tr>
       <td style="white-space:nowrap">${data_fmt}</td>
+      <td>${nomeCell}</td>
+      <td>${emailCell}</td>
       <td style="max-width:400px;word-break:break-word">${s.descrizione || '–'}</td>
       <td><span class="badge ${isAperto ? 'badge-att' : 'badge-v'}">${isAperto ? '🔴 Aperto' : '✅ Risolto'}</span></td>
       <td>${isAperto ? `<button class="action-btn btn-verifica" onclick="segnalazioneRisolta('${s.id}')">Segna come risolto</button> ` : ''}<button class="action-btn btn-elimina" onclick="eliminaSegnalazione('${s.id}')">🗑️</button></td>
