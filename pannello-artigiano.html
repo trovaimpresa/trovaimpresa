@@ -2768,16 +2768,46 @@ function chiudiModalPriorita() {
 
 // === RISOLUZIONE PROBLEMI (FAQ) ===
 const FAQS_LIST = [
-  { domanda: 'Domanda 1 — placeholder', risposta: 'Risposta 1 — placeholder' },
-  { domanda: 'Domanda 2 — placeholder', risposta: 'Risposta 2 — placeholder' },
-  { domanda: 'Domanda 3 — placeholder', risposta: 'Risposta 3 — placeholder' },
-  { domanda: 'Domanda 4 — placeholder', risposta: 'Risposta 4 — placeholder' },
-  { domanda: 'Domanda 5 — placeholder', risposta: 'Risposta 5 — placeholder' },
-  { domanda: 'Domanda 6 — placeholder', risposta: 'Risposta 6 — placeholder' },
-  { domanda: 'Domanda 7 — placeholder', risposta: 'Risposta 7 — placeholder' },
-  { domanda: 'Domanda 8 — placeholder', risposta: 'Risposta 8 — placeholder' },
-  { domanda: 'Domanda 9 — placeholder', risposta: 'Risposta 9 — placeholder' },
-  { domanda: 'Domanda 10 — placeholder', risposta: 'Risposta 10 — placeholder' }
+  {
+    domanda: "Non riesco ad accedere al mio account",
+    risposta: "Controlla email e password. Se hai dimenticato la password, clicca su 'Password dimenticata?' nella pagina di login: riceverai un'email per reimpostarla. Se l'email non arriva entro 5 minuti, controlla la cartella Spam."
+  },
+  {
+    domanda: "Come modifico i miei dati (telefono, indirizzo, descrizione)?",
+    risposta: "Clicca sulla card 'Modifica profilo' del pannello. Lì puoi aggiornare tutti i tuoi dati: contatti, descrizione attività, città, foto lavori. Ricordati di salvare in fondo alla pagina."
+  },
+  {
+    domanda: "Ho caricato un nuovo logo ma non si vede",
+    risposta: "Il browser potrebbe mostrarti la versione vecchia in cache. Premi CTRL+F5 (Windows) o CMD+SHIFT+R (Mac) per ricaricare. Formati supportati: JPG, PNG, WEBP. Dimensione massima: 2 MB."
+  },
+  {
+    domanda: "Non appaio nelle ricerche dei clienti",
+    risposta: "Verifica che: 1) Il profilo sia completo (categoria, città, descrizione, almeno una foto). 2) La città inserita sia scritta correttamente. 3) Se sei Free appari solo nella tua città; se sei Premium appari in tutta la regione."
+  },
+  {
+    domanda: "Qual è la differenza tra Free e Premium?",
+    risposta: "Free (€0): visibilità solo nella tua città, profilo base. Premium (€5/mese o €49/anno): visibilità in tutta la regione, badge verificato, statistiche profilo, personalizzazione pannello, priorità nei risultati di ricerca."
+  },
+  {
+    domanda: "Come passo a Premium?",
+    risposta: "Clicca sulla card 'Diventa Premium' o 'Abbonamento' nel tuo pannello. Pagamento sicuro tramite Stripe (carta di credito o debito). Puoi annullare in qualsiasi momento dalla sezione 'Modifica profilo'."
+  },
+  {
+    domanda: "Come ricevo recensioni dai miei clienti?",
+    risposta: "Nel pannello trovi un link diretto da condividere con i clienti (WhatsApp, email, SMS). Loro compileranno il modulo recensione con la propria email. La recensione apparirà nel tuo profilo pubblico dopo la verifica automatica."
+  },
+  {
+    domanda: "Come funzionano i preventivi?",
+    risposta: "I clienti ti contattano tramite il pulsante 'Richiedi preventivo' sulla tua scheda pubblica. Riceverai i dettagli del lavoro via email. Puoi rispondere direttamente al cliente con la tua proposta — TrovaImpresa non si trattiene commissioni."
+  },
+  {
+    domanda: "Voglio cancellare il mio account",
+    risposta: "Vai su 'Modifica profilo' → scorri fino in fondo → clicca 'Elimina account'. Attenzione: l'operazione è irreversibile e cancellerà profilo, recensioni e tutti i dati associati. Se sei Premium, l'abbonamento verrà annullato automaticamente."
+  },
+  {
+    domanda: "Ho un problema non elencato qui",
+    risposta: "Clicca sul pulsante 'Contatta assistenza' qui sotto per inviarci una segnalazione. Ti risponderemo via email entro 24-48 ore. In alternativa scrivi direttamente a info@trovaimpresa.com."
+  }
 ];
 
 function apriModalRisoluzione() {
