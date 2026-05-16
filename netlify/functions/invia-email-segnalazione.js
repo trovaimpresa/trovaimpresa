@@ -76,6 +76,7 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         from: 'TrovaImpresa <info@trovaimpresa.com>',
         to: ['info@trovaimpresa.com'],
+        reply_to: email,
         subject: `Nuova segnalazione da ${nomeMostra}`,
         html
       })
