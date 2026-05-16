@@ -866,10 +866,10 @@
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
         </div>
-        <a href="#certificazioni" class="dash-quick-card" data-card-id="certificazioni" style="text-decoration:none;color:inherit;display:block;">
+        <div onclick="apriModalCertificazioni()" class="dash-quick-card" data-card-id="certificazioni" style="cursor:pointer;display:block;">
           <div class="dash-quick-icon">📜</div>
           <div class="dash-quick-label">Certificazioni</div>
-        </a>
+        </div>
       </div>
 
       <!-- FUNZIONI PREMIUM -->
@@ -1148,33 +1148,8 @@
       <div class="foto-grid" id="foto-grid"></div>
     </div>
 
-    <!-- CERTIFICAZIONI -->
-    <div class="section" id="sec-certificazioni">
-      <div class="topbar">
-        <div class="topbar-title">📜 Certificazioni <span style="font-size:0.75rem;background:#f0f0f0;color:#888;border-radius:10px;padding:3px 10px;font-family:'DM Sans',sans-serif;font-weight:700;margin-left:8px;">Opzionale</span></div>
-      </div>
-
-      <div style="background:white;border-radius:16px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:16px;">Aggiungi certificazione</div>
-        <div class="form-group">
-          <label>Nome certificazione *</label>
-          <input type="text" id="cert-nome-input" placeholder="Es. SOA, ISO 9001, Patentino gas…">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Scadenza (opzionale)</label>
-            <input type="date" id="cert-scadenza-input">
-          </div>
-          <div class="form-group">
-            <label>File (PDF/immagine)</label>
-            <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
-          </div>
-        </div>
-        <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
-      </div>
-
-      <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
-    </div>
+    <!-- CERTIFICAZIONI (contenuto spostato in #modalCertificazioni) -->
+    <div class="section" id="sec-certificazioni" style="display:none"></div>
 
     <!-- PROFILO -->
     <div class="section" id="sec-profilo">
@@ -1749,6 +1724,41 @@
         </div>
       </div>
       <div id="scad-fisc-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CERTIFICAZIONI -->
+<div class="modal-ai-overlay" id="modalCertificazioni" onclick="if(event.target===this)chiudiModalCertificazioni()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📋 Certificazioni</h2>
+        <p>Le tue certificazioni professionali</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalCertificazioni()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Aggiungi certificazione</div>
+        <div class="form-group">
+          <label>Nome certificazione *</label>
+          <input type="text" id="cert-nome-input" placeholder="Es. SOA, ISO 9001, Patentino gas…">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Scadenza (opzionale)</label>
+            <input type="date" id="cert-scadenza-input">
+          </div>
+          <div class="form-group">
+            <label>File (PDF/immagine)</label>
+            <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
+          </div>
+        </div>
+        <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
+      </div>
+      <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
     </div>
   </div>
 </div>
@@ -3234,6 +3244,14 @@ function toggleFullscreen(btn) {
   const modal = btn.closest('.modal-ai');
   modal.classList.toggle('fullscreen');
   btn.textContent = modal.classList.contains('fullscreen') ? '⊟' : '⛶';
+}
+
+function apriModalCertificazioni() {
+  document.getElementById('modalCertificazioni').classList.add('show');
+  caricaCertificazioni();
+}
+function chiudiModalCertificazioni() {
+  document.getElementById('modalCertificazioni').classList.remove('show');
 }
 const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
 function calcIva() {
