@@ -1440,6 +1440,7 @@
         <button class="cant-tab active" data-tab="info" onclick="switchTabCantiere('info')">ℹ️ Info</button>
         <button class="cant-tab" data-tab="foto" onclick="switchTabCantiere('foto')">📷 Foto</button>
         <button class="cant-tab" data-tab="preventivi" onclick="switchTabCantiere('preventivi')">💰 Preventivi</button>
+        <button class="cant-tab" data-tab="fatture" onclick="switchTabCantiere('fatture')">🧾 Fatture</button>
       </div>
 
       <div class="cant-pane active" data-pane="info">
@@ -1493,6 +1494,51 @@
           </div>
         </div>
         <div id="dett-cant-preventivi-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+
+      <div class="cant-pane" data-pane="fatture">
+        <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova fattura</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Numero fattura</label>
+              <input type="text" id="fatt-cant-numero" placeholder="es. 2026/001">
+            </div>
+            <div class="form-group">
+              <label>Importo (€) *</label>
+              <input type="number" id="fatt-cant-importo" step="0.01" min="0" placeholder="0.00">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Data emissione</label>
+              <input type="date" id="fatt-cant-data-emissione">
+            </div>
+            <div class="form-group">
+              <label>Data scadenza</label>
+              <input type="date" id="fatt-cant-data-scadenza">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Allegato (PDF / immagine, opzionale)</label>
+            <input type="file" id="fatt-cant-file" accept=".pdf,image/*">
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+              <input type="checkbox" id="fatt-cant-pagata" style="width:18px;height:18px;cursor:pointer">
+              Fattura pagata
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Note</label>
+            <textarea id="fatt-cant-note" placeholder="Note aggiuntive..."></textarea>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <button class="btn-salva-annuncio" onclick="salvaFatturaCantiere()">💾 Salva fattura</button>
+            <span id="fatt-cant-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+          </div>
+        </div>
+        <div id="dett-cant-fatture-lista" style="display:flex;flex-direction:column;gap:12px"></div>
       </div>
     </div>
   </div>
@@ -2329,8 +2375,12 @@ async function apriDettaglioCantiere(id) {
   document.getElementById('dett-cant-data-fine').textContent = c.data_fine || '—';
   document.getElementById('dett-cant-stato').textContent = statoLabel[c.stato] || c.stato || '—';
   document.getElementById('dett-cant-note').textContent = c.note || '—';
+  const oggi = new Date().toISOString().slice(0, 10);
+  const dataEmis = document.getElementById('fatt-cant-data-emissione');
+  if (dataEmis && !dataEmis.value) dataEmis.value = oggi;
   await caricaFotoCantiere();
   await caricaPreventiviCantiere();
+  await caricaFattureCantiere();
 }
 
 function chiudiModalDettaglioCantiere() {
@@ -2477,6 +2527,89 @@ async function eliminaPreventivoCantiere(id, file_url) {
   }
   await sb.from('cantiere_preventivi').delete().eq('id', id);
   await caricaPreventiviCantiere();
+}
+
+// FATTURE CANTIERE
+async function caricaFattureCantiere() {
+  const lista = document.getElementById('dett-cant-fatture-lista');
+  if (!lista || !cantiereAttivo) return;
+  const { data } = await sb.from('cantiere_fatture').select('*').eq('cantiere_id', cantiereAttivo).order('created_at', { ascending: false });
+  const fatt = data || [];
+  if (!fatt.length) {
+    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna fattura ancora</div>';
+    return;
+  }
+  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtImporto = n => (n == null) ? '—' : Number(n).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtData = d => d ? new Date(d).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' }) : '—';
+  lista.innerHTML = fatt.map(f => {
+    const fileUrlSafe = (f.file_url || '').replace(/'/g, "\\'");
+    const badge = f.pagata
+      ? '<span style="display:inline-block;padding:4px 10px;background:#2a7a4b;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">✓ Pagata</span>'
+      : '<span style="display:inline-block;padding:4px 10px;background:#e8733a;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">Da pagare</span>';
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between">
+      <div style="flex:1;min-width:0">
+        ${f.numero ? `<div style="font-size:0.78rem;color:var(--mid);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Fattura nº ${esc(f.numero)}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#1a3a2a;font-weight:700">€ ${fmtImporto(f.importo)}</div>
+          ${badge}
+        </div>
+        <div style="font-size:0.82rem;color:#555;margin-bottom:6px">
+          📅 Emessa: ${fmtData(f.data_emissione)}${f.data_scadenza ? ` · ⏰ Scadenza: ${fmtData(f.data_scadenza)}` : ''}
+        </div>
+        ${f.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap;margin-bottom:6px">${esc(f.note)}</div>` : ''}
+        ${f.file_url ? `<a href="${f.file_url}" target="_blank" rel="noopener" style="font-size:0.85rem;color:#2a7a4b;font-weight:600;text-decoration:none">📄 Apri allegato</a>` : ''}
+      </div>
+      <button onclick="eliminaFatturaCantiere('${f.id}','${fileUrlSafe}')" title="Elimina fattura" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+async function salvaFatturaCantiere() {
+  if (!cantiereAttivo) return;
+  const importoRaw = document.getElementById('fatt-cant-importo').value;
+  if (importoRaw === '' || isNaN(Number(importoRaw))) { alert('Inserisci un importo valido.'); return; }
+  const importo = Number(importoRaw);
+  const numero = document.getElementById('fatt-cant-numero').value.trim() || null;
+  const data_emissione = document.getElementById('fatt-cant-data-emissione').value || null;
+  const data_scadenza  = document.getElementById('fatt-cant-data-scadenza').value || null;
+  const pagata = document.getElementById('fatt-cant-pagata').checked;
+  const note = document.getElementById('fatt-cant-note').value.trim() || null;
+  const fileInput = document.getElementById('fatt-cant-file');
+  const file = fileInput.files && fileInput.files[0];
+  let file_url = null;
+  if (file) {
+    if (file.size > 10 * 1024 * 1024) { alert('Il file supera i 10 MB.'); return; }
+    const path = `${cantiereAttivo}/${Date.now()}-${file.name}`;
+    const { error: upErr } = await sb.storage.from('cantieri-fatture').upload(path, file, { upsert: false });
+    if (upErr) { alert('Errore upload file: ' + upErr.message); return; }
+    const { data: { publicUrl } } = sb.storage.from('cantieri-fatture').getPublicUrl(path);
+    file_url = publicUrl;
+  }
+  const { error: insErr } = await sb.from('cantiere_fatture').insert({
+    cantiere_id: cantiereAttivo, numero, importo, data_emissione, data_scadenza, file_url, pagata, note
+  });
+  if (insErr) { alert('Errore: ' + insErr.message); return; }
+  document.getElementById('fatt-cant-numero').value = '';
+  document.getElementById('fatt-cant-importo').value = '';
+  document.getElementById('fatt-cant-data-emissione').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('fatt-cant-data-scadenza').value = '';
+  document.getElementById('fatt-cant-pagata').checked = false;
+  document.getElementById('fatt-cant-note').value = '';
+  fileInput.value = '';
+  const msg = document.getElementById('fatt-cant-msg');
+  if (msg) { msg.textContent = '✅ Salvata'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  await caricaFattureCantiere();
+}
+
+async function eliminaFatturaCantiere(id, file_url) {
+  if (!confirm('Eliminare questa fattura?')) return;
+  if (file_url) {
+    const path = file_url.split('/cantieri-fatture/')[1];
+    if (path) await sb.storage.from('cantieri-fatture').remove([path]);
+  }
+  await sb.from('cantiere_fatture').delete().eq('id', id);
+  await caricaFattureCantiere();
 }
 
 // CARICA CANDIDATI NELLA ZONA
