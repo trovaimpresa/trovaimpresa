@@ -891,7 +891,7 @@
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
-        <div class="dash-quick-card" data-card-id="preventivi-illimitati" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="showSection('preventivi', this)">
+        <div class="dash-quick-card" data-card-id="preventivi-illimitati" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="apriModalPreventivi()">
           <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Preventivi illimitati</div>
@@ -1033,15 +1033,8 @@
 
     </div>
 
-    <!-- PREVENTIVI -->
-    <div class="section" id="sec-preventivi">
-      <div class="topbar">
-        <div class="topbar-title">📋 Richieste preventivo ricevute</div>
-      </div>
-      <!-- Contatore preventivi del mese -->
-      <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
-      <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
-    </div>
+    <!-- PREVENTIVI (contenuto spostato in #modalPreventivi) -->
+    <div class="section" id="sec-preventivi" style="display:none"></div>
 
     <!-- OFFERTE DI LAVORO -->
     <div class="section" id="sec-lavoro">
@@ -1724,6 +1717,24 @@
         </div>
       </div>
       <div id="scad-fisc-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PREVENTIVI -->
+<div class="modal-ai-overlay" id="modalPreventivi" onclick="if(event.target===this)chiudiModalPreventivi()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📋 Richieste preventivo</h2>
+        <p>Le richieste ricevute dai tuoi clienti</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalPreventivi()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
+      <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
     </div>
   </div>
 </div>
@@ -3252,6 +3263,14 @@ function apriModalCertificazioni() {
 }
 function chiudiModalCertificazioni() {
   document.getElementById('modalCertificazioni').classList.remove('show');
+}
+
+function apriModalPreventivi() {
+  document.getElementById('modalPreventivi').classList.add('show');
+  caricaPreventivi();
+}
+function chiudiModalPreventivi() {
+  document.getElementById('modalPreventivi').classList.remove('show');
 }
 const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
 function calcIva() {
