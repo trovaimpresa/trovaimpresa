@@ -1439,6 +1439,7 @@
       <div class="cant-tabs">
         <button class="cant-tab active" data-tab="info" onclick="switchTabCantiere('info')">ℹ️ Info</button>
         <button class="cant-tab" data-tab="foto" onclick="switchTabCantiere('foto')">📷 Foto</button>
+        <button class="cant-tab" data-tab="preventivi" onclick="switchTabCantiere('preventivi')">💰 Preventivi</button>
       </div>
 
       <div class="cant-pane active" data-pane="info">
@@ -1461,6 +1462,37 @@
         </div>
         <div class="foto-upload-progress" id="dett-cant-foto-progress" style="display:none">⏳ Upload in corso...</div>
         <div class="foto-grid" id="dett-cant-foto-grid"></div>
+      </div>
+
+      <div class="cant-pane" data-pane="preventivi">
+        <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuovo preventivo</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Importo (€) *</label>
+              <input type="number" id="prev-cant-importo" step="0.01" min="0" placeholder="0.00">
+            </div>
+            <div class="form-group" style="display:flex;align-items:flex-end">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+                <input type="checkbox" id="prev-cant-accettato" style="width:18px;height:18px;cursor:pointer">
+                Accettato dal cliente
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Descrizione</label>
+            <textarea id="prev-cant-descrizione" placeholder="Dettagli del preventivo..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Allegato (PDF / immagine, opzionale)</label>
+            <input type="file" id="prev-cant-file" accept=".pdf,image/*">
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <button class="btn-salva-annuncio" onclick="salvaPreventivoCantiere()">💾 Salva preventivo</button>
+            <span id="prev-cant-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+          </div>
+        </div>
+        <div id="dett-cant-preventivi-lista" style="display:flex;flex-direction:column;gap:12px"></div>
       </div>
     </div>
   </div>
@@ -2298,6 +2330,7 @@ async function apriDettaglioCantiere(id) {
   document.getElementById('dett-cant-stato').textContent = statoLabel[c.stato] || c.stato || '—';
   document.getElementById('dett-cant-note').textContent = c.note || '—';
   await caricaFotoCantiere();
+  await caricaPreventiviCantiere();
 }
 
 function chiudiModalDettaglioCantiere() {
@@ -2372,6 +2405,78 @@ function dettCantDrop(e) {
   e.preventDefault();
   document.getElementById('dett-cant-upload-area').classList.remove('dragover');
   uploadFotoCantiere(e.dataTransfer.files);
+}
+
+// PREVENTIVI CANTIERE
+async function caricaPreventiviCantiere() {
+  const lista = document.getElementById('dett-cant-preventivi-lista');
+  if (!lista || !cantiereAttivo) return;
+  const { data } = await sb.from('cantiere_preventivi').select('*').eq('cantiere_id', cantiereAttivo).order('created_at', { ascending: false });
+  const prev = data || [];
+  if (!prev.length) {
+    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessun preventivo ancora</div>';
+    return;
+  }
+  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtImporto = n => (n == null) ? '—' : Number(n).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  lista.innerHTML = prev.map(p => {
+    const fileUrlSafe = (p.file_url || '').replace(/'/g, "\\'");
+    const badge = p.accettato
+      ? '<span style="display:inline-block;padding:4px 10px;background:#2a7a4b;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">✓ Accettato</span>'
+      : '<span style="display:inline-block;padding:4px 10px;background:#e8733a;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">In attesa</span>';
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="font-family:'Playfair Display',serif;font-size:1.4rem;color:#1a3a2a;font-weight:700">€ ${fmtImporto(p.importo)}</div>
+          ${badge}
+        </div>
+        ${p.descrizione ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap;margin-bottom:6px">${esc(p.descrizione)}</div>` : ''}
+        ${p.file_url ? `<a href="${p.file_url}" target="_blank" rel="noopener" style="font-size:0.85rem;color:#2a7a4b;font-weight:600;text-decoration:none">📎 Apri allegato</a>` : ''}
+      </div>
+      <button onclick="eliminaPreventivoCantiere('${p.id}','${fileUrlSafe}')" title="Elimina preventivo" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+async function salvaPreventivoCantiere() {
+  if (!cantiereAttivo) return;
+  const importoRaw = document.getElementById('prev-cant-importo').value;
+  if (importoRaw === '' || isNaN(Number(importoRaw))) { alert('Inserisci un importo valido.'); return; }
+  const importo = Number(importoRaw);
+  const descrizione = document.getElementById('prev-cant-descrizione').value.trim() || null;
+  const accettato = document.getElementById('prev-cant-accettato').checked;
+  const fileInput = document.getElementById('prev-cant-file');
+  const file = fileInput.files && fileInput.files[0];
+  let file_url = null;
+  if (file) {
+    if (file.size > 10 * 1024 * 1024) { alert('Il file supera i 10 MB.'); return; }
+    const path = `${cantiereAttivo}/${Date.now()}-${file.name}`;
+    const { error: upErr } = await sb.storage.from('cantieri-preventivi').upload(path, file, { upsert: false });
+    if (upErr) { alert('Errore upload file: ' + upErr.message); return; }
+    const { data: { publicUrl } } = sb.storage.from('cantieri-preventivi').getPublicUrl(path);
+    file_url = publicUrl;
+  }
+  const { error: insErr } = await sb.from('cantiere_preventivi').insert({
+    cantiere_id: cantiereAttivo, importo, descrizione, file_url, accettato
+  });
+  if (insErr) { alert('Errore: ' + insErr.message); return; }
+  document.getElementById('prev-cant-importo').value = '';
+  document.getElementById('prev-cant-descrizione').value = '';
+  document.getElementById('prev-cant-accettato').checked = false;
+  fileInput.value = '';
+  const msg = document.getElementById('prev-cant-msg');
+  if (msg) { msg.textContent = '✅ Salvato'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  await caricaPreventiviCantiere();
+}
+
+async function eliminaPreventivoCantiere(id, file_url) {
+  if (!confirm('Eliminare questo preventivo?')) return;
+  if (file_url) {
+    const path = file_url.split('/cantieri-preventivi/')[1];
+    if (path) await sb.storage.from('cantieri-preventivi').remove([path]);
+  }
+  await sb.from('cantiere_preventivi').delete().eq('id', id);
+  await caricaPreventiviCantiere();
 }
 
 // CARICA CANDIDATI NELLA ZONA
