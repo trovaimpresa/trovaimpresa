@@ -1442,6 +1442,7 @@
         <button class="cant-tab" data-tab="preventivi" onclick="switchTabCantiere('preventivi')">💰 Preventivi</button>
         <button class="cant-tab" data-tab="fatture" onclick="switchTabCantiere('fatture')">🧾 Fatture</button>
         <button class="cant-tab" data-tab="quaderno" onclick="switchTabCantiere('quaderno')">📓 Quaderno</button>
+        <button class="cant-tab" data-tab="scadenze" onclick="switchTabCantiere('scadenze')">⏰ Scadenze</button>
       </div>
 
       <div class="cant-pane active" data-pane="info">
@@ -1569,6 +1570,35 @@
           </div>
         </div>
         <div id="dett-cant-log-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+
+      <div class="cant-pane" data-pane="scadenze">
+        <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
+          <div class="form-group">
+            <label>Titolo *</label>
+            <input type="text" id="scad-cant-titolo" placeholder="es. Consegna materiale, sopralluogo, pagamento acconto">
+          </div>
+          <div class="form-group">
+            <label>Data scadenza *</label>
+            <input type="date" id="scad-cant-data">
+          </div>
+          <div class="form-group">
+            <label>Descrizione</label>
+            <textarea id="scad-cant-descrizione" placeholder="Dettagli sulla scadenza..."></textarea>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+              <input type="checkbox" id="scad-cant-completata" style="width:18px;height:18px;cursor:pointer">
+              Già completata
+            </label>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <button class="btn-salva-annuncio" onclick="salvaScadenzaCantiere()">💾 Salva scadenza</button>
+            <span id="scad-cant-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+          </div>
+        </div>
+        <div id="dett-cant-scadenze-lista" style="display:flex;flex-direction:column;gap:12px"></div>
       </div>
     </div>
   </div>
@@ -2410,10 +2440,16 @@ async function apriDettaglioCantiere(id) {
   if (dataEmis && !dataEmis.value) dataEmis.value = oggi;
   const dataLog = document.getElementById('log-cant-data');
   if (dataLog && !dataLog.value) dataLog.value = oggi;
+  const dataScad = document.getElementById('scad-cant-data');
+  if (dataScad && !dataScad.value) {
+    const d = new Date(); d.setDate(d.getDate() + 7);
+    dataScad.value = d.toISOString().slice(0, 10);
+  }
   await caricaFotoCantiere();
   await caricaPreventiviCantiere();
   await caricaFattureCantiere();
   await caricaLogCantiere();
+  await caricaScadenzeCantiere();
 }
 
 function chiudiModalDettaglioCantiere() {
@@ -2710,6 +2746,90 @@ async function eliminaLogCantiere(id) {
   if (!confirm('Eliminare questa registrazione?')) return;
   await sb.from('cantiere_log').delete().eq('id', id);
   await caricaLogCantiere();
+}
+
+// SCADENZE CANTIERE
+async function caricaScadenzeCantiere() {
+  const lista = document.getElementById('dett-cant-scadenze-lista');
+  if (!lista || !cantiereAttivo) return;
+  const { data } = await sb.from('cantiere_scadenze').select('*')
+    .eq('cantiere_id', cantiereAttivo)
+    .order('completata', { ascending: true })
+    .order('data_scadenza', { ascending: true });
+  const scad = data || [];
+  if (!scad.length) {
+    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna scadenza ancora</div>';
+    return;
+  }
+  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtData = d => {
+    if (!d) return '—';
+    const parts = new Date(d).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    return parts.charAt(0).toUpperCase() + parts.slice(1);
+  };
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  lista.innerHTML = scad.map(s => {
+    let badgeBg = '#888', badgeLbl = '—', extraStyle = '';
+    if (s.completata) {
+      badgeBg = '#888'; badgeLbl = '✓ Completata';
+      extraStyle = 'opacity:0.6';
+    } else if (s.data_scadenza) {
+      const ds = new Date(s.data_scadenza); ds.setHours(0,0,0,0);
+      const diffGg = Math.round((ds - oggi) / 86400000);
+      if (diffGg < 0) { badgeBg = '#c0392b'; badgeLbl = `⚠️ Scaduta da ${Math.abs(diffGg)}g`; }
+      else if (diffGg === 0) { badgeBg = '#c0392b'; badgeLbl = '🔥 Oggi'; }
+      else if (diffGg <= 7) { badgeBg = '#e8733a'; badgeLbl = `⏰ Tra ${diffGg}g`; }
+      else { badgeBg = '#2a7a4b'; badgeLbl = `📅 Tra ${diffGg}g`; }
+    }
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between;${extraStyle}">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="font-weight:700;color:#1a3a2a;font-size:1rem${s.completata ? ';text-decoration:line-through' : ''}">${esc(s.descrizione) || '—'}</div>
+          <span style="display:inline-block;padding:4px 10px;background:${badgeBg};color:white;border-radius:999px;font-size:0.72rem;font-weight:700">${badgeLbl}</span>
+        </div>
+        <div style="font-size:0.82rem;color:#555;margin-bottom:6px">📅 ${fmtData(s.data_scadenza)}</div>
+        ${s.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap">${esc(s.note)}</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button onclick="toggleScadenzaCantiere('${s.id}',${!s.completata})" title="${s.completata ? 'Riapri' : 'Segna come completata'}" style="background:transparent;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.95rem;padding:4px 8px;line-height:1">${s.completata ? '↺' : '✓'}</button>
+        <button onclick="eliminaScadenzaCantiere('${s.id}')" title="Elimina scadenza" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function salvaScadenzaCantiere() {
+  if (!cantiereAttivo) return;
+  const descrizione = document.getElementById('scad-cant-titolo').value.trim();
+  const data_scadenza = document.getElementById('scad-cant-data').value || null;
+  if (!descrizione) { alert('Il titolo è obbligatorio.'); return; }
+  if (!data_scadenza) { alert('La data scadenza è obbligatoria.'); return; }
+  const note = document.getElementById('scad-cant-descrizione').value.trim() || null;
+  const completata = document.getElementById('scad-cant-completata').checked;
+  const { error } = await sb.from('cantiere_scadenze').insert({
+    cantiere_id: cantiereAttivo, descrizione, data_scadenza, note, completata
+  });
+  if (error) { alert('Errore: ' + error.message); return; }
+  document.getElementById('scad-cant-titolo').value = '';
+  const d = new Date(); d.setDate(d.getDate() + 7);
+  document.getElementById('scad-cant-data').value = d.toISOString().slice(0, 10);
+  document.getElementById('scad-cant-descrizione').value = '';
+  document.getElementById('scad-cant-completata').checked = false;
+  const msg = document.getElementById('scad-cant-msg');
+  if (msg) { msg.textContent = '✅ Salvata'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  await caricaScadenzeCantiere();
+}
+
+async function toggleScadenzaCantiere(id, completata) {
+  const { error } = await sb.from('cantiere_scadenze').update({ completata }).eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaScadenzeCantiere();
+}
+
+async function eliminaScadenzaCantiere(id) {
+  if (!confirm('Eliminare questa scadenza?')) return;
+  await sb.from('cantiere_scadenze').delete().eq('id', id);
+  await caricaScadenzeCantiere();
 }
 
 // CARICA CANDIDATI NELLA ZONA
