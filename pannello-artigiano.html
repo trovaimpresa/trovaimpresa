@@ -835,7 +835,7 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="foto-lavori" style="cursor:pointer" onclick="showSectionById('foto'); setTimeout(()=>document.getElementById('sezione-foto-lavori').scrollIntoView({behavior:'smooth',block:'start'}), 50)">
+        <div class="dash-quick-card" data-card-id="foto-lavori" style="cursor:pointer" onclick="document.getElementById('modalFotoLavori').classList.add('show')">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
@@ -984,28 +984,6 @@
         <a href="pannello-bandi.html" style="display:inline-block;background:#e65100;color:white;padding:10px 20px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none">Apri la dashboard Bandi →</a>
       </div>
 
-      <!-- FOTO DEI LAVORI (dashboard) -->
-      <div id="sezione-foto-lavori" style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📷 Foto dei lavori</div>
-
-        <div class="foto-limit-bar" id="foto-limit-bar-dash">
-          <span style="font-size:1.3rem">📷</span>
-          <span id="foto-limit-testo-dash">Caricamento...</span>
-        </div>
-
-        <div class="foto-upload-progress" id="foto-progress-dash">⏳ Caricamento foto in corso...</div>
-
-        <div class="foto-upload-area" id="foto-upload-area-dash"
-             onclick="document.getElementById('foto-input-dash').click()"
-             ondragover="fotoDragOverDash(event)" ondragleave="fotoDragLeaveDash(event)" ondrop="fotoDrop(event)">
-          <input type="file" id="foto-input-dash" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
-          <div class="foto-upload-icon">📤</div>
-          <div class="foto-upload-label">Clicca o trascina le foto qui</div>
-          <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
-        </div>
-
-        <div class="foto-grid" id="foto-grid-dash"></div>
-      </div>
     </div>
 
     <!-- PREVENTIVI -->
@@ -1370,6 +1348,38 @@
         <p style="font-size:15px;font-weight:600;color:#2a7a4b;margin-bottom:6px;">Segnalazione inviata!</p>
         <p style="font-size:13px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOTO DEI LAVORI -->
+<div class="modal-ai-overlay" id="modalFotoLavori" onclick="if(event.target===this)chiudiModalFotoLavori()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📷 Foto dei lavori</h2>
+        <p>Carica e gestisci le foto dei tuoi lavori</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalFotoLavori()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="foto-limit-bar" id="foto-limit-bar-dash">
+        <span style="font-size:1.3rem">📷</span>
+        <span id="foto-limit-testo-dash">Caricamento...</span>
+      </div>
+
+      <div class="foto-upload-progress" id="foto-progress-dash">⏳ Caricamento foto in corso...</div>
+
+      <div class="foto-upload-area" id="foto-upload-area-dash"
+           onclick="document.getElementById('foto-input-dash').click()"
+           ondragover="fotoDragOverDash(event)" ondragleave="fotoDragLeaveDash(event)" ondrop="fotoDrop(event)">
+        <input type="file" id="foto-input-dash" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
+        <div class="foto-upload-icon">📤</div>
+        <div class="foto-upload-label">Clicca o trascina le foto qui</div>
+        <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
+      </div>
+
+      <div class="foto-grid" id="foto-grid-dash"></div>
     </div>
   </div>
 </div>
@@ -2834,6 +2844,10 @@ function apriModalRisoluzione() {
 
 function chiudiModalRisoluzione() {
   document.getElementById('modalRisoluzione').classList.remove('show');
+}
+
+function chiudiModalFotoLavori() {
+  document.getElementById('modalFotoLavori').classList.remove('show');
 }
 
 function toggleFaq(headerEl) {
