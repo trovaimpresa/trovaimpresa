@@ -460,6 +460,14 @@
   .modal-ai-header p { font-size:0.82rem; opacity:0.75; }
   .modal-ai-close { background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; opacity:0.7; line-height:1; padding:0; }
   .modal-ai-close:hover { opacity:1; }
+  .btn-fullscreen { background:transparent; border:none; color:white; font-size:1.2rem; cursor:pointer; padding:4px 8px; }
+  .modal-ai-overlay .modal-ai.fullscreen {
+    max-width: none !important;
+    width: 100vw;
+    height: 100vh;
+    max-height: none !important;
+    border-radius: 0;
+  }
   .modal-ai-body { padding:24px 28px; }
   .ai-form-group { margin-bottom:14px; }
   .ai-form-group label { display:block; font-size:0.73rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
@@ -1452,6 +1460,7 @@
         <h2 id="dett-cant-nome">🏗️ Dettaglio cantiere</h2>
         <p id="dett-cant-sub"></p>
       </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
       <button class="modal-ai-close" onclick="chiudiModalDettaglioCantiere()">✕</button>
     </div>
     <div class="modal-ai-body">
@@ -1631,6 +1640,7 @@
         <h2>📅 Agenda</h2>
         <p>I tuoi appuntamenti e impegni</p>
       </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
       <button class="modal-ai-close" onclick="chiudiAgenda()">✕</button>
     </div>
     <div class="modal-ai-body">
@@ -1680,6 +1690,7 @@
         <h2>📋 Scadenze fiscali</h2>
         <p>Tieni traccia di F24, DURC, assicurazioni e altri adempimenti</p>
       </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
       <button class="modal-ai-close" onclick="chiudiModalScadenzeFiscali()">✕</button>
     </div>
     <div class="modal-ai-body">
@@ -1750,6 +1761,7 @@
         <h2>🧮 Calcolatrice edile</h2>
         <p>Calcoli rapidi su IVA, ritenuta e rivalsa INPS</p>
       </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
       <button class="modal-ai-close" onclick="chiudiCalcolatrice()">✕</button>
     </div>
     <div class="modal-ai-body">
@@ -3216,6 +3228,12 @@ function apriCalcolatrice() {
 }
 function chiudiCalcolatrice() {
   document.getElementById('modalCalcolatrice').classList.remove('show');
+}
+
+function toggleFullscreen(btn) {
+  const modal = btn.closest('.modal-ai');
+  modal.classList.toggle('fullscreen');
+  btn.textContent = modal.classList.contains('fullscreen') ? '⊟' : '⛶';
 }
 const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
 function calcIva() {
