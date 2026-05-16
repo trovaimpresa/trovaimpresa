@@ -1004,6 +1004,25 @@
         <div id="lista-cantieri" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
       </div>
 
+      <!-- STRUMENTI -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">🛠️ Strumenti</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+          <div onclick="apriCalcolatrice()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🧮</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Calcolatrice edile</div>
+          </div>
+          <div onclick="alert('Disponibile a breve')" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📅</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Agenda</div>
+          </div>
+          <div onclick="alert('Disponibile a breve')" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📋</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Scadenze fiscali</div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- PREVENTIVI -->
@@ -1599,6 +1618,47 @@
           </div>
         </div>
         <div id="dett-cant-scadenze-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CALCOLATRICE EDILE -->
+<div class="modal-ai-overlay" id="modalCalcolatrice" onclick="if(event.target===this)chiudiCalcolatrice()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🧮 Calcolatrice edile</h2>
+        <p>Calcoli rapidi su IVA, ritenuta e rivalsa INPS</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiCalcolatrice()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">💶 IVA 22%</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-iva-in" step="0.01" min="0" placeholder="0.00" oninput="calcIva()">
+        </div>
+        <div id="calc-iva-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+      </div>
+
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">📉 Ritenuta d'acconto 4%</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-rit-in" step="0.01" min="0" placeholder="0.00" oninput="calcRit()">
+        </div>
+        <div id="calc-rit-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+      </div>
+
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">🏛️ Rivalsa INPS 4% (artigiani)</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-inps-in" step="0.01" min="0" placeholder="0.00" oninput="calcInps()">
+        </div>
+        <div id="calc-inps-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
       </div>
     </div>
   </div>
@@ -2830,6 +2890,33 @@ async function eliminaScadenzaCantiere(id) {
   if (!confirm('Eliminare questa scadenza?')) return;
   await sb.from('cantiere_scadenze').delete().eq('id', id);
   await caricaScadenzeCantiere();
+}
+
+// CALCOLATRICE EDILE
+function apriCalcolatrice() {
+  document.getElementById('modalCalcolatrice').classList.add('show');
+}
+function chiudiCalcolatrice() {
+  document.getElementById('modalCalcolatrice').classList.remove('show');
+}
+const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
+function calcIva() {
+  const v = Number(document.getElementById('calc-iva-in').value);
+  const out = document.getElementById('calc-iva-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `IVA: € ${_fmtCalc(v*0.22)} | Totale: € ${_fmtCalc(v*1.22)}`;
+}
+function calcRit() {
+  const v = Number(document.getElementById('calc-rit-in').value);
+  const out = document.getElementById('calc-rit-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `Ritenuta: € ${_fmtCalc(v*0.04)} | Netto: € ${_fmtCalc(v*0.96)}`;
+}
+function calcInps() {
+  const v = Number(document.getElementById('calc-inps-in').value);
+  const out = document.getElementById('calc-inps-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `INPS 4%: € ${_fmtCalc(v*0.04)} | Da addebitare al cliente`;
 }
 
 // CARICA CANDIDATI NELLA ZONA
