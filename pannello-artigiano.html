@@ -4655,5 +4655,32 @@ function chiudiModalProfilo() {
     setMeteo('📍', 'Geolocalizzazione non supportata', '', '');
   }
 })();
+
+(function() {
+  // Quando un modal apre (aggiunge class show), pusha state
+  const observer = new MutationObserver(muts => {
+    muts.forEach(m => {
+      const t = m.target;
+      const wasOpen = (m.oldValue || '').includes('show');
+      const isOpen = t.classList.contains('show');
+      if (!wasOpen && isOpen) {
+        history.pushState({ modal: t.id }, '');
+      }
+    });
+  });
+  document.querySelectorAll('.modal-ai-overlay').forEach(modal => {
+    observer.observe(modal, {
+      attributes: true,
+      attributeFilter: ['class'],
+      attributeOldValue: true
+    });
+  });
+
+  // Freccia indietro: chiudi tutti i modal aperti invece di navigare via
+  window.addEventListener('popstate', () => {
+    const open = document.querySelectorAll('.modal-ai-overlay.show');
+    open.forEach(m => m.classList.remove('show'));
+  });
+})();
 </script>
 </html>
