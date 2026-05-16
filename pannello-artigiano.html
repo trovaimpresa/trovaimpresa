@@ -524,6 +524,24 @@
   }
   .faq-cta-help button:hover { background:#ffec99; }
 
+  /* === DETTAGLIO CANTIERE: tabs === */
+  .cant-tabs { display:flex; gap:6px; border-bottom:1px solid var(--border); margin-bottom:18px; }
+  .cant-tab {
+    padding:10px 16px; background:transparent; border:none; border-bottom:3px solid transparent;
+    font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.9rem; color:var(--mid);
+    cursor:pointer; transition:all 0.15s;
+  }
+  .cant-tab.active { color:var(--verde); border-bottom-color:var(--verde); }
+  .cant-tab:hover { color:var(--verde); }
+  .cant-pane { display:none; }
+  .cant-pane.active { display:block; }
+  .cant-info-row {
+    display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--border);
+    font-size:0.92rem; color:#1a1a1a;
+  }
+  .cant-info-row:last-child { border-bottom:none; }
+  .cant-info-label { min-width:130px; font-weight:700; color:var(--mid); }
+
   /* === BOTTONE AZIONE UNIFORME === */
   .btn-az {
     background: white;
@@ -1407,6 +1425,47 @@
   </div>
 </div>
 
+<!-- MODAL DETTAGLIO CANTIERE -->
+<div class="modal-ai-overlay" id="modalDettaglioCantiere" onclick="if(event.target===this)chiudiModalDettaglioCantiere()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2 id="dett-cant-nome">🏗️ Dettaglio cantiere</h2>
+        <p id="dett-cant-sub"></p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalDettaglioCantiere()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="cant-tabs">
+        <button class="cant-tab active" data-tab="info" onclick="switchTabCantiere('info')">ℹ️ Info</button>
+        <button class="cant-tab" data-tab="foto" onclick="switchTabCantiere('foto')">📷 Foto</button>
+      </div>
+
+      <div class="cant-pane active" data-pane="info">
+        <div class="cant-info-row"><div class="cant-info-label">Cliente</div><div id="dett-cant-cliente">—</div></div>
+        <div class="cant-info-row"><div class="cant-info-label">Indirizzo</div><div id="dett-cant-indirizzo">—</div></div>
+        <div class="cant-info-row"><div class="cant-info-label">Data inizio</div><div id="dett-cant-data-inizio">—</div></div>
+        <div class="cant-info-row"><div class="cant-info-label">Data fine</div><div id="dett-cant-data-fine">—</div></div>
+        <div class="cant-info-row"><div class="cant-info-label">Stato</div><div id="dett-cant-stato">—</div></div>
+        <div class="cant-info-row"><div class="cant-info-label">Note</div><div id="dett-cant-note" style="white-space:pre-wrap">—</div></div>
+      </div>
+
+      <div class="cant-pane" data-pane="foto">
+        <div class="foto-upload-area" id="dett-cant-upload-area"
+             onclick="document.getElementById('dett-cant-foto-input').click()"
+             ondragover="dettCantDragOver(event)" ondragleave="dettCantDragLeave(event)" ondrop="dettCantDrop(event)">
+          <input type="file" id="dett-cant-foto-input" accept="image/*" multiple style="display:none" onchange="uploadFotoCantiere(this.files)">
+          <div class="foto-upload-icon">📤</div>
+          <div class="foto-upload-label">Clicca o trascina le foto qui</div>
+          <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
+        </div>
+        <div class="foto-upload-progress" id="dett-cant-foto-progress" style="display:none">⏳ Upload in corso...</div>
+        <div class="foto-grid" id="dett-cant-foto-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL FOTO DEI LAVORI -->
 <div class="modal-ai-overlay" id="modalFotoLavori" onclick="if(event.target===this)chiudiModalFotoLavori()">
   <div class="modal-ai">
@@ -1628,6 +1687,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let impresaCorrente = null;
 let preventivoCorrente = null;
+let cantiereAttivo = null;
 
 async function caricaSessioneConDati(session) {
   let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
@@ -2183,7 +2243,7 @@ async function caricaCantieri() {
   lista.innerHTML = data.map(c => {
     const colore = statoColore[c.stato] || '#888';
     const label  = statoLabel[c.stato]  || (c.stato || '—');
-    return `<div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:16px;cursor:pointer;background:#fafafa">
+    return `<div onclick="apriDettaglioCantiere('${c.id}')" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:16px;cursor:pointer;background:#fafafa">
       <div style="font-weight:700;color:#1a3a2a;margin-bottom:6px">${esc(c.nome) || '—'}</div>
       ${c.cliente ? `<div style="font-size:0.85rem;color:#555;margin-bottom:2px">👤 ${esc(c.cliente)}</div>` : ''}
       ${c.indirizzo ? `<div style="font-size:0.85rem;color:#555;margin-bottom:8px">📍 ${esc(c.indirizzo)}</div>` : ''}
@@ -2219,6 +2279,99 @@ async function salvaCantiere() {
 
 function chiudiModalNuovoCantiere() {
   document.getElementById('modalNuovoCantiere').classList.remove('show');
+}
+
+// DETTAGLIO CANTIERE
+async function apriDettaglioCantiere(id) {
+  cantiereAttivo = id;
+  document.getElementById('modalDettaglioCantiere').classList.add('show');
+  switchTabCantiere('info');
+  const { data: c } = await sb.from('cantieri').select('*').eq('id', id).single();
+  if (!c) return;
+  const statoLabel = { in_corso:'🟠 In corso', completato:'🟢 Completato', sospeso:'⚫ Sospeso' };
+  document.getElementById('dett-cant-nome').textContent = `🏗️ ${c.nome || '—'}`;
+  document.getElementById('dett-cant-sub').textContent = [c.cliente, c.indirizzo].filter(Boolean).join(' · ');
+  document.getElementById('dett-cant-cliente').textContent = c.cliente || '—';
+  document.getElementById('dett-cant-indirizzo').textContent = c.indirizzo || '—';
+  document.getElementById('dett-cant-data-inizio').textContent = c.data_inizio || '—';
+  document.getElementById('dett-cant-data-fine').textContent = c.data_fine || '—';
+  document.getElementById('dett-cant-stato').textContent = statoLabel[c.stato] || c.stato || '—';
+  document.getElementById('dett-cant-note').textContent = c.note || '—';
+  await caricaFotoCantiere();
+}
+
+function chiudiModalDettaglioCantiere() {
+  document.getElementById('modalDettaglioCantiere').classList.remove('show');
+  cantiereAttivo = null;
+}
+
+function switchTabCantiere(tabName) {
+  document.querySelectorAll('#modalDettaglioCantiere .cant-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tabName);
+  });
+  document.querySelectorAll('#modalDettaglioCantiere .cant-pane').forEach(p => {
+    p.classList.toggle('active', p.dataset.pane === tabName);
+  });
+}
+
+async function caricaFotoCantiere() {
+  const grid = document.getElementById('dett-cant-foto-grid');
+  if (!grid || !cantiereAttivo) return;
+  const { data } = await sb.from('cantiere_foto').select('*').eq('cantiere_id', cantiereAttivo).order('created_at', { ascending: false });
+  const foto = data || [];
+  if (!foto.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessuna foto per questo cantiere</div>';
+    return;
+  }
+  grid.innerHTML = foto.map(f => {
+    const path = (f.url || '').split('/cantieri-foto/')[1] || '';
+    const pathSafe = path.replace(/'/g, "\\'");
+    return `<div class="foto-item"><img src="${f.url}" alt="" loading="lazy"><button class="foto-item-del" onclick="eliminaFotoCantiere('${f.id}','${pathSafe}')" title="Elimina foto">✕ Elimina</button></div>`;
+  }).join('');
+}
+
+async function uploadFotoCantiere(files) {
+  if (!files?.length || !cantiereAttivo) return;
+  const progress = document.getElementById('dett-cant-foto-progress');
+  if (progress) { progress.style.display = 'block'; progress.textContent = `⏳ Caricamento ${files.length} foto...`; }
+  let ok = 0;
+  for (const file of Array.from(files)) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert(`"${file.name}" supera i 5 MB — saltata.`);
+      continue;
+    }
+    const path = `${cantiereAttivo}/${Date.now()}-${file.name}`;
+    const { error: upErr } = await sb.storage.from('cantieri-foto').upload(path, file, { upsert: false });
+    if (upErr) { console.error('Upload cantiere errore:', upErr); continue; }
+    const { data: { publicUrl } } = sb.storage.from('cantieri-foto').getPublicUrl(path);
+    const { error: insErr } = await sb.from('cantiere_foto').insert({ cantiere_id: cantiereAttivo, url: publicUrl });
+    if (insErr) { console.error('Insert cantiere_foto errore:', insErr); continue; }
+    ok++;
+  }
+  if (progress) { progress.textContent = `✅ ${ok} foto caricate!`; setTimeout(() => { progress.style.display = 'none'; }, 2500); }
+  const input = document.getElementById('dett-cant-foto-input');
+  if (input) input.value = '';
+  await caricaFotoCantiere();
+}
+
+async function eliminaFotoCantiere(id, path) {
+  if (!confirm('Eliminare questa foto?')) return;
+  if (path) await sb.storage.from('cantieri-foto').remove([path]);
+  await sb.from('cantiere_foto').delete().eq('id', id);
+  await caricaFotoCantiere();
+}
+
+function dettCantDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dett-cant-upload-area').classList.add('dragover');
+}
+function dettCantDragLeave(e) {
+  document.getElementById('dett-cant-upload-area').classList.remove('dragover');
+}
+function dettCantDrop(e) {
+  e.preventDefault();
+  document.getElementById('dett-cant-upload-area').classList.remove('dragover');
+  uploadFotoCantiere(e.dataTransfer.files);
 }
 
 // CARICA CANDIDATI NELLA ZONA
