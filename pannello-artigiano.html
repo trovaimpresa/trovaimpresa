@@ -363,7 +363,41 @@
     .main { margin-left:0; }
     .stats-grid { grid-template-columns:1fr; }
     .form-row { grid-template-columns:1fr; }
+    .cal-section-grid {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: auto !important;
+    }
+    .cal-section-grid .widget-calc-card {
+      grid-row: auto !important;
+      grid-column: auto !important;
+    }
   }
+
+  /* === Widget Calcolatrice (dashboard) === */
+  .wcalc-btn {
+    background: #fafafa;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a3a2a;
+    cursor: pointer;
+    transition: background 0.12s, transform 0.05s;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+  .wcalc-btn:hover { background: #f0f7f3; }
+  .wcalc-btn:active { transform: scale(0.96); }
+  .wcalc-btn.wcalc-op { background: #e8f5ee; color: #2a7a4b; }
+  .wcalc-btn.wcalc-op:hover { background: #d4ead9; }
+  .wcalc-btn.wcalc-eq { background: #2a7a4b; color: white; }
+  .wcalc-btn.wcalc-eq:hover { background: #1a5a3a; }
+  .wcalc-btn.wcalc-clear { background: #e85d4a; color: white; }
+  .wcalc-btn.wcalc-clear:hover { background: #c84a39; }
 
   /* === NUOVA DASHBOARD === */
   .dash-hero {
@@ -956,7 +990,7 @@
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:14px">
+        <div class="cal-section-grid" style="display:grid;grid-template-columns:1fr 0.5fr 0.5fr;grid-template-rows:auto auto;gap:14px">
 
           <!-- [A] Orologio (alto sx) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:center">
@@ -992,12 +1026,37 @@
             <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
           </div>
 
-          <!-- [D] Note (basso dx) -->
+          <!-- [D] Note (basso centro) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px">
             <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
             <textarea id="widget-note" placeholder="Scrivi un appunto..." style="resize:none;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:8px;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:60px;background:white"></textarea>
             <button onclick="aggiungiNota()" style="padding:8px 12px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;align-self:flex-start">+ Aggiungi nota</button>
             <div class="lista-note" id="lista-note" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
+          </div>
+
+          <!-- [E] Calcolatrice (terza colonna, full height) -->
+          <div class="widget-calc-card" style="grid-row:1 / span 2;grid-column:3;background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);padding:14px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">🧮 Calcolatrice</div>
+            <div id="wcalc-display" style="background:#f5f5f5;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px 12px;text-align:right;font-family:'Playfair Display',serif;font-size:1.4rem;color:#1a3a2a;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:42px;line-height:1.5">0</div>
+            <div class="wcalc-keys" style="display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(40px,1fr);gap:6px;flex:1">
+              <button type="button" onclick="wcalcClear()" class="wcalc-btn wcalc-clear">C</button>
+              <button type="button" onclick="wcalcSetOp('/')" class="wcalc-btn wcalc-op">÷</button>
+              <button type="button" onclick="wcalcSetOp('*')" class="wcalc-btn wcalc-op">×</button>
+              <button type="button" onclick="wcalcSetOp('-')" class="wcalc-btn wcalc-op">−</button>
+              <button type="button" onclick="wcalcDigit('7')" class="wcalc-btn">7</button>
+              <button type="button" onclick="wcalcDigit('8')" class="wcalc-btn">8</button>
+              <button type="button" onclick="wcalcDigit('9')" class="wcalc-btn">9</button>
+              <button type="button" onclick="wcalcSetOp('+')" class="wcalc-btn wcalc-op">+</button>
+              <button type="button" onclick="wcalcDigit('4')" class="wcalc-btn">4</button>
+              <button type="button" onclick="wcalcDigit('5')" class="wcalc-btn">5</button>
+              <button type="button" onclick="wcalcDigit('6')" class="wcalc-btn">6</button>
+              <button type="button" onclick="wcalcEq()" class="wcalc-btn wcalc-eq" style="grid-row:3 / span 3;grid-column:4">=</button>
+              <button type="button" onclick="wcalcDigit('1')" class="wcalc-btn">1</button>
+              <button type="button" onclick="wcalcDigit('2')" class="wcalc-btn">2</button>
+              <button type="button" onclick="wcalcDigit('3')" class="wcalc-btn">3</button>
+              <button type="button" onclick="wcalcDigit('0')" class="wcalc-btn" style="grid-column:span 2">0</button>
+              <button type="button" onclick="wcalcDot()" class="wcalc-btn">.</button>
+            </div>
           </div>
 
         </div>
@@ -4673,6 +4732,73 @@ function chiudiModalProfilo() {
   } else {
     setMeteo('📍', 'Geolocalizzazione non supportata', '', '');
   }
+})();
+
+/* ============================================================
+   WIDGET CALCOLATRICE (dashboard, colonna destra)
+   ============================================================ */
+(function () {
+  var cur = '0';
+  var prev = null;
+  var pendOp = null;
+  var resetNext = false;
+
+  function show() {
+    var el = document.getElementById('wcalc-display');
+    if (el) el.textContent = cur;
+  }
+
+  function compute() {
+    var a = parseFloat(prev);
+    var b = parseFloat(cur);
+    if (isNaN(a) || isNaN(b)) return b;
+    var r;
+    switch (pendOp) {
+      case '+': r = a + b; break;
+      case '-': r = a - b; break;
+      case '*': r = a * b; break;
+      case '/': r = b === 0 ? 0 : a / b; break;
+      default:  return b;
+    }
+    return Math.round(r * 1e10) / 1e10;
+  }
+
+  window.wcalcClear = function () {
+    cur = '0'; prev = null; pendOp = null; resetNext = false;
+    show();
+  };
+
+  window.wcalcDigit = function (d) {
+    if (resetNext) { cur = d; resetNext = false; }
+    else            { cur = (cur === '0') ? d : (cur + d); }
+    if (cur.replace('-', '').length > 12) cur = cur.slice(0, 13);
+    show();
+  };
+
+  window.wcalcDot = function () {
+    if (resetNext) { cur = '0.'; resetNext = false; }
+    else if (cur.indexOf('.') === -1) { cur += '.'; }
+    show();
+  };
+
+  window.wcalcSetOp = function (op) {
+    if (pendOp !== null && !resetNext) {
+      cur = String(compute());
+      show();
+    }
+    prev = cur;
+    pendOp = op;
+    resetNext = true;
+  };
+
+  window.wcalcEq = function () {
+    if (pendOp === null) return;
+    cur = String(compute());
+    prev = null;
+    pendOp = null;
+    resetNext = true;
+    show();
+  };
 })();
 
 /*
