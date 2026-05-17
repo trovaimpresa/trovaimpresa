@@ -1,0 +1,25 @@
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+    font-size: 14px;
+  }
+
+  [style*="grid-template-columns"]:not(#cal-griglia):not(.calendar-header) {
+    grid-template-columns: 1fr !important;
+  }
+
+  [style*="display:flex"],
+  [style*="display: flex"] {
+    flex-wrap: wrap !important;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  button:not(#cal-griglia button):not(.calendar-header button):not(table button) {
+    min-height: 44px;
+  }
+}
