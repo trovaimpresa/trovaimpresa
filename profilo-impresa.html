@@ -390,6 +390,12 @@ nav img{height:36px}
       <div id="video-lavori-grid" style="display:flex;flex-direction:column;gap:16px;padding:0 20px 20px"></div>
     </div>
 
+    <!-- CERTIFICAZIONI -->
+    <div class="card" id="card-certificazioni" style="display:none;border-top-color:#daa520">
+      <div class="card-title">🏆 Certificazioni e Patentini</div>
+      <div id="lista-certificazioni-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"></div>
+    </div>
+
     <!-- RECENSIONI -->
     <div class="card" style="border-top-color:#6c3483">
       <div class="card-title">⭐ Recensioni dei clienti</div>
@@ -571,6 +577,28 @@ async function caricaProfilo(id){
         rightCol.style.backgroundImage = `url("${pers.banner_url}")`;
         rightCol.style.backgroundSize = 'cover';
         rightCol.style.backgroundPosition = 'center';
+      }
+    }
+    // CERTIFICAZIONI
+    const certs = Array.isArray(d.certificazioni) ? d.certificazioni : [];
+    if (certs.length) {
+      function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+      const grid = document.getElementById('lista-certificazioni-grid');
+      const card = document.getElementById('card-certificazioni');
+      if (grid && card) {
+        grid.innerHTML = certs.map(c => {
+          const nome = escHtml(c.nome || '');
+          const cat  = escHtml(c.categoria || '');
+          const scad = c.scadenza ? `<div style="font-size:12px;color:#555;margin-top:6px">📅 Scade: ${escHtml(c.scadenza)}</div>` : '';
+          const file = c.file_url ? `<a href="${c.file_url}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;padding:6px 12px;background:#daa520;color:white;border-radius:8px;text-decoration:none;font-weight:700;font-size:12px">📎 Vedi documento</a>` : '';
+          return `<div style="background:#fafafa;border:1px solid #eee;border-radius:12px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,0.06)">
+            <div style="font-weight:800;color:#1a4d2e;font-size:14px;line-height:1.3">${nome}</div>
+            ${cat ? `<div style="font-size:12px;color:#888;margin-top:4px">${cat}</div>` : ''}
+            ${scad}
+            ${file}
+          </div>`;
+        }).join('');
+        card.style.display = '';
       }
     }
   }catch(e){console.error(e)}
