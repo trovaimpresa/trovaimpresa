@@ -538,6 +538,70 @@
     line-height:1.7; resize:vertical; outline:none;
   }
 
+  /* === MODAL CREA PREVENTIVO === */
+  .prev-section-label {
+    font-size:0.72rem; font-weight:800; color:var(--verde2);
+    text-transform:uppercase; letter-spacing:1px;
+    margin:20px 0 10px; padding-top:14px; border-top:1.5px solid #f0f0f0;
+  }
+  .prev-section-label:first-child { padding-top:0; border-top:none; margin-top:0; }
+  .prev-logo-preview { max-height:48px; width:auto; border-radius:6px; margin-bottom:10px; display:none; }
+  .form-group input[readonly].prev-readonly { background:#f5f5f5; color:#555; cursor:not-allowed; }
+  .prev-table { width:100%; border-collapse:collapse; margin-bottom:10px; font-size:0.88rem; }
+  .prev-table th {
+    background:#f0f7f3; padding:9px 8px; text-align:left;
+    font-size:0.7rem; font-weight:800; color:var(--mid);
+    text-transform:uppercase; letter-spacing:0.6px;
+    border-bottom:1.5px solid var(--border);
+  }
+  .prev-table td { padding:5px 4px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+  .prev-table input {
+    width:100%; padding:8px 10px; border:1.5px solid var(--border);
+    border-radius:8px; font-family:'DM Sans',sans-serif;
+    font-size:0.88rem; outline:none; background:white; transition:border 0.2s;
+  }
+  .prev-table input:focus { border-color:var(--verde); }
+  .prev-table input[type="number"] { text-align:right; }
+  .prev-totale-riga { font-weight:700; color:#1a3a2a; padding:8px 10px; text-align:right; min-width:90px; white-space:nowrap; }
+  .btn-rimuovi-riga {
+    background:transparent; border:none; color:#c0392b;
+    cursor:pointer; font-size:1rem; padding:4px 8px;
+    opacity:0.55; transition:opacity 0.15s;
+  }
+  .btn-rimuovi-riga:hover { opacity:1; }
+  .btn-aggiungi-riga {
+    padding:9px 16px; background:white; color:var(--verde);
+    border:1.5px dashed var(--verde); border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.85rem;
+    cursor:pointer; transition:all 0.15s; margin-bottom:18px;
+  }
+  .btn-aggiungi-riga:hover { background:var(--verde3); }
+  .prev-totali { background:#f8f8f8; border-radius:12px; padding:14px 18px; margin-bottom:14px; }
+  .prev-totali-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-size:0.92rem; color:var(--mid); }
+  .prev-totali-row.final {
+    padding-top:10px; margin-top:6px; border-top:1.5px solid var(--border);
+    font-size:1.1rem; font-weight:800; color:#1a3a2a;
+  }
+  .modal-ai-footer {
+    padding:16px 28px; border-top:1px solid var(--border);
+    display:flex; gap:10px; justify-content:flex-end;
+    background:#fafafa; border-radius:0 0 24px 24px;
+    position:sticky; bottom:0;
+  }
+  .btn-scarica-pdf {
+    padding:11px 22px; background:var(--verde); color:white;
+    border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.92rem; cursor:pointer; transition:all 0.15s;
+  }
+  .btn-scarica-pdf:hover:not(:disabled) { background:var(--verde2); }
+  .btn-scarica-pdf:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-chiudi-modal {
+    padding:11px 20px; background:white; color:var(--mid);
+    border:1.5px solid var(--border); border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer;
+  }
+  .btn-chiudi-modal:hover { background:#f5f5f5; }
+
   /* === FAQ ACCORDION === */
   .faq-list { display:flex; flex-direction:column; gap:8px; }
   .faq-item { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:white; }
@@ -1878,6 +1942,128 @@
         </div>
         <div id="calc-inps-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CREA PREVENTIVO -->
+<div class="modal-ai-overlay" id="modalCreaPreventivo" onclick="if(event.target===this)chiudiModalCreaPreventivo()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📄 Crea preventivo</h2>
+        <p>Compila i dati e scarica il PDF</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalCreaPreventivo()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+
+      <div class="prev-section-label">🏢 La tua attività</div>
+      <img id="prev-art-logo" class="prev-logo-preview" alt="Logo">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome attività</label>
+          <input type="text" id="prev-art-nome" class="prev-readonly" readonly>
+        </div>
+        <div class="form-group">
+          <label>P. IVA</label>
+          <input type="text" id="prev-art-piva" class="prev-readonly" readonly>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Indirizzo</label>
+        <input type="text" id="prev-art-indirizzo" class="prev-readonly" readonly>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefono</label>
+          <input type="text" id="prev-art-telefono" class="prev-readonly" readonly>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="text" id="prev-art-email" class="prev-readonly" readonly>
+        </div>
+      </div>
+
+      <div class="prev-section-label">👤 Dati cliente</div>
+      <div class="form-group">
+        <label>Nome cliente *</label>
+        <input type="text" id="prev-cli-nome" placeholder="Nome e cognome / Ragione sociale">
+      </div>
+      <div class="form-group">
+        <label>Indirizzo</label>
+        <input type="text" id="prev-cli-indirizzo" placeholder="Via, città">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefono</label>
+          <input type="tel" id="prev-cli-telefono" placeholder="+39 …">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="prev-cli-email" placeholder="cliente@example.com">
+        </div>
+      </div>
+
+      <div class="prev-section-label">🧾 Dati preventivo</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Numero preventivo</label>
+          <input type="text" id="prev-numero" class="prev-readonly" readonly>
+        </div>
+        <div class="form-group">
+          <label>Data</label>
+          <input type="text" id="prev-data" class="prev-readonly" readonly>
+        </div>
+      </div>
+
+      <div class="prev-section-label">📋 Voci</div>
+      <div style="overflow-x:auto">
+        <table class="prev-table">
+          <thead>
+            <tr>
+              <th>Descrizione</th>
+              <th style="width:80px;text-align:right">Qta</th>
+              <th style="width:130px;text-align:right">Prezzo unit. €</th>
+              <th style="width:110px;text-align:right">Totale €</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="prev-voci-body"></tbody>
+        </table>
+      </div>
+      <button type="button" class="btn-aggiungi-riga" onclick="aggiungiRigaPreventivo()">+ Aggiungi riga</button>
+
+      <div class="prev-totali">
+        <div class="prev-totali-row">
+          <span>Totale imponibile</span>
+          <span id="prev-imponibile">€ 0,00</span>
+        </div>
+        <div class="prev-totali-row">
+          <span>IVA 22%</span>
+          <span id="prev-iva">€ 0,00</span>
+        </div>
+        <div class="prev-totali-row final">
+          <span>Totale finale</span>
+          <span id="prev-totale-finale">€ 0,00</span>
+        </div>
+      </div>
+
+      <div class="prev-section-label">📝 Note e validità</div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea id="prev-note" placeholder="Condizioni, modalità di pagamento, esclusioni…"></textarea>
+      </div>
+      <div class="form-group" style="max-width:200px">
+        <label>Validità (giorni)</label>
+        <input type="number" id="prev-validita" min="1" max="365" value="30">
+      </div>
+
+    </div>
+    <div class="modal-ai-footer">
+      <button type="button" class="btn-chiudi-modal" onclick="chiudiModalCreaPreventivo()">Chiudi</button>
+      <button type="button" class="btn-scarica-pdf" id="btn-scarica-prev-pdf" disabled title="Disponibile prossimamente">📥 Scarica PDF</button>
     </div>
   </div>
 </div>
@@ -3317,8 +3503,90 @@ function chiudiCalcolatrice() {
   document.getElementById('modalCalcolatrice').classList.remove('show');
 }
 
-// PREVENTIVI (stub: modal da implementare)
-function apriModalCreaPreventivo() { console.log('TODO modal preventivo'); }
+// === MODAL CREA PREVENTIVO ===
+function apriModalCreaPreventivo() {
+  if (!impresaCorrente) {
+    alert('Caricamento dati in corso, riprova tra qualche secondo');
+    return;
+  }
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  setVal('prev-art-nome', impresaCorrente.nome_attivita);
+  setVal('prev-art-piva', impresaCorrente.piva);
+  setVal('prev-art-indirizzo', impresaCorrente.indirizzo);
+  setVal('prev-art-telefono', impresaCorrente.telefono);
+  setVal('prev-art-email', impresaCorrente.email);
+
+  const logoImg = document.getElementById('prev-art-logo');
+  if (logoImg) {
+    if (impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png') {
+      logoImg.src = impresaCorrente.logo_url;
+      logoImg.style.display = 'block';
+    } else {
+      logoImg.style.display = 'none';
+    }
+  }
+
+  setVal('prev-cli-nome', '');
+  setVal('prev-cli-indirizzo', '');
+  setVal('prev-cli-telefono', '');
+  setVal('prev-cli-email', '');
+  setVal('prev-note', '');
+  document.getElementById('prev-validita').value = 30;
+
+  document.getElementById('prev-numero').value = 'PREV-' + Date.now();
+  const oggi = new Date();
+  const dd = String(oggi.getDate()).padStart(2, '0');
+  const mm = String(oggi.getMonth() + 1).padStart(2, '0');
+  const yyyy = oggi.getFullYear();
+  document.getElementById('prev-data').value = `${dd}/${mm}/${yyyy}`;
+
+  document.getElementById('prev-voci-body').innerHTML = '';
+  aggiungiRigaPreventivo();
+  ricalcolaPreventivo();
+
+  document.getElementById('modalCreaPreventivo').classList.add('show');
+}
+
+function chiudiModalCreaPreventivo() {
+  document.getElementById('modalCreaPreventivo').classList.remove('show');
+}
+
+function aggiungiRigaPreventivo() {
+  const tbody = document.getElementById('prev-voci-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" class="prev-desc" placeholder="Descrizione lavoro / materiale" oninput="ricalcolaPreventivo()"></td>
+    <td><input type="number" class="prev-qta" min="0" step="0.01" value="1" oninput="ricalcolaPreventivo()"></td>
+    <td><input type="number" class="prev-prezzo" min="0" step="0.01" value="0" oninput="ricalcolaPreventivo()"></td>
+    <td class="prev-totale-riga">€ 0,00</td>
+    <td><button type="button" class="btn-rimuovi-riga" onclick="rimuoviRigaPreventivo(this)" title="Rimuovi riga">🗑️</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function rimuoviRigaPreventivo(btn) {
+  const tbody = document.getElementById('prev-voci-body');
+  if (tbody.children.length <= 1) return;
+  btn.closest('tr').remove();
+  ricalcolaPreventivo();
+}
+
+function ricalcolaPreventivo() {
+  const tbody = document.getElementById('prev-voci-body');
+  const fmt = v => '€ ' + v.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  let imponibile = 0;
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const qta = parseFloat(tr.querySelector('.prev-qta').value) || 0;
+    const prezzo = parseFloat(tr.querySelector('.prev-prezzo').value) || 0;
+    const tot = qta * prezzo;
+    tr.querySelector('.prev-totale-riga').textContent = fmt(tot);
+    imponibile += tot;
+  });
+  const iva = imponibile * 0.22;
+  document.getElementById('prev-imponibile').textContent = fmt(imponibile);
+  document.getElementById('prev-iva').textContent = fmt(iva);
+  document.getElementById('prev-totale-finale').textContent = fmt(imponibile + iva);
+}
 
 function toggleFullscreen(btn) {
   const modal = btn.closest('.modal-ai');
