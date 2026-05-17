@@ -1088,6 +1088,11 @@
             <div style="font-size:1.8rem;margin-bottom:8px">📋</div>
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Scadenze fiscali</div>
           </div>
+          <div onclick="apriModalCreaPreventivo()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📄</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Preventivi</div>
+            <div style="font-size:0.78rem;color:#888;margin-top:4px">Crea preventivi PDF per i tuoi clienti</div>
+          </div>
         </div>
       </div>
 
@@ -3311,6 +3316,9 @@ function apriCalcolatrice() {
 function chiudiCalcolatrice() {
   document.getElementById('modalCalcolatrice').classList.remove('show');
 }
+
+// PREVENTIVI (stub: modal da implementare)
+function apriModalCreaPreventivo() { console.log('TODO modal preventivo'); }
 
 function toggleFullscreen(btn) {
   const modal = btn.closest('.modal-ai');
