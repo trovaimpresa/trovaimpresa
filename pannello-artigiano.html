@@ -3617,6 +3617,41 @@ function scaricaPDFPreventivo() {
     by += lineH;
   });
 
+  // === Tabella voci ===
+  const body = [];
+  document.querySelectorAll('#prev-voci-body tr').forEach(tr => {
+    body.push([
+      tr.querySelector('.prev-desc').value,
+      tr.querySelector('.prev-qta').value,
+      tr.querySelector('.prev-prezzo').value,
+      tr.querySelector('.prev-totale-riga').textContent
+    ]);
+  });
+  doc.autoTable({
+    head: [['Descrizione', 'Qta', 'Prezzo €', 'Totale €']],
+    body: body,
+    startY: boxY + boxH + 8,
+    theme: 'striped',
+    headStyles: { fillColor: [42, 122, 75], textColor: 255 }
+  });
+
+  // === Totali allineati a destra ===
+  const imponibile    = document.getElementById('prev-imponibile').textContent;
+  const iva           = document.getElementById('prev-iva').textContent;
+  const totaleFinale  = document.getElementById('prev-totale-finale').textContent;
+  let ty = doc.lastAutoTable.finalY + 8;
+  const labelX = 150, valueX = 190;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('Imponibile:',    labelX, ty, { align: 'right' });
+  doc.text(imponibile,       valueX, ty, { align: 'right' });
+  ty += 6;
+  doc.text('IVA 22%:',       labelX, ty, { align: 'right' });
+  doc.text(iva,              valueX, ty, { align: 'right' });
+  ty += 6;
+  doc.text('Totale finale:', labelX, ty, { align: 'right' });
+  doc.text(totaleFinale,     valueX, ty, { align: 'right' });
+
   doc.save('Preventivo_' + numero + '.pdf');
 }
 
