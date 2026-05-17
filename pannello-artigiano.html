@@ -3652,6 +3652,30 @@ function scaricaPDFPreventivo() {
   doc.text('Totale finale:', labelX, ty, { align: 'right' });
   doc.text(totaleFinale,     valueX, ty, { align: 'right' });
 
+  // === Note + Validità ===
+  const note = document.getElementById('prev-note').value.trim();
+  const validita = document.getElementById('prev-validita').value || 30;
+  let ny = doc.lastAutoTable.finalY + 30;
+  if (note) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('Note:', 20, ny);
+    ny += 6;
+    doc.setFont('helvetica', 'normal');
+    const noteLines = doc.splitTextToSize(note, 170);
+    doc.text(noteLines, 20, ny);
+    ny += noteLines.length * 5 + 4;
+  }
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text('Validità: ' + validita + ' giorni', 20, ny);
+
+  // === Footer pagina ===
+  doc.setFontSize(8);
+  doc.setTextColor(150);
+  doc.text('Generato con TrovaImpresa.com', 105, 285, { align: 'center' });
+  doc.setTextColor(0);
+
   doc.save('Preventivo_' + numero + '.pdf');
 }
 
