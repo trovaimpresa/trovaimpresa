@@ -1815,7 +1815,8 @@
         <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Aggiungi certificazione</div>
         <div class="form-group">
           <label>Nome certificazione *</label>
-          <input type="text" id="cert-nome-input" placeholder="Es. SOA, ISO 9001, Patentino gas…">
+          <input list="cert-list" id="cert-search" placeholder="Cerca certificazione...">
+          <datalist id="cert-list"></datalist>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -3940,8 +3941,10 @@ function renderCertificazioni(certs) {
 }
 
 async function aggiungiCertificazione() {
-  const nome = document.getElementById('cert-nome-input').value.trim();
-  if (!nome) { alert('Inserisci il nome della certificazione.'); return; }
+  const inputEl = document.getElementById('cert-search');
+  const nomeInput = inputEl.value.trim();
+  const cert = (window.CERTIFICAZIONI_EDILIZIA || []).find(c => c.nome === nomeInput);
+  if (!cert) { alert("Seleziona una certificazione dall'elenco."); return; }
   const scadenza = document.getElementById('cert-scadenza-input').value || null;
   const fileInput = document.getElementById('cert-file-input');
   const file = fileInput.files[0];
@@ -3950,21 +3953,21 @@ async function aggiungiCertificazione() {
   if (file) {
     const userId = impresaCorrente.user_id;
     const ext = file.name.split('.').pop();
-    const path = `${userId}/${Date.now()}-${nome.replace(/\s+/g,'_').substring(0,40)}.${ext}`;
+    const path = `${userId}/${Date.now()}-${cert.nome.replace(/\s+/g,'_').substring(0,40)}.${ext}`;
     const { error: upErr } = await sb.storage.from('certificazioni').upload(path, file, { upsert: false, contentType: file.type });
     if (upErr) { alert('Errore caricamento file: ' + upErr.message); return; }
     const { data: urlData } = sb.storage.from('certificazioni').getPublicUrl(path);
     file_url = urlData.publicUrl;
   }
 
-  const nuovaCert = { nome, scadenza, file_url };
+  const nuovaCert = { id: cert.id, nome: cert.nome, categoria: cert.categoria, scadenza, file_url };
   const certs = [...(impresaCorrente.certificazioni || []), nuovaCert];
   const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
   if (error) { alert('Errore salvataggio: ' + error.message); return; }
 
   impresaCorrente.certificazioni = certs;
   renderCertificazioni(certs);
-  document.getElementById('cert-nome-input').value = '';
+  inputEl.value = '';
   document.getElementById('cert-scadenza-input').value = '';
   fileInput.value = '';
 }
@@ -4610,6 +4613,15 @@ var sidebarMap = null;
 </script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/certificazioni-edilizia.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var dl = document.getElementById('cert-list');
+  if (!dl || !window.CERTIFICAZIONI_EDILIZIA) return;
+  dl.innerHTML = window.CERTIFICAZIONI_EDILIZIA
+    .map(function (c) { return '<option value="' + c.nome + '">' + c.categoria + ' — ' + c.nome + '</option>'; })
+    .join('');
+});
+</script>
 </body>
 <script>
 function toggleSidebar() {
