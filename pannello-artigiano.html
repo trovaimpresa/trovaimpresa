@@ -2394,7 +2394,7 @@ async function inizializza() {
   }
   if (piano === 'premium' && window.Sortable) {
     document.querySelectorAll('.dash-quick-grid').forEach(grid => {
-      new Sortable(grid, { animation: 150, onUpdate: salvaCardOrdine });
+      new Sortable(grid, { animation: 150, onUpdate: salvaCardOrdine, delay: 400, delayOnTouchOnly: true, touchStartThreshold: 8 });
     });
   }
 
