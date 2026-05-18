@@ -3703,6 +3703,53 @@ async function scaricaPDFPreventivo() {
   doc.text('Generato con TrovaImpresa.com', 105, 285, { align: 'center' });
   doc.setTextColor(0);
 
+  // === Salva su Supabase (prima di generare il PDF) ===
+  try {
+    const vociPayload = [];
+    let imponibileNum = 0;
+    document.querySelectorAll('#prev-voci-body tr').forEach(tr => {
+      const desc = tr.querySelector('.prev-desc').value;
+      const qta = parseFloat(tr.querySelector('.prev-qta').value) || 0;
+      const prezzo = parseFloat(tr.querySelector('.prev-prezzo').value) || 0;
+      const tot = qta * prezzo;
+      imponibileNum += tot;
+      vociPayload.push({ descrizione: desc, qta: qta, prezzo: prezzo, totale: tot });
+    });
+    const ivaNum = imponibileNum * 0.22;
+    const totaleNum = imponibileNum + ivaNum;
+    const [ddIns, mmIns, yyyyIns] = (data || '').split('/');
+    const dataIso = (ddIns && mmIns && yyyyIns) ? `${yyyyIns}-${mmIns}-${ddIns}` : null;
+    const { error: errInsPrev } = await sb.from('preventivi_creati').insert({
+      impresa_id: impresaCorrente.id,
+      numero: numero,
+      data_preventivo: dataIso,
+      artigiano: {
+        nome_attivita: impresaCorrente.nome_attivita || '',
+        piva: impresaCorrente.piva || '',
+        indirizzo: impresaCorrente.indirizzo || '',
+        telefono: impresaCorrente.telefono || '',
+        email: impresaCorrente.email || ''
+      },
+      cliente: {
+        nome: cliNome,
+        indirizzo: cliIndirizzo,
+        telefono: cliTel,
+        email: cliEmail
+      },
+      voci: vociPayload,
+      imponibile: imponibileNum,
+      iva: ivaNum,
+      totale_finale: totaleNum,
+      note: note,
+      validita_giorni: parseInt(validita, 10) || 30
+    });
+    if (errInsPrev) {
+      alert('Errore nel salvataggio del preventivo: ' + errInsPrev.message);
+    }
+  } catch (e) {
+    alert('Errore nel salvataggio del preventivo: ' + (e && e.message ? e.message : e));
+  }
+
   doc.save('Preventivo_' + numero + '.pdf');
 }
 
