@@ -3535,6 +3535,7 @@ function apriModalCreaPreventivo() {
     alert('Caricamento dati in corso, riprova tra qualche secondo');
     return;
   }
+  window.preventivoInModifica = null;
   const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
   setVal('prev-art-nome', impresaCorrente.nome_attivita);
   setVal('prev-art-piva', impresaCorrente.piva);
@@ -3595,9 +3596,11 @@ async function apriModalStoricoPreventivi() {
     return;
   }
   if (!data || data.length === 0) {
+    window._storicoPreventivi = [];
     cont.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0">Nessun preventivo trovato</div>';
     return;
   }
+  window._storicoPreventivi = data;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   const fmtEuro = v => '€ ' + Number(v || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtData = iso => {
@@ -3607,17 +3610,86 @@ async function apriModalStoricoPreventivi() {
   };
   cont.innerHTML = data.map(p => {
     const cliNome = (p.cliente && p.cliente.nome) ? p.cliente.nome : '—';
+    const onclickEdit = esc(`modificaPreventivoCreato(${JSON.stringify(p.id)})`);
     const onclickDel = esc(`eliminaPreventivoCreato(${JSON.stringify(p.id)}, ${JSON.stringify(p.numero || '')})`);
     return `
-      <div style="background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 2fr 1fr auto;gap:14px;align-items:center;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 6px 18px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+      <div style="background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 2fr 1fr auto auto;gap:14px;align-items:center;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 6px 18px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
         <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Numero</div><div style="font-weight:700;color:#1a3a2a">${esc(p.numero || '—')}</div></div>
         <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Data</div><div style="color:#1a3a2a">${esc(fmtData(p.data_preventivo))}</div></div>
         <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Cliente</div><div style="color:#1a3a2a">${esc(cliNome)}</div></div>
         <div style="text-align:right"><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Totale</div><div style="font-weight:700;color:#2a7a4b">${fmtEuro(p.totale_finale)}</div></div>
+        <button onclick="${onclickEdit}" title="Modifica preventivo" style="background:#e8f5ee;color:#2a7a4b;border:1px solid #b3dcc1;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">✏️ Modifica</button>
         <button onclick="${onclickDel}" title="Elimina preventivo" style="background:#fdecec;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">🗑️ Elimina</button>
       </div>
     `;
   }).join('');
+}
+
+function modificaPreventivoCreato(id) {
+  if (!impresaCorrente) {
+    alert('Caricamento dati in corso, riprova tra qualche secondo');
+    return;
+  }
+  const lista = window._storicoPreventivi || [];
+  const p = lista.find(x => String(x.id) === String(id));
+  if (!p) {
+    alert('Preventivo non trovato');
+    return;
+  }
+  chiudiModalStoricoPreventivi();
+
+  const setVal = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v == null ? '' : v; };
+  setVal('prev-art-nome', impresaCorrente.nome_attivita);
+  setVal('prev-art-piva', impresaCorrente.piva);
+  setVal('prev-art-indirizzo', impresaCorrente.indirizzo);
+  setVal('prev-art-telefono', impresaCorrente.telefono);
+  setVal('prev-art-email', impresaCorrente.email);
+
+  const logoImg = document.getElementById('prev-art-logo');
+  if (logoImg) {
+    if (impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png') {
+      logoImg.src = impresaCorrente.logo_url;
+      logoImg.style.display = 'block';
+    } else {
+      logoImg.style.display = 'none';
+    }
+  }
+
+  const cli = p.cliente || {};
+  setVal('prev-cli-nome', cli.nome);
+  setVal('prev-cli-indirizzo', cli.indirizzo);
+  setVal('prev-cli-telefono', cli.telefono);
+  setVal('prev-cli-email', cli.email);
+
+  setVal('prev-numero', p.numero);
+  if (p.data_preventivo) {
+    const [y, m, d] = String(p.data_preventivo).split('-');
+    document.getElementById('prev-data').value = (d && m && y) ? `${d}/${m}/${y}` : '';
+  } else {
+    document.getElementById('prev-data').value = '';
+  }
+
+  setVal('prev-note', p.note);
+  document.getElementById('prev-validita').value = p.validita_giorni || 30;
+
+  const tbody = document.getElementById('prev-voci-body');
+  tbody.innerHTML = '';
+  const voci = Array.isArray(p.voci) ? p.voci : [];
+  if (voci.length === 0) {
+    aggiungiRigaPreventivo();
+  } else {
+    voci.forEach(v => {
+      aggiungiRigaPreventivo();
+      const tr = tbody.lastElementChild;
+      tr.querySelector('.prev-desc').value = v.descrizione || '';
+      tr.querySelector('.prev-qta').value = v.qta != null ? v.qta : 0;
+      tr.querySelector('.prev-prezzo').value = v.prezzo != null ? v.prezzo : 0;
+    });
+  }
+  ricalcolaPreventivo();
+
+  window.preventivoInModifica = id;
+  document.getElementById('modalCreaPreventivo').classList.add('show');
 }
 
 async function eliminaPreventivoCreato(id, numero) {
@@ -3800,7 +3872,7 @@ async function scaricaPDFPreventivo() {
     const totaleNum = imponibileNum + ivaNum;
     const [ddIns, mmIns, yyyyIns] = (data || '').split('/');
     const dataIso = (ddIns && mmIns && yyyyIns) ? `${yyyyIns}-${mmIns}-${ddIns}` : null;
-    const { error: errInsPrev } = await sb.from('preventivi_creati').insert({
+    const payload = {
       impresa_id: impresaCorrente.id,
       numero: numero,
       data_preventivo: dataIso,
@@ -3823,9 +3895,19 @@ async function scaricaPDFPreventivo() {
       totale_finale: totaleNum,
       note: note,
       validita_giorni: parseInt(validita, 10) || 30
-    });
-    if (errInsPrev) {
-      alert('Errore nel salvataggio del preventivo: ' + errInsPrev.message);
+    };
+    let errSavePrev;
+    if (window.preventivoInModifica) {
+      const { error } = await sb.from('preventivi_creati').update(payload).eq('id', window.preventivoInModifica);
+      errSavePrev = error;
+    } else {
+      const { error } = await sb.from('preventivi_creati').insert(payload);
+      errSavePrev = error;
+    }
+    if (errSavePrev) {
+      alert('Errore nel salvataggio del preventivo: ' + errSavePrev.message);
+    } else {
+      window.preventivoInModifica = null;
     }
   } catch (e) {
     alert('Errore nel salvataggio del preventivo: ' + (e && e.message ? e.message : e));
