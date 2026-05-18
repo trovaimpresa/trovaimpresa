@@ -1159,6 +1159,12 @@
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Preventivi</div>
             <div style="font-size:0.78rem;color:#888;margin-top:4px">Crea preventivi PDF per i tuoi clienti</div>
           </div>
+          <div onclick="apriModalStoricoPreventivi()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s;position:relative" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="position:absolute;top:8px;right:8px;background:#7c3aed;color:white;font-size:0.62rem;font-weight:800;padding:2px 8px;border-radius:8px;letter-spacing:0.5px">PREMIUM</div>
+            <div style="font-size:1.8rem;margin-bottom:8px">📚</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Storico preventivi</div>
+            <div style="font-size:0.78rem;color:#888;margin-top:4px">Tutti i preventivi che hai creato</div>
+          </div>
         </div>
       </div>
 
@@ -2066,6 +2072,24 @@
     <div class="modal-ai-footer">
       <button type="button" class="btn-chiudi-modal" onclick="chiudiModalCreaPreventivo()">Chiudi</button>
       <button type="button" class="btn-scarica-pdf" id="btn-scarica-prev-pdf" onclick="scaricaPDFPreventivo()">📥 Scarica PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STORICO PREVENTIVI -->
+<div class="modal-ai-overlay" id="modalStoricoPreventivi" onclick="if(event.target===this)chiudiModalStoricoPreventivi()">
+  <div class="modal-ai fullscreen">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📚 Storico preventivi</h2>
+        <p>Tutti i preventivi che hai creato</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalStoricoPreventivi()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="storico-prev-content" style="display:flex;flex-direction:column;gap:12px">
+        <div style="text-align:center;color:#888;padding:40px 0">Caricamento…</div>
+      </div>
     </div>
   </div>
 </div>
@@ -3551,6 +3575,51 @@ function apriModalCreaPreventivo() {
 
 function chiudiModalCreaPreventivo() {
   document.getElementById('modalCreaPreventivo').classList.remove('show');
+}
+
+async function apriModalStoricoPreventivi() {
+  document.getElementById('modalStoricoPreventivi').classList.add('show');
+  const cont = document.getElementById('storico-prev-content');
+  cont.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0">Caricamento…</div>';
+  if (!impresaCorrente) {
+    cont.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0">Dati attività non disponibili</div>';
+    return;
+  }
+  const { data, error } = await sb
+    .from('preventivi_creati')
+    .select('*')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
+  if (error) {
+    cont.innerHTML = '<div style="text-align:center;color:#c0392b;padding:40px 0">Errore nel caricamento: ' + error.message + '</div>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    cont.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0">Nessun preventivo trovato</div>';
+    return;
+  }
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  const fmtEuro = v => '€ ' + Number(v || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtData = iso => {
+    if (!iso) return '—';
+    const [y, m, d] = String(iso).split('-');
+    return (d && m && y) ? `${d}/${m}/${y}` : iso;
+  };
+  cont.innerHTML = data.map(p => {
+    const cliNome = (p.cliente && p.cliente.nome) ? p.cliente.nome : '—';
+    return `
+      <div style="background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 2fr 1fr;gap:14px;align-items:center;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 6px 18px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Numero</div><div style="font-weight:700;color:#1a3a2a">${esc(p.numero || '—')}</div></div>
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Data</div><div style="color:#1a3a2a">${esc(fmtData(p.data_preventivo))}</div></div>
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Cliente</div><div style="color:#1a3a2a">${esc(cliNome)}</div></div>
+        <div style="text-align:right"><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Totale</div><div style="font-weight:700;color:#2a7a4b">${fmtEuro(p.totale_finale)}</div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function chiudiModalStoricoPreventivi() {
+  document.getElementById('modalStoricoPreventivi').classList.remove('show');
 }
 
 async function scaricaPDFPreventivo() {
