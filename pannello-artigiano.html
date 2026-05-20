@@ -4890,6 +4890,8 @@ function chiudiModalRisoluzione() {
   document.getElementById('modalRisoluzione').classList.remove('show');
 }
 
+function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
 async function chiediSupportoAI() {
   const ta = document.getElementById('ai-supporto-prompt');
   const btn = document.getElementById('btn-ai-supporto');
@@ -4924,7 +4926,11 @@ async function chiediSupportoAI() {
       out.textContent = 'Errore AI: ' + ((data && data.error) || resp.status);
       return;
     }
-    out.textContent = (data && data.risposta) ? data.risposta : 'Risposta vuota.';
+    if (data && data.risposta) {
+      out.innerHTML = escHtml(data.risposta).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    } else {
+      out.textContent = 'Risposta vuota.';
+    }
   } catch (e) {
     out.textContent = 'Errore di rete: ' + (e && e.message ? e.message : e);
   } finally {
