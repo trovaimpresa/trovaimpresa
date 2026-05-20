@@ -2144,6 +2144,17 @@
     </div>
     <div class="modal-ai-body">
       <div class="faq-list" id="faq-list"></div>
+      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:6px;">🤖 Assistente AI</div>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Non hai trovato la risposta? Chiedi direttamente all'assistente AI.</p>
+        <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
+        <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
+          style="margin-top:10px;padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
+          onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
+          ✨ Chiedi all'AI
+        </button>
+        <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#1a3a2a;"></div>
+      </div>
       <div class="faq-cta-help">
         <button onclick="chiudiModalRisoluzione();apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
       </div>
@@ -4863,6 +4874,51 @@ function apriModalRisoluzione() {
 
 function chiudiModalRisoluzione() {
   document.getElementById('modalRisoluzione').classList.remove('show');
+}
+
+async function chiediSupportoAI() {
+  const ta = document.getElementById('ai-supporto-prompt');
+  const btn = document.getElementById('btn-ai-supporto');
+  const out = document.getElementById('ai-supporto-risposta');
+  const testo = (ta.value || '').trim();
+  if (!testo) {
+    alert('Scrivi la tua domanda prima di inviare.');
+    ta.focus();
+    return;
+  }
+  if (!impresaCorrente || !impresaCorrente.id) {
+    alert('Impresa non identificata. Ricarica la pagina.');
+    return;
+  }
+  const labelOriginale = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.style.cursor = 'not-allowed';
+  out.textContent = 'Sto pensando…';
+  try {
+    const resp = await fetch('/.netlify/functions/ai-claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        azione: 'supporto',
+        impresa_id: impresaCorrente.id,
+        prompt: testo
+      })
+    });
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) {
+      out.textContent = 'Errore AI: ' + ((data && data.error) || resp.status);
+      return;
+    }
+    out.textContent = (data && data.risposta) ? data.risposta : 'Risposta vuota.';
+  } catch (e) {
+    out.textContent = 'Errore di rete: ' + (e && e.message ? e.message : e);
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+    btn.innerHTML = labelOriginale;
+  }
 }
 
 function chiudiModalFotoLavori() {
