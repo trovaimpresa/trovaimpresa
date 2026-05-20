@@ -3988,12 +3988,15 @@ async function generaVociPreventivoAI() {
       return;
     }
     cleaned = cleaned.slice(start, end + 1);
+    cleaned = cleaned.replace(/}\s*{/g, '},{');
+    cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
 
     let parsed;
     try {
       parsed = JSON.parse(cleaned);
     } catch (errParse) {
       console.error('[AI preventivo] parse fallito:', errParse, cleaned);
+      console.error('AI cleaned:', cleaned, 'parseErr:', errParse);
       alert('Risposta AI non è JSON valido.');
       return;
     }
