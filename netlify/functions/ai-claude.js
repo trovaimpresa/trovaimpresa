@@ -83,6 +83,15 @@ exports.handler = async function(event) {
       return { statusCode: 429, body: JSON.stringify({ error: 'Limite giornaliero raggiunto' }) };
     }
 
+    const apiBody = {
+      model: 'claude-sonnet-4-5',
+      max_tokens: 4096,
+      messages: [{ role: 'user', content: prompt }]
+    };
+    if (azione === 'supporto') {
+      apiBody.system = `Sei l'assistente di supporto di TrovaImpresa.com, marketplace per imprese edili e artigiani. Aiuti gli iscritti a usare il pannello: profilo, certificazioni, preventivi (anche AI), cantieri, recensioni, abbonamento Free/Premium (€5/mese o €49/anno), pubblicità, ricerca e visibilità. Rispondi in italiano, breve e pratico, a passaggi. Per problemi di pagamenti, account o bug veri, invita a usare il pulsante "Segnala problema". Non inventare funzioni inesistenti.`;
+    }
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -90,11 +99,7 @@ exports.handler = async function(event) {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 4096,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      body: JSON.stringify(apiBody)
     });
     const data = await response.json();
 
