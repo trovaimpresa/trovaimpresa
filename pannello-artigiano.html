@@ -3566,7 +3566,7 @@ function apriModalCreaPreventivo() {
   setVal('prev-note', '');
   document.getElementById('prev-validita').value = 30;
 
-  document.getElementById('prev-numero').value = 'PREV-' + Date.now();
+  document.getElementById('prev-numero').value = '';
   const oggi = new Date();
   const dd = String(oggi.getDate()).padStart(2, '0');
   const mm = String(oggi.getMonth() + 1).padStart(2, '0');
