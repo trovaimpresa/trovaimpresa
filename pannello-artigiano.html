@@ -3579,11 +3579,6 @@ function apriModalCreaPreventivo() {
 
   const taAI = document.getElementById('prev-ai-prompt');
   if (taAI) taAI.value = '';
-  const btnAI = document.getElementById('btn-prev-genera-ai');
-  if (btnAI && !btnAI.dataset.bound) {
-    btnAI.addEventListener('click', generaVociPreventivoAI);
-    btnAI.dataset.bound = '1';
-  }
 
   document.getElementById('modalCreaPreventivo').classList.add('show');
 }
@@ -3931,6 +3926,7 @@ async function scaricaPDFPreventivo() {
 }
 
 async function generaVociPreventivoAI() {
+  alert('Click AI ricevuto');
   const ta = document.getElementById('prev-ai-prompt');
   const btn = document.getElementById('btn-prev-genera-ai');
   const testo = (ta.value || '').trim();
@@ -3974,6 +3970,12 @@ async function generaVociPreventivoAI() {
     btn.innerHTML = labelOriginale;
   }
 }
+
+document.addEventListener('click', function (e) {
+  if (e.target.closest && e.target.closest('#btn-prev-genera-ai')) {
+    generaVociPreventivoAI();
+  }
+});
 
 function aggiungiRigaPreventivo() {
   const tbody = document.getElementById('prev-voci-body');
