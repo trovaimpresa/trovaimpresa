@@ -3944,7 +3944,21 @@ async function generaVociPreventivoAI() {
   btn.style.cursor = 'not-allowed';
   btn.innerHTML = '⏳ Generazione in corso…';
   try {
-    const promptCompleto = testo + '\n\nrispondi solo JSON {voci:[{descrizione,quantita,unita,prezzo_unitario}],note}';
+    const istruzioni = [
+      '',
+      'Genera un preventivo dettagliato per il mercato edilizia di Rieti / Lazio nel 2026.',
+      'Usa prezzi realistici e arrotondati per quella zona (NON la media nazionale): tipicamente i prezzi a Rieti sono leggermente inferiori a Roma centro ma allineati al Lazio.',
+      'Unità di misura coerenti col tipo di voce — usa esattamente uno di questi valori nel campo "unita":',
+      '- "mq" SOLO per superfici (pavimenti, pareti, rivestimenti, intonaci, tinteggiature)',
+      '- "ml" per lunghezze (battiscopa, cornici, tubazioni lineari)',
+      '- "a corpo" per interventi forfettari (spostamento mobili, sopralluoghi, smontaggi, allacci, pulizia cantiere)',
+      '- "ore" per manodopera oraria',
+      '- "cad" o "pz" per pezzi singoli (sanitari, rubinetterie, prese, punti luce, porte)',
+      'Non usare "mq" dove non ha senso. Quantità coerenti col lavoro descritto.',
+      'Rispondi SOLO con JSON valido, senza testo prima o dopo, nel formato:',
+      '{"voci":[{"descrizione":"...","quantita":<numero>,"unita":"...","prezzo_unitario":<numero>}],"note":"..."}'
+    ].join('\n');
+    const promptCompleto = testo + '\n' + istruzioni;
     const resp = await fetch('/.netlify/functions/ai-claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
