@@ -3926,7 +3926,6 @@ async function scaricaPDFPreventivo() {
 }
 
 async function generaVociPreventivoAI() {
-  alert('Click AI ricevuto');
   const ta = document.getElementById('prev-ai-prompt');
   const btn = document.getElementById('btn-prev-genera-ai');
   const testo = (ta.value || '').trim();
@@ -3959,7 +3958,63 @@ async function generaVociPreventivoAI() {
     console.log('[AI preventivo] status:', resp.status, 'response:', data);
     if (!resp.ok) {
       alert('Errore AI: ' + ((data && data.error) || resp.status));
+      return;
     }
+
+    const raw = data && typeof data.risposta === 'string' ? data.risposta : '';
+    if (!raw) {
+      alert('Risposta AI vuota o in formato inatteso.');
+      return;
+    }
+    let cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) {
+      alert('Impossibile estrarre JSON dalla risposta AI.');
+      return;
+    }
+    cleaned = cleaned.slice(start, end + 1);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (errParse) {
+      console.error('[AI preventivo] parse fallito:', errParse, cleaned);
+      alert('Risposta AI non è JSON valido.');
+      return;
+    }
+    const voci = Array.isArray(parsed && parsed.voci) ? parsed.voci : null;
+    if (!voci || !voci.length) {
+      alert('La risposta AI non contiene voci.');
+      return;
+    }
+
+    const tbody = document.getElementById('prev-voci-body');
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const d = tr.querySelector('.prev-desc');
+      if (!d || !d.value.trim()) tr.remove();
+    });
+
+    voci.forEach(v => {
+      aggiungiRigaPreventivo();
+      const tr = tbody.lastElementChild;
+      if (!tr) return;
+      const descr = (v.descrizione || '').toString().trim();
+      const unita = (v.unita || '').toString().trim();
+      const descrFinale = descr + (unita ? ' (' + unita + ')' : '');
+      const qta = Number(v.quantita);
+      const prezzo = Number(v.prezzo_unitario);
+      tr.querySelector('.prev-desc').value = descrFinale;
+      tr.querySelector('.prev-qta').value = Number.isFinite(qta) ? qta : 1;
+      tr.querySelector('.prev-prezzo').value = Number.isFinite(prezzo) ? prezzo : 0;
+    });
+
+    if (parsed.note && typeof parsed.note === 'string') {
+      const noteEl = document.getElementById('prev-note');
+      if (noteEl && !noteEl.value.trim()) noteEl.value = parsed.note;
+    }
+
+    ricalcolaPreventivo();
   } catch (e) {
     console.error('[AI preventivo] errore:', e);
     alert('Errore di rete: ' + (e && e.message ? e.message : e));
