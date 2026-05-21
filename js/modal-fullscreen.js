@@ -67,7 +67,7 @@
 
   function init() {
     injectStyles();
-    document.querySelectorAll('.modal, .modal-ai').forEach(addButton);
+    document.querySelectorAll('.modal').forEach(addButton);
   }
 
   if (document.readyState === 'loading') {
