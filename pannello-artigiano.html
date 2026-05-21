@@ -2751,7 +2751,21 @@ function aggiornaPianoCards(piano) {
       btn.style.color = p.colore;
       btn.style.cursor = 'pointer';
       btn.disabled = false;
-      btn.onclick = p.href ? () => window.location.href = p.href : null;
+      btn.onclick = p.id === 'premium' ? async () => {
+        btn.disabled = true;
+        try {
+          const res = await fetch('/.netlify/functions/crea-checkout-abbonamento', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ piano: 'mensile', email: impresaCorrente.email, returnUrl: window.location.href })
+          });
+          const { url } = await res.json();
+          window.location.href = url;
+        } catch (e) {
+          alert('Errore: ' + e.message);
+          btn.disabled = false;
+        }
+      } : (p.href ? () => window.location.href = p.href : null);
     }
   });
   aggiornaCardVisibile(piano);
