@@ -2759,8 +2759,9 @@ function aggiornaPianoCards(piano) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ piano: 'mensile', email: impresaCorrente.email, returnUrl: window.location.href })
           });
-          const { url } = await res.json();
-          window.location.href = url;
+          const data = await res.json();
+          if (data.url) { window.location.href = data.url; }
+          else { alert('Errore Stripe: ' + (data.error || 'sconosciuto')); btn.disabled = false; }
         } catch (e) {
           alert('Errore: ' + e.message);
           btn.disabled = false;
