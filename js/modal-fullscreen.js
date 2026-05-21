@@ -65,30 +65,9 @@
     modal.appendChild(btn);
   }
 
-  function observeNewModals() {
-    if (typeof MutationObserver !== 'function' || !document.body) return;
-    var obs = new MutationObserver(function (mutations) {
-      for (var i = 0; i < mutations.length; i++) {
-        var added = mutations[i].addedNodes;
-        for (var j = 0; j < added.length; j++) {
-          var n = added[j];
-          if (!n || n.nodeType !== 1) continue;
-          if (n.matches && n.matches('.modal, .modal-ai')) {
-            addButton(n);
-          }
-          if (n.querySelectorAll) {
-            n.querySelectorAll('.modal, .modal-ai').forEach(addButton);
-          }
-        }
-      }
-    });
-    obs.observe(document.body, { childList: true, subtree: true });
-  }
-
   function init() {
     injectStyles();
     document.querySelectorAll('.modal, .modal-ai').forEach(addButton);
-    observeNewModals();
   }
 
   if (document.readyState === 'loading') {
