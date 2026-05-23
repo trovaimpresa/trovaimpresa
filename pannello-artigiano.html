@@ -2731,6 +2731,23 @@ function aggiornaBadgeEOverlay() {
   } else {
     document.getElementById('sezione-il-tuo-piano').style.display = 'none';
   }
+  bloccaCardPremium();
+}
+
+function bloccaCardPremium() {
+  const piano = (impresaCorrente.piano || 'free').toLowerCase();
+  if (piano === 'premium') return;
+  document.querySelectorAll('[data-premium="true"]').forEach(card => {
+    card.style.position = 'relative';
+    const overlay = document.createElement('div');
+    overlay.className = 'premium-lock-overlay';
+    overlay.textContent = '🔒';
+    overlay.onclick = (e) => {
+      e.stopPropagation();
+      window.location.href = 'info-premium.html';
+    };
+    card.appendChild(overlay);
+  });
 }
 
 function aggiornaPianoCards(piano) {
