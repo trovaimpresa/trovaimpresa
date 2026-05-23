@@ -806,6 +806,7 @@
     </section>
 
     <!-- CITY PICKER per annunci sponsorizzati (visibile solo senza ?citta in URL) -->
+    <section class="lavoro-links" style="background-image:url(https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1400&q=80&auto=format&fit=crop)">
     <div id="citta-picker-sponsor" style="background:#e8f5e9;padding:36px 0;display:none;max-width:1000px;width:90%;margin:0 auto;">
       <div style="display:flex;gap:8px;align-items:center;width:100%;">
         <input id="citta-picker-input" type="text" placeholder="Inserisci città… es. Roma" style="flex:1;padding:14px 14px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;" onkeydown="if(event.key==='Enter')vaiACittaSponsor()" />
@@ -813,6 +814,7 @@
         <button onclick="localizzamiSponsor()" title="Usa la mia posizione" style="padding:14px 20px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px;">📍</button>
       </div>
     </div>
+    </section>
     <script>
       (function(){ if(!new URLSearchParams(location.search).get('citta')){ var el=document.getElementById('citta-picker-sponsor'); if(el) el.style.display=''; } })();
       function vaiACittaSponsor(){ var v=(document.getElementById('citta-picker-input').value||'').trim(); if(!v) return; window.location.href='index.html?citta='+encodeURIComponent(v); }
