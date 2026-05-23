@@ -1051,6 +1051,18 @@
         <img src="/img/logo-trovaimpresa.svg" alt="TrovaImpresa" style="max-width:500px;width:100%;height:auto;">
     </section>
 
+    <!-- CITY PICKER per annunci sponsorizzati (visibile solo senza ?citta in URL) -->
+    <div id="citta-picker-sponsor" style="background:#fff8f4;padding:16px 20px 0;display:none;">
+      <div style="display:flex;gap:8px;align-items:center;max-width:900px;margin:0 auto;">
+        <input id="citta-picker-input" type="text" placeholder="Inserisci città… es. Roma" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;" onkeydown="if(event.key==='Enter')vaiACittaSponsor()" />
+        <button onclick="vaiACittaSponsor()" style="padding:10px 20px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px;">Vai</button>
+      </div>
+    </div>
+    <script>
+      (function(){ if(!new URLSearchParams(location.search).get('citta')){ var el=document.getElementById('citta-picker-sponsor'); if(el) el.style.display=''; } })();
+      function vaiACittaSponsor(){ var v=(document.getElementById('citta-picker-input').value||'').trim(); if(!v) return; window.location.href='index.html?citta='+encodeURIComponent(v); }
+    </script>
+
     <!-- ANNUNCI SPONSORIZZATI HOMEPAGE -->
     <div id="annunci-sponsorizzati" style="background:#fff8f4;padding:20px 0 8px;"></div>
 
