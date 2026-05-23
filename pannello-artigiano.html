@@ -965,7 +965,7 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="foto-lavori" style="cursor:pointer" onclick="document.getElementById('modalFotoLavori').classList.add('show')">
+        <div class="dash-quick-card" data-card-id="foto-lavori" data-premium="true" style="cursor:pointer" onclick="document.getElementById('modalFotoLavori').classList.add('show')">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
@@ -983,7 +983,7 @@
       <!-- FUNZIONI PREMIUM -->
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="priorita" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
+        <div class="dash-quick-card" data-card-id="priorita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
           <div class="dash-quick-icon">🔝</div>
           <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
@@ -995,16 +995,16 @@
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
         </div>
-        <div class="dash-quick-card" data-card-id="video-azienda" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
+        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
-        <div class="dash-quick-card" data-card-id="preventivi-illimitati" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="apriModalPreventivi()">
+        <div class="dash-quick-card" data-card-id="preventivi-illimitati" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="apriModalPreventivi()">
           <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Richiesta di preventivo</div>
         </div>
-        <div class="dash-quick-card" data-card-id="cerca-lavoro" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+        <div class="dash-quick-card" data-card-id="cerca-lavoro" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="registrazione-candidato.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
             <div class="dash-quick-icon">🧑</div>
             <div class="dash-quick-label">Registrati · Invia CV</div>
@@ -1014,7 +1014,7 @@
             <div class="dash-quick-label">Ricerca Candidati</div>
           </a>
         </div>
-        <div class="dash-quick-card" data-card-id="offerte-lavoro" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+        <div class="dash-quick-card" data-card-id="offerte-lavoro" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="offerte-registrazione.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
             <div class="dash-quick-icon">💼</div>
             <div class="dash-quick-label">Pubblica Offerta di Lavoro</div>
@@ -1024,7 +1024,7 @@
             <div class="dash-quick-label">Ricerca Offerte</div>
           </a>
         </div>
-        <div class="dash-quick-card" data-card-id="personalizza-pannello" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
+        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
@@ -1036,7 +1036,7 @@
           <div class="dash-quick-icon">📢</div>
           <div class="dash-quick-label">Pubblicità</div>
         </div>
-        <div class="dash-quick-card" data-card-id="subappalto" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+        <div class="dash-quick-card" data-card-id="subappalto" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
             <div class="dash-quick-icon">🔍</div>
             <div class="dash-quick-label">Cerco Subappaltatori</div>
@@ -1141,24 +1141,24 @@
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">🛠️ Strumenti</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
-          <div onclick="apriCalcolatrice()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+          <div data-premium="true" onclick="apriCalcolatrice()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">🧮</div>
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Calcolatrice edile</div>
           </div>
-          <div onclick="apriAgenda()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+          <div data-premium="true" onclick="apriAgenda()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">📅</div>
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Agenda</div>
           </div>
-          <div onclick="apriModalScadenzeFiscali()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+          <div data-premium="true" onclick="apriModalScadenzeFiscali()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">📋</div>
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Scadenze fiscali</div>
           </div>
-          <div onclick="apriModalCreaPreventivo()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+          <div data-premium="true" onclick="apriModalCreaPreventivo()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">📄</div>
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Preventivi</div>
             <div style="font-size:0.78rem;color:#888;margin-top:4px">Crea preventivi PDF per i tuoi clienti</div>
           </div>
-          <div onclick="apriModalStoricoPreventivi()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s;position:relative" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+          <div data-premium="true" onclick="apriModalStoricoPreventivi()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s;position:relative" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="position:absolute;top:8px;right:8px;background:#7c3aed;color:white;font-size:0.62rem;font-weight:800;padding:2px 8px;border-radius:8px;letter-spacing:0.5px">PREMIUM</div>
             <div style="font-size:1.8rem;margin-bottom:8px">📚</div>
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Storico preventivi</div>
