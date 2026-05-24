@@ -16,3 +16,7 @@
 .pannello-box section, .pannello-box .sezione-card{background:transparent !important;}
 .pannello-box section::before{display:none;}
 .pannello-box .bacheca-banner{background:#e65100;}
+.piano-box{max-width:1000px;width:90%;margin:0 auto;background:#eef4fb;border:2px solid #1565c0;border-radius:16px;padding:20px;}
+.piano-box section, .piano-box .sezione-card{background:transparent !important;}
+.piano-box section::before{display:none;}
+.piano-box .bacheca-banner{background:#1565c0;}
