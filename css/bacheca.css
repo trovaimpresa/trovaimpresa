@@ -24,3 +24,7 @@
 .subappalto-box section, .subappalto-box .sezione-card{background:transparent !important;}
 .subappalto-box section::before{display:none;}
 .subappalto-box .bacheca-banner{background:#c8960c;}
+.profilo-box{max-width:1000px;width:90%;margin:0 auto;background:#f6eefb;border:2px solid #6c3483;border-radius:16px;padding:20px;}
+.profilo-box section, .profilo-box .sezione-card{background:transparent !important;}
+.profilo-box section::before{display:none;}
+.profilo-box .bacheca-banner{background:#6c3483;}
