@@ -10,3 +10,5 @@
 .cerca-box{max-width:1000px;width:90%;margin:0 auto;background:#f1f8f4;border:2px solid #2e7d32;border-radius:16px;padding:20px;}
 .cerca-box section{max-width:none;width:auto;margin:0;padding:0;}
 .cerca-box .sezione-card{background:transparent;box-shadow:none;border-top:none;border-radius:0;padding:0;}
+.cerca-box section, .bacheca-inserzioni section{background:transparent !important;}
+.cerca-box section::before, .bacheca-inserzioni section::before{display:none;}
