@@ -1,0 +1,9 @@
+.bacheca-inserzioni{max-width:1000px;width:90%;margin:0 auto;background:#fff8f4;border:2px solid #e65100;border-radius:16px;padding:20px;}
+.bacheca-banner{background:#1f6e44;border-radius:12px;padding:22px 24px;text-align:center;color:#fff;margin-bottom:20px;}
+.bacheca-banner .bb-kicker{font-size:12px;letter-spacing:1.5px;font-weight:700;opacity:.92;margin-bottom:6px;}
+.bacheca-banner .bb-title{font-size:26px;font-weight:800;line-height:1.2;}
+.bacheca-banner .bb-sub{font-size:14px;opacity:.92;margin-top:8px;}
+.bacheca-inserzioni .lavoro-links{max-width:none;width:auto;margin:0;padding:0;}
+.bacheca-inserzioni .sezione-card{background:transparent;box-shadow:none;border-top:none;border-radius:0;padding:0;margin-bottom:20px;}
+.bacheca-inserzioni .lavoro-btn{position:relative;}
+.bacheca-tag{position:absolute;top:8px;right:8px;background:#1a4d2e;color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:6px;letter-spacing:.5px;}
