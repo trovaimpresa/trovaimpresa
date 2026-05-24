@@ -20,3 +20,7 @@
 .piano-box section, .piano-box .sezione-card{background:transparent !important;}
 .piano-box section::before{display:none;}
 .piano-box .bacheca-banner{background:#1565c0;}
+.subappalto-box{max-width:1000px;width:90%;margin:0 auto;background:#fffbf0;border:2px solid #c8960c;border-radius:16px;padding:20px;}
+.subappalto-box section, .subappalto-box .sezione-card{background:transparent !important;}
+.subappalto-box section::before{display:none;}
+.subappalto-box .bacheca-banner{background:#c8960c;}
