@@ -28,3 +28,5 @@
 .profilo-box section, .profilo-box .sezione-card{background:transparent !important;}
 .profilo-box section::before{display:none;}
 .profilo-box .bacheca-banner{background:#6c3483;}
+.cerca-box{background:#e8f4f5;border-color:#00838f;}
+.cerca-box .bacheca-banner{background:#00838f;}
