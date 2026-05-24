@@ -14,6 +14,9 @@
         .cat-card { transition: transform .3s, box-shadow .3s; }
         .cat-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
 
+        body.homepage-vetrina a, body.homepage-vetrina button { pointer-events:none; cursor:default; }
+        body.homepage-vetrina #citta-picker-sponsor a, body.homepage-vetrina #citta-picker-sponsor button, body.homepage-vetrina #citta-picker-sponsor input { pointer-events:auto; cursor:pointer; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
@@ -821,7 +824,7 @@
     </div>
     </section>
     <script>
-      (function(){ if(!new URLSearchParams(location.search).get('citta')){ var el=document.getElementById('citta-picker-sponsor'); if(el) el.style.display=''; } })();
+      (function(){ if(!new URLSearchParams(location.search).get('citta')){ var el=document.getElementById('citta-picker-sponsor'); if(el) el.style.display=''; document.body.classList.add('homepage-vetrina'); } })();
       function vaiACittaSponsor(){ var v=(document.getElementById('citta-picker-input').value||'').trim(); if(!v) return; window.location.href='index.html?citta='+encodeURIComponent(v); }
       function localizzamiSponsor(){
         if(!navigator.geolocation){ alert("Impossibile rilevare la posizione, scrivi la città a mano"); return; }
