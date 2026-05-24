@@ -12,3 +12,7 @@
 .cerca-box .sezione-card{background:transparent;box-shadow:none;border-top:none;border-radius:0;padding:0;}
 .cerca-box section, .bacheca-inserzioni section{background:transparent !important;}
 .cerca-box section::before, .bacheca-inserzioni section::before{display:none;}
+.pannello-box{max-width:1000px;width:90%;margin:0 auto;background:#fff4ec;border:2px solid #e65100;border-radius:16px;padding:20px;}
+.pannello-box section, .pannello-box .sezione-card{background:transparent !important;}
+.pannello-box section::before{display:none;}
+.pannello-box .bacheca-banner{background:#e65100;}
