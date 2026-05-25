@@ -680,13 +680,12 @@ async function inviaOrdine() {
     return;
   }
 
-  document.getElementById('ok-nome').textContent = azienda + '!';
-  document.getElementById('ok-email').textContent = email;
-  showPage(4);
+  const ids = insertData.map(function(r){ return r.id; });
 
   fetch('/.netlify/functions/notifica-pubblicita', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
     body: JSON.stringify({
       impresa: azienda,
       email: email,
@@ -698,6 +697,20 @@ async function inviaOrdine() {
       annuncio_id: (insertData && insertData[0]) ? insertData[0].id : null
     })
   }).catch(function(e) { console.error('Notifica email fallita:', e); });
+
+  const checkoutRes = await fetch('/.netlify/functions/crea-checkout-pubblicita', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids: ids, piano: periodo })
+  });
+  const checkout = await checkoutRes.json();
+  if (checkout.url) {
+    window.location.href = checkout.url;
+  } else {
+    alert('Errore checkout: ' + checkout.error);
+    btn.disabled = false;
+    btn.textContent = '📩 Conferma e invia ordine';
+  }
 }
 </script>
 <script src="/cookie-banner.js"></script>
