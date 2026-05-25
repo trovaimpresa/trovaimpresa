@@ -179,6 +179,24 @@
     .btn-ordina:disabled{background:#ccc;cursor:not-allowed;}
     .note-small{font-size:11px;color:var(--light);text-align:center;margin-top:8px;}
 
+    /* SCHEMA LATERALE */
+    .schema-grid{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:10px;}
+    .schema-row{display:grid;grid-template-columns:1fr minmax(64px,300px) 1fr;gap:8px;align-items:stretch;}
+    .slot{border:2px solid #f1c27a;background:#fffbeb;border-radius:10px;padding:8px;text-align:center;cursor:pointer;transition:all 0.2s;user-select:none;min-height:60px;display:flex;flex-direction:column;justify-content:center;}
+    .slot:hover{border-color:var(--arancio);transform:scale(1.02);}
+    .slot.sel{border-color:var(--arancio);background:#ffe7d3;box-shadow:0 4px 16px rgba(232,115,58,0.25);}
+    .slot.taken{border-color:#ddd;background:#f3f3f3;color:#aaa;cursor:not-allowed;}
+    .slot.taken:hover{transform:none;border-color:#ddd;}
+    .slot-price{font-weight:800;font-size:16px;color:#92400e;font-family:'Playfair Display',serif;}
+    .slot.sel .slot-price{color:var(--arancio2);}
+    .slot.taken .slot-price{color:#aaa;}
+    .slot-sub{font-size:10px;color:#b45309;margin-top:1px;}
+    .slot.taken .slot-sub{color:#bbb;}
+    .center-box{border-radius:10px;padding:8px;text-align:center;font-size:12px;font-weight:600;min-height:60px;display:flex;align-items:center;justify-content:center;}
+    .center-logo{background:linear-gradient(135deg,var(--verde2),var(--verde));color:#fff;font-family:'Playfair Display',serif;font-size:14px;}
+    .center-citta{background:var(--verde3);color:var(--verde2);}
+    .center-cont{background:#fafafa;border:1px solid #eee;color:var(--mid);}
+
     /* SUCCESS */
     .success-wrap{max-width:500px;margin:60px auto;text-align:center;background:#fff;padding:48px 32px;border-radius:20px;box-shadow:0 16px 60px rgba(0,0,0,0.12);}
     .success-wrap .big-emoji{font-size:60px;margin-bottom:16px;}
@@ -214,93 +232,24 @@
   <p>Scegli il tuo spazio, seleziona le città e paga in pochi minuti. Banner live entro 24 ore.</p>
   <div class="hero-stats">
     <div class="hero-stat"><div class="hero-stat-num">106</div><div class="hero-stat-label">Città italiane</div></div>
-    <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Posizioni per città</div></div>
-    <div class="hero-stat"><div class="hero-stat-num">€8</div><div class="hero-stat-label">Al mese da</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">16</div><div class="hero-stat-label">Posizioni per città</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">€6</div><div class="hero-stat-label">Al mese da</div></div>
   </div>
 </section>
 
 <div class="steps-nav">
-  <div class="step-tab active" id="tab0"><span class="step-circle" id="tc0">1</span> Categoria</div>
-  <div class="step-tab" id="tab1"><span class="step-circle" id="tc1">2</span> Formato</div>
-  <div class="step-tab" id="tab2"><span class="step-circle" id="tc2">3</span> Città e periodo</div>
-  <div class="step-tab" id="tab3"><span class="step-circle" id="tc3">4</span> Dati e pagamento</div>
-</div>
-
-<!-- STEP 0 - CATEGORIA -->
-<div class="step-page visible" id="page0">
-  <h2 class="step-title">Scegli la categoria</h2>
-  <p class="step-sub">Il tuo annuncio apparirà solo nella categoria selezionata — ogni categoria ha i suoi spazi indipendenti</p>
-  <div class="cat-grid">
-    <div class="cat-card" id="cat-artigiani" onclick="selCategoria('artigiani',this)">
-      <div class="cat-icon">🔨</div>
-      <div class="cat-nome">Artigiani</div>
-      <div class="cat-desc">Piccoli lavori e riparazioni</div>
-    </div>
-    <div class="cat-card" id="cat-imprese" onclick="selCategoria('imprese',this)">
-      <div class="cat-icon">🏗️</div>
-      <div class="cat-nome">Imprese Edili</div>
-      <div class="cat-desc">Ristrutturazioni e opere edili</div>
-    </div>
-    <div class="cat-card" id="cat-negozi" onclick="selCategoria('negozi',this)">
-      <div class="cat-icon">🏪</div>
-      <div class="cat-nome">Negozi Edili</div>
-      <div class="cat-desc">Materiali, ferramenta, noleggio</div>
-    </div>
-    <div class="cat-card" id="cat-professionisti" onclick="selCategoria('professionisti',this)">
-      <div class="cat-icon">👔</div>
-      <div class="cat-nome">Professionisti</div>
-      <div class="cat-desc">Geometri, architetti, ingegneri</div>
-    </div>
-  </div>
-  <div style="margin-top:28px;text-align:right;">
-    <button class="btn-avanti" id="btn0" disabled onclick="goToStep(1)">Continua → Scegli formato</button>
-  </div>
+  <div class="step-tab active" id="tab1"><span class="step-circle" id="tc1">1</span> Posizione</div>
+  <div class="step-tab" id="tab2"><span class="step-circle" id="tc2">2</span> Città e periodo</div>
+  <div class="step-tab" id="tab3"><span class="step-circle" id="tc3">3</span> Dati e pagamento</div>
 </div>
 
 <!-- STEP 1 -->
-<div class="step-page" id="page1">
-  <h2 class="step-title">Scegli il formato pubblicitario</h2>
-  <p class="step-sub">Clicca su uno spazio nell'anteprima oppure selezionalo a destra</p>
-  <div class="step1-grid">
-    <div>
-      <p style="font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">📱 Anteprima pagina città</p>
-      <div class="preview-box">
-        <div class="preview-bar">
-          <div class="dot" style="background:#ff5f57"></div>
-          <div class="dot" style="background:#febc2e"></div>
-          <div class="dot" style="background:#28c840"></div>
-          <div class="preview-url">trovaimpresa.com/imprese-roma.html</div>
-        </div>
-        <div class="preview-header">🏗️ Imprese Edili a Roma — TrovaImpresa</div>
-        <div class="ad-slot s1" id="prev-s1"><span>🥇</span><div><div style="font-weight:700;color:#92400e">SPAZIO 1 — In cima</div><div style="font-size:10px;color:#b45309">Prima cosa che vede il cliente • €15/mese</div></div><div class="ad-slot-check" id="chk1">○</div></div>
-        <div class="preview-mid">
-          <div>
-            <div class="fake-result"><div class="fake-result-name">🏗️ Edilizia Rossi & C.</div>Muratura · Roma · ⭐⭐⭐⭐⭐</div>
-            <div class="ad-slot s2" id="prev-s2" style="margin:4px 0"><span>🥈</span><div><div style="font-weight:700;color:var(--verde2)">SPAZIO 2 — A metà</div><div style="font-size:10px;color:var(--verde)">Tra i risultati • €10/mese</div></div><div class="ad-slot-check" id="chk2">○</div></div>
-            <div class="fake-result"><div class="fake-result-name">🔧 Idraulici Bianchi</div>Idraulica · Roma · ⭐⭐⭐⭐</div>
-            <div class="fake-result"><div class="fake-result-name">⚡ Elettrica Sud</div>Impianti · Roma · ⭐⭐⭐⭐⭐</div>
-            <div class="ad-slot s3" id="prev-s3" style="margin:4px 0"><span>🥉</span><div><div style="font-weight:700;color:#4338ca">SPAZIO 3 — In fondo</div><div style="font-size:10px;color:#6366f1">In fondo • €8/mese</div></div><div class="ad-slot-check" id="chk3">○</div></div>
-          </div>
-          <div>
-            <div class="sidebar-slot" id="prev-s4">📌<br>SPAZIO 4<br>Sidebar<br>€10/mese<div class="ad-slot-check" id="chk4" style="margin-top:4px">○</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="formati-panel">
-      <p style="font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Seleziona la posizione</p>
-      <div class="fmt-card" id="fc1"><div class="fmt-head"><div class="fmt-nome">🥇 In cima <span class="fmt-badge">⭐ Più visto</span></div><div class="fmt-price">€15 <small>/mese</small></div></div><div class="fmt-desc">Banner grande sopra tutti i risultati.</div></div>
-      <div class="fmt-card" id="fc2"><div class="fmt-head"><div class="fmt-nome">🥈 A metà pagina</div><div class="fmt-price">€10 <small>/mese</small></div></div><div class="fmt-desc">Banner tra i risultati di ricerca.</div></div>
-      <div class="fmt-card" id="fc3"><div class="fmt-head"><div class="fmt-nome">🥉 In fondo</div><div class="fmt-price">€8 <small>/mese</small></div></div><div class="fmt-desc">Banner in fondo alla pagina.</div></div>
-      <div class="fmt-card" id="fc4"><div class="fmt-head"><div class="fmt-nome">📌 Sidebar</div><div class="fmt-price">€10 <small>/mese</small></div></div><div class="fmt-desc">Banner laterale sempre visibile.</div></div>
-      <div class="sezione-label">🔹 Spazi piccoli — €5/mese</div>
-      <div class="fmt-small" id="fs1" onclick="selSmall(1,this)"><span class="fmt-small-nome">🔹 Piccolo 1 — Tra i risultati</span><span class="fmt-small-price">€5/mese</span></div>
-      <div class="fmt-small" id="fs2" onclick="selSmall(2,this)"><span class="fmt-small-nome">🔹 Piccolo 2 — Tra i risultati</span><span class="fmt-small-price">€5/mese</span></div>
-      <div class="fmt-small" id="fs3" onclick="selSmall(3,this)"><span class="fmt-small-nome">🔹 Piccolo 3 — In fondo</span><span class="fmt-small-price">€5/mese</span></div>
-      <div class="fmt-small" id="fs4" onclick="selSmall(4,this)"><span class="fmt-small-nome">🔹 Piccolo 4 — Sidebar piccola</span><span class="fmt-small-price">€5/mese</span></div>
-      <button class="btn-avanti" id="btn1" disabled>Continua → Scegli le città</button>
-    </div>
+<div class="step-page visible" id="page1">
+  <h2 class="step-title">Scegli la posizione</h2>
+  <p class="step-sub">Clicca uno spazio a sinistra o a destra del logo. Più in alto = più visibile = costa di più. Stesso prezzo sui due lati.</p>
+  <div id="schema" class="schema-grid"></div>
+  <div style="max-width:760px;margin:24px auto 0;">
+    <button class="btn-avanti" id="btn1" disabled>Continua → Scegli le città</button>
   </div>
 </div>
 
@@ -337,7 +286,7 @@
       </div>
       <div class="riepilogo-box">
         <div class="riepilogo-title">📋 Riepilogo</div>
-        <div class="ric-row"><span>Formato</span><span id="r-formato">—</span></div>
+        <div class="ric-row"><span>Posizione</span><span id="r-formato">—</span></div>
         <div class="ric-row"><span>Prezzo/città</span><span id="r-prezzo">—</span></div>
         <div class="ric-row"><span>Città selezionate</span><span id="r-ncitta">0</span></div>
         <div class="ric-row"><span>Periodo</span><span id="r-periodo">Mensile</span></div>
@@ -374,6 +323,11 @@
         <label>Logo aziendale (opzionale) — PNG/JPG, max 2MB</label>
         <input type="file" id="p-logo" accept="image/png, image/jpeg">
         <p class="note-small" style="margin-top:6px;">Se non carichi il logo useremo quello del profilo impresa.</p>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
+        <label>Link del banner (dove porta il click) — opzionale</label>
+        <input type="url" id="p-link" placeholder="https://iltuosito.it">
       </div>
 
       <button class="btn-ordina" id="btn-ordina">📩 Conferma e invia ordine</button>
@@ -433,83 +387,69 @@ supabaseClient.auth.onAuthStateChange(async function(event, session) {
   }
 });
 
-var fmt = null;
+var lato = null;
+var riga = null;
 var citta = [];
 var periodo = 'mensile';
-var metodo = 'bonifico';
-var prezzi = {1:15, 2:10, 3:8, 4:10};
-var nomi = {1:'🥇 In cima', 2:'🥈 A metà pagina', 3:'🥉 In fondo', 4:'📌 Sidebar'};
+var prezziRiga = {1:20, 2:18, 3:16, 4:14, 5:12, 6:10, 7:8, 8:6};
+var centri = {1:'Logo TrovaImpresa', 2:'Imprese a [Città]', 3:'Container 1', 4:'Container 2', 5:'Container 3', 6:'Container 4', 7:'Container 5', 8:'Container 6'};
 var tutteCitta = ['Agrigento','Alessandria','Ancona','Aosta','Arezzo','Ascoli Piceno','Asti','Avellino','Bari','Barletta','Belluno','Benevento','Bergamo','Biella','Bologna','Bolzano','Brescia','Brindisi','Cagliari','Caltanissetta','Campobasso','Caserta','Catania','Catanzaro','Cesena','Como','Cosenza','Cremona','Crotone','Cuneo','Ferrara','Firenze','Foggia','Frosinone','Genova','Grosseto','Imperia','La Spezia','Latina','Lecce','Lecco','Livorno','Lodi','Lucca','Macerata','Mantova','Marsala','Massa','Matera','Messina','Milano','Modena','Monza','Napoli','Novara','Nuoro','Oristano','Padova','Palermo','Parma','Pavia','Perugia','Pesaro','Pescara','Piacenza','Pisa','Pistoia','Pordenone','Potenza','Prato','Ragusa','Ravenna','Reggio Calabria','Reggio Emilia','Rieti','Rimini','Roma','Rovigo','Salerno','Sassari','Savona','Siena','Siracusa','Sondrio','Taranto','Terni','Torino','Trapani','Trento','Treviso','Trieste','Udine','Varese','Venezia','Verbania','Vercelli','Verona','Vibo Valentia','Vicenza','Viterbo'];
 
-// CATEGORIA
-var categoriaScelta = '';
-function selCategoria(cat, el) {
-  categoriaScelta = cat;
-  document.querySelectorAll('.cat-card').forEach(function(c){ c.classList.remove('sel'); });
-  el.classList.add('sel');
-  document.getElementById('btn0').disabled = false;
+// SCHEMA POSIZIONI
+function buildSchema() {
+  var wrap = document.getElementById('schema');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  for (var r = 1; r <= 8; r++) {
+    var row = document.createElement('div');
+    row.className = 'schema-row';
+    row.appendChild(makeSlot('sinistra', r));
+    var c = document.createElement('div');
+    c.className = 'center-box ' + (r === 1 ? 'center-logo' : r === 2 ? 'center-citta' : 'center-cont');
+    c.textContent = centri[r];
+    row.appendChild(c);
+    row.appendChild(makeSlot('destra', r));
+    wrap.appendChild(row);
+  }
 }
 
-function goToStep(n) {
-  document.querySelectorAll('.step-page').forEach(function(p){ p.classList.remove('visible'); });
-  document.querySelectorAll('.step-tab').forEach(function(t){ t.classList.remove('active'); });
-  document.getElementById('page' + n).classList.add('visible');
-  document.getElementById('tab' + n).classList.add('active');
-  if(n === 1) document.getElementById('tc0').textContent = '✓';
-  window.scrollTo({top:0, behavior:'smooth'});
-  history.pushState({step: n}, '');
+function makeSlot(l, r) {
+  var s = document.createElement('div');
+  s.className = 'slot';
+  s.id = 'slot-' + (l === 'sinistra' ? 'sx' : 'dx') + '-' + r;
+  s.innerHTML = '<div class="slot-price">€' + prezziRiga[r] + '</div><div class="slot-sub">al mese</div>';
+  s.addEventListener('click', function(){ selPosizione(l, r); });
+  return s;
 }
 
-// SPAZI PICCOLI
-var prezziSmall = {1:5, 2:5, 3:5, 4:5};
-var nomiSmall = {1:'🔹 Piccolo 1', 2:'🔹 Piccolo 2', 3:'🔹 Piccolo 3', 4:'🔹 Piccolo 4'};
-function selSmall(n, el) {
-  fmt = 'small-' + n;
-  document.querySelectorAll('.fmt-small').forEach(function(c){ c.classList.remove('sel'); });
-  document.querySelectorAll('.fmt-card').forEach(function(c){ c.classList.remove('sel'); });
-  document.querySelectorAll('.ad-slot,.sidebar-slot').forEach(function(c){ c.classList.remove('sel'); });
-  for(var i=1;i<=4;i++){ document.getElementById('chk'+i).textContent='○'; }
-  el.classList.add('sel');
-  prezzi['small-'+n] = 5;
-  nomi['small-'+n] = nomiSmall[n];
+function selPosizione(l, r) {
+  lato = l;
+  riga = r;
+  document.querySelectorAll('.slot').forEach(function(s){ s.classList.remove('sel'); });
+  document.getElementById('slot-' + (l === 'sinistra' ? 'sx' : 'dx') + '-' + r).classList.add('sel');
   document.getElementById('btn1').disabled = false;
   aggiornaRiepilogo();
 }
+
+
+
 
 // Inizializzazione
 window.addEventListener('DOMContentLoaded', function() {
   initFiltriGeo();
   buildCitta('');
+  buildSchema();
 
   // Navigazione
   document.getElementById('nav-prenota').addEventListener('click', function(e){ e.preventDefault(); showPage(1); });
-  document.getElementById('btn1').addEventListener('click', function(){ if(fmt) showPage(2); });
-  document.getElementById('back1').addEventListener('click', function(){ goToStep(1); });
+  document.getElementById('btn1').addEventListener('click', function(){ if(riga) showPage(2); });
   document.getElementById('btn2').addEventListener('click', function(){ if(citta.length > 0) showPage(3); });
   document.getElementById('back1').addEventListener('click', function(){ showPage(1); });
   document.getElementById('back2').addEventListener('click', function(){ showPage(2); });
 
-  // Formati - anteprima
-  document.getElementById('prev-s1').addEventListener('click', function(){ selFmt(1); });
-  document.getElementById('prev-s2').addEventListener('click', function(){ selFmt(2); });
-  document.getElementById('prev-s3').addEventListener('click', function(){ selFmt(3); });
-  document.getElementById('prev-s4').addEventListener('click', function(){ selFmt(4); });
-
-  // Formati - pannello
-  document.getElementById('fc1').addEventListener('click', function(){ selFmt(1); });
-  document.getElementById('fc2').addEventListener('click', function(){ selFmt(2); });
-  document.getElementById('fc3').addEventListener('click', function(){ selFmt(3); });
-  document.getElementById('fc4').addEventListener('click', function(){ selFmt(4); });
-
   // Periodo
   document.getElementById('tog-m').addEventListener('click', function(){ selPeriodo('mensile'); });
   document.getElementById('tog-a').addEventListener('click', function(){ selPeriodo('annuale'); });
-
-  // Metodo pagamento
-  var metB = document.getElementById('met-b');
-  var metS = document.getElementById('met-s');
-  if (metB) metB.addEventListener('click', function(){ selMetodo('bonifico'); });
-  if (metS) metS.addEventListener('click', function(){ selMetodo('stripe'); });
 
   // Cerca città
   document.getElementById('citta-input').addEventListener('input', function(){ buildCitta(this.value); });
@@ -532,24 +472,8 @@ function showPage(n, fromPopstate) {
   if(!fromPopstate) history.pushState({step: n}, '');
 }
 
-function selFmt(n) {
-  fmt = n;
-  // Reset
-  for(var i=1; i<=4; i++) {
-    document.getElementById('prev-s' + i).classList.remove('sel');
-    document.getElementById('fc' + i).classList.remove('sel');
-    document.getElementById('chk' + i).textContent = '○';
-  }
-  // Sidebar slot speciale
-  document.getElementById('prev-s4').classList.remove('sel');
-  // Seleziona
-  if(n <= 3) document.getElementById('prev-s' + n).classList.add('sel');
-  else document.getElementById('prev-s4').classList.add('sel');
-  document.getElementById('fc' + n).classList.add('sel');
-  document.getElementById('chk' + n).textContent = '✅';
-  document.getElementById('btn1').disabled = false;
-  aggiornaRiepilogo();
-}
+
+
 
 function buildCitta(filter) {
   var grid = document.getElementById('citta-grid');
@@ -640,53 +564,37 @@ function selPeriodo(p) {
 }
 
 function calcolaTotale() {
-  if(!fmt || citta.length === 0) return 0;
-  var base = prezzi[fmt] * citta.length;
+  if(!riga || citta.length === 0) return 0;
+  var base = prezziRiga[riga] * citta.length;
   if (periodo === 'annuale') return base * 10;
   if (periodo === 'trimestrale') return Math.round(base * 2.7);
   return base;
 }
 
 function aggiornaRiepilogo() {
-  document.getElementById('r-formato').textContent = fmt ? nomi[fmt] : '—';
-  document.getElementById('r-prezzo').textContent = fmt ? '€' + prezzi[fmt] + '/mese' : '—';
+  var posTxt = riga ? ('Riga ' + riga + ' · ' + (lato || '—')) : '—';
+  document.getElementById('r-formato').textContent = posTxt;
+  document.getElementById('r-prezzo').textContent = riga ? '€' + prezziRiga[riga] + '/mese' : '—';
   document.getElementById('r-ncitta').textContent = citta.length;
   document.getElementById('r-periodo').textContent = periodo === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile';
   var tot = calcolaTotale();
   document.getElementById('r-totale').textContent = tot > 0 ? '€' + tot : '€0';
-  if(fmt && citta.length > 0) {
-    var c3 = citta.slice(0,3).join(', ') + (citta.length > 3 ? '...' : '');
-    var causEl = document.getElementById('causale-txt');
-    if (causEl) causEl.textContent = 'Pub TrovaImpresa - ' + nomi[fmt] + ' - ' + c3;
-  }
 }
 
 function aggiornaOrdine() {
   var tot = calcolaTotale();
   document.getElementById('ord-totale').textContent = '€' + tot;
   var rows = '';
-  rows += '<div class="ord-row"><span>Formato</span><span>' + (nomi[fmt] || '—') + '</span></div>';
+  rows += '<div class="ord-row"><span>Posizione</span><span>Riga ' + (riga || '—') + ' · ' + (lato || '—') + '</span></div>';
   var c3 = citta.slice(0,2).join(', ') + (citta.length > 2 ? ' +' + (citta.length-2) : '');
   rows += '<div class="ord-row"><span>Città</span><span>' + c3 + '</span></div>';
   rows += '<div class="ord-row"><span>N° città</span><span>' + citta.length + '</span></div>';
   rows += '<div class="ord-row"><span>Periodo</span><span>' + (periodo === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile') + '</span></div>';
-  rows += '<div class="ord-row"><span>€/città/mese</span><span>€' + (prezzi[fmt] || 0) + '</span></div>';
+  rows += '<div class="ord-row"><span>€/città/mese</span><span>€' + (riga ? prezziRiga[riga] : 0) + '</span></div>';
   document.getElementById('ord-rows').innerHTML = rows;
 }
 
-function selMetodo(m) {
-  metodo = m;
-  var metB = document.getElementById('met-b');
-  var metS = document.getElementById('met-s');
-  var ibanSec = document.getElementById('iban-sec');
-  var stripeSec = document.getElementById('stripe-sec');
-  if (metB) metB.classList.toggle('sel', m === 'bonifico');
-  if (metS) metS.classList.toggle('sel', m === 'stripe');
-  if (ibanSec) ibanSec.classList.toggle('show', m === 'bonifico');
-  if (stripeSec) stripeSec.classList.toggle('show', m === 'stripe');
-}
-
-history.replaceState({step: 0}, '');
+history.replaceState({step: 1}, '');
 window.onpopstate = function(e) {
   if (e.state && typeof e.state.step !== 'undefined') {
     showPage(e.state.step, true);
@@ -694,10 +602,10 @@ window.onpopstate = function(e) {
 };
 
 async function inviaOrdine() {
-  var nome = document.getElementById('p-nome').value.trim();
   var azienda = document.getElementById('p-azienda').value.trim();
   var email = document.getElementById('p-email').value.trim();
-  if(!nome || !azienda || !email) { alert('Compila nome, azienda ed email!'); return; }
+  if(!azienda || !email) { alert('Compila azienda ed email!'); return; }
+  if(!riga || !lato || citta.length === 0) { alert('Seleziona una posizione e almeno una città!'); return; }
 
   if (!currentImpresa || !currentImpresa.id) {
     alert("Devi prima registrarti come impresa per pubblicare annunci.");
@@ -708,6 +616,17 @@ async function inviaOrdine() {
   btn.textContent = '⏳ Invio in corso...';
   btn.disabled = true;
 
+  // Disponibilità: blocca città già occupate in questa posizione
+  var occ = await supabaseClient.from('annunci_pubblicitari')
+    .select('citta').eq('lato', lato).eq('riga', riga).eq('stato', 'pagato').in('citta', citta);
+  if (occ.data && occ.data.length) {
+    alert('Spazio già occupato in: ' + occ.data.map(function(o){ return o.citta; }).join(', ') + '. Toglile o cambia posizione.');
+    btn.textContent = '📩 Conferma e invia ordine';
+    btn.disabled = false;
+    return;
+  }
+
+  // Upload logo (opzionale)
   var logoUrl = null;
   var logoFile = document.getElementById('p-logo').files[0];
   if (logoFile) {
@@ -726,24 +645,32 @@ async function inviaOrdine() {
       btn.disabled = false;
       return;
     }
-    var pubRes = supabaseClient.storage.from('loghi-pubblicita').getPublicUrl(path);
-    logoUrl = pubRes.data.publicUrl;
+    logoUrl = supabaseClient.storage.from('loghi-pubblicita').getPublicUrl(path).data.publicUrl;
   }
 
-  const { data: insertData, error: insertError } = await supabaseClient.from('annunci_pubblicitari').insert({
-    impresa_id: currentImpresa.id,
-    stato: 'pending',
-    attivo: false,
-    posizione: 'citta',
-    citta: citta.join(','),
-    regione: document.getElementById('regione-filtro').value || null,
-    provincia: document.getElementById('provincia-filtro').value || null,
-    categoria: currentImpresa.tipo,
-    formato: fmt,
-    durata: periodo,
-    logo_url: logoUrl || null,
-    prezzo_pagato: calcolaTotale()
-  }).select('id').single();
+  var linkUrl = document.getElementById('p-link').value.trim() || null;
+  var mult = periodo === 'annuale' ? 10 : (periodo === 'trimestrale' ? 2.7 : 1);
+  var importoRiga = Math.round(prezziRiga[riga] * mult);
+
+  // Una riga per città
+  var righe = citta.map(function(c) {
+    return {
+      impresa_id: currentImpresa.id,
+      nome_impresa: azienda,
+      email: email,
+      logo_url: logoUrl,
+      link_url: linkUrl,
+      citta: c,
+      lato: lato,
+      riga: riga,
+      prezzo: prezziRiga[riga],
+      piano: periodo,
+      importo_pagato: importoRiga,
+      stato: 'pending'
+    };
+  });
+
+  const { data: insertData, error: insertError } = await supabaseClient.from('annunci_pubblicitari').insert(righe).select('id');
 
   if (insertError) {
     alert('Errore durante l\'invio: ' + insertError.message);
@@ -752,7 +679,7 @@ async function inviaOrdine() {
     return;
   }
 
-  document.getElementById('ok-nome').textContent = nome + '!';
+  document.getElementById('ok-nome').textContent = azienda + '!';
   document.getElementById('ok-email').textContent = email;
   showPage(4);
 
@@ -760,14 +687,14 @@ async function inviaOrdine() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      impresa: currentImpresa ? (currentImpresa.nome_attivita || currentImpresa.nome) : nome,
-      email: currentImpresa ? currentImpresa.email : email,
-      telefono: currentImpresa ? (currentImpresa.telefono || '') : '',
-      formato: fmt,
+      impresa: azienda,
+      email: email,
+      telefono: currentImpresa.telefono || '',
+      formato: 'Riga ' + riga + ' · ' + lato,
       durata: periodo,
       citta: citta.join(', '),
       totale: calcolaTotale(),
-      annuncio_id: insertData ? insertData.id : null
+      annuncio_id: (insertData && insertData[0]) ? insertData[0].id : null
     })
   }).catch(function(e) { console.error('Notifica email fallita:', e); });
 }
