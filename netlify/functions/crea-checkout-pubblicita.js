@@ -1,34 +1,56 @@
 const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
+const PREZZI = { 1:20, 2:18, 3:16, 4:14, 5:12, 6:10, 7:8, 8:6 };
+const MOLT = { mensile:1, trimestrale:2.7, annuale:10 };
 
 exports.handler = async (event) => {
-  const { impresa_id, citta, posizione } = JSON.parse(event.body);
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
-  const prezzi = {
-    '1citta': 990,
-    '3citta': 2990
-  };
+  try {
+    const { ids, piano } = JSON.parse(event.body);
+    if (!ids || !ids.length) return { statusCode: 400, body: JSON.stringify({ error: 'Nessun annuncio' }) };
 
-  const tipo = citta.length >= 3 ? '3citta' : '1citta';
+    const { data: righe, error } = await supabase
+      .from('annunci_pubblicitari')
+      .select('id, riga, email')
+      .in('id', ids)
+      .eq('stato', 'pending');
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    mode: 'payment',
-    line_items: [{
-      price_data: {
-        currency: 'eur',
-        unit_amount: prezzi[tipo],
-        product_data: { name: `Pubblicità TrovaImpresa - ${tipo === '1citta' ? '1 città' : '3 città'}` }
-      },
-      quantity: 1
-    }],
-    metadata: { impresa_id, citta: JSON.stringify(citta), posizione },
-    success_url: 'https://trovaimpresa.com/pannello-impresa.html?pub=ok',
-    cancel_url: 'https://trovaimpresa.com/pannello-impresa.html?pub=cancel'
-  });
+    if (error || !righe || !righe.length) {
+      return { statusCode: 404, body: JSON.stringify({ error: 'Annunci non trovati' }) };
+    }
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ url: session.url })
-  };
+    const mult = MOLT[piano] || 1;
+    let totale = 0;
+    righe.forEach(function (r) { totale += (PREZZI[r.riga] || 0) * mult; });
+    totale = Math.round(totale);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      customer_email: righe[0].email || undefined,
+      line_items: [{
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: 'Pubblicità TrovaImpresa',
+            description: righe.length + ' città · piano ' + (piano || 'mensile'),
+          },
+          unit_amount: totale * 100,
+        },
+        quantity: 1,
+      }],
+      metadata: { ids: ids.join(','), piano: piano || 'mensile' },
+      success_url: 'https://trovaimpresa.com/pubblicita?pagamento=ok',
+      cancel_url: 'https://trovaimpresa.com/pubblicita?pagamento=annullato',
+    });
+
+    return { statusCode: 200, body: JSON.stringify({ url: session.url }) };
+  } catch (err) {
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+  }
 };
