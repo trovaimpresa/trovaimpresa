@@ -1,123 +1,101 @@
-/**
- * pubblicita-spazi.js
- * Mostra gli spazi pubblicitari acquistati su una pagina città.
- *
- * Legge la città dalla pagina, interroga `annunci_pubblicitari`
- * (stato = 'pagato') per quella città e riempie i container
- * #pub-sinistra e #pub-destra con 8 righe ciascuno:
- *   - slot venduto  -> logo cliccabile che porta a link_url
- *   - slot vuoto     -> "Spazio disponibile" che porta a /pubblicita
- *
- * I valori di `lato` sono quelli scritti da pubblicita.html: 'sinistra' / 'destra'.
- * Se i container non esistono, lo script esce senza fare nulla.
- */
+// js/pubblicita-spazi.js
+// Popola gli spazi pubblicitari della home con annunci pagati per la città attiva.
+// Esegue solo se l'URL contiene ?citta=X (home nazionale = nessuna pubblicità).
+
 (function () {
   'use strict';
-
-  var RIGHE = 8;
-
-  // Credenziali pubbliche (anon) usate come ultima risorsa se nella pagina
-  // non è già presente un client Supabase. Sono le stesse esposte in pubblicita.html.
-  var FALLBACK_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
-  var FALLBACK_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-
-  // Trova il client Supabase già presente nella pagina; se assente, ne crea uno.
-  function getClient() {
-    var candidati = [window.supabaseClient, window.sb, window._supabase];
-    for (var i = 0; i < candidati.length; i++) {
-      if (candidati[i] && typeof candidati[i].from === 'function') return candidati[i];
-    }
-    if (window.supabase && typeof window.supabase.createClient === 'function') {
-      var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : FALLBACK_URL;
-      var key = (typeof SUPABASE_KEY !== 'undefined') ? SUPABASE_KEY : FALLBACK_KEY;
-      return window.supabase.createClient(url, key);
-    }
-    return null;
-  }
-
-  // Legge la città: prima da data-citta sui container, poi dal link ?citta=...
-  function leggiCitta() {
-    var dc = document.getElementById('pub-sinistra') || document.getElementById('pub-destra');
-    if (dc && dc.dataset && dc.dataset.citta) return dc.dataset.citta.trim();
-    var link = document.querySelector('a[href*="citta="]');
-    if (link) {
-      try {
-        var c = new URL(link.href, location.origin).searchParams.get('citta');
-        if (c) return c.trim();
-      } catch (e) { /* ignora href non parsabili */ }
-    }
-    return null;
-  }
-
-  // Costruisce un singolo slot (venduto o vuoto) come nodo DOM.
-  function creaSlot(annuncio) {
-    if (annuncio && annuncio.logo_url) {
-      var a = document.createElement('a');
-      a.className = 'pub-slot pub-slot-venduto';
-      a.href = annuncio.link_url || '#';
-      if (annuncio.link_url) { a.target = '_blank'; a.rel = 'noopener'; }
-      a.style.cssText = 'display:flex;align-items:center;justify-content:center;min-height:60px;padding:8px;border:1px solid rgba(0,0,0,0.08);border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.05);text-decoration:none;';
-
-      var img = document.createElement('img');
-      img.src = annuncio.logo_url;
-      img.alt = 'Pubblicità';
-      img.loading = 'lazy';
-      img.style.cssText = 'max-width:100%;max-height:48px;object-fit:contain;';
-      a.appendChild(img);
-      return a;
-    }
-
-    var vuoto = document.createElement('a');
-    vuoto.className = 'pub-slot pub-slot-vuoto';
-    vuoto.href = '/pubblicita';
-    vuoto.textContent = 'Spazio disponibile';
-    vuoto.style.cssText = 'display:flex;align-items:center;justify-content:center;min-height:60px;padding:8px;border:2px dashed #d6d6d6;border-radius:10px;background:#fafafa;color:#999;font-size:12px;font-weight:600;text-align:center;text-decoration:none;';
-    return vuoto;
-  }
-
-  function renderLato(container, lato, perRiga) {
-    container.innerHTML = '';
-    for (var r = 1; r <= RIGHE; r++) {
-      container.appendChild(creaSlot(perRiga[r] || null));
-    }
-  }
-
-  async function init() {
-    var sinistra = document.getElementById('pub-sinistra');
-    var destra = document.getElementById('pub-destra');
-    if (!sinistra && !destra) return; // container assenti: esci senza errori
-
-    var client = getClient();
-    if (!client) return;
-
-    var citta = leggiCitta();
-    if (!citta) return;
-
-    try {
-      var res = await client
-        .from('annunci_pubblicitari')
-        .select('citta,lato,riga,logo_url,link_url')
-        .eq('stato', 'pagato')
-        .ilike('citta', citta);
-      if (res.error) return;
-
-      // Indicizza per lato + riga (primo annuncio vince in caso di duplicati).
-      var perLato = { sinistra: {}, destra: {} };
-      (res.data || []).forEach(function (ann) {
-        var slot = perLato[ann.lato];
-        if (slot && !slot[ann.riga]) slot[ann.riga] = ann;
-      });
-
-      if (sinistra) renderLato(sinistra, 'sinistra', perLato.sinistra);
-      if (destra) renderLato(destra, 'destra', perLato.destra);
-    } catch (e) {
-      // fallisce in silenzio: gli spazi semplicemente non vengono popolati
-    }
-  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+
+  async function init() {
+    // 1. Lettura città dall'URL
+    const params = new URLSearchParams(window.location.search);
+    const cittaRaw = params.get('citta');
+    if (!cittaRaw) {
+      console.log('[pub-spazi] Nessuna città in URL, skip (home nazionale).');
+      return;
+    }
+    const citta = cittaRaw.toLowerCase().trim();
+
+    // 2. Lista completa dei 18 spazi (per pre-compilazione link al form)
+    const TUTTI_SPAZI = [
+      'hero-sx', 'hero-dx',
+      'imprese-sx', 'imprese-dx',
+      'pannello-sx', 'pannello-dx',
+      'piano-sx', 'piano-dx',
+      'inserzioni-sx', 'inserzioni-dx',
+      'subappalto-sx-1', 'subappalto-sx-2', 'subappalto-dx-1', 'subappalto-dx-2',
+      'profilo-sx-1', 'profilo-sx-2', 'profilo-dx-1', 'profilo-dx-2'
+    ];
+
+    // 3. Recupero/creazione client Supabase
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+
+    let client = window.sb || window.supabaseClient;
+    if (!client) {
+      if (!window.supabase || !window.supabase.createClient) {
+        console.error('[pub-spazi] Libreria Supabase non caricata.');
+        aggiornaHrefVuoti(TUTTI_SPAZI, new Set(), citta);
+        return;
+      }
+      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // 4. Query annunci pagati attivi per la città
+    const oggi = new Date().toISOString().slice(0, 10);
+    let annunci = [];
+    try {
+      const { data, error } = await client
+        .from('annunci_pubblicitari')
+        .select('spazio_id, logo_url, link_url')
+        .eq('citta', citta)
+        .eq('stato', 'pagato')
+        .gte('data_fine', oggi);
+
+      if (error) {
+        console.error('[pub-spazi] Errore query:', error.message);
+      } else {
+        annunci = data || [];
+      }
+    } catch (e) {
+      console.error('[pub-spazi] Eccezione:', e);
+    }
+
+    // 5. Popolamento spazi venduti
+    const venduti = new Set();
+    for (const ann of annunci) {
+      const a = document.querySelector(`a.pub-link[data-spazio-id="${ann.spazio_id}"]`);
+      if (!a) {
+        console.warn('[pub-spazi] Spazio non trovato in DOM:', ann.spazio_id);
+        continue;
+      }
+      venduti.add(ann.spazio_id);
+      a.href = ann.link_url || '#';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.style.border = 'none';
+      a.style.padding = '0';
+      a.innerHTML = `<img src="${ann.logo_url}" alt="Pubblicità" style="width:100%;height:100%;object-fit:contain;display:block;">`;
+    }
+
+    // 6. Spazi NON venduti → href pre-compilato per il form acquisto
+    aggiornaHrefVuoti(TUTTI_SPAZI, venduti, citta);
+
+    console.log(`[pub-spazi] Città "${citta}": ${venduti.size}/18 spazi venduti.`);
+  }
+
+  function aggiornaHrefVuoti(tutti, venduti, citta) {
+    for (const sp of tutti) {
+      if (venduti.has(sp)) continue;
+      const a = document.querySelector(`a.pub-link[data-spazio-id="${sp}"]`);
+      if (a) {
+        a.href = `/pubblicita?spazio=${encodeURIComponent(sp)}&citta=${encodeURIComponent(citta)}`;
+      }
+    }
   }
 })();
