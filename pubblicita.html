@@ -240,7 +240,7 @@
       <div class="form-group"><label>Partita IVA / Cod. Fiscale</label><input type="text" id="p-piva" placeholder="IT12345678901"></div>
 
       <div class="form-group" style="margin-top:14px;">
-        <label>Logo aziendale (opzionale) — PNG/JPG, max 2MB</label>
+        <label>Immagine del banner pubblicitario — PNG/JPG (si ottimizza in automatico)</label>
         <input type="file" id="p-logo" accept="image/png, image/jpeg">
         <p class="note-small" style="margin-top:6px;">Se non carichi il logo useremo quello del profilo impresa.</p>
       </div>
@@ -583,6 +583,35 @@ window.addEventListener('DOMContentLoaded', function() {
   aggiornaRiepilogo();
 });
 
+// Ridimensiona/comprimi immagine lato client (canvas → blob). PNG resta PNG (trasparenza), il resto → JPEG.
+function ridimensionaImmagine(file, maxLato = 1200) {
+  return new Promise(function (resolve, reject) {
+    var isPng = file.type === 'image/png';
+    var mime = isPng ? 'image/png' : 'image/jpeg';
+    var ext = isPng ? 'png' : 'jpg';
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      var w = img.width, h = img.height;
+      if (w > maxLato || h > maxLato) {
+        if (w >= h) { h = Math.round(h * maxLato / w); w = maxLato; }
+        else { w = Math.round(w * maxLato / h); h = maxLato; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function (blob) {
+        if (blob) resolve({ blob: blob, mime: mime, ext: ext });
+        else reject(new Error('Compressione immagine fallita'));
+      }, mime, isPng ? undefined : 0.85);
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Immagine non valida')); };
+    img.src = url;
+  });
+}
+
 // === SUBMIT: INSERT pending + notifica + Stripe ===
 async function inviaOrdine() {
   if (!spazioSel || !cittaSel) { alert('Seleziona posizione e città!'); return; }
@@ -615,21 +644,29 @@ async function inviaOrdine() {
     return;
   }
 
-  // Upload logo (opzionale)
+  // Upload immagine banner (opzionale) — ridimensionata/compressa lato client
   var logoUrl = null;
   var logoFile = document.getElementById('p-logo').files[0];
   if (logoFile) {
-    if (logoFile.size > 2 * 1024 * 1024) {
-      alert('Il logo supera i 2MB. Carica un file più piccolo.');
+    if (!/^image\/(png|jpe?g)$/.test(logoFile.type)) {
+      alert('Formato non valido. Usa PNG o JPG.');
       btn.textContent = '💳 Conferma e vai al pagamento';
       btn.disabled = false;
       return;
     }
-    var ext = logoFile.name.split('.').pop();
-    var path = currentUser.id + '/logo_' + Date.now() + '.' + ext;
-    var uploadRes = await supabaseClient.storage.from('loghi-pubblicita').upload(path, logoFile, { contentType: logoFile.type });
+    var img;
+    try {
+      img = await ridimensionaImmagine(logoFile, 1200);
+    } catch (e) {
+      alert('Errore elaborazione immagine: ' + e.message);
+      btn.textContent = '💳 Conferma e vai al pagamento';
+      btn.disabled = false;
+      return;
+    }
+    var path = currentUser.id + '/pub_' + Date.now() + '.' + img.ext;
+    var uploadRes = await supabaseClient.storage.from('loghi-pubblicita').upload(path, img.blob, { contentType: img.mime });
     if (uploadRes.error) {
-      alert('Errore upload logo: ' + uploadRes.error.message);
+      alert('Errore upload immagine: ' + uploadRes.error.message);
       btn.textContent = '💳 Conferma e vai al pagamento';
       btn.disabled = false;
       return;
