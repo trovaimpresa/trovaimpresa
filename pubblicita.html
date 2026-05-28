@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pubblicità su TrovaImpresa – Raggiungi migliaia di clienti</title>
-  <meta name="description" content="Pubblica la tua azienda su TrovaImpresa. Spazi pubblicitari a partire da €8/mese.">
+  <title>Pubblicità su TrovaImpresa – Raggiungi i clienti della tua città</title>
+  <meta name="description" content="Pubblica la tua azienda su TrovaImpresa. Spazi pubblicitari per città a partire da €5/mese.">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -48,71 +48,25 @@
     /* CONTENUTO */
     .step-page{display:none;max-width:1100px;margin:0 auto;padding:40px 24px;}
     .step-page.visible{display:block;}
-    #page1, #page2 { zoom: 1.15; }
     .step-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px;}
     .step-sub{color:var(--mid);font-size:15px;margin-bottom:28px;}
 
-    /* STEP 0 - CATEGORIA */
-    .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-top: 20px; }
-    .cat-card { border: 2.5px solid var(--border); border-radius: 14px; padding: 24px 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
-    .cat-card:hover { border-color: var(--verde); transform: translateY(-2px); }
-    .cat-card.sel { border-color: var(--verde); background: #e8f5e9; }
-    .cat-icon { font-size: 32px; margin-bottom: 10px; }
-    .cat-nome { font-weight: 700; font-size: 15px; color: #222; margin-bottom: 4px; }
-    .cat-desc { font-size: 12px; color: #888; }
-    .cat-card.sel .cat-nome { color: var(--verde); }
+    /* STEP 1 - SELETTORE SPAZI */
+    .spazio-fascia{margin-bottom:18px;}
+    .spazio-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+    .sezione-label{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;}
 
-    /* STEP 1 - FORMATI */
-    .step1-grid{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
-    
-    /* ANTEPRIMA */
-    .preview-box{background:#fff;border-radius:16px;border:2px solid var(--border);overflow:hidden;box-shadow:var(--shadow);}
-    .preview-bar{background:#f0f0f0;padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
-    .dot{width:10px;height:10px;border-radius:50%;}
-    .preview-url{background:#fff;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--light);flex:1;}
-    .preview-header{background:linear-gradient(135deg,var(--verde2),var(--verde));padding:14px;color:#fff;font-size:12px;font-weight:700;text-align:center;}
-
-    .ad-slot{margin:8px;border-radius:8px;padding:11px 14px;border:2px dashed #ddd;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;font-size:12px;user-select:none;}
-    .ad-slot:hover{transform:scale(1.01);}
-    .ad-slot.s1{border-color:#f59e0b;background:#fffbeb;}
-    .ad-slot.s1.sel{border-style:solid;background:#fef3c7;box-shadow:0 4px 16px rgba(245,158,11,0.3);}
-    .ad-slot.s2{border-color:var(--verde);background:var(--verde3);}
-    .ad-slot.s2.sel{border-style:solid;background:#d1fae5;box-shadow:0 4px 16px rgba(42,122,75,0.2);}
-    .ad-slot.s3{border-color:#6366f1;background:#eef2ff;}
-    .ad-slot.s3.sel{border-style:solid;background:#e0e7ff;box-shadow:0 4px 16px rgba(99,102,241,0.2);}
-    .ad-slot-check{margin-left:auto;font-size:16px;min-width:20px;text-align:center;}
-    
-    .preview-mid{display:grid;grid-template-columns:1fr 72px;gap:6px;margin:0 8px;}
-    .fake-result{background:#fafafa;border:1px solid #eee;border-radius:6px;padding:8px 10px;font-size:10px;color:var(--mid);margin-bottom:5px;}
-    .fake-result-name{font-weight:700;color:var(--dark);font-size:11px;margin-bottom:1px;}
-    .sidebar-slot{background:#fff3e0;border:2px dashed var(--arancio);border-radius:8px;padding:14px 6px;font-size:10px;color:var(--arancio);font-weight:700;text-align:center;cursor:pointer;transition:all 0.2s;user-select:none;}
-    .sidebar-slot.sel{border-style:solid;background:#ffe0b2;box-shadow:0 4px 16px rgba(232,115,58,0.2);}
-
-    /* PANNELLO DESTRA */
-    .formati-panel{display:flex;flex-direction:column;gap:10px;}
     .fmt-card{background:#fff;border-radius:14px;padding:16px 18px;border:2px solid var(--border);cursor:pointer;transition:all 0.2s;user-select:none;}
     .fmt-card:hover{border-color:var(--verde);background:var(--verde3);}
     .fmt-card.sel{border-color:var(--verde);background:var(--verde3);}
+    .fmt-card.taken{border-color:#ddd;background:#f3f3f3;color:#aaa;cursor:not-allowed;}
+    .fmt-card.taken:hover{border-color:#ddd;background:#f3f3f3;}
     .fmt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-    .fmt-nome{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;}
+    .fmt-nome{font-weight:700;font-size:14px;}
     .fmt-price{font-size:17px;font-weight:800;color:var(--verde);font-family:'Playfair Display',serif;}
     .fmt-price small{font-size:11px;font-weight:500;color:var(--mid);font-family:'DM Sans',sans-serif;}
+    .fmt-card.taken .fmt-price{color:#aaa;}
     .fmt-desc{font-size:12px;color:var(--mid);line-height:1.4;}
-    .fmt-badge{background:#f59e0b;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;}
-
-    /* BOTTONI */
-    .btn-avanti{width:100%;padding:13px;background:var(--arancio);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-top:8px;transition:all 0.2s;}
-    .btn-avanti:hover{background:var(--arancio2);}
-    .btn-avanti:disabled{background:#ccc;cursor:not-allowed;}
-    .btn-back{padding:9px 18px;background:#fff;color:var(--mid);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;margin-bottom:20px;display:inline-block;}
-    .btn-back:hover{border-color:var(--verde);color:var(--verde);}
-
-    .fmt-small { border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
-    .fmt-small:hover { border-color: #6366f1; }
-    .fmt-small.sel { border-color: #6366f1; background: #f0f0ff; }
-    .fmt-small-nome { font-weight: 600; font-size: 13px; color: #333; }
-    .fmt-small-price { font-weight: 700; font-size: 13px; color: #6366f1; }
-    .sezione-label { font-size: 11px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px; }
 
     /* STEP 2 */
     .step2-grid{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;}
@@ -120,20 +74,20 @@
     .citta-search{width:100%;padding:12px 14px 12px 42px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border 0.2s;}
     .citta-search:focus{border-color:var(--verde);}
     .csearch-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:17px;}
-    .chips-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:16px;}
-    .chip{background:var(--verde3);color:var(--verde2);padding:5px 10px;border-radius:16px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer;}
-    .chip:hover{background:#fecaca;color:#e53e3e;}
-    .citta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;max-height:260px;overflow-y:auto;}
+    .citta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;max-height:300px;overflow-y:auto;}
     .citta-opt{background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;text-align:center;user-select:none;}
     .citta-opt:hover{border-color:var(--verde);background:var(--verde3);color:var(--verde);}
     .citta-opt.sel{border-color:var(--verde);background:var(--verde3);color:var(--verde2);font-weight:700;}
+    .citta-locked{background:var(--verde3);border:2px solid var(--verde);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:700;color:var(--verde2);display:flex;align-items:center;justify-content:space-between;}
+    .citta-locked button{background:none;border:none;color:var(--mid);font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;}
 
     .periodo-box{background:#fff;border-radius:14px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:16px;}
     .periodo-label{font-size:12px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;}
-    .toggle-row{display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:3px;}
-    .tog-opt{flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.2s;color:var(--mid);}
-    .tog-opt.active{background:#fff;color:var(--verde);box-shadow:var(--shadow);}
-    .risparmio-badge{font-size:10px;background:#d1fae5;color:var(--verde);padding:1px 5px;border-radius:5px;display:inline-block;margin-top:2px;}
+    .toggle-col{display:flex;flex-direction:column;gap:8px;}
+    .tog-opt{padding:12px 14px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:2px solid var(--border);transition:all 0.2s;color:var(--mid);display:flex;justify-content:space-between;align-items:center;}
+    .tog-opt.active{border-color:var(--verde);background:var(--verde3);color:var(--verde2);}
+    .tog-opt .tog-prezzo{font-family:'Playfair Display',serif;font-weight:800;color:var(--verde);}
+    .risparmio-badge{font-size:10px;background:#d1fae5;color:var(--verde);padding:2px 6px;border-radius:5px;display:inline-block;margin-left:6px;}
 
     .riepilogo-box{background:#fff;border-radius:14px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
     .riepilogo-title{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:14px;}
@@ -150,24 +104,6 @@
     .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--verde);background:#fff;}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 
-    .metodo-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
-    .metodo-card{background:#fff;border:2px solid var(--border);border-radius:11px;padding:13px 15px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;}
-    .metodo-card:hover{border-color:var(--verde);}
-    .metodo-card.sel{border-color:var(--verde);background:var(--verde3);}
-    .mradio{width:16px;height:16px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;}
-    .metodo-card.sel .mradio{border-color:var(--verde);background:var(--verde);position:relative;}
-    .metodo-card.sel .mradio::after{content:'';position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;top:50%;left:50%;transform:translate(-50%,-50%);}
-    .minfo h4{font-size:13px;font-weight:700;margin-bottom:1px;}
-    .minfo p{font-size:11px;color:var(--mid);}
-
-    .iban-section{display:none;}
-    .iban-section.show{display:block;}
-    .iban-box{background:#f0faf5;border:1.5px solid #a7d9b8;border-radius:11px;padding:14px;margin-bottom:14px;}
-    .iban-box h4{font-size:12px;font-weight:700;color:var(--verde2);margin-bottom:8px;}
-    .iban-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
-    .iban-row span:first-child{color:var(--mid);font-weight:600;}
-    .iban-row span:last-child{font-weight:700;font-family:monospace;}
-
     .sidebar-order{background:#fff;border-radius:14px;padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);position:sticky;top:80px;}
     .sidebar-order h3{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:16px;}
     .ord-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
@@ -175,28 +111,15 @@
     .ord-total-label{font-size:13px;font-weight:700;color:var(--verde2);}
     .ord-total-num{font-size:22px;font-weight:800;color:var(--verde);font-family:'Playfair Display',serif;}
 
+    .btn-avanti{width:100%;padding:13px;background:var(--arancio);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-top:8px;transition:all 0.2s;}
+    .btn-avanti:hover{background:var(--arancio2);}
+    .btn-avanti:disabled{background:#ccc;cursor:not-allowed;}
+    .btn-back{padding:9px 18px;background:#fff;color:var(--mid);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;margin-bottom:20px;display:inline-block;}
+    .btn-back:hover{border-color:var(--verde);color:var(--verde);}
     .btn-ordina{width:100%;padding:14px;background:var(--arancio);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-top:16px;transition:all 0.2s;}
     .btn-ordina:hover{background:var(--arancio2);}
     .btn-ordina:disabled{background:#ccc;cursor:not-allowed;}
     .note-small{font-size:11px;color:var(--light);text-align:center;margin-top:8px;}
-
-    /* SCHEMA LATERALE */
-    .schema-grid{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:10px;}
-    .schema-row{display:grid;grid-template-columns:1fr minmax(64px,300px) 1fr;gap:8px;align-items:stretch;}
-    .slot{border:2px solid #f1c27a;background:#fffbeb;border-radius:10px;padding:8px;text-align:center;cursor:pointer;transition:all 0.2s;user-select:none;min-height:60px;display:flex;flex-direction:column;justify-content:center;}
-    .slot:hover{border-color:var(--arancio);transform:scale(1.02);}
-    .slot.sel{border-color:var(--arancio);background:#ffe7d3;box-shadow:0 4px 16px rgba(232,115,58,0.25);}
-    .slot.taken{border-color:#ddd;background:#f3f3f3;color:#aaa;cursor:not-allowed;}
-    .slot.taken:hover{transform:none;border-color:#ddd;}
-    .slot-price{font-weight:800;font-size:16px;color:#92400e;font-family:'DM Sans',sans-serif;}
-    .slot.sel .slot-price{color:var(--arancio2);}
-    .slot.taken .slot-price{color:#aaa;}
-    .slot-sub{font-size:10px;color:#b45309;margin-top:1px;}
-    .slot.taken .slot-sub{color:#bbb;}
-    .center-box{border-radius:10px;padding:8px;text-align:center;font-size:12px;font-weight:600;min-height:60px;display:flex;align-items:center;justify-content:center;}
-    .center-logo{background:linear-gradient(135deg,var(--verde2),var(--verde));color:#fff;font-family:'Playfair Display',serif;font-size:14px;}
-    .center-citta{background:var(--verde3);color:var(--verde2);}
-    .center-cont{background:#fafafa;border:1px solid #eee;color:var(--mid);}
 
     /* SUCCESS */
     .success-wrap{max-width:500px;margin:60px auto;text-align:center;background:#fff;padding:48px 32px;border-radius:20px;box-shadow:0 16px 60px rgba(0,0,0,0.12);}
@@ -208,7 +131,7 @@
     footer a{color:rgba(255,255,255,0.8);text-decoration:none;}
 
     @media(max-width:768px){
-      .step1-grid,.step2-grid,.step3-grid{grid-template-columns:1fr;}
+      .step2-grid,.step3-grid{grid-template-columns:1fr;}
       .form-row{grid-template-columns:1fr;}
       .nav-links{display:none;}
     }
@@ -229,12 +152,12 @@
 
 <section class="hero">
   <div class="hero-badge">📢 Spazi pubblicitari disponibili</div>
-  <h1>Fai conoscere la tua azienda<br>a <span>migliaia di clienti</span></h1>
-  <p>Scegli il tuo spazio, seleziona le città e paga in pochi minuti. Banner live entro 24 ore.</p>
+  <h1>Fai conoscere la tua azienda<br>nella <span>tua città</span></h1>
+  <p>Scegli lo spazio, la città e il periodo. Banner live entro 24 ore dal pagamento.</p>
   <div class="hero-stats">
     <div class="hero-stat"><div class="hero-stat-num">106</div><div class="hero-stat-label">Città italiane</div></div>
-    <div class="hero-stat"><div class="hero-stat-num">16</div><div class="hero-stat-label">Posizioni per città</div></div>
-    <div class="hero-stat"><div class="hero-stat-num">€6</div><div class="hero-stat-label">Al mese da</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Posizioni per città</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">€5</div><div class="hero-stat-label">Al mese da</div></div>
   </div>
 </section>
 
@@ -247,10 +170,10 @@
 <!-- STEP 1 -->
 <div class="step-page visible" id="page1">
   <h2 class="step-title">Scegli la posizione</h2>
-  <p class="step-sub">Clicca uno spazio a sinistra o a destra del logo. Più in alto = più visibile = costa di più. Stesso prezzo sui due lati.</p>
-  <div id="schema" class="schema-grid"></div>
+  <p class="step-sub">Più in alto = più visibile = costa di più. Stesso prezzo sui due lati (sinistra/destra).</p>
+  <div id="schema"></div>
   <div style="max-width:760px;margin:24px auto 0;">
-    <button class="btn-avanti" id="btn1" disabled>Continua → Scegli le città</button>
+    <button class="btn-avanti" id="btn1" disabled>Continua → Scegli la città</button>
   </div>
 </div>
 
@@ -259,38 +182,40 @@
   <button class="btn-back" id="back1">← Indietro</button>
   <div class="step2-grid">
     <div>
-      <h2 class="step-title">Scegli le città</h2>
-      <p class="step-sub">Seleziona una o più città dove vuoi apparire</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-        <select id="regione-filtro" style="padding:11px 13px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:#fff;">
-          <option value="">-- Tutte le regioni --</option>
-        </select>
-        <select id="provincia-filtro" disabled style="padding:11px 13px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:#fff;">
-          <option value="">-- Tutte le province --</option>
-        </select>
+      <h2 class="step-title">Scegli la città</h2>
+      <p class="step-sub">Seleziona la città dove vuoi apparire (una città per annuncio)</p>
+      <div id="citta-locked-wrap" style="display:none;margin-bottom:14px;"></div>
+      <div id="citta-picker">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <select id="regione-filtro" style="padding:11px 13px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:#fff;">
+            <option value="">-- Tutte le regioni --</option>
+          </select>
+          <select id="provincia-filtro" disabled style="padding:11px 13px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:#fff;">
+            <option value="">-- Tutte le province --</option>
+          </select>
+        </div>
+        <div class="citta-search-wrap">
+          <span class="csearch-icon">🔍</span>
+          <input type="text" class="citta-search" id="citta-input" placeholder="Cerca una città...">
+        </div>
+        <div class="citta-grid" id="citta-grid"></div>
+        <p style="font-size:11px;color:var(--light);margin-top:8px">💡 Clicca per selezionare</p>
       </div>
-      <div class="citta-search-wrap">
-        <span class="csearch-icon">🔍</span>
-        <input type="text" class="citta-search" id="citta-input" placeholder="Cerca una città...">
-      </div>
-      <div class="chips-wrap" id="chips-wrap"><span style="font-size:12px;color:var(--light)">Nessuna città selezionata</span></div>
-      <div class="citta-grid" id="citta-grid"></div>
-      <p style="font-size:11px;color:var(--light);margin-top:8px">💡 Clicca per selezionare/deselezionare</p>
     </div>
     <div>
       <div class="periodo-box">
         <div class="periodo-label">Durata abbonamento</div>
-        <div class="toggle-row">
-          <div class="tog-opt active" id="tog-m">Mensile<br><small style="font-weight:500;color:var(--mid)">Paghi ogni mese</small></div>
-          <div class="tog-opt" id="tog-a">Annuale<br><span class="risparmio-badge">Risparmi 2 mesi!</span></div>
+        <div class="toggle-col">
+          <div class="tog-opt active" id="tog-1"><span>1 mese</span><span class="tog-prezzo" id="pz-1">—</span></div>
+          <div class="tog-opt" id="tog-3"><span>3 mesi <span class="risparmio-badge">-10%</span></span><span class="tog-prezzo" id="pz-3">—</span></div>
+          <div class="tog-opt" id="tog-12"><span>1 anno <span class="risparmio-badge">-25%</span></span><span class="tog-prezzo" id="pz-12">—</span></div>
         </div>
       </div>
       <div class="riepilogo-box">
         <div class="riepilogo-title">📋 Riepilogo</div>
         <div class="ric-row"><span>Posizione</span><span id="r-formato">—</span></div>
-        <div class="ric-row"><span>Prezzo/città</span><span id="r-prezzo">—</span></div>
-        <div class="ric-row"><span>Città selezionate</span><span id="r-ncitta">0</span></div>
-        <div class="ric-row"><span>Periodo</span><span id="r-periodo">Mensile</span></div>
+        <div class="ric-row"><span>Città</span><span id="r-citta">—</span></div>
+        <div class="ric-row"><span>Periodo</span><span id="r-periodo">1 mese</span></div>
         <div class="ric-row"><span>Totale</span><span class="ric-total" id="r-totale">€0</span></div>
       </div>
       <button class="btn-avanti" id="btn2" disabled style="margin-top:14px">Continua → Dati e pagamento</button>
@@ -314,12 +239,6 @@
       </div>
       <div class="form-group"><label>Partita IVA / Cod. Fiscale</label><input type="text" id="p-piva" placeholder="IT12345678901"></div>
 
-      <div style="background:#e8f5ee;border:1.5px solid #a7d9b8;border-radius:12px;padding:16px 18px;margin-top:24px;">
-        <div style="font-weight:700;font-size:14px;color:#1f5e38;margin-bottom:6px;">ℹ️ Pagamento</div>
-        <div style="font-size:13px;color:#2a7a4b;line-height:1.6;">Riceverai una email con le istruzioni per il pagamento. Ti contatteremo entro 24 ore per completare l'attivazione dell'annuncio.</div>
-      </div>
-      <div class="form-group" style="margin-top:14px;"><label>Note (opzionale)</label><textarea id="p-note" rows="3" placeholder="Logo, preferenze grafiche, ecc."></textarea></div>
-
       <div class="form-group" style="margin-top:14px;">
         <label>Logo aziendale (opzionale) — PNG/JPG, max 2MB</label>
         <input type="file" id="p-logo" accept="image/png, image/jpeg">
@@ -331,8 +250,13 @@
         <input type="url" id="p-link" placeholder="https://iltuosito.it">
       </div>
 
-      <button class="btn-ordina" id="btn-ordina">📩 Conferma e invia ordine</button>
-      <p class="note-small">Ti risponderemo entro 24 ore con istruzioni per il pagamento</p>
+      <div style="background:#e8f5ee;border:1.5px solid #a7d9b8;border-radius:12px;padding:16px 18px;margin-top:14px;">
+        <div style="font-weight:700;font-size:14px;color:#1f5e38;margin-bottom:6px;">ℹ️ Pagamento</div>
+        <div style="font-size:13px;color:#2a7a4b;line-height:1.6;">Dopo la conferma verrai reindirizzato al pagamento sicuro Stripe. Il banner diventa live entro 24 ore dal pagamento confermato.</div>
+      </div>
+
+      <button class="btn-ordina" id="btn-ordina">💳 Conferma e vai al pagamento</button>
+      <p class="note-small">Pagamento sicuro tramite Stripe</p>
     </div>
 
     <div class="sidebar-order">
@@ -342,17 +266,17 @@
         <span class="ord-total-label">Totale</span>
         <span class="ord-total-num" id="ord-totale">€0</span>
       </div>
-      <div style="font-size:11px;color:var(--light);margin-top:10px;line-height:1.6">✅ Nessun vincolo contrattuale<br>✅ Banner live entro 24 ore<br>✅ Disdetta in qualsiasi momento</div>
+      <div style="font-size:11px;color:var(--light);margin-top:10px;line-height:1.6">✅ Banner live entro 24 ore<br>✅ Pagamento sicuro Stripe</div>
     </div>
   </div>
 </div>
 
-<!-- SUCCESS -->
+<!-- SUCCESS (fallback) -->
 <div class="step-page" id="page-ok">
   <div class="success-wrap">
     <div class="big-emoji">🎉</div>
     <h2>Ordine ricevuto!</h2>
-    <p>Grazie <strong id="ok-nome"></strong>! Abbiamo ricevuto la tua richiesta.<br>Ti contatteremo entro 24 ore all'indirizzo <strong id="ok-email"></strong> con le istruzioni per il pagamento.</p>
+    <p>Grazie <strong id="ok-nome"></strong>! Stiamo elaborando la richiesta.</p>
     <a href="index.html" style="display:inline-block;background:var(--verde);color:#fff;padding:11px 22px;border-radius:10px;font-weight:700;text-decoration:none">Torna alla home →</a>
   </div>
 </div>
@@ -368,8 +292,68 @@ const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// === LISTINO PUBBLICITÀ (prezzi €/mese netti, forfettario no IVA) ===
+const PREZZI_MENSILI = {
+  'hero-sx': 20, 'hero-dx': 20,
+  'imprese-sx': 12, 'imprese-dx': 12,
+  'pannello-sx': 10, 'pannello-dx': 10,
+  'piano-sx': 9, 'piano-dx': 9,
+  'inserzioni-sx': 8, 'inserzioni-dx': 8,
+  'subappalto-sx-1': 6, 'subappalto-sx-2': 6, 'subappalto-dx-1': 6, 'subappalto-dx-2': 6,
+  'profilo-sx-1': 5, 'profilo-sx-2': 5, 'profilo-dx-1': 5, 'profilo-dx-2': 5
+};
+const PERIODI = {
+  '1':  { mesi: 1,  sconto: 0,    label: '1 mese' },
+  '3':  { mesi: 3,  sconto: 0.10, label: '3 mesi' },
+  '12': { mesi: 12, sconto: 0.25, label: '1 anno' }
+};
+function calcolaPrezzo(spazioId, periodoKey) {
+  const mensile = PREZZI_MENSILI[spazioId];
+  const p = PERIODI[periodoKey];
+  if (mensile == null || !p) return null;
+  return Math.round(mensile * p.mesi * (1 - p.sconto) * 100) / 100;
+}
+
+// Definizione 18 spazi raggruppati per fascia (ordine = gerarchia visiva)
+const FASCE = [
+  { nome: 'Hero — banner in alto', desc: 'Massima visibilità, sopra ai risultati', spazi: ['hero-sx','hero-dx'] },
+  { nome: "Trova un'impresa", desc: 'Nella sezione di ricerca imprese', spazi: ['imprese-sx','imprese-dx'] },
+  { nome: 'Pannello', desc: 'Accanto al pannello utente', spazi: ['pannello-sx','pannello-dx'] },
+  { nome: 'Scegli piano', desc: 'Nella sezione abbonamenti', spazi: ['piano-sx','piano-dx'] },
+  { nome: 'Inserzioni lavoro', desc: 'Accanto alle offerte di lavoro', spazi: ['inserzioni-sx','inserzioni-dx'] },
+  { nome: 'Subappalto', desc: 'Nella sezione subappalti', spazi: ['subappalto-sx-1','subappalto-sx-2','subappalto-dx-1','subappalto-dx-2'] },
+  { nome: 'Profilo', desc: 'Nelle pagine profilo impresa', spazi: ['profilo-sx-1','profilo-sx-2','profilo-dx-1','profilo-dx-2'] }
+];
+// Etichetta lato leggibile per ogni spazio_id
+function latoLabel(id){
+  if (id.endsWith('-sx-1')) return 'Sinistra 1';
+  if (id.endsWith('-sx-2')) return 'Sinistra 2';
+  if (id.endsWith('-dx-1')) return 'Destra 1';
+  if (id.endsWith('-dx-2')) return 'Destra 2';
+  if (id.endsWith('-sx')) return 'Sinistra';
+  if (id.endsWith('-dx')) return 'Destra';
+  return id;
+}
+function fasciaDiSpazio(id){
+  for (const f of FASCE) if (f.spazi.indexOf(id) >= 0) return f.nome;
+  return id;
+}
+
 let currentUser = null;
 let currentImpresa = null;
+
+// Stato selezione
+let spazioSel = null;
+let cittaSel = null;
+let cittaLocked = false;   // true se arrivata da ?citta= (non modificabile)
+let periodoSel = '1';
+
+// Lettura parametri URL (?spazio=X&citta=Y)
+const params = new URLSearchParams(window.location.search);
+const paramSpazio = params.get('spazio');
+const paramCitta = params.get('citta');
+
+const tutteCitta = ['Agrigento','Alessandria','Ancona','Aosta','Arezzo','Ascoli Piceno','Asti','Avellino','Bari','Barletta','Belluno','Benevento','Bergamo','Biella','Bologna','Bolzano','Brescia','Brindisi','Cagliari','Caltanissetta','Campobasso','Caserta','Catania','Catanzaro','Cesena','Como','Cosenza','Cremona','Crotone','Cuneo','Ferrara','Firenze','Foggia','Frosinone','Genova','Grosseto','Imperia','La Spezia','Latina','Lecce','Lecco','Livorno','Lodi','Lucca','Macerata','Mantova','Marsala','Massa','Matera','Messina','Milano','Modena','Monza','Napoli','Novara','Nuoro','Oristano','Padova','Palermo','Parma','Pavia','Perugia','Pesaro','Pescara','Piacenza','Pisa','Pistoia','Pordenone','Potenza','Prato','Ragusa','Ravenna','Reggio Calabria','Reggio Emilia','Rieti','Rimini','Roma','Rovigo','Salerno','Sassari','Savona','Siena','Siracusa','Sondrio','Taranto','Terni','Torino','Trapani','Trento','Treviso','Trieste','Udine','Varese','Venezia','Verbania','Vercelli','Verona','Vibo Valentia','Vicenza','Viterbo'];
 
 supabaseClient.auth.onAuthStateChange(async function(event, session) {
   if (event !== 'INITIAL_SESSION') return;
@@ -388,97 +372,47 @@ supabaseClient.auth.onAuthStateChange(async function(event, session) {
   }
 });
 
-var lato = null;
-var riga = null;
-var citta = [];
-var periodo = 'mensile';
-var prezziRiga = {1:20, 2:18, 3:16, 4:14, 5:12, 6:10, 7:8, 8:6};
-var centri = {1:'Logo TrovaImpresa', 2:'Imprese a [Città]', 3:'Container 1', 4:'Container 2', 5:'Container 3', 6:'Container 4', 7:'Container 5', 8:'Container 6'};
-var tutteCitta = ['Agrigento','Alessandria','Ancona','Aosta','Arezzo','Ascoli Piceno','Asti','Avellino','Bari','Barletta','Belluno','Benevento','Bergamo','Biella','Bologna','Bolzano','Brescia','Brindisi','Cagliari','Caltanissetta','Campobasso','Caserta','Catania','Catanzaro','Cesena','Como','Cosenza','Cremona','Crotone','Cuneo','Ferrara','Firenze','Foggia','Frosinone','Genova','Grosseto','Imperia','La Spezia','Latina','Lecce','Lecco','Livorno','Lodi','Lucca','Macerata','Mantova','Marsala','Massa','Matera','Messina','Milano','Modena','Monza','Napoli','Novara','Nuoro','Oristano','Padova','Palermo','Parma','Pavia','Perugia','Pesaro','Pescara','Piacenza','Pisa','Pistoia','Pordenone','Potenza','Prato','Ragusa','Ravenna','Reggio Calabria','Reggio Emilia','Rieti','Rimini','Roma','Rovigo','Salerno','Sassari','Savona','Siena','Siracusa','Sondrio','Taranto','Terni','Torino','Trapani','Trento','Treviso','Trieste','Udine','Varese','Venezia','Verbania','Vercelli','Verona','Vibo Valentia','Vicenza','Viterbo'];
-
-// SCHEMA POSIZIONI
+// === STEP 1: SELETTORE SPAZI ===
 function buildSchema() {
   var wrap = document.getElementById('schema');
-  if (!wrap) return;
   wrap.innerHTML = '';
-  for (var r = 1; r <= 8; r++) {
-    var row = document.createElement('div');
-    row.className = 'schema-row';
-    row.appendChild(makeSlot('sinistra', r));
-    var c = document.createElement('div');
-    c.className = 'center-box ' + (r === 1 ? 'center-logo' : r === 2 ? 'center-citta' : 'center-cont');
-    c.textContent = centri[r];
-    row.appendChild(c);
-    row.appendChild(makeSlot('destra', r));
-    wrap.appendChild(row);
-  }
+  FASCE.forEach(function(f) {
+    var sez = document.createElement('div');
+    sez.className = 'spazio-fascia';
+    var prezzo = PREZZI_MENSILI[f.spazi[0]];
+    sez.innerHTML = '<div class="sezione-label">' + f.nome + ' · €' + prezzo + '/mese</div>';
+    var grid = document.createElement('div');
+    grid.className = 'spazio-cards';
+    f.spazi.forEach(function(id) {
+      var card = document.createElement('div');
+      card.className = 'fmt-card';
+      card.id = 'spz-' + id;
+      card.innerHTML =
+        '<div class="fmt-head"><span class="fmt-nome">' + latoLabel(id) + '</span>' +
+        '<span class="fmt-price">€' + PREZZI_MENSILI[id] + '<small>/mese</small></span></div>' +
+        '<div class="fmt-desc">' + f.desc + '</div>';
+      card.addEventListener('click', function(){ selSpazio(id); });
+      grid.appendChild(card);
+    });
+    sez.appendChild(grid);
+    wrap.appendChild(sez);
+  });
 }
 
-function makeSlot(l, r) {
-  var s = document.createElement('div');
-  s.className = 'slot';
-  s.id = 'slot-' + (l === 'sinistra' ? 'sx' : 'dx') + '-' + r;
-  s.innerHTML = '<div class="slot-price">€' + prezziRiga[r] + '</div><div class="slot-sub">al mese</div>';
-  s.addEventListener('click', function(){ selPosizione(l, r); });
-  return s;
-}
-
-function selPosizione(l, r) {
-  lato = l;
-  riga = r;
-  document.querySelectorAll('.slot').forEach(function(s){ s.classList.remove('sel'); });
-  document.getElementById('slot-' + (l === 'sinistra' ? 'sx' : 'dx') + '-' + r).classList.add('sel');
+function selSpazio(id) {
+  spazioSel = id;
+  document.querySelectorAll('.fmt-card').forEach(function(c){ c.classList.remove('sel'); });
+  var el = document.getElementById('spz-' + id);
+  if (el) el.classList.add('sel');
   document.getElementById('btn1').disabled = false;
+  aggiornaPrezziPeriodo();
   aggiornaRiepilogo();
 }
 
-
-
-
-// Inizializzazione
-window.addEventListener('DOMContentLoaded', function() {
-  initFiltriGeo();
-  buildCitta('');
-  buildSchema();
-
-  // Navigazione
-  document.getElementById('nav-prenota').addEventListener('click', function(e){ e.preventDefault(); showPage(1); });
-  document.getElementById('btn1').addEventListener('click', function(){ if(riga) showPage(2); });
-  document.getElementById('btn2').addEventListener('click', function(){ if(citta.length > 0) showPage(3); });
-  document.getElementById('back1').addEventListener('click', function(){ showPage(1); });
-  document.getElementById('back2').addEventListener('click', function(){ showPage(2); });
-
-  // Periodo
-  document.getElementById('tog-m').addEventListener('click', function(){ selPeriodo('mensile'); });
-  document.getElementById('tog-a').addEventListener('click', function(){ selPeriodo('annuale'); });
-
-  // Cerca città
-  document.getElementById('citta-input').addEventListener('input', function(){ buildCitta(this.value); });
-
-  // Ordina
-  document.getElementById('btn-ordina').addEventListener('click', inviaOrdine);
-});
-
-function showPage(n, fromPopstate) {
-  document.querySelectorAll('.step-page').forEach(function(p){ p.classList.remove('visible'); });
-  document.querySelectorAll('.step-tab').forEach(function(t){ t.classList.remove('active'); });
-  if(n <= 3) {
-    document.getElementById('page' + n).classList.add('visible');
-    document.getElementById('tab' + n).classList.add('active');
-  } else {
-    document.getElementById('page-ok').classList.add('visible');
-  }
-  window.scrollTo({top:0, behavior:'smooth'});
-  if(n === 3) aggiornaOrdine();
-  if(!fromPopstate) history.pushState({step: n}, '');
-}
-
-
-
-
+// === STEP 2: CITTÀ ===
 function buildCitta(filter) {
   var grid = document.getElementById('citta-grid');
-  var f = filter.toLowerCase();
+  var f = (filter || '').toLowerCase();
   var regEl = document.getElementById('regione-filtro');
   var provEl = document.getElementById('provincia-filtro');
   var regione = regEl ? regEl.value : '';
@@ -499,11 +433,38 @@ function buildCitta(filter) {
   grid.innerHTML = '';
   lista.forEach(function(c) {
     var div = document.createElement('div');
-    div.className = 'citta-opt' + (citta.indexOf(c) >= 0 ? ' sel' : '');
+    div.className = 'citta-opt' + (cittaSel === c ? ' sel' : '');
     div.textContent = c;
-    div.addEventListener('click', function(){ toggleCitta(c); });
+    div.addEventListener('click', function(){ selCitta(c); });
     grid.appendChild(div);
   });
+}
+
+function selCitta(c) {
+  cittaSel = (cittaSel === c) ? null : c;
+  buildCitta(document.getElementById('citta-input').value);
+  document.getElementById('btn2').disabled = !cittaSel;
+  aggiornaRiepilogo();
+}
+
+// Città bloccata da URL
+function lockCitta(c) {
+  cittaSel = c;
+  cittaLocked = true;
+  document.getElementById('citta-picker').style.display = 'none';
+  var wrap = document.getElementById('citta-locked-wrap');
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div class="citta-locked"><span>📍 ' + c + '</span><button id="unlock-citta">Cambia città</button></div>';
+  document.getElementById('unlock-citta').addEventListener('click', function(){
+    cittaLocked = false;
+    cittaSel = null;
+    wrap.style.display = 'none';
+    document.getElementById('citta-picker').style.display = 'block';
+    document.getElementById('btn2').disabled = true;
+    buildCitta('');
+    aggiornaRiepilogo();
+  });
+  document.getElementById('btn2').disabled = false;
 }
 
 function initFiltriGeo() {
@@ -534,95 +495,122 @@ function initFiltriGeo() {
   });
 }
 
-function toggleCitta(c) {
-  var idx = citta.indexOf(c);
-  if(idx >= 0) citta.splice(idx, 1);
-  else citta.push(c);
-  buildCitta(document.getElementById('citta-input').value);
-  aggiornaChips();
+// === PERIODO ===
+function selPeriodo(k) {
+  periodoSel = k;
+  ['1','3','12'].forEach(function(x){
+    document.getElementById('tog-' + x).classList.toggle('active', x === k);
+  });
   aggiornaRiepilogo();
-  document.getElementById('btn2').disabled = citta.length === 0;
 }
 
-function aggiornaChips() {
-  var wrap = document.getElementById('chips-wrap');
-  if(citta.length === 0) { wrap.innerHTML = '<span style="font-size:12px;color:var(--light)">Nessuna città selezionata</span>'; return; }
-  wrap.innerHTML = '';
-  citta.forEach(function(c) {
-    var div = document.createElement('div');
-    div.className = 'chip';
-    div.innerHTML = '📍 ' + c + ' <span>✕</span>';
-    div.addEventListener('click', function(){ toggleCitta(c); });
-    wrap.appendChild(div);
+function aggiornaPrezziPeriodo() {
+  ['1','3','12'].forEach(function(k){
+    var el = document.getElementById('pz-' + k);
+    var p = spazioSel ? calcolaPrezzo(spazioSel, k) : null;
+    el.textContent = p != null ? '€' + p : '—';
   });
 }
 
-function selPeriodo(p) {
-  periodo = p;
-  document.getElementById('tog-m').classList.toggle('active', p === 'mensile');
-  document.getElementById('tog-a').classList.toggle('active', p === 'annuale');
-  aggiornaRiepilogo();
-}
-
-function calcolaTotale() {
-  if(!riga || citta.length === 0) return 0;
-  var base = prezziRiga[riga] * citta.length;
-  if (periodo === 'annuale') return base * 10;
-  if (periodo === 'trimestrale') return Math.round(base * 2.7);
-  return base;
-}
-
+// === RIEPILOGO / ORDINE ===
 function aggiornaRiepilogo() {
-  var posTxt = riga ? ('Riga ' + riga + ' · ' + (lato || '—')) : '—';
-  document.getElementById('r-formato').textContent = posTxt;
-  document.getElementById('r-prezzo').textContent = riga ? '€' + prezziRiga[riga] + '/mese' : '—';
-  document.getElementById('r-ncitta').textContent = citta.length;
-  document.getElementById('r-periodo').textContent = periodo === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile';
-  var tot = calcolaTotale();
-  document.getElementById('r-totale').textContent = tot > 0 ? '€' + tot : '€0';
+  document.getElementById('r-formato').textContent = spazioSel ? (fasciaDiSpazio(spazioSel) + ' · ' + latoLabel(spazioSel)) : '—';
+  document.getElementById('r-citta').textContent = cittaSel || '—';
+  document.getElementById('r-periodo').textContent = PERIODI[periodoSel].label;
+  var tot = (spazioSel && cittaSel) ? calcolaPrezzo(spazioSel, periodoSel) : 0;
+  document.getElementById('r-totale').textContent = '€' + (tot || 0);
 }
 
 function aggiornaOrdine() {
-  var tot = calcolaTotale();
-  document.getElementById('ord-totale').textContent = '€' + tot;
+  var tot = (spazioSel && cittaSel) ? calcolaPrezzo(spazioSel, periodoSel) : 0;
+  document.getElementById('ord-totale').textContent = '€' + (tot || 0);
   var rows = '';
-  rows += '<div class="ord-row"><span>Posizione</span><span>Riga ' + (riga || '—') + ' · ' + (lato || '—') + '</span></div>';
-  var c3 = citta.slice(0,2).join(', ') + (citta.length > 2 ? ' +' + (citta.length-2) : '');
-  rows += '<div class="ord-row"><span>Città</span><span>' + c3 + '</span></div>';
-  rows += '<div class="ord-row"><span>N° città</span><span>' + citta.length + '</span></div>';
-  rows += '<div class="ord-row"><span>Periodo</span><span>' + (periodo === 'annuale' ? 'Annuale (10 mesi)' : 'Mensile') + '</span></div>';
-  rows += '<div class="ord-row"><span>€/città/mese</span><span>€' + (riga ? prezziRiga[riga] : 0) + '</span></div>';
+  rows += '<div class="ord-row"><span>Posizione</span><span>' + (spazioSel ? latoLabel(spazioSel) : '—') + '</span></div>';
+  rows += '<div class="ord-row"><span>Sezione</span><span>' + (spazioSel ? fasciaDiSpazio(spazioSel) : '—') + '</span></div>';
+  rows += '<div class="ord-row"><span>Città</span><span>' + (cittaSel || '—') + '</span></div>';
+  rows += '<div class="ord-row"><span>Periodo</span><span>' + PERIODI[periodoSel].label + '</span></div>';
   document.getElementById('ord-rows').innerHTML = rows;
+}
+
+// === NAVIGAZIONE ===
+function showPage(n, fromPopstate) {
+  document.querySelectorAll('.step-page').forEach(function(p){ p.classList.remove('visible'); });
+  document.querySelectorAll('.step-tab').forEach(function(t){ t.classList.remove('active'); });
+  if (n <= 3) {
+    document.getElementById('page' + n).classList.add('visible');
+    document.getElementById('tab' + n).classList.add('active');
+  } else {
+    document.getElementById('page-ok').classList.add('visible');
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (n === 3) aggiornaOrdine();
+  if (!fromPopstate) history.pushState({step: n}, '');
 }
 
 history.replaceState({step: 1}, '');
 window.onpopstate = function(e) {
-  if (e.state && typeof e.state.step !== 'undefined') {
-    showPage(e.state.step, true);
-  }
+  if (e.state && typeof e.state.step !== 'undefined') showPage(e.state.step, true);
 };
 
-async function inviaOrdine() {
-  var azienda = document.getElementById('p-azienda').value.trim();
-  var email = document.getElementById('p-email').value.trim();
-  if(!azienda || !email) { alert('Compila azienda ed email!'); return; }
-  if(!riga || !lato || citta.length === 0) { alert('Seleziona una posizione e almeno una città!'); return; }
+// === INIT ===
+window.addEventListener('DOMContentLoaded', function() {
+  initFiltriGeo();
+  buildCitta('');
+  buildSchema();
 
+  document.getElementById('nav-prenota').addEventListener('click', function(e){ e.preventDefault(); showPage(1); });
+  document.getElementById('btn1').addEventListener('click', function(){ if(spazioSel) showPage(2); });
+  document.getElementById('btn2').addEventListener('click', function(){ if(cittaSel) showPage(3); });
+  document.getElementById('back1').addEventListener('click', function(){ showPage(1); });
+  document.getElementById('back2').addEventListener('click', function(){ showPage(2); });
+
+  document.getElementById('tog-1').addEventListener('click', function(){ selPeriodo('1'); });
+  document.getElementById('tog-3').addEventListener('click', function(){ selPeriodo('3'); });
+  document.getElementById('tog-12').addEventListener('click', function(){ selPeriodo('12'); });
+
+  document.getElementById('citta-input').addEventListener('input', function(){ buildCitta(this.value); });
+  document.getElementById('btn-ordina').addEventListener('click', inviaOrdine);
+
+  // Pre-selezione da URL
+  if (paramSpazio && PREZZI_MENSILI[paramSpazio] != null) {
+    selSpazio(paramSpazio);
+  }
+  if (paramCitta) {
+    var cittaTrovata = tutteCitta.find(function(c){ return c.toLowerCase() === paramCitta.toLowerCase(); });
+    if (cittaTrovata) lockCitta(cittaTrovata);
+  }
+  aggiornaPrezziPeriodo();
+  aggiornaRiepilogo();
+});
+
+// === SUBMIT: INSERT pending + notifica + Stripe ===
+async function inviaOrdine() {
+  if (!spazioSel || !cittaSel) { alert('Seleziona posizione e città!'); return; }
   if (!currentImpresa || !currentImpresa.id) {
-    alert("Devi prima registrarti come impresa per pubblicare annunci.");
+    alert('Devi prima registrarti come impresa per pubblicare annunci.');
     return;
   }
 
   var btn = document.getElementById('btn-ordina');
-  btn.textContent = '⏳ Invio in corso...';
+  btn.textContent = '⏳ Attendere...';
   btn.disabled = true;
 
-  // Disponibilità: blocca città già occupate in questa posizione
+  // Calcolo periodo
+  var mesi = PERIODI[periodoSel].mesi;
+  var inizioD = new Date();
+  var fineD = new Date(inizioD);
+  fineD.setMonth(fineD.getMonth() + mesi);
+  var dataInizio = inizioD.toISOString().slice(0, 10);
+  var dataFine = fineD.toISOString().slice(0, 10);
+  var prezzo = calcolaPrezzo(spazioSel, periodoSel);
+
+  // Disponibilità: blocca se esiste annuncio pagato sullo stesso spazio+città con periodo sovrapposto
   var occ = await supabaseClient.from('annunci_pubblicitari')
-    .select('citta').eq('lato', lato).eq('riga', riga).eq('stato', 'pagato').in('citta', citta);
-  if (occ.data && occ.data.length) {
-    alert('Spazio già occupato in: ' + occ.data.map(function(o){ return o.citta; }).join(', ') + '. Toglile o cambia posizione.');
-    btn.textContent = '📩 Conferma e invia ordine';
+    .select('data_inizio,data_fine')
+    .eq('spazio_id', spazioSel).eq('citta', cittaSel).eq('stato', 'pagato');
+  if (occ.data && occ.data.some(function(o){ return o.data_inizio <= dataFine && o.data_fine >= dataInizio; })) {
+    alert('Questo spazio è già occupato a ' + cittaSel + ' nel periodo scelto. Scegli un altro spazio o un periodo successivo.');
+    btn.textContent = '💳 Conferma e vai al pagamento';
     btn.disabled = false;
     return;
   }
@@ -633,7 +621,7 @@ async function inviaOrdine() {
   if (logoFile) {
     if (logoFile.size > 2 * 1024 * 1024) {
       alert('Il logo supera i 2MB. Carica un file più piccolo.');
-      btn.textContent = '📩 Conferma e invia ordine';
+      btn.textContent = '💳 Conferma e vai al pagamento';
       btn.disabled = false;
       return;
     }
@@ -642,7 +630,7 @@ async function inviaOrdine() {
     var uploadRes = await supabaseClient.storage.from('loghi-pubblicita').upload(path, logoFile, { contentType: logoFile.type });
     if (uploadRes.error) {
       alert('Errore upload logo: ' + uploadRes.error.message);
-      btn.textContent = '📩 Conferma e invia ordine';
+      btn.textContent = '💳 Conferma e vai al pagamento';
       btn.disabled = false;
       return;
     }
@@ -650,66 +638,68 @@ async function inviaOrdine() {
   }
 
   var linkUrl = document.getElementById('p-link').value.trim() || null;
-  var mult = periodo === 'annuale' ? 10 : (periodo === 'trimestrale' ? 2.7 : 1);
-  var importoRiga = Math.round(prezziRiga[riga] * mult);
 
-  // Una riga per città
-  var righe = citta.map(function(c) {
-    return {
-      impresa_id: currentImpresa.id,
-      nome_impresa: azienda,
-      email: email,
-      logo_url: logoUrl,
-      link_url: linkUrl,
-      citta: c,
-      lato: lato,
-      riga: riga,
-      prezzo: prezziRiga[riga],
-      piano: periodo,
-      importo_pagato: importoRiga,
-      stato: 'pending'
-    };
-  });
+  var record = {
+    spazio_id: spazioSel,
+    citta: cittaSel,
+    impresa_id: currentImpresa.id,
+    logo_url: logoUrl,
+    link_url: linkUrl,
+    prezzo: prezzo,
+    data_inizio: dataInizio,
+    data_fine: dataFine,
+    stato: 'pending'
+  };
 
-  const { data: insertData, error: insertError } = await supabaseClient.from('annunci_pubblicitari').insert(righe).select('id');
+  const { data: insertData, error: insertError } = await supabaseClient
+    .from('annunci_pubblicitari').insert(record).select('id').single();
 
   if (insertError) {
     alert('Errore durante l\'invio: ' + insertError.message);
-    btn.textContent = '📩 Conferma e invia ordine';
+    btn.textContent = '💳 Conferma e vai al pagamento';
     btn.disabled = false;
     return;
   }
 
-  const ids = insertData.map(function(r){ return r.id; });
+  const annuncioId = insertData.id;
 
+  // Notifica email staff (non blocca il flusso)
   fetch('/.netlify/functions/notifica-pubblicita', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     keepalive: true,
     body: JSON.stringify({
-      impresa: azienda,
-      email: email,
+      impresa: document.getElementById('p-azienda').value.trim(),
+      email: document.getElementById('p-email').value.trim(),
       telefono: currentImpresa.telefono || '',
-      formato: 'Riga ' + riga + ' · ' + lato,
-      durata: periodo,
-      citta: citta.join(', '),
-      totale: calcolaTotale(),
-      annuncio_id: (insertData && insertData[0]) ? insertData[0].id : null
+      spazio: fasciaDiSpazio(spazioSel) + ' · ' + latoLabel(spazioSel),
+      spazio_id: spazioSel,
+      citta: cittaSel,
+      periodo: PERIODI[periodoSel].label,
+      prezzo: prezzo,
+      annuncio_id: annuncioId
     })
   }).catch(function(e) { console.error('Notifica email fallita:', e); });
 
+  // Stripe checkout
   const checkoutRes = await fetch('/.netlify/functions/crea-checkout-pubblicita', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ids: ids, piano: periodo })
+    body: JSON.stringify({
+      annuncio_id: annuncioId,
+      spazio_id: spazioSel,
+      citta: cittaSel,
+      periodo: PERIODI[periodoSel].label,
+      prezzo: prezzo
+    })
   });
   const checkout = await checkoutRes.json();
-  if (checkout.url) {
+  if (checkout && checkout.url) {
     window.location.href = checkout.url;
   } else {
-    alert('Errore checkout: ' + checkout.error);
+    alert('Errore checkout: ' + (checkout && checkout.error ? checkout.error : 'riprova'));
     btn.disabled = false;
-    btn.textContent = '📩 Conferma e invia ordine';
+    btn.textContent = '💳 Conferma e vai al pagamento';
   }
 }
 </script>
