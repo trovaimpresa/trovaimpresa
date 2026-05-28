@@ -19,7 +19,7 @@
       console.log('[pub-spazi] Nessuna città in URL, skip (home nazionale).');
       return;
     }
-    const citta = cittaRaw.toLowerCase().trim();
+    const citta = cittaRaw.trim();
 
     // 2. Lista completa dei 18 spazi (per pre-compilazione link al form)
     const TUTTI_SPAZI = [
@@ -53,7 +53,7 @@
       const { data, error } = await client
         .from('annunci_pubblicitari')
         .select('spazio_id, logo_url, link_url')
-        .eq('citta', citta)
+        .ilike('citta', citta)
         .eq('stato', 'pagato')
         .gte('data_fine', oggi);
 
