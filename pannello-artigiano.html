@@ -431,7 +431,6 @@
     background:var(--arancio); border-radius:20px;
     padding:4px 12px; font-size:0.82rem; font-weight:700;
   }
-  .dash-piano-badge.pro { background:#1a73e8; }
   .dash-piano-badge.premium { background:#7b1fa2; }
   /* Certificazioni */
   .cert-item {
@@ -1419,7 +1418,7 @@
         <div id="card-premium" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
           <div style="font-size:1.5rem;margin-bottom:6px">👑</div>
           <div style="font-weight:800;font-size:1rem;color:#7c3aed;margin-bottom:6px">Premium</div>
-          <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto di Pro +<br>Logo personalizzato<br>Colore header personalizzato<br>Assistenza prioritaria</div>
+          <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto di Free +<br>Logo personalizzato<br>Colore header personalizzato<br>Assistenza prioritaria</div>
           <div style="margin-top:12px">
             <select id="sceltaPiano" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-weight:700;font-size:0.85rem;margin-bottom:8px;background:white;color:#333;cursor:pointer">
               <option value="mensile" selected>Mensile – €5/mese</option>
@@ -2593,7 +2592,7 @@ const PANNELLO_CORRENTE = 'artigiano';
 async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const piano = (impresaCorrente.piano || 'free').toLowerCase();
-  const isPro = piano === 'pro' || piano === 'premium';
+  const isPremium = piano === 'premium';
   const { data: recsRating } = await sb.from('feedback_clienti')
     .select('stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita')
     .eq('impresa_id', impresaCorrente.id)
@@ -2680,7 +2679,7 @@ async function inizializza() {
   // Area logo in base al piano
   const logoCol = document.getElementById('dash-hero-logo-col');
   if (logoCol) {
-    if (!isPro) {
+    if (!isPremium) {
       logoCol.style.cursor = 'default';
       logoCol.innerHTML = '';
     } else {
@@ -2729,21 +2728,18 @@ function aggiornaBadgeEOverlay() {
   const piano = (impresaCorrente ? (impresaCorrente.piano || 'free') : 'free').toLowerCase();
   const pianoBadge = document.getElementById('dash-piano-badge');
   if (pianoBadge) {
-    pianoBadge.classList.remove('pro', 'premium');
+    pianoBadge.classList.remove('premium');
     if (piano === 'premium') {
       pianoBadge.textContent = '💎 Premium';
       pianoBadge.classList.add('premium');
-    } else if (piano === 'pro') {
-      pianoBadge.textContent = '⭐ Pro';
-      pianoBadge.classList.add('pro');
     } else {
       pianoBadge.textContent = '🆓 Free';
     }
   }
   const lbl = document.getElementById('piano-dashboard-label');
   if (lbl) {
-    lbl.textContent = piano === 'premium' ? 'Premium 👑' : piano === 'pro' ? 'Pro ⭐' : 'Free';
-    lbl.style.color = piano === 'premium' ? '#7c3aed' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
+    lbl.textContent = piano === 'premium' ? 'Premium 👑' : 'Free';
+    lbl.style.color = piano === 'premium' ? '#7c3aed' : '#2a7a4b';
   }
   if (impresaCorrente.tipo === PANNELLO_CORRENTE) {
     aggiornaPianoCards(piano);
@@ -2852,20 +2848,18 @@ async function caricaPreventivi() {
     _badgePrev.style.display = _nonRisposti > 0 ? 'inline-block' : 'none';
   }
 
-  // Contatore richieste preventivo del mese (Free=3, Pro=10, Premium=∞)
+  // Contatore richieste preventivo del mese (Free=3, Premium=∞)
   const _pianoPrev = (impresaCorrente.piano || 'free').toLowerCase();
-  const _maxPrev = _pianoPrev === 'premium' ? Infinity : _pianoPrev === 'pro' ? 10 : 3;
+  const _maxPrev = _pianoPrev === 'premium' ? Infinity : 3;
   const _inizioMesePrev = new Date(); _inizioMesePrev.setDate(1); _inizioMesePrev.setHours(0,0,0,0);
   const _prevMese = lista.filter(p => new Date(p.created_at) >= _inizioMesePrev).length;
   const _atLimitPrev = _maxPrev !== Infinity && _prevMese >= _maxPrev;
   const _contPrevEl = document.getElementById('contatore-preventivi-mese');
   if (_contPrevEl) {
-    _contPrevEl.innerHTML = _pianoPrev === 'free'
-      ? `📊 Richieste preventivo questo mese: <strong>${_prevMese}/3</strong> (piano Free) — <a href="info-pro.html" style="color:var(--arancio);font-weight:700">Passa a Pro</a> per 10/mese`
-      : _pianoPrev === 'pro'
-      ? `📊 Richieste preventivo questo mese: <strong>${_prevMese}/10</strong> (piano Pro) — <a href="info-premium.html" style="color:#7c3aed;font-weight:700">Passa a Premium</a> per illimitate`
-      : `📊 Richieste preventivo questo mese: <strong>${_prevMese}</strong> (illimitate)`;
-    _contPrevEl.style.borderLeftColor = _atLimitPrev ? '#c0392b' : (_pianoPrev === 'premium' ? '#7c3aed' : _pianoPrev === 'pro' ? '#1a73e8' : '#2a7a4b');
+    _contPrevEl.innerHTML = _pianoPrev === 'premium'
+      ? `📊 Richieste preventivo questo mese: <strong>${_prevMese}</strong> (illimitate)`
+      : `📊 Richieste preventivo questo mese: <strong>${_prevMese}/3</strong> (piano Free) — <a href="info-premium.html" style="color:#7c3aed;font-weight:700">Passa a Premium</a> per richieste illimitate`;
+    _contPrevEl.style.borderLeftColor = _atLimitPrev ? '#c0392b' : (_pianoPrev === 'premium' ? '#7c3aed' : '#2a7a4b');
   }
 
   const container = document.getElementById('lista-preventivi');
@@ -4357,23 +4351,21 @@ async function caricaAnnunciLavoro() {
   annunciLavoro = data || [];
   const attivi = annunciLavoro.filter(a => a.attiva).length;
 
-  // Conteggio offerte del mese corrente (Free=1, Pro=3, Premium=∞)
+  // Conteggio offerte del mese corrente (Free=1, Premium=∞)
   const _piano = (impresaCorrente.piano || 'free').toLowerCase();
-  const _maxMese = _piano === 'premium' ? Infinity : _piano === 'pro' ? 3 : 1;
+  const _maxMese = _piano === 'premium' ? Infinity : 1;
   const _inizioMese = new Date(); _inizioMese.setDate(1); _inizioMese.setHours(0,0,0,0);
   const _offerteMese = annunciLavoro.filter(a => new Date(a.created_at) >= _inizioMese).length;
   const _atLimit = _offerteMese >= _maxMese;
   const _pianoLabel = _piano.charAt(0).toUpperCase() + _piano.slice(1);
   const _limiteStr = _maxMese === Infinity ? '∞' : _maxMese;
-  const _upsell = _piano === 'free'
-    ? ' — <a href="info-pro.html" style="color:var(--arancio);font-weight:700">Passa a Pro</a> per 3/mese'
-    : _piano === 'pro'
-    ? ' — <a href="info-premium.html" style="color:#7c3aed;font-weight:700">Passa a Premium</a> per offerte illimitate'
-    : '';
+  const _upsell = _piano === 'premium'
+    ? ''
+    : ' — <a href="info-premium.html" style="color:#7c3aed;font-weight:700">Passa a Premium</a> per offerte illimitate';
   const _contEl = document.getElementById('contatore-offerte-mese');
   if (_contEl) {
     _contEl.innerHTML = `📊 Offerte questo mese: <strong>${_offerteMese}/${_limiteStr}</strong> (Piano ${_pianoLabel})${_upsell}`;
-    _contEl.style.borderLeftColor = _atLimit ? '#c0392b' : (_piano === 'premium' ? '#7c3aed' : _piano === 'pro' ? '#1a73e8' : '#2a7a4b');
+    _contEl.style.borderLeftColor = _atLimit ? '#c0392b' : (_piano === 'premium' ? '#7c3aed' : '#2a7a4b');
   }
 
   // Aggiorna badge sidebar
@@ -4428,18 +4420,17 @@ function mostraAnnunciLavoro() {
 async function impostaPiano(piano) {
   if (!impresaCorrente) return;
   piano = (piano || '').toLowerCase();
-  const conferma = confirm(piano === 'pro' ? '⭐ Attivare il piano Pro?' : 'Tornare al piano Free?');
+  const conferma = confirm('Tornare al piano Free?');
   if (!conferma) return;
   const { error } = await sb.from('imprese').update({ piano }).eq('id', impresaCorrente.id);
   if (error) { alert('Errore: ' + error.message); return; }
   impresaCorrente.piano = piano;
-  const isPro = piano === 'pro';
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
-    dashLabel.textContent = piano === 'premium' ? 'Premium 👑' : piano === 'pro' ? 'Pro ⭐' : 'Free';
-    dashLabel.style.color = piano === 'premium' ? '#7c3aed' : piano === 'pro' ? '#1565c0' : '#2a7a4b';
+    dashLabel.textContent = piano === 'premium' ? 'Premium 👑' : 'Free';
+    dashLabel.style.color = piano === 'premium' ? '#7c3aed' : '#2a7a4b';
   }
-  alert(piano === 'premium' ? '✅ Piano Premium attivato! Ora sei al top dei risultati.' : piano === 'pro' ? '✅ Piano Pro attivato! Ora sei in evidenza nei risultati.' : '✅ Tornato al piano Free.');
+  alert(piano === 'premium' ? '✅ Piano Premium attivato! Ora sei al top dei risultati.' : '✅ Tornato al piano Free.');
 }
 
 function apriFormAnnuncio() {
@@ -4461,9 +4452,9 @@ function chiudiFormAnnuncio() {
 }
 
 async function salvaAnnuncio() {
-  // Gating mensile (Free=1, Pro=3, Premium=∞)
+  // Gating mensile (Free=1, Premium=∞)
   const _pianoSav = (impresaCorrente.piano || 'free').toLowerCase();
-  const _maxMeseSav = _pianoSav === 'premium' ? Infinity : _pianoSav === 'pro' ? 3 : 1;
+  const _maxMeseSav = _pianoSav === 'premium' ? Infinity : 1;
   const _inizioMeseSav = new Date(); _inizioMeseSav.setDate(1); _inizioMeseSav.setHours(0,0,0,0);
   const _offerteMeseSav = annunciLavoro.filter(a => new Date(a.created_at) >= _inizioMeseSav).length;
   if (_offerteMeseSav >= _maxMeseSav) {
@@ -4548,7 +4539,6 @@ async function copiaPreventivoDash() {
 // FOTO DEI LAVORI
 // =====================
 const MAX_FOTO_FREE = 5;
-const MAX_FOTO_PRO = 20;
 let fotoCaricate = [];
 
 async function caricaFotoLavori() {
@@ -4564,14 +4554,11 @@ async function caricaFotoLavori() {
 function aggiornaBannerFoto() {
   const piano = (impresaCorrente.piano || '').toLowerCase();
   const isPremium = piano === 'premium';
-  const isPro = piano === 'pro';
   const n = fotoCaricate.length;
-  const rimaste = isPremium ? Infinity : isPro ? Math.max(0, MAX_FOTO_PRO - n) : Math.max(0, MAX_FOTO_FREE - n);
+  const rimaste = isPremium ? Infinity : Math.max(0, MAX_FOTO_FREE - n);
   const testoHTML = isPremium
     ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7c3aed">Premium 💎</strong> — illimitate`
-    : isPro
-    ? `<span class="foto-limit-num">${n}/${MAX_FOTO_PRO}</span> foto caricate · Piano <strong style="color:#1a73e8">Pro ⭐</strong> — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="info-premium.html" style="color:var(--arancio);font-weight:700">passa a Premium</a> per foto illimitate'}`
-    : `<span class="foto-limit-num">${n}/${MAX_FOTO_FREE}</span> foto caricate · Piano Free — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="prezzi.html" style="color:var(--arancio);font-weight:700">passa a Pro</a> per foto illimitate'}`;
+    : `<span class="foto-limit-num">${n}/${MAX_FOTO_FREE}</span> foto caricate · Piano Free — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="info-premium.html" style="color:var(--arancio);font-weight:700">passa a Premium</a> per foto illimitate'}`;
 
   for (const suffix of ['', '-dash']) {
     const barEl = document.getElementById('foto-limit-bar' + suffix);
@@ -4579,7 +4566,7 @@ function aggiornaBannerFoto() {
     const uploadArea = document.getElementById('foto-upload-area' + suffix);
     if (!barEl) continue;
     testoEl.innerHTML = testoHTML;
-    barEl.style.borderColor = (isPremium || isPro) ? '#1a73e8' : '';
+    barEl.style.borderColor = isPremium ? '#1a73e8' : '';
     uploadArea.style.display = (isPremium || rimaste > 0) ? '' : 'none';
   }
 }
@@ -4602,15 +4589,10 @@ async function uploadFoto(files) {
   if (!files?.length) return;
   const piano = (impresaCorrente.piano || '').toLowerCase();
   const isPremium = piano === 'premium';
-  const isPro = piano === 'pro';
-  const rimaste = isPremium ? Infinity : isPro ? Math.max(0, MAX_FOTO_PRO - fotoCaricate.length) : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
+  const rimaste = isPremium ? Infinity : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
 
   if (!isPremium && rimaste === 0) {
-    if (isPro) {
-      alert('Hai raggiunto il limite di 20 foto del piano Pro. Passa a Premium per foto illimitate.');
-    } else {
-      alert('Hai raggiunto il limite di 5 foto per il piano Free. Passa a Pro per foto illimitate!');
-    }
+    alert('Hai raggiunto il limite di 5 foto per il piano Free. Passa a Premium per foto illimitate!');
     return;
   }
 
@@ -4714,19 +4696,15 @@ function chiudiModal() {
 }
 
 async function inviaPreventivo() {
-  // Gating mensile (Free=3, Pro=10, Premium=∞)
+  // Gating mensile (Free=3, Premium=∞)
   const _pianoInv = (impresaCorrente.piano || 'free').toLowerCase();
-  const _maxInv = _pianoInv === 'premium' ? Infinity : _pianoInv === 'pro' ? 10 : 3;
+  const _maxInv = _pianoInv === 'premium' ? Infinity : 3;
   if (_maxInv !== Infinity) {
     const { data: _prevList } = await sb.from('preventivi').select('id,created_at').eq('impresa_id', impresaCorrente.id);
     const _inizioMeseInv = new Date(); _inizioMeseInv.setDate(1); _inizioMeseInv.setHours(0,0,0,0);
     const _prevMeseInv = (_prevList || []).filter(p => new Date(p.created_at) >= _inizioMeseInv).length;
     if (_prevMeseInv >= _maxInv) {
-      if (_pianoInv === 'free') {
-        alert('Hai raggiunto il limite di 3 richieste preventivo mensili del piano Free. Passa a Pro per 10/mese.');
-      } else {
-        alert('Hai raggiunto il limite di 10 richieste preventivo mensili del piano Pro. Passa a Premium per richieste illimitate.');
-      }
+      alert('Hai raggiunto il limite di 3 richieste preventivo mensili del piano Free. Passa a Premium per richieste illimitate.');
       return;
     }
   }
