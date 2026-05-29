@@ -5041,12 +5041,13 @@ async function salvaListaAttesaPub() {
     nome_azienda: impresaCorrente.nome_attivita || '',
     telefono: impresaCorrente.telefono || '',
     citta,
-    periodo,
+    periodo_desiderato: periodo,
     note,
     stato: 'attesa'
   });
 
   if (error) {
+    console.error('[lista-attesa-pub] Errore INSERT:', error);
     alert('Errore nel salvataggio. Riprova.');
     btn.textContent = '💾 Salva richiesta';
     btn.disabled = false;
