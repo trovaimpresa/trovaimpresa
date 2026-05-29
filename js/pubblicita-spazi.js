@@ -92,9 +92,9 @@
   function aggiornaHrefVuoti(tutti, venduti, citta) {
     for (const sp of tutti) {
       if (venduti.has(sp)) continue;
-      const a = document.querySelector(`a.pub-link[data-spazio-id="${sp}"]`);
-      if (a) {
-        a.href = `/pubblicita?spazio=${encodeURIComponent(sp)}&citta=${encodeURIComponent(citta)}`;
+      const slot = document.querySelector(`a.pub-link[data-spazio-id="${sp}"]`);
+      if (slot) {
+        slot.style.display = 'none';
       }
     }
   }
