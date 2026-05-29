@@ -98,10 +98,6 @@
     box-shadow:var(--shadow); border:2px solid var(--border);
     position:relative; transition:all 0.3s;
   }
-  .piano-card.pro {
-    border-color:var(--verde); background:linear-gradient(180deg,#f0faf5,white);
-    box-shadow:var(--shadow2);
-  }
   .piano-badge {
     position:absolute; top:-14px; left:50%; transform:translateX(-50%);
     background:var(--arancio); color:white; padding:5px 18px;
@@ -138,11 +134,6 @@
     box-shadow:0 6px 20px rgba(42,122,75,0.35);
   }
   .piano-btn.free:hover { background:#163d27; transform:translateY(-1px); }
-  .piano-btn.pro-btn {
-    background:var(--arancio); color:white;
-    box-shadow:0 6px 20px rgba(232,115,58,0.35);
-  }
-  .piano-btn.pro-btn:hover { background:var(--arancio2); transform:translateY(-1px); }
 
   /* FAQ */
   .faq { max-width:700px; margin:0 auto; padding:0 24px 80px; }
@@ -323,49 +314,8 @@
   </div>
 </div>
 
-<!-- MODAL PAGAMENTO -->
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)chiudiModal()">
-  <div class="modal" style="position:relative">
-    <button class="btn-chiudi-modal" onclick="chiudiModal()">✕</button>
-    <div class="modal-title">💳 Attiva piano Pro</div>
-    <div class="modal-sub">Inizia subito — il primo anno è gratis!</div>
-
-    <div class="riepilogo-pay">
-      <div class="riepilogo-row"><span>Piano Pro TrovaImpresa</span><span id="pay-piano">Mensile</span></div>
-      <div class="riepilogo-row"><span>Primi 3 mesi</span><span style="color:var(--verde)">GRATIS</span></div>
-      <div class="riepilogo-row"><span>Dopo i 3 mesi</span><span id="pay-prezzo">€3/mese</span></div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Email impresa</label>
-      <input type="email" class="form-input" id="pay-email" placeholder="tua@email.com">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Dati carta</label>
-      <div id="card-element"></div>
-    </div>
-
-    <div class="pay-err" id="pay-err"></div>
-
-    <button class="pay-btn" id="pay-btn" onclick="processaPagamento()">
-      🔒 Attiva piano Pro gratis
-    </button>
-
-    <div class="stripe-logo">
-      🔒 Pagamento sicuro tramite <strong>Stripe</strong>
-    </div>
-  </div>
-</div>
-
-<script src="https://js.stripe.com/v3/"></script>
 <script>
-const STRIPE_KEY = 'pk_test_51TBh60PaYWKYGE1dl940APTOMGZ1ycnDgKQgtNgokucvvRtWMfbDTkO5vwN38v79aWceKhTO2x8Tdu5pjxStHnbh002LGOV6Ws';
-const stripe = Stripe(STRIPE_KEY);
-const elements = stripe.elements();
-
 let pianoAnnuale = false;
-let cardElement = null;
 
 // TOGGLE PIANO
 function togglePiano() {
@@ -374,89 +324,10 @@ function togglePiano() {
   toggle.classList.toggle('annuale', pianoAnnuale);
 
   if (pianoAnnuale) {
-    document.getElementById('pay-piano').textContent = 'Annuale';
-    document.getElementById('pay-prezzo').textContent = '€29/anno';
     document.getElementById('prezzo-display-premium').textContent = '€49';
   } else {
-    document.getElementById('pay-piano').textContent = 'Mensile';
-    document.getElementById('pay-prezzo').textContent = '€3/mese';
     document.getElementById('prezzo-display-premium').textContent = '€5';
   }
-}
-
-// APRI MODAL PAGAMENTO
-function apriModal() {
-  document.getElementById('modal-overlay').classList.add('show');
-
-  // Inizializza Stripe Elements
-  if (!cardElement) {
-    cardElement = elements.create('card', {
-      style: {
-        base: {
-          fontFamily: 'DM Sans, sans-serif',
-          fontSize: '16px',
-          color: '#1a1a1a',
-          '::placeholder': { color: '#999' }
-        }
-      },
-      hidePostalCode: true
-    });
-    cardElement.mount('#card-element');
-  }
-}
-
-function apriPagamento() { apriModal(); }
-
-function chiudiModal() {
-  document.getElementById('modal-overlay').classList.remove('show');
-}
-
-// PROCESSA PAGAMENTO (TEST)
-async function processaPagamento() {
-  const email = document.getElementById('pay-email').value.trim();
-  if (!email) {
-    mostraErr('Inserisci la tua email!');
-    return;
-  }
-
-  const btn = document.getElementById('pay-btn');
-  btn.textContent = '⏳ Elaborazione...';
-  btn.disabled = true;
-  document.getElementById('pay-err').style.display = 'none';
-
-  // Valida carta con Stripe (solo tokenizzazione, no addebito in test)
-  const { token, error } = await stripe.createToken(cardElement, {
-    currency: 'eur'
-  });
-
-  if (error) {
-    mostraErr(error.message);
-    btn.textContent = '🔒 Attiva piano Pro gratis';
-    btn.disabled = false;
-    return;
-  }
-
-  // Successo — carta valida!
-  chiudiModal();
-  document.body.innerHTML += `
-    <div style="position:fixed;inset:0;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);display:flex;align-items:center;justify-content:center;z-index:999;color:white;text-align:center;padding:24px">
-      <div>
-        <div style="font-size:4rem;margin-bottom:16px">🎉</div>
-        <div style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:12px">Piano Pro attivato!</div>
-        <div style="font-size:1rem;opacity:0.85;margin-bottom:8px">Il tuo primo anno è <strong>completamente gratuito</strong>.</div>
-        <div style="font-size:0.88rem;opacity:0.7;margin-bottom:32px">Conferma inviata a: ${email}</div>
-        <a href="login-impresa.html" style="background:white;color:#1a3a2a;padding:14px 32px;border-radius:14px;font-weight:800;text-decoration:none;font-size:1rem">
-          Vai al tuo pannello →
-        </a>
-      </div>
-    </div>
-  `;
-}
-
-function mostraErr(msg) {
-  const el = document.getElementById('pay-err');
-  el.textContent = '❌ ' + msg;
-  el.style.display = 'block';
 }
 
 // FAQ
