@@ -2204,28 +2204,10 @@
     <div class="modal-ai-header">
       <div>
         <h2>⏳ Lista d'attesa pubblicità</h2>
-        <p>Mettiti in lista per gli spazi pubblicitari della tua città</p>
       </div>
       <button class="modal-ai-close" onclick="chiudiModalListaAttesaPub()">✕</button>
     </div>
     <div class="modal-ai-body">
-      <div id="lap-form">
-        <div class="ai-form-group">
-          <label>Città *</label>
-          <input type="text" id="lap-citta" placeholder="Es. Roma">
-        </div>
-        <div class="ai-form-group">
-          <label>Periodo</label>
-          <input type="text" id="lap-periodo" placeholder="Es. Gennaio 2026 — 3 mesi">
-        </div>
-        <div class="ai-form-group">
-          <label>Note</label>
-          <textarea id="lap-note" placeholder="Note aggiuntive (facoltative)…"></textarea>
-        </div>
-        <div>
-          <button class="btn-salva-annuncio" onclick="salvaListaAttesaPub()">💾 Salva richiesta</button>
-        </div>
-      </div>
       <div id="lap-risultato" style="display:none;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:16px;font-size:15px;line-height:1.5;color:#1a3a2a;text-align:center;font-weight:700;"></div>
     </div>
   </div>
@@ -4971,10 +4953,6 @@ function chiudiModalRisoluzione() {
 }
 
 async function apriModalListaAttesaPub() {
-  document.getElementById('lap-citta').value = impresaCorrente.citta || '';
-  document.getElementById('lap-periodo').value = '';
-  document.getElementById('lap-note').value = '';
-  document.getElementById('lap-form').style.display = '';
   const ris = document.getElementById('lap-risultato');
   ris.style.display = 'none';
   ris.innerHTML = '';
@@ -4988,7 +4966,7 @@ async function apriModalListaAttesaPub() {
     .order('created_at', { ascending: true });
 
   if (error || !data || data.length === 0) {
-    ris.textContent = "Non sei in lista d'attesa";
+    ris.textContent = "Non sei in lista d'attesa. Per iscriverti vai su Pubblicità quando lo spazio che vuoi è occupato.";
     ris.style.display = '';
     return;
   }
@@ -4996,11 +4974,10 @@ async function apriModalListaAttesaPub() {
   // 'offerto' ha priorità: spazio riservato all'azienda
   const offerto = data.find(r => r.stato === 'offerto');
   if (offerto) {
-    document.getElementById('lap-form').style.display = 'none';
     const scad = offerto.offerta_scadenza
       ? new Date(offerto.offerta_scadenza).toLocaleDateString('it-IT')
       : '';
-    ris.innerHTML = `Spazio libero a ${escHtml(offerto.citta)}, è tuo fino al ${escHtml(scad)}` +
+    ris.innerHTML = `Si è liberato uno spazio a ${escHtml(offerto.citta)}! È tuo fino al ${escHtml(scad)}. Vuoi prenotarlo?` +
       `<div style="margin-top:14px;"><a href="pubblicita.html" class="btn-salva-annuncio" style="display:inline-block;text-decoration:none;">🛒 Acquista</a></div>`;
     ris.style.display = '';
     return;
@@ -5008,7 +4985,6 @@ async function apriModalListaAttesaPub() {
 
   // 'attesa': posizione = n. aziende in attesa per quella città con created_at <= la sua
   const inAttesa = data.find(r => r.stato === 'attesa');
-  document.getElementById('lap-form').style.display = 'none';
   const { count } = await sb.from('lista_attesa_pubblicita')
     .select('id', { count: 'exact', head: true })
     .ilike('citta', inAttesa.citta)
@@ -5020,51 +4996,6 @@ async function apriModalListaAttesaPub() {
 
 function chiudiModalListaAttesaPub() {
   document.getElementById('modalListaAttesaPub').classList.remove('show');
-}
-
-async function salvaListaAttesaPub() {
-  const citta = document.getElementById('lap-citta').value.trim();
-  const periodo = document.getElementById('lap-periodo').value.trim();
-  const note = document.getElementById('lap-note').value.trim();
-  if (!citta) {
-    alert('Inserisci la città.');
-    return;
-  }
-
-  const btn = document.querySelector('#lap-form .btn-salva-annuncio');
-  btn.textContent = '⏳ Salvataggio...';
-  btn.disabled = true;
-
-  const { error } = await sb.from('lista_attesa_pubblicita').insert({
-    impresa_id: impresaCorrente.id,
-    email: impresaCorrente.email || '',
-    nome_azienda: impresaCorrente.nome_attivita || '',
-    telefono: impresaCorrente.telefono || '',
-    citta,
-    periodo_desiderato: periodo,
-    note,
-    stato: 'attesa'
-  });
-
-  if (error) {
-    console.error('[lista-attesa-pub] Errore INSERT:', error);
-    alert('Errore nel salvataggio. Riprova.');
-    btn.textContent = '💾 Salva richiesta';
-    btn.disabled = false;
-    return;
-  }
-
-  const { count } = await sb.from('lista_attesa_pubblicita')
-    .select('id', { count: 'exact', head: true })
-    .ilike('citta', citta)
-    .eq('stato', 'attesa');
-
-  btn.textContent = '💾 Salva richiesta';
-  btn.disabled = false;
-  document.getElementById('lap-form').style.display = 'none';
-  const ris = document.getElementById('lap-risultato');
-  ris.textContent = `Sei in posizione n° ${count || 1} per ${citta}`;
-  ris.style.display = '';
 }
 
 function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
