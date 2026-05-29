@@ -77,7 +77,7 @@
 
   /* PIANI */
   .piani-grid {
-    display:grid; grid-template-columns:repeat(3,1fr);
+    display:grid; grid-template-columns:repeat(2,1fr);
     gap:24px; max-width:1100px; margin:32px auto; padding:0 24px 80px;
   }
   @media(max-width:900px){ .piani-grid { grid-template-columns:repeat(2,1fr); } }
@@ -222,7 +222,7 @@
   <img src="logo.png" alt="TrovaImpresa" style="width:600px;max-width:90%;margin:0 auto 0;display:block;">
   <div class="hero-badge">💰 Prezzi trasparenti, nessuna sorpresa</div>
   <h1>I primi <em>3 mesi sono gratis</em></h1>
-  <p>Registrati gratis e prova tutto senza pagare. Dopo 3 mesi scegli tu: resta gratis o passa al Pro!</p>
+  <p>Registrati gratis e prova tutto senza pagare. Dopo 3 mesi scegli tu: resta gratis o passa a Premium!</p>
 </div>
 
 <!-- TOGGLE MENSILE/ANNUALE -->
@@ -266,36 +266,6 @@
     </a>
   </div>
 
-  <!-- PIANO PRO -->
-  <div class="piano-card pro">
-    <div class="piano-badge">⭐ PIÙ POPOLARE</div>
-    <div class="piano-icon">🏆</div>
-    <div class="piano-nome">Pro</div>
-    <div class="piano-sub">Per crescere sul mercato</div>
-    <div class="piano-prezzo">
-      <div class="prezzo-num" id="prezzo-display">€3</div>
-      <div class="prezzo-periodo">al mese &nbsp;·&nbsp; oppure <strong>€29/anno</strong></div>
-      <div class="prezzo-periodo" style="margin-top:2px;">dopo i 3 mesi gratis</div>
-    </div>
-    <div class="piano-features">
-      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del piano gratuito</span></div>
-      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Badge <strong>Verificato</strong> sul profilo</span></div>
-      <div class="feature"><span class="feature-icon">🔝</span><span class="feature-text">Posizione prioritaria (prime pagine)</span></div>
-      <div class="feature"><span class="feature-icon">🇮🇹</span><span class="feature-text">Visibile nella tua città e regione</span></div>
-      <div class="feature"><span class="feature-icon">📩</span><span class="feature-text">5 preventivi ricevuti/mese</span></div>
-      <div class="feature"><span class="feature-icon">🤖</span><span class="feature-text">AI preventivi avanzata</span></div>
-      <div class="feature"><span class="feature-icon">📊</span><span class="feature-text">Statistiche visite profilo</span></div>
-      <div class="feature"><span class="feature-icon">📢</span><span class="feature-text">Avvisi bandi di gara nella tua zona</span></div>
-      <div class="feature"><span class="feature-icon">🔔</span><span class="feature-text">Notifica immediata nuovi preventivi</span></div>
-      <div class="feature"><span class="feature-icon">📸</span><span class="feature-text">Fino a 20 foto portfolio</span></div>
-      <div class="feature"><span class="feature-icon">✏️</span><span class="feature-text">Descrizione estesa del profilo</span></div>
-      <div class="feature"><span class="feature-icon">🌐</span><span class="feature-text">Link al tuo sito web</span></div>
-    </div>
-    <button class="piano-btn pro-btn" onclick="apriPagamento()" id="btn-pro">
-      💳 Inizia 3 mesi gratis
-    </button>
-  </div>
-
   <!-- PIANO PREMIUM -->
   <div class="piano-card premium">
     <div class="piano-badge" style="background:linear-gradient(135deg,#7b2fbe,#f4c02e);">💎 ESCLUSIVO</div>
@@ -308,7 +278,7 @@
       <div class="prezzo-periodo" style="margin-top:2px;">dopo i 3 mesi gratis</div>
     </div>
     <div class="piano-features">
-      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del piano Pro</span></div>
+      <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del Gratuito</span></div>
       <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Visibile in tutta Italia</span></div>
       <div class="feature"><span class="feature-icon">🥇</span><span class="feature-text">Posizione <strong>#1</strong> assoluta (prime file, sopra tutti)</span></div>
       <div class="feature"><span class="feature-icon">📩</span><span class="feature-text">20 preventivi ricevuti/mese</span></div>
@@ -337,7 +307,7 @@
   <div class="faq-title">Domande frequenti</div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Quando inizia il pagamento? <span>▼</span></div>
-    <div class="faq-a">I primi 3 mesi sono completamente gratuiti. Dopo puoi scegliere liberamente: restare nel piano gratuito per sempre (con i limiti base), oppure passare al Pro per avere tutti i vantaggi.</div>
+    <div class="faq-a">I primi 3 mesi sono completamente gratuiti. Dopo puoi scegliere liberamente: restare nel piano gratuito per sempre (con i limiti base), oppure passare a Premium per avere tutti i vantaggi.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Posso cancellare in qualsiasi momento? <span>▼</span></div>
@@ -349,7 +319,7 @@
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Cosa significa "posizione prioritaria"? <span>▼</span></div>
-    <div class="faq-a">Le imprese Pro appaiono in cima ai risultati di ricerca rispetto alle imprese gratuite, aumentando notevolmente la visibilità e le richieste ricevute.</div>
+    <div class="faq-a">Le imprese Premium appaiono in cima ai risultati di ricerca rispetto alle imprese gratuite, aumentando notevolmente la visibilità e le richieste ricevute.</div>
   </div>
 </div>
 
@@ -404,12 +374,10 @@ function togglePiano() {
   toggle.classList.toggle('annuale', pianoAnnuale);
 
   if (pianoAnnuale) {
-    document.getElementById('prezzo-display').textContent = '€29';
     document.getElementById('pay-piano').textContent = 'Annuale';
     document.getElementById('pay-prezzo').textContent = '€29/anno';
     document.getElementById('prezzo-display-premium').textContent = '€49';
   } else {
-    document.getElementById('prezzo-display').textContent = '€3';
     document.getElementById('pay-piano').textContent = 'Mensile';
     document.getElementById('pay-prezzo').textContent = '€3/mese';
     document.getElementById('prezzo-display-premium').textContent = '€5';
