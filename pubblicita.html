@@ -636,7 +636,7 @@ async function inviaOrdine() {
   // Disponibilità: blocca se esiste annuncio pagato sullo stesso spazio+città con periodo sovrapposto
   var occ = await supabaseClient.from('annunci_pubblicitari')
     .select('data_inizio,data_fine')
-    .eq('spazio_id', spazioSel).eq('citta', cittaSel).eq('stato', 'pagato');
+    .eq('spazio_id', spazioSel).ilike('citta', cittaSel).eq('stato', 'pagato');
   if (occ.data && occ.data.some(function(o){ return o.data_inizio <= dataFine && o.data_fine >= dataInizio; })) {
     alert('Questo spazio è già occupato a ' + cittaSel + ' nel periodo scelto. Scegli un altro spazio o un periodo successivo.');
     btn.textContent = '💳 Conferma e vai al pagamento';
