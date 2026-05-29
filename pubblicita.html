@@ -254,9 +254,8 @@
       <div class="form-group"><label>Partita IVA / Cod. Fiscale</label><input type="text" id="p-piva" placeholder="IT12345678901"></div>
 
       <div class="form-group" style="margin-top:14px;">
-        <label>Immagine del banner pubblicitario — PNG/JPG (si ottimizza in automatico)</label>
+        <label>Immagine del banner pubblicitario * — PNG/JPG (si ottimizza in automatico)</label>
         <input type="file" id="p-logo" accept="image/png, image/jpeg">
-        <p class="note-small" style="margin-top:6px;">Se non carichi il logo useremo quello del profilo impresa.</p>
       </div>
 
       <div class="form-group" style="margin-top:14px;">
@@ -685,35 +684,38 @@ async function inviaOrdine() {
     return;
   }
 
-  // Upload immagine banner (opzionale) — ridimensionata/compressa lato client
-  var logoUrl = null;
+  // Upload immagine banner (obbligatorio) — ridimensionata/compressa lato client
   var logoFile = document.getElementById('p-logo').files[0];
-  if (logoFile) {
-    if (!/^image\/(png|jpe?g)$/.test(logoFile.type)) {
-      alert('Formato non valido. Usa PNG o JPG.');
-      btn.textContent = '💳 Conferma e vai al pagamento';
-      btn.disabled = false;
-      return;
-    }
-    var img;
-    try {
-      img = await ridimensionaImmagine(logoFile, 1200);
-    } catch (e) {
-      alert('Errore elaborazione immagine: ' + e.message);
-      btn.textContent = '💳 Conferma e vai al pagamento';
-      btn.disabled = false;
-      return;
-    }
-    var path = currentUser.id + '/pub_' + Date.now() + '.' + img.ext;
-    var uploadRes = await supabaseClient.storage.from('loghi-pubblicita').upload(path, img.blob, { contentType: img.mime });
-    if (uploadRes.error) {
-      alert('Errore upload immagine: ' + uploadRes.error.message);
-      btn.textContent = '💳 Conferma e vai al pagamento';
-      btn.disabled = false;
-      return;
-    }
-    logoUrl = supabaseClient.storage.from('loghi-pubblicita').getPublicUrl(path).data.publicUrl;
+  if (!logoFile) {
+    alert('Carica l\'immagine del banner pubblicitario per procedere al pagamento.');
+    btn.textContent = '💳 Conferma e vai al pagamento';
+    btn.disabled = false;
+    return;
   }
+  if (!/^image\/(png|jpe?g)$/.test(logoFile.type)) {
+    alert('Formato non valido. Usa PNG o JPG.');
+    btn.textContent = '💳 Conferma e vai al pagamento';
+    btn.disabled = false;
+    return;
+  }
+  var img;
+  try {
+    img = await ridimensionaImmagine(logoFile, 1200);
+  } catch (e) {
+    alert('Errore elaborazione immagine: ' + e.message);
+    btn.textContent = '💳 Conferma e vai al pagamento';
+    btn.disabled = false;
+    return;
+  }
+  var path = currentUser.id + '/pub_' + Date.now() + '.' + img.ext;
+  var uploadRes = await supabaseClient.storage.from('loghi-pubblicita').upload(path, img.blob, { contentType: img.mime });
+  if (uploadRes.error) {
+    alert('Errore upload immagine: ' + uploadRes.error.message);
+    btn.textContent = '💳 Conferma e vai al pagamento';
+    btn.disabled = false;
+    return;
+  }
+  var logoUrl = supabaseClient.storage.from('loghi-pubblicita').getPublicUrl(path).data.publicUrl;
 
   var linkUrl = document.getElementById('p-link').value.trim() || null;
 
