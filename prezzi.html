@@ -146,61 +146,6 @@
   .faq-a { padding:0 20px 16px; font-size:0.88rem; color:var(--mid); line-height:1.7; display:none; }
   .faq-a.open { display:block; }
 
-  /* MODAL PAGAMENTO */
-  .modal-overlay {
-    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
-    z-index:200; align-items:center; justify-content:center; padding:20px;
-  }
-  .modal-overlay.show { display:flex; }
-  .modal {
-    background:white; border-radius:24px; padding:32px;
-    max-width:480px; width:100%; box-shadow:0 24px 80px rgba(0,0,0,0.25);
-  }
-  .modal-title { font-family:'Playfair Display',serif; font-size:1.4rem; margin-bottom:6px; }
-  .modal-sub { font-size:0.85rem; color:var(--light); margin-bottom:24px; }
-
-  .riepilogo-pay {
-    background:var(--verde3); border-radius:14px; padding:18px; margin-bottom:20px;
-  }
-  .riepilogo-row { display:flex; justify-content:space-between; font-size:0.88rem; margin-bottom:8px; }
-  .riepilogo-row:last-child { margin-bottom:0; font-weight:800; font-size:1rem; }
-
-  .form-group { margin-bottom:16px; }
-  .form-label { display:block; font-size:0.72rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
-  .form-input {
-    width:100%; padding:12px 14px; border-radius:10px;
-    border:1.5px solid var(--border); font-family:'DM Sans',sans-serif;
-    font-size:0.9rem; outline:none; transition:border 0.2s;
-  }
-  .form-input:focus { border-color:var(--verde); }
-
-  #card-element {
-    padding:12px 14px; border-radius:10px;
-    border:1.5px solid var(--border); background:white;
-    transition:border 0.2s;
-  }
-  #card-element.StripeElement--focus { border-color:var(--verde); }
-
-  .pay-btn {
-    width:100%; padding:15px; background:var(--arancio); color:white;
-    border:none; border-radius:14px; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:1rem; cursor:pointer; margin-top:16px;
-    box-shadow:0 6px 20px rgba(232,115,58,0.35); transition:all 0.2s;
-  }
-  .pay-btn:hover { background:var(--arancio2); }
-  .pay-btn:disabled { background:var(--light); box-shadow:none; cursor:not-allowed; }
-
-  .stripe-logo {
-    text-align:center; margin-top:12px; font-size:0.75rem; color:var(--light);
-    display:flex; align-items:center; justify-content:center; gap:6px;
-  }
-  .pay-err { color:#e53e3e; font-size:0.82rem; margin-top:8px; display:none; }
-
-  .btn-chiudi-modal {
-    position:absolute; top:16px; right:16px; background:var(--bg);
-    border:none; border-radius:8px; padding:6px 12px; cursor:pointer;
-    font-size:0.85rem; color:var(--mid); font-weight:700;
-  }
 </style>
 <link rel="stylesheet" href="/css/mobile.css">
 </head>
