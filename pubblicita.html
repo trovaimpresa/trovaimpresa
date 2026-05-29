@@ -130,6 +130,20 @@
     footer{background:var(--dark);color:rgba(255,255,255,0.6);padding:24px;text-align:center;font-size:13px;}
     footer a{color:rgba(255,255,255,0.8);text-decoration:none;}
 
+    /* DIALOG SPAZIO OCCUPATO */
+    .dlg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+    .dlg-overlay.show{display:flex;}
+    .dlg{background:#fff;border-radius:18px;padding:30px 26px;max-width:420px;width:100%;box-shadow:0 20px 70px rgba(0,0,0,0.25);text-align:center;}
+    .dlg .dlg-emoji{font-size:44px;margin-bottom:10px;}
+    .dlg h3{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:10px;color:var(--dark);}
+    .dlg p{color:var(--mid);font-size:14px;line-height:1.6;margin-bottom:22px;}
+    .dlg-actions{display:flex;flex-direction:column;gap:10px;}
+    .dlg-btn{width:100%;padding:13px;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;border:none;transition:all 0.2s;}
+    .dlg-btn-primary{background:var(--arancio);color:#fff;}
+    .dlg-btn-primary:hover{background:var(--arancio2);}
+    .dlg-btn-secondary{background:#fff;color:var(--mid);border:1.5px solid var(--border);}
+    .dlg-btn-secondary:hover{border-color:var(--verde);color:var(--verde);}
+
     @media(max-width:768px){
       .step2-grid,.step3-grid{grid-template-columns:1fr;}
       .form-row{grid-template-columns:1fr;}
@@ -278,6 +292,19 @@
     <h2>Ordine ricevuto!</h2>
     <p>Grazie <strong id="ok-nome"></strong>! Stiamo elaborando la richiesta.</p>
     <a href="index.html" style="display:inline-block;background:var(--verde);color:#fff;padding:11px 22px;border-radius:10px;font-weight:700;text-decoration:none">Torna alla home →</a>
+  </div>
+</div>
+
+<!-- DIALOG SPAZIO OCCUPATO -->
+<div class="dlg-overlay" id="dlg-occupato">
+  <div class="dlg">
+    <div class="dlg-emoji">🚫</div>
+    <h3>Spazio già occupato</h3>
+    <p id="dlg-occupato-msg"></p>
+    <div class="dlg-actions">
+      <button class="dlg-btn dlg-btn-secondary" id="dlg-altro-spazio">Prova un altro spazio</button>
+      <button class="dlg-btn dlg-btn-primary" id="dlg-lista-attesa">Mettiti in lista d'attesa</button>
+    </div>
   </div>
 </div>
 
@@ -571,6 +598,11 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('citta-input').addEventListener('input', function(){ buildCitta(this.value); });
   document.getElementById('btn-ordina').addEventListener('click', inviaOrdine);
 
+  // Dialog "spazio occupato"
+  document.getElementById('dlg-altro-spazio').addEventListener('click', function(){ chiudiDialogOccupato(); showPage(1); });
+  document.getElementById('dlg-occupato').addEventListener('click', function(e){ if (e.target === this) chiudiDialogOccupato(); });
+  // "Mettiti in lista d'attesa": azione da collegare in seguito
+
   // Pre-selezione da URL
   if (paramSpazio && PREZZI_MENSILI[paramSpazio] != null) {
     selSpazio(paramSpazio);
@@ -612,6 +644,15 @@ function ridimensionaImmagine(file, maxLato = 1200) {
   });
 }
 
+// === DIALOG SPAZIO OCCUPATO ===
+function mostraDialogOccupato() {
+  document.getElementById('dlg-occupato-msg').textContent = 'Questo spazio è già occupato a ' + cittaSel + ' nel periodo scelto';
+  document.getElementById('dlg-occupato').classList.add('show');
+}
+function chiudiDialogOccupato() {
+  document.getElementById('dlg-occupato').classList.remove('show');
+}
+
 // === SUBMIT: INSERT pending + notifica + Stripe ===
 async function inviaOrdine() {
   if (!spazioSel || !cittaSel) { alert('Seleziona posizione e città!'); return; }
@@ -638,9 +679,9 @@ async function inviaOrdine() {
     .select('data_inizio,data_fine')
     .eq('spazio_id', spazioSel).ilike('citta', cittaSel).eq('stato', 'pagato');
   if (occ.data && occ.data.some(function(o){ return o.data_inizio <= dataFine && o.data_fine >= dataInizio; })) {
-    alert('Questo spazio è già occupato a ' + cittaSel + ' nel periodo scelto. Scegli un altro spazio o un periodo successivo.');
     btn.textContent = '💳 Conferma e vai al pagamento';
     btn.disabled = false;
+    mostraDialogOccupato();
     return;
   }
 
