@@ -48,7 +48,6 @@ nav img{height:36px}
 .hero-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
 .hb{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
 .hb-v{background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3)}
-.hb-o{background:#FF6B35;color:white}
 .hb-g{background:rgba(255,255,255,0.15);color:white}
 
 /* STATS - stesso stile lavoro-btn homepage */
@@ -500,7 +499,6 @@ async function caricaProfilo(id){
     const b=[];
     if(d.verificata)b.push('<span class="hb hb-v">✓ Verificata</span>');
     if(d.anno_fondazione&&d.anno_fondazione>1900)b.push(`<span class="hb hb-g">Dal ${d.anno_fondazione}</span>`);
-    if(d.piano==='pro')b.push('<span class="hb hb-o">⭐ PRO</span>');
     document.getElementById('profile-badges').innerHTML=b.join('');
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;

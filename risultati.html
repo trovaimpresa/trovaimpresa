@@ -198,9 +198,6 @@
   .rbadge-v { background:var(--verde); color:white; }
   .rbadge-t { background:var(--arancio3); color:var(--arancio2); }
   .rbadge-a { background:#e8f0ff; color:#3355cc; }
-  .rbadge-pro { background:linear-gradient(135deg,#f6c744,#e6a817); color:#7a4f00; font-weight:900; }
-  .result-card.pro-card { border-color:#f6c744; box-shadow:0 4px 18px rgba(246,199,68,0.18); }
-  .result-card-accent.gold { background:linear-gradient(180deg,#f6c744,#e6a817); }
 
   .result-meta { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px; }
   .rmeta { font-size:0.8rem; color:var(--mid); display:flex; align-items:center; gap:4px; }
@@ -432,16 +429,16 @@ async function caricaImprese() {
     return;
   }
 
-  // Premium e Pro appaiono sempre, Free solo se la città corrisponde alla ricerca
+  // Premium appare sempre, Free solo se la città corrisponde alla ricerca
   if (data && searchVal) {
     data = data.filter(i => {
-      if (i.piano === 'premium' || i.piano === 'pro') return true;
+      if (i.piano === 'premium') return true;
       const citta = (i.citta || '').toLowerCase();
       return citta.includes(searchVal) || searchVal.includes(citta);
     });
   }
 
-  if (data) { const pp=p=>p==='premium'?3:p==='pro'?2:1; data.sort((a,b)=>pp(b.piano)-pp(a.piano)); }
+  if (data) { const pp=p=>p==='premium'?2:1; data.sort((a,b)=>pp(b.piano)-pp(a.piano)); }
 
   const list = document.getElementById('results-list');
 
@@ -459,8 +456,8 @@ async function caricaImprese() {
   document.getElementById('risultati-count').textContent = data.length + ' professionisti';
 
   list.innerHTML = data.map(i => `
-    <div class="result-card ${i.piano === 'pro' ? 'pro-card' : ''}" onclick="window.location='profilo-impresa.html?id=${i.id}'">
-      <div class="result-card-accent ${i.piano === 'pro' ? 'gold' : i.tipo === 'Artigiano' ? 'verde' : 'arancio'}"></div>
+    <div class="result-card" onclick="window.location='profilo-impresa.html?id=${i.id}'">
+      <div class="result-card-accent ${i.tipo === 'Artigiano' ? 'verde' : 'arancio'}"></div>
       <div class="result-card-body">
         <div class="result-avatar">${i.tipo === 'Artigiano' ? '🔨' : '🏗️'}</div>
         <div class="result-info">
@@ -468,7 +465,6 @@ async function caricaImprese() {
             <div class="result-name">${i.nome_attivita || i.nome + ' ' + i.cognome}</div>
           </div>
           <div class="result-badges">
-            ${i.piano === 'pro' ? '<span class="rbadge rbadge-pro">⭐ Pro</span>' : ''}
             ${i.verificata ? '<span class="rbadge rbadge-v">✓ Verificato</span>' : ''}
             <span class="rbadge rbadge-t">${i.tipo === 'Artigiano' ? '🔨' : '🏗️'} ${i.tipo}</span>
           </div>
