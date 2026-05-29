@@ -4970,13 +4970,52 @@ function chiudiModalRisoluzione() {
   document.getElementById('modalRisoluzione').classList.remove('show');
 }
 
-function apriModalListaAttesaPub() {
+async function apriModalListaAttesaPub() {
   document.getElementById('lap-citta').value = impresaCorrente.citta || '';
   document.getElementById('lap-periodo').value = '';
   document.getElementById('lap-note').value = '';
   document.getElementById('lap-form').style.display = '';
-  document.getElementById('lap-risultato').style.display = 'none';
+  const ris = document.getElementById('lap-risultato');
+  ris.style.display = 'none';
+  ris.innerHTML = '';
   document.getElementById('modalListaAttesaPub').classList.add('show');
+
+  // Carica le righe attive (attesa/offerto) dell'azienda loggata
+  const { data, error } = await sb.from('lista_attesa_pubblicita')
+    .select('citta, stato, created_at, offerta_scadenza')
+    .eq('impresa_id', impresaCorrente.id)
+    .in('stato', ['attesa', 'offerto'])
+    .order('created_at', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    ris.textContent = "Non sei in lista d'attesa";
+    ris.style.display = '';
+    return;
+  }
+
+  // 'offerto' ha priorità: spazio riservato all'azienda
+  const offerto = data.find(r => r.stato === 'offerto');
+  if (offerto) {
+    document.getElementById('lap-form').style.display = 'none';
+    const scad = offerto.offerta_scadenza
+      ? new Date(offerto.offerta_scadenza).toLocaleDateString('it-IT')
+      : '';
+    ris.innerHTML = `Spazio libero a ${escHtml(offerto.citta)}, è tuo fino al ${escHtml(scad)}` +
+      `<div style="margin-top:14px;"><a href="pubblicita.html" class="btn-salva-annuncio" style="display:inline-block;text-decoration:none;">🛒 Acquista</a></div>`;
+    ris.style.display = '';
+    return;
+  }
+
+  // 'attesa': posizione = n. aziende in attesa per quella città con created_at <= la sua
+  const inAttesa = data.find(r => r.stato === 'attesa');
+  document.getElementById('lap-form').style.display = 'none';
+  const { count } = await sb.from('lista_attesa_pubblicita')
+    .select('id', { count: 'exact', head: true })
+    .ilike('citta', inAttesa.citta)
+    .eq('stato', 'attesa')
+    .lte('created_at', inAttesa.created_at);
+  ris.textContent = `Sei in posizione n° ${count || 1} per ${inAttesa.citta}`;
+  ris.style.display = '';
 }
 
 function chiudiModalListaAttesaPub() {
