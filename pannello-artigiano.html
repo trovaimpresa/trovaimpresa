@@ -1010,6 +1010,10 @@
           <div class="dash-quick-icon">📢</div>
           <div class="dash-quick-label">Pubblicità</div>
         </div>
+        <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalListaAttesaPub()">
+          <div class="dash-quick-icon">⏳</div>
+          <div class="dash-quick-label">Lista d'attesa pubblicità</div>
+        </div>
         <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
@@ -2191,6 +2195,19 @@
         <div style="text-align:center;padding:40px 0;color:#999;">⏳ Calcolo in corso…</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- MODAL LISTA D'ATTESA PUBBLICITÀ -->
+<div class="modal-ai-overlay" id="modalListaAttesaPub" onclick="if(event.target===this)chiudiModalListaAttesaPub()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>⏳ Lista d'attesa pubblicità</h2>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalListaAttesaPub()">✕</button>
+    </div>
+    <div class="modal-ai-body"></div>
   </div>
 </div>
 
@@ -4931,6 +4948,14 @@ function apriModalRisoluzione() {
 
 function chiudiModalRisoluzione() {
   document.getElementById('modalRisoluzione').classList.remove('show');
+}
+
+function apriModalListaAttesaPub() {
+  document.getElementById('modalListaAttesaPub').classList.add('show');
+}
+
+function chiudiModalListaAttesaPub() {
+  document.getElementById('modalListaAttesaPub').classList.remove('show');
 }
 
 function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
