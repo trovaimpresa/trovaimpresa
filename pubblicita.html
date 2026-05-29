@@ -300,6 +300,7 @@
     <div class="dlg-emoji">🚫</div>
     <h3>Spazio già occupato</h3>
     <p id="dlg-occupato-msg"></p>
+    <p id="dlg-esito" style="display:none;font-size:14px;line-height:1.6;color:var(--dark);margin-bottom:18px;"></p>
     <div class="dlg-actions">
       <button class="dlg-btn dlg-btn-secondary" id="dlg-altro-spazio">Prova un altro spazio</button>
       <button class="dlg-btn dlg-btn-primary" id="dlg-lista-attesa">Mettiti in lista d'attesa</button>
@@ -385,7 +386,7 @@ supabaseClient.auth.onAuthStateChange(async function(event, session) {
   if (event !== 'INITIAL_SESSION') return;
   if (!session) { window.location.href = 'login-impresa.html'; return; }
   currentUser = session.user;
-  const { data } = await supabaseClient.from('imprese').select('id,tipo,nome,nome_attivita,email,telefono,partita_iva,citta').eq('user_id', currentUser.id).single();
+  const { data } = await supabaseClient.from('imprese').select('id,tipo,nome,nome_attivita,email,telefono,partita_iva,citta,piano').eq('user_id', currentUser.id).single();
   if (data) {
     currentImpresa = data;
     const nomeAz = data.nome_attivita || data.nome || '';
@@ -600,7 +601,7 @@ window.addEventListener('DOMContentLoaded', function() {
   // Dialog "spazio occupato"
   document.getElementById('dlg-altro-spazio').addEventListener('click', function(){ chiudiDialogOccupato(); showPage(1); });
   document.getElementById('dlg-occupato').addEventListener('click', function(e){ if (e.target === this) chiudiDialogOccupato(); });
-  // "Mettiti in lista d'attesa": azione da collegare in seguito
+  document.getElementById('dlg-lista-attesa').addEventListener('click', mettiInListaAttesa);
 
   // Pre-selezione da URL
   if (paramSpazio && PREZZI_MENSILI[paramSpazio] != null) {
@@ -646,10 +647,76 @@ function ridimensionaImmagine(file, maxLato = 1200) {
 // === DIALOG SPAZIO OCCUPATO ===
 function mostraDialogOccupato() {
   document.getElementById('dlg-occupato-msg').textContent = 'Questo spazio è già occupato a ' + cittaSel + ' nel periodo scelto';
+  var esito = document.getElementById('dlg-esito');
+  esito.style.display = 'none';
+  esito.innerHTML = '';
+  var btnLista = document.getElementById('dlg-lista-attesa');
+  btnLista.style.display = '';
+  btnLista.disabled = false;
+  btnLista.textContent = "Mettiti in lista d'attesa";
   document.getElementById('dlg-occupato').classList.add('show');
 }
 function chiudiDialogOccupato() {
   document.getElementById('dlg-occupato').classList.remove('show');
+}
+
+async function mettiInListaAttesa() {
+  if (!currentImpresa || !currentImpresa.id) {
+    alert('Devi essere registrato come impresa per metterti in lista.');
+    return;
+  }
+  var esito = document.getElementById('dlg-esito');
+  var btnLista = document.getElementById('dlg-lista-attesa');
+
+  // Funzione riservata ai Premium
+  var piano = (currentImpresa.piano || '').toLowerCase();
+  if (piano !== 'premium') {
+    btnLista.style.display = 'none';
+    esito.innerHTML = '🔒 <strong>Riservato ai Premium.</strong><br><a href="info-premium.html" style="color:var(--verde);font-weight:700;">Scopri Premium →</a>';
+    esito.style.display = 'block';
+    return;
+  }
+
+  btnLista.disabled = true;
+  btnLista.textContent = '⏳ Attendere...';
+
+  // Evita doppio inserimento: già in lista 'attesa' per questa città?
+  var gia = await supabaseClient.from('lista_attesa_pubblicita')
+    .select('id')
+    .eq('impresa_id', currentImpresa.id)
+    .ilike('citta', cittaSel)
+    .eq('stato', 'attesa')
+    .limit(1);
+
+  if (!gia.error && (!gia.data || gia.data.length === 0)) {
+    var ins = await supabaseClient.from('lista_attesa_pubblicita').insert({
+      impresa_id: currentImpresa.id,
+      email: currentImpresa.email || '',
+      nome_azienda: currentImpresa.nome_attivita || currentImpresa.nome || '',
+      telefono: currentImpresa.telefono || '',
+      citta: cittaSel,
+      periodo_desiderato: PERIODI[periodoSel].label,
+      note: '',
+      stato: 'attesa'
+    });
+    if (ins.error) {
+      console.error('[lista-attesa-pub] Errore INSERT:', ins.error);
+      alert('Errore nel salvataggio. Riprova.');
+      btnLista.disabled = false;
+      btnLista.textContent = "Mettiti in lista d'attesa";
+      return;
+    }
+  }
+
+  // Posizione = n. aziende in attesa per quella città
+  var cnt = await supabaseClient.from('lista_attesa_pubblicita')
+    .select('id', { count: 'exact', head: true })
+    .ilike('citta', cittaSel)
+    .eq('stato', 'attesa');
+
+  btnLista.style.display = 'none';
+  esito.textContent = 'Sei in posizione n° ' + (cnt.count || 1) + ' per ' + cittaSel;
+  esito.style.display = 'block';
 }
 
 // === SUBMIT: INSERT pending + notifica + Stripe ===
