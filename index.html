@@ -1130,6 +1130,19 @@
             order:10 !important;
             margin-bottom:16px !important;
           }
+          /* GRUPPO B: container subappalto/profilo (div.pub-spazio) sotto la loro sezione */
+          section.lavoro-links:has(> div.pub-spazio) { display:flex; flex-direction:column; }
+          body:not(.homepage-vetrina) section.lavoro-links > div.pub-spazio {
+            display:flex !important;
+            position:static !important;
+            width:100% !important;
+            left:auto !important;
+            right:auto !important;
+            top:auto !important;
+            transform:none !important;
+            order:10 !important;
+            margin-bottom:16px !important;
+          }
         }
         body.homepage-vetrina .pub-spazio { display:none !important }
         .pub-link { text-decoration:none; cursor:pointer; transition:background 0.2s }
