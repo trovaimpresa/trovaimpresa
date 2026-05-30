@@ -89,6 +89,7 @@ exports.handler = async function(event) {
       messages: [{ role: 'user', content: prompt }]
     };
     if (azione === 'supporto') {
+      apiBody.model = 'claude-haiku-4-5-20251001';
       apiBody.system = `Sei l'assistente di supporto di TrovaImpresa.com, marketplace per imprese edili e artigiani. Aiuti gli iscritti a usare il pannello: profilo, certificazioni, preventivi (anche AI), cantieri, recensioni, abbonamento Free/Premium (€5/mese o €49/anno), pubblicità, ricerca e visibilità. Rispondi in italiano, breve e pratico, a passaggi. Per problemi di pagamenti, account o bug veri, invita a usare il pulsante "Segnala problema". Non inventare funzioni inesistenti.`;
     }
 
