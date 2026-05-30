@@ -1883,7 +1883,6 @@ async function copiaPreventivoDash() {
 // =====================
 // FOTO DEI LAVORI
 // =====================
-const MAX_FOTO_FREE = 5;
 let fotoCaricate = [];
 
 async function caricaFotoLavori() {
@@ -1897,13 +1896,8 @@ async function caricaFotoLavori() {
 }
 
 function aggiornaBannerFoto() {
-  const piano = (impresaCorrente.piano || '').toLowerCase();
-  const isPremium = piano === 'premium';
   const n = fotoCaricate.length;
-  const rimaste = isPremium ? Infinity : Math.max(0, MAX_FOTO_FREE - n);
-  const testoHTML = isPremium
-    ? `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7c3aed">Premium 💎</strong> — illimitate`
-    : `<span class="foto-limit-num">${n}/${MAX_FOTO_FREE}</span> foto caricate · Piano Free — ${rimaste > 0 ? `puoi aggiungerne ancora <strong>${rimaste}</strong>` : '<strong style="color:var(--rosso)">limite raggiunto</strong> — <a href="info-premium.html" style="color:var(--arancio);font-weight:700">passa a Premium</a> per foto illimitate'}`;
+  const testoHTML = `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7c3aed">Premium 💎</strong> — illimitate`;
 
   for (const suffix of ['', '-dash']) {
     const barEl = document.getElementById('foto-limit-bar' + suffix);
@@ -1911,8 +1905,8 @@ function aggiornaBannerFoto() {
     const uploadArea = document.getElementById('foto-upload-area' + suffix);
     if (!barEl) continue;
     testoEl.innerHTML = testoHTML;
-    barEl.style.borderColor = isPremium ? '#1a73e8' : '';
-    uploadArea.style.display = (isPremium || rimaste > 0) ? '' : 'none';
+    barEl.style.borderColor = '#1a73e8';
+    uploadArea.style.display = '';
   }
 }
 
@@ -1932,16 +1926,8 @@ function renderFotoGrid() {
 
 async function uploadFoto(files) {
   if (!files?.length) return;
-  const piano = (impresaCorrente.piano || '').toLowerCase();
-  const isPremium = piano === 'premium';
-  const rimaste = isPremium ? Infinity : Math.max(0, MAX_FOTO_FREE - fotoCaricate.length);
 
-  if (!isPremium && rimaste === 0) {
-    alert('Hai raggiunto il limite di 5 foto per il piano Free. Passa a Premium per foto illimitate!');
-    return;
-  }
-
-  const daCaricari = Array.from(files).slice(0, isPremium ? files.length : rimaste);
+  const daCaricari = Array.from(files);
   const allProgress = ['foto-progress', 'foto-progress-dash'].map(id => document.getElementById(id)).filter(Boolean);
   allProgress.forEach(p => { p.style.display = 'block'; p.textContent = `⏳ Caricamento ${daCaricari.length} foto...`; });
 
