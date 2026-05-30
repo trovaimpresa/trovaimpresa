@@ -1418,7 +1418,7 @@
         <div id="card-premium" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
           <div style="font-size:1.5rem;margin-bottom:6px">👑</div>
           <div style="font-weight:800;font-size:1rem;color:#7c3aed;margin-bottom:6px">Premium</div>
-          <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto di Free +<br>Logo personalizzato<br>Colore header personalizzato<br>Assistenza prioritaria</div>
+          <div style="font-size:0.8rem;color:#666;line-height:1.5">Passa a Premium per sbloccare tutte le funzioni</div>
           <div style="margin-top:12px">
             <select id="sceltaPiano" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-weight:700;font-size:0.85rem;margin-bottom:8px;background:white;color:#333;cursor:pointer">
               <option value="mensile" selected>Mensile – €5/mese</option>
@@ -2789,7 +2789,7 @@ function aggiornaPianoCards(piano) {
       btn.disabled = true;
       btn.onclick = null;
     } else {
-      btn.textContent = `🔒 Passa a ${p.label}`;
+      btn.textContent = `Passa a ${p.label}`;
       btn.style.background = 'white';
       btn.style.color = p.colore;
       btn.style.cursor = 'pointer';
