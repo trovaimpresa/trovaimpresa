@@ -2094,6 +2094,7 @@
     </div>
     <div class="modal-ai-footer">
       <button type="button" class="btn-chiudi-modal" onclick="chiudiModalCreaPreventivo()">Chiudi</button>
+      <button type="button" id="btn-salva-prev" onclick="salvaPreventivo()" style="padding:11px 22px;background:white;color:var(--verde);border:1.5px solid var(--verde);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;transition:all 0.15s">💾 Salva</button>
       <button type="button" class="btn-scarica-pdf" id="btn-scarica-prev-pdf" onclick="scaricaPDFPreventivo()">📥 Scarica PDF</button>
     </div>
   </div>
@@ -3941,6 +3942,27 @@ async function scaricaPDFPreventivo() {
   doc.setTextColor(0);
 
   // === Salva su Supabase (prima di generare il PDF) ===
+  const _resSavePdf = await persistiPreventivoCreato();
+  if (!_resSavePdf.ok) {
+    alert('Errore nel salvataggio del preventivo: ' + _resSavePdf.message);
+  }
+
+  doc.save('Preventivo_' + numero + '.pdf');
+}
+
+// === Persistenza preventivo su Supabase (condivisa da "Salva" e "Scarica PDF") ===
+async function persistiPreventivoCreato() {
+  if (!impresaCorrente) {
+    return { ok: false, message: 'Dati attività non disponibili' };
+  }
+  const numero = document.getElementById('prev-numero').value || '';
+  const data = document.getElementById('prev-data').value || '';
+  const cliNome = document.getElementById('prev-cli-nome').value.trim();
+  const cliIndirizzo = document.getElementById('prev-cli-indirizzo').value.trim();
+  const cliTel = document.getElementById('prev-cli-telefono').value.trim();
+  const cliEmail = document.getElementById('prev-cli-email').value.trim();
+  const note = document.getElementById('prev-note').value.trim();
+  const validita = document.getElementById('prev-validita').value || 30;
   try {
     const vociPayload = [];
     let imponibileNum = 0;
@@ -3989,15 +4011,33 @@ async function scaricaPDFPreventivo() {
       errSavePrev = error;
     }
     if (errSavePrev) {
-      alert('Errore nel salvataggio del preventivo: ' + errSavePrev.message);
-    } else {
-      window.preventivoInModifica = null;
+      return { ok: false, message: errSavePrev.message };
     }
+    window.preventivoInModifica = null;
+    return { ok: true };
   } catch (e) {
-    alert('Errore nel salvataggio del preventivo: ' + (e && e.message ? e.message : e));
+    return { ok: false, message: (e && e.message ? e.message : String(e)) };
   }
+}
 
-  doc.save('Preventivo_' + numero + '.pdf');
+// === Bottone "Salva": persiste senza generare il PDF ===
+async function salvaPreventivo() {
+  if (!impresaCorrente) {
+    alert('Dati attività non disponibili');
+    return;
+  }
+  const btn = document.getElementById('btn-salva-prev');
+  const txt = btn ? btn.textContent : null;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Salvataggio...'; }
+  const res = await persistiPreventivoCreato();
+  if (btn) { btn.disabled = false; btn.textContent = txt; }
+  if (!res.ok) {
+    alert('Errore nel salvataggio del preventivo: ' + res.message);
+    return;
+  }
+  alert('✅ Preventivo salvato.');
+  chiudiModalCreaPreventivo();
+  apriModalStoricoPreventivi();
 }
 
 async function generaVociPreventivoAI() {
