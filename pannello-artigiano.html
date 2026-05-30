@@ -4919,9 +4919,12 @@ async function apriModalListaAttesaPub() {
   // 'offerto' ha priorità: spazio riservato all'azienda
   const offerto = data.find(r => r.stato === 'offerto');
   if (offerto) {
-    const scad = offerto.offerta_scadenza
-      ? new Date(offerto.offerta_scadenza).toLocaleDateString('it-IT')
-      : '';
+    let scad = '';
+    if (offerto.offerta_scadenza) {
+      const [g, m, a] = String(offerto.offerta_scadenza).split('/');
+      const d = new Date(`${a}-${m}-${g}`);
+      scad = isNaN(d) ? String(offerto.offerta_scadenza) : d.toLocaleDateString('it-IT');
+    }
     ris.innerHTML = `Si è liberato uno spazio a ${escHtml(offerto.citta)}! È tuo fino al ${escHtml(scad)}. Vuoi prenotarlo?` +
       `<div style="margin-top:14px;"><a href="pubblicita.html" class="btn-salva-annuncio" style="display:inline-block;text-decoration:none;">🛒 Acquista</a></div>`;
     ris.style.display = '';

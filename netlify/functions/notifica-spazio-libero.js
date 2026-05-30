@@ -28,7 +28,8 @@ exports.handler = async function(event) {
   // Data scadenza in formato gg/mm/aaaa (it-IT)
   let scadenza = '';
   if (record.offerta_scadenza) {
-    const d = new Date(record.offerta_scadenza);
+    const [g, m, a] = String(record.offerta_scadenza).split('/');
+    const d = new Date(`${a}-${m}-${g}`);
     scadenza = isNaN(d) ? String(record.offerta_scadenza) : d.toLocaleDateString('it-IT');
   }
 
