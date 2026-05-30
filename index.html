@@ -1093,7 +1093,21 @@
         .lk-side.dx { right: 28px; }
         @media (min-width: 1101px) { .lk-side.dx { right: 315px; } }
         @media (max-width: 900px) { .lk-side { display: none; } }
-        @media (max-width:1199px) { .pub-spazio { display:none !important } }
+        @media (max-width:1199px) {
+          .pub-spazio { display:none !important }
+          /* PROVA: hero-sx/dx come banner orizzontali a tutta larghezza nel flusso */
+          .pub-link[data-spazio-id="hero-sx"],
+          .pub-link[data-spazio-id="hero-dx"] {
+            display:flex !important;
+            position:static !important;
+            width:100% !important;
+            left:auto !important;
+            right:auto !important;
+            top:auto !important;
+            transform:none !important;
+            margin-bottom:16px !important;
+          }
+        }
         body.homepage-vetrina .pub-spazio { display:none !important }
         .pub-link { text-decoration:none; cursor:pointer; transition:background 0.2s }
         .pub-link:hover { background:rgba(255,255,255,0.1) }
