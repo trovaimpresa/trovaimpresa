@@ -5006,6 +5006,8 @@ async function chiediSupportoAI() {
   btn.style.opacity = '0.6';
   btn.style.cursor = 'not-allowed';
   out.textContent = 'Sto pensando…';
+  const faqTesto = FAQS_LIST.map(f => `D: ${f.domanda}\nR: ${f.risposta}`).join('\n\n');
+  const promptCompleto = `Rispondi basandoti su queste FAQ ufficiali di TrovaImpresa, non inventare funzioni o informazioni non presenti. Se la risposta non è nelle FAQ, dillo e invita a usare "Contatta assistenza".\n\nFAQ UFFICIALI:\n${faqTesto}\n\nDOMANDA DELL'UTENTE:\n${testo}`;
   try {
     const resp = await fetch('/.netlify/functions/ai-claude', {
       method: 'POST',
@@ -5013,7 +5015,7 @@ async function chiediSupportoAI() {
       body: JSON.stringify({
         azione: 'supporto',
         impresa_id: impresaCorrente.id,
-        prompt: testo
+        prompt: promptCompleto
       })
     });
     const data = await resp.json().catch(() => null);
