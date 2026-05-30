@@ -1110,6 +1110,26 @@
             transform:none !important;
             margin-bottom:16px !important;
           }
+          /* GRUPPO A: banner laterali (imprese/pannello/piano/inserzioni) sotto la loro sezione */
+          section.lavoro-links:has(> a.pub-link) { display:flex; flex-direction:column; }
+          .pub-link[data-spazio-id="imprese-sx"],
+          .pub-link[data-spazio-id="imprese-dx"],
+          .pub-link[data-spazio-id="pannello-sx"],
+          .pub-link[data-spazio-id="pannello-dx"],
+          .pub-link[data-spazio-id="piano-sx"],
+          .pub-link[data-spazio-id="piano-dx"],
+          .pub-link[data-spazio-id="inserzioni-sx"],
+          .pub-link[data-spazio-id="inserzioni-dx"] {
+            display:flex !important;
+            position:static !important;
+            width:100% !important;
+            left:auto !important;
+            right:auto !important;
+            top:auto !important;
+            transform:none !important;
+            order:10 !important;
+            margin-bottom:16px !important;
+          }
         }
         body.homepage-vetrina .pub-spazio { display:none !important }
         .pub-link { text-decoration:none; cursor:pointer; transition:background 0.2s }
