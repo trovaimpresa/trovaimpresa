@@ -990,15 +990,6 @@ async function caricaSegnalazioni() {
     tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">🆘</div>Nessuna segnalazione</div></td></tr>';
     return;
   }
-  const userIds = [...new Set(data.map(s => s.user_id).filter(Boolean))];
-  const impreseMap = new Map();
-  if (userIds.length) {
-    const { data: imprese } = await sb.from('imprese').select('user_id, nome_attivita, nome, cognome, email').in('user_id', userIds);
-    (imprese || []).forEach(i => {
-      const nome = i.nome_attivita || ((i.nome || i.cognome) ? `${i.nome || ''} ${i.cognome || ''}`.trim() : null);
-      impreseMap.set(i.user_id, { nome, email: i.email });
-    });
-  }
   tbody.innerHTML = data.map(s => {
     const data_fmt = new Date(s.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
     const isAperto = s.stato === 'aperto';
