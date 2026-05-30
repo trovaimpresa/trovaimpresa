@@ -2595,8 +2595,7 @@ async function inizializza() {
   const isPremium = piano === 'premium';
   const { data: recsRating } = await sb.from('feedback_clienti')
     .select('stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita')
-    .eq('impresa_id', impresaCorrente.id)
-    .eq('verificata', true);
+    .eq('impresa_id', impresaCorrente.id);
   const stelleRating = (recsRating || []).flatMap(r => [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita]).filter(s => s != null);
   const rating = stelleRating.length ? (stelleRating.reduce((a, b) => a + b, 0) / stelleRating.length).toFixed(1) : '—';
 
@@ -5441,7 +5440,7 @@ function ctaFree(d,piuUtenti) {
 }
 async function apriModalRecensioni() {
   if(!impresaCorrente)return;
-  const{data:recensioni}=await sb.from('feedback_clienti').select('*').eq('impresa_id',impresaCorrente.id).eq('verificata',true).order('created_at',{ascending:false});
+  const{data:recensioni}=await sb.from('feedback_clienti').select('*').eq('impresa_id',impresaCorrente.id).order('created_at',{ascending:false});
   document.body.insertAdjacentHTML('beforeend',renderModalRecensioni(recensioni||[]));
 }
 function renderModalRecensioni(recensioni) {

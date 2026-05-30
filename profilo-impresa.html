@@ -512,7 +512,7 @@ async function caricaProfilo(id){
     if(uniq.length)mg.innerHTML=uniq.map(v=>{const k=Object.keys(im).find(k=>v.toLowerCase().includes(k));return`<div class="cat"><span>${im[k]||'🔧'}</span> ${v}</div>`}).join('');
     else mg.innerHTML='<div style="color:#aaa;font-size:13px">Nessuna specializzazione</div>';
     // VALUTAZIONE + RECENSIONI: query live su feedback_clienti verificate
-    const rRev=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&verificata=eq.true&select=stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita`,{headers:{'apikey':SK}});
+    const rRev=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&select=stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita`,{headers:{'apikey':SK}});
     const recs=await rRev.json();
     const stelle=(Array.isArray(recs)?recs:[]).flatMap(r=>[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita]).filter(s=>s!=null);
     const nr=Array.isArray(recs)?recs.length:0;
