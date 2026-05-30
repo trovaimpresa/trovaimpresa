@@ -7,8 +7,8 @@ exports.handler = async (event) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
     const prezzi = {
-      mensile: 'price_1TZZucPaYWKYGE1dj63hOtjs',
-      annuale: 'price_1TZZz3PaYWKYGE1dCkB0599N'
+      mensile: 'price_1TcemeBVLZQWjpNjiQpqk5ms',
+      annuale: 'price_1TcepfBVLZQWjpNj89MMDwxA'
     };
 
     const session = await stripe.checkout.sessions.create({
