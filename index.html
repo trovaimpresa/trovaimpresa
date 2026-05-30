@@ -1095,6 +1095,9 @@
         @media (max-width: 900px) { .lk-side { display: none; } }
         @media (max-width:1199px) {
           .pub-spazio { display:none !important }
+          /* Hero in colonna: logo in cima, banner sotto */
+          .hero { display:flex; flex-direction:column; align-items:center; }
+          .hero img { order:-1; }
           /* PROVA: hero-sx/dx come banner orizzontali a tutta larghezza nel flusso */
           .pub-link[data-spazio-id="hero-sx"],
           .pub-link[data-spazio-id="hero-dx"] {
