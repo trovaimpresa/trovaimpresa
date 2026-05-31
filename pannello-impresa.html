@@ -521,6 +521,139 @@
   }
   .cant-info-row:last-child { border-bottom:none; }
   .cant-info-label { min-width:130px; font-weight:700; color:var(--mid); }
+
+  /* === FAQ ACCORDION === */
+  .faq-list { display:flex; flex-direction:column; gap:8px; }
+  .faq-item { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:white; }
+  .faq-domanda {
+    padding:12px 16px; font-size:0.92rem; font-weight:600; color:var(--dark);
+    cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+    gap:12px; user-select:none; transition:background 0.15s;
+  }
+  .faq-domanda:hover { background:#f8f8f8; }
+  .faq-domanda::after {
+    content:'+'; font-size:1.3rem; font-weight:700; color:var(--verde);
+    transition:transform 0.2s; flex-shrink:0; line-height:1;
+  }
+  .faq-item.open .faq-domanda::after { transform:rotate(45deg); }
+  .faq-risposta {
+    display:none; padding:0 16px 14px; font-size:0.88rem;
+    color:var(--mid); line-height:1.55;
+  }
+  .faq-item.open .faq-risposta { display:block; }
+  .faq-cta-help { margin-top:18px; padding-top:18px; border-top:1px solid var(--border); }
+  .faq-cta-help button {
+    width:100%; padding:13px; background:#fff3cd; color:#7b4f00;
+    border:1px solid #ffc107; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:0.92rem; font-weight:700;
+    cursor:pointer; transition:background 0.15s;
+  }
+  .faq-cta-help button:hover { background:#ffec99; }
+
+  body.theme-dark { background:#1a1a1a; color:#e5e5e5; }
+  body.theme-dark .sidebar { background:#222; border-right-color:rgba(255,255,255,0.08); }
+  body.theme-dark .topbar-title { color:#e5e5e5; }
+  body.theme-dark .stat-card,
+  body.theme-dark .dash-stat-card,
+  body.theme-dark .dash-quick-card,
+  body.theme-dark .prev-card,
+  body.theme-dark .profilo-card { background:#2a2a2a; border-color:rgba(255,255,255,0.08); color:#e5e5e5; }
+  body.theme-dark .stat-num,
+  body.theme-dark .dash-stat-num,
+  body.theme-dark .dash-quick-label,
+  body.theme-dark .profilo-title,
+  body.theme-dark .prev-nome { color:#e5e5e5; }
+  body.theme-dark .stat-lbl,
+  body.theme-dark .dash-stat-lbl,
+  body.theme-dark .profilo-key { color:#aaa; }
+  body.theme-dark .profilo-row,
+  body.theme-dark .profilo-title { border-bottom-color:rgba(255,255,255,0.08); }
+
+  #modal-personalizza-pannello .mpp-box {
+    background:white; border-radius:20px; width:100%; max-width:760px;
+    max-height:90vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  }
+  #modal-personalizza-pannello .mpp-box.fullscreen {
+    max-width: none !important;
+    width: 100vw;
+    height: 100vh;
+    max-height: none !important;
+    border-radius: 0;
+  }
+  #modal-personalizza-pannello .mpp-box.fullscreen .mpp-body {
+    max-height: none; flex: 1; min-height: 0;
+  }
+  #modal-personalizza-pannello .mpp-header {
+    background:linear-gradient(135deg,#7c3aed,#6d28d9); padding:24px;
+    color:white; display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  #modal-personalizza-pannello .mpp-header h2 {
+    font-family:'Playfair Display',serif; font-size:1.3rem; margin:0 0 4px; color:white;
+  }
+  #modal-personalizza-pannello .mpp-header p { margin:0; font-size:0.85rem; opacity:0.85; }
+  #modal-personalizza-pannello .mpp-close {
+    background:none; border:none; color:white; font-size:1.3rem; cursor:pointer;
+    opacity:0.85; line-height:1; padding:0;
+  }
+  #modal-personalizza-pannello .mpp-close:hover { opacity:1; }
+  #modal-personalizza-pannello .mpp-body {
+    padding:24px; overflow-y:auto; max-height:calc(90vh - 180px);
+  }
+  #modal-personalizza-pannello .mpp-section {
+    background:#f8f9fb; border-radius:12px; padding:14px; margin-bottom:10px;
+  }
+  #modal-personalizza-pannello .mpp-section:last-child { margin-bottom:0; }
+  #modal-personalizza-pannello .mpp-label {
+    display:block; font-size:0.73rem; font-weight:800; color:var(--mid);
+    text-transform:uppercase; letter-spacing:0.8px; margin:0 0 8px;
+  }
+  #modal-personalizza-pannello input[type="color"] {
+    width:56px; height:40px; border:2px solid white; border-radius:10px;
+    cursor:pointer; padding:0; box-shadow:0 0 0 1px #e5e7eb;
+  }
+  #modal-personalizza-pannello input[type="text"],
+  #modal-personalizza-pannello select {
+    width:100%; padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none;
+    background:white; box-sizing:border-box; transition:border-color 0.15s;
+  }
+  #modal-personalizza-pannello input[type="text"]:focus,
+  #modal-personalizza-pannello select:focus { border-color:#7c3aed; }
+  #modal-personalizza-pannello input[type="file"] {
+    font-family:'DM Sans',sans-serif; font-size:0.85rem; color:var(--mid);
+  }
+  #modal-personalizza-pannello input[type="file"]::file-selector-button {
+    padding:8px 16px; border:1.5px solid #7c3aed; border-radius:10px;
+    background:white; color:#7c3aed; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.85rem; cursor:pointer; margin-right:10px;
+    transition:all 0.15s;
+  }
+  #modal-personalizza-pannello input[type="file"]::file-selector-button:hover {
+    background:#7c3aed; color:white;
+  }
+  #modal-personalizza-pannello input[type="checkbox"] {
+    width:20px; height:20px; accent-color:#7c3aed; cursor:pointer;
+  }
+  #modal-personalizza-pannello input[type="range"] {
+    width:100%; cursor:pointer; accent-color:#7c3aed;
+  }
+  #modal-personalizza-pannello .mpp-footer {
+    padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:12px;
+    background:white; margin-top:auto;
+  }
+  #modal-personalizza-pannello .mpp-footer button {
+    flex:1; padding:12px; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer;
+  }
+  #modal-personalizza-pannello .mpp-btn-cancel {
+    border:1.5px solid var(--border); background:white; color:var(--mid);
+  }
+  #modal-personalizza-pannello .mpp-btn-save {
+    border:none; background:linear-gradient(135deg,#7c3aed,#9333ea); color:white;
+    box-shadow:0 4px 12px rgba(124,58,237,0.3); transition:transform 0.15s;
+  }
+  #modal-personalizza-pannello .mpp-btn-save:hover { transform:translateY(-1px); }
   .ai-form-group { margin-bottom:14px; }
   .ai-form-group label { display:block; font-size:0.73rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
   .ai-form-group input, .ai-form-group select, .ai-form-group textarea {
@@ -785,7 +918,7 @@
       <div class="dash-hero" id="dash-hero">
         <!-- SINISTRA: info + badge piano (1/3) -->
         <div class="dash-hero-info-col">
-          <div class="dash-welcome">Pannello impresa</div>
+          <div class="dash-welcome" id="dash-welcome">Pannello impresa</div>
           <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
           <div class="dash-meta">
             <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
@@ -888,9 +1021,25 @@
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Personalizza profilo</div>
         </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="qr-profilo" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalQRCode()">
+          <div class="dash-quick-icon">🔲</div>
+          <div class="dash-quick-label">QR Code profilo</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="risoluzione-problemi" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
+          <div class="dash-quick-icon">🛠️</div>
+          <div class="dash-quick-label">Risoluzione problemi</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalListaAttesaPub()">
+          <div class="dash-quick-icon">⏳</div>
+          <div class="dash-quick-label">Lista d'attesa pubblicità</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
+          <div class="dash-quick-icon">🎬</div>
+          <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
         <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">📊</div>
@@ -1624,6 +1773,149 @@
   </div>
 </div>
 
+<!-- MODAL RISOLUZIONE PROBLEMI -->
+<div class="modal-ai-overlay" id="modalRisoluzione" onclick="if(event.target===this)chiudiModalRisoluzione()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🛠️ Risoluzione problemi</h2>
+        <p>Domande frequenti e soluzioni rapide</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalRisoluzione()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="faq-list" id="faq-list"></div>
+      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:6px;">🤖 Assistente AI</div>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Non hai trovato la risposta? Chiedi direttamente all'assistente AI.</p>
+        <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
+        <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
+          style="margin-top:10px;padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
+          onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
+          ✨ Chiedi all'AI
+        </button>
+        <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#1a3a2a;"></div>
+      </div>
+      <div class="faq-cta-help">
+        <button onclick="chiudiModalRisoluzione();apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LISTA D'ATTESA PUBBLICITÀ -->
+<div class="modal-ai-overlay" id="modalListaAttesaPub" onclick="if(event.target===this)chiudiModalListaAttesaPub()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>⏳ Lista d'attesa pubblicità</h2>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalListaAttesaPub()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="lap-risultato" style="display:none;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:16px;font-size:15px;line-height:1.5;color:#1a3a2a;text-align:center;font-weight:700;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL QR CODE PROFILO -->
+<div class="modal-ai-overlay" id="modalQRCode" onclick="if(event.target===this)chiudiModalQRCode()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🔲 QR Code profilo</h2>
+        <p>Condividi il tuo profilo TrovaImpresa con un QR Code personalizzato</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalQRCode()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="qr-code-container" style="display:flex;justify-content:center;align-items:center;min-height:280px;padding:16px;background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:14px;"></div>
+      <div id="qr-url-line" style="font-size:0.75rem;color:#666;text-align:center;margin-bottom:16px;word-break:break-all;"></div>
+      <div class="ai-form-group">
+        <label>Colore QR Code</label>
+        <input type="color" id="qr-color-picker" value="#000000" oninput="aggiornaColoreQRCode(this.value)" style="width:100%;height:42px;padding:4px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:white;">
+      </div>
+      <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">⬇️ Scarica PNG 1024×1024</button>
+      <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:#1a3a2a;">
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px;">✅ Scaricato!</div>
+        <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
+        <div style="font-size:13px;color:#2a7a4b;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERSONALIZZA PANNELLO -->
+<div id="modal-personalizza-pannello" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)chiudiModalPersonalizzaPannello()">
+  <div class="mpp-box">
+    <div class="mpp-header">
+      <div>
+        <h2>🎨 Personalizza pannello</h2>
+        <p>Personalizza la tua esperienza</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="this.closest('.mpp-box').classList.toggle('fullscreen')">⛶</button>
+      <button class="mpp-close" onclick="chiudiModalPersonalizzaPannello()">✕</button>
+    </div>
+    <div id="personalizza-pannello-body" class="mpp-body">
+      <div class="mpp-section">
+        <label class="mpp-label">Colore header</label>
+        <input type="color" id="pers-pannello-colore-header" value="#2a7a4b">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Sfondo pagina</label>
+        <input type="color" id="pers-pannello-colore-sfondo" value="#f5f5f5">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Nome pannello</label>
+        <input type="text" id="pers-pannello-nome" maxlength="30">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Font header</label>
+        <select id="pers-pannello-font">
+          <option value="">Predefinito</option>
+          <option value="'Inter', sans-serif">Inter (moderno, pulito)</option>
+          <option value="'Poppins', sans-serif">Poppins (rotondo, friendly)</option>
+          <option value="'Montserrat', sans-serif">Montserrat (elegante)</option>
+          <option value="'Playfair Display', serif">Playfair Display (classico, serif)</option>
+          <option value="'Bebas Neue', sans-serif">Bebas Neue (bold, titoli)</option>
+        </select>
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Colore testo header</label>
+        <input type="color" id="pers-pannello-colore-testo" value="#ffffff">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Grandezza testo <span id="pers-pannello-size-label">1.0x</span></label>
+        <input type="range" id="pers-pannello-size-testo" min="0.7" max="1.5" step="0.05" value="1">
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Logo personalizzato</label>
+        <div id="pers-pannello-logo-preview" style="margin-bottom:8px;"></div>
+        <input type="file" id="pers-pannello-logo-file" accept="image/*">
+        <button type="button" id="pers-pannello-logo-remove" onclick="rimuoviLogoPersonalizzato()" style="display:none;margin-top:10px;padding:8px 16px;border:1.5px solid #dc2626;background:white;color:#dc2626;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.15s;">Rimuovi logo</button>
+      </div>
+      <div class="mpp-section">
+        <label class="mpp-label">Banner copertina</label>
+        <div id="pers-pannello-banner-preview" style="margin-bottom:8px;"></div>
+        <input type="file" id="pers-pannello-banner-file" accept="image/*">
+      </div>
+      <div class="mpp-section">
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--dark);cursor:pointer;margin:0;">
+          <input type="checkbox" id="pers-pannello-tema-scuro">
+          Tema scuro
+        </label>
+      </div>
+    </div>
+    <div class="mpp-footer">
+      <button class="mpp-btn-cancel" onclick="chiudiModalPersonalizzaPannello()">Annulla</button>
+      <button class="mpp-btn-save" onclick="salvaPersonalizzaPannello()">Salva</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PROMEMORIA -->
 <div class="modal-ai-overlay" id="modalPromemoria" onclick="if(event.target===this)chiudiPromemoria()">
   <div class="modal-ai" style="max-width:760px">
@@ -1967,6 +2259,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -3578,6 +3871,527 @@ async function eliminaScadenzaCantiere(id) {
   await caricaScadenzeCantiere();
 }
 
+
+// === RISOLUZIONE PROBLEMI / LISTA ATTESA PUBBLICITA / QR CODE ===
+const FAQS_LIST = [
+  {
+    domanda: "Non riesco ad accedere al mio account",
+    risposta: "Controlla email e password. Se hai dimenticato la password, clicca su 'Password dimenticata?' nella pagina di login: riceverai un'email per reimpostarla. Se l'email non arriva entro 5 minuti, controlla la cartella Spam."
+  },
+  {
+    domanda: "Come modifico i miei dati (telefono, indirizzo, descrizione)?",
+    risposta: "Clicca sulla card 'Modifica profilo' del pannello. Lì puoi aggiornare tutti i tuoi dati: contatti, descrizione attività, città, foto lavori. Ricordati di salvare in fondo alla pagina."
+  },
+  {
+    domanda: "Ho caricato un nuovo logo ma non si vede",
+    risposta: "Il browser potrebbe mostrarti la versione vecchia in cache. Premi CTRL+F5 (Windows) o CMD+SHIFT+R (Mac) per ricaricare. Formati supportati: JPG, PNG, WEBP. Dimensione massima: 2 MB."
+  },
+  {
+    domanda: "Non appaio nelle ricerche dei clienti",
+    risposta: "Verifica che: 1) Il profilo sia completo (categoria, città, descrizione, almeno una foto). 2) La città inserita sia scritta correttamente. 3) Se sei Free appari solo nella tua città; se sei Premium appari in tutta la regione."
+  },
+  {
+    domanda: "Qual è la differenza tra Free e Premium?",
+    risposta: "Free (€0): visibilità solo nella tua città, profilo base. Premium (€5/mese o €49/anno): visibilità in tutta la regione, badge verificato, statistiche profilo, personalizzazione pannello, priorità nei risultati di ricerca."
+  },
+  {
+    domanda: "Come passo a Premium?",
+    risposta: "Clicca sulla card 'Diventa Premium' o 'Abbonamento' nel tuo pannello. Pagamento sicuro tramite Stripe (carta di credito o debito). Puoi annullare in qualsiasi momento dalla sezione 'Modifica profilo'."
+  },
+  {
+    domanda: "Come ricevo recensioni dai miei clienti?",
+    risposta: "Nel pannello trovi un link diretto da condividere con i clienti (WhatsApp, email, SMS). Loro compileranno il modulo recensione con la propria email. La recensione apparirà nel tuo profilo pubblico dopo la verifica automatica."
+  },
+  {
+    domanda: "Come funzionano i preventivi?",
+    risposta: "I clienti ti contattano tramite il pulsante 'Richiedi preventivo' sulla tua scheda pubblica. Riceverai i dettagli del lavoro via email. Puoi rispondere direttamente al cliente con la tua proposta — TrovaImpresa non si trattiene commissioni."
+  },
+  {
+    domanda: "Voglio cancellare il mio account",
+    risposta: "Vai su 'Modifica profilo' → scorri fino in fondo → clicca 'Elimina account'. Attenzione: l'operazione è irreversibile e cancellerà profilo, recensioni e tutti i dati associati. Se sei Premium, l'abbonamento verrà annullato automaticamente."
+  },
+  {
+    domanda: "Ho un problema non elencato qui",
+    risposta: "Clicca sul pulsante 'Contatta assistenza' qui sotto per inviarci una segnalazione. Ti risponderemo via email entro 24-48 ore. In alternativa scrivi direttamente a info@trovaimpresa.com."
+  }
+];
+
+function apriModalRisoluzione() {
+  const lista = document.getElementById('faq-list');
+  if (!lista) return;
+  lista.innerHTML = FAQS_LIST.map(f => `
+    <div class="faq-item">
+      <div class="faq-domanda" onclick="toggleFaq(this)">${f.domanda}</div>
+      <div class="faq-risposta">${f.risposta}</div>
+    </div>
+  `).join('');
+  document.getElementById('modalRisoluzione').classList.add('show');
+}
+
+function chiudiModalRisoluzione() {
+  document.getElementById('modalRisoluzione').classList.remove('show');
+}
+
+async function apriModalListaAttesaPub() {
+  const ris = document.getElementById('lap-risultato');
+  ris.style.display = 'none';
+  ris.innerHTML = '';
+  document.getElementById('modalListaAttesaPub').classList.add('show');
+
+  // Carica le righe attive (attesa/offerto) dell'azienda loggata
+  const { data, error } = await sb.from('lista_attesa_pubblicita')
+    .select('citta, stato, created_at, offerta_scadenza')
+    .eq('impresa_id', impresaCorrente.id)
+    .in('stato', ['attesa', 'offerto'])
+    .order('created_at', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    ris.textContent = "Non sei in lista d'attesa. Per iscriverti vai su Pubblicità quando lo spazio che vuoi è occupato.";
+    ris.style.display = '';
+    return;
+  }
+
+  // 'offerto' ha priorità: spazio riservato all'azienda
+  const offerto = data.find(r => r.stato === 'offerto');
+  if (offerto) {
+    let scad = '';
+    if (offerto.offerta_scadenza) {
+      const [g, m, a] = String(offerto.offerta_scadenza).split('/');
+      const d = new Date(`${a}-${m}-${g}`);
+      scad = isNaN(d) ? String(offerto.offerta_scadenza) : d.toLocaleDateString('it-IT');
+    }
+    ris.innerHTML = `Si è liberato uno spazio a ${escHtml(offerto.citta)}! È tuo fino al ${escHtml(scad)}. Vuoi prenotarlo?` +
+      `<div style="margin-top:14px;"><a href="pubblicita.html" class="btn-salva-annuncio" style="display:inline-block;text-decoration:none;">🛒 Acquista</a></div>`;
+    ris.style.display = '';
+    return;
+  }
+
+  // 'attesa': posizione = n. aziende in attesa per quella città con created_at <= la sua
+  const inAttesa = data.find(r => r.stato === 'attesa');
+  const { count } = await sb.from('lista_attesa_pubblicita')
+    .select('id', { count: 'exact', head: true })
+    .ilike('citta', inAttesa.citta)
+    .eq('stato', 'attesa')
+    .lte('created_at', inAttesa.created_at);
+  ris.textContent = `Sei in posizione n° ${count || 1} per ${inAttesa.citta}`;
+  ris.style.display = '';
+}
+
+function chiudiModalListaAttesaPub() {
+  document.getElementById('modalListaAttesaPub').classList.remove('show');
+}
+
+function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function chiediSupportoAI() {
+  const ta = document.getElementById('ai-supporto-prompt');
+  const btn = document.getElementById('btn-ai-supporto');
+  const out = document.getElementById('ai-supporto-risposta');
+  const testo = (ta.value || '').trim();
+  if (!testo) {
+    alert('Scrivi la tua domanda prima di inviare.');
+    ta.focus();
+    return;
+  }
+  if (!impresaCorrente || !impresaCorrente.id) {
+    alert('Impresa non identificata. Ricarica la pagina.');
+    return;
+  }
+  const labelOriginale = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.style.cursor = 'not-allowed';
+  out.textContent = 'Sto pensando…';
+  const faqTesto = FAQS_LIST.map(f => `D: ${f.domanda}\nR: ${f.risposta}`).join('\n\n');
+  const promptCompleto = `Rispondi basandoti su queste FAQ ufficiali di TrovaImpresa, non inventare funzioni o informazioni non presenti. Se la risposta non è nelle FAQ, dillo e invita a usare "Contatta assistenza".\n\nFAQ UFFICIALI:\n${faqTesto}\n\nDOMANDA DELL'UTENTE:\n${testo}`;
+  try {
+    const resp = await fetch('/.netlify/functions/ai-claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        azione: 'supporto',
+        impresa_id: impresaCorrente.id,
+        prompt: promptCompleto
+      })
+    });
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) {
+      out.textContent = 'Errore AI: ' + ((data && data.error) || resp.status);
+      return;
+    }
+    if (data && data.risposta) {
+      out.innerHTML = escHtml(data.risposta).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    } else {
+      out.textContent = 'Risposta vuota.';
+    }
+  } catch (e) {
+    out.textContent = 'Errore di rete: ' + (e && e.message ? e.message : e);
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+    btn.innerHTML = labelOriginale;
+  }
+}
+function toggleFaq(headerEl) {
+  headerEl.parentElement.classList.toggle('open');
+}
+
+let _qrCodeInstance = null;
+let _qrCodeCurrentColor = '#000000';
+let _qrCodeLibPromise = null;
+function _caricaQRCodeStylingLib() {
+  if (_qrCodeLibPromise) return _qrCodeLibPromise;
+  _qrCodeLibPromise = new Promise((resolve, reject) => {
+    if (window.QRCodeStyling) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js';
+    s.onload = () => resolve();
+    s.onerror = () => { _qrCodeLibPromise = null; reject(new Error('Impossibile caricare la libreria QR Code')); };
+    document.head.appendChild(s);
+  });
+  return _qrCodeLibPromise;
+}
+function _qrTargetUrl() {
+  return `https://trovaimpresa.com/profilo-impresa.html?id=${impresaCorrente.id}`;
+}
+function _qrLogoUrl() {
+  return (impresaCorrente && impresaCorrente.logo_url) || '/img/logo.png';
+}
+function _qrColorDefault() {
+  const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
+  return pers.colore_header || '#000000';
+}
+function _qrConfig(size, color) {
+  return {
+    width: size,
+    height: size,
+    type: 'canvas',
+    data: _qrTargetUrl(),
+    image: _qrLogoUrl(),
+    dotsOptions: { color: color, type: 'rounded' },
+    backgroundOptions: { color: '#ffffff' },
+    imageOptions: { crossOrigin: 'anonymous', margin: 6, imageSize: 0.25 },
+    cornersSquareOptions: { color: color, type: 'extra-rounded' },
+    cornersDotOptions: { color: color }
+  };
+}
+async function apriModalQRCode() {
+  if (!impresaCorrente) return;
+  const piano = (impresaCorrente.piano || '').toLowerCase();
+  if (piano !== 'premium') {
+    if (confirm('🔲 QR Code profilo è una funzione Premium. Vuoi scoprire di più?')) {
+      window.location.href = 'info-premium.html';
+    }
+    return;
+  }
+  document.getElementById('modalQRCode').classList.add('show');
+  document.getElementById('qr-url-line').textContent = _qrTargetUrl();
+  const colore = _qrColorDefault();
+  _qrCodeCurrentColor = colore;
+  const colorInput = document.getElementById('qr-color-picker');
+  if (colorInput) colorInput.value = colore;
+  const container = document.getElementById('qr-code-container');
+  container.innerHTML = '<div style="color:#999;padding:40px 0;">⏳ Generazione QR Code…</div>';
+  try {
+    await _caricaQRCodeStylingLib();
+    container.innerHTML = '';
+    _qrCodeInstance = new QRCodeStyling(_qrConfig(280, colore));
+    _qrCodeInstance.append(container);
+  } catch (err) {
+    container.innerHTML = '<div style="color:#c0392b;padding:20px 0;text-align:center;">Errore: ' + err.message + '</div>';
+  }
+}
+function aggiornaColoreQRCode(nuovoColore) {
+  _qrCodeCurrentColor = nuovoColore;
+  if (!_qrCodeInstance) return;
+  _qrCodeInstance.update({
+    dotsOptions: { color: nuovoColore, type: 'rounded' },
+    cornersSquareOptions: { color: nuovoColore, type: 'extra-rounded' },
+    cornersDotOptions: { color: nuovoColore }
+  });
+}
+function chiudiModalQRCode() {
+  document.getElementById('modalQRCode').classList.remove('show');
+  const box = document.getElementById('qrSuccessBox');
+  if (box) box.style.display = 'none';
+}
+async function scaricaQRCodePNG() {
+  if (!impresaCorrente) return;
+  try {
+    await _caricaQRCodeStylingLib();
+    const qrDownload = new QRCodeStyling(_qrConfig(1024, _qrCodeCurrentColor));
+    await qrDownload.download({ name: `qr-trovaimpresa-${impresaCorrente.id}`, extension: 'png' });
+    const box = document.getElementById('qrSuccessBox');
+    if (box) box.style.display = 'block';
+  } catch (err) {
+    alert('Errore durante il download: ' + err.message);
+  }
+}
+
+// === PERSONALIZZA PANNELLO ===
+function applicaFontHero(font) {
+  const hero = document.getElementById('dash-hero');
+  if (!hero) return;
+  hero.querySelectorAll('.dash-welcome, .dash-nome').forEach(el => {
+    if (font) el.style.setProperty('font-family', font, 'important');
+    else el.style.removeProperty('font-family');
+  });
+}
+function applicaColoreTestoHero(colore) {
+  const hero = document.getElementById('dash-hero');
+  if (!hero) return;
+  hero.style.color = colore || '';
+  hero.querySelectorAll('.dash-welcome, .dash-nome').forEach(el => {
+    el.style.color = colore || '';
+  });
+}
+function applicaSizeTestoHero(size) {
+  const nome = document.querySelector('#dash-hero .dash-nome');
+  if (!nome) return;
+  const n = parseFloat(size);
+  if (n && n !== 1) {
+    nome.style.fontSize = `calc(1.6rem * ${n})`;
+  } else {
+    nome.style.fontSize = '';
+  }
+}
+function applicaBannerHero(url) {
+  const col = document.getElementById('dash-hero-logo-col');
+  if (!col) return;
+  if (url) {
+    col.style.backgroundImage = `url("${url}")`;
+    col.style.backgroundSize = 'cover';
+    col.style.backgroundPosition = 'center';
+  } else {
+    col.style.backgroundImage = '';
+    col.style.backgroundSize = '';
+    col.style.backgroundPosition = '';
+  }
+}
+let _persPannelloHeroBgTemp = null;
+let _persPannelloBodyBgTemp = null;
+let _persPannelloNomeTemp = null;
+let _persPannelloFontTemp = null;
+let _persPannelloLogoTemp = null;
+let _persPannelloTemaTemp = null;
+let _persPannelloColoreTestoTemp = null;
+let _persPannelloSizeTestoTemp = null;
+let _persPannelloBannerTemp = null;
+function apriModalPersonalizzaPannello() {
+  const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
+  document.getElementById('pers-pannello-colore-header').value = pers.colore_header || '#2a7a4b';
+  document.getElementById('pers-pannello-colore-sfondo').value = pers.colore_sfondo || '#f5f5f5';
+  const welcomeEl = document.getElementById('dash-welcome');
+  document.getElementById('pers-pannello-nome').value = pers.nome_pannello || (welcomeEl ? welcomeEl.textContent : '');
+  document.getElementById('pers-pannello-font').value = pers.font_pannello || '';
+  const haCustomLogo = impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png';
+  const logoPreviewEl = document.getElementById('pers-pannello-logo-preview');
+  if (logoPreviewEl) {
+    logoPreviewEl.innerHTML = haCustomLogo
+      ? `<img src="${impresaCorrente.logo_url}" style="max-height:40px;width:auto;">`
+      : '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
+  }
+  document.getElementById('pers-pannello-logo-file').value = '';
+  const logoRemoveBtn = document.getElementById('pers-pannello-logo-remove');
+  if (logoRemoveBtn) logoRemoveBtn.style.display = haCustomLogo ? '' : 'none';
+  const bannerPreviewEl = document.getElementById('pers-pannello-banner-preview');
+  if (bannerPreviewEl) {
+    bannerPreviewEl.innerHTML = pers.banner_url
+      ? `<img src="${pers.banner_url}" style="max-height:60px;max-width:100%;object-fit:cover;border-radius:6px;">`
+      : '<span style="font-size:0.78rem;color:var(--light);">Nessun banner</span>';
+  }
+  document.getElementById('pers-pannello-banner-file').value = '';
+  document.getElementById('pers-pannello-tema-scuro').checked = pers.tema_scuro === true;
+  document.getElementById('pers-pannello-colore-testo').value = pers.colore_testo_header || '#ffffff';
+  const sizeVal = pers.size_testo_header || 1;
+  document.getElementById('pers-pannello-size-testo').value = sizeVal;
+  document.getElementById('pers-pannello-size-label').textContent = parseFloat(sizeVal).toFixed(1) + 'x';
+  const hero = document.getElementById('dash-hero');
+  const sidebarLogoEl = document.querySelector('.sidebar-logo');
+  const nomeHeroEl = document.querySelector('#dash-hero .dash-nome');
+  _persPannelloHeroBgTemp = hero ? hero.style.background : '';
+  _persPannelloBodyBgTemp = document.body.style.background;
+  _persPannelloNomeTemp = welcomeEl ? welcomeEl.textContent : '';
+  _persPannelloFontTemp = nomeHeroEl ? nomeHeroEl.style.fontFamily : '';
+  _persPannelloLogoTemp = sidebarLogoEl ? sidebarLogoEl.innerHTML : null;
+  _persPannelloTemaTemp = document.body.classList.contains('theme-dark');
+  _persPannelloColoreTestoTemp = hero ? hero.style.color : '';
+  _persPannelloSizeTestoTemp = nomeHeroEl ? nomeHeroEl.style.fontSize : '';
+  _persPannelloBannerTemp = pers.banner_url || '';
+  document.getElementById('pers-pannello-colore-header').oninput = (e) => {
+    const c = e.target.value;
+    const h = document.getElementById('dash-hero');
+    if (h) h.style.background = `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 60%, black))`;
+  };
+  document.getElementById('pers-pannello-colore-sfondo').oninput = (e) => {
+    document.body.style.background = e.target.value;
+  };
+  document.getElementById('pers-pannello-nome').oninput = (e) => {
+    const w = document.getElementById('dash-welcome');
+    if (w) w.textContent = e.target.value;
+  };
+  document.getElementById('pers-pannello-font').onchange = (e) => {
+    applicaFontHero(e.target.value);
+  };
+  document.getElementById('pers-pannello-logo-file').onchange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const sl = document.querySelector('.sidebar-logo');
+      if (sl) {
+        const sm = sl.querySelector('small');
+        const smHtml = sm ? sm.outerHTML : '';
+        sl.innerHTML = `<img src="${ev.target.result}" style="max-height:40px;width:auto">${smHtml}`;
+      }
+    };
+    reader.readAsDataURL(f);
+  };
+  document.getElementById('pers-pannello-tema-scuro').onchange = (e) => {
+    if (e.target.checked) document.body.classList.add('theme-dark');
+    else document.body.classList.remove('theme-dark');
+  };
+  document.getElementById('pers-pannello-colore-testo').oninput = (e) => {
+    applicaColoreTestoHero(e.target.value);
+  };
+  document.getElementById('pers-pannello-size-testo').oninput = (e) => {
+    applicaSizeTestoHero(e.target.value);
+    document.getElementById('pers-pannello-size-label').textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+  };
+  document.getElementById('pers-pannello-banner-file').onchange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      applicaBannerHero(ev.target.result);
+    };
+    reader.readAsDataURL(f);
+  };
+  document.getElementById('modal-personalizza-pannello').style.display = 'flex';
+}
+function chiudiModalPersonalizzaPannello() {
+  if (_persPannelloHeroBgTemp !== null) {
+    const hero = document.getElementById('dash-hero');
+    if (hero) hero.style.background = _persPannelloHeroBgTemp;
+  }
+  if (_persPannelloBodyBgTemp !== null) {
+    document.body.style.background = _persPannelloBodyBgTemp;
+  }
+  if (_persPannelloNomeTemp !== null) {
+    const w = document.getElementById('dash-welcome');
+    if (w) w.textContent = _persPannelloNomeTemp;
+  }
+  if (_persPannelloFontTemp !== null) {
+    applicaFontHero(_persPannelloFontTemp);
+  }
+  if (_persPannelloLogoTemp !== null) {
+    const sl = document.querySelector('.sidebar-logo');
+    if (sl) sl.innerHTML = _persPannelloLogoTemp;
+  }
+  if (_persPannelloTemaTemp !== null) {
+    if (_persPannelloTemaTemp) document.body.classList.add('theme-dark');
+    else document.body.classList.remove('theme-dark');
+  }
+  if (_persPannelloColoreTestoTemp !== null) {
+    applicaColoreTestoHero(_persPannelloColoreTestoTemp);
+  }
+  if (_persPannelloSizeTestoTemp !== null) {
+    const nome = document.querySelector('#dash-hero .dash-nome');
+    if (nome) nome.style.fontSize = _persPannelloSizeTestoTemp;
+  }
+  if (_persPannelloBannerTemp !== null) {
+    applicaBannerHero(_persPannelloBannerTemp);
+  }
+  _persPannelloHeroBgTemp = null;
+  _persPannelloBodyBgTemp = null;
+  _persPannelloNomeTemp = null;
+  _persPannelloFontTemp = null;
+  _persPannelloLogoTemp = null;
+  _persPannelloTemaTemp = null;
+  _persPannelloColoreTestoTemp = null;
+  _persPannelloSizeTestoTemp = null;
+  _persPannelloBannerTemp = null;
+  document.getElementById('modal-personalizza-pannello').style.display = 'none';
+}
+async function rimuoviLogoPersonalizzato() {
+  await sb.from('imprese').update({ logo_url: null }).eq('id', impresaCorrente.id);
+  impresaCorrente.logo_url = null;
+  const previewEl = document.getElementById('pers-pannello-logo-preview');
+  if (previewEl) previewEl.innerHTML = '<span style="font-size:0.78rem;color:var(--light);">Nessun logo personalizzato</span>';
+  const sidebarLogo = document.querySelector('.sidebar-logo');
+  if (sidebarLogo) {
+    const small = sidebarLogo.querySelector('small');
+    const smallHtml = small ? small.outerHTML : '';
+    sidebarLogo.innerHTML = `<img src="/img/logo.png" style="max-height:40px;width:auto">${smallHtml}`;
+  }
+  const removeBtn = document.getElementById('pers-pannello-logo-remove');
+  if (removeBtn) removeBtn.style.display = 'none';
+  if (sidebarLogo) _persPannelloLogoTemp = sidebarLogo.innerHTML;
+}
+async function salvaCardOrdine() {
+  const card_ordine = Array.from(document.querySelectorAll('.dash-quick-grid [data-card-id]')).map(el => el.dataset.cardId);
+  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), card_ordine };
+  await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
+  impresaCorrente.personalizzazione = personalizzazione;
+}
+async function salvaPersonalizzaPannello() {
+  const colore_header = document.getElementById('pers-pannello-colore-header').value;
+  const colore_sfondo = document.getElementById('pers-pannello-colore-sfondo').value;
+  const nome_pannello = document.getElementById('pers-pannello-nome').value;
+  const font_pannello = document.getElementById('pers-pannello-font').value;
+  const tema_scuro = document.getElementById('pers-pannello-tema-scuro').checked;
+  const colore_testo_header = document.getElementById('pers-pannello-colore-testo').value;
+  const size_testo_header = parseFloat(document.getElementById('pers-pannello-size-testo').value);
+  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), colore_header, colore_sfondo, nome_pannello, font_pannello, tema_scuro, colore_testo_header, size_testo_header };
+  const updateData = { personalizzazione };
+  const fileInput = document.getElementById('pers-pannello-logo-file');
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const parts = file.name.split('.');
+    const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'png';
+    const path = `${impresaCorrente.user_id}/logo.${ext}`;
+    const { error: upErr } = await sb.storage.from('loghi-personalizzati').upload(path, file, { upsert: true });
+    if (upErr) {
+      alert('Errore caricamento logo: ' + upErr.message);
+      return;
+    }
+    const { data: pub } = sb.storage.from('loghi-personalizzati').getPublicUrl(path);
+    if (pub && pub.publicUrl) updateData.logo_url = pub.publicUrl;
+  }
+  const bannerInput = document.getElementById('pers-pannello-banner-file');
+  if (bannerInput && bannerInput.files && bannerInput.files[0]) {
+    const file = bannerInput.files[0];
+    const parts = file.name.split('.');
+    const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'png';
+    const path = `${impresaCorrente.id}/banner.${ext}`;
+    const { error: bnErr } = await sb.storage.from('banner-personalizzati').upload(path, file, { upsert: true });
+    if (bnErr) {
+      alert('Errore caricamento banner: ' + bnErr.message);
+      return;
+    }
+    const { data: pub } = sb.storage.from('banner-personalizzati').getPublicUrl(path);
+    if (pub && pub.publicUrl) personalizzazione.banner_url = pub.publicUrl;
+  }
+  const { error: updErr } = await sb.from('imprese').update(updateData).eq('id', impresaCorrente.id);
+  if (updErr) {
+    alert('Errore salvataggio: ' + updErr.message);
+    return;
+  }
+  impresaCorrente.personalizzazione = personalizzazione;
+  if (updateData.logo_url) impresaCorrente.logo_url = updateData.logo_url;
+  _persPannelloHeroBgTemp = null;
+  _persPannelloBodyBgTemp = null;
+  _persPannelloNomeTemp = null;
+  _persPannelloFontTemp = null;
+  _persPannelloLogoTemp = null;
+  _persPannelloTemaTemp = null;
+  _persPannelloColoreTestoTemp = null;
+  _persPannelloSizeTestoTemp = null;
+  _persPannelloBannerTemp = null;
+  chiudiModalPersonalizzaPannello();
+}
+
 const PANNELLO_CORRENTE = 'impresa';
 
 async function inizializza() {
@@ -3650,6 +4464,69 @@ async function inizializza() {
   await caricaFotoLavori();
   await caricaCertificazioni();
   await caricaCantieri();
+  // Colore header da personalizzazione (JSONB)
+  const colorePers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_header;
+  if (colorePers) {
+    const hero = document.getElementById('dash-hero');
+    if (hero) hero.style.background = `linear-gradient(135deg, ${colorePers}, color-mix(in srgb, ${colorePers} 60%, black))`;
+  }
+  const sfondoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_sfondo;
+  if (sfondoPers) {
+    document.body.style.background = sfondoPers;
+  }
+  const nomePers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.nome_pannello;
+  if (nomePers) {
+    const welcomeNomeEl = document.getElementById('dash-welcome');
+    if (welcomeNomeEl) welcomeNomeEl.textContent = nomePers;
+  }
+  const fontPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.font_pannello;
+  if (fontPers) {
+    applicaFontHero(fontPers);
+  }
+  const colTestoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_testo_header;
+  if (colTestoPers) {
+    applicaColoreTestoHero(colTestoPers);
+  }
+  const sizeTestoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.size_testo_header;
+  if (sizeTestoPers) {
+    applicaSizeTestoHero(sizeTestoPers);
+  }
+  const bannerPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.banner_url;
+  if (bannerPers) {
+    applicaBannerHero(bannerPers);
+  }
+  {
+    const sidebarLogo = document.querySelector('.sidebar-logo');
+    if (sidebarLogo) {
+      const small = sidebarLogo.querySelector('small');
+      const smallHtml = small ? small.outerHTML : '';
+      const haCustomLogo = impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png';
+      sidebarLogo.innerHTML = haCustomLogo
+        ? `<img src="${impresaCorrente.logo_url}" style="max-height:40px;width:auto">${smallHtml}`
+        : smallHtml;
+    }
+  }
+  const temaPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.tema_scuro;
+  if (temaPers === true) {
+    document.body.classList.add('theme-dark');
+  }
+  const cardOrd = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.card_ordine;
+  if (Array.isArray(cardOrd) && cardOrd.length) {
+    document.querySelectorAll('.dash-quick-grid').forEach(grid => {
+      const cards = Array.from(grid.querySelectorAll('[data-card-id]'));
+      cards.sort((a, b) => {
+        const ia = cardOrd.indexOf(a.dataset.cardId);
+        const ib = cardOrd.indexOf(b.dataset.cardId);
+        return (ia === -1 ? Infinity : ia) - (ib === -1 ? Infinity : ib);
+      });
+      cards.forEach(c => grid.appendChild(c));
+    });
+  }
+  if (piano === 'premium' && window.Sortable) {
+    document.querySelectorAll('.dash-quick-grid').forEach(grid => {
+      new Sortable(grid, { animation: 150, onUpdate: salvaCardOrdine, delay: 400, delayOnTouchOnly: true, touchStartThreshold: 8 });
+    });
+  }
   caricaProfilo();
 
   // Apri la sezione indicata dall'hash (se presente e valida)
