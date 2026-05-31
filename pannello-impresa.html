@@ -2483,6 +2483,9 @@ function showSection(id, el, fromPopstate) {
   const sec = document.getElementById('sec-' + id);
   if (sec) sec.classList.add('active');
   if (el) el.classList.add('active');
+  // "Il tuo piano" visibile solo sulla dashboard
+  const pianoBox = document.getElementById('sezione-il-tuo-piano');
+  if (pianoBox) pianoBox.style.display = (id === 'dashboard') ? '' : 'none';
   if (!fromPopstate) history.pushState({ section: id }, '', '#' + id);
 }
 
