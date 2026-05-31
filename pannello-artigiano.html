@@ -1522,13 +1522,14 @@
 </div>
 
 <!-- MODAL PROMEMORIA -->
-<div class="ti-modal-overlay" id="modalPromemoria" onclick="if(event.target===this)chiudiPromemoria()">
-  <div class="ti-modal xl">
+<div class="modal-ai-overlay" id="modalPromemoria" onclick="if(event.target===this)chiudiPromemoria()">
+  <div class="modal-ai" style="max-width:760px">
     <div class="modal-ai-header" style="background:linear-gradient(135deg,#c2410c,#f97316);">
       <div>
         <h2>🔔 Promemoria</h2>
         <p>Crea un promemoria con una data di scadenza</p>
       </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
       <button class="modal-ai-close" onclick="chiudiPromemoria()">✕</button>
     </div>
     <div class="modal-ai-body">
@@ -1540,10 +1541,10 @@
         <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Data</label>
         <input type="date" id="promemoria-data" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;">
       </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
-        <button type="button" onclick="chiudiPromemoria()" style="padding:12px 20px;background:#f5f5f5;color:#333;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Annulla</button>
-        <button type="button" id="btn-salva-promemoria" onclick="salvaPromemoria()" style="padding:12px 20px;background:#f97316;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Salva</button>
-      </div>
+    </div>
+    <div class="modal-ai-footer">
+      <button type="button" onclick="chiudiPromemoria()" style="padding:12px 20px;background:#f5f5f5;color:#333;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Annulla</button>
+      <button type="button" id="btn-salva-promemoria" onclick="salvaPromemoria()" style="padding:12px 20px;background:#f97316;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Salva</button>
     </div>
   </div>
 </div>
@@ -4917,11 +4918,11 @@ function apriPromemoria() {
   dataInput.min = oggi;
   dataInput.value = '';
   document.getElementById('promemoria-testo').value = '';
-  document.getElementById('modalPromemoria').classList.add('open');
+  document.getElementById('modalPromemoria').classList.add('show');
 }
 
 function chiudiPromemoria() {
-  document.getElementById('modalPromemoria').classList.remove('open');
+  document.getElementById('modalPromemoria').classList.remove('show');
 }
 
 async function salvaPromemoria() {
