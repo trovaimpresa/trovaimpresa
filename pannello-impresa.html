@@ -970,41 +970,20 @@
         </div>
       </div>
 
-<!-- SEZIONI (prima nel menu laterale, ora raggiungibili da qui) -->
-      <div class="dash-quick-title">Sezioni</div>
-      <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="sez-lavoro" style="cursor:pointer" onclick="showSectionById('lavoro')">
-          <div class="dash-quick-icon">💼</div>
-          <div class="dash-quick-label">Offerte di lavoro</div>
-        </div>
-        <div class="dash-quick-card" data-card-id="sez-candidati" style="cursor:pointer" onclick="showSectionById('candidati')">
-          <div class="dash-quick-icon">🔍</div>
-          <div class="dash-quick-label">Candidati nella tua zona</div>
-        </div>
-        <div class="dash-quick-card" data-card-id="sez-profilo" style="cursor:pointer" onclick="showSectionById('profilo')">
-          <div class="dash-quick-icon">👤</div>
-          <div class="dash-quick-label">Il mio profilo</div>
-        </div>
-      </div>
-
       <!-- FUNZIONI PREMIUM -->
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
-          <div class="dash-quick-icon">🔝</div>
-          <div class="dash-quick-label">Priorità nei risultati</div>
+        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('profilo', this)">
+          <div class="dash-quick-icon">👤</div>
+          <div class="dash-quick-label">Il mio profilo</div>
         </div>
-        <div id="card-visibile" class="dash-quick-card" style="cursor:pointer" onclick="apriModalVisibile()">
-          <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
-          <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
-        </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
+        <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
         </div>
-        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
-          <div class="dash-quick-icon">🎨</div>
-          <div class="dash-quick-label">Personalizza pannello</div>
+        <div id="card-visibile" class="dash-quick-card" data-card-id="visibile" style="cursor:pointer" onclick="apriModalVisibile()">
+          <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
+          <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
         <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
           <div class="dash-quick-icon">🛠️</div>
@@ -1018,11 +997,44 @@
           <div class="dash-quick-icon">⏳</div>
           <div class="dash-quick-label">Lista d'attesa pubblicità</div>
         </div>
+        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
+          <div class="dash-quick-icon">🎨</div>
+          <div class="dash-quick-label">Personalizza pannello</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="priorita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
+          <div class="dash-quick-icon">🔝</div>
+          <div class="dash-quick-label">Priorità nei risultati</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="preventivi-illimitati" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="showSection('preventivi', this)">
+          <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
+          <div class="dash-quick-icon">📄</div>
+          <div class="dash-quick-label">Richiesta di preventivo</div>
+        </div>
         <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+        <div class="dash-quick-card" data-card-id="cerca-lavoro" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+          <a href="registrazione-candidato.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
+            <div class="dash-quick-icon">🧑</div>
+            <div class="dash-quick-label">Registrati · Invia CV</div>
+          </a>
+          <a href="ricerca-candidati.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
+            <div class="dash-quick-icon">🔍</div>
+            <div class="dash-quick-label">Ricerca Candidati</div>
+          </a>
+        </div>
+        <div class="dash-quick-card" data-card-id="offerte-lavoro" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+          <a href="offerte-registrazione.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
+            <div class="dash-quick-icon">💼</div>
+            <div class="dash-quick-label">Pubblica Offerta di Lavoro</div>
+          </a>
+          <a href="ricerca-offerte.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
+            <div class="dash-quick-icon">🔍</div>
+            <div class="dash-quick-label">Ricerca Offerte</div>
+          </a>
+        </div>
+        <div class="dash-quick-card" data-card-id="subappalto" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
             <div class="dash-quick-icon">🔍</div>
             <div class="dash-quick-label">Cerco Subappaltatori</div>
