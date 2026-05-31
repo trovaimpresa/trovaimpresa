@@ -2137,12 +2137,13 @@
 
 <!-- MODAL STORICO PREVENTIVI -->
 <div class="modal-ai-overlay" id="modalStoricoPreventivi" onclick="if(event.target===this)chiudiModalStoricoPreventivi()">
-  <div class="modal-ai fullscreen">
+  <div class="modal-ai" style="max-width:760px">
     <div class="modal-ai-header">
       <div>
         <h2>📚 Storico preventivi</h2>
         <p>Tutti i preventivi che hai creato</p>
       </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
       <button class="modal-ai-close" onclick="chiudiModalStoricoPreventivi()">✕</button>
     </div>
     <div class="modal-ai-body">
