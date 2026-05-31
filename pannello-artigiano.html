@@ -1516,6 +1516,33 @@
   </div>
 </div>
 
+<!-- MODAL PROMEMORIA -->
+<div class="modal-ai-overlay" id="modalPromemoria" onclick="if(event.target===this)chiudiModalPromemoria()">
+  <div class="modal-ai">
+    <div class="modal-ai-header" style="background:linear-gradient(135deg,#c2410c,#f97316);">
+      <div>
+        <h2>🔔 Promemoria</h2>
+        <p>Crea un promemoria con una data di scadenza</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalPromemoria()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Testo</label>
+        <textarea id="promemoria-testo" rows="4" placeholder="Scrivi il tuo promemoria..." style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Data</label>
+        <input type="date" id="promemoria-data" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button type="button" onclick="chiudiModalPromemoria()" style="padding:12px 20px;background:#f5f5f5;color:#333;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Annulla</button>
+        <button type="button" id="btn-salva-promemoria" onclick="salvaPromemoria()" style="padding:12px 20px;background:#f97316;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Salva</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL NUOVO CANTIERE -->
 <div class="modal-ai-overlay" id="modalNuovoCantiere" onclick="if(event.target===this)chiudiModalNuovoCantiere()">
   <div class="modal-ai">
@@ -4316,6 +4343,7 @@ function caricaProfilo() {
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
       <a href="modifica-profilo.html" target="_blank" class="btn-az">✏️ Modifica profilo</a>
       <a href="#" onclick="avviaMFA(event)" class="btn-az arancio" id="link-2fa">🔐 Attiva 2FA</a>
+      <button type="button" onclick="apriModalPromemoria()" class="btn-az" style="border-top-color:#f97316;">🔔 Promemoria</button>
     </div>
   `;
   const mestieri = Array.isArray(i.mestieri) ? i.mestieri : [];
@@ -4876,6 +4904,43 @@ async function inviaSegnalazione() {
 
 function chiudiModalPriorita() {
   document.getElementById('modalPriorita').classList.remove('show');
+}
+
+// === PROMEMORIA ===
+function apriModalPromemoria() {
+  const oggi = new Date().toISOString().slice(0, 10);
+  const dataInput = document.getElementById('promemoria-data');
+  dataInput.min = oggi;
+  dataInput.value = '';
+  document.getElementById('promemoria-testo').value = '';
+  document.getElementById('modalPromemoria').classList.add('show');
+}
+
+function chiudiModalPromemoria() {
+  document.getElementById('modalPromemoria').classList.remove('show');
+}
+
+async function salvaPromemoria() {
+  const testo = document.getElementById('promemoria-testo').value.trim();
+  const data = document.getElementById('promemoria-data').value;
+  if (!testo) { alert('Scrivi il testo del promemoria.'); return; }
+  if (!data) { alert('Seleziona una data.'); return; }
+  const btn = document.getElementById('btn-salva-promemoria');
+  btn.disabled = true;
+  btn.textContent = '⏳ Salvataggio...';
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Utente non autenticato.');
+    const { error } = await sb.from('promemoria').insert({ user_id: user.id, testo, data });
+    if (error) throw error;
+    chiudiModalPromemoria();
+    alert('Promemoria salvato!');
+  } catch (err) {
+    alert('Errore durante il salvataggio: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salva';
+  }
 }
 
 // === RISOLUZIONE PROBLEMI (FAQ) ===
