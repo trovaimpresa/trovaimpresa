@@ -430,6 +430,79 @@
   .modal-ai-close { background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; opacity:0.7; line-height:1; padding:0; }
   .modal-ai-close:hover { opacity:1; }
   .modal-ai-body { padding:24px 28px; }
+
+  .btn-fullscreen { background:transparent; border:none; color:white; font-size:1.2rem; cursor:pointer; padding:4px 8px; }
+  .modal-ai-overlay .modal-ai.fullscreen {
+    max-width: none !important;
+    width: 100vw;
+    height: 100vh;
+    max-height: none !important;
+    border-radius: 0;
+  }
+
+  /* === MODAL CREA PREVENTIVO === */
+  .prev-section-label {
+    font-size:0.72rem; font-weight:800; color:var(--verde2);
+    text-transform:uppercase; letter-spacing:1px;
+    margin:20px 0 10px; padding-top:14px; border-top:1.5px solid #f0f0f0;
+  }
+  .prev-section-label:first-child { padding-top:0; border-top:none; margin-top:0; }
+  .prev-logo-preview { max-height:48px; width:auto; border-radius:6px; margin-bottom:10px; display:none; }
+  .form-group input[readonly].prev-readonly { background:#f5f5f5; color:#555; cursor:not-allowed; }
+  .prev-table { width:100%; border-collapse:collapse; margin-bottom:10px; font-size:0.88rem; }
+  .prev-table th {
+    background:#f0f7f3; padding:9px 8px; text-align:left;
+    font-size:0.7rem; font-weight:800; color:var(--mid);
+    text-transform:uppercase; letter-spacing:0.6px;
+    border-bottom:1.5px solid var(--border);
+  }
+  .prev-table td { padding:5px 4px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+  .prev-table input {
+    width:100%; padding:8px 10px; border:1.5px solid var(--border);
+    border-radius:8px; font-family:'DM Sans',sans-serif;
+    font-size:0.88rem; outline:none; background:white; transition:border 0.2s;
+  }
+  .prev-table input:focus { border-color:var(--verde); }
+  .prev-table input[type="number"] { text-align:right; }
+  .prev-totale-riga { font-weight:700; color:#1a3a2a; padding:8px 10px; text-align:right; min-width:90px; white-space:nowrap; }
+  .btn-rimuovi-riga {
+    background:transparent; border:none; color:#c0392b;
+    cursor:pointer; font-size:1rem; padding:4px 8px;
+    opacity:0.55; transition:opacity 0.15s;
+  }
+  .btn-rimuovi-riga:hover { opacity:1; }
+  .btn-aggiungi-riga {
+    padding:9px 16px; background:white; color:var(--verde);
+    border:1.5px dashed var(--verde); border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.85rem;
+    cursor:pointer; transition:all 0.15s; margin-bottom:18px;
+  }
+  .btn-aggiungi-riga:hover { background:var(--verde3); }
+  .prev-totali { background:#f8f8f8; border-radius:12px; padding:14px 18px; margin-bottom:14px; }
+  .prev-totali-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-size:0.92rem; color:var(--mid); }
+  .prev-totali-row.final {
+    padding-top:10px; margin-top:6px; border-top:1.5px solid var(--border);
+    font-size:1.1rem; font-weight:800; color:#1a3a2a;
+  }
+  .modal-ai-footer {
+    padding:16px 28px; border-top:1px solid var(--border);
+    display:flex; gap:10px; justify-content:flex-end;
+    background:#fafafa; border-radius:0 0 24px 24px;
+    position:sticky; bottom:0;
+  }
+  .btn-scarica-pdf {
+    padding:11px 22px; background:var(--verde); color:white;
+    border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.92rem; cursor:pointer; transition:all 0.15s;
+  }
+  .btn-scarica-pdf:hover:not(:disabled) { background:var(--verde2); }
+  .btn-scarica-pdf:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-chiudi-modal {
+    padding:11px 20px; background:white; color:var(--mid);
+    border:1.5px solid var(--border); border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer;
+  }
+  .btn-chiudi-modal:hover { background:#f5f5f5; }
   .ai-form-group { margin-bottom:14px; }
   .ai-form-group label { display:block; font-size:0.73rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
   .ai-form-group input, .ai-form-group select, .ai-form-group textarea {
@@ -826,6 +899,41 @@
             <div class="dash-quick-icon">🏗️</div>
             <div class="dash-quick-label">Sono Subappaltatore</div>
           </a>
+        </div>
+      </div>
+
+      <!-- STRUMENTI -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">🛠️ Strumenti</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+          <div data-premium="true" onclick="apriCalcolatrice()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🧮</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Calcolatrice edile</div>
+          </div>
+          <div data-premium="true" onclick="apriAgenda()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📅</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Agenda</div>
+          </div>
+          <div data-premium="true" onclick="apriModalScadenzeFiscali()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📋</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Scadenze fiscali</div>
+          </div>
+          <div data-premium="true" onclick="apriPromemoria()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🔔</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Promemoria</div>
+            <div style="font-size:0.78rem;color:#888;margin-top:4px">Ti avvisiamo via email</div>
+          </div>
+          <div data-premium="true" onclick="apriModalCreaPreventivo()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📄</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Preventivi</div>
+            <div style="font-size:0.78rem;color:#888;margin-top:4px">Crea preventivi PDF per i tuoi clienti</div>
+          </div>
+          <div data-premium="true" onclick="apriModalStoricoPreventivi()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s;position:relative" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="position:absolute;top:8px;right:8px;background:#7c3aed;color:white;font-size:0.62rem;font-weight:800;padding:2px 8px;border-radius:8px;letter-spacing:0.5px">PREMIUM</div>
+            <div style="font-size:1.8rem;margin-bottom:8px">📚</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Storico preventivi</div>
+            <div style="font-size:0.78rem;color:#888;margin-top:4px">Tutti i preventivi che hai creato</div>
+          </div>
         </div>
       </div>
 
@@ -1253,6 +1361,351 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- MODAL PROMEMORIA -->
+<div class="modal-ai-overlay" id="modalPromemoria" onclick="if(event.target===this)chiudiPromemoria()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header" style="background:linear-gradient(135deg,#c2410c,#f97316);">
+      <div>
+        <h2>🔔 Promemoria</h2>
+        <p>Crea un promemoria con una data di scadenza</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiPromemoria()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Testo</label>
+        <textarea id="promemoria-testo" rows="4" placeholder="Scrivi il tuo promemoria..." style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Data</label>
+        <input type="date" id="promemoria-data" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+      </div>
+    </div>
+    <div class="modal-ai-footer">
+      <button type="button" onclick="chiudiPromemoria()" style="padding:12px 20px;background:#f5f5f5;color:#333;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Annulla</button>
+      <button type="button" id="btn-salva-promemoria" onclick="salvaPromemoria()" style="padding:12px 20px;background:#f97316;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGENDA -->
+<div class="modal-ai-overlay" id="modalAgenda" onclick="if(event.target===this)chiudiAgenda()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📅 Agenda</h2>
+        <p>I tuoi appuntamenti e impegni</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiAgenda()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuovo appuntamento</div>
+        <div class="form-group">
+          <label>Titolo *</label>
+          <input type="text" id="ag-titolo" placeholder="es. Sopralluogo Villa Rossi">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data *</label>
+            <input type="date" id="ag-data">
+          </div>
+          <div class="form-group">
+            <label>Ora</label>
+            <input type="time" id="ag-ora">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cliente</label>
+          <input type="text" id="ag-cliente" placeholder="Nome del cliente">
+        </div>
+        <div class="form-group">
+          <label>Luogo</label>
+          <input type="text" id="ag-luogo" placeholder="Indirizzo o riferimento">
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="ag-note" placeholder="Annotazioni..."></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-salva-annuncio" onclick="salvaAppuntamento()">💾 Salva appuntamento</button>
+          <span id="ag-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+        </div>
+      </div>
+      <div id="agenda-appuntamenti-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SCADENZE FISCALI -->
+<div class="modal-ai-overlay" id="modalScadenzeFiscali" onclick="if(event.target===this)chiudiModalScadenzeFiscali()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📋 Scadenze fiscali</h2>
+        <p>Tieni traccia di F24, DURC, assicurazioni e altri adempimenti</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalScadenzeFiscali()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select id="scad-fisc-tipo">
+              <option value="">— Seleziona —</option>
+              <option>F24</option>
+              <option>DURC</option>
+              <option>Assicurazione RC</option>
+              <option>Attestato sicurezza</option>
+              <option>INPS</option>
+              <option>INAIL</option>
+              <option>Visura CCIAA</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Data scadenza *</label>
+            <input type="date" id="scad-fisc-data">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <input type="text" id="scad-fisc-descrizione" placeholder="Dettagli aggiuntivi">
+        </div>
+        <div class="form-group">
+          <label>Importo (€)</label>
+          <input type="number" id="scad-fisc-importo" step="0.01" min="0" placeholder="€">
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+            <input type="checkbox" id="scad-fisc-ricorrente" style="width:18px;height:18px;cursor:pointer" onchange="document.getElementById('scad-fisc-frequenza-row').style.display = this.checked ? 'block' : 'none'">
+            Ricorrente
+          </label>
+        </div>
+        <div class="form-group" id="scad-fisc-frequenza-row" style="display:none">
+          <label>Frequenza</label>
+          <select id="scad-fisc-frequenza">
+            <option value="mensile">Mensile</option>
+            <option value="trimestrale">Trimestrale</option>
+            <option value="semestrale">Semestrale</option>
+            <option value="annuale" selected>Annuale</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="scad-fisc-note" placeholder="Note aggiuntive..."></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-salva-annuncio" onclick="salvaScadenzaFiscale()">💾 Salva scadenza</button>
+          <span id="scad-fisc-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+        </div>
+      </div>
+      <div id="scad-fisc-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CALCOLATRICE EDILE -->
+<div class="modal-ai-overlay" id="modalCalcolatrice" onclick="if(event.target===this)chiudiCalcolatrice()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🧮 Calcolatrice edile</h2>
+        <p>Calcoli rapidi su IVA, ritenuta e rivalsa INPS</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiCalcolatrice()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">💶 IVA 22%</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-iva-in" step="0.01" min="0" placeholder="0.00" oninput="calcIva()">
+        </div>
+        <div id="calc-iva-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+      </div>
+
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">📉 Ritenuta d'acconto 4%</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-rit-in" step="0.01" min="0" placeholder="0.00" oninput="calcRit()">
+        </div>
+        <div id="calc-rit-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+      </div>
+
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">🏛️ Rivalsa INPS 4% (artigiani)</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-inps-in" step="0.01" min="0" placeholder="0.00" oninput="calcInps()">
+        </div>
+        <div id="calc-inps-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CREA PREVENTIVO -->
+<div class="modal-ai-overlay" id="modalCreaPreventivo" onclick="if(event.target===this)chiudiModalCreaPreventivo()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📄 Crea preventivo</h2>
+        <p>Compila i dati e scarica il PDF</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalCreaPreventivo()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+
+      <div class="prev-section-label">🏢 La tua attività</div>
+      <img id="prev-art-logo" class="prev-logo-preview" alt="Logo">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome attività</label>
+          <input type="text" id="prev-art-nome">
+        </div>
+        <div class="form-group">
+          <label>P. IVA</label>
+          <input type="text" id="prev-art-piva">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Indirizzo</label>
+        <input type="text" id="prev-art-indirizzo">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefono</label>
+          <input type="text" id="prev-art-telefono">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="text" id="prev-art-email">
+        </div>
+      </div>
+
+      <div class="prev-section-label">👤 Dati cliente</div>
+      <div class="form-group">
+        <label>Nome cliente *</label>
+        <input type="text" id="prev-cli-nome" placeholder="Nome e cognome / Ragione sociale">
+      </div>
+      <div class="form-group">
+        <label>Indirizzo</label>
+        <input type="text" id="prev-cli-indirizzo" placeholder="Via, città">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefono</label>
+          <input type="tel" id="prev-cli-telefono" placeholder="+39 …">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="prev-cli-email" placeholder="cliente@example.com">
+        </div>
+      </div>
+
+      <div class="prev-section-label">🧾 Dati preventivo</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Numero preventivo</label>
+          <input type="text" id="prev-numero">
+        </div>
+        <div class="form-group">
+          <label>Data</label>
+          <input type="text" id="prev-data">
+        </div>
+      </div>
+
+      <div class="prev-section-label">✨ Genera con AI</div>
+      <div class="form-group">
+        <textarea id="prev-ai-prompt" placeholder="Descrivi il lavoro in 1-2 righe (es. ristrutturazione bagno 8mq con piastrelle e sanitari)" style="min-height:70px"></textarea>
+      </div>
+      <button type="button" id="btn-prev-genera-ai"
+        style="padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;margin-bottom:18px;transition:background 0.15s"
+        onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
+        ✨ Genera con AI
+      </button>
+
+      <div class="prev-section-label">📋 Voci</div>
+      <div style="overflow-x:auto">
+        <table class="prev-table">
+          <thead>
+            <tr>
+              <th>Descrizione</th>
+              <th style="width:80px;text-align:right">Qta</th>
+              <th style="width:130px;text-align:right">Prezzo unit. €</th>
+              <th style="width:110px;text-align:right">Totale €</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="prev-voci-body"></tbody>
+        </table>
+      </div>
+      <button type="button" class="btn-aggiungi-riga" onclick="aggiungiRigaPreventivo()">+ Aggiungi riga</button>
+
+      <div class="prev-totali">
+        <div class="prev-totali-row">
+          <span>Totale imponibile</span>
+          <span id="prev-imponibile">€ 0,00</span>
+        </div>
+        <div class="prev-totali-row">
+          <span>IVA 22%</span>
+          <span id="prev-iva">€ 0,00</span>
+        </div>
+        <div class="prev-totali-row final">
+          <span>Totale finale</span>
+          <span id="prev-totale-finale">€ 0,00</span>
+        </div>
+      </div>
+
+      <div class="prev-section-label">📝 Note e validità</div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea id="prev-note" placeholder="Condizioni, modalità di pagamento, esclusioni…"></textarea>
+      </div>
+      <div class="form-group" style="max-width:200px">
+        <label>Validità (giorni)</label>
+        <input type="number" id="prev-validita" min="1" max="365" value="30">
+      </div>
+
+    </div>
+    <div class="modal-ai-footer">
+      <button type="button" class="btn-chiudi-modal" onclick="chiudiModalCreaPreventivo()">Chiudi</button>
+      <button type="button" id="btn-salva-prev" onclick="salvaPreventivo()" style="padding:11px 22px;background:white;color:var(--verde);border:1.5px solid var(--verde);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;transition:all 0.15s">💾 Salva</button>
+      <button type="button" class="btn-scarica-pdf" id="btn-scarica-prev-pdf" onclick="scaricaPDFPreventivo()">📥 Scarica PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STORICO PREVENTIVI -->
+<div class="modal-ai-overlay" id="modalStoricoPreventivi" onclick="if(event.target===this)chiudiModalStoricoPreventivi()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📚 Storico preventivi</h2>
+        <p>Tutti i preventivi che hai creato</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalStoricoPreventivi()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="storico-prev-content" style="display:flex;flex-direction:column;gap:12px">
+        <div style="text-align:center;color:#888;padding:40px 0">Caricamento…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -1530,6 +1983,866 @@ function bloccaCardPremium() {
     };
     card.appendChild(overlay);
   });
+}
+
+
+// === STRUMENTI: Agenda, Scadenze fiscali, Calcolatrice, Crea preventivo, Storico ===
+function apriAgenda() {
+  document.getElementById('modalAgenda').classList.add('show');
+  const dataInp = document.getElementById('ag-data');
+  if (dataInp && !dataInp.value) dataInp.value = new Date().toISOString().slice(0, 10);
+  caricaAppuntamenti();
+}
+
+function chiudiAgenda() {
+  document.getElementById('modalAgenda').classList.remove('show');
+}
+
+async function caricaAppuntamenti() {
+  const lista = document.getElementById('agenda-appuntamenti-lista');
+  if (!lista || !impresaCorrente) return;
+  const { data } = await sb.from('agenda_appuntamenti').select('*')
+    .eq('user_id', impresaCorrente.user_id)
+    .order('data', { ascending: true })
+    .order('ora', { ascending: true });
+  const app = data || [];
+  if (!app.length) {
+    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessun appuntamento ancora</div>';
+    return;
+  }
+  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtData = d => {
+    if (!d) return '—';
+    const parts = new Date(d).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    return parts.charAt(0).toUpperCase() + parts.slice(1);
+  };
+  const fmtOra = o => (o ? String(o).slice(0, 5) : null);
+  lista.innerHTML = app.map(a => {
+    const oraLbl = fmtOra(a.ora);
+    const extraStyle = a.completato ? 'opacity:0.6' : '';
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between;${extraStyle}">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#1a3a2a;font-weight:700">${fmtData(a.data)}</div>
+          ${oraLbl ? `<span style="display:inline-block;padding:4px 10px;background:#2a7a4b;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">🕐 ${oraLbl}</span>` : ''}
+        </div>
+        <div style="font-weight:700;color:#1a3a2a;font-size:0.98rem;margin-bottom:6px${a.completato ? ';text-decoration:line-through' : ''}">${esc(a.titolo) || '—'}</div>
+        ${a.cliente ? `<div style="font-size:0.85rem;color:#555;margin-bottom:2px">👤 ${esc(a.cliente)}</div>` : ''}
+        ${a.luogo ? `<div style="font-size:0.85rem;color:#555;margin-bottom:2px">📍 ${esc(a.luogo)}</div>` : ''}
+        ${a.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap;margin-top:6px">${esc(a.note)}</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button onclick="toggleAppuntamento('${a.id}',${!a.completato})" title="${a.completato ? 'Riapri' : 'Segna come completato'}" style="background:transparent;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.95rem;padding:4px 8px;line-height:1">${a.completato ? '↺' : '✓'}</button>
+        <button onclick="eliminaAppuntamento('${a.id}')" title="Elimina appuntamento" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function salvaAppuntamento() {
+  if (!impresaCorrente) return;
+  const titolo = document.getElementById('ag-titolo').value.trim();
+  const data = document.getElementById('ag-data').value || null;
+  if (!titolo) { alert('Il titolo è obbligatorio.'); return; }
+  if (!data) { alert('La data è obbligatoria.'); return; }
+  const ora = document.getElementById('ag-ora').value || null;
+  const cliente = document.getElementById('ag-cliente').value.trim() || null;
+  const luogo = document.getElementById('ag-luogo').value.trim() || null;
+  const note = document.getElementById('ag-note').value.trim() || null;
+  const { error } = await sb.from('agenda_appuntamenti').insert({
+    user_id: impresaCorrente.user_id, titolo, data, ora, cliente, luogo, note, completato: false
+  });
+  if (error) { alert('Errore: ' + error.message); return; }
+  document.getElementById('ag-titolo').value = '';
+  document.getElementById('ag-data').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('ag-ora').value = '';
+  document.getElementById('ag-cliente').value = '';
+  document.getElementById('ag-luogo').value = '';
+  document.getElementById('ag-note').value = '';
+  const msg = document.getElementById('ag-msg');
+  if (msg) { msg.textContent = '✅ Salvato'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  await caricaAppuntamenti();
+}
+
+async function toggleAppuntamento(id, completato) {
+  const { error } = await sb.from('agenda_appuntamenti').update({ completato }).eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaAppuntamenti();
+}
+
+async function eliminaAppuntamento(id) {
+  if (!confirm('Eliminare questo appuntamento?')) return;
+  await sb.from('agenda_appuntamenti').delete().eq('id', id);
+  await caricaAppuntamenti();
+}
+
+// SCADENZE FISCALI
+function apriModalScadenzeFiscali() {
+  document.getElementById('modalScadenzeFiscali').classList.add('show');
+  caricaScadenzeFiscali();
+}
+
+function chiudiModalScadenzeFiscali() {
+  document.getElementById('modalScadenzeFiscali').classList.remove('show');
+}
+
+async function caricaScadenzeFiscali() {
+  const lista = document.getElementById('scad-fisc-lista');
+  if (!lista || !impresaCorrente) return;
+  const { data } = await sb.from('scadenze_fiscali').select('*')
+    .eq('user_id', impresaCorrente.user_id)
+    .order('completata', { ascending: true })
+    .order('data_scadenza', { ascending: true });
+  const scad = data || [];
+  if (!scad.length) {
+    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna scadenza ancora</div>';
+    return;
+  }
+  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtData = d => {
+    if (!d) return '—';
+    const parts = new Date(d).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    return parts.charAt(0).toUpperCase() + parts.slice(1);
+  };
+  const fmtImporto = n => (n == null) ? null : Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  lista.innerHTML = scad.map(s => {
+    let badgeBg = '#888', badgeLbl = '—', extraStyle = '', strike = '';
+    if (s.completata) {
+      badgeBg = '#888'; badgeLbl = '✓ Completata';
+      extraStyle = 'opacity:0.6';
+      strike = ';text-decoration:line-through';
+    } else if (s.data_scadenza) {
+      const ds = new Date(s.data_scadenza); ds.setHours(0,0,0,0);
+      const diffGg = Math.round((ds - oggi) / 86400000);
+      if (diffGg < 0) { badgeBg = '#c0392b'; badgeLbl = `⚠️ Scaduta da ${Math.abs(diffGg)}g`; }
+      else if (diffGg === 0) { badgeBg = '#c0392b'; badgeLbl = '🔥 Oggi'; }
+      else if (diffGg <= 7) { badgeBg = '#e8733a'; badgeLbl = `⏰ Tra ${diffGg}g`; }
+      else { badgeBg = '#2a7a4b'; badgeLbl = `📅 Tra ${diffGg}g`; }
+    }
+    const importoLbl = fmtImporto(s.importo);
+    const ricorrenteBadge = s.ricorrente
+      ? `<span style="display:inline-block;padding:3px 8px;background:#7c3aed;color:white;border-radius:999px;font-size:0.68rem;font-weight:700">🔁 ${esc(s.frequenza || 'ricorrente')}</span>`
+      : '';
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:12px;align-items:flex-start;${extraStyle}">
+      <input type="checkbox" ${s.completata ? 'checked' : ''} onchange="toggleScadenzaFiscale('${s.id}',this.checked)" style="margin-top:4px;width:18px;height:18px;cursor:pointer;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+          <div style="font-weight:700;color:#1a3a2a;font-size:1rem${strike}">${esc(s.tipo) || '—'}</div>
+          ${ricorrenteBadge}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="font-size:0.85rem;color:#555">📅 ${fmtData(s.data_scadenza)}</div>
+          <span style="display:inline-block;padding:4px 10px;background:${badgeBg};color:white;border-radius:999px;font-size:0.72rem;font-weight:700">${badgeLbl}</span>
+        </div>
+        ${importoLbl ? `<div style="font-size:0.88rem;color:#555;margin-bottom:4px">💰 € ${importoLbl}</div>` : ''}
+        ${s.descrizione ? `<div style="font-size:0.88rem;color:#555;margin-bottom:4px">${esc(s.descrizione)}</div>` : ''}
+        ${s.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap">${esc(s.note)}</div>` : ''}
+      </div>
+      <button onclick="eliminaScadenzaFiscale('${s.id}')" title="Elimina scadenza" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+async function salvaScadenzaFiscale() {
+  if (!impresaCorrente) return;
+  const tipo = document.getElementById('scad-fisc-tipo').value;
+  const data_scadenza = document.getElementById('scad-fisc-data').value || null;
+  if (!tipo) { alert('Seleziona un tipo.'); return; }
+  if (!data_scadenza) { alert('La data scadenza è obbligatoria.'); return; }
+  const descrizione = document.getElementById('scad-fisc-descrizione').value.trim() || null;
+  const importoRaw = document.getElementById('scad-fisc-importo').value;
+  const importo = (importoRaw === '' || isNaN(Number(importoRaw))) ? null : Number(importoRaw);
+  const ricorrente = document.getElementById('scad-fisc-ricorrente').checked;
+  const frequenza = ricorrente ? document.getElementById('scad-fisc-frequenza').value : null;
+  const note = document.getElementById('scad-fisc-note').value.trim() || null;
+  const { error } = await sb.from('scadenze_fiscali').insert({
+    user_id: impresaCorrente.user_id, tipo, descrizione, data_scadenza, importo, ricorrente, frequenza, note, completata: false
+  });
+  if (error) { alert('Errore: ' + error.message); return; }
+  document.getElementById('scad-fisc-tipo').value = '';
+  document.getElementById('scad-fisc-data').value = '';
+  document.getElementById('scad-fisc-descrizione').value = '';
+  document.getElementById('scad-fisc-importo').value = '';
+  document.getElementById('scad-fisc-ricorrente').checked = false;
+  document.getElementById('scad-fisc-frequenza-row').style.display = 'none';
+  document.getElementById('scad-fisc-frequenza').value = 'annuale';
+  document.getElementById('scad-fisc-note').value = '';
+  const msg = document.getElementById('scad-fisc-msg');
+  if (msg) { msg.textContent = '✅ Salvata'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  await caricaScadenzeFiscali();
+}
+
+async function toggleScadenzaFiscale(id, completata) {
+  const { error } = await sb.from('scadenze_fiscali').update({ completata }).eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaScadenzeFiscali();
+}
+
+async function eliminaScadenzaFiscale(id) {
+  if (!confirm('Eliminare questa scadenza?')) return;
+  await sb.from('scadenze_fiscali').delete().eq('id', id);
+  await caricaScadenzeFiscali();
+}
+
+// CALCOLATRICE EDILE
+function apriCalcolatrice() {
+  document.getElementById('modalCalcolatrice').classList.add('show');
+}
+function chiudiCalcolatrice() {
+  document.getElementById('modalCalcolatrice').classList.remove('show');
+}
+
+// === MODAL CREA PREVENTIVO ===
+function apriModalCreaPreventivo() {
+  if (!impresaCorrente) {
+    alert('Caricamento dati in corso, riprova tra qualche secondo');
+    return;
+  }
+  window.preventivoInModifica = null;
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  setVal('prev-art-nome', impresaCorrente.nome_attivita);
+  setVal('prev-art-piva', impresaCorrente.piva);
+  setVal('prev-art-indirizzo', impresaCorrente.indirizzo);
+  setVal('prev-art-telefono', impresaCorrente.telefono);
+  setVal('prev-art-email', impresaCorrente.email);
+
+  const logoImg = document.getElementById('prev-art-logo');
+  if (logoImg) {
+    if (impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png') {
+      logoImg.src = impresaCorrente.logo_url;
+      logoImg.style.display = 'block';
+    } else {
+      logoImg.style.display = 'none';
+    }
+  }
+
+  setVal('prev-cli-nome', '');
+  setVal('prev-cli-indirizzo', '');
+  setVal('prev-cli-telefono', '');
+  setVal('prev-cli-email', '');
+  setVal('prev-note', '');
+  document.getElementById('prev-validita').value = 30;
+
+  document.getElementById('prev-numero').value = '';
+  const oggi = new Date();
+  const dd = String(oggi.getDate()).padStart(2, '0');
+  const mm = String(oggi.getMonth() + 1).padStart(2, '0');
+  const yyyy = oggi.getFullYear();
+  document.getElementById('prev-data').value = `${dd}/${mm}/${yyyy}`;
+
+  document.getElementById('prev-voci-body').innerHTML = '';
+  aggiungiRigaPreventivo();
+  ricalcolaPreventivo();
+
+  const taAI = document.getElementById('prev-ai-prompt');
+  if (taAI) taAI.value = '';
+
+  document.getElementById('modalCreaPreventivo').classList.add('show');
+}
+
+function chiudiModalCreaPreventivo() {
+  document.getElementById('modalCreaPreventivo').classList.remove('show');
+}
+
+async function apriModalStoricoPreventivi() {
+  document.getElementById('modalStoricoPreventivi').classList.add('show');
+  const cont = document.getElementById('storico-prev-content');
+  cont.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0">Caricamento…</div>';
+  if (!impresaCorrente) {
+    cont.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0">Dati attività non disponibili</div>';
+    return;
+  }
+  const { data, error } = await sb
+    .from('preventivi_creati')
+    .select('*')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
+  if (error) {
+    cont.innerHTML = '<div style="text-align:center;color:#c0392b;padding:40px 0">Errore nel caricamento: ' + error.message + '</div>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    window._storicoPreventivi = [];
+    cont.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0">Nessun preventivo trovato</div>';
+    return;
+  }
+  window._storicoPreventivi = data;
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  const fmtEuro = v => '€ ' + Number(v || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtData = iso => {
+    if (!iso) return '—';
+    const [y, m, d] = String(iso).split('-');
+    return (d && m && y) ? `${d}/${m}/${y}` : iso;
+  };
+  cont.innerHTML = data.map(p => {
+    const cliNome = (p.cliente && p.cliente.nome) ? p.cliente.nome : '—';
+    const onclickEdit = esc(`modificaPreventivoCreato(${JSON.stringify(p.id)})`);
+    const onclickDel = esc(`eliminaPreventivoCreato(${JSON.stringify(p.id)}, ${JSON.stringify(p.numero || '')})`);
+    return `
+      <div style="background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 2fr 1fr auto auto;gap:14px;align-items:center;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 6px 18px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Numero</div><div style="font-weight:700;color:#1a3a2a">${esc(p.numero || '—')}</div></div>
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Data</div><div style="color:#1a3a2a">${esc(fmtData(p.data_preventivo))}</div></div>
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Cliente</div><div style="color:#1a3a2a">${esc(cliNome)}</div></div>
+        <div style="text-align:right"><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Totale</div><div style="font-weight:700;color:#2a7a4b">${fmtEuro(p.totale_finale)}</div></div>
+        <button onclick="${onclickEdit}" title="Modifica preventivo" style="background:#e8f5ee;color:#2a7a4b;border:1px solid #b3dcc1;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">✏️ Modifica</button>
+        <button onclick="${onclickDel}" title="Elimina preventivo" style="background:#fdecec;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">🗑️ Elimina</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function modificaPreventivoCreato(id) {
+  if (!impresaCorrente) {
+    alert('Caricamento dati in corso, riprova tra qualche secondo');
+    return;
+  }
+  const lista = window._storicoPreventivi || [];
+  const p = lista.find(x => String(x.id) === String(id));
+  if (!p) {
+    alert('Preventivo non trovato');
+    return;
+  }
+  chiudiModalStoricoPreventivi();
+
+  const setVal = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v == null ? '' : v; };
+  setVal('prev-art-nome', impresaCorrente.nome_attivita);
+  setVal('prev-art-piva', impresaCorrente.piva);
+  setVal('prev-art-indirizzo', impresaCorrente.indirizzo);
+  setVal('prev-art-telefono', impresaCorrente.telefono);
+  setVal('prev-art-email', impresaCorrente.email);
+
+  const logoImg = document.getElementById('prev-art-logo');
+  if (logoImg) {
+    if (impresaCorrente.logo_url && impresaCorrente.logo_url !== '/img/logo.png') {
+      logoImg.src = impresaCorrente.logo_url;
+      logoImg.style.display = 'block';
+    } else {
+      logoImg.style.display = 'none';
+    }
+  }
+
+  const cli = p.cliente || {};
+  setVal('prev-cli-nome', cli.nome);
+  setVal('prev-cli-indirizzo', cli.indirizzo);
+  setVal('prev-cli-telefono', cli.telefono);
+  setVal('prev-cli-email', cli.email);
+
+  setVal('prev-numero', p.numero);
+  if (p.data_preventivo) {
+    const [y, m, d] = String(p.data_preventivo).split('-');
+    document.getElementById('prev-data').value = (d && m && y) ? `${d}/${m}/${y}` : '';
+  } else {
+    document.getElementById('prev-data').value = '';
+  }
+
+  setVal('prev-note', p.note);
+  document.getElementById('prev-validita').value = p.validita_giorni || 30;
+
+  const tbody = document.getElementById('prev-voci-body');
+  tbody.innerHTML = '';
+  const voci = Array.isArray(p.voci) ? p.voci : [];
+  if (voci.length === 0) {
+    aggiungiRigaPreventivo();
+  } else {
+    voci.forEach(v => {
+      aggiungiRigaPreventivo();
+      const tr = tbody.lastElementChild;
+      tr.querySelector('.prev-desc').value = v.descrizione || '';
+      tr.querySelector('.prev-qta').value = v.qta != null ? v.qta : 0;
+      tr.querySelector('.prev-prezzo').value = v.prezzo != null ? v.prezzo : 0;
+    });
+  }
+  ricalcolaPreventivo();
+
+  window.preventivoInModifica = id;
+  document.getElementById('modalCreaPreventivo').classList.add('show');
+}
+
+async function eliminaPreventivoCreato(id, numero) {
+  if (!confirm('Eliminare il preventivo ' + numero + '? Operazione irreversibile.')) return;
+  const { error } = await sb.from('preventivi_creati').delete().eq('id', id);
+  if (error) {
+    alert('Errore nell\'eliminazione: ' + error.message);
+    return;
+  }
+  apriModalStoricoPreventivi();
+}
+
+function chiudiModalStoricoPreventivi() {
+  document.getElementById('modalStoricoPreventivi').classList.remove('show');
+}
+
+async function scaricaPDFPreventivo() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('Libreria PDF non caricata, ricarica la pagina e riprova');
+    return;
+  }
+  if (!impresaCorrente) {
+    alert('Dati attività non disponibili');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+  // === Logo (alto-sinistra) — skip silenzioso se assente o CORS ===
+  try {
+    const logoUrl = impresaCorrente.logo_url;
+    if (logoUrl && logoUrl !== '/img/logo.png') {
+      const dataUrl = await new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+          } catch {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+        img.src = logoUrl;
+      });
+      if (dataUrl) doc.addImage(dataUrl, 'PNG', 15, 15, 35, 35);
+    }
+  } catch {
+    // skip silenzioso
+  }
+
+  const numero = document.getElementById('prev-numero').value || '';
+  const data = document.getElementById('prev-data').value || '';
+
+  // === Top right: dati artigiano ===
+  const rightX = 120;
+  let y = 20;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(impresaCorrente.nome_attivita || '', rightX, y);
+  y += 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  if (impresaCorrente.piva)      { doc.text('P.IVA: ' + impresaCorrente.piva, rightX, y); y += 4.5; }
+  if (impresaCorrente.indirizzo) { doc.text(impresaCorrente.indirizzo,        rightX, y); y += 4.5; }
+  if (impresaCorrente.telefono)  { doc.text('Tel: ' + impresaCorrente.telefono, rightX, y); y += 4.5; }
+  if (impresaCorrente.email)     { doc.text(impresaCorrente.email,            rightX, y); y += 4.5; }
+
+  // === Titolo centrato ===
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.text('PREVENTIVO', 105, 62, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`N. ${numero}   Data: ${data}`, 105, 70, { align: 'center' });
+
+  // === Box "Spett.le" a sinistra ===
+  const cliNome      = document.getElementById('prev-cli-nome').value.trim();
+  const cliIndirizzo = document.getElementById('prev-cli-indirizzo').value.trim();
+  const cliTel       = document.getElementById('prev-cli-telefono').value.trim();
+  const cliEmail     = document.getElementById('prev-cli-email').value.trim();
+
+  const rows = [];
+  if (cliNome)      rows.push({ text: cliNome,             bold: true  });
+  if (cliIndirizzo) rows.push({ text: cliIndirizzo,        bold: false });
+  if (cliTel)       rows.push({ text: 'Tel: ' + cliTel,    bold: false });
+  if (cliEmail)     rows.push({ text: cliEmail,            bold: false });
+
+  const boxX = 20, boxY = 82, boxW = 85, lineH = 5;
+  const boxH = 6 + 5 + (rows.length * lineH) + 3;
+  doc.setDrawColor(180);
+  doc.rect(boxX, boxY, boxW, boxH);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Spett.le', boxX + 3, boxY + 6);
+  doc.setFontSize(10);
+  let by = boxY + 12;
+  rows.forEach(r => {
+    doc.setFont('helvetica', r.bold ? 'bold' : 'normal');
+    doc.text(r.text, boxX + 3, by);
+    by += lineH;
+  });
+
+  // === Tabella voci ===
+  const body = [];
+  document.querySelectorAll('#prev-voci-body tr').forEach(tr => {
+    body.push([
+      tr.querySelector('.prev-desc').value,
+      tr.querySelector('.prev-qta').value,
+      tr.querySelector('.prev-prezzo').value,
+      tr.querySelector('.prev-totale-riga').textContent
+    ]);
+  });
+  doc.autoTable({
+    head: [['Descrizione', 'Qta', 'Prezzo €', 'Totale €']],
+    body: body,
+    startY: boxY + boxH + 8,
+    theme: 'striped',
+    headStyles: { fillColor: [42, 122, 75], textColor: 255 }
+  });
+
+  // === Totali allineati a destra ===
+  const imponibile    = document.getElementById('prev-imponibile').textContent;
+  const iva           = document.getElementById('prev-iva').textContent;
+  const totaleFinale  = document.getElementById('prev-totale-finale').textContent;
+  let ty = doc.lastAutoTable.finalY + 8;
+  const labelX = 150, valueX = 190;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('Imponibile:',    labelX, ty, { align: 'right' });
+  doc.text(imponibile,       valueX, ty, { align: 'right' });
+  ty += 6;
+  doc.text('IVA 22%:',       labelX, ty, { align: 'right' });
+  doc.text(iva,              valueX, ty, { align: 'right' });
+  ty += 6;
+  doc.text('Totale finale:', labelX, ty, { align: 'right' });
+  doc.text(totaleFinale,     valueX, ty, { align: 'right' });
+
+  // === Note + Validità ===
+  const note = document.getElementById('prev-note').value.trim();
+  const validita = document.getElementById('prev-validita').value || 30;
+  let ny = doc.lastAutoTable.finalY + 30;
+  if (note) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('Note:', 20, ny);
+    ny += 6;
+    doc.setFont('helvetica', 'normal');
+    const noteLines = doc.splitTextToSize(note, 170);
+    doc.text(noteLines, 20, ny);
+    ny += noteLines.length * 5 + 4;
+  }
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text('Validità: ' + validita + ' giorni', 20, ny);
+
+  // === Footer pagina ===
+  doc.setFontSize(8);
+  doc.setTextColor(150);
+  doc.text('Generato con TrovaImpresa.com', 105, 285, { align: 'center' });
+  doc.setTextColor(0);
+
+  // === Salva su Supabase (prima di generare il PDF) ===
+  const _resSavePdf = await persistiPreventivoCreato();
+  if (!_resSavePdf.ok) {
+    alert('Errore nel salvataggio del preventivo: ' + _resSavePdf.message);
+  }
+
+  doc.save('Preventivo_' + numero + '.pdf');
+}
+
+// === Persistenza preventivo su Supabase (condivisa da "Salva" e "Scarica PDF") ===
+async function persistiPreventivoCreato() {
+  if (!impresaCorrente) {
+    return { ok: false, message: 'Dati attività non disponibili' };
+  }
+  const numero = document.getElementById('prev-numero').value || '';
+  const data = document.getElementById('prev-data').value || '';
+  const cliNome = document.getElementById('prev-cli-nome').value.trim();
+  const cliIndirizzo = document.getElementById('prev-cli-indirizzo').value.trim();
+  const cliTel = document.getElementById('prev-cli-telefono').value.trim();
+  const cliEmail = document.getElementById('prev-cli-email').value.trim();
+  const note = document.getElementById('prev-note').value.trim();
+  const validita = document.getElementById('prev-validita').value || 30;
+  try {
+    const vociPayload = [];
+    let imponibileNum = 0;
+    document.querySelectorAll('#prev-voci-body tr').forEach(tr => {
+      const desc = tr.querySelector('.prev-desc').value;
+      const qta = parseFloat(tr.querySelector('.prev-qta').value) || 0;
+      const prezzo = parseFloat(tr.querySelector('.prev-prezzo').value) || 0;
+      const tot = qta * prezzo;
+      imponibileNum += tot;
+      vociPayload.push({ descrizione: desc, qta: qta, prezzo: prezzo, totale: tot });
+    });
+    const ivaNum = imponibileNum * 0.22;
+    const totaleNum = imponibileNum + ivaNum;
+    const [ddIns, mmIns, yyyyIns] = (data || '').split('/');
+    const dataIso = (ddIns && mmIns && yyyyIns) ? `${yyyyIns}-${mmIns}-${ddIns}` : null;
+    const payload = {
+      impresa_id: impresaCorrente.id,
+      numero: numero,
+      data_preventivo: dataIso,
+      artigiano: {
+        nome_attivita: impresaCorrente.nome_attivita || '',
+        piva: impresaCorrente.piva || '',
+        indirizzo: impresaCorrente.indirizzo || '',
+        telefono: impresaCorrente.telefono || '',
+        email: impresaCorrente.email || ''
+      },
+      cliente: {
+        nome: cliNome,
+        indirizzo: cliIndirizzo,
+        telefono: cliTel,
+        email: cliEmail
+      },
+      voci: vociPayload,
+      imponibile: imponibileNum,
+      iva: ivaNum,
+      totale_finale: totaleNum,
+      note: note,
+      validita_giorni: parseInt(validita, 10) || 30
+    };
+    let errSavePrev;
+    if (window.preventivoInModifica) {
+      const { error } = await sb.from('preventivi_creati').update(payload).eq('id', window.preventivoInModifica);
+      errSavePrev = error;
+    } else {
+      const { error } = await sb.from('preventivi_creati').insert(payload);
+      errSavePrev = error;
+    }
+    if (errSavePrev) {
+      return { ok: false, message: errSavePrev.message };
+    }
+    window.preventivoInModifica = null;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, message: (e && e.message ? e.message : String(e)) };
+  }
+}
+
+// === Bottone "Salva": persiste senza generare il PDF ===
+async function salvaPreventivo() {
+  if (!impresaCorrente) {
+    alert('Dati attività non disponibili');
+    return;
+  }
+  const btn = document.getElementById('btn-salva-prev');
+  const txt = btn ? btn.textContent : null;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Salvataggio...'; }
+  const res = await persistiPreventivoCreato();
+  if (btn) { btn.disabled = false; btn.textContent = txt; }
+  if (!res.ok) {
+    alert('Errore nel salvataggio del preventivo: ' + res.message);
+    return;
+  }
+  alert('✅ Preventivo salvato.');
+  chiudiModalCreaPreventivo();
+  apriModalStoricoPreventivi();
+}
+
+async function generaVociPreventivoAI() {
+  const ta = document.getElementById('prev-ai-prompt');
+  const btn = document.getElementById('btn-prev-genera-ai');
+  const testo = (ta.value || '').trim();
+  if (!testo) {
+    alert('Descrivi brevemente il lavoro prima di generare.');
+    ta.focus();
+    return;
+  }
+  if (!impresaCorrente || !impresaCorrente.id) {
+    alert('Impresa non identificata. Ricarica la pagina.');
+    return;
+  }
+  const labelOriginale = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.style.cursor = 'not-allowed';
+  btn.innerHTML = '⏳ Generazione in corso…';
+  try {
+    const istruzioni = [
+      '',
+      'Genera un preventivo dettagliato per il mercato edilizia di Rieti / Lazio nel 2026.',
+      'Usa prezzi realistici e arrotondati per quella zona (NON la media nazionale): tipicamente i prezzi a Rieti sono leggermente inferiori a Roma centro ma allineati al Lazio.',
+      'Unità di misura coerenti col tipo di voce — usa esattamente uno di questi valori nel campo "unita":',
+      '- "mq" SOLO per superfici (pavimenti, pareti, rivestimenti, intonaci, tinteggiature)',
+      '- "ml" per lunghezze (battiscopa, cornici, tubazioni lineari)',
+      '- "a corpo" per interventi forfettari (spostamento mobili, sopralluoghi, smontaggi, allacci, pulizia cantiere)',
+      '- "ore" per manodopera oraria',
+      '- "cad" o "pz" per pezzi singoli (sanitari, rubinetterie, prese, punti luce, porte)',
+      'Non usare "mq" dove non ha senso. Quantità coerenti col lavoro descritto.',
+      'Rispondi SOLO con JSON valido, senza testo prima o dopo, nel formato:',
+      '{"voci":[{"descrizione":"...","quantita":<numero>,"unita":"...","prezzo_unitario":<numero>}],"note":"..."}'
+    ].join('\n');
+    const promptCompleto = testo + '\n' + istruzioni;
+    const resp = await fetch('/.netlify/functions/ai-claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        azione: 'preventivo',
+        impresa_id: impresaCorrente.id,
+        prompt: promptCompleto
+      })
+    });
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) {
+      alert('Errore AI: ' + ((data && data.error) || resp.status));
+      return;
+    }
+
+    const raw = data && typeof data.risposta === 'string' ? data.risposta : '';
+    if (!raw) {
+      alert('Risposta AI vuota o in formato inatteso.');
+      return;
+    }
+    let cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) {
+      alert('Impossibile estrarre JSON dalla risposta AI.');
+      return;
+    }
+    cleaned = cleaned.slice(start, end + 1);
+    cleaned = cleaned.replace(/}\s*{/g, '},{');
+    cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (errParse) {
+      console.error('[AI preventivo] parse fallito:', errParse, cleaned);
+      console.error('AI cleaned:', cleaned, 'parseErr:', errParse);
+      alert('Risposta AI non è JSON valido.');
+      return;
+    }
+    const voci = Array.isArray(parsed && parsed.voci) ? parsed.voci : null;
+    if (!voci || !voci.length) {
+      alert('La risposta AI non contiene voci.');
+      return;
+    }
+
+    const tbody = document.getElementById('prev-voci-body');
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const d = tr.querySelector('.prev-desc');
+      if (!d || !d.value.trim()) tr.remove();
+    });
+
+    voci.forEach(v => {
+      aggiungiRigaPreventivo();
+      const tr = tbody.lastElementChild;
+      if (!tr) return;
+      const descr = (v.descrizione || '').toString().trim();
+      const unita = (v.unita || '').toString().trim();
+      const descrFinale = descr + (unita ? ' (' + unita + ')' : '');
+      const qta = Number(v.quantita);
+      const prezzo = Number(v.prezzo_unitario);
+      tr.querySelector('.prev-desc').value = descrFinale;
+      tr.querySelector('.prev-qta').value = Number.isFinite(qta) ? qta : 1;
+      tr.querySelector('.prev-prezzo').value = Number.isFinite(prezzo) ? prezzo : 0;
+    });
+
+    if (parsed.note && typeof parsed.note === 'string') {
+      const noteEl = document.getElementById('prev-note');
+      if (noteEl && !noteEl.value.trim()) noteEl.value = parsed.note;
+    }
+
+    ricalcolaPreventivo();
+  } catch (e) {
+    console.error('[AI preventivo] errore:', e);
+    alert('Errore di rete: ' + (e && e.message ? e.message : e));
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+    btn.innerHTML = labelOriginale;
+  }
+}
+
+document.addEventListener('click', function (e) {
+  if (e.target.closest && e.target.closest('#btn-prev-genera-ai')) {
+    generaVociPreventivoAI();
+  }
+});
+
+function aggiungiRigaPreventivo() {
+  const tbody = document.getElementById('prev-voci-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" class="prev-desc" placeholder="Descrizione lavoro / materiale" oninput="ricalcolaPreventivo()"></td>
+    <td><input type="number" class="prev-qta" min="0" step="0.01" value="1" oninput="ricalcolaPreventivo()"></td>
+    <td><input type="number" class="prev-prezzo" min="0" step="0.01" value="0" oninput="ricalcolaPreventivo()"></td>
+    <td class="prev-totale-riga">€ 0,00</td>
+    <td><button type="button" class="btn-rimuovi-riga" onclick="rimuoviRigaPreventivo(this)" title="Rimuovi riga">🗑️</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function rimuoviRigaPreventivo(btn) {
+  const tbody = document.getElementById('prev-voci-body');
+  if (tbody.children.length <= 1) return;
+  btn.closest('tr').remove();
+  ricalcolaPreventivo();
+}
+
+function ricalcolaPreventivo() {
+  const tbody = document.getElementById('prev-voci-body');
+  const fmt = v => '€ ' + v.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  let imponibile = 0;
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const qta = parseFloat(tr.querySelector('.prev-qta').value) || 0;
+    const prezzo = parseFloat(tr.querySelector('.prev-prezzo').value) || 0;
+    const tot = qta * prezzo;
+    tr.querySelector('.prev-totale-riga').textContent = fmt(tot);
+    imponibile += tot;
+  });
+  const iva = imponibile * 0.22;
+  document.getElementById('prev-imponibile').textContent = fmt(imponibile);
+  document.getElementById('prev-iva').textContent = fmt(iva);
+  document.getElementById('prev-totale-finale').textContent = fmt(imponibile + iva);
+}
+
+function toggleFullscreen(btn) {
+  const modal = btn.closest('.modal-ai');
+  modal.classList.toggle('fullscreen');
+  btn.textContent = modal.classList.contains('fullscreen') ? '⊟' : '⛶';
+}
+
+const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
+function calcIva() {
+  const v = Number(document.getElementById('calc-iva-in').value);
+  const out = document.getElementById('calc-iva-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `IVA: € ${_fmtCalc(v*0.22)} | Totale: € ${_fmtCalc(v*1.22)}`;
+}
+function calcRit() {
+  const v = Number(document.getElementById('calc-rit-in').value);
+  const out = document.getElementById('calc-rit-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `Ritenuta: € ${_fmtCalc(v*0.04)} | Netto: € ${_fmtCalc(v*0.96)}`;
+}
+function calcInps() {
+  const v = Number(document.getElementById('calc-inps-in').value);
+  const out = document.getElementById('calc-inps-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `INPS 4%: € ${_fmtCalc(v*0.04)} | Da addebitare al cliente`;
+}
+
+// === PROMEMORIA ===
+function apriPromemoria() {
+  const oggi = new Date().toISOString().slice(0, 10);
+  const dataInput = document.getElementById('promemoria-data');
+  dataInput.min = oggi;
+  dataInput.value = '';
+  document.getElementById('promemoria-testo').value = '';
+  document.getElementById('modalPromemoria').classList.add('show');
+}
+
+function chiudiPromemoria() {
+  document.getElementById('modalPromemoria').classList.remove('show');
+}
+
+async function salvaPromemoria() {
+  const testo = document.getElementById('promemoria-testo').value.trim();
+  const data = document.getElementById('promemoria-data').value;
+  if (!testo) { alert('Scrivi il testo del promemoria.'); return; }
+  if (!data) { alert('Seleziona una data.'); return; }
+  const btn = document.getElementById('btn-salva-promemoria');
+  btn.disabled = true;
+  btn.textContent = '⏳ Salvataggio...';
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Utente non autenticato.');
+    const { error } = await sb.from('promemoria').insert({ user_id: user.id, testo, data });
+    if (error) throw error;
+    chiudiPromemoria();
+    alert('Promemoria salvato!');
+  } catch (err) {
+    alert('Errore durante il salvataggio: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salva';
+  }
 }
 
 const PANNELLO_CORRENTE = 'impresa';
