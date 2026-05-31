@@ -1162,6 +1162,11 @@
             <div style="font-size:1.8rem;margin-bottom:8px">📋</div>
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Scadenze fiscali</div>
           </div>
+          <div data-premium="true" onclick="apriModalPromemoria()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🔔</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Promemoria</div>
+            <div style="font-size:0.78rem;color:#888;margin-top:4px">Ti avvisiamo via email</div>
+          </div>
           <div data-premium="true" onclick="apriModalCreaPreventivo()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">📄</div>
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Preventivi</div>
@@ -4343,7 +4348,6 @@ function caricaProfilo() {
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
       <a href="modifica-profilo.html" target="_blank" class="btn-az">✏️ Modifica profilo</a>
       <a href="#" onclick="avviaMFA(event)" class="btn-az arancio" id="link-2fa">🔐 Attiva 2FA</a>
-      <button type="button" onclick="apriModalPromemoria()" class="btn-az" style="border-top-color:#f97316;">🔔 Promemoria</button>
     </div>
   `;
   const mestieri = Array.isArray(i.mestieri) ? i.mestieri : [];
