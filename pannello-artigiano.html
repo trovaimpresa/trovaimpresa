@@ -809,9 +809,19 @@
 
   /* === Modal Personalizza pannello === */
   #modal-personalizza-pannello .mpp-box {
-    background:white; border-radius:20px; width:100%; max-width:600px;
+    background:white; border-radius:20px; width:100%; max-width:760px;
     max-height:90vh; display:flex; flex-direction:column; overflow:hidden;
     box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  }
+  #modal-personalizza-pannello .mpp-box.fullscreen {
+    max-width: none !important;
+    width: 100vw;
+    height: 100vh;
+    max-height: none !important;
+    border-radius: 0;
+  }
+  #modal-personalizza-pannello .mpp-box.fullscreen .mpp-body {
+    max-height: none; flex: 1; min-height: 0;
   }
   #modal-personalizza-pannello .mpp-header {
     background:linear-gradient(135deg,#7c3aed,#6d28d9); padding:24px;
@@ -2289,6 +2299,7 @@
         <h2>🎨 Personalizza pannello</h2>
         <p>Personalizza la tua esperienza</p>
       </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="this.closest('.mpp-box').classList.toggle('fullscreen')">⛶</button>
       <button class="mpp-close" onclick="chiudiModalPersonalizzaPannello()">✕</button>
     </div>
     <div id="personalizza-pannello-body" class="mpp-body">
