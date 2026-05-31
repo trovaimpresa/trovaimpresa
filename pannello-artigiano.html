@@ -78,28 +78,6 @@
   .sidebar-logo .trova { color:var(--verde); }
   .sidebar-logo .impresa { color:var(--arancio); }
   .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
-  .sidebar-nav { flex:1; padding:16px 12px; overflow-y:auto; }
-  .sidebar-nav { display:none; }
-  .nav-item {
-    display:flex; align-items:center; gap:10px;
-    padding:11px 14px; border-radius:10px; cursor:pointer;
-    font-size:0.88rem; font-weight:600; color:var(--dark);
-    transition:all 0.15s; margin-bottom:6px;
-    background:white; box-shadow:0 2px 8px rgba(0,0,0,0.07);
-    border-top:4px solid #2e7d32;
-  }
-  .nav-item:nth-child(1) { border-top-color:#2e7d32; }
-  .nav-item:nth-child(2) { border-top-color:#e65100; }
-  .nav-item:nth-child(3) { border-top-color:#1565c0; }
-  .nav-item:nth-child(4) { border-top-color:#2e7d32; }
-  .nav-item:nth-child(5) { border-top-color:#e65100; }
-  .nav-item:nth-child(6) { border-top-color:#1565c0; }
-  .nav-item:hover { box-shadow:0 4px 14px rgba(0,0,0,0.13); transform:translateY(-1px); color:var(--dark); }
-  .nav-item.active { box-shadow:0 4px 14px rgba(0,0,0,0.13); color:var(--dark); opacity:1; font-weight:800; }
-  .nav-badge {
-    margin-left:auto; background:var(--arancio); color:white;
-    font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:20px;
-  }
   #sidebar-map { flex:1; min-height:300px; width:100%; border-radius:12px; margin:0 0 16px; }
   .sidebar-footer { padding:16px; border-top:1px solid var(--border); }
   .logout-btn {
@@ -787,9 +765,6 @@
   /* === Tema scuro === */
   body.theme-dark { background:#1a1a1a; color:#e5e5e5; }
   body.theme-dark .sidebar { background:#222; border-right-color:rgba(255,255,255,0.08); }
-  body.theme-dark .nav-item { background:#2a2a2a; color:#e5e5e5; }
-  body.theme-dark .nav-item:hover,
-  body.theme-dark .nav-item.active { color:#fff; }
   body.theme-dark .topbar-title { color:#e5e5e5; }
   body.theme-dark .stat-card,
   body.theme-dark .dash-stat-card,
@@ -931,8 +906,6 @@
       <span class="trova">Trova</span><span class="impresa">Impresa</span>
       <small>Pannello Artigiano</small>
     </div>
-    <nav class="sidebar-nav">
-    </nav>
     <div id="sidebar-map"></div>
     <div class="sidebar-footer">
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
@@ -4393,12 +4366,6 @@ async function caricaAnnunciLavoro() {
   if (_contEl) {
     _contEl.innerHTML = `📊 Offerte questo mese: <strong>${_offerteMese}/${_limiteStr}</strong> (Piano ${_pianoLabel})${_upsell}`;
     _contEl.style.borderLeftColor = _atLimit ? '#c0392b' : (_piano === 'premium' ? '#7c3aed' : '#2a7a4b');
-  }
-
-  // Aggiorna badge sidebar
-  if (attivi > 0) {
-    const el = document.getElementById('badge-lavoro');
-    if (el) { el.textContent = attivi; el.style.display = ''; }
   }
 
   // Mostra/nascondi bottone (gating mensile)
