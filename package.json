@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "stripe": "^14.0.0",
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "@netlify/functions": "^2.8.1"
   }
 }
