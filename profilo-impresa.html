@@ -176,24 +176,28 @@ nav img{height:36px}
 .rec-msg.err{background:#fdecea;color:#c0392b}
 .rec-msg.warn{background:#fff3cd;color:#856404}
 /* RECENSIONI — sezione prominente */
-.rec-card .card-title{font-size:24px}
-.rec-card .rec-tab{font-size:16px;padding:12px 22px;border-radius:10px}
-.rec-card .rta{font-size:15px;min-height:120px;padding:14px 16px}
-.rec-card .ri{font-size:15px;padding:13px 14px}
+.rec-card .card-title{font-size:26px;color:#143d24}
+.rec-card .rec-tab{font-size:17px;font-weight:800;padding:13px 24px;border-radius:10px}
+.rec-card .rta{font-size:16px;min-height:140px;padding:16px 18px;color:#222}
+.rec-card .ri{font-size:16px;padding:15px 16px;color:#222}
 .rec-card .btn-rec{font-size:18px;padding:16px}
+.rec-card .rec-nome{font-size:16px;color:#222}
+.rec-card .rec-data{font-size:13px;color:#666;font-weight:600}
+.rec-card .rec-stelle{font-size:17px;font-weight:700}
+.rec-card .rec-testo{font-size:15px;color:#444}
 .st-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 .st-box{background:#faf7fd;border:2px solid #ede3f5;border-radius:14px;padding:18px 16px;text-align:center;margin-bottom:0}
-.st-box label{font-size:16px;font-weight:800;color:#4a235a;margin-bottom:10px}
+.st-box label{font-size:18px;font-weight:800;color:#3a1c52;margin-bottom:12px}
 .st-box .st-row{justify-content:center;gap:6px}
 .st-box .stella{font-size:34px}
 .rec-voti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
 .rec-voto-box{background:#faf7fd;border:1px solid #ede3f5;border-radius:10px;padding:10px 12px;text-align:center}
-.rec-voto-box .rv-lbl{font-size:13px;font-weight:700;color:#6c3483;margin-bottom:4px}
-.rec-voto-box .rv-st{font-size:20px;color:#f4c02e;letter-spacing:2px}
+.rec-voto-box .rv-lbl{font-size:14px;font-weight:800;color:#4a235a;margin-bottom:5px}
+.rec-voto-box .rv-st{font-size:22px;color:#f4c02e;letter-spacing:2px}
 .rec-empty{text-align:center;padding:32px 16px}
 .rec-empty-icon{font-size:54px;line-height:1;margin-bottom:12px}
 .rec-empty-title{font-size:22px;font-weight:800;color:#4a235a;margin-bottom:8px}
-.rec-empty-sub{font-size:15px;color:#777;margin-bottom:20px}
+.rec-empty-sub{font-size:16px;color:#555;margin-bottom:20px}
 .rec-empty-btn{width:auto;display:inline-block;padding:16px 34px;font-size:18px}
 
 /* SIDEBAR */
@@ -391,12 +395,12 @@ nav img{height:36px}
         </div>
         <textarea class="rta" id="rec-testo" placeholder="Descrivi la tua esperienza..."></textarea>
         <div class="r2" style="margin-bottom:10px">
-          <div><label style="font-size:11px;font-weight:700;display:block;margin-bottom:4px">Mese</label><select class="ri" id="rec-mese" style="margin-bottom:0"><option value="">—</option><option>Gennaio</option><option>Febbraio</option><option>Marzo</option><option>Aprile</option><option>Maggio</option><option>Giugno</option><option>Luglio</option><option>Agosto</option><option>Settembre</option><option>Ottobre</option><option>Novembre</option><option>Dicembre</option></select></div>
-          <div><label style="font-size:11px;font-weight:700;display:block;margin-bottom:4px">Anno</label><select class="ri" id="rec-anno" style="margin-bottom:0"><option value="">—</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014</option><option>2013</option><option>2012</option><option>2011</option><option>2010</option></select></div>
+          <div><label style="font-size:15px;font-weight:800;display:block;margin-bottom:6px;color:#1a4d2e">Mese</label><select class="ri" id="rec-mese" style="margin-bottom:0"><option value="">—</option><option>Gennaio</option><option>Febbraio</option><option>Marzo</option><option>Aprile</option><option>Maggio</option><option>Giugno</option><option>Luglio</option><option>Agosto</option><option>Settembre</option><option>Ottobre</option><option>Novembre</option><option>Dicembre</option></select></div>
+          <div><label style="font-size:15px;font-weight:800;display:block;margin-bottom:6px;color:#1a4d2e">Anno</label><select class="ri" id="rec-anno" style="margin-bottom:0"><option value="">—</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014</option><option>2013</option><option>2012</option><option>2011</option><option>2010</option></select></div>
         </div>
         <div id="rec-nome-email-wrapper">
           <div class="r2"><input type="text" class="ri" id="rec-nome" placeholder="Il tuo nome *" style="margin-bottom:0"><input type="email" class="ri" id="rec-email" placeholder="Email * (privata)" style="margin-bottom:0"></div>
-          <p style="font-size:11px;color:#aaa;margin:6px 0 10px">L'email non sarà pubblica.</p>
+          <p style="font-size:13px;color:#777;margin:8px 0 12px">L'email non sarà pubblica.</p>
         </div>
         <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
         <div class="rec-msg" id="rec-msg"></div>
