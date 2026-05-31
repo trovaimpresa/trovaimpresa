@@ -403,6 +403,13 @@
   .dash-quick-label { font-weight:700; font-size:0.9rem; color:var(--dark); margin-bottom:3px; }
   .dash-quick-sub { font-size:0.78rem; color:var(--light); }
 
+  .premium-lock-overlay {
+    position:absolute; inset:0; z-index:5;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.55); border-radius:14px;
+    cursor:pointer; font-size:1.6rem;
+  }
+
   /* === MODAL AI PREVENTIVO DASH === */
   .modal-ai-overlay {
     display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
@@ -758,59 +765,59 @@
       <!-- FUNZIONI PREMIUM -->
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
           <div class="dash-quick-icon">🔝</div>
           <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
-        <div id="card-visibile" class="dash-quick-card" style="cursor:pointer" onclick="apriModalVisibile()">
+        <div id="card-visibile" class="dash-quick-card" data-premium="true" style="cursor:pointer" onclick="apriModalVisibile()">
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
           <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto illimitate</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Video lavori illimitati</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Preventivi illimitati</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">💼</div>
           <div class="dash-quick-label">Offerte di lavoro illimitate</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Personalizza profilo</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">📊</div>
           <div class="dash-quick-label">Statistiche profilo</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">🔔</div>
           <div class="dash-quick-label">Notifiche real-time</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">🤖</div>
           <div class="dash-quick-label">AI preventivi</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">👑</div>
           <div class="dash-quick-label">Logo + colore header</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
             <div class="dash-quick-icon">🔍</div>
             <div class="dash-quick-label">Cerco Subappaltatori</div>
@@ -1505,6 +1512,24 @@ function aggiornaBadgeEOverlay() {
   } else {
     document.getElementById('sezione-il-tuo-piano').style.display = 'none';
   }
+  bloccaCardPremium();
+}
+
+function bloccaCardPremium() {
+  const piano = (impresaCorrente.piano || 'free').toLowerCase();
+  if (piano === 'premium') return;
+  document.querySelectorAll('[data-premium="true"]').forEach(card => {
+    if (card.querySelector('.premium-lock-overlay')) return;
+    card.style.position = 'relative';
+    const overlay = document.createElement('div');
+    overlay.className = 'premium-lock-overlay';
+    overlay.textContent = '🔒';
+    overlay.onclick = (e) => {
+      e.stopPropagation();
+      window.location.href = 'info-premium.html';
+    };
+    card.appendChild(overlay);
+  });
 }
 
 const PANNELLO_CORRENTE = 'impresa';
