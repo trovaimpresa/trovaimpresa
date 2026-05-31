@@ -94,7 +94,7 @@
       if (venduti.has(sp)) continue;
       const slot = document.querySelector(`a.pub-link[data-spazio-id="${sp}"]`);
       if (slot) {
-        slot.style.display = 'none';
+        slot.style.setProperty('display', 'none', 'important');
       }
     }
   }
