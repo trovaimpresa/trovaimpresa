@@ -1,3 +1,12 @@
+/* ===== SISTEMA MODALI UNIFICATO ===== */
+.ti-modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:9999; padding:16px; }
+.ti-modal-overlay.open{ display:flex; }
+.ti-modal{ background:#fff; border-radius:12px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,.2); }
+.ti-modal.sm{ max-width:420px; }
+.ti-modal.md{ max-width:640px; }
+.ti-modal.lg{ max-width:860px; }
+.ti-modal.xl{ max-width:1100px; }
+
 @media (max-width: 768px) {
   body {
     overflow-x: hidden;
