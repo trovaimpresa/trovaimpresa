@@ -522,6 +522,32 @@
   .cant-info-row:last-child { border-bottom:none; }
   .cant-info-label { min-width:130px; font-weight:700; color:var(--mid); }
 
+  /* === Widget Calcolatrice (dashboard) === */
+  .wcalc-btn {
+    background: #fafafa;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a3a2a;
+    cursor: pointer;
+    transition: background 0.12s, transform 0.05s;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+  .wcalc-btn:hover { background: #f0f7f3; }
+  .wcalc-btn:active { transform: scale(0.96); }
+  .wcalc-btn.wcalc-op { background: #e8f5ee; color: #2a7a4b; }
+  .wcalc-btn.wcalc-op:hover { background: #d4ead9; }
+  .wcalc-btn.wcalc-eq { background: #2a7a4b; color: white; }
+  .wcalc-btn.wcalc-eq:hover { background: #1a5a3a; }
+  .wcalc-btn.wcalc-clear { background: #e85d4a; color: white; }
+  .wcalc-btn.wcalc-clear:hover { background: #c84a39; }
+
   /* === FAQ ACCORDION === */
   .faq-list { display:flex; flex-direction:column; gap:8px; }
   .faq-item { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:white; }
@@ -924,19 +950,6 @@
             <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
             <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
           </div>
-          <!-- Colore header: visibile solo Premium, impostato da JS -->
-          <div id="header-color-controls" style="display:none;margin-top:12px;">
-            <div style="font-size:0.72rem;opacity:0.7;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Colore header</div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <input type="color" id="header-color-picker" value="#2a7a4b" title="Colore personalizzato"
-                style="width:30px;height:30px;border:2px solid rgba(255,255,255,0.5);border-radius:6px;cursor:pointer;padding:2px;background:transparent;"
-                onchange="applicaColoreHeader(this.value)">
-              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#1a3a2a,#2a7a4b)')" title="Verde (default)" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);"></button>
-              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#1a237e,#1565c0)')" title="Blu" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#1a237e,#1565c0);"></button>
-              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#4a148c,#7b1fa2)')" title="Viola" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#4a148c,#7b1fa2);"></button>
-              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#b71c1c,#e53935)')" title="Rosso" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#b71c1c,#e53935);"></button>
-            </div>
-          </div>
         </div>
         <!-- DESTRA: area logo (2/3) — contenuto impostato da JS in base al piano -->
         <div class="dash-hero-logo-col" id="dash-hero-logo-col"></div>
@@ -964,25 +977,18 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" onclick="showSectionById('foto')">
+        <div class="dash-quick-card" data-card-id="foto-lavori" data-premium="true" style="cursor:pointer" onclick="document.getElementById('modalFotoLavori').classList.add('show')">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
         </div>
-        <div class="dash-quick-card" onclick="showSectionById('recensioni')">
-          <div class="dash-quick-icon">⭐</div>
-          <div class="dash-quick-label">Recensioni</div>
-          <div class="dash-quick-sub">Cosa dicono i clienti</div>
+        <div onclick="showSectionById('certificazioni')" class="dash-quick-card" data-card-id="certificazioni" style="cursor:pointer;display:block;">
+          <div class="dash-quick-icon">📜</div>
+          <div class="dash-quick-label">Certificazioni</div>
         </div>
-        <div class="dash-quick-card" onclick="showSectionById('profilo')">
-          <div class="dash-quick-icon">👤</div>
-          <div class="dash-quick-label">Il mio profilo</div>
-          <div class="dash-quick-sub">Modifica i dati impresa</div>
-        </div>
-        <div class="dash-quick-card" onclick="apriModalPub()" style="border-top-color:#FF6B35;">
-          <div class="dash-quick-icon">🚀</div>
-          <div class="dash-quick-label">Promuovi la tua impresa</div>
-          <div class="dash-quick-sub">Acquista uno spazio pubblicitario</div>
+        <div class="dash-quick-card" data-card-id="qr-profilo" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalQRCode()">
+          <div class="dash-quick-icon">🔲</div>
+          <div class="dash-quick-label">QR Code profilo</div>
         </div>
       </div>
 
@@ -997,7 +1003,7 @@
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
           <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
         </div>
@@ -1024,10 +1030,6 @@
         <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
-        </div>
-        <div class="dash-quick-card" data-card-id="qr-profilo" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalQRCode()">
-          <div class="dash-quick-icon">🔲</div>
-          <div class="dash-quick-label">QR Code profilo</div>
         </div>
         <div class="dash-quick-card" data-card-id="risoluzione-problemi" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
           <div class="dash-quick-icon">🛠️</div>
@@ -1069,6 +1071,81 @@
         </div>
       </div>
 
+      <!-- CALENDARIO & ORARIO -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
+
+        <div class="cal-section-grid" style="display:grid;grid-template-columns:1fr 0.5fr 0.5fr;grid-template-rows:auto auto;gap:14px">
+
+          <!-- [A] Orologio (alto sx) -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:center">
+            <div id="cal-orologio" style="font-family:'Playfair Display',serif;font-size:2rem;color:#2a7a4b;letter-spacing:4px;font-weight:700;text-align:center"></div>
+          </div>
+
+          <!-- [B] Meteo (alto dx) -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:14px">
+            <div id="meteo-icona" style="font-size:2.2rem;line-height:1">⏳</div>
+            <div>
+              <div id="meteo-citta" style="font-weight:700;font-size:0.9rem;color:#1a3a2a">Rilevamento...</div>
+              <div id="meteo-temp" style="font-size:1.4rem;font-family:'Playfair Display',serif;color:#2a7a4b;font-weight:700"></div>
+              <div id="meteo-condizione" style="font-size:0.78rem;color:#999;margin-top:2px"></div>
+            </div>
+          </div>
+
+          <!-- [C] Calendario (basso sx) -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#2a7a4b;padding:10px 14px">
+              <button onclick="calPrev()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8249;</button>
+              <div id="cal-label" style="color:white;font-weight:700;font-size:0.85rem;text-transform:capitalize"></div>
+              <button onclick="calNext()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8250;</button>
+            </div>
+            <div class="calendar-header" style="display:grid;grid-template-columns:repeat(7,1fr);background:#e8f5ee">
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Lun</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Mar</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Mer</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Gio</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Ven</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Sab</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Dom</div>
+            </div>
+            <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
+          </div>
+
+          <!-- [D] Note (basso centro) -->
+          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
+            <textarea id="widget-note" placeholder="Scrivi un appunto..." style="resize:none;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:8px;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:60px;background:white"></textarea>
+            <button onclick="aggiungiNota()" style="padding:8px 12px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;align-self:flex-start">+ Aggiungi nota</button>
+            <div class="lista-note" id="lista-note" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
+          </div>
+
+          <!-- [E] Calcolatrice (terza colonna, full height) -->
+          <div class="widget-calc-card" style="grid-row:1 / span 2;grid-column:3;background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);padding:14px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">🧮 Calcolatrice</div>
+            <div id="wcalc-display" style="background:#f5f5f5;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px 12px;text-align:right;font-family:'Playfair Display',serif;font-size:1.4rem;color:#1a3a2a;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:42px;line-height:1.5">0</div>
+            <div class="wcalc-keys" style="display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(40px,1fr);gap:6px;flex:1">
+              <button type="button" onclick="wcalcClear()" class="wcalc-btn wcalc-clear">C</button>
+              <button type="button" onclick="wcalcSetOp('/')" class="wcalc-btn wcalc-op">÷</button>
+              <button type="button" onclick="wcalcSetOp('*')" class="wcalc-btn wcalc-op">×</button>
+              <button type="button" onclick="wcalcSetOp('-')" class="wcalc-btn wcalc-op">−</button>
+              <button type="button" onclick="wcalcDigit('7')" class="wcalc-btn">7</button>
+              <button type="button" onclick="wcalcDigit('8')" class="wcalc-btn">8</button>
+              <button type="button" onclick="wcalcDigit('9')" class="wcalc-btn">9</button>
+              <button type="button" onclick="wcalcSetOp('+')" class="wcalc-btn wcalc-op">+</button>
+              <button type="button" onclick="wcalcDigit('4')" class="wcalc-btn">4</button>
+              <button type="button" onclick="wcalcDigit('5')" class="wcalc-btn">5</button>
+              <button type="button" onclick="wcalcDigit('6')" class="wcalc-btn">6</button>
+              <button type="button" onclick="wcalcEq()" class="wcalc-btn wcalc-eq" style="grid-row:3 / span 3;grid-column:4">=</button>
+              <button type="button" onclick="wcalcDigit('1')" class="wcalc-btn">1</button>
+              <button type="button" onclick="wcalcDigit('2')" class="wcalc-btn">2</button>
+              <button type="button" onclick="wcalcDigit('3')" class="wcalc-btn">3</button>
+              <button type="button" onclick="wcalcDigit('0')" class="wcalc-btn" style="grid-column:span 2">0</button>
+              <button type="button" onclick="wcalcDot()" class="wcalc-btn">.</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
       <!-- I MIEI CANTIERI -->
       <div data-premium="true" style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap">
@@ -1113,77 +1190,6 @@
         </div>
       </div>
 
-      <!-- CALENDARIO & ORARIO -->
-      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:14px">
-
-          <!-- [A] Orologio (alto sx) -->
-          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:center">
-            <div id="cal-orologio" style="font-family:'Playfair Display',serif;font-size:2rem;color:#2a7a4b;letter-spacing:4px;font-weight:700;text-align:center"></div>
-          </div>
-
-          <!-- [B] Meteo (alto dx) -->
-          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:14px">
-            <div id="meteo-icona" style="font-size:2.2rem;line-height:1">⏳</div>
-            <div>
-              <div id="meteo-citta" style="font-weight:700;font-size:0.9rem;color:#1a3a2a">Rilevamento...</div>
-              <div id="meteo-temp" style="font-size:1.4rem;font-family:'Playfair Display',serif;color:#2a7a4b;font-weight:700"></div>
-              <div id="meteo-condizione" style="font-size:0.78rem;color:#999;margin-top:2px"></div>
-            </div>
-          </div>
-
-          <!-- [C] Calendario (basso sx) -->
-          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;overflow:hidden">
-            <div style="display:flex;align-items:center;justify-content:space-between;background:#2a7a4b;padding:10px 14px">
-              <button onclick="calPrev()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8249;</button>
-              <div id="cal-label" style="color:white;font-weight:700;font-size:0.85rem;text-transform:capitalize"></div>
-              <button onclick="calNext()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8250;</button>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(7,1fr);background:#e8f5ee">
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Lun</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Mar</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Mer</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Gio</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Ven</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Sab</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Dom</div>
-            </div>
-            <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
-          </div>
-
-          <!-- [D] Note (basso dx) -->
-          <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px">
-            <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
-            <textarea id="widget-note" placeholder="Scrivi i tuoi appunti..." style="flex:1;resize:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:140px;background:transparent" oninput="localStorage.setItem('ti_note',this.value)"></textarea>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- FOTO DEI LAVORI (dashboard) -->
-      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📷 Foto dei lavori</div>
-
-        <div class="foto-limit-bar" id="foto-limit-bar-dash">
-          <span style="font-size:1.3rem">📷</span>
-          <span id="foto-limit-testo-dash">Caricamento...</span>
-        </div>
-
-        <div class="foto-upload-progress" id="foto-progress-dash">⏳ Caricamento foto in corso...</div>
-
-        <div class="foto-upload-area" id="foto-upload-area-dash"
-             onclick="document.getElementById('foto-input-dash').click()"
-             ondragover="fotoDragOverDash(event)" ondragleave="fotoDragLeaveDash(event)" ondrop="fotoDrop(event)">
-          <input type="file" id="foto-input-dash" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
-          <div class="foto-upload-icon">📤</div>
-          <div class="foto-upload-label">Clicca o trascina le foto qui</div>
-          <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
-        </div>
-
-        <div class="foto-grid" id="foto-grid-dash"></div>
-      </div>
     </div>
 
     <!-- PREVENTIVI -->
@@ -1353,9 +1359,9 @@
       <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
       <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b"><span id="piano-attuale-label">Free</span></strong></div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:stretch">
+      <div id="piano-cards-grid" style="display:flex;gap:12px;flex-wrap:wrap;">
         <!-- FREE -->
-        <div id="card-free" style="border:2px solid #2a7a4b;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;min-height:200px;display:flex;flex-direction:column;justify-content:space-between">
+        <div id="card-free" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
           <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
           <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
           <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
@@ -1365,13 +1371,16 @@
         </div>
 
         <!-- PREMIUM -->
-        <div id="card-premium" style="border:2px solid #7b1fa2;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;background:linear-gradient(135deg,#f8f0ff,#fff);min-height:200px;display:flex;flex-direction:column;justify-content:space-between">
-          <div style="font-size:1.5rem;margin-bottom:6px">💎</div>
-          <div style="font-weight:800;font-size:1rem;color:#7b1fa2;margin-bottom:4px">Premium</div>
-          <div style="font-size:0.75rem;color:#7b1fa2;font-weight:700;margin-bottom:6px">€5/mese · €49/anno</div>
-          <div style="font-size:0.8rem;color:#666;line-height:1.5">Tutto il Free<br>AI integrata<br>Personalizzazione avanzata<br>Posizione #1 nei risultati</div>
+        <div id="card-premium" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
+          <div style="font-size:1.5rem;margin-bottom:6px">👑</div>
+          <div style="font-weight:800;font-size:1rem;color:#7c3aed;margin-bottom:6px">Premium</div>
+          <div style="font-size:0.8rem;color:#666;line-height:1.5">Passa a Premium per sbloccare tutte le funzioni</div>
           <div style="margin-top:12px">
-            <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#7b1fa2;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">💎 Passa a Premium</button>
+            <select id="sceltaPiano" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-weight:700;font-size:0.85rem;margin-bottom:8px;background:white;color:#333;cursor:pointer">
+              <option value="mensile" selected>Mensile – €5/mese</option>
+              <option value="annuale">Annuale – €49/anno</option>
+            </select>
+            <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#ccc;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">Passa a Premium</button>
           </div>
         </div>
       </div>
@@ -1912,6 +1921,39 @@
     <div class="mpp-footer">
       <button class="mpp-btn-cancel" onclick="chiudiModalPersonalizzaPannello()">Annulla</button>
       <button class="mpp-btn-save" onclick="salvaPersonalizzaPannello()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOTO DEI LAVORI -->
+<div class="modal-ai-overlay" id="modalFotoLavori" onclick="if(event.target===this)chiudiModalFotoLavori()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📷 Foto dei lavori</h2>
+        <p>Carica e gestisci le foto dei tuoi lavori</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalFotoLavori()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="foto-limit-bar" id="foto-limit-bar-dash">
+        <span style="font-size:1.3rem">📷</span>
+        <span id="foto-limit-testo-dash">Caricamento...</span>
+      </div>
+
+      <div class="foto-upload-progress" id="foto-progress-dash">⏳ Caricamento foto in corso...</div>
+
+      <div class="foto-upload-area" id="foto-upload-area-dash"
+           onclick="document.getElementById('foto-input-dash').click()"
+           ondragover="fotoDragOverDash(event)" ondragleave="fotoDragLeaveDash(event)" ondrop="fotoDrop(event)">
+        <input type="file" id="foto-input-dash" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
+        <div class="foto-upload-icon">📤</div>
+        <div class="foto-upload-label">Clicca o trascina le foto qui</div>
+        <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
+      </div>
+
+      <div class="foto-grid" id="foto-grid-dash"></div>
     </div>
   </div>
 </div>
@@ -4392,6 +4434,126 @@ async function salvaPersonalizzaPannello() {
   chiudiModalPersonalizzaPannello();
 }
 
+
+/* ============================================================
+   WIDGET CALCOLATRICE (dashboard, colonna destra)
+   ============================================================ */
+(function () {
+  var cur = '0';
+  var prev = null;
+  var pendOp = null;
+  var resetNext = false;
+
+  function show() {
+    var el = document.getElementById('wcalc-display');
+    if (el) el.textContent = cur;
+  }
+
+  function compute() {
+    var a = parseFloat(prev);
+    var b = parseFloat(cur);
+    if (isNaN(a) || isNaN(b)) return b;
+    var r;
+    switch (pendOp) {
+      case '+': r = a + b; break;
+      case '-': r = a - b; break;
+      case '*': r = a * b; break;
+      case '/': r = b === 0 ? 0 : a / b; break;
+      default:  return b;
+    }
+    return Math.round(r * 1e10) / 1e10;
+  }
+
+  window.wcalcClear = function () {
+    cur = '0'; prev = null; pendOp = null; resetNext = false;
+    show();
+  };
+
+  window.wcalcDigit = function (d) {
+    if (resetNext) { cur = d; resetNext = false; }
+    else            { cur = (cur === '0') ? d : (cur + d); }
+    if (cur.replace('-', '').length > 12) cur = cur.slice(0, 13);
+    show();
+  };
+
+  window.wcalcDot = function () {
+    if (resetNext) { cur = '0.'; resetNext = false; }
+    else if (cur.indexOf('.') === -1) { cur += '.'; }
+    show();
+  };
+
+  window.wcalcSetOp = function (op) {
+    if (pendOp !== null && !resetNext) {
+      cur = String(compute());
+      show();
+    }
+    prev = cur;
+    pendOp = op;
+    resetNext = true;
+  };
+
+  window.wcalcEq = function () {
+    if (pendOp === null) return;
+    cur = String(compute());
+    prev = null;
+    pendOp = null;
+    resetNext = true;
+    show();
+  };
+})();
+
+// === RECENSIONI (modale dinamico, come artigiano) ===
+async function apriModalRecensioni() {
+  if(!impresaCorrente)return;
+  const{data:recensioni}=await sb.from('feedback_clienti').select('*').eq('impresa_id',impresaCorrente.id).order('created_at',{ascending:false});
+  document.body.insertAdjacentHTML('beforeend',renderModalRecensioni(recensioni||[]));
+}
+function renderModalRecensioni(recensioni) {
+  let h='<div id="modalRecensioniOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="document.getElementById(\'modalRecensioniOverlay\').remove()">';
+  h+='<div style="background:white;border-radius:16px;padding:24px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.2)" onclick="event.stopPropagation()">';
+  h+='<h2 style="margin:0 0 16px">⭐ Recensioni verificate</h2>';
+  if(!recensioni.length){
+    h+='<div style="background:#f9f9f9;border-radius:8px;padding:24px;text-align:center;color:#888">Nessuna recensione ancora</div>';
+  } else {
+    for(const r of recensioni){
+      const sub=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(s=>s!=null);
+      const voto=sub.length?Math.round(sub.reduce((a,b)=>a+b,0)/sub.length):0;
+      const data=r.created_at?new Date(r.created_at).toLocaleDateString('it-IT'):'';
+      const stelle='★'.repeat(voto)+'☆'.repeat(5-voto);
+      h+='<div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px">';
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><strong>${r.nome_cliente||'Cliente'}</strong><span style="font-size:12px;color:#888">${data}</span></div>`;
+      h+=`<div style="color:#f5b50a;font-size:14px;margin-bottom:6px">${stelle}</div>`;
+      h+=`<div style="color:#444;font-size:14px">${r.testo||''}</div>`;
+      h+='</div>';
+    }
+  }
+  h+='<button onclick="document.getElementById(\'modalRecensioniOverlay\').remove()" style="background:transparent;border:1px solid #ddd;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px">Chiudi</button>';
+  h+='</div></div>';
+  return h;
+}
+
+// === CHIUDI MODAL FOTO LAVORI ===
+function chiudiModalFotoLavori() {
+  document.getElementById('modalFotoLavori').classList.remove('show');
+}
+
+// === NOTE (widget calendario, salvataggio localStorage) ===
+function caricaNote(){
+  var el=document.getElementById('lista-note'); if(!el)return;
+  var arr; try{arr=JSON.parse(localStorage.getItem('ti_note_list')||'[]');}catch(e){arr=[];}
+  el.innerHTML=arr.map(function(t,i){return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;background:#f8f8f8;border-radius:8px;padding:8px 10px;font-size:0.82rem;color:#1a1a1a"><span style="white-space:pre-wrap;flex:1">'+escHtml(t)+'</span><button onclick="eliminaNota('+i+')" title="Elimina" style="background:transparent;border:none;cursor:pointer;color:#c0392b;font-size:0.95rem;line-height:1">&#128465;</button></div>';}).join('');
+}
+function aggiungiNota(){
+  var ta=document.getElementById('widget-note'); if(!ta)return;
+  var t=(ta.value||'').trim(); if(!t)return;
+  var arr; try{arr=JSON.parse(localStorage.getItem('ti_note_list')||'[]');}catch(e){arr=[];}
+  arr.unshift(t); localStorage.setItem('ti_note_list',JSON.stringify(arr));
+  ta.value=''; caricaNote();
+}
+function eliminaNota(i){
+  var arr; try{arr=JSON.parse(localStorage.getItem('ti_note_list')||'[]');}catch(e){arr=[];}
+  arr.splice(i,1); localStorage.setItem('ti_note_list',JSON.stringify(arr)); caricaNote();
+}
 const PANNELLO_CORRENTE = 'impresa';
 
 async function inizializza() {
@@ -4527,6 +4689,7 @@ async function inizializza() {
       new Sortable(grid, { animation: 150, onUpdate: salvaCardOrdine, delay: 400, delayOnTouchOnly: true, touchStartThreshold: 8 });
     });
   }
+  caricaNote();
   caricaProfilo();
 
   // Apri la sezione indicata dall'hash (se presente e valida)
