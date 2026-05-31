@@ -1447,64 +1447,6 @@
   </main>
 </div>
 
-<!-- MODAL AI PREVENTIVO DASHBOARD -->
-<div class="modal-ai-overlay" id="modal-ai-dash" onclick="if(event.target===this)chiudiModalPreventivoDash()">
-  <div class="modal-ai" style="max-width:760px">
-    <div class="modal-ai-header">
-      <div>
-        <h2>🤖 Genera preventivo con AI</h2>
-        <p>Compila i dati del lavoro — l'AI creerà un preventivo professionale</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
-      <button class="modal-ai-close" onclick="chiudiModalPreventivoDash()">✕</button>
-    </div>
-    <div class="modal-ai-body">
-      <div class="ai-form-group">
-        <label>Tipo di lavoro *</label>
-        <select id="ai-tipo-lavoro">
-          <option value="">— Seleziona —</option>
-          <option>Ristrutturazione appartamento</option>
-          <option>Ristrutturazione bagno</option>
-          <option>Ristrutturazione cucina</option>
-          <option>Impianto elettrico</option>
-          <option>Impianto idraulico</option>
-          <option>Pavimentazione / Parquet</option>
-          <option>Tinteggiatura / Pittura</option>
-          <option>Facciata esterna</option>
-          <option>Copertura / Tetto</option>
-          <option>Opere murarie</option>
-          <option>Serramenti / Infissi</option>
-          <option>Altro</option>
-        </select>
-      </div>
-      <div class="ai-form-group">
-        <label>Descrizione del lavoro</label>
-        <textarea id="ai-descrizione" placeholder="Descrivi il lavoro richiesto, eventuali materiali, condizioni particolari…"></textarea>
-      </div>
-      <div class="ai-form-row">
-        <div class="ai-form-group">
-          <label>Dimensioni / Superficie</label>
-          <input type="text" id="ai-dimensioni" placeholder="Es. 80 mq, 3 stanze">
-        </div>
-        <div class="ai-form-group">
-          <label>Zona / Città</label>
-          <input type="text" id="ai-zona" placeholder="Es. Roma, Milano Nord">
-        </div>
-      </div>
-      <button class="btn-genera-ai-dash" id="btn-genera-ai-dash" onclick="generaPreventivoDash()">
-        🤖 Genera preventivo
-      </button>
-      <div class="ai-result-box" id="ai-result-box">
-        <div class="ai-result-label">
-          ✨ Preventivo generato — personalizzalo a piacere
-          <button class="btn-copia" onclick="copiaPreventivoDash()">📋 Copia</button>
-        </div>
-        <textarea class="ai-result-text" id="ai-result-text"></textarea>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL SEGNALAZIONE -->
 <div class="modal-ai-overlay" id="modal-segnalazione" onclick="if(event.target===this)chiudiModalSegnalazione()">
   <div class="modal-ai" style="max-width:760px">
@@ -4136,7 +4078,6 @@ async function generaVociPreventivoAI() {
       })
     });
     const data = await resp.json().catch(() => null);
-    console.log('[AI preventivo] status:', resp.status, 'response:', data);
     if (!resp.ok) {
       alert('Errore AI: ' + ((data && data.error) || resp.status));
       return;
@@ -4595,30 +4536,6 @@ async function eliminaAnnuncio(id) {
   if (!confirm('Sei sicuro di voler eliminare questo annuncio?')) return;
   await sb.from('offerte_lavoro').delete().eq('id', id);
   await caricaAnnunciLavoro();
-}
-
-// =====================
-// MODAL AI PREVENTIVO DASHBOARD
-// =====================
-function apriModalPreventivoDash() {
-  document.getElementById('modal-ai-dash').classList.add('show');
-  document.getElementById('ai-result-box').classList.remove('show');
-  document.getElementById('ai-result-text').value = '';
-  document.getElementById('btn-genera-ai-dash').disabled = false;
-  document.getElementById('btn-genera-ai-dash').innerHTML = '🤖 Genera preventivo';
-}
-
-function chiudiModalPreventivoDash() {
-  document.getElementById('modal-ai-dash').classList.remove('show');
-}
-
-async function copiaPreventivoDash() {
-  const testo = document.getElementById('ai-result-text').value;
-  await navigator.clipboard.writeText(testo);
-  const btn = document.querySelector('.btn-copia');
-  const orig = btn.textContent;
-  btn.textContent = '✅ Copiato!';
-  setTimeout(() => { btn.textContent = orig; }, 2000);
 }
 
 // =====================
