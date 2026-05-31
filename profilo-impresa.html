@@ -175,6 +175,26 @@ nav img{height:36px}
 .rec-msg.ok{background:#e8f5e9;color:#2a7a4b}
 .rec-msg.err{background:#fdecea;color:#c0392b}
 .rec-msg.warn{background:#fff3cd;color:#856404}
+/* RECENSIONI — sezione prominente */
+.rec-card .card-title{font-size:24px}
+.rec-card .rec-tab{font-size:16px;padding:12px 22px;border-radius:10px}
+.rec-card .rta{font-size:15px;min-height:120px;padding:14px 16px}
+.rec-card .ri{font-size:15px;padding:13px 14px}
+.rec-card .btn-rec{font-size:18px;padding:16px}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.st-box{background:#faf7fd;border:2px solid #ede3f5;border-radius:14px;padding:18px 16px;text-align:center;margin-bottom:0}
+.st-box label{font-size:16px;font-weight:800;color:#4a235a;margin-bottom:10px}
+.st-box .st-row{justify-content:center;gap:6px}
+.st-box .stella{font-size:34px}
+.rec-voti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.rec-voto-box{background:#faf7fd;border:1px solid #ede3f5;border-radius:10px;padding:10px 12px;text-align:center}
+.rec-voto-box .rv-lbl{font-size:13px;font-weight:700;color:#6c3483;margin-bottom:4px}
+.rec-voto-box .rv-st{font-size:20px;color:#f4c02e;letter-spacing:2px}
+.rec-empty{text-align:center;padding:32px 16px}
+.rec-empty-icon{font-size:54px;line-height:1;margin-bottom:12px}
+.rec-empty-title{font-size:22px;font-weight:800;color:#4a235a;margin-bottom:8px}
+.rec-empty-sub{font-size:15px;color:#777;margin-bottom:20px}
+.rec-empty-btn{width:auto;display:inline-block;padding:16px 34px;font-size:18px}
 
 /* SIDEBAR */
 .sidebar-trust{background:linear-gradient(135deg,#1a472a,#28a745);border-radius:16px;
@@ -262,6 +282,7 @@ nav img{height:36px}
   .hero-nome{font-size:1.6rem}
   nav{padding:10px 16px}
   .cal-grid-2x2{grid-template-columns:1fr}
+  .st-grid,.rec-voti-grid{grid-template-columns:1fr}
   .mini-stats-grid{gap:8px}
   #cover-foto img{height:160px}
 }
@@ -353,6 +374,35 @@ nav img{height:36px}
       </div>
     </div>
 
+    <!-- RECENSIONI -->
+    <div class="card rec-card" style="border-top-color:#6c3483">
+      <div class="card-title">⭐ Recensioni dei clienti</div>
+      <div class="rec-tabs">
+        <button class="rec-tab active" id="tab-btn-lista" onclick="showRecTab('lista',this)">⭐ Recensioni (<span id="rec-count">0</span>)</button>
+        <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">✍️ Lascia recensione</button>
+      </div>
+      <div id="rec-tab-lista"><div id="rec-lista"></div></div>
+      <div id="rec-tab-form" style="display:none">
+        <div class="st-grid">
+          <div class="st-gruppo st-box"><label>⭐ Qualità</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setSG('qualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('qualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('qualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('qualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('qualita',5)">★</span></div></div>
+          <div class="st-gruppo st-box"><label>⏱️ Puntualità</label><div class="st-row" id="stelle-puntualita"><span class="stella" data-v="1" onclick="setSG('puntualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('puntualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('puntualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('puntualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('puntualita',5)">★</span></div></div>
+          <div class="st-gruppo st-box"><label>💰 Prezzo</label><div class="st-row" id="stelle-prezzo"><span class="stella" data-v="1" onclick="setSG('prezzo',1)">★</span><span class="stella" data-v="2" onclick="setSG('prezzo',2)">★</span><span class="stella" data-v="3" onclick="setSG('prezzo',3)">★</span><span class="stella" data-v="4" onclick="setSG('prezzo',4)">★</span><span class="stella" data-v="5" onclick="setSG('prezzo',5)">★</span></div></div>
+          <div class="st-gruppo st-box"><label>🤝 Professionalità</label><div class="st-row" id="stelle-professionalita"><span class="stella" data-v="1" onclick="setSG('professionalita',1)">★</span><span class="stella" data-v="2" onclick="setSG('professionalita',2)">★</span><span class="stella" data-v="3" onclick="setSG('professionalita',3)">★</span><span class="stella" data-v="4" onclick="setSG('professionalita',4)">★</span><span class="stella" data-v="5" onclick="setSG('professionalita',5)">★</span></div></div>
+        </div>
+        <textarea class="rta" id="rec-testo" placeholder="Descrivi la tua esperienza..."></textarea>
+        <div class="r2" style="margin-bottom:10px">
+          <div><label style="font-size:11px;font-weight:700;display:block;margin-bottom:4px">Mese</label><select class="ri" id="rec-mese" style="margin-bottom:0"><option value="">—</option><option>Gennaio</option><option>Febbraio</option><option>Marzo</option><option>Aprile</option><option>Maggio</option><option>Giugno</option><option>Luglio</option><option>Agosto</option><option>Settembre</option><option>Ottobre</option><option>Novembre</option><option>Dicembre</option></select></div>
+          <div><label style="font-size:11px;font-weight:700;display:block;margin-bottom:4px">Anno</label><select class="ri" id="rec-anno" style="margin-bottom:0"><option value="">—</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014</option><option>2013</option><option>2012</option><option>2011</option><option>2010</option></select></div>
+        </div>
+        <div id="rec-nome-email-wrapper">
+          <div class="r2"><input type="text" class="ri" id="rec-nome" placeholder="Il tuo nome *" style="margin-bottom:0"><input type="email" class="ri" id="rec-email" placeholder="Email * (privata)" style="margin-bottom:0"></div>
+          <p style="font-size:11px;color:#aaa;margin:6px 0 10px">L'email non sarà pubblica.</p>
+        </div>
+        <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
+        <div class="rec-msg" id="rec-msg"></div>
+      </div>
+    </div>
+
     <!-- CHI SIAMO -->
     <div class="card" id="card-chi-siamo" style="display:none">
       <div class="card-title">📋 Chi siamo</div>
@@ -393,33 +443,6 @@ nav img{height:36px}
     <div class="card" id="card-certificazioni" style="display:none;border-top-color:#daa520">
       <div class="card-title">🏆 Certificazioni e Patentini</div>
       <div id="lista-certificazioni-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"></div>
-    </div>
-
-    <!-- RECENSIONI -->
-    <div class="card" style="border-top-color:#6c3483">
-      <div class="card-title">⭐ Recensioni dei clienti</div>
-      <div class="rec-tabs">
-        <button class="rec-tab active" id="tab-btn-lista" onclick="showRecTab('lista',this)">⭐ Recensioni (<span id="rec-count">0</span>)</button>
-        <button class="rec-tab" id="tab-btn-form" onclick="showRecTab('form',this)">✍️ Lascia recensione</button>
-      </div>
-      <div id="rec-tab-lista"><div id="rec-lista"></div></div>
-      <div id="rec-tab-form" style="display:none">
-        <div class="st-gruppo"><label>⭐ Qualità</label><div class="st-row" id="stelle-qualita"><span class="stella" data-v="1" onclick="setSG('qualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('qualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('qualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('qualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('qualita',5)">★</span></div></div>
-        <div class="st-gruppo"><label>⏱️ Puntualità</label><div class="st-row" id="stelle-puntualita"><span class="stella" data-v="1" onclick="setSG('puntualita',1)">★</span><span class="stella" data-v="2" onclick="setSG('puntualita',2)">★</span><span class="stella" data-v="3" onclick="setSG('puntualita',3)">★</span><span class="stella" data-v="4" onclick="setSG('puntualita',4)">★</span><span class="stella" data-v="5" onclick="setSG('puntualita',5)">★</span></div></div>
-        <div class="st-gruppo"><label>💰 Prezzo</label><div class="st-row" id="stelle-prezzo"><span class="stella" data-v="1" onclick="setSG('prezzo',1)">★</span><span class="stella" data-v="2" onclick="setSG('prezzo',2)">★</span><span class="stella" data-v="3" onclick="setSG('prezzo',3)">★</span><span class="stella" data-v="4" onclick="setSG('prezzo',4)">★</span><span class="stella" data-v="5" onclick="setSG('prezzo',5)">★</span></div></div>
-        <div class="st-gruppo"><label>🤝 Professionalità</label><div class="st-row" id="stelle-professionalita"><span class="stella" data-v="1" onclick="setSG('professionalita',1)">★</span><span class="stella" data-v="2" onclick="setSG('professionalita',2)">★</span><span class="stella" data-v="3" onclick="setSG('professionalita',3)">★</span><span class="stella" data-v="4" onclick="setSG('professionalita',4)">★</span><span class="stella" data-v="5" onclick="setSG('professionalita',5)">★</span></div></div>
-        <textarea class="rta" id="rec-testo" placeholder="Descrivi la tua esperienza..."></textarea>
-        <div class="r2" style="margin-bottom:10px">
-          <div><label style="font-size:11px;font-weight:700;display:block;margin-bottom:4px">Mese</label><select class="ri" id="rec-mese" style="margin-bottom:0"><option value="">—</option><option>Gennaio</option><option>Febbraio</option><option>Marzo</option><option>Aprile</option><option>Maggio</option><option>Giugno</option><option>Luglio</option><option>Agosto</option><option>Settembre</option><option>Ottobre</option><option>Novembre</option><option>Dicembre</option></select></div>
-          <div><label style="font-size:11px;font-weight:700;display:block;margin-bottom:4px">Anno</label><select class="ri" id="rec-anno" style="margin-bottom:0"><option value="">—</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014</option><option>2013</option><option>2012</option><option>2011</option><option>2010</option></select></div>
-        </div>
-        <div id="rec-nome-email-wrapper">
-          <div class="r2"><input type="text" class="ri" id="rec-nome" placeholder="Il tuo nome *" style="margin-bottom:0"><input type="email" class="ri" id="rec-email" placeholder="Email * (privata)" style="margin-bottom:0"></div>
-          <p style="font-size:11px;color:#aaa;margin:6px 0 10px">L'email non sarà pubblica.</p>
-        </div>
-        <button class="btn-rec" id="btn-rec" onclick="inviaRecensione()">⭐ Pubblica recensione</button>
-        <div class="rec-msg" id="rec-msg"></div>
-      </div>
     </div>
 
   </div>
@@ -620,7 +643,12 @@ async function caricaRecensioni(id){
     const r=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&order=created_at.desc&limit=10`,{headers:{'apikey':SK}});
     const data=await r.json();const div=document.getElementById('rec-lista');
     const ce=document.getElementById('rec-count');if(ce)ce.textContent=data?.length||0;
-    if(!data||!data.length){div.innerHTML='<p style="color:#aaa;font-size:13px;padding:14px 0">Nessuna recensione ancora. Sii il primo!</p>';return}
+    if(!data||!data.length){
+      let nomeImpresa=(document.getElementById('profile-name')?.textContent||'').trim();
+      if(!nomeImpresa||nomeImpresa==='Caricamento...')nomeImpresa='questa impresa';
+      div.innerHTML=`<div class="rec-empty"><div class="rec-empty-icon">⭐</div><div class="rec-empty-title">Sii il primo a recensire ${nomeImpresa}</div><p class="rec-empty-sub">Hai lavorato con questa impresa? Racconta la tua esperienza e aiuta gli altri clienti.</p><button class="btn-rec rec-empty-btn" onclick="showRecTab('form',document.getElementById('tab-btn-form'))">✍️ Lascia una recensione</button></div>`;
+      return;
+    }
     const piano=(window._pianoImpresa||'free').toLowerCase();
     const isFree=piano==='free';
     const visibili=isFree?data.slice(0,3):data;
@@ -629,7 +657,9 @@ async function caricaRecensioni(id){
       const avg=media.length?(media.reduce((a,b)=>a+b,0)/media.length).toFixed(1):'-';
       const st='★'.repeat(Math.round(parseFloat(avg)))+'☆'.repeat(5-Math.round(parseFloat(avg)));
       const quando=[r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' ');
-      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${r.nome_cliente||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><p class="rec-testo">${r.testo||''}</p></div>`;
+      const voti=[['⭐ Qualità',r.stelle_qualita],['⏱️ Puntualità',r.stelle_puntualita],['💰 Prezzo',r.stelle_prezzo],['🤝 Professionalità',r.stelle_professionalita]];
+      const votiHtml=voti.map(([lbl,v])=>{const n=parseInt(v)||0;const stars=n?'★'.repeat(n)+'☆'.repeat(5-n):'—';return`<div class="rec-voto-box"><div class="rv-lbl">${lbl}</div><div class="rv-st">${stars}</div></div>`}).join('');
+      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${r.nome_cliente||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${r.testo||''}</p></div>`;
     }).join('');
     if(isFree&&data.length>3){div.innerHTML+=`<div style="margin-top:14px;padding:12px 14px;background:#fff8e1;border-left:3px solid #f5a623;border-radius:6px;font-size:13px;color:#666">📌 ${data.length} recensioni totali, solo le 3 più recenti sono visibili sul piano Free</div>`;}
   }catch(e){console.error(e)}
