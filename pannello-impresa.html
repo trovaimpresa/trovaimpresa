@@ -994,41 +994,25 @@
           <div class="dash-quick-icon">🔝</div>
           <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
-        <div id="card-visibile" class="dash-quick-card" data-premium="true" style="cursor:pointer" onclick="apriModalVisibile()">
+        <div id="card-visibile" class="dash-quick-card" style="cursor:pointer" onclick="apriModalVisibile()">
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
           <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
+        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
-          <div class="dash-quick-icon">📷</div>
-          <div class="dash-quick-label">Foto illimitate</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">🎬</div>
-          <div class="dash-quick-label">Video lavori illimitati</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">📄</div>
-          <div class="dash-quick-label">Preventivi illimitati</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">💼</div>
-          <div class="dash-quick-label">Offerte di lavoro illimitate</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">👤</div>
-          <div class="dash-quick-label">Personalizza profilo</div>
         </div>
         <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
-        <div class="dash-quick-card" data-card-id="risoluzione-problemi" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
+        <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
           <div class="dash-quick-icon">🛠️</div>
           <div class="dash-quick-label">Risoluzione problemi</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="pubblicita" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='pubblicita.html'">
+          <div class="dash-quick-icon">📢</div>
+          <div class="dash-quick-label">Pubblicità</div>
         </div>
         <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalListaAttesaPub()">
           <div class="dash-quick-icon">⏳</div>
@@ -1037,22 +1021,6 @@
         <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">📊</div>
-          <div class="dash-quick-label">Statistiche profilo</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">🔔</div>
-          <div class="dash-quick-label">Notifiche real-time</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">🤖</div>
-          <div class="dash-quick-label">AI preventivi</div>
-        </div>
-        <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">👑</div>
-          <div class="dash-quick-label">Logo + colore header</div>
         </div>
         <div class="dash-quick-card" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
@@ -1142,7 +1110,7 @@
         </div>
       </div>
       <!-- I MIEI CANTIERI -->
-      <div data-premium="true" style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap">
           <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#1a3a2a">🏗️ I miei cantieri</div>
           <button onclick="document.getElementById('modalNuovoCantiere').classList.add('show')" style="padding:10px 18px;background:var(--verde);color:white;border:none;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer">+ Nuovo cantiere</button>
