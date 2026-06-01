@@ -570,6 +570,34 @@
     /* Calendario 2x2 su mobile: 1 col */
     #cal-orologio { font-size: 1.5rem !important; }
   }
+
+  /* === FAQ ACCORDION === */
+  .faq-list { display:flex; flex-direction:column; gap:8px; }
+  .faq-item { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:white; }
+  .faq-domanda {
+    padding:12px 16px; font-size:0.92rem; font-weight:600; color:var(--dark);
+    cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+    gap:12px; user-select:none; transition:background 0.15s;
+  }
+  .faq-domanda:hover { background:#f8f8f8; }
+  .faq-domanda::after {
+    content:'+'; font-size:1.3rem; font-weight:700; color:var(--verde);
+    transition:transform 0.2s; flex-shrink:0; line-height:1;
+  }
+  .faq-item.open .faq-domanda::after { transform:rotate(45deg); }
+  .faq-risposta {
+    display:none; padding:0 16px 14px; font-size:0.88rem;
+    color:var(--mid); line-height:1.55;
+  }
+  .faq-item.open .faq-risposta { display:block; }
+  .faq-cta-help { margin-top:18px; padding-top:18px; border-top:1px solid var(--border); }
+  .faq-cta-help button {
+    width:100%; padding:13px; background:#fff3cd; color:#7b4f00;
+    border:1px solid #ffc107; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:0.92rem; font-weight:700;
+    cursor:pointer; transition:background 0.15s;
+  }
+  .faq-cta-help button:hover { background:#ffec99; }
 </style>
 <link rel="stylesheet" href="/css/mobile.css">
 </head>
@@ -761,6 +789,18 @@
         <div class="dash-quick-card" data-card-id="logo-header" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">👑</div>
           <div class="dash-quick-label">Logo + colore header</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
+          <div class="dash-quick-icon">🛠️</div>
+          <div class="dash-quick-label">Risoluzione problemi</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="pubblicita" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='pubblicita.html'">
+          <div class="dash-quick-icon">📢</div>
+          <div class="dash-quick-label">Pubblicità</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalListaAttesaPub()">
+          <div class="dash-quick-icon">⏳</div>
+          <div class="dash-quick-label">Lista d'attesa pubblicità</div>
         </div>
       </div>
 
@@ -1104,6 +1144,51 @@
       <div id="priorita-content">
         <div style="text-align:center;padding:40px 0;color:#999;">⏳ Calcolo in corso…</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RISOLUZIONE PROBLEMI (FAQ) -->
+<div class="modal-ai-overlay" id="modalRisoluzione" onclick="if(event.target===this)chiudiModalRisoluzione()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🛠️ Risoluzione problemi</h2>
+        <p>Domande frequenti e soluzioni rapide</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalRisoluzione()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="faq-list" id="faq-list"></div>
+      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
+        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:6px;">🤖 Assistente AI</div>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Non hai trovato la risposta? Chiedi direttamente all'assistente AI.</p>
+        <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
+        <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
+          style="margin-top:10px;padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
+          onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
+          ✨ Chiedi all'AI
+        </button>
+        <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#1a3a2a;"></div>
+      </div>
+      <div class="faq-cta-help">
+        <button onclick="chiudiModalRisoluzione();apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LISTA D'ATTESA PUBBLICITÀ -->
+<div class="modal-ai-overlay" id="modalListaAttesaPub" onclick="if(event.target===this)chiudiModalListaAttesaPub()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>⏳ Lista d'attesa pubblicità</h2>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalListaAttesaPub()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div id="lap-risultato" style="display:none;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:16px;font-size:15px;line-height:1.5;color:#1a3a2a;text-align:center;font-weight:700;"></div>
     </div>
   </div>
 </div>
@@ -2260,6 +2345,171 @@ function renderModalRecensioni(recensioni) {
   h+='</div></div>';
   return h;
 }
+const FAQS_LIST = [
+  {
+    domanda: "Non riesco ad accedere al mio account",
+    risposta: "Controlla email e password. Se hai dimenticato la password, clicca su 'Password dimenticata?' nella pagina di login: riceverai un'email per reimpostarla. Se l'email non arriva entro 5 minuti, controlla la cartella Spam."
+  },
+  {
+    domanda: "Come modifico i miei dati (telefono, indirizzo, descrizione)?",
+    risposta: "Clicca sulla card 'Modifica profilo' del pannello. Lì puoi aggiornare tutti i tuoi dati: contatti, descrizione attività, città, foto lavori. Ricordati di salvare in fondo alla pagina."
+  },
+  {
+    domanda: "Ho caricato un nuovo logo ma non si vede",
+    risposta: "Il browser potrebbe mostrarti la versione vecchia in cache. Premi CTRL+F5 (Windows) o CMD+SHIFT+R (Mac) per ricaricare. Formati supportati: JPG, PNG, WEBP. Dimensione massima: 2 MB."
+  },
+  {
+    domanda: "Non appaio nelle ricerche dei clienti",
+    risposta: "Verifica che: 1) Il profilo sia completo (categoria, città, descrizione, almeno una foto). 2) La città inserita sia scritta correttamente. 3) Se sei Free appari solo nella tua città; se sei Premium appari in tutta la regione."
+  },
+  {
+    domanda: "Qual è la differenza tra Free e Premium?",
+    risposta: "Free (€0): visibilità solo nella tua città, profilo base. Premium (€5/mese o €49/anno): visibilità in tutta la regione, badge verificato, statistiche profilo, personalizzazione pannello, priorità nei risultati di ricerca."
+  },
+  {
+    domanda: "Come passo a Premium?",
+    risposta: "Clicca sulla card 'Diventa Premium' o 'Abbonamento' nel tuo pannello. Pagamento sicuro tramite Stripe (carta di credito o debito). Puoi annullare in qualsiasi momento dalla sezione 'Modifica profilo'."
+  },
+  {
+    domanda: "Come ricevo recensioni dai miei clienti?",
+    risposta: "Nel pannello trovi un link diretto da condividere con i clienti (WhatsApp, email, SMS). Loro compileranno il modulo recensione con la propria email. La recensione apparirà nel tuo profilo pubblico dopo la verifica automatica."
+  },
+  {
+    domanda: "Come funzionano i preventivi?",
+    risposta: "I clienti ti contattano tramite il pulsante 'Richiedi preventivo' sulla tua scheda pubblica. Riceverai i dettagli del lavoro via email. Puoi rispondere direttamente al cliente con la tua proposta — TrovaImpresa non si trattiene commissioni."
+  },
+  {
+    domanda: "Voglio cancellare il mio account",
+    risposta: "Vai su 'Modifica profilo' → scorri fino in fondo → clicca 'Elimina account'. Attenzione: l'operazione è irreversibile e cancellerà profilo, recensioni e tutti i dati associati. Se sei Premium, l'abbonamento verrà annullato automaticamente."
+  },
+  {
+    domanda: "Ho un problema non elencato qui",
+    risposta: "Clicca sul pulsante 'Contatta assistenza' qui sotto per inviarci una segnalazione. Ti risponderemo via email entro 24-48 ore. In alternativa scrivi direttamente a info@trovaimpresa.com."
+  }
+];
+
+function apriModalRisoluzione() {
+  const lista = document.getElementById('faq-list');
+  if (!lista) return;
+  lista.innerHTML = FAQS_LIST.map(f => `
+    <div class="faq-item">
+      <div class="faq-domanda" onclick="toggleFaq(this)">${f.domanda}</div>
+      <div class="faq-risposta">${f.risposta}</div>
+    </div>
+  `).join('');
+  document.getElementById('modalRisoluzione').classList.add('show');
+}
+
+function chiudiModalRisoluzione() {
+  document.getElementById('modalRisoluzione').classList.remove('show');
+}
+
+async function apriModalListaAttesaPub() {
+  const ris = document.getElementById('lap-risultato');
+  ris.style.display = 'none';
+  ris.innerHTML = '';
+  document.getElementById('modalListaAttesaPub').classList.add('show');
+
+  // Carica le righe attive (attesa/offerto) dell'azienda loggata
+  const { data, error } = await sb.from('lista_attesa_pubblicita')
+    .select('citta, stato, created_at, offerta_scadenza')
+    .eq('impresa_id', impresaCorrente.id)
+    .in('stato', ['attesa', 'offerto'])
+    .order('created_at', { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    ris.textContent = "Non sei in lista d'attesa. Per iscriverti vai su Pubblicità quando lo spazio che vuoi è occupato.";
+    ris.style.display = '';
+    return;
+  }
+
+  // 'offerto' ha priorità: spazio riservato all'azienda
+  const offerto = data.find(r => r.stato === 'offerto');
+  if (offerto) {
+    let scad = '';
+    if (offerto.offerta_scadenza) {
+      const [g, m, a] = String(offerto.offerta_scadenza).split('/');
+      const d = new Date(`${a}-${m}-${g}`);
+      scad = isNaN(d) ? String(offerto.offerta_scadenza) : d.toLocaleDateString('it-IT');
+    }
+    ris.innerHTML = `Si è liberato uno spazio a ${escHtml(offerto.citta)}! È tuo fino al ${escHtml(scad)}. Vuoi prenotarlo?` +
+      `<div style="margin-top:14px;"><a href="pubblicita.html" class="btn-salva-annuncio" style="display:inline-block;text-decoration:none;">🛒 Acquista</a></div>`;
+    ris.style.display = '';
+    return;
+  }
+
+  // 'attesa': posizione = n. aziende in attesa per quella città con created_at <= la sua
+  const inAttesa = data.find(r => r.stato === 'attesa');
+  const { count } = await sb.from('lista_attesa_pubblicita')
+    .select('id', { count: 'exact', head: true })
+    .ilike('citta', inAttesa.citta)
+    .eq('stato', 'attesa')
+    .lte('created_at', inAttesa.created_at);
+  ris.textContent = `Sei in posizione n° ${count || 1} per ${inAttesa.citta}`;
+  ris.style.display = '';
+}
+
+function chiudiModalListaAttesaPub() {
+  document.getElementById('modalListaAttesaPub').classList.remove('show');
+}
+
+function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function chiediSupportoAI() {
+  const ta = document.getElementById('ai-supporto-prompt');
+  const btn = document.getElementById('btn-ai-supporto');
+  const out = document.getElementById('ai-supporto-risposta');
+  const testo = (ta.value || '').trim();
+  if (!testo) {
+    alert('Scrivi la tua domanda prima di inviare.');
+    ta.focus();
+    return;
+  }
+  if (!impresaCorrente || !impresaCorrente.id) {
+    alert('Impresa non identificata. Ricarica la pagina.');
+    return;
+  }
+  const labelOriginale = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.style.cursor = 'not-allowed';
+  out.textContent = 'Sto pensando…';
+  const faqTesto = FAQS_LIST.map(f => `D: ${f.domanda}\nR: ${f.risposta}`).join('\n\n');
+  const promptCompleto = `Rispondi basandoti su queste FAQ ufficiali di TrovaImpresa, non inventare funzioni o informazioni non presenti. Se la risposta non è nelle FAQ, dillo e invita a usare "Contatta assistenza".\n\nFAQ UFFICIALI:\n${faqTesto}\n\nDOMANDA DELL'UTENTE:\n${testo}`;
+  try {
+    const resp = await fetch('/.netlify/functions/ai-claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        azione: 'supporto',
+        impresa_id: impresaCorrente.id,
+        prompt: promptCompleto
+      })
+    });
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) {
+      out.textContent = 'Errore AI: ' + ((data && data.error) || resp.status);
+      return;
+    }
+    if (data && data.risposta) {
+      out.innerHTML = escHtml(data.risposta).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    } else {
+      out.textContent = 'Risposta vuota.';
+    }
+  } catch (e) {
+    out.textContent = 'Errore di rete: ' + (e && e.message ? e.message : e);
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+    btn.innerHTML = labelOriginale;
+  }
+}
+
+function toggleFaq(headerEl) {
+  headerEl.parentElement.classList.toggle('open');
+}
+
 function ctaPremium(d,piuUtenti) {
   return `<p style="color:#666;font-size:14px">Senza Premium saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> grazie al Premium.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
 }
