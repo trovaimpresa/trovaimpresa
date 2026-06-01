@@ -63,6 +63,7 @@
     position:fixed; top:0; left:0; bottom:0; z-index:100;
     display:flex; flex-direction:column;
   }
+  #sidebar-map { flex:1; min-height:300px; width:100%; border-radius:12px; margin:0 0 16px; }
   .sidebar-logo {
     padding:24px 20px; border-bottom:1px solid var(--border);
     font-family:'Playfair Display',serif; font-size:1.1rem;
@@ -699,6 +700,7 @@
     }
   }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="/css/mobile.css">
 </head>
 <body>
@@ -758,6 +760,7 @@
         <span>👤</span> Il mio profilo
       </div>
     </nav>
+    <div id="sidebar-map"></div>
     <div class="sidebar-footer">
       <button onclick="apriModalSegnalazione()" style="width:100%;padding:10px;background:#fff3cd;color:#7b4f00;border:1px solid #ffc107;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;">🆘 Segnala problema</button>
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
@@ -4102,6 +4105,15 @@ window.addEventListener('pageshow', function(event) {
 </script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var sidebarMap = null;
+(function() {
+  var el = document.getElementById('sidebar-map');
+  if (!el || typeof L === 'undefined') return;
+  sidebarMap = L.map('sidebar-map', { zoomControl: false, attributionControl: false }).setView([41.9, 12.5], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(sidebarMap);
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
