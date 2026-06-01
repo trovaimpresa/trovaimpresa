@@ -58,15 +58,6 @@
     <g transform="rotate(180)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
     <g transform="rotate(225)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
     <g transform="rotate(270)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
-    <g transform="rotate(-45)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
-    <g transform="rotate(0)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
-    <g transform="rotate(45)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
-    <g transform="rotate(90)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
-    <g transform="rotate(135)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
-    <g transform="rotate(180)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
-    <g transform="rotate(225)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
-    <g transform="rotate(270)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
-    <circle cx="0" cy="0" r="11" fill="white"/>
   </g>
 
 </svg>
