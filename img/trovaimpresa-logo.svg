@@ -50,14 +50,14 @@
 
   <!-- FIORE scala 1.2 -->
   <g transform="translate(440, 255) scale(1.6)">
-    <g transform="rotate(-45)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -7,-58 a 7,18 0 1,0 14,0 a 7,18 0 1,0 -14,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
-    <g transform="rotate(0)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -7,-58 a 7,18 0 1,0 14,0 a 7,18 0 1,0 -14,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
-    <g transform="rotate(45)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -7,-58 a 7,18 0 1,0 14,0 a 7,18 0 1,0 -14,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
-    <g transform="rotate(90)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -7,-58 a 7,18 0 1,0 14,0 a 7,18 0 1,0 -14,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
-    <g transform="rotate(135)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -7,-58 a 7,18 0 1,0 14,0 a 7,18 0 1,0 -14,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
-    <g transform="rotate(180)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -7,-58 a 7,18 0 1,0 14,0 a 7,18 0 1,0 -14,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
-    <g transform="rotate(225)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -7,-58 a 7,18 0 1,0 14,0 a 7,18 0 1,0 -14,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
-    <g transform="rotate(270)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -7,-58 a 7,18 0 1,0 14,0 a 7,18 0 1,0 -14,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
+    <g transform="rotate(-45)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -10,-58 a 10,22 0 1,0 20,0 a 10,22 0 1,0 -20,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
+    <g transform="rotate(0)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -10,-58 a 10,22 0 1,0 20,0 a 10,22 0 1,0 -20,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
+    <g transform="rotate(45)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -10,-58 a 10,22 0 1,0 20,0 a 10,22 0 1,0 -20,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
+    <g transform="rotate(90)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -10,-58 a 10,22 0 1,0 20,0 a 10,22 0 1,0 -20,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
+    <g transform="rotate(135)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -10,-58 a 10,22 0 1,0 20,0 a 10,22 0 1,0 -20,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
+    <g transform="rotate(180)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -10,-58 a 10,22 0 1,0 20,0 a 10,22 0 1,0 -20,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
+    <g transform="rotate(225)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -10,-58 a 10,22 0 1,0 20,0 a 10,22 0 1,0 -20,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
+    <g transform="rotate(270)"><path d="M -17,-58 a 17,35 0 1,0 34,0 a 17,35 0 1,0 -34,0 Z M -10,-58 a 10,22 0 1,0 20,0 a 10,22 0 1,0 -20,0 Z" fill="#ff8800" fill-rule="evenodd"/></g>
   </g>
 
 </svg>
