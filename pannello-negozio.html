@@ -746,27 +746,27 @@
           <div class="dash-quick-icon">🔝</div>
           <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
-        <div id="card-visibile" class="dash-quick-card" style="cursor:pointer" onclick="apriModalVisibile()">
+        <div id="card-visibile" class="dash-quick-card" data-card-id="visibile" style="cursor:pointer" onclick="apriModalVisibile()">
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
           <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
-        <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed" onclick="apriModalRecensioni()">
+        <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
+        <div class="dash-quick-card" data-card-id="foto-lavori" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto illimitate</div>
         </div>
-        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed" onclick="window.location.href='galleria-video.html'">
+        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Video prodotti illimitati</div>
         </div>
-        <div class="dash-quick-card" data-card-id="preventivi-illimitati" data-premium="true" style="border-top-color:#7c3aed" onclick="showSectionById('preventivi')">
+        <div class="dash-quick-card" data-card-id="preventivi-illimitati" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('preventivi')">
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Preventivi illimitati</div>
         </div>
-        <div class="dash-quick-card" data-card-id="offerte-lavoro" data-premium="true" style="border-top-color:#7c3aed" onclick="window.location.href='offerte-registrazione.html'">
+        <div class="dash-quick-card" data-card-id="offerte-lavoro" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='offerte-registrazione.html'">
           <div class="dash-quick-icon">💼</div>
           <div class="dash-quick-label">Offerte di lavoro illimitate</div>
         </div>
@@ -790,7 +790,7 @@
             <div class="dash-quick-label">Sono Subappaltatore</div>
           </a>
         </div>
-        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed" onclick="showSection('profilo', this)">
+        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('profilo', this)">
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Personalizza profilo</div>
         </div>
@@ -798,7 +798,7 @@
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
-        <div class="dash-quick-card" style="border-top-color:#7c3aed">
+        <div class="dash-quick-card" data-card-id="statistiche" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">📊</div>
           <div class="dash-quick-label">Statistiche profilo</div>
         </div>
