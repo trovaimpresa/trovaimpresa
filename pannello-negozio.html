@@ -690,17 +690,17 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" onclick="showSectionById('foto')">
+        <div class="dash-quick-card" data-card-id="foto-lavori" onclick="showSectionById('foto')">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">I miei prodotti</div>
           <div class="dash-quick-sub">Carica e gestisci i tuoi prodotti</div>
         </div>
-        <div class="dash-quick-card" onclick="showSectionById('recensioni')">
+        <div class="dash-quick-card" data-card-id="recensioni" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">⭐</div>
           <div class="dash-quick-label">Recensioni</div>
           <div class="dash-quick-sub">Cosa dicono i clienti</div>
         </div>
-        <div class="dash-quick-card" onclick="showSectionById('profilo')">
+        <div class="dash-quick-card" data-card-id="mio-profilo" onclick="showSection('profilo', this)">
           <div class="dash-quick-icon">👤</div>
           <div class="dash-quick-label">Il mio profilo</div>
           <div class="dash-quick-sub">Modifica i dati impresa</div>
@@ -2231,6 +2231,34 @@ async function apriModalVisibile() {
   const cercaPage=cercaPageMap[tipo]||'cerca-imprese.html';
   const isPremium=piano==='premium';
   document.body.insertAdjacentHTML('beforeend',renderModalVisibile({isPremium,citta,regione,nCitta:nCitta||0,nRegione:nRegione||0,cercaPage}));
+}
+async function apriModalRecensioni() {
+  if(!impresaCorrente)return;
+  const{data:recensioni}=await sb.from('feedback_clienti').select('*').eq('impresa_id',impresaCorrente.id).order('created_at',{ascending:false});
+  document.body.insertAdjacentHTML('beforeend',renderModalRecensioni(recensioni||[]));
+}
+function renderModalRecensioni(recensioni) {
+  let h='<div id="modalRecensioniOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="document.getElementById(\'modalRecensioniOverlay\').remove()">';
+  h+='<div style="background:white;border-radius:16px;padding:24px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 4px 24px rgba(0,0,0,0.2)" onclick="event.stopPropagation()">';
+  h+='<h2 style="margin:0 0 16px">⭐ Recensioni verificate</h2>';
+  if(!recensioni.length){
+    h+='<div style="background:#f9f9f9;border-radius:8px;padding:24px;text-align:center;color:#888">Nessuna recensione ancora</div>';
+  } else {
+    for(const r of recensioni){
+      const sub=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(s=>s!=null);
+      const voto=sub.length?Math.round(sub.reduce((a,b)=>a+b,0)/sub.length):0;
+      const data=r.created_at?new Date(r.created_at).toLocaleDateString('it-IT'):'';
+      const stelle='★'.repeat(voto)+'☆'.repeat(5-voto);
+      h+='<div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px">';
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><strong>${r.nome_cliente||'Cliente'}</strong><span style="font-size:12px;color:#888">${data}</span></div>`;
+      h+=`<div style="color:#f5b50a;font-size:14px;margin-bottom:6px">${stelle}</div>`;
+      h+=`<div style="color:#444;font-size:14px">${r.testo||''}</div>`;
+      h+='</div>';
+    }
+  }
+  h+='<button onclick="document.getElementById(\'modalRecensioniOverlay\').remove()" style="background:transparent;border:1px solid #ddd;padding:10px 16px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px">Chiudi</button>';
+  h+='</div></div>';
+  return h;
 }
 function ctaPremium(d,piuUtenti) {
   return `<p style="color:#666;font-size:14px">Senza Premium saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> grazie al Premium.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
