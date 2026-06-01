@@ -845,33 +845,45 @@
       <!-- FUNZIONI PREMIUM -->
       <div class="dash-quick-title">Funzioni Premium</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="priorita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
-          <div class="dash-quick-icon">🔝</div>
-          <div class="dash-quick-label">Priorità nei risultati</div>
-        </div>
-        <div id="card-visibile" class="dash-quick-card" data-card-id="visibile" style="cursor:pointer" onclick="apriModalVisibile()">
-          <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
-          <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
+        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('profilo', this)">
+          <div class="dash-quick-icon">👤</div>
+          <div class="dash-quick-label">Personalizza profilo</div>
         </div>
         <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
         </div>
-        <div class="dash-quick-card" data-card-id="foto-lavori" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
-          <div class="dash-quick-icon">📷</div>
-          <div class="dash-quick-label">Foto illimitate</div>
+        <div id="card-visibile" class="dash-quick-card" data-card-id="visibile" style="cursor:pointer" onclick="apriModalVisibile()">
+          <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
+          <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
-        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
-          <div class="dash-quick-icon">🎬</div>
-          <div class="dash-quick-label">Video prodotti illimitati</div>
+        <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
+          <div class="dash-quick-icon">🛠️</div>
+          <div class="dash-quick-label">Risoluzione problemi</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="pubblicita" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='pubblicita.html'">
+          <div class="dash-quick-icon">📢</div>
+          <div class="dash-quick-label">Pubblicità</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalListaAttesaPub()">
+          <div class="dash-quick-icon">⏳</div>
+          <div class="dash-quick-label">Lista d'attesa pubblicità</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed">
+          <div class="dash-quick-icon">🎨</div>
+          <div class="dash-quick-label">Personalizza pannello</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="priorita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPriorita()">
+          <div class="dash-quick-icon">🔝</div>
+          <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
         <div class="dash-quick-card" data-card-id="preventivi-illimitati" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('preventivi')">
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Preventivi illimitati</div>
         </div>
-        <div class="dash-quick-card" data-card-id="offerte-lavoro" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='offerte-registrazione.html'">
-          <div class="dash-quick-icon">💼</div>
-          <div class="dash-quick-label">Offerte di lavoro illimitate</div>
+        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
+          <div class="dash-quick-icon">🎬</div>
+          <div class="dash-quick-label">Video prodotti illimitati</div>
         </div>
         <div class="dash-quick-card" data-card-id="cerca-lavoro" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="registrazione-candidato.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
@@ -883,6 +895,10 @@
             <div class="dash-quick-label">Ricerca Candidati</div>
           </a>
         </div>
+        <div class="dash-quick-card" data-card-id="offerte-lavoro" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='offerte-registrazione.html'">
+          <div class="dash-quick-icon">💼</div>
+          <div class="dash-quick-label">Offerte di lavoro illimitate</div>
+        </div>
         <div class="dash-quick-card" data-card-id="subappalto" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
             <div class="dash-quick-icon">🔍</div>
@@ -893,13 +909,9 @@
             <div class="dash-quick-label">Sono Subappaltatore</div>
           </a>
         </div>
-        <div class="dash-quick-card" data-card-id="mio-profilo" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('profilo', this)">
-          <div class="dash-quick-icon">👤</div>
-          <div class="dash-quick-label">Personalizza profilo</div>
-        </div>
-        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed">
-          <div class="dash-quick-icon">🎨</div>
-          <div class="dash-quick-label">Personalizza pannello</div>
+        <div class="dash-quick-card" data-card-id="foto-lavori" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSectionById('foto')">
+          <div class="dash-quick-icon">📷</div>
+          <div class="dash-quick-label">Foto illimitate</div>
         </div>
         <div class="dash-quick-card" data-card-id="statistiche" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">📊</div>
@@ -916,18 +928,6 @@
         <div class="dash-quick-card" data-card-id="logo-header" style="border-top-color:#7c3aed">
           <div class="dash-quick-icon">👑</div>
           <div class="dash-quick-label">Logo + colore header</div>
-        </div>
-        <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
-          <div class="dash-quick-icon">🛠️</div>
-          <div class="dash-quick-label">Risoluzione problemi</div>
-        </div>
-        <div class="dash-quick-card" data-card-id="pubblicita" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='pubblicita.html'">
-          <div class="dash-quick-icon">📢</div>
-          <div class="dash-quick-label">Pubblicità</div>
-        </div>
-        <div class="dash-quick-card" data-card-id="lista-attesa-pubblicita" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalListaAttesaPub()">
-          <div class="dash-quick-icon">⏳</div>
-          <div class="dash-quick-label">Lista d'attesa pubblicità</div>
         </div>
       </div>
 
