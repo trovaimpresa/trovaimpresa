@@ -2278,6 +2278,25 @@ window.addEventListener('pageshow', function(event) {
 });
 </script>
 <script src="/js/modal-fullscreen.js" defer></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+let _qrCodeLibPromise = null;
+function _caricaQRCodeStylingLib() {
+  if (_qrCodeLibPromise) return _qrCodeLibPromise;
+  _qrCodeLibPromise = new Promise((resolve, reject) => {
+    if (window.QRCodeStyling) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js';
+    s.onload = () => resolve();
+    s.onerror = () => { _qrCodeLibPromise = null; reject(new Error('Impossibile caricare la libreria QR Code')); };
+    document.head.appendChild(s);
+  });
+  return _qrCodeLibPromise;
+}
+</script>
 </body>
 <script>
 function toggleSidebar() {
