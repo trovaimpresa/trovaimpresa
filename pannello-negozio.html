@@ -624,6 +624,12 @@
   .wcalc-btn.wcalc-eq:hover { background: #1a5a3a; }
   .wcalc-btn.wcalc-clear { background: #e85d4a; color: white; }
   .wcalc-btn.wcalc-clear:hover { background: #c84a39; }
+  .modal-ai-footer {
+    padding:16px 28px; border-top:1px solid var(--border);
+    display:flex; gap:10px; justify-content:flex-end;
+    background:#fafafa; border-radius:0 0 24px 24px;
+    position:sticky; bottom:0;
+  }
   @media(max-width:768px){
     .cal-section-grid {
       grid-template-columns: 1fr !important;
@@ -959,6 +965,30 @@
         </div>
 
         <div class="foto-grid" id="foto-grid-dash"></div>
+      </div>
+
+      <!-- STRUMENTI -->
+      <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">🛠️ Strumenti</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+          <div data-premium="true" onclick="apriCalcolatrice()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🧮</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Calcolatrice edile</div>
+          </div>
+          <div data-premium="true" onclick="apriAgenda()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📅</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Agenda</div>
+          </div>
+          <div data-premium="true" onclick="apriModalScadenzeFiscali()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">📋</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Scadenze fiscali</div>
+          </div>
+          <div data-premium="true" onclick="apriPromemoria()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🔔</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Promemoria</div>
+            <div style="font-size:0.78rem;color:#888;margin-top:4px">Ti avvisiamo via email</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1301,6 +1331,193 @@
         <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
         <div style="font-size:13px;color:#2a7a4b;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CALCOLATRICE EDILE -->
+<div class="modal-ai-overlay" id="modalCalcolatrice" onclick="if(event.target===this)chiudiCalcolatrice()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🧮 Calcolatrice edile</h2>
+        <p>Calcoli rapidi su IVA, ritenuta e rivalsa INPS</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiCalcolatrice()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">💶 IVA 22%</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-iva-in" step="0.01" min="0" placeholder="0.00" oninput="calcIva()">
+        </div>
+        <div id="calc-iva-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+      </div>
+
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">📉 Ritenuta d'acconto 4%</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-rit-in" step="0.01" min="0" placeholder="0.00" oninput="calcRit()">
+        </div>
+        <div id="calc-rit-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+      </div>
+
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">🏛️ Rivalsa INPS 4% (artigiani)</div>
+        <div class="form-group">
+          <label>Imponibile (€)</label>
+          <input type="number" id="calc-inps-in" step="0.01" min="0" placeholder="0.00" oninput="calcInps()">
+        </div>
+        <div id="calc-inps-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGENDA -->
+<div class="modal-ai-overlay" id="modalAgenda" onclick="if(event.target===this)chiudiAgenda()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📅 Agenda</h2>
+        <p>I tuoi appuntamenti e impegni</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiAgenda()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuovo appuntamento</div>
+        <div class="form-group">
+          <label>Titolo *</label>
+          <input type="text" id="ag-titolo" placeholder="es. Sopralluogo Villa Rossi">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data *</label>
+            <input type="date" id="ag-data">
+          </div>
+          <div class="form-group">
+            <label>Ora</label>
+            <input type="time" id="ag-ora">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cliente</label>
+          <input type="text" id="ag-cliente" placeholder="Nome del cliente">
+        </div>
+        <div class="form-group">
+          <label>Luogo</label>
+          <input type="text" id="ag-luogo" placeholder="Indirizzo o riferimento">
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="ag-note" placeholder="Annotazioni..."></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-salva-annuncio" onclick="salvaAppuntamento()">💾 Salva appuntamento</button>
+          <span id="ag-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+        </div>
+      </div>
+      <div id="agenda-appuntamenti-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SCADENZE FISCALI -->
+<div class="modal-ai-overlay" id="modalScadenzeFiscali" onclick="if(event.target===this)chiudiModalScadenzeFiscali()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📋 Scadenze fiscali</h2>
+        <p>Tieni traccia di F24, DURC, assicurazioni e altri adempimenti</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalScadenzeFiscali()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select id="scad-fisc-tipo">
+              <option value="">— Seleziona —</option>
+              <option>F24</option>
+              <option>DURC</option>
+              <option>Assicurazione RC</option>
+              <option>Attestato sicurezza</option>
+              <option>INPS</option>
+              <option>INAIL</option>
+              <option>Visura CCIAA</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Data scadenza *</label>
+            <input type="date" id="scad-fisc-data">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <input type="text" id="scad-fisc-descrizione" placeholder="Dettagli aggiuntivi">
+        </div>
+        <div class="form-group">
+          <label>Importo (€)</label>
+          <input type="number" id="scad-fisc-importo" step="0.01" min="0" placeholder="€">
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+            <input type="checkbox" id="scad-fisc-ricorrente" style="width:18px;height:18px;cursor:pointer" onchange="document.getElementById('scad-fisc-frequenza-row').style.display = this.checked ? 'block' : 'none'">
+            Ricorrente
+          </label>
+        </div>
+        <div class="form-group" id="scad-fisc-frequenza-row" style="display:none">
+          <label>Frequenza</label>
+          <select id="scad-fisc-frequenza">
+            <option value="mensile">Mensile</option>
+            <option value="trimestrale">Trimestrale</option>
+            <option value="semestrale">Semestrale</option>
+            <option value="annuale" selected>Annuale</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="scad-fisc-note" placeholder="Note aggiuntive..."></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-salva-annuncio" onclick="salvaScadenzaFiscale()">💾 Salva scadenza</button>
+          <span id="scad-fisc-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+        </div>
+      </div>
+      <div id="scad-fisc-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROMEMORIA -->
+<div class="modal-ai-overlay" id="modalPromemoria" onclick="if(event.target===this)chiudiPromemoria()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header" style="background:linear-gradient(135deg,#c2410c,#f97316);">
+      <div>
+        <h2>🔔 Promemoria</h2>
+        <p>Crea un promemoria con una data di scadenza</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiPromemoria()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Testo</label>
+        <textarea id="promemoria-testo" rows="4" placeholder="Scrivi il tuo promemoria..." style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+      </div>
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Data</label>
+        <input type="date" id="promemoria-data" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;">
+      </div>
+    </div>
+    <div class="modal-ai-footer">
+      <button type="button" onclick="chiudiPromemoria()" style="padding:12px 20px;background:#f5f5f5;color:#333;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Annulla</button>
+      <button type="button" id="btn-salva-promemoria" onclick="salvaPromemoria()" style="padding:12px 20px;background:#f97316;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Salva</button>
     </div>
   </div>
 </div>
@@ -2767,6 +2984,269 @@ async function scaricaQRCodePNG() {
     show();
   };
 })();
+
+// CALCOLATRICE EDILE
+function apriCalcolatrice() {
+  document.getElementById('modalCalcolatrice').classList.add('show');
+}
+function chiudiCalcolatrice() {
+  document.getElementById('modalCalcolatrice').classList.remove('show');
+}
+const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
+function calcIva() {
+  const v = Number(document.getElementById('calc-iva-in').value);
+  const out = document.getElementById('calc-iva-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `IVA: € ${_fmtCalc(v*0.22)} | Totale: € ${_fmtCalc(v*1.22)}`;
+}
+function calcRit() {
+  const v = Number(document.getElementById('calc-rit-in').value);
+  const out = document.getElementById('calc-rit-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `Ritenuta: € ${_fmtCalc(v*0.04)} | Netto: € ${_fmtCalc(v*0.96)}`;
+}
+function calcInps() {
+  const v = Number(document.getElementById('calc-inps-in').value);
+  const out = document.getElementById('calc-inps-out');
+  if (!v || isNaN(v)) { out.textContent = ''; return; }
+  out.textContent = `INPS 4%: € ${_fmtCalc(v*0.04)} | Da addebitare al cliente`;
+}
+
+// AGENDA
+function apriAgenda() {
+  document.getElementById('modalAgenda').classList.add('show');
+  const dataInp = document.getElementById('ag-data');
+  if (dataInp && !dataInp.value) dataInp.value = new Date().toISOString().slice(0, 10);
+  caricaAppuntamenti();
+}
+
+function chiudiAgenda() {
+  document.getElementById('modalAgenda').classList.remove('show');
+}
+
+async function caricaAppuntamenti() {
+  const lista = document.getElementById('agenda-appuntamenti-lista');
+  if (!lista || !impresaCorrente) return;
+  const { data } = await sb.from('agenda_appuntamenti').select('*')
+    .eq('user_id', impresaCorrente.user_id)
+    .order('data', { ascending: true })
+    .order('ora', { ascending: true });
+  const app = data || [];
+  if (!app.length) {
+    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessun appuntamento ancora</div>';
+    return;
+  }
+  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtData = d => {
+    if (!d) return '—';
+    const parts = new Date(d).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    return parts.charAt(0).toUpperCase() + parts.slice(1);
+  };
+  const fmtOra = o => (o ? String(o).slice(0, 5) : null);
+  lista.innerHTML = app.map(a => {
+    const oraLbl = fmtOra(a.ora);
+    const extraStyle = a.completato ? 'opacity:0.6' : '';
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between;${extraStyle}">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#1a3a2a;font-weight:700">${fmtData(a.data)}</div>
+          ${oraLbl ? `<span style="display:inline-block;padding:4px 10px;background:#2a7a4b;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">🕐 ${oraLbl}</span>` : ''}
+        </div>
+        <div style="font-weight:700;color:#1a3a2a;font-size:0.98rem;margin-bottom:6px${a.completato ? ';text-decoration:line-through' : ''}">${esc(a.titolo) || '—'}</div>
+        ${a.cliente ? `<div style="font-size:0.85rem;color:#555;margin-bottom:2px">👤 ${esc(a.cliente)}</div>` : ''}
+        ${a.luogo ? `<div style="font-size:0.85rem;color:#555;margin-bottom:2px">📍 ${esc(a.luogo)}</div>` : ''}
+        ${a.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap;margin-top:6px">${esc(a.note)}</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button onclick="toggleAppuntamento('${a.id}',${!a.completato})" title="${a.completato ? 'Riapri' : 'Segna come completato'}" style="background:transparent;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.95rem;padding:4px 8px;line-height:1">${a.completato ? '↺' : '✓'}</button>
+        <button onclick="eliminaAppuntamento('${a.id}')" title="Elimina appuntamento" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function salvaAppuntamento() {
+  if (!impresaCorrente) return;
+  const titolo = document.getElementById('ag-titolo').value.trim();
+  const data = document.getElementById('ag-data').value || null;
+  if (!titolo) { alert('Il titolo è obbligatorio.'); return; }
+  if (!data) { alert('La data è obbligatoria.'); return; }
+  const ora = document.getElementById('ag-ora').value || null;
+  const cliente = document.getElementById('ag-cliente').value.trim() || null;
+  const luogo = document.getElementById('ag-luogo').value.trim() || null;
+  const note = document.getElementById('ag-note').value.trim() || null;
+  const { error } = await sb.from('agenda_appuntamenti').insert({
+    user_id: impresaCorrente.user_id, titolo, data, ora, cliente, luogo, note, completato: false
+  });
+  if (error) { alert('Errore: ' + error.message); return; }
+  document.getElementById('ag-titolo').value = '';
+  document.getElementById('ag-data').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('ag-ora').value = '';
+  document.getElementById('ag-cliente').value = '';
+  document.getElementById('ag-luogo').value = '';
+  document.getElementById('ag-note').value = '';
+  const msg = document.getElementById('ag-msg');
+  if (msg) { msg.textContent = '✅ Salvato'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  await caricaAppuntamenti();
+}
+
+async function toggleAppuntamento(id, completato) {
+  const { error } = await sb.from('agenda_appuntamenti').update({ completato }).eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaAppuntamenti();
+}
+
+async function eliminaAppuntamento(id) {
+  if (!confirm('Eliminare questo appuntamento?')) return;
+  await sb.from('agenda_appuntamenti').delete().eq('id', id);
+  await caricaAppuntamenti();
+}
+
+// SCADENZE FISCALI
+function apriModalScadenzeFiscali() {
+  document.getElementById('modalScadenzeFiscali').classList.add('show');
+  caricaScadenzeFiscali();
+}
+
+function chiudiModalScadenzeFiscali() {
+  document.getElementById('modalScadenzeFiscali').classList.remove('show');
+}
+
+async function caricaScadenzeFiscali() {
+  const lista = document.getElementById('scad-fisc-lista');
+  if (!lista || !impresaCorrente) return;
+  const { data } = await sb.from('scadenze_fiscali').select('*')
+    .eq('user_id', impresaCorrente.user_id)
+    .order('completata', { ascending: true })
+    .order('data_scadenza', { ascending: true });
+  const scad = data || [];
+  if (!scad.length) {
+    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna scadenza ancora</div>';
+    return;
+  }
+  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtData = d => {
+    if (!d) return '—';
+    const parts = new Date(d).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    return parts.charAt(0).toUpperCase() + parts.slice(1);
+  };
+  const fmtImporto = n => (n == null) ? null : Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  lista.innerHTML = scad.map(s => {
+    let badgeBg = '#888', badgeLbl = '—', extraStyle = '', strike = '';
+    if (s.completata) {
+      badgeBg = '#888'; badgeLbl = '✓ Completata';
+      extraStyle = 'opacity:0.6';
+      strike = ';text-decoration:line-through';
+    } else if (s.data_scadenza) {
+      const ds = new Date(s.data_scadenza); ds.setHours(0,0,0,0);
+      const diffGg = Math.round((ds - oggi) / 86400000);
+      if (diffGg < 0) { badgeBg = '#c0392b'; badgeLbl = `⚠️ Scaduta da ${Math.abs(diffGg)}g`; }
+      else if (diffGg === 0) { badgeBg = '#c0392b'; badgeLbl = '🔥 Oggi'; }
+      else if (diffGg <= 7) { badgeBg = '#e8733a'; badgeLbl = `⏰ Tra ${diffGg}g`; }
+      else { badgeBg = '#2a7a4b'; badgeLbl = `📅 Tra ${diffGg}g`; }
+    }
+    const importoLbl = fmtImporto(s.importo);
+    const ricorrenteBadge = s.ricorrente
+      ? `<span style="display:inline-block;padding:3px 8px;background:#7c3aed;color:white;border-radius:999px;font-size:0.68rem;font-weight:700">🔁 ${esc(s.frequenza || 'ricorrente')}</span>`
+      : '';
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:12px;align-items:flex-start;${extraStyle}">
+      <input type="checkbox" ${s.completata ? 'checked' : ''} onchange="toggleScadenzaFiscale('${s.id}',this.checked)" style="margin-top:4px;width:18px;height:18px;cursor:pointer;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+          <div style="font-weight:700;color:#1a3a2a;font-size:1rem${strike}">${esc(s.tipo) || '—'}</div>
+          ${ricorrenteBadge}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <div style="font-size:0.85rem;color:#555">📅 ${fmtData(s.data_scadenza)}</div>
+          <span style="display:inline-block;padding:4px 10px;background:${badgeBg};color:white;border-radius:999px;font-size:0.72rem;font-weight:700">${badgeLbl}</span>
+        </div>
+        ${importoLbl ? `<div style="font-size:0.88rem;color:#555;margin-bottom:4px">💰 € ${importoLbl}</div>` : ''}
+        ${s.descrizione ? `<div style="font-size:0.88rem;color:#555;margin-bottom:4px">${esc(s.descrizione)}</div>` : ''}
+        ${s.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap">${esc(s.note)}</div>` : ''}
+      </div>
+      <button onclick="eliminaScadenzaFiscale('${s.id}')" title="Elimina scadenza" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+async function salvaScadenzaFiscale() {
+  if (!impresaCorrente) return;
+  const tipo = document.getElementById('scad-fisc-tipo').value;
+  const data_scadenza = document.getElementById('scad-fisc-data').value || null;
+  if (!tipo) { alert('Seleziona un tipo.'); return; }
+  if (!data_scadenza) { alert('La data scadenza è obbligatoria.'); return; }
+  const descrizione = document.getElementById('scad-fisc-descrizione').value.trim() || null;
+  const importoRaw = document.getElementById('scad-fisc-importo').value;
+  const importo = (importoRaw === '' || isNaN(Number(importoRaw))) ? null : Number(importoRaw);
+  const ricorrente = document.getElementById('scad-fisc-ricorrente').checked;
+  const frequenza = ricorrente ? document.getElementById('scad-fisc-frequenza').value : null;
+  const note = document.getElementById('scad-fisc-note').value.trim() || null;
+  const { error } = await sb.from('scadenze_fiscali').insert({
+    user_id: impresaCorrente.user_id, tipo, descrizione, data_scadenza, importo, ricorrente, frequenza, note, completata: false
+  });
+  if (error) { alert('Errore: ' + error.message); return; }
+  document.getElementById('scad-fisc-tipo').value = '';
+  document.getElementById('scad-fisc-data').value = '';
+  document.getElementById('scad-fisc-descrizione').value = '';
+  document.getElementById('scad-fisc-importo').value = '';
+  document.getElementById('scad-fisc-ricorrente').checked = false;
+  document.getElementById('scad-fisc-frequenza-row').style.display = 'none';
+  document.getElementById('scad-fisc-frequenza').value = 'annuale';
+  document.getElementById('scad-fisc-note').value = '';
+  const msg = document.getElementById('scad-fisc-msg');
+  if (msg) { msg.textContent = '✅ Salvata'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  await caricaScadenzeFiscali();
+}
+
+async function toggleScadenzaFiscale(id, completata) {
+  const { error } = await sb.from('scadenze_fiscali').update({ completata }).eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaScadenzeFiscali();
+}
+
+async function eliminaScadenzaFiscale(id) {
+  if (!confirm('Eliminare questa scadenza?')) return;
+  await sb.from('scadenze_fiscali').delete().eq('id', id);
+  await caricaScadenzeFiscali();
+}
+
+// PROMEMORIA
+function apriPromemoria() {
+  const oggi = new Date().toISOString().slice(0, 10);
+  const dataInput = document.getElementById('promemoria-data');
+  dataInput.min = oggi;
+  dataInput.value = '';
+  document.getElementById('promemoria-testo').value = '';
+  document.getElementById('modalPromemoria').classList.add('show');
+}
+
+function chiudiPromemoria() {
+  document.getElementById('modalPromemoria').classList.remove('show');
+}
+
+async function salvaPromemoria() {
+  const testo = document.getElementById('promemoria-testo').value.trim();
+  const data = document.getElementById('promemoria-data').value;
+  if (!testo) { alert('Scrivi il testo del promemoria.'); return; }
+  if (!data) { alert('Seleziona una data.'); return; }
+  const btn = document.getElementById('btn-salva-promemoria');
+  btn.disabled = true;
+  btn.textContent = '⏳ Salvataggio...';
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Utente non autenticato.');
+    const { error } = await sb.from('promemoria').insert({ user_id: user.id, testo, data });
+    if (error) throw error;
+    chiudiPromemoria();
+    alert('Promemoria salvato!');
+  } catch (err) {
+    alert('Errore durante il salvataggio: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salva';
+  }
+}
 
 function ctaPremium(d,piuUtenti) {
   return `<p style="color:#666;font-size:14px">Senza Premium saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> grazie al Premium.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
