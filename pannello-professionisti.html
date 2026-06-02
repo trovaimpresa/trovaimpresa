@@ -421,6 +421,7 @@
   .dash-quick-icon { font-size:1.8rem; margin-bottom:8px; }
   .dash-quick-label { font-weight:700; font-size:0.9rem; color:var(--dark); margin-bottom:3px; }
   .dash-quick-sub { font-size:0.78rem; color:var(--light); }
+  #sidebar-map { flex:1; min-height:300px; width:100%; border-radius:12px; margin:0 0 16px; }
 
   /* === MODAL AI PREVENTIVO DASH === */
   .modal-ai-overlay {
@@ -571,6 +572,7 @@
     #cal-orologio { font-size: 1.5rem !important; }
   }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="/css/mobile.css">
 </head>
 <body>
@@ -605,30 +607,8 @@
       <span class="trova">Trova</span><span class="impresa">Impresa</span>
       <small>Pannello Professionista</small>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-item active" onclick="showSection('dashboard',this)">
-        <span>📊</span> Dashboard
-      </div>
-
-      <div class="nav-item" onclick="showSection('lavoro',this)">
-        <span>💼</span> Offerte di lavoro
-        <span class="nav-badge" id="badge-lavoro" style="display:none"></span>
-      </div>
-      <div class="nav-item" onclick="showSection('candidati',this)">
-        <span>🔍</span> Candidati nella tua zona
-      </div>
-      <div class="nav-item" onclick="showSection('foto',this)">
-        <span>📋</span> I miei servizi
-      </div>
-      <div class="nav-item" onclick="showSection('recensioni',this)">
-        <span>⭐</span> Le mie recensioni
-      </div>
-      <div class="nav-item" onclick="showSection('profilo',this)">
-        <span>👤</span> Il mio profilo
-      </div>
-    </nav>
+    <div id="sidebar-map"></div>
     <div class="sidebar-footer">
-      <button onclick="apriModalSegnalazione()" style="width:100%;padding:10px;background:#fff3cd;color:#7b4f00;border:1px solid #ffc107;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;">🆘 Segnala problema</button>
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
     </div>
   </aside>
@@ -646,19 +626,6 @@
           <div class="dash-meta">
             <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
             <span class="dash-piano-badge" id="dash-piano-badge">🆓 Free</span>
-          </div>
-          <!-- Colore header: visibile solo Premium, impostato da JS -->
-          <div id="header-color-controls" style="display:none;margin-top:12px;">
-            <div style="font-size:0.72rem;opacity:0.7;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Colore header</div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <input type="color" id="header-color-picker" value="#2a7a4b" title="Colore personalizzato"
-                style="width:30px;height:30px;border:2px solid rgba(255,255,255,0.5);border-radius:6px;cursor:pointer;padding:2px;background:transparent;"
-                onchange="applicaColoreHeader(this.value)">
-              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#1a3a2a,#2a7a4b)')" title="Verde (default)" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#1a3a2a,#2a7a4b);"></button>
-              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#1a237e,#1565c0)')" title="Blu" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#1a237e,#1565c0);"></button>
-              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#4a148c,#7b1fa2)')" title="Viola" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#4a148c,#7b1fa2);"></button>
-              <button onclick="applicaGradienteHeader('linear-gradient(135deg,#b71c1c,#e53935)')" title="Rosso" style="width:30px;height:30px;border-radius:6px;border:2px solid rgba(255,255,255,0.5);cursor:pointer;background:linear-gradient(135deg,#b71c1c,#e53935);"></button>
-            </div>
           </div>
         </div>
         <!-- DESTRA: area logo (visibile solo Premium) — contenuto impostato da JS -->
@@ -1199,6 +1166,7 @@ async function caricaSessioneConDati(session) {
   }
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
+  if (typeof sidebarMap !== 'undefined' && sidebarMap) sidebarMap.invalidateSize();
   inizializza();
 }
 
@@ -1226,6 +1194,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
   document.getElementById('spinner-avvio').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
+  if (typeof sidebarMap !== 'undefined' && sidebarMap) sidebarMap.invalidateSize();
   inizializza();
 });
 
@@ -1263,6 +1232,7 @@ async function doLogin() {
   localStorage.setItem('ti_logged', '1');
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('pannello').style.display = 'block';
+  if (typeof sidebarMap !== 'undefined' && sidebarMap) sidebarMap.invalidateSize();
   inizializza();
 }
 
@@ -2286,6 +2256,16 @@ window.addEventListener('pageshow', function(event) {
     window.location.reload();
   }
 });
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var sidebarMap = null;
+(function() {
+  var el = document.getElementById('sidebar-map');
+  if (!el || typeof L === 'undefined') return;
+  sidebarMap = L.map('sidebar-map', { zoomControl: false, attributionControl: false }).setView([41.9, 12.5], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(sidebarMap);
+})();
 </script>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>
