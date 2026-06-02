@@ -4515,22 +4515,46 @@ function chiudiModalFotoLavori() {
   document.getElementById('modalFotoLavori').classList.remove('show');
 }
 
-// === NOTE (widget calendario, salvataggio localStorage) ===
-function caricaNote(){
-  var el=document.getElementById('lista-note'); if(!el)return;
-  var arr; try{arr=JSON.parse(localStorage.getItem('ti_note_list')||'[]');}catch(e){arr=[];}
-  el.innerHTML=arr.map(function(t,i){return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;background:#f8f8f8;border-radius:8px;padding:8px 10px;font-size:0.82rem;color:#1a1a1a"><span style="white-space:pre-wrap;flex:1">'+escHtml(t)+'</span><button onclick="eliminaNota('+i+')" title="Elimina" style="background:transparent;border:none;cursor:pointer;color:#c0392b;font-size:0.95rem;line-height:1">&#128465;</button></div>';}).join('');
+// NOTE PERSONALI
+async function caricaNote() {
+  const { data } = await sb.from('note_personali').select('*')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('created_at', { ascending: false });
+  const container = document.getElementById('lista-note');
+  if (!container) return;
+  const lista = data || [];
+  if (!lista.length) {
+    container.innerHTML = '<div style="font-size:0.78rem;color:#888;text-align:center;padding:6px">Nessuna nota</div>';
+    return;
+  }
+  container.innerHTML = lista.map(n => {
+    const testoSafe = (n.testo || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const dataFmt = new Date(n.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    return `
+    <div style="background:#fffbea;border:1px solid #f0e3a0;border-radius:8px;padding:8px 10px;position:relative;font-size:0.82rem;color:#1a1a1a;line-height:1.4">
+      <button onclick="eliminaNota('${n.id}')" title="Elimina nota" style="position:absolute;top:4px;right:4px;background:transparent;border:none;cursor:pointer;font-size:0.9rem;color:#c0392b;padding:2px 4px;line-height:1">🗑️</button>
+      <div style="white-space:pre-wrap;word-break:break-word;margin-right:20px">${testoSafe}</div>
+      <div style="font-size:0.7rem;color:#888;margin-top:4px">${dataFmt}</div>
+    </div>`;
+  }).join('');
 }
-function aggiungiNota(){
-  var ta=document.getElementById('widget-note'); if(!ta)return;
-  var t=(ta.value||'').trim(); if(!t)return;
-  var arr; try{arr=JSON.parse(localStorage.getItem('ti_note_list')||'[]');}catch(e){arr=[];}
-  arr.unshift(t); localStorage.setItem('ti_note_list',JSON.stringify(arr));
-  ta.value=''; caricaNote();
+
+async function aggiungiNota() {
+  const ta = document.getElementById('widget-note');
+  if (!ta) return;
+  const testo = ta.value.trim();
+  if (!testo) return;
+  const { error } = await sb.from('note_personali').insert({ impresa_id: impresaCorrente.id, testo });
+  if (error) { alert('Errore: ' + error.message); return; }
+  ta.value = '';
+  await caricaNote();
 }
-function eliminaNota(i){
-  var arr; try{arr=JSON.parse(localStorage.getItem('ti_note_list')||'[]');}catch(e){arr=[];}
-  arr.splice(i,1); localStorage.setItem('ti_note_list',JSON.stringify(arr)); caricaNote();
+
+async function eliminaNota(id) {
+  if (!confirm('Eliminare questa nota?')) return;
+  const { error } = await sb.from('note_personali').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  await caricaNote();
 }
 const PANNELLO_CORRENTE = 'impresa';
 
@@ -5735,10 +5759,6 @@ function chiudiModalProfilo() {
   window.calPrev = function () { cMese--; if (cMese < 0) { cMese = 11; cAnno--; } renderCal(); };
   window.calNext = function () { cMese++; if (cMese > 11) { cMese = 0; cAnno++; } renderCal(); };
   renderCal();
-
-  /* --- NOTE --- */
-  var noteEl = document.getElementById('widget-note');
-  if (noteEl) noteEl.value = localStorage.getItem('ti_note') || '';
 
   /* --- METEO (wttr.in, no API key) --- */
   var WMO_ICONA = {
