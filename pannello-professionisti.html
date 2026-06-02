@@ -421,6 +421,13 @@
   .dash-quick-icon { font-size:1.8rem; margin-bottom:8px; }
   .dash-quick-label { font-weight:700; font-size:0.9rem; color:var(--dark); margin-bottom:3px; }
   .dash-quick-sub { font-size:0.78rem; color:var(--light); }
+
+  .premium-lock-overlay {
+    position:absolute; inset:0; z-index:5;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.55); border-radius:14px;
+    cursor:pointer; font-size:1.6rem;
+  }
   #sidebar-map { flex:1; min-height:300px; width:100%; border-radius:12px; margin:0 0 16px; }
 
   /* === Widget Calcolatrice (dashboard) === */
@@ -2132,6 +2139,7 @@ async function inizializza() {
   } else {
     document.getElementById('sezione-il-tuo-piano').style.display = 'none';
   }
+  bloccaCardPremium();
 
   // Colore header: visibile solo per piano Premium
   if (piano === 'premium') {
@@ -4401,6 +4409,22 @@ function ricalcolaPreventivo() {
   document.getElementById('prev-imponibile').textContent = fmt(imponibile);
   document.getElementById('prev-iva').textContent = fmt(iva);
   document.getElementById('prev-totale-finale').textContent = fmt(imponibile + iva);
+}
+
+function bloccaCardPremium() {
+  const piano = (impresaCorrente.piano || 'free').toLowerCase();
+  if (piano === 'premium') return;
+  document.querySelectorAll('[data-premium="true"]').forEach(card => {
+    card.style.position = 'relative';
+    const overlay = document.createElement('div');
+    overlay.className = 'premium-lock-overlay';
+    overlay.textContent = '🔒';
+    overlay.onclick = (e) => {
+      e.stopPropagation();
+      window.location.href = 'info-premium.html';
+    };
+    card.appendChild(overlay);
+  });
 }
 
 function ctaPremium(d,piuUtenti) {
