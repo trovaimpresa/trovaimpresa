@@ -2277,6 +2277,24 @@ async function inizializza() {
   }
   bloccaCardPremium();
 
+  const cardOrd = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.card_ordine;
+  if (Array.isArray(cardOrd) && cardOrd.length) {
+    document.querySelectorAll('.dash-quick-grid').forEach(grid => {
+      const cards = Array.from(grid.querySelectorAll('[data-card-id]'));
+      cards.sort((a, b) => {
+        const ia = cardOrd.indexOf(a.dataset.cardId);
+        const ib = cardOrd.indexOf(b.dataset.cardId);
+        return (ia === -1 ? Infinity : ia) - (ib === -1 ? Infinity : ib);
+      });
+      cards.forEach(c => grid.appendChild(c));
+    });
+  }
+  if (piano === 'premium' && window.Sortable) {
+    document.querySelectorAll('.dash-quick-grid').forEach(grid => {
+      new Sortable(grid, { animation: 150, onUpdate: salvaCardOrdine, delay: 400, delayOnTouchOnly: true, touchStartThreshold: 8 });
+    });
+  }
+
   // Colore header: visibile solo per piano Premium
   if (piano === 'premium') {
     const ctrl = document.getElementById('header-color-controls');
@@ -4853,6 +4871,13 @@ async function eliminaNota(id) {
   const { error } = await sb.from('note_personali').delete().eq('id', id);
   if (error) { alert('Errore: ' + error.message); return; }
   await caricaNote();
+}
+
+async function salvaCardOrdine() {
+  const card_ordine = Array.from(document.querySelectorAll('.dash-quick-grid [data-card-id]')).map(el => el.dataset.cardId);
+  const personalizzazione = { ...(impresaCorrente.personalizzazione || {}), card_ordine };
+  await sb.from('imprese').update({ personalizzazione }).eq('id', impresaCorrente.id);
+  impresaCorrente.personalizzazione = personalizzazione;
 }
 
 function ctaPremium(d,piuUtenti) {
