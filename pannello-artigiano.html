@@ -1164,6 +1164,37 @@
         </div>
       </div>
 
+      <!-- GESTIONE PIANO -->
+      <div id="sezione-il-tuo-piano" style="background:white;border-radius:20px;padding:24px;margin:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
+        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b">Free</strong></div>
+
+        <div id="piano-cards-grid" style="display:flex;gap:12px;flex-wrap:wrap;">
+          <!-- FREE -->
+          <div id="card-free" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
+            <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
+            <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
+            <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
+            <div style="margin-top:12px">
+              <button id="btn-piano-free" onclick="window.location.href='index.html'" style="width:100%;padding:10px;background:#ccc;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">Passa a Free</button>
+            </div>
+          </div>
+
+          <!-- PREMIUM -->
+          <div id="card-premium" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
+            <div style="font-size:1.5rem;margin-bottom:6px">👑</div>
+            <div style="font-weight:800;font-size:1rem;color:#7c3aed;margin-bottom:6px">Premium</div>
+            <div style="font-size:0.8rem;color:#666;line-height:1.5">Passa a Premium per sbloccare tutte le funzioni</div>
+            <div style="margin-top:12px">
+              <select id="sceltaPiano" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-weight:700;font-size:0.85rem;margin-bottom:8px;background:white;color:#333;cursor:pointer">
+                <option value="mensile" selected>Mensile – €5/mese</option>
+                <option value="annuale">Annuale – €49/anno</option>
+              </select>
+              <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#ccc;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">Passa a Premium</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- PREVENTIVI (contenuto spostato in #modalPreventivi) -->
@@ -1382,38 +1413,6 @@
           </div>
         </div>
         <div id="profilo-mappa" style="width:100%;height:300px;border-radius:16px;overflow:hidden;margin-top:16px;background:#e8f5ee;"></div>
-      </div>
-    </div>
-
-    <!-- GESTIONE PIANO -->
-    <div id="sezione-il-tuo-piano" style="background:white;border-radius:20px;padding:24px;margin:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
-      <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b">Free</strong></div>
-
-      <div id="piano-cards-grid" style="display:flex;gap:12px;flex-wrap:wrap;">
-        <!-- FREE -->
-        <div id="card-free" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
-          <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
-          <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
-          <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
-          <div style="margin-top:12px">
-            <button id="btn-piano-free" onclick="window.location.href='index.html'" style="width:100%;padding:10px;background:#ccc;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">Passa a Free</button>
-          </div>
-        </div>
-
-        <!-- PREMIUM -->
-        <div id="card-premium" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
-          <div style="font-size:1.5rem;margin-bottom:6px">👑</div>
-          <div style="font-weight:800;font-size:1rem;color:#7c3aed;margin-bottom:6px">Premium</div>
-          <div style="font-size:0.8rem;color:#666;line-height:1.5">Passa a Premium per sbloccare tutte le funzioni</div>
-          <div style="margin-top:12px">
-            <select id="sceltaPiano" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-weight:700;font-size:0.85rem;margin-bottom:8px;background:white;color:#333;cursor:pointer">
-              <option value="mensile" selected>Mensile – €5/mese</option>
-              <option value="annuale">Annuale – €49/anno</option>
-            </select>
-            <button id="btn-piano-premium" onclick="window.location.href='info-premium.html'" style="width:100%;padding:10px;background:#ccc;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">Passa a Premium</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -2555,9 +2554,7 @@ window.onpopstate = function(e) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     const sec = document.getElementById('sec-' + e.state.section);
     if (sec) sec.classList.add('active');
-  } else {
-    window.location.href = 'index.html';
-  }
+  } else { window.location.href = 'index.html'; }
 };
 
 const PANNELLO_CORRENTE = 'artigiano';
