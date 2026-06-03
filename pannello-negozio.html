@@ -254,52 +254,6 @@
   .mfa-alert-error { background:#fff0f0; border:1px solid #ffcccc; color:#cc0000; }
   .mfa-alert-success { background:var(--verde3); border:1px solid #a8d5b5; color:var(--verde2); }
 
-  /* === LAVORO SECTION === */
-  .lavoro-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
-  .btn-nuovo-annuncio {
-    padding:10px 20px; background:var(--arancio); color:white;
-    border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:0.88rem; cursor:pointer; transition:all 0.15s;
-    display:flex; align-items:center; gap:8px;
-  }
-  .btn-nuovo-annuncio:hover { background:var(--arancio2); transform:translateY(-1px); }
-
-  .lavoro-card {
-    background:white; border-radius:16px; padding:22px 24px;
-    box-shadow:var(--shadow); border:1px solid var(--border);
-    margin-bottom:14px; transition:all 0.2s;
-  }
-  .lavoro-card-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
-  .lavoro-titolo { font-family:'Playfair Display',serif; font-size:1.05rem; margin-bottom:4px; }
-  .lavoro-meta { display:flex; gap:14px; flex-wrap:wrap; font-size:0.8rem; color:var(--mid); margin-bottom:10px; }
-  .lavoro-desc { font-size:0.85rem; color:var(--mid); line-height:1.5; }
-  .lavoro-badge {
-    padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; white-space:nowrap;
-  }
-  .badge-attivo { background:var(--verde3); color:var(--verde2); }
-  .badge-disattivo { background:#f0f0f0; color:#888; }
-  .lavoro-actions { display:flex; gap:8px; margin-top:14px; }
-  .btn-toggle-annuncio {
-    padding:7px 16px; border-radius:10px; border:1.5px solid var(--border);
-    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
-    font-size:0.8rem; cursor:pointer; color:var(--mid); transition:all 0.15s;
-  }
-  .btn-toggle-annuncio:hover { border-color:var(--verde); color:var(--verde); }
-  .btn-elimina-annuncio {
-    padding:7px 16px; border-radius:10px; border:1.5px solid #fecaca;
-    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
-    font-size:0.8rem; cursor:pointer; color:var(--rosso); transition:all 0.15s;
-  }
-  .btn-elimina-annuncio:hover { background:var(--rosso3); }
-
-  /* FORM NUOVO ANNUNCIO */
-  .form-annuncio {
-    background:white; border-radius:16px; padding:28px;
-    box-shadow:var(--shadow); border:1px solid var(--border);
-    margin-bottom:24px; display:none;
-  }
-  .form-annuncio.show { display:block; }
-  .form-annuncio h3 { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:20px; }
   .form-group { margin-bottom:16px; }
   .form-group label { display:block; font-size:0.75rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
   .form-group input, .form-group select, .form-group textarea {
@@ -316,40 +270,6 @@
     font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.15s;
   }
   .btn-salva-annuncio:hover { background:var(--verde2); }
-  .btn-annulla-form {
-    padding:12px 20px; background:white; color:var(--mid);
-    border:1.5px solid var(--border); border-radius:12px; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:0.9rem; cursor:pointer; margin-left:10px;
-  }
-
-  /* INFO PIANO */
-  .piano-info {
-    background:linear-gradient(135deg,var(--arancio3),#fff);
-    border:1.5px solid #fdd5b8; border-radius:14px; padding:16px 20px;
-    font-size:0.85rem; color:var(--mid); margin-bottom:20px;
-    display:flex; align-items:center; gap:12px;
-  }
-  .piano-info strong { color:var(--arancio); }
-
-  /* === CANDIDATI SEZIONE === */
-  .candidato-card {
-    background:white; border-radius:16px; padding:22px 24px;
-    box-shadow:var(--shadow); border:1px solid var(--border);
-    margin-bottom:14px; transition:all 0.2s;
-  }
-  .candidato-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.1); transform:translateY(-1px); }
-  .candidato-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
-  .candidato-nome { font-family:'Playfair Display',serif; font-size:1.05rem; }
-  .candidato-livello-badge { padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; background:var(--verde3); color:var(--verde2); }
-  .candidato-info { display:flex; gap:12px; flex-wrap:wrap; font-size:0.82rem; color:var(--mid); margin-bottom:12px; }
-  .candidato-bio { font-size:0.85rem; color:var(--mid); line-height:1.5; margin-bottom:12px; }
-  .candidato-contatti { display:flex; gap:12px; flex-wrap:wrap; }
-  .btn-contatta {
-    padding:8px 16px; background:var(--arancio); color:white;
-    border:none; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:0.8rem; transition:all 0.15s;
-  }
-  .btn-contatta:hover { background:var(--arancio2); }
 
   @media(max-width:768px){
     .sidebar { transform:translateX(-100%); }
@@ -2063,11 +1983,6 @@ function showSection(id, el, fromPopstate) {
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
-function showSectionById(id, fromPopstate) {
-  const navItem = [...document.querySelectorAll('.nav-item')].find(n => n.getAttribute('onclick')?.includes(`'${id}'`));
-  if (navItem) showSection(id, navItem, fromPopstate);
-}
-
 history.replaceState({goHome: true}, '');
 history.pushState({section: 'dashboard'}, '');
 window.onpopstate = function(e) {
@@ -2251,24 +2166,6 @@ async function caricaPreventivi() {
   `).join('');
 }
 
-async function impostaPiano(piano) {
-  if (!impresaCorrente) return;
-  const conferma = confirm('Tornare al piano Free?');
-  if (!conferma) return;
-  const { error } = await sb.from('imprese').update({ piano }).eq('id', impresaCorrente.id);
-  if (error) { alert('Errore: ' + error.message); return; }
-  impresaCorrente.piano = piano;
-  const dashLabel = document.getElementById('piano-dashboard-label');
-  if (dashLabel) {
-    dashLabel.textContent = piano === 'premium' ? 'Premium 👑' : 'Free';
-    dashLabel.style.color = piano === 'premium' ? '#7c3aed' : '#2a7a4b';
-  }
-  document.getElementById('piano-label').textContent = piano === 'premium' ? 'Premium 👑' : 'Free';
-  document.getElementById('piano-label').style.color = piano === 'premium' ? '#7c3aed' : '#2a7a4b';
-  aggiornaPianoCards(piano);
-  alert(piano === 'premium' ? '✅ Piano Premium attivato! Ora sei al top dei risultati.' : '✅ Tornato al piano Free.');
-}
-
 function aggiornaPianoCards(piano) {
   const piani = [
     { id: 'free',    cardId: 'card-free',    btnId: 'btn-piano-free',    colore: '#2a7a4b', href: null,                label: 'Free' },
@@ -2350,23 +2247,6 @@ async function caricaLogoImpresa(event) {
   const placeholder = document.getElementById('dash-logo-placeholder');
   if (img) { img.src = logoUrl; img.style.display = 'block'; }
   if (placeholder) placeholder.style.display = 'none';
-}
-
-async function salvaColoreHeader(valore) {
-  await sb.from('imprese').update({ colore_header: valore }).eq('id', impresaCorrente.id);
-  impresaCorrente.colore_header = valore;
-}
-
-function applicaColoreHeader(colore) {
-  const hero = document.getElementById('dash-hero');
-  if (hero) hero.style.background = colore;
-  salvaColoreHeader(colore);
-}
-
-function applicaGradienteHeader(gradiente) {
-  const hero = document.getElementById('dash-hero');
-  if (hero) hero.style.background = gradiente;
-  salvaColoreHeader(gradiente);
 }
 
 // =====================
@@ -4303,13 +4183,6 @@ function renderModalVisibile(d) {
   return h;
 }
 </script>
-<!-- MODAL MODIFICA PROFILO -->
-<div id="modal-profilo-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center">
-  <div style="position:relative;width:100%;height:100%;max-width:860px;margin:auto;display:flex;flex-direction:column">
-    <button onclick="chiudiModalProfilo()" style="position:absolute;top:12px;right:12px;z-index:10000;background:white;border:none;border-radius:50%;width:40px;height:40px;font-size:1.3rem;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
-    <iframe id="iframe-modifica-profilo" src="" style="width:100%;height:100%;border:none;border-radius:0"></iframe>
-  </div>
-</div>
 
 <div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
   <a href="modifica-profilo.html#card-disdetta" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
@@ -4356,20 +4229,6 @@ function _caricaQRCodeStylingLib() {
 function toggleSidebar() {
   document.getElementById('sidebar-el').classList.toggle('open');
   document.getElementById('sidebar-overlay').classList.toggle('open');
-}
-function apriModalProfilo() {
-  var overlay = document.getElementById('modal-profilo-overlay');
-  var iframe  = document.getElementById('iframe-modifica-profilo');
-  iframe.src  = 'modifica-profilo.html';
-  overlay.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-function chiudiModalProfilo() {
-  var overlay = document.getElementById('modal-profilo-overlay');
-  var iframe  = document.getElementById('iframe-modifica-profilo');
-  overlay.style.display = 'none';
-  iframe.src  = '';
-  document.body.style.overflow = '';
 }
 </script>
 <script>
