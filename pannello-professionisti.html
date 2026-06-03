@@ -1346,6 +1346,100 @@
         <div class="profilo-title">Dati impresa</div>
         <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
       </div>
+      <div class="profilo-card" id="profilo-mestieri-card" style="margin-top:16px">
+        <div class="profilo-title">🔧 Servizi offerti</div>
+        <div class="form-group">
+          <label>Servizio principale *</label>
+          <select id="mest-m1">
+            <option value="">— Seleziona —</option>
+            <option>Edilizia / Muratura</option>
+            <option>Ristrutturazione completa</option>
+            <option>Cartongesso</option>
+            <option>Pittura e tinteggiatura</option>
+            <option>Pavimenti e piastrelle</option>
+            <option>Falegnameria</option>
+            <option>Serramenti / Infissi</option>
+            <option>Idraulica</option>
+            <option>Impianti elettrici</option>
+            <option>Climatizzazione / Caldaie</option>
+            <option>Fotovoltaico / Pannelli solari</option>
+            <option>Antennista / Allarmi</option>
+            <option>Coperture / Tetti</option>
+            <option>Cappotti termici / Isolamento</option>
+            <option>Fabbro / Cancelli / Recinzioni</option>
+            <option>Marmi e pietre</option>
+            <option>Vetraio</option>
+            <option>Tende da sole / Zanzariere</option>
+            <option>Giardinaggio / Esterni</option>
+            <option>Spurghi / Spazzacamino</option>
+            <option>Pulizie / Disinfestazioni</option>
+            <option>Sgomberi / Traslochi</option>
+            <option>Altro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Servizio secondario</label>
+          <select id="mest-m2">
+            <option value="">— Seleziona —</option>
+            <option>Edilizia / Muratura</option>
+            <option>Ristrutturazione completa</option>
+            <option>Cartongesso</option>
+            <option>Pittura e tinteggiatura</option>
+            <option>Pavimenti e piastrelle</option>
+            <option>Falegnameria</option>
+            <option>Serramenti / Infissi</option>
+            <option>Idraulica</option>
+            <option>Impianti elettrici</option>
+            <option>Climatizzazione / Caldaie</option>
+            <option>Fotovoltaico / Pannelli solari</option>
+            <option>Antennista / Allarmi</option>
+            <option>Coperture / Tetti</option>
+            <option>Cappotti termici / Isolamento</option>
+            <option>Fabbro / Cancelli / Recinzioni</option>
+            <option>Marmi e pietre</option>
+            <option>Vetraio</option>
+            <option>Tende da sole / Zanzariere</option>
+            <option>Giardinaggio / Esterni</option>
+            <option>Spurghi / Spazzacamino</option>
+            <option>Pulizie / Disinfestazioni</option>
+            <option>Sgomberi / Traslochi</option>
+            <option>Altro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Terzo servizio</label>
+          <select id="mest-m3">
+            <option value="">— Seleziona —</option>
+            <option>Edilizia / Muratura</option>
+            <option>Ristrutturazione completa</option>
+            <option>Cartongesso</option>
+            <option>Pittura e tinteggiatura</option>
+            <option>Pavimenti e piastrelle</option>
+            <option>Falegnameria</option>
+            <option>Serramenti / Infissi</option>
+            <option>Idraulica</option>
+            <option>Impianti elettrici</option>
+            <option>Climatizzazione / Caldaie</option>
+            <option>Fotovoltaico / Pannelli solari</option>
+            <option>Antennista / Allarmi</option>
+            <option>Coperture / Tetti</option>
+            <option>Cappotti termici / Isolamento</option>
+            <option>Fabbro / Cancelli / Recinzioni</option>
+            <option>Marmi e pietre</option>
+            <option>Vetraio</option>
+            <option>Tende da sole / Zanzariere</option>
+            <option>Giardinaggio / Esterni</option>
+            <option>Spurghi / Spazzacamino</option>
+            <option>Pulizie / Disinfestazioni</option>
+            <option>Sgomberi / Traslochi</option>
+            <option>Altro</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-az" id="btn-salva-mestieri" onclick="salvaMestieri()">💾 Salva</button>
+          <span id="msg-salva-mestieri" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+        </div>
+      </div>
     </div>
 
     <!-- GESTIONE PIANO -->
@@ -2578,6 +2672,28 @@ function caricaProfilo() {
     &nbsp;&nbsp;
     <a href="#" onclick="avviaMFA(event)" style="color:var(--arancio);font-weight:700;font-size:0.88rem" id="link-2fa">🔐 Attiva 2FA →</a>
   `;
+}
+
+async function salvaMestieri() {
+  const m1 = document.getElementById('mest-m1').value;
+  const m2 = document.getElementById('mest-m2').value;
+  const m3 = document.getElementById('mest-m3').value;
+  if (!m1) { alert('Seleziona almeno il mestiere principale.'); return; }
+  if ((m2 && m2 === m1) || (m3 && (m3 === m1 || m3 === m2))) {
+    alert('Mestiere secondario e terzo non possono coincidere con il principale né tra loro.');
+    return;
+  }
+  const mestieri = [...new Set([m1, m2, m3].filter(Boolean))];
+  const btn = document.getElementById('btn-salva-mestieri');
+  btn.disabled = true;
+  const { error } = await sb.from('imprese').update({ mestieri }).eq('id', impresaCorrente.id);
+  btn.disabled = false;
+  if (error) { alert('Errore: ' + error.message); return; }
+  impresaCorrente.mestieri = mestieri;
+  const msg = document.getElementById('msg-salva-mestieri');
+  msg.textContent = '✅ Salvato!';
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 2000);
 }
 
 // =====================
