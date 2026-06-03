@@ -592,7 +592,7 @@
         <div class="form-card fc-arancio">
           <div class="card-header arancio">💾 Salva profilo</div>
           <button type="button" class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
-          <a href="pannello-impresa.html" class="btn-back-link">← Torna al pannello</a>
+          <a href="pannello-impresa.html" class="btn-back-link" onclick="window.location.href = pannelloPerTipo(); return false;">← Torna al pannello</a>
           <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
             🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
             <a href="/privacy-policy.html" style="color:#2a7a4b;">Privacy Policy</a>
@@ -1166,9 +1166,16 @@
       location.reload();
     }
 
+    function pannelloPerTipo() {
+      const tipoImpresa = ((impresaData && impresaData.tipo) || '').toLowerCase();
+      return tipoImpresa === 'professionista' ? 'pannello-professionisti.html' :
+             tipoImpresa === 'artigiano'      ? 'pannello-artigiano.html' :
+             tipoImpresa === 'negozio'        ? 'pannello-negozio.html' :
+                                                'pannello-impresa.html';
+    }
     history.pushState(null, '', location.href);
     window.addEventListener('popstate', function() {
-      window.location.href = 'pannello-impresa.html';
+      window.location.href = pannelloPerTipo();
     });
   </script>
   <script src="/cookie-banner.js"></script>
