@@ -162,6 +162,10 @@
             <label>Sito web</label>
             <input type="url" id="f-sito_web" placeholder="https://www.miosito.it">
           </div>
+          <div class="form-group">
+            <label>Numero iscrizione albo</label>
+            <input type="text" id="f-numero_albo" placeholder="Es. 12345">
+          </div>
           <div class="form-group" style="margin-bottom:0;">
             <label>Descrizione <span id="desc-limit-label" style="font-weight:400;color:#888;">(max 500 caratteri)</span></label>
             <textarea id="f-descrizione" placeholder="Chi siete, cosa fate, i vostri punti di forza..." maxlength="500" style="min-height:100px;" oninput="aggiornaDescCounter()"></textarea>
@@ -785,6 +789,7 @@
       document.getElementById('f-email').value = d.email || '';
       document.getElementById('f-telefono').value = d.telefono || '';
       document.getElementById('f-sito_web').value = d.sito_web || '';
+      document.getElementById('f-numero_albo').value = d.numero_albo || '';
       document.getElementById('f-descrizione').value = d.descrizione || '';
 
       // Cascata Regione → Provincia → Città
@@ -996,6 +1001,7 @@
           provincia: document.getElementById('f-provincia').value,
           citta: document.getElementById('f-citta').value.trim(),
           sito_web: document.getElementById('f-sito_web').value.trim(),
+          numero_albo: document.getElementById('f-numero_albo').value.trim(),
           descrizione: document.getElementById('f-descrizione').value.trim(),
           lat: parseFloat(document.getElementById('f-lat').value) || null,
           lng: parseFloat(document.getElementById('f-lng').value) || null
