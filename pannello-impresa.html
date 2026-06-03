@@ -4925,23 +4925,6 @@ async function caricaLogoImpresa(event) {
   if (prevLogoWrap) prevLogoWrap.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
 }
 
-async function salvaColoreHeader(valore) {
-  await sb.from('imprese').update({ colore_header: valore }).eq('id', impresaCorrente.id);
-  impresaCorrente.colore_header = valore;
-}
-
-function applicaColoreHeader(colore) {
-  const hero = document.getElementById('dash-hero');
-  if (hero) hero.style.background = colore;
-  salvaColoreHeader(colore);
-}
-
-function applicaGradienteHeader(gradiente) {
-  const hero = document.getElementById('dash-hero');
-  if (hero) hero.style.background = gradiente;
-  salvaColoreHeader(gradiente);
-}
-
 // =====================
 // PIANO CARDS
 // =====================
@@ -5186,14 +5169,6 @@ async function calcolaPrioritaImpresa() {
   return { posUtente, totale: lista.length, posSenza, citta };
 }
 </script>
-<!-- MODAL MODIFICA PROFILO -->
-<div id="modal-profilo-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center">
-  <div style="position:relative;width:100%;height:100%;max-width:860px;margin:auto;display:flex;flex-direction:column">
-    <button onclick="chiudiModalProfilo()" style="position:absolute;top:12px;right:12px;z-index:10000;background:white;border:none;border-radius:50%;width:40px;height:40px;font-size:1.3rem;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
-    <iframe id="iframe-modifica-profilo" src="" style="width:100%;height:100%;border:none;border-radius:0"></iframe>
-  </div>
-</div>
-
 <div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
   <a href="modifica-profilo.html#card-disdetta" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
 </div>
@@ -5205,59 +5180,7 @@ window.addEventListener('pageshow', function(event) {
   }
 });
 
-// MODAL PUBBLICITA
-function apriModalPub() {
-  document.getElementById('modal-pub-overlay').classList.add('show');
-}
-function chiudiModalPub() {
-  document.getElementById('modal-pub-overlay').classList.remove('show');
-}
-async function avviaCheckoutPub() {
-  const citta = document.getElementById('pub-citta').value.trim();
-  const posizione = document.getElementById('pub-posizione').value;
-  if (!citta) { alert('Inserisci almeno una città.'); return; }
-  const btn = document.getElementById('pub-btn-paga');
-  btn.disabled = true; btn.textContent = '⏳ Attendere...';
-  try {
-    const res = await fetch('/.netlify/functions/crea-checkout-pubblicita', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ impresa_id: impresaCorrente.id, citta: [citta], posizione })
-    });
-    const { url } = await res.json();
-    window.location.href = url;
-  } catch (e) {
-    alert('Errore: ' + e.message);
-    btn.disabled = false; btn.textContent = '💳 Vai al pagamento';
-  }
-}
 </script>
-
-<!-- MODAL PUBBLICITA -->
-<div class="modal-overlay" id="modal-pub-overlay" onclick="if(event.target===this)chiudiModalPub()">
-  <div class="modal" style="max-width:420px">
-    <div class="modal-header">
-      <h2>🚀 Promuovi la tua impresa</h2>
-      <p>Scegli dove e come apparire su TrovaImpresa</p>
-    </div>
-    <div class="modal-body">
-      <div style="margin-bottom:18px">
-        <label style="display:block;font-weight:700;font-size:0.88rem;margin-bottom:6px;color:#333">Città</label>
-        <input id="pub-citta" type="text" placeholder="Es: Milano" style="width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:0.95rem;outline:none">
-      </div>
-      <div style="margin-bottom:24px">
-        <label style="display:block;font-weight:700;font-size:0.88rem;margin-bottom:6px;color:#333">Posizione annuncio</label>
-        <select id="pub-posizione" style="width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:0.95rem;outline:none;background:white">
-          <option value="homepage">Homepage</option>
-          <option value="categoria">Pagina categoria</option>
-          <option value="citta">Pagina città</option>
-        </select>
-      </div>
-      <button id="pub-btn-paga" onclick="avviaCheckoutPub()" style="width:100%;padding:13px;background:#FF6B35;color:white;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer">💳 Vai al pagamento</button>
-      <button onclick="chiudiModalPub()" style="width:100%;padding:11px;background:none;border:none;color:#888;font-size:0.9rem;cursor:pointer;margin-top:8px">Annulla</button>
-    </div>
-  </div>
-</div>
 
 <script>
 var sidebarMap = null;
@@ -5274,20 +5197,6 @@ var sidebarMap = null;
 function toggleSidebar() {
   document.getElementById('sidebar-el').classList.toggle('open');
   document.getElementById('sidebar-overlay').classList.toggle('open');
-}
-function apriModalProfilo() {
-  var overlay = document.getElementById('modal-profilo-overlay');
-  var iframe  = document.getElementById('iframe-modifica-profilo');
-  iframe.src  = 'modifica-profilo.html';
-  overlay.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-function chiudiModalProfilo() {
-  var overlay = document.getElementById('modal-profilo-overlay');
-  var iframe  = document.getElementById('iframe-modifica-profilo');
-  overlay.style.display = 'none';
-  iframe.src  = '';
-  document.body.style.overflow = '';
 }
 </script>
 <script>
