@@ -1288,38 +1288,6 @@
       <div id="lista-candidati"><div class="empty-state"><div class="empty-icon">🔍</div>Caricamento...</div></div>
     </div>
 
-    <!-- FOTO DEI LAVORI -->
-    <div class="section" id="sec-foto">
-      <div class="topbar">
-        <div class="topbar-title">📷 Foto dei lavori</div>
-      </div>
-
-      <div class="foto-limit-bar" id="foto-limit-bar">
-        <span style="font-size:1.3rem">📷</span>
-        <span id="foto-limit-testo">Caricamento...</span>
-      </div>
-
-      <div class="foto-upload-progress" id="foto-progress">⏳ Caricamento foto in corso...</div>
-
-      <div class="foto-upload-area" id="foto-upload-area" onclick="document.getElementById('foto-input').click()"
-           ondragover="fotoDragOver(event)" ondragleave="fotoDragLeave(event)" ondrop="fotoDrop(event)">
-        <input type="file" id="foto-input" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
-        <div class="foto-upload-icon">📤</div>
-        <div class="foto-upload-label">Clicca o trascina le foto qui</div>
-        <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
-      </div>
-
-      <div class="foto-grid" id="foto-grid"></div>
-    </div>
-
-    <!-- RECENSIONI -->
-    <div class="section" id="sec-recensioni">
-      <div class="topbar">
-        <div class="topbar-title">⭐ Le mie recensioni</div>
-      </div>
-      <div id="lista-recensioni"><div class="empty-state"><div class="empty-icon">⭐</div>Caricamento...</div></div>
-    </div>
-
     <!-- CERTIFICAZIONI -->
     <div class="section" id="sec-certificazioni">
       <div class="topbar">
@@ -2494,7 +2462,7 @@ function showSectionById(id, fromPopstate) {
 
 (function() {
   const hash = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','lavoro','candidati','foto','recensioni','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','lavoro','candidati','certificazioni','profilo'];
   if (hash && sezioniValide.includes(hash)) {
     history.replaceState({ section: hash }, '', '#' + hash);
   } else {
@@ -4696,7 +4664,7 @@ async function inizializza() {
 
   // Apri la sezione indicata dall'hash (se presente e valida)
   const hashIniziale = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','lavoro','candidati','foto','recensioni','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','lavoro','candidati','certificazioni','profilo'];
   if (hashIniziale && sezioniValide.includes(hashIniziale) && hashIniziale !== 'dashboard') {
     showSectionById(hashIniziale, true);
   }
@@ -4798,23 +4766,6 @@ async function caricaRecensioni() {
     .order('created_at', { ascending: false });
 
   document.getElementById('dash-stat-recensioni').textContent = data?.length || 0;
-
-  const container = document.getElementById('lista-recensioni');
-  if (!data?.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">⭐</div>Nessuna recensione ancora.</div>';
-    return;
-  }
-  container.innerHTML = data.map(r => `
-    <div style="background:white;border-radius:16px;padding:20px 24px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <strong>${r.nome_cliente}</strong>
-        <span style="color:#f4c02e">${'★'.repeat(r.voto)}${'☆'.repeat(5-r.voto)}</span>
-      </div>
-      ${r.lavoro_fatto ? `<div style="font-size:0.78rem;color:var(--light);margin-bottom:6px">${r.lavoro_fatto}</div>` : ''}
-      <div style="font-size:0.88rem;color:var(--mid)">${r.testo}</div>
-      <div style="font-size:0.75rem;color:var(--light);margin-top:8px">${new Date(r.created_at).toLocaleDateString('it-IT')}</div>
-    </div>
-  `).join('');
 }
 
 // PROFILO
@@ -5157,13 +5108,6 @@ async function eliminaFoto(nome) {
   await caricaFotoLavori();
 }
 
-function fotoDragOver(e) {
-  e.preventDefault();
-  document.getElementById('foto-upload-area').classList.add('dragover');
-}
-function fotoDragLeave(e) {
-  document.getElementById('foto-upload-area').classList.remove('dragover');
-}
 function fotoDrop(e) {
   e.preventDefault();
   ['foto-upload-area', 'foto-upload-area-dash'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('dragover'); });
