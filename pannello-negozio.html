@@ -928,6 +928,11 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
+        <div class="dash-quick-card" data-card-id="preventivi-ricevuti" onclick="showSection('preventivi', this)">
+          <div class="dash-quick-icon">📋</div>
+          <div class="dash-quick-label">Preventivi ricevuti</div>
+          <div class="dash-quick-sub">Richieste dai clienti</div>
+        </div>
         <div class="dash-quick-card" data-card-id="foto-lavori" onclick="showSection('foto', this)">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">I miei prodotti</div>
@@ -1182,91 +1187,6 @@
       <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
     </div>
 
-    <!-- OFFERTE DI LAVORO -->
-    <div class="section" id="sec-lavoro">
-      <div class="topbar">
-        <div class="topbar-title">💼 Offerte di lavoro</div>
-      </div>
-
-      <!-- Info piano -->
-      <div class="piano-info" id="piano-info-lavoro">
-        <span style="font-size:1.4rem">💡</span>
-        <div>Piano <strong id="piano-label">Free</strong>: puoi pubblicare <strong id="annunci-rimasti">1 annuncio</strong>. 
-        Passa al <strong><a href="info-premium.html" style="color:var(--arancio)">piano Premium</a></strong> per annunci illimitati e posizione in evidenza!</div>
-      </div>
-
-      <!-- Form nuovo annuncio -->
-      <div class="form-annuncio" id="form-annuncio">
-        <h3>➕ Pubblica nuovo annuncio</h3>
-        <div class="form-group">
-          <label>Titolo annuncio *</label>
-          <input type="text" id="ann-titolo" placeholder="Es. Cerco muratore esperienza 5+ anni">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Categoria / Ruolo *</label>
-            <select id="ann-categoria">
-              <option value="">— Seleziona —</option>
-              <option>Muratore</option>
-              <option>Elettricista</option>
-              <option>Idraulico</option>
-              <option>Carpentiere</option>
-              <option>Pittore/Imbianchino</option>
-              <option>Piastrellista</option>
-              <option>Operaio generico</option>
-              <option>Geometra</option>
-              <option>Ingegnere</option>
-              <option>Architetto</option>
-              <option>Gruista</option>
-              <option>Saldatore</option>
-              <option>Altro</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Tipo contratto *</label>
-            <select id="ann-contratto">
-              <option value="">— Seleziona —</option>
-              <option>Tempo indeterminato</option>
-              <option>Tempo determinato</option>
-              <option>Partita IVA</option>
-              <option>Stage/Apprendistato</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Città *</label>
-          <input type="text" id="ann-citta" placeholder="Es. Roma">
-        </div>
-        <div class="form-group">
-          <label>Descrizione del lavoro</label>
-          <textarea id="ann-descrizione" placeholder="Descrivi il lavoro, i requisiti richiesti, orari, ecc."></textarea>
-        </div>
-        <div>
-          <button class="btn-salva-annuncio" onclick="salvaAnnuncio()">💾 Pubblica annuncio</button>
-          <button class="btn-annulla-form" onclick="chiudiFormAnnuncio()">Annulla</button>
-        </div>
-      </div>
-
-      <!-- Bottone apri form -->
-      <div class="lavoro-topbar">
-        <button class="btn-nuovo-annuncio" id="btn-apri-form" onclick="apriFormAnnuncio()">
-          ➕ Pubblica annuncio
-        </button>
-      </div>
-
-      <div id="lista-annunci-lavoro">
-        <div class="empty-state"><div class="empty-icon">💼</div>Caricamento...</div>
-      </div>
-    </div>
-
-    <!-- CANDIDATI NELLA ZONA -->
-    <div class="section" id="sec-candidati">
-      <div class="topbar">
-        <div class="topbar-title">🔍 Candidati nella tua zona</div>
-      </div>
-      <div id="lista-candidati"><div class="empty-state"><div class="empty-icon">🔍</div>Caricamento...</div></div>
-    </div>
-
     <!-- FOTO DEI LAVORI -->
     <div class="section" id="sec-foto">
       <div class="topbar">
@@ -1289,14 +1209,6 @@
       </div>
 
       <div class="foto-grid" id="foto-grid"></div>
-    </div>
-
-    <!-- RECENSIONI -->
-    <div class="section" id="sec-recensioni">
-      <div class="topbar">
-        <div class="topbar-title">⭐ Le mie recensioni</div>
-      </div>
-      <div id="lista-recensioni"><div class="empty-state"><div class="empty-icon">⭐</div>Caricamento...</div></div>
     </div>
 
     <!-- PROFILO -->
@@ -2288,9 +2200,6 @@ async function inizializza() {
   document.getElementById('stat-rating').textContent = rating;
 
   await caricaPreventivi();
-  await caricaRecensioni();
-  await caricaAnnunciLavoro();
-  await caricaCandidatiZona();
   await caricaFotoLavori();
   await caricaNote();
   caricaProfilo();
