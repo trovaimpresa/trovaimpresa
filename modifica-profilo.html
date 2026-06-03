@@ -1088,13 +1088,7 @@
 
         showSuccess('✅ Profilo aggiornato con successo! Reindirizzamento in corso...');
         window.scrollTo(0, 0);
-        const tipoImpresa = (impresaData.tipo || '').toLowerCase();
-        const destinazionePannello =
-          tipoImpresa === 'professionista' ? 'pannello-professionisti.html' :
-          tipoImpresa === 'artigiano'      ? 'pannello-artigiano.html' :
-          tipoImpresa === 'negozio'        ? 'pannello-negozio.html' :
-                                             'pannello-impresa.html';
-        setTimeout(() => { window.location.href = destinazionePannello; }, 1500);
+        setTimeout(() => { window.location.href = pannelloPerTipo(); }, 1500);
 
       } catch (err) {
         console.error('Errore salvataggio:', err);
