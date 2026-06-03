@@ -867,6 +867,15 @@
     box-shadow:0 4px 12px rgba(124,58,237,0.3); transition:transform 0.15s;
   }
   #modal-personalizza-pannello .mpp-btn-save:hover { transform:translateY(-1px); }
+
+  /* === Certificazioni (copiato da pannello-artigiano) === */
+  .cert-item {
+    background:white; border-radius:14px; padding:16px 20px;
+    box-shadow:var(--shadow); border:1px solid var(--border);
+    margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .cert-nome { font-weight:700; font-size:0.92rem; color:var(--dark); }
+  .cert-meta { font-size:0.78rem; color:var(--light); margin-top:3px; }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="/css/mobile.css">
@@ -977,6 +986,10 @@
         <div class="dash-quick-card" data-card-id="recensioni" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
+        </div>
+        <div onclick="apriModalCertificazioni()" class="dash-quick-card" data-card-id="certificazioni" style="cursor:pointer;display:block;">
+          <div class="dash-quick-icon">📜</div>
+          <div class="dash-quick-label">Certificazioni</div>
         </div>
         <div id="card-visibile" class="dash-quick-card" data-card-id="visibile" style="cursor:pointer" onclick="apriModalVisibile()">
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
@@ -1313,6 +1326,9 @@
       </div>
       <div id="lista-recensioni"><div class="empty-state"><div class="empty-icon">⭐</div>Caricamento...</div></div>
     </div>
+
+    <!-- CERTIFICAZIONI -->
+    <div class="section" id="sec-certificazioni" style="display:none"></div>
 
     <!-- PROFILO -->
     <div class="section" id="sec-profilo">
@@ -5149,6 +5165,81 @@ async function salvaPersonalizzaPannello() {
   _persPannelloBannerTemp = null;
   chiudiModalPersonalizzaPannello();
 }
+
+/* --- Certificazioni (copiato da pannello-artigiano) --- */
+function apriModalCertificazioni() {
+  document.getElementById('modalCertificazioni').classList.add('show');
+  caricaCertificazioni();
+}
+function chiudiModalCertificazioni() {
+  document.getElementById('modalCertificazioni').classList.remove('show');
+}
+async function caricaCertificazioni() {
+  const { data } = await sb.from('imprese').select('certificazioni').eq('id', impresaCorrente.id).single();
+  const certs = data?.certificazioni || [];
+  impresaCorrente.certificazioni = certs;
+  renderCertificazioni(certs);
+}
+
+function renderCertificazioni(certs) {
+  const container = document.getElementById('lista-certificazioni');
+  if (!container) return;
+  if (!certs.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📜</div>Nessuna certificazione aggiunta.</div>';
+    return;
+  }
+  container.innerHTML = certs.map((c, i) => `
+    <div class="cert-item">
+      <div>
+        <div class="cert-nome">${c.nome}</div>
+        <div class="cert-meta">${c.scadenza ? '📅 Scade: ' + c.scadenza : ''}${c.file_url ? (c.scadenza ? ' · ' : '') + '<a href="' + c.file_url + '" target="_blank" style="color:var(--verde);font-weight:700;">📎 Visualizza file</a>' : ''}</div>
+      </div>
+      <button class="btn-az arancio" style="padding:10px 16px;font-size:0.82rem;" onclick="eliminaCertificazione(${i})">🗑️ Rimuovi</button>
+    </div>
+  `).join('');
+}
+
+async function aggiungiCertificazione() {
+  const inputEl = document.getElementById('cert-search');
+  const nomeInput = inputEl.value.trim();
+  const cert = (window.CERTIFICAZIONI_EDILIZIA || []).find(c => c.nome === nomeInput);
+  if (!cert) { alert("Seleziona una certificazione dall'elenco."); return; }
+  const scadenza = document.getElementById('cert-scadenza-input').value || null;
+  const fileInput = document.getElementById('cert-file-input');
+  const file = fileInput.files[0];
+  let file_url = null;
+
+  if (file) {
+    const userId = impresaCorrente.user_id;
+    const ext = file.name.split('.').pop();
+    const path = `${userId}/${Date.now()}-${cert.nome.replace(/\s+/g,'_').substring(0,40)}.${ext}`;
+    const { error: upErr } = await sb.storage.from('certificazioni').upload(path, file, { upsert: false, contentType: file.type });
+    if (upErr) { alert('Errore caricamento file: ' + upErr.message); return; }
+    const { data: urlData } = sb.storage.from('certificazioni').getPublicUrl(path);
+    file_url = urlData.publicUrl;
+  }
+
+  const nuovaCert = { id: cert.id, nome: cert.nome, categoria: cert.categoria, scadenza, file_url };
+  const certs = [...(impresaCorrente.certificazioni || []), nuovaCert];
+  const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
+  if (error) { alert('Errore salvataggio: ' + error.message); return; }
+
+  impresaCorrente.certificazioni = certs;
+  renderCertificazioni(certs);
+  inputEl.value = '';
+  document.getElementById('cert-scadenza-input').value = '';
+  fileInput.value = '';
+}
+
+async function eliminaCertificazione(index) {
+  if (!confirm('Rimuovere questa certificazione?')) return;
+  const certs = [...(impresaCorrente.certificazioni || [])];
+  certs.splice(index, 1);
+  const { error } = await sb.from('imprese').update({ certificazioni: certs }).eq('id', impresaCorrente.id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  impresaCorrente.certificazioni = certs;
+  renderCertificazioni(certs);
+}
 </script>
 
 <!-- MODAL RISOLUZIONE PROBLEMI (copiato da pannello-artigiano) -->
@@ -5265,6 +5356,42 @@ async function salvaPersonalizzaPannello() {
     </div>
   </div>
 </div>
+<!-- MODAL CERTIFICAZIONI (copiato da pannello-artigiano) -->
+<div class="modal-ai-overlay" id="modalCertificazioni" onclick="if(event.target===this)chiudiModalCertificazioni()">
+  <div class="modal-ai" style="max-width:760px">
+    <div class="modal-ai-header">
+      <div>
+        <h2>📋 Certificazioni</h2>
+        <p>Le tue certificazioni professionali</p>
+      </div>
+      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
+      <button class="modal-ai-close" onclick="chiudiModalCertificazioni()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Aggiungi certificazione</div>
+        <div class="form-group">
+          <label>Nome certificazione *</label>
+          <input list="cert-list" id="cert-search" placeholder="Cerca certificazione...">
+          <datalist id="cert-list"></datalist>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Scadenza (opzionale)</label>
+            <input type="date" id="cert-scadenza-input">
+          </div>
+          <div class="form-group">
+            <label>File (PDF/immagine)</label>
+            <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
+          </div>
+        </div>
+        <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
+      </div>
+      <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL MODIFICA PROFILO -->
 <div id="modal-profilo-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center">
   <div style="position:relative;width:100%;height:100%;max-width:860px;margin:auto;display:flex;flex-direction:column">
@@ -5297,6 +5424,16 @@ var sidebarMap = null;
 })();
 </script>
 <script src="/js/modal-fullscreen.js" defer></script>
+<script src="/js/certificazioni-edilizia.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var dl = document.getElementById('cert-list');
+  if (!dl || !window.CERTIFICAZIONI_EDILIZIA) return;
+  dl.innerHTML = window.CERTIFICAZIONI_EDILIZIA
+    .map(function (c) { return '<option value="' + c.nome + '">' + c.categoria + ' — ' + c.nome + '</option>'; })
+    .join('');
+});
+</script>
 </body>
 <script>
 function toggleSidebar() {
