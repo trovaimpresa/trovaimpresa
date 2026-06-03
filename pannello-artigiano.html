@@ -1197,9 +1197,6 @@
       </div>
     </div>
 
-    <!-- PREVENTIVI (contenuto spostato in #modalPreventivi) -->
-    <div class="section" id="sec-preventivi" style="display:none"></div>
-
     <!-- OFFERTE DI LAVORO -->
     <div class="section" id="sec-lavoro">
       <div class="topbar">
@@ -1304,9 +1301,6 @@
 
       <div class="foto-grid" id="foto-grid"></div>
     </div>
-
-    <!-- CERTIFICAZIONI (contenuto spostato in #modalCertificazioni) -->
-    <div class="section" id="sec-certificazioni" style="display:none"></div>
 
     <!-- PROFILO -->
     <div class="section" id="sec-profilo">
@@ -2541,7 +2535,7 @@ function showSectionById(id, fromPopstate) {
 // Inizializzazione: se c'è un hash valido nell'URL, apri quella sezione
 (function() {
   const hash = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','lavoro','candidati','foto','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','lavoro','candidati','foto','profilo'];
   if (hash && sezioniValide.includes(hash)) {
     history.replaceState({ section: hash }, '', '#' + hash);
   } else {
@@ -2687,7 +2681,7 @@ async function inizializza() {
 
   // Apri la sezione indicata dall'hash (se presente e valida)
   const hashIniziale = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','lavoro','candidati','foto','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','lavoro','candidati','foto','profilo'];
   if (hashIniziale && sezioniValide.includes(hashIniziale) && hashIniziale !== 'dashboard') {
     showSectionById(hashIniziale, true);
   }
