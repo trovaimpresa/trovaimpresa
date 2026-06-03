@@ -1207,87 +1207,6 @@
       <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
     </div>
 
-    <!-- OFFERTE DI LAVORO -->
-    <div class="section" id="sec-lavoro">
-      <div class="topbar">
-        <div class="topbar-title">💼 Offerte di lavoro</div>
-      </div>
-
-      <!-- Contatore offerte del mese -->
-      <div id="contatore-offerte-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
-
-      <!-- Form nuovo annuncio -->
-      <div class="form-annuncio" id="form-annuncio">
-        <h3>➕ Pubblica nuovo annuncio</h3>
-        <div class="form-group">
-          <label>Titolo annuncio *</label>
-          <input type="text" id="ann-titolo" placeholder="Es. Cerco muratore esperienza 5+ anni">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Categoria / Ruolo *</label>
-            <select id="ann-categoria">
-              <option value="">— Seleziona —</option>
-              <option>Muratore</option>
-              <option>Elettricista</option>
-              <option>Idraulico</option>
-              <option>Carpentiere</option>
-              <option>Pittore/Imbianchino</option>
-              <option>Piastrellista</option>
-              <option>Operaio generico</option>
-              <option>Geometra</option>
-              <option>Ingegnere</option>
-              <option>Architetto</option>
-              <option>Gruista</option>
-              <option>Saldatore</option>
-              <option>Altro</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Tipo contratto *</label>
-            <select id="ann-contratto">
-              <option value="">— Seleziona —</option>
-              <option>Tempo indeterminato</option>
-              <option>Tempo determinato</option>
-              <option>Partita IVA</option>
-              <option>Stage/Apprendistato</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Città *</label>
-          <input type="text" id="ann-citta" placeholder="Es. Roma">
-        </div>
-        <div class="form-group">
-          <label>Descrizione del lavoro</label>
-          <textarea id="ann-descrizione" placeholder="Descrivi il lavoro, i requisiti richiesti, orari, ecc."></textarea>
-        </div>
-        <div>
-          <button class="btn-salva-annuncio" onclick="salvaAnnuncio()">💾 Pubblica annuncio</button>
-          <button class="btn-annulla-form" onclick="chiudiFormAnnuncio()">Annulla</button>
-        </div>
-      </div>
-
-      <!-- Bottone apri form -->
-      <div class="lavoro-topbar">
-        <button class="btn-nuovo-annuncio" id="btn-apri-form" onclick="apriFormAnnuncio()">
-          ➕ Pubblica annuncio
-        </button>
-      </div>
-
-      <div id="lista-annunci-lavoro">
-        <div class="empty-state"><div class="empty-icon">💼</div>Caricamento...</div>
-      </div>
-    </div>
-
-    <!-- CANDIDATI NELLA ZONA -->
-    <div class="section" id="sec-candidati">
-      <div class="topbar">
-        <div class="topbar-title">🔍 Candidati nella tua zona</div>
-      </div>
-      <div id="lista-candidati"><div class="empty-state"><div class="empty-icon">🔍</div>Caricamento...</div></div>
-    </div>
-
     <!-- CERTIFICAZIONI -->
     <div class="section" id="sec-certificazioni">
       <div class="topbar">
@@ -2462,7 +2381,7 @@ function showSectionById(id, fromPopstate) {
 
 (function() {
   const hash = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','lavoro','candidati','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','certificazioni','profilo'];
   if (hash && sezioniValide.includes(hash)) {
     history.replaceState({ section: hash }, '', '#' + hash);
   } else {
@@ -4590,8 +4509,6 @@ async function inizializza() {
 
   await caricaPreventivi();
   await caricaRecensioni();
-  await caricaAnnunciLavoro();
-  await caricaCandidatiZona();
   await caricaFotoLavori();
   await caricaCertificazioni();
   await caricaCantieri();
@@ -4664,7 +4581,7 @@ async function inizializza() {
 
   // Apri la sezione indicata dall'hash (se presente e valida)
   const hashIniziale = window.location.hash.replace('#', '');
-  const sezioniValide = ['dashboard','lavoro','candidati','certificazioni','profilo'];
+  const sezioniValide = ['dashboard','certificazioni','profilo'];
   if (hashIniziale && sezioniValide.includes(hashIniziale) && hashIniziale !== 'dashboard') {
     showSectionById(hashIniziale, true);
   }
