@@ -917,7 +917,7 @@
       <!-- HERO HEADER -->
       <div class="dash-hero" id="dash-hero">
         <div>
-          <div class="dash-welcome">Pannello professionista</div>
+          <div class="dash-welcome" id="dash-welcome">Pannello professionista</div>
           <div class="dash-nome" id="dash-nome-impresa">La tua impresa</div>
           <div class="dash-meta">
             <span class="dash-rating-badge" id="dash-rating-badge">⭐ —</span>
@@ -2353,6 +2353,42 @@ async function inizializza() {
         }, 0);
       }
     }
+  }
+
+  // === Personalizzazione pannello salvata (copiato da pannello-artigiano; escluso il blocco logo-sidebar e card_ordine/Sortable) ===
+  const colorePers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_header;
+  if (colorePers) {
+    const heroP = document.getElementById('dash-hero');
+    if (heroP) heroP.style.background = `linear-gradient(135deg, ${colorePers}, color-mix(in srgb, ${colorePers} 60%, black))`;
+  }
+  const sfondoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_sfondo;
+  if (sfondoPers) {
+    document.body.style.background = sfondoPers;
+  }
+  const nomePers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.nome_pannello;
+  if (nomePers) {
+    const welcomeNomeEl = document.getElementById('dash-welcome');
+    if (welcomeNomeEl) welcomeNomeEl.textContent = nomePers;
+  }
+  const fontPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.font_pannello;
+  if (fontPers) {
+    applicaFontHero(fontPers);
+  }
+  const colTestoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.colore_testo_header;
+  if (colTestoPers) {
+    applicaColoreTestoHero(colTestoPers);
+  }
+  const sizeTestoPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.size_testo_header;
+  if (sizeTestoPers) {
+    applicaSizeTestoHero(sizeTestoPers);
+  }
+  const bannerPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.banner_url;
+  if (bannerPers) {
+    applicaBannerHero(bannerPers);
+  }
+  const temaPers = impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.tema_scuro;
+  if (temaPers === true) {
+    document.body.classList.add('theme-dark');
   }
 
   // Stat rating (condiviso)
