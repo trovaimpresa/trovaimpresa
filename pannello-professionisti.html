@@ -967,7 +967,7 @@
           <div class="dash-quick-label">I miei servizi</div>
           <div class="dash-quick-sub">Gestisci i tuoi servizi</div>
         </div>
-        <div class="dash-quick-card" onclick="showSectionById('recensioni')">
+        <div class="dash-quick-card" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">⭐</div>
           <div class="dash-quick-label">Recensioni</div>
           <div class="dash-quick-sub">Cosa dicono i clienti</div>
@@ -1351,14 +1351,6 @@
       </div>
 
       <div class="foto-grid" id="foto-grid"></div>
-    </div>
-
-    <!-- RECENSIONI -->
-    <div class="section" id="sec-recensioni">
-      <div class="topbar">
-        <div class="topbar-title">⭐ Le mie recensioni</div>
-      </div>
-      <div id="lista-recensioni"><div class="empty-state"><div class="empty-icon">⭐</div>Caricamento...</div></div>
     </div>
 
     <!-- CERTIFICAZIONI -->
@@ -2623,23 +2615,6 @@ async function caricaRecensioni() {
     .order('created_at', { ascending: false });
 
   document.getElementById('dash-stat-recensioni').textContent = data?.length || 0;
-
-  const container = document.getElementById('lista-recensioni');
-  if (!data?.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">⭐</div>Nessuna recensione ancora.</div>';
-    return;
-  }
-  container.innerHTML = data.map(r => `
-    <div style="background:white;border-radius:16px;padding:20px 24px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-        <strong>${r.nome_cliente}</strong>
-        <span style="color:#f4c02e">${'★'.repeat(r.voto)}${'☆'.repeat(5-r.voto)}</span>
-      </div>
-      ${r.lavoro_fatto ? `<div style="font-size:0.78rem;color:var(--light);margin-bottom:6px">${r.lavoro_fatto}</div>` : ''}
-      <div style="font-size:0.88rem;color:var(--mid)">${r.testo}</div>
-      <div style="font-size:0.75rem;color:var(--light);margin-top:8px">${new Date(r.created_at).toLocaleDateString('it-IT')}</div>
-    </div>
-  `).join('');
 }
 
 // PROFILO
