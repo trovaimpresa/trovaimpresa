@@ -253,52 +253,6 @@
   .mfa-alert-error { background:#fff0f0; border:1px solid #ffcccc; color:#cc0000; }
   .mfa-alert-success { background:var(--verde3); border:1px solid #a8d5b5; color:var(--verde2); }
 
-  /* === LAVORO SECTION === */
-  .lavoro-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
-  .btn-nuovo-annuncio {
-    padding:10px 20px; background:var(--arancio); color:white;
-    border:none; border-radius:12px; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:0.88rem; cursor:pointer; transition:all 0.15s;
-    display:flex; align-items:center; gap:8px;
-  }
-  .btn-nuovo-annuncio:hover { background:var(--arancio2); transform:translateY(-1px); }
-
-  .lavoro-card {
-    background:white; border-radius:16px; padding:22px 24px;
-    box-shadow:var(--shadow); border:1px solid var(--border);
-    margin-bottom:14px; transition:all 0.2s;
-  }
-  .lavoro-card-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
-  .lavoro-titolo { font-family:'Playfair Display',serif; font-size:1.05rem; margin-bottom:4px; }
-  .lavoro-meta { display:flex; gap:14px; flex-wrap:wrap; font-size:0.8rem; color:var(--mid); margin-bottom:10px; }
-  .lavoro-desc { font-size:0.85rem; color:var(--mid); line-height:1.5; }
-  .lavoro-badge {
-    padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; white-space:nowrap;
-  }
-  .badge-attivo { background:var(--verde3); color:var(--verde2); }
-  .badge-disattivo { background:#f0f0f0; color:#888; }
-  .lavoro-actions { display:flex; gap:8px; margin-top:14px; }
-  .btn-toggle-annuncio {
-    padding:7px 16px; border-radius:10px; border:1.5px solid var(--border);
-    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
-    font-size:0.8rem; cursor:pointer; color:var(--mid); transition:all 0.15s;
-  }
-  .btn-toggle-annuncio:hover { border-color:var(--verde); color:var(--verde); }
-  .btn-elimina-annuncio {
-    padding:7px 16px; border-radius:10px; border:1.5px solid #fecaca;
-    background:white; font-family:'DM Sans',sans-serif; font-weight:700;
-    font-size:0.8rem; cursor:pointer; color:var(--rosso); transition:all 0.15s;
-  }
-  .btn-elimina-annuncio:hover { background:var(--rosso3); }
-
-  /* FORM NUOVO ANNUNCIO */
-  .form-annuncio {
-    background:white; border-radius:16px; padding:28px;
-    box-shadow:var(--shadow); border:1px solid var(--border);
-    margin-bottom:24px; display:none;
-  }
-  .form-annuncio.show { display:block; }
-  .form-annuncio h3 { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:20px; }
   .form-group { margin-bottom:16px; }
   .form-group label { display:block; font-size:0.75rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
   .form-group input, .form-group select, .form-group textarea {
@@ -320,35 +274,6 @@
     border:1.5px solid var(--border); border-radius:12px; font-family:'DM Sans',sans-serif;
     font-weight:700; font-size:0.9rem; cursor:pointer; margin-left:10px;
   }
-
-  /* INFO PIANO */
-  .piano-info {
-    background:linear-gradient(135deg,var(--arancio3),#fff);
-    border:1.5px solid #fdd5b8; border-radius:14px; padding:16px 20px;
-    font-size:0.85rem; color:var(--mid); margin-bottom:20px;
-    display:flex; align-items:center; gap:12px;
-  }
-  .piano-info strong { color:var(--arancio); }
-
-  /* === CANDIDATI SEZIONE === */
-  .candidato-card {
-    background:white; border-radius:16px; padding:22px 24px;
-    box-shadow:var(--shadow); border:1px solid var(--border);
-    margin-bottom:14px; transition:all 0.2s;
-  }
-  .candidato-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.1); transform:translateY(-1px); }
-  .candidato-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
-  .candidato-nome { font-family:'Playfair Display',serif; font-size:1.05rem; }
-  .candidato-livello-badge { padding:4px 12px; border-radius:20px; font-size:0.72rem; font-weight:800; background:var(--verde3); color:var(--verde2); }
-  .candidato-info { display:flex; gap:12px; flex-wrap:wrap; font-size:0.82rem; color:var(--mid); margin-bottom:12px; }
-  .candidato-bio { font-size:0.85rem; color:var(--mid); line-height:1.5; margin-bottom:12px; }
-  .candidato-contatti { display:flex; gap:12px; flex-wrap:wrap; }
-  .btn-contatta {
-    padding:8px 16px; background:var(--arancio); color:white;
-    border:none; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif;
-    font-weight:700; font-size:0.8rem; transition:all 0.15s;
-  }
-  .btn-contatta:hover { background:var(--arancio2); }
 
   @media(max-width:768px){
     .sidebar { transform:translateX(-100%); }
@@ -2475,49 +2400,6 @@ async function caricaPreventivi() {
   `).join('');
 }
 
-// CARICA CANDIDATI NELLA ZONA
-async function caricaCandidatiZona() {
-  if (!impresaCorrente.citta) {
-    document.getElementById('lista-candidati').innerHTML = '<div class="empty-state"><div class="empty-icon">📍</div>Nessuna città impostata nel profilo.</div>';
-    return;
-  }
-
-  const { data } = await sb.from('candidati_lavoro').select('*')
-    .ilike('citta', impresaCorrente.citta)
-    .order('created_at', { ascending: false });
-
-  const container = document.getElementById('lista-candidati');
-  if (!data?.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div>Nessun candidato nella tua zona (${impresaCorrente.citta}).<br><small>I candidati appariranno qui man mano che si registrano!</small></div>`;
-    return;
-  }
-
-  container.innerHTML = `
-    <div style="background:#e8f5ee;border-radius:14px;padding:16px 20px;margin-bottom:20px;font-size:0.85rem;color:var(--mid)">
-      <span style="font-weight:700;color:var(--verde)">📍 ${data.length} candidato${data.length > 1 ? 'i' : ''} trovato${data.length > 1 ? 'i' : ''}</span> nella tua zona (${impresaCorrente.citta})
-    </div>
-  ` + data.map(c => `
-    <div class="candidato-card">
-      <div class="candidato-header">
-        <div class="candidato-nome">👤 ${c.nome} ${c.cognome}</div>
-        <span class="candidato-livello-badge">${c.livello}</span>
-      </div>
-      <div class="candidato-info">
-        <span>🔧 ${c.mestiere}</span>
-        <span>📍 ${c.citta}</span>
-        ${c.eta ? `<span>🎂 ${c.eta} anni</span>` : ''}
-        ${c.sesso ? `<span>👥 ${c.sesso}</span>` : ''}
-      </div>
-      ${c.descrizione ? `<div class="candidato-bio">${c.descrizione.substring(0, 200)}${c.descrizione.length > 200 ? '...' : ''}</div>` : ''}
-      <div class="candidato-contatti">
-        ${c.telefono ? `<a href="tel:${c.telefono}" class="btn-contatta">☎️ Chiama</a>` : ''}
-        ${c.email ? `<a href="mailto:${c.email}" class="btn-contatta">📧 Email</a>` : ''}
-        ${c.telefono ? `<a href="https://wa.me/${c.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-contatta">💬 WhatsApp</a>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
 // CARICA RECENSIONI
 async function caricaRecensioni() {
   const { data } = await sb.from('feedback_clienti').select('*')
@@ -2579,88 +2461,6 @@ async function salvaMestieri() {
   msg.textContent = '✅ Salvato!';
   msg.style.display = 'inline';
   setTimeout(() => { msg.style.display = 'none'; }, 2000);
-}
-
-// =====================
-// OFFERTE DI LAVORO
-// =====================
-let annunciLavoro = [];
-
-async function caricaAnnunciLavoro() {
-  const { data } = await sb.from('offerte_lavoro').select('*')
-    .eq('impresa_id', impresaCorrente.id)
-    .order('created_at', { ascending: false });
-
-  annunciLavoro = data || [];
-  const isPremium = impresaCorrente.piano === 'premium';
-  const maxAnnunci = isPremium ? Infinity : 1;
-  const attivi = annunciLavoro.filter(a => a.attiva).length;
-
-  // Aggiorna badge sidebar
-  if (attivi > 0) {
-    document.getElementById('badge-lavoro').textContent = attivi;
-    document.getElementById('badge-lavoro').style.display = '';
-  }
-
-  // Aggiorna info piano
-  document.getElementById('piano-label').textContent = impresaCorrente.piano === 'premium' ? '💎 Premium' : 'Free';
-  // Aggiorna dashboard piano
-  const dashLabel = document.getElementById('piano-dashboard-label');
-  if (dashLabel) {
-    dashLabel.textContent = impresaCorrente.piano === 'premium' ? 'Premium 👑' : 'Free';
-    dashLabel.style.color = impresaCorrente.piano === 'premium' ? '#7c3aed' : '#2a7a4b';
-  }
-  if (isPremium) {
-    document.getElementById('annunci-rimasti').textContent = 'annunci illimitati';
-    document.getElementById('piano-info-lavoro').style.background = 'linear-gradient(135deg,var(--verde3),#fff)';
-    document.getElementById('piano-info-lavoro').style.borderColor = '#a8d5b5';
-  } else {
-    const rimasti = Math.max(0, maxAnnunci - attivi);
-    document.getElementById('annunci-rimasti').textContent = rimasti > 0 ? `${rimasti} annuncio disponibile` : '0 annunci disponibili (limite raggiunto)';
-  }
-
-  // Mostra/nascondi bottone
-  const pubbPossibile = isPremium || attivi < 1;
-  document.getElementById('btn-apri-form').style.display = pubbPossibile ? '' : 'none';
-
-  mostraAnnunciLavoro();
-}
-
-function mostraAnnunciLavoro() {
-  const container = document.getElementById('lista-annunci-lavoro');
-  if (!annunciLavoro.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">💼</div>
-        <div>Nessun annuncio pubblicato ancora.</div>
-        <div style="margin-top:8px;font-size:0.85rem">Clicca <strong>"Pubblica annuncio"</strong> per iniziare!</div>
-      </div>`;
-    return;
-  }
-
-  container.innerHTML = annunciLavoro.map(a => `
-    <div class="lavoro-card">
-      <div class="lavoro-card-header">
-        <div>
-          <div class="lavoro-titolo">${a.titolo}</div>
-        </div>
-        <span class="lavoro-badge ${a.attiva ? 'badge-attivo' : 'badge-disattivo'}">${a.attiva ? '✅ Attivo' : '⏸ Disattivo'}</span>
-      </div>
-      <div class="lavoro-meta">
-        ${a.categoria ? `<span>🔧 ${a.categoria}</span>` : ''}
-        ${a.citta ? `<span>📍 ${a.citta}</span>` : ''}
-        ${a.tipo_contratto ? `<span>📋 ${a.tipo_contratto}</span>` : ''}
-        <span>📅 ${new Date(a.created_at).toLocaleDateString('it-IT')}</span>
-      </div>
-      ${a.descrizione ? `<div class="lavoro-desc">${a.descrizione.substring(0,180)}${a.descrizione.length>180?'...':''}</div>` : ''}
-      <div class="lavoro-actions">
-        <button class="btn-toggle-annuncio" onclick="toggleAnnuncio('${a.id}', ${a.attiva})">
-          ${a.attiva ? '⏸ Disattiva' : '▶️ Riattiva'}
-        </button>
-        <button class="btn-elimina-annuncio" onclick="eliminaAnnuncio('${a.id}')">🗑️ Elimina</button>
-      </div>
-    </div>
-  `).join('');
 }
 
 async function impostaPiano(piano) {
@@ -2767,74 +2567,6 @@ function applicaGradienteHeader(gradiente) {
   const hero = document.getElementById('dash-hero');
   if (hero) hero.style.background = gradiente;
   salvaColoreHeader(gradiente);
-}
-
-function apriFormAnnuncio() {
-  document.getElementById('form-annuncio').classList.add('show');
-  document.getElementById('btn-apri-form').style.display = 'none';
-  // Pre-compila città
-  document.getElementById('ann-citta').value = impresaCorrente.citta || '';
-  document.getElementById('ann-titolo').focus();
-}
-
-function chiudiFormAnnuncio() {
-  document.getElementById('form-annuncio').classList.remove('show');
-  document.getElementById('btn-apri-form').style.display = '';
-  // Reset form
-  document.getElementById('ann-titolo').value = '';
-  document.getElementById('ann-categoria').value = '';
-  document.getElementById('ann-contratto').value = '';
-  document.getElementById('ann-descrizione').value = '';
-}
-
-async function salvaAnnuncio() {
-  const titolo = document.getElementById('ann-titolo').value.trim();
-  const categoria = document.getElementById('ann-categoria').value;
-  const contratto = document.getElementById('ann-contratto').value;
-  const citta = document.getElementById('ann-citta').value.trim();
-  const descrizione = document.getElementById('ann-descrizione').value.trim();
-
-  if (!titolo || !categoria || !contratto || !citta) {
-    alert('Compila tutti i campi obbligatori (*)');
-    return;
-  }
-
-  const btn = document.querySelector('.btn-salva-annuncio');
-  btn.textContent = '⏳ Pubblicazione...';
-  btn.disabled = true;
-
-  const { error } = await sb.from('offerte_lavoro').insert({
-    impresa_id: impresaCorrente.id,
-    titolo,
-    categoria,
-    tipo_contratto: contratto,
-    citta,
-    descrizione,
-    attiva: true
-  });
-
-  if (error) {
-    alert('Errore nella pubblicazione. Riprova.');
-    btn.textContent = '💾 Pubblica annuncio';
-    btn.disabled = false;
-    return;
-  }
-
-  btn.textContent = '💾 Pubblica annuncio';
-  btn.disabled = false;
-  chiudiFormAnnuncio();
-  await caricaAnnunciLavoro();
-}
-
-async function toggleAnnuncio(id, attivaCorrente) {
-  await sb.from('offerte_lavoro').update({ attiva: !attivaCorrente }).eq('id', id);
-  await caricaAnnunciLavoro();
-}
-
-async function eliminaAnnuncio(id) {
-  if (!confirm('Sei sicuro di voler eliminare questo annuncio?')) return;
-  await sb.from('offerte_lavoro').delete().eq('id', id);
-  await caricaAnnunciLavoro();
 }
 
 // =====================
