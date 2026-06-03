@@ -962,7 +962,7 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" onclick="showSectionById('foto')">
+        <div class="dash-quick-card" onclick="showSection('foto', this)">
           <div class="dash-quick-icon">📋</div>
           <div class="dash-quick-label">I miei servizi</div>
           <div class="dash-quick-sub">Gestisci i tuoi servizi</div>
@@ -1017,7 +1017,7 @@
           <div class="dash-quick-icon">🔝</div>
           <div class="dash-quick-label">Priorità nei risultati</div>
         </div>
-        <div class="dash-quick-card" data-card-id="preventivi-illimitati" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer;position:relative">
+        <div class="dash-quick-card" data-card-id="preventivi-illimitati" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="showSection('preventivi', this)">
           <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Richiesta di preventivo</div>
