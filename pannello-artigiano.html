@@ -2552,7 +2552,9 @@ function showSectionById(id, fromPopstate) {
 
 window.onpopstate = function(e) {
   if (e.state && e.state.section) {
-    showSectionById(e.state.section, true);
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const sec = document.getElementById('sec-' + e.state.section);
+    if (sec) sec.classList.add('active');
   } else {
     window.location.href = 'index.html';
   }
