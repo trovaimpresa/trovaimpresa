@@ -513,13 +513,16 @@ sc.auth.onAuthStateChange((event, session) => { sessioneUtente = session; });
 
 function formattaMestiere(s){if(!s)return '';if(s==='amministratore_condominio')return 'Amministratore di condominio';const t=String(s).replace(/_/g,' ');return t.charAt(0).toUpperCase()+t.slice(1);}
 
+const TIPO_NEGOZIO_LABEL={materiali_edili:'Materiali edili',ferramenta:'Ferramenta',termoidraulica:'Termoidraulica',elettrico:'Elettrico',ceramiche:'Ceramiche e bagno',pavimenti:'Pavimenti e rivestimenti',colorificio:'Colorificio',legname:'Legname',infissi_serramenti:'Infissi e serramenti',attrezzature_edili:'Attrezzature edili',noleggio_attrezzature:'Noleggio attrezzature',isolanti_impermeabilizzanti:'Isolanti e impermeabilizzanti',arredo_bagno:'Arredo bagno',climatizzazione_caldaie:'Climatizzazione / Caldaie',stufe_camini:'Stufe e camini',agenzia_immobiliare:'Agenzia immobiliare'};
+function formattaTipoNegozio(slug){if(!slug)return '';return TIPO_NEGOZIO_LABEL[slug]||slug;}
+
 async function caricaProfilo(id){
   try{
     const r=await fetch(`${SU}/rest/v1/imprese?id=eq.${id}&select=*&limit=1`,{headers:{'apikey':SK}});
     const data=await r.json();if(!data||!data.length)return;const d=data[0];window._pianoImpresa=(d.piano||'free').toLowerCase();
     const nome=d.nome||'';
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
-    if(d.tipo){const tipoFmt='🔧 '+d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase();const mestieriArr=Array.isArray(d.mestieri)?d.mestieri.filter(Boolean):[];document.getElementById('profile-tipo-badge').textContent=mestieriArr.length?tipoFmt+' • '+mestieriArr.map(formattaMestiere).join(' · '):tipoFmt;}
+    if(d.tipo){const categoria=d.tipo==='negozio'?(formattaTipoNegozio(d.tipo_negozio)||'Negozio'):(d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase());const tipoFmt='🔧 '+categoria;const mestieriArr=Array.isArray(d.mestieri)?d.mestieri.filter(Boolean):[];document.getElementById('profile-tipo-badge').textContent=mestieriArr.length?tipoFmt+' • '+mestieriArr.map(formattaMestiere).join(' · '):tipoFmt;}
     if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
     if(d.colore_header){const h=document.getElementById('hero-section');if(!d.colore_header.includes('gradient'))h.style.backgroundImage='none';h.style.background=d.colore_header}
     if(d.foto_copertina_url){document.getElementById('cover-foto-img').src=d.foto_copertina_url;document.getElementById('cover-foto').style.display='block'}
