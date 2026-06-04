@@ -133,17 +133,24 @@
 
     <div class="filter-group">
       <div class="filter-label">Specializzazione</div>
-      <div class="mestieri-scroll">
-        <div class="chip all-chip" data-mestiere="tutti" onclick="selectMestiere(this)">🏗️ Tutte</div>
-        <div class="chip" data-mestiere="Ristrutturazione completa" onclick="selectMestiere(this)">🏠 Ristrutturazione completa</div>
-        <div class="chip" data-mestiere="Muratura" onclick="selectMestiere(this)">🧱 Muratura</div>
-        <div class="chip" data-mestiere="Carpenteria" onclick="selectMestiere(this)">🪵 Carpenteria</div>
-        <div class="chip" data-mestiere="Coperture e tetti" onclick="selectMestiere(this)">🏠 Coperture e tetti</div>
-        <div class="chip" data-mestiere="Impermeabilizzazione" onclick="selectMestiere(this)">💧 Impermeabilizzazione</div>
-        <div class="chip" data-mestiere="Demolizioni" onclick="selectMestiere(this)">🔨 Demolizioni</div>
-        <div class="chip" data-mestiere="Scavi e movimenti terra" onclick="selectMestiere(this)">⛏️ Scavi e movimenti terra</div>
-        <div class="chip" data-mestiere="Costruzione nuovo" onclick="selectMestiere(this)">🏗️ Costruzione nuovo</div>
-      </div>
+      <select onchange="selectMestiere(this)" style="width:100%;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
+        <option value="tutti">Tutti i mestieri</option>
+        <option value="Costruzione nuova">Costruzione nuova</option>
+        <option value="Ristrutturazione">Ristrutturazione</option>
+        <option value="Muratura e strutture">Muratura e strutture</option>
+        <option value="Coperture e tetti">Coperture e tetti</option>
+        <option value="Impermeabilizzazione">Impermeabilizzazione</option>
+        <option value="Ponteggi">Ponteggi</option>
+        <option value="Demolizione">Demolizione</option>
+        <option value="Movimento terra">Movimento terra</option>
+        <option value="Fondazioni">Fondazioni</option>
+        <option value="Facciate e cappotto termico">Facciate e cappotto termico</option>
+        <option value="Prefabbricati in calcestruzzo">Prefabbricati in calcestruzzo</option>
+        <option value="Edilizia commerciale">Edilizia commerciale</option>
+        <option value="Manutenzione edifici">Manutenzione edifici</option>
+        <option value="Costruzione industriale">Costruzione industriale</option>
+        <option value="Cottimisti">Cottimisti</option>
+      </select>
     </div>
 
     <div class="filter-group">
@@ -231,7 +238,7 @@
   let cittaLat=null,cittaLng=null,cittaGeocoded='';
   function haversine(lat1,lng1,lat2,lng2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
   function selectValutazione(el){document.querySelectorAll('.star-option').forEach(b=>b.classList.remove('active'));el.classList.add('active');valutazioneMin=parseFloat(el.dataset.min);cerca();}
-  function selectMestiere(el){document.querySelectorAll('.chip').forEach(c=>{c.classList.remove('active');if(c.classList.contains('all-chip'))c.classList.add('inactive');});el.classList.add('active');el.classList.remove('inactive');mestiereScelto=el.dataset.mestiere;aggiornaStatus();}
+  function selectMestiere(el){mestiereScelto=el.value;aggiornaStatus();}
   function aggiornaStatus(){const m=mestiereScelto==='tutti'?'🏗️ Tutte le specializzazioni':mestiereScelto;const c=cittaScelta?` · 📍 ${cittaScelta}`:'';document.getElementById('statusText').innerHTML=`Stai cercando: <strong>${m}</strong>${c}`;}
   function localizzami(){if(!navigator.geolocation){alert('Non supportato.');return;}navigator.geolocation.getCurrentPosition(async pos=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);const d=await r.json();const citta=d.address.city||d.address.town||d.address.village||'';document.getElementById('cittaInput').value=citta;cittaScelta=citta;aggiornaStatus();cerca();}catch(e){alert('Errore posizione.');}},()=>alert('Permesso negato.'));}
   async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();const cittaSafe=cittaScelta.replace(/[,()]/g,'').trim();const soloVerificati=document.getElementById('soloVerificati').checked;const conFoto=document.getElementById('conFoto').checked;const rispondeIn24h=document.getElementById('rispondeIn24h').checked;const preventivoOnline=document.getElementById('preventivoOnline').checked;const soaCertificata=document.getElementById('soaCertificata').checked;aggiornaStatus();if(cittaScelta&&cittaScelta!==cittaGeocoded){cittaGeocoded=cittaScelta;cittaLat=null;cittaLng=null;try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cittaScelta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const gd=await gr.json();if(gd&&gd[0]){cittaLat=parseFloat(gd[0].lat);cittaLng=parseFloat(gd[0].lon);}}catch(e){}}else if(!cittaScelta){cittaGeocoded='';cittaLat=null;cittaLng=null;}const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';try{let q=supabaseClient.from('imprese').select('*').eq('tipo', 'impresa').order('piano_ordine',{ascending:false}).order('created_at',{ascending:false});if(mestiereScelto!=='tutti')q=q.ilike('mestieri',`%${mestiereScelto}%`);const regione=document.getElementById('regioneSelect').value;const provinciaSel=document.getElementById('provincia').value;const cittaSel=document.getElementById('citta').value;if(!cittaScelta&&!cittaSel&&!regione){const div=document.getElementById('risultati');div.innerHTML='<div class="no-results"><h3>📍 Inserisci una città o regione</h3><p>Per vedere le imprese, indica dove stai cercando</p></div>';aggiornaMappaRis([]);return;}if(cittaScelta){if(regione){q=q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${regione})`);}else{q=q.ilike('citta',`%${cittaSafe}%`);}}if(regione)q=q.eq('regione',regione);if(provinciaSel)q=q.eq('provincia',provinciaSel);if(cittaSel){if(regione){q=q.or(`citta.eq.${cittaSel},and(piano.eq.premium,regione.eq.${regione})`);}else{q=q.eq('citta',cittaSel);}}if(valutazioneMin>0)q=q.gte('valutazione_media',valutazioneMin);if(soloVerificati)q=q.eq('verificato',true);if(conFoto)q=q.not('foto_lavori','is',null);if(rispondeIn24h)q=q.eq('risponde_24h',true);if(preventivoOnline)q=q.eq('preventivo_online',true);if(soaCertificata)q=q.eq('soa_certificata',true);if(tipoImpresa==='piccola'){q=q.gte('dipendenti',1).lte('dipendenti',10);}else if(tipoImpresa==='media'){q=q.gte('dipendenti',11).lte('dipendenti',50);}const{data,error}=await q.limit(50);if(error)throw error;if(data)data.sort((a,b)=>{const pp=p=>p==='premium'?2:1;return pp(b.piano)-pp(a.piano);});const distanzaMax=parseInt(document.getElementById('distanzaSlider').value);(data||[]).forEach(i=>{i._distKm=(cittaLat!==null&&i.lat&&i.lng)?Math.round(haversine(cittaLat,cittaLng,i.lat,i.lng)):null;});const risultati=distanzaMax<100&&cittaLat!==null?(data||[]).filter(i=>i._distKm===null||i._distKm<=distanzaMax):(data||[]);if(!risultati.length){div.innerHTML='<div class="no-results"><h3>😕 Nessuna impresa trovata</h3><p>Prova a cambiare città o specializzazione</p></div>';aggiornaMappaRis([]);return;}div.innerHTML=`<div style="color:white;margin-bottom:8px;font-size:12px;">Trovate <strong>${risultati.length}</strong> imprese</div><div class="results-grid">${risultati.map(i=>cardHTML(i)).join('')}</div>`;aggiornaMappaRis(risultati);}catch(e){div.innerHTML=`<div class="no-results"><p>${e.message}</p></div>`;}}
