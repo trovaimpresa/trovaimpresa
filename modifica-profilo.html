@@ -354,17 +354,6 @@
               <label>Nome negozio <span class="required">*</span></label>
               <input type="text" id="f-nome_negozio" placeholder="Es. Edilizia Rossi">
             </div>
-            <div class="form-group">
-              <label>Tipo di negozio <span class="required">*</span></label>
-              <select id="f-tipo_negozio">
-                <option value="">— Seleziona —</option>
-                <option>Materiali edili</option><option>Ferramenta</option><option>Pitture e vernici</option>
-                <option>Pavimenti e rivestimenti</option><option>Sanitari e idraulica</option>
-                <option>Elettrico e illuminazione</option><option>Legname e infissi</option>
-                <option>Macchine e attrezzature edili</option><option>Noleggio attrezzature edili</option>
-                <option>Altro</option>
-              </select>
-            </div>
             <div class="form-row" style="margin-bottom:0;">
               <div class="form-group" style="margin-bottom:0;">
                 <label>CAP</label>
@@ -911,7 +900,6 @@
 
       } else if (tipoCategoria === 'negozio') {
         document.getElementById('f-nome_negozio').value = d.nome_negozio || d.nome || '';
-        setSelectValue('f-tipo_negozio', d.tipo);
         document.getElementById('f-cap-negozio').value = d.cap || '';
         document.getElementById('f-indirizzo-negozio').value = d.indirizzo || '';
         document.getElementById('f-prodotti').value = d.prodotti || '';
@@ -1066,7 +1054,6 @@
         } else if (tipoCategoria === 'negozio') {
           Object.assign(dati, {
             nome_negozio: document.getElementById('f-nome_negozio').value.trim(),
-            tipo: document.getElementById('f-tipo_negozio').value,
             cap: document.getElementById('f-cap-negozio').value.trim(),
             indirizzo: document.getElementById('f-indirizzo-negozio').value.trim(),
             prodotti: document.getElementById('f-prodotti').value.trim(),
