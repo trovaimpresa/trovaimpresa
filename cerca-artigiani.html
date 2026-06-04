@@ -494,7 +494,8 @@
     const badge = i.piano === 'premium' ? '<span class="badge-premium">💎 PREMIUM</span>' : '';
     const desc = i.descrizione ? `<div class="card-desc">${i.descrizione}</div>` : '';
     const distBadge = i._distKm !== null ? `<span style="display:inline-block;background:#e8f5ec;color:#2a7a4b;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>` : '';
-    return `<a class="card${i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}</div></a>`;
+    const ratingBadge = `<span style="display:inline-block;background:#e8f5ec;color:#2a7a4b;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">⭐ ${i.valutazione_media>0?Number(i.valutazione_media).toFixed(1):'Nuovo'}</span>`;
+    return `<a class="card${i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}${ratingBadge}</div></a>`;
   }
 
   // Cascata Regione → Provincia → Città
