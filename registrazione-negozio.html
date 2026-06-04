@@ -181,28 +181,6 @@
       <div class="form-section" id="step-2">
         <h2>Categoria merceologica</h2>
         <div class="form-group">
-          <label>Categoria principale <span class="required">*</span></label>
-          <select id="mestiere">
-            <option value="">— Seleziona —</option>
-            <option>Materiali edili</option>
-            <option>Ferramenta</option>
-            <option>Pavimenti e rivestimenti</option>
-            <option>Infissi e serramenti</option>
-            <option>Sanitari e ceramiche</option>
-            <option>Impianti elettrici</option>
-            <option>Idraulica e termoidraulica</option>
-            <option>Pitture e vernici</option>
-            <option>Legname e derivati</option>
-            <option>Attrezzature edili</option>
-            <option>Noleggio attrezzature</option>
-            <option>Illuminazione</option>
-            <option>Isolanti e impermeabilizzanti</option>
-            <option>Porte e finestre</option>
-            <option>Arredo bagno</option>
-            <option>Cottimisti</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label>Tipo negozio <span class="required">*</span></label>
           <select id="tipo_negozio">
             <option value="">— Seleziona tipo negozio —</option>
@@ -458,13 +436,12 @@
     async function submitForm() {
       if (!document.getElementById('termini').checked) { alert('Devi accettare i termini di servizio!'); return; }
       const nome = document.getElementById('nome').value.trim();
-      const mestiere = document.getElementById('mestiere').value;
       const email = document.getElementById('email').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const citta = document.getElementById('citta').value.trim();
       const regione = document.getElementById('regione').value;
       const password = document.getElementById('password').value.trim();
-      if (!nome || !mestiere || !email || !telefono || !citta || !regione || !password) { alert('Compila tutti i campi obbligatori (*)'); return; }
+      if (!nome || !email || !telefono || !citta || !regione || !password) { alert('Compila tutti i campi obbligatori (*)'); return; }
       if (password.length < 8) { alert('La password deve essere di almeno 8 caratteri.'); return; }
       const btn = document.getElementById('btn-next');
       btn.disabled = true;
@@ -504,8 +481,6 @@
           tipo: 'negozio',
           nome: nome,
           nome_attivita: nome,
-          mestiere: mestiere,
-          mestieri: mestiere ? [mestiere] : [],
           tipo_negozio: document.getElementById('tipo_negozio').value || null,
           specializzazioni: document.getElementById('specializzazioni').value,
           descrizione: document.getElementById('descrizione').value,
