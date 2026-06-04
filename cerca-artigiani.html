@@ -141,33 +141,34 @@
 
     <div class="filter-group">
       <div class="filter-label">Mestiere</div>
-      <div class="mestieri-scroll">
-        <div id="mestieri-list">
-          <div class="filter-btn active" data-mestiere="tutti" onclick="selectMestiere(this)"><span class="filter-icon">🔧</span> Tutti i mestieri</div>
-          <div class="filter-btn" data-mestiere="Muratura" onclick="selectMestiere(this)"><span class="filter-icon">🧱</span> Muratura</div>
-          <div class="filter-btn" data-mestiere="Elettricista" onclick="selectMestiere(this)"><span class="filter-icon">⚡</span> Elettricista</div>
-          <div class="filter-btn" data-mestiere="Idraulico" onclick="selectMestiere(this)"><span class="filter-icon">🚿</span> Idraulico</div>
-          <div class="filter-btn" data-mestiere="Falegname" onclick="selectMestiere(this)"><span class="filter-icon">🪚</span> Falegname</div>
-          <div class="filter-btn" data-mestiere="Pittore" onclick="selectMestiere(this)"><span class="filter-icon">🎨</span> Pittore</div>
-          <div class="filter-btn" data-mestiere="Piastrellista" onclick="selectMestiere(this)"><span class="filter-icon">🟫</span> Piastrellista</div>
-          <div class="filter-btn" data-mestiere="Carpentiere" onclick="selectMestiere(this)"><span class="filter-icon">🪵</span> Carpentiere</div>
-          <div class="filter-btn" data-mestiere="Cartongesso" onclick="selectMestiere(this)"><span class="filter-icon">📦</span> Cartongesso</div>
-          <div class="filter-btn" data-mestiere="Fabbro" onclick="selectMestiere(this)"><span class="filter-icon">⚙️</span> Fabbro</div>
-          <div class="filter-btn" data-mestiere="Termoidraulico" onclick="selectMestiere(this)"><span class="filter-icon">🔥</span> Termoidraulico</div>
-          <div class="filter-btn" data-mestiere="Giardiniere" onclick="selectMestiere(this)"><span class="filter-icon">🌿</span> Giardiniere</div>
-          <div class="filter-btn" data-mestiere="Impermeabilizzazione" onclick="selectMestiere(this)"><span class="filter-icon">💧</span> Impermeabilizzazione</div>
-          <div class="filter-btn" data-mestiere="Intonacatore" onclick="selectMestiere(this)"><span class="filter-icon">🏚️</span> Intonacatore</div>
-          <div class="filter-btn" data-mestiere="Pavimentista" onclick="selectMestiere(this)"><span class="filter-icon">🪨</span> Pavimentista</div>
-          <div class="filter-btn" data-mestiere="Vetraio" onclick="selectMestiere(this)"><span class="filter-icon">🪟</span> Vetraio</div>
-          <div class="filter-btn" data-mestiere="Impianto solare" onclick="selectMestiere(this)"><span class="filter-icon">☀️</span> Impianto solare</div>
-          <div class="filter-btn" data-mestiere="Climatizzatore" onclick="selectMestiere(this)"><span class="filter-icon">❄️</span> Climatizzatore</div>
-          <div class="filter-btn" data-mestiere="Tecnico caldaie" onclick="selectMestiere(this)"><span class="filter-icon">🌡️</span> Tecnico caldaie</div>
-          <div class="filter-btn" data-mestiere="Ponteggi" onclick="selectMestiere(this)"><span class="filter-icon">🏗️</span> Ponteggi</div>
-          <div class="filter-btn" data-mestiere="Demolizione" onclick="selectMestiere(this)"><span class="filter-icon">🔨</span> Demolizione</div>
-          <div class="filter-btn" data-mestiere="Sgomberi" onclick="selectMestiere(this)"><span class="filter-icon">🚛</span> Sgomberi</div>
-          <div class="filter-btn" data-mestiere="Cottimisti" onclick="selectMestiere(this)"><span class="filter-icon">👷</span> Cottimisti</div>
-        </div>
-      </div>
+      <select onchange="selectMestiere(this)" style="width:100%;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
+        <option value="tutti">Tutti i mestieri</option>
+        <option value="Edilizia / Muratura">Edilizia / Muratura</option>
+        <option value="Ristrutturazione completa">Ristrutturazione completa</option>
+        <option value="Cartongesso">Cartongesso</option>
+        <option value="Pittura e tinteggiatura">Pittura e tinteggiatura</option>
+        <option value="Pavimenti e piastrelle">Pavimenti e piastrelle</option>
+        <option value="Falegnameria">Falegnameria</option>
+        <option value="Serramenti / Infissi">Serramenti / Infissi</option>
+        <option value="Idraulica">Idraulica</option>
+        <option value="Impianti elettrici">Impianti elettrici</option>
+        <option value="Climatizzazione / Caldaie">Climatizzazione / Caldaie</option>
+        <option value="Fotovoltaico / Pannelli solari">Fotovoltaico / Pannelli solari</option>
+        <option value="Antennista / Allarmi">Antennista / Allarmi</option>
+        <option value="Coperture / Tetti">Coperture / Tetti</option>
+        <option value="Cappotti termici / Isolamento">Cappotti termici / Isolamento</option>
+        <option value="Fabbro / Cancelli / Recinzioni">Fabbro / Cancelli / Recinzioni</option>
+        <option value="Marmi e pietre">Marmi e pietre</option>
+        <option value="Vetraio">Vetraio</option>
+        <option value="Tende da sole / Zanzariere">Tende da sole / Zanzariere</option>
+        <option value="Giardinaggio / Esterni">Giardinaggio / Esterni</option>
+        <option value="Spurghi / Spazzacamino">Spurghi / Spazzacamino</option>
+        <option value="Pulizie / Disinfestazioni">Pulizie / Disinfestazioni</option>
+        <option value="Sgomberi / Traslochi">Sgomberi / Traslochi</option>
+        <option value="Stufe e camini">Stufe e camini</option>
+        <option value="Frigorista / Celle frigorifere">Frigorista / Celle frigorifere</option>
+        <option value="Altro">Altro</option>
+      </select>
     </div>
 
     <div class="filter-group">
@@ -328,9 +329,7 @@
   }
 
   function selectMestiere(el) {
-    document.querySelectorAll('#mestieri-list .filter-btn').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-    mestiereScelto = el.dataset.mestiere;
+    mestiereScelto = el.value;
     paginaCorrente = 1; cerca();
   }
 
