@@ -444,14 +444,22 @@
               </div>
             </div>
             <div class="form-group">
-              <label>Tipo di professionista <span class="required">*</span></label>
-              <select id="f-tipo_prof">
+              <label>Professione principale <span class="required">*</span></label>
+              <select id="f-mestiere-professionista">
                 <option value="">— Seleziona —</option>
-                <option>Ingegnere civile</option><option>Ingegnere strutturale</option>
-                <option>Ingegnere impiantistico</option><option>Architetto</option>
-                <option>Geometra</option><option>Perito edile</option>
-                <option>Amministratore di condominio</option><option>Consulente energetico</option>
-                <option>Tecnico del lavoro</option><option>Altro</option>
+                <option value="architetto">Architetto</option>
+                <option value="ingegnere_civile">Ingegnere civile</option>
+                <option value="ingegnere_strutturale">Ingegnere strutturale</option>
+                <option value="ingegnere_impiantistico">Ingegnere impiantistico</option>
+                <option value="geometra">Geometra</option>
+                <option value="perito_industriale">Perito industriale</option>
+                <option value="topografo">Topografo</option>
+                <option value="consulente_energetico">Consulente energetico</option>
+                <option value="consulente_sicurezza">Consulente sicurezza</option>
+                <option value="direttore_lavori">Direttore lavori</option>
+                <option value="collaudatore_strutture">Collaudatore strutture</option>
+                <option value="project_manager">Project manager</option>
+                <option value="amministratore_condominio">Amministratore di condominio</option>
               </select>
             </div>
             <div class="form-group">
@@ -519,18 +527,6 @@
           </div>
           <div class="form-card fc-arancio">
             <div class="card-header arancio">⚙️ Qualifica e servizi</div>
-            <div class="form-group">
-              <label>Tipo professionista</label>
-              <select id="f-tipo_professionista-professionista" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
-                <option value="">— Seleziona —</option>
-                <option value="architetto">Architetto</option>
-                <option value="ingegnere">Ingegnere</option>
-                <option value="geometra">Geometra</option>
-                <option value="perito">Perito</option>
-                <option value="consulente_sicurezza">Consulente sicurezza</option>
-                <option value="amministratore_condominio">Amministratore condominio</option>
-              </select>
-            </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
                 <input type="checkbox" id="iscritto_albo-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
@@ -902,14 +898,13 @@
       } else if (tipoCategoria === 'professionista') {
         document.getElementById('f-nome-professionista').value = d.nome || '';
         document.getElementById('f-cognome').value = d.cognome || '';
-        setSelectValue('f-tipo_prof', d.tipo);
+        setSelectValue('f-mestiere-professionista', d.mestieri?.[0] || d.mestiere);
         document.getElementById('f-nome_attivita').value = d.nome_attivita || '';
         document.getElementById('f-albo').value = d.albo || '';
         document.getElementById('f-partita_iva-professionista').value = d.partita_iva || '';
         document.getElementById('f-anni_esperienza-professionista').value = d.anni_esperienza || '';
         document.getElementById('f-cap-professionista').value = d.cap || '';
         document.getElementById('f-indirizzo-professionista').value = d.indirizzo || '';
-        setSelectValue('f-tipo_professionista-professionista', d.tipo_professionista);
         document.getElementById('iscritto_albo-professionista').checked = !!d.iscritto_albo;
         document.getElementById('consulenza_online-professionista').checked = !!d.consulenza_online;
         document.getElementById('sopralluogo_gratuito-professionista').checked = !!d.sopralluogo_gratuito;
@@ -1060,7 +1055,8 @@
           Object.assign(dati, {
             nome: document.getElementById('f-nome-professionista').value.trim(),
             cognome: document.getElementById('f-cognome').value.trim(),
-            tipo: document.getElementById('f-tipo_prof').value,
+            mestiere: document.getElementById('f-mestiere-professionista').value || null,
+            mestieri: document.getElementById('f-mestiere-professionista').value ? [document.getElementById('f-mestiere-professionista').value] : [],
             nome_attivita: document.getElementById('f-nome_attivita').value.trim(),
             albo: document.getElementById('f-albo').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-professionista').value.trim(),
@@ -1068,7 +1064,6 @@
             cap: document.getElementById('f-cap-professionista').value.trim(),
             indirizzo: document.getElementById('f-indirizzo-professionista').value.trim(),
             specializzazioni: specializzazioni.length > 0 ? JSON.stringify(specializzazioni) : null,
-            tipo_professionista: document.getElementById('f-tipo_professionista-professionista').value || null,
             iscritto_albo: document.getElementById('iscritto_albo-professionista').checked,
             consulenza_online: document.getElementById('consulenza_online-professionista').checked,
             sopralluogo_gratuito: document.getElementById('sopralluogo_gratuito-professionista').checked,
