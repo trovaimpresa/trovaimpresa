@@ -2137,6 +2137,7 @@ async function caricaProdottiVetrina() {
           <input type="checkbox" ${checked} style="width:18px;height:18px;accent-color:var(--verde);cursor:pointer" onchange="toggleVetrinaProdotto('${esc(p.id)}', this.checked)">
           Visibile nel profilo pubblico
         </label>
+        <button class="btn-rimuovi-riga" style="align-self:flex-start;margin-top:4px" onclick="eliminaProdottoVetrina('${esc(p.id)}')">🗑 Elimina</button>
       </div>
     </div>`;
   }).join('');
@@ -2149,6 +2150,14 @@ async function toggleVetrinaProdotto(id, visibile) {
     alert('Errore aggiornamento visibilità: ' + error.message);
     await caricaProdottiVetrina();
   }
+}
+
+// elimina un prodotto dalla vetrina
+async function eliminaProdottoVetrina(id) {
+  if (!confirm('Eliminare questo prodotto dalla vetrina?')) return;
+  const { error } = await sb.from('vetrina_negozio').delete().eq('id', id);
+  if (error) { alert('Errore eliminazione: ' + error.message); return; }
+  await caricaProdottiVetrina();
 }
 
 async function inizializza() {
