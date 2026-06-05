@@ -853,10 +853,10 @@
           <div class="dash-quick-label">Preventivi ricevuti</div>
           <div class="dash-quick-sub">Richieste dai clienti</div>
         </div>
-        <div class="dash-quick-card" data-card-id="foto-lavori" onclick="showSection('foto', this)">
-          <div class="dash-quick-icon">📷</div>
+        <div class="dash-quick-card" data-card-id="miei-prodotti" onclick="showSection('miei-prodotti', this)">
+          <div class="dash-quick-icon">🛒</div>
           <div class="dash-quick-label">I miei prodotti</div>
-          <div class="dash-quick-sub">Carica e gestisci i tuoi prodotti</div>
+          <div class="dash-quick-sub">Aggiungi prodotti in vetrina</div>
         </div>
         <div class="dash-quick-card" data-card-id="recensioni" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">⭐</div>
@@ -1139,6 +1139,49 @@
       <div class="profilo-card" id="profilo-dati">
         <div class="profilo-title">Dati impresa</div>
         <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
+      </div>
+    </div>
+
+    <!-- I MIEI PRODOTTI -->
+    <div class="section" id="sec-miei-prodotti">
+      <div class="topbar">
+        <div class="topbar-title">🛍️ I miei prodotti</div>
+      </div>
+      <div class="profilo-card">
+        <div class="profilo-title">Aggiungi un prodotto in vetrina</div>
+        <div class="form-group">
+          <label>Titolo</label>
+          <input type="text" id="prod-titolo" placeholder="Es. Divano in pelle">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="prod-categoria">
+              <option value="Prodotto">Prodotto</option>
+              <option value="Immobile">Immobile</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Prezzo</label>
+            <input type="number" id="prod-prezzo" step="0.01" min="0" placeholder="Es. 499.00">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Dettagli</label>
+          <textarea id="prod-dettagli" placeholder="Descrivi il prodotto…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Foto (URL)</label>
+          <input type="url" id="prod-foto" placeholder="https://…">
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:normal;font-size:0.9rem;cursor:pointer">
+            <input type="checkbox" id="prod-vetrina" style="width:20px;height:20px;accent-color:var(--verde);cursor:pointer" checked>
+            In vetrina
+          </label>
+        </div>
+        <button class="btn-salva-annuncio" onclick="salvaProdottoVetrina()">💾 Salva</button>
       </div>
     </div>
 
@@ -1994,6 +2037,41 @@ window.onpopstate = function(e) {
     window.location.href = 'index.html';
   }
 };
+
+// === I MIEI PRODOTTI — salva una riga in vetrina_negozio ===
+async function salvaProdottoVetrina() {
+  const titolo = document.getElementById('prod-titolo').value.trim();
+  const categoria = document.getElementById('prod-categoria').value;
+  const prezzoRaw = document.getElementById('prod-prezzo').value;
+  const dettagli = document.getElementById('prod-dettagli').value.trim();
+  const foto = document.getElementById('prod-foto').value.trim();
+  const inVetrina = document.getElementById('prod-vetrina').checked;
+
+  if (!titolo) { alert('Inserisci il titolo del prodotto.'); return; }
+
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
+
+  const { error } = await sb.from('vetrina_negozio').insert({
+    negozio_id: user.id,
+    titolo,
+    categoria,
+    prezzo: prezzoRaw === '' ? null : parseFloat(prezzoRaw),
+    dettagli,
+    foto,
+    in_vetrina: inVetrina
+  });
+
+  if (error) { alert('Errore nel salvataggio: ' + error.message); return; }
+
+  alert('✅ Prodotto salvato in vetrina!');
+  document.getElementById('prod-titolo').value = '';
+  document.getElementById('prod-prezzo').value = '';
+  document.getElementById('prod-dettagli').value = '';
+  document.getElementById('prod-foto').value = '';
+  document.getElementById('prod-categoria').value = 'Prodotto';
+  document.getElementById('prod-vetrina').checked = true;
+}
 
 async function inizializza() {
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
