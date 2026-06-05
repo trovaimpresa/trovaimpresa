@@ -879,7 +879,7 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="foto-lavori" data-premium="true" style="cursor:pointer" onclick="document.getElementById('modalFotoLavori').classList.add('show')">
+        <div class="dash-quick-card" data-card-id="foto-lavori" data-premium="true" style="cursor:pointer" onclick="document.getElementById('modalFotoLavori').classList.add('show');caricaListaLavoriFoto()">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
@@ -1938,6 +1938,8 @@
         </label>
       </div>
       <button class="btn-salva-annuncio" onclick="salvaLavoroFoto()" style="margin-bottom:16px">Salva</button>
+
+      <div class="foto-grid" id="lista-lavori-foto"></div>
 
       <div class="foto-grid" id="foto-grid-dash"></div>
     </div>
@@ -4245,6 +4247,61 @@ async function salvaLavoroFoto() {
   document.getElementById('lav-foto').value = '';
   document.getElementById('lav-descrizione').value = '';
   document.getElementById('lav-pubblico').checked = true;
+  await caricaListaLavoriFoto();
+}
+
+// legge lavori_foto dell'utente loggato e disegna le card (stessa grafica del pannello-negozio)
+async function caricaListaLavoriFoto() {
+  const grid = document.getElementById('lista-lavori-foto');
+  if (!grid) return;
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  const { data, error } = await sb.from('lavori_foto')
+    .select('*').eq('owner_id', user.id).order('created_at', { ascending: false });
+  if (error) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">⚠️ Errore nel caricamento</div>';
+    return;
+  }
+  const lavori = data || [];
+  if (!lavori.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessun lavoro ancora.</div>';
+    return;
+  }
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  grid.innerHTML = lavori.map(l => {
+    const foto = l.foto
+      ? `<img src="${esc(l.foto)}" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f0f0f0">`
+      : '<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#f0f0f0">📷</div>';
+    const checked = l.pubblico ? 'checked' : '';
+    return `<div style="background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column">
+      ${foto}
+      <div style="padding:10px;display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:0.85rem;color:var(--dark);line-height:1.4">${esc(l.descrizione)}</div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--mid);cursor:pointer;margin-top:4px">
+          <input type="checkbox" ${checked} style="width:18px;height:18px;accent-color:var(--verde);cursor:pointer" onchange="toggleLavoroPubblico('${esc(l.id)}', this.checked)">
+          Mostra nel profilo pubblico
+        </label>
+        <button class="btn-rimuovi-riga" style="align-self:flex-start;margin-top:4px" onclick="eliminaLavoroFoto('${esc(l.id)}')">🗑 Elimina</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// aggiorna il flag pubblico del singolo lavoro
+async function toggleLavoroPubblico(id, pubblico) {
+  const { error } = await sb.from('lavori_foto').update({ pubblico }).eq('id', id);
+  if (error) {
+    alert('Errore aggiornamento visibilità: ' + error.message);
+    await caricaListaLavoriFoto();
+  }
+}
+
+// elimina un lavoro da lavori_foto
+async function eliminaLavoroFoto(id) {
+  if (!confirm('Eliminare questo lavoro?')) return;
+  const { error } = await sb.from('lavori_foto').delete().eq('id', id);
+  if (error) { alert('Errore eliminazione: ' + error.message); return; }
+  await caricaListaLavoriFoto();
 }
 
 function fotoDrop(e) {
