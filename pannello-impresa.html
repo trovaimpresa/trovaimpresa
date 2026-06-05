@@ -2333,6 +2333,7 @@ function showSection(id, el, fromPopstate) {
   // "Il tuo piano" visibile solo sulla dashboard
   const pianoBox = document.getElementById('sezione-il-tuo-piano');
   if (pianoBox) pianoBox.style.display = (id === 'dashboard') ? '' : 'none';
+  if (id === 'foto-lavori') caricaListaLavoriFoto();
   if (!fromPopstate) history.pushState({ section: id }, '', '#' + id);
 }
 
