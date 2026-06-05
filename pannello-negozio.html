@@ -856,7 +856,7 @@
         <div class="dash-quick-card" data-card-id="miei-prodotti" onclick="showSection('miei-prodotti', this)">
           <div class="dash-quick-icon">🛒</div>
           <div class="dash-quick-label">Carica qui la tua vetrina</div>
-          <div class="dash-quick-sub">Aggiungi prodotti in vetrina</div>
+          <div class="dash-quick-sub">Foto, prezzo e dettagli</div>
         </div>
         <div class="dash-quick-card" data-card-id="recensioni" onclick="apriModalRecensioni()">
           <div class="dash-quick-icon">⭐</div>
@@ -1172,8 +1172,10 @@
           <textarea id="prod-dettagli" placeholder="Descrivi il prodotto…"></textarea>
         </div>
         <div class="form-group">
-          <label>Foto (URL)</label>
-          <input type="url" id="prod-foto" placeholder="https://…">
+          <label>Foto</label>
+          <input type="file" id="prod-foto-file" accept="image/*" onchange="caricaFotoVetrina(this.files[0])">
+          <input type="hidden" id="prod-foto">
+          <div id="prod-foto-stato" style="font-size:0.8rem;color:var(--light);margin-top:6px"></div>
         </div>
         <div class="form-group">
           <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:normal;font-size:0.9rem;cursor:pointer">
@@ -2038,6 +2040,35 @@ window.onpopstate = function(e) {
   }
 };
 
+// === I MIEI PRODOTTI — upload foto (una foto → public URL) ===
+async function uploadFotoVetrina(file) {
+  if (!file) return null;
+  if (file.size > 5 * 1024 * 1024) { alert('La foto supera i 5 MB.'); return null; }
+  const folder = String(impresaCorrente.id);
+  const ext = file.name.split('.').pop();
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const { error } = await sb.storage.from('foto-lavori').upload(path, file, { upsert: false });
+  if (error) { alert('Errore upload foto: ' + error.message); return null; }
+  const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(path);
+  return publicUrl;
+}
+
+// onchange del campo file: carica e salva l'URL nel campo nascosto prod-foto
+async function caricaFotoVetrina(file) {
+  const stato = document.getElementById('prod-foto-stato');
+  const hidden = document.getElementById('prod-foto');
+  if (!file) { hidden.value = ''; stato.textContent = ''; return; }
+  stato.textContent = '⏳ Caricamento foto...';
+  const url = await uploadFotoVetrina(file);
+  if (url) {
+    hidden.value = url;
+    stato.textContent = '✅ Foto caricata';
+  } else {
+    hidden.value = '';
+    stato.textContent = '❌ Caricamento non riuscito';
+  }
+}
+
 // === I MIEI PRODOTTI — salva una riga in vetrina_negozio ===
 async function salvaProdottoVetrina() {
   const titolo = document.getElementById('prod-titolo').value.trim();
@@ -2069,6 +2100,8 @@ async function salvaProdottoVetrina() {
   document.getElementById('prod-prezzo').value = '';
   document.getElementById('prod-dettagli').value = '';
   document.getElementById('prod-foto').value = '';
+  document.getElementById('prod-foto-file').value = '';
+  document.getElementById('prod-foto-stato').textContent = '';
   document.getElementById('prod-categoria').value = 'Prodotto';
   document.getElementById('prod-vetrina').checked = true;
 }
