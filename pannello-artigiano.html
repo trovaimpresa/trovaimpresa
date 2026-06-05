@@ -1245,18 +1245,18 @@
       <div class="profilo-card">
         <div class="profilo-title">Aggiungi foto lavoro</div>
         <div class="form-group">
-          <label>Foto</label>
-          <input type="file" id="lav-foto-file" accept="image/*" onchange="caricaFotoLavoroFile(this.files[0])">
-          <input type="hidden" id="lav-foto">
-          <div id="lav-foto-stato" style="font-size:0.8rem;color:var(--light);margin-top:6px"></div>
-        </div>
-        <div class="form-group">
           <label>Titolo</label>
           <input type="text" id="lav-titolo" placeholder="Es. Ristrutturazione bagno a Rieti">
         </div>
         <div class="form-group">
           <label>Descrizione</label>
           <textarea id="lav-descrizione" placeholder="Descrivi il lavoro"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Foto</label>
+          <input type="file" id="lav-foto-file" accept="image/*" onchange="caricaFotoLavoroFile(this.files[0])">
+          <input type="hidden" id="lav-foto">
+          <div id="lav-foto-stato" style="font-size:0.8rem;color:var(--light);margin-top:6px"></div>
         </div>
         <div class="form-group">
           <label style="display:flex;align-items:center;gap:14px;text-transform:none;letter-spacing:normal;font-size:1.05rem;font-weight:700;color:var(--verde2);cursor:pointer;background:var(--verde3);border:1.5px solid var(--verde);border-radius:12px;padding:16px 18px">
