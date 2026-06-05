@@ -2497,7 +2497,6 @@ async function inizializza() {
 
   await caricaPreventivi();
   await caricaRecensioni();
-  await caricaFotoLavori();
   await caricaListaLavoriFoto();
   await caricaCertificazioni();
   await caricaNote();
@@ -4119,81 +4118,6 @@ async function inizializzaMappaProfilo(i) {
 // =====================
 // FOTO DEI LAVORI
 // =====================
-let fotoCaricate = [];
-
-async function caricaFotoLavori() {
-  if (!impresaCorrente?.id) return;
-  const folder = String(impresaCorrente.id);
-  const { data, error } = await sb.storage.from('foto-lavori').list(folder, { sortBy: { column: 'created_at', order: 'desc' } });
-  fotoCaricate = (data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
-  document.getElementById('dash-stat-foto').textContent = fotoCaricate.length;
-  aggiornaBannerFoto();
-  renderFotoGrid();
-}
-
-function aggiornaBannerFoto() {
-  const n = fotoCaricate.length;
-  const testoHTML = `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7c3aed">Premium 💎</strong> — illimitate`;
-
-  for (const suffix of ['', '-dash']) {
-    const barEl = document.getElementById('foto-limit-bar' + suffix);
-    const testoEl = document.getElementById('foto-limit-testo' + suffix);
-    const uploadArea = document.getElementById('foto-upload-area' + suffix);
-    if (!barEl) continue;
-    testoEl.innerHTML = testoHTML;
-    barEl.style.borderColor = '#1a73e8';
-    uploadArea.style.display = '';
-  }
-}
-
-function renderFotoGrid() {
-  const folder = String(impresaCorrente.id);
-  const emptyHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessuna foto ancora. Carica i tuoi lavori!</div>';
-  const fotoHTML = fotoCaricate.map(f => {
-    const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(`${folder}/${f.name}`);
-    return `<div class="foto-item"><img src="${publicUrl}" alt="${f.name}" loading="lazy"><button class="foto-item-del" onclick="eliminaFoto('${f.name}')" title="Elimina foto">✕ Elimina</button></div>`;
-  }).join('');
-
-  for (const id of ['foto-grid', 'foto-grid-dash']) {
-    const grid = document.getElementById(id);
-    if (grid) grid.innerHTML = fotoCaricate.length ? fotoHTML : emptyHTML;
-  }
-}
-
-async function uploadFoto(files) {
-  if (!files?.length) return;
-
-  const daCaricari = Array.from(files);
-  const allProgress = ['foto-progress', 'foto-progress-dash'].map(id => document.getElementById(id)).filter(Boolean);
-  allProgress.forEach(p => { p.style.display = 'block'; p.textContent = `⏳ Caricamento ${daCaricari.length} foto...`; });
-
-  const folder = String(impresaCorrente.id);
-  let ok = 0;
-
-  for (const file of daCaricari) {
-    if (file.size > 5 * 1024 * 1024) {
-      alert(`"${file.name}" supera i 5 MB — saltata.`);
-      continue;
-    }
-    const ext = file.name.split('.').pop();
-    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
-    const { error } = await sb.storage.from('foto-lavori').upload(path, file, { upsert: false });
-    if (!error) ok++;
-  }
-
-  allProgress.forEach(p => { p.textContent = `✅ ${ok} foto caricate con successo!`; });
-  setTimeout(() => { allProgress.forEach(p => { p.style.display = 'none'; }); }, 2500);
-  ['foto-input', 'foto-input-dash'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  await caricaFotoLavori();
-}
-
-async function eliminaFoto(nome) {
-  if (!confirm('Eliminare questa foto?')) return;
-  const folder = String(impresaCorrente.id);
-  await sb.storage.from('foto-lavori').remove([`${folder}/${nome}`]);
-  await caricaFotoLavori();
-}
-
 // carica la foto nel bucket foto-lavori e mette l'URL pubblico in lav-foto
 async function caricaFotoLavoroFile(file) {
   const stato = document.getElementById('lav-foto-stato');
@@ -4295,19 +4219,6 @@ async function eliminaLavoroFoto(id) {
   const { error } = await sb.from('lavori_foto').delete().eq('id', id);
   if (error) { alert('Errore eliminazione: ' + error.message); return; }
   await caricaListaLavoriFoto();
-}
-
-function fotoDrop(e) {
-  e.preventDefault();
-  ['foto-upload-area', 'foto-upload-area-dash'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('dragover'); });
-  uploadFoto(e.dataTransfer.files);
-}
-function fotoDragOverDash(e) {
-  e.preventDefault();
-  document.getElementById('foto-upload-area-dash').classList.add('dragover');
-}
-function fotoDragLeaveDash(e) {
-  document.getElementById('foto-upload-area-dash').classList.remove('dragover');
 }
 
 // =====================
@@ -4719,10 +4630,6 @@ async function chiediSupportoAI() {
     btn.style.cursor = '';
     btn.innerHTML = labelOriginale;
   }
-}
-
-function chiudiModalFotoLavori() {
-  document.getElementById('modalFotoLavori').classList.remove('show');
 }
 
 function toggleFaq(headerEl) {
