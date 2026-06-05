@@ -1157,8 +1157,19 @@
           <div class="form-group">
             <label>Categoria</label>
             <select id="prod-categoria">
-              <option value="Prodotto">Prodotto</option>
-              <option value="Immobile">Immobile</option>
+              <option value="" disabled selected>Scegli categoria</option>
+              <option value="Immobili">Immobili</option>
+              <option value="Materiali edili">Materiali edili</option>
+              <option value="Mobili e arredamento">Mobili e arredamento</option>
+              <option value="Ferramenta e utensili">Ferramenta e utensili</option>
+              <option value="Pavimenti e piastrelle">Pavimenti e piastrelle</option>
+              <option value="Serramenti e infissi">Serramenti e infissi</option>
+              <option value="Stufe camini e climatizzazione">Stufe camini e climatizzazione</option>
+              <option value="Sanitari e bagno">Sanitari e bagno</option>
+              <option value="Illuminazione">Illuminazione</option>
+              <option value="Vernici e pitture">Vernici e pitture</option>
+              <option value="Giardino ed esterni">Giardino ed esterni</option>
+              <option value="Elettrodomestici">Elettrodomestici</option>
               <option value="Altro">Altro</option>
             </select>
           </div>
@@ -2079,6 +2090,7 @@ async function salvaProdottoVetrina() {
   const inVetrina = document.getElementById('prod-vetrina').checked;
 
   if (!titolo) { alert('Inserisci il titolo del prodotto.'); return; }
+  if (!categoria) { alert('Scegli una categoria.'); return; }
 
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
@@ -2102,7 +2114,7 @@ async function salvaProdottoVetrina() {
   document.getElementById('prod-foto').value = '';
   document.getElementById('prod-foto-file').value = '';
   document.getElementById('prod-foto-stato').textContent = '';
-  document.getElementById('prod-categoria').value = 'Prodotto';
+  document.getElementById('prod-categoria').value = '';
   document.getElementById('prod-vetrina').checked = true;
 }
 
