@@ -4232,6 +4232,7 @@ async function salvaLavoroFoto() {
   alert('✅ Lavoro salvato!');
   document.getElementById('lav-foto-file').value = '';
   document.getElementById('lav-foto').value = '';
+  document.getElementById('lav-titolo').value = '';
   document.getElementById('lav-descrizione').value = '';
   document.getElementById('lav-pubblico').checked = true;
   await caricaListaLavoriFoto();
