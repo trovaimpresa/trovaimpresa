@@ -2116,6 +2116,55 @@ async function salvaProdottoVetrina() {
   document.getElementById('prod-foto-stato').textContent = '';
   document.getElementById('prod-categoria').value = '';
   document.getElementById('prod-vetrina').checked = true;
+  await caricaProdottiVetrina();
+}
+
+// === I MIEI PRODOTTI — legge vetrina_negozio e mostra le card in foto-grid-dash ===
+async function caricaProdottiVetrina() {
+  const grid = document.getElementById('foto-grid-dash');
+  if (!grid) return;
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  const { data, error } = await sb.from('vetrina_negozio')
+    .select('*').eq('negozio_id', user.id).order('created_at', { ascending: false });
+  if (error) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">⚠️ Errore nel caricamento prodotti</div>';
+    return;
+  }
+  const prodotti = data || [];
+  if (!prodotti.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛒</div>Nessun prodotto ancora. Carica la tua vetrina!</div>';
+    return;
+  }
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  grid.innerHTML = prodotti.map(p => {
+    const foto = p.foto
+      ? `<img src="${esc(p.foto)}" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f0f0f0">`
+      : '<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#f0f0f0">🛒</div>';
+    const prezzo = (p.prezzo != null && p.prezzo !== '') ? `€ ${esc(p.prezzo)}` : '';
+    const checked = p.in_vetrina ? 'checked' : '';
+    return `<div style="background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column">
+      ${foto}
+      <div style="padding:10px;display:flex;flex-direction:column;gap:4px">
+        <div style="font-weight:700;font-size:0.9rem;color:var(--dark)">${esc(p.titolo)}</div>
+        <div style="font-size:0.78rem;color:var(--light)">${esc(p.categoria)}</div>
+        <div style="font-weight:700;color:var(--verde2)">${prezzo}</div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--mid);cursor:pointer;margin-top:4px">
+          <input type="checkbox" ${checked} style="width:18px;height:18px;accent-color:var(--verde);cursor:pointer" onchange="toggleVetrinaProdotto('${esc(p.id)}', this.checked)">
+          Visibile nel profilo pubblico
+        </label>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// aggiorna il flag in_vetrina del singolo prodotto
+async function toggleVetrinaProdotto(id, visibile) {
+  const { error } = await sb.from('vetrina_negozio').update({ in_vetrina: visibile }).eq('id', id);
+  if (error) {
+    alert('Errore aggiornamento visibilità: ' + error.message);
+    await caricaProdottiVetrina();
+  }
 }
 
 async function inizializza() {
@@ -2239,6 +2288,7 @@ async function inizializza() {
 
   await caricaPreventivi();
   await caricaFotoLavori();
+  await caricaProdottiVetrina();
   await caricaNote();
   caricaProfilo();
 }
@@ -2466,7 +2516,7 @@ function renderFotoGrid() {
     return `<div class="foto-item"><img src="${publicUrl}" alt="${f.name}" loading="lazy"><button class="foto-item-del" onclick="eliminaFoto('${f.name}')" title="Elimina foto">✕</button></div>`;
   }).join('');
 
-  for (const id of ['foto-grid', 'foto-grid-dash']) {
+  for (const id of ['foto-grid']) {
     const grid = document.getElementById(id);
     if (grid) grid.innerHTML = fotoCaricate.length ? fotoHTML : emptyHTML;
   }
