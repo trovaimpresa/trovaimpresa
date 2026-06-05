@@ -4725,6 +4725,8 @@ async function caricaListaLavoriFoto() {
     return;
   }
   const lavori = data || [];
+  const statFoto = document.getElementById('dash-stat-foto');
+  if (statFoto) statFoto.textContent = lavori.length;
   if (!lavori.length) {
     grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessun lavoro ancora.</div>';
     return;
