@@ -1924,8 +1924,9 @@
       <!-- AGGIUNGI FOTO LAVORO -->
       <div class="form-group" style="margin-top:8px">
         <label>Aggiungi foto lavoro</label>
-        <input type="file" id="lav-foto-file" accept="image/*">
+        <input type="file" id="lav-foto-file" accept="image/*" onchange="caricaFotoLavoroFile(this.files[0])">
         <input type="hidden" id="lav-foto">
+        <div id="lav-foto-stato" style="font-size:0.8rem;color:var(--light);margin-top:6px"></div>
       </div>
       <div class="form-group">
         <textarea id="lav-descrizione" placeholder="Descrivi il lavoro"></textarea>
@@ -4203,6 +4204,23 @@ async function eliminaFoto(nome) {
   const folder = String(impresaCorrente.id);
   await sb.storage.from('foto-lavori').remove([`${folder}/${nome}`]);
   await caricaFotoLavori();
+}
+
+// carica la foto nel bucket foto-lavori e mette l'URL pubblico in lav-foto
+async function caricaFotoLavoroFile(file) {
+  const stato = document.getElementById('lav-foto-stato');
+  const hidden = document.getElementById('lav-foto');
+  if (!file) { hidden.value = ''; stato.textContent = ''; return; }
+  if (file.size > 5 * 1024 * 1024) { hidden.value = ''; stato.textContent = '❌ La foto supera i 5 MB.'; return; }
+  stato.textContent = '⏳ Caricamento foto...';
+  const folder = String(impresaCorrente.id);
+  const ext = file.name.split('.').pop();
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const { error } = await sb.storage.from('foto-lavori').upload(path, file, { upsert: false });
+  if (error) { hidden.value = ''; stato.textContent = '❌ Errore upload: ' + error.message; return; }
+  const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(path);
+  hidden.value = publicUrl;
+  stato.textContent = '✅ Foto caricata';
 }
 
 // INSERT di un lavoro in lavori_foto
