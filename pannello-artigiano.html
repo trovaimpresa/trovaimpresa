@@ -879,7 +879,7 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="foto-lavori" data-premium="true" style="cursor:pointer" onclick="document.getElementById('modalFotoLavori').classList.add('show');caricaListaLavoriFoto()">
+        <div class="dash-quick-card" data-card-id="foto-lavori" data-premium="true" style="cursor:pointer" onclick="showSection('foto-lavori', this)">
           <div class="dash-quick-icon">📷</div>
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
@@ -1228,6 +1228,33 @@
           </div>
         </div>
         <div id="profilo-mappa" style="width:100%;height:300px;border-radius:16px;overflow:hidden;margin-top:16px;background:#e8f5ee;"></div>
+      </div>
+    </div>
+
+    <!-- FOTO DEI LAVORI -->
+    <div class="section" id="sec-foto-lavori">
+      <div class="topbar">
+        <div class="topbar-title">📷 Foto dei lavori</div>
+      </div>
+      <div class="profilo-card">
+        <div class="profilo-title">Aggiungi foto lavoro</div>
+        <div class="form-group">
+          <label>Foto</label>
+          <input type="file" id="lav-foto-file" accept="image/*" onchange="caricaFotoLavoroFile(this.files[0])">
+          <input type="hidden" id="lav-foto">
+          <div id="lav-foto-stato" style="font-size:0.8rem;color:var(--light);margin-top:6px"></div>
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <textarea id="lav-descrizione" placeholder="Descrivi il lavoro"></textarea>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:14px;text-transform:none;letter-spacing:normal;font-size:1.05rem;font-weight:700;color:var(--verde2);cursor:pointer;background:var(--verde3);border:1.5px solid var(--verde);border-radius:12px;padding:16px 18px">
+            <input type="checkbox" id="lav-pubblico" checked style="width:26px;height:26px;accent-color:var(--verde);cursor:pointer;flex-shrink:0">
+            Mostra nel profilo pubblico
+          </label>
+        </div>
+        <button class="btn-salva-annuncio" onclick="salvaLavoroFoto()">Salva</button>
       </div>
     </div>
 
@@ -1920,24 +1947,6 @@
         <div class="foto-upload-label">Clicca o trascina le foto qui</div>
         <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
       </div>
-
-      <!-- AGGIUNGI FOTO LAVORO -->
-      <div class="form-group" style="margin-top:8px">
-        <label>Aggiungi foto lavoro</label>
-        <input type="file" id="lav-foto-file" accept="image/*" onchange="caricaFotoLavoroFile(this.files[0])">
-        <input type="hidden" id="lav-foto">
-        <div id="lav-foto-stato" style="font-size:0.8rem;color:var(--light);margin-top:6px"></div>
-      </div>
-      <div class="form-group">
-        <textarea id="lav-descrizione" placeholder="Descrivi il lavoro"></textarea>
-      </div>
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:normal;font-size:0.9rem;cursor:pointer">
-          <input type="checkbox" id="lav-pubblico" checked style="width:20px;height:20px;accent-color:var(--verde);cursor:pointer">
-          Mostra nel profilo pubblico
-        </label>
-      </div>
-      <button class="btn-salva-annuncio" onclick="salvaLavoroFoto()" style="margin-bottom:16px">Salva</button>
 
       <div class="foto-grid" id="lista-lavori-foto"></div>
 
