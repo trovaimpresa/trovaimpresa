@@ -2252,7 +2252,7 @@ async function inizializza() {
   } else {
     pianoBadge.textContent = '🆓 Free';
   }
-  if (impresaCorrente.tipo === PANNELLO_CORRENTE) {
+  if ((impresaCorrente.tipo || '').toLowerCase().trim() === PANNELLO_CORRENTE) {
     aggiornaPianoCards(piano);
   } else {
     document.getElementById('sezione-il-tuo-piano').style.display = 'none';
