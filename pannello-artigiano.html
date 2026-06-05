@@ -1921,6 +1921,23 @@
         <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
       </div>
 
+      <!-- AGGIUNGI FOTO LAVORO -->
+      <div class="form-group" style="margin-top:8px">
+        <label>Aggiungi foto lavoro</label>
+        <input type="file" id="lav-foto-file" accept="image/*">
+        <input type="hidden" id="lav-foto">
+      </div>
+      <div class="form-group">
+        <textarea id="lav-descrizione" placeholder="Descrivi il lavoro"></textarea>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:normal;font-size:0.9rem;cursor:pointer">
+          <input type="checkbox" id="lav-pubblico" checked style="width:20px;height:20px;accent-color:var(--verde);cursor:pointer">
+          Mostra nel profilo pubblico
+        </label>
+      </div>
+      <button class="btn-salva-annuncio" onclick="salvaLavoroFoto()" style="margin-bottom:16px">Salva</button>
+
       <div class="foto-grid" id="foto-grid-dash"></div>
     </div>
   </div>
@@ -4186,6 +4203,30 @@ async function eliminaFoto(nome) {
   const folder = String(impresaCorrente.id);
   await sb.storage.from('foto-lavori').remove([`${folder}/${nome}`]);
   await caricaFotoLavori();
+}
+
+// INSERT di un lavoro in lavori_foto
+async function salvaLavoroFoto() {
+  const foto = document.getElementById('lav-foto').value.trim();
+  const descrizione = document.getElementById('lav-descrizione').value.trim();
+  const pubblico = document.getElementById('lav-pubblico').checked;
+
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
+
+  const { error } = await sb.from('lavori_foto').insert({
+    owner_id: user.id,
+    foto,
+    descrizione,
+    pubblico
+  });
+  if (error) { alert('Errore nel salvataggio: ' + error.message); return; }
+
+  alert('✅ Lavoro salvato!');
+  document.getElementById('lav-foto-file').value = '';
+  document.getElementById('lav-foto').value = '';
+  document.getElementById('lav-descrizione').value = '';
+  document.getElementById('lav-pubblico').checked = true;
 }
 
 function fotoDrop(e) {
