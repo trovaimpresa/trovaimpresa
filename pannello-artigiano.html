@@ -4213,6 +4213,7 @@ async function caricaFotoLavoroFile(file) {
 // INSERT di un lavoro in lavori_foto
 async function salvaLavoroFoto() {
   const foto = document.getElementById('lav-foto').value.trim();
+  const titolo = document.getElementById('lav-titolo').value.trim();
   const descrizione = document.getElementById('lav-descrizione').value.trim();
   const pubblico = document.getElementById('lav-pubblico').checked;
 
@@ -4222,6 +4223,7 @@ async function salvaLavoroFoto() {
   const { error } = await sb.from('lavori_foto').insert({
     owner_id: user.id,
     foto,
+    titolo,
     descrizione,
     pubblico
   });
