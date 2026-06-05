@@ -1045,22 +1045,6 @@
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
         <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📷 Foto dei prodotti</div>
 
-        <div class="foto-limit-bar" id="foto-limit-bar-dash">
-          <span style="font-size:1.3rem">📷</span>
-          <span id="foto-limit-testo-dash">Caricamento...</span>
-        </div>
-
-        <div class="foto-upload-progress" id="foto-progress-dash">⏳ Caricamento foto in corso...</div>
-
-        <div class="foto-upload-area" id="foto-upload-area-dash"
-             onclick="document.getElementById('foto-input-dash').click()"
-             ondragover="fotoDragOverDash(event)" ondragleave="fotoDragLeaveDash(event)" ondrop="fotoDrop(event)">
-          <input type="file" id="foto-input-dash" accept="image/*" multiple style="display:none" onchange="uploadFoto(this.files)">
-          <div class="foto-upload-icon">📤</div>
-          <div class="foto-upload-label">Clicca o trascina le foto qui</div>
-          <div class="foto-upload-sub">JPG, PNG, WEBP · max 5 MB per foto</div>
-        </div>
-
         <div class="foto-grid" id="foto-grid-dash"></div>
       </div>
 
@@ -2497,7 +2481,7 @@ function aggiornaBannerFoto() {
   const n = fotoCaricate.length;
   const testoHTML = `<span class="foto-limit-num">${n}</span> foto caricate · Piano <strong style="color:#7c3aed">Premium 💎</strong> — illimitate`;
 
-  for (const suffix of ['', '-dash']) {
+  for (const suffix of ['']) {
     const barEl = document.getElementById('foto-limit-bar' + suffix);
     const testoEl = document.getElementById('foto-limit-testo' + suffix);
     const uploadArea = document.getElementById('foto-upload-area' + suffix);
@@ -2565,15 +2549,8 @@ function fotoDragLeave(e) {
 }
 function fotoDrop(e) {
   e.preventDefault();
-  ['foto-upload-area', 'foto-upload-area-dash'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('dragover'); });
+  ['foto-upload-area'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('dragover'); });
   uploadFoto(e.dataTransfer.files);
-}
-function fotoDragOverDash(e) {
-  e.preventDefault();
-  document.getElementById('foto-upload-area-dash').classList.add('dragover');
-}
-function fotoDragLeaveDash(e) {
-  document.getElementById('foto-upload-area-dash').classList.remove('dragover');
 }
 
 // =====================
