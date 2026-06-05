@@ -529,7 +529,12 @@ async function caricaProfilo(id){
     const nome=d.nome||'';
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
     if(d.tipo){const categoria=d.tipo==='negozio'?(formattaTipoNegozio(d.tipo_negozio)||'Negozio'):(d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase());const tipoFmt='🔧 '+categoria;const mestieriArr=Array.isArray(d.mestieri)?d.mestieri.filter(Boolean):[];document.getElementById('profile-tipo-badge').textContent=mestieriArr.length?tipoFmt+' • '+mestieriArr.map(formattaMestiere).join(' · '):tipoFmt;}
-    if(d.tipo==='negozio')caricaVetrina(d.user_id);
+    if(d.tipo==='negozio'){
+      caricaVetrina(d.user_id);
+      const _fg=document.getElementById('foto-lavori-grid');const _fc=_fg&&_fg.closest('.card');if(_fc)_fc.style.display='none';
+    }else{
+      caricaFotoLavori(id);
+    }
     if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
     if(d.colore_header){const h=document.getElementById('hero-section');if(!d.colore_header.includes('gradient'))h.style.backgroundImage='none';h.style.background=d.colore_header}
     if(d.foto_copertina_url){document.getElementById('cover-foto-img').src=d.foto_copertina_url;document.getElementById('cover-foto').style.display='block'}
@@ -863,7 +868,7 @@ function showRecTab(id,btn){
 
 document.addEventListener('DOMContentLoaded',async()=>{
   const p=new URLSearchParams(window.location.search);const id=p.get('id');
-  if(id){caricaProfilo(id).finally(()=>caricaRecensioni(id));caricaFotoLavori(id);caricaVideoLavori(id)}
+  if(id){caricaProfilo(id).finally(()=>caricaRecensioni(id));caricaVideoLavori(id)}
   if(sessioneUtente)document.getElementById('rec-nome-email-wrapper').style.display='none';
 });
 
