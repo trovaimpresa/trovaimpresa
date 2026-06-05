@@ -2350,7 +2350,7 @@ function aggiornaBadgeEOverlay() {
     lbl.textContent = piano === 'premium' ? 'Premium 👑' : 'Free';
     lbl.style.color = piano === 'premium' ? '#7b1fa2' : '#2a7a4b';
   }
-  if (impresaCorrente.tipo === PANNELLO_CORRENTE) {
+  if ((impresaCorrente.tipo || '').toLowerCase().trim() === PANNELLO_CORRENTE) {
     aggiornaPianoCards(piano);
   } else {
     document.getElementById('sezione-il-tuo-piano').style.display = 'none';
