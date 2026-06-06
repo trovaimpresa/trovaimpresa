@@ -4057,10 +4057,10 @@ function caricaProfilo() {
     <div class="profilo-row"><span class="profilo-key">Sito web</span><span>${i.sito_web || '—'}</span></div>
     <div class="profilo-row"><span class="profilo-key">Descrizione</span><span>${i.descrizione || '—'}</span></div>
     <div class="profilo-row"><span class="profilo-key">Stato</span><span>${i.verificata ? '✅ Verificata' : '⏳ In attesa di verifica'}</span></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
-      <a href="modifica-profilo.html" target="_blank" class="btn-az">✏️ Modifica profilo</a>
-      <a href="#" onclick="avviaMFA(event)" class="btn-az arancio" id="link-2fa">🔐 Attiva 2FA</a>
-    </div>
+    <br>
+    <a href="modifica-profilo.html" target="_blank" style="color:var(--verde);font-weight:700;font-size:0.88rem">✏️ Modifica profilo →</a>
+    &nbsp;&nbsp;
+    <a href="#" onclick="avviaMFA(event)" style="color:var(--arancio);font-weight:700;font-size:0.88rem" id="link-2fa">🔐 Attiva 2FA →</a>
   `;
   const mestieri = Array.isArray(i.mestieri) ? i.mestieri : [];
   const m1El = document.getElementById('mest-m1'); if (m1El) m1El.value = mestieri[0] || '';
