@@ -501,6 +501,9 @@ nav img{height:36px}
     <div class="fg"><label class="fl">Città</label><input type="text" class="fi2" id="prev-citta" placeholder="Es. Roma" required></div>
     <div class="fg"><label class="fl">Tipo di lavoro</label><select class="fs" id="prev-categoria" required><option value="">Seleziona...</option><option>Edilizia / Muratura</option><option>Ristrutturazione completa</option><option>Cartongesso</option><option>Pittura e tinteggiatura</option><option>Pavimenti e piastrelle</option><option>Falegnameria</option><option>Serramenti / Infissi</option><option>Idraulica</option><option>Impianti elettrici</option><option>Climatizzazione / Caldaie</option><option>Fotovoltaico / Pannelli solari</option><option>Antennista / Allarmi</option><option>Coperture / Tetti</option><option>Cappotti termici / Isolamento</option><option>Fabbro / Cancelli / Recinzioni</option><option>Marmi e pietre</option><option>Vetraio</option><option>Tende da sole / Zanzariere</option><option>Giardinaggio / Esterni</option><option>Spurghi / Spazzacamino</option><option>Pulizie / Disinfestazioni</option><option>Sgomberi / Traslochi</option><option>Altro</option></select></div>
     <div class="fg"><label class="fl">Descrizione</label><textarea class="ft" id="prev-descrizione" placeholder="Descrivi il lavoro..."></textarea></div>
+    <div class="fg"><label class="fl">Allega una foto del lavoro</label><input type="file" class="fi2" id="prev-foto-file" accept="image/*"></div>
+    <div class="fr2"><div class="fg"><label class="fl">Data preferita per il sopralluogo</label><input type="date" class="fi2" id="prev-data"></div><div class="fg"><label class="fl">Urgenza</label><select class="fs" id="prev-urgenza"><option>Normale</option><option>Entro la settimana</option><option>Urgente</option></select></div></div>
+    <div class="fg"><label class="fl">Budget indicativo</label><input type="text" class="fi2" id="prev-budget" placeholder="Es. 500-1000€"></div>
     <div id="prev-msg" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px"></div>
     <button class="btn-sub" onclick="submitPreventivo()">📋 Invia richiesta gratuita</button>
   </div>
@@ -718,14 +721,28 @@ async function submitPreventivo(){
   const nome=document.getElementById('prev-nome').value.trim();const email=document.getElementById('prev-email').value.trim();
   const citta=document.getElementById('prev-citta').value.trim();
   const categoria=document.getElementById('prev-categoria').value;
+  const dataPreferita=document.getElementById('prev-data').value;
+  const urgenza=document.getElementById('prev-urgenza').value;
+  const budget=document.getElementById('prev-budget').value.trim();
+  const fotoFile=document.getElementById('prev-foto-file').files[0];
   const me=document.getElementById('prev-msg');const btn=document.querySelector('.btn-sub');
   if(!nome||!email||!citta||!categoria){me.textContent='Compila tutti i campi obbligatori (nome, email, città, categoria).';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';return}
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
     const p=new URLSearchParams(window.location.search);const iid=parseInt(p.get('id'));
-    const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),created_at:new Date().toISOString()});
+    // Upload foto opzionale (best-effort, non blocca l'invio)
+    let fotoUrl=null;
+    if(fotoFile && fotoFile.size<=5*1024*1024){
+      try{
+        const ext=fotoFile.name.split('.').pop();
+        const path=`preventivi/${iid}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+        const {error:upErr}=await sc.storage.from('foto-lavori').upload(path,fotoFile,{upsert:false});
+        if(!upErr) fotoUrl=sc.storage.from('foto-lavori').getPublicUrl(path).data.publicUrl;
+      }catch(_){}
+    }
+    const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,created_at:new Date().toISOString()});
     if(error)throw error;
-    fetch('/.netlify/functions/notifica-preventivo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({impresa_id:iid,nome,email_cliente:email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim()})}).catch(()=>{});
+    fetch('/.netlify/functions/notifica-preventivo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({impresa_id:iid,nome,email_cliente:email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl})}).catch(()=>{});
     me.textContent='✅ Richiesta inviata!';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#e8f5ee;color:#2a7a4b;';
     btn.textContent='✅ Inviato';setTimeout(()=>hidePreventivo(),2000);
   }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}
