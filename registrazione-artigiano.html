@@ -619,6 +619,7 @@
           }
           throw new Error(insertError.message);
         }
+        try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nome, email: email, tipo: 'artigiano' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
         window.location.href = 'pannello-artigiano.html';
       } catch (err) {
         console.error(err);

@@ -14,6 +14,18 @@ exports.handler = async (event) => {
     const email = s.metadata && s.metadata.email;
     if (email) {
       await supabase.from('imprese').update({ piano: 'premium' }).eq('email', email);
+
+      // Email di conferma passaggio a Premium (best-effort, non blocca il webhook)
+      try {
+        const { data: row } = await supabase.from('imprese').select('nome, tipo').eq('email', email).single();
+        await fetch('https://trovaimpresa.com/.netlify/functions/invia-email-benvenuto', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome: row && row.nome, email, tipo: row && row.tipo, premium: true })
+        });
+      } catch (e) {
+        console.warn('Email premium fallita:', e);
+      }
     }
   }
   return { statusCode: 200, body: 'ok' };

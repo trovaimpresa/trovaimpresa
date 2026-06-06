@@ -620,6 +620,7 @@
           throw new Error('Errore salvataggio dati: ' + errText);
         }
 
+        try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: document.getElementById('nome').value, email: email, tipo: 'candidato' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
         window.location.href = 'pannello-candidato.html';
       } catch (err) {
         console.error('Errore:', err);
