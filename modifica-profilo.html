@@ -31,11 +31,27 @@
       border-radius: 0;
       box-shadow: none;
       padding: 0;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px 24px;
+      align-items: start;
     }
     .form-card:last-child { margin-bottom: 0; }
     .form-card.fc-arancio, .form-card.fc-blu { border: none; }
     .form-card .section-title { display: none; }
+    /* campi in griglia: la spaziatura verticale la dà il gap */
+    .form-card .form-group { margin-bottom: 0; }
+    /* titoletto e blocchi non-campo (mappa, form-row, overlay) a tutta larghezza */
+    .form-card > .card-header,
+    .form-card > div:not(.form-group) { grid-column: 1 / -1; }
+    /* le righe già a 2 colonne si fondono nella griglia della sezione */
+    .form-card > .form-row { display: contents; }
+    /* campi che devono restare a tutta larghezza */
+    .form-card .form-group:has(textarea),
+    .form-card .form-group:has(.tag-input),
+    .form-card .form-group:has(.upload-area),
+    .form-card .form-group:has(> div) { grid-column: 1 / -1; }
     .card-header {
       display: flex; align-items: center; gap: 8px;
       font-weight: 800; font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase;
@@ -130,7 +146,7 @@
       <div id="loading" class="loading">⏳ Caricamento dati in corso...</div>
       <div id="alert-box" style="display:none;"></div>
 
-      <div id="form-wrapper" style="display:none;max-width:1000px;margin:0 auto;">
+      <div id="form-wrapper" style="display:none;width:100%;margin:0 auto;">
 
         <div class="profilo-card-unica">
 
