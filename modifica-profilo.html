@@ -17,25 +17,33 @@
     .header h1 { font-size: 24px; margin-bottom: 8px; }
     .header p { font-size: 14px; opacity: 0.9; }
     .content { padding: 24px 0; background: transparent; }
-    .form-card {
+    .profilo-card-unica {
       background: white;
-      border-top: 4px solid #2e7d32;
-      border-radius: 14px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      padding: 20px 24px;
-      margin-bottom: 16px;
+      border: 1px solid #ececec;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      padding: 28px 30px;
+      margin-bottom: 20px;
     }
-    .form-card.fc-arancio { border-top-color: #e65100; }
-    .form-card.fc-blu     { border-top-color: #1565c0; }
+    .form-card {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      margin-bottom: 28px;
+    }
+    .form-card:last-child { margin-bottom: 0; }
+    .form-card.fc-arancio, .form-card.fc-blu { border: none; }
     .form-card .section-title { display: none; }
     .card-header {
       display: flex; align-items: center; gap: 8px;
-      font-weight: 700; font-size: 14px; color: #2e7d32;
-      margin-bottom: 16px; padding-bottom: 12px;
+      font-weight: 800; font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase;
+      color: #2a7a4b;
+      margin-bottom: 14px; padding-bottom: 10px;
       border-bottom: 1px solid #f0f0f0;
     }
-    .card-header.arancio { color: #e65100; }
-    .card-header.blu     { color: #1565c0; }
+    .card-header.arancio, .card-header.blu { color: #2a7a4b; }
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 7px; }
     .form-group input, .form-group select, .form-group textarea {
@@ -63,6 +71,12 @@
     }
     .btn-save:hover { background: #1a4d2e; }
     .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+    .form-footer { margin-top: 4px; }
+    .azioni-discrete { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 22px 0 30px; }
+    .link-discreto { background: none; border: none; cursor: pointer; font-size: 13px; font-weight: 600; color: #666; text-decoration: underline; padding: 4px; font-family: inherit; }
+    .link-discreto:hover { color: #333; }
+    .link-discreto.pericolo { color: #9c1010; }
+    .link-discreto.pericolo:hover { color: #6d0a0a; }
     .btn-back-link {
       display: block; text-align: center; margin-top: 14px;
       font-size: 13px; color: #2a7a4b; text-decoration: none; font-weight: 600;
@@ -99,7 +113,7 @@
       .header p  { font-size: 0.82rem !important; }
       .content { padding: 12px 0 !important; }
       .form-row { grid-template-columns: 1fr !important; }
-      .form-card { padding: 16px !important; }
+      .profilo-card-unica { padding: 18px !important; }
       .btn-back-link { font-size: 0.82rem !important; }
     }
   </style>
@@ -117,6 +131,8 @@
       <div id="alert-box" style="display:none;"></div>
 
       <div id="form-wrapper" style="display:none;max-width:1000px;margin:0 auto;">
+
+        <div class="profilo-card-unica">
 
         <!-- Card 1: Dati di contatto -->
         <div class="form-card">
@@ -690,33 +706,23 @@
           </div>
         </div>
 
-        <div class="form-card fc-arancio">
-          <div class="card-header arancio">💾 Salva profilo</div>
+        </div><!-- /profilo-card-unica -->
+
+        <div class="form-footer">
           <button type="button" class="btn-save" id="btn-save" onclick="salvaProfilo()">💾 Salva modifiche</button>
           <a href="pannello-impresa.html" class="btn-back-link" onclick="window.location.href = pannelloPerTipo(); return false;">← Torna al pannello</a>
           <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
             🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
             <a href="/privacy-policy.html" style="color:#2a7a4b;">Privacy Policy</a>
           </p>
-        </div><!-- /card save -->
-
-        <div class="form-card fc-arancio" id="card-disdetta" style="display:none;margin-top:16px;">
-          <div class="card-header arancio">⚠️ Gestione abbonamento</div>
-          <button type="button" id="btn-disdici" onclick="disdiciAbbonamento()"
-            style="background:#e65100;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;width:100%;">
-            Disdici abbonamento
-          </button>
-          <p id="info-disdetta" style="text-align:center;font-size:12px;color:#888;margin-top:10px;margin-bottom:0;"></p>
-        </div>
-
-        <div class="form-card" style="border-top:4px solid #9c1010;margin-top:16px;margin-bottom:30px;">
-          <div class="card-header" style="color:#9c1010;">⚠️ Elimina account</div>
-          <p style="text-align:center;font-size:12px;color:#888;margin-bottom:10px;">Azione irreversibile. Tutti i tuoi dati verranno cancellati.</p>
-          <button type="button" id="btn-elimina" onclick="eliminaAccount()"
-            style="background:#9c1010;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;width:100%;margin-top:10px;">
-            Elimina account definitivamente
-          </button>
-        </div>
+          <div class="azioni-discrete">
+            <div id="card-disdetta" style="display:none;">
+              <button type="button" id="btn-disdici" onclick="disdiciAbbonamento()" class="link-discreto">⚙️ Gestione abbonamento</button>
+              <p id="info-disdetta" style="font-size:12px;color:#888;margin-top:4px;margin-bottom:0;"></p>
+            </div>
+            <button type="button" id="btn-elimina" onclick="eliminaAccount()" class="link-discreto pericolo">Elimina account</button>
+          </div>
+        </div><!-- /form-footer -->
 
       </div><!-- /form-wrapper -->
     </div><!-- /content -->
