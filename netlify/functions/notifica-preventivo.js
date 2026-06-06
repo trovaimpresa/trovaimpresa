@@ -3,9 +3,9 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro;
+  let impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro, data_preferita, urgenza, budget, foto;
   try {
-    ({ impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro } = JSON.parse(event.body));
+    ({ impresa_id, nome, email_cliente, telefono, descrizione, citta, categoria_lavoro, data_preferita, urgenza, budget, foto } = JSON.parse(event.body));
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
@@ -63,12 +63,34 @@ exports.handler = async function(event) {
                 <td style="padding:10px 0">${citta || '—'}</td>
               </tr>
               ${descrizione ? `
-              <tr>
+              <tr style="border-bottom:1px solid #e5e5e5">
                 <td style="padding:10px 0;color:#666;vertical-align:top">Descrizione</td>
                 <td style="padding:10px 0;white-space:pre-wrap">${descrizione}</td>
               </tr>` : ''}
+              ${data_preferita ? `
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Data preferita</td>
+                <td style="padding:10px 0">${data_preferita}</td>
+              </tr>` : ''}
+              ${urgenza ? `
+              <tr style="border-bottom:1px solid #e5e5e5">
+                <td style="padding:10px 0;color:#666">Urgenza</td>
+                <td style="padding:10px 0;font-weight:700">${urgenza}</td>
+              </tr>` : ''}
+              ${budget ? `
+              <tr>
+                <td style="padding:10px 0;color:#666">Budget indicativo</td>
+                <td style="padding:10px 0">${budget}</td>
+              </tr>` : ''}
             </table>
           </div>
+          ${foto ? `
+          <div style="text-align:center;margin-bottom:24px">
+            <a href="${foto}" target="_blank" style="text-decoration:none">
+              <img src="${foto}" alt="Foto del lavoro" style="max-width:100%;border-radius:8px;border:1px solid #e5e5e5">
+              <div style="font-size:13px;color:#2a7a4b;font-weight:700;margin-top:8px">📷 Apri la foto allegata</div>
+            </a>
+          </div>` : ''}
           ${waUrl ? `
           <div style="text-align:center;margin-bottom:14px">
             <a href="${waUrl}"
