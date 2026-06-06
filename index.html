@@ -131,6 +131,11 @@
             position: relative;
             z-index: 1;
         }
+        .hero-side-video {
+            width: 180px;
+            height: auto;
+            border-radius: 12px;
+        }
         .hero-logo {
             height: 280px;
             width: auto;
@@ -713,6 +718,9 @@
           font-size: 12px !important; white-space: nowrap !important;
         }
 
+        /* Video laterali nascosti su mobile */
+        .hero-side-video { display: none !important; }
+
         /* Hero logo */
         .hero-logo { max-height: 150px !important; height: auto !important; width: auto !important; }
 
@@ -809,7 +817,11 @@
         <!-- Placeholder spazi pubblicitari (solo posizionamento) -->
         <a href="/pubblicita" data-spazio-id="hero-sx" class="pub-link pub-spazio" style="position:absolute; top:50%; left:40px; transform:translateY(-50%); width:calc(50% - 310px); height:260px; border:2px dashed #fff; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; font-weight:700; z-index:2;">Spazio disponibile</a>
         <a href="/pubblicita" data-spazio-id="hero-dx" class="pub-link pub-spazio" style="position:absolute; top:50%; right:40px; transform:translateY(-50%); width:calc(50% - 310px); height:260px; border:2px dashed #fff; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; font-weight:700; z-index:2;">Spazio disponibile</a>
-        <img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" style="max-width:420px;width:100%;height:auto;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:24px;">
+            <video class="hero-side-video" src="videos/video-imprese.mp4" autoplay muted loop playsinline></video>
+            <img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" style="max-width:420px;width:100%;height:auto;">
+            <video class="hero-side-video" src="videos/video-presentazione.mp4" autoplay muted loop playsinline></video>
+        </div>
     </section>
 
     <!-- CITY PICKER per annunci sponsorizzati (visibile solo senza ?citta in URL) -->
