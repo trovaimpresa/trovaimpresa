@@ -195,9 +195,85 @@
               <label>Anno di fondazione / inizio attività</label>
               <input type="number" id="f-anno_fondazione-artigiano" min="1900" max="2026" placeholder="Es. 2005">
             </div>
-            <div class="form-group" style="margin-bottom:0;">
+            <div class="form-group">
               <label>Mestiere principale <span class="required">*</span></label>
               <select id="f-mestiere-artigiano">
+                <option value="">— Seleziona —</option>
+                <option>Edilizia / Muratura</option>
+                <option>Ristrutturazione completa</option>
+                <option>Cartongesso</option>
+                <option>Pittura e tinteggiatura</option>
+                <option>Pavimenti e piastrelle</option>
+                <option>Falegnameria</option>
+                <option>Serramenti / Infissi</option>
+                <option>Idraulica</option>
+                <option>Impianti elettrici</option>
+                <option>Climatizzazione / Caldaie</option>
+                <option>Fotovoltaico / Pannelli solari</option>
+                <option>Antennista / Allarmi</option>
+                <option>Coperture / Tetti</option>
+                <option>Cappotti termici / Isolamento</option>
+                <option>Fabbro / Cancelli / Recinzioni</option>
+                <option>Marmi e pietre</option>
+                <option>Vetraio</option>
+                <option>Tende da sole / Zanzariere</option>
+                <option>Giardinaggio / Esterni</option>
+                <option>Spurghi / Spazzacamino</option>
+                <option>Pulizie / Disinfestazioni</option>
+                <option>Sgomberi / Traslochi</option>
+                <option>Stufe e camini</option>
+                <option>Frigorista / Celle frigorifere</option>
+                <option>Carpentiere</option>
+                <option>Impermeabilizzazione</option>
+                <option>Ponteggi</option>
+                <option>Demolizione</option>
+                <option>Movimento terra</option>
+                <option>Asfalti</option>
+                <option>Intonacatore</option>
+                <option>Altro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Mestiere secondario</label>
+              <select id="f-mestiere2-artigiano">
+                <option value="">— Seleziona —</option>
+                <option>Edilizia / Muratura</option>
+                <option>Ristrutturazione completa</option>
+                <option>Cartongesso</option>
+                <option>Pittura e tinteggiatura</option>
+                <option>Pavimenti e piastrelle</option>
+                <option>Falegnameria</option>
+                <option>Serramenti / Infissi</option>
+                <option>Idraulica</option>
+                <option>Impianti elettrici</option>
+                <option>Climatizzazione / Caldaie</option>
+                <option>Fotovoltaico / Pannelli solari</option>
+                <option>Antennista / Allarmi</option>
+                <option>Coperture / Tetti</option>
+                <option>Cappotti termici / Isolamento</option>
+                <option>Fabbro / Cancelli / Recinzioni</option>
+                <option>Marmi e pietre</option>
+                <option>Vetraio</option>
+                <option>Tende da sole / Zanzariere</option>
+                <option>Giardinaggio / Esterni</option>
+                <option>Spurghi / Spazzacamino</option>
+                <option>Pulizie / Disinfestazioni</option>
+                <option>Sgomberi / Traslochi</option>
+                <option>Stufe e camini</option>
+                <option>Frigorista / Celle frigorifere</option>
+                <option>Carpentiere</option>
+                <option>Impermeabilizzazione</option>
+                <option>Ponteggi</option>
+                <option>Demolizione</option>
+                <option>Movimento terra</option>
+                <option>Asfalti</option>
+                <option>Intonacatore</option>
+                <option>Altro</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Terzo mestiere</label>
+              <select id="f-mestiere3-artigiano">
                 <option value="">— Seleziona —</option>
                 <option>Edilizia / Muratura</option>
                 <option>Ristrutturazione completa</option>
@@ -889,6 +965,8 @@
         document.getElementById('f-anni_esperienza-artigiano').value = d.anni_esperienza || '';
         document.getElementById('f-anno_fondazione-artigiano').value = d.anno_fondazione || '';
         setSelectValue('f-mestiere-artigiano', Array.isArray(d.mestieri) ? d.mestieri[0] : (d.mestieri || d.mestiere));
+        setSelectValue('f-mestiere2-artigiano', Array.isArray(d.mestieri) ? d.mestieri[1] : '');
+        setSelectValue('f-mestiere3-artigiano', Array.isArray(d.mestieri) ? d.mestieri[2] : '');
         document.getElementById('f-specializzazioni-artigiano').value = d.specializzazioni || '';
         document.getElementById('f-zone-artigiano').value = d.zone || '';
         document.getElementById('risponde_24h').checked = !!d.risponde_24h;
@@ -1011,6 +1089,17 @@
         alert('La descrizione può essere max 200 caratteri sul piano Free. Passa a Premium per descrizione illimitata.');
         return;
       }
+      // Validazione mestieri (artigiano)
+      if (tipoCategoria === 'artigiano') {
+        const _m1 = document.getElementById('f-mestiere-artigiano').value;
+        const _m2 = document.getElementById('f-mestiere2-artigiano').value;
+        const _m3 = document.getElementById('f-mestiere3-artigiano').value;
+        if (!_m1) { alert('Seleziona almeno il mestiere principale.'); return; }
+        if ((_m2 && _m2 === _m1) || (_m3 && (_m3 === _m1 || _m3 === _m2))) {
+          alert('Mestiere secondario e terzo non possono coincidere con il principale né tra loro.');
+          return;
+        }
+      }
       const btn = document.getElementById('btn-save');
       btn.disabled = true;
       btn.textContent = '⏳ Salvataggio...';
@@ -1038,7 +1127,11 @@
             partita_iva: document.getElementById('f-partita_iva-artigiano').value.trim(),
             anni_esperienza: parseInt(document.getElementById('f-anni_esperienza-artigiano').value) || null,
             anno_fondazione: parseInt(document.getElementById('f-anno_fondazione-artigiano').value) || null,
-            mestieri: document.getElementById('f-mestiere-artigiano').value ? [document.getElementById('f-mestiere-artigiano').value] : [],
+            mestieri: [...new Set([
+              document.getElementById('f-mestiere-artigiano').value,
+              document.getElementById('f-mestiere2-artigiano').value,
+              document.getElementById('f-mestiere3-artigiano').value
+            ].filter(Boolean))],
             specializzazioni: document.getElementById('f-specializzazioni-artigiano').value.trim(),
             zone: document.getElementById('f-zone-artigiano').value.trim(),
             risponde_24h: document.getElementById('risponde_24h').checked,
