@@ -2222,6 +2222,7 @@ function showSection(id, el, fromPopstate) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   if (el) el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   // "Il tuo piano" visibile solo sulla dashboard
   const pianoBox = document.getElementById('sezione-il-tuo-piano');
   if (pianoBox) pianoBox.style.display = (id === 'dashboard') ? '' : 'none';
