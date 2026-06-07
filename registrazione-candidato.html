@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrazione Candidato - TrovaImpresa</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -285,6 +286,10 @@
             <option value="">-- Seleziona città --</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Anteprima posizione sulla mappa</label>
+          <div id="mappa-anteprima" style="height:280px;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;"></div>
+        </div>
       </div>
 
       <!-- STEP 4 -->
@@ -337,6 +342,7 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/geo-italia.js"></script>
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -626,6 +632,65 @@
         alert('Errore: ' + err.message);
       }
     }
+
+    // ── MAPPA ANTEPRIMA: un solo pin sulla città scelta (geocoding al volo) ──
+    let mapPrev = null, markerPrev = null;
+    const geoCachePrev = {};
+
+    function initMappaAnteprima() {
+      if (mapPrev || typeof L === 'undefined') return;
+      mapPrev = L.map('mappa-anteprima').setView([41.9, 12.5], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(mapPrev);
+    }
+
+    function creaIconaPrev() {
+      return L.divIcon({
+        className: '',
+        html: `<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#2a7a4b"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>`,
+        iconSize: [22, 30], iconAnchor: [11, 30], popupAnchor: [0, -30]
+      });
+    }
+
+    async function geocodificaPrev(query) {
+      const key = query.toLowerCase().trim();
+      if (geoCachePrev[key]) return geoCachePrev[key];
+      try {
+        const r = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ', Italia')}&format=json&limit=1`,
+          { headers: { 'Accept-Language': 'it' } }
+        );
+        const data = await r.json();
+        if (data && data[0]) {
+          const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+          geoCachePrev[key] = coords;
+          return coords;
+        }
+      } catch(e) {}
+      return null;
+    }
+
+    async function aggiornaPinAnteprima(citta) {
+      if (typeof L === 'undefined') return;
+      initMappaAnteprima();
+      setTimeout(() => { if (mapPrev) mapPrev.invalidateSize(); }, 60);
+      if (!citta) {
+        if (markerPrev) { mapPrev.removeLayer(markerPrev); markerPrev = null; }
+        return;
+      }
+      const coords = await geocodificaPrev(citta);
+      if (!coords) return;
+      if (markerPrev) markerPrev.setLatLng(coords);
+      else markerPrev = L.marker(coords, { icon: creaIconaPrev() }).addTo(mapPrev);
+      markerPrev.bindPopup('📍 ' + citta);
+      mapPrev.setView(coords, 12);
+    }
+
+    (function() {
+      const cs = document.getElementById('citta');
+      if (cs) cs.addEventListener('change', e => aggiornaPinAnteprima(e.target.value));
+    })();
   </script>
 <script src="/cookie-banner.js"></script>
 <footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
