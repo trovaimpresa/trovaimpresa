@@ -102,6 +102,15 @@ nav img{height:36px}
   color:#1a472a;border:1px solid #ddd;transition:all 0.2s}
 .cat:hover{background:#e8f5ee;border-color:#2a7a4b}
 
+/* INFO UNIFICATA */
+.info-section{margin-top:22px}
+.info-section:first-child{margin-top:0}
+.info-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#2a7a4b;margin-bottom:10px}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.info-item{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:10px 14px}
+.info-item .k{font-size:11px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.info-item .v{font-size:14px;color:#1a472a;font-weight:600;margin-top:3px;word-break:break-word}
+
 /* FOTO */
 .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
 .fi{aspect-ratio:1;border-radius:10px;overflow:hidden;background:#f5f5f5;border:1px solid #ddd;cursor:pointer}
@@ -410,16 +419,25 @@ nav img{height:36px}
       </div>
     </div>
 
-    <!-- CHI SIAMO -->
-    <div class="card" id="card-chi-siamo" style="display:none;border-top-color:#2a7a4b;min-height:341px">
-      <div class="card-title">📋 Chi siamo</div>
-      <p class="desc" id="profile-desc"></p>
-    </div>
-
-    <!-- SPECIALIZZAZIONI -->
-    <div class="card" style="border-top-color:#2a7a4b;min-height:341px">
-      <div class="card-title">🔧 Specializzazioni</div>
-      <div class="cats" id="profile-mestieri"><div style="color:#aaa;font-size:13px">⏳ Caricamento...</div></div>
+    <!-- INFORMAZIONI (vista unificata) -->
+    <div class="card" id="card-info" style="display:none;border-top-color:#2a7a4b">
+      <div class="card-title">📋 Informazioni</div>
+      <div class="info-section" id="info-desc-wrap" style="display:none">
+        <div class="info-label">Chi siamo</div>
+        <p class="desc" id="profile-desc"></p>
+      </div>
+      <div class="info-section" id="info-campi-wrap" style="display:none">
+        <div class="info-label">Dati</div>
+        <div class="info-grid" id="info-campi"></div>
+      </div>
+      <div class="info-section" id="info-mestieri-wrap" style="display:none">
+        <div class="info-label" id="info-mestieri-label">Mestieri / Servizi</div>
+        <div class="cats" id="profile-mestieri"></div>
+      </div>
+      <div class="info-section" id="info-spec-wrap" style="display:none">
+        <div class="info-label">Specializzazioni</div>
+        <div class="cats" id="profile-spec"></div>
+      </div>
     </div>
 
     <!-- MAPPA -->
@@ -429,7 +447,7 @@ nav img{height:36px}
     </div>
 
     <!-- FOTO -->
-    <div class="card" style="border-top-color:#2a7a4b;min-height:341px">
+    <div class="card" id="card-foto-lavori" style="border-top-color:#2a7a4b;display:none">
       <div class="card-title">📸 Foto dei lavori</div>
       <div class="fgrid" id="foto-lavori-grid">
         <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px;font-size:13px">📷 Nessuna foto caricata</div>
@@ -528,6 +546,15 @@ sc.auth.onAuthStateChange((event, session) => { sessioneUtente = session; });
 
 function formattaMestiere(s){if(!s)return '';if(s==='amministratore_condominio')return 'Amministratore di condominio';const t=String(s).replace(/_/g,' ');return t.charAt(0).toUpperCase()+t.slice(1);}
 
+// Normalizza le specializzazioni: array, JSON string (professionisti) o stringa separata da , ; \n
+function parseSpec(raw){
+  if(!raw)return [];
+  if(Array.isArray(raw))return raw.map(s=>String(s).trim()).filter(Boolean);
+  const s=String(raw).trim();if(!s)return [];
+  if(s.charAt(0)==='['){try{const a=JSON.parse(s);if(Array.isArray(a))return a.map(x=>String(x).trim()).filter(Boolean);}catch(e){}}
+  return s.split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean);
+}
+
 const TIPO_NEGOZIO_LABEL={materiali_edili:'Materiali edili',ferramenta:'Ferramenta',termoidraulica:'Termoidraulica',elettrico:'Elettrico',ceramiche:'Ceramiche e bagno',pavimenti:'Pavimenti e rivestimenti',colorificio:'Colorificio',legname:'Legname',infissi_serramenti:'Infissi e serramenti',attrezzature_edili:'Attrezzature edili',noleggio_attrezzature:'Noleggio attrezzature',isolanti_impermeabilizzanti:'Isolanti e impermeabilizzanti',arredo_bagno:'Arredo bagno',climatizzazione_caldaie:'Climatizzazione / Caldaie',stufe_camini:'Stufe e camini',agenzia_immobiliare:'Agenzia immobiliare'};
 function formattaTipoNegozio(slug){if(!slug)return '';return TIPO_NEGOZIO_LABEL[slug]||slug;}
 
@@ -553,15 +580,42 @@ async function caricaProfilo(id){
     document.getElementById('profile-badges').innerHTML=b.join('');
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;
-    if(d.descrizione){document.getElementById('profile-desc').textContent=d.descrizione;document.getElementById('card-chi-siamo').style.display='block'}
+    // ===== VISTA INFORMAZIONI UNIFICATA (solo campi compilati) =====
+    const _esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    let _infoHasContent=false;
+    // Chi siamo
+    if(d.descrizione){document.getElementById('profile-desc').textContent=d.descrizione;document.getElementById('info-desc-wrap').style.display='';_infoHasContent=true}
+    // Campi profilo
+    const _campi=[
+      ['Partita IVA',d.partita_iva],
+      ['Anni di esperienza',d.anni_esperienza?d.anni_esperienza+' anni':''],
+      ['Numero albo',d.numero_albo||d.albo],
+      ['Regione',d.regione],
+      ['Provincia',d.provincia],
+      ['Città',d.citta],
+      ['Indirizzo',d.indirizzo],
+      ['CAP',d.cap],
+      ['Zone servite',d.zone]
+    ];
+    const _campiHtml=_campi.filter(c=>c[1]!=null&&String(c[1]).trim()!=='').map(c=>`<div class="info-item"><div class="k">${c[0]}</div><div class="v">${_esc(c[1])}</div></div>`).join('');
+    if(_campiHtml){document.getElementById('info-campi').innerHTML=_campiHtml;document.getElementById('info-campi-wrap').style.display='';_infoHasContent=true}
+    // Mestieri / Servizi (da mestieri[] + mestiere)
     const im={'muratura':'🧱','carpentiere':'🪵','elettricista':'⚡','idraulico':'🚿','termoidraulico':'🔥','pittore':'🎨','piastrellista':'🟫','falegname':'🪚','fabbro':'🔩','giardiniere':'🌿','demolizione':'⛏️','fotovoltaico':'☀️'};
-    const voci=[];const mestieri=Array.isArray(d.mestieri)?d.mestieri:(d.mestieri?[d.mestieri]:[]);
-    if(d.mestiere)mestieri.unshift(d.mestiere);mestieri.forEach(m=>{if(m)voci.push(m)});
-    if(d.specializzazioni)String(d.specializzazioni).split(/[,;\n]+/).forEach(s=>{const t=s.trim();if(t)voci.push(t)});
-    const uniq=[...new Set(voci.filter(Boolean))];
-    const mg=document.getElementById('profile-mestieri');
-    if(uniq.length)mg.innerHTML=uniq.map(v=>{const k=Object.keys(im).find(k=>v.toLowerCase().includes(k));return`<div class="cat"><span>${im[k]||'🔧'}</span> ${formattaMestiere(v)}</div>`}).join('');
-    else mg.innerHTML='<div style="color:#aaa;font-size:13px">Nessuna specializzazione</div>';
+    const mestieri=Array.isArray(d.mestieri)?d.mestieri.slice():(d.mestieri?[d.mestieri]:[]);
+    if(d.mestiere)mestieri.unshift(d.mestiere);
+    const mestieriUniq=[...new Set(mestieri.map(m=>String(m==null?'':m).trim()).filter(Boolean))];
+    if(mestieriUniq.length){
+      document.getElementById('info-mestieri-label').textContent=d.tipo==='professionista'?'Professioni':(d.tipo==='negozio'?'Categorie':'Mestieri / Servizi');
+      document.getElementById('profile-mestieri').innerHTML=mestieriUniq.map(v=>{const k=Object.keys(im).find(k=>v.toLowerCase().includes(k));return`<div class="cat"><span>${im[k]||'🔧'}</span> ${_esc(formattaMestiere(v))}</div>`}).join('');
+      document.getElementById('info-mestieri-wrap').style.display='';_infoHasContent=true;
+    }
+    // Specializzazioni (parse JSON string per professionisti → chip pulite)
+    const specArr=parseSpec(d.specializzazioni);
+    if(specArr.length){
+      document.getElementById('profile-spec').innerHTML=specArr.map(v=>`<div class="cat"><span>📌</span> ${_esc(v)}</div>`).join('');
+      document.getElementById('info-spec-wrap').style.display='';_infoHasContent=true;
+    }
+    if(_infoHasContent)document.getElementById('card-info').style.display='';
     // VALUTAZIONE + RECENSIONI: query live su feedback_clienti verificate
     const rRev=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&select=stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita`,{headers:{'apikey':SK}});
     const recs=await rRev.json();
@@ -803,11 +857,13 @@ async function caricaVideoLavori(id){
 
 async function caricaFotoLavori(id){
   const grid=document.getElementById('foto-lavori-grid');if(!grid)return;
+  const card=grid.closest('.card');
   const {data,error}=await sc.storage.from('foto-lavori').list(String(id),{sortBy:{column:'created_at',order:'desc'}});
   const foto=(data||[]).filter(f=>f.name!=='.emptyFolderPlaceholder');
-  if(error||!foto.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:32px;font-size:13px">📷 Nessuna foto caricata</div>';return}
+  if(error||!foto.length){if(card)card.style.display='none';return}
   window.fotoLavoriUrls=foto.map(f=>sc.storage.from('foto-lavori').getPublicUrl(`${id}/${f.name}`).data.publicUrl);
   grid.innerHTML=window.fotoLavoriUrls.map((u,i)=>`<div class="fi" onclick="apriLightbox(${i})"><img src="${u}" alt="Foto" loading="lazy"></div>`).join('');
+  if(card)card.style.display='';
 }
 
 // VETRINA PRODOTTI (solo negozi): legge vetrina_negozio e mostra le card pubbliche
