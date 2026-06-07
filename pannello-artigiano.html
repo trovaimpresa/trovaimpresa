@@ -1347,6 +1347,216 @@
       </div>
     </div>
 
+    <!-- SCADENZE FISCALI -->
+    <div class="section" id="sec-scadenze-fiscali">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          📋 Scadenze fiscali
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tipo *</label>
+              <select id="scad-fisc-tipo">
+                <option value="">— Seleziona —</option>
+                <option>F24</option>
+                <option>DURC</option>
+                <option>Assicurazione RC</option>
+                <option>Attestato sicurezza</option>
+                <option>INPS</option>
+                <option>INAIL</option>
+                <option>Visura CCIAA</option>
+                <option>Altro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Data scadenza *</label>
+              <input type="date" id="scad-fisc-data">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Descrizione</label>
+            <input type="text" id="scad-fisc-descrizione" placeholder="Dettagli aggiuntivi">
+          </div>
+          <div class="form-group">
+            <label>Importo (€)</label>
+            <input type="number" id="scad-fisc-importo" step="0.01" min="0" placeholder="€">
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+              <input type="checkbox" id="scad-fisc-ricorrente" style="width:18px;height:18px;cursor:pointer" onchange="document.getElementById('scad-fisc-frequenza-row').style.display = this.checked ? 'block' : 'none'">
+              Ricorrente
+            </label>
+          </div>
+          <div class="form-group" id="scad-fisc-frequenza-row" style="display:none">
+            <label>Frequenza</label>
+            <select id="scad-fisc-frequenza">
+              <option value="mensile">Mensile</option>
+              <option value="trimestrale">Trimestrale</option>
+              <option value="semestrale">Semestrale</option>
+              <option value="annuale" selected>Annuale</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Note</label>
+            <textarea id="scad-fisc-note" placeholder="Note aggiuntive..."></textarea>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <button class="btn-salva-annuncio" onclick="salvaScadenzaFiscale()">💾 Salva scadenza</button>
+            <span id="scad-fisc-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+          </div>
+        </div>
+        <div id="scad-fisc-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+    </div>
+
+    <!-- CREA PREVENTIVO -->
+    <div class="section" id="sec-crea-preventivo">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          📄 Crea preventivo
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div class="prev-section-label">🏢 La tua attività</div>
+        <img id="prev-art-logo" class="prev-logo-preview" alt="Logo">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome attività</label>
+            <input type="text" id="prev-art-nome">
+          </div>
+          <div class="form-group">
+            <label>P. IVA</label>
+            <input type="text" id="prev-art-piva">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Indirizzo</label>
+          <input type="text" id="prev-art-indirizzo">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Telefono</label>
+            <input type="text" id="prev-art-telefono">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="text" id="prev-art-email">
+          </div>
+        </div>
+
+        <div class="prev-section-label">👤 Dati cliente</div>
+        <div class="form-group">
+          <label>Nome cliente *</label>
+          <input type="text" id="prev-cli-nome" placeholder="Nome e cognome / Ragione sociale">
+        </div>
+        <div class="form-group">
+          <label>Indirizzo</label>
+          <input type="text" id="prev-cli-indirizzo" placeholder="Via, città">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Telefono</label>
+            <input type="tel" id="prev-cli-telefono" placeholder="+39 …">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="prev-cli-email" placeholder="cliente@example.com">
+          </div>
+        </div>
+
+        <div class="prev-section-label">🧾 Dati preventivo</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Numero preventivo</label>
+            <input type="text" id="prev-numero">
+          </div>
+          <div class="form-group">
+            <label>Data</label>
+            <input type="text" id="prev-data">
+          </div>
+        </div>
+
+        <div class="prev-section-label">✨ Genera con AI</div>
+        <div class="form-group">
+          <textarea id="prev-ai-prompt" placeholder="Descrivi il lavoro in 1-2 righe (es. ristrutturazione bagno 8mq con piastrelle e sanitari)" style="min-height:70px"></textarea>
+        </div>
+        <button type="button" id="btn-prev-genera-ai"
+          style="padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;margin-bottom:18px;transition:background 0.15s"
+          onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
+          ✨ Genera con AI
+        </button>
+
+        <div class="prev-section-label">📋 Voci</div>
+        <div style="overflow-x:auto">
+          <table class="prev-table">
+            <thead>
+              <tr>
+                <th>Descrizione</th>
+                <th style="width:80px;text-align:right">Qta</th>
+                <th style="width:130px;text-align:right">Prezzo unit. €</th>
+                <th style="width:110px;text-align:right">Totale €</th>
+                <th style="width:40px"></th>
+              </tr>
+            </thead>
+            <tbody id="prev-voci-body"></tbody>
+          </table>
+        </div>
+        <button type="button" class="btn-aggiungi-riga" onclick="aggiungiRigaPreventivo()">+ Aggiungi riga</button>
+
+        <div class="prev-totali">
+          <div class="prev-totali-row">
+            <span>Totale imponibile</span>
+            <span id="prev-imponibile">€ 0,00</span>
+          </div>
+          <div class="prev-totali-row">
+            <span>IVA 22%</span>
+            <span id="prev-iva">€ 0,00</span>
+          </div>
+          <div class="prev-totali-row final">
+            <span>Totale finale</span>
+            <span id="prev-totale-finale">€ 0,00</span>
+          </div>
+        </div>
+
+        <div class="prev-section-label">📝 Note e validità</div>
+        <div class="form-group">
+          <label>Note</label>
+          <textarea id="prev-note" placeholder="Condizioni, modalità di pagamento, esclusioni…"></textarea>
+        </div>
+        <div class="form-group" style="max-width:200px">
+          <label>Validità (giorni)</label>
+          <input type="number" id="prev-validita" min="1" max="365" value="30">
+        </div>
+
+        <div class="modal-ai-footer">
+          <button type="button" class="btn-chiudi-modal" onclick="chiudiModalCreaPreventivo()">Chiudi</button>
+          <button type="button" id="btn-salva-prev" onclick="salvaPreventivo()" style="padding:11px 22px;background:white;color:var(--verde);border:1.5px solid var(--verde);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;transition:all 0.15s">💾 Salva</button>
+          <button type="button" class="btn-scarica-pdf" id="btn-scarica-prev-pdf" onclick="scaricaPDFPreventivo()">📥 Scarica PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STORICO PREVENTIVI -->
+    <div class="section" id="sec-storico-preventivi">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          📚 Storico preventivi
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div id="storico-prev-content" style="display:flex;flex-direction:column;gap:12px">
+          <div style="text-align:center;color:#888;padding:40px 0">Caricamento…</div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -1690,77 +1900,6 @@
   </div>
 </div>
 
-<!-- MODAL SCADENZE FISCALI -->
-<div class="modal-ai-overlay" id="modalScadenzeFiscali" onclick="if(event.target===this)chiudiModalScadenzeFiscali()">
-  <div class="modal-ai" style="max-width:760px">
-    <div class="modal-ai-header">
-      <div>
-        <h2>📋 Scadenze fiscali</h2>
-        <p>Tieni traccia di F24, DURC, assicurazioni e altri adempimenti</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
-      <button class="modal-ai-close" onclick="chiudiModalScadenzeFiscali()">✕</button>
-    </div>
-    <div class="modal-ai-body">
-      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tipo *</label>
-            <select id="scad-fisc-tipo">
-              <option value="">— Seleziona —</option>
-              <option>F24</option>
-              <option>DURC</option>
-              <option>Assicurazione RC</option>
-              <option>Attestato sicurezza</option>
-              <option>INPS</option>
-              <option>INAIL</option>
-              <option>Visura CCIAA</option>
-              <option>Altro</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Data scadenza *</label>
-            <input type="date" id="scad-fisc-data">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Descrizione</label>
-          <input type="text" id="scad-fisc-descrizione" placeholder="Dettagli aggiuntivi">
-        </div>
-        <div class="form-group">
-          <label>Importo (€)</label>
-          <input type="number" id="scad-fisc-importo" step="0.01" min="0" placeholder="€">
-        </div>
-        <div class="form-group">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
-            <input type="checkbox" id="scad-fisc-ricorrente" style="width:18px;height:18px;cursor:pointer" onchange="document.getElementById('scad-fisc-frequenza-row').style.display = this.checked ? 'block' : 'none'">
-            Ricorrente
-          </label>
-        </div>
-        <div class="form-group" id="scad-fisc-frequenza-row" style="display:none">
-          <label>Frequenza</label>
-          <select id="scad-fisc-frequenza">
-            <option value="mensile">Mensile</option>
-            <option value="trimestrale">Trimestrale</option>
-            <option value="semestrale">Semestrale</option>
-            <option value="annuale" selected>Annuale</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Note</label>
-          <textarea id="scad-fisc-note" placeholder="Note aggiuntive..."></textarea>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <button class="btn-salva-annuncio" onclick="salvaScadenzaFiscale()">💾 Salva scadenza</button>
-          <span id="scad-fisc-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
-        </div>
-      </div>
-      <div id="scad-fisc-lista" style="display:flex;flex-direction:column;gap:12px"></div>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL CALCOLATRICE EDILE -->
 <div class="modal-ai-overlay" id="modalCalcolatrice" onclick="if(event.target===this)chiudiCalcolatrice()">
   <div class="modal-ai" style="max-width:760px">
@@ -1803,157 +1942,6 @@
   </div>
 </div>
 
-<!-- MODAL CREA PREVENTIVO -->
-<div class="modal-ai-overlay" id="modalCreaPreventivo" onclick="if(event.target===this)chiudiModalCreaPreventivo()">
-  <div class="modal-ai" style="max-width:760px">
-    <div class="modal-ai-header">
-      <div>
-        <h2>📄 Crea preventivo</h2>
-        <p>Compila i dati e scarica il PDF</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
-      <button class="modal-ai-close" onclick="chiudiModalCreaPreventivo()">✕</button>
-    </div>
-    <div class="modal-ai-body">
-
-      <div class="prev-section-label">🏢 La tua attività</div>
-      <img id="prev-art-logo" class="prev-logo-preview" alt="Logo">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nome attività</label>
-          <input type="text" id="prev-art-nome">
-        </div>
-        <div class="form-group">
-          <label>P. IVA</label>
-          <input type="text" id="prev-art-piva">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Indirizzo</label>
-        <input type="text" id="prev-art-indirizzo">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Telefono</label>
-          <input type="text" id="prev-art-telefono">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="text" id="prev-art-email">
-        </div>
-      </div>
-
-      <div class="prev-section-label">👤 Dati cliente</div>
-      <div class="form-group">
-        <label>Nome cliente *</label>
-        <input type="text" id="prev-cli-nome" placeholder="Nome e cognome / Ragione sociale">
-      </div>
-      <div class="form-group">
-        <label>Indirizzo</label>
-        <input type="text" id="prev-cli-indirizzo" placeholder="Via, città">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Telefono</label>
-          <input type="tel" id="prev-cli-telefono" placeholder="+39 …">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="prev-cli-email" placeholder="cliente@example.com">
-        </div>
-      </div>
-
-      <div class="prev-section-label">🧾 Dati preventivo</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Numero preventivo</label>
-          <input type="text" id="prev-numero">
-        </div>
-        <div class="form-group">
-          <label>Data</label>
-          <input type="text" id="prev-data">
-        </div>
-      </div>
-
-      <div class="prev-section-label">✨ Genera con AI</div>
-      <div class="form-group">
-        <textarea id="prev-ai-prompt" placeholder="Descrivi il lavoro in 1-2 righe (es. ristrutturazione bagno 8mq con piastrelle e sanitari)" style="min-height:70px"></textarea>
-      </div>
-      <button type="button" id="btn-prev-genera-ai"
-        style="padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;margin-bottom:18px;transition:background 0.15s"
-        onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
-        ✨ Genera con AI
-      </button>
-
-      <div class="prev-section-label">📋 Voci</div>
-      <div style="overflow-x:auto">
-        <table class="prev-table">
-          <thead>
-            <tr>
-              <th>Descrizione</th>
-              <th style="width:80px;text-align:right">Qta</th>
-              <th style="width:130px;text-align:right">Prezzo unit. €</th>
-              <th style="width:110px;text-align:right">Totale €</th>
-              <th style="width:40px"></th>
-            </tr>
-          </thead>
-          <tbody id="prev-voci-body"></tbody>
-        </table>
-      </div>
-      <button type="button" class="btn-aggiungi-riga" onclick="aggiungiRigaPreventivo()">+ Aggiungi riga</button>
-
-      <div class="prev-totali">
-        <div class="prev-totali-row">
-          <span>Totale imponibile</span>
-          <span id="prev-imponibile">€ 0,00</span>
-        </div>
-        <div class="prev-totali-row">
-          <span>IVA 22%</span>
-          <span id="prev-iva">€ 0,00</span>
-        </div>
-        <div class="prev-totali-row final">
-          <span>Totale finale</span>
-          <span id="prev-totale-finale">€ 0,00</span>
-        </div>
-      </div>
-
-      <div class="prev-section-label">📝 Note e validità</div>
-      <div class="form-group">
-        <label>Note</label>
-        <textarea id="prev-note" placeholder="Condizioni, modalità di pagamento, esclusioni…"></textarea>
-      </div>
-      <div class="form-group" style="max-width:200px">
-        <label>Validità (giorni)</label>
-        <input type="number" id="prev-validita" min="1" max="365" value="30">
-      </div>
-
-    </div>
-    <div class="modal-ai-footer">
-      <button type="button" class="btn-chiudi-modal" onclick="chiudiModalCreaPreventivo()">Chiudi</button>
-      <button type="button" id="btn-salva-prev" onclick="salvaPreventivo()" style="padding:11px 22px;background:white;color:var(--verde);border:1.5px solid var(--verde);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;transition:all 0.15s">💾 Salva</button>
-      <button type="button" class="btn-scarica-pdf" id="btn-scarica-prev-pdf" onclick="scaricaPDFPreventivo()">📥 Scarica PDF</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL STORICO PREVENTIVI -->
-<div class="modal-ai-overlay" id="modalStoricoPreventivi" onclick="if(event.target===this)chiudiModalStoricoPreventivi()">
-  <div class="modal-ai" style="max-width:760px">
-    <div class="modal-ai-header">
-      <div>
-        <h2>📚 Storico preventivi</h2>
-        <p>Tutti i preventivi che hai creato</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
-      <button class="modal-ai-close" onclick="chiudiModalStoricoPreventivi()">✕</button>
-    </div>
-    <div class="modal-ai-body">
-      <div id="storico-prev-content" style="display:flex;flex-direction:column;gap:12px">
-        <div style="text-align:center;color:#888;padding:40px 0">Caricamento…</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- MODAL PRIORITÀ NEI RISULTATI -->
 <div class="modal-ai-overlay" id="modalPriorita" onclick="if(event.target===this)chiudiModalPriorita()">
@@ -3185,12 +3173,12 @@ async function eliminaAppuntamento(id) {
 
 // SCADENZE FISCALI
 function apriModalScadenzeFiscali() {
-  document.getElementById('modalScadenzeFiscali').classList.add('show');
+  showSection('scadenze-fiscali');
   caricaScadenzeFiscali();
 }
 
 function chiudiModalScadenzeFiscali() {
-  document.getElementById('modalScadenzeFiscali').classList.remove('show');
+  showSection('dashboard');
 }
 
 async function caricaScadenzeFiscali() {
@@ -3345,15 +3333,15 @@ function apriModalCreaPreventivo() {
   const taAI = document.getElementById('prev-ai-prompt');
   if (taAI) taAI.value = '';
 
-  document.getElementById('modalCreaPreventivo').classList.add('show');
+  showSection('crea-preventivo');
 }
 
 function chiudiModalCreaPreventivo() {
-  document.getElementById('modalCreaPreventivo').classList.remove('show');
+  showSection('dashboard');
 }
 
 async function apriModalStoricoPreventivi() {
-  document.getElementById('modalStoricoPreventivi').classList.add('show');
+  showSection('storico-preventivi');
   const cont = document.getElementById('storico-prev-content');
   cont.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0">Caricamento…</div>';
   if (!impresaCorrente) {
@@ -3463,7 +3451,7 @@ function modificaPreventivoCreato(id) {
   ricalcolaPreventivo();
 
   window.preventivoInModifica = id;
-  document.getElementById('modalCreaPreventivo').classList.add('show');
+  showSection('crea-preventivo');
 }
 
 async function eliminaPreventivoCreato(id, numero) {
@@ -3477,7 +3465,7 @@ async function eliminaPreventivoCreato(id, numero) {
 }
 
 function chiudiModalStoricoPreventivi() {
-  document.getElementById('modalStoricoPreventivi').classList.remove('show');
+  showSection('dashboard');
 }
 
 async function scaricaPDFPreventivo() {
