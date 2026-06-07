@@ -2009,6 +2009,7 @@ function showSection(id, el, fromPopstate) {
   const sec = document.getElementById('sec-' + id);
   if (sec) sec.classList.add('active');
   if (el) el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   if (id === 'personalizza') apriModalPersonalizzaPannello();
   if (id === 'risoluzione') apriModalRisoluzione();
   if (!fromPopstate) history.pushState({section: id}, '');
