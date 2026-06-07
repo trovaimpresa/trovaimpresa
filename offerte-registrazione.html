@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pubblica Offerta di Lavoro - TrovaImpresa</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <style>
         * {
             margin: 0;
@@ -457,6 +458,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Anteprima posizione sulla mappa</label>
+                    <div id="mappa-anteprima" style="height:280px;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;"></div>
+                </div>
+
+                <div class="form-group">
                     <label for="mestiere">Mestiere <span class="required">*</span></label>
                     <select id="mestiere" required>
                         <option value="">-- Seleziona --</option>
@@ -665,6 +671,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/geo-italia.js"></script>
 <script>
     const { createClient } = window.supabase;
@@ -895,6 +902,7 @@
                         provSel.value = match.provincia;
                         provSel.dispatchEvent(new Event('change'));
                         cittaSel.value = match.citta;
+                        cittaSel.dispatchEvent(new Event('change'));
                         btn.innerText = '✅ Localizzato!';
                     } else {
                         alert('Città "' + citta + '" non in elenco. Selezionala manualmente.');
@@ -1077,6 +1085,65 @@
         const input = document.getElementById(id);
         input.type = input.type === 'password' ? 'text' : 'password';
     }
+
+    // ── MAPPA ANTEPRIMA: un solo pin sulla città scelta (geocoding al volo) ──
+    let mapPrev = null, markerPrev = null;
+    const geoCachePrev = {};
+
+    function initMappaAnteprima() {
+      if (mapPrev || typeof L === 'undefined') return;
+      mapPrev = L.map('mappa-anteprima').setView([41.9, 12.5], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(mapPrev);
+    }
+
+    function creaIconaPrev() {
+      return L.divIcon({
+        className: '',
+        html: `<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#FF6B35"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>`,
+        iconSize: [22, 30], iconAnchor: [11, 30], popupAnchor: [0, -30]
+      });
+    }
+
+    async function geocodificaPrev(query) {
+      const key = query.toLowerCase().trim();
+      if (geoCachePrev[key]) return geoCachePrev[key];
+      try {
+        const r = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ', Italia')}&format=json&limit=1`,
+          { headers: { 'Accept-Language': 'it' } }
+        );
+        const data = await r.json();
+        if (data && data[0]) {
+          const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+          geoCachePrev[key] = coords;
+          return coords;
+        }
+      } catch(e) {}
+      return null;
+    }
+
+    async function aggiornaPinAnteprima(citta) {
+      if (typeof L === 'undefined') return;
+      initMappaAnteprima();
+      setTimeout(() => { if (mapPrev) mapPrev.invalidateSize(); }, 60);
+      if (!citta) {
+        if (markerPrev) { mapPrev.removeLayer(markerPrev); markerPrev = null; }
+        return;
+      }
+      const coords = await geocodificaPrev(citta);
+      if (!coords) return;
+      if (markerPrev) markerPrev.setLatLng(coords);
+      else markerPrev = L.marker(coords, { icon: creaIconaPrev() }).addTo(mapPrev);
+      markerPrev.bindPopup('📍 ' + citta);
+      mapPrev.setView(coords, 12);
+    }
+
+    (function() {
+      const cs = document.getElementById('citta-offerta');
+      if (cs) cs.addEventListener('change', e => aggiornaPinAnteprima(e.target.value));
+    })();
 </script>
 
 <script src="/cookie-banner.js"></script>
