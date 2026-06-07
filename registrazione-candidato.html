@@ -13,18 +13,17 @@
       padding: 20px;
     }
     .container {
-      max-width: 700px; margin: 40px auto; background: white;
-      border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      max-width: 1200px; margin: 0 auto;
     }
     .header {
-      background: white;
-      color: #1a472a; padding: 32px 24px; text-align: center; border-bottom: 1px solid #e0e0e0;
+      color: #1a472a; padding: 24px 0 16px; text-align: center;
     }
     .header h1 { font-size: 24px; margin-bottom: 8px; }
     .header p { font-size: 14px; opacity: 0.9; }
     .steps {
       display: flex; justify-content: space-between;
-      padding: 24px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0;
+      padding: 24px; background: white; border-bottom: 1px solid #e0e0e0;
+      border-radius: 16px 16px 0 0; box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
     .step { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
     .step-circle {
@@ -35,7 +34,7 @@
     .step.active .step-circle { background: #2a7a4b; color: white; }
     .step-label { font-size: 12px; color: #999; text-align: center; }
     .step.active .step-label { color: #2a7a4b; font-weight: 600; }
-    .content { padding: 32px; }
+    .content { padding: 32px; background: white; border-radius: 0 0 16px 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
     .form-section { display: none; }
     .form-section.active { display: block; }
     .form-section h2 { font-size: 20px; color: #333; margin-bottom: 24px; }
