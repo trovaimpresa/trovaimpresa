@@ -706,92 +706,79 @@
   body.theme-dark .profilo-row,
   body.theme-dark .profilo-title { border-bottom-color:rgba(255,255,255,0.08); }
 
-  /* === Modal Personalizza pannello === */
-  #modal-personalizza-pannello .mpp-box {
-    background:white; border-radius:20px; width:100%; max-width:760px;
-    max-height:90vh; display:flex; flex-direction:column; overflow:hidden;
-    box-shadow:0 24px 80px rgba(0,0,0,0.25);
+  /* === Personalizza pannello (sezione full-page) === */
+  #sec-personalizza .mpp-box {
+    background:white; border-radius:20px; width:100%; max-width:100%; margin:0 auto;
+    overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08);
   }
-  #modal-personalizza-pannello .mpp-box.fullscreen {
-    max-width: none !important;
-    width: 100vw;
-    height: 100vh;
-    max-height: none !important;
-    border-radius: 0;
+  #sec-personalizza .mpp-body {
+    padding:24px;
   }
-  #modal-personalizza-pannello .mpp-box.fullscreen .mpp-body {
-    max-height: none; flex: 1; min-height: 0;
-  }
-  #modal-personalizza-pannello .mpp-header {
-    background:linear-gradient(135deg,#7c3aed,#6d28d9); padding:24px;
-    color:white; display:flex; justify-content:space-between; align-items:flex-start;
-  }
-  #modal-personalizza-pannello .mpp-header h2 {
-    font-family:'Playfair Display',serif; font-size:1.3rem; margin:0 0 4px; color:white;
-  }
-  #modal-personalizza-pannello .mpp-header p { margin:0; font-size:0.85rem; opacity:0.85; }
-  #modal-personalizza-pannello .mpp-close {
-    background:none; border:none; color:white; font-size:1.3rem; cursor:pointer;
-    opacity:0.85; line-height:1; padding:0;
-  }
-  #modal-personalizza-pannello .mpp-close:hover { opacity:1; }
-  #modal-personalizza-pannello .mpp-body {
-    padding:24px; overflow-y:auto; max-height:calc(90vh - 180px);
-  }
-  #modal-personalizza-pannello .mpp-section {
+  #sec-personalizza .mpp-section {
     background:#f8f9fb; border-radius:12px; padding:14px; margin-bottom:10px;
   }
-  #modal-personalizza-pannello .mpp-section:last-child { margin-bottom:0; }
-  #modal-personalizza-pannello .mpp-label {
+  #sec-personalizza .mpp-section:last-child { margin-bottom:0; }
+  #sec-personalizza .mpp-label {
     display:block; font-size:0.73rem; font-weight:800; color:var(--mid);
     text-transform:uppercase; letter-spacing:0.8px; margin:0 0 8px;
   }
-  #modal-personalizza-pannello input[type="color"] {
+  #sec-personalizza input[type="color"] {
     width:56px; height:40px; border:2px solid white; border-radius:10px;
     cursor:pointer; padding:0; box-shadow:0 0 0 1px #e5e7eb;
   }
-  #modal-personalizza-pannello input[type="text"],
-  #modal-personalizza-pannello select {
+  #sec-personalizza input[type="text"],
+  #sec-personalizza select {
     width:100%; padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
     font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none;
     background:white; box-sizing:border-box; transition:border-color 0.15s;
   }
-  #modal-personalizza-pannello input[type="text"]:focus,
-  #modal-personalizza-pannello select:focus { border-color:#7c3aed; }
-  #modal-personalizza-pannello input[type="file"] {
+  #sec-personalizza input[type="text"]:focus,
+  #sec-personalizza select:focus { border-color:#7c3aed; }
+  #sec-personalizza input[type="file"] {
     font-family:'DM Sans',sans-serif; font-size:0.85rem; color:var(--mid);
   }
-  #modal-personalizza-pannello input[type="file"]::file-selector-button {
+  #sec-personalizza input[type="file"]::file-selector-button {
     padding:8px 16px; border:1.5px solid #7c3aed; border-radius:10px;
     background:white; color:#7c3aed; font-family:'DM Sans',sans-serif;
     font-weight:700; font-size:0.85rem; cursor:pointer; margin-right:10px;
     transition:all 0.15s;
   }
-  #modal-personalizza-pannello input[type="file"]::file-selector-button:hover {
+  #sec-personalizza input[type="file"]::file-selector-button:hover {
     background:#7c3aed; color:white;
   }
-  #modal-personalizza-pannello input[type="checkbox"] {
+  #sec-personalizza input[type="checkbox"] {
     width:20px; height:20px; accent-color:#7c3aed; cursor:pointer;
   }
-  #modal-personalizza-pannello input[type="range"] {
+  #sec-personalizza input[type="range"] {
     width:100%; cursor:pointer; accent-color:#7c3aed;
   }
-  #modal-personalizza-pannello .mpp-footer {
+  #sec-personalizza .mpp-footer {
     padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:12px;
-    background:white; margin-top:auto;
+    background:white;
   }
-  #modal-personalizza-pannello .mpp-footer button {
+  #sec-personalizza .mpp-footer button {
     flex:1; padding:12px; border-radius:10px;
     font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer;
   }
-  #modal-personalizza-pannello .mpp-btn-cancel {
+  #sec-personalizza .mpp-btn-cancel {
     border:1.5px solid var(--border); background:white; color:var(--mid);
   }
-  #modal-personalizza-pannello .mpp-btn-save {
+  #sec-personalizza .mpp-btn-save {
     border:none; background:linear-gradient(135deg,#7c3aed,#9333ea); color:white;
     box-shadow:0 4px 12px rgba(124,58,237,0.3); transition:transform 0.15s;
   }
-  #modal-personalizza-pannello .mpp-btn-save:hover { transform:translateY(-1px); }
+  #sec-personalizza .mpp-btn-save:hover { transform:translateY(-1px); }
+
+  /* === Fai conoscere la tua azienda (video) === */
+  #sec-video .video-row { display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid #f0f0f0; }
+  #sec-video .video-row:last-child { border-bottom:none; }
+  #sec-video .video-iframe-wrap { flex:0 0 240px; aspect-ratio:16/9; background:#000; border-radius:8px; overflow:hidden; }
+  #sec-video .video-iframe-wrap iframe { width:100%; height:100%; border:0; display:block; }
+  #sec-video .video-info { flex:1; min-width:0; }
+  #sec-video .video-info p { font-size:14px; color:#333; line-height:1.5; word-break:break-word; }
+  #sec-video .btn-del { background:#fff0f0; color:#c0392b; border:1px solid #f5c6c6; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px; flex-shrink:0; }
+  #sec-video .btn-del:hover { background:#ffe5e5; }
+  @media (max-width:768px){ #sec-video .video-row{flex-direction:column} #sec-video .video-iframe-wrap{flex:0 0 auto;width:100%} #sec-video .btn-del{width:100%} }
 
   /* === Certificazioni (copiato da pannello-artigiano) === */
   .cert-item {
@@ -910,7 +897,7 @@
           <div class="dash-quick-icon">✅</div>
           <div class="dash-quick-label">Recensioni verificate</div>
         </div>
-        <div onclick="apriModalCertificazioni()" class="dash-quick-card" data-card-id="certificazioni" style="cursor:pointer;display:block;">
+        <div onclick="showSection('certificazioni', this)" class="dash-quick-card" data-card-id="certificazioni" style="cursor:pointer;display:block;">
           <div class="dash-quick-icon">📜</div>
           <div class="dash-quick-label">Certificazioni</div>
         </div>
@@ -922,7 +909,7 @@
           <div id="card-visibile-icon" class="dash-quick-icon">📍</div>
           <div id="card-visibile-label" class="dash-quick-label">Visibile nella tua città</div>
         </div>
-        <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalRisoluzione()">
+        <div class="dash-quick-card" data-card-id="risoluzione-problemi" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('risoluzione', this)">
           <div class="dash-quick-icon">🛠️</div>
           <div class="dash-quick-label">Risoluzione problemi</div>
         </div>
@@ -934,7 +921,7 @@
           <div class="dash-quick-icon">⏳</div>
           <div class="dash-quick-label">Lista d'attesa pubblicità</div>
         </div>
-        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriModalPersonalizzaPannello()">
+        <div class="dash-quick-card" data-card-id="personalizza-pannello" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('personalizza', this)">
           <div class="dash-quick-icon">🎨</div>
           <div class="dash-quick-label">Personalizza pannello</div>
         </div>
@@ -947,7 +934,7 @@
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Richiesta di preventivo</div>
         </div>
-        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
+        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriVideo()">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
@@ -1191,6 +1178,181 @@
           </label>
         </div>
         <button class="btn-salva-annuncio" onclick="salvaLavoroFoto()">Salva</button>
+      </div>
+    </div>
+
+    <!-- PERSONALIZZA PANNELLO -->
+    <div class="section" id="sec-personalizza">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          🎨 Personalizza pannello
+        </div>
+      </div>
+      <div class="mpp-box">
+        <div id="personalizza-pannello-body" class="mpp-body">
+          <div class="mpp-section">
+            <label class="mpp-label">Colore header</label>
+            <input type="color" id="pers-pannello-colore-header" value="#2a7a4b">
+          </div>
+          <div class="mpp-section">
+            <label class="mpp-label">Sfondo pagina</label>
+            <input type="color" id="pers-pannello-colore-sfondo" value="#f5f5f5">
+          </div>
+          <div class="mpp-section">
+            <label class="mpp-label">Nome pannello</label>
+            <input type="text" id="pers-pannello-nome" maxlength="30">
+          </div>
+          <div class="mpp-section">
+            <label class="mpp-label">Font header</label>
+            <select id="pers-pannello-font">
+              <option value="">Predefinito</option>
+              <option value="'Inter', sans-serif">Inter (moderno, pulito)</option>
+              <option value="'Poppins', sans-serif">Poppins (rotondo, friendly)</option>
+              <option value="'Montserrat', sans-serif">Montserrat (elegante)</option>
+              <option value="'Playfair Display', serif">Playfair Display (classico, serif)</option>
+              <option value="'Bebas Neue', sans-serif">Bebas Neue (bold, titoli)</option>
+            </select>
+          </div>
+          <div class="mpp-section">
+            <label class="mpp-label">Colore testo header</label>
+            <input type="color" id="pers-pannello-colore-testo" value="#ffffff">
+          </div>
+          <div class="mpp-section">
+            <label class="mpp-label">Grandezza testo <span id="pers-pannello-size-label">1.0x</span></label>
+            <input type="range" id="pers-pannello-size-testo" min="0.7" max="1.5" step="0.05" value="1">
+          </div>
+          <div class="mpp-section">
+            <label class="mpp-label">Logo personalizzato</label>
+            <div id="pers-pannello-logo-preview" style="margin-bottom:8px;"></div>
+            <input type="file" id="pers-pannello-logo-file" accept="image/*">
+            <button type="button" id="pers-pannello-logo-remove" onclick="rimuoviLogoPersonalizzato()" style="display:none;margin-top:10px;padding:8px 16px;border:1.5px solid #dc2626;background:white;color:#dc2626;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.15s;">Rimuovi logo</button>
+          </div>
+          <div class="mpp-section">
+            <label class="mpp-label">Banner copertina</label>
+            <div id="pers-pannello-banner-preview" style="margin-bottom:8px;"></div>
+            <input type="file" id="pers-pannello-banner-file" accept="image/*">
+          </div>
+          <div class="mpp-section">
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--dark);cursor:pointer;margin:0;">
+              <input type="checkbox" id="pers-pannello-tema-scuro">
+              Tema scuro
+            </label>
+          </div>
+        </div>
+        <div class="mpp-footer">
+          <button class="mpp-btn-cancel" onclick="chiudiModalPersonalizzaPannello()">Annulla</button>
+          <button class="mpp-btn-save" onclick="salvaPersonalizzaPannello()">Salva</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RISOLUZIONE PROBLEMI -->
+    <div class="section" id="sec-risoluzione">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          🛠️ Risoluzione problemi
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div class="faq-list" id="faq-list"></div>
+        <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:6px;">🤖 Assistente AI</div>
+          <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Non hai trovato la risposta? Chiedi direttamente all'assistente AI.</p>
+          <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
+          <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
+            style="margin-top:10px;padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
+            onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
+            ✨ Chiedi all'AI
+          </button>
+          <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#1a3a2a;"></div>
+        </div>
+        <div class="faq-cta-help">
+          <button onclick="apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CERTIFICAZIONI -->
+    <div class="section" id="sec-certificazioni">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          📋 Certificazioni
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Aggiungi certificazione</div>
+          <div class="form-group">
+            <label>Nome certificazione *</label>
+            <input list="cert-list" id="cert-search" placeholder="Cerca certificazione...">
+            <datalist id="cert-list"></datalist>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Scadenza (opzionale)</label>
+              <input type="date" id="cert-scadenza-input">
+            </div>
+            <div class="form-group">
+              <label>File (PDF/immagine)</label>
+              <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
+            </div>
+          </div>
+          <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
+        </div>
+        <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
+      </div>
+    </div>
+
+    <!-- QR CODE PROFILO -->
+    <div class="section" id="sec-qrcode">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          🔲 QR Code profilo
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div id="qr-code-container" style="display:flex;justify-content:center;align-items:center;min-height:280px;padding:16px;background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:14px;"></div>
+        <div id="qr-url-line" style="font-size:0.75rem;color:#666;text-align:center;margin-bottom:16px;word-break:break-all;"></div>
+        <div class="ai-form-group">
+          <label>Colore QR Code</label>
+          <input type="color" id="qr-color-picker" value="#000000" oninput="aggiornaColoreQRCode(this.value)" style="width:100%;height:42px;padding:4px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:white;">
+        </div>
+        <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">⬇️ Scarica PNG 1024×1024</button>
+        <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:#1a3a2a;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:6px;">✅ Scaricato!</div>
+          <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
+          <div style="font-size:13px;color:#2a7a4b;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAI CONOSCERE LA TUA AZIENDA (VIDEO) -->
+    <div class="section" id="sec-video">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          🎬 Fai conoscere la tua azienda
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div class="profilo-title">➕ Aggiungi un video</div>
+        <div class="form-group">
+          <label>URL video (YouTube o Vimeo)</label>
+          <input type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=...  oppure  https://vimeo.com/...">
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <textarea id="video-desc" placeholder="Descrivi brevemente il lavoro mostrato..."></textarea>
+        </div>
+        <button class="btn-salva-annuncio" id="btn-salva-video" onclick="salvaVideo()">💾 Salva video</button>
+      </div>
+      <div class="profilo-card" style="margin-top:16px">
+        <div class="profilo-title">🎬 Video caricati</div>
+        <div id="lista-video"><div class="empty-state">Caricamento...</div></div>
       </div>
     </div>
 
@@ -2119,9 +2281,13 @@ function mfaShowAlert(msg, type) {
 function showSection(id, el, fromPopstate) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('sec-' + id).classList.add('active');
-  el.classList.add('active');
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  if (el) el.classList.add('active');
   if (id === 'foto-lavori') caricaListaLavoriFoto();
+  if (id === 'personalizza') apriModalPersonalizzaPannello();
+  if (id === 'risoluzione') apriModalRisoluzione();
+  if (id === 'certificazioni') apriModalCertificazioni();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -4405,11 +4571,6 @@ function apriModalRisoluzione() {
       <div class="faq-risposta">${f.risposta}</div>
     </div>
   `).join('');
-  document.getElementById('modalRisoluzione').classList.add('show');
-}
-
-function chiudiModalRisoluzione() {
-  document.getElementById('modalRisoluzione').classList.remove('show');
 }
 
 function toggleFaq(headerEl) {
@@ -4664,7 +4825,6 @@ function apriModalPersonalizzaPannello() {
     };
     reader.readAsDataURL(f);
   };
-  document.getElementById('modal-personalizza-pannello').style.display = 'flex';
 }
 function chiudiModalPersonalizzaPannello() {
   if (_persPannelloHeroBgTemp !== null) {
@@ -4708,7 +4868,7 @@ function chiudiModalPersonalizzaPannello() {
   _persPannelloColoreTestoTemp = null;
   _persPannelloSizeTestoTemp = null;
   _persPannelloBannerTemp = null;
-  document.getElementById('modal-personalizza-pannello').style.display = 'none';
+  showSection('dashboard');
 }
 async function rimuoviLogoPersonalizzato() {
   await sb.from('imprese').update({ logo_url: null }).eq('id', impresaCorrente.id);
@@ -4790,11 +4950,7 @@ async function salvaPersonalizzaPannello() {
 
 /* --- Certificazioni (copiato da pannello-artigiano) --- */
 function apriModalCertificazioni() {
-  document.getElementById('modalCertificazioni').classList.add('show');
   caricaCertificazioni();
-}
-function chiudiModalCertificazioni() {
-  document.getElementById('modalCertificazioni').classList.remove('show');
 }
 async function caricaCertificazioni() {
   const { data } = await sb.from('imprese').select('certificazioni').eq('id', impresaCorrente.id).single();
@@ -4912,7 +5068,7 @@ async function apriModalQRCode() {
     }
     return;
   }
-  document.getElementById('modalQRCode').classList.add('show');
+  showSection('qrcode');
   document.getElementById('qr-url-line').textContent = _qrTargetUrl();
   const colore = _qrColorDefault();
   _qrCodeCurrentColor = colore;
@@ -4938,11 +5094,6 @@ function aggiornaColoreQRCode(nuovoColore) {
     cornersDotOptions: { color: nuovoColore }
   });
 }
-function chiudiModalQRCode() {
-  document.getElementById('modalQRCode').classList.remove('show');
-  const box = document.getElementById('qrSuccessBox');
-  if (box) box.style.display = 'none';
-}
 async function scaricaQRCodePNG() {
   if (!impresaCorrente) return;
   try {
@@ -4955,38 +5106,81 @@ async function scaricaQRCodePNG() {
     alert('Errore durante il download: ' + err.message);
   }
 }
-</script>
 
-<!-- MODAL RISOLUZIONE PROBLEMI (copiato da pannello-artigiano) -->
-<div class="modal-ai-overlay" id="modalRisoluzione" onclick="if(event.target===this)chiudiModalRisoluzione()">
-  <div class="modal-ai" style="max-width:760px">
-    <div class="modal-ai-header">
-      <div>
-        <h2>🛠️ Risoluzione problemi</h2>
-        <p>Domande frequenti e soluzioni rapide</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
-      <button class="modal-ai-close" onclick="chiudiModalRisoluzione()">✕</button>
-    </div>
-    <div class="modal-ai-body">
-      <div class="faq-list" id="faq-list"></div>
-      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
-        <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:6px;">🤖 Assistente AI</div>
-        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Non hai trovato la risposta? Chiedi direttamente all'assistente AI.</p>
-        <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
-        <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
-          style="margin-top:10px;padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
-          onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
-          ✨ Chiedi all'AI
-        </button>
-        <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#1a3a2a;"></div>
-      </div>
-      <div class="faq-cta-help">
-        <button onclick="chiudiModalRisoluzione();apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
-      </div>
-    </div>
-  </div>
-</div>
+// === FAI CONOSCERE LA TUA AZIENDA (VIDEO) ===
+function apriVideo() {
+  if (!impresaCorrente) return;
+  const piano = (impresaCorrente.piano || '').toLowerCase();
+  if (piano !== 'premium') {
+    if (confirm('🎬 Fai conoscere la tua azienda è una funzione Premium. Vuoi scoprire di più?')) {
+      window.location.href = 'info-premium.html';
+    }
+    return;
+  }
+  showSection('video');
+  caricaVideo();
+}
+function _videoUrlValido(url) {
+  const lower = (url || '').toLowerCase();
+  return lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com');
+}
+function estraiVideoEmbed(url) {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '');
+    if (host === 'youtu.be') {
+      const id = u.pathname.slice(1).split('/')[0];
+      return /^[A-Za-z0-9_-]{6,}$/.test(id) ? 'https://www.youtube.com/embed/' + id : null;
+    }
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+      const id = u.searchParams.get('v');
+      return id && /^[A-Za-z0-9_-]{6,}$/.test(id) ? 'https://www.youtube.com/embed/' + id : null;
+    }
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+      const parts = u.pathname.split('/').filter(Boolean);
+      const id = parts.find(p => /^\d+$/.test(p));
+      return id ? 'https://player.vimeo.com/video/' + id : null;
+    }
+  } catch (_) {}
+  return null;
+}
+async function caricaVideo() {
+  const lista = document.getElementById('lista-video');
+  if (!lista || !impresaCorrente) return;
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const { data, error } = await sb.from('video_lavori').select('*').eq('impresa_id', impresaCorrente.id).order('created_at', { ascending: false });
+  if (error) { lista.innerHTML = '<div class="empty-state">Errore caricamento video.</div>'; return; }
+  if (!data || !data.length) { lista.innerHTML = '<div class="empty-state">Nessun video caricato. Aggiungi il primo qui sopra.</div>'; return; }
+  lista.innerHTML = data.map(v => {
+    const embed = estraiVideoEmbed(v.video_url);
+    const iframe = embed
+      ? '<iframe src="' + esc(embed) + '" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
+      : '<div style="padding:20px;color:#fff;font-size:13px">URL non valido</div>';
+    const desc = v.descrizione ? esc(v.descrizione) : '<em style="color:#888">Nessuna descrizione</em>';
+    return '<div class="video-row"><div class="video-iframe-wrap">' + iframe + '</div><div class="video-info"><p>' + desc + '</p></div><button class="btn-del" onclick="eliminaVideo(' + v.id + ')">🗑️ Elimina</button></div>';
+  }).join('');
+}
+async function salvaVideo() {
+  const url = document.getElementById('video-url').value.trim();
+  const desc = document.getElementById('video-desc').value.trim();
+  if (!url) { alert('Inserisci un URL video.'); return; }
+  if (!_videoUrlValido(url)) { alert('URL non valido. Sono ammessi solo link YouTube (youtube.com, youtu.be) o Vimeo (vimeo.com).'); return; }
+  const btn = document.getElementById('btn-salva-video');
+  btn.disabled = true; btn.textContent = '⏳ Salvataggio...';
+  const { error } = await sb.from('video_lavori').insert({ impresa_id: impresaCorrente.id, video_url: url, descrizione: desc });
+  btn.disabled = false; btn.textContent = '💾 Salva video';
+  if (error) { alert('Errore: ' + error.message); return; }
+  document.getElementById('video-url').value = '';
+  document.getElementById('video-desc').value = '';
+  caricaVideo();
+}
+async function eliminaVideo(id) {
+  if (!confirm('Eliminare questo video?')) return;
+  const { error } = await sb.from('video_lavori').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  caricaVideo();
+}
+</script>
 
 <!-- MODAL LISTA D'ATTESA PUBBLICITÀ (copiato da pannello-artigiano) -->
 <div class="modal-ai-overlay" id="modalListaAttesaPub" onclick="if(event.target===this)chiudiModalListaAttesaPub()">
@@ -5004,136 +5198,7 @@ async function scaricaQRCodePNG() {
   </div>
 </div>
 
-<!-- MODAL PERSONALIZZA PANNELLO (copiato da pannello-artigiano) -->
-<div id="modal-personalizza-pannello" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)chiudiModalPersonalizzaPannello()">
-  <div class="mpp-box">
-    <div class="mpp-header">
-      <div>
-        <h2>🎨 Personalizza pannello</h2>
-        <p>Personalizza la tua esperienza</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="this.closest('.mpp-box').classList.toggle('fullscreen')">⛶</button>
-      <button class="mpp-close" onclick="chiudiModalPersonalizzaPannello()">✕</button>
-    </div>
-    <div id="personalizza-pannello-body" class="mpp-body">
-      <div class="mpp-section">
-        <label class="mpp-label">Colore header</label>
-        <input type="color" id="pers-pannello-colore-header" value="#2a7a4b">
-      </div>
-      <div class="mpp-section">
-        <label class="mpp-label">Sfondo pagina</label>
-        <input type="color" id="pers-pannello-colore-sfondo" value="#f5f5f5">
-      </div>
-      <div class="mpp-section">
-        <label class="mpp-label">Nome pannello</label>
-        <input type="text" id="pers-pannello-nome" maxlength="30">
-      </div>
-      <div class="mpp-section">
-        <label class="mpp-label">Font header</label>
-        <select id="pers-pannello-font">
-          <option value="">Predefinito</option>
-          <option value="'Inter', sans-serif">Inter (moderno, pulito)</option>
-          <option value="'Poppins', sans-serif">Poppins (rotondo, friendly)</option>
-          <option value="'Montserrat', sans-serif">Montserrat (elegante)</option>
-          <option value="'Playfair Display', serif">Playfair Display (classico, serif)</option>
-          <option value="'Bebas Neue', sans-serif">Bebas Neue (bold, titoli)</option>
-        </select>
-      </div>
-      <div class="mpp-section">
-        <label class="mpp-label">Colore testo header</label>
-        <input type="color" id="pers-pannello-colore-testo" value="#ffffff">
-      </div>
-      <div class="mpp-section">
-        <label class="mpp-label">Grandezza testo <span id="pers-pannello-size-label">1.0x</span></label>
-        <input type="range" id="pers-pannello-size-testo" min="0.7" max="1.5" step="0.05" value="1">
-      </div>
-      <div class="mpp-section">
-        <label class="mpp-label">Logo personalizzato</label>
-        <div id="pers-pannello-logo-preview" style="margin-bottom:8px;"></div>
-        <input type="file" id="pers-pannello-logo-file" accept="image/*">
-        <button type="button" id="pers-pannello-logo-remove" onclick="rimuoviLogoPersonalizzato()" style="display:none;margin-top:10px;padding:8px 16px;border:1.5px solid #dc2626;background:white;color:#dc2626;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.15s;">Rimuovi logo</button>
-      </div>
-      <div class="mpp-section">
-        <label class="mpp-label">Banner copertina</label>
-        <div id="pers-pannello-banner-preview" style="margin-bottom:8px;"></div>
-        <input type="file" id="pers-pannello-banner-file" accept="image/*">
-      </div>
-      <div class="mpp-section">
-        <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--dark);cursor:pointer;margin:0;">
-          <input type="checkbox" id="pers-pannello-tema-scuro">
-          Tema scuro
-        </label>
-      </div>
-    </div>
-    <div class="mpp-footer">
-      <button class="mpp-btn-cancel" onclick="chiudiModalPersonalizzaPannello()">Annulla</button>
-      <button class="mpp-btn-save" onclick="salvaPersonalizzaPannello()">Salva</button>
-    </div>
-  </div>
-</div>
-<!-- MODAL CERTIFICAZIONI (copiato da pannello-artigiano) -->
-<div class="modal-ai-overlay" id="modalCertificazioni" onclick="if(event.target===this)chiudiModalCertificazioni()">
-  <div class="modal-ai" style="max-width:760px">
-    <div class="modal-ai-header">
-      <div>
-        <h2>📋 Certificazioni</h2>
-        <p>Le tue certificazioni professionali</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
-      <button class="modal-ai-close" onclick="chiudiModalCertificazioni()">✕</button>
-    </div>
-    <div class="modal-ai-body">
-      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Aggiungi certificazione</div>
-        <div class="form-group">
-          <label>Nome certificazione *</label>
-          <input list="cert-list" id="cert-search" placeholder="Cerca certificazione...">
-          <datalist id="cert-list"></datalist>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Scadenza (opzionale)</label>
-            <input type="date" id="cert-scadenza-input">
-          </div>
-          <div class="form-group">
-            <label>File (PDF/immagine)</label>
-            <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
-          </div>
-        </div>
-        <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
-      </div>
-      <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
-    </div>
-  </div>
-</div>
 
-<!-- MODAL QR CODE PROFILO (copiato da pannello-artigiano) -->
-<div class="modal-ai-overlay" id="modalQRCode" onclick="if(event.target===this)chiudiModalQRCode()">
-  <div class="modal-ai" style="max-width:760px">
-    <div class="modal-ai-header">
-      <div>
-        <h2>🔲 QR Code profilo</h2>
-        <p>Condividi il tuo profilo TrovaImpresa con un QR Code personalizzato</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
-      <button class="modal-ai-close" onclick="chiudiModalQRCode()">✕</button>
-    </div>
-    <div class="modal-ai-body">
-      <div id="qr-code-container" style="display:flex;justify-content:center;align-items:center;min-height:280px;padding:16px;background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:14px;"></div>
-      <div id="qr-url-line" style="font-size:0.75rem;color:#666;text-align:center;margin-bottom:16px;word-break:break-all;"></div>
-      <div class="ai-form-group">
-        <label>Colore QR Code</label>
-        <input type="color" id="qr-color-picker" value="#000000" oninput="aggiornaColoreQRCode(this.value)" style="width:100%;height:42px;padding:4px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:white;">
-      </div>
-      <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">⬇️ Scarica PNG 1024×1024</button>
-      <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:#1a3a2a;">
-        <div style="font-weight:700;font-size:14px;margin-bottom:6px;">✅ Scaricato!</div>
-        <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
-        <div style="font-size:13px;color:#2a7a4b;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
   <a href="modifica-profilo.html#card-disdetta" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
