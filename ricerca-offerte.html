@@ -401,7 +401,8 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', inizializzaMappa);
+    inizializzaMappa();
+    setTimeout(() => { if (map) map.invalidateSize(); }, 300);
 
     // Popola cascata Regione → Provincia → Città
     (function initGeo() {
