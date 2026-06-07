@@ -770,6 +770,17 @@
     box-shadow:0 4px 12px rgba(124,58,237,0.3); transition:transform 0.15s;
   }
   #sec-personalizza .mpp-btn-save:hover { transform:translateY(-1px); }
+
+  /* === Fai conoscere la tua azienda (video) === */
+  #sec-video .video-row { display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid #f0f0f0; }
+  #sec-video .video-row:last-child { border-bottom:none; }
+  #sec-video .video-iframe-wrap { flex:0 0 240px; aspect-ratio:16/9; background:#000; border-radius:8px; overflow:hidden; }
+  #sec-video .video-iframe-wrap iframe { width:100%; height:100%; border:0; display:block; }
+  #sec-video .video-info { flex:1; min-width:0; }
+  #sec-video .video-info p { font-size:14px; color:#333; line-height:1.5; word-break:break-word; }
+  #sec-video .btn-del { background:#fff0f0; color:#c0392b; border:1px solid #f5c6c6; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px; flex-shrink:0; }
+  #sec-video .btn-del:hover { background:#ffe5e5; }
+  @media (max-width:768px){ #sec-video .video-row{flex-direction:column} #sec-video .video-iframe-wrap{flex:0 0 auto;width:100%} #sec-video .btn-del{width:100%} }
 </style>
 <link rel="stylesheet" href="/css/mobile.css">
 </head>
@@ -910,7 +921,7 @@
           <div class="dash-quick-icon">📄</div>
           <div class="dash-quick-label">Richiesta di preventivo</div>
         </div>
-        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="window.location.href='galleria-video.html'">
+        <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriVideo()">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
@@ -1307,6 +1318,32 @@
           <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
           <div style="font-size:13px;color:#2a7a4b;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
         </div>
+      </div>
+    </div>
+
+    <!-- FAI CONOSCERE LA TUA AZIENDA (VIDEO) -->
+    <div class="section" id="sec-video">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          🎬 Fai conoscere la tua azienda
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div class="profilo-title">➕ Aggiungi un video</div>
+        <div class="form-group">
+          <label>URL video (YouTube o Vimeo)</label>
+          <input type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=...  oppure  https://vimeo.com/...">
+        </div>
+        <div class="form-group">
+          <label>Descrizione</label>
+          <textarea id="video-desc" placeholder="Descrivi brevemente il lavoro mostrato..."></textarea>
+        </div>
+        <button class="btn-salva-annuncio" id="btn-salva-video" onclick="salvaVideo()">💾 Salva video</button>
+      </div>
+      <div class="profilo-card" style="margin-top:16px">
+        <div class="profilo-title">🎬 Video caricati</div>
+        <div id="lista-video"><div class="empty-state">Caricamento...</div></div>
       </div>
     </div>
 
@@ -3864,6 +3901,80 @@ function apriModalCertificazioni() {
 
 function apriModalPreventivi() {
   caricaPreventivi();
+}
+
+// === FAI CONOSCERE LA TUA AZIENDA (VIDEO) ===
+function apriVideo() {
+  if (!impresaCorrente) return;
+  const piano = (impresaCorrente.piano || '').toLowerCase();
+  if (piano !== 'premium') {
+    if (confirm('🎬 Fai conoscere la tua azienda è una funzione Premium. Vuoi scoprire di più?')) {
+      window.location.href = 'info-premium.html';
+    }
+    return;
+  }
+  showSection('video');
+  caricaVideo();
+}
+function _videoUrlValido(url) {
+  const lower = (url || '').toLowerCase();
+  return lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com');
+}
+function estraiVideoEmbed(url) {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '');
+    if (host === 'youtu.be') {
+      const id = u.pathname.slice(1).split('/')[0];
+      return /^[A-Za-z0-9_-]{6,}$/.test(id) ? 'https://www.youtube.com/embed/' + id : null;
+    }
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+      const id = u.searchParams.get('v');
+      return id && /^[A-Za-z0-9_-]{6,}$/.test(id) ? 'https://www.youtube.com/embed/' + id : null;
+    }
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+      const parts = u.pathname.split('/').filter(Boolean);
+      const id = parts.find(p => /^\d+$/.test(p));
+      return id ? 'https://player.vimeo.com/video/' + id : null;
+    }
+  } catch (_) {}
+  return null;
+}
+async function caricaVideo() {
+  const lista = document.getElementById('lista-video');
+  if (!lista || !impresaCorrente) return;
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const { data, error } = await sb.from('video_lavori').select('*').eq('impresa_id', impresaCorrente.id).order('created_at', { ascending: false });
+  if (error) { lista.innerHTML = '<div class="empty-state">Errore caricamento video.</div>'; return; }
+  if (!data || !data.length) { lista.innerHTML = '<div class="empty-state">Nessun video caricato. Aggiungi il primo qui sopra.</div>'; return; }
+  lista.innerHTML = data.map(v => {
+    const embed = estraiVideoEmbed(v.video_url);
+    const iframe = embed
+      ? '<iframe src="' + esc(embed) + '" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
+      : '<div style="padding:20px;color:#fff;font-size:13px">URL non valido</div>';
+    const desc = v.descrizione ? esc(v.descrizione) : '<em style="color:#888">Nessuna descrizione</em>';
+    return '<div class="video-row"><div class="video-iframe-wrap">' + iframe + '</div><div class="video-info"><p>' + desc + '</p></div><button class="btn-del" onclick="eliminaVideo(' + v.id + ')">🗑️ Elimina</button></div>';
+  }).join('');
+}
+async function salvaVideo() {
+  const url = document.getElementById('video-url').value.trim();
+  const desc = document.getElementById('video-desc').value.trim();
+  if (!url) { alert('Inserisci un URL video.'); return; }
+  if (!_videoUrlValido(url)) { alert('URL non valido. Sono ammessi solo link YouTube (youtube.com, youtu.be) o Vimeo (vimeo.com).'); return; }
+  const btn = document.getElementById('btn-salva-video');
+  btn.disabled = true; btn.textContent = '⏳ Salvataggio...';
+  const { error } = await sb.from('video_lavori').insert({ impresa_id: impresaCorrente.id, video_url: url, descrizione: desc });
+  btn.disabled = false; btn.textContent = '💾 Salva video';
+  if (error) { alert('Errore: ' + error.message); return; }
+  document.getElementById('video-url').value = '';
+  document.getElementById('video-desc').value = '';
+  caricaVideo();
+}
+async function eliminaVideo(id) {
+  if (!confirm('Eliminare questo video?')) return;
+  const { error } = await sb.from('video_lavori').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  caricaVideo();
 }
 const _fmtCalc = n => Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
 function calcIva() {
