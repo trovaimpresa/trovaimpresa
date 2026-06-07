@@ -262,6 +262,56 @@
       background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
     }
     .toggle-pw:hover { color: #2ecc71; }
+
+    .login-box {
+      background: #f0faf4;
+      border: 1.5px solid #a8d5b5;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+    .login-box h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1a4d2e;
+      margin-bottom: 14px;
+    }
+    .login-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .login-row > input { flex: 1; min-width: 140px; padding: 13px 14px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 16px; color: #333; }
+    .login-row > .password-wrapper { flex: 1; min-width: 140px; position: relative; }
+    .login-row > .password-wrapper input { width: 100%; padding: 13px 14px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 16px; color: #333; }
+    .login-row > .btn-login { flex-shrink: 0; }
+    .btn-login {
+      padding: 12px 20px;
+      background: #2a7a4b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-login:hover { background: #1a4d2e; }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+    .login-msg { margin-top: 8px; font-size: 0.82rem; }
+    .campi-compilati {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #d4edda;
+      color: #155724;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
   </style>
 <link rel="stylesheet" href="/css/mobile.css">
 </head>
