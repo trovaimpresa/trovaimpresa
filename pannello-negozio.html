@@ -2290,29 +2290,58 @@ async function inizializza() {
 function caricaProfilo() {
   const i = impresaCorrente;
   if (!i) return;
+  const nome = i.nome_attivita || ((i.nome || '') + ' ' + (i.cognome || '')).trim() || '—';
+  const iniziali = nome.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+  const sottotitolo = [i.tipo, [i.citta, i.regione].filter(Boolean).join(', ')].filter(Boolean).join(' · ') || '—';
+  const statoBadge = i.verificata
+    ? '<span style="display:inline-block;background:var(--verde3);color:var(--verde2);font-weight:700;font-size:0.82rem;padding:6px 14px;border-radius:20px;white-space:nowrap">✅ Verificata</span>'
+    : '<span style="display:inline-block;background:var(--arancio3);color:var(--arancio2);font-weight:700;font-size:0.82rem;padding:6px 14px;border-radius:20px;white-space:nowrap">⏳ In attesa di verifica</span>';
+  const riga = (k, v) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.9rem"><span style="color:var(--mid);font-weight:600">${k}</span><span style="text-align:right;color:var(--dark)">${v || '—'}</span></div>`;
+  const titoletto = (t) => `<div style="font-size:0.72rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--verde2);margin-bottom:6px">${t}</div>`;
+
   document.getElementById('profilo-dati').innerHTML = `
-    <div class="profilo-title">Dati impresa</div>
-    <div class="profilo-row"><span class="profilo-key">Nome attività</span><span>${i.nome_attivita || i.nome || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Tipo</span><span>${i.tipo || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Tipo negozio</span><span>${i.tipo_negozio || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Email</span><span>${i.email || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Telefono</span><span>${i.telefono || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">WhatsApp</span><span>${i.whatsapp || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Regione</span><span>${i.regione || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Città</span><span>${i.citta || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Provincia</span><span>${i.provincia || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Indirizzo</span><span>${i.indirizzo || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">CAP</span><span>${i.cap || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Partita IVA</span><span>${i.partita_iva || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Specializzazioni</span><span>${i.specializzazioni || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Zone</span><span>${i.zone || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Sito web</span><span>${i.sito_web || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Descrizione</span><span>${i.descrizione || '—'}</span></div>
-    <div class="profilo-row"><span class="profilo-key">Stato</span><span>${i.verificata ? '✅ Verificata' : '⏳ In attesa di verifica'}</span></div>
-    <br>
-    <a href="modifica-profilo.html" target="_blank" style="color:var(--verde);font-weight:700;font-size:0.88rem">✏️ Modifica profilo →</a>
-    &nbsp;&nbsp;
-    <a href="#" onclick="avviaMFA(event)" style="color:var(--arancio);font-weight:700;font-size:0.88rem" id="link-2fa">🔐 Attiva 2FA →</a>
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--verde3);color:var(--verde);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;flex-shrink:0">${iniziali}</div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--dark);line-height:1.2">${nome}</div>
+        <div style="color:var(--mid);font-size:0.95rem;margin-top:4px">${sottotitolo}</div>
+      </div>
+      ${statoBadge}
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:28px">
+      <div>
+        ${titoletto('Contatti')}
+        ${riga('Email', i.email)}
+        ${riga('Telefono', i.telefono)}
+        ${riga('WhatsApp', i.whatsapp)}
+        ${riga('Sito web', i.sito_web)}
+      </div>
+      <div>
+        ${titoletto('Località')}
+        ${riga('Regione', i.regione)}
+        ${riga('Provincia', i.provincia)}
+        ${riga('Città', i.citta)}
+        ${riga('Indirizzo', i.indirizzo)}
+        ${riga('CAP', i.cap)}
+        ${riga('Zone', i.zone)}
+      </div>
+      <div>
+        ${titoletto('Attività')}
+        ${riga('Tipo negozio', i.tipo_negozio)}
+        ${riga('Partita IVA', i.partita_iva)}
+        ${riga('Specializzazioni', i.specializzazioni)}
+      </div>
+    </div>
+
+    <div style="margin-top:28px">
+      ${titoletto('Descrizione')}
+      <div style="font-size:0.92rem;color:var(--dark);line-height:1.6;white-space:pre-wrap">${i.descrizione || '—'}</div>
+    </div>
+
+    <div style="margin-top:28px">
+      <a href="modifica-profilo.html" target="_blank" style="display:inline-block;background:var(--verde);color:white;padding:12px 28px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none">✏️ Modifica profilo</a>
+    </div>
   `;
 }
 
