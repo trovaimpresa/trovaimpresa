@@ -860,7 +860,7 @@
           <div class="dash-quick-label">Foto dei lavori</div>
           <div class="dash-quick-sub">Carica e gestisci le tue foto</div>
         </div>
-        <div onclick="apriModalCertificazioni()" class="dash-quick-card" data-card-id="certificazioni" style="cursor:pointer;display:block;">
+        <div onclick="showSection('certificazioni', this)" class="dash-quick-card" data-card-id="certificazioni" style="cursor:pointer;display:block;">
           <div class="dash-quick-icon">📜</div>
           <div class="dash-quick-label">Certificazioni</div>
         </div>
@@ -1237,6 +1237,38 @@
         <div class="faq-cta-help">
           <button onclick="apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
         </div>
+      </div>
+    </div>
+
+    <!-- CERTIFICAZIONI -->
+    <div class="section" id="sec-certificazioni">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          📋 Certificazioni
+        </div>
+      </div>
+      <div class="profilo-card">
+        <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
+          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Aggiungi certificazione</div>
+          <div class="form-group">
+            <label>Nome certificazione *</label>
+            <input list="cert-list" id="cert-search" placeholder="Cerca certificazione...">
+            <datalist id="cert-list"></datalist>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Scadenza (opzionale)</label>
+              <input type="date" id="cert-scadenza-input">
+            </div>
+            <div class="form-group">
+              <label>File (PDF/immagine)</label>
+              <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
+            </div>
+          </div>
+          <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
+        </div>
+        <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
       </div>
     </div>
 
@@ -1668,42 +1700,6 @@
     <div class="modal-ai-body">
       <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
       <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL CERTIFICAZIONI -->
-<div class="modal-ai-overlay" id="modalCertificazioni" onclick="if(event.target===this)chiudiModalCertificazioni()">
-  <div class="modal-ai" style="max-width:760px">
-    <div class="modal-ai-header">
-      <div>
-        <h2>📋 Certificazioni</h2>
-        <p>Le tue certificazioni professionali</p>
-      </div>
-      <button class="btn-fullscreen" title="Ingrandisci" onclick="toggleFullscreen(this)">⛶</button>
-      <button class="modal-ai-close" onclick="chiudiModalCertificazioni()">✕</button>
-    </div>
-    <div class="modal-ai-body">
-      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-        <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Aggiungi certificazione</div>
-        <div class="form-group">
-          <label>Nome certificazione *</label>
-          <input list="cert-list" id="cert-search" placeholder="Cerca certificazione...">
-          <datalist id="cert-list"></datalist>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Scadenza (opzionale)</label>
-            <input type="date" id="cert-scadenza-input">
-          </div>
-          <div class="form-group">
-            <label>File (PDF/immagine)</label>
-            <input type="file" id="cert-file-input" accept=".pdf,image/*" style="padding:8px;">
-          </div>
-        </div>
-        <button class="btn-az" onclick="aggiungiCertificazione()">+ Aggiungi certificazione</button>
-      </div>
-      <div id="lista-certificazioni"><div class="empty-state"><div class="empty-icon">📜</div>Caricamento...</div></div>
     </div>
   </div>
 </div>
@@ -2225,6 +2221,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'foto-lavori') caricaListaLavoriFoto();
   if (id === 'personalizza') apriModalPersonalizzaPannello();
   if (id === 'risoluzione') apriModalRisoluzione();
+  if (id === 'certificazioni') apriModalCertificazioni();
   if (!fromPopstate) history.pushState({ section: id }, '', '#' + id);
 }
 
@@ -3869,11 +3866,7 @@ function toggleFullscreen(btn) {
 }
 
 function apriModalCertificazioni() {
-  document.getElementById('modalCertificazioni').classList.add('show');
   caricaCertificazioni();
-}
-function chiudiModalCertificazioni() {
-  document.getElementById('modalCertificazioni').classList.remove('show');
 }
 
 function apriModalPreventivi() {
