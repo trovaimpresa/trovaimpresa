@@ -593,6 +593,44 @@
               </select>
             </div>
             <div class="form-group">
+              <label>Professione secondaria</label>
+              <select id="f-mestiere2-professionista">
+                <option value="">— Seleziona —</option>
+                <option value="architetto">Architetto</option>
+                <option value="ingegnere_civile">Ingegnere civile</option>
+                <option value="ingegnere_strutturale">Ingegnere strutturale</option>
+                <option value="ingegnere_impiantistico">Ingegnere impiantistico</option>
+                <option value="geometra">Geometra</option>
+                <option value="perito_industriale">Perito industriale</option>
+                <option value="topografo">Topografo</option>
+                <option value="consulente_energetico">Consulente energetico</option>
+                <option value="consulente_sicurezza">Consulente sicurezza</option>
+                <option value="direttore_lavori">Direttore lavori</option>
+                <option value="collaudatore_strutture">Collaudatore strutture</option>
+                <option value="project_manager">Project manager</option>
+                <option value="amministratore_condominio">Amministratore di condominio</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Terza professione</label>
+              <select id="f-mestiere3-professionista">
+                <option value="">— Seleziona —</option>
+                <option value="architetto">Architetto</option>
+                <option value="ingegnere_civile">Ingegnere civile</option>
+                <option value="ingegnere_strutturale">Ingegnere strutturale</option>
+                <option value="ingegnere_impiantistico">Ingegnere impiantistico</option>
+                <option value="geometra">Geometra</option>
+                <option value="perito_industriale">Perito industriale</option>
+                <option value="topografo">Topografo</option>
+                <option value="consulente_energetico">Consulente energetico</option>
+                <option value="consulente_sicurezza">Consulente sicurezza</option>
+                <option value="direttore_lavori">Direttore lavori</option>
+                <option value="collaudatore_strutture">Collaudatore strutture</option>
+                <option value="project_manager">Project manager</option>
+                <option value="amministratore_condominio">Amministratore di condominio</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label>Nome studio / attività</label>
               <input type="text" id="f-nome_attivita" placeholder="Es. Studio Rossi Ingegneria">
             </div>
@@ -1020,6 +1058,8 @@
         document.getElementById('f-nome-professionista').value = d.nome || '';
         document.getElementById('f-cognome').value = d.cognome || '';
         setSelectValue('f-mestiere-professionista', d.mestieri?.[0] || d.mestiere);
+        setSelectValue('f-mestiere2-professionista', d.mestieri?.[1]);
+        setSelectValue('f-mestiere3-professionista', d.mestieri?.[2]);
         document.getElementById('f-nome_attivita').value = d.nome_attivita || '';
         document.getElementById('f-albo').value = d.albo || '';
         document.getElementById('f-partita_iva-professionista').value = d.partita_iva || '';
@@ -1115,6 +1155,17 @@
           return;
         }
       }
+      // Validazione professioni (professionista)
+      if (tipoCategoria === 'professionista') {
+        const _m1 = document.getElementById('f-mestiere-professionista').value;
+        const _m2 = document.getElementById('f-mestiere2-professionista').value;
+        const _m3 = document.getElementById('f-mestiere3-professionista').value;
+        if (!_m1) { alert('Seleziona almeno la professione principale.'); return; }
+        if ((_m2 && _m2 === _m1) || (_m3 && (_m3 === _m1 || _m3 === _m2))) {
+          alert('Professione secondaria e terza non possono coincidere con la principale né tra loro.');
+          return;
+        }
+      }
       const btn = document.getElementById('btn-save');
       btn.disabled = true;
       btn.textContent = '⏳ Salvataggio...';
@@ -1191,7 +1242,11 @@
             nome: document.getElementById('f-nome-professionista').value.trim(),
             cognome: document.getElementById('f-cognome').value.trim(),
             mestiere: document.getElementById('f-mestiere-professionista').value || null,
-            mestieri: document.getElementById('f-mestiere-professionista').value ? [document.getElementById('f-mestiere-professionista').value] : [],
+            mestieri: [...new Set([
+              document.getElementById('f-mestiere-professionista').value,
+              document.getElementById('f-mestiere2-professionista').value,
+              document.getElementById('f-mestiere3-professionista').value
+            ].filter(Boolean))],
             nome_attivita: document.getElementById('f-nome_attivita').value.trim(),
             albo: document.getElementById('f-albo').value.trim(),
             partita_iva: document.getElementById('f-partita_iva-professionista').value.trim(),
