@@ -569,7 +569,7 @@ async function caricaProfilo(id){
       caricaVetrina(d.user_id);
       const _fg=document.getElementById('foto-lavori-grid');const _fc=_fg&&_fg.closest('.card');if(_fc)_fc.style.display='none';
     }else{
-      caricaFotoLavori(id);
+      caricaFotoLavori(d.user_id);
     }
     if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
     if(d.colore_header){const h=document.getElementById('hero-section');if(!d.colore_header.includes('gradient'))h.style.backgroundImage='none';h.style.background=d.colore_header}
@@ -855,13 +855,15 @@ async function caricaVideoLavori(id){
   }catch(e){console.error(e)}
 }
 
-async function caricaFotoLavori(id){
+async function caricaFotoLavori(ownerId){
   const grid=document.getElementById('foto-lavori-grid');if(!grid)return;
   const card=grid.closest('.card');
-  const {data,error}=await sc.storage.from('foto-lavori').list(String(id),{sortBy:{column:'created_at',order:'desc'}});
-  const foto=(data||[]).filter(f=>f.name!=='.emptyFolderPlaceholder');
-  if(error||!foto.length){if(card)card.style.display='none';return}
-  window.fotoLavoriUrls=foto.map(f=>sc.storage.from('foto-lavori').getPublicUrl(`${id}/${f.name}`).data.publicUrl);
+  if(!ownerId){if(card)card.style.display='none';return}
+  const {data,error}=await sc.from('lavori_foto').select('*').eq('owner_id',ownerId).eq('pubblico',true).order('created_at',{ascending:false});
+  const lavori=Array.isArray(data)?data:[];
+  if(error||!lavori.length){if(card)card.style.display='none';return}
+  window.fotoLavoriUrls=lavori.map(l=>{const f=l.foto||'';if(!f)return '';return /^https?:\/\//i.test(f)?f:sc.storage.from('foto-lavori').getPublicUrl(f).data.publicUrl}).filter(Boolean);
+  if(!window.fotoLavoriUrls.length){if(card)card.style.display='none';return}
   grid.innerHTML=window.fotoLavoriUrls.map((u,i)=>`<div class="fi" onclick="apriLightbox(${i})"><img src="${u}" alt="Foto" loading="lazy"></div>`).join('');
   if(card)card.style.display='';
 }
