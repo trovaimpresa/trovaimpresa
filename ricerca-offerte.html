@@ -403,6 +403,7 @@
 
     inizializzaMappa();
     setTimeout(() => { if (map) map.invalidateSize(); }, 300);
+    cercaOfferte();  // carica subito le offerte attive (lista + pin sulla mappa)
 
     // Popola cascata Regione → Provincia → Città
     (function initGeo() {
