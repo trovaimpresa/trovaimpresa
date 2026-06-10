@@ -2613,12 +2613,23 @@ async function generaPreventivoDash() {
   btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
 
   try {
-    const res = await fetch('/.netlify/functions/ai-orienta', {
+    const res = await fetch('/.netlify/functions/ai-claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ testo: prompt })
+      body: JSON.stringify({
+        azione: 'preventivo',
+        impresa_id: impresaCorrente.id,
+        prompt: prompt
+      })
     });
-    const testo = await res.text();
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      alert('Errore AI: ' + ((data && data.error) || res.status));
+      btn.disabled = false;
+      btn.innerHTML = '🤖 Genera preventivo';
+      return;
+    }
+    const testo = (data && typeof data.risposta === 'string') ? data.risposta : '';
     document.getElementById('ai-result-text').value = testo;
     document.getElementById('ai-result-box').classList.add('show');
     btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
