@@ -1074,6 +1074,11 @@
             <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Storico preventivi</div>
             <div style="font-size:0.78rem;color:#888;margin-top:4px">Tutti i preventivi che hai creato</div>
           </div>
+          <div data-premium="true" onclick="apriModalPreventivoDash()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
+            <div style="font-size:1.8rem;margin-bottom:8px">🤖</div>
+            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Preventivo AI</div>
+            <div style="font-size:0.78rem;color:#888;margin-top:4px">L'AI scrive il preventivo a parole</div>
+          </div>
         </div>
       </div>
 
@@ -2014,6 +2019,63 @@
       <button class="btn-invia-prev" id="btn-invia-prev" onclick="inviaPreventivo()" style="display:none">
         📤 Invia preventivo al cliente
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AI PREVENTIVO DASHBOARD -->
+<div class="modal-ai-overlay" id="modal-ai-dash" onclick="if(event.target===this)chiudiModalPreventivoDash()">
+  <div class="modal-ai">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🤖 Genera preventivo con AI</h2>
+        <p>Compila i dati del lavoro — l'AI creerà un preventivo professionale</p>
+      </div>
+      <button class="modal-ai-close" onclick="chiudiModalPreventivoDash()">✕</button>
+    </div>
+    <div class="modal-ai-body">
+      <div class="ai-form-group">
+        <label>Tipo di lavoro *</label>
+        <select id="ai-tipo-lavoro">
+          <option value="">— Seleziona —</option>
+          <option>Ristrutturazione appartamento</option>
+          <option>Ristrutturazione bagno</option>
+          <option>Ristrutturazione cucina</option>
+          <option>Impianto elettrico</option>
+          <option>Impianto idraulico</option>
+          <option>Pavimentazione / Parquet</option>
+          <option>Tinteggiatura / Pittura</option>
+          <option>Facciata esterna</option>
+          <option>Copertura / Tetto</option>
+          <option>Opere murarie</option>
+          <option>Serramenti / Infissi</option>
+          <option>Altro</option>
+        </select>
+      </div>
+      <div class="ai-form-group">
+        <label>Descrizione del lavoro</label>
+        <textarea id="ai-descrizione" placeholder="Descrivi il lavoro richiesto, eventuali materiali, condizioni particolari…"></textarea>
+      </div>
+      <div class="ai-form-row">
+        <div class="ai-form-group">
+          <label>Dimensioni / Superficie</label>
+          <input type="text" id="ai-dimensioni" placeholder="Es. 80 mq, 3 stanze">
+        </div>
+        <div class="ai-form-group">
+          <label>Zona / Città</label>
+          <input type="text" id="ai-zona" placeholder="Es. Roma, Milano Nord">
+        </div>
+      </div>
+      <button class="btn-genera-ai-dash" id="btn-genera-ai-dash" onclick="generaPreventivoDash()">
+        🤖 Genera preventivo
+      </button>
+      <div class="ai-result-box" id="ai-result-box">
+        <div class="ai-result-label">
+          ✨ Preventivo generato — personalizzalo a piacere
+          <button class="btn-copia" onclick="copiaPreventivoDash()">📋 Copia</button>
+        </div>
+        <textarea class="ai-result-text" id="ai-result-text"></textarea>
+      </div>
     </div>
   </div>
 </div>
@@ -3277,6 +3339,73 @@ function apriCalcolatrice() {
 }
 function chiudiCalcolatrice() {
   showSection('dashboard');
+}
+
+// =====================
+// MODAL AI PREVENTIVO DASHBOARD
+// =====================
+function apriModalPreventivoDash() {
+  document.getElementById('modal-ai-dash').classList.add('show');
+  document.getElementById('ai-result-box').classList.remove('show');
+  document.getElementById('ai-result-text').value = '';
+  document.getElementById('btn-genera-ai-dash').disabled = false;
+  document.getElementById('btn-genera-ai-dash').innerHTML = '🤖 Genera preventivo';
+}
+
+function chiudiModalPreventivoDash() {
+  document.getElementById('modal-ai-dash').classList.remove('show');
+}
+
+async function generaPreventivoDash() {
+  const tipo = document.getElementById('ai-tipo-lavoro').value;
+  const descrizione = document.getElementById('ai-descrizione').value.trim();
+  const dimensioni = document.getElementById('ai-dimensioni').value.trim();
+  const zona = document.getElementById('ai-zona').value.trim();
+
+  if (!tipo) { alert('Seleziona il tipo di lavoro.'); return; }
+
+  const nomeImpresa = impresaCorrente.nome_attivita || (impresaCorrente.nome + ' ' + impresaCorrente.cognome);
+  const prompt = `Sei un esperto preventivista edile italiano. Genera un preventivo professionale completo in italiano per il seguente lavoro:\n- Tipo di lavoro: ${tipo}\n- Descrizione: ${descrizione || 'non specificata'}\n- Dimensioni/superficie: ${dimensioni || 'non specificata'}\n- Zona: ${zona || 'non specificata'}\n- Impresa: ${nomeImpresa}\n\nScrivi un preventivo professionale e formale con stima dei costi, tempistiche indicative, cosa include il servizio e garanzie. Usa il formato di una lettera commerciale italiana. Non usare JSON.`;
+
+  const btn = document.getElementById('btn-genera-ai-dash');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
+
+  try {
+    const res = await fetch('/.netlify/functions/ai-claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        azione: 'preventivo',
+        impresa_id: impresaCorrente.id,
+        prompt: prompt
+      })
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      alert('Errore AI: ' + ((data && data.error) || res.status));
+      btn.disabled = false;
+      btn.innerHTML = '🤖 Genera preventivo';
+      return;
+    }
+    const testo = (data && typeof data.risposta === 'string') ? data.risposta : '';
+    document.getElementById('ai-result-text').value = testo;
+    document.getElementById('ai-result-box').classList.add('show');
+    btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
+  } catch (err) {
+    alert('Errore nella generazione. Riprova.');
+    btn.disabled = false;
+    btn.innerHTML = '🤖 Genera preventivo';
+  }
+}
+
+async function copiaPreventivoDash() {
+  const testo = document.getElementById('ai-result-text').value;
+  await navigator.clipboard.writeText(testo);
+  const btn = document.querySelector('.btn-copia');
+  const orig = btn.textContent;
+  btn.textContent = '✅ Copiato!';
+  setTimeout(() => { btn.textContent = orig; }, 2000);
 }
 
 // === MODAL CREA PREVENTIVO ===
