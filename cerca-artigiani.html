@@ -461,12 +461,40 @@
     }
   }
 
+  function formRichiestaClienteHTML() {
+    return '<div id="richiesta-cliente-box" style="margin-top:22px;padding-top:18px;border-top:1px solid #eee;max-width:420px;margin-left:auto;margin-right:auto">'
+      + '<p style="font-size:14px;color:#555;margin-bottom:12px">Non hai trovato quello che cercavi? Lasciaci la tua richiesta: ti mettiamo in contatto appena arriva un\'attività nella tua zona</p>'
+      + '<input type="text" id="rc-nome" placeholder="Il tuo nome *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px">'
+      + '<input type="tel" id="rc-telefono" placeholder="Il tuo telefono *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px">'
+      + '<button onclick="inviaRichiestaCliente()" style="background:#2a7a4b;color:white;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer">Invia richiesta</button>'
+      + '</div>';
+  }
+
+  async function inviaRichiestaCliente() {
+    const nome = document.getElementById('rc-nome').value.trim();
+    const telefono = document.getElementById('rc-telefono').value.trim();
+    if (!nome || !telefono) { alert('Inserisci nome e telefono.'); return; }
+    const zona = (document.getElementById('cittaInput').value.trim() || document.getElementById('citta').value || document.getElementById('regioneSelect').value || '').trim();
+    const ricerca = (typeof mestiereScelto !== 'undefined' && mestiereScelto !== 'tutti') ? mestiereScelto : '';
+    try {
+      const res = await fetch('/.netlify/functions/richiesta-cliente', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, telefono, categoria: 'artigiani', zona, ricerca })
+      });
+      if (!res.ok) throw new Error('invio fallito');
+      document.getElementById('richiesta-cliente-box').innerHTML = '<p style="font-weight:700;color:#2a7a4b;font-size:15px">✅ Grazie! Ti ricontatteremo presto.</p>';
+    } catch (e) {
+      alert('Errore nell\'invio. Riprova.');
+    }
+  }
+
   function mostraPagina(pagina) {
     paginaCorrente = pagina;
     const div = document.getElementById('risultati');
     if (!tuttiRisultati.length) {
       document.getElementById('risultatiCount').textContent = 'Nessun risultato';
-      div.innerHTML = '<div class="no-results"><h3>😕 Nessun artigiano trovato</h3><p>Prova a cambiare città o mestiere</p></div>';
+      div.innerHTML = '<div class="no-results"><h3>😕 Nessun artigiano trovato</h3><p>Prova a cambiare città o mestiere</p>' + formRichiestaClienteHTML() + '</div>';
       document.getElementById('pagination').innerHTML = ''; return;
     }
     const totale = tuttiRisultati.length;
