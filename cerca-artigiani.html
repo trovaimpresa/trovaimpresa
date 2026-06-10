@@ -411,7 +411,7 @@
         return;
       }
       let q = supabaseClient.from('imprese').select('*').eq('tipo', 'artigiano');
-      if (mestiereScelto !== 'tutti') q = q.ilike('mestieri', `%${mestiereScelto}%`);
+      if (mestiereScelto !== 'tutti') q = q.contains('mestieri', [mestiereScelto]);
       if (citta) {
         if (regione) {
           q = q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${regione})`);
