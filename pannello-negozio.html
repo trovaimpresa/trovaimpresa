@@ -2768,6 +2768,19 @@ async function inviaPreventivo() {
     return;
   }
 
+  fetch('/.netlify/functions/notifica-risposta-preventivo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email_cliente: preventivoCorrente.email,
+      nome_cliente: preventivoCorrente.nome,
+      impresa_nome: impresaCorrente.nome_attivita,
+      risposta: testo,
+      prezzo_min: min ? parseInt(min) : null,
+      prezzo_max: max ? parseInt(max) : null
+    })
+  }).catch(() => {});
+
   btn.textContent = '✅ Preventivo inviato!';
   await caricaPreventivi();
   setTimeout(() => chiudiModal(), 1500);
