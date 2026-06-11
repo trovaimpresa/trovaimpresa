@@ -424,8 +424,8 @@
         }
       }
       if (valutazioneMin > 0) q = q.gte('valutazione_media', valutazioneMin);
-      if (soloVerificati) q = q.eq('verificato', true);
-      if (conFoto) q = q.not('foto_lavori', 'is', null);
+      if (soloVerificati) q = q.eq('verificata', true);
+      if (conFoto) q = q.not('foto_urls', 'is', null).neq('foto_urls', '[]');
       if (rispondeIn24h) q = q.eq('risponde_24h', true);
       if (preventivoOnline) q = q.eq('preventivo_online', true);
       q = q.order('piano_ordine', { ascending: false });
