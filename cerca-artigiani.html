@@ -205,10 +205,6 @@
       <select id="provincia" disabled style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
         <option value="">Tutte le province</option>
       </select>
-      <div class="filter-label" style="margin-top:14px;">Città</div>
-      <select id="citta" disabled style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
-        <option value="">Tutte le città</option>
-      </select>
     </div>
 
     <div class="filter-group">
@@ -393,8 +389,7 @@
     try {
       const regione = document.getElementById('regioneSelect').value;
       const provinciaSel = document.getElementById('provincia').value;
-      const cittaSel = document.getElementById('citta').value;
-      if (!citta && !cittaSel && !regione) {
+      if (!citta && !regione) {
         const div = document.getElementById('risultati');
         div.innerHTML = '<div class="no-results"><h3>📍 Inserisci una città o regione</h3><p>Per vedere gli artigiani, indica dove stai cercando</p></div>';
         aggiornaMappaRis([]);
@@ -416,13 +411,6 @@
       }
       if (regione) q = q.eq('regione', regione);
       if (provinciaSel) q = q.eq('provincia', provinciaSel);
-      if (cittaSel) {
-        if (regione) {
-          q = q.or(`citta.eq.${cittaSel},and(piano.eq.premium,regione.eq.${regione})`);
-        } else {
-          q = q.eq('citta', cittaSel);
-        }
-      }
       if (valutazioneMin > 0) q = q.gte('valutazione_media', valutazioneMin);
       if (soloVerificati) q = q.eq('verificata', true);
       if (conFoto) q = q.not('foto_urls', 'is', null).neq('foto_urls', '[]');
@@ -464,7 +452,7 @@
     const nome = document.getElementById('rc-nome').value.trim();
     const telefono = document.getElementById('rc-telefono').value.trim();
     if (!nome || !telefono) { alert('Inserisci nome e telefono.'); return; }
-    const zona = (document.getElementById('cittaInput').value.trim() || document.getElementById('citta').value || document.getElementById('regioneSelect').value || '').trim();
+    const zona = (document.getElementById('cittaInput').value.trim() || document.getElementById('regioneSelect').value || '').trim();
     const ricerca = (typeof mestiereScelto !== 'undefined' && mestiereScelto !== 'tutti') ? mestiereScelto : '';
     try {
       const res = await fetch('/.netlify/functions/richiesta-cliente', {
@@ -516,19 +504,16 @@
     return `<a class="card${i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}${ratingBadge}</div></a>`;
   }
 
-  // Cascata Regione → Provincia → Città
+  // Cascata Regione → Provincia
   (function initCascade() {
     const geo = window.GEO_ITALIA || {};
     const regSel = document.getElementById('regioneSelect');
     const provSel = document.getElementById('provincia');
-    const cittaSel = document.getElementById('citta');
     function resetSelect(sel, placeholder) {
       sel.innerHTML = '<option value="">' + placeholder + '</option>';
     }
     regSel.addEventListener('change', function() {
       resetSelect(provSel, 'Tutte le province');
-      resetSelect(cittaSel, 'Tutte le città');
-      cittaSel.disabled = true;
       const province = geo[regSel.value];
       if (!province) { provSel.disabled = true; }
       else {
@@ -542,20 +527,6 @@
       paginaCorrente = 1; cerca();
     });
     provSel.addEventListener('change', function() {
-      resetSelect(cittaSel, 'Tutte le città');
-      const cittaList = (geo[regSel.value] || {})[provSel.value];
-      if (!cittaList) { cittaSel.disabled = true; }
-      else {
-        cittaList.slice().sort((a, b) => a.localeCompare(b, 'it')).forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c; opt.textContent = c;
-          cittaSel.appendChild(opt);
-        });
-        cittaSel.disabled = false;
-      }
-      paginaCorrente = 1; cerca();
-    });
-    cittaSel.addEventListener('change', function() {
       paginaCorrente = 1; cerca();
     });
   })();
