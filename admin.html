@@ -631,6 +631,10 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let tutteImprese = [];
 
+// Credenziali admin tenute in memoria dopo il login: servono a ogni
+// chiamata alle funzioni server (es. admin-dati), che le riverifica.
+let adminU = null, adminP = null;
+
 // LOGIN
 async function doLogin() {
   const u = document.getElementById('login-user').value;
@@ -643,6 +647,7 @@ async function doLogin() {
     });
     const { ok } = await res.json();
     if (ok) {
+      adminU = u; adminP = p;
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       caricaTutto();
@@ -866,8 +871,17 @@ async function caricaPreventivi() {
 
 // CARICA RECENSIONI
 async function caricaRecensioni() {
-  const { data, error } = await sb.from('feedback_clienti').select('*').order('created_at', { ascending: false });
-  if (error) return;
+  let data;
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'list', table: 'feedback_clienti' })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) return;
+    data = json.data;
+  } catch { return; }
   const tbody = document.getElementById('table-recensioni');
   if (!data?.length) {
     tbody.innerHTML = '<tr><td colspan="5"><div class="empty-table"><div class="eicon">⭐</div>Nessuna recensione ancora</div></td></tr>';
@@ -915,8 +929,15 @@ async function eliminaImpresa(id, nome) {
 async function eliminaRecensione(id) {
   console.log('eliminaRecensione id:', id);
   if (!confirm('Eliminare questa recensione?')) return;
-  const { error } = await sb.from('feedback_clienti').delete().eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'delete', table: 'feedback_clienti', id })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) { alert('Errore: ' + (json.error || 'eliminazione non riuscita')); return; }
+  } catch (e) { alert('Errore: ' + e.message); return; }
   await caricaRecensioni();
 }
 
@@ -931,8 +952,15 @@ async function eliminaPreventivo(id) {
 // ELIMINA SEGNALAZIONE
 async function eliminaSegnalazione(id) {
   if (!confirm('Eliminare questa segnalazione?')) return;
-  const { error } = await sb.from('segnalazioni').delete().eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'delete', table: 'segnalazioni', id })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) { alert('Errore: ' + (json.error || 'eliminazione non riuscita')); return; }
+  } catch (e) { alert('Errore: ' + e.message); return; }
   await caricaSegnalazioni();
 }
 
@@ -979,8 +1007,17 @@ function chiudiModal() {
 async function caricaSegnalazioni() {
   const tbody = document.getElementById('table-segnalazioni');
   tbody.innerHTML = '<tr><td colspan="6" class="loading">Caricamento...</td></tr>';
-  const { data, error } = await sb.from('segnalazioni').select('*').order('created_at', { ascending: false });
-  if (error) {
+  let data;
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'list', table: 'segnalazioni' })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error();
+    data = json.data;
+  } catch {
     tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
     return;
   }
@@ -1007,8 +1044,15 @@ async function caricaSegnalazioni() {
 }
 
 async function segnalazioneRisolta(id) {
-  const { error } = await sb.from('segnalazioni').update({ stato: 'risolto' }).eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'update', table: 'segnalazioni', id, patch: { stato: 'risolto' } })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) { alert('Errore: ' + (json.error || 'aggiornamento non riuscito')); return; }
+  } catch (e) { alert('Errore: ' + e.message); return; }
   await caricaSegnalazioni();
 }
 
