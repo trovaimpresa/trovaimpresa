@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-200 0 1200 600" width="1200" height="600">
+  <defs>
+    <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066ff"/>
+      <stop offset="100%" style="stop-color:#0044dd"/>
+    </linearGradient>
+    <linearGradient id="grad-orange-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffaa00"/>
+      <stop offset="100%" style="stop-color:#ff8800"/>
+    </linearGradient>
+    <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#aa00ff"/>
+      <stop offset="100%" style="stop-color:#7700cc"/>
+    </linearGradient>
+    <linearGradient id="grad-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff1144"/>
+      <stop offset="100%" style="stop-color:#dd0033"/>
+    </linearGradient>
+    <linearGradient id="grad-teal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ddee"/>
+      <stop offset="100%" style="stop-color:#00bbcc"/>
+    </linearGradient>
+    <linearGradient id="grad-blue-teal" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ddee"/>
+      <stop offset="100%" style="stop-color:#0066ff"/>
+    </linearGradient>
+    <linearGradient id="grad-orange-blue" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffaa00"/>
+      <stop offset="100%" style="stop-color:#0066ff"/>
+    </linearGradient>
+    <linearGradient id="grad-purple-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#aa00ff"/>
+      <stop offset="100%" style="stop-color:#ff1144"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Simbolo T capovolta Calistoga - sinistra -->
+  <g transform="translate(-168, 380)">
+    <circle cx="76.4" cy="-22" r="14" fill="#ff8800"/>
+    <g transform="rotate(180, 76.4, 85.0)">
+      <path d="M35.91549295774648 170.0Q30.64788732394366 164.01408450704224 30.64788732394366 154.67605633802816Q43.57746478873239 154.67605633802816 50.64084507042253 151.56338028169014Q57.70422535211267 148.45070422535213 57.70422535211267 141.74647887323943V21.788732394366207H52.436619718309856Q46.2112676056338 21.788732394366207 40.1056338028169 25.619718309859167Q34.0 29.450704225352126 29.570422535211264 39.626760563380294Q25.140845070422532 49.80281690140846 23.464788732394364 69.19718309859155Q20.591549295774648 68.95774647887325 16.281690140845072 68.71830985915494Q11.971830985915492 68.47887323943662 8.02112676056338 67.88028169014085Q4.070422535211267 67.28169014084507 1.9154929577464788 66.56338028169014Q1.9154929577464788 61.535211267605646 2.3943661971830985 52.43661971830987Q2.873239436619718 43.338028169014095 3.8309859154929575 33.042253521126774Q4.788732394366197 22.746478873239454 6.345070422535211 13.76760563380283Q7.901408450704225 4.788732394366207 10.056338028169014 0.0Q14.36619718309859 0.0 19.873239436619716 0.7183098591549282Q25.380281690140844 1.4366197183098564 29.69014084507042 2.873239436619741H123.07042253521126Q127.61971830985915 1.4366197183098564 132.88732394366195 0.7183098591549282Q138.15492957746477 0.0 142.70422535211267 0.0Q144.85915492957744 4.788732394366207 146.41549295774647 13.76760563380283Q147.9718309859155 22.746478873239454 148.92957746478874 33.042253521126774Q149.88732394366195 43.338028169014095 150.36619718309856 52.43661971830987Q150.8450704225352 61.535211267605646 150.8450704225352 66.56338028169014Q147.73239436619718 67.7605633802817 140.90845070422534 68.47887323943662Q134.0845070422535 69.19718309859155 129.29577464788733 69.19718309859155Q127.85915492957746 49.80281690140846 124.50704225352112 39.626760563380294Q121.15492957746478 29.450704225352126 115.64788732394365 25.619718309859167Q110.14084507042253 21.788732394366207 101.52112676056338 21.788732394366207H97.45070422535211V141.74647887323943Q97.45070422535211 154.67605633802816 122.83098591549295 154.67605633802816Q122.83098591549295 164.01408450704224 117.32394366197182 170.0Z" fill="#ff8800"/>
+    </g>
+  </g>
+
+  <!-- TESTO gonfio: stroke-width alto + paint-order per riempire dentro -->
+  <text
+    x="500"
+    y="545"
+    text-anchor="middle"
+    font-family="'Trebuchet MS', 'Arial Rounded MT Bold', sans-serif"
+    font-size="165"
+    font-weight="900"
+    letter-spacing="-3"
+    paint-order="stroke"
+  >
+    <tspan fill="#0066ff" stroke="#0066ff" stroke-width="10" stroke-linejoin="round">Trova</tspan><tspan fill="#0066ff" stroke="#0066ff" stroke-width="10" stroke-linejoin="round">Impresa</tspan>
+  </text>
+
+  <!-- FIORE scala 1.2 -->
+  <g transform="translate(430, 255) scale(1.6)">
+    <g transform="rotate(-45)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(0)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(45)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(90)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(135)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(180)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(225)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(270)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(-45)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(0)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(45)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(90)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(135)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(180)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(225)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(270)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <circle cx="0" cy="0" r="11" fill="white"/>
+  </g>
+
+</svg>

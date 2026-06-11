@@ -49,7 +49,7 @@
   </text>
 
   <!-- FIORE scala 1.2 -->
-  <g transform="translate(440, 255) scale(1.6)">
+  <g transform="translate(430, 255) scale(1.6)">
     <g transform="rotate(-45)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
     <g transform="rotate(0)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
     <g transform="rotate(45)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>

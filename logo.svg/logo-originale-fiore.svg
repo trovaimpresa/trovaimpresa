@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600">
+  <defs>
+    <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066ff"/>
+      <stop offset="100%" style="stop-color:#0044dd"/>
+    </linearGradient>
+    <linearGradient id="grad-orange-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffaa00"/>
+      <stop offset="100%" style="stop-color:#ff8800"/>
+    </linearGradient>
+    <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#aa00ff"/>
+      <stop offset="100%" style="stop-color:#7700cc"/>
+    </linearGradient>
+    <linearGradient id="grad-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff1144"/>
+      <stop offset="100%" style="stop-color:#dd0033"/>
+    </linearGradient>
+    <linearGradient id="grad-teal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ddee"/>
+      <stop offset="100%" style="stop-color:#00bbcc"/>
+    </linearGradient>
+    <linearGradient id="grad-blue-teal" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ddee"/>
+      <stop offset="100%" style="stop-color:#0066ff"/>
+    </linearGradient>
+    <linearGradient id="grad-orange-blue" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffaa00"/>
+      <stop offset="100%" style="stop-color:#0066ff"/>
+    </linearGradient>
+    <linearGradient id="grad-purple-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#aa00ff"/>
+      <stop offset="100%" style="stop-color:#ff1144"/>
+    </linearGradient>
+  </defs>
+
+  <!-- TESTO gonfio: stroke-width alto + paint-order per riempire dentro -->
+  <text
+    x="500"
+    y="545"
+    text-anchor="middle"
+    font-family="'Trebuchet MS', 'Arial Rounded MT Bold', sans-serif"
+    font-size="165"
+    font-weight="900"
+    letter-spacing="-3"
+    paint-order="stroke"
+  >
+    <tspan fill="#0066ff" stroke="#0066ff" stroke-width="10" stroke-linejoin="round">Trova</tspan><tspan fill="#0066ff" stroke="#0066ff" stroke-width="10" stroke-linejoin="round">Impresa</tspan>
+  </text>
+
+  <!-- FIORE scala 1.2 -->
+  <g transform="translate(430, 255) scale(1.6)">
+    <g transform="rotate(-45)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(0)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(45)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(90)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(135)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(180)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(225)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(270)"><ellipse cx="0" cy="-58" rx="17" ry="35" fill="#ff8800"/></g>
+    <g transform="rotate(-45)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(0)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(45)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(90)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(135)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(180)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(225)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <g transform="rotate(270)"><ellipse cx="0" cy="-58" rx="7" ry="18" fill="white"/></g>
+    <circle cx="0" cy="0" r="11" fill="white"/>
+  </g>
+
+</svg>
