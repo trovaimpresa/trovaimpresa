@@ -196,13 +196,13 @@
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 30px;
             margin-bottom: 30px;
         }
 
         .feature-card {
-            padding: 35px;
+            padding: 45px;
             border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
@@ -247,6 +247,33 @@
             background: #0066cc;
         }
 
+        .feature-card:nth-child(4) {
+            background: linear-gradient(135deg, #f0fff4 0%, #e8f8ef 100%);
+            border-top: 4px solid #2a7a4b;
+        }
+
+        .feature-card:nth-child(4)::before {
+            background: #2a7a4b;
+        }
+
+        .feature-card:nth-child(5) {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            border-top: 4px solid #6c3483;
+        }
+
+        .feature-card:nth-child(5)::before {
+            background: #6c3483;
+        }
+
+        .feature-card:nth-child(6) {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffecec 100%);
+            border-top: 4px solid #c0392b;
+        }
+
+        .feature-card:nth-child(6)::before {
+            background: #c0392b;
+        }
+
         .feature-card:hover {
             transform: translateY(-8px) scale(1.02);
             box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
@@ -275,31 +302,6 @@
             color: #555;
             font-size: 15px;
             line-height: 1.7;
-        }
-
-        /* INFO BANNER */
-        .info-banner {
-            background: linear-gradient(135deg, #FF6B35 0%, #FFB347 100%);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
-            border: none;
-        }
-
-        .info-banner p {
-            color: #ffffff;
-            font-weight: 600;
-            margin: 0;
-            font-size: 16px;
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .info-banner strong {
-            color: #ffffff;
-            font-weight: 700;
         }
 
         /* WORK LINKS SECTION */
@@ -644,11 +646,6 @@
 
             .features-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .info-banner p {
-                flex-direction: column;
-                gap: 10px;
             }
 
             .lavoro-links {
@@ -1010,13 +1007,24 @@
                     <h3>Geolocalizzazione</h3>
                     <p>Trova i professionisti più vicini a te. Meno km, meno costi, più convenienza.</p>
                 </div>
-            </div>
 
-            <div class="info-banner">
-                <p>
-                    <strong>✨ Per i clienti: totalmente gratuito</strong>
-                    <strong>📱 Funziona perfettamente su smartphone</strong>
-                </p>
+                <div class="feature-card">
+                    <div class="feature-icon">🆓</div>
+                    <h3>Gratis per i clienti</h3>
+                    <p>Cercare e contattare le imprese non ti costa niente.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Perfetto da smartphone</h3>
+                    <p>Funziona alla perfezione anche da telefono, ovunque sei.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Preventivi gratuiti</h3>
+                    <p>Richiedi più preventivi e confrontali senza impegno.</p>
+                </div>
             </div>
         </div>
     </section>
