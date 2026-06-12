@@ -3250,6 +3250,14 @@ function chiudiModalScadenzeFiscali() {
   showSection('dashboard');
 }
 
+let scadenzeFiscaliCache = [];
+
+function sortScadenzeFiscali() {
+  scadenzeFiscaliCache.sort((a, b) =>
+    (a.completata === b.completata ? 0 : (a.completata ? 1 : -1)) ||
+    String(a.data_scadenza || '9999-12-31').localeCompare(String(b.data_scadenza || '9999-12-31')));
+}
+
 async function caricaScadenzeFiscali() {
   const lista = document.getElementById('scad-fisc-lista');
   if (!lista || !impresaCorrente) return;
@@ -3257,7 +3265,14 @@ async function caricaScadenzeFiscali() {
     .eq('user_id', impresaCorrente.user_id)
     .order('completata', { ascending: true })
     .order('data_scadenza', { ascending: true });
-  const scad = data || [];
+  scadenzeFiscaliCache = data || [];
+  renderScadenzeFiscali();
+}
+
+function renderScadenzeFiscali() {
+  const lista = document.getElementById('scad-fisc-lista');
+  if (!lista) return;
+  const scad = scadenzeFiscaliCache;
   if (!scad.length) {
     lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna scadenza ancora</div>';
     return;
@@ -3320,9 +3335,9 @@ async function salvaScadenzaFiscale() {
   const ricorrente = document.getElementById('scad-fisc-ricorrente').checked;
   const frequenza = ricorrente ? document.getElementById('scad-fisc-frequenza').value : null;
   const note = document.getElementById('scad-fisc-note').value.trim() || null;
-  const { error } = await sb.from('scadenze_fiscali').insert({
+  const { data: nuova, error } = await sb.from('scadenze_fiscali').insert({
     user_id: impresaCorrente.user_id, tipo, descrizione, data_scadenza, importo, ricorrente, frequenza, note, completata: false
-  });
+  }).select().single();
   if (error) { alert('Errore: ' + error.message); return; }
   document.getElementById('scad-fisc-tipo').value = '';
   document.getElementById('scad-fisc-data').value = '';
@@ -3334,19 +3349,28 @@ async function salvaScadenzaFiscale() {
   document.getElementById('scad-fisc-note').value = '';
   const msg = document.getElementById('scad-fisc-msg');
   if (msg) { msg.textContent = '✅ Salvata'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
-  await caricaScadenzeFiscali();
+  if (nuova) {
+    scadenzeFiscaliCache.push(nuova);
+    sortScadenzeFiscali();
+    renderScadenzeFiscali();
+  }
 }
 
 async function toggleScadenzaFiscale(id, completata) {
   const { error } = await sb.from('scadenze_fiscali').update({ completata }).eq('id', id);
   if (error) { alert('Errore: ' + error.message); return; }
-  await caricaScadenzeFiscali();
+  const s = scadenzeFiscaliCache.find(x => String(x.id) === String(id));
+  if (s) s.completata = completata;
+  sortScadenzeFiscali();
+  renderScadenzeFiscali();
 }
 
 async function eliminaScadenzaFiscale(id) {
   if (!confirm('Eliminare questa scadenza?')) return;
-  await sb.from('scadenze_fiscali').delete().eq('id', id);
-  await caricaScadenzeFiscali();
+  const { error } = await sb.from('scadenze_fiscali').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  scadenzeFiscaliCache = scadenzeFiscaliCache.filter(s => String(s.id) !== String(id));
+  renderScadenzeFiscali();
 }
 
 // CALCOLATRICE EDILE
