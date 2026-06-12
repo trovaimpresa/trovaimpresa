@@ -3048,6 +3048,14 @@ async function eliminaLogCantiere(id) {
 }
 
 // SCADENZE CANTIERE
+let scadenzeCantiereCache = [];
+
+function sortScadenzeCantiere() {
+  scadenzeCantiereCache.sort((a, b) =>
+    (a.completata === b.completata ? 0 : (a.completata ? 1 : -1)) ||
+    String(a.data_scadenza || '9999-12-31').localeCompare(String(b.data_scadenza || '9999-12-31')));
+}
+
 async function caricaScadenzeCantiere() {
   const lista = document.getElementById('dett-cant-scadenze-lista');
   if (!lista || !cantiereAttivo) return;
@@ -3055,7 +3063,14 @@ async function caricaScadenzeCantiere() {
     .eq('cantiere_id', cantiereAttivo)
     .order('completata', { ascending: true })
     .order('data_scadenza', { ascending: true });
-  const scad = data || [];
+  scadenzeCantiereCache = data || [];
+  renderScadenzeCantiere();
+}
+
+function renderScadenzeCantiere() {
+  const lista = document.getElementById('dett-cant-scadenze-lista');
+  if (!lista) return;
+  const scad = scadenzeCantiereCache;
   if (!scad.length) {
     lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna scadenza ancora</div>';
     return;
@@ -3105,9 +3120,9 @@ async function salvaScadenzaCantiere() {
   if (!data_scadenza) { alert('La data scadenza è obbligatoria.'); return; }
   const note = document.getElementById('scad-cant-descrizione').value.trim() || null;
   const completata = document.getElementById('scad-cant-completata').checked;
-  const { error } = await sb.from('cantiere_scadenze').insert({
+  const { data: nuova, error } = await sb.from('cantiere_scadenze').insert({
     cantiere_id: cantiereAttivo, descrizione, data_scadenza, note, completata
-  });
+  }).select().single();
   if (error) { alert('Errore: ' + error.message); return; }
   document.getElementById('scad-cant-titolo').value = '';
   const d = new Date(); d.setDate(d.getDate() + 7);
@@ -3116,19 +3131,28 @@ async function salvaScadenzaCantiere() {
   document.getElementById('scad-cant-completata').checked = false;
   const msg = document.getElementById('scad-cant-msg');
   if (msg) { msg.textContent = '✅ Salvata'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
-  await caricaScadenzeCantiere();
+  if (nuova) {
+    scadenzeCantiereCache.push(nuova);
+    sortScadenzeCantiere();
+    renderScadenzeCantiere();
+  }
 }
 
 async function toggleScadenzaCantiere(id, completata) {
   const { error } = await sb.from('cantiere_scadenze').update({ completata }).eq('id', id);
   if (error) { alert('Errore: ' + error.message); return; }
-  await caricaScadenzeCantiere();
+  const s = scadenzeCantiereCache.find(x => String(x.id) === String(id));
+  if (s) s.completata = completata;
+  sortScadenzeCantiere();
+  renderScadenzeCantiere();
 }
 
 async function eliminaScadenzaCantiere(id) {
   if (!confirm('Eliminare questa scadenza?')) return;
-  await sb.from('cantiere_scadenze').delete().eq('id', id);
-  await caricaScadenzeCantiere();
+  const { error } = await sb.from('cantiere_scadenze').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  scadenzeCantiereCache = scadenzeCantiereCache.filter(s => String(s.id) !== String(id));
+  renderScadenzeCantiere();
 }
 
 // AGENDA
