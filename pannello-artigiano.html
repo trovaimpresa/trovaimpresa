@@ -3009,11 +3009,20 @@ async function eliminaFatturaCantiere(id, file_url) {
 }
 
 // QUADERNO CANTIERE
+let logCantiereCache = [];
+
 async function caricaLogCantiere() {
   const lista = document.getElementById('dett-cant-log-lista');
   if (!lista || !cantiereAttivo) return;
   const { data } = await sb.from('cantiere_log').select('*').eq('cantiere_id', cantiereAttivo).order('data', { ascending: false });
-  const log = data || [];
+  logCantiereCache = data || [];
+  renderLogCantiere();
+}
+
+function renderLogCantiere() {
+  const lista = document.getElementById('dett-cant-log-lista');
+  if (!lista) return;
+  const log = logCantiereCache;
   if (!log.length) {
     lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna registrazione ancora</div>';
     return;
@@ -3056,9 +3065,9 @@ async function salvaLogCantiere() {
     alert('Compila almeno un campo.');
     return;
   }
-  const { error } = await sb.from('cantiere_log').insert({
+  const { data: nuovo, error } = await sb.from('cantiere_log').insert({
     cantiere_id: cantiereAttivo, data, ore_lavorate, materiali, note
-  });
+  }).select().single();
   if (error) { alert('Errore: ' + error.message); return; }
   document.getElementById('log-cant-data').value = new Date().toISOString().slice(0, 10);
   document.getElementById('log-cant-ore').value = '';
@@ -3066,13 +3075,20 @@ async function salvaLogCantiere() {
   document.getElementById('log-cant-note').value = '';
   const msg = document.getElementById('log-cant-msg');
   if (msg) { msg.textContent = '✅ Salvato'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
-  await caricaLogCantiere();
+  if (nuovo) {
+    logCantiereCache.push(nuovo);
+    logCantiereCache.sort((a, b) =>
+      String(b.data || '9999-12-31').localeCompare(String(a.data || '9999-12-31')));
+    renderLogCantiere();
+  }
 }
 
 async function eliminaLogCantiere(id) {
   if (!confirm('Eliminare questa registrazione?')) return;
-  await sb.from('cantiere_log').delete().eq('id', id);
-  await caricaLogCantiere();
+  const { error } = await sb.from('cantiere_log').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  logCantiereCache = logCantiereCache.filter(l => String(l.id) !== String(id));
+  renderLogCantiere();
 }
 
 // SCADENZE CANTIERE
