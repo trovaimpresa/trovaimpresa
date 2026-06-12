@@ -3227,7 +3227,9 @@ async function salvaAppuntamento() {
 async function toggleAppuntamento(id, completato) {
   const { error } = await sb.from('agenda_appuntamenti').update({ completato }).eq('id', id);
   if (error) { alert('Errore: ' + error.message); return; }
-  await caricaAppuntamenti();
+  const app = appuntamentiCache.find(a => String(a.id) === String(id));
+  if (app) app.completato = completato;
+  renderAppuntamenti();
 }
 
 async function eliminaAppuntamento(id) {
