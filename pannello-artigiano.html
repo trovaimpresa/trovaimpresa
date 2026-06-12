@@ -3143,6 +3143,8 @@ function chiudiAgenda() {
   showSection('dashboard');
 }
 
+let appuntamentiCache = [];
+
 async function caricaAppuntamenti() {
   const lista = document.getElementById('agenda-appuntamenti-lista');
   if (!lista || !impresaCorrente) return;
@@ -3150,7 +3152,14 @@ async function caricaAppuntamenti() {
     .eq('user_id', impresaCorrente.user_id)
     .order('data', { ascending: true })
     .order('ora', { ascending: true });
-  const app = data || [];
+  appuntamentiCache = data || [];
+  renderAppuntamenti();
+}
+
+function renderAppuntamenti() {
+  const lista = document.getElementById('agenda-appuntamenti-lista');
+  if (!lista) return;
+  const app = appuntamentiCache;
   if (!app.length) {
     lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessun appuntamento ancora</div>';
     return;
@@ -3194,9 +3203,9 @@ async function salvaAppuntamento() {
   const cliente = document.getElementById('ag-cliente').value.trim() || null;
   const luogo = document.getElementById('ag-luogo').value.trim() || null;
   const note = document.getElementById('ag-note').value.trim() || null;
-  const { error } = await sb.from('agenda_appuntamenti').insert({
+  const { data: nuovo, error } = await sb.from('agenda_appuntamenti').insert({
     user_id: impresaCorrente.user_id, titolo, data, ora, cliente, luogo, note, completato: false
-  });
+  }).select().single();
   if (error) { alert('Errore: ' + error.message); return; }
   document.getElementById('ag-titolo').value = '';
   document.getElementById('ag-data').value = new Date().toISOString().slice(0, 10);
@@ -3206,7 +3215,13 @@ async function salvaAppuntamento() {
   document.getElementById('ag-note').value = '';
   const msg = document.getElementById('ag-msg');
   if (msg) { msg.textContent = '✅ Salvato'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
-  await caricaAppuntamenti();
+  if (nuovo) {
+    appuntamentiCache.push(nuovo);
+    appuntamentiCache.sort((a, b) =>
+      String(a.data || '').localeCompare(String(b.data || '')) ||
+      String(a.ora || '99:99').localeCompare(String(b.ora || '99:99')));
+    renderAppuntamenti();
+  }
 }
 
 async function toggleAppuntamento(id, completato) {
@@ -3217,8 +3232,10 @@ async function toggleAppuntamento(id, completato) {
 
 async function eliminaAppuntamento(id) {
   if (!confirm('Eliminare questo appuntamento?')) return;
-  await sb.from('agenda_appuntamenti').delete().eq('id', id);
-  await caricaAppuntamenti();
+  const { error } = await sb.from('agenda_appuntamenti').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  appuntamentiCache = appuntamentiCache.filter(a => String(a.id) !== String(id));
+  renderAppuntamenti();
 }
 
 // SCADENZE FISCALI
