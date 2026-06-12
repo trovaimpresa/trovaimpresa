@@ -2826,11 +2826,20 @@ function dettCantDrop(e) {
 }
 
 // PREVENTIVI CANTIERE
+let preventiviCantiereCache = [];
+
 async function caricaPreventiviCantiere() {
   const lista = document.getElementById('dett-cant-preventivi-lista');
   if (!lista || !cantiereAttivo) return;
   const { data } = await sb.from('cantiere_preventivi').select('*').eq('cantiere_id', cantiereAttivo).order('created_at', { ascending: false });
-  const prev = data || [];
+  preventiviCantiereCache = data || [];
+  renderPreventiviCantiere();
+}
+
+function renderPreventiviCantiere() {
+  const lista = document.getElementById('dett-cant-preventivi-lista');
+  if (!lista) return;
+  const prev = preventiviCantiereCache;
   if (!prev.length) {
     lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessun preventivo ancora</div>';
     return;
@@ -2874,9 +2883,9 @@ async function salvaPreventivoCantiere() {
     const { data: { publicUrl } } = sb.storage.from('cantieri-preventivi').getPublicUrl(path);
     file_url = publicUrl;
   }
-  const { error: insErr } = await sb.from('cantiere_preventivi').insert({
+  const { data: nuovo, error: insErr } = await sb.from('cantiere_preventivi').insert({
     cantiere_id: cantiereAttivo, importo, descrizione, file_url, accettato
-  });
+  }).select().single();
   if (insErr) { alert('Errore: ' + insErr.message); return; }
   document.getElementById('prev-cant-importo').value = '';
   document.getElementById('prev-cant-descrizione').value = '';
@@ -2884,7 +2893,10 @@ async function salvaPreventivoCantiere() {
   fileInput.value = '';
   const msg = document.getElementById('prev-cant-msg');
   if (msg) { msg.textContent = '✅ Salvato'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
-  await caricaPreventiviCantiere();
+  if (nuovo) {
+    preventiviCantiereCache.unshift(nuovo);
+    renderPreventiviCantiere();
+  }
 }
 
 async function eliminaPreventivoCantiere(id, file_url) {
@@ -2893,8 +2905,10 @@ async function eliminaPreventivoCantiere(id, file_url) {
     const path = file_url.split('/cantieri-preventivi/')[1];
     if (path) await sb.storage.from('cantieri-preventivi').remove([path]);
   }
-  await sb.from('cantiere_preventivi').delete().eq('id', id);
-  await caricaPreventiviCantiere();
+  const { error } = await sb.from('cantiere_preventivi').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  preventiviCantiereCache = preventiviCantiereCache.filter(p => String(p.id) !== String(id));
+  renderPreventiviCantiere();
 }
 
 // FATTURE CANTIERE
