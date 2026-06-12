@@ -2071,7 +2071,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="strumenti-comuni.js?v=1"></script>
+<script src="strumenti-comuni.js?v=2"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
@@ -3635,115 +3635,6 @@ function calcInps() {
   const out = document.getElementById('calc-inps-out');
   if (!v || isNaN(v)) { out.textContent = ''; return; }
   out.textContent = `INPS 4%: € ${_fmtCalc(v*0.04)} | Da addebitare al cliente`;
-}
-
-// SCADENZE FISCALI
-function apriModalScadenzeFiscali() {
-  showSection('scadenze-fiscali');
-  caricaScadenzeFiscali();
-}
-
-function chiudiModalScadenzeFiscali() {
-  showSection('dashboard');
-}
-
-async function caricaScadenzeFiscali() {
-  const lista = document.getElementById('scad-fisc-lista');
-  if (!lista || !impresaCorrente) return;
-  const { data } = await sb.from('scadenze_fiscali').select('*')
-    .eq('user_id', impresaCorrente.user_id)
-    .order('completata', { ascending: true })
-    .order('data_scadenza', { ascending: true });
-  const scad = data || [];
-  if (!scad.length) {
-    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna scadenza ancora</div>';
-    return;
-  }
-  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const fmtData = d => {
-    if (!d) return '—';
-    const parts = new Date(d).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
-    return parts.charAt(0).toUpperCase() + parts.slice(1);
-  };
-  const fmtImporto = n => (n == null) ? null : Number(n).toLocaleString('it-IT', { minimumFractionDigits:2, maximumFractionDigits:2 });
-  const oggi = new Date(); oggi.setHours(0,0,0,0);
-  lista.innerHTML = scad.map(s => {
-    let badgeBg = '#888', badgeLbl = '—', extraStyle = '', strike = '';
-    if (s.completata) {
-      badgeBg = '#888'; badgeLbl = '✓ Completata';
-      extraStyle = 'opacity:0.6';
-      strike = ';text-decoration:line-through';
-    } else if (s.data_scadenza) {
-      const ds = new Date(s.data_scadenza); ds.setHours(0,0,0,0);
-      const diffGg = Math.round((ds - oggi) / 86400000);
-      if (diffGg < 0) { badgeBg = '#c0392b'; badgeLbl = `⚠️ Scaduta da ${Math.abs(diffGg)}g`; }
-      else if (diffGg === 0) { badgeBg = '#c0392b'; badgeLbl = '🔥 Oggi'; }
-      else if (diffGg <= 7) { badgeBg = '#e8733a'; badgeLbl = `⏰ Tra ${diffGg}g`; }
-      else { badgeBg = '#2a7a4b'; badgeLbl = `📅 Tra ${diffGg}g`; }
-    }
-    const importoLbl = fmtImporto(s.importo);
-    const ricorrenteBadge = s.ricorrente
-      ? `<span style="display:inline-block;padding:3px 8px;background:#7c3aed;color:white;border-radius:999px;font-size:0.68rem;font-weight:700">🔁 ${esc(s.frequenza || 'ricorrente')}</span>`
-      : '';
-    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:12px;align-items:flex-start;${extraStyle}">
-      <input type="checkbox" ${s.completata ? 'checked' : ''} onchange="toggleScadenzaFiscale('${s.id}',this.checked)" style="margin-top:4px;width:18px;height:18px;cursor:pointer;flex-shrink:0">
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-          <div style="font-weight:700;color:#1a3a2a;font-size:1rem${strike}">${esc(s.tipo) || '—'}</div>
-          ${ricorrenteBadge}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-          <div style="font-size:0.85rem;color:#555">📅 ${fmtData(s.data_scadenza)}</div>
-          <span style="display:inline-block;padding:4px 10px;background:${badgeBg};color:white;border-radius:999px;font-size:0.72rem;font-weight:700">${badgeLbl}</span>
-        </div>
-        ${importoLbl ? `<div style="font-size:0.88rem;color:#555;margin-bottom:4px">💰 € ${importoLbl}</div>` : ''}
-        ${s.descrizione ? `<div style="font-size:0.88rem;color:#555;margin-bottom:4px">${esc(s.descrizione)}</div>` : ''}
-        ${s.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap">${esc(s.note)}</div>` : ''}
-      </div>
-      <button onclick="eliminaScadenzaFiscale('${s.id}')" title="Elimina scadenza" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
-    </div>`;
-  }).join('');
-}
-
-async function salvaScadenzaFiscale() {
-  if (!impresaCorrente) return;
-  const tipo = document.getElementById('scad-fisc-tipo').value;
-  const data_scadenza = document.getElementById('scad-fisc-data').value || null;
-  if (!tipo) { alert('Seleziona un tipo.'); return; }
-  if (!data_scadenza) { alert('La data scadenza è obbligatoria.'); return; }
-  const descrizione = document.getElementById('scad-fisc-descrizione').value.trim() || null;
-  const importoRaw = document.getElementById('scad-fisc-importo').value;
-  const importo = (importoRaw === '' || isNaN(Number(importoRaw))) ? null : Number(importoRaw);
-  const ricorrente = document.getElementById('scad-fisc-ricorrente').checked;
-  const frequenza = ricorrente ? document.getElementById('scad-fisc-frequenza').value : null;
-  const note = document.getElementById('scad-fisc-note').value.trim() || null;
-  const { error } = await sb.from('scadenze_fiscali').insert({
-    user_id: impresaCorrente.user_id, tipo, descrizione, data_scadenza, importo, ricorrente, frequenza, note, completata: false
-  });
-  if (error) { alert('Errore: ' + error.message); return; }
-  document.getElementById('scad-fisc-tipo').value = '';
-  document.getElementById('scad-fisc-data').value = '';
-  document.getElementById('scad-fisc-descrizione').value = '';
-  document.getElementById('scad-fisc-importo').value = '';
-  document.getElementById('scad-fisc-ricorrente').checked = false;
-  document.getElementById('scad-fisc-frequenza-row').style.display = 'none';
-  document.getElementById('scad-fisc-frequenza').value = 'annuale';
-  document.getElementById('scad-fisc-note').value = '';
-  const msg = document.getElementById('scad-fisc-msg');
-  if (msg) { msg.textContent = '✅ Salvata'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
-  await caricaScadenzeFiscali();
-}
-
-async function toggleScadenzaFiscale(id, completata) {
-  const { error } = await sb.from('scadenze_fiscali').update({ completata }).eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
-  await caricaScadenzeFiscali();
-}
-
-async function eliminaScadenzaFiscale(id) {
-  if (!confirm('Eliminare questa scadenza?')) return;
-  await sb.from('scadenze_fiscali').delete().eq('id', id);
-  await caricaScadenzeFiscali();
 }
 
 // PROMEMORIA
