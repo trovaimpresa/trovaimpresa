@@ -2765,11 +2765,20 @@ function switchTabCantiere(tabName) {
   });
 }
 
+let fotoCantiereCache = [];
+
 async function caricaFotoCantiere() {
   const grid = document.getElementById('dett-cant-foto-grid');
   if (!grid || !cantiereAttivo) return;
   const { data } = await sb.from('cantiere_foto').select('*').eq('cantiere_id', cantiereAttivo).order('created_at', { ascending: false });
-  const foto = data || [];
+  fotoCantiereCache = data || [];
+  renderFotoCantiere();
+}
+
+function renderFotoCantiere() {
+  const grid = document.getElementById('dett-cant-foto-grid');
+  if (!grid) return;
+  const foto = fotoCantiereCache;
   if (!foto.length) {
     grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📷</div>Nessuna foto per questo cantiere</div>';
     return;
@@ -2795,21 +2804,24 @@ async function uploadFotoCantiere(files) {
     const { error: upErr } = await sb.storage.from('cantieri-foto').upload(path, file, { upsert: false });
     if (upErr) { console.error('Upload cantiere errore:', upErr); continue; }
     const { data: { publicUrl } } = sb.storage.from('cantieri-foto').getPublicUrl(path);
-    const { error: insErr } = await sb.from('cantiere_foto').insert({ cantiere_id: cantiereAttivo, url: publicUrl });
+    const { data: nuova, error: insErr } = await sb.from('cantiere_foto').insert({ cantiere_id: cantiereAttivo, url: publicUrl }).select().single();
     if (insErr) { console.error('Insert cantiere_foto errore:', insErr); continue; }
+    if (nuova) fotoCantiereCache.unshift(nuova);
     ok++;
   }
   if (progress) { progress.textContent = `✅ ${ok} foto caricate!`; setTimeout(() => { progress.style.display = 'none'; }, 2500); }
   const input = document.getElementById('dett-cant-foto-input');
   if (input) input.value = '';
-  await caricaFotoCantiere();
+  renderFotoCantiere();
 }
 
 async function eliminaFotoCantiere(id, path) {
   if (!confirm('Eliminare questa foto?')) return;
   if (path) await sb.storage.from('cantieri-foto').remove([path]);
-  await sb.from('cantiere_foto').delete().eq('id', id);
-  await caricaFotoCantiere();
+  const { error } = await sb.from('cantiere_foto').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  fotoCantiereCache = fotoCantiereCache.filter(f => String(f.id) !== String(id));
+  renderFotoCantiere();
 }
 
 function dettCantDragOver(e) {
