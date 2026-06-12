@@ -2898,11 +2898,20 @@ async function eliminaPreventivoCantiere(id, file_url) {
 }
 
 // FATTURE CANTIERE
+let fattureCantiereCache = [];
+
 async function caricaFattureCantiere() {
   const lista = document.getElementById('dett-cant-fatture-lista');
   if (!lista || !cantiereAttivo) return;
   const { data } = await sb.from('cantiere_fatture').select('*').eq('cantiere_id', cantiereAttivo).order('created_at', { ascending: false });
-  const fatt = data || [];
+  fattureCantiereCache = data || [];
+  renderFattureCantiere();
+}
+
+function renderFattureCantiere() {
+  const lista = document.getElementById('dett-cant-fatture-lista');
+  if (!lista) return;
+  const fatt = fattureCantiereCache;
   if (!fatt.length) {
     lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessuna fattura ancora</div>';
     return;
@@ -2954,9 +2963,9 @@ async function salvaFatturaCantiere() {
     const { data: { publicUrl } } = sb.storage.from('cantieri-fatture').getPublicUrl(path);
     file_url = publicUrl;
   }
-  const { error: insErr } = await sb.from('cantiere_fatture').insert({
+  const { data: nuova, error: insErr } = await sb.from('cantiere_fatture').insert({
     cantiere_id: cantiereAttivo, numero, importo, data_emissione, data_scadenza, file_url, pagata, note
-  });
+  }).select().single();
   if (insErr) { alert('Errore: ' + insErr.message); return; }
   document.getElementById('fatt-cant-numero').value = '';
   document.getElementById('fatt-cant-importo').value = '';
@@ -2967,7 +2976,10 @@ async function salvaFatturaCantiere() {
   fileInput.value = '';
   const msg = document.getElementById('fatt-cant-msg');
   if (msg) { msg.textContent = '✅ Salvata'; msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
-  await caricaFattureCantiere();
+  if (nuova) {
+    fattureCantiereCache.unshift(nuova);
+    renderFattureCantiere();
+  }
 }
 
 async function eliminaFatturaCantiere(id, file_url) {
@@ -2976,8 +2988,10 @@ async function eliminaFatturaCantiere(id, file_url) {
     const path = file_url.split('/cantieri-fatture/')[1];
     if (path) await sb.storage.from('cantieri-fatture').remove([path]);
   }
-  await sb.from('cantiere_fatture').delete().eq('id', id);
-  await caricaFattureCantiere();
+  const { error } = await sb.from('cantiere_fatture').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  fattureCantiereCache = fattureCantiereCache.filter(f => String(f.id) !== String(id));
+  renderFattureCantiere();
 }
 
 // QUADERNO CANTIERE
