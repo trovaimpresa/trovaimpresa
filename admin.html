@@ -888,11 +888,11 @@ async function caricaPreventivi() {
   }
   tbody.innerHTML = data.map(p => `
     <tr>
-      <td><strong>${p.nome}</strong></td>
-      <td>${p.email}</td>
-      <td>${p.telefono||'–'}</td>
-      <td>${p.tipo_lavoro||'–'}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.descrizione||'–'}</td>
+      <td><strong>${esc(p.nome)}</strong></td>
+      <td>${esc(p.email)}</td>
+      <td>${esc(p.telefono)||'–'}</td>
+      <td>${esc(p.tipo_lavoro)||'–'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.descrizione)||'–'}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(p.created_at).toLocaleDateString('it-IT')}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaPreventivo(${p.id})">🗑️</button></td>
     </tr>`).join('');
