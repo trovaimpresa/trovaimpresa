@@ -99,7 +99,7 @@
     try {
       const { data, error } = await supabaseClient
         .from('subappalti')
-        .select('id, tipo, nome_impresa, categoria, mestiere, regione, descrizione, lavoro, specializzazione, citta, telefono, email, lat, lng, created_at')
+        .select('id, tipo, nome_impresa, descrizione, lavoro, citta, telefono, email, created_at, categoria, mestiere, regione')
         .eq('id', id)
         .single();
       if (error || !data) throw error || new Error('not found');
