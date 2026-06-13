@@ -373,7 +373,7 @@
     try {
       let q = supabaseClient
         .from('subappalti')
-        .select('*')
+        .select('id, tipo, nome_impresa, categoria, mestiere, regione, descrizione, lavoro, specializzazione, citta, telefono, email, lat, lng, created_at')
         .eq('tipo', 'cerca');
       if (fCat) q = q.eq('categoria', fCat);
       if (fMest) q = q.eq('mestiere', fMest);
