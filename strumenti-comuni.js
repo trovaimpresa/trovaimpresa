@@ -245,3 +245,40 @@ async function eliminaScadenzaFiscale(id) {
   scadenzeFiscaliCache = scadenzeFiscaliCache.filter(s => String(s.id) !== String(id));
   renderScadenzeFiscali();
 }
+
+// PROMEMORIA
+function apriPromemoria() {
+  const oggi = new Date().toISOString().slice(0, 10);
+  const dataInput = document.getElementById('promemoria-data');
+  dataInput.min = oggi;
+  dataInput.value = '';
+  document.getElementById('promemoria-testo').value = '';
+  showSection('promemoria');
+}
+
+function chiudiPromemoria() {
+  showSection('dashboard');
+}
+
+async function salvaPromemoria() {
+  const testo = document.getElementById('promemoria-testo').value.trim();
+  const data = document.getElementById('promemoria-data').value;
+  if (!testo) { alert('Scrivi il testo del promemoria.'); return; }
+  if (!data) { alert('Seleziona una data.'); return; }
+  const btn = document.getElementById('btn-salva-promemoria');
+  btn.disabled = true;
+  btn.textContent = '⏳ Salvataggio...';
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Utente non autenticato.');
+    const { error } = await sb.from('promemoria').insert({ user_id: user.id, testo, data });
+    if (error) throw error;
+    chiudiPromemoria();
+    alert('Promemoria salvato!');
+  } catch (err) {
+    alert('Errore durante il salvataggio: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salva';
+  }
+}
