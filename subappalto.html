@@ -303,7 +303,7 @@
         }).join('');
       } else {
         div.innerHTML = data.map(r => {
-          const lines = (r.specializzazione || '').split('\n');
+          const lines = (r.lavoro || '').split('\n');
           const spec = lines[0] || '';
           const extra = lines.slice(1).join(' · ');
           return `<div class="annuncio-card">
@@ -410,7 +410,7 @@
       const { data: nuovo, error } = await supabaseClient.from('subappalti').insert({
         tipo: 'offre',
         nome_impresa: nome,
-        specializzazione,
+        lavoro: specializzazione,
         citta: zone,
         telefono: tel || null,
         email: email || null,
