@@ -298,6 +298,8 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
   );
 
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
   // ── MAPPA ──
   let map, markersLayer;
   const geoCache = {};
@@ -354,7 +356,7 @@
       const tipoLavoro = lines[0] || '';
       L.marker(coords, { icon: creaIcona() })
         .addTo(markersLayer)
-        .bindPopup(`<b>${r.nome_impresa || '—'}</b><br>${tipoLavoro ? '🔨 ' + tipoLavoro + '<br>' : ''}📍 ${r.citta}`);
+        .bindPopup(`<b>${esc(r.nome_impresa) || '—'}</b><br>${tipoLavoro ? '🔨 ' + esc(tipoLavoro) + '<br>' : ''}📍 ${esc(r.citta)}`);
     }
   }
 
@@ -387,18 +389,18 @@
         const dettagli = extra.filter(l => !l.startsWith('Requisiti:')).join(' · ');
         const reqLine = extra.find(l => l.startsWith('Requisiti:'));
         const reqTags = reqLine
-          ? reqLine.replace('Requisiti:', '').split(',').map(t => `<span class="annuncio-req-tag">${t.trim()}</span>`).join('')
+          ? reqLine.replace('Requisiti:', '').split(',').map(t => `<span class="annuncio-req-tag">${esc(t.trim())}</span>`).join('')
           : '';
         return `<div class="annuncio-card">
           <div class="annuncio-tag">📋 Cerca subappaltatore</div>
-          <div class="annuncio-nome">${r.nome_impresa || '—'}</div>
-          ${tipoLavoro ? `<div class="annuncio-tipo">🔨 ${tipoLavoro}</div>` : ''}
-          ${dettagli ? `<div class="annuncio-desc">${dettagli}</div>` : ''}
+          <div class="annuncio-nome">${esc(r.nome_impresa) || '—'}</div>
+          ${tipoLavoro ? `<div class="annuncio-tipo">🔨 ${esc(tipoLavoro)}</div>` : ''}
+          ${dettagli ? `<div class="annuncio-desc">${esc(dettagli)}</div>` : ''}
           ${reqTags ? `<div class="annuncio-req">${reqTags}</div>` : ''}
           <div class="annuncio-meta" style="margin-top:10px;">
-            ${r.citta ? `<span>📍 ${r.citta}</span>` : ''}
-            ${r.telefono ? `<span>📞 <a href="tel:${r.telefono}" style="color:#2a7a4b;text-decoration:none;">${r.telefono}</a></span>` : ''}
-            ${r.email ? `<span>✉️ <a href="mailto:${r.email}" style="color:#2a7a4b;text-decoration:none;">${r.email}</a></span>` : ''}
+            ${r.citta ? `<span>📍 ${esc(r.citta)}</span>` : ''}
+            ${r.telefono ? `<span>📞 <a href="tel:${esc(r.telefono)}" style="color:#2a7a4b;text-decoration:none;">${esc(r.telefono)}</a></span>` : ''}
+            ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}" style="color:#2a7a4b;text-decoration:none;">${esc(r.email)}</a></span>` : ''}
           </div>
         </div>`;
       }).join('');
