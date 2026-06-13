@@ -922,9 +922,9 @@ async function caricaRecensioni() {
     const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#2a7a4b;font-size:11px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
     return `
     <tr>
-      <td><strong>${r.nome_cliente}</strong>${badge}</td>
+      <td><strong>${esc(r.nome_cliente)}</strong>${badge}</td>
       <td>${'★'.repeat(voto)}${'☆'.repeat(5-voto)}</td>
-      <td style="max-width:200px">${r.testo||''}</td>
+      <td style="max-width:200px">${esc(r.testo||'')}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(r.created_at).toLocaleDateString('it-IT')}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaRecensione(${r.id})">🗑️</button></td>
     </tr>`;
