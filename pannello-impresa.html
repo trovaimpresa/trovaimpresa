@@ -4008,8 +4008,18 @@ async function caricaMieOfferte() {
           ${o.tipo_contratto ? `<span>📋 ${esc(o.tipo_contratto)}</span>` : ''}
         </div>
         <div style="margin-top:8px;font-size:13px;color:#888">Pubblicata il ${data_fmt}</div>
+        <div style="margin-top:12px">
+          <button onclick="eliminaOfferta('${o.id}')" style="background:#c62828;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">🗑️ Elimina offerta</button>
+        </div>
       </div>`;
   }).join('');
+}
+
+async function eliminaOfferta(id) {
+  if (!confirm('Vuoi eliminare questa offerta di lavoro?')) return;
+  const { error } = await sb.from('offerte_lavoro').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  caricaMieOfferte();
 }
 
 // CARICA RECENSIONI
