@@ -312,7 +312,7 @@
     try {
       const { data, error } = await supabaseClient
         .from('subappalti')
-        .select('id, tipo, nome_impresa, categoria, mestiere, regione, descrizione, lavoro, specializzazione, citta, telefono, email, lat, lng, created_at')
+        .select('id, tipo, nome_impresa, descrizione, lavoro, citta, telefono, email, created_at, categoria, mestiere, regione')
         .eq('tipo', 'offre')
         .order('created_at', { ascending: false })
         .limit(50);
