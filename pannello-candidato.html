@@ -313,9 +313,17 @@
           </div>
           <div class="candidatura-footer">
             <span class="candidatura-data">Inviata il ${data_fmt}</span>
+            <button onclick="ritiraCandidatura('${c.id}')" style="background:#fdecea;color:#c0392b;border:none;border-radius:8px;padding:7px 14px;font-family:inherit;font-weight:700;font-size:0.82rem;cursor:pointer;">🗑️ Ritira candidatura</button>
           </div>
         </div>`;
     }).join('');
+  }
+
+  async function ritiraCandidatura(id) {
+    if (!confirm('Vuoi ritirare questa candidatura?')) return;
+    const { error } = await sb.from('candidature').delete().eq('id', id);
+    if (error) { alert('Errore: ' + error.message); return; }
+    caricaCandidature();
   }
 
   function showSection(id, navEl) {
