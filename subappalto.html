@@ -198,6 +198,10 @@
       </div>
       <button class="btn-submit" onclick="salvaCerca()">📋 Pubblica richiesta</button>
       <div class="form-msg" id="msg-cerca"></div>
+      <div id="gestione-link-cerca" style="display:none; margin-top:14px; padding:14px; border:2px solid #2a7a4b; border-radius:10px; background:#eafaf0;">
+        <div style="font-weight:700; color:#1a5e35; margin-bottom:6px;">🔑 Salva questo link per modificare o cancellare il tuo annuncio:</div>
+        <a id="gestione-link-url-cerca" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#2a7a4b; font-weight:600;"></a>
+      </div>
     </div>
   </div>
 </div>
@@ -247,6 +251,10 @@
       </div>
       <button class="btn-submit offre" onclick="salvaOffre()">🙋 Offri disponibilità</button>
       <div class="form-msg" id="msg-offre"></div>
+      <div id="gestione-link-offre" style="display:none; margin-top:14px; padding:14px; border:2px solid #d4a017; border-radius:10px; background:#fff8e8;">
+        <div style="font-weight:700; color:#7a5200; margin-bottom:6px;">🔑 Salva questo link per modificare o cancellare il tuo annuncio:</div>
+        <a id="gestione-link-url-offre" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#a07a00; font-weight:600;"></a>
+      </div>
     </div>
   </div>
 </div>
@@ -348,21 +356,29 @@
     if (budget) descrizione += '\nBudget: ' + budget;
     if (requisiti) descrizione += '\nRequisiti: ' + requisiti;
 
+    const token = crypto.randomUUID();
+
     try {
-      const { error } = await supabaseClient.from('subappalti').insert({
+      const { data: nuovo, error } = await supabaseClient.from('subappalti').insert({
         tipo: 'cerca',
         nome_impresa: nome,
         descrizione,
         citta: zona,
         telefono: tel || null,
         email: email || null,
+        token,
         created_at: new Date().toISOString()
-      });
+      }).select('id').single();
       if (error) throw error;
       mostraMsg('cerca', '✅ Richiesta pubblicata con successo!', 'ok');
+      const linkGestione = `${location.origin}/subappalto-gestisci.html?id=${nuovo.id}&token=${token}`;
+      const aLink = document.getElementById('gestione-link-url-cerca');
+      aLink.href = linkGestione;
+      aLink.textContent = linkGestione;
+      document.getElementById('gestione-link-cerca').style.display = 'block';
       ['cerca-nome','cerca-tipo-lavoro','cerca-desc','cerca-zona','cerca-periodo','cerca-budget','cerca-requisiti','cerca-tel','cerca-email']
         .forEach(id => { document.getElementById(id).value = ''; });
-      setTimeout(() => { chiudiModal('cerca'); caricaLista('cerca'); document.getElementById('msg-cerca').style.display = 'none'; }, 1800);
+      caricaLista('cerca');
     } catch(e) {
       mostraMsg('cerca', '⚠️ Errore: ' + e.message, 'err');
     }
@@ -388,22 +404,30 @@
     if (esperienza) specializzazione += '\n' + esperienza + ' anni di esperienza';
     if (certs.length) specializzazione += '\nCertificazioni: ' + certs.join(', ');
 
+    const token = crypto.randomUUID();
+
     try {
-      const { error } = await supabaseClient.from('subappalti').insert({
+      const { data: nuovo, error } = await supabaseClient.from('subappalti').insert({
         tipo: 'offre',
         nome_impresa: nome,
         specializzazione,
         citta: zone,
         telefono: tel || null,
         email: email || null,
+        token,
         created_at: new Date().toISOString()
-      });
+      }).select('id').single();
       if (error) throw error;
       mostraMsg('offre', '✅ Disponibilità pubblicata con successo!', 'ok');
+      const linkGestione = `${location.origin}/subappalto-gestisci.html?id=${nuovo.id}&token=${token}`;
+      const aLink = document.getElementById('gestione-link-url-offre');
+      aLink.href = linkGestione;
+      aLink.textContent = linkGestione;
+      document.getElementById('gestione-link-offre').style.display = 'block';
       ['offre-nome','offre-spec','offre-zone','offre-esperienza','offre-tel','offre-email']
         .forEach(id => { document.getElementById(id).value = ''; });
       certIds.forEach(id => { document.getElementById(id).checked = false; });
-      setTimeout(() => { chiudiModal('offre'); caricaLista('offre'); document.getElementById('msg-offre').style.display = 'none'; }, 1800);
+      caricaLista('offre');
     } catch(e) {
       mostraMsg('offre', '⚠️ Errore: ' + e.message, 'err');
     }
