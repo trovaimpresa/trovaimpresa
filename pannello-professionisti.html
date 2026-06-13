@@ -957,6 +957,10 @@
             <div class="dash-quick-icon">🔍</div>
             <div class="dash-quick-label">Ricerca Offerte</div>
           </a>
+          <a href="javascript:void(0)" onclick="showSection('candidature'); caricaCandidature()" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
+            <div class="dash-quick-icon">📥</div>
+            <div class="dash-quick-label">Candidature ricevute</div>
+          </a>
         </div>
         <div class="dash-quick-card" data-card-id="subappalto" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
@@ -1141,6 +1145,18 @@
       <!-- Contatore preventivi del mese -->
       <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
       <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
+    </div>
+
+    <div class="section" id="sec-candidature">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          📥 Candidature ricevute
+        </div>
+      </div>
+      <div id="lista-candidature">
+        <div class="empty-state"><div class="empty-icon">📥</div>Caricamento...</div>
+      </div>
     </div>
 
     <!-- PROFILO -->
@@ -2450,6 +2466,50 @@ async function caricaPreventivi() {
       </div>
     </div>
   `).join('');
+}
+
+async function caricaCandidature() {
+  const { data, error } = await sb.from('candidature')
+    .select('*, candidati_lavoro(nome,cognome,email,telefono,cv,mestiere,citta), offerte_lavoro(titolo)')
+    .eq('impresa_id', impresaCorrente.id)
+    .order('data_candidatura', { ascending: false });
+  const container = document.getElementById('lista-candidature');
+  if (error) { container.innerHTML = '<div class="empty-state">Errore nel caricamento. Riprova.</div>'; return; }
+  const lista = data || [];
+  if (!lista.length) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div>Nessuna candidatura ancora.</div>'; return; }
+  const badge = {
+    inviata:   { txt: 'Nuova',     col: '#1565c0' },
+    vista:     { txt: 'Vista',     col: '#e65100' },
+    accettata: { txt: 'Accettata', col: '#2e7d32' },
+    rifiutata: { txt: 'Rifiutata', col: '#c62828' }
+  };
+  container.innerHTML = lista.map(c => {
+    const cand = c.candidati_lavoro || {};
+    const off = c.offerte_lavoro || {};
+    const nome = [cand.nome, cand.cognome].filter(Boolean).join(' ') || 'Candidato';
+    const cvLink = cand.cv ? `<a href="${cand.cv}" target="_blank" rel="noopener">📄 Apri CV</a>` : '';
+    const st = badge[c.stato] || badge.inviata;
+    return `
+      <div class="prev-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div style="font-weight:600">${nome}${cand.mestiere ? ' · ' + cand.mestiere : ''}</div>
+          <span style="background:${st.col};color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;white-space:nowrap">${st.txt}</span>
+        </div>
+        ${off.titolo ? `<div style="color:#666;font-size:14px">Offerta: ${off.titolo}</div>` : ''}
+        ${c.messaggio ? `<div style="margin-top:8px">${c.messaggio}</div>` : ''}
+        <div style="margin-top:8px;font-size:14px">${cand.email ? '✉️ ' + cand.email + ' ' : ''}${cand.telefono ? '· 📞 ' + cand.telefono + ' ' : ''}${cvLink}</div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button onclick="aggiornaStatoCandidatura(${c.id}, 'accettata')" style="background:#2e7d32;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✓ Accetta</button>
+          <button onclick="aggiornaStatoCandidatura(${c.id}, 'rifiutata')" style="background:#c62828;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✗ Rifiuta</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function aggiornaStatoCandidatura(id, stato) {
+  const { error } = await sb.from('candidature').update({ stato }).eq('id', id);
+  if (error) { alert('Errore nell\'aggiornamento. Riprova.'); return; }
+  caricaCandidature();
 }
 
 // CARICA RECENSIONI
