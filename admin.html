@@ -824,7 +824,7 @@ function renderImprese(lista) {
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
         <button class="action-btn btn-dettagli" onclick="apriDettaglio(${i.id})">👁️ Dettagli</button>
-        <button class="action-btn btn-elimina" onclick="eliminaImpresa(${i.id},'${(i.nome_attivita||'').replace(/'/g,"\\'")}')">🗑️</button>
+        <button class="action-btn btn-elimina" onclick="eliminaImpresa(${i.id})">🗑️</button>
       </td>
     </tr>
   `).join('');
@@ -948,7 +948,9 @@ async function verificaImpresa(id) {
 }
 
 // ELIMINA IMPRESA
-async function eliminaImpresa(id, nome) {
+async function eliminaImpresa(id) {
+  const imp = tutteImprese.find(x => x.id === id);
+  const nome = (imp && imp.nome_attivita) || '';
   if (!confirm(`Sei sicuro di voler eliminare "${nome}"?`)) return;
   const { error } = await sb.from('imprese').delete().eq('id', id);
   if (!error) { await caricaImprese(); }
