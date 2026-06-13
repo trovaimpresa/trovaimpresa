@@ -284,6 +284,7 @@
           <input class="form-input" id="f-email" placeholder="info@tuaimpresa.it" type="email">
         </div>
       </div>
+      <input class="form-input" id="f-website" name="website" type="text" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;opacity:0;">
       <button class="btn-submit" onclick="salva()">📋 Pubblica richiesta</button>
       <div class="form-msg" id="form-msg"></div>
     </div>
@@ -444,6 +445,9 @@
   }
 
   async function salva() {
+    // honeypot anti-bot: se valorizzato, interrompi silenziosamente
+    if (document.getElementById('f-website').value) return;
+
     const nome = document.getElementById('f-nome').value.trim();
     const categoria = document.getElementById('f-categoria').value;
     const mestiere = document.getElementById('f-mestiere').value;
