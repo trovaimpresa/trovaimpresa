@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Tabelle che questa funzione e' autorizzata a gestire.
-const TABELLE_CONSENTITE = ['feedback_clienti', 'segnalazioni'];
+const TABELLE_CONSENTITE = ['feedback_clienti', 'segnalazioni', 'subappalti'];
 const AZIONI_CONSENTITE = ['list', 'update', 'delete'];
 
 exports.handler = async function(event) {
