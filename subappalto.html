@@ -258,6 +258,8 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
   );
 
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
   async function caricaLista(tipo) {
     const divId = tipo === 'cerca' ? 'lista-cerca' : 'lista-offre';
     const div = document.getElementById(divId);
@@ -281,13 +283,13 @@
           const resto = lines.slice(1).join(' · ');
           return `<div class="annuncio-card">
             <div class="annuncio-tag">📋 Cerca subappaltatore</div>
-            <div class="annuncio-nome">${r.nome_impresa || '—'}</div>
-            ${tipoLavoro ? `<div class="annuncio-desc" style="font-weight:600;color:#1a3a2a;">${tipoLavoro}</div>` : ''}
-            ${resto ? `<div class="annuncio-desc">${resto}</div>` : ''}
+            <div class="annuncio-nome">${esc(r.nome_impresa) || '—'}</div>
+            ${tipoLavoro ? `<div class="annuncio-desc" style="font-weight:600;color:#1a3a2a;">${esc(tipoLavoro)}</div>` : ''}
+            ${resto ? `<div class="annuncio-desc">${esc(resto)}</div>` : ''}
             <div class="annuncio-meta">
-              ${r.citta ? `<span>📍 ${r.citta}</span>` : ''}
-              ${r.telefono ? `<span>📞 <a href="tel:${r.telefono}" style="color:#2a7a4b;text-decoration:none;">${r.telefono}</a></span>` : ''}
-              ${r.email ? `<span>✉️ <a href="mailto:${r.email}" style="color:#2a7a4b;text-decoration:none;">${r.email}</a></span>` : ''}
+              ${r.citta ? `<span>📍 ${esc(r.citta)}</span>` : ''}
+              ${r.telefono ? `<span>📞 <a href="tel:${esc(r.telefono)}" style="color:#2a7a4b;text-decoration:none;">${esc(r.telefono)}</a></span>` : ''}
+              ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}" style="color:#2a7a4b;text-decoration:none;">${esc(r.email)}</a></span>` : ''}
             </div>
           </div>`;
         }).join('');
@@ -298,13 +300,13 @@
           const extra = lines.slice(1).join(' · ');
           return `<div class="annuncio-card">
             <div class="annuncio-tag">🙋 Disponibile</div>
-            <div class="annuncio-nome">${r.nome_impresa || '—'}</div>
-            ${spec ? `<div class="annuncio-desc" style="font-weight:600;color:#7a5200;">${spec}</div>` : ''}
-            ${extra ? `<div class="annuncio-desc">${extra}</div>` : ''}
+            <div class="annuncio-nome">${esc(r.nome_impresa) || '—'}</div>
+            ${spec ? `<div class="annuncio-desc" style="font-weight:600;color:#7a5200;">${esc(spec)}</div>` : ''}
+            ${extra ? `<div class="annuncio-desc">${esc(extra)}</div>` : ''}
             <div class="annuncio-meta">
-              ${r.citta ? `<span>🗺️ ${r.citta}</span>` : ''}
-              ${r.telefono ? `<span>📞 <a href="tel:${r.telefono}" style="color:#d4a017;text-decoration:none;">${r.telefono}</a></span>` : ''}
-              ${r.email ? `<span>✉️ <a href="mailto:${r.email}" style="color:#d4a017;text-decoration:none;">${r.email}</a></span>` : ''}
+              ${r.citta ? `<span>🗺️ ${esc(r.citta)}</span>` : ''}
+              ${r.telefono ? `<span>📞 <a href="tel:${esc(r.telefono)}" style="color:#d4a017;text-decoration:none;">${esc(r.telefono)}</a></span>` : ''}
+              ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}" style="color:#d4a017;text-decoration:none;">${esc(r.email)}</a></span>` : ''}
             </div>
           </div>`;
         }).join('');
