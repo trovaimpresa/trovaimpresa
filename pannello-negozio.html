@@ -1810,7 +1810,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="strumenti-comuni.js?v=2"></script>
+<script src="strumenti-comuni.js?v=3"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
@@ -3327,43 +3327,6 @@ function calcInps() {
   const out = document.getElementById('calc-inps-out');
   if (!v || isNaN(v)) { out.textContent = ''; return; }
   out.textContent = `INPS 4%: € ${_fmtCalc(v*0.04)} | Da addebitare al cliente`;
-}
-
-// PROMEMORIA
-function apriPromemoria() {
-  const oggi = new Date().toISOString().slice(0, 10);
-  const dataInput = document.getElementById('promemoria-data');
-  dataInput.min = oggi;
-  dataInput.value = '';
-  document.getElementById('promemoria-testo').value = '';
-  showSection('promemoria');
-}
-
-function chiudiPromemoria() {
-  showSection('dashboard');
-}
-
-async function salvaPromemoria() {
-  const testo = document.getElementById('promemoria-testo').value.trim();
-  const data = document.getElementById('promemoria-data').value;
-  if (!testo) { alert('Scrivi il testo del promemoria.'); return; }
-  if (!data) { alert('Seleziona una data.'); return; }
-  const btn = document.getElementById('btn-salva-promemoria');
-  btn.disabled = true;
-  btn.textContent = '⏳ Salvataggio...';
-  try {
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) throw new Error('Utente non autenticato.');
-    const { error } = await sb.from('promemoria').insert({ user_id: user.id, testo, data });
-    if (error) throw error;
-    chiudiPromemoria();
-    alert('Promemoria salvato!');
-  } catch (err) {
-    alert('Errore durante il salvataggio: ' + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Salva';
-  }
 }
 
 function apriModalCreaPreventivo() {
