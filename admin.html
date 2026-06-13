@@ -295,6 +295,9 @@
       <div class="nav-item" onclick="showSection('lead',this)">
         <span class="nav-icon">👥</span> Lead
       </div>
+      <div class="nav-item" onclick="showSection('subappalti',this)">
+        <span class="nav-icon">🤝</span> Subappalti
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
@@ -615,6 +618,29 @@
       </div>
     </div>
 
+    <!-- SUBAPPALTI -->
+    <div class="section" id="sec-subappalti">
+      <div class="topbar">
+        <div class="topbar-title">🤝 Subappalti</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Impresa</th>
+              <th>Tipo</th>
+              <th>Città</th>
+              <th>Descrizione</th>
+              <th>Contatti</th>
+              <th>Data</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table-subappalti"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -673,6 +699,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'locandine') caricaPreviewLocandine();
   if (id === 'segnalazioni') caricaSegnalazioni();
   if (id === 'lead') caricaLead();
+  if (id === 'subappalti') caricaSubappalti();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -1054,6 +1081,60 @@ async function segnalazioneRisolta(id) {
     if (!res.ok || !json.success) { alert('Errore: ' + (json.error || 'aggiornamento non riuscito')); return; }
   } catch (e) { alert('Errore: ' + e.message); return; }
   await caricaSegnalazioni();
+}
+
+// SUBAPPALTI
+async function caricaSubappalti() {
+  const tbody = document.getElementById('table-subappalti');
+  tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
+  let data;
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'list', table: 'subappalti' })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error();
+    data = json.data;
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
+    return;
+  }
+  if (!data || !data.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">🤝</div>Nessun annuncio subappalto</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(s => {
+    const data_fmt = new Date(s.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const isCerca = s.tipo === 'cerca';
+    const tipoBadge = isCerca ? '<span class="badge badge-imp">📋 Cerca</span>' : '<span class="badge badge-a">🙋 Offre</span>';
+    const descr = s.descrizione || s.lavoro || '–';
+    const contatti = [s.telefono ? '📞 ' + s.telefono : '', s.email ? '✉️ ' + s.email : ''].filter(Boolean).join('<br>') || '–';
+    return `<tr>
+      <td><strong>${s.nome_impresa || '—'}</strong></td>
+      <td>${tipoBadge}</td>
+      <td>📍 ${s.citta || '–'}</td>
+      <td style="max-width:300px;word-break:break-word;white-space:pre-line">${descr}</td>
+      <td style="font-size:0.82rem">${contatti}</td>
+      <td style="white-space:nowrap;font-size:0.78rem;color:var(--light)">${data_fmt}</td>
+      <td><button class="action-btn btn-elimina" onclick="eliminaSubappalto('${s.id}')">🗑️ Elimina</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function eliminaSubappalto(id) {
+  if (!confirm('Eliminare questo annuncio subappalto?')) return;
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'delete', table: 'subappalti', id })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) { alert('Errore: ' + (json.error || 'eliminazione non riuscita')); return; }
+  } catch (e) { alert('Errore: ' + e.message); return; }
+  await caricaSubappalti();
 }
 
 // LEAD
