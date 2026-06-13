@@ -254,10 +254,56 @@ function apriPromemoria() {
   dataInput.value = '';
   document.getElementById('promemoria-testo').value = '';
   showSection('promemoria');
+  caricaPromemoria();
 }
 
 function chiudiPromemoria() {
   showSection('dashboard');
+}
+
+let promemoriaCache = [];
+
+async function caricaPromemoria() {
+  const lista = document.getElementById('promemoria-lista');
+  if (!lista || !impresaCorrente) return;
+  const { data } = await sb.from('promemoria').select('*')
+    .eq('user_id', impresaCorrente.user_id)
+    .order('data', { ascending: true });
+  promemoriaCache = data || [];
+  renderPromemoria();
+}
+
+function renderPromemoria() {
+  const lista = document.getElementById('promemoria-lista');
+  if (!lista) return;
+  const items = promemoriaCache;
+  if (!items.length) {
+    lista.innerHTML = '<div style="color:#999;font-size:0.9rem;text-align:center;padding:18px">Nessun promemoria ancora</div>';
+    return;
+  }
+  const esc = s => (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmtData = d => {
+    if (!d) return '—';
+    const parts = new Date(d).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    return parts.charAt(0).toUpperCase() + parts.slice(1);
+  };
+  lista.innerHTML = items.map(p => {
+    return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between">
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#1a3a2a;font-weight:700;margin-bottom:6px">${fmtData(p.data)}</div>
+        <div style="font-size:0.9rem;color:#555;white-space:pre-wrap">${esc(p.testo)}</div>
+      </div>
+      <button onclick="eliminaPromemoria('${p.id}')" title="Elimina promemoria" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+async function eliminaPromemoria(id) {
+  if (!confirm('Eliminare questo promemoria?')) return;
+  const { error } = await sb.from('promemoria').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  promemoriaCache = promemoriaCache.filter(p => String(p.id) !== String(id));
+  renderPromemoria();
 }
 
 async function salvaPromemoria() {
@@ -273,8 +319,14 @@ async function salvaPromemoria() {
     if (!user) throw new Error('Utente non autenticato.');
     const { error } = await sb.from('promemoria').insert({ user_id: user.id, testo, data });
     if (error) throw error;
-    chiudiPromemoria();
-    alert('Promemoria salvato!');
+    if (document.getElementById('promemoria-lista')) {
+      document.getElementById('promemoria-testo').value = '';
+      document.getElementById('promemoria-data').value = '';
+      await caricaPromemoria();
+    } else {
+      chiudiPromemoria();
+      alert('Promemoria salvato!');
+    }
   } catch (err) {
     alert('Errore durante il salvataggio: ' + err.message);
   } finally {
