@@ -958,6 +958,12 @@
             if (impresa) { impresaId = impresa.id; impresaPiano = (impresa.piano || 'free').toLowerCase(); }
         }
 
+        if (!user || !impresaId) {
+            alert('Per pubblicare un\'offerta devi prima accedere con il tuo account impresa.');
+            document.getElementById('login-email')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
         // Gating mensile (Free=1, Pro=3, Premium=∞) — sicurezza per accesso URL diretto
         if (impresaId) {
             const _maxMese = (impresaPiano === 'premium') ? 999 : 1;
