@@ -816,10 +816,10 @@ function renderImprese(lista) {
   }
   tbody.innerHTML = lista.map(i => `
     <tr>
-      <td><strong>${i.nome_attivita || i.nome + ' ' + i.cognome}</strong><br><small style="color:var(--light)">${i.email}</small></td>
-      <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${i.tipo || '–'}</span></td>
-      <td>📍 ${i.citta || '–'}</td>
-      <td>${(i.mestieri||[]).slice(0,2).join(', ')}${(i.mestieri||[]).length>2?' +altri':''}</td>
+      <td><strong>${esc(i.nome_attivita || (i.nome + ' ' + i.cognome))}</strong><br><small style="color:var(--light)">${esc(i.email)}</small></td>
+      <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo) || '–'}</span></td>
+      <td>📍 ${esc(i.citta) || '–'}</td>
+      <td>${esc((i.mestieri||[]).slice(0,2).join(', '))}${(i.mestieri||[]).length>2?' +altri':''}</td>
       <td><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
@@ -1007,20 +1007,20 @@ function apriDettaglio(id) {
   if (!i) return;
   document.getElementById('modal-content').innerHTML = `
     <button class="modal-close" onclick="chiudiModal()">✕ Chiudi</button>
-    <div class="modal-title">${i.nome_attivita || i.nome + ' ' + i.cognome}</div>
-    <div class="modal-row"><span class="modal-key">Tipo:</span><span class="modal-val">${i.tipo||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Nome:</span><span class="modal-val">${i.nome} ${i.cognome}</span></div>
-    <div class="modal-row"><span class="modal-key">Email:</span><span class="modal-val">${i.email}</span></div>
-    <div class="modal-row"><span class="modal-key">Telefono:</span><span class="modal-val">${i.telefono||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">P.IVA / CF:</span><span class="modal-val">${i.partita_iva||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Città:</span><span class="modal-val">${i.citta||'–'} ${i.cap||''}</span></div>
-    <div class="modal-row"><span class="modal-key">Indirizzo:</span><span class="modal-val">${i.indirizzo||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Zone:</span><span class="modal-val">${(i.zone||[]).join(', ')||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Mestieri:</span><span class="modal-val">${(i.mestieri||[]).join(', ')||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Dipendenti:</span><span class="modal-val">${i.dipendenti||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Dal:</span><span class="modal-val">${i.anno_fondazione||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Costo:</span><span class="modal-val">${i.costo||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Descrizione:</span><span class="modal-val">${i.descrizione||'–'}</span></div>
+    <div class="modal-title">${esc(i.nome_attivita || (i.nome + ' ' + i.cognome))}</div>
+    <div class="modal-row"><span class="modal-key">Tipo:</span><span class="modal-val">${esc(i.tipo)||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Nome:</span><span class="modal-val">${esc(i.nome)} ${esc(i.cognome)}</span></div>
+    <div class="modal-row"><span class="modal-key">Email:</span><span class="modal-val">${esc(i.email)}</span></div>
+    <div class="modal-row"><span class="modal-key">Telefono:</span><span class="modal-val">${esc(i.telefono)||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">P.IVA / CF:</span><span class="modal-val">${esc(i.partita_iva)||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Città:</span><span class="modal-val">${esc(i.citta)||'–'} ${esc(i.cap)||''}</span></div>
+    <div class="modal-row"><span class="modal-key">Indirizzo:</span><span class="modal-val">${esc(i.indirizzo)||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Zone:</span><span class="modal-val">${esc((i.zone||[]).join(', '))||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Mestieri:</span><span class="modal-val">${esc((i.mestieri||[]).join(', '))||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Dipendenti:</span><span class="modal-val">${esc(i.dipendenti)||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Dal:</span><span class="modal-val">${esc(i.anno_fondazione)||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Costo:</span><span class="modal-val">${esc(i.costo)||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Descrizione:</span><span class="modal-val">${esc(i.descrizione)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Stato:</span><span class="modal-val"><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></span></div>
     <div class="modal-row"><span class="modal-key">Registrato:</span><span class="modal-val">${new Date(i.created_at).toLocaleString('it-IT')}</span></div>
     ${!i.verificata ? `<br><button class="action-btn btn-verifica" style="width:100%;padding:12px;font-size:0.9rem" onclick="verificaImpresa(${i.id});chiudiModal()">✅ Verifica questa impresa</button>` : ''}
