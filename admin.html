@@ -838,15 +838,15 @@ function renderDaVerificare(lista) {
   }
   tbody.innerHTML = lista.map(i => `
     <tr>
-      <td><strong>${i.nome_attivita || i.nome + ' ' + i.cognome}</strong></td>
-      <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${i.tipo||'–'}</span></td>
-      <td>${i.email}<br><small style="color:var(--light)">${i.telefono||''}</small></td>
-      <td>📍 ${i.citta||'–'}</td>
+      <td><strong>${esc(i.nome_attivita || (i.nome + ' ' + i.cognome))}</strong></td>
+      <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo)||'–'}</span></td>
+      <td>${esc(i.email)}<br><small style="color:var(--light)">${esc(i.telefono)||''}</small></td>
+      <td>📍 ${esc(i.citta)||'–'}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
         <button class="action-btn btn-verifica" onclick="verificaImpresa(${i.id})">✅ Verifica</button>
         <button class="action-btn btn-dettagli" onclick="apriDettaglio(${i.id})">👁️ Dettagli</button>
-        <button class="action-btn btn-rifiuta" onclick="eliminaImpresa(${i.id},'${(i.nome_attivita||'').replace(/'/g,"\\'")}')">❌ Rifiuta</button>
+        <button class="action-btn btn-rifiuta" onclick="eliminaImpresa(${i.id})">❌ Rifiuta</button>
       </td>
     </tr>
   `).join('');
