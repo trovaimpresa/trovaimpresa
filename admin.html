@@ -1160,10 +1160,10 @@ async function caricaLead() {
                        l.stato === 'contattato' ? '<span class="badge badge-a">📞 Contattato</span>' :
                        `<span class="badge">${l.stato}</span>`;
     return `<tr>
-      <td style="font-weight:600">${l.nome_attivita || '–'}</td>
-      <td>${l.email || '–'}</td>
-      <td>${l.telefono || '–'}</td>
-      <td>${l.citta || '–'}</td>
+      <td style="font-weight:600">${esc(l.nome_attivita) || '–'}</td>
+      <td>${esc(l.email) || '–'}</td>
+      <td>${esc(l.telefono) || '–'}</td>
+      <td>${esc(l.citta) || '–'}</td>
       <td>${statoBadge}</td>
       <td style="white-space:nowrap">${data_fmt}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaLead('${l.id}')">🗑️</button></td>
