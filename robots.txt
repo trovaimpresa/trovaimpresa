@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /pannello-
+Disallow: /login-
+
+Sitemap: https://trovaimpresa.com/sitemap.xml
