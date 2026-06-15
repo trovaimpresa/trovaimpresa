@@ -131,11 +131,6 @@
             position: relative;
             z-index: 1;
         }
-        .hero-side-video {
-            width: calc(50% - 310px);
-            height: 260px;
-            border-radius: 12px;
-        }
         .hero-logo {
             height: 280px;
             width: auto;
@@ -714,9 +709,6 @@
           font-size: 12px !important; white-space: nowrap !important;
         }
 
-        /* Video laterali nascosti su mobile */
-        .hero-side-video { display: none !important; }
-
         /* Hero logo */
         .hero-logo { max-height: 150px !important; height: auto !important; width: auto !important; }
 
@@ -814,9 +806,7 @@
         <a href="/pubblicita" data-spazio-id="hero-sx" class="pub-link pub-spazio" style="position:absolute; top:50%; left:40px; transform:translateY(-50%); width:calc(50% - 310px); height:260px; border:2px dashed #fff; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; font-weight:700; z-index:2;">Spazio disponibile</a>
         <a href="/pubblicita" data-spazio-id="hero-dx" class="pub-link pub-spazio" style="position:absolute; top:50%; right:40px; transform:translateY(-50%); width:calc(50% - 310px); height:260px; border:2px dashed #fff; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; font-weight:700; z-index:2;">Spazio disponibile</a>
         <div style="display:flex;align-items:center;justify-content:center;gap:24px;">
-            <iframe class="hero-side-video" src="https://www.youtube.com/embed/zE6VHZKzlh0" frameborder="0" allowfullscreen></iframe>
             <img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" style="max-width:420px;width:100%;height:auto;">
-            <iframe class="hero-side-video" src="https://www.youtube.com/embed/2UcgUcUlphw" frameborder="0" allowfullscreen></iframe>
         </div>
     </section>
 
@@ -837,7 +827,7 @@
     </div>
     </section>
     <script>
-      (function(){ if(!new URLSearchParams(location.search).get('citta')){ var el=document.getElementById('citta-picker-sponsor'); if(el) el.style.display=''; document.body.classList.add('homepage-vetrina'); } else { document.querySelectorAll('.hero-side-video').forEach(function(v){ v.style.display='none'; }); } })();
+      (function(){ if(!new URLSearchParams(location.search).get('citta')){ var el=document.getElementById('citta-picker-sponsor'); if(el) el.style.display=''; document.body.classList.add('homepage-vetrina'); } })();
       function vaiACittaSponsor(){ var v=(document.getElementById('citta-picker-input').value||'').trim(); if(!v) return; window.location.href='index.html?citta='+encodeURIComponent(v); }
       function localizzamiSponsor(){
         if(!navigator.geolocation){ alert("Impossibile rilevare la posizione, scrivi la città a mano"); return; }
