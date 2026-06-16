@@ -31,7 +31,7 @@ const PAGINE_RICERCA = [
   const css = `
   #ti-bolla{position:fixed;bottom:20px;right:20px;z-index:99999;width:64px;height:64px;border-radius:50%;background:#0066ff;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);font-size:28px;display:flex;align-items:center;justify-content:center;transition:transform .15s}
   #ti-bolla:hover{transform:scale(1.08)}
-  #ti-box{position:fixed;top:20px;bottom:20px;right:20px;z-index:99999;width:33vw;min-width:360px;max-width:calc(100vw - 40px);background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);overflow:hidden;display:none;flex-direction:column;font-family:'Trebuchet MS',sans-serif}
+  #ti-box{position:fixed;bottom:96px;right:20px;z-index:99999;width:33vw;min-width:360px;max-width:calc(100vw - 40px);max-height:calc(100vh - 130px);background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);overflow:hidden;display:none;flex-direction:column;font-family:'Trebuchet MS',sans-serif}
   #ti-box.aperto{display:flex}
   #ti-head{flex:0 0 auto;background:linear-gradient(135deg,#0066ff,#0047b3);color:#fff;padding:17px 20px;display:flex;justify-content:space-between;align-items:center}
   #ti-head b{font-size:18px}
@@ -43,7 +43,7 @@ const PAGINE_RICERCA = [
   .ti-btn.sec{background:#fff;color:#0066ff;border:2px solid #0066ff}
   #ti-input{width:100%;box-sizing:border-box;border:2px solid #ddd;border-radius:8px;padding:13px;font-size:16px;font-family:inherit;resize:none}
   .ti-link{display:block;text-align:center;background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;padding:14px;margin-top:9px;font-size:16px}
-  @media (max-width:600px){#ti-box{top:10px;bottom:10px;right:10px;left:10px;width:auto;min-width:0;max-width:none}}
+  @media (max-width:600px){#ti-box{bottom:90px;right:10px;left:10px;width:auto;min-width:0;max-width:none;max-height:calc(100vh - 110px)}}
   `;
   const style = document.createElement('style');
   style.textContent = css;
