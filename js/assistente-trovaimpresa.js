@@ -236,7 +236,7 @@ const PAGINE_RICERCA = [
   /* ---------- Premium: compari prima? ---------- */
   function ramoPremium() {
     pulisci();
-    msg('Sì. Con il piano Premium la tua attività compare più in alto nei risultati di ricerca, quindi i clienti ti vedono prima rispetto ai profili Free. È uno dei vantaggi principali del Premium.');
+    msg('Sì. Con il piano Premium la tua attività compare più in alto nei risultati, prima dei profili Free. In più sei visibile in tutta la tua regione: i clienti ti trovano anche se cercano in una città vicina, non solo nella tua. È uno dei vantaggi principali del Premium.');
     link('Scopri il Premium', PAGINA_PREZZI);
     bottoneIndietro();
   }
