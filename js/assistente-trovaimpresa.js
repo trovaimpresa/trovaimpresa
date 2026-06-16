@@ -29,20 +29,20 @@ const PAGINE_RICERCA = [
 
   /* ---------- STILI (coerenti col tuo verde) ---------- */
   const css = `
-  #ti-bolla{position:fixed;bottom:20px;right:20px;z-index:99999;width:60px;height:60px;border-radius:50%;background:#2a7a4b;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);font-size:26px;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+  #ti-bolla{position:fixed;bottom:20px;right:20px;z-index:99999;width:64px;height:64px;border-radius:50%;background:#0066ff;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);font-size:28px;display:flex;align-items:center;justify-content:center;transition:transform .15s}
   #ti-bolla:hover{transform:scale(1.08)}
-  #ti-box{position:fixed;bottom:90px;right:20px;z-index:99999;width:340px;max-width:calc(100vw - 40px);background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);overflow:hidden;display:none;flex-direction:column;font-family:'Trebuchet MS',sans-serif}
+  #ti-box{position:fixed;bottom:96px;right:20px;z-index:99999;width:390px;max-width:calc(100vw - 40px);background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);overflow:hidden;display:none;flex-direction:column;font-family:'Trebuchet MS',sans-serif}
   #ti-box.aperto{display:flex}
-  #ti-head{background:linear-gradient(135deg,#2a7a4b,#1a4d2e);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
-  #ti-head b{font-size:16px}
-  #ti-chiudi{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1}
-  #ti-body{padding:16px;max-height:380px;overflow-y:auto}
-  .ti-msg{background:#f1f5f2;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px;color:#222;line-height:1.4}
-  .ti-btn{display:block;width:100%;background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:11px;margin-top:8px;font-size:14px;cursor:pointer;font-family:inherit}
-  .ti-btn:hover{background:#1f5e39}
-  .ti-btn.sec{background:#fff;color:#2a7a4b;border:2px solid #2a7a4b}
-  #ti-input{width:100%;box-sizing:border-box;border:2px solid #ddd;border-radius:8px;padding:10px;font-size:14px;font-family:inherit;resize:none}
-  .ti-link{display:block;text-align:center;background:#2a7a4b;color:#fff;text-decoration:none;border-radius:8px;padding:11px;margin-top:8px;font-size:14px}
+  #ti-head{background:linear-gradient(135deg,#0066ff,#0047b3);color:#fff;padding:15px 18px;display:flex;justify-content:space-between;align-items:center}
+  #ti-head b{font-size:17px}
+  #ti-chiudi{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1}
+  #ti-body{padding:18px;max-height:440px;overflow-y:auto}
+  .ti-msg{background:#eef3ff;border-radius:12px;padding:11px 13px;margin-bottom:10px;font-size:15px;color:#222;line-height:1.45}
+  .ti-btn{display:block;width:100%;background:#0066ff;color:#fff;border:none;border-radius:8px;padding:12px;margin-top:8px;font-size:15px;cursor:pointer;font-family:inherit}
+  .ti-btn:hover{background:#0052cc}
+  .ti-btn.sec{background:#fff;color:#0066ff;border:2px solid #0066ff}
+  #ti-input{width:100%;box-sizing:border-box;border:2px solid #ddd;border-radius:8px;padding:11px;font-size:15px;font-family:inherit;resize:none}
+  .ti-link{display:block;text-align:center;background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;padding:12px;margin-top:8px;font-size:15px}
   `;
   const style = document.createElement('style');
   style.textContent = css;
