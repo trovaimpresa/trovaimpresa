@@ -12,10 +12,12 @@ const PAGINE_REGISTRAZIONE = {
   negozio:        'registrazione-negozio.html',
   professionista: 'registrazione-professionista.html'
 };
-const PAGINA_LOGIN_IMPRESA   = 'login-impresa.html';
-const PAGINA_LOGIN_CANDIDATO = 'login-candidato.html';
-const PAGINA_PREZZI          = 'prezzi.html';
-const PAGINA_CONTATTI        = 'contatti.html';
+const PAGINA_LOGIN_IMPRESA    = 'login-impresa.html';
+const PAGINA_LOGIN_CANDIDATO  = 'login-candidato.html';
+const PAGINA_PREZZI           = 'prezzi.html';
+const PAGINA_CONTATTI         = 'contatti.html';
+const PAGINA_OFFERTE_LAVORO   = 'offerte-lavoro.html';
+const PAGINA_SUBAPPALTO       = 'subappalto.html';
 
 /* Pagine di RICERCA — combaciano con ai-orienta, NON cambiare */
 const PAGINE_RICERCA = [
@@ -121,10 +123,15 @@ const PAGINE_RICERCA = [
     body.appendChild(ta);
     btn('🔍 Cerca', () => orienta(ta.value));
     sep('— oppure —');
-    btn('🏗️ Registra la tua attività', ramoImpresa, true);
-    btn('🔑 Accedi', ramoAccedi, true);
-    btn('💶 Prezzi e piani', ramoPrezzi, true);
     btn('❓ Come funziona', ramoComeFunziona, true);
+    btn('🆓 È gratis cercare?', ramoGratis, true);
+    btn('📍 In quali città siete?', ramoCitta, true);
+    btn('💼 Offerte di lavoro', ramoLavoro, true);
+    btn('🔨 Subappalti', ramoSubappalti, true);
+    btn('🏗️ Registra la tua attività', ramoImpresa, true);
+    btn('💶 Prezzi e piani', ramoPrezzi, true);
+    btn('⭐ Premium: compari prima?', ramoPremium, true);
+    btn('🔑 Accedi', ramoAccedi, true);
     btn('✉️ Contatti', ramoContatti, true);
     ta.focus();
   }
@@ -170,6 +177,43 @@ const PAGINE_RICERCA = [
     bottoneIndietro();
   }
 
+  /* ---------- Come funziona ---------- */
+  function ramoComeFunziona() {
+    pulisci();
+    msg('TrovaImpresa ti aiuta a trovare artigiani, imprese, negozi e professionisti edili nella tua città.\n\nScrivi cosa ti serve o scegli una categoria, confronta i profili e contatta chi preferisci.\n\nSei un\'azienda? Registrati per farti trovare dai clienti.');
+    bottoneIndietro();
+  }
+
+  /* ---------- È gratis cercare? ---------- */
+  function ramoGratis() {
+    pulisci();
+    msg('Sì! Per chi cerca un\'impresa, un artigiano o un professionista, TrovaImpresa è gratuito. Scrivi cosa ti serve o scegli una categoria e contatta chi preferisci, senza costi.');
+    bottoneIndietro();
+  }
+
+  /* ---------- In quali città siete? ---------- */
+  function ramoCitta() {
+    pulisci();
+    msg('TrovaImpresa copre tutte le principali città italiane. Cerca per la tua città e trovi le imprese e i professionisti della tua zona.');
+    bottoneIndietro();
+  }
+
+  /* ---------- Offerte di lavoro ---------- */
+  function ramoLavoro() {
+    pulisci();
+    msg('Su TrovaImpresa le imprese pubblicano offerte di lavoro e i candidati possono rispondere. Dai un\'occhiata alle offerte disponibili.');
+    link('Vai alle offerte di lavoro', PAGINA_OFFERTE_LAVORO);
+    bottoneIndietro();
+  }
+
+  /* ---------- Subappalti ---------- */
+  function ramoSubappalti() {
+    pulisci();
+    msg('C\'è una bacheca dedicata a chi cerca e offre subappalti e cottimi nel settore edile. Se sei del mestiere, puoi consultarla o pubblicare.');
+    link('Vai ai subappalti', PAGINA_SUBAPPALTO);
+    bottoneIndietro();
+  }
+
   /* ---------- Registra la tua attività ---------- */
   function ramoImpresa() {
     pulisci();
@@ -181,15 +225,6 @@ const PAGINE_RICERCA = [
     bottoneIndietro();
   }
 
-  /* ---------- Accedi ---------- */
-  function ramoAccedi() {
-    pulisci();
-    msg('Hai già un account? Scegli come accedere:');
-    link('Sono un\'impresa o un professionista', PAGINA_LOGIN_IMPRESA);
-    link('Cerco lavoro (candidato)', PAGINA_LOGIN_CANDIDATO);
-    bottoneIndietro();
-  }
-
   /* ---------- Prezzi e piani ---------- */
   function ramoPrezzi() {
     pulisci();
@@ -198,10 +233,20 @@ const PAGINE_RICERCA = [
     bottoneIndietro();
   }
 
-  /* ---------- Come funziona ---------- */
-  function ramoComeFunziona() {
+  /* ---------- Premium: compari prima? ---------- */
+  function ramoPremium() {
     pulisci();
-    msg('TrovaImpresa ti aiuta a trovare artigiani, imprese, negozi e professionisti edili nella tua città.\n\nScrivi cosa ti serve o scegli una categoria, confronta i profili e contatta chi preferisci.\n\nSei un\'azienda? Registrati per farti trovare dai clienti.');
+    msg('Sì. Con il piano Premium la tua attività compare più in alto nei risultati di ricerca, quindi i clienti ti vedono prima rispetto ai profili Free. È uno dei vantaggi principali del Premium.');
+    link('Scopri il Premium', PAGINA_PREZZI);
+    bottoneIndietro();
+  }
+
+  /* ---------- Accedi ---------- */
+  function ramoAccedi() {
+    pulisci();
+    msg('Hai già un account? Scegli come accedere:');
+    link('Sono un\'impresa o un professionista', PAGINA_LOGIN_IMPRESA);
+    link('Cerco lavoro (candidato)', PAGINA_LOGIN_CANDIDATO);
     bottoneIndietro();
   }
 
