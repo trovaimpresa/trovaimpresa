@@ -1,21 +1,23 @@
 /* ============================================================
    ASSISTENTE TROVAIMPRESA — finestrella interattiva del sito
-   Si aggancia alla funzione Netlify "ai-orienta" che hai già.
-   Niente librerie, niente dipendenze: JS puro.
+   Campo libero (AI: ai-orienta) + menu di voci fisse (gratis).
+   JS puro, niente dipendenze.
    ============================================================ */
 
-/* >>> CONTROLLA SOLO QUESTI 4 NOMI <<<
-   Sono le tue pagine di REGISTRAZIONE.
-   Se sui tuoi file si chiamano diversamente, correggi qui sotto
-   (e basta: non devi toccare altro nel file). */
+/* >>> CONTROLLA SOLO QUESTI NOMI DI PAGINA <<<
+   Se sui tuoi file si chiamano diversamente, correggi qui. */
 const PAGINE_REGISTRAZIONE = {
   artigiano:      'registrazione-artigiano.html',
   impresa:        'registrazione-impresa.html',
   negozio:        'registrazione-negozio.html',
   professionista: 'registrazione-professionista.html'
 };
+const PAGINA_LOGIN_IMPRESA   = 'login-impresa.html';
+const PAGINA_LOGIN_CANDIDATO = 'login-candidato.html';
+const PAGINA_PREZZI          = 'prezzi.html';
+const PAGINA_CONTATTI        = 'contatti.html';
 
-/* Pagine di RICERCA — NON cambiare: combaciano con ai-orienta */
+/* Pagine di RICERCA — combaciano con ai-orienta, NON cambiare */
 const PAGINE_RICERCA = [
   'cerca-artigiani.html',
   'cerca-imprese.html',
@@ -24,32 +26,31 @@ const PAGINE_RICERCA = [
 ];
 
 (function () {
-  if (window.__assistenteTI) return;      // evita doppio caricamento
+  if (window.__assistenteTI) return;
   window.__assistenteTI = true;
 
-  /* ---------- STILI (coerenti col tuo verde) ---------- */
   const css = `
   #ti-bolla{position:fixed;bottom:20px;right:20px;z-index:99999;width:64px;height:64px;border-radius:50%;background:#0066ff;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);font-size:28px;display:flex;align-items:center;justify-content:center;transition:transform .15s}
   #ti-bolla:hover{transform:scale(1.08)}
-  #ti-box{position:fixed;bottom:96px;right:20px;z-index:99999;width:380px;max-width:calc(100vw - 30px);min-height:440px;max-height:calc(100vh - 100px);background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);overflow:hidden;display:none;flex-direction:column;font-family:'Trebuchet MS',sans-serif}
+  #ti-box{position:fixed;top:20px;bottom:20px;right:20px;z-index:99999;width:33vw;min-width:360px;max-width:calc(100vw - 40px);background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18);overflow:hidden;display:none;flex-direction:column;font-family:'Trebuchet MS',sans-serif}
   #ti-box.aperto{display:flex}
-  #ti-head{flex:0 0 auto;background:linear-gradient(135deg,#0066ff,#0047b3);color:#fff;padding:24px 20px;display:flex;justify-content:space-between;align-items:center}
+  #ti-head{flex:0 0 auto;background:linear-gradient(135deg,#0066ff,#0047b3);color:#fff;padding:20px;display:flex;justify-content:space-between;align-items:center}
   #ti-head b{font-size:18px}
   #ti-chiudi{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1}
   #ti-body{flex:1 1 auto;padding:20px;overflow-y:auto}
-  .ti-msg{background:#eef3ff;border-radius:12px;padding:18px 15px;margin-bottom:11px;font-size:16px;color:#222;line-height:1.5}
-  .ti-btn{display:block;width:100%;background:#0066ff;color:#fff;border:none;border-radius:8px;padding:20px 16px;margin-top:10px;font-size:16px;cursor:pointer;font-family:inherit}
+  .ti-msg{background:#eef3ff;border-radius:12px;padding:15px;margin-bottom:12px;font-size:16px;color:#222;line-height:1.5;white-space:pre-wrap}
+  .ti-sep{font-size:13px;color:#888;text-align:center;margin:14px 0 6px}
+  .ti-btn{display:block;width:100%;background:#0066ff;color:#fff;border:none;border-radius:8px;padding:15px;margin-top:9px;font-size:16px;cursor:pointer;font-family:inherit}
   .ti-btn:hover{background:#0052cc}
   .ti-btn.sec{background:#fff;color:#0066ff;border:2px solid #0066ff}
   #ti-input{width:100%;box-sizing:border-box;border:2px solid #ddd;border-radius:8px;padding:13px;font-size:16px;font-family:inherit;resize:none}
-  .ti-link{display:block;text-align:center;background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;padding:14px;margin-top:9px;font-size:16px}
-  @media (max-width:600px){#ti-box{bottom:90px;right:10px;left:10px;width:auto;max-width:none;min-height:0;max-height:calc(100vh - 110px)}}
+  .ti-link{display:block;text-align:center;background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;padding:15px;margin-top:9px;font-size:16px}
+  @media (max-width:600px){#ti-box{top:10px;bottom:10px;right:10px;left:10px;width:auto;min-width:0;max-width:none}}
   `;
   const style = document.createElement('style');
   style.textContent = css;
   document.head.appendChild(style);
 
-  /* ---------- Struttura base ---------- */
   const bolla = document.createElement('button');
   bolla.id = 'ti-bolla';
   bolla.setAttribute('aria-label', 'Assistente TrovaImpresa');
@@ -73,7 +74,7 @@ const PAGINE_RICERCA = [
   };
   box.querySelector('#ti-chiudi').onclick = () => box.classList.remove('aperto');
 
-  /* ---------- Helper (textContent = niente XSS) ---------- */
+  /* ---------- helper (textContent = niente XSS) ---------- */
   function msg(testo) {
     const d = document.createElement('div');
     d.className = 'ti-msg';
@@ -83,52 +84,57 @@ const PAGINE_RICERCA = [
     return d;
   }
   function pulisci() { body.innerHTML = ''; }
-  function bottoneIndietro() {
+  function btn(testo, onclick, sec) {
     const b = document.createElement('button');
-    b.className = 'ti-btn sec';
-    b.textContent = '↩️ Torna indietro';
-    b.onclick = schermataIniziale;
+    b.className = 'ti-btn' + (sec ? ' sec' : '');
+    b.textContent = testo;
+    b.onclick = onclick;
     body.appendChild(b);
+    return b;
+  }
+  function link(testo, href) {
+    const a = document.createElement('a');
+    a.className = 'ti-link';
+    a.href = '/' + href;
+    a.textContent = testo;
+    body.appendChild(a);
+    return a;
+  }
+  function sep(testo) {
+    const d = document.createElement('div');
+    d.className = 'ti-sep';
+    d.textContent = testo;
+    body.appendChild(d);
+  }
+  function bottoneIndietro() {
+    btn('↩️ Torna al menu', schermataIniziale, true);
   }
 
-  /* ---------- Schermata iniziale: il bivio ---------- */
+  /* ---------- Menu iniziale ---------- */
   function schermataIniziale() {
     pulisci();
-    msg('Ciao! 👋 Come posso aiutarti?');
-    const b1 = document.createElement('button');
-    b1.className = 'ti-btn';
-    b1.textContent = "🔍 Cerco un'impresa";
-    b1.onclick = ramoCliente;
-    body.appendChild(b1);
-    const b2 = document.createElement('button');
-    b2.className = 'ti-btn sec';
-    b2.textContent = '🏗️ Voglio registrare la mia attività';
-    b2.onclick = ramoImpresa;
-    body.appendChild(b2);
-  }
-
-  /* ---------- Ramo CLIENTE (usa l'AI: ai-orienta) ---------- */
-  function ramoCliente() {
-    pulisci();
-    msg('Dimmi cosa ti serve e ti porto nella pagina giusta. Esempio: "Devo rifare il bagno a Rieti".');
+    msg('Ciao! 👋 Dimmi cosa cerchi, oppure scegli un\'opzione qui sotto.');
     const ta = document.createElement('textarea');
     ta.id = 'ti-input';
     ta.rows = 3;
-    ta.placeholder = 'Scrivi qui...';
+    ta.placeholder = 'Cosa cerchi? Es: rifare il bagno a Rieti';
     body.appendChild(ta);
-    const invia = document.createElement('button');
-    invia.className = 'ti-btn';
-    invia.textContent = 'Invia';
-    invia.onclick = () => orienta(ta.value, invia);
-    body.appendChild(invia);
+    btn('🔍 Cerca', () => orienta(ta.value));
+    sep('— oppure —');
+    btn('🏗️ Registra la tua attività', ramoImpresa, true);
+    btn('🔑 Accedi', ramoAccedi, true);
+    btn('💶 Prezzi e piani', ramoPrezzi, true);
+    btn('❓ Come funziona', ramoComeFunziona, true);
+    btn('✉️ Contatti', ramoContatti, true);
     ta.focus();
   }
 
-  async function orienta(testo, btn) {
+  /* ---------- Campo libero → AI (ai-orienta) ---------- */
+  async function orienta(testo) {
     testo = (testo || '').trim();
     if (!testo) return;
-    btn.disabled = true;
-    btn.textContent = 'Sto pensando...';
+    pulisci();
+    msg('Sto cercando...');
     try {
       const r = await fetch('/.netlify/functions/ai-orienta', {
         method: 'POST',
@@ -141,58 +147,69 @@ const PAGINE_RICERCA = [
       fallback();
     }
   }
-
   function estraiJSON(raw) {
     try { return JSON.parse(raw); } catch (e) {}
     const a = raw.indexOf('{'), b = raw.lastIndexOf('}');
     if (a >= 0 && b > a) { try { return JSON.parse(raw.slice(a, b + 1)); } catch (e) {} }
     return null;
   }
-
   function mostraRisultato(dato) {
     pulisci();
     if (!dato || !PAGINE_RICERCA.includes(dato.pagina)) return fallback();
     if (dato.motivo) msg(dato.motivo);
-    const a = document.createElement('a');
-    a.className = 'ti-link';
-    a.href = '/' + dato.pagina;
-    a.textContent = '➡️ Vai alla ricerca';
-    body.appendChild(a);
+    link('➡️ Vai alla ricerca', dato.pagina);
     bottoneIndietro();
   }
-
   function fallback() {
     pulisci();
     msg('Scegli tu la categoria che cerchi:');
-    [['Artigiani', 'cerca-artigiani.html'],
-     ['Imprese', 'cerca-imprese.html'],
-     ['Negozi', 'cerca-negozi.html'],
-     ['Professionisti', 'cerca-professionisti.html']
-    ].forEach(([nome, pag]) => {
-      const a = document.createElement('a');
-      a.className = 'ti-link';
-      a.href = '/' + pag;
-      a.textContent = nome;
-      body.appendChild(a);
-    });
+    link('Artigiani', 'cerca-artigiani.html');
+    link('Imprese', 'cerca-imprese.html');
+    link('Negozi', 'cerca-negozi.html');
+    link('Professionisti', 'cerca-professionisti.html');
     bottoneIndietro();
   }
 
-  /* ---------- Ramo IMPRESA (porta alla registrazione) ---------- */
+  /* ---------- Registra la tua attività ---------- */
   function ramoImpresa() {
     pulisci();
     msg('Ottimo! Scegli la categoria della tua attività per registrarti:');
-    [['Sono un artigiano', 'artigiano'],
-     ["Sono un'impresa", 'impresa'],
-     ['Ho un negozio', 'negozio'],
-     ['Sono un professionista', 'professionista']
-    ].forEach(([nome, cat]) => {
-      const a = document.createElement('a');
-      a.className = 'ti-link';
-      a.href = '/' + PAGINE_REGISTRAZIONE[cat];
-      a.textContent = nome;
-      body.appendChild(a);
-    });
+    link('Sono un artigiano', PAGINE_REGISTRAZIONE.artigiano);
+    link('Sono un\'impresa', PAGINE_REGISTRAZIONE.impresa);
+    link('Ho un negozio', PAGINE_REGISTRAZIONE.negozio);
+    link('Sono un professionista', PAGINE_REGISTRAZIONE.professionista);
+    bottoneIndietro();
+  }
+
+  /* ---------- Accedi ---------- */
+  function ramoAccedi() {
+    pulisci();
+    msg('Hai già un account? Scegli come accedere:');
+    link('Sono un\'impresa o un professionista', PAGINA_LOGIN_IMPRESA);
+    link('Cerco lavoro (candidato)', PAGINA_LOGIN_CANDIDATO);
+    bottoneIndietro();
+  }
+
+  /* ---------- Prezzi e piani ---------- */
+  function ramoPrezzi() {
+    pulisci();
+    msg('Su TrovaImpresa hai due piani:\n\nFREE — €0\nProfilo base e visibilità nella tua città.\n\nPREMIUM — €5 al mese (oppure €49 all\'anno)\nPiù visibilità, foto dei lavori, preventivi con AI e strumenti avanzati.');
+    link('Vedi tutti i dettagli', PAGINA_PREZZI);
+    bottoneIndietro();
+  }
+
+  /* ---------- Come funziona ---------- */
+  function ramoComeFunziona() {
+    pulisci();
+    msg('TrovaImpresa ti aiuta a trovare artigiani, imprese, negozi e professionisti edili nella tua città.\n\nScrivi cosa ti serve o scegli una categoria, confronta i profili e contatta chi preferisci.\n\nSei un\'azienda? Registrati per farti trovare dai clienti.');
+    bottoneIndietro();
+  }
+
+  /* ---------- Contatti ---------- */
+  function ramoContatti() {
+    pulisci();
+    msg('Hai bisogno di aiuto? Scrivici dalla pagina contatti, ti rispondiamo al più presto.');
+    link('Vai ai contatti', PAGINA_CONTATTI);
     bottoneIndietro();
   }
 })();
