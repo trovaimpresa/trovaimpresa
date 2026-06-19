@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configura il gestionale — Impresa</title>
+<style>
+  :root{--bg:#f3f5f2;--surface:#fff;--ink:#19211d;--muted:#69756e;--line:#e3e8e3;--accent:#1f6f5c;--accent-d:#143f33;--accent-soft:#e7f1ed;--danger:#c0392b;--shadow:0 4px 16px rgba(20,40,30,.07)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;padding:22px 16px}
+  .head-in{max-width:760px;margin:0 auto}
+  header h1{font-size:20px;font-weight:800}header small{font-size:12px;opacity:.85;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+  .signout{float:right;background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer}
+  .wrap{max-width:760px;margin:0 auto;padding:22px 16px 80px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+  .card h2{font-size:16px;font-weight:700;margin-bottom:6px}
+  .card .hint{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.45}
+  label{display:block;font-size:12.5px;font-weight:700;color:#46524b;margin-bottom:5px}
+  input,select{width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fcfdfc}
+  input:focus,select:focus{outline:none;border-color:var(--accent);background:#fff}
+  .field{margin-bottom:13px}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .presets button{font-size:18px;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:#fcfdfc;cursor:pointer}
+  .colors{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .colors button{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+  .colors button.on{box-shadow:0 0 0 3px var(--accent)}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 18px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
+  .btn:active{transform:translateY(1px)}
+  .item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:9px}
+  .item .ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:20px;color:#fff;flex:0 0 auto}
+  .item .nm{flex:1;font-size:15px;font-weight:700}.item .nm small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+  .item .del{border:1px solid #f0d2cd;color:var(--danger);background:#fff;border-radius:8px;padding:7px 11px;font-size:13px;font-weight:600;cursor:pointer}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .badge.inv{background:#fcf0e0;color:#b45309}.badge.att{background:#e3f3e8;color:var(--accent-d)}
+  .invite{background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px}
+  .invite b{font-size:16px;letter-spacing:1px}
+  .copy{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-size:12.5px;font-weight:700;cursor:pointer;margin-left:8px}
+  .empty{text-align:center;color:var(--muted);padding:22px 10px;font-size:14px}
+  .msg{font-size:13px;font-weight:600;padding:10px 12px;border-radius:9px;margin-bottom:12px;display:none}
+  .msg.err{display:block;background:#fdeae1;color:var(--danger)}.msg.ok{display:block;background:#e3f3e8;color:var(--accent-d)}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header><div class="head-in"><button class="signout hidden" id="signout">Esci</button><h1>Configura il gestionale</h1><small>Impresa · TrovaImpresa</small></div></header>
+<div class="wrap">
+  <div id="msg" class="msg"></div>
+
+  <div id="login" class="card hidden">
+    <h2>Accedi</h2>
+    <div class="field"><label>Email</label><input type="email" id="email"></div>
+    <div class="field"><label>Password</label><input type="password" id="password"></div>
+    <button class="btn" id="btn-login">Entra</button>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="card">
+      <h2>1 · I tuoi mestieri</h2>
+      <div class="hint">I reparti del gestionale (Giardini, Pulizie, Idraulica…). Mettine quanti vuoi.</div>
+      <div class="field"><label>Nome</label><input type="text" id="m-nome" placeholder="Es. Giardini"></div>
+      <div class="field"><label>Icona</label><input type="text" id="m-icona" value="🛠️" maxlength="2"><div class="presets" id="ic-presets"></div></div>
+      <div class="field"><label>Colore</label><div class="colors" id="col-presets"></div></div>
+      <button class="btn" id="btn-mest">+ Aggiungi mestiere</button>
+      <div id="mest-list" style="margin-top:14px"></div>
+    </div>
+
+    <div class="card">
+      <h2>2 · Squadra e inviti</h2>
+      <div class="hint">Aggiungi un operatore: si crea un <b>codice invito</b> da mandargli. Lui si registra, inserisce il codice e vede solo la sua agenda.</div>
+      <div class="field"><label>Mestiere</label><select id="o-mest"></select></div>
+      <div class="field"><label>Nome operatore</label><input type="text" id="o-nome" placeholder="Es. Wahid"></div>
+      <button class="btn" id="btn-op">+ Aggiungi operatore e crea invito</button>
+      <div id="op-list" style="margin-top:14px"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
+const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+const $=s=>document.querySelector(s);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ICONE=["🌳","🧹","🏗️","🔧","⚡","🚰","🎨","🧱","🪜","🚿","🛠️","🌿"];
+const COLORI=["#2e9e5b","#2570c4","#c0703a","#7c4dff","#e0457b","#0f9b8e","#d4a017","#5a6a7a"];
+let scelta={icona:"🛠️",colore:"#2e9e5b"}, uid=null;
+function msg(t,ok){const m=$("#msg");m.textContent=t;m.className="msg "+(ok?"ok":"err");setTimeout(()=>m.className="msg",3800);}
+function rand(){return Math.random().toString(36).slice(2,8).toUpperCase();}
+function inviteLink(c){return location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c;}
+
+$("#ic-presets").innerHTML=ICONE.map(i=>`<button type="button" data-ic="${i}">${i}</button>`).join("");
+$("#ic-presets").onclick=e=>{const b=e.target.closest("[data-ic]");if(b){scelta.icona=b.dataset.ic;$("#m-icona").value=b.dataset.ic;}};
+$("#m-icona").oninput=e=>scelta.icona=e.target.value||"🛠️";
+$("#col-presets").innerHTML=COLORI.map((c,i)=>`<button type="button" data-col="${c}" style="background:${c}" class="${i===0?'on':''}"></button>`).join("");
+$("#col-presets").onclick=e=>{const b=e.target.closest("[data-col]");if(b){scelta.colore=b.dataset.col;document.querySelectorAll("#col-presets button").forEach(x=>x.classList.toggle("on",x.dataset.col===b.dataset.col));}};
+
+async function refresh(session){
+  if(session){uid=session.user.id;$("#login").classList.add("hidden");$("#app").classList.remove("hidden");$("#signout").classList.remove("hidden");loadMest();loadOp();}
+  else{uid=null;$("#login").classList.remove("hidden");$("#app").classList.add("hidden");$("#signout").classList.add("hidden");}
+}
+sb.auth.onAuthStateChange((_e,s)=>refresh(s));
+sb.auth.getSession().then(({data})=>refresh(data.session));
+$("#btn-login").onclick=async()=>{const email=$("#email").value.trim(),password=$("#password").value;if(!email||!password){msg("Inserisci email e password");return;}const {error}=await sb.auth.signInWithPassword({email,password});if(error)msg("Accesso non riuscito: "+error.message);};
+$("#signout").onclick=()=>sb.auth.signOut();
+
+async function loadMest(){
+  const {data,error}=await sb.from("gest_mestieri").select("*").order("ordine");
+  if(error){$("#mest-list").innerHTML=`<div class="empty">Errore: ${error.message}</div>`;return;}
+  $("#o-mest").innerHTML=data.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join("")||`<option value="">— crea prima un mestiere —</option>`;
+  $("#mest-list").innerHTML=data.length?data.map(m=>`<div class="item"><div class="ic" style="background:${m.colore}">${m.icona}</div><div class="nm">${esc(m.nome)}</div><button class="del" data-delm="${m.id}">Elimina</button></div>`).join(""):`<div class="empty">Nessun mestiere ancora.</div>`;
+}
+$("#btn-mest").onclick=async()=>{
+  const nome=$("#m-nome").value.trim();if(!nome){msg("Scrivi il nome del mestiere");return;}
+  const {count}=await sb.from("gest_mestieri").select("id",{count:"exact",head:true});
+  const {error}=await sb.from("gest_mestieri").insert({user_id:uid,nome,icona:scelta.icona,colore:scelta.colore,ordine:count||0});
+  if(error){msg("Errore: "+error.message);return;}
+  $("#m-nome").value="";msg("Mestiere aggiunto ✔",true);loadMest();
+};
+$("#mest-list").onclick=async e=>{const b=e.target.closest("[data-delm]");if(!b)return;if(!confirm("Eliminare il mestiere e tutto ciò che contiene?"))return;const {error}=await sb.from("gest_mestieri").delete().eq("id",b.dataset.delm);if(error){msg("Errore: "+error.message);return;}loadMest();loadOp();};
+
+async function loadOp(){
+  const [{data:ops},{data:mest},{data:membri}]=await Promise.all([
+    sb.from("gest_operatori").select("*"),
+    sb.from("gest_mestieri").select("id,nome"),
+    sb.from("gest_membri").select("operatore_id,codice,stato")
+  ]);
+  if(!ops){$("#op-list").innerHTML="";return;}
+  const mN=Object.fromEntries((mest||[]).map(m=>[m.id,m.nome]));
+  const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
+  $("#op-list").innerHTML=ops.length?ops.map(o=>{
+    const inv=mB[o.id]; const att=inv&&inv.stato==="attivo";
+    return `<div class="item" style="flex-wrap:wrap">
+      <div class="ic" style="background:#69756e">👷</div>
+      <div class="nm">${esc(o.nome)}<small>${esc(mN[o.mestiere_id]||"—")}</small></div>
+      <span class="badge ${att?'att':'inv'}">${att?"Attivo":"Invitato"}</span>
+      <button class="del" data-delo="${o.id}">Elimina</button>
+      ${inv&&!att?`<div class="invite" style="flex-basis:100%">Codice: <b>${inv.codice}</b><button class="copy" data-link="${inviteLink(inv.codice)}">Copia link</button></div>`:""}
+    </div>`;}).join(""):`<div class="empty">Nessun operatore ancora.</div>`;
+}
+$("#btn-op").onclick=async()=>{
+  const mestiere_id=$("#o-mest").value, nome=$("#o-nome").value.trim();
+  if(!mestiere_id){msg("Crea prima un mestiere");return;}
+  if(!nome){msg("Scrivi il nome dell'operatore");return;}
+  const {data:op,error}=await sb.from("gest_operatori").insert({user_id:uid,mestiere_id,nome}).select().single();
+  if(error){msg("Errore: "+error.message);return;}
+  const codice=rand();
+  const {error:e2}=await sb.from("gest_membri").insert({impresa_id:uid,operatore_id:op.id,codice,stato:"invitato"});
+  if(e2){msg("Errore invito: "+e2.message);return;}
+  $("#o-nome").value="";msg("Operatore aggiunto, invito creato ✔",true);loadOp();
+};
+$("#op-list").onclick=async e=>{
+  const c=e.target.closest("[data-link]");if(c){navigator.clipboard.writeText(c.dataset.link).then(()=>msg("Link copiato ✔",true));return;}
+  const d=e.target.closest("[data-delo]");if(d){if(!confirm("Eliminare questo operatore?"))return;await sb.from("gest_membri").delete().eq("operatore_id",d.dataset.delo);await sb.from("gest_operatori").delete().eq("id",d.dataset.delo);loadOp();}
+};
+</script>
+</body>
+</html>

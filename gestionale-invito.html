@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accetta invito — Gestionale</title>
+<style>
+  :root{--bg:#f3f5f2;--surface:#fff;--ink:#19211d;--muted:#69756e;--line:#e3e8e3;--accent:#1f6f5c;--accent-d:#143f33;--accent-soft:#e7f1ed;--danger:#c0392b;--shadow:0 4px 16px rgba(20,40,30,.07)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;padding:22px 16px;text-align:center}
+  header h1{font-size:20px;font-weight:800}header small{font-size:12px;opacity:.85;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+  .wrap{max-width:480px;margin:0 auto;padding:24px 16px 60px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+  .card h2{font-size:17px;font-weight:700;margin-bottom:6px}
+  .hint{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.45}
+  label{display:block;font-size:12.5px;font-weight:700;color:#46524b;margin-bottom:5px}
+  input{width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fcfdfc}
+  input:focus{outline:none;border-color:var(--accent);background:#fff}
+  .field{margin-bottom:13px}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px 18px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;width:100%}
+  .btn:active{transform:translateY(1px)}
+  .switch{text-align:center;margin-top:12px;font-size:13px;color:var(--muted)}
+  .switch a{color:var(--accent-d);font-weight:700;cursor:pointer;text-decoration:underline}
+  .msg{font-size:13px;font-weight:600;padding:11px 13px;border-radius:9px;margin-bottom:12px;display:none;line-height:1.4}
+  .msg.err{display:block;background:#fdeae1;color:var(--danger)}.msg.ok{display:block;background:#e3f3e8;color:var(--accent-d)}
+  .hidden{display:none}
+  .big-ok{text-align:center;padding:20px 6px}.big-ok .e{font-size:46px}.big-ok h2{margin:10px 0 6px}
+</style>
+</head>
+<body>
+<header><h1>Invito al gestionale</h1><small>TrovaImpresa</small></header>
+<div class="wrap">
+  <div id="msg" class="msg"></div>
+
+  <!-- registrazione / login -->
+  <div id="auth" class="card hidden">
+    <h2 id="auth-title">Registrati</h2>
+    <div class="hint" id="auth-hint">Crea il tuo accesso gratuito per entrare nel gestionale della tua impresa.</div>
+    <div class="field"><label>Email</label><input type="email" id="email"></div>
+    <div class="field"><label>Password</label><input type="password" id="password" placeholder="almeno 6 caratteri"></div>
+    <button class="btn" id="btn-auth">Crea account</button>
+    <div class="switch" id="switch"></div>
+  </div>
+
+  <!-- inserimento codice -->
+  <div id="redeem" class="card hidden">
+    <h2>Inserisci il codice invito</h2>
+    <div class="hint">Te l'ha dato la tua impresa. Inseriscilo per collegarti.</div>
+    <div class="field"><label>Codice</label><input type="text" id="codice" placeholder="ES. A1B2C3" style="text-transform:uppercase"></div>
+    <button class="btn" id="btn-redeem">Collegami all'impresa</button>
+  </div>
+
+  <!-- successo -->
+  <div id="done" class="card hidden"><div class="big-ok"><div class="e">✅</div><h2>Sei collegato!</h2><p style="color:var(--muted);font-size:14px">Da ora puoi aprire la tua agenda e vedere i lavori che ti assegnano.</p></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
+const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+const $=s=>document.querySelector(s);
+let mode="register";
+const params=new URLSearchParams(location.search);
+function msg(t,ok){const m=$("#msg");m.textContent=t;m.className="msg "+(ok?"ok":"err");}
+
+function show(which){["auth","redeem","done"].forEach(id=>$("#"+id).classList.toggle("hidden",id!==which));}
+function renderAuth(){
+  $("#auth-title").textContent=mode==="register"?"Registrati":"Accedi";
+  $("#auth-hint").textContent=mode==="register"?"Crea il tuo accesso gratuito per entrare nel gestionale della tua impresa.":"Bentornato, accedi col tuo account.";
+  $("#btn-auth").textContent=mode==="register"?"Crea account":"Entra";
+  $("#switch").innerHTML=mode==="register"?'Hai già un account? <a id="sw">Accedi</a>':'Sei nuovo? <a id="sw">Registrati</a>';
+  $("#sw").onclick=()=>{mode=mode==="register"?"login":"register";renderAuth();};
+}
+function refresh(session){
+  if(session){ $("#codice").value=(params.get("codice")||"").toUpperCase(); show("redeem"); }
+  else { renderAuth(); show("auth"); }
+}
+sb.auth.onAuthStateChange((_e,s)=>refresh(s));
+sb.auth.getSession().then(({data})=>refresh(data.session));
+
+$("#btn-auth").onclick=async()=>{
+  const email=$("#email").value.trim(), password=$("#password").value;
+  if(!email||!password){msg("Inserisci email e password");return;}
+  if(mode==="register"){
+    const {error}=await sb.auth.signUp({email,password});
+    if(error){msg("Registrazione non riuscita: "+error.message);return;}
+    const {error:e2}=await sb.auth.signInWithPassword({email,password});
+    if(e2){msg("Account creato. Se ti chiede di confermare l'email, fallo e poi torna qui.",true);return;}
+  }else{
+    const {error}=await sb.auth.signInWithPassword({email,password});
+    if(error){msg("Accesso non riuscito: "+error.message);return;}
+  }
+};
+
+$("#btn-redeem").onclick=async()=>{
+  const codice=$("#codice").value.trim().toUpperCase();
+  if(!codice){msg("Inserisci il codice");return;}
+  const {data,error}=await sb.rpc("gest_redeem_invito",{_codice:codice});
+  if(error){msg("Errore: "+error.message);return;}
+  if(data&&data.ok){show("done");}
+  else{msg((data&&data.err)||"Codice non valido");}
+};
+</script>
+</body>
+</html>
