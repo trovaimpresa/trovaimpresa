@@ -144,7 +144,7 @@ async function showLanding(){
   if(error){toast("Errore: "+error.message);return;}
   const cnt=await Promise.all((data||[]).map(async m=>{
     const {count}=await sb.from("gest_lavori").select("id",{count:"exact",head:true}).eq("mestiere_id",m.id).neq("stato","fatto");
-    return count||0;});
+    return count||0;}));
   $("#panels").innerHTML=(data||[]).length?data.map((m,i)=>`<button class="panel-card" data-enter='${m.id}' data-m='${esc(JSON.stringify(m))}' style="background:linear-gradient(135deg,${m.colore},${m.colore})">
     <span class="ic">${m.icona||"🛠️"}</span><h2>${esc(m.nome)}</h2><span class="meta">${cnt[i]} da fare</span></button>`).join("")
     :`<div class="empty"><div class="ic">🧰</div><p>Nessun mestiere</p><small>Creane uno in "Configura mestieri e squadra"</small></div>`;
