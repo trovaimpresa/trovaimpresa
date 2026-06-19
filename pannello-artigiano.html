@@ -414,6 +414,20 @@
     max-height: none !important;
     border-radius: 0;
   }
+  /* === NUOVO CANTIERE: layout a tutta pagina === */
+  #modalNuovoCantiere { padding:0; align-items:flex-start; justify-content:stretch; overflow-y:auto; }
+  #modalNuovoCantiere .modal-ai {
+    max-width:none; width:100%; min-height:100vh; max-height:none;
+    border-radius:0; overflow:visible; display:flex; flex-direction:column;
+  }
+  #modalNuovoCantiere .modal-ai-header { border-radius:0; }
+  #modalNuovoCantiere .modal-ai-body { flex:1; display:flex; flex-direction:column; padding-bottom:0; }
+  #modalNuovoCantiere .cant-actions {
+    position:sticky; bottom:0; margin-top:auto;
+    display:flex; gap:12px; align-items:center;
+    margin-left:-28px; margin-right:-28px; padding:16px 28px;
+    background:white; border-top:1px solid var(--border);
+  }
   .modal-ai-body { padding:24px 28px; }
   .ai-form-group { margin-bottom:14px; }
   .ai-form-group label { display:block; font-size:0.73rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
@@ -1839,7 +1853,7 @@
         <label>Note</label>
         <textarea id="cant-note" placeholder="Note aggiuntive..."></textarea>
       </div>
-      <div>
+      <div class="cant-actions">
         <button class="btn-salva-annuncio" onclick="salvaCantiere()">💾 Salva cantiere</button>
         <button class="btn-annulla-form" onclick="chiudiModalNuovoCantiere()">Annulla</button>
       </div>
