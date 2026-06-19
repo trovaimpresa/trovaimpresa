@@ -151,7 +151,7 @@ $("#btn-op").onclick=async()=>{
   $("#o-nome").value="";msg("Operatore aggiunto, invito creato ✔",true);loadOp();
 };
 $("#op-list").onclick=async e=>{
-  const c=e.target.closest("[data-link]");if(c){navigator.clipboard.writeText(c.dataset.link).then(()=>msg("Link copiato ✔",true));return;}
+  const c=e.target.closest("[data-link]");if(c){const t=c.dataset.link,ok=()=>msg("Link copiato ✔",true),fb=()=>{const a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.focus();a.select();let d=false;try{d=document.execCommand("copy");}catch(_){}document.body.removeChild(a);d?ok():prompt("Copia il link a mano:",t);};(navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(t).then(ok).catch(fb):fb();return;}
   const d=e.target.closest("[data-delo]");if(d){if(!confirm("Eliminare questo operatore?"))return;await sb.from("gest_membri").delete().eq("operatore_id",d.dataset.delo);await sb.from("gest_operatori").delete().eq("id",d.dataset.delo);loadOp();}
 };
 </script>
