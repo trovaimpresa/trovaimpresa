@@ -147,11 +147,9 @@
   .empty p{font-size:15px;font-weight:600;color:#48544d}
   .empty small{display:block;font-size:13px;margin-top:6px;font-weight:500}
 
-  .overlay{position:fixed;inset:0;background:rgba(20,30,25,.5);z-index:50;display:none;align-items:flex-end;justify-content:center}
-  .overlay.open{display:flex;animation:fade .15s ease}
-  @media(min-width:640px){.overlay{align-items:center}}
-  .sheet{background:#fff;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:20px 18px 28px;animation:up .22s ease}
-  @media(min-width:640px){.sheet{border-radius:18px}}
+  .overlay{position:fixed;inset:0;background:#f3f5f2;z-index:50;display:none;overflow-y:auto}
+  .overlay.open{display:block;animation:fade .15s ease}
+  .sheet{background:#fff;width:100%;max-width:700px;min-height:100vh;margin:0 auto;padding:22px 18px 28px;animation:up .18s ease}
   @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
   .sheet h3{font-size:18px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px}
   .field{margin-bottom:13px}
@@ -160,7 +158,7 @@
   .field textarea{resize:vertical;min-height:58px}
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:#fff}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-  .sheet-actions{display:flex;gap:10px;margin-top:8px}
+  .sheet-actions{position:sticky;bottom:0;display:flex;gap:10px;margin-top:18px;padding:14px 0 8px;background:#fff;border-top:1px solid var(--line)}
   .sheet-actions button{flex:1;padding:13px;border-radius:11px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;border:none}
   .b-save{background:var(--accent);color:#fff} .b-cancel{background:#eef1ef;color:#48544d}
   .seg{display:flex;gap:6px;flex-wrap:wrap}
