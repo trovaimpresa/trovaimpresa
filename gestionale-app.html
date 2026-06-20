@@ -1043,7 +1043,13 @@
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
     if(a==="del-job"){if(confirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Eliminato");}return;}
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
-    if(a==="fatt"){const l=db().lavori.find(x=>x.id===id);l.fattStato=t.dataset.v;l.pagato=l.fattStato==="pagata";await save();renderAll();toast(l.fattStato==="pagata"?"Fattura pagata ✅":l.fattStato==="emessa"?"Fattura emessa 📄":"Aggiornato");return;}
+    if(a==="fatt"){
+      if(!sb||!sbUid){toast("Devi essere loggato");return;}
+      const v=t.dataset.v;
+      const {error}=await sb.from("gest_lavori").update({fatt_stato:v}).eq("id",id).eq("user_id",sbUid);
+      if(error){toast("Errore: "+error.message);return;}
+      renderFatture();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
+    }
     if(a==="open-day")return openDay(t.dataset.d);
     if(a==="save-note"){const ds=t.dataset.d,v=$("#day-note").value.trim();if(v)db().note[ds]=v;else delete db().note[ds];await save();closeSheet();renderCal();toast("Nota salvata 📌");return;}
     if(a==="cal-prev"){cal.setMonth(cal.getMonth()-1);renderCal();return;}
