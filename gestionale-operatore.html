@@ -174,7 +174,7 @@ function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
 
 /* ===== avvio ===== */
 sb.auth.getSession().then(({data})=>boot(data.session));
-sb.auth.onAuthStateChange((_e,s)=>boot(s));
+sb.auth.onAuthStateChange((_e,s)=>setTimeout(()=>boot(s),0));
 
 async function boot(session){
   if(!session){gate("Per entrare usa il link che ti ha mandato la tua impresa.");return;}
