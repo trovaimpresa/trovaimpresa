@@ -379,8 +379,8 @@
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();}});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();}});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();}});
   }
 
   /* LANDING */
@@ -462,13 +462,33 @@
       </div></div>`;
   }
 
-  function renderJobs(){
-    let L=[...db().lavori];
-    if(filter.stato==="da_incassare")L=L.filter(l=>l.stato==="fatto"&&l.fattStato!=="pagata");
-    else if(filter.stato!=="tutti")L=L.filter(l=>l.stato===filter.stato);
-    if(filter.q){const q=filter.q.toLowerCase();L=L.filter(l=>{const c=cliById(l.clienteId);return(c&&c.nome.toLowerCase().includes(q))||(l.descrizione||"").toLowerCase().includes(q);});}
-    L.sort((a,b)=>(a.dataPrevista||"9999").localeCompare(b.dataPrevista||"9999"));
-    $("#jobs-list").innerHTML=L.length?L.map(jobCard).join(""):`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;
+  function jobCardSupa(l){
+    const fatto=l.stato==="fatto", dove=l.dove||"";
+    return `<div class="job">
+      <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div></div>
+      <div class="stati">
+        <span class="st"><i class="pall ${fatto?'verde':'rosso'}"></i><span class="lab">${fatto?'Fatto':'Da fare'}</span></span>
+      </div>
+      <div class="job-meta">
+        ${dove?`<span>📍 ${esc(dove)}</span>`:""}
+        <span>📅 ${fdate(l.data_prevista)}</span>
+      </div>
+      <div class="job-actions">
+        ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+      </div></div>`;
+  }
+  async function renderJobs(){
+    const box=$("#jobs-list");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;return;}
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista").eq("user_id",sbUid);
+    let L=data||[];
+    if(filter.stato==="fatto")L=L.filter(l=>l.stato==="fatto");
+    else if(filter.stato==="da_fare")L=L.filter(l=>l.stato!=="fatto");
+    else if(filter.stato==="in_corso")L=L.filter(l=>l.stato==="in_corso");
+    else if(filter.stato==="da_incassare")L=[];
+    if(filter.q){const q=filter.q.toLowerCase();L=L.filter(l=>(l.descrizione||"").toLowerCase().includes(q)||(l.dove||"").toLowerCase().includes(q));}
+    L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+    box.innerHTML=L.length?L.map(jobCardSupa).join(""):`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;
   }
 
   function fattRow(l,btn){
