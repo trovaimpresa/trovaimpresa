@@ -320,6 +320,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   const KEY="gestionale_multiservizi_v5";
@@ -364,6 +365,23 @@
   }
   async function save(){try{await window.storage.set(KEY,JSON.stringify(state));}catch(e){toast("Errore salvataggio");}}
   function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
+
+  /* SUPABASE — solo per il tab Squadra (riusa gestionale-config.html) */
+  const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
+  const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
+  const sb=window.supabase?window.supabase.createClient(SUPA_URL,SUPA_KEY):null;
+  let sbUid=null;
+  const sbRand=()=>Math.random().toString(36).slice(2,8).toUpperCase();
+  const inviteLink=c=>location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c;
+  function copyLink(txt){
+    const ok=()=>toast("Link copiato ✔");
+    const fb=()=>{const a=document.createElement("textarea");a.value=txt;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.focus();a.select();let d=false;try{d=document.execCommand("copy");}catch(_){}document.body.removeChild(a);d?ok():prompt("Copia il link a mano:",txt);};
+    (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
+  }
+  if(sb){
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur)renderDip();});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur)renderDip();});
+  }
 
   /* LANDING */
   function renderLanding(){
@@ -523,13 +541,48 @@
         <button class="del" data-action="del-cli" data-id="${c.id}">Elimina</button></div></div>`;
     }).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun condominio</p><small>Aggiungi i clienti di questo reparto</small></div>`;
   }
-  function renderDip(){
-    $("#dip-list").innerHTML=db().dipendenti.length?db().dipendenti.map(d=>{
-      const n=db().lavori.filter(l=>l.assegnatoId===d.id&&l.stato!=="fatto").length;
-      return `<div class="card"><div><h3>${esc(d.nome)}</h3><div class="cnt">${n} lavor${n===1?"o":"i"} aperti</div></div>
-        <div class="card-acts"><button data-action="edit-dip" data-id="${d.id}">Rinomina</button>
-        <button class="del" data-action="del-dip" data-id="${d.id}">Elimina</button></div></div>`;
+  async function renderDip(){
+    const box=$("#dip-list");if(!box)return;
+    if(!sb){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Squadra non disponibile</p><small>Connessione non riuscita</small></div>`;return;}
+    if(!sbUid){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Accedi per gestire la squadra</p><small>Entra nel pannello per invitare le persone</small></div>`;return;}
+    const [{data:ops},{data:membri}]=await Promise.all([
+      sb.from("gest_operatori").select("id,nome"),
+      sb.from("gest_membri").select("operatore_id,codice,stato")
+    ]);
+    const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
+    box.innerHTML=(ops&&ops.length)?ops.map(o=>{
+      const inv=mB[o.id], att=inv&&inv.stato==="attivo", codice=inv?inv.codice:"";
+      const link=inviteLink(codice);
+      const wa="https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link);
+      return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":"Invitato"}</div></div>
+        <div class="card-acts">${codice?`<button data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
+        <button data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>`:""}</div></div>`;
     }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
+  }
+  function squadraForm(){
+    openSheet(`<h3>Nuova persona</h3>
+      <div class="field"><label>Nome</label><input id="d-nome" placeholder="Es. Wahid"></div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="sq-add">Aggiungi</button></div>`);
+  }
+  async function ensureMestiere(){
+    const {data}=await sb.from("gest_mestieri").select("id").limit(1);
+    if(data&&data.length)return data[0].id;
+    const {data:m,error}=await sb.from("gest_mestieri").insert({user_id:sbUid,nome:"Squadra",icona:"🛠️",colore:"#2e9e5b",ordine:0}).select().single();
+    if(error)throw error;
+    return m.id;
+  }
+  async function squadraAdd(){
+    const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
+    if(!sbUid){toast("Devi essere loggato");return;}
+    let mestiere_id;
+    try{mestiere_id=await ensureMestiere();}catch(e){toast("Errore: "+e.message);return;}
+    const {data:op,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id,nome}).select().single();
+    if(error){toast("Errore: "+error.message);return;}
+    const codice=sbRand();
+    const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato"});
+    if(e2){toast("Errore invito: "+e2.message);return;}
+    closeSheet();renderDip();toast("Persona aggiunta, invito creato ✔");
   }
 
   /* FORM LAVORO (nessun campo "servizio": il reparto è già il pannello) */
@@ -867,7 +920,10 @@
     if(a==="edit-cli")return cliForm(db().clienti.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
     if(a==="del-cli"){const n=db().lavori.filter(l=>l.clienteId===id).length;if(confirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){db().clienti=db().clienti.filter(c=>c.id!==id);await save();renderAll();toast("Eliminato");}return;}
-    if(a==="new-dip")return dipForm(null);
+    if(a==="new-dip")return squadraForm();
+    if(a==="sq-add")return squadraAdd();
+    if(a==="sq-copy"){copyLink(t.dataset.link);return;}
+    if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
     if(a==="save-dip")return saveDip(id);
     if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Eliminato");}return;}
