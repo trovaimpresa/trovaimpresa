@@ -661,7 +661,7 @@
     if(!sb){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Squadra non disponibile</p><small>Connessione non riuscita</small></div>`;return;}
     if(!sbUid){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Accedi per gestire la squadra</p><small>Entra nel pannello per invitare le persone</small></div>`;return;}
     const [{data:ops},{data:membri}]=await Promise.all([
-      sb.from("gest_operatori").select("id,nome"),
+      sb.from("gest_operatori").select("id,nome").eq("mestiere_id",curMestiere()),
       sb.from("gest_membri").select("operatore_id,codice,stato")
     ]);
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
@@ -705,8 +705,8 @@
     if(!sbUid){toast("Devi essere loggato");return;}
     const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
-    let mestiere_id;
-    try{mestiere_id=await ensureMestiere();}catch(e){toast("Errore: "+e.message);return;}
+    const mestiere_id=curMestiere();
+    if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
     const {data:op,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id,nome}).select().single();
     if(error){toast("Errore: "+error.message);return;}
     const codice=sbRand();
@@ -772,7 +772,7 @@
   }
   async function fillOperai(){
     const sel=$("#j-operaio");if(!sel||!sb||!sbUid)return;
-    const {data}=await sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid);
+    const {data}=await sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("");
   }
   function bindSeg(id){$$("#"+id+" button").forEach(b=>b.onclick=()=>{$$("#"+id+" button").forEach(x=>x.classList.remove("on"));b.classList.add("on");});}
