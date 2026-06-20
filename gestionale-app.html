@@ -636,11 +636,24 @@
         <button data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>`:""}</div></div>`;
     }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
   }
+  const PERMS=[{key:"calendario",label:"Calendario"},{key:"lavori",label:"Lavori"},{key:"foto",label:"Foto"},{key:"note",label:"Note"},{key:"clienti",label:"Clienti"},{key:"fatture",label:"Fatture"},{key:"pagamenti",label:"Pagamenti"}];
+  const RUOLO_PRESET={operaio:["calendario","lavori","foto"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","note","clienti","fatture","pagamenti"]};
+  function applyRuoloPreset(){
+    const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
+    $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm));
+  }
   function squadraForm(){
     openSheet(`<h3>Nuova persona</h3>
       <div class="field"><label>Nome</label><input id="d-nome" placeholder="Es. Wahid"></div>
+      <div class="field"><label>Ruolo</label><select id="d-ruolo">
+        <option value="operaio">Operaio</option>
+        <option value="preposto">Preposto</option>
+        <option value="segretaria">Segretaria</option></select></div>
+      <div class="field"><label>Permessi</label><div id="d-perms">
+        ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
       <button class="b-save" data-action="sq-add">Aggiungi</button></div>`);
+    $("#d-ruolo").onchange=applyRuoloPreset;applyRuoloPreset();
   }
   async function ensureMestiere(){
     const {data}=await sb.from("gest_mestieri").select("id").limit(1);
@@ -652,12 +665,14 @@
   async function squadraAdd(){
     const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
+    const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
+    const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     let mestiere_id;
     try{mestiere_id=await ensureMestiere();}catch(e){toast("Errore: "+e.message);return;}
     const {data:op,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id,nome}).select().single();
     if(error){toast("Errore: "+error.message);return;}
     const codice=sbRand();
-    const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato"});
+    const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato",ruolo,permessi});
     if(e2){toast("Errore invito: "+e2.message);return;}
     closeSheet();renderDip();toast("Persona aggiunta, invito creato ✔");
   }
