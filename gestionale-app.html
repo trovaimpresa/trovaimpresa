@@ -398,7 +398,7 @@
       }
       p.mestiere_id=mid;changed=true;
     }
-    if(changed)await save();
+    if(changed){await save();if(!cur)renderLanding();}
   }
 
   /* SUPABASE — solo per il tab Squadra (riusa gestionale-config.html) */
@@ -414,15 +414,21 @@
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
   }
 
   /* LANDING */
-  function renderLanding(){
+  async function renderLanding(){
     const ps=state.panels||[];
+    let rows=[];
+    if(sb&&sbUid){
+      const {data}=await sb.from("gest_lavori").select("mestiere_id,stato").eq("user_id",sbUid);
+      rows=data||[];
+    }
     $("#panels").innerHTML=ps.length?ps.map(p=>{
-      const b=state[p.id]||{lavori:[]}, df=b.lavori.filter(l=>l.stato!=="fatto").length, tot=b.lavori.length;
+      const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
+      const tot=mine.length, df=mine.filter(l=>l.stato!=="fatto").length;
       return `<div class="panel-card" data-action="enter" data-p="${p.id}" style="background:linear-gradient(135deg,${p.a},${p.ad})">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
         <span class="pc-ic">${p.icon}</span><h2>${esc(p.nome)}</h2>
@@ -462,7 +468,7 @@
       $("#prossimi").innerHTML=`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
       return;
     }
-    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto").eq("user_id",sbUid);
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     const S=data||[];
     $("#k-dafare").textContent=S.filter(l=>l.stato==="da_fare").length;
     $("#k-incorso").textContent=S.filter(l=>l.stato==="in_corso").length;
@@ -528,7 +534,7 @@
   async function renderJobs(){
     const box=$("#jobs-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;return;}
-    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista").eq("user_id",sbUid);
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     let L=data||[];
     if(filter.stato==="fatto")L=L.filter(l=>l.stato==="fatto");
     else if(filter.stato==="da_fare")L=L.filter(l=>l.stato!=="fatto");
@@ -585,7 +591,7 @@
   async function renderFatture(){
     let L=[];
     if(sb&&sbUid){
-      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto").eq("user_id",sbUid);
+      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       L=(data||[]).filter(l=>+l.importo>0);
     }
     const daFatt=L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none");
@@ -609,7 +615,7 @@
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
-    if(sb&&sbUid){const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid);calJobs=data||[];}
+    if(sb&&sbUid){const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];}
     else calJobs=[];
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
