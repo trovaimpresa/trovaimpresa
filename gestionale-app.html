@@ -1012,10 +1012,11 @@
     if(!sb||!sbUid){if($("#gal-op"))$("#gal-op").innerHTML="";box.innerHTML=`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;return;}
     const [{data:foto},{data:lavori}]=await Promise.all([
       sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
-      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid)
+      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
     ]);
-    const all=foto||[];
     const lavName=Object.fromEntries((lavori||[]).map(l=>[l.id,l.descrizione||"Lavoro"]));
+    const lavIds=new Set((lavori||[]).map(l=>l.id));
+    const all=(foto||[]).filter(f=>lavIds.has(f.lavoro_id));
     const ops=new Set();all.forEach(f=>ops.add(f.operatore||""));
     const opChips=[`<button class="chip ${galFilter.op===""?"on":""}" data-action="gal-op" data-v="">Tutti gli operatori</button>`]
       .concat(Array.from(ops).filter(Boolean).map(o=>`<button class="chip ${galFilter.op===o?"on":""}" data-action="gal-op" data-v="${esc(o)}">${esc(o)}</button>`)).join("");
