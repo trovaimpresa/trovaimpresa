@@ -482,6 +482,8 @@
 
   function jobCardSupa(l,withFoto){
     const fatto=l.stato==="fatto", dove=l.dove||"";
+    const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
+    const wa="https://wa.me/?text="+encodeURIComponent("Nuovo lavoro: "+(l.descrizione||"Lavoro")+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div></div>
       <div class="stati">
@@ -494,6 +496,7 @@
       <div class="job-actions">
         ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
         ${withFoto?`<button class="ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
+        ${withFoto?`<button class="ja" data-action="sq-wa" data-wa="${esc(wa)}">Avvisa su WhatsApp</button>`:""}
       </div></div>`;
   }
   async function renderJobs(){
