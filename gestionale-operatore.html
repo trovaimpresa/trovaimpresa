@@ -183,7 +183,7 @@ async function boot(session){
   if(!session){gate("Per entrare usa il link che ti ha mandato la tua impresa.");return;}
   MIO.uid=session.user.id;
   const {data:membri,error}=await sb.from("gest_membri")
-    .select("impresa_id,operatore_id,stato").eq("membro_id",MIO.uid).eq("stato","attivo");
+    .select("impresa_id,operatore_id,stato,permessi").eq("membro_id",MIO.uid).eq("stato","attivo");
   if(error){gate("Non riesco a caricare. Riprova tra poco.");return;}
   if(!membri||!membri.length){gate("Non sei ancora collegato a un'impresa. Apri il link di invito.");return;}
   MIO.impresaId=membri[0].impresa_id;
@@ -193,6 +193,13 @@ async function boot(session){
     MIO.nome=(op&&op.nome)||"Operatore";
   }
   $("#hd-name").textContent=MIO.nome||"Operatore";
+  const perms=membri[0].permessi;
+  if(perms && perms.lavori!==true){
+    const LABELS={calendario:"Calendario",lavori:"Lavori",foto:"Foto",note:"Note",clienti:"Clienti",fatture:"Fatture",pagamenti:"Pagamenti"};
+    const attivi=Object.keys(LABELS).filter(k=>perms[k]===true).map(k=>LABELS[k]);
+    gate(attivi.length?("Il tuo accesso: "+attivi.join(", ")+" — sezioni in arrivo"):"Il tuo accesso non include l'agenda — sezioni in arrivo");
+    return;
+  }
   await loadLavori();
   const n=new Date();calY=n.getFullYear();calM=n.getMonth();
   renderCal();renderDay();
