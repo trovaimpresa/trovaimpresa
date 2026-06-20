@@ -125,7 +125,12 @@
     </div>
 
     <div class="panel">
-      <div class="label">Foto del lavoro</div>
+      <div class="label">Foto dal capo (cosa fare)</div>
+      <div class="foto-grid" id="lv-foto-capo"></div>
+    </div>
+
+    <div class="panel">
+      <div class="label">Le tue foto</div>
       <div class="foto-grid" id="lv-foto"></div>
       <input type="file" id="lv-file" accept="image/*" capture="environment" class="hidden">
       <button class="btn-line" id="btn-foto" style="width:100%">📷 Aggiungi foto</button>
@@ -278,10 +283,18 @@ async function openLavoro(id){
 $("#btn-back").onclick=()=>{renderCal();renderDay();show("agenda");};
 
 async function caricaFoto(lavoroId){
-  const {data}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",lavoroId).order("created_at",{ascending:false});
-  const grid=$("#lv-foto");grid.innerHTML="";
-  if(!data||!data.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:14px">Ancora nessuna foto.</div>';return;}
-  for(const f of data){
+  const {data}=await sb.from("gest_foto").select("storage_path,tipo").eq("lavoro_id",lavoroId).order("created_at",{ascending:false});
+  const capo=$("#lv-foto-capo"), grid=$("#lv-foto");
+  capo.innerHTML="";grid.innerHTML="";
+  const rows=data||[];
+  const daCapo=rows.filter(f=>f.tipo==="da_fare"), mie=rows.filter(f=>f.tipo!=="da_fare");
+  if(!daCapo.length)capo.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:14px">Nessuna foto dal capo.</div>';
+  else for(const f of daCapo){
+    const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
+    if(su&&su.signedUrl){const img=document.createElement("img");img.src=su.signedUrl;capo.appendChild(img);}
+  }
+  if(!mie.length)grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:14px">Ancora nessuna foto.</div>';
+  else for(const f of mie){
     const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
     if(su&&su.signedUrl){const img=document.createElement("img");img.src=su.signedUrl;grid.appendChild(img);}
   }
