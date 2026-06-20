@@ -379,8 +379,8 @@
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();}});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();}});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();}});
   }
 
   /* LANDING */
@@ -414,18 +414,27 @@
 
   function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();}
 
-  function renderRiepilogo(){
+  async function renderRiepilogo(){
+    /* soldi e ore: invariati per ora (dipendono dalle fatture, su localStorage) */
     const L=db().lavori;
-    $("#k-dafare").textContent=L.filter(l=>l.stato==="da_fare").length;
-    $("#k-incorso").textContent=L.filter(l=>l.stato==="in_corso").length;
-    $("#k-fatti").textContent=L.filter(l=>l.stato==="fatto"&&thisMonth(l.dataFatto)).length;
-    $("#k-lavori").textContent=L.length;
     $("#k-daincassare").textContent=eur(L.filter(l=>l.fattStato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
     $("#k-incassato").textContent=eur(L.filter(l=>l.fattStato==="pagata"&&thisMonth(l.dataFatto)).reduce((s,l)=>s+(+l.importo||0),0));
     const ore=L.filter(l=>thisMonth(l.dataFatto)||thisMonth(l.dataPrevista)).reduce((s,l)=>s+(+l.ore||0),0);
     $("#k-ore").textContent=(Math.round(ore*10)/10)+" h";
-    const pross=L.filter(l=>l.stato!=="fatto").sort((a,b)=>(a.dataPrevista||"9999").localeCompare(b.dataPrevista||"9999")).slice(0,5);
-    $("#prossimi").innerHTML=pross.length?pross.map(jobCard).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
+    /* contatori e prossimi: da gest_lavori su Supabase */
+    if(!sb||!sbUid){
+      $("#k-dafare").textContent=0;$("#k-incorso").textContent=0;$("#k-fatti").textContent=0;$("#k-lavori").textContent=0;
+      $("#prossimi").innerHTML=`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
+      return;
+    }
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto").eq("user_id",sbUid);
+    const S=data||[];
+    $("#k-dafare").textContent=S.filter(l=>l.stato==="da_fare").length;
+    $("#k-incorso").textContent=S.filter(l=>l.stato==="in_corso").length;
+    $("#k-fatti").textContent=S.filter(l=>l.stato==="fatto"&&thisMonth(l.data_fatto)).length;
+    $("#k-lavori").textContent=S.length;
+    const pross=S.filter(l=>l.stato!=="fatto").sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999")).slice(0,5);
+    $("#prossimi").innerHTML=pross.length?pross.map(jobCardSupa).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
   }
 
   function jobCard(l){
