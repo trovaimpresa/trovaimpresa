@@ -150,8 +150,6 @@
 <div id="toast"></div>
 
 <script>
-window.addEventListener('error',e=>document.body.insertAdjacentHTML('afterbegin','<pre style="padding:16px;color:#b00;white-space:pre-wrap;font-size:13px">ERRORE: '+e.message+'</pre>'));
-window.addEventListener('unhandledrejection',e=>document.body.insertAdjacentHTML('afterbegin','<pre style="padding:16px;color:#b00;white-space:pre-wrap;font-size:13px">PROMISE: '+((e.reason&&e.reason.message)||e.reason)+'</pre>'));
 /* ===== Supabase =====
    Se la pagina non si connette, copia SUPA_URL e SUPA_KEY
    IDENTICI da gestionale-invito.html (lì funzionano di sicuro). */
