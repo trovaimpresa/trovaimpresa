@@ -379,8 +379,8 @@
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur)renderDip();});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur)renderDip();});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();}});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();}});
   }
 
   /* LANDING */
@@ -823,26 +823,37 @@
         if(fotoCache[id])im.src=fotoCache[id];}catch(e){}
     }
   }
-  function renderGalleria(){
+  async function renderGalleria(){
     if(!cur)return;
-    const jobs=db().lavori.filter(l=>(l.foto||[]).length);
-    const ops=new Set();jobs.forEach(l=>l.foto.forEach(f=>ops.add(f.operatore||"")));
+    const box=$("#gal-body");if(!box)return;
+    if(!sb||!sbUid){if($("#gal-op"))$("#gal-op").innerHTML="";box.innerHTML=`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;return;}
+    const [{data:foto},{data:lavori}]=await Promise.all([
+      sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
+      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid)
+    ]);
+    const all=foto||[];
+    const lavName=Object.fromEntries((lavori||[]).map(l=>[l.id,l.descrizione||"Lavoro"]));
+    const ops=new Set();all.forEach(f=>ops.add(f.operatore||""));
     const opChips=[`<button class="chip ${galFilter.op===""?"on":""}" data-action="gal-op" data-v="">Tutti gli operatori</button>`]
-      .concat(Array.from(ops).filter(Boolean).map(o=>{const nm=o==="Capo"?"Capo":(dipById(o)?dipById(o).nome:o);
-        return `<button class="chip ${galFilter.op===o?"on":""}" data-action="gal-op" data-v="${esc(o)}">${esc(nm)}</button>`;})).join("");
+      .concat(Array.from(ops).filter(Boolean).map(o=>`<button class="chip ${galFilter.op===o?"on":""}" data-action="gal-op" data-v="${esc(o)}">${esc(o)}</button>`)).join("");
     if($("#gal-op"))$("#gal-op").innerHTML=opChips;
+    const matchTipo=f=>galFilter.tipo==="prima"?f.tipo==="da_fare":galFilter.tipo==="dopo"?f.tipo!=="da_fare":true;
+    const fs=all.filter(f=>(!galFilter.op||f.operatore===galFilter.op)&&matchTipo(f));
+    const groups=new Map();
+    fs.forEach(f=>{const k=f.lavoro_id||"";if(!groups.has(k))groups.set(k,[]);groups.get(k).push(f);});
     let html="",any=false;
-    jobs.forEach(l=>{
-      const fs=l.foto.filter(f=>(!galFilter.op||f.operatore===galFilter.op)&&(!galFilter.tipo||f.tipo===galFilter.tipo)).sort((a,b)=>a.ts-b.ts);
-      if(!fs.length)return;any=true;const c=cliById(l.clienteId);
-      html+=`<div class="gal-group"><div class="gal-cantiere">🏢 ${esc(c?c.nome:"—")}${l.descrizione?` · <span style="font-weight:500;color:var(--muted)">${esc(l.descrizione)}</span>`:""}</div><div class="thumbs">`;
-      fs.forEach(f=>{const tip=f.tipo==="prima"?"Da fare":"Fatto",opName=f.operatore==="Capo"?"Capo":(dipById(f.operatore)?dipById(f.operatore).nome:"");
-        html+=`<div class="thumb"><img data-foto="${f.id}" data-action="view-foto" data-id="${f.id}">
-          <span class="thtag ${f.tipo}">${tip}</span>${opName?`<span class="thop">${esc(opName)}</span>`:""}</div>`;});
-      html+=`</div></div>`;
-    });
-    if($("#gal-body"))$("#gal-body").innerHTML=any?html:`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;
-    hydrateFoto();
+    groups.forEach((arr,k)=>{any=true;
+      html+=`<div class="gal-group"><div class="gal-cantiere">🏢 ${esc(lavName[k]||"—")}</div><div class="thumbs">`;
+      arr.forEach(f=>{const dafare=f.tipo==="da_fare",tip=dafare?"Da fare":"Fatto",tcls=dafare?"prima":"dopo",opName=f.operatore||"";
+        html+=`<div class="thumb"><img data-gfoto="${esc(f.id)}" data-action="view-foto" data-id="${esc(f.id)}">
+          <span class="thtag ${tcls}">${tip}</span>${opName?`<span class="thop">${esc(opName)}</span>`:""}</div>`;});
+      html+=`</div></div>`;});
+    box.innerHTML=any?html:`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;
+    for(const f of fs){
+      try{const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
+        if(su&&su.signedUrl){fotoCache[f.id]=su.signedUrl;const im=box.querySelector(`img[data-gfoto="${f.id}"]`);if(im)im.src=su.signedUrl;}
+      }catch(e){}
+    }
   }
 
   function agendaCard(l){
