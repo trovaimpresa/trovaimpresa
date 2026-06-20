@@ -852,12 +852,22 @@
   }
 
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0)+" EUR";
-  function generaPdf(l){
+  async function generaPdf(id){
     if(!window.jspdf){toast("PDF non ancora pronto, riprova tra un attimo");return;}
-    const az=state.azienda||{};
-    if(!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
-    const c=cliById(l.clienteId)||{};
-    if(!l.numFatt){l.numFatt=(az.num||1);az.num=(az.num||1)+1;state.azienda=az;save();}
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    const {data:lav}=await sb.from("gest_lavori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(!lav){toast("Lavoro non trovato");return;}
+    let c={};
+    if(lav.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,referente").eq("id",lav.cliente_id).maybeSingle();c=cl||{};}
+    let numFatt=lav.num_fatt;
+    if(!numFatt){
+      numFatt=az.num_fatt||1;
+      await sb.from("gest_lavori").update({num_fatt:numFatt}).eq("id",id).eq("user_id",sbUid);
+      await sb.from("gest_azienda").update({num_fatt:numFatt+1}).eq("user_id",sbUid);
+    }
+    const l={numFatt,dataFatto:lav.data_fatto,dataPrevista:lav.data_prevista,descrizione:lav.descrizione,lavoroSvolto:lav.lavoro_svolto,ore:lav.ore,importo:lav.importo,fattStato:lav.fatt_stato};
     const pp=(state.panels||[]).find(p=>p.id===cur), repNome=pp?pp.nome:"";
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
     let y=20;
@@ -1037,7 +1047,7 @@
     if(a==="home")return goHome();
     if(a==="azienda")return aziendaForm();
     if(a==="save-azienda")return saveAzienda();
-    if(a==="pdf"){const l=db().lavori.find(x=>x.id===id);if(l)generaPdf(l);return;}
+    if(a==="pdf")return generaPdf(id);
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
