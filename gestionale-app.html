@@ -388,8 +388,8 @@
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();}});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();}});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();}});
   }
 
   /* LANDING */
@@ -573,15 +573,18 @@
     $("#fatt-body").innerHTML=h;
   }
 
-  function renderCal(){
+  let calJobs=[];
+  async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
+    if(sb&&sbUid){const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid);calJobs=data||[];}
+    else calJobs=[];
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
     let html=dow.map(d=>`<div class="cal-dow">${d}</div>`).join("");
     for(let i=0;i<lead;i++)html+=`<div class="cal-cell empty"></div>`;
     for(let d=1;d<=days;d++){
-      const ds=ymd(y,m,d), jobs=db().lavori.filter(l=>l.dataPrevista===ds);
+      const ds=ymd(y,m,d), jobs=calJobs.filter(l=>l.data_prevista===ds);
       const dots=jobs.slice(0,6).map(j=>`<i class="dot ${j.stato==='fatto'?'done':'todo'}"></i>`).join("");
       const note=db().note[ds]?`<span class="cal-note-mark">📌</span>`:"";
       html+=`<div class="cal-cell ${ds===todayStr()?"today":""}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-dots">${dots}</div></div>`;
@@ -590,12 +593,11 @@
   }
 
   function openDay(ds){
-    const jobs=db().lavori.filter(l=>l.dataPrevista===ds);
-    const list=jobs.length?jobs.map(j=>{const c=cliById(j.clienteId);
-      return `<div class="day-job" data-action="edit-job" data-id="${j.id}"><i class="dot ${j.stato==='fatto'?'done':'todo'}"></i>
-        <div style="flex:1"><b style="font-size:14px">${esc(c?c.nome:"—")}</b>
-        <div style="font-size:12px;color:var(--muted)">${j.descrizione?esc(j.descrizione):"(senza descrizione)"}</div></div>
-        <span class="stato ${j.stato}">${statoLabel[j.stato]}</span></div>`;}).join("")
+    const jobs=calJobs.filter(l=>l.data_prevista===ds);
+    const list=jobs.length?jobs.map(j=>{const sf=j.stato==="fatto";
+      return `<div class="day-job"><i class="dot ${sf?'done':'todo'}"></i>
+        <div style="flex:1"><b style="font-size:14px">${esc(j.descrizione||"(senza descrizione)")}</b></div>
+        <span class="stato ${sf?'fatto':'da_fare'}">${sf?'Fatto':'Da fare'}</span></div>`;}).join("")
       :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
     openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
