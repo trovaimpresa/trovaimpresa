@@ -483,7 +483,7 @@
   function jobCardSupa(l,withFoto){
     const fatto=l.stato==="fatto", dove=l.dove||"";
     const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
-    const wa="https://wa.me/?text="+encodeURIComponent("Nuovo lavoro: "+(l.descrizione||"Lavoro")+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
+    const wa="https://wa.me/?text="+encodeURIComponent("Ciao! C'è un nuovo lavoro per te.\nLavoro: "+(l.descrizione||"Lavoro")+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div></div>
       <div class="stati">
