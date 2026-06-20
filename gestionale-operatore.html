@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La tua agenda — Gestionale</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --green:#2a7a4b; --green-d:#1a4d2e; --green-l:#e8f3ec;
+    --bg:#f4f6f5; --card:#ffffff; --text:#17241d; --muted:#6b7a72;
+    --line:#e3e8e5; --orange:#e65100; --blue:#1565c0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Trebuchet MS',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .hidden{display:none!important;}
+
+  /* HEADER */
+  header{background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0)) 16px;}
+  .h-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .h-hi{font-size:13px;opacity:.85;line-height:1.2;}
+  .h-name{font-size:21px;font-weight:bold;line-height:1.2;}
+  .h-imp{font-size:12px;opacity:.8;margin-top:2px;}
+  .esci{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:bold;cursor:pointer;}
+
+  .wrap{max-width:520px;margin:0 auto;padding:14px;}
+
+  /* CALENDARIO */
+  .cal{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:14px;margin-bottom:16px;}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .cal-mese{font-weight:bold;font-size:16px;text-transform:capitalize;}
+  .cal-nav{background:var(--green-l);color:var(--green-d);border:none;width:34px;height:34px;border-radius:9px;font-size:18px;font-weight:bold;cursor:pointer;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-dow{text-align:center;font-size:11px;color:var(--muted);font-weight:bold;padding:4px 0;}
+  .cal-day{aspect-ratio:1;border:none;background:transparent;border-radius:10px;font-size:14px;color:var(--text);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;}
+  .cal-day.empty{visibility:hidden;}
+  .cal-day.oggi{outline:2px solid var(--green);}
+  .cal-day.sel{background:var(--green);color:#fff;font-weight:bold;}
+  .cal-day .dot{position:absolute;bottom:6px;width:5px;height:5px;border-radius:50%;background:var(--orange);}
+  .cal-day.sel .dot{background:#fff;}
+
+  /* LISTA LAVORI */
+  .day-title{font-weight:bold;font-size:15px;margin:0 4px 10px;color:var(--green-d);text-transform:capitalize;}
+  .job{background:var(--card);border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.07);border-left:5px solid var(--green);padding:14px;margin-bottom:10px;cursor:pointer;}
+  .job h3{font-size:16px;margin-bottom:4px;}
+  .job .where{font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .badge{display:inline-block;font-size:11px;font-weight:bold;padding:3px 9px;border-radius:999px;}
+  .b-dafare{background:#fff3e8;color:var(--orange);}
+  .b-corso{background:#e7f0fb;color:var(--blue);}
+  .b-fatto{background:var(--green-l);color:var(--green-d);}
+  .empty-state{text-align:center;color:var(--muted);padding:30px 14px;font-size:14px;}
+
+  /* GATE */
+  #gate{max-width:420px;margin:60px auto;padding:24px;text-align:center;}
+  #gate .ic{font-size:40px;margin-bottom:12px;}
+  #gate h2{font-size:20px;margin-bottom:8px;}
+  #gate p{color:var(--muted);font-size:14px;margin-bottom:18px;line-height:1.5;}
+  .btn{display:inline-block;background:var(--green);color:#fff;border:none;border-radius:10px;padding:13px 22px;font-size:15px;font-weight:bold;cursor:pointer;text-decoration:none;}
+
+  /* DETTAGLIO LAVORO */
+  .back{background:none;border:none;color:var(--green-d);font-size:15px;font-weight:bold;cursor:pointer;padding:6px 0;margin-bottom:6px;}
+  .panel{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:16px;margin-bottom:14px;}
+  .panel h2{font-size:19px;margin-bottom:6px;}
+  .meta{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .label{font-size:12px;font-weight:bold;color:var(--green-d);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+  .istr{background:var(--green-l);border-radius:12px;padding:13px;font-size:15px;line-height:1.5;white-space:pre-wrap;}
+  .foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+  .foto-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#eee;}
+  textarea{width:100%;min-height:90px;border:1.5px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:15px;resize:vertical;}
+  .row-btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+  .btn-line{background:var(--card);color:var(--green-d);border:1.5px solid var(--green);border-radius:10px;padding:12px 16px;font-size:14px;font-weight:bold;cursor:pointer;flex:1;min-width:140px;}
+  .btn-fill{background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:bold;cursor:pointer;flex:1;min-width:140px;}
+  .btn-fill[disabled],.btn-line[disabled]{opacity:.5;}
+
+  /* TOAST */
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#17241d;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50;}
+  #toast.on{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- GATE: non collegato -->
+<div id="gate" class="hidden">
+  <div class="ic">🔒</div>
+  <h2>Apri il tuo invito</h2>
+  <p id="gate-msg">Per entrare usa il link che ti ha mandato la tua impresa.</p>
+  <a class="btn" href="gestionale-invito.html">Vai al collegamento</a>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <header>
+    <div class="h-top">
+      <div>
+        <div class="h-hi">Ciao</div>
+        <div class="h-name" id="hd-name">Operatore</div>
+        <div class="h-imp" id="hd-imp"></div>
+      </div>
+      <button class="esci" id="btn-esci">Esci</button>
+    </div>
+  </header>
+
+  <!-- VISTA AGENDA -->
+  <div class="wrap" id="view-agenda">
+    <div class="cal">
+      <div class="cal-head">
+        <button class="cal-nav" id="cal-prev">‹</button>
+        <div class="cal-mese" id="cal-mese"></div>
+        <button class="cal-nav" id="cal-next">›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="day-title" id="day-title">Lavori di oggi</div>
+    <div id="day-list"></div>
+  </div>
+
+  <!-- VISTA DETTAGLIO -->
+  <div class="wrap hidden" id="view-lavoro">
+    <button class="back" id="btn-back">‹ Torna</button>
+    <div class="panel">
+      <h2 id="lv-title">Lavoro</h2>
+      <div class="meta" id="lv-meta"></div>
+      <div class="label">Cosa devi fare</div>
+      <div class="istr" id="lv-istr">—</div>
+    </div>
+
+    <div class="panel">
+      <div class="label">Foto del lavoro</div>
+      <div class="foto-grid" id="lv-foto"></div>
+      <input type="file" id="lv-file" accept="image/*" capture="environment" class="hidden">
+      <button class="btn-line" id="btn-foto" style="width:100%">📷 Aggiungi foto</button>
+    </div>
+
+    <div class="panel">
+      <div class="label">Cosa hai fatto / note</div>
+      <textarea id="lv-note" placeholder="Scrivi qui cosa hai fatto…"></textarea>
+      <div class="row-btns">
+        <button class="btn-line" id="btn-salva">Salva note</button>
+        <button class="btn-fill" id="btn-fatto">Segna come fatto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ===== Supabase =====
+   Se la pagina non si connette, copia SUPA_URL e SUPA_KEY
+   IDENTICI da gestionale-invito.html (lì funzionano di sicuro). */
+const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
+const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+const MIO={uid:null,impresaId:null,operatoreId:null,nome:""};
+let LAVORI=[], CLIENTI={}, selDate=ymd(new Date()), calY, calM, curLavoro=null;
+
+const $=s=>document.querySelector(s);
+const MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+const DOW=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+
+function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function dataIt(s){if(!s)return"";const[a,m,g]=s.split("-");return g+"/"+m+"/"+a;}
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("on");setTimeout(()=>el.classList.remove("on"),2200);}
+function show(v){
+  $("#gate").classList.toggle("hidden",v!=="gate");
+  $("#app").classList.toggle("hidden",v==="gate");
+  $("#view-agenda").classList.toggle("hidden",v!=="agenda");
+  $("#view-lavoro").classList.toggle("hidden",v!=="lavoro");
+}
+function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
+
+/* ===== avvio ===== */
+sb.auth.getSession().then(({data})=>boot(data.session));
+sb.auth.onAuthStateChange((_e,s)=>boot(s));
+
+async function boot(session){
+  if(!session){gate("Per entrare usa il link che ti ha mandato la tua impresa.");return;}
+  MIO.uid=session.user.id;
+  const {data:membri,error}=await sb.from("gest_membri")
+    .select("impresa_id,operatore_id,stato").eq("membro_id",MIO.uid).eq("stato","attivo");
+  if(error){gate("Non riesco a caricare. Riprova tra poco.");return;}
+  if(!membri||!membri.length){gate("Non sei ancora collegato a un'impresa. Apri il link di invito.");return;}
+  MIO.impresaId=membri[0].impresa_id;
+  MIO.operatoreId=membri[0].operatore_id;
+  if(MIO.operatoreId){
+    const {data:op}=await sb.from("gest_operatori").select("nome").eq("id",MIO.operatoreId).maybeSingle();
+    MIO.nome=(op&&op.nome)||"Operatore";
+  }
+  $("#hd-name").textContent=MIO.nome||"Operatore";
+  await loadLavori();
+  const n=new Date();calY=n.getFullYear();calM=n.getMonth();
+  renderCal();renderDay();
+  show("agenda");
+}
+
+async function loadLavori(){
+  let q=sb.from("gest_lavori").select("*").eq("user_id",MIO.impresaId);
+  if(MIO.operatoreId)q=q.eq("operatore_id",MIO.operatoreId);
+  const {data}=await q.order("data_prevista",{ascending:true});
+  LAVORI=data||[];
+  const ids=[...new Set(LAVORI.map(l=>l.cliente_id).filter(Boolean))];
+  if(ids.length){
+    const {data:cl}=await sb.from("gest_clienti").select("id,nome,indirizzo").in("id",ids);
+    CLIENTI=Object.fromEntries((cl||[]).map(c=>[c.id,c]));
+  }
+}
+
+/* ===== calendario ===== */
+function renderCal(){
+  $("#cal-mese").textContent=MESI[calM]+" "+calY;
+  const grid=$("#cal-grid");grid.innerHTML="";
+  DOW.forEach(d=>{const e=document.createElement("div");e.className="cal-dow";e.textContent=d;grid.appendChild(e);});
+  const first=new Date(calY,calM,1);
+  let start=first.getDay();start=(start===0)?6:start-1; // lun=0
+  for(let i=0;i<start;i++){const e=document.createElement("div");e.className="cal-day empty";grid.appendChild(e);}
+  const days=new Date(calY,calM+1,0).getDate();
+  const oggi=ymd(new Date());
+  const conLavoro=new Set(LAVORI.map(l=>l.data_prevista).filter(Boolean));
+  for(let g=1;g<=days;g++){
+    const ds=calY+"-"+String(calM+1).padStart(2,"0")+"-"+String(g).padStart(2,"0");
+    const b=document.createElement("button");
+    b.className="cal-day"+(ds===oggi?" oggi":"")+(ds===selDate?" sel":"");
+    b.textContent=g;
+    if(conLavoro.has(ds)){const dot=document.createElement("span");dot.className="dot";b.appendChild(dot);}
+    b.onclick=()=>{selDate=ds;renderCal();renderDay();};
+    grid.appendChild(b);
+  }
+}
+$("#cal-prev").onclick=()=>{calM--;if(calM<0){calM=11;calY--;}renderCal();};
+$("#cal-next").onclick=()=>{calM++;if(calM>11){calM=0;calY++;}renderCal();};
+
+/* ===== lista del giorno ===== */
+function statoBadge(s){
+  const v=(s||"").toLowerCase();
+  if(v.includes("fatt")||v.includes("complet"))return'<span class="badge b-fatto">Fatto</span>';
+  if(v.includes("corso"))return'<span class="badge b-corso">In corso</span>';
+  return'<span class="badge b-dafare">Da fare</span>';
+}
+function renderDay(){
+  const oggi=ymd(new Date());
+  $("#day-title").textContent=(selDate===oggi)?"Lavori di oggi":"Lavori del "+dataIt(selDate);
+  const list=LAVORI.filter(l=>l.data_prevista===selDate);
+  const box=$("#day-list");
+  if(!list.length){box.innerHTML='<div class="empty-state">Nessun lavoro per questo giorno.</div>';return;}
+  box.innerHTML=list.map(l=>{
+    const cl=CLIENTI[l.cliente_id];
+    const titolo=cl?cl.nome:(l.descrizione?l.descrizione.slice(0,40):"Lavoro");
+    const dove=l.dove||(cl&&cl.indirizzo)||"";
+    return `<div class="job" data-id="${l.id}">
+      <h3>${esc(titolo)}</h3>
+      ${dove?`<div class="where">📍 ${esc(dove)}</div>`:""}
+      ${statoBadge(l.stato)}
+    </div>`;
+  }).join("");
+  box.querySelectorAll(".job").forEach(j=>j.onclick=()=>openLavoro(j.dataset.id));
+}
+function esc(s){return(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+/* ===== dettaglio ===== */
+async function openLavoro(id){
+  const l=LAVORI.find(x=>x.id===id);if(!l)return;
+  curLavoro=l;
+  const cl=CLIENTI[l.cliente_id];
+  $("#lv-title").textContent=cl?cl.nome:(l.descrizione?l.descrizione.slice(0,50):"Lavoro");
+  const bits=[];
+  if(l.dove||(cl&&cl.indirizzo))bits.push("📍 "+(l.dove||cl.indirizzo));
+  if(l.data_prevista)bits.push("📅 "+dataIt(l.data_prevista));
+  $("#lv-meta").innerHTML=bits.join(" · ")+" "+statoBadge(l.stato);
+  $("#lv-istr").textContent=l.descrizione||"Nessuna istruzione.";
+  $("#lv-note").value=l.lavoro_svolto||"";
+  $("#lv-foto").innerHTML="";
+  show("lavoro");
+  caricaFoto(l.id);
+}
+$("#btn-back").onclick=()=>{renderCal();renderDay();show("agenda");};
+
+async function caricaFoto(lavoroId){
+  const {data}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",lavoroId).order("created_at",{ascending:false});
+  const grid=$("#lv-foto");grid.innerHTML="";
+  if(!data||!data.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;padding:14px">Ancora nessuna foto.</div>';return;}
+  for(const f of data){
+    const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
+    if(su&&su.signedUrl){const img=document.createElement("img");img.src=su.signedUrl;grid.appendChild(img);}
+  }
+}
+
+/* foto: carica */
+$("#btn-foto").onclick=()=>$("#lv-file").click();
+$("#lv-file").onchange=async e=>{
+  const file=e.target.files[0];if(!file||!curLavoro)return;
+  $("#btn-foto").disabled=true;$("#btn-foto").textContent="Carico…";
+  const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+  const path=MIO.impresaId+"/"+curLavoro.id+"/"+Date.now()+"_"+safe;
+  const {error:up}=await sb.storage.from("gestionale-foto").upload(path,file);
+  if(up){toast("Foto non caricata: "+up.message);}
+  else{
+    const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:curLavoro.id,tipo:"lavoro",operatore:MIO.nome,storage_path:path});
+    if(ins)toast("Foto su, ma non salvata: "+ins.message);
+    else{toast("Foto aggiunta ✔");await caricaFoto(curLavoro.id);}
+  }
+  $("#btn-foto").disabled=false;$("#btn-foto").textContent="📷 Aggiungi foto";
+  e.target.value="";
+};
+
+/* salva note */
+$("#btn-salva").onclick=async()=>{
+  if(!curLavoro)return;
+  const txt=$("#lv-note").value;
+  $("#btn-salva").disabled=true;
+  const {error}=await sb.from("gest_lavori").update({lavoro_svolto:txt}).eq("id",curLavoro.id);
+  $("#btn-salva").disabled=false;
+  if(error){toast("Non salvato: "+error.message);return;}
+  curLavoro.lavoro_svolto=txt;const l=LAVORI.find(x=>x.id===curLavoro.id);if(l)l.lavoro_svolto=txt;
+  toast("Salvato ✔");
+};
+
+/* segna fatto */
+$("#btn-fatto").onclick=async()=>{
+  if(!curLavoro)return;
+  $("#btn-fatto").disabled=true;
+  const {error}=await sb.from("gest_lavori").update({stato:"fatto",data_fatto:ymd(new Date())}).eq("id",curLavoro.id);
+  $("#btn-fatto").disabled=false;
+  if(error){toast("Errore: "+error.message);return;}
+  curLavoro.stato="fatto";const l=LAVORI.find(x=>x.id===curLavoro.id);if(l){l.stato="fatto";l.data_fatto=ymd(new Date());}
+  toast("Segnato come fatto ✔");
+  openLavoro(curLavoro.id);
+};
+
+/* esci */
+$("#btn-esci").onclick=async()=>{await sb.auth.signOut();gate("Sei uscito. Per rientrare apri il tuo link di invito.");};
+</script>
+</body>
+</html>
