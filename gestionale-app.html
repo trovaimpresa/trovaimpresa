@@ -779,7 +779,7 @@
       if(!descrizione||!data_prevista||!operatore_id){toast("Compila Descrizione, Data e Operaio");return;}
       const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
       if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
-      const obj={user_id:sbUid,stato:editing.fattura?"fatto":"da_fare",
+      const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
         descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id,importo};
       if(editing.fattura)obj.fatt_stato="emessa";
       const {error}=await sb.from("gest_lavori").insert(obj);
