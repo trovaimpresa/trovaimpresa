@@ -358,6 +358,7 @@
   const db=()=>state[cur];
   const cliById=id=>db().clienti.find(c=>c.id===id);
   const dipById=id=>db().dipendenti.find(d=>d.id===id);
+  const curMestiere=()=>{const p=(state.panels||[]).find(x=>x.id===cur);return p?p.mestiere_id:null;};
 
   if(!window.storage){window.storage={get:async k=>{const v=localStorage.getItem(k);return v===null?null:{value:v};},set:async(k,v)=>{localStorage.setItem(k,v);return{value:v};},delete:async k=>{localStorage.removeItem(k);return{deleted:true};}};}
   async function load(){
@@ -371,9 +372,34 @@
       b.lavori.forEach(l=>{if(!l.fattStato)l.fattStato=l.pagato?"pagata":"none";});
     });
     await save();
+    backfillMestieri();
   }
   async function save(){try{await window.storage.set(KEY,JSON.stringify(state));}catch(e){toast("Errore salvataggio");}}
   function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
+
+  /* Passo 1 separazione reparti: ogni panel ha un mestiere_id (gest_mestieri) */
+  let mestieriBackfilled=false;
+  async function backfillMestieri(){
+    if(mestieriBackfilled||!sb||!sbUid||!state.panels)return;
+    const need=state.panels.filter(p=>!p.mestiere_id);
+    mestieriBackfilled=true;
+    if(!need.length)return;
+    const used=new Set(state.panels.map(p=>p.mestiere_id).filter(Boolean));
+    const {data:existing}=await sb.from("gest_mestieri").select("id,nome").eq("user_id",sbUid);
+    const squadra=(existing||[]).find(m=>m.nome==="Squadra"&&!used.has(m.id));
+    let squadraId=squadra?squadra.id:null, changed=false;
+    for(const p of need){
+      let mid=null;
+      if(squadraId){mid=squadraId;squadraId=null;}
+      else{
+        const {data:m,error}=await sb.from("gest_mestieri").insert({user_id:sbUid,nome:p.nome,icona:p.icon,colore:p.a,ordine:0}).select().single();
+        if(error){toast("Errore reparto: "+error.message);continue;}
+        mid=m.id;
+      }
+      p.mestiere_id=mid;changed=true;
+    }
+    if(changed)await save();
+  }
 
   /* SUPABASE — solo per il tab Squadra (riusa gestionale-config.html) */
   const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
@@ -388,8 +414,8 @@
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}});
   }
 
   /* LANDING */
@@ -815,8 +841,14 @@
   async function savePanel(){
     const nome=$("#p-nome").value.trim();if(!nome){toast("Scrivi il nome del reparto");return;}
     const c=COLORI[nuovoSel.col]||COLORI[0], id=uid();
+    let mestiere_id=null;
+    if(sb&&sbUid){
+      const {data:m,error}=await sb.from("gest_mestieri").insert({user_id:sbUid,nome,icona:nuovoSel.icon,colore:c.a,ordine:0}).select().single();
+      if(error){toast("Errore reparto: "+error.message);return;}
+      mestiere_id=m.id;
+    }
     state.panels=state.panels||[];
-    state.panels.push({id,nome,icon:nuovoSel.icon,a:c.a,ad:c.ad,as:c.as});
+    state.panels.push({id,nome,icon:nuovoSel.icon,a:c.a,ad:c.ad,as:c.as,mestiere_id});
     state[id]={clienti:[],dipendenti:[],lavori:[],note:{}};
     await save();closeSheet();renderLanding();toast("Reparto creato ✔");
   }
