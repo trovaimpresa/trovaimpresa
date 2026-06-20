@@ -681,13 +681,13 @@
   }
 
   /* FORM LAVORO (nessun campo "servizio": il reparto è già il pannello) */
-  function jobForm(job,presetDate,preset,supa){
+  function jobForm(job,presetDate,preset,supa,fattura){
     const isNew=!job;
     const jid=job?job.id:uid();
     job=job||Object.assign({id:jid,stato:"da_fare",fattStato:"none",dataPrevista:presetDate||""},preset||{});
-    editing={id:jid,foto:(job.foto||[]).slice(),supa:!!supa};
+    editing={id:jid,foto:(job.foto||[]).slice(),supa:!!supa,fattura:!!fattura};
     if(supa){
-      openSheet(`<h3>Nuovo lavoro</h3>
+      openSheet(`<h3>${fattura?"Nuova fattura":"Nuovo lavoro"}</h3>
         <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
         <div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
         <div class="row2">
@@ -695,7 +695,7 @@
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
         <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-          <button class="b-save" data-action="save-job">Crea lavoro</button></div>`);
+          <button class="b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
       fillOperai();return;
     }
     const cliOpts=db().clienti.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
@@ -749,10 +749,13 @@
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
       if(!descrizione||!data_prevista||!operatore_id){toast("Compila Descrizione, Data e Operaio");return;}
       const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
-      const {error}=await sb.from("gest_lavori").insert({user_id:sbUid,stato:"da_fare",
-        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id,importo});
+      if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
+      const obj={user_id:sbUid,stato:editing.fattura?"fatto":"da_fare",
+        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id,importo};
+      if(editing.fattura)obj.fatt_stato="emessa";
+      const {error}=await sb.from("gest_lavori").insert(obj);
       if(error){toast("Errore: "+error.message);return;}
-      closeSheet();renderJobs();toast("Lavoro creato ✔");return;
+      closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un condominio");return;}
     const id=editing.id, exists=db().lavori.some(l=>l.id===id), prev=db().lavori.find(l=>l.id===id);
@@ -1032,7 +1035,7 @@
     if(a==="new-job")return jobForm(null,"",null,true);
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
-    if(a==="new-fattura")return jobForm(null,"",{stato:"fatto",fattStato:"emessa"});
+    if(a==="new-fattura")return jobForm(null,"",null,true,true);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
     if(a==="edit-job"){closeSheet();return jobForm(db().lavori.find(l=>l.id===id));}
     if(a==="save-job")return saveJob();
