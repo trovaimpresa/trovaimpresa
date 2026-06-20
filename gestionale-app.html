@@ -606,11 +606,22 @@
   }
 
   /* FORM LAVORO (nessun campo "servizio": il reparto è già il pannello) */
-  function jobForm(job,presetDate,preset){
+  function jobForm(job,presetDate,preset,supa){
     const isNew=!job;
     const jid=job?job.id:uid();
     job=job||Object.assign({id:jid,stato:"da_fare",fattStato:"none",dataPrevista:presetDate||""},preset||{});
-    editing={id:jid,foto:(job.foto||[]).slice()};
+    editing={id:jid,foto:(job.foto||[]).slice(),supa:!!supa};
+    if(supa){
+      openSheet(`<h3>Nuovo lavoro</h3>
+        <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
+        <div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
+        <div class="row2">
+          <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
+          <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
+        <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+          <button class="b-save" data-action="save-job">Crea lavoro</button></div>`);
+      fillOperai();return;
+    }
     const cliOpts=db().clienti.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
     const dipOpts=db().dipendenti.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
     const dipSel=id=>db().dipendenti.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
@@ -648,10 +659,24 @@
     $("#up-dopo").onchange=e=>{addFoto(e.target.files,"dopo",$("#op-dopo").value);e.target.value="";};
     renderFotoBlocks();
   }
+  async function fillOperai(){
+    const sel=$("#j-operaio");if(!sel||!sb||!sbUid)return;
+    const {data}=await sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid);
+    sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("");
+  }
   function bindSeg(id){$$("#"+id+" button").forEach(b=>b.onclick=()=>{$$("#"+id+" button").forEach(x=>x.classList.remove("on"));b.classList.add("on");});}
   function segVal(id){const e=$("#"+id+" button.on");return e?e.dataset.v:"";}
 
   async function saveJob(){
+    if(editing&&editing.supa){
+      if(!sbUid){toast("Devi essere loggato");return;}
+      const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
+      if(!descrizione||!data_prevista||!operatore_id){toast("Compila Descrizione, Data e Operaio");return;}
+      const {error}=await sb.from("gest_lavori").insert({user_id:sbUid,stato:"da_fare",
+        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id});
+      if(error){toast("Errore: "+error.message);return;}
+      closeSheet();renderJobs();toast("Lavoro creato ✔");return;
+    }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un condominio");return;}
     const id=editing.id, exists=db().lavori.some(l=>l.id===id), prev=db().lavori.find(l=>l.id===id);
     const stato=segVal("j-stato"), fattStato=segVal("j-fatt")||"none";
@@ -927,7 +952,7 @@
     if(a==="save-azienda")return saveAzienda();
     if(a==="pdf"){const l=db().lavori.find(x=>x.id===id);if(l)generaPdf(l);return;}
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
-    if(a==="new-job")return jobForm(null);
+    if(a==="new-job")return jobForm(null,"",null,true);
     if(a==="new-fattura")return jobForm(null,"",{stato:"fatto",fattStato:"emessa"});
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d);}
     if(a==="edit-job"){closeSheet();return jobForm(db().lavori.find(l=>l.id===id));}
