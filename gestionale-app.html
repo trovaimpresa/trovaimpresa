@@ -388,8 +388,8 @@
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();}});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}});
   }
 
   /* LANDING */
@@ -547,18 +547,21 @@
     renderLavoroFoto();
   }
   function fattRow(l,btn){
-    const c=cliById(l.clienteId);
     return `<div class="fatt-row">
-      <div class="fatt-info"><b>${esc(c?c.nome:"—")}</b>
-        <div class="sub">${l.descrizione?esc(l.descrizione)+" · ":""}📅 ${fdate(l.dataFatto||l.dataPrevista)}</div></div>
+      <div class="fatt-info"><b>${esc(l.descrizione||"Lavoro")}</b>
+        <div class="sub">📅 ${fdate(l.data_fatto||l.data_prevista)}</div></div>
       <div class="fatt-imp">${eur(l.importo)}</div>
       <button class="ja" data-action="pdf" data-id="${l.id}">PDF</button>${btn||""}</div>`;
   }
-  function renderFatture(){
-    const L=db().lavori.filter(l=>+l.importo>0);
-    const daFatt=L.filter(l=>l.stato==="fatto"&&l.fattStato==="none");
-    const daInc=L.filter(l=>l.fattStato==="emessa");
-    const pagate=L.filter(l=>l.fattStato==="pagata");
+  async function renderFatture(){
+    let L=[];
+    if(sb&&sbUid){
+      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto").eq("user_id",sbUid);
+      L=(data||[]).filter(l=>+l.importo>0);
+    }
+    const daFatt=L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none");
+    const daInc=L.filter(l=>l.fatt_stato==="emessa");
+    const pagate=L.filter(l=>l.fatt_stato==="pagata");
     const tInc=daInc.reduce((s,l)=>s+(+l.importo||0),0);
     const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
     $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div></div>
