@@ -311,6 +311,15 @@
       <div class="sec-head"><h2>Squadra</h2><button class="add" data-action="new-dip">+ Persona</button></div>
       <div class="grid" id="dip-list"></div>
     </section>
+
+    <section id="lavoro-foto">
+      <div class="sec-head"><h2 id="lf-title">Foto — cosa fare</h2><button class="add" data-action="lf-back">‹ Indietro</button></div>
+      <div class="gal-intro">Carica qui le foto di <b>cosa c'è da fare</b> per questo lavoro: le vedrà l'operaio nella sua agenda.</div>
+      <div class="field"><label>📷 Foto "cosa fare"</label>
+        <input type="file" id="lf-file" accept="image/*" multiple style="display:none">
+        <label class="up-btn" for="lf-file">＋ Aggiungi foto</label></div>
+      <div class="thumbs" id="lf-grid"></div>
+    </section>
   </div>
 </div>
 
@@ -434,7 +443,7 @@
     $("#k-fatti").textContent=S.filter(l=>l.stato==="fatto"&&thisMonth(l.data_fatto)).length;
     $("#k-lavori").textContent=S.length;
     const pross=S.filter(l=>l.stato!=="fatto").sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999")).slice(0,5);
-    $("#prossimi").innerHTML=pross.length?pross.map(jobCardSupa).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
+    $("#prossimi").innerHTML=pross.length?pross.map(l=>jobCardSupa(l)).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
   }
 
   function jobCard(l){
@@ -471,7 +480,7 @@
       </div></div>`;
   }
 
-  function jobCardSupa(l){
+  function jobCardSupa(l,withFoto){
     const fatto=l.stato==="fatto", dove=l.dove||"";
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div></div>
@@ -484,6 +493,7 @@
       </div>
       <div class="job-actions">
         ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        ${withFoto?`<button class="ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
       </div></div>`;
   }
   async function renderJobs(){
@@ -497,9 +507,45 @@
     else if(filter.stato==="da_incassare")L=[];
     if(filter.q){const q=filter.q.toLowerCase();L=L.filter(l=>(l.descrizione||"").toLowerCase().includes(q)||(l.dove||"").toLowerCase().includes(q));}
     L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
-    box.innerHTML=L.length?L.map(jobCardSupa).join(""):`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;
+    box.innerHTML=L.length?L.map(l=>jobCardSupa(l,true)).join(""):`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;
   }
 
+  let lfLavoroId=null;
+  function showLavoroFoto(id,desc){
+    lfLavoroId=id;
+    if($("#lf-title"))$("#lf-title").textContent="Foto — "+(desc||"cosa fare");
+    $$("nav.tabs button").forEach(x=>x.classList.remove("active"));
+    $$("section").forEach(s=>s.classList.toggle("active",s.id==="lavoro-foto"));
+    window.scrollTo(0,0);renderLavoroFoto();
+  }
+  async function renderLavoroFoto(){
+    const grid=$("#lf-grid");if(!grid)return;
+    if(!sb||!sbUid||!lfLavoroId){grid.innerHTML="";return;}
+    const {data}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",lfLavoroId).eq("tipo","da_fare");
+    const fs=data||[];
+    if(!fs.length){grid.innerHTML=`<div class="empty"><div class="ic">📷</div><p>Ancora nessuna foto</p><small>Aggiungi le foto di cosa c'è da fare</small></div>`;return;}
+    grid.innerHTML="";
+    for(const f of fs){
+      const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
+      if(su&&su.signedUrl){const d=document.createElement("div");d.className="thumb";const img=document.createElement("img");img.src=su.signedUrl;d.appendChild(img);grid.appendChild(d);}
+    }
+  }
+  async function uploadLavoroFoto(files){
+    if(!files||!files.length||!lfLavoroId)return;
+    if(!sbUid){toast("Devi essere loggato");return;}
+    let n=0;
+    for(const file of Array.from(files)){
+      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=sbUid+"/"+lfLavoroId+"/"+Date.now()+"_"+safe;
+      const {error:up}=await sb.storage.from("gestionale-foto").upload(path,file);
+      if(up){toast("Foto non caricata: "+up.message);continue;}
+      const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:lfLavoroId,tipo:"da_fare",operatore:"Capo",storage_path:path});
+      if(ins){toast("Foto su, ma non salvata: "+ins.message);continue;}
+      n++;
+    }
+    if(n)toast(n===1?"Foto aggiunta ✔":n+" foto aggiunte ✔");
+    renderLavoroFoto();
+  }
   function fattRow(l,btn){
     const c=cliById(l.clienteId);
     return `<div class="fatt-row">
@@ -962,6 +1008,8 @@
     if(a==="pdf"){const l=db().lavori.find(x=>x.id===id);if(l)generaPdf(l);return;}
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
+    if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
+    if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",{stato:"fatto",fattStato:"emessa"});
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d);}
     if(a==="edit-job"){closeSheet();return jobForm(db().lavori.find(l=>l.id===id));}
@@ -1003,6 +1051,7 @@
   });
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
+  if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
 
   (async()=>{await load();renderLanding();})();
 })();
