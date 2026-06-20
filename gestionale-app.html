@@ -824,8 +824,11 @@
     await save();renderLanding();toast("Reparto eliminato");
   }
 
-  function aziendaForm(){
-    const a=state.azienda||{};
+  let aziendaRow=null;
+  async function aziendaForm(){
+    aziendaRow=null;
+    if(sb&&sbUid){const {data}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();aziendaRow=data||null;}
+    const a=aziendaRow||{};
     openSheet(`<h3>Dati azienda</h3>
       <p style="font-size:13px;color:var(--muted);margin:-8px 0 14px">Compaiono in cima a ogni PDF fattura. Sono i dati dell'azienda multiservizi.</p>
       <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||"")}" placeholder="Es. Multiservizi Rossi srl"></div>
@@ -838,10 +841,14 @@
       <button class="b-save" data-action="save-azienda">Salva</button></div>`);
   }
   async function saveAzienda(){
-    const a=state.azienda||{};
-    a.nome=$("#a-nome").value.trim();a.piva=$("#a-piva").value.trim();a.indirizzo=$("#a-ind").value.trim();
-    a.tel=$("#a-tel").value.trim();a.email=$("#a-email").value.trim();a.iban=$("#a-iban").value.trim();
-    if(a.num==null)a.num=1;state.azienda=a;await save();closeSheet();toast("Dati azienda salvati ✔");
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const row={user_id:sbUid,
+      nome:$("#a-nome").value.trim(),piva:$("#a-piva").value.trim(),indirizzo:$("#a-ind").value.trim(),
+      tel:$("#a-tel").value.trim(),email:$("#a-email").value.trim(),iban:$("#a-iban").value.trim(),
+      num_fatt:(aziendaRow&&aziendaRow.num_fatt!=null)?aziendaRow.num_fatt:1};
+    const {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet();toast("Dati azienda salvati ✔");
   }
 
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0)+" EUR";
