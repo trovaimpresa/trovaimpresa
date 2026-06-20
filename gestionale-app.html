@@ -1013,7 +1013,7 @@
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",{stato:"fatto",fattStato:"emessa"});
-    if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d);}
+    if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
     if(a==="edit-job"){closeSheet();return jobForm(db().lavori.find(l=>l.id===id));}
     if(a==="save-job")return saveJob();
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
