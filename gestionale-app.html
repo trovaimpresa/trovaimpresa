@@ -693,6 +693,7 @@
         <div class="row2">
           <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
+        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
         <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
           <button class="b-save" data-action="save-job">Crea lavoro</button></div>`);
       fillOperai();return;
@@ -747,8 +748,9 @@
       if(!sbUid){toast("Devi essere loggato");return;}
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
       if(!descrizione||!data_prevista||!operatore_id){toast("Compila Descrizione, Data e Operaio");return;}
+      const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
       const {error}=await sb.from("gest_lavori").insert({user_id:sbUid,stato:"da_fare",
-        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id});
+        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id,importo});
       if(error){toast("Errore: "+error.message);return;}
       closeSheet();renderJobs();toast("Lavoro creato ✔");return;
     }
