@@ -10,7 +10,9 @@
 async function caricaCantieri() {
   const lista = document.getElementById('lista-cantieri');
   if (!lista || !impresaCorrente) return;
-  const { data, error } = await sb.from('cantieri').select('*').eq('user_id', impresaCorrente.user_id).order('created_at', { ascending: false });
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  const { data, error } = await sb.from('cantieri').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
   if (error) {
     lista.innerHTML = '<div style="color:#c0392b;font-size:0.9rem;grid-column:1/-1">Errore caricamento cantieri</div>';
     return;
@@ -43,8 +45,10 @@ async function salvaCantiere() {
   const data_fine   = document.getElementById('cant-data-fine').value || null;
   const stato = document.getElementById('cant-stato').value;
   const note  = document.getElementById('cant-note').value.trim() || null;
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
   const { error } = await sb.from('cantieri').insert({
-    user_id: impresaCorrente.user_id,
+    user_id: user.id,
     nome, cliente, indirizzo, data_inizio, data_fine, stato, note
   });
   if (error) { alert('Errore: ' + error.message); return; }
