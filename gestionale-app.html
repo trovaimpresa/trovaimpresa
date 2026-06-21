@@ -428,11 +428,46 @@
     }
   }
   /* Solo professionista: nei TESTI VISIBILI dell'interfaccia del reparto (#appview e i form in #sheet)
-     sostituisce le parole intere lavoro→pratica e lavori→pratiche, preservando le maiuscole.
+     traduce le etichette fisse lavoro→pratica con concordanza femminile corretta (vedi _FRASI),
+     più swap a parola solo per conteggi nudi e tab/intestazione.
      Agisce solo sui nodi di testo (non su id/classi/attributi/placeholder né su tabelle/campi Supabase). */
+  /* Frasi fisse con articolo/aggettivo: tradotte come unità per la concordanza femminile (pratica/pratiche).
+     Ordine: prima le frasi più lunghe/specifiche, poi quelle brevi (es. "Nuovo lavoro"). */
+  const _FRASI=[
+    ['Prossimi lavori da fare','Prossime pratiche da fare'],
+    ['quanti lavori hai da fare','quante pratiche hai da fare'],
+    ['Tutti i lavori del reparto','Tutte le pratiche del reparto'],
+    ['tutti i suoi lavori','tutte le sue pratiche'],
+    ['Lavori finiti da fatturare','Pratiche finite da fatturare'],
+    ['Da fatturare (lavori finiti)','Da fatturare (pratiche finite)'],
+    ['Nessun lavoro finito in attesa di fattura.','Nessuna pratica finita in attesa di fattura.'],
+    ['Nessun lavoro in sospeso','Nessuna pratica in sospeso'],
+    ['Aggiungi un lavoro col pulsante','Aggiungi una pratica col pulsante'],
+    ['Cambia filtro o aggiungi un nuovo lavoro','Cambia filtro o aggiungi una nuova pratica'],
+    ['Nessun lavoro in questa data.','Nessuna pratica in questa data.'],
+    ['Nessun lavoro qui','Nessuna pratica qui'],
+    ['+ Lavoro in questa data','+ Pratica in questa data'],
+    ['Questo operatore non ha lavori assegnati','Questo operatore non ha pratiche assegnate'],
+    ['Assegna i lavori a una persona dalla scheda del lavoro','Assegna le pratiche a una persona dalla scheda della pratica'],
+    ['Carica le foto aprendo un lavoro','Carica le foto aprendo una pratica'],
+    ['Foto lavoro DA FARE','Foto pratica DA FARE'],
+    ['Foto lavoro FATTO','Foto pratica FATTO'],
+    ['per mostrarti il lavoro','per mostrarti la pratica'],
+    ['a lavoro finito','a pratica finita'],
+    ['per questo lavoro','per questa pratica'],
+    ['Modifica lavoro','Modifica pratica'],
+    ['Nuovo lavoro','Nuova pratica'],
+    ['Crea lavoro','Crea pratica'],
+  ];
   function _swapPratiche(s){
-    return s.replace(/\bLavori\b/g,'Pratiche').replace(/\blavori\b/g,'pratiche')
-            .replace(/\bLavoro\b/g,'Pratica').replace(/\blavoro\b/g,'pratica');
+    for(const f of _FRASI){if(s.indexOf(f[0])>=0)s=s.split(f[0]).join(f[1]);}
+    /* conteggi nudi: "1 lavoro"→"1 pratica", "N lavori"→"N pratiche" */
+    s=s.replace(/(\d+)\s+lavori\b/g,'$1 pratiche').replace(/(\d+)\s+lavoro\b/g,'$1 pratica');
+    /* tab/intestazione: nodo composto SOLO dalla parola */
+    const t=s.trim();
+    if(t==='Lavori')s=s.replace('Lavori','Pratiche');
+    else if(t==='Lavoro')s=s.replace('Lavoro','Pratica');
+    return s;
   }
   /* Contenitori del CONTENUTO inserito dall'utente: i loro nodi di testo NON vanno tradotti
      (nomi reparti, titoli/descrizioni pratiche, note, dati cliente, nomi operatori).
