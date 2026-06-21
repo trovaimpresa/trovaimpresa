@@ -420,11 +420,14 @@
 
   /* LANDING */
   async function renderLanding(){
-    const ps=state.panels||[];
+    let ps=state.panels||[];
     let rows=[];
     if(sb&&sbUid){
       const {data}=await sb.from("gest_lavori").select("mestiere_id,stato").eq("user_id",sbUid);
       rows=data||[];
+      const {data:mest}=await sb.from("gest_mestieri").select("id").eq("user_id",sbUid);
+      const mineIds=mest?mest.map(m=>m.id):[];
+      ps=ps.filter(p=>p.mestiere_id&&mineIds.includes(p.mestiere_id));
     }
     $("#panels").innerHTML=ps.length?ps.map(p=>{
       const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
