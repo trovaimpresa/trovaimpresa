@@ -424,7 +424,36 @@
     if(ruoloUtente==='professionista'){
       const sub=document.querySelector('.landing-sub');
       if(sub)sub.textContent="Ogni reparto è separato: pratiche, clienti, collaboratori e calendario non si mischiano.";
+      avviaLocalizzazionePratiche();
     }
+  }
+  /* Solo professionista: nei TESTI VISIBILI dell'interfaccia del reparto (#appview e i form in #sheet)
+     sostituisce le parole intere lavoro→pratica e lavori→pratiche, preservando le maiuscole.
+     Agisce solo sui nodi di testo (non su id/classi/attributi/placeholder né su tabelle/campi Supabase). */
+  function _swapPratiche(s){
+    return s.replace(/\bLavori\b/g,'Pratiche').replace(/\blavori\b/g,'pratiche')
+            .replace(/\bLavoro\b/g,'Pratica').replace(/\blavoro\b/g,'pratica');
+  }
+  let _praticheObs=null;
+  function _osservaPratiche(){
+    if(!_praticheObs)return;
+    ['#appview','#sheet'].forEach(sel=>{const el=document.querySelector(sel);if(el)_praticheObs.observe(el,{childList:true,subtree:true,characterData:true});});
+  }
+  function localizzaPratiche(){
+    if(ruoloUtente!=='professionista')return;
+    if(_praticheObs)_praticheObs.disconnect(); /* si stacca durante la riscrittura: le mutazioni che genera (e quelle già in coda) vengono scartate → niente loop */
+    ['#appview','#sheet'].forEach(sel=>{
+      const root=document.querySelector(sel);if(!root)return;
+      const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null);
+      const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
+      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+    });
+    _osservaPratiche(); /* si riattacca solo a riscrittura conclusa */
+  }
+  function avviaLocalizzazionePratiche(){
+    if(ruoloUtente!=='professionista'||_praticheObs)return;
+    _praticheObs=new MutationObserver(()=>localizzaPratiche());
+    localizzaPratiche();
   }
   if(sb){
     sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
