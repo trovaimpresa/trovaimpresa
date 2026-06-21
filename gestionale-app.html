@@ -434,6 +434,10 @@
     return s.replace(/\bLavori\b/g,'Pratiche').replace(/\blavori\b/g,'pratiche')
             .replace(/\bLavoro\b/g,'Pratica').replace(/\blavoro\b/g,'pratica');
   }
+  /* Contenitori del CONTENUTO inserito dall'utente: i loro nodi di testo NON vanno tradotti
+     (nomi reparti, titoli/descrizioni pratiche, note, dati cliente, nomi operatori).
+     Restano traducibili le etichette fisse (tab "Lavori", "+ Nuovo lavoro", contatori, messaggi vuoti…). */
+  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,#panel-name,#panel-sub,#rie-title,#lf-title,#gal-op,#ag-op,textarea';
   let _praticheObs=null;
   function _osservaPratiche(){
     if(!_praticheObs)return;
@@ -444,7 +448,7 @@
     if(_praticheObs)_praticheObs.disconnect(); /* si stacca durante la riscrittura: le mutazioni che genera (e quelle già in coda) vengono scartate → niente loop */
     ['#appview','#sheet'].forEach(sel=>{
       const root=document.querySelector(sel);if(!root)return;
-      const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null);
+      const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
       const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
       nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
     });
