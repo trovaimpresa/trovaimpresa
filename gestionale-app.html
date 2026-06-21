@@ -413,8 +413,15 @@
     const fb=()=>{const a=document.createElement("textarea");a.value=txt;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.focus();a.select();let d=false;try{d=document.execCommand("copy");}catch(_){}document.body.removeChild(a);d?ok():prompt("Copia il link a mano:",txt);};
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
+  /* Legge la categoria (tipo) dell'utente loggato — stesso metodo dei pannelli: tabella 'imprese', campo 'tipo', chiave user_id */
+  async function logRuoloUtente(uid){
+    if(!sb||!uid){console.log('[gestionale] ruolo utente: nessun utente loggato');return;}
+    const {data,error}=await sb.from('imprese').select('tipo').eq('user_id',uid).maybeSingle();
+    if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
+    console.log('[gestionale] ruolo utente:',data&&data.tipo?data.tipo:'(nessun profilo)');
+  }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
     sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
   }
 
