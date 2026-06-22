@@ -458,6 +458,11 @@
     ['Modifica lavoro','Modifica pratica'],
     ['Nuovo lavoro','Nuova pratica'],
     ['Crea lavoro','Crea pratica'],
+    /* squadra/membro → collaboratore/collaboratori: frasi esatte (collaboratori = maschile plurale).
+       Le più specifiche prima della parola nuda "Squadra" per la concordanza corretta. */
+    ['Squadra non disponibile','Collaboratori non disponibili'],
+    ['Accedi per gestire la squadra','Accedi per gestire i collaboratori'],
+    ['Squadra','Collaboratori'],
   ];
   function _swapPratiche(s){
     for(const f of _FRASI){if(s.indexOf(f[0])>=0)s=s.split(f[0]).join(f[1]);}
@@ -485,7 +490,7 @@
       const root=document.querySelector(sel);if(!root)return;
       const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
       const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
-      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]|squadr/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
     });
     _osservaPratiche(); /* si riattacca solo a riscrittura conclusa */
   }
