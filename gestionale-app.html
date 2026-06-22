@@ -449,7 +449,7 @@
     ['Nessun lavoro in questa data.','Nessuna pratica in questa data.'],
     ['Nessun lavoro qui','Nessuna pratica qui'],
     ['+ Lavoro in questa data','+ Pratica in questa data'],
-    ['Questo operatore non ha lavori assegnati','Questo operatore non ha pratiche assegnate'],
+    ['Questo operatore non ha lavori assegnati','Questo collaboratore non ha pratiche assegnate'],
     ['Assegna i lavori a una persona dalla scheda del lavoro','Assegna le pratiche a una persona dalla scheda della pratica'],
     ['Carica le foto aprendo un lavoro','Carica le foto aprendo una pratica'],
     ['Foto lavoro DA FARE','Foto pratica DA FARE'],
@@ -477,6 +477,13 @@
     ['Nessun condominio','Nessun cliente'],
     ['Referente / Amministratore','Referente'],
     ['Condomini','Clienti'],
+    /* "Agenda operatore" → "Agenda" (togli "operatore"); operatore → collaboratore solo nelle
+       etichette/filtri legati ai collaboratori. La parola nuda "Operatore" per ultima. */
+    ['Agenda operatore','Agenda'],
+    ['Filtra per operatore','Filtra per collaboratore'],
+    ['Scegli un operatore','Scegli un collaboratore'],
+    ['(operatore)','(collaboratore)'],
+    ['Operatore','Collaboratore'],
   ];
   function _swapPratiche(s){
     for(const f of _FRASI){if(s.indexOf(f[0])>=0)s=s.split(f[0]).join(f[1]);}
@@ -504,7 +511,7 @@
       const root=document.querySelector(sel);if(!root)return;
       const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
       const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
-      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]|squadr|condomin|amministrator/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]|squadr|condomin|amministrator|operator/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
     });
     _osservaPratiche(); /* si riattacca solo a riscrittura conclusa */
   }
@@ -1121,7 +1128,7 @@
     const lavIds=new Set((lavori||[]).map(l=>l.id));
     const all=(foto||[]).filter(f=>lavIds.has(f.lavoro_id));
     const ops=new Set();all.forEach(f=>ops.add(f.operatore||""));
-    const opChips=[`<button class="chip ${galFilter.op===""?"on":""}" data-action="gal-op" data-v="">Tutti gli operatori</button>`]
+    const opChips=[`<button class="chip ${galFilter.op===""?"on":""}" data-action="gal-op" data-v="">${ruoloUtente==='professionista'?'Tutti i collaboratori':'Tutti gli operatori'}</button>`]
       .concat(Array.from(ops).filter(Boolean).map(o=>`<button class="chip ${galFilter.op===o?"on":""}" data-action="gal-op" data-v="${esc(o)}">${esc(o)}</button>`)).join("");
     if($("#gal-op"))$("#gal-op").innerHTML=opChips;
     const matchTipo=f=>galFilter.tipo==="prima"?f.tipo==="da_fare":galFilter.tipo==="dopo"?f.tipo!=="da_fare":true;
