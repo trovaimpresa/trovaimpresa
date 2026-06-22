@@ -424,6 +424,8 @@
     if(ruoloUtente==='professionista'){
       const sub=document.querySelector('.landing-sub');
       if(sub)sub.textContent="Ogni reparto è separato: pratiche, clienti, collaboratori e calendario non si mischiano.";
+      const fsearch=document.querySelector('#f-search'); /* placeholder in HTML statico: per-ruolo via JS, non dal translator */
+      if(fsearch)fsearch.placeholder="Cerca cliente o pratica...";
       avviaLocalizzazionePratiche();
     }
   }
@@ -463,6 +465,18 @@
     ['Squadra non disponibile','Collaboratori non disponibili'],
     ['Accedi per gestire la squadra','Accedi per gestire i collaboratori'],
     ['Squadra','Collaboratori'],
+    /* condominio/amministratore → cliente: frasi esatte. Le più specifiche prima della parola
+       nuda "Condomini", così "Condomini / Clienti" non diventa "Clienti / Clienti". */
+    ['Dove (vuoto = indirizzo del condominio)','Dove (vuoto = indirizzo del cliente)'],
+    ['Nome condominio / cliente','Nome cliente'],
+    ['Condomini / Clienti','Clienti'],
+    ['Condominio / Cantiere','Cliente'],
+    ['+ Aggiungi nuovo condominio','+ Aggiungi nuovo cliente'],
+    ['Nuovo condominio','Nuovo cliente'],
+    ['Modifica condominio','Modifica cliente'],
+    ['Nessun condominio','Nessun cliente'],
+    ['Referente / Amministratore','Referente'],
+    ['Condomini','Clienti'],
   ];
   function _swapPratiche(s){
     for(const f of _FRASI){if(s.indexOf(f[0])>=0)s=s.split(f[0]).join(f[1]);}
@@ -490,7 +504,7 @@
       const root=document.querySelector(sel);if(!root)return;
       const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
       const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
-      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]|squadr/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]|squadr|condomin|amministrator/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
     });
     _osservaPratiche(); /* si riattacca solo a riscrittura conclusa */
   }
@@ -896,7 +910,7 @@
   function cliForm(c){
     const isNew=!c;c=c||{};
     openSheet(`<h3>${isNew?"Nuovo condominio":"Modifica condominio"}</h3>
-      <div class="field"><label>Nome condominio / cliente</label><input id="c-nome" value="${esc(c.nome||"")}" placeholder="Es. Condominio Via Roma 12"></div>
+      <div class="field"><label>Nome condominio / cliente</label><input id="c-nome" value="${esc(c.nome||"")}" placeholder="${ruoloUtente==='professionista'?'Es. Mario Rossi':'Es. Condominio Via Roma 12'}"></div>
       <div class="field"><label>Indirizzo</label><input id="c-ind" value="${esc(c.indirizzo||"")}" placeholder="Via, numero, città"></div>
       <div class="row2"><div class="field"><label>Referente / Amministratore</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Nome"></div>
       <div class="field"><label>Telefono</label><input id="c-tel" value="${esc(c.telefono||"")}" placeholder="Numero"></div></div>
