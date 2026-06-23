@@ -225,6 +225,7 @@
       <button data-tab="galleria">Galleria</button>
       <button data-tab="clienti">Condomini</button>
       <button data-tab="squadra">Squadra</button>
+      <button data-tab="scadenzario" id="tab-scadenzario" style="display:none">Scadenzario</button>
     </nav>
   </header>
 
@@ -310,6 +311,11 @@
     <section id="squadra">
       <div class="sec-head"><h2>Squadra</h2><button class="add" data-action="new-dip">+ Persona</button></div>
       <div class="grid" id="dip-list"></div>
+    </section>
+
+    <section id="scadenzario">
+      <div class="sec-head"><h2>Scadenzario</h2><button class="add" data-action="new-scad">+ Nuova</button></div>
+      <div class="grid" id="scad-list"></div>
     </section>
 
     <section id="lavoro-foto">
@@ -426,12 +432,15 @@
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
     console.log('[gestionale] ruolo utente:',ruoloUtente||'(nessun profilo)');
+    const _tabScad=document.querySelector('#tab-scadenzario');
+    if(_tabScad)_tabScad.style.display=(ruoloUtente==='professionista')?'':'none';
     if(ruoloUtente==='professionista'){
       const sub=document.querySelector('.landing-sub');
       if(sub)sub.textContent="Ogni reparto è separato: pratiche, clienti, collaboratori e calendario non si mischiano.";
       const fsearch=document.querySelector('#f-search'); /* placeholder in HTML statico: per-ruolo via JS, non dal translator */
       if(fsearch)fsearch.placeholder="Cerca cliente o pratica...";
       avviaLocalizzazionePratiche();
+      renderScadenze();
     }
   }
   /* Solo professionista: nei TESTI VISIBILI dell'interfaccia del reparto (#appview e i form in #sheet)
@@ -582,7 +591,7 @@
   }
   function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();window.scrollTo(0,0);}
 
-  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();}
+  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderScadenze();}
 
   async function renderRiepilogo(){
     /* soldi e ore: invariati per ora (dipendono dalle fatture, su localStorage) */
@@ -849,6 +858,69 @@
     const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato",ruolo,permessi});
     if(e2){toast("Errore invito: "+e2.message);return;}
     closeSheet();renderDip();toast("Persona aggiunta, invito creato ✔");
+  }
+
+  /* SCADENZARIO (solo professionista): tabella gest_scadenze, isolamento user_id+mestiere_id come gest_lavori/gest_clienti */
+  const TIPI_PRATICA=["SCIA","CILA","Permesso di Costruire","Agibilità","Altro"];
+  let scadCache=[];
+  function _giorniDopo(ds,n){const[y,m,d]=ds.split("-").map(Number);const dt=new Date(y,m-1,d+n);const mm=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");return dt.getFullYear()+"-"+mm+"-"+dd;}
+  async function renderScadenze(){
+    const box=$("#scad-list");if(!box)return;
+    if(ruoloUtente!=='professionista'||!cur){box.innerHTML="";return;}
+    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📅</div><p>Nessuna scadenza</p><small>Accedi per gestire lo scadenzario</small></div>`;return;}
+    const mid=curMestiere();
+    const [{data:sc},{data:cl}]=await Promise.all([
+      sb.from("gest_scadenze").select("id,titolo,tipo_pratica,cliente_id,data_scadenza,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("data_scadenza",{ascending:true}),
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)
+    ]);
+    scadCache=sc||[];
+    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
+    const oggi=todayStr(),lim=_giorniDopo(oggi,7);
+    box.innerHTML=scadCache.length?scadCache.map(s=>scadCard(s,cliMap,oggi,lim)).join(""):`<div class="empty"><div class="ic">📅</div><p>Nessuna scadenza</p><small>Aggiungi le scadenze di questo reparto</small></div>`;
+  }
+  function scadCard(s,cliMap,oggi,lim){
+    const fatta=s.stato==="fatta";
+    const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
+    let bg="#eef2f7",fg="#555",lab="Aperta";
+    if(fatta){bg="#e3f3e8";fg="var(--fatto)";lab="Fatta";}
+    else if(s.data_scadenza&&s.data_scadenza<oggi){bg="#fdecea";fg="#c0392b";lab="Scaduta";}
+    else if(s.data_scadenza&&s.data_scadenza<=lim){bg="#fff4e5";fg="#c2410c";lab="In scadenza";}
+    return `<div class="card"><div>
+      <h3>${esc(s.titolo||"Scadenza")}</h3>
+      <p>${s.tipo_pratica?"📄 "+esc(s.tipo_pratica)+"<br>":""}${cliNome?"👤 "+esc(cliNome)+"<br>":""}📅 ${fdate(s.data_scadenza)} <span class="stato" style="background:${bg};color:${fg}">${lab}</span>${s.note?"<br>📝 "+esc(s.note):""}</p></div>
+      <div class="card-acts">
+        ${fatta?`<button data-action="scad-stato" data-id="${s.id}" data-v="aperta">↩ Riapri</button>`:`<button data-action="scad-stato" data-id="${s.id}" data-v="fatta">✔ Segna fatta</button>`}
+        <button data-action="edit-scad" data-id="${s.id}">Modifica</button>
+        <button class="del" data-action="del-scad" data-id="${s.id}">Elimina</button></div></div>`;
+  }
+  async function scadForm(s){
+    const isNew=!s;s=s||{};
+    const mid=curMestiere();
+    let cl=[];
+    if(sb&&sbUid){const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome");cl=data||[];}
+    const tipoOpts=TIPI_PRATICA.map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
+    const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===s.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
+    openSheet(`<h3>${isNew?"Nuova scadenza":"Modifica scadenza"}</h3>
+      <div class="field"><label>Titolo</label><input id="s-tit" value="${esc(s.titolo||"")}" placeholder="Es. Presentazione SCIA"></div>
+      <div class="field"><label>Tipo</label><select id="s-tipo">${tipoOpts}</select></div>
+      <div class="field"><label>Cliente</label><select id="s-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
+      <div class="field"><label>Data scadenza</label><input type="date" id="s-data" value="${s.data_scadenza||""}"></div>
+      <div class="field"><label>Note</label><textarea id="s-note" placeholder="Dettagli, riferimenti...">${esc(s.note||"")}</textarea></div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+  }
+  async function saveScad(id){
+    const titolo=$("#s-tit").value.trim();if(!titolo){toast("Scrivi il titolo");return;}
+    const data_scadenza=$("#s-data").value;if(!data_scadenza){toast("Inserisci la data di scadenza");return;}
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const tipo_pratica=$("#s-tipo")?$("#s-tipo").value:"";
+    const cliente_id=($("#s-cli")&&$("#s-cli").value)?$("#s-cli").value:null;
+    const note=$("#s-note").value.trim();
+    const {error}=id
+      ?await sb.from("gest_scadenze").update({titolo,tipo_pratica,cliente_id,data_scadenza,note}).eq("id",id).eq("user_id",sbUid)
+      :await sb.from("gest_scadenze").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,tipo_pratica,cliente_id,data_scadenza,note,stato:"aperta"});
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet();renderScadenze();toast(id?"Aggiornato":"Scadenza aggiunta ✔");
   }
 
   /* FORM LAVORO (nessun campo "servizio": il reparto è già il pannello) */
@@ -1277,6 +1349,17 @@
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
     if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
+    if(a==="new-scad")return scadForm(null);
+    if(a==="edit-scad")return scadForm(scadCache.find(s=>s.id===id));
+    if(a==="save-scad")return saveScad(id);
+    if(a==="scad-stato"){
+      if(!sb||!sbUid){toast("Devi essere loggato");return;}
+      const v=t.dataset.v;
+      const {error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid);
+      if(error){toast("Errore: "+error.message);return;}
+      renderScadenze();toast(v==="fatta"?"Scadenza completata ✔":"Riaperta");return;
+    }
+    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderScadenze();toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
