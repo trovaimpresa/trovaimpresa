@@ -643,12 +643,14 @@
 
   function jobCardSupa(l,withFoto){
     const fatto=l.stato==="fatto", dove=l.dove||"";
+    const lavLab=fatto?"Fatto":(l.stato==="in_corso"?"In corso":"Da fare");
+    const dp=esc(l.data_prevista||"");
     const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
     const wa="https://wa.me/?text="+encodeURIComponent("Ciao! C'è un nuovo lavoro per te.\nLavoro: "+(l.descrizione||"Lavoro")+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div></div>
       <div class="stati">
-        <span class="st"><i class="pall ${fatto?'verde':'rosso'}"></i><span class="lab">${fatto?'Fatto':'Da fare'}</span></span>
+        <span class="st"><i class="pall ${fatto?'verde':'rosso'}"></i><span class="lab">${lavLab}</span></span>
       </div>
       <div class="job-meta">
         ${dove?`<span>📍 ${esc(dove)}</span>`:""}
@@ -656,6 +658,9 @@
       </div>
       <div class="job-actions">
         ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        ${withFoto&&l.stato==="da_fare"?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}">▶ Avvia</button>`:""}
+        ${withFoto&&!fatto?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}">✔ Segna fatto</button>`:""}
+        ${withFoto&&fatto?`<button class="ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}">↩ Riapri</button>`:""}
         ${withFoto?`<button class="ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
         ${withFoto?`<button class="ja" data-action="sq-wa" data-wa="${esc(wa)}">Avvisa su WhatsApp</button>`:""}
       </div></div>`;
@@ -1249,6 +1254,13 @@
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
     if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
+    if(a==="stato-supa"){
+      if(!sb||!sbUid){toast("Devi essere loggato");return;}
+      const v=t.dataset.v, dp=t.dataset.dp||"";
+      const {error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid);
+      if(error){toast("Errore: "+error.message);return;}
+      renderJobs();toast("Stato: "+(statoLabel[v]||v));return;
+    }
     if(a==="fatt"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v;
