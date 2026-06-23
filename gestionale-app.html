@@ -499,6 +499,9 @@
     ['Eliminare questo condominio?','Eliminare questo cliente?'],
     ['Questo condominio ha','Questo cliente ha'],
     ['lavori collegati. Eliminarlo comunque?','pratiche collegate. Eliminarlo comunque?'],
+    ['Lavoro eliminato','Pratica eliminata'],
+    ['Condominio eliminato','Cliente eliminato'],
+    ['Persona eliminata','Collaboratore eliminato'],
   ];
   function _swapPratiche(s){
     for(const f of _FRASI){if(s.indexOf(f[0])>=0)s=s.split(f[0]).join(f[1]);}
@@ -1230,7 +1233,7 @@
     if(a==="gal-op"){galFilter.op=t.dataset.v;renderGalleria();return;}
     if(a==="ag-op"){agFilter.op=t.dataset.v;renderAgenda();return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
-    if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Eliminato");}return;}
+    if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="fatt"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -1247,14 +1250,14 @@
     if(a==="new-cli")return cliForm(null);
     if(a==="edit-cli")return cliForm(db().clienti.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){db().clienti=db().clienti.filter(c=>c.id!==id);await save();renderAll();toast("Eliminato");}return;}
+    if(a==="del-cli"){const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){db().clienti=db().clienti.filter(c=>c.id!==id);await save();renderAll();toast("Condominio eliminato");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
     if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
     if(a==="save-dip")return saveDip(id);
-    if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Eliminato");}return;}
+    if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
     if(a==="quick-cli")return cliForm(null);
     if(a==="close")return closeSheet();
   });
