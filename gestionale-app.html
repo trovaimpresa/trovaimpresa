@@ -375,7 +375,11 @@
     backfillMestieri();
   }
   async function save(){try{await window.storage.set(KEY,JSON.stringify(state));}catch(e){toast("Errore salvataggio");}}
-  function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
+  function toast(m){const t=$("#toast");t.textContent=_msgPro(m);t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
+  /* Solo professionista: i testi dei toast/confirm passano dalla mappa _FRASI (un solo punto qui).
+     Artigiano e negozio restano invariati. Non tocca il contenuto utente già interpolato (numeri, nomi). */
+  function _msgPro(m){return ruoloUtente==='professionista'?_swapPratiche(String(m)):m;}
+  function gconfirm(m){return confirm(_msgPro(m));}
 
   /* Passo 1 separazione reparti: ogni panel ha un mestiere_id (gest_mestieri) */
   let mestieriBackfilled=false;
@@ -484,6 +488,17 @@
     ['Scegli un operatore','Scegli un collaboratore'],
     ['(operatore)','(collaboratore)'],
     ['Operatore','Collaboratore'],
+    /* Messaggi toast/confirm (professionista): frasi esatte, concordanza corretta.
+       Il numero in "N lavori collegati" lo gestisce a parte la regex dei conteggi nudi. */
+    ['Lavoro creato ✔','Pratica creata ✔'],
+    ['Lavoro aggiornato','Pratica aggiornata'],
+    ['Lavoro non trovato','Pratica non trovata'],
+    ['Scegli un condominio','Scegli un cliente'],
+    ['Condominio aggiunto ✔','Cliente aggiunto ✔'],
+    ['Eliminare questo lavoro?','Eliminare questa pratica?'],
+    ['Eliminare questo condominio?','Eliminare questo cliente?'],
+    ['Questo condominio ha','Questo cliente ha'],
+    ['lavori collegati. Eliminarlo comunque?','pratiche collegate. Eliminarlo comunque?'],
   ];
   function _swapPratiche(s){
     for(const f of _FRASI){if(s.indexOf(f[0])>=0)s=s.split(f[0]).join(f[1]);}
@@ -1215,7 +1230,7 @@
     if(a==="gal-op"){galFilter.op=t.dataset.v;renderGalleria();return;}
     if(a==="ag-op"){agFilter.op=t.dataset.v;renderAgenda();return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
-    if(a==="del-job"){if(confirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Eliminato");}return;}
+    if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Eliminato");}return;}
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="fatt"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -1232,7 +1247,7 @@
     if(a==="new-cli")return cliForm(null);
     if(a==="edit-cli")return cliForm(db().clienti.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){const n=db().lavori.filter(l=>l.clienteId===id).length;if(confirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){db().clienti=db().clienti.filter(c=>c.id!==id);await save();renderAll();toast("Eliminato");}return;}
+    if(a==="del-cli"){const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){db().clienti=db().clienti.filter(c=>c.id!==id);await save();renderAll();toast("Eliminato");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
