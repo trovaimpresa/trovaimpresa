@@ -919,12 +919,12 @@
     if(editing&&editing.supa){
       if(!sbUid){toast("Devi essere loggato");return;}
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
-      if(!descrizione||!data_prevista||!operatore_id){toast("Compila Descrizione, Data e Operaio");return;}
+      if(!descrizione||!data_prevista){toast("Compila Descrizione e Data");return;}
       const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
       if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
-        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id,importo,cliente_id};
+        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id};
       if(editing.fattura)obj.fatt_stato="emessa";
       const {error}=await sb.from("gest_lavori").insert(obj);
       if(error){toast("Errore: "+error.message);return;}
