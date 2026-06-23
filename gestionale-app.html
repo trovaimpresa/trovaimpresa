@@ -859,10 +859,11 @@
         <div class="row2">
           <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
+        <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
         <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
           <button class="b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
-      fillOperai();return;
+      fillOperai();fillClienti(job.cliente_id);return;
     }
     const cliOpts=db().clienti.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
     const dipOpts=db().dipendenti.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
@@ -906,6 +907,11 @@
     const {data}=await sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("");
   }
+  async function fillClienti(selId){
+    const sel=$("#j-cliente");if(!sel||!sb||!sbUid)return;
+    const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+    sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(c=>`<option value="${esc(c.id)}" ${c.id===selId?"selected":""}>${esc(c.nome)}</option>`).join("");
+  }
   function bindSeg(id){$$("#"+id+" button").forEach(b=>b.onclick=()=>{$$("#"+id+" button").forEach(x=>x.classList.remove("on"));b.classList.add("on");});}
   function segVal(id){const e=$("#"+id+" button.on");return e?e.dataset.v:"";}
 
@@ -916,8 +922,9 @@
       if(!descrizione||!data_prevista||!operatore_id){toast("Compila Descrizione, Data e Operaio");return;}
       const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
       if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
+      const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
-        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id,importo};
+        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id,importo,cliente_id};
       if(editing.fattura)obj.fatt_stato="emessa";
       const {error}=await sb.from("gest_lavori").insert(obj);
       if(error){toast("Errore: "+error.message);return;}
