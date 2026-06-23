@@ -359,6 +359,7 @@
   const cliById=id=>db().clienti.find(c=>c.id===id);
   const dipById=id=>db().dipendenti.find(d=>d.id===id);
   const curMestiere=()=>{const p=(state.panels||[]).find(x=>x.id===cur);return p?p.mestiere_id:null;};
+  let cliCache=[]; /* clienti del reparto corrente, da gest_clienti (Supabase) */
 
   if(!window.storage){window.storage={get:async k=>{const v=localStorage.getItem(k);return v===null?null:{value:v};},set:async(k,v)=>{localStorage.setItem(k,v);return{value:v};},delete:async k=>{localStorage.removeItem(k);return{deleted:true};}};}
   async function load(){
@@ -773,12 +774,14 @@
         <button class="b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
   }
 
-  function renderClienti(){
-    $("#cli-list").innerHTML=db().clienti.length?db().clienti.map(c=>{
-      const n=db().lavori.filter(l=>l.clienteId===c.id).length;
+  async function renderClienti(){
+    const box=$("#cli-list");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">🏢</div><p>Nessun condominio</p><small>Accedi per gestire i clienti</small></div>`;return;}
+    const {data}=await sb.from("gest_clienti").select("id,nome,indirizzo,referente,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+    cliCache=data||[];
+    box.innerHTML=cliCache.length?cliCache.map(c=>{
       return `<div class="card"><div><h3>${esc(c.nome)}</h3>
-        <p>${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"· 📞 "+esc(c.telefono):""}</p>
-        <div class="cnt">${n} lavor${n===1?"o":"i"}</div></div>
+        <p>${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"· 📞 "+esc(c.telefono):""}</p></div>
         <div class="card-acts"><button data-action="map" data-q="${esc(c.indirizzo||c.nome)}">🗺 Mappa</button>
         <button data-action="edit-cli" data-id="${c.id}">Modifica</button>
         <button class="del" data-action="del-cli" data-id="${c.id}">Elimina</button></div></div>`;
@@ -944,9 +947,13 @@
   }
   async function saveCli(id){
     const nome=$("#c-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
-    const obj={id:id||uid(),nome,indirizzo:$("#c-ind").value.trim(),referente:$("#c-ref").value.trim(),telefono:$("#c-tel").value.trim()};
-    if(id)db().clienti=db().clienti.map(c=>c.id===id?obj:c);else db().clienti.push(obj);
-    await save();closeSheet();renderAll();toast(id?"Aggiornato":"Condominio aggiunto ✔");
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const indirizzo=$("#c-ind").value.trim(),referente=$("#c-ref").value.trim(),telefono=$("#c-tel").value.trim();
+    const {error}=id
+      ?await sb.from("gest_clienti").update({nome,indirizzo,referente,telefono}).eq("id",id).eq("user_id",sbUid)
+      :await sb.from("gest_clienti").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,indirizzo,referente,telefono});
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet();renderClienti();toast(id?"Aggiornato":"Condominio aggiunto ✔");
   }
   function dipForm(d){
     const isNew=!d;d=d||{};
@@ -1248,9 +1255,9 @@
     if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
     if(a==="new-cli")return cliForm(null);
-    if(a==="edit-cli")return cliForm(db().clienti.find(c=>c.id===id));
+    if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){db().clienti=db().clienti.filter(c=>c.id!==id);await save();renderAll();toast("Condominio eliminato");}return;}
+    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
