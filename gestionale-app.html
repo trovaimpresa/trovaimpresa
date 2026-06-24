@@ -366,6 +366,7 @@
   const dipById=id=>db().dipendenti.find(d=>d.id===id);
   const curMestiere=()=>{const p=(state.panels||[]).find(x=>x.id===cur);return p?p.mestiere_id:null;};
   let cliCache=[]; /* clienti del reparto corrente, da gest_clienti (Supabase) */
+  let dipCache=[]; /* squadra del reparto corrente: id,nome,telefono,ruolo,permessi (gest_operatori + gest_membri) */
 
   if(!window.storage){window.storage={get:async k=>{const v=localStorage.getItem(k);return v===null?null:{value:v};},set:async(k,v)=>{localStorage.setItem(k,v);return{value:v};},delete:async k=>{localStorage.removeItem(k);return{deleted:true};}};}
   async function load(){
@@ -827,15 +828,17 @@
     if(!sbUid){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Accedi per gestire la squadra</p><small>Entra nel pannello per invitare le persone</small></div>`;return;}
     const [{data:ops},{data:membri}]=await Promise.all([
       sb.from("gest_operatori").select("id,nome,telefono").eq("mestiere_id",curMestiere()),
-      sb.from("gest_membri").select("operatore_id,codice,stato")
+      sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi")
     ]);
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
+    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return {id:o.id,nome:o.nome,telefono:o.telefono,ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{}};});
     box.innerHTML=(ops&&ops.length)?ops.map(o=>{
       const inv=mB[o.id], att=inv&&inv.stato==="attivo", codice=inv?inv.codice:"";
       const link=inviteLink(codice);
       const wa="https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link);
       return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":"Invitato"}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
-        <div class="card-acts">${codice?`<button data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
+        <div class="card-acts"><button data-action="sq-edit" data-id="${o.id}">Modifica</button>
+        ${codice?`<button data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
         <button data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>`:""}</div></div>`;
     }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
   }
@@ -846,8 +849,8 @@
     $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm));
   }
   function squadraForm(op){
-    op=op||{};
-    openSheet(`<h3>Nuova persona</h3>
+    const isNew=!op;op=op||{};
+    openSheet(`<h3>${isNew?"Nuova persona":"Modifica persona"}</h3>
       <div class="field"><label>Nome</label><input id="d-nome" value="${esc(op.nome||"")}" placeholder="Es. Wahid"></div>
       <div class="field"><label>Telefono</label><input id="d-tel" type="tel" value="${esc(op.telefono||"")}" placeholder="Es. 333 1234567 (facoltativo)"></div>
       <div class="field"><label>Ruolo</label><select id="d-ruolo">
@@ -857,8 +860,14 @@
       <div class="field"><label>Permessi</label><div id="d-perms">
         ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="sq-add">Aggiungi</button></div>`);
-    $("#d-ruolo").onchange=applyRuoloPreset;applyRuoloPreset();
+      <button class="b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
+    $("#d-ruolo").onchange=applyRuoloPreset;
+    if(isNew){applyRuoloPreset();}
+    else{
+      if(op.ruolo)$("#d-ruolo").value=op.ruolo;
+      const perms=op.permessi||{};
+      $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=!!perms[ch.dataset.perm]);
+    }
   }
   async function ensureMestiere(){
     const {data}=await sb.from("gest_mestieri").select("id").limit(1);
@@ -881,6 +890,19 @@
     const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato",ruolo,permessi});
     if(e2){toast("Errore invito: "+e2.message);return;}
     closeSheet();renderDip();toast("Persona aggiunta, invito creato ✔");
+  }
+  async function squadraSave(id){
+    if(!id)return;
+    const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
+    const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
+    const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
+    const {error}=await sb.from("gest_operatori").update({nome,telefono:telefono||null}).eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    const {error:e2}=await sb.from("gest_membri").update({ruolo,permessi}).eq("operatore_id",id).eq("impresa_id",sbUid);
+    if(e2){toast("Errore permessi: "+e2.message);return;}
+    closeSheet();renderDip();toast("Aggiornato ✔");
   }
 
   /* SCADENZARIO (solo professionista): tabella gest_scadenze, isolamento user_id+mestiere_id come gest_lavori/gest_clienti */
@@ -1385,6 +1407,8 @@
     if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderScadenze();toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
+    if(a==="sq-edit")return squadraForm(dipCache.find(d=>d.id===id));
+    if(a==="sq-save")return squadraSave(id);
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
     if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
