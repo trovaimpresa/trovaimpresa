@@ -499,6 +499,9 @@
     ['Scegli un operatore','Scegli un collaboratore'],
     ['(operatore)','(collaboratore)'],
     ['Operatore','Collaboratore'],
+    /* etichetta del menu assegnatario nel form pratica → "Collaboratore". Il ruolo "Operaio"
+       del form Squadra è protetto via _SKIP_UTENTE (#d-ruolo), quindi resta invariato. */
+    ['Operaio','Collaboratore'],
     /* Messaggi toast/confirm (professionista): frasi esatte, concordanza corretta.
        Il numero in "N lavori collegati" lo gestisce a parte la regex dei conteggi nudi. */
     ['Lavoro creato ✔','Pratica creata ✔'],
@@ -527,7 +530,7 @@
   /* Contenitori del CONTENUTO inserito dall'utente: i loro nodi di testo NON vanno tradotti
      (nomi reparti, titoli/descrizioni pratiche, note, dati cliente, nomi operatori).
      Restano traducibili le etichette fisse (tab "Lavori", "+ Nuovo lavoro", contatori, messaggi vuoti…). */
-  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,#panel-name,#panel-sub,#rie-title,#lf-title,#gal-op,#ag-op,textarea';
+  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,#panel-name,#panel-sub,#rie-title,#lf-title,#gal-op,#ag-op,#d-ruolo,textarea';
   let _praticheObs=null;
   function _osservaPratiche(){
     if(!_praticheObs)return;
@@ -540,7 +543,7 @@
       const root=document.querySelector(sel);if(!root)return;
       const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
       const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
-      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]|squadr|condomin|amministrator|operator/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]|squadr|condomin|amministrator|operai|operator/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
     });
     _osservaPratiche(); /* si riattacca solo a riscrittura conclusa */
   }
