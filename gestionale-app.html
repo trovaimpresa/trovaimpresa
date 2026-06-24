@@ -650,12 +650,30 @@
       </div></div>`;
   }
 
-  function jobCardSupa(l,withFoto){
+  /* Pulisce un numero per wa.me. Numeri vuoti → "" (link senza destinatario).
+     - se l'originale inizia con "+" o "00" ha già il prefisso internazionale:
+       usa le cifre così come sono (tolto "00" iniziale, il "+" cade con le non-cifre);
+     - altrimenti, se le cifre iniziano con "3" (mobile IT) antepone "39". */
+  function waCleanTel(tel){
+    if(!tel)return"";
+    const raw=String(tel).trim();
+    const intl=raw[0]==="+"||raw.indexOf("00")===0;
+    let n=raw.replace(/\D/g,"");
+    if(!n)return"";
+    if(intl){if(n.indexOf("00")===0)n=n.slice(2);return n;}
+    if(/^3/.test(n))return"39"+n;
+    return n;
+  }
+  function jobCardSupa(l,withFoto,opTel){
     const fatto=l.stato==="fatto", dove=l.dove||"";
     const lavLab=fatto?"Fatto":(l.stato==="in_corso"?"In corso":"Da fare");
     const dp=esc(l.data_prevista||"");
     const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
-    const wa="https://wa.me/?text="+encodeURIComponent("Ciao! C'è un nuovo lavoro per te.\nLavoro: "+(l.descrizione||"Lavoro")+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
+    const isPro=ruoloUtente==='professionista';
+    const termLow=isPro?"pratica":"lavoro", termCap=isPro?"Pratica":"Lavoro";
+    const waText=encodeURIComponent("Ciao! C'è un nuovo "+termLow+" per te.\n"+termCap+": "+(l.descrizione||termCap)+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
+    const waTel=waCleanTel(opTel);
+    const wa=waTel?("https://wa.me/"+waTel+"?text="+waText):("https://wa.me/?text="+waText);
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div></div>
       <div class="stati">
@@ -677,15 +695,17 @@
   async function renderJobs(){
     const box=$("#jobs-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;return;}
-    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     let L=data||[];
+    const {data:ops}=await sb.from("gest_operatori").select("id,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const telMap=Object.fromEntries((ops||[]).map(o=>[o.id,o.telefono||""]));
     if(filter.stato==="fatto")L=L.filter(l=>l.stato==="fatto");
     else if(filter.stato==="da_fare")L=L.filter(l=>l.stato!=="fatto");
     else if(filter.stato==="in_corso")L=L.filter(l=>l.stato==="in_corso");
     else if(filter.stato==="da_incassare")L=[];
     if(filter.q){const q=filter.q.toLowerCase();L=L.filter(l=>(l.descrizione||"").toLowerCase().includes(q)||(l.dove||"").toLowerCase().includes(q));}
     L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
-    box.innerHTML=L.length?L.map(l=>jobCardSupa(l,true)).join(""):`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;
+    box.innerHTML=L.length?L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join(""):`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;
   }
 
   let lfLavoroId=null;
@@ -806,7 +826,7 @@
     if(!sb){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Squadra non disponibile</p><small>Connessione non riuscita</small></div>`;return;}
     if(!sbUid){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Accedi per gestire la squadra</p><small>Entra nel pannello per invitare le persone</small></div>`;return;}
     const [{data:ops},{data:membri}]=await Promise.all([
-      sb.from("gest_operatori").select("id,nome").eq("mestiere_id",curMestiere()),
+      sb.from("gest_operatori").select("id,nome,telefono").eq("mestiere_id",curMestiere()),
       sb.from("gest_membri").select("operatore_id,codice,stato")
     ]);
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
@@ -814,7 +834,7 @@
       const inv=mB[o.id], att=inv&&inv.stato==="attivo", codice=inv?inv.codice:"";
       const link=inviteLink(codice);
       const wa="https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link);
-      return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":"Invitato"}</div></div>
+      return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":"Invitato"}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
         <div class="card-acts">${codice?`<button data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
         <button data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>`:""}</div></div>`;
     }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
@@ -825,9 +845,11 @@
     const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
     $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm));
   }
-  function squadraForm(){
+  function squadraForm(op){
+    op=op||{};
     openSheet(`<h3>Nuova persona</h3>
-      <div class="field"><label>Nome</label><input id="d-nome" placeholder="Es. Wahid"></div>
+      <div class="field"><label>Nome</label><input id="d-nome" value="${esc(op.nome||"")}" placeholder="Es. Wahid"></div>
+      <div class="field"><label>Telefono</label><input id="d-tel" type="tel" value="${esc(op.telefono||"")}" placeholder="Es. 333 1234567 (facoltativo)"></div>
       <div class="field"><label>Ruolo</label><select id="d-ruolo">
         <option value="operaio">Operaio</option>
         <option value="preposto">Preposto</option>
@@ -848,11 +870,12 @@
   async function squadraAdd(){
     const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
+    const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
     const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const mestiere_id=curMestiere();
     if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
-    const {data:op,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id,nome}).select().single();
+    const {data:op,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id,nome,telefono:telefono||null}).select().single();
     if(error){toast("Errore: "+error.message);return;}
     const codice=sbRand();
     const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato",ruolo,permessi});
@@ -981,7 +1004,7 @@
   }
   async function fillOperai(){
     const sel=$("#j-operaio");if(!sel||!sb||!sbUid)return;
-    const {data}=await sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const {data}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     sel.innerHTML=`<option value="">— nessuno —</option>`+(data||[]).map(o=>`<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("");
   }
   async function fillClienti(selId){
