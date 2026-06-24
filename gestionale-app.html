@@ -671,8 +671,9 @@
     const dp=esc(l.data_prevista||"");
     const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
     const isPro=ruoloUtente==='professionista';
-    const termLow=isPro?"pratica":"lavoro", termCap=isPro?"Pratica":"Lavoro";
-    const waText=encodeURIComponent("Ciao! C'è un nuovo "+termLow+" per te.\n"+termCap+": "+(l.descrizione||termCap)+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
+    const termCap=isPro?"Pratica":"Lavoro";
+    const intro=isPro?"Ciao! C'è una nuova pratica per te.":"Ciao! C'è un nuovo lavoro per te.";
+    const waText=encodeURIComponent(intro+"\n"+termCap+": "+(l.descrizione||termCap)+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
     const waTel=waCleanTel(opTel);
     const wa=waTel?("https://wa.me/"+waTel+"?text="+waText):("https://wa.me/?text="+waText);
     return `<div class="job">
