@@ -567,9 +567,27 @@
     if(sb&&sbUid){
       const {data}=await sb.from("gest_lavori").select("mestiere_id,stato").eq("user_id",sbUid);
       rows=data||[];
-      const {data:mest}=await sb.from("gest_mestieri").select("id").eq("user_id",sbUid);
-      const mineIds=mest?mest.map(m=>m.id):[];
-      ps=ps.filter(p=>p.mestiere_id&&mineIds.includes(p.mestiere_id));
+      /* FONTE PRIMARIA dei reparti = gest_mestieri su Supabase (visibili da qualsiasi browser/account).
+         state.panels resta come cache/fallback locale: lo idratiamo dai mestieri così entrata (cur/curMestiere)
+         e contatori continuano a funzionare senza altre modifiche. */
+      const {data:mest}=await sb.from("gest_mestieri").select("id,nome,icona,colore,ordine").eq("user_id",sbUid).order("ordine",{ascending:true});
+      let changed=false;
+      ps=(mest||[]).map(m=>{
+        let p=(state.panels||[]).find(x=>x.mestiere_id===m.id);
+        const pal=COLORI.find(c=>c.a===m.colore); /* dark/soft (ad/as) non sono su DB: ricavati dalla palette per colore */
+        if(!p){
+          const col=pal||{a:m.colore,ad:m.colore,as:m.colore};
+          p={id:uid(),nome:m.nome,icon:m.icona||"🛠️",a:col.a,ad:col.ad,as:col.as,mestiere_id:m.id};
+          (state.panels=state.panels||[]).push(p);
+          if(!state[p.id])state[p.id]={clienti:[],dipendenti:[],lavori:[],note:{}};
+          changed=true;
+        }else{
+          p.nome=m.nome; p.icon=m.icona||p.icon; /* nome/icona dal DB come fonte primaria */
+          if(pal){p.a=pal.a;p.ad=pal.ad;p.as=pal.as;}
+        }
+        return p;
+      });
+      if(changed)await save();
     }
     $("#panels").innerHTML=ps.length?ps.map(p=>{
       const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
