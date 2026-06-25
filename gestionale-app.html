@@ -438,10 +438,13 @@
     if(ruoloUtente==='professionista'){
       const sub=document.querySelector('.landing-sub');
       if(sub)sub.textContent="Ogni reparto è separato: pratiche, clienti, collaboratori e calendario non si mischiano.";
+      const lt=document.querySelector('.landing-top h1'); /* titolo landing statico: adattato per ruolo via JS, fuori dal translator */
+      if(lt)lt.textContent="Gestionale Studio";
       const fsearch=document.querySelector('#f-search'); /* placeholder in HTML statico: per-ruolo via JS, non dal translator */
       if(fsearch)fsearch.placeholder="Cerca cliente o pratica...";
       avviaLocalizzazionePratiche();
       renderScadenze();
+      if(!cur)renderLanding(); /* ruoloUtente noto solo ora: ridisegna le card landing coi contatori "pratiche" */
     }
   }
   /* Solo professionista: nei TESTI VISIBILI dell'interfaccia del reparto (#appview e i form in #sheet)
@@ -574,7 +577,7 @@
       return `<div class="panel-card" data-action="enter" data-p="${p.id}" style="background:linear-gradient(135deg,${p.a},${p.ad})">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
         <span class="pc-ic">${p.icon}</span><h2>${esc(p.nome)}</h2>
-        <span class="pc-meta">${df} da fare · ${tot} lavori totali</span></div>`;
+        <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
     }).join(""):`<div class="empty-rep">Ancora nessun reparto.<br>Creane uno qui sotto 👇</div>`;
   }
 
