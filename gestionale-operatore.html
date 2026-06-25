@@ -183,11 +183,12 @@ async function boot(session){
   if(!session){gate("Per entrare usa il link che ti ha mandato la tua impresa.");return;}
   MIO.uid=session.user.id;
   const {data:membri,error}=await sb.from("gest_membri")
-    .select("impresa_id,operatore_id,stato,permessi").eq("membro_id",MIO.uid).eq("stato","attivo");
+    .select("impresa_id,operatore_id,ruolo,stato,permessi").eq("membro_id",MIO.uid).eq("stato","attivo");
   if(error){gate("Non riesco a caricare. Riprova tra poco.");return;}
   if(!membri||!membri.length){gate("Non sei ancora collegato a un'impresa. Apri il link di invito.");return;}
   MIO.impresaId=membri[0].impresa_id;
   MIO.operatoreId=membri[0].operatore_id;
+  MIO.ruolo=membri[0].ruolo;
   if(MIO.operatoreId){
     const {data:op}=await sb.from("gest_operatori").select("nome").eq("id",MIO.operatoreId).maybeSingle();
     MIO.nome=(op&&op.nome)||"Operatore";
@@ -208,7 +209,7 @@ async function boot(session){
 
 async function loadLavori(){
   let q=sb.from("gest_lavori").select("*").eq("user_id",MIO.impresaId);
-  if(MIO.operatoreId)q=q.eq("operatore_id",MIO.operatoreId);
+  if(MIO.operatoreId && MIO.ruolo!=='segretaria')q=q.eq("operatore_id",MIO.operatoreId); /* segretaria: niente filtro operatore → tutte le pratiche dello studio */
   const {data}=await q.order("data_prevista",{ascending:true});
   LAVORI=data||[];
   const ids=[...new Set(LAVORI.map(l=>l.cliente_id).filter(Boolean))];
