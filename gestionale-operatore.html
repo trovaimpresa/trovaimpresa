@@ -25,6 +25,11 @@
 
   .wrap{max-width:520px;margin:0 auto;padding:14px;}
 
+  /* NAV SEZIONI */
+  .app-nav{display:flex;justify-content:center;gap:8px;padding:14px 14px 0;max-width:520px;margin:0 auto;}
+  .nav-btn{background:var(--green-l);color:var(--text);border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;}
+  .nav-btn.active{background:var(--green);color:#fff;}
+
   /* CALENDARIO */
   .cal{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:14px;margin-bottom:16px;}
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -182,11 +187,15 @@ function show(v){
   $("#view-agenda").classList.toggle("hidden",v!=="agenda");
   $("#view-lavoro").classList.toggle("hidden",v!=="lavoro");
   $("#view-clienti").classList.toggle("hidden",v!=="clienti");
+  if(v==="agenda"||v==="clienti"){curView=v;renderNav();}
 }
 function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
+let curView="agenda";
 function renderNav(){
   $("#nav-agenda").classList.toggle("hidden",MIO.permessi.lavori!==true);
   $("#nav-clienti").classList.toggle("hidden",MIO.permessi.clienti!==true);
+  $("#nav-agenda").classList.toggle("active",curView==="agenda");
+  $("#nav-clienti").classList.toggle("active",curView==="clienti");
 }
 
 /* ===== avvio ===== */
