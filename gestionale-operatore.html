@@ -55,6 +55,11 @@
   .b-fatto{background:var(--green-l);color:var(--green-d);}
   .empty-state{text-align:center;color:var(--muted);padding:30px 14px;font-size:14px;}
 
+  /* CLIENTI */
+  .cli-card{background:var(--card);border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.07);padding:14px;margin-bottom:10px;}
+  .cli-card h3{font-size:16px;margin-bottom:4px;}
+  .cli-card .cli-info{font-size:13px;color:var(--muted);line-height:1.5;}
+
   /* GATE */
   #gate{max-width:420px;margin:60px auto;padding:24px;text-align:center;}
   #gate .ic{font-size:40px;margin-bottom:12px;}
@@ -125,7 +130,8 @@
 
   <!-- VISTA CLIENTI -->
   <div class="wrap hidden" id="view-clienti">
-    <h2>Clienti</h2>
+    <div class="day-title">Clienti</div>
+    <div id="clienti-list"></div>
   </div>
 
   <!-- VISTA DETTAGLIO -->
@@ -173,6 +179,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
 const MIO={uid:null,impresaId:null,operatoreId:null,nome:"",permessi:{}};
 let LAVORI=[], CLIENTI={}, selDate=ymd(new Date()), calY, calM, curLavoro=null;
+let CLIENTI_LISTA=null;
 
 const $=s=>document.querySelector(s);
 const MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
@@ -232,6 +239,7 @@ async function boot(session){
     renderCal();renderDay();
     show("agenda");
   }else{
+    await loadClienti();
     show("clienti");
   }
 }
@@ -246,6 +254,20 @@ async function loadLavori(){
     const {data:cl}=await sb.from("gest_clienti").select("id,nome,indirizzo").in("id",ids);
     CLIENTI=Object.fromEntries((cl||[]).map(c=>[c.id,c]));
   }
+}
+
+async function loadClienti(){
+  if(CLIENTI_LISTA)return renderClientiSezione();
+  const {data}=await sb.from("gest_clienti").select("id,nome,indirizzo,referente,telefono").eq("user_id",MIO.impresaId).order("nome");
+  CLIENTI_LISTA=data||[];
+  renderClientiSezione();
+}
+function renderClientiSezione(){
+  const box=$("#clienti-list");
+  const lista=CLIENTI_LISTA||[];
+  box.innerHTML=lista.length?lista.map(c=>`<div class="cli-card"><h3>${esc(c.nome)}</h3>
+    <div class="cli-info">${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"📞 "+esc(c.telefono):""}</div></div>`).join("")
+    :`<div class="empty-state">Nessun cliente</div>`;
 }
 
 /* ===== calendario ===== */
@@ -380,7 +402,7 @@ $("#btn-fatto").onclick=async()=>{
 /* esci */
 $("#btn-esci").onclick=async()=>{await sb.auth.signOut();gate("Sei uscito. Per rientrare apri il tuo link di invito.");};
 $("#nav-agenda").onclick=()=>{renderCal();renderDay();show("agenda");};
-$("#nav-clienti").onclick=()=>{show("clienti");};
+$("#nav-clienti").onclick=async()=>{await loadClienti();show("clienti");};
 </script>
 </body>
 </html>
