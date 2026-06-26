@@ -1148,8 +1148,20 @@
     await save();closeSheet();renderLanding();toast("Reparto creato ✔");
   }
   async function delPanel(id){
-    if(!confirm("Eliminare questo reparto e tutto il suo contenuto?"))return;
-    state.panels=(state.panels||[]).filter(p=>p.id!==id);
+    const p=(state.panels||[]).find(x=>x.id===id);
+    if(!p)return;
+    let n=0;
+    if(sb&&sbUid&&p.mestiere_id){
+      const {data}=await sb.from("gest_lavori").select("id").eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
+      n=(data||[]).length;
+    }
+    const msg=n?`Stai per eliminare il reparto «${p.nome}» e le sue ${n} pratiche. L'operazione è definitiva. Continuare?`:`Stai per eliminare il reparto «${p.nome}». L'operazione è definitiva. Continuare?`;
+    if(!gconfirm(msg))return;
+    if(sb&&sbUid&&p.mestiere_id){
+      await sb.from("gest_lavori").delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
+      await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
+    }
+    state.panels=(state.panels||[]).filter(x=>x.id!==id);
     delete state[id];
     await save();renderLanding();toast("Reparto eliminato");
   }
