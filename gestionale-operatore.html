@@ -98,6 +98,10 @@
       </div>
       <button class="esci" id="btn-esci">Esci</button>
     </div>
+    <div class="app-nav" id="app-nav">
+      <button class="nav-btn hidden" id="nav-agenda">Agenda</button>
+      <button class="nav-btn hidden" id="nav-clienti">Clienti</button>
+    </div>
   </header>
 
   <!-- VISTA AGENDA -->
@@ -112,6 +116,11 @@
     </div>
     <div class="day-title" id="day-title">Lavori di oggi</div>
     <div id="day-list"></div>
+  </div>
+
+  <!-- VISTA CLIENTI -->
+  <div class="wrap hidden" id="view-clienti">
+    <h2>Clienti</h2>
   </div>
 
   <!-- VISTA DETTAGLIO -->
@@ -157,7 +166,7 @@ const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
 const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
-const MIO={uid:null,impresaId:null,operatoreId:null,nome:""};
+const MIO={uid:null,impresaId:null,operatoreId:null,nome:"",permessi:{}};
 let LAVORI=[], CLIENTI={}, selDate=ymd(new Date()), calY, calM, curLavoro=null;
 
 const $=s=>document.querySelector(s);
@@ -172,8 +181,13 @@ function show(v){
   $("#app").classList.toggle("hidden",v==="gate");
   $("#view-agenda").classList.toggle("hidden",v!=="agenda");
   $("#view-lavoro").classList.toggle("hidden",v!=="lavoro");
+  $("#view-clienti").classList.toggle("hidden",v!=="clienti");
 }
 function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
+function renderNav(){
+  $("#nav-agenda").classList.toggle("hidden",MIO.permessi.lavori!==true);
+  $("#nav-clienti").classList.toggle("hidden",MIO.permessi.clienti!==true);
+}
 
 /* ===== avvio ===== */
 sb.auth.getSession().then(({data})=>boot(data.session));
@@ -195,16 +209,22 @@ async function boot(session){
   }
   $("#hd-name").textContent=MIO.nome||"Operatore";
   const perms=membri[0].permessi;
-  if(perms && perms.lavori!==true){
+  MIO.permessi=perms||{};
+  if(perms && perms.lavori!==true && perms.clienti!==true){
     const LABELS={calendario:"Calendario",lavori:"Lavori",foto:"Foto",note:"Note",clienti:"Clienti",fatture:"Fatture",pagamenti:"Pagamenti"};
     const attivi=Object.keys(LABELS).filter(k=>perms[k]===true).map(k=>LABELS[k]);
     gate(attivi.length?("Il tuo accesso: "+attivi.join(", ")+" — sezioni in arrivo"):"Il tuo accesso non include l'agenda — sezioni in arrivo");
     return;
   }
-  await loadLavori();
-  const n=new Date();calY=n.getFullYear();calM=n.getMonth();
-  renderCal();renderDay();
-  show("agenda");
+  renderNav();
+  if(!perms || perms.lavori===true){
+    await loadLavori();
+    const n=new Date();calY=n.getFullYear();calM=n.getMonth();
+    renderCal();renderDay();
+    show("agenda");
+  }else{
+    show("clienti");
+  }
 }
 
 async function loadLavori(){
@@ -350,6 +370,8 @@ $("#btn-fatto").onclick=async()=>{
 
 /* esci */
 $("#btn-esci").onclick=async()=>{await sb.auth.signOut();gate("Sei uscito. Per rientrare apri il tuo link di invito.");};
+$("#nav-agenda").onclick=()=>{renderCal();renderDay();show("agenda");};
+$("#nav-clienti").onclick=()=>{show("clienti");};
 </script>
 </body>
 </html>
