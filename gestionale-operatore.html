@@ -111,6 +111,7 @@
     <div class="app-nav" id="app-nav">
       <button class="nav-btn hidden" id="nav-agenda">Agenda</button>
       <button class="nav-btn hidden" id="nav-clienti">Clienti</button>
+      <button class="nav-btn hidden" id="nav-scadenze">Scadenze</button>
     </div>
   </header>
 
@@ -132,6 +133,12 @@
   <div class="wrap hidden" id="view-clienti">
     <div class="day-title">Clienti</div>
     <div id="clienti-list"></div>
+  </div>
+
+  <!-- VISTA SCADENZE -->
+  <div class="wrap hidden" id="view-scadenze">
+    <div class="day-title">Scadenze</div>
+    <div id="scadenze-list"></div>
   </div>
 
   <!-- VISTA DETTAGLIO -->
@@ -180,6 +187,8 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 const MIO={uid:null,impresaId:null,operatoreId:null,nome:"",permessi:{}};
 let LAVORI=[], CLIENTI={}, selDate=ymd(new Date()), calY, calM, curLavoro=null;
 let CLIENTI_LISTA=null;
+let SCADENZE_LISTA=null;
+let SCAD_CLIMAP={};
 
 const $=s=>document.querySelector(s);
 const MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
@@ -194,15 +203,18 @@ function show(v){
   $("#view-agenda").classList.toggle("hidden",v!=="agenda");
   $("#view-lavoro").classList.toggle("hidden",v!=="lavoro");
   $("#view-clienti").classList.toggle("hidden",v!=="clienti");
-  if(v==="agenda"||v==="clienti"){curView=v;renderNav();}
+  $("#view-scadenze").classList.toggle("hidden",v!=="scadenze");
+  if(v==="agenda"||v==="clienti"||v==="scadenze"){curView=v;renderNav();}
 }
 function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
 let curView="agenda";
 function renderNav(){
   $("#nav-agenda").classList.toggle("hidden",MIO.permessi.lavori!==true);
   $("#nav-clienti").classList.toggle("hidden",MIO.permessi.clienti!==true);
+  $("#nav-scadenze").classList.toggle("hidden",MIO.permessi.lavori!==true);
   $("#nav-agenda").classList.toggle("active",curView==="agenda");
   $("#nav-clienti").classList.toggle("active",curView==="clienti");
+  $("#nav-scadenze").classList.toggle("active",curView==="scadenze");
 }
 
 /* ===== avvio ===== */
@@ -268,6 +280,36 @@ function renderClientiSezione(){
   box.innerHTML=lista.length?lista.map(c=>`<div class="cli-card"><h3>${esc(c.nome)}</h3>
     <div class="cli-info">${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"📞 "+esc(c.telefono):""}</div></div>`).join("")
     :`<div class="empty-state">Nessun cliente</div>`;
+}
+
+async function loadScadenze(){
+  if(SCADENZE_LISTA)return renderScadenzeSezione();
+  const [{data:sc},{data:cl}]=await Promise.all([
+    sb.from("gest_scadenze").select("id,titolo,tipo_pratica,cliente_id,data_scadenza,stato,note").eq("user_id",MIO.impresaId).order("data_scadenza",{ascending:true}),
+    sb.from("gest_clienti").select("id,nome").eq("user_id",MIO.impresaId)
+  ]);
+  SCADENZE_LISTA=sc||[];
+  SCAD_CLIMAP=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
+  renderScadenzeSezione();
+}
+function renderScadenzeSezione(){
+  const box=$("#scadenze-list");
+  const lista=SCADENZE_LISTA||[];
+  const oggi=ymd(new Date());
+  const[ay,am,ad]=oggi.split("-").map(Number);
+  const lim=ymd(new Date(ay,am-1,ad+7));
+  box.innerHTML=lista.length?lista.map(s=>scadCardOperatore(s,oggi,lim)).join("")
+    :`<div class="empty-state">Nessuna scadenza</div>`;
+}
+function scadCardOperatore(s,oggi,lim){
+  const fatta=s.stato==="fatta";
+  const cliNome=s.cliente_id?(SCAD_CLIMAP[s.cliente_id]||"(cliente eliminato)"):"";
+  let bg="#eef2f7",fg="#555",lab="Aperta";
+  if(fatta){bg="#e3f3e8";fg="var(--green-d)";lab="Fatta";}
+  else if(s.data_scadenza&&s.data_scadenza<oggi){bg="#fdecea";fg="#c0392b";lab="Scaduta";}
+  else if(s.data_scadenza&&s.data_scadenza<=lim){bg="#fff4e5";fg="#c2410c";lab="In scadenza";}
+  return `<div class="cli-card"><h3>${esc(s.titolo||"Scadenza")}</h3>
+    <div class="cli-info">${s.tipo_pratica?"📄 "+esc(s.tipo_pratica)+"<br>":""}${cliNome?"👤 "+esc(cliNome)+"<br>":""}📅 ${dataIt(s.data_scadenza)} <span class="badge" style="background:${bg};color:${fg}">${lab}</span>${s.note?"<br>📝 "+esc(s.note):""}</div></div>`;
 }
 
 /* ===== calendario ===== */
@@ -403,6 +445,7 @@ $("#btn-fatto").onclick=async()=>{
 $("#btn-esci").onclick=async()=>{await sb.auth.signOut();gate("Sei uscito. Per rientrare apri il tuo link di invito.");};
 $("#nav-agenda").onclick=()=>{renderCal();renderDay();show("agenda");};
 $("#nav-clienti").onclick=async()=>{await loadClienti();show("clienti");};
+$("#nav-scadenze").onclick=async()=>{await loadScadenze();show("scadenze");};
 </script>
 </body>
 </html>
