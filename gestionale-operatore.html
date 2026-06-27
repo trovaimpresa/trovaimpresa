@@ -112,6 +112,7 @@
       <button class="nav-btn hidden" id="nav-agenda">Agenda</button>
       <button class="nav-btn hidden" id="nav-clienti">Clienti</button>
       <button class="nav-btn hidden" id="nav-scadenze">Scadenze</button>
+      <button class="nav-btn hidden" id="nav-fatture">Fatture</button>
     </div>
   </header>
 
@@ -139,6 +140,13 @@
   <div class="wrap hidden" id="view-scadenze">
     <div class="day-title">Scadenze</div>
     <div id="scadenze-list"></div>
+  </div>
+
+  <!-- VISTA FATTURE -->
+  <div class="wrap hidden" id="view-fatture">
+    <div class="day-title">Fatture</div>
+    <div id="fatture-list"></div>
+    <input type="file" id="fatt-pdf-file" accept="application/pdf" class="hidden">
   </div>
 
   <!-- VISTA DETTAGLIO -->
@@ -189,6 +197,10 @@ let LAVORI=[], CLIENTI={}, selDate=ymd(new Date()), calY, calM, curLavoro=null;
 let CLIENTI_LISTA=null;
 let SCADENZE_LISTA=null;
 let SCAD_CLIMAP={};
+let FATTURE_LISTA=null;
+let FATT_CLIMAP={};
+let FATT_PDFCACHE={};
+let fattUploadLavoroId=null;
 
 const $=s=>document.querySelector(s);
 const MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
@@ -196,6 +208,7 @@ const DOW=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
 
 function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function dataIt(s){if(!s)return"";const[a,m,g]=s.split("-");return g+"/"+m+"/"+a;}
+function eur(n){return "€ "+(Number(n)||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("on");setTimeout(()=>el.classList.remove("on"),2200);}
 function show(v){
   $("#gate").classList.toggle("hidden",v!=="gate");
@@ -204,7 +217,8 @@ function show(v){
   $("#view-lavoro").classList.toggle("hidden",v!=="lavoro");
   $("#view-clienti").classList.toggle("hidden",v!=="clienti");
   $("#view-scadenze").classList.toggle("hidden",v!=="scadenze");
-  if(v==="agenda"||v==="clienti"||v==="scadenze"){curView=v;renderNav();}
+  $("#view-fatture").classList.toggle("hidden",v!=="fatture");
+  if(v==="agenda"||v==="clienti"||v==="scadenze"||v==="fatture"){curView=v;renderNav();}
 }
 function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
 let curView="agenda";
@@ -212,9 +226,11 @@ function renderNav(){
   $("#nav-agenda").classList.toggle("hidden",MIO.permessi.lavori!==true);
   $("#nav-clienti").classList.toggle("hidden",MIO.permessi.clienti!==true);
   $("#nav-scadenze").classList.toggle("hidden",MIO.permessi.lavori!==true);
+  $("#nav-fatture").classList.toggle("hidden",MIO.permessi.fatture!==true);
   $("#nav-agenda").classList.toggle("active",curView==="agenda");
   $("#nav-clienti").classList.toggle("active",curView==="clienti");
   $("#nav-scadenze").classList.toggle("active",curView==="scadenze");
+  $("#nav-fatture").classList.toggle("active",curView==="fatture");
 }
 
 /* ===== avvio ===== */
@@ -310,6 +326,76 @@ function scadCardOperatore(s,oggi,lim){
   else if(s.data_scadenza&&s.data_scadenza<=lim){bg="#fff4e5";fg="#c2410c";lab="In scadenza";}
   return `<div class="cli-card"><h3>${esc(s.titolo||"Scadenza")}</h3>
     <div class="cli-info">${s.tipo_pratica?"📄 "+esc(s.tipo_pratica)+"<br>":""}${cliNome?"👤 "+esc(cliNome)+"<br>":""}📅 ${dataIt(s.data_scadenza)} <span class="badge" style="background:${bg};color:${fg}">${lab}</span>${s.note?"<br>📝 "+esc(s.note):""}</div></div>`;
+}
+
+/* ===== fatture (segretaria: carica/apre il PDF, non genera) ===== */
+async function loadFatture(){
+  if(FATTURE_LISTA)return renderFattureSezione();
+  const [{data:lav},{data:cl}]=await Promise.all([
+    sb.from("gest_lavori").select("id,descrizione,cliente_id,stato,importo,fatt_stato,data_prevista,data_fatto").eq("user_id",MIO.impresaId),
+    sb.from("gest_clienti").select("id,nome").eq("user_id",MIO.impresaId)
+  ]);
+  FATTURE_LISTA=(lav||[]).filter(l=>+l.importo>0);
+  FATT_CLIMAP=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
+  await loadFattPdf();
+  renderFattureSezione();
+}
+async function loadFattPdf(){
+  FATT_PDFCACHE={};
+  const ids=(FATTURE_LISTA||[]).map(l=>l.id);
+  if(!ids.length)return;
+  const {data:pdfs}=await sb.from("gest_foto").select("id,lavoro_id,storage_path,created_at").eq("user_id",MIO.impresaId).eq("tipo","fattura").in("lavoro_id",ids).order("created_at",{ascending:false});
+  (pdfs||[]).forEach(p=>{if(!FATT_PDFCACHE[p.lavoro_id])FATT_PDFCACHE[p.lavoro_id]=p;});
+}
+function sezFatt(titolo,arr,vuoto){
+  const cards=arr.length?arr.map(fattCardOperatore).join(""):`<div class="empty-state">${vuoto}</div>`;
+  return `<div class="day-title" style="font-size:15px;margin-top:14px">${titolo}</div>${cards}`;
+}
+function fattCardOperatore(l){
+  const cli=l.cliente_id?(FATT_CLIMAP[l.cliente_id]||"(cliente eliminato)"):"";
+  const pdf=FATT_PDFCACHE[l.id];
+  let lab="Da fatturare",bg="#fff4e5",fg="#c2410c";
+  if(l.fatt_stato==="pagata"){lab="Pagata";bg="#e3f3e8";fg="var(--green-d)";}
+  else if(l.fatt_stato==="emessa"){lab="Emessa";bg="#eef2f7";fg="#555";}
+  const apri=pdf?`<button class="btn-line" data-fatt-open="${esc(pdf.id)}">📄 Apri fattura PDF</button>`:"";
+  return `<div class="cli-card"><h3>${esc(l.descrizione||"Lavoro")}</h3>
+    <div class="cli-info">${cli?"👤 "+esc(cli)+"<br>":""}💶 ${eur(l.importo)} <span class="badge" style="background:${bg};color:${fg}">${lab}</span>${(l.data_fatto||l.data_prevista)?"<br>📅 "+dataIt(l.data_fatto||l.data_prevista):""}</div>
+    <div class="row-btns" style="margin-top:10px">${apri}<button class="btn-line" data-fatt-up="${l.id}">📎 Carica fattura PDF</button></div></div>`;
+}
+function renderFattureSezione(){
+  const box=$("#fatture-list");
+  const lista=FATTURE_LISTA||[];
+  if(!lista.length){box.innerHTML=`<div class="empty-state">Nessuna pratica da fatturare</div>`;return;}
+  const daFatt=lista.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none");
+  const emesse=lista.filter(l=>l.fatt_stato==="emessa");
+  const pagate=lista.filter(l=>l.fatt_stato==="pagata");
+  let h="";
+  h+=sezFatt("📄 Da fatturare (lavori finiti)",daFatt,"Nessun lavoro finito da fatturare.");
+  h+=sezFatt("💶 Emesse · da incassare",emesse,"Nessuna fattura da incassare.");
+  h+=sezFatt("✅ Pagate",pagate,"Ancora nessuna fattura pagata.");
+  box.innerHTML=h;
+  box.querySelectorAll("[data-fatt-up]").forEach(b=>b.onclick=()=>chiediFatturaPdf(b.dataset.fattUp));
+  box.querySelectorAll("[data-fatt-open]").forEach(b=>b.onclick=()=>apriFatturaPdf(b.dataset.fattOpen));
+}
+function chiediFatturaPdf(lavoroId){fattUploadLavoroId=lavoroId;$("#fatt-pdf-file").click();}
+async function uploadFatturaPdf(file){
+  if(!file||!fattUploadLavoroId)return;
+  if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
+  const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+  const path=MIO.impresaId+"/"+fattUploadLavoroId+"/"+Date.now()+"_"+safe;
+  const {error:up}=await sb.storage.from("gestionale-foto").upload(path,file);
+  if(up){toast("Fattura non caricata: "+up.message);return;}
+  const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:fattUploadLavoroId,tipo:"fattura",operatore:MIO.nome,storage_path:path});
+  if(ins){toast("File su, ma non salvato: "+ins.message);return;}
+  toast("Fattura PDF caricata ✔");
+  await loadFattPdf();renderFattureSezione();
+}
+async function apriFatturaPdf(fotoId){
+  const f=Object.values(FATT_PDFCACHE).find(p=>p.id===fotoId);
+  if(!f)return;
+  const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
+  if(su&&su.signedUrl)window.open(su.signedUrl,"_blank");
+  else toast("Non riesco ad aprire la fattura");
 }
 
 /* ===== calendario ===== */
@@ -446,6 +532,8 @@ $("#btn-esci").onclick=async()=>{await sb.auth.signOut();gate("Sei uscito. Per r
 $("#nav-agenda").onclick=()=>{renderCal();renderDay();show("agenda");};
 $("#nav-clienti").onclick=async()=>{await loadClienti();show("clienti");};
 $("#nav-scadenze").onclick=async()=>{await loadScadenze();show("scadenze");};
+$("#nav-fatture").onclick=async()=>{await loadFatture();show("fatture");};
+$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
 </script>
 </body>
 </html>
