@@ -433,6 +433,10 @@ function statoBadge(s){
   if(v.includes("corso"))return'<span class="badge b-corso">In corso</span>';
   return'<span class="badge b-dafare">Da fare</span>';
 }
+function etic(s){
+  if(MIO.tipoStudio!=='professionista')return s;
+  return s.replace(/Lavori/g,"Pratiche").replace(/Lavoro/g,"Pratica").replace(/lavoro/g,"pratica").replace(/lavori/g,"pratiche");
+}
 function renderDay(){
   const oggi=ymd(new Date());
   $("#day-title").textContent=(selDate===oggi)?"Lavori di oggi":"Lavori del "+dataIt(selDate);
