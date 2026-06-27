@@ -435,7 +435,7 @@ function statoBadge(s){
 }
 function etic(s){
   if(MIO.tipoStudio!=='professionista')return s;
-  return s.replace(/Lavori/g,"Pratiche").replace(/Lavoro/g,"Pratica").replace(/lavoro/g,"pratica").replace(/lavori/g,"pratiche");
+  return s.replace(/Nessun lavoro/g,"Nessuna pratica").replace(/Lavori/g,"Pratiche").replace(/Lavoro/g,"Pratica").replace(/lavoro/g,"pratica").replace(/lavori/g,"pratiche");
 }
 function renderDay(){
   const oggi=ymd(new Date());
