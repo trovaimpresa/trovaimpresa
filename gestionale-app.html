@@ -287,6 +287,7 @@
       <div class="sec-head"><h2>Fatture</h2><button class="add" data-action="new-fattura">+ Nuova</button></div>
       <div class="fatt-summary" id="fatt-summary"></div>
       <div id="fatt-body"></div>
+      <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
     </section>
 
     <section id="galleria">
@@ -770,18 +771,53 @@
     if(n)toast(n===1?"Foto aggiunta ✔":n+" foto aggiunte ✔");
     renderLavoroFoto();
   }
+  let fattUploadLavoroId=null;
+  function chiediFatturaPdf(lavoroId){
+    fattUploadLavoroId=lavoroId;
+    $("#fatt-pdf-file").click();
+  }
+  async function uploadFatturaPdf(file){
+    if(!file||!fattUploadLavoroId)return;
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    const path=sbUid+"/"+fattUploadLavoroId+"/"+Date.now()+"_"+safe;
+    const {error:up}=await sb.storage.from("gestionale-foto").upload(path,file);
+    if(up){toast("Fattura non caricata: "+up.message);return;}
+    const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:fattUploadLavoroId,tipo:"fattura",operatore:"Capo",storage_path:path});
+    if(ins){toast("File su, ma non salvato: "+ins.message);return;}
+    toast("Fattura PDF caricata ✔");renderFatture();
+  }
+  async function apriFatturaPdf(fotoId){
+    const all=Object.values(fatturaPdfCache);
+    const f=all.find(p=>p.id===fotoId);
+    if(!f)return;
+    const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
+    if(su&&su.signedUrl)window.open(su.signedUrl,"_blank");
+    else toast("Non riesco ad aprire la fattura");
+  }
   function fattRow(l,btn){
+    const fatturaPdf=fatturaPdfCache[l.id];
+    const fatturaBtns=(fatturaPdf?`<button class="ja" data-action="open-fattura" data-id="${esc(fatturaPdf.id)}">📄 Apri fattura PDF</button>`:"")
+      +`<button class="ja" data-action="upload-fattura" data-id="${l.id}">📎 Carica fattura PDF</button>`;
     return `<div class="fatt-row">
       <div class="fatt-info"><b>${esc(l.descrizione||"Lavoro")}</b>
         <div class="sub">📅 ${fdate(l.data_fatto||l.data_prevista)}</div></div>
       <div class="fatt-imp">${eur(l.importo)}</div>
-      <button class="ja" data-action="pdf" data-id="${l.id}">PDF</button>${btn||""}</div>`;
+      <button class="ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
   }
+  let fatturaPdfCache={};
   async function renderFatture(){
     let L=[];
     if(sb&&sbUid){
       const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       L=(data||[]).filter(l=>+l.importo>0);
+      const ids=L.map(l=>l.id);
+      fatturaPdfCache={};
+      if(ids.length){
+        const {data:pdfs}=await sb.from("gest_foto").select("id,lavoro_id,storage_path,created_at").eq("user_id",sbUid).eq("tipo","fattura").in("lavoro_id",ids).order("created_at",{ascending:false});
+        (pdfs||[]).forEach(p=>{if(!fatturaPdfCache[p.lavoro_id])fatturaPdfCache[p.lavoro_id]=p;});
+      }
     }
     const daFatt=L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none");
     const daInc=L.filter(l=>l.fatt_stato==="emessa");
@@ -1317,7 +1353,7 @@
     ]);
     const lavName=Object.fromEntries((lavori||[]).map(l=>[l.id,l.descrizione||"Lavoro"]));
     const lavIds=new Set((lavori||[]).map(l=>l.id));
-    const all=(foto||[]).filter(f=>lavIds.has(f.lavoro_id));
+    const all=(foto||[]).filter(f=>lavIds.has(f.lavoro_id)&&f.tipo!=="fattura");
     const ops=new Set();all.forEach(f=>ops.add(f.operatore||""));
     const opChips=[`<button class="chip ${galFilter.op===""?"on":""}" data-action="gal-op" data-v="">${ruoloUtente==='professionista'?'Tutti i collaboratori':'Tutti gli operatori'}</button>`]
       .concat(Array.from(ops).filter(Boolean).map(o=>`<button class="chip ${galFilter.op===o?"on":""}" data-action="gal-op" data-v="${esc(o)}">${esc(o)}</button>`)).join("");
@@ -1422,6 +1458,8 @@
       if(error){toast("Errore: "+error.message);return;}
       renderFatture();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
     }
+    if(a==="upload-fattura")return chiediFatturaPdf(id);
+    if(a==="open-fattura")return apriFatturaPdf(id);
     if(a==="open-day")return openDay(t.dataset.d);
     if(a==="save-note"){const ds=t.dataset.d,v=$("#day-note").value.trim();if(v)db().note[ds]=v;else delete db().note[ds];await save();closeSheet();renderCal();toast("Nota salvata 📌");return;}
     if(a==="cal-prev"){cal.setMonth(cal.getMonth()-1);renderCal();return;}
@@ -1463,6 +1501,7 @@
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
+  if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
 
   (async()=>{await load();renderLanding();})();
 })();
