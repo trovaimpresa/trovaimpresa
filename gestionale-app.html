@@ -1495,6 +1495,13 @@
     if(a==="sq-save")return squadraSave(id);
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
     if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
+    if(a==="sq-revoca"){
+      if(!sb||!sbUid){toast("Devi essere loggato");return;}
+      if(!gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale."))return;
+      const {error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid);
+      if(error){toast("Errore: "+error.message);return;}
+      renderDip();toast("Accesso rimosso");return;
+    }
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
     if(a==="save-dip")return saveDip(id);
     if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
