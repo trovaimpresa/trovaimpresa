@@ -245,6 +245,10 @@ async function boot(session){
   if(error){gate("Non riesco a caricare. Riprova tra poco.");return;}
   if(!membri||!membri.length){gate("Non sei ancora collegato a un'impresa. Apri il link di invito.");return;}
   MIO.impresaId=membri[0].impresa_id;
+  try{
+    const {data:imp}=await sb.from("imprese").select("tipo").eq("user_id",MIO.impresaId).maybeSingle();
+    MIO.tipoStudio=imp?imp.tipo:null;
+  }catch(_){MIO.tipoStudio=null;}
   MIO.operatoreId=membri[0].operatore_id;
   MIO.ruolo=membri[0].ruolo;
   if(MIO.operatoreId){
