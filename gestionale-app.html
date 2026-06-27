@@ -908,7 +908,8 @@
       return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":"Invitato"}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
         <div class="card-acts"><button data-action="sq-edit" data-id="${o.id}">Modifica</button>
         ${codice?`<button data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
-        <button data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>`:""}</div></div>`;
+        <button data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>
+        <button data-action="sq-revoca" data-id="${o.id}" data-nome="${esc(o.nome)}" style="background:#fff0f0;color:#c0392b;border:1px solid #f0c0c0">Rimuovi accesso</button>`:""}</div></div>`;
     }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
   }
   const PERMS=[{key:"calendario",label:"Calendario"},{key:"lavori",label:"Lavori"},{key:"foto",label:"Foto"},{key:"note",label:"Note"},{key:"clienti",label:"Clienti"},{key:"fatture",label:"Fatture"},{key:"pagamenti",label:"Pagamenti"}];
