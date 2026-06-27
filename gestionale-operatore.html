@@ -439,10 +439,10 @@ function etic(s){
 }
 function renderDay(){
   const oggi=ymd(new Date());
-  $("#day-title").textContent=(selDate===oggi)?"Lavori di oggi":"Lavori del "+dataIt(selDate);
+  $("#day-title").textContent=etic((selDate===oggi)?"Lavori di oggi":"Lavori del "+dataIt(selDate));
   const list=LAVORI.filter(l=>l.data_prevista===selDate);
   const box=$("#day-list");
-  if(!list.length){box.innerHTML='<div class="empty-state">Nessun lavoro per questo giorno.</div>';return;}
+  if(!list.length){box.innerHTML='<div class="empty-state">'+etic("Nessun lavoro per questo giorno.")+'</div>';return;}
   box.innerHTML=list.map(l=>{
     const cl=CLIENTI[l.cliente_id];
     const titolo=cl?cl.nome:(l.descrizione?l.descrizione.slice(0,40):"Lavoro");
@@ -462,7 +462,7 @@ async function openLavoro(id){
   const l=LAVORI.find(x=>x.id===id);if(!l)return;
   curLavoro=l;
   const cl=CLIENTI[l.cliente_id];
-  $("#lv-title").textContent=cl?cl.nome:(l.descrizione?l.descrizione.slice(0,50):"Lavoro");
+  $("#lv-title").textContent=cl?cl.nome:(l.descrizione?l.descrizione.slice(0,50):etic("Lavoro"));
   const bits=[];
   if(l.dove||(cl&&cl.indirizzo))bits.push("📍 "+(l.dove||cl.indirizzo));
   if(l.data_prevista)bits.push("📅 "+dataIt(l.data_prevista));
