@@ -11,3 +11,8 @@
 
 [context.branch-deploy]
   command = "echo 'Branch deploy disabilitato per risparmiare crediti'"
+
+[[redirects]]
+  from = "/gestionale"
+  to = "/gestionale-invito.html"
+  status = 302
