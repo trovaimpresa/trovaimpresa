@@ -73,8 +73,12 @@ function renderAuth(){
   $("#switch").innerHTML=mode==="register"?'Hai già un account? <a id="sw">Accedi</a>':'Sei nuovo? <a id="sw">Registrati</a>';
   $("#sw").onclick=()=>{mode=mode==="register"?"login":"register";renderAuth();};
 }
-function refresh(session){
-  if(session){ $("#codice").value=(params.get("codice")||"").toUpperCase(); show("redeem"); }
+async function refresh(session){
+  if(session){
+    const {data:membri}=await sb.from("gest_membri").select("impresa_id").eq("membro_id",session.user.id).eq("stato","attivo");
+    if(membri&&membri.length){location.href="gestionale-operatore.html";return;}
+    $("#codice").value=(params.get("codice")||"").toUpperCase(); show("redeem");
+  }
   else { renderAuth(); show("auth"); }
 }
 sb.auth.onAuthStateChange((_e,s)=>refresh(s));
