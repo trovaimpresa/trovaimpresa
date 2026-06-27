@@ -913,7 +913,7 @@
     }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
   }
   const PERMS=[{key:"calendario",label:"Calendario"},{key:"lavori",label:"Lavori"},{key:"foto",label:"Foto"},{key:"note",label:"Note"},{key:"clienti",label:"Clienti"},{key:"fatture",label:"Fatture"},{key:"pagamenti",label:"Pagamenti"}];
-  const RUOLO_PRESET={operaio:["calendario","lavori","foto"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","note","clienti","fatture","pagamenti"]};
+  const RUOLO_PRESET={operaio:["calendario","lavori","foto"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
   function applyRuoloPreset(){
     const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
     $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm));
