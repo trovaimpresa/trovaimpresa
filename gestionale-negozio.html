@@ -671,7 +671,7 @@
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
     const r=document.documentElement.style;
     r.setProperty("--accent",p.a);r.setProperty("--accent-d",p.ad);r.setProperty("--accent-soft",p.as);
-    $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Reparto "+p.nome;
+    $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Categoria "+p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="block";
     filter={stato:"tutti",q:""};$("#f-search").value="";cal=new Date();
