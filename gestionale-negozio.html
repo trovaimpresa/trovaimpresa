@@ -1641,6 +1641,7 @@
     loadMagazzino();
   });
   $('[data-tab="magazzino"]')?.addEventListener("click",loadMagazzino);
+  let editFornId=null;
   async function loadFornitori(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_fornitori")
@@ -1654,25 +1655,49 @@
         <div style="color:#666;font-size:14px;margin-top:4px">${x.telefono?"☎ "+x.telefono+" · ":""}${x.email?x.email+" · ":""}${x.piva?"P.IVA "+x.piva:""}</div>
         ${x.indirizzo?`<div style="color:#666;font-size:13px;margin-top:2px">${x.indirizzo}</div>`:""}
         ${x.note?`<div style="color:#888;font-size:13px;margin-top:4px">${x.note}</div>`:""}
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="forn-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
+          <button class="forn-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
+        </div>
       </div>`).join("");
   }
   $("#nf-save")?.addEventListener("click",async()=>{
     const nome=$("#nf-nome").value.trim();
     if(!nome){alert("Inserisci il nome");return;}
     if(!(sb&&sbUid)){alert("Non connesso");return;}
-    const {error}=await sb.from("neg_fornitori").insert({
-      user_id:sbUid, nome,
+    const dati={nome,
       telefono:$("#nf-telefono").value.trim()||null,
       email:$("#nf-email").value.trim()||null,
       indirizzo:$("#nf-indirizzo").value.trim()||null,
       piva:$("#nf-piva").value.trim()||null,
-      note:$("#nf-note").value.trim()||null
-    });
+      note:$("#nf-note").value.trim()||null};
+    let error;
+    if(editFornId){({error}=await sb.from("neg_fornitori").update(dati).eq("id",editFornId));}
+    else {({error}=await sb.from("neg_fornitori").insert({user_id:sbUid,...dati}));}
     if(error){alert("Errore: "+error.message);return;}
     ["nf-nome","nf-telefono","nf-email","nf-indirizzo","nf-piva","nf-note"].forEach(id=>$("#"+id).value="");
+    editFornId=null; $("#nf-save").textContent="Aggiungi fornitore";
     loadFornitori();
   });
   $('[data-tab="fornitori"]')?.addEventListener("click",loadFornitori);
+  $("#fornitori-body")?.addEventListener("click",async e=>{
+    const ed=e.target.closest(".forn-edit"), del=e.target.closest(".forn-del");
+    if(del){
+      if(!confirm("Eliminare questo fornitore?"))return;
+      const {error}=await sb.from("neg_fornitori").delete().eq("id",del.dataset.id);
+      if(error){alert("Errore: "+error.message);return;}
+      loadFornitori();return;
+    }
+    if(ed){
+      const {data}=await sb.from("neg_fornitori").select("*").eq("id",ed.dataset.id).single();
+      if(!data)return;
+      $("#nf-nome").value=data.nome||""; $("#nf-telefono").value=data.telefono||"";
+      $("#nf-email").value=data.email||""; $("#nf-indirizzo").value=data.indirizzo||"";
+      $("#nf-piva").value=data.piva||""; $("#nf-note").value=data.note||"";
+      editFornId=data.id; $("#nf-save").textContent="Salva modifica";
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+  });
   async function loadMovimenti(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_movimenti")
