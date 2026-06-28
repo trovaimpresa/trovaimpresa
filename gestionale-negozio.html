@@ -280,6 +280,16 @@
 
     <section id="fornitori">
       <h2 style="margin:0 0 16px">Fornitori</h2>
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e7d32;padding:16px;margin-bottom:16px">
+        <h3 style="margin:0 0 12px">Nuovo fornitore</h3>
+        <input id="nf-nome" placeholder="Nome fornitore *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nf-telefono" placeholder="Telefono" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nf-email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nf-indirizzo" placeholder="Indirizzo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nf-piva" placeholder="P.IVA" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nf-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <button id="nf-save" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi fornitore</button>
+      </div>
       <div id="fornitori-body"></div>
     </section>
 
@@ -1587,6 +1597,38 @@
     loadMagazzino();
   });
   $('[data-tab="magazzino"]')?.addEventListener("click",loadMagazzino);
+  async function loadFornitori(){
+    if(!(sb&&sbUid)) return;
+    const {data}=await sb.from("neg_fornitori")
+      .select("id,nome,telefono,email,indirizzo,piva,note").eq("user_id",sbUid).order("nome");
+    const f=data||[], box=$("#fornitori-body");
+    if(!box) return;
+    if(!f.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun fornitore. Aggiungine uno.</p>';return;}
+    box.innerHTML=f.map(x=>`
+      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
+        <strong>${x.nome||"—"}</strong>
+        <div style="color:#666;font-size:14px;margin-top:4px">${x.telefono?"☎ "+x.telefono+" · ":""}${x.email?x.email+" · ":""}${x.piva?"P.IVA "+x.piva:""}</div>
+        ${x.indirizzo?`<div style="color:#666;font-size:13px;margin-top:2px">${x.indirizzo}</div>`:""}
+        ${x.note?`<div style="color:#888;font-size:13px;margin-top:4px">${x.note}</div>`:""}
+      </div>`).join("");
+  }
+  $("#nf-save")?.addEventListener("click",async()=>{
+    const nome=$("#nf-nome").value.trim();
+    if(!nome){alert("Inserisci il nome");return;}
+    if(!(sb&&sbUid)){alert("Non connesso");return;}
+    const {error}=await sb.from("neg_fornitori").insert({
+      user_id:sbUid, nome,
+      telefono:$("#nf-telefono").value.trim()||null,
+      email:$("#nf-email").value.trim()||null,
+      indirizzo:$("#nf-indirizzo").value.trim()||null,
+      piva:$("#nf-piva").value.trim()||null,
+      note:$("#nf-note").value.trim()||null
+    });
+    if(error){alert("Errore: "+error.message);return;}
+    ["nf-nome","nf-telefono","nf-email","nf-indirizzo","nf-piva","nf-note"].forEach(id=>$("#"+id).value="");
+    loadFornitori();
+  });
+  $('[data-tab="fornitori"]')?.addEventListener("click",loadFornitori);
   $("#np-save")?.addEventListener("click",async()=>{
     const nome=$("#np-nome").value.trim();
     if(!nome){alert("Inserisci il nome");return;}
