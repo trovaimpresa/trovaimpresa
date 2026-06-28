@@ -224,6 +224,7 @@
       <button data-tab="riepilogo" class="active">Riepilogo</button>
       <button data-tab="mezzi">Mezzi</button>
       <button data-tab="clienti-nol">Clienti</button>
+      <button data-tab="noleggi">Noleggi</button>
       <button data-tab="prodotti">Prodotti</button>
       <button data-tab="magazzino">Magazzino</button>
       <button data-tab="fornitori">Fornitori</button>
@@ -295,6 +296,31 @@
         <button id="ncl-save" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi cliente</button>
       </div>
       <div id="clienti-nol-body"></div>
+    </section>
+
+    <section id="noleggi">
+      <h2 style="margin:0 0 16px">Noleggi</h2>
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e7d32;padding:16px;margin-bottom:16px">
+        <h3 style="margin:0 0 12px">Nuovo noleggio</h3>
+        <select id="nn-mezzo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box"><option value="">— Seleziona mezzo —</option></select>
+        <select id="nn-cliente" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box"><option value="">— Seleziona cliente —</option></select>
+        <label style="font-size:13px;color:#666">Data uscita</label>
+        <input id="nn-uscita" type="date" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <label style="font-size:13px;color:#666">Rientro previsto</label>
+        <input id="nn-prevista" type="date" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <label style="font-size:13px;color:#666">Rientro effettivo (lascia vuoto se ancora fuori)</label>
+        <input id="nn-effettivo" type="date" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nn-importo" type="number" step="0.01" placeholder="Importo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nn-cauzione" type="number" step="0.01" placeholder="Cauzione €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <select id="nn-pagamento" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          <option value="da_pagare">Da pagare</option>
+          <option value="pagato">Pagato</option>
+        </select>
+        <input id="nn-danni" placeholder="Danni al rientro" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nn-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <button id="nn-save" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi noleggio</button>
+      </div>
+      <div id="noleggi-body"></div>
     </section>
 
     <section id="prodotti">
@@ -881,6 +907,82 @@
     loadClientiNol();
   });
   $('[data-tab="clienti-nol"]')?.addEventListener("click",loadClientiNol);
+  let editNoleggioId=null;
+  async function popolaSelectNoleggi(){
+    if(!(sb&&sbUid)) return;
+    const {data:mz}=await sb.from("nol_mezzi").select("nome").eq("user_id",sbUid).order("nome");
+    const {data:cl}=await sb.from("nol_clienti").select("nome").eq("user_id",sbUid).order("nome");
+    const selM=$("#nn-mezzo"), selC=$("#nn-cliente");
+    if(selM)selM.innerHTML='<option value="">— Seleziona mezzo —</option>'+(mz||[]).map(x=>`<option value="${x.nome}">${x.nome}</option>`).join("");
+    if(selC)selC.innerHTML='<option value="">— Seleziona cliente —</option>'+(cl||[]).map(x=>`<option value="${x.nome}">${x.nome}</option>`).join("");
+  }
+  async function loadNoleggi(){
+    if(!(sb&&sbUid)) return;
+    await popolaSelectNoleggi();
+    const {data}=await sb.from("nol_noleggi").select("*").eq("user_id",sbUid).order("data_uscita",{ascending:false});
+    const n=data||[], box=$("#noleggi-body"), oggi=new Date().toISOString().slice(0,10);
+    if(!box) return;
+    if(!n.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun noleggio.</p>';return;}
+    box.innerHTML=n.map(x=>{
+      let col,et;
+      if(x.data_rientro_effettivo){col="#2e7d32";et="RIENTRATO";}
+      else if(x.data_rientro_prevista&&x.data_rientro_prevista<oggi){col="#c62828";et="IN RITARDO";}
+      else {col="#e65100";et="IN CORSO";}
+      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${col};padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><strong>${x.mezzo||"—"}</strong><span style="background:${col};color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">${et}</span></div>
+        <div style="color:#666;font-size:14px;margin-top:4px">${x.cliente?"Cliente: "+x.cliente:""}</div>
+        <div style="color:#666;font-size:13px;margin-top:2px">Uscita ${x.data_uscita||"—"} · prev. ${x.data_rientro_prevista||"—"}${x.data_rientro_effettivo?" · rientro "+x.data_rientro_effettivo:""}</div>
+        <div style="color:#666;font-size:13px;margin-top:2px">€ ${x.importo??0}${x.cauzione?" · cauz. €"+x.cauzione:""} · ${x.stato_pagamento==="pagato"?"PAGATO":"DA PAGARE"}${x.danni?" · danni: "+x.danni:""}</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="nol-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
+          <button class="nol-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
+        </div></div>`;
+    }).join("");
+  }
+  $("#nn-save")?.addEventListener("click",async()=>{
+    const mezzo=$("#nn-mezzo").value;
+    if(!mezzo){alert("Seleziona un mezzo");return;}
+    if(!(sb&&sbUid)){alert("Non connesso");return;}
+    const dati={mezzo, cliente:$("#nn-cliente").value||null,
+      data_uscita:$("#nn-uscita").value||null,
+      data_rientro_prevista:$("#nn-prevista").value||null,
+      data_rientro_effettivo:$("#nn-effettivo").value||null,
+      importo:parseFloat($("#nn-importo").value)||0,
+      cauzione:parseFloat($("#nn-cauzione").value)||0,
+      stato_pagamento:$("#nn-pagamento").value,
+      danni:$("#nn-danni").value.trim()||null,
+      note:$("#nn-note").value.trim()||null};
+    let error;
+    if(editNoleggioId){({error}=await sb.from("nol_noleggi").update(dati).eq("id",editNoleggioId));}
+    else {({error}=await sb.from("nol_noleggi").insert({user_id:sbUid,...dati}));}
+    if(error){alert("Errore: "+error.message);return;}
+    ["nn-uscita","nn-prevista","nn-effettivo","nn-importo","nn-cauzione","nn-danni","nn-note"].forEach(id=>$("#"+id).value="");
+    $("#nn-mezzo").value="";$("#nn-cliente").value="";$("#nn-pagamento").value="da_pagare";
+    editNoleggioId=null; $("#nn-save").textContent="Aggiungi noleggio";
+    loadNoleggi();
+  });
+  $("#noleggi-body")?.addEventListener("click",async e=>{
+    const ed=e.target.closest(".nol-edit"), del=e.target.closest(".nol-del");
+    if(del){
+      if(!confirm("Eliminare questo noleggio?"))return;
+      const {error}=await sb.from("nol_noleggi").delete().eq("id",del.dataset.id);
+      if(error){alert("Errore: "+error.message);return;}
+      loadNoleggi();return;
+    }
+    if(ed){
+      const {data}=await sb.from("nol_noleggi").select("*").eq("id",ed.dataset.id).single();
+      if(!data)return;
+      await popolaSelectNoleggi();
+      $("#nn-mezzo").value=data.mezzo||""; $("#nn-cliente").value=data.cliente||"";
+      $("#nn-uscita").value=data.data_uscita||""; $("#nn-prevista").value=data.data_rientro_prevista||"";
+      $("#nn-effettivo").value=data.data_rientro_effettivo||""; $("#nn-importo").value=data.importo??"";
+      $("#nn-cauzione").value=data.cauzione??""; $("#nn-pagamento").value=data.stato_pagamento||"da_pagare";
+      $("#nn-danni").value=data.danni||""; $("#nn-note").value=data.note||"";
+      editNoleggioId=data.id; $("#nn-save").textContent="Salva modifica";
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+  });
+  $('[data-tab="noleggi"]')?.addEventListener("click",loadNoleggi);
   $("#clienti-nol-body")?.addEventListener("click",async e=>{
     const ed=e.target.closest(".clinol-edit"), del=e.target.closest(".clinol-del");
     if(del){
