@@ -687,6 +687,7 @@
   function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderScadenze();}
 
   async function renderRiepilogo(){
+    return renderRiepilogoNegozio();
     /* soldi e ore: invariati per ora (dipendono dalle fatture, su localStorage) */
     const L=db().lavori;
     $("#k-daincassare").textContent=eur(L.filter(l=>l.fattStato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
