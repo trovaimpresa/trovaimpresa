@@ -241,20 +241,20 @@
     <section id="riepilogo" class="active">
       <div class="rie-intro">
         <h2 id="rie-title">Riepilogo</h2>
-        <p>A colpo d'occhio la situazione del reparto: quanti lavori hai da fare, quali sono in corso, quali finiti, e quanti soldi ci sono da incassare.</p>
+        <p>A colpo d'occhio la situazione del negozio: prodotti a catalogo, scorte da riordinare, vendite e acquisti del mese.</p>
       </div>
       <div class="kpis">
-        <div class="kpi df"><div class="n" id="k-dafare">0</div><div class="l">Da fare</div><div class="sub">Non ancora iniziati</div></div>
-        <div class="kpi ic"><div class="n" id="k-incorso">0</div><div class="l">In corso</div><div class="sub">Iniziati, non finiti</div></div>
-        <div class="kpi ft"><div class="n" id="k-fatti">0</div><div class="l">Fatti</div><div class="sub">Finiti questo mese</div></div>
-        <div class="kpi eu"><div class="n" id="k-lavori">0</div><div class="l">Totale</div><div class="sub">Tutti i lavori del reparto</div></div>
+        <div class="kpi df"><div class="n" id="k-dafare">0</div><div class="l">Prodotti</div><div class="sub">A catalogo</div></div>
+        <div class="kpi ic"><div class="n" id="k-incorso">0</div><div class="l">Sotto scorta</div><div class="sub">Da riordinare</div></div>
+        <div class="kpi ft"><div class="n" id="k-fatti">0</div><div class="l">Movimenti</div><div class="sub">Operazioni questo mese</div></div>
+        <div class="kpi eu"><div class="n" id="k-lavori">0</div><div class="l">Valore magazzino</div><div class="sub">Prezzo x quantita</div></div>
       </div>
       <div class="money-row">
-        <div class="money out"><div class="n" id="k-daincassare">€ 0</div><div class="l">Da incassare</div><div class="sub">Fatture non pagate</div></div>
-        <div class="money in"><div class="n" id="k-incassato">€ 0</div><div class="l">Incassato</div><div class="sub">Pagate questo mese</div></div>
-        <div class="money ore"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
+        <div class="money out"><div class="n" id="k-daincassare">€ 0</div><div class="l">Venduto</div><div class="sub">Questo mese</div></div>
+        <div class="money in"><div class="n" id="k-incassato">€ 0</div><div class="l">Acquistato</div><div class="sub">Ordini questo mese</div></div>
+        <div class="money ore" style="display:none"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
       </div>
-      <div class="mini-title">Prossimi lavori da fare</div>
+      <div class="mini-title">Prodotti sotto scorta</div>
       <div id="prossimi"></div>
     </section>
 
@@ -708,6 +708,34 @@
     const pross=S.filter(l=>l.stato!=="fatto").sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999")).slice(0,5);
     $("#prossimi").innerHTML=pross.length?pross.map(l=>jobCardSupa(l)).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
   }
+
+  async function renderRiepilogoNegozio(){
+    if(!(sb&&sbUid)){
+      ["k-dafare","k-incorso","k-fatti"].forEach(i=>{const e=$("#"+i);if(e)e.textContent=0;});
+      ["k-lavori","k-daincassare","k-incassato"].forEach(i=>{const e=$("#"+i);if(e)e.textContent="€ 0";});
+      if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
+      if($("#prossimi"))$("#prossimi").innerHTML='<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+      return;
+    }
+    if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
+    const {data:prod}=await sb.from("neg_prodotti").select("nome,prezzo,quantita,soglia_minima").eq("user_id",sbUid);
+    const P=prod||[];
+    const sotto=P.filter(p=>(p.quantita??0)<=(p.soglia_minima??0));
+    const valore=P.reduce((s,p)=>s+((+p.prezzo||0)*(+p.quantita||0)),0);
+    if($("#k-dafare"))$("#k-dafare").textContent=P.length;
+    if($("#k-incorso"))$("#k-incorso").textContent=sotto.length;
+    if($("#k-lavori"))$("#k-lavori").textContent="€ "+(Math.round(valore*100)/100);
+    const {data:mov}=await sb.from("neg_movimenti").select("tipo,importo,data_mov").eq("user_id",sbUid);
+    const M=mov||[];
+    const mese=M.filter(m=>thisMonth(m.data_mov));
+    if($("#k-fatti"))$("#k-fatti").textContent=mese.length;
+    const venduto=mese.filter(m=>m.tipo==="vendita").reduce((s,m)=>s+(+m.importo||0),0);
+    const acquistato=mese.filter(m=>m.tipo==="ordine").reduce((s,m)=>s+(+m.importo||0),0);
+    if($("#k-daincassare"))$("#k-daincassare").textContent="€ "+(Math.round(venduto*100)/100);
+    if($("#k-incassato"))$("#k-incassato").textContent="€ "+(Math.round(acquistato*100)/100);
+    if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>`<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #c62828;padding:12px;margin-bottom:10px"><strong>${p.nome||"—"}</strong><div style="color:#666;font-size:13px">Q.tà ${p.quantita??0} · soglia ${p.soglia_minima??0}</div></div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+  }
+  $('[data-tab="riepilogo"]')?.addEventListener("click",renderRiepilogoNegozio);
 
   function jobCard(l){
     const c=cliById(l.clienteId), d=dipById(l.assegnatoId), dove=l.dove||(c&&c.indirizzo)||"";
