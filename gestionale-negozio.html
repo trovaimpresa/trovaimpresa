@@ -1574,6 +1574,7 @@
     window.scrollTo({top:0,behavior:"smooth"});
   });
 
+  let editProdId=null;
   async function loadProdotti(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_prodotti")
@@ -1586,9 +1587,32 @@
       <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
         <strong>${p.nome||"—"}</strong>
         <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${p.prezzo??0} · Q.tà ${p.quantita??0}${p.codice?" · cod. "+p.codice:""}</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="prod-edit" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
+          <button class="prod-del" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
+        </div>
       </div>`).join("");
   }
   $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
+  $("#prodotti-body")?.addEventListener("click",async e=>{
+    const ed=e.target.closest(".prod-edit"), del=e.target.closest(".prod-del");
+    if(del){
+      if(!confirm("Eliminare questo prodotto?"))return;
+      const {error}=await sb.from("neg_prodotti").delete().eq("id",del.dataset.id);
+      if(error){alert("Errore: "+error.message);return;}
+      loadProdotti();return;
+    }
+    if(ed){
+      const {data}=await sb.from("neg_prodotti").select("*").eq("id",ed.dataset.id).single();
+      if(!data)return;
+      $("#np-nome").value=data.nome||""; $("#np-prezzo").value=data.prezzo??"";
+      $("#np-quantita").value=data.quantita??""; $("#np-categoria").value=data.categoria||"";
+      $("#np-soglia").value=data.soglia_minima??""; $("#np-codice").value=data.codice||"";
+      $("#np-note").value=data.note||"";
+      editProdId=data.id; $("#np-save").textContent="Salva modifica";
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+  });
   async function loadMagazzino(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_prodotti")
@@ -1686,17 +1710,19 @@
     const nome=$("#np-nome").value.trim();
     if(!nome){alert("Inserisci il nome");return;}
     if(!(sb&&sbUid)){alert("Non connesso");return;}
-    const {error}=await sb.from("neg_prodotti").insert({
-      user_id:sbUid, nome,
+    const dati={nome,
       prezzo:parseFloat($("#np-prezzo").value)||0,
       quantita:parseInt($("#np-quantita").value)||0,
       categoria:$("#np-categoria").value.trim()||null,
       soglia_minima:parseInt($("#np-soglia").value)||0,
       codice:$("#np-codice").value.trim()||null,
-      note:$("#np-note").value.trim()||null
-    });
+      note:$("#np-note").value.trim()||null};
+    let error;
+    if(editProdId){({error}=await sb.from("neg_prodotti").update(dati).eq("id",editProdId));}
+    else {({error}=await sb.from("neg_prodotti").insert({user_id:sbUid,...dati}));}
     if(error){alert("Errore: "+error.message);return;}
     ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note"].forEach(id=>$("#"+id).value="");
+    editProdId=null; $("#np-save").textContent="Aggiungi prodotto";
     loadProdotti();
   });
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
