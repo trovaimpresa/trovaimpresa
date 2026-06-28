@@ -296,6 +296,20 @@
 
     <section id="movimenti">
       <h2 style="margin:0 0 16px">Movimenti</h2>
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e7d32;padding:16px;margin-bottom:16px">
+        <h3 style="margin:0 0 12px">Nuovo movimento</h3>
+        <select id="nm-tipo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          <option value="vendita">Vendita (merce che esce)</option>
+          <option value="ordine">Ordine a fornitore (merce che entra)</option>
+        </select>
+        <input id="nm-prodotto" placeholder="Prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nm-quantita" type="number" placeholder="Quantità" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nm-importo" type="number" step="0.01" placeholder="Importo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nm-controparte" placeholder="Cliente o fornitore" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nm-data" type="date" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nm-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <button id="nm-save" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi movimento</button>
+      </div>
       <div id="movimenti-body"></div>
     </section>
 
@@ -1635,6 +1649,39 @@
     loadFornitori();
   });
   $('[data-tab="fornitori"]')?.addEventListener("click",loadFornitori);
+  async function loadMovimenti(){
+    if(!(sb&&sbUid)) return;
+    const {data}=await sb.from("neg_movimenti")
+      .select("id,tipo,prodotto,quantita,importo,controparte,data_mov,note").eq("user_id",sbUid).order("data_mov",{ascending:false});
+    const m=data||[], box=$("#movimenti-body");
+    if(!box) return;
+    if(!m.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun movimento.</p>';return;}
+    box.innerHTML=m.map(x=>{
+      const vend=x.tipo==="vendita", col=vend?"#2e7d32":"#e65100", fre=vend?"↑":"↓", et=vend?"VENDITA":"ORDINE";
+      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${col};padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><strong>${fre} ${x.prodotto||"—"}</strong><span style="background:${col};color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">${et}</span></div>
+        <div style="color:#666;font-size:14px;margin-top:4px">Q.tà ${x.quantita??0} · € ${x.importo??0}${x.controparte?" · "+x.controparte:""}</div>
+        <div style="color:#888;font-size:13px;margin-top:2px">${x.data_mov||""}${x.note?" · "+x.note:""}</div>
+      </div>`;
+    }).join("");
+  }
+  $("#nm-save")?.addEventListener("click",async()=>{
+    const prodotto=$("#nm-prodotto").value.trim();
+    if(!prodotto){alert("Inserisci il prodotto");return;}
+    if(!(sb&&sbUid)){alert("Non connesso");return;}
+    const {error}=await sb.from("neg_movimenti").insert({
+      user_id:sbUid, tipo:$("#nm-tipo").value, prodotto,
+      quantita:parseInt($("#nm-quantita").value)||0,
+      importo:parseFloat($("#nm-importo").value)||0,
+      controparte:$("#nm-controparte").value.trim()||null,
+      data_mov:$("#nm-data").value||null,
+      note:$("#nm-note").value.trim()||null
+    });
+    if(error){alert("Errore: "+error.message);return;}
+    ["nm-prodotto","nm-quantita","nm-importo","nm-controparte","nm-data","nm-note"].forEach(id=>$("#"+id).value="");
+    loadMovimenti();
+  });
+  $('[data-tab="movimenti"]')?.addEventListener("click",loadMovimenti);
   $("#np-save")?.addEventListener("click",async()=>{
     const nome=$("#np-nome").value.trim();
     if(!nome){alert("Inserisci il nome");return;}
