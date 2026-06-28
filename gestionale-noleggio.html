@@ -223,6 +223,7 @@
     <nav class="tabs">
       <button data-tab="riepilogo" class="active">Riepilogo</button>
       <button data-tab="mezzi">Mezzi</button>
+      <button data-tab="clienti-nol">Clienti</button>
       <button data-tab="prodotti">Prodotti</button>
       <button data-tab="magazzino">Magazzino</button>
       <button data-tab="fornitori">Fornitori</button>
@@ -279,6 +280,21 @@
         <button id="nz-save" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi mezzo</button>
       </div>
       <div id="mezzi-body"></div>
+    </section>
+
+    <section id="clienti-nol">
+      <h2 style="margin:0 0 16px">Clienti</h2>
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e7d32;padding:16px;margin-bottom:16px">
+        <h3 style="margin:0 0 12px">Nuovo cliente</h3>
+        <input id="ncl-nome" placeholder="Nome cliente *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="ncl-telefono" placeholder="Telefono" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="ncl-email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="ncl-indirizzo" placeholder="Indirizzo" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="ncl-piva" placeholder="P.IVA / Cod. Fiscale" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="ncl-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <button id="ncl-save" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi cliente</button>
+      </div>
+      <div id="clienti-nol-body"></div>
     </section>
 
     <section id="prodotti">
@@ -822,6 +838,64 @@
       $("#nz-tmese").value=data.tariffa_mese??""; $("#nz-cauzione").value=data.cauzione??"";
       $("#nz-note").value=data.note||"";
       editMezzoId=data.id; $("#nz-save").textContent="Salva modifica";
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+  });
+
+  let editClienteNolId=null;
+  async function loadClientiNol(){
+    if(!(sb&&sbUid)) return;
+    const {data}=await sb.from("nol_clienti")
+      .select("id,nome,telefono,email,indirizzo,piva,note").eq("user_id",sbUid).order("nome");
+    const c=data||[], box=$("#clienti-nol-body");
+    if(!box) return;
+    if(!c.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun cliente. Aggiungine uno.</p>';return;}
+    box.innerHTML=c.map(x=>`
+      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
+        <strong>${x.nome||"—"}</strong>
+        <div style="color:#666;font-size:14px;margin-top:4px">${x.telefono?"☎ "+x.telefono+" · ":""}${x.email?x.email+" · ":""}${x.piva?"P.IVA "+x.piva:""}</div>
+        ${x.indirizzo?`<div style="color:#666;font-size:13px;margin-top:2px">${x.indirizzo}</div>`:""}
+        ${x.note?`<div style="color:#888;font-size:13px;margin-top:4px">${x.note}</div>`:""}
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="clinol-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
+          <button class="clinol-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
+        </div>
+      </div>`).join("");
+  }
+  $("#ncl-save")?.addEventListener("click",async()=>{
+    const nome=$("#ncl-nome").value.trim();
+    if(!nome){alert("Inserisci il nome");return;}
+    if(!(sb&&sbUid)){alert("Non connesso");return;}
+    const dati={nome,
+      telefono:$("#ncl-telefono").value.trim()||null,
+      email:$("#ncl-email").value.trim()||null,
+      indirizzo:$("#ncl-indirizzo").value.trim()||null,
+      piva:$("#ncl-piva").value.trim()||null,
+      note:$("#ncl-note").value.trim()||null};
+    let error;
+    if(editClienteNolId){({error}=await sb.from("nol_clienti").update(dati).eq("id",editClienteNolId));}
+    else {({error}=await sb.from("nol_clienti").insert({user_id:sbUid,...dati}));}
+    if(error){alert("Errore: "+error.message);return;}
+    ["ncl-nome","ncl-telefono","ncl-email","ncl-indirizzo","ncl-piva","ncl-note"].forEach(id=>$("#"+id).value="");
+    editClienteNolId=null; $("#ncl-save").textContent="Aggiungi cliente";
+    loadClientiNol();
+  });
+  $('[data-tab="clienti-nol"]')?.addEventListener("click",loadClientiNol);
+  $("#clienti-nol-body")?.addEventListener("click",async e=>{
+    const ed=e.target.closest(".clinol-edit"), del=e.target.closest(".clinol-del");
+    if(del){
+      if(!confirm("Eliminare questo cliente?"))return;
+      const {error}=await sb.from("nol_clienti").delete().eq("id",del.dataset.id);
+      if(error){alert("Errore: "+error.message);return;}
+      loadClientiNol();return;
+    }
+    if(ed){
+      const {data}=await sb.from("nol_clienti").select("*").eq("id",ed.dataset.id).single();
+      if(!data)return;
+      $("#ncl-nome").value=data.nome||""; $("#ncl-telefono").value=data.telefono||"";
+      $("#ncl-email").value=data.email||""; $("#ncl-indirizzo").value=data.indirizzo||"";
+      $("#ncl-piva").value=data.piva||""; $("#ncl-note").value=data.note||"";
+      editClienteNolId=data.id; $("#ncl-save").textContent="Salva modifica";
       window.scrollTo({top:0,behavior:"smooth"});
     }
   });
