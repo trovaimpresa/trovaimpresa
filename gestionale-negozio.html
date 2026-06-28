@@ -1520,6 +1520,22 @@
     $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
     window.scrollTo({top:0,behavior:"smooth"});
   });
+
+  async function loadProdotti(){
+    if(!(sb&&sbUid)) return;
+    const {data}=await sb.from("neg_prodotti")
+      .select("id,nome,prezzo,quantita,categoria,soglia_minima,codice,note")
+      .eq("user_id",sbUid).order("nome");
+    const prods=data||[], box=$("#prodotti-body");
+    if(!box) return;
+    if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto. Aggiungine uno.</p>';return;}
+    box.innerHTML=prods.map(p=>`
+      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
+        <strong>${p.nome||"—"}</strong>
+        <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${p.prezzo??0} · Q.tà ${p.quantita??0}${p.codice?" · cod. "+p.codice:""}</div>
+      </div>`).join("");
+  }
+  $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
