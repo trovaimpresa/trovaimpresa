@@ -1698,6 +1698,7 @@
       window.scrollTo({top:0,behavior:"smooth"});
     }
   });
+  let editMovId=null;
   async function loadMovimenti(){
     if(!(sb&&sbUid)) return;
     const {data}=await sb.from("neg_movimenti")
@@ -1711,6 +1712,10 @@
         <div style="display:flex;justify-content:space-between;align-items:center"><strong>${fre} ${x.prodotto||"—"}</strong><span style="background:${col};color:#fff;font-size:11px;padding:2px 8px;border-radius:10px">${et}</span></div>
         <div style="color:#666;font-size:14px;margin-top:4px">Q.tà ${x.quantita??0} · € ${x.importo??0}${x.controparte?" · "+x.controparte:""}</div>
         <div style="color:#888;font-size:13px;margin-top:2px">${x.data_mov||""}${x.note?" · "+x.note:""}</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="mov-edit" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
+          <button class="mov-del" data-id="${x.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
+        </div>
       </div>`;
     }).join("");
   }
@@ -1718,19 +1723,40 @@
     const prodotto=$("#nm-prodotto").value.trim();
     if(!prodotto){alert("Inserisci il prodotto");return;}
     if(!(sb&&sbUid)){alert("Non connesso");return;}
-    const {error}=await sb.from("neg_movimenti").insert({
-      user_id:sbUid, tipo:$("#nm-tipo").value, prodotto,
+    const dati={tipo:$("#nm-tipo").value, prodotto,
       quantita:parseInt($("#nm-quantita").value)||0,
       importo:parseFloat($("#nm-importo").value)||0,
       controparte:$("#nm-controparte").value.trim()||null,
       data_mov:$("#nm-data").value||null,
-      note:$("#nm-note").value.trim()||null
-    });
+      note:$("#nm-note").value.trim()||null};
+    let error;
+    if(editMovId){({error}=await sb.from("neg_movimenti").update(dati).eq("id",editMovId));}
+    else {({error}=await sb.from("neg_movimenti").insert({user_id:sbUid,...dati}));}
     if(error){alert("Errore: "+error.message);return;}
     ["nm-prodotto","nm-quantita","nm-importo","nm-controparte","nm-data","nm-note"].forEach(id=>$("#"+id).value="");
+    editMovId=null; $("#nm-save").textContent="Aggiungi movimento";
     loadMovimenti();
   });
   $('[data-tab="movimenti"]')?.addEventListener("click",loadMovimenti);
+  $("#movimenti-body")?.addEventListener("click",async e=>{
+    const ed=e.target.closest(".mov-edit"), del=e.target.closest(".mov-del");
+    if(del){
+      if(!confirm("Eliminare questo movimento?"))return;
+      const {error}=await sb.from("neg_movimenti").delete().eq("id",del.dataset.id);
+      if(error){alert("Errore: "+error.message);return;}
+      loadMovimenti();return;
+    }
+    if(ed){
+      const {data}=await sb.from("neg_movimenti").select("*").eq("id",ed.dataset.id).single();
+      if(!data)return;
+      $("#nm-tipo").value=data.tipo||"vendita"; $("#nm-prodotto").value=data.prodotto||"";
+      $("#nm-quantita").value=data.quantita??""; $("#nm-importo").value=data.importo??"";
+      $("#nm-controparte").value=data.controparte||""; $("#nm-data").value=data.data_mov||"";
+      $("#nm-note").value=data.note||"";
+      editMovId=data.id; $("#nm-save").textContent="Salva modifica";
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+  });
   $("#np-save")?.addEventListener("click",async()=>{
     const nome=$("#np-nome").value.trim();
     if(!nome){alert("Inserisci il nome");return;}
