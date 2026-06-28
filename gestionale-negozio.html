@@ -257,6 +257,17 @@
 
     <section id="prodotti">
       <h2 style="margin:0 0 16px">Prodotti</h2>
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e7d32;padding:16px;margin-bottom:16px">
+        <h3 style="margin:0 0 12px">Nuovo prodotto</h3>
+        <input id="np-nome" placeholder="Nome prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="np-prezzo" type="number" step="0.01" placeholder="Prezzo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="np-quantita" type="number" placeholder="Quantità" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="np-categoria" placeholder="Categoria" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="np-soglia" type="number" placeholder="Soglia minima" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="np-codice" placeholder="Codice" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="np-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <button id="np-save" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi prodotto</button>
+      </div>
       <div id="prodotti-body"></div>
     </section>
 
@@ -1536,6 +1547,23 @@
       </div>`).join("");
   }
   $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
+  $("#np-save")?.addEventListener("click",async()=>{
+    const nome=$("#np-nome").value.trim();
+    if(!nome){alert("Inserisci il nome");return;}
+    if(!(sb&&sbUid)){alert("Non connesso");return;}
+    const {error}=await sb.from("neg_prodotti").insert({
+      user_id:sbUid, nome,
+      prezzo:parseFloat($("#np-prezzo").value)||0,
+      quantita:parseInt($("#np-quantita").value)||0,
+      categoria:$("#np-categoria").value.trim()||null,
+      soglia_minima:parseInt($("#np-soglia").value)||0,
+      codice:$("#np-codice").value.trim()||null,
+      note:$("#np-note").value.trim()||null
+    });
+    if(error){alert("Errore: "+error.message);return;}
+    ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note"].forEach(id=>$("#"+id).value="");
+    loadProdotti();
+  });
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
