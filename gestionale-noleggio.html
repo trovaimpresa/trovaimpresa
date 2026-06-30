@@ -257,6 +257,13 @@
         <div class="money in"><div class="n" id="k-incassato">€ 0</div><div class="l">Acquistato</div><div class="sub">Ordini questo mese</div></div>
         <div class="money ore" style="display:none"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
       </div>
+      <div style="font-size:13px;font-weight:700;color:#666;text-transform:uppercase;margin:20px 0 10px">Noleggio</div>
+      <div class="kpis">
+        <div class="kpi df"><div class="n" id="kn-mezzi">0</div><div class="l">Mezzi</div><div class="sub">Totali</div></div>
+        <div class="kpi ic"><div class="n" id="kn-fuori">0</div><div class="l">Fuori adesso</div><div class="sub">Noleggiati</div></div>
+        <div class="kpi ft"><div class="n" id="kn-ritardo">0</div><div class="l">In ritardo</div><div class="sub">Da rientrare</div></div>
+        <div class="kpi eu"><div class="n" id="kn-incasso">€ 0</div><div class="l">Incassato noleggi</div><div class="sub">Questo mese</div></div>
+      </div>
       <div class="mini-title">Prodotti sotto scorta</div>
       <div id="prossimi"></div>
     </section>
@@ -779,6 +786,8 @@
     if(!(sb&&sbUid)){
       ["k-dafare","k-incorso","k-fatti"].forEach(i=>{const e=$("#"+i);if(e)e.textContent=0;});
       ["k-lavori","k-daincassare","k-incassato"].forEach(i=>{const e=$("#"+i);if(e)e.textContent="€ 0";});
+      ["kn-mezzi","kn-fuori","kn-ritardo"].forEach(i=>{const e=$("#"+i);if(e)e.textContent=0;});
+      if($("#kn-incasso"))$("#kn-incasso").textContent="€ 0";
       if($("#rie-title"))$("#rie-title").textContent="Riepilogo negozio";
       if($("#prossimi"))$("#prossimi").innerHTML='<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
       return;
@@ -800,6 +809,18 @@
     if($("#k-daincassare"))$("#k-daincassare").textContent="€ "+(Math.round(venduto*100)/100);
     if($("#k-incassato"))$("#k-incassato").textContent="€ "+(Math.round(acquistato*100)/100);
     if($("#prossimi"))$("#prossimi").innerHTML=sotto.length?sotto.map(p=>`<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #c62828;padding:12px;margin-bottom:10px"><strong>${p.nome||"—"}</strong><div style="color:#666;font-size:13px">Q.tà ${p.quantita??0} · soglia ${p.soglia_minima??0}</div></div>`).join(""):'<p style="color:#666;padding:8px">Nessun prodotto sotto scorta.</p>';
+    // KPI noleggio
+    const {data:mezzi}=await sb.from("nol_mezzi").select("stato").eq("user_id",sbUid);
+    const MZ=mezzi||[];
+    if($("#kn-mezzi"))$("#kn-mezzi").textContent=MZ.length;
+    const {data:nol}=await sb.from("nol_noleggi").select("data_rientro_prevista,data_rientro_effettivo,importo,data_uscita").eq("user_id",sbUid);
+    const N=nol||[], oggiN=new Date().toISOString().slice(0,10);
+    const fuori=N.filter(x=>!x.data_rientro_effettivo);
+    const ritardo=fuori.filter(x=>x.data_rientro_prevista&&x.data_rientro_prevista<oggiN);
+    if($("#kn-fuori"))$("#kn-fuori").textContent=fuori.length;
+    if($("#kn-ritardo"))$("#kn-ritardo").textContent=ritardo.length;
+    const incassoNol=N.filter(x=>thisMonth(x.data_uscita)).reduce((s,x)=>s+(+x.importo||0),0);
+    if($("#kn-incasso"))$("#kn-incasso").textContent="€ "+(Math.round(incassoNol*100)/100);
   }
   $('[data-tab="riepilogo"]')?.addEventListener("click",renderRiepilogoNegozio);
 
