@@ -284,13 +284,13 @@
         <button class="chip" data-stato="da_incassare">Da incassare</button>
       </div>
       <div class="filters"><input type="text" id="f-search" placeholder="Cerca condominio o lavoro..."></div>
-      <div id="jobs-list" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+      <div id="jobs-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
     </section>
 
     <section id="fatture">
       <div class="sec-head"><h2>Fatture</h2><button class="add" data-action="new-fattura">+ Nuova</button></div>
       <div class="fatt-summary" id="fatt-summary"></div>
-      <div id="fatt-body" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+      <div id="fatt-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
     </section>
 
@@ -305,7 +305,7 @@
       </div>
       <div class="filt-label">Filtra per operatore</div>
       <div class="chiprow" id="gal-op"></div>
-      <div id="gal-body" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+      <div id="gal-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
     </section>
 
     <section id="clienti">
