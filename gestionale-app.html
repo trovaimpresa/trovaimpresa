@@ -726,6 +726,7 @@
         ${withFoto&&fatto?`<button class="ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}">↩ Riapri</button>`:""}
         ${withFoto?`<button class="ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
         ${withFoto?`<button class="ja" data-action="sq-wa" data-wa="${esc(wa)}">Avvisa su WhatsApp</button>`:""}
+        <button class="ja" data-action="del-job-supa" data-id="${esc(l.id)}">🗑 Elimina</button>
       </div></div>`;
   }
   async function renderJobs(){
@@ -1484,6 +1485,12 @@
     if(a==="ag-op"){agFilter.op=t.dataset.v;renderAgenda();return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
     if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
+    if(a==="del-job-supa"){
+      if(!confirm("Eliminare questo lavoro? L'azione non si può annullare."))return;
+      const {error}=await sb.from("gest_lavori").delete().eq("id",id).eq("user_id",sbUid);
+      if(error){toast("Errore: "+error.message);return;}
+      renderAll();toast("Lavoro eliminato ✔");return;
+    }
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="stato-supa"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
