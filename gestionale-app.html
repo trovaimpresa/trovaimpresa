@@ -1124,6 +1124,20 @@
       const realId=data.id;
       closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
+    if(editing && editing.realId){
+      const {error}=await sb.from('gest_lavori').update({
+        descrizione:$("#j-desc").value.trim(),
+        dove:$("#j-dove").value.trim(),
+        data_prevista:$("#j-data").value||null,
+        operatore_id:$("#j-dip").value||null,
+        cliente_id:$("#j-cli").value||null,
+        stato:segVal("j-stato"),
+        importo:+($("#j-imp").value)||0,
+        fatt_stato:segVal("j-fatt")||"none"
+      }).eq('id', editing.realId);
+      if(error){toast("Errore: "+error.message);return;}
+      closeSheet();renderAll();toast("Lavoro aggiornato ✔");return;
+    }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un condominio");return;}
     const id=editing.id, exists=db().lavori.some(l=>l.id===id), prev=db().lavori.find(l=>l.id===id);
     const stato=segVal("j-stato"), fattStato=segVal("j-fatt")||"none";
