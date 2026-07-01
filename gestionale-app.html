@@ -1133,7 +1133,10 @@
         cliente_id:$("#j-cli").value||null,
         stato:segVal("j-stato"),
         importo:+($("#j-imp").value)||0,
-        fatt_stato:segVal("j-fatt")||"none"
+        fatt_stato:segVal("j-fatt")||"none",
+        lavoro_svolto:$("#j-svolto").value.trim()||null,
+        note:$("#j-note").value.trim()||null,
+        ore:parseFloat($("#j-ore").value)||null
       }).eq('id', editing.realId);
       if(error){toast("Errore: "+error.message);return;}
       for(const f of (editing.foto||[])){
