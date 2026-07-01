@@ -1118,8 +1118,9 @@
       const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
         descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id};
       if(editing.fattura)obj.fatt_stato="emessa";
-      const {error}=await sb.from("gest_lavori").insert(obj);
+      const {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();
       if(error){toast("Errore: "+error.message);return;}
+      const realId=data.id;
       closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un condominio");return;}
