@@ -113,6 +113,31 @@ exports.handler = async function(event) {
       return { statusCode: 500, body: 'Errore Resend: ' + errBody };
     }
 
+    // Notifica admin: avvisa info@trovaimpresa.com di ogni nuova iscrizione/upgrade.
+    // Isolata: se fallisce non blocca la risposta OK né la mail all'utente.
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: 'TrovaImpresa <info@trovaimpresa.com>',
+          to: ['info@trovaimpresa.com'],
+          subject: (premium ? '⭐ Passaggio a Premium: ' : '🔔 Nuova iscrizione: ')
+                   + (nome || 'senza nome') + ' (' + (tipo || 'n/d') + ')',
+          html: '<h2>' + (premium ? 'Passaggio a Premium' : 'Nuova iscrizione') + ' su TrovaImpresa</h2>'
+                + '<p><strong>Nome:</strong> ' + (nome || '—') + '</p>'
+                + '<p><strong>Email:</strong> ' + email + '</p>'
+                + '<p><strong>Tipo:</strong> ' + (tipo || '—') + '</p>'
+                + (premium ? '<p><strong>Premium:</strong> sì</p>' : '')
+        })
+      });
+    } catch (e) {
+      // notifica admin fallita: ignorata di proposito
+    }
+
     return { statusCode: 200, body: 'OK' };
   } catch (err) {
     return { statusCode: 500, body: 'Errore: ' + err.message };
