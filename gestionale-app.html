@@ -1136,6 +1136,17 @@
         fatt_stato:segVal("j-fatt")||"none"
       }).eq('id', editing.realId);
       if(error){toast("Errore: "+error.message);return;}
+      for(const f of (editing.foto||[])){
+        try{
+          let dataURL=fotoCache[f.id]||await window.storage.get("gfoto_"+f.id);
+          if(!dataURL)continue;
+          const blob=await (await fetch(dataURL)).blob();
+          const path=sbUid+"/"+editing.realId+"/"+Date.now()+"_"+f.id+".jpg";
+          await sb.storage.from("gestionale-foto").upload(path,blob);
+          const tipoMap=f.tipo==="prima"?"da_fare":(f.tipo==="dopo"?"fatto":f.tipo);
+          await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:editing.realId,tipo:tipoMap,operatore:f.operatore||"Capo",storage_path:path});
+        }catch(e){}
+      }
       closeSheet();renderAll();toast("Lavoro aggiornato ✔");return;
     }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un condominio");return;}
