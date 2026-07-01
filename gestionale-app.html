@@ -719,6 +719,7 @@
         <span>📅 ${fdate(l.data_prevista)}</span>
       </div>
       <div class="job-actions">
+        <button class="ja" data-action="edit-job" data-id="${esc(l.id)}">✏ Modifica</button>
         ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
         ${withFoto&&l.stato==="da_fare"?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}">▶ Avvia</button>`:""}
         ${withFoto&&!fatto?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}">✔ Segna fatto</button>`:""}
