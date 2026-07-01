@@ -1060,7 +1060,7 @@
     }
     const cliOpts=db().clienti.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
     const dipOpts=db().dipendenti.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
-    const dipSel=id=>db().dipendenti.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
+    const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
     openSheet(`<h3>${isNew?"Nuovo lavoro":"Modifica lavoro"}</h3>
       <div class="field"><label>Condominio / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
