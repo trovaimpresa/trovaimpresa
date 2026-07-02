@@ -94,6 +94,13 @@
       if (venduti.has(sp)) continue;
       const slot = document.querySelector(`a.pub-link[data-spazio-id="${sp}"]`);
       if (slot) {
+        const sid = slot.getAttribute('data-spazio-id');
+        if(sid==='hero-sx' || sid==='hero-dx'){
+          slot.innerHTML = `<img src="/img/${sid}.svg" alt="Spazio pubblicitario disponibile" style="width:100%;height:100%;object-fit:contain;display:block;">`;
+          slot.removeAttribute('href');
+          slot.style.cursor='default';
+          continue; // in questo giro del ciclo, non nascondere
+        }
         slot.style.setProperty('display', 'none', 'important');
       }
     }
