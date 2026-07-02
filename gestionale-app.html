@@ -1487,6 +1487,12 @@
     if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="del-job-supa"){
       if(!confirm("Eliminare questo lavoro? L'azione non si può annullare."))return;
+      const {data:foto}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",id).eq("user_id",sbUid);
+      if(foto&&foto.length){
+        const paths=foto.map(f=>f.storage_path).filter(Boolean);
+        if(paths.length)await sb.storage.from("gestionale-foto").remove(paths);
+        await sb.from("gest_foto").delete().eq("lavoro_id",id).eq("user_id",sbUid);
+      }
       const {error}=await sb.from("gest_lavori").delete().eq("id",id).eq("user_id",sbUid);
       if(error){toast("Errore: "+error.message);return;}
       renderAll();toast("Lavoro eliminato ✔");return;
