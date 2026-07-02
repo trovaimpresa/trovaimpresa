@@ -96,10 +96,13 @@
       if (slot) {
         const sid = slot.getAttribute('data-spazio-id');
         if(sid==='hero-sx' || sid==='hero-dx'){
-          slot.innerHTML = `<img src="/img/${sid}.svg" alt="Spazio pubblicitario disponibile" style="width:100%;height:100%;object-fit:fill;display:block;">`;
+          slot.style.setProperty('padding','0','important');
+          slot.style.setProperty('border','none','important');
+          slot.style.setProperty('overflow','hidden','important');
+          slot.innerHTML = `<img src="/img/${sid}.svg" alt="Spazio pubblicitario disponibile" style="width:100%;height:100%;object-fit:fill;display:block;border-radius:inherit;">`;
           slot.removeAttribute('href');
           slot.style.cursor='default';
-          continue; // in questo giro del ciclo, non nascondere
+          continue;
         }
         slot.style.setProperty('display', 'none', 'important');
       }
