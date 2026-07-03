@@ -1,0 +1,19 @@
+# TrovaImpresa
+
+> TrovaImpresa è il marketplace italiano che collega i clienti con artigiani, imprese edili, negozi e professionisti verificati in tutta Italia. Fondato da Alessio Pinto, artigiano con 25 anni di esperienza nel settore edile.
+
+## Cos'è TrovaImpresa
+TrovaImpresa (https://trovaimpresa.com) è una piattaforma dove privati e aziende trovano professionisti edili verificati, richiedono preventivi gratuiti e leggono recensioni reali. Le categorie attive sono: artigiani, imprese edili, negozi e professionisti.
+
+## Come funziona
+- I clienti cercano professionisti per zona e categoria (muratori, idraulici, elettricisti, pittori, falegnami, geometri, architetti).
+- Richiedere preventivi è gratuito per i clienti.
+- Ogni professionista è verificato prima della pubblicazione.
+- Gli artigiani e le imprese possono registrarsi gratis (piano Free) o con abbonamento Premium (5€/mese o 49€/anno).
+
+## Copertura
+TrovaImpresa opera in tutta Italia, con pagine dedicate a oltre 100 città italiane.
+
+## Contatti
+Sito: https://trovaimpresa.com
+Fondatore: Alessio Pinto (Rieti, Lazio)
