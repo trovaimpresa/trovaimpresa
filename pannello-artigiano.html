@@ -1388,6 +1388,7 @@
       </div>
       <div id="chat-aperta" style="display:none">
         <a href="javascript:void(0)" onclick="tornaAConversazioni()" style="cursor:pointer;color:#7c3aed;font-size:0.95rem;font-weight:700;display:inline-block;margin-bottom:12px">← Torna alle conversazioni</a>
+        <button onclick="eliminaConversazione()" style="margin-left:12px;margin-bottom:12px;padding:6px 12px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">🗑 Elimina conversazione</button>
         <div class="msg-messages" id="msg-messages"></div>
         <div class="msg-input-row">
           <input type="text" id="msg-testo" placeholder="Scrivi una risposta...">
@@ -4910,6 +4911,20 @@ function tornaAConversazioni() {
   document.getElementById('chat-aperta').style.display = 'none';
   document.getElementById('lista-conversazioni').style.display = 'block';
   caricaConversazioni();
+}
+
+async function eliminaConversazione() {
+  if (!msgConversazioneAperta) return;
+  if (!confirm('Vuoi eliminare questa conversazione? I messaggi verranno cancellati per entrambi.')) return;
+  const convId = msgConversazioneAperta.convId;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/chat_messaggi?conversation_id=eq.${encodeURIComponent(convId)}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'return=minimal' }
+    });
+    if (!res.ok) { console.error('Eliminazione conversazione fallita:', res.status, await res.text()); return; }
+    tornaAConversazioni();
+  } catch (e) { console.error(e); }
 }
 
 function renderMessaggioChat(m) {
