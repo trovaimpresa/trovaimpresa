@@ -1056,7 +1056,8 @@ document.addEventListener('DOMContentLoaded',function(){
     const nome=document.getElementById('chat-nome').value.trim();
     const email=document.getElementById('chat-email').value.trim();
     if(!nome||!email)return;
-    const conv=id+'_'+email;
+    const rand=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
+    const conv=id+'_'+email+'_'+rand;
     localStorage.setItem('chat_'+id,conv);
     localStorage.setItem('chat_'+id+'_nome',nome);
     localStorage.setItem('chat_'+id+'_email',email);
