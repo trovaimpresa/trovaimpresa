@@ -4912,8 +4912,10 @@ function tornaAConversazioni() {
 function renderMessaggioChat(m) {
   const wrap = document.getElementById('msg-messages');
   if (!wrap) return;
+  if (m.id != null && wrap.querySelector(`[data-msg-id="${m.id}"]`)) return;
   const isImpresa = m.mittente === 'impresa';
   const div = document.createElement('div');
+  if (m.id != null) div.dataset.msgId = m.id;
   div.className = 'msg-bubble ' + (isImpresa ? 'msg-bubble-impresa' : 'msg-bubble-cliente');
   const ora = m.created_at ? new Date(m.created_at).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
   div.innerHTML = msgEsc(m.testo) + (ora ? `<div class="msg-bubble-meta">${ora}</div>` : '');
@@ -4925,9 +4927,18 @@ async function caricaMessaggiConversazione(convId) {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/chat_messaggi?conversation_id=eq.${encodeURIComponent(convId)}&order=created_at.asc`, { headers: { 'apikey': SUPABASE_KEY } });
     const data = await r.json();
+    const arr = Array.isArray(data) ? data : [];
+    // Ricava nome/email cliente dai messaggi già caricati (fallback ai data-* passati all'apertura)
+    if (msgConversazioneAperta && msgConversazioneAperta.convId === convId) {
+      const info = arr.find(m => m.cliente_nome || m.cliente_email);
+      if (info) {
+        if (!msgConversazioneAperta.clienteNome) msgConversazioneAperta.clienteNome = info.cliente_nome || '';
+        if (!msgConversazioneAperta.clienteEmail) msgConversazioneAperta.clienteEmail = info.cliente_email || '';
+      }
+    }
     const wrap = document.getElementById('msg-messages');
     if (wrap) wrap.innerHTML = '';
-    (Array.isArray(data) ? data : []).forEach(renderMessaggioChat);
+    arr.forEach(renderMessaggioChat);
   } catch (e) { console.error(e); }
 }
 
@@ -4946,20 +4957,28 @@ async function inviaMessaggioArtigiano() {
   const input = document.getElementById('msg-testo');
   const testo = input.value.trim();
   if (!testo) return;
-  input.value = '';
+  // Prende conversation_id e dati cliente dalla conversazione aperta (messaggi caricati o data-*)
+  const convId = msgConversazioneAperta.convId;
+  const clienteNome = msgConversazioneAperta.clienteNome || '';
+  const clienteEmail = msgConversazioneAperta.clienteEmail || '';
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/chat_messaggi`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/chat_messaggi`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'return=minimal' },
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'return=representation' },
       body: JSON.stringify({
-        conversation_id: msgConversazioneAperta.convId,
+        conversation_id: convId,
         impresa_id: impresaCorrente.id,
-        cliente_nome: msgConversazioneAperta.clienteNome,
-        cliente_email: msgConversazioneAperta.clienteEmail,
+        cliente_nome: clienteNome,
+        cliente_email: clienteEmail,
         testo,
         mittente: 'impresa'
       })
     });
+    if (!res.ok) { console.error('Invio messaggio fallito:', res.status, await res.text()); return; }
+    const rows = await res.json().catch(() => []);
+    const nuovo = (Array.isArray(rows) && rows.length) ? rows[0] : { testo, mittente: 'impresa', created_at: new Date().toISOString() };
+    renderMessaggioChat(nuovo);
+    input.value = '';
   } catch (e) { console.error(e); }
 }
 
