@@ -452,6 +452,7 @@ nav img{height:36px}
             <button class="chat-btn" onclick="inviaMessaggioChat()">Invia</button>
           </div>
           <button onclick="eliminaConversazioneImpresa()" style="margin-top:10px;padding:8px 14px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">🗑 Elimina conversazione</button>
+          <div id="chat-bloccato-box" style="display:none;margin-top:10px;padding:12px 14px;background:#c0392b;color:white;border-radius:8px;font-size:14px;font-weight:700">🚫 Sei stato bloccato da questa impresa e non puoi più inviare messaggi.</div>
         </div>
       </div>
     </div>
@@ -1045,11 +1046,30 @@ document.addEventListener('DOMContentLoaded',function(){
       .subscribe();
   }
 
+  async function clienteBloccato(email){
+    const id=getImpresaId();
+    if(!email)return false;
+    try{
+      const r=await fetch(`${SU}/rest/v1/chat_bloccati?impresa_id=eq.${id}&cliente_email=eq.${encodeURIComponent(email)}`,{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
+      const data=await r.json();
+      return Array.isArray(data)&&data.length>0;
+    }catch(e){console.error(e);return false}
+  }
+
+  function applicaStatoBlocco(bloccato){
+    const inputRow=document.querySelector('#chat-window .chat-input-row');
+    const box=document.getElementById('chat-bloccato-box');
+    if(inputRow)inputRow.style.display=bloccato?'none':'';
+    if(box)box.style.display=bloccato?'block':'none';
+  }
+
   function mostraFinestraChat(conv){
     document.getElementById('chat-start-form').style.display='none';
     document.getElementById('chat-window').style.display='block';
     caricaMessaggiChat(conv);
     sottoscriviRealtimeChat(conv);
+    const email=localStorage.getItem('chat_'+getImpresaId()+'_email')||'';
+    clienteBloccato(email).then(applicaStatoBlocco);
   }
 
   window.iniziaChatImpresa=function(){
