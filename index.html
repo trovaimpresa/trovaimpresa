@@ -837,12 +837,27 @@
     <!-- CITY PICKER per annunci sponsorizzati (visibile solo senza ?citta in URL) -->
     <section class="lavoro-links" style="background:#f4f6f9;min-height:280px">
     <div id="citta-picker-sponsor" class="citta-box" style="background:#e8f5e9;padding:32px 40px;display:none;max-width:1000px;width:90%;margin:0 auto;border-radius:16px;border-top:4px solid #e65100;">
-      <div class="bacheca-banner"><div class="bb-kicker">PRIMO PASSO</div><div class="bb-title">Scegli la tua città</div><div class="bb-sub">Inserisci la città per vedere imprese, offerte e professionisti della tua zona</div></div>
+      <div class="bacheca-banner"><div class="bb-kicker">PRIMO PASSO</div><div class="bb-title" style="font-size:34px;">Scegli la tua città</div><div class="bb-sub" style="font-size:18px;">Inserisci la città per vedere imprese, offerte e professionisti della tua zona</div></div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px 24px;justify-content:center;margin:18px 0 22px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#ff8800;color:#1a1a1a;font-weight:800;font-size:17px;flex-shrink:0;">1</span>
+          <span style="font-size:16px;font-weight:700;color:#1a1a1a;">Scegli la tua città</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#ff8800;color:#1a1a1a;font-weight:800;font-size:17px;flex-shrink:0;">2</span>
+          <span style="font-size:16px;font-weight:700;color:#1a1a1a;">Scegli la categoria</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#ff8800;color:#1a1a1a;font-weight:800;font-size:17px;flex-shrink:0;">3</span>
+          <span style="font-size:16px;font-weight:700;color:#1a1a1a;">Contatta imprese e artigiani</span>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;align-items:center;width:100%;">
-        <input id="citta-picker-input" type="text" placeholder="Inserisci città… es. Roma" style="flex:1;padding:14px 14px;border:1px solid #ddd;border-radius:10px;font-size:15px;outline:none;" onkeydown="if(event.key==='Enter')vaiACittaSponsor()" />
+        <input id="citta-picker-input" type="text" placeholder="Inserisci città… es. Roma" style="flex:1;padding:18px 16px;border:1px solid #ddd;border-radius:10px;font-size:17px;outline:none;" onkeydown="if(event.key==='Enter')vaiACittaSponsor()" oninput="var e=document.getElementById('citta-picker-err'); if(e) e.style.display='none'; this.style.border='1px solid #ddd';" />
         <button onclick="vaiACittaSponsor()" style="padding:14px 20px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px;">Vai</button>
         <button onclick="localizzamiSponsor()" title="Usa la mia posizione" style="padding:14px 20px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px;">📍</button>
       </div>
+      <div id="citta-picker-err" style="display:none;margin-top:12px;color:#c0392b;font-weight:700;font-size:15px;">⚠️ Inserisci prima la tua città per iniziare</div>
     </div>
     <!-- HEADER città attiva (visibile solo con ?citta in URL) -->
     <div id="citta-attiva-sponsor" class="citta-box" style="background:#e8f5e9;padding:32px 40px;display:none;max-width:1000px;width:90%;margin:0 auto;border-radius:16px;border-top:4px solid #e65100;">
@@ -852,7 +867,7 @@
     </section>
     <script>
       (function(){ if(!new URLSearchParams(location.search).get('citta')){ var el=document.getElementById('citta-picker-sponsor'); if(el) el.style.display=''; document.body.classList.add('homepage-vetrina'); } })();
-      function vaiACittaSponsor(){ var v=(document.getElementById('citta-picker-input').value||'').trim(); if(!v) return; window.location.href='index.html?citta='+encodeURIComponent(v); }
+      function vaiACittaSponsor(){ var inp=document.getElementById('citta-picker-input'); var v=(inp.value||'').trim(); var err=document.getElementById('citta-picker-err'); if(!v){ if(err) err.style.display='block'; if(inp) inp.style.border='1px solid #c0392b'; return; } window.location.href='index.html?citta='+encodeURIComponent(v); }
       function localizzamiSponsor(){
         if(!navigator.geolocation){ alert("Impossibile rilevare la posizione, scrivi la città a mano"); return; }
         navigator.geolocation.getCurrentPosition(async function(pos){
