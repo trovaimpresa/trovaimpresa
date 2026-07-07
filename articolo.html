@@ -40,6 +40,13 @@
       font-size: 15px;
     }
     .navbar .menu a:hover { color: #004bcc; }
+    .navbar .menu a.menu-btn {
+      background: #ff8800;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+    .navbar .menu a.menu-btn:hover { background: #e67a00; color: #fff; }
 
     .article-wrap { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
 
@@ -147,7 +154,7 @@
     </a>
     <div class="menu">
       <a href="index.html">Home</a>
-      <a href="blog.html">Guide e Costi</a>
+      <a href="blog.html" class="menu-btn">Guide e Costi Edili</a>
     </div>
   </nav>
 
@@ -237,7 +244,7 @@
       box.innerHTML = `
         <div class="breadcrumb">
           <a href="index.html">Home</a> &rsaquo;
-          <a href="blog.html">Guide e Costi</a> &rsaquo;
+          <a href="blog.html">Guide e Costi Edili</a> &rsaquo;
           <span>${escapeHtml(data.titolo)}</span>
         </div>
         <span class="cat-badge">${CATEGORIE[data.categoria] || 'Guida'}</span>
