@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caricamento... | TrovaImpresa</title>
+  <meta name="description" id="metaDesc" content="Guide e costi edili reali su TrovaImpresa.">
+  <link rel="canonical" id="canonicalLink" href="https://trovaimpresa.com/blog.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" id="ogTitle" content="TrovaImpresa">
+  <meta property="og:description" id="ogDesc" content="">
+  <meta property="og:url" id="ogUrl" content="">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+      background: #f4f7fc;
+      color: #1a1a1a;
+      line-height: 1.7;
+    }
+    .navbar {
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar .logo img { height: 60px; }
+    .navbar .menu { display: flex; gap: 22px; align-items: center; }
+    .navbar .menu a {
+      text-decoration: none;
+      color: #0066ff;
+      font-weight: bold;
+      font-size: 15px;
+    }
+    .navbar .menu a:hover { color: #004bcc; }
+
+    .article-wrap { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
+
+    .breadcrumb { font-size: 14px; margin-bottom: 22px; }
+    .breadcrumb a { color: #0066ff; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb span { color: #999; }
+
+    .cat-badge {
+      display: inline-block;
+      background: #fff3e6;
+      color: #e65100;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h1.title { font-size: 32px; color: #0047b3; margin-bottom: 12px; line-height: 1.25; }
+    .art-date { font-size: 14px; color: #999; margin-bottom: 26px; }
+
+    .cover-img {
+      width: 100%;
+      border-radius: 16px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    /* CONTENUTO ARTICOLO */
+    .content { font-size: 17px; color: #2a2a2a; }
+    .content h2 { color: #0047b3; font-size: 24px; margin: 32px 0 14px; }
+    .content h3 { color: #0066ff; font-size: 20px; margin: 24px 0 10px; }
+    .content p { margin-bottom: 16px; }
+    .content ul, .content ol { margin: 0 0 16px 24px; }
+    .content li { margin-bottom: 8px; }
+    .content strong { color: #0047b3; }
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 15px;
+    }
+    .content th, .content td {
+      border: 1px solid #dce4f0;
+      padding: 10px 12px;
+      text-align: left;
+    }
+    .content th { background: #e8f0ff; color: #0047b3; }
+    .content blockquote {
+      border-left: 4px solid #ff8800;
+      background: #fff8f0;
+      padding: 12px 18px;
+      margin: 18px 0;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+    }
+
+    /* CTA finale */
+    .cta-box {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      border-top: 4px solid #ff8800;
+      padding: 34px;
+      text-align: center;
+      margin-top: 46px;
+    }
+    .cta-box h3 { color: #0047b3; font-size: 22px; margin-bottom: 10px; }
+    .cta-box p { color: #555; margin-bottom: 20px; }
+    .cta-box a {
+      display: inline-block;
+      background: #ff8800;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 13px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .cta-box a:hover { background: #e67a00; }
+
+    .back-link { display: inline-block; margin-top: 30px; color: #0066ff; text-decoration: none; font-weight: bold; }
+    .back-link:hover { text-decoration: underline; }
+
+    .stato { text-align: center; padding: 80px 24px; color: #777; font-size: 17px; }
+
+    @media (max-width: 600px) {
+      .navbar { padding: 10px 16px; }
+      .navbar .menu { gap: 14px; }
+      .navbar .menu a { font-size: 13px; }
+      h1.title { font-size: 25px; }
+      .article-wrap { padding: 28px 16px 44px; }
+      .content { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <img src="img/trovaimpresa-logo.svg" alt="TrovaImpresa">
+    </a>
+    <div class="menu">
+      <a href="index.html">Home</a>
+      <a href="blog.html">Guide e Costi</a>
+    </div>
+  </nav>
+
+  <div class="article-wrap">
+    <div id="articolo">
+      <div class="stato">Caricamento articolo...</div>
+    </div>
+  </div>
+
+  <!-- JSON-LD (riempito da JS) -->
+  <script type="application/ld+json" id="jsonld"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const CATEGORIE = { costi: 'Costi', bonus: 'Bonus fiscali', guide: 'Guide' };
+
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s || '';
+      return d.innerHTML;
+    }
+    function formatData(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    function getSlug() {
+      const p = new URLSearchParams(window.location.search);
+      return p.get('slug');
+    }
+
+    async function caricaArticolo() {
+      const box = document.getElementById('articolo');
+      const slug = getSlug();
+
+      if (!slug) {
+        box.innerHTML = '<div class="stato">Articolo non trovato. <a href="blog.html">Torna alle guide</a></div>';
+        return;
+      }
+
+      const { data, error } = await sb
+        .from('blog_articoli')
+        .select('*')
+        .eq('slug', slug)
+        .eq('pubblicato', true)
+        .single();
+
+      if (error || !data) {
+        box.innerHTML = '<div class="stato">Articolo non trovato o non pubblicato. <a href="blog.html">Torna alle guide</a></div>';
+        return;
+      }
+
+      // Aggiorna testa pagina per SEO
+      document.title = data.titolo + ' | TrovaImpresa';
+      const url = 'https://trovaimpresa.com/articolo.html?slug=' + encodeURIComponent(slug);
+      document.getElementById('metaDesc').setAttribute('content', data.meta_description || '');
+      document.getElementById('canonicalLink').setAttribute('href', url);
+      document.getElementById('ogTitle').setAttribute('content', data.titolo);
+      document.getElementById('ogDesc').setAttribute('content', data.meta_description || '');
+      document.getElementById('ogUrl').setAttribute('content', url);
+
+      // JSON-LD Article
+      document.getElementById('jsonld').textContent = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": data.titolo,
+        "description": data.meta_description || '',
+        "datePublished": data.created_at,
+        "image": data.immagine || undefined,
+        "author": { "@type": "Organization", "name": "TrovaImpresa" },
+        "publisher": {
+          "@type": "Organization",
+          "name": "TrovaImpresa",
+          "url": "https://trovaimpresa.com"
+        },
+        "mainEntityOfPage": url
+      });
+
+      const cover = data.immagine
+        ? `<img class="cover-img" src="${escapeHtml(data.immagine)}" alt="${escapeHtml(data.titolo)}" onerror="this.style.display='none'">`
+        : '';
+
+      box.innerHTML = `
+        <div class="breadcrumb">
+          <a href="index.html">Home</a> &rsaquo;
+          <a href="blog.html">Guide e Costi</a> &rsaquo;
+          <span>${escapeHtml(data.titolo)}</span>
+        </div>
+        <span class="cat-badge">${CATEGORIE[data.categoria] || 'Guida'}</span>
+        <h1 class="title">${escapeHtml(data.titolo)}</h1>
+        <div class="art-date">Pubblicato il ${formatData(data.created_at)}</div>
+        ${cover}
+        <div class="content">${data.contenuto}</div>
+
+        <div class="cta-box">
+          <h3>Devi fare questo lavoro?</h3>
+          <p>Trova imprese edili e artigiani verificati nella tua zona. Confronta e richiedi preventivi gratis.</p>
+          <a href="index.html">Trova un'impresa</a>
+        </div>
+
+        <a class="back-link" href="blog.html">&larr; Torna a tutte le guide</a>
+      `;
+    }
+
+    caricaArticolo();
+  </script>
+
+</body>
+</html>
