@@ -136,6 +136,29 @@
         return new Date(d).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
       };
 
+      // Inserisce i dati "stelle" leggibili da Google (schema.org AggregateRating)
+      function injettaSchemaGoogle(media, quante) {
+        if (document.getElementById("tir-ld")) return;
+        var dati = {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "TrovaImpresa",
+          "url": "https://trovaimpresa.com",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": media.toFixed(1),
+            "reviewCount": quante,
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        };
+        var s = document.createElement("script");
+        s.type = "application/ld+json";
+        s.id = "tir-ld";
+        s.textContent = JSON.stringify(dati);
+        document.head.appendChild(s);
+      }
+
       var selected = 0;
       var rate = $("tir-rate");
       var starBtns = [].slice.call(rate.querySelectorAll(".tir-star"));
@@ -165,6 +188,7 @@
               $("tir-avg").textContent = avg.toFixed(1).replace(".", ",");
               $("tir-avg-stars").textContent = stars(Math.round(avg));
               $("tir-count").textContent = list.length + (list.length === 1 ? " recensione" : " recensioni");
+              injettaSchemaGoogle(avg, list.length);
             } else {
               $("tir-avg").textContent = "–";
               $("tir-count").textContent = "Nessuna recensione, sii il primo!";
