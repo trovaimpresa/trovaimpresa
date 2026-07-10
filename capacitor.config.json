@@ -1,0 +1,9 @@
+﻿{
+  "appId": "com.trovaimpresa.app",
+  "appName": "TrovaImpresa",
+  "webDir": "www",
+  "server": {
+    "url": "https://trovaimpresa.com",
+    "cleartext": false
+  }
+}

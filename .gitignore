@@ -1,2 +1,18 @@
+# --- Cartelle Claude / lavoro ---
 .claude/
 setup-test-user.js
+
+# --- Dipendenze e cache (NON vanno pubblicate) ---
+node_modules/
+__pycache__/
+*.pyc
+
+# --- App mobile Capacitor (generati in automatico, non servono al sito) ---
+android/
+www/
+
+# --- File di appunti / screenshot ---
+mintty.*.png
+
+# --- File di lock (facoltativo: si rigenera da solo) ---
+# package-lock.json
