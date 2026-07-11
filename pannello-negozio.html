@@ -861,7 +861,8 @@
       <!-- ACCESSI RAPIDI -->
       <div class="dash-quick-title">Accesso rapido</div>
       <div class="dash-quick-grid">
-        <div class="dash-quick-card" data-card-id="preventivi-ricevuti" onclick="showSection('preventivi', this)">
+        <div class="dash-quick-card" data-card-id="preventivi-ricevuti" style="position:relative" onclick="showSection('preventivi', this)">
+          <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
           <div class="dash-quick-icon">📋</div>
           <div class="dash-quick-label">Preventivi ricevuti</div>
           <div class="dash-quick-sub">Richieste dai clienti</div>
@@ -2441,6 +2442,14 @@ async function caricaPreventivi() {
     .order('created_at', { ascending: false });
 
   const lista = data || [];
+
+  // Badge "non risposti" sulla card Preventivi ricevuti
+  const _nonRisposti = lista.filter(p => p.risposta == null).length;
+  const _badgePrev = document.getElementById('badge-prev-card');
+  if (_badgePrev) {
+    _badgePrev.textContent = _nonRisposti;
+    _badgePrev.style.display = _nonRisposti > 0 ? 'inline-block' : 'none';
+  }
 
   // Contatore richieste preventivo del mese
   const _inizioMesePrev = new Date(); _inizioMesePrev.setDate(1); _inizioMesePrev.setHours(0,0,0,0);
