@@ -32,7 +32,7 @@ function slugFromFile(file) {
 
 async function fetchImprese(citta) {
   const filtro = `or=(citta.ilike.*${encodeURIComponent(citta)}*,provincia.ilike.*${encodeURIComponent(citta)}*)`;
-  const url = `${SUPABASE_URL}/rest/v1/imprese?select=id,nome,mestiere,tipo,citta,valutazione_media,piano,verificata,descrizione&${filtro}&limit=40`;
+  const url = `${SUPABASE_URL}/rest/v1/imprese?select=id,nome,mestiere,tipo,citta,valutazione_media,piano,verificata,descrizione&${filtro}&is_test=eq.false&limit=40`;
   const res = await fetch(url, {
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
   });
