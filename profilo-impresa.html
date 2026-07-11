@@ -840,7 +840,7 @@ async function submitPreventivo(){
     }
     const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,condivisibile:document.getElementById('prev-condivisibile').checked,created_at:new Date().toISOString()});
     if(error)throw error;
-    fetch('/.netlify/functions/notifica-preventivo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({impresa_id:iid,nome,email_cliente:email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl})}).catch(()=>{});
+    // Email di notifica rimossa: la nuova richiesta appare direttamente nel pannello (badge sul bottone Preventivi).
     me.textContent='✅ Richiesta inviata!';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#e8f5ee;color:#2a7a4b;';
     btn.textContent='✅ Inviato';setTimeout(()=>hidePreventivo(),2000);
   }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}

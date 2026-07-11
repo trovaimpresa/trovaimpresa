@@ -3801,7 +3801,7 @@ async function apriModal(prevId) {
   const { data: mioSblocco } = await sb.from('lead_sblocchi').select('id')
     .eq('preventivo_id', data.id).eq('impresa_id', impresaCorrente.id).maybeSingle();
   const isMia = String(data.impresa_id) === String(impresaCorrente.id);
-  const _premium = (impresaCorrente.piano || '').toLowerCase() === 'premium';
+  const _premium = ['premium','mensile','annuale'].includes((impresaCorrente.piano || '').toLowerCase());
   const sbloccatoDaMe = !!mioSblocco || (isMia && data.sbloccato) || (isMia && _premium);
   window._sbloccatoDaMe = sbloccatoDaMe; window._isMiaRichiesta = isMia;
 

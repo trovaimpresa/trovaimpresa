@@ -61,7 +61,7 @@ exports.handler = async function(event) {
       return { statusCode: 404, body: JSON.stringify({ error: 'Impresa non trovata.' }) };
     }
 
-    if ((impresa.piano || '').toLowerCase() !== 'premium') {
+    if (!['premium','mensile','annuale'].includes((impresa.piano || '').toLowerCase())) {
       await logRichiesta({ errore: 'Piano Free' });
       return { statusCode: 403, body: JSON.stringify({ error: 'AI solo Premium' }) };
     }

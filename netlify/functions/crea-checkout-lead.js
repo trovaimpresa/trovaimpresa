@@ -60,7 +60,7 @@ exports.handler = async function (event) {
     const isDiretta = String(prev.impresa_id) === String(impresa.id);
 
     // Modello ibrido: per i Premium le PROPRIE richieste sono incluse, niente da pagare
-    if (isDiretta && (impresa.piano || '').toLowerCase() === 'premium') {
+    if (isDiretta && ['premium','mensile','annuale'].includes((impresa.piano || '').toLowerCase())) {
       return { statusCode: 400, body: 'Contatto incluso nel tuo piano Premium: nessun pagamento necessario' };
     }
 

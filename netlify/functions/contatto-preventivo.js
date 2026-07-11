@@ -57,7 +57,7 @@ exports.handler = async function (event) {
       .eq('impresa_id', impresa.id)
       .maybeSingle();
 
-    const isPremium = (impresa.piano || '').toLowerCase() === 'premium';
+    const isPremium = ['premium','mensile','annuale'].includes((impresa.piano || '').toLowerCase());
     const autorizzato =
       !!mioSblocco ||
       (isDiretta && prev.sbloccato) ||

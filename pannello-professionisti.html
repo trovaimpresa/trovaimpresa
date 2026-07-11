@@ -2499,6 +2499,14 @@ async function caricaPreventivi() {
 
   const lista = data || [];
 
+  // Badge "non risposti" sulla card Funzioni Premium
+  const _nonRisposti = lista.filter(p => p.risposta == null).length;
+  const _badgePrev = document.getElementById('badge-prev-card');
+  if (_badgePrev) {
+    _badgePrev.textContent = _nonRisposti;
+    _badgePrev.style.display = _nonRisposti > 0 ? 'inline-block' : 'none';
+  }
+
   // Contatore richieste preventivo del mese
   const _inizioMesePrev = new Date(); _inizioMesePrev.setDate(1); _inizioMesePrev.setHours(0,0,0,0);
   const _prevMese = lista.filter(p => new Date(p.created_at) >= _inizioMesePrev).length;
@@ -2941,7 +2949,7 @@ async function apriModal(prevId) {
   const { data: mioSblocco } = await sb.from('lead_sblocchi').select('id')
     .eq('preventivo_id', data.id).eq('impresa_id', impresaCorrente.id).maybeSingle();
   const isMia = String(data.impresa_id) === String(impresaCorrente.id);
-  const _premium = (impresaCorrente.piano || '').toLowerCase() === 'premium';
+  const _premium = ['premium','mensile','annuale'].includes((impresaCorrente.piano || '').toLowerCase());
   const sbloccatoDaMe = !!mioSblocco || (isMia && data.sbloccato) || (isMia && _premium);
   window._sbloccatoDaMe = sbloccatoDaMe; window._isMiaRichiesta = isMia;
 

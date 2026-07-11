@@ -34,7 +34,7 @@ exports.handler = async function(event) {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
       });
       const imprese = await ri.json();
-      autorizzato = imprese && imprese[0] && (imprese[0].piano || '').toLowerCase() === 'premium';
+      autorizzato = imprese && imprese[0] && ['premium','mensile','annuale'].includes((imprese[0].piano || '').toLowerCase());
     }
     if (!autorizzato) return { statusCode: 403, body: 'Contatto non sbloccato: sblocca il contatto prima di rispondere' };
     email_cliente = prev.email;
