@@ -7,7 +7,7 @@
     "@capacitor/cli": "^8.4.1",
     "@capacitor/core": "^8.4.1",
     "@netlify/functions": "^2.8.1",
-    "@supabase/supabase-js": "^2.39.0",
+    "@supabase/supabase-js": "2.39.8",
     "stripe": "^14.0.0"
   },
   "description": "",
