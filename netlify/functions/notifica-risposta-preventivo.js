@@ -3,15 +3,37 @@ exports.handler = async function(event) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let email_cliente, nome_cliente, impresa_nome, risposta, prezzo_min, prezzo_max;
+  let preventivo_id, email_cliente, nome_cliente, impresa_nome, risposta, prezzo_min, prezzo_max;
   try {
-    ({ email_cliente, nome_cliente, impresa_nome, risposta, prezzo_min, prezzo_max } = JSON.parse(event.body));
+    ({ preventivo_id, email_cliente, nome_cliente, impresa_nome, risposta, prezzo_min, prezzo_max } = JSON.parse(event.body));
   } catch {
     return { statusCode: 400, body: 'JSON non valido' };
   }
 
-  if (!email_cliente || !nome_cliente || !impresa_nome || !risposta) {
-    return { statusCode: 400, body: 'Parametri mancanti: email_cliente, nome_cliente, impresa_nome e risposta sono obbligatori' };
+  if (!impresa_nome || !risposta) {
+    return { statusCode: 400, body: 'Parametri mancanti: impresa_nome e risposta sono obbligatori' };
+  }
+
+  // Pay-per-lead: i pannelli non possono più leggere l'email del cliente,
+  // quindi la recuperiamo qui col service key, partendo dal preventivo_id.
+  // Si può rispondere SOLO se il contatto è stato sbloccato (pagato).
+  if (preventivo_id) {
+    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    if (!SUPABASE_KEY) return { statusCode: 500, body: 'SUPABASE_SERVICE_KEY non configurata' };
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/preventivi?id=eq.${encodeURIComponent(preventivo_id)}&select=email,nome,sbloccato`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const rows = await r.json();
+    const prev = rows && rows[0];
+    if (!prev) return { statusCode: 404, body: 'Preventivo non trovato' };
+    if (!prev.sbloccato) return { statusCode: 403, body: 'Contatto non sbloccato: sblocca il contatto prima di rispondere' };
+    email_cliente = prev.email;
+    nome_cliente = nome_cliente || prev.nome || 'cliente';
+  }
+
+  if (!email_cliente || !nome_cliente) {
+    return { statusCode: 400, body: 'Parametri mancanti: preventivo_id (o email_cliente e nome_cliente) obbligatori' };
   }
 
   try {

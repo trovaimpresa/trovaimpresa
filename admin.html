@@ -880,7 +880,7 @@ function renderCharts(lista) {
 
 // CARICA PREVENTIVI
 async function caricaPreventivi() {
-  const { data, error } = await sb.from('preventivi').select('*').order('created_at', { ascending: false });
+  const { data, error } = await sb.from('preventivi_safe').select('*').order('created_at', { ascending: false });
   if (error) return;
   document.getElementById('stat-preventivi').textContent = data?.length || 0;
   const tbody = document.getElementById('table-preventivi');
