@@ -7,9 +7,9 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-// 🔧 Se un domani vuoi includere i contatti per i Premium senza pagamento,
-// metti questa a true: è l'unica riga da cambiare.
-const PREMIUM_INCLUSO = false;
+// 🔧 MODELLO IBRIDO: i Premium hanno i contatti delle PROPRIE richieste
+// inclusi nell'abbonamento (le richieste di zona restano a pagamento per tutti).
+const PREMIUM_INCLUSO = true;
 
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
@@ -45,12 +45,23 @@ exports.handler = async function (event) {
       .select('id, impresa_id, sbloccato, email, telefono, nome')
       .eq('id', preventivo_id)
       .maybeSingle();
-    if (!prev || String(prev.impresa_id) !== String(impresa.id)) {
-      return { statusCode: 403, body: 'Preventivo non tuo' };
-    }
+    if (!prev) return { statusCode: 404, body: 'Preventivo non trovato' };
+
+    const isDiretta = String(prev.impresa_id) === String(impresa.id);
+
+    // Sblocco registrato per questa impresa? (vale sia per dirette che di zona)
+    const { data: mioSblocco } = await admin
+      .from('lead_sblocchi')
+      .select('id')
+      .eq('preventivo_id', prev.id)
+      .eq('impresa_id', impresa.id)
+      .maybeSingle();
 
     const isPremium = (impresa.piano || '').toLowerCase() === 'premium';
-    const autorizzato = prev.sbloccato || (PREMIUM_INCLUSO && isPremium);
+    const autorizzato =
+      !!mioSblocco ||
+      (isDiretta && prev.sbloccato) ||
+      (isDiretta && PREMIUM_INCLUSO && isPremium);
 
     if (!autorizzato) {
       return { statusCode: 402, body: JSON.stringify({ sbloccato: false }) };

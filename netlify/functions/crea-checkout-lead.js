@@ -5,7 +5,9 @@
 const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
 
-const PREZZO_LEAD_EUR = 5; // 💰 prezzo sblocco contatto
+const PREZZO_LEAD_EUR = 5;      // 💰 prezzo sblocco contatto
+const MAX_SBLOCCHI = 5;         // massimo di imprese che possono sbloccare lo stesso lead
+const ORE_ESCLUSIVA = 48;       // ore di esclusiva per l'impresa scelta dal cliente
 const PANNELLI_VALIDI = [
   'pannello-artigiano.html',
   'pannello-impresa.html',
@@ -47,17 +49,49 @@ exports.handler = async function (event) {
       .maybeSingle();
     if (!impresa) return { statusCode: 403, body: 'Impresa non trovata' };
 
-    // 3. Il preventivo è suo? È già sbloccato?
+    // 3. Il preventivo esiste? L'impresa può sbloccarlo?
     const { data: prev } = await admin
       .from('preventivi')
-      .select('id, impresa_id, sbloccato, categoria_lavoro, citta')
+      .select('id, impresa_id, sbloccato, categoria_lavoro, citta, condivisibile, created_at')
       .eq('id', preventivo_id)
       .maybeSingle();
-    if (!prev || String(prev.impresa_id) !== String(impresa.id)) {
-      return { statusCode: 403, body: 'Preventivo non tuo' };
+    if (!prev) return { statusCode: 404, body: 'Preventivo non trovato' };
+
+    const isDiretta = String(prev.impresa_id) === String(impresa.id);
+
+    // Modello ibrido: per i Premium le PROPRIE richieste sono incluse, niente da pagare
+    if (isDiretta && (impresa.piano || '').toLowerCase() === 'premium') {
+      return { statusCode: 400, body: 'Contatto incluso nel tuo piano Premium: nessun pagamento necessario' };
     }
-    if (prev.sbloccato) {
+
+    // Ha già sbloccato questo lead?
+    const { data: mioSblocco } = await admin
+      .from('lead_sblocchi')
+      .select('id')
+      .eq('preventivo_id', prev.id)
+      .eq('impresa_id', impresa.id)
+      .maybeSingle();
+    if (mioSblocco || (isDiretta && prev.sbloccato)) {
       return { statusCode: 400, body: 'Contatto già sbloccato' };
+    }
+
+    if (!isDiretta) {
+      // Impresa di zona: il lead deve essere condivisibile,
+      // l'esclusiva di 48h scaduta e il tetto di 5 sblocchi non raggiunto
+      if (!prev.condivisibile) {
+        return { statusCode: 403, body: 'Il cliente non ha autorizzato la condivisione di questa richiesta' };
+      }
+      const scadenzaEsclusiva = new Date(new Date(prev.created_at).getTime() + ORE_ESCLUSIVA * 3600 * 1000);
+      if (new Date() < scadenzaEsclusiva) {
+        return { statusCode: 403, body: `Richiesta in esclusiva fino al ${scadenzaEsclusiva.toLocaleString('it-IT')}` };
+      }
+      const { count } = await admin
+        .from('lead_sblocchi')
+        .select('id', { count: 'exact', head: true })
+        .eq('preventivo_id', prev.id);
+      if ((count || 0) >= MAX_SBLOCCHI) {
+        return { statusCode: 410, body: 'Richiesta esaurita: già sbloccata dal numero massimo di imprese' };
+      }
     }
 
     // 4. Sessione di pagamento
@@ -76,7 +110,7 @@ exports.handler = async function (event) {
         },
         quantity: 1,
       }],
-      metadata: { preventivo_id: String(prev.id) },
+      metadata: { preventivo_id: String(prev.id), impresa_id: String(impresa.id) },
       success_url: `https://trovaimpresa.com/${paginaRitorno}?sblocco=ok&preventivo=${prev.id}`,
       cancel_url: `https://trovaimpresa.com/${paginaRitorno}?sblocco=annullato`,
     });

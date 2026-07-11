@@ -3980,9 +3980,7 @@ async function caricaPreventivi() {
   const container = document.getElementById('lista-preventivi');
   if (!lista.length) {
     container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>Nessuna richiesta ancora.<br><small>Le richieste dei clienti appariranno qui!</small></div>';
-    return;
-  }
-
+  } else {
   container.innerHTML = lista.map(p => `
     <div class="prev-card" onclick="apriModal(${p.id})">
       <div class="prev-header">
@@ -4004,6 +4002,48 @@ async function caricaPreventivi() {
       </div>
     </div>
   `).join('');
+  }
+
+  // ===== RICHIESTE DALLA TUA ZONA (lead condivisi dal cliente, dopo 48h) =====
+  try {
+    const cutoff = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+    let { data: zona } = await sb.from('preventivi_safe').select('*')
+      .eq('condivisibile', true)
+      .neq('impresa_id', impresaCorrente.id)
+      .lt('created_at', cutoff)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    const mia = (impresaCorrente.citta || '').toLowerCase();
+    zona = (zona || []).filter(l => {
+      const lc = (l.citta || '').toLowerCase();
+      return lc && mia && (lc.includes(mia) || mia.includes(lc));
+    });
+    let box = document.getElementById('lead-zona-box');
+    const anchor = document.getElementById('lista-preventivi');
+    if (!box && anchor) {
+      box = document.createElement('div');
+      box.id = 'lead-zona-box';
+      anchor.parentNode.insertBefore(box, anchor.nextSibling);
+    }
+    if (box) {
+      if (!zona.length) { box.innerHTML = ''; }
+      else {
+        box.innerHTML = `
+          <div style="margin-top:28px;padding-top:18px;border-top:2px dashed #cfe5d8">
+            <h3 style="font-size:16px;font-weight:800;color:#1a4d2e;margin-bottom:4px">📍 Richieste dalla tua zona</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:14px">Clienti della tua zona che hanno autorizzato la condivisione. Sblocca il contatto per rispondere (5€, max 5 imprese per richiesta).</p>
+            <div style="display:grid;gap:10px">
+              ${zona.map(l => `
+                <div onclick="apriModal(${l.id})" style="background:white;border:1px solid #e0e8e3;border-left:4px solid #e8733a;border-radius:10px;padding:14px 16px;cursor:pointer">
+                  <div style="font-weight:700;font-size:14px">${l.categoria_lavoro || l.tipo_lavoro || 'Lavoro'} · 📍 ${l.citta || ''}</div>
+                  <div style="font-size:13px;color:#555;margin-top:4px">${(l.descrizione || '').slice(0, 110)}${(l.descrizione || '').length > 110 ? '…' : ''}</div>
+                  <div style="font-size:12px;color:#888;margin-top:6px">${l.budget ? '💶 ' + l.budget + ' · ' : ''}${new Date(l.created_at).toLocaleDateString('it-IT')} · 🔒 contatto da sbloccare</div>
+                </div>`).join('')}
+            </div>
+          </div>`;
+      }
+    }
+  } catch (e) { console.error('lead zona:', e); }
 }
 
 async function caricaCandidature() {
@@ -4354,8 +4394,16 @@ async function apriModal(prevId) {
   if (!data) return;
   preventivoCorrente = data;
 
+  // Sblocco: mio se registrato in lead_sblocchi, o (per la richiesta diretta) flag storico
+  const { data: mioSblocco } = await sb.from('lead_sblocchi').select('id')
+    .eq('preventivo_id', data.id).eq('impresa_id', impresaCorrente.id).maybeSingle();
+  const isMia = String(data.impresa_id) === String(impresaCorrente.id);
+  const _premium = (impresaCorrente.piano || '').toLowerCase() === 'premium';
+  const sbloccatoDaMe = !!mioSblocco || (isMia && data.sbloccato) || (isMia && _premium);
+  window._sbloccatoDaMe = sbloccatoDaMe; window._isMiaRichiesta = isMia;
+
   // PAY-PER-LEAD: contatto visibile solo dopo lo sblocco (5€)
-  const contattoHtml = data.sbloccato
+  const contattoHtml = sbloccatoDaMe
     ? `<div class="ric-row" id="ric-contatto"><span class="ric-key">Contatto:</span><span>⏳ caricamento…</span></div>`
     : `<div class="ric-row" id="ric-contatto" style="flex-direction:column;align-items:flex-start;gap:8px">
         <span>🔒 <strong>Telefono ed email del cliente sono riservati</strong></span>
@@ -4374,7 +4422,7 @@ async function apriModal(prevId) {
     ${contattoHtml}
   `;
 
-  if (data.sbloccato) caricaContattoSbloccato(data.id);
+  if (sbloccatoDaMe) caricaContattoSbloccato(data.id);
 
   document.getElementById('prev-generato').classList.remove('show');
   document.getElementById('btn-invia-prev').style.display = 'none';
@@ -4386,7 +4434,7 @@ async function apriModal(prevId) {
     document.getElementById('prev-min').value = data.prezzo_min || '';
     document.getElementById('prev-max').value = data.prezzo_max || '';
     document.getElementById('prev-generato').classList.add('show');
-    document.getElementById('btn-invia-prev').style.display = data.sbloccato ? 'block' : 'none';
+    document.getElementById('btn-invia-prev').style.display = (sbloccatoDaMe && isMia) ? 'block' : 'none';
     document.getElementById('btn-invia-prev').textContent = '✅ Già inviato — Reinvia';
   }
 
@@ -4459,7 +4507,7 @@ async function generaConAI() {
   document.getElementById('prev-min').value = min;
   document.getElementById('prev-max').value = max;
   document.getElementById('prev-generato').classList.add('show');
-  document.getElementById('btn-invia-prev').style.display = preventivoCorrente.sbloccato ? 'block' : 'none';
+  document.getElementById('btn-invia-prev').style.display = (window._sbloccatoDaMe && window._isMiaRichiesta) ? 'block' : 'none';
 
   btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
 }

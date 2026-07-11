@@ -27,23 +27,45 @@ exports.handler = async function (event) {
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object;
     const preventivoId = session.metadata && session.metadata.preventivo_id;
+    const impresaId = session.metadata && session.metadata.impresa_id;
 
-    if (preventivoId) {
+    if (preventivoId && impresaId) {
       const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-      const { error } = await admin
-        .from('preventivi')
-        .update({
-          sbloccato: true,
-          sbloccato_at: new Date().toISOString(),
-          stripe_session_id: session.id,
-        })
-        .eq('id', preventivoId);
 
-      if (error) {
-        console.error('[stripe-webhook-lead] errore update:', error.message);
-        return { statusCode: 500, body: 'Errore aggiornamento' };
+      // Registra lo sblocco per QUESTA impresa (upsert: idempotente)
+      const { error: errSblocco } = await admin
+        .from('lead_sblocchi')
+        .upsert(
+          {
+            preventivo_id: preventivoId,
+            impresa_id: impresaId,
+            stripe_session_id: session.id,
+          },
+          { onConflict: 'preventivo_id,impresa_id' }
+        );
+      if (errSblocco) {
+        console.error('[stripe-webhook-lead] errore sblocco:', errSblocco.message);
+        return { statusCode: 500, body: 'Errore registrazione sblocco' };
       }
-      console.log(`[stripe-webhook-lead] preventivo ${preventivoId} sbloccato`);
+
+      // Se è l'impresa scelta dal cliente, aggiorna anche il flag storico
+      const { data: prev } = await admin
+        .from('preventivi')
+        .select('impresa_id')
+        .eq('id', preventivoId)
+        .maybeSingle();
+      if (prev && String(prev.impresa_id) === String(impresaId)) {
+        await admin
+          .from('preventivi')
+          .update({
+            sbloccato: true,
+            sbloccato_at: new Date().toISOString(),
+            stripe_session_id: session.id,
+          })
+          .eq('id', preventivoId);
+      }
+
+      console.log(`[stripe-webhook-lead] preventivo ${preventivoId} sbloccato da impresa ${impresaId}`);
     }
   }
 

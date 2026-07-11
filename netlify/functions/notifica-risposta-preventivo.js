@@ -21,13 +21,22 @@ exports.handler = async function(event) {
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
     if (!SUPABASE_KEY) return { statusCode: 500, body: 'SUPABASE_SERVICE_KEY non configurata' };
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/preventivi?id=eq.${encodeURIComponent(preventivo_id)}&select=email,nome,sbloccato`, {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/preventivi?id=eq.${encodeURIComponent(preventivo_id)}&select=email,nome,sbloccato,impresa_id`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
     const rows = await r.json();
     const prev = rows && rows[0];
     if (!prev) return { statusCode: 404, body: 'Preventivo non trovato' };
-    if (!prev.sbloccato) return { statusCode: 403, body: 'Contatto non sbloccato: sblocca il contatto prima di rispondere' };
+    // Autorizzato se sbloccato (pagato) oppure se l'impresa destinataria è Premium (incluso)
+    let autorizzato = !!prev.sbloccato;
+    if (!autorizzato && prev.impresa_id) {
+      const ri = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${encodeURIComponent(prev.impresa_id)}&select=piano`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      });
+      const imprese = await ri.json();
+      autorizzato = imprese && imprese[0] && (imprese[0].piano || '').toLowerCase() === 'premium';
+    }
+    if (!autorizzato) return { statusCode: 403, body: 'Contatto non sbloccato: sblocca il contatto prima di rispondere' };
     email_cliente = prev.email;
     nome_cliente = nome_cliente || prev.nome || 'cliente';
   }

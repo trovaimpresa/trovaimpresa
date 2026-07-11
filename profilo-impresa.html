@@ -560,6 +560,12 @@ nav img{height:36px}
     <div class="fg"><label class="fl">Allega una foto del lavoro</label><input type="file" class="fi2" id="prev-foto-file" accept="image/*"></div>
     <div class="fr2"><div class="fg"><label class="fl">Data preferita per il sopralluogo</label><input type="date" class="fi2" id="prev-data"></div><div class="fg"><label class="fl">Urgenza</label><select class="fs" id="prev-urgenza"><option>Normale</option><option>Entro la settimana</option><option>Urgente</option></select></div></div>
     <div class="fg"><label class="fl">Budget indicativo</label><input type="text" class="fi2" id="prev-budget" placeholder="Es. 500-1000€"></div>
+    <div class="fg" style="background:#f0f7f3;border:1px solid #cfe5d8;border-radius:8px;padding:12px 14px;margin-bottom:14px">
+      <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#333;cursor:pointer">
+        <input type="checkbox" id="prev-condivisibile" checked style="margin-top:2px;width:16px;height:16px;flex-shrink:0">
+        <span>Se l'impresa non risponde entro <strong>48 ore</strong>, autorizzo TrovaImpresa a inviare la mia richiesta anche ad altre imprese della zona (massimo 5), così ricevo comunque dei preventivi.</span>
+      </label>
+    </div>
     <div id="prev-msg" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px"></div>
     <button class="btn-sub" onclick="submitPreventivo()">📋 Invia richiesta gratuita</button>
   </div>
@@ -832,7 +838,7 @@ async function submitPreventivo(){
         if(!upErr) fotoUrl=sc.storage.from('foto-lavori').getPublicUrl(path).data.publicUrl;
       }catch(_){}
     }
-    const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,created_at:new Date().toISOString()});
+    const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,condivisibile:document.getElementById('prev-condivisibile').checked,created_at:new Date().toISOString()});
     if(error)throw error;
     fetch('/.netlify/functions/notifica-preventivo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({impresa_id:iid,nome,email_cliente:email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl})}).catch(()=>{});
     me.textContent='✅ Richiesta inviata!';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#e8f5ee;color:#2a7a4b;';
