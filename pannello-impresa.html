@@ -369,6 +369,8 @@
     max-height: none !important;
     border-radius: 0;
   }
+  /* Quando il modal è a tutta pagina, l'overlay non deve avere padding */
+  .modal-ai-overlay:has(> .modal-ai.fullscreen) { padding: 0; }
 
   /* === MODAL CREA PREVENTIVO === */
   .prev-section-label {
@@ -1877,36 +1879,44 @@
 </div>
 
 <!-- MODAL AI PREVENTIVO -->
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)chiudiModal()">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>🤖 Genera preventivo con AI</h2>
-      <p>L'AI analizzerà la richiesta e creerà un preventivo professionale</p>
-    </div>
-    <div class="modal-body">
-      <div class="richiesta-box" id="modal-richiesta"></div>
-      <div class="ai-genera-box">
-        <button class="ai-genera-btn" id="btn-genera-ai" onclick="generaConAI()">
-          🤖 Genera preventivo con AI
-        </button>
+<div class="modal-ai-overlay" id="modal-overlay" onclick="if(event.target===this)chiudiModal()">
+  <div class="modal-ai fullscreen">
+    <div class="modal-ai-header">
+      <div>
+        <h2>🤖 Genera preventivo con AI</h2>
+        <p>L'AI analizzerà la richiesta e creerà un preventivo professionale</p>
       </div>
-      <div class="prev-generato" id="prev-generato">
-        <div class="prev-gen-label">✨ Preventivo generato dall'AI — personalizzalo a piacere</div>
-        <textarea class="prev-textarea" id="prev-testo"></textarea>
-        <div class="prev-prezzo-row">
-          <div class="prev-input-wrap">
-            <label>💶 Prezzo minimo (€)</label>
-            <input type="number" class="prev-input" id="prev-min" placeholder="Es. 1500">
-          </div>
-          <div class="prev-input-wrap">
-            <label>💶 Prezzo massimo (€)</label>
-            <input type="number" class="prev-input" id="prev-max" placeholder="Es. 2500">
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn-fullscreen" title="Riduci / ingrandisci" onclick="this.closest('.modal-ai').classList.toggle('fullscreen')">⤢</button>
+        <button class="modal-ai-close" onclick="chiudiModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-ai-body">
+      <div style="max-width:820px;margin:0 auto">
+        <div class="richiesta-box" id="modal-richiesta"></div>
+        <div class="ai-genera-box">
+          <button class="ai-genera-btn" id="btn-genera-ai" onclick="generaConAI()">
+            🤖 Genera preventivo con AI
+          </button>
+        </div>
+        <div class="prev-generato" id="prev-generato">
+          <div class="prev-gen-label">✨ Preventivo generato dall'AI — personalizzalo a piacere</div>
+          <textarea class="prev-textarea" id="prev-testo"></textarea>
+          <div class="prev-prezzo-row">
+            <div class="prev-input-wrap">
+              <label>💶 Prezzo minimo (€)</label>
+              <input type="number" class="prev-input" id="prev-min" placeholder="Es. 1500">
+            </div>
+            <div class="prev-input-wrap">
+              <label>💶 Prezzo massimo (€)</label>
+              <input type="number" class="prev-input" id="prev-max" placeholder="Es. 2500">
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-chiudi" onclick="chiudiModal()">✕ Chiudi</button>
+    <div class="modal-ai-footer">
+      <button class="btn-chiudi-modal" onclick="chiudiModal()">✕ Chiudi</button>
       <button class="btn-invia-prev" id="btn-invia-prev" onclick="inviaPreventivo()" style="display:none">
         📤 Invia preventivo al cliente
       </button>
