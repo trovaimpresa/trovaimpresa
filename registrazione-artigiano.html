@@ -638,6 +638,7 @@ src="https://www.facebook.com/tr?id=4290849067798148&ev=PageView&noscript=1"/></
           throw new Error(insertError.message);
         }
         try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nome, email: email, tipo: 'artigiano' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
+        if (typeof fbq !== 'undefined') { fbq('track', 'CompleteRegistration'); }
         window.location.href = 'pannello-artigiano.html';
       } catch (err) {
         console.error(err);
