@@ -16,3 +16,9 @@
   from = "/gestionale"
   to = "/gestionale-invito.html"
   status = 302
+
+[[redirects]]
+  from = "/registrazione.html"
+  to = "/#registrati"
+  status = 301
+  force = true
