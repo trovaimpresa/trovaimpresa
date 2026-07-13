@@ -2237,7 +2237,14 @@ sb.auth.onAuthStateChange(async (event, session) => {
     window.location.replace('login-impresa.html');
     return;
   }
-  const { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
+  let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (!data) {
+    const { data: byEmail } = await sb.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
+    if (byEmail) {
+      await sb.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
+      data = byEmail;
+    }
+  }
   if (!data) {
     window.location.replace('login-impresa.html');
     return;
@@ -2435,6 +2442,10 @@ window.onpopstate = function(e) {
 const PANNELLO_CORRENTE = 'artigiano';
 
 async function inizializza() {
+  // mensile/annuale valgono come premium in tutto il pannello
+  if (impresaCorrente && ['mensile','annuale'].includes((impresaCorrente.piano||'').toLowerCase())) {
+    impresaCorrente.piano = 'premium';
+  }
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const piano = (impresaCorrente.piano || 'free').toLowerCase();
   const isPremium = piano === 'premium';
@@ -2708,16 +2719,16 @@ async function caricaPreventivi() {
     <div class="prev-card" style="position:relative" onclick="apriModal(${p.id})">
       <button onclick="event.stopPropagation();eliminaPreventivo(${p.id})" title="Elimina preventivo" style="position:absolute;top:10px;right:10px;background:#fdecec;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:4px 8px;font-size:0.72rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">🗑️ Elimina</button>
       <div class="prev-header">
-        <div class="prev-nome">👤 ${p.nome}</div>
+        <div class="prev-nome">👤 ${escHtml(p.nome)}</div>
         <span class="prev-badge ${p.risposta ? 'badge-inviato' : 'badge-nuovo'}" style="margin-right:80px">${p.risposta ? '✅ Risposto' : '🆕 Nuovo'}</span>
       </div>
       <div class="prev-info">
-        <span>🔨 ${p.tipo_lavoro || '—'}</span>
-        <span>📍 ${p.indirizzo || '—'}</span>
-        <span>⏰ ${p.urgenza || '—'}</span>
-        ${p.budget ? `<span>💶 ${p.budget}</span>` : ''}
+        <span>🔨 ${escHtml(p.tipo_lavoro || '—')}</span>
+        <span>📍 ${escHtml(p.indirizzo || '—')}</span>
+        <span>⏰ ${escHtml(p.urgenza || '—')}</span>
+        ${p.budget ? `<span>💶 ${escHtml(p.budget)}</span>` : ''}
       </div>
-      <div class="prev-desc">${(p.descrizione || '').substring(0, 150)}${p.descrizione?.length > 150 ? '...' : ''}</div>
+      <div class="prev-desc">${escHtml((p.descrizione || '').substring(0, 150))}${p.descrizione?.length > 150 ? '...' : ''}</div>
       <div class="prev-footer">
         <span class="prev-data">${new Date(p.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</span>
       </div>
@@ -2756,9 +2767,9 @@ async function caricaPreventivi() {
             <div style="display:grid;gap:10px">
               ${zona.map(l => `
                 <div onclick="apriModal(${l.id})" style="background:white;border:1px solid #e0e8e3;border-left:4px solid #e8733a;border-radius:10px;padding:14px 16px;cursor:pointer">
-                  <div style="font-weight:700;font-size:14px">${l.categoria_lavoro || l.tipo_lavoro || 'Lavoro'} · 📍 ${l.citta || ''}</div>
-                  <div style="font-size:13px;color:#555;margin-top:4px">${(l.descrizione || '').slice(0, 110)}${(l.descrizione || '').length > 110 ? '…' : ''}</div>
-                  <div style="font-size:12px;color:#888;margin-top:6px">${l.budget ? '💶 ' + l.budget + ' · ' : ''}${new Date(l.created_at).toLocaleDateString('it-IT')} · 🔒 contatto da sbloccare</div>
+                  <div style="font-weight:700;font-size:14px">${escHtml(l.categoria_lavoro || l.tipo_lavoro || 'Lavoro')} · 📍 ${escHtml(l.citta || '')}</div>
+                  <div style="font-size:13px;color:#555;margin-top:4px">${escHtml((l.descrizione || '').slice(0, 110))}${(l.descrizione || '').length > 110 ? '…' : ''}</div>
+                  <div style="font-size:12px;color:#888;margin-top:6px">${l.budget ? '💶 ' + escHtml(l.budget) + ' · ' : ''}${new Date(l.created_at).toLocaleDateString('it-IT')} · 🔒 contatto da sbloccare</div>
                 </div>`).join('')}
             </div>
           </div>`;
@@ -3834,14 +3845,14 @@ async function apriModal(prevId) {
 
   document.getElementById('modal-richiesta').innerHTML = `
     <div class="ric-title">📋 Richiesta del cliente</div>
-    <div class="ric-row"><span class="ric-key">Nome:</span><span>${data.nome}</span></div>
-    <div class="ric-row"><span class="ric-key">Lavoro:</span><span>${data.tipo_lavoro || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Categoria:</span><span>${preventivoCorrente.categoria_lavoro || '—'}</span></div>
-    ${indirizzo ? `<div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${indirizzo}</span></div>` : ''}
+    <div class="ric-row"><span class="ric-key">Nome:</span><span>${escHtml(data.nome)}</span></div>
+    <div class="ric-row"><span class="ric-key">Lavoro:</span><span>${escHtml(data.tipo_lavoro || '—')}</span></div>
+    <div class="ric-row"><span class="ric-key">Categoria:</span><span>${escHtml(preventivoCorrente.categoria_lavoro || '—')}</span></div>
+    ${indirizzo ? `<div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${escHtml(indirizzo)}</span></div>` : ''}
     ${preventivoCorrente.piano != null ? `<div class="ric-row"><span class="ric-key">Piano:</span><span>${pianoLabels[preventivoCorrente.piano] ?? '—'}</span></div>` : ''}
     ${preventivoCorrente.mq != null ? `<div class="ric-row"><span class="ric-key">Metri quadri:</span><span>${preventivoCorrente.mq} mq</span></div>` : ''}
-    <div class="ric-row"><span class="ric-key">Descrizione:</span><span>${data.descrizione || '—'}</span></div>
-    ${data.superficie ? `<div class="ric-row"><span class="ric-key">Superficie:</span><span>${data.superficie} mq</span></div>` : ''}
+    <div class="ric-row"><span class="ric-key">Descrizione:</span><span>${escHtml(data.descrizione || '—')}</span></div>
+    ${data.superficie ? `<div class="ric-row"><span class="ric-key">Superficie:</span><span>${escHtml(String(data.superficie))} mq</span></div>` : ''}
     ${contattoHtml}
   `;
 
