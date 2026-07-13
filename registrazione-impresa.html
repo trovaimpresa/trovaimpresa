@@ -24,7 +24,7 @@
     .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #e0e0e0; color: #333; font-size: 15px; }
     .step.active .step-circle { background: #0066ff; color: white; }
     .step-label { font-size: 11px; color: #999; text-align: center; }
-    .step.active .step-label { color: #2a7a4b; font-weight: 600; }
+    .step.active .step-label { color: #0066ff; font-weight: 600; }
     .content { padding: 32px; }
     .form-section { display: none; }
     .form-section.active { display: block; }
@@ -32,36 +32,36 @@
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: #111; margin-bottom: 7px; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111; }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2a7a4b; box-shadow: 0 0 0 3px rgba(42,122,75,0.1); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.1); }
     .form-group textarea { resize: vertical; min-height: 90px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .required { color: #ff6b6b; }
     .buttons { display: flex; gap: 12px; margin-top: 28px; }
     .btn-back { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #e0e0e0; color: #111; }
-    .btn-next { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #2a7a4b; color: white; }
-    .btn-next:hover { background: #1a4d2e; }
+    .btn-next { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #0066ff; color: white; }
+    .btn-next:hover { background: #0052cc; }
     .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
     .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; background: #fafafa; }
-    .upload-area:hover { border-color: #2a7a4b; background: rgba(42,122,75,0.05); }
+    .upload-area:hover { border-color: #0066ff; background: rgba(0,102,255,0.05); }
     .upload-area .upload-icon { font-size: 36px; margin-bottom: 8px; }
     .upload-area p { font-size: 14px; color: #222; margin-bottom: 4px; }
     .upload-area small { font-size: 12px; color: #aaa; }
-    .file-selected { display: none; align-items: center; gap: 10px; background: #e8f5e9; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
-    .file-selected span { font-size: 13px; color: #2a7a4b; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-selected { display: none; align-items: center; gap: 10px; background: #e8f0ff; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
+    .file-selected span { font-size: 13px; color: #0066ff; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .file-selected button { background: none; border: none; color: #aaa; font-size: 18px; cursor: pointer; }
     .file-selected button:hover { color: #f44336; }
     #logo-input { display: none; }
     .piano-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
     .piano-card { border: 2px solid #ddd; border-radius: 10px; padding: 16px; cursor: pointer; text-align: center; transition: all 0.2s; }
-    .piano-card:hover { border-color: #2a7a4b; }
-    .piano-card.selected { border-color: #2a7a4b; background: #e8f5e9; }
+    .piano-card:hover { border-color: #0066ff; }
+    .piano-card.selected { border-color: #0066ff; background: #e8f0ff; }
     .piano-card.selected-premium { border-color: #7b1fa2; background: #f3e5f5; }
     .piano-card .piano-icon { font-size: 28px; margin-bottom: 6px; }
     .piano-card .piano-nome { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
     .piano-card .piano-prezzo { font-size: 13px; color: #888; margin-bottom: 8px; }
     .piano-card ul { list-style: none; text-align: left; font-size: 12px; color: #222; }
     .piano-card ul li { padding: 2px 0; }
-    .piano-card ul li::before { content: "✓ "; color: #2a7a4b; font-weight: 700; }
+    .piano-card ul li::before { content: "✓ "; color: #0066ff; font-weight: 700; }
     .piano-card.selected-premium ul li::before { color: #7b1fa2; }
     .password-wrapper { position: relative; }
     .password-wrapper input { padding-right: 44px; }
@@ -70,9 +70,9 @@
       background: none; border: none; cursor: pointer; color: #aaa;
       padding: 0; display: flex; align-items: center; transition: color 0.2s;
     }
-    .toggle-pw:hover { color: #2a7a4b; }
+    .toggle-pw:hover { color: #0066ff; }
     .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #111; border-bottom: 1px solid #f0f0f0; }
-    .map-dd-item:hover { background: #e8f5e9; }
+    .map-dd-item:hover { background: #e8f0ff; }
     .map-dd-item:last-child { border-bottom: none; }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -298,7 +298,7 @@
         <button class="btn-next" id="btn-next">Avanti →</button>
       </div>
       <div style="text-align:center;margin-top:12px;"><span style="font-size:0.9rem;color:#555;">Sei già registrato? </span><a href="login-impresa.html" style="display:inline-block;margin-left:8px;padding:9px 22px;background:#f5a800;color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:0.9rem;">Accedi</a></div>
-        <p style="text-align:center;font-size:12px;color:#888;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#2a7a4b;">Privacy Policy</a></p>
+        <p style="text-align:center;font-size:12px;color:#888;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
     </div>
   </div>
 
@@ -311,7 +311,7 @@
       if (input.type === 'password') {
         input.type = 'text';
         svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
-        btn.style.color = '#2a7a4b';
+        btn.style.color = '#0066ff';
       } else {
         input.type = 'password';
         svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
@@ -376,7 +376,7 @@
       logoFile = file;
       document.getElementById('file-name').textContent = file.name;
       document.getElementById('file-selected').style.display = 'flex';
-      document.getElementById('upload-area').style.borderColor = '#2a7a4b';
+      document.getElementById('upload-area').style.borderColor = '#0066ff';
     });
 
     function removeFile(e) {
