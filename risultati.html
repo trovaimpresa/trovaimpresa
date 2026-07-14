@@ -10,8 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --verde:   #2a7a4b;
-    --verde2:  #1f5e38;
+    --verde:   #0066ff;
+    --verde2:  #0052cc;
     --verde3:  #e8f5ee;
     --arancio: #e8733a;
     --arancio2:#c45e28;
@@ -160,7 +160,7 @@
     background:var(--verde3); color:var(--verde2);
     padding:5px 12px; border-radius:20px;
     font-size:0.78rem; font-weight:700;
-    border:1px solid rgba(42,122,75,0.2);
+    border:1px solid rgba(0,102,255,0.2);
   }
   .filtro-tag span { cursor:pointer; font-size:1rem; opacity:0.6; }
   .filtro-tag span:hover { opacity:1; }
@@ -176,7 +176,7 @@
     display:flex;
     cursor:pointer;
   }
-  .result-card:hover { transform:translateY(-3px); box-shadow:var(--shadow2); border-color:rgba(42,122,75,0.2); }
+  .result-card:hover { transform:translateY(-3px); box-shadow:var(--shadow2); border-color:rgba(0,102,255,0.2); }
 
   .result-card-accent { width:5px; flex-shrink:0; }
   .result-card-accent.verde { background:var(--verde); }
@@ -253,7 +253,7 @@
     display:flex; align-items:center; justify-content:center;
   }
   .page-btn:hover { border-color:var(--verde); color:var(--verde); }
-  .page-btn.active { background:var(--verde); color:white; border-color:var(--verde); box-shadow:0 4px 12px rgba(42,122,75,0.3); }
+  .page-btn.active { background:var(--verde); color:white; border-color:var(--verde); box-shadow:0 4px 12px rgba(0,102,255,0.3); }
 
   /* Nessun risultato */
   .empty { text-align:center; padding:60px 20px; }
@@ -285,10 +285,10 @@
 
 <!-- NAV -->
 <nav style="background:white;border-bottom:1px solid rgba(0,0,0,0.08);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-  <a href="index.html" style="text-decoration:none;font-family:'Playfair Display',serif;font-size:20px;"><span style="color:#2a7a4b;">Trova</span><span style="color:#e8733a;">Impresa</span></a>
+  <a href="index.html" style="text-decoration:none;font-family:'Playfair Display',serif;font-size:20px;"><span style="color:#0066ff;">Trova</span><span style="color:#e8733a;">Impresa</span></a>
   <div style="display:flex;gap:10px;align-items:center;">
     <a href="login-impresa.html" style="color:#555;font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;text-decoration:none;">Entra (Imprese)</a>
-    <a href="/#registrati" style="background:#2a7a4b;color:white;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">Registrati (Imprese)</a>
+    <a href="/#registrati" style="background:#0066ff;color:white;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">Registrati (Imprese)</a>
     <a href="pubblicita.html" style="background:#e8733a;color:white;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">📢 Pubblicità</a>
   </div>
 </nav>
@@ -533,7 +533,7 @@ window.onload = () => {
 </script>
 
 <script src="/cookie-banner.js"></script>
-<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>
 </html>

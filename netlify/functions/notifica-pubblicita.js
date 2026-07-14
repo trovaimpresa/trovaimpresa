@@ -16,7 +16,7 @@ exports.handler = async function(event) {
 
   const html = `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
-      <div style="background:linear-gradient(135deg,#1a4d2e,#2a7a4b);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+      <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
         <h1 style="color:white;margin:0;font-size:22px">📢 Nuova richiesta pubblicità</h1>
       </div>
       <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
@@ -27,7 +27,7 @@ exports.handler = async function(event) {
           </tr>
           <tr style="border-bottom:1px solid #eee">
             <td style="padding:10px 0;color:#666">Email</td>
-            <td style="padding:10px 0"><a href="mailto:${email}" style="color:#2a7a4b">${email}</a></td>
+            <td style="padding:10px 0"><a href="mailto:${email}" style="color:#0066ff">${email}</a></td>
           </tr>
           <tr style="border-bottom:1px solid #eee">
             <td style="padding:10px 0;color:#666">Telefono</td>
@@ -47,7 +47,7 @@ exports.handler = async function(event) {
           </tr>
           <tr style="border-bottom:1px solid #eee">
             <td style="padding:10px 0;color:#666">Totale</td>
-            <td style="padding:10px 0;font-weight:700;color:#2a7a4b">€${totale || 0}</td>
+            <td style="padding:10px 0;font-weight:700;color:#0066ff">€${totale || 0}</td>
           </tr>
           <tr>
             <td style="padding:10px 0;color:#666">ID annuncio</td>
@@ -56,7 +56,7 @@ exports.handler = async function(event) {
         </table>
         <div style="text-align:center;margin-top:28px">
           <a href="https://trovaimpresa.com/admin.html"
-             style="display:inline-block;background:#2a7a4b;color:white;padding:13px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none">
+             style="display:inline-block;background:#0066ff;color:white;padding:13px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none">
             🔧 Gestisci annuncio →
           </a>
         </div>

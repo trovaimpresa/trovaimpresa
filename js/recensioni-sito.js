@@ -51,7 +51,7 @@
     + '#ti-recensioni .tir-submit:hover{filter:brightness(.95)}'
     + '#ti-recensioni .tir-submit:disabled{opacity:.6;cursor:default}'
     + '#ti-recensioni .tir-msg{font-size:14px}'
-    + '#ti-recensioni .tir-msg.ok{color:#2e7d32}#ti-recensioni .tir-msg.err{color:#c0392b}'
+    + '#ti-recensioni .tir-msg.ok{color:#2e537d}#ti-recensioni .tir-msg.err{color:#c0392b}'
     + '#ti-recensioni .tir-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}'
     + '#ti-recensioni .tir-review{background:var(--tir-card);border:1px solid var(--tir-border);border-radius:12px;padding:16px}'
     + '#ti-recensioni .tir-review-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}'

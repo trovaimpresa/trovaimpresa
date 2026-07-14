@@ -51,7 +51,7 @@ function cardHTML(i) {
   const badge = i.piano === 'premium'
     ? '<span style="background:#7b2fbe;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">💎 Premium</span>' : '';
   const verificata = i.verificata
-    ? '<span style="color:#2a7a4b;font-size:12px;font-weight:700;margin-left:6px;">✓ Verificata</span>' : '';
+    ? '<span style="color:#0066ff;font-size:12px;font-weight:700;margin-left:6px;">✓ Verificata</span>' : '';
   const rating = i.valutazione_media > 0
     ? `⭐ ${Number(i.valutazione_media).toFixed(1)}` : '⭐ Nuova';
   const desc = i.descrizione
@@ -83,7 +83,7 @@ function sezioneHTML(citta, imprese) {
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0;">
 ${items}
     </div>
-    <p style="text-align:center;"><a href="/cerca-imprese?citta=${encodeURIComponent(citta)}" style="color:#2a7a4b;font-weight:700;">Vedi tutte le imprese a ${esc(citta)} →</a></p>
+    <p style="text-align:center;"><a href="/cerca-imprese?citta=${encodeURIComponent(citta)}" style="color:#0066ff;font-weight:700;">Vedi tutte le imprese a ${esc(citta)} →</a></p>
   </div>
   <script type="application/ld+json">
 ${JSON.stringify(itemList, null, 2)}

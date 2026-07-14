@@ -14,8 +14,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root {
-    --verde:   #2a7a4b;
-    --verde2:  #1f5e38;
+    --verde:   #0066ff;
+    --verde2:  #0052cc;
     --verde3:  #e8f5ee;
     --arancio: #e8733a;
     --arancio2:#c45e28;
@@ -34,7 +34,7 @@
 
   .login-screen {
     min-height:100vh; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(135deg,#1a3a2a,#2a7a4b); padding:20px;
+    background:linear-gradient(135deg,#0a2a4d,#0066ff); padding:20px;
   }
   .login-box {
     background:white; border-radius:24px; padding:48px 40px;
@@ -81,12 +81,12 @@
     font-size:0.88rem; font-weight:600; color:var(--dark);
     transition:all 0.15s; margin-bottom:10px;
     background:white; box-shadow:0 2px 8px rgba(0,0,0,0.07);
-    border-top:4px solid #2e7d32;
+    border-top:4px solid #2e537d;
   }
-  .nav-item:nth-child(1) { border-top-color:#2e7d32; }
+  .nav-item:nth-child(1) { border-top-color:#2e537d; }
   .nav-item:nth-child(2) { border-top-color:#e65100; }
   .nav-item:nth-child(3) { border-top-color:#1565c0; }
-  .nav-item:nth-child(4) { border-top-color:#2e7d32; }
+  .nav-item:nth-child(4) { border-top-color:#2e537d; }
   .nav-item:nth-child(5) { border-top-color:#e65100; }
   .nav-item:nth-child(6) { border-top-color:#1565c0; }
   .nav-item:hover { box-shadow:0 4px 14px rgba(0,0,0,0.13); transform:translateY(-1px); color:var(--dark); }
@@ -149,7 +149,7 @@
     font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.82rem;
     display:flex; align-items:center; gap:6px; transition:all 0.15s;
   }
-  .btn-genera:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(42,122,75,0.3); }
+  .btn-genera:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,102,255,0.3); }
 
   .modal-overlay {
     display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
@@ -162,7 +162,7 @@
     box-shadow:0 24px 80px rgba(0,0,0,0.25);
   }
   .modal-header {
-    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    background:linear-gradient(135deg,#0a2a4d,#0066ff);
     padding:24px 28px; border-radius:24px 24px 0 0; color:white;
   }
   .modal-header h2 { font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:4px; }
@@ -179,7 +179,7 @@
   .ai-genera-box { margin-bottom:20px; }
   .ai-genera-btn {
     width:100%; padding:14px; border-radius:14px; border:none;
-    background:linear-gradient(135deg,#1a3a2a,#2a7a4b); color:white;
+    background:linear-gradient(135deg,#0a2a4d,#0066ff); color:white;
     font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
     cursor:pointer; display:flex; align-items:center; justify-content:center;
     gap:8px; transition:all 0.2s;
@@ -248,7 +248,7 @@
   .mfa-qr svg { max-width:180px; border:1px solid var(--border); border-radius:8px; padding:8px; }
   .mfa-secret { font-size:0.75rem; color:var(--mid); text-align:center; margin-bottom:16px; word-break:break-all; }
   .mfa-input { width:100%; padding:13px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:1.1rem; font-family:inherit; text-align:center; letter-spacing:4px; outline:none; margin-bottom:14px; }
-  .mfa-input:focus { border-color:var(--verde); box-shadow:0 0 0 3px rgba(42,122,75,0.1); }
+  .mfa-input:focus { border-color:var(--verde); box-shadow:0 0 0 3px rgba(0,102,255,0.1); }
   .mfa-btn { width:100%; padding:13px; background:var(--verde); color:white; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.15s; }
   .mfa-btn:hover { background:var(--verde2); }
   .mfa-btn:disabled { opacity:0.6; cursor:not-allowed; }
@@ -256,7 +256,7 @@
   .mfa-cancel:hover { color:var(--dark); }
   .mfa-alert { padding:10px 14px; border-radius:8px; font-size:0.83rem; margin-bottom:14px; }
   .mfa-alert-error { background:#fff0f0; border:1px solid #ffcccc; color:#cc0000; }
-  .mfa-alert-success { background:var(--verde3); border:1px solid #a8d5b5; color:var(--verde2); }
+  .mfa-alert-success { background:var(--verde3); border:1px solid #a8bdd5; color:var(--verde2); }
 
   .form-group { margin-bottom:16px; }
   .form-group label { display:block; font-size:0.75rem; font-weight:800; color:var(--mid); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
@@ -289,7 +289,7 @@
 
   /* === NUOVA DASHBOARD === */
   .dash-hero {
-    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    background:linear-gradient(135deg,#0a2a4d,#0066ff);
     border-radius:20px; padding:28px 32px; color:white;
     display:flex; align-items:stretch; justify-content:space-between;
     margin-bottom:20px; gap:20px; position:relative;
@@ -310,7 +310,7 @@
   .dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
   .dash-stat-card {
     background:white; border-radius:16px; padding:20px;
-    box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e7d32;
+    box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e537d;
     text-align:center;
   }
   .dash-stat-card:nth-child(2) { border-top-color:#e65100; }
@@ -323,12 +323,12 @@
   .dash-quick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
   .dash-quick-card {
     background:white; border-radius:16px; padding:20px;
-    box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e7d32;
+    box-shadow:0 4px 16px rgba(0,0,0,0.08); border-top:4px solid #2e537d;
     cursor:pointer; transition:all 0.2s; text-align:center;
   }
   .dash-quick-card:nth-child(2) { border-top-color:#e65100; }
   .dash-quick-card:nth-child(3) { border-top-color:#1565c0; }
-  .dash-quick-card:hover { box-shadow:0 8px 24px rgba(42,122,75,0.12); transform:translateY(-2px); }
+  .dash-quick-card:hover { box-shadow:0 8px 24px rgba(0,102,255,0.12); transform:translateY(-2px); }
   .dash-quick-icon { font-size:1.8rem; margin-bottom:8px; }
   .dash-quick-label { font-weight:700; font-size:0.9rem; color:var(--dark); margin-bottom:3px; }
   .dash-quick-sub { font-size:0.78rem; color:var(--light); }
@@ -396,7 +396,7 @@
   }
   .prev-table input:focus { border-color:var(--verde); }
   .prev-table input[type="number"] { text-align:right; }
-  .prev-totale-riga { font-weight:700; color:#1a3a2a; padding:8px 10px; text-align:right; min-width:90px; white-space:nowrap; }
+  .prev-totale-riga { font-weight:700; color:#0a2a4d; padding:8px 10px; text-align:right; min-width:90px; white-space:nowrap; }
   .btn-rimuovi-riga {
     background:transparent; border:none; color:#c0392b;
     cursor:pointer; font-size:1rem; padding:4px 8px;
@@ -414,7 +414,7 @@
   .prev-totali-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-size:0.92rem; color:var(--mid); }
   .prev-totali-row.final {
     padding-top:10px; margin-top:6px; border-top:1.5px solid var(--border);
-    font-size:1.1rem; font-weight:800; color:#1a3a2a;
+    font-size:1.1rem; font-weight:800; color:#0a2a4d;
   }
   .modal-ai-footer {
     padding:16px 28px; border-top:1px solid var(--border);
@@ -462,7 +462,7 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 1rem;
     font-weight: 700;
-    color: #1a3a2a;
+    color: #0a2a4d;
     cursor: pointer;
     transition: background 0.12s, transform 0.05s;
     padding: 0;
@@ -473,10 +473,10 @@
   }
   .wcalc-btn:hover { background: #f0f7f3; }
   .wcalc-btn:active { transform: scale(0.96); }
-  .wcalc-btn.wcalc-op { background: #e8f5ee; color: #2a7a4b; }
-  .wcalc-btn.wcalc-op:hover { background: #d4ead9; }
-  .wcalc-btn.wcalc-eq { background: #2a7a4b; color: white; }
-  .wcalc-btn.wcalc-eq:hover { background: #1a5a3a; }
+  .wcalc-btn.wcalc-op { background: #e8f5ee; color: #0066ff; }
+  .wcalc-btn.wcalc-op:hover { background: #d4deea; }
+  .wcalc-btn.wcalc-eq { background: #0066ff; color: white; }
+  .wcalc-btn.wcalc-eq:hover { background: #1a385a; }
   .wcalc-btn.wcalc-clear { background: #e85d4a; color: white; }
   .wcalc-btn.wcalc-clear:hover { background: #c84a39; }
 
@@ -624,7 +624,7 @@
   .ai-result-label { font-size:0.72rem; font-weight:800; color:var(--verde2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
   .btn-copia {
     padding:5px 12px; background:var(--verde3); color:var(--verde2);
-    border:1px solid #a8d5b5; border-radius:8px; font-family:'DM Sans',sans-serif;
+    border:1px solid #a8bdd5; border-radius:8px; font-family:'DM Sans',sans-serif;
     font-weight:700; font-size:0.75rem; cursor:pointer; transition:all 0.15s;
   }
   .btn-copia:hover { background:var(--verde); color:white; }
@@ -665,7 +665,7 @@
   }
   .foto-item:hover .foto-item-del { opacity:1; }
   .foto-upload-progress {
-    background:var(--verde3); border:1px solid #a8d5b5; border-radius:10px;
+    background:var(--verde3); border:1px solid #a8bdd5; border-radius:10px;
     padding:10px 16px; font-size:0.85rem; color:var(--verde2); margin-bottom:14px;
     display:none;
   }
@@ -713,7 +713,7 @@
   .btn-az {
     background: white;
     border: 1px solid rgba(0,0,0,0.08);
-    border-top: 4px solid #2e7d32;
+    border-top: 4px solid #2e537d;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     padding: 12px 20px;
@@ -811,7 +811,7 @@
 <body>
 
 <!-- LOGIN -->
-<div id="spinner-avvio" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a2a,#2a7a4b)">
+<div id="spinner-avvio" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a2a4d,#0066ff)">
   <div style="text-align:center;color:white">
     <div style="font-size:2.5rem;margin-bottom:16px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
     <div style="font-size:1rem;opacity:0.85;font-weight:600">Caricamento...</div>
@@ -994,56 +994,56 @@
 
       <!-- CALENDARIO & ORARIO -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📅 Calendario &amp; Orario</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#0a2a4d">📅 Calendario &amp; Orario</div>
 
         <div class="cal-section-grid" style="display:grid;grid-template-columns:1fr 0.5fr 0.5fr;grid-template-rows:auto auto;gap:14px">
 
           <!-- [A] Orologio (alto sx) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:center">
-            <div id="cal-orologio" style="font-family:'Playfair Display',serif;font-size:2rem;color:#2a7a4b;letter-spacing:4px;font-weight:700;text-align:center"></div>
+            <div id="cal-orologio" style="font-family:'Playfair Display',serif;font-size:2rem;color:#0066ff;letter-spacing:4px;font-weight:700;text-align:center"></div>
           </div>
 
           <!-- [B] Meteo (alto dx) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:14px">
             <div id="meteo-icona" style="font-size:2.2rem;line-height:1">⏳</div>
             <div>
-              <div id="meteo-citta" style="font-weight:700;font-size:0.9rem;color:#1a3a2a">Rilevamento...</div>
-              <div id="meteo-temp" style="font-size:1.4rem;font-family:'Playfair Display',serif;color:#2a7a4b;font-weight:700"></div>
+              <div id="meteo-citta" style="font-weight:700;font-size:0.9rem;color:#0a2a4d">Rilevamento...</div>
+              <div id="meteo-temp" style="font-size:1.4rem;font-family:'Playfair Display',serif;color:#0066ff;font-weight:700"></div>
               <div id="meteo-condizione" style="font-size:0.78rem;color:#999;margin-top:2px"></div>
             </div>
           </div>
 
           <!-- [C] Calendario (basso sx) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;overflow:hidden">
-            <div style="display:flex;align-items:center;justify-content:space-between;background:#2a7a4b;padding:10px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#0066ff;padding:10px 14px">
               <button onclick="calPrev()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8249;</button>
               <div id="cal-label" style="color:white;font-weight:700;font-size:0.85rem;text-transform:capitalize"></div>
               <button onclick="calNext()" style="background:none;border:none;color:white;font-size:1.4rem;cursor:pointer;padding:0 4px;line-height:1">&#8250;</button>
             </div>
             <div class="calendar-header" style="display:grid;grid-template-columns:repeat(7,1fr);background:#e8f5ee">
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Lun</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Mar</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Mer</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Gio</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Ven</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Sab</div>
-              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#2a7a4b;padding:6px 0">Dom</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#0066ff;padding:6px 0">Lun</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#0066ff;padding:6px 0">Mar</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#0066ff;padding:6px 0">Mer</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#0066ff;padding:6px 0">Gio</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#0066ff;padding:6px 0">Ven</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#0066ff;padding:6px 0">Sab</div>
+              <div style="text-align:center;font-size:0.65rem;font-weight:700;color:#0066ff;padding:6px 0">Dom</div>
             </div>
             <div id="cal-griglia" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:rgba(0,0,0,0.05)"></div>
           </div>
 
           <!-- [D] Note (basso centro) -->
           <div style="border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px">
-            <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
+            <div style="font-size:0.78rem;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px">📝 Note</div>
             <textarea id="widget-note" placeholder="Scrivi un appunto..." style="resize:none;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:8px;outline:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:#1a1a1a;line-height:1.5;min-height:60px;background:white"></textarea>
-            <button onclick="aggiungiNota()" style="padding:8px 12px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;align-self:flex-start">+ Aggiungi nota</button>
+            <button onclick="aggiungiNota()" style="padding:8px 12px;background:#0066ff;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;align-self:flex-start">+ Aggiungi nota</button>
             <div class="lista-note" id="lista-note" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
           </div>
 
           <!-- [E] Calcolatrice (terza colonna, full height) -->
           <div class="widget-calc-card" style="grid-row:1 / span 2;grid-column:3;background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,0.04);padding:14px;display:flex;flex-direction:column;gap:10px">
-            <div style="font-size:0.78rem;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:0.5px">🧮 Calcolatrice</div>
-            <div id="wcalc-display" style="background:#f5f5f5;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px 12px;text-align:right;font-family:'Playfair Display',serif;font-size:1.4rem;color:#1a3a2a;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:42px;line-height:1.5">0</div>
+            <div style="font-size:0.78rem;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:0.5px">🧮 Calcolatrice</div>
+            <div id="wcalc-display" style="background:#f5f5f5;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:10px 12px;text-align:right;font-family:'Playfair Display',serif;font-size:1.4rem;color:#0a2a4d;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:42px;line-height:1.5">0</div>
             <div class="wcalc-keys" style="display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(40px,1fr);gap:6px;flex:1">
               <button type="button" onclick="wcalcClear()" class="wcalc-btn wcalc-clear">C</button>
               <button type="button" onclick="wcalcSetOp('/')" class="wcalc-btn wcalc-op">÷</button>
@@ -1073,24 +1073,24 @@
         <!-- GESTIONALE LAVORI -->
         <div data-premium="true" style="flex:1 1 300px;background:white;border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.08);display:flex;flex-direction:column">
           <div style="margin-bottom:16px">
-            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#1a3a2a">🛠️ Gestionale lavori</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d">🛠️ Gestionale lavori</div>
             <div style="font-size:0.78rem;color:#888;margin-top:4px">Organizza cantieri, squadra e lavori da fare</div>
           </div>
           <div onclick="location.href='/gestionale-app.html'" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">🛠️</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Apri gestionale</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Apri gestionale</div>
           </div>
         </div>
 
         <!-- I MIEI CANTIERI -->
         <div data-premium="true" style="flex:1 1 300px;background:white;border-radius:20px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.08);display:flex;flex-direction:column">
-          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#1a3a2a;margin-bottom:16px">🏗️ I miei cantieri</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a2a4d;margin-bottom:16px">🏗️ I miei cantieri</div>
           <div id="lista-cantieri" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:14px">
             <div style="grid-column:1/-1;text-align:center;color:#888;font-size:0.9rem;padding:6px 0">Nessun cantiere ancora</div>
           </div>
           <div onclick="document.getElementById('modalNuovoCantiere').classList.add('show')" style="margin-top:auto;border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">➕</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Nuovo cantiere</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Nuovo cantiere</div>
           </div>
         </div>
 
@@ -1098,38 +1098,38 @@
 
       <!-- STRUMENTI -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">🛠️ Strumenti</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#0a2a4d">🛠️ Strumenti</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
           <div data-premium="true" onclick="apriCalcolatrice()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">🧮</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Calcolatrice edile</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Calcolatrice edile</div>
           </div>
           <div data-premium="true" onclick="apriAgenda()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">📅</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Agenda</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Agenda</div>
           </div>
           <div data-premium="true" onclick="apriModalScadenzeFiscali()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">📋</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Scadenze fiscali</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Scadenze fiscali</div>
           </div>
           <div data-premium="true" onclick="apriPromemoria()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">🔔</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Promemoria</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Promemoria</div>
             <div style="font-size:0.78rem;color:#888;margin-top:4px">Ti avvisiamo via email</div>
           </div>
           <div data-premium="true" onclick="apriModalCreaPreventivo()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">📄</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Preventivi</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Preventivi</div>
             <div style="font-size:0.78rem;color:#888;margin-top:4px">Crea preventivi PDF per i tuoi clienti</div>
           </div>
           <div data-premium="true" onclick="apriModalStoricoPreventivi()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">📚</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Storico preventivi</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Storico preventivi</div>
             <div style="font-size:0.78rem;color:#888;margin-top:4px">Tutti i preventivi che hai creato</div>
           </div>
           <div data-premium="true" onclick="apriModalPreventivoDash()" style="border:1.5px solid rgba(0,0,0,0.08);border-radius:14px;padding:18px;cursor:pointer;text-align:center;background:#fafafa;transition:background 0.15s" onmouseover="this.style.background='#f0f7f3'" onmouseout="this.style.background='#fafafa'">
             <div style="font-size:1.8rem;margin-bottom:8px">🤖</div>
-            <div style="font-weight:700;color:#1a3a2a;font-size:0.95rem">Preventivo AI</div>
+            <div style="font-weight:700;color:#0a2a4d;font-size:0.95rem">Preventivo AI</div>
             <div style="font-size:0.78rem;color:#888;margin-top:4px">L'AI scrive il preventivo a parole</div>
           </div>
         </div>
@@ -1137,23 +1137,23 @@
 
       <!-- FOTO DEI LAVORI (lista) -->
       <div style="background:white;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#1a3a2a">📷 Foto dei lavori</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:#0a2a4d">📷 Foto dei lavori</div>
         <div class="foto-grid" id="lista-lavori-foto"></div>
       </div>
 
       <!-- GESTIONE PIANO -->
       <div id="sezione-il-tuo-piano" style="background:white;border-radius:20px;padding:24px;margin:20px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#1a3a2a">🏆 Il tuo piano</div>
-        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#2a7a4b"><span id="piano-attuale-label">Free</span></strong></div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:6px;color:#0a2a4d">🏆 Il tuo piano</div>
+        <div style="font-size:0.9rem;color:#666;margin-bottom:20px">Piano attuale: <strong id="piano-dashboard-label" style="color:#0066ff"><span id="piano-attuale-label">Free</span></strong></div>
 
         <div id="piano-cards-grid" style="display:flex;gap:12px;flex-wrap:wrap;">
           <!-- FREE -->
           <div id="card-free" style="flex:1;min-width:180px;border:2px solid #ccc;border-radius:14px;padding:18px;text-align:center;transition:all 0.2s;">
             <div style="font-size:1.5rem;margin-bottom:6px">🆓</div>
-            <div style="font-weight:800;font-size:1rem;color:#2a7a4b;margin-bottom:6px">Free</div>
+            <div style="font-weight:800;font-size:1rem;color:#0066ff;margin-bottom:6px">Free</div>
             <div style="font-size:0.8rem;color:#666;line-height:1.5">1 annuncio di lavoro<br>Profilo base<br>Visibilità standard</div>
             <div style="margin-top:12px">
-              <button id="btn-piano-free" onclick="impostaPiano('free')" style="width:100%;padding:10px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">✅ Attiva Free</button>
+              <button id="btn-piano-free" onclick="impostaPiano('free')" style="width:100%;padding:10px;background:#0066ff;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.85rem">✅ Attiva Free</button>
             </div>
           </div>
 
@@ -1180,7 +1180,7 @@
         <div class="topbar-title">📋 Richieste preventivo ricevute</div>
       </div>
       <!-- Contatore preventivi del mese -->
-      <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#1a3a2a;border-left:4px solid #2a7a4b;">📊 Caricamento...</div>
+      <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#0a2a4d;border-left:4px solid #0066ff;">📊 Caricamento...</div>
       <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
     </div>
 
@@ -1285,7 +1285,7 @@
         <div id="personalizza-pannello-body" class="mpp-body">
           <div class="mpp-section">
             <label class="mpp-label">Colore header</label>
-            <input type="color" id="pers-pannello-colore-header" value="#2a7a4b">
+            <input type="color" id="pers-pannello-colore-header" value="#0066ff">
           </div>
           <div class="mpp-section">
             <label class="mpp-label">Sfondo pagina</label>
@@ -1354,11 +1354,11 @@
           <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">Non hai trovato la risposta? Chiedi direttamente all'assistente AI.</p>
           <textarea id="ai-supporto-prompt" placeholder="Scrivi la tua domanda…" style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.92rem;resize:vertical;box-sizing:border-box;"></textarea>
           <button type="button" id="btn-ai-supporto" onclick="chiediSupportoAI()"
-            style="margin-top:10px;padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
-            onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
+            style="margin-top:10px;padding:11px 18px;background:#0066ff;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:background 0.15s"
+            onmouseover="this.style.background='#0052cc'" onmouseout="this.style.background='#0066ff'">
             ✨ Chiedi all'AI
           </button>
-          <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#1a3a2a;"></div>
+          <div id="ai-supporto-risposta" style="margin-top:14px;white-space:pre-wrap;font-size:0.92rem;line-height:1.55;color:#0a2a4d;"></div>
         </div>
         <div class="faq-cta-help">
           <button onclick="apriModalSegnalazione();">❓ Non ho trovato la risposta · Contatta assistenza</button>
@@ -1405,10 +1405,10 @@
           <input type="color" id="qr-color-picker" value="#000000" oninput="aggiornaColoreQRCode(this.value)" style="width:100%;height:42px;padding:4px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:white;">
         </div>
         <button onclick="scaricaQRCodePNG()" style="width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.95rem;">⬇️ Scarica PNG 1024×1024</button>
-        <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:#1a3a2a;">
+        <div id="qrSuccessBox" style="display:none;margin-top:14px;background:#e7f5ec;border:1.5px solid #0066ff;border-radius:8px;padding:12px;font-size:13px;line-height:1.5;color:#0a2a4d;">
           <div style="font-weight:700;font-size:14px;margin-bottom:6px;">✅ Scaricato!</div>
           <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
-          <div style="font-size:13px;color:#2a7a4b;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
+          <div style="font-size:13px;color:#0066ff;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
         </div>
       </div>
     </div>
@@ -1449,30 +1449,30 @@
       </div>
       <div class="profilo-card">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">💶 IVA 22%</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:10px;font-size:0.95rem">💶 IVA 22%</div>
           <div class="form-group">
             <label>Imponibile (€)</label>
             <input type="number" id="calc-iva-in" step="0.01" min="0" placeholder="0.00" oninput="calcIva()">
           </div>
-          <div id="calc-iva-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+          <div id="calc-iva-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#0066ff;font-weight:700;min-height:24px"></div>
         </div>
 
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">📉 Ritenuta d'acconto 4%</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:10px;font-size:0.95rem">📉 Ritenuta d'acconto 4%</div>
           <div class="form-group">
             <label>Imponibile (€)</label>
             <input type="number" id="calc-rit-in" step="0.01" min="0" placeholder="0.00" oninput="calcRit()">
           </div>
-          <div id="calc-rit-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+          <div id="calc-rit-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#0066ff;font-weight:700;min-height:24px"></div>
         </div>
 
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:10px;font-size:0.95rem">🏛️ Rivalsa INPS 4% (artigiani)</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:10px;font-size:0.95rem">🏛️ Rivalsa INPS 4% (artigiani)</div>
           <div class="form-group">
             <label>Imponibile (€)</label>
             <input type="number" id="calc-inps-in" step="0.01" min="0" placeholder="0.00" oninput="calcInps()">
           </div>
-          <div id="calc-inps-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#2a7a4b;font-weight:700;min-height:24px"></div>
+          <div id="calc-inps-out" style="font-family:'Playfair Display',serif;font-size:1rem;color:#0066ff;font-weight:700;min-height:24px"></div>
         </div>
       </div>
     </div>
@@ -1487,7 +1487,7 @@
       </div>
       <div class="profilo-card">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuovo appuntamento</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuovo appuntamento</div>
           <div class="form-group">
             <label>Titolo *</label>
             <input type="text" id="ag-titolo" placeholder="es. Sopralluogo Villa Rossi">
@@ -1516,7 +1516,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <button class="btn-salva-annuncio" onclick="salvaAppuntamento()">💾 Salva appuntamento</button>
-            <span id="ag-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+            <span id="ag-msg" style="display:none;color:#0066ff;font-weight:700;font-size:0.9rem"></span>
           </div>
         </div>
         <div id="agenda-appuntamenti-lista" style="display:flex;flex-direction:column;gap:12px"></div>
@@ -1533,7 +1533,7 @@
       </div>
       <div class="profilo-card">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
           <div class="form-row">
             <div class="form-group">
               <label>Tipo *</label>
@@ -1583,7 +1583,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <button class="btn-salva-annuncio" onclick="salvaScadenzaFiscale()">💾 Salva scadenza</button>
-            <span id="scad-fisc-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+            <span id="scad-fisc-msg" style="display:none;color:#0066ff;font-weight:700;font-size:0.9rem"></span>
           </div>
         </div>
         <div id="scad-fisc-lista" style="display:flex;flex-direction:column;gap:12px"></div>
@@ -1743,8 +1743,8 @@
           <textarea id="prev-ai-prompt" placeholder="Descrivi il lavoro in 1-2 righe (es. ristrutturazione bagno 8mq con piastrelle e sanitari)" style="min-height:70px"></textarea>
         </div>
         <button type="button" id="btn-prev-genera-ai"
-          style="padding:11px 18px;background:#2a7a4b;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;margin-bottom:18px;transition:background 0.15s"
-          onmouseover="this.style.background='#1f5e38'" onmouseout="this.style.background='#2a7a4b'">
+          style="padding:11px 18px;background:#0066ff;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;margin-bottom:18px;transition:background 0.15s"
+          onmouseover="this.style.background='#0052cc'" onmouseout="this.style.background='#0066ff'">
           ✨ Genera con AI
         </button>
 
@@ -1836,7 +1836,7 @@
       </div>
       <div id="segnalazione-success" style="display:none;text-align:center;padding:20px 0;">
         <div style="font-size:48px;margin-bottom:12px;">✅</div>
-        <p style="font-size:15px;font-weight:600;color:#2a7a4b;margin-bottom:6px;">Segnalazione inviata!</p>
+        <p style="font-size:15px;font-weight:600;color:#0066ff;margin-bottom:6px;">Segnalazione inviata!</p>
         <p style="font-size:13px;color:#666;">Ti risponderemo a info@trovaimpresa.com</p>
       </div>
     </div>
@@ -2025,7 +2025,7 @@
 
       <div class="cant-pane" data-pane="preventivi">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuovo preventivo</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuovo preventivo</div>
           <div class="form-row">
             <div class="form-group">
               <label>Importo (€) *</label>
@@ -2048,7 +2048,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <button class="btn-salva-annuncio" onclick="salvaPreventivoCantiere()">💾 Salva preventivo</button>
-            <span id="prev-cant-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+            <span id="prev-cant-msg" style="display:none;color:#0066ff;font-weight:700;font-size:0.9rem"></span>
           </div>
         </div>
         <div id="dett-cant-preventivi-lista" style="display:flex;flex-direction:column;gap:12px"></div>
@@ -2056,7 +2056,7 @@
 
       <div class="cant-pane" data-pane="fatture">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova fattura</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuova fattura</div>
           <div class="form-row">
             <div class="form-group">
               <label>Numero fattura</label>
@@ -2093,7 +2093,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <button class="btn-salva-annuncio" onclick="salvaFatturaCantiere()">💾 Salva fattura</button>
-            <span id="fatt-cant-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+            <span id="fatt-cant-msg" style="display:none;color:#0066ff;font-weight:700;font-size:0.9rem"></span>
           </div>
         </div>
         <div id="dett-cant-fatture-lista" style="display:flex;flex-direction:column;gap:12px"></div>
@@ -2101,7 +2101,7 @@
 
       <div class="cant-pane" data-pane="quaderno">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova registrazione</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuova registrazione</div>
           <div class="form-row">
             <div class="form-group">
               <label>Data</label>
@@ -2122,7 +2122,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <button class="btn-salva-annuncio" onclick="salvaLogCantiere()">💾 Salva</button>
-            <span id="log-cant-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+            <span id="log-cant-msg" style="display:none;color:#0066ff;font-weight:700;font-size:0.9rem"></span>
           </div>
         </div>
         <div id="dett-cant-log-lista" style="display:flex;flex-direction:column;gap:12px"></div>
@@ -2130,7 +2130,7 @@
 
       <div class="cant-pane" data-pane="scadenze">
         <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-weight:700;color:#1a3a2a;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
+          <div style="font-weight:700;color:#0a2a4d;margin-bottom:12px;font-size:0.95rem">➕ Nuova scadenza</div>
           <div class="form-group">
             <label>Titolo *</label>
             <input type="text" id="scad-cant-titolo" placeholder="es. Consegna materiale, sopralluogo, pagamento acconto">
@@ -2151,7 +2151,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <button class="btn-salva-annuncio" onclick="salvaScadenzaCantiere()">💾 Salva scadenza</button>
-            <span id="scad-cant-msg" style="display:none;color:#2a7a4b;font-weight:700;font-size:0.9rem"></span>
+            <span id="scad-cant-msg" style="display:none;color:#0066ff;font-weight:700;font-size:0.9rem"></span>
           </div>
         </div>
         <div id="dett-cant-scadenze-lista" style="display:flex;flex-direction:column;gap:12px"></div>
@@ -2171,7 +2171,7 @@
       <button class="modal-ai-close" onclick="chiudiModalListaAttesaPub()">✕</button>
     </div>
     <div class="modal-ai-body">
-      <div id="lap-risultato" style="display:none;background:#e7f5ec;border:1.5px solid #2a7a4b;border-radius:8px;padding:16px;font-size:15px;line-height:1.5;color:#1a3a2a;text-align:center;font-weight:700;"></div>
+      <div id="lap-risultato" style="display:none;background:#e7f5ec;border:1.5px solid #0066ff;border-radius:8px;padding:16px;font-size:15px;line-height:1.5;color:#0a2a4d;text-align:center;font-weight:700;"></div>
     </div>
   </div>
 </div>
@@ -2453,7 +2453,7 @@ function aggiornaBadgeEOverlay() {
   const lbl = document.getElementById('piano-dashboard-label');
   if (lbl) {
     lbl.textContent = piano === 'premium' ? 'Premium 👑' : 'Free';
-    lbl.style.color = piano === 'premium' ? '#7b1fa2' : '#2a7a4b';
+    lbl.style.color = piano === 'premium' ? '#7b1fa2' : '#0066ff';
   }
   if ((impresaCorrente.tipo || '').toLowerCase().trim() === PANNELLO_CORRENTE) {
     aggiornaPianoCards(piano);
@@ -2578,11 +2578,11 @@ async function apriModalStoricoPreventivi() {
     const onclickDel = esc(`eliminaPreventivoCreato(${JSON.stringify(p.id)}, ${JSON.stringify(p.numero || '')})`);
     return `
       <div style="background:white;border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 2fr 1fr auto auto;gap:14px;align-items:center;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow='0 6px 18px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Numero</div><div style="font-weight:700;color:#1a3a2a">${esc(p.numero || '—')}</div></div>
-        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Data</div><div style="color:#1a3a2a">${esc(fmtData(p.data_preventivo))}</div></div>
-        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Cliente</div><div style="color:#1a3a2a">${esc(cliNome)}</div></div>
-        <div style="text-align:right"><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Totale</div><div style="font-weight:700;color:#2a7a4b">${fmtEuro(p.totale_finale)}</div></div>
-        <button onclick="${onclickEdit}" title="Modifica preventivo" style="background:#e8f5ee;color:#2a7a4b;border:1px solid #b3dcc1;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">✏️ Modifica</button>
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Numero</div><div style="font-weight:700;color:#0a2a4d">${esc(p.numero || '—')}</div></div>
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Data</div><div style="color:#0a2a4d">${esc(fmtData(p.data_preventivo))}</div></div>
+        <div><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Cliente</div><div style="color:#0a2a4d">${esc(cliNome)}</div></div>
+        <div style="text-align:right"><div style="font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Totale</div><div style="font-weight:700;color:#0066ff">${fmtEuro(p.totale_finale)}</div></div>
+        <button onclick="${onclickEdit}" title="Modifica preventivo" style="background:#e8f5ee;color:#0066ff;border:1px solid #b3c6dc;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">✏️ Modifica</button>
         <button onclick="${onclickDel}" title="Elimina preventivo" style="background:#fdecec;color:#c0392b;border:1px solid #f5c6c6;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;line-height:1;font-family:'DM Sans',sans-serif">🗑️ Elimina</button>
       </div>
     `;
@@ -3481,7 +3481,7 @@ let _persPannelloSizeTestoTemp = null;
 let _persPannelloBannerTemp = null;
 function apriModalPersonalizzaPannello() {
   const pers = (impresaCorrente && impresaCorrente.personalizzazione) || {};
-  document.getElementById('pers-pannello-colore-header').value = pers.colore_header || '#2a7a4b';
+  document.getElementById('pers-pannello-colore-header').value = pers.colore_header || '#0066ff';
   document.getElementById('pers-pannello-colore-sfondo').value = pers.colore_sfondo || '#f5f5f5';
   const welcomeEl = document.getElementById('dash-welcome');
   document.getElementById('pers-pannello-nome').value = pers.nome_pannello || (welcomeEl ? welcomeEl.textContent : '');
@@ -4058,8 +4058,8 @@ async function caricaPreventivi() {
       if (!zona.length) { box.innerHTML = ''; }
       else {
         box.innerHTML = `
-          <div style="margin-top:28px;padding-top:18px;border-top:2px dashed #cfe5d8">
-            <h3 style="font-size:16px;font-weight:800;color:#1a4d2e;margin-bottom:4px">📍 Richieste dalla tua zona</h3>
+          <div style="margin-top:28px;padding-top:18px;border-top:2px dashed #cfd9e5">
+            <h3 style="font-size:16px;font-weight:800;color:#0052cc;margin-bottom:4px">📍 Richieste dalla tua zona</h3>
             <p style="font-size:13px;color:#666;margin-bottom:14px">Clienti della tua zona che hanno autorizzato la condivisione. Sblocca il contatto per rispondere (5€, max 5 imprese per richiesta).</p>
             <div style="display:grid;gap:10px">
               ${zona.map(l => `
@@ -4087,7 +4087,7 @@ async function caricaCandidature() {
   const badge = {
     inviata:   { txt: 'Nuova',     col: '#1565c0' },
     vista:     { txt: 'Vista',     col: '#e65100' },
-    accettata: { txt: 'Accettata', col: '#2e7d32' },
+    accettata: { txt: 'Accettata', col: '#2e537d' },
     rifiutata: { txt: 'Rifiutata', col: '#c62828' }
   };
   container.innerHTML = lista.map(c => {
@@ -4106,7 +4106,7 @@ async function caricaCandidature() {
         ${c.messaggio ? `<div style="margin-top:8px">${c.messaggio}</div>` : ''}
         <div style="margin-top:8px;font-size:14px">${cand.email ? '✉️ ' + cand.email + ' ' : ''}${cand.telefono ? '· 📞 ' + cand.telefono + ' ' : ''}${cvLink}</div>
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button onclick="aggiornaStatoCandidatura(${c.id}, 'accettata')" style="background:#2e7d32;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✓ Accetta</button>
+          <button onclick="aggiornaStatoCandidatura(${c.id}, 'accettata')" style="background:#2e537d;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✓ Accetta</button>
           <button onclick="aggiornaStatoCandidatura(${c.id}, 'rifiutata')" style="background:#c62828;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer">✗ Rifiuta</button>
         </div>
       </div>`;
@@ -4133,7 +4133,7 @@ async function caricaMieOfferte() {
       ? new Date(o.data_pubblicazione).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' })
       : '—';
     const statoBadge = o.attiva
-      ? '<span style="background:#2e7d32;color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;white-space:nowrap">Attiva</span>'
+      ? '<span style="background:#2e537d;color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;white-space:nowrap">Attiva</span>'
       : '<span style="background:#c62828;color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;white-space:nowrap">Non attiva</span>';
     return `
       <div class="prev-card">
@@ -4237,7 +4237,7 @@ async function impostaPiano(piano) {
   const dashLabel = document.getElementById('piano-dashboard-label');
   if (dashLabel) {
     dashLabel.textContent = piano === 'premium' ? 'Premium 👑' : 'Free';
-    dashLabel.style.color = piano === 'premium' ? '#7b1fa2' : '#2a7a4b';
+    dashLabel.style.color = piano === 'premium' ? '#7b1fa2' : '#0066ff';
   }
   alert(piano === 'premium' ? '✅ Piano Premium attivato! Ora sei al top dei risultati.' : '✅ Tornato al piano Free.');
 }
@@ -4488,7 +4488,7 @@ async function caricaContattoSbloccato(prevId) {
     const telPulito = (c.telefono || '').replace(/[\s\-+]/g, '').replace(/^39/, '');
     const waUrl = telPulito ? `https://wa.me/39${telPulito}` : '';
     const el = document.getElementById('ric-contatto');
-    if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>${c.email || '—'} · ${c.telefono || '—'}${waUrl ? ` &nbsp;<a href="${waUrl}" target="_blank" style="background:#25D366;color:white;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">📱 WhatsApp</a>` : ''}</span>`;
+    if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>${c.email || '—'} · ${c.telefono || '—'}${waUrl ? ` &nbsp;<a href="${waUrl}" target="_blank" style="background:#25d366;color:white;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">📱 WhatsApp</a>` : ''}</span>`;
   } catch (e) {
     const el = document.getElementById('ric-contatto');
     if (el) el.innerHTML = `<span class="ric-key">Contatto:</span><span>⚠️ Errore nel caricamento, riprova</span>`;
@@ -4665,7 +4665,7 @@ async function caricaLogoImpresa(event) {
 function aggiornaPianoCards(piano) {
   aggiornaCardVisibile(piano);
   const piani = [
-    { id: 'free',    cardId: 'card-free',    btnId: 'btn-piano-free',    colore: '#2a7a4b', href: null,                label: 'Free' },
+    { id: 'free',    cardId: 'card-free',    btnId: 'btn-piano-free',    colore: '#0066ff', href: null,                label: 'Free' },
     { id: 'premium', cardId: 'card-premium', btnId: 'btn-piano-premium', colore: '#7b1fa2', href: 'info-premium.html', label: 'Premium' },
   ];
   piani.forEach(p => {
@@ -4810,7 +4810,7 @@ function aggiornaCardVisibile(piano) {
     icon.textContent = '🌍';
     label.textContent = 'Visibile in tutta la regione';
   } else {
-    card.style.borderTopColor = '#2a7a4b';
+    card.style.borderTopColor = '#0066ff';
     icon.textContent = '📍';
     label.textContent = 'Visibile nella tua città';
   }
@@ -4830,11 +4830,11 @@ async function apriModalPriorita() {
     const cittaUrl = encodeURIComponent(citta);
     content.innerHTML = `
       <div style="display:flex;justify-content:center;margin-bottom:18px;">
-        <span style="background:#22c55e;color:white;font-weight:800;font-size:0.78rem;padding:6px 14px;border-radius:999px;letter-spacing:0.6px;">✓ ATTIVO</span>
+        <span style="background:#226ec5;color:white;font-weight:800;font-size:0.78rem;padding:6px 14px;border-radius:999px;letter-spacing:0.6px;">✓ ATTIVO</span>
       </div>
-      <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;">
-        <div style="font-size:0.75rem;color:#15803d;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Posizione attuale</div>
-        <div style="font-size:1.05rem;font-weight:800;color:#15803d;line-height:1.4;">Sei in posizione ${posUtente} su ${totale} imprese a ${citta}</div>
+      <div style="background:#f0fdf4;border:1.5px solid #226ec5;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;">
+        <div style="font-size:0.75rem;color:#154780;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Posizione attuale</div>
+        <div style="font-size:1.05rem;font-weight:800;color:#154780;line-height:1.4;">Sei in posizione ${posUtente} su ${totale} imprese a ${citta}</div>
       </div>
       <div style="background:#fff7ed;border:1.5px solid #f59e0b;border-radius:14px;padding:18px;text-align:center;margin-bottom:18px;">
         <div style="font-size:0.75rem;color:#92400e;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Senza Premium</div>
@@ -4863,12 +4863,12 @@ function ctaPremium(d,piuUtenti) {
   return `<p style="color:#666;font-size:14px">Senza Premium saresti visibile solo a ${d.citta} (${d.nCitta} utenti). Stai raggiungendo <strong>${piuUtenti} utenti in più</strong> grazie al Premium.</p><button onclick="window.location.href='${d.cercaPage}?regione=${encodeURIComponent(d.regione)}'" style="background:#7c3aed;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Vedi come ti vedono</button>`;
 }
 function ctaFree(d,piuUtenti) {
-  return `<p style="color:#666;font-size:14px">Con Premium saresti visibile in tutta ${d.regione} (${d.nRegione} utenti, <strong>${piuUtenti} in più</strong>).</p><button onclick="window.location.href='prezzi.html'" style="background:#2a7a4b;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Passa a Premium</button>`;
+  return `<p style="color:#666;font-size:14px">Con Premium saresti visibile in tutta ${d.regione} (${d.nRegione} utenti, <strong>${piuUtenti} in più</strong>).</p><button onclick="window.location.href='prezzi.html'" style="background:#0066ff;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px;font-weight:600">Passa a Premium</button>`;
 }
 function renderModalVisibile(d) {
   const titolo=d.isPremium?'🌍 Visibile in tutta la regione':'📍 Visibile nella tua città';
   const bgBox=d.isPremium?'#e8f5e9':'#fff3e0';
-  const colorBox=d.isPremium?'#2e7d32':'#e65100';
+  const colorBox=d.isPremium?'#2e537d':'#e65100';
   const numero=d.isPremium?d.nRegione:d.nCitta;
   const dove=d.isPremium?'utenti in tutta la regione '+d.regione:'utenti a '+d.citta;
   const piuUtenti=d.nRegione-d.nCitta;
@@ -4906,7 +4906,7 @@ async function calcolaPrioritaImpresa() {
 <div style="text-align:center;padding:20px;border-top:1px solid #eee;margin-top:20px;">
   <a href="modifica-profilo.html#card-disdetta" style="color:#e53e3e;font-size:0.85rem;text-decoration:none;">Disdetta abbonamento / Elimina account</a>
 </div>
-<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script>
 window.addEventListener('pageshow', function(event) {
   if (event.persisted) {
@@ -4971,7 +4971,7 @@ function toggleSidebar() {
     for (var g = 1; g <= giorni; g++) {
       var isOggi = g === oggi.getDate() && cMese === oggi.getMonth() && cAnno === oggi.getFullYear();
       html += isOggi
-        ? '<div style="background:white;display:flex;align-items:center;justify-content:center;padding:4px 0"><div style="width:30px;height:30px;border-radius:50%;background:#2a7a4b;color:white;font-weight:800;font-size:0.85rem;display:flex;align-items:center;justify-content:center">' + g + '</div></div>'
+        ? '<div style="background:white;display:flex;align-items:center;justify-content:center;padding:4px 0"><div style="width:30px;height:30px;border-radius:50%;background:#0066ff;color:white;font-weight:800;font-size:0.85rem;display:flex;align-items:center;justify-content:center">' + g + '</div></div>'
         : '<div style="background:white;text-align:center;padding:8px 0;font-size:0.85rem;color:#1a1a1a">' + g + '</div>';
     }
     griglia.innerHTML = html;
@@ -5132,7 +5132,7 @@ function setBloccoBtn(bloccato) {
   if (!btn) return;
   btn.dataset.bloccato = bloccato ? '1' : '0';
   btn.textContent = bloccato ? '✓ Sblocca cliente' : '🚫 Blocca cliente';
-  btn.style.background = bloccato ? '#2e7d32' : '#c0392b';
+  btn.style.background = bloccato ? '#2e537d' : '#c0392b';
 }
 
 async function aggiornaStatoBloccoCliente() {

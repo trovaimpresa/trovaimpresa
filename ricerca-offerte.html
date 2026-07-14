@@ -27,7 +27,7 @@
         .header {
             text-align: center;
             margin-bottom: 40px;
-            color: #1a472a;
+            color: #1a2f47;
         }
         .header h1 {
             font-size: 40px;
@@ -156,7 +156,7 @@
         .offerta-titolo {
             font-size: 15px;
             font-weight: 700;
-            color: #1a472a;
+            color: #1a2f47;
             margin-bottom: 10px;
         }
         .offerta-info {
@@ -189,7 +189,7 @@
             flex: 1;
             min-width: 100px;
             padding: 8px 12px;
-            background: #28a745;
+            background: #2863a7;
             color: white;
             border: none;
             border-radius: 6px;
@@ -201,7 +201,7 @@
             text-align: center;
         }
         .btn-contatta:hover {
-            background: #228636;
+            background: #225186;
         }
         .empty-state {
             text-align: center;
@@ -235,7 +235,7 @@
         .logo {
             font-size: 20px;
             font-weight: 800;
-            color: #28a745;
+            color: #2863a7;
         }
         .logo span {
             color: #FF6B35;
@@ -361,7 +361,7 @@
     function creaIcona() {
       return L.divIcon({
         className: '',
-        html: `<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#2a7a4b"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>`,
+        html: `<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#0066ff"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>`,
         iconSize: [22, 30], iconAnchor: [11, 30], popupAnchor: [0, -30]
       });
     }
@@ -531,7 +531,7 @@
                     ${o.telefono ? `<a href="tel:${o.telefono}" class="btn-contatta">☎️ Chiama</a>` : ''}
                     ${o.email ? `<a href="mailto:${o.email}" class="btn-contatta">📧 Email</a>` : ''}
                     ${o.telefono ? `<a href="https://wa.me/${o.telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-contatta">💬 WhatsApp</a>` : ''}
-                    <button onclick="inviaCandidatura('${o.id}', '${o.impresa_id}', '${o.titolo}')" style="background:#2a7a4b;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:600;cursor:pointer;">📝 Invia candidatura</button>
+                    <button onclick="inviaCandidatura('${o.id}', '${o.impresa_id}', '${o.titolo}')" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-weight:600;cursor:pointer;">📝 Invia candidatura</button>
                 </div>
             </div>
         `).join('');
@@ -646,19 +646,19 @@
 
 <div id="modale-candidatura" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:36px;width:100%;max-width:480px;margin:20px;">
-    <h2 id="modale-titolo" style="font-size:1.1rem;color:#1a4d2e;margin-bottom:20px;"></h2>
+    <h2 id="modale-titolo" style="font-size:1.1rem;color:#0052cc;margin-bottom:20px;"></h2>
     <input type="hidden" id="modale-offerta-id">
     <input type="hidden" id="modale-impresa-id">
     <textarea id="modale-messaggio" placeholder="Scrivi perché sei interessato..." maxlength="500" style="width:100%;height:120px;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.9rem;resize:vertical;margin-bottom:20px;"></textarea>
     <div style="display:flex;gap:12px;justify-content:flex-end;">
       <button onclick="chiudiModaleCandidatura()" style="padding:10px 20px;border:1.5px solid #ccc;background:white;border-radius:8px;cursor:pointer;font-weight:600;">Annulla</button>
-      <button id="btn-invia-candidatura" onclick="submitCandidatura()" style="padding:10px 20px;background:#2a7a4b;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Invia</button>
+      <button id="btn-invia-candidatura" onclick="submitCandidatura()" style="padding:10px 20px;background:#0066ff;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Invia</button>
     </div>
   </div>
 </div>
 
 <script src="/cookie-banner.js"></script>
-<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>
 </html>

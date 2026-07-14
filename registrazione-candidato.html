@@ -20,7 +20,7 @@
       max-width: 1200px; margin: 0 auto;
     }
     .header {
-      color: #1a472a; padding: 24px 0 16px; text-align: center;
+      color: #1a2f47; padding: 24px 0 16px; text-align: center;
     }
     .header h1 { font-size: 40px; font-weight: 800; margin-bottom: 8px; }
     .header p { font-size: 14px; opacity: 0.9; }
@@ -35,9 +35,9 @@
       align-items: center; justify-content: center; font-weight: 700;
       background: #e0e0e0; color: #666; font-size: 16px;
     }
-    .step.active .step-circle { background: #2a7a4b; color: white; }
+    .step.active .step-circle { background: #0066ff; color: white; }
     .step-label { font-size: 12px; color: #999; text-align: center; }
-    .step.active .step-label { color: #2a7a4b; font-weight: 600; }
+    .step.active .step-label { color: #0066ff; font-weight: 600; }
     .content { padding: 32px; background: white; border-radius: 0 0 16px 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
     .form-section { display: none; }
     .form-section.active { display: block; }
@@ -49,7 +49,7 @@
       font-size: 16px; font-family: inherit; color: #333;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      outline: none; border-color: #2a7a4b; box-shadow: 0 0 0 3px rgba(42,122,75,0.1);
+      outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.1);
     }
     .form-group textarea { resize: vertical; min-height: 100px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -63,9 +63,9 @@
     .btn-next {
       flex: 1; padding: 14px 24px; border: none; border-radius: 8px;
       font-size: 14px; font-weight: 600; cursor: pointer;
-      background: #2a7a4b; color: white; transition: all 0.3s;
+      background: #0066ff; color: white; transition: all 0.3s;
     }
-    .btn-next:hover { background: #1a4d2e; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(42,122,75,0.3); }
+    .btn-next:hover { background: #0052cc; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,102,255,0.3); }
     .btn-next:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .required { color: #ff6b6b; }
 
@@ -74,7 +74,7 @@
       text-align: center; cursor: pointer; transition: all 0.3s; background: #fafafa;
     }
     .upload-area:hover, .upload-area.dragover {
-      border-color: #2a7a4b; background: rgba(42,122,75,0.05);
+      border-color: #0066ff; background: rgba(0,102,255,0.05);
     }
     .upload-area .upload-icon { font-size: 40px; margin-bottom: 10px; }
     .upload-area p { font-size: 14px; color: #555; margin-bottom: 4px; }
@@ -83,7 +83,7 @@
       display: none; align-items: center; gap: 10px;
       background: #e8f5e9; border-radius: 8px; padding: 12px 16px; margin-top: 10px;
     }
-    .file-selected span { font-size: 14px; color: #2a7a4b; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-selected span { font-size: 14px; color: #0066ff; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .file-selected button {
       background: none; border: none; color: #aaa; font-size: 20px;
       cursor: pointer; line-height: 1; padding: 0; flex-shrink: 0;
@@ -97,11 +97,11 @@
       position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
     }
-    .toggle-pw:hover { color: #2ecc71; }
+    .toggle-pw:hover { color: #2e78cc; }
 
   .login-box {
     background: #f0faf4;
-    border: 1.5px solid #a8d5b5;
+    border: 1.5px solid #a8bdd5;
     border-radius: 12px;
     padding: 20px 24px;
     margin-bottom: 28px;
@@ -109,7 +109,7 @@
   .login-box h3 {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #1a4d2e;
+    color: #0052cc;
     margin-bottom: 14px;
   }
   .login-row {
@@ -124,7 +124,7 @@
   .login-row > .btn-login { flex-shrink: 0; }
   .btn-login {
     padding: 12px 20px;
-    background: #2a7a4b;
+    background: #0066ff;
     color: white;
     border: none;
     border-radius: 8px;
@@ -135,15 +135,15 @@
     white-space: nowrap;
     transition: background 0.2s;
   }
-  .btn-login:hover { background: #1a4d2e; }
+  .btn-login:hover { background: #0052cc; }
   .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
   .login-msg { margin-top: 8px; font-size: 0.82rem; }
   .campi-compilati {
     display: none;
     margin-top: 10px;
     padding: 10px 14px;
-    background: #d4edda;
-    color: #155724;
+    background: #d4e0ed;
+    color: #153457;
     border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 600;
@@ -341,7 +341,7 @@
         <button class="btn-back" id="btn-back" style="display:none;">← Indietro</button>
         <button class="btn-next" id="btn-next">Avanti →</button>
       </div>
-        <p style="text-align:center;font-size:12px;color:#888;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#2a7a4b;">Privacy Policy</a></p>
+        <p style="text-align:center;font-size:12px;color:#888;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
     </div>
   </div>
 
@@ -461,7 +461,7 @@
       cvFile = file;
       document.getElementById('file-name').textContent = file.name;
       document.getElementById('file-selected').style.display = 'flex';
-      document.getElementById('upload-area').style.borderColor = '#2a7a4b';
+      document.getElementById('upload-area').style.borderColor = '#0066ff';
     });
 
     // Drag & drop
@@ -476,7 +476,7 @@
       cvFile = file;
       document.getElementById('file-name').textContent = file.name;
       document.getElementById('file-selected').style.display = 'flex';
-      uploadArea.style.borderColor = '#2a7a4b';
+      uploadArea.style.borderColor = '#0066ff';
     });
 
     function removeFile(e) {
@@ -651,7 +651,7 @@
     function creaIconaPrev() {
       return L.divIcon({
         className: '',
-        html: `<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#2a7a4b"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>`,
+        html: `<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#0066ff"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>`,
         iconSize: [22, 30], iconAnchor: [11, 30], popupAnchor: [0, -30]
       });
     }
@@ -696,7 +696,7 @@
     })();
   </script>
 <script src="/cookie-banner.js"></script>
-<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>
 </html>

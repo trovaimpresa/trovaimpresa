@@ -12,9 +12,9 @@
 
     header { background: white; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
     header a img { height: 44px; }
-    header nav a { color: #2a7a4b; text-decoration: none; font-weight: 600; margin-left: 20px; font-size: 17px; }
+    header nav a { color: #0066ff; text-decoration: none; font-weight: 600; margin-left: 20px; font-size: 17px; }
 
-    .top-bar { background: #1a4d2e; padding: 18px 28px; display: flex; align-items: center; gap: 14px; }
+    .top-bar { background: #0052cc; padding: 18px 28px; display: flex; align-items: center; gap: 14px; }
     .top-bar h1 { color: white; font-size: 2rem; font-weight: 800; white-space: nowrap; }
     .top-search { flex: 1; display: flex; gap: 10px; }
     .top-search input { flex: 1; border: none; border-radius: 10px; padding: 14px 20px; font-size: 18px; outline: none; }
@@ -30,13 +30,13 @@
     .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
     .sidebar-title { font-size: 22px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
     .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #555; text-transform: uppercase; margin: 0 0 10px; }
-    .filter-group { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-top: 4px solid #2e7d32; padding: 16px; margin-bottom: 16px; }
-    .filter-group:nth-child(2) { border-top-color: #2e7d32; }
+    .filter-group { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-top: 4px solid #2e537d; padding: 16px; margin-bottom: 16px; }
+    .filter-group:nth-child(2) { border-top-color: #2e537d; }
     .filter-group:nth-child(3) { border-top-color: #e65100; }
     .filter-group:nth-child(4) { border-top-color: #1565c0; }
     .filter-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #111; transition: all 0.15s; margin-bottom: 4px; }
-    .filter-btn:hover { background: #f0f9f4; color: #2a7a4b; }
-    .filter-btn.active { background: #e8f5ec; color: #2a7a4b; font-weight: 700; }
+    .filter-btn:hover { background: #f0f9f4; color: #0066ff; }
+    .filter-btn.active { background: #e8f5ec; color: #0066ff; font-weight: 700; }
     .filter-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
     .mestieri-scroll { max-height: 260px; overflow-y: auto; overflow-x: hidden; }
     .mestieri-scroll::-webkit-scrollbar { width: 3px; }
@@ -51,7 +51,7 @@
 
     /* CARD OFFERTA */
     .card-offerta { background: white; border-radius: 14px; padding: 22px 26px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 16px; border-left: 5px solid #e0e0e0; transition: box-shadow 0.2s, transform 0.15s; }
-    .card-offerta:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-2px); border-left-color: #2a7a4b; }
+    .card-offerta:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-2px); border-left-color: #0066ff; }
     .card-offerta-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
     .card-offerta-titolo { font-size: 21px; font-weight: 800; color: #1a1a1a; }
     .card-offerta-azienda { font-size: 15px; color: #555; margin-top: 4px; }
@@ -59,15 +59,15 @@
     .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
     .badge-tipo { background: #eef3ff; color: #3b5bdb; }
     .badge-contratto { background: #fff3ee; color: #FF6B35; }
-    .badge-citta { background: #e8f5ec; color: #2a7a4b; }
+    .badge-citta { background: #e8f5ec; color: #0066ff; }
     .card-offerta-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 15px; color: #555; margin-bottom: 14px; }
     .btn-candidati { background: #FF6B35; color: white; border: none; border-radius: 10px; padding: 12px 24px; font-size: 16px; font-weight: 700; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
     .btn-candidati:hover { background: #e55a25; }
 
     .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 28px; padding-bottom: 32px; }
     .page-btn { width: 44px; height: 44px; border: 1.5px solid #ddd; background: white; border-radius: 10px; font-size: 17px; font-weight: 600; color: #222; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-    .page-btn:hover { border-color: #2a7a4b; color: #2a7a4b; }
-    .page-btn.active { background: #2a7a4b; color: white; border-color: #2a7a4b; }
+    .page-btn:hover { border-color: #0066ff; color: #0066ff; }
+    .page-btn.active { background: #0066ff; color: white; border-color: #0066ff; }
 
     .loading, .no-results { text-align: center; padding: 50px; color: #111; background: white; border-radius: 14px; font-size: 18px; }
     .no-results h3 { font-size: 20px; color: #111; margin-bottom: 10px; }
@@ -257,8 +257,8 @@
   cerca();
 </script>
 <script src="/cookie-banner.js"></script>
-<footer style="background:#1a3a2a;color:white;font-size:0.9rem;padding:18px;text-align:center">
-  © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a>
+<footer style="background:#0a2a4d;color:white;font-size:0.9rem;padding:18px;text-align:center">
+  © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a>
 </footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>

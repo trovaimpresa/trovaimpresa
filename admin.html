@@ -10,8 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --verde:   #2a7a4b;
-    --verde2:  #1f5e38;
+    --verde:   #0066ff;
+    --verde2:  #0052cc;
     --verde3:  #e8f5ee;
     --arancio: #e8733a;
     --arancio2:#c45e28;
@@ -32,7 +32,7 @@
   /* LOGIN */
   .login-screen {
     min-height:100vh; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(135deg,#1a3a2a,#2a7a4b);
+    background:linear-gradient(135deg,#0a2a4d,#0066ff);
   }
   .login-box {
     background:white; border-radius:24px; padding:48px 40px;
@@ -168,7 +168,7 @@
   }
   td { padding:14px 16px; border-bottom:1px solid var(--border); font-size:0.88rem; }
   tr:last-child td { border-bottom:none; }
-  tr:hover td { background:rgba(42,122,75,0.02); }
+  tr:hover td { background:rgba(0,102,255,0.02); }
 
   .badge { padding:4px 10px; border-radius:20px; font-size:0.72rem; font-weight:800; display:inline-block; }
   .badge-v { background:var(--verde3); color:var(--verde2); }
@@ -240,7 +240,7 @@
       position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer; color: #999; padding: 0; line-height: 1;
     }
-    .toggle-pw:hover { color: #2ecc71; }
+    .toggle-pw:hover { color: #2e78cc; }
   </style>
 <link rel="stylesheet" href="/css/mobile.css">
 </head>
@@ -466,12 +466,12 @@
           </div>
 
           <div id="loc-card-2" class="loc-card">
-            <div style="font-weight:700; color:#2a7a4b; margin-bottom:4px;">🥈 Spazio 2 — A metà (€10/mese)</div>
+            <div style="font-weight:700; color:#0066ff; margin-bottom:4px;">🥈 Spazio 2 — A metà (€10/mese)</div>
             <div id="loc-preview-2" style="width:100%; height:120px; background:#f5f5f5; border-radius:8px; margin:10px 0; display:flex; align-items:center; justify-content:center; overflow:hidden; border:1px solid #eee;">
               <span style="color:#bbb; font-size:12px;">Nessuna immagine</span>
             </div>
             <input type="file" id="loc-input-2" accept="image/*" style="display:none" onchange="uploadLocandina(2,this)">
-            <button onclick="document.getElementById('loc-input-2').click()" style="width:100%; padding:9px; background:#2a7a4b; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
+            <button onclick="document.getElementById('loc-input-2').click()" style="width:100%; padding:9px; background:#0066ff; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px;">📤 Carica immagine</button>
             <button onclick="eliminaLocandina(2)" style="width:100%; padding:7px; background:white; color:#c0392b; border:1.5px solid #c0392b; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; margin-top:6px;">🗑️ Elimina immagine</button>
             <div id="loc-status-2" style="font-size:12px; color:#666; margin-top:6px; text-align:center;"></div>
           </div>
@@ -777,7 +777,7 @@ async function uploadLocandina(slot, input) {
     const url = BUCKET_URL + fileName;
     document.getElementById('loc-preview-' + slot).innerHTML = '<img src="' + url + '?t=' + Date.now() + '" style="width:100%;height:100%;object-fit:cover;">';
     status.textContent = '✅ Caricata con successo!';
-    status.style.color = '#2a7a4b';
+    status.style.color = '#0066ff';
   } catch(err) {
     status.textContent = '❌ Errore: ' + err.message;
     status.style.color = '#c0392b';
@@ -922,7 +922,7 @@ async function caricaRecensioni() {
   tbody.innerHTML = data.map(r => {
     const sub = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(s => s != null);
     const voto = r.stelle ?? (sub.length ? Math.round(sub.reduce((a,b)=>a+b,0)/sub.length) : 0);
-    const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#2a7a4b;font-size:11px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
+    const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#0066ff;font-size:11px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
     return `
     <tr>
       <td><strong>${esc(r.nome_cliente)}</strong>${badge}</td>
@@ -1209,7 +1209,7 @@ async function aggiungiLead() {
 }
 </script>
 <script src="/cookie-banner.js"></script>
-<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>
 </html>

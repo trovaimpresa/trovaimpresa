@@ -8,7 +8,7 @@
 <title>Configura il gestionale — Impresa</title>
   <meta name="robots" content="noindex, nofollow">
 <style>
-  :root{--bg:#f3f5f2;--surface:#fff;--ink:#19211d;--muted:#69756e;--line:#e3e8e3;--accent:#1f6f5c;--accent-d:#143f33;--accent-soft:#e7f1ed;--danger:#c0392b;--shadow:0 4px 16px rgba(20,40,30,.07)}
+  :root{--bg:#f3f5f2;--surface:#fff;--ink:#19211d;--muted:#69756e;--line:#e3e8e3;--accent:#1f446f;--accent-d:#143f33;--accent-soft:#e7f1ed;--danger:#c0392b;--shadow:0 4px 16px rgba(20,40,30,.07)}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
   header{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;padding:22px 16px}
@@ -87,8 +87,8 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 const $=s=>document.querySelector(s);
 const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ICONE=["🌳","🧹","🏗️","🔧","⚡","🚰","🎨","🧱","🪜","🚿","🛠️","🌿"];
-const COLORI=["#2e9e5b","#2570c4","#c0703a","#7c4dff","#e0457b","#0f9b8e","#d4a017","#5a6a7a"];
-let scelta={icona:"🛠️",colore:"#2e9e5b"}, uid=null;
+const COLORI=["#2e629e","#2570c4","#c0703a","#7c4dff","#e0457b","#0f509b","#d4a017","#5a6a7a"];
+let scelta={icona:"🛠️",colore:"#2e629e"}, uid=null;
 function msg(t,ok){const m=$("#msg");m.textContent=t;m.className="msg "+(ok?"ok":"err");setTimeout(()=>m.className="msg",3800);}
 function rand(){return Math.random().toString(36).slice(2,8).toUpperCase();}
 function inviteLink(c){return location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c;}

@@ -17,7 +17,7 @@
     }
     .container { max-width: 100%; margin: 40px auto; background: transparent; border-radius: 0; overflow: visible; box-shadow: none; }
     .content { padding: 24px 0; background: transparent; }
-    .form-title { font-size: 22px; font-weight: 800; color: #1a3a2a; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #ececec; }
+    .form-title { font-size: 22px; font-weight: 800; color: #0a2a4d; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #ececec; }
     .profilo-card-unica {
       background: white;
       border: 1px solid #ececec;
@@ -56,11 +56,11 @@
     .card-header {
       display: flex; align-items: center; gap: 8px;
       font-weight: 800; font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase;
-      color: #2a7a4b;
+      color: #0066ff;
       margin-bottom: 14px; padding-bottom: 10px;
       border-bottom: 1px solid #f0f0f0;
     }
-    .card-header.arancio, .card-header.blu { color: #2a7a4b; }
+    .card-header.arancio, .card-header.blu { color: #0066ff; }
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 7px; }
     .form-group input, .form-group select, .form-group textarea {
@@ -68,14 +68,14 @@
       font-size: 14px; font-family: inherit; color: #333;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      outline: none; border-color: #2a7a4b; box-shadow: 0 0 0 3px rgba(42,122,75,0.1);
+      outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.1);
     }
     .form-group input:disabled { background: #f5f5f5; color: #999; cursor: not-allowed; }
     .form-group textarea { resize: vertical; min-height: 90px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .required { color: #ff6b6b; }
     .section-title {
-      font-size: 15px; font-weight: 700; color: #2a7a4b;
+      font-size: 15px; font-weight: 700; color: #0066ff;
       margin: 28px 0 16px; padding-bottom: 8px;
       border-bottom: 2px solid #e8f5e9;
     }
@@ -84,9 +84,9 @@
     .btn-save {
       width: 100%; padding: 14px; border: none; border-radius: 8px;
       font-size: 15px; font-weight: 700; cursor: pointer;
-      background: #2a7a4b; color: white; margin-top: 12px;
+      background: #0066ff; color: white; margin-top: 12px;
     }
-    .btn-save:hover { background: #1a4d2e; }
+    .btn-save:hover { background: #0052cc; }
     .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
     .form-footer { margin-top: 4px; }
     .azioni-discrete { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 22px 0 30px; }
@@ -96,23 +96,23 @@
     .link-discreto.pericolo:hover { color: #6d0a0a; }
     .btn-back-link {
       display: block; text-align: center; margin-top: 14px;
-      font-size: 13px; color: #2a7a4b; text-decoration: none; font-weight: 600;
+      font-size: 13px; color: #0066ff; text-decoration: none; font-weight: 600;
     }
     .btn-back-link:hover { text-decoration: underline; }
     .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; }
     .alert-error { background: #ffeaea; color: #c0392b; border: 1px solid #f5c6c6; }
-    .alert-success { background: #e8f5e9; color: #2a7a4b; border: 1px solid #a8d5b5; }
+    .alert-success { background: #e8f5e9; color: #0066ff; border: 1px solid #a8bdd5; }
     .loading { text-align: center; padding: 48px 0; color: #666; font-size: 15px; }
     .upload-area {
       border: 2px dashed #ddd; border-radius: 8px; padding: 20px;
       text-align: center; cursor: pointer; background: #fafafa; transition: border-color 0.2s;
     }
-    .upload-area:hover { border-color: #2a7a4b; background: rgba(42,122,75,0.04); }
+    .upload-area:hover { border-color: #0066ff; background: rgba(0,102,255,0.04); }
     .upload-area p { font-size: 14px; color: #555; margin-bottom: 4px; }
     .upload-area small { font-size: 12px; color: #aaa; }
     #logo-input { display: none; }
     .logo-preview { max-width: 90px; max-height: 90px; border-radius: 8px; object-fit: cover; display: block; margin-bottom: 8px; }
-    .tag { background: #2a7a4b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+    .tag { background: #0066ff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
     .tag button { background: none; border: none; color: white; cursor: pointer; font-size: 16px; line-height: 1; }
     .tag-input { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; min-height: 44px; }
     .tag-input input { flex: 1; min-width: 120px; border: none; background: transparent; font-size: 14px; outline: none; }
@@ -356,13 +356,13 @@
             <div class="card-header arancio">⚙️ Preferenze di contatto</div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="risponde_24h" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="risponde_24h" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Risponde entro 24h
               </label>
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="preventivo_online" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="preventivo_online" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Preventivo online
               </label>
             </div>
@@ -431,19 +431,19 @@
             <div class="card-header arancio">⚙️ Certificazioni e contatto</div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="risponde_24h-impresa" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="risponde_24h-impresa" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Risponde entro 24h
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="preventivo_online-impresa" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="preventivo_online-impresa" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Preventivo online
               </label>
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="soa_certificata-impresa" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="soa_certificata-impresa" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 SOA certificata
               </label>
             </div>
@@ -513,49 +513,49 @@
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="consegna_domicilio-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="consegna_domicilio-negozio" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Consegna a domicilio
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="ritiro_in_negozio-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="ritiro_in_negozio-negozio" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Ritiro in negozio
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="ecommerce-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="ecommerce-negozio" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 E-commerce
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="noleggio_attrezzi-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="noleggio_attrezzi-negozio" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Noleggio attrezzi
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="taglio_su_misura-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="taglio_su_misura-negozio" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Taglio su misura
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="aperto_sabato-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="aperto_sabato-negozio" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Aperto sabato
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="parcheggio_cliente-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="parcheggio_cliente-negozio" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Parcheggio cliente
               </label>
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="preventivo_online-negozio" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="preventivo_online-negozio" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Preventivi online
               </label>
             </div>
@@ -689,7 +689,7 @@
                   </optgroup>
                   <optgroup label="Altro"><option>Altro</option></optgroup>
                 </select>
-                <button type="button" onclick="aggiungiSpec()" style="padding:0 16px;background:#2a7a4b;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:18px;">+</button>
+                <button type="button" onclick="aggiungiSpec()" style="padding:0 16px;background:#0066ff;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:18px;">+</button>
               </div>
               <div class="tag-input" id="f-spec-input">
                 <input type="text" id="f-spec-field" placeholder="Oppure scrivi una specializzazione e premi Enter...">
@@ -700,25 +700,25 @@
             <div class="card-header arancio">⚙️ Qualifica e servizi</div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="iscritto_albo-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="iscritto_albo-professionista" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Iscritto all'albo
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="consulenza_online-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="consulenza_online-professionista" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Consulenza online
               </label>
             </div>
             <div class="form-group" style="margin-bottom:8px;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="sopralluogo_gratuito-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="sopralluogo_gratuito-professionista" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Sopralluogo gratuito
               </label>
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;">
-                <input type="checkbox" id="risponde_24h-professionista" style="width:18px;height:18px;accent-color:#2a7a4b;cursor:pointer;">
+                <input type="checkbox" id="risponde_24h-professionista" style="width:18px;height:18px;accent-color:#0066ff;cursor:pointer;">
                 Risponde entro 24h
               </label>
             </div>
@@ -763,7 +763,7 @@
           <a href="pannello-impresa.html" class="btn-back-link" onclick="window.location.href = pannelloPerTipo(); return false;">← Torna al pannello</a>
           <p style="text-align:center;font-size:12px;color:#888;margin-top:16px;">
             🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi.
-            <a href="/privacy-policy.html" style="color:#2a7a4b;">Privacy Policy</a>
+            <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a>
           </p>
           <div class="azioni-discrete">
             <div id="card-disdetta" style="display:none;">
@@ -1361,7 +1361,7 @@
     });
   </script>
   <script src="/cookie-banner.js"></script>
-<footer style="background:#1a3a2a;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a0d8b3">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a0d8b3">Termini</a> | <a href="/cookie-policy.html" style="color:#a0d8b3">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a0d8b3">Privacy</a> | <a href="/contatti.html" style="color:#a0d8b3">Contatti</a></footer>
+<footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
 </body>
 </html>

@@ -49,7 +49,7 @@ exports.handler = async function(event) {
 
     const html = `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
-        <div style="background:linear-gradient(135deg,#1a4d2e,#2a7a4b);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+        <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
           <h1 style="color:white;margin:0;font-size:22px">📝 Nuova candidatura ricevuta</h1>
         </div>
         <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
@@ -70,12 +70,12 @@ exports.handler = async function(event) {
             ${candidato.email ? `
             <tr style="border-bottom:1px solid #eee">
               <td style="padding:10px 0;color:#666">Email</td>
-              <td style="padding:10px 0"><a href="mailto:${candidato.email}" style="color:#2a7a4b">${candidato.email}</a></td>
+              <td style="padding:10px 0"><a href="mailto:${candidato.email}" style="color:#0066ff">${candidato.email}</a></td>
             </tr>` : ''}
             ${candidato.telefono ? `
             <tr style="border-bottom:1px solid #eee">
               <td style="padding:10px 0;color:#666">Telefono</td>
-              <td style="padding:10px 0"><a href="tel:${candidato.telefono}" style="color:#2a7a4b">${candidato.telefono}</a></td>
+              <td style="padding:10px 0"><a href="tel:${candidato.telefono}" style="color:#0066ff">${candidato.telefono}</a></td>
             </tr>` : ''}
             <tr>
               <td style="padding:10px 0;color:#666">Offerta</td>
@@ -84,7 +84,7 @@ exports.handler = async function(event) {
           </table>
           <div style="text-align:center;margin-bottom:28px">
             <a href="https://trovaimpresa.com/offerte-lavoro.html"
-               style="display:inline-block;background:#2a7a4b;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
+               style="display:inline-block;background:#0066ff;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
               👀 Gestisci le tue offerte →
             </a>
           </div>
@@ -119,7 +119,7 @@ exports.handler = async function(event) {
 
     const html2 = `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
-        <div style="background:linear-gradient(135deg,#1a4d2e,#2a7a4b);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+        <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
           <h1 style="color:white;margin:0;font-size:22px">Candidatura inviata</h1>
         </div>
         <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
@@ -129,7 +129,7 @@ exports.handler = async function(event) {
           </p>
           <div style="text-align:center;margin-bottom:28px">
             <a href="https://trovaimpresa.com/pannello-candidato.html"
-               style="display:inline-block;background:#2a7a4b;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
+               style="display:inline-block;background:#0066ff;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
               Vedi le tue candidature
             </a>
           </div>

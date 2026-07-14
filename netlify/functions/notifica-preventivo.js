@@ -39,7 +39,7 @@ exports.handler = async function(event) {
 
     const html = `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
-        <div style="background:linear-gradient(135deg,#1a4d2e,#2a7a4b);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+        <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
           <h1 style="color:white;margin:0;font-size:22px">📋 Nuova richiesta di preventivo</h1>
         </div>
         <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
@@ -48,7 +48,7 @@ exports.handler = async function(event) {
             Hai ricevuto una nuova richiesta di preventivo su TrovaImpresa.
           </p>
           <div style="background:#f5f5f5;border-radius:8px;padding:8px 20px;margin-bottom:24px">
-            <h3 style="font-size:13px;font-weight:700;color:#2a7a4b;text-transform:uppercase;letter-spacing:1px;margin:12px 0 4px">Richiesta del cliente</h3>
+            <h3 style="font-size:13px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:1px;margin:12px 0 4px">Richiesta del cliente</h3>
             <table style="width:100%;border-collapse:collapse;font-size:14px">
               <tr style="border-bottom:1px solid #e5e5e5">
                 <td style="padding:10px 0;color:#666;width:140px">Nome</td>
@@ -88,7 +88,7 @@ exports.handler = async function(event) {
           <div style="text-align:center;margin-bottom:24px">
             <a href="${foto}" target="_blank" style="text-decoration:none">
               <img src="${foto}" alt="Foto del lavoro" style="max-width:100%;border-radius:8px;border:1px solid #e5e5e5">
-              <div style="font-size:13px;color:#2a7a4b;font-weight:700;margin-top:8px">📷 Apri la foto allegata</div>
+              <div style="font-size:13px;color:#0066ff;font-weight:700;margin-top:8px">📷 Apri la foto allegata</div>
             </a>
           </div>` : ''}
           <div style="background:#fff8f0;border:1px solid #f0d9c0;border-radius:8px;padding:16px 20px;margin-bottom:14px;text-align:center">

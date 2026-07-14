@@ -50,10 +50,10 @@ function renderAppuntamenti() {
     return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between;${extraStyle}">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
-          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#1a3a2a;font-weight:700">${fmtData(a.data)}</div>
-          ${oraLbl ? `<span style="display:inline-block;padding:4px 10px;background:#2a7a4b;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">🕐 ${oraLbl}</span>` : ''}
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#0a2a4d;font-weight:700">${fmtData(a.data)}</div>
+          ${oraLbl ? `<span style="display:inline-block;padding:4px 10px;background:#0066ff;color:white;border-radius:999px;font-size:0.72rem;font-weight:700">🕐 ${oraLbl}</span>` : ''}
         </div>
-        <div style="font-weight:700;color:#1a3a2a;font-size:0.98rem;margin-bottom:6px${a.completato ? ';text-decoration:line-through' : ''}">${esc(a.titolo) || '—'}</div>
+        <div style="font-weight:700;color:#0a2a4d;font-size:0.98rem;margin-bottom:6px${a.completato ? ';text-decoration:line-through' : ''}">${esc(a.titolo) || '—'}</div>
         ${a.cliente ? `<div style="font-size:0.85rem;color:#555;margin-bottom:2px">👤 ${esc(a.cliente)}</div>` : ''}
         ${a.luogo ? `<div style="font-size:0.85rem;color:#555;margin-bottom:2px">📍 ${esc(a.luogo)}</div>` : ''}
         ${a.note ? `<div style="font-size:0.88rem;color:#555;white-space:pre-wrap;margin-top:6px">${esc(a.note)}</div>` : ''}
@@ -170,7 +170,7 @@ function renderScadenzeFiscali() {
       if (diffGg < 0) { badgeBg = '#c0392b'; badgeLbl = `⚠️ Scaduta da ${Math.abs(diffGg)}g`; }
       else if (diffGg === 0) { badgeBg = '#c0392b'; badgeLbl = '🔥 Oggi'; }
       else if (diffGg <= 7) { badgeBg = '#e8733a'; badgeLbl = `⏰ Tra ${diffGg}g`; }
-      else { badgeBg = '#2a7a4b'; badgeLbl = `📅 Tra ${diffGg}g`; }
+      else { badgeBg = '#0066ff'; badgeLbl = `📅 Tra ${diffGg}g`; }
     }
     const importoLbl = fmtImporto(s.importo);
     const ricorrenteBadge = s.ricorrente
@@ -180,7 +180,7 @@ function renderScadenzeFiscali() {
       <input type="checkbox" ${s.completata ? 'checked' : ''} onchange="toggleScadenzaFiscale('${s.id}',this.checked)" style="margin-top:4px;width:18px;height:18px;cursor:pointer;flex-shrink:0">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-          <div style="font-weight:700;color:#1a3a2a;font-size:1rem${strike}">${esc(s.tipo) || '—'}</div>
+          <div style="font-weight:700;color:#0a2a4d;font-size:1rem${strike}">${esc(s.tipo) || '—'}</div>
           ${ricorrenteBadge}
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
@@ -290,7 +290,7 @@ function renderPromemoria() {
   lista.innerHTML = items.map(p => {
     return `<div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:white;display:flex;gap:14px;align-items:flex-start;justify-content:space-between">
       <div style="flex:1;min-width:0">
-        <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#1a3a2a;font-weight:700;margin-bottom:6px">${fmtData(p.data)}</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#0a2a4d;font-weight:700;margin-bottom:6px">${fmtData(p.data)}</div>
         <div style="font-size:0.9rem;color:#555;white-space:pre-wrap">${esc(p.testo)}</div>
       </div>
       <button onclick="eliminaPromemoria('${p.id}')" title="Elimina promemoria" style="background:transparent;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:4px 6px;line-height:1">🗑️</button>

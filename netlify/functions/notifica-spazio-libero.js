@@ -35,7 +35,7 @@ exports.handler = async function(event) {
 
   const html = `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
-      <div style="background:linear-gradient(135deg,#1a4d2e,#2a7a4b);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
+      <div style="background:linear-gradient(135deg,#0052cc,#0066ff);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
         <h1 style="color:white;margin:0;font-size:22px">📢 Si è liberato uno spazio pubblicitario!</h1>
       </div>
       <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
@@ -44,13 +44,13 @@ exports.handler = async function(event) {
           Buone notizie: si è liberato uno spazio pubblicitario a <strong>${record.citta}</strong>,
           la città per cui eri in lista d'attesa.
         </p>
-        <div style="background:#e8f5ee;border:1.5px solid #a7d9b8;border-radius:12px;padding:18px 20px;margin-bottom:24px;font-size:14px;line-height:1.6;color:#1f5e38">
+        <div style="background:#e8f5ee;border:1.5px solid #a7bed9;border-radius:12px;padding:18px 20px;margin-bottom:24px;font-size:14px;line-height:1.6;color:#0052cc">
           🔒 Lo spazio è <strong>riservato a te</strong>${scadenza ? ` fino al <strong>${scadenza}</strong>` : ''}.
           Prenotalo prima della scadenza, poi tornerà disponibile per le altre imprese in lista.
         </div>
         <div style="text-align:center;margin-bottom:28px">
           <a href="https://trovaimpresa.com/pannello-artigiano.html"
-             style="display:inline-block;background:#2a7a4b;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
+             style="display:inline-block;background:#0066ff;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
             🛒 Prenota ora il tuo spazio →
           </a>
         </div>
