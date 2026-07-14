@@ -22,3 +22,16 @@
   to = "/#registrati"
   status = 301
   force = true
+
+# Pagina Termini duplicata: unifichiamo tutto su /termini-condizioni
+[[redirects]]
+  from = "/termini-servizio"
+  to = "/termini-condizioni"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/termini-servizio.html"
+  to = "/termini-condizioni.html"
+  status = 301
+  force = true
