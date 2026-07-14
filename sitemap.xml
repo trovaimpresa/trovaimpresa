@@ -600,4 +600,14 @@
     <lastmod>2026-07-11</lastmod>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://trovaimpresa.com/citta</loc>
+    <lastmod>2026-07-14</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://trovaimpresa.com/chi-siamo</loc>
+    <lastmod>2026-07-14</lastmod>
+    <priority>0.5</priority>
+  </url>
 </urlset>
