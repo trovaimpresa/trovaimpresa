@@ -2467,16 +2467,16 @@ async function caricaPreventivi() {
   container.innerHTML = lista.map(p => `
     <div class="prev-card" onclick="apriModal(${p.id})">
       <div class="prev-header">
-        <div class="prev-nome">👤 ${p.nome}</div>
+        <div class="prev-nome">👤 ${escHtml(p.nome)}</div>
         <span class="prev-badge ${p.risposta ? 'badge-inviato' : 'badge-nuovo'}">${p.risposta ? '✅ Risposto' : '🆕 Nuovo'}</span>
       </div>
       <div class="prev-info">
-        <span>🔨 ${p.tipo_lavoro || '—'}</span>
-        <span>📍 ${p.indirizzo || '—'}</span>
-        <span>⏰ ${p.urgenza || '—'}</span>
-        ${p.budget ? `<span>💶 ${p.budget}</span>` : ''}
+        <span>🔨 ${escHtml(p.tipo_lavoro || '—')}</span>
+        <span>📍 ${escHtml(p.indirizzo || '—')}</span>
+        <span>⏰ ${escHtml(p.urgenza || '—')}</span>
+        ${p.budget ? `<span>💶 ${escHtml(p.budget)}</span>` : ''}
       </div>
-      <div class="prev-desc">${(p.descrizione || '').substring(0, 150)}${p.descrizione?.length > 150 ? '...' : ''}</div>
+      <div class="prev-desc">${escHtml((p.descrizione || '').substring(0, 150))}${p.descrizione?.length > 150 ? '...' : ''}</div>
       <div class="prev-footer">
         <span class="prev-data">${new Date(p.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</span>
         <button class="btn-genera" onclick="event.stopPropagation();apriModal(${p.id})">
@@ -2518,9 +2518,9 @@ async function caricaPreventivi() {
             <div style="display:grid;gap:10px">
               ${zona.map(l => `
                 <div onclick="apriModal(${l.id})" style="background:white;border:1px solid #e0e8e3;border-left:4px solid #e8733a;border-radius:10px;padding:14px 16px;cursor:pointer">
-                  <div style="font-weight:700;font-size:14px">${l.categoria_lavoro || l.tipo_lavoro || 'Lavoro'} · 📍 ${l.citta || ''}</div>
-                  <div style="font-size:13px;color:#555;margin-top:4px">${(l.descrizione || '').slice(0, 110)}${(l.descrizione || '').length > 110 ? '…' : ''}</div>
-                  <div style="font-size:12px;color:#888;margin-top:6px">${l.budget ? '💶 ' + l.budget + ' · ' : ''}${new Date(l.created_at).toLocaleDateString('it-IT')} · 🔒 contatto da sbloccare</div>
+                  <div style="font-weight:700;font-size:14px">${escHtml(l.categoria_lavoro || l.tipo_lavoro || 'Lavoro')} · 📍 ${escHtml(l.citta || '')}</div>
+                  <div style="font-size:13px;color:#555;margin-top:4px">${escHtml((l.descrizione || '').slice(0, 110))}${(l.descrizione || '').length > 110 ? '…' : ''}</div>
+                  <div style="font-size:12px;color:#888;margin-top:6px">${l.budget ? '💶 ' + escHtml(l.budget) + ' · ' : ''}${new Date(l.created_at).toLocaleDateString('it-IT')} · 🔒 contatto da sbloccare</div>
                 </div>`).join('')}
             </div>
           </div>`;
@@ -2840,13 +2840,13 @@ async function apriModal(prevId) {
 
   document.getElementById('modal-richiesta').innerHTML = `
     <div class="ric-title">📋 Richiesta del cliente</div>
-    <div class="ric-row"><span class="ric-key">Nome:</span><span>${data.nome}</span></div>
-    <div class="ric-row"><span class="ric-key">Lavoro:</span><span>${data.tipo_lavoro || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Descrizione:</span><span>${data.descrizione || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${data.indirizzo || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Urgenza:</span><span>${data.urgenza || '—'}</span></div>
-    <div class="ric-row"><span class="ric-key">Budget:</span><span>${data.budget || '—'}</span></div>
-    ${data.superficie ? `<div class="ric-row"><span class="ric-key">Superficie:</span><span>${data.superficie} mq</span></div>` : ''}
+    <div class="ric-row"><span class="ric-key">Nome:</span><span>${escHtml(data.nome)}</span></div>
+    <div class="ric-row"><span class="ric-key">Lavoro:</span><span>${escHtml(data.tipo_lavoro || '—')}</span></div>
+    <div class="ric-row"><span class="ric-key">Descrizione:</span><span>${escHtml(data.descrizione || '—')}</span></div>
+    <div class="ric-row"><span class="ric-key">Indirizzo:</span><span>${escHtml(data.indirizzo || '—')}</span></div>
+    <div class="ric-row"><span class="ric-key">Urgenza:</span><span>${escHtml(data.urgenza || '—')}</span></div>
+    <div class="ric-row"><span class="ric-key">Budget:</span><span>${escHtml(data.budget || '—')}</span></div>
+    ${data.superficie ? `<div class="ric-row"><span class="ric-key">Superficie:</span><span>${escHtml(String(data.superficie))} mq</span></div>` : ''}
     ${contattoHtml}
   `;
 
