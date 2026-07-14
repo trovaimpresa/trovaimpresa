@@ -13,7 +13,8 @@ exports.handler = async (event) => {
     const s = ev.data.object;
     const email = s.metadata && s.metadata.email;
     if (email) {
-      await supabase.from('imprese').update({ piano: 'premium' }).eq('email', email);
+      // Pagamento ricevuto: Premium senza scadenza (azzero eventuale scadenza del regalo di 3 mesi)
+      await supabase.from('imprese').update({ piano: 'premium', premium_scadenza: null }).eq('email', email);
 
       // Email di conferma passaggio a Premium (best-effort, non blocca il webhook)
       try {
