@@ -1379,4 +1379,12 @@
 (function(){
   var ua = navigator.userAgent || '';
   if(/FBAN|FBAV|Instagram/i.test(ua)){
-    var b = document.createElement('
+    var b = document.createElement('div');
+    b.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff8800;color:#fff;padding:12px;font-size:14px;z-index:9999;text-align:center;line-height:1.4;';
+    b.innerHTML = '⚠️ Stai usando il browser di Facebook. Per registrarti apri questa pagina in Chrome: tocca i 3 puntini in alto a destra → Apri in Chrome';
+    document.body.appendChild(b);
+  }
+})();
+</script>
+</body>
+</html>

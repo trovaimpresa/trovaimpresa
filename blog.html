@@ -225,4 +225,14 @@
             <span class="cat">${CATEGORIE[a.categoria] || 'Guida'}</span>
             <h2>${escapeHtml(a.titolo)}</h2>
             <p class="excerpt">${escapeHtml(a.meta_description)}</p>
-            <span class="date">${formatData(a.cre
+            <span class="date">${formatData(a.created_at)}</span>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    caricaArticoli();
+  </script>
+
+</body>
+</html>
