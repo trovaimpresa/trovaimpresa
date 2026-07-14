@@ -2209,7 +2209,14 @@ sb.auth.onAuthStateChange(async (event, session) => {
     window.location.replace('login-impresa.html');
     return;
   }
-  const { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).single();
+  let { data } = await sb.from('imprese').select('*').eq('user_id', session.user.id).maybeSingle();
+  if (!data) {
+    const { data: byEmail } = await sb.from('imprese').select('*').eq('email', session.user.email).maybeSingle();
+    if (byEmail) {
+      await sb.from('imprese').update({ user_id: session.user.id }).eq('id', byEmail.id);
+      data = byEmail;
+    }
+  }
   if (!data) {
     window.location.replace('login-impresa.html');
     return;
@@ -2391,6 +2398,10 @@ window.onpopstate = function(e) {
 const PANNELLO_CORRENTE = 'professionista';
 
 async function inizializza() {
+  // mensile/annuale valgono come premium in tutto il pannello
+  if (impresaCorrente && ['mensile','annuale'].includes((impresaCorrente.piano||'').toLowerCase())) {
+    impresaCorrente.piano = 'premium';
+  }
   const nome = impresaCorrente.nome_attivita || impresaCorrente.nome + ' ' + impresaCorrente.cognome;
   const rating = impresaCorrente.rating || '—';
 
