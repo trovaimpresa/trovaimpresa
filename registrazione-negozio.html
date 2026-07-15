@@ -524,7 +524,7 @@
         console.error(err);
         btn.disabled = false;
         btn.textContent = '✓ Completa Registrazione';
-        if (err.message && err.message.includes('23505')) {
+        if (err.message && (err.message.includes('23505') || /already registered|already exists|user already|duplicate|invalid login|credentials|imprese_email_key/i.test(err.message))) {
           alert('⚠️ Questa email è già registrata su TrovaImpresa. Accedi al tuo account o usa un\'altra email.');
           window.location.href = 'login-impresa.html';
         } else {
