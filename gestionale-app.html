@@ -631,20 +631,20 @@
   function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderScadenze();}
 
   async function renderRiepilogo(){
-    /* soldi e ore: invariati per ora (dipendono dalle fatture, su localStorage) */
-    const L=db().lavori;
-    $("#k-daincassare").textContent=eur(L.filter(l=>l.fattStato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
-    $("#k-incassato").textContent=eur(L.filter(l=>l.fattStato==="pagata"&&thisMonth(l.dataFatto)).reduce((s,l)=>s+(+l.importo||0),0));
-    const ore=L.filter(l=>thisMonth(l.dataFatto)||thisMonth(l.dataPrevista)).reduce((s,l)=>s+(+l.ore||0),0);
-    $("#k-ore").textContent=(Math.round(ore*10)/10)+" h";
-    /* contatori e prossimi: da gest_lavori su Supabase */
+    /* contatori, soldi e ore: tutto da gest_lavori su Supabase */
     if(!sb||!sbUid){
+      $("#k-daincassare").textContent=eur(0);$("#k-incassato").textContent=eur(0);$("#k-ore").textContent="0 h";
       $("#k-dafare").textContent=0;$("#k-incorso").textContent=0;$("#k-fatti").textContent=0;$("#k-lavori").textContent=0;
       $("#prossimi").innerHTML=`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
       return;
     }
-    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     const S=data||[];
+    /* soldi e ore (stessa logica della scheda Fatture, da Supabase) */
+    $("#k-daincassare").textContent=eur(S.filter(l=>l.fatt_stato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
+    $("#k-incassato").textContent=eur(S.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0));
+    const ore=S.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
+    $("#k-ore").textContent=(Math.round(ore*10)/10)+" h";
     $("#k-dafare").textContent=S.filter(l=>l.stato==="da_fare").length;
     $("#k-incorso").textContent=S.filter(l=>l.stato==="in_corso").length;
     $("#k-fatti").textContent=S.filter(l=>l.stato==="fatto"&&thisMonth(l.data_fatto)).length;
@@ -1063,7 +1063,7 @@
       fillOperai();fillClienti(job.cliente_id);return;
     }
     const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
-    const dipOpts=db().dipendenti.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
+    const dipOpts=dipCache.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
     const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
     openSheet(`<h3>${isNew?"Nuovo lavoro":"Modifica lavoro"}</h3>
       <div class="field"><label>Condominio / Cantiere</label>
@@ -1444,17 +1444,28 @@
         <button class="ja" data-action="edit-job" data-id="${l.id}">✏ Apri scheda</button>
       </div></div>`;
   }
-  function renderAgenda(){
+  async function renderAgenda(){
     if(!cur)return;
+    const body=$("#ag-body");
+    if(!sb||!sbUid){
+      if($("#ag-op"))$("#ag-op").innerHTML=`<button class="chip on" data-action="ag-op" data-v="">Tutti</button>`;
+      if(body)body.innerHTML=`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>Assegna i lavori a una persona dalla scheda del lavoro, voce "Chi ci va"</small></div>`;
+      return;
+    }
+    /* chip operatori dalla squadra del reparto (Supabase) */
+    const {data:ops}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const OPS=ops||[];
+    const telMap=Object.fromEntries(OPS.map(o=>[o.id,o.telefono||""]));
     const opChips=[`<button class="chip ${agFilter.op===""?"on":""}" data-action="ag-op" data-v="">Tutti</button>`]
-      .concat(db().dipendenti.map(d=>`<button class="chip ${agFilter.op===d.id?"on":""}" data-action="ag-op" data-v="${d.id}">${esc(d.nome)}</button>`)).join("");
+      .concat(OPS.map(d=>`<button class="chip ${agFilter.op===d.id?"on":""}" data-action="ag-op" data-v="${d.id}">${esc(d.nome)}</button>`)).join("");
     if($("#ag-op"))$("#ag-op").innerHTML=opChips;
-    let L=[...db().lavori];
+    /* lavori del reparto (Supabase) */
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    let L=data||[];
     if(agFilter.stato==="aperti")L=L.filter(l=>l.stato!=="fatto");
-    if(agFilter.op)L=L.filter(l=>l.assegnatoId===agFilter.op);
-    L.sort((a,b)=>(a.dataPrevista||"9999").localeCompare(b.dataPrevista||"9999"));
-    if($("#ag-body"))$("#ag-body").innerHTML=L.length?L.map(agendaCard).join(""):`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>${agFilter.op?"Questo operatore non ha lavori assegnati":"Assegna i lavori a una persona dalla scheda del lavoro, voce \"Chi ci va\""}</small></div>`;
-    hydrateFoto();
+    if(agFilter.op)L=L.filter(l=>l.operatore_id===agFilter.op);
+    L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+    if(body)body.innerHTML=L.length?L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join(""):`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>${agFilter.op?"Questo operatore non ha lavori assegnati":"Assegna i lavori a una persona dalla scheda del lavoro, voce \"Chi ci va\""}</small></div>`;
   }
 
   function openSheet(html){$("#sheet").innerHTML=html;$("#overlay").classList.add("open");}
