@@ -72,3 +72,18 @@
     padding: 18px 14px !important;
   }
 }
+
+/* ===== TITOLI E LOGO PIU' COMPATTI SUL TELEFONO ===== */
+@media (max-width: 768px) {
+  /* Titoli grandi delle sezioni (Scegli la tua citta', Scegli il tuo Piano...) */
+  .bb-title { font-size: 21px !important; line-height: 1.25 !important; }
+
+  /* Logo grande in cima piu' piccolo */
+  .hero-logo { max-height: 78px !important; height: auto !important; }
+
+  /* Neutralizza le dimensioni giganti scritte a mano nello stile */
+  [style*="font-size:52px"], [style*="font-size: 52px"] { font-size: 26px !important; line-height: 1.2 !important; }
+  [style*="font-size:40px"], [style*="font-size: 40px"] { font-size: 24px !important; line-height: 1.2 !important; }
+  [style*="font-size:34px"], [style*="font-size: 34px"],
+  [style*="font-size:32px"], [style*="font-size: 32px"] { font-size: 21px !important; line-height: 1.25 !important; }
+}

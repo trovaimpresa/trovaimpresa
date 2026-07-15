@@ -1,6 +1,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/css/mobile.css">
+<link rel="stylesheet" href="/css/mobile.css?v=3">
 <div id="app-root">
 <style>
   :root{
@@ -2096,8 +2096,4 @@
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
-  if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
-
-  (async()=>{await load();renderLanding();})();
-})();
-</script>
+  if($("#fatt-pdf-file"))$("#fatt-pdf-fil
