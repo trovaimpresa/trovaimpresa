@@ -88,16 +88,18 @@
   [style*="font-size:32px"], [style*="font-size: 32px"] { font-size: 21px !important; line-height: 1.25 !important; }
 }
 
-/* ===== TEST DIAGNOSTICO (temporaneo) — da rimuovere ===== */
+/* ===== COMPATTAZIONE DECISA SUL TELEFONO ===== */
 @media (max-width: 768px) {
-  body::before {
-    content: "\2705 MOBILE ATTIVO v4";
-    display: block;
-    background: #0a7d2c;
-    color: #fff;
-    text-align: center;
-    padding: 10px;
-    font: 700 15px sans-serif;
-    letter-spacing: .5px;
-  }
+  /* Card-banner colorati (Scegli la citta', Trova un'impresa, Piani...) */
+  .bacheca-banner { padding: 16px 14px !important; margin-bottom: 14px !important; }
+  .bacheca-banner .bb-title { font-size: 19px !important; line-height: 1.2 !important; }
+  .bacheca-banner .bb-sub { font-size: 13px !important; margin-top: 6px !important; }
+  .bacheca-banner .bb-kicker { font-size: 11px !important; margin-bottom: 4px !important; }
+
+  /* Riquadri categoria (Artigiano, Impresa, Negozio, Professionista) */
+  .cat-card { padding: 14px 8px !important; gap: 8px !important; font-size: 14px !important; }
+  .cat-card svg { width: 26px !important; height: 26px !important; }
+
+  /* Meno spazio vuoto verticale nelle sezioni */
+  section, .sezione-card { padding-top: 18px !important; padding-bottom: 18px !important; }
 }
