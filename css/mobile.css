@@ -87,3 +87,17 @@
   [style*="font-size:34px"], [style*="font-size: 34px"],
   [style*="font-size:32px"], [style*="font-size: 32px"] { font-size: 21px !important; line-height: 1.25 !important; }
 }
+
+/* ===== TEST DIAGNOSTICO (temporaneo) — da rimuovere ===== */
+@media (max-width: 768px) {
+  body::before {
+    content: "\2705 MOBILE ATTIVO v4";
+    display: block;
+    background: #0a7d2c;
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    font: 700 15px sans-serif;
+    letter-spacing: .5px;
+  }
+}
