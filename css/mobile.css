@@ -103,3 +103,28 @@
   /* Meno spazio vuoto verticale nelle sezioni */
   section, .sezione-card { padding-top: 18px !important; padding-bottom: 18px !important; }
 }
+
+/* ===== RIQUADRI CATEGORIA: 2 per riga, bassi e compatti ===== */
+@media (max-width: 768px) {
+  /* Forza 2 colonne (batte la vecchia regola a 1 colonna) */
+  .sezione-card > div[style*="grid-template-columns"]:not(#cal-griglia),
+  .sezione-card > div[style*="flex-wrap"]:not(#cal-griglia) {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    max-width: 100% !important;
+  }
+
+  /* Card basse: niente stiramento in altezza + padding ridotto */
+  .lavoro-btn, .cat-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 14px 6px !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+    align-self: start !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  .lavoro-btn svg, .cat-card svg { width: 24px !important; height: 24px !important; }
+}
