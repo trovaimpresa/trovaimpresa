@@ -1,45 +1,49 @@
-/* Barra "apri nel browser" mostrata solo dentro i browser interni di
-   Facebook / Instagram / Messenger. Aiuta l'utente a passare a Chrome/Safari,
-   dove la registrazione funziona senza intoppi. */
+/* Avviso LEGGERO mostrato solo dentro i browser interni di Facebook / Instagram.
+   La registrazione funziona anche qui, quindi e' solo un suggerimento opzionale,
+   chiudibile e ricordato (non blocca e non allarma). */
 (function () {
   var ua = navigator.userAgent || '';
-  var isInApp = /FBAN|FBAV|FB_IAB|Instagram|Messenger|Line|MicroMessenger/i.test(ua);
-  if (!isInApp) return;
+  if (!/FBAN|FBAV|FB_IAB|Instagram|Messenger/i.test(ua)) return;
+
+  // Se l'utente l'ha gia' chiuso, non ripresentarlo
+  try { if (localStorage.getItem('tiHintBrowserChiuso') === '1') return; } catch (e) {}
 
   var isAndroid = /Android/i.test(ua);
   var url = location.href;
 
   var bar = document.createElement('div');
-  bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#0d2a4a;color:#fff;padding:16px;box-shadow:0 -4px 20px rgba(0,0,0,.25);';
+  bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#eef2f7;color:#1a2f47;border-top:1px solid #d5dde8;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.35;box-shadow:0 -2px 10px rgba(0,0,0,.08);';
 
-  var msg = document.createElement('div');
-  msg.style.cssText = 'font-size:14px;line-height:1.4;margin-bottom:10px;text-align:center;';
-  msg.innerHTML = '⚠️ Per registrarti apri il sito nel tuo browser (Chrome o Safari).';
+  var txt = document.createElement('div');
+  txt.style.cssText = 'flex:1;';
+  txt.innerHTML = '💡 Per comodità puoi aprire il sito in ' + (isAndroid ? 'Chrome' : 'Safari') + '.';
 
-  var btn = document.createElement(isAndroid ? 'a' : 'button');
-  btn.style.cssText = 'display:block;width:100%;background:#ff8800;color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;text-align:center;text-decoration:none;cursor:pointer;box-sizing:border-box;';
-
+  var open = document.createElement(isAndroid ? 'a' : 'button');
+  open.textContent = 'Apri';
+  open.style.cssText = 'background:#0066ff;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;white-space:nowrap;';
   if (isAndroid) {
-    btn.textContent = '👉 Apri in Chrome';
-    btn.href = 'intent://' + location.host + location.pathname + location.search +
-               '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
-               encodeURIComponent(url) + ';end';
+    open.href = 'intent://' + location.host + location.pathname + location.search +
+                '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
+                encodeURIComponent(url) + ';end';
   } else {
-    btn.textContent = '📋 Copia il link (poi aprilo su Safari)';
-    btn.onclick = function () {
+    open.onclick = function () {
       try { navigator.clipboard.writeText(url); } catch (e) {}
-      msg.innerHTML = '✅ Link copiato! Apri <b>Safari</b>, tocca la barra in alto e <b>incolla</b>.<br>Oppure tocca <b>•••</b> in alto a destra → <b>Apri in browser</b>.';
-      btn.style.display = 'none';
+      txt.innerHTML = '✅ Link copiato: aprilo in Safari, oppure tocca ••• in alto a destra → Apri in browser.';
+      open.style.display = 'none';
     };
   }
 
-  var close = document.createElement('div');
-  close.textContent = 'Continua qui comunque';
-  close.style.cssText = 'text-align:center;font-size:12.5px;color:#cdd9e5;margin-top:10px;text-decoration:underline;cursor:pointer;';
-  close.onclick = function () { bar.remove(); };
+  var close = document.createElement('button');
+  close.textContent = '✕';
+  close.setAttribute('aria-label', 'Chiudi');
+  close.style.cssText = 'background:none;border:none;color:#7a8699;font-size:18px;cursor:pointer;padding:0 4px;line-height:1;';
+  close.onclick = function () {
+    try { localStorage.setItem('tiHintBrowserChiuso', '1'); } catch (e) {}
+    bar.remove();
+  };
 
-  bar.appendChild(msg);
-  bar.appendChild(btn);
+  bar.appendChild(txt);
+  bar.appendChild(open);
   bar.appendChild(close);
   document.body.appendChild(bar);
 })();
