@@ -113,17 +113,18 @@
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
     max-width: 100% !important;
+    grid-auto-rows: 1fr !important; /* tutte le righe della stessa altezza */
   }
 
-  /* Card basse e strette: poco spazio interno */
+  /* Card compatte MA tutte della stessa altezza */
   .lavoro-btn, .cat-card {
     min-width: 0 !important;
     max-width: 100% !important;
     padding: 8px 6px !important;
     gap: 3px !important;
     font-size: 13px !important;
-    align-self: start !important;
-    height: auto !important;
+    align-self: stretch !important;   /* riempie la cella: card uguali */
+    height: 100% !important;
     min-height: 0 !important;
   }
   .lavoro-btn svg, .cat-card svg { width: 22px !important; height: 22px !important; }
