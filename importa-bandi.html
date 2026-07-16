@@ -31,7 +31,7 @@
     <ol>
       <li>Vai su <a href="https://www.incentivi.gov.it/it/open-data" target="_blank" rel="noopener">incentivi.gov.it/it/open-data</a> e clicca <b>SCARICA JSON</b> (scarica il file <code>opendata-export.json</code>).</li>
       <li>Qui sotto inserisci il <b>token</b> e scegli il file scaricato.</li>
-      <li>Clicca <b>Importa</b>. I bandi utili (edilizia/artigianato, attivi) finiscono in automatico nella pagina <a href="/bandi" target="_blank">/bandi</a>.</li>
+      <li>Clicca <b>Importa</b>. I bandi utili (edilizia/artigianato, attivi) finiscono nella pagina <a href="/bandi" target="_blank">/bandi</a>.</li>
     </ol>
 
     <label>Token di import</label>
@@ -48,10 +48,46 @@
 
   <script>
     const $ = s => document.querySelector(s);
-    // ricorda il token in questo browser (solo tuo)
     try { const t = localStorage.getItem('tiBandiToken'); if (t) $('#token').value = t; } catch(e){}
-
     function show(txt, ok){ const m=$('#msg'); m.className='msg '+(ok?'ok':'err'); m.textContent=txt; }
+
+    // parole chiave cercate SOLO nel titolo del bando
+    const KW = ['edil','ediliz','costruzion','ristruttur','cappotto','efficientamento',
+      'riqualificazione energetica','rigenerazione urban','rigenerazione','antisism',
+      'efficienza energetica','infiss','coibent','opere edil','impiant','artigian','fotovoltaic','abitat'];
+    const joinArr = v => Array.isArray(v) ? v.join(', ') : (v || '');
+    const dateOnly = s => s ? String(s).slice(0,10) : null;
+
+    // filtra e mappa nel browser: manda alla funzione solo i bandi utili (poche righe)
+    function preparaBandi(all){
+      const oggi = new Date().toISOString().slice(0,10);
+      const attivo = r => { const dc=dateOnly(r.Data_chiusura); return !dc || dc>=oggi; };
+      const rilevante = r => { const t=(r.Titolo||'').toLowerCase(); return KW.some(k=>t.includes(k)); };
+      return all.filter(r => attivo(r) && rilevante(r)).map(r => {
+        const forme = Array.isArray(r.Forma_agevolazione) ? r.Forma_agevolazione : [];
+        const fondoPerduto = forme.some(x => /fondo perduto|contributo/i.test(x));
+        const tipo = fondoPerduto ? 'Fondo perduto' : (forme[0] || 'Incentivo');
+        const regs = Array.isArray(r.Regioni) ? r.Regioni : [];
+        const regione = regs.length >= 15 ? 'Nazionale' : (regs.join(', ') || 'Nazionale');
+        const impMax = Number(r.Agevolazione_Concedibile_max);
+        const importo = impMax > 0 ? ('fino a ' + impMax.toLocaleString('it-IT') + ' €') : null;
+        return {
+          external_id: String(r.ID_Incentivo),
+          titolo: (r.Titolo || 'Bando').slice(0,300),
+          descrizione: (r.Descrizione || '').slice(0,600),
+          ente: r.Soggetto_Concedente || null,
+          tipo,
+          settore: joinArr(r.Settore_Attivita) || null,
+          regione,
+          importo,
+          data_apertura: dateOnly(r.Data_apertura),
+          data_scadenza: dateOnly(r.Data_chiusura),
+          link_ufficiale: r.Link_istituzionale || null,
+          fonte: 'incentivi.gov.it',
+          attivo: true
+        };
+      });
+    }
 
     $('#btn').addEventListener('click', async () => {
       const token = $('#token').value.trim();
@@ -60,17 +96,22 @@
       if (!file) { show('Scegli il file opendata-export.json.', false); return; }
       try { localStorage.setItem('tiBandiToken', token); } catch(e){}
 
-      const btn = $('#btn'); btn.disabled = true; btn.textContent = '⏳ Importo...';
-      show('Lettura del file...', true);
+      const btn = $('#btn'); btn.disabled = true; btn.textContent = '⏳ Elaboro il file...';
+      show('Leggo e filtro il file...', true);
       try {
         const testo = await file.text();
-        // controllo veloce che sia un JSON valido
-        try { JSON.parse(testo); } catch { show('Il file non è un JSON valido.', false); btn.disabled=false; btn.textContent='Importa i bandi'; return; }
+        let all;
+        try { all = JSON.parse(testo); } catch { show('Il file non è un JSON valido.', false); btn.disabled=false; btn.textContent='Importa i bandi'; return; }
+        if (!Array.isArray(all)) { show('Il file non ha il formato atteso (lista di incentivi).', false); btn.disabled=false; btn.textContent='Importa i bandi'; return; }
 
+        const righe = preparaBandi(all);
+        if (!righe.length) { show('Nessun bando pertinente trovato nel file.', false); btn.disabled=false; btn.textContent='Importa i bandi'; return; }
+
+        btn.textContent = '⏳ Importo ' + righe.length + ' bandi...';
         const res = await fetch('/.netlify/functions/importa-bandi', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-import-token': token },
-          body: testo
+          body: JSON.stringify(righe)
         });
         const out = await res.text();
         if (res.ok) show('✅ ' + out, true);
