@@ -108,12 +108,14 @@
 @media (max-width: 768px) {
   /* Forza 2 colonne (batte la vecchia regola a 1 colonna) */
   .sezione-card > div[style*="grid-template-columns"]:not(#cal-griglia),
-  .sezione-card > div[style*="flex-wrap"]:not(#cal-griglia) {
+  .sezione-card > div[style*="flex-wrap"]:not(#cal-griglia),
+  .lavoro-buttons-grid {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
     max-width: 100% !important;
-    grid-auto-rows: 1fr !important; /* tutte le righe della stessa altezza */
+    grid-auto-rows: 1fr !important;   /* tutte le righe della stessa altezza */
+    align-items: stretch !important;  /* card che riempiono la cella */
   }
 
   /* Card compatte MA tutte della stessa altezza */
