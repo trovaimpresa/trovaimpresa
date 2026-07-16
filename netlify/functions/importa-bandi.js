@@ -1,13 +1,14 @@
-// Importa in automatico i bandi/fondi perduti da incentivi.gov.it (open data JSON)
-// nella tabella Supabase 'bandi'. Gira in automatico ogni giorno (vedi netlify.toml).
+// Importa i bandi/fondi perduti nella tabella Supabase 'bandi'.
+// Riceve via POST il JSON open data di incentivi.gov.it (inviato dalla pagina importa-bandi.html),
+// filtra i bandi utili a imprese edili/artigiani, e li salva/aggiorna.
 //
-// Variabili d'ambiente necessarie su Netlify:
-//   BANDI_JSON_URL        -> il link "SCARICA JSON" della pagina incentivi.gov.it/it/open-data
-//   SUPABASE_SERVICE_ROLE -> la chiave service_role di Supabase (Settings > API)
+// Variabili d'ambiente su Netlify:
+//   SUPABASE_SERVICE_ROLE -> chiave segreta Supabase (gia' presente)
+//   IMPORT_TOKEN          -> una password a tua scelta (per proteggere l'import)
 
 const SUPA_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
 
-// Parole chiave cercate SOLO nel titolo del bando (per tenere i temi utili a imprese edili/artigiani)
+// Parole chiave cercate SOLO nel titolo del bando
 const KW = [
   'edil', 'ediliz', 'costruzion', 'ristruttur', 'cappotto', 'efficientamento',
   'riqualificazione energetica', 'rigenerazione urban', 'rigenerazione', 'antisism',
@@ -18,29 +19,23 @@ const KW = [
 const joinArr = v => Array.isArray(v) ? v.join(', ') : (v || '');
 const dateOnly = s => s ? String(s).slice(0, 10) : null;
 
-exports.handler = async function () {
-  const JSON_URL = process.env.BANDI_JSON_URL;
+exports.handler = async function (event) {
   const KEY = process.env.SUPABASE_SERVICE_ROLE;
-  if (!JSON_URL || !KEY) {
-    return { statusCode: 500, body: 'Config mancante: imposta BANDI_JSON_URL e SUPABASE_SERVICE_ROLE su Netlify.' };
+  const TOKEN = process.env.IMPORT_TOKEN;
+  if (!KEY) return { statusCode: 500, body: 'Config mancante: SUPABASE_SERVICE_ROLE non impostata su Netlify.' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Metodo non consentito: usa POST.' };
+  if (!TOKEN || (event.headers['x-import-token'] || '') !== TOKEN) {
+    return { statusCode: 401, body: 'Non autorizzato: token di import errato o mancante.' };
   }
 
-  // 1) Scarica l'open data
   let all;
-  try {
-    const res = await fetch(JSON_URL);
-    if (!res.ok) return { statusCode: 502, body: 'Download open data fallito: HTTP ' + res.status };
-    all = await res.json();
-  } catch (e) {
-    return { statusCode: 502, body: 'Errore download open data: ' + e.message };
-  }
-  if (!Array.isArray(all)) return { statusCode: 500, body: 'Formato open data inatteso.' };
+  try { all = JSON.parse(event.body); } catch { return { statusCode: 400, body: 'File JSON non valido.' }; }
+  if (!Array.isArray(all)) return { statusCode: 400, body: 'Il file deve essere una lista di incentivi (array JSON).' };
 
   const oggi = new Date().toISOString().slice(0, 10);
   const attivo = r => { const dc = dateOnly(r.Data_chiusura); return !dc || dc >= oggi; };
   const rilevante = r => { const t = (r.Titolo || '').toLowerCase(); return KW.some(k => t.includes(k)); };
 
-  // 2) Filtra e mappa sui campi della tabella 'bandi'
   const righe = all.filter(r => attivo(r) && rilevante(r)).map(r => {
     const forme = Array.isArray(r.Forma_agevolazione) ? r.Forma_agevolazione : [];
     const fondoPerduto = forme.some(x => /fondo perduto|contributo/i.test(x));
@@ -69,7 +64,8 @@ exports.handler = async function () {
     };
   });
 
-  // 3) Upsert su Supabase (la service_role bypassa le RLS)
+  if (!righe.length) return { statusCode: 200, body: 'Nessun bando pertinente trovato nel file (0 importati).' };
+
   try {
     const up = await fetch(SUPA_URL + '/rest/v1/bandi?on_conflict=external_id', {
       method: 'POST',
@@ -83,15 +79,10 @@ exports.handler = async function () {
     });
     if (!up.ok) { const t = await up.text(); return { statusCode: 500, body: 'Upsert fallito: ' + t }; }
 
-    // 4) Nasconde i bandi ormai scaduti
+    // Nasconde i bandi ormai scaduti
     await fetch(SUPA_URL + '/rest/v1/bandi?data_scadenza=lt.' + oggi, {
       method: 'PATCH',
-      headers: {
-        apikey: KEY,
-        Authorization: 'Bearer ' + KEY,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal'
-      },
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({ attivo: false })
     });
   } catch (e) {

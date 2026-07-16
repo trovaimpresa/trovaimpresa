@@ -23,10 +23,6 @@
   status = 301
   force = true
 
-# Import automatico bandi da incentivi.gov.it: ogni giorno alle 06:00 UTC
-[functions."importa-bandi"]
-  schedule = "0 6 * * *"
-
 # Pagina Termini duplicata: unifichiamo tutto su /termini-condizioni
 [[redirects]]
   from = "/termini-servizio"
