@@ -1,15 +1,12 @@
-// Restituisce email/telefono del cliente SOLO se il contatto è stato
-// sbloccato (pagato). È l'unica via per ottenere i contatti: la lettura
-// diretta delle colonne email/telefono è revocata a livello di database.
+// Restituisce email/telefono del cliente all'impresa a cui la richiesta
+// è indirizzata (gratis, nessun pay-per-lead). La lettura diretta delle
+// colonne email/telefono resta revocata a livello di database, quindi
+// i contatti passano sempre da qui.
 //
 // Chiamata dal pannello con: { preventivo_id }
 // Header richiesto: Authorization: Bearer <access_token Supabase dell'impresa>
 
 const { createClient } = require('@supabase/supabase-js');
-
-// 🔧 MODELLO IBRIDO: i Premium hanno i contatti delle PROPRIE richieste
-// inclusi nell'abbonamento (le richieste di zona restano a pagamento per tutti).
-const PREMIUM_INCLUSO = true;
 
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
@@ -49,22 +46,10 @@ exports.handler = async function (event) {
 
     const isDiretta = String(prev.impresa_id) === String(impresa.id);
 
-    // Sblocco registrato per questa impresa? (vale sia per dirette che di zona)
-    const { data: mioSblocco } = await admin
-      .from('lead_sblocchi')
-      .select('id')
-      .eq('preventivo_id', prev.id)
-      .eq('impresa_id', impresa.id)
-      .maybeSingle();
-
-    const isPremium = ['premium','mensile','annuale'].includes((impresa.piano || '').toLowerCase());
-    const autorizzato =
-      !!mioSblocco ||
-      (isDiretta && prev.sbloccato) ||
-      (isDiretta && PREMIUM_INCLUSO && isPremium);
-
-    if (!autorizzato) {
-      return { statusCode: 402, body: JSON.stringify({ sbloccato: false }) };
+    // Nessun pay-per-lead: l'impresa vede gratuitamente i contatti
+    // delle richieste indirizzate a lei.
+    if (!isDiretta) {
+      return { statusCode: 403, body: 'Questa richiesta non è indirizzata alla tua impresa' };
     }
 
     return {

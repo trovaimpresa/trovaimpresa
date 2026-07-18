@@ -14,8 +14,8 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: 'Parametri mancanti: impresa_id, nome e email_cliente sono obbligatori' };
   }
 
-  // Pay-per-lead: i contatti del cliente NON vengono inviati via email.
-  // L'impresa li sblocca dal pannello (pagamento Stripe).
+  // I contatti del cliente sono disponibili direttamente nel pannello
+  // dell'impresa (nessun pay-per-lead).
 
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -91,14 +91,14 @@ exports.handler = async function(event) {
               <div style="font-size:13px;color:#0066ff;font-weight:700;margin-top:8px">📷 Apri la foto allegata</div>
             </a>
           </div>` : ''}
-          <div style="background:#fff8f0;border:1px solid #f0d9c0;border-radius:8px;padding:16px 20px;margin-bottom:14px;text-align:center">
-            <p style="font-size:14px;margin:0 0 4px;font-weight:700">🔒 Telefono ed email del cliente sono riservati</p>
-            <p style="font-size:13px;color:#666;margin:0">Sblocca il contatto dal tuo pannello per soli 5€ e rispondi subito al cliente.</p>
+          <div style="background:#f0f7ff;border:1px solid #cfe0f5;border-radius:8px;padding:16px 20px;margin-bottom:14px;text-align:center">
+            <p style="font-size:14px;margin:0 0 4px;font-weight:700">📇 Contatti del cliente disponibili nel tuo pannello</p>
+            <p style="font-size:13px;color:#666;margin:0">Apri la richiesta dal pannello per vedere telefono ed email e rispondere subito.</p>
           </div>
           <div style="text-align:center;margin-bottom:28px">
             <a href="https://trovaimpresa.com/pannello-artigiano.html"
-               style="display:inline-block;background:#e8733a;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
-              🔓 Apri il pannello e sblocca il contatto →
+               style="display:inline-block;background:#0066ff;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
+              📂 Apri il pannello e rispondi →
             </a>
           </div>
           <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">

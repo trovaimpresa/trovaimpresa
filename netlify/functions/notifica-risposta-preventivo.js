@@ -14,29 +14,19 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: 'Parametri mancanti: impresa_nome e risposta sono obbligatori' };
   }
 
-  // Pay-per-lead: i pannelli non possono più leggere l'email del cliente,
-  // quindi la recuperiamo qui col service key, partendo dal preventivo_id.
-  // Si può rispondere SOLO se il contatto è stato sbloccato (pagato).
+  // I pannelli leggono la vista preventivi_safe (senza email del cliente):
+  // recuperiamo email e nome col service key partendo dal preventivo_id.
+  // Nessun pay-per-lead: l'impresa può sempre rispondere.
   if (preventivo_id) {
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
     if (!SUPABASE_KEY) return { statusCode: 500, body: 'SUPABASE_SERVICE_KEY non configurata' };
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/preventivi?id=eq.${encodeURIComponent(preventivo_id)}&select=email,nome,sbloccato,impresa_id`, {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/preventivi?id=eq.${encodeURIComponent(preventivo_id)}&select=email,nome`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
     const rows = await r.json();
     const prev = rows && rows[0];
     if (!prev) return { statusCode: 404, body: 'Preventivo non trovato' };
-    // Autorizzato se sbloccato (pagato) oppure se l'impresa destinataria è Premium (incluso)
-    let autorizzato = !!prev.sbloccato;
-    if (!autorizzato && prev.impresa_id) {
-      const ri = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${encodeURIComponent(prev.impresa_id)}&select=piano`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-      });
-      const imprese = await ri.json();
-      autorizzato = imprese && imprese[0] && ['premium','mensile','annuale'].includes((imprese[0].piano || '').toLowerCase());
-    }
-    if (!autorizzato) return { statusCode: 403, body: 'Contatto non sbloccato: sblocca il contatto prima di rispondere' };
     email_cliente = prev.email;
     nome_cliente = nome_cliente || prev.nome || 'cliente';
   }

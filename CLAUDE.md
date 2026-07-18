@@ -19,18 +19,17 @@
 - Supabase project: `nacvrsgkyfavykxjxszu`.
 
 ## Pannelli
-- 5 pannelli: `pannello-impresa`, `pannello-artigiano`, `pannello-professionisti`, `pannello-negozio` (le 4 categorie business con pay-per-lead) + `pannello-candidato` (senza pay-per-lead).
+- 5 pannelli: `pannello-impresa`, `pannello-artigiano`, `pannello-professionisti`, `pannello-negozio` (le 4 categorie business) + `pannello-candidato`.
 - Modal "Genera preventivo con AI": stile `.modal-ai` a tutta pagina (fullscreen), header chiaro. Funzione AI (generaConAI/generaTestoPreventivo/calcolaPrezzo) uniforme su tutti i 4 pannelli.
 - Badge numero preventivi sul bottone: presente su impresa/artigiano/professionisti. **Negozio ancora senza** (opzionale da aggiungere).
 
-## Pay-per-lead
-- Contatti cliente (email/telefono) nascosti; si sbloccano con pagamento Stripe 5€ (`crea-checkout-lead.js` + `stripe-webhook-lead.js`). I **Premium** hanno incluse le proprie richieste dirette.
-- Il campo `imprese.piano` può valere `premium`, `mensile` o `annuale`: tutti i check "è premium?" devono accettare tutti e tre (frontend + functions).
-- Le richieste arrivano nella tabella `preventivi`; i pannelli leggono la vista `preventivi_safe` (esclude email/telefono). Sblocchi tracciati in `lead_sblocchi`.
-- **ATTENZIONE**: se si aggiungono colonne nuove a `preventivi`, rieseguire il blocco `GRANT SELECT (colonne tranne email/telefono) ON public.preventivi TO anon, authenticated`, altrimenti il pannello va in 403 ("permission denied for table preventivi").
-- L'email di notifica "nuova richiesta" all'impresa è stata **rimossa**: le nuove richieste si vedono solo dal numero sul bottone del pannello.
+## Preventivi (pay-per-lead RIMOSSO — luglio 2026)
+- **Nessun pagamento**: l'impresa vede gratis i contatti (email/telefono) delle richieste indirizzate a lei. Rimossi pulsante "Sblocca a 5€", sezione "Richieste dalla tua zona" e i file `crea-checkout-lead.js`, `stripe-webhook-lead.js`, `sql/pay-per-lead.sql`, `sql/condivisione-lead.sql`.
+- Le richieste arrivano nella tabella `preventivi`; i pannelli leggono la vista `preventivi_safe` (esclude email/telefono). I contatti si ottengono dalla function `contatto-preventivo.js`, che ora li restituisce a chi ha la richiesta indirizzata (nessun gate di pagamento).
+- **ATTENZIONE**: se si aggiungono colonne nuove a `preventivi`, rieseguire il blocco `GRANT SELECT (colonne tranne email/telefono) ON public.preventivi TO anon, authenticated` e ricreare `preventivi_safe`, altrimenti il pannello va in 403 ("permission denied for table preventivi").
+- DB: le colonne `sbloccato`, `sbloccato_at`, `stripe_session_id`, `condivisibile` e la tabella `lead_sblocchi` restano ma sono **inutilizzate** (innocue). Si possono rimuovere in un secondo momento se si vuole pulire.
+- Env Stripe `STRIPE_WEBHOOK_SECRET_LEAD` non serve più (l'endpoint webhook lead su Stripe si può disattivare).
 
 ## Da fare / opzionali
 - Badge numero preventivi anche sul pannello negozio.
-- Verificare che il webhook Stripe (`STRIPE_WEBHOOK_SECRET_LEAD`) sia configurato, così lo sblocco si registra dopo il pagamento.
-- Decisione aperta: la generazione del preventivo AI è libera anche per i Free (pagano solo il contatto) — valutare se bloccarla dietro lo sblocco.
+- (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
