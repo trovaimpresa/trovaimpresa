@@ -259,7 +259,7 @@
         }
 
         .feature-card:nth-child(2) {
-            background: linear-gradient(135deg, #fffaf0 0%, #fff8f0 100%);
+            background: linear-gradient(135deg, #fffdf2 0%, #fff8f0 100%);
             border-top: 4px solid #FFB347;
         }
 
@@ -805,34 +805,28 @@
   .nav-cta:hover{ background:#0052cc; }
 
   .hero{ padding:56px 20px 44px !important; background:var(--ti-bg); position:relative; }
-  .hero-inner{ max-width:800px; margin:0 auto; text-align:center; position:relative; z-index:3; }
-  .hero-h1{ font-size:34px; line-height:1.22; font-weight:800; color:var(--ti-ink); margin:0 auto 12px; letter-spacing:-.4px; max-width:780px; }
-  .hero .hero-sub{ font-size:17px; color:var(--ti-txt); margin:0 auto 26px; font-weight:500; }
-  .hero .search-bar{ max-width:640px; margin:0 auto; }
+  .hero-inner{ max-width:760px; margin:0 auto; text-align:center; position:relative; z-index:3; }
+  .hero-logo{ max-width:300px; width:70%; height:auto; display:block; margin:0 auto 18px; }
+  .hero-h1{ font-size:31px; line-height:1.24; font-weight:800; color:var(--ti-ink); margin:0 auto 10px; letter-spacing:-.4px; max-width:720px; }
+  .hero .hero-sub{ font-size:16.5px; color:var(--ti-txt); margin:0 auto 26px; font-weight:500; }
 
-  .search-bar{ display:flex; gap:8px; align-items:stretch; background:#fff; padding:8px; border-radius:14px; box-shadow:0 6px 24px rgba(10,42,77,.10); }
-  .sb-field{ display:flex; align-items:center; gap:8px; padding:0 12px; background:#fff; border:1px solid var(--ti-bd); border-radius:10px; height:50px; }
-  .sb-field svg{ flex-shrink:0; }
-  .sb-cat{ flex:1.05; }
-  .sb-citta{ flex:1; }
-  .sb-field select, .sb-field input{ border:none; outline:none; background:transparent; font-size:15px; color:var(--ti-ink); font-family:inherit; width:100%; min-width:0; height:100%; cursor:pointer; }
-  .sb-field input{ cursor:text; }
-  .sb-geo{ border:none; background:transparent; color:#7a8699; cursor:pointer; padding:4px; display:flex; border-radius:6px; }
-  .sb-geo:hover{ color:var(--ti-blu); background:var(--ti-bg); }
-  .sb-go{ background:var(--ti-blu); color:#fff; border:none; border-radius:10px; padding:0 30px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
-  .sb-go:hover{ background:#0052cc; }
-  .sb-err{ display:none; color:#c0392b; font-weight:600; font-size:14px; margin:10px 0 0; }
+  /* Scelta della citta: e' il primo passo del sito, quindi ha il colore piu forte */
+  .citta-box{ background:#fffdf2; border:2px solid #ffd60a; border-radius:16px; padding:20px 22px; max-width:620px; margin:0 auto; box-shadow:0 6px 22px rgba(255,214,10,.22); }
+  .citta-lab{ display:block; font-size:17px; font-weight:800; color:#7a5c00; margin-bottom:12px; }
+  .citta-riga{ display:flex; gap:10px; align-items:stretch; }
+  .citta-campo{ flex:1; display:flex; align-items:center; gap:9px; background:#fff; border:2px solid #ffe680; border-radius:11px; padding:0 13px; height:54px; min-width:0; }
+  .citta-campo:focus-within{ border-color:#ffd60a; box-shadow:0 0 0 4px rgba(255,214,10,.28); }
+  .citta-campo svg{ flex-shrink:0; }
+  .citta-campo input{ flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:inherit; font-size:16.5px; color:var(--ti-ink); height:100%; }
+  .citta-geo{ border:none; background:transparent; color:#a07d1a; cursor:pointer; padding:5px; display:flex; border-radius:7px; }
+  .citta-geo:hover{ background:#fff8d6; color:#7a5c00; }
+  .citta-go{ background:#ffd60a; color:#3d2f00; border:none; border-radius:11px; padding:0 32px; font-family:inherit; font-size:17px; font-weight:800; cursor:pointer; }
+  .citta-go:hover{ background:#f2c800; }
+  .sb-err{ display:none; color:#c0392b; font-weight:700; font-size:14.5px; margin:12px 0 0; }
 
-  .sb-chips{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; align-items:center; margin:16px 0 0; }
-  .sb-chips-l{ font-size:14px; color:var(--ti-txt); font-weight:600; }
-  .sb-chips button{ font-family:inherit; font-size:14px; font-weight:600; color:var(--ti-ink); background:#fff; border:1px solid var(--ti-bd); border-radius:999px; padding:8px 15px; cursor:pointer; transition:border-color .15s, background .15s; }
-  .sb-chips button:hover{ background:#eaf2ff; border-color:var(--ti-blu); color:var(--ti-blu); }
-
-  .hero-trust{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin:20px 0 0; color:#6b7a8d; font-size:13px; font-weight:600; }
-  .hero-trust span{ display:inline-flex; align-items:center; gap:6px; }
-  .hero-biz{ margin:26px auto 0; padding-top:18px; border-top:1px solid var(--ti-bd); display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; font-size:15px; color:var(--ti-txt); }
-  .hero-biz a{ color:var(--ti-blu); font-weight:700; text-decoration:none; }
-  .hero-biz a:hover{ text-decoration:underline; }
+  .citta-attiva{ display:none; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; background:#fffdf2; border:2px solid #ffd60a; border-radius:14px; padding:16px 22px; max-width:620px; margin:0 auto; font-size:18px; color:var(--ti-ink); }
+  .citta-attiva b{ font-weight:800; }
+  .citta-attiva a{ color:#0066ff; font-weight:700; font-size:15px; }
 
   .hero-pub{ position:absolute; top:50%; transform:translateY(-50%); width:calc(50% - 360px); max-width:300px; height:250px; border:1px solid var(--ti-bd); background:#fff; border-radius:12px; display:flex; align-items:center; justify-content:center; text-align:center; color:#9aa7b8; font-weight:600; font-size:14px; text-decoration:none; z-index:2; }
   .hero-pub.sx{ left:40px; }
@@ -892,12 +886,13 @@
     .hero{ padding:34px 16px 30px !important; }
     .hero-h1{ font-size:25px; }
     .hero .hero-sub{ font-size:15px; margin-bottom:20px; }
-    .search-bar{ flex-direction:column; gap:8px; }
-    .sb-go{ padding:15px; }
+    .citta-riga{ flex-direction:column; gap:9px; }
+    .citta-go{ padding:15px; }
+    .citta-box{ padding:16px; }
+    .hero-logo{ max-width:210px; }
     .hrow2{ grid-template-columns:minmax(0,1fr); }
     .hcard{ padding:18px 16px 20px; }
     .hcard-grid.c4{ grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .hero-trust{ gap:14px; font-size:12px; }
   }
 </style>
 </head>
@@ -950,45 +945,33 @@
         <a href="/pubblicita" data-spazio-id="hero-dx" class="pub-link pub-spazio hero-pub dx">Spazio disponibile</a>
 
         <div class="hero-inner">
+            <img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" class="hero-logo">
             <h1 class="hero-h1">Trova imprese edili, artigiani, negozi e professionisti verificati nella tua zona</h1>
             <p class="hero-sub">Richiedi preventivi gratuiti e senza impegno in pochi minuti</p>
 
-            <div class="search-bar">
-                <div class="sb-field sb-cat">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8699" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <select id="sb-lavoro" aria-label="Di cosa hai bisogno"><option value="">Di cosa hai bisogno?</option></select>
+            <div class="citta-box" id="citta-scelta">
+                <label class="citta-lab" for="sb-citta">In quale citt&agrave; cerchi?</label>
+                <div class="citta-riga">
+                    <div class="citta-campo">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a6d1f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <input id="sb-citta" type="text" placeholder="Scrivi la tua citt&agrave;... es. Roma" autocomplete="address-level2" onkeydown="if(event.key==='Enter')avviaRicerca()">
+                        <button type="button" class="citta-geo" onclick="localizzami()" title="Usa la mia posizione" aria-label="Usa la mia posizione">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/></svg>
+                        </button>
+                    </div>
+                    <button type="button" class="citta-go" onclick="avviaRicerca()">Cerca</button>
                 </div>
-                
-                <div class="sb-field sb-citta">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8699" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    <input id="sb-citta" type="text" placeholder="Città — es. Roma" autocomplete="address-level2" onkeydown="if(event.key==='Enter')avviaRicerca()">
-                    <button type="button" class="sb-geo" onclick="localizzami()" title="Usa la mia posizione" aria-label="Usa la mia posizione">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/></svg>
-                    </button>
-                </div>
-                <button type="button" class="sb-go" onclick="avviaRicerca()">Cerca</button>
-            </div>
-            <p id="sb-err" class="sb-err">Inserisci una città per continuare</p>
-
-            <div class="sb-chips">
-                <span class="sb-chips-l">I più richiesti:</span>
-                <button type="button" onclick="cercaLavoro('Rifare il bagno')">Rifare il bagno</button>
-                <button type="button" onclick="cercaLavoro('Imbianchino')">Imbianchino</button>
-                <button type="button" onclick="cercaLavoro('Mi piove dal tetto')">Tetto che perde</button>
-                <button type="button" onclick="cercaLavoro('Elettricista')">Elettricista</button>
-                <button type="button" onclick="cercaLavoro('Idraulico')">Idraulico</button>
-                <button type="button" onclick="cercaLavoro('Ristrutturare casa')">Ristrutturare casa</button>
+                <p id="sb-err" class="sb-err">Scrivi la tua citt&agrave; per continuare</p>
             </div>
 
-            <div class="hero-trust">
-                <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> Profili verificati</span>
-                <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Preventivi gratuiti</span>
-                <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg> Tutta Italia</span>
+            <div class="citta-attiva" id="citta-attiva">
+                <span>Stai cercando a <b id="citta-attiva-nome"></b></span>
+                <a href="index.html">cambia citt&agrave;</a>
             </div>
 
             <div class="hero-biz">
                 <span>Sei un'impresa o un artigiano?</span>
-                <a href="/registrazione-impresa.html">Ricevi richieste dai clienti della tua zona →</a>
+                <a href="/registrazione-impresa.html">Ricevi richieste dai clienti della tua zona &rarr;</a>
             </div>
         </div>
     </section>
@@ -1090,46 +1073,29 @@
 
     <script src="/js/ricerca-problema.js"></script>
     <script>
-      // Riempie la tendina dei lavori, raggruppati per bisogno.
-      window.RicercaProblema.riempiTendina(document.getElementById('sb-lavoro'));
-
       // Tendine informative sotto le 4 card: mostrano i mestieri di ogni categoria.
-      // Scegliendone uno si va ai risultati di quel mestiere, portandosi dietro
-      // la citta' se il cliente l'ha gia' scritta nella barra in alto.
       document.querySelectorAll('.tile-sel').forEach(function(sel){
         window.RicercaProblema.riempiTendinaCategoria(sel, sel.dataset.cat);
         sel.addEventListener('change', function(){
           if(!this.value) return;
-          var citta = (document.getElementById('sb-citta').value || '').trim();
+          var c = new URLSearchParams(location.search).get('citta');
+          var inp = document.getElementById('sb-citta');
+          var citta = (c || (inp ? inp.value : '') || '').trim();
           window.location.href = window.RicercaProblema.urlDaTendina(this.value, citta);
         });
       });
 
+      // La citta e' il primo passo: "Cerca" ricarica la home con la citta attiva,
+      // cosi' si accendono anche gli spazi pubblicitari locali.
       function avviaRicerca(){
-        var lavoro = document.getElementById('sb-lavoro').value;
-        var citta  = (document.getElementById('sb-citta').value || '').trim();
+        var inp = document.getElementById('sb-citta');
+        var citta = (inp.value || '').trim();
         var err = document.getElementById('sb-err');
-        if(!citta){
-          err.textContent = 'Scrivi la tua città per vedere chi lavora nella tua zona';
-          err.style.display='block';
-          document.getElementById('sb-citta').focus();
-          return;
-        }
+        if(!citta){ err.style.display='block'; inp.focus(); return; }
         err.style.display='none';
-        window.location.href = window.RicercaProblema.urlDaTendina(lavoro, citta);
+        window.location.href = 'index.html?citta=' + encodeURIComponent(citta);
       }
-      // Esempi iniziali: selezionano la voce nella tendina e cercano subito.
-      function cercaLavoro(testo){
-        var sel = document.getElementById('sb-lavoro');
-        var voce = window.RicercaProblema.riconosci(testo);
-        if(voce){
-          var atteso = voce.p + '|' + voce.q + '|' + voce.v;
-          for(var i=0;i<sel.options.length;i++){
-            if(sel.options[i].value === atteso){ sel.selectedIndex = i; break; }
-          }
-        }
-        avviaRicerca();
-      }
+
       function localizzami(){
         if(!navigator.geolocation){ alert('Impossibile rilevare la posizione, scrivi la città a mano'); return; }
         navigator.geolocation.getCurrentPosition(async function(pos){
@@ -1139,16 +1105,19 @@
             var c = (d && d.address) ? (d.address.city || d.address.town || d.address.village || '') : '';
             if(!c){ alert('Impossibile rilevare la posizione, scrivi la città a mano'); return; }
             document.getElementById('sb-citta').value = c;
-            document.getElementById('sb-err').style.display='none';
+            avviaRicerca();
           }catch(e){ alert('Impossibile rilevare la posizione, scrivi la città a mano'); }
         }, function(){ alert('Impossibile rilevare la posizione, scrivi la città a mano'); });
       }
+
+      // Con la citta gia' scelta mostro "Stai cercando a X" al posto del campo.
       (function(){
         var c = new URLSearchParams(location.search).get('citta');
-        if(c && c.trim()){
-          var t = c.trim(); t = t.charAt(0).toUpperCase() + t.slice(1);
-          var i = document.getElementById('sb-citta'); if(i) i.value = t;
-        }
+        if(!c || !c.trim()) return;
+        var t = c.trim(); t = t.charAt(0).toUpperCase() + t.slice(1);
+        document.getElementById('citta-attiva-nome').textContent = t;
+        document.getElementById('citta-scelta').style.display = 'none';
+        document.getElementById('citta-attiva').style.display = 'flex';
       })();
     </script>
 
