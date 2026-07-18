@@ -25,7 +25,10 @@
     .map(function (s) { return s.trim(); }).filter(Boolean);
   if (!lista.length) return;
 
+  var cittaFissa = (script && script.dataset.citta || '').trim();
+
   function citta() {
+    if (cittaFissa) return cittaFissa;   // pagine di una citta' sola
     var p = new URLSearchParams(window.location.search).get('citta');
     if (p && p.trim()) return p.trim();
     if (window.TI_CITTA && String(window.TI_CITTA).trim()) return String(window.TI_CITTA).trim();
@@ -74,30 +77,29 @@
   async function riempi() {
     var c = citta();
     if (!c) return; // senza citta' non si sa quali annunci mostrare
-    var client = window.sb || window.supabaseClient;
-    if (!client) {
-      if (!window.supabase || !window.supabase.createClient) return;
-      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
     var oggi = new Date().toISOString().slice(0, 10);
-    var res = await client.from('annunci_pubblicitari')
-      .select('spazio_id, logo_url, link_url')
-      .in('spazio_id', lista)
-      .ilike('citta', c)
-      .eq('stato', 'pagato')
-      .gte('data_fine', oggi);
-    if (res.error || !res.data) return;
-    res.data.forEach(function (ann) {
-      var a = document.querySelector('a.pub-link[data-spazio-id="' + ann.spazio_id + '"]');
-      if (!a) return;
-      a.href = ann.link_url || '#';
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.style.padding = '0';
-      a.style.border = 'none';
-      a.innerHTML = '<img src="' + ann.logo_url + '" alt="Pubblicità" '
-                  + 'style="width:100%;height:100%;object-fit:cover;display:block">';
-    });
+    var url = SUPABASE_URL + '/rest/v1/annunci_pubblicitari'
+            + '?select=spazio_id,logo_url,link_url'
+            + '&spazio_id=in.(' + lista.join(',') + ')'
+            + '&citta=ilike.' + encodeURIComponent(c)
+            + '&stato=eq.pagato'
+            + '&data_fine=gte.' + oggi;
+    try {
+      var r = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY } });
+      if (!r.ok) return;
+      var dati = await r.json();
+      dati.forEach(function (ann) {
+        var a = document.querySelector('a.pub-link[data-spazio-id="' + ann.spazio_id + '"]');
+        if (!a) return;
+        a.href = ann.link_url || '#';
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.padding = '0';
+        a.style.border = 'none';
+        a.innerHTML = '<img src="' + ann.logo_url + '" alt="Pubblicità" '
+                    + 'style="width:100%;height:100%;object-fit:cover;display:block">';
+      });
+    } catch (e) { /* rete assente: restano i segnaposto */ }
   }
 
   var ultimaCitta = null;
