@@ -798,6 +798,7 @@
 
   .navbar{ padding:10px 32px !important; gap:16px; }
   .navbar .logo{ display:block; text-decoration:none; }
+  .nav-sinistra{ display:flex; align-items:center; gap:20px; flex-shrink:0; }
   .nav-links{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
   .nav-a{ color:var(--ti-txt); text-decoration:none; font-size:14px; font-weight:600; padding:8px 12px; border-radius:8px; white-space:nowrap; }
   .nav-a:hover{ background:var(--ti-bg); color:var(--ti-ink); }
@@ -812,8 +813,6 @@
   .nav-login:hover{ background:#eaf2ff; }
   .nav-login::before{ content:''; width:15px; height:15px; flex-shrink:0; background:currentColor; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center/contain no-repeat; }
 
-  .nav-cta{ background:var(--ti-blu); color:#fff; text-decoration:none; font-size:14px; font-weight:700; padding:9px 16px; border-radius:8px; white-space:nowrap; }
-  .nav-cta:hover{ background:#0052cc; }
 
   .hero{ padding:56px 20px 44px !important; background:var(--ti-bg); position:relative; }
   .hero-inner{ max-width:760px; margin:0 auto; text-align:center; position:relative; z-index:3; }
@@ -933,9 +932,9 @@
     .navbar{ padding:10px 14px !important; }
     .nav-a{ font-size:13px; padding:7px 8px; }
     .nav-links{ gap:4px; }
-    .nav-login{ font-size:12.5px; padding:7px 10px; }
+    .nav-sinistra{ gap:10px; }
+    .nav-login{ font-size:12px; padding:6px 9px; }
     .nav-login::before{ width:13px; height:13px; }
-    .nav-cta{ font-size:13px; padding:8px 12px; }
     .hero{ padding:34px 16px 30px !important; }
     .hero-h1{ font-size:25px; }
     .hero .hero-sub{ font-size:15px; margin-bottom:20px; }
@@ -986,15 +985,16 @@
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <a href="/" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" style="height:44px;width:auto;display:block;"></a>
+        <div class="nav-sinistra">
+          <a href="/" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" style="height:44px;width:auto;display:block;"></a>
+          <a href="/login-impresa.html" class="nav-login">Accedi al tuo pannello</a>
+        </div>
         <div class="nav-links">
           <a href="/bandi.html" class="nav-a nav-bandi">Bandi e fondi</a>
           <a href="/blog.html" class="nav-a nav-guide">Guide e costi</a>
           <a href="/offerte-lavoro.html" class="nav-a">Lavoro</a>
           <a href="/subappalto.html" class="nav-a">Subappalti</a>
           <a href="/prezzi.html" class="nav-a">Prezzi</a>
-          <a href="/login-impresa.html" class="nav-login">Accedi al tuo pannello</a>
-          <a href="#registrati" class="nav-cta">Iscrivi la tua attivit&agrave;</a>
         </div>
     </nav>
 
