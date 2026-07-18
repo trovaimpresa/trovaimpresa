@@ -30,13 +30,35 @@
     ]
 }
 </script>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GQ0HDYPCXE"></script>
+    <!-- Google tag (gtag.js) — con Consent Mode -->
     <script>
+      // Prima di caricare Analytics dichiaro che il consenso NON c'e'.
+      // Senza questo blocco i cookie venivano scritti all'apertura della pagina,
+      // prima ancora che il banner comparisse: il banner c'era ma non bloccava nulla.
+      // cookie-banner.js chiama gtag('consent','update') quando l'utente accetta.
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500
+      });
+      // Se l'utente aveva gia' accettato in una visita precedente, sblocco subito
+      try {
+        if (localStorage.getItem('cookie_consent') === 'all') {
+          gtag('consent', 'update', {
+            ad_storage: 'granted', ad_user_data: 'granted',
+            ad_personalization: 'granted', analytics_storage: 'granted'
+          });
+        }
+      } catch (e) {}
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GQ0HDYPCXE"></script>
+    <script>
       gtag('js', new Date());
-      gtag('config', 'G-GQ0HDYPCXE');
+      gtag('config', 'G-GQ0HDYPCXE', { anonymize_ip: true });
     </script>
     <style>
         * {
@@ -1209,6 +1231,7 @@
                     <li><a href="/contatti.html">Contatti e assistenza</a></li>
                     <li><a href="/privacy-policy.html">Informativa sulla privacy</a></li>
                     <li><a href="/cookie-policy.html">Cookie Policy</a></li>
+                    <li><a href="#" onclick="riapriBannerCookie();return false;">Gestisci i cookie</a></li>
                     <li><a href="/termini-condizioni.html">Termini di servizio</a></li>
                     <li><a href="/cancella-iscrizione.html">Cancella iscrizione</a></li>
                 </ul>

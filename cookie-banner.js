@@ -5,6 +5,17 @@
   var STORAGE_DATE_KEY = 'cookie_consent_date';
   var EXPIRY_DAYS = 365;
 
+  // Definita subito, prima di ogni uscita anticipata: serve proprio a chi ha
+  // gia' dato il consenso, che altrimenti non avrebbe modo di tornare indietro.
+  // La revoca dev'essere facile quanto il consenso.
+  window.riapriBannerCookie = function () {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_DATE_KEY);
+    } catch (e) {}
+    location.reload();
+  };
+
   // Se l'utente ha già espresso una scelta, controlla se è scaduta
   try {
     var savedConsent = localStorage.getItem(STORAGE_KEY);
@@ -56,8 +67,11 @@
   banner.setAttribute('aria-label', 'Consenso cookie');
   banner.innerHTML =
     '<p>' +
-      'Utilizziamo <strong>cookie tecnici</strong> necessari al funzionamento del sito e, previo consenso, cookie analitici con IP anonimizzato. ' +
-      'Per maggiori informazioni consulta la nostra <a href="/cookie-policy.html">Cookie Policy</a>.' +
+      'Usiamo <strong>cookie tecnici</strong>, necessari al funzionamento del sito. ' +
+      'Solo con il tuo consenso usiamo anche cookie <strong>statistici</strong> (Google Analytics, IP anonimizzato) ' +
+      'e di <strong>profilazione pubblicitaria</strong> (Meta/Facebook), che possono seguirti su altri siti. ' +
+      'Puoi cambiare idea quando vuoi dal link in fondo alla pagina. ' +
+      'Dettagli nella <a href="/cookie-policy.html">Cookie Policy</a>.' +
     '</p>' +
     '<div class="cb-buttons">' +
       '<button id="cb-accept-all" aria-label="Accetta tutti i cookie">Accetta tutti</button>' +
@@ -80,12 +94,25 @@
 
   document.getElementById('cb-accept-all').addEventListener('click', function () {
     saveConsent('all');
+    sbloccaAnalytics();
     caricaPixel();
   });
 
   document.getElementById('cb-accept-essential').addEventListener('click', function () {
     saveConsent('essential');
   });
+
+  // Comunica a Google Consent Mode che il consenso e' arrivato. Senza questo
+  // Analytics resterebbe bloccato dal blocco 'default: denied' nella pagina.
+  function sbloccaAnalytics() {
+    if (typeof window.gtag !== 'function') return;
+    window.gtag('consent', 'update', {
+      ad_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted',
+      analytics_storage: 'granted'
+    });
+  }
 
   function caricaPixel() {
     if (window.fbq) return;
