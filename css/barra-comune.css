@@ -1,0 +1,63 @@
+/* css/barra-comune.css
+   Stile condiviso dei due pulsanti "Accedi" e "Iscriviti" presenti nella barra
+   in alto di tutte le pagine.
+
+   Perche' esiste: ogni pagina del sito ha la sua barra scritta dentro il file,
+   quindi senza questo foglio comune un cambio di colore andrebbe ripetuto a
+   mano su nove file, col rischio di dimenticarne uno.
+
+   Da usare cosi':
+     <a href="/login-impresa.html" class="ti-accedi">Accedi</a>
+     <a href="/#registrati" class="ti-iscriviti">Iscrivi la tua attivita</a>
+
+   Nota: qui c'e' solo lo stile, non l'HTML. La barra resta scritta in ogni
+   pagina di proposito: iniettarla via JavaScript farebbe lampeggiare il
+   contenuto al caricamento e i motori di ricerca vedrebbero una pagina
+   incompleta. */
+
+.ti-accedi,
+.ti-iscriviti {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  transition: background .15s, border-color .15s;
+}
+
+/* Chi e' gia' iscritto: azione secondaria, bordo senza riempimento */
+.ti-accedi {
+  color: #0066ff;
+  background: #ffffff;
+  border: 2px solid #0066ff;
+  margin-left: 20px;
+}
+.ti-accedi:hover {
+  background: #eaf2ff;
+}
+
+/* Chi deve ancora iscriversi: stesso verde del riquadro in homepage */
+.ti-iscriviti {
+  color: #ffffff;
+  background: #15803d;
+  border: 2px solid #15803d;
+  margin-left: 10px;
+}
+.ti-iscriviti:hover {
+  background: #116631;
+  border-color: #116631;
+}
+
+@media (max-width: 820px) {
+  .ti-accedi,
+  .ti-iscriviti {
+    font-size: 13px;
+    padding: 5px 10px;
+    margin-left: 8px;
+  }
+}
