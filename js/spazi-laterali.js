@@ -100,25 +100,39 @@
     });
   }
 
+  var ultimaCitta = null;
+
   function avvia() {
     crea();
-    // Alcune pagine (profilo-impresa) scoprono la citta' solo dopo aver
-    // caricato i dati: se non c'e' ancora, riprovo per qualche secondo.
-    if (citta()) { riempi(); return; }
-    var tentativi = 0;
-    var t = setInterval(function () {
-      if (citta()) { clearInterval(t); aggiornaTesti(); riempi(); }
-      else if (++tentativi > 20) clearInterval(t);   // ~5 secondi e mi fermo
-    }, 250);
+    // La citta' puo' arrivare dopo: profilo-impresa la sa dopo aver caricato
+    // i dati, i pannelli dopo il login, offerte-lavoro quando l'utente la
+    // scrive nel filtro. Quindi la tengo d'occhio e ricarico se cambia.
+    controlla();
+    setInterval(controlla, 800);
   }
 
-  // Rinfresca "Visibile a chi cerca a X" quando la citta' arriva in ritardo
+  function controlla() {
+    var c = citta();
+    if (c === ultimaCitta) return;
+    ultimaCitta = c;
+    aggiornaTesti();
+    if (c) riempi();
+  }
+
+  // Rinfresca "Visibile a chi cerca a X" e il link al form d'acquisto
   function aggiornaTesti() {
-    var c = citta(); if (!c) return;
-    var testo = 'Visibile a chi cerca a ' + c.charAt(0).toUpperCase() + c.slice(1);
+    var c = citta();
+    var testo = c
+      ? 'Visibile a chi cerca a ' + c.charAt(0).toUpperCase() + c.slice(1)
+      : 'Visibile a chi cerca nella tua zona';
     lista.forEach(function (sid) {
-      var a = document.querySelector('a.ti-spazio[data-spazio-id="' + sid + '"] small');
-      if (a) a.textContent = testo;
+      var a = document.querySelector('a.ti-spazio[data-spazio-id="' + sid + '"]');
+      if (!a) return;
+      var s = a.querySelector('small');
+      if (s) s.textContent = testo;
+      if (a.target !== '_blank') {
+        a.href = '/pubblicita' + (c ? '?citta=' + encodeURIComponent(c) : '');
+      }
     });
   }
 

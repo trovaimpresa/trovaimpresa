@@ -19,13 +19,10 @@
 
     // 2. Lista completa dei 18 spazi (per pre-compilazione link al form)
     const TUTTI_SPAZI = [
-      'hero-sx', 'hero-dx',
-      'imprese-sx', 'imprese-dx',
-      'pannello-sx', 'pannello-dx',
-      'piano-sx', 'piano-dx',
-      'inserzioni-sx', 'inserzioni-dx',
-      'subappalto-sx-1', 'subappalto-sx-2', 'subappalto-dx-1', 'subappalto-dx-2',
-      'profilo-sx-1', 'profilo-sx-2', 'profilo-dx-1', 'profilo-dx-2'
+      // Sulla homepage restano solo gli spazi hero: gli altri sono stati
+      // spostati sulle pagine che il listino indica (ricerca, profilo,
+      // pannelli, offerte di lavoro), gestiti da js/spazi-laterali.js
+      'hero-sx', 'hero-dx'
     ];
 
     aggiornaTestoCitta(citta);

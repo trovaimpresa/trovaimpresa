@@ -4839,6 +4839,15 @@ document.addEventListener('DOMContentLoaded', function () {
     .join('');
 });
 </script>
+<script>
+// La pubblicita' e' venduta per citta': qui non c'e' ?citta= nell'URL, quindi
+// passo agli spazi laterali la citta' dell'attivita' che ha fatto l'accesso.
+(function(){var n=0,t=setInterval(function(){
+  if(typeof impresaCorrente!=='undefined'&&impresaCorrente&&impresaCorrente.citta){
+    window.TI_CITTA=impresaCorrente.citta; clearInterval(t);
+  } else if(++n>40) clearInterval(t);
+},250);})();
+</script>
 <script src="/js/spazi-laterali.js" data-spazi="pannello-sx,pannello-dx"></script>
 </body>
 <script>
