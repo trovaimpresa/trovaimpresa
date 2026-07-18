@@ -801,6 +801,11 @@
   .nav-links{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
   .nav-a{ color:var(--ti-txt); text-decoration:none; font-size:14px; font-weight:600; padding:8px 12px; border-radius:8px; white-space:nowrap; }
   .nav-a:hover{ background:var(--ti-bg); color:var(--ti-ink); }
+  /* Pastiglie colorate: visibili, ma senza competere con Accedi e Iscriviti */
+  .nav-bandi{ background:#fef3c7; color:#92400e; }
+  .nav-bandi:hover{ background:#fde68a; color:#78350f; }
+  .nav-guide{ background:#ede9fe; color:#5b21b6; }
+  .nav-guide:hover{ background:#ddd6fe; color:#4c1d95; }
   /* Chi e' gia' iscritto entra ogni giorno: deve trovare l'accesso a colpo
      d'occhio, non nascosto tra i link di testo. */
   .nav-login{ display:inline-flex; align-items:center; gap:7px; color:var(--ti-blu); background:#fff; border:2px solid var(--ti-blu); text-decoration:none; font-size:14px; font-weight:700; padding:8px 15px; border-radius:8px; white-space:nowrap; }
@@ -975,8 +980,8 @@
     <nav class="navbar">
         <a href="/" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa" style="height:44px;width:auto;display:block;"></a>
         <div class="nav-links">
-          <a href="/bandi.html" class="nav-a">Bandi e fondi</a>
-          <a href="/blog.html" class="nav-a">Guide e costi</a>
+          <a href="/bandi.html" class="nav-a nav-bandi">Bandi e fondi</a>
+          <a href="/blog.html" class="nav-a nav-guide">Guide e costi</a>
           <a href="/prezzi.html" class="nav-a">Prezzi</a>
           <a href="/login-impresa.html" class="nav-login">Accedi al tuo pannello</a>
           <a href="#registrati" class="nav-cta">Iscrivi la tua attivit&agrave;</a>
@@ -1011,11 +1016,6 @@
             <div class="citta-attiva" id="citta-attiva">
                 <span>Stai cercando a <b id="citta-attiva-nome"></b></span>
                 <a href="index.html">cambia citt&agrave;</a>
-            </div>
-
-            <div class="hero-biz">
-                <span>Sei gi&agrave; iscritto?</span>
-                <a href="/login-impresa.html" class="hb-accedi">Accedi al tuo pannello</a>
             </div>
         </div>
     </section>
