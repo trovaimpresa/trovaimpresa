@@ -624,6 +624,9 @@ async function caricaProfilo(id){
     document.getElementById('profile-badges').innerHTML=b.join('');
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;
+    // La pubblicita' e' venduta per citta': qui non c'e' ?citta= nell'URL,
+    // quindi passiamo agli spazi laterali la citta' dell'impresa mostrata.
+    if(d.citta){ window.TI_CITTA = d.citta; }
     // ===== VISTA INFORMAZIONI UNIFICATA (solo campi compilati) =====
     const _esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     let _infoHasContent=false;
@@ -1152,5 +1155,6 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 
 <script src="/js/modal-fullscreen.js" defer></script>
+<script src="/js/spazi-laterali.js" data-spazi="profilo-sx-1,profilo-sx-2,profilo-dx-1,profilo-dx-2"></script>
 </body>
 </html>
