@@ -868,6 +868,22 @@
   .row b{ font-size:15.5px; font-weight:700; }
   .row small{ font-size:13.5px; color:#59687b; font-weight:600; }
 
+  /* Fascia iscrizione: presente ma senza competere col blocco della ricerca */
+  .banner-iscriviti{ background:linear-gradient(135deg,#fff6f1 0%,#ffece2 100%); border:1px solid #ffd0b8; border-left:6px solid #FF6B35; border-radius:0 16px 16px 0; padding:22px 26px; display:flex; align-items:center; justify-content:space-between; gap:22px; flex-wrap:wrap; }
+  .bi-k{ display:block; font-size:12px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:#c04a15; margin-bottom:5px; }
+  .banner-iscriviti h2{ font-size:19px; font-weight:800; color:var(--ti-ink); margin:0; letter-spacing:-.2px; }
+  .banner-iscriviti p{ font-size:14px; color:var(--ti-txt); margin:5px 0 0; font-weight:500; }
+  .bi-links{ display:flex; gap:8px; flex-wrap:wrap; }
+  .bi-links a{ background:#FF6B35; color:#fff; text-decoration:none; font-size:14px; font-weight:700; padding:11px 18px; border-radius:9px; white-space:nowrap; }
+  .bi-links a:hover{ background:#e04e18; }
+
+  /* Striscia servizi secondari: lavoro e subappalto, che parlano alle imprese */
+  .strip-servizi{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+  .strip-servizi a{ display:flex; flex-direction:column; gap:3px; background:#fff; border:1px solid var(--ti-bd); border-radius:12px; padding:16px 18px; text-decoration:none; }
+  .strip-servizi a:hover{ border-color:var(--ti-blu); background:#f7faff; }
+  .strip-servizi b{ font-size:15px; font-weight:700; color:var(--ti-ink); }
+  .strip-servizi span{ font-size:13.5px; font-weight:600; color:var(--ti-blu); }
+
   .home-rail{ min-width:0; }
   .rail-sticky{ position:sticky; top:88px; display:flex; flex-direction:column; gap:14px; }
   .rail-slot{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; height:210px; background:#fff; border:1px solid var(--ti-bd); border-radius:12px; text-decoration:none; text-align:center; padding:14px; overflow:hidden; }
@@ -900,6 +916,9 @@
     .citta-box{ padding:16px; }
     .hero-logo{ max-width:210px; }
     .hrow2{ grid-template-columns:minmax(0,1fr); }
+    .strip-servizi{ grid-template-columns:minmax(0,1fr); }
+    .banner-iscriviti{ flex-direction:column; align-items:flex-start; }
+    .bi-links a{ padding:11px 14px; font-size:13px; }
     .hcard{ padding:18px 16px 20px; }
     .hcard-grid.c4{ grid-template-columns:repeat(2,minmax(0,1fr)); }
   }
@@ -1013,13 +1032,17 @@
           </div>
         </section>
 
-        <section class="hcard" id="registrati" style="--hc:#FF6B35;--hb:#fff6f1;">
-          <div class="hcard-h"><span class="hcard-k">Sei un'impresa o un artigiano?</span><h2>Iscriviti e ricevi richieste</h2><p class="hcard-s">Crea il tuo profilo gratuito e ricevi le richieste dei clienti della tua zona. Scegli il tipo di attivit&agrave;:</p></div>
-          <div class="hcard-grid c4">
-            <a href="registrazione-artigiano.html" class="tile" style="--tc:#0066ff;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
-            <a href="registrazione-impresa.html" class="tile" style="--tc:#FF6B35;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa</a>
-            <a href="registrazione-negozio.html" class="tile" style="--tc:#c0392b;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg>Negozio edile</a>
-            <a href="registrazione-professionista.html" class="tile" style="--tc:#6c3483;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6c3483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Professionista</a>
+        <section class="banner-iscriviti" id="registrati">
+          <div class="bi-testo">
+            <span class="bi-k">Sei un'impresa o un artigiano?</span>
+            <h2>Iscriviti e ricevi richieste dai clienti della tua zona</h2>
+            <p>Gratis, nessun vincolo, ti cancelli quando vuoi.</p>
+          </div>
+          <div class="bi-links">
+            <a href="registrazione-artigiano.html">Artigiano</a>
+            <a href="registrazione-impresa.html">Impresa</a>
+            <a href="registrazione-negozio.html">Negozio edile</a>
+            <a href="registrazione-professionista.html">Professionista</a>
           </div>
         </section>
 
@@ -1043,25 +1066,10 @@
           </section>
         </div>
 
-        <div class="hrow2">
-          <section class="hcard" style="--hc:#1f446e;--hb:#f2f6fb;">
-            <div class="hcard-h"><span class="hcard-k">Bacheca inserzioni</span><h2>Lavoro</h2><p class="hcard-s">Pubblica un’offerta di lavoro o invia la tua candidatura</p></div>
-            <div class="hcard-list">
-              <a href="registrazione-candidato.html" class="row" style="--tc:#2980b9;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><span><b>Registrati · Invia CV</b><small>Per candidati</small></span></a>
-              <a href="ricerca-offerte.html" class="row" style="--tc:#1a5276;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a5276" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span><b>Cerca offerte</b><small>Per candidati</small></span></a>
-              <a href="ricerca-candidati.html" class="row" style="--tc:#1656a0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1656a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span><b>Cerca candidati</b><small>Per imprese</small></span></a>
-              <a href="offerte-registrazione.html" class="row" style="--tc:#e67e22;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span><b>Pubblica offerta</b><small>Per imprese</small></span></a>
-            </div>
-          </section>
-
-          <section class="hcard" style="--hc:#d4a017;--hb:#fffbef;">
-            <div class="hcard-h"><span class="hcard-k">Subappalto</span><h2>Imprese cercano imprese</h2><p class="hcard-s">Trova subappaltatori o offri la tua disponibilità</p></div>
-            <div class="hcard-list">
-              <a href="subappalto-cerca.html" class="row" style="--tc:#d4a017;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span><b>Cerco subappaltatori</b><small>Affida una lavorazione</small></span></a>
-              <a href="subappalto-offre.html" class="row" style="--tc:#0066ff;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg><span><b>Sono subappaltatore</b><small>Offri la tua disponibilità</small></span></a>
-            </div>
-          </section>
-        </div>
+        <section class="strip-servizi">
+          <a href="offerte-lavoro.html"><b>Cerchi lavoro nell'edilizia?</b><span>Offerte e candidature &rarr;</span></a>
+          <a href="subappalto.html"><b>Sei un'impresa e cerchi subappalti?</b><span>Cerca o offri disponibilit&agrave; &rarr;</span></a>
+        </section>
 
       </main>
 
