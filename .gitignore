@@ -14,5 +14,11 @@ www/
 # --- File di appunti / screenshot ---
 mintty.*.png
 
+# --- Copie di sicurezza: restano sul PC, non vanno pubblicate.
+#     Online sarebbero una seconda homepage identica, e Google la
+#     indicizzerebbe come contenuto duplicato. ---
+*-backup.html
+*.bak
+
 # --- File di lock (facoltativo: si rigenera da solo) ---
 # package-lock.json
