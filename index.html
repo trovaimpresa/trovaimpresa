@@ -833,7 +833,7 @@
   .hero-pub.sx{ left:40px; }
   .hero-pub.dx{ right:40px; }
 
-  .home-layout{ max-width:1400px; margin:0 auto; padding:36px 32px 56px; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:28px; align-items:start; background:var(--ti-bg); }
+  .home-layout{ max-width:1620px; margin:0 auto; padding:36px 32px 56px; display:grid; grid-template-columns:290px minmax(0,1fr) 290px; gap:28px; align-items:start; background:var(--ti-bg); }
   .home-main{ display:flex; flex-direction:column; gap:20px; min-width:0; }
   .hrow2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
 
@@ -864,8 +864,13 @@
   .rail-cta{ display:block; text-align:center; font-size:13px; font-weight:700; color:var(--ti-blu); text-decoration:none; padding:10px; }
   .rail-cta:hover{ text-decoration:underline; }
 
+  /* Schermi medi: resta solo la colonna destra, il contenuto torna centrato. */
+  @media (max-width:1450px){
+    .home-layout{ grid-template-columns:minmax(0,1fr) 290px; max-width:1240px; }
+    .rail-sx{ display:none; }
+  }
   @media (max-width:1100px){
-    .home-layout{ grid-template-columns:minmax(0,1fr); padding:28px 20px 44px; }
+    .home-layout{ grid-template-columns:minmax(0,1fr); max-width:1000px; padding:28px 20px 44px; }
     .home-rail{ display:none; }
     .hero-pub{ display:none !important; }
   }
@@ -974,6 +979,20 @@
 
     <!-- CONTENUTO + COLONNA PUBBLICITARIA -->
     <div class="home-layout">
+      <aside class="home-rail rail-sx" aria-label="Spazi pubblicitari">
+        <div class="rail-sticky">
+          <a href="/pubblicita" data-spazio-id="imprese-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="pannello-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="piano-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="inserzioni-sx" class="pub-link rail-slot" data-pub-extra="1"></a>
+          <a href="/pubblicita" data-spazio-id="subappalto-sx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
+          <a href="/pubblicita" data-spazio-id="subappalto-sx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
+          <a href="/pubblicita" data-spazio-id="profilo-sx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
+          <a href="/pubblicita" data-spazio-id="profilo-sx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
+          <a href="/pubblicita" class="rail-cta">Promuovi la tua attività →</a>
+        </div>
+      </aside>
+
       <main class="home-main">
 
         <section class="hcard" id="categorie" style="--hc:#0066ff;--hb:#f0f5ff;">
@@ -1038,22 +1057,14 @@
 
       </main>
 
-      <aside class="home-rail" aria-label="Spazi pubblicitari">
+      <aside class="home-rail rail-dx" aria-label="Spazi pubblicitari">
         <div class="rail-sticky">
-          <a href="/pubblicita" data-spazio-id="imprese-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
           <a href="/pubblicita" data-spazio-id="imprese-dx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
-          <a href="/pubblicita" data-spazio-id="pannello-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
           <a href="/pubblicita" data-spazio-id="pannello-dx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
-          <a href="/pubblicita" data-spazio-id="piano-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
           <a href="/pubblicita" data-spazio-id="piano-dx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
-          <a href="/pubblicita" data-spazio-id="inserzioni-sx" class="pub-link rail-slot" data-pub-extra="1"></a>
           <a href="/pubblicita" data-spazio-id="inserzioni-dx" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="subappalto-sx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="subappalto-sx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
           <a href="/pubblicita" data-spazio-id="subappalto-dx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
           <a href="/pubblicita" data-spazio-id="subappalto-dx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="profilo-sx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="profilo-sx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
           <a href="/pubblicita" data-spazio-id="profilo-dx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
           <a href="/pubblicita" data-spazio-id="profilo-dx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
           <a href="/pubblicita" class="rail-cta">Promuovi la tua attività →</a>
