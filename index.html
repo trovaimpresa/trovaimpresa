@@ -836,18 +836,18 @@
   .home-main{ display:flex; flex-direction:column; gap:20px; min-width:0; }
   .hrow2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
 
-  .hcard{ background:#fff; border:1px solid var(--ti-bd); border-radius:16px; padding:22px 24px 24px; }
-  .hcard-h{ margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid var(--ti-bd); }
-  .hcard-k{ display:inline-block; font-size:12px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:var(--ti-blu); background:#eaf2ff; padding:4px 10px; border-radius:6px; margin-bottom:9px; }
+  .hcard{ background:linear-gradient(135deg,#ffffff 0%, var(--hb,#ffffff) 100%); border:1px solid var(--ti-bd); border-top:5px solid var(--hc,var(--ti-blu)); border-radius:16px; padding:22px 24px 24px; box-shadow:0 8px 24px rgba(10,42,77,.09); }
+  .hcard-h{ margin-bottom:18px; padding-bottom:14px; border-bottom:2px solid color-mix(in srgb, var(--hc,var(--ti-blu)) 18%, #ffffff); }
+  .hcard-k{ display:inline-block; font-size:12px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:#fff; background:var(--hc,var(--ti-blu)); padding:5px 11px; border-radius:6px; margin-bottom:9px; }
   .hcard-h h2{ font-size:23px; font-weight:800; color:var(--ti-ink); margin:0; letter-spacing:-.3px; line-height:1.25; }
   .hcard-s{ font-size:15px; color:var(--ti-txt); margin:7px 0 0; line-height:1.45; }
   .hcard-grid{ display:grid; gap:12px; }
   .hcard-grid.c4{ grid-template-columns:repeat(4,minmax(0,1fr)); }
-  .tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:22px 10px; background:#fff; border:1px solid var(--ti-bd); border-top:3px solid var(--tc,var(--ti-blu)); border-radius:12px; text-decoration:none; color:var(--ti-ink); font-weight:700; font-size:14px; text-align:center; transition:box-shadow .15s, transform .15s; }
-  .tile:hover{ box-shadow:0 8px 20px rgba(10,42,77,.10); transform:translateY(-2px); }
+  .tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:22px 10px; background:linear-gradient(135deg,#ffffff 0%, color-mix(in srgb, var(--tc,var(--ti-blu)) 9%, #ffffff) 100%); border:1px solid color-mix(in srgb, var(--tc,var(--ti-blu)) 22%, #ffffff); border-top:4px solid var(--tc,var(--ti-blu)); border-radius:12px; text-decoration:none; color:var(--ti-ink); font-weight:700; font-size:15px; text-align:center; box-shadow:0 4px 14px rgba(10,42,77,.07); transition:box-shadow .25s cubic-bezier(.34,1.56,.64,1), transform .25s cubic-bezier(.34,1.56,.64,1); }
+  .tile:hover{ box-shadow:0 12px 28px rgba(10,42,77,.16); transform:translateY(-5px); }
   .hcard-list{ display:flex; flex-direction:column; gap:9px; }
-  .row{ display:flex; align-items:center; gap:13px; padding:13px 15px; background:#fff; border:1px solid var(--ti-bd); border-left:3px solid var(--tc,var(--ti-blu)); border-radius:0 10px 10px 0; text-decoration:none; color:var(--ti-ink); transition:background .15s; }
-  .row:hover{ background:var(--ti-bg); }
+  .row{ display:flex; align-items:center; gap:13px; padding:14px 16px; background:linear-gradient(135deg,#ffffff 0%, color-mix(in srgb, var(--tc,var(--ti-blu)) 8%, #ffffff) 100%); border:1px solid color-mix(in srgb, var(--tc,var(--ti-blu)) 20%, #ffffff); border-left:5px solid var(--tc,var(--ti-blu)); border-radius:0 10px 10px 0; text-decoration:none; color:var(--ti-ink); box-shadow:0 3px 10px rgba(10,42,77,.05); transition:transform .2s, box-shadow .2s; }
+  .row:hover{ transform:translateX(4px); box-shadow:0 8px 20px rgba(10,42,77,.12); }
   .row svg{ flex-shrink:0; }
   .row span{ display:flex; flex-direction:column; gap:2px; min-width:0; }
   .row b{ font-size:15.5px; font-weight:700; }
@@ -975,7 +975,7 @@
     <div class="home-layout">
       <main class="home-main">
 
-        <section class="hcard" id="categorie">
+        <section class="hcard" id="categorie" style="--hc:#0066ff;--hb:#f0f5ff;">
           <div class="hcard-h"><span class="hcard-k">Trova un'impresa</span><h2>Scegli la categoria</h2><p class="hcard-s">Scegli chi ti serve e trova i migliori nella tua zona</p></div>
           <div class="hcard-grid c4">
             <a href="cerca-artigiani.html" class="tile" style="--tc:#0066ff;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
@@ -985,7 +985,7 @@
           </div>
         </section>
 
-        <section class="hcard" id="registrati">
+        <section class="hcard" id="registrati" style="--hc:#FF6B35;--hb:#fff6f1;">
           <div class="hcard-h"><span class="hcard-k">Registrati</span><h2>Scegli il tuo profilo</h2><p class="hcard-s">Iscriviti come artigiano, impresa, negozio o professionista</p></div>
           <div class="hcard-grid c4">
             <a href="registrazione-artigiano.html" class="tile" style="--tc:#0066ff;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
@@ -996,7 +996,7 @@
         </section>
 
         <div class="hrow2">
-          <section class="hcard">
+          <section class="hcard" style="--hc:#6c3483;--hb:#faf5ff;">
             <div class="hcard-h"><span class="hcard-k">Piani e prezzi</span><h2>Scegli il tuo piano</h2><p class="hcard-s">Free, Premium o spazio pubblicitario per la tua attività</p></div>
             <div class="hcard-list">
               <a href="info-free.html" class="row" style="--tc:#0066ff;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span><b>Piano Free</b><small>Iscrizione gratuita</small></span></a>
@@ -1005,7 +1005,7 @@
             </div>
           </section>
 
-          <section class="hcard">
+          <section class="hcard" style="--hc:#0288d1;--hb:#f0faff;">
             <div class="hcard-h"><span class="hcard-k">Area riservata</span><h2>Il tuo pannello</h2><p class="hcard-s">Entra nel tuo account o gestisci la tua iscrizione</p></div>
             <div class="hcard-list">
               <a href="login-impresa.html" class="row" style="--tc:#0066ff;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>Accedi</b><small>Sei già registrato?</small></span></a>
@@ -1016,7 +1016,7 @@
         </div>
 
         <div class="hrow2">
-          <section class="hcard">
+          <section class="hcard" style="--hc:#1f446e;--hb:#f2f6fb;">
             <div class="hcard-h"><span class="hcard-k">Bacheca inserzioni</span><h2>Lavoro</h2><p class="hcard-s">Pubblica un’offerta di lavoro o invia la tua candidatura</p></div>
             <div class="hcard-list">
               <a href="registrazione-candidato.html" class="row" style="--tc:#2980b9;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><span><b>Registrati · Invia CV</b><small>Per candidati</small></span></a>
@@ -1026,7 +1026,7 @@
             </div>
           </section>
 
-          <section class="hcard">
+          <section class="hcard" style="--hc:#d4a017;--hb:#fffbef;">
             <div class="hcard-h"><span class="hcard-k">Subappalto</span><h2>Imprese cercano imprese</h2><p class="hcard-s">Trova subappaltatori o offri la tua disponibilità</p></div>
             <div class="hcard-list">
               <a href="subappalto-cerca.html" class="row" style="--tc:#d4a017;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span><b>Cerco subappaltatori</b><small>Affida una lavorazione</small></span></a>
