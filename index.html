@@ -823,6 +823,11 @@
   .sb-go:hover{ background:#0052cc; }
   .sb-err{ display:none; color:#c0392b; font-weight:600; font-size:14px; margin:10px 0 0; }
 
+  .sb-chips{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; align-items:center; margin:16px 0 0; }
+  .sb-chips-l{ font-size:14px; color:var(--ti-txt); font-weight:600; }
+  .sb-chips button{ font-family:inherit; font-size:14px; font-weight:600; color:var(--ti-ink); background:#fff; border:1px solid var(--ti-bd); border-radius:999px; padding:8px 15px; cursor:pointer; transition:border-color .15s, background .15s; }
+  .sb-chips button:hover{ background:#eaf2ff; border-color:var(--ti-blu); color:var(--ti-blu); }
+
   .hero-trust{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin:20px 0 0; color:#6b7a8d; font-size:13px; font-weight:600; }
   .hero-trust span{ display:inline-flex; align-items:center; gap:6px; }
   .hero-biz{ margin:26px auto 0; padding-top:18px; border-top:1px solid var(--ti-bd); display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; font-size:15px; color:var(--ti-txt); }
@@ -945,14 +950,37 @@
 
             <div class="search-bar">
                 <div class="sb-field sb-cat">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8699" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-                    <select id="sb-categoria" aria-label="Cosa cerchi">
-                        <option value="cerca-imprese.html">Impresa edile</option>
-                        <option value="cerca-artigiani.html">Artigiano</option>
-                        <option value="cerca-negozi.html">Negozio edile</option>
-                        <option value="cerca-professionisti.html">Professionista</option>
-                    </select>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8699" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input id="sb-lavoro" type="text" list="lavori-comuni" placeholder="Di cosa hai bisogno? es. mi piove dal tetto" aria-label="Di cosa hai bisogno" onkeydown="if(event.key==='Enter')avviaRicerca()">
                 </div>
+                <datalist id="lavori-comuni">
+                    <option value="Rifare il bagno"></option>
+                    <option value="Ristrutturare casa"></option>
+                    <option value="Mi piove dal tetto"></option>
+                    <option value="Imbianchino"></option>
+                    <option value="Idraulico"></option>
+                    <option value="Elettricista"></option>
+                    <option value="Cambiare le finestre"></option>
+                    <option value="Posa pavimento"></option>
+                    <option value="Caldaia"></option>
+                    <option value="Condizionatore"></option>
+                    <option value="Cartongesso"></option>
+                    <option value="Fabbro cancello"></option>
+                    <option value="Giardiniere"></option>
+                    <option value="Trasloco"></option>
+                    <option value="Cappotto termico"></option>
+                    <option value="Fotovoltaico"></option>
+                    <option value="Zanzariere"></option>
+                    <option value="Spurgo fossa biologica"></option>
+                    <option value="Muratore"></option>
+                    <option value="Costruire casa nuova"></option>
+                    <option value="Rifacimento facciata"></option>
+                    <option value="Geometra pratiche catasto"></option>
+                    <option value="Architetto"></option>
+                    <option value="Certificazione energetica APE"></option>
+                    <option value="Ferramenta"></option>
+                    <option value="Noleggio attrezzature"></option>
+                </datalist>
                 <div class="sb-field sb-citta">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8699" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     <input id="sb-citta" type="text" placeholder="Città — es. Roma" autocomplete="address-level2" onkeydown="if(event.key==='Enter')avviaRicerca()">
@@ -963,6 +991,16 @@
                 <button type="button" class="sb-go" onclick="avviaRicerca()">Cerca</button>
             </div>
             <p id="sb-err" class="sb-err">Inserisci una città per continuare</p>
+
+            <div class="sb-chips">
+                <span class="sb-chips-l">I più richiesti:</span>
+                <button type="button" onclick="cercaLavoro('Rifare il bagno')">Rifare il bagno</button>
+                <button type="button" onclick="cercaLavoro('Imbianchino')">Imbianchino</button>
+                <button type="button" onclick="cercaLavoro('Mi piove dal tetto')">Tetto che perde</button>
+                <button type="button" onclick="cercaLavoro('Elettricista')">Elettricista</button>
+                <button type="button" onclick="cercaLavoro('Idraulico')">Idraulico</button>
+                <button type="button" onclick="cercaLavoro('Ristrutturare casa')">Ristrutturare casa</button>
+            </div>
 
             <div class="hero-trust">
                 <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> Profili verificati</span>
@@ -1072,14 +1110,25 @@
       </aside>
     </div>
 
+    <script src="/js/ricerca-problema.js"></script>
     <script>
       function avviaRicerca(){
-        var cat = document.getElementById('sb-categoria').value;
-        var citta = (document.getElementById('sb-citta').value || '').trim();
+        var lavoro = (document.getElementById('sb-lavoro').value || '').trim();
+        var citta  = (document.getElementById('sb-citta').value  || '').trim();
         var err = document.getElementById('sb-err');
-        if(!citta){ err.style.display='block'; document.getElementById('sb-citta').focus(); return; }
+        if(!citta){
+          err.textContent = 'Scrivi la tua città per vedere chi lavora nella tua zona';
+          err.style.display='block';
+          document.getElementById('sb-citta').focus();
+          return;
+        }
         err.style.display='none';
-        window.location.href = cat + '?citta=' + encodeURIComponent(citta);
+        window.location.href = window.RicercaProblema.costruisciUrl(lavoro, citta);
+      }
+      // Bottoni dei lavori piu richiesti: riempiono il campo e cercano subito.
+      function cercaLavoro(testo){
+        document.getElementById('sb-lavoro').value = testo;
+        avviaRicerca();
       }
       function localizzami(){
         if(!navigator.geolocation){ alert('Impossibile rilevare la posizione, scrivi la città a mano'); return; }
