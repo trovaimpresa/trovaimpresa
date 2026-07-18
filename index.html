@@ -855,7 +855,10 @@
   .ha-subappalto{ background:#ffedd5; border-color:#fdba74; color:#9a3412; }
   .ha-subappalto:hover{ background:#fed7aa; border-color:#fb923c; }
 
-  .hero-pub{ position:absolute; top:50%; transform:translateY(-50%); width:calc(50% - 360px); max-width:300px; height:250px; border:1px solid var(--ti-bd); background:#fff; border-radius:12px; display:flex; align-items:center; justify-content:center; text-align:center; color:#9aa7b8; font-weight:600; font-size:14px; text-decoration:none; z-index:2; }
+  /* Stesse proporzioni dei file hero-sx.svg e hero-dx.svg (400x260): se il
+     riquadro ha una forma diversa, l'immagine si centra e lascia le bande
+     vuote sopra e sotto invece di riempirlo. */
+  .hero-pub{ position:absolute; top:50%; transform:translateY(-50%); width:calc(50% - 360px); max-width:300px; aspect-ratio:400/260; height:auto; border:1px solid var(--ti-bd); background:#fff; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; text-align:center; color:#9aa7b8; font-weight:600; font-size:14px; text-decoration:none; z-index:2; }
   .hero-pub.sx{ left:40px; }
   .hero-pub.dx{ right:40px; }
 
@@ -912,8 +915,22 @@
   .strip-servizi span{ font-size:13.5px; font-weight:600; color:var(--ti-blu); }
 
   .home-rail{ min-width:0; }
-  .rail-sticky{ position:sticky; top:88px; display:flex; flex-direction:column; gap:14px; }
-  .rail-slot{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; height:210px; background:#fff; border:1px solid var(--ti-bd); border-radius:12px; text-decoration:none; text-align:center; padding:14px; overflow:hidden; }
+  /* La colonna riproduce il listino: piu' in alto = piu' grande = costa di piu'.
+     Niente sticky, altrimenti anche l'ultimo riquadro resterebbe sempre in vista
+     e la differenza di prezzo tra prima e ultima posizione non avrebbe senso.
+     Proporzioni 400x260 su tutti, come i file degli inserzionisti. */
+  .rail-sticky{ position:static; display:flex; flex-direction:column; gap:12px; }
+  .rail-slot{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:100%; background:#fff; border:1px solid var(--ti-bd); border-radius:12px; text-decoration:none; text-align:center; padding:12px; overflow:hidden; }
+
+  /* Scala originale delle altezze: piu' in alto = piu' grande = costa di piu'.
+     Sono le stesse misure di prima delle modifiche di oggi. */
+  .rail-slot[data-spazio-id^="imprese"]    { height:300px; }  /* 12 euro */
+  .rail-slot[data-spazio-id^="pannello"]   { height:270px; }  /* 10 euro */
+  .rail-slot[data-spazio-id^="piano"]      { height:250px; }  /*  9 euro */
+  .rail-slot[data-spazio-id^="inserzioni"] { height:230px; }  /*  8 euro */
+  .rail-slot[data-spazio-id^="subappalto"] { height:220px; }  /*  6 euro */
+  .rail-slot[data-spazio-id^="profilo"]    { height:190px; }  /*  5 euro */
+
   .rail-slot b{ font-size:14px; font-weight:700; color:var(--ti-ink); }
   .rail-slot small{ font-size:12px; color:#8b98a9; }
   .rail-slot .rs-i{ width:26px; height:26px; border-radius:6px; background:var(--ti-bg); display:block; }
@@ -1047,13 +1064,13 @@
       <aside class="home-rail rail-sx" aria-label="Spazi pubblicitari">
         <div class="rail-sticky">
           <a href="/pubblicita" data-spazio-id="imprese-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
-          <a href="/pubblicita" data-spazio-id="pannello-sx" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="piano-sx" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="inserzioni-sx" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="subappalto-sx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="subappalto-sx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="profilo-sx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="profilo-sx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
+          <a href="/pubblicita" data-spazio-id="pannello-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="piano-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="inserzioni-sx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="subappalto-sx-1" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="subappalto-sx-2" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="profilo-sx-1" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="profilo-sx-2" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
           <a href="/pubblicita" class="rail-cta">Promuovi la tua attività →</a>
         </div>
       </aside>
@@ -1085,13 +1102,13 @@
       <aside class="home-rail rail-dx" aria-label="Spazi pubblicitari">
         <div class="rail-sticky">
           <a href="/pubblicita" data-spazio-id="imprese-dx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
-          <a href="/pubblicita" data-spazio-id="pannello-dx" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="piano-dx" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="inserzioni-dx" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="subappalto-dx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="subappalto-dx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="profilo-dx-1" class="pub-link rail-slot" data-pub-extra="1"></a>
-          <a href="/pubblicita" data-spazio-id="profilo-dx-2" class="pub-link rail-slot" data-pub-extra="1"></a>
+          <a href="/pubblicita" data-spazio-id="pannello-dx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="piano-dx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="inserzioni-dx" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="subappalto-dx-1" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="subappalto-dx-2" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="profilo-dx-1" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
+          <a href="/pubblicita" data-spazio-id="profilo-dx-2" class="pub-link rail-slot"><span class="rs-i"></span><b>Il tuo annuncio qui</b><small class="rs-c">Visibile a chi cerca nella tua zona</small></a>
           <a href="/pubblicita" class="rail-cta">Promuovi la tua attività →</a>
         </div>
       </aside>
