@@ -102,6 +102,22 @@
       .sidebar { display: none; }
       .results-col { padding: 16px; }
       .results-grid { grid-template-columns: 1fr 1fr; }
+
+      /* La barra blu era un flex con il titolo a 2rem e white-space:nowrap:
+         su telefono il titolo si prendeva tutta la larghezza e spingeva il
+         bottone "Cerca" fuori dallo schermo. Qui va in colonna. */
+      .top-bar { flex-direction: column; align-items: stretch; padding: 14px 16px; gap: 10px; }
+      .top-bar h1 { font-size: 1.3rem; white-space: normal; text-align: center; }
+      .top-search { gap: 8px; }
+      /* 16px sul campo evita che iPhone ingrandisca la pagina al tocco */
+      .top-search input { font-size: 16px; padding: 12px 14px; min-width: 0; }
+      .btn-cerca { padding: 12px 18px; font-size: 15px; white-space: nowrap; }
+      .btn-loc { padding: 12px 14px; font-size: 15px; }
+
+      /* Anche l'intestazione con logo e link andava stretta */
+      header { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+      header nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+      header nav a { margin-left: 0; font-size: 14px; }
     }
     #mappa-risultati{height:420px;border-radius:14px;overflow:hidden;margin-top:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.1);}
   </style>
