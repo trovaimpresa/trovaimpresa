@@ -851,6 +851,12 @@
   .hcard-grid.c4{ grid-template-columns:repeat(4,minmax(0,1fr)); }
   .tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:22px 10px; background:linear-gradient(135deg,#ffffff 0%, color-mix(in srgb, var(--tc,var(--ti-blu)) 9%, #ffffff) 100%); border:1px solid color-mix(in srgb, var(--tc,var(--ti-blu)) 22%, #ffffff); border-top:4px solid var(--tc,var(--ti-blu)); border-radius:12px; text-decoration:none; color:var(--ti-ink); font-weight:700; font-size:15px; text-align:center; box-shadow:0 4px 14px rgba(10,42,77,.07); transition:box-shadow .25s cubic-bezier(.34,1.56,.64,1), transform .25s cubic-bezier(.34,1.56,.64,1); }
   .tile:hover{ box-shadow:0 12px 28px rgba(10,42,77,.16); transform:translateY(-5px); }
+  .tile-wrap{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .tile-wrap .tile{ flex:1; }
+  .tile-sel{ width:100%; font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ti-txt); background:#fff; border:1px solid color-mix(in srgb, var(--tc,var(--ti-blu)) 30%, #ffffff); border-radius:9px; padding:9px 10px; cursor:pointer; }
+  .tile-sel:hover{ border-color:var(--tc,var(--ti-blu)); }
+  .tile-sel:focus{ outline:none; border-color:var(--tc,var(--ti-blu)); box-shadow:0 0 0 3px color-mix(in srgb, var(--tc,var(--ti-blu)) 18%, transparent); }
+
   .hcard-list{ display:flex; flex-direction:column; gap:9px; }
   .row{ display:flex; align-items:center; gap:13px; padding:14px 16px; background:linear-gradient(135deg,#ffffff 0%, color-mix(in srgb, var(--tc,var(--ti-blu)) 8%, #ffffff) 100%); border:1px solid color-mix(in srgb, var(--tc,var(--ti-blu)) 20%, #ffffff); border-left:5px solid var(--tc,var(--ti-blu)); border-radius:0 10px 10px 0; text-decoration:none; color:var(--ti-ink); box-shadow:0 3px 10px rgba(10,42,77,.05); transition:transform .2s, box-shadow .2s; }
   .row:hover{ transform:translateX(4px); box-shadow:0 8px 20px rgba(10,42,77,.12); }
@@ -896,7 +902,6 @@
 </style>
 </head>
 <body>
-
 
 <!-- TOP BANNER -->
 <style>
@@ -951,36 +956,9 @@
             <div class="search-bar">
                 <div class="sb-field sb-cat">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8699" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input id="sb-lavoro" type="text" list="lavori-comuni" placeholder="Di cosa hai bisogno? es. mi piove dal tetto" aria-label="Di cosa hai bisogno" onkeydown="if(event.key==='Enter')avviaRicerca()">
+                    <select id="sb-lavoro" aria-label="Di cosa hai bisogno"><option value="">Di cosa hai bisogno?</option></select>
                 </div>
-                <datalist id="lavori-comuni">
-                    <option value="Rifare il bagno"></option>
-                    <option value="Ristrutturare casa"></option>
-                    <option value="Mi piove dal tetto"></option>
-                    <option value="Imbianchino"></option>
-                    <option value="Idraulico"></option>
-                    <option value="Elettricista"></option>
-                    <option value="Cambiare le finestre"></option>
-                    <option value="Posa pavimento"></option>
-                    <option value="Caldaia"></option>
-                    <option value="Condizionatore"></option>
-                    <option value="Cartongesso"></option>
-                    <option value="Fabbro cancello"></option>
-                    <option value="Giardiniere"></option>
-                    <option value="Trasloco"></option>
-                    <option value="Cappotto termico"></option>
-                    <option value="Fotovoltaico"></option>
-                    <option value="Zanzariere"></option>
-                    <option value="Spurgo fossa biologica"></option>
-                    <option value="Muratore"></option>
-                    <option value="Costruire casa nuova"></option>
-                    <option value="Rifacimento facciata"></option>
-                    <option value="Geometra pratiche catasto"></option>
-                    <option value="Architetto"></option>
-                    <option value="Certificazione energetica APE"></option>
-                    <option value="Ferramenta"></option>
-                    <option value="Noleggio attrezzature"></option>
-                </datalist>
+                
                 <div class="sb-field sb-citta">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8699" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     <input id="sb-citta" type="text" placeholder="Città — es. Roma" autocomplete="address-level2" onkeydown="if(event.key==='Enter')avviaRicerca()">
@@ -1036,10 +1014,10 @@
         <section class="hcard" id="categorie" style="--hc:#0066ff;--hb:#f0f5ff;">
           <div class="hcard-h"><span class="hcard-k">Trova un'impresa</span><h2>Scegli la categoria</h2><p class="hcard-s">Scegli chi ti serve e trova i migliori nella tua zona</p></div>
           <div class="hcard-grid c4">
-            <a href="cerca-artigiani.html" class="tile" style="--tc:#0066ff;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
-            <a href="cerca-imprese.html" class="tile" style="--tc:#FF6B35;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa edile</a>
-            <a href="cerca-negozi.html" class="tile" style="--tc:#c0392b;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg>Negozio edile</a>
-            <a href="cerca-professionisti.html" class="tile" style="--tc:#6c3483;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6c3483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Professionista</a>
+            <div class="tile-wrap" style="--tc:#0066ff;"><a href="cerca-artigiani.html" class="tile"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a><select class="tile-sel" data-cat="artigiano" aria-label="Mestieri di questa categoria"></select></div>
+            <div class="tile-wrap" style="--tc:#FF6B35;"><a href="cerca-imprese.html" class="tile"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa edile</a><select class="tile-sel" data-cat="impresa" aria-label="Mestieri di questa categoria"></select></div>
+            <div class="tile-wrap" style="--tc:#c0392b;"><a href="cerca-negozi.html" class="tile"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><rect x="5" y="14" width="14" height="8" rx="1"/></svg>Negozio edile</a><select class="tile-sel" data-cat="negozio" aria-label="Mestieri di questa categoria"></select></div>
+            <div class="tile-wrap" style="--tc:#6c3483;"><a href="cerca-professionisti.html" class="tile"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6c3483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Professionista</a><select class="tile-sel" data-cat="professionista" aria-label="Mestieri di questa categoria"></select></div>
           </div>
         </section>
 
@@ -1112,9 +1090,24 @@
 
     <script src="/js/ricerca-problema.js"></script>
     <script>
+      // Riempie la tendina dei lavori, raggruppati per bisogno.
+      window.RicercaProblema.riempiTendina(document.getElementById('sb-lavoro'));
+
+      // Tendine informative sotto le 4 card: mostrano i mestieri di ogni categoria.
+      // Scegliendone uno si va ai risultati di quel mestiere, portandosi dietro
+      // la citta' se il cliente l'ha gia' scritta nella barra in alto.
+      document.querySelectorAll('.tile-sel').forEach(function(sel){
+        window.RicercaProblema.riempiTendinaCategoria(sel, sel.dataset.cat);
+        sel.addEventListener('change', function(){
+          if(!this.value) return;
+          var citta = (document.getElementById('sb-citta').value || '').trim();
+          window.location.href = window.RicercaProblema.urlDaTendina(this.value, citta);
+        });
+      });
+
       function avviaRicerca(){
-        var lavoro = (document.getElementById('sb-lavoro').value || '').trim();
-        var citta  = (document.getElementById('sb-citta').value  || '').trim();
+        var lavoro = document.getElementById('sb-lavoro').value;
+        var citta  = (document.getElementById('sb-citta').value || '').trim();
         var err = document.getElementById('sb-err');
         if(!citta){
           err.textContent = 'Scrivi la tua città per vedere chi lavora nella tua zona';
@@ -1123,11 +1116,18 @@
           return;
         }
         err.style.display='none';
-        window.location.href = window.RicercaProblema.costruisciUrl(lavoro, citta);
+        window.location.href = window.RicercaProblema.urlDaTendina(lavoro, citta);
       }
-      // Bottoni dei lavori piu richiesti: riempiono il campo e cercano subito.
+      // Esempi iniziali: selezionano la voce nella tendina e cercano subito.
       function cercaLavoro(testo){
-        document.getElementById('sb-lavoro').value = testo;
+        var sel = document.getElementById('sb-lavoro');
+        var voce = window.RicercaProblema.riconosci(testo);
+        if(voce){
+          var atteso = voce.p + '|' + voce.q + '|' + voce.v;
+          for(var i=0;i<sel.options.length;i++){
+            if(sel.options[i].value === atteso){ sel.selectedIndex = i; break; }
+          }
+        }
         avviaRicerca();
       }
       function localizzami(){
@@ -1435,8 +1435,6 @@
         });
 
     </script>
-
-
 
 <script src="/cookie-banner.js"></script>
 <footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>

@@ -139,9 +139,247 @@
     return pagina + (params.length ? '?' + params.join('&') : '');
   }
 
+  // ------------------------------------------------------------------
+  // Tendina "Di cosa hai bisogno?"
+  // Raggruppata per BISOGNO del cliente, non per tipo di fornitore:
+  // chi ha il lavandino otturato cerca "Idraulico", non sa ne' gli importa
+  // che nel database stia sotto "artigiano".
+  // Ogni riga: [etichetta mostrata, pagina, parametro, valore nel database]
+  // ------------------------------------------------------------------
+  var GRUPPI = [
+    ['Impianti', [
+      ['Idraulico', A,'mestiere','Idraulica'],
+      ['Elettricista', A,'mestiere','Impianti elettrici'],
+      ['Caldaie e condizionatori', A,'mestiere','Climatizzazione / Caldaie'],
+      ['Fotovoltaico e pannelli solari', A,'mestiere','Fotovoltaico / Pannelli solari'],
+      ['Allarmi, antenne, videosorveglianza', A,'mestiere','Antennista / Allarmi'],
+      ['Stufe e camini', A,'mestiere','Stufe e camini'],
+      ['Frigorista / celle frigorifere', A,'mestiere','Frigorista / Celle frigorifere']
+    ]],
+    ['Casa e ristrutturazione', [
+      ['Ristrutturazione completa', A,'mestiere','Ristrutturazione completa'],
+      ['Muratore / opere murarie', A,'mestiere','Edilizia / Muratura'],
+      ['Imbianchino / tinteggiatura', A,'mestiere','Pittura e tinteggiatura'],
+      ['Pavimenti e piastrelle', A,'mestiere','Pavimenti e piastrelle'],
+      ['Cartongesso e controsoffitti', A,'mestiere','Cartongesso'],
+      ['Intonaco e rasature', A,'mestiere','Intonacatore'],
+      ['Falegname / mobili su misura', A,'mestiere','Falegnameria'],
+      ['Marmi e pietre', A,'mestiere','Marmi e pietre'],
+      ['Vetraio', A,'mestiere','Vetraio']
+    ]],
+    ['Tetto, infissi ed esterni', [
+      ['Tetti e coperture', A,'mestiere','Coperture / Tetti'],
+      ['Infiltrazioni e impermeabilizzazione', A,'mestiere','Impermeabilizzazione'],
+      ['Cappotto termico e isolamento', A,'mestiere','Cappotti termici / Isolamento'],
+      ['Infissi, finestre e tapparelle', A,'mestiere','Serramenti / Infissi'],
+      ['Fabbro, cancelli e recinzioni', A,'mestiere','Fabbro / Cancelli / Recinzioni'],
+      ['Tende da sole e zanzariere', A,'mestiere','Tende da sole / Zanzariere'],
+      ['Giardinaggio e potature', A,'mestiere','Giardinaggio / Esterni']
+    ]],
+    ['Grandi lavori edili', [
+      ['Costruire una casa nuova', I,'mestiere','Costruzione nuova'],
+      ['Rifacimento facciata', I,'mestiere','Facciate e cappotto termico'],
+      ['Manutenzione edifici e condomini', I,'mestiere','Manutenzione edifici'],
+      ['Strutture e cemento armato', I,'mestiere','Muratura e strutture'],
+      ['Fondazioni', I,'mestiere','Fondazioni'],
+      ['Demolizioni', A,'mestiere','Demolizione'],
+      ['Movimento terra e scavi', A,'mestiere','Movimento terra'],
+      ['Ponteggi', A,'mestiere','Ponteggi'],
+      ['Asfalti', A,'mestiere','Asfalti'],
+      ['Carpenteria', A,'mestiere','Carpentiere'],
+      ['Capannoni e prefabbricati', I,'mestiere','Prefabbricati in calcestruzzo'],
+      ['Costruzione industriale', I,'mestiere','Costruzione industriale'],
+      ['Negozi e uffici da ristrutturare', I,'mestiere','Edilizia commerciale'],
+      ['Cottimisti', I,'mestiere','Cottimisti']
+    ]],
+    ['Servizi per la casa', [
+      ['Pulizie e disinfestazioni', A,'mestiere','Pulizie / Disinfestazioni'],
+      ['Sgomberi e traslochi', A,'mestiere','Sgomberi / Traslochi'],
+      ['Spurghi e canna fumaria', A,'mestiere','Spurghi / Spazzacamino']
+    ]],
+    ['Progetti, pratiche e documenti', [
+      ['Architetto', P,'tipo','Architetto'],
+      ['Geometra / pratiche catastali', P,'tipo','Geometra'],
+      ['Ingegnere civile', P,'tipo','Ingegnere civile'],
+      ['Ingegnere strutturale / antisismica', P,'tipo','Ingegnere strutturale'],
+      ['Ingegnere impiantistico', P,'tipo','Ingegnere impiantistico'],
+      ['Certificazione energetica (APE)', P,'tipo','Consulente energetico'],
+      ['Sicurezza in cantiere', P,'tipo','Consulente sicurezza'],
+      ['Direttore dei lavori', P,'tipo','Direttore lavori'],
+      ['Collaudo strutture', P,'tipo','Collaudatore strutture'],
+      ['Topografo / rilievi', P,'tipo','Topografo'],
+      ['Amministratore di condominio', P,'tipo','Amministratore di condominio'],
+      ['Perito industriale', P,'tipo','Perito industriale'],
+      ['Project manager / gestione cantiere', P,'tipo','Project manager']
+    ]],
+    ['Comprare materiali e attrezzi', [
+      ['Ferramenta', N,'tipo','ferramenta'],
+      ['Materiali edili', N,'tipo','materiali_edili'],
+      ['Colorificio e vernici', N,'tipo','colorificio'],
+      ['Ceramiche e piastrelle', N,'tipo','ceramiche'],
+      ['Pavimenti e parquet', N,'tipo','pavimenti'],
+      ['Arredo bagno e sanitari', N,'tipo','arredo_bagno'],
+      ['Infissi e serramenti', N,'tipo','infissi_serramenti'],
+      ['Termoidraulica', N,'tipo','termoidraulica'],
+      ['Climatizzazione e caldaie', N,'tipo','climatizzazione_caldaie'],
+      ['Materiale elettrico', N,'tipo','elettrico'],
+      ['Stufe e camini', N,'tipo','stufe_camini'],
+      ['Legname', N,'tipo','legname'],
+      ['Isolanti e impermeabilizzanti', N,'tipo','isolanti_impermeabilizzanti'],
+      ['Attrezzature edili', N,'tipo','attrezzature_edili'],
+      ['Noleggio attrezzature', N,'tipo','noleggio_attrezzature'],
+      ['Agenzia immobiliare', N,'tipo','agenzia_immobiliare']
+    ]]
+  ];
+
+  // Mestieri divisi per categoria, per le tendine informative sotto le card.
+  var PER_CATEGORIA = {
+    artigiano: { pagina:A, param:'mestiere', voci:[
+      ['Edilizia / Muratura','Edilizia / Muratura'],
+      ['Ristrutturazione completa','Ristrutturazione completa'],
+      ['Cartongesso','Cartongesso'],
+      ['Pittura e tinteggiatura','Pittura e tinteggiatura'],
+      ['Pavimenti e piastrelle','Pavimenti e piastrelle'],
+      ['Falegnameria','Falegnameria'],
+      ['Serramenti / Infissi','Serramenti / Infissi'],
+      ['Idraulica','Idraulica'],
+      ['Impianti elettrici','Impianti elettrici'],
+      ['Climatizzazione / Caldaie','Climatizzazione / Caldaie'],
+      ['Fotovoltaico / Pannelli solari','Fotovoltaico / Pannelli solari'],
+      ['Antennista / Allarmi','Antennista / Allarmi'],
+      ['Coperture / Tetti','Coperture / Tetti'],
+      ['Cappotti termici / Isolamento','Cappotti termici / Isolamento'],
+      ['Fabbro / Cancelli / Recinzioni','Fabbro / Cancelli / Recinzioni'],
+      ['Marmi e pietre','Marmi e pietre'],
+      ['Vetraio','Vetraio'],
+      ['Tende da sole / Zanzariere','Tende da sole / Zanzariere'],
+      ['Giardinaggio / Esterni','Giardinaggio / Esterni'],
+      ['Spurghi / Spazzacamino','Spurghi / Spazzacamino'],
+      ['Pulizie / Disinfestazioni','Pulizie / Disinfestazioni'],
+      ['Sgomberi / Traslochi','Sgomberi / Traslochi'],
+      ['Stufe e camini','Stufe e camini'],
+      ['Frigorista / Celle frigorifere','Frigorista / Celle frigorifere'],
+      ['Carpentiere','Carpentiere'],
+      ['Impermeabilizzazione','Impermeabilizzazione'],
+      ['Ponteggi','Ponteggi'],
+      ['Demolizione','Demolizione'],
+      ['Movimento terra','Movimento terra'],
+      ['Asfalti','Asfalti'],
+      ['Intonacatore','Intonacatore']
+    ]},
+    impresa: { pagina:I, param:'mestiere', voci:[
+      ['Costruzione nuova','Costruzione nuova'],
+      ['Ristrutturazione','Ristrutturazione'],
+      ['Muratura e strutture','Muratura e strutture'],
+      ['Coperture e tetti','Coperture e tetti'],
+      ['Impermeabilizzazione','Impermeabilizzazione'],
+      ['Ponteggi','Ponteggi'],
+      ['Demolizione','Demolizione'],
+      ['Movimento terra','Movimento terra'],
+      ['Fondazioni','Fondazioni'],
+      ['Facciate e cappotto termico','Facciate e cappotto termico'],
+      ['Prefabbricati in calcestruzzo','Prefabbricati in calcestruzzo'],
+      ['Edilizia commerciale','Edilizia commerciale'],
+      ['Manutenzione edifici','Manutenzione edifici'],
+      ['Costruzione industriale','Costruzione industriale'],
+      ['Cottimisti','Cottimisti']
+    ]},
+    professionista: { pagina:P, param:'tipo', voci:[
+      ['Architetto','Architetto'],
+      ['Ingegnere civile','Ingegnere civile'],
+      ['Ingegnere strutturale','Ingegnere strutturale'],
+      ['Ingegnere impiantistico','Ingegnere impiantistico'],
+      ['Geometra','Geometra'],
+      ['Perito industriale','Perito industriale'],
+      ['Topografo','Topografo'],
+      ['Consulente energetico','Consulente energetico'],
+      ['Consulente sicurezza','Consulente sicurezza'],
+      ['Direttore lavori','Direttore lavori'],
+      ['Collaudatore strutture','Collaudatore strutture'],
+      ['Project manager','Project manager'],
+      ['Amministratore di condominio','Amministratore di condominio']
+    ]},
+    negozio: { pagina:N, param:'tipo', voci:[
+      ['Materiali edili','materiali_edili'],
+      ['Ferramenta','ferramenta'],
+      ['Termoidraulica','termoidraulica'],
+      ['Elettrico','elettrico'],
+      ['Ceramiche e bagno','ceramiche'],
+      ['Pavimenti e rivestimenti','pavimenti'],
+      ['Colorificio','colorificio'],
+      ['Legname','legname'],
+      ['Infissi e serramenti','infissi_serramenti'],
+      ['Attrezzature edili','attrezzature_edili'],
+      ['Noleggio attrezzature','noleggio_attrezzature'],
+      ['Isolanti e impermeabilizzanti','isolanti_impermeabilizzanti'],
+      ['Arredo bagno','arredo_bagno'],
+      ['Climatizzazione / Caldaie','climatizzazione_caldaie'],
+      ['Stufe e camini','stufe_camini'],
+      ['Agenzia immobiliare','agenzia_immobiliare']
+    ]}
+  };
+
+  // Riempie un <select> con i gruppi. Il valore di ogni option e' "pagina|parametro|valore".
+  function riempiTendina(select, testoIniziale) {
+    if (!select) return;
+    select.innerHTML = '';
+    var vuota = document.createElement('option');
+    vuota.value = '';
+    vuota.textContent = testoIniziale || 'Di cosa hai bisogno?';
+    select.appendChild(vuota);
+
+    GRUPPI.forEach(function (gruppo) {
+      var og = document.createElement('optgroup');
+      og.label = gruppo[0];
+      gruppo[1].forEach(function (riga) {
+        var o = document.createElement('option');
+        o.value = riga[1] + '|' + riga[2] + '|' + riga[3];
+        o.textContent = riga[0];
+        og.appendChild(o);
+      });
+      select.appendChild(og);
+    });
+  }
+
+  // Da "pagina|parametro|valore" + citta all'URL finale.
+  function urlDaTendina(valore, citta) {
+    var params = [];
+    var pagina = A;
+    if (valore) {
+      var pezzi = valore.split('|');
+      pagina = pezzi[0];
+      params.push(pezzi[1] + '=' + encodeURIComponent(pezzi[2]));
+    }
+    if (citta) params.push('citta=' + encodeURIComponent(citta));
+    return pagina + (params.length ? '?' + params.join('&') : '');
+  }
+
+  // Tendina informativa sotto una card: mostra i mestieri di quella categoria.
+  // Scegliendone uno si va direttamente ai risultati di quel mestiere.
+  function riempiTendinaCategoria(select, categoria, testoIniziale) {
+    var c = PER_CATEGORIA[categoria];
+    if (!select || !c) return;
+    select.innerHTML = '';
+    var vuota = document.createElement('option');
+    vuota.value = '';
+    vuota.textContent = testoIniziale || 'Vedi i mestieri';
+    select.appendChild(vuota);
+    c.voci.forEach(function (riga) {
+      var o = document.createElement('option');
+      o.value = c.pagina + '|' + c.param + '|' + riga[1];
+      o.textContent = riga[0];
+      select.appendChild(o);
+    });
+  }
+
   w.RicercaProblema = {
     riconosci: riconosci,
     costruisciUrl: costruisciUrl,
-    voci: VOCI
+    riempiTendina: riempiTendina,
+    riempiTendinaCategoria: riempiTendinaCategoria,
+    urlDaTendina: urlDaTendina,
+    voci: VOCI,
+    gruppi: GRUPPI,
+    perCategoria: PER_CATEGORIA
   };
 })(window);
