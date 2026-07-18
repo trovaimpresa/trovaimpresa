@@ -945,16 +945,31 @@
   }
   @media (max-width:1100px){
     .home-layout{ grid-template-columns:minmax(0,1fr); max-width:1000px; padding:28px 20px 44px; }
-    .hero-pub{ display:none !important; }
-    /* Su telefono la colonna non sparisce: diventa una fascia orizzontale sotto
-       il contenuto. I segnaposto liberi restano nascosti (a chi cerca un idraulico
-       non interessano), gli annunci pagati invece si vedono: prima erano invisibili
-       su mobile, cioe' proprio dove passa la maggior parte dei visitatori. */
-    .rail-sx{ display:none; }
+    /* --- PUBBLICITA SU TELEFONO ---
+       I segnaposto liberi restano nascosti: a chi cerca un idraulico non
+       interessano, e su schermo piccolo occuperebbero mezza pagina.
+       Gli annunci PAGATI invece si vedono, come fasce larghe: prima erano
+       invisibili su mobile, cioe' proprio dove passa la maggior parte
+       dei visitatori. Il JS li rende visibili con display:flex !important. */
+
+    /* Hero: e' lo spazio piu' caro (20 euro), non puo' sparire dal telefono.
+       Diventa una fascia sotto la scelta della citta'. */
+    .hero-pub{ position:static !important; transform:none !important;
+               width:100% !important; max-width:420px !important;
+               margin:18px auto 0 !important; display:none !important; }
+    .hero-pub[style*="flex"]{ display:flex !important; }
+
+    /* Su telefono si vedono gli annunci di ENTRAMBE le colonne: il listino
+       dice "stesso prezzo sui due lati", quindi nascondere la sinistra
+       darebbe meno visibilita a chi paga la stessa cifra.
+       order:2 le porta comunque dopo il contenuto. */
     .home-rail{ order:2; }
-    .rail-sticky{ position:static; flex-direction:row; flex-wrap:wrap; justify-content:center; gap:12px; }
-    .rail-slot{ display:none; height:auto; max-width:320px; flex:1 1 280px; }
-    .rail-cta{ flex-basis:100%; }
+    .rail-sticky{ position:static; flex-direction:column; align-items:center; gap:12px; }
+    /* Stessa specificita' delle regole della scala, ma viene dopo: qui vince.
+       Senza questo un annuncio resterebbe alto 300px in 320 di larghezza. */
+    .rail-slot[data-spazio-id]{ display:none; height:auto; aspect-ratio:400/260;
+                                width:100%; max-width:420px; }
+    .rail-cta{ display:none; }
   }
   @media (max-width:820px){
     .navbar{ padding:10px 14px !important; }
