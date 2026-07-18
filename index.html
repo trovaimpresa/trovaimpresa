@@ -837,9 +837,10 @@
   .hrow2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
 
   .hcard{ background:#fff; border:1px solid var(--ti-bd); border-radius:16px; padding:22px 24px 24px; }
-  .hcard-h{ margin-bottom:16px; }
-  .hcard-k{ display:block; font-size:11px; font-weight:800; letter-spacing:.9px; text-transform:uppercase; color:var(--ti-blu); margin-bottom:5px; }
-  .hcard-h h2{ font-size:20px; font-weight:800; color:var(--ti-ink); margin:0; letter-spacing:-.2px; }
+  .hcard-h{ margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid var(--ti-bd); }
+  .hcard-k{ display:inline-block; font-size:12px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:var(--ti-blu); background:#eaf2ff; padding:4px 10px; border-radius:6px; margin-bottom:9px; }
+  .hcard-h h2{ font-size:23px; font-weight:800; color:var(--ti-ink); margin:0; letter-spacing:-.3px; line-height:1.25; }
+  .hcard-s{ font-size:15px; color:var(--ti-txt); margin:7px 0 0; line-height:1.45; }
   .hcard-grid{ display:grid; gap:12px; }
   .hcard-grid.c4{ grid-template-columns:repeat(4,minmax(0,1fr)); }
   .tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:22px 10px; background:#fff; border:1px solid var(--ti-bd); border-top:3px solid var(--tc,var(--ti-blu)); border-radius:12px; text-decoration:none; color:var(--ti-ink); font-weight:700; font-size:14px; text-align:center; transition:box-shadow .15s, transform .15s; }
@@ -849,8 +850,8 @@
   .row:hover{ background:var(--ti-bg); }
   .row svg{ flex-shrink:0; }
   .row span{ display:flex; flex-direction:column; gap:2px; min-width:0; }
-  .row b{ font-size:15px; font-weight:700; }
-  .row small{ font-size:13px; color:#6b7a8d; font-weight:500; }
+  .row b{ font-size:15.5px; font-weight:700; }
+  .row small{ font-size:13.5px; color:#59687b; font-weight:600; }
 
   .home-rail{ min-width:0; }
   .rail-sticky{ position:sticky; top:88px; display:flex; flex-direction:column; gap:14px; }
@@ -975,7 +976,7 @@
       <main class="home-main">
 
         <section class="hcard" id="categorie">
-          <div class="hcard-h"><span class="hcard-k">Trova un'impresa</span><h2>Scegli la categoria</h2></div>
+          <div class="hcard-h"><span class="hcard-k">Trova un'impresa</span><h2>Scegli la categoria</h2><p class="hcard-s">Scegli chi ti serve e trova i migliori nella tua zona</p></div>
           <div class="hcard-grid c4">
             <a href="cerca-artigiani.html" class="tile" style="--tc:#0066ff;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
             <a href="cerca-imprese.html" class="tile" style="--tc:#FF6B35;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa edile</a>
@@ -985,7 +986,7 @@
         </section>
 
         <section class="hcard" id="registrati">
-          <div class="hcard-h"><span class="hcard-k">Registrati</span><h2>Scegli il tuo profilo</h2></div>
+          <div class="hcard-h"><span class="hcard-k">Registrati</span><h2>Scegli il tuo profilo</h2><p class="hcard-s">Iscriviti come artigiano, impresa, negozio o professionista</p></div>
           <div class="hcard-grid c4">
             <a href="registrazione-artigiano.html" class="tile" style="--tc:#0066ff;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Artigiano</a>
             <a href="registrazione-impresa.html" class="tile" style="--tc:#FF6B35;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>Impresa</a>
@@ -996,7 +997,7 @@
 
         <div class="hrow2">
           <section class="hcard">
-            <div class="hcard-h"><span class="hcard-k">Piani e prezzi</span><h2>Scegli il tuo piano</h2></div>
+            <div class="hcard-h"><span class="hcard-k">Piani e prezzi</span><h2>Scegli il tuo piano</h2><p class="hcard-s">Free, Premium o spazio pubblicitario per la tua attività</p></div>
             <div class="hcard-list">
               <a href="info-free.html" class="row" style="--tc:#0066ff;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span><b>Piano Free</b><small>Iscrizione gratuita</small></span></a>
               <a href="info-premium.html" class="row" style="--tc:#0288d1;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0288d1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 18 3-18"/></svg><span><b>Piano Premium</b><small>5€/mese o 49€/anno</small></span></a>
@@ -1005,7 +1006,7 @@
           </section>
 
           <section class="hcard">
-            <div class="hcard-h"><span class="hcard-k">Area riservata</span><h2>Il tuo pannello</h2></div>
+            <div class="hcard-h"><span class="hcard-k">Area riservata</span><h2>Il tuo pannello</h2><p class="hcard-s">Entra nel tuo account o gestisci la tua iscrizione</p></div>
             <div class="hcard-list">
               <a href="login-impresa.html" class="row" style="--tc:#0066ff;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>Accedi</b><small>Sei già registrato?</small></span></a>
               <a href="registrazione-impresa.html" class="row" style="--tc:#FF6B35;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg><span><b>Crea un account</b><small>Iscrizione in 2 minuti</small></span></a>
@@ -1016,7 +1017,7 @@
 
         <div class="hrow2">
           <section class="hcard">
-            <div class="hcard-h"><span class="hcard-k">Bacheca inserzioni</span><h2>Lavoro</h2></div>
+            <div class="hcard-h"><span class="hcard-k">Bacheca inserzioni</span><h2>Lavoro</h2><p class="hcard-s">Pubblica un’offerta di lavoro o invia la tua candidatura</p></div>
             <div class="hcard-list">
               <a href="registrazione-candidato.html" class="row" style="--tc:#2980b9;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><span><b>Registrati · Invia CV</b><small>Per candidati</small></span></a>
               <a href="ricerca-offerte.html" class="row" style="--tc:#1a5276;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a5276" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span><b>Cerca offerte</b><small>Per candidati</small></span></a>
@@ -1026,7 +1027,7 @@
           </section>
 
           <section class="hcard">
-            <div class="hcard-h"><span class="hcard-k">Subappalto</span><h2>Imprese cercano imprese</h2></div>
+            <div class="hcard-h"><span class="hcard-k">Subappalto</span><h2>Imprese cercano imprese</h2><p class="hcard-s">Trova subappaltatori o offri la tua disponibilità</p></div>
             <div class="hcard-list">
               <a href="subappalto-cerca.html" class="row" style="--tc:#d4a017;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span><b>Cerco subappaltatori</b><small>Affida una lavorazione</small></span></a>
               <a href="subappalto-offre.html" class="row" style="--tc:#0066ff;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0066ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg><span><b>Sono subappaltatore</b><small>Offri la tua disponibilità</small></span></a>
