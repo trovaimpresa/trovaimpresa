@@ -15,11 +15,7 @@
     // 1. Lettura città dall'URL
     const params = new URLSearchParams(window.location.search);
     const cittaRaw = params.get('citta');
-    if (!cittaRaw) {
-      console.log('[pub-spazi] Nessuna città in URL, skip (home nazionale).');
-      return;
-    }
-    const citta = cittaRaw.trim();
+    const citta = (cittaRaw || '').trim();
 
     // 2. Lista completa dei 18 spazi (per pre-compilazione link al form)
     const TUTTI_SPAZI = [
@@ -31,6 +27,16 @@
       'subappalto-sx-1', 'subappalto-sx-2', 'subappalto-dx-1', 'subappalto-dx-2',
       'profilo-sx-1', 'profilo-sx-2', 'profilo-dx-1', 'profilo-dx-2'
     ];
+
+    aggiornaTestoCitta(citta);
+
+    // Home nazionale (senza ?citta): nessun annuncio da mostrare, ma gli spazi
+    // vanno comunque impostati come "disponibili" invece di restare grezzi.
+    if (!citta) {
+      console.log('[pub-spazi] Nessuna città in URL: spazi mostrati come disponibili.');
+      aggiornaHrefVuoti(TUTTI_SPAZI, new Set(), '');
+      return;
+    }
 
     // 3. Recupero/creazione client Supabase
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -78,6 +84,7 @@
       a.href = ann.link_url || '#';
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
+      a.style.setProperty('display', 'flex', 'important');
       a.style.border = 'none';
       a.style.padding = '0';
       a.innerHTML = `<img src="${ann.logo_url}" alt="Pubblicità" style="width:100%;height:100%;object-fit:contain;display:block;">`;
@@ -89,23 +96,41 @@
     console.log(`[pub-spazi] Città "${citta}": ${venduti.size}/18 spazi venduti.`);
   }
 
+  // Personalizza il sottotitolo degli spazi liberi con la città attiva.
+  function aggiornaTestoCitta(citta) {
+    const testo = citta
+      ? 'Visibile a chi cerca a ' + citta.charAt(0).toUpperCase() + citta.slice(1)
+      : 'Visibile a chi cerca nella tua zona';
+    document.querySelectorAll('.rs-c').forEach(function (el) { el.textContent = testo; });
+  }
+
   function aggiornaHrefVuoti(tutti, venduti, citta) {
+    const q = citta ? '?citta=' + encodeURIComponent(citta) : '';
     for (const sp of tutti) {
       if (venduti.has(sp)) continue;
       const slot = document.querySelector(`a.pub-link[data-spazio-id="${sp}"]`);
-      if (slot) {
-        const sid = slot.getAttribute('data-spazio-id');
-        if(sid==='hero-sx' || sid==='hero-dx'){
-          slot.style.setProperty('padding','0','important');
-          slot.style.setProperty('border','none','important');
-          slot.style.setProperty('overflow','hidden','important');
-          slot.innerHTML = `<img src="/img/${sid}.svg" alt="Spazio pubblicitario disponibile" style="width:100%;height:100%;object-fit:fill;display:block;border-radius:inherit;">`;
-          slot.removeAttribute('href');
-          slot.style.cursor='default';
-          continue;
-        }
-        slot.style.setProperty('display', 'none', 'important');
+      if (!slot) continue;
+      const sid = slot.getAttribute('data-spazio-id');
+
+      if (sid === 'hero-sx' || sid === 'hero-dx') {
+        slot.style.setProperty('padding','0','important');
+        slot.style.setProperty('border','none','important');
+        slot.style.setProperty('overflow','hidden','important');
+        slot.innerHTML = `<img src="/img/${sid}.svg" alt="Spazio pubblicitario disponibile" style="width:100%;height:100%;object-fit:fill;display:block;border-radius:inherit;">`;
+        slot.removeAttribute('href');
+        slot.style.cursor='default';
+        continue;
       }
+
+      // Slot "extra": restano nascosti finché non vengono venduti.
+      if (slot.hasAttribute('data-pub-extra')) {
+        slot.style.setProperty('display', 'none', 'important');
+        continue;
+      }
+
+      // Slot in vetrina: restano visibili come "Il tuo annuncio qui",
+      // con il link al form già precompilato sulla città attiva.
+      slot.href = '/pubblicita' + q;
     }
   }
 })();
