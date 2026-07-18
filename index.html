@@ -841,11 +841,17 @@
 
   /* Chi ha gia' un profilo entra ogni giorno: l'accesso sta qui in alto,
      senza dover scorrere fino in fondo alla pagina. */
-  .hero-biz{ margin:24px auto 0; padding-top:20px; border-top:1px solid var(--ti-bd); display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; font-size:15.5px; color:var(--ti-txt); font-weight:600; }
-  .hb-iscriviti{ background:#15803d; color:#fff; text-decoration:none; font-weight:700; font-size:14.5px; padding:10px 18px; border-radius:9px; }
-  .hb-iscriviti:hover{ background:#116631; }
-  .hb-accedi{ background:#fff; color:var(--ti-blu); border:2px solid var(--ti-blu); text-decoration:none; font-weight:700; font-size:14.5px; padding:8px 18px; border-radius:9px; }
-  .hb-accedi:hover{ background:#eaf2ff; }
+  /* Servizi secondari: sotto la citta', cosi' la scelta resta la prima cosa che si legge */
+  .hero-altro{ margin:22px auto 0; padding-top:20px; border-top:1px solid var(--ti-bd); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; max-width:620px; }
+  .ha{ display:flex; align-items:center; gap:11px; padding:13px 16px; border-radius:12px; text-decoration:none; text-align:left; border:2px solid; }
+  .ha svg{ flex-shrink:0; }
+  .ha span{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .ha b{ font-size:14px; font-weight:800; line-height:1.25; }
+  .ha small{ font-size:12.5px; font-weight:600; opacity:.85; }
+  .ha-lavoro{ background:#cffafe; border-color:#67e8f9; color:#155e75; }
+  .ha-lavoro:hover{ background:#a5f3fc; border-color:#22d3ee; }
+  .ha-subappalto{ background:#ffedd5; border-color:#fdba74; color:#9a3412; }
+  .ha-subappalto:hover{ background:#fed7aa; border-color:#fb923c; }
 
   .hero-pub{ position:absolute; top:50%; transform:translateY(-50%); width:calc(50% - 360px); max-width:300px; height:250px; border:1px solid var(--ti-bd); background:#fff; border-radius:12px; display:flex; align-items:center; justify-content:center; text-align:center; color:#9aa7b8; font-weight:600; font-size:14px; text-decoration:none; z-index:2; }
   .hero-pub.sx{ left:40px; }
@@ -933,11 +939,12 @@
     .hero-h1{ font-size:25px; }
     .hero .hero-sub{ font-size:15px; margin-bottom:20px; }
     .citta-riga{ flex-direction:column; gap:9px; }
+    .hero-altro{ grid-template-columns:minmax(0,1fr); }
+    .strip-servizi{ grid-template-columns:minmax(0,1fr); }
     .citta-go{ padding:15px; }
     .citta-box{ padding:16px; }
     .hero-logo{ max-width:210px; }
     .hrow2{ grid-template-columns:minmax(0,1fr); }
-    .strip-servizi{ grid-template-columns:minmax(0,1fr); }
     .banner-iscriviti{ flex-direction:column; align-items:flex-start; }
     .bi-links a{ padding:11px 14px; font-size:13px; }
     .hcard{ padding:18px 16px 20px; }
@@ -1017,6 +1024,17 @@
                 <span>Stai cercando a <b id="citta-attiva-nome"></b></span>
                 <a href="index.html">cambia citt&agrave;</a>
             </div>
+
+            <div class="hero-altro">
+                <a href="offerte-lavoro.html" class="ha ha-lavoro">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                    <span><b>Cerchi lavoro nell'edilizia?</b><small>Offerte e candidature</small></span>
+                </a>
+                <a href="subappalto.html" class="ha ha-subappalto">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M2 9h20"/></svg>
+                    <span><b>Sei un'impresa e cerchi subappalti?</b><small>Cerca o offri disponibilit&agrave;</small></span>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -1057,8 +1075,6 @@
             <div class="tile-wrap" style="--tc:#0e7490;"><a href="registrazione-professionista.html" class="tile tile-pieno"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span class="tile-n">Professionista</span><small class="tile-d">Progetti, pratiche e perizie</small></a></div>
           </div>
         </section>
-
-        
 
         <section class="strip-servizi">
           <a href="offerte-lavoro.html"><b>Cerchi lavoro nell'edilizia?</b><span>Offerte e candidature &rarr;</span></a>
