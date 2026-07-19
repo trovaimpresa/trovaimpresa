@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calcolatori costi ristrutturazione 2026: stima gratis | TrovaImpresa</title>
+<meta name="description" content="Calcola gratis quanto costa rifare il bagno, ristrutturare casa, il cappotto termico, l'impianto elettrico e idraulico, il condizionatore e il bonus ristrutturazione. Stima in 15 secondi.">
+<link rel="canonical" href="https://trovaimpresa.com/calcolatori">
+<meta property="og:title" content="Calcolatori costi ristrutturazione 2026 | TrovaImpresa">
+<meta property="og:description" content="Stima gratis i costi dei lavori in casa: bagno, ristrutturazione, cappotto, impianti, condizionatore e bonus.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/calcolatori">
+<meta property="og:image" content="https://trovaimpresa.com/logo.png">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --radius:14px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.6;background:#f4f7fc}
+  a{color:var(--primary-dark)}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px}
+  .hdr{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:44px 24px;text-align:center}
+  .hdr h1{font-size:32px;margin:0 0 12px;line-height:1.2}
+  .hdr p{font-size:17px;max-width:620px;margin:0 auto;opacity:.95}
+  .wrap{max-width:720px;margin:0 auto;padding:28px 20px 50px}
+  .picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;justify-content:center}
+  .picker button{padding:10px 16px;border:1.5px solid var(--line);background:#fff;border-radius:999px;font-family:inherit;font-weight:bold;font-size:14px;color:var(--text);cursor:pointer;transition:.15s}
+  .picker button.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .panel{display:none;background:#fff;border-radius:18px;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:24px}
+  .panel.active{display:block}
+  .panel h2{color:var(--primary-dark);font-size:22px;margin:0 0 4px}
+  .panel .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .field{margin:16px 0}
+  .field label{display:block;font-weight:bold;margin-bottom:8px;font-size:15px}
+  .field .val{color:var(--primary-dark)}
+  input[type=range]{width:100%;accent-color:var(--primary);height:6px}
+  input[type=number]{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;font-family:inherit;-moz-appearance:textfield}
+  input[type=number]:focus{outline:none;border-color:var(--primary)}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:78px;padding:11px 8px;border:1.5px solid var(--line);background:#fff;border-radius:11px;font-family:inherit;font-size:14px;font-weight:bold;color:var(--text);cursor:pointer;transition:.15s}
+  .seg button.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .seg button small{display:block;font-weight:normal;font-size:11px;opacity:.75}
+  .checks{display:grid;gap:9px}
+  .chk{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;cursor:pointer;font-size:15px;user-select:none}
+  .chk input{width:19px;height:19px;accent-color:var(--primary);margin:0}
+  .chk.active{border-color:var(--primary);background:var(--primary-soft)}
+  .chk .price{margin-left:auto;color:var(--muted);font-size:13px;white-space:nowrap}
+  .result{margin-top:22px;background:var(--primary);color:#fff;border-radius:13px;padding:20px;text-align:center}
+  .result .lbl{font-size:14px;opacity:.9;text-transform:uppercase;letter-spacing:.5px}
+  .result .amount{font-size:32px;font-weight:800;margin:5px 0}
+  .result .extra{font-size:14px;opacity:.93}
+  .result .hint{font-size:13px;opacity:.85;margin-top:6px}
+  .golink{display:block;text-align:center;margin-top:14px;font-weight:bold;font-size:14px;text-decoration:none;color:var(--primary-dark)}
+  .cta-box{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid var(--accent);padding:30px;text-align:center;margin-top:26px}
+  .cta-box h3{color:var(--primary-dark);font-size:21px;margin:0 0 8px}
+  .cta-box p{color:#555;margin:0 0 18px}
+  .cta-box a{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:bold;padding:13px 28px;border-radius:8px;font-size:16px}
+  footer{border-top:1px solid var(--line);padding:24px;color:var(--muted);font-size:13px;text-align:center}
+  @media(max-width:600px){
+    .navbar{padding:10px 16px}.navbar .menu{gap:10px}.navbar .menu a{font-size:13px}.navbar .logo img{height:44px}
+    .hdr h1{font-size:25px}.wrap{padding:22px 14px 40px}.seg button{min-width:0}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/costi-ristrutturazione.html">Guide</a>
+    <a href="/cerca-imprese.html" class="menu-btn">Trova un'impresa</a>
+  </div>
+</nav>
+
+<header class="hdr">
+  <h1>Calcolatori costi ristrutturazione</h1>
+  <p>Stima gratis quanto costa un lavoro in casa in 15 secondi. Nessun dato richiesto, nessuna email. Prezzi reali 2026.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="picker" id="picker">
+    <button data-t="bagno" class="active">🛁 Bagno</button>
+    <button data-t="casa">🏠 Ristrutturazione</button>
+    <button data-t="cappotto">🧱 Cappotto</button>
+    <button data-t="elettrico">⚡ Elettrico</button>
+    <button data-t="idraulico">🚿 Idraulico</button>
+    <button data-t="condizionatore">❄️ Condizionatore</button>
+    <button data-t="bonus">💶 Bonus</button>
+  </div>
+
+  <!-- BAGNO -->
+  <section class="panel active" data-p="bagno">
+    <h2>Quanto costa rifare il bagno</h2>
+    <p class="sub">Stima chiavi in mano, IVA inclusa.</p>
+    <div class="field"><label>Dimensione bagno: <span class="val" data-v="mq">6 mq</span></label><input type="range" data-r="mq" min="2" max="15" value="6" step="1"></div>
+    <div class="field"><label>Livello finiture</label><div class="seg" data-s="liv"><button data-k="0.85">Economico</button><button data-k="1" class="active">Medio</button><button data-k="1.45">Alto</button></div></div>
+    <div class="field"><label>Extra</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="1500"> Spostare gli scarichi <span class="price">+1.500 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="900"> Box doccia su misura <span class="price">+900 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="600"> Sanitari sospesi <span class="price">+600 €</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="hint">Per la cifra esatta serve un sopralluogo.</div></div>
+    <a class="golink" href="/quanto-costa-rifare-il-bagno.html">Leggi la guida completa al costo del bagno →</a>
+  </section>
+
+  <!-- CASA -->
+  <section class="panel" data-p="casa">
+    <h2>Quanto costa ristrutturare casa</h2>
+    <p class="sub">Stima chiavi in mano, IVA inclusa.</p>
+    <div class="field"><label>Superficie casa: <span class="val" data-v="mq">100 mq</span></label><input type="range" data-r="mq" min="30" max="250" value="100" step="5"></div>
+    <div class="field"><label>Tipo di ristrutturazione</label><div class="seg" data-s="tipo">
+      <button data-eur="475">Leggera</button><button data-eur="750">Media</button><button data-eur="1150" class="active">Completa</button><button data-eur="1900">Pregio</button>
+    </div></div>
+    <div class="field"><label>Extra</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="10000"> Cambio infissi <span class="price">+10.000 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="9000"> Secondo bagno <span class="price">+9.000 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="6000"> Nuovo riscaldamento <span class="price">+6.000 €</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Per la cifra esatta serve un sopralluogo.</div></div>
+    <a class="golink" href="/quanto-costa-ristrutturare-casa.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- CAPPOTTO -->
+  <section class="panel" data-p="cappotto">
+    <h2>Quanto costa il cappotto termico</h2>
+    <p class="sub">Metri quadri di parete, non di pavimento.</p>
+    <div class="field"><label>Superficie parete: <span class="val" data-v="mq">150 mq</span></label><input type="range" data-r="mq" min="30" max="500" value="150" step="10"></div>
+    <div class="field"><label>Materiale isolante</label><div class="seg" data-s="mat"><button data-eur="72" class="active">EPS</button><button data-eur="102">Lana roccia</button><button data-eur="130">Fibra legno</button></div></div>
+    <div class="field"><label>Extra (al mq)</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="12" checked> Ponteggio <span class="price">+12 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="8"> Facciata da preparare <span class="price">+8 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="6"> Cornici finestre <span class="price">+6 €/mq</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Sopralluogo in facciata per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-cappotto-termico.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- ELETTRICO -->
+  <section class="panel" data-p="elettrico">
+    <h2>Quanto costa l'impianto elettrico</h2>
+    <p class="sub">Rifacimento completo, IVA esclusa.</p>
+    <div class="field"><label>Superficie casa: <span class="val" data-v="mq">100 mq</span></label><input type="range" data-r="mq" min="30" max="250" value="100" step="5"></div>
+    <div class="field"><label>Livello impianto</label><div class="seg" data-s="liv"><button data-eur="60">Base</button><button data-eur="85" class="active">Standard</button><button data-eur="120">Domotico</button></div></div>
+    <div class="field"><label>Extra</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="450" checked> Nuovo quadro + salvavita <span class="price">+450 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="250" checked> Dichiarazione conformità <span class="price">+250 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="500"> Punti aggiuntivi <span class="price">+500 €</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Sopralluogo per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-rifare-impianto-elettrico.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- IDRAULICO -->
+  <section class="panel" data-p="idraulico">
+    <h2>Quanto costa l'impianto idraulico</h2>
+    <p class="sub">Solo impianto, IVA esclusa. Sanitari a parte.</p>
+    <div class="field"><label>Quanti bagni</label><div class="seg" data-s="bagni"><button data-n="1" class="active">1 bagno</button><button data-n="2">2 bagni</button><button data-n="3">3 bagni</button></div></div>
+    <div class="field"><label>Livello materiali</label><div class="seg" data-s="liv"><button data-k="0.85">Economico</button><button data-k="1" class="active">Medio</button><button data-k="1.25">Top</button></div></div>
+    <div class="field"><label>Altri ambienti</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="850" checked> Cucina <span class="price">+850 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="600"> Lavanderia <span class="price">+600 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="350"> Predisposizione addolcitore <span class="price">+350 €</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="hint">Sopralluogo per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-rifare-impianto-idraulico.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- CONDIZIONATORE -->
+  <section class="panel" data-p="condizionatore">
+    <h2>Quanto costa installare un condizionatore</h2>
+    <p class="sub">Apparecchio + installazione, IVA inclusa.</p>
+    <div class="field"><label>Quante stanze (unità interne)</label><div class="seg" data-s="unita"><button data-n="1" class="active">1</button><button data-n="2">2</button><button data-n="3">3</button><button data-n="4">4</button></div></div>
+    <div class="field"><label>Fascia apparecchio</label><div class="seg" data-s="fascia"><button data-k="0.82">Economico</button><button data-k="1" class="active">Media</button><button data-k="1.35">Top A+++</button></div></div>
+    <div class="field"><label>Extra</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="160"> Linea lunga (oltre 5 m) <span class="price">+160 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="120"> Lavoro in quota <span class="price">+120 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="90"> Smontaggio vecchio <span class="price">+90 €</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="hint">Sopralluogo per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-installare-un-condizionatore.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- BONUS -->
+  <section class="panel" data-p="bonus">
+    <h2>Bonus ristrutturazione: quanto ti torna</h2>
+    <p class="sub">Detrazione in 10 rate annuali. Stima informativa, non consulenza fiscale.</p>
+    <div class="field"><label>Spesa prevista per i lavori (€)</label><input type="number" data-r="spesa" min="0" step="1000" placeholder="es. 40000" value="40000"></div>
+    <div class="field"><label>Tipo di immobile</label><div class="seg" data-s="tipo"><button data-p="0.50" class="active">Prima casa (50%)</button><button data-p="0.36">Seconda casa (36%)</button></div></div>
+    <div class="result"><div class="lbl">Detrazione totale in 10 anni</div><div class="amount" data-o="out">—</div><div class="extra" data-o="rata"></div><div class="hint" data-o="cap"></div></div>
+    <a class="golink" href="/bonus-ristrutturazione-2026.html">Leggi la guida completa al bonus →</a>
+  </section>
+
+  <div class="cta-box">
+    <h3>Hai la stima? Trova chi fa il lavoro</h3>
+    <p>Cerca imprese edili e artigiani verificati nella tua zona, confronta e richiedi più preventivi gratis.</p>
+    <a href="/cerca-imprese.html">Trova un'impresa</a>
+  </div>
+
+</div>
+
+<footer>
+  TrovaImpresa — i valori dei calcolatori sono stime orientative basate sui prezzi medi di mercato 2026 e possono variare per zona, materiali e condizioni del cantiere.
+</footer>
+
+<script>
+(function(){
+  var euro = function(n){ return n.toLocaleString('it-IT'); };
+  function checksSum(panel){
+    var s=0; panel.querySelectorAll('[data-c=ex] input:checked').forEach(function(c){ s+=parseInt(c.dataset.add,10); }); return s;
+  }
+  function bindChecks(panel, cb){
+    panel.querySelectorAll('[data-c=ex] input').forEach(function(c){
+      c.addEventListener('change', function(){ c.closest('.chk').classList.toggle('active', c.checked); cb(); });
+      c.closest('.chk').classList.toggle('active', c.checked);
+    });
+  }
+  function bindSeg(panel, name, cb){
+    panel.querySelectorAll('[data-s='+name+'] button').forEach(function(b){
+      b.addEventListener('click', function(){
+        panel.querySelectorAll('[data-s='+name+'] button').forEach(function(x){ x.classList.remove('active'); });
+        b.classList.add('active'); cb();
+      });
+    });
+  }
+  function activeData(panel, name, attr){
+    var b = panel.querySelector('[data-s='+name+'] button.active'); return b ? b.dataset[attr] : null;
+  }
+
+  // Selettore
+  var picker = document.getElementById('picker');
+  picker.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){
+      picker.querySelectorAll('button').forEach(function(x){ x.classList.remove('active'); });
+      b.classList.add('active');
+      document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('active', p.dataset.p === b.dataset.t); });
+    });
+  });
+
+  // BAGNO
+  (function(){
+    var p=document.querySelector('[data-p=bagno]'), r=p.querySelector('[data-r=mq]'), v=p.querySelector('[data-v=mq]'), o=p.querySelector('[data-o=out]');
+    function f(n){return Math.round(n/100)*100;}
+    function calc(){
+      var k=parseFloat(activeData(p,'liv','k'));
+      var mid=Math.max(r.value*1250*k+checksSum(p),3800);
+      o.textContent=euro(f(mid*0.88))+' – '+euro(f(mid*1.14))+' €';
+      v.textContent=r.value+' mq';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'liv',calc); bindChecks(p,calc); calc();
+  })();
+
+  // CASA
+  (function(){
+    var p=document.querySelector('[data-p=casa]'), r=p.querySelector('[data-r=mq]'), v=p.querySelector('[data-v=mq]'), o=p.querySelector('[data-o=out]'), pm=p.querySelector('[data-o=permq]');
+    function f(n){return Math.round(n/1000)*1000;}
+    function calc(){
+      var eur=parseFloat(activeData(p,'tipo','eur'));
+      var mid=r.value*eur+checksSum(p);
+      o.textContent=euro(f(mid*0.90))+' – '+euro(f(mid*1.15))+' €';
+      pm.textContent='circa '+euro(Math.round(mid/r.value/10)*10)+' €/mq';
+      v.textContent=r.value+' mq';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'tipo',calc); bindChecks(p,calc); calc();
+  })();
+
+  // CAPPOTTO
+  (function(){
+    var p=document.querySelector('[data-p=cappotto]'), r=p.querySelector('[data-r=mq]'), v=p.querySelector('[data-v=mq]'), o=p.querySelector('[data-o=out]'), pm=p.querySelector('[data-o=permq]');
+    function f(n){return Math.round(n/100)*100;}
+    function calc(){
+      var eur=parseFloat(activeData(p,'mat','eur'));
+      var per=eur+checksSum(p);
+      var mid=r.value*per;
+      o.textContent=euro(f(mid*0.88))+' – '+euro(f(mid*1.14))+' €';
+      pm.textContent='circa '+euro(per)+' €/mq';
+      v.textContent=r.value+' mq';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'mat',calc); bindChecks(p,calc); calc();
+  })();
+
+  // ELETTRICO
+  (function(){
+    var p=document.querySelector('[data-p=elettrico]'), r=p.querySelector('[data-r=mq]'), v=p.querySelector('[data-v=mq]'), o=p.querySelector('[data-o=out]'), pm=p.querySelector('[data-o=permq]');
+    function f(n){return Math.round(n/100)*100;}
+    function calc(){
+      var eur=parseFloat(activeData(p,'liv','eur'));
+      var mid=r.value*eur+checksSum(p);
+      o.textContent=euro(f(mid*0.88))+' – '+euro(f(mid*1.14))+' €';
+      pm.textContent='circa '+euro(Math.round(mid/r.value/5)*5)+' €/mq';
+      v.textContent=r.value+' mq';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'liv',calc); bindChecks(p,calc); calc();
+  })();
+
+  // IDRAULICO
+  (function(){
+    var p=document.querySelector('[data-p=idraulico]'), o=p.querySelector('[data-o=out]');
+    function f(n){return Math.round(n/50)*50;}
+    function calc(){
+      var nb=parseInt(activeData(p,'bagni','n'),10);
+      var k=parseFloat(activeData(p,'liv','k'));
+      var mid=(600+nb*1100+checksSum(p))*k;
+      o.textContent=euro(f(mid*0.86))+' – '+euro(f(mid*1.16))+' €';
+    }
+    bindSeg(p,'bagni',calc); bindSeg(p,'liv',calc); bindChecks(p,calc); calc();
+  })();
+
+  // CONDIZIONATORE
+  (function(){
+    var p=document.querySelector('[data-p=condizionatore]'), o=p.querySelector('[data-o=out]');
+    var BASE={1:1200,2:2600,3:3650,4:4700};
+    function f(n){return Math.round(n/50)*50;}
+    function calc(){
+      var n=parseInt(activeData(p,'unita','n'),10);
+      var k=parseFloat(activeData(p,'fascia','k'));
+      var mid=BASE[n]*k+checksSum(p);
+      o.textContent=euro(f(mid*0.86))+' – '+euro(f(mid*1.16))+' €';
+    }
+    bindSeg(p,'unita',calc); bindSeg(p,'fascia',calc); bindChecks(p,calc); calc();
+  })();
+
+  // BONUS
+  (function(){
+    var p=document.querySelector('[data-p=bonus]'), sp=p.querySelector('[data-r=spesa]'), o=p.querySelector('[data-o=out]'), ra=p.querySelector('[data-o=rata]'), cap=p.querySelector('[data-o=cap]');
+    var T=96000;
+    function calc(){
+      var s=parseFloat(sp.value)||0; if(s<0)s=0;
+      var perc=parseFloat(activeData(p,'tipo','p'));
+      var base=Math.min(s,T), det=base*perc;
+      o.textContent=euro(Math.round(det))+' €';
+      ra.textContent='= '+euro(Math.round(det/10))+' € all’anno per 10 anni';
+      cap.textContent = s>T ? 'La spesa supera il tetto di 96.000 €, il calcolo si ferma lì.' : '';
+    }
+    sp.addEventListener('input',calc); bindSeg(p,'tipo',calc); calc();
+  })();
+})();
+</script>
+
+</body>
+</html>
