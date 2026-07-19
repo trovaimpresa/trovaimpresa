@@ -29,6 +29,22 @@ WHERE NOT EXISTS (
   SELECT 1 FROM public.blog_articoli WHERE slug = 'quanto-costa-rifare-il-bagno'
 );
 
+-- 3-bis) Articolo "Quanto costa ristrutturare casa" -> pagina statica con calcolatore
+INSERT INTO public.blog_articoli
+  (titolo, slug, meta_description, categoria, contenuto, url_esterno, pubblicato, created_at)
+SELECT
+  'Quanto costa ristrutturare casa nel 2026 (al mq)',
+  'quanto-costa-ristrutturare-casa',
+  'Prezzi reali al metro quadro voce per voce, come riconoscere un preventivo gonfiato e un calcolatore gratuito per stimare la tua ristrutturazione.',
+  'costi',
+  '<p>Guida completa con prezzi al mq e calcolatore. <a href="/quanto-costa-ristrutturare-casa.html">Apri la guida &rarr;</a></p>',
+  '/quanto-costa-ristrutturare-casa.html',
+  true,
+  now()
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.blog_articoli WHERE slug = 'quanto-costa-ristrutturare-casa'
+);
+
 -- 4) Strumento "Controlla se il preventivo è gonfiato" -> pagina statica
 INSERT INTO public.blog_articoli
   (titolo, slug, meta_description, categoria, contenuto, url_esterno, pubblicato, created_at)
