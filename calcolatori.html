@@ -100,6 +100,8 @@
     <button data-t="tetto">🏚️ Tetto</button>
     <button data-t="facciata">🎨 Facciata</button>
     <button data-t="pavimento">🪵 Pavimento</button>
+    <button data-t="imbiancare">🖌️ Imbiancare</button>
+    <button data-t="fotovoltaico">☀️ Fotovoltaico</button>
     <button data-t="bonus">💶 Bonus</button>
   </div>
 
@@ -253,6 +255,35 @@
     </div></div>
     <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Sopralluogo sul sottofondo per la cifra esatta.</div></div>
     <a class="golink" href="/quanto-costa-posare-il-pavimento.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- IMBIANCARE -->
+  <section class="panel" data-p="imbiancare">
+    <h2>Quanto costa imbiancare casa</h2>
+    <p class="sub">Materiali e manodopera inclusi.</p>
+    <div class="field"><label>Superficie casa: <span class="val" data-v="mq">90 mq</span></label><input type="range" data-r="mq" min="10" max="200" value="90" step="5"></div>
+    <div class="field"><label>Tipo di lavoro</label><div class="seg" data-s="tipo"><button data-eur="10">Rinfresco</button><button data-eur="16" class="active">Standard</button><button data-eur="24">Con preparazione</button></div></div>
+    <div class="field"><label>Extra (al mq)</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="4"> Pittura lavabile/antimuffa <span class="price">+4 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="3"> Colori scuri / più mani <span class="price">+3 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="2" checked> Proteggere mobili <span class="price">+2 €/mq</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="hint">Per casa vuota o semi-arredata.</div></div>
+    <a class="golink" href="/quanto-costa-imbiancare-casa.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- FOTOVOLTAICO -->
+  <section class="panel" data-p="fotovoltaico">
+    <h2>Quanto costa il fotovoltaico</h2>
+    <p class="sub">Chiavi in mano, prima delle detrazioni.</p>
+    <div class="field"><label>Potenza impianto: <span class="val" data-v="kw">6 kW</span></label><input type="range" data-r="kw" min="2" max="12" value="6" step="0.5"></div>
+    <div class="field"><label>Batteria di accumulo</label><div class="seg" data-s="acc"><button data-kwh="0" class="active">Nessuna</button><button data-kwh="5">5 kWh</button><button data-kwh="10">10 kWh</button></div></div>
+    <div class="field"><label>Extra</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="1500"> Colonnina ricarica auto <span class="price">+1.500 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="900"> Tetto complesso / ottimizzatori <span class="price">+900 €</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="hint">Sopralluogo sul tetto per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-impianto-fotovoltaico.html">Leggi la guida completa →</a>
   </section>
 
   <!-- BONUS -->
@@ -450,6 +481,33 @@
       v.textContent=r.value+' mq';
     }
     r.addEventListener('input',calc); bindSeg(p,'tipo',calc); bindChecks(p,calc); calc();
+  })();
+
+  // IMBIANCARE
+  (function(){
+    var p=document.querySelector('[data-p=imbiancare]'), r=p.querySelector('[data-r=mq]'), v=p.querySelector('[data-v=mq]'), o=p.querySelector('[data-o=out]');
+    function f(x){return Math.round(x/50)*50;}
+    function calc(){
+      var eur=parseFloat(activeData(p,'tipo','eur'));
+      var mid=r.value*(eur+checksSum(p));
+      o.textContent=euro(f(mid*0.82))+' – '+euro(f(mid*1.18))+' €';
+      v.textContent=r.value+' mq';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'tipo',calc); bindChecks(p,calc); calc();
+  })();
+
+  // FOTOVOLTAICO
+  (function(){
+    var p=document.querySelector('[data-p=fotovoltaico]'), r=p.querySelector('[data-r=kw]'), v=p.querySelector('[data-v=kw]'), o=p.querySelector('[data-o=out]');
+    var EUR_KW=1650, EUR_KWH=800;
+    function f(x){return Math.round(x/100)*100;}
+    function calc(){
+      var kwh=parseFloat(activeData(p,'acc','kwh'));
+      var mid=r.value*EUR_KW + kwh*EUR_KWH + checksSum(p);
+      o.textContent=euro(f(mid*0.86))+' – '+euro(f(mid*1.14))+' €';
+      v.textContent=r.value+' kW';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'acc',calc); bindChecks(p,calc); calc();
   })();
 
   // BONUS
