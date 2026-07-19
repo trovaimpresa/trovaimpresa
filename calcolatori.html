@@ -96,6 +96,7 @@
     <button data-t="elettrico">⚡ Elettrico</button>
     <button data-t="idraulico">🚿 Idraulico</button>
     <button data-t="condizionatore">❄️ Condizionatore</button>
+    <button data-t="infissi">🪟 Infissi</button>
     <button data-t="bonus">💶 Bonus</button>
   </div>
 
@@ -189,6 +190,21 @@
     </div></div>
     <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="hint">Sopralluogo per la cifra esatta.</div></div>
     <a class="golink" href="/quanto-costa-installare-un-condizionatore.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- INFISSI -->
+  <section class="panel" data-p="infissi">
+    <h2>Quanto costa cambiare gli infissi</h2>
+    <p class="sub">Fornitura + posa, IVA agevolata esclusa.</p>
+    <div class="field"><label>Quante aperture: <span class="val" data-v="n">9</span></label><input type="range" data-r="n" min="1" max="18" value="9" step="1"></div>
+    <div class="field"><label>Materiale</label><div class="seg" data-s="mat"><button data-eur="800" class="active">PVC</button><button data-eur="1300">Alluminio</button><button data-eur="1600">Legno</button></div></div>
+    <div class="field"><label>Extra</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="900"> Tapparelle motorizzate <span class="price">+900 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="250"> Zanzariere su tutte <span class="price">+250 €</span></label>
+      <label class="chk"><input type="checkbox" data-add="300" checked> Smontaggio vecchi <span class="price">+300 €</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="hint">Rilievo misure per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-cambiare-gli-infissi.html">Leggi la guida completa →</a>
   </section>
 
   <!-- BONUS -->
@@ -328,6 +344,19 @@
       o.textContent=euro(f(mid*0.86))+' – '+euro(f(mid*1.16))+' €';
     }
     bindSeg(p,'unita',calc); bindSeg(p,'fascia',calc); bindChecks(p,calc); calc();
+  })();
+
+  // INFISSI
+  (function(){
+    var p=document.querySelector('[data-p=infissi]'), r=p.querySelector('[data-r=n]'), v=p.querySelector('[data-v=n]'), o=p.querySelector('[data-o=out]');
+    function f(x){return Math.round(x/100)*100;}
+    function calc(){
+      var eur=parseFloat(activeData(p,'mat','eur'));
+      var mid=r.value*eur+checksSum(p);
+      o.textContent=euro(f(mid*0.86))+' – '+euro(f(mid*1.14))+' €';
+      v.textContent=r.value;
+    }
+    r.addEventListener('input',calc); bindSeg(p,'mat',calc); bindChecks(p,calc); calc();
   })();
 
   // BONUS
