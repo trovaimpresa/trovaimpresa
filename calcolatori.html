@@ -99,6 +99,7 @@
     <button data-t="infissi">🪟 Infissi</button>
     <button data-t="tetto">🏚️ Tetto</button>
     <button data-t="facciata">🎨 Facciata</button>
+    <button data-t="pavimento">🪵 Pavimento</button>
     <button data-t="bonus">💶 Bonus</button>
   </div>
 
@@ -237,6 +238,21 @@
     </div></div>
     <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Sopralluogo per la cifra esatta.</div></div>
     <a class="golink" href="/quanto-costa-rifare-la-facciata.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- PAVIMENTO -->
+  <section class="panel" data-p="pavimento">
+    <h2>Quanto costa posare il pavimento</h2>
+    <p class="sub">Materiale + posa, IVA esclusa.</p>
+    <div class="field"><label>Superficie: <span class="val" data-v="mq">80 mq</span></label><input type="range" data-r="mq" min="5" max="250" value="80" step="5"></div>
+    <div class="field"><label>Tipo di pavimento</label><div class="seg" data-s="tipo"><button data-eur="35">Laminato</button><button data-eur="50" class="active">Gres std</button><button data-eur="75">Gres grande</button><button data-eur="90">Parquet</button></div></div>
+    <div class="field"><label>Extra (al mq)</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="14" checked> Rimozione vecchio <span class="price">+14 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="18"> Rifare massetto <span class="price">+18 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="8"> Nuovi battiscopa <span class="price">+8 €/mq</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Sopralluogo sul sottofondo per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-posare-il-pavimento.html">Leggi la guida completa →</a>
   </section>
 
   <!-- BONUS -->
@@ -415,6 +431,21 @@
       var per=eur+checksSum(p);
       var mid=r.value*per;
       o.textContent=euro(f(mid*0.86))+' – '+euro(f(mid*1.16))+' €';
+      pm.textContent='circa '+euro(per)+' €/mq';
+      v.textContent=r.value+' mq';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'tipo',calc); bindChecks(p,calc); calc();
+  })();
+
+  // PAVIMENTO
+  (function(){
+    var p=document.querySelector('[data-p=pavimento]'), r=p.querySelector('[data-r=mq]'), v=p.querySelector('[data-v=mq]'), o=p.querySelector('[data-o=out]'), pm=p.querySelector('[data-o=permq]');
+    function f(x){return Math.round(x/100)*100;}
+    function calc(){
+      var eur=parseFloat(activeData(p,'tipo','eur'));
+      var per=eur+checksSum(p);
+      var mid=r.value*per;
+      o.textContent=euro(f(mid*0.86))+' – '+euro(f(mid*1.14))+' €';
       pm.textContent='circa '+euro(per)+' €/mq';
       v.textContent=r.value+' mq';
     }
