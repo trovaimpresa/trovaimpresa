@@ -97,6 +97,7 @@
     <button data-t="idraulico">🚿 Idraulico</button>
     <button data-t="condizionatore">❄️ Condizionatore</button>
     <button data-t="infissi">🪟 Infissi</button>
+    <button data-t="tetto">🏚️ Tetto</button>
     <button data-t="bonus">💶 Bonus</button>
   </div>
 
@@ -205,6 +206,21 @@
     </div></div>
     <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="hint">Rilievo misure per la cifra esatta.</div></div>
     <a class="golink" href="/quanto-costa-cambiare-gli-infissi.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- TETTO -->
+  <section class="panel" data-p="tetto">
+    <h2>Quanto costa rifare il tetto</h2>
+    <p class="sub">Metri quadri di falda, IVA esclusa. Amianto a parte.</p>
+    <div class="field"><label>Superficie tetto: <span class="val" data-v="mq">120 mq</span></label><input type="range" data-r="mq" min="30" max="400" value="120" step="10"></div>
+    <div class="field"><label>Tipo di intervento</label><div class="seg" data-s="tipo"><button data-eur="100">Solo manto</button><button data-eur="200" class="active">Isolato/ventilato</button><button data-eur="300">Nuova struttura</button></div></div>
+    <div class="field"><label>Extra (al mq)</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="15" checked> Ponteggio <span class="price">+15 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="25" checked> Rimozione vecchia copertura <span class="price">+25 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="18"> Grondaie e lattoneria <span class="price">+18 €/mq</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Non include lo smaltimento amianto. Sopralluogo per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-rifare-il-tetto.html">Leggi la guida completa →</a>
   </section>
 
   <!-- BONUS -->
@@ -357,6 +373,21 @@
       v.textContent=r.value;
     }
     r.addEventListener('input',calc); bindSeg(p,'mat',calc); bindChecks(p,calc); calc();
+  })();
+
+  // TETTO
+  (function(){
+    var p=document.querySelector('[data-p=tetto]'), r=p.querySelector('[data-r=mq]'), v=p.querySelector('[data-v=mq]'), o=p.querySelector('[data-o=out]'), pm=p.querySelector('[data-o=permq]');
+    function f(x){return Math.round(x/100)*100;}
+    function calc(){
+      var eur=parseFloat(activeData(p,'tipo','eur'));
+      var per=eur+checksSum(p);
+      var mid=r.value*per;
+      o.textContent=euro(f(mid*0.88))+' – '+euro(f(mid*1.14))+' €';
+      pm.textContent='circa '+euro(per)+' €/mq';
+      v.textContent=r.value+' mq';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'tipo',calc); bindChecks(p,calc); calc();
   })();
 
   // BONUS
