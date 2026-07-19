@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controlla se il preventivo del bagno è gonfiato — Strumento gratuito | TrovaImpresa</title>
+<meta name="description" content="Inserisci le voci del tuo preventivo per rifare il bagno e scopri in un minuto quali prezzi sono nella norma e quali sono gonfiati. Gratis, senza registrazione.">
+<link rel="canonical" href="https://trovaimpresa.com/controlla-preventivo-bagno">
+<meta property="og:title" content="Controlla se il preventivo del bagno è gonfiato | TrovaImpresa">
+<meta property="og:description" content="Verifica voce per voce se il tuo preventivo per il bagno è onesto o gonfiato. Strumento gratuito.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/controlla-preventivo-bagno">
+<meta property="og:image" content="https://trovaimpresa.com/logo.png">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;
+    --primary-dark:#0047b3;
+    --primary-soft:#eaf2ff;
+    --accent:#ff8800;
+    --accent-dark:#e67a00;
+    --ok:#15803d; --ok-bg:#e9f7ef;
+    --warn:#b7791f; --warn-bg:#fff8e6;
+    --bad:#c0362c; --bad-bg:#fdecea;
+    --low:#5a6b8c; --low-bg:#eef1f7;
+    --text:#1a1a1a; --muted:#6b7280; --line:#e5e7eb;
+    --radius:14px;
+    --font:'Trebuchet MS','Segoe UI',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font);background:#f4f7fc;color:var(--text);line-height:1.6}
+  a{color:var(--primary-dark)}
+  /* Navbar TrovaImpresa */
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:60px}
+  .navbar .menu{display:flex;gap:22px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  /* Header */
+  .tool-header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:48px 24px;text-align:center}
+  .tool-header h1{font-size:32px;margin-bottom:12px;line-height:1.2}
+  .tool-header p{font-size:17px;max-width:640px;margin:0 auto;opacity:.95}
+  .container{max-width:760px;margin:0 auto;padding:36px 24px}
+  .card{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:26px;margin-bottom:26px}
+  .card h2{color:var(--primary-dark);font-size:22px;margin-bottom:6px}
+  .card .sub{color:var(--muted);font-size:15px;margin-bottom:18px}
+  .field{margin:16px 0}
+  .field label{display:block;font-weight:bold;margin-bottom:6px;font-size:15px}
+  .field .hint{font-weight:normal;color:var(--muted);font-size:13px}
+  input[type=number]{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;font-family:inherit;-moz-appearance:textfield}
+  input[type=number]:focus{outline:none;border-color:var(--primary)}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .seg button{flex:1;min-width:90px;padding:11px 8px;border:1.5px solid var(--line);background:#fff;border-radius:10px;font-size:15px;font-weight:bold;color:var(--text);cursor:pointer;transition:.15s}
+  .seg button.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .voci{display:grid;gap:12px;margin-top:6px}
+  .voce{display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:center}
+  .voce .name{font-size:15px;font-weight:bold}
+  .voce .name small{display:block;font-weight:normal;color:var(--muted);font-size:12px}
+  .voce input{padding:10px 12px}
+  .btn-analyze{width:100%;background:var(--accent);color:#fff;border:none;padding:16px;border-radius:12px;font-size:17px;font-weight:bold;cursor:pointer;font-family:inherit;margin-top:22px;transition:.15s}
+  .btn-analyze:hover{background:var(--accent-dark)}
+  /* Risultati */
+  #results{display:none}
+  .verdict{border-radius:14px;padding:22px;text-align:center;margin-bottom:20px;color:#fff}
+  .verdict h3{font-size:24px;margin-bottom:6px}
+  .verdict p{font-size:15px;opacity:.95}
+  .verdict.v-ok{background:var(--ok)}
+  .verdict.v-warn{background:var(--warn)}
+  .verdict.v-bad{background:var(--bad)}
+  .rowline{display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;margin-bottom:10px;border:1px solid var(--line)}
+  .rowline .tag{font-size:12px;font-weight:bold;padding:4px 10px;border-radius:20px;white-space:nowrap}
+  .rowline .info{flex:1}
+  .rowline .info .t{font-weight:bold;font-size:15px}
+  .rowline .info .d{font-size:13px;color:var(--muted)}
+  .rowline .amt{font-weight:bold;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .r-ok{background:var(--ok-bg)} .r-ok .tag{background:var(--ok);color:#fff}
+  .r-warn{background:var(--warn-bg)} .r-warn .tag{background:var(--warn);color:#fff}
+  .r-bad{background:var(--bad-bg)} .r-bad .tag{background:var(--bad);color:#fff}
+  .r-low{background:var(--low-bg)} .r-low .tag{background:var(--low);color:#fff}
+  .cta-group{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+  .cta{display:block;text-align:center;padding:15px 18px;border-radius:12px;font-weight:bold;font-size:16px;text-decoration:none;transition:.15s}
+  .cta-primary{background:var(--accent);color:#fff}
+  .cta-primary:hover{background:var(--accent-dark)}
+  .cta-secondary{background:#fff;color:var(--primary-dark);border:2px solid var(--primary)}
+  .cta-secondary:hover{background:var(--primary-soft)}
+  .disclaimer{font-size:13px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:26px 24px;color:var(--muted);font-size:13px;text-align:center}
+  @media(max-width:600px){
+    .navbar{padding:10px 16px}.navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .tool-header h1{font-size:25px}.container{padding:24px 16px}.card{padding:20px}
+    .voce{grid-template-columns:1fr 110px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/blog.html">Guide e Costi</a>
+    <a href="/cerca-artigiani.html" class="menu-btn">Trova un artigiano</a>
+  </div>
+</nav>
+
+<header class="tool-header">
+  <h1>Il preventivo del tuo bagno è gonfiato?</h1>
+  <p>Inserisci le voci che hai sul preventivo. Ti dico in un minuto quali prezzi sono nella norma e quali sono troppo alti. Gratis, senza registrazione.</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Compila le voci del preventivo</h2>
+    <p class="sub">Non serve averle tutte: inserisci solo gli importi che hai. Metti le cifre <strong>IVA esclusa</strong> per un confronto corretto.</p>
+
+    <div class="field">
+      <label>Dimensione del bagno <span class="hint">(serve per calcolare la posa al metro quadro)</span></label>
+      <input type="number" id="mq" min="1" max="30" step="1" placeholder="es. 6" value="6"> <span class="hint">mq</span>
+    </div>
+
+    <div class="field">
+      <label>Livello delle finiture</label>
+      <div class="seg" id="livello">
+        <button data-k="0.85">Economico</button>
+        <button data-k="1" class="active">Medio</button>
+        <button data-k="1.4">Alto / lusso</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Importi per voce <span class="hint">(in €, lascia vuoto quelle che non hai)</span></label>
+      <div class="voci" id="voci">
+        <div class="voce"><div class="name">Demolizione e smaltimento <small>rimozione + discarica</small></div><input type="number" min="0" step="50" data-v="demolizione" placeholder="€"></div>
+        <div class="voce"><div class="name">Impianto idraulico <small>tubi acqua e scarichi</small></div><input type="number" min="0" step="50" data-v="idraulico" placeholder="€"></div>
+        <div class="voce"><div class="name">Impianto elettrico <small>punti luce e prese</small></div><input type="number" min="0" step="50" data-v="elettrico" placeholder="€"></div>
+        <div class="voce"><div class="name">Massetto e impermeabilizzazione <small>sottofondi + guaina</small></div><input type="number" min="0" step="50" data-v="massetto" placeholder="€"></div>
+        <div class="voce"><div class="name">Piastrelle — materiale <small>solo l'acquisto</small></div><input type="number" min="0" step="50" data-v="piastrelle" placeholder="€"></div>
+        <div class="voce"><div class="name">Posa piastrelle — manodopera <small>totale posa</small></div><input type="number" min="0" step="50" data-v="posa" placeholder="€"></div>
+        <div class="voce"><div class="name">Sanitari e rubinetteria <small>WC, lavabo, box doccia…</small></div><input type="number" min="0" step="50" data-v="sanitari" placeholder="€"></div>
+        <div class="voce"><div class="name">Manodopera e finiture <small>montaggi, silicone, pulizia</small></div><input type="number" min="0" step="50" data-v="manodopera" placeholder="€"></div>
+      </div>
+    </div>
+
+    <button class="btn-analyze" id="analyze">Controlla il preventivo →</button>
+  </div>
+
+  <div id="results">
+    <div class="verdict" id="verdict"><h3 id="vTitle"></h3><p id="vText"></p></div>
+    <div class="card">
+      <h2>Analisi voce per voce</h2>
+      <p class="sub">Confronto con i prezzi reali di cantiere 2026 in Italia, adattati ai tuoi metri quadri e al livello scelto.</p>
+      <div id="rows"></div>
+    </div>
+    <div class="cta-group">
+      <a href="/cerca-artigiani.html" class="cta cta-primary">Trova un artigiano vicino a te per un secondo preventivo →</a>
+      <a href="/quanto-costa-rifare-il-bagno.html" class="cta cta-secondary">Leggi la guida completa ai costi del bagno →</a>
+    </div>
+    <p class="disclaimer">Questo strumento dà una stima orientativa basata sui prezzi medi di mercato. Ogni cantiere è diverso: prezzi più alti possono essere giustificati da materiali di pregio, difficoltà logistiche o lavori extra. Usa il risultato come punto di partenza per fare le domande giuste, non come verità assoluta.</p>
+  </div>
+
+</div>
+
+<footer>
+  TrovaImpresa — trova imprese edili e artigiani verificati nella tua zona. I prezzi indicati sono stime orientative e possono variare per zona, materiali e condizioni del cantiere.
+</footer>
+
+<script>
+(function(){
+  var mqEl = document.getElementById('mq');
+  var livBtns = document.querySelectorAll('#livello button');
+  var k = 1;
+  livBtns.forEach(function(b){ b.addEventListener('click', function(){
+    livBtns.forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active'); k = parseFloat(b.dataset.k);
+  });});
+
+  // Benchmark base (finiture medie, bagno ~5-6 mq). [min, max]
+  // "perMq": la voce scala coi metri quadri. "fixedish": scala poco.
+  var BM = {
+    demolizione:{min:700,max:1500,mq:true,liv:false,label:'Demolizione e smaltimento'},
+    idraulico:{min:1200,max:2800,mq:false,liv:false,label:'Impianto idraulico'},
+    elettrico:{min:600,max:1400,mq:false,liv:false,label:'Impianto elettrico'},
+    massetto:{min:800,max:1600,mq:true,liv:false,label:'Massetto e impermeabilizzazione'},
+    piastrelle:{min:700,max:2500,mq:true,liv:true,label:'Piastrelle (materiale)'},
+    posa:{min:1000,max:2200,mq:true,liv:false,label:'Posa piastrelle'},
+    sanitari:{min:1000,max:3500,mq:false,liv:true,label:'Sanitari e rubinetteria'},
+    manodopera:{min:800,max:1500,mq:true,liv:false,label:'Manodopera e finiture'}
+  };
+  var REF_MQ = 5.5; // mq di riferimento dei benchmark
+
+  function euro(n){ return Math.round(n).toLocaleString('it-IT'); }
+
+  function rangeFor(key, mq, k){
+    var b = BM[key];
+    var min = b.min, max = b.max;
+    // posa: benchmark è €/mq -> range totale = mq * (min..max) ; superficie piastrellata ~ 2.2x mq pavimento
+    if(b.mq === 'rate'){
+      var sup = mq * 2.2;
+      return {min: min*sup, max: max*sup, isRate:true, rateMin:min, rateMax:max, sup:sup};
+    }
+    if(b.mq === true){
+      var f = mq / REF_MQ;
+      min = min * f; max = max * f;
+    }
+    if(b.liv){ min = min * k; max = max * k; }
+    return {min:min, max:max, isRate:false};
+  }
+
+  function classify(val, r){
+    if(val < r.min*0.65) return 'low';
+    if(val <= r.max*1.05) return 'ok';
+    if(val <= r.max*1.30) return 'warn';
+    return 'bad';
+  }
+
+  var TAG = {ok:'IN LINEA', warn:'UN PO’ ALTO', bad:'GONFIATO', low:'TROPPO BASSO'};
+  var MSG = {
+    ok:'Prezzo nella norma di mercato.',
+    warn:'Sopra la media: chiedi come mai ed eventualmente contratta.',
+    bad:'Ben oltre i prezzi normali: fatti spiegare questa voce nel dettaglio.',
+    low:'Sospettosamente basso: attenzione a lavoro in nero o materiale scadente.'
+  };
+
+  document.getElementById('analyze').addEventListener('click', function(){
+    var mq = parseFloat(mqEl.value) || 5.5;
+    if(mq < 1) mq = 1;
+    var inputs = document.querySelectorAll('#voci input');
+    var rowsHtml = '', bad=0, warn=0, low=0, ok=0, entered=0;
+
+    inputs.forEach(function(inp){
+      var raw = inp.value.trim();
+      if(raw === '') return;
+      var val = parseFloat(raw);
+      if(isNaN(val) || val < 0) return;
+      entered++;
+      var key = inp.dataset.v;
+      var b = BM[key];
+      var r = rangeFor(key, mq, k);
+      var cls = classify(val, r);
+      if(cls==='bad')bad++; else if(cls==='warn')warn++; else if(cls==='low')low++; else ok++;
+
+      var rangeTxt;
+      if(r.isRate){
+        var perMq = val / r.sup;
+        rangeTxt = 'Normale: '+r.rateMin+'–'+r.rateMax+' €/mq  ·  il tuo: '+euro(perMq)+' €/mq';
+      } else {
+        rangeTxt = 'Normale: '+euro(r.min)+'–'+euro(r.max)+' €';
+      }
+      rowsHtml += '<div class="rowline r-'+cls+'">'+
+        '<span class="tag">'+TAG[cls]+'</span>'+
+        '<div class="info"><div class="t">'+b.label+'</div><div class="d">'+rangeTxt+' — '+MSG[cls]+'</div></div>'+
+        '<div class="amt">'+euro(val)+' €</div>'+
+      '</div>';
+    });
+
+    var res = document.getElementById('results');
+    if(entered === 0){
+      alert('Inserisci almeno una voce del preventivo per fare il controllo.');
+      return;
+    }
+
+    document.getElementById('rows').innerHTML = rowsHtml;
+
+    // Verdetto
+    var v = document.getElementById('verdict');
+    var vt = document.getElementById('vTitle');
+    var vx = document.getElementById('vText');
+    v.className = 'verdict';
+    if(bad >= 1 || warn >= 3){
+      v.classList.add('v-bad');
+      vt.textContent = 'Occhio: preventivo probabilmente gonfiato';
+      vx.textContent = 'Ci sono voci ben sopra i prezzi di mercato. Chiedi un secondo preventivo prima di firmare.';
+    } else if(warn >= 1 || low >= 1){
+      v.classList.add('v-warn');
+      vt.textContent = 'Quasi in linea, ma qualcosa da chiarire';
+      vx.textContent = 'Un paio di voci meritano una domanda. Contratta o confronta con un altro preventivo.';
+    } else {
+      v.classList.add('v-ok');
+      vt.textContent = 'Preventivo in linea coi prezzi di mercato';
+      vx.textContent = 'Le voci che hai inserito rientrano nei prezzi normali di cantiere. Buon segno.';
+    }
+
+    res.style.display = 'block';
+    res.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+})();
+</script>
+
+</body>
+</html>
