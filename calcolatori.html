@@ -98,6 +98,7 @@
     <button data-t="condizionatore">❄️ Condizionatore</button>
     <button data-t="infissi">🪟 Infissi</button>
     <button data-t="tetto">🏚️ Tetto</button>
+    <button data-t="facciata">🎨 Facciata</button>
     <button data-t="bonus">💶 Bonus</button>
   </div>
 
@@ -221,6 +222,21 @@
     </div></div>
     <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Non include lo smaltimento amianto. Sopralluogo per la cifra esatta.</div></div>
     <a class="golink" href="/quanto-costa-rifare-il-tetto.html">Leggi la guida completa →</a>
+  </section>
+
+  <!-- FACCIATA -->
+  <section class="panel" data-p="facciata">
+    <h2>Quanto costa rifare la facciata</h2>
+    <p class="sub">Metri quadri di facciata, IVA esclusa.</p>
+    <div class="field"><label>Superficie facciata: <span class="val" data-v="mq">200 mq</span></label><input type="range" data-r="mq" min="30" max="600" value="200" step="10"></div>
+    <div class="field"><label>Tipo di intervento</label><div class="seg" data-s="tipo"><button data-eur="22">Tinteggiatura</button><button data-eur="57" class="active">Intonaco + pittura</button><button data-eur="90">Rifacimento</button></div></div>
+    <div class="field"><label>Extra (al mq)</label><div class="checks" data-c="ex">
+      <label class="chk"><input type="checkbox" data-add="12" checked> Ponteggio <span class="price">+12 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="10"> Cornicioni e decori <span class="price">+10 €/mq</span></label>
+      <label class="chk"><input type="checkbox" data-add="8"> Ripristino balconi <span class="price">+8 €/mq</span></label>
+    </div></div>
+    <div class="result"><div class="lbl">Stima indicativa</div><div class="amount" data-o="out">—</div><div class="extra" data-o="permq"></div><div class="hint">Sopralluogo per la cifra esatta.</div></div>
+    <a class="golink" href="/quanto-costa-rifare-la-facciata.html">Leggi la guida completa →</a>
   </section>
 
   <!-- BONUS -->
@@ -384,6 +400,21 @@
       var per=eur+checksSum(p);
       var mid=r.value*per;
       o.textContent=euro(f(mid*0.88))+' – '+euro(f(mid*1.14))+' €';
+      pm.textContent='circa '+euro(per)+' €/mq';
+      v.textContent=r.value+' mq';
+    }
+    r.addEventListener('input',calc); bindSeg(p,'tipo',calc); bindChecks(p,calc); calc();
+  })();
+
+  // FACCIATA
+  (function(){
+    var p=document.querySelector('[data-p=facciata]'), r=p.querySelector('[data-r=mq]'), v=p.querySelector('[data-v=mq]'), o=p.querySelector('[data-o=out]'), pm=p.querySelector('[data-o=permq]');
+    function f(x){return Math.round(x/100)*100;}
+    function calc(){
+      var eur=parseFloat(activeData(p,'tipo','eur'));
+      var per=eur+checksSum(p);
+      var mid=r.value*per;
+      o.textContent=euro(f(mid*0.86))+' – '+euro(f(mid*1.16))+' €';
       pm.textContent='circa '+euro(per)+' €/mq';
       v.textContent=r.value+' mq';
     }
