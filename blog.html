@@ -174,27 +174,6 @@
   </header>
 
   <div class="container">
-    <div class="grid" style="margin-bottom:26px">
-      <a class="card" href="quanto-costa-rifare-il-bagno.html">
-        <div class="cover" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0066ff,#0047b3);color:#fff;font-size:44px">🛁</div>
-        <div class="body">
-          <span class="cat">In evidenza · Costi</span>
-          <h2>Quanto costa rifare il bagno nel 2026</h2>
-          <p class="excerpt">Prezzi reali voce per voce, calcolatore gratuito e come riconoscere un preventivo gonfiato. Scritto da chi i bagni li ha rifatti per 25 anni.</p>
-          <span class="date">Guida + strumento</span>
-        </div>
-      </a>
-      <a class="card" href="controlla-preventivo-bagno.html">
-        <div class="cover" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ff8800,#e67a00);color:#fff;font-size:44px">🔍</div>
-        <div class="body">
-          <span class="cat">Strumento gratuito</span>
-          <h2>Il tuo preventivo del bagno è gonfiato?</h2>
-          <p class="excerpt">Inserisci le voci del preventivo e scopri in un minuto quali prezzi sono nella norma e quali troppo alti. Gratis, senza registrazione.</p>
-          <span class="date">Verifica online</span>
-        </div>
-      </a>
-    </div>
-
     <div id="lista" class="grid">
       <div class="stato">Caricamento articoli...</div>
     </div>
@@ -230,7 +209,7 @@
       const box = document.getElementById('lista');
       const { data, error } = await sb
         .from('blog_articoli')
-        .select('titolo, slug, meta_description, immagine, categoria, created_at')
+        .select('titolo, slug, meta_description, immagine, categoria, created_at, url_esterno')
         .eq('pubblicato', true)
         .order('created_at', { ascending: false });
 
@@ -244,7 +223,7 @@
       }
 
       box.innerHTML = data.map(a => `
-        <a class="card" href="articolo.html?slug=${encodeURIComponent(a.slug)}">
+        <a class="card" href="${a.url_esterno ? escapeHtml(a.url_esterno) : 'articolo.html?slug=' + encodeURIComponent(a.slug)}">
           <img class="cover" src="${a.immagine ? escapeHtml(a.immagine) : 'img/blog-placeholder.jpg'}" alt="${escapeHtml(a.titolo)}" onerror="this.style.display='none'">
           <div class="body">
             <span class="cat">${CATEGORIE[a.categoria] || 'Guida'}</span>
