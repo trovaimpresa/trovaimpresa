@@ -41,3 +41,4 @@ Disallow: /login-
 Disallow: /gestionale-
 
 Sitemap: https://trovaimpresa.com/sitemap.xml
+Sitemap: https://trovaimpresa.com/sitemap-seo.xml

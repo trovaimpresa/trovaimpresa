@@ -312,16 +312,12 @@ negozi.forEach(it => {
   generated.push(it.slug + '.html');
 });
 
-// --- Sitemap ---
-const mainPages = ['', 'cerca-artigiani.html', 'cerca-imprese.html', 'cerca-negozi.html',
-  'cerca-professionisti.html', 'bandi.html', 'blog.html', 'offerte-lavoro.html',
-  'subappalto.html', 'prezzi.html', 'pubblicita.html'];
-const allUrls = mainPages.concat(generated);
+// --- Sitemap SEPARATA (non tocca la sitemap.xml esistente) ---
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${allUrls.map(u => `  <url><loc>${BASE}/${u}</loc><lastmod>${TODAY}</lastmod></url>`).join('\n')}
+${generated.map(u => `  <url><loc>${BASE}/${u}</loc><lastmod>${TODAY}</lastmod></url>`).join('\n')}
 </urlset>
 `;
-fs.writeFileSync(path.join(OUT, 'sitemap.xml'), sitemap, 'utf8');
+fs.writeFileSync(path.join(OUT, 'sitemap-seo.xml'), sitemap, 'utf8');
 
-console.log('OK: generate ' + generated.length + ' pagine SEO + sitemap.xml (' + allUrls.length + ' url)');
+console.log('OK: generate ' + generated.length + ' pagine SEO + sitemap-seo.xml (' + generated.length + ' url)');
