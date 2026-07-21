@@ -1,6 +1,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <div id="app-root">
 <style>
   :root{
@@ -195,17 +198,99 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
   .wrap{max-width:1140px}
   header .top-in, nav.tabs{max-width:1140px}
-  body{zoom:1.2}
+  /* zoom rimosso: rendeva sfocati testi e click su alcuni browser */
+
+  /* ================= RESTYLING PRO 2026 ================= */
+  #app-root{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f4f6f8;font-size:14.5px}
+  :root{--line:#e5e9ee;--bg:#f4f6f8;--muted:#64707c;--ink:#161e26;--accent:#2456a6;--accent-d:#1a3f7d;--accent-soft:#e8effa}
+  .emic{width:1em;height:1em;vertical-align:-.13em;display:inline-block;flex:0 0 auto}
+  #appview{align-items:stretch;min-height:100vh}
+  .side{width:238px;flex:0 0 238px;background:#fff;border-right:1px solid var(--line);padding:16px 13px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .side .back{background:#f1f4f7;color:#3c4854;border:none;border-radius:8px;width:34px;height:34px;padding:0;font-size:16px;font-weight:700;cursor:pointer;flex:0 0 auto}
+  .side .back:hover{background:#e6ebf0}
+  .side-brand{min-width:0}
+  .side-brand h1{font-size:15.5px;font-weight:800;letter-spacing:-.2px;color:#141c24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side-brand small{display:block;font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side .btn-new{width:100%;margin:0 0 14px;background:var(--accent);color:#fff;border-radius:9px;padding:11px;font-size:13.5px;font-weight:700;box-shadow:none}
+  .side nav.tabs{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;max-width:none;overflow:visible}
+  .side nav.tabs button{display:flex;align-items:center;gap:10px;width:100%;color:#5b6672;font-size:13.5px;font-weight:600;padding:9px 11px;border-radius:8px;border-bottom:none;text-align:left}
+  .side nav.tabs button svg{width:17px;height:17px;flex:0 0 auto;opacity:.85}
+  .side nav.tabs button:hover{background:#f1f4f7;color:#1c2530}
+  .side nav.tabs button.active{background:var(--accent-soft);color:var(--accent-d);border-bottom:none}
+  .main{flex:1;min-width:0;background:var(--bg)}
+  .main .wrap{padding-top:26px;max-width:1080px}
+  .kpi,.money,.card,.job,.fatt-row,.fatt-tot{border-radius:12px;border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,32,.04)}
+  .job{border-left-width:4px}
+  .kpi .n{font-size:26px}
+  .money .n{font-size:20px}
+  .sec-head h2{font-size:19px;font-weight:800;letter-spacing:-.3px}
+  .chip{border-radius:8px;font-size:12.5px;padding:6px 12px;background:#fff}
+  .chip.on{background:var(--accent-d);border-color:var(--accent-d)}
+  .ja{border-radius:7px;font-size:12px;display:inline-flex;align-items:center;gap:5px}
+  .overlay{background:rgba(15,22,30,.5);backdrop-filter:blur(2px)}
+  .sheet{max-width:640px;min-height:0;margin:38px auto;border-radius:14px;padding:26px 26px 16px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+  .field input,.field select,.field textarea{border-radius:9px}
+  .landing-top{background:linear-gradient(135deg,#14324e,#1a3f7d);position:relative}
+  .lt-actions{position:absolute;top:12px;right:14px;display:flex;gap:8px}
+  .lt-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:9px;padding:8px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .lt-btn.gold{background:#f5b301;border-color:#f5b301;color:#3d2e00;font-weight:800}
+  @media(max-width:640px){.lt-actions{position:static;justify-content:center;margin-bottom:12px}}
+  .panel-card{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,32,.06);padding:18px;min-height:132px}
+  .panel-card:hover{box-shadow:0 8px 22px rgba(16,24,32,.11)}
+  .panel-card h2{font-size:18px;font-weight:800;letter-spacing:-.3px;color:#161e26}
+  .panel-card .pc-ic{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:21px;margin-bottom:2px}
+  .panel-card .pc-ic svg{width:22px;height:22px}
+  .panel-card .pc-meta{font-size:12.5px;font-weight:600;color:var(--muted)}
+  .pc-del{background:#f1f4f7;color:#8a949e;width:30px;height:30px;border-radius:8px;font-size:13px}
+  .pc-del:hover{background:#fdecea;color:#c0392b}
+  .landing-top .mk svg{width:34px;height:34px}
+  .new-rep-btn{border:1.5px dashed #c6cfd8;color:var(--accent-d);background:#fff}
+  .burger{display:none;margin-left:auto;background:#f1f4f7;border:none;border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;color:#3c4854;flex:0 0 auto}
+  .burger svg{width:19px;height:19px}
+  .rep-grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:760px){.rep-grid{grid-template-columns:1fr 1fr}}
+  .rep-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(16,24,32,.04)}
+  .rep-card h3{font-size:14px;font-weight:800;margin-bottom:12px;color:#3a463f;text-transform:uppercase;letter-spacing:.4px}
+  .rep-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .rep-table td{padding:8px 4px;border-bottom:1px solid var(--line)}
+  .rep-table td:last-child{text-align:right;font-weight:700}
+  .rep-bar-wrap{display:flex;align-items:flex-end;gap:8px;height:150px;padding-top:6px}
+  .rep-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+  .rep-bars{display:flex;gap:3px;align-items:flex-end;height:120px}
+  .rep-bar{width:16px;border-radius:4px 4px 0 0;min-height:2px}
+  .rep-bar.inc{background:var(--accent)} .rep-bar.sp{background:#e07b54}
+  .rep-bar-lab{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .rep-legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);font-weight:600}
+  .rep-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
+  @media(max-width:880px){
+    #appview{flex-direction:column}
+    .side{width:100%;flex:0 0 auto;height:auto;position:sticky;top:0;z-index:30;padding:10px 12px 8px;border-right:none;border-bottom:1px solid var(--line)}
+    .side-top{margin-bottom:0}
+    .burger{display:flex}
+    .side .btn-new,.side nav.tabs{display:none}
+    .side.open .btn-new{display:block;margin:8px 0}
+    .side.open nav.tabs{display:flex;flex-direction:column}
+    .side.open .side-top{margin-bottom:10px}
+    .sheet{margin:0;min-height:100vh;border-radius:0}
+  }
 </style>
 
 <!-- LANDING -->
 <div id="landing">
-  <div class="landing-top"><div class="mk">🛠️</div><h1>Gestionale Multiservizi</h1><small>Scegli il reparto</small></div>
+  <div class="landing-top">
+    <div class="lt-actions">
+      <button class="lt-btn" data-action="azienda">⚙ Dati azienda</button>
+      <button class="lt-btn" data-action="export-json">Backup (JSON)</button>
+      <button class="lt-btn gold" data-action="export-excel">⬇ Esporta dati</button>
+    </div>
+    <div class="mk">🏪</div><h1>Gestionale Negozio</h1><small>Scegli il reparto</small>
+  </div>
   <div class="wrap">
     <p class="landing-sub">Ogni reparto è separato: lavori, clienti, squadra e calendario non si mischiano.</p>
     <div class="panels" id="panels"></div>
     <button class="new-rep-btn" data-action="new-panel">➕ Nuovo reparto</button>
-    <div style="text-align:center;margin-top:28px"><button class="az-btn" data-action="azienda">⚙ Dati azienda (per le fatture)</button></div>
+    <p style="text-align:center;font-size:12.5px;color:#8a949e;margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
     <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid #e0e0e0">
       <p style="color:#666;font-size:14px;margin-bottom:10px">Sei un collaboratore o una segretaria?</p>
       <a href="gestionale-invito.html" style="display:inline-block;background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;padding:13px 24px;font-weight:600">Entra qui →</a>
@@ -215,31 +300,36 @@
 
 <!-- APP -->
 <div id="appview" style="display:none">
-  <header class="top">
-    <div class="top-in">
-      <div class="brand">
-        <button class="back" data-action="home">← Pannelli</button>
-        <div><h1 id="panel-name">—</h1><small id="panel-sub">Reparto</small></div>
-      </div>
-      <button class="btn-new" data-action="new-job">+ Nuovo lavoro</button>
+  <aside class="side">
+    <div class="side-top">
+      <button class="back" data-action="home">←</button>
+      <div class="side-brand"><h1><span class="rep-dot" id="rep-dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;background:#9aa7b2"></span><span id="panel-name">—</span></h1><small id="panel-sub">Reparto</small></div>
+      <button class="burger" data-action="burger" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
     </div>
+    <button class="btn-new" data-action="new-job">+ Nuovo lavoro</button>
     <nav class="tabs">
-      <button data-tab="riepilogo" class="active">Riepilogo</button>
-      <button data-tab="prodotti">Prodotti</button>
-      <button data-tab="magazzino">Magazzino</button>
-      <button data-tab="fornitori">Fornitori</button>
-      <button data-tab="movimenti">Movimenti</button>
-      <button data-tab="agenda" style="display:none">Agenda operatore</button>
-      <button data-tab="calendario">Calendario</button>
-      <button data-tab="lavori" style="display:none">Lavori</button>
-      <button data-tab="fatture">Fatture</button>
-      <button data-tab="galleria">Galleria</button>
-      <button data-tab="clienti" style="display:none">Condomini</button>
-      <button data-tab="squadra" style="display:none">Squadra</button>
-      <button data-tab="scadenzario" id="tab-scadenzario" style="display:none">Scadenzario</button>
+      <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
+      <button data-tab="prodotti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg><span>Prodotti</span></button>
+      <button data-tab="magazzino"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect x="6" y="10" width="12" height="12"/></svg><span>Magazzino</span></button>
+      <button data-tab="fornitori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18h-5"/><path d="M22 18h1a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.3-.7l-3.4-3.4a1 1 0 0 0-.7-.3H14" transform="translate(-2 0)"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Fornitori</span></button>
+      <button data-tab="movimenti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg><span>Movimenti</span></button>
+      <button data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg><span>Report</span></button>
+      <button data-tab="agenda" style="display:none"><span>Agenda operatore</span></button>
+      <button data-tab="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><span>Calendario</span></button>
+      <button data-tab="lavori" style="display:none"><span>Lavori</span></button>
+      <button data-tab="fatture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg><span>Fatture</span></button>
+      <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
+      <button data-tab="clienti" style="display:none"><span>Condomini</span></button>
+      <button data-tab="squadra" style="display:none"><span>Squadra</span></button>
+      <button data-tab="scadenzario" id="tab-scadenzario" style="display:none"><span>Scadenzario</span></button>
     </nav>
-  </header>
+    <div class="side-foot" style="margin-top:auto;display:flex;flex-direction:column;gap:5px;padding-top:12px;border-top:1px solid var(--line)">
+      <button data-action="azienda" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:#5b6672;font-family:inherit;font-size:13px;font-weight:600;padding:9px 11px;border-radius:8px;text-align:left;cursor:pointer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg><span>Dati azienda</span></button>
+      <button data-action="export-excel" style="display:flex;align-items:center;gap:10px;width:100%;background:#fff8e1;border:1px solid #f2d16b;color:#7a5a00;font-family:inherit;font-size:13px;font-weight:700;padding:9px 11px;border-radius:8px;text-align:left;cursor:pointer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Esporta i miei dati</span></button>
+    </div>
+  </aside>
 
+  <div class="main">
   <div class="wrap">
     <section id="riepilogo" class="active">
       <div class="rie-intro">
@@ -397,6 +487,13 @@
         <label class="up-btn" for="lf-file">＋ Aggiungi foto</label></div>
       <div class="thumbs" id="lf-grid"></div>
     </section>
+
+    <section id="report">
+      <div class="sec-head"><h2>Report</h2><button class="add" data-action="report-csv">⬇ Esporta CSV</button></div>
+      <div class="gal-intro">L'andamento del negozio: vendite e acquisti mese per mese, i prodotti che vendono di più e lo stato del magazzino.</div>
+      <div id="rep-body"></div>
+    </section>
+  </div>
   </div>
 </div>
 
@@ -407,6 +504,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function(){
   const KEY="gestionale_multiservizi_v5";
@@ -663,20 +761,20 @@
     $("#panels").innerHTML=ps.length?ps.map(p=>{
       const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
       const tot=mine.length, df=mine.filter(l=>l.stato!=="fatto").length;
-      return `<div class="panel-card" data-action="enter" data-p="${p.id}" style="background:linear-gradient(135deg,${p.a},${p.ad})">
+      return `<div class="panel-card" data-action="enter" data-p="${p.id}" style="border-top:4px solid ${p.a}">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
-        <span class="pc-ic">${p.icon}</span><h2>${esc(p.nome)}</h2>
+        <span class="pc-ic" style="background:${p.as};color:${p.ad}">${p.icon}</span><h2>${esc(p.nome)}</h2>
         <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
     }).join(""):`<div class="empty-rep">Ancora nessun reparto.<br>Creane uno qui sotto 👇</div>`;
   }
 
   function enterPanel(id){
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
-    const r=document.documentElement.style;
-    r.setProperty("--accent",p.a);r.setProperty("--accent-d",p.ad);r.setProperty("--accent-soft",p.as);
+    /* colore primario fisso: il colore del reparto resta solo come pallino accanto al nome */
+    const dot=$("#rep-dot");if(dot)dot.style.background=p.a;
     $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Categoria "+p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
-    $("#landing").style.display="none";$("#appview").style.display="block";
+    $("#landing").style.display="none";$("#appview").style.display="flex";
     filter={stato:"tutti",q:""};$("#f-search").value="";cal=new Date();
     galFilter={op:"",tipo:""};$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===""));
     agFilter={op:"",stato:"aperti"};$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="aperti"));
@@ -1614,6 +1712,7 @@
   $$("nav.tabs button").forEach(b=>b.onclick=()=>{
     $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
     $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
+    const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
     window.scrollTo({top:0,behavior:"smooth"});
   });
 
@@ -1823,6 +1922,173 @@
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
+
+  /* ===== RESTYLING + STRUMENTI 2026: icone SVG, export dati, report negozio ===== */
+  const _NICONS={
+    "🗺":'<path d="M9 3 4 5v16l5-2 6 2 5-2V3l-5 2-6-2z"/><path d="M9 3v16"/><path d="M15 5v16"/>',
+    "✏":'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+    "🗑":'<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    "📷":'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+    "📄":'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    "💶":'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',
+    "📅":'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+    "📍":'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+    "👤":'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    "📞":'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.5 2.8.7a2 2 0 0 1 1.7 2z"/>',
+    "📝":'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z"/>',
+    "📌":'<path d="M12 17v5"/><path d="M9 10.8 7.5 12.3a1 1 0 0 0 .7 1.7h7.6a1 1 0 0 0 .7-1.7L15 10.8V5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1Z"/>',
+    "📎":'<path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l8.5-8.5a4 4 0 1 1 5.7 5.7l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8"/>',
+    "⚙":'<circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/>',
+    "⬇":'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+    "✔":'<path d="M20 6 9 17l-5-5"/>',
+    "✅":'<circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/>',
+    "▶":'<path d="m6 4 14 8-14 8Z"/>',
+    "↩":'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+    "＋":'<path d="M5 12h14"/><path d="M12 5v14"/>',
+    "➕":'<path d="M5 12h14"/><path d="M12 5v14"/>',
+    "🔓":'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
+    "📦":'<path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/>',
+    "🏪":'<path d="m2 7 2-4h16l2 4"/><path d="M4 7v13a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7"/><path d="M2 7h20"/><path d="M9 21v-6h6v6"/>',
+    "🚚":'<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18h-5"/><path d="M14 8h4l4 4v5a1 1 0 0 1-1 1h-1"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+    "🏢":'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/>',
+    "🛒":'<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+    "🌳":'<path d="M8 19a4 4 0 0 1-1-7.9 5.5 5.5 0 0 1 10 0A4 4 0 0 1 16 19Z"/><path d="M12 19v3"/>',
+    "🌿":'<path d="M11 20A7 7 0 0 1 4 13c0-4 3-8 9-9 4.5-.8 7 1 8 2-1 1-2.5 3.5-3 6-1 5-4 8-7 8Z"/><path d="M4 21c3-5 7-8 12-9"/>',
+    "🧹":'<path d="m9.1 14.9 7.7-7.7a2.1 2.1 0 1 1 3 3l-7.7 7.7"/><path d="M9 15c-2 0-5 1-6 6 3 0 6-1 8-4Z"/>',
+    "🧱":'<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 12h18"/><path d="M9 5v7"/><path d="M15 12v7"/>',
+    "🔧":'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    "⚡":'<path d="M13 2 3 14h7l-1 8 11-12h-7l1-8z"/>',
+    "🎨":'<circle cx="12" cy="12" r="10"/><circle cx="8.5" cy="10" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="15.5" cy="10" r="1"/><path d="M12 22a2 2 0 0 1 0-4 4 4 0 0 0 4-4 6 6 0 0 0-4-10"/>',
+    "🚿":'<path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/><path d="M14 17v.01"/><path d="M10 16v.01"/><path d="M13 13v.01"/><path d="M16 10v.01"/><path d="M11 20v.01"/><path d="M17 14v.01"/><path d="M20 11v.01"/>',
+    "🪚":'<path d="M3 15h8l6-6 4 4-6 6H3z"/><path d="M7 15v3"/><path d="M11 15v3"/>',
+    "🛠":'<path d="m15 12-8.5 8.5a2.12 2.12 0 1 1-3-3L12 9"/><path d="m17.6 3.2 3.4 3.3-2 2-3.4-3.4z"/><path d="m14 7 3 3"/>',
+    "🏠":'<path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/>',
+    "🪜":'<path d="M8 3v18"/><path d="M16 3v18"/><path d="M8 8h8"/><path d="M8 13h8"/><path d="M8 18h8"/>',
+    "🏗":'<path d="M3 21h18"/><path d="M6 21V7l9-4v18"/><path d="M6 11h9"/><path d="M15 7h4v4"/>',
+    "🔌":'<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M6 8h12v4a6 6 0 0 1-12 0Z"/>'
+  };
+  const _NEMO_KEYS=Object.keys(_NICONS).join("|");
+  const _NEMO_RE=new RegExp("("+_NEMO_KEYS+")️?","g");
+  const _NEMO_TEST=new RegExp("("+_NEMO_KEYS+")");
+  const _nSvg=e=>'<svg class="emic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+_NICONS[e]+'</svg>';
+  let _nObs=null;
+  function _nIconizza(){
+    if(_nObs)_nObs.disconnect();
+    ["#appview","#sheet","#landing"].forEach(sel=>{
+      const root=document.querySelector(sel);if(!root)return;
+      const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){
+        if(!t.nodeValue||!_NEMO_TEST.test(t.nodeValue))return NodeFilter.FILTER_REJECT;
+        return t.parentElement&&t.parentElement.closest("textarea,script,style")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+      const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
+      nodi.forEach(t=>{
+        const span=document.createElement("span");
+        span.innerHTML=t.nodeValue.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m])).replace(_NEMO_RE,(m,e)=>_nSvg(e));
+        t.parentNode.replaceChild(span,t);
+      });
+    });
+    ["#appview","#sheet","#landing"].forEach(sel=>{const el=document.querySelector(sel);if(el)_nObs.observe(el,{childList:true,subtree:true,characterData:true});});
+  }
+  _nObs=new MutationObserver(()=>_nIconizza());
+  setTimeout(_nIconizza,0);
+
+  /* ---- ESPORTAZIONE DATI NEGOZIO (Excel + JSON) ---- */
+  async function _fetchAllExportNeg(){
+    if(!sb||!sbUid){toast("Devi essere loggato");return null;}
+    toast("Preparo l'esportazione…");
+    const [prod,forn,mov,lav,az]=await Promise.all([
+      sb.from("neg_prodotti").select("*").eq("user_id",sbUid),
+      sb.from("neg_fornitori").select("*").eq("user_id",sbUid),
+      sb.from("neg_movimenti").select("*").eq("user_id",sbUid),
+      sb.from("gest_lavori").select("*").eq("user_id",sbUid),
+      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
+    ]);
+    return {prod:prod.data||[],forn:forn.data||[],mov:mov.data||[],lav:(lav.data||[]).filter(l=>+l.importo>0),az:az.data||null};
+  }
+  async function esportaExcel(){
+    if(!window.XLSX){toast("Modulo Excel non ancora caricato, riprova tra un attimo");return;}
+    const D=await _fetchAllExportNeg();if(!D)return;
+    const wb=XLSX.utils.book_new();
+    const add=(nome,rows)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{Vuoto:"—"}]),nome);
+    add("Prodotti",D.prod.map(p=>({Nome:p.nome||"",Categoria:p.categoria||"",Codice:p.codice||"","Prezzo €":+p.prezzo||0,Quantità:+p.quantita||0,"Soglia minima":+p.soglia_minima||0,"Valore €":(+p.prezzo||0)*(+p.quantita||0),Note:p.note||""})));
+    add("Fornitori",D.forn.map(f=>({Nome:f.nome||"",Telefono:f.telefono||"",Email:f.email||"",Indirizzo:f.indirizzo||"","P.IVA":f.piva||"",Note:f.note||""})));
+    add("Movimenti",D.mov.map(m=>({Tipo:m.tipo==="vendita"?"Vendita":"Ordine fornitore",Prodotto:m.prodotto||"",Quantità:+m.quantita||0,"Importo €":+m.importo||0,"Cliente/Fornitore":m.controparte||"",Data:m.data_mov||"",Note:m.note||""})));
+    add("Fatture",D.lav.map(l=>({Descrizione:l.descrizione||"","Importo €":+l.importo||0,Stato:l.fatt_stato||"none",Data:l.data_fatto||l.data_prevista||""})));
+    if(D.az)add("Dati azienda",[{Nome:D.az.nome||"","P.IVA":D.az.piva||"",Indirizzo:D.az.indirizzo||"",Telefono:D.az.tel||"",Email:D.az.email||"",IBAN:D.az.iban||""}]);
+    XLSX.writeFile(wb,"gestionale-negozio-trovaimpresa-"+todayStr()+".xlsx");
+    toast("Dati esportati in Excel ✅");
+  }
+  async function esportaJson(){
+    const D=await _fetchAllExportNeg();if(!D)return;
+    const out={esportato_il:new Date().toISOString(),formato:"trovaimpresa-negozio-v1",azienda:D.az,prodotti:D.prod,fornitori:D.forn,movimenti:D.mov,fatture:D.lav};
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}));
+    a.download="backup-negozio-trovaimpresa-"+todayStr()+".json";a.click();URL.revokeObjectURL(a.href);
+    toast("Backup JSON scaricato ✅");
+  }
+
+  /* ---- REPORT NEGOZIO ---- */
+  let repNegData=null;
+  async function renderReportNegozio(){
+    const box=$("#rep-body");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📊</div><p>Nessun dato</p><small>Accedi per vedere i report</small></div>`;return;}
+    const [{data:mov},{data:prod}]=await Promise.all([
+      sb.from("neg_movimenti").select("tipo,prodotto,quantita,importo,data_mov").eq("user_id",sbUid),
+      sb.from("neg_prodotti").select("nome,prezzo,quantita,soglia_minima").eq("user_id",sbUid)
+    ]);
+    const M=mov||[],P=prod||[];
+    repNegData={M,P};
+    const now=new Date(),mkeys=[];
+    for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mkeys.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
+    const vend=mkeys.map(k=>M.filter(m=>m.tipo==="vendita"&&(m.data_mov||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0));
+    const acq=mkeys.map(k=>M.filter(m=>m.tipo!=="vendita"&&(m.data_mov||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0));
+    const mx=Math.max(...vend,...acq,1);
+    const bars=mkeys.map((k,i)=>`<div class="rep-bar-col"><div class="rep-bars">
+      <div class="rep-bar inc" style="height:${Math.round(vend[i]/mx*118)}px" title="Venduto ${eur(vend[i])}"></div>
+      <div class="rep-bar sp" style="height:${Math.round(acq[i]/mx*118)}px" title="Acquistato ${eur(acq[i])}"></div></div>
+      <span class="rep-bar-lab">${mesi[+k.slice(5,7)-1].slice(0,3)}</span></div>`).join("");
+    const perProd={};
+    M.filter(m=>m.tipo==="vendita").forEach(m=>{const k=(m.prodotto||"—").trim();perProd[k]=(perProd[k]||0)+(+m.importo||0);});
+    const top=Object.entries(perProd).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const totV=M.filter(m=>m.tipo==="vendita").reduce((s,m)=>s+(+m.importo||0),0);
+    const totA=M.filter(m=>m.tipo!=="vendita").reduce((s,m)=>s+(+m.importo||0),0);
+    const valMag=P.reduce((s,p)=>s+(+p.prezzo||0)*(+p.quantita||0),0);
+    const sotto=P.filter(p=>+p.quantita<=+p.soglia_minima&&p.soglia_minima!=null);
+    box.innerHTML=`<div class="rep-grid">
+      <div class="rep-card" style="grid-column:1/-1"><h3>📈 Venduto e acquistato — ultimi 6 mesi</h3>
+        <div class="rep-bar-wrap">${bars}</div>
+        <div class="rep-legend"><span><i style="background:var(--accent)"></i>Venduto</span><span><i style="background:#e07b54"></i>Acquistato</span></div></div>
+      <div class="rep-card"><h3>🏪 Situazione negozio</h3><table class="rep-table">
+        <tr><td>Prodotti a catalogo</td><td>${P.length}</td></tr>
+        <tr><td>Sotto scorta</td><td style="color:${sotto.length?'var(--danger)':'inherit'}">${sotto.length}</td></tr>
+        <tr><td>Valore magazzino</td><td>${eur(valMag)}</td></tr>
+        <tr><td>Venduto totale</td><td>${eur(totV)}</td></tr>
+        <tr><td>Acquistato totale</td><td style="color:var(--danger)">−${eur(totA)}</td></tr>
+        <tr><td><b>Saldo</b></td><td style="color:${totV-totA>=0?'var(--fatto)':'var(--danger)'}">${eur(totV-totA)}</td></tr></table></div>
+      <div class="rep-card"><h3>🏆 Prodotti più venduti</h3><table class="rep-table">
+        ${top.length?top.map(([n,v])=>`<tr><td>${esc(n)}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Registra le vendite nei Movimenti per vedere la classifica.</td></tr>`}</table></div>
+    </div>`;
+  }
+  function reportCsvNeg(){
+    if(!repNegData||!repNegData.M.length){toast("Nessun movimento da esportare");return;}
+    const num=n=>String(+n||0).replace(".",",");
+    const rows=[["Tipo","Prodotto","Quantità","Importo","Cliente/Fornitore","Data"]];
+    repNegData.M.forEach(m=>rows.push([m.tipo==="vendita"?"Vendita":"Ordine",m.prodotto||"",num(m.quantita),num(m.importo),m.controparte||"",m.data_mov||""]));
+    const csv="﻿"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+    a.download="movimenti-negozio-"+todayStr()+".csv";a.click();URL.revokeObjectURL(a.href);
+    toast("CSV esportato ⬇");
+  }
+  document.addEventListener("click",e=>{
+    const t=e.target.closest("[data-action]");if(!t)return;
+    const a=t.dataset.action;
+    if(a==="export-excel")return esportaExcel();
+    if(a==="export-json")return esportaJson();
+    if(a==="report-csv")return reportCsvNeg();
+    if(a==="burger"){const s=document.querySelector(".side");if(s)s.classList.toggle("open");return;}
+  });
+  const _tabRep=document.querySelector('[data-tab="report"]');
+  if(_tabRep)_tabRep.addEventListener("click",renderReportNegozio);
 
   load().then(()=>{if(!cur)renderLanding();});
 })();
