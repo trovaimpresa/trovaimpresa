@@ -293,7 +293,36 @@
   .panel-card{border-radius:14px;box-shadow:0 6px 18px rgba(16,24,32,.12)}
   .new-rep-btn{border-radius:12px}
 
+  /* colore primario fisso (blu professionale) — il colore reparto resta solo nel pallino */
+  :root{--accent:#2456a6;--accent-d:#1a3f7d;--accent-soft:#e8effa}
+  .rep-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;background:#9aa7b2}
+  .burger{display:none;margin-left:auto;background:#f1f4f7;border:none;border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;color:#3c4854;flex:0 0 auto}
+  .burger svg{width:19px;height:19px}
+
+  /* tabelle desktop (Lavori / Fatture) */
+  .dtab{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,32,.04)}
+  .dtab th{background:#f7f9fb;text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:#5b6672;font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .dtab th[data-action]{cursor:pointer;user-select:none}
+  .dtab th[data-action]:hover{color:var(--accent-d)}
+  .dtab td{padding:10px 12px;border-bottom:1px solid #eef1f4;vertical-align:middle}
+  .dtab tbody tr:last-child td{border-bottom:none}
+  .dtab tbody tr:hover{background:#f8fafc}
+  .t-act{display:flex;gap:4px;flex-wrap:wrap}
+  .t-act .ja{padding:6px 8px}
+  .stato.pagata{background:#e3f3e8;color:var(--fatto)}
+  .stato.emessa{background:#fcf0e0;color:var(--warn)}
+  .stato.nonf{background:#eef1ef;color:#5a6660}
+
   /* mobile: sidebar diventa barra in alto */
+  @media(max-width:880px){
+    .burger{display:flex}
+    .side .btn-new,.side nav.tabs{display:none}
+    .side.open .btn-new{display:block}
+    .side.open nav.tabs{display:flex;flex-direction:column;overflow:visible}
+    .side.open nav.tabs button{width:100%}
+    .side-top{margin-bottom:0}
+    .side.open .side-top{margin-bottom:10px}
+  }
   @media(max-width:880px){
     #appview{flex-direction:column}
     .side{width:100%;flex:0 0 auto;height:auto;position:sticky;top:0;z-index:30;padding:10px 12px 8px;border-right:none;border-bottom:1px solid var(--line)}
@@ -326,7 +355,8 @@
   <aside class="side">
     <div class="side-top">
       <button class="back" data-action="home">←</button>
-      <div class="side-brand"><h1 id="panel-name">—</h1><small id="panel-sub">Reparto</small></div>
+      <div class="side-brand"><h1><span class="rep-dot" id="rep-dot"></span><span id="panel-name">—</span></h1><small id="panel-sub">Reparto</small></div>
+      <button class="burger" data-action="burger" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
     </div>
     <button class="btn-new" data-action="new-job">+ Nuovo lavoro</button>
     <nav class="tabs">
@@ -741,6 +771,7 @@
     "↩":'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
     "✔":'<path d="M20 6 9 17l-5-5"/>',
     "✅":'<circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/>',
+    "💬":'<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5Z"/>',
     "＋":'<path d="M5 12h14"/><path d="M12 5v14"/>'
   };
   const _EMO_KEYS=Object.keys(_ICONS).join("|");
@@ -809,8 +840,8 @@
 
   function enterPanel(id){
     cur=id;const p=(state.panels||[]).find(x=>x.id===id);if(!p)return goHome();
-    const r=document.documentElement.style;
-    r.setProperty("--accent",p.a);r.setProperty("--accent-d",p.ad);r.setProperty("--accent-soft",p.as);
+    /* colore primario fisso (blu professionale): il colore del reparto resta solo come pallino accanto al nome */
+    const dot=$("#rep-dot");if(dot)dot.style.background=p.a;
     $("#panel-name").textContent=p.nome;$("#panel-sub").textContent="Reparto "+p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="flex";
@@ -942,20 +973,60 @@
         <button class="ja" data-action="del-job-supa" data-id="${esc(l.id)}">🗑 Elimina</button>
       </div></div>`;
   }
+  /* Lavori: tabella ordinabile su desktop, card su mobile */
+  let jobsSort={k:"data_prevista",d:1};
+  const _deskTab=()=>window.matchMedia("(min-width:881px)").matches;
+  function _waLavoro(l,opTel){
+    const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
+    const isPro=ruoloUtente==='professionista';
+    const termCap=isPro?"Pratica":"Lavoro";
+    const intro=isPro?"Ciao! C'è una nuova pratica per te.":"Ciao! C'è un nuovo lavoro per te.";
+    const waText=encodeURIComponent(intro+"\n"+termCap+": "+(l.descrizione||termCap)+"\nDove: "+(l.dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
+    const waTel=waCleanTel(opTel);
+    return waTel?("https://wa.me/"+waTel+"?text="+waText):("https://wa.me/?text="+waText);
+  }
   async function renderJobs(){
     const box=$("#jobs-list");if(!box)return;
-    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;return;}
+    if(!sb||!sbUid){box.style.display="grid";box.innerHTML=`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;return;}
     const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     let L=data||[];
-    const {data:ops}=await sb.from("gest_operatori").select("id,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const {data:ops}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     const telMap=Object.fromEntries((ops||[]).map(o=>[o.id,o.telefono||""]));
+    const opName=Object.fromEntries((ops||[]).map(o=>[o.id,o.nome||""]));
     if(filter.stato==="fatto")L=L.filter(l=>l.stato==="fatto");
     else if(filter.stato==="da_fare")L=L.filter(l=>l.stato!=="fatto");
     else if(filter.stato==="in_corso")L=L.filter(l=>l.stato==="in_corso");
     else if(filter.stato==="da_incassare")L=[];
     if(filter.q){const q=filter.q.toLowerCase();L=L.filter(l=>(l.descrizione||"").toLowerCase().includes(q)||(l.dove||"").toLowerCase().includes(q));}
-    L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
-    box.innerHTML=L.length?L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join(""):`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;
+    if(!L.length){box.style.display="grid";box.innerHTML=`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;return;}
+    if(!_deskTab()){
+      L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+      box.style.display="grid";
+      box.innerHTML=L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join("");
+      return;
+    }
+    const val=l=>jobsSort.k==="op"?(opName[l.operatore_id]||""):String(l[jobsSort.k]||"");
+    L.sort((a,b)=>val(a).toLowerCase().localeCompare(val(b).toLowerCase())*jobsSort.d);
+    const arrow=k=>jobsSort.k===k?(jobsSort.d>0?" ↑":" ↓"):"";
+    const th=(k,lab)=>`<th data-action="jobs-sort" data-k="${k}">${lab}${arrow(k)}</th>`;
+    box.style.display="block";
+    box.innerHTML=`<table class="dtab"><thead><tr>
+      ${th("descrizione","Lavoro")}${th("dove","Dove")}${th("data_prevista","Data")}${th("op","Operatore")}${th("stato","Stato")}<th>Azioni</th>
+      </tr></thead><tbody>`+L.map(l=>{
+      const dp=esc(l.data_prevista||""), fatto=l.stato==="fatto";
+      return `<tr><td><b>${esc(l.descrizione||"—")}</b></td>
+      <td>${esc(l.dove||"—")}</td><td style="white-space:nowrap">${fdate(l.data_prevista)}</td>
+      <td>${esc(opName[l.operatore_id]||"—")}</td>
+      <td><span class="stato ${l.stato}">${statoLabel[l.stato]||l.stato}</span></td>
+      <td><div class="t-act">
+        ${l.stato==="da_fare"?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}" title="Avvia">▶</button>`:""}
+        ${!fatto?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}" title="Segna fatto">✔</button>`:`<button class="ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}" title="Riapri">↩</button>`}
+        <button class="ja" data-action="edit-job" data-id="${esc(l.id)}" title="Modifica">✏</button>
+        <button class="ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}" title="Foto">📷</button>
+        ${l.dove?`<button class="ja" data-action="map" data-q="${esc(l.dove)}" title="Mappa">🗺</button>`:""}
+        <button class="ja" data-action="sq-wa" data-wa="${esc(_waLavoro(l,telMap[l.operatore_id]||""))}" title="Avvisa su WhatsApp">💬</button>
+        <button class="ja del" data-action="del-job-supa" data-id="${esc(l.id)}" title="Elimina">🗑</button>
+      </div></td></tr>`;}).join("")+`</tbody></table>`;
   }
 
   let lfLavoroId=null;
@@ -1049,15 +1120,54 @@
     const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
     $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div></div>
       <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div></div>`;
-    let h="";
-    h+=`<div class="mini-title">📄 Da fatturare (lavori finiti)</div>`;
-    h+=daFatt.length?daFatt.map(l=>fattRow(l,`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`)).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
-    h+=`<div class="mini-title">💶 Emesse · da incassare</div>`;
-    h+=daInc.length?daInc.map(l=>fattRow(l,`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`)).join(""):`<p class="fatt-empty">Nessuna fattura da incassare.</p>`;
-    h+=`<div class="mini-title">✅ Pagate</div>`;
-    h+=pagate.length?pagate.map(l=>fattRow(l,`<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`)).join(""):`<p class="fatt-empty">Ancora nessuna fattura pagata.</p>`;
-    $("#fatt-body").innerHTML=h;
+    const box=$("#fatt-body");
+    if(!_deskTab()){
+      box.style.display="grid";
+      let h="";
+      h+=`<div class="mini-title">📄 Da fatturare (lavori finiti)</div>`;
+      h+=daFatt.length?daFatt.map(l=>fattRow(l,`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`)).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
+      h+=`<div class="mini-title">💶 Emesse · da incassare</div>`;
+      h+=daInc.length?daInc.map(l=>fattRow(l,`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`)).join(""):`<p class="fatt-empty">Nessuna fattura da incassare.</p>`;
+      h+=`<div class="mini-title">✅ Pagate</div>`;
+      h+=pagate.length?pagate.map(l=>fattRow(l,`<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`)).join(""):`<p class="fatt-empty">Ancora nessuna fattura pagata.</p>`;
+      box.innerHTML=h;
+      return;
+    }
+    /* desktop: tabella unica ordinabile */
+    const rank=l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none"?0:(l.fatt_stato==="emessa"?1:(l.fatt_stato==="pagata"?2:3));
+    let R=L.filter(l=>rank(l)<3);
+    if(!R.length){box.style.display="grid";box.innerHTML=`<div class="empty"><div class="ic">📄</div><p>Nessuna fattura qui</p><small>Le fatture nascono dai lavori finiti con un importo</small></div>`;return;}
+    R.sort((a,b)=>{
+      let r;
+      if(fattSort.k==="importo")r=(+a.importo||0)-(+b.importo||0);
+      else if(fattSort.k==="data")r=String(a.data_fatto||a.data_prevista||"").localeCompare(String(b.data_fatto||b.data_prevista||""));
+      else if(fattSort.k==="descrizione")r=String(a.descrizione||"").toLowerCase().localeCompare(String(b.descrizione||"").toLowerCase());
+      else r=rank(a)-rank(b)||String(a.data_fatto||a.data_prevista||"").localeCompare(String(b.data_fatto||b.data_prevista||""));
+      return r*fattSort.d;
+    });
+    const farrow=k=>fattSort.k===k?(fattSort.d>0?" ↑":" ↓"):"";
+    const fth=(k,lab)=>`<th data-action="fatt-sort" data-k="${k}">${lab}${farrow(k)}</th>`;
+    const fsBadge=l=>{const fs=l.fatt_stato||"none";
+      return fs==="pagata"?`<span class="stato pagata">Pagata</span>`:fs==="emessa"?`<span class="stato emessa">Emessa</span>`:`<span class="stato nonf">Da fatturare</span>`;};
+    box.style.display="block";
+    box.innerHTML=`<table class="dtab"><thead><tr>
+      ${fth("descrizione","Lavoro")}${fth("data","Data")}${fth("importo","Importo")}${fth("rank","Stato")}<th>Azioni</th>
+      </tr></thead><tbody>`+R.map(l=>{
+      const fs=l.fatt_stato||"none", pdf=fatturaPdfCache[l.id];
+      return `<tr><td><b>${esc(l.descrizione||"Lavoro")}</b></td>
+      <td style="white-space:nowrap">${fdate(l.data_fatto||l.data_prevista)}</td>
+      <td style="white-space:nowrap;font-weight:700">${eur(l.importo)}</td>
+      <td>${fsBadge(l)}</td>
+      <td><div class="t-act">
+        ${rank(l)===0?`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`:""}
+        ${fs==="emessa"?`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`:""}
+        ${fs==="pagata"?`<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa" title="Riporta a emessa">↩</button>`:""}
+        <button class="ja" data-action="pdf" data-id="${l.id}" title="Scarica PDF cortesia">📄 PDF</button>
+        ${pdf?`<button class="ja" data-action="open-fattura" data-id="${esc(pdf.id)}" title="Apri fattura caricata">📄 Apri</button>`:""}
+        <button class="ja" data-action="upload-fattura" data-id="${l.id}" title="Carica fattura PDF">📎</button>
+      </div></td></tr>`;}).join("")+`</tbody></table>`;
   }
+  let fattSort={k:"rank",d:1};
 
   let calJobs=[];
   async function renderCal(){
@@ -1979,7 +2089,12 @@
     if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevPdf(id);
     if(a==="report-csv")return reportCsv();
+    if(a==="jobs-sort"){const k=t.dataset.k;jobsSort=jobsSort.k===k?{k,d:-jobsSort.d}:{k,d:1};renderJobs();return;}
+    if(a==="fatt-sort"){const k=t.dataset.k;fattSort=fattSort.k===k?{k,d:-fattSort.d}:{k,d:1};renderFatture();return;}
+    if(a==="burger"){const s=document.querySelector(".side");if(s)s.classList.toggle("open");return;}
   });
+  /* al cambio desktop/mobile ridisegna liste (tabella ↔ card) */
+  try{window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderFatture();}});}catch(e){}
 
   function openSheet(html){$("#sheet").innerHTML=html;$("#overlay").classList.add("open");}
   function closeSheet(){$("#overlay").classList.remove("open");}
@@ -2084,6 +2199,7 @@
   $$("nav.tabs button").forEach(b=>b.onclick=()=>{
     $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
     $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
+    const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
     window.scrollTo({top:0,behavior:"smooth"});
   });
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
