@@ -343,6 +343,14 @@
     <div class="panels" id="panels"></div>
     <button class="new-rep-btn" data-action="new-panel">➕ Nuovo reparto</button>
     <div style="text-align:center;margin-top:28px"><button class="az-btn" data-action="azienda">⚙ Dati azienda (per le fatture)</button></div>
+    <div style="max-width:560px;margin:16px auto 0;background:#fff;border:1px solid #e5e9ee;border-radius:14px;padding:16px 18px;box-shadow:0 1px 2px rgba(16,24,32,.04)">
+      <p style="font-weight:800;font-size:14px;color:#161e26">I tuoi dati sono tuoi</p>
+      <p style="font-size:13px;color:#64707c;margin:4px 0 12px;line-height:1.45">Scarica quando vuoi tutto quello che hai inserito: lavori, clienti, preventivi, spese e scadenze. Nessun vincolo.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="az-btn" data-action="export-excel">⬇ Esporta tutto in Excel</button>
+        <button class="az-btn" data-action="export-json">Backup completo (JSON)</button>
+      </div>
+    </div>
     <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid #e0e0e0">
       <p style="color:#666;font-size:14px;margin-bottom:10px">Sei un collaboratore o una segretaria?</p>
       <a href="gestionale-invito.html" style="display:inline-block;background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;padding:13px 24px;font-weight:600">Entra qui →</a>
@@ -511,6 +519,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
@@ -2072,6 +2081,54 @@
     toast("CSV esportato ⬇");
   }
 
+  /* ---- ESPORTAZIONE DATI (portabilità: Excel + JSON) ---- */
+  async function _fetchAllExport(){
+    if(!sb||!sbUid){toast("Devi essere loggato");return null;}
+    toast("Preparo l'esportazione…");
+    const [mest,lav,cli,ops,scad,prev,righe,spese,az]=await Promise.all([
+      sb.from("gest_mestieri").select("*").eq("user_id",sbUid),
+      sb.from("gest_lavori").select("*").eq("user_id",sbUid),
+      sb.from("gest_clienti").select("*").eq("user_id",sbUid),
+      sb.from("gest_operatori").select("*").eq("user_id",sbUid),
+      sb.from("gest_scadenze").select("*").eq("user_id",sbUid),
+      sb.from("gest_preventivi").select("*").eq("user_id",sbUid),
+      sb.from("gest_preventivo_righe").select("*").eq("user_id",sbUid),
+      sb.from("gest_spese").select("*").eq("user_id",sbUid),
+      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
+    ]);
+    return {mest:mest.data||[],lav:lav.data||[],cli:cli.data||[],ops:ops.data||[],scad:scad.data||[],prev:prev.data||[],righe:righe.data||[],spese:spese.data||[],az:az.data||null};
+  }
+  async function esportaExcel(){
+    if(!window.XLSX){toast("Modulo Excel non ancora caricato, riprova tra un attimo");return;}
+    const D=await _fetchAllExport();if(!D)return;
+    const mN=Object.fromEntries(D.mest.map(m=>[m.id,m.nome]));
+    const cN=Object.fromEntries(D.cli.map(c=>[c.id,c.nome]));
+    const oN=Object.fromEntries(D.ops.map(o=>[o.id,o.nome]));
+    const lN=Object.fromEntries(D.lav.map(l=>[l.id,l.descrizione||""]));
+    const pN=Object.fromEntries(D.prev.map(p=>[p.id,p.numero]));
+    const wb=XLSX.utils.book_new();
+    const add=(nome,rows)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{Vuoto:"—"}]),nome);
+    add("Lavori",D.lav.map(l=>({Reparto:mN[l.mestiere_id]||"",Descrizione:l.descrizione||"",Dove:l.dove||"",Cliente:cN[l.cliente_id]||"",Operatore:oN[l.operatore_id]||"",Stato:statoLabel[l.stato]||l.stato||"","Data prevista":l.data_prevista||"","Data fatto":l.data_fatto||"",Ore:+l.ore||0,"Importo €":+l.importo||0,"Stato fattura":l.fatt_stato||"none","N. fattura":l.num_fatt||"",Consuntivo:l.lavoro_svolto||"",Note:l.note||""})));
+    add("Clienti",D.cli.map(c=>({Reparto:mN[c.mestiere_id]||"",Nome:c.nome||"",Indirizzo:c.indirizzo||"",Referente:c.referente||"",Telefono:c.telefono||""})));
+    add("Squadra",D.ops.map(o=>({Reparto:mN[o.mestiere_id]||"",Nome:o.nome||"",Telefono:o.telefono||""})));
+    const tot={};D.righe.forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+    add("Preventivi",D.prev.map(p=>({Numero:p.numero,Titolo:p.titolo||"",Reparto:mN[p.mestiere_id]||"",Cliente:cN[p.cliente_id]||"",Data:p.data||"",Stato:p.stato||"","Totale €":tot[p.id]||0,Note:p.note||""})));
+    add("Voci preventivi",D.righe.map(r=>({"N. preventivo":pN[r.preventivo_id]||"",Descrizione:r.descrizione||"","Q.tà":+r.qta||1,"Prezzo €":+r.prezzo||0,"Totale €":(+r.qta||1)*(+r.prezzo||0)})));
+    add("Spese",D.spese.map(s=>({Lavoro:lN[s.lavoro_id]||"",Descrizione:s.descrizione||"","Importo €":+s.importo||0,Data:s.data||""})));
+    add("Scadenze",D.scad.map(s=>({Reparto:mN[s.mestiere_id]||"",Titolo:s.titolo||"",Tipo:s.tipo_pratica||"",Cliente:cN[s.cliente_id]||"","Data scadenza":s.data_scadenza||"",Stato:s.stato||"",Note:s.note||""})));
+    if(D.az)add("Dati azienda",[{Nome:D.az.nome||"","P.IVA":D.az.piva||"",Indirizzo:D.az.indirizzo||"",Telefono:D.az.tel||"",Email:D.az.email||"",IBAN:D.az.iban||""}]);
+    XLSX.writeFile(wb,"gestionale-trovaimpresa-"+todayStr()+".xlsx");
+    toast("Dati esportati in Excel ✅");
+  }
+  async function esportaJson(){
+    const D=await _fetchAllExport();if(!D)return;
+    const out={esportato_il:new Date().toISOString(),formato:"trovaimpresa-gestionale-v1",azienda:D.az,mestieri:D.mest,clienti:D.cli,operatori:D.ops,lavori:D.lav,spese:D.spese,preventivi:D.prev,preventivo_righe:D.righe,scadenze:D.scad};
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}));
+    a.download="backup-gestionale-trovaimpresa-"+todayStr()+".json";a.click();URL.revokeObjectURL(a.href);
+    toast("Backup JSON scaricato ✅");
+  }
+
   /* click handler dei nuovi strumenti (separato: non tocca quello esistente) */
   document.addEventListener("click",e=>{
     const t=e.target.closest("[data-action]");if(!t)return;
@@ -2092,6 +2149,8 @@
     if(a==="jobs-sort"){const k=t.dataset.k;jobsSort=jobsSort.k===k?{k,d:-jobsSort.d}:{k,d:1};renderJobs();return;}
     if(a==="fatt-sort"){const k=t.dataset.k;fattSort=fattSort.k===k?{k,d:-fattSort.d}:{k,d:1};renderFatture();return;}
     if(a==="burger"){const s=document.querySelector(".side");if(s)s.classList.toggle("open");return;}
+    if(a==="export-excel")return esportaExcel();
+    if(a==="export-json")return esportaJson();
   });
   /* al cambio desktop/mobile ridisegna liste (tabella ↔ card) */
   try{window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderFatture();}});}catch(e){}
