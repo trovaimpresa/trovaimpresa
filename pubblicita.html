@@ -325,7 +325,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const PREZZI_MENSILI = {
   'hero-sx': 20, 'hero-dx': 20,
   'imprese-sx': 12, 'imprese-dx': 12,
-  'pannello-sx': 10, 'pannello-dx': 10,
   'inserzioni-sx': 8, 'inserzioni-dx': 8,
   'profilo-sx-1': 5, 'profilo-sx-2': 5, 'profilo-dx-1': 5, 'profilo-dx-2': 5
 };
@@ -341,11 +340,10 @@ function calcolaPrezzo(spazioId, periodoKey) {
   return Math.round(mensile * p.mesi * (1 - p.sconto) * 100) / 100;
 }
 
-// Definizione 18 spazi raggruppati per fascia (ordine = gerarchia visiva)
+// Definizione 16 spazi raggruppati per fascia (ordine = gerarchia visiva; "pannello-sx/dx" rimossi a luglio 2026)
 const FASCE = [
   { nome: 'Hero — banner in alto', desc: 'Massima visibilità, sopra ai risultati', spazi: ['hero-sx','hero-dx'] },
   { nome: "Trova un'impresa", desc: 'Nella sezione di ricerca imprese', spazi: ['imprese-sx','imprese-dx'] },
-  { nome: 'Pannello', desc: 'Accanto al pannello utente', spazi: ['pannello-sx','pannello-dx'] },
   { nome: 'Inserzioni lavoro', desc: 'Accanto alle offerte di lavoro', spazi: ['inserzioni-sx','inserzioni-dx'] },
   { nome: 'Profilo', desc: 'Nelle pagine profilo impresa', spazi: ['profilo-sx-1','profilo-sx-2','profilo-dx-1','profilo-dx-2'] }
 ];

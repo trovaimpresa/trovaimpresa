@@ -7,7 +7,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 const PREZZI_MENSILI = {
   'hero-sx': 20, 'hero-dx': 20,
   'imprese-sx': 12, 'imprese-dx': 12,
-  'pannello-sx': 10, 'pannello-dx': 10,
+  /* 'pannello-sx' e 'pannello-dx' rimossi (luglio 2026): gli spazi nei pannelli non esistono più */
   'piano-sx': 9, 'piano-dx': 9,
   'inserzioni-sx': 8, 'inserzioni-dx': 8,
   'subappalto-sx-1': 6, 'subappalto-sx-2': 6, 'subappalto-dx-1': 6, 'subappalto-dx-2': 6,
