@@ -313,6 +313,21 @@
   .stato.emessa{background:#fcf0e0;color:var(--warn)}
   .stato.nonf{background:#eef1ef;color:#5a6660}
 
+  /* grafico guadagno/perdita per lavoro */
+  .mlav{padding:10px 0;border-bottom:1px solid #eef1f4}
+  .mlav:last-child{border-bottom:none}
+  .mlav-top{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13.5px;margin-bottom:6px}
+  .mlav-top b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mbadge{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;white-space:nowrap}
+  .mbadge.pos{background:#e3f3e8;color:#1c7a43}
+  .mbadge.neg{background:#fdecea;color:#c0392b}
+  .mbadge.zero{background:#eef1ef;color:#5a6660}
+  .mlav-bars{display:flex;flex-direction:column;gap:2px}
+  .mlav-bar{height:7px;border-radius:4px}
+  .mlav-bar.inc{background:var(--accent)}
+  .mlav-bar.sp{background:#e07b54}
+  .mlav-sub{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px}
+
   /* mobile: sidebar diventa barra in alto */
   @media(max-width:880px){
     .burger{display:flex}
@@ -2045,7 +2060,25 @@
     const totSp=SP.reduce((s,x)=>s+(+x.importo||0),0);
     const anno=String(now.getFullYear());
     const incAnno=L.filter(l=>l.fatt_stato==="pagata"&&(l.data_fatto||"").slice(0,4)===anno).reduce((s,l)=>s+(+l.importo||0),0);
+    /* guadagno/perdita per singolo lavoro (importo − spese) */
+    const spPer={};SP.forEach(x=>{spPer[x.lavoro_id]=(spPer[x.lavoro_id]||0)+(+x.importo||0);});
+    let ML=L.filter(l=>(+l.importo||0)>0||spPer[l.id]).map(l=>({d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0}));
+    ML.forEach(m=>m.marg=m.inc-m.sp);
+    ML.sort((a,b)=>a.marg-b.marg);
+    const mlMax=Math.max(...ML.map(m=>Math.max(m.inc,m.sp)),1);
+    const nPos=ML.filter(m=>m.marg>0).length,nNeg=ML.filter(m=>m.marg<0).length,nZero=ML.filter(m=>m.marg===0).length;
+    const mlRows=ML.slice(0,15).map(m=>{
+      const badge=m.marg>0?`<span class="mbadge pos">▲ Guadagno ${eur(m.marg)}</span>`:m.marg<0?`<span class="mbadge neg">▼ Perdita ${eur(Math.abs(m.marg))}</span>`:`<span class="mbadge zero">Pareggio</span>`;
+      return `<div class="mlav"><div class="mlav-top"><b>${esc(m.d)}</b>${badge}</div>
+      <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.sp/mlMax*100,m.sp?1:0)}%"></div></div>
+      <div class="mlav-sub">Incasso ${eur(m.inc)} · Spese ${eur(m.sp)}</div></div>`;
+    }).join("");
+    const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>💶 Guadagno o perdita per lavoro</h3>
+      <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--accent)"></i>Incasso</span><span><i style="background:#e07b54"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
+      ${ML.length?mlRows:`<p class="fatt-empty">Metti un importo nei lavori e registra le spese (dentro "Modifica" del lavoro) per vedere qui il margine.</p>`}
+      ${ML.length>15?`<p class="fatt-empty" style="margin-top:8px">Mostro i 15 lavori col margine più basso: se un lavoro non compare, è tra quelli in positivo.</p>`:""}</div>`;
     box.innerHTML=`<div class="rep-grid">
+      ${mlCard}
       <div class="rep-card"><h3>📈 Incassi e spese — ultimi 6 mesi</h3>
         <div class="rep-bar-wrap">${bars}</div>
         <div class="rep-legend"><span><i style="background:var(--accent)"></i>Incassato</span><span><i style="background:#e07b54"></i>Spese</span></div></div>
