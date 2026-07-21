@@ -545,4 +545,7 @@ $("#nav-agenda").onclick=()=>{renderCal();renderDay();show("agenda");};
 $("#nav-clienti").onclick=async()=>{await loadClienti();show("clienti");};
 $("#nav-scadenze").onclick=async()=>{await loadScadenze();show("scadenze");};
 $("#nav-fatture").onclick=async()=>{await loadFatture();show("fatture");};
-$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);
+$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
+</script>
+</body>
+</html>

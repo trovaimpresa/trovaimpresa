@@ -56,7 +56,7 @@
   </div>
 
   <!-- successo -->
-  <div id="done" class="card hidden"><div class="big-ok"><div class="e">✅</div><h2>Sei collegato!</h2><p style="color:var(--muted);font-size:14px">Da ora puoi aprire la tua agenda e vedere i lavori che ti assegnano.</p></div></div>
+  <div id="done" class="card hidden"><div class="big-ok"><div class="e">✅</div><h2>Sei collegato!</h2><p style="color:var(--muted);font-size:14px;margin-bottom:16px">Da ora puoi aprire la tua agenda e vedere i lavori che ti assegnano.</p><a class="btn" href="gestionale-operatore.html" style="display:inline-block;text-decoration:none;text-align:center">Apri la tua agenda →</a></div></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -108,4 +108,8 @@ $("#btn-redeem").onclick=async()=>{
   const {data,error}=await sb.rpc("gest_redeem_invito",{_codice:codice});
   if(error){msg("Errore: "+error.message);return;}
   if(data&&data.ok){show("done");}
-  else{msg((data&&data.err)||"Codi
+  else{msg((data&&data.err)||"Codice non valido o già usato. Chiedi all'impresa di mandartene uno nuovo.");}
+};
+</script>
+</body>
+</html>
