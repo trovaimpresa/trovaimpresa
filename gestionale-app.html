@@ -937,6 +937,8 @@
         <span class="pc-ic" style="background:${p.as};color:${p.ad}">${p.icon}</span><h2>${esc(p.nome)}</h2>
         <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
     }).join(""):`<div class="empty-rep">Ancora nessun reparto.<br>Creane uno qui sotto 👇</div>`;
+    /* deep link + un solo reparto: entra da solo */
+    if(_deepTab&&ps.length===1)enterPanel(ps[0].id);
   }
 
   function enterPanel(id){
@@ -953,6 +955,16 @@
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
     renderAll();window.scrollTo(0,0);
+    _applyDeepTab(); /* link diretto tipo #preventivi: apre subito la scheda richiesta */
+  }
+  /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
+  let _deepTab=(location.hash||"").replace("#","")||null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","scadenzario"].includes(_deepTab))_deepTab=null;
+  function _applyDeepTab(){
+    if(!_deepTab)return;
+    const b=document.querySelector('nav.tabs button[data-tab="'+_deepTab+'"]');
+    _deepTab=null;
+    if(b)b.click();
   }
   function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();window.scrollTo(0,0);}
 
