@@ -196,6 +196,44 @@
   .wrap{max-width:1140px}
   header .top-in, nav.tabs{max-width:1140px}
   body{zoom:1.2}
+
+  /* ---- UPGRADE 2026: migliorie leggere + nuovi strumenti ---- */
+  .job,.card,.kpi,.money{transition:box-shadow .15s,transform .15s}
+  .job:hover,.card:hover{box-shadow:0 8px 22px rgba(20,40,30,.12);transform:translateY(-1px)}
+  nav.tabs button{letter-spacing:.1px}
+  .stato.bozza{background:#eef1ef;color:#5a6660}
+  .stato.inviato{background:#e4ecfd;color:var(--incorso)}
+  .stato.accettato{background:#e3f3e8;color:var(--fatto)}
+  .stato.rifiutato{background:#fdecea;color:var(--danger)}
+  .prev-tot{font-weight:800;font-size:17px;color:var(--accent-d);letter-spacing:-.3px}
+  .prev-riga{display:grid;grid-template-columns:1fr 64px 92px 34px;gap:6px;margin-bottom:6px}
+  .prev-riga input{width:100%;font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fcfdfc}
+  .prev-riga .rdel{border:1px solid #f0d2cd;background:#fff;color:var(--danger);border-radius:8px;cursor:pointer;font-size:15px}
+  .prev-somma{text-align:right;font-weight:800;font-size:16px;color:var(--accent-d);padding:8px 2px}
+  .spese-list{margin-top:8px}
+  .spesa-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;font-size:13.5px}
+  .spesa-row b{margin-left:auto;white-space:nowrap}
+  .spesa-row .sdel{border:none;background:none;color:var(--danger);font-size:15px;cursor:pointer}
+  .spesa-add{display:grid;grid-template-columns:1fr 100px auto;gap:6px;margin-top:8px}
+  .spesa-add input{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fcfdfc}
+  .spesa-add button{background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;padding:0 14px}
+  .margine-box{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:#f6f8f6;border:1px solid var(--line);border-radius:10px;font-size:13.5px;font-weight:700}
+  .margine-box .neg{color:var(--danger)} .margine-box .pos{color:var(--fatto)}
+  .rep-grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:760px){.rep-grid{grid-template-columns:1fr 1fr}}
+  .rep-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+  .rep-card h3{font-size:14px;font-weight:800;margin-bottom:12px;color:#3a463f;text-transform:uppercase;letter-spacing:.4px}
+  .rep-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .rep-table td{padding:8px 4px;border-bottom:1px solid var(--line)}
+  .rep-table td:last-child{text-align:right;font-weight:700}
+  .rep-bar-wrap{display:flex;align-items:flex-end;gap:8px;height:150px;padding-top:6px}
+  .rep-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+  .rep-bars{display:flex;gap:3px;align-items:flex-end;height:120px}
+  .rep-bar{width:16px;border-radius:4px 4px 0 0;min-height:2px}
+  .rep-bar.inc{background:var(--accent)} .rep-bar.sp{background:#e07b54}
+  .rep-bar-lab{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .rep-legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);font-weight:600}
+  .rep-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
 </style>
 
 <!-- LANDING -->
@@ -228,11 +266,13 @@
       <button data-tab="agenda">Agenda operatore</button>
       <button data-tab="calendario">Calendario</button>
       <button data-tab="lavori">Lavori</button>
+      <button data-tab="preventivi">Preventivi</button>
       <button data-tab="fatture">Fatture</button>
+      <button data-tab="report">Report</button>
       <button data-tab="galleria">Galleria</button>
       <button data-tab="clienti">Condomini</button>
       <button data-tab="squadra">Squadra</button>
-      <button data-tab="scadenzario" id="tab-scadenzario" style="display:none">Scadenzario</button>
+      <button data-tab="scadenzario" id="tab-scadenzario">Scadenzario</button>
     </nav>
   </header>
 
@@ -252,6 +292,11 @@
         <div class="money out"><div class="n" id="k-daincassare">€ 0</div><div class="l">Da incassare</div><div class="sub">Fatture non pagate</div></div>
         <div class="money in"><div class="n" id="k-incassato">€ 0</div><div class="l">Incassato</div><div class="sub">Pagate questo mese</div></div>
         <div class="money ore"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
+      </div>
+      <div class="money-row">
+        <div class="money out"><div class="n" id="k-spese">€ 0</div><div class="l">Spese</div><div class="sub">Materiali e costi questo mese</div></div>
+        <div class="money in"><div class="n" id="k-utile">€ 0</div><div class="l">Utile</div><div class="sub">Incassato − spese del mese</div></div>
+        <div class="money ore"><div class="n" id="k-prev-attesa">0</div><div class="l">Preventivi aperti</div><div class="sub">In attesa di risposta</div></div>
       </div>
       <div class="mini-title">Prossimi lavori da fare</div>
       <div id="prossimi"></div>
@@ -328,6 +373,25 @@
     <section id="scadenzario">
       <div class="sec-head"><h2>Scadenzario</h2><button class="add" data-action="new-scad">+ Nuova</button></div>
       <div class="grid" id="scad-list"></div>
+    </section>
+
+    <section id="preventivi">
+      <div class="sec-head"><h2>Preventivi</h2><button class="add" data-action="new-prev">+ Nuovo preventivo</button></div>
+      <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
+      <div class="chiprow" id="prev-chips">
+        <button class="chip on" data-action="prev-filtro" data-v="tutti">Tutti</button>
+        <button class="chip" data-action="prev-filtro" data-v="bozza">Bozze</button>
+        <button class="chip" data-action="prev-filtro" data-v="inviato">Inviati</button>
+        <button class="chip" data-action="prev-filtro" data-v="accettato">Accettati</button>
+        <button class="chip" data-action="prev-filtro" data-v="rifiutato">Rifiutati</button>
+      </div>
+      <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
+    </section>
+
+    <section id="report">
+      <div class="sec-head"><h2>Report</h2><button class="add" data-action="report-csv">⬇ Esporta CSV</button></div>
+      <div class="gal-intro">L'andamento del reparto: incassi e spese mese per mese, i clienti migliori e le ore della squadra.</div>
+      <div id="rep-body"></div>
     </section>
 
     <section id="lavoro-foto">
@@ -445,8 +509,9 @@
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
     console.log('[gestionale] ruolo utente:',ruoloUtente||'(nessun profilo)');
+    /* scadenzario attivo per tutti i ruoli (imprese: DURC, assicurazioni, mezzi...) */
     const _tabScad=document.querySelector('#tab-scadenzario');
-    if(_tabScad)_tabScad.style.display=(ruoloUtente==='professionista')?'':'none';
+    if(_tabScad)_tabScad.style.display='';
     if(ruoloUtente==='professionista'){
       const sub=document.querySelector('.landing-sub');
       if(sub)sub.textContent="Ogni reparto è separato: pratiche, clienti, collaboratori e calendario non si mischiano.";
@@ -628,7 +693,7 @@
   }
   function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();window.scrollTo(0,0);}
 
-  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderScadenze();}
+  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderScadenze();renderPreventivi();renderReport();}
 
   async function renderRiepilogo(){
     /* contatori, soldi e ore: tutto da gest_lavori su Supabase */
@@ -649,6 +714,20 @@
     $("#k-incorso").textContent=S.filter(l=>l.stato==="in_corso").length;
     $("#k-fatti").textContent=S.filter(l=>l.stato==="fatto"&&thisMonth(l.data_fatto)).length;
     $("#k-lavori").textContent=S.length;
+    /* spese, utile e preventivi aperti (nuove card) */
+    try{
+      const ids=S.map(l=>l.id);
+      let speseMese=0;
+      if(ids.length){
+        const {data:sp}=await sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids);
+        speseMese=(sp||[]).filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
+      }
+      const incMese=S.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
+      if($("#k-spese"))$("#k-spese").textContent=eur(speseMese);
+      if($("#k-utile"))$("#k-utile").textContent=eur(incMese-speseMese);
+      const {data:pv}=await sb.from("gest_preventivi").select("id,stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      if($("#k-prev-attesa"))$("#k-prev-attesa").textContent=(pv||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato").length;
+    }catch(e){}
     const pross=S.filter(l=>l.stato!=="fatto").sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999")).slice(0,5);
     $("#prossimi").innerHTML=pross.length?pross.map(l=>jobCardSupa(l)).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
   }
@@ -981,12 +1060,14 @@
   }
 
   /* SCADENZARIO (solo professionista): tabella gest_scadenze, isolamento user_id+mestiere_id come gest_lavori/gest_clienti */
-  const TIPI_PRATICA=["SCIA","CILA","Permesso di Costruire","Agibilità","Altro"];
+  const tipiScadenza=()=>ruoloUtente==='professionista'
+    ?["SCIA","CILA","Permesso di Costruire","Agibilità","Altro"]
+    :["DURC","Assicurazione","Revisione mezzo","Manutenzione programmata","Certificazione","Pagamento fornitore","Altro"];
   let scadCache=[];
   function _giorniDopo(ds,n){const[y,m,d]=ds.split("-").map(Number);const dt=new Date(y,m-1,d+n);const mm=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");return dt.getFullYear()+"-"+mm+"-"+dd;}
   async function renderScadenze(){
     const box=$("#scad-list");if(!box)return;
-    if(ruoloUtente!=='professionista'||!cur){box.innerHTML="";return;}
+    if(!cur){box.innerHTML="";return;}
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📅</div><p>Nessuna scadenza</p><small>Accedi per gestire lo scadenzario</small></div>`;return;}
     const mid=curMestiere();
     const [{data:sc},{data:cl}]=await Promise.all([
@@ -1018,7 +1099,7 @@
     const mid=curMestiere();
     let cl=[];
     if(sb&&sbUid){const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome");cl=data||[];}
-    const tipoOpts=TIPI_PRATICA.map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
+    const tipoOpts=tipiScadenza().map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===s.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
     openSheet(`<h3>${isNew?"Nuova scadenza":"Modifica scadenza"}</h3>
       <div class="field"><label>Titolo</label><input id="s-tit" value="${esc(s.titolo||"")}" placeholder="Es. Presentazione SCIA"></div>
@@ -1090,6 +1171,13 @@
       <div class="row2">
         <div class="field"><label>Ore lavorate</label><input type="number" id="j-ore" inputmode="decimal" step="0.5" value="${job.ore||""}" placeholder="0"></div>
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
+      <div class="field" id="spese-wrap" style="display:none"><label>💶 Spese e materiali di questo lavoro</label>
+        <div class="spese-list" id="spese-list"></div>
+        <div class="spesa-add">
+          <input id="sp-desc" placeholder="Es. Cemento, noleggio piattaforma...">
+          <input id="sp-imp" type="number" inputmode="decimal" placeholder="€">
+          <button type="button" data-action="spesa-add">+ Aggiungi</button></div>
+        <div class="margine-box" id="margine-box"></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
       <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
@@ -1468,6 +1556,300 @@
     if(body)body.innerHTML=L.length?L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join(""):`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>${agFilter.op?"Questo operatore non ha lavori assegnati":"Assegna i lavori a una persona dalla scheda del lavoro, voce \"Chi ci va\""}</small></div>`;
   }
 
+  /* ============================================================
+     UPGRADE 2026 — Spese/margine, Preventivi, Report
+     ============================================================ */
+  const eur2=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2}).format(+n||0);
+
+  /* ---- SPESE / MARGINE per lavoro ---- */
+  let speseLavoroId=null;
+  async function renderSpeseBlock(lavoroId,importo){
+    speseLavoroId=lavoroId;
+    const wrap=$("#spese-wrap");if(!wrap||!sb||!sbUid)return;
+    wrap.style.display="block";
+    const {data}=await sb.from("gest_spese").select("id,descrizione,importo,data").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
+    const sp=data||[];
+    const tot=sp.reduce((s,x)=>s+(+x.importo||0),0);
+    $("#spese-list").innerHTML=sp.length?sp.map(x=>`<div class="spesa-row"><span>${esc(x.descrizione)}</span><b>${eur2(x.importo)}</b><button type="button" class="sdel" data-action="spesa-del" data-id="${x.id}">🗑</button></div>`).join(""):`<p class="fatt-empty">Nessuna spesa registrata.</p>`;
+    const imp=+($("#j-imp")?$("#j-imp").value:importo)||0;
+    const marg=imp-tot;
+    $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span><span>Spese: <span class="neg">−${eur2(tot)}</span></span><span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`;
+  }
+  async function spesaAdd(){
+    if(!sbUid||!speseLavoroId)return;
+    const descrizione=$("#sp-desc").value.trim(), importo=+($("#sp-imp").value)||0;
+    if(!descrizione){toast("Scrivi la descrizione della spesa");return;}
+    const {error}=await sb.from("gest_spese").insert({user_id:sbUid,lavoro_id:speseLavoroId,descrizione,importo});
+    if(error){toast("Errore: "+error.message);return;}
+    $("#sp-desc").value="";$("#sp-imp").value="";
+    renderSpeseBlock(speseLavoroId);toast("Spesa aggiunta ✔");
+  }
+
+  /* ---- PREVENTIVI ---- */
+  let prevCache=[], prevFilter="tutti", prevRigheCount=0;
+  async function renderPreventivi(){
+    const box=$("#prev-list");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo</p><small>Accedi per creare i preventivi</small></div>`;return;}
+    const [{data:pv},{data:cl}]=await Promise.all([
+      sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("created_at",{ascending:false}),
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+    ]);
+    prevCache=pv||[];
+    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
+    let tot={};
+    if(prevCache.length){
+      const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",prevCache.map(p=>p.id));
+      (rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+    }
+    const stLab={bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato"};
+    const L=prevCache.filter(p=>prevFilter==="tutti"||p.stato===prevFilter);
+    box.innerHTML=L.length?L.map(p=>`<div class="job">
+      <div class="job-top"><div class="job-cli">N. ${p.numero} — ${esc(p.titolo)}</div><span class="stato ${p.stato}">${stLab[p.stato]||p.stato}</span></div>
+      <div class="job-meta">
+        ${p.cliente_id?`<span>👤 ${esc(cliMap[p.cliente_id]||"—")}</span>`:""}
+        <span>📅 ${fdate(p.data)}</span>
+        <span class="prev-tot">${eur2(tot[p.id]||0)}</span></div>
+      ${p.note?`<div class="job-note">📝 ${esc(p.note)}</div>`:""}
+      <div class="job-actions">
+        <button class="ja" data-action="edit-prev" data-id="${p.id}">✏ Modifica</button>
+        <button class="ja" data-action="prev-pdf" data-id="${p.id}">📄 PDF</button>
+        ${p.stato==="bozza"?`<button class="ja go" data-action="prev-stato" data-id="${p.id}" data-v="inviato">📤 Segna inviato</button>`:""}
+        ${(p.stato==="bozza"||p.stato==="inviato")?`<button class="ja pay" data-action="prev-to-lavoro" data-id="${p.id}">✔ Accettato → crea lavoro</button>
+        <button class="ja unpay" data-action="prev-stato" data-id="${p.id}" data-v="rifiutato">✕ Rifiutato</button>`:""}
+        ${p.stato==="rifiutato"?`<button class="ja" data-action="prev-stato" data-id="${p.id}" data-v="bozza">↩ Riapri</button>`:""}
+        <button class="ja del" data-action="del-prev" data-id="${p.id}">🗑</button>
+      </div></div>`).join(""):`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo qui</p><small>Crea il primo col pulsante "+ Nuovo preventivo"</small></div>`;
+  }
+  function prevRigaHtml(r){
+    r=r||{};prevRigheCount++;
+    return `<div class="prev-riga" data-riga>
+      <input class="pr-desc" placeholder="Descrizione voce" value="${esc(r.descrizione||"")}">
+      <input class="pr-qta" type="number" inputmode="decimal" step="0.5" placeholder="Q.tà" value="${r.qta!=null?r.qta:1}">
+      <input class="pr-prezzo" type="number" inputmode="decimal" step="0.01" placeholder="Prezzo €" value="${r.prezzo!=null?r.prezzo:""}">
+      <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
+  }
+  function prevTotaleLive(){
+    let t=0;$$("#prev-righe [data-riga]").forEach(d=>{t+=(+d.querySelector(".pr-qta").value||1)*(+d.querySelector(".pr-prezzo").value||0);});
+    const el=$("#prev-somma");if(el)el.textContent="Totale: "+eur2(t);
+    return t;
+  }
+  async function prevForm(p){
+    const isNew=!p;p=p||{};
+    let cl=[],righe=[];
+    if(sb&&sbUid){
+      const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");cl=data||[];
+      if(p.id){const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",p.id).order("ordine");righe=rr||[];}
+    }
+    const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===p.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
+    openSheet(`<h3>${isNew?"Nuovo preventivo":"Modifica preventivo N. "+p.numero}</h3>
+      <div class="field"><label>Titolo</label><input id="pv-tit" value="${esc(p.titolo||"")}" placeholder="Es. Rifacimento bagno completo"></div>
+      <div class="row2">
+        <div class="field"><label>Cliente</label><select id="pv-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
+        <div class="field"><label>Data</label><input type="date" id="pv-data" value="${p.data||todayStr()}"></div></div>
+      <div class="field"><label>Voci del preventivo</label>
+        <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
+        <button type="button" class="quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
+        <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0))}</div></div>
+      <div class="field"><label>Note (compaiono sul PDF)</label><textarea id="pv-note" placeholder="Condizioni, tempi, esclusioni...">${esc(p.note||"")}</textarea></div>
+      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
+      <button class="b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button></div>`);
+    $("#prev-righe").addEventListener("input",prevTotaleLive);
+  }
+  async function savePrev(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const titolo=$("#pv-tit").value.trim();if(!titolo){toast("Scrivi il titolo del preventivo");return;}
+    const righe=[];
+    $$("#prev-righe [data-riga]").forEach((d,i)=>{
+      const descrizione=d.querySelector(".pr-desc").value.trim();
+      if(!descrizione)return;
+      righe.push({descrizione,qta:+d.querySelector(".pr-qta").value||1,prezzo:+d.querySelector(".pr-prezzo").value||0,ordine:i});
+    });
+    if(!righe.length){toast("Aggiungi almeno una voce");return;}
+    const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=$("#pv-note").value.trim()||null;
+    let pid=id;
+    if(id){
+      const {error}=await sb.from("gest_preventivi").update({titolo,cliente_id,data,note}).eq("id",id).eq("user_id",sbUid);
+      if(error){toast("Errore: "+error.message);return;}
+      await sb.from("gest_preventivo_righe").delete().eq("preventivo_id",id).eq("user_id",sbUid);
+    }else{
+      const numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
+      const {data:np,error}=await sb.from("gest_preventivi").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,cliente_id,data,note,numero,stato:"bozza"}).select().single();
+      if(error){toast("Errore: "+error.message);return;}
+      pid=np.id;
+    }
+    const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,user_id:sbUid,preventivo_id:pid})));
+    if(e2){toast("Errore voci: "+e2.message);return;}
+    closeSheet();renderPreventivi();renderRiepilogo();toast(id?"Preventivo aggiornato ✔":"Preventivo creato ✔");
+  }
+  async function prevToLavoro(id){
+    const p=prevCache.find(x=>x.id===id);if(!p||!sbUid)return;
+    if(!gconfirm("Il cliente ha accettato? Creo il lavoro dal preventivo N. "+p.numero+"."))return;
+    const {data:rr}=await sb.from("gest_preventivo_righe").select("descrizione,qta,prezzo").eq("preventivo_id",id).order("ordine");
+    const tot=(rr||[]).reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0);
+    const {data:lav,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:curMestiere(),stato:"da_fare",
+      descrizione:p.titolo,dove:"",data_prevista:todayStr(),cliente_id:p.cliente_id,importo:tot}).select("id").single();
+    if(error){toast("Errore: "+error.message);return;}
+    await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:lav.id}).eq("id",id).eq("user_id",sbUid);
+    renderPreventivi();renderJobs();renderRiepilogo();toast("Lavoro creato dal preventivo ✔");
+  }
+  async function prevPdf(id){
+    if(!window.jspdf){toast("PDF non ancora pronto, riprova tra un attimo");return;}
+    const p=prevCache.find(x=>x.id===id);if(!p)return;
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    let c={};
+    if(p.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,referente").eq("id",p.cliente_id).maybeSingle();c=cl||{};}
+    const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
+    const righe=rr||[];
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
+    let y=20;
+    doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(az.nome,M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",az.indirizzo||"",[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("PREVENTIVO",R,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    doc.text("N. "+p.numero+"   del "+fdate(p.data||todayStr()),R,y+5.5,{align:"right"});
+    doc.setTextColor(0);
+    y=Math.max(hy,y+15)+4;doc.setDrawColor(210);doc.line(M,y,R,y);y+=10;
+    doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Spett.le",M,y);y+=6;
+    doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(c.nome||"—",M,y);y+=5;
+    doc.setFontSize(9);doc.setTextColor(90);
+    if(c.indirizzo){doc.text(c.indirizzo,M,y);y+=4.5;}
+    if(c.referente){doc.text("Rif. "+c.referente,M,y);y+=4.5;}
+    doc.setTextColor(0);y+=4;
+    doc.setFont("helvetica","bold");doc.setFontSize(11);
+    const titLines=doc.splitTextToSize("Oggetto: "+p.titolo,R-M);
+    doc.text(titLines,M,y);y+=titLines.length*5+4;
+    doc.setFillColor(31,111,92);doc.rect(M,y,R-M,8,"F");
+    doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(9.5);
+    doc.text("Descrizione",M+2,y+5.5);doc.text("Q.tà",R-60,y+5.5,{align:"right"});doc.text("Prezzo",R-32,y+5.5,{align:"right"});doc.text("Totale",R-2,y+5.5,{align:"right"});
+    doc.setTextColor(0);doc.setFont("helvetica","normal");y+=8;
+    let tot=0;
+    righe.forEach(r=>{
+      const rt=(+r.qta||1)*(+r.prezzo||0);tot+=rt;
+      const lines=doc.splitTextToSize(r.descrizione,R-M-72);
+      const rowH=lines.length*5+4;
+      if(y+rowH>270){doc.addPage();y=20;}
+      doc.setDrawColor(210);doc.rect(M,y,R-M,rowH);
+      doc.setFontSize(9.5);doc.text(lines,M+2,y+5);
+      doc.text(String(+r.qta||1),R-60,y+5,{align:"right"});
+      doc.text(eurPdf(r.prezzo),R-32,y+5,{align:"right"});
+      doc.text(eurPdf(rt),R-2,y+5,{align:"right"});
+      y+=rowH;
+    });
+    y+=4;
+    doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-70,y,70,12);doc.setLineWidth(.2);
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("TOTALE",R-68,y+7.6);doc.text(eurPdf(tot),R-2,y+7.6,{align:"right"});
+    y+=22;
+    if(p.note){
+      doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Note e condizioni",M,y);y+=5.5;
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+      const nl=doc.splitTextToSize(p.note,R-M);doc.text(nl,M,y);y+=nl.length*4.5;doc.setTextColor(0);
+    }
+    doc.setFontSize(7.5);doc.setTextColor(140);
+    doc.text("Preventivo non vincolante, salvo diversa indicazione nelle note. Prezzi IVA esclusa dove non specificato.",M,286,{maxWidth:R-M});
+    doc.save("preventivo-"+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+    toast("PDF preventivo scaricato ✅");
+  }
+
+  /* ---- REPORT & STATISTICHE ---- */
+  let repData=null;
+  async function renderReport(){
+    const box=$("#rep-body");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📊</div><p>Nessun dato</p><small>Accedi per vedere i report</small></div>`;return;}
+    const mid=curMestiere();
+    const [{data:lav},{data:cl},{data:ops}]=await Promise.all([
+      sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+      sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)
+    ]);
+    const L=lav||[];
+    let SP=[];
+    if(L.length){const {data:sp}=await sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",L.map(l=>l.id));SP=sp||[];}
+    repData={L,cl:cl||[],ops:ops||[],SP};
+    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
+    const opMap=Object.fromEntries((ops||[]).map(o=>[o.id,o.nome]));
+    /* ultimi 6 mesi */
+    const now=new Date(), mkeys=[];
+    for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mkeys.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
+    const inc=mkeys.map(k=>L.filter(l=>l.fatt_stato==="pagata"&&(l.data_fatto||"").slice(0,7)===k).reduce((s,l)=>s+(+l.importo||0),0));
+    const spm=mkeys.map(k=>SP.filter(x=>(x.data||"").slice(0,7)===k).reduce((s,x)=>s+(+x.importo||0),0));
+    const mx=Math.max(...inc,...spm,1);
+    const bars=mkeys.map((k,i)=>{
+      const lab=mesi[+k.slice(5,7)-1].slice(0,3);
+      return `<div class="rep-bar-col"><div class="rep-bars">
+        <div class="rep-bar inc" style="height:${Math.round(inc[i]/mx*118)}px" title="Incassato ${eur(inc[i])}"></div>
+        <div class="rep-bar sp" style="height:${Math.round(spm[i]/mx*118)}px" title="Spese ${eur(spm[i])}"></div></div>
+        <span class="rep-bar-lab">${lab}</span></div>`;
+    }).join("");
+    /* top clienti */
+    const perCli={};
+    L.forEach(l=>{if(!l.cliente_id||!(+l.importo))return;perCli[l.cliente_id]=(perCli[l.cliente_id]||0)+(+l.importo||0);});
+    const topCli=Object.entries(perCli).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    /* ore per operatore */
+    const perOp={};
+    L.forEach(l=>{if(!l.operatore_id||!(+l.ore))return;perOp[l.operatore_id]=(perOp[l.operatore_id]||0)+(+l.ore||0);});
+    const opRows=Object.entries(perOp).sort((a,b)=>b[1]-a[1]);
+    const totInc=L.filter(l=>l.fatt_stato==="pagata").reduce((s,l)=>s+(+l.importo||0),0);
+    const totSp=SP.reduce((s,x)=>s+(+x.importo||0),0);
+    const anno=String(now.getFullYear());
+    const incAnno=L.filter(l=>l.fatt_stato==="pagata"&&(l.data_fatto||"").slice(0,4)===anno).reduce((s,l)=>s+(+l.importo||0),0);
+    box.innerHTML=`<div class="rep-grid">
+      <div class="rep-card"><h3>📈 Incassi e spese — ultimi 6 mesi</h3>
+        <div class="rep-bar-wrap">${bars}</div>
+        <div class="rep-legend"><span><i style="background:var(--accent)"></i>Incassato</span><span><i style="background:#e07b54"></i>Spese</span></div></div>
+      <div class="rep-card"><h3>📋 Situazione reparto</h3><table class="rep-table">
+        <tr><td>Lavori da fare</td><td>${L.filter(l=>l.stato==="da_fare").length}</td></tr>
+        <tr><td>Lavori in corso</td><td>${L.filter(l=>l.stato==="in_corso").length}</td></tr>
+        <tr><td>Lavori fatti</td><td>${L.filter(l=>l.stato==="fatto").length}</td></tr>
+        <tr><td>Incassato ${anno}</td><td>${eur(incAnno)}</td></tr>
+        <tr><td>Incassato totale</td><td>${eur(totInc)}</td></tr>
+        <tr><td>Spese totali</td><td style="color:var(--danger)">−${eur(totSp)}</td></tr>
+        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp>=0?'var(--fatto)':'var(--danger)'}">${eur(totInc-totSp)}</td></tr></table></div>
+      <div class="rep-card"><h3>🏆 Migliori clienti (per fatturato)</h3><table class="rep-table">
+        ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
+      <div class="rep-card"><h3>⏱ Ore per operatore</h3><table class="rep-table">
+        ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||"—")}</td><td>${Math.round(v*10)/10} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
+    </div>`;
+  }
+  function reportCsv(){
+    if(!repData||!repData.L.length){toast("Nessun dato da esportare");return;}
+    const cliMap=Object.fromEntries(repData.cl.map(c=>[c.id,c.nome]));
+    const opMap=Object.fromEntries(repData.ops.map(o=>[o.id,o.nome]));
+    const speseMap={};repData.SP.forEach(x=>{speseMap[x.lavoro_id]=(speseMap[x.lavoro_id]||0)+(+x.importo||0);});
+    const num=n=>String(+n||0).replace(".",",");
+    const rows=[["Descrizione","Stato","Data prevista","Data fatto","Cliente","Operatore","Ore","Importo","Spese","Margine","Fattura"]];
+    repData.L.forEach(l=>{
+      const sp=speseMap[l.id]||0;
+      rows.push([l.descrizione||"",statoLabel[l.stato]||l.stato,l.data_prevista||"",l.data_fatto||"",cliMap[l.cliente_id]||"",opMap[l.operatore_id]||"",num(l.ore),num(l.importo),num(sp),num((+l.importo||0)-sp),l.fatt_stato||"none"]);
+    });
+    const csv="﻿"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+    a.download="report-lavori-"+todayStr()+".csv";a.click();URL.revokeObjectURL(a.href);
+    toast("CSV esportato ⬇");
+  }
+
+  /* click handler dei nuovi strumenti (separato: non tocca quello esistente) */
+  document.addEventListener("click",e=>{
+    const t=e.target.closest("[data-action]");if(!t)return;
+    const a=t.dataset.action,id=t.dataset.id;
+    if(a==="spesa-add")return spesaAdd();
+    if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).then(()=>renderSpeseBlock(speseLavoroId));return;}
+    if(a==="new-prev")return prevForm(null);
+    if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
+    if(a==="save-prev")return savePrev(id||null);
+    if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
+    if(a==="prev-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();prevTotaleLive();}return;}
+    if(a==="prev-filtro"){prevFilter=t.dataset.v;$$("#prev-chips .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===prevFilter));renderPreventivi();return;}
+    if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo aggiornato ✔");});return;}
+    if(a==="prev-to-lavoro")return prevToLavoro(id);
+    if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo eliminato");});return;}
+    if(a==="prev-pdf")return prevPdf(id);
+    if(a==="report-csv")return reportCsv();
+  });
+
   function openSheet(html){$("#sheet").innerHTML=html;$("#overlay").classList.add("open");}
   function closeSheet(){$("#overlay").classList.remove("open");}
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
@@ -1489,7 +1871,7 @@
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",null,true,true);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
-    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing) editing.realId = data.id;return;}
+    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);}return;}
     if(a==="save-job")return saveJob();
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
@@ -1576,4 +1958,8 @@
   $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
-  if($("#fatt-pdf-file"))$("#fatt-pdf-fil
+  if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
+
+  load().then(()=>{if(!cur)renderLanding();});
+})();
+</script>
