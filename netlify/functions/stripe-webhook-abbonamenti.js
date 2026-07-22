@@ -12,7 +12,11 @@ exports.handler = async (event) => {
   if (ev.type === 'checkout.session.completed') {
     const s = ev.data.object;
     const email = s.metadata && s.metadata.email;
-    if (email) {
+    const prodotto = s.metadata && s.metadata.prodotto;
+    if (email && prodotto === 'gestionale') {
+      // Add-on Gestionale attivato: NON tocca il piano Premium.
+      await supabase.from('imprese').update({ gestionale_attivo: true, gestionale_scadenza: null }).eq('email', email);
+    } else if (email) {
       // Pagamento ricevuto: Premium pagato, senza scadenza (azzero l'eventuale scadenza del regalo)
       await supabase.from('imprese').update({ piano: 'premium', premium_scadenza: null, premium_pagato: true }).eq('email', email);
 
@@ -29,5 +33,16 @@ exports.handler = async (event) => {
       }
     }
   }
+
+  // Disdetta abbonamento: se era il gestionale, revoca l'accesso.
+  if (ev.type === 'customer.subscription.deleted') {
+    const sub = ev.data.object;
+    const email = sub.metadata && sub.metadata.email;
+    const prodotto = sub.metadata && sub.metadata.prodotto;
+    if (email && prodotto === 'gestionale') {
+      await supabase.from('imprese').update({ gestionale_attivo: false }).eq('email', email);
+    }
+  }
+
   return { statusCode: 200, body: 'ok' };
 };

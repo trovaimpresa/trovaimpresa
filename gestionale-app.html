@@ -2398,3 +2398,60 @@
   load().then(()=>{if(!cur)renderLanding();});
 })();
 </script>
+
+<!-- ===== LUCCHETTO GESTIONALE (add-on a pagamento) ===== -->
+<div id="gate-gestionale" style="display:none;position:fixed;inset:0;z-index:999999;background:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;align-items:center;justify-content:center;padding:20px;">
+  <div style="max-width:460px;width:100%;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(10,42,77,0.12);overflow:hidden;">
+    <div style="background:#0066ff;color:#fff;padding:24px;text-align:center;">
+      <div style="font-size:20px;font-weight:800;">&#128274; Gestionale TrovaImpresa</div>
+    </div>
+    <div id="gate-checking" style="padding:32px;text-align:center;color:#5a6b7b;font-size:14px;">Verifica accesso in corso&hellip;</div>
+    <div id="gate-paywall" style="display:none;padding:28px 28px 32px;color:#1a2733;">
+      <p style="margin:0 0 12px;font-size:15px;line-height:1.6;">Il Gestionale &egrave; uno strumento professionale a parte: agenda, preventivi PDF, scadenze fiscali, squadra e cantieri, tutto in un unico posto.</p>
+      <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Attivalo per sbloccare l&rsquo;accesso completo:</p>
+      <div id="gate-btns">
+        <button onclick="attivaGestionale('mensile')" style="width:100%;padding:14px;margin-bottom:10px;border:none;border-radius:10px;background:#0066ff;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">12&euro; / mese</button>
+        <button onclick="attivaGestionale('annuale')" style="width:100%;padding:14px;border:2px solid #7b1fa2;border-radius:10px;background:#f3e5f5;color:#7b1fa2;font-size:15px;font-weight:700;cursor:pointer;">119&euro; / anno &middot; risparmi 25&euro;</button>
+      </div>
+      <p style="margin:16px 0 0;font-size:12px;color:#9aa7b4;text-align:center;">Pagamento sicuro con Stripe &middot; disdici quando vuoi</p>
+      <p style="margin:14px 0 0;text-align:center;"><a href="#" onclick="history.back();return false;" style="color:#0066ff;font-size:13px;text-decoration:none;">&larr; Torna indietro</a></p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var SU="https://nacvrsgkyfavykxjxszu.supabase.co";
+  var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
+  var RETURN=location.origin+location.pathname;
+  function q(id){return document.getElementById(id);}
+  function showChecking(t){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='block';q('gate-checking').textContent=t;q('gate-paywall').style.display='none';document.body.style.overflow='hidden';}
+  function showPaywall(){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='none';q('gate-paywall').style.display='block';document.body.style.overflow='hidden';}
+  function hideGate(){q('gate-gestionale').style.display='none';document.body.style.overflow='';}
+  window.attivaGestionale=function(piano){
+    var b=q('gate-btns');b.style.opacity='0.5';b.style.pointerEvents='none';
+    fetch('/.netlify/functions/crea-checkout-gestionale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piano:piano,email:window._gestEmail||'',returnUrl:RETURN})})
+      .then(function(r){return r.json();})
+      .then(function(d){if(d&&d.url){location.href=d.url;}else{alert('Errore: '+((d&&d.error)||'riprova'));b.style.opacity='1';b.style.pointerEvents='auto';}})
+      .catch(function(){alert('Errore di rete, riprova.');b.style.opacity='1';b.style.pointerEvents='auto';});
+  };
+  function start(){
+    if(!window.supabase){return setTimeout(start,200);}
+    var gc=window.supabase.createClient(SU,SK);
+    showChecking('Verifica accesso in corso…');
+    gc.auth.getSession().then(function(r){
+      var s=r.data.session;
+      if(!s){hideGate();return;}
+      gc.from('imprese').select('gestionale_attivo,gestionale_scadenza,email').eq('user_id',s.user.id).maybeSingle().then(function(res){
+        var row=res.data;
+        window._gestEmail=(row&&row.email)||s.user.email||'';
+        var attivo=row&&row.gestionale_attivo&&(!row.gestionale_scadenza||new Date(row.gestionale_scadenza)>new Date());
+        if(attivo){hideGate();return;}
+        var p=new URLSearchParams(location.search);
+        if(p.get('gest')==='ok'){showChecking('Pagamento ricevuto! Attivazione in corso… se non si sblocca, ricarica la pagina tra qualche secondo.');setTimeout(function(){location.reload();},6000);return;}
+        showPaywall();
+      });
+    });
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',start);}else{start();}
+})();
+</script>
