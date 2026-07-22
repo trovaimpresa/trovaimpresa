@@ -302,9 +302,11 @@
         <div class="form-group">
           <label>Crea password <span class="required">*</span></label>
           <div class="password-wrapper">
-            <input type="password" id="password" placeholder="Almeno 6 caratteri" minlength="6" required>
+            <input type="password" id="password" placeholder="Almeno 6 caratteri" minlength="6" required oninput="checkPwStrength(this.value)">
             <button class="toggle-pw" type="button" onclick="togglePw('password', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
+          <div style="height:6px;border-radius:4px;background:#eee;margin-top:7px;overflow:hidden;"><div id="pw-strength-bar" style="height:100%;width:0;transition:width .2s,background .2s;"></div></div>
+          <div id="pw-strength-label" style="font-size:11px;color:#888;margin-top:3px;">Usa almeno 6 caratteri, meglio con maiuscole, numeri e simboli.</div>
         </div>
         <div class="form-group">
           <label>Conferma password <span class="required">*</span></label>
@@ -334,9 +336,13 @@
             <span>Accetto i Termini di Servizio <span class="required">*</span></span>
           </label>
         </div>
+        <!-- honeypot anti-bot: deve restare vuoto -->
+        <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
       </div>
 
       <!-- BUTTONS -->
+      <div id="form-msg" style="display:none;padding:12px 14px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
+
       <div class="buttons">
         <button class="btn-back" id="btn-back" style="display:none;">← Indietro</button>
         <button class="btn-next" id="btn-next">Avanti →</button>
@@ -346,10 +352,12 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/geo-italia.js"></script>
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function accediCandidato() {
       const email = document.getElementById('login-email').value.trim();
@@ -455,7 +463,7 @@
       const file = e.target.files[0];
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) {
-        alert('File troppo grande. Massimo 5MB.');
+        showMsg('Il file è troppo grande. Massimo 5MB.', 'error');
         return;
       }
       cvFile = file;
@@ -472,7 +480,7 @@
       e.preventDefault(); this.classList.remove('dragover');
       const file = e.dataTransfer.files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { alert('File troppo grande. Massimo 5MB.'); return; }
+      if (file.size > 5 * 1024 * 1024) { showMsg('Il file è troppo grande. Massimo 5MB.', 'error'); return; }
       cvFile = file;
       document.getElementById('file-name').textContent = file.name;
       document.getElementById('file-selected').style.display = 'flex';
@@ -498,8 +506,68 @@
       if (!fromPopstate) history.pushState({step: step}, '');
     }
 
-    function nextStep() { if (currentStep < 4) { goToStep(currentStep + 1); } else { submitForm(); } }
+    function nextStep() { if (currentStep < 4) { if (validateStep(currentStep)) goToStep(currentStep + 1); } else { submitForm(); } }
     function prevStep() { if (currentStep > 1) { goToStep(currentStep - 1); } }
+
+    // ---- Helper UI: messaggi, validazione, robustezza password ----
+    function showMsg(text, type) {
+      const el = document.getElementById('form-msg');
+      el.textContent = text;
+      el.style.display = 'block';
+      if (type === 'error') { el.style.background = '#fdecea'; el.style.color = '#b71c1c'; el.style.border = '1px solid #f5c6cb'; }
+      else if (type === 'success') { el.style.background = '#e6f4ea'; el.style.color = '#1e4620'; el.style.border = '1px solid #b7dfc0'; }
+      else { el.style.background = '#e8f0ff'; el.style.color = '#0052cc'; el.style.border = '1px solid #b3d1ff'; }
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function hideMsg() { const el = document.getElementById('form-msg'); if (el) el.style.display = 'none'; }
+    function markInvalid(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.borderColor = '#e53935';
+      el.focus();
+      const h = function(){ el.style.borderColor = ''; el.removeEventListener('input', h); el.removeEventListener('change', h); };
+      el.addEventListener('input', h); el.addEventListener('change', h);
+    }
+    function checkPwStrength(v) {
+      let score = 0;
+      if (v.length >= 6) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const steps = [
+        { w: '0%',   c: '#eee',     t: '' },
+        { w: '25%',  c: '#e53935',  t: 'Debole' },
+        { w: '50%',  c: '#fb8c00',  t: 'Media' },
+        { w: '75%',  c: '#fdd835',  t: 'Buona' },
+        { w: '100%', c: '#43a047',  t: 'Ottima' }
+      ];
+      const cfg = steps[v ? score : 0];
+      const bar = document.getElementById('pw-strength-bar');
+      const label = document.getElementById('pw-strength-label');
+      if (bar) { bar.style.width = cfg.w; bar.style.background = cfg.c; }
+      if (label) label.textContent = cfg.t ? 'Sicurezza password: ' + cfg.t : 'Usa almeno 6 caratteri, meglio con maiuscole, numeri e simboli.';
+    }
+    function validateStep(step) {
+      hideMsg();
+      const need = (id, lbl) => { if (!document.getElementById(id).value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
+      if (step === 1) {
+        if (!need('nome', 'Nome')) return false;
+        if (!need('cognome', 'Cognome')) return false;
+        if (!need('eta', 'Età')) return false;
+        if (!need('sesso', 'Sesso')) return false;
+      } else if (step === 2) {
+        if (!need('mestiere', 'Mestiere')) return false;
+        if (!need('anni_esperienza', 'Anni di esperienza')) return false;
+      } else if (step === 3) {
+        if (!need('email', 'Email')) return false;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
+        if (!need('telefono', 'Telefono')) return false;
+        if (!need('regione', 'Regione')) return false;
+        if (!need('provincia', 'Provincia')) return false;
+        if (!need('citta', 'Città')) return false;
+      }
+      return true;
+    }
 
     document.getElementById('btn-next').addEventListener('click', nextStep);
     document.getElementById('btn-back').addEventListener('click', prevStep);
@@ -536,107 +604,77 @@
     }
 
     async function submitForm() {
+      hideMsg();
+      // Anti-bot: se il campo honeypot è pieno, è un bot → esci in silenzio.
+      if (document.getElementById('website_hp').value) { return; }
+      // Rivalida gli step 1-3
+      if (!validateStep(1)) { goToStep(1); return; }
+      if (!validateStep(2)) { goToStep(2); return; }
+      if (!validateStep(3)) { goToStep(3); return; }
       const pw = document.getElementById('password').value;
       const pwConf = document.getElementById('password-conferma').value;
-      if (pw.length < 6) {
-        alert('La password deve essere di almeno 6 caratteri.');
-        return;
-      }
-      if (pw !== pwConf) {
-        alert('Le password non coincidono.');
-        return;
-      }
-      if (!document.getElementById('termini').checked) {
-        alert('Devi accettare i termini di servizio!');
-        return;
-      }
+      if (pw.length < 6) { markInvalid('password'); showMsg('La password deve avere almeno 6 caratteri.', 'error'); return; }
+      if (pw !== pwConf) { markInvalid('password-conferma'); showMsg('Le due password non coincidono.', 'error'); return; }
+      if (!document.getElementById('termini').checked) { showMsg('Devi accettare i Termini di Servizio per completare la registrazione.', 'error'); return; }
 
       const btnNext = document.getElementById('btn-next');
       btnNext.disabled = true;
 
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = document.getElementById('email').value.trim();
+      const password = pw;
 
       try {
-        // 1. Supabase Auth signUp
-        btnNext.textContent = '⏳ Creazione account...';
-        const signUpRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-          body: JSON.stringify({ email, password })
-        });
-        const signUpData = await signUpRes.json();
-        if (!signUpRes.ok || !signUpData.user) {
-          throw new Error(signUpData.msg || signUpData.error_description || signUpData.message || 'Errore registrazione account.');
-        }
-        const userId = signUpData.user.id;
-
-        // 2. signInWithPassword per sessione immediata
-        btnNext.textContent = '⏳ Accesso in corso...';
-        const signInRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-          body: JSON.stringify({ email, password })
-        });
-        const signInData = await signInRes.json();
-        if (signInData.access_token) {
-          localStorage.setItem('sb-access-token', signInData.access_token);
-          localStorage.setItem('sb-refresh-token', signInData.refresh_token);
-        }
-
-        // 3. Upload CV (se presente)
+        // 1. Upload CV (se presente) — usa la chiave anon, non serve la sessione
         let cvUrl = null;
         if (cvFile) {
           btnNext.textContent = '⏳ Caricamento CV...';
           cvUrl = await uploadCV(cvFile, email);
         }
 
-        // 4. INSERT su candidati_lavoro (senza password, con user_id)
-        btnNext.textContent = '⏳ Salvataggio dati...';
-        const dati = {
-          user_id: userId,
-          nome: document.getElementById('nome').value,
-          cognome: document.getElementById('cognome').value,
-          eta: document.getElementById('eta').value || null,
-          sesso: document.getElementById('sesso').value,
-          mestiere: document.getElementById('mestiere').value,
-          anni_esperienza: document.getElementById('anni_esperienza').value || null,
-          competenze: document.getElementById('competenze').value,
-          email: email,
-          telefono: document.getElementById('telefono').value,
-          regione: document.getElementById('regione').value,
-          provincia: document.getElementById('provincia').value,
-          citta: document.getElementById('citta').value,
-          cv: cvUrl,
-          created_at: new Date().toISOString()
-        };
-
-        const insertRes = await fetch(SUPABASE_URL + '/rest/v1/candidati_lavoro', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + signInData.access_token,
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify(dati)
+        // 2. signUp: il profilo in candidati_lavoro viene creato dal trigger
+        // on_auth_user_created_candidato leggendo options.data (niente insert manuale).
+        btnNext.textContent = '⏳ Creazione account...';
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              tipo: 'candidato',
+              nome: document.getElementById('nome').value.trim(),
+              cognome: document.getElementById('cognome').value.trim(),
+              eta: document.getElementById('eta').value || '',
+              sesso: document.getElementById('sesso').value,
+              mestiere: document.getElementById('mestiere').value.trim(),
+              anni_esperienza: document.getElementById('anni_esperienza').value || '',
+              competenze: document.getElementById('competenze').value.trim(),
+              telefono: document.getElementById('telefono').value.trim(),
+              regione: document.getElementById('regione').value,
+              provincia: document.getElementById('provincia').value,
+              citta: document.getElementById('citta').value,
+              cv: cvUrl || ''
+            }
+          }
         });
-        if (!insertRes.ok) {
-          const errText = await insertRes.text();
-          throw new Error('Errore salvataggio dati: ' + errText);
+        if (authError) throw new Error(authError.message);
+        if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+          showMsg('⚠️ Questa email è già registrata su TrovaImpresa. Ti stiamo portando alla pagina di accesso...', 'error');
+          setTimeout(() => { window.location.href = 'login-candidato.html'; }, 2500);
+          return;
         }
 
         try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: document.getElementById('nome').value, email: email, tipo: 'candidato' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
-        window.location.href = 'pannello-candidato.html';
+        btnNext.textContent = '✅ Account creato!';
+        showMsg('✅ Account creato! Ti abbiamo inviato una email di conferma: aprila e clicca sul link per attivare il profilo. Controlla anche nella cartella SPAM. Ti portiamo all\'accesso...', 'success');
+        setTimeout(() => { window.location.href = 'login-candidato.html'; }, 4500);
       } catch (err) {
         console.error('Errore:', err);
         btnNext.disabled = false;
         btnNext.textContent = '✓ Completa Registrazione';
         if (err.message && /already registered|already exists|user already|duplicate|invalid login|credentials/i.test(err.message)) {
-          alert('⚠️ Questa email è già registrata su TrovaImpresa. Accedi al tuo account o usa un\'altra email.');
-          window.location.href = 'login-candidato.html';
+          showMsg('⚠️ Questa email è già registrata su TrovaImpresa. Ti stiamo portando alla pagina di accesso...', 'error');
+          setTimeout(() => { window.location.href = 'login-candidato.html'; }, 2500);
         } else {
-          alert('❌ Errore durante la registrazione. Riprova tra poco.');
+          showMsg('❌ Errore durante la registrazione. Riprova tra poco.', 'error');
         }
       }
     }

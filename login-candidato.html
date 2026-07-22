@@ -144,6 +144,13 @@
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
+        // Verifica che esista il profilo candidato per questo user_id
+        const { data: cand } = await supabaseClient.from('candidati_lavoro').select('id').eq('user_id', data.user.id).maybeSingle();
+        if (!cand) {
+          await supabaseClient.auth.signOut();
+          throw new Error('Accesso riuscito, ma non abbiamo trovato nessun profilo candidato collegato a questo account. Se ti sei appena registrato, conferma prima la mail (controlla anche nello SPAM) e riprova. Se il problema persiste scrivici a info@trovaimpresa.com.');
+        }
+
         // Controlla se il 2FA è richiesto
         const { data: aal } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aal.nextLevel === 'aal2' && aal.nextLevel !== aal.currentLevel) {

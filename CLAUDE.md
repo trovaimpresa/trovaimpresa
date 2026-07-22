@@ -12,6 +12,15 @@
 - Soluzioni pronte da copiare/incollare, poca teoria.
 - Alex è **solo founder e sviluppatore** (HTML/CSS/JS, Supabase, Netlify). Email: pintoalessio@icloud.com.
 
+## Stile email di Alex (per le mail agli iscritti)
+- Tono **caldo, personale, in prima persona singolare** ("ho deciso di attivare", "sarei lieto", "Resto a disposizione").
+- Apertura: "Gentile [Nome]," poi "grazie per esserti iscritto a TrovaImpresa.com".
+- Spesso include un **regalo/incentivo**: Piano Premium 3 mesi gratis.
+- Sottolinea **visibilità** e **contatto con potenziali clienti**.
+- Chiusura fissa: "Un cordiale saluto, Il Team di TrovaImpresa.com".
+- Mittente: info@trovaimpresa.com. Colori brand: blu #0066ff, blu scuro #0a2a4d, viola Premium #7b1fa2.
+- Template pronto: `email-completa-profilo.html` (versione HTML impaginata).
+
 ## Stack e ambiente
 - Repo GitHub `trovaimpresa/trovaimpresa`, branch `main`.
 - Netlify: `NODE_VERSION = "22"` in `netlify.toml`.
@@ -38,8 +47,17 @@
 - `login-impresa.html`: dopo il login verifica la riga in `imprese` per `user_id`; se manca → `signOut` + messaggio esplicito (non redirect silenzioso).
 - Migliorie UX sui 4 form: validazione per-step, campo "Conferma password", indicatore forza password, honeypot anti-bot (`#website_hp`), banner `#form-msg` al posto degli `alert()`. Testo piano Free corretto (rimosso il vecchio "sblocco contatto 5€").
 
+## Registrazione CANDIDATO (allineata — luglio 2026)
+- I candidati NON sono imprese: il profilo va in `candidati_lavoro`, non in `imprese`.
+- `registrazione-candidato.html` ora usa `supabaseClient.auth.signUp({ options: { data: {...} } })` (prima usava `fetch` diretto a `/auth/v1/signup` + insert manuale). Il CV si carica **prima** del signUp (usa la chiave anon, non la sessione) e l'URL si passa nei metadata.
+- **Serve il trigger DB**: `sql/trigger-candidato.sql` crea `crea_profilo_candidato()` + trigger `on_auth_user_created_candidato`, che inserisce in `candidati_lavoro` SOLO quando `tipo = 'candidato'`. Da eseguire su Supabase (come per imprese).
+- **ATTENZIONE**: verificare che `crea_profilo_impresa()` NON crei righe in `imprese` per i candidati → deve filtrare su `tipo in ('impresa','artigiano','professionista','negozio')` (snippet nel file SQL).
+- Chiavi passate ai metadata: `tipo, nome, cognome, eta, sesso, mestiere, anni_esperienza, competenze, telefono, regione, provincia, citta, cv` (email da `new.email`).
+- Stesse migliorie UX degli altri form (banner, honeypot, strength, validazione step) + messaggio conferma mail e redirect a `login-candidato.html`.
+- `login-candidato.html`: dopo il login verifica la riga in `candidati_lavoro` per `user_id`; se manca → `signOut` + messaggio esplicito.
+
 ## Da fare / opzionali
 - Badge numero preventivi anche sul pannello negozio.
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
-- `registrazione-candidato.html` usa `fetch` diretto a `/auth/v1/signup` (flusso diverso): valutare se allinearlo agli altri.
-- Se in futuro si vuole salvare i campi extra alla registrazione, ampliare il trigger `crea_profilo_impresa` per leggerli da `raw_user_meta_data`.
+- Eseguire `sql/trigger-candidato.sql` su Supabase e aggiungere il filtro sul `tipo` a `crea_profilo_impresa` (vedi sopra).
+- Se in futuro si vuole salvare i campi extra alla registrazione impresa, ampliare il trigger `crea_profilo_impresa` per leggerli da `raw_user_meta_data`.
