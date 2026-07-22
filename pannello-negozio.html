@@ -2991,6 +2991,19 @@ async function salvaProdottoVetrina() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { alert('Sessione scaduta. Effettua di nuovo l\'accesso.'); return; }
 
+  // Limite piano Free: massimo 3 prodotti in vetrina. Premium: illimitati.
+  const pianoNorm = (impresaCorrente.piano || 'free').toLowerCase();
+  const isPremium = ['premium', 'mensile', 'annuale'].includes(pianoNorm);
+  if (!isPremium) {
+    const { count } = await sb.from('vetrina_negozio')
+      .select('id', { count: 'exact', head: true })
+      .eq('negozio_id', user.id);
+    if ((count || 0) >= 3) {
+      alert('Con il piano Free puoi pubblicare fino a 3 prodotti in vetrina. Passa a Premium per averne illimitati.');
+      return;
+    }
+  }
+
   const { error } = await sb.from('vetrina_negozio').insert({
     negozio_id: user.id,
     titolo,
