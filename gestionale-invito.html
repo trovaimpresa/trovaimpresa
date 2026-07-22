@@ -109,7 +109,7 @@ $("#btn-auth").onclick=async()=>{
     const {error}=await sb.auth.signUp({email,password});
     if(error){msg("Registrazione non riuscita: "+error.message);return;}
     const {error:e2}=await sb.auth.signInWithPassword({email,password});
-    if(e2){msg("Account creato. Se ti chiede di confermare l'email, fallo e poi torna qui.",true);return;}
+    if(e2){msg("Account creato! Controlla la tua email e clicca sul link di conferma (guarda anche nella cartella SPAM), poi torna qui per accedere.",true);return;}
   }else{
     const {error}=await sb.auth.signInWithPassword({email,password});
     if(error){msg("Accesso non riuscito: "+error.message);return;}

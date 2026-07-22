@@ -236,49 +236,41 @@
     btn.textContent = '⏳ Creazione account...';
 
     try {
-      // 1. Crea account Auth
-      const { data: authData, error: authError } = await sb.auth.signUp({ email, password });
-      if (authError) throw new Error(authError.message);
-      const user_id = authData.user.id;
-
-      // 2. Login immediato
-      btn.textContent = '⏳ Accesso in corso...';
-      const { error: signInError } = await sb.auth.signInWithPassword({ email, password });
-      if (signInError) throw new Error(signInError.message);
-
-      // 3. Inserisce in imprese
-      btn.textContent = '⏳ Salvataggio profilo...';
-      const { error: insertError } = await sb.from('imprese').insert({
-        user_id:       user_id,
-        nome_attivita: nome_attivita,
-        nome:          nome_attivita,
-        email:         email,
-        telefono:      telefono,
-        citta:         citta,
-        tipo:          tipoMap[categoria],
-        mestieri:      mestiere ? [mestiere] : [],
-        piano:         'free'
-      });
-      if (insertError) {
-        if (insertError.code === '23505' || insertError.message.includes('duplicate key') || insertError.message.includes('imprese_email_key')) {
-          throw new Error('⚠️ Questa email è già registrata. Accedi al pannello o usa un\'altra email.');
+      // 1. Crea account Auth: il profilo in "imprese" viene creato dal trigger
+      // on_auth_user_created leggendo i dati da options.data (niente insert manuale).
+      const { data: authData, error: authError } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            tipo: tipoMap[categoria],
+            nome_attivita: nome_attivita,
+            nome: nome_attivita,
+            telefono: telefono,
+            citta: citta,
+            mestiere: mestiere
+          }
         }
-        throw new Error(insertError.message);
+      });
+      if (authError) throw new Error(authError.message);
+      if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+        throw new Error('⚠️ Questa email è già registrata. Accedi al pannello o usa un\'altra email.');
       }
 
-      // 4. Aggiorna stato lead ad "attivato"
+      // 2. Aggiorna stato lead ad "attivato"
       await sb.from('lead_imprese').update({ stato: 'attivato' }).eq('id', leadId);
 
-      // 5. Successo
+      // 3. Successo
       document.getElementById('main-content').innerHTML = `
         <div class="success-wrap">
-          <div class="big-emoji">🎉</div>
-          <h2>Profilo attivato!</h2>
-          <p>Benvenuto su TrovaImpresa, <strong>${escHtml(nome_attivita)}</strong>!<br>
-          Stai per essere reindirizzato al tuo pannello...</p>
+          <div class="big-emoji">📬</div>
+          <h2>Ci sei quasi!</h2>
+          <p>Account creato per <strong>${escHtml(nome_attivita)}</strong>.<br>
+          Ti abbiamo inviato una email di conferma: aprila e clicca sul link per attivare il profilo.<br>
+          Se non la trovi, controlla anche nella cartella <strong>SPAM</strong>.<br>
+          Dopo la conferma potrai accedere al tuo pannello.</p>
         </div>
       `;
-      setTimeout(() => { window.location.href = 'pannello-impresa.html'; }, 2000);
 
     } catch (err) {
       btn.disabled = false;
