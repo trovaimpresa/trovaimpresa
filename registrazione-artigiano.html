@@ -329,12 +329,25 @@
         <div class="form-group">
           <label>Password <span class="required">*</span></label>
           <div class="password-wrapper">
-            <input type="password" id="password" placeholder="Almeno 8 caratteri">
+            <input type="password" id="password" placeholder="Almeno 8 caratteri" oninput="checkPwStrength(this.value)">
             <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
+          <div style="height:6px;border-radius:4px;background:#eee;margin-top:7px;overflow:hidden;"><div id="pw-strength-bar" style="height:100%;width:0;transition:width .2s,background .2s;"></div></div>
+          <div id="pw-strength-label" style="font-size:11px;color:#888;margin-top:3px;">Usa almeno 8 caratteri, con maiuscole, numeri e simboli.</div>
         </div>
+        <div class="form-group">
+          <label>Conferma password <span class="required">*</span></label>
+          <div class="password-wrapper">
+            <input type="password" id="password2" placeholder="Ripeti la password">
+            <button class="toggle-pw" type="button" onclick="togglePassword('password2', this)" tabindex="-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- honeypot anti-bot: deve restare vuoto -->
+        <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
       </div>
 
       <!-- STEP 4 -->
@@ -348,7 +361,7 @@
             <ul>
               <li>Visibile nella tua città</li>
               <li>Fino a 10 foto</li>
-              <li>Richieste di preventivo (sblocco contatto 5€)</li>
+              <li>Richieste di preventivo con contatti inclusi</li>
               <li>1 annuncio lavoro</li>
             </ul>
           </div>
@@ -388,6 +401,8 @@
           </label>
         </div>
       </div>
+
+      <div id="form-msg" style="display:none;padding:12px 14px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
 
       <div class="buttons">
         <button class="btn-back" id="btn-back" style="display:none;">← Indietro</button>
@@ -469,7 +484,7 @@
     document.getElementById('logo-input').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { alert('File troppo grande. Massimo 5MB.'); return; }
+      if (file.size > 5 * 1024 * 1024) { showMsg('Il file è troppo grande. Massimo 5MB.', 'error'); return; }
       logoFile = file;
       document.getElementById('file-name').textContent = file.name;
       document.getElementById('file-selected').style.display = 'flex';
@@ -496,12 +511,71 @@
     }
 
     document.getElementById('btn-next').addEventListener('click', function() {
-      if (currentStep < 4) goToStep(currentStep + 1);
+      if (currentStep < 4) { if (validateStep(currentStep)) goToStep(currentStep + 1); }
       else submitForm();
     });
     document.getElementById('btn-back').addEventListener('click', function() {
       if (currentStep > 1) goToStep(currentStep - 1);
     });
+
+    // ---- Helper UI: messaggi, validazione, robustezza password ----
+    function showMsg(text, type) {
+      const el = document.getElementById('form-msg');
+      el.textContent = text;
+      el.style.display = 'block';
+      if (type === 'error') { el.style.background = '#fdecea'; el.style.color = '#b71c1c'; el.style.border = '1px solid #f5c6cb'; }
+      else if (type === 'success') { el.style.background = '#e6f4ea'; el.style.color = '#1e4620'; el.style.border = '1px solid #b7dfc0'; }
+      else { el.style.background = '#e8f0ff'; el.style.color = '#0052cc'; el.style.border = '1px solid #b3d1ff'; }
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function hideMsg() { const el = document.getElementById('form-msg'); if (el) el.style.display = 'none'; }
+    function markInvalid(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.borderColor = '#e53935';
+      el.focus();
+      const h = function(){ el.style.borderColor = '#ddd'; el.removeEventListener('input', h); el.removeEventListener('change', h); };
+      el.addEventListener('input', h); el.addEventListener('change', h);
+    }
+    function checkPwStrength(v) {
+      let score = 0;
+      if (v.length >= 8) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const steps = [
+        { w: '0%',   c: '#eee',     t: '' },
+        { w: '25%',  c: '#e53935',  t: 'Debole' },
+        { w: '50%',  c: '#fb8c00',  t: 'Media' },
+        { w: '75%',  c: '#fdd835',  t: 'Buona' },
+        { w: '100%', c: '#43a047',  t: 'Ottima' }
+      ];
+      const cfg = steps[v ? score : 0];
+      const bar = document.getElementById('pw-strength-bar');
+      const label = document.getElementById('pw-strength-label');
+      if (bar) { bar.style.width = cfg.w; bar.style.background = cfg.c; }
+      if (label) label.textContent = cfg.t ? 'Sicurezza password: ' + cfg.t : 'Usa almeno 8 caratteri, con maiuscole, numeri e simboli.';
+    }
+    function validateStep(step) {
+      hideMsg();
+      const need = (id, lbl) => { if (!document.getElementById(id).value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
+      if (step === 1) {
+        if (!need('nome', 'Nome / Ragione sociale')) return false;
+        if (!need('regione', 'Regione')) return false;
+        if (!need('provincia', 'Provincia')) return false;
+        if (!need('citta', 'Città')) return false;
+      } else if (step === 2) {
+        if (!document.getElementById('mestiere').value) { markInvalid('mestiere'); showMsg('Seleziona il mestiere principale.', 'error'); return false; }
+      } else if (step === 3) {
+        if (!need('email', 'Email')) return false;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
+        if (!need('telefono', 'Telefono')) return false;
+        const pw = document.getElementById('password').value;
+        if (pw.length < 8) { markInvalid('password'); showMsg('La password deve avere almeno 8 caratteri.', 'error'); return false; }
+        if (pw !== document.getElementById('password2').value) { markInvalid('password2'); showMsg('Le due password non coincidono.', 'error'); return false; }
+      }
+      return true;
+    }
 
     history.replaceState({step: 1}, '');
     window.onpopstate = function(e) {
@@ -529,7 +603,13 @@
     }
 
     async function submitForm() {
-      if (!document.getElementById('termini').checked) { alert('Devi accettare i termini di servizio!'); return; }
+      hideMsg();
+      // Anti-bot: se il campo honeypot è pieno, è un bot → esci in silenzio.
+      if (document.getElementById('website_hp').value) { return; }
+      if (!document.getElementById('termini').checked) { showMsg('Devi accettare i Termini di Servizio per completare la registrazione.', 'error'); return; }
+      if (!validateStep(1)) { goToStep(1); return; }
+      if (!validateStep(2)) { goToStep(2); return; }
+      if (!validateStep(3)) { goToStep(3); return; }
       const nome = document.getElementById('nome').value.trim();
       const mestiere = document.getElementById('mestiere').value;
       const mestiere2 = document.getElementById('mestiere2').value;
@@ -539,12 +619,11 @@
       const citta = document.getElementById('citta').value.trim();
       const regione = document.getElementById('regione').value;
       const password = document.getElementById('password').value.trim();
-      if (!nome || !mestiere || !email || !telefono || !citta || !regione || !password) { alert('Compila tutti i campi obbligatori (*)'); return; }
       if ((mestiere2 && mestiere2 === mestiere) || (mestiere3 && (mestiere3 === mestiere || mestiere3 === mestiere2))) {
-        alert('Mestiere secondario e terzo non possono coincidere con il principale né tra loro.');
+        goToStep(2);
+        showMsg('Mestiere secondario e terzo non possono coincidere con il principale né tra loro.', 'error');
         return;
       }
-      if (password.length < 8) { alert('La password deve essere di almeno 8 caratteri.'); return; }
       const btn = document.getElementById('btn-next');
       btn.disabled = true;
       try {
@@ -570,23 +649,24 @@
         });
         if (authError) throw new Error(authError.message);
         if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
-          alert('⚠️ Questa email è già registrata su TrovaImpresa. Accedi al tuo account o usa un\'altra email.');
-          window.location.href = 'login-impresa.html';
+          showMsg('⚠️ Questa email è già registrata su TrovaImpresa. Ti stiamo portando alla pagina di accesso...', 'error');
+          setTimeout(() => { window.location.href = 'login-impresa.html'; }, 2500);
           return;
         }
         try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nome, email: email, tipo: 'artigiano' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
         if (typeof fbq !== 'undefined') { fbq('track', 'CompleteRegistration'); }
-        alert('✅ Account creato! Ti abbiamo inviato una email di conferma: aprila e clicca sul link per attivare il tuo profilo. Se non la trovi, controlla anche nella cartella SPAM. Dopo la conferma potrai accedere al tuo pannello.');
-        window.location.href = 'login-impresa.html';
+        btn.textContent = '✅ Account creato!';
+        showMsg('✅ Account creato! Ti abbiamo inviato una email di conferma: aprila e clicca sul link per attivare il profilo. Controlla anche nella cartella SPAM. Ti portiamo all\'accesso...', 'success');
+        setTimeout(() => { window.location.href = 'login-impresa.html'; }, 4500);
       } catch (err) {
         console.error(err);
         btn.disabled = false;
         btn.textContent = '✓ Completa Registrazione';
         if (err.message && (err.message.includes('23505') || /already registered|already exists|user already|duplicate|invalid login|credentials|imprese_email_key/i.test(err.message))) {
-          alert('⚠️ Questa email è già registrata su TrovaImpresa. Accedi al tuo account o usa un\'altra email.');
-          window.location.href = 'login-impresa.html';
+          showMsg('⚠️ Questa email è già registrata su TrovaImpresa. Ti stiamo portando alla pagina di accesso...', 'error');
+          setTimeout(() => { window.location.href = 'login-impresa.html'; }, 2500);
         } else {
-          alert('❌ Errore durante la registrazione. Riprova tra poco.');
+          showMsg('❌ Errore durante la registrazione. Riprova tra poco.', 'error');
         }
       }
     }
