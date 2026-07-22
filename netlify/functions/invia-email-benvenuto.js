@@ -1,8 +1,10 @@
-// Email di benvenuto inviata alla registrazione (free) e al passaggio a Premium.
+// Email di benvenuto inviata alla registrazione.
+// Ogni nuovo iscritto riceve 3 mesi di Premium in regalo (reverse trial):
+// il piano premium + scadenza 3 mesi viene impostato dal trigger DB
+// crea_profilo_impresa; qui inviamo la mail che lo annuncia.
 // Body atteso: { nome, email, tipo, premium }
-//  - tipo: impresa | professionista | artigiano | negozio | candidato
-//  - premium: true  -> email "grazie per essere passato a Premium"
-//             false/assente -> email di benvenuto registrazione
+//  - premium: true  -> email "grazie per il passaggio a Premium" (upgrade pagato)
+//  - premium: false/assente -> email di benvenuto con regalo 3 mesi Premium
 
 const PANNELLI = {
   impresa: 'pannello-impresa.html',
@@ -10,14 +12,6 @@ const PANNELLI = {
   artigiano: 'pannello-artigiano.html',
   negozio: 'pannello-negozio.html',
   candidato: 'pannello-candidato.html'
-};
-
-const ETICHETTE = {
-  impresa: 'la tua impresa',
-  professionista: 'il tuo profilo professionale',
-  artigiano: 'la tua attività artigiana',
-  negozio: 'il tuo negozio',
-  candidato: 'il tuo profilo'
 };
 
 exports.handler = async function(event) {
@@ -36,62 +30,72 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: 'Parametro mancante: email obbligatoria' };
   }
 
-  const saluto = nome ? 'Ciao <strong>' + nome + '</strong>!' : 'Ciao!';
-  const pannello = PANNELLI[tipo] || 'index.html';
+  const saluto = nome ? 'Gentile ' + nome + ',' : 'Gentile utente,';
+  const pannello = PANNELLI[tipo] || 'login-impresa.html';
   const linkPannello = 'https://trovaimpresa.com/' + pannello;
-  const etichetta = ETICHETTE[tipo] || 'il tuo profilo';
+  const isCandidato = tipo === 'candidato';
 
-  let subject, corpo, ctaTesto;
+  let subject, corpo, mostraRegalo;
 
   if (premium) {
-    subject = '⭐ Benvenuto in TrovaImpresa Premium!';
-    ctaTesto = 'Vai al tuo pannello →';
-    corpo = `
-      <p style="font-size:16px;margin-bottom:16px">${saluto}</p>
-      <p style="font-size:14px;line-height:1.6;margin-bottom:16px">
-        Grazie per essere passato a <strong>TrovaImpresa Premium</strong>! 🎉
-      </p>
-      <p style="font-size:14px;line-height:1.6;margin-bottom:24px">
-        Da ora ${etichetta} ha accesso a tutte le funzionalità Premium: maggiore visibilità,
-        priorità nei risultati di ricerca e strumenti avanzati per ricevere più richieste dai clienti.
-      </p>`;
-  } else {
+    // Upgrade pagato (Stripe): niente scadenza, ringraziamento.
+    subject = '⭐ Grazie per essere passato a TrovaImpresa Premium!';
+    mostraRegalo = false;
+    corpo =
+      '<p style="margin:0 0 16px;">' + saluto + '</p>' +
+      '<p style="margin:0 0 16px;">grazie per aver scelto <strong>TrovaImpresa Premium</strong>.</p>' +
+      '<p style="margin:0 0 16px;">Da ora hai accesso a tutte le funzionalit&agrave; avanzate del portale: <strong>posizione prioritaria</strong> nei risultati, maggiore visibilit&agrave; e pi&ugrave; possibilit&agrave; di essere contattato dai clienti.</p>';
+  } else if (isCandidato) {
+    // I candidati non hanno il piano Premium: benvenuto semplice.
     subject = '🎉 Benvenuto su TrovaImpresa!';
-    ctaTesto = 'Vai al tuo pannello →';
-    corpo = `
-      <p style="font-size:16px;margin-bottom:16px">${saluto}</p>
-      <p style="font-size:14px;line-height:1.6;margin-bottom:16px">
-        La registrazione su <strong>TrovaImpresa</strong> è andata a buon fine: ${etichetta} è ora online!
-      </p>
-      <p style="font-size:14px;line-height:1.6;margin-bottom:24px">
-        Accedi al tuo pannello per completare il profilo, aggiungere foto e iniziare a ricevere
-        richieste e preventivi dai clienti della tua zona.
-      </p>`;
+    mostraRegalo = false;
+    corpo =
+      '<p style="margin:0 0 16px;">' + saluto + '</p>' +
+      '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
+      '<p style="margin:0 0 16px;">Il tuo profilo &egrave; attivo: accedi per completarlo e farti trovare dalle imprese che cercano collaboratori nella tua zona.</p>';
+  } else {
+    // Nuova iscrizione business: regalo 3 mesi Premium.
+    subject = '🎁 Benvenuto su TrovaImpresa – 3 mesi di Premium in regalo!';
+    mostraRegalo = true;
+    corpo =
+      '<p style="margin:0 0 16px;">' + saluto + '</p>' +
+      '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
+      '<p style="margin:0 0 16px;">Per darti il benvenuto e ringraziarti della fiducia, ho deciso di attivare sul tuo account il <strong>Piano Premium per i primi 3 mesi, in modo del tutto gratuito</strong>.</p>' +
+      '<p style="margin:0 0 16px;">Con il Premium hai <strong>maggiore visibilit&agrave;</strong>, posizione prioritaria nei risultati di ricerca e pi&ugrave; possibilit&agrave; di essere contattato dai potenziali clienti. Il tuo account &egrave; gi&agrave; stato aggiornato e non &egrave; richiesta alcuna azione da parte tua.</p>' +
+      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">Allo scadere dei 3 mesi il tuo profilo torner&agrave; automaticamente al piano Free, <strong>senza alcun addebito</strong>.</p>';
   }
 
-  const html = `
-    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
-      <div style="background:linear-gradient(135deg,#FF6B35,#b84a0a);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
-        <h1 style="color:white;margin:0;font-size:22px">🏗️ TrovaImpresa</h1>
-      </div>
-      <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
-        ${corpo}
-        <div style="text-align:center;margin-bottom:28px">
-          <a href="${linkPannello}"
-             style="display:inline-block;background:#FF6B35;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">
-            ${ctaTesto}
-          </a>
-        </div>
-        <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
-          Se il bottone non funziona, copia questo link nel browser:<br>
-          <a href="${linkPannello}" style="color:#FF6B35;word-break:break-all">${linkPannello}</a>
-        </p>
-      </div>
-      <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">
-        TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a>
-      </p>
-    </div>
-  `;
+  const fasciaRegalo = mostraRegalo
+    ? '<tr><td style="background:#7b1fa2;padding:13px 32px;text-align:center;color:#ffffff;font-size:15px;font-weight:700;">🎁 In regalo per te: 3 mesi di Premium gratis</td></tr>'
+    : '';
+
+  const html =
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;margin:0;padding:24px 0;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Arial,sans-serif;">' +
+      '<tr><td align="center">' +
+        '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(10,42,77,0.08);">' +
+          '<tr><td style="background:#0066ff;padding:26px 32px;text-align:center;">' +
+            '<div style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">🏗️ TrovaImpresa</div>' +
+            '<div style="font-size:13px;color:#dbe8ff;margin-top:4px;">Il portale delle imprese e degli artigiani</div>' +
+          '</td></tr>' +
+          fasciaRegalo +
+          '<tr><td style="padding:32px;color:#1a2733;font-size:15px;line-height:1.65;">' +
+            corpo +
+            '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px auto 22px;"><tr>' +
+              '<td align="center" style="border-radius:9px;background:#0066ff;">' +
+                '<a href="' + linkPannello + '" style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:9px;">Vai al tuo pannello &rarr;</a>' +
+              '</td>' +
+            '</tr></table>' +
+            '<p style="margin:0 0 16px;">Resto a disposizione per qualsiasi necessit&agrave; o chiarimento tramite questo indirizzo email.</p>' +
+            '<p style="margin:0;">Un cordiale saluto,<br><strong>Il Team di TrovaImpresa.com</strong></p>' +
+          '</td></tr>' +
+          '<tr><td style="background:#0a2a4d;padding:18px 32px;text-align:center;color:#a9c9f5;font-size:12px;line-height:1.5;">' +
+            '&copy; 2026 TrovaImpresa &ndash; Alessio Pinto &ndash; Rieti (RI)<br>' +
+            '<a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5;text-decoration:underline;">info@trovaimpresa.com</a> &middot; ' +
+            '<a href="https://trovaimpresa.com/privacy-policy.html" style="color:#a9c9f5;text-decoration:underline;">Privacy</a>' +
+          '</td></tr>' +
+        '</table>' +
+      '</td></tr>' +
+    '</table>';
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
@@ -114,7 +118,6 @@ exports.handler = async function(event) {
     }
 
     // Notifica admin: avvisa info@trovaimpresa.com di ogni nuova iscrizione/upgrade.
-    // Isolata: se fallisce non blocca la risposta OK né la mail all'utente.
     try {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
