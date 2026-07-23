@@ -293,6 +293,7 @@
       </div>
       <div class="nav-item" onclick="showSection('pubblicita-clienti',this)">
         <span class="nav-icon">💰</span> Pubblicità clienti
+        <span class="nav-badge" id="badge-pubblicita" style="background:var(--verde);display:none">0</span>
       </div>
       <div class="nav-item" onclick="showSection('segnalazioni',this)">
         <span class="nav-icon">🆘</span> Segnalazioni
@@ -847,6 +848,22 @@ async function caricaPubblicitaClienti() {
   }
   _pubData = (ann || []).map(a => Object.assign({}, a, { _imp: impMap[a.impresa_id] || null }));
   renderPubblicitaClienti();
+  // Aprendo la sezione, segno come "visti" tutti gli annunci pagati e azzero il badge.
+  const maxId = (ann || []).filter(a => a.stato === 'pagato').reduce((m, a) => Math.max(m, a.id || 0), 0);
+  if (maxId) localStorage.setItem('pub_last_seen_id', String(maxId));
+  const b = document.getElementById('badge-pubblicita');
+  if (b) b.style.display = 'none';
+}
+
+function pubLastSeen() { return parseInt(localStorage.getItem('pub_last_seen_id') || '0', 10) || 0; }
+
+// Conta gli annunci pagati "nuovi" (id maggiore dell'ultimo visto) per il badge nel menu.
+async function caricaBadgePubblicita() {
+  const b = document.getElementById('badge-pubblicita');
+  if (!b) return;
+  const { data } = await sb.from('annunci_pubblicitari').select('id,stato').eq('stato', 'pagato');
+  const nuovi = (data || []).filter(a => (a.id || 0) > pubLastSeen()).length;
+  if (nuovi > 0) { b.textContent = nuovi; b.style.display = ''; } else { b.style.display = 'none'; }
 }
 
 function pubStatoReale(a) {
@@ -1134,7 +1151,7 @@ async function uploadLocandina(slot, input) {
 
 // CARICA TUTTO
 async function caricaTutto() {
-  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaSegnalazioni(), caricaSupportoAdmin()]);
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaSegnalazioni(), caricaSupportoAdmin(), caricaBadgePubblicita()]);
 }
 
 // CARICA IMPRESE
