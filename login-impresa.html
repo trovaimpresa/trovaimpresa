@@ -140,10 +140,20 @@
         if (error) throw error;
 
         // Verifica che esista il profilo in imprese per questo user_id
-        const { data: imp } = await supabaseClient.from('imprese').select('tipo').eq('user_id', data.user.id).maybeSingle();
+        const { data: imp } = await supabaseClient.from('imprese').select('tipo, nome, benvenuto_inviato').eq('user_id', data.user.id).maybeSingle();
         if (!imp) {
           await supabaseClient.auth.signOut();
           throw new Error('Accesso riuscito, ma non abbiamo trovato nessun profilo impresa collegato a questo account. Se ti sei appena registrato, conferma prima la mail (controlla anche nello SPAM) e riprova. Se il problema persiste scrivici a info@trovaimpresa.com.');
+        }
+
+        // Email di benvenuto (regalo 3 mesi Premium) al primo accesso, una sola volta.
+        if (imp.benvenuto_inviato === false) {
+          supabaseClient.from('imprese').update({ benvenuto_inviato: true }).eq('user_id', data.user.id).then(function(){});
+          fetch('/.netlify/functions/invia-email-benvenuto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: imp.nome, email: email, tipo: imp.tipo, premium: false })
+          }).catch(function(){});
         }
         // Dispatch in base al tipo dell'utente (tabella imprese)
         const PANNELLI = {

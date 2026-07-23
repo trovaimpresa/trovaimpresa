@@ -145,10 +145,20 @@
         if (error) throw error;
 
         // Verifica che esista il profilo candidato per questo user_id
-        const { data: cand } = await supabaseClient.from('candidati_lavoro').select('id').eq('user_id', data.user.id).maybeSingle();
+        const { data: cand } = await supabaseClient.from('candidati_lavoro').select('id, nome, benvenuto_inviato').eq('user_id', data.user.id).maybeSingle();
         if (!cand) {
           await supabaseClient.auth.signOut();
           throw new Error('Accesso riuscito, ma non abbiamo trovato nessun profilo candidato collegato a questo account. Se ti sei appena registrato, conferma prima la mail (controlla anche nello SPAM) e riprova. Se il problema persiste scrivici a info@trovaimpresa.com.');
+        }
+
+        // Email di benvenuto al primo accesso, una sola volta (candidato: senza regalo Premium).
+        if (cand.benvenuto_inviato === false) {
+          supabaseClient.from('candidati_lavoro').update({ benvenuto_inviato: true }).eq('user_id', data.user.id).then(function(){});
+          fetch('/.netlify/functions/invia-email-benvenuto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: cand.nome, email: email, tipo: 'candidato', premium: false })
+          }).catch(function(){});
         }
 
         // Controlla se il 2FA è richiesto
