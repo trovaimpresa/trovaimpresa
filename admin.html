@@ -663,7 +663,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Azienda</th><th>Contatti</th><th>Spazio / Città</th><th>Periodo</th><th>Prezzo</th><th>Stato</th><th>Banner</th></tr>
+              <tr><th>Azienda</th><th>Contatti</th><th>Spazio / Città</th><th>Periodo</th><th>Prezzo</th><th>Stato</th><th>Banner</th><th>Azioni</th></tr>
             </thead>
             <tbody id="table-pubblicita"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
           </table>
@@ -835,7 +835,7 @@ async function caricaPubblicitaClienti() {
   const { data: ann, error } = await sb.from('annunci_pubblicitari')
     .select('*').order('data_inizio', { ascending: false });
   if (error) {
-    tb.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="eicon">⚠️</div>Errore: ' + error.message + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="eicon">⚠️</div>Errore: ' + error.message + '</td></tr>';
     return;
   }
   // Recupero i dati delle imprese collegate (nome, contatti)
@@ -853,6 +853,20 @@ async function caricaPubblicitaClienti() {
   if (maxId) localStorage.setItem('pub_last_seen_id', String(maxId));
   const b = document.getElementById('badge-pubblicita');
   if (b) b.style.display = 'none';
+}
+
+async function eliminaAnnuncioPub(id) {
+  const a = _pubData.find(x => x.id === id);
+  const nome = (a && a._imp && (a._imp.nome_attivita || a._imp.nome)) || ('#' + id);
+  if (!confirm('Eliminare definitivamente l\'annuncio di "' + nome + '"?')) return;
+  const res = await fetch('/.netlify/functions/admin-elimina-annuncio', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ u: adminU, p: adminP, id })
+  });
+  const j = await res.json().catch(() => ({}));
+  if (res.ok && j.success) { await caricaPubblicitaClienti(); }
+  else { alert('Errore: ' + (j.error || 'eliminazione non riuscita')); }
 }
 
 function pubLastSeen() { return parseInt(localStorage.getItem('pub_last_seen_id') || '0', 10) || 0; }
@@ -898,7 +912,7 @@ function renderPubblicitaClienti() {
   });
 
   if (!righe.length) {
-    tb.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="eicon">💰</div>Nessun annuncio pubblicitario</td></tr>';
+    tb.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="eicon">💰</div>Nessun annuncio pubblicitario</td></tr>';
     return;
   }
 
@@ -927,6 +941,7 @@ function renderPubblicitaClienti() {
       + '<td><strong>€' + (parseFloat(a.prezzo) || 0).toFixed(2) + '</strong></td>'
       + '<td>' + badge + '</td>'
       + '<td>' + banner + link + '</td>'
+      + '<td><button class="action-btn btn-elimina" onclick="eliminaAnnuncioPub(' + a.id + ')">🗑️</button></td>'
       + '</tr>';
   }).join('');
 }
