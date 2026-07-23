@@ -305,6 +305,9 @@
         <span class="nav-icon">🎧</span> Supporto
         <span class="nav-badge" id="badge-supporto" style="background:var(--rosso);display:none">0</span>
       </div>
+      <div class="nav-item" onclick="showSection('abbonamenti',this)">
+        <span class="nav-icon">💎</span> Premium &amp; Gestionale
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
@@ -339,6 +342,22 @@
         <div class="stat-card">
           <div class="stat-icon b">📋</div>
           <div><div class="stat-num" id="stat-preventivi">–</div><div class="stat-lbl">Preventivi ricevuti</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon g">🆕</div>
+          <div><div class="stat-num" id="stat-oggi">–</div><div class="stat-lbl">Iscritti oggi</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon o">📅</div>
+          <div><div class="stat-num" id="stat-settimana">–</div><div class="stat-lbl">Iscritti 7 giorni</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon b">💎</div>
+          <div><div class="stat-num" id="stat-premium">–</div><div class="stat-lbl">Premium attivi</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon r">🛠️</div>
+          <div><div class="stat-num" id="stat-gestionali">–</div><div class="stat-lbl">Gestionali attivi</div></div>
         </div>
       </div>
 
@@ -597,6 +616,24 @@
       </div>
     </div>
 
+    <!-- PREMIUM & GESTIONALE -->
+    <div class="section" id="sec-abbonamenti">
+      <div class="topbar">
+        <div class="topbar-title">💎 Premium &amp; Gestionale</div>
+      </div>
+      <div style="padding:16px">
+        <input id="abb-search" type="text" placeholder="Cerca per nome o email..." oninput="renderAbbonamenti()" style="width:100%;max-width:360px;padding:10px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:14px">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Impresa</th><th>Tipo</th><th>Piano</th><th>Scadenza Premium</th><th>Gestionale</th><th>Azioni</th></tr>
+            </thead>
+            <tbody id="table-abbonamenti"><tr><td colspan="6" class="loading">Caricamento...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- LEAD -->
     <div class="section" id="sec-lead">
       <div class="topbar">
@@ -734,6 +771,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'lead') caricaLead();
   if (id === 'subappalti') caricaSubappalti();
   if (id === 'supporto') caricaSupportoAdmin();
+  if (id === 'abbonamenti') renderAbbonamenti();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -931,6 +969,15 @@ async function caricaImprese() {
   document.getElementById('stat-totali').textContent = tot;
   document.getElementById('stat-verificate').textContent = verificate;
   document.getElementById('stat-attesa').textContent = attesa;
+
+  // Statistiche aggiuntive (calcolate dallo stesso elenco imprese)
+  const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  const oggiStr = new Date().toISOString().slice(0, 10);
+  const settimanaFa = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+  _set('stat-oggi', tutteImprese.filter(i => (i.created_at || '').slice(0, 10) === oggiStr).length);
+  _set('stat-settimana', tutteImprese.filter(i => i.created_at && new Date(i.created_at) >= settimanaFa).length);
+  _set('stat-premium', tutteImprese.filter(i => (i.piano || '').toLowerCase() === 'premium').length);
+  _set('stat-gestionali', tutteImprese.filter(i => i.gestionale_attivo === true).length);
   document.getElementById('badge-imprese').textContent = tot;
   document.getElementById('badge-daverif').textContent = attesa;
   document.getElementById('imprese-count').textContent = tot + ' imprese registrate';
