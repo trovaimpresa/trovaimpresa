@@ -378,9 +378,14 @@
       <div class="topbar">
         <div class="topbar-title">🏗️ Tutte le imprese</div>
       </div>
-      <div class="table-header">
+      <div class="table-header" style="flex-wrap:wrap;gap:10px">
         <div class="table-title" id="imprese-count">–</div>
-        <input class="search-input" placeholder="🔍 Cerca impresa..." oninput="filtraImprese(this.value)">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input id="imp-search" class="search-input" placeholder="🔍 Cerca impresa..." oninput="applicaFiltriImprese()">
+          <select id="imp-filtro-tipo" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i tipi</option><option value="impresa">Impresa</option><option value="artigiano">Artigiano</option><option value="professionista">Professionista</option><option value="negozio">Negozio</option></select>
+          <select id="imp-filtro-piano" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i piani</option><option value="premium">Premium</option><option value="free">Free</option></select>
+          <select id="imp-filtro-stato" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti gli stati</option><option value="verificata">Verificate</option><option value="attesa">In attesa</option></select>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
@@ -391,11 +396,12 @@
               <th>Città</th>
               <th>Mestieri</th>
               <th>Stato</th>
+              <th>Piano</th>
               <th>Data</th>
               <th>Azioni</th>
             </tr>
           </thead>
-          <tbody id="table-imprese"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+          <tbody id="table-imprese"><tr><td colspan="8" class="loading">Caricamento...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -1033,7 +1039,7 @@ async function caricaImprese() {
 function renderImprese(lista) {
   const tbody = document.getElementById('table-imprese');
   if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">🏗️</div>Nessuna impresa registrata</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-table"><div class="eicon">🏗️</div>Nessuna impresa trovata</div></td></tr>';
     return;
   }
   tbody.innerHTML = lista.map(i => `
@@ -1043,6 +1049,7 @@ function renderImprese(lista) {
       <td>📍 ${esc(i.citta) || '–'}</td>
       <td>${esc((i.mestieri||[]).slice(0,2).join(', '))}${(i.mestieri||[]).length>2?' +altri':''}</td>
       <td><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></td>
+      <td>${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
         <button class="action-btn btn-dettagli" onclick="apriDettaglio(${i.id})">👁️ Dettagli</button>
@@ -1154,14 +1161,24 @@ async function caricaRecensioni() {
 }
 
 // FILTRA IMPRESE
-function filtraImprese(q) {
-  const f = tutteImprese.filter(i =>
-    (i.nome_attivita||'').toLowerCase().includes(q.toLowerCase()) ||
-    (i.citta||'').toLowerCase().includes(q.toLowerCase()) ||
-    (i.email||'').toLowerCase().includes(q.toLowerCase())
-  );
+function applicaFiltriImprese() {
+  const q = (document.getElementById('imp-search')?.value || '').toLowerCase();
+  const ft = document.getElementById('imp-filtro-tipo')?.value || '';
+  const fp = document.getElementById('imp-filtro-piano')?.value || '';
+  const fs = document.getElementById('imp-filtro-stato')?.value || '';
+  const f = tutteImprese.filter(i => {
+    const testo = ((i.nome_attivita || '') + ' ' + (i.citta || '') + ' ' + (i.email || '')).toLowerCase();
+    if (q && !testo.includes(q)) return false;
+    if (ft && (i.tipo || '') !== ft) return false;
+    if (fp === 'premium' && (i.piano || '').toLowerCase() !== 'premium') return false;
+    if (fp === 'free' && (i.piano || '').toLowerCase() === 'premium') return false;
+    if (fs === 'verificata' && !i.verificata) return false;
+    if (fs === 'attesa' && i.verificata) return false;
+    return true;
+  });
   renderImprese(f);
 }
+function filtraImprese() { applicaFiltriImprese(); }
 
 // VERIFICA IMPRESA
 async function verificaImpresa(id) {
