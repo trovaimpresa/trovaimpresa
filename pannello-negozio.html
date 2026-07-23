@@ -1675,7 +1675,7 @@
       </div>
 
       <!-- ACCESSI RAPIDI -->
-      <div class="dash-quick-title">Accesso rapido</div>
+      <div class="dash-quick-title">Gestisci il tuo profilo pubblico</div>
       <div class="dash-quick-grid">
         <div class="dash-quick-card" data-card-id="preventivi-ricevuti" style="position:relative" onclick="showSection('preventivi', this)">
           <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
@@ -1702,6 +1702,11 @@
           <div class="dash-quick-icon">💬</div>
           <div class="dash-quick-label">Messaggi</div>
           <div class="dash-quick-sub">Messaggi dai clienti</div>
+        </div>
+        <div class="dash-quick-card" data-card-id="anteprima" style="cursor:pointer" onclick="showSection('anteprima', this)">
+          <div class="dash-quick-icon">🔍</div>
+          <div class="dash-quick-label">Anteprima del tuo pannello pubblico</div>
+          <div class="dash-quick-sub">Quello che i clienti vedono di te</div>
         </div>
       </div>
 
@@ -2186,6 +2191,28 @@
           <div style="font-weight:700;font-size:14px;margin-bottom:6px;">✅ Scaricato!</div>
           <div style="margin-bottom:8px;">Stampa il PNG e attaccalo dove vuoi: chi lo inquadra col telefono arriva direttamente al tuo profilo.</div>
           <div style="font-size:13px;color:#0066ff;">📇 Biglietti da visita · 🚐 Furgone · 🏪 Vetrina · 📄 Fatture · 📦 Volantini</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANTEPRIMA PUBBLICA -->
+    <div class="section" id="sec-anteprima">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          🔍 Anteprima pubblica
+        </div>
+      </div>
+      <div class="profilo-card">
+        <p style="margin:0 0 12px;color:#555;font-size:0.9rem">Ecco come i clienti vedono il tuo profilo pubblico.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px">
+          <button id="anteprima-btn-desktop" onclick="anteprimaDevice('desktop')" style="padding:9px 16px;border:1.5px solid #7c3aed;border-radius:10px;font-weight:700;cursor:pointer;background:#7c3aed;color:#fff">🖥️ Desktop</button>
+          <button id="anteprima-btn-mobile" onclick="anteprimaDevice('mobile')" style="padding:9px 16px;border:1.5px solid #7c3aed;border-radius:10px;font-weight:700;cursor:pointer;background:#f3f0fa;color:#7c3aed">📱 Mobile</button>
+          <button onclick="ricaricaAnteprima()" style="padding:9px 16px;border:1.5px solid var(--border);border-radius:10px;font-weight:700;cursor:pointer;background:#fff;color:#333">🔄 Ricarica</button>
+          <a id="anteprima-newtab" href="#" target="_blank" rel="noopener" style="margin-left:auto;padding:9px 16px;border-radius:10px;font-weight:700;text-decoration:none;background:#0066ff;color:#fff">↗ Apri in nuova scheda</a>
+        </div>
+        <div id="anteprima-frame-wrap" style="margin:0 auto;width:100%;max-width:100%;height:720px;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;transition:max-width .2s ease">
+          <iframe id="anteprima-iframe" title="Anteprima del tuo profilo pubblico" style="width:100%;height:100%;border:none;display:block"></iframe>
         </div>
       </div>
     </div>
@@ -2932,7 +2959,30 @@ function showSection(id, el, fromPopstate) {
   if (id === 'personalizza') apriModalPersonalizzaPannello();
   if (id === 'risoluzione') apriModalRisoluzione();
   if (id === 'messaggi') caricaConversazioni();
+  if (id === 'anteprima') caricaAnteprima();
   if (!fromPopstate) history.pushState({section: id}, '');
+}
+
+// === ANTEPRIMA PUBBLICA: iframe del profilo pubblico dell'utente loggato ===
+function caricaAnteprima() {
+  if (!impresaCorrente || impresaCorrente.id == null) return;
+  const url = 'profilo-impresa.html?id=' + encodeURIComponent(impresaCorrente.id);
+  const ifr = document.getElementById('anteprima-iframe');
+  if (ifr && ifr.getAttribute('src') !== url) ifr.src = url;
+  const nt = document.getElementById('anteprima-newtab');
+  if (nt) nt.href = url;
+}
+function ricaricaAnteprima() {
+  const ifr = document.getElementById('anteprima-iframe');
+  if (ifr && ifr.src) { ifr.src = ifr.src; } else { caricaAnteprima(); }
+}
+function anteprimaDevice(mode) {
+  const wrap = document.getElementById('anteprima-frame-wrap');
+  if (wrap) wrap.style.maxWidth = (mode === 'mobile') ? '390px' : '100%';
+  const d = document.getElementById('anteprima-btn-desktop');
+  const m = document.getElementById('anteprima-btn-mobile');
+  if (d) { d.style.background = (mode === 'desktop') ? '#7c3aed' : '#f3f0fa'; d.style.color = (mode === 'desktop') ? '#fff' : '#7c3aed'; }
+  if (m) { m.style.background = (mode === 'mobile') ? '#7c3aed' : '#f3f0fa'; m.style.color = (mode === 'mobile') ? '#fff' : '#7c3aed'; }
 }
 
 history.replaceState({goHome: true}, '');
