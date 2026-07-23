@@ -256,86 +256,36 @@
         .feature-card {
             padding: 24px 22px;
             border-radius: 14px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
-            border: none;
+            box-shadow: 0 2px 8px rgba(10, 42, 77, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            border: 1px solid #e6ebf2;
+            background: #fff;
             position: relative;
             overflow: hidden;
         }
 
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-        }
-
-        .feature-card:nth-child(1) {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-            border-top: 4px solid #FF6B35;
-        }
-
-        .feature-card:nth-child(1)::before {
-            background: #FF6B35;
-        }
-
-        .feature-card:nth-child(2) {
-            background: linear-gradient(135deg, #fffdf2 0%, #fff8f0 100%);
-            border-top: 4px solid #FFB347;
-        }
-
-        .feature-card:nth-child(2)::before {
-            background: #FFB347;
-        }
-
-        .feature-card:nth-child(3) {
-            background: linear-gradient(135deg, #f0f5ff 0%, #e8f0ff 100%);
-            border-top: 4px solid #0066cc;
-        }
-
-        .feature-card:nth-child(3)::before {
-            background: #0066cc;
-        }
-
-        .feature-card:nth-child(4) {
-            background: linear-gradient(135deg, #f0fff4 0%, #e8f8ef 100%);
-            border-top: 4px solid #0066ff;
-        }
-
-        .feature-card:nth-child(4)::before {
-            background: #0066ff;
-        }
-
-        .feature-card:nth-child(5) {
-            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-            border-top: 4px solid #6c3483;
-        }
-
-        .feature-card:nth-child(5)::before {
-            background: #6c3483;
-        }
-
-        .feature-card:nth-child(6) {
-            background: linear-gradient(135deg, #fff5f5 0%, #ffecec 100%);
-            border-top: 4px solid #c0392b;
-        }
-
-        .feature-card:nth-child(6)::before {
-            background: #c0392b;
-        }
+        /* Card uniformi: bianche, senza bordi colorati o sfumature */
 
         .feature-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(10, 42, 77, 0.12);
+            border-color: #cddcf0;
         }
 
         .feature-icon {
-            font-size: 28px;
-            margin-bottom: 10px;
-            display: inline-block;
-            line-height: 1;
+            width: 46px;
+            height: 46px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #eaf1ff;
+        }
+        .feature-icon svg {
+            stroke: #0066ff !important;
+            width: 24px;
+            height: 24px;
         }
 
         @keyframes bounce {
@@ -344,7 +294,7 @@
         }
 
         .feature-card h3 {
-            font-weight: 800;
+            font-weight: 700;
             margin-bottom: 12px;
             color: #1a2f47;
             font-size: 20px;
