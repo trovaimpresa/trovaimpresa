@@ -301,6 +301,10 @@
       <div class="nav-item" onclick="showSection('subappalti',this)">
         <span class="nav-icon">🤝</span> Subappalti
       </div>
+      <div class="nav-item" onclick="showSection('supporto',this)">
+        <span class="nav-icon">🎧</span> Supporto
+        <span class="nav-badge" id="badge-supporto" style="background:var(--rosso);display:none">0</span>
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="logout-btn" onclick="doLogout()">🚪 Esci</div>
@@ -569,6 +573,30 @@
       </div>
     </div>
 
+    <!-- SUPPORTO -->
+    <div class="section" id="sec-supporto">
+      <div class="topbar">
+        <div class="topbar-title">🎧 Supporto</div>
+      </div>
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;padding:16px;align-items:start">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="padding:12px 14px;font-weight:700;border-bottom:1px solid var(--border)">Conversazioni</div>
+          <div id="supp-conv-list" style="overflow-y:auto;max-height:560px"><div class="loading" style="padding:16px">Caricamento...</div></div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;height:600px">
+          <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span id="supp-conv-nome">Seleziona una conversazione</span>
+            <button id="supp-del-btn" onclick="eliminaConvAdmin()" style="display:none;padding:6px 10px;border:1px solid #e0b4b4;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap">🗑 Elimina</button>
+          </div>
+          <div id="supp-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f7f8fa"></div>
+          <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px">
+            <input id="supp-reply-input" type="text" placeholder="Scrivi una risposta..." onkeydown="if(event.key==='Enter')rispondiSupportoAdmin()" style="flex:1;padding:11px;border:1.5px solid var(--border);border-radius:10px">
+            <button onclick="rispondiSupportoAdmin()" style="padding:11px 20px;background:var(--verde);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer">Invia</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- LEAD -->
     <div class="section" id="sec-lead">
       <div class="topbar">
@@ -705,6 +733,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'segnalazioni') caricaSegnalazioni();
   if (id === 'lead') caricaLead();
   if (id === 'subappalti') caricaSubappalti();
+  if (id === 'supporto') caricaSupportoAdmin();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -715,6 +744,106 @@ window.onpopstate = function(e) {
     if (navItem) showSection(e.state.section, navItem, true);
   }
 };
+
+// ===== SUPPORTO (chat clienti) =====
+let _suppData = { messaggi: [], utenti: {} };
+let _suppConvUid = null;
+
+async function suppFetch(action, extra) {
+  const res = await fetch('/.netlify/functions/admin-supporto', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({ u: adminU, p: adminP, action }, extra || {}))
+  });
+  return res.json();
+}
+
+async function caricaSupportoAdmin() {
+  const j = await suppFetch('list');
+  if (!j || !j.success) return;
+  _suppData = { messaggi: j.messaggi || [], utenti: j.utenti || {} };
+  renderConvList();
+  aggiornaBadgeSupporto();
+  if (_suppConvUid) apriConversazioneAdmin(_suppConvUid);
+}
+
+function convRaggruppate() {
+  const map = {};
+  _suppData.messaggi.forEach(m => {
+    const k = m.user_id;
+    if (!map[k]) map[k] = { user_id: k, ultimo: m, nonLetti: 0 };
+    map[k].ultimo = m;
+    if (!m.da_admin && !m.letto) map[k].nonLetti++;
+  });
+  return Object.values(map).sort((a, b) => new Date(b.ultimo.created_at) - new Date(a.ultimo.created_at));
+}
+
+function renderConvList() {
+  const box = document.getElementById('supp-conv-list');
+  if (!box) return;
+  const convs = convRaggruppate();
+  if (!convs.length) { box.innerHTML = '<div style="padding:16px;color:#888">Nessuna conversazione.</div>'; return; }
+  box.innerHTML = convs.map(c => {
+    const u = _suppData.utenti[c.user_id] || {};
+    const nome = esc(u.nome || 'Utente');
+    const anteprima = esc((c.ultimo.messaggio || '').slice(0, 42));
+    const badge = c.nonLetti ? '<span style="background:#c0392b;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:6px">' + c.nonLetti + '</span>' : '';
+    const active = (c.user_id === _suppConvUid) ? 'background:var(--verde3)' : '';
+    return '<div onclick="apriConversazioneAdmin(\'' + c.user_id + '\')" style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;' + active + '">'
+      + '<div style="font-weight:700;font-size:14px">' + nome + badge + '</div>'
+      + '<div style="font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + anteprima + '</div></div>';
+  }).join('');
+}
+
+async function apriConversazioneAdmin(uid) {
+  _suppConvUid = uid;
+  const u = _suppData.utenti[uid] || {};
+  document.getElementById('supp-conv-nome').textContent = (u.nome || 'Utente') + (u.email ? ' · ' + u.email : '');
+  document.getElementById('supp-del-btn').style.display = '';
+  const msgs = _suppData.messaggi.filter(m => m.user_id === uid);
+  const box = document.getElementById('supp-msgs');
+  box.innerHTML = msgs.map(m => {
+    const admin = m.da_admin;
+    const style = 'max-width:75%;padding:9px 13px;border-radius:12px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-break:break-word;'
+      + (admin ? 'align-self:flex-end;background:var(--verde);color:#fff' : 'align-self:flex-start;background:#fff;color:#111;border:1px solid var(--border)');
+    return '<div style="' + style + '">' + esc(m.messaggio || '') + '</div>';
+  }).join('');
+  box.scrollTop = box.scrollHeight;
+  renderConvList();
+  await suppFetch('mark_read', { user_id: uid });
+  _suppData.messaggi.forEach(m => { if (m.user_id === uid && !m.da_admin) m.letto = true; });
+  aggiornaBadgeSupporto();
+}
+
+async function rispondiSupportoAdmin() {
+  if (!_suppConvUid) return;
+  const inp = document.getElementById('supp-reply-input');
+  const txt = (inp.value || '').trim();
+  if (!txt) return;
+  inp.value = '';
+  const j = await suppFetch('reply', { user_id: _suppConvUid, messaggio: txt });
+  if (!j || !j.success) { alert('Errore invio: ' + ((j && j.error) || '')); inp.value = txt; return; }
+  await caricaSupportoAdmin();
+}
+
+async function eliminaConvAdmin() {
+  if (!_suppConvUid) return;
+  if (!confirm('Eliminare tutta la conversazione con questo utente?')) return;
+  const j = await suppFetch('delete_conv', { user_id: _suppConvUid });
+  if (!j || !j.success) { alert('Errore eliminazione: ' + ((j && j.error) || '')); return; }
+  _suppConvUid = null;
+  document.getElementById('supp-conv-nome').textContent = 'Seleziona una conversazione';
+  document.getElementById('supp-del-btn').style.display = 'none';
+  document.getElementById('supp-msgs').innerHTML = '';
+  await caricaSupportoAdmin();
+}
+
+function aggiornaBadgeSupporto() {
+  const tot = _suppData.messaggi.filter(m => !m.da_admin && !m.letto).length;
+  const b = document.getElementById('badge-supporto');
+  if (!b) return;
+  if (tot > 0) { b.textContent = tot; b.style.display = ''; } else { b.style.display = 'none'; }
+}
 
 // LOCANDINE
 const BUCKET_URL = SUPABASE_URL + '/storage/v1/object/public/loghi-pubblicita/';
@@ -786,7 +915,7 @@ async function uploadLocandina(slot, input) {
 
 // CARICA TUTTO
 async function caricaTutto() {
-  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaSegnalazioni()]);
+  await Promise.all([caricaImprese(), caricaPreventivi(), caricaRecensioni(), caricaSegnalazioni(), caricaSupportoAdmin()]);
 }
 
 // CARICA IMPRESE
