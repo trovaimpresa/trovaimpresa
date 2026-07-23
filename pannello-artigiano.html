@@ -1457,7 +1457,10 @@
         </div>
       </div>
       <div class="profilo-card">
-        <p style="margin:0 0 12px;color:#555;font-size:0.9rem">Scrivici per assistenza: ti rispondiamo qui.</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 12px">
+          <p style="margin:0;color:#555;font-size:0.9rem">Scrivici per assistenza: ti rispondiamo qui.</p>
+          <button onclick="eliminaConversazioneSupporto()" style="padding:7px 12px;border:1.5px solid #e0b4b4;border-radius:9px;background:#fff;color:#c0392b;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">🗑 Elimina conversazione</button>
+        </div>
         <div id="supporto-msgs" style="height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:#f7f8fa;border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
         <div style="display:flex;gap:8px">
           <input id="supporto-input" type="text" placeholder="Scrivi un messaggio..." autocomplete="off" onkeydown="if(event.key==='Enter')inviaSupporto()" style="flex:1;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px">
@@ -2527,6 +2530,15 @@ async function inviaSupporto() {
   const { error } = await sb.from('supporto_messaggi')
     .insert({ user_id: user.id, da_admin: false, messaggio: txt, letto: false });
   if (error) { alert('Errore invio: ' + error.message); inp.value = txt; }
+}
+async function eliminaConversazioneSupporto() {
+  if (!confirm('Vuoi eliminare tutta la conversazione? L\'operazione non è reversibile.')) return;
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { alert('Sessione scaduta, accedi di nuovo.'); return; }
+  const { error } = await sb.from('supporto_messaggi').delete().eq('user_id', user.id);
+  if (error) { alert('Errore eliminazione: ' + error.message); return; }
+  const box = document.getElementById('supporto-msgs');
+  if (box) box.innerHTML = '';
 }
 
 function showSectionById(id, fromPopstate) {
