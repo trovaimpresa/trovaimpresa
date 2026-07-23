@@ -4532,9 +4532,11 @@ function applicaFontHero(font) {
 function applicaColoreTestoHero(colore) {
   const hero = document.getElementById('dash-hero');
   if (!hero) return;
-  hero.style.color = colore || '';
+  if (colore) hero.style.setProperty('color', colore, 'important');
+  else hero.style.removeProperty('color');
   hero.querySelectorAll('.dash-welcome, .dash-nome').forEach(el => {
-    el.style.color = colore || '';
+    if (colore) el.style.setProperty('color', colore, 'important');
+    else el.style.removeProperty('color');
   });
 }
 function applicaSizeTestoHero(size) {
@@ -4649,14 +4651,14 @@ function aggiornaPreviewPersonalizza(opts) {
   if (frame) frame.style.background = sfondo;
   if (frame) frame.classList.toggle('pv-dark', scuro);
   if (hero) hero.style.background = `linear-gradient(135deg, ${header}, color-mix(in srgb, ${header} 60%, black))`;
-  if (hero) hero.style.color = testo;
+  if (hero) hero.style.setProperty('color', testo, 'important');
   if (nomeEl) {
     nomeEl.textContent = nome;
     nomeEl.style.fontFamily = font || '';
     nomeEl.style.fontSize = (1.15 * size) + 'rem';
-    nomeEl.style.color = testo;
+    nomeEl.style.setProperty('color', testo, 'important');
   }
-  if (welEl) welEl.style.color = testo;
+  if (welEl) welEl.style.setProperty('color', testo, 'important');
   const bannerUrl = opts.bannerUrl !== undefined ? opts.bannerUrl
     : ((impresaCorrente && impresaCorrente.personalizzazione && impresaCorrente.personalizzazione.banner_url) || '');
   if (banner) banner.style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
