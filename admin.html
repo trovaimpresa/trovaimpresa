@@ -291,6 +291,9 @@
       <div class="nav-item" onclick="showSection('locandine',this)">
         <span class="nav-icon">📢</span> Locandine Pub.
       </div>
+      <div class="nav-item" onclick="showSection('pubblicita-clienti',this)">
+        <span class="nav-icon">💰</span> Pubblicità clienti
+      </div>
       <div class="nav-item" onclick="showSection('segnalazioni',this)">
         <span class="nav-icon">🆘</span> Segnalazioni
         <span class="nav-badge" id="badge-segnalazioni" style="background:var(--rosso)">0</span>
@@ -640,6 +643,33 @@
       </div>
     </div>
 
+    <!-- PUBBLICITÀ CLIENTI -->
+    <div class="section" id="sec-pubblicita-clienti">
+      <div class="topbar">
+        <div class="topbar-title">💰 Pubblicità clienti</div>
+      </div>
+      <div style="padding:16px">
+        <div id="pub-riepilogo" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <input id="pub-search" type="text" placeholder="Cerca azienda, città, email..." oninput="renderPubblicitaClienti()" style="flex:1;min-width:220px;max-width:360px;padding:10px;border:1.5px solid var(--border);border-radius:10px">
+          <select id="pub-filtro-stato" onchange="renderPubblicitaClienti()" style="padding:10px;border:1.5px solid var(--border);border-radius:10px">
+            <option value="">Tutti gli stati</option>
+            <option value="pagato">Pagati (attivi)</option>
+            <option value="scaduto">Scaduti</option>
+            <option value="pending">Non pagati</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Azienda</th><th>Contatti</th><th>Spazio / Città</th><th>Periodo</th><th>Prezzo</th><th>Stato</th><th>Banner</th></tr>
+            </thead>
+            <tbody id="table-pubblicita"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- LEAD -->
     <div class="section" id="sec-lead">
       <div class="topbar">
@@ -778,6 +808,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'subappalti') caricaSubappalti();
   if (id === 'supporto') caricaSupportoAdmin();
   if (id === 'abbonamenti') renderAbbonamenti();
+  if (id === 'pubblicita-clienti') caricaPubblicitaClienti();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -788,6 +819,107 @@ window.onpopstate = function(e) {
     if (navItem) showSection(e.state.section, navItem, true);
   }
 };
+
+// ===== PUBBLICITÀ CLIENTI =====
+let _pubData = [];
+
+const PUB_SPAZI = {
+  'imprese-sx-1':'Spazio 1 · Sinistra (in cima)', 'imprese-dx-1':'Spazio 1 · Destra (in cima)',
+  'imprese-sx-2':'Spazio 2 · Sinistra (a metà)', 'imprese-dx-2':'Spazio 2 · Destra (a metà)'
+};
+function pubSpazioLabel(sid){ return PUB_SPAZI[sid] || sid || '—'; }
+
+async function caricaPubblicitaClienti() {
+  const tb = document.getElementById('table-pubblicita');
+  const { data: ann, error } = await sb.from('annunci_pubblicitari')
+    .select('*').order('data_inizio', { ascending: false });
+  if (error) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="eicon">⚠️</div>Errore: ' + error.message + '</td></tr>';
+    return;
+  }
+  // Recupero i dati delle imprese collegate (nome, contatti)
+  const ids = [...new Set((ann || []).map(a => a.impresa_id).filter(Boolean))];
+  let impMap = {};
+  if (ids.length) {
+    const { data: imp } = await sb.from('imprese')
+      .select('id,nome_attivita,nome,email,telefono,tipo').in('id', ids);
+    (imp || []).forEach(i => { impMap[i.id] = i; });
+  }
+  _pubData = (ann || []).map(a => Object.assign({}, a, { _imp: impMap[a.impresa_id] || null }));
+  renderPubblicitaClienti();
+}
+
+function pubStatoReale(a) {
+  const oggi = new Date().toISOString().slice(0, 10);
+  if (a.stato === 'pagato' && a.data_fine && a.data_fine < oggi) return 'scaduto';
+  return a.stato || 'pending';
+}
+
+function renderPubblicitaClienti() {
+  const tb = document.getElementById('table-pubblicita');
+  const ril = document.getElementById('pub-riepilogo');
+  if (!tb) return;
+  const q = (document.getElementById('pub-search')?.value || '').toLowerCase().trim();
+  const fs = document.getElementById('pub-filtro-stato')?.value || '';
+
+  // Riepilogo (su tutti i dati, non filtrati)
+  const oggi = new Date().toISOString().slice(0, 10);
+  const attivi = _pubData.filter(a => a.stato === 'pagato' && (!a.data_fine || a.data_fine >= oggi));
+  const incasso = _pubData.filter(a => a.stato === 'pagato')
+    .reduce((s, a) => s + (parseFloat(a.prezzo) || 0), 0);
+  ril.innerHTML =
+    pubCard('Annunci attivi', attivi.length, 'var(--verde)') +
+    pubCard('Totale pagati', _pubData.filter(a => a.stato === 'pagato').length, '#0066ff') +
+    pubCard('Incasso pubblicità', '€' + incasso.toFixed(2), '#7b1fa2');
+
+  let righe = _pubData.slice();
+  if (fs) righe = righe.filter(a => pubStatoReale(a) === fs);
+  if (q) righe = righe.filter(a => {
+    const i = a._imp || {};
+    return [i.nome_attivita, i.nome, i.email, a.citta, a.spazio_id]
+      .filter(Boolean).join(' ').toLowerCase().includes(q);
+  });
+
+  if (!righe.length) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="eicon">💰</div>Nessun annuncio pubblicitario</td></tr>';
+    return;
+  }
+
+  tb.innerHTML = righe.map(a => {
+    const i = a._imp || {};
+    const nome = i.nome_attivita || i.nome || ('Impresa #' + (a.impresa_id || '—'));
+    const contatti = [i.email, i.telefono].filter(Boolean).join('<br>') || '—';
+    const stato = pubStatoReale(a);
+    const badge = stato === 'pagato'
+        ? '<span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">✅ Pagato</span>'
+      : stato === 'scaduto'
+        ? '<span style="background:#f1f1f1;color:#777;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">⌛ Scaduto</span>'
+        : '<span style="background:#fff4e5;color:#b26a00;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">⏳ Non pagato</span>';
+    const periodo = (a.data_inizio || '—') + ' → ' + (a.data_fine || '—');
+    const banner = a.logo_url
+      ? '<a href="' + a.logo_url + '" target="_blank"><img src="' + a.logo_url + '" style="height:38px;border-radius:6px;border:1px solid var(--border)"></a>'
+      : '—';
+    const link = a.link_url
+      ? '<div style="font-size:11px"><a href="' + a.link_url + '" target="_blank" style="color:#0066ff">' + a.link_url + '</a></div>'
+      : '';
+    return '<tr>'
+      + '<td><strong>' + nome + '</strong>' + (i.tipo ? '<div style="font-size:11px;color:#888">' + i.tipo + '</div>' : '') + '</td>'
+      + '<td style="font-size:12px">' + contatti + '</td>'
+      + '<td>' + pubSpazioLabel(a.spazio_id) + '<div style="font-size:12px;color:#888">📍 ' + (a.citta || '—') + '</div></td>'
+      + '<td style="font-size:12px">' + periodo + '</td>'
+      + '<td><strong>€' + (parseFloat(a.prezzo) || 0).toFixed(2) + '</strong></td>'
+      + '<td>' + badge + '</td>'
+      + '<td>' + banner + link + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function pubCard(label, val, color) {
+  return '<div style="background:#fff;border:1px solid var(--border);border-left:4px solid ' + color
+    + ';border-radius:12px;padding:12px 18px;min-width:150px">'
+    + '<div style="font-size:12px;color:#888;font-weight:600">' + label + '</div>'
+    + '<div style="font-size:1.5rem;font-weight:800;color:' + color + '">' + val + '</div></div>';
+}
 
 // ===== SUPPORTO (chat clienti) =====
 let _suppData = { messaggi: [], utenti: {} };
