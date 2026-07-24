@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <link rel="canonical" href="https://trovaimpresa.com/professionisti">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professionisti dell'edilizia: geometri, ingegneri, periti e architetti - TrovaImpresa</title>
+  <meta name="description" content="Trova il professionista giusto per prestazione e comune: geometri, ingegneri, periti e architetti verificati. Affida il tuo incarico e ricevi un preventivo di onorario.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="TrovaImpresa">
+  <meta property="og:title" content="Professionisti dell'edilizia per prestazione e comune - TrovaImpresa">
+  <meta property="og:description" content="Geometri, ingegneri, periti e architetti verificati. Cerca per prestazione e comune e affida il tuo incarico.">
+  <meta property="og:url" content="https://trovaimpresa.com/professionisti">
+  <meta property="og:image" content="https://trovaimpresa.com/logo.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; color: #111; }
+
+    header { background: white; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+    header a img { height: 44px; }
+    header nav a { color: #0066ff; text-decoration: none; font-weight: 600; margin-left: 20px; font-size: 16px; }
+
+    .top-bar { background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%); padding: 26px 28px; }
+    .top-bar h1 { color: white; font-size: 1.9rem; font-weight: 800; margin-bottom: 6px; }
+    .top-bar p { color: rgba(255,255,255,0.9); font-size: 1rem; }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 40px; }
+
+    /* Sezioni full-page (NO-MODAL) */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Barra di ricerca prestazione + comune */
+    .search-card { background: white; border-radius: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); padding: 20px; margin-bottom: 22px; }
+    .search-grid { display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 12px; align-items: end; }
+    .field label { display: block; font-size: 13px; font-weight: 700; color: #444; margin-bottom: 6px; }
+    .field select, .field input { width: 100%; padding: 13px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; color: #111; background: white; }
+    .field select:focus, .field input:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.12); }
+    .btn-cerca { background: #ff8800; color: white; border: none; border-radius: 10px; padding: 14px 30px; font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .btn-cerca:hover { background: #e67a00; }
+
+    .results-count { font-size: 15px; color: #444; margin-bottom: 14px; }
+    .results-count strong { color: #111; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+    .card { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); border-top: 4px solid #0066ff; display: flex; flex-direction: column; }
+    .card.premium { border-top-color: #7c3aed; }
+    .card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .card-logo { width: 46px; height: 46px; border-radius: 50%; background: #eef4ff; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0066ff; font-size: 18px; overflow: hidden; flex-shrink: 0; }
+    .card-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .card-name { font-weight: 800; font-size: 16px; color: #1a1a1a; line-height: 1.2; }
+    .card-prof { font-size: 13px; color: #0066ff; font-weight: 600; margin-top: 2px; }
+    .card-citta { font-size: 13px; color: #555; margin: 4px 0 10px; }
+    .card-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .bdg { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+    .bdg-albo { background: #e6f4ea; color: #1e7e34; }
+    .bdg-albo-p { background: #fff3e0; color: #b45309; }
+    .bdg-rc { background: #e8f0ff; color: #0052cc; }
+    .bdg-prem { background: #f3e8ff; color: #7c3aed; }
+    .card-prest { font-size: 12.5px; color: #666; line-height: 1.5; margin-bottom: 14px; flex: 1; }
+    .card-actions { display: flex; gap: 8px; margin-top: auto; }
+    .btn-profilo { flex: 1; text-align: center; text-decoration: none; background: #f0f4fa; color: #0066ff; font-weight: 700; font-size: 13px; padding: 10px; border-radius: 9px; }
+    .btn-incarico { flex: 1; border: none; cursor: pointer; background: #0066ff; color: white; font-weight: 700; font-size: 13px; padding: 10px; border-radius: 9px; }
+    .btn-incarico:hover { background: #0052cc; }
+
+    .state-box { text-align: center; padding: 44px 20px; background: white; border-radius: 14px; color: #444; }
+    .state-box h3 { font-size: 18px; color: #111; margin-bottom: 8px; }
+
+    /* Form richiesta incarico */
+    .form-card { background: white; border-radius: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); padding: 26px; max-width: 680px; margin: 0 auto; }
+    .form-card h2 { font-size: 1.5rem; color: #111; margin-bottom: 6px; }
+    .form-card .lead { color: #555; font-size: 14px; margin-bottom: 22px; }
+    .fg { margin-bottom: 16px; }
+    .fg label { display: block; font-size: 13px; font-weight: 700; color: #333; margin-bottom: 6px; }
+    .fg input, .fg select, .fg textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; color: #111; }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.12); }
+    .fg textarea { resize: vertical; min-height: 90px; }
+    .fg .req { color: #ff6b6b; }
+    .fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .upload { border: 2px dashed #cfd8e3; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; background: #fafcff; color: #555; font-size: 14px; }
+    .upload:hover { border-color: #0066ff; background: #f0f7ff; }
+    .file-list { margin-top: 10px; font-size: 13px; color: #0066ff; }
+    .file-list div { padding: 3px 0; }
+    .form-actions { display: flex; gap: 12px; margin-top: 22px; }
+    .btn-back { background: #eef0f3; color: #333; border: none; padding: 13px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
+    .btn-invia { flex: 1; background: #ff8800; color: white; border: none; padding: 13px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 15px; }
+    .btn-invia:hover { background: #e67a00; }
+    .btn-invia:disabled { opacity: 0.6; cursor: not-allowed; }
+    .msg { display: none; padding: 12px 14px; border-radius: 10px; font-size: 14px; margin-top: 14px; }
+
+    .prof-badge { display: inline-flex; align-items: center; gap: 8px; background: #eef4ff; color: #0052cc; font-weight: 700; padding: 10px 16px; border-radius: 12px; font-size: 14px; margin-bottom: 20px; }
+
+    @media (max-width: 760px) {
+      .top-bar h1 { font-size: 1.4rem; }
+      .search-grid { grid-template-columns: 1fr; }
+      .btn-cerca { width: 100%; }
+      .fg-row { grid-template-columns: 1fr; }
+      header nav a { margin-left: 12px; font-size: 14px; }
+    }
+  </style>
+  <link rel="stylesheet" href="/css/mobile.css?v=3">
+</head>
+<body>
+
+<header>
+  <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
+  <nav>
+    <a href="cerca-imprese.html">Imprese</a>
+    <a href="cerca-artigiani.html">Artigiani</a>
+    <a href="cerca-negozi.html">Negozi</a>
+    <a href="/login-impresa.html">Accedi</a>
+  </nav>
+</header>
+
+<!-- ============ SEZIONE 1: RICERCA ============ -->
+<div class="section active" id="sec-cerca">
+  <div class="top-bar">
+    <h1>👔 Professionisti dell'edilizia</h1>
+    <p>Cerca per prestazione e comune. Affida il tuo incarico a geometri, ingegneri, periti e architetti verificati.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="search-card">
+      <div class="search-grid">
+        <div class="field">
+          <label>Prestazione</label>
+          <select id="f-prestazione"><option value="">Tutte le prestazioni</option></select>
+        </div>
+        <div class="field">
+          <label>Comune</label>
+          <input type="text" id="f-comune" placeholder="Es. Roma, Milano, Rieti...">
+        </div>
+        <button class="btn-cerca" onclick="cerca()">🔍 Cerca</button>
+      </div>
+    </div>
+
+    <div class="results-count" id="results-count"></div>
+    <div id="risultati"><div class="state-box">⏳ Caricamento professionisti...</div></div>
+  </div>
+</div>
+
+<!-- ============ SEZIONE 2: RICHIESTA INCARICO ============ -->
+<div class="section" id="sec-richiedi">
+  <div class="top-bar">
+    <h1>📋 Affida un incarico</h1>
+    <p>Descrivi la prestazione che ti serve: il professionista ti risponderà con un preventivo di onorario.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="form-card">
+      <div class="prof-badge" id="prof-selezionato">Professionista selezionato</div>
+
+      <h2>La tua richiesta di incarico</h2>
+      <p class="lead">Nessun impegno: invii la richiesta e il professionista ti contatta per definire l'incarico e l'onorario.</p>
+
+      <div class="fg">
+        <label>Prestazione richiesta <span class="req">*</span></label>
+        <select id="i-prestazione"><option value="">— Seleziona la prestazione —</option></select>
+      </div>
+
+      <div class="fg-row">
+        <div class="fg">
+          <label>Comune dell'immobile <span class="req">*</span></label>
+          <input type="text" id="i-comune" placeholder="Es. Roma">
+        </div>
+        <div class="fg">
+          <label>Urgenza</label>
+          <select id="i-urgenza">
+            <option value="bassa">Nessuna fretta</option>
+            <option value="media" selected>Entro qualche settimana</option>
+            <option value="alta">Urgente</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Documenti (opzionale)</label>
+        <div class="upload" id="upload-area" onclick="document.getElementById('i-file').click()">
+          📎 Clicca per allegare documenti (planimetrie, visure, foto...)<br>
+          <small style="color:#999">PDF, JPG, PNG, DWG — max 10MB per file</small>
+        </div>
+        <input type="file" id="i-file" multiple accept=".pdf,.jpg,.jpeg,.png,.dwg,.doc,.docx" style="display:none">
+        <div class="file-list" id="file-list"></div>
+      </div>
+
+      <div class="fg">
+        <label>Note per il professionista</label>
+        <textarea id="i-note" placeholder="Descrivi brevemente cosa ti serve..."></textarea>
+      </div>
+
+      <div class="fg-row">
+        <div class="fg">
+          <label>Il tuo nome <span class="req">*</span></label>
+          <input type="text" id="i-nome" placeholder="Nome e cognome">
+        </div>
+        <div class="fg">
+          <label>Telefono <span class="req">*</span></label>
+          <input type="tel" id="i-telefono" placeholder="+39 333 1234567">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Email</label>
+        <input type="email" id="i-email" placeholder="latua@email.it">
+      </div>
+
+      <div class="msg" id="i-msg"></div>
+
+      <div class="form-actions">
+        <button class="btn-back" onclick="showSection('cerca')">← Indietro</button>
+        <button class="btn-invia" id="btn-invia" onclick="inviaIncarico()">Invia richiesta di incarico</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer style="background:#0a2a4d;color:white;font-size:0.9rem;padding:18px;text-align:center">
+  © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) –
+  <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> |
+  <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> |
+  <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> |
+  <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> |
+  <a href="/contatti.html" style="color:#a9c9f5">Contatti</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // === Catalogo prestazioni per categoria (condiviso con registrazione e pannello) ===
+  const PRESTAZIONI_CATALOGO = {
+    "Geometra": [
+      "Accatastamento e pratiche catastali (DOCFA)",
+      "Visure e volture catastali",
+      "Frazionamenti e tipo mappale (PREGEO)",
+      "Rilievi topografici",
+      "Pratiche edilizie (CILA, SCIA, permesso di costruire)",
+      "Sanatorie e condoni edilizi",
+      "Certificato di agibilità",
+      "Computo metrico estimativo",
+      "Direzione lavori",
+      "Successioni immobiliari",
+      "APE - Attestato di Prestazione Energetica",
+      "Perizie e stime immobiliari"
+    ],
+    "Ingegnere": [
+      "Progettazione strutturale (c.a., acciaio, legno)",
+      "Calcolo strutturale e relazioni di calcolo",
+      "Progettazione impianti (elettrico, termico, idraulico)",
+      "Direzione lavori strutturali",
+      "Collaudo statico",
+      "Pratiche sismiche e deposito al Genio Civile",
+      "Pratiche antincendio (SCIA VVF)",
+      "Progettazione BIM",
+      "Classificazione sismica e Sismabonus",
+      "Coordinamento sicurezza (CSP/CSE)"
+    ],
+    "Perito industriale": [
+      "Progettazione impianti elettrici",
+      "Progettazione impianti termici e climatizzazione",
+      "Dichiarazione di conformità impianti (DM 37/2008)",
+      "Progettazione impianto fotovoltaico",
+      "Pratiche antincendio",
+      "Collaudo e certificazione impianti",
+      "Consulenza efficientamento energetico",
+      "Direzione lavori impiantistici"
+    ],
+    "Perito estimatore": [
+      "Stime e valutazioni immobiliari",
+      "Perizie di stima per mutuo",
+      "Perizie giurate / asseverate",
+      "Consulenza tecnica (CTU e CTP)",
+      "Stime per successioni e divisioni",
+      "Perizie danni e assicurative",
+      "Stime di aziende e macchinari",
+      "Perizie estimative agrarie"
+    ]
+  };
+
+  // Popola i due select (ricerca + form) con optgroup per categoria
+  function popolaSelectPrestazioni() {
+    const optgroups = Object.keys(PRESTAZIONI_CATALOGO).map(cat => {
+      const opts = PRESTAZIONI_CATALOGO[cat].map(p => `<option value="${p}">${p}</option>`).join('');
+      return `<optgroup label="${cat}">${opts}</optgroup>`;
+    }).join('');
+    document.getElementById('f-prestazione').insertAdjacentHTML('beforeend', optgroups);
+    document.getElementById('i-prestazione').insertAdjacentHTML('beforeend', optgroups);
+  }
+  popolaSelectPrestazioni();
+
+  function formattaMestiere(s) {
+    if (!s) return 'Professionista';
+    if (s === 'amministratore_condominio') return 'Amministratore di condominio';
+    const t = String(s).replace(/_/g, ' ');
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // === Navigazione a sezioni (NO-MODAL) ===
+  function showSection(id, fromPopstate) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const sec = document.getElementById('sec-' + id);
+    if (sec) sec.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!fromPopstate) history.pushState({ section: id }, '');
+  }
+  history.replaceState({ section: 'cerca' }, '');
+  window.onpopstate = function (e) {
+    const id = (e.state && e.state.section) ? e.state.section : 'cerca';
+    showSection(id, true);
+  };
+
+  // === RICERCA ===
+  async function cerca() {
+    const prestazione = document.getElementById('f-prestazione').value;
+    const comune = document.getElementById('f-comune').value.trim();
+    const div = document.getElementById('risultati');
+    const countEl = document.getElementById('results-count');
+    div.innerHTML = '<div class="state-box">⏳ Ricerca in corso...</div>';
+    countEl.textContent = '';
+    try {
+      let q = sb.from('imprese').select('*')
+        .eq('tipo', 'professionista').eq('is_test', false)
+        .order('piano_ordine', { ascending: false })
+        .order('created_at', { ascending: false });
+      if (prestazione) q = q.contains('prestazioni', [prestazione]);
+      const { data, error } = await q.limit(100);
+      if (error) throw error;
+      let risultati = data || [];
+      // Filtro comune: comuni_competenza contiene il comune OPPURE città corrisponde
+      if (comune) {
+        const c = comune.toLowerCase();
+        risultati = risultati.filter(i => {
+          const comuni = Array.isArray(i.comuni_competenza) ? i.comuni_competenza.map(x => String(x).toLowerCase()) : [];
+          const inComuni = comuni.some(x => x.includes(c) || c.includes(x));
+          const inCitta = (i.citta || '').toLowerCase().includes(c);
+          return inComuni || inCitta;
+        });
+      }
+      // premium prima
+      risultati.sort((a, b) => (b.piano === 'premium' ? 1 : 0) - (a.piano === 'premium' ? 1 : 0));
+      if (!risultati.length) {
+        countEl.textContent = '';
+        div.innerHTML = '<div class="state-box"><h3>😕 Nessun professionista trovato</h3><p>Prova a cambiare prestazione o comune.</p></div>';
+        return;
+      }
+      countEl.innerHTML = `Trovati <strong>${risultati.length}</strong> professionisti`;
+      div.innerHTML = `<div class="grid">${risultati.map(cardHTML).join('')}</div>`;
+    } catch (e) {
+      div.innerHTML = `<div class="state-box"><h3>Errore</h3><p>${esc(e.message)}</p></div>`;
+    }
+  }
+
+  const _profMap = {};
+  function cardHTML(i) {
+    const nome = i.nome_attivita || `${i.nome || ''} ${i.cognome || ''}`.trim() || 'Professionista';
+    _profMap[i.id] = { id: i.id, nome: nome };
+    const iniz = nome.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+    const logo = i.logo_url && i.logo_url !== '/img/logo.png' ? `<img src="${esc(i.logo_url)}" alt="logo">` : iniz;
+    const prof = formattaMestiere(i.mestiere);
+    const premium = i.piano === 'premium';
+
+    const badges = [];
+    if (i.albo_verificato) badges.push('<span class="bdg bdg-albo">🎓 Albo verificato</span>');
+    else if (i.numero_albo || i.albo) badges.push('<span class="bdg bdg-albo-p">📋 Iscritto all\'albo</span>');
+    if (i.rc_scadenza && new Date(i.rc_scadenza) > new Date()) badges.push('<span class="bdg bdg-rc">🛡️ RC professionale</span>');
+    if (premium) badges.push('<span class="bdg bdg-prem">💎 Premium</span>');
+
+    const prest = Array.isArray(i.prestazioni) ? i.prestazioni.filter(Boolean) : [];
+    const prestTxt = prest.length ? esc(prest.slice(0, 3).join(' · ')) + (prest.length > 3 ? ' …' : '') : '';
+
+    return `<div class="card${premium ? ' premium' : ''}">
+      <div class="card-top">
+        <div class="card-logo">${logo}</div>
+        <div>
+          <div class="card-name">${esc(nome)}</div>
+          <div class="card-prof">👔 ${esc(prof)}</div>
+        </div>
+      </div>
+      <div class="card-citta">📍 ${esc([i.citta, i.provincia].filter(Boolean).join(', ') || '—')}</div>
+      <div class="card-badges">${badges.join('')}</div>
+      ${prestTxt ? `<div class="card-prest">🛠️ ${prestTxt}</div>` : '<div class="card-prest"></div>'}
+      <div class="card-actions">
+        <a class="btn-profilo" href="profilo-impresa.html?id=${i.id}">Vedi profilo</a>
+        <button class="btn-incarico" onclick="apriIncarico('${i.id}')">Richiedi incarico</button>
+      </div>
+    </div>`;
+  }
+
+  // === RICHIESTA INCARICO ===
+  let profSelezionato = null;
+  let fileSelezionati = [];
+
+  function apriIncarico(id) {
+    const prof = _profMap[id];
+    if (!prof) return;
+    profSelezionato = prof;
+    document.getElementById('prof-selezionato').innerHTML = '👔 ' + esc(prof.nome);
+    // pre-compila la prestazione con quella cercata, se presente
+    const cercata = document.getElementById('f-prestazione').value;
+    if (cercata) document.getElementById('i-prestazione').value = cercata;
+    const comuneCercato = document.getElementById('f-comune').value.trim();
+    if (comuneCercato) document.getElementById('i-comune').value = comuneCercato;
+    showSection('richiedi');
+  }
+
+  document.getElementById('i-file').addEventListener('change', function (e) {
+    for (const f of e.target.files) {
+      if (f.size > 10 * 1024 * 1024) { alert('Il file "' + f.name + '" supera i 10MB e non è stato aggiunto.'); continue; }
+      fileSelezionati.push(f);
+    }
+    renderFileList();
+    e.target.value = '';
+  });
+  function renderFileList() {
+    document.getElementById('file-list').innerHTML = fileSelezionati.map((f, idx) =>
+      `<div>📄 ${esc(f.name)} <span style="color:#c00;cursor:pointer" onclick="rimuoviFile(${idx})">✕</span></div>`
+    ).join('');
+  }
+  function rimuoviFile(idx) { fileSelezionati.splice(idx, 1); renderFileList(); }
+
+  function showMsgI(text, type) {
+    const el = document.getElementById('i-msg');
+    el.textContent = text;
+    el.style.display = 'block';
+    if (type === 'error') { el.style.background = '#fdecea'; el.style.color = '#b71c1c'; }
+    else if (type === 'success') { el.style.background = '#e6f4ea'; el.style.color = '#1e4620'; }
+    else { el.style.background = '#e8f0ff'; el.style.color = '#0052cc'; }
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function inviaIncarico() {
+    if (!profSelezionato) { showMsgI('Seleziona prima un professionista dalla ricerca.', 'error'); return; }
+    const prestazione = document.getElementById('i-prestazione').value;
+    const comune = document.getElementById('i-comune').value.trim();
+    const urgenza = document.getElementById('i-urgenza').value;
+    const note = document.getElementById('i-note').value.trim();
+    const nome = document.getElementById('i-nome').value.trim();
+    const telefono = document.getElementById('i-telefono').value.trim();
+    const email = document.getElementById('i-email').value.trim();
+
+    if (!prestazione) { showMsgI('Seleziona la prestazione richiesta.', 'error'); return; }
+    if (!comune) { showMsgI('Indica il comune dell\'immobile.', 'error'); return; }
+    if (!nome) { showMsgI('Inserisci il tuo nome.', 'error'); return; }
+    if (!telefono) { showMsgI('Inserisci un recapito telefonico.', 'error'); return; }
+
+    const btn = document.getElementById('btn-invia');
+    btn.disabled = true; btn.textContent = '⏳ Invio in corso...';
+    try {
+      // 1) Upload documenti nel bucket privato (path: <professionista_id>/<timestamp>_<file>)
+      const documenti = [];
+      for (const f of fileSelezionati) {
+        const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `${profSelezionato.id}/${Date.now()}_${safe}`;
+        const { error: upErr } = await sb.storage.from('documenti-incarichi').upload(path, f, { contentType: f.type || 'application/octet-stream' });
+        if (upErr) throw new Error('Upload documento fallito: ' + upErr.message);
+        documenti.push(path);
+      }
+      // 2) Utente loggato? (facoltativo)
+      let richiedente_user_id = null;
+      try { const { data: { user } } = await sb.auth.getUser(); if (user) richiedente_user_id = user.id; } catch (e) {}
+      // 3) Inserisci la richiesta di incarico
+      const { error } = await sb.from('incarichi_richieste').insert({
+        professionista_id: profSelezionato.id,
+        richiedente_user_id,
+        nome, email: email || null, telefono,
+        prestazione, comune, urgenza,
+        note: note || null,
+        documenti
+      });
+      if (error) throw error;
+      showMsgI('✅ Richiesta di incarico inviata! Il professionista ti contatterà a breve con un preventivo di onorario.', 'success');
+      btn.textContent = '✅ Inviata';
+      // reset campi
+      document.getElementById('i-note').value = '';
+      fileSelezionati = []; renderFileList();
+    } catch (e) {
+      showMsgI('❌ ' + e.message, 'error');
+      btn.disabled = false; btn.textContent = 'Invia richiesta di incarico';
+    }
+  }
+
+  // Avvio: mostra tutti i professionisti
+  cerca();
+</script>
+<script src="/cookie-banner.js"></script>
+</body>
+</html>

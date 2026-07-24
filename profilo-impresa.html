@@ -472,6 +472,10 @@ nav img{height:36px}
         <div class="info-label" id="info-mestieri-label">Mestieri / Servizi</div>
         <div class="cats" id="profile-mestieri"></div>
       </div>
+      <div class="info-section" id="info-prest-wrap" style="display:none">
+        <div class="info-label">Prestazioni offerte</div>
+        <div class="cats" id="profile-prest"></div>
+      </div>
       <div class="info-section" id="info-spec-wrap" style="display:none">
         <div class="info-label">Specializzazioni</div>
         <div class="cats" id="profile-spec"></div>
@@ -620,6 +624,8 @@ async function caricaProfilo(id){
     if(d.foto_copertina_url){document.getElementById('cover-foto-img').src=d.foto_copertina_url;document.getElementById('cover-foto').style.display='block'}
     const b=[];
     if(d.verificata)b.push('<span class="hb hb-v">✓ Verificata</span>');
+    if(d.albo_verificato)b.push('<span class="hb hb-v">🎓 Albo verificato</span>');
+    if(d.rc_scadenza && new Date(d.rc_scadenza) > new Date())b.push('<span class="hb hb-g">🛡️ RC professionale</span>');
     if(d.anno_fondazione&&d.anno_fondazione>1900)b.push(`<span class="hb hb-g">Dal ${d.anno_fondazione}</span>`);
     document.getElementById('profile-badges').innerHTML=b.join('');
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
@@ -637,6 +643,7 @@ async function caricaProfilo(id){
       ['Partita IVA',d.partita_iva],
       ['Anni di esperienza',d.anni_esperienza?d.anni_esperienza+' anni':''],
       ['Numero albo',d.numero_albo||d.albo],
+      ['Ordine / Collegio',d.ordine_provinciale],
       ['Regione',d.regione],
       ['Provincia',d.provincia],
       ['Città',d.citta],
@@ -655,6 +662,12 @@ async function caricaProfilo(id){
       document.getElementById('info-mestieri-label').textContent=d.tipo==='professionista'?'Professioni':(d.tipo==='negozio'?'Categorie':'Mestieri / Servizi');
       document.getElementById('profile-mestieri').innerHTML=mestieriUniq.map(v=>{const k=Object.keys(im).find(k=>v.toLowerCase().includes(k));return`<div class="cat"><span>${im[k]||'🔧'}</span> ${_esc(formattaMestiere(v))}</div>`}).join('');
       document.getElementById('info-mestieri-wrap').style.display='';_infoHasContent=true;
+    }
+    // Prestazioni (array text[] per professionisti → chip)
+    const prestArr=Array.isArray(d.prestazioni)?d.prestazioni.filter(Boolean):[];
+    if(prestArr.length){
+      const w=document.getElementById('info-prest-wrap');
+      if(w){document.getElementById('profile-prest').innerHTML=prestArr.map(v=>`<div class="cat"><span>🛠️</span> ${_esc(v)}</div>`).join('');w.style.display='';_infoHasContent=true;}
     }
     // Specializzazioni (parse JSON string per professionisti → chip pulite)
     const specArr=parseSpec(d.specializzazioni);

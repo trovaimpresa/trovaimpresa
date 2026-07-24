@@ -2117,6 +2117,44 @@
         <div class="profilo-title">Dati impresa</div>
         <div class="empty-state"><div class="empty-icon">👤</div>Caricamento...</div>
       </div>
+
+      <!-- Prestazioni offerte + dati albo/RC (editabile) -->
+      <div class="profilo-card" id="profilo-prestazioni" style="margin-top:20px">
+        <div class="profilo-title">🛠️ Prestazioni offerte</div>
+        <div style="font-size:0.85rem;color:var(--mid);margin-bottom:14px">Seleziona i servizi che offri: i clienti ti troveranno cercando la singola prestazione nella pagina Professionisti.</div>
+        <div id="prest-blocco"></div>
+
+        <div style="margin-top:18px">
+          <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Comuni di competenza</label>
+          <input type="text" id="prest-comuni" placeholder="Es. Roma, Fiumicino, Tivoli (separati da virgola)" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
+        </div>
+
+        <div class="profilo-title" style="margin-top:26px">🎓 Dati albo e assicurazione</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:12px">
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Numero iscrizione albo</label>
+            <input type="text" id="prof-numero-albo" placeholder="Es. 1234" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Ordine / Collegio provinciale</label>
+            <input type="text" id="prof-ordine" placeholder="Es. Ordine Ingegneri di Roma" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Compagnia RC professionale</label>
+            <input type="text" id="prof-rc-compagnia" placeholder="Es. Generali, UnipolSai..." style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--dark);margin-bottom:6px">Scadenza polizza RC</label>
+            <input type="date" id="prof-rc-scadenza" style="width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:inherit;color:var(--dark)">
+          </div>
+        </div>
+        <div id="prof-albo-stato" style="margin-top:14px;font-size:0.85rem"></div>
+
+        <div style="margin-top:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <button onclick="salvaPrestazioniProfilo()" style="background:var(--verde);color:white;border:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer">💾 Salva prestazioni e dati</button>
+          <span id="prest-msg" style="font-size:0.85rem;font-weight:600"></span>
+        </div>
+      </div>
     </div>
 
     <!-- FOTO DEI LAVORI -->
@@ -3660,6 +3698,105 @@ async function caricaRecensioni() {
 }
 
 // PROFILO
+// === Catalogo prestazioni per categoria (condiviso con registrazione e landing) ===
+const PRESTAZIONI_CATALOGO = {
+  "Geometra": [
+    "Accatastamento e pratiche catastali (DOCFA)",
+    "Visure e volture catastali",
+    "Frazionamenti e tipo mappale (PREGEO)",
+    "Rilievi topografici",
+    "Pratiche edilizie (CILA, SCIA, permesso di costruire)",
+    "Sanatorie e condoni edilizi",
+    "Certificato di agibilità",
+    "Computo metrico estimativo",
+    "Direzione lavori",
+    "Successioni immobiliari",
+    "APE - Attestato di Prestazione Energetica",
+    "Perizie e stime immobiliari"
+  ],
+  "Ingegnere": [
+    "Progettazione strutturale (c.a., acciaio, legno)",
+    "Calcolo strutturale e relazioni di calcolo",
+    "Progettazione impianti (elettrico, termico, idraulico)",
+    "Direzione lavori strutturali",
+    "Collaudo statico",
+    "Pratiche sismiche e deposito al Genio Civile",
+    "Pratiche antincendio (SCIA VVF)",
+    "Progettazione BIM",
+    "Classificazione sismica e Sismabonus",
+    "Coordinamento sicurezza (CSP/CSE)"
+  ],
+  "Perito industriale": [
+    "Progettazione impianti elettrici",
+    "Progettazione impianti termici e climatizzazione",
+    "Dichiarazione di conformità impianti (DM 37/2008)",
+    "Progettazione impianto fotovoltaico",
+    "Pratiche antincendio",
+    "Collaudo e certificazione impianti",
+    "Consulenza efficientamento energetico",
+    "Direzione lavori impiantistici"
+  ],
+  "Perito estimatore": [
+    "Stime e valutazioni immobiliari",
+    "Perizie di stima per mutuo",
+    "Perizie giurate / asseverate",
+    "Consulenza tecnica (CTU e CTP)",
+    "Stime per successioni e divisioni",
+    "Perizie danni e assicurative",
+    "Stime di aziende e macchinari",
+    "Perizie estimative agrarie"
+  ]
+};
+
+function caricaPrestazioniProfilo() {
+  const i = impresaCorrente;
+  if (!i) return;
+  const selezionate = Array.isArray(i.prestazioni) ? i.prestazioni : [];
+  const box = document.getElementById('prest-blocco');
+  if (box) {
+    box.innerHTML = Object.keys(PRESTAZIONI_CATALOGO).map(cat => {
+      const items = PRESTAZIONI_CATALOGO[cat].map(p => {
+        const on = selezionate.includes(p) ? 'checked' : '';
+        return `<label style="display:flex;align-items:flex-start;gap:8px;font-size:0.85rem;color:var(--dark);cursor:pointer;padding:5px 4px;border-radius:6px;line-height:1.35"><input type="checkbox" class="prest-item" value="${p}" ${on} style="width:auto;margin-top:2px;accent-color:var(--verde);flex-shrink:0"><span>${p}</span></label>`;
+      }).join('');
+      return `<div style="border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden"><div style="background:#f4f8ff;padding:10px 14px;font-weight:700;font-size:0.8rem;color:#0052cc;border-bottom:1px solid var(--border)">${cat}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;padding:12px 14px">${items}</div></div>`;
+    }).join('');
+  }
+  const comuni = Array.isArray(i.comuni_competenza) ? i.comuni_competenza : [];
+  const cEl = document.getElementById('prest-comuni'); if (cEl) cEl.value = comuni.join(', ');
+  const nAlbo = document.getElementById('prof-numero-albo'); if (nAlbo) nAlbo.value = i.numero_albo || '';
+  const ord = document.getElementById('prof-ordine'); if (ord) ord.value = i.ordine_provinciale || '';
+  const rcC = document.getElementById('prof-rc-compagnia'); if (rcC) rcC.value = i.rc_compagnia || '';
+  const rcS = document.getElementById('prof-rc-scadenza'); if (rcS) rcS.value = i.rc_scadenza || '';
+  const stato = document.getElementById('prof-albo-stato');
+  if (stato) {
+    stato.innerHTML = i.albo_verificato
+      ? '<span style="color:var(--verde2);font-weight:700">🎓 Albo verificato dallo staff TrovaImpresa</span>'
+      : '<span style="color:var(--mid)">L\'iscrizione all\'albo viene verificata manualmente dallo staff. Il badge "Albo verificato" comparirà sul tuo profilo dopo il controllo.</span>';
+  }
+}
+
+async function salvaPrestazioniProfilo() {
+  const msg = document.getElementById('prest-msg');
+  const prestazioni = Array.from(document.querySelectorAll('.prest-item:checked')).map(c => c.value);
+  const comuni_competenza = (document.getElementById('prest-comuni').value || '')
+    .split(',').map(s => s.trim()).filter(Boolean);
+  const numero_albo = document.getElementById('prof-numero-albo').value.trim() || null;
+  const ordine_provinciale = document.getElementById('prof-ordine').value.trim() || null;
+  const rc_compagnia = document.getElementById('prof-rc-compagnia').value.trim() || null;
+  const rc_scadenza = document.getElementById('prof-rc-scadenza').value || null;
+  if (msg) { msg.style.color = 'var(--mid)'; msg.textContent = 'Salvataggio...'; }
+  const { error } = await sb.from('imprese').update({
+    prestazioni, comuni_competenza, numero_albo, ordine_provinciale, rc_compagnia, rc_scadenza
+  }).eq('id', impresaCorrente.id);
+  if (error) {
+    if (msg) { msg.style.color = '#c62828'; msg.textContent = '❌ Errore: ' + error.message; }
+    return;
+  }
+  Object.assign(impresaCorrente, { prestazioni, comuni_competenza, numero_albo, ordine_provinciale, rc_compagnia, rc_scadenza });
+  if (msg) { msg.style.color = 'var(--verde2)'; msg.textContent = '✅ Salvato!'; setTimeout(() => { msg.textContent = ''; }, 3000); }
+}
+
 function caricaProfilo() {
   const i = impresaCorrente;
   if (!i) return;
@@ -3716,6 +3853,7 @@ function caricaProfilo() {
       <a href="modifica-profilo.html" target="_blank" style="display:inline-block;background:var(--verde);color:white;padding:12px 28px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none">✏️ Modifica profilo</a>
     </div>
   `;
+  caricaPrestazioniProfilo();
 }
 
 function aggiornaPianoCards(piano) {

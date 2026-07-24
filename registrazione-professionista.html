@@ -75,6 +75,14 @@
     .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #111; border-bottom: 1px solid #f0f0f0; }
     .map-dd-item:hover { background: #e8f5e9; }
     .map-dd-item:last-child { border-bottom: none; }
+    /* Prestazioni a checkbox raggruppate per categoria */
+    .prest-cat { border: 1px solid #e5e5e5; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+    .prest-cat-head { background: #f4f8ff; padding: 10px 14px; font-weight: 700; font-size: 13px; color: #0052cc; border-bottom: 1px solid #e5e5e5; }
+    .prest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; padding: 12px 14px; }
+    .prest-check { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #222; cursor: pointer; padding: 5px 4px; border-radius: 6px; line-height: 1.35; }
+    .prest-check:hover { background: #f0f7ff; }
+    .prest-check input { width: auto; margin-top: 2px; accent-color: #0066ff; flex-shrink: 0; }
+    @media (max-width: 768px) { .prest-grid { grid-template-columns: 1fr; } }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
@@ -201,6 +209,16 @@
             <option value="project_manager">Project manager</option>
             <option value="amministratore_condominio">Amministratore di condominio</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>Prestazioni offerte</label>
+          <div style="font-size:12px;color:#888;margin-bottom:10px;">Seleziona i servizi che offri: i clienti ti troveranno cercando la singola prestazione.</div>
+          <div id="prestazioni-blocco"></div>
+        </div>
+        <div class="form-group">
+          <label>Comuni di competenza</label>
+          <input type="text" id="comuni_competenza" placeholder="Es. Roma, Fiumicino, Tivoli (separati da virgola)">
+          <div style="font-size:11px;color:#888;margin-top:4px;">Elenco dei comuni in cui accetti incarichi, separati da virgola.</div>
         </div>
         <div class="form-group">
           <label>Altre competenze / specializzazioni</label>
@@ -386,6 +404,75 @@
     let currentStep = 1;
     let logoFile = null;
 
+    // === Catalogo prestazioni per categoria (condiviso con pannello e landing) ===
+    const PRESTAZIONI_CATALOGO = {
+      "Geometra": [
+        "Accatastamento e pratiche catastali (DOCFA)",
+        "Visure e volture catastali",
+        "Frazionamenti e tipo mappale (PREGEO)",
+        "Rilievi topografici",
+        "Pratiche edilizie (CILA, SCIA, permesso di costruire)",
+        "Sanatorie e condoni edilizi",
+        "Certificato di agibilità",
+        "Computo metrico estimativo",
+        "Direzione lavori",
+        "Successioni immobiliari",
+        "APE - Attestato di Prestazione Energetica",
+        "Perizie e stime immobiliari"
+      ],
+      "Ingegnere": [
+        "Progettazione strutturale (c.a., acciaio, legno)",
+        "Calcolo strutturale e relazioni di calcolo",
+        "Progettazione impianti (elettrico, termico, idraulico)",
+        "Direzione lavori strutturali",
+        "Collaudo statico",
+        "Pratiche sismiche e deposito al Genio Civile",
+        "Pratiche antincendio (SCIA VVF)",
+        "Progettazione BIM",
+        "Classificazione sismica e Sismabonus",
+        "Coordinamento sicurezza (CSP/CSE)"
+      ],
+      "Perito industriale": [
+        "Progettazione impianti elettrici",
+        "Progettazione impianti termici e climatizzazione",
+        "Dichiarazione di conformità impianti (DM 37/2008)",
+        "Progettazione impianto fotovoltaico",
+        "Pratiche antincendio",
+        "Collaudo e certificazione impianti",
+        "Consulenza efficientamento energetico",
+        "Direzione lavori impiantistici"
+      ],
+      "Perito estimatore": [
+        "Stime e valutazioni immobiliari",
+        "Perizie di stima per mutuo",
+        "Perizie giurate / asseverate",
+        "Consulenza tecnica (CTU e CTP)",
+        "Stime per successioni e divisioni",
+        "Perizie danni e assicurative",
+        "Stime di aziende e macchinari",
+        "Perizie estimative agrarie"
+      ]
+    };
+
+    (function renderPrestazioni() {
+      const box = document.getElementById('prestazioni-blocco');
+      if (!box) return;
+      box.innerHTML = Object.keys(PRESTAZIONI_CATALOGO).map(cat => {
+        const items = PRESTAZIONI_CATALOGO[cat].map(p =>
+          `<label class="prest-check"><input type="checkbox" class="prest-item" value="${p}"><span>${p}</span></label>`
+        ).join('');
+        return `<div class="prest-cat"><div class="prest-cat-head">${cat}</div><div class="prest-grid">${items}</div></div>`;
+      }).join('');
+    })();
+
+    function getPrestazioniSelezionate() {
+      return Array.from(document.querySelectorAll('.prest-item:checked')).map(c => c.value);
+    }
+    function getComuniCompetenza() {
+      return (document.getElementById('comuni_competenza').value || '')
+        .split(',').map(s => s.trim()).filter(Boolean);
+    }
+
 
     document.getElementById('logo-input').addEventListener('change', function(e) {
       const file = e.target.files[0];
@@ -541,7 +628,9 @@
               citta: citta,
               provincia: document.getElementById('provincia').value,
               regione: regione,
-              mestiere: mestiere
+              mestiere: mestiere,
+              prestazioni: getPrestazioniSelezionate(),
+              comuni_competenza: getComuniCompetenza()
             }
           }
         });
