@@ -1879,10 +1879,6 @@
           <div class="dash-quick-icon">📁</div>
           <div class="dash-quick-label">Richieste di incarico</div>
         </div>
-        <div class="dash-quick-card" data-card-id="imprese-zona" style="border-top-color:#ff8800;cursor:pointer" onclick="showSection('imprese-zona', this)">
-          <div class="dash-quick-icon">🏗️</div>
-          <div class="dash-quick-label">Imprese nella tua zona</div>
-        </div>
         <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriVideo()">
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
@@ -2098,16 +2094,6 @@
       <!-- Contatore incarichi del mese -->
       <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#0a2a4d;border-left:4px solid #0066ff;">📊 Caricamento...</div>
       <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📁</div>Caricamento...</div></div>
-    </div>
-
-    <div class="section" id="sec-imprese-zona">
-      <div class="topbar">
-        <div class="topbar-title">🏗️ Imprese nella tua zona</div>
-      </div>
-      <div style="background:#fff7ee;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#0a2a4d;border-left:4px solid #ff8800;">
-        Imprese e artigiani attivi nella tua zona: fai rete e fatti conoscere per direzione lavori, pratiche, collaudi e consulenze.
-      </div>
-      <div id="lista-imprese-zona"><div class="empty-state"><div class="empty-icon">🏗️</div>Caricamento...</div></div>
     </div>
 
     <div class="section" id="sec-candidature">
@@ -3426,7 +3412,6 @@ function showSection(id, el, fromPopstate) {
   if (id === 'messaggi') caricaConversazioni();
   if (id === 'anteprima') caricaAnteprima();
   if (id === 'supporto') caricaSupporto();
-  if (id === 'imprese-zona') caricaImpreseZona();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -3857,52 +3842,6 @@ function normalizzaComuneProf(s){
     .trim();
 }
 
-// === CROSS-MATCH speculare: imprese/artigiani nella zona del professionista ===
-async function caricaImpreseZona(){
-  const cont = document.getElementById('lista-imprese-zona');
-  if (!cont || !impresaCorrente) return;
-  const citta = impresaCorrente.citta || '';
-  const cittaSafe = citta.replace(/[,()]/g, '').trim();
-  const nc = normalizzaComuneProf(citta);
-  cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🏗️</div>Caricamento...</div>';
-  try {
-    let q = sb.from('imprese').select('*')
-      .in('tipo', ['impresa', 'artigiano']).eq('is_test', false)
-      .order('piano_ordine', { ascending: false }).limit(40);
-    if (cittaSafe) q = q.or(`citta.ilike.%${cittaSafe}%,comuni_competenza.cs.{"${nc}"}`);
-    const { data, error } = await q;
-    if (error) throw error;
-    const lista = data || [];
-    if (!lista.length) {
-      cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🏗️</div>Nessuna impresa trovata nella tua zona.<br><small>Compila il comune nel profilo per vedere chi lavora vicino a te.</small></div>';
-      return;
-    }
-    cont.innerHTML = lista.map(p => {
-      const nome = p.nome_attivita || p.nome || 'Impresa';
-      const tipo = (p.tipo === 'artigiano') ? 'Artigiano' : 'Impresa edile';
-      const mest = (p.mestiere || '').replace(/_/g, ' ');
-      const badge = p.verificata ? '<span class="prev-badge badge-inviato">✅ Verificata</span>' : '';
-      const desc = p.descrizione ? `<div class="prev-desc">${escHtml(String(p.descrizione).substring(0, 140))}</div>` : '';
-      return `
-      <div class="prev-card">
-        <div class="prev-header">
-          <div class="prev-nome">🏗️ ${escHtml(nome)}</div>
-          ${badge}
-        </div>
-        <div class="prev-info">
-          <span>🔧 ${escHtml(mest || tipo)}</span>
-          <span>📍 ${escHtml([p.citta, p.provincia].filter(Boolean).join(', ') || '—')}</span>
-        </div>
-        ${desc}
-        <div class="prev-footer">
-          <a class="btn-genera" style="text-decoration:none" href="profilo-impresa.html?id=${p.id}" target="_blank">Vedi profilo</a>
-        </div>
-      </div>`;
-    }).join('');
-  } catch (e) {
-    cont.innerHTML = '<div class="empty-state">Errore nel caricamento: ' + escHtml(e.message) + '</div>';
-  }
-}
 function caricaPrestazioniProfilo() {
   const i = impresaCorrente;
   if (!i) return;

@@ -659,15 +659,6 @@ async function caricaProfilo(id){
       if(tl) tl.innerHTML='<strong>Affida un incarico</strong><span>Ti risponde con un preventivo di onorario</span>';
       const preComune=document.getElementById('inc-comune'); if(preComune&&d.citta) preComune.value=d.citta;
       const st=document.getElementById('scrivi-title'); if(st) st.textContent='💬 Scrivi al professionista';
-      // Cross-match: apertura precompilata dal pannello impresa (?incarico=1&pre_nome=&pre_comune=&pre_prestazione=)
-      const _p=new URLSearchParams(location.search);
-      if(_p.get('incarico')==='1'){
-        showIncarico();
-        const inNome=document.getElementById('inc-nome'); if(inNome&&_p.get('pre_nome')) inNome.value=_p.get('pre_nome');
-        const inComune=document.getElementById('inc-comune'); if(inComune&&_p.get('pre_comune')) inComune.value=_p.get('pre_comune');
-        const prePrest=_p.get('pre_prestazione');
-        if(prePrest){const s=document.getElementById('inc-prestazione'); if(s&&[...s.options].some(o=>o.value===prePrest)) s.value=prePrest;}
-      }
     }
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;
