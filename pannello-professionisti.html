@@ -1876,8 +1876,8 @@
         </div>
         <div class="dash-quick-card" data-card-id="preventivi-illimitati" style="border-top-color:#7c3aed;cursor:pointer;position:relative" onclick="showSection('preventivi', this)">
           <span id="badge-prev-card" style="display:none;position:absolute;top:8px;right:8px;background:#c0392b;color:white;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:10px;text-align:center;line-height:20px;box-sizing:border-box"></span>
-          <div class="dash-quick-icon">📄</div>
-          <div class="dash-quick-label">Richiesta di preventivo</div>
+          <div class="dash-quick-icon">📁</div>
+          <div class="dash-quick-label">Richieste di incarico</div>
         </div>
         <div class="dash-quick-card" data-card-id="video-azienda" data-premium="true" style="border-top-color:#7c3aed;cursor:pointer" onclick="apriVideo()">
           <div class="dash-quick-icon">🎬</div>
@@ -2089,11 +2089,11 @@
     <!-- PREVENTIVI -->
     <div class="section" id="sec-preventivi">
       <div class="topbar">
-        <div class="topbar-title">📋 Richieste preventivo ricevute</div>
+        <div class="topbar-title">📁 Richieste di incarico ricevute</div>
       </div>
-      <!-- Contatore preventivi del mese -->
+      <!-- Contatore incarichi del mese -->
       <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#0a2a4d;border-left:4px solid #0066ff;">📊 Caricamento...</div>
-      <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
+      <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📁</div>Caricamento...</div></div>
     </div>
 
     <div class="section" id="sec-candidature">
@@ -3591,57 +3591,78 @@ async function inizializza() {
   aggiornaBadgeMessaggi();
 }
 
-// CARICA PREVENTIVI
+// CARICA RICHIESTE DI INCARICO (riusa la card/sezione ex "preventivi")
 async function caricaPreventivi() {
-  const { data } = await sb.from('preventivi_safe').select('*')
-    .eq('impresa_id', impresaCorrente.id)
+  const { data } = await sb.from('incarichi_richieste').select('*')
+    .eq('professionista_id', impresaCorrente.id)
     .order('created_at', { ascending: false });
 
   const lista = data || [];
 
-  // Badge "non risposti" sulla card Funzioni Premium
-  const _nonRisposti = lista.filter(p => p.risposta == null).length;
+  // Badge "nuove" sulla card
+  const _nuovi = lista.filter(x => x.stato === 'nuova').length;
   const _badgePrev = document.getElementById('badge-prev-card');
   if (_badgePrev) {
-    _badgePrev.textContent = _nonRisposti;
-    _badgePrev.style.display = _nonRisposti > 0 ? 'inline-block' : 'none';
+    _badgePrev.textContent = _nuovi;
+    _badgePrev.style.display = _nuovi > 0 ? 'inline-block' : 'none';
   }
 
-  // Contatore richieste preventivo del mese
-  const _inizioMesePrev = new Date(); _inizioMesePrev.setDate(1); _inizioMesePrev.setHours(0,0,0,0);
-  const _prevMese = lista.filter(p => new Date(p.created_at) >= _inizioMesePrev).length;
-  const _contPrevEl = document.getElementById('contatore-preventivi-mese');
-  if (_contPrevEl) {
-    _contPrevEl.innerHTML = `📊 Richieste preventivo questo mese: <strong>${_prevMese}</strong> (illimitate)`;
-    _contPrevEl.style.borderLeftColor = '#7c3aed';
+  // Contatore incarichi del mese
+  const _inizioMese = new Date(); _inizioMese.setDate(1); _inizioMese.setHours(0,0,0,0);
+  const _mese = lista.filter(x => new Date(x.created_at) >= _inizioMese).length;
+  const _contEl = document.getElementById('contatore-preventivi-mese');
+  if (_contEl) {
+    _contEl.innerHTML = `📊 Richieste di incarico questo mese: <strong>${_mese}</strong>`;
+    _contEl.style.borderLeftColor = '#0066ff';
   }
 
   const container = document.getElementById('lista-preventivi');
+  if (!container) return;
   if (!lista.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>Nessuna richiesta ancora.<br><small>Le richieste dei clienti appariranno qui!</small></div>';
-  } else {
-  container.innerHTML = lista.map(p => `
-    <div class="prev-card" onclick="apriModal(${p.id})">
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div>Nessuna richiesta di incarico ancora.<br><small>Le richieste dei clienti appariranno qui!</small></div>';
+    return;
+  }
+  container.innerHTML = lista.map(x => {
+    const docs = Array.isArray(x.documenti) ? x.documenti : [];
+    const docBtns = docs.map((p, i) => `<button class="btn-genera" style="margin:2px" onclick="scaricaDocIncarico('${String(p).replace(/'/g, "\\'")}')">📎 Documento ${i + 1}</button>`).join('');
+    const gestita = x.stato && x.stato !== 'nuova';
+    return `
+    <div class="prev-card">
       <div class="prev-header">
-        <div class="prev-nome">👤 ${escHtml(p.nome)}</div>
-        <span class="prev-badge ${p.risposta ? 'badge-inviato' : 'badge-nuovo'}">${p.risposta ? '✅ Risposto' : '🆕 Nuovo'}</span>
+        <div class="prev-nome">👤 ${escHtml(x.nome || '—')}</div>
+        <span class="prev-badge ${gestita ? 'badge-inviato' : 'badge-nuovo'}">${gestita ? '✅ Gestita' : '🆕 Nuova'}</span>
       </div>
       <div class="prev-info">
-        <span>🔨 ${escHtml(p.tipo_lavoro || '—')}</span>
-        <span>📍 ${escHtml(p.indirizzo || '—')}</span>
-        <span>⏰ ${escHtml(p.urgenza || '—')}</span>
-        ${p.budget ? `<span>💶 ${escHtml(p.budget)}</span>` : ''}
+        <span>🛠️ ${escHtml(x.prestazione || '—')}</span>
+        <span>📍 ${escHtml(x.comune || '—')}</span>
+        <span>⏰ ${escHtml(x.urgenza || '—')}</span>
       </div>
-      <div class="prev-desc">${escHtml((p.descrizione || '').substring(0, 150))}${p.descrizione?.length > 150 ? '...' : ''}</div>
+      <div class="prev-info">
+        <span>📞 ${escHtml(x.telefono || '—')}</span>
+        ${x.email ? `<span>✉️ ${escHtml(x.email)}</span>` : ''}
+      </div>
+      ${x.note ? `<div class="prev-desc">${escHtml(x.note)}</div>` : ''}
+      ${docs.length ? `<div style="margin:8px 0">${docBtns}</div>` : ''}
       <div class="prev-footer">
-        <span class="prev-data">${new Date(p.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</span>
-        <button class="btn-genera" onclick="event.stopPropagation();apriModal(${p.id})">
-          🤖 Genera preventivo AI
-        </button>
+        <span class="prev-data">${new Date(x.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</span>
+        ${gestita ? '' : `<button class="btn-genera" onclick="segnaIncaricoGestito('${x.id}')">✓ Segna come gestita</button>`}
       </div>
-    </div>
-  `).join('');
-  }
+    </div>`;
+  }).join('');
+}
+
+// Scarica un documento allegato all'incarico (bucket privato -> URL firmato temporaneo)
+async function scaricaDocIncarico(path) {
+  const { data, error } = await sb.storage.from('documenti-incarichi').createSignedUrl(path, 3600);
+  if (error || !data) { alert('Impossibile aprire il documento.'); return; }
+  window.open(data.signedUrl, '_blank');
+}
+
+// Segna una richiesta di incarico come gestita
+async function segnaIncaricoGestito(id) {
+  const { error } = await sb.from('incarichi_richieste').update({ stato: 'presa_in_carico' }).eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  caricaPreventivi();
 }
 
 async function caricaCandidature() {
