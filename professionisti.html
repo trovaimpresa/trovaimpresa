@@ -318,6 +318,12 @@
     const comune = document.getElementById('f-comune').value.trim();
     const div = document.getElementById('risultati');
     const countEl = document.getElementById('results-count');
+    // Come nelle altre pagine: niente lista finché non si cerca
+    if (!prestazione && !comune) {
+      countEl.textContent = '';
+      div.innerHTML = '<div class="state-box"><h3>🔎 Cerca un professionista</h3><p>Scegli una prestazione o inserisci un comune per vedere i professionisti disponibili.</p></div>';
+      return;
+    }
     div.innerHTML = '<div class="state-box">⏳ Ricerca in corso...</div>';
     countEl.textContent = '';
     try {
@@ -371,7 +377,7 @@
     const prest = Array.isArray(i.prestazioni) ? i.prestazioni.filter(Boolean) : [];
     const prestTxt = prest.length ? esc(prest.slice(0, 3).join(' · ')) + (prest.length > 3 ? ' …' : '') : '';
 
-    return `<div class="card${premium ? ' premium' : ''}">
+    return `<div class="card${premium ? ' premium' : ''}" style="cursor:pointer" onclick="location.href='profilo-impresa.html?id=${i.id}'">
       <div class="card-top">
         <div class="card-logo">${logo}</div>
         <div>
@@ -383,8 +389,8 @@
       <div class="card-badges">${badges.join('')}</div>
       ${prestTxt ? `<div class="card-prest">🛠️ ${prestTxt}</div>` : '<div class="card-prest"></div>'}
       <div class="card-actions">
-        <a class="btn-profilo" href="profilo-impresa.html?id=${i.id}">Vedi profilo</a>
-        <button class="btn-incarico" onclick="apriIncarico('${i.id}')">Richiedi incarico</button>
+        <a class="btn-profilo" href="profilo-impresa.html?id=${i.id}" onclick="event.stopPropagation()">Vedi profilo</a>
+        <button class="btn-incarico" onclick="event.stopPropagation();apriIncarico('${i.id}')">Richiedi incarico</button>
       </div>
     </div>`;
   }
