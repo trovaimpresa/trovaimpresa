@@ -575,6 +575,25 @@ nav img{height:36px}
   </div>
 </div>
 
+<!-- SEZIONE AFFIDA UN INCARICO (full-page, solo professionisti) -->
+<div class="prev-section" id="sec-incarico">
+  <div class="prev-topbar">
+    <div class="prev-topbar-title">📋 Affida un incarico</div>
+    <a class="prev-back" onclick="hideIncarico()">← Torna al profilo</a>
+  </div>
+  <div class="prev-card">
+    <p class="prev-sub">Nessun impegno: il professionista ti risponde con un preventivo di onorario.</p>
+    <div class="fg"><label class="fl">Prestazione richiesta</label><select class="fs" id="inc-prestazione"><option value="">— Seleziona la prestazione —</option></select></div>
+    <div class="fr2"><div class="fg"><label class="fl">Comune dell'immobile</label><input type="text" class="fi2" id="inc-comune" placeholder="Es. Roma"></div><div class="fg"><label class="fl">Urgenza</label><select class="fs" id="inc-urgenza"><option value="bassa">Nessuna fretta</option><option value="media" selected>Entro qualche settimana</option><option value="alta">Urgente</option></select></div></div>
+    <div class="fg"><label class="fl">Documenti (opzionale)</label><input type="file" class="fi2" id="inc-file" multiple accept=".pdf,.jpg,.jpeg,.png,.dwg,.doc,.docx"><div style="font-size:12px;color:#999;margin-top:4px">Planimetrie, visure, foto… PDF/JPG/PNG/DWG, max 10MB per file.</div></div>
+    <div class="fg"><label class="fl">Note per il professionista</label><textarea class="ft" id="inc-note" placeholder="Descrivi brevemente cosa ti serve..."></textarea></div>
+    <div class="fr2"><div class="fg"><label class="fl">Il tuo nome</label><input type="text" class="fi2" id="inc-nome" placeholder="Nome e cognome"></div><div class="fg"><label class="fl">Telefono</label><input type="tel" class="fi2" id="inc-telefono" placeholder="+39 333 1234567"></div></div>
+    <div class="fg"><label class="fl">Email</label><input type="email" class="fi2" id="inc-email" placeholder="latua@email.it"></div>
+    <div id="inc-msg" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px"></div>
+    <button class="btn-sub" onclick="submitIncarico()">📋 Invia richiesta di incarico</button>
+  </div>
+</div>
+
 <!-- LIGHTBOX FOTO -->
 <div class="lightbox" id="lightbox" onclick="chiudiLightbox()">
   <button class="lb-btn lb-close" onclick="event.stopPropagation();chiudiLightbox()">✕</button>
@@ -630,14 +649,15 @@ async function caricaProfilo(id){
     document.getElementById('profile-badges').innerHTML=b.join('');
     // Professionista: CTA dedicato "Affida un incarico" (flusso incarico/onorario con documenti)
     if(d.tipo==='professionista'){
+      window._incaricoProf={id:d.id,nome:(d.nome||d.nome_attivita||'Professionista')};
       const cta=document.getElementById('cta-principale');
       if(cta){
-        cta.removeAttribute('onclick');
-        cta.setAttribute('href','professionisti.html?incarico='+encodeURIComponent(d.id));
+        cta.setAttribute('onclick','showIncarico()');
         const sp=cta.querySelector('span'); if(sp) sp.textContent='📋 Affida un incarico';
       }
       const tl=document.getElementById('cta-trust-label');
       if(tl) tl.innerHTML='<strong>Affida un incarico</strong><span>Ti risponde con un preventivo di onorario</span>';
+      const preComune=document.getElementById('inc-comune'); if(preComune&&d.citta) preComune.value=d.citta;
     }
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;
@@ -841,6 +861,42 @@ async function inviaRecensione(){
 function mostraMsg(t,tipo){const m=document.getElementById('rec-msg');m.textContent=t;m.className='rec-msg '+tipo;m.style.display='block'}
 function showPreventivo(){document.getElementById('profilo-view').style.display='none';document.getElementById('sec-preventivo').classList.add('open');window.scrollTo(0,0)}
 function hidePreventivo(){document.getElementById('sec-preventivo').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0)}
+
+// === AFFIDA UN INCARICO (solo professionisti) ===
+const PRESTAZIONI_CATALOGO={
+  "Geometra":["Accatastamento e pratiche catastali (DOCFA)","Visure e volture catastali","Frazionamenti e tipo mappale (PREGEO)","Rilievi topografici","Pratiche edilizie (CILA, SCIA, permesso di costruire)","Sanatorie e condoni edilizi","Certificato di agibilità","Computo metrico estimativo","Direzione lavori","Successioni immobiliari","APE - Attestato di Prestazione Energetica","Perizie e stime immobiliari"],
+  "Ingegnere":["Progettazione strutturale (c.a., acciaio, legno)","Calcolo strutturale e relazioni di calcolo","Progettazione impianti (elettrico, termico, idraulico)","Direzione lavori strutturali","Collaudo statico","Pratiche sismiche e deposito al Genio Civile","Pratiche antincendio (SCIA VVF)","Progettazione BIM","Classificazione sismica e Sismabonus","Coordinamento sicurezza (CSP/CSE)"],
+  "Perito industriale":["Progettazione impianti elettrici","Progettazione impianti termici e climatizzazione","Dichiarazione di conformità impianti (DM 37/2008)","Progettazione impianto fotovoltaico","Pratiche antincendio","Collaudo e certificazione impianti","Consulenza efficientamento energetico","Direzione lavori impiantistici"],
+  "Perito estimatore":["Stime e valutazioni immobiliari","Perizie di stima per mutuo","Perizie giurate / asseverate","Consulenza tecnica (CTU e CTP)","Stime per successioni e divisioni","Perizie danni e assicurative","Stime di aziende e macchinari","Perizie estimative agrarie"]
+};
+function popolaIncPrestazioni(){const sel=document.getElementById('inc-prestazione');if(!sel||sel.dataset.done)return;sel.insertAdjacentHTML('beforeend',Object.keys(PRESTAZIONI_CATALOGO).map(cat=>`<optgroup label="${cat}">${PRESTAZIONI_CATALOGO[cat].map(p=>`<option value="${p}">${p}</option>`).join('')}</optgroup>`).join(''));sel.dataset.done='1';}
+function showIncarico(){popolaIncPrestazioni();document.getElementById('profilo-view').style.display='none';document.getElementById('sec-incarico').classList.add('open');window.scrollTo(0,0);}
+function hideIncarico(){document.getElementById('sec-incarico').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);}
+async function submitIncarico(){
+  const prof=window._incaricoProf;
+  const me=document.getElementById('inc-msg');const btn=document.querySelector('#sec-incarico .btn-sub');
+  const setMsg=(t,ok)=>{me.textContent=t;me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;'+(ok?'background:#eafaf0;color:#1e7e34;':'background:#fff0f0;color:#c0392b;');};
+  if(!prof){setMsg('Errore: professionista non identificato. Ricarica la pagina.',false);return;}
+  const prestazione=document.getElementById('inc-prestazione').value;
+  const comune=document.getElementById('inc-comune').value.trim();
+  const urgenza=document.getElementById('inc-urgenza').value;
+  const note=document.getElementById('inc-note').value.trim();
+  const nome=document.getElementById('inc-nome').value.trim();
+  const telefono=document.getElementById('inc-telefono').value.trim();
+  const email=document.getElementById('inc-email').value.trim();
+  if(!prestazione||!comune||!nome||!telefono){setMsg('Compila prestazione, comune, nome e telefono.',false);return;}
+  btn.disabled=true;btn.textContent='⏳ Invio...';
+  try{
+    const files=document.getElementById('inc-file').files;
+    const documenti=[];
+    for(const f of files){if(f.size>10*1024*1024)throw new Error('Il file "'+f.name+'" supera i 10MB.');const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=`${prof.id}/${Date.now()}_${safe}`;const {error:up}=await sc.storage.from('documenti-incarichi').upload(path,f,{contentType:f.type||'application/octet-stream'});if(up)throw new Error('Upload documento fallito: '+up.message);documenti.push(path);}
+    let richiedente_user_id=null;try{const {data:{user}}=await sc.auth.getUser();if(user)richiedente_user_id=user.id;}catch(e){}
+    const {error}=await sc.from('incarichi_richieste').insert({professionista_id:prof.id,richiedente_user_id,nome,email:email||null,telefono,prestazione,comune,urgenza,note:note||null,documenti});
+    if(error)throw error;
+    setMsg('✅ Richiesta di incarico inviata! Il professionista ti contatterà con un preventivo di onorario.',true);
+    btn.textContent='✅ Inviata';
+  }catch(e){setMsg('❌ '+e.message,false);btn.disabled=false;btn.textContent='📋 Invia richiesta di incarico';}
+}
 
 async function submitPreventivo(){
   const nome=document.getElementById('prev-nome').value.trim();const email=document.getElementById('prev-email').value.trim();
