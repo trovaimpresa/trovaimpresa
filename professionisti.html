@@ -2,218 +2,511 @@
 <html lang="it">
 <head>
   <link rel="canonical" href="https://trovaimpresa.com/professionisti">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Professionisti dell'edilizia: geometri, ingegneri, periti e architetti - TrovaImpresa</title>
-  <meta name="description" content="Trova il professionista giusto per prestazione e comune: geometri, ingegneri, periti e architetti verificati. Affida il tuo incarico e ricevi un preventivo di onorario.">
+  <meta name="description" content="Trova professionisti dell'edilizia vicino a te: geometri, architetti, ingegneri e periti. Confronta profili verificati e richiedi una consulenza gratuita.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="TrovaImpresa">
-  <meta property="og:title" content="Professionisti dell'edilizia per prestazione e comune - TrovaImpresa">
-  <meta property="og:description" content="Geometri, ingegneri, periti e architetti verificati. Cerca per prestazione e comune e affida il tuo incarico.">
+  <meta property="og:title" content="Cerca Professionisti Edili: Geometri, Architetti, Ingegneri - TrovaImpresa">
+  <meta property="og:description" content="Geometri, architetti, ingegneri e periti verificati vicino a te. Richiedi una consulenza gratuita.">
   <meta property="og:url" content="https://trovaimpresa.com/professionisti">
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; color: #111; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; font-size: 18px; }
 
     header { background: white; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
     header a img { height: 44px; }
-    header nav a { color: #0066ff; text-decoration: none; font-weight: 600; margin-left: 20px; font-size: 16px; }
+    header nav a { color: #0066ff; text-decoration: none; font-weight: 600; margin-left: 20px; font-size: 17px; }
 
-    .top-bar { background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%); padding: 26px 28px; }
-    .top-bar h1 { color: white; font-size: 1.9rem; font-weight: 800; margin-bottom: 6px; }
-    .top-bar p { color: rgba(255,255,255,0.9); font-size: 1rem; }
+    .top-bar { background: #0052cc; padding: 18px 28px; display: flex; align-items: center; gap: 14px; }
+    .top-bar h1 { color: white; font-size: 2rem; font-weight: 800; white-space: nowrap; }
+    .top-search { flex: 1; display: flex; gap: 10px; }
+    .top-search input { flex: 1; border: none; border-radius: 10px; padding: 14px 20px; font-size: 18px; outline: none; }
+    .top-search input:focus { box-shadow: 0 0 0 3px #FF6B35; }
+    .btn-cerca { background: #FF6B35; color: white; border: none; border-radius: 10px; padding: 14px 28px; font-size: 18px; font-weight: 700; cursor: pointer; }
+    .btn-cerca:hover { background: #e55a25; }
+    .btn-loc { background: rgba(255,255,255,0.2); color: white; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 10px; padding: 14px 18px; font-size: 18px; cursor: pointer; }
 
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 40px; }
+    .page-body { display: flex; width: 100%; margin: 0; padding: 0; gap: 0; align-items: flex-start; }
 
-    /* Sezioni full-page (NO-MODAL) */
-    .section { display: none; }
-    .section.active { display: block; }
+    /* SIDEBAR */
+    .sidebar { width: 320px; flex-shrink: 0; background: white; padding: 22px; box-shadow: 2px 0 8px rgba(0,0,0,0.06); min-height: calc(100vh - 120px); overflow-x: hidden; }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+    .sidebar-title { font-size: 22px; font-weight: 800; color: #222; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+    .filter-label { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: #555; text-transform: uppercase; margin: 0 0 10px; }
+    .filter-group { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-left: 5px solid #2e537d; padding: 16px; margin-bottom: 16px; }
+    .filter-group:nth-child(2) { border-left-color: #2e537d; }
+    .filter-group:nth-child(3) { border-left-color: #e65100; }
+    .filter-group:nth-child(4) { border-left-color: #1565c0; }
+    .filter-group:nth-child(5) { border-left-color: #2e537d; }
+    .filter-group:nth-child(6) { border-left-color: #e65100; }
+    .sidebar-divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
+    .mestieri-scroll { max-height: 260px; overflow-y: auto; overflow-x: hidden; }
+    .mestieri-scroll::-webkit-scrollbar { width: 3px; }
+    .mestieri-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+    .tipo-btn { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; cursor: pointer; font-size: 17px; font-weight: 600; color: #111; border: 1.5px solid #eee; margin-bottom: 8px; transition: all 0.15s; background: white; }
+    .tipo-btn:hover { border-color: #0066ff; color: #0066ff; }
+    .tipo-btn.active { background: #e8f5ec; color: #0066ff; border-color: #0066ff; }
 
-    /* Barra di ricerca prestazione + comune */
-    .search-card { background: white; border-radius: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); padding: 20px; margin-bottom: 22px; }
-    .search-grid { display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 12px; align-items: end; }
-    .field label { display: block; font-size: 13px; font-weight: 700; color: #444; margin-bottom: 6px; }
-    .field select, .field input { width: 100%; padding: 13px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; color: #111; background: white; }
-    .field select:focus, .field input:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.12); }
-    .btn-cerca { background: #ff8800; color: white; border: none; border-radius: 10px; padding: 14px 30px; font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-    .btn-cerca:hover { background: #e67a00; }
+    /* Chips styled as sidebar filter buttons */
+    .chip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #111; transition: all 0.15s; margin-bottom: 4px; }
+    .chip:hover { background: #f0f9f4; color: #0066ff; }
+    .chip.active { background: #e8f5ec; color: #0066ff; font-weight: 700; }
+    .chip.all-chip { background: #e8f5ec; color: #0066ff; font-weight: 700; }
+    .chip.all-chip.inactive { background: white; color: #111; font-weight: 600; }
+    .star-option { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; cursor: pointer; font-size: 17px; color: #222; transition: all 0.15s; margin-bottom: 4px; }
+    .star-option:hover { background: #f0f9f4; }
+    .star-option.active { background: #e8f5ec; color: #0066ff; font-weight: 700; }
+    .star-option .s { color: #f5a623; font-size: 18px; }
+    .slider-wrap { padding: 0 4px; }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 14px; color: #555; margin-top: 6px; }
+    .slider-value { text-align: center; font-size: 17px; font-weight: 700; color: #0066ff; margin-bottom: 8px; }
+    input[type=range] { width: 100%; accent-color: #0066ff; cursor: pointer; height: 6px; }
+    .check-option { display: flex; align-items: center; gap: 10px; padding: 9px 4px; font-size: 17px; color: #111; cursor: pointer; border-radius: 8px; }
+    .check-option:hover { background: #f0f9f4; }
+    .check-option input[type=checkbox] { accent-color: #0066ff; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
 
-    .results-count { font-size: 15px; color: #444; margin-bottom: 14px; }
-    .results-count strong { color: #111; }
+    /* RESULTS */
+    .results-col { flex: 1; min-width: 0; padding: 20px 28px; }
+    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .results-count { font-size: 17px; color: #333; }
+    .results-count strong { color: #222; font-weight: 700; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    /* Compact result grid */
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-top: 4px; }
+    .results-col div[style*="color:white"] { color: #555 !important; font-size: 15px !important; }
 
-    .card { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); border-top: 4px solid #0066ff; display: flex; flex-direction: column; }
+    /* CARD */
+    .card { background: white; border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); display: block; border-top: 5px solid #0066ff; transition: box-shadow 0.2s, transform 0.15s; text-decoration: none; color: inherit; }
+    .card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-2px); }
     .card.premium { border-top-color: #7c3aed; }
-    .card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-    .card-logo { width: 46px; height: 46px; border-radius: 50%; background: #eef4ff; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0066ff; font-size: 18px; overflow: hidden; flex-shrink: 0; }
-    .card-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .card-name { font-weight: 800; font-size: 16px; color: #1a1a1a; line-height: 1.2; }
-    .card-prof { font-size: 13px; color: #0066ff; font-weight: 600; margin-top: 2px; }
-    .card-citta { font-size: 13px; color: #555; margin: 4px 0 10px; }
-    .card-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-    .bdg { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
-    .bdg-albo { background: #e6f4ea; color: #1e7e34; }
-    .bdg-albo-p { background: #fff3e0; color: #b45309; }
-    .bdg-rc { background: #e8f0ff; color: #0052cc; }
-    .bdg-prem { background: #f3e8ff; color: #7c3aed; }
-    .card-prest { font-size: 12.5px; color: #666; line-height: 1.5; margin-bottom: 14px; flex: 1; }
-    .card-actions { display: flex; gap: 8px; margin-top: auto; }
-    .btn-profilo { flex: 1; text-align: center; text-decoration: none; background: #f0f4fa; color: #0066ff; font-weight: 700; font-size: 13px; padding: 10px; border-radius: 9px; }
-    .btn-incarico { flex: 1; border: none; cursor: pointer; background: #0066ff; color: white; font-weight: 700; font-size: 13px; padding: 10px; border-radius: 9px; }
-    .btn-incarico:hover { background: #0052cc; }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .card-logo { width: 40px; height: 40px; border-radius: 50%; background: #f0f9f4; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; overflow: hidden; border: 1.5px solid #eee; }
+    .card-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .card-name { font-weight: 800; font-size: 17px; color: #1a1a1a; }
+    .card-desc { font-size: 14px; color: #666; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .card-tipo { font-size: 14px; color: #0066ff; font-weight: 600; }
+    .card-citta { font-size: 14px; color: #555; margin-top: 4px; }
+    .badge-premium { display: inline-block; background: #7c3aed; color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 4px; }
+    .albo-tag { display: inline-block; background: #e8f5ec; color: #0066ff; font-size: 11px; padding: 2px 7px; border-radius: 6px; margin-top: 4px; }
 
-    .state-box { text-align: center; padding: 44px 20px; background: white; border-radius: 14px; color: #444; }
-    .state-box h3 { font-size: 18px; color: #111; margin-bottom: 8px; }
+    .loading, .no-results { text-align: center; padding: 50px; color: #111; background: white; border-radius: 14px; font-size: 18px; }
+    .no-results h3 { font-size: 20px; color: #111; margin-bottom: 10px; }
 
-    /* Form richiesta incarico */
-    .form-card { background: white; border-radius: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); padding: 26px; max-width: 680px; margin: 0 auto; }
-    .form-card h2 { font-size: 1.5rem; color: #111; margin-bottom: 6px; }
-    .form-card .lead { color: #555; font-size: 14px; margin-bottom: 22px; }
-    .fg { margin-bottom: 16px; }
-    .fg label { display: block; font-size: 13px; font-weight: 700; color: #333; margin-bottom: 6px; }
-    .fg input, .fg select, .fg textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; color: #111; }
-    .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.12); }
-    .fg textarea { resize: vertical; min-height: 90px; }
-    .fg .req { color: #ff6b6b; }
-    .fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .upload { border: 2px dashed #cfd8e3; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; background: #fafcff; color: #555; font-size: 14px; }
-    .upload:hover { border-color: #0066ff; background: #f0f7ff; }
-    .file-list { margin-top: 10px; font-size: 13px; color: #0066ff; }
-    .file-list div { padding: 3px 0; }
-    .form-actions { display: flex; gap: 12px; margin-top: 22px; }
-    .btn-back { background: #eef0f3; color: #333; border: none; padding: 13px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
-    .btn-invia { flex: 1; background: #ff8800; color: white; border: none; padding: 13px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 15px; }
-    .btn-invia:hover { background: #e67a00; }
-    .btn-invia:disabled { opacity: 0.6; cursor: not-allowed; }
-    .msg { display: none; padding: 12px 14px; border-radius: 10px; font-size: 14px; margin-top: 14px; }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .results-col { padding: 16px; }
+      /* Una colonna sola: due schede su un telefono lasciavano ~100px al nome
+         dell'impresa. E "1fr" non impedisce alla colonna di allargarsi oltre
+         lo schermo, per questo la griglia sbordava a destra senza poter
+         scorrere. minmax(0,1fr) la obbliga a stare dentro. */
+      .results-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .card { padding: 16px 18px; }
+      .card-name { font-size: 18px; overflow-wrap: break-word; }
+      .card-desc, .card-tipo, .card-citta { font-size: 14px; }
 
-    .prof-badge { display: inline-flex; align-items: center; gap: 8px; background: #eef4ff; color: #0052cc; font-weight: 700; padding: 10px 16px; border-radius: 12px; font-size: 14px; margin-bottom: 20px; }
+      /* La barra blu era un flex con il titolo a 2rem e white-space:nowrap:
+         su telefono il titolo si prendeva tutta la larghezza e spingeva il
+         bottone "Cerca" fuori dallo schermo. Qui va in colonna. */
+      .top-bar { flex-direction: column; align-items: stretch; padding: 14px 16px; gap: 10px; }
+      .top-bar h1 { font-size: 1.3rem; white-space: normal; text-align: center; }
+      .top-search { gap: 8px; }
+      /* 16px sul campo evita che iPhone ingrandisca la pagina al tocco */
+      .top-search input { font-size: 16px; padding: 12px 14px; min-width: 0; }
+      .btn-cerca { padding: 12px 18px; font-size: 15px; white-space: nowrap; }
+      .btn-loc { padding: 12px 14px; font-size: 15px; }
 
-    @media (max-width: 760px) {
-      .top-bar h1 { font-size: 1.4rem; }
-      .search-grid { grid-template-columns: 1fr; }
-      .btn-cerca { width: 100%; }
-      .fg-row { grid-template-columns: 1fr; }
-      header nav a { margin-left: 12px; font-size: 14px; }
+      /* Anche l'intestazione con logo e link andava stretta */
+      header { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+      header nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+      header nav a { margin-left: 0; font-size: 14px; }
     }
+    #mappa-risultati{height:420px;border-radius:14px;overflow:hidden;margin-top:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.1);}
+    /* Badge fiducia sulle card */
+    .card-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+    .bdg{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
+    .bdg-albo{background:#e6f4ea;color:#1e7e34}
+    .bdg-albo-p{background:#fff3e0;color:#b45309}
+    .bdg-rc{background:#e8f0ff;color:#0052cc}
+    /* Card cliccabile con bottone incarico */
+    .card-actions{display:flex;gap:8px;margin-top:12px}
+    .btn-incarico-card{flex:1;border:none;cursor:pointer;background:#0066ff;color:white;font-weight:700;font-size:13px;padding:9px;border-radius:9px}
+    .btn-incarico-card:hover{background:#0052cc}
+    .btn-profilo-card{flex:1;text-align:center;text-decoration:none;background:#f0f4fa;color:#0066ff;font-weight:700;font-size:13px;padding:9px;border-radius:9px}
+    /* Pannello full-page RICHIESTA INCARICO */
+    .inc-overlay{position:fixed;inset:0;background:#f4f6f8;z-index:2000;overflow-y:auto;display:none}
+    .inc-overlay.open{display:block}
+    .inc-topbar{background:linear-gradient(135deg,#0066ff 0%,#0052cc 100%);padding:22px 28px;color:white}
+    .inc-topbar h2{font-size:1.5rem;font-weight:800}
+    .inc-back{display:inline-block;margin-top:8px;color:#fff;font-weight:700;cursor:pointer;text-decoration:underline}
+    .inc-card{max-width:680px;margin:24px auto;background:white;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.08);padding:26px}
+    .inc-prof{display:inline-flex;align-items:center;gap:8px;background:#eef4ff;color:#0052cc;font-weight:700;padding:10px 16px;border-radius:12px;font-size:14px;margin-bottom:18px}
+    .inc-card .lead{color:#555;font-size:14px;margin-bottom:20px}
+    .ifg{margin-bottom:16px}
+    .ifg label{display:block;font-size:13px;font-weight:700;color:#333;margin-bottom:6px}
+    .ifg input,.ifg select,.ifg textarea{width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px;font-family:inherit;color:#111}
+    .ifg textarea{resize:vertical;min-height:90px}
+    .ifg .req{color:#ff6b6b}
+    .ifg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .inc-upload{border:2px dashed #cfd8e3;border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:#fafcff;color:#555;font-size:14px}
+    .inc-upload:hover{border-color:#0066ff;background:#f0f7ff}
+    .inc-filelist{margin-top:10px;font-size:13px;color:#0066ff}
+    .inc-filelist div{padding:3px 0}
+    .inc-actions{display:flex;gap:12px;margin-top:22px}
+    .inc-btn-back{background:#eef0f3;color:#333;border:none;padding:13px 22px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px}
+    .inc-btn-invia{flex:1;background:#FF6B35;color:white;border:none;padding:13px 22px;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px}
+    .inc-btn-invia:hover{background:#e55a25}
+    .inc-btn-invia:disabled{opacity:.6;cursor:not-allowed}
+    .inc-msg{display:none;padding:12px 14px;border-radius:10px;font-size:14px;margin-top:14px}
+    @media (max-width:700px){.ifg-row{grid-template-columns:1fr}}
   </style>
-  <link rel="stylesheet" href="/css/mobile.css?v=3">
+<link rel="stylesheet" href="/css/mobile.css?v=3">
+<link rel="stylesheet" href="/css/barra-comune.css">
 </head>
 <body>
 
 <header>
   <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
   <nav>
-    <a href="cerca-imprese.html">Imprese</a>
     <a href="cerca-artigiani.html">Artigiani</a>
+    <a href="cerca-imprese.html">Imprese</a>
     <a href="cerca-negozi.html">Negozi</a>
-    <a href="/login-impresa.html">Accedi</a>
+  
+    <a href="/login-impresa.html" class="ti-accedi">Accedi</a>
+    <a href="/#registrati" class="ti-iscriviti">Iscrivi la tua attivit&agrave;</a>
   </nav>
 </header>
 
-<!-- ============ SEZIONE 1: RICERCA ============ -->
-<div class="section active" id="sec-cerca">
-  <div class="top-bar">
-    <h1>👔 Professionisti dell'edilizia</h1>
-    <p>Cerca per prestazione e comune. Affida il tuo incarico a geometri, ingegneri, periti e architetti verificati.</p>
-  </div>
-
-  <div class="wrap">
-    <div class="search-card">
-      <div class="search-grid">
-        <div class="field">
-          <label>Prestazione</label>
-          <select id="f-prestazione"><option value="">Tutte le prestazioni</option></select>
-        </div>
-        <div class="field">
-          <label>Comune</label>
-          <input type="text" id="f-comune" placeholder="Es. Roma, Milano, Rieti...">
-        </div>
-        <button class="btn-cerca" onclick="cerca()">🔍 Cerca</button>
-      </div>
-    </div>
-
-    <div class="results-count" id="results-count"></div>
-    <div id="risultati"><div class="state-box">⏳ Caricamento professionisti...</div></div>
+<div class="top-bar">
+  <h1>👔 Trova un professionista dell'edilizia vicino a te</h1>
+  <div class="top-search">
+    <input type="text" id="cittaInput" placeholder="Città o CAP... es. Milano, Roma" />
+    <button class="btn-cerca" onclick="cerca()">🔍 Cerca</button>
+    <button class="btn-loc" onclick="localizzami()">📍</button>
   </div>
 </div>
 
-<!-- ============ SEZIONE 2: RICHIESTA INCARICO ============ -->
-<div class="section" id="sec-richiedi">
-  <div class="top-bar">
-    <h1>📋 Affida un incarico</h1>
-    <p>Descrivi la prestazione che ti serve: il professionista ti risponderà con un preventivo di onorario.</p>
+<h2 style="margin:0;padding:14px 28px;background:#f0f5ff;color:#0a2a4d;font-size:1rem;font-weight:600;border-bottom:1px solid #e3e8ef;">Geometri, architetti, ingegneri e periti verificati nella tua città</h2>
+
+<div class="page-body">
+
+  <div class="sidebar">
+    <div class="sidebar-title">⚙️ Filtri</div>
+
+    <div class="filter-group">
+      <div class="filter-label">Prestazione</div>
+      <select id="prestazioneSelect" onchange="selectPrestazione(this)" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:10px;font-size:15px;font-family:inherit;color:#111;">
+        <option value="">Tutte le prestazioni</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Professione</div>
+      <select onchange="selectTipoProfessionista(this)" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:10px;font-size:15px;font-family:inherit;color:#111;">
+        <option value="tutti">Tutte le professioni</option>
+        <option value="architetto">Architetto</option>
+        <option value="ingegnere_civile">Ingegnere civile</option>
+        <option value="ingegnere_strutturale">Ingegnere strutturale</option>
+        <option value="ingegnere_impiantistico">Ingegnere impiantistico</option>
+        <option value="geometra">Geometra</option>
+        <option value="perito_industriale">Perito industriale</option>
+        <option value="topografo">Topografo</option>
+        <option value="consulente_energetico">Consulente energetico</option>
+        <option value="consulente_sicurezza">Consulente sicurezza</option>
+        <option value="direttore_lavori">Direttore lavori</option>
+        <option value="collaudatore_strutture">Collaudatore strutture</option>
+        <option value="project_manager">Project manager</option>
+        <option value="amministratore_condominio">Amministratore di condominio</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Specializzazione</div>
+      <div class="mestieri-scroll">
+        <div class="chip all-chip" data-specializzazione="tutte" onclick="selectSpecializzazione(this)">👔 Tutte</div>
+        <div class="chip" data-specializzazione="Progettazione" onclick="selectSpecializzazione(this)">✏️ Progettazione</div>
+        <div class="chip" data-specializzazione="Direzione lavori" onclick="selectSpecializzazione(this)">📊 Direzione lavori</div>
+        <div class="chip" data-specializzazione="Sicurezza cantieri" onclick="selectSpecializzazione(this)">🦺 Sicurezza cantieri</div>
+        <div class="chip" data-specializzazione="Certificazioni energetiche" onclick="selectSpecializzazione(this)">🌿 Certificazioni energetiche</div>
+        <div class="chip" data-specializzazione="Pratiche catastali" onclick="selectSpecializzazione(this)">📁 Pratiche catastali</div>
+        <div class="chip" data-specializzazione="Perizie" onclick="selectSpecializzazione(this)">🔍 Perizie</div>
+        <div class="chip" data-specializzazione="Computi metrici" onclick="selectSpecializzazione(this)">🧮 Computi metrici</div>
+        <div class="chip" data-specializzazione="Restauro" onclick="selectSpecializzazione(this)">🏛️ Restauro</div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Valutazione minima</div>
+      <div class="star-option active" data-min="0" onclick="selectValutazione(this)">Qualsiasi</div>
+      <div class="star-option" data-min="3" onclick="selectValutazione(this)"><span class="s">★★★</span> 3+ stelle</div>
+      <div class="star-option" data-min="4" onclick="selectValutazione(this)"><span class="s">★★★★</span> 4+ stelle</div>
+      <div class="star-option" data-min="4.5" onclick="selectValutazione(this)"><span class="s">★★★★★</span> 4.5+ stelle</div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Regione</div>
+      <select id="regioneSelect" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
+        <option value="">Tutte le regioni</option>
+        <option value="Abruzzo">Abruzzo</option>
+        <option value="Basilicata">Basilicata</option>
+        <option value="Calabria">Calabria</option>
+        <option value="Campania">Campania</option>
+        <option value="Emilia-Romagna">Emilia-Romagna</option>
+        <option value="Friuli-Venezia Giulia">Friuli-Venezia Giulia</option>
+        <option value="Lazio">Lazio</option>
+        <option value="Liguria">Liguria</option>
+        <option value="Lombardia">Lombardia</option>
+        <option value="Marche">Marche</option>
+        <option value="Molise">Molise</option>
+        <option value="Piemonte">Piemonte</option>
+        <option value="Puglia">Puglia</option>
+        <option value="Sardegna">Sardegna</option>
+        <option value="Sicilia">Sicilia</option>
+        <option value="Toscana">Toscana</option>
+        <option value="Trentino-Alto Adige">Trentino-Alto Adige</option>
+        <option value="Umbria">Umbria</option>
+        <option value="Valle d'Aosta">Valle d'Aosta</option>
+        <option value="Veneto">Veneto</option>
+      </select>
+      <div class="filter-label" style="margin-top:14px;">Provincia</div>
+      <select id="provincia" disabled style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;color:#333;background:#fff;cursor:pointer;">
+        <option value="">Tutte le province</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Distanza massima</div>
+      <div class="slider-wrap">
+        <div class="slider-value" id="distanzaVal">Qualsiasi</div>
+        <input type="range" id="distanzaSlider" min="5" max="100" value="100" step="5" oninput="document.getElementById('distanzaVal').textContent=this.value>=100?'Qualsiasi':this.value+' km';cerca()">
+        <div class="slider-labels"><span>5 km</span><span>100 km</span></div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Altro</div>
+      <label class="check-option"><input type="checkbox" id="soloVerificati" onchange="cerca()"> Solo verificati</label>
+      <label class="check-option"><input type="checkbox" id="iscrittoAlbo" onchange="cerca()"> Iscritto all'albo</label>
+      <label class="check-option"><input type="checkbox" id="consulenzaOnline" onchange="cerca()"> Consulenza online</label>
+      <label class="check-option"><input type="checkbox" id="sopralluogoGratuito" onchange="cerca()"> Sopralluogo gratuito</label>
+      <label class="check-option"><input type="checkbox" id="rispondeIn24h" onchange="cerca()"> Risponde in 24h</label>
+    </div>
   </div>
 
-  <div class="wrap">
-    <div class="form-card">
-      <div class="prof-badge" id="prof-selezionato">Professionista selezionato</div>
+  <div class="results-col">
+    <div class="results-header">
+      <div class="results-count" id="risultatiCount">Ricerca in corso...</div>
+    </div>
+    <div id="annunci-categoria"></div>
+    <div id="risultati"><div class="loading">⏳ Caricamento...</div></div>
+    <div id="mappa-risultati"></div>
+  </div>
 
-      <h2>La tua richiesta di incarico</h2>
-      <p class="lead">Nessun impegno: invii la richiesta e il professionista ti contatta per definire l'incarico e l'onorario.</p>
+</div>
 
-      <div class="fg">
-        <label>Prestazione richiesta <span class="req">*</span></label>
-        <select id="i-prestazione"><option value="">— Seleziona la prestazione —</option></select>
-      </div>
+<!-- hidden status element for JS compatibility -->
+<div id="statusText" style="display:none"></div>
 
-      <div class="fg-row">
-        <div class="fg">
-          <label>Comune dell'immobile <span class="req">*</span></label>
-          <input type="text" id="i-comune" placeholder="Es. Roma">
-        </div>
-        <div class="fg">
-          <label>Urgenza</label>
-          <select id="i-urgenza">
-            <option value="bassa">Nessuna fretta</option>
-            <option value="media" selected>Entro qualche settimana</option>
-            <option value="alta">Urgente</option>
-          </select>
-        </div>
-      </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/geo-italia.js"></script>
+<script>
+  const supabaseClient=supabase.createClient('https://nacvrsgkyfavykxjxszu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic');
+  let tipoScelto='tutti',specializzazioneScelta='tutte',cittaScelta='',valutazioneMin=0;
+  let prestazioneScelta='';
+  let cittaLat=null,cittaLng=null,cittaGeocoded='';
 
-      <div class="fg">
-        <label>Documenti (opzionale)</label>
-        <div class="upload" id="upload-area" onclick="document.getElementById('i-file').click()">
-          📎 Clicca per allegare documenti (planimetrie, visure, foto...)<br>
-          <small style="color:#999">PDF, JPG, PNG, DWG — max 10MB per file</small>
-        </div>
-        <input type="file" id="i-file" multiple accept=".pdf,.jpg,.jpeg,.png,.dwg,.doc,.docx" style="display:none">
-        <div class="file-list" id="file-list"></div>
-      </div>
+  // === Catalogo prestazioni per categoria (condiviso con registrazione e pannello) ===
+  const PRESTAZIONI_CATALOGO = {
+    "Geometra": ["Accatastamento e pratiche catastali (DOCFA)","Visure e volture catastali","Frazionamenti e tipo mappale (PREGEO)","Rilievi topografici","Pratiche edilizie (CILA, SCIA, permesso di costruire)","Sanatorie e condoni edilizi","Certificato di agibilità","Computo metrico estimativo","Direzione lavori","Successioni immobiliari","APE - Attestato di Prestazione Energetica","Perizie e stime immobiliari"],
+    "Ingegnere": ["Progettazione strutturale (c.a., acciaio, legno)","Calcolo strutturale e relazioni di calcolo","Progettazione impianti (elettrico, termico, idraulico)","Direzione lavori strutturali","Collaudo statico","Pratiche sismiche e deposito al Genio Civile","Pratiche antincendio (SCIA VVF)","Progettazione BIM","Classificazione sismica e Sismabonus","Coordinamento sicurezza (CSP/CSE)"],
+    "Perito industriale": ["Progettazione impianti elettrici","Progettazione impianti termici e climatizzazione","Dichiarazione di conformità impianti (DM 37/2008)","Progettazione impianto fotovoltaico","Pratiche antincendio","Collaudo e certificazione impianti","Consulenza efficientamento energetico","Direzione lavori impiantistici"],
+    "Perito estimatore": ["Stime e valutazioni immobiliari","Perizie di stima per mutuo","Perizie giurate / asseverate","Consulenza tecnica (CTU e CTP)","Stime per successioni e divisioni","Perizie danni e assicurative","Stime di aziende e macchinari","Perizie estimative agrarie"]
+  };
+  (function popolaPrestazioni(){
+    const sel=document.getElementById('prestazioneSelect');
+    if(!sel)return;
+    sel.insertAdjacentHTML('beforeend', Object.keys(PRESTAZIONI_CATALOGO).map(cat=>{
+      const opts=PRESTAZIONI_CATALOGO[cat].map(p=>`<option value="${p}">${p}</option>`).join('');
+      return `<optgroup label="${cat}">${opts}</optgroup>`;
+    }).join(''));
+  })();
+  function selectPrestazione(el){prestazioneScelta=el.value;cerca();}
+  function formattaMestiere(s){if(!s)return '';if(s==='amministratore_condominio')return 'Amministratore di condominio';const t=String(s).replace(/_/g,' ');return t.charAt(0).toUpperCase()+t.slice(1);}
+  function haversine(lat1,lng1,lat2,lng2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+  function selectValutazione(el){document.querySelectorAll('.star-option').forEach(b=>b.classList.remove('active'));el.classList.add('active');valutazioneMin=parseFloat(el.dataset.min);cerca();}
+  function selectTipoProfessionista(el){tipoScelto=el.value;cerca();}
+  function selectSpecializzazione(el){document.querySelectorAll('.chip[data-specializzazione]').forEach(c=>{c.classList.remove('active');if(c.classList.contains('all-chip'))c.classList.add('inactive');});el.classList.add('active');el.classList.remove('inactive');specializzazioneScelta=el.dataset.specializzazione;cerca();}
+  function aggiornaStatus(){const t=tipoScelto==='tutti'?'👔 Tutti i professionisti':tipoScelto;const c=cittaScelta?` · 📍 ${cittaScelta}`:'';document.getElementById('statusText').innerHTML=`Stai cercando: <strong>${t}</strong>${c}`;}
+  function localizzami(){if(!navigator.geolocation){alert('Non supportato.');return;}navigator.geolocation.getCurrentPosition(async pos=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);const d=await r.json();const citta=d.address.city||d.address.town||d.address.village||'';document.getElementById('cittaInput').value=citta;cittaScelta=citta;aggiornaStatus();cerca();}catch(e){alert('Errore posizione.');}},()=>alert('Permesso negato.'));}
+  function formRichiestaClienteHTML() {
+    return '<div id="richiesta-cliente-box" style="margin-top:22px;padding-top:18px;border-top:1px solid #eee;max-width:420px;margin-left:auto;margin-right:auto">'
+      + '<p style="font-size:14px;color:#555;margin-bottom:12px">Non hai trovato quello che cercavi? Lasciaci la tua richiesta: ti mettiamo in contatto appena arriva un\'attività nella tua zona</p>'
+      + '<input type="text" id="rc-nome" placeholder="Il tuo nome *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px">'
+      + '<input type="tel" id="rc-telefono" placeholder="Il tuo telefono *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px">'
+      + '<button onclick="inviaRichiestaCliente()" style="background:#0066ff;color:white;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer">Invia richiesta</button>'
+      + '</div>';
+  }
+  async function inviaRichiestaCliente() {
+    const nome = document.getElementById('rc-nome').value.trim();
+    const telefono = document.getElementById('rc-telefono').value.trim();
+    if (!nome || !telefono) { alert('Inserisci nome e telefono.'); return; }
+    const zona = (document.getElementById('cittaInput').value.trim() || document.getElementById('regioneSelect').value || '').trim();
+    let ricerca = (typeof tipoScelto !== 'undefined' && tipoScelto !== 'tutti') ? tipoScelto : '';
+    if (typeof specializzazioneScelta !== 'undefined' && specializzazioneScelta !== 'tutte') {
+      ricerca = ricerca ? ricerca + ' / ' + specializzazioneScelta : specializzazioneScelta;
+    }
+    try {
+      const res = await fetch('/.netlify/functions/richiesta-cliente', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, telefono, categoria: 'professionisti', zona, ricerca })
+      });
+      if (!res.ok) throw new Error('invio fallito');
+      document.getElementById('richiesta-cliente-box').innerHTML = '<p style="font-weight:700;color:#0066ff;font-size:15px">✅ Grazie! Ti ricontatteremo presto.</p>';
+    } catch (e) {
+      alert('Errore nell\'invio. Riprova.');
+    }
+  }
+  async function cerca(){cittaScelta=document.getElementById('cittaInput').value.trim();const cittaSafe=cittaScelta.replace(/[,()]/g,'').trim();const soloVerificati=document.getElementById('soloVerificati').checked;const iscrittoAlbo=document.getElementById('iscrittoAlbo').checked;const consulenzaOnline=document.getElementById('consulenzaOnline').checked;const sopralluogoGratuito=document.getElementById('sopralluogoGratuito').checked;const rispondeIn24h=document.getElementById('rispondeIn24h').checked;aggiornaStatus();if(cittaScelta&&cittaScelta!==cittaGeocoded){cittaGeocoded=cittaScelta;cittaLat=null;cittaLng=null;try{const gr=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cittaScelta+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const gd=await gr.json();if(gd&&gd[0]){cittaLat=parseFloat(gd[0].lat);cittaLng=parseFloat(gd[0].lon);}}catch(e){}}else if(!cittaScelta){cittaGeocoded='';cittaLat=null;cittaLng=null;}const div=document.getElementById('risultati');div.innerHTML='<div class="loading">⏳ Ricerca in corso...</div>';try{let q=supabaseClient.from('imprese').select('*').eq('tipo', 'professionista').eq('is_test',false).order('piano_ordine',{ascending:false}).order('created_at',{ascending:false});if(tipoScelto!=='tutti')q=q.eq('mestiere',tipoScelto);if(specializzazioneScelta!=='tutte')q=q.ilike('specializzazioni',`%${specializzazioneScelta}%`);if(prestazioneScelta)q=q.contains('prestazioni',[prestazioneScelta]);const regione=document.getElementById('regioneSelect').value;const provinciaSel=document.getElementById('provincia').value;if(!cittaScelta&&!regione){div.innerHTML='<div class="no-results"><h3>📍 Inserisci una città o regione</h3><p>Per vedere i professionisti, indica dove stai cercando</p></div>';aggiornaMappaRis([]);return;}if(cittaScelta){if(regione){q=q.or(`citta.ilike.%${cittaSafe}%,and(piano.eq.premium,regione.eq.${regione})`);}else{q=q.ilike('citta',`%${cittaSafe}%`);}}if(regione)q=q.eq('regione',regione);if(provinciaSel)q=q.eq('provincia',provinciaSel);if(valutazioneMin>0)q=q.gte('valutazione_media',valutazioneMin);if(soloVerificati)q=q.eq('verificata',true);if(iscrittoAlbo)q=q.eq('iscritto_albo',true);if(consulenzaOnline)q=q.eq('consulenza_online',true);if(sopralluogoGratuito)q=q.eq('sopralluogo_gratuito',true);if(rispondeIn24h)q=q.eq('risponde_24h',true);const{data,error}=await q.limit(50);if(error)throw error;if(data)data.sort((a,b)=>{const pp=p=>p==='premium'?2:1;return pp(b.piano)-pp(a.piano);});const distanzaMax=parseInt(document.getElementById('distanzaSlider').value);(data||[]).forEach(i=>{i._distKm=(cittaLat!==null&&i.lat&&i.lng)?Math.round(haversine(cittaLat,cittaLng,i.lat,i.lng)):null;});const risultati=distanzaMax<100&&cittaLat!==null?(data||[]).filter(i=>i._distKm===null||i._distKm<=distanzaMax):(data||[]);if(!risultati.length){div.innerHTML='<div class="no-results"><h3>😕 Nessun professionista trovato</h3><p>Prova a cambiare città o tipo</p>'+formRichiestaClienteHTML()+'</div>';aggiornaMappaRis([]);return;}div.innerHTML=`<div style="color:white;margin-bottom:8px;font-size:12px;">Trovati <strong>${risultati.length}</strong> professionisti</div><div class="results-grid">${risultati.map(i=>cardHTML(i)).join('')}</div>`;aggiornaMappaRis(risultati);}catch(e){div.innerHTML=`<div class="no-results"><p>${e.message}</p></div>`;}}
+  function cardHTML(i){const logo=i.logo_url?`<img src="${i.logo_url}" alt="logo">`:`👔`;const badge=i.piano==='premium'?'<span class="badge-premium">💎 PREMIUM</span>':'';const _bd=[];if(i.albo_verificato)_bd.push('<span class="bdg bdg-albo">🎓 Albo verificato</span>');else if(i.numero_albo||i.albo)_bd.push('<span class="bdg bdg-albo-p">📋 Iscritto all\'albo</span>');if(i.rc_scadenza&&new Date(i.rc_scadenza)>new Date())_bd.push('<span class="bdg bdg-rc">🛡️ RC professionale</span>');const albo=_bd.length?`<div class="card-badges">${_bd.join('')}</div>`:'';const nome=i.nome_attivita||`${i.nome||''} ${i.cognome||''}`.trim()||'Professionista';const desc=i.descrizione?`<div class="card-desc">${i.descrizione}</div>`:'';const distBadge=i._distKm!==null?`<span style="display:inline-block;background:#e8f5ec;color:#0066ff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>`:'';const ratingBadge=`<span style="display:inline-block;background:#e8f5ec;color:#0066ff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">⭐ ${i.valutazione_media>0?Number(i.valutazione_media).toFixed(1):'Nuovo'}</span>`;return `<a class="card${i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${nome}${badge}</div>${desc}<div class="card-tipo">👔 ${i.tipo||''}</div></div></div>${albo}<div class="card-citta">📍 ${i.citta||''}${distBadge}${ratingBadge}</div></a>`;}
+  // Cascata Regione → Provincia
+  (function initCascade(){
+    const geo=window.GEO_ITALIA||{};
+    const regSel=document.getElementById('regioneSelect');
+    const provSel=document.getElementById('provincia');
+    function resetSelect(sel,placeholder){sel.innerHTML='<option value="">'+placeholder+'</option>';}
+    regSel.addEventListener('change',function(){
+      resetSelect(provSel,'Tutte le province');
+      const province=geo[regSel.value];
+      if(!province){provSel.disabled=true;}
+      else{
+        Object.keys(province).sort((a,b)=>a.localeCompare(b,'it')).forEach(p=>{
+          const opt=document.createElement('option');
+          opt.value=p;opt.textContent=p;
+          provSel.appendChild(opt);
+        });
+        provSel.disabled=false;
+      }
+      cerca();
+    });
+    provSel.addEventListener('change',function(){cerca();});
+  })();
 
-      <div class="fg">
-        <label>Note per il professionista</label>
-        <textarea id="i-note" placeholder="Descrivi brevemente cosa ti serve..."></textarea>
-      </div>
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('citta')){document.getElementById('cittaInput').value=params.get('citta');cittaScelta=params.get('citta');}
+  if(params.get('tipo')){tipoScelto=params.get('tipo');document.querySelectorAll('.chip').forEach(c=>{if(c.dataset.tipo===tipoScelto){c.classList.add('active');c.classList.remove('inactive');document.querySelector('.all-chip').classList.remove('active');document.querySelector('.all-chip').classList.add('inactive');}});}
+  if(params.get('citta')||params.get('tipo'))cerca();
+  aggiornaStatus();
+  cerca();
+  loadAnnunciCategoria();
+  async function loadAnnunciCategoria(){const container=document.getElementById('annunci-categoria');if(!container)return;const ora=new Date().toISOString();const{data:annunci}=await supabaseClient.from('annunci_pubblicitari').select('*').eq('attivo',true).eq('posizione','categoria').gt('data_fine',ora);if(!annunci||!annunci.length)return;const cards=await Promise.all(annunci.map(async(ann)=>{const{data:imp}=await supabaseClient.from('imprese').select('id,nome,citta,tipo,logo_url,mestiere').eq('id',ann.impresa_id).eq('is_test',false).maybeSingle();if(!imp)return'';const logo=imp.logo_url?`<img src="${imp.logo_url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`:`<div style="width:40px;height:40px;border-radius:50%;background:#fff3ee;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏗️</div>`;return`<a href="profilo-impresa.html?id=${imp.id}" style="display:flex;align-items:center;gap:14px;background:white;border-radius:14px;padding:16px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.07);text-decoration:none;color:inherit;border-left:4px solid #FF6B35;transition:box-shadow 0.2s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 10px rgba(0,0,0,0.07)';this.style.transform='translateY(0)'">${logo}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-weight:800;font-size:15px;color:#1a1a1a;">${imp.nome||'Impresa'}</span><span style="background:#FF6B35;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">Sponsorizzato</span></div><div style="font-size:13px;color:#555;">${imp.mestiere?formattaMestiere(imp.mestiere):(imp.tipo||'')}${imp.citta?' · 📍 '+imp.citta:''}</div></div></a>`;}));const valide=cards.filter(Boolean);if(!valide.length)return;container.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">${valide.join('')}</div>`;}
+  let mappaRis=null,markersRis=null,iconaVerde;const geoCacheRis={};
+  function inizializzaMappaRis(){mappaRis=L.map('mappa-risultati').setView([41.9,12.5],6);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(mappaRis);markersRis=L.layerGroup().addTo(mappaRis);iconaVerde=L.divIcon({className:'',html:'<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#0066ff"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>',iconSize:[22,30],iconAnchor:[11,30],popupAnchor:[0,-30]});}
+  async function geocodificaRis(q){const k=q.toLowerCase().trim();if(geoCacheRis[k])return geoCacheRis[k];await new Promise(r=>setTimeout(r,1100));try{const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const d=await res.json();if(d&&d[0]){const c=[parseFloat(d[0].lat),parseFloat(d[0].lon)];geoCacheRis[k]=c;return c;}}catch(e){}return null;}
+  async function aggiornaMappaRis(records){if(!mappaRis||!markersRis)return;markersRis.clearLayers();for(const r of records){if(!r.citta)continue;let c=r.lat&&r.lng?[r.lat,r.lng]:await geocodificaRis(r.citta);if(!c)continue;const nome=r.nome_attivita||r.nome_negozio||r.nome||'—';const tipo=r.mestiere?formattaMestiere(r.mestiere):(r.tipo||'');L.marker(c,{icon:iconaVerde}).addTo(markersRis).bindPopup(`<b>${nome}</b><br>${tipo?tipo+'<br>':''}📍 ${r.citta}<br><a href="profilo-impresa.html?id=${r.id}" style="color:#0066ff;font-weight:700;">Vedi profilo →</a>`);}}
+  inizializzaMappaRis();
 
-      <div class="fg-row">
-        <div class="fg">
-          <label>Il tuo nome <span class="req">*</span></label>
-          <input type="text" id="i-nome" placeholder="Nome e cognome">
-        </div>
-        <div class="fg">
-          <label>Telefono <span class="req">*</span></label>
-          <input type="tel" id="i-telefono" placeholder="+39 333 1234567">
-        </div>
-      </div>
-      <div class="fg">
-        <label>Email</label>
-        <input type="email" id="i-email" placeholder="latua@email.it">
-      </div>
+  // ===== RICHIESTA INCARICO (overlay full-page, apribile dal profilo con ?incarico=<id>) =====
+  let profIncarico=null, fileIncarico=[];
+  function popolaSelectIncarico(){
+    const sel=document.getElementById('inc-prestazione');
+    if(!sel||sel.dataset.done)return;
+    sel.insertAdjacentHTML('beforeend', Object.keys(PRESTAZIONI_CATALOGO).map(cat=>`<optgroup label="${cat}">${PRESTAZIONI_CATALOGO[cat].map(p=>`<option value="${p}">${p}</option>`).join('')}</optgroup>`).join(''));
+    sel.dataset.done='1';
+  }
+  async function apriIncaricoId(id){
+    const {data}=await supabaseClient.from('imprese').select('id,nome_attivita,nome,cognome').eq('id',id).eq('tipo','professionista').maybeSingle();
+    if(!data)return;
+    profIncarico={id:data.id,nome:data.nome_attivita||`${data.nome||''} ${data.cognome||''}`.trim()||'Professionista'};
+    popolaSelectIncarico();
+    document.getElementById('inc-prof').textContent='👔 '+profIncarico.nome;
+    if(prestazioneScelta){const s=document.getElementById('inc-prestazione');if([...s.options].some(o=>o.value===prestazioneScelta))s.value=prestazioneScelta;}
+    const cc=document.getElementById('cittaInput').value.trim(); if(cc)document.getElementById('inc-comune').value=cc;
+    document.getElementById('inc-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+    window.scrollTo(0,0);
+  }
+  function chiudiIncarico(){document.getElementById('inc-overlay').classList.remove('open');document.body.style.overflow='';}
+  function renderIncFile(){document.getElementById('inc-filelist').innerHTML=fileIncarico.map((f,i)=>`<div>📄 ${f.name} <span style="color:#c00;cursor:pointer" onclick="rimuoviIncFile(${i})">✕</span></div>`).join('');}
+  function rimuoviIncFile(i){fileIncarico.splice(i,1);renderIncFile();}
+  function incMsg(t,type){const el=document.getElementById('inc-msg');el.textContent=t;el.style.display='block';if(type==='error'){el.style.background='#fdecea';el.style.color='#b71c1c';}else if(type==='success'){el.style.background='#e6f4ea';el.style.color='#1e4620';}else{el.style.background='#e8f0ff';el.style.color='#0052cc';}}
+  async function inviaIncarico(){
+    if(!profIncarico)return;
+    const prestazione=document.getElementById('inc-prestazione').value;
+    const comune=document.getElementById('inc-comune').value.trim();
+    const urgenza=document.getElementById('inc-urgenza').value;
+    const note=document.getElementById('inc-note').value.trim();
+    const nome=document.getElementById('inc-nome').value.trim();
+    const telefono=document.getElementById('inc-telefono').value.trim();
+    const email=document.getElementById('inc-email').value.trim();
+    if(!prestazione){incMsg('Seleziona la prestazione richiesta.','error');return;}
+    if(!comune){incMsg('Indica il comune dell\'immobile.','error');return;}
+    if(!nome){incMsg('Inserisci il tuo nome.','error');return;}
+    if(!telefono){incMsg('Inserisci un recapito telefonico.','error');return;}
+    const btn=document.getElementById('inc-invia');btn.disabled=true;btn.textContent='⏳ Invio...';
+    try{
+      const documenti=[];
+      for(const f of fileIncarico){const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=`${profIncarico.id}/${Date.now()}_${safe}`;const {error:up}=await supabaseClient.storage.from('documenti-incarichi').upload(path,f,{contentType:f.type||'application/octet-stream'});if(up)throw new Error('Upload documento fallito: '+up.message);documenti.push(path);}
+      let richiedente_user_id=null;try{const {data:{user}}=await supabaseClient.auth.getUser();if(user)richiedente_user_id=user.id;}catch(e){}
+      const {error}=await supabaseClient.from('incarichi_richieste').insert({professionista_id:profIncarico.id,richiedente_user_id,nome,email:email||null,telefono,prestazione,comune,urgenza,note:note||null,documenti});
+      if(error)throw error;
+      incMsg('✅ Richiesta di incarico inviata! Il professionista ti contatterà a breve con un preventivo di onorario.','success');
+      btn.textContent='✅ Inviata';document.getElementById('inc-note').value='';fileIncarico=[];renderIncFile();
+    }catch(e){incMsg('❌ '+e.message,'error');btn.disabled=false;btn.textContent='Invia richiesta di incarico';}
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    const inpf=document.getElementById('inc-file');
+    if(inpf)inpf.addEventListener('change',function(e){for(const f of e.target.files){if(f.size>10*1024*1024){alert('Il file "'+f.name+'" supera i 10MB e non è stato aggiunto.');continue;}fileIncarico.push(f);}renderIncFile();e.target.value='';});
+    const inc=params.get('incarico');
+    if(inc)apriIncaricoId(inc);
+  });
+</script>
 
-      <div class="msg" id="i-msg"></div>
-
-      <div class="form-actions">
-        <button class="btn-back" onclick="showSection('cerca')">← Indietro</button>
-        <button class="btn-invia" id="btn-invia" onclick="inviaIncarico()">Invia richiesta di incarico</button>
-      </div>
+<!-- OVERLAY: RICHIESTA INCARICO -->
+<div class="inc-overlay" id="inc-overlay">
+  <div class="inc-topbar">
+    <h2>📋 Affida un incarico</h2>
+    <span class="inc-back" onclick="chiudiIncarico()">← Torna alla ricerca</span>
+  </div>
+  <div class="inc-card">
+    <div class="inc-prof" id="inc-prof">Professionista</div>
+    <p class="lead">Nessun impegno: invii la richiesta e il professionista ti contatta per definire l'incarico e l'onorario.</p>
+    <div class="ifg"><label>Prestazione richiesta <span class="req">*</span></label><select id="inc-prestazione"><option value="">— Seleziona la prestazione —</option></select></div>
+    <div class="ifg-row">
+      <div class="ifg"><label>Comune dell'immobile <span class="req">*</span></label><input type="text" id="inc-comune" placeholder="Es. Roma"></div>
+      <div class="ifg"><label>Urgenza</label><select id="inc-urgenza"><option value="bassa">Nessuna fretta</option><option value="media" selected>Entro qualche settimana</option><option value="alta">Urgente</option></select></div>
+    </div>
+    <div class="ifg"><label>Documenti (opzionale)</label>
+      <div class="inc-upload" onclick="document.getElementById('inc-file').click()">📎 Clicca per allegare documenti (planimetrie, visure, foto...)<br><small style="color:#999">PDF, JPG, PNG, DWG — max 10MB per file</small></div>
+      <input type="file" id="inc-file" multiple accept=".pdf,.jpg,.jpeg,.png,.dwg,.doc,.docx" style="display:none">
+      <div class="inc-filelist" id="inc-filelist"></div>
+    </div>
+    <div class="ifg"><label>Note per il professionista</label><textarea id="inc-note" placeholder="Descrivi brevemente cosa ti serve..."></textarea></div>
+    <div class="ifg-row">
+      <div class="ifg"><label>Il tuo nome <span class="req">*</span></label><input type="text" id="inc-nome" placeholder="Nome e cognome"></div>
+      <div class="ifg"><label>Telefono <span class="req">*</span></label><input type="tel" id="inc-telefono" placeholder="+39 333 1234567"></div>
+    </div>
+    <div class="ifg"><label>Email</label><input type="email" id="inc-email" placeholder="latua@email.it"></div>
+    <div class="inc-msg" id="inc-msg"></div>
+    <div class="inc-actions">
+      <button class="inc-btn-back" onclick="chiudiIncarico()">← Indietro</button>
+      <button class="inc-btn-invia" id="inc-invia" onclick="inviaIncarico()">Invia richiesta di incarico</button>
     </div>
   </div>
 </div>
 
+<script src="/cookie-banner.js"></script>
+<section style="max-width:1000px;margin:24px auto;padding:0 20px 12px;color:#3c4a5c;font-size:15px;line-height:1.75;">
+  <h2 style="font-size:20px;color:#0a2a4d;margin-bottom:12px;">Trova ogni professionista dell'edilizia su TrovaImpresa</h2>
+  <p>Su TrovaImpresa trovi <strong>architetti</strong>, <strong>ingegneri civili</strong>, <strong>ingegneri strutturali</strong>, <strong>ingegneri impiantistici</strong>, <strong>geometri</strong>, <strong>periti industriali</strong>, <strong>topografi</strong>, <strong>consulenti energetici</strong>, <strong>consulenti per la sicurezza</strong>, <strong>direttori dei lavori</strong>, <strong>collaudatori di strutture</strong>, <strong>project manager</strong> e <strong>amministratori di condominio</strong> vicino a te, in tutta Italia. Confronta i profili verificati, leggi le recensioni e richiedi un preventivo o una consulenza gratuita, con contatto diretto e senza intermediari.</p>
+  <p style="margin-top:8px;font-size:14px;line-height:2.1;">Pagine dedicate: <a href="architetto.html">Architetto</a> &middot; <a href="ingegnere-civile.html">Ingegnere civile</a> &middot; <a href="ingegnere-strutturale.html">Ingegnere strutturale</a> &middot; <a href="ingegnere-impiantistico.html">Ingegnere impiantistico</a> &middot; <a href="geometra.html">Geometra</a> &middot; <a href="perito-industriale.html">Perito industriale</a> &middot; <a href="topografo.html">Topografo</a> &middot; <a href="consulente-energetico.html">Consulente energetico</a> &middot; <a href="consulente-sicurezza.html">Consulente sicurezza</a> &middot; <a href="direttore-lavori.html">Direttore dei lavori</a> &middot; <a href="collaudatore-strutture.html">Collaudatore di strutture</a> &middot; <a href="project-manager.html">Project manager</a> &middot; <a href="amministratore-condominio.html">Amministratore di condominio</a></p>
+</section>
 <footer style="background:#0a2a4d;color:white;font-size:0.9rem;padding:18px;text-align:center">
   © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) –
   <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> |
@@ -222,299 +515,7 @@
   <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> |
   <a href="/contatti.html" style="color:#a9c9f5">Contatti</a>
 </footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  // === Catalogo prestazioni per categoria (condiviso con registrazione e pannello) ===
-  const PRESTAZIONI_CATALOGO = {
-    "Geometra": [
-      "Accatastamento e pratiche catastali (DOCFA)",
-      "Visure e volture catastali",
-      "Frazionamenti e tipo mappale (PREGEO)",
-      "Rilievi topografici",
-      "Pratiche edilizie (CILA, SCIA, permesso di costruire)",
-      "Sanatorie e condoni edilizi",
-      "Certificato di agibilità",
-      "Computo metrico estimativo",
-      "Direzione lavori",
-      "Successioni immobiliari",
-      "APE - Attestato di Prestazione Energetica",
-      "Perizie e stime immobiliari"
-    ],
-    "Ingegnere": [
-      "Progettazione strutturale (c.a., acciaio, legno)",
-      "Calcolo strutturale e relazioni di calcolo",
-      "Progettazione impianti (elettrico, termico, idraulico)",
-      "Direzione lavori strutturali",
-      "Collaudo statico",
-      "Pratiche sismiche e deposito al Genio Civile",
-      "Pratiche antincendio (SCIA VVF)",
-      "Progettazione BIM",
-      "Classificazione sismica e Sismabonus",
-      "Coordinamento sicurezza (CSP/CSE)"
-    ],
-    "Perito industriale": [
-      "Progettazione impianti elettrici",
-      "Progettazione impianti termici e climatizzazione",
-      "Dichiarazione di conformità impianti (DM 37/2008)",
-      "Progettazione impianto fotovoltaico",
-      "Pratiche antincendio",
-      "Collaudo e certificazione impianti",
-      "Consulenza efficientamento energetico",
-      "Direzione lavori impiantistici"
-    ],
-    "Perito estimatore": [
-      "Stime e valutazioni immobiliari",
-      "Perizie di stima per mutuo",
-      "Perizie giurate / asseverate",
-      "Consulenza tecnica (CTU e CTP)",
-      "Stime per successioni e divisioni",
-      "Perizie danni e assicurative",
-      "Stime di aziende e macchinari",
-      "Perizie estimative agrarie"
-    ]
-  };
-
-  // Popola i due select (ricerca + form) con optgroup per categoria
-  function popolaSelectPrestazioni() {
-    const optgroups = Object.keys(PRESTAZIONI_CATALOGO).map(cat => {
-      const opts = PRESTAZIONI_CATALOGO[cat].map(p => `<option value="${p}">${p}</option>`).join('');
-      return `<optgroup label="${cat}">${opts}</optgroup>`;
-    }).join('');
-    document.getElementById('f-prestazione').insertAdjacentHTML('beforeend', optgroups);
-    document.getElementById('i-prestazione').insertAdjacentHTML('beforeend', optgroups);
-  }
-  popolaSelectPrestazioni();
-
-  function formattaMestiere(s) {
-    if (!s) return 'Professionista';
-    if (s === 'amministratore_condominio') return 'Amministratore di condominio';
-    const t = String(s).replace(/_/g, ' ');
-    return t.charAt(0).toUpperCase() + t.slice(1);
-  }
-  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-  // === Navigazione a sezioni (NO-MODAL) ===
-  function showSection(id, fromPopstate) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    const sec = document.getElementById('sec-' + id);
-    if (sec) sec.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (!fromPopstate) history.pushState({ section: id }, '');
-  }
-  history.replaceState({ section: 'cerca' }, '');
-  window.onpopstate = function (e) {
-    const id = (e.state && e.state.section) ? e.state.section : 'cerca';
-    showSection(id, true);
-  };
-
-  // === RICERCA ===
-  async function cerca() {
-    const prestazione = document.getElementById('f-prestazione').value;
-    const comune = document.getElementById('f-comune').value.trim();
-    const div = document.getElementById('risultati');
-    const countEl = document.getElementById('results-count');
-    // Come nelle altre pagine: niente lista finché non si cerca
-    if (!prestazione && !comune) {
-      countEl.textContent = '';
-      div.innerHTML = '<div class="state-box"><h3>🔎 Cerca un professionista</h3><p>Scegli una prestazione o inserisci un comune per vedere i professionisti disponibili.</p></div>';
-      return;
-    }
-    div.innerHTML = '<div class="state-box">⏳ Ricerca in corso...</div>';
-    countEl.textContent = '';
-    try {
-      let q = sb.from('imprese').select('*')
-        .eq('tipo', 'professionista').eq('is_test', false)
-        .order('piano_ordine', { ascending: false })
-        .order('created_at', { ascending: false });
-      if (prestazione) q = q.contains('prestazioni', [prestazione]);
-      const { data, error } = await q.limit(100);
-      if (error) throw error;
-      let risultati = data || [];
-      // Filtro comune: comuni_competenza contiene il comune OPPURE città corrisponde
-      if (comune) {
-        const c = comune.toLowerCase();
-        risultati = risultati.filter(i => {
-          const comuni = Array.isArray(i.comuni_competenza) ? i.comuni_competenza.map(x => String(x).toLowerCase()) : [];
-          const inComuni = comuni.some(x => x.includes(c) || c.includes(x));
-          const inCitta = (i.citta || '').toLowerCase().includes(c);
-          return inComuni || inCitta;
-        });
-      }
-      // premium prima
-      risultati.sort((a, b) => (b.piano === 'premium' ? 1 : 0) - (a.piano === 'premium' ? 1 : 0));
-      if (!risultati.length) {
-        countEl.textContent = '';
-        div.innerHTML = '<div class="state-box"><h3>😕 Nessun professionista trovato</h3><p>Prova a cambiare prestazione o comune.</p></div>';
-        return;
-      }
-      countEl.innerHTML = `Trovati <strong>${risultati.length}</strong> professionisti`;
-      div.innerHTML = `<div class="grid">${risultati.map(cardHTML).join('')}</div>`;
-    } catch (e) {
-      div.innerHTML = `<div class="state-box"><h3>Errore</h3><p>${esc(e.message)}</p></div>`;
-    }
-  }
-
-  const _profMap = {};
-  function cardHTML(i) {
-    const nome = i.nome_attivita || `${i.nome || ''} ${i.cognome || ''}`.trim() || 'Professionista';
-    _profMap[i.id] = { id: i.id, nome: nome };
-    const iniz = nome.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
-    const logo = i.logo_url && i.logo_url !== '/img/logo.png' ? `<img src="${esc(i.logo_url)}" alt="logo">` : iniz;
-    const prof = formattaMestiere(i.mestiere);
-    const premium = i.piano === 'premium';
-
-    const badges = [];
-    if (i.albo_verificato) badges.push('<span class="bdg bdg-albo">🎓 Albo verificato</span>');
-    else if (i.numero_albo || i.albo) badges.push('<span class="bdg bdg-albo-p">📋 Iscritto all\'albo</span>');
-    if (i.rc_scadenza && new Date(i.rc_scadenza) > new Date()) badges.push('<span class="bdg bdg-rc">🛡️ RC professionale</span>');
-    if (premium) badges.push('<span class="bdg bdg-prem">💎 Premium</span>');
-
-    const prest = Array.isArray(i.prestazioni) ? i.prestazioni.filter(Boolean) : [];
-    const prestTxt = prest.length ? esc(prest.slice(0, 3).join(' · ')) + (prest.length > 3 ? ' …' : '') : '';
-
-    return `<div class="card${premium ? ' premium' : ''}" style="cursor:pointer" onclick="location.href='profilo-impresa.html?id=${i.id}'">
-      <div class="card-top">
-        <div class="card-logo">${logo}</div>
-        <div>
-          <div class="card-name">${esc(nome)}</div>
-          <div class="card-prof">👔 ${esc(prof)}</div>
-        </div>
-      </div>
-      <div class="card-citta">📍 ${esc([i.citta, i.provincia].filter(Boolean).join(', ') || '—')}</div>
-      <div class="card-badges">${badges.join('')}</div>
-      ${prestTxt ? `<div class="card-prest">🛠️ ${prestTxt}</div>` : '<div class="card-prest"></div>'}
-      <div class="card-actions">
-        <a class="btn-profilo" href="profilo-impresa.html?id=${i.id}" onclick="event.stopPropagation()">Vedi profilo</a>
-        <button class="btn-incarico" onclick="event.stopPropagation();apriIncarico('${i.id}')">Richiedi incarico</button>
-      </div>
-    </div>`;
-  }
-
-  // === RICHIESTA INCARICO ===
-  let profSelezionato = null;
-  let fileSelezionati = [];
-
-  function apriIncarico(id) {
-    const prof = _profMap[id];
-    if (!prof) return;
-    profSelezionato = prof;
-    document.getElementById('prof-selezionato').innerHTML = '👔 ' + esc(prof.nome);
-    // pre-compila la prestazione con quella cercata, se presente
-    const cercata = document.getElementById('f-prestazione').value;
-    if (cercata) document.getElementById('i-prestazione').value = cercata;
-    const comuneCercato = document.getElementById('f-comune').value.trim();
-    if (comuneCercato) document.getElementById('i-comune').value = comuneCercato;
-    showSection('richiedi');
-  }
-
-  document.getElementById('i-file').addEventListener('change', function (e) {
-    for (const f of e.target.files) {
-      if (f.size > 10 * 1024 * 1024) { alert('Il file "' + f.name + '" supera i 10MB e non è stato aggiunto.'); continue; }
-      fileSelezionati.push(f);
-    }
-    renderFileList();
-    e.target.value = '';
-  });
-  function renderFileList() {
-    document.getElementById('file-list').innerHTML = fileSelezionati.map((f, idx) =>
-      `<div>📄 ${esc(f.name)} <span style="color:#c00;cursor:pointer" onclick="rimuoviFile(${idx})">✕</span></div>`
-    ).join('');
-  }
-  function rimuoviFile(idx) { fileSelezionati.splice(idx, 1); renderFileList(); }
-
-  function showMsgI(text, type) {
-    const el = document.getElementById('i-msg');
-    el.textContent = text;
-    el.style.display = 'block';
-    if (type === 'error') { el.style.background = '#fdecea'; el.style.color = '#b71c1c'; }
-    else if (type === 'success') { el.style.background = '#e6f4ea'; el.style.color = '#1e4620'; }
-    else { el.style.background = '#e8f0ff'; el.style.color = '#0052cc'; }
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  async function inviaIncarico() {
-    if (!profSelezionato) { showMsgI('Seleziona prima un professionista dalla ricerca.', 'error'); return; }
-    const prestazione = document.getElementById('i-prestazione').value;
-    const comune = document.getElementById('i-comune').value.trim();
-    const urgenza = document.getElementById('i-urgenza').value;
-    const note = document.getElementById('i-note').value.trim();
-    const nome = document.getElementById('i-nome').value.trim();
-    const telefono = document.getElementById('i-telefono').value.trim();
-    const email = document.getElementById('i-email').value.trim();
-
-    if (!prestazione) { showMsgI('Seleziona la prestazione richiesta.', 'error'); return; }
-    if (!comune) { showMsgI('Indica il comune dell\'immobile.', 'error'); return; }
-    if (!nome) { showMsgI('Inserisci il tuo nome.', 'error'); return; }
-    if (!telefono) { showMsgI('Inserisci un recapito telefonico.', 'error'); return; }
-
-    const btn = document.getElementById('btn-invia');
-    btn.disabled = true; btn.textContent = '⏳ Invio in corso...';
-    try {
-      // 1) Upload documenti nel bucket privato (path: <professionista_id>/<timestamp>_<file>)
-      const documenti = [];
-      for (const f of fileSelezionati) {
-        const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const path = `${profSelezionato.id}/${Date.now()}_${safe}`;
-        const { error: upErr } = await sb.storage.from('documenti-incarichi').upload(path, f, { contentType: f.type || 'application/octet-stream' });
-        if (upErr) throw new Error('Upload documento fallito: ' + upErr.message);
-        documenti.push(path);
-      }
-      // 2) Utente loggato? (facoltativo)
-      let richiedente_user_id = null;
-      try { const { data: { user } } = await sb.auth.getUser(); if (user) richiedente_user_id = user.id; } catch (e) {}
-      // 3) Inserisci la richiesta di incarico
-      const { error } = await sb.from('incarichi_richieste').insert({
-        professionista_id: profSelezionato.id,
-        richiedente_user_id,
-        nome, email: email || null, telefono,
-        prestazione, comune, urgenza,
-        note: note || null,
-        documenti
-      });
-      if (error) throw error;
-      showMsgI('✅ Richiesta di incarico inviata! Il professionista ti contatterà a breve con un preventivo di onorario.', 'success');
-      btn.textContent = '✅ Inviata';
-      // reset campi
-      document.getElementById('i-note').value = '';
-      fileSelezionati = []; renderFileList();
-    } catch (e) {
-      showMsgI('❌ ' + e.message, 'error');
-      btn.disabled = false; btn.textContent = 'Invia richiesta di incarico';
-    }
-  }
-
-  // Avvio: mostra tutti i professionisti
-  cerca();
-
-  // Apertura diretta del form incarico da URL (es. dal profilo pubblico: ?incarico=<id>&prestazione=...)
-  (async function initFromParams() {
-    const p = new URLSearchParams(location.search);
-    const incId = p.get('incarico');
-    const prest = p.get('prestazione');
-    if (prest) {
-      const s = document.getElementById('f-prestazione');
-      if ([...s.options].some(o => o.value === prest)) s.value = prest;
-    }
-    if (incId) {
-      const { data } = await sb.from('imprese').select('id,nome_attivita,nome,cognome')
-        .eq('id', incId).eq('tipo', 'professionista').maybeSingle();
-      if (data) {
-        const nome = data.nome_attivita || `${data.nome || ''} ${data.cognome || ''}`.trim() || 'Professionista';
-        _profMap[data.id] = { id: data.id, nome };
-        if (prest) {
-          const is = document.getElementById('i-prestazione');
-          if ([...is.options].some(o => o.value === prest)) is.value = prest;
-        }
-        apriIncarico(String(data.id));
-      }
-    }
-  })();
-</script>
-<script src="/cookie-banner.js"></script>
+<script src="/js/modal-fullscreen.js" defer></script>
+<script src="/js/sync-filtro.js"></script>
 </body>
 </html>
