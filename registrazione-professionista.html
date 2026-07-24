@@ -468,9 +468,19 @@
     function getPrestazioniSelezionate() {
       return Array.from(document.querySelectorAll('.prest-item:checked')).map(c => c.value);
     }
+    // Normalizzazione comuni: STESSA regola della query lato ricerca (professionisti.html)
+    function normalizzaComune(s){
+      return (s==null?'':String(s)).trim().toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g,'')
+        .replace(/['’`]/g,' ')
+        .replace(/[^a-z0-9\s-]/g,'')
+        .replace(/\s+/g,' ')
+        .trim();
+    }
     function getComuniCompetenza() {
-      return (document.getElementById('comuni_competenza').value || '')
-        .split(',').map(s => s.trim()).filter(Boolean);
+      const arr = (document.getElementById('comuni_competenza').value || '')
+        .split(',').map(normalizzaComune).filter(Boolean);
+      return [...new Set(arr)];
     }
 
 
