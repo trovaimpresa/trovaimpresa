@@ -484,6 +484,30 @@
 
   // Avvio: mostra tutti i professionisti
   cerca();
+
+  // Apertura diretta del form incarico da URL (es. dal profilo pubblico: ?incarico=<id>&prestazione=...)
+  (async function initFromParams() {
+    const p = new URLSearchParams(location.search);
+    const incId = p.get('incarico');
+    const prest = p.get('prestazione');
+    if (prest) {
+      const s = document.getElementById('f-prestazione');
+      if ([...s.options].some(o => o.value === prest)) s.value = prest;
+    }
+    if (incId) {
+      const { data } = await sb.from('imprese').select('id,nome_attivita,nome,cognome')
+        .eq('id', incId).eq('tipo', 'professionista').maybeSingle();
+      if (data) {
+        const nome = data.nome_attivita || `${data.nome || ''} ${data.cognome || ''}`.trim() || 'Professionista';
+        _profMap[data.id] = { id: data.id, nome };
+        if (prest) {
+          const is = document.getElementById('i-prestazione');
+          if ([...is.options].some(o => o.value === prest)) is.value = prest;
+        }
+        apriIncarico(String(data.id));
+      }
+    }
+  })();
 </script>
 <script src="/cookie-banner.js"></script>
 </body>
