@@ -285,6 +285,7 @@
       + '<p style="font-size:14px;color:#555;margin-bottom:12px">Non hai trovato quello che cercavi? Lasciaci la tua richiesta: ti mettiamo in contatto appena arriva un\'attività nella tua zona</p>'
       + '<input type="text" id="rc-nome" placeholder="Il tuo nome *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px">'
       + '<input type="tel" id="rc-telefono" placeholder="Il tuo telefono *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px">'
+      + '<textarea id="rc-cerca" required placeholder="Cosa cerchi? Descrivi il lavoro *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;min-height:70px;resize:vertical;font-family:inherit"></textarea>'
       + '<button onclick="inviaRichiestaCliente()" style="background:#0066ff;color:white;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer">Invia richiesta</button>'
       + '</div>';
   }
@@ -292,8 +293,11 @@
     const nome = document.getElementById('rc-nome').value.trim();
     const telefono = document.getElementById('rc-telefono').value.trim();
     if (!nome || !telefono) { alert('Inserisci nome e telefono.'); return; }
+    const cosaCerca = document.getElementById('rc-cerca').value.trim();
+    if (!cosaCerca) { alert('Descrivi cosa cerchi (es. il tipo di lavoro).'); document.getElementById('rc-cerca').focus(); return; }
     const zona = (document.getElementById('cittaInput').value.trim() || document.getElementById('regioneSelect').value || '').trim();
-    const ricerca = (typeof tipoScelto !== 'undefined' && tipoScelto !== 'tutti') ? tipoScelto : '';
+    const _contesto = (typeof tipoScelto !== 'undefined' && tipoScelto !== 'tutti') ? tipoScelto : '';
+    const ricerca = _contesto ? (cosaCerca + ' — ' + _contesto) : cosaCerca;
     try {
       const res = await fetch('/.netlify/functions/richiesta-cliente', {
         method: 'POST',
