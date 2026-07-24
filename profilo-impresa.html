@@ -438,7 +438,7 @@ nav img{height:36px}
 
     <!-- CHAT CON L'IMPRESA -->
     <div class="card" id="card-chat-impresa">
-      <div class="card-title">💬 Scrivi all'impresa</div>
+      <div class="card-title" id="scrivi-title">💬 Scrivi all'impresa</div>
       <div class="chat-box">
         <div id="chat-start-form">
           <div class="chat-field"><label>Nome</label><input type="text" id="chat-nome" placeholder="Il tuo nome"></div>
@@ -658,6 +658,7 @@ async function caricaProfilo(id){
       const tl=document.getElementById('cta-trust-label');
       if(tl) tl.innerHTML='<strong>Affida un incarico</strong><span>Ti risponde con un preventivo di onorario</span>';
       const preComune=document.getElementById('inc-comune'); if(preComune&&d.citta) preComune.value=d.citta;
+      const st=document.getElementById('scrivi-title'); if(st) st.textContent='💬 Scrivi al professionista';
     }
     const luogo=[d.citta,d.provincia].filter(Boolean).join(', ');
     if(luogo)document.getElementById('profile-city').textContent='📍 '+luogo;

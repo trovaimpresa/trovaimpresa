@@ -3645,10 +3645,21 @@ async function caricaPreventivi() {
       ${docs.length ? `<div style="margin:8px 0">${docBtns}</div>` : ''}
       <div class="prev-footer">
         <span class="prev-data">${new Date(x.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</span>
-        ${gestita ? '' : `<button class="btn-genera" onclick="segnaIncaricoGestito('${x.id}')">✓ Segna come gestita</button>`}
+        <span style="display:flex;gap:8px">
+          ${gestita ? '' : `<button class="btn-genera" onclick="segnaIncaricoGestito('${x.id}')">✓ Segna come gestita</button>`}
+          <button class="btn-genera" style="background:#c0392b" onclick="eliminaIncarico('${x.id}')">🗑 Elimina</button>
+        </span>
       </div>
     </div>`;
   }).join('');
+}
+
+// Elimina una richiesta di incarico (dopo conferma)
+async function eliminaIncarico(id) {
+  if (!confirm('Eliminare questa richiesta? L\'operazione non è reversibile.')) return;
+  const { error } = await sb.from('incarichi_richieste').delete().eq('id', id);
+  if (error) { alert('Errore: ' + error.message); return; }
+  caricaPreventivi();
 }
 
 // Scarica un documento allegato all'incarico (bucket privato -> URL firmato temporaneo)

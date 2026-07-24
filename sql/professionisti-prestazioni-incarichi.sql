@@ -166,6 +166,19 @@ create policy "incarichi_update_owner" on public.incarichi_richieste
   )
   with check (true);
 
+-- DELETE: il professionista destinatario puo' eliminare le proprie richieste
+drop policy if exists "incarichi_delete_owner" on public.incarichi_richieste;
+create policy "incarichi_delete_owner" on public.incarichi_richieste
+  for delete
+  to authenticated
+  using (
+    exists (
+      select 1 from public.imprese im
+      where im.id = incarichi_richieste.professionista_id
+        and im.user_id = auth.uid()
+    )
+  );
+
 
 -- ============================================================
 -- TASK 3 — Bucket Storage "documenti-incarichi" (PRIVATO) + policy
