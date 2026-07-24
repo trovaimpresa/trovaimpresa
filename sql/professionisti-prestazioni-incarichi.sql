@@ -130,6 +130,11 @@ create table if not exists public.incarichi_richieste (
 create index if not exists idx_incarichi_professionista on public.incarichi_richieste(professionista_id);
 create index if not exists idx_incarichi_created_at on public.incarichi_richieste(created_at desc);
 
+-- Risposta del professionista al cliente (onorario + testo)
+alter table public.incarichi_richieste add column if not exists risposta text;
+alter table public.incarichi_richieste add column if not exists onorario text;
+alter table public.incarichi_richieste add column if not exists risposta_at timestamptz;
+
 alter table public.incarichi_richieste enable row level security;
 
 -- INSERT: chiunque (anche cliente NON loggato, come per i preventivi) puo' inviare

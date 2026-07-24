@@ -3599,8 +3599,8 @@ async function caricaPreventivi() {
 
   const lista = data || [];
 
-  // Badge "nuove" sulla card
-  const _nuovi = lista.filter(x => x.stato === 'nuova').length;
+  // Badge "da rispondere" sulla card
+  const _nuovi = lista.filter(x => !x.risposta).length;
   const _badgePrev = document.getElementById('badge-prev-card');
   if (_badgePrev) {
     _badgePrev.textContent = _nuovi;
@@ -3625,12 +3625,17 @@ async function caricaPreventivi() {
   container.innerHTML = lista.map(x => {
     const docs = Array.isArray(x.documenti) ? x.documenti : [];
     const docBtns = docs.map((p, i) => `<button class="btn-genera" style="margin:2px" onclick="scaricaDocIncarico('${String(p).replace(/'/g, "\\'")}')">📎 Documento ${i + 1}</button>`).join('');
-    const gestita = x.stato && x.stato !== 'nuova';
+    const risposto = !!x.risposta;
+    const telClean = (x.telefono || '').replace(/[^\d+]/g, '');
+    const waNum = (x.telefono || '').replace(/\D/g, '');
+    const azioni =
+      (waNum ? `<a class="btn-genera" style="text-decoration:none;background:#25D366" target="_blank" rel="noopener" href="https://wa.me/${waNum}">💬 WhatsApp</a>` : '') +
+      (telClean ? `<a class="btn-genera" style="text-decoration:none;background:#0a2a4d" href="tel:${telClean}">📞 Chiama</a>` : '');
     return `
     <div class="prev-card">
       <div class="prev-header">
         <div class="prev-nome">👤 ${escHtml(x.nome || '—')}</div>
-        <span class="prev-badge ${gestita ? 'badge-inviato' : 'badge-nuovo'}">${gestita ? '✅ Gestita' : '🆕 Nuova'}</span>
+        <span class="prev-badge ${risposto ? 'badge-inviato' : 'badge-nuovo'}">${risposto ? '✅ Risposto' : '🆕 Nuova'}</span>
       </div>
       <div class="prev-info">
         <span>🛠️ ${escHtml(x.prestazione || '—')}</span>
@@ -3643,15 +3648,62 @@ async function caricaPreventivi() {
       </div>
       ${x.note ? `<div class="prev-desc">${escHtml(x.note)}</div>` : ''}
       ${docs.length ? `<div style="margin:8px 0">${docBtns}</div>` : ''}
+      ${azioni ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px">${azioni}</div>` : ''}
+
+      <div style="margin:10px 0 4px">
+        <button class="btn-genera" style="background:#0066ff" onclick="toggleRisposta('${x.id}')">✍️ ${risposto ? 'Modifica risposta' : 'Rispondi e invia onorario'}</button>
+      </div>
+      <div id="risp-${x.id}" style="display:${risposto ? 'block' : 'none'};margin:6px 0 4px;padding:12px;background:#f7f9fc;border:1px solid #e3e8ef;border-radius:10px">
+        <textarea id="risp-testo-${x.id}" placeholder="Scrivi la risposta per il cliente: disponibilità, tempi, cosa serve, ecc." style="width:100%;min-height:80px;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">${risposto ? escHtml(x.risposta) : ''}</textarea>
+        <input id="risp-onorario-${x.id}" placeholder="Onorario indicativo (es. 800€ oppure 'da concordare')" value="${risposto && x.onorario ? escHtml(x.onorario) : ''}" style="width:100%;margin-top:8px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box">
+        <button id="risp-btn-${x.id}" class="btn-genera" style="margin-top:10px;background:#0066ff" onclick="inviaRispostaIncarico('${x.id}')">📧 Invia risposta al cliente</button>
+        ${risposto && x.risposta_at ? `<div style="font-size:12px;color:#888;margin-top:6px">Ultima risposta inviata il ${new Date(x.risposta_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
+      </div>
+
       <div class="prev-footer">
         <span class="prev-data">${new Date(x.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})}</span>
-        <span style="display:flex;gap:8px">
-          ${gestita ? '' : `<button class="btn-genera" onclick="segnaIncaricoGestito('${x.id}')">✓ Segna come gestita</button>`}
-          <button class="btn-genera" style="background:#c0392b" onclick="eliminaIncarico('${x.id}')">🗑 Elimina</button>
-        </span>
+        <button class="btn-genera" style="background:#c0392b" onclick="eliminaIncarico('${x.id}')">🗑 Elimina</button>
       </div>
     </div>`;
   }).join('');
+}
+
+// Mostra/nasconde il riquadro di risposta di una richiesta
+function toggleRisposta(id) {
+  const el = document.getElementById('risp-' + id);
+  if (el) el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+
+// Salva la risposta + onorario sulla richiesta e invia l'email al cliente
+async function inviaRispostaIncarico(id) {
+  const testo = (document.getElementById('risp-testo-' + id).value || '').trim();
+  const onorario = (document.getElementById('risp-onorario-' + id).value || '').trim();
+  if (!testo) { alert('Scrivi la risposta per il cliente.'); return; }
+  const btn = document.getElementById('risp-btn-' + id);
+  btn.disabled = true; btn.textContent = '⏳ Invio in corso...';
+  const { data: row } = await sb.from('incarichi_richieste').select('nome,email').eq('id', id).maybeSingle();
+  const { error } = await sb.from('incarichi_richieste').update({
+    risposta: testo, onorario: onorario || null, risposta_at: new Date().toISOString(), stato: 'risposta_inviata'
+  }).eq('id', id);
+  if (error) { alert('Errore nel salvataggio: ' + error.message); btn.disabled = false; btn.textContent = '📧 Invia risposta al cliente'; return; }
+  let emailInviata = false;
+  if (row && row.email) {
+    try {
+      const res = await fetch('/.netlify/functions/notifica-risposta-incarico', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email_cliente: row.email,
+          nome_cliente: row.nome || 'cliente',
+          professionista_nome: (impresaCorrente.nome_attivita || impresaCorrente.nome || 'Il professionista'),
+          risposta: testo,
+          onorario: onorario || null
+        })
+      });
+      emailInviata = res.ok;
+    } catch (e) { emailInviata = false; }
+  }
+  btn.textContent = emailInviata ? '✅ Inviata al cliente!' : '✅ Salvata (email non inviata)';
+  setTimeout(() => caricaPreventivi(), 1400);
 }
 
 // Elimina una richiesta di incarico (dopo conferma)
