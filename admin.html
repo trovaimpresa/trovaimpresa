@@ -1335,11 +1335,42 @@ function renderAbbonamenti() {
   }).join('');
 }
 
+// ===== SCRITTURE ADMIN =====
+// Tutte le modifiche passano da /.netlify/functions/admin-dati, che verifica
+// la password lato server e scrive con service_role.
+//
+// PERCHÉ: la tabella "imprese" ha RLS con scrittura riservata al proprietario.
+// Scrivendo con la chiave anon (come si faceva prima) PostgREST non dà errore,
+// aggiorna zero righe e basta: i pulsanti sembravano funzionare senza fare
+// nulla. Se aggiungi un pulsante che scrive, usa questa funzione.
+async function adminWrite(action, table, id, patch) {
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action, table, id, patch })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.success) {
+      alert('Errore: ' + (j.error || 'operazione non riuscita'));
+      return false;
+    }
+    // count === 0 = nessuna riga toccata: meglio saperlo che credere sia andata.
+    if (j.count === 0) {
+      alert('Attenzione: nessuna riga modificata (id ' + id + ' non trovato).');
+      return false;
+    }
+    return true;
+  } catch (e) {
+    alert('Errore di rete: ' + e.message);
+    return false;
+  }
+}
+
 async function togglePremium(id, attiva) {
   if (!confirm(attiva ? 'Regalare il Premium (3 mesi) a questa impresa?' : 'Togliere il Premium a questa impresa?')) return;
   const patch = attiva ? { piano: 'premium' } : { piano: 'free', premium_scadenza: null };
-  const { error } = await sb.from('imprese').update(patch).eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
+  if (!await adminWrite('update', 'imprese', id, patch)) return;
   await caricaImprese();
   renderAbbonamenti();
 }
@@ -1347,8 +1378,7 @@ async function togglePremium(id, attiva) {
 async function toggleGestionale(id, attiva) {
   if (!confirm(attiva ? 'Attivare il Gestionale per questa impresa?' : 'Disattivare il Gestionale per questa impresa?')) return;
   const patch = attiva ? { gestionale_attivo: true, gestionale_scadenza: null } : { gestionale_attivo: false };
-  const { error } = await sb.from('imprese').update(patch).eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
+  if (!await adminWrite('update', 'imprese', id, patch)) return;
   await caricaImprese();
   renderAbbonamenti();
 }
@@ -1603,8 +1633,9 @@ function filtraImprese() { applicaFiltriImprese(); }
 
 // VERIFICA IMPRESA
 async function verificaImpresa(id) {
-  const { error } = await sb.from('imprese').update({ verificata: true }).eq('id', id);
-  if (!error) { await caricaImprese(); alert('✅ Impresa verificata!'); }
+  if (!await adminWrite('update', 'imprese', id, { verificata: true })) return;
+  await caricaImprese();
+  alert('✅ Impresa verificata!');
 }
 
 // ELIMINA IMPRESA
@@ -1612,8 +1643,8 @@ async function eliminaImpresa(id) {
   const imp = tutteImprese.find(x => x.id === id);
   const nome = (imp && imp.nome_attivita) || '';
   if (!confirm(`Sei sicuro di voler eliminare "${nome}"?`)) return;
-  const { error } = await sb.from('imprese').delete().eq('id', id);
-  if (!error) { await caricaImprese(); }
+  if (!await adminWrite('delete', 'imprese', id)) return;
+  await caricaImprese();
 }
 
 // ELIMINA RECENSIONE
@@ -1635,8 +1666,7 @@ async function eliminaRecensione(id) {
 // ELIMINA PREVENTIVO
 async function eliminaPreventivo(id) {
   if (!confirm('Eliminare questo preventivo?')) return;
-  const { error } = await sb.from('preventivi').delete().eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
+  if (!await adminWrite('delete', 'preventivi', id)) return;
   await caricaPreventivi();
 }
 
@@ -1658,8 +1688,7 @@ async function eliminaSegnalazione(id) {
 // ELIMINA LEAD
 async function eliminaLead(id) {
   if (!confirm('Eliminare questo lead?')) return;
-  const { error } = await sb.from('lead_imprese').delete().eq('id', id);
-  if (error) { alert('Errore: ' + error.message); return; }
+  if (!await adminWrite('delete', 'lead_imprese', id)) return;
   await caricaLead();
 }
 
@@ -1841,12 +1870,9 @@ async function aggiungiLead() {
   if (!nome) { msg.style.color = 'var(--rosso)'; msg.textContent = '⚠️ Il nome attività è obbligatorio.'; return; }
   msg.textContent = '⏳ Salvataggio...';
   msg.style.color = 'var(--mid)';
-  const { error } = await sb.from('lead_imprese').insert({ nome_attivita: nome, email, telefono, citta, nota, stato: 'in_attesa' });
-  if (error) {
-    msg.style.color = 'var(--rosso)';
-    msg.textContent = '❌ Errore: ' + error.message;
-    return;
-  }
+  const ok = await adminWrite('insert', 'lead_imprese', null,
+    { nome_attivita: nome, email, telefono, citta, nota, stato: 'in_attesa' });
+  if (!ok) { msg.style.color = 'var(--rosso)'; msg.textContent = '❌ Salvataggio non riuscito.'; return; }
   msg.style.color = 'var(--verde)';
   msg.textContent = '✅ Lead aggiunto!';
   document.getElementById('lead-nome').value = '';

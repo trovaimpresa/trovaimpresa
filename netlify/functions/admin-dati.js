@@ -8,8 +8,18 @@ const corsHeaders = {
 };
 
 // Tabelle che questa funzione e' autorizzata a gestire.
-const TABELLE_CONSENTITE = ['feedback_clienti', 'segnalazioni', 'subappalti'];
-const AZIONI_CONSENTITE = ['list', 'update', 'delete'];
+//
+// "imprese" e' stata aggiunta a luglio 2026: il pannello admin scriveva con la
+// chiave anon, ma su "imprese" c'e' RLS con scrittura riservata al proprietario
+// (user_id = auth.uid()). PostgREST non restituisce errore quando RLS blocca
+// una UPDATE: aggiorna zero righe e basta. Risultato: i pulsanti Verifica /
+// Premium / Gestionale sembravano funzionare e non scrivevano nulla.
+// Con service_role qui la scrittura avviene davvero.
+const TABELLE_CONSENTITE = [
+  'feedback_clienti', 'segnalazioni', 'subappalti',
+  'imprese', 'preventivi', 'lead_imprese'
+];
+const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 
 exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') {
@@ -74,18 +84,40 @@ exports.handler = async function(event) {
       if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
         return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'patch mancante o non valido.' }) };
       }
-      const { error } = await supabaseAdmin.from(table).update(patch).eq('id', id);
+      // .select('id') fa tornare le righe toccate: cosi' il pannello sa
+      // distinguere "aggiornato" da "nessuna riga con quell'id".
+      const { data, error } = await supabaseAdmin
+        .from(table).update(patch).eq('id', id).select('id');
       if (error) throw error;
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
+      return {
+        statusCode: 200, headers: corsHeaders,
+        body: JSON.stringify({ success: true, count: (data || []).length })
+      };
     }
 
     if (action === 'delete') {
       if (id === undefined || id === null) {
         return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'id mancante.' }) };
       }
-      const { error } = await supabaseAdmin.from(table).delete().eq('id', id);
+      const { data, error } = await supabaseAdmin
+        .from(table).delete().eq('id', id).select('id');
       if (error) throw error;
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
+      return {
+        statusCode: 200, headers: corsHeaders,
+        body: JSON.stringify({ success: true, count: (data || []).length })
+      };
+    }
+
+    if (action === 'insert') {
+      if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'patch mancante o non valido.' }) };
+      }
+      const { data, error } = await supabaseAdmin.from(table).insert(patch).select('id');
+      if (error) throw error;
+      return {
+        statusCode: 200, headers: corsHeaders,
+        body: JSON.stringify({ success: true, count: (data || []).length })
+      };
     }
 
     // Non dovrebbe accadere (azione gia' validata sopra).
