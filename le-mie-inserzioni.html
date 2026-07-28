@@ -59,6 +59,8 @@
     .btn:hover{background:var(--verde2);}
     .btn[disabled]{opacity:.6;cursor:default;}
     .btn-out{background:#fff;color:var(--verde);border:1.5px solid var(--verde);}
+    .btn-cest{background:#fff;color:#c92a2a;border:1.5px solid #f0c2c2;}
+    .btn-cest:hover{background:#fdeaea;}
     .riga-azioni{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}
     .msg{font-size:13px;font-weight:600;}
 
@@ -122,7 +124,7 @@ function fasciaDiSpazio(id){
   return id;
 }
 
-let currentUser = null, currentImpresa = null;
+let currentUser = null, currentImpresa = null, _tutti = [];
 
 sb.auth.onAuthStateChange(async function(event, session){
   if (event !== 'INITIAL_SESSION') return;
@@ -175,6 +177,7 @@ async function carica(){
     return;
   }
   const tutti = res.data || [];
+  _tutti = tutti;   // serve a elimina() per il messaggio di conferma
   if (!tutti.length) {
     box.innerHTML = '<div class="vuoto"><h3>Non hai ancora inserzioni</h3>'
       + '<p>Scegli uno spazio nella tua città e la tua azienda comparirà a chi cerca lì.</p>'
@@ -251,10 +254,41 @@ function cardSemplice(a){
     + imgHTML(a, null)
     + '<div class="ins-body">'
       + intestazione(a)
-      + '<a href="'+link+'" class="btn btn-out" style="text-decoration:none;display:inline-block">'
-      + (st === 'scaduto' ? 'Riattiva questo spazio' : 'Completa l\'acquisto') + '</a>'
+      + '<div class="riga-azioni">'
+        + '<a href="'+link+'" class="btn btn-out" style="text-decoration:none;display:inline-block">'
+        + (st === 'scaduto' ? 'Riattiva questo spazio' : 'Completa l\'acquisto') + '</a>'
+        + '<button class="btn btn-cest" id="del-'+a.id+'" onclick="elimina('+a.id+')" '
+        + 'title="Togli questa inserzione dall\'elenco">🗑️ Elimina</button>'
+        + '<span class="msg" id="dmsg-'+a.id+'"></span>'
+      + '</div>'
     + '</div>'
   + '</div>';
+}
+
+// Cestino: solo su scadute e non pagate. Le attive NON si eliminano da qui —
+// sono spazi pagati e in corso, cancellarli sarebbe buttare via dei soldi
+// senza rimborso. Per quelle il cliente deve scriverci.
+async function elimina(id){
+  const a = (_tutti || []).find(x => x.id === id);
+  const dove = a ? (fasciaDiSpazio(a.spazio_id)+' · '+latoLabel(a.spazio_id)+' a '+(a.citta||'')) : ('#'+id);
+  if (!confirm('Eliminare l\'inserzione "'+dove+'" dall\'elenco?\n\nL\'operazione non si può annullare.')) return;
+
+  const btn = document.getElementById('del-'+id);
+  const msg = document.getElementById('dmsg-'+id);
+  btn.disabled = true; btn.textContent = 'Elimino…';
+
+  try {
+    // Doppia sicurezza: impresa_id nella query (oltre alla RLS) e stato diverso
+    // da una riga pagata e attiva, cosi' un id manomesso non cancella nulla.
+    const res = await sb.from('annunci_pubblicitari')
+      .delete().eq('id', id).eq('impresa_id', currentImpresa.id).select('id');
+    if (res.error) throw new Error(res.error.message);
+    if (!res.data || !res.data.length) throw new Error('Eliminazione non consentita.');
+    await carica();
+  } catch (e) {
+    msg.textContent = '❌ ' + e.message; msg.style.color = '#c92a2a';
+    btn.disabled = false; btn.textContent = '🗑️ Elimina';
+  }
 }
 
 // ------------------------------------------------------------------ salvataggio
