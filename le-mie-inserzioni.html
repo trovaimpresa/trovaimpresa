@@ -133,11 +133,13 @@ let currentUser = null, currentImpresa = null, _tutti = [];
 document.addEventListener('click', function (e) {
   const b = e.target.closest('button[data-azione]');
   if (!b) return;
-  const id = parseInt(b.dataset.id, 10);
+  // L'id resta com'e' (testo): con parseInt si romperebbe il giorno in cui
+  // la tabella usasse id non numerici.
+  const id = b.dataset.id;
   if (!id) return;
   e.preventDefault();
-  if (b.dataset.azione === 'salva') salva(id);
-  else if (b.dataset.azione === 'elimina') elimina(id);
+  if (b.dataset.azione === 'salva') salva(id, b);
+  else if (b.dataset.azione === 'elimina') elimina(id, b);
 });
 
 sb.auth.onAuthStateChange(async function(event, session){
@@ -295,14 +297,18 @@ function cardSemplice(a){
 // Cestino: solo su scadute e non pagate. Le attive NON si eliminano da qui —
 // sono spazi pagati e in corso, cancellarli sarebbe buttare via dei soldi
 // senza rimborso. Per quelle il cliente deve scriverci.
-async function elimina(id){
-  const a = (_tutti || []).find(x => x.id === id);
+// btn arriva dal clic: uso quell'elemento invece di ricercarlo per id.
+// Ricercandolo si rischiava di trovare null (e crashare) se nel frattempo
+// l'elenco era stato ridisegnato.
+async function elimina(id, btn){
+  // Confronto come testo: dal DOM l'id arriva sempre stringa, dal database
+  // puo' essere numero. Con === non combaciavano e usciva "#4".
+  const a = (_tutti || []).find(x => String(x.id) === String(id));
   const dove = a ? (fasciaDiSpazio(a.spazio_id)+' · '+latoLabel(a.spazio_id)+' a '+(a.citta||'')) : ('#'+id);
   if (!confirm('Eliminare l\'inserzione "'+dove+'" dall\'elenco?\n\nL\'operazione non si può annullare.')) return;
 
-  const btn = document.getElementById('del-'+id);
   const msg = document.getElementById('dmsg-'+id);
-  btn.disabled = true; btn.textContent = 'Elimino…';
+  if (btn) { btn.disabled = true; btn.textContent = 'Elimino…'; }
 
   try {
     // Doppia sicurezza: impresa_id nella query (oltre alla RLS) e stato diverso
@@ -313,8 +319,9 @@ async function elimina(id){
     if (!res.data || !res.data.length) throw new Error('Eliminazione non consentita.');
     await carica();
   } catch (e) {
-    msg.textContent = '❌ ' + e.message; msg.style.color = '#c92a2a';
-    btn.disabled = false; btn.textContent = '🗑️ Elimina';
+    if (msg) { msg.textContent = '❌ ' + e.message; msg.style.color = '#c92a2a'; }
+    else alert('Eliminazione non riuscita: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🗑️ Elimina'; }
   }
 }
 
@@ -350,20 +357,24 @@ function ridimensionaImmagine(file, maxLato){
   });
 }
 
-async function salva(id){
-  const btn  = document.getElementById('btn-'+id);
-  const msg  = document.getElementById('msg-'+id);
-  const file = document.getElementById('file-'+id).files[0];
-  const link = document.getElementById('link-'+id).value.trim();
+async function salva(id, btn){
+  btn = btn || document.getElementById('btn-'+id);
+  const msg   = document.getElementById('msg-'+id);
+  const campoF = document.getElementById('file-'+id);
+  const campoL = document.getElementById('link-'+id);
+  if (!campoF || !campoL) return;   // elenco ridisegnato nel frattempo
+  const file = campoF.files[0];
+  const link = campoL.value.trim();
 
-  function esito(t, c){ msg.textContent = t; msg.style.color = c; }
+  function esito(t, c){ if (msg) { msg.textContent = t; msg.style.color = c; } }
 
   if (!file && !link) { esito('Non hai cambiato niente.', '#b26a00'); return; }
   if (link && !/^https?:\/\//i.test(link)) {
     esito('Il link deve iniziare con http:// o https://', '#c92a2a'); return;
   }
 
-  btn.disabled = true; btn.textContent = 'Salvataggio…'; esito('', '#555');
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvataggio…'; }
+  esito('', '#555');
   const patch = { link_url: link || null };
 
   try {
@@ -393,7 +404,7 @@ async function salva(id){
     esito('❌ ' + e.message, '#c92a2a');
   }
 
-  btn.disabled = false; btn.textContent = 'Salva modifiche';
+  if (btn) { btn.disabled = false; btn.textContent = 'Salva modifiche'; }
 }
 </script>
 <script src="/cookie-banner.js"></script>
