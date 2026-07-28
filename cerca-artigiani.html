@@ -414,16 +414,23 @@
   // comparivano imprese di Roma).
   function filtraDistanza(lista, distanzaMax, lat, citta) {
     lista = lista || [];
+
+    // ECCEZIONE PREMIUM: chi paga il Premium si vede in tutta la sua regione,
+    // a qualsiasi impostazione dello slider. La query a monte porta solo i
+    // Premium della regione della citta' cercata, quindi qui basta lasciarli
+    // passare. E' un vantaggio venduto: non va tolto dal filtro distanza.
+    function premium(i) { return i && i.piano === 'premium'; }
+
     if (!distanzaMax) {
       var c = (citta || '').trim().toLowerCase();
       if (!c) return lista;
       return lista.filter(function (i) {
-        return (i.citta || '').trim().toLowerCase().indexOf(c) !== -1;
+        return premium(i) || (i.citta || '').trim().toLowerCase().indexOf(c) !== -1;
       });
     }
     if (distanzaMax >= 100 || lat === null) return lista;
     return lista.filter(function (i) {
-      return i._distKm !== null && i._distKm <= distanzaMax;
+      return premium(i) || (i._distKm !== null && i._distKm <= distanzaMax);
     });
   }
 
