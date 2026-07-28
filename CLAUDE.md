@@ -27,6 +27,45 @@
 - `@supabase/supabase-js` **bloccato a 2.39.8** in package.json: le versioni più recenti richiedono Node 22 / WebSocket nativo e rompono le Netlify Functions con l'errore "native WebSocket not found". Non sbloccare il `^`.
 - Supabase project: `nacvrsgkyfavykxjxszu`.
 
+## TRAPPOLE NOTE (leggere prima di scrivere codice)
+
+### 1. Gli id sono UUID: negli `onclick` vanno SEMPRE fra apici
+Le tabelle usano id **UUID**, non interi. Scrivere l'id in un handler inline senza apici
+produce JavaScript non valido e **il pulsante muore in silenzio**:
+
+```js
+// SBAGLIATO -> onclick="elimina(4a3f9b2c-58cc-4372-a567-0e02b2c3d479)"
+//              "0e02b2c3d479" non e' un numero valido -> Uncaught SyntaxError
+'<button onclick="elimina(' + x.id + ')">'
+`<button onclick="elimina(${x.id})">`
+
+// GIUSTO
+'<button onclick="elimina(\'' + x.id + '\')">'
+`<button onclick="elimina('${x.id}')">`
+```
+
+Sintomo: `Uncaught SyntaxError: Invalid or unexpected token` a `nomepagina:1`, e il clic non fa
+nulla. Corretto in `admin.html` (11 pulsanti) a luglio 2026. Meglio ancora: `data-id` +
+un solo event listener sul contenitore, come in `le-mie-inserzioni.html`.
+
+Corollario: **mai `parseInt()` su un id**. Su un UUID che inizia per "4" restituisce 4 e
+manda tutto fuori strada. Confrontare sempre con `String(a) === String(b)`.
+
+### 2. Scritture admin: mai con la chiave anon
+`imprese` ha RLS con scrittura riservata al proprietario (`user_id = auth.uid()`, ruolo
+`authenticated`). Il pannello admin usa la chiave **anon senza sessione**: PostgREST non
+restituisce errore quando RLS blocca una UPDATE, aggiorna **zero righe** e risponde OK.
+Risultato: pulsanti che sembrano funzionare e non scrivono niente.
+
+Tutte le scritture admin passano da `netlify/functions/admin-dati.js` (verifica password
+lato server, scrive con `service_role`) tramite l'helper `adminWrite()` in `admin.html`.
+La function restituisce `count` = righe toccate: se e' 0 il pannello avvisa.
+Tabelle in whitelist: `feedback_clienti, segnalazioni, subappalti, imprese, preventivi, lead_imprese`.
+
+### 3. Verificare che una scrittura sia andata a buon fine
+Aggiungere sempre `.select('id')` a UPDATE e DELETE e controllare che tornino righe.
+Senza, una scrittura bloccata da RLS e' indistinguibile da una riuscita.
+
 ## Pannelli
 - 5 pannelli: `pannello-impresa`, `pannello-artigiano`, `pannello-professionisti`, `pannello-negozio` (le 4 categorie business) + `pannello-candidato`.
 - Modal "Genera preventivo con AI": stile `.modal-ai` a tutta pagina (fullscreen), header chiaro. Funzione AI (generaConAI/generaTestoPreventivo/calcolaPrezzo) uniforme su tutti i 4 pannelli.
@@ -55,6 +94,34 @@
 - Chiavi passate ai metadata: `tipo, nome, cognome, eta, sesso, mestiere, anni_esperienza, competenze, telefono, regione, provincia, citta, cv` (email da `new.email`).
 - Stesse migliorie UX degli altri form (banner, honeypot, strength, validazione step) + messaggio conferma mail e redirect a `login-candidato.html`.
 - `login-candidato.html`: dopo il login verifica la riga in `candidati_lavoro` per `user_id`; se manca → `signOut` + messaggio esplicito.
+
+## Pubblicità e inserzioni (luglio 2026)
+- La pubblicità è venduta **per città**. `js/pubblicita-spazi.js` (home) e `js/spazi-laterali.js`
+  (altre pagine) mostrano un annuncio **solo** sulla città per cui è stato pagato.
+  Niente rotazione, niente rilevamento da IP: erano state provate e hanno spalmato
+  l'annuncio di Roma su tutte le 106 città. Home nazionale = nessun annuncio venduto,
+  solo le locandine di TrovaImpresa (`/img/hero-sx.svg`, `/img/hero-dx.svg`).
+- `js/citta-obbligatoria.js`: nessun percorso di ricerca parte senza città. Al clic su una
+  categoria si apre un pannello che la chiede; dalla home nazionale si passa **sempre** dalla
+  home città (`index.html?citta=X`). La scelta resta in `localStorage` (`ti_citta_scelta`),
+  quindi il pannello si vede una volta sola. I link restano `<a href>` veri: Google li segue.
+- `le-mie-inserzioni.html`: il cliente cambia da solo locandina e link degli spazi attivi,
+  ed elimina quelli scaduti o non pagati. Raggiungibile dai 4 pannelli.
+- Colonna `mesi` su `annunci_pubblicitari` (`sql/pubblicita-colonna-mesi.sql`): durata
+  acquistata, fonte di verità per prezzo e sconti. Le righe vecchie ricadono sul calcolo
+  dalle date e in admin sono marcate "~ stimata".
+- `controlla-scadenze-pubblicita.js` gira ogni mattina alle 7: avvisa il cliente 7 giorni
+  prima della scadenza **e** manda ad Alex un riepilogo (env `ADMIN_EMAIL`, default info@).
+
+## Ricerca (luglio 2026)
+- Lo slider distanza parte da **0 = "Solo la città"**. Prima partiva da 100 ("Qualsiasi"),
+  cioè il filtro era di fatto spento.
+- Chi non ha lat/lng salvate **non passa** il filtro raggio. Prima `_distKm === null`
+  lasciava passare tutti, ed è per questo che cercando Rieti uscivano imprese di Roma.
+- **Eccezione Premium**: chi paga il Premium resta visibile in tutta la sua regione a
+  qualsiasi impostazione dello slider, ma finisce **in fondo** alla lista con l'etichetta
+  "anche nella tua regione" (`_fuoriZona` + `ordinaFuoriZona()`).
+- Attenzione: `cerca-artigiani.html` usa `cittaSafe`, gli altri 3 file `cittaScelta`.
 
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
