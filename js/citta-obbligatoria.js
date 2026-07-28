@@ -174,11 +174,19 @@
     };
   }
 
-  // Naviga verso url mettendoci la città. Se manca, la chiede prima.
+  // Naviga verso url mettendoci la città.
+  //
+  // Se la città si sa già, si va dritti dove il cliente ha cliccato.
+  // Se invece bisogna chiederla, appena l'ha scritta lo si porta sulla HOME
+  // della sua città (index.html?citta=X), non alla pagina di ricerca: è lì che
+  // vede la sua zona per intero e gli spazi pubblicitari principali. Da lì
+  // rifà il clic sulla categoria e prosegue normalmente.
   function vaiA(url) {
     var c = leggi();
     if (c) { w.location.href = conCitta(url, c); return; }
-    chiedi(function (scelta) { w.location.href = conCitta(url, scelta); });
+    chiedi(function (scelta) {
+      w.location.href = 'index.html?citta=' + encodeURIComponent(scelta);
+    });
   }
 
   // ---------------------------------------------------------------- aggancio
