@@ -249,8 +249,8 @@
     <div class="filter-group">
       <div class="filter-label">Distanza massima</div>
       <div class="slider-wrap">
-        <div class="slider-value" id="distanzaVal">Qualsiasi</div>
-        <input type="range" id="distanzaSlider" min="5" max="100" value="100" step="5" oninput="aggiornaDistanza(this.value)">
+        <div class="slider-value" id="distanzaVal">Solo la citt&agrave;</div>
+        <input type="range" id="distanzaSlider" min="0" max="100" value="0" step="5" oninput="aggiornaDistanza(this.value)">
         <div class="slider-labels"><span>5 km</span><span>100 km</span></div>
       </div>
     </div>
@@ -375,7 +375,7 @@
   function cambiaSorting(val) { sortBy = val; paginaCorrente = 1; cerca(); }
 
   function aggiornaDistanza(val) {
-    document.getElementById('distanzaVal').textContent = val >= 100 ? 'Qualsiasi' : val + ' km';
+    document.getElementById('distanzaVal').textContent = val == 0 ? 'Solo la citt\u00e0' : (val >= 100 ? 'Qualsiasi' : val + ' km');
     paginaCorrente = 1; cerca();
   }
 
@@ -404,6 +404,27 @@
     window._chipResets = chips.map(c => c.reset);
     document.getElementById('activeFilters').innerHTML = chips.map((c, i) =>
       `<span class="filter-chip" onclick="window._chipResets[${i}]()">🔍 ${c.label} ×</span>`).join('');
+  }
+
+
+  // Filtro distanza. distanzaMax = 0 significa "solo la citta' cercata":
+  // niente risultati di altri comuni, nemmeno i Premium della stessa regione.
+  // Sopra lo zero si ragiona a raggio; chi non ha le coordinate salvate NON
+  // passa piu' (prima passava sempre, ed e' per questo che cercando Rieti
+  // comparivano imprese di Roma).
+  function filtraDistanza(lista, distanzaMax, lat, citta) {
+    lista = lista || [];
+    if (!distanzaMax) {
+      var c = (citta || '').trim().toLowerCase();
+      if (!c) return lista;
+      return lista.filter(function (i) {
+        return (i.citta || '').trim().toLowerCase().indexOf(c) !== -1;
+      });
+    }
+    if (distanzaMax >= 100 || lat === null) return lista;
+    return lista.filter(function (i) {
+      return i._distKm !== null && i._distKm <= distanzaMax;
+    });
   }
 
   async function cerca() {
@@ -466,9 +487,7 @@
       tuttiRisultati.forEach(i => {
         i._distKm = (cittaLat !== null && i.lat && i.lng) ? Math.round(haversine(cittaLat, cittaLng, i.lat, i.lng)) : null;
       });
-      if (distanzaMax < 100 && cittaLat !== null) {
-        tuttiRisultati = tuttiRisultati.filter(i => i._distKm === null || i._distKm <= distanzaMax);
-      }
+      tuttiRisultati = filtraDistanza(tuttiRisultati, distanzaMax, cittaLat, cittaScelta);
       if (sortBy === 'piano') { const pp=p=>p==='premium'?2:1; tuttiRisultati.sort((a,b)=>pp(b.piano)-pp(a.piano)); }
       paginaCorrente = 1;
       mostraPagina(1);
