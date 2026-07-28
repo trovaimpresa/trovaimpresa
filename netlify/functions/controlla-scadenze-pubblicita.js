@@ -119,11 +119,14 @@ function emailRiepilogoAdmin(righe) {
   </div>`;
 }
 
-// Durata leggibile ricavata da data_inizio → data_fine
-function durataLabel(inizio, fine) {
-  if (!inizio || !fine) return '—';
-  const a = new Date(inizio), b = new Date(fine);
-  const m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+// Durata leggibile: usa la colonna "mesi"; se manca (righe vecchie) la ricava dalle date.
+function durataLabel(inizio, fine, mesi) {
+  let m = Number(mesi) > 0 ? Number(mesi) : null;
+  if (m === null) {
+    if (!inizio || !fine) return '—';
+    const a = new Date(inizio), b = new Date(fine);
+    m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+  }
   if (m === 12) return '1 anno';
   if (m === 1) return '1 mese';
   if (m > 0 && m % 12 === 0) return (m / 12) + ' anni';
@@ -145,7 +148,7 @@ const handler = async function () {
     // ---------- 1. RINNOVI: annunci in scadenza fra 7 giorni ----------
     const { data: inScadenza, error: e1 } = await sb
       .from('annunci_pubblicitari')
-      .select('id, spazio_id, citta, impresa_id, data_inizio, data_fine')
+      .select('id, spazio_id, citta, impresa_id, data_inizio, data_fine, mesi')
       .eq('stato', 'pagato')
       .eq('data_fine', giorno(7));
     if (e1) throw e1;
@@ -167,7 +170,7 @@ const handler = async function () {
         email: (imp && imp.email) || '',
         spazio: ann.spazio_id,
         citta: ann.citta,
-        durata: durataLabel(ann.data_inizio, ann.data_fine),
+        durata: durataLabel(ann.data_inizio, ann.data_fine, ann.mesi),
         scadenza: dataItaliana(ann.data_fine)
       });
 

@@ -891,8 +891,10 @@ PUB_LISTINO.forEach(s => { PUB_SPAZI[s.id] = s.nome; });
 function pubSpazioLabel(sid){ return PUB_SPAZI[sid] || sid || '—'; }
 
 // --- durata e scadenze -------------------------------------------------
-// La durata non è salvata nel DB: si ricava da data_inizio → data_fine.
+// Durata: si legge la colonna "mesi" (sql/pubblicita-colonna-mesi.sql).
+// Le righe vecchie, create prima della colonna, ricadono sul calcolo dalle date.
 function pubMesi(a) {
+  if (Number(a.mesi) > 0) return Number(a.mesi);
   if (!a.data_inizio || !a.data_fine) return null;
   const i = new Date(a.data_inizio), f = new Date(a.data_fine);
   if (isNaN(i) || isNaN(f)) return null;
@@ -907,6 +909,15 @@ function pubDurataLabel(a) {
   if (m % 12 === 0) return (m / 12) + ' anni';
   return m + ' mesi';
 }
+// Durata esatta in giorni del periodo acquistato
+function pubGiorniTotali(a) {
+  if (!a.data_inizio || !a.data_fine) return null;
+  const i = new Date(a.data_inizio + 'T00:00:00'), f = new Date(a.data_fine + 'T00:00:00');
+  if (isNaN(i) || isNaN(f)) return null;
+  const g = Math.round((f - i) / 86400000);
+  return g > 0 ? g : null;
+}
+
 // Giorni che mancano alla scadenza (negativo = già scaduto)
 function pubGiorniResidui(a) {
   if (!a.data_fine) return null;
@@ -1032,9 +1043,11 @@ function renderPubblicitaClienti() {
     const periodo = pubDataIt(a.data_inizio) + ' → ' + pubDataIt(a.data_fine);
 
     const mesi = pubMesi(a);
+    const gTot = pubGiorniTotali(a);
     const durataCol = '<strong>' + pubDurataLabel(a) + '</strong>'
-      + (mesi === 12 ? '<div style="font-size:11px;color:#0066ff;font-weight:700">annuale</div>'
-        : mesi ? '<div style="font-size:11px;color:#888">' + mesi + ' mes' + (mesi === 1 ? 'e' : 'i') + '</div>' : '');
+      + (mesi === 12 ? '<div style="font-size:11px;color:#0066ff;font-weight:700">annuale</div>' : '')
+      + (gTot ? '<div style="font-size:11px;color:#888">' + gTot + ' giorni</div>' : '')
+      + (a.mesi == null ? '<div style="font-size:10px;color:#c92a2a" title="Riga creata prima della colonna mesi: durata stimata dalle date">~ stimata</div>' : '');
 
     // Scadenza: giorni residui, con avviso se manca poco
     const gg = pubGiorniResidui(a);

@@ -29,7 +29,7 @@ exports.handler = async (event) => {
     // Leggo la riga dal DB (fonte di verità per spazio e periodo)
     const { data: ann, error } = await supabase
       .from('annunci_pubblicitari')
-      .select('id, spazio_id, citta, data_inizio, data_fine, stato, impresa_id')
+      .select('id, spazio_id, citta, data_inizio, data_fine, mesi, stato, impresa_id')
       .eq('id', annuncio_id)
       .eq('stato', 'pending')
       .single();
@@ -40,7 +40,9 @@ exports.handler = async (event) => {
     // Ricalcolo prezzo server-side
     const mensile = PREZZI_MENSILI[ann.spazio_id];
     if (mensile == null) return { statusCode: 400, body: JSON.stringify({ error: 'Spazio non valido' }) };
-    const mesi = mesiTraDate(ann.data_inizio, ann.data_fine);
+    // Durata: la colonna "mesi" è la fonte di verità. Le righe vecchie (create
+    // prima che la colonna esistesse) ricadono sul calcolo dalle date.
+    const mesi = Number(ann.mesi) > 0 ? Number(ann.mesi) : mesiTraDate(ann.data_inizio, ann.data_fine);
     const sconto = SCONTI[mesi] || 0;
     const prezzo = Math.round(mensile * mesi * (1 - sconto) * 100) / 100;
     if (prezzo <= 0) return { statusCode: 400, body: JSON.stringify({ error: 'Prezzo non valido' }) };
