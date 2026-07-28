@@ -80,6 +80,56 @@ function emailRinnovo(nome, spazio, citta, scadenza) {
   </div>`;
 }
 
+// Riepilogo per Alex: cosa sta per scadere, così può chiamare/riproporre il rinnovo.
+function emailRiepilogoAdmin(righe) {
+  const tr = righe.map(function (r) {
+    return `<tr>
+      <td style="padding:8px;border-bottom:1px solid #eee"><strong>${esc(r.nome)}</strong><br>
+        <span style="font-size:12px;color:#888">${esc(r.email || '—')}</span></td>
+      <td style="padding:8px;border-bottom:1px solid #eee">${esc(r.spazio)}<br>
+        <span style="font-size:12px;color:#888">📍 ${esc(r.citta)}</span></td>
+      <td style="padding:8px;border-bottom:1px solid #eee">${esc(r.durata)}</td>
+      <td style="padding:8px;border-bottom:1px solid #eee">${esc(r.scadenza)}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div style="font-family:sans-serif;max-width:640px;margin:0 auto;color:#333">
+    <div style="background:#0a2a4d;padding:22px 24px;border-radius:12px 12px 0 0">
+      <h1 style="color:#fff;margin:0;font-size:19px">Spazi pubblicitari in scadenza fra 7 giorni</h1>
+    </div>
+    <div style="padding:24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
+      <p style="font-size:14px;margin:0 0 16px">
+        ${righe.length} annunc${righe.length === 1 ? 'io' : 'i'} in scadenza.
+        Al cliente è già partita la mail di rinnovo automatica.
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:#f5f7fa;text-align:left">
+            <th style="padding:8px">Cliente</th><th style="padding:8px">Spazio</th>
+            <th style="padding:8px">Durata</th><th style="padding:8px">Scade il</th>
+          </tr>
+        </thead>
+        <tbody>${tr}</tbody>
+      </table>
+      <p style="margin:20px 0 0">
+        <a href="https://trovaimpresa.com/admin" style="color:#0066ff;font-weight:700">Apri il pannello admin &rarr;</a>
+      </p>
+    </div>
+  </div>`;
+}
+
+// Durata leggibile ricavata da data_inizio → data_fine
+function durataLabel(inizio, fine) {
+  if (!inizio || !fine) return '—';
+  const a = new Date(inizio), b = new Date(fine);
+  const m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+  if (m === 12) return '1 anno';
+  if (m === 1) return '1 mese';
+  if (m > 0 && m % 12 === 0) return (m / 12) + ' anni';
+  return m > 0 ? m + ' mesi' : '—';
+}
+
 const handler = async function () {
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -95,10 +145,12 @@ const handler = async function () {
     // ---------- 1. RINNOVI: annunci in scadenza fra 7 giorni ----------
     const { data: inScadenza, error: e1 } = await sb
       .from('annunci_pubblicitari')
-      .select('id, spazio_id, citta, impresa_id, data_fine')
+      .select('id, spazio_id, citta, impresa_id, data_inizio, data_fine')
       .eq('stato', 'pagato')
       .eq('data_fine', giorno(7));
     if (e1) throw e1;
+
+    const perAdmin = [];
 
     for (const ann of inScadenza || []) {
       const { data: imp } = await sb
@@ -106,18 +158,38 @@ const handler = async function () {
         .select('email, nome_attivita, nome')
         .eq('id', ann.impresa_id)
         .maybeSingle();
+      const nomeCliente = (imp && (imp.nome_attivita || imp.nome)) || ('Impresa #' + ann.impresa_id);
+
+      // Riga per il riepilogo ad Alex: ci finisce anche chi non ha l'email,
+      // così il caso "email mancante" resta visibile invece di sparire.
+      perAdmin.push({
+        nome: nomeCliente,
+        email: (imp && imp.email) || '',
+        spazio: ann.spazio_id,
+        citta: ann.citta,
+        durata: durataLabel(ann.data_inizio, ann.data_fine),
+        scadenza: dataItaliana(ann.data_fine)
+      });
+
       const email = imp && imp.email;
       if (!email) { risultato.errori.push('email mancante per annuncio ' + ann.id); continue; }
 
       const ok = await inviaEmail(
         email,
         'Il tuo spazio pubblicitario scade fra una settimana',
-        emailRinnovo(
-          (imp.nome_attivita || imp.nome || ''),
-          ann.spazio_id, ann.citta, dataItaliana(ann.data_fine)
-        )
+        emailRinnovo(nomeCliente, ann.spazio_id, ann.citta, dataItaliana(ann.data_fine))
       );
       if (ok) risultato.promemoria++;
+    }
+
+    // ---------- 1b. RIEPILOGO ad Alex ----------
+    if (perAdmin.length) {
+      const okAdmin = await inviaEmail(
+        process.env.ADMIN_EMAIL || 'info@trovaimpresa.com',
+        '[Admin] ' + perAdmin.length + ' spazi pubblicitari in scadenza fra 7 giorni',
+        emailRiepilogoAdmin(perAdmin)
+      );
+      risultato.riepilogoAdmin = okAdmin;
     }
 
     // ---------- 2. LISTA D'ATTESA: spazi liberati ieri ----------

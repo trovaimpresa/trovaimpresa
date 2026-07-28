@@ -295,6 +295,9 @@
         <span class="nav-icon">💰</span> Pubblicità clienti
         <span class="nav-badge" id="badge-pubblicita" style="background:var(--verde);display:none">0</span>
       </div>
+      <div class="nav-item" onclick="showSection('mappa-spazi',this)">
+        <span class="nav-icon">🗺️</span> Mappa spazi
+      </div>
       <div class="nav-item" onclick="showSection('segnalazioni',this)">
         <span class="nav-icon">🆘</span> Segnalazioni
         <span class="nav-badge" id="badge-segnalazioni" style="background:var(--rosso)">0</span>
@@ -656,17 +659,61 @@
           <select id="pub-filtro-stato" onchange="renderPubblicitaClienti()" style="padding:10px;border:1.5px solid var(--border);border-radius:10px">
             <option value="">Tutti gli stati</option>
             <option value="pagato">Pagati (attivi)</option>
+            <option value="scadenza">In scadenza (30 giorni)</option>
             <option value="scaduto">Scaduti</option>
             <option value="pending">Non pagati</option>
+          </select>
+          <select id="pub-filtro-durata" onchange="renderPubblicitaClienti()" style="padding:10px;border:1.5px solid var(--border);border-radius:10px">
+            <option value="">Tutte le durate</option>
+            <option value="1">1 mese</option>
+            <option value="3">3 mesi</option>
+            <option value="12">1 anno</option>
           </select>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Azienda</th><th>Contatti</th><th>Spazio / Città</th><th>Periodo</th><th>Prezzo</th><th>Stato</th><th>Banner</th><th>Azioni</th></tr>
+              <tr><th>Azienda</th><th>Contatti</th><th>Spazio / Città</th><th>Durata</th><th>Periodo</th><th>Scadenza</th><th>Prezzo</th><th>Stato</th><th>Banner</th><th>Azioni</th></tr>
             </thead>
-            <tbody id="table-pubblicita"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+            <tbody id="table-pubblicita"><tr><td colspan="10" class="loading">Caricamento...</td></tr></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAPPA SPAZI PUBBLICITARI -->
+    <div class="section" id="sec-mappa-spazi">
+      <div class="topbar">
+        <div class="topbar-title">🗺️ Mappa spazi pubblicitari</div>
+      </div>
+      <div style="padding:16px">
+        <p style="color:#666;font-size:14px;margin:0 0 16px">
+          Tutti gli spazi del listino, città per città: chi li occupa, per quanto e fino a quando.
+        </p>
+        <div id="map-riepilogo" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px"></div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+          <label style="font-size:13px;font-weight:700;color:#555">Città:</label>
+          <select id="map-citta" onchange="renderMappaSpazi()" style="padding:10px;border:1.5px solid var(--border);border-radius:10px;min-width:200px"></select>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#555;cursor:pointer">
+            <input type="checkbox" id="map-solo-occupati" onchange="renderMappaSpazi()"> mostra solo gli spazi occupati
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Spazio</th><th>Dove si vede</th><th>€/mese</th><th>Stato</th><th>Occupato da</th><th>Durata</th><th>Scade il</th></tr>
+            </thead>
+            <tbody id="table-mappa-spazi"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:28px">
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;margin-bottom:10px">
+            📍 Città con spazi venduti
+          </div>
+          <div id="map-citta-vendute" style="display:flex;gap:8px;flex-wrap:wrap"></div>
         </div>
       </div>
     </div>
@@ -810,6 +857,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'supporto') caricaSupportoAdmin();
   if (id === 'abbonamenti') renderAbbonamenti();
   if (id === 'pubblicita-clienti') caricaPubblicitaClienti();
+  if (id === 'mappa-spazi') caricaMappaSpazi();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -824,11 +872,60 @@ window.onpopstate = function(e) {
 // ===== PUBBLICITÀ CLIENTI =====
 let _pubData = [];
 
-const PUB_SPAZI = {
-  'imprese-sx-1':'Spazio 1 · Sinistra (in cima)', 'imprese-dx-1':'Spazio 1 · Destra (in cima)',
-  'imprese-sx-2':'Spazio 2 · Sinistra (a metà)', 'imprese-dx-2':'Spazio 2 · Destra (a metà)'
-};
+// Listino completo: deve restare allineato a pubblicita.html e a
+// netlify/functions/crea-checkout-pubblicita.js. Se aggiungi uno spazio, aggiungilo qui.
+const PUB_LISTINO = [
+  { id:'hero-sx',      nome:'Hero · Sinistra',     dove:'Home città (in alto)',   prezzo:20 },
+  { id:'hero-dx',      nome:'Hero · Destra',       dove:'Home città (in alto)',   prezzo:20 },
+  { id:'imprese-sx',   nome:"Trova impresa · Sinistra", dove:'Pagine di ricerca', prezzo:12 },
+  { id:'imprese-dx',   nome:"Trova impresa · Destra",   dove:'Pagine di ricerca', prezzo:12 },
+  { id:'inserzioni-sx',nome:'Lavoro · Sinistra',   dove:'Offerte di lavoro',      prezzo:8  },
+  { id:'inserzioni-dx',nome:'Lavoro · Destra',     dove:'Offerte di lavoro',      prezzo:8  },
+  { id:'profilo-sx-1', nome:'Profilo · Sinistra 1',dove:'Pagine profilo impresa', prezzo:5  },
+  { id:'profilo-sx-2', nome:'Profilo · Sinistra 2',dove:'Pagine profilo impresa', prezzo:5  },
+  { id:'profilo-dx-1', nome:'Profilo · Destra 1',  dove:'Pagine profilo impresa', prezzo:5  },
+  { id:'profilo-dx-2', nome:'Profilo · Destra 2',  dove:'Pagine profilo impresa', prezzo:5  }
+];
+const PUB_SPAZI = {};
+PUB_LISTINO.forEach(s => { PUB_SPAZI[s.id] = s.nome; });
 function pubSpazioLabel(sid){ return PUB_SPAZI[sid] || sid || '—'; }
+
+// --- durata e scadenze -------------------------------------------------
+// La durata non è salvata nel DB: si ricava da data_inizio → data_fine.
+function pubMesi(a) {
+  if (!a.data_inizio || !a.data_fine) return null;
+  const i = new Date(a.data_inizio), f = new Date(a.data_fine);
+  if (isNaN(i) || isNaN(f)) return null;
+  const m = (f.getFullYear() - i.getFullYear()) * 12 + (f.getMonth() - i.getMonth());
+  return m > 0 ? m : null;
+}
+function pubDurataLabel(a) {
+  const m = pubMesi(a);
+  if (m === null) return '—';
+  if (m === 12) return '1 anno';
+  if (m === 1) return '1 mese';
+  if (m % 12 === 0) return (m / 12) + ' anni';
+  return m + ' mesi';
+}
+// Giorni che mancano alla scadenza (negativo = già scaduto)
+function pubGiorniResidui(a) {
+  if (!a.data_fine) return null;
+  const f = new Date(a.data_fine + 'T00:00:00');
+  if (isNaN(f)) return null;
+  const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+  return Math.round((f - oggi) / 86400000);
+}
+function pubDataIt(iso) {
+  if (!iso) return '—';
+  const p = String(iso).slice(0, 10).split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+}
+// true se l'annuncio è pagato, ancora attivo e scade entro N giorni
+function pubInScadenza(a, giorni) {
+  if (a.stato !== 'pagato') return false;
+  const g = pubGiorniResidui(a);
+  return g !== null && g >= 0 && g <= (giorni || 30);
+}
 
 async function caricaPubblicitaClienti() {
   const tb = document.getElementById('table-pubblicita');
@@ -892,19 +989,25 @@ function renderPubblicitaClienti() {
   if (!tb) return;
   const q = (document.getElementById('pub-search')?.value || '').toLowerCase().trim();
   const fs = document.getElementById('pub-filtro-stato')?.value || '';
+  const fd = document.getElementById('pub-filtro-durata')?.value || '';
 
   // Riepilogo (su tutti i dati, non filtrati)
   const oggi = new Date().toISOString().slice(0, 10);
   const attivi = _pubData.filter(a => a.stato === 'pagato' && (!a.data_fine || a.data_fine >= oggi));
+  const inScad = attivi.filter(a => pubInScadenza(a, 30));
   const incasso = _pubData.filter(a => a.stato === 'pagato')
     .reduce((s, a) => s + (parseFloat(a.prezzo) || 0), 0);
+  const annuali = attivi.filter(a => pubMesi(a) === 12).length;
   ril.innerHTML =
     pubCard('Annunci attivi', attivi.length, 'var(--verde)') +
-    pubCard('Totale pagati', _pubData.filter(a => a.stato === 'pagato').length, '#0066ff') +
+    pubCard('In scadenza (30gg)', inScad.length, inScad.length ? '#e67700' : '#999') +
+    pubCard('Abbonamenti annuali', annuali, '#0066ff') +
     pubCard('Incasso pubblicità', '€' + incasso.toFixed(2), '#7b1fa2');
 
   let righe = _pubData.slice();
-  if (fs) righe = righe.filter(a => pubStatoReale(a) === fs);
+  if (fs === 'scadenza') righe = righe.filter(a => pubInScadenza(a, 30));
+  else if (fs) righe = righe.filter(a => pubStatoReale(a) === fs);
+  if (fd) righe = righe.filter(a => String(pubMesi(a)) === fd);
   if (q) righe = righe.filter(a => {
     const i = a._imp || {};
     return [i.nome_attivita, i.nome, i.email, a.citta, a.spazio_id]
@@ -912,7 +1015,7 @@ function renderPubblicitaClienti() {
   });
 
   if (!righe.length) {
-    tb.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="eicon">💰</div>Nessun annuncio pubblicitario</td></tr>';
+    tb.innerHTML = '<tr><td colspan="10" class="empty-table"><div class="eicon">💰</div>Nessun annuncio pubblicitario</td></tr>';
     return;
   }
 
@@ -926,7 +1029,29 @@ function renderPubblicitaClienti() {
       : stato === 'scaduto'
         ? '<span style="background:#f1f1f1;color:#777;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">⌛ Scaduto</span>'
         : '<span style="background:#fff4e5;color:#b26a00;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">⏳ Non pagato</span>';
-    const periodo = (a.data_inizio || '—') + ' → ' + (a.data_fine || '—');
+    const periodo = pubDataIt(a.data_inizio) + ' → ' + pubDataIt(a.data_fine);
+
+    const mesi = pubMesi(a);
+    const durataCol = '<strong>' + pubDurataLabel(a) + '</strong>'
+      + (mesi === 12 ? '<div style="font-size:11px;color:#0066ff;font-weight:700">annuale</div>'
+        : mesi ? '<div style="font-size:11px;color:#888">' + mesi + ' mes' + (mesi === 1 ? 'e' : 'i') + '</div>' : '');
+
+    // Scadenza: giorni residui, con avviso se manca poco
+    const gg = pubGiorniResidui(a);
+    let scadCol = '—';
+    if (a.data_fine) {
+      if (stato !== 'pagato') scadCol = '<span style="color:#999">' + pubDataIt(a.data_fine) + '</span>';
+      else if (gg === null) scadCol = pubDataIt(a.data_fine);
+      else if (gg < 0) scadCol = '<span style="color:#999">' + pubDataIt(a.data_fine) + '<br><small>scaduto</small></span>';
+      else {
+        const col = gg <= 7 ? '#c92a2a' : gg <= 30 ? '#e67700' : '#1a7f43';
+        const ico = gg <= 7 ? '🔴 ' : gg <= 30 ? '🟠 ' : '';
+        scadCol = pubDataIt(a.data_fine)
+          + '<div style="font-size:11px;font-weight:700;color:' + col + '">' + ico
+          + (gg === 0 ? 'scade oggi' : 'fra ' + gg + ' giorn' + (gg === 1 ? 'o' : 'i')) + '</div>';
+      }
+    }
+
     const banner = a.logo_url
       ? '<a href="' + a.logo_url + '" target="_blank"><img src="' + a.logo_url + '" style="height:38px;border-radius:6px;border:1px solid var(--border)"></a>'
       : '—';
@@ -937,13 +1062,132 @@ function renderPubblicitaClienti() {
       + '<td><strong>' + nome + '</strong>' + (i.tipo ? '<div style="font-size:11px;color:#888">' + i.tipo + '</div>' : '') + '</td>'
       + '<td style="font-size:12px">' + contatti + '</td>'
       + '<td>' + pubSpazioLabel(a.spazio_id) + '<div style="font-size:12px;color:#888">📍 ' + (a.citta || '—') + '</div></td>'
+      + '<td style="font-size:12px">' + durataCol + '</td>'
       + '<td style="font-size:12px">' + periodo + '</td>'
+      + '<td style="font-size:12px">' + scadCol + '</td>'
       + '<td><strong>€' + (parseFloat(a.prezzo) || 0).toFixed(2) + '</strong></td>'
       + '<td>' + badge + '</td>'
       + '<td>' + banner + link + '</td>'
       + '<td><button class="action-btn btn-elimina" onclick="eliminaAnnuncioPub(' + a.id + ')">🗑️</button></td>'
       + '</tr>';
   }).join('');
+}
+
+// ===== MAPPA SPAZI PUBBLICITARI =====
+// Riusa _pubData (caricata da caricaPubblicitaClienti): se la sezione viene
+// aperta per prima, i dati vengono scaricati qui.
+async function caricaMappaSpazi() {
+  if (!_pubData.length) await caricaPubblicitaClienti();
+  const sel = document.getElementById('map-citta');
+  if (sel && !sel.options.length) {
+    // Città con almeno un annuncio, in cima; poi tutte le altre del listino.
+    const conAnnunci = [...new Set(_pubData.map(a => (a.citta || '').trim()).filter(Boolean))]
+      .sort((x, y) => x.localeCompare(y));
+    const altre = MAP_TUTTE_CITTA.filter(c =>
+      !conAnnunci.some(v => v.toLowerCase() === c.toLowerCase()));
+    sel.innerHTML =
+      (conAnnunci.length
+        ? '<optgroup label="Con annunci">' +
+          conAnnunci.map(c => '<option value="' + c + '">' + c + '</option>').join('') +
+          '</optgroup>'
+        : '') +
+      '<optgroup label="Tutte le città">' +
+      altre.map(c => '<option value="' + c + '">' + c + '</option>').join('') +
+      '</optgroup>';
+  }
+  renderMappaSpazi();
+}
+
+const MAP_TUTTE_CITTA = ['Agrigento','Alessandria','Ancona','Aosta','Arezzo','Ascoli Piceno','Asti','Avellino','Bari','Barletta','Belluno','Benevento','Bergamo','Biella','Bologna','Bolzano','Brescia','Brindisi','Cagliari','Caltanissetta','Campobasso','Caserta','Catania','Catanzaro','Cesena','Como','Cosenza','Cremona','Crotone','Cuneo','Ferrara','Firenze','Foggia','Frosinone','Genova','Grosseto','Imperia','La Spezia','Latina','Lecce','Lecco','Livorno','Lodi','Lucca','Macerata','Mantova','Marsala','Massa','Matera','Messina','Milano','Modena','Monza','Napoli','Novara','Nuoro','Oristano','Padova','Palermo','Parma','Pavia','Perugia','Pesaro','Pescara','Piacenza','Pisa','Pistoia','Pordenone','Potenza','Prato','Ragusa','Ravenna','Reggio Calabria','Reggio Emilia','Rieti','Rimini','Roma','Rovigo','Salerno','Sassari','Savona','Siena','Siracusa','Sondrio','Taranto','Terni','Torino','Trapani','Trento','Treviso','Trieste','Udine','Varese','Venezia','Verbania','Vercelli','Verona','Vibo Valentia','Vicenza','Viterbo'];
+
+// Annuncio attivo (pagato e non scaduto) per uno spazio in una città
+function mapAnnuncioAttivo(spazioId, citta) {
+  const c = (citta || '').trim().toLowerCase();
+  return _pubData.find(a =>
+    a.spazio_id === spazioId &&
+    (a.citta || '').trim().toLowerCase() === c &&
+    pubStatoReale(a) === 'pagato'
+  ) || null;
+}
+
+function renderMappaSpazi() {
+  const tb = document.getElementById('table-mappa-spazi');
+  const ril = document.getElementById('map-riepilogo');
+  const box = document.getElementById('map-citta-vendute');
+  if (!tb) return;
+
+  const citta = document.getElementById('map-citta')?.value || '';
+  const soloOcc = document.getElementById('map-solo-occupati')?.checked;
+
+  // Riepilogo globale (tutte le città)
+  const attiviTot = _pubData.filter(a => pubStatoReale(a) === 'pagato');
+  const cittaVendute = [...new Set(attiviTot.map(a => (a.citta || '').trim()).filter(Boolean))];
+  const capienza = PUB_LISTINO.length * MAP_TUTTE_CITTA.length;
+  const ricorrente = attiviTot.reduce((s, a) => {
+    const sp = PUB_LISTINO.find(x => x.id === a.spazio_id);
+    return s + (sp ? sp.prezzo : 0);
+  }, 0);
+  ril.innerHTML =
+    pubCard('Spazi occupati', attiviTot.length + ' / ' + capienza, 'var(--verde)') +
+    pubCard('Città con vendite', cittaVendute.length + ' / ' + MAP_TUTTE_CITTA.length, '#0066ff') +
+    pubCard('Valore mensile occupato', '€' + ricorrente.toFixed(2), '#7b1fa2');
+
+  // Tabella spazi della città selezionata
+  let righe = PUB_LISTINO.map(sp => ({ sp, ann: mapAnnuncioAttivo(sp.id, citta) }));
+  if (soloOcc) righe = righe.filter(r => r.ann);
+
+  if (!righe.length) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="eicon">🗺️</div>'
+      + (soloOcc ? 'Nessuno spazio occupato a ' + citta : 'Nessuno spazio nel listino') + '</td></tr>';
+  } else {
+    tb.innerHTML = righe.map(r => {
+      const a = r.ann;
+      if (!a) {
+        return '<tr>'
+          + '<td><strong>' + r.sp.nome + '</strong></td>'
+          + '<td style="font-size:12px;color:#888">' + r.sp.dove + '</td>'
+          + '<td>€' + r.sp.prezzo + '</td>'
+          + '<td><span style="background:#f1f3f5;color:#666;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">⬜ Libero</span></td>'
+          + '<td colspan="3" style="color:#bbb;font-size:12px">—</td>'
+          + '</tr>';
+      }
+      const i = a._imp || {};
+      const nome = i.nome_attivita || i.nome || ('Impresa #' + (a.impresa_id || '—'));
+      const gg = pubGiorniResidui(a);
+      const col = gg === null ? '#666' : gg <= 7 ? '#c92a2a' : gg <= 30 ? '#e67700' : '#1a7f43';
+      const nota = gg === null ? '' : gg < 0 ? 'scaduto'
+        : gg === 0 ? 'scade oggi' : 'fra ' + gg + ' giorn' + (gg === 1 ? 'o' : 'i');
+      return '<tr style="background:#f7fbf8">'
+        + '<td><strong>' + r.sp.nome + '</strong></td>'
+        + '<td style="font-size:12px;color:#888">' + r.sp.dove + '</td>'
+        + '<td>€' + r.sp.prezzo + '</td>'
+        + '<td><span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">✅ Occupato</span></td>'
+        + '<td><strong>' + nome + '</strong>'
+        + (i.email ? '<div style="font-size:11px;color:#888">' + i.email + '</div>' : '') + '</td>'
+        + '<td><strong>' + pubDurataLabel(a) + '</strong></td>'
+        + '<td>' + pubDataIt(a.data_fine)
+        + '<div style="font-size:11px;font-weight:700;color:' + col + '">' + nota + '</div></td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  // Chip delle città che hanno almeno uno spazio venduto
+  if (box) {
+    box.innerHTML = cittaVendute.length
+      ? cittaVendute.sort((x, y) => x.localeCompare(y)).map(c => {
+          const n = attiviTot.filter(a => (a.citta || '').trim() === c).length;
+          return '<button onclick="mapVaiA(\'' + c.replace(/'/g, "\\'") + '\')" '
+            + 'style="background:#e7f0ff;border:1px solid #b9d4ff;color:#0052cc;border-radius:20px;'
+            + 'padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer">'
+            + c + ' <span style="opacity:.7">(' + n + ')</span></button>';
+        }).join('')
+      : '<span style="color:#999;font-size:13px">Nessuno spazio venduto al momento.</span>';
+  }
+}
+
+function mapVaiA(citta) {
+  const sel = document.getElementById('map-citta');
+  if (sel) { sel.value = citta; renderMappaSpazi(); }
 }
 
 function pubCard(label, val, color) {
