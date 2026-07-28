@@ -1081,7 +1081,7 @@ function renderPubblicitaClienti() {
       + '<td><strong>€' + (parseFloat(a.prezzo) || 0).toFixed(2) + '</strong></td>'
       + '<td>' + badge + '</td>'
       + '<td>' + banner + link + '</td>'
-      + '<td><button class="action-btn btn-elimina" onclick="eliminaAnnuncioPub(' + a.id + ')">🗑️</button></td>'
+      + '<td><button class="action-btn btn-elimina" onclick="eliminaAnnuncioPub(\'' + a.id + '\')">🗑️</button></td>'
       + '</tr>';
   }).join('');
 }
@@ -1329,8 +1329,8 @@ function renderAbbonamenti() {
       + '<td>' + scad + '</td>'
       + '<td>' + (gest ? '<span style="color:#0066ff;font-weight:700">Attivo</span>' : '–') + '</td>'
       + '<td style="white-space:nowrap">'
-      + '<button class="action-btn" onclick="togglePremium(' + i.id + ',' + (!premium) + ')">' + (premium ? 'Togli Premium' : 'Regala Premium') + '</button> '
-      + '<button class="action-btn" onclick="toggleGestionale(' + i.id + ',' + (!gest) + ')">' + (gest ? 'Togli Gestionale' : 'Attiva Gestionale') + '</button>'
+      + '<button class="action-btn" onclick="togglePremium(\'' + i.id + '\',' + (!premium) + ')">' + (premium ? 'Togli Premium' : 'Regala Premium') + '</button> '
+      + '<button class="action-btn" onclick="toggleGestionale(\'' + i.id + '\',' + (!gest) + ')">' + (gest ? 'Togli Gestionale' : 'Attiva Gestionale') + '</button>'
       + '</td></tr>';
   }).join('');
 }
@@ -1503,8 +1503,8 @@ function renderImprese(lista) {
       <td>${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
-        <button class="action-btn btn-dettagli" onclick="apriDettaglio(${i.id})">👁️ Dettagli</button>
-        <button class="action-btn btn-elimina" onclick="eliminaImpresa(${i.id})">🗑️</button>
+        <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
+        <button class="action-btn btn-elimina" onclick="eliminaImpresa('${i.id}')">🗑️</button>
       </td>
     </tr>
   `).join('');
@@ -1524,9 +1524,9 @@ function renderDaVerificare(lista) {
       <td>📍 ${esc(i.citta)||'–'}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
-        <button class="action-btn btn-verifica" onclick="verificaImpresa(${i.id})">✅ Verifica</button>
-        <button class="action-btn btn-dettagli" onclick="apriDettaglio(${i.id})">👁️ Dettagli</button>
-        <button class="action-btn btn-rifiuta" onclick="eliminaImpresa(${i.id})">❌ Rifiuta</button>
+        <button class="action-btn btn-verifica" onclick="verificaImpresa('${i.id}')">✅ Verifica</button>
+        <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
+        <button class="action-btn btn-rifiuta" onclick="eliminaImpresa('${i.id}')">❌ Rifiuta</button>
       </td>
     </tr>
   `).join('');
@@ -1574,7 +1574,7 @@ async function caricaPreventivi() {
       <td>${esc(p.tipo_lavoro)||'–'}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.descrizione)||'–'}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(p.created_at).toLocaleDateString('it-IT')}</td>
-      <td><button class="action-btn btn-elimina" onclick="eliminaPreventivo(${p.id})">🗑️</button></td>
+      <td><button class="action-btn btn-elimina" onclick="eliminaPreventivo('${p.id}')">🗑️</button></td>
     </tr>`).join('');
 }
 
@@ -1606,7 +1606,7 @@ async function caricaRecensioni() {
       <td>${'★'.repeat(voto)}${'☆'.repeat(5-voto)}</td>
       <td style="max-width:200px">${esc(r.testo||'')}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(r.created_at).toLocaleDateString('it-IT')}</td>
-      <td><button class="action-btn btn-elimina" onclick="eliminaRecensione(${r.id})">🗑️</button></td>
+      <td><button class="action-btn btn-elimina" onclick="eliminaRecensione('${r.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
 }
@@ -1714,7 +1714,7 @@ function apriDettaglio(id) {
     <div class="modal-row"><span class="modal-key">Descrizione:</span><span class="modal-val">${esc(i.descrizione)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Stato:</span><span class="modal-val"><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></span></div>
     <div class="modal-row"><span class="modal-key">Registrato:</span><span class="modal-val">${new Date(i.created_at).toLocaleString('it-IT')}</span></div>
-    ${!i.verificata ? `<br><button class="action-btn btn-verifica" style="width:100%;padding:12px;font-size:0.9rem" onclick="verificaImpresa(${i.id});chiudiModal()">✅ Verifica questa impresa</button>` : ''}
+    ${!i.verificata ? `<br><button class="action-btn btn-verifica" style="width:100%;padding:12px;font-size:0.9rem" onclick="verificaImpresa('${i.id}');chiudiModal()">✅ Verifica questa impresa</button>` : ''}
   `;
   document.getElementById('modal-overlay').classList.add('show');
 }
