@@ -38,6 +38,10 @@
     .ins{background:#fff;border:1px solid #e3e9f0;border-radius:14px;padding:18px;margin-bottom:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;}
     .ins.scaduta{opacity:.75;}
     .ins-img{width:190px;aspect-ratio:400/260;object-fit:cover;border-radius:10px;border:1px solid #e3e9f0;background:#f7f9fc;flex-shrink:0;}
+    /* Annunci senza locandina (o con un file sparito dallo storage): invece
+       dell'icona di immagine rotta si mostra un riquadro con la scritta. */
+    .ins-vuota{display:flex;align-items:center;justify-content:center;text-align:center;
+      color:#9aa7b8;font-size:13px;font-weight:600;padding:10px;border-style:dashed;}
     .ins-body{flex:1;min-width:250px;}
     .ins-nome{font-weight:800;color:#0a2a4d;font-size:16px;}
     .ins-meta{font-size:13px;color:var(--mid);margin:3px 0 14px;}
@@ -208,10 +212,22 @@ function intestazione(a){
        + ' · dal '+dataIt(a.data_inizio)+' al '+dataIt(a.data_fine)+'</div>';
 }
 
+// Anteprima della locandina. Se non c'e' l'immagine, o se il file non si
+// carica, si mostra un riquadro tratteggiato invece dell'icona rotta.
+function imgHTML(a, idPrev){
+  const id = idPrev ? ' id="'+idPrev+'"' : '';
+  if (!a.logo_url) {
+    return '<div class="ins-img ins-vuota"'+id+'>Nessuna immagine caricata</div>';
+  }
+  return '<img class="ins-img"'+id+' src="'+a.logo_url+'" alt="Locandina attuale" '
+       + 'onerror="this.classList.add(\'ins-vuota\');this.removeAttribute(\'src\');'
+       + 'this.alt=\'\';this.textContent=\'Immagine non disponibile\'">';
+}
+
 // Inserzione attiva: modificabile
 function cardAttiva(a){
   return '<div class="ins">'
-    + '<img class="ins-img" id="prev-'+a.id+'" src="'+(a.logo_url||'')+'" alt="Locandina attuale">'
+    + imgHTML(a, 'prev-'+a.id)
     + '<div class="ins-body">'
       + intestazione(a)
       + '<label class="f" for="file-'+a.id+'">Cambia immagine (PNG o JPG)</label>'
@@ -232,7 +248,7 @@ function cardSemplice(a){
              + '&citta='+encodeURIComponent(a.citta||'');
   const st = statoDi(a);
   return '<div class="ins scaduta">'
-    + '<img class="ins-img" src="'+(a.logo_url||'')+'" alt="Locandina">'
+    + imgHTML(a, null)
     + '<div class="ins-body">'
       + intestazione(a)
       + '<a href="'+link+'" class="btn btn-out" style="text-decoration:none;display:inline-block">'
