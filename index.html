@@ -796,8 +796,11 @@
   .hero .hero-sub{ font-size:16.5px; color:var(--ti-txt); margin:0 auto 26px; font-weight:500; }
 
   /* Scelta della citta: e' il primo passo del sito, quindi ha il colore piu forte */
-  .citta-box{ background:#fff; border:1px solid #e6ebf2; border-radius:16px; padding:20px 22px; max-width:620px; margin:0 auto; box-shadow:0 4px 18px rgba(10,42,77,.08); }
+  .citta-box{ background:#ffd400; border:2px solid #e6b800; border-radius:16px; padding:20px 22px; max-width:620px; margin:0 auto; box-shadow:0 4px 18px rgba(10,42,77,.08); }
   .citta-lab{ display:block; font-size:17px; font-weight:800; color:#7a5c00; margin-bottom:12px; }
+  #btn-geo-home{ background:#1a1a1a; color:#fff; border:none; border-radius:999px; padding:11px 22px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; margin-top:10px; }
+  #btn-geo-home:disabled{ opacity:.65; cursor:default; }
+  #geo-err-home{ display:none; color:#8a2b1e; font-weight:700; font-size:14.5px; margin:10px 0 0; }
   .citta-riga{ display:flex; gap:10px; align-items:stretch; }
   .citta-campo{ flex:1; display:flex; align-items:center; gap:9px; background:#fff; border:2px solid #ffe680; border-radius:11px; padding:0 13px; height:54px; min-width:0; }
   .citta-campo:focus-within{ border-color:#ffd60a; box-shadow:0 0 0 4px rgba(255,214,10,.28); }
@@ -805,8 +808,8 @@
   .citta-campo input{ flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:inherit; font-size:16.5px; color:var(--ti-ink); height:100%; }
   .citta-geo{ border:none; background:transparent; color:#a07d1a; cursor:pointer; padding:5px; display:flex; border-radius:7px; }
   .citta-geo:hover{ background:#fff8d6; color:#7a5c00; }
-  .citta-go{ background:#ffd60a; color:#3d2f00; border:none; border-radius:11px; padding:0 32px; font-family:inherit; font-size:17px; font-weight:800; cursor:pointer; }
-  .citta-go:hover{ background:#f2c800; }
+  .citta-go{ background:#0a2a4d; color:#fff; border:none; border-radius:11px; padding:0 32px; font-family:inherit; font-size:17px; font-weight:800; cursor:pointer; }
+  .citta-go:hover{ background:#06203c; }
   .sb-err{ display:none; color:#c0392b; font-weight:700; font-size:14.5px; margin:12px 0 0; }
 
   .citta-attiva{ display:none; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; background:#fffdf2; border:2px solid #ffd60a; border-radius:14px; padding:16px 22px; max-width:620px; margin:0 auto; font-size:18px; color:var(--ti-ink); }
@@ -995,7 +998,7 @@
             <p class="hero-sub">Con TrovaImpresa trovi, confronti recensioni e richiedi preventivi gratuiti in pochi minuti</p>
 
             <div class="citta-box" id="citta-scelta">
-                <label class="citta-lab" for="sb-citta">In quale citt&agrave; cerchi?</label>
+                <label class="citta-lab" for="sb-citta">&#9888;&#65039; 1&deg; PASSAGGIO &mdash; In quale citt&agrave; cerchi?</label>
                 <div class="citta-riga">
                     <div class="citta-campo">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a6d1f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1006,7 +1009,9 @@
                     </div>
                     <button type="button" class="citta-go" onclick="avviaRicerca()">Cerca</button>
                 </div>
+                <button type="button" id="btn-geo-home">&#128205; Non lo so &mdash; usa la mia posizione</button>
                 <p id="sb-err" class="sb-err">Scrivi la tua citt&agrave; per continuare</p>
+                <p id="geo-err-home">Non riesco a rilevarti &mdash; scrivi la citt&agrave; qui sopra</p>
             </div>
 
             <div class="citta-attiva" id="citta-attiva">
@@ -1083,6 +1088,54 @@
           }catch(e){ alert('Impossibile rilevare la posizione, scrivi la città a mano'); }
         }, function(){ alert('Impossibile rilevare la posizione, scrivi la città a mano'); });
       }
+
+      // Bottone grande "usa la mia posizione": esegue la STESSA azione del mirino
+      // gia' presente dentro il campo (click sul bottone .citta-geo -> localizzami()).
+      // Qui aggiungo solo lo stato di attesa e la gestione degli errori.
+      (function(){
+        var btn = document.getElementById('btn-geo-home');
+        if(!btn) return;
+        if(!navigator.geolocation){ btn.style.display='none'; return; }
+
+        var mirino = document.querySelector('#citta-scelta .citta-geo');
+        var err    = document.getElementById('geo-err-home');
+        var inp    = document.getElementById('sb-citta');
+        var testo  = btn.innerHTML;
+        var timer  = null, alertOrig = null, chiuso = false;
+
+        function ripristina(){
+          if(chiuso) return; chiuso = true;
+          if(timer){ clearTimeout(timer); timer = null; }
+          if(alertOrig){ window.alert = alertOrig; alertOrig = null; }
+          btn.disabled = false;
+          btn.innerHTML = testo;
+        }
+        function fallisci(){
+          ripristina();
+          err.style.display = 'block';
+          if(inp) inp.focus();
+        }
+
+        btn.addEventListener('click', function(){
+          if(btn.disabled) return;
+          chiuso = false;
+          err.style.display = 'none';
+          btn.disabled = true;
+          btn.innerHTML = '📍 Ti sto localizzando...';
+
+          // localizzami() segnala ogni errore con alert(): lo intercetto solo
+          // durante il tentativo, per mostrare il messaggio dentro il riquadro.
+          alertOrig = window.alert;
+          window.alert = function(){ fallisci(); };
+
+          // Rete di sicurezza: se non succede nulla entro 15s considero fallito.
+          timer = setTimeout(fallisci, 15000);
+
+          if(mirino){ mirino.click(); }
+          else if(typeof localizzami === 'function'){ localizzami(); }
+          else { fallisci(); }
+        });
+      })();
 
       // Con la citta gia' scelta mostro "Stai cercando a X" al posto del campo.
       (function(){
