@@ -1060,7 +1060,11 @@
           var c = new URLSearchParams(location.search).get('citta');
           var inp = document.getElementById('sb-citta');
           var citta = (c || (inp ? inp.value : '') || '').trim();
-          window.location.href = window.RicercaProblema.urlDaTendina(this.value, citta);
+          var url = window.RicercaProblema.urlDaTendina(this.value, citta);
+          // Senza città il risultato sarebbe nazionale e la pubblicità locale
+          // non comparirebbe: TICitta la chiede prima di proseguire.
+          if (!citta && window.TICitta) { this.selectedIndex = 0; window.TICitta.vaiA(url); return; }
+          window.location.href = url;
         });
       });
 
@@ -1450,6 +1454,7 @@
     </script>
 
 <script src="/cookie-banner.js"></script>
+<script src="/js/citta-obbligatoria.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/pubblicita-spazi.js" defer></script>
 <script>
