@@ -4,8 +4,9 @@
 // Come si ricava la città, in ordine:
 //   1. ?citta=X nell'URL (l'utente l'ha scritta o ha usato la geolocalizzazione)
 //   2. IP del visitatore, via Edge Function Netlify /api/geo (silenzioso, senza permessi)
-//   3. Se non si ricava nulla: gli spazi mostrano comunque gli annunci pagati
-//      a rotazione, così chi ha comprato uno spazio non resta mai con zero impression.
+//   3. Se non si ricava nessuna città: spazi vuoti (nessun annuncio).
+//      La pubblicità è venduta per città: un annuncio comprato a Bari si vede
+//      SOLO a Bari, mai sulle altre pagine né sulla home nazionale.
 
 (function () {
   'use strict';
@@ -69,14 +70,10 @@
       popolaSpazi(annunci, venduti);
     }
 
-    // 5. Fallback: spazi ancora vuoti -> annunci pagati di altre città a rotazione.
-    //    Serve a non lasciare mai un inserzionista senza impression quando
-    //    non riusciamo a capire da dove arriva il visitatore.
-    var vuoti = TUTTI_SPAZI.filter(function (s) { return !venduti.has(s); });
-    if (vuoti.length) {
-      var tutti = await queryAnnunci(client, oggi, null);
-      popolaSpazi(scegliARotazione(tutti, vuoti), venduti);
-    }
+    // 5. NIENTE fallback a rotazione: la pubblicità è per città.
+    //    Se per la città attiva non c'è nessun annuncio pagato, lo spazio
+    //    resta libero. Mostrare l'annuncio di un'altra città sarebbe
+    //    visibilità non acquistata (e non pagata) su tutte le 106 pagine.
 
     // 6. Spazi rimasti liberi -> href pre-compilato per il form acquisto
     aggiornaHrefVuoti(TUTTI_SPAZI, venduti, citta);
@@ -131,8 +128,9 @@
         .eq('stato', 'pagato')
         .gte('data_fine', oggi);
 
-      if (citta) q = q.ilike('citta', citta);
-      else q = q.limit(60);
+      // Sempre filtrato per città: senza città non si mostra nulla.
+      if (!citta) return [];
+      q = q.ilike('citta', citta);
 
       var res = await q;
       if (res.error) {
@@ -144,21 +142,6 @@
       console.error('[pub-spazi] Eccezione:', e);
       return [];
     }
-  }
-
-  // Assegna a ogni spazio ancora vuoto un annuncio pescato a caso fra quelli
-  // pagati, evitando di ripetere lo stesso annuncio su due spazi vicini.
-  function scegliARotazione(annunci, spaziVuoti) {
-    if (!annunci.length) return [];
-    var pool = annunci.slice();
-    for (var i = pool.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var t = pool[i]; pool[i] = pool[j]; pool[j] = t;
-    }
-    return spaziVuoti.map(function (spazio, idx) {
-      var a = pool[idx % pool.length];
-      return { spazio_id: spazio, logo_url: a.logo_url, link_url: a.link_url };
-    });
   }
 
   function popolaSpazi(annunci, venduti) {
