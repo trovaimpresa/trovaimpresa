@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Le tue inserzioni — TrovaImpresa</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --verde:#0066ff;--verde2:#0052cc;--verde3:#e8f5ee;
+      --arancio:#e8733a;--arancio2:#c45e28;
+      --dark:#1a1a1a;--mid:#555;--light:#999;--bg:#f4f6f9;
+      --viola:#7b1fa2;
+      --border:rgba(0,0,0,0.08);--shadow:0 4px 24px rgba(0,0,0,0.08);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);}
+
+    .navbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+    .nav-logo{text-decoration:none;font-family:'Playfair Display',serif;font-size:22px;}
+    .nav-logo .trova{color:var(--verde);}
+    .nav-logo .impresa{color:var(--arancio);}
+    .nav-links{display:flex;gap:12px;align-items:center;}
+    .nav-link{text-decoration:none;color:var(--mid);font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;}
+    .nav-link:hover{background:var(--verde3);color:var(--verde);}
+    .nbtn{padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;}
+    .nbtn-arancio{background:var(--arancio);color:#fff;}
+    .nbtn-arancio:hover{background:var(--arancio2);}
+
+    .wrap{max-width:920px;margin:0 auto;padding:32px 18px 60px;}
+    .page-h1{font-family:'Playfair Display',serif;font-size:30px;margin-bottom:6px;}
+    .page-sub{font-size:15px;color:var(--mid);margin-bottom:28px;line-height:1.55;}
+
+    .gruppo-t{font-size:15px;font-weight:700;color:var(--dark);margin:30px 0 12px;display:flex;align-items:center;gap:8px;}
+    .gruppo-t .n{background:#eef2f7;color:var(--mid);font-size:12px;padding:2px 9px;border-radius:20px;}
+
+    .ins{background:#fff;border:1px solid #e3e9f0;border-radius:14px;padding:18px;margin-bottom:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;}
+    .ins.scaduta{opacity:.75;}
+    .ins-img{width:190px;aspect-ratio:400/260;object-fit:cover;border-radius:10px;border:1px solid #e3e9f0;background:#f7f9fc;flex-shrink:0;}
+    .ins-body{flex:1;min-width:250px;}
+    .ins-nome{font-weight:800;color:#0a2a4d;font-size:16px;}
+    .ins-meta{font-size:13px;color:var(--mid);margin:3px 0 14px;}
+    .stato{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:8px;}
+    .st-attivo{background:#e7f6ec;color:#1a7f43;}
+    .st-scad{background:#fff4e5;color:#b26a00;}
+    .st-scaduto{background:#f1f1f1;color:#777;}
+    .st-attesa{background:#fdeaea;color:#c92a2a;}
+
+    label.f{display:block;font-size:13px;font-weight:700;color:#0a2a4d;margin-bottom:5px;}
+    input[type=url]{width:100%;padding:10px 12px;border:1.5px solid #dbe3ec;border-radius:8px;font-size:14px;font-family:inherit;}
+    input[type=url]:focus{outline:none;border-color:var(--verde);}
+    input[type=file]{width:100%;font-size:14px;margin-bottom:12px;}
+    .btn{background:var(--verde);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+    .btn:hover{background:var(--verde2);}
+    .btn[disabled]{opacity:.6;cursor:default;}
+    .btn-out{background:#fff;color:var(--verde);border:1.5px solid var(--verde);}
+    .riga-azioni{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}
+    .msg{font-size:13px;font-weight:600;}
+
+    .vuoto{background:#fff;border:1px dashed #cfd8e3;border-radius:14px;padding:40px 24px;text-align:center;}
+    .vuoto h3{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:8px;}
+    .vuoto p{color:var(--mid);font-size:14px;margin-bottom:18px;}
+
+    @media(max-width:640px){
+      .nav-links{display:none;}
+      .ins-img{width:100%;}
+    }
+  </style>
+  <link rel="stylesheet" href="/css/mobile.css?v=3">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="pannello-impresa.html" class="nav-link">Il tuo pannello</a>
+  </div>
+  <a href="pubblicita.html" class="nbtn nbtn-arancio">📢 Nuovo spazio</a>
+</nav>
+
+<div class="wrap">
+  <h1 class="page-h1">Le tue inserzioni</h1>
+  <p class="page-sub">
+    Qui trovi tutti gli spazi pubblicitari che hai acquistato. Puoi cambiare
+    l'immagine e il link quando vuoi: la modifica va online subito e non cambia
+    la data di scadenza.
+  </p>
+  <div id="contenuto"><p style="color:var(--mid)">Caricamento…</p></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Etichette spazi: stesse di pubblicita.html. Se aggiungi uno spazio al
+// listino, aggiungilo anche qui, altrimenti compare l'id grezzo.
+const FASCE = [
+  { nome: 'Hero — banner in alto', spazi: ['hero-sx','hero-dx'] },
+  { nome: "Trova un'impresa",      spazi: ['imprese-sx','imprese-dx'] },
+  { nome: 'Inserzioni lavoro',     spazi: ['inserzioni-sx','inserzioni-dx'] },
+  { nome: 'Profilo',               spazi: ['profilo-sx-1','profilo-sx-2','profilo-dx-1','profilo-dx-2'] }
+];
+function latoLabel(id){
+  if(id.endsWith('-sx-1')) return 'Sinistra 1';
+  if(id.endsWith('-sx-2')) return 'Sinistra 2';
+  if(id.endsWith('-dx-1')) return 'Destra 1';
+  if(id.endsWith('-dx-2')) return 'Destra 2';
+  if(id.endsWith('-sx'))   return 'Sinistra';
+  if(id.endsWith('-dx'))   return 'Destra';
+  return id;
+}
+function fasciaDiSpazio(id){
+  for(const f of FASCE) if(f.spazi.indexOf(id) >= 0) return f.nome;
+  return id;
+}
+
+let currentUser = null, currentImpresa = null;
+
+sb.auth.onAuthStateChange(async function(event, session){
+  if (event !== 'INITIAL_SESSION') return;
+  if (!session) { window.location.href = 'login-impresa.html'; return; }
+  currentUser = session.user;
+  const { data } = await sb.from('imprese').select('id,nome,nome_attivita')
+    .eq('user_id', currentUser.id).maybeSingle();
+  if (!data) {
+    document.getElementById('contenuto').innerHTML =
+      '<div class="vuoto"><h3>Profilo non trovato</h3><p>Non risulta un\'attività collegata a questo account.</p></div>';
+    return;
+  }
+  currentImpresa = data;
+  carica();
+});
+
+// ------------------------------------------------------------------ dati
+
+function oggiISO(){ return new Date().toISOString().slice(0,10); }
+
+function dataIt(iso){
+  if(!iso) return '—';
+  const p = String(iso).slice(0,10).split('-');
+  return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : iso;
+}
+
+function giorniResidui(a){
+  if(!a.data_fine) return null;
+  const f = new Date(a.data_fine + 'T00:00:00');
+  const o = new Date(); o.setHours(0,0,0,0);
+  return Math.round((f - o) / 86400000);
+}
+
+// attivo | scaduto | attesa (pagamento non completato)
+function statoDi(a){
+  if (a.stato !== 'pagato') return 'attesa';
+  if (a.data_fine && a.data_fine < oggiISO()) return 'scaduto';
+  return 'attivo';
+}
+
+async function carica(){
+  const box = document.getElementById('contenuto');
+  const res = await sb.from('annunci_pubblicitari')
+    .select('id,spazio_id,citta,logo_url,link_url,data_inizio,data_fine,stato,prezzo')
+    .eq('impresa_id', currentImpresa.id)
+    .order('data_fine', { ascending: false });
+
+  if (res.error) {
+    box.innerHTML = '<div class="vuoto"><h3>Errore</h3><p>'+res.error.message+'</p></div>';
+    return;
+  }
+  const tutti = res.data || [];
+  if (!tutti.length) {
+    box.innerHTML = '<div class="vuoto"><h3>Non hai ancora inserzioni</h3>'
+      + '<p>Scegli uno spazio nella tua città e la tua azienda comparirà a chi cerca lì.</p>'
+      + '<a href="pubblicita.html" class="btn" style="text-decoration:none;display:inline-block">📢 Prenota uno spazio</a></div>';
+    return;
+  }
+
+  const attivi  = tutti.filter(a => statoDi(a) === 'attivo');
+  const attesa  = tutti.filter(a => statoDi(a) === 'attesa');
+  const scaduti = tutti.filter(a => statoDi(a) === 'scaduto');
+
+  let html = '';
+  if (attivi.length)  html += gruppo('Attive', attivi.length, attivi.map(cardAttiva).join(''));
+  if (attesa.length)  html += gruppo('In attesa di pagamento', attesa.length, attesa.map(cardSemplice).join(''));
+  if (scaduti.length) html += gruppo('Scadute', scaduti.length, scaduti.map(cardSemplice).join(''));
+  box.innerHTML = html;
+}
+
+function gruppo(titolo, n, corpo){
+  return '<div class="gruppo-t">'+titolo+' <span class="n">'+n+'</span></div>' + corpo;
+}
+
+function intestazione(a){
+  const st = statoDi(a);
+  const gg = giorniResidui(a);
+  let badge;
+  if (st === 'attivo')  badge = (gg !== null && gg <= 14)
+      ? '<span class="stato st-scad">scade fra '+gg+' giorn'+(gg===1?'o':'i')+'</span>'
+      : '<span class="stato st-attivo">attiva</span>';
+  else if (st === 'scaduto') badge = '<span class="stato st-scaduto">scaduta</span>';
+  else badge = '<span class="stato st-attesa">pagamento non completato</span>';
+
+  return '<div class="ins-nome">'+fasciaDiSpazio(a.spazio_id)+' · '+latoLabel(a.spazio_id)+badge+'</div>'
+       + '<div class="ins-meta">📍 '+(a.citta||'—')
+       + ' · dal '+dataIt(a.data_inizio)+' al '+dataIt(a.data_fine)+'</div>';
+}
+
+// Inserzione attiva: modificabile
+function cardAttiva(a){
+  return '<div class="ins">'
+    + '<img class="ins-img" id="prev-'+a.id+'" src="'+(a.logo_url||'')+'" alt="Locandina attuale">'
+    + '<div class="ins-body">'
+      + intestazione(a)
+      + '<label class="f" for="file-'+a.id+'">Cambia immagine (PNG o JPG)</label>'
+      + '<input type="file" id="file-'+a.id+'" accept="image/png,image/jpeg">'
+      + '<label class="f" for="link-'+a.id+'">Link di destinazione</label>'
+      + '<input type="url" id="link-'+a.id+'" value="'+(a.link_url||'')+'" placeholder="https://iltuosito.it">'
+      + '<div class="riga-azioni">'
+        + '<button class="btn" id="btn-'+a.id+'" onclick="salva('+a.id+')">Salva modifiche</button>'
+        + '<span class="msg" id="msg-'+a.id+'"></span>'
+      + '</div>'
+    + '</div>'
+  + '</div>';
+}
+
+// Scaduta o non pagata: sola lettura, con la via per riattivarla
+function cardSemplice(a){
+  const link = 'pubblicita.html?spazio='+encodeURIComponent(a.spazio_id)
+             + '&citta='+encodeURIComponent(a.citta||'');
+  const st = statoDi(a);
+  return '<div class="ins scaduta">'
+    + '<img class="ins-img" src="'+(a.logo_url||'')+'" alt="Locandina">'
+    + '<div class="ins-body">'
+      + intestazione(a)
+      + '<a href="'+link+'" class="btn btn-out" style="text-decoration:none;display:inline-block">'
+      + (st === 'scaduto' ? 'Riattiva questo spazio' : 'Completa l\'acquisto') + '</a>'
+    + '</div>'
+  + '</div>';
+}
+
+// ------------------------------------------------------------------ salvataggio
+
+// Ridimensiona e comprime lato client: le foto da telefono sono troppo pesanti
+// e il banner viene mostrato a 400x260, non serve di piu'.
+function ridimensionaImmagine(file, maxLato){
+  maxLato = maxLato || 1200;
+  return new Promise(function(risolvi, rifiuta){
+    const lettore = new FileReader();
+    lettore.onerror = function(){ rifiuta(new Error('Lettura file non riuscita')); };
+    lettore.onload = function(){
+      const img = new Image();
+      img.onerror = function(){ rifiuta(new Error('Immagine non valida')); };
+      img.onload = function(){
+        let w = img.width, h = img.height;
+        if (w > maxLato || h > maxLato) {
+          const s = Math.min(maxLato / w, maxLato / h);
+          w = Math.round(w * s); h = Math.round(h * s);
+        }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        c.toBlob(function(blob){
+          if (!blob) { rifiuta(new Error('Conversione non riuscita')); return; }
+          risolvi({ blob: blob, mime: 'image/jpeg', ext: 'jpg' });
+        }, 'image/jpeg', 0.85);
+      };
+      img.src = lettore.result;
+    };
+    lettore.readAsDataURL(file);
+  });
+}
+
+async function salva(id){
+  const btn  = document.getElementById('btn-'+id);
+  const msg  = document.getElementById('msg-'+id);
+  const file = document.getElementById('file-'+id).files[0];
+  const link = document.getElementById('link-'+id).value.trim();
+
+  function esito(t, c){ msg.textContent = t; msg.style.color = c; }
+
+  if (!file && !link) { esito('Non hai cambiato niente.', '#b26a00'); return; }
+  if (link && !/^https?:\/\//i.test(link)) {
+    esito('Il link deve iniziare con http:// o https://', '#c92a2a'); return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Salvataggio…'; esito('', '#555');
+  const patch = { link_url: link || null };
+
+  try {
+    if (file) {
+      if (!/^image\/(png|jpe?g)$/.test(file.type)) throw new Error('Formato non valido: usa PNG o JPG.');
+      const img = await ridimensionaImmagine(file, 1200);
+      const path = currentUser.id + '/pub_' + Date.now() + '.' + img.ext;
+      const up = await sb.storage.from('loghi-pubblicita')
+        .upload(path, img.blob, { contentType: img.mime });
+      if (up.error) throw new Error('Caricamento immagine non riuscito: ' + up.error.message);
+      patch.logo_url = sb.storage.from('loghi-pubblicita').getPublicUrl(path).data.publicUrl;
+    }
+
+    // .select() restituisce le righe toccate: se la RLS bloccasse la scrittura
+    // non arriverebbe un errore, arriverebbero zero righe. Senza questo
+    // controllo diremmo "salvato" senza aver salvato niente.
+    const res = await sb.from('annunci_pubblicitari')
+      .update(patch).eq('id', id).eq('impresa_id', currentImpresa.id).select('id');
+
+    if (res.error) throw new Error(res.error.message);
+    if (!res.data || !res.data.length) throw new Error('Modifica non consentita su questa inserzione.');
+
+    if (patch.logo_url) document.getElementById('prev-'+id).src = patch.logo_url;
+    document.getElementById('file-'+id).value = '';
+    esito('✅ Salvato, la modifica è già online.', '#1a7f43');
+  } catch (e) {
+    esito('❌ ' + e.message, '#c92a2a');
+  }
+
+  btn.disabled = false; btn.textContent = 'Salva modifiche';
+}
+</script>
+<script src="/cookie-banner.js"></script>
+</body>
+</html>

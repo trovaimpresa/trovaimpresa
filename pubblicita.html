@@ -177,14 +177,24 @@
   </div>
 </section>
 
-<!-- I TUOI SPAZI ATTIVI — compare solo se l'impresa ne ha almeno uno -->
-<section id="miei-spazi" style="display:none;max-width:900px;margin:0 auto 34px;padding:0 18px">
-  <h2 style="font-size:22px;color:#0a2a4d;margin:0 0 6px">I tuoi spazi pubblicitari</h2>
-  <p style="font-size:14px;color:#666;margin:0 0 18px">
-    Puoi cambiare quando vuoi l'immagine e il link di destinazione. La modifica è
-    immediata e non cambia la scadenza: non stai ricomprando lo spazio.
-  </p>
-  <div id="miei-spazi-lista"></div>
+<!-- Scorciatoia: compare solo se l'impresa ha gia' delle inserzioni.
+     La gestione vera e propria sta in le-mie-inserzioni.html -->
+<section id="hai-inserzioni" style="display:none;max-width:900px;margin:0 auto 30px;padding:0 18px">
+  <div style="background:#fff;border:1px solid #e3e9f0;border-left:4px solid #0066ff;
+              border-radius:12px;padding:16px 20px;display:flex;gap:16px;
+              align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <div>
+      <div style="font-weight:700;color:#0a2a4d;font-size:15px">Hai già delle inserzioni attive</div>
+      <div style="font-size:13px;color:#666;margin-top:2px">
+        Per cambiare la locandina o il link non serve comprare di nuovo.
+      </div>
+    </div>
+    <a href="le-mie-inserzioni.html"
+       style="background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;
+              padding:11px 20px;font-size:14px;font-weight:700;white-space:nowrap">
+      Gestisci le tue inserzioni →
+    </a>
+  </div>
 </section>
 
 <div class="steps-nav">
@@ -406,124 +416,21 @@ supabaseClient.auth.onAuthStateChange(async function(event, session) {
   }
 });
 
-// ===================== I TUOI SPAZI: cambia locandina e link =====================
-// Il cliente compra lo spazio una volta, ma la locandina puo' volerla cambiare
-// (promozione finita, logo rifatto, numero di telefono diverso). Qui puo' farlo
-// da solo, senza passare da noi. La RLS "annunci_write_owner" permette la UPDATE
-// solo sulle righe con impresa_id dell'utente loggato.
-
-var _mieiAnnunci = [];
-
+// Scorciatoia verso le-mie-inserzioni.html: mostro il riquadro solo a chi
+// ha gia' comprato almeno uno spazio. La gestione (cambio locandina e link)
+// sta tutta nella pagina dedicata, non qui dentro al percorso di acquisto.
 async function caricaMieiSpazi() {
   if (!currentImpresa || !currentImpresa.id) return;
-  var sez = document.getElementById('miei-spazi');
-  var box = document.getElementById('miei-spazi-lista');
-  if (!sez || !box) return;
-
-  var oggi = new Date().toISOString().slice(0, 10);
+  var sez = document.getElementById('hai-inserzioni');
+  if (!sez) return;
   var res = await supabaseClient
     .from('annunci_pubblicitari')
-    .select('id,spazio_id,citta,logo_url,link_url,data_inizio,data_fine,stato')
+    .select('id')
     .eq('impresa_id', currentImpresa.id)
     .eq('stato', 'pagato')
-    .gte('data_fine', oggi)
-    .order('data_fine', { ascending: true });
-
-  if (res.error || !res.data || !res.data.length) { sez.style.display = 'none'; return; }
-
-  _mieiAnnunci = res.data;
-  sez.style.display = '';
-  box.innerHTML = _mieiAnnunci.map(cardMioSpazio).join('');
-}
-
-function dataIt(iso) {
-  if (!iso) return '—';
-  var p = String(iso).slice(0, 10).split('-');
-  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
-}
-
-function cardMioSpazio(a) {
-  var nome = fasciaDiSpazio(a.spazio_id) + ' · ' + latoLabel(a.spazio_id);
-  return '' +
-  '<div style="background:#fff;border:1px solid #e3e9f0;border-radius:14px;padding:18px;margin-bottom:14px;' +
-       'display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">' +
-    '<img id="prev-' + a.id + '" src="' + (a.logo_url || '') + '" alt="Locandina attuale" ' +
-      'style="width:180px;aspect-ratio:400/260;object-fit:cover;border-radius:10px;border:1px solid #e3e9f0;background:#f7f9fc">' +
-    '<div style="flex:1;min-width:240px">' +
-      '<div style="font-weight:800;color:#0a2a4d;font-size:16px">' + nome + '</div>' +
-      '<div style="font-size:13px;color:#666;margin:2px 0 14px">📍 ' + (a.citta || '—') +
-        ' · attivo fino al ' + dataIt(a.data_fine) + '</div>' +
-
-      '<label style="display:block;font-size:13px;font-weight:700;color:#0a2a4d;margin-bottom:5px">Nuova immagine (PNG o JPG)</label>' +
-      '<input type="file" id="file-' + a.id + '" accept="image/png,image/jpeg" ' +
-        'style="width:100%;font-size:14px;margin-bottom:12px">' +
-
-      '<label style="display:block;font-size:13px;font-weight:700;color:#0a2a4d;margin-bottom:5px">Link di destinazione</label>' +
-      '<input type="url" id="link-' + a.id + '" value="' + (a.link_url || '') + '" ' +
-        'placeholder="https://iltuosito.it" ' +
-        'style="width:100%;padding:10px 12px;border:1.5px solid #dbe3ec;border-radius:8px;font-size:14px;box-sizing:border-box">' +
-
-      '<div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">' +
-        '<button type="button" onclick="salvaMioSpazio(' + a.id + ')" id="btn-' + a.id + '" ' +
-          'style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:11px 22px;' +
-          'font-size:14px;font-weight:700;cursor:pointer">Salva modifiche</button>' +
-        '<span id="msg-' + a.id + '" style="font-size:13px;font-weight:600"></span>' +
-      '</div>' +
-    '</div>' +
-  '</div>';
-}
-
-async function salvaMioSpazio(id) {
-  var btn = document.getElementById('btn-' + id);
-  var msg = document.getElementById('msg-' + id);
-  var file = document.getElementById('file-' + id).files[0];
-  var link = document.getElementById('link-' + id).value.trim();
-
-  function esito(testo, colore) { msg.textContent = testo; msg.style.color = colore; }
-
-  if (!file && !link) { esito('Non hai cambiato niente.', '#b26a00'); return; }
-  if (link && !/^https?:\/\//i.test(link)) {
-    esito('Il link deve iniziare con http:// o https://', '#c92a2a'); return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Salvataggio...';
-  esito('', '#666');
-
-  var patch = { link_url: link || null };
-
-  try {
-    if (file) {
-      if (!/^image\/(png|jpe?g)$/.test(file.type)) throw new Error('Formato non valido: usa PNG o JPG.');
-      var img = await ridimensionaImmagine(file, 1200);
-      var path = currentUser.id + '/pub_' + Date.now() + '.' + img.ext;
-      var up = await supabaseClient.storage.from('loghi-pubblicita')
-        .upload(path, img.blob, { contentType: img.mime });
-      if (up.error) throw new Error('Caricamento immagine non riuscito: ' + up.error.message);
-      patch.logo_url = supabaseClient.storage.from('loghi-pubblicita').getPublicUrl(path).data.publicUrl;
-    }
-
-    // .select() fa tornare la riga aggiornata: se la RLS bloccasse la scrittura
-    // non arriverebbe errore ma zero righe, e diremmo "salvato" a vuoto.
-    var res = await supabaseClient
-      .from('annunci_pubblicitari')
-      .update(patch)
-      .eq('id', id)
-      .eq('impresa_id', currentImpresa.id)
-      .select('id');
-
-    if (res.error) throw new Error(res.error.message);
-    if (!res.data || !res.data.length) throw new Error('Modifica non consentita su questo annuncio.');
-
-    if (patch.logo_url) document.getElementById('prev-' + id).src = patch.logo_url;
-    document.getElementById('file-' + id).value = '';
-    esito('✅ Salvato. La modifica è già online.', '#1a7f43');
-  } catch (e) {
-    esito('❌ ' + e.message, '#c92a2a');
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Salva modifiche';
+    .gte('data_fine', new Date().toISOString().slice(0, 10))
+    .limit(1);
+  if (!res.error && res.data && res.data.length) sez.style.display = '';
 }
 
 // === STEP 1: SELETTORE SPAZI ===
