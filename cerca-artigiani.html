@@ -421,16 +421,35 @@
     // passare. E' un vantaggio venduto: non va tolto dal filtro distanza.
     function premium(i) { return i && i.piano === 'premium'; }
 
+    // _fuoriZona = sta nei risultati solo perche' e' Premium della regione,
+    // non perche' e' davvero nella zona cercata. Va in fondo, con l'etichetta.
+    function segna(i, inZona) { i._fuoriZona = !inZona; return true; }
+
     if (!distanzaMax) {
       var c = (citta || '').trim().toLowerCase();
-      if (!c) return lista;
+      if (!c) { lista.forEach(function (i) { i._fuoriZona = false; }); return lista; }
       return lista.filter(function (i) {
-        return premium(i) || (i.citta || '').trim().toLowerCase().indexOf(c) !== -1;
+        var inZona = (i.citta || '').trim().toLowerCase().indexOf(c) !== -1;
+        if (!inZona && !premium(i)) return false;
+        return segna(i, inZona);
       });
     }
-    if (distanzaMax >= 100 || lat === null) return lista;
+    if (distanzaMax >= 100 || lat === null) {
+      lista.forEach(function (i) { i._fuoriZona = false; });
+      return lista;
+    }
     return lista.filter(function (i) {
-      return premium(i) || (i._distKm !== null && i._distKm <= distanzaMax);
+      var inZona = (i._distKm !== null && i._distKm <= distanzaMax);
+      if (!inZona && !premium(i)) return false;
+      return segna(i, inZona);
+    });
+  }
+
+  // I Premium fuori zona restano visibili ma scendono in fondo alla lista:
+  // prima chi il cliente ha davvero vicino.
+  function ordinaFuoriZona(lista) {
+    return (lista || []).slice().sort(function (a, b) {
+      return (a._fuoriZona ? 1 : 0) - (b._fuoriZona ? 1 : 0);
     });
   }
 
@@ -494,8 +513,11 @@
       tuttiRisultati.forEach(i => {
         i._distKm = (cittaLat !== null && i.lat && i.lng) ? Math.round(haversine(cittaLat, cittaLng, i.lat, i.lng)) : null;
       });
-      tuttiRisultati = filtraDistanza(tuttiRisultati, distanzaMax, cittaLat, cittaScelta);
+      tuttiRisultati = filtraDistanza(tuttiRisultati, distanzaMax, cittaLat, cittaSafe);
       if (sortBy === 'piano') { const pp=p=>p==='premium'?2:1; tuttiRisultati.sort((a,b)=>pp(b.piano)-pp(a.piano)); }
+      // Va per ultimo: qualsiasi altro ordinamento non deve risollevare
+      // i Premium fuori zona sopra a chi il cliente ha davvero vicino.
+      tuttiRisultati = ordinaFuoriZona(tuttiRisultati);
       paginaCorrente = 1;
       mostraPagina(1);
       aggiornaMappaRis(tuttiRisultati);
@@ -570,8 +592,9 @@
     const badge = i.piano === 'premium' ? '<span class="badge-premium">💎 PREMIUM</span>' : '';
     const desc = i.descrizione ? `<div class="card-desc">${i.descrizione}</div>` : '';
     const distBadge = i._distKm !== null ? `<span style="display:inline-block;background:#e8f5ec;color:#0066ff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>` : '';
+    const fzBadge = i._fuoriZona ? '<span style="display:inline-block;background:#f3e8ff;color:#7b1fa2;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">anche nella tua regione</span>' : '';
     const ratingBadge = `<span style="display:inline-block;background:#e8f5ec;color:#0066ff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">⭐ ${i.valutazione_media>0?Number(i.valutazione_media).toFixed(1):'Nuovo'}</span>`;
-    return `<a class="card${i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}${ratingBadge}</div></a>`;
+    return `<a class="card${i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${i.nome||'Artigiano'}${badge}</div>${desc}<div class="card-tipo">🔧 ${i.mestiere||i.tipo||'Artigiano'}</div></div></div><div class="card-citta">📍 ${i.citta||''}${distBadge}${ratingBadge}${fzBadge}</div></a>`;
   }
 
   // Cascata Regione → Provincia

@@ -174,16 +174,28 @@
     };
   }
 
+  // Siamo sulla home nazionale? (index.html o "/" senza ?citta=)
+  function homeNazionale() {
+    var f = w.location.pathname.split('/').pop().replace(/\.html$/, '');
+    if (f !== '' && f !== 'index') return false;
+    var c = new URLSearchParams(w.location.search).get('citta');
+    return !(c && c.trim());
+  }
+
   // Naviga verso url mettendoci la città.
   //
-  // Se la città si sa già, si va dritti dove il cliente ha cliccato.
-  // Se invece bisogna chiederla, appena l'ha scritta lo si porta sulla HOME
-  // della sua città (index.html?citta=X), non alla pagina di ricerca: è lì che
-  // vede la sua zona per intero e gli spazi pubblicitari principali. Da lì
-  // rifà il clic sulla categoria e prosegue normalmente.
+  // Regola: dalla HOME NAZIONALE non si va mai dritti a una pagina di ricerca.
+  // Si passa sempre dalla home della città (index.html?citta=X) — che la città
+  // sia da chiedere o già salvata. È lì che il cliente vede la sua zona per
+  // intero e gli spazi pubblicitari principali. Da quel momento in poi la
+  // navigazione è normale: dalla home città il clic va dritto alla ricerca.
   function vaiA(url) {
     var c = leggi();
-    if (c) { w.location.href = conCitta(url, c); return; }
+    if (c) {
+      if (homeNazionale()) { w.location.href = 'index.html?citta=' + encodeURIComponent(c); return; }
+      w.location.href = conCitta(url, c);
+      return;
+    }
     chiedi(function (scelta) {
       w.location.href = 'index.html?citta=' + encodeURIComponent(scelta);
     });
