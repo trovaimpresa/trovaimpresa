@@ -1,30 +1,16 @@
 // js/pubblicita-spazi.js
 // Popola gli spazi pubblicitari della home con annunci pagati per la città attiva.
 //
-// Come si ricava la città, in ordine:
-//   1. ?citta=X nell'URL (l'utente l'ha scritta o ha usato la geolocalizzazione)
-//   2. IP del visitatore, via Edge Function Netlify /api/geo (silenzioso, senza permessi)
-//   3. Se non si ricava nessuna città: spazi vuoti (nessun annuncio).
-//      La pubblicità è venduta per città: un annuncio comprato a Bari si vede
-//      SOLO a Bari, mai sulle altre pagine né sulla home nazionale.
+// La città si ricava SOLO da ?citta=X nell'URL.
+// Home nazionale (senza ?citta=) = nessuna pubblicità, spazi liberi.
+// Niente rilevamento da IP e niente rotazione: la pubblicità è venduta per
+// città, un annuncio comprato a Roma si vede SOLO su ?citta=roma.
 
 (function () {
   'use strict';
 
   var SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-
-  // Netlify restituisce alcuni nomi di città in inglese: qui li riporto
-  // alla forma italiana usata nel DB e nelle pagine /imprese-<citta>.
-  // Se in futuro ne trovi altri, aggiungili qui sotto.
-  var NOMI_IT = {
-    'rome': 'Roma', 'milan': 'Milano', 'turin': 'Torino', 'naples': 'Napoli',
-    'florence': 'Firenze', 'venice': 'Venezia', 'genoa': 'Genova',
-    'padua': 'Padova', 'syracuse': 'Siracusa', 'mantua': 'Mantova',
-    'leghorn': 'Livorno', 'bozen': 'Bolzano', 'bolzano-bozen': 'Bolzano',
-    'l\'aquila': "L'Aquila", 'reggio calabria': 'Reggio Calabria',
-    'reggio emilia': 'Reggio Emilia', 'forli': 'Forlì'
-  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -37,18 +23,18 @@
     // stanno sulle pagine ricerca/profilo/pannelli, gestiti da js/spazi-laterali.js
     var TUTTI_SPAZI = ['hero-sx', 'hero-dx'];
 
-    // 1. Città dall'URL, altrimenti 2. dall'IP del visitatore
+    // 1. Città: solo da ?citta= nell'URL
     var params = new URLSearchParams(window.location.search);
     var citta = (params.get('citta') || '').trim();
-    var daIP = false;
-
-    if (!citta) {
-      citta = await rilevaCittaDaIP();
-      daIP = !!citta;
-      if (daIP) console.log('[pub-spazi] Città rilevata da IP:', citta);
-    }
 
     aggiornaTestoCitta(citta);
+
+    // 2. Home nazionale: nessuna pubblicità, spazi liberi e stop.
+    if (!citta) {
+      aggiornaHrefVuoti(TUTTI_SPAZI, new Set(), '');
+      console.log('[pub-spazi] Home nazionale: nessuna pubblicità.');
+      return;
+    }
 
     // 3. Client Supabase
     var client = window.sb || window.supabaseClient;
@@ -64,58 +50,17 @@
     var oggi = new Date().toISOString().slice(0, 10);
     var venduti = new Set();
 
-    // 4. Annunci pagati e attivi per la città rilevata
-    if (citta) {
-      var annunci = await queryAnnunci(client, oggi, citta);
-      popolaSpazi(annunci, venduti);
-    }
+    // 4. Annunci pagati e attivi SOLO per la città in URL.
+    //    Nessun fallback a rotazione: se per questa città non c'è nessun
+    //    annuncio pagato, gli spazi restano liberi.
+    var annunci = await queryAnnunci(client, oggi, citta);
+    popolaSpazi(annunci, venduti);
 
-    // 5. NIENTE fallback a rotazione: la pubblicità è per città.
-    //    Se per la città attiva non c'è nessun annuncio pagato, lo spazio
-    //    resta libero. Mostrare l'annuncio di un'altra città sarebbe
-    //    visibilità non acquistata (e non pagata) su tutte le 106 pagine.
-
-    // 6. Spazi rimasti liberi -> href pre-compilato per il form acquisto
+    // 5. Spazi rimasti liberi -> href pre-compilato per il form acquisto
     aggiornaHrefVuoti(TUTTI_SPAZI, venduti, citta);
 
-    console.log('[pub-spazi] Città "' + (citta || '-') + '"' +
-      (daIP ? ' (da IP)' : '') + ': ' + venduti.size + '/' + TUTTI_SPAZI.length + ' spazi pieni.');
-  }
-
-  // ---------------------------------------------------------------- città da IP
-
-  async function rilevaCittaDaIP() {
-    // Una sola chiamata per sessione: il risultato viene riusato.
-    try {
-      var cache = sessionStorage.getItem('ti_citta_ip');
-      if (cache !== null) return cache;
-    } catch (e) { /* sessionStorage non disponibile: pazienza */ }
-
-    var citta = '';
-    try {
-      var ctrl = new AbortController();
-      var timer = setTimeout(function () { ctrl.abort(); }, 2500);
-      var r = await fetch('/api/geo', { signal: ctrl.signal });
-      clearTimeout(timer);
-      if (r.ok) {
-        var d = await r.json();
-        // Solo visitatori italiani: per gli altri la città non ci serve.
-        if (!d.paese || d.paese === 'IT') citta = normalizzaCitta(d.city || '');
-      }
-    } catch (e) {
-      console.log('[pub-spazi] Rilevamento IP non riuscito, proseguo senza città.');
-    }
-
-    try { sessionStorage.setItem('ti_citta_ip', citta); } catch (e) { /* ok */ }
-    return citta;
-  }
-
-  function normalizzaCitta(nome) {
-    var n = (nome || '').trim();
-    if (!n) return '';
-    var k = n.toLowerCase();
-    if (NOMI_IT[k]) return NOMI_IT[k];
-    return n.charAt(0).toUpperCase() + n.slice(1);
+    console.log('[pub-spazi] Città "' + citta + '": '
+      + venduti.size + '/' + TUTTI_SPAZI.length + ' spazi pieni.');
   }
 
   // ---------------------------------------------------------------- dati e DOM
