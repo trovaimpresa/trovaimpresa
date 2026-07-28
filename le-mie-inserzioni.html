@@ -126,6 +126,20 @@ function fasciaDiSpazio(id){
 
 let currentUser = null, currentImpresa = null, _tutti = [];
 
+// I pulsanti sono creati dopo, quindi ascolto i clic sul contenitore che c'e'
+// gia'. Niente onclick scritti dentro l'HTML: se qualcosa altera la pagina
+// (estensioni, iniezioni di script, regole di sicurezza) gli handler inline
+// smettono di funzionare in silenzio, questo invece regge.
+document.addEventListener('click', function (e) {
+  const b = e.target.closest('button[data-azione]');
+  if (!b) return;
+  const id = parseInt(b.dataset.id, 10);
+  if (!id) return;
+  e.preventDefault();
+  if (b.dataset.azione === 'salva') salva(id);
+  else if (b.dataset.azione === 'elimina') elimina(id);
+});
+
 sb.auth.onAuthStateChange(async function(event, session){
   if (event !== 'INITIAL_SESSION') return;
   if (!session) { window.location.href = 'login-impresa.html'; return; }
@@ -194,6 +208,7 @@ async function carica(){
   if (attesa.length)  html += gruppo('In attesa di pagamento', attesa.length, attesa.map(cardSemplice).join(''));
   if (scaduti.length) html += gruppo('Scadute', scaduti.length, scaduti.map(cardSemplice).join(''));
   box.innerHTML = html;
+  gestisciImmaginiRotte();
 }
 
 function gruppo(titolo, n, corpo){
@@ -222,9 +237,21 @@ function imgHTML(a, idPrev){
   if (!a.logo_url) {
     return '<div class="ins-img ins-vuota"'+id+'>Nessuna immagine caricata</div>';
   }
-  return '<img class="ins-img"'+id+' src="'+a.logo_url+'" alt="Locandina attuale" '
-       + 'onerror="this.classList.add(\'ins-vuota\');this.removeAttribute(\'src\');'
-       + 'this.alt=\'\';this.textContent=\'Immagine non disponibile\'">';
+  return '<img class="ins-img"'+id+' src="'+a.logo_url+'" alt="Locandina attuale">';
+}
+
+// Immagini che non si caricano (file rimosso dallo storage): le trasformo nel
+// riquadro tratteggiato. Attaccato da JS, non come attributo onerror.
+function gestisciImmaginiRotte(){
+  document.querySelectorAll('img.ins-img').forEach(function (img) {
+    img.addEventListener('error', function () {
+      const box = document.createElement('div');
+      box.className = 'ins-img ins-vuota';
+      if (img.id) box.id = img.id;
+      box.textContent = 'Immagine non disponibile';
+      img.replaceWith(box);
+    });
+  });
 }
 
 // Inserzione attiva: modificabile
@@ -238,7 +265,7 @@ function cardAttiva(a){
       + '<label class="f" for="link-'+a.id+'">Link di destinazione</label>'
       + '<input type="url" id="link-'+a.id+'" value="'+(a.link_url||'')+'" placeholder="https://iltuosito.it">'
       + '<div class="riga-azioni">'
-        + '<button class="btn" id="btn-'+a.id+'" onclick="salva('+a.id+')">Salva modifiche</button>'
+        + '<button class="btn" id="btn-'+a.id+'" data-azione="salva" data-id="'+a.id+'">Salva modifiche</button>'
         + '<span class="msg" id="msg-'+a.id+'"></span>'
       + '</div>'
     + '</div>'
@@ -257,7 +284,7 @@ function cardSemplice(a){
       + '<div class="riga-azioni">'
         + '<a href="'+link+'" class="btn btn-out" style="text-decoration:none;display:inline-block">'
         + (st === 'scaduto' ? 'Riattiva questo spazio' : 'Completa l\'acquisto') + '</a>'
-        + '<button class="btn btn-cest" id="del-'+a.id+'" onclick="elimina('+a.id+')" '
+        + '<button class="btn btn-cest" id="del-'+a.id+'" data-azione="elimina" data-id="'+a.id+'" '
         + 'title="Togli questa inserzione dall\'elenco">🗑️ Elimina</button>'
         + '<span class="msg" id="dmsg-'+a.id+'"></span>'
       + '</div>'
