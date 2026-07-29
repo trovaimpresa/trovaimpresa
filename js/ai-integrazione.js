@@ -12,6 +12,15 @@
 (function () {
   'use strict';
 
+  // Nel gestionale il client Supabase è dichiarato `const sb = ...`: const non
+  // finisce su window, quindi window.sb resta undefined. Questa funzione recupera
+  // il client sia dallo scope (const/let) sia da window.
+  function getSb() {
+    try { if (typeof sb !== 'undefined' && sb) return sb; } catch (e) {}
+    if (window.sb) return window.sb;
+    return null;
+  }
+
   const FUNCTION_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-generate';
 
   const AI = {
@@ -36,7 +45,8 @@
   /* STATO CREDITI                                                       */
   /* ------------------------------------------------------------------ */
   async function caricaStato() {
-    if (!window.sb) return null;
+    const sb = getSb();
+    if (!sb) return null;
     try {
       const { data, error } = await sb.rpc('get_ai_status');
       if (error) { console.warn('[AI] get_ai_status', error.message); return null; }
@@ -53,6 +63,8 @@
   /* CHIAMATA ALLA EDGE FUNCTION                                         */
   /* ------------------------------------------------------------------ */
   async function genera(feature, input) {
+    const sb = getSb();
+    if (!sb) { avviso('Sessione non pronta, riprova tra un attimo'); return null; }
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { avviso('Sessione scaduta, rifai il login'); return null; }
 
@@ -394,7 +406,8 @@
   /* ------------------------------------------------------------------ */
   async function avvia() {
     if (AI.pronto) return;
-    if (!window.sb) return;
+    const sb = getSb();
+    if (!sb) return;
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return;          // non loggato: niente pulsante
 
