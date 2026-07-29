@@ -1,6 +1,7 @@
 /* =====================================================================
    TrovaImpresa — Integrazione AI nel gestionale
-   Si aggancia al client Supabase esistente (`sb`) e a `sbUid`.
+   NON usa il client `sb` del gestionale (è chiuso in una closure, irraggiungibile):
+   legge il token di sessione da localStorage e la chiave anon dall'HTML della pagina.
    Non crea un secondo client: niente warning GoTrueClient.
 
    INSTALLAZIONE
@@ -12,16 +13,40 @@
 (function () {
   'use strict';
 
-  // Nel gestionale il client Supabase è dichiarato `const sb = ...`: const non
-  // finisce su window, quindi window.sb resta undefined. Questa funzione recupera
-  // il client sia dallo scope (const/let) sia da window.
-  function getSb() {
-    try { if (typeof sb !== 'undefined' && sb) return sb; } catch (e) {}
-    if (window.sb) return window.sb;
+  // Il gestionale tiene il client Supabase (`sb`) dentro una closure: dall'esterno
+  // è irraggiungibile (`typeof sb` === 'undefined'). Quindi NON usiamo `sb`: leggiamo
+  // il token di sessione direttamente da localStorage e la chiave anon dall'HTML.
+  function getToken(){
+    try{
+      const k=Object.keys(localStorage).find(x=>x.startsWith('sb-')&&x.includes('auth-token'));
+      if(!k) return null;
+      const v=JSON.parse(localStorage.getItem(k));
+      return v&&v.access_token?v.access_token:null;
+    }catch(e){return null;}
+  }
+
+  let ANON=null;
+  async function getAnon(){
+    if(ANON) return ANON;
+    try{
+      const html=await (await fetch(location.href,{cache:'no-store'})).text();
+      const m=html.match(/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,}/);
+      if(m){ANON=m[0];return ANON;}
+    }catch(e){}
     return null;
   }
 
+  // Il reparto attivo (prima da `cur.nome`, anch'esso nella closure) lo leggiamo
+  // dal primo h1 della pagina; se vuoto o è il titolo del gestionale, stringa vuota.
+  function repartoAttivo(){
+    const h=document.querySelector('h1');
+    const t=h?(h.textContent||'').trim():'';
+    if(!t||/gestionale/i.test(t)) return '';
+    return t;
+  }
+
   const FUNCTION_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/functions/v1/ai-generate';
+  const RPC_STATUS_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co/rest/v1/rpc/get_ai_status';
 
   const AI = {
     stato: null,
@@ -45,14 +70,23 @@
   /* STATO CREDITI                                                       */
   /* ------------------------------------------------------------------ */
   async function caricaStato() {
-    const sb = getSb();
-    if (!sb) return null;
+    const token = getToken();
+    if (!token) return null;
     try {
-      const { data, error } = await sb.rpc('get_ai_status');
-      if (error) { console.warn('[AI] get_ai_status', error.message); return null; }
-      AI.stato = data;
+      const anon = await getAnon();
+      const res = await fetch(RPC_STATUS_URL, {
+        method: 'POST',
+        headers: {
+          'apikey': anon,
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) { console.warn('[AI] get_ai_status', res.status); return null; }
+      AI.stato = await res.json();
       aggiornaFab();
-      return data;
+      return AI.stato;
     } catch (e) {
       console.warn('[AI] stato non disponibile', e);
       return null;
@@ -63,15 +97,13 @@
   /* CHIAMATA ALLA EDGE FUNCTION                                         */
   /* ------------------------------------------------------------------ */
   async function genera(feature, input) {
-    const sb = getSb();
-    if (!sb) { avviso('Sessione non pronta, riprova tra un attimo'); return null; }
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) { avviso('Sessione scaduta, rifai il login'); return null; }
+    const token = getToken();
+    if (!token) { avviso('Sessione scaduta, rifai il login'); return null; }
 
     const res = await fetch(FUNCTION_URL, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + session.access_token,
+        'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ feature, input }),
@@ -132,8 +164,8 @@
 
     chiudiTutto();
 
-    const reparto = (typeof cur !== 'undefined' && cur && cur.nome) ? cur.nome : '';
-    const ruolo   = (typeof ruoloUtente !== 'undefined' && ruoloUtente) ? ruoloUtente : 'artigiano';
+    const reparto = repartoAttivo();
+    const ruolo   = 'artigiano';
 
     const ov = document.createElement('div');
     ov.className = 'ai-ov';
@@ -402,14 +434,11 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* AVVIO — aspetta che sb e la sessione siano pronti                   */
+  /* AVVIO — aspetta che la sessione (token in localStorage) sia pronta  */
   /* ------------------------------------------------------------------ */
   async function avvia() {
     if (AI.pronto) return;
-    const sb = getSb();
-    if (!sb) return;
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) return;          // non loggato: niente pulsante
+    if (!getToken()) return;       // non loggato: niente pulsante
 
     AI.pronto = true;
     stili();
@@ -417,7 +446,7 @@
     await caricaStato();
   }
 
-  // Il gestionale carica in modo asincrono: riproviamo finché sb non c'è
+  // Il gestionale carica in modo asincrono: riproviamo finché il token non c'è
   let tentativi = 0;
   const t = setInterval(() => {
     avvia();
