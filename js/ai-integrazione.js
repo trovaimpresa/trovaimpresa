@@ -63,6 +63,13 @@
     style: 'currency', currency: 'EUR'
   });
 
+  // Markdown minimale per le risposte dell'assistente: PRIMA escape dell'HTML
+  // (mai innerHTML su testo grezzo), POI **grassetto** e *corsivo*.
+  const mdInline = txt => String(txt)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
   const avviso = msg => {
     if (typeof window.gestToast === 'function') { window.gestToast(msg); return; }
     // fuori dal gestionale: mini-toast a schermo (non solo console)
@@ -133,8 +140,15 @@
     if (!res.ok) throw new Error(body.error || 'Errore AI');
 
     if (AI.stato) {
-      if (typeof body.remaining !== 'undefined') AI.stato.remaining = body.remaining;
-      if (typeof body.help_left !== 'undefined') AI.stato.help_left = body.help_left;
+      if (feature === 'assistente') {
+        // Per l'assistente il "remaining" del server è il numero di DOMANDE GRATUITE
+        // rimaste: va su help_left. NON toccare AI.stato.remaining (crediti preventivi).
+        if (typeof body.help_left !== 'undefined') AI.stato.help_left = body.help_left;
+        else if (typeof body.remaining !== 'undefined') AI.stato.help_left = body.remaining;
+      } else {
+        if (typeof body.remaining !== 'undefined') AI.stato.remaining = body.remaining;
+        if (typeof body.help_left !== 'undefined') AI.stato.help_left = body.help_left;
+      }
     }
     return body.result;
   }
@@ -274,8 +288,14 @@
             <div class="ai-help-txt"></div>
             <button id="ai-help-nuovo" class="ai-ghost">Fai un'altra domanda</button>
           </div>`;
-        out.querySelector('.ai-help-txt').textContent = String(risposta);   // testo semplice, a capo rispettati (pre-wrap via CSS)
+        // markdown -> HTML (escape già fatto dentro mdInline); a capo rispettati via pre-wrap CSS
+        out.querySelector('.ai-help-txt').innerHTML = mdInline(risposta);
         out.querySelector('#ai-help-nuovo').onclick = () => { out.innerHTML = ''; inp.value = ''; inp.focus(); };
+        // aggiorna il footer con le domande gratuite rimaste (help_left)
+        const foot = ov.querySelector('#ai-help-foot');
+        if (foot && AI.stato && typeof AI.stato.help_left !== 'undefined') {
+          foot.textContent = 'Domande gratuite rimaste questo mese: ' + AI.stato.help_left;
+        }
       } catch (e) {
         // include il 402 "no_help_credits": messaggio qui dentro, NON la modale piani
         out.innerHTML = '<div class="ai-err"></div>';
@@ -283,10 +303,6 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'Chiedi';
-        const foot = ov.querySelector('#ai-help-foot');
-        if (foot && AI.stato && typeof AI.stato.help_left !== 'undefined') {
-          foot.textContent = 'Domande gratuite rimaste questo mese: ' + AI.stato.help_left;
-        }
       }
     };
   }
@@ -515,7 +531,7 @@
 .ai-help-chip:hover{background:#d9f3ee}
 .ai-help-res{margin-top:20px;border-top:1px solid #e5e7eb;padding-top:18px}
 .ai-help-txt{white-space:pre-wrap;font-size:14.5px;line-height:1.6;color:#1f2937}
-.ai-help-res .ai-ghost{margin-top:14px;padding:10px 0;font-weight:600}
+.ai-help-res .ai-ghost{display:block;margin-top:10px}
 .ai-help-foot{margin-top:16px;font-size:11.5px;color:#9ca3af;text-align:center}
 
 @media(max-width:560px){
