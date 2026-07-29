@@ -53,7 +53,8 @@
     pronto: false,
   };
   window.AI = AI;
-  AI.apri = apriPannello;   // il gestionale apre il pannello da qui (pulsante "✨ Con AI")
+  AI.apri = apriPannello;        // pulsante "✨ Con AI" nei Preventivi
+  AI.apriAiuto = apriAiuto;      // voce di menu "Aiuto"
 
   /* ------------------------------------------------------------------ */
   /* UTILITY                                                             */
@@ -119,12 +120,22 @@
 
     if (res.status === 402) {
       await caricaStato();
+      // L'assistente "Come si fa" è gratuito: niente modale piani, l'errore
+      // va mostrato nel pannello stesso (lo gestisce chi ha chiamato genera).
+      if (feature === 'assistente') {
+        throw new Error(body.reason === 'no_help_credits'
+          ? 'Hai esaurito le domande gratuite di questo mese. Riprova il mese prossimo.'
+          : (body.error || 'Servizio non disponibile al momento'));
+      }
       mostraUpgrade(body.reason);
       return null;
     }
     if (!res.ok) throw new Error(body.error || 'Errore AI');
 
-    if (AI.stato) { AI.stato.remaining = body.remaining; }
+    if (AI.stato) {
+      if (typeof body.remaining !== 'undefined') AI.stato.remaining = body.remaining;
+      if (typeof body.help_left !== 'undefined') AI.stato.help_left = body.help_left;
+    }
     return body.result;
   }
 
@@ -189,6 +200,93 @@
         btn.textContent = 'Genera preventivo';
         const c = document.querySelector('.ai-crediti b');
         if (c && AI.stato) c.textContent = AI.stato.remaining;
+      }
+    };
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* ASSISTENTE "COME SI FA" (gratuito)                                  */
+  /* ------------------------------------------------------------------ */
+  function apriAiuto() {
+    chiudiTutto();
+
+    const sezione = (document.querySelector('section.active') || {}).id || 'nessuna';
+    const domande = [
+      'Come aggiungo un cliente?',
+      'Come creo il mio primo lavoro?',
+      'Come mando un preventivo al cliente?',
+      'Come segno una fattura come pagata?'
+    ];
+    const helpLeft = (AI.stato && typeof AI.stato.help_left !== 'undefined') ? AI.stato.help_left : '—';
+
+    const ov = document.createElement('div');
+    ov.className = 'ai-ov';
+    ov.innerHTML = `
+      <div class="ai-box">
+        <button class="ai-x" aria-label="Chiudi">&times;</button>
+        <div class="ai-occhio">Assistente · Come si fa</div>
+        <h3 class="ai-tit">Come posso aiutarti?</h3>
+        <p class="ai-sub">Chiedi in parole tue, come lo diresti a un collega.</p>
+
+        <div class="ai-help-chips">
+          ${domande.map(d => `<button type="button" class="ai-help-chip">${d}</button>`).join('')}
+        </div>
+
+        <textarea id="ai-help-in" rows="3" placeholder="Es. Come faccio a..."></textarea>
+
+        <div class="ai-riga">
+          <span></span>
+          <button id="ai-help-go" class="ai-cta">Chiedi</button>
+        </div>
+
+        <div id="ai-help-out"></div>
+        <p class="ai-help-foot" id="ai-help-foot">Domande gratuite rimaste questo mese: ${helpLeft}</p>
+      </div>`;
+    document.body.appendChild(ov);
+
+    ov.querySelector('.ai-x').onclick = chiudiTutto;
+    ov.onclick = e => { if (e.target === ov) chiudiTutto(); };
+
+    const inp = ov.querySelector('#ai-help-in');
+    inp.focus();
+
+    // I 4 suggerimenti riempiono la casella
+    ov.querySelectorAll('.ai-help-chip').forEach(c => {
+      c.onclick = () => { inp.value = c.textContent; inp.focus(); };
+    });
+
+    ov.querySelector('#ai-help-go').onclick = async () => {
+      const btn = ov.querySelector('#ai-help-go');
+      const out = ov.querySelector('#ai-help-out');
+      const domanda = inp.value.trim();
+      if (domanda.length < 4) { avviso('Scrivi la domanda'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Chiedo...';
+      out.innerHTML = '<div class="ai-load">Sto cercando la risposta...</div>';
+
+      try {
+        const contesto = `[Sezione aperta: ${sezione}]\n` + domanda;
+        const risposta = await genera('assistente', contesto);
+        if (risposta === null) { out.innerHTML = ''; return; }   // es. non loggato: avviso già mostrato
+        out.innerHTML = `
+          <div class="ai-help-res">
+            <div class="ai-help-txt"></div>
+            <button id="ai-help-nuovo" class="ai-ghost">Fai un'altra domanda</button>
+          </div>`;
+        out.querySelector('.ai-help-txt').textContent = String(risposta);   // testo semplice, a capo rispettati (pre-wrap via CSS)
+        out.querySelector('#ai-help-nuovo').onclick = () => { out.innerHTML = ''; inp.value = ''; inp.focus(); };
+      } catch (e) {
+        // include il 402 "no_help_credits": messaggio qui dentro, NON la modale piani
+        out.innerHTML = '<div class="ai-err"></div>';
+        out.querySelector('.ai-err').textContent = (e && e.message) || String(e);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Chiedi';
+        const foot = ov.querySelector('#ai-help-foot');
+        if (foot && AI.stato && typeof AI.stato.help_left !== 'undefined') {
+          foot.textContent = 'Domande gratuite rimaste questo mese: ' + AI.stato.help_left;
+        }
       }
     };
   }
@@ -368,9 +466,9 @@
 .ai-occhio{font:700 11px/1 system-ui;letter-spacing:1.2px;text-transform:uppercase;color:#0f766e;margin-bottom:9px}
 .ai-tit{font-size:21px;font-weight:750;color:#111827;margin:0 0 8px}
 .ai-sub{font-size:14px;line-height:1.55;color:#4b5563;margin:0 0 18px}
-#ai-in{width:100%;border:1.5px solid #e5e7eb;border-radius:11px;padding:13px;font:14px/1.5 inherit;
+#ai-in,#ai-help-in{width:100%;border:1.5px solid #e5e7eb;border-radius:11px;padding:13px;font:14px/1.5 inherit;
   resize:vertical;box-sizing:border-box;color:#111827}
-#ai-in:focus{outline:none;border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+#ai-in:focus,#ai-help-in:focus{outline:none;border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
 .ai-riga{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
 .ai-crediti{font-size:13px;color:#6b7280}
 .ai-cta{background:#0f766e;color:#fff;border:none;text-decoration:none;display:inline-block;
@@ -410,6 +508,15 @@
 .ai-pp{font-size:21px;font-weight:750;color:#111827}
 .ai-pp small{font-size:11px;font-weight:500;color:#9ca3af}
 .ai-pd{font-size:11.5px;color:#6b7280;margin-top:5px}
+
+.ai-help-chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 16px}
+.ai-help-chip{background:#f0fdfa;border:1px solid #ccece6;color:#115e59;border-radius:999px;
+  padding:8px 14px;font:600 13px inherit;cursor:pointer;transition:background .15s ease}
+.ai-help-chip:hover{background:#d9f3ee}
+.ai-help-res{margin-top:20px;border-top:1px solid #e5e7eb;padding-top:18px}
+.ai-help-txt{white-space:pre-wrap;font-size:14.5px;line-height:1.6;color:#1f2937}
+.ai-help-res .ai-ghost{margin-top:14px;padding:10px 0;font-weight:600}
+.ai-help-foot{margin-top:16px;font-size:11.5px;color:#9ca3af;text-align:center}
 
 @media(max-width:560px){
   .ai-box{padding:24px 18px 18px;border-radius:14px}
