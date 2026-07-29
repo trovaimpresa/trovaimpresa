@@ -487,7 +487,7 @@
     </section>
 
     <section id="lavori">
-      <div class="sec-head"><h2>Lavori</h2><button class="add" data-action="new-job">+ Nuovo</button></div>
+      <div class="sec-head"><h2>Lavori</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" data-action="new-job">+ Nuovo</button><button class="add" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">✨ Con AI</button></div></div>
       <div class="chiprow" id="stato-chips">
         <button class="chip on" data-stato="tutti">Tutti</button>
         <button class="chip" data-stato="da_fare">Da fare</button>
@@ -521,7 +521,7 @@
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Condomini / Clienti</h2><button class="add" data-action="new-cli">+ Nuovo</button></div>
+      <div class="sec-head"><h2>Condomini / Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" data-action="new-cli">+ Nuovo</button><button class="add" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Con AI</button></div></div>
       <div class="grid" id="cli-list"></div>
     </section>
 

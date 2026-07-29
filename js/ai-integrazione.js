@@ -53,8 +53,10 @@
     pronto: false,
   };
   window.AI = AI;
-  AI.apri = apriPannello;        // pulsante "✨ Con AI" nei Preventivi
-  AI.apriAiuto = apriAiuto;      // voce di menu "Aiuto"
+  AI.apri = apriPannello;              // pulsante "✨ Con AI" nei Preventivi
+  AI.apriAiuto = apriAiuto;            // voce di menu "Aiuto"
+  AI.compilaCliente = compilaCliente;  // pulsante "✨ Con AI" nei Condomini/Clienti
+  AI.compilaLavoro = compilaLavoro;    // pulsante "✨ Con AI" nei Lavori
 
   /* ------------------------------------------------------------------ */
   /* UTILITY                                                             */
@@ -455,6 +457,144 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') chiudiTutto(); });
 
   /* ------------------------------------------------------------------ */
+  /* COMPILA CON AI — l'AI riempie il form, NON scrive mai nel DB        */
+  /* ------------------------------------------------------------------ */
+  // confronto tollerante: minuscole, senza accenti, senza spazi ai bordi
+  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+
+  // I <select> j-cliente / j-operaio sono popolati in modo asincrono da
+  // fillClienti()/fillOperai(): riprovo ogni 200ms per max 3s finché trovo
+  // l'opzione col testo corrispondente; se non arriva, lascio il select com'è.
+  function impostaSelectQuando(sel, nome, timeoutMs) {
+    if (!sel || !nome) return;
+    const target = norm(nome);
+    const scadenza = Date.now() + (timeoutMs || 3000);
+    const prova = () => {
+      if (!document.body.contains(sel)) return;   // form chiuso nel frattempo
+      const opt = Array.from(sel.options).find(o => norm(o.textContent) === target);
+      if (opt) { sel.value = opt.value; return; }
+      if (Date.now() < scadenza) setTimeout(prova, 200);
+      // scaduto: nessun errore, select invariato
+    };
+    prova();
+  }
+
+  // Pannello generico "descrivi a parole → compilo il form"
+  function pannelloCompila(titolo, placeholder, onCompila) {
+    chiudiTutto();
+    const ov = document.createElement('div');
+    ov.className = 'ai-ov';
+    ov.innerHTML = `
+      <div class="ai-box">
+        <button class="ai-x" aria-label="Chiudi">&times;</button>
+        <div class="ai-occhio">Assistente · Compila con AI</div>
+        <h3 class="ai-tit">${titolo}</h3>
+        <p class="ai-sub">Scrivi come parleresti al telefono, ci penso io a mettere le cose al posto giusto.</p>
+        <textarea id="ai-comp-in" rows="4" placeholder="${placeholder}"></textarea>
+        <div class="ai-riga"><span></span><button id="ai-comp-go" class="ai-cta">Compila il modulo</button></div>
+        <div id="ai-comp-out"></div>
+      </div>`;
+    document.body.appendChild(ov);
+
+    ov.querySelector('.ai-x').onclick = chiudiTutto;
+    ov.onclick = e => { if (e.target === ov) chiudiTutto(); };
+    const inp = ov.querySelector('#ai-comp-in');
+    inp.focus();
+
+    ov.querySelector('#ai-comp-go').onclick = async () => {
+      const btn = ov.querySelector('#ai-comp-go');
+      const out = ov.querySelector('#ai-comp-out');
+      const testo = inp.value.trim();
+      if (testo.length < 8) { avviso('Scrivi qualche dettaglio in più'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Compilo...';
+      out.innerHTML = '<div class="ai-load">Sto leggendo e compilo il modulo...</div>';
+
+      try {
+        const ok = await onCompila(testo);
+        if (!ok) { out.innerHTML = ''; btn.disabled = false; btn.textContent = 'Compila il modulo'; }
+        // se ok === true il pannello è già stato chiuso da onCompila
+      } catch (e) {
+        // include il JSON.parse fallito: messaggio nel pannello, nessun form aperto
+        out.innerHTML = '<div class="ai-err"></div>';
+        out.querySelector('.ai-err').textContent = (e && e.message) || String(e);
+        btn.disabled = false;
+        btn.textContent = 'Compila il modulo';
+      }
+    };
+  }
+
+  // Riempie un input solo se il valore non è vuoto; ritorna l'elemento se compilato
+  function riempiCampo(id, val, primoRef) {
+    const el = document.getElementById(id);
+    if (el && val != null && String(val).trim() !== '') {
+      el.value = String(val).trim();
+      if (primoRef && !primoRef.el) primoRef.el = el;
+      return el;
+    }
+    return null;
+  }
+
+  function compilaCliente() {
+    pannelloCompila(
+      'Descrivi il cliente',
+      'Condominio Le Betulle, via Verdi 12 Milano, amministratore Rossi, 02 1234567',
+      async (testo) => {
+        const risultato = await genera('dati_cliente', testo);
+        if (risultato === null) return false;            // es. non loggato: avviso già mostrato
+        let d;
+        try { d = JSON.parse(risultato); } catch (e) { throw new Error('Non ho capito, prova a riscriverlo'); }
+
+        chiudiTutto();                                    // chiudi il pannello AI
+        const apri = document.querySelector('[data-action="new-cli"]');
+        if (apri) apri.click();                           // apre il form Cliente (openSheet, sincrono)
+
+        const primo = { el: null };
+        riempiCampo('c-nome', d.nome, primo);
+        riempiCampo('c-ind', d.indirizzo, primo);
+        riempiCampo('c-ref', d.referente, primo);
+        riempiCampo('c-tel', d.telefono, primo);
+
+        avviso('Modulo compilato, controlla i dati e premi Salva');
+        if (primo.el) primo.el.focus();
+        return true;
+      }
+    );
+  }
+
+  function compilaLavoro() {
+    pannelloCompila(
+      'Descrivi il lavoro',
+      'Giovedì prossimo taglio siepe da Le Betulle, ci va Marco, 350 euro',
+      async (testo) => {
+        const risultato = await genera('dati_lavoro', testo);
+        if (risultato === null) return false;
+        let d;
+        try { d = JSON.parse(risultato); } catch (e) { throw new Error('Non ho capito, prova a riscriverlo'); }
+
+        chiudiTutto();
+        const apri = document.querySelector('[data-action="new-job"]');
+        if (apri) apri.click();                           // apre il form Lavoro (modalità semplice/supa)
+
+        const primo = { el: null };
+        riempiCampo('j-desc', d.descrizione, primo);
+        riempiCampo('j-dove', d.dove, primo);
+        riempiCampo('j-data', d.data, primo);
+        riempiCampo('j-imp', d.importo, primo);
+
+        // select popolati in modo asincrono: imposta il valore solo quando l'opzione compare
+        impostaSelectQuando(document.getElementById('j-cliente'), d.cliente, 3000);
+        impostaSelectQuando(document.getElementById('j-operaio'), d.operatore, 3000);
+
+        avviso('Modulo compilato, controlla i dati e premi Salva');
+        if (primo.el) primo.el.focus();
+        return true;
+      }
+    );
+  }
+
+  /* ------------------------------------------------------------------ */
   /* STILI                                                               */
   /* ------------------------------------------------------------------ */
   function stili() {
@@ -482,9 +622,9 @@
 .ai-occhio{font:700 11px/1 system-ui;letter-spacing:1.2px;text-transform:uppercase;color:#0f766e;margin-bottom:9px}
 .ai-tit{font-size:21px;font-weight:750;color:#111827;margin:0 0 8px}
 .ai-sub{font-size:14px;line-height:1.55;color:#4b5563;margin:0 0 18px}
-#ai-in,#ai-help-in{width:100%;border:1.5px solid #e5e7eb;border-radius:11px;padding:13px;font:14px/1.5 inherit;
+#ai-in,#ai-help-in,#ai-comp-in{width:100%;border:1.5px solid #e5e7eb;border-radius:11px;padding:13px;font:14px/1.5 inherit;
   resize:vertical;box-sizing:border-box;color:#111827}
-#ai-in:focus,#ai-help-in:focus{outline:none;border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+#ai-in:focus,#ai-help-in:focus,#ai-comp-in:focus{outline:none;border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
 .ai-riga{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
 .ai-crediti{font-size:13px;color:#6b7280}
 .ai-cta{background:#0f766e;color:#fff;border:none;text-decoration:none;display:inline-block;
