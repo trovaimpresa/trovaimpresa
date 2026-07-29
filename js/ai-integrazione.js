@@ -53,6 +53,7 @@
     pronto: false,
   };
   window.AI = AI;
+  AI.apri = apriPannello;   // il gestionale apre il pannello da qui (pulsante "✨ Con AI")
 
   /* ------------------------------------------------------------------ */
   /* UTILITY                                                             */
@@ -62,8 +63,14 @@
   });
 
   const avviso = msg => {
-    if (typeof toast === 'function') toast(msg);
-    else console.log('[AI]', msg);
+    if (typeof window.gestToast === 'function') { window.gestToast(msg); return; }
+    // fuori dal gestionale: mini-toast a schermo (non solo console)
+    let t = document.getElementById('ai-toast');
+    if (!t) { t = document.createElement('div'); t.id = 'ai-toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(avviso._t);
+    avviso._t = setTimeout(() => t.classList.remove('on'), 3000);
   };
 
   /* ------------------------------------------------------------------ */
@@ -85,7 +92,6 @@
       });
       if (!res.ok) { console.warn('[AI] get_ai_status', res.status); return null; }
       AI.stato = await res.json();
-      aggiornaFab();
       return AI.stato;
     } catch (e) {
       console.warn('[AI] stato non disponibile', e);
@@ -118,41 +124,8 @@
     }
     if (!res.ok) throw new Error(body.error || 'Errore AI');
 
-    if (AI.stato) { AI.stato.remaining = body.remaining; aggiornaFab(); }
+    if (AI.stato) { AI.stato.remaining = body.remaining; }
     return body.result;
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* PULSANTE FLOTTANTE                                                  */
-  /* ------------------------------------------------------------------ */
-  function creaFab() {
-    if (document.getElementById('ai-fab')) return;
-    const b = document.createElement('button');
-    b.id = 'ai-fab';
-    b.type = 'button';
-    b.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/>
-      </svg>
-      <span id="ai-fab-txt">Preventivo AI</span>
-      <span id="ai-fab-num"></span>`;
-    b.onclick = apriPannello;
-    document.body.appendChild(b);
-    aggiornaFab();
-  }
-
-  function aggiornaFab() {
-    const num = document.getElementById('ai-fab-num');
-    const fab = document.getElementById('ai-fab');
-    if (!num || !fab) return;
-
-    if (!AI.stato || !AI.stato.has_ai) {
-      num.textContent = 'PRO';
-      fab.className = 'ai-locked';
-    } else {
-      num.textContent = AI.stato.remaining;
-      fab.className = AI.stato.remaining <= 10 ? 'ai-basso' : '';
-    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -256,13 +229,30 @@
         </div>
         ${p.note ? `<p class="ai-note">${p.note}</p>` : ''}
         <div class="ai-azioni">
-          <button id="ai-copia" class="ai-cta">Copia preventivo</button>
+          <button id="ai-salva" class="ai-cta">Salva nel gestionale</button>
+          <button id="ai-copia" class="ai-ghost">Copia testo</button>
           <button id="ai-nuovo" class="ai-ghost">Genera un altro</button>
         </div>
         <p class="ai-disc">Prezzi indicativi generati dall'AI. Verificali sempre prima di inviarli al cliente.</p>
       </div>`;
 
+    document.getElementById('ai-salva').onclick = async () => {
+      const btn = document.getElementById('ai-salva');
+      if (typeof window.gestSalvaPreventivoAI !== 'function') { avviso('Salvataggio disponibile solo nel gestionale'); return; }
+      btn.disabled = true;
+      const orig = btn.textContent;
+      btn.textContent = 'Salvo...';
+      try {
+        const r = await window.gestSalvaPreventivoAI(p.titolo || 'Preventivo', voci, p.note || null);
+        if (r && r.ok) { chiudiTutto(); avviso('Preventivo salvato ✓'); }
+        else { avviso('Errore: ' + ((r && r.error) || 'salvataggio non riuscito')); btn.disabled = false; btn.textContent = orig; }
+      } catch (e) {
+        avviso('Errore: ' + (e.message || e)); btn.disabled = false; btn.textContent = orig;
+      }
+    };
+
     document.getElementById('ai-copia').onclick = () => {
+      const btn = document.getElementById('ai-copia');
       const txt = [
         p.titolo || 'Preventivo', '',
         ...voci.map(v => `${v.descrizione} — ${v.quantita} ${v.unita || ''} x ${euro(v.prezzo_unitario)} = ${euro((Number(v.quantita)||0) * (Number(v.prezzo_unitario)||0))}`),
@@ -270,7 +260,7 @@
         p.note ? '\n' + p.note : ''
       ].join('\n');
       navigator.clipboard.writeText(txt)
-        .then(() => avviso('Preventivo copiato ✓'))
+        .then(() => { const orig = btn.textContent; btn.textContent = 'Copiato ✓'; setTimeout(() => { btn.textContent = orig; }, 2000); })
         .catch(() => avviso('Copia non riuscita'));
     };
 
@@ -358,14 +348,10 @@
     const s = document.createElement('style');
     s.id = 'ai-css';
     s.textContent = `
-#ai-fab{position:fixed;right:20px;bottom:20px;z-index:9000;display:flex;align-items:center;gap:8px;
-  padding:13px 19px;border:none;border-radius:999px;cursor:pointer;
-  background:#0f766e;color:#fff;font:650 14px/1 system-ui,-apple-system,Segoe UI,sans-serif;
-  box-shadow:0 6px 20px rgba(15,118,110,.35);transition:transform .15s ease,box-shadow .15s ease}
-#ai-fab:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(15,118,110,.45)}
-#ai-fab.ai-locked{background:#111827;box-shadow:0 6px 20px rgba(0,0,0,.3)}
-#ai-fab.ai-basso{background:#b45309;box-shadow:0 6px 20px rgba(180,83,9,.35)}
-#ai-fab-num{background:rgba(255,255,255,.22);padding:3px 8px;border-radius:999px;font-size:12px;font-weight:700}
+#ai-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);z-index:9600;
+  background:#111827;color:#fff;padding:12px 18px;border-radius:10px;font:600 14px system-ui,-apple-system,Segoe UI,sans-serif;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;max-width:90vw}
+#ai-toast.on{opacity:1;transform:translate(-50%,0)}
 
 .ai-ov{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);
   display:flex;align-items:center;justify-content:center;z-index:9500;padding:20px;
@@ -428,7 +414,6 @@
 @media(max-width:560px){
   .ai-box{padding:24px 18px 18px;border-radius:14px}
   .ai-piani{flex-direction:column}
-  #ai-fab{right:14px;bottom:14px;padding:12px 16px;font-size:13px}
 }`;
     document.head.appendChild(s);
   }
@@ -438,11 +423,10 @@
   /* ------------------------------------------------------------------ */
   async function avvia() {
     if (AI.pronto) return;
-    if (!getToken()) return;       // non loggato: niente pulsante
+    if (!getToken()) return;       // non loggato: niente AI
 
     AI.pronto = true;
     stili();
-    creaFab();
     await caricaStato();
   }
 

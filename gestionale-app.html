@@ -539,7 +539,7 @@
     </section>
 
     <section id="preventivi">
-      <div class="sec-head"><h2>Preventivi</h2><button class="add" data-action="new-prev">+ Nuovo preventivo</button></div>
+      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" data-action="new-prev">+ Nuovo preventivo</button><button class="add" onclick="window.AI&&window.AI.apri&&window.AI.apri()">✨ Con AI</button></div></div>
       <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
       <div class="chiprow" id="prev-chips">
         <button class="chip on" data-action="prev-filtro" data-v="tutti">Tutti</button>
@@ -2041,6 +2041,29 @@
     if(e2){toast("Errore voci: "+e2.message);return;}
     closeSheet();renderPreventivi();renderRiepilogo();toast(id?"Preventivo aggiornato ✔":"Preventivo creato ✔");
   }
+  /* Ponte per js/ai-integrazione.js: salva un preventivo generato dall'AI.
+     Riusa curMestiere() e la stessa formula del numero progressivo di savePrev. */
+  window.gestSalvaPreventivoAI = async function(titolo, voci, note){
+    try{
+      if(!sbUid) return {ok:false, error:"Non sei loggato"};
+      titolo=(titolo||"").trim();
+      if(!titolo) return {ok:false, error:"Titolo mancante"};
+      const righe=(Array.isArray(voci)?voci:[]).map((v,i)=>{
+        let desc=(v.descrizione||"").trim();
+        if(v.unita) desc+=" ("+String(v.unita).trim()+")";
+        return {user_id:sbUid, descrizione:desc, qta:+v.quantita||1, prezzo:+v.prezzo_unitario||0, ordine:i};
+      }).filter(r=>r.descrizione);
+      if(!righe.length) return {ok:false, error:"Nessuna voce valida"};
+      const numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
+      const {data:np,error}=await sb.from("gest_preventivi").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,note:note||null,data:todayStr(),stato:"bozza",numero}).select().single();
+      if(error) return {ok:false, error:error.message};
+      const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,preventivo_id:np.id})));
+      if(e2) return {ok:false, error:e2.message};
+      renderPreventivi();renderRiepilogo();
+      return {ok:true, id:np.id};
+    }catch(e){ return {ok:false, error:(e&&e.message)||String(e)}; }
+  };
+  window.gestToast = function(m){ toast(m); };
   async function prevToLavoro(id){
     const p=prevCache.find(x=>x.id===id);if(!p||!sbUid)return;
     if(!gconfirm("Il cliente ha accettato? Creo il lavoro dal preventivo N. "+p.numero+"."))return;
