@@ -101,7 +101,12 @@
   @media(max-width:520px){.money-row{grid-template-columns:1fr 1fr}.money.ore{grid-column:span 2}}
   .money{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow)}
   .money .n{font-size:22px;font-weight:800;letter-spacing:-.5px}
-  .money.in .n{color:var(--fatto)} .money.out .n{color:var(--danger)} .money.ore .n{color:var(--accent-d)}
+  .money.in .n{color:var(--fatto)} .money.out .n{color:var(--testo)} .money.ore .n{color:var(--accent-d)}
+  /* Rosso = solo problemi reali. "Da incassare" e' un'attesa, "Spese" e' un dato neutro,
+     l'utile diventa rosso solo se e' davvero negativo (classe .neg da renderRiepilogo). */
+  #k-daincassare{color:var(--attesa)}
+  #k-spese{color:var(--testo)}
+  #k-utile{color:var(--ok)} #k-utile.neg{color:var(--err)}
   .money .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
   .mini-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:24px 0 10px}
   .rie-intro{margin-bottom:16px}
@@ -109,10 +114,12 @@
   .rie-intro p{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.45;max-width:640px}
   .kpi .sub,.money .sub{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px;line-height:1.25}
   .fatt-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
-  .fatt-tot{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow);border-top:4px solid var(--danger)}
-  .fatt-tot.alt{border-top-color:var(--warn)}
-  .fatt-tot .n{font-size:22px;font-weight:800;color:var(--danger);letter-spacing:-.5px}
-  .fatt-tot.alt .n{color:var(--warn)}
+  /* Entrambi i totali sono soldi in attesa (emesse da incassare / finiti da fatturare):
+     stesso numero del KPI "Da incassare" del Riepilogo, quindi stesso ambra. */
+  .fatt-tot{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow);border-top:4px solid var(--attesa)}
+  .fatt-tot.alt{border-top-color:var(--attesa)}
+  .fatt-tot .n{font-size:22px;font-weight:800;color:var(--attesa);letter-spacing:-.5px}
+  .fatt-tot.alt .n{color:var(--attesa)}
   .fatt-tot .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
   .fatt-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow)}
   .fatt-info{flex:1;min-width:0}
@@ -135,7 +142,7 @@
   .job-note{font-size:13px;color:var(--attesa);margin-top:6px;line-height:1.35;background:var(--attesa-bg);padding:7px 10px;border-radius:9px}
   .job-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px;font-size:12.5px;color:var(--muted);font-weight:500}
   .job-meta span{display:inline-flex;align-items:center;gap:4px}
-  .euro{font-weight:700;font-size:14px} .euro.np{color:var(--danger)} .euro.pg{color:var(--fatto)}
+  .euro{font-weight:700;font-size:14px} .euro.np{color:var(--attesa)} .euro.pg{color:var(--ok)}
   .stati{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
   .st{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
   .pall{width:13px;height:13px;border-radius:50%;display:inline-block;box-shadow:0 0 0 3px rgba(0,0,0,.05)}
@@ -249,7 +256,9 @@
   .mezzo-add select{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
   .mezzo-add button{padding:0 14px}
   .margine-box{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:var(--sfondo);border:1px solid var(--line);border-radius:10px;font-size:13.5px;font-weight:700}
-  .margine-box .neg{color:var(--danger)} .margine-box .pos{color:var(--fatto)}
+  /* .sp = spese (dato neutro). .neg resta SOLO per il margine negativo, che e' un problema vero. */
+  .margine-box .sp{color:var(--testo)}
+  .margine-box .neg{color:var(--err)} .margine-box .pos{color:var(--ok)}
   .rep-grid{display:grid;grid-template-columns:1fr;gap:14px}
   @media(min-width:760px){.rep-grid{grid-template-columns:1fr 1fr}}
   .rep-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
@@ -415,6 +424,11 @@
      Questo blocco sta in fondo di proposito: vince sulle regole vecchie
      senza doverle cancellare (stessa specificita', ordine successivo).
      ================================================================ */
+
+  /* La regola raggruppata piu' sopra (.kpi,.money,...,.fatt-tot) usa la scorciatoia
+     "border:1px solid var(--line)" e azzerava il border-top dei totali Fatture: il
+     gemello .alt sopravviveva solo per specificita'. Qui li riallineo entrambi. */
+  .fatt-tot{border-top-color:var(--attesa)}
 
   /* ---------- 3. PULSANTI: un solo set ---------- */
   .btn,.btn-primary,.btn-danger,.btn-ghost{
@@ -1086,6 +1100,8 @@
     /* contatori, soldi e ore: tutto da gest_lavori su Supabase */
     if(!sb||!sbUid){
       $("#k-daincassare").textContent=eur(0);$("#k-incassato").textContent=eur(0);$("#k-ore").textContent="0 h";
+      if($("#k-spese"))$("#k-spese").textContent=eur(0);
+      if($("#k-utile")){$("#k-utile").textContent=eur(0);$("#k-utile").classList.remove("neg");}
       $("#k-dafare").textContent=0;$("#k-incorso").textContent=0;$("#k-fatti").textContent=0;$("#k-lavori").textContent=0;
       $("#prossimi").innerHTML=`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
       return;
@@ -1117,7 +1133,7 @@
       if(ra)ra.innerHTML=inPerdita.length?`<div class="rie-warn" data-action="vai-report">⚠ <b>${inPerdita.length===1?"1 lavoro in perdita":inPerdita.length+" lavori in perdita"}</b> — le spese superano l'importo. Clicca per vedere quali nel Report.</div>`:"";
       const incMese=S.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
       if($("#k-spese"))$("#k-spese").textContent=eur(speseMese);
-      if($("#k-utile"))$("#k-utile").textContent=eur(incMese-speseMese);
+      if($("#k-utile")){const utile=incMese-speseMese;$("#k-utile").textContent=eur(utile);$("#k-utile").classList.toggle("neg",utile<0);}
       const {data:pv}=await sb.from("gest_preventivi").select("id,stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       if($("#k-prev-attesa"))$("#k-prev-attesa").textContent=(pv||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato").length;
     }catch(e){}
@@ -2177,7 +2193,7 @@
     $("#spese-list").innerHTML=sp.length?sp.map(x=>`<div class="spesa-row"><span>${esc(x.descrizione)}</span><b>${eur2(x.importo)}</b><button type="button" class="sdel" data-action="spesa-del" data-id="${x.id}">🗑</button></div>`).join(""):`<p class="fatt-empty">Nessuna spesa registrata.</p>`;
     const imp=+($("#j-imp")?$("#j-imp").value:importo)||0;
     const marg=imp-tot;
-    $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span><span>Spese: <span class="neg">−${eur2(tot)}</span></span><span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`;
+    $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span><span>Spese: <span class="sp">−${eur2(tot)}</span></span><span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`;
   }
   async function spesaAdd(){
     if(!sbUid||!speseLavoroId)return;
@@ -2450,8 +2466,8 @@
         <tr><td>Lavori fatti</td><td>${L.filter(l=>l.stato==="fatto").length}</td></tr>
         <tr><td>Incassato ${anno}</td><td>${eur(incAnno)}</td></tr>
         <tr><td>Incassato totale</td><td>${eur(totInc)}</td></tr>
-        <tr><td>Spese totali</td><td style="color:var(--danger)">−${eur(totSp)}</td></tr>
-        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp>=0?'var(--fatto)':'var(--danger)'}">${eur(totInc-totSp)}</td></tr></table></div>
+        <tr><td>Spese totali</td><td style="color:var(--testo)">−${eur(totSp)}</td></tr>
+        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp)}</td></tr></table></div>
       <div class="rep-card"><h3>🏆 Migliori clienti (per fatturato)</h3><table class="rep-table">
         ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
       <div class="rep-card"><h3>⏱ Ore per operatore</h3><table class="rep-table">
