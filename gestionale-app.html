@@ -111,7 +111,7 @@
   .mini-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:24px 0 10px}
   .rie-intro{margin-bottom:16px}
   .rie-intro h2{font-size:20px;font-weight:700;letter-spacing:-.3px}
-  .rie-intro p{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.45;max-width:640px}
+  .rie-intro p{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.45}
   .kpi .sub,.money .sub{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px;line-height:1.25}
   .fatt-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
   /* Entrambi i totali sono soldi in attesa (emesse da incassare / finiti da fatturare):
@@ -155,8 +155,9 @@
   .ja{cursor:pointer}
   .ja.del{margin-left:auto}
 
-  .grid{display:grid;grid-template-columns:1fr;gap:10px}
-  @media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+  /* auto-fill (non auto-fit): le card si affiancano quante ce ne stanno, ma una card
+     sola resta della sua misura invece di stirarsi su tutta la riga. */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .card h3{font-size:15px;font-weight:700;letter-spacing:-.2px}
   .card p{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
@@ -167,9 +168,9 @@
   .cal-head h2{font-size:18px;font-weight:700;text-transform:capitalize}
   .cal-nav{display:flex;gap:6px}
   .cal-nav button{width:38px;height:38px;padding:0;font-size:18px}
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .cal-grid{display:grid;width:100%;grid-template-columns:repeat(7,1fr);gap:5px}
   .cal-dow{text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:4px 0}
-  .cal-cell{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:62px;padding:5px;cursor:pointer;position:relative;display:flex;flex-direction:column;gap:3px}
+  .cal-cell{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:110px;padding:5px;cursor:pointer;position:relative;display:flex;flex-direction:column;gap:3px}
   .cal-cell.empty{background:transparent;border:none;cursor:default}
   .cal-cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
   .cal-cell .dn{font-size:12px;font-weight:700;color:var(--testo)}
@@ -219,7 +220,7 @@
   .up-btn{margin-top:2px}
   .gal-group{margin-bottom:18px}
   .gal-cantiere{font-size:14px;font-weight:700;margin-bottom:8px}
-  .gal-intro{font-size:14px;color:var(--muted);line-height:1.45;max-width:660px;margin-bottom:16px}
+  .gal-intro{font-size:14px;color:var(--muted);line-height:1.45;margin-bottom:16px}
   .gal-intro b{color:var(--testo-2)}
   .filt-label{font-size:12px;font-weight:700;color:var(--testo-2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
   .ag-foto-label{font-size:12px;font-weight:700;color:var(--testo-2);margin-top:10px}
@@ -307,14 +308,14 @@
     margin:14px 0 6px;padding:0 2px;letter-spacing:0;text-transform:none}
   .side nav.tabs .side-group:first-child{margin-top:0}
   .main{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column}
-  .main .wrap{padding-top:26px;max-width:1080px}
+  .main .wrap{width:100%;max-width:1440px;margin:0 auto;padding:24px 28px 56px}
 
   /* superfici e componenti */
   .kpi,.money,.card,.job,.rep-card,.fatt-row,.fatt-tot{border-radius:12px;border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,32,.04)}
   .job{border-left-width:4px}
   .job:hover,.card:hover{box-shadow:0 5px 16px rgba(16,24,32,.09);transform:none}
-  .kpi .n{font-size:26px}
-  .money .n{font-size:20px}
+  .kpi .n{font-size:28px;font-weight:700}
+  .money .n{font-size:28px;font-weight:700}
   .sec-head h2{font-size:19px;font-weight:800;letter-spacing:-.3px}
   .chip{border-radius:8px;font-size:12.5px;padding:6px 12px;background:var(--card)}
   .chip.on{background:var(--accent-d);border-color:var(--accent-d)}
@@ -416,6 +417,10 @@
     .side nav.tabs button{flex:0 0 auto;width:auto;padding:10px 12px}
     .side-group{font-size:11px;margin:10px 0 5px}
     .sheet{margin:0;min-height:100vh;border-radius:0}
+    /* su 375px 28px per lato mangiavano il 15% della larghezza */
+    .main .wrap{padding:16px 16px 40px}
+    /* celle 110px alte su una colonna da 41px erano stecchini */
+    .cal-cell{min-height:72px}
   }
 
   /* ================================================================
@@ -540,7 +545,7 @@
   .sec-head h2,.rie-intro h2,.cal-head h2{font-size:var(--f-xl);font-weight:700;letter-spacing:-.3px;color:var(--testo)}
   .rie-intro p,.gal-intro{font-size:var(--f-base);color:var(--testo-2);line-height:1.5}
   .sheet h3{font-size:var(--f-lg);font-weight:700;color:var(--testo)}
-  #app-root{font-size:var(--f-base);color:var(--testo)}
+  #app-root{font-size:var(--f-md);color:var(--testo)}
 </style>
 
 <!-- LANDING -->
@@ -731,7 +736,7 @@
         <button class="chip" data-action="prev-filtro" data-v="accettato">Accettati</button>
         <button class="chip" data-action="prev-filtro" data-v="rifiutato">Rifiutati</button>
       </div>
-      <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px"></div>
+      <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
     </section>
 
     <section id="report">
