@@ -282,7 +282,7 @@
 
   /* layout con sidebar */
   #appview{align-items:stretch;min-height:100vh}
-  .side{width:238px;flex:0 0 238px;background:var(--card);border-right:1px solid var(--line);padding:16px 13px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side{width:244px;flex:0 0 244px;background:var(--card);border-right:1px solid var(--line);padding:14px 12px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
   .side-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
   .side .back{background:var(--sfondo);color:var(--testo-2);border:none;border-radius:8px;width:34px;height:34px;padding:0;font-size:16px;font-weight:700;cursor:pointer;flex:0 0 auto}
   .side .back:hover{background:var(--bordo)}
@@ -290,16 +290,22 @@
   .side-brand h1{font-size:15.5px;font-weight:800;letter-spacing:-.2px;color:var(--testo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side-brand small{display:block;font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side .btn-new{width:100%;margin:0 0 14px;box-shadow:none}
-  .side nav.tabs{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;max-width:none;overflow:visible}
-  /* TAPPA 2 — voci di menu: testo pieno, non grigio sottile. */
-  .side nav.tabs button{display:flex;align-items:center;gap:10px;width:100%;
-    padding:9px 10px;border:none;border-left:3px solid transparent;border-radius:var(--r);
-    background:none;font-family:inherit;font-size:var(--f-base);font-weight:600;color:var(--testo);
+  .side nav.tabs{display:flex;flex-direction:column;gap:0;margin:0;padding:0;max-width:none;overflow:visible}
+  /* TAPPA 2 — ogni voce di menu e' una card. Il bordo colorato tutto attorno
+     segnala la voce attiva meglio della barretta a sinistra. */
+  .side nav.tabs button{display:flex;align-items:center;gap:12px;width:100%;
+    padding:13px 14px;margin-bottom:8px;
+    background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);
+    font-family:inherit;font-size:var(--f-md);font-weight:600;color:var(--testo);
     text-align:left;cursor:pointer;transition:background .15s,border-color .15s}
-  .side nav.tabs button svg{width:18px;height:18px;flex:0 0 auto;color:var(--testo-2);opacity:1}
-  .side nav.tabs button:hover{background:var(--sfondo);color:var(--testo)}
-  .side nav.tabs button.active{background:var(--blu-tenue);border-left-color:var(--blu);color:var(--testo)}
+  .side nav.tabs button svg{width:20px;height:20px;flex:0 0 auto;color:var(--testo-2);opacity:1}
+  .side nav.tabs button:hover{border-color:var(--bordo-forte)}
+  .side nav.tabs button.active{background:var(--blu-tenue);border-color:var(--blu);color:var(--testo)}
   .side nav.tabs button.active svg{color:var(--blu-scuro)}
+  /* etichette dei due gruppi: sentence case, non maiuscolo */
+  .side-group{font-size:12px;font-weight:600;color:var(--testo-3);
+    margin:14px 0 6px;padding:0 2px;letter-spacing:0;text-transform:none}
+  .side nav.tabs .side-group:first-child{margin-top:0}
   .main{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column}
   .main .wrap{padding-top:26px;max-width:1080px}
 
@@ -406,9 +412,9 @@
     .side{width:100%;flex:0 0 auto;height:auto;position:sticky;top:0;z-index:30;padding:10px 12px 8px;border-right:none;border-bottom:1px solid var(--line)}
     .side-top{margin-bottom:8px}
     .side .btn-new{margin:0 0 8px}
-    .side nav.tabs{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
-    .side nav.tabs button{flex:0 0 auto;width:auto;padding:8px 11px;font-size:13px}
-    .side nav.tabs button svg{width:15px;height:15px}
+    .side nav.tabs{flex-direction:row;overflow-x:auto;gap:0;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+    .side nav.tabs button{flex:0 0 auto;width:auto;padding:10px 12px}
+    .side-group{font-size:11px;margin:10px 0 5px}
     .sheet{margin:0;min-height:100vh;border-radius:0}
   }
 
@@ -449,7 +455,7 @@
   .btn:disabled,.btn-primary:disabled{opacity:.5;cursor:default}
   .t-act .btn{height:30px;padding:0 8px}
   /* adattamenti ai contenitori esistenti (il layout non cambia) */
-  .side .btn-new{height:38px;padding:0}
+  .side .btn-new{height:42px;padding:0;font-size:var(--f-md)}
   .sheet-actions button{flex:1;height:38px;padding:0 14px;font-size:var(--f-base);font-weight:600;border-radius:var(--r)}
   .sheet-actions .btn{border:1px solid var(--bordo-forte)}
   .sheet-actions .btn-primary{border:none}
@@ -511,8 +517,10 @@
   .tb-btn.tb-help:hover{background:#EAF2FF}
 
   /* contatori del menu: visibili solo se c'e' un numero (:empty li nasconde) */
-  .tab-cnt{flex:0 0 auto;margin-left:auto;font-size:11px;font-weight:700;
-    line-height:1.55;border-radius:20px;padding:2px 7px}
+  /* line-height fissa a 16px: col padding fa 20px, esattamente l'altezza
+     dell'icona, cosi' le card col contatore non diventano piu' alte delle altre. */
+  .tab-cnt{flex:0 0 auto;margin-left:auto;font-size:12px;font-weight:700;
+    line-height:16px;border-radius:20px;padding:2px 8px}
   .tab-cnt:empty{display:none}
   .tab-cnt.attesa{background:var(--attesa-bg);color:var(--attesa)}
   .tab-cnt.err{background:var(--err-bg);color:var(--err)}
@@ -567,18 +575,20 @@
     </div>
     <button class="btn-primary btn-new" data-action="new-job">+ Nuovo lavoro</button>
     <nav class="tabs">
+      <div class="side-group">Lavoro</div>
       <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
-      <button data-tab="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span>Agenda operatore</span></button>
-      <button data-tab="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><span>Calendario</span></button>
       <button data-tab="lavori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Lavori</span><span class="tab-cnt" id="cnt-lavori"></span></button>
       <button data-tab="preventivi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span>Preventivi</span><span class="tab-cnt" id="cnt-preventivi"></span></button>
       <button data-tab="fatture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg><span>Fatture</span></button>
+      <button data-tab="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><span>Calendario</span></button>
+      <button data-tab="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span>Agenda operatore</span></button>
+      <div class="side-group">Azienda</div>
+      <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
+      <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
+      <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Condomini</span></button>
+      <button data-tab="scadenzario" id="tab-scadenzario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg><span>Scadenzario</span><span class="tab-cnt" id="cnt-scadenzario"></span></button>
       <button data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg><span>Report</span></button>
       <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
-      <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Condomini</span></button>
-      <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
-      <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
-      <button data-tab="scadenzario" id="tab-scadenzario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg><span>Scadenzario</span><span class="tab-cnt" id="cnt-scadenzario"></span></button>
     </nav>
   </aside>
 
