@@ -7,12 +7,41 @@
 <div id="app-root">
 <style>
   :root{
-    --bg:#f3f5f2; --surface:#ffffff; --ink:#19211d; --muted:#69756e;
-    --line:#e3e8e3;
-    --accent:#1f446f; --accent-d:#143f33; --accent-soft:#e7f1ed;
-    --dafare:#c2410c; --incorso:#2563eb; --fatto:#164780;
-    --danger:#c0392b; --warn:#b45309;
-    --shadow:0 4px 16px rgba(20,40,30,.07);
+    /* marchio */
+    --blu:        #0066FF;   /* azioni principali */
+    --blu-scuro:  #0B4BC4;   /* barre e superfici ampie */
+    --blu-hover:  #0052D6;
+    --blu-tenue:  #E6F0FF;   /* sfondi selezionati */
+
+    /* testo */
+    --testo:      #0F172A;
+    --testo-2:    #475569;
+    --testo-3:    #94A3B8;
+
+    /* superfici */
+    --sfondo:     #F8FAFC;
+    --card:       #FFFFFF;
+    --bordo:      #E2E8F0;
+    --bordo-forte:#CBD5E1;
+
+    /* stati: SOLO per comunicare uno stato, mai per decorare */
+    --ok:#059669;      --ok-bg:#ECFDF5;
+    --attesa:#D97706;  --attesa-bg:#FFFBEB;
+    --err:#DC2626;     --err-bg:#FEF2F2;
+    --info:#2563EB;    --info-bg:#EFF6FF;
+
+    /* forme e misure */
+    --r:10px;  --r-card:14px;
+    --f-sm:13px; --f-base:14px; --f-md:15px; --f-lg:18px; --f-xl:22px;
+
+    /* ---- alias: i nomi storici usati nel resto del CSS puntano alle nuove variabili.
+       Servono perche' il file li usa in centinaia di punti (layout, tabelle, calendario). ---- */
+    --bg:var(--sfondo); --surface:var(--card); --ink:var(--testo); --muted:var(--testo-2);
+    --line:var(--bordo);
+    --accent:var(--blu); --accent-d:var(--blu-scuro); --accent-soft:var(--blu-tenue);
+    --dafare:var(--attesa); --incorso:var(--info); --fatto:var(--ok);
+    --danger:var(--err); --warn:var(--attesa);
+    --shadow:0 1px 2px rgba(15,23,42,.06);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   #app-root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -20,7 +49,7 @@
   .wrap{max-width:1040px;margin:0 auto;padding:0 16px 120px}
 
   /* LANDING */
-  .landing-top{background:linear-gradient(135deg,#1f446f,#143f33);color:#fff;padding:30px 16px 26px;text-align:center}
+  .landing-top{background:var(--blu-scuro);color:#fff;padding:30px 16px 26px;text-align:center}
   .landing-top .mk{font-size:30px;margin-bottom:8px}
   .landing-top h1{font-size:23px;font-weight:800;letter-spacing:-.3px}
   .landing-top small{display:block;font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-top:4px}
@@ -33,13 +62,13 @@
   .panel-card h2{font-size:22px;font-weight:800;letter-spacing:-.3px}
   .panel-card .pc-meta{font-size:13px;font-weight:600;opacity:.95;margin-top:auto}
   .panel-card:active{transform:translateY(1px)}
-  .az-btn{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 16px;font-family:inherit;font-size:13px;font-weight:700;color:#46524b;cursor:pointer;box-shadow:var(--shadow)}
+  .az-btn{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 16px;font-family:inherit;font-size:13px;font-weight:700;color:var(--testo-2);cursor:pointer;box-shadow:var(--shadow)}
   .panel-card{position:relative}
   .pc-del{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.2);border:none;color:#fff;width:32px;height:32px;border-radius:9px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .new-rep-btn{display:block;width:100%;max-width:560px;margin:16px auto 0;background:#fff;border:2px dashed #c3d3cb;color:var(--accent-d);border-radius:14px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:var(--shadow)}
+  .new-rep-btn{display:block;width:100%;max-width:560px;margin:16px auto 0;background:var(--card);border:2px dashed var(--bordo-forte);color:var(--accent-d);border-radius:14px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:var(--shadow)}
   .empty-rep{text-align:center;color:var(--muted);padding:30px 16px;font-weight:600;font-size:14px}
-  .picker{display:flex;flex-wrap:wrap;gap:8px}.picker .pk{font-size:20px;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:#fcfdfc;cursor:pointer}.picker .pk.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(31,68,111,.2)}
-  .colors{display:flex;flex-wrap:wrap;gap:10px}.colors .cl{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}.colors .cl.on{box-shadow:0 0 0 3px var(--accent)}
+  .picker{display:flex;flex-wrap:wrap;gap:8px}.picker .pk{font-size:20px;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}.picker .pk.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,102,255,.2)}
+  .colors{display:flex;flex-wrap:wrap;gap:10px}.colors .cl{width:30px;height:30px;border-radius:50%;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line);cursor:pointer}.colors .cl.on{box-shadow:0 0 0 3px var(--accent)}
 
   /* HEADER pannello */
   header.top{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;
@@ -50,7 +79,7 @@
   .back:active{transform:translateY(1px)}
   .brand h1{font-size:18px;font-weight:700;letter-spacing:-.2px;line-height:1.1}
   .brand small{display:block;font-size:11px;font-weight:500;opacity:.85;letter-spacing:.3px;text-transform:uppercase}
-  .btn-new{background:#fff;color:var(--accent-d);border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  .btn-new{background:var(--card);color:var(--accent-d);border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12)}
   .btn-new:active{transform:translateY(1px)}
   nav.tabs{display:flex;gap:2px;max-width:1040px;margin:12px auto 0;padding:0 16px;overflow-x:auto}
   nav.tabs button{flex:0 0 auto;background:none;border:none;color:rgba(255,255,255,.78);font-size:14px;font-weight:600;padding:8px 13px 12px;cursor:pointer;border-bottom:3px solid transparent}
@@ -61,7 +90,6 @@
   @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
   .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
   .sec-head h2{font-size:20px;font-weight:700;letter-spacing:-.3px}
-  .sec-head .add{background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;padding:8px 13px;font-size:13px;font-weight:700;cursor:pointer}
 
   .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:8px}
   @media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
@@ -94,32 +122,31 @@
   .fatt-empty{font-size:13px;color:var(--muted);padding:2px 2px 6px;font-weight:500}
 
   .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-  .filters input{font-family:inherit;font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-weight:500;flex:1;min-width:140px}
+  .filters input{font-family:inherit;font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font-weight:500;flex:1;min-width:140px}
   .chiprow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-  .chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
   .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
 
   .job{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:5px solid var(--accent)}
   .job-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
   .job-cli{font-size:15px;font-weight:700;letter-spacing:-.2px}
-  .job-desc{font-size:14px;color:#34403a;margin-top:3px;line-height:1.35}
-  .job-done{font-size:13px;color:var(--fatto);margin-top:6px;line-height:1.35;background:#eef7f0;padding:7px 10px;border-radius:9px}
-  .job-note{font-size:13px;color:#6a5b2e;margin-top:6px;line-height:1.35;background:#fbf6e6;padding:7px 10px;border-radius:9px}
+  .job-desc{font-size:14px;color:var(--testo);margin-top:3px;line-height:1.35}
+  .job-done{font-size:13px;color:var(--fatto);margin-top:6px;line-height:1.35;background:var(--ok-bg);padding:7px 10px;border-radius:9px}
+  .job-note{font-size:13px;color:var(--attesa);margin-top:6px;line-height:1.35;background:var(--attesa-bg);padding:7px 10px;border-radius:9px}
   .job-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px;font-size:12.5px;color:var(--muted);font-weight:500}
   .job-meta span{display:inline-flex;align-items:center;gap:4px}
   .euro{font-weight:700;font-size:14px} .euro.np{color:var(--danger)} .euro.pg{color:var(--fatto)}
   .stati{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
   .st{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
   .pall{width:13px;height:13px;border-radius:50%;display:inline-block;box-shadow:0 0 0 3px rgba(0,0,0,.05)}
-  .pall.rosso{background:#e53935} .pall.verde{background:#225fa5} .pall.grigio{background:#c2c9c4}
-  .st .lab{color:#46524b}
+  /* "da fare"/"da incassare" = ambra (attesa). Il rosso e' riservato al ritardo. */
+  .pall.rosso{background:var(--attesa)} .pall.verde{background:var(--ok)} .pall.grigio{background:var(--testo-3)}
+  .pall.ritardo{background:var(--err)}
+  .st .lab{color:var(--testo-2)}
   .job-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
-  .ja{font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#3a463f;cursor:pointer}
-  .ja.go{background:var(--accent-soft);border-color:rgba(0,0,0,.06);color:var(--accent-d)}
-  .ja.map{background:#eef2f0;border-color:var(--line);color:#3a463f}
-  .ja.pay{background:#e3f3e8;border-color:#bfd0e3;color:var(--fatto)}
-  .ja.unpay{background:#fcf0e0;border-color:#f0d9b8;color:var(--warn)}
-  .ja.del{color:var(--danger);border-color:#f0d2cd;margin-left:auto}
+  /* .ja: solo geometria. Il colore arriva dal set .btn (vedi in fondo al file) */
+  .ja{cursor:pointer}
+  .ja.del{margin-left:auto}
 
   .grid{display:grid;grid-template-columns:1fr;gap:10px}
   @media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
@@ -128,69 +155,67 @@
   .card p{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
   .card .cnt{font-size:12px;color:var(--accent-d);font-weight:700;margin-top:6px}
   .card-acts{display:flex;flex-direction:column;gap:6px}
-  .card-acts button{font-size:12px;font-weight:600;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;color:#3a463f}
-  .card-acts button.del{color:var(--danger);border-color:#f0d2cd}
 
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
   .cal-head h2{font-size:18px;font-weight:700;text-transform:capitalize}
   .cal-nav{display:flex;gap:6px}
-  .cal-nav button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:18px;cursor:pointer;color:var(--accent-d);font-weight:700}
+  .cal-nav button{width:38px;height:38px;padding:0;font-size:18px}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
   .cal-dow{text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:4px 0}
   .cal-cell{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:62px;padding:5px;cursor:pointer;position:relative;display:flex;flex-direction:column;gap:3px}
   .cal-cell.empty{background:transparent;border:none;cursor:default}
   .cal-cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-  .cal-cell .dn{font-size:12px;font-weight:700;color:#3a463f}
+  .cal-cell .dn{font-size:12px;font-weight:700;color:var(--testo)}
   .cal-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
   .dot{width:8px;height:8px;border-radius:50%}
-  .dot.todo{background:#e53935} .dot.done{background:#225fa5}
+  .dot.todo{background:var(--attesa)} .dot.done{background:var(--ok)} .dot.ritardo{background:var(--err)}
   .cal-note-mark{position:absolute;top:4px;right:5px;font-size:10px}
   .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted);font-weight:600}
   .cal-legend span{display:inline-flex;align-items:center;gap:5px}
 
   .empty{text-align:center;padding:46px 20px;color:var(--muted)}
   .empty .ic{font-size:40px;margin-bottom:10px;opacity:.7}
-  .empty p{font-size:15px;font-weight:600;color:#48544d}
+  .empty p{font-size:15px;font-weight:600;color:var(--testo)}
   .empty small{display:block;font-size:13px;margin-top:6px;font-weight:500}
 
-  .overlay{position:fixed;inset:0;background:#f3f5f2;z-index:50;display:none;overflow-y:auto}
+  .overlay{position:fixed;inset:0;background:var(--sfondo);z-index:50;display:none;overflow-y:auto}
   .overlay.open{display:block;animation:fade .15s ease}
-  .sheet{background:#fff;width:100%;max-width:none;min-height:100vh;margin:0;padding:24px 6vw 30px;animation:up .18s ease}
+  .sheet{background:var(--card);width:100%;max-width:none;min-height:100vh;margin:0;padding:24px 6vw 30px;animation:up .18s ease}
   @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
   .sheet h3{font-size:18px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px}
   .field{margin-bottom:13px}
-  .field label{display:block;font-size:12.5px;font-weight:700;color:#46524b;margin-bottom:5px}
-  .field input,.field select,.field textarea{width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fcfdfc;color:var(--ink)}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--testo-2);margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
   .field textarea{resize:vertical;min-height:58px}
-  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:#fff}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:var(--card)}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-  .sheet-actions{position:sticky;bottom:0;display:flex;gap:10px;margin-top:18px;padding:14px 0 8px;background:#fff;border-top:1px solid var(--line)}
+  .sheet-actions{position:sticky;bottom:0;display:flex;gap:10px;margin-top:18px;padding:14px 0 8px;background:var(--card);border-top:1px solid var(--line)}
   .sheet-actions button{flex:1;padding:13px;border-radius:11px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;border:none}
-  .b-save{background:var(--accent);color:#fff} .b-cancel{background:#eef1ef;color:#48544d}
   .seg{display:flex;gap:6px;flex-wrap:wrap}
-  .seg button{flex:1;min-width:72px;padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:#fcfdfc;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button{flex:1;min-width:72px;padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
   .seg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
-  .quick-add{font-size:12.5px;color:var(--accent-d);font-weight:700;background:none;border:none;cursor:pointer;padding:4px 0;margin-top:4px}
+  .quick-add{margin-top:6px}
   .day-jobs{margin-bottom:14px}
   .day-job{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer}
   .day-job .dot{flex:0 0 auto}
   .stato{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px}
-  .stato.da_fare{background:#fdeae1;color:var(--dafare)} .stato.in_corso{background:#e4ecfd;color:var(--incorso)} .stato.fatto{background:#e3f3e8;color:var(--fatto)}
+  .stato.ritardo{background:var(--err-bg);color:var(--err)}
+  .stato.da_fare{background:var(--attesa-bg);color:var(--dafare)} .stato.in_corso{background:var(--info-bg);color:var(--incorso)} .stato.fatto{background:var(--ok-bg);color:var(--fatto)}
 
   .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .thumb{position:relative;width:84px;height:84px;border-radius:10px;overflow:hidden;background:#eef1ef;border:1px solid var(--line)}
+  .thumb{position:relative;width:84px;height:84px;border-radius:10px;overflow:hidden;background:var(--sfondo);border:1px solid var(--line)}
   .thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
   .thumb .thdel{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:1;cursor:pointer}
   .thumb .thop{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .thumb .thtag{position:absolute;top:3px;left:3px;font-size:9px;font-weight:800;padding:2px 5px;border-radius:5px;text-transform:uppercase}
-  .thumb .thtag.prima{background:#fdeae1;color:var(--dafare)} .thumb .thtag.dopo{background:#e3f3e8;color:var(--fatto)}
-  .up-btn{display:inline-block;background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer}
+  .thumb .thtag.prima{background:var(--attesa-bg);color:var(--dafare)} .thumb .thtag.dopo{background:var(--ok-bg);color:var(--fatto)}
+  .up-btn{margin-top:2px}
   .gal-group{margin-bottom:18px}
   .gal-cantiere{font-size:14px;font-weight:700;margin-bottom:8px}
   .gal-intro{font-size:14px;color:var(--muted);line-height:1.45;max-width:660px;margin-bottom:16px}
-  .gal-intro b{color:#46524b}
-  .filt-label{font-size:12px;font-weight:700;color:#46524b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
-  .ag-foto-label{font-size:12px;font-weight:700;color:#46524b;margin-top:10px}
+  .gal-intro b{color:var(--testo-2)}
+  .filt-label{font-size:12px;font-weight:700;color:var(--testo-2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+  .ag-foto-label{font-size:12px;font-weight:700;color:var(--testo-2);margin-top:10px}
   #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:80;display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
   #lightbox.open{display:flex}
   #lightbox img{max-width:100%;max-height:100%;border-radius:8px}
@@ -204,31 +229,31 @@
   .job,.card,.kpi,.money{transition:box-shadow .15s,transform .15s}
   .job:hover,.card:hover{box-shadow:0 8px 22px rgba(20,40,30,.12);transform:translateY(-1px)}
   nav.tabs button{letter-spacing:.1px}
-  .stato.bozza{background:#eef1ef;color:#5a6660}
-  .stato.inviato{background:#e4ecfd;color:var(--incorso)}
-  .stato.accettato{background:#e3f3e8;color:var(--fatto)}
-  .stato.rifiutato{background:#fdecea;color:var(--danger)}
+  .stato.bozza{background:var(--sfondo);color:var(--testo-2)}
+  .stato.inviato{background:var(--info-bg);color:var(--incorso)}
+  .stato.accettato{background:var(--ok-bg);color:var(--fatto)}
+  .stato.rifiutato{background:var(--err-bg);color:var(--danger)}
   .prev-tot{font-weight:800;font-size:17px;color:var(--accent-d);letter-spacing:-.3px}
   .prev-riga{display:grid;grid-template-columns:1fr 64px 92px 34px;gap:6px;margin-bottom:6px}
-  .prev-riga input{width:100%;font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fcfdfc}
-  .prev-riga .rdel{border:1px solid #f0d2cd;background:#fff;color:var(--danger);border-radius:8px;cursor:pointer;font-size:15px}
+  .prev-riga input{width:100%;font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+  .prev-riga .rdel{border:1px solid var(--bordo-forte);background:var(--card);color:var(--danger);border-radius:8px;cursor:pointer;font-size:15px}
   .prev-somma{text-align:right;font-weight:800;font-size:16px;color:var(--accent-d);padding:8px 2px}
   .spese-list{margin-top:8px}
   .spesa-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;font-size:13.5px}
   .spesa-row b{margin-left:auto;white-space:nowrap}
   .spesa-row .sdel{border:none;background:none;color:var(--danger);font-size:15px;cursor:pointer}
   .spesa-add{display:grid;grid-template-columns:1fr 100px auto;gap:6px;margin-top:8px}
-  .spesa-add input{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fcfdfc}
-  .spesa-add button{background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;padding:0 14px}
+  .spesa-add input{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+  .spesa-add button{padding:0 14px}
   .mezzo-add{display:grid;grid-template-columns:1fr auto;gap:6px;margin-top:8px}
-  .mezzo-add select{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fcfdfc}
-  .mezzo-add button{background:var(--accent-soft);color:var(--accent-d);border:1px solid rgba(0,0,0,.06);border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;padding:0 14px}
-  .margine-box{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:#f6f8f6;border:1px solid var(--line);border-radius:10px;font-size:13.5px;font-weight:700}
+  .mezzo-add select{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+  .mezzo-add button{padding:0 14px}
+  .margine-box{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:var(--sfondo);border:1px solid var(--line);border-radius:10px;font-size:13.5px;font-weight:700}
   .margine-box .neg{color:var(--danger)} .margine-box .pos{color:var(--fatto)}
   .rep-grid{display:grid;grid-template-columns:1fr;gap:14px}
   @media(min-width:760px){.rep-grid{grid-template-columns:1fr 1fr}}
   .rep-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
-  .rep-card h3{font-size:14px;font-weight:800;margin-bottom:12px;color:#3a463f;text-transform:uppercase;letter-spacing:.4px}
+  .rep-card h3{font-size:14px;font-weight:800;margin-bottom:12px;color:var(--testo);text-transform:uppercase;letter-spacing:.4px}
   .rep-table{width:100%;border-collapse:collapse;font-size:13.5px}
   .rep-table td{padding:8px 4px;border-bottom:1px solid var(--line)}
   .rep-table td:last-child{text-align:right;font-weight:700}
@@ -236,31 +261,30 @@
   .rep-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
   .rep-bars{display:flex;gap:3px;align-items:flex-end;height:120px}
   .rep-bar{width:16px;border-radius:4px 4px 0 0;min-height:2px}
-  .rep-bar.inc{background:var(--accent)} .rep-bar.sp{background:#e07b54}
+  /* grafici: nessun colore di stato. Incassi = blu marchio, spese = grigio */
+  .rep-bar.inc{background:var(--blu)} .rep-bar.sp{background:var(--testo-3)}
   .rep-bar-lab{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase}
   .rep-legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);font-weight:600}
   .rep-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
 
   /* ================= RESTYLING PRO 2026 ================= */
-  #app-root{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f4f6f8;font-size:14.5px}
-  :root{--line:#e5e9ee;--bg:#f4f6f8;--muted:#64707c;--ink:#161e26}
+  #app-root{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--sfondo);color:var(--testo);font-size:var(--f-base)}
   .emic{width:1em;height:1em;vertical-align:-.13em;display:inline-block;flex:0 0 auto}
 
   /* layout con sidebar */
   #appview{align-items:stretch;min-height:100vh}
-  .side{width:238px;flex:0 0 238px;background:#fff;border-right:1px solid var(--line);padding:16px 13px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side{width:238px;flex:0 0 238px;background:var(--card);border-right:1px solid var(--line);padding:16px 13px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
   .side-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-  .side .back{background:#f1f4f7;color:#3c4854;border:none;border-radius:8px;width:34px;height:34px;padding:0;font-size:16px;font-weight:700;cursor:pointer;flex:0 0 auto}
-  .side .back:hover{background:#e6ebf0}
+  .side .back{background:var(--sfondo);color:var(--testo-2);border:none;border-radius:8px;width:34px;height:34px;padding:0;font-size:16px;font-weight:700;cursor:pointer;flex:0 0 auto}
+  .side .back:hover{background:var(--bordo)}
   .side-brand{min-width:0}
-  .side-brand h1{font-size:15.5px;font-weight:800;letter-spacing:-.2px;color:#141c24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side-brand h1{font-size:15.5px;font-weight:800;letter-spacing:-.2px;color:var(--testo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side-brand small{display:block;font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .side .btn-new{width:100%;margin:0 0 14px;background:var(--accent);color:#fff;border-radius:9px;padding:11px;font-size:13.5px;font-weight:700;box-shadow:none}
-  .side .btn-new:hover{filter:brightness(1.08)}
+  .side .btn-new{width:100%;margin:0 0 14px;box-shadow:none}
   .side nav.tabs{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;max-width:none;overflow:visible}
-  .side nav.tabs button{display:flex;align-items:center;gap:10px;width:100%;color:#5b6672;font-size:13.5px;font-weight:600;padding:9px 11px;border-radius:8px;border-bottom:none;text-align:left}
+  .side nav.tabs button{display:flex;align-items:center;gap:10px;width:100%;color:var(--testo-2);font-size:13.5px;font-weight:600;padding:9px 11px;border-radius:8px;border-bottom:none;text-align:left}
   .side nav.tabs button svg{width:17px;height:17px;flex:0 0 auto;opacity:.85}
-  .side nav.tabs button:hover{background:#f1f4f7;color:#1c2530}
+  .side nav.tabs button:hover{background:var(--sfondo);color:var(--testo)}
   .side nav.tabs button.active{background:var(--accent-soft);color:var(--accent-d);border-bottom:none}
   .side nav.tabs button.active svg{opacity:1}
   .main{flex:1;min-width:0;background:var(--bg)}
@@ -273,8 +297,7 @@
   .kpi .n{font-size:26px}
   .money .n{font-size:20px}
   .sec-head h2{font-size:19px;font-weight:800;letter-spacing:-.3px}
-  .sec-head .add{border-radius:8px}
-  .chip{border-radius:8px;font-size:12.5px;padding:6px 12px;background:#fff}
+  .chip{border-radius:8px;font-size:12.5px;padding:6px 12px;background:var(--card)}
   .chip.on{background:var(--accent-d);border-color:var(--accent-d)}
   .ja{border-radius:7px;font-size:12px;display:inline-flex;align-items:center;gap:5px}
   .stato{border-radius:7px}
@@ -292,80 +315,78 @@
   .sheet-actions button{border-radius:9px;font-size:14px;padding:12px}
 
   /* landing più sobria */
-  .landing-top{background:linear-gradient(135deg,#14324e,#0e3d33)}
+  .landing-top{background:var(--blu-scuro)}
   .panel-card{border-radius:14px;box-shadow:0 6px 18px rgba(16,24,32,.12)}
   .new-rep-btn{border-radius:12px}
 
   /* colore primario fisso (blu professionale) — il colore reparto resta solo nel pallino */
-  :root{--accent:#2456a6;--accent-d:#1a3f7d;--accent-soft:#e8effa}
-  .rep-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;background:#9aa7b2}
-  .burger{display:none;margin-left:auto;background:#f1f4f7;border:none;border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;color:#3c4854;flex:0 0 auto}
+  .rep-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--testo-3)}
+  .burger{display:none;margin-left:auto;background:var(--sfondo);border:none;border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;color:var(--testo-2);flex:0 0 auto}
   .burger svg{width:19px;height:19px}
 
   /* tabelle desktop (Lavori / Fatture) */
-  .dtab{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,32,.04)}
-  .dtab th{background:#f7f9fb;text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:#5b6672;font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .dtab{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,32,.04)}
+  .dtab th{background:var(--sfondo);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--testo-2);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
   .dtab th[data-action]{cursor:pointer;user-select:none}
   .dtab th[data-action]:hover{color:var(--accent-d)}
-  .dtab td{padding:10px 12px;border-bottom:1px solid #eef1f4;vertical-align:middle}
+  .dtab td{padding:10px 12px;border-bottom:1px solid var(--bordo);vertical-align:middle}
   .dtab tbody tr:last-child td{border-bottom:none}
-  .dtab tbody tr:hover{background:#f8fafc}
+  .dtab tbody tr:hover{background:var(--sfondo)}
   .t-act{display:flex;gap:4px;flex-wrap:wrap}
   .t-act .ja{padding:6px 8px}
-  .stato.pagata{background:#e3f3e8;color:var(--fatto)}
-  .stato.emessa{background:#fcf0e0;color:var(--warn)}
-  .stato.nonf{background:#eef1ef;color:#5a6660}
+  .stato.pagata{background:var(--ok-bg);color:var(--fatto)}
+  .stato.emessa{background:var(--attesa-bg);color:var(--warn)}
+  .stato.nonf{background:var(--sfondo);color:var(--testo-2)}
 
   /* card reparto professionali (bianche, icona SVG in chip colorato) */
-  .panel-card{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,32,.06);padding:18px;min-height:132px;transition:box-shadow .15s,transform .15s}
+  .panel-card{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,32,.06);padding:18px;min-height:132px;transition:box-shadow .15s,transform .15s}
   .panel-card:hover{box-shadow:0 8px 22px rgba(16,24,32,.11);transform:translateY(-1px)}
   .panel-card:active{transform:none}
-  .panel-card h2{font-size:18px;font-weight:800;letter-spacing:-.3px;color:#161e26}
+  .panel-card h2{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--testo)}
   .panel-card .pc-ic{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:21px;margin-bottom:2px}
   .panel-card .pc-ic svg{width:22px;height:22px}
   .panel-card .pc-meta{font-size:12.5px;font-weight:600;color:var(--muted);opacity:1}
-  .pc-del{background:#f1f4f7;color:#8a949e;width:30px;height:30px;border-radius:8px;font-size:13px}
-  .pc-del:hover{background:#fdecea;color:#c0392b}
+  .pc-del{background:var(--sfondo);color:var(--testo-3);width:30px;height:30px;border-radius:8px;font-size:13px}
+  .pc-del:hover{background:var(--err-bg);color:var(--err)}
   .landing-top .mk svg{width:34px;height:34px}
-  .new-rep-btn{border:1.5px dashed #c6cfd8;color:var(--accent-d);background:#fff}
-  .new-rep-btn:hover{background:#f6f9fc}
+  .new-rep-btn{border:1.5px dashed var(--bordo-forte);color:var(--accent-d);background:var(--card)}
+  .new-rep-btn:hover{background:var(--sfondo)}
 
   /* pulsanti in cima alla landing + piede sidebar */
   .landing-top{position:relative}
   .lt-actions{position:absolute;top:12px;right:14px;display:flex;gap:8px}
   .lt-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:9px;padding:8px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
   .lt-btn:hover{background:rgba(255,255,255,.24)}
-  .lt-btn.gold{background:#f5b301;border-color:#f5b301;color:#3d2e00;font-weight:800}
-  .lt-btn.gold:hover{background:#ffc21a}
   @media(max-width:640px){.lt-actions{position:static;justify-content:center;margin-bottom:12px}}
   .side-foot{margin-top:auto;display:flex;flex-direction:column;gap:5px;padding-top:12px;border-top:1px solid var(--line)}
-  .side-foot button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:#5b6672;font-family:inherit;font-size:13px;font-weight:600;padding:9px 11px;border-radius:8px;text-align:left;cursor:pointer}
+  .side-foot button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--testo-2);font-family:inherit;font-size:13px;font-weight:600;padding:9px 11px;border-radius:8px;text-align:left;cursor:pointer}
   .side-foot button svg{width:16px;height:16px;flex:0 0 auto;opacity:.85}
-  .side-foot button:hover{background:#f1f4f7;color:#1c2530}
-  .side-foot button.gold{background:#fff8e1;color:#7a5a00;border:1px solid #f2d16b;font-weight:700}
-  .side-foot button.gold:hover{background:#fdf0c8}
+  .side-foot button:hover{background:var(--sfondo);color:var(--testo)}
+  /* "Esporta i miei dati": non e' un'azione principale ne' pericolosa -> neutra */
+  .side-foot button.gold{background:transparent;color:var(--testo);border:1px solid var(--bordo-forte);font-weight:600}
+  .side-foot button.gold:hover{background:var(--sfondo)}
   @media(max-width:880px){
     .side .side-foot{display:none}
     .side.open .side-foot{display:flex}
   }
 
-  .rie-warn{margin-top:12px;background:#fdecea;border:1px solid #f5c6c0;color:#9c2f22;border-radius:12px;padding:12px 15px;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
-  .rie-warn:hover{background:#fbdfdb}
+  .rie-warn{margin-top:12px;background:var(--err-bg);border:1px solid rgba(220,38,38,.28);color:var(--err);border-radius:12px;padding:12px 15px;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .rie-warn:hover{background:rgba(220,38,38,.10)}
   .rie-warn b{font-weight:800}
 
   /* grafico guadagno/perdita per lavoro */
-  .mlav{padding:10px 0;border-bottom:1px solid #eef1f4}
+  .mlav{padding:10px 0;border-bottom:1px solid var(--bordo)}
   .mlav:last-child{border-bottom:none}
   .mlav-top{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13.5px;margin-bottom:6px}
   .mlav-top b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mbadge{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:999px;white-space:nowrap}
-  .mbadge.pos{background:#e3f3e8;color:#1c7a43}
-  .mbadge.neg{background:#fdecea;color:#c0392b}
-  .mbadge.zero{background:#eef1ef;color:#5a6660}
+  .mbadge.pos{background:var(--ok-bg);color:var(--ok)}
+  .mbadge.neg{background:var(--err-bg);color:var(--err)}
+  .mbadge.zero{background:var(--sfondo);color:var(--testo-2)}
   .mlav-bars{display:flex;flex-direction:column;gap:2px}
   .mlav-bar{height:7px;border-radius:4px}
-  .mlav-bar.inc{background:var(--accent)}
-  .mlav-bar.sp{background:#e07b54}
+  .mlav-bar.inc{background:var(--blu)}
+  .mlav-bar.sp{background:var(--testo-3)}
   .mlav-sub{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px}
 
   /* mobile: sidebar diventa barra in alto */
@@ -382,12 +403,82 @@
     #appview{flex-direction:column}
     .side{width:100%;flex:0 0 auto;height:auto;position:sticky;top:0;z-index:30;padding:10px 12px 8px;border-right:none;border-bottom:1px solid var(--line)}
     .side-top{margin-bottom:8px}
-    .side .btn-new{margin:0 0 8px;padding:10px}
+    .side .btn-new{margin:0 0 8px}
     .side nav.tabs{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:2px;-webkit-overflow-scrolling:touch}
     .side nav.tabs button{flex:0 0 auto;width:auto;padding:8px 11px;font-size:13px}
     .side nav.tabs button svg{width:15px;height:15px}
     .sheet{margin:0;min-height:100vh;border-radius:0}
   }
+
+  /* ================================================================
+     TAPPA 1 — FONDAMENTA: pulsanti, campi, tipografia.
+     Questo blocco sta in fondo di proposito: vince sulle regole vecchie
+     senza doverle cancellare (stessa specificita', ordine successivo).
+     ================================================================ */
+
+  /* ---------- 3. PULSANTI: un solo set ---------- */
+  .btn,.btn-primary,.btn-danger,.btn-ghost{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    height:38px;padding:0 14px;border-radius:var(--r);
+    font-family:inherit;font-size:var(--f-base);font-weight:600;line-height:1;
+    cursor:pointer;white-space:nowrap;
+    transition:background .15s,border-color .15s,color .15s,box-shadow .15s;
+  }
+  /* secondario (default) */
+  .btn{background:var(--card);border:1px solid var(--bordo-forte);color:var(--testo)}
+  .btn:hover{background:var(--sfondo)}
+  /* principale: uno solo per schermata */
+  .btn-primary{background:var(--blu);border:none;color:#fff}
+  .btn-primary:hover{background:var(--blu-hover)}
+  /* distruttivo */
+  .btn-danger{background:var(--card);border:1px solid var(--err);color:var(--err)}
+  .btn-danger:hover{background:var(--err-bg)}
+  /* terziario */
+  .btn-ghost{background:transparent;border:none;color:var(--testo-2)}
+  .btn-ghost:hover{background:var(--sfondo)}
+  /* unica variante di misura: azioni dense dentro card e righe di tabella.
+     Serve a non alzare le righe (il layout non si tocca in questa tappa). */
+  .btn-sm{height:30px;padding:0 10px;font-size:12.5px;border-radius:8px}
+  .btn:disabled,.btn-primary:disabled{opacity:.5;cursor:default}
+  .t-act .btn{height:30px;padding:0 8px}
+  /* adattamenti ai contenitori esistenti (il layout non cambia) */
+  .side .btn-new{height:38px;padding:0}
+  .sheet-actions button{flex:1;height:38px;padding:0 14px;font-size:var(--f-base);font-weight:600;border-radius:var(--r)}
+  .sheet-actions .btn{border:1px solid var(--bordo-forte)}
+  .sheet-actions .btn-primary{border:none}
+  .card-acts .btn{width:100%}
+  .spesa-add .btn,.mezzo-add .btn{height:40px}
+  .field .btn-ghost{height:auto;padding:6px 0;font-size:12.5px;justify-content:flex-start}
+  .field .btn.up-btn{display:inline-flex;height:36px;font-size:var(--f-sm);color:var(--testo)}
+
+  /* ---------- 4. CAMPI DEI FORM ---------- */
+  .field input,.field select,.filters input,.prev-riga input,.spesa-add input,.mezzo-add select{
+    height:40px;padding:0 12px;
+    font-family:inherit;font-size:var(--f-base);color:var(--testo);
+    background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);
+  }
+  .field input,.field select,.prev-riga input,.spesa-add input,.mezzo-add select{width:100%}
+  .field textarea{
+    width:100%;padding:10px 12px;min-height:64px;resize:vertical;
+    font-family:inherit;font-size:var(--f-base);line-height:1.45;color:var(--testo);
+    background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus,
+  .filters input:focus,.prev-riga input:focus,.spesa-add input:focus,.mezzo-add select:focus{
+    outline:none;border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,102,255,.12);
+  }
+  .field input::placeholder,.field textarea::placeholder,.filters input::placeholder,
+  .prev-riga input::placeholder,.spesa-add input::placeholder{color:var(--testo-3)}
+  .field label,.filt-label,.ag-foto-label{
+    display:block;font-size:var(--f-sm);font-weight:600;color:var(--testo-2);
+    margin-bottom:6px;text-transform:none;letter-spacing:0;
+  }
+
+  /* ---------- 5. TIPOGRAFIA ---------- */
+  .sec-head h2,.rie-intro h2,.cal-head h2{font-size:var(--f-xl);font-weight:700;letter-spacing:-.3px;color:var(--testo)}
+  .rie-intro p,.gal-intro{font-size:var(--f-base);color:var(--testo-2);line-height:1.5}
+  .sheet h3{font-size:var(--f-lg);font-weight:700;color:var(--testo)}
+  #app-root{font-size:var(--f-base);color:var(--testo)}
 </style>
 
 <!-- LANDING -->
@@ -404,10 +495,10 @@
     <p class="landing-sub">Ogni reparto è separato: lavori, clienti, squadra e calendario non si mischiano.</p>
     <div class="panels" id="panels"></div>
     <button class="new-rep-btn" data-action="new-panel">➕ Nuovo reparto</button>
-    <p style="text-align:center;font-size:12.5px;color:#8a949e;margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
-    <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid #e0e0e0">
-      <p style="color:#666;font-size:14px;margin-bottom:10px">Sei un collaboratore o una segretaria?</p>
-      <a href="gestionale-invito.html" style="display:inline-block;background:#0066ff;color:#fff;text-decoration:none;border-radius:8px;padding:13px 24px;font-weight:600">Entra qui →</a>
+    <p style="text-align:center;font-size:12.5px;color:var(--testo-3);margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
+    <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid var(--bordo)">
+      <p style="color:var(--testo-2);font-size:var(--f-base);margin-bottom:10px">Sei un collaboratore o una segretaria?</p>
+      <a href="gestionale-invito.html" style="display:inline-block;background:var(--blu);color:#fff;text-decoration:none;border-radius:8px;padding:13px 24px;font-weight:600">Entra qui →</a>
     </div>
   </div>
 </div>
@@ -420,7 +511,7 @@
       <div class="side-brand"><h1><span class="rep-dot" id="rep-dot"></span><span id="panel-name">—</span></h1><small id="panel-sub">Reparto</small></div>
       <button class="burger" data-action="burger" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
     </div>
-    <button class="btn-new" data-action="new-job">+ Nuovo lavoro</button>
+    <button class="btn-primary btn-new" data-action="new-job">+ Nuovo lavoro</button>
     <nav class="tabs">
       <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
       <button data-tab="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span>Agenda operatore</span></button>
@@ -485,13 +576,13 @@
 
     <section id="calendario">
       <div class="cal-head"><h2 id="cal-title">—</h2>
-        <div class="cal-nav"><button data-action="cal-prev">‹</button><button data-action="cal-today">•</button><button data-action="cal-next">›</button></div></div>
+        <div class="cal-nav"><button class="btn" data-action="cal-prev">‹</button><button class="btn" data-action="cal-today">•</button><button class="btn" data-action="cal-next">›</button></div></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend"><span><i class="dot todo"></i>Da fare</span><span><i class="dot done"></i>Fatto</span><span>📌 Nota</span></div>
+      <div class="cal-legend"><span><i class="dot todo"></i>Da fare</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot done"></i>Fatto</span><span>📌 Nota</span></div>
     </section>
 
     <section id="lavori">
-      <div class="sec-head"><h2>Lavori</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" data-action="new-job">+ Nuovo</button><button class="add" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">✨ Con AI</button></div></div>
+      <div class="sec-head"><h2>Lavori</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-job">+ Nuovo</button><button class="btn add" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">✨ Con AI</button></div></div>
       <div class="chiprow" id="stato-chips">
         <button class="chip on" data-stato="tutti">Tutti</button>
         <button class="chip" data-stato="da_fare">Da fare</button>
@@ -504,7 +595,7 @@
     </section>
 
     <section id="fatture">
-      <div class="sec-head"><h2>Fatture</h2><button class="add" data-action="new-fattura">+ Nuova</button></div>
+      <div class="sec-head"><h2>Fatture</h2><button class="btn add" data-action="new-fattura">+ Nuova</button></div>
       <div class="fatt-summary" id="fatt-summary"></div>
       <div id="fatt-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
@@ -525,21 +616,21 @@
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Condomini / Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" data-action="new-cli">+ Nuovo</button><button class="add" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Con AI</button></div></div>
+      <div class="sec-head"><h2>Condomini / Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli">+ Nuovo</button><button class="btn add" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Con AI</button></div></div>
       <div class="grid" id="cli-list"></div>
     </section>
 
     <section id="squadra">
-      <div class="sec-head"><h2>Squadra</h2><button class="add" data-action="new-dip">+ Persona</button></div>
-      <div style="background:#e8f4ff;border:1px solid #b3d9ff;border-radius:12px;padding:14px 18px;margin-bottom:16px">
-        <p style="margin:0;color:#0066ff;font-weight:600;font-size:15px">💡 Come entrano i collaboratori</p>
-        <p style="margin:6px 0 0;color:#444;font-size:14px">Ogni giorno entrano da <strong>trovaimpresa.com/gestionale</strong> con la loro email e password. Dì loro di salvarlo tra i preferiti del browser.</p>
+      <div class="sec-head"><h2>Squadra</h2><button class="btn add" data-action="new-dip">+ Persona</button></div>
+      <div style="background:var(--info-bg);border:1px solid rgba(37,99,235,.25);border-radius:12px;padding:14px 18px;margin-bottom:16px">
+        <p style="margin:0;color:var(--info);font-weight:600;font-size:var(--f-md)">💡 Come entrano i collaboratori</p>
+        <p style="margin:6px 0 0;color:var(--testo);font-size:var(--f-base)">Ogni giorno entrano da <strong>trovaimpresa.com/gestionale</strong> con la loro email e password. Dì loro di salvarlo tra i preferiti del browser.</p>
       </div>
       <div class="grid" id="dip-list"></div>
     </section>
 
     <section id="mezzi">
-      <div class="sec-head"><h2>Mezzi e attrezzature</h2><button class="add" data-action="new-mezzo">+ Nuovo</button></div>
+      <div class="sec-head"><h2>Mezzi e attrezzature</h2><button class="btn add" data-action="new-mezzo">+ Nuovo</button></div>
       <div class="gal-intro">Furgoni, escavatori, ponteggi, trapani: qui c'è tutto quello che usi in cantiere, con lo stato e le scadenze (revisione, bollo, tagliando, assicurazione).</div>
       <div class="chiprow" id="mezzi-chips">
         <button class="chip on" data-action="mezzo-filtro" data-v="tutti">Tutti</button>
@@ -551,12 +642,12 @@
     </section>
 
     <section id="scadenzario">
-      <div class="sec-head"><h2>Scadenzario</h2><button class="add" data-action="new-scad">+ Nuova</button></div>
+      <div class="sec-head"><h2>Scadenzario</h2><button class="btn add" data-action="new-scad">+ Nuova</button></div>
       <div class="grid" id="scad-list"></div>
     </section>
 
     <section id="preventivi">
-      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" data-action="new-prev">+ Nuovo preventivo</button><button class="add" onclick="window.AI&&window.AI.apri&&window.AI.apri()">✨ Con AI</button></div></div>
+      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn add" onclick="window.AI&&window.AI.apri&&window.AI.apri()">✨ Con AI</button></div></div>
       <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
       <div class="chiprow" id="prev-chips">
         <button class="chip on" data-action="prev-filtro" data-v="tutti">Tutti</button>
@@ -569,17 +660,17 @@
     </section>
 
     <section id="report">
-      <div class="sec-head"><h2>Report</h2><button class="add" data-action="report-csv">⬇ Esporta CSV</button></div>
+      <div class="sec-head"><h2>Report</h2><button class="btn add" data-action="report-csv">⬇ Esporta CSV</button></div>
       <div class="gal-intro">L'andamento del reparto: incassi e spese mese per mese, i clienti migliori e le ore della squadra.</div>
       <div id="rep-body"></div>
     </section>
 
     <section id="lavoro-foto">
-      <div class="sec-head"><h2 id="lf-title">Foto — cosa fare</h2><button class="add" data-action="lf-back">‹ Indietro</button></div>
+      <div class="sec-head"><h2 id="lf-title">Foto — cosa fare</h2><button class="btn add" data-action="lf-back">‹ Indietro</button></div>
       <div class="gal-intro">Carica qui le foto di <b>cosa c'è da fare</b> per questo lavoro: le vedrà l'operaio nella sua agenda.</div>
       <div class="field"><label>📷 Foto "cosa fare"</label>
         <input type="file" id="lf-file" accept="image/*" multiple style="display:none">
-        <label class="up-btn" for="lf-file">＋ Aggiungi foto</label></div>
+        <label class="btn up-btn" for="lf-file">＋ Aggiungi foto</label></div>
       <div class="thumbs" id="lf-grid"></div>
     </section>
   </div>
@@ -617,6 +708,9 @@
   const thisMonth=d=>d&&d.slice(0,7)===todayStr().slice(0,7);
   const ymd=(y,m,d)=>`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
   const statoLabel={da_fare:"Da fare",in_corso:"In corso",fatto:"Fatto"};
+  /* Lavoro in ritardo: data prevista gia' passata e non ancora fatto.
+     Il rosso (--err) e' riservato SOLO a questo caso; il "da fare" normale e' ambra (--attesa). */
+  const inRitardo=(stato,data)=>!!data&&stato!=="fatto"&&data<todayStr();
   const mesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
   const db=()=>state[cur];
@@ -1036,12 +1130,13 @@
     const fatto=l.stato==="fatto", fs=l.fattStato||"none";
     const lavLab=fatto?"Fatto":(l.stato==="in_corso"?"In corso":"Da fare");
     const fattDot=fs==="pagata"?"verde":(fs==="emessa"?"rosso":"grigio");
+    const late=inRitardo(l.stato,l.dataPrevista);
     const fattLab=fs==="pagata"?"Pagata":(fs==="emessa"?"Emessa, da incassare":"Non fatturata");
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(c?c.nome:"(cliente eliminato)")}</div></div>
       ${l.descrizione?`<div class="job-desc">${esc(l.descrizione)}</div>`:""}
       <div class="stati">
-        <span class="st"><i class="pall ${fatto?'verde':'rosso'}"></i><span class="lab">${lavLab}</span></span>
+        <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':'rosso')}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
         ${l.importo?`<span class="st"><i class="pall ${fattDot}"></i><span class="lab">${fattLab}</span></span>`:""}
       </div>
       ${l.lavoroSvolto?`<div class="job-done">✔ Fatto: ${esc(l.lavoroSvolto)}</div>`:""}
@@ -1054,14 +1149,14 @@
         ${l.importo?`<span class="euro ${fs==='pagata'?'pg':'np'}">💶 ${eur(l.importo)}</span>`:""}
       </div>
       <div class="job-actions">
-        ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
-        ${l.stato==="da_fare"?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
-        ${!fatto?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
-        ${fatto&&fs==="none"?`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">📄 Fattura emessa</button>`:""}
-        ${fs==="emessa"?`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">💶 Segna pagata</button>`:""}
-        ${fs==="pagata"?`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`:""}
-        <button class="ja" data-action="edit-job" data-id="${l.id}">✏ Modifica</button>
-        <button class="ja del" data-action="del-job" data-id="${l.id}">🗑</button>
+        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
+        ${!fatto?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
+        ${fatto&&fs==="none"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">📄 Fattura emessa</button>`:""}
+        ${fs==="emessa"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">💶 Segna pagata</button>`:""}
+        ${fs==="pagata"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`:""}
+        <button class="btn btn-sm ja" data-action="edit-job" data-id="${l.id}">✏ Modifica</button>
+        <button class="btn btn-sm btn-danger ja del" data-action="del-job" data-id="${l.id}">🗑</button>
       </div></div>`;
   }
 
@@ -1081,6 +1176,7 @@
   }
   function jobCardSupa(l,withFoto,opTel){
     const fatto=l.stato==="fatto", dove=l.dove||"";
+    const late=inRitardo(l.stato,l.data_prevista);
     const lavLab=fatto?"Fatto":(l.stato==="in_corso"?"In corso":"Da fare");
     const dp=esc(l.data_prevista||"");
     const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
@@ -1093,21 +1189,21 @@
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div></div>
       <div class="stati">
-        <span class="st"><i class="pall ${fatto?'verde':'rosso'}"></i><span class="lab">${lavLab}</span></span>
+        <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':'rosso')}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
       </div>
       <div class="job-meta">
         ${dove?`<span>📍 ${esc(dove)}</span>`:""}
         <span>📅 ${fdate(l.data_prevista)}</span>
       </div>
       <div class="job-actions">
-        <button class="ja" data-action="edit-job" data-id="${esc(l.id)}">✏ Modifica</button>
-        ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
-        ${withFoto&&l.stato==="da_fare"?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}">▶ Avvia</button>`:""}
-        ${withFoto&&!fatto?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}">✔ Segna fatto</button>`:""}
-        ${withFoto&&fatto?`<button class="ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}">↩ Riapri</button>`:""}
-        ${withFoto?`<button class="ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
-        ${withFoto?`<button class="ja" data-action="sq-wa" data-wa="${esc(wa)}">Avvisa su WhatsApp</button>`:""}
-        <button class="ja" data-action="del-job-supa" data-id="${esc(l.id)}">🗑 Elimina</button>
+        <button class="btn btn-sm ja" data-action="edit-job" data-id="${esc(l.id)}">✏ Modifica</button>
+        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        ${withFoto&&l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}">▶ Avvia</button>`:""}
+        ${withFoto&&!fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}">✔ Segna fatto</button>`:""}
+        ${withFoto&&fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}">↩ Riapri</button>`:""}
+        ${withFoto?`<button class="btn btn-sm ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
+        ${withFoto?`<button class="btn btn-sm ja" data-action="sq-wa" data-wa="${esc(wa)}">Avvisa su WhatsApp</button>`:""}
+        <button class="btn btn-sm ja" data-action="del-job-supa" data-id="${esc(l.id)}">🗑 Elimina</button>
       </div></div>`;
   }
   /* Lavori: tabella ordinabile su desktop, card su mobile */
@@ -1154,15 +1250,15 @@
       return `<tr><td><b>${esc(l.descrizione||"—")}</b></td>
       <td>${esc(l.dove||"—")}</td><td style="white-space:nowrap">${fdate(l.data_prevista)}</td>
       <td>${esc(opName[l.operatore_id]||"—")}</td>
-      <td><span class="stato ${l.stato}">${statoLabel[l.stato]||l.stato}</span></td>
+      <td><span class="stato ${inRitardo(l.stato,l.data_prevista)?'ritardo':l.stato}"${inRitardo(l.stato,l.data_prevista)?' title="In ritardo"':''}>${statoLabel[l.stato]||l.stato}</span></td>
       <td><div class="t-act">
-        ${l.stato==="da_fare"?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}" title="Avvia">▶</button>`:""}
-        ${!fatto?`<button class="ja go" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}" title="Segna fatto">✔</button>`:`<button class="ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}" title="Riapri">↩</button>`}
-        <button class="ja" data-action="edit-job" data-id="${esc(l.id)}" title="Modifica">✏</button>
-        <button class="ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}" title="Foto">📷</button>
-        ${l.dove?`<button class="ja" data-action="map" data-q="${esc(l.dove)}" title="Mappa">🗺</button>`:""}
-        <button class="ja" data-action="sq-wa" data-wa="${esc(_waLavoro(l,telMap[l.operatore_id]||""))}" title="Avvisa su WhatsApp">💬</button>
-        <button class="ja del" data-action="del-job-supa" data-id="${esc(l.id)}" title="Elimina">🗑</button>
+        ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}" title="Avvia">▶</button>`:""}
+        ${!fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}" title="Segna fatto">✔</button>`:`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}" title="Riapri">↩</button>`}
+        <button class="btn btn-sm ja" data-action="edit-job" data-id="${esc(l.id)}" title="Modifica">✏</button>
+        <button class="btn btn-sm ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}" title="Foto">📷</button>
+        ${l.dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(l.dove)}" title="Mappa">🗺</button>`:""}
+        <button class="btn btn-sm ja" data-action="sq-wa" data-wa="${esc(_waLavoro(l,telMap[l.operatore_id]||""))}" title="Avvisa su WhatsApp">💬</button>
+        <button class="btn btn-sm btn-danger ja del" data-action="del-job-supa" data-id="${esc(l.id)}" title="Elimina">🗑</button>
       </div></td></tr>`;}).join("")+`</tbody></table>`;
   }
 
@@ -1229,13 +1325,13 @@
   }
   function fattRow(l,btn){
     const fatturaPdf=fatturaPdfCache[l.id];
-    const fatturaBtns=(fatturaPdf?`<button class="ja" data-action="open-fattura" data-id="${esc(fatturaPdf.id)}">📄 Apri fattura PDF</button>`:"")
-      +`<button class="ja" data-action="upload-fattura" data-id="${l.id}">📎 Carica fattura PDF</button>`;
+    const fatturaBtns=(fatturaPdf?`<button class="btn btn-sm ja" data-action="open-fattura" data-id="${esc(fatturaPdf.id)}">📄 Apri fattura PDF</button>`:"")
+      +`<button class="btn btn-sm ja" data-action="upload-fattura" data-id="${l.id}">📎 Carica fattura PDF</button>`;
     return `<div class="fatt-row">
       <div class="fatt-info"><b>${esc(l.descrizione||"Lavoro")}</b>
         <div class="sub">📅 ${fdate(l.data_fatto||l.data_prevista)}</div></div>
       <div class="fatt-imp">${eur(l.importo)}</div>
-      <button class="ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
+      <button class="btn btn-sm ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
   }
   let fatturaPdfCache={};
   async function renderFatture(){
@@ -1262,11 +1358,11 @@
       box.style.display="grid";
       let h="";
       h+=`<div class="mini-title">📄 Da fatturare (lavori finiti)</div>`;
-      h+=daFatt.length?daFatt.map(l=>fattRow(l,`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`)).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
+      h+=daFatt.length?daFatt.map(l=>fattRow(l,`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`)).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
       h+=`<div class="mini-title">💶 Emesse · da incassare</div>`;
-      h+=daInc.length?daInc.map(l=>fattRow(l,`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`)).join(""):`<p class="fatt-empty">Nessuna fattura da incassare.</p>`;
+      h+=daInc.length?daInc.map(l=>fattRow(l,`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`)).join(""):`<p class="fatt-empty">Nessuna fattura da incassare.</p>`;
       h+=`<div class="mini-title">✅ Pagate</div>`;
-      h+=pagate.length?pagate.map(l=>fattRow(l,`<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`)).join(""):`<p class="fatt-empty">Ancora nessuna fattura pagata.</p>`;
+      h+=pagate.length?pagate.map(l=>fattRow(l,`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`)).join(""):`<p class="fatt-empty">Ancora nessuna fattura pagata.</p>`;
       box.innerHTML=h;
       return;
     }
@@ -1296,12 +1392,12 @@
       <td style="white-space:nowrap;font-weight:700">${eur(l.importo)}</td>
       <td>${fsBadge(l)}</td>
       <td><div class="t-act">
-        ${rank(l)===0?`<button class="ja unpay" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`:""}
-        ${fs==="emessa"?`<button class="ja pay" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`:""}
-        ${fs==="pagata"?`<button class="ja" data-action="fatt" data-id="${l.id}" data-v="emessa" title="Riporta a emessa">↩</button>`:""}
-        <button class="ja" data-action="pdf" data-id="${l.id}" title="Scarica PDF cortesia">📄 PDF</button>
-        ${pdf?`<button class="ja" data-action="open-fattura" data-id="${esc(pdf.id)}" title="Apri fattura caricata">📄 Apri</button>`:""}
-        <button class="ja" data-action="upload-fattura" data-id="${l.id}" title="Carica fattura PDF">📎</button>
+        ${rank(l)===0?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`:""}
+        ${fs==="emessa"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`:""}
+        ${fs==="pagata"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa" title="Riporta a emessa">↩</button>`:""}
+        <button class="btn btn-sm ja" data-action="pdf" data-id="${l.id}" title="Scarica PDF cortesia">📄 PDF</button>
+        ${pdf?`<button class="btn btn-sm ja" data-action="open-fattura" data-id="${esc(pdf.id)}" title="Apri fattura caricata">📄 Apri</button>`:""}
+        <button class="btn btn-sm ja" data-action="upload-fattura" data-id="${l.id}" title="Carica fattura PDF">📎</button>
       </div></td></tr>`;}).join("")+`</tbody></table>`;
   }
   let fattSort={k:"rank",d:1};
@@ -1318,7 +1414,8 @@
     for(let i=0;i<lead;i++)html+=`<div class="cal-cell empty"></div>`;
     for(let d=1;d<=days;d++){
       const ds=ymd(y,m,d), jobs=calJobs.filter(l=>l.data_prevista===ds);
-      const dots=jobs.slice(0,6).map(j=>`<i class="dot ${j.stato==='fatto'?'done':'todo'}"></i>`).join("");
+      const scaduto=ds<todayStr();
+      const dots=jobs.slice(0,6).map(j=>`<i class="dot ${j.stato==='fatto'?'done':(scaduto?'ritardo':'todo')}"></i>`).join("");
       const note=db().note[ds]?`<span class="cal-note-mark">📌</span>`:"";
       html+=`<div class="cal-cell ${ds===todayStr()?"today":""}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-dots">${dots}</div></div>`;
     }
@@ -1327,17 +1424,17 @@
 
   function openDay(ds){
     const jobs=calJobs.filter(l=>l.data_prevista===ds);
-    const list=jobs.length?jobs.map(j=>{const sf=j.stato==="fatto";
-      return `<div class="day-job"><i class="dot ${sf?'done':'todo'}"></i>
+    const list=jobs.length?jobs.map(j=>{const sf=j.stato==="fatto", late=inRitardo(j.stato,ds);
+      return `<div class="day-job"><i class="dot ${sf?'done':(late?'ritardo':'todo')}"></i>
         <div style="flex:1"><b style="font-size:14px">${esc(j.descrizione||"(senza descrizione)")}</b></div>
-        <span class="stato ${sf?'fatto':'da_fare'}">${sf?'Fatto':'Da fare'}</span></div>`;}).join("")
+        <span class="stato ${sf?'fatto':(late?'ritardo':'da_fare')}">${sf?'Fatto':'Da fare'}</span></div>`;}).join("")
       :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
     openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
         <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(db().note[ds]||"")}</textarea></div>
       <div class="sheet-actions">
-        <button class="b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
-        <button class="b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
+        <button class="btn b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
+        <button class="btn-primary b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
   }
 
   async function renderClienti(){
@@ -1348,9 +1445,9 @@
     box.innerHTML=cliCache.length?cliCache.map(c=>{
       return `<div class="card"><div><h3>${esc(c.nome)}</h3>
         <p>${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"· 📞 "+esc(c.telefono):""}</p></div>
-        <div class="card-acts"><button data-action="map" data-q="${esc(c.indirizzo||c.nome)}">🗺 Mappa</button>
-        <button data-action="edit-cli" data-id="${c.id}">Modifica</button>
-        <button class="del" data-action="del-cli" data-id="${c.id}">Elimina</button></div></div>`;
+        <div class="card-acts"><button class="btn btn-sm" data-action="map" data-q="${esc(c.indirizzo||c.nome)}">🗺 Mappa</button>
+        <button class="btn btn-sm" data-action="edit-cli" data-id="${c.id}">Modifica</button>
+        <button class="btn btn-sm btn-danger del" data-action="del-cli" data-id="${c.id}">Elimina</button></div></div>`;
     }).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun condominio</p><small>Aggiungi i clienti di questo reparto</small></div>`;
   }
   async function renderDip(){
@@ -1368,10 +1465,10 @@
       const link=inviteLink(codice);
       const wa="https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link);
       return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":"Invitato"}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
-        <div class="card-acts"><button data-action="sq-edit" data-id="${o.id}">Modifica</button>
-        ${codice?`<button data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
-        <button data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>
-        <button data-action="sq-revoca" data-id="${o.id}" data-nome="${esc(o.nome)}" style="background:#fff0f0;color:#c0392b;border:1px solid #f0c0c0">Rimuovi accesso</button>`:""}</div></div>`;
+        <div class="card-acts"><button class="btn btn-sm" data-action="sq-edit" data-id="${o.id}">Modifica</button>
+        ${codice?`<button class="btn btn-sm" data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
+        <button class="btn btn-sm" data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>
+        <button data-action="sq-revoca" data-id="${o.id}" data-nome="${esc(o.nome)}" class="btn btn-sm btn-danger">Rimuovi accesso</button>`:""}</div></div>`;
     }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
   }
   const PERMS=[{key:"calendario",label:"Calendario"},{key:"lavori",label:"Lavori"},{key:"foto",label:"Foto"},{key:"note",label:"Note"},{key:"clienti",label:"Clienti"},{key:"fatture",label:"Fatture"},{key:"pagamenti",label:"Pagamenti"}];
@@ -1391,8 +1488,8 @@
         <option value="segretaria">Segretaria</option></select></div>
       <div class="field"><label>Permessi</label><div id="d-perms">
         ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
     $("#d-ruolo").onchange=applyRuoloPreset;
     if(isNew){applyRuoloPreset();}
     else{
@@ -1444,10 +1541,10 @@
      gest_mezzi_scadenze. DDL: sql/gestionale-mezzi.sql
      ============================================================ */
   const MEZZO_STATI={
-    disponibile:{lab:"Disponibile",bg:"#e3f3e8",fg:"var(--fatto)"},
-    in_uso:{lab:"In uso",bg:"#e6eefa",fg:"#2570c4"},
-    manutenzione:{lab:"In manutenzione",bg:"#fff4e5",fg:"#c2410c"},
-    fuori_uso:{lab:"Fuori uso",bg:"#eef2f7",fg:"#5a6670"}
+    disponibile:{lab:"Disponibile",bg:"var(--ok-bg)",fg:"var(--ok)"},
+    in_uso:{lab:"In uso",bg:"var(--info-bg)",fg:"var(--info)"},
+    manutenzione:{lab:"In manutenzione",bg:"var(--attesa-bg)",fg:"var(--attesa)"},
+    fuori_uso:{lab:"Fuori uso",bg:"var(--sfondo)",fg:"var(--testo-2)"}
   };
   let mezziCache=[], mezziFilter="tutti";
   /* giorni da oggi alla data ds (positivo = nel futuro) */
@@ -1472,21 +1569,21 @@
     const cat=m.categoria==="attrezzatura"?"🔧 Attrezzatura":"🚚 Mezzo";
     let scLine="";
     if(sc&&sc.scadute>0){
-      scLine=`<br><span style="color:#c0392b;font-weight:700">⚠ ${sc.scadute} ${sc.scadute===1?"scadenza scaduta":"scadenze scadute"}</span>`;
+      scLine=`<br><span style="color:var(--err);font-weight:700">⚠ ${sc.scadute} ${sc.scadute===1?"scadenza scaduta":"scadenze scadute"}</span>`;
     }else if(sc&&sc.prossima_data){
       const g=_giorniA(sc.prossima_data);
       const eti=sc.prossimo_tipo||sc.prossimo_titolo||"Scadenza";
       const quando=g===0?"oggi":(g===1?"tra 1 giorno":"tra "+g+" giorni");
-      scLine=`<br><span style="color:${g<=7?"#c2410c":"var(--muted)"};font-weight:${g<=7?"700":"400"}">📅 ${esc(eti)} ${quando}</span>`;
+      scLine=`<br><span style="color:${g<=7?"var(--attesa)":"var(--muted)"};font-weight:${g<=7?"700":"400"}">📅 ${esc(eti)} ${quando}</span>`;
     }
     return `<div class="card"><div>
       <h3>${esc(m.nome)}</h3>
       <p>${cat}${m.targa?" · 🔖 "+esc(m.targa):""}<br>
       <span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>${scLine}${m.note?"<br>📝 "+esc(m.note):""}</p></div>
       <div class="card-acts">
-        <button data-action="mezzo-scad" data-id="${m.id}">+ Scadenza</button>
-        <button data-action="edit-mezzo" data-id="${m.id}">Modifica</button>
-        <button class="del" data-action="del-mezzo" data-id="${m.id}">Elimina</button></div></div>`;
+        <button class="btn btn-sm" data-action="mezzo-scad" data-id="${m.id}">+ Scadenza</button>
+        <button class="btn btn-sm" data-action="edit-mezzo" data-id="${m.id}">Modifica</button>
+        <button class="btn btn-sm btn-danger del" data-action="del-mezzo" data-id="${m.id}">Elimina</button></div></div>`;
   }
   function mezzoForm(m){
     const isNew=!m;m=m||{};
@@ -1501,8 +1598,8 @@
         <div class="field"><label>Targa / matricola</label><input id="m-targa" value="${esc(m.targa||"")}" placeholder="Es. AB123CD"></div></div>
       <div class="field"><label>Stato</label><select id="m-stato">${statoOpts}</select></div>
       <div class="field"><label>Note</label><textarea id="m-note" placeholder="Dove si trova, chi lo usa, promemoria...">${esc(m.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
   async function saveMezzo(id){
     const nome=$("#m-nome").value.trim();if(!nome){toast("Scrivi il nome del mezzo");return;}
@@ -1572,17 +1669,17 @@
     const fatta=s.stato==="fatta";
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
     const mezNome=s.mezzo_id?((mezMap||{})[s.mezzo_id]||"(mezzo eliminato)"):"";
-    let bg="#eef2f7",fg="#555",lab="Aperta";
-    if(fatta){bg="#e3f3e8";fg="var(--fatto)";lab="Fatta";}
-    else if(s.data_scadenza&&s.data_scadenza<oggi){bg="#fdecea";fg="#c0392b";lab="Scaduta";}
-    else if(s.data_scadenza&&s.data_scadenza<=lim){bg="#fff4e5";fg="#c2410c";lab="In scadenza";}
+    let bg="var(--sfondo)",fg="var(--testo-2)",lab="Aperta";
+    if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";}
+    else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";}
+    else if(s.data_scadenza&&s.data_scadenza<=lim){bg="var(--attesa-bg)";fg="var(--attesa)";lab="In scadenza";}
     return `<div class="card"><div>
       <h3>${esc(s.titolo||"Scadenza")}</h3>
       <p>${s.tipo_pratica?"📄 "+esc(s.tipo_pratica)+"<br>":""}${cliNome?"👤 "+esc(cliNome)+"<br>":""}${mezNome?"🚚 "+esc(mezNome)+"<br>":""}📅 ${fdate(s.data_scadenza)} <span class="stato" style="background:${bg};color:${fg}">${lab}</span>${s.note?"<br>📝 "+esc(s.note):""}</p></div>
       <div class="card-acts">
-        ${fatta?`<button data-action="scad-stato" data-id="${s.id}" data-v="aperta">↩ Riapri</button>`:`<button data-action="scad-stato" data-id="${s.id}" data-v="fatta">✔ Segna fatta</button>`}
-        <button data-action="edit-scad" data-id="${s.id}">Modifica</button>
-        <button class="del" data-action="del-scad" data-id="${s.id}">Elimina</button></div></div>`;
+        ${fatta?`<button class="btn btn-sm" data-action="scad-stato" data-id="${s.id}" data-v="aperta">↩ Riapri</button>`:`<button class="btn btn-sm" data-action="scad-stato" data-id="${s.id}" data-v="fatta">✔ Segna fatta</button>`}
+        <button class="btn btn-sm" data-action="edit-scad" data-id="${s.id}">Modifica</button>
+        <button class="btn btn-sm btn-danger del" data-action="del-scad" data-id="${s.id}">Elimina</button></div></div>`;
   }
   /* preset: valori precompilati per una NUOVA scadenza (es. mezzo_id dal pulsante "+ Scadenza" della card mezzo) */
   async function scadForm(s,preset){
@@ -1606,8 +1703,8 @@
       <div class="field"><label>Mezzo / attrezzatura (facoltativo)</label><select id="s-mezzo"><option value="">— nessuno —</option>${mezOpts}</select></div>
       <div class="field"><label>Data scadenza</label><input type="date" id="s-data" value="${s.data_scadenza||""}"></div>
       <div class="field"><label>Note</label><textarea id="s-note" placeholder="Dettagli, riferimenti...">${esc(s.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
   async function saveScad(id){
     const titolo=$("#s-tit").value.trim();if(!titolo){toast("Scrivi il titolo");return;}
@@ -1640,8 +1737,8 @@
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
         <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
-        <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-          <button class="b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
+        <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+          <button class="btn-primary b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
       fillOperai();fillClienti(job.cliente_id);return;
     }
     const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
@@ -1650,7 +1747,7 @@
     openSheet(`<h3>${isNew?"Nuovo lavoro":"Modifica lavoro"}</h3>
       <div class="field"><label>Condominio / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
-        <button class="quick-add" data-action="quick-cli">+ Aggiungi nuovo condominio</button></div>
+        <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo condominio</button></div>
       <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
       <div class="field"><label>Dove (vuoto = indirizzo del condominio)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
       <div class="row2">
@@ -1658,7 +1755,7 @@
         <div class="field"><label>Chi ci va</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
       <div class="field"><label>📷 Foto lavoro DA FARE (dal capo)</label>
         <input type="file" id="up-prima" accept="image/*" multiple style="display:none">
-        <label class="up-btn" for="up-prima">＋ Aggiungi foto</label>
+        <label class="btn up-btn" for="up-prima">＋ Aggiungi foto</label>
         <div class="thumbs" id="th-prima"></div></div>
       <div class="field"><label>Stato</label><div class="seg" id="j-stato">
         ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
@@ -1666,7 +1763,7 @@
       <div class="field"><label>📷 Foto lavoro FATTO (operatore)</label>
         <select id="op-dopo"><option value="">— chi l'ha fatto —</option>${dipOpts}</select>
         <input type="file" id="up-dopo" accept="image/*" multiple style="display:none">
-        <label class="up-btn" for="up-dopo" style="margin-top:8px">＋ Aggiungi foto</label>
+        <label class="btn up-btn" for="up-dopo" style="margin-top:8px">＋ Aggiungi foto</label>
         <div class="thumbs" id="th-dopo"></div></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
       <div class="row2">
@@ -1677,17 +1774,17 @@
         <div class="spesa-add">
           <input id="sp-desc" placeholder="Es. Cemento, noleggio piattaforma...">
           <input id="sp-imp" type="number" inputmode="decimal" placeholder="€">
-          <button type="button" data-action="spesa-add">+ Aggiungi</button></div>
+          <button type="button" class="btn" data-action="spesa-add">+ Aggiungi</button></div>
         <div class="margine-box" id="margine-box"></div></div>
       <div class="field" id="mezzi-wrap" style="display:none"><label>🚚 Mezzi e attrezzature usati in questo lavoro</label>
         <div class="spese-list" id="lm-list"></div>
         <div class="mezzo-add">
           <select id="lm-sel"></select>
-          <button type="button" data-action="lm-add">+ Aggiungi</button></div></div>
+          <button type="button" class="btn" data-action="lm-add">+ Aggiungi</button></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-        <button class="b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+        <button class="btn-primary b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button></div>`);
     bindSeg("j-stato");bindSeg("j-fatt");
     $("#up-prima").onchange=e=>{addFoto(e.target.files,"prima","Capo");e.target.value="";};
     $("#up-dopo").onchange=e=>{addFoto(e.target.files,"dopo",$("#op-dopo").value);e.target.value="";};
@@ -1771,8 +1868,8 @@
       <div class="field"><label>Indirizzo</label><input id="c-ind" value="${esc(c.indirizzo||"")}" placeholder="Via, numero, città"></div>
       <div class="row2"><div class="field"><label>Referente / Amministratore</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Nome"></div>
       <div class="field"><label>Telefono</label><input id="c-tel" value="${esc(c.telefono||"")}" placeholder="Numero"></div></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
   async function saveCli(id){
     const nome=$("#c-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
@@ -1788,8 +1885,8 @@
     const isNew=!d;d=d||{};
     openSheet(`<h3>${isNew?"Nuova persona":"Rinomina persona"}</h3>
       <div class="field"><label>Nome</label><input id="d-nome" value="${esc(d.nome||"")}" placeholder="Es. Wahid"></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-dip" data-id="${d.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="save-dip" data-id="${d.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
   }
   async function saveDip(id){
     const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
@@ -1803,8 +1900,8 @@
       <div class="field"><label>Nome del reparto</label><input id="p-nome" placeholder="${ruoloUtente==='professionista'?'Es. Progettazione, Direzione lavori, Catasto':'Es. Muratura, Idraulica, Giardini'}"></div>
       <div class="field"><label>Icona</label><div class="picker" id="p-ic">${ICONE.map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")}</div></div>
       <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}"></button>`).join("")}</div></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-panel">Crea reparto</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="save-panel">Crea reparto</button></div>`);
     $("#p-ic").onclick=e=>{const b=e.target.closest("[data-ic]");if(!b)return;nuovoSel.icon=b.dataset.ic;[...$("#p-ic").children].forEach(x=>x.classList.toggle("on",x===b));};
     $("#p-col").onclick=e=>{const b=e.target.closest("[data-col]");if(!b)return;nuovoSel.col=+b.dataset.col;[...$("#p-col").children].forEach(x=>x.classList.toggle("on",x===b));};
   }
@@ -1854,8 +1951,8 @@
       <div class="row2"><div class="field"><label>Telefono</label><input id="a-tel" value="${esc(a.tel||"")}"></div>
       <div class="field"><label>Email</label><input id="a-email" value="${esc(a.email||"")}"></div></div>
       <div class="field"><label>IBAN (per i bonifici)</label><input id="a-iban" value="${esc(a.iban||"")}" placeholder="IT.."></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-azienda">Salva</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="save-azienda">Salva</button></div>`);
   }
   async function saveAzienda(){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -2019,10 +2116,11 @@
   function agendaCard(l){
     const c=cliById(l.clienteId), d=dipById(l.assegnatoId), dove=l.dove||(c&&c.indirizzo)||"";
     const fatto=l.stato==="fatto", prima=(l.foto||[]).filter(f=>f.tipo==="prima");
+    const late=inRitardo(l.stato,l.dataPrevista);
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(c?c.nome:"—")}</div></div>
       ${l.descrizione?`<div class="job-desc">${esc(l.descrizione)}</div>`:""}
-      <div class="stati"><span class="st"><i class="pall ${fatto?'verde':'rosso'}"></i><span class="lab">${fatto?'Fatto':(l.stato==='in_corso'?'In corso':'Da fare')}</span></span></div>
+      <div class="stati"><span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':'rosso')}"${late?' title="In ritardo"':''}></i><span class="lab">${fatto?'Fatto':(l.stato==='in_corso'?'In corso':'Da fare')}</span></span></div>
       <div class="job-meta">
         ${dove?`<span>📍 ${esc(dove)}</span>`:""}
         <span>📅 ${fdate(l.dataPrevista)}</span>
@@ -2032,10 +2130,10 @@
       ${prima.length?`<div class="ag-foto-label">📷 Foto dal capo — cosa fare</div><div class="thumbs">${prima.map(f=>fotoThumb(f,false)).join("")}</div>`:""}
       ${l.note?`<div class="job-note">📝 ${esc(l.note)}</div>`:""}
       <div class="job-actions">
-        ${dove?`<button class="ja map" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
-        ${l.stato==="da_fare"?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
-        ${!fatto?`<button class="ja go" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
-        <button class="ja" data-action="edit-job" data-id="${l.id}">✏ Apri scheda</button>
+        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
+        ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
+        ${!fatto?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
+        <button class="btn btn-sm ja" data-action="edit-job" data-id="${l.id}">✏ Apri scheda</button>
       </div></div>`;
   }
   async function renderAgenda(){
@@ -2117,13 +2215,13 @@
         <span class="prev-tot">${eur2(tot[p.id]||0)}</span></div>
       ${p.note?`<div class="job-note">📝 ${esc(p.note)}</div>`:""}
       <div class="job-actions">
-        <button class="ja" data-action="edit-prev" data-id="${p.id}">✏ Modifica</button>
-        <button class="ja" data-action="prev-pdf" data-id="${p.id}">📄 PDF</button>
-        ${p.stato==="bozza"?`<button class="ja go" data-action="prev-stato" data-id="${p.id}" data-v="inviato">📤 Segna inviato</button>`:""}
-        ${(p.stato==="bozza"||p.stato==="inviato")?`<button class="ja pay" data-action="prev-to-lavoro" data-id="${p.id}">✔ Accettato → crea lavoro</button>
-        <button class="ja unpay" data-action="prev-stato" data-id="${p.id}" data-v="rifiutato">✕ Rifiutato</button>`:""}
-        ${p.stato==="rifiutato"?`<button class="ja" data-action="prev-stato" data-id="${p.id}" data-v="bozza">↩ Riapri</button>`:""}
-        <button class="ja del" data-action="del-prev" data-id="${p.id}">🗑</button>
+        <button class="btn btn-sm ja" data-action="edit-prev" data-id="${p.id}">✏ Modifica</button>
+        <button class="btn btn-sm ja" data-action="prev-pdf" data-id="${p.id}">📄 PDF</button>
+        ${p.stato==="bozza"?`<button class="btn btn-sm ja" data-action="prev-stato" data-id="${p.id}" data-v="inviato">📤 Segna inviato</button>`:""}
+        ${(p.stato==="bozza"||p.stato==="inviato")?`<button class="btn btn-sm ja" data-action="prev-to-lavoro" data-id="${p.id}">✔ Accettato → crea lavoro</button>
+        <button class="btn btn-sm ja" data-action="prev-stato" data-id="${p.id}" data-v="rifiutato">✕ Rifiutato</button>`:""}
+        ${p.stato==="rifiutato"?`<button class="btn btn-sm ja" data-action="prev-stato" data-id="${p.id}" data-v="bozza">↩ Riapri</button>`:""}
+        <button class="btn btn-sm btn-danger ja del" data-action="del-prev" data-id="${p.id}">🗑</button>
       </div></div>`).join(""):`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo qui</p><small>Crea il primo col pulsante "+ Nuovo preventivo"</small></div>`;
   }
   function prevRigaHtml(r){
@@ -2154,11 +2252,11 @@
         <div class="field"><label>Data</label><input type="date" id="pv-data" value="${p.data||todayStr()}"></div></div>
       <div class="field"><label>Voci del preventivo</label>
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
-        <button type="button" class="quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
+        <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
         <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0))}</div></div>
       <div class="field"><label>Note (compaiono sul PDF)</label><textarea id="pv-note" placeholder="Condizioni, tempi, esclusioni...">${esc(p.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="b-cancel" data-action="close">Annulla</button>
-      <button class="b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button></div>`);
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button></div>`);
     $("#prev-righe").addEventListener("input",prevTotaleLive);
   }
   async function savePrev(id){
@@ -2338,14 +2436,14 @@
       <div class="mlav-sub">Incasso ${eur(m.inc)} · Spese ${eur(m.sp)}</div></div>`;
     }).join("");
     const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>💶 Guadagno o perdita per lavoro</h3>
-      <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--accent)"></i>Incasso</span><span><i style="background:#e07b54"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
+      <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>Incasso</span><span><i style="background:var(--testo-3)"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
       ${ML.length?mlRows:`<p class="fatt-empty">Metti un importo nei lavori e registra le spese (dentro "Modifica" del lavoro) per vedere qui il margine.</p>`}
       ${ML.length>15?`<p class="fatt-empty" style="margin-top:8px">Mostro i 15 lavori col margine più basso: se un lavoro non compare, è tra quelli in positivo.</p>`:""}</div>`;
     box.innerHTML=`<div class="rep-grid">
       ${mlCard}
       <div class="rep-card"><h3>📈 Incassi e spese — ultimi 6 mesi</h3>
         <div class="rep-bar-wrap">${bars}</div>
-        <div class="rep-legend"><span><i style="background:var(--accent)"></i>Incassato</span><span><i style="background:#e07b54"></i>Spese</span></div></div>
+        <div class="rep-legend"><span><i style="background:var(--blu)"></i>Incassato</span><span><i style="background:var(--testo-3)"></i>Spese</span></div></div>
       <div class="rep-card"><h3>📋 Situazione reparto</h3><table class="rep-table">
         <tr><td>Lavori da fare</td><td>${L.filter(l=>l.stato==="da_fare").length}</td></tr>
         <tr><td>Lavori in corso</td><td>${L.filter(l=>l.stato==="in_corso").length}</td></tr>
@@ -2602,21 +2700,21 @@
 </script>
 
 <!-- ===== LUCCHETTO GESTIONALE (add-on a pagamento) ===== -->
-<div id="gate-gestionale" style="display:none;position:fixed;inset:0;z-index:999999;background:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;align-items:center;justify-content:center;padding:20px;">
-  <div style="max-width:460px;width:100%;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(10,42,77,0.12);overflow:hidden;">
-    <div style="background:#0066ff;color:#fff;padding:24px;text-align:center;">
+<div id="gate-gestionale" style="display:none;position:fixed;inset:0;z-index:999999;background:var(--sfondo);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;align-items:center;justify-content:center;padding:20px;">
+  <div style="max-width:460px;width:100%;background:var(--card);border-radius:16px;box-shadow:0 8px 30px rgba(10,42,77,0.12);overflow:hidden;">
+    <div style="background:var(--blu);color:#fff;padding:24px;text-align:center;">
       <div style="font-size:20px;font-weight:800;">&#128274; Gestionale TrovaImpresa</div>
     </div>
-    <div id="gate-checking" style="padding:32px;text-align:center;color:#5a6b7b;font-size:14px;">Verifica accesso in corso&hellip;</div>
-    <div id="gate-paywall" style="display:none;padding:28px 28px 32px;color:#1a2733;">
+    <div id="gate-checking" style="padding:32px;text-align:center;color:var(--testo-2);font-size:var(--f-base);">Verifica accesso in corso&hellip;</div>
+    <div id="gate-paywall" style="display:none;padding:28px 28px 32px;color:var(--testo);">
       <p style="margin:0 0 12px;font-size:15px;line-height:1.6;">Il Gestionale &egrave; uno strumento professionale a parte: agenda, preventivi PDF, scadenze fiscali, squadra e cantieri, tutto in un unico posto.</p>
       <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Attivalo per sbloccare l&rsquo;accesso completo:</p>
       <div id="gate-btns">
-        <button onclick="attivaGestionale('mensile')" style="width:100%;padding:14px;margin-bottom:10px;border:none;border-radius:10px;background:#0066ff;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">12&euro; / mese</button>
-        <button onclick="attivaGestionale('annuale')" style="width:100%;padding:14px;border:2px solid #7b1fa2;border-radius:10px;background:#f3e5f5;color:#7b1fa2;font-size:15px;font-weight:700;cursor:pointer;">119&euro; / anno &middot; risparmi 25&euro;</button>
+        <button onclick="attivaGestionale('mensile')" style="width:100%;padding:14px;margin-bottom:10px;border:none;border-radius:10px;background:var(--blu);color:#fff;font-size:var(--f-md);font-weight:700;cursor:pointer;">12&euro; / mese</button>
+        <button onclick="attivaGestionale('annuale')" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--blu-scuro);color:#fff;font-size:var(--f-md);font-weight:700;cursor:pointer;">119&euro; / anno &middot; risparmi 25&euro;</button>
       </div>
-      <p style="margin:16px 0 0;font-size:12px;color:#9aa7b4;text-align:center;">Pagamento sicuro con Stripe &middot; disdici quando vuoi</p>
-      <p style="margin:14px 0 0;text-align:center;"><a href="#" onclick="history.back();return false;" style="color:#0066ff;font-size:13px;text-decoration:none;">&larr; Torna indietro</a></p>
+      <p style="margin:16px 0 0;font-size:12px;color:var(--testo-3);text-align:center;">Pagamento sicuro con Stripe &middot; disdici quando vuoi</p>
+      <p style="margin:14px 0 0;text-align:center;"><a href="#" onclick="history.back();return false;" style="color:var(--blu);font-size:var(--f-sm);text-decoration:none;">&larr; Torna indietro</a></p>
     </div>
   </div>
 </div>
