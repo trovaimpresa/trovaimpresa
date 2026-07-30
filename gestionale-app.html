@@ -541,6 +541,82 @@
     .tb-actions{margin-left:0;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
   }
 
+  /* ================================================================
+     SEZIONE LAVORI — schermata di riferimento da scrivania.
+     Tabella sopra 880px, card sotto. Le viste restano in entrambi i casi.
+     ================================================================ */
+  .lav-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .lav-head h2{font-size:var(--f-xl);font-weight:500;letter-spacing:-.3px;color:var(--testo)}
+  .lav-head-act{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .lav-search{width:280px;height:34px;padding:0 12px;font-family:inherit;font-size:var(--f-base);
+    color:var(--testo);background:var(--card);border:1px solid var(--bordo);border-radius:var(--r)}
+  .lav-search::placeholder{color:var(--testo-3)}
+  .lav-search:focus{outline:none;border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,102,255,.12)}
+  .lav-head-act .btn,.lav-head-act .btn-primary{height:34px}
+
+  /* viste a schede sottolineate */
+  .viste{display:flex;gap:0;margin-bottom:2px;border-bottom:.5px solid var(--bordo);overflow-x:auto}
+  .viste .vista{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
+    height:38px;padding:0 14px;margin-bottom:-.5px;
+    background:none;border:none;border-bottom:2px solid transparent;
+    font-family:inherit;font-size:var(--f-base);font-weight:400;color:var(--testo-2);
+    cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s}
+  .viste .vista:hover{color:var(--testo)}
+  .viste .vista.on{border-bottom-color:var(--blu);font-weight:600;color:var(--testo)}
+  .v-cnt{font-size:11px;font-weight:500;color:var(--testo-3)}
+  .v-cnt.err{font-weight:700;background:var(--err-bg);color:var(--err);border-radius:20px;padding:1px 6px}
+
+  /* tabella */
+  .ltab{width:100%;table-layout:fixed;border-collapse:collapse;font-size:var(--f-base)}
+  .ltab th{text-align:left;font-size:12px;font-weight:400;color:var(--testo-3);
+    padding:12px;border-bottom:.5px solid var(--bordo);white-space:nowrap}
+  /* niente color qui: lo eredita da #app-root e lascia vincere le classi .q-* (0,1,0) */
+  .ltab td{padding:12px;border-top:.5px solid var(--bordo);vertical-align:middle;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ltab tbody tr:hover{background:var(--sfondo);cursor:pointer}
+  .ltab th.c-imp,.ltab td.c-imp{text-align:right;font-variant-numeric:tabular-nums}
+  .ltab .c-cli,.ltab .c-chi{color:var(--testo-2)}
+  /* stato: barretta, non badge */
+  .lav-bar{display:inline-block;width:3px;height:15px;border-radius:2px;margin-right:10px;vertical-align:-2px}
+  .lav-bar.ritardo{background:var(--err)}
+  .lav-bar.da_fare{background:var(--attesa)}
+  .lav-bar.in_corso{background:var(--info)}
+  .lav-bar.fatto{background:var(--ok)}
+  /* riga del totale */
+  .ltab .lav-tot td{border-top:1px solid var(--bordo-forte);font-weight:600;color:var(--testo)}
+  .ltab .lav-tot:hover{background:none;cursor:default}
+  /* colonna azioni + menu a tendina */
+  .ltab td.c-menu{position:relative;overflow:visible;text-align:right;padding:6px 6px 6px 0}
+  .lav-dots{width:28px;height:28px;padding:0;border:none;background:none;border-radius:8px;
+    color:var(--testo-2);font-size:17px;line-height:1;cursor:pointer}
+  .lav-dots:hover{background:var(--bordo)}
+  .lav-pop{position:absolute;right:6px;top:36px;z-index:40;min-width:200px;padding:6px;text-align:left;
+    background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);
+    box-shadow:0 8px 24px rgba(15,23,42,.14);white-space:nowrap}
+  .lav-pop button{display:flex;align-items:center;gap:9px;width:100%;height:34px;padding:0 10px;
+    background:none;border:none;border-radius:8px;font-family:inherit;font-size:var(--f-base);
+    font-weight:500;color:var(--testo);text-align:left;cursor:pointer}
+  .lav-pop button:hover{background:var(--sfondo)}
+  .lav-pop button.del{color:var(--err)}
+  .lav-pop button.del:hover{background:var(--err-bg)}
+  .lav-pop .sep{border:none;border-top:1px solid var(--bordo);margin:5px 2px}
+  /* stati vuoti */
+  .lav-vuoto{padding:56px 20px;text-align:center}
+  .lav-vuoto svg{width:40px;height:40px;color:var(--testo-3);margin-bottom:12px}
+  .lav-vuoto h3{font-size:16px;font-weight:600;color:var(--testo)}
+  .lav-vuoto p{font-size:var(--f-base);color:var(--testo-2);margin-top:6px}
+  /* distanza da oggi in parole (usata anche da Preventivi/Fatture/Scadenzario) */
+  .q-passato{color:var(--err)}
+  .q-neutro{color:var(--testo-2)}
+  .q-oggi{color:var(--testo);font-weight:600}
+  .q-futuro{color:var(--testo-2)}
+  .q-vuoto{color:var(--testo-3)}
+  @media(max-width:880px){
+    .lav-head-act{width:100%;margin-left:0}
+    .lav-search{flex:1;width:auto}
+    #jobs-list{display:grid;grid-template-columns:1fr;gap:10px}
+  }
+
   /* ---------- 5. TIPOGRAFIA ---------- */
   .sec-head h2,.rie-intro h2,.cal-head h2{font-size:var(--f-xl);font-weight:700;letter-spacing:-.3px;color:var(--testo)}
   .rie-intro p,.gal-intro{font-size:var(--f-base);color:var(--testo-2);line-height:1.5}
@@ -662,16 +738,16 @@
     </section>
 
     <section id="lavori">
-      <div class="sec-head"><h2>Lavori</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-job">+ Nuovo</button><button class="btn add" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">✨ Con AI</button></div></div>
-      <div class="chiprow" id="stato-chips">
-        <button class="chip on" data-stato="tutti">Tutti</button>
-        <button class="chip" data-stato="da_fare">Da fare</button>
-        <button class="chip" data-stato="in_corso">In corso</button>
-        <button class="chip" data-stato="fatto">Fatti</button>
-        <button class="chip" data-stato="da_incassare">Da incassare</button>
+      <div class="lav-head">
+        <h2>Lavori</h2>
+        <div class="lav-head-act">
+          <input type="text" id="f-search" class="lav-search" placeholder="Cerca cliente, indirizzo, lavoro">
+          <button class="btn" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">&#10024; Con AI</button>
+          <button class="btn-primary" data-action="new-job">+ Nuovo lavoro</button>
+        </div>
       </div>
-      <div class="filters"><input type="text" id="f-search" placeholder="Cerca condominio o lavoro..."></div>
-      <div id="jobs-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div class="viste" id="lav-viste"></div>
+      <div id="jobs-list"></div>
     </section>
 
     <section id="fatture">
@@ -777,7 +853,7 @@
   ];
   let nuovoSel={icon:"🛠️",col:0};
   let state={};
-  let cur=null, filter={stato:"tutti",q:""}, cal=new Date(), editing=null, galFilter={op:"",tipo:""}, agFilter={op:"",stato:"aperti"};
+  let cur=null, filter={vista:"settimana",q:""}, cal=new Date(), editing=null, galFilter={op:"",tipo:""}, agFilter={op:"",stato:"aperti"};
   const fotoCache={};
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -985,7 +1061,7 @@
   /* Contenitori del CONTENUTO inserito dall'utente: i loro nodi di testo NON vanno tradotti
      (nomi reparti, titoli/descrizioni pratiche, note, dati cliente, nomi operatori).
      Restano traducibili le etichette fisse (tab "Lavori", "+ Nuovo lavoro", contatori, messaggi vuoti…). */
-  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op,#ag-op,#d-ruolo,textarea';
+  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op,#ag-op,#d-ruolo,textarea';
   let _praticheObs=null;
   function _osservaPratiche(){
     if(!_praticheObs)return;
@@ -1141,10 +1217,9 @@
     if($("#tb-panel-name"))$("#tb-panel-name").textContent=p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="flex";
-    filter={stato:"tutti",q:""};$("#f-search").value="";cal=new Date();
+    filter={vista:"settimana",q:""};lavVistaAuto=true;$("#f-search").value="";cal=new Date();
     galFilter={op:"",tipo:""};$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===""));
     agFilter={op:"",stato:"aperti"};$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="aperti"));
-    $$("#stato-chips .chip").forEach(c=>c.classList.toggle("on",c.dataset.stato==="tutti"));
     mezziFilter="tutti";$$("#mezzi-chips .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="tutti"));
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
@@ -1334,59 +1409,155 @@
       </div></div>`;
   }
   /* Lavori: tabella ordinabile su desktop, card su mobile */
-  let jobsSort={k:"data_prevista",d:1};
   const _deskTab=()=>window.matchMedia("(min-width:881px)").matches;
   function _waLavoro(l,opTel){
     const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
     const isPro=ruoloUtente==='professionista';
     const termCap=isPro?"Pratica":"Lavoro";
-    const intro=isPro?"Ciao! C'è una nuova pratica per te.":"Ciao! C'è un nuovo lavoro per te.";
-    const waText=encodeURIComponent(intro+"\n"+termCap+": "+(l.descrizione||termCap)+"\nDove: "+(l.dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
+    const intro=isPro?"Ciao! C'\u00e8 una nuova pratica per te.":"Ciao! C'\u00e8 un nuovo lavoro per te.";
+    const waText=encodeURIComponent(intro+"\n"+termCap+": "+(l.descrizione||termCap)+"\nDove: "+(l.dove||"\u2014")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
     const waTel=waCleanTel(opTel);
     return waTel?("https://wa.me/"+waTel+"?text="+waText):("https://wa.me/?text="+waText);
   }
+
+  /* ============================================================
+     "QUANDO" IN PAROLE — distanza da oggi, non la data.
+     Riutilizzabile: serve anche a Preventivi, Fatture, Scadenzario.
+     Ritorna {testo, classe}; la classe porta il colore (.q-*).
+     opt.neutro = "qui una data passata non e' un problema" (lavoro gia' fatto,
+     fattura pagata...): il rosso resta riservato ai ritardi veri.
+     ============================================================ */
+  const MESI_BREVI=["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+  function quando(ds,opt){
+    if(!ds)return{testo:"\u2014",classe:"q-vuoto"};
+    const g=_giorniA(ds);                       /* positivo = nel futuro */
+    if(g===null)return{testo:"\u2014",classe:"q-vuoto"};
+    if(g<0){const n=-g;return{testo:n===1?"ieri":n+" giorni fa",classe:(opt&&opt.neutro)?"q-neutro":"q-passato"};}
+    if(g===0)return{testo:"oggi",classe:"q-oggi"};
+    if(g===1)return{testo:"domani",classe:"q-futuro"};
+    if(g<14)return{testo:"fra "+g+" giorni",classe:"q-futuro"};
+    if(g<=30){const w=Math.round(g/7);return{testo:"fra "+w+" settimane",classe:"q-futuro"};}
+    const mm=+ds.split("-")[1], dd=+ds.split("-")[2];
+    return{testo:dd+" "+MESI_BREVI[mm-1],classe:"q-futuro"};
+  }
+
+  /* ============================================================
+     LAVORI — viste al posto dei filtri di stato
+     ============================================================ */
+  /* ultimo giorno della settimana in corso (domenica) */
+  function _fineSettimana(){const g=(new Date().getDay()+6)%7;return _giorniDopo(todayStr(),6-g);}
+  const LAV_VISTE=[
+    {k:"ritardo",  lab:"In ritardo"},
+    {k:"oggi",     lab:"Oggi"},
+    {k:"settimana",lab:"Questa settimana"},
+    {k:"incassare",lab:"Da incassare"},
+    {k:"archivio", lab:"Archivio"}
+  ];
+  function lavFiltra(L,v,oggi,dom){
+    if(v==="ritardo")  return L.filter(l=>inRitardo(l.stato,l.data_prevista));
+    if(v==="oggi")     return L.filter(l=>l.stato!=="fatto"&&l.data_prevista===oggi);
+    if(v==="settimana")return L.filter(l=>l.stato!=="fatto"&&l.data_prevista&&l.data_prevista>=oggi&&l.data_prevista<=dom);
+    if(v==="incassare")return L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")!=="pagata");
+    if(v==="archivio") return L.filter(l=>l.stato==="fatto");
+    return L;
+  }
+  const _SVGV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">';
+  const LAV_VUOTO={
+    ritardo:  {t:"Nessun lavoro in ritardo",      s:"Sei in pari con le scadenze.",            i:_SVGV+'<path d="M20 6 9 17l-5-5"/></svg>'},
+    oggi:     {t:"Niente in programma per oggi",  s:"Nessun lavoro con data di oggi.",         i:_SVGV+'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg>'},
+    settimana:{t:"Nessun lavoro questa settimana",s:"Da qui a domenica non c'\u00e8 niente in programma.",i:_SVGV+'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>'},
+    incassare:{t:"Hai incassato tutto",           s:"Nessuna fattura in sospeso.",             i:_SVGV+'<path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7 7 0 1 0 0 12"/></svg>'},
+    archivio: {t:"Ancora nessun lavoro finito",   s:"Qui finiscono i lavori completati.",      i:_SVGV+'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>'}
+  };
+  function lavVuoto(v){
+    const e=LAV_VUOTO[v]||LAV_VUOTO.settimana;
+    return `<div class="lav-vuoto">${e.i}<h3>${e.t}</h3><p>${e.s}</p></div>`;
+  }
+  /* menu "..." della riga: nessuna azione della vecchia barra e' andata persa */
+  function lavPop(l,wa){
+    const id=esc(l.id), dp=esc(l.data_prevista||""), fatto=l.stato==="fatto", fs=l.fatt_stato||"none";
+    let h='<div class="lav-pop">';
+    if(l.stato==="da_fare")h+=`<button data-action="stato-supa" data-id="${id}" data-v="in_corso" data-dp="${dp}">\u25b6 Avvia</button>`;
+    if(!fatto)h+=`<button data-action="stato-supa" data-id="${id}" data-v="fatto" data-dp="${dp}">\u2714 Segna fatto</button>`;
+    else h+=`<button data-action="stato-supa" data-id="${id}" data-v="da_fare" data-dp="${dp}">\u21a9 Riapri</button>`;
+    h+=`<button data-action="lf-open" data-id="${id}" data-desc="${esc(l.descrizione||"Lavoro")}">\ud83d\udcf7 Foto</button>`;
+    if(l.dove)h+=`<button data-action="map" data-q="${esc(l.dove)}">\ud83d\uddfa Mappa</button>`;
+    h+=`<button data-action="sq-wa" data-wa="${esc(wa)}">\ud83d\udcac Avvisa su WhatsApp</button>`;
+    h+='<hr class="sep">';
+    h+=`<button data-action="pdf" data-id="${id}">\ud83d\udcc4 Scarica PDF</button>`;
+    if(fs!=="emessa")h+=`<button data-action="fatt" data-id="${id}" data-v="emessa">\ud83e\uddfe Fattura emessa</button>`;
+    if(fs!=="pagata")h+=`<button data-action="fatt" data-id="${id}" data-v="pagata">\ud83d\udcb6 Segna pagata</button>`;
+    h+='<hr class="sep">';
+    h+=`<button class="del" data-action="del-job-supa" data-id="${id}">\ud83d\uddd1 Elimina</button>`;
+    return h+'</div>';
+  }
+  function lavChiudiPop(){document.querySelectorAll(".lav-pop").forEach(x=>x.remove());}
+
+  let lavVistaAuto=true;   /* la prima vista la sceglie il codice, poi comanda l'utente */
+  let lavCache=[], lavTel={};
   async function renderJobs(){
-    const box=$("#jobs-list");if(!box)return;
-    if(!sb||!sbUid){box.style.display="grid";box.innerHTML=`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;return;}
-    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
-    let L=data||[];
-    const {data:ops}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
-    const telMap=Object.fromEntries((ops||[]).map(o=>[o.id,o.telefono||""]));
+    const box=$("#jobs-list"), viste=$("#lav-viste");
+    if(!box)return;
+    lavChiudiPop();
+    if(!sb||!sbUid){if(viste)viste.innerHTML="";box.style.display="block";box.innerHTML=lavVuoto("settimana");return;}
+    const oggi=todayStr(), dom=_fineSettimana();
+    const [{data:lav},{data:ops},{data:cls}]=await Promise.all([
+      sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+    ]);
+    const TUTTI=lav||[];
+    lavCache=TUTTI;
+    lavTel=Object.fromEntries((ops||[]).map(o=>[o.id,o.telefono||""]));
     const opName=Object.fromEntries((ops||[]).map(o=>[o.id,o.nome||""]));
-    if(filter.stato==="fatto")L=L.filter(l=>l.stato==="fatto");
-    else if(filter.stato==="da_fare")L=L.filter(l=>l.stato!=="fatto");
-    else if(filter.stato==="in_corso")L=L.filter(l=>l.stato==="in_corso");
-    else if(filter.stato==="da_incassare")L=[];
-    if(filter.q){const q=filter.q.toLowerCase();L=L.filter(l=>(l.descrizione||"").toLowerCase().includes(q)||(l.dove||"").toLowerCase().includes(q));}
-    if(!L.length){box.style.display="grid";box.innerHTML=`<div class="empty"><div class="ic">📋</div><p>Nessun lavoro qui</p><small>Cambia filtro o aggiungi un nuovo lavoro</small></div>`;return;}
-    if(!_deskTab()){
-      L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
-      box.style.display="grid";
-      box.innerHTML=L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join("");
+    const cliName=Object.fromEntries((cls||[]).map(c=>[c.id,c.nome||""]));
+    /* conteggi per vista: sulla lista intera, non su quella cercata */
+    const conta={};LAV_VISTE.forEach(v=>conta[v.k]=lavFiltra(TUTTI,v.k,oggi,dom).length);
+    if(lavVistaAuto){filter.vista=conta.ritardo>0?"ritardo":"settimana";lavVistaAuto=false;}
+    if(viste)viste.innerHTML=LAV_VISTE.map(v=>{
+      const n=conta[v.k];
+      const badge=n?`<span class="v-cnt${v.k==="ritardo"?" err":""}">${n}</span>`:"";
+      return `<button class="vista${filter.vista===v.k?" on":""}" data-action="lav-vista" data-v="${v.k}">${v.lab}${badge}</button>`;
+    }).join("");
+
+    let L=lavFiltra(TUTTI,filter.vista,oggi,dom);
+    if(filter.q){
+      const q=filter.q.toLowerCase();
+      L=L.filter(l=>(l.descrizione||"").toLowerCase().includes(q)
+                  ||(l.dove||"").toLowerCase().includes(q)
+                  ||(cliName[l.cliente_id]||"").toLowerCase().includes(q));
+    }
+    L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+    if(!L.length){
+      box.style.display="block";
+      box.innerHTML=filter.q
+        ? `<div class="lav-vuoto">${_SVGV}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><h3>Nessun risultato</h3><p>Nessun lavoro trovato per \u00ab${esc(filter.q)}\u00bb.</p></div>`
+        : lavVuoto(filter.vista);
       return;
     }
-    const val=l=>jobsSort.k==="op"?(opName[l.operatore_id]||""):String(l[jobsSort.k]||"");
-    L.sort((a,b)=>val(a).toLowerCase().localeCompare(val(b).toLowerCase())*jobsSort.d);
-    const arrow=k=>jobsSort.k===k?(jobsSort.d>0?" ↑":" ↓"):"";
-    const th=(k,lab)=>`<th data-action="jobs-sort" data-k="${k}">${lab}${arrow(k)}</th>`;
+    /* sotto 880px si torna alle card */
+    if(!_deskTab()){
+      box.style.display="grid";
+      box.innerHTML=L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"")).join("");
+      return;
+    }
+    const tot=L.reduce((a,l)=>a+(+l.importo||0),0);
     box.style.display="block";
-    box.innerHTML=`<table class="dtab"><thead><tr>
-      ${th("descrizione","Lavoro")}${th("dove","Dove")}${th("data_prevista","Data")}${th("op","Operatore")}${th("stato","Stato")}<th>Azioni</th>
-      </tr></thead><tbody>`+L.map(l=>{
-      const dp=esc(l.data_prevista||""), fatto=l.stato==="fatto";
-      return `<tr><td><b>${esc(l.descrizione||"—")}</b></td>
-      <td>${esc(l.dove||"—")}</td><td style="white-space:nowrap">${fdate(l.data_prevista)}</td>
-      <td>${esc(opName[l.operatore_id]||"—")}</td>
-      <td><span class="stato ${inRitardo(l.stato,l.data_prevista)?'ritardo':l.stato}"${inRitardo(l.stato,l.data_prevista)?' title="In ritardo"':''}>${statoLabel[l.stato]||l.stato}</span></td>
-      <td><div class="t-act">
-        ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}" title="Avvia">▶</button>`:""}
-        ${!fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}" title="Segna fatto">✔</button>`:`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}" title="Riapri">↩</button>`}
-        <button class="btn btn-sm ja" data-action="edit-job" data-id="${esc(l.id)}" title="Modifica">✏</button>
-        <button class="btn btn-sm ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}" title="Foto">📷</button>
-        ${l.dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(l.dove)}" title="Mappa">🗺</button>`:""}
-        <button class="btn btn-sm ja" data-action="sq-wa" data-wa="${esc(_waLavoro(l,telMap[l.operatore_id]||""))}" title="Avvisa su WhatsApp">💬</button>
-        <button class="btn btn-sm btn-danger ja del" data-action="del-job-supa" data-id="${esc(l.id)}" title="Elimina">🗑</button>
-      </div></td></tr>`;}).join("")+`</tbody></table>`;
+    box.innerHTML=`<table class="ltab">
+      <colgroup><col style="width:36%"><col style="width:24%"><col style="width:17%"><col style="width:10%"><col style="width:13%"><col style="width:36px"></colgroup>
+      <thead><tr><th>Lavoro</th><th>Cliente</th><th>Quando</th><th>Chi</th><th class="c-imp">Importo</th><th></th></tr></thead>
+      <tbody>`+L.map(l=>{
+      const q=quando(l.data_prevista,{neutro:l.stato==="fatto"});
+      const late=inRitardo(l.stato,l.data_prevista);
+      return `<tr data-action="edit-job" data-id="${esc(l.id)}">
+        <td><span class="lav-bar ${late?"ritardo":l.stato}" title="${late?"In ritardo":(statoLabel[l.stato]||l.stato)}"></span><span class="c-nome">${esc(l.descrizione||"\u2014")}</span></td>
+        <td class="c-cli">${esc(cliName[l.cliente_id]||l.dove||"\u2014")}</td>
+        <td class="${q.classe}">${q.testo}</td>
+        <td class="c-chi">${esc(opName[l.operatore_id]||"\u2014")}</td>
+        <td class="c-imp">${+l.importo?eur(l.importo):"\u2014"}</td>
+        <td class="c-menu"><button class="lav-dots" data-action="lav-menu" data-id="${esc(l.id)}" title="Altre azioni">&#8943;</button></td></tr>`;
+    }).join("")+`<tr class="lav-tot"><td colspan="4">${L.length} ${L.length===1?"lavoro":"lavori"}</td><td class="c-imp">${eur(tot)}</td><td></td></tr>
+      </tbody></table>`;
   }
 
   let lfLavoroId=null;
@@ -2675,7 +2846,15 @@
     if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevPdf(id);
     if(a==="report-csv")return reportCsv();
-    if(a==="jobs-sort"){const k=t.dataset.k;jobsSort=jobsSort.k===k?{k,d:-jobsSort.d}:{k,d:1};renderJobs();return;}
+    if(a==="lav-vista"){filter.vista=t.dataset.v;lavVistaAuto=false;renderJobs();return;}
+    if(a==="lav-menu"){
+      const cella=t.closest("td"), aperto=cella.querySelector(".lav-pop");
+      lavChiudiPop();
+      if(aperto)return;                                   /* secondo clic: chiude */
+      const l=lavCache.find(x=>String(x.id)===String(id));
+      if(l)cella.insertAdjacentHTML("beforeend",lavPop(l,_waLavoro(l,lavTel[l.operatore_id]||"")));
+      return;
+    }
     if(a==="fatt-sort"){const k=t.dataset.k;fattSort=fattSort.k===k?{k,d:-fattSort.d}:{k,d:1};renderFatture();return;}
     if(a==="burger"){const s=document.querySelector(".side");if(s)s.classList.toggle("open");return;}
     if(a==="export-excel")return esportaExcel();
@@ -2734,14 +2913,14 @@
       const v=t.dataset.v, dp=t.dataset.dp||"";
       const {error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid);
       if(error){toast("Errore: "+error.message);return;}
-      renderJobs();toast("Stato: "+(statoLabel[v]||v));return;
+      renderJobs();renderContatori();toast("Stato: "+(statoLabel[v]||v));return;
     }
     if(a==="fatt"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v;
       const {error}=await sb.from("gest_lavori").update({fatt_stato:v}).eq("id",id).eq("user_id",sbUid);
       if(error){toast("Errore: "+error.message);return;}
-      renderFatture();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
+      renderFatture();renderJobs();renderContatori();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
     }
     if(a==="upload-fattura")return chiediFatturaPdf(id);
     if(a==="open-fattura")return apriFatturaPdf(id);
@@ -2812,11 +2991,17 @@
     b.onclick=()=>{
       $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
       $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
+      /* Lavori si ridisegna all'apertura: altrimenti mostra quello che era stato reso
+         entrando nel reparto, con la forma (tabella o card) di quella larghezza. */
+      if(b.dataset.tab==="lavori")renderJobs();
       const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
       window.scrollTo({top:0,behavior:"smooth"});
     };
   });
-  $$("#stato-chips .chip").forEach(c=>c.onclick=()=>{$$("#stato-chips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");filter.stato=c.dataset.stato;renderJobs();});
+  /* chiude il menu "..." a ogni clic fuori dal pulsante che lo apre */
+  document.addEventListener("click",e=>{if(!e.target.closest(".lav-dots"))lavChiudiPop();});
+  /* la tabella si ridisegna al passaggio desktop/mobile: sotto 880px tornano le card */
+  window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur)renderJobs();});
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
