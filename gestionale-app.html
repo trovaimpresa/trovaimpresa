@@ -2192,10 +2192,10 @@
       <div class="rep-card"><h3>📈 Incassi e spese — ultimi 6 mesi</h3>
         <div class="rep-bar-wrap">${bars}</div>
         <div class="rep-legend"><span><i style="background:var(--blu)"></i>Incassato</span><span><i style="background:var(--testo-3)"></i>Spese</span></div></div>
-      <div class="rep-card"><h3>📋 Situazione reparto</h3><table class="rep-table">
-        <tr><td>Lavori da fare</td><td>${L.filter(l=>l.stato==="da_fare").length}</td></tr>
-        <tr><td>Lavori in corso</td><td>${L.filter(l=>l.stato==="in_corso").length}</td></tr>
-        <tr><td>Lavori fatti</td><td>${L.filter(l=>l.stato==="fatto").length}</td></tr>
+      ${/* Solo dati storici: da fare / in corso / fatti stanno gia' nel Riepilogo,
+            che e' la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
+      <div class="rep-card"><h3 class="con-sub">📋 Totali storici</h3>
+        <p class="rep-sub">Da quando usi il gestionale</p><table class="rep-table">
         <tr><td>Incassato ${anno}</td><td>${eur(incAnno)}</td></tr>
         <tr><td>Incassato totale</td><td>${eur(totInc)}</td></tr>
         <tr><td>Spese totali</td><td style="color:var(--testo)">−${eur(totSp)}</td></tr>
