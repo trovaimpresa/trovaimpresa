@@ -138,6 +138,10 @@
   /* importo a destra del titolo: mai "0 €", chi non ha importo non stampa niente */
   .job-imp{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
   .job-clic{cursor:pointer}
+  /* icona in linea nei meta: stesso tratto delle icone del menu, 16px.
+     Il colore e' fisso e non eredita quello del testo accanto (che puo' virare
+     in ambra quando l'attesa e' lunga): l'icona resta neutra. */
+  .ic16{width:16px;height:16px;flex:0 0 auto;color:var(--testo-2)}
   .job-desc{font-size:14px;color:var(--testo);margin-top:3px;line-height:1.35}
   .job-done{font-size:13px;color:var(--fatto);margin-top:6px;line-height:1.35;background:var(--ok-bg);padding:7px 10px;border-radius:9px}
   .job-note{font-size:13px;color:var(--attesa);margin-top:6px;line-height:1.35;background:var(--attesa-bg);padding:7px 10px;border-radius:9px}
@@ -1350,6 +1354,9 @@
      lo si scopriva solo entrando nella scheda Preventivi. Dal piu' vecchio, cosi'
      in cima c'e' sempre quello da sollecitare. Se non ce n'e' nessuno il blocco
      sparisce del tutto (titolo compreso): niente sezioni vuote nel Riepilogo. */
+  const _ICO='<svg class="ic16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+  const _ICO_OROLOGIO=_ICO+'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+  const _ICO_PERSONA=_ICO+'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
   let rieprevCache=[];
   async function renderPrevAttesa(attesa){
     const box=$("#rie-prev");if(!box)return;
@@ -1372,8 +1379,8 @@
           <div class="job-top"><div class="job-cli">${esc(p.titolo||"Preventivo")}</div>
             ${imp?`<span class="job-imp">${eur(imp)}</span>`:""}</div>
           <div class="job-meta">
-            <span>👤 ${esc(cliMap[p.cliente_id]||"—")}</span>
-            <span class="${cls}">⏳ ${q.testo}</span>
+            <span>${_ICO_PERSONA}${esc(cliMap[p.cliente_id]||"—")}</span>
+            <span class="${cls}">${_ICO_OROLOGIO}${q.testo}</span>
           </div></div>`;
       }).join("");
   }
