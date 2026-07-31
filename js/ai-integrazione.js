@@ -525,15 +525,40 @@
     };
   }
 
+  /* Numero scritto all'italiana -> numero che <input type="number"> accetta.
+     Serve perche' l'AI risponde come parla l'utente: "1000 euro", "€ 1.000",
+     "1.200,50". Un input numerico rifiuta in SILENZIO tutto cio' che non e' un
+     numero puro (el.value resta ''), ed e' cosi' che l'importo spariva prima di
+     arrivare al Salva. Peggio ancora "1.000": l'input lo accetta e lo legge
+     come 1 euro, quindi i punti delle migliaia vanno tolti a mano. */
+  function numeroIt(val) {
+    if (val == null) return '';
+    if (typeof val === 'number') return isFinite(val) ? String(val) : '';
+    let s = String(val).trim().replace(/[^\d.,-]/g, '');   // via €, spazi, "euro", ecc.
+    if (!s) return '';
+    const vir = s.lastIndexOf(','), pun = s.lastIndexOf('.');
+    if (vir > -1 && pun > -1) {
+      // ci sono entrambi: l'ultimo e' il separatore decimale, l'altro le migliaia
+      s = vir > pun ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+    } else if (vir > -1) {
+      s = s.replace(',', '.');                             // virgola = decimali
+    } else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) {
+      s = s.replace(/\./g, '');                            // 1.000 = mille, non 1
+    }
+    const n = Number(s);
+    return isFinite(n) ? String(n) : '';
+  }
+
   // Riempie un input solo se il valore non è vuoto; ritorna l'elemento se compilato
   function riempiCampo(id, val, primoRef) {
     const el = document.getElementById(id);
-    if (el && val != null && String(val).trim() !== '') {
-      el.value = String(val).trim();
-      if (primoRef && !primoRef.el) primoRef.el = el;
-      return el;
-    }
-    return null;
+    if (!el) return null;
+    // i campi numerici passano dal normalizzatore, gli altri restano come sono
+    const v = el.type === 'number' ? numeroIt(val) : (val == null ? '' : String(val).trim());
+    if (v === '') return null;
+    el.value = v;
+    if (primoRef && !primoRef.el) primoRef.el = el;
+    return el;
   }
 
   function compilaCliente() {
