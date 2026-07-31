@@ -128,8 +128,6 @@
   .fatt-imp{font-weight:800;font-size:15px;color:var(--accent-d);white-space:nowrap}
   .fatt-empty{font-size:13px;color:var(--muted);padding:2px 2px 6px;font-weight:500}
 
-  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-  .filters input{font-family:inherit;font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font-weight:500;flex:1;min-width:140px}
   .chiprow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
   .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
   .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -322,7 +320,6 @@
   .ja{border-radius:7px;font-size:12px;display:inline-flex;align-items:center;gap:5px}
   .stato{border-radius:7px}
   .mini-title{letter-spacing:.6px}
-  .filters input{border-radius:8px}
   .cal-cell{border-radius:8px}
   .empty .ic{font-size:34px;opacity:.55}
 
@@ -470,7 +467,7 @@
   .field .btn.up-btn{display:inline-flex;height:36px;font-size:var(--f-sm);color:var(--testo)}
 
   /* ---------- 4. CAMPI DEI FORM ---------- */
-  .field input,.field select,.filters input,.prev-riga input,.spesa-add input,.mezzo-add select{
+  .field input,.field select,.prev-riga input,.spesa-add input,.mezzo-add select{
     height:40px;padding:0 12px;
     font-family:inherit;font-size:var(--f-base);color:var(--testo);
     background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);
@@ -482,10 +479,10 @@
     background:var(--card);border:1px solid var(--bordo);border-radius:var(--r);
   }
   .field input:focus,.field select:focus,.field textarea:focus,
-  .filters input:focus,.prev-riga input:focus,.spesa-add input:focus,.mezzo-add select:focus{
+  .prev-riga input:focus,.spesa-add input:focus,.mezzo-add select:focus{
     outline:none;border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,102,255,.12);
   }
-  .field input::placeholder,.field textarea::placeholder,.filters input::placeholder,
+  .field input::placeholder,.field textarea::placeholder,
   .prev-riga input::placeholder,.spesa-add input::placeholder{color:var(--testo-3)}
   .field label,.filt-label,.ag-foto-label{
     display:block;font-size:var(--f-sm);font-weight:600;color:var(--testo-2);
@@ -555,7 +552,11 @@
   .lav-head-act .btn,.lav-head-act .btn-primary{height:34px}
 
   /* viste a schede sottolineate */
-  .viste{display:flex;gap:0;margin-bottom:2px;border-bottom:.5px solid var(--bordo);overflow-x:auto}
+  /* overflow-y:hidden obbligatorio: con solo overflow-x:auto il browser porta anche
+     l'asse Y ad auto e, per il mezzo pixel di margin-bottom delle schede, disegna una
+     barra di scorrimento verticale (le due frecce su/giu') all'estrema destra. */
+  .viste{display:flex;gap:0;margin-bottom:2px;border-bottom:.5px solid var(--bordo);
+    overflow-x:auto;overflow-y:hidden}
   .viste .vista{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
     height:38px;padding:0 14px;margin-bottom:-.5px;
     background:none;border:none;border-bottom:2px solid transparent;
