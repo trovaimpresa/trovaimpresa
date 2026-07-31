@@ -137,6 +137,7 @@
   .job-cli{font-size:15px;font-weight:700;letter-spacing:-.2px}
   /* importo a destra del titolo: mai "0 €", chi non ha importo non stampa niente */
   .job-imp{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .job-clic{cursor:pointer}
   .job-desc{font-size:14px;color:var(--testo);margin-top:3px;line-height:1.35}
   .job-done{font-size:13px;color:var(--fatto);margin-top:6px;line-height:1.35;background:var(--ok-bg);padding:7px 10px;border-radius:9px}
   .job-note{font-size:13px;color:var(--attesa);margin-top:6px;line-height:1.35;background:var(--attesa-bg);padding:7px 10px;border-radius:9px}
@@ -621,6 +622,9 @@
   .q-oggi{color:var(--testo);font-weight:600}
   .q-futuro{color:var(--testo-2)}
   .q-vuoto{color:var(--testo-3)}
+  /* attesa lunga (preventivo fermo da oltre due settimane): ambra, non rosso —
+     il rosso resta riservato ai lavori in ritardo vero. */
+  .q-attesa{color:var(--attesa);font-weight:600}
   @media(max-width:880px){
     .lav-head-act{width:100%;margin-left:0}
     .lav-search{flex:1;width:auto}
@@ -725,6 +729,7 @@
       <div id="rie-alert"></div>
       <div class="mini-title">Prossimi lavori da fare</div>
       <div id="prossimi"></div>
+      <div id="rie-prev"></div>
     </section>
 
     <section id="agenda">
@@ -752,7 +757,7 @@
         <h2>Lavori</h2>
         <div class="lav-head-act">
           <input type="text" id="f-search" class="lav-search" placeholder="Cerca cliente, indirizzo, lavoro">
-          <button class="btn" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">&#10024; Con AI</button>
+          <button class="btn" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">&#10024; Compila con AI</button>
           <button class="btn-primary" data-action="new-job">+ Nuovo lavoro</button>
         </div>
       </div>
@@ -782,7 +787,7 @@
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Condomini / Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli">+ Nuovo</button><button class="btn add" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Con AI</button></div></div>
+      <div class="sec-head"><h2>Condomini / Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli">+ Nuovo</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
       <div class="grid" id="cli-list"></div>
     </section>
 
@@ -813,7 +818,7 @@
     </section>
 
     <section id="preventivi">
-      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn add" onclick="window.AI&&window.AI.apri&&window.AI.apri()">✨ Con AI</button></div></div>
+      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn add" title="Descrivi il lavoro, preparo io le voci di costo" onclick="window.AI&&window.AI.apri&&window.AI.apri()">✨ Genera con AI</button></div></div>
       <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
       <div class="chiprow" id="prev-chips">
         <button class="chip on" data-action="prev-filtro" data-v="tutti">Tutti</button>
@@ -863,7 +868,7 @@
   ];
   let nuovoSel={icon:"🛠️",col:0};
   let state={};
-  let cur=null, filter={vista:"prossimi",q:""}, cal=new Date(), editing=null, galFilter={op:"",tipo:""}, agFilter={op:"",stato:"aperti"};
+  let cur=null, filter={vista:"tutti",q:""}, cal=new Date(), editing=null, galFilter={op:"",tipo:""}, agFilter={op:"",stato:"aperti"};
   const fotoCache={};
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -1227,7 +1232,7 @@
     if($("#tb-panel-name"))$("#tb-panel-name").textContent=p.nome;
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="flex";
-    filter={vista:"prossimi",q:""};lavVistaAuto=true;$("#f-search").value="";cal=new Date();
+    filter={vista:"tutti",q:""};$("#f-search").value="";cal=new Date();
     galFilter={op:"",tipo:""};$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===""));
     agFilter={op:"",stato:"aperti"};$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="aperti"));
     mezziFilter="tutti";$$("#mezzi-chips .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="tutti"));
@@ -1300,6 +1305,7 @@
       if($("#k-utile")){$("#k-utile").textContent=eur(0);$("#k-utile").classList.remove("neg");}
       $("#k-dafare").textContent=0;$("#k-incorso").textContent=0;$("#k-fatti").textContent=0;$("#k-lavori").textContent=0;
       $("#prossimi").innerHTML=`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
+      if($("#rie-prev"))$("#rie-prev").innerHTML="";
       return;
     }
     const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
@@ -1330,11 +1336,46 @@
       const incMese=S.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
       if($("#k-spese"))$("#k-spese").textContent=eur(speseMese);
       if($("#k-utile")){const utile=incMese-speseMese;$("#k-utile").textContent=eur(utile);$("#k-utile").classList.toggle("neg",utile<0);}
-      const {data:pv}=await sb.from("gest_preventivi").select("id,stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
-      if($("#k-prev-attesa"))$("#k-prev-attesa").textContent=(pv||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato").length;
+      const {data:pv}=await sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      const attesa=(pv||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato");
+      if($("#k-prev-attesa"))$("#k-prev-attesa").textContent=attesa.length;
+      await renderPrevAttesa(attesa);
     }catch(e){}
     const pross=S.filter(l=>l.stato!=="fatto").sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999")).slice(0,5);
     $("#prossimi").innerHTML=pross.length?pross.map(l=>jobCardSupa(l,false,"",true)).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
+  }
+
+  /* ---- Riepilogo: preventivi che aspettano una risposta ----
+     Un preventivo in bozza o inviato e' lavoro potenziale fermo: senza questo blocco
+     lo si scopriva solo entrando nella scheda Preventivi. Dal piu' vecchio, cosi'
+     in cima c'e' sempre quello da sollecitare. Se non ce n'e' nessuno il blocco
+     sparisce del tutto (titolo compreso): niente sezioni vuote nel Riepilogo. */
+  let rieprevCache=[];
+  async function renderPrevAttesa(attesa){
+    const box=$("#rie-prev");if(!box)return;
+    rieprevCache=attesa||[];
+    if(!rieprevCache.length){box.innerHTML="";return;}
+    const L=rieprevCache.slice().sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
+    const [{data:cl},{data:rr}]=await Promise.all([
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",L.map(p=>p.id))
+    ]);
+    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome||""]));
+    const tot={};(rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+    box.innerHTML=`<div class="mini-title">Preventivi in attesa di risposta</div>`
+      +L.map(p=>{
+        const q=quando(p.data,{neutro:true});          /* neutro: qui il rosso non c'entra */
+        const g=_giorniA(p.data), att=g===null?0:-g;   /* giorni di attesa */
+        const cls=att>14?"q-attesa":q.classe;          /* oltre due settimane: ambra */
+        const imp=tot[p.id]||0;
+        return `<div class="job job-clic" data-action="rie-prev" data-id="${esc(p.id)}" title="Apri il preventivo">
+          <div class="job-top"><div class="job-cli">${esc(p.titolo||"Preventivo")}</div>
+            ${imp?`<span class="job-imp">${eur(imp)}</span>`:""}</div>
+          <div class="job-meta">
+            <span>👤 ${esc(cliMap[p.cliente_id]||"—")}</span>
+            <span class="${cls}">⏳ ${q.testo}</span>
+          </div></div>`;
+      }).join("");
   }
 
   function jobCard(l){
@@ -1457,7 +1498,10 @@
   /* ============================================================
      LAVORI — viste al posto dei filtri di stato
      ============================================================ */
-  /* Le viste dei lavori aperti coprono tutta la linea del tempo, senza buchi:
+  /* "Tutti" e' la vista di apertura: chi entra vede il lavoro del reparto per intero,
+     poi semmai restringe. Le altre viste servono a restringere, non a nascondere:
+     per questo la prima vista non la sceglie piu' il codice in base ai ritardi.
+     Le viste dei lavori aperti coprono tutta la linea del tempo, senza buchi:
      ritardo (prima di oggi) + oggi + prossimi (dopo oggi) = tutti i non finiti.
      "Prossimi" non ha limite in avanti: prima si fermava a domenica e i lavori
      piu' in la' sparivano da ogni vista pur restando nei contatori.
@@ -1466,6 +1510,7 @@
      Archivio raccoglie tutti i finiti; "Da incassare" e' un suo sottoinsieme e
      per questo resta fuori dal conto della copertura. */
   const LAV_VISTE=[
+    {k:"tutti",    lab:"Tutti"},
     {k:"ritardo",  lab:"In ritardo"},
     {k:"oggi",     lab:"Oggi"},
     {k:"prossimi", lab:"Prossimi"},
@@ -1474,6 +1519,7 @@
   ];
   function lavFiltra(L,v,oggi){
     const aperto=l=>l.stato!=="fatto";
+    if(v==="tutti")    return L.slice();
     if(v==="ritardo")  return L.filter(l=>aperto(l)&&!!l.data_prevista&&l.data_prevista<oggi);
     if(v==="oggi")     return L.filter(l=>aperto(l)&&l.data_prevista===oggi);
     if(v==="prossimi") return L.filter(l=>aperto(l)&&(!l.data_prevista||l.data_prevista>oggi));
@@ -1483,6 +1529,7 @@
   }
   const _SVGV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">';
   const LAV_VUOTO={
+    tutti:    {t:"Ancora nessun lavoro",           s:"Aggiungi il primo col pulsante «+ Nuovo lavoro».", i:_SVGV+'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'},
     ritardo:  {t:"Nessun lavoro in ritardo",      s:"Sei in pari con le scadenze.",            i:_SVGV+'<path d="M20 6 9 17l-5-5"/></svg>'},
     oggi:     {t:"Niente in programma per oggi",  s:"Nessun lavoro con data di oggi.",         i:_SVGV+'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg>'},
     prossimi: {t:"Nessun lavoro in programma", s:"Non c'\u00e8 niente da fare dopo oggi.",     i:_SVGV+'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>'},
@@ -1490,7 +1537,7 @@
     archivio: {t:"Ancora nessun lavoro finito",   s:"Qui finiscono i lavori completati.",      i:_SVGV+'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>'}
   };
   function lavVuoto(v){
-    const e=LAV_VUOTO[v]||LAV_VUOTO.prossimi;
+    const e=LAV_VUOTO[v]||LAV_VUOTO.tutti;
     return `<div class="lav-vuoto">${e.i}<h3>${e.t}</h3><p>${e.s}</p></div>`;
   }
   /* menu "..." della riga: nessuna azione della vecchia barra e' andata persa */
@@ -1522,13 +1569,12 @@
     return h;
   }
 
-  let lavVistaAuto=true;   /* la prima vista la sceglie il codice, poi comanda l'utente */
   let lavCache=[], lavTel={};
   async function renderJobs(){
     const box=$("#jobs-list"), viste=$("#lav-viste");
     if(!box)return;
     lavChiudiPop();
-    if(!sb||!sbUid){if(viste)viste.innerHTML="";box.style.display="block";box.innerHTML=lavVuoto("prossimi");return;}
+    if(!sb||!sbUid){if(viste)viste.innerHTML="";box.style.display="block";box.innerHTML=lavVuoto("tutti");return;}
     const oggi=todayStr();
     const [{data:lav},{data:ops},{data:cls}]=await Promise.all([
       sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
@@ -1542,7 +1588,6 @@
     const cliName=Object.fromEntries((cls||[]).map(c=>[c.id,c.nome||""]));
     /* conteggi per vista: sulla lista intera, non su quella cercata */
     const conta={};LAV_VISTE.forEach(v=>conta[v.k]=lavFiltra(TUTTI,v.k,oggi).length);
-    if(lavVistaAuto){filter.vista=conta.ritardo>0?"ritardo":"prossimi";lavVistaAuto=false;}
     if(viste)viste.innerHTML=LAV_VISTE.map(v=>{
       const n=conta[v.k];
       const badge=n?`<span class="v-cnt${v.k==="ritardo"?" err":""}">${n}</span>`:"";
@@ -1556,7 +1601,11 @@
                   ||(l.dove||"").toLowerCase().includes(q)
                   ||(cliName[l.cliente_id]||"").toLowerCase().includes(q));
     }
-    L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+    /* In "Tutti" i finiti scendono in fondo: la lista serve a vedere cosa resta da fare.
+       Nelle altre viste i lavori sono gia' tutti aperti o tutti chiusi, quindi conta solo la data. */
+    const _fin=l=>l.stato==="fatto"?1:0;
+    L.sort((a,b)=>(filter.vista==="tutti"?_fin(a)-_fin(b):0)
+                ||(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
     if(!L.length){
       box.style.display="block";
       box.innerHTML=filter.q
@@ -2866,6 +2915,9 @@
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).then(()=>renderSpeseBlock(speseLavoroId));return;}
     if(a==="new-prev")return prevForm(null);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
+    /* dal Riepilogo: prevCache puo' essere ancora vuota (scheda Preventivi mai aperta),
+       quindi il preventivo si prende dalla lista gia' caricata per il blocco. */
+    if(a==="rie-prev"){const p=rieprevCache.find(x=>String(x.id)===String(id));if(p)prevForm(p);return;}
     if(a==="save-prev")return savePrev(id||null);
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     if(a==="prev-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();prevTotaleLive();}return;}
@@ -2875,7 +2927,7 @@
     if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevPdf(id);
     if(a==="report-csv")return reportCsv();
-    if(a==="lav-vista"){filter.vista=t.dataset.v;lavVistaAuto=false;renderJobs();return;}
+    if(a==="lav-vista"){filter.vista=t.dataset.v;renderJobs();return;}
     if(a==="lav-menu"){
       const cella=t.closest("td"), aperto=cella.querySelector(".lav-pop");
       lavChiudiPop();

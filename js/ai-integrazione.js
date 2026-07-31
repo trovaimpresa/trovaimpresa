@@ -53,10 +53,10 @@
     pronto: false,
   };
   window.AI = AI;
-  AI.apri = apriPannello;              // pulsante "✨ Con AI" nei Preventivi
+  AI.apri = apriPannello;              // pulsante "✨ Genera con AI" nei Preventivi
   AI.apriAiuto = apriAiuto;            // voce di menu "Aiuto"
-  AI.compilaCliente = compilaCliente;  // pulsante "✨ Con AI" nei Condomini/Clienti
-  AI.compilaLavoro = compilaLavoro;    // pulsante "✨ Con AI" nei Lavori
+  AI.compilaCliente = compilaCliente;  // pulsante "✨ Compila con AI" nei Condomini/Clienti
+  AI.compilaLavoro = compilaLavoro;    // pulsante "✨ Compila con AI" nei Lavori
 
   /* ------------------------------------------------------------------ */
   /* UTILITY                                                             */
