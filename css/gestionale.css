@@ -347,15 +347,6 @@
   .burger svg{width:19px;height:19px}
 
   /* tabelle desktop (Lavori / Fatture) */
-  .dtab{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px;box-shadow:0 1px 2px rgba(16,24,32,.04)}
-  .dtab th{background:var(--sfondo);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--testo-2);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-  .dtab th[data-action]{cursor:pointer;user-select:none}
-  .dtab th[data-action]:hover{color:var(--accent-d)}
-  .dtab td{padding:10px 12px;border-bottom:1px solid var(--bordo);vertical-align:middle}
-  .dtab tbody tr:last-child td{border-bottom:none}
-  .dtab tbody tr:hover{background:var(--sfondo)}
-  .t-act{display:flex;gap:4px;flex-wrap:wrap}
-  .t-act .ja{padding:6px 8px}
   .stato.pagata{background:var(--ok-bg);color:var(--fatto)}
   .stato.emessa{background:var(--attesa-bg);color:var(--warn)}
   .stato.nonf{background:var(--sfondo);color:var(--testo-2)}
@@ -460,7 +451,6 @@
      Serve a non alzare le righe (il layout non si tocca in questa tappa). */
   .btn-sm{height:30px;padding:0 10px;font-size:12.5px;border-radius:8px}
   .btn:disabled,.btn-primary:disabled{opacity:.5;cursor:default}
-  .t-act .btn{height:30px;padding:0 8px}
   /* adattamenti ai contenitori esistenti (il layout non cambia) */
   .side .btn-new{height:42px;padding:0;font-size:var(--f-md)}
   .sheet-actions button{flex:1;height:38px;padding:0 14px;font-size:var(--f-base);font-weight:600;border-radius:var(--r)}

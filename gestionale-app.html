@@ -137,6 +137,7 @@
     <section id="fatture">
       <div class="sec-head"><h2>Fatture</h2><button class="btn add" data-action="new-fattura">+ Nuova</button></div>
       <div class="fatt-summary" id="fatt-summary"></div>
+      <div class="viste" id="fatt-viste"></div>
       <div id="fatt-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
     </section>
@@ -157,11 +158,13 @@
 
     <section id="clienti">
       <div class="sec-head"><h2>Condomini / Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli">+ Nuovo</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
+      <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px">
       <div class="grid" id="cli-list"></div>
     </section>
 
     <section id="squadra">
       <div class="sec-head"><h2>Squadra</h2><button class="btn add" data-action="new-dip">+ Persona</button></div>
+      <input type="text" id="dip-search" class="lav-search" placeholder="Cerca nome, ruolo, telefono" style="margin-bottom:14px">
       <div style="background:var(--info-bg);border:1px solid rgba(37,99,235,.25);border-radius:12px;padding:14px 18px;margin-bottom:16px">
         <p style="margin:0;color:var(--info);font-weight:600;font-size:var(--f-md)">💡 Come entrano i collaboratori</p>
         <p style="margin:6px 0 0;color:var(--testo);font-size:var(--f-base)">Ogni giorno entrano da <strong>trovaimpresa.com/gestionale</strong> con la loro email e password. Dì loro di salvarlo tra i preferiti del browser.</p>
@@ -172,30 +175,20 @@
     <section id="mezzi">
       <div class="sec-head"><h2>Mezzi e attrezzature</h2><button class="btn add" data-action="new-mezzo">+ Nuovo</button></div>
       <div class="gal-intro">Furgoni, escavatori, ponteggi, trapani: qui c'è tutto quello che usi in cantiere, con lo stato e le scadenze (revisione, bollo, tagliando, assicurazione).</div>
-      <div class="chiprow" id="mezzi-chips">
-        <button class="chip on" data-action="mezzo-filtro" data-v="tutti">Tutti</button>
-        <button class="chip" data-action="mezzo-filtro" data-v="mezzo">Mezzi</button>
-        <button class="chip" data-action="mezzo-filtro" data-v="attrezzatura">Attrezzature</button>
-        <button class="chip" data-action="mezzo-filtro" data-v="manutenzione">In manutenzione</button>
-      </div>
+      <div class="viste" id="mezzi-viste"></div>
       <div class="grid" id="mezzi-list"></div>
     </section>
 
     <section id="scadenzario">
       <div class="sec-head"><h2>Scadenzario</h2><button class="btn add" data-action="new-scad">+ Nuova</button></div>
+      <div class="viste" id="scad-viste"></div>
       <div class="grid" id="scad-list"></div>
     </section>
 
     <section id="preventivi">
       <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn add" title="Descrivi il lavoro, preparo io le voci di costo" onclick="window.AI&&window.AI.apri&&window.AI.apri()">✨ Genera con AI</button></div></div>
       <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
-      <div class="chiprow" id="prev-chips">
-        <button class="chip on" data-action="prev-filtro" data-v="tutti">Tutti</button>
-        <button class="chip" data-action="prev-filtro" data-v="bozza">Bozze</button>
-        <button class="chip" data-action="prev-filtro" data-v="inviato">Inviati</button>
-        <button class="chip" data-action="prev-filtro" data-v="accettato">Accettati</button>
-        <button class="chip" data-action="prev-filtro" data-v="rifiutato">Rifiutati</button>
-      </div>
+      <div class="viste" id="prev-viste"></div>
       <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
     </section>
 
@@ -602,9 +595,11 @@
     if($("#rie-title"))$("#rie-title").textContent="Riepilogo — "+p.nome;
     $("#landing").style.display="none";$("#appview").style.display="flex";
     filter={vista:"tutti",q:""};$("#f-search").value="";cal=new Date();
+    cliQ="";dipQ="";if($("#cli-search"))$("#cli-search").value="";if($("#dip-search"))$("#dip-search").value="";
+    prevFilter="tutti";fattVista="tutte";scadVista="tutte";
     galFilter={op:"",tipo:""};$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===""));
     agFilter={op:"",stato:"aperti"};$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="aperti"));
-    mezziFilter="tutti";$$("#mezzi-chips .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="tutti"));
+    mezziFilter="tutti";
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
     renderAll();window.scrollTo(0,0);
@@ -913,24 +908,103 @@
     return `<div class="lav-vuoto">${e.i}<h3>${e.t}</h3><p>${e.s}</p></div>`;
   }
   /* menu "..." della riga: nessuna azione della vecchia barra e' andata persa */
-  function lavPop(l,wa){
-    const id=esc(l.id), dp=esc(l.data_prevista||""), fatto=l.stato==="fatto", fs=l.fatt_stato||"none";
-    let h='<div class="lav-pop">';
-    if(l.stato==="da_fare")h+=`<button data-action="stato-supa" data-id="${id}" data-v="in_corso" data-dp="${dp}">\u25b6 Avvia</button>`;
-    if(!fatto)h+=`<button data-action="stato-supa" data-id="${id}" data-v="fatto" data-dp="${dp}">\u2714 Segna fatto</button>`;
-    else h+=`<button data-action="stato-supa" data-id="${id}" data-v="da_fare" data-dp="${dp}">\u21a9 Riapri</button>`;
-    h+=`<button data-action="lf-open" data-id="${id}" data-desc="${esc(l.descrizione||"Lavoro")}">\ud83d\udcf7 Foto</button>`;
-    if(l.dove)h+=`<button data-action="map" data-q="${esc(l.dove)}">\ud83d\uddfa Mappa</button>`;
-    h+=`<button data-action="sq-wa" data-wa="${esc(wa)}">\ud83d\udcac Avvisa su WhatsApp</button>`;
-    h+='<hr class="sep">';
-    h+=`<button data-action="pdf" data-id="${id}">\ud83d\udcc4 Scarica PDF</button>`;
-    if(fs!=="emessa")h+=`<button data-action="fatt" data-id="${id}" data-v="emessa">\ud83e\uddfe Fattura emessa</button>`;
-    if(fs!=="pagata")h+=`<button data-action="fatt" data-id="${id}" data-v="pagata">\ud83d\udcb6 Segna pagata</button>`;
-    h+='<hr class="sep">';
-    h+=`<button class="del" data-action="del-job-supa" data-id="${id}">\ud83d\uddd1 Elimina</button>`;
-    return h+'</div>';
+  function lavVoci(l,wa){
+    const dp=l.data_prevista||"", fatto=l.stato==="fatto", fs=l.fatt_stato||"none";
+    const v=[];
+    if(l.stato==="da_fare")v.push({lab:"\u25b6 Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
+    if(!fatto)v.push({lab:"\u2714 Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
+    else v.push({lab:"\u21a9 Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
+    v.push({lab:"\ud83d\udcf7 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"}});
+    if(l.dove)v.push({lab:"\ud83d\uddfa Mappa",action:"map",data:{q:l.dove}});
+    v.push({lab:"\ud83d\udcac Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});
+    v.push({sep:true});
+    v.push({lab:"\ud83d\udcc4 Scarica PDF",action:"pdf",data:{id:l.id}});
+    if(fs!=="emessa")v.push({lab:"\ud83e\uddfe Fattura emessa",action:"fatt",data:{id:l.id,v:"emessa"}});
+    if(fs!=="pagata")v.push({lab:"\ud83d\udcb6 Segna pagata",action:"fatt",data:{id:l.id,v:"pagata"}});
+    v.push({sep:true});
+    v.push({lab:"\ud83d\uddd1 Elimina",action:"del-job-supa",data:{id:l.id},del:true});
+    return v;
   }
-  function lavChiudiPop(){document.querySelectorAll(".lav-pop").forEach(x=>x.remove());}
+
+  /* ============================================================
+     TABELLA CONDIVISA \u2014 una sola implementazione per tutte le sezioni.
+     Prima ogni scheda aveva la sua griglia di card con i pulsanti in fila:
+     le stesse azioni cambiavano posto (e forma) da una sezione all'altra, e
+     in Squadra finivano incolonnate una sotto l'altra. Qui la riga e' sempre
+     uguale ovunque: click sulla riga = apri, "..." = tutto il resto.
+     Le voci del menu restano <button data-action="..."> identici a prima,
+     cosi' i gestori del click gia' esistenti continuano a funzionare.
+
+     cfg = {
+       id          chiave del registro dei menu (una per sezione)
+       box         selettore del contenitore
+       viste       selettore delle schede vista (o niente: rubriche come Condomini)
+       visteDef    [{k,lab,err}]  con vista (attiva), conta{k:n}, azioneVista
+       colonne     [{lab,w,cls,sort}]   w = larghezza in %
+       righe       [{id, celle:[html | {h,cls}], click:{action,data}, menu:[voci]}]
+       totale      {testo,valore} oppure niente
+       vuoto       html dello stato vuoto
+       cards       ()=>html  usato sotto 880px al posto della tabella
+       sortAction/sortK/sortD  intestazioni ordinabili (le usa solo Fatture)
+     }
+     ============================================================ */
+  const TAB_MENU={};
+  function tabChiudiPop(){document.querySelectorAll(".lav-pop").forEach(x=>x.remove());}
+  function tabAttr(d){return Object.keys(d||{}).map(k=>` data-${k}="${esc(String(d[k]))}"`).join("");}
+  function tabPop(voci){
+    return '<div class="lav-pop">'+(voci||[]).map(v=>v.sep
+      ? '<hr class="sep">'
+      : `<button${v.del?' class="del"':''} data-action="${v.action}"${tabAttr(v.data)}>${v.lab}</button>`
+    ).join("")+'</div>';
+  }
+  function renderTabella(cfg){
+    const box=$(cfg.box);if(!box)return;
+    tabChiudiPop();
+    const vb=cfg.viste?$(cfg.viste):null;
+    if(vb)vb.innerHTML=(cfg.visteDef||[]).map(v=>{
+      const n=(cfg.conta||{})[v.k]||0;
+      const badge=n?`<span class="v-cnt${v.err?" err":""}">${n}</span>`:"";
+      return `<button class="vista${cfg.vista===v.k?" on":""}" data-action="${cfg.azioneVista}" data-v="${v.k}">${v.lab}${badge}</button>`;
+    }).join("");
+    const R=cfg.righe||[];
+    if(!R.length){box.style.display="block";box.innerHTML=cfg.vuoto||"";return;}
+    if(!_deskTab()&&cfg.cards){box.style.display="grid";box.innerHTML=cfg.cards();return;}
+    TAB_MENU[cfg.id]={};R.forEach(r=>{if(r.menu&&r.menu.length)TAB_MENU[cfg.id][String(r.id)]=r.menu;});
+    const freccia=k=>cfg.sortK===k?(cfg.sortD>0?" \u2191":" \u2193"):"";
+    const cols=cfg.colonne.map(c=>`<col style="width:${c.w}">`).join("")+'<col style="width:36px">';
+    const intest=cfg.colonne.map(c=>{
+      const cl=c.cls?` class="${c.cls}"`:"";
+      return (c.sort&&cfg.sortAction)
+        ? `<th${cl} data-action="${cfg.sortAction}" data-k="${c.sort}" style="cursor:pointer">${c.lab}${freccia(c.sort)}</th>`
+        : `<th${cl}>${c.lab}</th>`;
+    }).join("")+"<th></th>";
+    const corpo=R.map(r=>{
+      const apri=r.click?` data-action="${r.click.action}"${tabAttr(r.click.data)}`:"";
+      const celle=r.celle.map((cel,i)=>{
+        const c=cfg.colonne[i]||{};
+        const obj=cel&&typeof cel==="object";
+        const cl=[c.cls,obj?cel.cls:""].filter(Boolean).join(" ");
+        return `<td${cl?` class="${cl}"`:""}>${obj?cel.h:cel}</td>`;
+      }).join("");
+      const menu=(r.menu&&r.menu.length)
+        ? `<button class="lav-dots" data-action="tab-menu" data-tab="${cfg.id}" data-id="${esc(String(r.id))}" title="Altre azioni">&#8943;</button>`
+        : "";
+      return `<tr${apri}>${celle}<td class="c-menu">${menu}</td></tr>`;
+    }).join("");
+    const ultima=cfg.colonne[cfg.colonne.length-1]||{};
+    const tot=cfg.totale
+      ? `<tr class="lav-tot"><td colspan="${cfg.colonne.length-1}">${cfg.totale.testo}</td><td class="${ultima.cls||""}">${cfg.totale.valore}</td><td></td></tr>`
+      : "";
+    box.style.display="block";
+    box.innerHTML=`<table class="ltab"><colgroup>${cols}</colgroup><thead><tr>${intest}</tr></thead><tbody>${corpo}${tot}</tbody></table>`;
+  }
+  /* stato vuoto nello stile di Lavori, riusabile da tutte le sezioni */
+  function tabVuoto(titolo,sotto,icona){
+    return `<div class="lav-vuoto">${icona||_SVGV+'<circle cx="12" cy="12" r="9"/></svg>'}<h3>${titolo}</h3><p>${sotto}</p></div>`;
+  }
+  function tabVuotoCerca(q){
+    return `<div class="lav-vuoto">${_SVGV}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><h3>Nessun risultato</h3><p>Niente trovato per \u00ab${esc(q)}\u00bb.</p></div>`;
+  }
   /* colonna Cliente: prima riga il nome (o "—" se il lavoro non ha cliente collegato),
      seconda riga l'indirizzo, che prima usurpava il posto del nome e confondeva. */
   function cellaCliente(nome,dove){
@@ -945,7 +1019,7 @@
   async function renderJobs(){
     const box=$("#jobs-list"), viste=$("#lav-viste");
     if(!box)return;
-    lavChiudiPop();
+    tabChiudiPop();
     if(!sb||!sbUid){if(viste)viste.innerHTML="";box.style.display="block";box.innerHTML=lavVuoto("tutti");return;}
     const oggi=todayStr();
     const [{data:lav},{data:ops},{data:cls}]=await Promise.all([
@@ -960,12 +1034,6 @@
     const cliName=Object.fromEntries((cls||[]).map(c=>[c.id,c.nome||""]));
     /* conteggi per vista: sulla lista intera, non su quella cercata */
     const conta={};LAV_VISTE.forEach(v=>conta[v.k]=lavFiltra(TUTTI,v.k,oggi).length);
-    if(viste)viste.innerHTML=LAV_VISTE.map(v=>{
-      const n=conta[v.k];
-      const badge=n?`<span class="v-cnt${v.k==="ritardo"?" err":""}">${n}</span>`:"";
-      return `<button class="vista${filter.vista===v.k?" on":""}" data-action="lav-vista" data-v="${v.k}">${v.lab}${badge}</button>`;
-    }).join("");
-
     let L=lavFiltra(TUTTI,filter.vista,oggi);
     if(filter.q){
       const q=filter.q.toLowerCase();
@@ -978,36 +1046,33 @@
     const _fin=l=>l.stato==="fatto"?1:0;
     L.sort((a,b)=>(filter.vista==="tutti"?_fin(a)-_fin(b):0)
                 ||(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
-    if(!L.length){
-      box.style.display="block";
-      box.innerHTML=filter.q
-        ? `<div class="lav-vuoto">${_SVGV}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><h3>Nessun risultato</h3><p>Nessun lavoro trovato per \u00ab${esc(filter.q)}\u00bb.</p></div>`
-        : lavVuoto(filter.vista);
-      return;
-    }
-    /* sotto 880px si torna alle card */
-    if(!_deskTab()){
-      box.style.display="grid";
-      box.innerHTML=L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"")).join("");
-      return;
-    }
     const tot=L.reduce((a,l)=>a+(+l.importo||0),0);
-    box.style.display="block";
-    box.innerHTML=`<table class="ltab">
-      <colgroup><col style="width:36%"><col style="width:24%"><col style="width:17%"><col style="width:10%"><col style="width:13%"><col style="width:36px"></colgroup>
-      <thead><tr><th>Lavoro</th><th>Cliente</th><th>Quando</th><th>Chi</th><th class="c-imp">Importo</th><th></th></tr></thead>
-      <tbody>`+L.map(l=>{
-      const q=quando(l.data_prevista,{neutro:l.stato==="fatto"});
-      const late=inRitardo(l.stato,l.data_prevista);
-      return `<tr data-action="edit-job" data-id="${esc(l.id)}">
-        <td><span class="lav-bar ${late?"ritardo":l.stato}" title="${late?"In ritardo":(statoLabel[l.stato]||l.stato)}"></span><span class="c-nome">${esc(l.descrizione||"\u2014")}</span></td>
-        <td class="c-cli">${cellaCliente(cliName[l.cliente_id],l.dove)}</td>
-        <td class="${q.classe}">${q.testo}</td>
-        <td class="c-chi">${esc(opName[l.operatore_id]||"\u2014")}</td>
-        <td class="c-imp">${+l.importo?eur(l.importo):"\u2014"}</td>
-        <td class="c-menu"><button class="lav-dots" data-action="lav-menu" data-id="${esc(l.id)}" title="Altre azioni">&#8943;</button></td></tr>`;
-    }).join("")+`<tr class="lav-tot"><td colspan="4">${L.length} ${L.length===1?"lavoro":"lavori"}</td><td class="c-imp">${eur(tot)}</td><td></td></tr>
-      </tbody></table>`;
+    renderTabella({
+      id:"lav", box:"#jobs-list",
+      viste:"#lav-viste", visteDef:LAV_VISTE.map(v=>({k:v.k,lab:v.lab,err:v.k==="ritardo"})),
+      vista:filter.vista, conta:conta, azioneVista:"lav-vista",
+      vuoto:filter.q?tabVuotoCerca(filter.q):lavVuoto(filter.vista),
+      colonne:[{lab:"Lavoro",w:"36%"},{lab:"Cliente",w:"24%",cls:"c-cli"},{lab:"Quando",w:"17%"},
+               {lab:"Chi",w:"10%",cls:"c-chi"},{lab:"Importo",w:"13%",cls:"c-imp"}],
+      righe:L.map(l=>{
+        const q=quando(l.data_prevista,{neutro:l.stato==="fatto"});
+        const late=inRitardo(l.stato,l.data_prevista);
+        return {
+          id:l.id,
+          click:{action:"edit-job",data:{id:l.id}},
+          celle:[
+            `<span class="lav-bar ${late?"ritardo":l.stato}" title="${late?"In ritardo":(statoLabel[l.stato]||l.stato)}"></span><span class="c-nome">${esc(l.descrizione||"\u2014")}</span>`,
+            cellaCliente(cliName[l.cliente_id],l.dove),
+            {h:q.testo,cls:q.classe},
+            esc(opName[l.operatore_id]||"\u2014"),
+            +l.importo?eur(l.importo):"\u2014"
+          ],
+          menu:lavVoci(l,_waLavoro(l,lavTel[l.operatore_id]||""))
+        };
+      }),
+      totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
+      cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"")).join("")
+    });
   }
 
   let lfLavoroId=null;
@@ -1083,10 +1148,14 @@
   }
   let fatturaPdfCache={};
   async function renderFatture(){
-    let L=[];
+    let L=[], cliMap={};
     if(sb&&sbUid){
-      const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+      const [{data},{data:cls}]=await Promise.all([
+        sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,cliente_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      ]);
       L=(data||[]).filter(l=>+l.importo>0);
+      cliMap=Object.fromEntries((cls||[]).map(c=>[c.id,c.nome||""]));
       const ids=L.map(l=>l.id);
       fatturaPdfCache={};
       if(ids.length){
@@ -1101,23 +1170,13 @@
     const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
     $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div></div>
       <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div></div>`;
-    const box=$("#fatt-body");
-    if(!_deskTab()){
-      box.style.display="grid";
-      let h="";
-      h+=`<div class="mini-title">📄 Da fatturare (lavori finiti)</div>`;
-      h+=daFatt.length?daFatt.map(l=>fattRow(l,`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`)).join(""):`<p class="fatt-empty">Nessun lavoro finito in attesa di fattura.</p>`;
-      h+=`<div class="mini-title">💶 Emesse · da incassare</div>`;
-      h+=daInc.length?daInc.map(l=>fattRow(l,`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`)).join(""):`<p class="fatt-empty">Nessuna fattura da incassare.</p>`;
-      h+=`<div class="mini-title">✅ Pagate</div>`;
-      h+=pagate.length?pagate.map(l=>fattRow(l,`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`)).join(""):`<p class="fatt-empty">Ancora nessuna fattura pagata.</p>`;
-      box.innerHTML=h;
-      return;
-    }
-    /* desktop: tabella unica ordinabile */
+    /* le fatture nascono dai lavori: rank 3 = lavoro non ancora finito, resta fuori */
     const rank=l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none"?0:(l.fatt_stato==="emessa"?1:(l.fatt_stato==="pagata"?2:3));
-    let R=L.filter(l=>rank(l)<3);
-    if(!R.length){box.style.display="grid";box.innerHTML=`<div class="empty"><div class="ic">📄</div><p>Nessuna fattura qui</p><small>Le fatture nascono dai lavori finiti con un importo</small></div>`;return;}
+    const TUTTE=L.filter(l=>rank(l)<3);
+    const filtra=(A,v)=>v==="incassare"?A.filter(l=>l.fatt_stato==="emessa")
+                      :v==="pagate"?A.filter(l=>l.fatt_stato==="pagata"):A.slice();
+    const conta={};FATT_VISTE.forEach(v=>conta[v.k]=filtra(TUTTE,v.k).length);
+    let R=filtra(TUTTE,fattVista);
     R.sort((a,b)=>{
       let r;
       if(fattSort.k==="importo")r=(+a.importo||0)-(+b.importo||0);
@@ -1126,29 +1185,59 @@
       else r=rank(a)-rank(b)||String(a.data_fatto||a.data_prevista||"").localeCompare(String(b.data_fatto||b.data_prevista||""));
       return r*fattSort.d;
     });
-    const farrow=k=>fattSort.k===k?(fattSort.d>0?" ↑":" ↓"):"";
-    const fth=(k,lab)=>`<th data-action="fatt-sort" data-k="${k}">${lab}${farrow(k)}</th>`;
-    const fsBadge=l=>{const fs=l.fatt_stato||"none";
-      return fs==="pagata"?`<span class="stato pagata">Pagata</span>`:fs==="emessa"?`<span class="stato emessa">Emessa</span>`:`<span class="stato nonf">Da fatturare</span>`;};
-    box.style.display="block";
-    box.innerHTML=`<table class="dtab"><thead><tr>
-      ${fth("descrizione","Lavoro")}${fth("data","Data")}${fth("importo","Importo")}${fth("rank","Stato")}<th>Azioni</th>
-      </tr></thead><tbody>`+R.map(l=>{
-      const fs=l.fatt_stato||"none", pdf=fatturaPdfCache[l.id];
-      return `<tr><td><b>${esc(l.descrizione||"Lavoro")}</b></td>
-      <td style="white-space:nowrap">${fdate(l.data_fatto||l.data_prevista)}</td>
-      <td style="white-space:nowrap;font-weight:700">${eur(l.importo)}</td>
-      <td>${fsBadge(l)}</td>
-      <td><div class="t-act">
-        ${rank(l)===0?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`:""}
-        ${fs==="emessa"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`:""}
-        ${fs==="pagata"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa" title="Riporta a emessa">↩</button>`:""}
-        <button class="btn btn-sm ja" data-action="pdf" data-id="${l.id}" title="Scarica PDF cortesia">📄 PDF</button>
-        ${pdf?`<button class="btn btn-sm ja" data-action="open-fattura" data-id="${esc(pdf.id)}" title="Apri fattura caricata">📄 Apri</button>`:""}
-        <button class="btn btn-sm ja" data-action="upload-fattura" data-id="${l.id}" title="Carica fattura PDF">📎</button>
-      </div></td></tr>`;}).join("")+`</tbody></table>`;
+    const somma=R.reduce((s,l)=>s+(+l.importo||0),0);
+    renderTabella({
+      id:"fatt", box:"#fatt-body",
+      viste:"#fatt-viste", visteDef:FATT_VISTE, vista:fattVista, conta:conta, azioneVista:"fatt-vista",
+      sortAction:"fatt-sort", sortK:fattSort.k, sortD:fattSort.d,
+      vuoto:tabVuoto("Nessuna fattura qui","Le fatture nascono dai lavori finiti con un importo.",
+        _SVGV+'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg>'),
+      colonne:[{lab:"Lavoro",w:"36%",sort:"descrizione"},{lab:"Cliente",w:"24%",cls:"c-cli"},
+               {lab:"Quando",w:"18%",sort:"data"},{lab:"Importo",w:"22%",cls:"c-imp",sort:"importo"}],
+      righe:R.map(l=>{
+        const q=quando(l.data_fatto||l.data_prevista,{neutro:true});
+        const fs=l.fatt_stato||"none";
+        return {
+          id:l.id,
+          click:{action:"edit-job",data:{id:l.id}},
+          celle:[
+            `<span class="lav-bar ${FATT_BAR[fs]||"da_fare"}" title="${FATT_LAB[fs]||fs}"></span><span class="c-nome">${esc(l.descrizione||"Lavoro")}</span>`,
+            esc(cliMap[l.cliente_id]||"—"),
+            {h:q.testo,cls:q.classe},
+            eur(l.importo)
+          ],
+          menu:fattVoci(l)
+        };
+      }),
+      totale:{testo:R.length+" "+(R.length===1?"fattura":"fatture"),valore:eur(somma)},
+      cards:()=>{
+        let h="";
+        const sez=(tit,A,btn,vuoto)=>{h+=`<div class="mini-title">${tit}</div>`;
+          h+=A.length?A.map(l=>fattRow(l,btn(l))).join(""):`<p class="fatt-empty">${vuoto}</p>`;};
+        if(fattVista==="tutte")sez("📄 Da fatturare (lavori finiti)",daFatt,l=>`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`,"Nessun lavoro finito in attesa di fattura.");
+        if(fattVista!=="pagate")sez("💶 Emesse · da incassare",daInc,l=>`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`,"Nessuna fattura da incassare.");
+        if(fattVista!=="incassare")sez("✅ Pagate",pagate,l=>`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`,"Ancora nessuna fattura pagata.");
+        return h;
+      }
+    });
   }
-  let fattSort={k:"rank",d:1};
+  const FATT_VISTE=[{k:"tutte",lab:"Tutte"},{k:"incassare",lab:"Da incassare"},{k:"pagate",lab:"Pagate"}];
+  const FATT_LAB={none:"Da fatturare",emessa:"Emessa",pagata:"Pagata"};
+  const FATT_BAR={none:"da_fare",emessa:"in_corso",pagata:"fatto"};
+  function fattVoci(l){
+    const fs=l.fatt_stato||"none", pdf=fatturaPdfCache[l.id];
+    const v=[{lab:"📄 Scarica PDF",action:"pdf",data:{id:l.id}}];
+    if(pdf)v.push({lab:"📄 Apri fattura caricata",action:"open-fattura",data:{id:pdf.id}});
+    v.push({lab:"📎 Carica fattura PDF",action:"upload-fattura",data:{id:l.id}});
+    v.push({sep:true});
+    if(fs==="none")v.push({lab:"🧾 Segna emessa",action:"fatt",data:{id:l.id,v:"emessa"}});
+    if(fs!=="pagata")v.push({lab:"💶 Segna pagata",action:"fatt",data:{id:l.id,v:"pagata"}});
+    if(fs==="pagata")v.push({lab:"↩ Riporta a non pagata",action:"fatt",data:{id:l.id,v:"emessa"}});
+    v.push({sep:true});
+    v.push({lab:"🗑 Elimina",action:"del-job-supa",data:{id:l.id},del:true});
+    return v;
+  }
+  let fattSort={k:"rank",d:1}, fattVista="tutte";
 
   let calJobs=[];
   async function renderCal(){
@@ -1185,39 +1274,104 @@
         <button class="btn-primary b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
   }
 
+  /* Condomini e Squadra sono rubriche: non hanno stati, quindi niente viste.
+     Al loro posto la sola ricerca, che qui e' l'unico modo utile di restringere. */
+  let cliQ="", dipQ="";
+  function cliVoci(c){
+    return [
+      {lab:"🗺 Mappa",action:"map",data:{q:c.indirizzo||c.nome}},
+      {sep:true},
+      {lab:"✏ Modifica",action:"edit-cli",data:{id:c.id}},
+      {lab:"🗑 Elimina",action:"del-cli",data:{id:c.id},del:true}
+    ];
+  }
+  function cliCard(c){
+    return `<div class="card"><div><h3>${esc(c.nome)}</h3>
+      <p>${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"· 📞 "+esc(c.telefono):""}</p></div>
+      <div class="card-acts">${cliVoci(c).filter(x=>!x.sep)
+        .map(x=>`<button class="btn btn-sm${x.del?" btn-danger del":""}" data-action="${x.action}"${tabAttr(x.data)}>${x.lab}</button>`).join("")}</div></div>`;
+  }
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
-    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">🏢</div><p>Nessun condominio</p><small>Accedi per gestire i clienti</small></div>`;return;}
+    if(!sb||!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Nessun condominio","Accedi per gestire i clienti.");return;}
     const {data}=await sb.from("gest_clienti").select("id,nome,indirizzo,referente,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
     cliCache=data||[];
-    box.innerHTML=cliCache.length?cliCache.map(c=>{
-      return `<div class="card"><div><h3>${esc(c.nome)}</h3>
-        <p>${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"· 📞 "+esc(c.telefono):""}</p></div>
-        <div class="card-acts"><button class="btn btn-sm" data-action="map" data-q="${esc(c.indirizzo||c.nome)}">🗺 Mappa</button>
-        <button class="btn btn-sm" data-action="edit-cli" data-id="${c.id}">Modifica</button>
-        <button class="btn btn-sm btn-danger del" data-action="del-cli" data-id="${c.id}">Elimina</button></div></div>`;
-    }).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun condominio</p><small>Aggiungi i clienti di questo reparto</small></div>`;
+    let L=cliCache;
+    if(cliQ){const q=cliQ.toLowerCase();
+      L=L.filter(c=>[c.nome,c.indirizzo,c.referente,c.telefono].some(x=>(x||"").toLowerCase().includes(q)));}
+    renderTabella({
+      id:"cli", box:"#cli-list",
+      vuoto:cliQ?tabVuotoCerca(cliQ):tabVuoto("Nessun condominio","Aggiungi i clienti di questo reparto.",
+        _SVGV+'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/></svg>'),
+      colonne:[{lab:"Nome",w:"30%"},{lab:"Indirizzo",w:"34%",cls:"c-cli"},
+               {lab:"Referente",w:"20%",cls:"c-chi"},{lab:"Telefono",w:"16%",cls:"c-chi"}],
+      righe:L.map(c=>({
+        id:c.id,
+        click:{action:"edit-cli",data:{id:c.id}},
+        celle:[`<span class="c-nome">${esc(c.nome||"—")}</span>`,esc(c.indirizzo||"—"),esc(c.referente||"—"),esc(c.telefono||"—")],
+        menu:cliVoci(c)
+      })),
+      totale:{testo:L.length+" "+(L.length===1?"condominio":"condomini"),valore:""},
+      cards:()=>L.map(c=>cliCard(c)).join("")
+    });
   }
   async function renderDip(){
     const box=$("#dip-list");if(!box)return;
-    if(!sb){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Squadra non disponibile</p><small>Connessione non riuscita</small></div>`;return;}
-    if(!sbUid){box.innerHTML=`<div class="empty"><div class="ic">👷</div><p>Accedi per gestire la squadra</p><small>Entra nel pannello per invitare le persone</small></div>`;return;}
+    if(!sb){box.style.display="block";box.innerHTML=tabVuoto("Squadra non disponibile","Connessione non riuscita.");return;}
+    if(!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Accedi per gestire la squadra","Entra nel pannello per invitare le persone.");return;}
     const [{data:ops},{data:membri}]=await Promise.all([
       sb.from("gest_operatori").select("id,nome,telefono").eq("mestiere_id",curMestiere()),
       sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi")
     ]);
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
     dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return {id:o.id,nome:o.nome,telefono:o.telefono,ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{}};});
-    box.innerHTML=(ops&&ops.length)?ops.map(o=>{
-      const inv=mB[o.id], att=inv&&inv.stato==="attivo", codice=inv?inv.codice:"";
-      const link=inviteLink(codice);
-      const wa="https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link);
-      return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${att?"Attivo":"Invitato"}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
-        <div class="card-acts"><button class="btn btn-sm" data-action="sq-edit" data-id="${o.id}">Modifica</button>
-        ${codice?`<button class="btn btn-sm" data-action="sq-copy" data-link="${esc(link)}">Copia link</button>
-        <button class="btn btn-sm" data-action="sq-wa" data-wa="${esc(wa)}">Invia su WhatsApp</button>
-        <button data-action="sq-revoca" data-id="${o.id}" data-nome="${esc(o.nome)}" class="btn btn-sm btn-danger">Rimuovi accesso</button>`:""}</div></div>`;
-    }).join(""):`<div class="empty"><div class="ic">👷</div><p>Nessuna persona</p><small>Aggiungi chi lavora in questo reparto</small></div>`;
+    let L=(ops||[]).map(o=>{
+      const inv=mB[o.id]||{}, dc=dipCache.find(d=>d.id===o.id)||{};
+      const link=inviteLink(inv.codice||"");
+      return {id:o.id,nome:o.nome,telefono:o.telefono,ruolo:dc.ruolo||"operaio",
+        attivo:inv.stato==="attivo",codice:inv.codice||"",link:link,
+        wa:"https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link)};
+    });
+    if(dipQ){const q=dipQ.toLowerCase();
+      L=L.filter(o=>[o.nome,o.telefono,SQ_RUOLO[o.ruolo]].some(x=>(x||"").toLowerCase().includes(q)));}
+    renderTabella({
+      id:"dip", box:"#dip-list",
+      vuoto:dipQ?tabVuotoCerca(dipQ):tabVuoto("Nessuna persona","Aggiungi chi lavora in questo reparto.",
+        _SVGV+'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'),
+      colonne:[{lab:"Nome",w:"28%"},{lab:"Ruolo",w:"20%",cls:"c-chi"},{lab:"Telefono",w:"20%",cls:"c-chi"},
+               {lab:"Stato",w:"16%"},{lab:"",w:"16%"}],
+      righe:L.map(o=>({
+        id:o.id,
+        click:{action:"sq-edit",data:{id:o.id}},
+        celle:[
+          `<span class="c-nome">${esc(o.nome||"—")}</span>`,
+          SQ_RUOLO[o.ruolo]||o.ruolo||"—",
+          esc(o.telefono||"—"),
+          `<span class="stato ${o.attivo?"fatto":"da_fare"}">${o.attivo?"Attivo":"Invitato"}</span>`,
+          ""
+        ],
+        menu:dipVoci(o)
+      })),
+      cards:()=>L.map(o=>dipCard(o)).join("")
+    });
+  }
+  const SQ_RUOLO={operaio:"Operaio",preposto:"Preposto",segretaria:"Segretaria"};
+  /* Copia link, WhatsApp e Rimuovi accesso esistono solo se la persona ha un
+     codice d'invito: senza codice non c'e' niente da mandare né da revocare. */
+  function dipVoci(o){
+    const v=[{lab:"✏ Modifica",action:"sq-edit",data:{id:o.id}}];
+    if(o.codice){
+      v.push({lab:"🔗 Copia link",action:"sq-copy",data:{link:o.link}});
+      v.push({lab:"💬 Invia su WhatsApp",action:"sq-wa",data:{wa:o.wa}});
+      v.push({sep:true});
+      v.push({lab:"🚫 Rimuovi accesso",action:"sq-revoca",data:{id:o.id,nome:o.nome},del:true});
+    }
+    return v;
+  }
+  function dipCard(o){
+    return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${o.attivo?"Attivo":"Invitato"}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
+      <div class="card-acts">${dipVoci(o).filter(x=>!x.sep)
+        .map(x=>`<button class="btn btn-sm${x.del?" btn-danger":""}" data-action="${x.action}"${tabAttr(x.data)}>${x.lab}</button>`).join("")}</div></div>`;
   }
   const PERMS=[{key:"calendario",label:"Calendario"},{key:"lavori",label:"Lavori"},{key:"foto",label:"Foto"},{key:"note",label:"Note"},{key:"clienti",label:"Clienti"},{key:"fatture",label:"Fatture"},{key:"pagamenti",label:"Pagamenti"}];
   const RUOLO_PRESET={operaio:["calendario","lavori","foto"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
@@ -1308,9 +1462,52 @@
     ]);
     mezziCache=mz||[];
     const scadMap=Object.fromEntries((vw||[]).map(v=>[v.mezzo_id,v]));
-    const L=mezziCache.filter(m=>mezziFilter==="tutti"?true:(mezziFilter==="manutenzione"?m.stato==="manutenzione":m.categoria===mezziFilter));
-    box.innerHTML=L.length?L.map(m=>mezzoCard(m,scadMap[m.id])).join("")
-      :`<div class="empty"><div class="ic">🚚</div><p>Nessun mezzo</p><small>${mezziCache.length?"Nessun mezzo con questo filtro":"Aggiungi i mezzi e le attrezzature di questo reparto"}</small></div>`;
+    const filtra=(A,v)=>v==="tutti"?A.slice():(v==="manutenzione"?A.filter(m=>m.stato==="manutenzione"):A.filter(m=>m.categoria===v));
+    const conta={};MEZZI_VISTE.forEach(v=>conta[v.k]=filtra(mezziCache,v.k).length);
+    const L=filtra(mezziCache,mezziFilter);
+    renderTabella({
+      id:"mezzi", box:"#mezzi-list",
+      viste:"#mezzi-viste", visteDef:MEZZI_VISTE, vista:mezziFilter, conta:conta, azioneVista:"mezzo-filtro",
+      vuoto:tabVuoto("Nessun mezzo",mezziCache.length?"Nessun mezzo con questo filtro.":"Aggiungi i mezzi e le attrezzature di questo reparto.",
+        _SVGV+'<path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>'),
+      colonne:[{lab:"Mezzo",w:"30%"},{lab:"Tipo",w:"14%",cls:"c-chi"},{lab:"Targa",w:"16%",cls:"c-chi"},
+               {lab:"Stato",w:"18%"},{lab:"Prossima scadenza",w:"22%",cls:"c-cli"}],
+      righe:L.map(m=>{
+        const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
+        return {
+          id:m.id,
+          click:{action:"edit-mezzo",data:{id:m.id}},
+          celle:[
+            `<span class="c-nome">${esc(m.nome||"—")}</span>`,
+            m.categoria==="attrezzatura"?"Attrezzatura":"Mezzo",
+            esc(m.targa||"—"),
+            `<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
+            cellaScadenza(scadMap[m.id])
+          ],
+          menu:[
+            {lab:"📅 Aggiungi scadenza",action:"mezzo-scad",data:{id:m.id}},
+            {sep:true},
+            {lab:"✏ Modifica",action:"edit-mezzo",data:{id:m.id}},
+            {lab:"🗑 Elimina",action:"del-mezzo",data:{id:m.id},del:true}
+          ]
+        };
+      }),
+      cards:()=>L.map(m=>mezzoCard(m,scadMap[m.id])).join("")
+    });
+  }
+  const MEZZI_VISTE=[{k:"tutti",lab:"Tutti"},{k:"mezzo",lab:"Mezzi"},{k:"attrezzatura",lab:"Attrezzature"},{k:"manutenzione",lab:"In manutenzione"}];
+  /* colonna "Prossima scadenza": il tipo sopra, il quando sotto.
+     Rosso se e' gia' passata, ambra se casca entro 30 giorni: prima il rosso
+     scattava solo col conteggio delle scadute e l'ambra a 7 giorni. */
+  function cellaScadenza(sc){
+    if(!sc||!sc.prossima_data){
+      if(sc&&sc.scadute>0)return `<span class="cli-nome q-passato">${sc.scadute} ${sc.scadute===1?"scaduta":"scadute"}</span>`;
+      return `<span class="cli-nome vuoto">—</span>`;
+    }
+    const g=_giorniA(sc.prossima_data), q=quando(sc.prossima_data);
+    const cls=g<0?"q-passato":(g<=30?"q-attesa":"q-futuro");
+    const eti=sc.prossimo_tipo||sc.prossimo_titolo||"Scadenza";
+    return `<span class="cli-nome">${esc(eti)}</span><span class="cli-dove ${cls}">${q.testo}</span>`;
   }
   function mezzoCard(m,sc){
     const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
@@ -1411,8 +1608,46 @@
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
     const mezMap=Object.fromEntries((mz||[]).map(m=>[m.id,m.nome]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
-    box.innerHTML=scadCache.length?scadCache.map(s=>scadCard(s,cliMap,oggi,lim,mezMap)).join(""):`<div class="empty"><div class="ic">📅</div><p>Nessuna scadenza</p><small>Aggiungi le scadenze di questo reparto</small></div>`;
+    const filtra=(A,v)=>v==="scadute"?A.filter(s=>s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza<oggi)
+                      :v==="prossime"?A.filter(s=>s.stato!=="fatta"&&(!s.data_scadenza||s.data_scadenza>=oggi))
+                      :v==="fatte"?A.filter(s=>s.stato==="fatta"):A.slice();
+    const conta={};SCAD_VISTE.forEach(v=>conta[v.k]=filtra(scadCache,v.k).length);
+    const L=filtra(scadCache,scadVista);
+    renderTabella({
+      id:"scad", box:"#scad-list",
+      viste:"#scad-viste", visteDef:SCAD_VISTE, vista:scadVista, conta:conta, azioneVista:"scad-vista",
+      vuoto:tabVuoto("Nessuna scadenza","Aggiungi le scadenze di questo reparto.",
+        _SVGV+'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>'),
+      colonne:[{lab:"Scadenza",w:"32%"},{lab:"Tipo",w:"18%",cls:"c-chi"},
+               {lab:"Riferimento",w:"24%",cls:"c-cli"},{lab:"Quando",w:"26%"}],
+      righe:L.map(s=>{
+        const fatta=s.stato==="fatta";
+        const q=quando(s.data_scadenza,{neutro:fatta});
+        const rif=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
+                 :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
+        return {
+          id:s.id,
+          click:{action:"edit-scad",data:{id:s.id}},
+          celle:[
+            `<span class="lav-bar ${fatta?"fatto":(s.data_scadenza&&s.data_scadenza<oggi?"ritardo":(s.data_scadenza&&s.data_scadenza<=lim?"da_fare":"in_corso"))}" title="${fatta?"Fatta":(s.data_scadenza&&s.data_scadenza<oggi?"Scaduta":(s.data_scadenza&&s.data_scadenza<=lim?"In scadenza":"Aperta"))}"></span><span class="c-nome">${esc(s.titolo||"Scadenza")}</span>`,
+            esc(s.tipo_pratica||"—"),
+            rif?esc(rif):`<span class="cli-nome vuoto">—</span>`,
+            {h:q.testo,cls:q.classe}
+          ],
+          menu:[
+            fatta?{lab:"↩ Riapri",action:"scad-stato",data:{id:s.id,v:"aperta"}}
+                 :{lab:"✔ Segna fatta",action:"scad-stato",data:{id:s.id,v:"fatta"}},
+            {sep:true},
+            {lab:"✏ Modifica",action:"edit-scad",data:{id:s.id}},
+            {lab:"🗑 Elimina",action:"del-scad",data:{id:s.id},del:true}
+          ]
+        };
+      }),
+      cards:()=>L.map(s=>scadCard(s,cliMap,oggi,lim,mezMap)).join("")
+    });
   }
+  const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
+  let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap){
     const fatta=s.stato==="fatta";
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
@@ -2023,24 +2258,70 @@
       const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",prevCache.map(p=>p.id));
       (rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
     }
-    const stLab={bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato"};
     const L=prevCache.filter(p=>prevFilter==="tutti"||p.stato===prevFilter);
-    box.innerHTML=L.length?L.map(p=>`<div class="job">
-      <div class="job-top"><div class="job-cli">N. ${p.numero} — ${esc(p.titolo)}</div><span class="stato ${p.stato}">${stLab[p.stato]||p.stato}</span></div>
+    const conta={};PREV_VISTE.forEach(v=>conta[v.k]=prevCache.filter(p=>v.k==="tutti"||p.stato===v.k).length);
+    const somma=L.reduce((s,p)=>s+(tot[p.id]||0),0);
+    renderTabella({
+      id:"prev", box:"#prev-list",
+      viste:"#prev-viste", visteDef:PREV_VISTE, vista:prevFilter, conta:conta, azioneVista:"prev-filtro",
+      vuoto:tabVuoto("Nessun preventivo qui",'Crea il primo col pulsante «+ Nuovo preventivo».',
+        _SVGV+'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>'),
+      colonne:[{lab:"N.",w:"6%"},{lab:"Preventivo",w:"32%"},{lab:"Cliente",w:"24%",cls:"c-cli"},
+               {lab:"Quando",w:"18%"},{lab:"Importo",w:"20%",cls:"c-imp"}],
+      righe:L.map(p=>{
+        const q=quando(p.data,{neutro:true});
+        return {
+          id:p.id,
+          click:{action:"edit-prev",data:{id:p.id}},
+          celle:[
+            esc(String(p.numero||"—")),
+            `<span class="lav-bar ${PREV_BAR[p.stato]||"da_fare"}" title="${PREV_LAB[p.stato]||p.stato}"></span><span class="c-nome">${esc(p.titolo||"—")}</span>`,
+            esc(cliMap[p.cliente_id]||"—"),
+            {h:PREV_VERBO[p.stato]+" "+q.testo,cls:q.classe},
+            eur(tot[p.id]||0)
+          ],
+          menu:prevVoci(p)
+        };
+      }),
+      totale:{testo:L.length+" "+(L.length===1?"preventivo":"preventivi"),valore:eur(somma)},
+      cards:()=>L.map(p=>prevCard(p,cliMap,tot)).join("")
+    });
+  }
+  /* sotto 880px: la card di prima, con le stesse azioni del menu */
+  function prevCard(p,cliMap,tot){
+    return `<div class="job">
+      <div class="job-top"><div class="job-cli">N. ${esc(String(p.numero||"—"))} — ${esc(p.titolo||"")}</div><span class="stato ${p.stato}">${PREV_LAB[p.stato]||p.stato}</span></div>
       <div class="job-meta">
         ${p.cliente_id?`<span>👤 ${esc(cliMap[p.cliente_id]||"—")}</span>`:""}
         <span>📅 ${fdate(p.data)}</span>
         <span class="prev-tot">${eur2(tot[p.id]||0)}</span></div>
       ${p.note?`<div class="job-note">📝 ${esc(p.note)}</div>`:""}
-      <div class="job-actions">
-        <button class="btn btn-sm ja" data-action="edit-prev" data-id="${p.id}">✏ Modifica</button>
-        <button class="btn btn-sm ja" data-action="prev-pdf" data-id="${p.id}">📄 PDF</button>
-        ${p.stato==="bozza"?`<button class="btn btn-sm ja" data-action="prev-stato" data-id="${p.id}" data-v="inviato">📤 Segna inviato</button>`:""}
-        ${(p.stato==="bozza"||p.stato==="inviato")?`<button class="btn btn-sm ja" data-action="prev-to-lavoro" data-id="${p.id}">✔ Accettato → crea lavoro</button>
-        <button class="btn btn-sm ja" data-action="prev-stato" data-id="${p.id}" data-v="rifiutato">✕ Rifiutato</button>`:""}
-        ${p.stato==="rifiutato"?`<button class="btn btn-sm ja" data-action="prev-stato" data-id="${p.id}" data-v="bozza">↩ Riapri</button>`:""}
-        <button class="btn btn-sm btn-danger ja del" data-action="del-prev" data-id="${p.id}">🗑</button>
-      </div></div>`).join(""):`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo qui</p><small>Crea il primo col pulsante "+ Nuovo preventivo"</small></div>`;
+      <div class="job-actions">${prevVoci(p).filter(x=>!x.sep)
+        .map(x=>`<button class="btn btn-sm ja${x.del?" btn-danger del":""}" data-action="${x.action}"${tabAttr(x.data)}>${x.lab}</button>`).join("")}
+      </div></div>`;
+  }
+  /* Preventivi: viste, colore della barretta e verbo della colonna "Quando".
+     Il verbo cambia con lo stato ("inviato 3 giorni fa", "creato 3 giorni fa"):
+     la data e' sempre p.data, quello che cambia e' cosa e' successo in quel giorno. */
+  const PREV_VISTE=[
+    {k:"tutti",lab:"Tutti"},{k:"bozza",lab:"Bozze"},{k:"inviato",lab:"Inviati"},
+    {k:"accettato",lab:"Accettati"},{k:"rifiutato",lab:"Rifiutati"}
+  ];
+  const PREV_LAB={bozza:"Bozza",inviato:"Inviato",accettato:"Accettato",rifiutato:"Rifiutato"};
+  const PREV_BAR={bozza:"da_fare",inviato:"in_corso",accettato:"fatto",rifiutato:"ritardo"};
+  const PREV_VERBO={bozza:"creato",inviato:"inviato",accettato:"accettato",rifiutato:"rifiutato"};
+  function prevVoci(p){
+    const v=[{lab:"📄 Scarica PDF",action:"prev-pdf",data:{id:p.id}}];
+    if(p.stato==="bozza")v.push({lab:"📤 Segna inviato",action:"prev-stato",data:{id:p.id,v:"inviato"}});
+    if(p.stato==="bozza"||p.stato==="inviato"){
+      v.push({lab:"✔ Accettato → crea lavoro",action:"prev-to-lavoro",data:{id:p.id}});
+      v.push({lab:"✕ Rifiutato",action:"prev-stato",data:{id:p.id,v:"rifiutato"}});
+    }
+    if(p.stato==="rifiutato")v.push({lab:"↩ Riapri",action:"prev-stato",data:{id:p.id,v:"bozza"}});
+    v.push({sep:true});
+    v.push({lab:"✏ Modifica",action:"edit-prev",data:{id:p.id}});
+    v.push({lab:"🗑 Elimina",action:"del-prev",data:{id:p.id},del:true});
+    return v;
   }
   function prevRigaHtml(r){
     r=r||{};prevRigheCount++;
@@ -2363,22 +2644,25 @@
     if(a==="save-prev")return savePrev(id||null);
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     if(a==="prev-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();prevTotaleLive();}return;}
-    if(a==="prev-filtro"){prevFilter=t.dataset.v;$$("#prev-chips .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===prevFilter));renderPreventivi();return;}
+    if(a==="prev-filtro"){prevFilter=t.dataset.v;renderPreventivi();return;}
     if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo aggiornato ✔");});return;}
     if(a==="prev-to-lavoro")return prevToLavoro(id);
     if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevPdf(id);
     if(a==="report-csv")return reportCsv();
     if(a==="lav-vista"){filter.vista=t.dataset.v;renderJobs();return;}
-    if(a==="lav-menu"){
+    /* un solo menu "..." per tutte le sezioni: le voci le ha gia' preparate
+       renderTabella, qui si legge solo il registro. */
+    if(a==="tab-menu"){
       const cella=t.closest("td"), aperto=cella.querySelector(".lav-pop");
-      lavChiudiPop();
+      tabChiudiPop();
       if(aperto)return;                                   /* secondo clic: chiude */
-      const l=lavCache.find(x=>String(x.id)===String(id));
-      if(l)cella.insertAdjacentHTML("beforeend",lavPop(l,_waLavoro(l,lavTel[l.operatore_id]||"")));
+      const voci=(TAB_MENU[t.dataset.tab]||{})[String(id)];
+      if(voci&&voci.length)cella.insertAdjacentHTML("beforeend",tabPop(voci));
       return;
     }
     if(a==="fatt-sort"){const k=t.dataset.k;fattSort=fattSort.k===k?{k,d:-fattSort.d}:{k,d:1};renderFatture();return;}
+    if(a==="fatt-vista"){fattVista=t.dataset.v;renderFatture();return;}
     if(a==="burger"){const s=document.querySelector(".side");if(s)s.classList.toggle("open");return;}
     if(a==="export-excel")return esportaExcel();
     if(a==="export-json")return esportaJson();
@@ -2459,7 +2743,7 @@
     if(a==="new-mezzo")return mezzoForm(null);
     if(a==="edit-mezzo")return mezzoForm(mezziCache.find(m=>String(m.id)===String(id)));
     if(a==="save-mezzo")return saveMezzo(id||null);
-    if(a==="mezzo-filtro"){mezziFilter=t.dataset.v;$$("#mezzi-chips .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===mezziFilter));renderMezzi();return;}
+    if(a==="mezzo-filtro"){mezziFilter=t.dataset.v;renderMezzi();return;}
     if(a==="mezzo-scad")return scadForm(null,{mezzo_id:id});
     if(a==="del-mezzo"){
       if(!sbUid){toast("Devi essere loggato");return;}
@@ -2480,6 +2764,7 @@
       renderMezziBlock(mezziLavoroId);return;
     }
     if(a==="new-scad")return scadForm(null);
+    if(a==="scad-vista"){scadVista=t.dataset.v;renderScadenze();return;}
     if(a==="edit-scad")return scadForm(scadCache.find(s=>s.id===id));
     if(a==="save-scad")return saveScad(id);
     if(a==="scad-stato"){
@@ -2522,10 +2807,12 @@
     };
   });
   /* chiude il menu "..." a ogni clic fuori dal pulsante che lo apre */
-  document.addEventListener("click",e=>{if(!e.target.closest(".lav-dots"))lavChiudiPop();});
+  document.addEventListener("click",e=>{if(!e.target.closest(".lav-dots"))tabChiudiPop();});
   /* la tabella si ridisegna al passaggio desktop/mobile: sotto 880px tornano le card */
   window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur)renderJobs();});
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
+  if($("#cli-search"))$("#cli-search").oninput=e=>{cliQ=e.target.value;renderClienti();};
+  if($("#dip-search"))$("#dip-search").oninput=e=>{dipQ=e.target.value;renderDip();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
 
