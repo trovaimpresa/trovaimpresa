@@ -257,6 +257,8 @@
   /* .sp = spese (dato neutro). .neg resta SOLO per il margine negativo, che e' un problema vero. */
   .margine-box .sp{color:var(--testo)}
   .margine-box .neg{color:var(--err)} .margine-box .pos{color:var(--ok)}
+  /* riga sotto il grafico spese/preventivo */
+  .and-nota{margin:6px 2px 0;font-size:13px;color:var(--testo-2);font-weight:500}
   .rep-grid{display:grid;grid-template-columns:1fr;gap:14px}
   @media(min-width:760px){.rep-grid{grid-template-columns:1fr 1fr}}
   .rep-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}

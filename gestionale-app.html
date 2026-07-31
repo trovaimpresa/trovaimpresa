@@ -1524,6 +1524,7 @@
           <input id="sp-imp" type="number" inputmode="decimal" placeholder="€">
           <button type="button" class="btn" data-action="spesa-add">+ Aggiungi</button></div>
         <div class="margine-box" id="margine-box"></div></div>
+      <div class="field" id="andamento-wrap" style="display:none"></div>
       <div class="field" id="mezzi-wrap" style="display:none"><label>🚚 Mezzi e attrezzature usati in questo lavoro</label>
         <div class="spese-list" id="lm-list"></div>
         <div class="mezzo-add">
@@ -1919,13 +1920,82 @@
     speseLavoroId=lavoroId;
     const wrap=$("#spese-wrap");if(!wrap||!sb||!sbUid)return;
     wrap.style.display="block";
-    const {data}=await sb.from("gest_spese").select("id,descrizione,importo,data").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
+    /* created_at serve al grafico: la colonna "data" e' nullable (l'inserimento non la passa
+       e arriva dal default del DB), quindi se manca la data della spesa si usa quella. */
+    const {data}=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
     const sp=data||[];
     const tot=sp.reduce((s,x)=>s+(+x.importo||0),0);
     $("#spese-list").innerHTML=sp.length?sp.map(x=>`<div class="spesa-row"><span>${esc(x.descrizione)}</span><b>${eur2(x.importo)}</b><button type="button" class="sdel" data-action="spesa-del" data-id="${x.id}">🗑</button></div>`).join(""):`<p class="fatt-empty">Nessuna spesa registrata.</p>`;
     const imp=+($("#j-imp")?$("#j-imp").value:importo)||0;
     const marg=imp-tot;
     $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span><span>Spese: <span class="sp">−${eur2(tot)}</span></span><span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`;
+    renderAndamentoSpese(sp,imp);
+  }
+
+  /* ---- ANDAMENTO SPESE / PREVENTIVO (dentro il lavoro) ----
+     Il Report racconta com'e' andata a cose fatte; qui serve capire se il cantiere
+     sta sforando MENTRE e' ancora aperto. Si disegna solo dove c'e' davvero un
+     andamento da leggere: almeno 3 spese e almeno 15 giorni fra la prima e l'ultima.
+     Su un lavoro di mezza giornata sarebbe soltanto rumore.
+     SVG scritto a mano di proposito: una libreria di grafici peserebbe piu' di
+     tutto il resto della pagina per una linea e un tratteggio. */
+  const AND_MIN_SPESE=3, AND_MIN_GIORNI=15;
+  /* la data buona della spesa: "data" se c'e', altrimenti il giorno in cui e' stata registrata */
+  const _spData=x=>(x.data||String(x.created_at||"").slice(0,10)||"");
+  const _diffGG=(a,b)=>Math.round((Date.parse(b+"T00:00:00")-Date.parse(a+"T00:00:00"))/86400000);
+  /* sotto l'80% si e' larghi, fino al 100% si sta stretti, oltre si e' sforato.
+     Senza preventivo non c'e' niente da giudicare: colore neutro. */
+  const _colSpesa=p=>p===null?"var(--blu)":p<80?"var(--ok)":p<=100?"var(--attesa)":"var(--err)";
+  function renderAndamentoSpese(sp,imp){
+    const wrap=$("#andamento-wrap");if(!wrap)return;
+    const S=(sp||[]).filter(x=>_spData(x)).sort((a,b)=>_spData(a).localeCompare(_spData(b)));
+    const oggi=todayStr();
+    if(S.length<AND_MIN_SPESE||_diffGG(_spData(S[0]),_spData(S[S.length-1]))<AND_MIN_GIORNI){
+      wrap.style.display="none";wrap.innerHTML="";return;
+    }
+    wrap.style.display="block";
+    /* un punto per data, col totale speso fino a li' (non la singola spesa) */
+    const punti=[];let acc=0;
+    S.forEach(x=>{
+      acc+=+x.importo||0;
+      const d=_spData(x);
+      if(punti.length&&punti[punti.length-1].d===d)punti[punti.length-1].v=acc;
+      else punti.push({d:d,v:acc});
+    });
+    const tot=acc, t0=punti[0].d, ultima=punti[punti.length-1].d;
+    const t1=ultima>oggi?ultima:oggi;                 /* l'asse arriva a oggi */
+    if(ultima!==t1)punti.push({d:t1,v:tot});          /* dall'ultima spesa a oggi la somma non cresce */
+    const span=Math.max(_diffGG(t0,t1),1);
+    const W=Math.max(280,Math.min(900,wrap.clientWidth||600)), H=180;
+    const PL=46,PR=12,PT=14,PB=22;                    /* spazio per le etichette */
+    const x0=PL,x1=W-PR,y0=PT,y1=H-PB;
+    const yMax=Math.max(tot,imp||0)*1.08||1;          /* un po' d'aria sopra la linea piu' alta */
+    const X=d=>x0+(x1-x0)*(_diffGG(t0,d)/span);
+    const Y=v=>y1-(y1-y0)*(v/yMax);
+    const LAB='style="fill:var(--testo-3);font-size:11px"';
+    let griglia="";
+    [0,.5,1].forEach(f=>{
+      const y=y1-(y1-y0)*f;
+      griglia+=`<line x1="${x0}" y1="${y.toFixed(1)}" x2="${x1}" y2="${y.toFixed(1)}" style="stroke:var(--bordo)" stroke-width="1"/>`
+             +`<text x="${x0-6}" y="${(y+3.5).toFixed(1)}" text-anchor="end" ${LAB}>${eur(yMax*f)}</text>`;
+    });
+    let prev="";
+    if(imp>0){
+      const y=Y(imp), stretto=(y-y0)<14;              /* riga alta: l'etichetta va sotto, non fuori */
+      prev=`<line x1="${x0}" y1="${y.toFixed(1)}" x2="${x1}" y2="${y.toFixed(1)}" style="stroke:var(--testo-2)" stroke-width="1" stroke-dasharray="5 4"/>`
+         +`<text x="${x1}" y="${(stretto?y+13:y-5).toFixed(1)}" text-anchor="end" ${LAB}>Preventivo ${eur(imp)}</text>`;
+    }
+    const perc=imp>0?Math.round(tot/imp*100):null;
+    const col=_colSpesa(perc);
+    const linea=`<polyline points="${punti.map(p=>X(p.d).toFixed(1)+","+Y(p.v).toFixed(1)).join(" ")}" fill="none" style="stroke:${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    const assex=`<text x="${x0}" y="${H-6}" ${LAB}>${fdate(t0)}</text>`
+               +`<text x="${x1}" y="${H-6}" text-anchor="end" ${LAB}>${t1===oggi?"oggi":fdate(t1)}</text>`;
+    const nota=perc===null
+      ? "Nessun preventivo impostato per il confronto"
+      : `Speso ${eur(tot)} su ${eur(imp)} (<b style="color:${col}">${perc}%</b>)`;
+    wrap.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:180px;display:block" role="img" aria-label="Spese accumulate rispetto al preventivo">
+      ${griglia}${prev}${linea}${assex}</svg>
+      <p class="and-nota">${nota}</p>`;
   }
   async function spesaAdd(){
     if(!sbUid||!speseLavoroId)return;
