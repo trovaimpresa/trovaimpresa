@@ -577,6 +577,13 @@
   .ltab tbody tr:hover{background:var(--sfondo);cursor:pointer}
   .ltab th.c-imp,.ltab td.c-imp{text-align:right;font-variant-numeric:tabular-nums}
   .ltab .c-cli,.ltab .c-chi{color:var(--testo-2)}
+  /* colonna Cliente su due righe: nome sopra, indirizzo sotto in piccolo.
+     Il taglio con i puntini sta sulle righe, non sulla cella: con figli block
+     il text-overflow del <td> non varrebbe piu'. */
+  .ltab .c-cli .cli-nome,.ltab .c-cli .cli-dove{
+    display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ltab .c-cli .cli-nome.vuoto{color:var(--testo-3)}
+  .ltab .c-cli .cli-dove{font-size:12px;color:var(--testo-3);margin-top:2px}
   /* stato: barretta, non badge */
   .lav-bar{display:inline-block;width:3px;height:15px;border-radius:2px;margin-right:10px;vertical-align:-2px}
   .lav-bar.ritardo{background:var(--err)}
@@ -1493,6 +1500,15 @@
     return h+'</div>';
   }
   function lavChiudiPop(){document.querySelectorAll(".lav-pop").forEach(x=>x.remove());}
+  /* colonna Cliente: prima riga il nome (o "—" se il lavoro non ha cliente collegato),
+     seconda riga l'indirizzo, che prima usurpava il posto del nome e confondeva. */
+  function cellaCliente(nome,dove){
+    const n=(nome||"").trim(), d=(dove||"").trim();
+    let h=n?`<span class="cli-nome">${esc(n)}</span>`
+           :`<span class="cli-nome vuoto">—</span>`;
+    if(d)h+=`<span class="cli-dove">${esc(d)}</span>`;
+    return h;
+  }
 
   let lavVistaAuto=true;   /* la prima vista la sceglie il codice, poi comanda l'utente */
   let lavCache=[], lavTel={};
@@ -1552,7 +1568,7 @@
       const late=inRitardo(l.stato,l.data_prevista);
       return `<tr data-action="edit-job" data-id="${esc(l.id)}">
         <td><span class="lav-bar ${late?"ritardo":l.stato}" title="${late?"In ritardo":(statoLabel[l.stato]||l.stato)}"></span><span class="c-nome">${esc(l.descrizione||"\u2014")}</span></td>
-        <td class="c-cli">${esc(cliName[l.cliente_id]||l.dove||"\u2014")}</td>
+        <td class="c-cli">${cellaCliente(cliName[l.cliente_id],l.dove)}</td>
         <td class="${q.classe}">${q.testo}</td>
         <td class="c-chi">${esc(opName[l.operatore_id]||"\u2014")}</td>
         <td class="c-imp">${+l.importo?eur(l.importo):"\u2014"}</td>
