@@ -579,9 +579,26 @@
       }
     };
 
-    async function uploadCV(file, email) {
-      const ext = file.name.split('.').pop();
-      const fileName = email.replace(/[^a-z0-9]/gi, '_') + '_' + Date.now() + '.' + ext;
+    /* Nome del file: UUID casuale dentro il prefisso "registrazioni/".
+       Prima era "<email>_<timestamp>.<ext>" nella radice del bucket, ed era il
+       caso peggiore di tutti: l'email della persona in chiaro dentro il nome di
+       un file su un bucket pubblico. Chi indovinava il nome scaricava il CV, e
+       il nome stesso rivelava l'email.
+       Serviva anche una cartella: senza, non c'e' niente su cui scrivere una
+       policy piu' stretta di "chiunque scrive ovunque".
+       L'estensione va ripulita: arriva dal nome del file scelto dall'utente. */
+    function nomeCasualeFile(file, estDefault) {
+      const pezzi = String(file.name || '').split('.');
+      const grezza = pezzi.length > 1 ? pezzi.pop() : '';
+      const ext = (String(grezza).toLowerCase().match(/^[a-z0-9]{1,5}$/) || [estDefault])[0];
+      const id = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      return 'registrazioni/' + id + '.' + ext;
+    }
+
+    async function uploadCV(file) {
+      const fileName = nomeCasualeFile(file, 'pdf');
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/cv-candidati/' + fileName, {
         method: 'POST',
         headers: {
@@ -628,7 +645,7 @@
         let cvUrl = null;
         if (cvFile) {
           btnNext.textContent = '⏳ Caricamento CV...';
-          cvUrl = await uploadCV(cvFile, email);
+          cvUrl = await uploadCV(cvFile);
         }
 
         // 2. signUp: il profilo in candidati_lavoro viene creato dal trigger

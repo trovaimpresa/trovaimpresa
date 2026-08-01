@@ -587,9 +587,24 @@
       }
     };
 
-    async function uploadLogo(file, email) {
-      const ext = file.name.split('.').pop();
-      const fileName = email.replace(/[^a-z0-9]/gi, '_') + '_' + Date.now() + '.' + ext;
+    /* Nome del file: UUID casuale dentro il prefisso "registrazioni/".
+       Prima era "<email>_<timestamp>.<ext>" nella radice del bucket: l'email
+       finiva dentro il nome di un file su un bucket pubblico, e senza una
+       cartella non c'era niente su cui scrivere una policy piu' stretta di
+       "chiunque scrive ovunque".
+       L'estensione va ripulita: arriva dal nome del file scelto dall'utente. */
+    function nomeCasualeFile(file, estDefault) {
+      const pezzi = String(file.name || '').split('.');
+      const grezza = pezzi.length > 1 ? pezzi.pop() : '';
+      const ext = (String(grezza).toLowerCase().match(/^[a-z0-9]{1,5}$/) || [estDefault])[0];
+      const id = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      return 'registrazioni/' + id + '.' + ext;
+    }
+
+    async function uploadLogo(file) {
+      const fileName = nomeCasualeFile(file, 'png');
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/loghi-imprese/' + fileName, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type || 'image/png' },
