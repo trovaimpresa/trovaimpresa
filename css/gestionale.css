@@ -1007,3 +1007,12 @@
 /* la finestra "Carica foto o video" */
 #gu-stato{ font-size:15px; color:var(--testo-2); min-height:22px; margin-top:6px; }
 #gu-foto, #gu-video{ font-size:15px; padding:10px 12px; }
+
+/* --- finestra Lavori: la riga "Foto e video" che ha sostituito i quattro
+       blocchi di caricamento. Ora foto e video sono mestiere della Galleria. --- */
+.lav-media{ font-size:15px; color:var(--testo-2); }
+.lav-media .lm-conta{ margin-bottom:10px; line-height:1.5; }
+.lav-media .lm-conta b{ color:var(--testo); font-weight:700; }
+.lav-media .lm-vuoto{ line-height:1.5; margin-bottom:0; }
+.lav-media .lm-btn{ display:inline-flex; height:38px; padding:0 16px; font-size:14px;
+                    font-weight:600; color:var(--testo); }
