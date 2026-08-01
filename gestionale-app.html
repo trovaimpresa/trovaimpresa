@@ -1689,16 +1689,19 @@
       return;
     }
     const dipName=id=>{const d=dipCache.find(x=>String(x.id)===String(id));return d?d.nome:null;};
-    box.innerHTML=carteCache.map(c=>{
+    const ordinate=[...carteCache].sort((a,b)=>(saldoMap[a.id]||0)-(saldoMap[b.id]||0));
+    box.innerHTML=ordinate.map(c=>{
       const saldo=saldoMap[c.id]||0;
+      const vuota=saldo<=0;
       const nomeDip=dipName(c.dipendente_id);
       const bloccata=c.stato==="bloccata";
-      return `<div class="card" data-action="carta-dettaglio" data-id="${c.id}" style="cursor:pointer;padding:18px">
+      return `<div class="card" data-action="carta-dettaglio" data-id="${c.id}" style="cursor:pointer;padding:18px${vuota?";border:2px solid var(--err)":""}">
+        ${vuota?'<div style="background:var(--err);color:#fff;font-weight:700;font-size:0.95rem;padding:6px 10px;border-radius:8px;margin-bottom:10px;text-align:center">⚠️ SENZA SOLDI — ricarica la carta</div>':""}
         <div>
           <h3 style="font-size:1.3rem;margin-bottom:8px">${esc(c.nome)}</h3>
           <p style="font-size:1.05rem;line-height:1.5">${nomeDip?"👤 "+esc(nomeDip):"<span style=\"color:var(--testo-3)\">Nessun titolare assegnato</span>"}<br>
           <span class="stato" style="background:${bloccata?"var(--sfondo)":"var(--ok-bg)"};color:${bloccata?"var(--testo-2)":"var(--ok)"};font-size:0.95rem;padding:4px 10px">${bloccata?"Bloccata":"Attiva"}</span></p>
-          <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-top:12px;color:${saldo<0?"var(--err)":"#0a2a4d"}">${eur(saldo)}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-top:12px;color:${vuota?"var(--err)":"#0a2a4d"}">${eur(saldo)}</div>
         </div>
         <div class="card-acts" style="gap:8px;margin-top:14px">
           <button class="btn btn-sm" style="font-size:1rem;padding:10px 14px" data-action="carta-dettaglio" data-id="${c.id}">Movimenti</button>
@@ -1771,7 +1774,8 @@
     ]);
     movimentiCartaCache=mv||[];
     const saldo=(sd&&sd.saldo)||0;
-    if(saldoBox)saldoBox.innerHTML=`<span style="color:${saldo<0?"var(--err)":"#0a2a4d"}">${eur(saldo)}</span>`;
+    const vuota=saldo<=0;
+    if(saldoBox)saldoBox.innerHTML=`${vuota?'<div style="background:var(--err);color:#fff;font-weight:700;font-size:0.95rem;padding:6px 10px;border-radius:8px;margin-bottom:10px;text-align:center">⚠️ SENZA SOLDI — ricarica la carta</div>':""}<span style="color:${vuota?"var(--err)":"#0a2a4d"}">${eur(saldo)}</span>`;
     if(!movimentiCartaCache.length){lista.innerHTML='<div style="color:#999;font-size:0.9rem;text-align:center;padding:14px">Nessun movimento ancora</div>';return;}
     const fmtData=d=>d?new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
     lista.innerHTML=movimentiCartaCache.map(m=>{
