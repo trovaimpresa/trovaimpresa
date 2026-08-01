@@ -167,6 +167,21 @@
     </div>
     <div class="day-title" id="day-title">Lavori di oggi</div>
     <div id="day-list"></div>
+
+    <div class="panel" id="carta-panel" style="display:none">
+      <div class="label">La tua carta aziendale</div>
+      <div id="carta-info"></div>
+      <div id="carta-storico"></div>
+      <button class="btn-line" id="btn-carta-spesa" style="width:100%;margin-top:10px">💳 Registra una spesa</button>
+      <div id="carta-form" class="hidden" style="margin-top:10px">
+        <input type="number" inputmode="decimal" id="carta-imp" placeholder="Importo speso (€)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box">
+        <input type="text" id="carta-causale" placeholder="Per cosa? (es. viti e tasselli)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box">
+        <div class="row-btns">
+          <button class="btn-line" id="btn-carta-annulla" style="flex:1">Annulla</button>
+          <button class="btn-fill" id="btn-carta-salva" style="flex:1">Salva spesa</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- VISTA CLIENTI -->
@@ -321,6 +336,7 @@ async function boot(session){
     const n=new Date();calY=n.getFullYear();calM=n.getMonth();
     renderCal();renderDay();
     show("agenda");
+    caricaCartaMia();
   }else{
     await loadClienti();
     show("clienti");
@@ -613,6 +629,48 @@ $("#lv-video-file").onchange=async e=>{
   }
   $("#btn-video").disabled=false;$("#btn-video").textContent="🎥 Aggiungi video (max 50 MB)";
   e.target.value="";
+};
+
+/* carta aziendale: la mostro solo se al mio operatoreId e' assegnata una
+   carta attiva. Il saldo arriva dalla vista gest_carte_saldo (ricariche
+   meno spese), non si scrive mai a mano. */
+let MIA_CARTA=null;
+async function caricaCartaMia(){
+  if(!MIO.operatoreId)return;
+  const {data}=await sb.from("gest_carte_saldo").select("carta_id,nome,saldo")
+    .eq("user_id",MIO.impresaId).eq("dipendente_id",MIO.operatoreId).eq("stato","attiva").limit(1);
+  const mia=(data&&data[0])||null;
+  if(!mia){$("#carta-panel").style.display="none";return;}
+  MIA_CARTA=mia;
+  $("#carta-panel").style.display="block";
+  $("#carta-info").innerHTML=`<div style="font-size:24px;font-weight:800;color:var(--green-d)">${eur(mia.saldo)}</div><div style="font-size:12px;color:var(--muted)">Saldo disponibile — ${esc(mia.nome)}</div>`;
+  const {data:mov}=await sb.from("gest_carte_movimenti").select("tipo,importo,causale,data").eq("carta_id",mia.carta_id).order("data",{ascending:false}).limit(5);
+  const st=$("#carta-storico");
+  if(!mov||!mov.length){st.innerHTML="";return;}
+  st.innerHTML=mov.map(m=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)">
+    <span>${m.tipo==="spesa"?"➖":"➕"} ${esc(m.causale||(m.tipo==="spesa"?"Spesa":"Ricarica"))}</span>
+    <span style="font-weight:700">${eur(m.importo)}</span></div>`).join("");
+}
+$("#btn-carta-spesa").onclick=()=>{$("#carta-form").classList.remove("hidden");$("#btn-carta-spesa").style.display="none";};
+$("#btn-carta-annulla").onclick=()=>{
+  $("#carta-form").classList.add("hidden");$("#btn-carta-spesa").style.display="block";
+  $("#carta-imp").value="";$("#carta-causale").value="";
+};
+$("#btn-carta-salva").onclick=async()=>{
+  if(!MIA_CARTA)return;
+  const importo=+($("#carta-imp").value);
+  if(!importo||importo<=0){toast("Inserisci un importo valido");return;}
+  const causale=$("#carta-causale").value.trim()||null;
+  $("#btn-carta-salva").disabled=true;
+  const {error}=await sb.from("gest_carte_movimenti").insert({
+    user_id:MIO.impresaId,carta_id:MIA_CARTA.carta_id,tipo:"spesa",importo,causale,inserito_da:MIO.nome
+  });
+  $("#btn-carta-salva").disabled=false;
+  if(error){toast("Errore: "+error.message);return;}
+  toast("Spesa registrata ✔");
+  $("#carta-imp").value="";$("#carta-causale").value="";
+  $("#carta-form").classList.add("hidden");$("#btn-carta-spesa").style.display="block";
+  caricaCartaMia();
 };
 
 /* salva note */

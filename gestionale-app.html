@@ -49,6 +49,7 @@
       <div class="side-group">Azienda</div>
       <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
+      <button data-tab="carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Carte</span></button>
       <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Condomini</span></button>
       <button data-tab="scadenzario" id="tab-scadenzario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg><span>Scadenzario</span><span class="tab-cnt" id="cnt-scadenzario"></span></button>
       <button data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg><span>Report</span></button>
@@ -181,6 +182,12 @@
       <div class="gal-intro">Furgoni, escavatori, ponteggi, trapani: qui c'è tutto quello che usi in cantiere, con lo stato e le scadenze (revisione, bollo, tagliando, assicurazione).</div>
       <div class="viste" id="mezzi-viste"></div>
       <div class="grid" id="mezzi-list"></div>
+    </section>
+
+    <section id="carte">
+      <div class="sec-head"><h2>Carte aziendali</h2><button class="btn add" data-action="new-carta">+ Nuova</button></div>
+      <div class="gal-intro">Le carte prepagate (tipo bancomat) che dai ai tuoi dipendenti per le spese sul lavoro. Il saldo si aggiorna da solo con le ricariche e le spese che registrate.</div>
+      <div class="grid" id="carte-list"></div>
     </section>
 
     <section id="scadenzario">
@@ -631,7 +638,7 @@
 
   /* controllo segmentato (Agenda "Mostra", Galleria tipo foto): un solo pulsante acceso */
   function segmOn(sel,v){$$(sel+" button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));}
-  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderMezzi();renderScadenze();renderPreventivi();renderReport();renderContatori();}
+  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderMezzi();renderCarte();renderScadenze();renderPreventivi();renderReport();renderContatori();}
 
   /* ============================================================
      CONTATORI DEL MENU (tappa 2)
@@ -1654,6 +1661,154 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
     closeSheet();renderMezzi();toast(id?"Aggiornato":"Mezzo aggiunto ✔");
+  }
+
+  /* ============================================================
+     CARTE AZIENDALI — tabella gest_carte (anagrafica) + gest_carte_movimenti
+     (ricariche/spese). Il saldo NON si scrive mai a mano: arriva sempre
+     dalla vista gest_carte_saldo (ricariche - spese). DDL: nella chat con
+     l'utente, stesso schema di permessi di gest_mezzi (owner + team_read,
+     piu' un team_insert per i movimenti riservato al dipendente titolare
+     della carta — vedi RLS "gest_carte_movimenti_team_insert").
+     ============================================================ */
+  let carteCache=[];
+  async function renderCarte(){
+    const box=$("#carte-list");if(!box)return;
+    if(!cur){box.innerHTML="";return;}
+    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">💳</div><p>Nessuna carta</p><small>Accedi per gestire le carte aziendali</small></div>`;return;}
+    const mid=curMestiere();
+    const [{data:cs},{data:sd}]=await Promise.all([
+      sb.from("gest_carte").select("id,nome,dipendente_id,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid)
+    ]);
+    carteCache=cs||[];
+    const saldoMap=Object.fromEntries((sd||[]).map(s=>[s.carta_id,s.saldo]));
+    if(!carteCache.length){
+      box.innerHTML=tabVuoto("Nessuna carta","Aggiungi le carte prepagate date ai tuoi dipendenti.",
+        _SVGV+'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>');
+      return;
+    }
+    const dipName=id=>{const d=dipCache.find(x=>String(x.id)===String(id));return d?d.nome:null;};
+    box.innerHTML=carteCache.map(c=>{
+      const saldo=saldoMap[c.id]||0;
+      const nomeDip=dipName(c.dipendente_id);
+      const bloccata=c.stato==="bloccata";
+      return `<div class="card" data-action="carta-dettaglio" data-id="${c.id}" style="cursor:pointer">
+        <div>
+          <h3>${esc(c.nome)}</h3>
+          <p>${nomeDip?"👤 "+esc(nomeDip):"<span style=\"color:var(--testo-3)\">Nessun titolare assegnato</span>"}<br>
+          <span class="stato" style="background:${bloccata?"var(--sfondo)":"var(--ok-bg)"};color:${bloccata?"var(--testo-2)":"var(--ok)"}">${bloccata?"Bloccata":"Attiva"}</span></p>
+          <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-top:8px;color:${saldo<0?"var(--err)":"#0a2a4d"}">${eur(saldo)}</div>
+        </div>
+        <div class="card-acts">
+          <button class="btn btn-sm" data-action="carta-dettaglio" data-id="${c.id}">Movimenti</button>
+          <button class="btn btn-sm" data-action="edit-carta" data-id="${c.id}">Modifica</button>
+          <button class="btn btn-sm btn-danger del" data-action="del-carta" data-id="${c.id}">Elimina</button></div></div>`;
+    }).join("");
+  }
+  function cartaForm(c){
+    const isNew=!c;c=c||{};
+    const dipOpts=`<option value="">— nessuno —</option>`+dipCache.map(d=>`<option value="${d.id}" ${String(c.dipendente_id||"")===String(d.id)?"selected":""}>${esc(d.nome)}</option>`).join("");
+    openSheet(`<h3>${isNew?"Nuova carta":"Modifica carta"}</h3>
+      <div class="field"><label>Nome carta</label><input id="ct-nome" value="${esc(c.nome||"")}" placeholder="Es. Carta Mario, Carta cantiere Nord"></div>
+      <div class="field"><label>Titolare (chi ce l'ha in tasca)</label><select id="ct-dip">${dipOpts}</select></div>
+      <div class="field"><label>Stato</label><select id="ct-stato">
+        <option value="attiva" ${(c.stato||"attiva")==="attiva"?"selected":""}>Attiva</option>
+        <option value="bloccata" ${c.stato==="bloccata"?"selected":""}>Bloccata</option></select></div>
+      <div class="field"><label>Note</label><textarea id="ct-note" placeholder="Numero carta, limite, promemoria...">${esc(c.note||"")}</textarea></div>
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" data-action="save-carta" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+  }
+  async function saveCarta(id){
+    const nome=$("#ct-nome").value.trim();if(!nome){toast("Scrivi il nome della carta");return;}
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const dipendente_id=$("#ct-dip").value||null, stato=$("#ct-stato").value, note=$("#ct-note").value.trim()||null;
+    const {data,error}=id
+      ?await sb.from("gest_carte").update({nome,dipendente_id,stato,note}).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_carte").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,dipendente_id,stato,note}).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
+    closeSheet();renderCarte();toast(id?"Aggiornata":"Carta aggiunta ✔");
+  }
+  async function delCarta(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(!gconfirm("Eliminare questa carta? Anche i movimenti registrati andranno persi."))return;
+    const {data,error}=await sb.from("gest_carte").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non eliminata: nessuna riga rimossa");return;}
+    renderCarte();toast("Carta eliminata");
+  }
+
+  /* dettaglio carta: saldo + movimenti, si apre dalla lista carte */
+  let cartaAttivaId=null, movimentiCartaCache=[];
+  async function apriDettaglioCarta(id){
+    cartaAttivaId=id;
+    const c=carteCache.find(x=>String(x.id)===String(id));if(!c)return;
+    const dipName=(dipCache.find(d=>String(d.id)===String(c.dipendente_id))||{}).nome;
+    openSheet(`<h3>💳 ${esc(c.nome)}</h3>
+      <p style="color:var(--testo-2);margin-bottom:14px">${dipName?"Titolare: "+esc(dipName):"Nessun titolare assegnato"}</p>
+      <div id="ct-saldo-box" style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:16px">—</div>
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="font-weight:700;color:#0a2a4d;margin-bottom:10px;font-size:0.9rem">➕ Nuovo movimento</div>
+        <div class="row2">
+          <div class="field"><label>Tipo</label><select id="mv-tipo">
+            <option value="spesa">Spesa</option><option value="ricarica">Ricarica</option></select></div>
+          <div class="field"><label>Importo (€)</label><input type="number" id="mv-importo" inputmode="decimal" placeholder="0"></div>
+        </div>
+        <div class="field"><label>Per cosa</label><input id="mv-causale" placeholder="Es. Viti e tasselli, ricarica mensile..."></div>
+        <button class="btn btn-primary" style="width:100%" data-action="save-movimento" data-id="${id}">+ Aggiungi movimento</button>
+      </div>
+      <div id="ct-mov-lista"></div>
+      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Chiudi</button></div>`);
+    renderMovimentiCarta();
+  }
+  async function renderMovimentiCarta(){
+    const lista=$("#ct-mov-lista"), saldoBox=$("#ct-saldo-box");
+    if(!lista||!cartaAttivaId)return;
+    const [{data:mv},{data:sd}]=await Promise.all([
+      sb.from("gest_carte_movimenti").select("id,tipo,importo,causale,data,inserito_da").eq("carta_id",cartaAttivaId).order("data",{ascending:false}).order("created_at",{ascending:false}),
+      sb.from("gest_carte_saldo").select("saldo").eq("carta_id",cartaAttivaId).maybeSingle()
+    ]);
+    movimentiCartaCache=mv||[];
+    const saldo=(sd&&sd.saldo)||0;
+    if(saldoBox)saldoBox.innerHTML=`<span style="color:${saldo<0?"var(--err)":"#0a2a4d"}">${eur(saldo)}</span>`;
+    if(!movimentiCartaCache.length){lista.innerHTML='<div style="color:#999;font-size:0.9rem;text-align:center;padding:14px">Nessun movimento ancora</div>';return;}
+    const fmtData=d=>d?new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
+    lista.innerHTML=movimentiCartaCache.map(m=>{
+      const segno=m.tipo==="spesa"?"−":"+";
+      const colore=m.tipo==="spesa"?"var(--err)":"var(--ok)";
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:600;color:#0a2a4d">${esc(m.causale||(m.tipo==="spesa"?"Spesa":"Ricarica"))}</div>
+          <div style="font-size:0.78rem;color:#999">${fmtData(m.data)}${m.inserito_da?" · "+esc(m.inserito_da):""}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-weight:700;color:${colore}">${segno} ${eur(m.importo)}</div>
+          <button data-action="del-movimento" data-id="${m.id}" title="Elimina" style="background:transparent;border:none;cursor:pointer;color:#c0392b">🗑️</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+  async function salvaMovimentoCarta(){
+    if(!cartaAttivaId||!sbUid){toast("Devi essere loggato");return;}
+    const tipo=$("#mv-tipo").value, importoRaw=$("#mv-importo").value;
+    const importo=+importoRaw;
+    if(!importo||importo<=0){toast("Inserisci un importo valido");return;}
+    const causale=$("#mv-causale").value.trim()||null;
+    const {error}=await sb.from("gest_carte_movimenti").insert({
+      user_id:sbUid,carta_id:cartaAttivaId,tipo,importo,causale,inserito_da:"Capo"
+    });
+    if(error){toast("Errore: "+error.message);return;}
+    $("#mv-importo").value="";$("#mv-causale").value="";
+    toast("Movimento registrato ✔");renderMovimentiCarta();renderCarte();
+  }
+  async function eliminaMovimentoCarta(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(!gconfirm("Eliminare questo movimento?"))return;
+    const {data,error}=await sb.from("gest_carte_movimenti").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
+    renderMovimentiCarta();renderCarte();toast("Movimento eliminato");
   }
 
   /* ---- mezzi usati su un lavoro (gest_lavoro_mezzi): si salva subito,
@@ -3063,6 +3218,13 @@
       if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
       renderMezzi();renderScadenze();toast("Mezzo eliminato");return;
     }
+    if(a==="new-carta")return cartaForm(null);
+    if(a==="edit-carta")return cartaForm(carteCache.find(c=>String(c.id)===String(id)));
+    if(a==="save-carta")return saveCarta(id||null);
+    if(a==="del-carta")return delCarta(id);
+    if(a==="carta-dettaglio")return apriDettaglioCarta(id);
+    if(a==="save-movimento")return salvaMovimentoCarta();
+    if(a==="del-movimento")return eliminaMovimentoCarta(id);
     if(a==="lm-add")return mezzoLavoroAdd();
     if(a==="lm-del"){
       if(!sbUid){toast("Devi essere loggato");return;}
