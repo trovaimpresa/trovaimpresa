@@ -1857,6 +1857,14 @@
         <input type="file" id="up-dopo" accept="image/*" multiple style="display:none">
         <label class="btn up-btn" for="up-dopo" style="margin-top:8px">＋ Aggiungi foto</label>
         <div class="thumbs" id="th-dopo"></div></div>
+      <div class="field" id="vid-prima-wrap"><label>🎥 Video "prima" (max 50 MB)</label>
+        <input type="file" id="up-vid-prima" accept="video/*" style="display:none">
+        <label class="btn up-btn" for="up-vid-prima">＋ Aggiungi video</label>
+        <div class="thumbs" id="th-vid-prima"></div></div>
+      <div class="field" id="vid-dopo-wrap"><label>🎥 Video "dopo" (max 50 MB)</label>
+        <input type="file" id="up-vid-dopo" accept="video/*" style="display:none">
+        <label class="btn up-btn" for="up-vid-dopo">＋ Aggiungi video</label>
+        <div class="thumbs" id="th-vid-dopo"></div></div>
       </div>
       <div class="sh-b sh-b-d">
       <div class="field" id="spese-wrap" style="display:none"><label>💶 Spese e materiali di questo lavoro</label>
@@ -1884,7 +1892,9 @@
     bindSeg("j-stato");bindSeg("j-fatt");
     $("#up-prima").onchange=e=>{addFoto(e.target.files,"prima","Capo");e.target.value="";};
     $("#up-dopo").onchange=e=>{addFoto(e.target.files,"dopo",$("#op-dopo").value);e.target.value="";};
-    renderFotoBlocks();
+    $("#up-vid-prima").onchange=e=>{uploadVideoLavoro(e.target.files[0],"da_fare","Capo",e.target);};
+    $("#up-vid-dopo").onchange=e=>{uploadVideoLavoro(e.target.files[0],"fatto",$("#op-dopo").value,e.target);};
+    renderFotoBlocks();renderVideoBlocks();
   }
   async function fillOperai(){
     const sel=$("#j-operaio");if(!sel||!sb||!sbUid)return;
@@ -2205,6 +2215,47 @@
       ${withDel?`<button class="thdel" data-action="del-foto" data-id="${esc(f.id)}">×</button>`:""}</div>`;
   }
   let _fotoRun=0;
+  /* video dentro il modulo "Modifica lavoro": a differenza delle foto NON
+     si mette in cache come base64 (troppo pesante per file fino a 50 MB),
+     si carica subito su Supabase. Per questo serve gia' un lavoro salvato
+     (editing.realId): se manca, si avvisa e basta. */
+  async function uploadVideoLavoro(file,tipoDb,operatore,inputEl){
+    if(!file)return;
+    const lav=editing&&editing.realId;
+    if(!lav){toast("Salva prima il lavoro, poi potrai aggiungere il video");if(inputEl)inputEl.value="";return;}
+    if(file.size>52428800){toast("Il video supera i 50 MB");if(inputEl)inputEl.value="";return;}
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    const path=sbUid+"/"+lav+"/"+Date.now()+"_"+safe;
+    const {error:up}=await sb.storage.from("gestionale-video").upload(path,file);
+    if(up){toast("Video non caricato: "+up.message);if(inputEl)inputEl.value="";return;}
+    const {error:ins}=await sb.from("gest_video").insert({user_id:sbUid,lavoro_id:lav,tipo:tipoDb,operatore:operatore||"Capo",storage_path:path});
+    if(ins){toast("Video su, ma non salvato: "+ins.message);if(inputEl)inputEl.value="";return;}
+    toast("Video aggiunto ✔");if(inputEl)inputEl.value="";renderVideoBlocks();
+  }
+  async function renderVideoBlocks(){
+    const p=$("#th-vid-prima"),d=$("#th-vid-dopo");if(!p&&!d)return;
+    const lav=editing&&editing.realId;
+    if(!lav){
+      if(p)p.innerHTML='<div style="font-size:12px;color:var(--testo-3)">Salva prima il lavoro, poi potrai aggiungere il video.</div>';
+      if(d)d.innerHTML="";
+      return;
+    }
+    if(!sb||!sbUid)return;
+    const {data}=await sb.from("gest_video").select("id,storage_path,tipo").eq("lavoro_id",lav).eq("user_id",sbUid);
+    const righe=(data||[]).filter(r=>FOTO_TIPO_UI[r.tipo]);
+    const vidThumb=url=>`<div class="thumb"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#222;color:#fff;font-size:22px;cursor:pointer" onclick="window.open('${url}','_blank')">▶️</div></div>`;
+    const render=async(box,tipo)=>{
+      if(!box)return;
+      const rs=righe.filter(r=>FOTO_TIPO_UI[r.tipo]===tipo);
+      const urls=await Promise.all(rs.map(async r=>{
+        const {data:su}=await sb.storage.from("gestionale-video").createSignedUrl(r.storage_path,3600);
+        return su&&su.signedUrl?su.signedUrl:null;
+      }));
+      box.innerHTML=urls.filter(Boolean).map(vidThumb).join("");
+    };
+    await render(p,"prima");await render(d,"dopo");
+  }
   async function renderFotoBlocks(){
     const p=$("#th-prima"),d=$("#th-dopo");if(!p&&!d)return;
     const run=++_fotoRun;   /* se parte un secondo render, il primo non sovrascrive */
@@ -2950,7 +3001,7 @@
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",null,true,true);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
-    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderFotoBlocks();}return;}
+    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderFotoBlocks();renderVideoBlocks();}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();
