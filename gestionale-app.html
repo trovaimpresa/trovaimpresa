@@ -1916,18 +1916,18 @@
       const vuota=saldo<=0;
       const nomeDip=dipName(c.dipendente_id);
       const bloccata=c.stato==="bloccata";
-      return `<div class="card" data-action="carta-dettaglio" data-id="${c.id}" style="cursor:pointer;padding:18px${vuota?";border:2px solid var(--err)":""}">
-        ${vuota?'<div style="background:var(--err);color:#fff;font-weight:700;font-size:0.95rem;padding:6px 10px;border-radius:8px;margin-bottom:10px;text-align:center">⚠️ SENZA SOLDI — ricarica la carta</div>':""}
-        <div>
-          <h3 style="font-size:1.3rem;margin-bottom:8px">${esc(c.nome)}</h3>
-          <p style="font-size:1.05rem;line-height:1.5">${nomeDip?"👤 "+esc(nomeDip):"<span style=\"color:var(--testo-3)\">Nessun titolare assegnato</span>"}<br>
-          <span class="stato" style="background:${bloccata?"var(--sfondo)":"var(--ok-bg)"};color:${bloccata?"var(--testo-2)":"var(--ok)"};font-size:0.95rem;padding:4px 10px">${bloccata?"Bloccata":"Attiva"}</span></p>
-          <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-top:12px;color:${vuota?"var(--err)":"#0a2a4d"}">${eur(saldo)}</div>
+      return `<div class="card ${vuota?"t-err":"t-neutro"}" data-action="carta-dettaglio" data-id="${c.id}" style="cursor:pointer">
+        <div class="c-head"><h3>${esc(c.nome)}</h3></div>
+        <div class="c-num">${eur(saldo)}</div>
+        <div class="c-lab">${vuota?"senza soldi — ricarica la carta":"saldo disponibile"}</div>
+        <div class="c-righe">
+          <div class="c-r"><span class="c-rt">Titolare</span><span class="c-rv">${nomeDip?esc(nomeDip):"nessuno"}</span></div>
+          <div class="c-r"><span class="c-rt">Stato</span><span class="c-rv ${bloccata?"":"ok"}">${bloccata?"Bloccata":"Attiva"}</span></div>
         </div>
-        <div class="card-acts" style="gap:8px;margin-top:14px">
-          <button class="btn btn-sm" style="font-size:1rem;padding:10px 14px" data-action="carta-dettaglio" data-id="${c.id}">Movimenti</button>
-          <button class="btn btn-sm" style="font-size:1rem;padding:10px 14px" data-action="edit-carta" data-id="${c.id}">Modifica</button>
-          <button class="btn btn-sm btn-danger del" style="font-size:1rem;padding:10px 14px" data-action="del-carta" data-id="${c.id}">Elimina</button></div></div>`;
+        <div class="card-acts">
+          <button class="btn" data-action="carta-dettaglio" data-id="${c.id}">Movimenti</button>
+          <button class="btn" data-action="edit-carta" data-id="${c.id}">Modifica</button>
+          <button class="btn btn-danger del" data-action="del-carta" data-id="${c.id}">Elimina</button></div></div>`;
     }).join("");
   }
   function cartaForm(c){

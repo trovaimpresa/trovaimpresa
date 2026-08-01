@@ -1281,3 +1281,185 @@
   #lavori .lav-head-act .btn-primary{ height:50px; }
   #lavori .viste .vista{ padding:14px 14px; font-size:16px; }
 }
+
+/* =========================================================================
+   STESSO PASSO PER TUTTE LE SEZIONI
+   Finora avevo ingrandito una sezione alla volta e il gestionale aveva due
+   facce: Riepilogo, Lavori, Galleria e Mappa grandi, tutto il resto piccolo.
+   Qui porto Fatture, Preventivi, Calendario, Agenda, Mezzi, Squadra, Carte,
+   Condomini, Scadenzario e Report alla stessa misura.
+   Vale solo dentro il contenuto (.wrap section): il menu di sinistra e la
+   barra blu in alto restano come sono.
+   ========================================================================= */
+
+.wrap section{ font-size:17px; line-height:1.5; }
+
+/* --- titoli e testi di apertura, uguali ovunque --- */
+.wrap section .sec-head{ margin-bottom:20px; gap:16px; }
+.wrap section .sec-head h2,
+.wrap section .cal-head h2{ font-size:30px; font-weight:800; letter-spacing:-.5px; }
+.wrap section .gal-intro,
+.wrap section .rie-intro p{ font-size:17px; line-height:1.6; max-width:74ch; margin-bottom:22px; }
+
+/* --- pulsanti in testa alle sezioni --- */
+.wrap section .sec-head .btn,
+.wrap section .sec-head .btn-primary{
+  height:46px; padding:0 20px; font-size:16px; font-weight:700; border-radius:11px;
+}
+
+/* --- filtri e linguette, uguali ovunque --- */
+.wrap section .filtri{ gap:22px 28px; margin-bottom:22px; }
+.wrap section .filtro-lab{ font-size:15px; font-weight:600; }
+.wrap section .filtro-sel{ height:42px; font-size:16px; padding:0 34px 0 12px; max-width:280px; }
+.wrap section .segm button{ height:36px; padding:0 16px; font-size:15px; }
+.wrap section .viste .vista{ padding:14px 18px; font-size:17px; border-bottom-width:3px; }
+.wrap section .viste .vista.on{ font-weight:700; }
+.wrap section .v-cnt{ font-size:15px; font-weight:700; }
+.wrap section .v-cnt.err{ font-size:14px; padding:2px 9px; }
+.wrap section .chip{ font-size:15px; padding:9px 18px; }
+
+/* --- tabelle (Fatture, Condomini, Mezzi, Squadra, Scadenzario...) --- */
+.wrap section .ltab{ font-size:17px; }
+.wrap section .ltab th{ font-size:14px; font-weight:700; color:var(--testo-2); padding:14px; }
+.wrap section .ltab td{ padding:18px 14px; line-height:1.45; }
+.wrap section .ltab tbody tr:hover{ background:var(--blu-tenue); }
+.wrap section .ltab .c-nome{ font-size:19px; font-weight:700; color:var(--testo); }
+.wrap section .ltab .c-cli .cli-nome{ font-size:17px; color:var(--testo); }
+.wrap section .ltab .c-cli .cli-dove{ font-size:15px; color:var(--testo-2); margin-top:4px; }
+.wrap section .ltab .c-imp{ font-size:19px; font-weight:700; color:var(--testo); }
+.wrap section .lav-bar{ width:6px; height:30px; border-radius:3px; margin-right:14px; vertical-align:-9px; }
+.wrap section .ltab .lav-tot td{ padding:20px 14px; font-size:18px; font-weight:700; }
+.wrap section .lav-dots{ width:40px; height:40px; font-size:22px; }
+
+/* --- schede delle anagrafiche (Carte, Mezzi, Squadra, Condomini) --- */
+.wrap section .card{ padding:22px 24px; border-radius:14px; gap:18px; }
+.wrap section .card h3{ font-size:21px; font-weight:700; letter-spacing:-.2px; }
+.wrap section .card p{ font-size:16px; margin-top:8px; line-height:1.5; }
+.wrap section .card .cnt{ font-size:15px; margin-top:10px; }
+.wrap section .card-acts{ gap:10px; }
+.wrap section .card-acts .btn{ height:42px; padding:0 18px; font-size:15px; font-weight:600; border-radius:10px; }
+
+/* --- Report --- */
+.wrap section .rep-card{ padding:24px 26px; border-radius:14px; }
+.wrap section .rep-card h3{ font-size:20px; font-weight:700; text-transform:none; letter-spacing:-.2px; margin-bottom:16px; }
+.wrap section .rep-sub{ font-size:16px; margin-bottom:16px; }
+.wrap section .rep-table{ font-size:17px; }
+.wrap section .rep-table td{ padding:14px 4px; }
+.wrap section .rep-legend{ font-size:15px; margin-top:14px; }
+.wrap section .rep-legend i{ width:13px; height:13px; }
+.wrap section .rep-bar-lab{ font-size:13px; }
+.wrap section .rep-bar-wrap{ height:200px; }
+.wrap section .rep-bars{ height:165px; }
+.wrap section .rep-bar{ width:20px; }
+.wrap section .mlav{ padding:16px 0; }
+.wrap section .mlav-top{ font-size:18px; margin-bottom:10px; }
+.wrap section .mbadge{ font-size:14px; padding:5px 14px; }
+.wrap section .mlav-bar{ height:10px; }
+.wrap section .mlav-sub{ font-size:15px; margin-top:8px; }
+
+/* --- Fatture --- */
+.wrap section .fatt-tot{ padding:22px 24px; }
+.wrap section .fatt-tot .n{ font-size:32px; }
+.wrap section .fatt-tot .l{ font-size:16px; margin-top:8px; }
+.wrap section .fatt-row{ padding:18px 20px; gap:16px; border-radius:12px; margin-bottom:12px; }
+.wrap section .fatt-info b{ font-size:19px; }
+.wrap section .fatt-info .sub{ font-size:15px; margin-top:4px; }
+.wrap section .fatt-imp{ font-size:20px; }
+.wrap section .fatt-empty{ font-size:16px; }
+
+/* --- Preventivi --- */
+.wrap section .prev-tot{ font-size:21px; }
+.wrap section .prev-somma{ font-size:19px; }
+
+/* --- Calendario: caselle piu' alte, altrimenti il testo grande non ci sta --- */
+.wrap section .cal-head h2{ font-size:28px; }
+.wrap section .cal-nav button{ width:46px; height:46px; font-size:20px; }
+.wrap section .cal-dow{ font-size:14px; padding:8px 0; }
+.wrap section .cal-cell{ min-height:132px; padding:8px; border-radius:12px; }
+.wrap section .cal-cell .dn{ font-size:16px; }
+.wrap section .cal-legend{ font-size:15px; margin-top:18px; }
+.wrap section .day-job{ padding:14px 16px; font-size:17px; border-radius:11px; margin-bottom:10px; }
+
+/* --- Agenda operatore --- */
+.wrap section .ag-foto-label{ font-size:15px; margin-top:14px; }
+
+/* su schermo stretto le caselle del calendario tornano basse */
+@media(max-width:880px){
+  .wrap section .cal-cell{ min-height:84px; padding:5px; }
+  .wrap section .cal-cell .dn{ font-size:14px; }
+  .wrap section .sec-head .btn,
+  .wrap section .sec-head .btn-primary{ height:50px; }
+}
+
+/* =========================================================================
+   LE SCHEDE DELLE SEZIONI HANNO LO STESSO STAMPO DEL RIEPILOGO
+   Carte, Squadra, Condomini, Mezzi e Preventivi usavano una scheda tutta
+   diversa: piu' piccola, senza il bordo colorato, coi pulsanti in colonna a
+   destra. Ora sono uguali alle schede del Riepilogo, cosi' il gestionale ha
+   una faccia sola.
+   ========================================================================= */
+
+.wrap section .card{
+  display:flex; flex-direction:column; align-items:stretch; gap:0;
+  background:var(--card);
+  border:1px solid var(--bordo);
+  border-left:5px solid var(--bordo-forte);
+  border-radius:16px;
+  padding:22px 22px 18px;
+  box-shadow:var(--shadow);
+  transition:box-shadow .15s, transform .15s, border-color .15s;
+}
+.wrap section .card:hover{
+  box-shadow:0 6px 20px rgba(15,23,42,.10);
+  transform:translateY(-2px);
+  border-color:var(--bordo-forte);
+}
+.wrap section .card > div:first-child{ flex:1 1 auto; min-width:0; }
+
+.wrap section .card .c-head,
+.wrap section .card h3{
+  font-size:21px; font-weight:700; letter-spacing:-.2px; color:var(--testo);
+  margin:0 0 14px;
+}
+.wrap section .card .c-head h3{ margin:0; }
+
+/* il numero grande, come nel Riepilogo */
+.wrap section .card .c-num{
+  font-size:44px; font-weight:800; line-height:1.05; letter-spacing:-1.5px; color:var(--testo);
+}
+.wrap section .card .c-lab{ font-size:16px; color:var(--testo-2); margin-top:6px; line-height:1.4; }
+
+/* le righe di dettaglio */
+.wrap section .card .c-righe{
+  margin-top:18px; padding-top:14px; border-top:1px solid var(--bordo);
+  display:flex; flex-direction:column; gap:2px;
+}
+.wrap section .card .c-r{
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  padding:8px 0; font-size:16px;
+}
+.wrap section .card .c-rt{ color:var(--testo-2); font-weight:600; }
+.wrap section .card .c-rv{ color:var(--testo); font-weight:700; text-align:right; }
+.wrap section .card .c-rv.ok{ color:var(--ok); }
+
+/* i pulsanti passano da colonna a destra a riga in fondo */
+.wrap section .card-acts{
+  flex-direction:row; flex-wrap:wrap; gap:10px;
+  margin-top:18px; padding-top:16px; border-top:1px solid var(--bordo);
+}
+.wrap section .card-acts .btn{
+  height:44px; padding:0 18px; font-size:15px; font-weight:600; border-radius:10px;
+}
+
+/* il bordo colorato dice come sta, come nel Riepilogo */
+.wrap section .card.t-err{ border-left-color:var(--err); }
+.wrap section .card.t-err .c-num{ color:var(--err); }
+.wrap section .card.t-err .c-lab{ color:var(--err); font-weight:600; }
+.wrap section .card.t-attesa{ border-left-color:var(--attesa); }
+.wrap section .card.t-attesa .c-num{ color:var(--attesa); }
+.wrap section .card.t-ok{ border-left-color:var(--ok); }
+.wrap section .card.t-ok .c-num{ color:var(--ok); }
+.wrap section .card.t-neutro{ border-left-color:var(--bordo-forte); }
+
+/* i pulsanti della scheda stanno in fila, non uno sotto l'altro */
+.wrap section .card-acts .btn{ flex:0 0 auto; width:auto; }
