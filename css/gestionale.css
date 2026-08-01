@@ -1106,3 +1106,65 @@
   .sheet .field input, .sheet .field select,
   .sheet .spesa-add input, .sheet .mezzo-add select{ min-height:56px; }
 }
+
+/* =========================================================================
+   MAPPA — la carta con i cantieri e la lista delle distanze.
+   Stesso passo di Riepilogo e Galleria: testo 17px, molta aria.
+   ========================================================================= */
+
+#mappa{ font-size:17px; line-height:1.55; }
+#mappa .sec-head h2{ font-size:30px; letter-spacing:-.5px; font-weight:800; }
+#mappa .gal-intro{ font-size:17px; line-height:1.6; max-width:70ch; margin-bottom:24px; }
+#mappa .filtri{ gap:24px 30px; margin-bottom:22px; }
+#mappa .filtro-lab{ font-size:15px; font-weight:600; }
+#mappa .segm button{ height:36px; padding:0 16px; font-size:15px; }
+#mappa .filtro .btn{ height:40px; padding:0 16px; font-size:15px; font-weight:600; }
+
+.mp-mappa{
+  height:440px; border-radius:14px; overflow:hidden;
+  border:1px solid var(--bordo); background:var(--card); margin-bottom:24px;
+}
+@media(max-width:768px){ .mp-mappa{ height:320px; } }
+
+.mp-avviso{
+  background:var(--attesa-bg); border:1px solid #FDE68A; border-radius:12px;
+  padding:16px 20px; font-size:17px; line-height:1.55; margin-bottom:20px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.mp-avviso-lieve{ background:var(--info-bg); border-color:#BFDBFE; font-size:16px; }
+.mp-carico{ padding:26px 4px; font-size:17px; color:var(--testo-3); }
+
+.mp-part{ font-size:16px; color:var(--testo-2); margin-bottom:14px; }
+.mp-part b{ color:var(--testo); }
+
+.mp-righe{ border:1px solid var(--bordo); border-radius:14px; overflow:hidden; background:var(--card); }
+.mp-riga{
+  display:flex; align-items:center; gap:18px;
+  padding:18px 20px; border-top:1px solid var(--bordo);
+}
+.mp-riga:first-child{ border-top:none; }
+.mp-riga.senza{ background:#FCFDFE; }
+.mp-r-testo{ flex:1 1 auto; min-width:0; }
+.mp-r-tit{ font-size:18px; font-weight:700; color:var(--testo);
+           overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.mp-r-sub{ font-size:15px; color:var(--testo-2); margin-top:4px;
+           overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.mp-r-sub .q-passato{ color:var(--err); font-weight:600; }
+.mp-r-sub .q-oggi{ color:var(--attesa); font-weight:700; }
+
+.mp-r-dist{ flex:0 0 auto; text-align:right; min-width:120px; }
+.mp-km{ font-size:24px; font-weight:800; letter-spacing:-.5px; color:var(--testo); line-height:1.1; }
+.mp-min{ font-size:14px; color:var(--testo-2); margin-top:2px; }
+.mp-riga.senza .mp-km{ color:var(--testo-3); }
+
+.mp-r-btn{ flex:0 0 auto; height:42px; padding:0 16px; font-size:15px; font-weight:600; border-radius:10px; }
+
+@media(max-width:700px){
+  .mp-riga{ flex-wrap:wrap; gap:12px; }
+  .mp-r-testo{ flex:1 1 100%; }
+  .mp-r-dist{ text-align:left; min-width:0; }
+  .mp-r-btn{ margin-left:auto; }
+}
+
+/* i popup della carta con il testo del gestionale, non quello di sistema */
+.leaflet-popup-content{ font-family:inherit; font-size:15px; line-height:1.5; }

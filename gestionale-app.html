@@ -54,6 +54,7 @@
       <button data-tab="scadenzario" id="tab-scadenzario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg><span>Scadenzario</span><span class="tab-cnt" id="cnt-scadenzario"></span></button>
       <button data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg><span>Report</span></button>
       <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
+      <button data-tab="mappa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Mappa</span><span class="tab-cnt" id="cnt-mappa"></span></button>
     </nav>
   </aside>
 
@@ -150,6 +151,22 @@
           <select class="filtro-sel" id="gal-op-sel"></select></div>
       </div>
       <div id="gal-body"></div>
+    </section>
+
+    <section id="mappa">
+      <div class="sec-head"><h2>Mappa</h2></div>
+      <div class="gal-intro">Dove sono i tuoi cantieri e quanto distano dalla tua azienda: chilometri su strada e tempo di viaggio, dal pi&ugrave; vicino al pi&ugrave; lontano. Il punto di partenza &egrave; l&#39;indirizzo che hai messo in <b>Dati azienda</b>.</div>
+      <div id="mp-avviso"></div>
+      <div class="filtri">
+        <div class="filtro"><span class="filtro-lab">Mostra</span>
+          <div class="segm" id="mp-vista">
+            <button class="on" data-action="mp-vista" data-v="aperti">Lavori da fare</button>
+            <button data-action="mp-vista" data-v="tutti">Tutti i lavori</button>
+          </div></div>
+        <div class="filtro"><button class="btn" data-action="mp-ricalcola">&#8635; Ricalcola distanze</button></div>
+      </div>
+      <div id="mp-mappa" class="mp-mappa"></div>
+      <div id="mp-lista"></div>
     </section>
 
     <section id="clienti">
@@ -609,6 +626,7 @@
     cliQ="";dipQ="";if($("#cli-search"))$("#cli-search").value="";if($("#dip-search"))$("#dip-search").value="";
     prevFilter="tutti";fattVista="tutte";scadVista="tutte";
     galFilter={op:"",tipo:"",media:"",lav:""};segmOn("#gal-tipo","");segmOn("#gal-media","");
+    mpVista="aperti";segmOn("#mp-vista","aperti");if(mpLayer){try{mpLayer.remove();}catch(e){}mpLayer=null;}
     agFilter={op:"",stato:"aperti"};segmOn("#ag-stato","aperti");
     mezziFilter="tutti";
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
@@ -618,7 +636,7 @@
   }
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     const b=document.querySelector('nav.tabs button[data-tab="'+_deepTab+'"]');
@@ -920,6 +938,31 @@
       lab:"foto e video caricati", tono:"neutro",
       vuoto:"Nessuna foto o video caricato",
       righe:(nFoto+nVideo)?[{t:"Foto",v:String(nFoto)},{t:"Video",v:String(nVideo)}]:[]
+    }));
+
+    /* Mappa: quanti cantieri hanno un indirizzo e le distanze gia' calcolate.
+       Qui non chiamo nessun servizio esterno: leggo solo quello che la sezione
+       Mappa ha gia' messo da parte, altrimenti aprire il Riepilogo diventerebbe
+       lento e consumerebbe le richieste del servizio gratuito. */
+    const conIndirizzo=aperti.filter(l=>{
+      const c=CLI.find(x=>x.id===l.cliente_id);
+      return (l.dove||"").trim()||(c&&(c.indirizzo||"").trim());
+    });
+    let mpNote=[];
+    try{
+      const C=JSON.parse(localStorage.getItem("ti_mappa_cache_v1")||"{}");
+      const tratte=Object.values(C.tratte||{}).filter(Boolean);
+      if(tratte.length){
+        const km=tratte.map(t=>t.km).sort((a,b)=>a-b);
+        mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0])},
+                {t:"Il più lontano",v:mpFormattaKm(km[km.length-1])}];
+      }
+    }catch(e){}
+    C.push(rieCard({
+      tab:"mappa", titolo:"Mappa", n:conIndirizzo.length,
+      lab:"cantieri aperti con un indirizzo", tono:"neutro",
+      vuoto:"Apri la Mappa per calcolare le distanze",
+      righe:mpNote
     }));
 
     G.innerHTML=C.join("");
@@ -2783,6 +2826,212 @@
     }
   }
 
+  /* ================= MAPPA =================
+     Dove sono i cantieri e quanto distano dall'azienda.
+     Tre pezzi, tutti gratuiti e senza chiavi da gestire:
+       - la carta la disegna Leaflet con le tessere di OpenStreetMap
+       - l'indirizzo diventa un punto sulla carta con Nominatim
+       - i chilometri su strada e i minuti arrivano da OSRM
+     Nominatim chiede al massimo una richiesta al secondo: per questo le
+     chiamate sono in fila una dietro l'altra e ogni risultato viene messo
+     da parte sul computer, cosi' un indirizzo gia' cercato non si ricerca mai piu'.
+     ========================================= */
+
+  const MP_CACHE_KEY="ti_mappa_cache_v1";
+  let mpCache=null, mpVista="aperti", mpMappa=null, mpLayer=null, mpInCorso=false;
+
+  function mpLeggiCache(){
+    if(mpCache)return mpCache;
+    try{mpCache=JSON.parse(localStorage.getItem(MP_CACHE_KEY)||"{}");}catch(e){mpCache={};}
+    if(!mpCache.punti)mpCache.punti={};
+    if(!mpCache.tratte)mpCache.tratte={};
+    return mpCache;
+  }
+  function mpSalvaCache(){try{localStorage.setItem(MP_CACHE_KEY,JSON.stringify(mpCache));}catch(e){}}
+  function mpChiave(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim();}
+  const mpAspetta=ms=>new Promise(r=>setTimeout(r,ms));
+
+  /* carica Leaflet solo la prima volta che apri la Mappa */
+  function mpCaricaLeaflet(){
+    if(window.L)return Promise.resolve(true);
+    return new Promise(resolve=>{
+      const css=document.createElement("link");
+      css.rel="stylesheet";css.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+      document.head.appendChild(css);
+      const js=document.createElement("script");
+      js.src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+      js.onload=()=>resolve(true);js.onerror=()=>resolve(false);
+      document.head.appendChild(js);
+    });
+  }
+
+  /* indirizzo scritto a mano -> punto sulla carta */
+  async function mpTrovaPunto(indirizzo){
+    const q=mpChiave(indirizzo);
+    if(!q)return null;
+    const C=mpLeggiCache();
+    if(C.punti[q]!==undefined)return C.punti[q];       /* null incluso: gia' cercato e non trovato */
+    try{
+      const url="https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=it&q="+encodeURIComponent(indirizzo);
+      const r=await fetch(url,{headers:{"Accept":"application/json"}});
+      const d=await r.json();
+      C.punti[q]=(d&&d[0])?{lat:+d[0].lat,lon:+d[0].lon,nome:d[0].display_name||""}:null;
+    }catch(e){C.punti[q]=null;}
+    mpSalvaCache();
+    await mpAspetta(1100);        /* il servizio gratuito accetta una richiesta al secondo */
+    return C.punti[q];
+  }
+
+  /* due punti -> chilometri su strada e minuti */
+  async function mpTratta(a,b){
+    if(!a||!b)return null;
+    const k=a.lat.toFixed(4)+","+a.lon.toFixed(4)+"->"+b.lat.toFixed(4)+","+b.lon.toFixed(4);
+    const C=mpLeggiCache();
+    if(C.tratte[k]!==undefined)return C.tratte[k];
+    try{
+      const url="https://router.project-osrm.org/route/v1/driving/"+a.lon+","+a.lat+";"+b.lon+","+b.lat+"?overview=false";
+      const r=await fetch(url);
+      const d=await r.json();
+      const rt=d&&d.routes&&d.routes[0];
+      C.tratte[k]=rt?{km:rt.distance/1000,min:rt.duration/60}:null;
+    }catch(e){C.tratte[k]=null;}
+    mpSalvaCache();
+    return C.tratte[k];
+  }
+
+  function mpFormattaKm(km){
+    if(km==null)return "—";
+    return (km<10?(Math.round(km*10)/10).toString().replace(".",","):Math.round(km))+" km";
+  }
+  function mpFormattaMin(min){
+    if(min==null)return "";
+    const m=Math.round(min);
+    if(m<60)return m+" min";
+    const h=Math.floor(m/60), r=m%60;
+    return h+" h"+(r?" "+r+" min":"");
+  }
+
+  async function renderMappa(forza){
+    const box=$("#mp-lista"), avviso=$("#mp-avviso");
+    if(!box)return;
+    if(!sb||!sbUid||!cur){box.innerHTML="";return;}
+    if(mpInCorso)return;
+    mpInCorso=true;
+    try{
+      if(forza){mpCache={punti:{},tratte:{}};mpSalvaCache();}
+
+      /* 1) da dove si parte: l'indirizzo dell'azienda */
+      const {data:az}=await sb.from("gest_azienda").select("nome,indirizzo").eq("user_id",sbUid).maybeSingle();
+      const partenzaTxt=(az&&az.indirizzo||"").trim();
+      if(!partenzaTxt){
+        if(avviso)avviso.innerHTML='<div class="mp-avviso">Per calcolare le distanze mi serve l\'indirizzo della tua azienda. <button class="btn" data-action="azienda">Compila i Dati azienda</button></div>';
+        $("#mp-mappa").style.display="none";
+        box.innerHTML=tabVuoto("Manca il punto di partenza","Scrivi l'indirizzo della tua azienda e torna qui.",_SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
+        return;
+      }
+      if(avviso)avviso.innerHTML="";
+      $("#mp-mappa").style.display="";
+
+      /* 2) i lavori con un indirizzo */
+      const [{data:lav},{data:cli}]=await Promise.all([
+        sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+        sb.from("gest_clienti").select("id,nome,indirizzo").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      ]);
+      const cliMap=Object.fromEntries((cli||[]).map(c=>[c.id,c]));
+      let L=(lav||[]);
+      if(mpVista==="aperti")L=L.filter(l=>l.stato!=="fatto");
+      const voci=L.map(l=>{
+        const c=cliMap[l.cliente_id];
+        const ind=(l.dove||"").trim()||((c&&c.indirizzo)||"").trim();
+        return {l,c,ind};
+      }).filter(v=>v.ind);
+
+      box.innerHTML='<div class="mp-carico">Sto cercando gli indirizzi sulla carta… ci vuole un secondo per ognuno, la prima volta.</div>';
+
+      /* 3) partenza sulla carta */
+      const pPart=await mpTrovaPunto(partenzaTxt+", Italia");
+      if(!pPart){
+        box.innerHTML=tabVuoto("Non trovo l'indirizzo della tua azienda",
+          'Ho cercato "'+esc(partenzaTxt)+'" e non l\'ho trovato. Prova a scriverlo con il comune, tipo "Via Roma 10, Rieti".',
+          _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
+        return;
+      }
+
+      /* 4) uno alla volta: indirizzo -> punto -> tratta */
+      const righe=[];
+      for(const v of voci){
+        const q=v.ind+(/\d{5}|,/.test(v.ind)?"":", Italia");
+        const p=await mpTrovaPunto(q);
+        const t=p?await mpTratta(pPart,p):null;
+        righe.push({...v,p,t});
+      }
+      righe.sort((a,b)=>{
+        const ka=a.t?a.t.km:(a.p?1e8:1e9), kb=b.t?b.t.km:(b.p?1e8:1e9);
+        return ka-kb;
+      });
+
+      /* 5) la carta */
+      const ok=await mpCaricaLeaflet();
+      if(ok&&window.L){
+        if(!mpMappa){
+          mpMappa=L.map("mp-mappa",{scrollWheelZoom:false});
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {maxZoom:18,attribution:"© OpenStreetMap"}).addTo(mpMappa);
+        }
+        if(mpLayer)mpLayer.remove();
+        mpLayer=L.layerGroup().addTo(mpMappa);
+        const punti=[[pPart.lat,pPart.lon]];
+        L.marker([pPart.lat,pPart.lon]).addTo(mpLayer)
+          .bindPopup("<b>Partenza</b><br>"+esc(az.nome||"La tua azienda"));
+        righe.forEach((r,i)=>{
+          if(!r.p)return;
+          punti.push([r.p.lat,r.p.lon]);
+          const col=r.l.stato==="fatto"?"#059669":(inRitardo(r.l.stato,r.l.data_prevista)?"#DC2626":"#D97706");
+          L.circleMarker([r.p.lat,r.p.lon],{radius:11,color:"#fff",weight:3,fillColor:col,fillOpacity:1})
+            .addTo(mpLayer)
+            .bindPopup("<b>"+esc(r.l.descrizione||"Lavoro")+"</b><br>"+esc(r.ind)
+              +(r.t?"<br>"+mpFormattaKm(r.t.km)+" · "+mpFormattaMin(r.t.min):""));
+        });
+        try{mpMappa.fitBounds(punti,{padding:[40,40],maxZoom:14});}catch(e){mpMappa.setView([pPart.lat,pPart.lon],12);}
+        setTimeout(()=>{try{mpMappa.invalidateSize();}catch(e){}},200);
+      }else{
+        $("#mp-mappa").innerHTML='<div class="mp-carico">Non riesco a caricare la carta. La lista con le distanze qui sotto funziona lo stesso.</div>';
+      }
+
+      /* 6) la lista sotto la carta */
+      if(!righe.length){
+        box.innerHTML=tabVuoto("Nessun cantiere da mostrare",
+          "Scrivi il campo «Dove» nei lavori, oppure l'indirizzo nei condomini.",
+          _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
+        return;
+      }
+      const nonTrovati=righe.filter(r=>!r.p).length;
+      box.innerHTML=
+        '<div class="mp-part">Si parte da <b>'+esc(partenzaTxt)+'</b></div>'
+        +(nonTrovati?'<div class="mp-avviso mp-avviso-lieve">'+nonTrovati+(nonTrovati===1?' indirizzo non trovato':' indirizzi non trovati')+'. Di solito manca il comune: scrivi per esempio «Via Verani 18, Rieti» invece di «via verani 18».</div>':"")
+        +'<div class="mp-righe">'
+        +righe.map(r=>{
+          const q=quando(r.l.data_prevista);
+          const rit=inRitardo(r.l.stato,r.l.data_prevista);
+          return '<div class="mp-riga'+(r.p?"":" senza")+'">'
+            +'<div class="mp-r-testo">'
+            +  '<div class="mp-r-tit">'+esc(r.l.descrizione||"Lavoro")+'</div>'
+            +  '<div class="mp-r-sub">'+esc(r.ind)
+            +    (r.c?' · '+esc(r.c.nome||""):"")
+            +    ' · <span class="'+(rit?"q-passato":q.classe)+'">'+esc(q.testo)+'</span></div>'
+            +'</div>'
+            +'<div class="mp-r-dist">'
+            +  (r.t?'<div class="mp-km">'+mpFormattaKm(r.t.km)+'</div><div class="mp-min">'+mpFormattaMin(r.t.min)+'</div>'
+                  :(r.p?'<div class="mp-km">—</div><div class="mp-min">strada non trovata</div>'
+                       :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>'))
+            +'</div>'
+            +'<button class="btn mp-r-btn" data-action="map" data-q="'+esc(r.ind)+'">Indicazioni</button>'
+            +'</div>';
+        }).join("")
+        +'</div>';
+    }finally{ mpInCorso=false; }
+  }
+
   /* ---- finestra "Carica foto o video" ---- */
   function galUploadForm(){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -3598,6 +3847,8 @@
     if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;segmOn("#gal-tipo",t.dataset.v);renderGalleria();return;}
     if(a==="gal-media"){galFilter.media=t.dataset.v;segmOn("#gal-media",t.dataset.v);renderGalleria();return;}
     if(a==="gal-nuovo"){galCaricaLavori().then(galUploadForm);return;}
+    if(a==="mp-vista"){mpVista=t.dataset.v;segmOn("#mp-vista",t.dataset.v);renderMappa();return;}
+    if(a==="mp-ricalcola"){toast("Ricalcolo le distanze…");renderMappa(true);return;}
     if(a==="vai-galleria"){
       galFilter.lav=t.dataset.id;galFilter.media="";galFilter.tipo="";galFilter.op="";
       closeSheet();
@@ -3722,6 +3973,7 @@
          entrando nel reparto, con la forma (tabella o card) di quella larghezza. */
       if(b.dataset.tab==="lavori")renderJobs();
       if(b.dataset.tab==="agenda")renderAgenda();
+      if(b.dataset.tab==="mappa")renderMappa();   /* la mappa si disegna solo quando la apri: non rallenta il resto */
       const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
       window.scrollTo({top:0,behavior:"smooth"});
     };
