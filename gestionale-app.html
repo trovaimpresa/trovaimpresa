@@ -2932,20 +2932,61 @@
         return {l,c,ind};
       }).filter(v=>v.ind);
 
-      box.innerHTML='<div class="mp-carico">Sto cercando gli indirizzi sulla carta… ci vuole un secondo per ognuno, la prima volta.</div>';
+      /* 3) LA CARTA PRIMA DI TUTTO.
+         Prima la disegnavo alla fine, dopo aver cercato tutti gli indirizzi: per
+         qualche secondo si vedeva solo un rettangolo bianco e sembrava rotta.
+         Ora la carta compare subito e i pin si aggiungono man mano che li trovo. */
+      const ok=await mpCaricaLeaflet();
+      if(ok&&window.L){
+        if(!mpMappa){
+          mpMappa=L.map("mp-mappa",{scrollWheelZoom:false}).setView([41.9,12.5],5);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {maxZoom:18,attribution:"© OpenStreetMap"}).addTo(mpMappa);
+        }
+        if(mpLayer)mpLayer.remove();
+        mpLayer=L.layerGroup().addTo(mpMappa);
+        setTimeout(()=>{try{mpMappa.invalidateSize();}catch(e){}},100);
+      }else{
+        $("#mp-mappa").innerHTML='<div class="mp-carico">Non riesco a caricare la carta. La lista con le distanze qui sotto funziona lo stesso.</div>';
+      }
+      const punti=[];
+      const inquadra=()=>{
+        if(!(ok&&window.L&&mpMappa))return;
+        try{if(punti.length)mpMappa.fitBounds(punti,{padding:[40,40],maxZoom:14});}catch(e){}
+      };
 
-      /* 3) partenza sulla carta */
+      /* 4) l'ufficio */
+      const dice=(fatti,tot)=>{box.innerHTML='<div class="mp-carico">Sto cercando gli indirizzi sulla carta… '+fatti+' di '+tot+'.<br>Ci vuole un secondo per ognuno, ma solo la prima volta.</div>';};
+      dice(0,voci.length+1);
       const pPart=partenzaTxt?await mpTrovaPunto(partenzaTxt+", Italia"):null;
       if(partenzaTxt&&!pPart&&avviso){
         avviso.innerHTML='<div class="mp-avviso">Non trovo l\'indirizzo del tuo ufficio: ho cercato <b>'+esc(partenzaTxt)+'</b>. Scrivilo con via, numero e comune (per esempio <b>Via Roma 10, Rieti</b>) dal pulsante <b>Azienda</b> in alto a destra. Intanto la carta con i cantieri la vedi lo stesso.</div>';
       }
+      if(pPart&&ok&&window.L){
+        punti.push([pPart.lat,pPart.lon]);
+        L.marker([pPart.lat,pPart.lon]).addTo(mpLayer)
+          .bindPopup("<b>Il tuo ufficio</b><br>"+esc(az.nome||"La tua azienda"));
+        inquadra();
+      }
 
-      /* 4) uno alla volta: indirizzo -> punto -> tratta */
+      /* 5) i cantieri, uno alla volta: il pin compare appena lo trovo */
       const righe=[];
+      let fatti=1;
       for(const v of voci){
         const q=v.ind+(/\d{5}|,/.test(v.ind)?"":", Italia");
-        const p=await mpTrovaPunto(q);
-        righe.push({...v,p,km:(p&&pPart)?mpDistanzaKm(pPart,p):null});
+        const pt=await mpTrovaPunto(q);
+        const km=(pt&&pPart)?mpDistanzaKm(pPart,pt):null;
+        righe.push({...v,p:pt,km});
+        if(pt&&ok&&window.L){
+          punti.push([pt.lat,pt.lon]);
+          const col=v.l.stato==="fatto"?"#059669":(inRitardo(v.l.stato,v.l.data_prevista)?"#DC2626":"#D97706");
+          L.circleMarker([pt.lat,pt.lon],{radius:11,color:"#fff",weight:3,fillColor:col,fillOpacity:1})
+            .addTo(mpLayer)
+            .bindPopup("<b>"+esc(v.l.descrizione||"Lavoro")+"</b><br>"+esc(v.ind)
+              +(km!=null?"<br><b>"+mpFormattaKm(km)+"</b> dall'ufficio":""));
+          inquadra();
+        }
+        fatti++;dice(fatti-1,voci.length+1);
       }
       righe.sort((a,b)=>(a.km==null?1e9:a.km)-(b.km==null?1e9:b.km));
       /* metto da parte le distanze: la scheda Mappa del Riepilogo le legge da qui
@@ -2953,40 +2994,6 @@
       const C2=mpLeggiCache();C2.km={};
       righe.forEach(r=>{if(r.km!=null)C2.km[mpChiave(r.ind)]=r.km;});
       mpSalvaCache();
-
-      /* 5) la carta */
-      const ok=await mpCaricaLeaflet();
-      if(ok&&window.L){
-        if(!mpMappa){
-          mpMappa=L.map("mp-mappa",{scrollWheelZoom:false});
-          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {maxZoom:18,attribution:"© OpenStreetMap"}).addTo(mpMappa);
-        }
-        if(mpLayer)mpLayer.remove();
-        mpLayer=L.layerGroup().addTo(mpMappa);
-        const punti=[];
-        if(pPart){
-          punti.push([pPart.lat,pPart.lon]);
-          L.marker([pPart.lat,pPart.lon]).addTo(mpLayer)
-            .bindPopup("<b>Il tuo ufficio</b><br>"+esc(az.nome||"La tua azienda"));
-        }
-        righe.forEach((r,i)=>{
-          if(!r.p)return;
-          punti.push([r.p.lat,r.p.lon]);
-          const col=r.l.stato==="fatto"?"#059669":(inRitardo(r.l.stato,r.l.data_prevista)?"#DC2626":"#D97706");
-          L.circleMarker([r.p.lat,r.p.lon],{radius:11,color:"#fff",weight:3,fillColor:col,fillOpacity:1})
-            .addTo(mpLayer)
-            .bindPopup("<b>"+esc(r.l.descrizione||"Lavoro")+"</b><br>"+esc(r.ind)
-              +(r.km!=null?"<br><b>"+mpFormattaKm(r.km)+"</b> dall\'ufficio":""));
-        });
-        try{
-          if(punti.length)mpMappa.fitBounds(punti,{padding:[40,40],maxZoom:14});
-          else mpMappa.setView([41.9,12.5],5);        /* nessun punto: mostro l'Italia */
-        }catch(e){mpMappa.setView([41.9,12.5],5);}
-        setTimeout(()=>{try{mpMappa.invalidateSize();}catch(e){}},200);
-      }else{
-        $("#mp-mappa").innerHTML='<div class="mp-carico">Non riesco a caricare la carta. La lista con le distanze qui sotto funziona lo stesso.</div>';
-      }
 
       /* 6) la lista sotto la carta */
       if(!righe.length){
