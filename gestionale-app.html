@@ -1771,6 +1771,7 @@
     const jid=job?job.id:uid();
     job=job||Object.assign({id:jid,stato:"da_fare",fattStato:"none",dataPrevista:presetDate||""},preset||{});
     editing={id:jid,foto:(job.foto||[]).slice(),supa:!!supa,fattura:!!fattura};
+    fotoSupa={};   /* registro delle foto su Supabase: e' del lavoro aperto, non va ereditato */
     if(supa){
       openSheet(`<h3>${fattura?"Nuova fattura":"Nuovo lavoro"}</h3>
         <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
@@ -2115,21 +2116,91 @@
     syncEditingToJob();await save();renderFotoBlocks();renderGalleria();
     if(n)toast(n+" foto aggiunte 📷");
   }
+  /* ---- FOTO DEL MODULO: locali (non ancora salvate) + quelle su Supabase ----
+     Il blocco foto della scheda lavoro leggeva SOLO l'archivio locale: le foto
+     gia' su Supabase non comparivano piu' dopo un F5, e da un altro dispositivo
+     mai. gest_lavori non ha una colonna foto, stanno in gest_foto.
+     I tipi non coincidono: nel modulo sono "prima"/"dopo", nella tabella
+     "da_fare"/"fatto"/"lavoro". "lavoro" e' quello che scrive l'app operatore
+     dal cantiere, cioe' il caso piu' frequente: va letto insieme a "fatto". */
+  const FOTO_TIPO_UI={da_fare:"prima",fatto:"dopo",lavoro:"dopo"};
+  let fotoSupa={};   /* id riga gest_foto -> {storage_path} : serve a deleteFoto */
+
   async function deleteFoto(id){
+    /* foto gia' su Supabase: si cancella la riga E il file, in quest'ordine.
+       La .select('id') fa da cancello: se la RLS blocca, PostgREST non da'
+       errore, tocca zero righe e risponde OK — senza questo controllo la foto
+       "sparirebbe" dallo schermo per poi ricomparire al render successivo. */
+    const sup=fotoSupa[id];
+    if(sup){
+      if(!sb||!sbUid){toast("Devi essere loggato");return;}
+      const {data:tolte,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
+      if(error){toast("Foto non eliminata: "+error.message);return;}
+      if(!tolte||!tolte.length){toast("Foto non eliminata: non hai i permessi su questa riga");return;}
+      let avviso="Foto eliminata";
+      if(sup.storage_path){
+        const {error:eRm}=await sb.storage.from("gestionale-foto").remove([sup.storage_path]);
+        /* la riga non c'e' piu': il file resta orfano nel bucket, ma la foto
+           e' sparita davvero dall'app. Meglio dirlo che tacere. */
+        if(eRm)avviso="Riga eliminata, ma il file resta nel bucket: "+eRm.message;
+      }
+      delete fotoSupa[id];delete fotoCache[id];
+      renderFotoBlocks();renderGalleria();toast(avviso);
+      return;
+    }
+    /* foto locale non ancora salvata: resta il vecchio percorso */
     editing.foto=editing.foto.filter(f=>f.id!==id);
     try{await window.storage.delete("gfoto_"+id);}catch(e){}
     delete fotoCache[id];syncEditingToJob();await save();renderFotoBlocks();renderGalleria();toast("Foto eliminata");
   }
-  function fotoThumb(f,withDel){
+  /* src="" = da riempire dopo (foto locale, hydrateFoto legge da IndexedDB).
+     Per quelle su Supabase l'URL firmato arriva gia' pronto.
+     onerror: se il file non c'e' piu' nel bucket la miniatura sparisce invece
+     di restare l'icona di immagine rotta. */
+  function fotoThumb(f,withDel,src){
     const opName=f.operatore==="Capo"?"Capo":(dipById(f.operatore)?dipById(f.operatore).nome:"");
-    return `<div class="thumb"><img data-foto="${f.id}" data-action="view-foto" data-id="${f.id}">
+    const img=src
+      ? `<img src="${esc(src)}" data-action="view-foto" data-id="${esc(f.id)}" onerror="this.closest('.thumb').remove()">`
+      : `<img data-foto="${esc(f.id)}" data-action="view-foto" data-id="${esc(f.id)}">`;
+    return `<div class="thumb">${img}
       ${opName?`<span class="thop">${esc(opName)}</span>`:""}
-      ${withDel?`<button class="thdel" data-action="del-foto" data-id="${f.id}">×</button>`:""}</div>`;
+      ${withDel?`<button class="thdel" data-action="del-foto" data-id="${esc(f.id)}">×</button>`:""}</div>`;
   }
-  function renderFotoBlocks(){
+  let _fotoRun=0;
+  async function renderFotoBlocks(){
     const p=$("#th-prima"),d=$("#th-dopo");if(!p&&!d)return;
-    if(p)p.innerHTML=editing.foto.filter(f=>f.tipo==="prima").map(f=>fotoThumb(f,true)).join("");
-    if(d)d.innerHTML=editing.foto.filter(f=>f.tipo==="dopo").map(f=>fotoThumb(f,true)).join("");
+    const run=++_fotoRun;   /* se parte un secondo render, il primo non sovrascrive */
+    /* 1) subito le locali non ancora salvate: chi ha appena aggiunto una foto
+          la deve vedere senza aspettare la rete. Quelle gia' caricate (uploaded)
+          si saltano: arrivano da Supabase, altrimenti si vedrebbero doppie. */
+    const loc=(editing.foto||[]).filter(f=>!f.uploaded);
+    const dis=(box,tipo,extra)=>{if(box)box.innerHTML=loc.filter(f=>f.tipo===tipo).map(f=>fotoThumb(f,true)).join("")+(extra||"");};
+    dis(p,"prima");dis(d,"dopo");
+    hydrateFoto();
+    /* 2) poi quelle su Supabase, per il lavoro aperto */
+    const lav=editing&&editing.realId;
+    if(!lav||!sb||!sbUid)return;
+    let righe=[];
+    try{
+      const {data}=await sb.from("gest_foto").select("id,storage_path,tipo,operatore")
+        .eq("lavoro_id",lav).eq("user_id",sbUid);
+      righe=(data||[]).filter(r=>FOTO_TIPO_UI[r.tipo]);   /* fuori le fatture e i tipi ignoti */
+    }catch(e){return;}
+    /* firma in parallelo; chi non si firma (file cancellato dal bucket) si scarta */
+    const firmate=await Promise.all(righe.map(async r=>{
+      try{
+        const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(r.storage_path,3600);
+        return su&&su.signedUrl?{r,url:su.signedUrl}:null;
+      }catch(e){return null;}
+    }));
+    if(run!==_fotoRun)return;                              /* render superato */
+    const ok=firmate.filter(Boolean);
+    fotoSupa={};
+    ok.forEach(({r,url})=>{fotoSupa[r.id]=r;fotoCache[r.id]=url;});  /* fotoCache: fa funzionare view-foto */
+    const html=t=>ok.filter(({r})=>FOTO_TIPO_UI[r.tipo]===t)
+      .map(({r,url})=>fotoThumb({id:r.id,operatore:r.operatore||""},true,url)).join("");
+    dis(p,"prima",html("prima"));
+    dis(d,"dopo",html("dopo"));
     hydrateFoto();
   }
   async function hydrateFoto(){
@@ -2841,7 +2912,9 @@
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",null,true,true);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
-    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);}return;}
+    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderFotoBlocks();}return;}
+    /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
+       viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
