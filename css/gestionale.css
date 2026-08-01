@@ -1016,3 +1016,93 @@
 .lav-media .lm-vuoto{ line-height:1.5; margin-bottom:0; }
 .lav-media .lm-btn{ display:inline-flex; height:38px; padding:0 16px; font-size:14px;
                     font-weight:600; color:var(--testo); }
+
+/* =========================================================================
+   CAMPI DA COMPILARE — testo piu' grande e caselle piu' alte in TUTTE le
+   finestre (lavoro, preventivo, condominio, mezzo, carta, scadenza, persona,
+   caricamento foto). Prima le etichette erano 12,5px e il testo dentro 15px:
+   troppo piccolo per capire cosa si sta scrivendo.
+   Vale solo dentro le finestre (.sheet): le liste e le tabelle non cambiano.
+   ========================================================================= */
+
+.sheet h3{ font-size:24px; font-weight:800; letter-spacing:-.4px; margin-bottom:22px; }
+.sheet--grande .sh-head h3{ font-size:24px; font-weight:800; letter-spacing:-.4px; }
+
+/* l'etichetta sopra la casella: e' quella che ti dice cosa scrivere */
+.sheet .field label,
+.sheet .field > label{
+  font-size:16px; font-weight:700; color:var(--testo);
+  margin-bottom:8px; line-height:1.4; text-transform:none; letter-spacing:0;
+}
+
+/* la casella vera e propria */
+.sheet .field input,
+.sheet .field select,
+.sheet .field textarea,
+.sheet .spesa-add input,
+.sheet .mezzo-add select,
+.sheet .prev-riga input{
+  font-size:18px;
+  padding:13px 14px;
+  border-radius:11px;
+  border:1.5px solid var(--bordo-forte);
+  line-height:1.4;
+}
+.sheet .field input[type="date"]{ font-size:18px; }
+.sheet .field textarea{ min-height:88px; line-height:1.5; }
+
+.sheet .field input::placeholder,
+.sheet .field textarea::placeholder,
+.sheet .spesa-add input::placeholder{ font-size:17px; color:var(--testo-3); }
+
+.sheet .field input:focus,
+.sheet .field select:focus,
+.sheet .field textarea:focus{
+  border-color:var(--blu); box-shadow:0 0 0 3px rgba(0,102,255,.14);
+}
+
+/* piu' aria tra un campo e l'altro: e' quello che fa capire dove finisce uno
+   e comincia il successivo */
+.sheet .field{ margin-bottom:22px; }
+.sheet .row2{ gap:18px; }
+
+/* i pulsanti a scelta (Da fare / In corso / Fatto, Non emessa / Emessa / Pagata) */
+.sheet .seg button{
+  min-height:48px; padding:12px 10px; font-size:16px; font-weight:600;
+  border-radius:11px; border:1.5px solid var(--bordo-forte);
+}
+.sheet .seg{ gap:8px; }
+
+/* i pulsanti in fondo alla finestra */
+.sheet .sheet-actions button,
+.sheet--grande .sh-foot button{ font-size:17px; font-weight:700; height:50px; border-radius:12px; }
+
+/* il pulsantino "+ Aggiungi nuovo condominio" sotto la tendina */
+.sheet .field .btn-ghost{ font-size:15px; padding:8px 0; }
+
+/* i pulsanti "+ Aggiungi" delle spese e dei mezzi */
+.sheet .spesa-add .btn,
+.sheet .mezzo-add .btn{ height:50px; font-size:16px; font-weight:600; border-radius:11px; }
+
+/* su schermo stretto le finestre restano comode da usare col dito */
+@media(max-width:768px){
+  .sheet .field input, .sheet .field select, .sheet .field textarea{ font-size:18px; padding:15px 14px; }
+  .sheet .seg button{ min-height:52px; }
+}
+
+/* Le caselle avevano un'altezza fissa di 40px: alzando il testo a 18px il
+   contenuto veniva tagliato (si vedeva mezza riga). Tolgo l'altezza fissa e
+   lascio decidere al testo, con un minimo comodo da toccare. */
+.sheet .field input,
+.sheet .field select,
+.sheet .spesa-add input,
+.sheet .mezzo-add select,
+.sheet .prev-riga input{
+  height:auto;
+  min-height:52px;
+}
+.sheet .field input[type="date"]{ min-height:52px; }
+@media(max-width:768px){
+  .sheet .field input, .sheet .field select,
+  .sheet .spesa-add input, .sheet .mezzo-add select{ min-height:56px; }
+}
