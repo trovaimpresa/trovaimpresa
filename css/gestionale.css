@@ -1204,3 +1204,80 @@
    tra schede vicine anche quando i titoli vanno a capo in modo diverso */
 .rie-card .rc-list,
 .rie-card .rc-vuoto{ margin-top:auto; }
+
+/* =========================================================================
+   LAVORI — la sezione che si apre piu' di tutte.
+   Stesso passo del Riepilogo: testo 17px, titolo 30px, righe alte e ariose.
+   Chiuso dentro #lavori: Fatture, Condomini, Mezzi e le altre tabelle che
+   usano lo stesso stampo restano come sono finche' non tocchera' a loro.
+   ========================================================================= */
+
+#lavori{ font-size:17px; line-height:1.5; }
+
+/* --- intestazione --- */
+#lavori .lav-head{ margin-bottom:22px; gap:16px; }
+#lavori .lav-head h2{ font-size:30px; font-weight:800; letter-spacing:-.5px; }
+#lavori .lav-head-act{ gap:12px; }
+#lavori .lav-search{
+  width:320px; height:46px; padding:0 16px; font-size:16px;
+  border-radius:11px; border:1.5px solid var(--bordo-forte);
+}
+#lavori .lav-search::placeholder{ font-size:16px; }
+#lavori .lav-head-act .btn,
+#lavori .lav-head-act .btn-primary{
+  height:46px; padding:0 20px; font-size:16px; font-weight:700; border-radius:11px;
+}
+
+/* --- le linguette Tutti / In ritardo / Oggi ... --- */
+#lavori .viste{ margin-bottom:6px; gap:4px; border-bottom-width:1px; }
+#lavori .viste .vista{
+  padding:14px 18px; font-size:17px; border-bottom-width:3px;
+}
+#lavori .viste .vista.on{ font-weight:700; }
+#lavori .v-cnt{ font-size:15px; font-weight:700; }
+#lavori .v-cnt.err{ font-size:14px; padding:2px 9px; }
+
+/* --- la tabella --- */
+#lavori .ltab{ font-size:17px; }
+#lavori .ltab th{
+  font-size:14px; font-weight:700; color:var(--testo-2);
+  padding:14px 14px; letter-spacing:.3px; border-bottom:1px solid var(--bordo);
+}
+#lavori .ltab td{
+  padding:20px 14px; border-top:1px solid var(--bordo); line-height:1.45;
+}
+#lavori .ltab tbody tr:hover{ background:var(--blu-tenue); }
+
+/* il nome del lavoro: la prima cosa che l'occhio deve prendere */
+#lavori .ltab .c-nome{ font-size:19px; font-weight:700; color:var(--testo); }
+
+/* la barretta di stato: da 3px a 6px, e alta quanto la riga di testo */
+#lavori .lav-bar{
+  width:6px; height:30px; border-radius:3px; margin-right:14px; vertical-align:-9px;
+}
+
+/* cliente e indirizzo */
+#lavori .ltab .c-cli .cli-nome{ font-size:17px; color:var(--testo); }
+#lavori .ltab .c-cli .cli-dove{ font-size:15px; color:var(--testo-2); margin-top:4px; }
+#lavori .ltab .c-chi{ font-size:17px; }
+#lavori .ltab .c-imp{ font-size:19px; font-weight:700; color:var(--testo); }
+
+/* quando: il colore dice se sei in ritardo senza dover leggere */
+#lavori .ltab .q-passato{ color:var(--err); font-weight:700; }
+#lavori .ltab .q-oggi{ color:var(--attesa); font-weight:700; }
+#lavori .ltab .q-futuro{ color:var(--testo-2); }
+
+/* la riga del totale in fondo */
+#lavori .ltab .lav-tot td{ padding:20px 14px; font-size:18px; font-weight:700; border-top:2px solid var(--bordo-forte); }
+
+/* il pulsante dei tre puntini */
+#lavori .lav-dots{ width:40px; height:40px; font-size:22px; }
+#lavori .ltab td.c-menu{ padding:10px 8px 10px 0; }
+
+/* --- su schermo stretto la lista diventa a schede --- */
+@media(max-width:880px){
+  #lavori .lav-search{ width:auto; flex:1; height:50px; }
+  #lavori .lav-head-act .btn,
+  #lavori .lav-head-act .btn-primary{ height:50px; }
+  #lavori .viste .vista{ padding:14px 14px; font-size:16px; }
+}
