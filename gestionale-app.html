@@ -740,7 +740,7 @@
     const oggi=todayStr(), lim7=_giorniDopo(oggi,7), lim30=_giorniDopo(oggi,30);
 
     /* ---- primo giro di letture: tutto quello che non dipende dagli id dei lavori ---- */
-    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[];
+    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null;
     try{
       const r=await Promise.all([
         sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -751,10 +751,12 @@
         sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo").eq("user_id",sbUid),
         sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid)
+        sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid),
+        sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
       ]);
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
       MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
+      AZ=r[9].data||null;
     }catch(e){}
 
     const ids=L.map(l=>l.id);
@@ -780,8 +782,17 @@
     /* ---- calcoli (identici a prima) ---- */
     const aperti   = L.filter(l=>l.stato!=="fatto");
     const ritardo  = aperti.filter(l=>inRitardo(l.stato,l.data_prevista));
-    const daInc    = L.filter(l=>l.fatt_stato!=="pagata"&&l.stato==="fatto");
+    /* Stessa definizione della sezione Fatture: "da incassare" sono le fatture
+       che hai EMESSO e che non ti hanno pagato. I lavori finiti non ancora
+       fatturati sono un'altra cosa e li conto a parte: prima finivano qui dentro
+       e il numero del Riepilogo non tornava con quello di Fatture. */
+    const daInc    = L.filter(l=>l.fatt_stato==="emessa");
     const totDaInc = daInc.reduce((s,l)=>s+(+l.importo||0),0);
+    const daFatt   = L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none"&&+l.importo>0);
+    const totDaFatt= daFatt.reduce((s,l)=>s+(+l.importo||0),0);
+    const ggPag    = (AZ&&+AZ.giorni_pagamento)||30;
+    const scadenza = l=>{const d=l.data_fatt_emessa||l.data_fatto||l.data_prevista;return d?_giorniDopo(d,ggPag):"";};
+    const scadute  = daInc.filter(l=>{const sc=scadenza(l);return sc&&sc<oggi;});
     const incMese  = L.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
     const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
     const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
@@ -852,13 +863,22 @@
 
     C.push(rieCard({
       tab:"fatture", titolo:"Fatture", n:eur(totDaInc),
-      lab:"da incassare · incassato questo mese "+eur(incMese),
-      tono: totDaInc>0?"attesa":"ok",
-      vuoto:"Nessuna fattura da incassare",
-      righe: daInc.slice().sort((a,b)=>String(a.data_fatto||"").localeCompare(String(b.data_fatto||"")))
-              .slice(0,2).map(l=>({
-        t:(cliMap[l.cliente_id]||l.descrizione||"Lavoro"), v:eur(l.importo),
-        action:"edit-job", id:l.id}))
+      lab: scadute.length
+            ? "da incassare · "+scadute.length+(scadute.length===1?" fattura scaduta":" fatture scadute")
+            : "da incassare · da fatturare "+eur(totDaFatt),
+      tono: scadute.length?"err":(totDaInc>0?"attesa":"ok"),
+      vuoto: totDaFatt>0?("Da fatturare: "+eur(totDaFatt)):"Nessuna fattura da incassare",
+      righe: daInc.slice()
+              .sort((a,b)=>String(a.data_fatt_emessa||a.data_fatto||"").localeCompare(String(b.data_fatt_emessa||b.data_fatto||"")))
+              .slice(0,2).map(l=>{
+        const sc=scadenza(l), fuori=sc&&sc<oggi;
+        const d=l.data_fatt_emessa||l.data_fatto||l.data_prevista;
+        const g=d?-_giorniA(d):null;
+        return {t:(cliMap[l.cliente_id]||l.descrizione||"Lavoro"),
+                v:eur(l.importo)+(g!=null?" · "+g+" gg":""),
+                cls:fuori?"q-passato":"",
+                action:"edit-job", id:l.id};
+      })
     }));
 
     C.push(rieCard({
