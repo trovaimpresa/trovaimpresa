@@ -1497,6 +1497,12 @@
      non li hai impostati). Nessuna data va compilata a mano.
      ========================================== */
 
+  /* le tre linguette della sezione Fatture: le avevo cancellate per sbaglio
+     rifacendo la sezione, e senza queste la pagina si fermava a meta'. */
+  const FATT_VISTE=[{k:"tutte",lab:"Tutte"},{k:"incassare",lab:"Da incassare"},{k:"pagate",lab:"Pagate"}];
+  const FATT_LAB={none:"Da fatturare",emessa:"Emessa",pagata:"Pagata"};
+  const FATT_BAR={none:"da_fare",emessa:"in_corso",pagata:"fatto"};
+
   let fattAzienda=null;
 
   function fattDataEmissione(l){
@@ -1558,6 +1564,7 @@
   }
 
   async function renderFatture(){
+   try{
     let L=[], cliMap={};
     if(sb&&sbUid){
       const [{data},{data:cls},{data:az}]=await Promise.all([
@@ -1632,6 +1639,14 @@
     }
     body.className="griglia-schede";body.style.display="grid";
     body.innerHTML=R.map(l=>fattCard(l,cliMap[l.cliente_id]||"",gg)).join("");
+   }catch(err){
+    const m=(err&&(err.message||err.toString()))||"errore sconosciuto";
+    const b=$("#fatt-body");
+    if(b){b.className="";b.style.display="block";
+      b.innerHTML='<div class="mp-avviso"><b>Le fatture non si sono caricate.</b><br>'+esc(m)
+        +'<br><br>Manda questa schermata ad Alessio.</div>';}
+    try{console.error("[FATTURE]",err);}catch(e){}
+   }
   }
   let fattSort={k:"rank",d:1}, fattVista="tutte";
 
