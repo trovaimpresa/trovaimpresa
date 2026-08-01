@@ -415,6 +415,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/foto-upload.js"></script>
   <script src="js/geo-italia.js"></script>
   <script>
     // Popola cascata Regione → Provincia → Città
@@ -591,22 +592,26 @@
        cartella non c'era niente su cui scrivere una policy piu' stretta di
        "chiunque scrive ovunque".
        L'estensione va ripulita: arriva dal nome del file scelto dall'utente. */
-    function nomeCasualeFile(file, estDefault) {
-      const pezzi = String(file.name || '').split('.');
-      const grezza = pezzi.length > 1 ? pezzi.pop() : '';
-      const ext = (String(grezza).toLowerCase().match(/^[a-z0-9]{1,5}$/) || [estDefault])[0];
+    function nomeCasualeFile(file, estDefault, forzaEst) {
       const id = (window.crypto && crypto.randomUUID)
         ? crypto.randomUUID()
         : 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      if (forzaEst) return 'registrazioni/' + id + '.' + forzaEst;
+      const pezzi = String(file.name || '').split('.');
+      const grezza = pezzi.length > 1 ? pezzi.pop() : '';
+      const ext = (String(grezza).toLowerCase().match(/^[a-z0-9]{1,5}$/) || [estDefault])[0];
       return 'registrazioni/' + id + '.' + ext;
     }
 
     async function uploadLogo(file) {
-      const fileName = nomeCasualeFile(file, 'png');
+      /* 400px WebP: sui loghi il JPEG perderebbe la trasparenza */
+      const prep = await preparaFileUpload(file, { lato: 400, qualita: 0.82, formato: 'webp' });
+      if (prep.errore) throw new Error(prep.errore);
+      const fileName = nomeCasualeFile(file, 'png', prep.compressa ? 'webp' : null);
       const res = await fetch(SUPABASE_URL + '/storage/v1/object/loghi-imprese/' + fileName, {
         method: 'POST',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type || 'image/png' },
-        body: file
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': prep.compressa ? 'image/webp' : (file.type || 'image/png') },
+        body: prep.file
       });
       if (!res.ok) throw new Error('Errore upload logo');
       return SUPABASE_URL + '/storage/v1/object/public/loghi-imprese/' + fileName;

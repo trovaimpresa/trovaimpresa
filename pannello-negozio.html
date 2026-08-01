@@ -2918,6 +2918,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/foto-upload.js"></script>
 <script src="strumenti-comuni.js?v=4"></script>
 <script>
 const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -3230,10 +3231,12 @@ window.onpopstate = function(e) {
 async function uploadFotoVetrina(file) {
   if (!file) return null;
   if (file.size > 5 * 1024 * 1024) { alert('La foto supera i 5 MB.'); return null; }
+  const prep = await preparaFileUpload(file);
+  if (prep.errore) { alert(prep.errore); return null; }
   const folder = String(impresaCorrente.id);
-  const ext = file.name.split('.').pop();
+  const ext = prep.compressa ? 'jpg' : (file.name.split('.').pop() || 'jpg');
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
-  const { error } = await sb.storage.from('foto-lavori').upload(path, file, { upsert: false });
+  const { error } = await sb.storage.from('foto-lavori').upload(path, prep.file, { upsert: false, contentType: prep.compressa ? 'image/jpeg' : file.type, cacheControl: '31536000' });
   if (error) { alert('Errore upload foto: ' + error.message); return null; }
   const { data: { publicUrl } } = sb.storage.from('foto-lavori').getPublicUrl(path);
   return publicUrl;
@@ -3688,8 +3691,10 @@ async function caricaLogoImpresa(event) {
   const file = event.target.files[0];
   if (!file) return;
   const userId = impresaCorrente.user_id;
-  const path = `${userId}/logo.png`;
-  const { error: upErr } = await sb.storage.from('loghi-imprese').upload(path, file, { upsert: true, contentType: file.type });
+  const prep = await preparaFileUpload(file, { lato: 400, qualita: 0.82, formato: 'webp' });
+  if (prep.errore) { alert(prep.errore); return; }
+  const path = `${userId}/logo.${prep.compressa ? 'webp' : 'png'}`;
+  const { error: upErr } = await sb.storage.from('loghi-imprese').upload(path, prep.file, { upsert: true, contentType: prep.compressa ? 'image/webp' : file.type, cacheControl: '31536000' });
   if (upErr) { alert('Errore caricamento logo: ' + upErr.message); return; }
   const { data: urlData } = sb.storage.from('loghi-imprese').getPublicUrl(path);
   const logoUrl = urlData.publicUrl;
@@ -3827,9 +3832,11 @@ async function uploadFoto(files) {
       alert(`"${file.name}" supera i 5 MB — saltata.`);
       continue;
     }
-    const ext = file.name.split('.').pop();
+    const prep = await preparaFileUpload(file);
+    if (prep.errore) { alert(`"${file.name}": ${prep.errore} — saltata.`); continue; }
+    const ext = prep.compressa ? 'jpg' : (file.name.split('.').pop() || 'jpg');
     const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
-    const { error } = await sb.storage.from('foto-lavori').upload(path, file, { upsert: false });
+    const { error } = await sb.storage.from('foto-lavori').upload(path, prep.file, { upsert: false, contentType: prep.compressa ? 'image/jpeg' : file.type, cacheControl: '31536000' });
     if (!error) ok++;
   }
 

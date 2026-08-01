@@ -149,8 +149,11 @@ async function uploadFotoCantiere(files) {
       alert(`"${file.name}" supera i 5 MB — saltata.`);
       continue;
     }
-    const path = `${cantiereAttivo}/${Date.now()}-${file.name}`;
-    const { error: upErr } = await sb.storage.from('cantieri-foto').upload(path, file, { upsert: false });
+    const prep = await preparaFileUpload(file);
+    if (prep.errore) { alert(`"${file.name}": ${prep.errore} — saltata.`); continue; }
+    const nomeFinale = prep.compressa ? prep.nome : file.name;
+    const path = `${cantiereAttivo}/${Date.now()}-${nomeFinale}`;
+    const { error: upErr } = await sb.storage.from('cantieri-foto').upload(path, prep.file, { upsert: false, contentType: prep.compressa ? 'image/jpeg' : file.type, cacheControl: '31536000' });
     if (upErr) { console.error('Upload cantiere errore:', upErr); continue; }
     const { data: { publicUrl } } = sb.storage.from('cantieri-foto').getPublicUrl(path);
     const { data: nuova, error: insErr } = await sb.from('cantiere_foto').insert({ cantiere_id: cantiereAttivo, url: publicUrl }).select().single();
