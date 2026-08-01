@@ -479,6 +479,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/foto-upload.js"></script>
 <script>
 (function(){
   const KEY="gestionale_multiservizi_v5";
@@ -1144,9 +1145,12 @@
     if(!sbUid){toast("Devi essere loggato");return;}
     let n=0;
     for(const file of Array.from(files)){
-      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+      /* ridimensiona a 1600px/JPEG 0.75 e blocca oltre 15 MB (js/foto-upload.js) */
+      const p=await preparaFileUpload(file);
+      if(p.errore){toast(p.errore);continue;}
+      const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
       const path=sbUid+"/"+lfLavoroId+"/"+Date.now()+"_"+safe;
-      const {error:up}=await sb.storage.from("gestionale-foto").upload(path,file);
+      const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
       if(up){toast("Foto non caricata: "+up.message);continue;}
       const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:lfLavoroId,tipo:"da_fare",operatore:"Capo",storage_path:path});
       if(ins){toast("Foto su, ma non salvata: "+ins.message);continue;}
@@ -1164,9 +1168,12 @@
     if(!file||!fattUploadLavoroId)return;
     if(!sbUid){toast("Devi essere loggato");return;}
     if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
-    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    /* il PDF non e' un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
+    const p=await preparaFileUpload(file);
+    if(p.errore){toast(p.errore);return;}
+    const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
     const path=sbUid+"/"+fattUploadLavoroId+"/"+Date.now()+"_"+safe;
-    const {error:up}=await sb.storage.from("gestionale-foto").upload(path,file);
+    const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
     if(up){toast("Fattura non caricata: "+up.message);return;}
     const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:fattUploadLavoroId,tipo:"fattura",operatore:"Capo",storage_path:path});
     if(ins){toast("File su, ma non salvato: "+ins.message);return;}
@@ -1682,11 +1689,13 @@
       const img=new Image(), rd=new FileReader();
       rd.onerror=rej;
       rd.onload=()=>{img.onerror=rej;img.onload=()=>{
-        const max=1200;let w=img.width,h=img.height;
+        /* stessi valori di js/foto-upload.js: le foto del flusso locale finiscono
+           nello stesso bucket, non devono avere una risoluzione diversa */
+        const max=1600;let w=img.width,h=img.height;
         if(w>h){if(w>max){h=Math.round(h*max/w);w=max;}}else{if(h>max){w=Math.round(w*max/h);h=max;}}
         const cv=document.createElement("canvas");cv.width=w;cv.height=h;
         cv.getContext("2d").drawImage(img,0,0,w,h);
-        res(cv.toDataURL("image/jpeg",0.7));
+        res(cv.toDataURL("image/jpeg",0.75));
       };img.src=rd.result;};
       rd.readAsDataURL(file);
     });

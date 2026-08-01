@@ -8,6 +8,7 @@
 <title>La tua agenda — Gestionale</title>
   <meta name="robots" content="noindex, nofollow">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/foto-upload.js"></script>
 <style>
   :root{
     --green:#0066ff; --green-d:#0052cc; --green-l:#e8f3ec;
@@ -422,9 +423,12 @@ function chiediFatturaPdf(lavoroId){fattUploadLavoroId=lavoroId;$("#fatt-pdf-fil
 async function uploadFatturaPdf(file){
   if(!file||!fattUploadLavoroId)return;
   if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
-  const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+  /* il PDF non e' un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
+  const p=await preparaFileUpload(file);
+  if(p.errore){toast(p.errore);return;}
+  const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
   const path=MIO.impresaId+"/"+fattUploadLavoroId+"/"+Date.now()+"_"+safe;
-  const {error:up}=await sb.storage.from("gestionale-foto").upload(path,file);
+  const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
   if(up){toast("Fattura non caricata: "+up.message);return;}
   const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:fattUploadLavoroId,tipo:"fattura",operatore:MIO.nome,storage_path:path});
   if(ins){toast("File su, ma non salvato: "+ins.message);return;}
@@ -535,9 +539,17 @@ $("#btn-foto").onclick=()=>$("#lv-file").click();
 $("#lv-file").onchange=async e=>{
   const file=e.target.files[0];if(!file||!curLavoro)return;
   $("#btn-foto").disabled=true;$("#btn-foto").textContent="Carico…";
-  const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+  /* ridimensiona a 1600px/JPEG 0.75 e blocca oltre 15 MB (js/foto-upload.js).
+     Qui conta doppio: si carica dal cantiere, spesso con poco campo. */
+  const p=await preparaFileUpload(file);
+  if(p.errore){
+    toast(p.errore);
+    $("#btn-foto").disabled=false;$("#btn-foto").textContent="📷 Aggiungi foto";
+    e.target.value="";return;
+  }
+  const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
   const path=MIO.impresaId+"/"+curLavoro.id+"/"+Date.now()+"_"+safe;
-  const {error:up}=await sb.storage.from("gestionale-foto").upload(path,file);
+  const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
   if(up){toast("Foto non caricata: "+up.message);}
   else{
     const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:curLavoro.id,tipo:"lavoro",operatore:MIO.nome,storage_path:path});
