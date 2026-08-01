@@ -1712,15 +1712,15 @@
   function cartaForm(c){
     const isNew=!c;c=c||{};
     const dipOpts=`<option value="">— nessuno —</option>`+dipCache.map(d=>`<option value="${d.id}" ${String(c.dipendente_id||"")===String(d.id)?"selected":""}>${esc(d.nome)}</option>`).join("");
-    openSheet(`<h3>${isNew?"Nuova carta":"Modifica carta"}</h3>
-      <div class="field"><label>Nome carta</label><input id="ct-nome" value="${esc(c.nome||"")}" placeholder="Es. Carta Mario, Carta cantiere Nord"></div>
-      <div class="field"><label>Titolare (chi ce l'ha in tasca)</label><select id="ct-dip">${dipOpts}</select></div>
-      <div class="field"><label>Stato</label><select id="ct-stato">
+    openSheet(`<h3 style="font-size:1.4rem">${isNew?"Nuova carta":"Modifica carta"}</h3>
+      <div class="field"><label style="font-size:1.05rem">Nome carta</label><input id="ct-nome" style="font-size:1.1rem;padding:12px" value="${esc(c.nome||"")}" placeholder="Es. Carta Mario, Carta cantiere Nord"></div>
+      <div class="field"><label style="font-size:1.05rem">Titolare (chi ce l'ha in tasca)</label><select id="ct-dip" style="font-size:1.1rem;padding:12px">${dipOpts}</select></div>
+      <div class="field"><label style="font-size:1.05rem">Stato</label><select id="ct-stato" style="font-size:1.1rem;padding:12px">
         <option value="attiva" ${(c.stato||"attiva")==="attiva"?"selected":""}>Attiva</option>
         <option value="bloccata" ${c.stato==="bloccata"?"selected":""}>Bloccata</option></select></div>
-      <div class="field"><label>Note</label><textarea id="ct-note" placeholder="Numero carta, limite, promemoria...">${esc(c.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" data-action="save-carta" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+      <div class="field"><label style="font-size:1.05rem">Note</label><textarea id="ct-note" style="font-size:1.1rem;padding:12px" placeholder="Numero carta, limite, promemoria...">${esc(c.note||"")}</textarea></div>
+      <div class="sheet-actions"><button class="btn b-cancel" style="font-size:1.05rem;padding:12px 18px" data-action="close">Annulla</button>
+      <button class="btn-primary b-save" style="font-size:1.05rem;padding:12px 18px" data-action="save-carta" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
   }
   async function saveCarta(id){
     const nome=$("#ct-nome").value.trim();if(!nome){toast("Scrivi il nome della carta");return;}
