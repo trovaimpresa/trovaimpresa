@@ -936,3 +936,22 @@
 .rie-card.t-neutro{ border-left-color:var(--bordo-forte); }
 
 .rc-caricamento{ padding:40px 4px; font-size:17px; color:var(--testo-3); }
+
+/* --- rifiniture: schede alte quanto il loro contenuto, non quanto la vicina --- */
+.rie-grid{ align-items:start; }
+
+/* --- scheda senza niente dentro: piu' bassa e piu' smorta, cosi' l'occhio va
+       dritto alle schede che hanno davvero qualcosa da dire --- */
+.rie-card.vuota{ background:#FCFDFE; padding:20px 22px 16px; }
+.rie-card.vuota .rc-n{ font-size:34px; color:var(--testo-3); }
+.rie-card.vuota .rc-head svg,
+.rie-card.vuota .rc-tit{ color:var(--testo-2); }
+.rie-card.vuota .rc-l{ font-size:15px; }
+.rie-card.vuota .rc-vuoto{ margin-top:14px; padding-top:12px; font-size:15px; }
+.rie-card.vuota:hover{ box-shadow:0 4px 14px rgba(15,23,42,.07); }
+
+/* --- colonne sempre della stessa larghezza: senza minmax(0,1fr) un titolo lungo
+       allarga la sua colonna e schiaccia le altre --- */
+.rie-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+@media(max-width:1180px){ .rie-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px){  .rie-grid{ grid-template-columns:minmax(0,1fr); } }

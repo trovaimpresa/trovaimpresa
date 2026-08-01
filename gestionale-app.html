@@ -692,7 +692,7 @@
                + '</div>';
         }).join("")+'</div>'
       : '<div class="rc-vuoto">'+esc(o.vuoto||"Niente da segnalare")+'</div>';
-    return '<div class="rie-card t-'+(o.tono||"neutro")+'" data-action="rie-go" data-go="'+o.tab+'">'
+    return '<div class="rie-card t-'+(o.tono||"neutro")+(righe.length?"":" vuota")+'" data-action="rie-go" data-go="'+o.tab+'">'
          +   '<div class="rc-head">'+rieIco(o.tab)+'<span class="rc-tit">'+esc(o.titolo)+'</span></div>'
          +   '<div class="rc-n">'+esc(String(o.n))+'</div>'
          +   '<div class="rc-l">'+esc(o.lab||"")+'</div>'
