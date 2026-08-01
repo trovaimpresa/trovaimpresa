@@ -746,3 +746,70 @@
     .rep-bars{gap:2px}
     .rep-bar-lab{font-size:10px}
   }
+
+  /* ================================================================
+     MODALE GRANDE — solo per i moduli lunghi (lavoro, preventivo).
+     Il modulo del lavoro ha una decina di campi piu' foto, spese, mezzi
+     e il grafico: dentro i 640px della modale normale diventava una
+     colonna lunghissima, e per arrivare al pulsante Salva bisognava
+     scorrere tutto. Qui intestazione e piede stanno fermi, scorre solo
+     il contenuto.
+     I moduli corti (cliente, mezzo, scadenza, persona) restano sulla
+     .sheet normale: con quattro campi a tutta pagina sembrerebbero vuoti.
+     Nota: .sheet--grande ha la stessa specificita' di .sheet, quindi
+     questo blocco deve restare DOPO le regole di .sheet (riga ~333).
+     ================================================================ */
+  .sheet--grande{
+    width:92%; max-width:1100px;
+    height:90vh; max-height:90vh; min-height:0;
+    margin:5vh auto; padding:0;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  /* dvh dove c'e': su mobile 100vh comprende la barra degli indirizzi, quindi
+     il piede — con dentro Salva — finirebbe sotto il bordo dello schermo,
+     che e' esattamente il problema che questa modale doveva risolvere. */
+  @supports (height:90dvh){
+    .sheet--grande{height:90dvh; max-height:90dvh; margin:5dvh auto}
+  }
+  /* intestazione fissa */
+  .sheet--grande .sh-head{
+    flex:0 0 auto; display:flex; align-items:center; gap:12px;
+    padding:15px 22px; border-bottom:1px solid var(--bordo);
+  }
+  .sheet--grande .sh-head h3{
+    flex:1; min-width:0; margin:0;
+    font-size:var(--f-lg); font-weight:700; color:var(--testo);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .sheet--grande .sh-x{
+    flex:0 0 auto; width:34px; height:34px; padding:0;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:none; border:none; border-radius:8px;
+    color:var(--testo-2); cursor:pointer; transition:background .15s,color .15s;
+  }
+  .sheet--grande .sh-x:hover{background:var(--sfondo); color:var(--testo)}
+  .sheet--grande .sh-x svg{width:18px; height:18px}
+  /* l'unica parte che scorre */
+  .sheet--grande .sh-body{flex:1 1 auto; min-height:0; overflow-y:auto; padding:20px 22px}
+  /* piede fisso: Salva e Annulla sempre a portata di clic */
+  .sheet--grande .sh-foot{
+    flex:0 0 auto; display:flex; gap:10px; justify-content:flex-end;
+    padding:13px 22px; border-top:1px solid var(--bordo); background:var(--card);
+  }
+  .sheet--grande .sh-foot .btn,.sheet--grande .sh-foot .btn-primary{min-width:124px}
+
+  /* due colonne sopra i 900px */
+  @media(min-width:901px){
+    .sheet--grande .sh-cols{display:grid; grid-template-columns:1fr 1fr; gap:0 28px; align-items:start}
+    .sheet--grande .sh-col{min-width:0}
+  }
+  /* sotto i 900px: una colonna sola, e la modale prende tutto lo schermo */
+  @media(max-width:900px){
+    .sheet--grande{width:100%; max-width:none; height:100vh; max-height:100vh; margin:0; border-radius:0;
+      animation:none}   /* a tutto schermo il translateY iniziale spingerebbe il piede fuori */
+    @supports (height:100dvh){
+      .sheet--grande{height:100dvh; max-height:100dvh}
+    }
+    .sheet--grande .sh-head,.sheet--grande .sh-body,.sheet--grande .sh-foot{padding-left:16px; padding-right:16px}
+    .sheet--grande .sh-foot .btn,.sheet--grande .sh-foot .btn-primary{flex:1; min-width:0}
+  }

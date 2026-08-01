@@ -1787,7 +1787,10 @@
     const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
     const dipOpts=dipCache.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
     const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
-    openSheet(`<h3>${isNew?"Nuovo lavoro":"Modifica lavoro"}</h3>
+    /* Modulo lungo -> modale grande. A sinistra il lavoro in se' (cosa, dove,
+       quando, chi, com'e' andata), a destra gli allegati e i soldi. */
+    openSheetGrande(isNew?"Nuovo lavoro":"Modifica lavoro",
+      `<div class="sh-cols"><div class="sh-col">
       <div class="field"><label>Condominio / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
         <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo condominio</button></div>
@@ -1796,22 +1799,20 @@
       <div class="row2">
         <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
         <div class="field"><label>Chi ci va</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
+      <div class="field"><label>Stato</label><div class="seg" id="j-stato">
+        ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
+      <div class="field"><label>Cosa è stato fatto (consuntivo)</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
+      <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
+      </div><div class="sh-col">
       <div class="field"><label>📷 Foto lavoro DA FARE (dal capo)</label>
         <input type="file" id="up-prima" accept="image/*" multiple style="display:none">
         <label class="btn up-btn" for="up-prima">＋ Aggiungi foto</label>
         <div class="thumbs" id="th-prima"></div></div>
-      <div class="field"><label>Stato</label><div class="seg" id="j-stato">
-        ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
-      <div class="field"><label>Cosa è stato fatto (consuntivo)</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
       <div class="field"><label>📷 Foto lavoro FATTO (operatore)</label>
         <select id="op-dopo"><option value="">— chi l'ha fatto —</option>${dipOpts}</select>
         <input type="file" id="up-dopo" accept="image/*" multiple style="display:none">
         <label class="btn up-btn" for="up-dopo" style="margin-top:8px">＋ Aggiungi foto</label>
         <div class="thumbs" id="th-dopo"></div></div>
-      <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
-      <div class="row2">
-        <div class="field"><label>Ore lavorate</label><input type="number" id="j-ore" inputmode="decimal" step="0.5" value="${job.ore||""}" placeholder="0"></div>
-        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
       <div class="field" id="spese-wrap" style="display:none"><label>💶 Spese e materiali di questo lavoro</label>
         <div class="spese-list" id="spese-list"></div>
         <div class="spesa-add">
@@ -1819,16 +1820,20 @@
           <input id="sp-imp" type="number" inputmode="decimal" placeholder="€">
           <button type="button" class="btn" data-action="spesa-add">+ Aggiungi</button></div>
         <div class="margine-box" id="margine-box"></div></div>
-      <div class="field" id="andamento-wrap" style="display:none"></div>
       <div class="field" id="mezzi-wrap" style="display:none"><label>🚚 Mezzi e attrezzature usati in questo lavoro</label>
         <div class="spese-list" id="lm-list"></div>
         <div class="mezzo-add">
           <select id="lm-sel"></select>
           <button type="button" class="btn" data-action="lm-add">+ Aggiungi</button></div></div>
+      <div class="field" id="andamento-wrap" style="display:none"></div>
+      <div class="row2">
+        <div class="field"><label>Ore lavorate</label><input type="number" id="j-ore" inputmode="decimal" step="0.5" value="${job.ore||""}" placeholder="0"></div>
+        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-        <button class="btn-primary b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button></div>`);
+      </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button>`);
     bindSeg("j-stato");bindSeg("j-fatt");
     $("#up-prima").onchange=e=>{addFoto(e.target.files,"prima","Capo");e.target.value="";};
     $("#up-dopo").onchange=e=>{addFoto(e.target.files,"dopo",$("#op-dopo").value);e.target.value="";};
@@ -2454,18 +2459,23 @@
       if(p.id){const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",p.id).order("ordine");righe=rr||[];}
     }
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===p.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
-    openSheet(`<h3>${isNew?"Nuovo preventivo":"Modifica preventivo N. "+p.numero}</h3>
+    /* Modulo lungo -> modale grande: a sinistra l'intestazione del preventivo,
+       a destra le voci di costo, che sono la parte che ha bisogno di spazio. */
+    openSheetGrande(isNew?"Nuovo preventivo":"Modifica preventivo N. "+p.numero,
+      `<div class="sh-cols"><div class="sh-col">
       <div class="field"><label>Titolo</label><input id="pv-tit" value="${esc(p.titolo||"")}" placeholder="Es. Rifacimento bagno completo"></div>
       <div class="row2">
         <div class="field"><label>Cliente</label><select id="pv-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
         <div class="field"><label>Data</label><input type="date" id="pv-data" value="${p.data||todayStr()}"></div></div>
+      <div class="field"><label>Note (compaiono sul PDF)</label><textarea id="pv-note" placeholder="Condizioni, tempi, esclusioni...">${esc(p.note||"")}</textarea></div>
+      </div><div class="sh-col">
       <div class="field"><label>Voci del preventivo</label>
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
         <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0))}</div></div>
-      <div class="field"><label>Note (compaiono sul PDF)</label><textarea id="pv-note" placeholder="Condizioni, tempi, esclusioni...">${esc(p.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button></div>`);
+      </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button>`);
     $("#prev-righe").addEventListener("input",prevTotaleLive);
   }
   async function savePrev(id){
@@ -2785,7 +2795,22 @@
   /* al cambio desktop/mobile ridisegna liste (tabella ↔ card) */
   try{window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderFatture();}});}catch(e){}
 
-  function openSheet(html){$("#sheet").innerHTML=html;$("#overlay").classList.add("open");}
+  function openSheet(html){const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");}
+  /* Variante grande: SOLO i moduli lunghi (lavoro e preventivo). Intestazione e
+     piede restano fermi, scorre solo il corpo — prima per salvare bisognava
+     arrivare in fondo a una colonna di dieci campi.
+     corpo = due <div class="sh-col"> dentro <div class="sh-cols">: sopra i 900px
+     diventano due colonne, sotto tornano una sola. */
+  const _ICO_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+  function openSheetGrande(titolo,corpo,azioni){
+    const s=$("#sheet");
+    s.className="sheet sheet--grande";
+    s.innerHTML=`<div class="sh-head"><h3>${titolo}</h3>
+        <button class="sh-x" data-action="close" title="Chiudi" aria-label="Chiudi">${_ICO_X}</button></div>
+      <div class="sh-body">${corpo}</div>
+      <div class="sh-foot">${azioni}</div>`;
+    $("#overlay").classList.add("open");
+  }
   function closeSheet(){$("#overlay").classList.remove("open");}
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
 
