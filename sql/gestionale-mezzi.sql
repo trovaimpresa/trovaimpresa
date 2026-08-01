@@ -1,120 +1,143 @@
--- ============================================================
--- TrovaImpresa — GESTIONALE: sezione MEZZI E ATTREZZATURE
+-- =====================================================================
+-- TrovaImpresa — Mezzi e attrezzature
+-- Da salvare come  sql/gestionale-mezzi.sql
+-- Incolla tutto in Supabase > SQL Editor > Run
 --
--- Crea:
---   1. gest_mezzi          -> anagrafica mezzi/attrezzature (per reparto)
---   2. gest_lavoro_mezzi   -> quali mezzi sono stati usati su un lavoro
---   3. gest_scadenze.mezzo_id -> collega una scadenza a un mezzo
---   4. gest_mezzi_scadenze -> vista di riepilogo scadenze per mezzo
---
--- Stesso modello di gest_clienti: isolamento user_id + mestiere_id,
--- RLS "owner_all" come sql/rls-batch1-gestionale.sql.
---
--- Eseguire nell'SQL Editor di Supabase. E' idempotente: si puo'
--- rieseguire senza rompere niente.
--- ============================================================
+-- Scelte progettuali:
+-- 1. Le scadenze (revisione, bollo, assicurazione, tagliando) NON sono
+--    colonne di gest_mezzi: si agganciano a gest_scadenze con mezzo_id.
+--    Cosi' riusano la logica "scaduta / in scadenza" gia' esistente.
+-- 2. Un lavoro puo' usare piu' mezzi -> tabella ponte gest_lavoro_mezzi.
+-- 3. Policy collaboratori inclusa da subito (lezione di gest_scadenze).
+-- =====================================================================
 
-
--- ---------- 1. ANAGRAFICA MEZZI ----------
-
+-- ---------------------------------------------------------------------
+-- 1. ANAGRAFICA MEZZI E ATTREZZATURE
+-- ---------------------------------------------------------------------
 create table if not exists public.gest_mezzi (
-  id          uuid primary key default gen_random_uuid(),
-  user_id     uuid not null references auth.users(id) on delete cascade,
-  mestiere_id uuid references public.gest_mestieri(id) on delete cascade,
-  nome        text not null,
-  categoria   text not null default 'mezzo',
-  targa       text,
-  stato       text not null default 'disponibile',
-  note        text,
-  created_at  timestamptz not null default now()
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users(id)          on delete cascade,
+  mestiere_id  uuid          references public.gest_mestieri(id) on delete cascade,
+
+  nome         text not null,               -- "Furgone Ducato", "Piattaforma 20mt"
+  categoria    text not null default 'mezzo',  -- 'mezzo' | 'attrezzatura'
+  targa        text,                        -- targa o matricola
+  stato        text not null default 'disponibile',
+                                            -- 'disponibile' | 'in_uso' | 'manutenzione' | 'fuori_uso'
+  note         text,
+  created_at   timestamptz not null default now(),
+
+  constraint gest_mezzi_categoria_ok
+    check (categoria in ('mezzo', 'attrezzatura')),
+  constraint gest_mezzi_stato_ok
+    check (stato in ('disponibile', 'in_uso', 'manutenzione', 'fuori_uso'))
 );
 
--- categoria: mezzo | attrezzatura
-alter table public.gest_mezzi drop constraint if exists gest_mezzi_categoria_chk;
-alter table public.gest_mezzi add constraint gest_mezzi_categoria_chk
-  check (categoria in ('mezzo','attrezzatura'));
+create index if not exists gest_mezzi_user_idx     on public.gest_mezzi (user_id);
+create index if not exists gest_mezzi_mestiere_idx on public.gest_mezzi (mestiere_id);
 
--- stato: disponibile | in_uso | manutenzione | fuori_uso
-alter table public.gest_mezzi drop constraint if exists gest_mezzi_stato_chk;
-alter table public.gest_mezzi add constraint gest_mezzi_stato_chk
-  check (stato in ('disponibile','in_uso','manutenzione','fuori_uso'));
+-- ---------------------------------------------------------------------
+-- 2. SCADENZE COLLEGATE AL MEZZO
+--    Aggiunge solo la colonna: la tabella e la logica sono le tue.
+-- ---------------------------------------------------------------------
+alter table public.gest_scadenze
+  add column if not exists mezzo_id uuid references public.gest_mezzi(id) on delete cascade;
 
-create index if not exists gest_mezzi_user_idx     on public.gest_mezzi(user_id);
-create index if not exists gest_mezzi_mestiere_idx on public.gest_mezzi(mestiere_id);
+create index if not exists gest_scadenze_mezzo_idx on public.gest_scadenze (mezzo_id);
 
-alter table public.gest_mezzi enable row level security;
-drop policy if exists "owner_all" on public.gest_mezzi;
-create policy "owner_all" on public.gest_mezzi
-  for all to authenticated
-  using (user_id = auth.uid())
-  with check (user_id = auth.uid());
-
-
--- ---------- 2. MEZZI USATI SU UN LAVORO ----------
-
+-- ---------------------------------------------------------------------
+-- 3. QUALI MEZZI SU QUALE LAVORO (tabella ponte)
+--    Salvata separatamente dopo saveJob, come si fa per le spese.
+-- ---------------------------------------------------------------------
 create table if not exists public.gest_lavoro_mezzi (
   id         uuid primary key default gen_random_uuid(),
-  user_id    uuid not null references auth.users(id) on delete cascade,
+  user_id    uuid not null references auth.users(id)         on delete cascade,
   lavoro_id  uuid not null references public.gest_lavori(id) on delete cascade,
-  mezzo_id   uuid not null references public.gest_mezzi(id) on delete cascade,
-  created_at timestamptz not null default now()
+  mezzo_id   uuid not null references public.gest_mezzi(id)  on delete cascade,
+  created_at timestamptz not null default now(),
+
+  -- lo stesso mezzo non puo' essere aggiunto due volte allo stesso lavoro
+  unique (lavoro_id, mezzo_id)
 );
 
--- lo stesso mezzo non si aggiunge due volte allo stesso lavoro
-create unique index if not exists gest_lavoro_mezzi_uniq
-  on public.gest_lavoro_mezzi(lavoro_id, mezzo_id);
-create index if not exists gest_lavoro_mezzi_mezzo_idx on public.gest_lavoro_mezzi(mezzo_id);
+create index if not exists gest_lavoro_mezzi_lavoro_idx on public.gest_lavoro_mezzi (lavoro_id);
+create index if not exists gest_lavoro_mezzi_mezzo_idx  on public.gest_lavoro_mezzi (mezzo_id);
 
+-- ---------------------------------------------------------------------
+-- 4. RLS — pattern standard del progetto
+-- ---------------------------------------------------------------------
+alter table public.gest_mezzi        enable row level security;
 alter table public.gest_lavoro_mezzi enable row level security;
-drop policy if exists "owner_all" on public.gest_lavoro_mezzi;
-create policy "owner_all" on public.gest_lavoro_mezzi
-  for all to authenticated
-  using (user_id = auth.uid())
-  with check (user_id = auth.uid());
 
+-- Il titolare: pieno controllo sui propri mezzi
+drop policy if exists "gest_mezzi_own" on public.gest_mezzi;
+create policy "gest_mezzi_own" on public.gest_mezzi
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- ---------- 3. SCADENZE COLLEGATE A UN MEZZO ----------
--- Revisione, bollo, tagliando, assicurazione... vivono nello scadenzario
--- che gia' c'e': basta il riferimento al mezzo (facoltativo).
+drop policy if exists "gest_lavoro_mezzi_own" on public.gest_lavoro_mezzi;
+create policy "gest_lavoro_mezzi_own" on public.gest_lavoro_mezzi
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
-alter table public.gest_scadenze
-  add column if not exists mezzo_id uuid references public.gest_mezzi(id) on delete set null;
+-- I collaboratori attivi: SOLA LETTURA.
+-- Serve perche' l'operaio in cantiere deve vedere quali mezzi gli
+-- sono stati assegnati, ma non deve poter modificare l'anagrafica.
+-- Senza questa policy la sezione risulta vuota per la squadra:
+-- e' esattamente il problema gia' capitato con gest_scadenze.
+drop policy if exists "gest_mezzi_team_read" on public.gest_mezzi;
+create policy "gest_mezzi_team_read" on public.gest_mezzi
+  for select using (
+    exists (
+      select 1 from public.gest_membri m
+      where m.membro_id  = auth.uid()
+        and m.impresa_id = gest_mezzi.user_id
+        and m.stato      = 'attivo'
+    )
+  );
 
-create index if not exists gest_scadenze_mezzo_idx on public.gest_scadenze(mezzo_id);
+drop policy if exists "gest_lavoro_mezzi_team_read" on public.gest_lavoro_mezzi;
+create policy "gest_lavoro_mezzi_team_read" on public.gest_lavoro_mezzi
+  for select using (
+    exists (
+      select 1 from public.gest_membri m
+      where m.membro_id  = auth.uid()
+        and m.impresa_id = gest_lavoro_mezzi.user_id
+        and m.stato      = 'attivo'
+    )
+  );
 
-
--- ---------- 4. VISTA RIEPILOGO SCADENZE PER MEZZO ----------
--- Una riga per mezzo. La card del mezzo legge da qui per scrivere
--- "Revisione tra 12 giorni" oppure "2 scadenze scadute".
---
--- security_invoker = true: la vista applica l'RLS di chi interroga,
--- altrimenti mostrerebbe i mezzi di tutti.
-
-drop view if exists public.gest_mezzi_scadenze;
-create view public.gest_mezzi_scadenze
-with (security_invoker = true) as
+-- ---------------------------------------------------------------------
+-- 5. VISTA: mezzi con la prossima scadenza
+--    Serve alla card del mezzo per mostrare "Revisione tra 12 giorni".
+-- ---------------------------------------------------------------------
+create or replace view public.gest_mezzi_scadenze as
 select
-  m.id          as mezzo_id,
-  m.user_id     as user_id,
-  m.mestiere_id as mestiere_id,
+  m.id                                     as mezzo_id,
+  m.user_id,
+  m.mestiere_id,
+  m.nome,
+  m.categoria,
+  m.targa,
+  m.stato,
+  min(s.data_scadenza) filter (where s.stato = 'aperta') as prossima_scadenza,
   count(s.id) filter (
-    where s.stato is distinct from 'fatta'
-  )::int as aperte,
+    where s.stato = 'aperta' and s.data_scadenza < current_date
+  )                                        as scadenze_scadute,
   count(s.id) filter (
-    where s.stato is distinct from 'fatta' and s.data_scadenza < current_date
-  )::int as scadute,
-  min(s.data_scadenza) filter (
-    where s.stato is distinct from 'fatta' and s.data_scadenza >= current_date
-  ) as prossima_data,
-  (array_agg(s.titolo order by s.data_scadenza) filter (
-    where s.stato is distinct from 'fatta' and s.data_scadenza >= current_date
-  ))[1] as prossimo_titolo,
-  (array_agg(s.tipo_pratica order by s.data_scadenza) filter (
-    where s.stato is distinct from 'fatta' and s.data_scadenza >= current_date
-  ))[1] as prossimo_tipo
+    where s.stato = 'aperta'
+      and s.data_scadenza >= current_date
+      and s.data_scadenza <= current_date + interval '30 days'
+  )                                        as scadenze_vicine
 from public.gest_mezzi m
-left join public.gest_scadenze s
-  on s.mezzo_id = m.id and s.user_id = m.user_id
-group by m.id, m.user_id, m.mestiere_id;
+left join public.gest_scadenze s on s.mezzo_id = m.id
+group by m.id, m.user_id, m.mestiere_id, m.nome, m.categoria, m.targa, m.stato;
 
-grant select on public.gest_mezzi_scadenze to authenticated;
+-- La vista eredita la RLS delle tabelle sottostanti solo con
+-- security_invoker: senza, mostrerebbe i mezzi di tutti.
+alter view public.gest_mezzi_scadenze set (security_invoker = true);
+
+-- ---------------------------------------------------------------------
+-- 6. VERIFICA
+-- ---------------------------------------------------------------------
+-- select count(*) from public.gest_mezzi;              -- deve dare 0
+-- select count(*) from public.gest_lavoro_mezzi;       -- deve dare 0
+-- select mezzo_id from public.gest_scadenze limit 1;   -- colonna esiste
