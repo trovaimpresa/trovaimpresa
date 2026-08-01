@@ -1790,7 +1790,8 @@
     /* Modulo lungo -> modale grande. A sinistra il lavoro in se' (cosa, dove,
        quando, chi, com'e' andata), a destra gli allegati e i soldi. */
     openSheetGrande(isNew?"Nuovo lavoro":"Modifica lavoro",
-      `<div class="sh-cols"><div class="sh-col">
+      `<div class="sh-cols sh-cols--3"><div class="sh-col">
+      <div class="sh-b sh-b-a">
       <div class="field"><label>Condominio / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
         <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo condominio</button></div>
@@ -1801,9 +1802,13 @@
         <div class="field"><label>Chi ci va</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
       <div class="field"><label>Stato</label><div class="seg" id="j-stato">
         ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
+      </div>
+      <div class="sh-b sh-b-b">
       <div class="field"><label>Cosa è stato fatto (consuntivo)</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
+      </div>
       </div><div class="sh-col">
+      <div class="sh-b sh-b-c">
       <div class="field"><label>📷 Foto lavoro DA FARE (dal capo)</label>
         <input type="file" id="up-prima" accept="image/*" multiple style="display:none">
         <label class="btn up-btn" for="up-prima">＋ Aggiungi foto</label>
@@ -1813,6 +1818,8 @@
         <input type="file" id="up-dopo" accept="image/*" multiple style="display:none">
         <label class="btn up-btn" for="up-dopo" style="margin-top:8px">＋ Aggiungi foto</label>
         <div class="thumbs" id="th-dopo"></div></div>
+      </div>
+      <div class="sh-b sh-b-d">
       <div class="field" id="spese-wrap" style="display:none"><label>💶 Spese e materiali di questo lavoro</label>
         <div class="spese-list" id="spese-list"></div>
         <div class="spesa-add">
@@ -1831,6 +1838,7 @@
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
       <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
         ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
+      </div>
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button>`);
@@ -2800,7 +2808,9 @@
      piede restano fermi, scorre solo il corpo — prima per salvare bisognava
      arrivare in fondo a una colonna di dieci campi.
      corpo = due <div class="sh-col"> dentro <div class="sh-cols">: sopra i 900px
-     diventano due colonne, sotto tornano una sola. */
+     diventano due colonne, sotto tornano una sola.
+     Il modulo lavoro aggiunge .sh-cols--3 e divide i due contenitori in quattro
+     blocchi .sh-b-a/b/c/d: sopra i 1500px la griglia passa a tre colonne. */
   const _ICO_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
   function openSheetGrande(titolo,corpo,azioni){
     const s=$("#sheet");

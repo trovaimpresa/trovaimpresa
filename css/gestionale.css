@@ -760,16 +760,16 @@
      questo blocco deve restare DOPO le regole di .sheet (riga ~333).
      ================================================================ */
   .sheet--grande{
-    width:92%; max-width:1100px;
-    height:90vh; max-height:90vh; min-height:0;
-    margin:5vh auto; padding:0;
+    width:96%; max-width:1600px;
+    height:94vh; max-height:94vh; min-height:0;
+    margin:3vh auto; padding:0;
     display:flex; flex-direction:column; overflow:hidden;
   }
   /* dvh dove c'e': su mobile 100vh comprende la barra degli indirizzi, quindi
      il piede — con dentro Salva — finirebbe sotto il bordo dello schermo,
      che e' esattamente il problema che questa modale doveva risolvere. */
-  @supports (height:90dvh){
-    .sheet--grande{height:90dvh; max-height:90dvh; margin:5dvh auto}
+  @supports (height:94dvh){
+    .sheet--grande{height:94dvh; max-height:94dvh; margin:3dvh auto}
   }
   /* intestazione fissa */
   .sheet--grande .sh-head{
@@ -799,9 +799,29 @@
   .sheet--grande .sh-foot .btn,.sheet--grande .sh-foot .btn-primary{min-width:124px}
 
   /* due colonne sopra i 900px */
+  /* due colonne 50/50 da 901 a 1500px */
   @media(min-width:901px){
     .sheet--grande .sh-cols{display:grid; grid-template-columns:1fr 1fr; gap:0 28px; align-items:start}
     .sheet--grande .sh-col{min-width:0}
+  }
+  /* ---- tre colonne sopra i 1500px (solo il modulo lavoro: .sh-cols--3) ----
+     Il DOM resta a due contenitori .sh-col, perche' e' quello che serve a
+     901-1500px. Qui i contenitori spariscono (display:contents) e i quattro
+     blocchi diventano celle vere della griglia:
+       A (cosa/dove/quando/chi/stato)  -> colonna 1, alta quanto serve
+       B (consuntivo, note)            -> colonna 2, in alto
+       C (foto da fare, foto fatto)    -> colonna 2, sotto B
+       D (spese, mezzi, grafico, soldi)-> colonna 3
+     A e D occupano entrambe le righe: cosi' partono dal bordo alto e non
+     si allineano all'altezza di B. */
+  @media(min-width:1501px){
+    .sheet--grande .sh-cols--3{grid-template-columns:1fr 1fr 1fr}
+    .sheet--grande .sh-cols--3 .sh-col{display:contents}
+    .sheet--grande .sh-cols--3 .sh-b{min-width:0}
+    .sheet--grande .sh-cols--3 .sh-b-a{grid-column:1; grid-row:1 / span 2}
+    .sheet--grande .sh-cols--3 .sh-b-b{grid-column:2; grid-row:1}
+    .sheet--grande .sh-cols--3 .sh-b-c{grid-column:2; grid-row:2}
+    .sheet--grande .sh-cols--3 .sh-b-d{grid-column:3; grid-row:1 / span 2}
   }
   /* sotto i 900px: una colonna sola, e la modale prende tutto lo schermo */
   @media(max-width:900px){
