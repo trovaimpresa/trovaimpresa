@@ -950,7 +950,7 @@
     });
     let mpNote=[];
     try{
-      const C=JSON.parse(localStorage.getItem("ti_mappa_cache_v1")||"{}");
+      const C=JSON.parse(localStorage.getItem("ti_mappa_cache_v2")||"{}");
       const km=Object.values(C.km||{}).filter(v=>typeof v==="number").sort((a,b)=>a-b);
       if(km.length){
         mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0])},
@@ -2836,7 +2836,7 @@
      da parte sul computer, cosi' un indirizzo gia' cercato non si ricerca mai piu'.
      ========================================= */
 
-  const MP_CACHE_KEY="ti_mappa_cache_v1";
+  const MP_CACHE_KEY="ti_mappa_cache_v2";
   let mpCache=null, mpVista="aperti", mpMappa=null, mpLayer=null, mpInCorso=false;
 
   function mpLeggiCache(){
@@ -2864,16 +2864,25 @@
   }
 
   /* indirizzo scritto a mano -> punto sulla carta */
-  async function mpTrovaPunto(indirizzo){
+  async function mpTrovaPunto(indirizzo,vicinoA){
     const q=mpChiave(indirizzo);
     if(!q)return null;
     const C=mpLeggiCache();
     if(C.punti[q]!==undefined)return C.punti[q];       /* null incluso: gia' cercato e non trovato */
     try{
-      const url="https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=it&q="+encodeURIComponent(indirizzo);
+      let url="https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=it&q="+encodeURIComponent(indirizzo);
+      /* spingo la ricerca verso la zona dell'ufficio: senza questo, una via che
+         esiste anche in un'altra provincia poteva essere pescata a 400 km */
+      if(vicinoA){
+        const d=1.2;
+        url+="&viewbox="+(vicinoA.lon-d)+","+(vicinoA.lat+d)+","+(vicinoA.lon+d)+","+(vicinoA.lat-d);
+      }
       const r=await fetch(url,{headers:{"Accept":"application/json"}});
-      const d=await r.json();
-      C.punti[q]=(d&&d[0])?{lat:+d[0].lat,lon:+d[0].lon,nome:d[0].display_name||""}:null;
+      const d0=await r.json();
+      const a=(d0&&d0[0])?d0[0]:null;
+      const ad=(a&&a.address)||{};
+      C.punti[q]=a?{lat:+a.lat,lon:+a.lon,nome:a.display_name||"",
+                    comune:ad.city||ad.town||ad.village||ad.municipality||""}:null;
     }catch(e){C.punti[q]=null;}
     mpSalvaCache();
     await mpAspetta(1100);        /* il servizio gratuito accetta una richiesta al secondo */
@@ -2977,6 +2986,7 @@
       const dice=(fatti,tot)=>{box.innerHTML='<div class="mp-carico">Sto cercando gli indirizzi sulla carta… '+fatti+' di '+tot+'.<br>Ci vuole un secondo per ognuno, ma solo la prima volta.</div>';};
       dice(0,voci.length+1);
       const pPart=partenzaTxt?await mpTrovaPunto(partenzaTxt+", Italia"):null;
+      const comuneUff=(pPart&&pPart.comune)||"";
       if(partenzaTxt&&!pPart&&avviso){
         avviso.innerHTML='<div class="mp-avviso">Non trovo l\'indirizzo del tuo ufficio: ho cercato <b>'+esc(partenzaTxt)+'</b>. Scrivilo con via, numero e comune (per esempio <b>Via Roma 10, Rieti</b>) dal pulsante <b>Azienda</b> in alto a destra. Intanto la carta con i cantieri la vedi lo stesso.</div>';
       }
@@ -2991,11 +3001,21 @@
       const righe=[];
       let fatti=1;
       for(const v of voci){
-        const q=v.ind+(/\d{5}|,/.test(v.ind)?"":", Italia");
-        const pt=await mpTrovaPunto(q);
-        const km=(pt&&pPart)?mpDistanzaKm(pPart,pt):null;
-        righe.push({...v,p:pt,km});
-        if(pt&&ok&&window.L){
+        /* Se l'indirizzo non dice in che comune sta ("via verani 18"), do' per
+           buono il comune dell'ufficio. Prima cercavo alla cieca in tutta Italia
+           e potevo pescare una via con lo stesso nome a centinaia di chilometri:
+           usciva un numero preciso e completamente sbagliato. */
+        const haComune=/\d{5}|,/.test(v.ind);
+        const ipotesi=!haComune&&!!comuneUff;
+        const q=v.ind+(haComune?", Italia":(comuneUff?", "+comuneUff+", Italia":", Italia"));
+        const pt=await mpTrovaPunto(q,pPart);
+        let km=(pt&&pPart)?mpDistanzaKm(pPart,pt):null;
+        /* rete di sicurezza: se l'indirizzo era incompleto e il risultato e'
+           lontanissimo, non e' il posto giusto. Meglio dire "non lo so". */
+        const sospetto=(!haComune&&km!=null&&km>80);
+        if(sospetto)km=null;
+        righe.push({...v,p:sospetto?null:pt,km,ipotesi,sospetto});
+        if(pt&&!sospetto&&ok&&window.L){
           punti.push([pt.lat,pt.lon]);
           const col=v.l.stato==="fatto"?"#059669":(inRitardo(v.l.stato,v.l.data_prevista)?"#DC2626":"#D97706");
           L.circleMarker([pt.lat,pt.lon],{radius:11,color:"#fff",weight:3,fillColor:col,fillOpacity:1})
@@ -3022,7 +3042,7 @@
       }
       const nonTrovati=pPart?righe.filter(r=>!r.p).length:0;
       box.innerHTML=
-        (nonTrovati?'<div class="mp-avviso mp-avviso-lieve">'+nonTrovati+(nonTrovati===1?' indirizzo non trovato':' indirizzi non trovati')+'. Di solito manca il comune: scrivi per esempio «Via Verani 18, Rieti» invece di «via verani 18».</div>':"")
+        (nonTrovati?'<div class="mp-avviso mp-avviso-lieve"><b>'+nonTrovati+(nonTrovati===1?' cantiere senza distanza':' cantieri senza distanza')+'.</b> Nel campo «Dove» del lavoro scrivi anche il comune, per esempio <b>Via Verani 18, Rieti</b> invece di <b>via verani 18</b>. Senza il comune la stessa via esiste in cento paesi e non posso sapere quale sia il tuo.</div>':"")
         +'<div class="mp-righe">'
         +righe.map(r=>{
           const q=quando(r.l.data_prevista);
@@ -3032,12 +3052,15 @@
             +  '<div class="mp-r-tit">'+esc(r.l.descrizione||"Lavoro")+'</div>'
             +  '<div class="mp-r-sub">'+esc(r.ind)
             +    (r.c?' · '+esc(r.c.nome||""):"")
-            +    ' · <span class="'+(rit?"q-passato":q.classe)+'">'+esc(q.testo)+'</span></div>'
+            +    ' · <span class="'+(rit?"q-passato":q.classe)+'">'+esc(q.testo)+'</span>'
+            +    (r.ipotesi&&!r.sospetto?' · <span class="mp-ipotesi">comune ipotizzato: '+esc(comuneUff)+'</span>':"")
+            +    '</div>'
             +'</div>'
             +'<div class="mp-r-dist">'
             +  (r.km!=null?'<div class="mp-km">'+mpFormattaKm(r.km)+'</div><div class="mp-min">dall\'ufficio</div>'
                  :(!pPart?'<div class="mp-km">—</div><div class="mp-min">manca l\'ufficio</div>'
-                         :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>'))
+                   :(r.sospetto?'<div class="mp-km">?</div><div class="mp-min">indirizzo troppo vago</div>'
+                               :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>')))
             +'</div>'
             +'<button class="btn mp-r-btn" data-action="map" data-q="'+esc(r.ind)+'">Indicazioni</button>'
             +'</div>';
