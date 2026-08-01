@@ -744,16 +744,19 @@
     const opeMap=Object.fromEntries(OPE.map(o=>[o.id,o.nome||""]));
 
     /* ---- secondo giro: quello che ha bisogno degli id dei lavori ---- */
-    let SP=[],nFoto=0,nVideo=0,PR=[];
+    let SP=[],nFoto=0,nVideo=0,PR=[],CM=[];
     try{
       const attesaIds=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato").map(p=>p.id);
+      const carteIds=CA.map(c=>c.id);
       const q=await Promise.all([
         ids.length?sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({data:[]}),
         ids.length?sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
         ids.length?sb.from("gest_video").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
-        attesaIds.length?sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",attesaIds):Promise.resolve({data:[]})
+        attesaIds.length?sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",attesaIds):Promise.resolve({data:[]}),
+        carteIds.length?sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at,carta_id").eq("user_id",sbUid).in("carta_id",carteIds):Promise.resolve({data:[]})
       ]);
       SP=q[0].data||[];nFoto=q[1].count||0;nVideo=q[2].count||0;PR=q[3].data||[];
+      CM=(q[4].data||[]).filter(m=>m.tipo==="spesa");
     }catch(e){}
 
     /* ---- calcoli (identici a prima) ---- */
@@ -763,8 +766,12 @@
     const totDaInc = daInc.reduce((s,l)=>s+(+l.importo||0),0);
     const incMese  = L.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
     const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
-    const speseMese= SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
-    const utile    = incMese-speseMese;
+    const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
+    /* anche le spese delle carte entrano nel conto: prima erano invisibili
+       e l'utile risultava piu' alto del vero */
+    const speseCarte= CM.filter(m=>thisMonth(m.data||(m.created_at||"").slice(0,10))).reduce((s,m)=>s+(+m.importo||0),0);
+    const speseMese = speseLav+speseCarte;
+    const utile     = incMese-speseMese;
 
     /* avviso lavori in perdita: resta com'era, sopra le schede */
     const spPerL={};SP.forEach(x=>{spPerL[x.lavoro_id]=(spPerL[x.lavoro_id]||0)+(+x.importo||0);});
@@ -904,7 +911,8 @@
       lab:"utile di questo mese (incassato − spese)",
       tono: utile<0?"err":(utile>0?"ok":"neutro"),
       vuoto:"Nessun movimento questo mese",
-      righe:[{t:"Incassato questo mese",v:eur(incMese)},{t:"Spese questo mese",v:eur(speseMese)}]
+      righe:[{t:"Incassato questo mese",v:eur(incMese)},
+             {t:"Spese: lavori "+eur(speseLav)+" · carte",v:eur(speseCarte)}]
     }));
 
     C.push(rieCard({
@@ -928,6 +936,7 @@
   const _ICO_EURO=_ICO+'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>';
   const _ICO_TREND=_ICO+'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>';
   const _ICO_LISTA=_ICO+'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>';
+  const _ICO_CARTA=_ICO+'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>';
   const _ICO_TROFEO=_ICO+'<path d="M6 9a6 6 0 0 0 12 0V3H6Z"/><path d="M6 5H3v2a4 4 0 0 0 4 4"/><path d="M18 5h3v2a4 4 0 0 1-4 4"/><path d="M12 15v4"/><path d="M8 21h8"/></svg>';
   let rieprevCache=[];
   async function renderPrevAttesa(attesa,cliMapIn){
@@ -2263,6 +2272,7 @@
       const {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();
       if(error){toast("Errore: "+error.message);return;}
       const realId=data.id;
+      if(editing.fattura)await assegnaNumFatt(realId);   /* nasce emessa: numero subito */
       closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
     if(editing && editing.realId){
@@ -2280,6 +2290,8 @@
         ore:parseFloat($("#j-ore").value)||null
       }).eq('id', editing.realId);
       if(error){toast("Errore: "+error.message);return;}
+      /* segnata emessa o pagata: e' questo il momento in cui la fattura prende il numero */
+      {const _fs=segVal("j-fatt")||"none";if(_fs==="emessa"||_fs==="pagata")await assegnaNumFatt(editing.realId);}
       for(const f of (editing.foto||[])){
         if(f.uploaded) continue;
         try{
@@ -2412,6 +2424,25 @@
   }
 
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0)+" EUR";
+  /* ---- numero di fattura ----
+     Prima il numero veniva preso quando si scaricava il PDF: bastava scaricarlo
+     per curiosita' e quel numero restava impegnato su quel lavoro, anche se poi
+     la fattura non la emettevi. Ora si prende nel momento giusto: quando dichiari
+     la fattura emessa (o pagata). Il PDF non consuma piu' nessun numero.
+     Se un numero c'e' gia', non si tocca: la numerazione non cambia mai. */
+  async function assegnaNumFatt(lavoroId){
+    if(!sb||!sbUid||!lavoroId)return null;
+    try{
+      const {data:lav}=await sb.from("gest_lavori").select("num_fatt").eq("id",lavoroId).eq("user_id",sbUid).maybeSingle();
+      if(lav&&lav.num_fatt)return lav.num_fatt;              /* gia' numerata: fermi tutti */
+      const {data:az}=await sb.from("gest_azienda").select("num_fatt").eq("user_id",sbUid).maybeSingle();
+      const n=(az&&az.num_fatt)||1;
+      await sb.from("gest_lavori").update({num_fatt:n}).eq("id",lavoroId).eq("user_id",sbUid);
+      await sb.from("gest_azienda").update({num_fatt:n+1}).eq("user_id",sbUid);
+      return n;
+    }catch(e){return null;}
+  }
+
   async function generaPdf(id){
     if(!window.jspdf){toast("PDF non ancora pronto, riprova tra un attimo");return;}
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -2421,12 +2452,9 @@
     if(!lav){toast("Lavoro non trovato");return;}
     let c={};
     if(lav.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,referente").eq("id",lav.cliente_id).maybeSingle();c=cl||{};}
-    let numFatt=lav.num_fatt;
-    if(!numFatt){
-      numFatt=az.num_fatt||1;
-      await sb.from("gest_lavori").update({num_fatt:numFatt}).eq("id",id).eq("user_id",sbUid);
-      await sb.from("gest_azienda").update({num_fatt:numFatt+1}).eq("user_id",sbUid);
-    }
+    /* il numero NON si assegna qui: scaricare il PDF non deve impegnare
+       un numero di fattura. Lo assegna assegnaNumFatt() quando segni "Emessa". */
+    const numFatt=lav.num_fatt||null;
     const l={numFatt,dataFatto:lav.data_fatto,dataPrevista:lav.data_prevista,descrizione:lav.descrizione,lavoroSvolto:lav.lavoro_svolto,ore:lav.ore,importo:lav.importo,fattStato:lav.fatt_stato};
     const pp=(state.panels||[]).find(p=>p.id===cur), repNome=pp?pp.nome:"";
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
@@ -2438,7 +2466,7 @@
     doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("FATTURA",R,y,{align:"right"});
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     doc.text("Copia di cortesia",R,y+5.5,{align:"right"});
-    doc.text("N. "+l.numFatt+"   del "+fdate(l.dataFatto||l.dataPrevista||todayStr()),R,y+10.5,{align:"right"});
+    doc.text((l.numFatt?("N. "+l.numFatt):"Non ancora emessa")+"   del "+fdate(l.dataFatto||l.dataPrevista||todayStr()),R,y+10.5,{align:"right"});
     doc.setTextColor(0);
     y=Math.max(hy,y+15)+4;doc.setDrawColor(210);doc.line(M,y,R,y);y+=10;
     doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Cliente",M,y);y+=6;
@@ -3310,6 +3338,22 @@
     const L=lav||[];
     let SP=[];
     if(L.length){const {data:sp}=await sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",L.map(l=>l.id));SP=sp||[];}
+    /* ---- spese fatte con le carte aziendali ----
+       Prima il Report le ignorava del tutto: guardava solo le spese scritte dentro
+       i lavori, quindi l'utile risultava piu' alto del vero. Ora entrano nel conto,
+       ma restano una voce separata cosi' si capisce sempre da dove viene il numero. */
+    let CM=[], CARTE=[];
+    try{
+      const {data:ca}=await sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid);
+      CARTE=ca||[];
+      if(CARTE.length){
+        const {data:mv}=await sb.from("gest_carte_movimenti").select("id,tipo,importo,causale,data,created_at,carta_id")
+          .eq("user_id",sbUid).in("carta_id",CARTE.map(c=>c.id));
+        CM=(mv||[]).filter(m=>m.tipo==="spesa");
+      }
+    }catch(e){}
+    const carteNome=Object.fromEntries(CARTE.map(c=>[c.id,c.nome||"Carta"]));
+    const totCarte=CM.reduce((t,m)=>t+(+m.importo||0),0);
     repData={L,cl:cl||[],ops:ops||[],SP};
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
     const opMap=Object.fromEntries((ops||[]).map(o=>[o.id,o.nome]));
@@ -3319,7 +3363,9 @@
     const now=new Date(), mkeys=[];
     for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mkeys.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
     const inc=mkeys.map(k=>L.filter(l=>l.fatt_stato==="pagata"&&(l.data_fatto||"").slice(0,7)===k).reduce((s,l)=>s+(+l.importo||0),0));
-    const spm=mkeys.map(k=>SP.filter(x=>(x.data||"").slice(0,7)===k).reduce((s,x)=>s+(+x.importo||0),0));
+    const spm=mkeys.map(k=>
+      SP.filter(x=>(x.data||"").slice(0,7)===k).reduce((s,x)=>s+(+x.importo||0),0)
+      +CM.filter(m=>String(m.data||m.created_at||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0));
     const mx=Math.max(...inc,...spm,1);
     const hBar=v=>v>0?Math.max(Math.round(v/mx*H_BAR),2):0;
     const bars=mkeys.map((k,i)=>{
@@ -3369,10 +3415,20 @@
         <p class="rep-sub">Da quando usi il gestionale</p><table class="rep-table">
         <tr><td>Incassato ${anno}</td><td>${eur(incAnno)}</td></tr>
         <tr><td>Incassato totale</td><td>${eur(totInc)}</td></tr>
-        <tr><td>Spese totali</td><td style="color:var(--testo)">−${eur(totSp)}</td></tr>
-        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp)}</td></tr></table></div>
+        <tr><td>Spese nei lavori</td><td style="color:var(--testo)">−${eur(totSp)}</td></tr>
+        <tr><td>Spese con le carte</td><td style="color:var(--testo)">−${eur(totCarte)}</td></tr>
+        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp-totCarte)}</td></tr></table></div>
       <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per fatturato)</h3><table class="rep-table">
         ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
+      <div class="rep-card"><h3>${_ICO_CARTA}Spese con le carte aziendali</h3>
+        <p class="rep-sub">Soldi usciti dalle carte, non legati a un lavoro preciso. Sono compresi nel margine qui sopra.</p>
+        <table class="rep-table">
+        ${CM.length
+          ? CM.slice().sort((a,b)=>String(b.data||b.created_at||"").localeCompare(String(a.data||a.created_at||""))).slice(0,6)
+              .map(m=>`<tr><td>${esc(m.causale||"Spesa")}<br><span style="font-size:13px;color:var(--testo-3)">${esc(carteNome[m.carta_id]||"")}</span></td><td>−${eur(m.importo)}</td></tr>`).join("")
+            +`<tr><td><b>Totale</b></td><td><b>−${eur(totCarte)}</b></td></tr>`
+          : `<tr><td colspan="2" style="color:var(--muted)">Nessuna spesa registrata sulle carte.</td></tr>`}
+        </table></div>
       <div class="rep-card"><h3>${_ICO_OROLOGIO}Ore per operatore</h3><table class="rep-table">
         ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||"—")}</td><td>${Math.round(v*10)/10} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
     </div>`;
@@ -3582,6 +3638,7 @@
       const v=t.dataset.v;
       const {error}=await sb.from("gest_lavori").update({fatt_stato:v}).eq("id",id).eq("user_id",sbUid);
       if(error){toast("Errore: "+error.message);return;}
+      if(v==="emessa"||v==="pagata")await assegnaNumFatt(id);
       renderFatture();renderJobs();renderContatori();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
     }
     if(a==="upload-fattura")return chiediFatturaPdf(id);
