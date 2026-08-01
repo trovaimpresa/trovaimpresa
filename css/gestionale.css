@@ -628,3 +628,121 @@
   .rie-intro p,.gal-intro{font-size:var(--f-base);color:var(--testo-2);line-height:1.5}
   .sheet h3{font-size:var(--f-lg);font-weight:700;color:var(--testo)}
   #app-root{font-size:var(--f-md);color:var(--testo)}
+
+  /* ================================================================
+     TAPPA 3 — Agenda, Riepilogo, Galleria, Calendario, Report.
+     Chiude il restyling: le pillole blu diventano tendine e controlli
+     segmentati, le card-elenco diventano righe, i pallini del calendario
+     diventano righine leggibili.
+     ================================================================ */
+
+  /* ---------- filtri: etichetta + controllo, tutto su una riga ---------- */
+  .filtri{display:flex;align-items:center;flex-wrap:wrap;gap:18px;margin-bottom:16px}
+  .filtro{display:flex;align-items:center;gap:8px;min-width:0}
+  /* non usa .filt-label: quella e' display:block e andrebbe a capo */
+  .filtro-lab{flex:0 0 auto;font-size:13px;font-weight:500;color:var(--testo-2);
+    margin:0;white-space:nowrap;text-transform:none;letter-spacing:0}
+  .filtro-sel{height:32px;padding:0 30px 0 10px;max-width:220px;
+    font-family:inherit;font-size:13px;font-weight:500;color:var(--testo);
+    background:var(--card) no-repeat right 9px center;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    border:1px solid var(--bordo);border-radius:8px;cursor:pointer;
+    -webkit-appearance:none;-moz-appearance:none;appearance:none;
+    text-overflow:ellipsis}
+  .filtro-sel:hover{border-color:var(--bordo-forte)}
+  .filtro-sel:focus{outline:none;border-color:var(--blu);box-shadow:0 0 0 3px rgba(0,102,255,.12)}
+
+  /* ---------- controllo segmentato ---------- */
+  .segm{display:inline-flex;flex:0 0 auto;gap:2px;padding:2px;
+    background:var(--sfondo);border:1px solid var(--bordo);border-radius:8px}
+  .segm button{height:26px;padding:0 12px;border:none;border-radius:6px;background:none;
+    font-family:inherit;font-size:13px;font-weight:500;color:var(--testo-2);
+    line-height:1;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+  .segm button:hover{color:var(--testo)}
+  .segm button.on{background:var(--card);color:var(--testo);font-weight:600;
+    box-shadow:0 1px 2px rgba(16,24,32,.10)}
+  /* Sotto 768px css/mobile.css porta ogni <button> a min-height:44px (bersaglio
+     per il dito) e vince di specificita': il suo :not(#cal-griglia button) porta
+     dentro un id. Non lo combatto — 44px sul telefono e' giusto — ma allineo la
+     tendina, se no nella stessa riga ci sarebbero due altezze diverse. */
+  @media(max-width:768px){ .filtro-sel{height:44px} }
+
+  /* ---------- righe compatte del Riepilogo ---------- */
+  .righe{border:1px solid var(--bordo);border-radius:var(--r);background:var(--card);overflow:hidden}
+  .riga{display:flex;align-items:center;gap:12px;min-height:44px;padding:6px 12px;cursor:pointer;
+    transition:background .12s}
+  .riga+.riga{border-top:.5px solid var(--bordo)}
+  .riga:hover{background:var(--sfondo)}
+  .riga-bar{flex:0 0 auto;width:3px;height:22px;border-radius:2px;background:var(--testo-3)}
+  .riga-bar.ritardo{background:var(--err)}
+  .riga-bar.da_fare{background:var(--attesa)}
+  .riga-bar.in_corso{background:var(--info)}
+  .riga-bar.fatto{background:var(--ok)}
+  .riga-txt{flex:1;min-width:0}
+  .riga-tit{display:block;font-size:var(--f-base);color:var(--testo);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .riga-sub{display:block;margin-top:1px;font-size:13px;color:var(--testo-2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* il "quando" dentro la riga tiene i suoi colori (.q-*), il resto resta neutro */
+  .riga-imp{flex:0 0 auto;font-size:var(--f-base);color:var(--testo);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  /* ---------- Agenda: la tabella condivisa, card sotto 880px ---------- */
+  @media(max-width:880px){ #ag-body{display:grid;grid-template-columns:1fr;gap:10px} }
+
+  /* ---------- Calendario ---------- */
+  .cal-head h2{font-size:20px;font-weight:700}
+  /* minmax(0,1fr) + min-width:0 obbligatori: con "1fr" nudo la colonna non scende
+     sotto il min-content della cella, e da quando dentro ci sono i titoli dei lavori
+     (prima solo pallini da 8px) le 7 colonne sfondavano la larghezza dello schermo.
+     Su telefono non si vedeva come barra di scorrimento perche' mobile.css taglia
+     con overflow-x:hidden: gli ultimi giorni della settimana sparivano e basta. */
+  .cal-grid{grid-template-columns:repeat(7,minmax(0,1fr))}
+  .cal-cell{min-height:112px;padding:6px;gap:2px;min-width:0}
+  .cal-cell .dn{font-size:14px;font-weight:600;color:var(--testo);line-height:1.1}
+  /* sabato e domenica: la settimana lavorativa si stacca da sola */
+  .cal-cell.we{background:var(--sfondo)}
+  /* oggi: solo il bordo blu e il numero blu, senza aloni */
+  .cal-cell.today{border-color:var(--blu);box-shadow:none}
+  .cal-cell.today .dn{color:var(--blu)}
+  /* i lavori dentro la cella: barretta di stato + titolo troncato */
+  .cal-lavori{display:flex;flex-direction:column;gap:2px;margin-top:4px;min-width:0;overflow:hidden}
+  .cal-lav{display:flex;align-items:center;gap:5px;min-width:0}
+  .cal-lav-bar{flex:0 0 auto;width:3px;height:11px;border-radius:2px;background:var(--testo-3)}
+  .cal-lav-bar.ritardo{background:var(--err)}
+  .cal-lav-bar.da_fare{background:var(--attesa)}
+  .cal-lav-bar.in_corso{background:var(--info)}
+  .cal-lav-bar.fatto{background:var(--ok)}
+  .cal-lav-t{flex:1;min-width:0;font-size:12px;color:var(--testo-2);line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cal-piu{font-size:11px;font-weight:600;color:var(--testo-3);padding-left:8px}
+  .cal-legend{font-size:12px;color:var(--testo-3);font-weight:500;gap:16px}
+  .cal-legend .dot{width:7px;height:7px}
+  .dot.corso{background:var(--info)}
+  @media(max-width:880px){
+    .cal-cell{min-height:74px;padding:4px}
+    .cal-lav-t{font-size:10.5px}
+    .cal-cell .dn{font-size:12px}
+  }
+
+  /* ---------- Report ---------- */
+  .rep-card{border:1px solid var(--bordo);border-radius:var(--r-card);padding:16px 18px}
+  /* titoli con icona SVG al posto delle emoji: stessa misura e stesso grigio del menu */
+  .rep-card h3{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
+    text-transform:none;letter-spacing:0;color:var(--testo)}
+  .rep-card h3 .ic16{color:var(--testo-2)}
+  /* barre orizzontali guadagno/perdita */
+  .mlav-bar{height:8px;border-radius:4px}
+  /* grafico incassi e spese: barre affiancate su 12 mesi, alte 160px */
+  .rep-bar-wrap{display:flex;align-items:flex-end;justify-content:space-between;
+    gap:6px;height:auto;padding-top:6px}
+  .rep-bar-col{flex:1 1 0;min-width:0;justify-content:flex-end}
+  .rep-bars{height:160px;gap:3px;justify-content:center;width:100%}
+  .rep-bar{width:14px;max-width:40%;border-radius:3px 3px 0 0;min-height:0}
+  .rep-bar-lab{font-size:11px;font-weight:500;color:var(--testo-3);text-transform:none;letter-spacing:0}
+  @media(max-width:880px){
+    .rep-bar-wrap{gap:2px}
+    .rep-bar{width:7px}
+    .rep-bars{gap:2px}
+    .rep-bar-lab{font-size:10px}
+  }

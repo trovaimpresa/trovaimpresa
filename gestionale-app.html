@@ -104,12 +104,14 @@
     <section id="agenda">
       <div class="sec-head"><h2>Agenda operatore</h2></div>
       <div class="gal-intro">Il quadro completo di cosa c'è da fare, persona per persona. Scegli un operatore: vedi tutti i suoi lavori con indirizzo, mappa, foto del capo e note — tutto in un colpo solo, pronto per andare in cantiere.</div>
-      <div class="filt-label">Operatore</div>
-      <div class="chiprow" id="ag-op"></div>
-      <div class="filt-label">Mostra</div>
-      <div class="chiprow" id="ag-stato">
-        <button class="chip on" data-action="ag-stato" data-v="aperti">Da fare</button>
-        <button class="chip" data-action="ag-stato" data-v="tutti">Tutti</button>
+      <div class="filtri">
+        <div class="filtro"><label class="filtro-lab" for="ag-op-sel">Operatore</label>
+          <select class="filtro-sel" id="ag-op-sel"></select></div>
+        <div class="filtro"><span class="filtro-lab">Mostra</span>
+          <div class="segm" id="ag-stato">
+            <button class="on" data-action="ag-stato" data-v="aperti">Da fare</button>
+            <button data-action="ag-stato" data-v="tutti">Tutti</button>
+          </div></div>
       </div>
       <div id="ag-body"></div>
     </section>
@@ -118,7 +120,7 @@
       <div class="cal-head"><h2 id="cal-title">—</h2>
         <div class="cal-nav"><button class="btn" data-action="cal-prev">‹</button><button class="btn" data-action="cal-today">•</button><button class="btn" data-action="cal-next">›</button></div></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend"><span><i class="dot todo"></i>Da fare</span><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot done"></i>Fatto</span><span>📌 Nota</span></div>
+      <div class="cal-legend"><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Da fare</span><span><i class="dot corso"></i>In corso</span><span><i class="dot done"></i>Fatto</span><span>📌 Nota</span></div>
     </section>
 
     <section id="lavori">
@@ -144,15 +146,17 @@
 
     <section id="galleria">
       <div class="sec-head"><h2>Galleria foto</h2></div>
-      <div class="gal-intro">Tutte le foto del reparto, divise per cantiere. Le foto <b>Da fare</b> le mette il capo per mostrarti il lavoro; le foto <b>Fatto</b> le caricate voi a lavoro finito. Usa i filtri qui sotto per trovarle.</div>
-      <div class="filt-label">Filtra per tipo di foto</div>
-      <div class="chiprow" id="gal-tipo">
-        <button class="chip on" data-action="gal-tipo" data-v="">Tutte</button>
-        <button class="chip" data-action="gal-tipo" data-v="prima">Da fare</button>
-        <button class="chip" data-action="gal-tipo" data-v="dopo">Fatto</button>
+      <div class="gal-intro">Tutte le foto del reparto, divise per cantiere. Le foto <b>prima del lavoro</b> le mette il capo per mostrare cosa c'è da fare; quelle <b>a lavoro finito</b> le caricate voi quando avete terminato. Usa i filtri qui sotto per trovarle.</div>
+      <div class="filtri">
+        <div class="filtro"><span class="filtro-lab">Foto</span>
+          <div class="segm" id="gal-tipo">
+            <button class="on" data-action="gal-tipo" data-v="">Tutte le foto</button>
+            <button data-action="gal-tipo" data-v="prima">Prima del lavoro</button>
+            <button data-action="gal-tipo" data-v="dopo">A lavoro finito</button>
+          </div></div>
+        <div class="filtro"><label class="filtro-lab" for="gal-op-sel">Operatore</label>
+          <select class="filtro-sel" id="gal-op-sel"></select></div>
       </div>
-      <div class="filt-label">Filtra per operatore</div>
-      <div class="chiprow" id="gal-op"></div>
       <div id="gal-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
     </section>
 
@@ -355,7 +359,9 @@
     ['+ Lavoro in questa data','+ Pratica in questa data'],
     ['Questo operatore non ha lavori assegnati','Questo collaboratore non ha pratiche assegnate'],
     ['Assegna i lavori a una persona dalla scheda del lavoro','Assegna le pratiche a una persona dalla scheda della pratica'],
-    ['Carica le foto aprendo un lavoro','Carica le foto aprendo una pratica'],
+    ['Le foto si caricano dalla scheda del lavoro','Le foto si caricano dalla scheda della pratica'],
+    ['Prima del lavoro','Prima della pratica'],
+    ['A lavoro finito','A pratica finita'],
     ['Foto lavoro DA FARE','Foto pratica DA FARE'],
     ['Foto lavoro FATTO','Foto pratica FATTO'],
     ['per mostrarti il lavoro','per mostrarti la pratica'],
@@ -438,7 +444,7 @@
   /* Contenitori del CONTENUTO inserito dall'utente: i loro nodi di testo NON vanno tradotti
      (nomi reparti, titoli/descrizioni pratiche, note, dati cliente, nomi operatori).
      Restano traducibili le etichette fisse (tab "Lavori", "+ Nuovo lavoro", contatori, messaggi vuoti…). */
-  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op,#ag-op,#d-ruolo,textarea';
+  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
   let _praticheObs=null;
   function _osservaPratiche(){
     if(!_praticheObs)return;
@@ -523,7 +529,8 @@
   const _EMO_RE=new RegExp("("+_EMO_KEYS+")️?","g");
   const _EMO_TEST=new RegExp("("+_EMO_KEYS+")");
   const _svgIcon=e=>'<svg class="emic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+_ICONS[e]+'</svg>';
-  const _ICO_SKIP='textarea,script,style';
+  /* select: le <option> sono testo, non markup — sostituirle con uno <span> le distruggerebbe */
+  const _ICO_SKIP='textarea,script,style,select';
   let _icoObs=null;
   function _iconizza(){
     if(_icoObs)_icoObs.disconnect();
@@ -597,8 +604,8 @@
     filter={vista:"tutti",q:""};$("#f-search").value="";cal=new Date();
     cliQ="";dipQ="";if($("#cli-search"))$("#cli-search").value="";if($("#dip-search"))$("#dip-search").value="";
     prevFilter="tutti";fattVista="tutte";scadVista="tutte";
-    galFilter={op:"",tipo:""};$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===""));
-    agFilter={op:"",stato:"aperti"};$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v==="aperti"));
+    galFilter={op:"",tipo:""};segmOn("#gal-tipo","");
+    agFilter={op:"",stato:"aperti"};segmOn("#ag-stato","aperti");
     mezziFilter="tutti";
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
@@ -616,6 +623,8 @@
   }
   function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();window.scrollTo(0,0);}
 
+  /* controllo segmentato (Agenda "Mostra", Galleria tipo foto): un solo pulsante acceso */
+  function segmOn(sel,v){$$(sel+" button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));}
   function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderMezzi();renderScadenze();renderPreventivi();renderReport();renderContatori();}
 
   /* ============================================================
@@ -668,12 +677,17 @@
       if($("#k-spese"))$("#k-spese").textContent=eur(0);
       if($("#k-utile")){$("#k-utile").textContent=eur(0);$("#k-utile").classList.remove("neg");}
       $("#k-dafare").textContent=0;$("#k-incorso").textContent=0;$("#k-fatti").textContent=0;$("#k-lavori").textContent=0;
-      $("#prossimi").innerHTML=`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
+      $("#prossimi").innerHTML=tabVuoto("Nessun lavoro in sospeso","Aggiungi un lavoro col pulsante «+ Nuovo lavoro».",
+        _SVGV+'<path d="M20 6 9 17l-5-5"/></svg>');
       if($("#rie-prev"))$("#rie-prev").innerHTML="";
       return;
     }
-    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const [{data},{data:rieCli}]=await Promise.all([
+      sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+    ]);
     const S=data||[];
+    const rieCliMap=Object.fromEntries((rieCli||[]).map(c=>[c.id,c.nome||""]));
     /* soldi e ore (stessa logica della scheda Fatture, da Supabase) */
     $("#k-daincassare").textContent=eur(S.filter(l=>l.fatt_stato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
     $("#k-incassato").textContent=eur(S.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0));
@@ -703,10 +717,21 @@
       const {data:pv}=await sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
       const attesa=(pv||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato");
       if($("#k-prev-attesa"))$("#k-prev-attesa").textContent=attesa.length;
-      await renderPrevAttesa(attesa);
+      await renderPrevAttesa(attesa,rieCliMap);
     }catch(e){}
     const pross=S.filter(l=>l.stato!=="fatto").sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999")).slice(0,5);
-    $("#prossimi").innerHTML=pross.length?pross.map(l=>jobCardSupa(l,false,"",true)).join(""):`<div class="empty"><div class="ic">✅</div><p>Nessun lavoro in sospeso</p><small>Aggiungi un lavoro col pulsante "+ Nuovo lavoro"</small></div>`;
+    $("#prossimi").innerHTML=pross.length
+      ? `<div class="righe">`+pross.map(l=>{
+          const q=quando(l.data_prevista);
+          return rigaCompatta({
+            id:l.id, action:"edit-job", bar:inRitardo(l.stato,l.data_prevista)?"ritardo":l.stato,
+            titolo:l.descrizione||"Lavoro",
+            sub:[rieCliMap[l.cliente_id]||l.dove||"",{t:q.testo,cls:q.classe}],
+            imp:+l.importo?eur(l.importo):""
+          });
+        }).join("")+`</div>`
+      : tabVuoto("Nessun lavoro in sospeso","Aggiungi un lavoro col pulsante «+ Nuovo lavoro».",
+          _SVGV+'<path d="M20 6 9 17l-5-5"/></svg>');
   }
 
   /* ---- Riepilogo: preventivi che aspettano una risposta ----
@@ -716,33 +741,33 @@
      sparisce del tutto (titolo compreso): niente sezioni vuote nel Riepilogo. */
   const _ICO='<svg class="ic16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
   const _ICO_OROLOGIO=_ICO+'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
-  const _ICO_PERSONA=_ICO+'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  /* icone dei titoli del Report: stesso tratto e stessa misura delle icone del menu */
+  const _ICO_EURO=_ICO+'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>';
+  const _ICO_TREND=_ICO+'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>';
+  const _ICO_LISTA=_ICO+'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>';
+  const _ICO_TROFEO=_ICO+'<path d="M6 9a6 6 0 0 0 12 0V3H6Z"/><path d="M6 5H3v2a4 4 0 0 0 4 4"/><path d="M18 5h3v2a4 4 0 0 1-4 4"/><path d="M12 15v4"/><path d="M8 21h8"/></svg>';
   let rieprevCache=[];
-  async function renderPrevAttesa(attesa){
+  async function renderPrevAttesa(attesa,cliMapIn){
     const box=$("#rie-prev");if(!box)return;
     rieprevCache=attesa||[];
     if(!rieprevCache.length){box.innerHTML="";return;}
     const L=rieprevCache.slice().sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
-    const [{data:cl},{data:rr}]=await Promise.all([
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-      sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",L.map(p=>p.id))
-    ]);
-    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome||""]));
+    const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",L.map(p=>p.id));
+    const cliMap=cliMapIn||{};
     const tot={};(rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
-    box.innerHTML=`<div class="mini-title">Preventivi in attesa di risposta</div>`
+    box.innerHTML=`<div class="mini-title">Preventivi in attesa di risposta</div><div class="righe">`
       +L.map(p=>{
         const q=quando(p.data,{neutro:true});          /* neutro: qui il rosso non c'entra */
         const g=_giorniA(p.data), att=g===null?0:-g;   /* giorni di attesa */
         const cls=att>14?"q-attesa":q.classe;          /* oltre due settimane: ambra */
         const imp=tot[p.id]||0;
-        return `<div class="job job-clic" data-action="rie-prev" data-id="${esc(p.id)}" title="Apri il preventivo">
-          <div class="job-top"><div class="job-cli">${esc(p.titolo||"Preventivo")}</div>
-            ${imp?`<span class="job-imp">${eur(imp)}</span>`:""}</div>
-          <div class="job-meta">
-            <span>${_ICO_PERSONA}${esc(cliMap[p.cliente_id]||"—")}</span>
-            <span class="${cls}">${_ICO_OROLOGIO}${q.testo}</span>
-          </div></div>`;
-      }).join("");
+        return rigaCompatta({
+          id:p.id, action:"rie-prev", bar:"da_fare",
+          titolo:p.titolo||"Preventivo",
+          sub:[cliMap[p.cliente_id]||"",{t:q.testo,cls:cls}],
+          imp:imp?eur(imp):""
+        });
+      }).join("")+`</div>`;
   }
 
   function jobCard(l){
@@ -1015,6 +1040,24 @@
     return h;
   }
 
+  /* ---- RIGA COMPATTA del Riepilogo ----
+     Le due liste del Riepilogo (prossimi lavori, preventivi in attesa) erano card
+     alte con i pulsanti in fila: tanta altezza per poche informazioni, e le stesse
+     azioni gia' presenti nella sezione vera. Qui la riga e' alta 44px, il click
+     apre l'elemento e non c'e' nessun pulsante.
+     bar = classe di stato (.ritardo/.da_fare/.in_corso/.fatto)
+     sub = [testo, ...] con eventuale {t,cls} per colorare il "quando". */
+  function rigaCompatta(o){
+    const sub=(o.sub||[]).filter(Boolean).map(x=>typeof x==="object"
+      ? `<span class="${x.cls||""}">${esc(x.t)}</span>`
+      : esc(x)).join(" · ");
+    return `<div class="riga" data-action="${o.action}" data-id="${esc(String(o.id))}" title="${esc(o.titolo||"")}">
+      <i class="riga-bar ${o.bar||"da_fare"}"></i>
+      <span class="riga-txt"><span class="riga-tit">${esc(o.titolo||"—")}</span>${sub?`<span class="riga-sub">${sub}</span>`:""}</span>
+      ${o.imp?`<span class="riga-imp">${o.imp}</span>`:""}
+    </div>`;
+  }
+
   let lavCache=[], lavTel={};
   async function renderJobs(){
     const box=$("#jobs-list"), viste=$("#lav-viste");
@@ -1249,12 +1292,22 @@
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
     let html=dow.map(d=>`<div class="cal-dow">${d}</div>`).join("");
     for(let i=0;i<lead;i++)html+=`<div class="cal-cell empty"></div>`;
+    /* Prima nella cella c'erano solo pallini: si vedeva "quanti", mai "quali".
+       Ora ogni lavoro e' una righina con la barretta di stato e il titolo troncato,
+       gli stessi colori della tabella Lavori. Oltre il quarto: "+N". */
+    const MAX_CELLA=4;
     for(let d=1;d<=days;d++){
       const ds=ymd(y,m,d), jobs=calJobs.filter(l=>l.data_prevista===ds);
       const scaduto=ds<todayStr();
-      const dots=jobs.slice(0,6).map(j=>`<i class="dot ${j.stato==='fatto'?'done':(scaduto?'ritardo':'todo')}"></i>`).join("");
+      const righe=jobs.slice(0,MAX_CELLA).map(j=>{
+        const cls=j.stato==="fatto"?"fatto":(scaduto?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
+        const tit=j.descrizione||"Lavoro";
+        return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${esc(tit)}</span></span>`;
+      }).join("");
+      const piu=jobs.length>MAX_CELLA?`<span class="cal-piu">+${jobs.length-MAX_CELLA}</span>`:"";
+      const we=(lead+d-1)%7>=5?" we":"";
       const note=db().note[ds]?`<span class="cal-note-mark">📌</span>`:"";
-      html+=`<div class="cal-cell ${ds===todayStr()?"today":""}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-dots">${dots}</div></div>`;
+      html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${piu}</div></div>`;
     }
     $("#cal-grid").innerHTML=html;
   }
@@ -2063,10 +2116,16 @@
         if(fotoCache[id])im.src=fotoCache[id];}catch(e){}
     }
   }
+  const GAL_VUOTO=_SVGV+'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>';
+  function galVuoto(box){
+    box.style.display="block";
+    box.innerHTML=tabVuoto("Nessuna foto in questo reparto","Le foto si caricano dalla scheda del lavoro, voce «Foto».",GAL_VUOTO);
+  }
   async function renderGalleria(){
     if(!cur)return;
     const box=$("#gal-body");if(!box)return;
-    if(!sb||!sbUid){if($("#gal-op"))$("#gal-op").innerHTML="";box.innerHTML=`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;return;}
+    const sel=$("#gal-op-sel");
+    if(!sb||!sbUid){if(sel)sel.innerHTML=`<option value="">Tutti</option>`;galVuoto(box);return;}
     const [{data:foto},{data:lavori}]=await Promise.all([
       sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
       sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
@@ -2075,9 +2134,8 @@
     const lavIds=new Set((lavori||[]).map(l=>l.id));
     const all=(foto||[]).filter(f=>lavIds.has(f.lavoro_id)&&f.tipo!=="fattura");
     const ops=new Set();all.forEach(f=>ops.add(f.operatore||""));
-    const opChips=[`<button class="chip ${galFilter.op===""?"on":""}" data-action="gal-op" data-v="">${ruoloUtente==='professionista'?'Tutti i collaboratori':'Tutti gli operatori'}</button>`]
-      .concat(Array.from(ops).filter(Boolean).map(o=>`<button class="chip ${galFilter.op===o?"on":""}" data-action="gal-op" data-v="${esc(o)}">${esc(o)}</button>`)).join("");
-    if($("#gal-op"))$("#gal-op").innerHTML=opChips;
+    if(sel)sel.innerHTML=[`<option value=""${galFilter.op===""?" selected":""}>${ruoloUtente==='professionista'?'Tutti i collaboratori':'Tutti gli operatori'}</option>`]
+      .concat(Array.from(ops).filter(Boolean).map(o=>`<option value="${esc(o)}"${galFilter.op===o?" selected":""}>${esc(o)}</option>`)).join("");
     const matchTipo=f=>galFilter.tipo==="prima"?f.tipo==="da_fare":galFilter.tipo==="dopo"?f.tipo!=="da_fare":true;
     const fs=all.filter(f=>(!galFilter.op||f.operatore===galFilter.op)&&matchTipo(f));
     const groups=new Map();
@@ -2085,11 +2143,11 @@
     let html="",any=false;
     groups.forEach((arr,k)=>{any=true;
       html+=`<div class="gal-group"><div class="gal-cantiere">🏢 ${esc(lavName[k]||"—")}</div><div class="thumbs">`;
-      arr.forEach(f=>{const dafare=f.tipo==="da_fare",tip=dafare?"Da fare":"Fatto",tcls=dafare?"prima":"dopo",opName=f.operatore||"";
+      arr.forEach(f=>{const dafare=f.tipo==="da_fare",tip=dafare?"Prima":"Finito",tcls=dafare?"prima":"dopo",opName=f.operatore||"";
         html+=`<div class="thumb"><img data-gfoto="${esc(f.id)}" data-action="view-foto" data-id="${esc(f.id)}">
           <span class="thtag ${tcls}">${tip}</span>${opName?`<span class="thop">${esc(opName)}</span>`:""}</div>`;});
       html+=`</div></div>`;});
-    box.innerHTML=any?html:`<div class="empty"><div class="ic">📷</div><p>Nessuna foto in questo reparto</p><small>Carica le foto aprendo un lavoro (cantiere)</small></div>`;
+    if(any){box.style.display="grid";box.innerHTML=html;}else{galVuoto(box);}
     for(const f of fs){
       try{const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
         if(su&&su.signedUrl){fotoCache[f.id]=su.signedUrl;const im=box.querySelector(`img[data-gfoto="${f.id}"]`);if(im)im.src=su.signedUrl;}
@@ -2120,28 +2178,70 @@
         <button class="btn btn-sm ja" data-action="edit-job" data-id="${l.id}">✏ Apri scheda</button>
       </div></div>`;
   }
+  /* menu "..." della riga Agenda: tutte le azioni che prima erano pulsanti nella card */
+  function agVoci(l,wa){
+    const dp=l.data_prevista||"", fatto=l.stato==="fatto";
+    const v=[{lab:"✏ Modifica",action:"edit-job",data:{id:l.id}}];
+    if(l.dove)v.push({lab:"🗺 Mappa",action:"map",data:{q:l.dove}});
+    if(l.stato==="da_fare")v.push({lab:"▶ Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
+    if(!fatto)v.push({lab:"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
+    else v.push({lab:"↩ Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
+    v.push({lab:"📷 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"}});
+    v.push({lab:"💬 Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});
+    v.push({sep:true});
+    v.push({lab:"🗑 Elimina",action:"del-job-supa",data:{id:l.id},del:true});
+    return v;
+  }
+  const AG_VUOTO=_SVGV+'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14h6"/></svg>';
   async function renderAgenda(){
     if(!cur)return;
-    const body=$("#ag-body");
+    const body=$("#ag-body"), sel=$("#ag-op-sel");
     if(!sb||!sbUid){
-      if($("#ag-op"))$("#ag-op").innerHTML=`<button class="chip on" data-action="ag-op" data-v="">Tutti</button>`;
-      if(body)body.innerHTML=`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>Assegna i lavori a una persona dalla scheda del lavoro, voce "Chi ci va"</small></div>`;
+      if(sel)sel.innerHTML=`<option value="">Tutti</option>`;
+      if(body){body.style.display="block";body.innerHTML=tabVuoto("Niente da fare qui","Assegna i lavori a una persona dalla scheda del lavoro, voce «Chi ci va».",AG_VUOTO);}
       return;
     }
-    /* chip operatori dalla squadra del reparto (Supabase) */
+    /* elenco operatori della squadra del reparto (Supabase) */
     const {data:ops}=await sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     const OPS=ops||[];
     const telMap=Object.fromEntries(OPS.map(o=>[o.id,o.telefono||""]));
-    const opChips=[`<button class="chip ${agFilter.op===""?"on":""}" data-action="ag-op" data-v="">Tutti</button>`]
-      .concat(OPS.map(d=>`<button class="chip ${agFilter.op===d.id?"on":""}" data-action="ag-op" data-v="${d.id}">${esc(d.nome)}</button>`)).join("");
-    if($("#ag-op"))$("#ag-op").innerHTML=opChips;
+    if(sel)sel.innerHTML=[`<option value=""${agFilter.op===""?" selected":""}>Tutti</option>`]
+      .concat(OPS.map(d=>`<option value="${esc(d.id)}"${agFilter.op===d.id?" selected":""}>${esc(d.nome)}</option>`)).join("");
     /* lavori del reparto (Supabase) */
-    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id,importo").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     let L=data||[];
     if(agFilter.stato==="aperti")L=L.filter(l=>l.stato!=="fatto");
     if(agFilter.op)L=L.filter(l=>l.operatore_id===agFilter.op);
     L.sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
-    if(body)body.innerHTML=L.length?L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join(""):`<div class="empty"><div class="ic">🗒️</div><p>Niente da fare qui</p><small>${agFilter.op?"Questo operatore non ha lavori assegnati":"Assegna i lavori a una persona dalla scheda del lavoro, voce \"Chi ci va\""}</small></div>`;
+    const tot=L.reduce((a,l)=>a+(+l.importo||0),0);
+    renderTabella({
+      id:"ag", box:"#ag-body",
+      vuoto:tabVuoto("Niente da fare qui",
+        agFilter.op?"Questo operatore non ha lavori assegnati.":"Assegna i lavori a una persona dalla scheda del lavoro, voce «Chi ci va».",AG_VUOTO),
+      colonne:[{lab:"Lavoro",w:"34%"},{lab:"Dove",w:"26%",cls:"c-cli"},{lab:"Quando",w:"16%"},
+               {lab:"Stato",w:"12%"},{lab:"Importo",w:"12%",cls:"c-imp"}],
+      righe:L.map(l=>{
+        const fatto=l.stato==="fatto";
+        const late=inRitardo(l.stato,l.data_prevista);
+        const q=quando(l.data_prevista,{neutro:fatto});
+        const st=late?{c:"ritardo",l:"In ritardo"}:fatto?{c:"fatto",l:"Fatto"}
+                :l.stato==="in_corso"?{c:"in_corso",l:"In corso"}:{c:"da_fare",l:"Da fare"};
+        return {
+          id:l.id,
+          click:{action:"edit-job",data:{id:l.id}},
+          celle:[
+            `<span class="lav-bar ${st.c}" title="${st.l}"></span><span class="c-nome">${esc(l.descrizione||"—")}</span>`,
+            esc(l.dove||"—"),
+            {h:q.testo,cls:q.classe},
+            `<span class="stato ${st.c}">${st.l}</span>`,
+            +l.importo?eur(l.importo):"—"
+          ],
+          menu:agVoci(l,_waLavoro(l,telMap[l.operatore_id]||""))
+        };
+      }),
+      totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
+      cards:()=>L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join("")
+    });
   }
 
   /* ============================================================
@@ -2483,7 +2583,8 @@
   let repData=null;
   async function renderReport(){
     const box=$("#rep-body");if(!box)return;
-    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📊</div><p>Nessun dato</p><small>Accedi per vedere i report</small></div>`;return;}
+    if(!sb||!sbUid){box.innerHTML=tabVuoto("Nessun dato","Accedi per vedere i report.",
+      _SVGV+'<path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>');return;}
     const mid=curMestiere();
     const [{data:lav},{data:cl},{data:ops}]=await Promise.all([
       sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -2496,17 +2597,20 @@
     repData={L,cl:cl||[],ops:ops||[],SP};
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
     const opMap=Object.fromEntries((ops||[]).map(o=>[o.id,o.nome]));
-    /* ultimi 6 mesi */
+    /* ultimi 12 mesi: a 6 il grafico era una fila di barrette minuscole e non si
+       vedeva la stagionalita' (l'anno intero, non mezzo). Altezza barre 160px. */
+    const H_BAR=160;
     const now=new Date(), mkeys=[];
-    for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mkeys.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
+    for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mkeys.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
     const inc=mkeys.map(k=>L.filter(l=>l.fatt_stato==="pagata"&&(l.data_fatto||"").slice(0,7)===k).reduce((s,l)=>s+(+l.importo||0),0));
     const spm=mkeys.map(k=>SP.filter(x=>(x.data||"").slice(0,7)===k).reduce((s,x)=>s+(+x.importo||0),0));
     const mx=Math.max(...inc,...spm,1);
+    const hBar=v=>v>0?Math.max(Math.round(v/mx*H_BAR),2):0;
     const bars=mkeys.map((k,i)=>{
       const lab=mesi[+k.slice(5,7)-1].slice(0,3);
       return `<div class="rep-bar-col"><div class="rep-bars">
-        <div class="rep-bar inc" style="height:${Math.round(inc[i]/mx*118)}px" title="Incassato ${eur(inc[i])}"></div>
-        <div class="rep-bar sp" style="height:${Math.round(spm[i]/mx*118)}px" title="Spese ${eur(spm[i])}"></div></div>
+        <div class="rep-bar inc" style="height:${hBar(inc[i])}px" title="Incassato ${eur(inc[i])}"></div>
+        <div class="rep-bar sp" style="height:${hBar(spm[i])}px" title="Spese ${eur(spm[i])}"></div></div>
         <span class="rep-bar-lab">${lab}</span></div>`;
     }).join("");
     /* top clienti */
@@ -2534,26 +2638,26 @@
       <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.sp/mlMax*100,m.sp?1:0)}%"></div></div>
       <div class="mlav-sub">Incasso ${eur(m.inc)} · Spese ${eur(m.sp)}</div></div>`;
     }).join("");
-    const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>💶 Guadagno o perdita per lavoro</h3>
+    const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_EURO}Guadagno o perdita per lavoro</h3>
       <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>Incasso</span><span><i style="background:var(--testo-3)"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
       ${ML.length?mlRows:`<p class="fatt-empty">Metti un importo nei lavori e registra le spese (dentro "Modifica" del lavoro) per vedere qui il margine.</p>`}
       ${ML.length>15?`<p class="fatt-empty" style="margin-top:8px">Mostro i 15 lavori col margine più basso: se un lavoro non compare, è tra quelli in positivo.</p>`:""}</div>`;
     box.innerHTML=`<div class="rep-grid">
       ${mlCard}
-      <div class="rep-card"><h3>📈 Incassi e spese — ultimi 6 mesi</h3>
+      <div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_TREND}Incassi e spese — ultimi 12 mesi</h3>
         <div class="rep-bar-wrap">${bars}</div>
         <div class="rep-legend"><span><i style="background:var(--blu)"></i>Incassato</span><span><i style="background:var(--testo-3)"></i>Spese</span></div></div>
       ${/* Solo dati storici: da fare / in corso / fatti stanno gia' nel Riepilogo,
             che e' la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
-      <div class="rep-card"><h3 class="con-sub">📋 Totali storici</h3>
+      <div class="rep-card"><h3 class="con-sub">${_ICO_LISTA}Totali storici</h3>
         <p class="rep-sub">Da quando usi il gestionale</p><table class="rep-table">
         <tr><td>Incassato ${anno}</td><td>${eur(incAnno)}</td></tr>
         <tr><td>Incassato totale</td><td>${eur(totInc)}</td></tr>
         <tr><td>Spese totali</td><td style="color:var(--testo)">−${eur(totSp)}</td></tr>
         <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp)}</td></tr></table></div>
-      <div class="rep-card"><h3>🏆 Migliori clienti (per fatturato)</h3><table class="rep-table">
+      <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per fatturato)</h3><table class="rep-table">
         ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
-      <div class="rep-card"><h3>⏱ Ore per operatore</h3><table class="rep-table">
+      <div class="rep-card"><h3>${_ICO_OROLOGIO}Ore per operatore</h3><table class="rep-table">
         ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||"—")}</td><td>${Math.round(v*10)/10} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
     </div>`;
   }
@@ -2697,10 +2801,8 @@
     if(a==="view-foto"){const src=fotoCache[t.dataset.id];if(src){$("#lb-img").src=src;$("#lightbox").classList.add("open");}return;}
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
     if(a==="del-foto"){if(confirm("Eliminare questa foto?"))deleteFoto(t.dataset.id);return;}
-    if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;$$("#gal-tipo .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderGalleria();return;}
-    if(a==="gal-op"){galFilter.op=t.dataset.v;renderGalleria();return;}
-    if(a==="ag-op"){agFilter.op=t.dataset.v;renderAgenda();return;}
-    if(a==="ag-stato"){agFilter.stato=t.dataset.v;$$("#ag-stato .chip").forEach(x=>x.classList.toggle("on",x.dataset.v===t.dataset.v));renderAgenda();return;}
+    if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;segmOn("#gal-tipo",t.dataset.v);renderGalleria();return;}
+    if(a==="ag-stato"){agFilter.stato=t.dataset.v;segmOn("#ag-stato",t.dataset.v);renderAgenda();return;}
     if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="del-job-supa"){
       if(!confirm("Eliminare questo lavoro? L'azione non si può annullare."))return;
@@ -2802,6 +2904,7 @@
       /* Lavori si ridisegna all'apertura: altrimenti mostra quello che era stato reso
          entrando nel reparto, con la forma (tabella o card) di quella larghezza. */
       if(b.dataset.tab==="lavori")renderJobs();
+      if(b.dataset.tab==="agenda")renderAgenda();
       const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
       window.scrollTo({top:0,behavior:"smooth"});
     };
@@ -2809,7 +2912,11 @@
   /* chiude il menu "..." a ogni clic fuori dal pulsante che lo apre */
   document.addEventListener("click",e=>{if(!e.target.closest(".lav-dots"))tabChiudiPop();});
   /* la tabella si ridisegna al passaggio desktop/mobile: sotto 880px tornano le card */
-  window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur)renderJobs();});
+  window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderAgenda();}});
+  /* i due filtri a tendina: l'elemento resta lo stesso a ogni render (cambiano solo
+     le <option>), quindi il listener si aggancia una volta sola qui */
+  if($("#ag-op-sel"))$("#ag-op-sel").onchange=e=>{agFilter.op=e.target.value;renderAgenda();};
+  if($("#gal-op-sel"))$("#gal-op-sel").onchange=e=>{galFilter.op=e.target.value;renderGalleria();};
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#cli-search"))$("#cli-search").oninput=e=>{cliQ=e.target.value;renderClienti();};
   if($("#dip-search"))$("#dip-search").oninput=e=>{dipQ=e.target.value;renderDip();};
