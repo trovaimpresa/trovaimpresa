@@ -1542,3 +1542,54 @@
    senza buchi in mezzo. */
 .wrap section .job .job-meta{ margin-top:0; }
 .wrap section .job .job-actions{ margin-top:auto; }
+
+/* =========================================================================
+   FATTURE — i cinque numeri in cima e le righe di dettaglio nelle schede
+   ========================================================================= */
+
+#fatture .fatt-summary{
+  display:grid; grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:16px; margin-bottom:26px;
+}
+@media(max-width:1180px){ #fatture .fatt-summary{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:760px){  #fatture .fatt-summary{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+#fatture .fatt-tot{
+  background:var(--card); border:1px solid var(--bordo);
+  border-left:5px solid var(--bordo-forte); border-top:none;
+  border-radius:14px; padding:20px 20px 18px;
+}
+#fatture .fatt-tot .n{ font-size:30px; font-weight:800; letter-spacing:-1px; color:var(--testo); line-height:1.1; }
+#fatture .fatt-tot .l{ font-size:16px; font-weight:600; color:var(--testo-2); margin-top:8px; }
+#fatture .fatt-tot .sub{ font-size:14px; color:var(--testo-3); margin-top:4px; line-height:1.35; }
+#fatture .fatt-tot.t-err{ border-left-color:var(--err); }      #fatture .fatt-tot.t-err .n{ color:var(--err); }
+#fatture .fatt-tot.t-attesa{ border-left-color:var(--attesa); } #fatture .fatt-tot.t-attesa .n{ color:var(--attesa); }
+#fatture .fatt-tot.t-ok{ border-left-color:var(--ok); }         #fatture .fatt-tot.t-ok .n{ color:var(--ok); }
+#fatture .fatt-tot.t-info{ border-left-color:var(--info); }     #fatture .fatt-tot.t-info .n{ color:var(--info); }
+
+/* le righe di dettaglio dentro la scheda della fattura */
+.wrap section .job .job-righe{
+  margin-top:4px; padding-top:14px; border-top:1px solid var(--bordo);
+  display:flex; flex-direction:column; gap:2px;
+}
+.wrap section .job .job-r{
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  padding:7px 0; font-size:16px;
+}
+.wrap section .job .job-rt{ color:var(--testo-2); font-weight:600; flex:0 0 auto; }
+.wrap section .job .job-rv{
+  color:var(--testo); font-weight:700; text-align:right;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+}
+.wrap section .job .job-rv.q-passato{ color:var(--err); }
+.wrap section .job .job-rv.q-vuoto{ color:var(--testo-3); font-weight:600; }
+
+/* il bordo colorato della scheda fattura */
+.wrap section .job.t-err{ border-left-color:var(--err); }
+.wrap section .job.t-attesa{ border-left-color:var(--attesa); }
+.wrap section .job.t-ok{ border-left-color:var(--ok); }
+.wrap section .job.t-info{ border-left-color:var(--info); }
+.wrap section .job .pall.grigio{ background:var(--testo-3); }
+
+/* testo di aiuto sotto un campo */
+.campo-aiuto{ font-size:14px; color:var(--testo-2); margin-top:8px; line-height:1.45; }

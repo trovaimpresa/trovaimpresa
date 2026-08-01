@@ -124,7 +124,7 @@
       <div class="sec-head"><h2>Fatture</h2><button class="btn add" data-action="new-fattura">+ Nuova</button></div>
       <div class="fatt-summary" id="fatt-summary"></div>
       <div class="viste" id="fatt-viste"></div>
-      <div id="fatt-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="fatt-body"></div>
       <input type="file" id="fatt-pdf-file" accept="application/pdf" style="display:none">
     </section>
 
@@ -1469,13 +1469,83 @@
       <button class="btn btn-sm ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
   }
   let fatturaPdfCache={};
+  /* ================= FATTURE =================
+     Ogni fattura e' una scheda, come nel resto del gestionale. Su ognuna:
+     il numero e la data di emissione, da quanti giorni aspetti i soldi,
+     il cliente e il cantiere, e se il PDF c'e' gia'.
+     La scadenza si calcola dai giorni di pagamento dei Dati azienda (30 se
+     non li hai impostati). Nessuna data va compilata a mano.
+     ========================================== */
+
+  let fattAzienda=null;
+
+  function fattDataEmissione(l){
+    /* data_fatt_emessa la scrive il gestionale quando segni "emessa".
+       Sulle fatture vecchie non c'e': ripiego sul giorno in cui hai finito il lavoro. */
+    return l.data_fatt_emessa||l.data_fatto||l.data_prevista||"";
+  }
+  function fattGiorniDa(ds){
+    if(!ds)return null;
+    const g=_giorniA(ds);
+    return g===null?null:-g;                 /* giorni passati */
+  }
+  function fattScadenza(l,gg){
+    const d=fattDataEmissione(l);
+    return d?_giorniDopo(d,gg):"";
+  }
+
+  function fattCard(l,cliNome,gg){
+    const fs=l.fatt_stato||"none";
+    const emis=fattDataEmissione(l);
+    const gio=fattGiorniDa(emis);
+    const scad=fattScadenza(l,gg);
+    const scaduta=fs==="emessa"&&scad&&scad<todayStr();
+    const pdf=fatturaPdfCache[l.id];
+    const tono=fs==="pagata"?"ok":(scaduta?"err":(fs==="emessa"?"attesa":"info"));
+    const statoLab=fs==="pagata"?"Pagata":(fs==="emessa"?(scaduta?"Scaduta, non pagata":"Emessa, da incassare"):"Da fatturare");
+    const pall=fs==="pagata"?"verde":(scaduta?"ritardo":(fs==="emessa"?"rosso":"grigio"));
+
+    const righe=[];
+    if(l.num_fatt)righe.push(["Numero","n. "+l.num_fatt]);
+    if(emis)righe.push([fs==="none"?"Lavoro finito il":"Emessa il",fdate(emis)]);
+    if(fs==="emessa"&&gio!=null)
+      righe.push(["Aspetti da",gio+(gio===1?" giorno":" giorni"),scaduta?"q-passato":""]);
+    if(fs==="emessa"&&scad)
+      righe.push([scaduta?"Doveva pagare entro":"Da pagare entro",fdate(scad),scaduta?"q-passato":""]);
+    if(cliNome)righe.push(["Cliente",cliNome]);
+    if(l.dove)righe.push(["Cantiere",l.dove]);
+    righe.push(["PDF",pdf?"caricato":"non ancora caricato",pdf?"":"q-vuoto"]);
+
+    const bottoni=[];
+    if(fs==="none")bottoni.push('<button class="btn btn-sm ja" data-action="fatt" data-id="'+esc(l.id)+'" data-v="emessa">Segna emessa</button>');
+    if(fs==="emessa")bottoni.push('<button class="btn btn-sm ja" data-action="fatt" data-id="'+esc(l.id)+'" data-v="pagata">Segna pagata</button>');
+    if(fs==="pagata")bottoni.push('<button class="btn btn-sm ja" data-action="fatt" data-id="'+esc(l.id)+'" data-v="emessa">Non pagata</button>');
+    bottoni.push('<button class="btn btn-sm ja" data-action="pdf" data-id="'+esc(l.id)+'">Scarica PDF</button>');
+    if(pdf)bottoni.push('<button class="btn btn-sm ja" data-action="open-fattura" data-id="'+esc(pdf.id)+'">Apri PDF</button>');
+    else bottoni.push('<button class="btn btn-sm ja" data-action="upload-fattura" data-id="'+esc(l.id)+'">Carica PDF</button>');
+    bottoni.push('<button class="btn btn-sm ja" data-action="edit-job" data-id="'+esc(l.id)+'">Apri lavoro</button>');
+
+    return '<div class="job t-'+tono+'">'
+      + '<div class="job-top"><div class="job-cli">'+esc(l.descrizione||"Lavoro")+'</div>'
+      +   '<span class="job-imp">'+eur(l.importo)+'</span></div>'
+      + '<div class="stati"><span class="st"><i class="pall '+pall+'"></i><span class="lab">'+statoLab+'</span></span></div>'
+      + '<div class="job-righe">'
+      +   righe.map(r=>'<div class="job-r"><span class="job-rt">'+esc(r[0])+'</span>'
+      +     '<span class="job-rv'+(r[2]?" "+r[2]:"")+'">'+esc(r[1])+'</span></div>').join("")
+      + '</div>'
+      + '<div class="job-actions">'+bottoni.join("")+'</div>'
+      + '</div>';
+  }
+
   async function renderFatture(){
     let L=[], cliMap={};
     if(sb&&sbUid){
-      const [{data},{data:cls}]=await Promise.all([
-        sb.from("gest_lavori").select("id,descrizione,stato,importo,fatt_stato,data_prevista,data_fatto,cliente_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      const [{data},{data:cls},{data:az}]=await Promise.all([
+        sb.from("gest_lavori").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+        sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
       ]);
+      fattAzienda=az||null;
       L=(data||[]).filter(l=>+l.importo>0);
       cliMap=Object.fromEntries((cls||[]).map(c=>[c.id,c.nome||""]));
       const ids=L.map(l=>l.id);
@@ -1485,79 +1555,63 @@
         (pdfs||[]).forEach(p=>{if(!fatturaPdfCache[p.lavoro_id])fatturaPdfCache[p.lavoro_id]=p;});
       }
     }
+    const gg=(fattAzienda&&+fattAzienda.giorni_pagamento)||30;
+    const anno=todayStr().slice(0,4);
+
     const daFatt=L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none");
-    const daInc=L.filter(l=>l.fatt_stato==="emessa");
+    const daInc =L.filter(l=>l.fatt_stato==="emessa");
     const pagate=L.filter(l=>l.fatt_stato==="pagata");
-    const tInc=daInc.reduce((s,l)=>s+(+l.importo||0),0);
+
+    const tInc =daInc.reduce((s,l)=>s+(+l.importo||0),0);
     const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
-    $("#fatt-summary").innerHTML=`<div class="fatt-tot"><div class="n">${eur(tInc)}</div><div class="l">Da incassare (fatture emesse)</div></div>
-      <div class="fatt-tot alt"><div class="n">${eur(tFatt)}</div><div class="l">Lavori finiti da fatturare</div></div>`;
-    /* le fatture nascono dai lavori: rank 3 = lavoro non ancora finito, resta fuori */
+    const incAnno=pagate.filter(l=>String(l.data_fatto||"").slice(0,4)===anno).reduce((s,l)=>s+(+l.importo||0),0);
+    /* il credito piu' vecchio: quanti giorni aspetti la fattura emessa da piu' tempo */
+    const attese=daInc.map(l=>fattGiorniDa(fattDataEmissione(l))).filter(x=>x!=null);
+    const piuVecchio=attese.length?Math.max.apply(null,attese):null;
+    const emesseAnno=L.filter(l=>(l.fatt_stato==="emessa"||l.fatt_stato==="pagata")
+                                 &&String(fattDataEmissione(l)).slice(0,4)===anno).length;
+    const scadute=daInc.filter(l=>{const sc=fattScadenza(l,gg);return sc&&sc<todayStr();}).length;
+
+    const box=(n,l,sub,tono)=>'<div class="fatt-tot'+(tono?" t-"+tono:"")+'"><div class="n">'+n+'</div>'
+      +'<div class="l">'+l+'</div>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>';
+    $("#fatt-summary").innerHTML=
+        box(eur(tInc),"Da incassare",daInc.length+(daInc.length===1?" fattura emessa":" fatture emesse"),scadute?"err":"attesa")
+      + box(eur(tFatt),"Da fatturare",daFatt.length+(daFatt.length===1?" lavoro finito":" lavori finiti"),"info")
+      + box(eur(incAnno),"Incassato "+anno,"gia' entrato in cassa","ok")
+      + box(piuVecchio==null?"—":(piuVecchio+" gg"),"Il credito più vecchio",
+            piuVecchio==null?"nessuna fattura in attesa":"dalla data di emissione",
+            (piuVecchio!=null&&piuVecchio>gg)?"err":"neutro")
+      + box(String(emesseAnno),"Fatture emesse "+anno,"nel corso dell'anno","neutro");
+
     const rank=l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none"?0:(l.fatt_stato==="emessa"?1:(l.fatt_stato==="pagata"?2:3));
     const TUTTE=L.filter(l=>rank(l)<3);
     const filtra=(A,v)=>v==="incassare"?A.filter(l=>l.fatt_stato==="emessa")
                       :v==="pagate"?A.filter(l=>l.fatt_stato==="pagata"):A.slice();
     const conta={};FATT_VISTE.forEach(v=>conta[v.k]=filtra(TUTTE,v.k).length);
     let R=filtra(TUTTE,fattVista);
+    /* prima quelle che chiedono qualcosa: da fatturare, poi le scadute, poi il resto */
     R.sort((a,b)=>{
-      let r;
-      if(fattSort.k==="importo")r=(+a.importo||0)-(+b.importo||0);
-      else if(fattSort.k==="data")r=String(a.data_fatto||a.data_prevista||"").localeCompare(String(b.data_fatto||b.data_prevista||""));
-      else if(fattSort.k==="descrizione")r=String(a.descrizione||"").toLowerCase().localeCompare(String(b.descrizione||"").toLowerCase());
-      else r=rank(a)-rank(b)||String(a.data_fatto||a.data_prevista||"").localeCompare(String(b.data_fatto||b.data_prevista||""));
-      return r*fattSort.d;
+      const sc=l=>{const s2=fattScadenza(l,gg);return (l.fatt_stato==="emessa"&&s2&&s2<todayStr())?0:1;};
+      return rank(a)-rank(b)||sc(a)-sc(b)
+           ||String(fattDataEmissione(a)).localeCompare(String(fattDataEmissione(b)));
     });
-    const somma=R.reduce((s,l)=>s+(+l.importo||0),0);
-    renderTabella({
-      id:"fatt", box:"#fatt-body",
-      viste:"#fatt-viste", visteDef:FATT_VISTE, vista:fattVista, conta:conta, azioneVista:"fatt-vista",
-      sortAction:"fatt-sort", sortK:fattSort.k, sortD:fattSort.d,
-      vuoto:tabVuoto("Nessuna fattura qui","Le fatture nascono dai lavori finiti con un importo.",
-        _SVGV+'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg>'),
-      colonne:[{lab:"Lavoro",w:"36%",sort:"descrizione"},{lab:"Cliente",w:"24%",cls:"c-cli"},
-               {lab:"Quando",w:"18%",sort:"data"},{lab:"Importo",w:"22%",cls:"c-imp",sort:"importo"}],
-      righe:R.map(l=>{
-        const q=quando(l.data_fatto||l.data_prevista,{neutro:true});
-        const fs=l.fatt_stato||"none";
-        return {
-          id:l.id,
-          click:{action:"edit-job",data:{id:l.id}},
-          celle:[
-            `<span class="lav-bar ${FATT_BAR[fs]||"da_fare"}" title="${FATT_LAB[fs]||fs}"></span><span class="c-nome">${esc(l.descrizione||"Lavoro")}</span>`,
-            esc(cliMap[l.cliente_id]||"—"),
-            {h:q.testo,cls:q.classe},
-            eur(l.importo)
-          ],
-          menu:fattVoci(l)
-        };
-      }),
-      totale:{testo:R.length+" "+(R.length===1?"fattura":"fatture"),valore:eur(somma)},
-      cards:()=>{
-        let h="";
-        const sez=(tit,A,btn,vuoto)=>{h+=`<div class="mini-title">${tit}</div>`;
-          h+=A.length?A.map(l=>fattRow(l,btn(l))).join(""):`<p class="fatt-empty">${vuoto}</p>`;};
-        if(fattVista==="tutte")sez("📄 Da fatturare (lavori finiti)",daFatt,l=>`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">Emessa</button>`,"Nessun lavoro finito in attesa di fattura.");
-        if(fattVista!=="pagate")sez("💶 Emesse · da incassare",daInc,l=>`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">Pagata</button>`,"Nessuna fattura da incassare.");
-        if(fattVista!=="incassare")sez("✅ Pagate",pagate,l=>`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩</button>`,"Ancora nessuna fattura pagata.");
-        return h;
-      }
-    });
-  }
-  const FATT_VISTE=[{k:"tutte",lab:"Tutte"},{k:"incassare",lab:"Da incassare"},{k:"pagate",lab:"Pagate"}];
-  const FATT_LAB={none:"Da fatturare",emessa:"Emessa",pagata:"Pagata"};
-  const FATT_BAR={none:"da_fare",emessa:"in_corso",pagata:"fatto"};
-  function fattVoci(l){
-    const fs=l.fatt_stato||"none", pdf=fatturaPdfCache[l.id];
-    const v=[{lab:"📄 Scarica PDF",action:"pdf",data:{id:l.id}}];
-    if(pdf)v.push({lab:"📄 Apri fattura caricata",action:"open-fattura",data:{id:pdf.id}});
-    v.push({lab:"📎 Carica fattura PDF",action:"upload-fattura",data:{id:l.id}});
-    v.push({sep:true});
-    if(fs==="none")v.push({lab:"🧾 Segna emessa",action:"fatt",data:{id:l.id,v:"emessa"}});
-    if(fs!=="pagata")v.push({lab:"💶 Segna pagata",action:"fatt",data:{id:l.id,v:"pagata"}});
-    if(fs==="pagata")v.push({lab:"↩ Riporta a non pagata",action:"fatt",data:{id:l.id,v:"emessa"}});
-    v.push({sep:true});
-    v.push({lab:"🗑 Elimina",action:"del-job-supa",data:{id:l.id},del:true});
-    return v;
+
+    const body=$("#fatt-body");
+    const viste=$("#fatt-viste");
+    if(viste)viste.innerHTML=FATT_VISTE.map(v=>{
+      const n=conta[v.k]||0;
+      return '<button class="vista'+(fattVista===v.k?" on":"")+'" data-action="fatt-vista" data-v="'+v.k+'">'
+        +v.lab+(n?'<span class="v-cnt">'+n+'</span>':'')+'</button>';
+    }).join("");
+
+    if(!R.length){
+      body.className="";body.style.display="block";
+      body.innerHTML=tabVuoto("Nessuna fattura qui","Le fatture nascono dai lavori finiti con un importo.",
+        _SVGV+'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg>');
+      return;
+    }
+    body.className="griglia-schede";body.style.display="grid";
+    body.innerHTML=R.map(l=>fattCard(l,cliMap[l.cliente_id]||"",gg)).join("");
   }
   let fattSort={k:"rank",d:1}, fattVista="tutte";
 
@@ -2457,6 +2511,9 @@
       <div class="row2"><div class="field"><label>Telefono</label><input id="a-tel" value="${esc(a.tel||"")}"></div>
       <div class="field"><label>Email</label><input id="a-email" value="${esc(a.email||"")}"></div></div>
       <div class="field"><label>IBAN (per i bonifici)</label><input id="a-iban" value="${esc(a.iban||"")}" placeholder="IT.."></div>
+      <div class="field"><label>Entro quanti giorni ti devono pagare</label>
+        <input type="number" id="a-gg" inputmode="numeric" value="${a.giorni_pagamento||30}" placeholder="30">
+        <div class="campo-aiuto">Serve alle Fatture per dirti quando una fattura &egrave; scaduta. Di solito 30 giorni.</div></div>
       <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
       <button class="btn-primary b-save" data-action="save-azienda">Salva</button></div>`);
   }
@@ -2466,7 +2523,16 @@
       nome:$("#a-nome").value.trim(),piva:$("#a-piva").value.trim(),indirizzo:$("#a-ind").value.trim(),
       tel:$("#a-tel").value.trim(),email:$("#a-email").value.trim(),iban:$("#a-iban").value.trim(),
       num_fatt:(aziendaRow&&aziendaRow.num_fatt!=null)?aziendaRow.num_fatt:1};
-    const {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
+    const gg=parseInt($("#a-gg")?$("#a-gg").value:"",10);
+    if(gg>0)row.giorni_pagamento=gg;
+    let {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
+    /* se la colonna dei giorni non c'e' ancora nel database, salvo tutto il resto
+       lo stesso invece di far fallire il salvataggio */
+    if(error&&/giorni_pagamento/.test(error.message||"")){
+      delete row.giorni_pagamento;
+      ({error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"}));
+      if(!error)toast("Salvato. I giorni di pagamento richiedono un aggiornamento del database.");
+    }
     if(error){toast("Errore: "+error.message);return;}
     closeSheet();toast("Dati azienda salvati ✔");
   }
@@ -3940,6 +4006,12 @@
       const {error}=await sb.from("gest_lavori").update({fatt_stato:v}).eq("id",id).eq("user_id",sbUid);
       if(error){toast("Errore: "+error.message);return;}
       if(v==="emessa"||v==="pagata")await assegnaNumFatt(id);
+      /* segno anche QUANDO l'ho emessa: senza questa data non posso dirti da
+         quanti giorni aspetti i soldi. Se la colonna non c'e' ancora, tiro dritto. */
+      if(v==="emessa"){
+        try{await sb.from("gest_lavori").update({data_fatt_emessa:todayStr()})
+              .eq("id",id).eq("user_id",sbUid).is("data_fatt_emessa",null);}catch(e){}
+      }
       renderFatture();renderJobs();renderContatori();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
     }
     if(a==="upload-fattura")return chiediFatturaPdf(id);
