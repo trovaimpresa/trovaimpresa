@@ -2924,9 +2924,14 @@
         sb.from("gest_clienti").select("id,nome,indirizzo").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
       ]);
       const cliMap=Object.fromEntries((cli||[]).map(c=>[c.id,c]));
-      let L=(lav||[]);
-      if(mpVista==="aperti")L=L.filter(l=>l.stato!=="fatto");
-      const voci=L.map(l=>{
+      /* ATTENZIONE: qui la lista dei lavori NON si puo' chiamare L.
+         Leaflet, la libreria che disegna la carta, si chiama proprio L: chiamando
+         L la lista dei lavori le si andava sopra, e L.map("mp-mappa") non creava
+         piu' la carta ma provava a scorrere la lista dei lavori. Da qui l'errore
+         «string "mp-mappa" is not a function». */
+      let LAV=(lav||[]);
+      if(mpVista==="aperti")LAV=LAV.filter(l=>l.stato!=="fatto");
+      const voci=LAV.map(l=>{
         const c=cliMap[l.cliente_id];
         const ind=(l.dove||"").trim()||((c&&c.indirizzo)||"").trim();
         return {l,c,ind};
