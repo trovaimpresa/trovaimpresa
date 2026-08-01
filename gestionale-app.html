@@ -2938,7 +2938,10 @@
          Ora la carta compare subito e i pin si aggiungono man mano che li trovo. */
       const ok=await mpCaricaLeaflet();
       if(ok&&window.L){
+        const cont=document.getElementById("mp-mappa");
+        if(mpMappa&&(!cont||!cont._leaflet_id)){mpMappa=null;}  /* contenitore rifatto: ricomincio */
         if(!mpMappa){
+          if(cont)cont.innerHTML="";
           mpMappa=L.map("mp-mappa",{scrollWheelZoom:false}).setView([41.9,12.5],5);
           L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             {maxZoom:18,attribution:"© OpenStreetMap"}).addTo(mpMappa);
@@ -2946,6 +2949,16 @@
         if(mpLayer)mpLayer.remove();
         mpLayer=L.layerGroup().addTo(mpMappa);
         setTimeout(()=>{try{mpMappa.invalidateSize();}catch(e){}},100);
+        /* se dopo 6 secondi non e' arrivata nessuna tessera, la carta e' bloccata */
+        setTimeout(()=>{
+          try{
+            const t=document.querySelectorAll("#mp-mappa img.leaflet-tile-loaded").length;
+            if(!t&&avviso&&!avviso.dataset.tile){
+              avviso.dataset.tile="1";
+              avviso.insertAdjacentHTML("beforeend",'<div class="mp-avviso">La carta non riesce a scaricare le immagini da OpenStreetMap. Le distanze qui sotto funzionano lo stesso. Se hai un blocco pubblicit&agrave; o una protezione attiva sul browser, prova a disattivarla su questo sito.</div>');
+            }
+          }catch(e){}
+        },6000);
       }else{
         $("#mp-mappa").innerHTML='<div class="mp-carico">Non riesco a caricare la carta. La lista con le distanze qui sotto funziona lo stesso.</div>';
       }
@@ -3025,6 +3038,13 @@
             +'</div>';
         }).join("")
         +'</div>';
+    }catch(err){
+      /* Se qualcosa va storto voglio vederlo scritto qui, non restare davanti a
+         una pagina vuota senza sapere perche'. */
+      const m=(err&&(err.message||err.toString()))||"errore sconosciuto";
+      if(box)box.innerHTML='<div class="mp-avviso"><b>La mappa si &egrave; fermata.</b><br>'
+        +esc(m)+'<br><br>Manda questa schermata ad Alessio: con questa scritta si capisce cosa sistemare.</div>';
+      try{console.error("[MAPPA]",err);}catch(e){}
     }finally{ mpInCorso=false; }
   }
 
