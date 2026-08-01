@@ -833,3 +833,106 @@
     .sheet--grande .sh-head,.sheet--grande .sh-body,.sheet--grande .sh-foot{padding-left:16px; padding-right:16px}
     .sheet--grande .sh-foot .btn,.sheet--grande .sh-foot .btn-primary{flex:1; min-width:0}
   }
+
+/* =========================================================================
+   RIEPILOGO A SCHEDE  (aggiunto in fondo: sovrascrive solo dentro #riepilogo,
+   nessun'altra sezione del gestionale viene toccata)
+   Obiettivo: testo grande, molta aria, una scheda = una cosa sola.
+   ========================================================================= */
+
+#riepilogo{ font-size:17px; line-height:1.55; }
+
+#riepilogo .rie-intro{ margin:0 0 28px; }
+#riepilogo .rie-intro h2{ font-size:30px; line-height:1.2; letter-spacing:-.5px; font-weight:800; }
+#riepilogo .rie-intro p{ font-size:17px; color:var(--testo-2); margin-top:10px; max-width:62ch; }
+
+#riepilogo .rie-warn{ font-size:17px; padding:16px 18px; margin-bottom:22px; }
+
+/* --- la griglia: 3 schede per riga sul computer --- */
+.rie-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  align-items:stretch;
+}
+@media(max-width:1180px){ .rie-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:760px){  .rie-grid{ grid-template-columns:1fr; gap:16px; } }
+
+/* --- la scheda --- */
+.rie-card{
+  background:var(--card);
+  border:1px solid var(--bordo);
+  border-left:5px solid var(--bordo-forte);
+  border-radius:16px;
+  padding:22px 22px 18px;
+  display:flex;
+  flex-direction:column;
+  cursor:pointer;
+  transition:box-shadow .15s, transform .15s, border-color .15s;
+}
+.rie-card:hover{
+  box-shadow:0 6px 20px rgba(15,23,42,.10);
+  transform:translateY(-2px);
+  border-color:var(--bordo-forte);
+}
+
+/* riga del titolo: icona identica a quella del menu + nome sezione */
+.rie-card .rc-head{ display:flex; align-items:center; gap:11px; margin-bottom:14px; }
+.rie-card .rc-head svg{ width:24px; height:24px; flex:0 0 24px; color:var(--testo-2); }
+.rie-card .rc-tit{
+  font-size:18px; font-weight:700; color:var(--testo);
+  letter-spacing:-.2px;
+}
+
+/* il numero grande: la cosa che vedi da lontano */
+.rie-card .rc-n{
+  font-size:44px; font-weight:800; line-height:1.05;
+  letter-spacing:-1.5px; color:var(--testo);
+}
+.rie-card .rc-l{
+  font-size:16px; color:var(--testo-2); margin-top:6px; line-height:1.4;
+}
+
+/* le due righe di dettaglio */
+.rie-card .rc-list{
+  margin-top:18px; padding-top:14px;
+  border-top:1px solid var(--bordo);
+  display:flex; flex-direction:column; gap:2px;
+}
+.rie-card .rc-r{
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  padding:9px 8px; margin:0 -8px; border-radius:8px;
+  font-size:16px;
+}
+.rie-card .rc-r.cliccabile{ cursor:pointer; }
+.rie-card .rc-r.cliccabile:hover{ background:var(--blu-tenue); }
+.rie-card .rc-rt{
+  color:var(--testo); font-weight:600;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+}
+.rie-card .rc-rv{ color:var(--testo-2); font-weight:600; white-space:nowrap; flex:0 0 auto; }
+.rie-card .rc-rv.q-passato{ color:var(--err); }
+.rie-card .rc-rv.q-oggi{ color:var(--attesa); font-weight:700; }
+.rie-card .rc-rv.q-futuro,
+.rie-card .rc-rv.q-neutro,
+.rie-card .rc-rv.q-vuoto{ color:var(--testo-2); }
+
+/* quando non c'e' niente da mostrare: nessun blocco vuoto, solo una frase calma */
+.rie-card .rc-vuoto{
+  margin-top:18px; padding-top:14px;
+  border-top:1px solid var(--bordo);
+  font-size:16px; color:var(--testo-3);
+}
+
+/* il bordo colorato a sinistra dice come sta la sezione, senza leggere */
+.rie-card.t-err   { border-left-color:var(--err); }
+.rie-card.t-err    .rc-n{ color:var(--err); }
+.rie-card.t-attesa{ border-left-color:var(--attesa); }
+.rie-card.t-attesa .rc-n{ color:var(--attesa); }
+.rie-card.t-ok    { border-left-color:var(--ok); }
+.rie-card.t-ok     .rc-n{ color:var(--ok); }
+.rie-card.t-info  { border-left-color:var(--info); }
+.rie-card.t-info   .rc-n{ color:var(--info); }
+.rie-card.t-neutro{ border-left-color:var(--bordo-forte); }
+
+.rc-caricamento{ padding:40px 4px; font-size:17px; color:var(--testo-3); }

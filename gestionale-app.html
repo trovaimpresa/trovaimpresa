@@ -78,28 +78,10 @@
     <section id="riepilogo" class="active">
       <div class="rie-intro">
         <h2 id="rie-title">Riepilogo</h2>
-        <p>A colpo d'occhio la situazione del reparto: quanti lavori hai da fare, quali sono in corso, quali finiti, e quanti soldi ci sono da incassare.</p>
-      </div>
-      <div class="kpis">
-        <div class="kpi df"><div class="n" id="k-dafare">0</div><div class="l">Da fare</div><div class="sub">Non ancora iniziati</div></div>
-        <div class="kpi ic"><div class="n" id="k-incorso">0</div><div class="l">In corso</div><div class="sub">Iniziati, non finiti</div></div>
-        <div class="kpi ft"><div class="n" id="k-fatti">0</div><div class="l">Fatti</div><div class="sub">Finiti questo mese</div></div>
-        <div class="kpi eu"><div class="n" id="k-lavori">0</div><div class="l">Totale</div><div class="sub">Tutti i lavori del reparto</div></div>
-      </div>
-      <div class="money-row">
-        <div class="money out"><div class="n" id="k-daincassare">€ 0</div><div class="l">Da incassare</div><div class="sub">Fatture non pagate</div></div>
-        <div class="money in"><div class="n" id="k-incassato">€ 0</div><div class="l">Incassato</div><div class="sub">Pagate questo mese</div></div>
-        <div class="money ore"><div class="n" id="k-ore">0 h</div><div class="l">Ore</div><div class="sub">Lavorate questo mese</div></div>
-      </div>
-      <div class="money-row">
-        <div class="money out"><div class="n" id="k-spese">€ 0</div><div class="l">Spese</div><div class="sub">Materiali e costi questo mese</div></div>
-        <div class="money in"><div class="n" id="k-utile">€ 0</div><div class="l">Utile</div><div class="sub">Incassato − spese del mese</div></div>
-        <div class="money ore"><div class="n" id="k-prev-attesa">0</div><div class="l">Preventivi aperti</div><div class="sub">In attesa di risposta</div></div>
+        <p>Tutto il reparto in un colpo d'occhio: una scheda per ogni sezione del menu. Clicca una scheda per entrare.</p>
       </div>
       <div id="rie-alert"></div>
-      <div class="mini-title">Prossimi lavori da fare</div>
-      <div id="prossimi"></div>
-      <div id="rie-prev"></div>
+      <div class="rie-grid" id="rie-grid"></div>
     </section>
 
     <section id="agenda">
@@ -683,68 +665,247 @@
     }catch(e){}
   }
 
+  /* ================= RIEPILOGO A SCHEDE =================
+     Una scheda per ogni voce del menu, nello stesso ordine del menu.
+     Ogni scheda fa UNA cosa sola: dice come sta quella sezione con un numero
+     grande, e mostra sotto le due righe piu' importanti. Cliccando la scheda si
+     entra nella sezione; cliccando una riga si apre direttamente quell'elemento.
+     Nessun dato nuovo: sono gli stessi numeri di prima, solo raggruppati per
+     sezione invece che sparsi. ===================================== */
+
+  /* l'icona della scheda e' clonata dal bottone del menu: cosi' menu e riepilogo
+     restano identici per sempre, anche se un domani cambio un'icona. */
+  function rieIco(tab){
+    const b=document.querySelector('nav.tabs button[data-tab="'+tab+'"] svg');
+    return b?b.outerHTML:"";
+  }
+
+  /* o = {tab, titolo, n, lab, tono, righe:[{t,v,cls,action,id}], vuoto} */
+  function rieCard(o){
+    const righe=(o.righe||[]).filter(Boolean).slice(0,2);
+    const corpo=righe.length
+      ? '<div class="rc-list">'+righe.map(r=>{
+          const cli=r.action?' data-action="'+r.action+'" data-id="'+esc(r.id)+'"':"";
+          return '<div class="rc-r'+(r.action?" cliccabile":"")+'"'+cli+'>'
+               +   '<span class="rc-rt">'+esc(r.t||"")+'</span>'
+               +   '<span class="rc-rv'+(r.cls?" "+r.cls:"")+'">'+esc(r.v||"")+'</span>'
+               + '</div>';
+        }).join("")+'</div>'
+      : '<div class="rc-vuoto">'+esc(o.vuoto||"Niente da segnalare")+'</div>';
+    return '<div class="rie-card t-'+(o.tono||"neutro")+'" data-action="rie-go" data-go="'+o.tab+'">'
+         +   '<div class="rc-head">'+rieIco(o.tab)+'<span class="rc-tit">'+esc(o.titolo)+'</span></div>'
+         +   '<div class="rc-n">'+esc(String(o.n))+'</div>'
+         +   '<div class="rc-l">'+esc(o.lab||"")+'</div>'
+         +   corpo
+         + '</div>';
+  }
+
+  function rieVuotoTotale(){
+    const g=$("#rie-grid");if(!g)return;
+    g.innerHTML='<div class="rc-caricamento">Caricamento del riepilogo…</div>';
+  }
+
   async function renderRiepilogo(){
-    /* contatori, soldi e ore: tutto da gest_lavori su Supabase */
-    if(!sb||!sbUid){
-      $("#k-daincassare").textContent=eur(0);$("#k-incassato").textContent=eur(0);$("#k-ore").textContent="0 h";
-      if($("#k-spese"))$("#k-spese").textContent=eur(0);
-      if($("#k-utile")){$("#k-utile").textContent=eur(0);$("#k-utile").classList.remove("neg");}
-      $("#k-dafare").textContent=0;$("#k-incorso").textContent=0;$("#k-fatti").textContent=0;$("#k-lavori").textContent=0;
-      $("#prossimi").innerHTML=tabVuoto("Nessun lavoro in sospeso","Aggiungi un lavoro col pulsante «+ Nuovo lavoro».",
-        _SVGV+'<path d="M20 6 9 17l-5-5"/></svg>');
-      if($("#rie-prev"))$("#rie-prev").innerHTML="";
-      return;
-    }
-    const [{data},{data:rieCli}]=await Promise.all([
-      sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
-    ]);
-    const S=data||[];
-    const rieCliMap=Object.fromEntries((rieCli||[]).map(c=>[c.id,c.nome||""]));
-    /* soldi e ore (stessa logica della scheda Fatture, da Supabase) */
-    $("#k-daincassare").textContent=eur(S.filter(l=>l.fatt_stato!=="pagata"&&l.stato==="fatto").reduce((s,l)=>s+(+l.importo||0),0));
-    $("#k-incassato").textContent=eur(S.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0));
-    const ore=S.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
-    $("#k-ore").textContent=(Math.round(ore*10)/10)+" h";
-    $("#k-dafare").textContent=S.filter(l=>l.stato==="da_fare").length;
-    $("#k-incorso").textContent=S.filter(l=>l.stato==="in_corso").length;
-    $("#k-fatti").textContent=S.filter(l=>l.stato==="fatto"&&thisMonth(l.data_fatto)).length;
-    $("#k-lavori").textContent=S.length;
-    /* spese, utile e preventivi aperti (nuove card) */
+    const G=$("#rie-grid");if(!G)return;
+    if($("#rie-alert"))$("#rie-alert").innerHTML="";
+    if(!sb||!sbUid||!cur){rieVuotoTotale();return;}
+    const mid=curMestiere();
+    const oggi=todayStr(), lim7=_giorniDopo(oggi,7), lim30=_giorniDopo(oggi,30);
+
+    /* ---- primo giro di letture: tutto quello che non dipende dagli id dei lavori ---- */
+    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[];
     try{
-      const ids=S.map(l=>l.id);
-      let speseMese=0, spAll=[];
-      if(ids.length){
-        const {data:sp}=await sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids);
-        spAll=sp||[];
-        speseMese=spAll.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
-      }
-      /* avviso lavori in perdita (spese > importo) */
-      const spPerL={};spAll.forEach(x=>{spPerL[x.lavoro_id]=(spPerL[x.lavoro_id]||0)+(+x.importo||0);});
-      const inPerdita=S.filter(l=>((+l.importo||0)>0||spPerL[l.id])&&((+l.importo||0)-(spPerL[l.id]||0))<0);
-      const ra=$("#rie-alert");
-      if(ra)ra.innerHTML=inPerdita.length?`<div class="rie-warn" data-action="vai-report">⚠ <b>${inPerdita.length===1?"1 lavoro in perdita":inPerdita.length+" lavori in perdita"}</b> — le spese superano l'importo. Clicca per vedere quali nel Report.</div>`:"";
-      const incMese=S.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
-      if($("#k-spese"))$("#k-spese").textContent=eur(speseMese);
-      if($("#k-utile")){const utile=incMese-speseMese;$("#k-utile").textContent=eur(utile);$("#k-utile").classList.toggle("neg",utile<0);}
-      const {data:pv}=await sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
-      const attesa=(pv||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato");
-      if($("#k-prev-attesa"))$("#k-prev-attesa").textContent=attesa.length;
-      await renderPrevAttesa(attesa,rieCliMap);
+      const r=await Promise.all([
+        sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo").eq("user_id",sbUid),
+        sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid)
+      ]);
+      L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
+      MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
     }catch(e){}
-    const pross=S.filter(l=>l.stato!=="fatto").sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999")).slice(0,5);
-    $("#prossimi").innerHTML=pross.length
-      ? `<div class="righe">`+pross.map(l=>{
-          const q=quando(l.data_prevista);
-          return rigaCompatta({
-            id:l.id, action:"edit-job", bar:inRitardo(l.stato,l.data_prevista)?"ritardo":l.stato,
-            titolo:l.descrizione||"Lavoro",
-            sub:[rieCliMap[l.cliente_id]||l.dove||"",{t:q.testo,cls:q.classe}],
-            imp:+l.importo?eur(l.importo):""
-          });
-        }).join("")+`</div>`
-      : tabVuoto("Nessun lavoro in sospeso","Aggiungi un lavoro col pulsante «+ Nuovo lavoro».",
-          _SVGV+'<path d="M20 6 9 17l-5-5"/></svg>');
+
+    const ids=L.map(l=>l.id);
+    const cliMap=Object.fromEntries(CLI.map(c=>[c.id,c.nome||""]));
+    const opeMap=Object.fromEntries(OPE.map(o=>[o.id,o.nome||""]));
+
+    /* ---- secondo giro: quello che ha bisogno degli id dei lavori ---- */
+    let SP=[],nFoto=0,nVideo=0,PR=[];
+    try{
+      const attesaIds=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato").map(p=>p.id);
+      const q=await Promise.all([
+        ids.length?sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({data:[]}),
+        ids.length?sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
+        ids.length?sb.from("gest_video").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
+        attesaIds.length?sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",attesaIds):Promise.resolve({data:[]})
+      ]);
+      SP=q[0].data||[];nFoto=q[1].count||0;nVideo=q[2].count||0;PR=q[3].data||[];
+    }catch(e){}
+
+    /* ---- calcoli (identici a prima) ---- */
+    const aperti   = L.filter(l=>l.stato!=="fatto");
+    const ritardo  = aperti.filter(l=>inRitardo(l.stato,l.data_prevista));
+    const daInc    = L.filter(l=>l.fatt_stato!=="pagata"&&l.stato==="fatto");
+    const totDaInc = daInc.reduce((s,l)=>s+(+l.importo||0),0);
+    const incMese  = L.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
+    const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
+    const speseMese= SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
+    const utile    = incMese-speseMese;
+
+    /* avviso lavori in perdita: resta com'era, sopra le schede */
+    const spPerL={};SP.forEach(x=>{spPerL[x.lavoro_id]=(spPerL[x.lavoro_id]||0)+(+x.importo||0);});
+    const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id])&&((+l.importo||0)-(spPerL[l.id]||0))<0);
+    const ra=$("#rie-alert");
+    if(ra)ra.innerHTML=inPerdita.length?'<div class="rie-warn" data-action="vai-report">⚠ <b>'+(inPerdita.length===1?"1 lavoro in perdita":inPerdita.length+" lavori in perdita")+'</b> — le spese superano l\'importo. Clicca per vedere quali nel Report.</div>':"";
+
+    /* preventivi in attesa (+ totale di ognuno) */
+    const attesa=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato")
+                   .sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
+    rieprevCache=attesa;
+    const totPrev={};PR.forEach(r=>{totPrev[r.preventivo_id]=(totPrev[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+
+    /* prossimi lavori, ordinati per data */
+    const pross=aperti.slice().sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
+    /* calendario: cosa c'e' nei prossimi 7 giorni */
+    const set7=aperti.filter(l=>l.data_prevista&&l.data_prevista>=oggi&&l.data_prevista<=lim7)
+                     .sort((a,b)=>a.data_prevista.localeCompare(b.data_prevista));
+    /* agenda: lavori aperti raggruppati per operatore */
+    const perOpe={};aperti.forEach(l=>{if(l.operatore_id)perOpe[l.operatore_id]=(perOpe[l.operatore_id]||0)+1;});
+    const opeOrd=Object.keys(perOpe).sort((a,b)=>perOpe[b]-perOpe[a]);
+    /* mezzi che chiedono attenzione */
+    const miei=new Set(MZ.map(m=>m.id));
+    const mzNome=Object.fromEntries(MZ.map(m=>[m.id,m.nome||"Mezzo"]));
+    const mzAvvisa=MZS.filter(v=>miei.has(v.mezzo_id)&&(v.scadute>0||(v.prossima_data&&v.prossima_data<=lim30)))
+                      .sort((a,b)=>String(a.prossima_data||"9999").localeCompare(String(b.prossima_data||"9999")));
+    /* squadra: quanti lavori aperti ha ciascuno */
+    /* carte: saldo per carta */
+    const saldoMap=Object.fromEntries(CAS.map(x=>[x.carta_id,+x.saldo||0]));
+    const carteAtt=CA.filter(c=>c.stato!=="chiusa");
+    const saldoTot=carteAtt.reduce((s,c)=>s+(saldoMap[c.id]||0),0);
+    /* condomini: quanti lavori aperti per ciascuno */
+    const perCli={};aperti.forEach(l=>{if(l.cliente_id)perCli[l.cliente_id]=(perCli[l.cliente_id]||0)+1;});
+    const cliOrd=Object.keys(perCli).sort((a,b)=>perCli[b]-perCli[a]);
+    /* scadenzario */
+    const scAperte=SC.filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30)
+                     .sort((a,b)=>a.data_scadenza.localeCompare(b.data_scadenza));
+
+    /* ---- le 12 schede, nello stesso ordine del menu ---- */
+    const C=[];
+
+    C.push(rieCard({
+      tab:"lavori", titolo:"Lavori", n:aperti.length,
+      lab: ritardo.length? ritardo.length+(ritardo.length===1?" in ritardo":" in ritardo"):"lavori aperti",
+      tono: ritardo.length?"err":(aperti.length?"attesa":"ok"),
+      vuoto:"Nessun lavoro aperto",
+      righe: pross.slice(0,2).map(l=>{const q=quando(l.data_prevista);return{
+        t:l.descrizione||"Lavoro", v:q.testo, cls:inRitardo(l.stato,l.data_prevista)?"q-passato":q.classe,
+        action:"edit-job", id:l.id};})
+    }));
+
+    C.push(rieCard({
+      tab:"preventivi", titolo:"Preventivi", n:attesa.length,
+      lab:"in attesa di risposta", tono:attesa.length?"attesa":"ok",
+      vuoto:"Nessun preventivo in attesa",
+      righe: attesa.slice(0,2).map(p=>({
+        t:p.titolo||"Preventivo", v:totPrev[p.id]?eur(totPrev[p.id]):"",
+        action:"rie-prev", id:p.id}))
+    }));
+
+    C.push(rieCard({
+      tab:"fatture", titolo:"Fatture", n:eur(totDaInc),
+      lab:"da incassare · incassato questo mese "+eur(incMese),
+      tono: totDaInc>0?"attesa":"ok",
+      vuoto:"Nessuna fattura da incassare",
+      righe: daInc.slice().sort((a,b)=>String(a.data_fatto||"").localeCompare(String(b.data_fatto||"")))
+              .slice(0,2).map(l=>({
+        t:(cliMap[l.cliente_id]||l.descrizione||"Lavoro"), v:eur(l.importo),
+        action:"edit-job", id:l.id}))
+    }));
+
+    C.push(rieCard({
+      tab:"calendario", titolo:"Calendario", n:set7.length,
+      lab:"nei prossimi 7 giorni", tono:set7.length?"info":"neutro",
+      vuoto:"Nessun impegno questa settimana",
+      righe: set7.slice(0,2).map(l=>{const q=quando(l.data_prevista);return{
+        t:l.descrizione||"Lavoro", v:q.testo, cls:q.classe, action:"edit-job", id:l.id};})
+    }));
+
+    C.push(rieCard({
+      tab:"agenda", titolo:"Agenda operatore", n:opeOrd.length,
+      lab:"operatori con lavori assegnati", tono:opeOrd.length?"info":"neutro",
+      vuoto:"Nessun lavoro assegnato",
+      righe: opeOrd.slice(0,2).map(k=>({
+        t:opeMap[k]||"Operatore", v:perOpe[k]+(perOpe[k]===1?" lavoro":" lavori")}))
+    }));
+
+    C.push(rieCard({
+      tab:"mezzi", titolo:"Mezzi", n:MZ.length,
+      lab: mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine"):"mezzi in azienda",
+      tono: mzAvvisa.some(v=>v.scadute>0)?"err":(mzAvvisa.length?"attesa":"ok"),
+      vuoto: MZ.length?"Nessuna scadenza in arrivo":"Nessun mezzo registrato",
+      righe: mzAvvisa.slice(0,2).map(v=>{const q=quando(v.prossima_data);return{
+        t:mzNome[v.mezzo_id]+(v.prossimo_titolo?" · "+v.prossimo_titolo:""),
+        v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
+    }));
+
+    C.push(rieCard({
+      tab:"squadra", titolo:"Squadra", n:OPE.length,
+      lab:"persone in squadra · "+(Math.round(oreMese*10)/10)+" h questo mese",
+      tono:"neutro", vuoto:"Nessun operatore registrato",
+      righe: OPE.slice(0,2).map(o=>({
+        t:o.nome||"Operatore",
+        v:(perOpe[o.id]||0)+((perOpe[o.id]||0)===1?" lavoro":" lavori")}))
+    }));
+
+    C.push(rieCard({
+      tab:"carte", titolo:"Carte", n:eur(saldoTot),
+      lab:"saldo di "+carteAtt.length+(carteAtt.length===1?" carta attiva":" carte attive"),
+      tono: saldoTot<0?"err":"neutro", vuoto:"Nessuna carta attiva",
+      righe: carteAtt.slice(0,2).map(c=>({
+        t:c.nome||"Carta", v:eur(saldoMap[c.id]||0),
+        cls:(saldoMap[c.id]||0)<0?"q-passato":""}))
+    }));
+
+    C.push(rieCard({
+      tab:"clienti", titolo:"Condomini", n:CLI.length,
+      lab:"condomini e clienti in anagrafica", tono:"neutro",
+      vuoto:"Nessun condominio registrato",
+      righe: cliOrd.slice(0,2).map(k=>({
+        t:cliMap[k]||"Condominio",
+        v:perCli[k]+(perCli[k]===1?" lavoro aperto":" lavori aperti")}))
+    }));
+
+    C.push(rieCard({
+      tab:"scadenzario", titolo:"Scadenzario", n:scAperte.length,
+      lab:"scadenze entro 30 giorni",
+      tono: scAperte.some(x=>x.data_scadenza<oggi)?"err":(scAperte.length?"attesa":"ok"),
+      vuoto:"Nessuna scadenza in arrivo",
+      righe: scAperte.slice(0,2).map(x=>{const q=quando(x.data_scadenza);return{
+        t:x.titolo||"Scadenza", v:x.data_scadenza<oggi?"scaduta":q.testo,
+        cls:x.data_scadenza<oggi?"q-passato":q.classe};})
+    }));
+
+    C.push(rieCard({
+      tab:"report", titolo:"Report", n:eur(utile),
+      lab:"utile di questo mese (incassato − spese)",
+      tono: utile<0?"err":(utile>0?"ok":"neutro"),
+      vuoto:"Nessun movimento questo mese",
+      righe:[{t:"Incassato questo mese",v:eur(incMese)},{t:"Spese questo mese",v:eur(speseMese)}]
+    }));
+
+    C.push(rieCard({
+      tab:"galleria", titolo:"Galleria", n:(nFoto+nVideo),
+      lab:"foto e video caricati", tono:"neutro",
+      vuoto:"Nessuna foto o video caricato",
+      righe:(nFoto+nVideo)?[{t:"Foto",v:String(nFoto)},{t:"Video",v:String(nVideo)}]:[]
+    }));
+
+    G.innerHTML=C.join("");
   }
 
   /* ---- Riepilogo: preventivi che aspettano una risposta ----
@@ -3118,6 +3279,9 @@
     if(a==="export-excel")return esportaExcel();
     if(a==="export-json")return esportaJson();
     if(a==="vai-report"){const b=document.querySelector('nav.tabs button[data-tab="report"]');if(b)b.click();return;}
+    /* click su una scheda del Riepilogo: entra nella sezione corrispondente,
+       come se avessi cliccato la voce nel menu di sinistra. */
+    if(a==="rie-go"){const b=document.querySelector('nav.tabs button[data-tab="'+t.dataset.go+'"]');if(b){b.click();window.scrollTo(0,0);}return;}
   });
   /* al cambio desktop/mobile ridisegna liste (tabella ↔ card) */
   try{window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderFatture();}});}catch(e){}
