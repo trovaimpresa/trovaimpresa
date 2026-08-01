@@ -30,6 +30,74 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: 'Parametro mancante: email obbligatoria' };
   }
 
+  // ------------------------------------------------------------------
+  //  UNA SOLA EMAIL PER ISCRITTO
+  //  Prima questa funzione mandava tutte le volte che qualcuno la chiamava,
+  //  e la chiamavano in due: la pagina di registrazione (sempre) e la pagina
+  //  di accesso al primo ingresso. Risultato: due o tre email uguali.
+  //  Ora il controllo sta qui, sul server, e funziona cosi':
+  //  provo a "prendermi" il diritto di mandare con un UPDATE che riesce solo
+  //  se benvenuto_inviato e' ancora false. Se l'UPDATE non tocca nessuna riga
+  //  vuol dire che qualcun altro l'ha gia' fatto, e non mando niente.
+  //  Essendo una sola istruzione sul database, due chiamate contemporanee non
+  //  possono passare entrambe.
+  //  L'email di passaggio a Premium (premium: true) e' un'altra cosa e non
+  //  passa da questo controllo.
+  // ------------------------------------------------------------------
+  const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
+  const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+
+  if (!premium && SUPABASE_KEY) {
+    const sbHeaders = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    };
+    const emailEnc = encodeURIComponent(email);
+    const tabella = tipo === 'candidato' ? 'candidati_lavoro' : 'imprese';
+
+    async function provaAPrendere(tab) {
+      const url = SUPABASE_URL + '/rest/v1/' + tab
+                + '?email=eq.' + emailEnc + '&benvenuto_inviato=is.false&select=id';
+      const r = await fetch(url, {
+        method: 'PATCH',
+        headers: sbHeaders,
+        body: JSON.stringify({ benvenuto_inviato: true })
+      });
+      if (!r.ok) return null;              // tabella o colonna diversa: non blocco l'invio
+      const righe = await r.json();
+      return Array.isArray(righe) ? righe.length : 0;
+    }
+    async function esiste(tab) {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/' + tab + '?email=eq.' + emailEnc + '&select=id&limit=1',
+                            { headers: sbHeaders });
+      if (!r.ok) return false;
+      const righe = await r.json();
+      return Array.isArray(righe) && righe.length > 0;
+    }
+
+    try {
+      let presa = await provaAPrendere(tabella);
+      // il tipo puo' essere sbagliato o mancante: provo anche l'altra tabella
+      if (presa === 0) {
+        const altra = tabella === 'imprese' ? 'candidati_lavoro' : 'imprese';
+        const p2 = await provaAPrendere(altra);
+        if (p2 > 0) presa = p2;
+        else if (await esiste(tabella) || await esiste(altra)) {
+          // la riga c'e' ma era gia' spuntata: l'email e' gia' partita
+          console.log('[benvenuto] gia inviata a', email, '- non rimando');
+          return { statusCode: 200, body: JSON.stringify({ ok: true, saltata: true }) };
+        }
+        // nessuna riga trovata: mando lo stesso, meglio una email in piu' che nessuna
+        console.log('[benvenuto] nessun profilo trovato per', email, '- mando comunque');
+      }
+    } catch (e) {
+      // se il controllo non funziona non blocco l'email: meglio un doppione che il silenzio
+      console.warn('[benvenuto] controllo non riuscito:', e && e.message);
+    }
+  }
+
   const saluto = nome ? 'Gentile ' + nome + ',' : 'Gentile utente,';
   const pannello = PANNELLI[tipo] || 'login-impresa.html';
   const linkPannello = 'https://trovaimpresa.com/' + pannello;

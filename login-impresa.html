@@ -148,7 +148,10 @@
 
         // Email di benvenuto (regalo 3 mesi Premium) al primo accesso, una sola volta.
         if (imp.benvenuto_inviato === false) {
-          supabaseClient.from('imprese').update({ benvenuto_inviato: true }).eq('user_id', data.user.id).then(function(){});
+          // La spunta NON si mette piu' da qui: la mette la funzione
+          // invia-email-benvenuto sul server, nello stesso momento in cui manda
+          // l'email. Prima la mettevamo qui senza aspettare che fosse scritta
+          // davvero: se falliva, ogni accesso rimandava l'email da capo.
           fetch('/.netlify/functions/invia-email-benvenuto', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
