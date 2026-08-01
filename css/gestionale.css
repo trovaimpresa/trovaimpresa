@@ -1463,3 +1463,82 @@
 
 /* i pulsanti della scheda stanno in fila, non uno sotto l'altro */
 .wrap section .card-acts .btn{ flex:0 0 auto; width:auto; }
+
+/* =========================================================================
+   TUTTE LE SEZIONI FATTE A SCHEDE, COME IL RIEPILOGO
+   Prima sul computer le liste erano tabelle a righe e sul telefono schede:
+   due disegni diversi per la stessa cosa. Ora la forma e' una sola.
+   ========================================================================= */
+
+.wrap section .griglia-schede{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:20px; align-items:stretch;
+}
+@media(max-width:1180px){ .wrap section .griglia-schede{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px){  .wrap section .griglia-schede{ grid-template-columns:minmax(0,1fr); gap:16px; } }
+
+/* la scheda di un lavoro / preventivo / fattura prende lo stampo del Riepilogo */
+.wrap section .job{
+  display:flex; flex-direction:column;
+  background:var(--card);
+  border:1px solid var(--bordo);
+  border-left:5px solid var(--bordo-forte);
+  border-radius:16px;
+  padding:22px 22px 18px;
+  box-shadow:var(--shadow);
+  transition:box-shadow .15s, transform .15s, border-color .15s;
+}
+.wrap section .job:hover{
+  box-shadow:0 6px 20px rgba(15,23,42,.10); transform:translateY(-2px);
+  border-color:var(--bordo-forte);
+}
+
+/* titolo e importo in cima */
+.wrap section .job .job-top{
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px;
+  margin-bottom:12px;
+}
+.wrap section .job .job-cli{
+  font-size:21px; font-weight:700; letter-spacing:-.2px; color:var(--testo);
+  line-height:1.3; min-width:0;
+}
+.wrap section .job .job-imp{
+  font-size:22px; font-weight:800; color:var(--testo); white-space:nowrap; flex:0 0 auto;
+}
+.wrap section .job .job-desc{ font-size:17px; color:var(--testo-2); margin-bottom:10px; line-height:1.5; }
+
+/* la riga dello stato */
+.wrap section .job .stati{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
+.wrap section .job .st{ display:inline-flex; align-items:center; gap:9px; font-size:16px; }
+.wrap section .job .st .lab{ font-weight:600; color:var(--testo-2); }
+.wrap section .job .pall{ width:12px; height:12px; }
+
+/* dove e quando */
+.wrap section .job .job-meta{
+  margin-top:auto; padding-top:14px; border-top:1px solid var(--bordo);
+  display:flex; flex-direction:column; gap:8px; font-size:16px; color:var(--testo-2);
+}
+.wrap section .job .job-done,
+.wrap section .job .job-note{ font-size:16px; line-height:1.5; margin-top:10px; }
+
+/* i pulsanti in fondo, in fila */
+.wrap section .job .job-actions{
+  display:flex; flex-wrap:wrap; gap:10px;
+  margin-top:16px; padding-top:16px; border-top:1px solid var(--bordo);
+}
+.wrap section .job .job-actions .btn{
+  flex:0 0 auto; width:auto; height:42px; padding:0 16px;
+  font-size:15px; font-weight:600; border-radius:10px;
+}
+
+/* il bordo a sinistra dice come sta il lavoro, come nel Riepilogo */
+.wrap section .job:has(.pall.ritardo){ border-left-color:var(--err); }
+.wrap section .job:has(.pall.rosso){ border-left-color:var(--attesa); }
+.wrap section .job:has(.pall.verde){ border-left-color:var(--ok); }
+
+/* Dove e quando stanno sotto al contenuto, non a mezz'aria: e' l'ultima riga
+   (i pulsanti) che si aggancia in fondo, cosi' le schede restano allineate
+   senza buchi in mezzo. */
+.wrap section .job .job-meta{ margin-top:0; }
+.wrap section .job .job-actions{ margin-top:auto; }

@@ -1227,7 +1227,13 @@
     }).join("");
     const R=cfg.righe||[];
     if(!R.length){box.style.display="block";box.innerHTML=cfg.vuoto||"";return;}
-    if(!_deskTab()&&cfg.cards){box.style.display="grid";box.innerHTML=cfg.cards();return;}
+    /* SCHEDE SEMPRE, non solo su schermo stretto.
+       Prima sul computer usciva una tabella a righe e sul telefono le schede:
+       due disegni diversi per la stessa cosa. Ora ogni sezione ha la stessa
+       forma del Riepilogo, su qualunque schermo.
+       (Per tornare alle tabelle basta rimettere "!_deskTab()&&" qui davanti.) */
+    if(cfg.cards){box.style.display="grid";box.classList.add("griglia-schede");box.innerHTML=cfg.cards();return;}
+    box.classList.remove("griglia-schede");
     TAB_MENU[cfg.id]={};R.forEach(r=>{if(r.menu&&r.menu.length)TAB_MENU[cfg.id][String(r.id)]=r.menu;});
     const freccia=k=>cfg.sortK===k?(cfg.sortD>0?" \u2191":" \u2193"):"";
     const cols=cfg.colonne.map(c=>`<col style="width:${c.w}">`).join("")+'<col style="width:36px">';
