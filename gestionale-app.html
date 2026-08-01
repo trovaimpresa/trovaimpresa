@@ -2910,17 +2910,12 @@
       /* 1) da dove si parte: l'indirizzo dell'azienda */
       const {data:az}=await sb.from("gest_azienda").select("nome,indirizzo").eq("user_id",sbUid).maybeSingle();
       const partenzaTxt=(az&&az.indirizzo||"").trim();
-      if(!partenzaTxt){
-        if(avviso)avviso.innerHTML="";
-        $("#mp-mappa").style.display="none";
-        box.innerHTML=tabVuoto("Manca l'indirizzo del tuo ufficio",
-          "Torna alla schermata dei reparti, apri «Dati azienda» in alto e scrivi l'indirizzo. Poi rientra qui.",
-          _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
-        return;
-      }
-      /* i dati dell'azienda si vedono qui, in cima alla Mappa */
-      if(avviso)avviso.innerHTML='<div class="mp-ufficio"><span class="mp-u-lab">Ufficio</span><b>'
-        +esc(az.nome||"La tua azienda")+'</b><span class="mp-u-ind">'+esc(partenzaTxt)+'</span></div>';
+      /* Anche senza l'indirizzo dell'ufficio la carta si vede lo stesso, con i pin
+         dei cantieri: mancano solo i chilometri, perche' non c'e' da dove misurarli. */
+      if(avviso)avviso.innerHTML = partenzaTxt
+        ? '<div class="mp-ufficio"><span class="mp-u-lab">Ufficio</span><b>'
+          +esc(az.nome||"La tua azienda")+'</b><span class="mp-u-ind">'+esc(partenzaTxt)+'</span></div>'
+        : '<div class="mp-avviso">Per vedere le distanze mi serve l\'indirizzo del tuo ufficio. Lo trovi nel pulsante <b>Azienda</b> in alto a destra, primo campo utile: <b>Indirizzo</b>. Scrivilo con via, numero e comune. Intanto la carta con i cantieri la vedi lo stesso.</div>';
       $("#mp-mappa").style.display="";
 
       /* 2) i lavori con un indirizzo */
@@ -2940,12 +2935,9 @@
       box.innerHTML='<div class="mp-carico">Sto cercando gli indirizzi sulla carta… ci vuole un secondo per ognuno, la prima volta.</div>';
 
       /* 3) partenza sulla carta */
-      const pPart=await mpTrovaPunto(partenzaTxt+", Italia");
-      if(!pPart){
-        box.innerHTML=tabVuoto("Non trovo l'indirizzo della tua azienda",
-          'Ho cercato "'+esc(partenzaTxt)+'" e non l\'ho trovato. Prova a scriverlo con il comune, tipo "Via Roma 10, Rieti".',
-          _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
-        return;
+      const pPart=partenzaTxt?await mpTrovaPunto(partenzaTxt+", Italia"):null;
+      if(partenzaTxt&&!pPart&&avviso){
+        avviso.innerHTML='<div class="mp-avviso">Non trovo l\'indirizzo del tuo ufficio: ho cercato <b>'+esc(partenzaTxt)+'</b>. Scrivilo con via, numero e comune (per esempio <b>Via Roma 10, Rieti</b>) dal pulsante <b>Azienda</b> in alto a destra. Intanto la carta con i cantieri la vedi lo stesso.</div>';
       }
 
       /* 4) uno alla volta: indirizzo -> punto -> tratta */
@@ -2953,7 +2945,7 @@
       for(const v of voci){
         const q=v.ind+(/\d{5}|,/.test(v.ind)?"":", Italia");
         const p=await mpTrovaPunto(q);
-        righe.push({...v,p,km:p?mpDistanzaKm(pPart,p):null});
+        righe.push({...v,p,km:(p&&pPart)?mpDistanzaKm(pPart,p):null});
       }
       righe.sort((a,b)=>(a.km==null?1e9:a.km)-(b.km==null?1e9:b.km));
       /* metto da parte le distanze: la scheda Mappa del Riepilogo le legge da qui
@@ -2972,9 +2964,12 @@
         }
         if(mpLayer)mpLayer.remove();
         mpLayer=L.layerGroup().addTo(mpMappa);
-        const punti=[[pPart.lat,pPart.lon]];
-        L.marker([pPart.lat,pPart.lon]).addTo(mpLayer)
-          .bindPopup("<b>Partenza</b><br>"+esc(az.nome||"La tua azienda"));
+        const punti=[];
+        if(pPart){
+          punti.push([pPart.lat,pPart.lon]);
+          L.marker([pPart.lat,pPart.lon]).addTo(mpLayer)
+            .bindPopup("<b>Il tuo ufficio</b><br>"+esc(az.nome||"La tua azienda"));
+        }
         righe.forEach((r,i)=>{
           if(!r.p)return;
           punti.push([r.p.lat,r.p.lon]);
@@ -2984,7 +2979,10 @@
             .bindPopup("<b>"+esc(r.l.descrizione||"Lavoro")+"</b><br>"+esc(r.ind)
               +(r.km!=null?"<br><b>"+mpFormattaKm(r.km)+"</b> dall\'ufficio":""));
         });
-        try{mpMappa.fitBounds(punti,{padding:[40,40],maxZoom:14});}catch(e){mpMappa.setView([pPart.lat,pPart.lon],12);}
+        try{
+          if(punti.length)mpMappa.fitBounds(punti,{padding:[40,40],maxZoom:14});
+          else mpMappa.setView([41.9,12.5],5);        /* nessun punto: mostro l'Italia */
+        }catch(e){mpMappa.setView([41.9,12.5],5);}
         setTimeout(()=>{try{mpMappa.invalidateSize();}catch(e){}},200);
       }else{
         $("#mp-mappa").innerHTML='<div class="mp-carico">Non riesco a caricare la carta. La lista con le distanze qui sotto funziona lo stesso.</div>';
@@ -2997,7 +2995,7 @@
           _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
         return;
       }
-      const nonTrovati=righe.filter(r=>!r.p).length;
+      const nonTrovati=pPart?righe.filter(r=>!r.p).length:0;
       box.innerHTML=
         (nonTrovati?'<div class="mp-avviso mp-avviso-lieve">'+nonTrovati+(nonTrovati===1?' indirizzo non trovato':' indirizzi non trovati')+'. Di solito manca il comune: scrivi per esempio «Via Verani 18, Rieti» invece di «via verani 18».</div>':"")
         +'<div class="mp-righe">'
@@ -3013,7 +3011,8 @@
             +'</div>'
             +'<div class="mp-r-dist">'
             +  (r.km!=null?'<div class="mp-km">'+mpFormattaKm(r.km)+'</div><div class="mp-min">dall\'ufficio</div>'
-                          :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>')
+                 :(!pPart?'<div class="mp-km">—</div><div class="mp-min">manca l\'ufficio</div>'
+                         :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>'))
             +'</div>'
             +'<button class="btn mp-r-btn" data-action="map" data-q="'+esc(r.ind)+'">Indicazioni</button>'
             +'</div>';
