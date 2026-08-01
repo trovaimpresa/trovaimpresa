@@ -1182,3 +1182,25 @@
 
 /* quando il comune non e' scritto nell'indirizzo e l'ho dato per buono */
 .mp-ipotesi{ color:var(--attesa); font-weight:600; }
+
+/* =========================================================================
+   RIEPILOGO — tutte e 13 le schede identiche.
+   Avevo fatto le schede vuote piu' basse e piu' smorte: rompeva la regola
+   "una scheda = una cosa, tutte uguali". Torno indietro: stessa altezza,
+   stesso sfondo, stessa misura del numero, che dentro ci sia roba o no.
+   ========================================================================= */
+
+.rie-grid{ align-items:stretch; }
+
+.rie-card.vuota{ background:var(--card); padding:22px 22px 18px; }
+.rie-card.vuota .rc-n{ font-size:44px; color:var(--testo-3); }   /* solo il grigio resta: dice "qui non c'e' niente" */
+.rie-card.vuota .rc-head svg{ color:var(--testo-2); }
+.rie-card.vuota .rc-tit{ color:var(--testo); }
+.rie-card.vuota .rc-l{ font-size:16px; }
+.rie-card.vuota .rc-vuoto{ margin-top:18px; padding-top:14px; font-size:16px; }
+.rie-card.vuota:hover{ box-shadow:0 6px 20px rgba(15,23,42,.10); }
+
+/* il blocco di dettaglio si appoggia in fondo: cosi' le righe si allineano
+   tra schede vicine anche quando i titoli vanno a capo in modo diverso */
+.rie-card .rc-list,
+.rie-card .rc-vuoto{ margin-top:auto; }
