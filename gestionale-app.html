@@ -155,7 +155,7 @@
 
     <section id="mappa">
       <div class="sec-head"><h2>Mappa</h2></div>
-      <div class="gal-intro">Dove sono i tuoi cantieri e quanto distano dalla tua azienda: chilometri su strada e tempo di viaggio, dal pi&ugrave; vicino al pi&ugrave; lontano. Il punto di partenza &egrave; l&#39;indirizzo che hai messo in <b>Dati azienda</b>.</div>
+      <div class="gal-intro">Dove sono i tuoi cantieri e quanto distano dal tuo ufficio, dal pi&ugrave; vicino al pi&ugrave; lontano. La distanza &egrave; in linea d&#39;aria, come nella mappa del sito.</div>
       <div id="mp-avviso"></div>
       <div class="filtri">
         <div class="filtro"><span class="filtro-lab">Mostra</span>
@@ -951,9 +951,8 @@
     let mpNote=[];
     try{
       const C=JSON.parse(localStorage.getItem("ti_mappa_cache_v1")||"{}");
-      const tratte=Object.values(C.tratte||{}).filter(Boolean);
-      if(tratte.length){
-        const km=tratte.map(t=>t.km).sort((a,b)=>a-b);
+      const km=Object.values(C.km||{}).filter(v=>typeof v==="number").sort((a,b)=>a-b);
+      if(km.length){
         mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0])},
                 {t:"Il più lontano",v:mpFormattaKm(km[km.length-1])}];
       }
@@ -2844,7 +2843,6 @@
     if(mpCache)return mpCache;
     try{mpCache=JSON.parse(localStorage.getItem(MP_CACHE_KEY)||"{}");}catch(e){mpCache={};}
     if(!mpCache.punti)mpCache.punti={};
-    if(!mpCache.tratte)mpCache.tratte={};
     return mpCache;
   }
   function mpSalvaCache(){try{localStorage.setItem(MP_CACHE_KEY,JSON.stringify(mpCache));}catch(e){}}
@@ -2882,34 +2880,23 @@
     return C.punti[q];
   }
 
-  /* due punti -> chilometri su strada e minuti */
-  async function mpTratta(a,b){
+  /* due punti -> chilometri in linea d'aria.
+     E' la stessa identica formula che usa la mappa del sito (cerca-artigiani):
+     nessun servizio esterno da interrogare, quindi il numero compare subito. */
+  function mpDistanzaKm(a,b){
     if(!a||!b)return null;
-    const k=a.lat.toFixed(4)+","+a.lon.toFixed(4)+"->"+b.lat.toFixed(4)+","+b.lon.toFixed(4);
-    const C=mpLeggiCache();
-    if(C.tratte[k]!==undefined)return C.tratte[k];
-    try{
-      const url="https://router.project-osrm.org/route/v1/driving/"+a.lon+","+a.lat+";"+b.lon+","+b.lat+"?overview=false";
-      const r=await fetch(url);
-      const d=await r.json();
-      const rt=d&&d.routes&&d.routes[0];
-      C.tratte[k]=rt?{km:rt.distance/1000,min:rt.duration/60}:null;
-    }catch(e){C.tratte[k]=null;}
-    mpSalvaCache();
-    return C.tratte[k];
+    const R=6371;
+    const dLat=(b.lat-a.lat)*Math.PI/180, dLon=(b.lon-a.lon)*Math.PI/180;
+    const x=Math.sin(dLat/2)**2
+      +Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
   }
 
   function mpFormattaKm(km){
     if(km==null)return "—";
     return (km<10?(Math.round(km*10)/10).toString().replace(".",","):Math.round(km))+" km";
   }
-  function mpFormattaMin(min){
-    if(min==null)return "";
-    const m=Math.round(min);
-    if(m<60)return m+" min";
-    const h=Math.floor(m/60), r=m%60;
-    return h+" h"+(r?" "+r+" min":"");
-  }
+
 
   async function renderMappa(forza){
     const box=$("#mp-lista"), avviso=$("#mp-avviso");
@@ -2918,18 +2905,22 @@
     if(mpInCorso)return;
     mpInCorso=true;
     try{
-      if(forza){mpCache={punti:{},tratte:{}};mpSalvaCache();}
+      if(forza){mpCache={punti:{}};mpSalvaCache();}
 
       /* 1) da dove si parte: l'indirizzo dell'azienda */
       const {data:az}=await sb.from("gest_azienda").select("nome,indirizzo").eq("user_id",sbUid).maybeSingle();
       const partenzaTxt=(az&&az.indirizzo||"").trim();
       if(!partenzaTxt){
-        if(avviso)avviso.innerHTML='<div class="mp-avviso">Per calcolare le distanze mi serve l\'indirizzo della tua azienda. <button class="btn" data-action="azienda">Compila i Dati azienda</button></div>';
+        if(avviso)avviso.innerHTML="";
         $("#mp-mappa").style.display="none";
-        box.innerHTML=tabVuoto("Manca il punto di partenza","Scrivi l'indirizzo della tua azienda e torna qui.",_SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
+        box.innerHTML=tabVuoto("Manca l'indirizzo del tuo ufficio",
+          "Torna alla schermata dei reparti, apri «Dati azienda» in alto e scrivi l'indirizzo. Poi rientra qui.",
+          _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
         return;
       }
-      if(avviso)avviso.innerHTML="";
+      /* i dati dell'azienda si vedono qui, in cima alla Mappa */
+      if(avviso)avviso.innerHTML='<div class="mp-ufficio"><span class="mp-u-lab">Ufficio</span><b>'
+        +esc(az.nome||"La tua azienda")+'</b><span class="mp-u-ind">'+esc(partenzaTxt)+'</span></div>';
       $("#mp-mappa").style.display="";
 
       /* 2) i lavori con un indirizzo */
@@ -2962,13 +2953,14 @@
       for(const v of voci){
         const q=v.ind+(/\d{5}|,/.test(v.ind)?"":", Italia");
         const p=await mpTrovaPunto(q);
-        const t=p?await mpTratta(pPart,p):null;
-        righe.push({...v,p,t});
+        righe.push({...v,p,km:p?mpDistanzaKm(pPart,p):null});
       }
-      righe.sort((a,b)=>{
-        const ka=a.t?a.t.km:(a.p?1e8:1e9), kb=b.t?b.t.km:(b.p?1e8:1e9);
-        return ka-kb;
-      });
+      righe.sort((a,b)=>(a.km==null?1e9:a.km)-(b.km==null?1e9:b.km));
+      /* metto da parte le distanze: la scheda Mappa del Riepilogo le legge da qui
+         senza rifare nessun calcolo e senza chiamare nessun servizio */
+      const C2=mpLeggiCache();C2.km={};
+      righe.forEach(r=>{if(r.km!=null)C2.km[mpChiave(r.ind)]=r.km;});
+      mpSalvaCache();
 
       /* 5) la carta */
       const ok=await mpCaricaLeaflet();
@@ -2990,7 +2982,7 @@
           L.circleMarker([r.p.lat,r.p.lon],{radius:11,color:"#fff",weight:3,fillColor:col,fillOpacity:1})
             .addTo(mpLayer)
             .bindPopup("<b>"+esc(r.l.descrizione||"Lavoro")+"</b><br>"+esc(r.ind)
-              +(r.t?"<br>"+mpFormattaKm(r.t.km)+" · "+mpFormattaMin(r.t.min):""));
+              +(r.km!=null?"<br><b>"+mpFormattaKm(r.km)+"</b> dall\'ufficio":""));
         });
         try{mpMappa.fitBounds(punti,{padding:[40,40],maxZoom:14});}catch(e){mpMappa.setView([pPart.lat,pPart.lon],12);}
         setTimeout(()=>{try{mpMappa.invalidateSize();}catch(e){}},200);
@@ -3007,8 +2999,7 @@
       }
       const nonTrovati=righe.filter(r=>!r.p).length;
       box.innerHTML=
-        '<div class="mp-part">Si parte da <b>'+esc(partenzaTxt)+'</b></div>'
-        +(nonTrovati?'<div class="mp-avviso mp-avviso-lieve">'+nonTrovati+(nonTrovati===1?' indirizzo non trovato':' indirizzi non trovati')+'. Di solito manca il comune: scrivi per esempio «Via Verani 18, Rieti» invece di «via verani 18».</div>':"")
+        (nonTrovati?'<div class="mp-avviso mp-avviso-lieve">'+nonTrovati+(nonTrovati===1?' indirizzo non trovato':' indirizzi non trovati')+'. Di solito manca il comune: scrivi per esempio «Via Verani 18, Rieti» invece di «via verani 18».</div>':"")
         +'<div class="mp-righe">'
         +righe.map(r=>{
           const q=quando(r.l.data_prevista);
@@ -3021,9 +3012,8 @@
             +    ' · <span class="'+(rit?"q-passato":q.classe)+'">'+esc(q.testo)+'</span></div>'
             +'</div>'
             +'<div class="mp-r-dist">'
-            +  (r.t?'<div class="mp-km">'+mpFormattaKm(r.t.km)+'</div><div class="mp-min">'+mpFormattaMin(r.t.min)+'</div>'
-                  :(r.p?'<div class="mp-km">—</div><div class="mp-min">strada non trovata</div>'
-                       :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>'))
+            +  (r.km!=null?'<div class="mp-km">'+mpFormattaKm(r.km)+'</div><div class="mp-min">dall\'ufficio</div>'
+                          :'<div class="mp-km">?</div><div class="mp-min">indirizzo non trovato</div>')
             +'</div>'
             +'<button class="btn mp-r-btn" data-action="map" data-q="'+esc(r.ind)+'">Indicazioni</button>'
             +'</div>';

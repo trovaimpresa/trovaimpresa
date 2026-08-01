@@ -1168,3 +1168,14 @@
 
 /* i popup della carta con il testo del gestionale, non quello di sistema */
 .leaflet-popup-content{ font-family:inherit; font-size:15px; line-height:1.5; }
+
+/* l'ufficio in cima alla Mappa: i dati azienda si vedono qui, senza dover
+   aprire quella finestra (che serve alle fatture, non alla mappa) */
+.mp-ufficio{
+  display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  background:var(--card); border:1px solid var(--bordo); border-left:5px solid var(--blu);
+  border-radius:12px; padding:16px 20px; margin-bottom:18px; font-size:17px;
+}
+.mp-u-lab{ font-size:13px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:var(--blu); }
+.mp-ufficio b{ font-size:19px; font-weight:700; color:var(--testo); }
+.mp-u-ind{ color:var(--testo-2); }
