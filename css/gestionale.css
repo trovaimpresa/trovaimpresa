@@ -955,3 +955,55 @@
 .rie-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
 @media(max-width:1180px){ .rie-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:760px){  .rie-grid{ grid-template-columns:minmax(0,1fr); } }
+
+/* =========================================================================
+   GALLERIA — testo piu' grande, miniature piu' grandi, e il riquadro video
+   che prima non esisteva (in Galleria i video non si vedevano affatto).
+   Chiuso dentro #galleria: nessun'altra sezione viene toccata.
+   ========================================================================= */
+
+#galleria{ font-size:17px; line-height:1.55; }
+#galleria .sec-head{ margin-bottom:18px; }
+#galleria .sec-head h2{ font-size:30px; letter-spacing:-.5px; font-weight:800; }
+#galleria .sec-head .btn-primary{ height:46px; padding:0 22px; font-size:17px; font-weight:700; border-radius:12px; }
+#galleria .gal-intro{ font-size:17px; line-height:1.6; max-width:70ch; margin-bottom:26px; }
+
+#galleria .filtri{ gap:24px 30px; margin-bottom:26px; padding-bottom:22px; border-bottom:1px solid var(--bordo); }
+#galleria .filtro-lab{ font-size:15px; font-weight:600; }
+#galleria .filtro-sel{ height:42px; font-size:16px; max-width:280px; padding:0 34px 0 12px; }
+#galleria .segm{ padding:3px; }
+#galleria .segm button{ height:36px; padding:0 16px; font-size:15px; }
+
+/* un blocco per cantiere, con il nome grande e quanta roba c'e' dentro */
+#galleria .gal-group{
+  background:var(--card); border:1px solid var(--bordo); border-radius:14px;
+  padding:20px 22px; margin-bottom:18px;
+}
+#galleria .gal-cantiere{
+  font-size:20px; font-weight:700; letter-spacing:-.2px; margin-bottom:14px;
+  display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+}
+#galleria .gal-conta{ font-size:15px; font-weight:600; color:var(--testo-3); }
+
+#galleria .thumbs{ gap:12px; margin-top:0; }
+#galleria .thumb{ width:150px; height:150px; border-radius:12px; }
+#galleria .thumb .thtag{ font-size:11px; padding:3px 7px; border-radius:6px; top:6px; left:6px; }
+#galleria .thumb .thop{ font-size:12px; padding:4px 6px; }
+#galleria .thumb .thdel{ width:28px; height:28px; font-size:17px; top:6px; right:6px; }
+#galleria .thumb .thdel:hover{ background:var(--err); }
+
+/* riquadro del video: prima in Galleria non c'era proprio */
+#galleria .thumb-video{
+  cursor:pointer; background:#1E293B; border-color:#1E293B;
+  display:flex; align-items:center; justify-content:center;
+}
+#galleria .thumb-video .vid-play{
+  display:flex; flex-direction:column; align-items:center; gap:6px; color:#fff;
+}
+#galleria .thumb-video .vid-play svg{ width:38px; height:38px; }
+#galleria .thumb-video .vid-play span{ font-size:13px; font-weight:700; letter-spacing:.4px; }
+#galleria .thumb-video:hover{ background:#0F172A; }
+
+/* la finestra "Carica foto o video" */
+#gu-stato{ font-size:15px; color:var(--testo-2); min-height:22px; margin-top:6px; }
+#gu-foto, #gu-video{ font-size:15px; padding:10px 12px; }

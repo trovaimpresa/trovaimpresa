@@ -128,19 +128,28 @@
     </section>
 
     <section id="galleria">
-      <div class="sec-head"><h2>Galleria foto</h2></div>
-      <div class="gal-intro">Tutte le foto del reparto, divise per cantiere. Le foto <b>prima del lavoro</b> le mette il capo per mostrare cosa c'è da fare; quelle <b>a lavoro finito</b> le caricate voi quando avete terminato. Usa i filtri qui sotto per trovarle.</div>
+      <div class="sec-head"><h2>Galleria</h2>
+        <button class="btn-primary" data-action="gal-nuovo">&#65291; Carica foto o video</button></div>
+      <div class="gal-intro">Tutte le foto e i video del reparto, raggruppati per cantiere. Le <b>foto prima</b> le metti tu per far vedere all'operatore cosa c'&egrave; da fare; quelle <b>a lavoro finito</b> le carica chi ha fatto il lavoro.</div>
       <div class="filtri">
-        <div class="filtro"><span class="filtro-lab">Foto</span>
+        <div class="filtro"><span class="filtro-lab">Mostra</span>
+          <div class="segm" id="gal-media">
+            <button class="on" data-action="gal-media" data-v="">Foto e video</button>
+            <button data-action="gal-media" data-v="foto">Solo foto</button>
+            <button data-action="gal-media" data-v="video">Solo video</button>
+          </div></div>
+        <div class="filtro"><span class="filtro-lab">Quando</span>
           <div class="segm" id="gal-tipo">
-            <button class="on" data-action="gal-tipo" data-v="">Tutte le foto</button>
+            <button class="on" data-action="gal-tipo" data-v="">Tutte</button>
             <button data-action="gal-tipo" data-v="prima">Prima del lavoro</button>
             <button data-action="gal-tipo" data-v="dopo">A lavoro finito</button>
           </div></div>
-        <div class="filtro"><label class="filtro-lab" for="gal-op-sel">Operatore</label>
+        <div class="filtro"><label class="filtro-lab" for="gal-lav-sel">Cantiere</label>
+          <select class="filtro-sel" id="gal-lav-sel"></select></div>
+        <div class="filtro"><label class="filtro-lab" for="gal-op-sel">Chi l'ha caricata</label>
           <select class="filtro-sel" id="gal-op-sel"></select></div>
       </div>
-      <div id="gal-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+      <div id="gal-body"></div>
     </section>
 
     <section id="clienti">
@@ -229,7 +238,7 @@
   ];
   let nuovoSel={icon:"🛠️",col:0};
   let state={};
-  let cur=null, filter={vista:"tutti",q:""}, cal=new Date(), editing=null, galFilter={op:"",tipo:""}, agFilter={op:"",stato:"aperti"};
+  let cur=null, filter={vista:"tutti",q:""}, cal=new Date(), editing=null, galFilter={op:"",tipo:"",media:"",lav:""}, agFilter={op:"",stato:"aperti"};
   const fotoCache={};
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -599,7 +608,7 @@
     filter={vista:"tutti",q:""};$("#f-search").value="";cal=new Date();
     cliQ="";dipQ="";if($("#cli-search"))$("#cli-search").value="";if($("#dip-search"))$("#dip-search").value="";
     prevFilter="tutti";fattVista="tutte";scadVista="tutte";
-    galFilter={op:"",tipo:""};segmOn("#gal-tipo","");
+    galFilter={op:"",tipo:"",media:"",lav:""};segmOn("#gal-tipo","");segmOn("#gal-media","");
     agFilter={op:"",stato:"aperti"};segmOn("#ag-stato","aperti");
     mezziFilter="tutti";
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
@@ -2622,40 +2631,228 @@
   const GAL_VUOTO=_SVGV+'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>';
   function galVuoto(box){
     box.style.display="block";
-    box.innerHTML=tabVuoto("Nessuna foto in questo reparto","Le foto si caricano dalla scheda del lavoro, voce «Foto».",GAL_VUOTO);
+    box.innerHTML=tabVuoto("Nessuna foto o video da mostrare","Usa il pulsante «Carica foto o video» qui sopra, oppure cambia i filtri.",GAL_VUOTO);
   }
+  /* ================= GALLERIA =================
+     Da qui si carica, si guarda e si elimina. Prima la Galleria sapeva solo
+     mostrare le foto: caricare ed eliminare si poteva fare unicamente dalla
+     scheda del lavoro, e i video non si vedevano affatto.
+     Ogni sezione fa il suo mestiere: le foto e i video sono mestiere di qui.
+     ============================================ */
+
+  let galVideoCache={};   /* id riga gest_video -> url firmato, per aprire il video */
+  let galRigheFoto={};    /* id -> riga: serve per eliminare (storage_path) */
+  let galRigheVideo={};
+
+  function galNomeOp(v){
+    if(!v)return "";
+    if(v==="Capo")return "Capo";
+    const d=dipById(v);
+    return d?d.nome:v;
+  }
+
   async function renderGalleria(){
     if(!cur)return;
     const box=$("#gal-body");if(!box)return;
-    const sel=$("#gal-op-sel");
-    if(!sb||!sbUid){if(sel)sel.innerHTML=`<option value="">Tutti</option>`;galVuoto(box);return;}
-    const [{data:foto},{data:lavori}]=await Promise.all([
+    const selOp=$("#gal-op-sel"), selLav=$("#gal-lav-sel");
+    if(!sb||!sbUid){
+      if(selOp)selOp.innerHTML='<option value="">Tutti</option>';
+      if(selLav)selLav.innerHTML='<option value="">Tutti i cantieri</option>';
+      galVuoto(box);return;
+    }
+    const [{data:foto},{data:video},{data:lavori}]=await Promise.all([
       sb.from("gest_foto").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
-      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      sb.from("gest_video").select("id,lavoro_id,storage_path,tipo,operatore").eq("user_id",sbUid),
+      sb.from("gest_lavori").select("id,descrizione,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
     ]);
-    const lavName=Object.fromEntries((lavori||[]).map(l=>[l.id,l.descrizione||"Lavoro"]));
-    const lavIds=new Set((lavori||[]).map(l=>l.id));
-    const all=(foto||[]).filter(f=>lavIds.has(f.lavoro_id)&&f.tipo!=="fattura");
-    const ops=new Set();all.forEach(f=>ops.add(f.operatore||""));
-    if(sel)sel.innerHTML=[`<option value=""${galFilter.op===""?" selected":""}>${ruoloUtente==='professionista'?'Tutti i collaboratori':'Tutti gli operatori'}</option>`]
-      .concat(Array.from(ops).filter(Boolean).map(o=>`<option value="${esc(o)}"${galFilter.op===o?" selected":""}>${esc(o)}</option>`)).join("");
-    const matchTipo=f=>galFilter.tipo==="prima"?f.tipo==="da_fare":galFilter.tipo==="dopo"?f.tipo!=="da_fare":true;
-    const fs=all.filter(f=>(!galFilter.op||f.operatore===galFilter.op)&&matchTipo(f));
-    const groups=new Map();
-    fs.forEach(f=>{const k=f.lavoro_id||"";if(!groups.has(k))groups.set(k,[]);groups.get(k).push(f);});
-    let html="",any=false;
-    groups.forEach((arr,k)=>{any=true;
-      html+=`<div class="gal-group"><div class="gal-cantiere">🏢 ${esc(lavName[k]||"—")}</div><div class="thumbs">`;
-      arr.forEach(f=>{const dafare=f.tipo==="da_fare",tip=dafare?"Prima":"Finito",tcls=dafare?"prima":"dopo",opName=f.operatore||"";
-        html+=`<div class="thumb"><img data-gfoto="${esc(f.id)}" data-action="view-foto" data-id="${esc(f.id)}">
-          <span class="thtag ${tcls}">${tip}</span>${opName?`<span class="thop">${esc(opName)}</span>`:""}</div>`;});
-      html+=`</div></div>`;});
-    if(any){box.style.display="grid";box.innerHTML=html;}else{galVuoto(box);}
-    for(const f of fs){
+    const lavArr=(lavori||[]);
+    const lavName=Object.fromEntries(lavArr.map(l=>[l.id,l.descrizione||"Lavoro"]));
+    const lavIds=new Set(lavArr.map(l=>l.id));
+
+    /* le foto di tipo "fattura" non sono foto di cantiere: restano fuori */
+    const tutteF=(foto||[]).filter(f=>lavIds.has(f.lavoro_id)&&f.tipo!=="fattura");
+    const tutteV=(video||[]).filter(v=>lavIds.has(v.lavoro_id));
+    galRigheFoto={};tutteF.forEach(f=>galRigheFoto[f.id]=f);
+    galRigheVideo={};tutteV.forEach(v=>galRigheVideo[v.id]=v);
+
+    /* tendina "chi l'ha caricata" */
+    const ops=new Set();
+    tutteF.concat(tutteV).forEach(x=>{if(x.operatore)ops.add(x.operatore);});
+    if(selOp)selOp.innerHTML=['<option value=""'+(galFilter.op===""?" selected":"")+'>Tutti</option>']
+      .concat(Array.from(ops).map(o=>'<option value="'+esc(o)+'"'+(galFilter.op===o?" selected":"")+'>'+esc(galNomeOp(o))+'</option>')).join("");
+
+    /* tendina cantiere: solo i lavori che hanno almeno una foto o un video */
+    const conRoba=new Set(tutteF.map(f=>f.lavoro_id).concat(tutteV.map(v=>v.lavoro_id)));
+    if(selLav)selLav.innerHTML=['<option value=""'+(galFilter.lav===""?" selected":"")+'>Tutti i cantieri</option>']
+      .concat(lavArr.filter(l=>conRoba.has(l.id))
+        .sort((a,b)=>String(b.data_prevista||"").localeCompare(String(a.data_prevista||"")))
+        .map(l=>'<option value="'+esc(l.id)+'"'+(galFilter.lav===l.id?" selected":"")+'>'+esc(l.descrizione||"Lavoro")+'</option>')).join("");
+
+    /* filtri */
+    const quando=x=>FOTO_TIPO_UI[x.tipo]==="prima"?"prima":"dopo";
+    const passa=x=>(!galFilter.op||x.operatore===galFilter.op)
+                 &&(!galFilter.lav||String(x.lavoro_id)===String(galFilter.lav))
+                 &&(!galFilter.tipo||quando(x)===galFilter.tipo);
+    const F=(galFilter.media==="video")?[]:tutteF.filter(passa);
+    const V=(galFilter.media==="foto") ?[]:tutteV.filter(passa);
+
+    if(!F.length&&!V.length){galVuoto(box);return;}
+
+    /* raggruppo per cantiere */
+    const gruppi=new Map();
+    const metti=(x,kind)=>{const k=x.lavoro_id||"";if(!gruppi.has(k))gruppi.set(k,[]);gruppi.get(k).push({x,kind});};
+    F.forEach(f=>metti(f,"foto"));V.forEach(v=>metti(v,"video"));
+
+    let html="";
+    gruppi.forEach((arr,k)=>{
+      const nF=arr.filter(a=>a.kind==="foto").length, nV=arr.length-nF;
+      const conta=[nF?nF+(nF===1?" foto":" foto"):"",nV?nV+(nV===1?" video":" video"):""].filter(Boolean).join(" · ");
+      html+='<div class="gal-group"><div class="gal-cantiere">'+esc(lavName[k]||"—")
+          + '<span class="gal-conta">'+conta+'</span></div><div class="thumbs">';
+      arr.forEach(({x,kind})=>{
+        const q=quando(x), tag=q==="prima"?"Prima":"Finito", tcls=q==="prima"?"prima":"dopo";
+        const op=galNomeOp(x.operatore);
+        if(kind==="foto"){
+          html+='<div class="thumb"><img data-gfoto="'+esc(x.id)+'" data-action="view-foto" data-id="'+esc(x.id)+'" alt="">'
+              + '<span class="thtag '+tcls+'">'+tag+'</span>'
+              + (op?'<span class="thop">'+esc(op)+'</span>':"")
+              + '<button class="thdel" data-action="gal-del-foto" data-id="'+esc(x.id)+'" title="Elimina">×</button></div>';
+        }else{
+          html+='<div class="thumb thumb-video" data-action="gal-play" data-id="'+esc(x.id)+'">'
+              + '<div class="vid-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>Video</span></div>'
+              + '<span class="thtag '+tcls+'">'+tag+'</span>'
+              + (op?'<span class="thop">'+esc(op)+'</span>':"")
+              + '<button class="thdel" data-action="gal-del-video" data-id="'+esc(x.id)+'" title="Elimina">×</button></div>';
+        }
+      });
+      html+='</div></div>';
+    });
+    box.style.display="block";
+    box.innerHTML=html;
+
+    /* le immagini arrivano dopo: gli indirizzi vanno firmati uno per uno */
+    for(const f of F){
       try{const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
-        if(su&&su.signedUrl){fotoCache[f.id]=su.signedUrl;const im=box.querySelector(`img[data-gfoto="${f.id}"]`);if(im)im.src=su.signedUrl;}
+        if(su&&su.signedUrl){fotoCache[f.id]=su.signedUrl;
+          const im=box.querySelector('img[data-gfoto="'+f.id+'"]');if(im)im.src=su.signedUrl;}
       }catch(e){}
     }
+    for(const v of V){
+      try{const {data:su}=await sb.storage.from("gestionale-video").createSignedUrl(v.storage_path,3600);
+        if(su&&su.signedUrl)galVideoCache[v.id]=su.signedUrl;
+      }catch(e){}
+    }
+  }
+
+  /* ---- finestra "Carica foto o video" ---- */
+  function galUploadForm(){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const lavOpts=(galLavCache||[]).map(l=>'<option value="'+esc(l.id)+'">'+esc(l.descrizione||"Lavoro")+'</option>').join("");
+    const dipOpts=dipCache.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.nome)+'</option>').join("");
+    openSheet('<h3>Carica foto o video</h3>'
+      +'<div class="field"><label>Di quale lavoro?</label>'
+      +  '<select id="gu-lav"><option value="">— scegli il lavoro —</option>'+lavOpts+'</select></div>'
+      +'<div class="field"><label>Quando sono state fatte?</label><div class="seg" id="gu-quando">'
+      +  '<button data-v="prima" class="on">Prima del lavoro</button>'
+      +  '<button data-v="dopo">A lavoro finito</button></div></div>'
+      +'<div class="field"><label>Chi le ha fatte</label>'
+      +  '<select id="gu-op"><option value="Capo">Capo (io)</option>'+dipOpts+'</select></div>'
+      +'<div class="field"><label>Foto (puoi sceglierne pi&ugrave; di una)</label>'
+      +  '<input type="file" id="gu-foto" accept="image/*" multiple></div>'
+      +'<div class="field"><label>Video (uno per volta, massimo 50 MB)</label>'
+      +  '<input type="file" id="gu-video" accept="video/*"></div>'
+      +'<div id="gu-stato" class="gu-stato"></div>'
+      +'<div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>'
+      +  '<button class="btn-primary b-save" data-action="gal-carica">Carica</button></div>');
+    bindSeg("gu-quando");
+  }
+
+  /* la lista dei lavori serve alla finestra di caricamento: la tengo aggiornata */
+  let galLavCache=[];
+  async function galCaricaLavori(){
+    if(!sb||!sbUid||!cur)return;
+    const {data}=await sb.from("gest_lavori").select("id,descrizione,data_prevista")
+      .eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      .order("data_prevista",{ascending:false});
+    galLavCache=data||[];
+  }
+
+  async function galCarica(){
+    const lav=$("#gu-lav")?$("#gu-lav").value:"";
+    if(!lav){toast("Scegli prima di quale lavoro sono");return;}
+    const quando=segVal("gu-quando")||"prima";
+    const tipoDb=quando==="prima"?"da_fare":"fatto";
+    const op=$("#gu-op")?$("#gu-op").value:"Capo";
+    const fotoFiles=$("#gu-foto")?Array.from($("#gu-foto").files||[]):[];
+    const vidFile=($("#gu-video")&&$("#gu-video").files&&$("#gu-video").files[0])||null;
+    if(!fotoFiles.length&&!vidFile){toast("Scegli almeno una foto o un video");return;}
+    const st=$("#gu-stato"), btn=document.querySelector('[data-action="gal-carica"]');
+    const dice=m=>{if(st)st.textContent=m;};
+    if(btn){btn.disabled=true;btn.textContent="Sto caricando…";}
+    let nF=0,nV=0,errori=[];
+    try{
+      let i=0;
+      for(const file of fotoFiles){
+        i++;dice("Foto "+i+" di "+fotoFiles.length+"…");
+        const pr=await preparaFileUpload(file);
+        if(pr.errore){errori.push(pr.errore);continue;}
+        const safe=pr.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
+        const path=sbUid+"/"+lav+"/"+Date.now()+"_"+safe;
+        const {error:up}=await sb.storage.from("gestionale-foto").upload(path,pr.file);
+        if(up){errori.push("Foto non caricata: "+up.message);continue;}
+        const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:lav,tipo:tipoDb,operatore:op,storage_path:path});
+        if(ins){errori.push("Foto su, ma non salvata: "+ins.message);continue;}
+        nF++;
+      }
+      if(vidFile){
+        if(vidFile.size>52428800){errori.push("Il video supera i 50 MB");}
+        else{
+          dice("Sto caricando il video…");
+          const safe=vidFile.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+          const path=sbUid+"/"+lav+"/"+Date.now()+"_"+safe;
+          const {error:up}=await sb.storage.from("gestionale-video").upload(path,vidFile);
+          if(up){errori.push("Video non caricato: "+up.message);}
+          else{
+            const {error:ins}=await sb.from("gest_video").insert({user_id:sbUid,lavoro_id:lav,tipo:tipoDb,operatore:op,storage_path:path});
+            if(ins)errori.push("Video su, ma non salvato: "+ins.message); else nV++;
+          }
+        }
+      }
+    }catch(e){errori.push(String(e&&e.message||e));}
+    if(btn){btn.disabled=false;btn.textContent="Carica";}
+    if(errori.length&&!nF&&!nV){dice(errori[0]);toast(errori[0]);return;}
+    closeSheet();
+    const pezzi=[];if(nF)pezzi.push(nF===1?"1 foto":nF+" foto");if(nV)pezzi.push(nV===1?"1 video":nV+" video");
+    toast(pezzi.join(" e ")+" caricat"+((nF+nV)===1?"o":"i")+" ✔"+(errori.length?" (qualcosa non è andato)":""));
+    renderGalleria();renderRiepilogo();
+  }
+
+  async function galDelFoto(id){
+    const r=galRigheFoto[id];if(!r)return;
+    const {data:tolte,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Foto non eliminata: "+error.message);return;}
+    if(!tolte||!tolte.length){toast("Foto non eliminata: non hai i permessi su questa riga");return;}
+    let avviso="Foto eliminata";
+    if(r.storage_path){
+      const {error:eRm}=await sb.storage.from("gestionale-foto").remove([r.storage_path]);
+      if(eRm)avviso="Riga eliminata, ma il file resta nel bucket: "+eRm.message;
+    }
+    delete fotoCache[id];delete galRigheFoto[id];
+    renderGalleria();renderRiepilogo();toast(avviso);
+  }
+
+  async function galDelVideo(id){
+    const r=galRigheVideo[id];if(!r)return;
+    const {data:tolte,error}=await sb.from("gest_video").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Video non eliminato: "+error.message);return;}
+    if(!tolte||!tolte.length){toast("Video non eliminato: non hai i permessi su questa riga");return;}
+    let avviso="Video eliminato";
+    if(r.storage_path){
+      const {error:eRm}=await sb.storage.from("gestionale-video").remove([r.storage_path]);
+      if(eRm)avviso="Riga eliminata, ma il file resta nel bucket: "+eRm.message;
+    }
+    delete galVideoCache[id];delete galRigheVideo[id];
+    renderGalleria();renderRiepilogo();toast(avviso);
   }
 
   function agendaCard(l){
@@ -3332,6 +3529,12 @@
     if(a==="close-lb"){$("#lightbox").classList.remove("open");return;}
     if(a==="del-foto"){if(confirm("Eliminare questa foto?"))deleteFoto(t.dataset.id);return;}
     if(a==="gal-tipo"){galFilter.tipo=t.dataset.v;segmOn("#gal-tipo",t.dataset.v);renderGalleria();return;}
+    if(a==="gal-media"){galFilter.media=t.dataset.v;segmOn("#gal-media",t.dataset.v);renderGalleria();return;}
+    if(a==="gal-nuovo"){galCaricaLavori().then(galUploadForm);return;}
+    if(a==="gal-carica")return galCarica();
+    if(a==="gal-del-foto"){if(confirm("Eliminare questa foto?"))galDelFoto(t.dataset.id);return;}
+    if(a==="gal-del-video"){if(confirm("Eliminare questo video?"))galDelVideo(t.dataset.id);return;}
+    if(a==="gal-play"){const u=galVideoCache[t.dataset.id];if(u)window.open(u,"_blank");else toast("Video non ancora pronto, riprova tra un attimo");return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;segmOn("#ag-stato",t.dataset.v);renderAgenda();return;}
     if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="del-job-supa"){
@@ -3454,6 +3657,7 @@
      le <option>), quindi il listener si aggancia una volta sola qui */
   if($("#ag-op-sel"))$("#ag-op-sel").onchange=e=>{agFilter.op=e.target.value;renderAgenda();};
   if($("#gal-op-sel"))$("#gal-op-sel").onchange=e=>{galFilter.op=e.target.value;renderGalleria();};
+  if($("#gal-lav-sel"))$("#gal-lav-sel").onchange=e=>{galFilter.lav=e.target.value;renderGalleria();};
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#cli-search"))$("#cli-search").oninput=e=>{cliQ=e.target.value;renderClienti();};
   if($("#dip-search"))$("#dip-search").oninput=e=>{dipQ=e.target.value;renderDip();};
