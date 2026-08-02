@@ -1650,8 +1650,14 @@
     const imponibile=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0),0);
     const iva=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0)*(+r.iva||0)/100,0);
     const ritenuta=imponibile*(+f.ritenuta_perc||0)/100;
-    const totale=imponibile+iva-(+f.sconto||0)+(+f.bollo||0)-ritenuta;
-    return {imponibile,iva,ritenuta,totale};
+    /* Due numeri diversi, e mescolarli e' un errore che lo SDI vede subito:
+       - totale     = quanto vale il documento (imponibile + IVA - sconto + bollo)
+       - daPagare   = quanto ti bonifica davvero il cliente, tolta la ritenuta
+       La ritenuta non e' uno sconto: e' una parte del tuo compenso che il
+       cliente versa allo Stato al posto tuo. Il documento vale lo stesso. */
+    const totale=imponibile+iva-(+f.sconto||0)+(+f.bollo||0);
+    const daPagare=totale-ritenuta;
+    return {imponibile,iva,ritenuta,totale,daPagare};
   }
   function fattNumero(f){
     return f.numero ? "n. "+f.numero+"/"+f.anno : "bozza senza numero";
@@ -1734,6 +1740,9 @@
     /* due PDF diversi, e i nomi di prima si scambiavano facilmente:
        uno lo CREA il gestionale, l'altro lo ALLEGHI tu se ce l'hai. */
     az.push({lab:"⬇ Crea il PDF",action:"fatt-pdf",data:{id:f.id}});
+    /* l'XML solo sulle emesse: una bozza non ha il numero, e senza numero
+       lo SDI non la accetta */
+    if(f.numero) az.push({lab:"⬇ File per lo SDI (XML)",action:"fatt-xml",data:{id:f.id}});
     if(pdf) az.push({lab:"📄 Apri il PDF allegato",action:"open-fattura", data:{id:pdf.id}});
     else    az.push({lab:"📎 Allega un PDF tuo",   action:"upload-fattura",data:{id:f.id}});
     az.push({lab:"🗑 Elimina",action:"del-fatt",data:{id:f.id},del:true});
@@ -1741,7 +1750,7 @@
     return schedaJob({
       tono,
       titolo:esc(f.cli_nome||(cli&&cli.nome)||"Fattura")+" — "+esc(statoLab),
-      destra:'<span class="job-imp">'+eur(c.totale)+'</span>',
+      destra:'<span class="job-imp">'+eur(c.daPagare)+'</span>',
       meta,
       nota:f.note?"📝 "+esc(f.note):"",
       azioni:az
@@ -1797,10 +1806,10 @@
     const pagate = fattCache.filter(f=>f.stato==="pagata");
     const scadute= emesse.filter(f=>fattScaduta(f,gg));
 
-    const tInc  = emesse.reduce((s,f)=>s+conti[f.id].totale,0);
+    const tInc  = emesse.reduce((s,f)=>s+conti[f.id].daPagare,0);
     const tFatt = fattLavLiberi.reduce((s,l)=>s+(+l.importo||0),0);
     const incAnno = pagate.filter(f=>String(f.data_pagata||f.data||"").slice(0,4)===anno)
-                          .reduce((s,f)=>s+conti[f.id].totale,0);
+                          .reduce((s,f)=>s+conti[f.id].daPagare,0);
     const attese = emesse.map(f=>fattGiorniDa(f.data)).filter(x=>x!=null);
     const piuVecchio = attese.length?Math.max.apply(null,attese):null;
     const emesseAnno = fattCache.filter(f=>f.numero&&String(f.anno)===anno).length;
@@ -1889,7 +1898,8 @@
     const bollo =+($("#fa-bollo") ||{}).value||0;
     const rit   =+($("#fa-rit")   ||{}).value||0;
     const ritE=imp*rit/100;
-    const tot=imp+iva-sconto+bollo-ritE;
+    const tot=imp+iva-sconto+bollo;      /* quanto vale il documento */
+    const netto=tot-ritE;                /* quanto ti bonificano davvero */
     const el=$("#fatt-somma");
     if(el)el.innerHTML=
         '<div class="fs-r"><span>Imponibile</span><b>'+eur2(imp)+'</b></div>'
@@ -1897,7 +1907,8 @@
       + (sconto?'<div class="fs-r"><span>Sconto</span><b>−'+eur2(sconto)+'</b></div>':"")
       + (bollo ?'<div class="fs-r"><span>Bollo</span><b>'+eur2(bollo)+'</b></div>':"")
       + (ritE  ?'<div class="fs-r"><span>Ritenuta '+rit+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
-      + '<div class="fs-r fs-tot"><span>Totale</span><b>'+eur2(tot)+'</b></div>';
+      + '<div class="fs-r fs-tot"><span>'+(ritE?"Totale fattura":"Totale")+'</span><b>'+eur2(tot)+'</b></div>'
+      + (ritE?'<div class="fs-r fs-tot"><span>Netto a pagare</span><b>'+eur2(netto)+'</b></div>':"");
     return tot;
   }
 
@@ -2362,6 +2373,10 @@
     doc.setDrawColor(11,75,196);doc.setLineWidth(.4);
     doc.rect(Rx-72,y-2,72,11);doc.setLineWidth(.2);
     y+=6;riga("TOTALE",eurPdf(c.totale),true);
+    if(c.ritenuta){
+      y+=2;doc.setDrawColor(11,75,196);doc.setLineWidth(.4);doc.rect(Rx-72,y-2,72,11);doc.setLineWidth(.2);
+      y+=6;riga("NETTO A PAGARE",eurPdf(c.daPagare),true);
+    }
     y+=6;
 
     /* pagamento e note */
@@ -2395,6 +2410,253 @@
     const nome=(f.cli_nome||cli.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase();
     doc.save("fattura-"+(f.numero?f.numero+"-"+f.anno:"bozza")+"-"+nome+".pdf");
     toast("PDF scaricato ✅");
+  }
+
+
+  /* ================= FATTURA ELETTRONICA (XML per lo SDI) =================
+     Il PDF che il gestionale scarica e' una copia di cortesia: per lo Stato
+     non vale niente. La fattura che conta e' questo file XML, nel formato
+     FatturaPA. Qui il gestionale lo GENERA e te lo fa scaricare: lo carichi
+     sul portale del tuo commercialista, che lo manda allo SDI. L'invio
+     automatico e' un altro lavoro e viene dopo.
+
+     Formato: FatturaPA 1.2.2, attributo versione FPR12 (fattura fra privati).
+     Le specifiche tecniche sono passate alla 1.9.1 il 15 maggio 2026, ma sono
+     ritocchi che non toccano una fattura edile: lo schema del file e' lo stesso.
+
+     REGOLA IMPORTANTE: questo file non si manda mai senza averlo prima passato
+     dal validatore gratuito dell'Agenzia delle Entrate. Il gestionale controlla
+     quello che puo' controllare (campi mancanti, formati sbagliati), ma la
+     parola finale ce l'ha il validatore. ====================================== */
+
+  const XML_TIPO={fattura:"TD01", acconto:"TD02", nota_credito:"TD04"};
+
+  /* Sotto i tag XML non ci va tutto: & < > " ' vanno scritti in un altro modo,
+     altrimenti il file si rompe. Es. "Rossi & Figli" diventa "Rossi &amp; Figli". */
+  function xesc(v){
+    return String(v==null?"":v)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+  }
+  /* lo SDI vuole il punto come separatore dei decimali e due cifre esatte */
+  const xnum=n=>(Math.round((+n||0)*100)/100).toFixed(2);
+  /* la denominazione ha un limite di 80 caratteri; le descrizioni di 1000 */
+  const xtaglia=(v,n)=>String(v==null?"":v).trim().slice(0,n);
+
+  /* ---- il controllo prima di generare ----
+     Meglio dire subito cosa manca che produrre un file che lo SDI rifiuta
+     una settimana dopo. Ogni voce dice cosa manca e dove si mette. */
+  function fattXmlControllo(f){
+    const az=fattAzienda||{};
+    const cli=fattCliCache.find(x=>String(x.id)===String(f.cliente_id))||{};
+    const R=fattRighe[f.id]||[];
+    const forf=(f.regime_fiscale||az.regime_fiscale)==="RF19";
+    const m=[];
+
+    if(!f.numero) m.push("La fattura è ancora una bozza: prima va emessa, così prende il numero.");
+
+    /* --- chi emette: te --- */
+    if(!(az.nome||"").trim())        m.push("Manca il nome della tua azienda — Dati azienda.");
+    if(!(az.piva||"").trim())        m.push("Manca la tua partita IVA — Dati azienda.");
+    if(!(az.regime_fiscale||"").trim()) m.push("Manca il tuo regime fiscale — Dati azienda.");
+    if(!(az.indirizzo||"").trim())   m.push("Manca la via della tua sede — Dati azienda.");
+    if(!/^\d{5}$/.test((az.cap||"").trim()))  m.push("Il CAP della tua sede manca o non è di 5 cifre — Dati azienda.");
+    if(!(az.citta||"").trim())       m.push("Manca la città della tua sede — Dati azienda.");
+
+    /* --- chi riceve: il cliente --- */
+    if(!f.cliente_id)                m.push("La fattura non ha un cliente.");
+    else{
+      const piva=(f.cli_piva||cli.piva||"").trim();
+      const cf  =(f.cli_cod_fiscale||cli.cod_fiscale||"").trim();
+      if(!piva&&!cf)                 m.push("Il cliente non ha né partita IVA né codice fiscale — apri la sua scheda in Condomini.");
+      if(!(f.cli_indirizzo||cli.indirizzo||"").trim()) m.push("Manca la via del cliente — Condomini.");
+      if(!/^\d{5}$/.test((f.cli_cap||cli.cap||"").trim())) m.push("Il CAP del cliente manca o non è di 5 cifre — Condomini.");
+      if(!(f.cli_citta||cli.citta||"").trim())          m.push("Manca la città del cliente — Condomini.");
+      const sdi=(f.cli_sdi||cli.sdi_codice||"").trim();
+      const pec=(f.cli_pec||cli.sdi_pec||"").trim();
+      if(!sdi&&!pec)
+        m.push("Il cliente non ha né codice destinatario né PEC. Se non li ha davvero, scrivi 0000000 nel codice destinatario: la fattura gli arriverà nel suo cassetto fiscale.");
+      if(sdi&&sdi!=="0000000"&&sdi.length!==7)
+        m.push("Il codice destinatario del cliente deve essere di 7 caratteri (o 0000000 se non ce l'ha).");
+    }
+
+    /* --- le righe --- */
+    if(!R.length) m.push("La fattura non ha nessuna voce.");
+    R.forEach((r,i)=>{
+      if(!(r.descrizione||"").trim()) m.push("La voce n. "+(i+1)+" non ha descrizione.");
+      if(!forf && (+r.iva||0)===0)
+        m.push("La voce «"+xtaglia(r.descrizione,40)+"» ha IVA 0% ma tu non sei in regime forfettario. "
+             + "Lo SDI in questo caso vuole sapere PERCHÉ non c'è IVA, e il gestionale non può indovinarlo. "
+             + "Metti l'aliquota giusta, oppure chiedi al commercialista quale caso è.");
+    });
+    return m;
+  }
+
+  /* ---- il file ---- */
+  function fattXmlCostruisci(f){
+    const az=fattAzienda||{};
+    const cli=fattCliCache.find(x=>String(x.id)===String(f.cliente_id))||{};
+    const R=(fattRighe[f.id]||[]).slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0));
+    const forf=(f.regime_fiscale||az.regime_fiscale)==="RF19";
+    const c=fattConti(f);
+
+    const cPiva =(f.cli_piva||cli.piva||"").trim();
+    const cCf   =(f.cli_cod_fiscale||cli.cod_fiscale||"").trim();
+    const cSdi  =(f.cli_sdi||cli.sdi_codice||"").trim();
+    const cPec  =(f.cli_pec||cli.sdi_pec||"").trim();
+    const codDest = cSdi || "0000000";
+
+    /* il progressivo dell'invio: identifica il file, non la fattura.
+       Basta che sia diverso ogni volta e lungo al massimo 10 caratteri. */
+    const prog=String(f.anno).slice(2)+String(f.numero).padStart(5,"0");
+
+    const sede=(o,pref)=>
+        "        <Indirizzo>"+xesc(xtaglia(o[pref+"indirizzo"],60))+"</Indirizzo>\n"
+      + "        <CAP>"+xesc((o[pref+"cap"]||"").trim())+"</CAP>\n"
+      + "        <Comune>"+xesc(xtaglia(o[pref+"citta"],60))+"</Comune>\n"
+      + ((o[pref+"prov"]||"").trim()?"        <Provincia>"+xesc(o[pref+"prov"].trim().toUpperCase())+"</Provincia>\n":"")
+      + "        <Nazione>IT</Nazione>\n";
+
+    /* i dati del cliente: quelli congelati nella fattura, se ci sono, altrimenti
+       quelli dell'anagrafica di adesso */
+    const cliDati={
+      indirizzo:f.cli_indirizzo||cli.indirizzo||"",
+      cap:f.cli_cap||cli.cap||"",
+      citta:f.cli_citta||cli.citta||"",
+      prov:f.cli_prov||cli.prov||"",
+      nome:f.cli_nome||cli.nome||""
+    };
+
+    let x='<?xml version="1.0" encoding="UTF-8"?>\n';
+    x+='<p:FatturaElettronica versione="FPR12"'
+     + ' xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"'
+     + ' xmlns:ds="http://www.w3.org/2000/09/xmldsig#"'
+     + ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
+     + ' xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2'
+     + ' http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2.2/Schema_del_file_xml_FatturaPA_versione_1.2.2.xsd">\n';
+
+    /* ---- INTESTAZIONE ---- */
+    x+='  <FatturaElettronicaHeader>\n';
+    x+='    <DatiTrasmissione>\n';
+    x+='      <IdTrasmittente>\n        <IdPaese>IT</IdPaese>\n        <IdCodice>'+xesc(az.piva)+'</IdCodice>\n      </IdTrasmittente>\n';
+    x+='      <ProgressivoInvio>'+xesc(prog)+'</ProgressivoInvio>\n';
+    x+='      <FormatoTrasmissione>FPR12</FormatoTrasmissione>\n';
+    x+='      <CodiceDestinatario>'+xesc(codDest)+'</CodiceDestinatario>\n';
+    /* la PEC si scrive solo quando il cliente non ha un codice destinatario:
+       messa insieme al codice, lo SDI scarta il file */
+    if(codDest==="0000000"&&cPec) x+='      <PECDestinatario>'+xesc(cPec)+'</PECDestinatario>\n';
+    x+='    </DatiTrasmissione>\n';
+
+    x+='    <CedentePrestatore>\n      <DatiAnagrafici>\n';
+    x+='        <IdFiscaleIVA>\n          <IdPaese>IT</IdPaese>\n          <IdCodice>'+xesc(az.piva)+'</IdCodice>\n        </IdFiscaleIVA>\n';
+    if((az.cod_fiscale||"").trim()) x+='        <CodiceFiscale>'+xesc(az.cod_fiscale.trim().toUpperCase())+'</CodiceFiscale>\n';
+    x+='        <Anagrafica>\n          <Denominazione>'+xesc(xtaglia(az.nome,80))+'</Denominazione>\n        </Anagrafica>\n';
+    x+='        <RegimeFiscale>'+xesc(az.regime_fiscale||"RF01")+'</RegimeFiscale>\n';
+    x+='      </DatiAnagrafici>\n      <Sede>\n'+sede(az,"")+'      </Sede>\n    </CedentePrestatore>\n';
+
+    x+='    <CessionarioCommittente>\n      <DatiAnagrafici>\n';
+    if(cPiva) x+='        <IdFiscaleIVA>\n          <IdPaese>IT</IdPaese>\n          <IdCodice>'+xesc(cPiva)+'</IdCodice>\n        </IdFiscaleIVA>\n';
+    if(cCf)   x+='        <CodiceFiscale>'+xesc(cCf.toUpperCase())+'</CodiceFiscale>\n';
+    x+='        <Anagrafica>\n          <Denominazione>'+xesc(xtaglia(cliDati.nome,80))+'</Denominazione>\n        </Anagrafica>\n';
+    x+='      </DatiAnagrafici>\n      <Sede>\n'+sede(cliDati,"")+'      </Sede>\n    </CessionarioCommittente>\n';
+    x+='  </FatturaElettronicaHeader>\n';
+
+    /* ---- CORPO ---- */
+    x+='  <FatturaElettronicaBody>\n    <DatiGenerali>\n      <DatiGeneraliDocumento>\n';
+    x+='        <TipoDocumento>'+(XML_TIPO[f.tipo]||"TD01")+'</TipoDocumento>\n';
+    x+='        <Divisa>EUR</Divisa>\n';
+    x+='        <Data>'+xesc(f.data)+'</Data>\n';
+    x+='        <Numero>'+xesc(String(f.numero))+'</Numero>\n';
+    /* l'ordine di questi blocchi non e' a caso: lo schema li vuole cosi' */
+    if(+f.ritenuta_perc){
+      x+='        <DatiRitenuta>\n';
+      x+='          <TipoRitenuta>RT02</TipoRitenuta>\n';
+      x+='          <ImportoRitenuta>'+xnum(c.ritenuta)+'</ImportoRitenuta>\n';
+      x+='          <AliquotaRitenuta>'+xnum(f.ritenuta_perc)+'</AliquotaRitenuta>\n';
+      x+='          <CausalePagamento>A</CausalePagamento>\n';
+      x+='        </DatiRitenuta>\n';
+    }
+    if(+f.bollo){
+      x+='        <DatiBollo>\n          <BolloVirtuale>SI</BolloVirtuale>\n          <ImportoBollo>'+xnum(f.bollo)+'</ImportoBollo>\n        </DatiBollo>\n';
+    }
+    if(+f.sconto){
+      x+='        <ScontoMaggiorazione>\n          <Tipo>SC</Tipo>\n          <Importo>'+xnum(f.sconto)+'</Importo>\n        </ScontoMaggiorazione>\n';
+    }
+    /* qui va il valore del DOCUMENTO, non quello che incassi: lo SDI lo
+       confronta con la somma di imponibile e imposta, e se ci sottrai la
+       ritenuta il file viene segnalato. La ritenuta si toglie piu' sotto,
+       nell'importo del pagamento. */
+    x+='        <ImportoTotaleDocumento>'+xnum(c.totale)+'</ImportoTotaleDocumento>\n';
+    if((f.note||"").trim()) x+='        <Causale>'+xesc(xtaglia(f.note,200))+'</Causale>\n';
+    x+='      </DatiGeneraliDocumento>\n    </DatiGenerali>\n';
+
+    x+='    <DatiBeniServizi>\n';
+    const perAliq={};
+    R.forEach((r,i)=>{
+      const al=forf?0:(+r.iva||0);
+      const imp=(+r.qta||0)*(+r.prezzo||0);
+      perAliq[al]=(perAliq[al]||0)+imp;
+      x+='      <DettaglioLinee>\n';
+      x+='        <NumeroLinea>'+(i+1)+'</NumeroLinea>\n';
+      x+='        <Descrizione>'+xesc(xtaglia(r.descrizione,1000))+'</Descrizione>\n';
+      x+='        <Quantita>'+xnum(r.qta)+'</Quantita>\n';
+      x+='        <PrezzoUnitario>'+xnum(r.prezzo)+'</PrezzoUnitario>\n';
+      x+='        <PrezzoTotale>'+xnum(imp)+'</PrezzoTotale>\n';
+      x+='        <AliquotaIVA>'+xnum(al)+'</AliquotaIVA>\n';
+      /* quando l'IVA e' zero lo SDI vuole sapere perche': in forfettario e'
+         il codice N2.2, "operazione non soggetta" */
+      if(al===0) x+='        <Natura>N2.2</Natura>\n';
+      x+='      </DettaglioLinee>\n';
+    });
+    Object.keys(perAliq).sort((a,b)=>b-a).forEach(al=>{
+      const imp=perAliq[al], imposta=imp*(+al)/100;
+      x+='      <DatiRiepilogo>\n';
+      x+='        <AliquotaIVA>'+xnum(al)+'</AliquotaIVA>\n';
+      if(+al===0) x+='        <Natura>N2.2</Natura>\n';
+      x+='        <ImponibileImporto>'+xnum(imp)+'</ImponibileImporto>\n';
+      x+='        <Imposta>'+xnum(imposta)+'</Imposta>\n';
+      x+='        <EsigibilitaIVA>I</EsigibilitaIVA>\n';
+      if(+al===0) x+='        <RiferimentoNormativo>Operazione non soggetta a IVA ai sensi dell\'art. 1, commi 54-89, L. 190/2014 - regime forfettario</RiferimentoNormativo>\n';
+      x+='      </DatiRiepilogo>\n';
+    });
+    x+='    </DatiBeniServizi>\n';
+
+    if((az.iban||"").trim()){
+      const gg=(+az.giorni_pagamento)||30;
+      x+='    <DatiPagamento>\n      <CondizioniPagamento>TP02</CondizioniPagamento>\n';
+      x+='      <DettaglioPagamento>\n';
+      x+='        <ModalitaPagamento>MP05</ModalitaPagamento>\n';
+      x+='        <DataScadenzaPagamento>'+xesc(_giorniDopo(f.data,gg))+'</DataScadenzaPagamento>\n';
+      x+='        <ImportoPagamento>'+xnum(c.daPagare)+'</ImportoPagamento>\n';
+      x+='        <IBAN>'+xesc(az.iban.replace(/\s+/g,"").toUpperCase())+'</IBAN>\n';
+      x+='      </DettaglioPagamento>\n    </DatiPagamento>\n';
+    }
+
+    x+='  </FatturaElettronicaBody>\n</p:FatturaElettronica>\n';
+    return {xml:x, nome:"IT"+String(az.piva||"").replace(/\D/g,"")+"_"+prog+".xml"};
+  }
+
+  async function fatturaXml(id){
+    const f=fattCache.find(x=>String(x.id)===String(id));
+    if(!f){toast("Fattura non trovata");return;}
+    const mancano=fattXmlControllo(f);
+    if(mancano.length){
+      openSheetGrande("Non posso ancora fare il file per lo SDI",
+        '<div class="sh-b"><div class="sh-tit">Cosa manca</div>'
+        + '<div class="sh-nota">Lo SDI rifiuta la fattura se anche una sola di queste cose non c\'è. Meglio saperlo adesso che fra una settimana.</div>'
+        + '<ul class="xml-manca">'+mancano.map(m=>"<li>"+esc(m)+"</li>").join("")+'</ul>'
+        + '</div>',
+        '<button class="btn b-cancel" data-action="close">Ho capito</button>');
+      return;
+    }
+    const {xml,nome}=fattXmlCostruisci(f);
+    /* scarico il file senza passare da nessun server: resta tutto sul tuo computer */
+    const blob=new Blob([xml],{type:"application/xml;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);a.download=nome;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+    toast("File XML scaricato ✅ — passalo dal validatore prima di mandarlo");
   }
 
   let calJobs=[];
@@ -5154,6 +5416,7 @@
     if(a==="fatt-stato")return fattCambiaStato(id,t.dataset.v);
     if(a==="del-fatt")return eliminaFattura(id);
     if(a==="fatt-pdf")return fatturaPdf(id);
+    if(a==="fatt-xml")return fatturaXml(id);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
     if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId

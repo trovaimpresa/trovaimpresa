@@ -1873,3 +1873,23 @@
 @media(min-width:900px){
   .sheet--grande .sh-cols--fatt{ grid-template-columns:1.55fr 1fr; }
 }
+
+/* l'errore di salvataggio della fattura: resta lì, non svanisce come un toast */
+.fatt-errore{
+  background:var(--err-bg); border:2px solid var(--err); border-radius:12px;
+  padding:16px 18px; margin-bottom:20px; font-size:16px; line-height:1.55; color:var(--err);
+}
+.fatt-errore b{ font-weight:800; }
+
+/* la lista di cosa manca prima di poter fare il file per lo SDI */
+.xml-manca{ margin:14px 0 0; padding-left:0; list-style:none; }
+.xml-manca li{
+  font-size:17px; line-height:1.55; color:var(--testo);
+  padding:14px 16px 14px 44px; margin-bottom:10px; position:relative;
+  background:var(--attesa-bg); border:1.5px solid #f0d9a8; border-radius:10px;
+}
+.xml-manca li::before{
+  content:"!"; position:absolute; left:15px; top:14px;
+  width:22px; height:22px; border-radius:50%; background:var(--attesa); color:#fff;
+  font-weight:800; font-size:14px; text-align:center; line-height:22px;
+}
