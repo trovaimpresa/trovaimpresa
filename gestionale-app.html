@@ -1366,6 +1366,30 @@
     const b=btn?`<button class="btn-primary lv-btn" data-action="${btn.a}">${btn.t}</button>`:"";
     return `<div class="lav-vuoto">${icona||_SVGV+'<circle cx="12" cy="12" r="9"/></svg>'}<h3>${titolo}</h3><p>${sotto}</p>${b}</div>`;
   }
+  /* ---- LA SCHEDA UNICA DI TUTTE LE SEZIONI ----
+     Prima Lavori e Preventivi avevano un disegno (barretta colorata a sinistra,
+     pulsanti in fondo) e Condomini, Squadra, Mezzi e Scadenzario un altro
+     (niente barretta, pulsanti incolonnati a destra). Due modi di disegnare la
+     stessa cosa: girando le sezioni il gestionale sembrava fatto da due persone.
+     Ora passano tutte da qui.
+       tono    "t-err" | "t-attesa" | "t-ok" | "t-neutro" — il colore della
+               barretta a sinistra: rosso scaduto, arancione in arrivo, verde a
+               posto, grigio quando non c'e' nessuno stato da dire
+       titolo  il nome, in grande (gia' passato per esc)
+       destra  la pastiglia di stato a destra del titolo, facoltativa
+       meta    le righe di dettaglio, una per voce
+       nota    il riquadro giallo in fondo (note libere), facoltativo
+       azioni  [{lab,action,data,del}] — gli stessi oggetti dei menu "..." */
+  function schedaJob(o){
+    const meta=(o.meta||[]).filter(Boolean);
+    return `<div class="job ${o.tono||"t-neutro"}">
+      <div class="job-top"><div class="job-cli">${o.titolo||""}</div>${o.destra||""}</div>
+      ${meta.length?`<div class="job-meta">${meta.map(x=>`<span>${x}</span>`).join("")}</div>`:""}
+      ${o.nota?`<div class="job-note">${o.nota}</div>`:""}
+      <div class="job-actions">${(o.azioni||[]).filter(x=>x&&!x.sep).map(a=>
+        `<button class="btn btn-sm ja${a.del?" btn-danger del":""}" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`
+      ).join("")}</div></div>`;
+  }
   function tabVuotoCerca(q){
     return `<div class="lav-vuoto">${_SVGV}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><h3>Nessun risultato</h3><p>Niente trovato per \u00ab${esc(q)}\u00bb.</p></div>`;
   }
@@ -1788,10 +1812,14 @@
     ];
   }
   function cliCard(c){
-    return `<div class="card"><div><h3>${esc(c.nome)}</h3>
-      <p>${c.indirizzo?"📍 "+esc(c.indirizzo)+"<br>":""}${c.referente?"👤 "+esc(c.referente)+" ":""}${c.telefono?"· 📞 "+esc(c.telefono):""}</p></div>
-      <div class="card-acts">${cliVoci(c).filter(x=>!x.sep)
-        .map(x=>`<button class="btn btn-sm${x.del?" btn-danger del":""}" data-action="${x.action}"${tabAttr(x.data)}>${x.lab}</button>`).join("")}</div></div>`;
+    return schedaJob({
+      tono:"t-neutro",                 /* un cliente non ha uno stato: barretta grigia */
+      titolo:esc(c.nome),
+      meta:[c.indirizzo?"📍 "+esc(c.indirizzo):"",
+            c.referente?"👤 "+esc(c.referente):"",
+            c.telefono?"📞 "+esc(c.telefono):""],
+      azioni:cliVoci(c)
+    });
   }
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
@@ -1938,13 +1966,19 @@
   }
   function dipCard(o){
     const av=dipAvvisi(o);
-    const riga2=[o.mansione?esc(o.mansione):"",o.attivo?"Attivo":"Invitato",o.telefono?"📞 "+esc(o.telefono):""].filter(Boolean).join(" · ");
-    const allerta=av.length?`<div class="cnt" style="margin-top:6px;font-weight:700;color:${av.some(x=>x.scaduto)?"#b3261e":"#b26a00"}">${av.some(x=>x.scaduto)
-        ?"⚠ "+esc(av.filter(x=>x.scaduto).map(x=>x.lab).join(", "))+" scadut"+(av.filter(x=>x.scaduto).length>1?"i":"o")
-        :"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", "))}</div>`:"";
-    return `<div class="card"><div><h3>${esc(o.nome)}</h3><p>${riga2}</p>${allerta}</div>
-      <div class="card-acts">${dipVoci(o).filter(x=>!x.sep)
-        .map(x=>`<button class="btn btn-sm${x.del?" btn-danger":""}" data-action="${x.action}"${tabAttr(x.data)}>${x.lab}</button>`).join("")}</div></div>`;
+    const scaduti=av.filter(x=>x.scaduto);
+    /* la barretta dice lo stato dei documenti senza dover leggere:
+       rossa se qualcosa e' gia' scaduto, arancione se sta per scadere */
+    const tono=scaduti.length?"t-err":(av.length?"t-attesa":(o.attivo?"t-ok":"t-neutro"));
+    const nota=scaduti.length
+      ? "⚠ "+esc(scaduti.map(x=>x.lab).join(", "))+" scadut"+(scaduti.length>1?"i":"o")
+      : (av.length?"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", ")):"");
+    return schedaJob({
+      tono, titolo:esc(o.nome),
+      destra:`<span class="stato ${o.attivo?"fatto":"bozza"}">${o.attivo?"Attivo":"Invitato"}</span>`,
+      meta:[o.mansione?"👷 "+esc(o.mansione):"", o.telefono?"📞 "+esc(o.telefono):""],
+      nota, azioni:dipVoci(o)
+    });
   }
   const PERMS=[{key:"calendario",label:"Calendario"},{key:"lavori",label:"Lavori"},{key:"foto",label:"Foto"},{key:"note",label:"Note"},{key:"clienti",label:"Clienti"},{key:"fatture",label:"Fatture"},{key:"pagamenti",label:"Pagamenti"}];
   const RUOLO_PRESET={operaio:["calendario","lavori","foto"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
@@ -2153,23 +2187,29 @@
   function mezzoCard(m,sc){
     const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
     const cat=m.categoria==="attrezzatura"?"🔧 Attrezzatura":"🚚 Mezzo";
-    let scLine="";
+    /* la barretta a sinistra dice come sta il mezzo senza leggere:
+       rossa se ha scadenze gia' passate, arancione se una arriva entro 7 giorni */
+    let scTesto="", tono="t-ok";
     if(sc&&sc.scadute>0){
-      scLine=`<br><span style="color:var(--err);font-weight:700">⚠ ${sc.scadute} ${sc.scadute===1?"scadenza scaduta":"scadenze scadute"}</span>`;
+      tono="t-err";
+      scTesto=`<span style="color:var(--err);font-weight:700">⚠ ${sc.scadute} ${sc.scadute===1?"scadenza scaduta":"scadenze scadute"}</span>`;
     }else if(sc&&sc.prossima_data){
       const g=_giorniA(sc.prossima_data);
       const eti=sc.prossimo_tipo||sc.prossimo_titolo||"Scadenza";
       const quando=g===0?"oggi":(g===1?"tra 1 giorno":"tra "+g+" giorni");
-      scLine=`<br><span style="color:${g<=7?"var(--attesa)":"var(--muted)"};font-weight:${g<=7?"700":"400"}">📅 ${esc(eti)} ${quando}</span>`;
-    }
-    return `<div class="card"><div>
-      <h3>${esc(m.nome)}</h3>
-      <p>${cat}${m.targa?" · 🔖 "+esc(m.targa):""}<br>
-      <span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>${scLine}${m.note?"<br>📝 "+esc(m.note):""}</p></div>
-      <div class="card-acts">
-        <button class="btn btn-sm" data-action="mezzo-scad" data-id="${m.id}">+ Scadenza</button>
-        <button class="btn btn-sm" data-action="edit-mezzo" data-id="${m.id}">Modifica</button>
-        <button class="btn btn-sm btn-danger del" data-action="del-mezzo" data-id="${m.id}">Elimina</button></div></div>`;
+      if(g<=7)tono="t-attesa";
+      scTesto=`<span style="color:${g<=7?"var(--attesa)":"var(--muted)"};font-weight:${g<=7?"700":"400"}">📅 ${esc(eti)} ${quando}</span>`;
+    }else{ tono="t-neutro"; }
+    return schedaJob({
+      tono, titolo:esc(m.nome),
+      destra:`<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
+      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", scTesto],
+      nota:m.note?"📝 "+esc(m.note):"",
+      azioni:[
+        {lab:"＋ Scadenza",action:"mezzo-scad",data:{id:m.id}},
+        {lab:"✏ Modifica",action:"edit-mezzo",data:{id:m.id}},
+        {lab:"🗑 Elimina",action:"del-mezzo",data:{id:m.id},del:true}
+      ]});
   }
   function mezzoForm(m){
     const isNew=!m;m=m||{};
@@ -2486,28 +2526,37 @@
   let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap){
     if(s._persona){
-      let bgP="var(--sfondo)",fgP="var(--testo-2)",labP="Aperta";
-      if(s.data_scadenza<oggi){bgP="var(--err-bg)";fgP="var(--err)";labP="Scaduta";}
-      else if(s.data_scadenza<=lim){bgP="var(--attesa-bg)";fgP="var(--attesa)";labP="In scadenza";}
-      return `<div class="card"><div>
-        <h3>${esc(s.titolo)}</h3>
-        <p>👷 ${esc(s._nome)}<br>📅 ${fdate(s.data_scadenza)} <span class="stato" style="background:${bgP};color:${fgP}">${labP}</span></p></div>
-        <div class="card-acts"><button class="btn btn-sm" data-action="scad-persona" data-id="${s._opId}">Apri la scheda</button></div></div>`;
+      let bgP="var(--sfondo)",fgP="var(--testo-2)",labP="Aperta",tonoP="t-neutro";
+      if(s.data_scadenza<oggi){bgP="var(--err-bg)";fgP="var(--err)";labP="Scaduta";tonoP="t-err";}
+      else if(s.data_scadenza<=lim){bgP="var(--attesa-bg)";fgP="var(--attesa)";labP="In scadenza";tonoP="t-attesa";}
+      return schedaJob({
+        tono:tonoP, titolo:esc(s.titolo),
+        destra:`<span class="stato" style="background:${bgP};color:${fgP}">${labP}</span>`,
+        meta:["👷 "+esc(s._nome), "📅 "+fdate(s.data_scadenza)],
+        azioni:[{lab:"Apri la scheda",action:"scad-persona",data:{id:s._opId}}]
+      });
     }
     const fatta=s.stato==="fatta";
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
     const mezNome=s.mezzo_id?((mezMap||{})[s.mezzo_id]||"(mezzo eliminato)"):"";
-    let bg="var(--sfondo)",fg="var(--testo-2)",lab="Aperta";
-    if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";}
-    else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";}
-    else if(s.data_scadenza&&s.data_scadenza<=lim){bg="var(--attesa-bg)";fg="var(--attesa)";lab="In scadenza";}
-    return `<div class="card"><div>
-      <h3>${esc(s.titolo||"Scadenza")}</h3>
-      <p>${s.tipo_pratica?"📄 "+esc(s.tipo_pratica)+"<br>":""}${cliNome?"👤 "+esc(cliNome)+"<br>":""}${mezNome?"🚚 "+esc(mezNome)+"<br>":""}📅 ${fdate(s.data_scadenza)} <span class="stato" style="background:${bg};color:${fg}">${lab}</span>${s.note?"<br>📝 "+esc(s.note):""}</p></div>
-      <div class="card-acts">
-        ${fatta?`<button class="btn btn-sm" data-action="scad-stato" data-id="${s.id}" data-v="aperta">↩ Riapri</button>`:`<button class="btn btn-sm" data-action="scad-stato" data-id="${s.id}" data-v="fatta">✔ Segna fatta</button>`}
-        <button class="btn btn-sm" data-action="edit-scad" data-id="${s.id}">Modifica</button>
-        <button class="btn btn-sm btn-danger del" data-action="del-scad" data-id="${s.id}">Elimina</button></div></div>`;
+    let bg="var(--sfondo)",fg="var(--testo-2)",lab="Aperta",tono="t-neutro";
+    if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";tono="t-ok";}
+    else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";tono="t-err";}
+    else if(s.data_scadenza&&s.data_scadenza<=lim){bg="var(--attesa-bg)";fg="var(--attesa)";lab="In scadenza";tono="t-attesa";}
+    return schedaJob({
+      tono, titolo:esc(s.titolo||"Scadenza"),
+      destra:`<span class="stato" style="background:${bg};color:${fg}">${lab}</span>`,
+      meta:[s.tipo_pratica?"📄 "+esc(s.tipo_pratica):"",
+            cliNome?"👤 "+esc(cliNome):"",
+            mezNome?"🚚 "+esc(mezNome):"",
+            "📅 "+fdate(s.data_scadenza)],
+      nota:s.note?"📝 "+esc(s.note):"",
+      azioni:[
+        fatta?{lab:"↩ Riapri",action:"scad-stato",data:{id:s.id,v:"aperta"}}
+             :{lab:"✔ Segna fatta",action:"scad-stato",data:{id:s.id,v:"fatta"}},
+        {lab:"✏ Modifica",action:"edit-scad",data:{id:s.id}},
+        {lab:"🗑 Elimina",action:"del-scad",data:{id:s.id},del:true}
+      ]});
   }
   /* preset: valori precompilati per una NUOVA scadenza (es. mezzo_id dal pulsante "+ Scadenza" della card mezzo) */
   async function scadForm(s,preset){

@@ -1758,3 +1758,23 @@
   #lavori .lav-head-act .btn,
   #lavori .lav-head-act .btn-primary{ flex:1 1 0; min-width:0; padding:0 12px; }
 }
+
+/* =========================================================================
+   UN DISEGNO SOLO PER TUTTE LE SCHEDE
+   Condomini, Squadra, Mezzi e Scadenzario usavano una scheda diversa da
+   quella di Lavori, Preventivi e Fatture. Ora usano tutte la stessa
+   (funzione schedaJob nel gestionale): barretta colorata a sinistra, titolo,
+   pastiglia di stato a destra, righe di dettaglio, pulsanti in fondo.
+   Qui restano solo i due pezzi che mancavano al foglio di stile.
+   ========================================================================= */
+
+/* barretta grigia: la scheda non ha nessuno stato da comunicare
+   (un cliente non e' ne' in ritardo ne' a posto, e' solo un cliente) */
+.wrap section .job.t-neutro{ border-left-color:var(--bordo-forte); }
+
+/* le righe di dettaglio andavano bene per due voci; qui possono essere
+   quattro (tipo, cliente, mezzo, data) e serve piu' respiro tra una e l'altra */
+.wrap section .job .job-meta{ gap:8px 20px; }
+
+/* la pastiglia di stato accanto al titolo: prima era minuscola, 11px */
+.wrap section .job .job-top .stato{ font-size:14px; padding:5px 12px; white-space:nowrap; }
