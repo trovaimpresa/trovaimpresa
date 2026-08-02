@@ -1916,7 +1916,7 @@
           <option value="preposto">Preposto</option>
           <option value="segretaria">Segretaria</option></select></div>
         <div class="field"><label>Permessi</label><div id="d-perms">
-          ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
+          ${PERMS.map(p=>`<label class="perm-row"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}"></label>`).join("")}</div></div>
       </div>
 
       <div class="sh-b">

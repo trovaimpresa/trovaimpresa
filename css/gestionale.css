@@ -1619,3 +1619,19 @@
   margin:-4px 0 16px;
 }
 .sh-b{margin-bottom:14px}
+
+/* ---- Permessi della scheda persona: due per riga, righe compatte ----
+   Prima erano sette righe alte in colonna e da sole riempivano mezza
+   finestra, sbilanciando le due colonne del modulo. */
+#d-perms{
+  display:grid; grid-template-columns:1fr 1fr; gap:8px 12px;
+}
+#d-perms .perm-row{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:10px 12px; margin:0;
+  background:var(--sfondo); border:1px solid var(--bordo); border-radius:10px;
+  font-size:15px; cursor:pointer;
+}
+#d-perms .perm-row:hover{border-color:var(--blu)}
+#d-perms .perm-row input[type=checkbox]{width:20px; height:20px; flex:0 0 auto; margin:0}
+@media (max-width:560px){ #d-perms{grid-template-columns:1fr} }
