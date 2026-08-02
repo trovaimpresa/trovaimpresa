@@ -123,13 +123,12 @@ exports.handler = async function (event) {
   }
 
   // ---- 4) Gli avvisi automatici sanno a chi scrivere? ----
-  if (!(process.env.ADMIN_EMAIL || '').trim()) {
-    aggiungi('Avvisi a te', false,
-      'Manca ADMIN_EMAIL: i riepiloghi automatici finiscono su info@trovaimpresa.com.',
-      'Se va bene cosi\', ignora pure.');
-  } else {
-    aggiungi('Avvisi a te', true, 'Gli avvisi automatici arrivano a ' + process.env.ADMIN_EMAIL.trim() + '.');
-  }
+  // Non e' un guasto: senza ADMIN_EMAIL i riepiloghi vanno all'indirizzo
+  // predefinito, che va benissimo. Va segnato come a posto, non come rosso.
+  const mailAvvisi = (process.env.ADMIN_EMAIL || '').trim();
+  aggiungi('Avvisi a te', true,
+    mailAvvisi ? ('Gli avvisi automatici arrivano a ' + mailAvvisi + '.')
+               : 'Gli avvisi automatici arrivano a info@trovaimpresa.com.');
 
   const problemi = controlli.filter(c => !c.ok);
   return {
