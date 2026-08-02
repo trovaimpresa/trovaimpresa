@@ -1635,3 +1635,9 @@
 #d-perms .perm-row:hover{border-color:var(--blu)}
 #d-perms .perm-row input[type=checkbox]{width:20px; height:20px; flex:0 0 auto; margin:0}
 @media (max-width:560px){ #d-perms{grid-template-columns:1fr} }
+
+/* Il corpo delle finestre grandi non deve "inseguire" la posizione quando il
+   contenuto cambia altezza (emoji sostituite da icone SVG dopo l'apertura):
+   senza questo il modulo resta scorso e la prima etichetta sparisce sopra. */
+.sheet--grande .sh-body{overflow-anchor:none}
+.sheet--grande .sh-body *{overflow-anchor:none}

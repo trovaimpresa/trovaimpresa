@@ -4102,7 +4102,15 @@
     /* Il corpo scorre: senza questo il modulo si apre gia' scorso di qualche
        riga (resta la posizione della volta prima) e la prima etichetta sparisce. */
     const _b=s.querySelector(".sh-body");
-    if(_b){_b.scrollTop=0;requestAnimationFrame(function(){_b.scrollTop=0;});}
+    if(_b){
+      /* Le emoji diventano icone SVG subito dopo l'apertura: il contenuto cambia
+         altezza e il browser "insegue" la posizione (scroll anchoring), lasciando
+         il modulo scorso di qualche riga. Riportiamo l'inizio anche dopo. */
+      _b.scrollTop=0;
+      requestAnimationFrame(function(){_b.scrollTop=0;});
+      setTimeout(function(){_b.scrollTop=0;},80);
+      setTimeout(function(){_b.scrollTop=0;},250);
+    }
   }
   function closeSheet(){$("#overlay").classList.remove("open");}
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
