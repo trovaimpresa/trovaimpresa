@@ -279,6 +279,21 @@
   .u-det{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
   .u-det > div{background:#f4f7fb;border-radius:10px;padding:12px 14px}
   .u-det .k{font-size:13px;color:#5b6b80} .u-det .v{font-size:16px;font-weight:700;margin-top:2px}
+  /* Scrivi a tutti */
+  .st-lab{display:block;font-weight:800;font-size:16px;margin:20px 0 8px;color:#12233a}
+  .st-campo{width:100%;padding:14px;font-size:16px;line-height:1.6;color:#12233a;
+            border:2px solid var(--border,#e2e8f0);border-radius:12px;font-family:inherit;background:#fff}
+  .st-campo:focus{outline:3px solid #b7d4ff;border-color:#0066ff}
+  textarea.st-campo{resize:vertical;min-height:280px}
+  .st-nota{font-size:14.5px;color:#5b6b80;margin-top:8px}
+  .st-bottoni{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+  .st-btn{font-family:inherit;font-size:16px;font-weight:800;padding:15px 26px;border-radius:12px;border:none;cursor:pointer}
+  .st-prova{background:#fff;color:#0066ff;border:2px solid #0066ff}
+  .st-vero{background:#0066ff;color:#fff}
+  .st-btn:disabled{opacity:.5;cursor:default}
+  #st-esito:not(:empty){margin-top:22px;padding:18px 20px;border-radius:12px;border:2px solid;font-size:15.5px;line-height:1.7}
+  #st-esito.ok{background:#f2fbf5;border-color:#b5e2c5}
+  #st-esito.ko{background:#fdecea;border-color:#f5c2bd;color:#b3261e}
   .u-badge{display:inline-block;background:#f3e5f5;color:#7b1fa2;font-weight:800;font-size:13px;
            padding:3px 10px;border-radius:999px;margin-left:8px}
 </style>
@@ -354,6 +369,9 @@
       </div>
       <div class="nav-item" onclick="showSection('abbonamenti',this)">
         <span class="nav-icon">💎</span> Premium &amp; Gestionale
+      </div>
+      <div class="nav-item" onclick="showSection('scrivi-tutti',this)">
+        <span class="nav-icon">✉️</span> Scrivi a tutti
       </div>
       <div class="nav-item" onclick="showSection('utilizzo',this)">
         <span class="nav-icon">📈</span> Chi usa il gestionale
@@ -847,6 +865,48 @@
       </div>
     </div>
 
+    <!-- SCRIVI A TUTTI -->
+    <div class="section" id="sec-scrivi-tutti">
+      <div class="topbar">
+        <div class="topbar-title">✉️ Scrivi a tutti</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+      <div style="padding:18px;max-width:900px">
+
+        <div style="background:#e7f0ff;border:2px solid #b7d4ff;border-radius:14px;padding:18px 20px;margin-bottom:24px;line-height:1.7;font-size:15px">
+          Nel testo puoi usare queste parole magiche: verranno sostituite per ognuno.<br>
+          <b>[NOME]</b> il nome dell'attività &nbsp;·&nbsp; <b>[SCADENZA]</b> la sua data di scadenza Premium &nbsp;·&nbsp; <b>[CITTA]</b> la sua città<br>
+          Lascia una <b>riga vuota</b> fra un paragrafo e l'altro. Niente asterischi o simboli: scrivi come parli.
+        </div>
+
+        <label class="st-lab">A chi scrivo</label>
+        <select id="st-gruppo" class="st-campo" onchange="contaDestinatari()">
+          <option value="completi">Solo chi ha il profilo compilato</option>
+          <option value="incompleti">Solo chi ha il profilo vuoto</option>
+          <option value="tutti">Tutti gli iscritti</option>
+        </select>
+        <div id="st-quanti" class="st-nota">—</div>
+
+        <label class="st-lab">Oggetto</label>
+        <input id="st-oggetto" class="st-campo" placeholder="Il tuo Piano Premium è attivo — un regalo di benvenuto">
+
+        <label class="st-lab">Testo della email</label>
+        <textarea id="st-testo" class="st-campo" rows="16" placeholder="Gentile [NOME],&#10;&#10;grazie per esserti iscritto a TrovaImpresa.com.&#10;&#10;..."></textarea>
+
+        <div class="st-bottoni">
+          <button class="st-btn st-prova" onclick="inviaAnnuncio('prova')">👁 Mandala solo a me</button>
+          <button class="st-btn st-vero" onclick="inviaAnnuncio()">✉️ Invia a tutti</button>
+        </div>
+
+        <div id="st-esito"></div>
+
+        <div style="background:#fffaf0;border:2px solid #f0d9a8;border-radius:14px;padding:18px 20px;margin-top:26px;line-height:1.7;font-size:15px">
+          <b>Prima di premere "Invia a tutti"</b>, manda sempre la prova a te stesso e controlla come è venuta nella tua casella. Una volta partita a 37 persone non si torna indietro.
+        </div>
+
+      </div>
+    </div>
+
     <!-- CHI USA IL GESTIONALE -->
     <div class="section" id="sec-utilizzo">
       <div class="topbar">
@@ -1022,6 +1082,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'pubblicita-clienti') caricaPubblicitaClienti();
   if (id === 'mappa-spazi') caricaMappaSpazi();
   if (id === 'utilizzo') caricaUtilizzo();
+  if (id === 'scrivi-tutti') contaDestinatari();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -1524,6 +1585,62 @@ function renderAbbonamenti() {
 // Scrivendo con la chiave anon (come si faceva prima) PostgREST non dà errore,
 // aggiorna zero righe e basta: i pulsanti sembravano funzionare senza fare
 // nulla. Se aggiungi un pulsante che scrive, usa questa funzione.
+// ===== SCRIVI A TUTTI =====
+async function annuncioFetch(payload) {
+  const res = await fetch('/.netlify/functions/invia-annuncio', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({ u: adminU, p: adminP }, payload))
+  });
+  return await res.json().catch(() => ({ error: 'risposta non leggibile' }));
+}
+
+// Quanti sono e chi e' il primo: si vede prima di spedire.
+async function contaDestinatari() {
+  const box = document.getElementById('st-quanti');
+  if (!box) return;
+  const gruppo = document.getElementById('st-gruppo').value;
+  box.textContent = 'Conto…';
+  const j = await annuncioFetch({ gruppo, solo_conteggio: true, oggetto: '.', testo: '.' });
+  if (!j.success) { box.textContent = 'Non riesco a contare: ' + (j.error || ''); return; }
+  box.innerHTML = '<b>' + j.quanti + '</b> ' + (j.quanti === 1 ? 'destinatario' : 'destinatari')
+    + (j.anteprima ? ' — il primo è ' + j.anteprima.a : '');
+}
+
+async function inviaAnnuncio(modo) {
+  const esito = document.getElementById('st-esito');
+  const gruppo = modo === 'prova' ? 'prova' : document.getElementById('st-gruppo').value;
+  const oggetto = document.getElementById('st-oggetto').value.trim();
+  const testo = document.getElementById('st-testo').value.trim();
+  esito.className = ''; esito.textContent = '';
+
+  if (!oggetto || !testo) {
+    esito.className = 'ko'; esito.textContent = 'Scrivi prima oggetto e testo.'; return;
+  }
+
+  if (modo !== 'prova') {
+    const c = await annuncioFetch({ gruppo, solo_conteggio: true, oggetto, testo });
+    if (!c.success) { esito.className = 'ko'; esito.textContent = c.error || 'Errore'; return; }
+    if (!confirm('Sto per mandare questa email a ' + c.quanti + ' persone.\n\nHai già fatto la prova su di te?\n\nUna volta partita non si torna indietro.')) return;
+  }
+
+  const bottoni = document.querySelectorAll('.st-btn');
+  bottoni.forEach(b => b.disabled = true);
+  esito.textContent = 'Invio in corso…';
+
+  const j = await annuncioFetch({ gruppo, oggetto, testo });
+  bottoni.forEach(b => b.disabled = false);
+
+  if (!j.success) {
+    esito.className = 'ko';
+    esito.innerHTML = '<b>Non è partita.</b><br>' + (j.error || 'errore sconosciuto');
+    return;
+  }
+  esito.className = 'ok';
+  esito.innerHTML = modo === 'prova'
+    ? '<b>Prova inviata.</b><br>Controlla la tua casella e guarda com\'è venuta prima di mandarla a tutti.'
+    : '<b>Inviata a ' + j.inviate + ' ' + (j.inviate === 1 ? 'persona' : 'persone') + '.</b><br>Se qualcuno non la riceve, controlla che la sua email sia scritta bene.';
+}
+
 // ===== SEMAFORO: il sito sta bene? =====
 // Le chiavi (Supabase, email, pagamenti) non scadono a una data, ma smettono
 // di funzionare quando vengono rigenerate o sostituite. E quando smettono,
