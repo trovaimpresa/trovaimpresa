@@ -1931,7 +1931,9 @@
       '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
 
       + '<div class="sh-b"><div class="sh-tit">A chi e quando</div>'
-      +   '<div class="field"><label>Cliente</label><select id="fa-cli"><option value="">— nessuno —</option>'+cliOpts+'</select></div>'
+      +   '<div class="field"><label>Cliente</label><select id="fa-cli"><option value="">— nessuno —</option>'+cliOpts+'</select>'
+      +     (fattCliCache.length?'':'<div class="campo-aiuto" style="color:var(--attesa)">In questo reparto non hai ancora nessun cliente in anagrafica, quindi la tendina è vuota. Puoi scrivere le voci lo stesso e salvare la bozza: il cliente lo aggiungi in <b>Condomini</b> e poi lo scegli qui. Per <b>emettere</b> la fattura il cliente serve.</div>')
+      +   '</div>'
       +   '<div class="row2">'
       +     '<div class="field"><label>Data</label><input type="date" id="fa-data" value="'+(f.data||todayStr())+'"></div>'
       +     '<div class="field"><label>Tipo</label><select id="fa-tipo">'+tipoOpts+'</select></div>'
@@ -2053,6 +2055,12 @@
   async function fattCambiaStato(id,v){
     const f=fattCache.find(x=>String(x.id)===String(id));
     if(!f){toast("Fattura non trovata");return;}
+    /* una fattura senza cliente non e' una fattura: finche' e' bozza va bene,
+       ma non deve poter prendere un numero */
+    if(v==="emessa"&&!f.cliente_id){
+      toast("Scegli il cliente prima di emetterla: una fattura deve dire a chi va");
+      fattForm(f);return;
+    }
     if(v==="emessa"&&!f.numero){
       const n=await fattAssegnaNumero(f);
       if(n==null)return;
