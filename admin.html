@@ -468,6 +468,7 @@
               <th>Tipo</th>
               <th>Città</th>
               <th>Mestieri</th>
+              <th>Verifica</th>
               <th>Piano</th>
               <th>Data</th>
               <th>Azioni</th>
@@ -1930,7 +1931,7 @@ async function caricaImprese() {
 function renderImprese(lista) {
   const tbody = document.getElementById('table-imprese');
   if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">🏗️</div>Nessuna impresa trovata</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-table"><div class="eicon">🏗️</div>Nessuna impresa trovata</div></td></tr>';
     return;
   }
   tbody.innerHTML = lista.map(i => `
@@ -1939,9 +1940,13 @@ function renderImprese(lista) {
       <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo) || '–'}</span></td>
       <td>📍 ${esc(i.citta) || '–'}</td>
       <td>${esc((i.mestieri||[]).slice(0,2).join(', '))}${(i.mestieri||[]).length>2?' +altri':''}</td>
+      <td>${i.verificata
+            ? '<span class="badge badge-v">✅ Verificata</span>'
+            : '<span class="badge badge-att">Da controllare</span>'}</td>
       <td>${i.is_test?'<span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span><br>':''}${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
+        ${!i.verificata ? `<button class="action-btn btn-verifica" onclick="verificaImpresa('${i.id}')">✅ Verifica</button> ` : ''}
         <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
         <button class="action-btn btn-elimina" onclick="eliminaImpresa('${i.id}')">🗑️</button>
       </td>
