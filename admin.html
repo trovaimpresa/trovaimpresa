@@ -290,9 +290,11 @@
   <div class="login-box">
     <div class="login-logo"><span class="trova">Trova</span><span class="impresa">Impresa</span></div>
     <div class="login-sub">Pannello Amministratore</div>
-    <input type="text" id="login-user" placeholder="Username admin">
+    <input type="text" id="login-user" name="ti-admin-user" autocomplete="username"
+           placeholder="Username admin" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="password-wrapper">
-      <input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="login-pass" name="ti-admin-pass" autocomplete="current-password"
+             placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
       <button class="toggle-pw" type="button" onclick="togglePassword('login-pass', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
     <button class="login-btn" onclick="doLogin()">🔐 Accedi</button>
@@ -954,6 +956,27 @@ let tutteImprese = [];
 let adminU = null, adminP = null;
 
 // LOGIN
+// Quando riapri il pannello, l'utente e' gia' scritto e il cursore sta sulla
+// password: cosi' Chrome propone la credenziale giusta invece dell'elenco di
+// tutti gli account del sito.
+(function ricordaUtenteAdmin(){
+  function avvia(){
+    const campo = document.getElementById('login-user');
+    if (!campo) return;
+    let salvato = '';
+    try { salvato = localStorage.getItem('ti_admin_user') || ''; } catch(e){}
+    if (salvato) {
+      campo.value = salvato;
+      const pw = document.getElementById('login-pass');
+      if (pw) setTimeout(function(){ pw.focus(); }, 120);
+    } else {
+      setTimeout(function(){ campo.focus(); }, 120);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avvia);
+  else avvia();
+})();
+
 async function doLogin() {
   const u = document.getElementById('login-user').value;
   const p = document.getElementById('login-pass').value;
@@ -966,6 +989,7 @@ async function doLogin() {
     const { ok } = await res.json();
     if (ok) {
       adminU = u; adminP = p;
+      try { localStorage.setItem('ti_admin_user', u); } catch(e){}
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       caricaTutto();
