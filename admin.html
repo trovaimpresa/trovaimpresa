@@ -1585,6 +1585,30 @@ function renderAbbonamenti() {
 // Scrivendo con la chiave anon (come si faceva prima) PostgREST non dà errore,
 // aggiorna zero righe e basta: i pulsanti sembravano funzionare senza fare
 // nulla. Se aggiungi un pulsante che scrive, usa questa funzione.
+// Manda un messaggio nella chat interna di una singola impresa, anche se non
+// ha mai scritto per prima. Serve quando l'email e' sbagliata e le notifiche
+// non le arrivano: questo lo vede comunque entrando nel suo pannello.
+async function inviaMsgInterno(userId) {
+  const campo = document.getElementById('msg-interno');
+  const btn = document.getElementById('msg-interno-btn');
+  const esito = document.getElementById('msg-interno-esito');
+  if (!campo || !userId) return;
+  const txt = (campo.value || '').trim();
+  if (!txt) { esito.style.color = '#b3261e'; esito.textContent = 'Scrivi prima il messaggio.'; return; }
+  btn.disabled = true; esito.style.color = '#5b6b80'; esito.textContent = 'Invio…';
+  const j = await suppFetch('reply', { user_id: userId, messaggio: txt });
+  btn.disabled = false;
+  if (!j || !j.success) {
+    esito.style.color = '#b3261e';
+    esito.textContent = 'Non è partito: ' + ((j && j.error) || 'riprova');
+    return;
+  }
+  campo.value = '';
+  esito.style.color = '#1b8a3f';
+  esito.textContent = 'Messaggio inviato. Lo vedrà entrando nel suo pannello, alla voce Supporto.';
+  if (typeof caricaSupportoAdmin === 'function') caricaSupportoAdmin();
+}
+
 // ===== SCRIVI A TUTTI =====
 async function annuncioFetch(payload) {
   const res = await fetch('/.netlify/functions/invia-annuncio', {
@@ -2126,6 +2150,18 @@ function apriDettaglio(id) {
     <div class="modal-row"><span class="modal-key">Stato:</span><span class="modal-val"><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></span></div>
     <div class="modal-row"><span class="modal-key">Registrato:</span><span class="modal-val">${new Date(i.created_at).toLocaleString('it-IT')}</span></div>
     ${!i.verificata ? `<br><button class="action-btn btn-verifica" style="width:100%;padding:12px;font-size:0.9rem" onclick="verificaImpresa('${i.id}');chiudiModal()">✅ Verifica questa impresa</button>` : ''}
+    ${i.user_id ? `
+    <div style="margin-top:22px;padding-top:18px;border-top:2px solid var(--border,#e2e8f0)">
+      <div style="font-weight:800;font-size:16px;margin-bottom:6px">✉️ Scrivi un messaggio dentro il sito</div>
+      <div style="font-size:14px;color:#5b6b80;line-height:1.6;margin-bottom:10px">
+        Gli arriva nel suo pannello, alla voce Supporto. Utile quando l'email non funziona.
+      </div>
+      <textarea id="msg-interno" rows="4" placeholder="Scrivi qui il messaggio..."
+        style="width:100%;padding:13px;font-size:15.5px;line-height:1.6;color:#12233a;border:2px solid var(--border,#e2e8f0);border-radius:11px;font-family:inherit;resize:vertical"></textarea>
+      <button id="msg-interno-btn" class="action-btn btn-verifica" style="width:100%;padding:13px;font-size:0.95rem;margin-top:10px"
+        onclick="inviaMsgInterno('${i.user_id}')">Invia il messaggio</button>
+      <div id="msg-interno-esito" style="margin-top:10px;font-size:14.5px;line-height:1.6"></div>
+    </div>` : ''}
   `;
   document.getElementById('modal-overlay').classList.add('show');
 }
