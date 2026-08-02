@@ -405,12 +405,12 @@
           <div><div class="stat-num" id="stat-totali">–</div><div class="stat-lbl">Totale imprese</div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon o">⏳</div>
-          <div><div class="stat-num" id="stat-attesa">–</div><div class="stat-lbl">In attesa verifica</div></div>
+          <div class="stat-icon o">📝</div>
+          <div><div class="stat-num" id="stat-incompleti">–</div><div class="stat-lbl">Profili da completare</div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon g">✅</div>
-          <div><div class="stat-num" id="stat-verificate">–</div><div class="stat-lbl">Verificate</div></div>
+          <div class="stat-icon g">🗺️</div>
+          <div><div class="stat-num" id="stat-citta">–</div><div class="stat-lbl">Città coperte</div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon b">📋</div>
@@ -1901,6 +1901,13 @@ async function caricaImprese() {
 
   const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   _set('stat-totali', tot);
+  // "Verificate" e "In attesa" non dicevano nulla di utile: nessuno verifica.
+  // Al loro posto due numeri su cui si puo' agire davvero.
+  const senzaNome = impreseVere.filter(i => !i.nome_attivita || !String(i.nome_attivita).trim()).length;
+  const citta = new Set(impreseVere.map(i => (i.citta || '').trim().toLowerCase()).filter(Boolean));
+  _set('stat-incompleti', senzaNome);
+  _set('stat-citta', citta.size);
+  // restano aggiornati se un giorno rimettiamo i riquadri
   _set('stat-verificate', verificate);
   _set('stat-attesa', attesa);
   const oggiStr = new Date().toISOString().slice(0, 10);
