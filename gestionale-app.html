@@ -1741,33 +1741,35 @@
     if(!sb){box.style.display="block";box.innerHTML=tabVuoto("Squadra non disponibile","Connessione non riuscita.");return;}
     if(!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Accedi per gestire la squadra","Entra nel pannello per invitare le persone.");return;}
     const [{data:ops},{data:membri}]=await Promise.all([
-      sb.from("gest_operatori").select("id,nome,telefono").eq("mestiere_id",curMestiere()),
+      sb.from("gest_operatori").select("*").eq("mestiere_id",curMestiere()),
       sb.from("gest_membri").select("operatore_id,codice,stato,ruolo,permessi")
     ]);
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
-    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return {id:o.id,nome:o.nome,telefono:o.telefono,ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{}};});
+    /* dipCache alimenta il modulo di modifica: deve contenere tutti i campi della persona */
+    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return Object.assign({},o,{ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{}});});
     let L=(ops||[]).map(o=>{
       const inv=mB[o.id]||{}, dc=dipCache.find(d=>d.id===o.id)||{};
       const link=inviteLink(inv.codice||"");
-      return {id:o.id,nome:o.nome,telefono:o.telefono,ruolo:dc.ruolo||"operaio",
+      return Object.assign({},o,{ruolo:dc.ruolo||"operaio",
         attivo:inv.stato==="attivo",codice:inv.codice||"",link:link,
-        wa:"https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link)};
+        wa:"https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+link)});
     });
     if(dipQ){const q=dipQ.toLowerCase();
-      L=L.filter(o=>[o.nome,o.telefono,SQ_RUOLO[o.ruolo]].some(x=>(x||"").toLowerCase().includes(q)));}
+      L=L.filter(o=>[o.nome,o.telefono,o.mansione,SQ_RUOLO[o.ruolo]].some(x=>(x||"").toLowerCase().includes(q)));}
     renderTabella({
       id:"dip", box:"#dip-list",
       vuoto:dipQ?tabVuotoCerca(dipQ):tabVuoto("Nessuna persona","Aggiungi chi lavora in questo reparto.",
         _SVGV+'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'),
-      colonne:[{lab:"Nome",w:"28%"},{lab:"Ruolo",w:"20%",cls:"c-chi"},{lab:"Telefono",w:"20%",cls:"c-chi"},
-               {lab:"Stato",w:"16%"},{lab:"",w:"16%"}],
+      colonne:[{lab:"Nome",w:"24%"},{lab:"Mansione",w:"18%",cls:"c-chi"},{lab:"Telefono",w:"18%",cls:"c-chi"},
+               {lab:"Documenti",w:"16%"},{lab:"Stato",w:"14%"},{lab:"",w:"10%"}],
       righe:L.map(o=>({
         id:o.id,
         click:{action:"sq-edit",data:{id:o.id}},
         celle:[
           `<span class="c-nome">${esc(o.nome||"—")}</span>`,
-          SQ_RUOLO[o.ruolo]||o.ruolo||"—",
+          esc(o.mansione||SQ_RUOLO[o.ruolo]||"—"),
           esc(o.telefono||"—"),
+          dipBadge(o),
           `<span class="stato ${o.attivo?"fatto":"da_fare"}">${o.attivo?"Attivo":"Invitato"}</span>`,
           ""
         ],
@@ -1777,6 +1779,66 @@
     });
   }
   const SQ_RUOLO={operaio:"Operaio",preposto:"Preposto",segretaria:"Segretaria"};
+
+  /* ---- SCHEDA PERSONA: mansione, costo orario, documenti di sicurezza ----
+     La mansione e' il mestiere in cantiere (muratore, manovale...), diversa dal
+     "ruolo nell'app" che decide solo cosa vede l'operatore sul telefono.
+     Il costo orario servira' per il costo della manodopera sui lavori.
+     Le scadenze (visita medica, formazione, documenti) generano gli avvisi. */
+  const MANSIONI=["Muratore","Manovale","Capocantiere","Carpentiere","Ferraiolo","Piastrellista",
+    "Imbianchino","Cartongessista","Elettricista","Idraulico","Fabbro","Falegname","Gruista",
+    "Escavatorista","Autista","Operatore macchine","Geometra","Impiegato","Altro"];
+  const CONTRATTI=["Tempo indeterminato","Tempo determinato","Apprendistato","Part-time","Stagionale","A chiamata","Collaborazione","Altro"];
+
+  /* Restituisce le scadenze scadute o vicine (entro 30 giorni) di una persona. */
+  function dipAvvisi(o){
+    if(!o)return [];
+    const oggi=new Date();oggi.setHours(0,0,0,0);
+    const voci=[["Visita medica",o.visita_medica_scadenza],["Formazione sicurezza",o.formazione_scadenza],
+                ["Documento",o.documento_scadenza],["Permesso di soggiorno",o.permesso_scadenza]];
+    const out=[];
+    voci.forEach(function(v){
+      if(!v[1])return;
+      const d=new Date(String(v[1])+"T00:00:00");
+      if(isNaN(d))return;
+      const g=Math.round((d-oggi)/86400000);
+      if(g<0)out.push({lab:v[0],giorni:g,scaduto:true});
+      else if(g<=30)out.push({lab:v[0],giorni:g,scaduto:false});
+    });
+    return out;
+  }
+  /* Pallino riassuntivo da mettere in tabella e nelle card. */
+  function dipBadge(o){
+    const a=dipAvvisi(o);
+    if(!a.length)return '<span class="stato fatto">In regola</span>';
+    const scaduti=a.filter(function(x){return x.scaduto;});
+    if(scaduti.length)return '<span class="stato da_fare" style="background:#fdecea;color:#b3261e" title="'+esc(scaduti.map(function(x){return x.lab;}).join(", "))+'">'+scaduti.length+' scadut'+(scaduti.length>1?'i':'o')+'</span>';
+    return '<span class="stato da_fare" style="background:#fdf3e3;color:#b26a00" title="'+esc(a.map(function(x){return x.lab+" fra "+x.giorni+" gg";}).join(", "))+'">In scadenza</span>';
+  }
+  /* Legge tutti i campi nuovi dal modulo. Vuoto diventa null, non stringa vuota:
+     cosi' le colonne data non danno errore su Postgres. */
+  function dipCampiExtra(){
+    const v=function(id){const e=$(id);return e?String(e.value||"").trim():"";};
+    const n=function(x){x=String(x||"").replace(",",".").trim();if(x==="")return null;const f=parseFloat(x);return isNaN(f)?null:f;};
+    const o=function(x){return x===""?null:x;};
+    return {
+      mansione:o(v("#d-mansione")),
+      costo_orario:n(v("#d-costo")),
+      visita_medica_scadenza:o(v("#d-visita")),
+      formazione_scadenza:o(v("#d-formazione")),
+      attestati:o(v("#d-attestati")),
+      documento_numero:o(v("#d-doc-num")),
+      documento_scadenza:o(v("#d-doc-scad")),
+      permesso_scadenza:o(v("#d-permesso")),
+      data_nascita:o(v("#d-nascita")),
+      codice_fiscale:o(v("#d-cf").toUpperCase()),
+      email:o(v("#d-email")),
+      data_assunzione:o(v("#d-assunzione")),
+      tipo_contratto:o(v("#d-contratto")),
+      emergenza_nome:o(v("#d-emerg-nome")),
+      emergenza_telefono:o(v("#d-emerg-tel"))
+    };
+  }
   /* Copia link, WhatsApp e Rimuovi accesso esistono solo se la persona ha un
      codice d'invito: senza codice non c'e' niente da mandare né da revocare. */
   function dipVoci(o){
@@ -1790,7 +1852,12 @@
     return v;
   }
   function dipCard(o){
-    return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${o.attivo?"Attivo":"Invitato"}${o.telefono?" · 📞 "+esc(o.telefono):""}</div></div>
+    const av=dipAvvisi(o);
+    const riga2=[o.mansione?esc(o.mansione):"",o.attivo?"Attivo":"Invitato",o.telefono?"📞 "+esc(o.telefono):""].filter(Boolean).join(" · ");
+    const allerta=av.length?`<div class="cnt" style="margin-top:6px;font-weight:700;color:${av.some(x=>x.scaduto)?"#b3261e":"#b26a00"}">${av.some(x=>x.scaduto)
+        ?"⚠ "+esc(av.filter(x=>x.scaduto).map(x=>x.lab).join(", "))+" scadut"+(av.filter(x=>x.scaduto).length>1?"i":"o")
+        :"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", "))}</div>`:"";
+    return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${riga2}</div>${allerta}</div>
       <div class="card-acts">${dipVoci(o).filter(x=>!x.sep)
         .map(x=>`<button class="btn btn-sm${x.del?" btn-danger":""}" data-action="${x.action}"${tabAttr(x.data)}>${x.lab}</button>`).join("")}</div></div>`;
   }
@@ -1804,13 +1871,49 @@
     const isNew=!op;op=op||{};
     openSheet(`<h3>${isNew?"Nuova persona":"Modifica persona"}</h3>
       <div class="field"><label>Nome</label><input id="d-nome" value="${esc(op.nome||"")}" placeholder="Es. Wahid"></div>
-      <div class="field"><label>Telefono</label><input id="d-tel" type="tel" value="${esc(op.telefono||"")}" placeholder="Es. 333 1234567 (facoltativo)"></div>
-      <div class="field"><label>Ruolo</label><select id="d-ruolo">
+      <div class="field"><label>Telefono</label><input id="d-tel" type="tel" value="${esc(op.telefono||"")}" placeholder="Es. 333 1234567"></div>
+      <div class="field"><label>Mansione in cantiere</label>
+        <input id="d-mansione" list="d-mansioni-list" value="${esc(op.mansione||"")}" placeholder="Es. Muratore">
+        <datalist id="d-mansioni-list">${MANSIONI.map(m=>`<option value="${m}"></option>`).join("")}</datalist></div>
+      <div class="field"><label>Costo orario (€)</label>
+        <input id="d-costo" type="number" step="0.50" min="0" value="${op.costo_orario!=null&&op.costo_orario!==""?esc(op.costo_orario):""}" placeholder="Es. 22.50">
+        <div style="font-size:13px;color:var(--testo-3);margin-top:6px;line-height:1.5">Serve per calcolare il costo della manodopera sui lavori.</div></div>
+
+      <div class="field"><label>Ruolo nell'app <span style="font-weight:400;color:var(--testo-3)">(cosa vede sul telefono)</span></label><select id="d-ruolo">
         <option value="operaio">Operaio</option>
         <option value="preposto">Preposto</option>
         <option value="segretaria">Segretaria</option></select></div>
       <div class="field"><label>Permessi</label><div id="d-perms">
         ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
+
+      <details class="dip-extra" style="margin:14px 0;border:2px solid var(--bordo,#dbe2ec);border-radius:12px;overflow:hidden"${dipAvvisi(op).length?" open":""}>
+        <summary style="padding:14px 16px;cursor:pointer;font-weight:700;background:var(--sfondo,#f5f8fc);list-style:revert">🦺 Documenti e sicurezza</summary>
+        <div style="padding:14px 16px 4px">
+          <div class="field"><label>Visita medica — scade il</label><input id="d-visita" type="date" value="${esc(op.visita_medica_scadenza||"")}"></div>
+          <div class="field"><label>Formazione sicurezza — scade il</label><input id="d-formazione" type="date" value="${esc(op.formazione_scadenza||"")}"></div>
+          <div class="field"><label>Attestati e patentini</label><input id="d-attestati" value="${esc(op.attestati||"")}" placeholder="Es. muletto, piattaforma aerea, primo soccorso"></div>
+          <div class="field"><label>Documento d'identità — numero</label><input id="d-doc-num" value="${esc(op.documento_numero||"")}" placeholder="Es. CA12345AB"></div>
+          <div class="field"><label>Documento — scade il</label><input id="d-doc-scad" type="date" value="${esc(op.documento_scadenza||"")}"></div>
+          <div class="field"><label>Permesso di soggiorno — scade il</label><input id="d-permesso" type="date" value="${esc(op.permesso_scadenza||"")}">
+            <div style="font-size:13px;color:var(--testo-3);margin-top:6px;line-height:1.5">Solo per lavoratori extra UE. Lascia vuoto se non serve.</div></div>
+        </div>
+      </details>
+
+      <details class="dip-extra" style="margin:14px 0;border:2px solid var(--bordo,#dbe2ec);border-radius:12px;overflow:hidden">
+        <summary style="padding:14px 16px;cursor:pointer;font-weight:700;background:var(--sfondo,#f5f8fc);list-style:revert">👤 Dati anagrafici e contratto</summary>
+        <div style="padding:14px 16px 4px">
+          <div class="field"><label>Data di nascita</label><input id="d-nascita" type="date" value="${esc(op.data_nascita||"")}"></div>
+          <div class="field"><label>Codice fiscale</label><input id="d-cf" value="${esc(op.codice_fiscale||"")}" style="text-transform:uppercase" placeholder="RSSMRA80A01H501U"></div>
+          <div class="field"><label>Email</label><input id="d-email" type="email" value="${esc(op.email||"")}" placeholder="nome@email.it"></div>
+          <div class="field"><label>Data di assunzione</label><input id="d-assunzione" type="date" value="${esc(op.data_assunzione||"")}"></div>
+          <div class="field"><label>Tipo di contratto</label>
+            <input id="d-contratto" list="d-contratti-list" value="${esc(op.tipo_contratto||"")}" placeholder="Es. Tempo indeterminato">
+            <datalist id="d-contratti-list">${CONTRATTI.map(c=>`<option value="${c}"></option>`).join("")}</datalist></div>
+          <div class="field"><label>In caso di emergenza chiamare</label><input id="d-emerg-nome" value="${esc(op.emergenza_nome||"")}" placeholder="Es. Maria (moglie)"></div>
+          <div class="field"><label>Telefono di emergenza</label><input id="d-emerg-tel" type="tel" value="${esc(op.emergenza_telefono||"")}" placeholder="Es. 333 7654321"></div>
+        </div>
+      </details>
+
       <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
       <button class="btn-primary b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
     $("#d-ruolo").onchange=applyRuoloPreset;
@@ -1836,7 +1939,8 @@
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const mestiere_id=curMestiere();
     if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
-    const {data:op,error}=await sb.from("gest_operatori").insert({user_id:sbUid,mestiere_id,nome,telefono:telefono||null}).select().single();
+    const extra=dipCampiExtra();
+    const {data:op,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id,nome,telefono:telefono||null},extra)).select().single();
     if(error){toast("Errore: "+error.message);return;}
     const codice=sbRand();
     const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato",ruolo,permessi});
@@ -1850,7 +1954,8 @@
     const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
     const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
-    const {error}=await sb.from("gest_operatori").update({nome,telefono:telefono||null}).eq("id",id).eq("user_id",sbUid);
+    const extra=dipCampiExtra();
+    const {error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     const {error:e2}=await sb.from("gest_membri").update({ruolo,permessi}).eq("operatore_id",id).eq("impresa_id",sbUid);
     if(e2){toast("Errore permessi: "+e2.message);return;}
