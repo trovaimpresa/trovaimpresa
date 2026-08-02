@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Gestione chat di supporto lato ADMIN (service_role).
-// Azioni: list | reply | delete_conv | mark_read
+// Azioni: list | reply | delete_conv | delete_msg | mark_read
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: corsHeaders, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method Not Allowed' }) };
@@ -21,9 +21,9 @@ exports.handler = async function (event) {
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Configurazione server mancante.' }) };
   }
 
-  let u, p, action, user_id, messaggio;
+  let u, p, action, user_id, messaggio, msg_id;
   try {
-    ({ u, p, action, user_id, messaggio } = JSON.parse(event.body || '{}'));
+    ({ u, p, action, user_id, messaggio, msg_id } = JSON.parse(event.body || '{}'));
   } catch {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Body JSON non valido.' }) };
   }
@@ -66,6 +66,19 @@ exports.handler = async function (event) {
       const { error } = await sb.from('supporto_messaggi')
         .update({ letto: true }).eq('user_id', user_id).eq('da_admin', false);
       if (error) throw error;
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
+    }
+
+    // Cancella UN solo messaggio, e solo se e' una risposta dell'admin:
+    // i messaggi degli utenti non si toccano.
+    if (action === 'delete_msg') {
+      if (!msg_id) return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'msg_id mancante.' }) };
+      const { data, error } = await sb.from('supporto_messaggi')
+        .delete().eq('id', msg_id).eq('da_admin', true).select('id');
+      if (error) throw error;
+      if (!data || !data.length) {
+        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Messaggio non trovato, oppure non e\' una tua risposta.' }) };
+      }
       return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
     }
 

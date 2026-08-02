@@ -1396,7 +1396,14 @@ async function apriConversazioneAdmin(uid) {
     const admin = m.da_admin;
     const style = 'max-width:75%;padding:9px 13px;border-radius:12px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-break:break-word;'
       + (admin ? 'align-self:flex-end;background:var(--verde);color:#fff' : 'align-self:flex-start;background:#fff;color:#111;border:1px solid var(--border)');
-    return '<div style="' + style + '">' + esc(m.messaggio || '') + '</div>';
+    // Il cestino compare solo sulle TUE risposte: i messaggi degli utenti non si cancellano.
+    if (!admin) return '<div style="' + style + '">' + esc(m.messaggio || '') + '</div>';
+    return '<div style="align-self:flex-end;display:flex;align-items:flex-start;gap:6px;max-width:80%">'
+      + '<button onclick="eliminaMsgAdmin(\'' + m.id + '\')" title="Elimina questo messaggio"'
+      + ' style="flex:0 0 auto;background:none;border:none;cursor:pointer;font-size:15px;opacity:.45;padding:6px 2px"'
+      + ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.45">🗑</button>'
+      + '<div style="' + style.replace('align-self:flex-end;','') + '">' + esc(m.messaggio || '') + '</div>'
+      + '</div>';
   }).join('');
   box.scrollTop = box.scrollHeight;
   renderConvList();
@@ -1414,6 +1421,16 @@ async function rispondiSupportoAdmin() {
   const j = await suppFetch('reply', { user_id: _suppConvUid, messaggio: txt });
   if (!j || !j.success) { alert('Errore invio: ' + ((j && j.error) || '')); inp.value = txt; return; }
   await caricaSupportoAdmin();
+}
+
+// Cancella una singola risposta scritta da te. Sparisce anche all'utente.
+async function eliminaMsgAdmin(id) {
+  if (!id) return;
+  if (!confirm('Eliminare questo messaggio?\n\nSparisce anche all\'utente e non si torna indietro.')) return;
+  const j = await suppFetch('delete_msg', { msg_id: id });
+  if (!j || !j.success) { alert('Errore: ' + ((j && j.error) || 'non riuscito')); return; }
+  await caricaSupportoAdmin();
+  if (_suppConvUid) await apriConversazioneAdmin(_suppConvUid);
 }
 
 async function eliminaConvAdmin() {
