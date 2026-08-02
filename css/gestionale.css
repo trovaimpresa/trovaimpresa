@@ -1717,3 +1717,28 @@
    loro sfondo: la riga sotto li sporcherebbe */
 .sh-tit--click{ border-bottom:none; padding-bottom:13px; }
 .sh-b{ margin-bottom:26px; }
+
+/* =========================================================================
+   SEZIONI VUOTE CHE SPIEGANO COSA FARE
+   Prima una sezione vuota era un titolo piccolo e una riga di testo: non si
+   capiva a cosa servisse quella sezione ne' da dove cominciare. Ora il testo
+   spiega a cosa serve e il pulsante fa partire la cosa da fare, senza doverla
+   cercare in cima alla pagina.
+   ========================================================================= */
+.lav-vuoto{ padding:70px 24px; max-width:64ch; margin:0 auto; }
+.lav-vuoto svg{ width:52px; height:52px; margin-bottom:18px; }
+.lav-vuoto h3{ font-size:24px; font-weight:800; letter-spacing:-.3px; line-height:1.25; }
+.lav-vuoto p{ font-size:17px; line-height:1.6; color:var(--testo-2); margin-top:12px; }
+
+.lav-vuoto .lv-btn{
+  margin-top:26px; height:52px; padding:0 28px;
+  font-size:17px; font-weight:700; border-radius:12px;
+}
+
+@media(max-width:760px){
+  .lav-vuoto{ padding:48px 18px; }
+  .lav-vuoto svg{ width:46px; height:46px; margin-bottom:14px; }
+  .lav-vuoto h3{ font-size:21px; }
+  .lav-vuoto p{ font-size:16px; }
+  .lav-vuoto .lv-btn{ width:100%; margin-top:22px; }
+}
