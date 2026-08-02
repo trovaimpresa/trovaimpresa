@@ -743,7 +743,7 @@
     const oggi=todayStr(), lim7=_giorniDopo(oggi,7), lim30=_giorniDopo(oggi,30);
 
     /* ---- primo giro di letture: tutto quello che non dipende dagli id dei lavori ---- */
-    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null;
+    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null,FT=[];
     try{
       const r=await Promise.all([
         sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -755,11 +755,12 @@
         sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid),
-        sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
+        sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+        sb.from("gest_fatture").select("id,stato,data,data_pagata,anno,numero,sconto,bollo,ritenuta_perc").eq("user_id",sbUid).eq("mestiere_id",mid)
       ]);
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
       MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
-      AZ=r[9].data||null;
+      AZ=r[9].data||null;FT=r[10].data||[];
     }catch(e){}
 
     const ids=L.map(l=>l.id);
@@ -767,7 +768,7 @@
     const opeMap=Object.fromEntries(OPE.map(o=>[o.id,o.nome||""]));
 
     /* ---- secondo giro: quello che ha bisogno degli id dei lavori ---- */
-    let SP=[],nFoto=0,nVideo=0,PR=[],CM=[];
+    let SP=[],nFoto=0,nVideo=0,PR=[],CM=[],FR=[];
     try{
       const attesaIds=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato").map(p=>p.id);
       const carteIds=CA.map(c=>c.id);
@@ -776,10 +777,11 @@
         ids.length?sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
         ids.length?sb.from("gest_video").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
         attesaIds.length?sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",attesaIds):Promise.resolve({data:[]}),
-        carteIds.length?sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at,carta_id").eq("user_id",sbUid).in("carta_id",carteIds):Promise.resolve({data:[]})
+        carteIds.length?sb.from("gest_carte_movimenti").select("tipo,importo,data,created_at,carta_id").eq("user_id",sbUid).in("carta_id",carteIds):Promise.resolve({data:[]}),
+        FT.length?sb.from("gest_fattura_righe").select("fattura_id,qta,prezzo,iva").eq("user_id",sbUid).in("fattura_id",FT.map(f=>f.id)):Promise.resolve({data:[]})
       ]);
       SP=q[0].data||[];nFoto=q[1].count||0;nVideo=q[2].count||0;PR=q[3].data||[];
-      CM=(q[4].data||[]).filter(m=>m.tipo==="spesa");
+      CM=(q[4].data||[]).filter(m=>m.tipo==="spesa");FR=q[5].data||[];
     }catch(e){}
 
     /* ---- calcoli (identici a prima) ---- */
@@ -789,14 +791,29 @@
        che hai EMESSO e che non ti hanno pagato. I lavori finiti non ancora
        fatturati sono un'altra cosa e li conto a parte: prima finivano qui dentro
        e il numero del Riepilogo non tornava con quello di Fatture. */
-    const daInc    = L.filter(l=>l.fatt_stato==="emessa");
-    const totDaInc = daInc.reduce((s,l)=>s+(+l.importo||0),0);
+    /* i conti delle fatture arrivano dalle fatture vere, non piu' dalle
+       caselle sul lavoro: una fattura puo' tenerne dentro tre, e ha l'IVA. */
+    const totFatt={};
+    FR.forEach(r=>{
+      const imp=(+r.qta||0)*(+r.prezzo||0);
+      const t=totFatt[r.fattura_id]=totFatt[r.fattura_id]||{imp:0,iva:0};
+      t.imp+=imp; t.iva+=imp*(+r.iva||0)/100;
+    });
+    const totaleFatt=f=>{
+      const t=totFatt[f.id]||{imp:0,iva:0};
+      return t.imp+t.iva-(+f.sconto||0)+(+f.bollo||0)-t.imp*(+f.ritenuta_perc||0)/100;
+    };
+    const daInc    = FT.filter(f=>f.stato==="emessa");
+    const totDaInc = daInc.reduce((s,f)=>s+totaleFatt(f),0);
+    /* "da fatturare" = lavori finiti con un importo che non stanno ancora
+       dentro nessuna fattura. Qui basta il flag sul lavoro, che la fattura
+       tiene aggiornato da sola. */
     const daFatt   = L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none"&&+l.importo>0);
     const totDaFatt= daFatt.reduce((s,l)=>s+(+l.importo||0),0);
     const ggPag    = (AZ&&+AZ.giorni_pagamento)||30;
-    const scadenza = l=>{const d=l.data_fatt_emessa||l.data_fatto||l.data_prevista;return d?_giorniDopo(d,ggPag):"";};
-    const scadute  = daInc.filter(l=>{const sc=scadenza(l);return sc&&sc<oggi;});
-    const incMese  = L.filter(l=>l.fatt_stato==="pagata"&&thisMonth(l.data_fatto)).reduce((s,l)=>s+(+l.importo||0),0);
+    const scadenza = f=>f.data?_giorniDopo(f.data,ggPag):"";
+    const scadute  = daInc.filter(f=>{const sc=scadenza(f);return sc&&sc<oggi;});
+    const incMese  = FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data)).reduce((s,f)=>s+totaleFatt(f),0);
     const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
     const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
     /* anche le spese delle carte entrano nel conto: prima erano invisibili
@@ -853,12 +870,14 @@
     const mzScaduti = mzAvvisa.filter(v=>v.scadute>0);
     const limVecchio = _giorniDopo(oggi,-7);
     const prevFermi = attesa.filter(p=>p.data&&String(p.data)<limVecchio);
-    const totScadute = scadute.reduce((s,l)=>s+(+l.importo||0),0);
+    const totScadute = scadute.reduce((s,f)=>s+totaleFatt(f),0);
 
     const DA=[];
     const nn=(n,uno,tanti)=>n+" "+(n===1?uno:tanti);
     if(scadute.length)   DA.push({g:1,t:nn(scadute.length,"fattura scaduta","fatture scadute"),
                                   d:"Non ti hanno ancora pagato: "+eur(totScadute),go:"fatture"});
+    if(daFatt.length)    DA.push({g:2,t:nn(daFatt.length,"lavoro finito da fatturare","lavori finiti da fatturare"),
+                                  d:"Valgono "+eur(totDaFatt)+" e non sono ancora in nessuna fattura",go:"fatture"});
     if(ritardo.length)   DA.push({g:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
                                   d:"La data prevista è già passata",go:"lavori"});
     if(scScadute.length) DA.push({g:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),
@@ -938,15 +957,14 @@
       tono: scadute.length?"err":(totDaInc>0?"attesa":"ok"),
       vuoto: totDaFatt>0?("Da fatturare: "+eur(totDaFatt)):"Nessuna fattura da incassare",
       righe: daInc.slice()
-              .sort((a,b)=>String(a.data_fatt_emessa||a.data_fatto||"").localeCompare(String(b.data_fatt_emessa||b.data_fatto||"")))
-              .slice(0,2).map(l=>{
-        const sc=scadenza(l), fuori=sc&&sc<oggi;
-        const d=l.data_fatt_emessa||l.data_fatto||l.data_prevista;
-        const g=d?-_giorniA(d):null;
-        return {t:(cliMap[l.cliente_id]||l.descrizione||"Lavoro"),
-                v:eur(l.importo)+(g!=null?" · "+g+" gg":""),
+              .sort((a,b)=>String(a.data||"").localeCompare(String(b.data||"")))
+              .slice(0,2).map(f=>{
+        const sc=scadenza(f), fuori=sc&&sc<oggi;
+        const g=f.data?-_giorniA(f.data):null;
+        return {t:"Fattura n. "+(f.numero||"—")+"/"+f.anno,
+                v:eur(totaleFatt(f))+(g!=null?" · "+g+" gg":""),
                 cls:fuori?"q-passato":"",
-                action:"edit-job", id:l.id};
+                action:"rie-go-fatture", id:f.id};
       })
     }));
 
@@ -1120,9 +1138,7 @@
         ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
         ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
         ${!fatto?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
-        ${fatto&&fs==="none"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">📄 Fattura emessa</button>`:""}
-        ${fs==="emessa"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="pagata">💶 Segna pagata</button>`:""}
-        ${fs==="pagata"?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}" data-v="emessa">↩ Non pagata</button>`:""}
+        ${fatto?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}">${fs==="none"?"🧾 Crea fattura":"🧾 Apri fattura"}</button>`:""}
         <button class="btn btn-sm ja" data-action="edit-job" data-id="${l.id}">✏ Modifica</button>
         <button class="btn btn-sm btn-danger ja del" data-action="del-job" data-id="${l.id}">🗑</button>
       </div></div>`;
@@ -1267,8 +1283,7 @@
     v.push({lab:"\ud83d\udcac Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});
     v.push({sep:true});
     v.push({lab:"\ud83d\udcc4 Scarica PDF",action:"pdf",data:{id:l.id}});
-    if(fs!=="emessa")v.push({lab:"\ud83e\uddfe Fattura emessa",action:"fatt",data:{id:l.id,v:"emessa"}});
-    if(fs!=="pagata")v.push({lab:"\ud83d\udcb6 Segna pagata",action:"fatt",data:{id:l.id,v:"pagata"}});
+    if(fatto)v.push({lab:fs==="none"?"\ud83e\uddfe Crea fattura":"\ud83e\uddfe Apri fattura",action:"fatt",data:{id:l.id}});
     v.push({sep:true});
     v.push({lab:"\ud83d\uddd1 Elimina",action:"del-job-supa",data:{id:l.id},del:true});
     return v;
@@ -1555,205 +1570,798 @@
     if(ins){toast("Video su, ma non salvato: "+ins.message);return;}
     toast("Video aggiunto ✔");renderLavoroVideo();
   }
-  let fattUploadLavoroId=null;
-  function chiediFatturaPdf(lavoroId){
-    fattUploadLavoroId=lavoroId;
+  /* il PDF vero della fattura (quello del commercialista) si carica a mano e
+     ora si appoggia alla FATTURA, non al lavoro: una fattura puo' avere dentro
+     piu' lavori, ma il documento e' uno solo. */
+  let fattUploadId=null;
+  function chiediFatturaPdf(fatturaId){
+    fattUploadId=fatturaId;
     $("#fatt-pdf-file").click();
   }
   async function uploadFatturaPdf(file){
-    if(!file||!fattUploadLavoroId)return;
+    if(!file||!fattUploadId)return;
     if(!sbUid){toast("Devi essere loggato");return;}
     if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
     /* il PDF non e' un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
     const p=await preparaFileUpload(file);
     if(p.errore){toast(p.errore);return;}
     const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
-    const path=sbUid+"/"+fattUploadLavoroId+"/"+Date.now()+"_"+safe;
+    const path=sbUid+"/fatture/"+fattUploadId+"/"+Date.now()+"_"+safe;
     const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
     if(up){toast("Fattura non caricata: "+up.message);return;}
-    const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:fattUploadLavoroId,tipo:"fattura",operatore:"Capo",storage_path:path});
+    const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,fattura_id:fattUploadId,tipo:"fattura",operatore:"Capo",storage_path:path});
     if(ins){toast("File su, ma non salvato: "+ins.message);return;}
-    toast("Fattura PDF caricata ✔");renderFatture();
+    toast("Fattura PDF caricata \u2714");renderFatture();
   }
   async function apriFatturaPdf(fotoId){
-    const all=Object.values(fatturaPdfCache);
-    const f=all.find(p=>p.id===fotoId);
+    const f=Object.values(fatturaPdfCache).find(p=>String(p.id)===String(fotoId));
     if(!f)return;
     const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
     if(su&&su.signedUrl)window.open(su.signedUrl,"_blank");
     else toast("Non riesco ad aprire la fattura");
   }
-  function fattRow(l,btn){
-    const fatturaPdf=fatturaPdfCache[l.id];
-    const fatturaBtns=(fatturaPdf?`<button class="btn btn-sm ja" data-action="open-fattura" data-id="${esc(fatturaPdf.id)}">📄 Apri fattura PDF</button>`:"")
-      +`<button class="btn btn-sm ja" data-action="upload-fattura" data-id="${l.id}">📎 Carica fattura PDF</button>`;
-    return `<div class="fatt-row">
-      <div class="fatt-info"><b>${esc(l.descrizione||"Lavoro")}</b>
-        <div class="sub">📅 ${fdate(l.data_fatto||l.data_prevista)}</div></div>
-      <div class="fatt-imp">${eur(l.importo)}</div>
-      <button class="btn btn-sm ja" data-action="pdf" data-id="${l.id}">PDF</button>${fatturaBtns}${btn||""}</div>`;
-  }
-  let fatturaPdfCache={};
+
   /* ================= FATTURE =================
-     Ogni fattura e' una scheda, come nel resto del gestionale. Su ognuna:
-     il numero e la data di emissione, da quanti giorni aspetti i soldi,
-     il cliente e il cantiere, e se il PDF c'e' gia'.
-     La scadenza si calcola dai giorni di pagamento dei Dati azienda (30 se
-     non li hai impostati). Nessuna data va compilata a mano.
+     Fino al 2 agosto la fattura non esisteva: erano tre caselle attaccate al
+     lavoro (fatt_stato, num_fatt, data_fatt_emessa). Una fattura per lavoro,
+     una riga sola, niente IVA, niente acconti, niente nota di credito — e
+     senza l'IVA riga per riga il file XML per lo SDI non si poteva nemmeno
+     cominciare.
+
+     Ora la fattura e' una cosa a se': gest_fatture + gest_fattura_righe, sullo
+     stampo dei preventivi, piu' la tabella ponte gest_fattura_lavori che
+     permette di mettere piu' lavori nella stessa fattura.
+
+     La casella fatt_stato sul lavoro NON e' stata cancellata: adesso e'
+     un riflesso. Quando una fattura passa a emessa o pagata, i lavori che ci
+     stanno dentro si aggiornano da soli. Cosi' Lavori, Report, Riepilogo ed
+     Esporta continuano a funzionare esattamente come prima.
      ========================================== */
 
-  /* le tre linguette della sezione Fatture: le avevo cancellate per sbaglio
-     rifacendo la sezione, e senza queste la pagina si fermava a meta'. */
-  const FATT_VISTE=[{k:"tutte",lab:"Tutte"},{k:"incassare",lab:"Da incassare"},{k:"pagate",lab:"Pagate"}];
-  const FATT_LAB={none:"Da fatturare",emessa:"Emessa",pagata:"Pagata"};
-  const FATT_BAR={none:"da_fare",emessa:"in_corso",pagata:"fatto"};
+  const FATT_VISTE=[
+    {k:"tutte",    lab:"Tutte"},
+    {k:"bozze",    lab:"Bozze"},
+    {k:"incassare",lab:"Da incassare"},
+    {k:"scadute",  lab:"Scadute", err:true},
+    {k:"pagate",   lab:"Pagate"}
+  ];
+  /* le aliquote che usa un'impresa edile: 22 ordinaria, 10 manutenzione e
+     ristrutturazione, 4 prima casa, 0 quando l'IVA non si applica */
+  const IVA_SCELTE=[22,10,4,0];
+  const IVA_DEF=10;
+  const FATT_TIPI=[["fattura","Fattura"],["acconto","Fattura di acconto"],["nota_credito","Nota di credito"]];
+  const FATT_STATO_LAB={bozza:"Bozza",emessa:"Emessa, da incassare",pagata:"Pagata",annullata:"Annullata"};
+  const FATT_TIPO_LAB={fattura:"Fattura",acconto:"Acconto",nota_credito:"Nota di credito"};
 
-  let fattAzienda=null;
+  let fattCache=[], fattRighe={}, fattLavori={}, fattCliCache=[], fattLavLiberi=[];
+  let fattAzienda=null, fatturaPdfCache={}, fattVista="tutte", fattRigheCount=0;
 
-  function fattDataEmissione(l){
-    /* data_fatt_emessa la scrive il gestionale quando segni "emessa".
-       Sulle fatture vecchie non c'e': ripiego sul giorno in cui hai finito il lavoro. */
-    return l.data_fatt_emessa||l.data_fatto||l.data_prevista||"";
+  /* in regime forfettario non si applica IVA: il gestionale toglie la colonna,
+     mette la dicitura di legge sul PDF e propone il bollo da 2 euro */
+  function fattForfettario(){ return (fattAzienda&&fattAzienda.regime_fiscale)==="RF19"; }
+
+  /* i conti della fattura. Sono gli stessi della vista gest_fatture_totali su
+     Supabase: qui li rifaccio in locale perche' le righe le ho gia' lette per
+     disegnare la scheda, e una lettura in meno e' una lettura in meno. */
+  function fattConti(f){
+    const R=fattRighe[f.id]||[];
+    const imponibile=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0),0);
+    const iva=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0)*(+r.iva||0)/100,0);
+    const ritenuta=imponibile*(+f.ritenuta_perc||0)/100;
+    const totale=imponibile+iva-(+f.sconto||0)+(+f.bollo||0)-ritenuta;
+    return {imponibile,iva,ritenuta,totale};
+  }
+  function fattNumero(f){
+    return f.numero ? "n. "+f.numero+"/"+f.anno : "bozza senza numero";
+  }
+  function fattScadenza(f,gg){ return f.data?_giorniDopo(f.data,gg):""; }
+  function fattScaduta(f,gg){
+    if(f.stato!=="emessa")return false;
+    const sc=fattScadenza(f,gg);
+    return !!(sc&&sc<todayStr());
   }
   function fattGiorniDa(ds){
     if(!ds)return null;
     const g=_giorniA(ds);
-    return g===null?null:-g;                 /* giorni passati */
-  }
-  function fattScadenza(l,gg){
-    const d=fattDataEmissione(l);
-    return d?_giorniDopo(d,gg):"";
+    return g===null?null:-g;
   }
 
-  function fattCard(l,cliNome,gg){
-    const fs=l.fatt_stato||"none";
-    const emis=fattDataEmissione(l);
-    const gio=fattGiorniDa(emis);
-    const scad=fattScadenza(l,gg);
-    const scaduta=fs==="emessa"&&scad&&scad<todayStr();
-    const pdf=fatturaPdfCache[l.id];
-    const tono=fs==="pagata"?"ok":(scaduta?"err":(fs==="emessa"?"attesa":"info"));
-    const statoLab=fs==="pagata"?"Pagata":(fs==="emessa"?(scaduta?"Scaduta, non pagata":"Emessa, da incassare"):"Da fatturare");
-    const pall=fs==="pagata"?"verde":(scaduta?"ritardo":(fs==="emessa"?"rosso":"grigio"));
-
-    const righe=[];
-    if(l.num_fatt)righe.push(["Numero","n. "+l.num_fatt]);
-    if(emis)righe.push([fs==="none"?"Lavoro finito il":"Emessa il",fdate(emis)]);
-    if(fs==="emessa"&&gio!=null)
-      righe.push(["Aspetti da",gio+(gio===1?" giorno":" giorni"),scaduta?"q-passato":""]);
-    if(fs==="emessa"&&scad)
-      righe.push([scaduta?"Doveva pagare entro":"Da pagare entro",fdate(scad),scaduta?"q-passato":""]);
-    if(cliNome)righe.push(["Cliente",cliNome]);
-    if(l.dove)righe.push(["Cantiere",l.dove]);
-    righe.push(["PDF",pdf?"caricato":"non ancora caricato",pdf?"":"q-vuoto"]);
-
-    const bottoni=[];
-    if(fs==="none")bottoni.push('<button class="btn btn-sm ja" data-action="fatt" data-id="'+esc(l.id)+'" data-v="emessa">Segna emessa</button>');
-    if(fs==="emessa")bottoni.push('<button class="btn btn-sm ja" data-action="fatt" data-id="'+esc(l.id)+'" data-v="pagata">Segna pagata</button>');
-    if(fs==="pagata")bottoni.push('<button class="btn btn-sm ja" data-action="fatt" data-id="'+esc(l.id)+'" data-v="emessa">Non pagata</button>');
-    bottoni.push('<button class="btn btn-sm ja" data-action="pdf" data-id="'+esc(l.id)+'">Scarica PDF</button>');
-    if(pdf)bottoni.push('<button class="btn btn-sm ja" data-action="open-fattura" data-id="'+esc(pdf.id)+'">Apri PDF</button>');
-    else bottoni.push('<button class="btn btn-sm ja" data-action="upload-fattura" data-id="'+esc(l.id)+'">Carica PDF</button>');
-    bottoni.push('<button class="btn btn-sm ja" data-action="edit-job" data-id="'+esc(l.id)+'">Apri lavoro</button>');
-
-    return '<div class="job t-'+tono+'">'
-      + '<div class="job-top"><div class="job-cli">'+esc(l.descrizione||"Lavoro")+'</div>'
-      +   '<span class="job-imp">'+eur(l.importo)+'</span></div>'
-      + '<div class="stati"><span class="st"><i class="pall '+pall+'"></i><span class="lab">'+statoLab+'</span></span></div>'
-      + '<div class="job-righe">'
-      +   righe.map(r=>'<div class="job-r"><span class="job-rt">'+esc(r[0])+'</span>'
-      +     '<span class="job-rv'+(r[2]?" "+r[2]:"")+'">'+esc(r[1])+'</span></div>').join("")
-      + '</div>'
-      + '<div class="job-actions">'+bottoni.join("")+'</div>'
-      + '</div>';
+  /* ---- il riflesso sul lavoro ----
+     Il lavoro deve sapere se e' stato fatturato: lo usano la scheda del lavoro,
+     il Report, il Riepilogo e l'esportazione. Invece di duplicare il dato a
+     mano, lo riscrivo qui ogni volta che la fattura cambia stato. */
+  async function fattSincronizzaLavori(fatturaId,stato){
+    if(!sb||!sbUid||!fatturaId)return;
+    const ids=(fattLavori[fatturaId]||[]);
+    if(!ids.length)return;
+    const nuovo = stato==="pagata" ? "pagata" : (stato==="emessa" ? "emessa" : "none");
+    try{ await sb.from("gest_lavori").update({fatt_stato:nuovo}).in("id",ids).eq("user_id",sbUid); }catch(e){}
   }
 
+  /* ---- il numero, assegnato una volta sola ----
+     Una bozza non consuma nessun numero: il numero si prende quando dichiari
+     la fattura emessa, ed e' il primo libero di quell'anno. Cosi' la
+     numerazione riparte da 1 ogni gennaio e non lascia buchi.
+     Il vincolo unique(user_id, anno, numero) sul database fa da rete: se due
+     salvataggi partissero insieme, il secondo viene rifiutato invece di
+     creare due fatture con lo stesso numero. */
+  async function fattAssegnaNumero(f){
+    if(f.numero)return f.numero;
+    const anno=(f.data||todayStr()).slice(0,4);
+    const {data}=await sb.from("gest_fatture").select("numero")
+      .eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null)
+      .order("numero",{ascending:false}).limit(1);
+    const n=((data&&data[0]&&+data[0].numero)||0)+1;
+    const {error}=await sb.from("gest_fatture").update({numero:n,anno:+anno}).eq("id",f.id).eq("user_id",sbUid);
+    if(error){toast("Numero non assegnato: "+error.message);return null;}
+    return n;
+  }
+
+  /* ---------- la scheda della fattura ---------- */
+  function fattCard(f,gg){
+    const c=fattConti(f);
+    const scaduta=fattScaduta(f,gg);
+    const gio=f.stato==="emessa"?fattGiorniDa(f.data):null;
+    const pdf=fatturaPdfCache[f.id];
+    const nLav=(fattLavori[f.id]||[]).length;
+    const tono = f.stato==="pagata" ? "t-ok"
+               : scaduta            ? "t-err"
+               : f.stato==="emessa" ? "t-attesa"
+               : f.stato==="annullata" ? "t-neutro" : "t-info";
+    const statoLab = scaduta ? "Scaduta, non pagata" : (FATT_STATO_LAB[f.stato]||f.stato);
+    const cli=fattCliCache.find(x=>String(x.id)===String(f.cliente_id));
+    const nome=f.cli_nome||(cli&&cli.nome)||"—";
+
+    const meta=[
+      "🧾 "+esc(fattNumero(f)),
+      "📅 "+fdate(f.data),
+      "👤 "+esc(nome),
+      nLav?("🛠 "+nLav+(nLav===1?" lavoro":" lavori")):"",
+      f.stato==="emessa"&&gio!=null
+        ? '<span'+(scaduta?' style="color:var(--err);font-weight:700"':'')+'>⏳ aspetti da '+gio+(gio===1?" giorno":" giorni")+'</span>'
+        : "",
+      f.tipo!=="fattura" ? "📄 "+FATT_TIPO_LAB[f.tipo] : "",
+      pdf?"":'<span style="color:var(--testo-3)">PDF non caricato</span>'
+    ];
+
+    const az=[];
+    if(f.stato==="bozza")   az.push({lab:"📤 Emetti",       action:"fatt-stato",data:{id:f.id,v:"emessa"}});
+    if(f.stato==="emessa")  az.push({lab:"💶 Segna pagata", action:"fatt-stato",data:{id:f.id,v:"pagata"}});
+    if(f.stato==="pagata")  az.push({lab:"↩ Non pagata",    action:"fatt-stato",data:{id:f.id,v:"emessa"}});
+    az.push({lab:"✏ Apri",     action:"edit-fatt",data:{id:f.id}});
+    az.push({lab:"⬇ Scarica PDF",action:"fatt-pdf",  data:{id:f.id}});
+    if(pdf) az.push({lab:"📄 Apri PDF caricato",action:"open-fattura", data:{id:pdf.id}});
+    else    az.push({lab:"📎 Carica PDF",       action:"upload-fattura",data:{id:f.id}});
+    az.push({lab:"🗑 Elimina",action:"del-fatt",data:{id:f.id},del:true});
+
+    return schedaJob({
+      tono,
+      titolo:esc(f.cli_nome||(cli&&cli.nome)||"Fattura")+" — "+esc(statoLab),
+      destra:'<span class="job-imp">'+eur(c.totale)+'</span>',
+      meta,
+      nota:f.note?"📝 "+esc(f.note):"",
+      azioni:az
+    });
+  }
+
+  /* ---------- la sezione ---------- */
   async function renderFatture(){
    try{
-    let L=[], cliMap={};
-    if(sb&&sbUid){
-      const [{data},{data:cls},{data:az}]=await Promise.all([
-        sb.from("gest_lavori").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-        sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-        sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
-      ]);
-      fattAzienda=az||null;
-      L=(data||[]).filter(l=>+l.importo>0);
-      cliMap=Object.fromEntries((cls||[]).map(c=>[c.id,c.nome||""]));
-      const ids=L.map(l=>l.id);
-      fatturaPdfCache={};
-      if(ids.length){
-        const {data:pdfs}=await sb.from("gest_foto").select("id,lavoro_id,storage_path,created_at").eq("user_id",sbUid).eq("tipo","fattura").in("lavoro_id",ids).order("created_at",{ascending:false});
-        (pdfs||[]).forEach(p=>{if(!fatturaPdfCache[p.lavoro_id])fatturaPdfCache[p.lavoro_id]=p;});
-      }
+    const body=$("#fatt-body"), viste=$("#fatt-viste"), sum=$("#fatt-summary");
+    if(!body)return;
+    if(!sb||!sbUid||!cur){
+      if(sum)sum.innerHTML="";if(viste)viste.innerHTML="";
+      body.className="";body.style.display="block";
+      body.innerHTML=tabVuoto("Le fatture","Accedi per gestire le fatture di questo reparto.");
+      return;
     }
+    const mid=curMestiere();
+
+    const [{data:ff},{data:cls},{data:az},{data:lav}]=await Promise.all([
+      sb.from("gest_fatture").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
+      sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+      sb.from("gest_lavori").select("id,descrizione,dove,stato,importo,data_fatto,data_prevista,cliente_id")
+        .eq("user_id",sbUid).eq("mestiere_id",mid).eq("stato","fatto")
+    ]);
+    fattCache=ff||[]; fattCliCache=cls||[]; fattAzienda=az||null;
+    fattRighe={}; fattLavori={}; fatturaPdfCache={};
+
+    const ids=fattCache.map(f=>f.id);
+    if(ids.length){
+      const [{data:rr},{data:fl},{data:pdfs}]=await Promise.all([
+        sb.from("gest_fattura_righe").select("*").eq("user_id",sbUid).in("fattura_id",ids).order("ordine"),
+        sb.from("gest_fattura_lavori").select("fattura_id,lavoro_id").eq("user_id",sbUid).in("fattura_id",ids),
+        sb.from("gest_foto").select("id,fattura_id,storage_path,created_at").eq("user_id",sbUid).eq("tipo","fattura").in("fattura_id",ids)
+      ]);
+      (rr||[]).forEach(r=>{(fattRighe[r.fattura_id]=fattRighe[r.fattura_id]||[]).push(r);});
+      (fl||[]).forEach(x=>{(fattLavori[x.fattura_id]=fattLavori[x.fattura_id]||[]).push(x.lavoro_id);});
+      (pdfs||[]).forEach(p=>{if(p.fattura_id&&!fatturaPdfCache[p.fattura_id])fatturaPdfCache[p.fattura_id]=p;});
+    }
+
+    /* i lavori finiti che non stanno ancora dentro nessuna fattura:
+       sono il "da fatturare" e la sorgente del selettore */
+    const dentro=new Set();
+    Object.values(fattLavori).forEach(a=>a.forEach(x=>dentro.add(String(x))));
+    fattLavLiberi=(lav||[]).filter(l=>+l.importo>0 && !dentro.has(String(l.id)));
+
     const gg=(fattAzienda&&+fattAzienda.giorni_pagamento)||30;
     const anno=todayStr().slice(0,4);
+    const conti={};fattCache.forEach(f=>{conti[f.id]=fattConti(f);});
 
-    const daFatt=L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none");
-    const daInc =L.filter(l=>l.fatt_stato==="emessa");
-    const pagate=L.filter(l=>l.fatt_stato==="pagata");
+    const emesse = fattCache.filter(f=>f.stato==="emessa");
+    const pagate = fattCache.filter(f=>f.stato==="pagata");
+    const scadute= emesse.filter(f=>fattScaduta(f,gg));
 
-    const tInc =daInc.reduce((s,l)=>s+(+l.importo||0),0);
-    const tFatt=daFatt.reduce((s,l)=>s+(+l.importo||0),0);
-    const incAnno=pagate.filter(l=>String(l.data_fatto||"").slice(0,4)===anno).reduce((s,l)=>s+(+l.importo||0),0);
-    /* il credito piu' vecchio: quanti giorni aspetti la fattura emessa da piu' tempo */
-    const attese=daInc.map(l=>fattGiorniDa(fattDataEmissione(l))).filter(x=>x!=null);
-    const piuVecchio=attese.length?Math.max.apply(null,attese):null;
-    const emesseAnno=L.filter(l=>(l.fatt_stato==="emessa"||l.fatt_stato==="pagata")
-                                 &&String(fattDataEmissione(l)).slice(0,4)===anno).length;
-    const scadute=daInc.filter(l=>{const sc=fattScadenza(l,gg);return sc&&sc<todayStr();}).length;
+    const tInc  = emesse.reduce((s,f)=>s+conti[f.id].totale,0);
+    const tFatt = fattLavLiberi.reduce((s,l)=>s+(+l.importo||0),0);
+    const incAnno = pagate.filter(f=>String(f.data_pagata||f.data||"").slice(0,4)===anno)
+                          .reduce((s,f)=>s+conti[f.id].totale,0);
+    const attese = emesse.map(f=>fattGiorniDa(f.data)).filter(x=>x!=null);
+    const piuVecchio = attese.length?Math.max.apply(null,attese):null;
+    const emesseAnno = fattCache.filter(f=>f.numero&&String(f.anno)===anno).length;
 
-    const box=(n,l,sub,tono)=>'<div class="fatt-tot'+(tono?" t-"+tono:"")+'"><div class="n">'+n+'</div>'
+    const box=(n,l,sub,tono,azione)=>'<div class="fatt-tot'+(tono?" t-"+tono:"")
+      +(azione?'" '+azione+' style="cursor:pointer':'')+'"><div class="n">'+n+'</div>'
       +'<div class="l">'+l+'</div>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>';
-    $("#fatt-summary").innerHTML=
-        box(eur(tInc),"Da incassare",daInc.length+(daInc.length===1?" fattura emessa":" fatture emesse"),scadute?"err":"attesa")
-      + box(eur(tFatt),"Da fatturare",daFatt.length+(daFatt.length===1?" lavoro finito":" lavori finiti"),"info")
-      + box(eur(incAnno),"Incassato "+anno,"gia' entrato in cassa","ok")
+    if(sum)sum.innerHTML=
+        box(eur(tInc),"Da incassare",emesse.length+(emesse.length===1?" fattura emessa":" fatture emesse"),scadute.length?"err":"attesa")
+      + box(eur(tFatt),"Da fatturare",
+            fattLavLiberi.length?(fattLavLiberi.length+(fattLavLiberi.length===1?" lavoro finito · clicca per fatturarlo":" lavori finiti · clicca per fatturarli")):"niente in attesa",
+            "info", fattLavLiberi.length?'data-action="fatt-da-lavori"':"")
+      + box(eur(incAnno),"Incassato "+anno,"già entrato in cassa","ok")
       + box(piuVecchio==null?"—":(piuVecchio+" gg"),"Il credito più vecchio",
-            piuVecchio==null?"nessuna fattura in attesa":"dalla data di emissione",
+            piuVecchio==null?"nessuna fattura in attesa":"dalla data della fattura",
             (piuVecchio!=null&&piuVecchio>gg)?"err":"neutro")
-      + box(String(emesseAnno),"Fatture emesse "+anno,"nel corso dell'anno","neutro");
+      + box(String(emesseAnno),"Fatture emesse "+anno,"numerate nel corso dell'anno","neutro");
 
-    const rank=l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none"?0:(l.fatt_stato==="emessa"?1:(l.fatt_stato==="pagata"?2:3));
-    const TUTTE=L.filter(l=>rank(l)<3);
-    const filtra=(A,v)=>v==="incassare"?A.filter(l=>l.fatt_stato==="emessa")
-                      :v==="pagate"?A.filter(l=>l.fatt_stato==="pagata"):A.slice();
-    const conta={};FATT_VISTE.forEach(v=>conta[v.k]=filtra(TUTTE,v.k).length);
-    let R=filtra(TUTTE,fattVista);
-    /* prima quelle che chiedono qualcosa: da fatturare, poi le scadute, poi il resto */
-    R.sort((a,b)=>{
-      const sc=l=>{const s2=fattScadenza(l,gg);return (l.fatt_stato==="emessa"&&s2&&s2<todayStr())?0:1;};
-      return rank(a)-rank(b)||sc(a)-sc(b)
-           ||String(fattDataEmissione(a)).localeCompare(String(fattDataEmissione(b)));
-    });
-
-    const body=$("#fatt-body");
-    const viste=$("#fatt-viste");
+    const filtra=(A,v)=>
+        v==="bozze"    ? A.filter(f=>f.stato==="bozza")
+      : v==="incassare"? A.filter(f=>f.stato==="emessa")
+      : v==="scadute"  ? A.filter(f=>fattScaduta(f,gg))
+      : v==="pagate"   ? A.filter(f=>f.stato==="pagata")
+      : A.slice();
+    const conta={};FATT_VISTE.forEach(v=>conta[v.k]=filtra(fattCache,v.k).length);
     if(viste)viste.innerHTML=FATT_VISTE.map(v=>{
       const n=conta[v.k]||0;
       return '<button class="vista'+(fattVista===v.k?" on":"")+'" data-action="fatt-vista" data-v="'+v.k+'">'
-        +v.lab+(n?'<span class="v-cnt">'+n+'</span>':'')+'</button>';
+        +v.lab+(n?'<span class="v-cnt'+(v.err?" err":"")+'">'+n+'</span>':'')+'</button>';
     }).join("");
+
+    let R=filtra(fattCache,fattVista);
+    /* prima quelle che chiedono qualcosa: scadute, poi emesse, poi bozze,
+       poi le pagate. A parita', la piu' recente in cima. */
+    const rank=f=>fattScaduta(f,gg)?0:(f.stato==="emessa"?1:(f.stato==="bozza"?2:(f.stato==="pagata"?3:4)));
+    R.sort((a,b)=>rank(a)-rank(b)
+      || String(b.data||"").localeCompare(String(a.data||""))
+      || (+b.numero||0)-(+a.numero||0));
 
     if(!R.length){
       body.className="";body.style.display="block";
-      body.innerHTML=tabVuoto("Nessuna fattura qui","Le fatture nascono dai lavori finiti con un importo.",
-        _SVGV+'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg>');
+      const filtrando=fattCache.length>0;
+      body.innerHTML=tabVuoto(
+        filtrando?"Nessuna fattura con questo filtro":"Ancora nessuna fattura",
+        filtrando?"Prova a cambiare vista qui sopra."
+                 :"Righe con quantità, prezzo e IVA, il numero progressivo che riparte ogni anno, e il PDF pronto da mandare. Una fattura può raccogliere più lavori dello stesso cliente: uno solo, oppure tutti quelli del mese.",
+        _SVGV+'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg>',
+        filtrando?null:{t:"+ Crea la prima fattura",a:"new-fattura"});
       return;
     }
     body.className="griglia-schede";body.style.display="grid";
-    body.innerHTML=R.map(l=>fattCard(l,cliMap[l.cliente_id]||"",gg)).join("");
+    body.innerHTML=R.map(f=>fattCard(f,gg)).join("");
    }catch(err){
     const m=(err&&(err.message||err.toString()))||"errore sconosciuto";
     const b=$("#fatt-body");
     if(b){b.className="";b.style.display="block";
       b.innerHTML='<div class="mp-avviso"><b>Le fatture non si sono caricate.</b><br>'+esc(m)
-        +'<br><br>Manda questa schermata ad Alessio.</div>';}
+        +'<br><br>Se dice che una tabella non esiste, manca il blocco SQL delle fatture su Supabase.</div>';}
     try{console.error("[FATTURE]",err);}catch(e){}
    }
   }
-  let fattSort={k:"rank",d:1}, fattVista="tutte";
+
+  /* ---------- il modulo ---------- */
+  function fattRigaHtml(r){
+    r=r||{};fattRigheCount++;
+    const iva=r.iva!=null?+r.iva:IVA_DEF;
+    const opts=IVA_SCELTE.map(v=>'<option value="'+v+'"'+(+iva===v?" selected":"")+'>'+v+'%</option>').join("");
+    return '<div class="fatt-riga" data-riga>'
+      + '<input class="fr-desc" placeholder="Descrizione voce" value="'+esc(r.descrizione||"")+'">'
+      + '<input class="fr-qta" type="number" inputmode="decimal" step="0.5" placeholder="Q.tà" value="'+(r.qta!=null?r.qta:1)+'">'
+      + '<input class="fr-prezzo" type="number" inputmode="decimal" step="0.01" placeholder="Prezzo €" value="'+(r.prezzo!=null?r.prezzo:"")+'">'
+      + '<select class="fr-iva"'+(fattForfettario()?' style="display:none"':'')+'>'+opts+'</select>'
+      + '<button type="button" class="rdel" data-action="fatt-riga-del">×</button></div>';
+  }
+  /* i totali si rifanno a ogni tasto premuto: si vede il conto crescere
+     mentre scrivi, invece di scoprirlo dopo aver salvato */
+  function fattTotaleLive(){
+    let imp=0, iva=0;
+    $$("#fatt-righe [data-riga]").forEach(d=>{
+      const q=+d.querySelector(".fr-qta").value||0;
+      const p=+d.querySelector(".fr-prezzo").value||0;
+      const a=+(d.querySelector(".fr-iva")||{}).value||0;
+      imp+=q*p; iva+=q*p*a/100;
+    });
+    const sconto=+($("#fa-sconto")||{}).value||0;
+    const bollo =+($("#fa-bollo") ||{}).value||0;
+    const rit   =+($("#fa-rit")   ||{}).value||0;
+    const ritE=imp*rit/100;
+    const tot=imp+iva-sconto+bollo-ritE;
+    const el=$("#fatt-somma");
+    if(el)el.innerHTML=
+        '<div class="fs-r"><span>Imponibile</span><b>'+eur2(imp)+'</b></div>'
+      + (fattForfettario()?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(iva)+'</b></div>')
+      + (sconto?'<div class="fs-r"><span>Sconto</span><b>−'+eur2(sconto)+'</b></div>':"")
+      + (bollo ?'<div class="fs-r"><span>Bollo</span><b>'+eur2(bollo)+'</b></div>':"")
+      + (ritE  ?'<div class="fs-r"><span>Ritenuta '+rit+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
+      + '<div class="fs-r fs-tot"><span>Totale</span><b>'+eur2(tot)+'</b></div>';
+    return tot;
+  }
+
+  async function fattForm(f,preset){
+    const isNew=!f;
+    f=f||preset||{};
+    let righe=[];
+    if(sb&&sbUid){
+      if(!fattCliCache.length){
+        const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+        fattCliCache=data||[];
+      }
+      if(!fattAzienda){
+        const {data}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+        fattAzienda=data||null;
+      }
+      if(f.id){
+        const {data:rr}=await sb.from("gest_fattura_righe").select("*").eq("fattura_id",f.id).order("ordine");
+        righe=rr||[];
+      }
+    }
+    if(!righe.length&&preset&&preset._righe)righe=preset._righe;
+
+    const bloccata=f.stato==="emessa"||f.stato==="pagata";
+    const cliOpts=fattCliCache.map(c=>'<option value="'+c.id+'"'+(String(c.id)===String(f.cliente_id)?" selected":"")+'>'+esc(c.nome)+'</option>').join("");
+    const tipoOpts=FATT_TIPI.map(t=>'<option value="'+t[0]+'"'+((f.tipo||"fattura")===t[0]?" selected":"")+'>'+t[1]+'</option>').join("");
+    const nLav=(preset&&preset._lavori?preset._lavori.length:(fattLavori[f.id]||[]).length);
+
+    const titolo = isNew ? "Nuova fattura"
+                 : (f.numero ? "Fattura n. "+f.numero+"/"+f.anno : "Bozza di fattura");
+
+    openSheetGrande(titolo,
+      /* colonna di sinistra piu' larga: le voci hanno bisogno di spazio per la
+         descrizione, che e' la cosa che il cliente legge davvero */
+      '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
+
+      + '<div class="sh-b"><div class="sh-tit">A chi e quando</div>'
+      +   '<div class="field"><label>Cliente</label><select id="fa-cli"><option value="">— nessuno —</option>'+cliOpts+'</select></div>'
+      +   '<div class="row2">'
+      +     '<div class="field"><label>Data</label><input type="date" id="fa-data" value="'+(f.data||todayStr())+'"></div>'
+      +     '<div class="field"><label>Tipo</label><select id="fa-tipo">'+tipoOpts+'</select></div>'
+      +   '</div>'
+      +   (nLav?'<div class="sh-nota">Questa fattura raccoglie <b>'+nLav+(nLav===1?" lavoro":" lavori")+'</b>. I lavori collegati si segnano da soli come fatturati quando la emetti.</div>':'')
+      +   (bloccata?'<div class="sh-nota" style="color:var(--attesa)">⚠ Questa fattura è già stata emessa. Se la cambi, cambia un documento che il cliente ha già ricevuto: fallo solo se sai cosa stai facendo.</div>':'')
+      + '</div>'
+
+      + '<div class="sh-b"><div class="sh-tit">Voci della fattura</div>'
+      +   '<div id="fatt-righe">'+((righe.length?righe:[{}]).map(r=>fattRigaHtml(r)).join(""))+'</div>'
+      +   '<button type="button" class="btn-ghost quick-add" data-action="fatt-riga-add">+ Aggiungi voce</button>'
+      +   (fattForfettario()?'<div class="sh-nota">Sei in regime forfettario: la colonna IVA è nascosta e le voci vanno senza IVA.</div>'
+                            :'<div class="sh-nota">L\'aliquota si sceglie riga per riga. In edilizia il 10% è quello della manutenzione e ristrutturazione, il 4% della prima casa.</div>')
+      + '</div>'
+
+      + '</div><div class="sh-col">'
+
+      + '<div class="sh-b"><div class="sh-tit">Il conto</div>'
+      +   '<div class="fatt-somma" id="fatt-somma"></div>'
+      + '</div>'
+
+      + '<div class="sh-b"><div class="sh-tit">In fondo alla fattura</div>'
+      +   '<div class="row2">'
+      +     '<div class="field"><label>Sconto (€)</label><input type="number" step="0.01" id="fa-sconto" value="'+(+f.sconto||"")+'" placeholder="0"></div>'
+      +     '<div class="field"><label>Bollo (€)</label><input type="number" step="0.01" id="fa-bollo" value="'+(+f.bollo||"")+'" placeholder="0"></div>'
+      +   '</div>'
+      +   '<div class="field"><label>Ritenuta d\'acconto (%)</label><input type="number" step="0.01" id="fa-rit" value="'+(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
+      +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €. Scrivi 2 nel campo qui sopra.</div>':'')
+      + '</div>'
+
+      + '<div class="sh-b"><div class="sh-tit">Note</div>'
+      +   '<div class="field"><textarea id="fa-note" placeholder="Condizioni di pagamento, riferimenti, esclusioni...">'+esc(f.note||"")+'</textarea></div>'
+      +   '<div class="sh-nota">Compaiono in fondo al PDF.</div>'
+      + '</div>'
+
+      + '</div></div>',
+
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="save-fatt" data-id="'+(f.id||"")+'">'+(isNew?"Crea fattura":"Salva")+'</button>');
+
+    /* i lavori scelti nel selettore viaggiano attaccati al modulo finche' non si salva */
+    fattLavoriInCorso = (preset&&preset._lavori) ? preset._lavori.slice() : null;
+
+    const cont=$("#fatt-righe");
+    if(cont)cont.addEventListener("input",fattTotaleLive);
+    ["#fa-sconto","#fa-bollo","#fa-rit"].forEach(id=>{const e=$(id);if(e)e.addEventListener("input",fattTotaleLive);});
+    fattTotaleLive();
+  }
+  let fattLavoriInCorso=null;
+
+  async function saveFattura(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const righe=[];
+    $$("#fatt-righe [data-riga]").forEach((d,i)=>{
+      const descrizione=d.querySelector(".fr-desc").value.trim();
+      if(!descrizione)return;
+      righe.push({
+        descrizione,
+        qta:+d.querySelector(".fr-qta").value||1,
+        prezzo:+d.querySelector(".fr-prezzo").value||0,
+        iva: fattForfettario()?0:(+(d.querySelector(".fr-iva")||{}).value||0),
+        ordine:i
+      });
+    });
+    if(!righe.length){toast("Aggiungi almeno una voce");return;}
+
+    const cliente_id=$("#fa-cli").value||null;
+    const data=$("#fa-data").value||todayStr();
+    const testata={
+      cliente_id, data,
+      anno:+data.slice(0,4),
+      tipo:$("#fa-tipo").value||"fattura",
+      sconto:+$("#fa-sconto").value||0,
+      bollo:+$("#fa-bollo").value||0,
+      ritenuta_perc:+$("#fa-rit").value||0,
+      note:$("#fa-note").value.trim()||null
+    };
+    /* una copia dei dati del cliente resta dentro la fattura: se domani cambi
+       l'indirizzo in anagrafica, la fattura gia' emessa non deve cambiare */
+    const c=fattCliCache.find(x=>String(x.id)===String(cliente_id));
+    if(c){
+      testata.cli_nome=c.nome||null; testata.cli_piva=c.piva||null;
+      testata.cli_cod_fiscale=c.cod_fiscale||null; testata.cli_indirizzo=c.indirizzo||null;
+      testata.cli_cap=c.cap||null; testata.cli_citta=c.citta||null; testata.cli_prov=c.prov||null;
+      testata.cli_sdi=c.sdi_codice||null; testata.cli_pec=c.sdi_pec||null;
+    }
+    testata.regime_fiscale=(fattAzienda&&fattAzienda.regime_fiscale)||null;
+
+    let fid=id;
+    if(id){
+      const {error}=await sb.from("gest_fatture").update(testata).eq("id",id).eq("user_id",sbUid);
+      if(error){toast("Errore: "+error.message);return;}
+      await sb.from("gest_fattura_righe").delete().eq("fattura_id",id).eq("user_id",sbUid);
+    }else{
+      const {data:nf,error}=await sb.from("gest_fatture")
+        .insert({...testata,user_id:sbUid,mestiere_id:curMestiere(),stato:"bozza"}).select().single();
+      if(error){toast("Errore: "+error.message);return;}
+      fid=nf.id;
+    }
+    const {error:e2}=await sb.from("gest_fattura_righe")
+      .insert(righe.map(r=>({...r,user_id:sbUid,fattura_id:fid})));
+    if(e2){toast("Errore voci: "+e2.message);return;}
+
+    /* i lavori scelti nel selettore, agganciati adesso che la fattura esiste */
+    if(fattLavoriInCorso&&fattLavoriInCorso.length){
+      const {error:e3}=await sb.from("gest_fattura_lavori")
+        .insert(fattLavoriInCorso.map(lid=>({user_id:sbUid,fattura_id:fid,lavoro_id:lid})));
+      if(e3&&!/duplicate|unique/i.test(e3.message||""))toast("Lavori non collegati: "+e3.message);
+      fattLavori[fid]=(fattLavori[fid]||[]).concat(fattLavoriInCorso);
+      fattLavoriInCorso=null;
+    }
+
+    closeSheet();
+    await renderFatture();renderRiepilogo();renderJobs();
+    toast(id?"Fattura aggiornata ✔":"Fattura creata ✔ — è una bozza, emettila quando è pronta");
+  }
+
+  /* ---------- cambio di stato ---------- */
+  async function fattCambiaStato(id,v){
+    const f=fattCache.find(x=>String(x.id)===String(id));
+    if(!f){toast("Fattura non trovata");return;}
+    if(v==="emessa"&&!f.numero){
+      const n=await fattAssegnaNumero(f);
+      if(n==null)return;
+      f.numero=n;
+    }
+    const patch={stato:v};
+    if(v==="pagata")patch.data_pagata=todayStr();
+    if(v==="emessa")patch.data_pagata=null;
+    const {error}=await sb.from("gest_fatture").update(patch).eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    await fattSincronizzaLavori(id,v);
+    await renderFatture();renderRiepilogo();renderJobs();
+    toast(v==="emessa"?("Fattura n. "+f.numero+"/"+f.anno+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
+  }
+
+  async function eliminaFattura(id){
+    const f=fattCache.find(x=>String(x.id)===String(id));
+    const avviso=f&&f.numero
+      ? "Questa fattura ha il numero "+f.numero+"/"+f.anno+". Cancellarla lascia un buco nella numerazione, e i buchi il commercialista li vede. Se è sbagliata, di solito si fa una nota di credito.\n\nEliminare lo stesso?"
+      : "Eliminare questa bozza di fattura?";
+    if(!gconfirm(avviso))return;
+    await fattSincronizzaLavori(id,"none");
+    const {error}=await sb.from("gest_fatture").delete().eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    await renderFatture();renderRiepilogo();renderJobs();toast("Fattura eliminata");
+  }
+
+  /* ---------- le tre origini ----------
+     1. da uno o piu' lavori finiti  2. da un preventivo accettato  3. vuota */
+
+  function fattDaLavoriScegli(){
+    if(!fattLavLiberi.length){toast("Non ci sono lavori finiti da fatturare");return;}
+    /* raggruppo per cliente: fatturare insieme tre lavori di clienti diversi
+       non ha senso, e mostrarli mischiati invita a sbagliare */
+    const perCli={};
+    fattLavLiberi.forEach(l=>{const k=String(l.cliente_id||"");(perCli[k]=perCli[k]||[]).push(l);});
+    const nomeCli=k=>{const c=fattCliCache.find(x=>String(x.id)===k);return c?c.nome:"Senza cliente";};
+    const gruppi=Object.keys(perCli).sort((a,b)=>nomeCli(a).localeCompare(nomeCli(b)));
+
+    openSheetGrande("Quali lavori metto in fattura",
+      '<div class="sh-b"><div class="sh-tit">Lavori finiti non ancora fatturati</div>'
+      + '<div class="sh-nota">Spunta i lavori dello <b>stesso cliente</b>: diventano le voci di una fattura sola. È così che tre lavori per lo stesso condominio smettono di essere tre fatture.</div>'
+      + '<div id="fl-lista">'
+      + gruppi.map(k=>
+          '<div class="fl-gruppo"><div class="fl-cli">'+esc(nomeCli(k))+'</div>'
+          + perCli[k].map(l=>
+              '<label class="fl-riga"><input type="checkbox" class="fl-ck" value="'+esc(l.id)+'" data-cli="'+esc(k)+'">'
+              + '<span class="fl-t">'+esc(l.descrizione||"Lavoro")
+              +   (l.dove?'<span class="fl-d">'+esc(l.dove)+'</span>':"")
+              + '</span><span class="fl-i">'+eur(l.importo)+'</span></label>').join("")
+          + '</div>').join("")
+      + '</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="fatt-da-lavori-ok">Continua</button>');
+  }
+
+  function fattDaLavoriConferma(){
+    const ck=$$("#fl-lista .fl-ck:checked");
+    if(!ck.length){toast("Spunta almeno un lavoro");return;}
+    const cli=new Set(ck.map(c=>c.dataset.cli));
+    if(cli.size>1){toast("Scegli lavori di un cliente solo: una fattura va a un cliente solo");return;}
+    const ids=ck.map(c=>c.value);
+    const lavori=fattLavLiberi.filter(l=>ids.includes(String(l.id)));
+    const clienteId=[...cli][0]||null;
+    closeSheet();
+    fattForm(null,{
+      cliente_id:clienteId||null,
+      data:todayStr(),
+      _lavori:ids,
+      _righe:lavori.map((l,i)=>({
+        descrizione:(l.descrizione||"Prestazione di servizi")+(l.dove?" — "+l.dove:""),
+        qta:1, prezzo:+l.importo||0, iva:fattForfettario()?0:IVA_DEF, ordine:i
+      }))
+    });
+  }
+
+  async function fattDaPreventivoScegli(){
+    if(!sb||!sbUid)return;
+    const {data}=await sb.from("gest_preventivi").select("*")
+      .eq("user_id",sbUid).eq("mestiere_id",curMestiere()).eq("stato","accettato")
+      .order("data",{ascending:false});
+    const P=data||[];
+    if(!P.length){toast("Non ci sono preventivi accettati");return;}
+    const cliNome=id=>{const c=fattCliCache.find(x=>String(x.id)===String(id));return c?c.nome:"";};
+    openSheetGrande("Da quale preventivo accettato",
+      '<div class="sh-b"><div class="sh-tit">Preventivi accettati</div>'
+      + '<div class="sh-nota">La fattura si porta dietro tutte le righe del preventivo, con quantità e prezzi. Non devi riscrivere niente.</div>'
+      + '<div id="fp-lista">'
+      + P.map(p=>'<label class="fl-riga"><input type="radio" name="fp" class="fp-ck" value="'+esc(p.id)+'">'
+          + '<span class="fl-t">N. '+esc(String(p.numero||"—"))+' — '+esc(p.titolo||"Preventivo")
+          + (cliNome(p.cliente_id)?'<span class="fl-d">'+esc(cliNome(p.cliente_id))+'</span>':"")
+          + '</span><span class="fl-i">'+fdate(p.data)+'</span></label>').join("")
+      + '</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="fatt-da-prev-ok">Continua</button>');
+  }
+
+  async function fattDaPreventivoConferma(){
+    const sel=document.querySelector("#fp-lista .fp-ck:checked");
+    if(!sel){toast("Scegli un preventivo");return;}
+    const pid=sel.value;
+    const [{data:p},{data:rr}]=await Promise.all([
+      sb.from("gest_preventivi").select("*").eq("id",pid).eq("user_id",sbUid).maybeSingle(),
+      sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",pid).order("ordine")
+    ]);
+    if(!p){toast("Preventivo non trovato");return;}
+    closeSheet();
+    fattForm(null,{
+      cliente_id:p.cliente_id||null,
+      data:todayStr(),
+      note:p.note||null,
+      _righe:(rr||[]).map((r,i)=>({
+        descrizione:r.descrizione, qta:+r.qta||1, prezzo:+r.prezzo||0,
+        iva:fattForfettario()?0:IVA_DEF, ordine:i
+      }))
+    });
+  }
+
+
+
+  /* Il pulsante "+ Nuova": prima creava un lavoro con la fattura gia' emessa.
+     Ora chiede da dove nasce la fattura, perche' le strade sono tre. */
+  function fattNuovaScegli(){
+    const nLav=fattLavLiberi.length;
+    openSheetGrande("Da dove nasce questa fattura",
+      '<div class="sh-b"><div class="sh-tit">Scegli come partire</div>'
+      + '<div class="fn-scelte">'
+      +   '<button type="button" class="fn-s" data-action="fatt-da-lavori">'
+      +     '<span class="fn-t">Da uno o più lavori finiti</span>'
+      +     '<span class="fn-d">'+(nLav?(nLav+(nLav===1?" lavoro finito aspetta":" lavori finiti aspettano")+" di essere fatturati. Li spunti e diventano le voci."):"Al momento non ci sono lavori finiti da fatturare.")+'</span></button>'
+      +   '<button type="button" class="fn-s" data-action="fatt-da-prev">'
+      +     '<span class="fn-t">Da un preventivo accettato</span>'
+      +     '<span class="fn-d">Si porta dietro tutte le righe con quantità e prezzi. Non riscrivi niente.</span></button>'
+      +   '<button type="button" class="fn-s" data-action="fatt-vuota">'
+      +     '<span class="fn-t">Vuota, la scrivo io</span>'
+      +     '<span class="fn-d">Per acconti, rimborsi spese, consulenze: tutto quello che non ha un lavoro dietro.</span></button>'
+      + '</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>');
+  }
+
+  /* dalla scheda di un lavoro: fattura con dentro quel lavoro solo */
+  async function fattDaUnLavoro(lavoroId){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    /* se quel lavoro sta gia' dentro una fattura, non ne creo un'altra: apro quella */
+    const {data:gia}=await sb.from("gest_fattura_lavori").select("fattura_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId).limit(1);
+    if(gia&&gia.length){
+      const {data:f}=await sb.from("gest_fatture").select("*").eq("id",gia[0].fattura_id).maybeSingle();
+      if(f){closeSheet();
+        if(!fattCliCache.length){const {data:c}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");fattCliCache=c||[];}
+        fattForm(f);toast("Questo lavoro è già in una fattura: te l'ho aperta");return;}
+    }
+    const {data:l}=await sb.from("gest_lavori").select("*").eq("id",lavoroId).eq("user_id",sbUid).maybeSingle();
+    if(!l){toast("Lavoro non trovato");return;}
+    closeSheet();
+    fattForm(null,{
+      cliente_id:l.cliente_id||null,
+      data:todayStr(),
+      _lavori:[l.id],
+      _righe:[{descrizione:(l.descrizione||"Prestazione di servizi")+(l.dove?" — "+l.dove:""),
+               qta:1, prezzo:+l.importo||0, iva:fattForfettario()?0:IVA_DEF, ordine:0}]
+    });
+  }
+
+  /* ---------- il PDF ----------
+     Il vecchio PDF metteva TOTALE = importo del lavoro, senza imponibile e
+     senza IVA: non era una fattura, era una ricevuta. Questo ha le righe con
+     l'aliquota, il riepilogo per aliquota che chiede lo SDI, e le diciture di
+     legge per il forfettario. Resta una copia di cortesia: la fattura valida
+     e' quella elettronica. */
+  async function fatturaPdf(id){
+    if(!window.jspdf){toast("PDF non ancora pronto, riprova tra un attimo");return;}
+    const f=fattCache.find(x=>String(x.id)===String(id));
+    if(!f){toast("Fattura non trovata");return;}
+    const R=(fattRighe[f.id]||[]).slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0));
+    if(!R.length){toast("Questa fattura non ha voci");return;}
+    const az=fattAzienda||{};
+    const forf=(f.regime_fiscale||az.regime_fiscale)==="RF19";
+    const c=fattConti(f);
+
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:"mm",format:"a4"});
+    const M=16, Rx=194;
+    let y=18;
+
+    /* intestazione: chi emette */
+    doc.setFont("helvetica","bold");doc.setFontSize(15);
+    doc.text(az.nome||"La tua azienda",M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    let hy=y+6;
+    [az.piva?"P.IVA "+az.piva:"", az.cod_fiscale?"C.F. "+az.cod_fiscale:"", azIndirizzo(az),
+     [az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+
+    /* numero e data */
+    doc.setTextColor(0);doc.setFont("helvetica","bold");doc.setFontSize(13);
+    doc.text(FATT_TIPO_LAB[f.tipo]||"Fattura",Rx,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(90);
+    doc.text(f.numero?("N. "+f.numero+" / "+f.anno):"Bozza — non ancora emessa",Rx,y+6,{align:"right"});
+    doc.text("del "+fdate(f.data),Rx,y+11,{align:"right"});
+    doc.setTextColor(0);
+
+    y=Math.max(hy,y+16)+4;doc.setDrawColor(210);doc.line(M,y,Rx,y);y+=9;
+
+    /* cliente */
+    const cli=fattCliCache.find(x=>String(x.id)===String(f.cliente_id))||{};
+    doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Cliente",M,y);y+=6;
+    doc.setFont("helvetica","normal");doc.setFontSize(11);
+    doc.text(f.cli_nome||cli.nome||"—",M,y);y+=5;
+    doc.setFontSize(9);doc.setTextColor(90);
+    const cInd=[f.cli_indirizzo||cli.indirizzo||"",
+                [f.cli_cap||cli.cap||"", f.cli_citta||cli.citta||""].filter(Boolean).join(" ")
+                 +((f.cli_prov||cli.prov)?" ("+(f.cli_prov||cli.prov)+")":"")].filter(x=>x.trim());
+    cInd.forEach(t=>{doc.text(t,M,y);y+=4.5;});
+    const cFisc=[(f.cli_piva||cli.piva)?"P.IVA "+(f.cli_piva||cli.piva):"",
+                 (f.cli_cod_fiscale||cli.cod_fiscale)?"C.F. "+(f.cli_cod_fiscale||cli.cod_fiscale):""].filter(Boolean).join("   ");
+    if(cFisc){doc.text(cFisc,M,y);y+=4.5;}
+    doc.setTextColor(0);y+=7;
+
+    /* tabella delle voci */
+    const colQ=Rx-96, colP=Rx-66, colI=Rx-40, colT=Rx;
+    doc.setFillColor(11,75,196);doc.rect(M,y,Rx-M,8,"F");
+    doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(9);
+    doc.text("Descrizione",M+2,y+5.5);
+    doc.text("Q.tà",colQ,y+5.5,{align:"right"});
+    doc.text("Prezzo",colP,y+5.5,{align:"right"});
+    if(!forf)doc.text("IVA",colI,y+5.5,{align:"right"});
+    doc.text("Importo",colT-2,y+5.5,{align:"right"});
+    doc.setTextColor(0);doc.setFont("helvetica","normal");y+=8;
+
+    const perAliq={};
+    R.forEach(r=>{
+      const imp=(+r.qta||0)*(+r.prezzo||0);
+      const al=forf?0:(+r.iva||0);
+      perAliq[al]=(perAliq[al]||0)+imp;
+      const lines=doc.splitTextToSize(r.descrizione||"",colQ-M-8);
+      const h=Math.max(lines.length*4.6+5, 9);
+      if(y+h>262){doc.addPage();y=20;}
+      doc.setDrawColor(220);doc.line(M,y,Rx,y);
+      doc.setFontSize(9.5);
+      doc.text(lines,M+2,y+5.5);
+      doc.text(String(+r.qta||0).replace(".",","),colQ,y+5.5,{align:"right"});
+      doc.text(eurPdf(r.prezzo),colP,y+5.5,{align:"right"});
+      if(!forf)doc.text(al+"%",colI,y+5.5,{align:"right"});
+      doc.text(eurPdf(imp),colT-2,y+5.5,{align:"right"});
+      y+=h;
+    });
+    doc.setDrawColor(180);doc.line(M,y,Rx,y);y+=8;
+
+    /* riepilogo per aliquota: e' quello che chiede lo SDI, e serve al
+       commercialista per controllare in due secondi */
+    if(!forf&&Object.keys(perAliq).length){
+      doc.setFontSize(8.5);doc.setTextColor(110);
+      doc.text("Riepilogo IVA",M,y);y+=4.5;
+      Object.keys(perAliq).sort((a,b)=>b-a).forEach(al=>{
+        const imp=perAliq[al], im=imp*(+al)/100;
+        doc.text("aliquota "+al+"%  ·  imponibile "+eurPdf(imp)+"  ·  imposta "+eurPdf(im),M,y);y+=4.2;
+      });
+      doc.setTextColor(0);y+=4;
+    }
+
+    /* totali */
+    const riga=(lab,val,grosso)=>{
+      doc.setFont("helvetica",grosso?"bold":"normal");
+      doc.setFontSize(grosso?11.5:10);
+      doc.text(lab,Rx-70,y);doc.text(val,Rx-2,y,{align:"right"});
+      y+=grosso?7:5.4;
+    };
+    riga("Imponibile",eurPdf(c.imponibile));
+    if(!forf)riga("IVA",eurPdf(c.iva));
+    if(+f.sconto)riga("Sconto","-"+eurPdf(f.sconto));
+    if(+f.bollo)riga("Imposta di bollo",eurPdf(f.bollo));
+    if(c.ritenuta)riga("Ritenuta d'acconto "+(+f.ritenuta_perc)+"%","-"+eurPdf(c.ritenuta));
+    doc.setDrawColor(11,75,196);doc.setLineWidth(.4);
+    doc.rect(Rx-72,y-2,72,11);doc.setLineWidth(.2);
+    y+=6;riga("TOTALE",eurPdf(c.totale),true);
+    y+=6;
+
+    /* pagamento e note */
+    if(az.iban){
+      doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Pagamento",M,y);y+=5.5;
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+      doc.text("Bonifico — IBAN "+az.iban,M,y);y+=4.5;
+      if(f.numero)doc.text("Causale: fattura n. "+f.numero+"/"+f.anno,M,y),y+=4.5;
+      doc.setTextColor(0);y+=3;
+    }
+    if(f.note){
+      doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Note",M,y);y+=5.5;
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+      doc.splitTextToSize(f.note,Rx-M).forEach(t=>{doc.text(t,M,y);y+=4.4;});
+      doc.setTextColor(0);y+=3;
+    }
+    doc.setFont("helvetica","bold");doc.setFontSize(10);
+    doc.text("Stato: "+(f.stato==="pagata"?"PAGATA":(f.stato==="emessa"?"DA SALDARE":"BOZZA")),M,y);
+
+    /* diciture di legge in fondo */
+    const piede=[];
+    if(forf)piede.push("Operazione senza applicazione dell'IVA ai sensi dell'art. 1, commi 54-89, L. 190/2014 (regime forfettario).");
+    if(forf&&+f.bollo)piede.push("Imposta di bollo assolta in modo virtuale.");
+    piede.push("Documento non fiscale (copia di cortesia). La fattura elettronica valida viene emessa tramite Sistema di Interscambio.");
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(140);
+    let py=283;piede.reverse().forEach(t=>{
+      const L=doc.splitTextToSize(t,Rx-M);
+      py-=L.length*3.2;doc.text(L,M,py);
+    });
+
+    const nome=(f.cli_nome||cli.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase();
+    doc.save("fattura-"+(f.numero?f.numero+"-"+f.anno:"bozza")+"-"+nome+".pdf");
+    toast("PDF scaricato ✅");
+  }
 
   let calJobs=[];
   async function renderCal(){
@@ -2665,13 +3273,18 @@
       <div class="row2">
         <div class="field"><label>Ore lavorate</label><input type="number" id="j-ore" inputmode="decimal" step="0.5" value="${job.ore||""}" placeholder="0"></div>
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
-      <div class="field"><label>Fattura</label><div class="seg" id="j-fatt">
-        ${[["none","Non emessa"],["emessa","Emessa"],["pagata","Pagata"]].map(p=>`<button data-v="${p[0]}" class="${(job.fattStato||'none')===p[0]?'on':''}">${p[1]}</button>`).join("")}</div></div>
+      <div class="field"><label>Fattura</label>
+        <div class="j-fatt-info">${
+          (job.fattStato||"none")==="pagata" ? "\u2714 Fatturato e incassato"
+          : (job.fattStato||"none")==="emessa" ? "\ud83e\uddfe Fatturato, in attesa di incasso"
+          : "Non ancora fatturato"}</div>
+        <div class="campo-aiuto">Lo stato lo decide la fattura, non questo modulo: si aggiorna da solo quando emetti o incassi.${
+          job.id?' <b>Salva</b>, poi usa il pulsante <b>Crea fattura</b> sulla scheda del lavoro.':''}</div></div>
       </div>
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button>`);
-    bindSeg("j-stato");bindSeg("j-fatt");
+    bindSeg("j-stato");
     renderLavMedia();
   }
   /* ---- riga "Foto e video" della finestra Lavori ----
@@ -2726,11 +3339,11 @@
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
         descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id};
-      if(editing.fattura)obj.fatt_stato="emessa";
+      /* niente scorciatoia "nasce gia' fatturato": la fattura si crea dalla sua sezione */
       const {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();
       if(error){toast("Errore: "+error.message);return;}
       const realId=data.id;
-      if(editing.fattura)await assegnaNumFatt(realId);   /* nasce emessa: numero subito */
+      /* il numero di fattura lo assegna la fattura quando la emetti */
       closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
     if(editing && editing.realId){
@@ -2742,14 +3355,14 @@
         cliente_id:$("#j-cli").value||null,
         stato:segVal("j-stato"),
         importo:+($("#j-imp").value)||0,
-        fatt_stato:segVal("j-fatt")||"none",
+        /* fatt_stato non si scrive piu' da qui: e' il riflesso della fattura */
         lavoro_svolto:$("#j-svolto").value.trim()||null,
         note:$("#j-note").value.trim()||null,
         ore:parseFloat($("#j-ore").value)||null
       }).eq('id', editing.realId);
       if(error){toast("Errore: "+error.message);return;}
       /* segnata emessa o pagata: e' questo il momento in cui la fattura prende il numero */
-      {const _fs=segVal("j-fatt")||"none";if(_fs==="emessa"||_fs==="pagata")await assegnaNumFatt(editing.realId);}
+      /* il numero di fattura lo assegna la fattura quando la emetti, non il lavoro */
       for(const f of (editing.foto||[])){
         if(f.uploaded) continue;
         try{
@@ -2767,7 +3380,9 @@
     }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un condominio");return;}
     const id=editing.id, exists=db().lavori.some(l=>l.id===id), prev=db().lavori.find(l=>l.id===id);
-    const stato=segVal("j-stato"), fattStato=segVal("j-fatt")||"none";
+    const stato=segVal("j-stato");
+    /* lo stato della fattura non si tocca da qui: lo decide la fattura */
+    const fattStato=(prev&&prev.fattStato)||"none";
     const obj={id,clienteId:cli,descrizione:$("#j-desc").value.trim(),dove:$("#j-dove").value.trim(),
       dataPrevista:$("#j-data").value,assegnatoId:$("#j-dip").value,stato,lavoroSvolto:$("#j-svolto").value.trim(),
       note:$("#j-note").value.trim(),ore:$("#j-ore").value,importo:$("#j-imp").value,fattStato,pagato:fattStato==="pagata",
@@ -2996,24 +3611,9 @@
   }
 
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0)+" EUR";
-  /* ---- numero di fattura ----
-     Prima il numero veniva preso quando si scaricava il PDF: bastava scaricarlo
-     per curiosita' e quel numero restava impegnato su quel lavoro, anche se poi
-     la fattura non la emettevi. Ora si prende nel momento giusto: quando dichiari
-     la fattura emessa (o pagata). Il PDF non consuma piu' nessun numero.
-     Se un numero c'e' gia', non si tocca: la numerazione non cambia mai. */
-  async function assegnaNumFatt(lavoroId){
-    if(!sb||!sbUid||!lavoroId)return null;
-    try{
-      const {data:lav}=await sb.from("gest_lavori").select("num_fatt").eq("id",lavoroId).eq("user_id",sbUid).maybeSingle();
-      if(lav&&lav.num_fatt)return lav.num_fatt;              /* gia' numerata: fermi tutti */
-      const {data:az}=await sb.from("gest_azienda").select("num_fatt").eq("user_id",sbUid).maybeSingle();
-      const n=(az&&az.num_fatt)||1;
-      await sb.from("gest_lavori").update({num_fatt:n}).eq("id",lavoroId).eq("user_id",sbUid);
-      await sb.from("gest_azienda").update({num_fatt:n+1}).eq("user_id",sbUid);
-      return n;
-    }catch(e){return null;}
-  }
+  /* Il vecchio contatore delle fatture (uno solo, sul lavoro, che non
+     ripartiva mai) e' stato tolto: adesso il numero lo assegna la fattura
+     quando la emetti, e riparte da 1 ogni anno. Vedi fattAssegnaNumero(). */
 
   async function generaPdf(id){
     if(!window.jspdf){toast("PDF non ancora pronto, riprova tra un attimo");return;}
@@ -4363,7 +4963,6 @@
       if(voci&&voci.length)cella.insertAdjacentHTML("beforeend",tabPop(voci));
       return;
     }
-    if(a==="fatt-sort"){const k=t.dataset.k;fattSort=fattSort.k===k?{k,d:-fattSort.d}:{k,d:1};renderFatture();return;}
     if(a==="fatt-vista"){fattVista=t.dataset.v;renderFatture();return;}
     if(a==="burger"){const s=document.querySelector(".side");if(s)s.classList.toggle("open");return;}
     if(a==="export-excel")return esportaExcel();
@@ -4375,6 +4974,7 @@
     /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
        che non e' una scheda del menu — quindi apro direttamente quella. */
     if(a==="rie-azienda")return aziendaForm();
+    if(a==="rie-go-fatture"){const b=document.querySelector('nav.tabs button[data-tab="fatture"]');if(b){b.click();window.scrollTo(0,0);}return;}
   });
   /* al cambio desktop/mobile ridisegna liste (tabella ↔ card) */
   try{window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderFatture();}});}catch(e){}
@@ -4427,7 +5027,20 @@
     if(a==="new-job")return jobForm(null,"",null,true);
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
-    if(a==="new-fattura")return jobForm(null,"",null,true,true);
+    /* ---- fatture ---- */
+    if(a==="new-fattura")return fattNuovaScegli();
+    if(a==="fatt-vuota"){closeSheet();return fattForm(null);}
+    if(a==="fatt-da-lavori")return fattDaLavoriScegli();
+    if(a==="fatt-da-lavori-ok")return fattDaLavoriConferma();
+    if(a==="fatt-da-prev")return fattDaPreventivoScegli();
+    if(a==="fatt-da-prev-ok")return fattDaPreventivoConferma();
+    if(a==="edit-fatt"){const f=fattCache.find(x=>String(x.id)===String(id));if(f)fattForm(f);return;}
+    if(a==="save-fatt")return saveFattura(id||null);
+    if(a==="fatt-riga-add"){$("#fatt-righe").insertAdjacentHTML("beforeend",fattRigaHtml());fattTotaleLive();return;}
+    if(a==="fatt-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();fattTotaleLive();}return;}
+    if(a==="fatt-stato")return fattCambiaStato(id,t.dataset.v);
+    if(a==="del-fatt")return eliminaFattura(id);
+    if(a==="fatt-pdf")return fatturaPdf(id);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
     if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
@@ -4476,20 +5089,10 @@
       if(error){toast("Errore: "+error.message);return;}
       renderJobs();renderContatori();toast("Stato: "+(statoLabel[v]||v));return;
     }
-    if(a==="fatt"){
-      if(!sb||!sbUid){toast("Devi essere loggato");return;}
-      const v=t.dataset.v;
-      const {error}=await sb.from("gest_lavori").update({fatt_stato:v}).eq("id",id).eq("user_id",sbUid);
-      if(error){toast("Errore: "+error.message);return;}
-      if(v==="emessa"||v==="pagata")await assegnaNumFatt(id);
-      /* segno anche QUANDO l'ho emessa: senza questa data non posso dirti da
-         quanti giorni aspetti i soldi. Se la colonna non c'e' ancora, tiro dritto. */
-      if(v==="emessa"){
-        try{await sb.from("gest_lavori").update({data_fatt_emessa:todayStr()})
-              .eq("id",id).eq("user_id",sbUid).is("data_fatt_emessa",null);}catch(e){}
-      }
-      renderFatture();renderJobs();renderContatori();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
-    }
+    /* Dal lavoro: prima questo pulsante scriveva a mano "fatturato" sul lavoro,
+       e la fattura non esisteva da nessuna parte. Ora apre la fattura vera, con
+       il lavoro gia' dentro come voce. Lo stato del lavoro lo scrive la fattura. */
+    if(a==="fatt")return fattDaUnLavoro(id);
     if(a==="upload-fattura")return chiediFatturaPdf(id);
     if(a==="open-fattura")return apriFatturaPdf(id);
     if(a==="open-day")return openDay(t.dataset.d);

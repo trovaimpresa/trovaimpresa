@@ -1778,3 +1778,98 @@
 
 /* la pastiglia di stato accanto al titolo: prima era minuscola, 11px */
 .wrap section .job .job-top .stato{ font-size:14px; padding:5px 12px; white-space:nowrap; }
+
+/* =========================================================================
+   FATTURE — le parti nuove
+   La fattura ora e' una cosa a se': righe con l'aliquota, il conto che si
+   aggiorna mentre scrivi, e il selettore dei lavori da mettere dentro.
+   ========================================================================= */
+
+/* --- una riga della fattura: descrizione, quantita', prezzo, IVA, cestino --- */
+.fatt-riga{
+  display:grid; grid-template-columns:1fr 72px 104px 88px 40px;
+  gap:8px; margin-bottom:8px; align-items:center;
+}
+.fatt-riga input,
+.fatt-riga select{
+  width:100%; font-family:inherit; font-size:16px; padding:11px 12px;
+  border:1.5px solid var(--bordo); border-radius:10px; background:var(--card);
+  min-width:0;
+}
+.fatt-riga .fr-qta,
+.fatt-riga .fr-prezzo{ text-align:right; font-variant-numeric:tabular-nums; }
+.fatt-riga .rdel{
+  border:1.5px solid var(--bordo-forte); background:var(--card); color:var(--err);
+  border-radius:10px; cursor:pointer; font-size:20px; height:44px; line-height:1;
+}
+.fatt-riga .rdel:hover{ background:var(--err-bg); border-color:var(--err); }
+
+/* sul telefono cinque colonne non ci stanno: descrizione sopra, il resto sotto */
+@media(max-width:760px){
+  .fatt-riga{
+    grid-template-columns:1fr 1fr 88px 44px;
+    gap:8px; padding-bottom:12px; margin-bottom:12px;
+    border-bottom:1px solid var(--bordo);
+  }
+  .fatt-riga .fr-desc{ grid-column:1 / -1; }
+}
+
+/* --- il conto, sempre sotto gli occhi mentre scrivi --- */
+.fatt-somma{
+  background:var(--sfondo); border:1.5px solid var(--bordo);
+  border-radius:12px; padding:16px 18px;
+}
+.fatt-somma .fs-r{
+  display:flex; justify-content:space-between; align-items:baseline; gap:16px;
+  font-size:16px; color:var(--testo-2); padding:6px 0;
+}
+.fatt-somma .fs-r b{ color:var(--testo); font-weight:700; font-variant-numeric:tabular-nums; }
+.fatt-somma .fs-tot{
+  border-top:2px solid var(--bordo-forte); margin-top:8px; padding-top:12px;
+  font-size:18px; color:var(--testo); font-weight:700;
+}
+.fatt-somma .fs-tot b{ font-size:26px; font-weight:800; letter-spacing:-.5px; color:var(--blu); }
+
+/* --- da dove nasce la fattura: le tre strade --- */
+.fn-scelte{ display:flex; flex-direction:column; gap:14px; }
+.fn-s{
+  text-align:left; background:var(--card); border:2px solid var(--bordo);
+  border-left:6px solid var(--blu); border-radius:14px; padding:20px 22px;
+  cursor:pointer; font-family:inherit; display:block; width:100%;
+  transition:box-shadow .15s, border-color .15s, transform .15s;
+}
+.fn-s:hover{ box-shadow:0 6px 20px rgba(15,23,42,.10); transform:translateY(-2px); }
+.fn-s .fn-t{ display:block; font-size:19px; font-weight:800; color:var(--testo); letter-spacing:-.2px; }
+.fn-s .fn-d{ display:block; font-size:16px; color:var(--testo-2); line-height:1.5; margin-top:6px; }
+
+/* --- il selettore dei lavori (e dei preventivi) da mettere in fattura --- */
+.fl-gruppo{ margin-bottom:22px; }
+.fl-cli{
+  font-size:15px; font-weight:800; letter-spacing:.3px; text-transform:uppercase;
+  color:var(--blu); padding-bottom:8px; border-bottom:2px solid var(--bordo); margin-bottom:6px;
+}
+.fl-riga{
+  display:flex; align-items:center; gap:14px;
+  padding:14px 12px; margin:0 -12px; border-radius:10px; cursor:pointer;
+  border-top:1px solid var(--bordo);
+}
+.fl-riga:first-child{ border-top:none; }
+.fl-riga:hover{ background:var(--blu-tenue); }
+.fl-riga input{ width:22px; height:22px; flex:0 0 22px; accent-color:var(--blu); cursor:pointer; }
+.fl-riga .fl-t{ flex:1; min-width:0; font-size:17px; font-weight:600; color:var(--testo); }
+.fl-riga .fl-d{ display:block; font-size:15px; font-weight:400; color:var(--testo-2); margin-top:3px; }
+.fl-riga .fl-i{ flex:0 0 auto; font-size:17px; font-weight:700; white-space:nowrap; font-variant-numeric:tabular-nums; }
+
+/* --- lo stato della fattura dentro il modulo del lavoro: non si tocca piu' --- */
+.j-fatt-info{
+  font-size:17px; font-weight:700; color:var(--testo);
+  background:var(--sfondo); border:1.5px solid var(--bordo);
+  border-radius:10px; padding:12px 14px;
+}
+
+/* la finestra della fattura ha la colonna di sinistra piu' larga: le voci
+   hanno bisogno di spazio per la descrizione, che e' quello che il cliente
+   legge davvero. A destra ci va solo il conto, che di spazio ne vuole poco. */
+@media(min-width:900px){
+  .sheet--grande .sh-cols--fatt{ grid-template-columns:1.55fr 1fr; }
+}
