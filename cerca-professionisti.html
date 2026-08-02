@@ -298,37 +298,54 @@
   function selectSpecializzazione(el){document.querySelectorAll('.chip[data-specializzazione]').forEach(c=>{c.classList.remove('active');if(c.classList.contains('all-chip'))c.classList.add('inactive');});el.classList.add('active');el.classList.remove('inactive');specializzazioneScelta=el.dataset.specializzazione;cerca();}
   function aggiornaStatus(){const t=tipoScelto==='tutti'?'👔 Tutti i professionisti':tipoScelto;const c=cittaScelta?` · 📍 ${cittaScelta}`:'';document.getElementById('statusText').innerHTML=`Stai cercando: <strong>${t}</strong>${c}`;}
   function localizzami(){if(!navigator.geolocation){alert('Non supportato.');return;}navigator.geolocation.getCurrentPosition(async pos=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);const d=await r.json();const citta=d.address.city||d.address.town||d.address.village||'';document.getElementById('cittaInput').value=citta;cittaScelta=citta;aggiornaStatus();cerca();}catch(e){alert('Errore posizione.');}},()=>alert('Permesso negato.'));}
+  let rcInvioInCorso = false;
   function formRichiestaClienteHTML() {
+    rcInvioInCorso = false;
     return '<div id="richiesta-cliente-box" style="margin-top:22px;padding-top:18px;border-top:1px solid #eee;max-width:420px;margin-left:auto;margin-right:auto">'
       + '<p style="font-size:14px;color:#555;margin-bottom:12px">Non hai trovato quello che cercavi? Lasciaci la tua richiesta: ti mettiamo in contatto appena arriva un\'attività nella tua zona</p>'
       + '<input type="text" id="rc-nome" placeholder="Il tuo nome *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:8px">'
       + '<input type="tel" id="rc-telefono" placeholder="Il tuo telefono *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px">'
+      + '<input type="email" id="rc-email" placeholder="La tua email (facoltativa, per ricevere risposta)" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px">'
       + '<textarea id="rc-cerca" required placeholder="Cosa cerchi? Descrivi il lavoro *" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;min-height:70px;resize:vertical;font-family:inherit"></textarea>'
-      + '<button onclick="inviaRichiestaCliente()" style="background:#0066ff;color:white;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer">Invia richiesta</button>'
+      + '<button id="rc-btn" onclick="inviaRichiestaCliente()" style="background:#0066ff;color:white;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer">Invia richiesta</button>'
       + '<p style="font-size:11px;color:#999;margin-top:8px">Inviando la richiesta acconsenti a essere ricontattato: la tua richiesta può essere inoltrata alle imprese iscritte della tua zona.</p>'
       + '</div>';
   }
   async function inviaRichiestaCliente() {
+    if (rcInvioInCorso) return;
+    const btn = document.getElementById('rc-btn');
     const nome = document.getElementById('rc-nome').value.trim();
     const telefono = document.getElementById('rc-telefono').value.trim();
     if (!nome || !telefono) { alert('Inserisci nome e telefono.'); return; }
+    const emailEl = document.getElementById('rc-email');
+    const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { alert('Controlla l\'email: non sembra valida.'); emailEl.focus(); return; }
     const cosaCerca = document.getElementById('rc-cerca').value.trim();
     if (!cosaCerca) { alert('Descrivi cosa cerchi (es. il tipo di lavoro).'); document.getElementById('rc-cerca').focus(); return; }
+    if (cosaCerca.length > 300) { alert('La descrizione \u00e8 troppo lunga: massimo 300 caratteri.'); document.getElementById('rc-cerca').focus(); return; }
+    if (/(https?:\/\/|www\.|\b\d{9,}\b|whatsapp|preventivi gratuiti|contattami|chiamami|scrivimi)/i.test(cosaCerca)) {
+      alert('Nella descrizione non inserire link, numeri di telefono o messaggi pubblicitari.\n\nSe offri servizi, iscriviti gratis come attivit\u00e0 su trovaimpresa.com');
+      document.getElementById('rc-cerca').focus(); return;
+    }
     const zona = (document.getElementById('cittaInput').value.trim() || document.getElementById('regioneSelect').value || '').trim();
     let _contesto = (typeof tipoScelto !== 'undefined' && tipoScelto !== 'tutti') ? tipoScelto : '';
     if (typeof specializzazioneScelta !== 'undefined' && specializzazioneScelta !== 'tutte') {
       _contesto = _contesto ? _contesto + ' / ' + specializzazioneScelta : specializzazioneScelta;
     }
     const ricerca = _contesto ? (cosaCerca + ' — ' + _contesto) : cosaCerca;
+    rcInvioInCorso = true;
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'not-allowed'; btn.textContent = 'Invio in corso...'; }
     try {
       const res = await fetch('/.netlify/functions/richiesta-cliente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, telefono, categoria: 'professionisti', zona, ricerca })
+        body: JSON.stringify({ nome, telefono, email, categoria: 'professionisti', zona, ricerca })
       });
       if (!res.ok) throw new Error('invio fallito');
       document.getElementById('richiesta-cliente-box').innerHTML = '<p style="font-weight:700;color:#0066ff;font-size:15px">✅ Grazie! Ti ricontatteremo presto.</p>';
     } catch (e) {
+      rcInvioInCorso = false;
+      if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.textContent = 'Invia richiesta'; }
       alert('Errore nell\'invio. Riprova.');
     }
   }

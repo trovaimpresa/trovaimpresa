@@ -17,14 +17,16 @@ function normalizzaComune(s) {
     .trim();
 }
 
-function inviaEmail(to, subject, html) {
+function inviaEmail(to, subject, html, replyTo) {
+  const payload = { from: 'TrovaImpresa <info@trovaimpresa.com>', to: [to], subject, html };
+  if (replyTo) payload.reply_to = [replyTo];
   return fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ from: 'TrovaImpresa <info@trovaimpresa.com>', to: [to], subject, html })
+    body: JSON.stringify(payload)
   });
 }
 
@@ -55,7 +57,9 @@ exports.handler = async function (event) {
   const telefono = taglia(body.telefono);
   const categoria = taglia(body.categoria);
   const zona = taglia(body.zona);
-  const ricerca = taglia(body.ricerca);
+  const ricerca = (body.ricerca == null ? '' : String(body.ricerca)).trim().slice(0, 300);
+  const emailRaw = taglia(body.email).toLowerCase();
+  const email = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailRaw) ? emailRaw : '';
 
   if (!nome || !telefono) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Nome e telefono sono obbligatori.' }) };
@@ -63,12 +67,30 @@ exports.handler = async function (event) {
 
   const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+  // Anti-doppione: stessa richiesta arrivata negli ultimi 2 minuti -> la ignoriamo
+  try {
+    const dueMinutiFa = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    const { data: gia } = await supabaseAdmin
+      .from('richieste_clienti')
+      .select('id')
+      .eq('telefono', telefono)
+      .eq('ricerca', ricerca)
+      .gte('created_at', dueMinutiFa)
+      .limit(1);
+    if (gia && gia.length) {
+      console.log('[richiesta-cliente] doppione ignorato:', telefono);
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, duplicato: true }) };
+    }
+  } catch (err) {
+    console.error('[richiesta-cliente] controllo doppione fallito:', err.message);
+  }
+
   // Salvataggio richiesta (recuperiamo l'id per tracciare gli inoltri)
   let richiestaId = null;
   try {
     const { data: ins, error } = await supabaseAdmin
       .from('richieste_clienti')
-      .insert({ nome, telefono, categoria, zona, ricerca })
+      .insert({ nome, telefono, email: email || null, categoria, zona, ricerca })
       .select('id')
       .single();
     if (error) throw error;
@@ -98,6 +120,7 @@ exports.handler = async function (event) {
           <table style="width:100%;border-collapse:collapse;font-size:14px">
             <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;width:140px">Nome</td><td style="padding:10px 0;font-weight:700">${esc(nome)}</td></tr>
             <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Telefono</td><td style="padding:10px 0">${esc(telefono)}</td></tr>
+            <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Email</td><td style="padding:10px 0">${email ? `<a href="mailto:${esc(email)}">${esc(email)}</a>` : 'non lasciata'}</td></tr>
             <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Categoria</td><td style="padding:10px 0">${esc(categoria) || '—'}</td></tr>
             <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Zona</td><td style="padding:10px 0">${esc(zona) || '—'}</td></tr>
             <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;vertical-align:top">Ricerca</td><td style="padding:10px 0;white-space:pre-wrap">${esc(ricerca) || '—'}</td></tr>
@@ -111,7 +134,7 @@ exports.handler = async function (event) {
     </div>
   `;
   try {
-    const res = await inviaEmail('info@trovaimpresa.com', 'Nuova richiesta cliente da TrovaImpresa', htmlAdmin);
+    const res = await inviaEmail('info@trovaimpresa.com', 'Nuova richiesta cliente da TrovaImpresa', htmlAdmin, email || null);
     if (!res.ok) console.error('[richiesta-cliente] errore Resend admin:', await res.text());
   } catch (err) {
     console.error('[richiesta-cliente] errore email admin:', err.message);
@@ -182,6 +205,7 @@ exports.handler = async function (event) {
                 <table style="width:100%;border-collapse:collapse;font-size:14px">
                   <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;width:130px">Cliente</td><td style="padding:10px 0;font-weight:700">${esc(nome)}</td></tr>
                   <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Telefono</td><td style="padding:10px 0;font-weight:700">${esc(telefono)}</td></tr>
+                  ${email ? `<tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Email</td><td style="padding:10px 0"><a href="mailto:${esc(email)}">${esc(email)}</a></td></tr>` : ''}
                   <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Zona</td><td style="padding:10px 0">${esc(zona) || '—'}</td></tr>
                   <tr><td style="padding:10px 0;color:#666;vertical-align:top">Cosa cerca</td><td style="padding:10px 0;white-space:pre-wrap">${esc(ricerca) || '—'}</td></tr>
                 </table>
@@ -197,7 +221,7 @@ exports.handler = async function (event) {
           </div>
         `;
         try {
-          const r = await inviaEmail(im.email, 'Nuova richiesta cliente nella tua zona — TrovaImpresa', htmlImp);
+          const r = await inviaEmail(im.email, 'Nuova richiesta cliente nella tua zona — TrovaImpresa', htmlImp, email || null);
           if (r.ok) {
             await supabaseAdmin.from('richieste_inviate').insert({ richiesta_id: richiestaId ? String(richiestaId) : null, impresa_id: im.id });
           } else {
