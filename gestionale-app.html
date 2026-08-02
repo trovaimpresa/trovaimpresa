@@ -4190,6 +4190,24 @@
       .then(function(d){if(d&&d.url){location.href=d.url;}else{alert('Errore: '+((d&&d.error)||'riprova'));b.style.opacity='1';b.style.pointerEvents='auto';}})
       .catch(function(){alert('Errore di rete, riprova.');b.style.opacity='1';b.style.pointerEvents='auto';});
   };
+  /* Traccia chi apre il gestionale. Una riga ogni 30 minuti per utente,
+     cosi' i refresh non riempiono la tabella. Se fallisce non blocca nulla. */
+  function registraAccesso(gc,uid,email,attivo){
+    try{
+      var k='ti_ultimo_accesso_'+uid;
+      var last=parseInt(localStorage.getItem(k)||'0',10);
+      if(Date.now()-last<30*60*1000)return;
+      localStorage.setItem(k,String(Date.now()));
+    }catch(_){}
+    try{
+      gc.from('gest_accessi').insert({
+        user_id:uid,
+        email:email||'',
+        pagina:'gestionale-app',
+        ha_accesso:!!attivo
+      }).then(function(){},function(){});
+    }catch(_){}
+  }
   function start(){
     if(!window.supabase){return setTimeout(start,200);}
     var gc=window.supabase.createClient(SU,SK);
@@ -4201,6 +4219,7 @@
         var row=res.data;
         window._gestEmail=(row&&row.email)||s.user.email||'';
         var attivo=row&&row.gestionale_attivo&&(!row.gestionale_scadenza||new Date(row.gestionale_scadenza)>new Date());
+        registraAccesso(gc,s.user.id,window._gestEmail,attivo);
         if(attivo){hideGate();return;}
         var p=new URLSearchParams(location.search);
         if(p.get('gest')==='ok'){showChecking('Pagamento ricevuto! Attivazione in corso… se non si sblocca, ricarica la pagina tra qualche secondo.');setTimeout(function(){location.reload();},6000);return;}

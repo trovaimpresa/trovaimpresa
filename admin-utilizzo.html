@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Chi usa il gestionale — TrovaImpresa</title>
+<style>
+  :root{
+    --blu:#0066ff;
+    --blu-scuro:#0a2a4d;
+    --viola:#7b1fa2;
+    --verde:#1b8a3f;
+    --giallo:#b26a00;
+    --rosso:#b3261e;
+    --bordo:#d8dee7;
+    --sfondo:#f4f7fb;
+    --testo:#12233a;
+    --grigio:#5b6b80;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--sfondo);
+    color:var(--testo);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:18px;
+    line-height:1.65;
+  }
+  header{
+    background:var(--blu-scuro);
+    color:#fff;
+    padding:26px 22px;
+  }
+  header h1{margin:0;font-size:1.6rem;letter-spacing:.2px}
+  header p{margin:8px 0 0;font-size:1rem;opacity:.85}
+  .wrap{max-width:1100px;margin:0 auto;padding:26px 22px 70px}
+
+  /* ---- LOGIN ---- */
+  .card{
+    background:#fff;
+    border:2px solid var(--bordo);
+    border-radius:16px;
+    padding:26px;
+    margin-bottom:26px;
+  }
+  label{display:block;font-weight:700;margin:16px 0 8px;font-size:1.05rem}
+  input[type=text],input[type=password]{
+    width:100%;
+    padding:16px 14px;
+    font-size:1.1rem;
+    border:2px solid var(--bordo);
+    border-radius:12px;
+    background:#fff;
+    color:var(--testo);
+  }
+  input:focus{outline:3px solid #b7d4ff;border-color:var(--blu)}
+  button{
+    font-family:inherit;
+    font-size:1.1rem;
+    font-weight:700;
+    padding:16px 26px;
+    border:none;
+    border-radius:12px;
+    background:var(--blu);
+    color:#fff;
+    cursor:pointer;
+    margin-top:22px;
+  }
+  button:hover{background:#0052cc}
+  button.secondario{
+    background:#fff;color:var(--blu);border:2px solid var(--blu);
+    padding:12px 20px;font-size:1rem;margin:0;
+  }
+  button.secondario.attivo{background:var(--blu);color:#fff}
+
+  .errore{
+    background:#fdecea;border:2px solid #f5c2bd;color:var(--rosso);
+    padding:16px;border-radius:12px;margin-top:20px;font-weight:600;
+  }
+
+  /* ---- NUMERI IN ALTO ---- */
+  .numeri{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
+    margin-bottom:30px;
+  }
+  .numero{
+    background:#fff;border:2px solid var(--bordo);border-radius:16px;
+    padding:24px 22px;
+  }
+  .numero .valore{font-size:2.6rem;font-weight:800;line-height:1.1}
+  .numero .etichetta{font-size:1rem;color:var(--grigio);margin-top:6px}
+  .numero.verde .valore{color:var(--verde)}
+  .numero.giallo .valore{color:var(--giallo)}
+  .numero.rosso .valore{color:var(--rosso)}
+
+  /* ---- FILTRI ---- */
+  .filtri{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+
+  /* ---- LISTA IMPRESE ---- */
+  .impresa{
+    background:#fff;
+    border:2px solid var(--bordo);
+    border-left:10px solid var(--bordo);
+    border-radius:16px;
+    padding:22px 24px;
+    margin-bottom:16px;
+  }
+  .impresa.viva{border-left-color:var(--verde)}
+  .impresa.ferma{border-left-color:var(--giallo)}
+  .impresa.mai{border-left-color:var(--rosso)}
+  .impresa .nome{font-size:1.25rem;font-weight:800;margin-bottom:4px}
+  .impresa .sotto{color:var(--grigio);font-size:1rem;margin-bottom:14px}
+  .stato{
+    display:inline-block;font-weight:800;font-size:1.05rem;
+    padding:6px 14px;border-radius:999px;margin-bottom:12px;
+  }
+  .stato.viva{background:#e6f6ec;color:var(--verde)}
+  .stato.ferma{background:#fdf3e3;color:var(--giallo)}
+  .stato.mai{background:#fdecea;color:var(--rosso)}
+  .dettagli{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px;
+    margin-top:8px;
+  }
+  .dettaglio{background:var(--sfondo);border-radius:12px;padding:14px 16px}
+  .dettaglio .k{font-size:.95rem;color:var(--grigio)}
+  .dettaglio .v{font-size:1.15rem;font-weight:700;margin-top:2px}
+  .badge-premium{
+    display:inline-block;background:#f3e5f5;color:var(--viola);
+    font-weight:800;font-size:.95rem;padding:4px 12px;border-radius:999px;margin-left:8px;
+  }
+  .vuoto{text-align:center;color:var(--grigio);padding:50px 20px;font-size:1.15rem}
+  #zona-dati{display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Chi usa il gestionale</h1>
+  <p>Pagina riservata — TrovaImpresa</p>
+</header>
+
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <div class="card" id="zona-login">
+    <label for="u">Utente</label>
+    <input type="text" id="u" autocomplete="username">
+    <label for="p">Password</label>
+    <input type="password" id="p" autocomplete="current-password">
+    <button id="btn-entra">Entra</button>
+    <div class="errore" id="errore" style="display:none"></div>
+  </div>
+
+  <!-- DATI -->
+  <div id="zona-dati">
+    <div class="numeri" id="numeri"></div>
+
+    <div class="filtri">
+      <button class="secondario attivo" data-filtro="tutte">Tutte</button>
+      <button class="secondario" data-filtro="viva">Attive (ultimi 7 giorni)</button>
+      <button class="secondario" data-filtro="ferma">Ferme</button>
+      <button class="secondario" data-filtro="mai">Mai entrate</button>
+      <button class="secondario" id="btn-aggiorna">Aggiorna</button>
+    </div>
+
+    <div id="lista"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var dati = [];
+  var filtro = 'tutte';
+
+  function el(id){ return document.getElementById(id); }
+
+  function mostraErrore(t){
+    var e = el('errore');
+    e.textContent = t;
+    e.style.display = 'block';
+  }
+
+  function giorniDa(iso){
+    if(!iso) return null;
+    var ms = Date.now() - new Date(iso).getTime();
+    return Math.floor(ms / 86400000);
+  }
+
+  function statoDi(r){
+    if(!r.ultimo_accesso) return 'mai';
+    return giorniDa(r.ultimo_accesso) <= 7 ? 'viva' : 'ferma';
+  }
+
+  function testoUltimoAccesso(iso){
+    if(!iso) return 'Mai entrata';
+    var g = giorniDa(iso);
+    if(g === 0) return 'Oggi';
+    if(g === 1) return 'Ieri';
+    if(g < 30) return g + ' giorni fa';
+    return new Date(iso).toLocaleDateString('it-IT');
+  }
+
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function disegnaNumeri(){
+    var vive = dati.filter(function(r){ return statoDi(r) === 'viva'; }).length;
+    var ferme = dati.filter(function(r){ return statoDi(r) === 'ferma'; }).length;
+    var mai = dati.filter(function(r){ return statoDi(r) === 'mai'; }).length;
+
+    el('numeri').innerHTML =
+      '<div class="numero"><div class="valore">' + dati.length + '</div><div class="etichetta">Imprese registrate</div></div>' +
+      '<div class="numero verde"><div class="valore">' + vive + '</div><div class="etichetta">Attive negli ultimi 7 giorni</div></div>' +
+      '<div class="numero giallo"><div class="valore">' + ferme + '</div><div class="etichetta">Entrate ma poi ferme</div></div>' +
+      '<div class="numero rosso"><div class="valore">' + mai + '</div><div class="etichetta">Mai entrate nel gestionale</div></div>';
+  }
+
+  function disegnaLista(){
+    var righe = dati.filter(function(r){
+      return filtro === 'tutte' || statoDi(r) === filtro;
+    });
+
+    if(!righe.length){
+      el('lista').innerHTML = '<div class="vuoto">Nessuna impresa in questo gruppo.</div>';
+      return;
+    }
+
+    el('lista').innerHTML = righe.map(function(r){
+      var st = statoDi(r);
+      var etichetta = st === 'viva' ? 'La sta usando' : (st === 'ferma' ? 'Si e\' fermata' : 'Mai entrata');
+      var nome = r.nome_attivita || r.nome || 'Senza nome';
+      var premium = String(r.piano || '').toLowerCase() === 'premium'
+        ? '<span class="badge-premium">Premium</span>' : '';
+
+      return '<div class="impresa ' + st + '">' +
+        '<div class="nome">' + esc(nome) + premium + '</div>' +
+        '<div class="sotto">' + esc(r.tipo || '—') + ' &middot; ' + esc(r.citta || 'citta non indicata') + ' &middot; ' + esc(r.email || '') + '</div>' +
+        '<div class="stato ' + st + '">' + etichetta + '</div>' +
+        '<div class="dettagli">' +
+          '<div class="dettaglio"><div class="k">Ultima volta dentro</div><div class="v">' + testoUltimoAccesso(r.ultimo_accesso) + '</div></div>' +
+          '<div class="dettaglio"><div class="k">Aperture ultimi 7 giorni</div><div class="v">' + (r.accessi_7gg || 0) + '</div></div>' +
+          '<div class="dettaglio"><div class="k">Aperture ultimi 30 giorni</div><div class="v">' + (r.accessi_30gg || 0) + '</div></div>' +
+          '<div class="dettaglio"><div class="k">Aperture totali</div><div class="v">' + (r.accessi_totali || 0) + '</div></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function carica(u, p){
+    return fetch('/.netlify/functions/admin-utilizzo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: u, p: p })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d || !d.success) throw new Error((d && d.error) || 'Errore sconosciuto');
+      dati = d.data || [];
+      el('zona-login').style.display = 'none';
+      el('zona-dati').style.display = 'block';
+      disegnaNumeri();
+      disegnaLista();
+    });
+  }
+
+  el('btn-entra').addEventListener('click', function(){
+    var u = el('u').value.trim();
+    var p = el('p').value;
+    el('errore').style.display = 'none';
+    if(!u || !p){ mostraErrore('Scrivi utente e password.'); return; }
+    this.disabled = true;
+    var btn = this;
+    carica(u, p)
+      .then(function(){
+        try {
+          sessionStorage.setItem('ti_admin_u', u);
+          sessionStorage.setItem('ti_admin_p', p);
+        } catch(_){}
+      })
+      .catch(function(err){ mostraErrore(err.message); })
+      .then(function(){ btn.disabled = false; });
+  });
+
+  el('p').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') el('btn-entra').click();
+  });
+
+  el('btn-aggiorna').addEventListener('click', function(){
+    var u = '', p = '';
+    try {
+      u = sessionStorage.getItem('ti_admin_u') || '';
+      p = sessionStorage.getItem('ti_admin_p') || '';
+    } catch(_){}
+    if(u && p) carica(u, p).catch(function(err){ alert(err.message); });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-filtro]'), function(b){
+    b.addEventListener('click', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('[data-filtro]'), function(x){
+        x.classList.remove('attivo');
+      });
+      b.classList.add('attivo');
+      filtro = b.getAttribute('data-filtro');
+      disegnaLista();
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
