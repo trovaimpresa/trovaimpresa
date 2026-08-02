@@ -1723,7 +1723,7 @@
         ? '<span'+(scaduta?' style="color:var(--err);font-weight:700"':'')+'>⏳ aspetti da '+gio+(gio===1?" giorno":" giorni")+'</span>'
         : "",
       f.tipo!=="fattura" ? "📄 "+FATT_TIPO_LAB[f.tipo] : "",
-      pdf?"":'<span style="color:var(--testo-3)">PDF non caricato</span>'
+      pdf?"":'<span style="color:var(--testo-3)">nessun PDF allegato</span>'
     ];
 
     const az=[];
@@ -1731,9 +1731,11 @@
     if(f.stato==="emessa")  az.push({lab:"💶 Segna pagata", action:"fatt-stato",data:{id:f.id,v:"pagata"}});
     if(f.stato==="pagata")  az.push({lab:"↩ Non pagata",    action:"fatt-stato",data:{id:f.id,v:"emessa"}});
     az.push({lab:"✏ Apri",     action:"edit-fatt",data:{id:f.id}});
-    az.push({lab:"⬇ Scarica PDF",action:"fatt-pdf",  data:{id:f.id}});
-    if(pdf) az.push({lab:"📄 Apri PDF caricato",action:"open-fattura", data:{id:pdf.id}});
-    else    az.push({lab:"📎 Carica PDF",       action:"upload-fattura",data:{id:f.id}});
+    /* due PDF diversi, e i nomi di prima si scambiavano facilmente:
+       uno lo CREA il gestionale, l'altro lo ALLEGHI tu se ce l'hai. */
+    az.push({lab:"⬇ Crea il PDF",action:"fatt-pdf",data:{id:f.id}});
+    if(pdf) az.push({lab:"📄 Apri il PDF allegato",action:"open-fattura", data:{id:pdf.id}});
+    else    az.push({lab:"📎 Allega un PDF tuo",   action:"upload-fattura",data:{id:f.id}});
     az.push({lab:"🗑 Elimina",action:"del-fatt",data:{id:f.id},del:true});
 
     return schedaJob({
@@ -1986,8 +1988,27 @@
   }
   let fattLavoriInCorso=null;
 
+  /* Un salvataggio che fallisce con un messaggino che svanisce e' peggio di
+     uno che non fallisce: si perde quello che si e' scritto e non si capisce
+     perche'. Questo riquadro resta dentro il modulo finche' non si riprova. */
+  function fattErrore(testo){
+    const b=document.querySelector("#sheet .sh-body");
+    if(!b){toast(testo);return;}
+    let box=b.querySelector("#fatt-errore");
+    if(!box){
+      box=document.createElement("div");
+      box.id="fatt-errore";box.className="fatt-errore";
+      b.insertBefore(box,b.firstChild);
+    }
+    box.innerHTML="<b>La fattura non e\u2019 stata salvata.</b><br>"+esc(testo)
+      +"<br><br>Quello che hai scritto e\u2019 ancora qui: correggi e riprova, oppure manda questa schermata ad Alessio.";
+    b.scrollTop=0;
+    try{console.error("[FATTURA]",testo);}catch(e){}
+  }
+
   async function saveFattura(id){
-    if(!sbUid){toast("Devi essere loggato");return;}
+    if(!sbUid){fattErrore("Non risulti loggato.");return;}
+    try{
     const righe=[];
     $$("#fatt-righe [data-riga]").forEach((d,i)=>{
       const descrizione=d.querySelector(".fr-desc").value.trim();
@@ -2000,7 +2021,7 @@
         ordine:i
       });
     });
-    if(!righe.length){toast("Aggiungi almeno una voce");return;}
+    if(!righe.length){fattErrore("Manca almeno una voce: scrivi una descrizione, la quantità e il prezzo.");return;}
 
     const cliente_id=$("#fa-cli").value||null;
     const data=$("#fa-data").value||todayStr();
@@ -2027,17 +2048,17 @@
     let fid=id;
     if(id){
       const {error}=await sb.from("gest_fatture").update(testata).eq("id",id).eq("user_id",sbUid);
-      if(error){toast("Errore: "+error.message);return;}
+      if(error){fattErrore(error.message);return;}
       await sb.from("gest_fattura_righe").delete().eq("fattura_id",id).eq("user_id",sbUid);
     }else{
       const {data:nf,error}=await sb.from("gest_fatture")
         .insert({...testata,user_id:sbUid,mestiere_id:curMestiere(),stato:"bozza"}).select().single();
-      if(error){toast("Errore: "+error.message);return;}
+      if(error){fattErrore(error.message);return;}
       fid=nf.id;
     }
     const {error:e2}=await sb.from("gest_fattura_righe")
       .insert(righe.map(r=>({...r,user_id:sbUid,fattura_id:fid})));
-    if(e2){toast("Errore voci: "+e2.message);return;}
+    if(e2){fattErrore("Le voci non sono state salvate: "+e2.message);return;}
 
     /* i lavori scelti nel selettore, agganciati adesso che la fattura esiste */
     if(fattLavoriInCorso&&fattLavoriInCorso.length){
@@ -2051,6 +2072,9 @@
     closeSheet();
     await renderFatture();renderRiepilogo();renderJobs();
     toast(id?"Fattura aggiornata ✔":"Fattura creata ✔ — è una bozza, emettila quando è pronta");
+    }catch(err){
+      fattErrore((err&&(err.message||err.toString()))||"errore sconosciuto");
+    }
   }
 
   /* ---------- cambio di stato ---------- */
