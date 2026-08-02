@@ -252,6 +252,13 @@
            background:#f4f7fb;color:#0066ff;text-decoration:none;font-weight:600;font-size:15px}
   .mv-link:hover{background:#0066ff;color:#fff}
   .mv-nota{font-size:13.5px;color:#5b6b80;line-height:1.6;margin-top:10px}
+  /* Semaforo stato del sito */
+  #stato-sistema.ok{background:#f2fbf5;border-color:#b5e2c5;color:#12233a}
+  #stato-sistema.ko{background:#fdf3e3;border-color:#f0d9a8;color:#12233a}
+  #stato-sistema .ss-tit{font-weight:800;font-size:17px;margin-bottom:4px}
+  #stato-sistema .ss-voce{margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)}
+  #stato-sistema .ss-nome{font-weight:800}
+  #stato-sistema .ss-fare{margin-top:5px;font-size:14.5px;color:#5b6b80}
   /* Chi usa il gestionale */
   .u-numeri{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:22px}
   .u-num{background:#fff;border:2px solid var(--border,#e2e8f0);border-radius:14px;padding:20px}
@@ -363,6 +370,8 @@
 
     <!-- DASHBOARD -->
     <div class="section active" id="sec-dashboard">
+      <div id="stato-sistema" style="display:none;margin:14px 18px 0;padding:16px 20px;border-radius:14px;
+           border:2px solid;font-size:15.5px;line-height:1.65"></div>
       <div class="topbar">
         <div class="topbar-title">📊 Dashboard</div>
         <div class="topbar-right">
@@ -960,6 +969,7 @@ async function doLogin() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       caricaTutto();
+      controllaStatoSistema();
     } else {
       document.getElementById('login-err').style.display = 'block';
     }
@@ -1490,6 +1500,38 @@ function renderAbbonamenti() {
 // Scrivendo con la chiave anon (come si faceva prima) PostgREST non dà errore,
 // aggiorna zero righe e basta: i pulsanti sembravano funzionare senza fare
 // nulla. Se aggiungi un pulsante che scrive, usa questa funzione.
+// ===== SEMAFORO: il sito sta bene? =====
+// Le chiavi (Supabase, email, pagamenti) non scadono a una data, ma smettono
+// di funzionare quando vengono rigenerate o sostituite. E quando smettono,
+// nulla si lamenta. Questo controllo le prova davvero a ogni accesso.
+async function controllaStatoSistema() {
+  const box = document.getElementById('stato-sistema');
+  if (!box) return;
+  try {
+    const res = await fetch('/.netlify/functions/stato-sistema', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!j.success) return;                       // in silenzio: non e' un problema del sito
+
+    if (j.tutto_ok) {
+      box.className = 'ok';
+      box.innerHTML = '<div class="ss-tit">🟢 Tutto a posto</div>'
+        + 'Database, email e pagamenti funzionano.';
+    } else {
+      box.className = 'ko';
+      const guasti = j.controlli.filter(c => !c.ok);
+      box.innerHTML = '<div class="ss-tit">🔴 ' + guasti.length
+        + (guasti.length === 1 ? ' cosa non funziona' : ' cose non funzionano') + '</div>'
+        + 'Il sito sembra normale ma qualcosa sotto e\' fermo. Ecco cosa:'
+        + guasti.map(c => '<div class="ss-voce"><span class="ss-nome">' + c.nome + '</span> — ' + c.dettaglio
+            + (c.cosa_fare ? '<div class="ss-fare">👉 ' + c.cosa_fare + '</div>' : '') + '</div>').join('');
+    }
+    box.style.display = 'block';
+  } catch (e) { /* niente rete: non allarmiamo per un problema di connessione */ }
+}
+
 // ===== CHI USA IL GESTIONALE =====
 // Riusa utente e password del login admin: nessuna seconda password da inserire.
 let _utilizzo = [], _utilizzoFiltro = 'tutte';
