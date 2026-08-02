@@ -2458,10 +2458,27 @@
     /* --- chi emette: te --- */
     if(!(az.nome||"").trim())        m.push("Manca il nome della tua azienda — Dati azienda.");
     const pulita=v=>String(v||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase();
+    /* La partita IVA non e' un numero qualsiasi: l'ultima cifra e' una cifra di
+       controllo calcolata dalle altre dieci. Cosi' una battitura sbagliata si
+       becca subito, invece di scoprirla quando lo SDI scarta la fattura.
+       (Somma le cifre dispari cosi' come sono; raddoppia le pari e se viene
+       piu' di 9 toglie 9; il totale deve finire con zero.) */
+    const pivaOk=v=>{
+      if(!/^\d{11}$/.test(v))return false;
+      let s=0;
+      for(let i=0;i<11;i++){
+        let d=+v[i];
+        if(i%2===1){d*=2;if(d>9)d-=9;}
+        s+=d;
+      }
+      return s%10===0;
+    };
     const azPiva=pulita(az.piva);
     if(!azPiva)                      m.push("Manca la tua partita IVA — Dati azienda.");
     else if(!/^\d{11}$/.test(azPiva))
       m.push("La tua partita IVA è di "+azPiva.length+" cifre, ma una partita IVA italiana ne ha esattamente 11 — Dati azienda.");
+    else if(!pivaOk(azPiva))
+      m.push("La tua partita IVA ha 11 cifre ma non è valida: l'ultima cifra è una cifra di controllo e non torna. Probabilmente è un errore di battitura — Dati azienda.");
     const azCf=pulita(az.cod_fiscale);
     if(azCf&&!/^(\d{11}|[A-Z0-9]{16})$/.test(azCf))
       m.push("Il tuo codice fiscale non ha una forma valida: 11 cifre per un'azienda, 16 caratteri per una persona — Dati azienda.");
@@ -2484,6 +2501,8 @@
       if(!pP&&!pC)                   m.push("Il cliente non ha né partita IVA né codice fiscale — apri la sua scheda in Condomini.");
       if(pP&&!/^\d{11}$/.test(pP))
         m.push("La partita IVA del cliente è di "+pP.length+" cifre invece di 11 — Condomini.");
+      else if(pP&&!pivaOk(pP))
+        m.push("La partita IVA del cliente ha 11 cifre ma non è valida: la cifra di controllo non torna. Ricontrollala — Condomini.");
       if(pC&&!/^(\d{11}|[A-Z0-9]{16})$/.test(pC))
         m.push("Il codice fiscale del cliente non ha una forma valida: 11 cifre per un condominio o un'azienda, 16 caratteri per un privato — Condomini.");
       if(!(f.cli_indirizzo||cli.indirizzo||"").trim()) m.push("Manca la via del cliente — Condomini.");
