@@ -1742,3 +1742,19 @@
   .lav-vuoto p{ font-size:16px; }
   .lav-vuoto .lv-btn{ width:100%; margin-top:22px; }
 }
+
+/* =========================================================================
+   PROVA DAL TELEFONO — difetti trovati su schermo da 390px
+   ========================================================================= */
+
+/* LAVORI: la barra in alto (titolo + ricerca + due pulsanti) non andava a capo.
+   Su un telefono "+ Nuovo lavoro" finiva mezzo fuori dallo schermo e la pagina
+   scorreva di lato. Ora la ricerca prende tutta la riga e i due pulsanti si
+   dividono quella sotto. */
+@media(max-width:760px){
+  #lavori .lav-head{ gap:12px; }
+  #lavori .lav-head-act{ width:100%; margin-left:0; flex-wrap:wrap; gap:10px; }
+  #lavori .lav-search{ flex:1 1 100%; width:100%; min-width:0; }
+  #lavori .lav-head-act .btn,
+  #lavori .lav-head-act .btn-primary{ flex:1 1 0; min-width:0; padding:0 12px; }
+}

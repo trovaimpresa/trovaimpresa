@@ -1942,7 +1942,7 @@
     const allerta=av.length?`<div class="cnt" style="margin-top:6px;font-weight:700;color:${av.some(x=>x.scaduto)?"#b3261e":"#b26a00"}">${av.some(x=>x.scaduto)
         ?"⚠ "+esc(av.filter(x=>x.scaduto).map(x=>x.lab).join(", "))+" scadut"+(av.filter(x=>x.scaduto).length>1?"i":"o")
         :"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", "))}</div>`:"";
-    return `<div class="card"><div><h3>${esc(o.nome)}</h3><div class="cnt">${riga2}</div>${allerta}</div>
+    return `<div class="card"><div><h3>${esc(o.nome)}</h3><p>${riga2}</p>${allerta}</div>
       <div class="card-acts">${dipVoci(o).filter(x=>!x.sep)
         .map(x=>`<button class="btn btn-sm${x.del?" btn-danger":""}" data-action="${x.action}"${tabAttr(x.data)}>${x.lab}</button>`).join("")}</div></div>`;
   }
