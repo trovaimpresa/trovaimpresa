@@ -4099,6 +4099,10 @@
       <div class="sh-body">${corpo}</div>
       <div class="sh-foot">${azioni}</div>`;
     $("#overlay").classList.add("open");
+    /* Il corpo scorre: senza questo il modulo si apre gia' scorso di qualche
+       riga (resta la posizione della volta prima) e la prima etichetta sparisce. */
+    const _b=s.querySelector(".sh-body");
+    if(_b){_b.scrollTop=0;requestAnimationFrame(function(){_b.scrollTop=0;});}
   }
   function closeSheet(){$("#overlay").classList.remove("open");}
   $("#overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeSheet();});
