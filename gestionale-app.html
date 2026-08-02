@@ -2313,11 +2313,36 @@
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
     const mezMap=Object.fromEntries((mz||[]).map(m=>[m.id,m.nome]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
+
+    /* SCADENZE DELLE PERSONE — non sono righe di gest_scadenze.
+       Si leggono dalle date della scheda persona (gest_operatori) e compaiono
+       qui in sola lettura: si risolvono aggiornando la data nella scheda, cosi'
+       il dato resta in un posto solo e non si creano doppioni da tenere allineati. */
+    const SCAD_PERSONA=[["visita_medica_scadenza","Visita medica","Sicurezza"],
+                        ["formazione_scadenza","Formazione sicurezza","Sicurezza"],
+                        ["documento_scadenza","Documento d'identita'","Documento"],
+                        ["permesso_scadenza","Permesso di soggiorno","Documento"]];
+    let scadPersone=[];
+    try{
+      const {data:ops}=await sb.from("gest_operatori")
+        .select("id,nome,visita_medica_scadenza,formazione_scadenza,documento_scadenza,permesso_scadenza")
+        .eq("user_id",sbUid).eq("mestiere_id",mid);
+      (ops||[]).forEach(function(o){
+        SCAD_PERSONA.forEach(function(t){
+          if(!o[t[0]])return;
+          scadPersone.push({id:"op:"+o.id+":"+t[0],_persona:true,_opId:o.id,_nome:o.nome||"Persona",
+            titolo:t[1],tipo_pratica:t[2],data_scadenza:o[t[0]],stato:"aperta"});
+        });
+      });
+    }catch(_){ scadPersone=[]; }
+    const scadTutte=scadCache.concat(scadPersone).sort(function(a,b){
+      return String(a.data_scadenza||"9999-99-99").localeCompare(String(b.data_scadenza||"9999-99-99"));
+    });
     const filtra=(A,v)=>v==="scadute"?A.filter(s=>s.stato!=="fatta"&&s.data_scadenza&&s.data_scadenza<oggi)
                       :v==="prossime"?A.filter(s=>s.stato!=="fatta"&&(!s.data_scadenza||s.data_scadenza>=oggi))
                       :v==="fatte"?A.filter(s=>s.stato==="fatta"):A.slice();
-    const conta={};SCAD_VISTE.forEach(v=>conta[v.k]=filtra(scadCache,v.k).length);
-    const L=filtra(scadCache,scadVista);
+    const conta={};SCAD_VISTE.forEach(v=>conta[v.k]=filtra(scadTutte,v.k).length);
+    const L=filtra(scadTutte,scadVista);
     renderTabella({
       id:"scad", box:"#scad-list",
       viste:"#scad-viste", visteDef:SCAD_VISTE, vista:scadVista, conta:conta, azioneVista:"scad-vista",
@@ -2328,8 +2353,22 @@
       righe:L.map(s=>{
         const fatta=s.stato==="fatta";
         const q=quando(s.data_scadenza,{neutro:fatta});
-        const rif=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
+        const rif=s._persona?s._nome
+                 :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
                  :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
+        if(s._persona){
+          return {
+            id:s.id,
+            click:{action:"scad-persona",data:{id:s._opId}},
+            celle:[
+              `<span class="lav-bar ${s.data_scadenza<oggi?"ritardo":(s.data_scadenza<=lim?"da_fare":"in_corso")}" title="${s.data_scadenza<oggi?"Scaduta":(s.data_scadenza<=lim?"In scadenza":"Aperta")}"></span><span class="c-nome">${esc(s.titolo)}</span>`,
+              esc(s.tipo_pratica||"—"),
+              `👷 ${esc(rif)}`,
+              {h:q.testo,cls:q.classe}
+            ],
+            menu:[{lab:"👷 Apri la scheda della persona",action:"scad-persona",data:{id:s._opId}}]
+          };
+        }
         return {
           id:s.id,
           click:{action:"edit-scad",data:{id:s.id}},
@@ -2354,6 +2393,15 @@
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
   function scadCard(s,cliMap,oggi,lim,mezMap){
+    if(s._persona){
+      let bgP="var(--sfondo)",fgP="var(--testo-2)",labP="Aperta";
+      if(s.data_scadenza<oggi){bgP="var(--err-bg)";fgP="var(--err)";labP="Scaduta";}
+      else if(s.data_scadenza<=lim){bgP="var(--attesa-bg)";fgP="var(--attesa)";labP="In scadenza";}
+      return `<div class="card"><div>
+        <h3>${esc(s.titolo)}</h3>
+        <p>👷 ${esc(s._nome)}<br>📅 ${fdate(s.data_scadenza)} <span class="stato" style="background:${bgP};color:${fgP}">${labP}</span></p></div>
+        <div class="card-acts"><button class="btn btn-sm" data-action="scad-persona" data-id="${s._opId}">Apri la scheda</button></div></div>`;
+    }
     const fatta=s.stato==="fatta";
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
     const mezNome=s.mezzo_id?((mezMap||{})[s.mezzo_id]||"(mezzo eliminato)"):"";
@@ -4236,6 +4284,14 @@
     }
     if(a==="new-scad")return scadForm(null);
     if(a==="scad-vista"){scadVista=t.dataset.v;renderScadenze();return;}
+    if(a==="scad-persona"){
+      if(!sb||!sbUid){toast("Devi essere loggato");return;}
+      const inCache=dipCache.find(d=>String(d.id)===String(id));
+      if(inCache)return squadraForm(inCache);
+      const {data:p}=await sb.from("gest_operatori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+      if(p)return squadraForm(p);
+      toast("Persona non trovata");return;
+    }
     if(a==="edit-scad")return scadForm(scadCache.find(s=>s.id===id));
     if(a==="save-scad")return saveScad(id);
     if(a==="scad-stato"){
