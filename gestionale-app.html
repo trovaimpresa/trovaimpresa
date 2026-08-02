@@ -342,6 +342,9 @@
     const {data,error}=await sb.from('imprese').select('tipo').eq('user_id',uid).maybeSingle();
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
+    /* Barra FONDATORE: "Vedi come" fa provare le altre categorie senza cambiare
+       account. E' solo una vista: i dati mostrati restano i propri. */
+    try{var _vc=sessionStorage.getItem("ti_vedi_tipo");if(_vc)ruoloUtente=_vc;}catch(_e){}
     console.log('[gestionale] ruolo utente:',ruoloUtente||'(nessun profilo)');
     /* scadenzario attivo per tutti i ruoli (imprese: DURC, assicurazioni, mezzi...) */
     const _tabScad=document.querySelector('#tab-scadenzario');
@@ -4521,3 +4524,4 @@
 })();
 </script>
 <script src="/js/ai-integrazione.js"></script>
+<script src="/js/fondatore.js"></script>

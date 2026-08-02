@@ -243,6 +243,16 @@
     .toggle-pw:hover { color: #2e78cc; }
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
+<style>
+  /* Le mie viste */
+  .mv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+  .mv-card{background:#fff;border:2px solid var(--border,#e2e8f0);border-radius:14px;padding:20px}
+  .mv-tit{font-weight:800;font-size:17px;margin-bottom:14px}
+  .mv-link{display:block;padding:11px 13px;margin-bottom:8px;border-radius:9px;
+           background:#f4f7fb;color:#0066ff;text-decoration:none;font-weight:600;font-size:15px}
+  .mv-link:hover{background:#0066ff;color:#fff}
+  .mv-nota{font-size:13.5px;color:#5b6b80;line-height:1.6;margin-top:10px}
+</style>
 </head>
 <body>
 
@@ -314,6 +324,9 @@
       </div>
       <div class="nav-item" onclick="showSection('abbonamenti',this)">
         <span class="nav-icon">💎</span> Premium &amp; Gestionale
+      </div>
+      <div class="nav-item" onclick="showSection('mie-viste',this)">
+        <span class="nav-icon">🧭</span> Le mie viste
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -790,6 +803,73 @@
           </thead>
           <tbody id="table-subappalti"><tr><td colspan="7" class="loading">Caricamento...</td></tr></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- LE MIE VISTE — tutto quello che serve ad Alessio per provare il sito
+         da un posto solo, senza account finti. -->
+    <div class="section" id="sec-mie-viste">
+      <div class="topbar">
+        <div class="topbar-title">🧭 Le mie viste</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+
+      <div style="padding:18px;max-width:1000px">
+
+        <div style="background:#f3e5f5;border:2px solid #e0c2ec;border-radius:14px;padding:20px;margin-bottom:24px;line-height:1.7">
+          <div style="font-weight:800;font-size:17px;margin-bottom:8px;color:#7b1fa2">Come funziona</div>
+          Entra con il <b>tuo unico account</b> (pintoalessio@icloud.com). Dentro il gestionale e nei
+          pannelli trovi in alto la <b>barra FONDATORE</b>: da lì cambi la categoria che vuoi vedere
+          (impresa, artigiano, professionista) e passi da Free a Premium con un clic.
+          <b>Non ti servono più account finti.</b>
+        </div>
+
+        <div class="mv-grid">
+
+          <div class="mv-card">
+            <div class="mv-tit">🛠️ Gestionali</div>
+            <a class="mv-link" href="/gestionale-app.html" target="_blank">Gestionale impresa e artigiano</a>
+            <a class="mv-link" href="/gestionale-negozio.html" target="_blank">Gestionale negozio</a>
+            <a class="mv-link" href="/gestionale-noleggio.html" target="_blank">Gestionale noleggio</a>
+            <a class="mv-link" href="/gestionale-operatore.html" target="_blank">App dell'operaio</a>
+            <div class="mv-nota">Al momento in manutenzione: entri solo tu.</div>
+          </div>
+
+          <div class="mv-card">
+            <div class="mv-tit">👤 Pannelli utente</div>
+            <a class="mv-link" href="/pannello-impresa.html" target="_blank">Pannello impresa</a>
+            <a class="mv-link" href="/pannello-artigiano.html" target="_blank">Pannello artigiano</a>
+            <a class="mv-link" href="/pannello-professionisti.html" target="_blank">Pannello professionista</a>
+            <a class="mv-link" href="/pannello-negozio.html" target="_blank">Pannello negozio</a>
+            <a class="mv-link" href="/pannello-candidato.html" target="_blank">Pannello candidato</a>
+          </div>
+
+          <div class="mv-card">
+            <div class="mv-tit">🌐 Sito pubblico</div>
+            <a class="mv-link" href="/index.html" target="_blank">Home</a>
+            <a class="mv-link" href="/cerca-imprese.html" target="_blank">Ricerca imprese</a>
+            <a class="mv-link" href="/cerca-artigiani.html" target="_blank">Ricerca artigiani</a>
+            <a class="mv-link" href="/prezzi.html" target="_blank">Prezzi e piani</a>
+            <div class="mv-nota">Per vedere il sito come un cliente qualsiasi, aprilo in una finestra di navigazione in incognito.</div>
+          </div>
+
+          <div class="mv-card">
+            <div class="mv-tit">📊 Strumenti</div>
+            <a class="mv-link" href="/admin-utilizzo.html" target="_blank">Chi usa il gestionale</a>
+            <a class="mv-link" href="https://supabase.com/dashboard/project/nacvrsgkyfavykxjxszu" target="_blank">Database (Supabase)</a>
+            <a class="mv-link" href="https://app.netlify.com/projects/trovaimpresa" target="_blank">Deploy (Netlify)</a>
+            <a class="mv-link" href="https://github.com/trovaimpresa/trovaimpresa" target="_blank">Codice (GitHub)</a>
+          </div>
+
+        </div>
+
+        <div style="background:#fffaf0;border:2px solid #f0d9a8;border-radius:14px;padding:20px;margin-top:24px;line-height:1.7">
+          <div style="font-weight:800;font-size:17px;margin-bottom:8px;color:#b26a00">Prima di cancellare gli account finti</div>
+          Cancellali da <b>Imprese</b>, uno alla volta, e <b>tieni il tuo</b> (luigi · pintoalessio@icloud.com):
+          è quello che contiene i dati del gestionale su cui stiamo lavorando.
+          Se cancelli un account, spariscono anche i suoi lavori, preventivi e clienti — e non si torna indietro.
+        </div>
+
       </div>
     </div>
 
