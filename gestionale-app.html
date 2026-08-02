@@ -805,11 +805,10 @@
     const speseMese = speseLav+speseCarte;
     const utile     = incMese-speseMese;
 
-    /* avviso lavori in perdita: resta com'era, sopra le schede */
+    /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
+       (ora e' una riga dentro "Da sistemare oggi", piu' in basso) */
     const spPerL={};SP.forEach(x=>{spPerL[x.lavoro_id]=(spPerL[x.lavoro_id]||0)+(+x.importo||0);});
     const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id])&&((+l.importo||0)-(spPerL[l.id]||0))<0);
-    const ra=$("#rie-alert");
-    if(ra)ra.innerHTML=inPerdita.length?'<div class="rie-warn" data-action="vai-report">⚠ <b>'+(inPerdita.length===1?"1 lavoro in perdita":inPerdita.length+" lavori in perdita")+'</b> — le spese superano l\'importo. Clicca per vedere quali nel Report.</div>':"";
 
     /* preventivi in attesa (+ totale di ognuno) */
     const attesa=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato")
@@ -841,6 +840,54 @@
     /* scadenzario */
     const scAperte=SC.filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30)
                      .sort((a,b)=>a.data_scadenza.localeCompare(b.data_scadenza));
+
+    /* ---- "Da sistemare oggi": la scorciatoia in cima ----
+       Non calcola niente di nuovo: raccoglie i numeri gia' contati qui sopra
+       e li mette in fila dal piu' urgente. Le schede sotto restano identiche.
+       Se non c'e' niente di scaduto o in ritardo, lo dice e basta. */
+    const lavOggi = aperti.filter(l=>l.data_prevista===oggi);
+    const scScadute = scAperte.filter(x=>x.data_scadenza<oggi);
+    const mzScaduti = mzAvvisa.filter(v=>v.scadute>0);
+    const limVecchio = _giorniDopo(oggi,-7);
+    const prevFermi = attesa.filter(p=>p.data&&String(p.data)<limVecchio);
+    const totScadute = scadute.reduce((s,l)=>s+(+l.importo||0),0);
+
+    const DA=[];
+    const nn=(n,uno,tanti)=>n+" "+(n===1?uno:tanti);
+    if(scadute.length)   DA.push({g:1,t:nn(scadute.length,"fattura scaduta","fatture scadute"),
+                                  d:"Non ti hanno ancora pagato: "+eur(totScadute),go:"fatture"});
+    if(ritardo.length)   DA.push({g:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
+                                  d:"La data prevista è già passata",go:"lavori"});
+    if(scScadute.length) DA.push({g:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),
+                                  d:(scScadute[0].titolo||"Scadenza")+(scScadute.length>1?" e altre":""),go:"scadenzario"});
+    if(mzScaduti.length) DA.push({g:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
+                                  d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
+    if(inPerdita.length) DA.push({g:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
+                                  d:"Le spese superano l'importo del lavoro",go:"report"});
+    if(lavOggi.length)   DA.push({g:2,t:nn(lavOggi.length,"lavoro in programma oggi","lavori in programma oggi"),
+                                  d:(lavOggi[0].descrizione||"Lavoro")+(lavOggi.length>1?" e altri":""),go:"lavori"});
+    if(prevFermi.length) DA.push({g:2,t:nn(prevFermi.length,"preventivo senza risposta","preventivi senza risposta"),
+                                  d:"Fermi da più di una settimana: forse vanno sollecitati",go:"preventivi"});
+
+    const ra=$("#rie-alert");
+    if(ra){
+      if(!DA.length){
+        ra.innerHTML='<div class="rie-oggi tutto-ok">'
+          + '<div class="ro-tit"><span class="ro-pallino"></span>Tutto in ordine</div>'
+          + '<div class="ro-sotto">Niente di scaduto e niente in ritardo. Buon lavoro.</div>'
+          + '</div>';
+      }else{
+        ra.innerHTML='<div class="rie-oggi">'
+          + '<div class="ro-tit"><span class="ro-pallino"></span>Da sistemare oggi</div>'
+          + '<div class="ro-sotto">'+(DA.length===1?"Una cosa che chiede attenzione.":DA.length+" cose che chiedono attenzione.")+' Clicca una riga per andarci.</div>'
+          + DA.slice(0,5).map(r=>
+              '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'" data-action="rie-go" data-go="'+r.go+'">'
+            +   '<span class="ro-testo">'+esc(r.t)+'<span class="ro-dett">'+esc(r.d)+'</span></span>'
+            +   '<span class="ro-freccia">›</span>'
+            + '</div>').join("")
+          + '</div>';
+      }
+    }
 
     /* ---- le 12 schede, nello stesso ordine del menu ---- */
     const C=[];

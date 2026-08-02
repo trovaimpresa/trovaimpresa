@@ -1641,3 +1641,58 @@
    senza questo il modulo resta scorso e la prima etichetta sparisce sopra. */
 .sheet--grande .sh-body{overflow-anchor:none}
 .sheet--grande .sh-body *{overflow-anchor:none}
+
+/* =========================================================================
+   RIEPILOGO — "Da sistemare oggi"
+   Le 13 schede sotto restano identiche: questa e' solo una scorciatoia in
+   cima che raccoglie le cose scadute o in ritardo, cosi' aprendo il
+   gestionale si capisce in due secondi cosa fare senza leggere tutto.
+   Il vecchio riquadro "lavori in perdita" ora e' una riga qui dentro.
+   ========================================================================= */
+
+/* il riquadro rosso si spezzava male sul telefono: era display:flex e le
+   parole finivano incolonnate in una striscia stretta. Torna testo normale
+   che va a capo da solo. */
+.rie-warn{ display:block; }
+
+#riepilogo .rie-oggi{
+  background:var(--card);
+  border:1px solid var(--bordo);
+  border-left:6px solid var(--err);
+  border-radius:16px;
+  padding:20px 22px 14px;
+  margin-bottom:26px;
+}
+#riepilogo .rie-oggi.tutto-ok{ border-left-color:var(--ok); padding-bottom:20px; }
+
+#riepilogo .ro-tit{
+  display:flex; align-items:center; gap:10px;
+  font-size:20px; font-weight:800; letter-spacing:-.3px; color:var(--testo);
+  margin-bottom:4px;
+}
+#riepilogo .ro-tit .ro-pallino{
+  width:12px; height:12px; border-radius:50%; background:var(--err); flex:0 0 12px;
+}
+#riepilogo .rie-oggi.tutto-ok .ro-pallino{ background:var(--ok); }
+#riepilogo .ro-sotto{ font-size:16px; color:var(--testo-2); margin-bottom:8px; }
+
+#riepilogo .ro-riga{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:15px 10px; margin:0 -10px;
+  border-top:1px solid var(--bordo);
+  border-radius:10px; cursor:pointer;
+}
+#riepilogo .ro-riga:hover{ background:var(--blu-tenue); }
+#riepilogo .ro-testo{ font-size:18px; font-weight:700; color:var(--testo); line-height:1.4; }
+#riepilogo .ro-testo .ro-dett{ display:block; font-size:16px; font-weight:500; color:var(--testo-2); margin-top:3px; }
+#riepilogo .ro-freccia{ flex:0 0 auto; font-size:22px; color:var(--testo-3); font-weight:700; }
+
+#riepilogo .ro-riga.grave .ro-testo{ color:var(--err); }
+#riepilogo .ro-riga.attesa .ro-testo{ color:var(--attesa); }
+
+@media(max-width:760px){
+  #riepilogo .rie-oggi{ padding:18px 18px 12px; margin-bottom:20px; }
+  #riepilogo .ro-tit{ font-size:19px; }
+  #riepilogo .ro-riga{ padding:14px 8px; margin:0 -8px; gap:12px; }
+  #riepilogo .ro-testo{ font-size:17px; }
+}
