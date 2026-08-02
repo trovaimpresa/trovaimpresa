@@ -180,9 +180,19 @@
 
   function el(id){ return document.getElementById(id); }
 
-  function mostraErrore(t){
+  function mostraErrore(t, info){
     var e = el('errore');
-    e.textContent = t;
+    var html = esc(t);
+    if(info){
+      html += '<div style="margin-top:14px;font-weight:400;font-size:.95rem;line-height:1.9">';
+      for(var k in info){
+        if(Object.prototype.hasOwnProperty.call(info, k)){
+          html += '<div><b>' + esc(k.replace(/_/g,' ')) + ':</b> ' + esc(String(info[k])) + '</div>';
+        }
+      }
+      html += '</div>';
+    }
+    e.innerHTML = html;
     e.style.display = 'block';
   }
 
@@ -262,7 +272,11 @@
     })
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if(!d || !d.success) throw new Error((d && d.error) || 'Errore sconosciuto');
+      if(!d || !d.success){
+        var e = new Error((d && d.error) || 'Errore sconosciuto');
+        e.info = d && d.info;
+        throw e;
+      }
       dati = d.data || [];
       el('zona-login').style.display = 'none';
       el('zona-dati').style.display = 'block';
@@ -285,7 +299,7 @@
           sessionStorage.setItem('ti_admin_p', p);
         } catch(_){}
       })
-      .catch(function(err){ mostraErrore(err.message); })
+      .catch(function(err){ mostraErrore(err.message, err.info); })
       .then(function(){ btn.disabled = false; });
   });
 
