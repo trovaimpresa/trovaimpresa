@@ -1683,9 +1683,15 @@ async function caricaImprese() {
   if (error) { console.error(error); return; }
   tutteImprese = data || [];
 
-  const tot = tutteImprese.length;
-  const verificate = tutteImprese.filter(i => i.verificata).length;
-  const attesa = tutteImprese.filter(i => !i.verificata).length;
+  // I profili di prova (is_test) restano nell'elenco, cosi' li puoi ancora
+  // aprire e gestire, ma NON entrano nei numeri: i contatori devono dire
+  // quanti sono i clienti veri, non quante righe ci sono nella tabella.
+  const impreseVere = tutteImprese.filter(i => !i.is_test);
+  const nTest = tutteImprese.length - impreseVere.length;
+
+  const tot = impreseVere.length;
+  const verificate = impreseVere.filter(i => i.verificata).length;
+  const attesa = impreseVere.filter(i => !i.verificata).length;
 
   document.getElementById('stat-totali').textContent = tot;
   document.getElementById('stat-verificate').textContent = verificate;
@@ -1695,13 +1701,14 @@ async function caricaImprese() {
   const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
   const oggiStr = new Date().toISOString().slice(0, 10);
   const settimanaFa = new Date(Date.now() - 7 * 24 * 3600 * 1000);
-  _set('stat-oggi', tutteImprese.filter(i => (i.created_at || '').slice(0, 10) === oggiStr).length);
-  _set('stat-settimana', tutteImprese.filter(i => i.created_at && new Date(i.created_at) >= settimanaFa).length);
-  _set('stat-premium', tutteImprese.filter(i => (i.piano || '').toLowerCase() === 'premium').length);
-  _set('stat-gestionali', tutteImprese.filter(i => i.gestionale_attivo === true).length);
+  _set('stat-oggi', impreseVere.filter(i => (i.created_at || '').slice(0, 10) === oggiStr).length);
+  _set('stat-settimana', impreseVere.filter(i => i.created_at && new Date(i.created_at) >= settimanaFa).length);
+  _set('stat-premium', impreseVere.filter(i => (i.piano || '').toLowerCase() === 'premium').length);
+  _set('stat-gestionali', impreseVere.filter(i => i.gestionale_attivo === true).length);
   document.getElementById('badge-imprese').textContent = tot;
   document.getElementById('badge-daverif').textContent = attesa;
-  document.getElementById('imprese-count').textContent = tot + ' imprese registrate';
+  document.getElementById('imprese-count').textContent =
+    tot + ' imprese registrate' + (nTest ? ' (esclusi ' + nTest + ' profili di prova)' : '');
 
   renderImprese(tutteImprese);
   renderDaVerificare(tutteImprese.filter(i => !i.verificata));
@@ -1721,7 +1728,7 @@ function renderImprese(lista) {
       <td>📍 ${esc(i.citta) || '–'}</td>
       <td>${esc((i.mestieri||[]).slice(0,2).join(', '))}${(i.mestieri||[]).length>2?' +altri':''}</td>
       <td><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></td>
-      <td>${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
+      <td>${i.is_test?'<span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span><br>':''}${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
         <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
