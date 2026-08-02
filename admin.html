@@ -310,10 +310,9 @@
         <span class="nav-icon">🏗️</span> Imprese
         <span class="nav-badge" id="badge-imprese">0</span>
       </div>
-      <div class="nav-item" onclick="showSection('da-verificare',this)">
-        <span class="nav-icon">⏳</span> Da verificare
-        <span class="nav-badge" id="badge-daverif" style="background:var(--arancio)">0</span>
-      </div>
+<!-- "Da verificare" rimosso: mostrava le stesse imprese dell'elenco principale.
+           Il filtro "In attesa" dentro Imprese fa la stessa cosa. -->
+      
       <div class="nav-item" onclick="showSection('preventivi',this)">
         <span class="nav-icon">📋</span> Preventivi
       </div>
@@ -1095,7 +1094,7 @@ async function caricaPubblicitaClienti() {
 }
 
 async function eliminaAnnuncioPub(id) {
-  const a = _pubData.find(x => x.id === id);
+  const a = _pubData.find(x => String(x.id) === String(id));
   const nome = (a && a._imp && (a._imp.nome_attivita || a._imp.nome)) || ('#' + id);
   if (!confirm('Eliminare definitivamente l\'annuncio di "' + nome + '"?')) return;
   const res = await fetch('/.netlify/functions/admin-elimina-annuncio', {
@@ -1731,6 +1730,7 @@ function renderImprese(lista) {
       <td>${i.is_test?'<span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span><br>':''}${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
+        ${!i.verificata ? `<button class="action-btn btn-verifica" onclick="verificaImpresa('${i.id}')">✅ Verifica</button> ` : ''}
         <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
         <button class="action-btn btn-elimina" onclick="eliminaImpresa('${i.id}')">🗑️</button>
       </td>
@@ -1754,7 +1754,7 @@ function renderDaVerificare(lista) {
       <td>
         <button class="action-btn btn-verifica" onclick="verificaImpresa('${i.id}')">✅ Verifica</button>
         <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
-        <button class="action-btn btn-rifiuta" onclick="eliminaImpresa('${i.id}')">❌ Rifiuta</button>
+        <button class="action-btn btn-rifiuta" onclick="eliminaImpresa('${i.id}')">🗑 Elimina</button>
       </td>
     </tr>
   `).join('');
@@ -1868,7 +1868,7 @@ async function verificaImpresa(id) {
 
 // ELIMINA IMPRESA
 async function eliminaImpresa(id) {
-  const imp = tutteImprese.find(x => x.id === id);
+  const imp = tutteImprese.find(x => String(x.id) === String(id));
   const nome = (imp && imp.nome_attivita) || '';
   if (!confirm(`Sei sicuro di voler eliminare "${nome}"?`)) return;
   if (!await adminWrite('delete', 'imprese', id)) return;
@@ -1922,7 +1922,7 @@ async function eliminaLead(id) {
 
 // DETTAGLIO IMPRESA
 function apriDettaglio(id) {
-  const i = tutteImprese.find(x => x.id === id);
+  const i = tutteImprese.find(x => String(x.id) === String(id));
   if (!i) return;
   document.getElementById('modal-content').innerHTML = `
     <button class="modal-close" onclick="chiudiModal()">✕ Chiudi</button>
