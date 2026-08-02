@@ -1593,3 +1593,29 @@
 
 /* testo di aiuto sotto un campo */
 .campo-aiuto{ font-size:14px; color:var(--testo-2); margin-top:8px; line-height:1.45; }
+
+/* ================================================================
+   TITOLI E NOTE DENTRO LE FINESTRE GRANDI  (agosto 2026)
+   Usate dalla scheda persona: raggruppano i campi in blocchi con un
+   titolo leggibile, e rendono i <details> cliccabili come una barra.
+   Classi nuove: non toccano nulla di esistente.
+   ================================================================ */
+.sh-tit{
+  font-size:17px; font-weight:800; color:var(--testo);
+  margin:2px 0 12px; letter-spacing:-.2px;
+}
+.sh-tit--click{
+  cursor:pointer; padding:13px 15px; margin:0;
+  background:var(--sfondo); border-radius:10px;
+  display:flex; align-items:center; gap:8px;
+}
+.sh-tit--click:hover{background:var(--bordo)}
+.sh-b>details{margin:0 0 14px; border:1px solid var(--bordo); border-radius:12px; overflow:hidden}
+.sh-b>details[open]>.sh-tit--click{margin-bottom:16px; border-radius:10px 10px 0 0}
+.sh-b>details>*:not(summary){padding-left:15px; padding-right:15px}
+.sh-b>details[open]{padding-bottom:4px}
+.sh-nota{
+  font-size:14px; line-height:1.55; color:var(--testo-3);
+  margin:-4px 0 16px;
+}
+.sh-b{margin-bottom:14px}

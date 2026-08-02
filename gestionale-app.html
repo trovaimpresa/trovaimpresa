@@ -1869,53 +1869,80 @@
   }
   function squadraForm(op){
     const isNew=!op;op=op||{};
-    openSheet(`<h3>${isNew?"Nuova persona":"Modifica persona"}</h3>
-      <div class="field"><label>Nome</label><input id="d-nome" value="${esc(op.nome||"")}" placeholder="Es. Wahid"></div>
-      <div class="field"><label>Telefono</label><input id="d-tel" type="tel" value="${esc(op.telefono||"")}" placeholder="Es. 333 1234567"></div>
-      <div class="field"><label>Mansione in cantiere</label>
-        <input id="d-mansione" list="d-mansioni-list" value="${esc(op.mansione||"")}" placeholder="Es. Muratore">
-        <datalist id="d-mansioni-list">${MANSIONI.map(m=>`<option value="${m}"></option>`).join("")}</datalist></div>
-      <div class="field"><label>Costo orario (€)</label>
-        <input id="d-costo" type="number" step="0.50" min="0" value="${op.costo_orario!=null&&op.costo_orario!==""?esc(op.costo_orario):""}" placeholder="Es. 22.50">
-        <div style="font-size:13px;color:var(--testo-3);margin-top:6px;line-height:1.5">Serve per calcolare il costo della manodopera sui lavori.</div></div>
+    const apriSic=dipAvvisi(op).length?" open":"";
+    /* Modulo lungo -> finestra grande a due colonne, come lavoro e preventivo.
+       A sinistra la persona e i suoi documenti, a destra cosa vede sul telefono
+       e l'anagrafica. Sotto i 900px torna una colonna sola. */
+    openSheetGrande(isNew?"Nuova persona":"Modifica persona",
+      `<div class="sh-cols"><div class="sh-col">
 
-      <div class="field"><label>Ruolo nell'app <span style="font-weight:400;color:var(--testo-3)">(cosa vede sul telefono)</span></label><select id="d-ruolo">
-        <option value="operaio">Operaio</option>
-        <option value="preposto">Preposto</option>
-        <option value="segretaria">Segretaria</option></select></div>
-      <div class="field"><label>Permessi</label><div id="d-perms">
-        ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
+      <div class="sh-b">
+        <div class="sh-tit">Chi \u00e8</div>
+        <div class="field"><label>Nome</label><input id="d-nome" value="${esc(op.nome||"")}" placeholder="Es. Wahid"></div>
+        <div class="field"><label>Telefono</label><input id="d-tel" type="tel" value="${esc(op.telefono||"")}" placeholder="Es. 333 1234567"></div>
+        <div class="row2">
+          <div class="field"><label>Mansione in cantiere</label>
+            <input id="d-mansione" list="d-mansioni-list" value="${esc(op.mansione||"")}" placeholder="Es. Muratore">
+            <datalist id="d-mansioni-list">${MANSIONI.map(m=>`<option value="${m}"></option>`).join("")}</datalist></div>
+          <div class="field"><label>Costo orario (\u20ac)</label>
+            <input id="d-costo" type="number" step="0.50" min="0" value="${op.costo_orario!=null&&op.costo_orario!==""?esc(op.costo_orario):""}" placeholder="Es. 22.50"></div>
+        </div>
+        <div class="sh-nota">Il costo orario serve per calcolare la manodopera sui lavori.</div>
+      </div>
 
-      <details class="dip-extra" style="margin:14px 0;border:2px solid var(--bordo,#dbe2ec);border-radius:12px;overflow:hidden"${dipAvvisi(op).length?" open":""}>
-        <summary style="padding:14px 16px;cursor:pointer;font-weight:700;background:var(--sfondo,#f5f8fc);list-style:revert">🦺 Documenti e sicurezza</summary>
-        <div style="padding:14px 16px 4px">
-          <div class="field"><label>Visita medica — scade il</label><input id="d-visita" type="date" value="${esc(op.visita_medica_scadenza||"")}"></div>
-          <div class="field"><label>Formazione sicurezza — scade il</label><input id="d-formazione" type="date" value="${esc(op.formazione_scadenza||"")}"></div>
+      <div class="sh-b">
+        <details${apriSic}>
+          <summary class="sh-tit sh-tit--click">\ud83e\uddba Documenti e sicurezza</summary>
+          <div class="row2">
+            <div class="field"><label>Visita medica \u2014 scade il</label><input id="d-visita" type="date" value="${esc(op.visita_medica_scadenza||"")}"></div>
+            <div class="field"><label>Formazione sicurezza \u2014 scade il</label><input id="d-formazione" type="date" value="${esc(op.formazione_scadenza||"")}"></div>
+          </div>
           <div class="field"><label>Attestati e patentini</label><input id="d-attestati" value="${esc(op.attestati||"")}" placeholder="Es. muletto, piattaforma aerea, primo soccorso"></div>
-          <div class="field"><label>Documento d'identità — numero</label><input id="d-doc-num" value="${esc(op.documento_numero||"")}" placeholder="Es. CA12345AB"></div>
-          <div class="field"><label>Documento — scade il</label><input id="d-doc-scad" type="date" value="${esc(op.documento_scadenza||"")}"></div>
-          <div class="field"><label>Permesso di soggiorno — scade il</label><input id="d-permesso" type="date" value="${esc(op.permesso_scadenza||"")}">
-            <div style="font-size:13px;color:var(--testo-3);margin-top:6px;line-height:1.5">Solo per lavoratori extra UE. Lascia vuoto se non serve.</div></div>
-        </div>
-      </details>
+          <div class="row2">
+            <div class="field"><label>Documento \u2014 numero</label><input id="d-doc-num" value="${esc(op.documento_numero||"")}" placeholder="Es. CA12345AB"></div>
+            <div class="field"><label>Documento \u2014 scade il</label><input id="d-doc-scad" type="date" value="${esc(op.documento_scadenza||"")}"></div>
+          </div>
+          <div class="field"><label>Permesso di soggiorno \u2014 scade il</label><input id="d-permesso" type="date" value="${esc(op.permesso_scadenza||"")}"></div>
+          <div class="sh-nota">Il permesso serve solo per lavoratori extra UE. Lascia vuoto se non serve.</div>
+        </details>
+      </div>
 
-      <details class="dip-extra" style="margin:14px 0;border:2px solid var(--bordo,#dbe2ec);border-radius:12px;overflow:hidden">
-        <summary style="padding:14px 16px;cursor:pointer;font-weight:700;background:var(--sfondo,#f5f8fc);list-style:revert">👤 Dati anagrafici e contratto</summary>
-        <div style="padding:14px 16px 4px">
-          <div class="field"><label>Data di nascita</label><input id="d-nascita" type="date" value="${esc(op.data_nascita||"")}"></div>
-          <div class="field"><label>Codice fiscale</label><input id="d-cf" value="${esc(op.codice_fiscale||"")}" style="text-transform:uppercase" placeholder="RSSMRA80A01H501U"></div>
+      </div><div class="sh-col">
+
+      <div class="sh-b">
+        <div class="sh-tit">Cosa vede sul telefono</div>
+        <div class="field"><label>Ruolo nell'app</label><select id="d-ruolo">
+          <option value="operaio">Operaio</option>
+          <option value="preposto">Preposto</option>
+          <option value="segretaria">Segretaria</option></select></div>
+        <div class="field"><label>Permessi</label><div id="d-perms">
+          ${PERMS.map(p=>`<label class="perm-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 2px"><span>${p.label}</span><input type="checkbox" data-perm="${p.key}" style="width:22px;height:22px"></label>`).join("")}</div></div>
+      </div>
+
+      <div class="sh-b">
+        <details>
+          <summary class="sh-tit sh-tit--click">\ud83d\udc64 Dati anagrafici e contratto</summary>
+          <div class="row2">
+            <div class="field"><label>Data di nascita</label><input id="d-nascita" type="date" value="${esc(op.data_nascita||"")}"></div>
+            <div class="field"><label>Codice fiscale</label><input id="d-cf" value="${esc(op.codice_fiscale||"")}" style="text-transform:uppercase" placeholder="RSSMRA80A01H501U"></div>
+          </div>
           <div class="field"><label>Email</label><input id="d-email" type="email" value="${esc(op.email||"")}" placeholder="nome@email.it"></div>
-          <div class="field"><label>Data di assunzione</label><input id="d-assunzione" type="date" value="${esc(op.data_assunzione||"")}"></div>
-          <div class="field"><label>Tipo di contratto</label>
-            <input id="d-contratto" list="d-contratti-list" value="${esc(op.tipo_contratto||"")}" placeholder="Es. Tempo indeterminato">
-            <datalist id="d-contratti-list">${CONTRATTI.map(c=>`<option value="${c}"></option>`).join("")}</datalist></div>
-          <div class="field"><label>In caso di emergenza chiamare</label><input id="d-emerg-nome" value="${esc(op.emergenza_nome||"")}" placeholder="Es. Maria (moglie)"></div>
-          <div class="field"><label>Telefono di emergenza</label><input id="d-emerg-tel" type="tel" value="${esc(op.emergenza_telefono||"")}" placeholder="Es. 333 7654321"></div>
-        </div>
-      </details>
+          <div class="row2">
+            <div class="field"><label>Data di assunzione</label><input id="d-assunzione" type="date" value="${esc(op.data_assunzione||"")}"></div>
+            <div class="field"><label>Tipo di contratto</label>
+              <input id="d-contratto" list="d-contratti-list" value="${esc(op.tipo_contratto||"")}" placeholder="Es. Tempo indeterminato">
+              <datalist id="d-contratti-list">${CONTRATTI.map(c=>`<option value="${c}"></option>`).join("")}</datalist></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>In emergenza chiamare</label><input id="d-emerg-nome" value="${esc(op.emergenza_nome||"")}" placeholder="Es. Maria (moglie)"></div>
+            <div class="field"><label>Telefono di emergenza</label><input id="d-emerg-tel" type="tel" value="${esc(op.emergenza_telefono||"")}" placeholder="Es. 333 7654321"></div>
+          </div>
+        </details>
+      </div>
 
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
+      </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button>`);
     $("#d-ruolo").onchange=applyRuoloPreset;
     if(isNew){applyRuoloPreset();}
     else{
