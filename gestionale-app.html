@@ -867,6 +867,13 @@
                                   d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
     if(inPerdita.length) DA.push({g:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
                                   d:"Le spese superano l'importo del lavoro",go:"report"});
+    /* patente a crediti: sotto 15 l'impresa non puo' operare in cantiere,
+       quindi avviso gia' a 20 per dare il tempo di recuperarli. */
+    const patC = AZ&&AZ.pat_crediti!=null ? +AZ.pat_crediti : null;
+    if(patC!=null&&patC<15)      DA.push({g:1,t:"Patente a crediti sotto il minimo — "+patC+(patC===1?" credito":" crediti"),
+                                  d:"Sotto 15 crediti non si può operare in cantiere",act:"rie-azienda"});
+    else if(patC!=null&&patC<20) DA.push({g:2,t:"Patente a crediti quasi al minimo — "+patC+" crediti",
+                                  d:"Il minimo per operare in cantiere è 15",act:"rie-azienda"});
     if(lavOggi.length)   DA.push({g:2,t:nn(lavOggi.length,"lavoro in programma oggi","lavori in programma oggi"),
                                   d:(lavOggi[0].descrizione||"Lavoro")+(lavOggi.length>1?" e altri":""),go:"lavori"});
     if(prevFermi.length) DA.push({g:2,t:nn(prevFermi.length,"preventivo senza risposta","preventivi senza risposta"),
@@ -884,7 +891,8 @@
           + '<div class="ro-tit"><span class="ro-pallino"></span>Da sistemare oggi</div>'
           + '<div class="ro-sotto">'+(DA.length===1?"Una cosa che chiede attenzione.":DA.length+" cose che chiedono attenzione.")+' Clicca una riga per andarci.</div>'
           + DA.slice(0,5).map(r=>
-              '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'" data-action="rie-go" data-go="'+r.go+'">'
+              '<div class="ro-riga '+(r.g===1?"grave":"attesa")+'" '
+            +   (r.act?'data-action="'+r.act+'"':'data-action="rie-go" data-go="'+r.go+'"')+'>'
             +   '<span class="ro-testo">'+esc(r.t)+'<span class="ro-dett">'+esc(r.d)+'</span></span>'
             +   '<span class="ro-freccia">›</span>'
             + '</div>').join("")
@@ -2782,6 +2790,17 @@
       <div class="field"><label>Entro quanti giorni ti devono pagare</label>
         <input type="number" id="a-gg" inputmode="numeric" value="${a.giorni_pagamento||30}" placeholder="30">
         <div class="campo-aiuto">Serve alle Fatture per dirti quando una fattura &egrave; scaduta. Di solito 30 giorni.</div></div>
+
+      <h4 class="az-sez">Patente a crediti</h4>
+      <p class="az-sez-sub">Serve per lavorare in cantiere. Si parte da 30 crediti; <b>sotto 15 non si pu&ograve; operare</b>. Il Riepilogo ti avvisa gi&agrave; sotto 20, cos&igrave; hai tempo di recuperarli.</p>
+      <div class="row2">
+        <div class="field"><label>Numero patente</label><input id="a-pat-n" value="${esc(a.pat_numero||"")}" placeholder="Come sul portale INL"></div>
+        <div class="field"><label>Data di rilascio</label><input type="date" id="a-pat-d" value="${esc(a.pat_data||"")}"></div>
+      </div>
+      <div class="field"><label>Crediti attuali</label>
+        <input type="number" id="a-pat-c" inputmode="numeric" min="0" max="100" value="${a.pat_crediti!=null?a.pat_crediti:""}" placeholder="30">
+        <div class="campo-aiuto">Lascia vuoto se non la usi. Aggiornalo tu quando cambia: il gestionale non pu&ograve; leggerlo da solo dal portale.</div></div>
+
       <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
       <button class="btn-primary b-save" data-action="save-azienda">Salva</button></div>`);
   }
@@ -2793,13 +2812,28 @@
       num_fatt:(aziendaRow&&aziendaRow.num_fatt!=null)?aziendaRow.num_fatt:1};
     const gg=parseInt($("#a-gg")?$("#a-gg").value:"",10);
     if(gg>0)row.giorni_pagamento=gg;
+    /* patente a crediti: campi facoltativi. Vuoto = null, cosi' si puo' anche
+       svuotare un campo compilato per sbaglio. */
+    const patN=$("#a-pat-n")?$("#a-pat-n").value.trim():"";
+    const patD=$("#a-pat-d")?$("#a-pat-d").value:"";
+    const patC=$("#a-pat-c")?$("#a-pat-c").value.trim():"";
+    row.pat_numero  = patN||null;
+    row.pat_data    = patD||null;
+    row.pat_crediti = patC===""?null:Math.max(0,parseInt(patC,10)||0);
+
     let {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
-    /* se la colonna dei giorni non c'e' ancora nel database, salvo tutto il resto
-       lo stesso invece di far fallire il salvataggio */
-    if(error&&/giorni_pagamento/.test(error.message||"")){
-      delete row.giorni_pagamento;
+    /* se una colonna aggiunta di recente non c'e' ancora nel database, salvo
+       tutto il resto lo stesso invece di far fallire il salvataggio */
+    const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti"];
+    const tolte=[];
+    while(error){
+      const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);
+      if(!c)break;
+      delete row[c];tolte.push(c);
       ({error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"}));
-      if(!error)toast("Salvato. I giorni di pagamento richiedono un aggiornamento del database.");
+    }
+    if(!error&&tolte.length){
+      toast("Salvato, ma alcuni campi nuovi richiedono un aggiornamento del database.");
     }
     if(error){toast("Errore: "+error.message);return;}
     closeSheet();toast("Dati azienda salvati ✔");
@@ -4179,6 +4213,9 @@
     /* click su una scheda del Riepilogo: entra nella sezione corrispondente,
        come se avessi cliccato la voce nel menu di sinistra. */
     if(a==="rie-go"){const b=document.querySelector('nav.tabs button[data-tab="'+t.dataset.go+'"]');if(b){b.click();window.scrollTo(0,0);}return;}
+    /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
+       che non e' una scheda del menu — quindi apro direttamente quella. */
+    if(a==="rie-azienda")return aziendaForm();
   });
   /* al cambio desktop/mobile ridisegna liste (tabella ↔ card) */
   try{window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderFatture();}});}catch(e){}

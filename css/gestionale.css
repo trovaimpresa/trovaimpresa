@@ -1696,3 +1696,12 @@
   #riepilogo .ro-riga{ padding:14px 8px; margin:0 -8px; gap:12px; }
   #riepilogo .ro-testo{ font-size:17px; }
 }
+
+/* --- Dati azienda: titoletto che separa la patente a crediti dal resto,
+       cosi' il modulo non e' una colonna unica di dieci campi --- */
+.az-sez{
+  font-size:19px; font-weight:800; letter-spacing:-.2px; color:var(--testo);
+  margin:26px 0 4px; padding-top:20px; border-top:2px solid var(--bordo);
+}
+.az-sez-sub{ font-size:15px; color:var(--testo-2); line-height:1.5; margin:0 0 14px; }
+.az-sez-sub b{ color:var(--err); font-weight:800; }
