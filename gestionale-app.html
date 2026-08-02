@@ -752,7 +752,7 @@
         sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo").eq("user_id",sbUid),
-        sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid),
         sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
@@ -846,7 +846,10 @@
        e li mette in fila dal piu' urgente. Le schede sotto restano identiche.
        Se non c'e' niente di scaduto o in ritardo, lo dice e basta. */
     const lavOggi = aperti.filter(l=>l.data_prevista===oggi);
-    const scScadute = scAperte.filter(x=>x.data_scadenza<oggi);
+    /* le scadenze legate a un mezzo (revisione, assicurazione...) sono le stesse
+       righe che la vista gest_mezzi_scadenze conta per i Mezzi: le tolgo da qui,
+       altrimenti la stessa cosa comparirebbe due volte con parole diverse. */
+    const scScadute = scAperte.filter(x=>x.data_scadenza<oggi&&!x.mezzo_id);
     const mzScaduti = mzAvvisa.filter(v=>v.scadute>0);
     const limVecchio = _giorniDopo(oggi,-7);
     const prevFermi = attesa.filter(p=>p.data&&String(p.data)<limVecchio);
