@@ -2457,21 +2457,40 @@
 
     /* --- chi emette: te --- */
     if(!(az.nome||"").trim())        m.push("Manca il nome della tua azienda — Dati azienda.");
-    if(!(az.piva||"").trim())        m.push("Manca la tua partita IVA — Dati azienda.");
+    const pulita=v=>String(v||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase();
+    const azPiva=pulita(az.piva);
+    if(!azPiva)                      m.push("Manca la tua partita IVA — Dati azienda.");
+    else if(!/^\d{11}$/.test(azPiva))
+      m.push("La tua partita IVA è di "+azPiva.length+" cifre, ma una partita IVA italiana ne ha esattamente 11 — Dati azienda.");
+    const azCf=pulita(az.cod_fiscale);
+    if(azCf&&!/^(\d{11}|[A-Z0-9]{16})$/.test(azCf))
+      m.push("Il tuo codice fiscale non ha una forma valida: 11 cifre per un'azienda, 16 caratteri per una persona — Dati azienda.");
     if(!(az.regime_fiscale||"").trim()) m.push("Manca il tuo regime fiscale — Dati azienda.");
     if(!(az.indirizzo||"").trim())   m.push("Manca la via della tua sede — Dati azienda.");
     if(!/^\d{5}$/.test((az.cap||"").trim()))  m.push("Il CAP della tua sede manca o non è di 5 cifre — Dati azienda.");
     if(!(az.citta||"").trim())       m.push("Manca la città della tua sede — Dati azienda.");
+    if((az.prov||"").trim()&&!/^[A-Za-z]{2}$/.test((az.prov||"").trim()))
+      m.push("La provincia della tua sede deve essere di 2 lettere, es. RI — Dati azienda.");
+    const iban=pulita(az.iban);
+    if(iban&&!/^IT\d{2}[A-Z]\d{10}[A-Z0-9]{12}$/.test(iban))
+      m.push("L'IBAN non ha la forma di un IBAN italiano (IT, 2 cifre, 1 lettera, 22 caratteri) — Dati azienda. Se lo lasci vuoto la fattura si fa lo stesso, senza i dati del bonifico.");
 
     /* --- chi riceve: il cliente --- */
     if(!f.cliente_id)                m.push("La fattura non ha un cliente.");
     else{
       const piva=(f.cli_piva||cli.piva||"").trim();
       const cf  =(f.cli_cod_fiscale||cli.cod_fiscale||"").trim();
-      if(!piva&&!cf)                 m.push("Il cliente non ha né partita IVA né codice fiscale — apri la sua scheda in Condomini.");
+      const pP=pulita(piva), pC=pulita(cf);
+      if(!pP&&!pC)                   m.push("Il cliente non ha né partita IVA né codice fiscale — apri la sua scheda in Condomini.");
+      if(pP&&!/^\d{11}$/.test(pP))
+        m.push("La partita IVA del cliente è di "+pP.length+" cifre invece di 11 — Condomini.");
+      if(pC&&!/^(\d{11}|[A-Z0-9]{16})$/.test(pC))
+        m.push("Il codice fiscale del cliente non ha una forma valida: 11 cifre per un condominio o un'azienda, 16 caratteri per un privato — Condomini.");
       if(!(f.cli_indirizzo||cli.indirizzo||"").trim()) m.push("Manca la via del cliente — Condomini.");
       if(!/^\d{5}$/.test((f.cli_cap||cli.cap||"").trim())) m.push("Il CAP del cliente manca o non è di 5 cifre — Condomini.");
       if(!(f.cli_citta||cli.citta||"").trim())          m.push("Manca la città del cliente — Condomini.");
+      const prv=(f.cli_prov||cli.prov||"").trim();
+      if(prv&&!/^[A-Za-z]{2}$/.test(prv)) m.push("La provincia del cliente deve essere di 2 lettere, es. RI — Condomini.");
       const sdi=(f.cli_sdi||cli.sdi_codice||"").trim();
       const pec=(f.cli_pec||cli.sdi_pec||"").trim();
       if(!sdi&&!pec)
