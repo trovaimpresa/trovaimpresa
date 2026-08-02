@@ -252,6 +252,28 @@
            background:#f4f7fb;color:#0066ff;text-decoration:none;font-weight:600;font-size:15px}
   .mv-link:hover{background:#0066ff;color:#fff}
   .mv-nota{font-size:13.5px;color:#5b6b80;line-height:1.6;margin-top:10px}
+  /* Chi usa il gestionale */
+  .u-numeri{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:22px}
+  .u-num{background:#fff;border:2px solid var(--border,#e2e8f0);border-radius:14px;padding:20px}
+  .u-num .v{font-size:2.3rem;font-weight:800;line-height:1.1}
+  .u-num .e{font-size:14.5px;color:#5b6b80;margin-top:4px;line-height:1.5}
+  .u-num.verde .v{color:#1b8a3f} .u-num.giallo .v{color:#b26a00} .u-num.rosso .v{color:#b3261e}
+  .u-filtri{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+  .u-btn{font-family:inherit;font-size:14.5px;font-weight:700;padding:10px 16px;border-radius:10px;
+         border:2px solid #0066ff;background:#fff;color:#0066ff;cursor:pointer}
+  .u-btn.attivo{background:#0066ff;color:#fff}
+  .u-riga{background:#fff;border:2px solid var(--border,#e2e8f0);border-left:9px solid #cbd5e1;
+          border-radius:14px;padding:18px 20px;margin-bottom:14px}
+  .u-riga.viva{border-left-color:#1b8a3f} .u-riga.ferma{border-left-color:#b26a00} .u-riga.mai{border-left-color:#b3261e}
+  .u-riga .n{font-size:18px;font-weight:800}
+  .u-riga .s{color:#5b6b80;font-size:14.5px;margin:3px 0 10px}
+  .u-stato{display:inline-block;font-weight:800;font-size:14px;padding:5px 12px;border-radius:999px;margin-bottom:10px}
+  .u-stato.viva{background:#e6f6ec;color:#1b8a3f} .u-stato.ferma{background:#fdf3e3;color:#b26a00} .u-stato.mai{background:#fdecea;color:#b3261e}
+  .u-det{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .u-det > div{background:#f4f7fb;border-radius:10px;padding:12px 14px}
+  .u-det .k{font-size:13px;color:#5b6b80} .u-det .v{font-size:16px;font-weight:700;margin-top:2px}
+  .u-badge{display:inline-block;background:#f3e5f5;color:#7b1fa2;font-weight:800;font-size:13px;
+           padding:3px 10px;border-radius:999px;margin-left:8px}
 </style>
 </head>
 <body>
@@ -324,6 +346,9 @@
       </div>
       <div class="nav-item" onclick="showSection('abbonamenti',this)">
         <span class="nav-icon">💎</span> Premium &amp; Gestionale
+      </div>
+      <div class="nav-item" onclick="showSection('utilizzo',this)">
+        <span class="nav-icon">📈</span> Chi usa il gestionale
       </div>
       <div class="nav-item" onclick="showSection('mie-viste',this)">
         <span class="nav-icon">🧭</span> Le mie viste
@@ -806,6 +831,25 @@
       </div>
     </div>
 
+    <!-- CHI USA IL GESTIONALE -->
+    <div class="section" id="sec-utilizzo">
+      <div class="topbar">
+        <div class="topbar-title">📈 Chi usa il gestionale</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+      <div style="padding:18px">
+        <div class="u-numeri" id="u-numeri"></div>
+        <div class="u-filtri">
+          <button class="u-btn attivo" data-uf="tutte" onclick="filtraUtilizzo('tutte',this)">Tutte</button>
+          <button class="u-btn" data-uf="viva" onclick="filtraUtilizzo('viva',this)">Attive (ultimi 7 giorni)</button>
+          <button class="u-btn" data-uf="ferma" onclick="filtraUtilizzo('ferma',this)">Ferme</button>
+          <button class="u-btn" data-uf="mai" onclick="filtraUtilizzo('mai',this)">Mai entrate</button>
+          <button class="u-btn" onclick="caricaUtilizzo()">Aggiorna</button>
+        </div>
+        <div id="u-lista"><div class="loading">Caricamento...</div></div>
+      </div>
+    </div>
+
     <!-- LE MIE VISTE — tutto quello che serve ad Alessio per provare il sito
          da un posto solo, senza account finti. -->
     <div class="section" id="sec-mie-viste">
@@ -855,7 +899,7 @@
 
           <div class="mv-card">
             <div class="mv-tit">📊 Strumenti</div>
-            <a class="mv-link" href="/admin-utilizzo.html" target="_blank">Chi usa il gestionale</a>
+            <a class="mv-link" href="#" onclick="showSection('utilizzo',document.querySelector('[onclick*=&quot;utilizzo&quot;]'));return false;">Chi usa il gestionale</a>
             <a class="mv-link" href="https://supabase.com/dashboard/project/nacvrsgkyfavykxjxszu" target="_blank">Database (Supabase)</a>
             <a class="mv-link" href="https://app.netlify.com/projects/trovaimpresa" target="_blank">Deploy (Netlify)</a>
             <a class="mv-link" href="https://github.com/trovaimpresa/trovaimpresa" target="_blank">Codice (GitHub)</a>
@@ -938,6 +982,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'abbonamenti') renderAbbonamenti();
   if (id === 'pubblicita-clienti') caricaPubblicitaClienti();
   if (id === 'mappa-spazi') caricaMappaSpazi();
+  if (id === 'utilizzo') caricaUtilizzo();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
 
@@ -1423,6 +1468,79 @@ function renderAbbonamenti() {
 // Scrivendo con la chiave anon (come si faceva prima) PostgREST non dà errore,
 // aggiorna zero righe e basta: i pulsanti sembravano funzionare senza fare
 // nulla. Se aggiungi un pulsante che scrive, usa questa funzione.
+// ===== CHI USA IL GESTIONALE =====
+// Riusa utente e password del login admin: nessuna seconda password da inserire.
+let _utilizzo = [], _utilizzoFiltro = 'tutte';
+
+function _uGiorni(iso){ if(!iso) return null; return Math.floor((Date.now() - new Date(iso).getTime())/86400000); }
+function _uStato(r){ if(!r.ultimo_accesso) return 'mai'; return _uGiorni(r.ultimo_accesso) <= 7 ? 'viva' : 'ferma'; }
+function _uQuando(iso){
+  if(!iso) return 'Mai entrata';
+  const g = _uGiorni(iso);
+  if(g === 0) return 'Oggi';
+  if(g === 1) return 'Ieri';
+  if(g < 30) return g + ' giorni fa';
+  return new Date(iso).toLocaleDateString('it-IT');
+}
+function _uEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function caricaUtilizzo(){
+  const box = document.getElementById('u-lista');
+  if(box) box.innerHTML = '<div class="loading">Caricamento...</div>';
+  try{
+    const res = await fetch('/.netlify/functions/admin-utilizzo', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!j.success) throw new Error(j.error || 'errore sconosciuto');
+    _utilizzo = j.data || [];
+    disegnaUtilizzo();
+  }catch(e){
+    if(box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _uEsc(e.message) + '</div>';
+  }
+}
+
+function filtraUtilizzo(f, el){
+  _utilizzoFiltro = f;
+  document.querySelectorAll('#sec-utilizzo .u-btn').forEach(b => b.classList.remove('attivo'));
+  if(el) el.classList.add('attivo');
+  disegnaUtilizzo();
+}
+
+function disegnaUtilizzo(){
+  const vive  = _utilizzo.filter(r => _uStato(r) === 'viva').length;
+  const ferme = _utilizzo.filter(r => _uStato(r) === 'ferma').length;
+  const mai   = _utilizzo.filter(r => _uStato(r) === 'mai').length;
+  const numeri = document.getElementById('u-numeri');
+  if(numeri) numeri.innerHTML =
+      '<div class="u-num"><div class="v">' + _utilizzo.length + '</div><div class="e">Imprese registrate</div></div>'
+    + '<div class="u-num verde"><div class="v">' + vive + '</div><div class="e">Attive negli ultimi 7 giorni</div></div>'
+    + '<div class="u-num giallo"><div class="v">' + ferme + '</div><div class="e">Entrate ma poi ferme</div></div>'
+    + '<div class="u-num rosso"><div class="v">' + mai + '</div><div class="e">Mai entrate nel gestionale</div></div>';
+
+  const righe = _utilizzo.filter(r => _utilizzoFiltro === 'tutte' || _uStato(r) === _utilizzoFiltro);
+  const box = document.getElementById('u-lista');
+  if(!box) return;
+  if(!righe.length){ box.innerHTML = '<div style="text-align:center;color:#5b6b80;padding:40px;font-size:16px">Nessuna impresa in questo gruppo.</div>'; return; }
+  box.innerHTML = righe.map(r => {
+    const st = _uStato(r);
+    const et = st === 'viva' ? 'La sta usando' : (st === 'ferma' ? 'Si e\' fermata' : 'Mai entrata');
+    const nome = r.nome_attivita || r.nome || 'Senza nome';
+    const prem = String(r.piano || '').toLowerCase() === 'premium' ? '<span class="u-badge">Premium</span>' : '';
+    return '<div class="u-riga ' + st + '">'
+      + '<div class="n">' + _uEsc(nome) + prem + '</div>'
+      + '<div class="s">' + _uEsc(r.tipo || '—') + ' &middot; ' + _uEsc(r.citta || 'citta non indicata') + ' &middot; ' + _uEsc(r.email || '') + '</div>'
+      + '<div class="u-stato ' + st + '">' + et + '</div>'
+      + '<div class="u-det">'
+        + '<div><div class="k">Ultima volta dentro</div><div class="v">' + _uQuando(r.ultimo_accesso) + '</div></div>'
+        + '<div><div class="k">Aperture ultimi 7 giorni</div><div class="v">' + (r.accessi_7gg || 0) + '</div></div>'
+        + '<div><div class="k">Aperture ultimi 30 giorni</div><div class="v">' + (r.accessi_30gg || 0) + '</div></div>'
+        + '<div><div class="k">Aperture totali</div><div class="v">' + (r.accessi_totali || 0) + '</div></div>'
+      + '</div></div>';
+  }).join('');
+}
+
 async function adminWrite(action, table, id, patch) {
   try {
     const res = await fetch('/.netlify/functions/admin-dati', {
