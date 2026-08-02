@@ -1697,11 +1697,23 @@
   #riepilogo .ro-testo{ font-size:17px; }
 }
 
-/* --- Dati azienda: titoletto che separa la patente a crediti dal resto,
-       cosi' il modulo non e' una colonna unica di dieci campi --- */
-.az-sez{
-  font-size:19px; font-weight:800; letter-spacing:-.2px; color:var(--testo);
-  margin:26px 0 4px; padding-top:20px; border-top:2px solid var(--bordo);
+/* --- Dati azienda: ora usa la finestra grande a due colonne, come persona,
+       lavoro e preventivo. Qui resta solo il rosso della soglia patente. --- */
+.az-rosso{ color:var(--err); font-weight:800; }
+
+/* =========================================================================
+   FINESTRE GRANDI — stesso passo per tutte e quattro
+   (Dati azienda, Persona, Lavoro, Preventivo)
+   I titoletti dei blocchi erano quasi uguali alle etichette dei campi: a
+   colpo d'occhio non si capiva dove finiva un gruppo e cominciava l'altro.
+   Ora sono piu' grandi, con una riga sotto, e i gruppi hanno piu' aria.
+   ========================================================================= */
+.sh-tit{
+  font-size:19px; letter-spacing:-.25px;
+  margin:2px 0 14px; padding-bottom:9px;
+  border-bottom:2px solid var(--bordo);
 }
-.az-sez-sub{ font-size:15px; color:var(--testo-2); line-height:1.5; margin:0 0 14px; }
-.az-sez-sub b{ color:var(--err); font-weight:800; }
+/* i titoletti cliccabili (i blocchi che si aprono e chiudono) hanno gia' il
+   loro sfondo: la riga sotto li sporcherebbe */
+.sh-tit--click{ border-bottom:none; padding-bottom:13px; }
+.sh-b{ margin-bottom:26px; }

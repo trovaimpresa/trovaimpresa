@@ -69,7 +69,7 @@
       </div>
     </div>
     <div class="tb-actions">
-      <button class="tb-btn" data-action="azienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg><span>Azienda</span></button>
+      <button class="tb-btn" data-action="azienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg><span>Dati azienda</span></button>
       <button class="tb-btn" data-action="export-json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span>Backup</span></button>
       <button class="tb-btn" data-action="export-excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Esporta</span></button>
       <button class="tb-btn tb-help" onclick="window.AI&&window.AI.apriAiuto&&window.AI.apriAiuto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span>Aiuto</span></button>
@@ -878,6 +878,14 @@
                                   d:(lavOggi[0].descrizione||"Lavoro")+(lavOggi.length>1?" e altri":""),go:"lavori"});
     if(prevFermi.length) DA.push({g:2,t:nn(prevFermi.length,"preventivo senza risposta","preventivi senza risposta"),
                                   d:"Fermi da più di una settimana: forse vanno sollecitati",go:"preventivi"});
+
+    /* dati azienda mancanti: va in cima a tutto il resto. Senza nome e partita
+       IVA i PDF di preventivi e fatture escono senza intestazione, quindi e' la
+       prima cosa da fare appena ci si iscrive. */
+    if(!AZ||!(AZ.nome||"").trim()||!(AZ.piva||"").trim()){
+      DA.unshift({g:2,t:"Completa i dati della tua azienda",
+                  d:"Nome e partita IVA compaiono in cima a ogni preventivo e fattura",act:"rie-azienda"});
+    }
 
     const ra=$("#rie-alert");
     if(ra){
@@ -2775,41 +2783,116 @@
   }
 
   let aziendaRow=null;
+
+  /* Regimi fiscali della fattura elettronica. Ne tengo pochi: sono quelli che
+     usa davvero un'impresa edile o un artigiano. Gli altri li sa il commercialista. */
+  const REGIMI=[
+    ["RF01","RF01 — Ordinario (il piu' comune)"],
+    ["RF19","RF19 — Forfettario"],
+    ["RF02","RF02 — Minimi (vecchio regime)"],
+    ["RF17","RF17 — IVA per cassa"],
+    ["RF16","RF16 — IVA per cassa verso la Pubblica Amministrazione"]
+  ];
+
+  /* L'indirizzo completo, messo insieme dai pezzi. Serve ai PDF e alla Mappa.
+     Se citta' e CAP non sono ancora compilati, resta quello che c'era prima:
+     cosi' chi ha gia' scritto tutto dentro "Via e numero" non perde niente. */
+  function azIndirizzo(a){
+    if(!a)return "";
+    const via=(a.indirizzo||"").trim();
+    const coda=[(a.cap||"").trim(),(a.citta||"").trim()].filter(Boolean).join(" ");
+    const pr=(a.prov||"").trim();
+    if(!coda&&!pr)return via;
+    return [via,coda+(pr?" ("+pr.toUpperCase()+")":"")].filter(Boolean).join(", ");
+  }
+
   async function aziendaForm(){
     aziendaRow=null;
     if(sb&&sbUid){const {data}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();aziendaRow=data||null;}
     const a=aziendaRow||{};
-    openSheet(`<h3>Dati azienda</h3>
-      <p style="font-size:13px;color:var(--muted);margin:-8px 0 14px">Compaiono in cima a ogni PDF fattura. Sono i dati dell'azienda multiservizi.</p>
-      <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||"")}" placeholder="Es. Multiservizi Rossi srl"></div>
-      <div class="field"><label>P.IVA</label><input id="a-piva" value="${esc(a.piva||"")}" placeholder="01234567890"></div>
-      <div class="field"><label>Indirizzo</label><input id="a-ind" value="${esc(a.indirizzo||"")}" placeholder="Via, numero, città"></div>
-      <div class="row2"><div class="field"><label>Telefono</label><input id="a-tel" value="${esc(a.tel||"")}"></div>
-      <div class="field"><label>Email</label><input id="a-email" value="${esc(a.email||"")}"></div></div>
-      <div class="field"><label>IBAN (per i bonifici)</label><input id="a-iban" value="${esc(a.iban||"")}" placeholder="IT.."></div>
-      <div class="field"><label>Entro quanti giorni ti devono pagare</label>
-        <input type="number" id="a-gg" inputmode="numeric" value="${a.giorni_pagamento||30}" placeholder="30">
-        <div class="campo-aiuto">Serve alle Fatture per dirti quando una fattura &egrave; scaduta. Di solito 30 giorni.</div></div>
+    const reg=a.regime_fiscale||"RF01";
+    /* Modulo lungo -> finestra grande a due colonne, come persona, lavoro e
+       preventivo. A sinistra chi sei e dove sei, a destra fisco e cantiere.
+       Sotto i 900px torna una colonna sola. */
+    openSheetGrande("Dati azienda",
+      `<div class="sh-cols"><div class="sh-col">
 
-      <h4 class="az-sez">Patente a crediti</h4>
-      <p class="az-sez-sub">Serve per lavorare in cantiere. Si parte da 30 crediti; <b>sotto 15 non si pu&ograve; operare</b>. Il Riepilogo ti avvisa gi&agrave; sotto 20, cos&igrave; hai tempo di recuperarli.</p>
-      <div class="row2">
-        <div class="field"><label>Numero patente</label><input id="a-pat-n" value="${esc(a.pat_numero||"")}" placeholder="Come sul portale INL"></div>
-        <div class="field"><label>Data di rilascio</label><input type="date" id="a-pat-d" value="${esc(a.pat_data||"")}"></div>
+      <div class="sh-b">
+        <div class="sh-tit">Chi sei</div>
+        <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||"")}" placeholder="Es. Multiservizi Rossi srl"></div>
+        <div class="row2">
+          <div class="field"><label>Partita IVA</label><input id="a-piva" value="${esc(a.piva||"")}" placeholder="01234567890"></div>
+          <div class="field"><label>Codice fiscale</label><input id="a-cf" value="${esc(a.cod_fiscale||"")}" placeholder="Se diverso dalla P.IVA"></div>
+        </div>
+        <div class="sh-nota">Compaiono in cima a ogni PDF di preventivo e fattura.</div>
       </div>
-      <div class="field"><label>Crediti attuali</label>
-        <input type="number" id="a-pat-c" inputmode="numeric" min="0" max="100" value="${a.pat_crediti!=null?a.pat_crediti:""}" placeholder="30">
-        <div class="campo-aiuto">Lascia vuoto se non la usi. Aggiornalo tu quando cambia: il gestionale non pu&ograve; leggerlo da solo dal portale.</div></div>
 
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" data-action="save-azienda">Salva</button></div>`);
+      <div class="sh-b">
+        <div class="sh-tit">Dove sei</div>
+        <div class="field"><label>Via e numero</label><input id="a-ind" value="${esc(a.indirizzo||"")}" placeholder="Es. Via Dante Alighieri, 5"></div>
+        <div class="row2">
+          <div class="field"><label>CAP</label><input id="a-cap" value="${esc(a.cap||"")}" placeholder="02100" inputmode="numeric"></div>
+          <div class="field"><label>Città</label><input id="a-citta" value="${esc(a.citta||"")}" placeholder="Rieti"></div>
+        </div>
+        <div class="field"><label>Provincia</label><input id="a-prov" value="${esc(a.prov||"")}" placeholder="RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+        <div class="sh-nota">La Mappa parte da qui per calcolare le distanze dei cantieri.</div>
+      </div>
+
+      <div class="sh-b">
+        <div class="sh-tit">Come ti trovano e come ti pagano</div>
+        <div class="row2">
+          <div class="field"><label>Telefono</label><input id="a-tel" type="tel" value="${esc(a.tel||"")}"></div>
+          <div class="field"><label>Email</label><input id="a-email" type="email" value="${esc(a.email||"")}"></div>
+        </div>
+        <div class="field"><label>IBAN (per i bonifici)</label><input id="a-iban" value="${esc(a.iban||"")}" placeholder="IT.."></div>
+        <div class="field"><label>Entro quanti giorni ti devono pagare</label>
+          <input type="number" id="a-gg" inputmode="numeric" value="${a.giorni_pagamento||30}" placeholder="30"></div>
+        <div class="sh-nota">I giorni servono alle Fatture per dirti quando una fattura è scaduta. Di solito 30.</div>
+      </div>
+
+      </div><div class="sh-col">
+
+      <div class="sh-b">
+        <div class="sh-tit">Fattura elettronica</div>
+        <div class="field"><label>Regime fiscale</label>
+          <select id="a-regime">${REGIMI.map(r=>`<option value="${r[0]}"${reg===r[0]?" selected":""}>${r[1]}</option>`).join("")}</select></div>
+        <div class="field"><label>Codice destinatario</label>
+          <input id="a-sdi" value="${esc(a.sdi_codice||"")}" placeholder="7 caratteri, oppure 0000000" maxlength="7" style="text-transform:uppercase"></div>
+        <div class="field"><label>PEC</label><input id="a-pec" type="email" value="${esc(a.sdi_pec||"")}" placeholder="nomeazienda@pec.it"></div>
+        <div class="sh-nota">Questi tre te li dà il commercialista. Non servono ancora a niente: li chiederà la fattura elettronica, che sto ancora costruendo. Compilarli adesso ti fa risparmiare tempo dopo.</div>
+      </div>
+
+      <div class="sh-b">
+        <div class="sh-tit">Patente a crediti</div>
+        <div class="row2">
+          <div class="field"><label>Numero patente</label><input id="a-pat-n" value="${esc(a.pat_numero||"")}" placeholder="Come sul portale INL"></div>
+          <div class="field"><label>Data di rilascio</label><input type="date" id="a-pat-d" value="${esc(a.pat_data||"")}"></div>
+        </div>
+        <div class="field"><label>Crediti attuali</label>
+          <input type="number" id="a-pat-c" inputmode="numeric" min="0" max="100" value="${a.pat_crediti!=null?a.pat_crediti:""}" placeholder="30" style="max-width:160px"></div>
+        <div class="sh-nota">Si parte da 30 crediti; <b class="az-rosso">sotto 15 non si può operare in cantiere</b>. Il Riepilogo ti avvisa già sotto 20, così hai tempo di recuperarli. È dell'impresa, non del singolo dipendente. Aggiornalo tu quando cambia: non si può leggere da solo dal portale.</div>
+      </div>
+
+      </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="save-azienda">Salva</button>`);
   }
   async function saveAzienda(){
     if(!sbUid){toast("Devi essere loggato");return;}
+    const v=id=>{const e=$(id);return e?String(e.value||"").trim():"";};
     const row={user_id:sbUid,
-      nome:$("#a-nome").value.trim(),piva:$("#a-piva").value.trim(),indirizzo:$("#a-ind").value.trim(),
-      tel:$("#a-tel").value.trim(),email:$("#a-email").value.trim(),iban:$("#a-iban").value.trim(),
+      nome:v("#a-nome"),piva:v("#a-piva"),indirizzo:v("#a-ind"),
+      tel:v("#a-tel"),email:v("#a-email"),iban:v("#a-iban"),
       num_fatt:(aziendaRow&&aziendaRow.num_fatt!=null)?aziendaRow.num_fatt:1};
+    /* dove sei + dati fiscali: tutti facoltativi. Vuoto = null, cosi' si puo'
+       anche svuotare un campo compilato per sbaglio. */
+    row.cod_fiscale    = v("#a-cf").toUpperCase()||null;
+    row.cap            = v("#a-cap")||null;
+    row.citta          = v("#a-citta")||null;
+    row.prov           = v("#a-prov").toUpperCase()||null;
+    row.regime_fiscale = v("#a-regime")||null;
+    row.sdi_codice     = v("#a-sdi").toUpperCase()||null;
+    row.sdi_pec        = v("#a-pec")||null;
     const gg=parseInt($("#a-gg")?$("#a-gg").value:"",10);
     if(gg>0)row.giorni_pagamento=gg;
     /* patente a crediti: campi facoltativi. Vuoto = null, cosi' si puo' anche
@@ -2824,7 +2907,8 @@
     let {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
     /* se una colonna aggiunta di recente non c'e' ancora nel database, salvo
        tutto il resto lo stesso invece di far fallire il salvataggio */
-    const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti"];
+    const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti",
+               "cod_fiscale","cap","citta","prov","regime_fiscale","sdi_codice","sdi_pec"];
     const tolte=[];
     while(error){
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);
@@ -2877,7 +2961,7 @@
     let y=20;
     doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",az.indirizzo||"",[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
     doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("FATTURA",R,y,{align:"right"});
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
@@ -3292,7 +3376,7 @@
 
       /* 1) da dove si parte: l'indirizzo dell'azienda */
       const {data:az}=await sb.from("gest_azienda").select("nome,indirizzo").eq("user_id",sbUid).maybeSingle();
-      const partenzaTxt=(az&&az.indirizzo||"").trim();
+      const partenzaTxt=azIndirizzo(az).trim();
       /* Anche senza l'indirizzo dell'ufficio la carta si vede lo stesso, con i pin
          dei cantieri: mancano solo i chilometri, perche' non c'e' da dove misurarli. */
       if(avviso)avviso.innerHTML = partenzaTxt
@@ -3942,7 +4026,7 @@
     let y=20;
     doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(az.nome,M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",az.indirizzo||"",[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
     doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("PREVENTIVO",R,y,{align:"right"});
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
@@ -4160,7 +4244,7 @@
     add("Scadenze",D.scad.map(s=>({Reparto:mN[s.mestiere_id]||"",Titolo:s.titolo||"",Tipo:s.tipo_pratica||"",Cliente:cN[s.cliente_id]||"",Mezzo:zN[s.mezzo_id]||"","Data scadenza":s.data_scadenza||"",Stato:s.stato||"",Note:s.note||""})));
     add("Mezzi",D.mezzi.map(m=>({Reparto:mN[m.mestiere_id]||"",Nome:m.nome||"",Categoria:zCat[m.categoria]||m.categoria||"","Targa / matricola":m.targa||"",Stato:zStato[m.stato]||m.stato||"",Note:m.note||""})));
     add("Mezzi per lavoro",D.lavMezzi.map(x=>({Lavoro:lN[x.lavoro_id]||"",Mezzo:zN[x.mezzo_id]||""})));
-    if(D.az)add("Dati azienda",[{Nome:D.az.nome||"","P.IVA":D.az.piva||"",Indirizzo:D.az.indirizzo||"",Telefono:D.az.tel||"",Email:D.az.email||"",IBAN:D.az.iban||""}]);
+    if(D.az)add("Dati azienda",[{Nome:D.az.nome||"","P.IVA":D.az.piva||"","Codice fiscale":D.az.cod_fiscale||"",Indirizzo:azIndirizzo(D.az),Telefono:D.az.tel||"",Email:D.az.email||"",IBAN:D.az.iban||"","Regime fiscale":D.az.regime_fiscale||"","Codice destinatario":D.az.sdi_codice||"",PEC:D.az.sdi_pec||"","Patente a crediti":D.az.pat_crediti!=null?String(D.az.pat_crediti):""}]);
     XLSX.writeFile(wb,"gestionale-trovaimpresa-"+todayStr()+".xlsx");
     toast("Dati esportati in Excel ✅");
   }
