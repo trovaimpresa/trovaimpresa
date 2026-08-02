@@ -2488,9 +2488,25 @@
     if(!(az.citta||"").trim())       m.push("Manca la città della tua sede — Dati azienda.");
     if((az.prov||"").trim()&&!/^[A-Za-z]{2}$/.test((az.prov||"").trim()))
       m.push("La provincia della tua sede deve essere di 2 lettere, es. RI — Dati azienda.");
+    /* Anche l'IBAN ha la sua prova del nove: si spostano le prime quattro
+       lettere in fondo, si trasformano le lettere in numeri, e il numerone
+       che viene fuori diviso 97 deve dare resto 1. Se una cifra e' sbagliata
+       il resto cambia. Meglio scoprirlo qui che con un bonifico perso. */
+    const ibanOk=v=>{
+      if(!/^IT\d{2}[A-Z]\d{10}[A-Z0-9]{12}$/.test(v))return false;
+      const r=v.slice(4)+v.slice(0,4);
+      let n="";
+      for(const ch of r) n += (ch>="A"&&ch<="Z") ? String(ch.charCodeAt(0)-55) : ch;
+      /* il numero e' troppo lungo per una divisione normale: si divide a pezzi */
+      let resto=0;
+      for(const ch of n) resto=(resto*10+(+ch))%97;
+      return resto===1;
+    };
     const iban=pulita(az.iban);
     if(iban&&!/^IT\d{2}[A-Z]\d{10}[A-Z0-9]{12}$/.test(iban))
-      m.push("L'IBAN non ha la forma di un IBAN italiano (IT, 2 cifre, 1 lettera, 22 caratteri) — Dati azienda. Se lo lasci vuoto la fattura si fa lo stesso, senza i dati del bonifico.");
+      m.push("L'IBAN non ha la forma di un IBAN italiano: IT, 2 cifre, 1 lettera e poi 22 caratteri, 27 in tutto — Dati azienda. Se lo lasci vuoto la fattura si fa lo stesso, senza i dati del bonifico.");
+    else if(iban&&!ibanOk(iban))
+      m.push("L'IBAN ha la forma giusta ma non è valido: la sua cifra di controllo non torna. C'è un carattere sbagliato — Dati azienda.");
 
     /* --- chi riceve: il cliente --- */
     if(!f.cliente_id)                m.push("La fattura non ha un cliente.");
