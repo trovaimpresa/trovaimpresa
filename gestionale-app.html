@@ -4208,24 +4208,32 @@
       }).then(function(){},function(){});
     }catch(_){}
   }
+  /* AGOSTO 2026 — Il gestionale e' incluso per tutti gli iscritti a TrovaImpresa.
+     Tolto l'abbonamento separato: non si controlla piu' gestionale_attivo e il
+     paywall non viene mai mostrato. showPaywall() e attivaGestionale() restano
+     definiti ma inutilizzati, per poterli riattivare in futuro senza riscrivere.
+     Qualsiasi errore di rete fa comunque entrare: nessuno resta bloccato fuori. */
   function start(){
     if(!window.supabase){return setTimeout(start,200);}
     var gc=window.supabase.createClient(SU,SK);
-    showChecking('Verifica accesso in corso…');
+    showChecking('Apertura del gestionale…');
+    var apri=function(){ hideGate(); };
     gc.auth.getSession().then(function(r){
-      var s=r.data.session;
-      if(!s){hideGate();return;}
-      gc.from('imprese').select('gestionale_attivo,gestionale_scadenza,email').eq('user_id',s.user.id).maybeSingle().then(function(res){
-        var row=res.data;
+      var s=r.data && r.data.session;
+      if(!s){apri();return;}
+      gc.from('imprese').select('email').eq('user_id',s.user.id).maybeSingle().then(function(res){
+        var row=res && res.data;
         window._gestEmail=(row&&row.email)||s.user.email||'';
-        var attivo=row&&row.gestionale_attivo&&(!row.gestionale_scadenza||new Date(row.gestionale_scadenza)>new Date());
-        registraAccesso(gc,s.user.id,window._gestEmail,attivo);
-        if(attivo){hideGate();return;}
-        var p=new URLSearchParams(location.search);
-        if(p.get('gest')==='ok'){showChecking('Pagamento ricevuto! Attivazione in corso… se non si sblocca, ricarica la pagina tra qualche secondo.');setTimeout(function(){location.reload();},6000);return;}
-        showPaywall();
+        registraAccesso(gc,s.user.id,window._gestEmail,true);
+        apri();
+      },function(){
+        window._gestEmail=s.user.email||'';
+        registraAccesso(gc,s.user.id,window._gestEmail,true);
+        apri();
       });
-    });
+    },apri);
+    /* rete lenta o bloccata: dopo 8 secondi si apre lo stesso */
+    setTimeout(apri,8000);
   }
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',start);}else{start();}
 })();
