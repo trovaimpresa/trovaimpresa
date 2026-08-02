@@ -260,7 +260,9 @@
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
   const uid=()=>"id"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n||0);
+  /* useGrouping:true e' esplicito apposta: senza, certi browser non mettono il
+     punto delle migliaia e usciva "1000,00 €" invece di "1.000,00 €". */
+  const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0,useGrouping:true}).format(n||0);
   const fdate=d=>{if(!d)return"—";const[y,m,g]=d.split("-");return g+"/"+m+"/"+y;};
   const todayStr=()=>new Date().toISOString().slice(0,10);
   const thisMonth=d=>d&&d.slice(0,7)===todayStr().slice(0,7);
@@ -3618,7 +3620,7 @@
     closeSheet();toast("Dati azienda salvati ✔");
   }
 
-  const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0)+" EUR";
+  const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0)+" EUR";
   /* Il vecchio contatore delle fatture (uno solo, sul lavoro, che non
      ripartiva mai) e' stato tolto: adesso il numero lo assegna la fattura
      quando la emetti, e riparte da 1 ogni anno. Vedi fattAssegnaNumero(). */
@@ -4417,7 +4419,7 @@
   /* ============================================================
      UPGRADE 2026 — Spese/margine, Preventivi, Report
      ============================================================ */
-  const eur2=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2}).format(+n||0);
+  const eur2=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",minimumFractionDigits:2,useGrouping:true}).format(+n||0);
 
   /* ---- SPESE / MARGINE per lavoro ---- */
   let speseLavoroId=null;
