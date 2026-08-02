@@ -2137,9 +2137,19 @@ async function eliminaLead(id) {
 }
 
 // DETTAGLIO IMPRESA
+// Alcuni profili hanno zone/mestieri salvati come testo invece che come lista,
+// oppure vuoti: con .join() diretto la finestra andava in errore e non si apriva.
+function _lista(v) {
+  if (Array.isArray(v)) return v.filter(Boolean).join(', ');
+  if (v == null || v === '') return '';
+  if (typeof v === 'string') return v;
+  try { return String(v); } catch (e) { return ''; }
+}
+
 function apriDettaglio(id) {
   const i = tutteImprese.find(x => String(x.id) === String(id));
-  if (!i) return;
+  if (!i) { alert('Non trovo questa impresa nell\'elenco. Ricarica la pagina.'); return; }
+  try {
   document.getElementById('modal-content').innerHTML = `
     <button class="modal-close" onclick="chiudiModal()">✕ Chiudi</button>
     <div class="modal-title">${esc(i.nome_attivita || (i.nome + ' ' + i.cognome))}</div>
@@ -2155,8 +2165,8 @@ function apriDettaglio(id) {
       ${i.partita_iva ? `<a href="https://www.google.com/search?q=${encodeURIComponent(i.partita_iva)}" target="_blank" style="margin-left:8px;color:#0066ff;font-weight:700;text-decoration:none">cerca 🔎</a>` : ''}</span></div>
     <div class="modal-row"><span class="modal-key">Città:</span><span class="modal-val">${esc(i.citta)||'–'} ${esc(i.cap)||''}</span></div>
     <div class="modal-row"><span class="modal-key">Indirizzo:</span><span class="modal-val">${esc(i.indirizzo)||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Zone:</span><span class="modal-val">${esc((i.zone||[]).join(', '))||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">Mestieri:</span><span class="modal-val">${esc((i.mestieri||[]).join(', '))||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Zone:</span><span class="modal-val">${esc(_lista(i.zone))||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">Mestieri:</span><span class="modal-val">${esc(_lista(i.mestieri))||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Dipendenti:</span><span class="modal-val">${esc(i.dipendenti)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Dal:</span><span class="modal-val">${esc(i.anno_fondazione)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Costo:</span><span class="modal-val">${esc(i.costo)||'–'}</span></div>
@@ -2189,6 +2199,12 @@ function apriDettaglio(id) {
     </div>` : ''}
   `;
   document.getElementById('modal-overlay').classList.add('show');
+  } catch (e) {
+    // Se un dato storto rompe la costruzione della scheda, meglio dirlo
+    // che lasciare il pulsante che non fa niente in silenzio.
+    console.error('apriDettaglio:', e);
+    alert('Non riesco a mostrare questa scheda: ' + e.message);
+  }
 }
 
 function chiudiModal() {
