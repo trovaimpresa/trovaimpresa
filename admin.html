@@ -1946,7 +1946,7 @@ function renderImprese(lista) {
       <td>${i.is_test?'<span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span><br>':''}${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
       <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
       <td>
-        ${!i.verificata ? `<button class="action-btn btn-verifica" onclick="verificaImpresa('${i.id}')">✅ Verifica</button> ` : ''}
+        ${!i.verificata ? `<button class="action-btn btn-verifica" onclick="apriDettaglio('${i.id}')">🔍 Controlla</button> ` : ''}
         <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
         <button class="action-btn btn-elimina" onclick="eliminaImpresa('${i.id}')">🗑️</button>
       </td>
@@ -2143,11 +2143,16 @@ function apriDettaglio(id) {
   document.getElementById('modal-content').innerHTML = `
     <button class="modal-close" onclick="chiudiModal()">✕ Chiudi</button>
     <div class="modal-title">${esc(i.nome_attivita || (i.nome + ' ' + i.cognome))}</div>
+    <div style="margin:-6px 0 16px">
+      <a href="https://www.google.com/search?q=${encodeURIComponent((i.nome_attivita || '') + ' ' + (i.citta || ''))}" target="_blank"
+         style="color:#0066ff;font-weight:700;font-size:14.5px;text-decoration:none">🔎 Cerca questa attività su Google</a>
+    </div>
     <div class="modal-row"><span class="modal-key">Tipo:</span><span class="modal-val">${esc(i.tipo)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Nome:</span><span class="modal-val">${esc(i.nome)} ${esc(i.cognome)}</span></div>
     <div class="modal-row"><span class="modal-key">Email:</span><span class="modal-val">${esc(i.email)}</span></div>
     <div class="modal-row"><span class="modal-key">Telefono:</span><span class="modal-val">${esc(i.telefono)||'–'}</span></div>
-    <div class="modal-row"><span class="modal-key">P.IVA / CF:</span><span class="modal-val">${esc(i.partita_iva)||'–'}</span></div>
+    <div class="modal-row"><span class="modal-key">P.IVA / CF:</span><span class="modal-val">${esc(i.partita_iva)||'–'}
+      ${i.partita_iva ? `<a href="https://www.google.com/search?q=${encodeURIComponent(i.partita_iva)}" target="_blank" style="margin-left:8px;color:#0066ff;font-weight:700;text-decoration:none">cerca 🔎</a>` : ''}</span></div>
     <div class="modal-row"><span class="modal-key">Città:</span><span class="modal-val">${esc(i.citta)||'–'} ${esc(i.cap)||''}</span></div>
     <div class="modal-row"><span class="modal-key">Indirizzo:</span><span class="modal-val">${esc(i.indirizzo)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Zone:</span><span class="modal-val">${esc((i.zone||[]).join(', '))||'–'}</span></div>
@@ -2158,7 +2163,18 @@ function apriDettaglio(id) {
     <div class="modal-row"><span class="modal-key">Descrizione:</span><span class="modal-val">${esc(i.descrizione)||'–'}</span></div>
     <div class="modal-row"><span class="modal-key">Stato:</span><span class="modal-val"><span class="badge ${i.verificata?'badge-v':'badge-att'}">${i.verificata?'✅ Verificata':'⏳ In attesa'}</span></span></div>
     <div class="modal-row"><span class="modal-key">Registrato:</span><span class="modal-val">${new Date(i.created_at).toLocaleString('it-IT')}</span></div>
-    ${!i.verificata ? `<br><button class="action-btn btn-verifica" style="width:100%;padding:12px;font-size:0.9rem" onclick="verificaImpresa('${i.id}');chiudiModal()">✅ Verifica questa impresa</button>` : ''}
+    ${!i.verificata ? `
+    <div style="margin-top:20px;padding:16px 18px;background:#f2fbf5;border:2px solid #b5e2c5;border-radius:12px">
+      <div style="font-weight:800;font-size:16px;margin-bottom:6px">Questa attività ti sembra vera?</div>
+      <div style="font-size:14.5px;color:#5b6b80;line-height:1.6;margin-bottom:12px">
+        Controlla partita IVA, telefono e città. Se ti convince, mettile il bollino: i clienti lo vedranno nelle ricerche.
+      </div>
+      <button class="action-btn btn-verifica" style="width:100%;padding:13px;font-size:0.95rem"
+        onclick="verificaImpresa('${i.id}');chiudiModal()">✅ Sì, verifica questa impresa</button>
+    </div>` : `
+    <div style="margin-top:20px;padding:14px 18px;background:#f2fbf5;border:2px solid #b5e2c5;border-radius:12px;font-weight:700">
+      ✅ Questa impresa è già verificata
+    </div>`}
     ${i.user_id ? `
     <div style="margin-top:22px;padding-top:18px;border-top:2px solid var(--border,#e2e8f0)">
       <div style="font-weight:800;font-size:16px;margin-bottom:6px">✉️ Scrivi un messaggio dentro il sito</div>
