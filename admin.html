@@ -264,18 +264,18 @@
   .u-num{background:#fff;border:2px solid var(--border,#e2e8f0);border-radius:14px;padding:20px}
   .u-num .v{font-size:2.3rem;font-weight:800;line-height:1.1}
   .u-num .e{font-size:14.5px;color:#5b6b80;margin-top:4px;line-height:1.5}
-  .u-num.verde .v{color:#1b8a3f} .u-num.giallo .v{color:#b26a00} .u-num.rosso .v{color:#b3261e}
+  .u-num.verde .v{color:#1b8a3f} .u-num.giallo .v{color:#b26a00} .u-num.rosso .v{color:#b3261e} .u-num.viola .v{color:#7b1fa2}
   .u-filtri{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
   .u-btn{font-family:inherit;font-size:14.5px;font-weight:700;padding:10px 16px;border-radius:10px;
          border:2px solid #0066ff;background:#fff;color:#0066ff;cursor:pointer}
   .u-btn.attivo{background:#0066ff;color:#fff}
   .u-riga{background:#fff;border:2px solid var(--border,#e2e8f0);border-left:9px solid #cbd5e1;
           border-radius:14px;padding:18px 20px;margin-bottom:14px}
-  .u-riga.viva{border-left-color:#1b8a3f} .u-riga.ferma{border-left-color:#b26a00} .u-riga.mai{border-left-color:#b3261e}
+  .u-riga.viva{border-left-color:#1b8a3f} .u-riga.ferma{border-left-color:#b26a00} .u-riga.mai{border-left-color:#b3261e} .u-riga.bussato{border-left-color:#7b1fa2}
   .u-riga .n{font-size:18px;font-weight:800}
   .u-riga .s{color:#5b6b80;font-size:14.5px;margin:3px 0 10px}
   .u-stato{display:inline-block;font-weight:800;font-size:14px;padding:5px 12px;border-radius:999px;margin-bottom:10px}
-  .u-stato.viva{background:#e6f6ec;color:#1b8a3f} .u-stato.ferma{background:#fdf3e3;color:#b26a00} .u-stato.mai{background:#fdecea;color:#b3261e}
+  .u-stato.viva{background:#e6f6ec;color:#1b8a3f} .u-stato.ferma{background:#fdf3e3;color:#b26a00} .u-stato.mai{background:#fdecea;color:#b3261e} .u-stato.bussato{background:#f5e9fa;color:#7b1fa2}
   .u-det{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
   .u-det > div{background:#f4f7fb;border-radius:10px;padding:12px 14px}
   .u-det .k{font-size:13px;color:#5b6b80} .u-det .v{font-size:16px;font-weight:700;margin-top:2px}
@@ -919,6 +919,7 @@
           <button class="u-btn attivo" data-uf="tutte" onclick="filtraUtilizzo('tutte',this)">Tutte</button>
           <button class="u-btn" data-uf="viva" onclick="filtraUtilizzo('viva',this)">Attive (ultimi 7 giorni)</button>
           <button class="u-btn" data-uf="ferma" onclick="filtraUtilizzo('ferma',this)">Ferme</button>
+          <button class="u-btn" data-uf="bussato" onclick="filtraUtilizzo('bussato',this)">Hanno bussato</button>
           <button class="u-btn" data-uf="mai" onclick="filtraUtilizzo('mai',this)">Mai entrate</button>
           <button class="u-btn" onclick="caricaUtilizzo()">Aggiorna</button>
         </div>
@@ -1702,7 +1703,10 @@ async function controllaStatoSistema() {
 let _utilizzo = [], _utilizzoFiltro = 'tutte';
 
 function _uGiorni(iso){ if(!iso) return null; return Math.floor((Date.now() - new Date(iso).getTime())/86400000); }
-function _uStato(r){ if(!r.ultimo_accesso) return 'mai'; return _uGiorni(r.ultimo_accesso) <= 7 ? 'viva' : 'ferma'; }
+function _uStato(r){
+  if(!r.ultimo_accesso) return (Number(r.tentativi_totali)||0) > 0 ? 'bussato' : 'mai';
+  return _uGiorni(r.ultimo_accesso) <= 7 ? 'viva' : 'ferma';
+}
 function _uQuando(iso){
   if(!iso) return 'Mai entrata';
   const g = _uGiorni(iso);
@@ -1740,12 +1744,14 @@ function filtraUtilizzo(f, el){
 function disegnaUtilizzo(){
   const vive  = _utilizzo.filter(r => _uStato(r) === 'viva').length;
   const ferme = _utilizzo.filter(r => _uStato(r) === 'ferma').length;
+  const bussa = _utilizzo.filter(r => _uStato(r) === 'bussato').length;
   const mai   = _utilizzo.filter(r => _uStato(r) === 'mai').length;
   const numeri = document.getElementById('u-numeri');
   if(numeri) numeri.innerHTML =
       '<div class="u-num"><div class="v">' + _utilizzo.length + '</div><div class="e">Imprese registrate</div></div>'
     + '<div class="u-num verde"><div class="v">' + vive + '</div><div class="e">Attive negli ultimi 7 giorni</div></div>'
     + '<div class="u-num giallo"><div class="v">' + ferme + '</div><div class="e">Entrate ma poi ferme</div></div>'
+    + '<div class="u-num viola"><div class="v">' + bussa + '</div><div class="e">Hanno bussato ma sono chiuse fuori</div></div>'
     + '<div class="u-num rosso"><div class="v">' + mai + '</div><div class="e">Mai entrate nel gestionale</div></div>';
 
   const righe = _utilizzo.filter(r => _utilizzoFiltro === 'tutte' || _uStato(r) === _utilizzoFiltro);
@@ -1754,7 +1760,7 @@ function disegnaUtilizzo(){
   if(!righe.length){ box.innerHTML = '<div style="text-align:center;color:#5b6b80;padding:40px;font-size:16px">Nessuna impresa in questo gruppo.</div>'; return; }
   box.innerHTML = righe.map(r => {
     const st = _uStato(r);
-    const et = st === 'viva' ? 'La sta usando' : (st === 'ferma' ? 'Si e\' fermata' : 'Mai entrata');
+    const et = st === 'viva' ? 'La sta usando' : (st === 'ferma' ? 'Si e\' fermata' : (st === 'bussato' ? 'Ha bussato, e chiusa fuori' : 'Mai entrata'));
     const nome = r.nome_attivita || r.nome || 'Senza nome';
     const prem = String(r.piano || '').toLowerCase() === 'premium' ? '<span class="u-badge">Premium</span>' : '';
     return '<div class="u-riga ' + st + '">'
@@ -1766,6 +1772,9 @@ function disegnaUtilizzo(){
         + '<div><div class="k">Aperture ultimi 7 giorni</div><div class="v">' + (r.accessi_7gg || 0) + '</div></div>'
         + '<div><div class="k">Aperture ultimi 30 giorni</div><div class="v">' + (r.accessi_30gg || 0) + '</div></div>'
         + '<div><div class="k">Aperture totali</div><div class="v">' + (r.accessi_totali || 0) + '</div></div>'
+        + ((Number(r.tentativi_totali)||0) > 0
+            ? '<div><div class="k">Ha bussato senza entrare</div><div class="v">' + r.tentativi_totali + ' volte &middot; ' + _uQuando(r.ultimo_tentativo) + '</div></div>'
+            : '')
       + '</div></div>';
   }).join('');
 }
