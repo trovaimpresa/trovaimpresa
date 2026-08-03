@@ -136,28 +136,11 @@
         return new Date(d).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
       };
 
-      // Inserisce i dati "stelle" leggibili da Google (schema.org AggregateRating)
-      function injettaSchemaGoogle(media, quante) {
-        if (document.getElementById("tir-ld")) return;
-        var dati = {
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          "name": "TrovaImpresa",
-          "url": "https://trovaimpresa.com",
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": media.toFixed(1),
-            "reviewCount": quante,
-            "bestRating": "5",
-            "worstRating": "1"
-          }
-        };
-        var s = document.createElement("script");
-        s.type = "application/ld+json";
-        s.id = "tir-ld";
-        s.textContent = JSON.stringify(dati);
-        document.head.appendChild(s);
-      }
+      // Il codice AggregateRating per Google e' stato tolto apposta:
+      // Google non accetta le recensioni che un sito raccoglie su se stesso
+      // per mostrare le stelline nei risultati, e in certi casi penalizza.
+      // Il riquadro delle valutazioni resta e funziona come prima.
+      function injettaSchemaGoogle() { /* volutamente vuota */ }
 
       var selected = 0;
       var rate = $("tir-rate");
