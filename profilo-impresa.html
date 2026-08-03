@@ -1117,32 +1117,51 @@ document.addEventListener('DOMContentLoaded',function(){
     wrap.scrollTop=wrap.scrollHeight;
   }
 
-  async function caricaMessaggiChat(conv){
+  let chatUltimoId=0;
+
+  async function chatRpc(nome,corpo){
+    const r=await fetch(`${SU}/rest/v1/rpc/${nome}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+      body:JSON.stringify(corpo)
+    });
+    if(!r.ok){console.error('chat '+nome+':',r.status,await r.text().catch(()=>''));return null}
+    const t=await r.text();
+    return t?JSON.parse(t):null;
+  }
+
+  async function caricaMessaggiChat(conv,soloNuovi){
     try{
-      const r=await fetch(`${SU}/rest/v1/chat_messaggi?conversation_id=eq.${encodeURIComponent(conv)}&order=created_at.asc`,{headers:{'apikey':SK}});
-      const data=await r.json();
+      const data=await chatRpc('chat_leggi',{p_conv:conv});
+      const arr=Array.isArray(data)?data:[];
       const wrap=document.getElementById('chat-messages');
-      if(wrap)wrap.innerHTML='';
-      (Array.isArray(data)?data:[]).forEach(renderMessaggioChat);
+      if(!soloNuovi){
+        if(wrap)wrap.innerHTML='';
+        chatUltimoId=0;
+      }
+      arr.forEach(m=>{
+        const mid=Number(m.id)||0;
+        if(mid>chatUltimoId){renderMessaggioChat(m);chatUltimoId=mid}
+      });
     }catch(e){console.error(e)}
   }
 
+  let chatTimer=null;
+
   function sottoscriviRealtimeChat(conv){
-    if(chatChannel)sc.removeChannel(chatChannel);
-    chatChannel=sc.channel('chat_messaggi_'+conv)
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messaggi',filter:`conversation_id=eq.${conv}`},payload=>{
-        renderMessaggioChat(payload.new);
-      })
-      .subscribe();
+    if(chatTimer)clearInterval(chatTimer);
+    chatTimer=setInterval(()=>{
+      if(document.hidden)return;
+      caricaMessaggiChat(conv,true);
+    },5000);
   }
 
   async function clienteBloccato(email){
     const id=getImpresaId();
     if(!email)return false;
     try{
-      const r=await fetch(`${SU}/rest/v1/chat_bloccati?impresa_id=eq.${id}&cliente_email=eq.${encodeURIComponent(email)}`,{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
-      const data=await r.json();
-      return Array.isArray(data)&&data.length>0;
+      const data=await chatRpc('chat_bloccato',{p_impresa_id:Number(id),p_email:email});
+      return data===true;
     }catch(e){console.error(e);return false}
   }
 
@@ -1186,11 +1205,14 @@ document.addEventListener('DOMContentLoaded',function(){
     const clienteEmail=localStorage.getItem('chat_'+id+'_email')||'';
     input.value='';
     try{
-      await fetch(`${SU}/rest/v1/chat_messaggi`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK,'Prefer':'return=minimal'},
-        body:JSON.stringify({conversation_id:conv,impresa_id:Number(id),cliente_nome:clienteNome,cliente_email:clienteEmail,testo,mittente:'cliente'})
+      await chatRpc('chat_invia',{
+        p_conv:conv,
+        p_impresa_id:Number(id),
+        p_nome:clienteNome,
+        p_email:clienteEmail,
+        p_testo:testo
       });
+      await caricaMessaggiChat(conv,true);
     }catch(e){console.error(e)}
   };
 
@@ -1200,11 +1222,9 @@ document.addEventListener('DOMContentLoaded',function(){
     const conv=localStorage.getItem('chat_'+id);
     if(!conv)return;
     try{
-      const res=await fetch(`${SU}/rest/v1/chat_messaggi?conversation_id=eq.${encodeURIComponent(conv)}`,{
-        method:'DELETE',
-        headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Prefer':'return=minimal'}
-      });
-      if(!res.ok){console.error('Eliminazione conversazione fallita:',res.status,await res.text());return}
+      await chatRpc('chat_elimina',{p_conv:conv});
+      if(chatTimer){clearInterval(chatTimer);chatTimer=null}
+      chatUltimoId=0;
       localStorage.removeItem('chat_'+id);
       localStorage.removeItem('chat_'+id+'_nome');
       localStorage.removeItem('chat_'+id+'_email');
