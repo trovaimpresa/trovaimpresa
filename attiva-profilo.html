@@ -103,11 +103,10 @@
       return;
     }
 
-    const { data: lead, error } = await sb
-      .from('lead_imprese')
-      .select('*')
-      .ilike('email', emailParam)
-      .maybeSingle();
+    /* Non si legge piu' la tabella dei lead: si passa da una funzione che
+       restituisce SOLO il lead di cui conosci l'email esatta. */
+    const { data: trovati, error } = await sb.rpc('lead_per_email', { p_email: emailParam });
+    const lead = Array.isArray(trovati) ? trovati[0] : trovati;
 
     if (error || !lead) {
       content.innerHTML = `<div class="not-found-wrap"><div class="icon">🔍</div><p>Nessun lead trovato per l'email <strong>${emailParam}</strong>.<br>Contatta l'amministratore.</p></div>`;
@@ -258,7 +257,7 @@
       }
 
       // 2. Aggiorna stato lead ad "attivato"
-      await sb.from('lead_imprese').update({ stato: 'attivato' }).eq('id', leadId);
+      await sb.rpc('lead_segna_attivato', { p_id: String(leadId), p_email: email });
 
       // 3. Successo
       document.getElementById('main-content').innerHTML = `

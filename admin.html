@@ -2331,8 +2331,19 @@ async function eliminaSubappalto(id) {
 async function caricaLead() {
   const tbody = document.getElementById('table-lead');
   tbody.innerHTML = '<tr><td colspan="7" class="loading">Caricamento...</td></tr>';
-  const { data, error } = await sb.from('lead_imprese').select('*').order('created_at', { ascending: false });
-  if (error) {
+  /* I lead non sono piu' leggibili da fuori: si passa dalla funzione admin,
+     che usa la chiave segreta. Stessa lista di prima, porta diversa. */
+  let data = null;
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'list', table: 'lead_imprese' })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.error || 'errore');
+    data = json.data;
+  } catch (e) {
     tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
     return;
   }
