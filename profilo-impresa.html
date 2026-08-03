@@ -812,6 +812,7 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 });
 
+function recEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
 async function caricaRecensioni(id){
   try{
     const r=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&order=created_at.desc&limit=10`,{headers:{'apikey':SK}});
@@ -820,7 +821,7 @@ async function caricaRecensioni(id){
     if(!data||!data.length){
       let nomeImpresa=(document.getElementById('profile-name')?.textContent||'').trim();
       if(!nomeImpresa||nomeImpresa==='Caricamento...')nomeImpresa='questa impresa';
-      div.innerHTML=`<div class="rec-empty"><div class="rec-empty-icon">⭐</div><div class="rec-empty-title">Sii il primo a recensire ${nomeImpresa}</div><p class="rec-empty-sub">Hai lavorato con questa impresa? Racconta la tua esperienza e aiuta gli altri clienti.</p><button class="btn-rec rec-empty-btn" onclick="showRecTab('form',document.getElementById('tab-btn-form'))">✍️ Lascia una recensione</button></div>`;
+      div.innerHTML=`<div class="rec-empty"><div class="rec-empty-icon">⭐</div><div class="rec-empty-title">Sii il primo a recensire ${recEsc(nomeImpresa)}</div><p class="rec-empty-sub">Hai lavorato con questa impresa? Racconta la tua esperienza e aiuta gli altri clienti.</p><button class="btn-rec rec-empty-btn" onclick="showRecTab('form',document.getElementById('tab-btn-form'))">✍️ Lascia una recensione</button></div>`;
       return;
     }
     const piano=(window._pianoImpresa||'free').toLowerCase();
@@ -830,10 +831,10 @@ async function caricaRecensioni(id){
       const media=[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita].filter(Boolean);
       const avg=media.length?(media.reduce((a,b)=>a+b,0)/media.length).toFixed(1):'-';
       const st='★'.repeat(Math.round(parseFloat(avg)))+'☆'.repeat(5-Math.round(parseFloat(avg)));
-      const quando=[r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' ');
+      const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
       const voti=[['⭐ Qualità',r.stelle_qualita],['⏱️ Puntualità',r.stelle_puntualita],['💰 Prezzo',r.stelle_prezzo],['🤝 Professionalità',r.stelle_professionalita]];
       const votiHtml=voti.map(([lbl,v])=>{const n=parseInt(v)||0;const stars=n?'★'.repeat(n)+'☆'.repeat(5-n):'—';return`<div class="rec-voto-box"><div class="rv-lbl">${lbl}</div><div class="rv-st">${stars}</div></div>`}).join('');
-      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${r.nome_cliente||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${r.testo||''}</p></div>`;
+      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p></div>`;
     }).join('');
     if(isFree&&data.length>3){div.innerHTML+=`<div style="margin-top:14px;padding:12px 14px;background:#fff8e1;border-left:3px solid #f5a623;border-radius:6px;font-size:13px;color:#666">📌 ${data.length} recensioni totali, solo le 3 più recenti sono visibili sul piano Free</div>`;}
   }catch(e){console.error(e)}
