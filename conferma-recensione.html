@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conferma recensione — TrovaImpresa</title>
+<style>
+  body{margin:0;background:#f5f8fc;color:#12233a;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:18px;line-height:1.7}
+  nav{background:#1a2f47;padding:16px 22px}
+  nav a{color:#fff;text-decoration:none;font-weight:800;font-size:19px}
+  .wrap{max-width:620px;margin:0 auto;padding:40px 22px 80px}
+  .card{background:#fff;border:2px solid #dbe2ec;border-radius:18px;padding:34px 30px;text-align:center}
+  .ico{font-size:56px;line-height:1;margin-bottom:14px}
+  h1{font-size:1.6rem;margin:0 0 14px;line-height:1.3}
+  p{margin:0 0 16px}
+  .bollino{display:inline-block;background:#e6f6ec;color:#1b8a3f;font-weight:800;padding:8px 16px;border-radius:999px;margin:8px 0 4px}
+  .btn{display:inline-block;margin-top:18px;background:#0066ff;color:#fff;text-decoration:none;font-weight:800;padding:15px 26px;border-radius:10px;font-size:17px}
+  .sotto{color:#5b6b80;font-size:16px}
+</style>
+</head>
+<body>
+<nav><a href="/">TrovaImpresa</a></nav>
+<div class="wrap">
+  <div class="card" id="box">
+    <div class="ico">⏳</div>
+    <h1>Un attimo…</h1>
+    <p class="sotto">Sto pubblicando la tua recensione.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  function mostra(ico, titolo, testo, bollino, link){
+    document.getElementById('box').innerHTML =
+      '<div class="ico">'+ico+'</div>'+
+      '<h1>'+titolo+'</h1>'+
+      (bollino?'<div class="bollino">✅ Recensione verificata</div>':'')+
+      '<p class="sotto">'+testo+'</p>'+
+      (link?'<a class="btn" href="'+link+'">Vedi la recensione</a>':'<a class="btn" href="/">Torna al sito</a>');
+  }
+
+  var t = new URLSearchParams(location.search).get('t') || '';
+  if(!t){ mostra('⚠️','Link incompleto','Apri il link direttamente dall\'email che ti abbiamo mandato.',false,null); return; }
+
+  fetch('/.netlify/functions/recensione-conferma',{
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({t:t})
+  })
+  .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+  .then(function(res){
+    if(res.ok && res.d.ok){
+      mostra('🎉','Recensione pubblicata!',
+        res.d.verificata
+          ? 'Grazie. Abbiamo trovato la tua richiesta a questa impresa su TrovaImpresa, quindi la tua recensione ha il bollino di verificata.'
+          : 'Grazie, la tua recensione e ora online sul profilo dell\'impresa.',
+        res.d.verificata,
+        res.d.impresa_id ? '/profilo-impresa.html?id='+encodeURIComponent(res.d.impresa_id) : null);
+    } else {
+      mostra('⚠️','Non ha funzionato', (res.d && (res.d.messaggio || res.d.error)) || 'Riprova fra poco.', false, null);
+    }
+  })
+  .catch(function(){ mostra('⚠️','Non ha funzionato','Controlla la connessione e riprova.',false,null); });
+})();
+</script>
+</body>
+</html>

@@ -305,6 +305,7 @@ nav img{height:36px}
 }
 
 /* CHAT CON L'IMPRESA */
+.rec-verif{display:inline-block;background:#e6f6ec;color:#1b8a3f;font-weight:800;font-size:12px;padding:3px 10px;border-radius:999px;margin-left:8px;vertical-align:middle}
 .chat-box{display:flex;flex-direction:column;gap:12px}
 .chat-field{display:flex;flex-direction:column;gap:4px}
 .chat-field label{font-size:15px;font-weight:600;color:#555}
@@ -815,8 +816,12 @@ document.addEventListener('DOMContentLoaded',function(){
 function recEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
 async function caricaRecensioni(id){
   try{
-    const r=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&order=created_at.desc&limit=10`,{headers:{'apikey':SK}});
-    const data=await r.json();const div=document.getElementById('rec-lista');
+    const r=await fetch(`${SU}/rest/v1/rpc/recensioni_pubbliche`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+      body:JSON.stringify({p_impresa_id:parseInt(id)})
+    });
+    const rj=await r.json();const data=Array.isArray(rj)?rj:[];const div=document.getElementById('rec-lista');
     const ce=document.getElementById('rec-count');if(ce)ce.textContent=data?.length||0;
     if(!data||!data.length){
       let nomeImpresa=(document.getElementById('profile-name')?.textContent||'').trim();
@@ -834,7 +839,7 @@ async function caricaRecensioni(id){
       const quando=recEsc([r.mese_lavoro,r.anno_lavoro].filter(Boolean).join(' '));
       const voti=[['⭐ Qualità',r.stelle_qualita],['⏱️ Puntualità',r.stelle_puntualita],['💰 Prezzo',r.stelle_prezzo],['🤝 Professionalità',r.stelle_professionalita]];
       const votiHtml=voti.map(([lbl,v])=>{const n=parseInt(v)||0;const stars=n?'★'.repeat(n)+'☆'.repeat(5-n):'—';return`<div class="rec-voto-box"><div class="rv-lbl">${lbl}</div><div class="rv-st">${stars}</div></div>`}).join('');
-      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p></div>`;
+      return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p></div>`;
     }).join('');
     if(isFree&&data.length>3){div.innerHTML+=`<div style="margin-top:14px;padding:12px 14px;background:#fff8e1;border-left:3px solid #f5a623;border-radius:6px;font-size:13px;color:#666">📌 ${data.length} recensioni totali, solo le 3 più recenti sono visibili sul piano Free</div>`;}
   }catch(e){console.error(e)}
@@ -850,12 +855,15 @@ async function inviaRecensione(){
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
     const p=new URLSearchParams(window.location.search);const iid=p.get('id');
-    const ah={'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+(session?session.access_token:SK),'Prefer':'return=minimal'};
-    const dati={impresa_id:parseInt(iid),nome_cliente:nome,email_cliente:email,testo:document.getElementById('rec-testo').value.trim(),stelle_qualita:vS.qualita||null,stelle_puntualita:vS.puntualita||null,stelle_prezzo:vS.prezzo||null,stelle_professionalita:vS.professionalita||null,mese_lavoro:document.getElementById('rec-mese').value||null,anno_lavoro:parseInt(document.getElementById('rec-anno').value)||null,created_at:new Date().toISOString()};
-    const res=await fetch(`${SU}/rest/v1/feedback_clienti`,{method:'POST',headers:ah,body:JSON.stringify(dati)});
-    if(res.ok){mostraMsg('✅ Recensione pubblicata!','ok');caricaRecensioni(iid);}
-    else if(res.status===409){mostraMsg('⚠️ Hai già lasciato una recensione per questa impresa','warn');}
-    else{mostraMsg("❌ Errore durante l'invio. Riprova",'err');}
+    const dati={impresa_id:parseInt(iid),nome_cliente:nome,email_cliente:email,testo:document.getElementById('rec-testo').value.trim(),stelle_qualita:vS.qualita||null,stelle_puntualita:vS.puntualita||null,stelle_prezzo:vS.prezzo||null,stelle_professionalita:vS.professionalita||null,mese_lavoro:document.getElementById('rec-mese').value||null,anno_lavoro:parseInt(document.getElementById('rec-anno').value)||null};
+    const res=await fetch('/.netlify/functions/recensione-invia',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(dati)});
+    const out=await res.json().catch(()=>({}));
+    if(res.ok&&out.ok){
+      mostraMsg('📧 Ti abbiamo mandato una email a '+email+'. Apri la casella e clicca il link: la recensione va online subito dopo.','ok');
+      document.getElementById('rec-testo').value='';
+    }
+    else if(out.gia){mostraMsg('⚠️ '+out.messaggio,'warn');}
+    else{mostraMsg('❌ '+(out.error||"Errore durante l'invio. Riprova"),'err');}
   }catch(e){mostraMsg("❌ Errore durante l'invio. Riprova",'err')}
   btn.disabled=false;btn.textContent='⭐ Pubblica recensione';
 }
