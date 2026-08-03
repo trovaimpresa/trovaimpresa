@@ -3100,12 +3100,15 @@
     if(!cur){box.innerHTML="";return;}
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">🚚</div><p>Nessun mezzo</p><small>Accedi per gestire mezzi e attrezzature</small></div>`;return;}
     const mid=curMestiere();
-    const [{data:mz},{data:vw}]=await Promise.all([
+    const [{data:mz},{data:vw},{data:cb}]=await Promise.all([
       sb.from("gest_mezzi").select("id,nome,categoria,targa,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
-      sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid)
+      sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid),
+      /* i totali carburante: se la tabella non c'e' ancora, cb resta vuoto e non cambia niente */
+      sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid)
     ]);
     mezziCache=mz||[];
     const scadMap=Object.fromEntries((vw||[]).map(v=>[v.mezzo_id,v]));
+    carbMap=Object.fromEntries((cb||[]).map(v=>[v.mezzo_id,v]));
     const filtra=(A,v)=>v==="tutti"?A.slice():(v==="manutenzione"?A.filter(m=>m.stato==="manutenzione"):A.filter(m=>m.categoria===v));
     const conta={};MEZZI_VISTE.forEach(v=>conta[v.k]=filtra(mezziCache,v.k).length);
     const L=filtra(mezziCache,mezziFilter);
@@ -3132,6 +3135,7 @@
             cellaScadenza(scadMap[m.id])
           ],
           menu:[
+            {lab:"⛽ Rifornimenti",action:"mezzo-rifornimenti",data:{id:m.id}},
             {lab:"📅 Aggiungi scadenza",action:"mezzo-scad",data:{id:m.id}},
             {sep:true},
             {lab:"✏ Modifica",action:"edit-mezzo",data:{id:m.id}},
@@ -3142,6 +3146,7 @@
       cards:()=>L.map(m=>mezzoCard(m,scadMap[m.id])).join("")
     });
   }
+  let carbMap={};
   const MEZZI_VISTE=[{k:"tutti",lab:"Tutti"},{k:"mezzo",lab:"Mezzi"},{k:"attrezzatura",lab:"Attrezzature"},{k:"manutenzione",lab:"In manutenzione"}];
   /* colonna "Prossima scadenza": il tipo sopra, il quando sotto.
      Rosso se e' gia' passata, ambra se casca entro 30 giorni: prima il rosso
@@ -3172,12 +3177,17 @@
       if(g<=7)tono="t-attesa";
       scTesto=`<span style="color:${g<=7?"var(--attesa)":"var(--muted)"};font-weight:${g<=7?"700":"400"}">📅 ${esc(eti)} ${quando}</span>`;
     }else{ tono="t-neutro"; }
+    const cb=carbMap[m.id];
+    const carbTesto=cb&&(+cb.spesa_totale)>0
+      ? "⛽ "+eur2(cb.spesa_totale)+(cb.km_litro?" · "+String(cb.km_litro).replace(".",",")+" km/l":"")
+      : "";
     return schedaJob({
       tono, titolo:esc(m.nome),
       destra:`<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
-      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", scTesto],
+      meta:[cat, m.targa?"🔖 "+esc(m.targa):"", carbTesto, scTesto],
       nota:m.note?"📝 "+esc(m.note):"",
       azioni:[
+        {lab:"⛽ Rifornimenti",action:"mezzo-rifornimenti",data:{id:m.id}},
         {lab:"＋ Scadenza",action:"mezzo-scad",data:{id:m.id}},
         {lab:"✏ Modifica",action:"edit-mezzo",data:{id:m.id}},
         {lab:"🗑 Elimina",action:"del-mezzo",data:{id:m.id},del:true}
@@ -3363,6 +3373,159 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
     renderMovimentiCarta();renderCarte();toast("Movimento eliminato");
+  }
+
+
+  /* ============================================================
+     RIFORNIMENTI — un pieno per riga, agganciato al MEZZO.
+     Le carte restano quello che sono (il portafoglio del dipendente):
+     quando si paga con la carta creiamo anche il movimento di spesa e ci
+     teniamo il suo id in movimento_id, cosi' se cancelli il rifornimento
+     sparisce anche dalla carta e il saldo resta giusto.
+     Tabella: gest_rifornimenti + vista gest_mezzi_carburante.
+     ============================================================ */
+  let rifMezzoId=null, rifCache=[], rifCarte=[], rifOperatori=[];
+  const RIF_PAG={carta:{lab:"Carta aziendale",ic:"💳"},buono:{lab:"Buono del distributore",ic:"🎟️"},contanti:{lab:"Contanti",ic:"💶"}};
+
+  async function apriRifornimenti(mezzoId){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    rifMezzoId=mezzoId;
+    const m=mezziCache.find(x=>String(x.id)===String(mezzoId))||{};
+    const mid=curMestiere();
+    const [{data:ct},{data:op}]=await Promise.all([
+      sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).order("nome")
+    ]);
+    rifCarte=ct||[]; rifOperatori=op||[];
+    const optCarte=rifCarte.map(c=>`<option value="${c.id}">${esc(c.nome)}</option>`).join("");
+    const optChi=`<option value="">— chi ha fatto il pieno —</option>`+rifOperatori.map(o=>`<option value="${o.id}">${esc(o.nome)}</option>`).join("");
+    const optPag=Object.keys(RIF_PAG).map(k=>`<option value="${k}">${RIF_PAG[k].ic} ${RIF_PAG[k].lab}</option>`).join("");
+    openSheetGrande(`⛽ Rifornimenti — ${esc(m.nome||"Mezzo")}`,
+      `<div id="rf-riassunto" style="margin-bottom:22px"></div>
+      <div style="background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:22px">
+        <div style="font-weight:700;color:#0a2a4d;margin-bottom:14px;font-size:1.1rem">➕ Nuovo pieno</div>
+        <div class="row2">
+          <div class="field"><label style="font-size:1rem">Giorno</label><input type="date" id="rf-data" value="${todayStr()}" style="font-size:1.05rem;padding:10px"></div>
+          <div class="field"><label style="font-size:1rem">Quanto hai speso (€)</label><input type="number" id="rf-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px"></div>
+        </div>
+        <div class="field"><label style="font-size:1rem">Come hai pagato</label><select id="rf-pag" style="font-size:1.05rem;padding:10px">${optPag}</select></div>
+        <div class="field" id="rf-carta-box"><label style="font-size:1rem">Con quale carta</label>
+          <select id="rf-carta" style="font-size:1.05rem;padding:10px">${optCarte||'<option value="">Nessuna carta registrata</option>'}</select>
+          <small style="color:var(--testo-2)">La carta si scala da sola: non riscriverlo nei movimenti.</small></div>
+        <div class="row2">
+          <div class="field"><label style="font-size:1rem">Distributore</label><input id="rf-distr" placeholder="Es. Q8 via Salaria" style="font-size:1.05rem;padding:10px"></div>
+          <div class="field"><label style="font-size:1rem">Chi</label><select id="rf-chi" style="font-size:1.05rem;padding:10px">${optChi}</select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label style="font-size:1rem">Litri <span style="color:var(--testo-2);font-weight:400">(se vuoi)</span></label><input type="number" id="rf-litri" inputmode="decimal" placeholder="—" style="font-size:1.05rem;padding:10px"></div>
+          <div class="field"><label style="font-size:1rem">Chilometri <span style="color:var(--testo-2);font-weight:400">(se vuoi)</span></label><input type="number" id="rf-km" inputmode="numeric" placeholder="—" style="font-size:1.05rem;padding:10px"></div>
+        </div>
+        <small style="color:var(--testo-2);display:block;margin-bottom:12px">Litri e chilometri servono solo per sapere quanti km fa con un litro. Se hai fretta lasciali vuoti.</small>
+        <button class="btn btn-primary" style="width:100%;font-size:1.05rem;padding:12px" data-action="save-rifornimento">+ Registra il pieno</button>
+      </div>
+      <div id="rf-lista" style="font-size:1.05rem"></div>`,
+      `<button class="btn b-cancel" data-action="close">Chiudi</button>`);
+    const sel=$("#rf-pag");
+    if(sel)sel.addEventListener("change",rifMostraCarta);
+    rifMostraCarta();
+    renderRifornimenti();
+  }
+
+  function rifMostraCarta(){
+    const box=$("#rf-carta-box"), sel=$("#rf-pag");
+    if(box&&sel)box.style.display=(sel.value==="carta")?"":"none";
+  }
+
+  async function renderRifornimenti(){
+    const lista=$("#rf-lista"), box=$("#rf-riassunto");
+    if(!lista||!rifMezzoId)return;
+    const [{data:rf},{data:tot}]=await Promise.all([
+      sb.from("gest_rifornimenti").select("id,data,pagamento,distributore,operatore_id,importo,litri,km,movimento_id")
+        .eq("mezzo_id",rifMezzoId).order("data",{ascending:false}).order("id",{ascending:false}),
+      sb.from("gest_mezzi_carburante").select("*").eq("mezzo_id",rifMezzoId).maybeSingle()
+    ]);
+    rifCache=rf||[];
+    const t=tot||{};
+    if(box){
+      const kml=t.km_litro?`<div><div style="font-size:0.85rem;color:var(--testo-2)">Km con un litro</div><div style="font-weight:700;font-size:1.4rem">${String(t.km_litro).replace(".",",")}</div></div>`:"";
+      const buoni=(+t.spesa_buoni||0)>0?`<div><div style="font-size:0.85rem;color:var(--testo-2)">Di cui con buoni</div><div style="font-weight:700;font-size:1.4rem">${eur2(t.spesa_buoni)}</div></div>`:"";
+      box.innerHTML=rifCache.length
+        ?`<div style="display:flex;gap:26px;flex-wrap:wrap;background:#f4f8ff;border:1px solid var(--border);border-radius:12px;padding:18px">
+            <div><div style="font-size:0.85rem;color:var(--testo-2)">Speso in tutto</div><div style="font-weight:700;font-size:1.4rem">${eur2(t.spesa_totale)}</div></div>
+            <div><div style="font-size:0.85rem;color:var(--testo-2)">Pieni fatti</div><div style="font-weight:700;font-size:1.4rem">${t.rifornimenti||rifCache.length}</div></div>
+            ${buoni}${kml}
+          </div>`
+        :"";
+    }
+    if(!rifCache.length){
+      lista.innerHTML='<div style="color:#999;text-align:center;padding:18px">Nessun pieno registrato per questo mezzo</div>';
+      return;
+    }
+    const fmtData=d=>d?new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
+    const chi=id=>{const o=rifOperatori.find(x=>String(x.id)===String(id));return o?o.nome:""};
+    lista.innerHTML=rifCache.map(r=>{
+      const p=RIF_PAG[r.pagamento]||RIF_PAG.contanti;
+      const sotto=[fmtData(r.data),p.ic+" "+p.lab,r.distributore?esc(r.distributore):"",chi(r.operatore_id)?"👷 "+esc(chi(r.operatore_id)):""].filter(Boolean).join(" · ");
+      const extra=[r.litri?String(r.litri).replace(".",",")+" litri":"", r.km?Number(r.km).toLocaleString("it-IT")+" km":""].filter(Boolean).join(" · ");
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+        <div style="min-width:0">
+          <div style="font-weight:600;color:#0a2a4d">${eur2(r.importo)}${extra?' <span style="font-weight:400;color:var(--testo-2)">— '+extra+'</span>':''}</div>
+          <div style="font-size:0.85rem;color:#999">${sotto}</div>
+        </div>
+        <button data-action="del-rifornimento" data-id="${r.id}" title="Elimina" style="background:transparent;border:none;cursor:pointer;color:#c0392b;font-size:1.1rem">🗑️</button>
+      </div>`;
+    }).join("");
+  }
+
+  async function salvaRifornimento(){
+    if(!rifMezzoId||!sbUid){toast("Devi essere loggato");return;}
+    const importo=+$("#rf-importo").value;
+    if(!importo||importo<=0){toast("Scrivi quanto hai speso");return;}
+    const pagamento=$("#rf-pag").value;
+    const carta_id=(pagamento==="carta")?($("#rf-carta").value||null):null;
+    if(pagamento==="carta"&&!carta_id){toast("Scegli con quale carta hai pagato");return;}
+    const data=$("#rf-data").value||todayStr();
+    const distributore=$("#rf-distr").value.trim()||null;
+    const operatore_id=$("#rf-chi").value||null;
+    const litri=$("#rf-litri").value?+$("#rf-litri").value:null;
+    const km=$("#rf-km").value?parseInt($("#rf-km").value,10):null;
+    const mezzoNome=(mezziCache.find(x=>String(x.id)===String(rifMezzoId))||{}).nome||"Mezzo";
+
+    /* se ha pagato con la carta, la carta si scala qui: un posto solo */
+    let movimento_id=null;
+    if(carta_id){
+      const {data:mv,error:e1}=await sb.from("gest_carte_movimenti").insert({
+        user_id:sbUid,carta_id,tipo:"spesa",importo,data,
+        causale:"⛽ "+mezzoNome+(distributore?" · "+distributore:""),inserito_da:"Capo"
+      }).select("id");
+      if(e1){toast("Errore: "+e1.message);return;}
+      movimento_id=(mv&&mv[0])?mv[0].id:null;
+    }
+    const {error}=await sb.from("gest_rifornimenti").insert({
+      user_id:sbUid,mestiere_id:curMestiere(),mezzo_id:rifMezzoId,data,pagamento,
+      carta_id,movimento_id,distributore,operatore_id,importo,litri,km
+    });
+    if(error){
+      /* se il rifornimento non entra, tolgo anche il movimento appena creato:
+         mai lasciare la carta scalata per un pieno che non esiste */
+      if(movimento_id)await sb.from("gest_carte_movimenti").delete().eq("id",movimento_id).eq("user_id",sbUid);
+      toast("Errore: "+error.message);return;
+    }
+    ["#rf-importo","#rf-litri","#rf-km","#rf-distr"].forEach(s=>{const el=$(s);if(el)el.value="";});
+    toast("Pieno registrato ✔");
+    renderRifornimenti();renderMezzi();
+    if(carta_id)renderCarte();
+  }
+
+  async function eliminaRifornimento(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(!gconfirm("Eliminare questo pieno?"))return;
+    const r=rifCache.find(x=>String(x.id)===String(id));
+    const {data,error}=await sb.from("gest_rifornimenti").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
+    if(r&&r.movimento_id){await sb.from("gest_carte_movimenti").delete().eq("id",r.movimento_id).eq("user_id",sbUid);renderCarte();}
+    renderRifornimenti();renderMezzi();toast("Pieno eliminato");
   }
 
   /* ---- mezzi usati su un lavoro (gest_lavoro_mezzi): si salva subito,
@@ -5555,6 +5718,9 @@
     if(a==="carta-dettaglio")return apriDettaglioCarta(id);
     if(a==="save-movimento")return salvaMovimentoCarta();
     if(a==="del-movimento")return eliminaMovimentoCarta(id);
+    if(a==="mezzo-rifornimenti")return apriRifornimenti(id);
+    if(a==="save-rifornimento")return salvaRifornimento();
+    if(a==="del-rifornimento")return eliminaRifornimento(id);
     if(a==="lm-add")return mezzoLavoroAdd();
     if(a==="lm-del"){
       if(!sbUid){toast("Devi essere loggato");return;}
