@@ -48,6 +48,7 @@
       <button data-tab="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span>Agenda operatore</span></button>
       <div class="side-group">Azienda</div>
       <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
+      <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Attrezzature</button>
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
       <button data-tab="carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Carte</span></button>
       <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Condomini</span></button>
@@ -188,10 +189,17 @@
     </section>
 
     <section id="mezzi">
-      <div class="sec-head"><h2>Mezzi e attrezzature</h2><button class="btn add" data-action="new-mezzo">+ Nuovo</button></div>
-      <div class="gal-intro">Furgoni, escavatori, ponteggi, trapani: qui c'è tutto quello che usi in cantiere, con lo stato e le scadenze (revisione, bollo, tagliando, assicurazione).</div>
+      <div class="sec-head"><h2>Mezzi</h2><button class="btn add" data-action="new-mezzo">+ Nuovo mezzo</button></div>
+      <div class="gal-intro">Furgoni, escavatori, auto: quello che si guida e ha una targa. Con lo stato, le scadenze (revisione, bollo, tagliando, assicurazione) e i rifornimenti.</div>
       <div class="viste" id="mezzi-viste"></div>
       <div class="grid" id="mezzi-list"></div>
+    </section>
+
+    <section id="attrezzature">
+      <div class="sec-head"><h2>Attrezzature</h2><button class="btn add" data-action="new-attrezzatura">+ Nuova attrezzatura</button></div>
+      <div class="gal-intro">Ponteggi, betoniere, trabattelli, trapani: quello che non si guida. Con lo stato e le scadenze delle verifiche periodiche.</div>
+      <div class="viste" id="attr-viste"></div>
+      <div class="grid" id="attr-list"></div>
     </section>
 
     <section id="carte">
@@ -645,7 +653,7 @@
     galFilter={op:"",tipo:"",media:"",lav:""};segmOn("#gal-tipo","");segmOn("#gal-media","");
     mpVista="aperti";segmOn("#mp-vista","aperti");if(mpLayer){try{mpLayer.remove();}catch(e){}mpLayer=null;}
     agFilter={op:"",stato:"aperti"};segmOn("#ag-stato","aperti");
-    mezziFilter="tutti";
+    mezziFilter="tutti";attrezzFilter="tutti";
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
     renderAll();window.scrollTo(0,0);
@@ -664,7 +672,7 @@
 
   /* controllo segmentato (Agenda "Mostra", Galleria tipo foto): un solo pulsante acceso */
   function segmOn(sel,v){$$(sel+" button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));}
-  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderMezzi();renderCarte();renderScadenze();renderPreventivi();renderReport();renderContatori();}
+  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderMezzi();renderAttrezzature();renderCarte();renderScadenze();renderPreventivi();renderReport();renderContatori();}
 
   /* ============================================================
      CONTATORI DEL MENU (tappa 2)
@@ -3104,13 +3112,14 @@
     manutenzione:{lab:"In manutenzione",bg:"var(--attesa-bg)",fg:"var(--attesa)"},
     fuori_uso:{lab:"Fuori uso",bg:"var(--sfondo)",fg:"var(--testo-2)"}
   };
-  let mezziCache=[], mezziFilter="tutti";
+  let mezziCache=[], mezziFilter="tutti", attrezzFilter="tutti";
   /* giorni da oggi alla data ds (positivo = nel futuro) */
   function _giorniA(ds){if(!ds)return null;const[y,m,d]=ds.split("-").map(Number);const a=new Date(y,m-1,d);const o=new Date();o.setHours(0,0,0,0);return Math.round((a-o)/86400000);}
-  async function renderMezzi(){
-    const box=$("#mezzi-list");if(!box)return;
-    if(!cur){box.innerHTML="";return;}
-    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">🚚</div><p>Nessun mezzo</p><small>Accedi per gestire mezzi e attrezzature</small></div>`;return;}
+  /* Mezzi e attrezzature stanno in due sezioni diverse: un furgone e un
+     ponteggio non hanno niente in comune. La lettura dal database e' una
+     sola (mezziCache tiene tutto, serve anche altrove), poi ogni sezione
+     disegna solo la sua categoria. */
+  async function caricaMezziCache(){
     const mid=curMestiere();
     const [{data:mz},{data:vw},{data:cb}]=await Promise.all([
       sb.from("gest_mezzi").select("id,nome,categoria,targa,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
@@ -3119,21 +3128,45 @@
       sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid)
     ]);
     mezziCache=mz||[];
-    const scadMap=Object.fromEntries((vw||[]).map(v=>[v.mezzo_id,v]));
     carbMap=Object.fromEntries((cb||[]).map(v=>[v.mezzo_id,v]));
-    const filtra=(A,v)=>v==="tutti"?A.slice():(v==="manutenzione"?A.filter(m=>m.stato==="manutenzione"):A.filter(m=>m.categoria===v));
-    const conta={};MEZZI_VISTE.forEach(v=>conta[v.k]=filtra(mezziCache,v.k).length);
-    const L=filtra(mezziCache,mezziFilter);
+    return Object.fromEntries((vw||[]).map(v=>[v.mezzo_id,v]));
+  }
+
+  async function renderMezzi(){ return renderParcoMezzi("mezzo"); }
+  async function renderAttrezzature(){ return renderParcoMezzi("attrezzatura"); }
+
+  async function renderParcoMezzi(cat){
+    const attrezzo = (cat==="attrezzatura");
+    const box=$(attrezzo?"#attr-list":"#mezzi-list");if(!box)return;
+    if(!cur){box.innerHTML="";return;}
+    if(!sb||!sbUid){
+      box.innerHTML=`<div class="empty"><div class="ic">${attrezzo?"🔧":"🚚"}</div><p>Nessun${attrezzo?"a attrezzatura":" mezzo"}</p><small>Accedi per gestire mezzi e attrezzature</small></div>`;
+      return;
+    }
+    const scadMap=await caricaMezziCache();
+    const tutti=mezziCache.filter(m=> attrezzo ? m.categoria==="attrezzatura" : m.categoria!=="attrezzatura");
+    const filtro=attrezzo?attrezzFilter:mezziFilter;
+    const filtra=(A,v)=>v==="manutenzione"?A.filter(m=>m.stato==="manutenzione"):A.slice();
+    const conta={};MEZZI_VISTE.forEach(v=>conta[v.k]=filtra(tutti,v.k).length);
+    const L=filtra(tutti,filtro);
     renderTabella({
-      id:"mezzi", box:"#mezzi-list",
-      viste:"#mezzi-viste", visteDef:MEZZI_VISTE, vista:mezziFilter, conta:conta, azioneVista:"mezzo-filtro",
+      id:attrezzo?"attrezzature":"mezzi", box:attrezzo?"#attr-list":"#mezzi-list",
+      viste:attrezzo?"#attr-viste":"#mezzi-viste", visteDef:MEZZI_VISTE, vista:filtro, conta:conta,
+      azioneVista:attrezzo?"attrezzo-filtro":"mezzo-filtro",
       vuoto:tabVuoto(
-        mezziCache.length?"Nessun mezzo con questo filtro":"I mezzi e le attrezzature",
-        mezziCache.length?"Prova a cambiare filtro qui sopra.":"Furgoni, ponteggi, betoniere, trabattelli. Con le date di revisione, assicurazione e bollo: il Riepilogo ti avvisa prima che scadano.",
-        _SVGV+'<path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
-        mezziCache.length?null:{t:"+ Aggiungi il primo mezzo",a:"new-mezzo"}),
-      colonne:[{lab:"Mezzo",w:"30%"},{lab:"Tipo",w:"14%",cls:"c-chi"},{lab:"Targa",w:"16%",cls:"c-chi"},
-               {lab:"Stato",w:"18%"},{lab:"Prossima scadenza",w:"22%",cls:"c-cli"}],
+        tutti.length?(attrezzo?"Nessuna attrezzatura con questo filtro":"Nessun mezzo con questo filtro")
+                    :(attrezzo?"Le attrezzature":"I mezzi"),
+        tutti.length?"Prova a cambiare filtro qui sopra."
+          :(attrezzo
+            ? "Ponteggi, betoniere, trabattelli, trapani. Con le date delle verifiche periodiche: il Riepilogo ti avvisa prima che scadano."
+            : "Furgoni, escavatori, auto. Con le date di revisione, assicurazione e bollo, e i rifornimenti: il Riepilogo ti avvisa prima che scadano."),
+        attrezzo
+          ? _SVGV+'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
+          : _SVGV+'<path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
+        tutti.length?null:{t:attrezzo?"+ Aggiungi la prima attrezzatura":"+ Aggiungi il primo mezzo",
+                           a:attrezzo?"new-attrezzatura":"new-mezzo"}),
+      colonne:[{lab:attrezzo?"Attrezzatura":"Mezzo",w:"32%"},{lab:attrezzo?"Matricola":"Targa",w:"20%",cls:"c-chi"},
+               {lab:"Stato",w:"22%"},{lab:"Prossima scadenza",w:"26%",cls:"c-cli"}],
       righe:L.map(m=>{
         const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
         return {
@@ -3141,25 +3174,23 @@
           click:{action:"edit-mezzo",data:{id:m.id}},
           celle:[
             `<span class="c-nome">${esc(m.nome||"—")}</span>`,
-            m.categoria==="attrezzatura"?"Attrezzatura":"Mezzo",
             esc(m.targa||"—"),
             `<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
             cellaScadenza(scadMap[m.id])
           ],
           menu:[
-            {lab:"⛽ Rifornimenti",action:"mezzo-rifornimenti",data:{id:m.id}},
+            attrezzo?null:{lab:"⛽ Rifornimenti",action:"mezzo-rifornimenti",data:{id:m.id}},
             {lab:"📅 Aggiungi scadenza",action:"mezzo-scad",data:{id:m.id}},
             {sep:true},
             {lab:"✏ Modifica",action:"edit-mezzo",data:{id:m.id}},
             {lab:"🗑 Elimina",action:"del-mezzo",data:{id:m.id},del:true}
-          ]
+          ].filter(Boolean)
         };
       }),
       cards:()=>L.map(m=>mezzoCard(m,scadMap[m.id])).join("")
     });
   }
-  let carbMap={};
-  const MEZZI_VISTE=[{k:"tutti",lab:"Tutti"},{k:"mezzo",lab:"Mezzi"},{k:"attrezzatura",lab:"Attrezzature"},{k:"manutenzione",lab:"In manutenzione"}];
+  const MEZZI_VISTE=[{k:"tutti",lab:"Tutti"},{k:"manutenzione",lab:"In manutenzione"}];
   /* colonna "Prossima scadenza": il tipo sopra, il quando sotto.
      Rosso se e' gia' passata, ambra se casca entro 30 giorni: prima il rosso
      scattava solo col conteggio delle scadute e l'ambra a 7 giorni. */
@@ -3205,17 +3236,19 @@
         {lab:"🗑 Elimina",action:"del-mezzo",data:{id:m.id},del:true}
       ]});
   }
-  function mezzoForm(m){
+  function mezzoForm(m,catIniziale){
     const isNew=!m;m=m||{};
+    const cat=m.categoria||catIniziale||"mezzo";
+    const attrezzo=(cat==="attrezzatura");
     const catOpts=[["mezzo","Mezzo (furgone, escavatore, auto...)"],["attrezzatura","Attrezzatura (ponteggio, trapano, betoniera...)"]]
-      .map(c=>`<option value="${c[0]}" ${((m.categoria||"mezzo")===c[0])?"selected":""}>${c[1]}</option>`).join("");
+      .map(c=>`<option value="${c[0]}" ${(cat===c[0])?"selected":""}>${c[1]}</option>`).join("");
     const statoOpts=Object.keys(MEZZO_STATI)
       .map(k=>`<option value="${k}" ${((m.stato||"disponibile")===k)?"selected":""}>${MEZZO_STATI[k].lab}</option>`).join("");
-    openSheet(`<h3>${isNew?"Nuovo mezzo":"Modifica mezzo"}</h3>
-      <div class="field"><label>Nome</label><input id="m-nome" value="${esc(m.nome||"")}" placeholder="Es. Furgone Ducato, Ponteggio 6 m"></div>
+    openSheet(`<h3>${isNew?(attrezzo?"Nuova attrezzatura":"Nuovo mezzo"):(attrezzo?"Modifica attrezzatura":"Modifica mezzo")}</h3>
+      <div class="field"><label>Nome</label><input id="m-nome" value="${esc(m.nome||"")}" placeholder="${attrezzo?"Es. Ponteggio 6 m, Betoniera 350 l":"Es. Furgone Ducato, Fiat Doblo"}"></div>
       <div class="row2">
         <div class="field"><label>Categoria</label><select id="m-cat">${catOpts}</select></div>
-        <div class="field"><label>Targa / matricola</label><input id="m-targa" value="${esc(m.targa||"")}" placeholder="Es. AB123CD"></div></div>
+        <div class="field"><label>${attrezzo?"Matricola":"Targa"}</label><input id="m-targa" value="${esc(m.targa||"")}" placeholder="${attrezzo?"Es. MT-4471":"Es. AB123CD"}"></div></div>
       <div class="field"><label>Stato</label><select id="m-stato">${statoOpts}</select></div>
       <div class="field"><label>Note</label><textarea id="m-note" placeholder="Dove si trova, chi lo usa, promemoria...">${esc(m.note||"")}</textarea></div>
       <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
@@ -3230,7 +3263,7 @@
       :await sb.from("gest_mezzi").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,categoria,targa,stato,note}).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
-    closeSheet();renderMezzi();toast(id?"Aggiornato":"Mezzo aggiunto ✔");
+    closeSheet();renderMezzi();renderAttrezzature();toast(id?"Aggiornato":(categoria==="attrezzatura"?"Attrezzatura aggiunta ✔":"Mezzo aggiunto ✔"));
   }
 
   /* ============================================================
@@ -5770,10 +5803,12 @@
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
     if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
-    if(a==="new-mezzo")return mezzoForm(null);
+    if(a==="new-mezzo")return mezzoForm(null,"mezzo");
     if(a==="edit-mezzo")return mezzoForm(mezziCache.find(m=>String(m.id)===String(id)));
     if(a==="save-mezzo")return saveMezzo(id||null);
     if(a==="mezzo-filtro"){mezziFilter=t.dataset.v;renderMezzi();return;}
+    if(a==="attrezzo-filtro"){attrezzFilter=t.dataset.v;renderAttrezzature();return;}
+    if(a==="new-attrezzatura")return mezzoForm(null,"attrezzatura");
     if(a==="mezzo-scad")return scadForm(null,{mezzo_id:id});
     if(a==="del-mezzo"){
       if(!sbUid){toast("Devi essere loggato");return;}
@@ -5782,7 +5817,7 @@
       const {data,error}=await sb.from("gest_mezzi").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
-      renderMezzi();renderScadenze();toast("Mezzo eliminato");return;
+      renderMezzi();renderAttrezzature();renderScadenze();toast("Eliminato");return;
     }
     if(a==="new-carta")return cartaForm(null);
     if(a==="edit-carta")return cartaForm(carteCache.find(c=>String(c.id)===String(id)));
@@ -5853,7 +5888,9 @@
       if(b.dataset.tab==="lavori")renderJobs();
       if(b.dataset.tab==="agenda")renderAgenda();
       if(b.dataset.tab==="mappa")renderMappa();
-      if(b.dataset.tab==="richieste")renderRichieste();   /* la mappa si disegna solo quando la apri: non rallenta il resto */
+      if(b.dataset.tab==="richieste")renderRichieste();
+      if(b.dataset.tab==="mezzi")renderMezzi();
+      if(b.dataset.tab==="attrezzature")renderAttrezzature();   /* la mappa si disegna solo quando la apri: non rallenta il resto */
       const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
       window.scrollTo({top:0,behavior:"smooth"});
     };
