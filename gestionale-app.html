@@ -1342,6 +1342,14 @@
       : `<button${v.del?' class="del"':''} data-action="${v.action}"${tabAttr(v.data)}>${v.lab}</button>`
     ).join("")+'</div>';
   }
+  /* Nasconde il "+" in alto quando la sezione e' vuota e c'e' gia' il
+     bottone grande dentro il riquadro vuoto. Vale per tutte le sezioni. */
+  function tabBottoneTesta(box, mostra){
+    const sez=box&&box.closest?box.closest("section"):null;
+    if(!sez)return;
+    sez.querySelectorAll(".sec-head .btn.add").forEach(b=>{ b.style.display = mostra ? "" : "none"; });
+  }
+
   function renderTabella(cfg){
     const box=$(cfg.box);if(!box)return;
     tabChiudiPop();
@@ -1352,6 +1360,10 @@
       return `<button class="vista${cfg.vista===v.k?" on":""}" data-action="${cfg.azioneVista}" data-v="${v.k}">${v.lab}${badge}</button>`;
     }).join("");
     const R=cfg.righe||[];
+    /* Mai due bottoni che fanno la stessa cosa: quando la sezione e' vuota
+       comanda quello grande in mezzo alla pagina, e quello piccolo in alto
+       sparisce. Appena c'e' qualcosa dentro, torna. */
+    tabBottoneTesta(box, R.length>0);
     if(!R.length){box.style.display="block";box.innerHTML=cfg.vuoto||"";return;}
     /* SCHEDE SEMPRE, non solo su schermo stretto.
        Prima sul computer usciva una tabella a righe e sul telefono le schede:
@@ -3122,7 +3134,7 @@
   async function caricaMezziCache(){
     const mid=curMestiere();
     const [{data:mz},{data:vw},{data:cb}]=await Promise.all([
-      sb.from("gest_mezzi").select("id,nome,categoria,targa,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      sb.from("gest_mezzi").select("id,nome,categoria,tipo,targa,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
       sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo,prossimo_tipo").eq("user_id",sbUid),
       /* i totali carburante: se la tabella non c'e' ancora, cb resta vuoto e non cambia niente */
       sb.from("gest_mezzi_carburante").select("mezzo_id,spesa_totale,km_litro").eq("user_id",sbUid)
@@ -3165,8 +3177,9 @@
           : _SVGV+'<path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
         tutti.length?null:{t:attrezzo?"+ Aggiungi la prima attrezzatura":"+ Aggiungi il primo mezzo",
                            a:attrezzo?"new-attrezzatura":"new-mezzo"}),
-      colonne:[{lab:attrezzo?"Attrezzatura":"Mezzo",w:"32%"},{lab:attrezzo?"Matricola":"Targa",w:"20%",cls:"c-chi"},
-               {lab:"Stato",w:"22%"},{lab:"Prossima scadenza",w:"26%",cls:"c-cli"}],
+      colonne:[{lab:attrezzo?"Attrezzatura":"Mezzo",w:"26%"},{lab:"Tipo",w:"16%",cls:"c-chi"},
+               {lab:attrezzo?"Matricola":"Targa",w:"16%",cls:"c-chi"},
+               {lab:"Stato",w:"20%"},{lab:"Prossima scadenza",w:"22%",cls:"c-cli"}],
       righe:L.map(m=>{
         const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
         return {
@@ -3174,6 +3187,7 @@
           click:{action:"edit-mezzo",data:{id:m.id}},
           celle:[
             `<span class="c-nome">${esc(m.nome||"—")}</span>`,
+            esc(m.tipo||"—"),
             esc(m.targa||"—"),
             `<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
             cellaScadenza(scadMap[m.id])
@@ -3206,7 +3220,8 @@
   }
   function mezzoCard(m,sc){
     const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
-    const cat=m.categoria==="attrezzatura"?"🔧 Attrezzatura":"🚚 Mezzo";
+    const cat=m.tipo?((m.categoria==="attrezzatura"?"🔧 ":"🚚 ")+esc(m.tipo))
+                    :(m.categoria==="attrezzatura"?"🔧 Attrezzatura":"🚚 Mezzo");
     /* la barretta a sinistra dice come sta il mezzo senza leggere:
        rossa se ha scadenze gia' passate, arancione se una arriva entro 7 giorni */
     let scTesto="", tono="t-ok";
@@ -3240,16 +3255,22 @@
     const isNew=!m;m=m||{};
     const cat=m.categoria||catIniziale||"mezzo";
     const attrezzo=(cat==="attrezzatura");
-    const catOpts=[["mezzo","Mezzo (furgone, escavatore, auto...)"],["attrezzatura","Attrezzatura (ponteggio, trapano, betoniera...)"]]
-      .map(c=>`<option value="${c[0]}" ${(cat===c[0])?"selected":""}>${c[1]}</option>`).join("");
+    /* i tipi gia' usati diventano suggerimenti: non un elenco chiuso */
+    const tipiUsati=[...new Set(mezziCache.map(x=>(x.tipo||"").trim()).filter(Boolean))].sort();
+    const tipoSugg=tipiUsati.map(t=>`<option value="${esc(t)}">`).join("");
     const statoOpts=Object.keys(MEZZO_STATI)
       .map(k=>`<option value="${k}" ${((m.stato||"disponibile")===k)?"selected":""}>${MEZZO_STATI[k].lab}</option>`).join("");
     openSheet(`<h3>${isNew?(attrezzo?"Nuova attrezzatura":"Nuovo mezzo"):(attrezzo?"Modifica attrezzatura":"Modifica mezzo")}</h3>
       <div class="field"><label>Nome</label><input id="m-nome" value="${esc(m.nome||"")}" placeholder="${attrezzo?"Es. Ponteggio 6 m, Betoniera 350 l":"Es. Furgone Ducato, Fiat Doblo"}"></div>
       <div class="row2">
-        <div class="field"><label>Categoria</label><select id="m-cat">${catOpts}</select></div>
+        <div class="field"><label>Tipo</label>
+          <input id="m-tipo" list="m-tipo-sugg" value="${esc(m.tipo||"")}" placeholder="${attrezzo?"Es. ponteggio, betoniera, trapano":"Es. furgone, escavatore, auto"}" autocomplete="off">
+          <datalist id="m-tipo-sugg">${tipoSugg}</datalist></div>
         <div class="field"><label>${attrezzo?"Matricola":"Targa"}</label><input id="m-targa" value="${esc(m.targa||"")}" placeholder="${attrezzo?"Es. MT-4471":"Es. AB123CD"}"></div></div>
       <div class="field"><label>Stato</label><select id="m-stato">${statoOpts}</select></div>
+      <label style="display:flex;align-items:center;gap:10px;font-size:1rem;margin:4px 0 16px;cursor:pointer">
+        <input type="checkbox" id="m-attrezzo" ${attrezzo?"checked":""} style="width:20px;height:20px">
+        <span>È un'attrezzatura (non si guida) — sta fra le Attrezzature invece che fra i Mezzi</span></label>
       <div class="field"><label>Note</label><textarea id="m-note" placeholder="Dove si trova, chi lo usa, promemoria...">${esc(m.note||"")}</textarea></div>
       <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
       <button class="btn-primary b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
@@ -3257,10 +3278,12 @@
   async function saveMezzo(id){
     const nome=$("#m-nome").value.trim();if(!nome){toast("Scrivi il nome del mezzo");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
-    const categoria=$("#m-cat").value, targa=$("#m-targa").value.trim(), stato=$("#m-stato").value, note=$("#m-note").value.trim();
+    const categoria=$("#m-attrezzo").checked?"attrezzatura":"mezzo";
+    const tipo=$("#m-tipo").value.trim()||null;
+    const targa=$("#m-targa").value.trim(), stato=$("#m-stato").value, note=$("#m-note").value.trim();
     const {data,error}=id
-      ?await sb.from("gest_mezzi").update({nome,categoria,targa,stato,note}).eq("id",id).eq("user_id",sbUid).select("id")
-      :await sb.from("gest_mezzi").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,categoria,targa,stato,note}).select("id");
+      ?await sb.from("gest_mezzi").update({nome,categoria,tipo,targa,stato,note}).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_mezzi").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,categoria,tipo,targa,stato,note}).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
     closeSheet();renderMezzi();renderAttrezzature();toast(id?"Aggiornato":(categoria==="attrezzatura"?"Attrezzatura aggiunta ✔":"Mezzo aggiunto ✔"));
