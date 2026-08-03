@@ -307,17 +307,17 @@ nav img{height:36px}
 /* CHAT CON L'IMPRESA */
 .chat-box{display:flex;flex-direction:column;gap:12px}
 .chat-field{display:flex;flex-direction:column;gap:4px}
-.chat-field label{font-size:13px;font-weight:600;color:#555}
-.chat-field input{padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px}
-.chat-btn{padding:10px 18px;border:none;border-radius:8px;background:#2863a7;color:white;font-weight:700;cursor:pointer;font-size:14px}
+.chat-field label{font-size:15px;font-weight:600;color:#555}
+.chat-field input{padding:14px 16px;border:1px solid #ddd;border-radius:8px;font-size:16px}
+.chat-btn{padding:14px 24px;border:none;border-radius:8px;background:#2863a7;color:white;font-weight:700;cursor:pointer;font-size:16px}
 .chat-btn:hover{background:#215188}
-.chat-messages{display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto;padding:12px;background:#f5f5f5;border-radius:10px}
-.chat-msg{max-width:75%;padding:8px 12px;border-radius:12px;font-size:14px;line-height:1.4;word-wrap:break-word}
+.chat-messages{display:flex;flex-direction:column;gap:10px;min-height:340px;max-height:520px;overflow-y:auto;padding:16px;background:#f5f5f5;border-radius:10px;border:1px solid #e3e3e3}
+.chat-msg{max-width:80%;padding:12px 16px;border-radius:12px;font-size:16px;line-height:1.55;word-wrap:break-word}
 .chat-msg-cliente{align-self:flex-end;background:#0066ff;color:white;border-bottom-right-radius:2px}
 .chat-msg-impresa{align-self:flex-start;background:#ff8800;color:white;border-bottom-left-radius:2px}
-.chat-msg-meta{font-size:10px;opacity:0.7;margin-top:4px}
+.chat-msg-meta{font-size:12px;opacity:0.75;margin-top:6px}
 .chat-input-row{display:flex;gap:8px}
-.chat-input-row input{flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px}
+.chat-input-row input{flex:1;padding:14px 16px;border:1px solid #ddd;border-radius:8px;font-size:16px}
 </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 </head>
@@ -1117,7 +1117,7 @@ document.addEventListener('DOMContentLoaded',function(){
     wrap.scrollTop=wrap.scrollHeight;
   }
 
-  let chatUltimoId=0;
+  let chatVisti=new Set();
 
   async function chatRpc(nome,corpo){
     const r=await fetch(`${SU}/rest/v1/rpc/${nome}`,{
@@ -1137,11 +1137,13 @@ document.addEventListener('DOMContentLoaded',function(){
       const wrap=document.getElementById('chat-messages');
       if(!soloNuovi){
         if(wrap)wrap.innerHTML='';
-        chatUltimoId=0;
+        chatVisti=new Set();
       }
       arr.forEach(m=>{
-        const mid=Number(m.id)||0;
-        if(mid>chatUltimoId){renderMessaggioChat(m);chatUltimoId=mid}
+        const k=String(m.id||m.created_at||'');
+        if(chatVisti.has(k))return;
+        chatVisti.add(k);
+        renderMessaggioChat(m);
       });
     }catch(e){console.error(e)}
   }
@@ -1224,7 +1226,7 @@ document.addEventListener('DOMContentLoaded',function(){
     try{
       await chatRpc('chat_elimina',{p_conv:conv});
       if(chatTimer){clearInterval(chatTimer);chatTimer=null}
-      chatUltimoId=0;
+      chatVisti=new Set();
       localStorage.removeItem('chat_'+id);
       localStorage.removeItem('chat_'+id+'_nome');
       localStorage.removeItem('chat_'+id+'_email');
