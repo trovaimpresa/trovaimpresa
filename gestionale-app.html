@@ -55,6 +55,8 @@
       <button data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg><span>Report</span></button>
       <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
       <button data-tab="mappa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Mappa</span><span class="tab-cnt" id="cnt-mappa"></span></button>
+      <div class="side-group">TrovaImpresa</div>
+      <button data-tab="richieste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Cosa ti manca?</button>
     </nav>
   </aside>
 
@@ -196,6 +198,16 @@
       <div class="sec-head"><h2>Carte aziendali</h2><button class="btn add" data-action="new-carta">+ Nuova</button></div>
       <div class="gal-intro">Le carte prepagate (tipo bancomat) che dai ai tuoi dipendenti per le spese sul lavoro. Il saldo si aggiorna da solo con le ricariche e le spese che registrate.</div>
       <div class="grid" id="carte-list"></div>
+    </section>
+
+    <section id="richieste">
+      <div class="sec-head"><h2>Cosa ti manca?</h2></div>
+      <div class="gal-intro">Questo gestionale lo scrivo io, da solo, per imprese come la tua. Se ti serve una cosa che qui non c'è, scrivimela qui sotto: la leggo di persona. Non serve che sia una richiesta ben scritta — bastano due righe.</div>
+      <div class="field" style="margin-top:8px">
+        <textarea id="rq-testo" rows="5" placeholder="Es. Mi servirebbe segnare le ore dei dipendenti giorno per giorno..." style="font-size:1.05rem;padding:14px;line-height:1.6"></textarea>
+      </div>
+      <button class="btn btn-primary" style="font-size:1.05rem;padding:13px 26px" data-action="save-richiesta">Manda la richiesta</button>
+      <div id="rq-lista"></div>
     </section>
 
     <section id="scadenzario">
@@ -3528,6 +3540,67 @@
     renderRifornimenti();renderMezzi();toast("Pieno eliminato");
   }
 
+
+  /* ============================================================
+     COSA TI MANCA? — le richieste dell'impresa (gest_richieste).
+     Lei scrive, noi rispondiamo cambiando lo stato dal pannello admin.
+     Lo stato non lo puo' toccare: le regole del database glielo impediscono.
+     ============================================================ */
+  const RQ_STATI={
+    ricevuta:{lab:"Ricevuta",bg:"#eef2f7",fg:"#5b6b80"},
+    in_lavorazione:{lab:"Ci stiamo lavorando",bg:"#fff3e0",fg:"#b26a00"},
+    fatta:{lab:"Fatta ✔",bg:"#e6f6ec",fg:"#1b8a3f"},
+    non_faremo:{lab:"Per ora non la facciamo",bg:"#fdecea",fg:"#b3261e"}
+  };
+
+  async function renderRichieste(){
+    const lista=$("#rq-lista");if(!lista)return;
+    if(!sb||!sbUid){lista.innerHTML="";return;}
+    const {data}=await sb.from("gest_richieste")
+      .select("id,testo,stato,risposta,created_at")
+      .eq("user_id",sbUid).order("created_at",{ascending:false});
+    const R=data||[];
+    if(!R.length){
+      lista.innerHTML=`<div class="gal-intro" style="margin-top:22px">Qui sotto compariranno le cose che ci hai chiesto, con lo stato di ognuna.</div>`;
+      return;
+    }
+    const fmt=d=>d?new Date(d).toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"}):"";
+    lista.innerHTML=`<h3 style="margin:28px 0 12px;font-size:1.15rem">Cosa ci hai chiesto</h3>`+R.map(r=>{
+      const st=RQ_STATI[r.stato]||RQ_STATI.ricevuta;
+      return `<div style="background:var(--card,#fff);border:2px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+          <span style="background:${st.bg};color:${st.fg};font-weight:800;font-size:0.9rem;padding:5px 14px;border-radius:999px">${st.lab}</span>
+          <span style="color:var(--testo-2);font-size:0.9rem">${fmt(r.created_at)}</span>
+        </div>
+        <div style="font-size:1.05rem;line-height:1.6">${esc(r.testo)}</div>
+        ${r.risposta?`<div style="margin-top:12px;padding:12px 14px;background:#f4f8ff;border-left:4px solid var(--blu,#0066ff);border-radius:8px;font-size:1rem"><b>Risposta:</b> ${esc(r.risposta)}</div>`:""}
+      </div>`;
+    }).join("");
+  }
+
+  async function salvaRichiesta(){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const ta=$("#rq-testo");
+    const testo=(ta?ta.value:"").trim();
+    if(testo.length<5){toast("Scrivi cosa ti serve, anche poche parole");return;}
+    if(testo.length>2000){toast("Troppo lungo: massimo 2000 caratteri");return;}
+    let email="";
+    try{const {data:{user}}=await sb.auth.getUser();email=(user&&user.email)||"";}catch(e){}
+    const {data,error}=await sb.from("gest_richieste")
+      .insert({user_id:sbUid,email,testo}).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(ta)ta.value="";
+    toast("Ricevuto, grazie ✔");
+    /* le email partono dal server: se non parte, la richiesta resta comunque salvata */
+    try{
+      await fetch("/.netlify/functions/richiesta-funzione",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id:(data&&data[0])?data[0].id:null})
+      });
+    }catch(e){}
+    renderRichieste();
+  }
+
   /* ---- mezzi usati su un lavoro (gest_lavoro_mezzi): si salva subito,
          fuori da saveJob(), esattamente come le spese ---- */
   let mezziLavoroId=null;
@@ -5721,6 +5794,7 @@
     if(a==="mezzo-rifornimenti")return apriRifornimenti(id);
     if(a==="save-rifornimento")return salvaRifornimento();
     if(a==="del-rifornimento")return eliminaRifornimento(id);
+    if(a==="save-richiesta")return salvaRichiesta();
     if(a==="lm-add")return mezzoLavoroAdd();
     if(a==="lm-del"){
       if(!sbUid){toast("Devi essere loggato");return;}
@@ -5778,7 +5852,8 @@
          entrando nel reparto, con la forma (tabella o card) di quella larghezza. */
       if(b.dataset.tab==="lavori")renderJobs();
       if(b.dataset.tab==="agenda")renderAgenda();
-      if(b.dataset.tab==="mappa")renderMappa();   /* la mappa si disegna solo quando la apri: non rallenta il resto */
+      if(b.dataset.tab==="mappa")renderMappa();
+      if(b.dataset.tab==="richieste")renderRichieste();   /* la mappa si disegna solo quando la apri: non rallenta il resto */
       const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
       window.scrollTo({top:0,behavior:"smooth"});
     };

@@ -343,6 +343,9 @@
       <div class="nav-item" onclick="showSection('recensioni',this)">
         <span class="nav-icon">⭐</span> Recensioni
       </div>
+      <div class="nav-item" onclick="showSection('richieste',this)">
+        <span class="nav-icon">💡</span> Cosa chiedono
+      </div>
       <div class="nav-item" onclick="showSection('locandine',this)">
         <span class="nav-icon">📢</span> Locandine Pub.
       </div>
@@ -525,6 +528,12 @@
     </div>
 
     <!-- RECENSIONI -->
+    <div class="section" id="sec-richieste">
+      <h2 style="margin:0 0 6px">💡 Cosa chiedono le imprese</h2>
+      <p style="color:#5b6b80;margin:0 0 18px;font-size:15px">Quello che le imprese ti scrivono dal gestionale, dalla piu' recente. Cambiando lo stato loro lo vedono subito.</p>
+      <div id="lista-richieste"><div class="loading">Caricamento...</div></div>
+    </div>
+
     <div class="section" id="sec-recensioni">
       <div class="topbar">
         <div class="topbar-title">⭐ Recensioni</div>
@@ -1083,6 +1092,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'pubblicita-clienti') caricaPubblicitaClienti();
   if (id === 'mappa-spazi') caricaMappaSpazi();
   if (id === 'utilizzo') caricaUtilizzo();
+  if (id === 'richieste') caricaRichieste();
   if (id === 'scrivi-tutti') contaDestinatari();
   if (!fromPopstate) history.pushState({section: id}, '');
 }
@@ -2325,6 +2335,67 @@ async function eliminaSubappalto(id) {
     if (!res.ok || !json.success) { alert('Errore: ' + (json.error || 'eliminazione non riuscita')); return; }
   } catch (e) { alert('Errore: ' + e.message); return; }
   await caricaSubappalti();
+}
+
+
+// COSA CHIEDONO LE IMPRESE
+const RQ_STATI_ADM = {
+  ricevuta:       { lab: 'Ricevuta',              cls: 'badge-att' },
+  in_lavorazione: { lab: 'Ci stiamo lavorando',   cls: 'badge-att' },
+  fatta:          { lab: 'Fatta',                 cls: 'badge-a'   },
+  non_faremo:     { lab: 'Non la facciamo',       cls: 'badge'     }
+};
+
+async function caricaRichieste() {
+  const box = document.getElementById('lista-richieste');
+  box.innerHTML = '<div class="loading">Caricamento...</div>';
+  let data = null;
+  try {
+    const res = await fetch('/.netlify/functions/admin-dati', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP, action: 'list', table: 'gest_richieste' })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.error || 'errore');
+    data = json.data;
+  } catch (e) {
+    box.innerHTML = '<div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div>';
+    return;
+  }
+  if (!data || !data.length) {
+    box.innerHTML = '<div class="empty-table"><div class="eicon">💡</div>Nessuna richiesta ancora</div>';
+    return;
+  }
+  box.innerHTML = data.map(r => {
+    const st = RQ_STATI_ADM[r.stato] || RQ_STATI_ADM.ricevuta;
+    const quando = r.created_at ? new Date(r.created_at).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+    return '<div style="background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:14px">'
+      + '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px">'
+      +   '<span class="badge ' + st.cls + '">' + st.lab + '</span>'
+      +   '<span style="color:#5b6b80;font-size:14px">' + esc(r.email || '') + ' &middot; ' + quando + '</span>'
+      + '</div>'
+      + '<div style="font-size:17px;line-height:1.6;margin-bottom:12px">' + esc(r.testo || '') + '</div>'
+      + (r.risposta ? '<div style="background:#f4f8ff;border-left:4px solid #0066ff;border-radius:8px;padding:10px 14px;font-size:15px;margin-bottom:12px"><b>Risposta:</b> ' + esc(r.risposta) + '</div>' : '')
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +   '<button class="u-btn" onclick="cambiaStatoRichiesta(' + r.id + ',\'in_lavorazione\')">Ci sto lavorando</button>'
+      +   '<button class="u-btn" onclick="cambiaStatoRichiesta(' + r.id + ',\'fatta\')">Fatta</button>'
+      +   '<button class="u-btn" onclick="cambiaStatoRichiesta(' + r.id + ',\'non_faremo\')">Non la facciamo</button>'
+      +   '<button class="u-btn" onclick="rispondiRichiesta(' + r.id + ')">Scrivi una risposta</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function cambiaStatoRichiesta(id, stato) {
+  if (!await adminWrite('update', 'gest_richieste', id, { stato: stato, aggiornata_il: new Date().toISOString() })) return;
+  caricaRichieste();
+}
+
+async function rispondiRichiesta(id) {
+  const t = prompt('Cosa vuoi rispondere? (lo vede nel suo gestionale)');
+  if (t === null) return;
+  if (!await adminWrite('update', 'gest_richieste', id, { risposta: t.trim() || null, aggiornata_il: new Date().toISOString() })) return;
+  caricaRichieste();
 }
 
 // LEAD

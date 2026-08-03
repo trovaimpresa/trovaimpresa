@@ -17,7 +17,7 @@ const corsHeaders = {
 // Con service_role qui la scrittura avviene davvero.
 const TABELLE_CONSENTITE = [
   'feedback_clienti', 'segnalazioni', 'subappalti',
-  'imprese', 'preventivi', 'lead_imprese'
+  'imprese', 'preventivi', 'lead_imprese', 'gest_richieste'
 ];
 const AZIONI_CONSENTITE = ['list', 'update', 'delete', 'insert'];
 
