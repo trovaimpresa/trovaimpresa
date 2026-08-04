@@ -294,6 +294,22 @@
   #st-esito:not(:empty){margin-top:22px;padding:18px 20px;border-radius:12px;border:2px solid;font-size:15.5px;line-height:1.7}
   #st-esito.ok{background:#f2fbf5;border-color:#b5e2c5}
   #st-esito.ko{background:#fdecea;border-color:#f5c2bd;color:#b3261e}
+  /* Email salvate */
+  .st-salva-box{background:#f7f9fc;border:2px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-bottom:22px}
+  .st-salva-riga{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .st-salva-riga select{flex:1 1 240px;min-width:0;padding:12px;font-size:15px;font-family:inherit;
+                        border:2px solid #e2e8f0;border-radius:10px;background:#fff;color:#12233a}
+  .st-mini{font-family:inherit;font-size:14.5px;font-weight:800;padding:12px 16px;border-radius:10px;
+           border:2px solid #0066ff;background:#fff;color:#0066ff;cursor:pointer;white-space:nowrap}
+  .st-mini:hover{background:#eaf2ff}
+  .st-mini.pieno{background:#0066ff;color:#fff}
+  .st-mini.pieno:hover{background:#0052cc}
+  .st-mini.rosso{border-color:#c0392b;color:#c0392b}
+  .st-mini.rosso:hover{background:#fdecea}
+  .st-nome-riga{display:none;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap}
+  .st-nome-riga.visibile{display:flex}
+  .st-nome-riga input{flex:1 1 240px;min-width:0;padding:12px;font-size:15px;font-family:inherit;
+                      border:2px solid #0066ff;border-radius:10px}
   .u-badge{display:inline-block;background:#f3e5f5;color:#7b1fa2;font-weight:800;font-size:13px;
            padding:3px 10px;border-radius:999px;margin-left:8px}
 </style>
@@ -886,6 +902,22 @@
           Nel testo puoi usare queste parole magiche: verranno sostituite per ognuno.<br>
           <b>[NOME]</b> il nome dell'attività &nbsp;·&nbsp; <b>[SCADENZA]</b> la sua data di scadenza Premium &nbsp;·&nbsp; <b>[CITTA]</b> la sua città<br>
           Lascia una <b>riga vuota</b> fra un paragrafo e l'altro. Niente asterischi o simboli: scrivi come parli.
+        </div>
+
+        <div class="st-salva-box">
+          <label class="st-lab" style="margin-top:0">Le tue email salvate</label>
+          <div class="st-salva-riga">
+            <select id="st-salvate" onchange="caricaEmailSalvata()"></select>
+            <button type="button" class="st-mini" onclick="nuovaEmail()">+ Nuova</button>
+            <button type="button" class="st-mini pieno" onclick="mostraSalva()">Salva</button>
+            <button type="button" class="st-mini rosso" onclick="eliminaEmailSalvata()">Elimina</button>
+          </div>
+          <div class="st-nome-riga" id="st-nome-riga">
+            <input id="st-nome" placeholder="Come vuoi chiamarla? es. Completa il profilo" maxlength="60">
+            <button type="button" class="st-mini pieno" onclick="salvaEmail()">Conferma</button>
+            <button type="button" class="st-mini" onclick="annullaSalva()">Annulla</button>
+          </div>
+          <div class="st-nota" id="st-salva-nota">Restano salvate su questo computer: le ritrovi ogni volta che apri il pannello.</div>
         </div>
 
         <label class="st-lab">A chi scrivo</label>
@@ -2473,5 +2505,137 @@ async function aggiungiLead() {
 <script src="/cookie-banner.js"></script>
 <footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></footer>
 <script src="/js/modal-fullscreen.js" defer></script>
+
+<!-- ============================================================
+     EMAIL SALVATE — pannello "Scrivi a tutti" (agosto 2026)
+     Le email si salvano nel browser di questo computer.
+     Niente database, niente SQL: sono solo tue e restano qui.
+     ============================================================ -->
+<script>
+(function () {
+  var CHIAVE = 'ti_email_salvate';
+
+  // Alla prima apertura mette dentro l'email scritta insieme il 4 agosto 2026,
+  // cosi' non parti dal foglio bianco.
+  var INIZIALI = [{
+    nome: 'Completa il profilo',
+    oggetto: '[NOME], le imprese di [CITTA] sono online su TrovaImpresa',
+    testo:
+'Gentile [NOME],\n\n' +
+'in questi giorni ho pubblicato le pagine di ogni citta con l\'elenco delle imprese registrate: chi cerca un professionista a [CITTA] ora trova i nomi, il mestiere e il collegamento al profilo.\n\n' +
+'Ti chiedo un favore: vai a controllare come appare il tuo. Molte schede sono rimaste a meta, e cosi non rendono giustizia a chi lavora bene.\n\n' +
+'Entra nel tuo pannello e apri la sezione "Modifica profilo": li trovi tutti i campi da completare. Prenditi il tempo di compilarli tutti - l\'indirizzo, che e quello che ti fa comparire tra i risultati dei clienti della tua zona, una descrizione chiara di quello che fai, e qualche foto dei tuoi lavori. Si entra da qui: https://trovaimpresa.com/login-impresa.html\n\n' +
+'Ci tengo a essere chiaro, perche e il cuore di TrovaImpresa: tutto il sito si regge sul farti vedere e notare dai clienti. Ma io posso mostrare solo quello che c\'e. Se il profilo resta a meta rimani invisibile, e il sito non puo aiutarti. Non e una formalita: e la differenza tra essere iscritto ed essere trovato.\n\n' +
+'Ne vale la pena anche per un altro motivo: il tuo Piano Premium e attivo e gratuito fino al [SCADENZA], e a breve ci entrera dentro anche il gestionale - fatture, cantieri, operatori e scadenze, tutto in un posto solo. Mi farebbe piacere che tu lo trovassi gia pronto quando arriva.\n\n' +
+'Un cordiale saluto,\n' +
+'Il Team di TrovaImpresa.com'
+  }];
+
+  function leggi() {
+    try {
+      var g = localStorage.getItem(CHIAVE);
+      if (!g) { scrivi(INIZIALI); return INIZIALI.slice(); }
+      var v = JSON.parse(g);
+      return Array.isArray(v) ? v : [];
+    } catch (e) { return []; }
+  }
+  function scrivi(lista) {
+    try { localStorage.setItem(CHIAVE, JSON.stringify(lista)); } catch (e) {}
+  }
+  function nota(msg, colore) {
+    var n = document.getElementById('st-salva-nota');
+    if (!n) return;
+    n.textContent = msg;
+    n.style.color = colore || '#5b6b80';
+    n.style.fontWeight = colore ? '700' : '400';
+    if (colore) setTimeout(function () {
+      n.textContent = 'Restano salvate su questo computer: le ritrovi ogni volta che apri il pannello.';
+      n.style.color = '#5b6b80'; n.style.fontWeight = '400';
+    }, 4000);
+  }
+
+  function disegnaLista(selezionata) {
+    var sel = document.getElementById('st-salvate');
+    if (!sel) return;
+    var lista = leggi();
+    sel.innerHTML = '<option value="">— scegli un\'email salvata —</option>' +
+      lista.map(function (e, i) {
+        return '<option value="' + i + '">' + (e.nome || 'senza nome').replace(/</g, '&lt;') + '</option>';
+      }).join('');
+    if (selezionata !== undefined && selezionata !== null) sel.value = String(selezionata);
+  }
+
+  window.caricaEmailSalvata = function () {
+    var sel = document.getElementById('st-salvate');
+    if (!sel || sel.value === '') return;
+    var e = leggi()[Number(sel.value)];
+    if (!e) return;
+    document.getElementById('st-oggetto').value = e.oggetto || '';
+    document.getElementById('st-testo').value = e.testo || '';
+    nota('Caricata "' + (e.nome || '') + '". Puoi modificarla e risalvarla.', '#1e8e3e');
+  };
+
+  window.nuovaEmail = function () {
+    document.getElementById('st-oggetto').value = '';
+    document.getElementById('st-testo').value = '';
+    var sel = document.getElementById('st-salvate'); if (sel) sel.value = '';
+    annullaSalva();
+    document.getElementById('st-oggetto').focus();
+    nota('Foglio pulito: scrivi la tua email nuova.', '#0066ff');
+  };
+
+  window.mostraSalva = function () {
+    var riga = document.getElementById('st-nome-riga');
+    var sel = document.getElementById('st-salvate');
+    var inp = document.getElementById('st-nome');
+    if (!riga) return;
+    // se ne stai modificando una gia' salvata, propone lo stesso nome (sovrascrive)
+    if (sel && sel.value !== '') {
+      var e = leggi()[Number(sel.value)];
+      if (e) inp.value = e.nome || '';
+    }
+    riga.classList.add('visibile');
+    inp.focus();
+  };
+
+  window.annullaSalva = function () {
+    var riga = document.getElementById('st-nome-riga');
+    if (riga) riga.classList.remove('visibile');
+    var inp = document.getElementById('st-nome'); if (inp) inp.value = '';
+  };
+
+  window.salvaEmail = function () {
+    var nome = (document.getElementById('st-nome').value || '').trim();
+    var oggetto = document.getElementById('st-oggetto').value || '';
+    var testo = document.getElementById('st-testo').value || '';
+    if (!nome) { nota('Dai un nome all\'email prima di salvarla.', '#c0392b'); return; }
+    if (!oggetto.trim() && !testo.trim()) { nota('Non c\'e niente da salvare: scrivi prima oggetto e testo.', '#c0392b'); return; }
+
+    var lista = leggi();
+    var i = lista.findIndex(function (e) { return (e.nome || '').toLowerCase() === nome.toLowerCase(); });
+    if (i >= 0) lista[i] = { nome: nome, oggetto: oggetto, testo: testo };
+    else { lista.push({ nome: nome, oggetto: oggetto, testo: testo }); i = lista.length - 1; }
+    scrivi(lista);
+    disegnaLista(i);
+    annullaSalva();
+    nota('Salvata come "' + nome + '".', '#1e8e3e');
+  };
+
+  window.eliminaEmailSalvata = function () {
+    var sel = document.getElementById('st-salvate');
+    if (!sel || sel.value === '') { nota('Scegli prima quale email eliminare.', '#c0392b'); return; }
+    var lista = leggi();
+    var i = Number(sel.value);
+    var nome = (lista[i] && lista[i].nome) || '';
+    lista.splice(i, 1);
+    scrivi(lista);
+    disegnaLista();
+    nota('Eliminata "' + nome + '". I campi qui sotto sono rimasti come stavano.', '#c0392b');
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { disegnaLista(); });
+  else disegnaLista();
+})();
+</script>
 </body>
 </html>
