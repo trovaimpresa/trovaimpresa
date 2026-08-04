@@ -53,6 +53,18 @@
   .checklist{list-style:none;padding:0;margin:16px 0}
   .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
   .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .up-list li:before{content:"▲";color:#c0392b}
+  .down-list li:before{content:"▼";color:#1e8e3e}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
   .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
   .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
   .related a{font-weight:bold}
@@ -125,15 +137,20 @@
 
   <article>
     <h1>Quanto costa rifare la facciata nel 2026</h1>
-    <p class="meta">Aggiornato luglio 2026 · Lettura 6 min</p>
+    <p class="meta">Aggiornato agosto 2026 · Lettura 8 min · Prezzi verificati su prezziari di settore</p>
 
     <div class="answer">
       <strong>Risposta rapida:</strong> rifare la facciata costa
       <span class="price-big">da 60 a 120 €/mq</span>
-      per un rifacimento completo (risanamento intonaco + tinteggiatura), <strong>ponteggio escluso</strong>. Se serve solo <strong>ritinteggiare</strong> si sta sui 15–30 €/mq. Il ponteggio aggiunge 8–15 €/mq e può pesare fino al 30–45% del totale. Sotto trovi i prezzi per tipo di lavoro e un calcolatore.
+      per un rifacimento completo (risanamento intonaco + tinteggiatura), <strong>ponteggio escluso</strong>. Se serve solo <strong>ritinteggiare</strong> si sta sui 15–30 €/mq. Il ponteggio aggiunge <strong>15–25 €/mq</strong> (più 2–3 €/mq al mese oltre il primo) e può pesare fino al 30–45% del totale. Sotto trovi i prezzi per tipo di lavoro e un calcolatore.
     </div>
 
     <p class="lead">Sulla facciata il trucco per non spendere male è capire <strong>cosa serve davvero</strong>: se l'intonaco è sano basta una tinteggiatura; se è ammalorato, si crepa o si stacca, va risanato prima. E poi c'è il grande protagonista nascosto: il <strong>ponteggio</strong>. Su un edificio alto può costare quanto la tinteggiatura stessa, quindi conviene approfittarne per fare tutto insieme (facciata, lattoneria, magari il cappotto).</p>
+
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> il ponteggio si paga una volta: montaggio, smontaggio e noleggio te li fanno pagare comunque, che tu faccia un lavoro o cinque. Quando è su, <strong>fai tutto quello che c'è da fare lassù</strong>: facciata, frontalini dei balconi, scossaline, davanzali, magari un controllo al tetto. Smontarlo oggi e rimontarlo tra due anni per i frontalini è il modo più caro che esista di ristrutturare.
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
 
     <h2>Prezzi della facciata per tipo di intervento</h2>
     <table>
@@ -145,7 +162,9 @@
         <tr><td>Solo tinteggiatura</td><td>Lavaggio, fissativo e due mani di pittura</td><td class="num" style="text-align:right">15 – 30 €/mq</td></tr>
         <tr><td>Intonaco + tinteggiatura</td><td>Rifacimento intonaci ammalorati e pittura</td><td class="num" style="text-align:right">45 – 70 €/mq</td></tr>
         <tr><td>Rifacimento completo</td><td>Risanamento, crepe, intonaco, rasatura e finitura</td><td class="num" style="text-align:right">60 – 120 €/mq</td></tr>
-        <tr><td>Ponteggio</td><td>Montaggio, noleggio (primo mese) e smontaggio</td><td class="num" style="text-align:right">8 – 15 €/mq</td></tr>
+        <tr><td>Ponteggio</td><td>Montaggio, noleggio del primo mese e smontaggio. Oltre il primo mese: 2–3 €/mq al mese.</td><td class="num" style="text-align:right">15 – 25 €/mq</td></tr>
+        <tr><td>Frontalini balconi</td><td>Rimozione parti ammalorate, trattamento ferri, ricostruzione. Il prezzo sale col degrado.</td><td class="num" style="text-align:right">20 – 40+ €/ml</td></tr>
+        <tr><td>Cornicioni e marcapiani</td><td>Rifacimento delle fasce decorative e dei cornicioni</td><td class="num" style="text-align:right">~ 120 €/ml</td></tr>
       </tbody>
     </table>
 
@@ -160,6 +179,33 @@
       <li><strong>Risanamento intonaci</strong> dove crepati o distaccati, con rete dove serve.</li>
       <li><strong>Fissativo e finitura</strong>: pittura per esterni (silossanica o ai silicati per durare).</li>
       <li><strong>Lattoneria e ripristini</strong>: scossaline, davanzali, frontalini dei balconi.</li>
+    </ul>
+
+    <h2>Cosa fa salire il prezzo</h2>
+    <ul class="checklist up-list">
+      <li><strong>L'altezza dell'edificio.</strong> Più piani = più mq di ponteggio, e il ponteggio da solo può valere il 30–45% del totale.</li>
+      <li><strong>Lo stato dell'intonaco.</strong> Tra ritinteggiare (15–30 €/mq) e risanare tutto (60–120 €/mq) c'è quattro volte tanto: lo decide quanto è ammalorata la facciata, non il pittore.</li>
+      <li><strong>Frontalini e ferri scoperti.</strong> Se dai balconi si vedono i ferri arrugginiti, ogni metro di frontalino va ricostruito: 20–40+ €/ml che si sommano in fretta.</li>
+      <li><strong>Cornicioni, decori e marcapiani.</strong> Le fasce decorative si lavorano a mano: circa 120 €/ml.</li>
+      <li><strong>Il cantiere che si allunga.</strong> Ogni mese di ponteggio oltre il primo sono 2–3 €/mq in più: su 300 mq, 600–900 € al mese solo per l'impalcatura ferma.</li>
+    </ul>
+
+    <h2>Cosa fa scendere il prezzo</h2>
+    <ul class="checklist down-list">
+      <li><strong>Fare più lavori con lo stesso ponteggio.</strong> Facciata + frontalini + lattoneria (e magari il tetto) in un colpo solo: il ponteggio lo paghi una volta.</li>
+      <li><strong>Intervenire quando l'intonaco è ancora sano.</strong> Una tinteggiatura fatta in tempo costa un quarto del risanamento fatto tardi.</li>
+      <li><strong>Tempi certi nel contratto.</strong> Durata dei lavori e del noleggio ponteggio scritte nero su bianco: ogni settimana di ritardo ha un costo.</li>
+      <li><strong>In condominio, muoversi insieme.</strong> Una facciata grande costa meno al mq di una piccola: i costi fissi di cantiere e ponteggio si dividono su più metri (e su più millesimi).</li>
+    </ul>
+
+    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <p>Sono quelle che trasformano il preventivo firmato in un conto più salato a fine cantiere:</p>
+    <ul class="checklist forget-list">
+      <li><strong>Il noleggio del ponteggio oltre il primo mese</strong> — molti preventivi quotano montaggio e smontaggio e tacciono sui 2–3 €/mq al mese se il cantiere si allunga. E i cantieri si allungano.</li>
+      <li><strong>L'occupazione del suolo pubblico</strong> — se il ponteggio sta su strada o marciapiede si paga una tassa al Comune, per tutta la durata: qualcuno la deve mettere in conto (e fare la pratica).</li>
+      <li><strong>I frontalini dei balconi</strong> — il degrado vero si vede solo dal ponteggio: fatti scrivere prima il prezzo al metro lineare, così l'extra non lo decide l'impresa a cantiere aperto.</li>
+      <li><strong>Lattoneria, scossaline e davanzali</strong> — se rifai la facciata e lasci le scossaline vecchie, le colature ricompaiono in un anno: o sono comprese o sono quotate.</li>
+      <li><strong>Smaltimento dell'intonaco demolito</strong> — le macerie del risanamento vanno in discarica e la discarica si paga.</li>
     </ul>
 
     <div class="related">
@@ -190,7 +236,7 @@
       <div class="field">
         <label>Extra (aggiungono al costo al mq)</label>
         <div class="checks" id="extra">
-          <label class="chk"><input type="checkbox" data-add="12" checked> Ponteggio <span class="price">+12 €/mq</span></label>
+          <label class="chk"><input type="checkbox" data-add="20" checked> Ponteggio (montaggio + 1° mese + smontaggio) <span class="price">+20 €/mq</span></label>
           <label class="chk"><input type="checkbox" data-add="10"> Cornicioni e decori <span class="price">+10 €/mq</span></label>
           <label class="chk"><input type="checkbox" data-add="8"> Ripristino balconi / frontalini <span class="price">+8 €/mq</span></label>
         </div>
@@ -198,8 +244,8 @@
 
       <div class="result">
         <div class="lbl">Stima indicativa</div>
-        <div class="amount" id="out">12.100 – 15.900 €</div>
-        <div class="permq" id="permq">circa 69 €/mq</div>
+        <div class="amount" id="out">13.200 – 17.900 €</div>
+        <div class="permq" id="permq">circa 77 €/mq</div>
         <div class="hint">Prezzo orientativo, IVA esclusa. Per la cifra esatta serve un sopralluogo sullo stato della facciata.</div>
       </div>
 
@@ -213,9 +259,10 @@
     <h2>Detrazioni per la facciata</h2>
     <p>Il rifacimento della facciata rientra tra gli interventi agevolabili con il <strong>bonus ristrutturazione</strong> (manutenzione straordinaria) e, se aggiungi l'isolamento a cappotto, nell'<strong>ecobonus</strong> con percentuali più alte. Attenzione: il vecchio "bonus facciate" non è più in vigore, quindi oggi si passa da queste agevolazioni. Le regole cambiano ogni anno: verifica sul sito dell'Agenzia delle Entrate e paga con bonifico parlante. Vedi la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.</p>
 
-    <h2>Come non farsi fregare sulla facciata</h2>
-    <ul class="checklist">
-      <li><strong>Ponteggio non quotato a parte.</strong> È la voce che pesa di più: fatti scrivere montaggio, durata del noleggio e smontaggio.</li>
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>Pagare il ponteggio due volte.</strong> Fare la facciata oggi e i frontalini tra due anni significa rimontare tutto: pianifica tutti i lavori "in quota" prima di montare.</li>
+      <li><strong>Ponteggio non quotato a parte.</strong> È la voce che pesa di più: fatti scrivere montaggio, durata del noleggio compresa, costo mensile oltre il primo mese e smontaggio.</li>
       <li><strong>"Rifacimento" che in realtà è solo pittura.</strong> Se l'intonaco è crepato, ridipingere sopra dura due anni. Chiedi se è previsto il risanamento.</li>
       <li><strong>Pittura non specificata.</strong> Per gli esterni servono pitture traspiranti e resistenti (silossaniche, ai silicati): fatti scrivere tipo e marca.</li>
       <li><strong>In condominio, delibera e millesimi.</strong> La facciata è parte comune: senza delibera regolare rischi contestazioni. Verifica prima con l'amministratore.</li>
@@ -231,7 +278,7 @@
     <div class="faq">
       <details open>
         <summary>Quanto costa tinteggiare una facciata?</summary>
-        <p>La sola tinteggiatura costa <strong>15–30 €/mq</strong>, a cui va aggiunto il ponteggio (8–15 €/mq). Per una facciata di 200 mq parli quindi di circa <strong>4.500–9.000 €</strong> ponteggio incluso.</p>
+        <p>La sola tinteggiatura costa <strong>15–30 €/mq</strong>, a cui va aggiunto il ponteggio (15–25 €/mq). Per una facciata di 200 mq parli quindi di circa <strong>6.000–11.000 €</strong> ponteggio incluso.</p>
       </details>
       <details>
         <summary>Quanto pesa il ponteggio sul totale?</summary>
@@ -249,6 +296,31 @@
         <summary>Quanto dura il lavoro?</summary>
         <p>Per una casa singola in genere <strong>1–3 settimane</strong> a seconda dello stato della facciata e del meteo (la pittura per esterni va data con tempo asciutto e temperature miti).</p>
       </details>
+      <details>
+        <summary>Quanto costano i frontalini dei balconi?</summary>
+        <p>Il ripristino dei frontalini costa in genere <strong>20–40 € al metro lineare</strong>, e sale se i ferri sono scoperti e va ricostruito il copriferro. È la voce che più spesso spunta a cantiere aperto: fatti scrivere il prezzo al metro <strong>prima</strong> di montare il ponteggio.</p>
+      </details>
+    </div>
+
+    <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
+    <div class="cities">
+      <h2>Trova imprese per questo lavoro nella tua città</h2>
+      <p>Su TrovaImpresa ci sono imprese edili e artigiani verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
+      <div class="cities-grid">
+        <a href="/imprese-roma.html">Roma</a>
+        <a href="/imprese-milano.html">Milano</a>
+        <a href="/imprese-napoli.html">Napoli</a>
+        <a href="/imprese-torino.html">Torino</a>
+        <a href="/imprese-bologna.html">Bologna</a>
+        <a href="/imprese-firenze.html">Firenze</a>
+        <a href="/imprese-genova.html">Genova</a>
+        <a href="/imprese-palermo.html">Palermo</a>
+        <a href="/imprese-bari.html">Bari</a>
+        <a href="/imprese-verona.html">Verona</a>
+        <a href="/imprese-venezia.html">Venezia</a>
+        <a href="/imprese-rieti.html">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
     </div>
 
   </article>
@@ -265,7 +337,7 @@
   "@context":"https://schema.org",
   "@type":"FAQPage",
   "mainEntity":[
-    {"@type":"Question","name":"Quanto costa tinteggiare una facciata?","acceptedAnswer":{"@type":"Answer","text":"La sola tinteggiatura costa 15–30 €/mq, più il ponteggio (8–15 €/mq). Per una facciata di 200 mq circa 4.500–9.000 € ponteggio incluso."}},
+    {"@type":"Question","name":"Quanto costa tinteggiare una facciata?","acceptedAnswer":{"@type":"Answer","text":"La sola tinteggiatura costa 15–30 €/mq, più il ponteggio (15–25 €/mq). Per una facciata di 200 mq circa 6.000–11.000 € ponteggio incluso."}},
     {"@type":"Question","name":"Quanto pesa il ponteggio sul costo della facciata?","acceptedAnswer":{"@type":"Answer","text":"Può valere il 30–45% della spesa, soprattutto sugli edifici alti. Conviene sfruttarlo per fare più lavori insieme (facciata, lattoneria, cappotto)."}},
     {"@type":"Question","name":"Meglio ritinteggiare o rifare l'intonaco della facciata?","acceptedAnswer":{"@type":"Answer","text":"Se l'intonaco è sano basta ritinteggiare; se è crepato o si stacca va risanato prima, altrimenti la pittura nuova salta in poco tempo."}},
     {"@type":"Question","name":"Serve un permesso per rifare la facciata?","acceptedAnswer":{"@type":"Answer","text":"Per la sola tinteggiatura mantenendo il colore in genere è edilizia libera. Se cambi colore o materiali o sei in zona vincolata servono autorizzazioni; in condominio serve la delibera."}},

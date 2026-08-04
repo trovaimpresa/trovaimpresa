@@ -63,6 +63,18 @@
   .checklist{list-style:none;padding:0;margin:16px 0}
   .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
   .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .up-list li:before{content:"▲";color:#c0392b}
+  .down-list li:before{content:"▼";color:#1e8e3e}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
   .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
   .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
   .related a{font-weight:bold}
@@ -135,7 +147,7 @@
 
   <article>
     <h1>Quanto costa rifare l'impianto elettrico nel 2026</h1>
-    <p class="meta">Aggiornato luglio 2026 · Lettura 6 min</p>
+    <p class="meta">Aggiornato agosto 2026 · Lettura 8 min · Prezzi verificati in cantiere</p>
 
     <div class="answer">
       <strong>Risposta rapida:</strong> rifare l'impianto elettrico di casa costa
@@ -145,7 +157,12 @@
 
     <p class="lead">L'impianto elettrico è uno di quei lavori dove non si scherza: è quello che tiene la casa sicura. Il prezzo lo fanno due cose — <strong>quanti punti</strong> (prese, luci, comandi) e <strong>che livello di impianto</strong> vuoi. La norma CEI 64-8 divide gli impianti in tre livelli, dal minimo di legge fino alla domotica, e più sali di livello più punti servono per stanza.</p>
 
-    <p>Un consiglio da cantiere: non guardare solo il prezzo. Un impianto va rifatto una volta ogni 30 anni, quindi risparmiare 500 € su un lavoro che dura decenni e riguarda la sicurezza non ha senso. Meglio spendere il giusto e avere la <strong>dichiarazione di conformità</strong> in mano.</p>
+    <p>Un consiglio prima di tutto: non guardare solo il prezzo. Un impianto va rifatto una volta ogni 30 anni, quindi risparmiare 500 € su un lavoro che dura decenni e riguarda la sicurezza non ha senso. Meglio spendere il giusto e avere la <strong>dichiarazione di conformità</strong> in mano.</p>
+
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> se un preventivo elettrico ti chiede 1.500 € e un altro 8.000, non è che il primo è un affare: <strong>contiene meno roba</strong>. Con 1.500 € di sola manodopera, materiali comprati da te e tracce fatte dal muratore, l'impianto si fa davvero — ma fuori restano fili, muratore, chiusure, rasature e tinteggiatura. Sommato tutto, la cifra torna sempre quella vera. Prima di confrontare due preventivi, chiediti: <strong>chi fa le tracce? chi compra i materiali? chi richiude e ritinteggia?</strong>
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
 
     <h2>Prezzi per livello (norma CEI 64-8)</h2>
     <table>
@@ -164,13 +181,54 @@
       <strong>Metodo a punto luce:</strong> molti elettricisti preventivano "a punto". Ogni punto (una presa, un interruttore, un'uscita per il lampadario) costa <strong>80–150 €</strong> tutto compreso. Un appartamento di 100 mq ha in genere 60–90 punti: fai il conto e confrontalo col prezzo al mq.
     </div>
 
+    <h2>Chi fa le tracce? Tre modi di preventivare lo stesso impianto</h2>
+    <p>È il motivo per cui i preventivi elettrici sembrano incomparabili: lo stesso identico impianto si può organizzare in tre modi, con tre prezzi diversi dell'elettricista — ma il costo <strong>totale</strong> del lavoro finito resta simile.</p>
+    <table>
+      <caption>Appartamento di 100 mq, rifacimento completo — i tre modi di dividere il lavoro</caption>
+      <thead>
+        <tr><th>Come si organizza</th><th>Cosa paghi all'elettricista</th><th style="text-align:right">Preventivo elettricista</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Chiavi in mano</strong></td><td>Tutto: tracce, chiusure, materiali, impianto e certificazione. Il prezzo delle tabelle qui sopra.</td><td class="num" style="text-align:right">5.000 – 9.000 €</td></tr>
+        <tr><td><strong>Tracce al muratore</strong></td><td>Solo la parte elettrica: il muratore (magari già in cantiere per la ristrutturazione) apre e richiude le tracce. Il costo dell'elettricista scende parecchio, ma il muratore lo paghi a parte.</td><td class="num" style="text-align:right">molto più basso</td></tr>
+        <tr><td><strong>Solo manodopera</strong></td><td>I materiali (fili, scatole, frutti) li compri tu, le tracce le fa il muratore: all'elettricista resta posa e collegamenti. Per un 100 mq si parla di circa <strong>1.500 €</strong> — ma fuori resta tutto il resto.</td><td class="num" style="text-align:right">~ 1.500 €</td></tr>
+      </tbody>
+    </table>
+    <p>Attento però: nel secondo e terzo caso <strong>la cifra finale non cambia molto</strong>, perché muratore, materiali, rasature e tinteggiatura li paghi comunque — solo su fatture diverse. Il vantaggio vero c'è quando il muratore è <strong>già in cantiere</strong> per una ristrutturazione: lì l'assistenza muraria costa poco perché la squadra c'è già.</p>
+
     <h2>Cosa deve comprendere il prezzo</h2>
     <ul class="checklist">
       <li><strong>Tracce e ripristini</strong>: aprire i muri per i nuovi corrugati e richiudere (poi vanno rasati/tinteggiati, spesso a parte).</li>
       <li><strong>Cavi, scatole, frutti e placche</strong>: il materiale visibile e quello dentro il muro.</li>
       <li><strong>Quadro elettrico nuovo</strong> con salvavita (differenziale) e magnetotermici a norma.</li>
       <li><strong>Impianto di terra</strong>: fondamentale per la sicurezza, deve essere verificato.</li>
-      <li><strong>Dichiarazione di conformità (DiCo)</strong>: il documento che certifica l'impianto a norma. Senza, l'impianto è fuorilegge.</li>
+      <li><strong>Dichiarazione di conformità (DiCo)</strong>: il documento che certifica l'impianto a norma. Va <strong>consegnata a fine lavori, sempre</strong>: senza, l'impianto è fuorilegge e avrai problemi con vendita, affitto e assicurazione.</li>
+    </ul>
+
+    <h2>Cosa fa salire il prezzo</h2>
+    <ul class="checklist up-list">
+      <li><strong>Il livello e il numero di punti.</strong> È la variabile principale: dal livello base al domotico si passa da 50 a 140 €/mq, e ogni presa o comando in più è un punto che paghi.</li>
+      <li><strong>Il chiavi in mano.</strong> Comodo, un solo referente — ma dentro ci sono anche tracce, chiusure e materiali al prezzo dell'elettricista.</li>
+      <li><strong>I ripristini dopo le tracce.</strong> Rasatura e tinteggiatura delle pareti toccate spesso non sono comprese: chiedi sempre chi le fa e a che prezzo.</li>
+      <li><strong>Punti decisi in corso d'opera.</strong> Ogni "già che ci sei, aggiungi una presa qui" a muri chiusi costa molto più della stessa presa decisa prima.</li>
+    </ul>
+
+    <h2>Cosa fa scendere il prezzo</h2>
+    <ul class="checklist down-list">
+      <li><strong>Tracce e chiusure al muratore.</strong> Se il muratore è già in cantiere per la ristrutturazione, l'assistenza muraria costa poco e il preventivo dell'elettricista scende parecchio.</li>
+      <li><strong>Materiali comprati da te.</strong> Fili, scatole e frutti li puoi comprare tu: con la sola manodopera un 100 mq si fa con circa 1.500 €. Funziona solo se sai cosa comprare (o ti fai fare la lista dall'elettricista) — e ricorda che il totale del lavoro finito non cambia molto.</li>
+      <li><strong>Decidere i punti prima, stanza per stanza.</strong> Un progetto chiaro evita varianti in corso d'opera, che sono i soldi spesi peggio di tutto il cantiere.</li>
+      <li><strong>Farlo dentro una ristrutturazione completa.</strong> Tracce, ripristini e tinteggiature si sommano agli altri lavori invece di essere pagati due volte.</li>
+    </ul>
+
+    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <p>Controlla che queste voci ci siano scritte, sono quelle che ritrovi come extra a fine lavori:</p>
+    <ul class="checklist forget-list">
+      <li><strong>Chi chiude le tracce</strong> — il preventivo dell'elettricista spesso apre e basta: chiusura, rasatura e tinteggiatura restano fuori.</li>
+      <li><strong>La tinteggiatura finale</strong> — dopo un rifacimento completo si ritinteggia quasi tutta la casa: qualcuno deve quotarla.</li>
+      <li><strong>L'impianto di terra</strong> — su un rifacimento completo va verificato o rifatto: se non c'è la voce, chiedi.</li>
+      <li><strong>La dichiarazione di conformità</strong> — è obbligatoria e va consegnata: se nel preventivo non è nominata, pretendila per iscritto.</li>
+      <li><strong>Spostamento del quadro o linee dedicate</strong> — forno, piano a induzione, condizionatori e wallbox vogliono linee proprie: vanno previste prima.</li>
     </ul>
 
     <div class="related">
@@ -222,8 +280,10 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Come capire se un preventivo elettrico è gonfiato</h2>
-    <ul class="checklist">
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>Confrontare preventivi che contengono cose diverse.</strong> Un "solo manodopera" da 1.500 € e un chiavi in mano da 8.000 non sono paragonabili: prima chiarisci chi fa le tracce, chi compra i materiali e chi ripristina, poi confronta.</li>
+      <li><strong>Saldare senza la dichiarazione di conformità in mano.</strong> La DiCo va consegnata a fine lavori: è il momento in cui hai più forza per pretenderla.</li>
       <li><strong>Prezzo a punto sopra i 180 €</strong> senza motivo (frutti di lusso o domotica): il punto standard sta sui 80–150 €.</li>
       <li><strong>Manca la dichiarazione di conformità.</strong> Deve essere inclusa: è obbligatoria per legge, non un extra da aggiungere dopo.</li>
       <li><strong>Nessuna voce per l'impianto di terra.</strong> Su un rifacimento completo va sempre verificato o rifatto.</li>
@@ -258,6 +318,31 @@
         <summary>Quanto dura il lavoro?</summary>
         <p>Per un appartamento medio in genere <strong>1–2 settimane</strong>, tra tracce, posa dei cavi, montaggio di quadro e frutti e chiusura. I ripristini murari e la tinteggiatura allungano un po' i tempi.</p>
       </details>
+      <details>
+        <summary>Perché un preventivo dice 1.500 € e un altro 8.000?</summary>
+        <p>Perché contengono cose diverse. Con <strong>1.500 €</strong> di sola manodopera (materiali comprati da te, tracce fatte dal muratore) l'impianto di un 100 mq si fa — ma fili, muratore, chiusure, rasature e tinteggiatura li paghi a parte. Il <strong>chiavi in mano</strong> mette tutto dentro un prezzo solo. Sommato tutto, il costo del lavoro finito è simile: cambia solo come è diviso.</p>
+      </details>
+    </div>
+
+    <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
+    <div class="cities">
+      <h2>Trova imprese per questo lavoro nella tua città</h2>
+      <p>Su TrovaImpresa ci sono imprese edili e artigiani verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
+      <div class="cities-grid">
+        <a href="/imprese-roma.html">Roma</a>
+        <a href="/imprese-milano.html">Milano</a>
+        <a href="/imprese-napoli.html">Napoli</a>
+        <a href="/imprese-torino.html">Torino</a>
+        <a href="/imprese-bologna.html">Bologna</a>
+        <a href="/imprese-firenze.html">Firenze</a>
+        <a href="/imprese-genova.html">Genova</a>
+        <a href="/imprese-palermo.html">Palermo</a>
+        <a href="/imprese-bari.html">Bari</a>
+        <a href="/imprese-verona.html">Verona</a>
+        <a href="/imprese-venezia.html">Venezia</a>
+        <a href="/imprese-rieti.html">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
     </div>
 
   </article>

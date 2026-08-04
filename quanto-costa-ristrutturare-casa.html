@@ -63,6 +63,18 @@
   tbody tr:last-child td{border-bottom:none}
   td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
   .total-row{background:var(--primary-soft)!important;font-weight:700}
+  .up-list li:before{content:"▲";color:#c0392b}
+  .down-list li:before{content:"▼";color:#1e8e3e}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
   .checklist{list-style:none;padding:0;margin:16px 0}
   .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
   .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
@@ -139,17 +151,22 @@
 
   <article>
     <h1>Quanto costa ristrutturare casa nel 2026 (al metro quadro)</h1>
-    <p class="meta">Scritto da un muratore con 25 anni di cantiere · Aggiornato luglio 2026 · Lettura 7 min</p>
+    <p class="meta">Scritto da un muratore con 25 anni di cantiere · Aggiornato agosto 2026 · Lettura 8 min</p>
 
     <div class="answer">
       <strong>Risposta rapida:</strong> ristrutturare casa in Italia costa
-      <span class="price-big">da 400 a 1.800 €/mq</span>
-      Una ristrutturazione parziale (pavimenti, tinteggiatura, un bagno) sta sui <strong>400–700 €/mq</strong>; una completa con impianti nuovi e finiture medie sui <strong>900–1.400 €/mq</strong>. Per un appartamento di 100 mq ristrutturato del tutto parli di <strong>90.000–140.000 €</strong>. Sotto trovi i prezzi voce per voce e un calcolatore.
+      <span class="price-big">da 350 a 800 €/mq</span>
+      Una ristrutturazione leggera (pavimenti, tinteggiatura, porte) sta sui <strong>350–600 €/mq</strong>; una completa con impianti nuovi e finiture medie sui <strong>600–800 €/mq</strong>, cioè <strong>60.000–80.000 €</strong> per un appartamento di 100 mq. Il conto vero però si fa in due pezzi: circa <strong>40.000 € di lavori d'impresa</strong> più i materiali di finitura che scegli tu. Con materiali di pregio si supera anche il doppio. Sotto trovi come si divide il conto e un calcolatore.
     </div>
 
     <p class="lead">Il prezzo di una ristrutturazione lo decide una cosa sopra tutte: <strong>quanto rifai gli impianti</strong>. Finché tocchi solo superfici (pavimenti, pareti, porte) resti in basso. Nel momento in cui apri le tracce per rifare elettrico, idraulico e riscaldamento, il costo al metro quadro raddoppia. È lì lo scalino vero, non nelle piastrelle di pregio.</p>
 
     <p>Ti do i numeri come li vedo in cantiere, non come li scrivono le agenzie. E ricordati: il "prezzo al mq" è comodo per farsi un'idea, ma il preventivo serio si fa sulle voci reali, perché una casa di 60 mq da rifare tutta costa di più al mq di una da 150 mq (i costi fissi si spalmano su meno superficie).</p>
+
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> il preventivo dell'impresa e i materiali sono <strong>due conti separati</strong>. I lavori di una ristrutturazione media su 100 mq — demolizioni, impianti, massetti, intonaci, posa e tinteggiatura — costano intorno ai <strong>40.000 €</strong>. Porte, finestre, pavimenti, rivestimenti e sanitari li scegli tu, e sono loro a decidere se il totale si ferma a 60.000 € o vola oltre gli 80.000. Quando confronti i preventivi, la prima domanda è sempre: <strong>materiali compresi o esclusi?</strong>
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
 
     <h2>Prezzi al mq per tipo di ristrutturazione</h2>
     <table>
@@ -159,33 +176,54 @@
       </thead>
       <tbody>
         <tr><td>Leggera</td><td>Tinteggiatura, pavimenti, porte, piccole opere. Impianti invariati.</td><td class="num" style="text-align:right">350 – 600 €/mq</td></tr>
-        <tr><td>Media / parziale</td><td>Come sopra + un bagno rifatto e qualche modifica di impianto.</td><td class="num" style="text-align:right">600 – 900 €/mq</td></tr>
-        <tr><td>Completa</td><td>Si rifà tutto: impianti nuovi, bagni, pavimenti, finiture medie.</td><td class="num" style="text-align:right">900 – 1.400 €/mq</td></tr>
-        <tr><td>Di pregio / lusso</td><td>Completa con materiali alti, domotica, infissi top, progettazione.</td><td class="num" style="text-align:right">1.400 – 2.500 €/mq</td></tr>
+        <tr><td>Parziale</td><td>Come sopra + un bagno rifatto e qualche modifica di impianto.</td><td class="num" style="text-align:right">450 – 700 €/mq</td></tr>
+        <tr><td>Completa, finiture medie</td><td>Si rifà tutto: impianti nuovi, bagni, pavimenti. Per un 100 mq sono 60.000–80.000 €.</td><td class="num" style="text-align:right">600 – 800 €/mq</td></tr>
+        <tr><td>Di pregio / lusso</td><td>Stessi lavori, ma qui comandano i materiali: infissi top, domotica, progettazione.</td><td class="num" style="text-align:right">1.000 – 1.800 €/mq</td></tr>
       </tbody>
     </table>
 
-    <h2>Dove finiscono i soldi: le voci di una ristrutturazione completa</h2>
-    <p>Questa è la scomposizione tipica per un appartamento di 100 mq rifatto interamente, finiture medie. Serve per leggere un preventivo e capire se qualcuno ti sta caricando su una voce.</p>
+    <h2>Dove finiscono i soldi: lavori da una parte, materiali dall'altra</h2>
+    <p>Le imprese serie il conto lo fanno così, in due pezzi. Ed è così che devi leggerlo anche tu, perché è l'unico modo per confrontare due preventivi senza farti confondere.</p>
 
     <table>
       <caption>Ristrutturazione completa, appartamento 100 mq, finiture medie</caption>
       <thead>
-        <tr><th>Voce di lavoro</th><th style="text-align:right">Costo</th></tr>
+        <tr><th>Parte del conto</th><th>Cosa c'è dentro</th><th style="text-align:right">Costo</th></tr>
       </thead>
       <tbody>
-        <tr><td>Demolizioni e smaltimento in discarica</td><td class="num" style="text-align:right">5.000 – 9.000 €</td></tr>
-        <tr><td>Impianto elettrico nuovo a norma</td><td class="num" style="text-align:right">6.000 – 10.000 €</td></tr>
-        <tr><td>Impianto idraulico e riscaldamento</td><td class="num" style="text-align:right">7.000 – 13.000 €</td></tr>
-        <tr><td>Massetti, intonaci, cartongesso</td><td class="num" style="text-align:right">8.000 – 14.000 €</td></tr>
-        <tr><td>Pavimenti e rivestimenti (materiale + posa)</td><td class="num" style="text-align:right">12.000 – 22.000 €</td></tr>
-        <tr><td>Infissi e serramenti</td><td class="num" style="text-align:right">8.000 – 16.000 €</td></tr>
-        <tr><td>Bagni completi (uno o due)</td><td class="num" style="text-align:right">8.000 – 16.000 €</td></tr>
-        <tr><td>Opere per la cucina + tinteggiatura</td><td class="num" style="text-align:right">6.000 – 11.000 €</td></tr>
-        <tr><td>Pratiche, progetto, direzione lavori e sicurezza</td><td class="num" style="text-align:right">4.000 – 8.000 €</td></tr>
-        <tr class="total-row"><td>Totale indicativo</td><td class="num" style="text-align:right">64.000 – 119.000 €</td></tr>
+        <tr><td><strong>Lavori d'impresa</strong></td><td>Demolizioni e smaltimento, impianto elettrico e idraulico nuovi, massetti e intonaci, posa di pavimenti e rivestimenti, montaggio di porte e sanitari, tinteggiatura, assistenze murarie.</td><td class="num" style="text-align:right">~ 40.000 €</td></tr>
+        <tr><td><strong>Materiali di finitura</strong> (li scegli tu)</td><td>Porte, finestre, pavimenti, rivestimenti, sanitari e rubinetterie. Fascia media. Con materiali di pregio questa voce può anche raddoppiare.</td><td class="num" style="text-align:right">20.000 – 40.000 €</td></tr>
+        <tr class="total-row"><td>Totale chiavi in mano</td><td>Finiture di fascia media</td><td class="num" style="text-align:right">60.000 – 80.000 €</td></tr>
       </tbody>
     </table>
+
+    <p>Perché ti conviene ragionare così? Perché i <strong>lavori d'impresa si possono confrontare</strong>: demolire, rifare gli impianti e posare costa più o meno uguale per tutti, e se un preventivo si stacca troppo dai 40.000 € (in su o in giù) c'è una ragione da farsi spiegare. I <strong>materiali invece sono gusto e budget tuoi</strong>: la stessa casa cambia di decine di migliaia di euro solo scegliendo un pavimento o un infisso diverso — a parità di lavori.</p>
+
+    <h2>Cosa fa salire il prezzo</h2>
+    <ul class="checklist up-list">
+      <li><strong>Gli impianti.</strong> È lo scalino vero: finché tocchi le superfici resti in basso, quando apri le tracce per elettrico e idraulico il costo al mq raddoppia.</li>
+      <li><strong>I materiali di finitura.</strong> Dai 20.000 € di una fascia media si può raddoppiare senza accorgersene: è la voce che fa ballare il totale più di tutte.</li>
+      <li><strong>Le varianti in corso d'opera.</strong> Ogni "già che ci siamo" deciso a cantiere aperto costa il doppio della stessa scelta fatta prima di iniziare.</li>
+      <li><strong>La casa piccola.</strong> Al mq costa di più: i costi fissi (cantiere, pratiche, un bagno comunque intero) si spalmano su meno superficie.</li>
+    </ul>
+
+    <h2>Cosa fa scendere il prezzo</h2>
+    <ul class="checklist down-list">
+      <li><strong>Decidere tutto prima.</strong> Progetto chiaro, materiali scelti prima di aprire il cantiere: niente varianti, niente fermi, niente sorprese.</li>
+      <li><strong>Fare tutti i lavori in una volta.</strong> Aprire il cantiere una volta sola costa meno che ristrutturare a pezzi in anni diversi: demolizioni, ponteggi e pratiche si pagano una volta.</li>
+      <li><strong>Stare sulla fascia media dei materiali.</strong> Tra il pavimento medio e quello di pregio la differenza si vede sul conto più che sotto i piedi.</li>
+      <li><strong>Confrontare 3 preventivi con lo stesso schema di voci.</strong> Non per prendere il più basso: per vedere chi ha dimenticato pezzi di lavoro.</li>
+    </ul>
+
+    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <p>Su un lavoro da decine di migliaia di euro, queste sono le voci che spariscono dal preventivo e ricompaiono a metà cantiere:</p>
+    <ul class="checklist forget-list">
+      <li><strong>Smaltimento in discarica</strong> — le macerie di una ristrutturazione completa sono tante e la discarica si paga: la voce deve esserci, con la quantità.</li>
+      <li><strong>Assistenze murarie agli impiantisti</strong> — chi apre e richiude le tracce per elettricista e idraulico? Se non è scritto, è un extra sicuro.</li>
+      <li><strong>Pratiche, direzione lavori e sicurezza</strong> — CILA/SCIA, tecnico e piano di sicurezza: una ristrutturazione seria li ha. Se spariscono dal preventivo, ricompaiono dopo.</li>
+      <li><strong>Tinteggiatura finale</strong> — dopo impianti e ripristini si ritinteggia tutta la casa: qualcuno deve averla quotata.</li>
+      <li><strong>Montaggi delle finiture</strong> — porte, sanitari e ferramenta vanno montati: controlla che la posa sia dentro i lavori, non solo la fornitura.</li>
+    </ul>
 
     <div class="related">
       🛁 Se devi rifare solo il bagno, ho una guida dedicata con prezzi e calcolatore: <a href="/quanto-costa-rifare-il-bagno.html">quanto costa rifare il bagno</a>.<br>
@@ -210,9 +248,9 @@
         <label>Tipo di ristrutturazione</label>
         <div class="seg" id="tipo">
           <button data-eur="475">Leggera<small>solo superfici</small></button>
-          <button data-eur="750">Media<small>parziale</small></button>
-          <button data-eur="1150" class="active">Completa<small>impianti nuovi</small></button>
-          <button data-eur="1900">Pregio<small>lusso</small></button>
+          <button data-eur="575">Parziale<small>+ un bagno</small></button>
+          <button data-eur="700" class="active">Completa<small>finiture medie</small></button>
+          <button data-eur="1400">Pregio<small>lusso</small></button>
         </div>
       </div>
 
@@ -228,8 +266,8 @@
 
       <div class="result">
         <div class="lbl">Stima indicativa</div>
-        <div class="amount" id="out">103.000 – 132.000 €</div>
-        <div class="permq" id="permq">circa 1.150 €/mq</div>
+        <div class="amount" id="out">63.000 – 81.000 €</div>
+        <div class="permq" id="permq">circa 700 €/mq</div>
         <div class="hint">Prezzo orientativo chiavi in mano, IVA 10% inclusa. Per la cifra esatta serve un sopralluogo.</div>
       </div>
 
@@ -240,8 +278,9 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Come capire se un preventivo di ristrutturazione è gonfiato</h2>
-    <ul class="checklist">
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>Confrontare un preventivo "materiali compresi" con uno "materiali esclusi".</strong> È l'errore numero uno: sembrano lontani 30.000 € ma magari contengono le stesse cose. Prima separa lavori e materiali, poi confronta.</li>
       <li><strong>"Ristrutturazione a corpo" con un solo numero.</strong> Su decine di migliaia di euro pretendi il computo metrico: ogni voce con quantità e prezzo unitario. Il blocco unico serve a nascondere il margine.</li>
       <li><strong>Prezzo al mq troppo tondo e uguale per tutto.</strong> Rifare un bagno costa al mq molto più di ripiastrellare una camera. Se ti applicano lo stesso €/mq ovunque, stanno arrotondando a loro favore.</li>
       <li><strong>Impianti "adeguamento" invece di "rifacimento".</strong> Sono due cose e due prezzi diversi. Fatti scrivere nero su bianco cosa viene rifatto davvero e cosa resta.</li>
@@ -263,7 +302,11 @@
     <div class="faq">
       <details open>
         <summary>Quanto costa ristrutturare un appartamento di 100 mq?</summary>
-        <p>Dipende dal tipo di lavori. Una ristrutturazione completa con impianti nuovi e finiture medie costa in genere <strong>90.000–140.000 €</strong>. Se è parziale (superfici e un bagno) si scende a <strong>50.000–80.000 €</strong>.</p>
+        <p>Dipende dal tipo di lavori. Una ristrutturazione completa con impianti nuovi e finiture medie costa in genere <strong>60.000–80.000 €</strong>: circa 40.000 € di lavori d'impresa più 20.000–40.000 € di materiali di finitura. Una ristrutturazione leggera (solo superfici) sta invece sui <strong>35.000–60.000 €</strong>.</p>
+      </details>
+      <details>
+        <summary>I 40.000 € di lavori cosa comprendono?</summary>
+        <p>Tutto quello che fa l'impresa: demolizioni e smaltimento, impianto elettrico e idraulico nuovi, massetti e intonaci, posa di pavimenti e rivestimenti, montaggio di porte e sanitari, tinteggiatura e assistenze murarie. Restano <strong>fuori i materiali di finitura</strong> che scegli tu: porte, finestre, pavimenti, rivestimenti e sanitari.</p>
       </details>
       <details>
         <summary>Conviene di più al mq una casa piccola o grande?</summary>
@@ -283,6 +326,27 @@
       </details>
     </div>
 
+    <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
+    <div class="cities">
+      <h2>Trova imprese per questo lavoro nella tua città</h2>
+      <p>Su TrovaImpresa ci sono imprese edili e artigiani verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
+      <div class="cities-grid">
+        <a href="/imprese-roma.html">Roma</a>
+        <a href="/imprese-milano.html">Milano</a>
+        <a href="/imprese-napoli.html">Napoli</a>
+        <a href="/imprese-torino.html">Torino</a>
+        <a href="/imprese-bologna.html">Bologna</a>
+        <a href="/imprese-firenze.html">Firenze</a>
+        <a href="/imprese-genova.html">Genova</a>
+        <a href="/imprese-palermo.html">Palermo</a>
+        <a href="/imprese-bari.html">Bari</a>
+        <a href="/imprese-verona.html">Verona</a>
+        <a href="/imprese-venezia.html">Venezia</a>
+        <a href="/imprese-rieti.html">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
+    </div>
+
   </article>
 </main>
 
@@ -297,7 +361,7 @@
   "@context":"https://schema.org",
   "@type":"FAQPage",
   "mainEntity":[
-    {"@type":"Question","name":"Quanto costa ristrutturare un appartamento di 100 mq?","acceptedAnswer":{"@type":"Answer","text":"Una ristrutturazione completa con impianti nuovi e finiture medie costa in genere 90.000–140.000 €. Se è parziale (superfici e un bagno) si scende a 50.000–80.000 €."}},
+    {"@type":"Question","name":"Quanto costa ristrutturare un appartamento di 100 mq?","acceptedAnswer":{"@type":"Answer","text":"Una ristrutturazione completa con impianti nuovi e finiture medie costa in genere 60.000–80.000 €: circa 40.000 € di lavori d'impresa più 20.000–40.000 € di materiali di finitura. Una ristrutturazione leggera (solo superfici) sta sui 35.000–60.000 €."}},
     {"@type":"Question","name":"Conviene di più al mq una casa piccola o grande?","acceptedAnswer":{"@type":"Answer","text":"Al metro quadro una casa piccola costa di più, perché i costi fissi si spalmano su meno superficie. Una casa grande abbassa il costo al mq."}},
     {"@type":"Question","name":"Quanto tempo ci vuole per ristrutturare casa?","acceptedAnswer":{"@type":"Answer","text":"Una ristrutturazione completa di un appartamento medio richiede in genere 3–5 mesi, tra pratiche, demolizioni, impianti, asciugature, finiture e montaggi."}},
     {"@type":"Question","name":"Ci sono bonus fiscali per ristrutturare casa?","acceptedAnswer":{"@type":"Answer","text":"Sì, i lavori rientrano nel bonus ristrutturazioni e, per alcuni interventi, in agevolazioni sull'efficienza energetica. Percentuali e massimali cambiano ogni anno con la legge di bilancio; pagare con bonifico parlante."}},
@@ -315,7 +379,7 @@
   var tipoBtns = document.querySelectorAll('#tipo button');
   var checks = document.querySelectorAll('#extra input');
   var chkLabels = document.querySelectorAll('#extra .chk');
-  var eurMq = 1150;
+  var eurMq = 700;
 
   function fmt(n){ return Math.round(n/1000)*1000; }
   function euro(n){ return n.toLocaleString('it-IT'); }

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trova cantieri: come trovare lavori in subappalto nel 2026 | TrovaImpresa</title>
+<meta name="description" content="Cerchi cantieri o lavori in subappalto? Su TrovaImpresa pubblichi gratis la tua disponibilità e ti fai trovare dalle imprese che cercano squadre nella tua zona.">
+<link rel="canonical" href="https://trovaimpresa.com/trova-cantieri">
+<meta property="og:title" content="Trova cantieri: come trovare lavori in subappalto nel 2026">
+<meta property="og:description" content="Dove si trovano i cantieri oggi, come funziona la bacheca subappalto gratuita e come farsi scegliere dalle imprese.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://trovaimpresa.com/trova-cantieri">
+<meta property="og:image" content="https://trovaimpresa.com/logo.png">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .steps{counter-reset:step;list-style:none;padding:0;margin:16px 0}
+  .steps li{position:relative;padding:14px 0 14px 56px;border-bottom:1px solid var(--line)}
+  .steps li:before{counter-increment:step;content:counter(step);position:absolute;left:6px;top:12px;width:34px;height:34px;border-radius:50%;background:var(--primary);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"–"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-band .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px}
+  .cta-band .cta-dark:hover{background:var(--accent-dark)}
+  .cta-band .cta-light{display:inline-block;background:#fff;color:var(--primary-dark);border:2px solid var(--primary);padding:13px 24px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;margin-left:8px}
+  .cta-band .cta-light:hover{background:var(--primary-soft)}
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    th,td{padding:10px}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .cta-band .cta-light{margin-left:0}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/blog.html">Guide e Costi</a>
+    <a href="/subappalto-offre.html" class="menu-btn">Offri disponibilità</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/subappalto.html">Subappalto</a> › Trova cantieri</nav>
+
+  <article>
+    <h1>Trova cantieri: come trovare lavori in subappalto</h1>
+    <p class="meta">Aggiornato agosto 2026 · Lettura 6 min · Scritto da chi in cantiere ci ha lavorato 25 anni</p>
+
+    <div class="answer">
+      <strong>Risposta rapida:</strong> per trovare cantieri e lavori in subappalto oggi i canali sono quattro: il passaparola, le rivendite di materiali, i general contractor e le <strong>bacheche online specializzate</strong>. Su TrovaImpresa c'è una <strong>bacheca subappalto gratuita</strong>: pubblichi la disponibilità della tua squadra e ti fai trovare dalle imprese che cercano subappaltatori nella tua zona — o guardi direttamente le richieste aperte.
+    </div>
+
+    <p class="lead">Chi ha una squadra lo sa: il problema non è lavorare, è <strong>non avere buchi tra un cantiere e l'altro</strong>. Una squadra ferma costa come una che lavora, solo che non fattura. Ecco i canali che funzionano davvero per riempire il calendario, e come usare la bacheca subappalto di TrovaImpresa.</p>
+
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> il passaparola è il canale migliore che esista — finché gira. Il problema è che si esaurisce sempre nel momento peggiore: quando il general contractor che ti dava lavoro rallenta, si ferma tutta la tua stagione. Le squadre che non restano mai ferme sono quelle che tengono <strong>più canali aperti insieme</strong>: il passaparola, sì, ma anche la presenza fissa dove le imprese cercano.
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
+
+    <h2>Dove si trovano i cantieri in subappalto oggi</h2>
+    <table>
+      <caption>I canali per trovare lavori in subappalto, pro e contro</caption>
+      <thead>
+        <tr><th>Canale</th><th>Come funziona</th><th>Il limite</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Passaparola</strong></td><td>Imprese e capicantiere con cui hai già lavorato ti richiamano.</td><td>Si esaurisce quando il giro rallenta; non lo controlli tu.</td></tr>
+        <tr><td><strong>Rivendite di materiali</strong></td><td>Il banconista sa chi sta aprendo cantieri in zona: chiedere costa niente.</td><td>Informazione casuale, non costante.</td></tr>
+        <tr><td><strong>General contractor</strong></td><td>Le imprese grandi che vincono appalti cercano squadre in subappalto in continuazione.</td><td>Margini più bassi e pagamenti da negoziare bene.</td></tr>
+        <tr><td><strong>Bacheca subappalto online</strong></td><td>Pubblichi la disponibilità una volta e resti visibile a tutte le imprese che cercano nella tua zona.</td><td>Devi scrivere bene l'annuncio (sotto ti dico come).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Come funziona la bacheca subappalto di TrovaImpresa</h2>
+    <ol class="steps">
+      <li><strong>Se cerchi cantieri:</strong> pubblichi gratis la disponibilità della tua squadra su <a href="/subappalto-offre.html">Sono subappaltatore</a> — mestiere, zona, da quando sei libero.</li>
+      <li><strong>Se cerchi squadre:</strong> pubblichi gratis la richiesta su <a href="/subappalto-cerca.html">Cerco subappaltatori</a> — le squadre disponibili della tua zona ti trovano.</li>
+      <li><strong>Il contatto è diretto:</strong> impresa e subappaltatore si parlano senza intermediari e si accordano tra loro.</li>
+    </ol>
+
+    <div class="note">
+      <strong>Perché conviene esserci anche quando lavori:</strong> l'annuncio pubblicato oggi lavora per te tra due mesi, quando il cantiere attuale finisce. Il momento giusto per farsi trovare non è quando la squadra è ferma: è prima.
+    </div>
+
+    <h2>Come farsi scegliere: cosa scrivere nell'annuncio</h2>
+    <ul class="checklist">
+      <li><strong>Il mestiere preciso.</strong> "Impresa edile" dice poco: "squadra di 4 muratori per murature, intonaci e massetti" dice tutto.</li>
+      <li><strong>La zona reale di lavoro.</strong> Provincia e raggio in cui ti muovi davvero: promettere trasferte che poi non fai brucia i contatti.</li>
+      <li><strong>Squadra e attrezzatura.</strong> Quante persone, che mezzi e attrezzature porti in cantiere: è la prima cosa che un'impresa valuta.</li>
+      <li><strong>Da quando sei disponibile.</strong> Le imprese cercano quasi sempre per date precise: chi ha la disponibilità chiara vince sul generico "contattaci".</li>
+      <li><strong>Documenti in regola.</strong> DURC regolare e visura pronta: chi subappalta ne ha bisogno per contratto, e chi li ha già pronti parte in vantaggio.</li>
+    </ul>
+
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>Lavorare senza contratto di subappalto scritto.</strong> Oggetto dei lavori, importi, tempi e penali nero su bianco: la stretta di mano non paga i fornitori.</li>
+      <li><strong>Non definire i pagamenti.</strong> Acconti e stati di avanzamento (SAL) vanno scritti prima di entrare in cantiere, non discussi alla fine.</li>
+      <li><strong>Entrare a prezzo troppo basso pur di lavorare.</strong> Un cantiere in perdita costa più di una settimana ferma: fai i conti prima di dire sì.</li>
+      <li><strong>Dipendere da un solo committente.</strong> Se un'impresa vale l'80% del tuo fatturato, il tuo calendario non è tuo: tieni sempre più canali aperti.</li>
+    </ul>
+
+    <div class="cta-band">
+      <h3>Cerchi cantieri per la tua squadra?</h3>
+      <p>Pubblica gratis la tua disponibilità e fatti trovare dalle imprese della tua zona.</p>
+      <a href="/subappalto-offre.html" class="cta-dark">Pubblica la disponibilità →</a>
+      <a href="/subappalto-cerca.html" class="cta-light">Cerco io dei subappaltatori →</a>
+    </div>
+
+    <h2>Domande frequenti su cantieri e subappalto</h2>
+    <div class="faq">
+      <details open>
+        <summary>Come trovo cantieri in subappalto nella mia zona?</summary>
+        <p>Tieni aperti più canali insieme: passaparola, rivendite di materiali, general contractor e una <strong>bacheca online</strong>. Su TrovaImpresa pubblichi gratis la disponibilità della tua squadra e resti visibile alle imprese che cercano subappaltatori nella tua provincia.</p>
+      </details>
+      <details>
+        <summary>Quanto costa pubblicare l'annuncio su TrovaImpresa?</summary>
+        <p><strong>Niente</strong>: pubblicare la disponibilità come subappaltatore e pubblicare una richiesta di subappaltatori sono gratuiti. Il contatto tra impresa e squadra è diretto, senza intermediari.</p>
+      </details>
+      <details>
+        <summary>Cosa serve per lavorare in subappalto in regola?</summary>
+        <p>Le basi: <strong>contratto di subappalto scritto</strong>, DURC regolare, idoneità tecnico-professionale e i requisiti di sicurezza del cantiere. Per gli appalti pubblici ci sono regole in più: verifica sempre cosa chiede il contratto d'appalto principale.</p>
+      </details>
+      <details>
+        <summary>Meglio lavorare per un solo general contractor o per più imprese?</summary>
+        <p>Il general contractor unico dà continuità ma ti lega: se rallenta lui, ti fermi tu. La posizione più solida è avere <strong>un committente principale e altri canali attivi</strong>, così un calo di lavoro non diventa una stagione persa.</p>
+      </details>
+      <details>
+        <summary>Le imprese possono cercare squadre su TrovaImpresa?</summary>
+        <p>Sì: un'impresa che cerca subappaltatori pubblica gratis la richiesta su <strong>Cerco subappaltatori</strong> indicando lavorazione, zona e periodo, e viene contattata dalle squadre disponibili.</p>
+      </details>
+    </div>
+
+    <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
+    <div class="cities">
+      <h2>Cerca imprese e squadre nella tua città</h2>
+      <p>Su TrovaImpresa ci sono imprese edili e artigiani verificati in 106 città italiane. Scegli la tua:</p>
+      <div class="cities-grid">
+        <a href="/imprese-roma.html">Roma</a>
+        <a href="/imprese-milano.html">Milano</a>
+        <a href="/imprese-napoli.html">Napoli</a>
+        <a href="/imprese-torino.html">Torino</a>
+        <a href="/imprese-bologna.html">Bologna</a>
+        <a href="/imprese-firenze.html">Firenze</a>
+        <a href="/imprese-genova.html">Genova</a>
+        <a href="/imprese-palermo.html">Palermo</a>
+        <a href="/imprese-bari.html">Bari</a>
+        <a href="/imprese-verona.html">Verona</a>
+        <a href="/imprese-venezia.html">Venezia</a>
+        <a href="/imprese-rieti.html">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa — trova imprese edili e artigiani verificati nella tua zona, e cantieri per la tua squadra con la bacheca subappalto gratuita.</p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Come trovo cantieri in subappalto nella mia zona?","acceptedAnswer":{"@type":"Answer","text":"Tenendo aperti più canali insieme: passaparola, rivendite di materiali, general contractor e una bacheca online. Su TrovaImpresa si pubblica gratis la disponibilità della squadra e si resta visibili alle imprese che cercano subappaltatori in zona."}},
+    {"@type":"Question","name":"Quanto costa pubblicare l'annuncio di subappalto su TrovaImpresa?","acceptedAnswer":{"@type":"Answer","text":"Niente: pubblicare la disponibilità come subappaltatore e pubblicare una richiesta di subappaltatori sono gratuiti. Il contatto tra impresa e squadra è diretto."}},
+    {"@type":"Question","name":"Cosa serve per lavorare in subappalto in regola?","acceptedAnswer":{"@type":"Answer","text":"Contratto di subappalto scritto, DURC regolare, idoneità tecnico-professionale e requisiti di sicurezza del cantiere. Per gli appalti pubblici valgono regole aggiuntive."}},
+    {"@type":"Question","name":"Meglio lavorare per un solo general contractor o per più imprese?","acceptedAnswer":{"@type":"Answer","text":"Il committente unico dà continuità ma lega: la posizione più solida è un committente principale più altri canali attivi, così un calo di lavoro non ferma la squadra."}},
+    {"@type":"Question","name":"Le imprese possono cercare squadre in subappalto su TrovaImpresa?","acceptedAnswer":{"@type":"Answer","text":"Sì: l'impresa pubblica gratis la richiesta indicando lavorazione, zona e periodo, e viene contattata dalle squadre disponibili."}}
+  ]
+}
+</script>
+
+</body>
+</html>
