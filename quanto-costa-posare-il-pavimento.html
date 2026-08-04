@@ -53,6 +53,12 @@
   .checklist{list-style:none;padding:0;margin:16px 0}
   .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
   .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .up-list li:before{content:"▲";color:#c0392b}
+  .down-list li:before{content:"▼";color:#1e8e3e}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
   .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
   .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
   .related a{font-weight:bold}
@@ -131,7 +137,7 @@
 
   <article>
     <h1>Quanto costa posare il pavimento nel 2026</h1>
-    <p class="meta">Aggiornato luglio 2026 · Lettura 6 min</p>
+    <p class="meta">Scritto da un muratore con 25 anni di cantiere · Aggiornato agosto 2026 · Lettura 8 min</p>
 
     <div class="answer">
       <strong>Risposta rapida:</strong> posare il pavimento costa, materiale + posa,
@@ -140,6 +146,11 @@
     </div>
 
     <p class="lead">Il pavimento ha due prezzi che spesso vengono confusi: il <strong>materiale</strong> (la piastrella o il legno che compri) e la <strong>posa</strong> (la manodopera per metterlo giù). Un gres economico posato bene può costare meno di un gres di pregio posato male. E c'è un terzo elemento che decide tutto: <strong>lo stato del sottofondo</strong>. Se il massetto è storto o va rifatto, il conto cambia parecchio.</p>
+
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> quando si toglie il vecchio pavimento bisogna <strong>pregare che il massetto sotto sia in ottimo stato</strong>. Perché se è sfarinato, staccato o pieno di crepe non lo puoi riusare: va rifatto, e lì i costi si impennano. Ed è la beffa di questo lavoro — <strong>il massetto non lo vedi finché non hai già demolito</strong>, cioè quando ormai non puoi più tornare indietro. Per questo il preventivo di un pavimento va chiesto con una domanda in più: <em>"e se il massetto è da rifare, quanto mi costa in più?"</em> Farsi dare quel numero prima vale più di qualsiasi sconto sulla piastrella.
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
 
     <h2>Prezzi del pavimento per tipo (posa inclusa)</h2>
     <table>
@@ -159,6 +170,20 @@
       <strong>Solo posa:</strong> se il materiale lo compri tu, la manodopera di posa costa <strong>18–38 €/mq</strong>: gres standard 18–25 €/mq, grandi formati e pose diagonali 30–38 €/mq, parquet 25–40 €/mq. I formati grandi (120x120, 80x240) costano di più perché servono attrezzature e due posatori.
     </div>
 
+    <h2>Sovrapposizione o demolizione: le due strade</h2>
+    <p>In una ristrutturazione, davanti a un pavimento da cambiare, le strade sono due. Sceglierne una o l'altra cambia il conto più di qualsiasi piastrella.</p>
+    <table>
+      <caption>Le due strade a confronto, ristrutturazione completa</caption>
+      <thead>
+        <tr><th>Strada</th><th>Come funziona</th><th>Il rischio</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Sovrapposizione</strong><br>(posa sopra l'esistente)</td><td>Se il vecchio pavimento è <strong>buono e ben ancorato</strong>, non si tocca: si tratta con un prodotto molto aggrappante (primer) e si posa sopra con una <strong>colla apposita</strong>. Niente demolizione, niente macerie, niente polvere, e si va molto più veloci.</td><td>Il pavimento si alza di qualche centimetro: vanno accorciate le porte e sistemate le soglie.</td></tr>
+        <tr><td><strong>Demolizione</strong><br>(si toglie il vecchio)</td><td>Si rimuove tutto il pavimento esistente e si posa il nuovo sul massetto. È la strada obbligata se il vecchio pavimento è staccato, crepato o "suona a vuoto".</td><td><strong>Il massetto.</strong> Se sotto è sfarinato o rovinato va rifatto, e i costi si impennano. Lo scopri solo dopo aver demolito.</td></tr>
+      </tbody>
+    </table>
+    <p>La sovrapposizione ha una cattiva fama immeritata: fatta con i prodotti giusti tiene benissimo, e ti risparmia demolizione, smaltimento in discarica, polvere in tutta casa e — soprattutto — <strong>il rischio massetto</strong>. Il suo unico vero limite è l'altezza: alzando il piano di calpestio bisogna accorciare le porte e raccordare le soglie con gli altri ambienti. Se il pavimento vecchio invece si muove, suona a vuoto o è crepato, non c'è scelta: si demolisce, perché posare su un fondo instabile significa vedere il pavimento nuovo staccarsi entro un anno.</p>
+
     <h2>Cosa deve comprendere il prezzo</h2>
     <ul class="checklist">
       <li><strong>Rimozione del vecchio pavimento</strong> e smaltimento (10–18 €/mq), se non posi sopra l'esistente.</li>
@@ -166,6 +191,35 @@
       <li><strong>Colla o materiale di posa</strong> adatto al formato (i grandi formati vogliono colle specifiche).</li>
       <li><strong>Posa</strong> con le fughe giuste e planarità controllata.</li>
       <li><strong>Battiscopa</strong> e profili di raccordo tra ambienti.</li>
+    </ul>
+
+    <h2>Cosa fa salire il prezzo</h2>
+    <ul class="checklist up-list">
+      <li><strong>Il massetto da rifare.</strong> È di gran lunga la voce più pesante: si scopre solo dopo aver demolito e può cambiare il conto di migliaia di euro su una casa intera.</li>
+      <li><strong>I grandi formati.</strong> Le lastre 120x120 o 80x240 vogliono attrezzature dedicate e due posatori: la manodopera passa da 18–25 a 30–38 €/mq.</li>
+      <li><strong>Le pose particolari.</strong> Diagonale, spina di pesce, cassero irregolare: più tagli, più sfrido, più ore.</li>
+      <li><strong>Le stanze piccole e piene di angoli.</strong> Bagni e corridoi costano al mq più di un salone: si taglia di più e si posa di meno.</li>
+      <li><strong>Demolizione e discarica.</strong> Togliere il vecchio pavimento sono 10–18 €/mq tra manodopera e smaltimento delle macerie.</li>
+    </ul>
+
+    <h2>Cosa fa scendere il prezzo</h2>
+    <ul class="checklist down-list">
+      <li><strong>La sovrapposizione, quando è possibile.</strong> Niente demolizione, niente discarica, nessun rischio massetto: è il risparmio più grosso disponibile su questo lavoro.</li>
+      <li><strong>Il formato standard.</strong> Un 60x60 si posa veloce e senza attrezzature speciali. I formati giganti sono bellissimi ma li paghi due volte, in materiale e in manodopera.</li>
+      <li><strong>La posa dritta.</strong> Rispetto alla diagonale o alla spina si risparmia sia in ore sia in sfrido di materiale.</li>
+      <li><strong>Fare tutta la casa in una volta.</strong> Un solo cantiere, un solo trasporto, un solo allestimento: al mq costa meno che stanza per stanza.</li>
+      <li><strong>Case vuote e ambienti sgombri.</strong> Se il posatore non deve spostare mobili e proteggere ogni cosa, lavora più in fretta.</li>
+    </ul>
+
+    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <p>Sui pavimenti la sorpresa arriva quasi sempre da sotto. Controlla che ci sia scritto:</p>
+    <ul class="checklist forget-list">
+      <li><strong>Cosa succede se il massetto è da rifare</strong> — la voce più importante di tutte. Fatti dare il prezzo al mq del rifacimento <em>prima</em> di iniziare, così se capita non sei in balia di nessuno.</li>
+      <li><strong>Lo smaltimento in discarica</strong> — le macerie di un pavimento demolito sono tante e pesanti: il trasporto e la discarica si pagano.</li>
+      <li><strong>Lo sfrido del materiale</strong> — si compra sempre il 10% in più per tagli e rotture: se il preventivo conta i mq esatti della stanza, il materiale non basterà.</li>
+      <li><strong>Battiscopa, soglie e profili</strong> — sono la rifinitura che si vede di più e spesso restano fuori dal prezzo al mq.</li>
+      <li><strong>L'accorciatura delle porte</strong> — se fai la sovrapposizione il piano si alza: le porte vanno tagliate e le soglie raccordate.</li>
+      <li><strong>La pulizia finale e la stuccatura delle fughe</strong> — il gres appena posato va lavato con prodotti specifici per togliere i residui di colla e stucco.</li>
     </ul>
 
     <div class="related">
@@ -216,8 +270,11 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Come non farsi fregare sulla posa</h2>
-    <ul class="checklist">
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>Firmare senza sapere cosa succede se il massetto è da rifare.</strong> È il rischio numero uno del lavoro e si scopre a demolizione fatta: il prezzo di quell'eventualità va concordato prima, non contrattato quando il pavimento è già a terra.</li>
+      <li><strong>Demolire quando si poteva sovrapporre.</strong> Se il pavimento vecchio è sano e ben ancorato, buttarlo giù significa pagare demolizione, discarica e rischio massetto per niente. Fatti spiegare perché non si può posare sopra.</li>
+      <li><strong>Sovrapporre su un pavimento che si muove.</strong> Il contrario dell'errore di sopra: se il vecchio suona a vuoto o è crepato, posare sopra vuol dire vedersi staccare il nuovo entro un anno.</li>
       <li><strong>Materiale e posa in un unico numero.</strong> Fatti separare le due voci: così capisci se stai pagando troppo il lavoro o la piastrella.</li>
       <li><strong>Sottofondo dato per scontato.</strong> Il posatore deve dirti se il massetto va bene: se posa su un fondo storto, il pavimento "balla" e le fughe si aprono.</li>
       <li><strong>Prezzo uguale per formati diversi.</strong> Un 120x120 non si posa come un 30x30: se il prezzo è identico, o non hanno capito o taglieranno gli angoli.</li>
@@ -255,6 +312,14 @@
       <details>
         <summary>Quanto dura il lavoro?</summary>
         <p>Per un appartamento di 80–100 mq in genere <strong>3–6 giorni</strong>, più i tempi di asciugatura di massetti e colle prima di camminarci sopra. I grandi formati e le pose particolari allungano i tempi.</p>
+      </details>
+      <details>
+        <summary>Si può posare il pavimento nuovo sopra quello vecchio?</summary>
+        <p><strong>Sì, se il vecchio è sano e ben ancorato.</strong> Si tratta con un prodotto molto aggrappante e si posa sopra con una colla apposita: niente demolizione, niente macerie, niente rischio massetto, e si fa molto prima. Non si può fare se il pavimento vecchio si muove, suona a vuoto o è crepato. L'unico limite è l'altezza: il piano si alza di qualche centimetro e vanno accorciate le porte.</p>
+      </details>
+      <details>
+        <summary>E se sotto il vecchio pavimento il massetto è rovinato?</summary>
+        <p>Va rifatto, e <strong>lì i costi si impennano</strong>: si parla di 12–25 €/mq in più solo per il massetto, su tutta la superficie. Il problema è che lo stato del massetto si vede solo dopo aver demolito. Per questo, prima di iniziare, fatti scrivere nel preventivo <strong>quanto costerebbe rifarlo</strong>: se poi capita, il prezzo è già concordato.</p>
       </details>
     </div>
 
