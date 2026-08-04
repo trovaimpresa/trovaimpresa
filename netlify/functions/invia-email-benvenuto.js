@@ -103,12 +103,32 @@ exports.handler = async function(event) {
   const linkPannello = 'https://trovaimpresa.com/' + pannello;
   const isCandidato = tipo === 'candidato';
 
-  let subject, corpo, mostraRegalo;
+  let subject, corpo, mostraRegalo, ctaTesto;
+
+  // Il pezzo piu' importante di tutta l'email: senza profilo completo
+  // l'iscritto resta invisibile e il portale non puo' fare niente per lui.
+  // Va detto subito e chiaro, altrimenti legge "ti ho regalato il Premium",
+  // pensa di aver finito e non torna piu'.
+  const bloccoProfilo =
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 20px;">' +
+      '<tr><td style="background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:10px;padding:16px 18px;">' +
+        '<div style="font-size:15px;font-weight:800;color:#1e8e3e;margin-bottom:6px;">Adesso serve una cosa sola: completare il profilo</div>' +
+        '<div style="font-size:14px;color:#25452f;line-height:1.6;">' +
+          'Entra nel pannello, apri <strong>&ldquo;Modifica profilo&rdquo;</strong> e compila tutti i campi. Contano soprattutto tre cose: ' +
+          'l&rsquo;<strong>indirizzo</strong>, che &egrave; quello che ti fa comparire tra i risultati dei clienti della tua zona; ' +
+          'una <strong>descrizione</strong> chiara di quello che fai; e qualche <strong>foto dei tuoi lavori</strong>.<br><br>' +
+          'Ci tengo a essere chiaro, perch&eacute; &egrave; il cuore di TrovaImpresa: tutto il portale si regge sul farti vedere e notare dai clienti. ' +
+          'Ma io posso mostrare solo quello che c&rsquo;&egrave;. <strong>Se il profilo resta a met&agrave; rimani invisibile</strong>, e il sito non pu&ograve; aiutarti. ' +
+          'Non &egrave; una formalit&agrave;: &egrave; la differenza tra essere iscritto ed essere trovato.' +
+        '</div>' +
+      '</td></tr>' +
+    '</table>';
 
   if (premium) {
     // Upgrade pagato (Stripe): niente scadenza, ringraziamento.
     subject = '⭐ Grazie per essere passato a TrovaImpresa Premium!';
     mostraRegalo = false;
+    ctaTesto = 'Vai al tuo pannello &rarr;';
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
       '<p style="margin:0 0 16px;">grazie per aver scelto <strong>TrovaImpresa Premium</strong>.</p>' +
@@ -117,20 +137,23 @@ exports.handler = async function(event) {
     // I candidati non hanno il piano Premium: benvenuto semplice.
     subject = '🎉 Benvenuto su TrovaImpresa!';
     mostraRegalo = false;
+    ctaTesto = 'Completa il tuo profilo &rarr;';
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
       '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
-      '<p style="margin:0 0 16px;">Il tuo profilo &egrave; attivo: accedi per completarlo e farti trovare dalle imprese che cercano collaboratori nella tua zona.</p>';
+      '<p style="margin:0 0 16px;">Il tuo profilo &egrave; attivo, ma per farti trovare dalle imprese che cercano collaboratori nella tua zona deve essere <strong>completo</strong>: mestiere, esperienza, zona e curriculum. Un profilo a met&agrave; non viene notato.</p>';
   } else {
     // Nuova iscrizione business: regalo 3 mesi Premium.
     subject = '🎁 Benvenuto su TrovaImpresa – 3 mesi di Premium in regalo!';
     mostraRegalo = true;
+    ctaTesto = 'Completa il tuo profilo &rarr;';
     corpo =
       '<p style="margin:0 0 16px;">' + saluto + '</p>' +
       '<p style="margin:0 0 16px;">grazie per esserti iscritto a <strong>TrovaImpresa.com</strong>.</p>' +
       '<p style="margin:0 0 16px;">Per darti il benvenuto e ringraziarti della fiducia, ho deciso di attivare sul tuo account il <strong>Piano Premium per i primi 3 mesi, in modo del tutto gratuito</strong>.</p>' +
       '<p style="margin:0 0 16px;">Con il Premium hai <strong>maggiore visibilit&agrave;</strong>, posizione prioritaria nei risultati di ricerca e pi&ugrave; possibilit&agrave; di essere contattato dai potenziali clienti. Il tuo account &egrave; gi&agrave; stato aggiornato e non &egrave; richiesta alcuna azione da parte tua.</p>' +
-      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">Allo scadere dei 3 mesi il tuo profilo torner&agrave; automaticamente al piano Free, <strong>senza alcun addebito</strong>.</p>';
+      '<p style="margin:0 0 16px;color:#5a6b7b;font-size:14px;">Allo scadere dei 3 mesi il tuo profilo torner&agrave; automaticamente al piano Free, <strong>senza alcun addebito</strong>.</p>' +
+      bloccoProfilo;
   }
 
   const fasciaRegalo = mostraRegalo
@@ -150,7 +173,7 @@ exports.handler = async function(event) {
             corpo +
             '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px auto 22px;"><tr>' +
               '<td align="center" style="border-radius:9px;background:#0066ff;">' +
-                '<a href="' + linkPannello + '" style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:9px;">Vai al tuo pannello &rarr;</a>' +
+                '<a href="' + linkPannello + '" style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:9px;">' + (ctaTesto || 'Vai al tuo pannello &rarr;') + '</a>' +
               '</td>' +
             '</tr></table>' +
             '<p style="margin:0 0 16px;">Resto a disposizione per qualsiasi necessit&agrave; o chiarimento tramite questo indirizzo email.</p>' +
