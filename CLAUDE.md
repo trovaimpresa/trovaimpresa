@@ -123,9 +123,71 @@ Senza, una scrittura bloccata da RLS e' indistinguibile da una riuscita.
   "anche nella tua regione" (`_fuoriZona` + `ordinaFuoriZona()`).
 - Attenzione: `cerca-artigiani.html` usa `cittaSafe`, gli altri 3 file `cittaScelta`.
 
+## SEO e contenuti (agosto 2026)
+
+### ⚠️ REGOLA D'ORO: rilanciare `genera-imprese-citta.js` dopo ogni gruppo di iscrizioni
+Le pagine città mostrano le imprese tramite una **sezione statica** scritta dentro l'HTML
+dallo script `genera-imprese-citta.js` (marker `<!-- IMPRESE-LOCALI-START/END -->`).
+**Non è dinamica**: se lo script non viene rilanciato, le imprese nuove restano invisibili.
+
+Sintomo: ci sono imprese in `imprese` con quella città, ma la pagina non ha la sezione
+"Imprese e artigiani attivi a X". Non è un bug, è solo lo script non rilanciato.
+
+Ad agosto 2026 era fermo da luglio: 46 imprese iscritte e **una sola** pagina città
+(Rieti) con contenuto. Rilanciato → **31 pagine città popolate** in un colpo.
+
+Blocco pronto da dare ad Alex:
+```bash
+cd ~/Downloads/trovaimpresa && node genera-imprese-citta.js && git add -A && git commit -m "Aggiornate imprese citta" && git push
+```
+
+**Correlazione osservata**: l'unica pagina città che compariva su Google era l'unica con
+imprese vere dentro. Le pagine città senza imprese non si posizionano: sono ~420 parole
+identiche + un paragrafo unico sul settore edile locale. Il problema è di **offerta**
+(poche imprese iscritte), non di SEO.
+
+### Strategia contenuti: guide sui prezzi
+Google ha classificato TrovaImpresa come sito di **prezzi edilizi**, non come marketplace
+(298 query, quasi tutte ricerche di costo). La strategia è assecondare: guide "quanto costa"
+molto approfondite che portano dentro il marketplace.
+
+- Template riutilizzabile: `docs/TEMPLATE-guida-costi.html` (non pubblicato, sta in docs).
+- Struttura di una guida: risposta secca col prezzo in alto, box verde **"Parola di cantiere"**
+  (l'esperienza vera di Alex, la firma che i concorrenti non possono copiare), tabelle prezzi,
+  ▲ cosa fa salire, ▼ cosa fa scendere, ✎ voci dimenticate, ✕ errori da evitare, calcolatore,
+  FAQ + JSON-LD FAQPage, blocco finale "Trova imprese nella tua città".
+- **I prezzi si chiedono ad Alex, non si inventano**: 25 anni in cantiere come muratore.
+  Se non li sa, si cercano su prezziari/fonti di settore e si fanno confermare da lui.
+- Le guide sono **file HTML statici nella root**. La tabella Supabase `blog_articoli` serve
+  solo a generare la card nel blog, con `url_esterno` che punta al file statico.
+  Per una guida nuova: creare l'HTML + INSERT in `blog_articoli` + voce in `sitemap.xml`
+  + card in `costi-ristrutturazione.html`.
+
+### Regole di Alex sulle pagine esistenti
+- **NON toccare** title, meta description, canonical, JSON-LD, robots.txt, sitemap delle
+  pagine già a posto. Si aggiunge contenuto visibile, non si tocca la testa del file.
+- I 7 errori 404 non si sistemano (7 pagine su 848, impatto zero).
+
+### Stato SEO (3 mag – 31 lug 2026)
+79 clic totali, di cui **57 di brand** ("trovaimpresa"): SEO vera = 22 clic in 3 mesi.
+La homepage prende 67 clic su 79. Le guide fanno 488 impressioni ma CTR 0,8% (posizione
+troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
 - **Deciso di NON mettere** spazi pubblicitari sulle pagine `cerca-*` e `risultati.html` (scelta di Alex, luglio 2026). Non riproporlo.
 - Eseguire `sql/trigger-candidato.sql` su Supabase e aggiungere il filtro sul `tipo` a `crea_profilo_impresa` (vedi sopra).
 - Se in futuro si vuole salvare i campi extra alla registrazione impresa, ampliare il trigger `crea_profilo_impresa` per leggerli da `raw_user_meta_data`.
+- **75 città sono ancora senza imprese** (agosto 2026): è la lista di lavoro per il reclutamento.
+  Obiettivo concreto, non "trovare imprese ovunque".
+- **Piano reclutamento imprese: da finire.** Analisi fatta, decisioni aperte: (a) se regalare
+  gli strumenti del gestionale o limitarsi a cambiare il messaggio (oggi l'offerta vende
+  "visibilità", che a traffico zero non è credibile — gli strumenti sì); (b) quante ore a
+  settimana Alex può davvero dedicarci, perché lavora in cantiere. Materiali proposti e non
+  ancora fatti: email per la lista `reclutamento-lazio.csv`, volantino per le rivendite,
+  traccia telefonata, riscrittura di `perche-registrarsi.html`.
+- Guide "quanto costa" ancora da arricchire: **bagno (priorità, è la ricerca più fatta)**,
+  tetto, cappotto, imbiancare, fotovoltaico.
+- Domanda strategica aperta: TrovaImpresa è un marketplace o un software per imprese edili?
+  Sono due aziende diverse e prima o poi cambia dove Alex mette le sue ore.
