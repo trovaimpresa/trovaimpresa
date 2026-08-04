@@ -2821,6 +2821,7 @@
       meta:[ind?"📍 "+esc(ind):"",
             c.referente?"👤 "+esc(c.referente):"",
             c.telefono?"📞 "+esc(c.telefono):"",
+            c.email?"✉️ "+esc(c.email):"",
             fisc?"🧾 "+fisc:""],
       azioni:cliVoci(c)
     });
@@ -2832,7 +2833,7 @@
     cliCache=data||[];
     let L=cliCache;
     if(cliQ){const q=cliQ.toLowerCase();
-      L=L.filter(c=>[c.nome,c.indirizzo,c.referente,c.telefono].some(x=>(x||"").toLowerCase().includes(q)));}
+      L=L.filter(c=>[c.nome,c.indirizzo,c.referente,c.telefono,c.email].some(x=>(x||"").toLowerCase().includes(q)));}
     renderTabella({
       id:"cli", box:"#cli-list",
       vuoto:cliQ?tabVuotoCerca(cliQ):tabVuoto("Qui tieni i tuoi clienti",
@@ -4067,6 +4068,9 @@
           <div class="field"><label>Referente / Amministratore</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Nome"></div>
           <div class="field"><label>Telefono</label><input id="c-tel" type="tel" value="${esc(c.telefono||"")}" placeholder="Numero"></div>
         </div>
+        <div class="field"><label>Email</label>
+          <input id="c-email" type="email" value="${esc(c.email||"")}" placeholder="cliente@email.it"></div>
+        <div class="sh-nota">Serve per mandargli preventivi e fatture via email. Non &egrave; la PEC: quella si scrive pi&ugrave; in basso.</div>
       </div>
 
       <div class="sh-b">
@@ -4109,7 +4113,7 @@
     const nome=v("#c-nome");if(!nome){toast("Scrivi il nome");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const row={nome,
-      indirizzo:v("#c-ind"), referente:v("#c-ref"), telefono:v("#c-tel"),
+      indirizzo:v("#c-ind"), referente:v("#c-ref"), telefono:v("#c-tel"), email:v("#c-email")||null,
       cap:v("#c-cap")||null, citta:v("#c-citta")||null, prov:v("#c-prov").toUpperCase()||null,
       piva:v("#c-piva")||null, cod_fiscale:v("#c-cf").toUpperCase()||null,
       sdi_codice:v("#c-sdi").toUpperCase()||null, sdi_pec:v("#c-pec")||null};
