@@ -63,6 +63,12 @@
   .checklist{list-style:none;padding:0;margin:16px 0}
   .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
   .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .up-list li:before{content:"▲";color:#c0392b}
+  .down-list li:before{content:"▼";color:#1e8e3e}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
   .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
   .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
   .related a{font-weight:bold}
@@ -137,7 +143,7 @@
 
   <article>
     <h1>Quanto costa rifare l'impianto idraulico nel 2026</h1>
-    <p class="meta">Aggiornato luglio 2026 · Lettura 6 min</p>
+    <p class="meta">Scritto da un muratore con 25 anni di cantiere · Aggiornato agosto 2026 · Lettura 8 min</p>
 
     <div class="answer">
       <strong>Risposta rapida:</strong> rifare l'impianto idraulico di casa costa
@@ -146,6 +152,11 @@
     </div>
 
     <p class="lead">L'impianto idraulico si conta a <strong>punti acqua</strong>: ogni presa d'acqua (lavabo, doccia, WC, lavatrice, lavello) e ogni scarico è un punto. Più punti e più sono lontani dalle colonne, più costa. Il grosso della fatica non è il tubo, ma <strong>aprire e richiudere i muri</strong> per farlo passare — ecco perché conviene rifarlo insieme alle piastrelle, non dopo.</p>
+
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> il preventivo dell'idraulico <strong>non comprende quasi mai le tracce</strong>. Agli impiantisti — idraulici ed elettricisti — le tracce non piacciono: qualcuno fa le tracce piccole e blocca tubi e scatole in posizione, ma il lavoro grosso e pesante (aprire le tracce, chiuderle, rasare e ripristinare) <strong>lo fa il muratore</strong>, ed è un altro mestiere e un'altra fattura. È la ragione numero uno per cui due preventivi idraulici sembrano incomparabili: uno tiene dentro l'assistenza muraria e l'altro no. Chiedilo sempre, prima di firmare.
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
 
     <h2>Prezzi per ambiente e a punto acqua</h2>
     <table>
@@ -165,13 +176,56 @@
       <strong>Al metro quadro:</strong> per una casa intera si può ragionare anche a <strong>70–150 €/mq</strong>, ma è una stima grossolana: l'idraulico si paga sui punti, non sui metri quadri. Diffida di chi ti fa un prezzo al mq secco senza contare bagni e cucina.
     </div>
 
+    <h2>Chi fa le tracce: la domanda che decide il preventivo</h2>
+    <p>Su un rifacimento idraulico il tubo è la parte facile. La fatica vera è <strong>aprire i muri per farlo passare e poi richiuderli</strong>. E quel lavoro, quasi sempre, non lo fa l'idraulico.</p>
+    <table>
+      <caption>Come si divide davvero il lavoro in cantiere</caption>
+      <thead>
+        <tr><th>Chi</th><th>Cosa fa</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>L'idraulico</strong></td><td>Porta e monta tubi, collettori e scarichi. Al massimo fa le <strong>tracce piccole</strong> e blocca tubi e scatole in posizione. Poi fa il collaudo in pressione.</td></tr>
+        <tr><td><strong>Il muratore</strong></td><td>Il lavoro grosso e pesante: aprire le tracce lunghe, richiuderle, rasare, ripristinare. Più lo smaltimento delle macerie.</td></tr>
+        <tr><td><strong>L'imbianchino</strong></td><td>Rasatura fine e tinteggiatura delle pareti toccate, a lavori finiti.</td></tr>
+      </tbody>
+    </table>
+    <p>Ecco perché due preventivi idraulici possono sembrare lontanissimi tra loro: uno tiene dentro l'<strong>assistenza muraria</strong> e l'altro no. Prima di confrontare i numeri, chiedi a ognuno la stessa domanda — <em>chi apre le tracce, chi le chiude, chi ripristina?</em> — e vedrai che i prezzi si riavvicinano. Se il muratore è già in cantiere per una ristrutturazione, l'assistenza muraria costa poco perché la squadra c'è già: è un altro motivo per fare tutti i lavori insieme invece che a pezzi.</p>
+
     <h2>Cosa deve comprendere il prezzo</h2>
     <ul class="checklist">
-      <li><strong>Tracce e ripristini murari</strong> per far passare i tubi (poi vanno rasati, spesso a parte).</li>
+      <li><strong>Tracce e ripristini murari</strong> per far passare i tubi — ma controlla <strong>chi</strong> li fa: spesso è il muratore e si paga a parte.</li>
       <li><strong>Tubazioni di carico</strong> (acqua calda e fredda), in genere con collettore e tubo multistrato.</li>
       <li><strong>Scarichi</strong> con le giuste pendenze: se sono fatti male, il bagno "gorgoglia" o puzza.</li>
       <li><strong>Attacchi</strong> per lavatrice, lavastoviglie e caldaia dove servono.</li>
       <li><strong>Collaudo tenuta</strong>: prova in pressione prima di chiudere i muri, per essere sicuri che non perda.</li>
+    </ul>
+
+    <h2>Cosa fa salire il prezzo</h2>
+    <ul class="checklist up-list">
+      <li><strong>Spostare i punti acqua e gli scarichi.</strong> Lasciare WC e doccia dov'erano costa poco; spostarli di due metri vuol dire tracce lunghe, pendenze da rifare e a volte un rialzo del pavimento.</li>
+      <li><strong>L'assistenza muraria non compresa.</strong> Tracce, chiusure e ripristini sono un secondo mestiere: se non sono nel preventivo dell'idraulico, sono una fattura in più.</li>
+      <li><strong>La distanza dalle colonne di scarico.</strong> Più il punto è lontano dalla colonna, più tubo serve e più diventa complicato tenere la pendenza giusta.</li>
+      <li><strong>Il secondo bagno o la lavanderia.</strong> Ogni ambiente nuovo con acqua aggiunge punti, tubi e scarichi.</li>
+      <li><strong>Lavorare a muri chiusi.</strong> Rifare l'impianto dopo aver piastrellato significa rompere il nuovo: è il modo più caro di fare le cose.</li>
+    </ul>
+
+    <h2>Cosa fa scendere il prezzo</h2>
+    <ul class="checklist down-list">
+      <li><strong>Tenere i sanitari dove sono.</strong> Stessa posizione di WC, doccia e lavabo: pochi metri di tubo, poche tracce, prezzo minimo.</li>
+      <li><strong>Farlo insieme alla ristrutturazione.</strong> Se muratore e piastrellista sono già in casa, tracce e ripristini costano una frazione: mai rifare l'impianto da solo se hai in programma anche il resto.</li>
+      <li><strong>Decidere tutto prima.</strong> Posizione di ogni attacco, lavatrice, lavastoviglie e addolcitore stabilita sul foglio: ogni ripensamento a muri aperti è tempo e soldi.</li>
+      <li><strong>Un solo referente per impianto e opere murarie.</strong> L'impresa che coordina idraulico e muratore evita i tempi morti in cui nessuno lavora e tu paghi il cantiere fermo.</li>
+    </ul>
+
+    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <p>Su un impianto idraulico queste sono quelle che spuntano a lavori iniziati:</p>
+    <ul class="checklist forget-list">
+      <li><strong>Chi chiude le tracce</strong> — la dimenticanza numero uno: l'idraulico apre (o fa aprire) e va via, il muro resta così.</li>
+      <li><strong>Rasatura e tinteggiatura finale</strong> — dopo le tracce le pareti vanno rifinite e ripitturate: quasi mai è nel preventivo dell'idraulico.</li>
+      <li><strong>Lo smaltimento delle macerie</strong> — le tracce producono detriti, e la discarica si paga.</li>
+      <li><strong>La sostituzione della colonna di scarico</strong> — se la colonna condominiale è vecchia e in ghisa, scoprirlo a muri aperti cambia il conto: chiedi che venga verificata prima.</li>
+      <li><strong>Il collaudo in pressione</strong> — è il controllo che ti evita di scoprire una perdita dopo aver piastrellato: deve essere scritto.</li>
+      <li><strong>Rubinetteria e sanitari</strong> — l'impianto è una cosa, i pezzi che si vedono sono un'altra: quasi sempre si comprano a parte.</li>
     </ul>
 
     <div class="related">
@@ -224,8 +278,10 @@
     </div>
     <!-- =============== FINE CALCOLATORE =============== -->
 
-    <h2>Come capire se un preventivo idraulico è gonfiato</h2>
-    <ul class="checklist">
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>Confrontare preventivi che contengono cose diverse.</strong> Uno comprende l'assistenza muraria e l'altro no: prima chiarisci chi apre e chiude le tracce, poi confronta i numeri.</li>
+      <li><strong>Rifare l'impianto dopo aver piastrellato.</strong> È l'errore più caro in assoluto: si rompe il nuovo per rifare il vecchio. L'ordine giusto è impianti, poi massetti e piastrelle.</li>
       <li><strong>Non dice quanti punti acqua.</strong> È la base del preventivo idraulico: pretendi il numero di punti, non solo il totale.</li>
       <li><strong>Prezzo a punto sopra i 180 €</strong> senza motivo: il punto standard sta sui 75–150 €.</li>
       <li><strong>Manca il collaudo in pressione.</strong> È il controllo che evita disastri dopo aver chiuso i muri: deve esserci.</li>
@@ -263,6 +319,10 @@
       <details>
         <summary>Quanto dura il lavoro?</summary>
         <p>Per un bagno singolo <strong>2–4 giorni</strong>; per un appartamento completo <strong>1–2 settimane</strong>, considerando tracce, posa, collaudo e chiusura dei muri.</p>
+      </details>
+      <details>
+        <summary>Le tracce sono comprese nel preventivo dell'idraulico?</summary>
+        <p>Quasi mai per intero. Agli impiantisti le tracce non piacciono: l'idraulico fa al massimo le <strong>tracce piccole</strong> e blocca tubi e scatole in posizione, mentre il lavoro grosso — aprire le tracce lunghe, chiuderle, rasare e ripristinare — <strong>lo fa il muratore</strong>, con una fattura a parte. È la prima cosa da chiarire quando confronti due preventivi.</p>
       </details>
     </div>
 
