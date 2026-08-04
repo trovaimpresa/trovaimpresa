@@ -1,0 +1,402 @@
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  TEMPLATE GUIDA "QUANTO COSTA" — TrovaImpresa
+  ═══════════════════════════════════════════════════════════════════
+  COME SI USA:
+  1. Copia questo file nella root del progetto e rinominalo, es.:
+     quanto-costa-NOME-LAVORO.html (tutto minuscolo, parole separate da -)
+  2. Cerca tutti i segnaposto ⟦COSÌ⟧ e sostituiscili (CTRL+F → "⟦")
+  3. Controlla che il canonical sia SENZA .html
+  4. Aggiungi la pagina a sitemap.xml
+  5. Aggiungi il link alla guida in costi-ristrutturazione.html e blog.html
+  NON pubblicare il file con i segnaposto ancora dentro!
+  ═══════════════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⟦DOMANDA ESATTA CERCATA, es: Quanto costa rifare il bagno⟧ nel 2026: prezzi reali | TrovaImpresa</title>
+<meta name="description" content="⟦Domanda?⟧ ⟦Risposta secca col prezzo, es: Da 4.000 a 8.000 € per un bagno standard.⟧ Prezzi reali di cantiere, voci dimenticate nei preventivi e calcolatore gratuito.">
+<link rel="canonical" href="https://trovaimpresa.com/⟦nome-file-senza-.html⟧">
+<meta property="og:title" content="⟦Stesso title senza | TrovaImpresa⟧">
+<meta property="og:description" content="⟦Riassunto breve con i prezzi⟧">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://trovaimpresa.com/⟦nome-file-senza-.html⟧">
+<meta property="og:image" content="https://trovaimpresa.com/logo.png">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --ok-bg:#eefbf1;--ok-line:#b7e4c3;
+    --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  caption{text-align:left;font-size:14px;color:var(--muted);margin-bottom:8px}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .up-list li:before{content:"▲";color:#c0392b}
+  .down-list li:before{content:"▼";color:#1e8e3e}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:var(--ok-bg);border:1px solid var(--ok-line);border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"–"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .calc{border:2px solid var(--primary);border-radius:18px;padding:24px;margin:34px 0;background:linear-gradient(180deg,#fff, var(--bg-alt))}
+  .calc h3{margin-top:0;font-size:23px;color:var(--primary-dark)}
+  .calc .sub{color:var(--muted);font-size:15px;margin-top:-2px}
+  .field{margin:18px 0}
+  .field label{display:block;font-weight:600;margin-bottom:8px;font-size:16px}
+  .field .val{color:var(--primary-dark);font-weight:700}
+  input[type=range]{width:100%;accent-color:var(--primary);height:6px}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:70px;padding:12px 8px;border:1.5px solid var(--line);background:#fff;border-radius:12px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;transition:.15s}
+  .seg button.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .seg button small{display:block;font-weight:normal;font-size:12px;opacity:.75}
+  .checks{display:grid;gap:10px}
+  .chk{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;font-size:16px;user-select:none}
+  .chk input{width:20px;height:20px;accent-color:var(--primary);margin:0}
+  .chk.active{border-color:var(--primary);background:var(--primary-soft)}
+  .chk .price{margin-left:auto;color:var(--muted);font-size:14px;white-space:nowrap}
+  .result{margin-top:24px;background:var(--primary);color:#fff;border-radius:14px;padding:22px;text-align:center}
+  .result .lbl{font-size:15px;opacity:.9;text-transform:uppercase;letter-spacing:.5px}
+  .result .amount{font-size:34px;font-weight:800;margin:6px 0}
+  .result .hint{font-size:14px;opacity:.9;margin-top:4px}
+  .cta-group{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  .cta{display:block;text-align:center;padding:15px 18px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:.15s}
+  .cta-primary{background:#fff;color:var(--primary-dark);border:2px solid #fff}
+  .cta-primary:hover{background:var(--primary-soft)}
+  .cta-secondary{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.6)}
+  .cta-secondary:hover{border-color:#fff}
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-band .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px}
+  .cta-band .cta-dark:hover{background:var(--accent-dark)}
+
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .price-big{font-size:24px}
+    th,td{padding:10px}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+    .seg button{min-width:0}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/blog.html">Guide e Costi</a>
+    <a href="/cerca-artigiani.html" class="menu-btn">Trova un ⟦mestiere, es: idraulico⟧</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/costi-ristrutturazione.html">Costi</a> › ⟦Domanda della guida⟧</nav>
+
+  <article>
+
+    <!-- H1 = la domanda ESATTA che la gente scrive su Google -->
+    <h1>⟦Quanto costa …⟧ nel 2026</h1>
+    <p class="meta">Aggiornato ⟦mese anno⟧ · Lettura ⟦N⟧ min · Prezzi verificati in cantiere</p>
+
+    <!-- RISPOSTA SECCA: prezzo medio nelle prime 3 righe, sempre -->
+    <div class="answer">
+      <strong>Risposta rapida:</strong> ⟦lavoro⟧ costa
+      <span class="price-big">⟦da X a Y €⟧</span>
+      ⟦2-3 frasi che spiegano la forchetta: prezzo al mq / a punto / a unità e da cosa dipende. Chiudere con: Sotto trovi la tabella completa e un calcolatore.⟧
+    </div>
+
+    <p class="lead">⟦Paragrafo d'apertura con l'esperienza di cantiere: qual è LA cosa che determina il prezzo di questo lavoro, l'errore più comune di chi chiede i preventivi. Tono diretto, niente giri di parole.⟧</p>
+
+    <!-- Box verde "parola di cantiere": è la firma di TrovaImpresa,
+         un'osservazione vera che solo chi ha fatto il mestiere sa -->
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> ⟦aneddoto o regola pratica vera di Alessio, es: "Nove volte su dieci il preventivo più basso è quello che dimentica lo smaltimento delle macerie: te lo ritrovi come extra a fine lavori."⟧
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
+
+    <!-- ============ TABELLA PREZZI PRINCIPALE ============ -->
+    <h2>⟦Prezzi di …⟧: la tabella completa</h2>
+    <table>
+      <caption>Costi indicativi 2026 — ⟦unità di misura: €/mq, € a punto luce, € a unità…⟧, ⟦cosa è incluso⟧</caption>
+      <thead>
+        <tr><th>⟦Tipo / intervento⟧</th><th>⟦Note / caratteristiche⟧</th><th style="text-align:right">Costo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>⟦voce 1⟧</td><td>⟦nota⟧</td><td class="num" style="text-align:right">⟦X – Y €⟧</td></tr>
+        <tr><td>⟦voce 2⟧</td><td>⟦nota⟧</td><td class="num" style="text-align:right">⟦X – Y €⟧</td></tr>
+        <tr><td>⟦voce 3⟧</td><td>⟦nota⟧</td><td class="num" style="text-align:right">⟦X – Y €⟧</td></tr>
+        <tr><td>⟦voce 4⟧</td><td>⟦nota⟧</td><td class="num" style="text-align:right">⟦X – Y €⟧</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Seconda tabella facoltativa: es. "costo totale per casa tipo" -->
+
+    <div class="note">
+      <strong>Occhio:</strong> ⟦l'avvertenza più importante su questi prezzi: cosa NON comprendono di solito.⟧
+    </div>
+
+    <!-- ============ COSA FA SALIRE IL PREZZO ============ -->
+    <h2>Cosa fa salire il prezzo</h2>
+    <ul class="checklist up-list">
+      <li><strong>⟦Fattore 1⟧.</strong> ⟦Spiegazione e, se possibile, quanto incide in € o %.⟧</li>
+      <li><strong>⟦Fattore 2⟧.</strong> ⟦…⟧</li>
+      <li><strong>⟦Fattore 3⟧.</strong> ⟦…⟧</li>
+      <li><strong>⟦Fattore 4⟧.</strong> ⟦…⟧</li>
+    </ul>
+
+    <!-- ============ COSA FA SCENDERE IL PREZZO ============ -->
+    <h2>Cosa fa scendere il prezzo</h2>
+    <ul class="checklist down-list">
+      <li><strong>⟦Fattore 1⟧.</strong> ⟦es: fare più lavori nello stesso cantiere, scegliere il periodo giusto, preparare la casa prima…⟧</li>
+      <li><strong>⟦Fattore 2⟧.</strong> ⟦…⟧</li>
+      <li><strong>⟦Fattore 3⟧.</strong> ⟦…⟧</li>
+    </ul>
+
+    <!-- ==== VOCI CHE NEI PREVENTIVI VENGONO DIMENTICATE ==== -->
+    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <p>⟦Frase introduttiva: sono le voci che fanno la differenza tra il preventivo e il conto finale.⟧</p>
+    <ul class="checklist forget-list">
+      <li><strong>⟦Voce 1⟧</strong> — ⟦quanto costa davvero e perché la saltano⟧</li>
+      <li><strong>⟦Voce 2⟧</strong> — ⟦…⟧</li>
+      <li><strong>⟦Voce 3⟧</strong> — ⟦…⟧</li>
+      <li><strong>⟦Voce 4⟧</strong> — ⟦…⟧</li>
+    </ul>
+
+    <div class="related">
+      🔗 Vedi anche ⟦link a 2-3 guide sorelle pertinenti⟧ e il <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.<br>
+      📋 Permessi: <a href="/permessi-ristrutturazione-cila-scia.html">quale pratica serve per i tuoi lavori</a>.
+    </div>
+
+    <!-- ================= CALCOLATORE ================= -->
+    <!-- Adattare campi e valori al lavoro. Base: scelta quantità +
+         fascia qualità + extra a checkbox. Il JS in fondo va aggiornato. -->
+    <div class="calc" id="calcolatore">
+      <h3>Calcola il costo ⟦del tuo …⟧</h3>
+      <p class="sub">Stima in 15 secondi, ⟦cosa comprende⟧.</p>
+
+      <div class="field">
+        <label>⟦Quantità: mq / stanze / punti luce⟧: <span class="val" id="nVal">⟦valore iniziale⟧</span></label>
+        <input type="range" id="n" min="⟦min⟧" max="⟦max⟧" value="⟦iniziale⟧" step="⟦step⟧">
+      </div>
+
+      <div class="field">
+        <label>⟦Fascia / tipo⟧</label>
+        <div class="seg" id="fascia">
+          <button data-k="0.85">⟦Economico⟧</button>
+          <button data-k="1" class="active">⟦Media⟧</button>
+          <button data-k="1.3">⟦Top⟧</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Extra (aggiungono al totale)</label>
+        <div class="checks" id="extra">
+          <label class="chk"><input type="checkbox" data-add="⟦€⟧"> ⟦Extra 1⟧ <span class="price">+⟦€⟧ €</span></label>
+          <label class="chk"><input type="checkbox" data-add="⟦€⟧"> ⟦Extra 2⟧ <span class="price">+⟦€⟧ €</span></label>
+          <label class="chk"><input type="checkbox" data-add="⟦€⟧"> ⟦Extra 3⟧ <span class="price">+⟦€⟧ €</span></label>
+        </div>
+      </div>
+
+      <div class="result">
+        <div class="lbl">Stima indicativa</div>
+        <div class="amount" id="out">— €</div>
+        <div class="hint">Prezzo orientativo ⟦cosa include⟧. Per la cifra esatta serve un sopralluogo.</div>
+      </div>
+
+      <div class="cta-group">
+        <a href="/cerca-artigiani.html" class="cta cta-primary">Trova un ⟦mestiere⟧ vicino a te →</a>
+        <a href="/costi-ristrutturazione.html" class="cta cta-secondary">Vedi tutte le guide sui costi →</a>
+      </div>
+    </div>
+    <!-- =============== FINE CALCOLATORE =============== -->
+
+    <h2>Detrazioni fiscali</h2>
+    <p>⟦Se e quando questo lavoro rientra nei bonus. Rimandare sempre a⟧ <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a> ⟦e ricordare bonifico parlante + verifica su Agenzia delle Entrate.⟧</p>
+
+    <!-- ============ ERRORI DA EVITARE ============ -->
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>⟦Errore 1⟧.</strong> ⟦Perché è un errore e cosa costa.⟧</li>
+      <li><strong>⟦Errore 2⟧.</strong> ⟦…⟧</li>
+      <li><strong>⟦Errore 3⟧.</strong> ⟦…⟧</li>
+      <li><strong>⟦Errore 4⟧.</strong> ⟦…⟧</li>
+    </ul>
+
+    <div class="cta-band">
+      <h3>⟦Vuoi fare questo lavoro?⟧</h3>
+      <p>Trova ⟦imprese/artigiani⟧ verificati nella tua zona, confronta e richiedi più preventivi gratis.</p>
+      <a href="/cerca-artigiani.html" class="cta-dark">Trova un ⟦mestiere⟧ →</a>
+    </div>
+
+    <!-- ============ FAQ (stesse domande del JSON-LD!) ============ -->
+    <h2>Domande frequenti ⟦su …⟧</h2>
+    <div class="faq">
+      <details open>
+        <summary>⟦Domanda 1 — di solito ripete la domanda principale con un caso concreto⟧</summary>
+        <p>⟦Risposta breve con il prezzo in grassetto.⟧</p>
+      </details>
+      <details>
+        <summary>⟦Domanda 2⟧</summary>
+        <p>⟦…⟧</p>
+      </details>
+      <details>
+        <summary>⟦Domanda 3⟧</summary>
+        <p>⟦…⟧</p>
+      </details>
+      <details>
+        <summary>⟦Domanda 4⟧</summary>
+        <p>⟦…⟧</p>
+      </details>
+      <details>
+        <summary>⟦Domanda 5⟧</summary>
+        <p>⟦…⟧</p>
+      </details>
+    </div>
+
+    <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
+    <div class="cities">
+      <h2>Trova imprese per questo lavoro nella tua città</h2>
+      <p>Su TrovaImpresa ci sono imprese edili e artigiani verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
+      <div class="cities-grid">
+        <a href="/imprese-roma.html">Roma</a>
+        <a href="/imprese-milano.html">Milano</a>
+        <a href="/imprese-napoli.html">Napoli</a>
+        <a href="/imprese-torino.html">Torino</a>
+        <a href="/imprese-bologna.html">Bologna</a>
+        <a href="/imprese-firenze.html">Firenze</a>
+        <a href="/imprese-genova.html">Genova</a>
+        <a href="/imprese-palermo.html">Palermo</a>
+        <a href="/imprese-bari.html">Bari</a>
+        <a href="/imprese-verona.html">Verona</a>
+        <a href="/imprese-venezia.html">Venezia</a>
+        <a href="/imprese-rieti.html">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa — trova imprese edili e artigiani verificati nella tua zona. I prezzi indicati sono stime orientative basate su esperienza diretta di cantiere e possono variare per zona, materiali e condizioni del lavoro.</p>
+  </div>
+</footer>
+
+<!-- JSON-LD FAQPage: STESSE 5 domande e risposte delle FAQ qui sopra -->
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"⟦Domanda 1⟧","acceptedAnswer":{"@type":"Answer","text":"⟦Risposta 1 in testo semplice, senza HTML⟧"}},
+    {"@type":"Question","name":"⟦Domanda 2⟧","acceptedAnswer":{"@type":"Answer","text":"⟦Risposta 2⟧"}},
+    {"@type":"Question","name":"⟦Domanda 3⟧","acceptedAnswer":{"@type":"Answer","text":"⟦Risposta 3⟧"}},
+    {"@type":"Question","name":"⟦Domanda 4⟧","acceptedAnswer":{"@type":"Answer","text":"⟦Risposta 4⟧"}},
+    {"@type":"Question","name":"⟦Domanda 5⟧","acceptedAnswer":{"@type":"Answer","text":"⟦Risposta 5⟧"}}
+  ]
+}
+</script>
+
+<script>
+(function(){
+  // ADATTARE: prezzo base per unità (mq, punto luce, stanza…) fascia media
+  var PREZZO_BASE = 0; // ⟦€ per unità⟧
+  var n = document.getElementById('n');
+  var nVal = document.getElementById('nVal');
+  var out = document.getElementById('out');
+  var fasciaBtns = document.querySelectorAll('#fascia button');
+  var checks = document.querySelectorAll('#extra input');
+  var chkLabels = document.querySelectorAll('#extra .chk');
+  var k = 1;
+
+  function fmt(x){ return Math.round(x/50)*50; }
+  function euro(x){ return x.toLocaleString('it-IT'); }
+
+  function calc(){
+    var add = 0;
+    checks.forEach(function(c){ if(c.checked) add += parseInt(c.dataset.add,10); });
+    var mid = n.value * PREZZO_BASE * k + add;
+    out.textContent = euro(fmt(mid*0.86)) + ' – ' + euro(fmt(mid*1.14)) + ' €';
+    nVal.textContent = n.value;
+  }
+
+  n.addEventListener('input', calc);
+  fasciaBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      fasciaBtns.forEach(function(x){ x.classList.remove('active'); });
+      b.classList.add('active');
+      k = parseFloat(b.dataset.k);
+      calc();
+    });
+  });
+  checks.forEach(function(c, i){
+    c.addEventListener('change', function(){
+      chkLabels[i].classList.toggle('active', c.checked);
+      calc();
+    });
+  });
+  calc();
+})();
+</script>
+
+</body>
+</html>

@@ -63,6 +63,18 @@
   .checklist{list-style:none;padding:0;margin:16px 0}
   .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
   .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .up-list li:before{content:"▲";color:#c0392b}
+  .down-list li:before{content:"▼";color:#1e8e3e}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
   .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
   .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
   .related a{font-weight:bold}
@@ -133,15 +145,20 @@
 
   <article>
     <h1>Quanto costa installare un condizionatore nel 2026</h1>
-    <p class="meta">Aggiornato luglio 2026 · Lettura 6 min</p>
+    <p class="meta">Aggiornato agosto 2026 · Lettura 8 min · Prezzi verificati in cantiere</p>
 
     <div class="answer">
       <strong>Risposta rapida:</strong> installare un condizionatore, apparecchio + montaggio, costa
       <span class="price-big">da 800 a 1.500 € un monosplit</span>
-      Un <strong>dual split</strong> (due stanze) sta sui <strong>2.000–3.500 €</strong>, un <strong>trial split</strong> (tre stanze) sui <strong>2.800–4.500 €</strong>. Il prezzo dipende dalla fascia dell'apparecchio, dai BTU e dalla difficoltà del montaggio. Sotto trovi i BTU giusti per stanza e un calcolatore.
+      Un <strong>dual split</strong> (due stanze) sta sui <strong>2.000–3.500 €</strong>, un <strong>trial split</strong> (tre stanze) sui <strong>2.800–4.500 €</strong>. Questi prezzi valgono per il montaggio <strong>con canaline esterne a vista</strong>: se vuoi i tubi <strong>sottotraccia</strong> (nascosti nel muro) aggiungi <strong>1.200–2.000 €</strong>. Sotto trovi i BTU giusti per stanza e un calcolatore.
     </div>
 
-    <p class="lead">Due errori fanno buttare via soldi: prendere un condizionatore <strong>troppo potente</strong> (paghi di più e consuma senza motivo) o <strong>troppo debole</strong> (non raffresca e va sempre al massimo). La potenza si misura in BTU e va scelta sui metri quadri della stanza. Il resto del prezzo lo fa il montaggio: dove metti l'unità esterna e quanti metri di tubo servono.</p>
+    <p class="lead">Due errori fanno buttare via soldi: prendere un condizionatore <strong>troppo potente</strong> (paghi di più e consuma senza motivo) o <strong>troppo debole</strong> (non raffresca e va sempre al massimo). La potenza si misura in BTU e va scelta sui metri quadri della stanza. Il resto del prezzo lo fa il montaggio: <strong>canaline a vista o tubazioni sottotraccia</strong>, dove metti l'unità esterna e quanti metri di tubo servono.</p>
+
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> prima di confrontare due preventivi guarda <strong>come passano i tubi</strong>. Uno con canaline esterne e uno sottotraccia non sono lo stesso lavoro: il sottotraccia costa 1.200–2.000 € in più perché dietro ci sono demolizione delle tracce, chiusura, rasatura e tinteggiatura — tre mestieri, non uno. Se il preventivo sottotraccia non elenca queste voci, te le ritroverai come extra a fine lavori.
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
 
     <h2>Quanti BTU servono per stanza</h2>
     <table>
@@ -161,13 +178,54 @@
       <strong>Occhio:</strong> i prezzi qui sopra sono del solo apparecchio. Ci vanno aggiunti il <strong>montaggio</strong> (350–450 € a unità per un mono "spalla a spalla") e i materiali. Sotto il calcolatore fa già il conto completo.
     </div>
 
+    <h2>Canaline esterne o tubazioni sottotraccia?</h2>
+    <p>È la scelta che cambia di più il conto finale, e quasi nessuno la spiega. I tubi che collegano l'unità interna a quella esterna possono passare in due modi:</p>
+    <table>
+      <caption>Differenza di costo tra i due tipi di montaggio, monosplit</caption>
+      <thead>
+        <tr><th>Tipo di montaggio</th><th>Cosa comporta</th><th style="text-align:right">Costo posa</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Canaline esterne a vista</strong></td><td>I tubi corrono in una canalina di plastica fissata al muro. Rapido (mezza giornata), niente polvere, niente muratore.</td><td class="num" style="text-align:right">350 – 450 €</td></tr>
+        <tr><td><strong>Tubazioni sottotraccia</strong></td><td>I tubi spariscono dentro il muro: demolizione delle tracce, chiusura, rasatura e tinteggiatura delle pareti toccate. Servono più giornate e più mestieri.</td><td class="num" style="text-align:right">+ 1.200 – 2.000 €</td></tr>
+      </tbody>
+    </table>
+    <p>Il sottotraccia rende di più esteticamente, ma conviene farlo <strong>durante una ristrutturazione</strong>, quando muratore e imbianchino sono già in casa e le pareti vanno comunque rifatte. In una casa abitata e finita, le canaline esterne sono la scelta pratica: costi ridotti, lavoro più rapido e molto meno invasivo.</p>
+
     <h2>Cosa comprende il prezzo di installazione</h2>
     <ul class="checklist">
       <li><strong>Montaggio unità interna ed esterna</strong> con staffe a norma.</li>
-      <li><strong>Linea frigorifera</strong> (tubi in rame) fino a circa 3–5 metri; oltre si paga a metro.</li>
+      <li><strong>Linea frigorifera</strong> (tubi in rame) fino a circa 3–5 metri, in canalina esterna; oltre si paga a metro.</li>
       <li><strong>Collegamento elettrico</strong> e scarico della condensa.</li>
       <li><strong>Vuoto e carica</strong> del gas: passaggio tecnico obbligatorio per far funzionare bene l'impianto.</li>
       <li><strong>Messa in funzione e collaudo.</strong></li>
+    </ul>
+
+    <h2>Cosa fa salire il prezzo</h2>
+    <ul class="checklist up-list">
+      <li><strong>Tubazioni sottotraccia.</strong> La voce più pesante: +1.200–2.000 € rispetto alle canaline, perché comprende demolizione delle tracce, chiusura, rasatura e tinteggiatura.</li>
+      <li><strong>Linea frigorifera lunga.</strong> Oltre i 3–5 metri compresi, ogni metro in più di tubo, isolante e canalina si paga a parte.</li>
+      <li><strong>Unità esterna difficile da raggiungere.</strong> Facciata senza balcone, lavoro in quota, staffe alte: servono attrezzature e tempo in più.</li>
+      <li><strong>Fascia dell'apparecchio.</strong> Tra un modello base e un inverter A+++ di marca ci sono centinaia di euro — che però si recuperano in bolletta.</li>
+      <li><strong>Più unità interne.</strong> Ogni stanza in più aggiunge apparecchio, montaggio e metri di linea.</li>
+    </ul>
+
+    <h2>Cosa fa scendere il prezzo</h2>
+    <ul class="checklist down-list">
+      <li><strong>Canaline esterne a vista.</strong> Il modo più semplice per risparmiare: montaggio più rapido, meno invasivo e senza opere murarie.</li>
+      <li><strong>Predisposizione già fatta.</strong> Se durante una ristrutturazione hai già fatto passare tubi e scarichi nei muri, l'installatore deve solo collegare e caricare: la posa costa molto meno.</li>
+      <li><strong>Unità esterna comoda.</strong> Balcone o terrazzo a fianco della stanza, montaggio "spalla a spalla": è il caso da cui partono i prezzi minimi.</li>
+      <li><strong>Un preventivo con le voci scritte.</strong> Quando tutto è nero su bianco (BTU, metri di linea, tipo di montaggio) non ci sono extra a sorpresa: è lì che si risparmia davvero.</li>
+    </ul>
+
+    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <p>Sono le voci che fanno la differenza tra il preventivo e il conto finale. Controlla che ci siano scritte:</p>
+    <ul class="checklist forget-list">
+      <li><strong>Rasatura e tinteggiatura dopo le tracce</strong> — nel montaggio sottotraccia c'è chi quota solo demolizione e chiusura: la pittura delle pareti toccate resta fuori e la paghi dopo.</li>
+      <li><strong>Metri di linea oltre quelli compresi</strong> — il preventivo dice "installazione inclusa" ma non quanti metri comprende, né il prezzo del metro in più.</li>
+      <li><strong>Scarico della condensa</strong> — se non c'è pendenza verso l'esterno serve la pompa condensa o un percorso più lungo: va previsto prima, non scoperto al montaggio.</li>
+      <li><strong>Smontaggio e smaltimento del vecchio impianto</strong> — il vecchio condizionatore non si butta nel cassonetto: o è compreso o è quotato a parte.</li>
+      <li><strong>Presa o linea elettrica dedicata</strong> — negli impianti vecchi può servire: vedi <a href="/quanto-costa-rifare-impianto-elettrico.html">quanto costa l'impianto elettrico</a>.</li>
     </ul>
 
     <div class="related">
@@ -202,6 +260,7 @@
       <div class="field">
         <label>Extra (aggiungono al totale)</label>
         <div class="checks" id="extra">
+          <label class="chk"><input type="checkbox" data-add="1600"> Tubazioni sottotraccia invece delle canaline (tracce, chiusura, rasatura, tinteggiatura) <span class="price">+1.200–2.000 €</span></label>
           <label class="chk"><input type="checkbox" data-add="160"> Linea frigorifera lunga (oltre 5 m) <span class="price">+160 €</span></label>
           <label class="chk"><input type="checkbox" data-add="120"> Staffe alte / lavoro in quota <span class="price">+120 €</span></label>
           <label class="chk"><input type="checkbox" data-add="90"> Smontaggio e smaltimento vecchio impianto <span class="price">+90 €</span></label>
@@ -224,8 +283,9 @@
     <h2>Detrazioni: quando si può recuperare il 50%</h2>
     <p>Il semplice acquisto di un condizionatore, da solo, in genere non basta per la detrazione. Rientra invece nelle agevolazioni quando è collegato a una <strong>ristrutturazione</strong> oppure quando installi una <strong>pompa di calore in sostituzione di un impianto a combustibile fossile</strong> (ecobonus). Le regole e le percentuali cambiano ogni anno: verifica sempre sul sito dell'Agenzia delle Entrate e paga con bonifico parlante. Vedi anche la guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a>.</p>
 
-    <h2>Come non farsi fregare sull'installazione</h2>
-    <ul class="checklist">
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>Confrontare un preventivo con canaline e uno sottotraccia.</strong> Non sono lo stesso lavoro: il secondo comprende (o dovrebbe comprendere) anche opere murarie e tinteggiatura. Prima decidi il tipo di montaggio, poi confronta.</li>
       <li><strong>Preventivo senza i BTU indicati.</strong> Devono essere scritti: sono la cosa che determina se il condizionatore è adatto alla stanza.</li>
       <li><strong>"Installazione inclusa" troppo vaga.</strong> Fatti specificare quanti metri di linea sono compresi e quanto costa il metro in più.</li>
       <li><strong>Nessun accenno a vuoto e carica gas.</strong> È un passaggio obbligatorio: se non c'è, o è compreso o è un tecnico che taglia gli angoli.</li>
@@ -260,6 +320,31 @@
         <summary>Quanto dura l'installazione?</summary>
         <p>Un monosplit si installa in <strong>mezza giornata</strong>; un dual o trial in <strong>una giornata</strong>. I tempi si allungano se l'unità esterna è difficile da raggiungere o serve molta linea frigorifera.</p>
       </details>
+      <details>
+        <summary>Meglio canaline esterne o tubazioni sottotraccia?</summary>
+        <p>In una casa abitata e finita convengono le <strong>canaline esterne</strong>: montaggio rapido, niente polvere e costi ridotti. Il <strong>sottotraccia</strong> è più bello ma costa <strong>1.200–2.000 € in più</strong> (demolizione tracce, chiusura, rasatura e tinteggiatura): ha senso soprattutto durante una ristrutturazione, quando le pareti vanno comunque rifatte.</p>
+      </details>
+    </div>
+
+    <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
+    <div class="cities">
+      <h2>Trova imprese per questo lavoro nella tua città</h2>
+      <p>Su TrovaImpresa ci sono imprese edili e artigiani verificati in 106 città italiane. Scegli la tua e richiedi preventivi gratis:</p>
+      <div class="cities-grid">
+        <a href="/imprese-roma.html">Roma</a>
+        <a href="/imprese-milano.html">Milano</a>
+        <a href="/imprese-napoli.html">Napoli</a>
+        <a href="/imprese-torino.html">Torino</a>
+        <a href="/imprese-bologna.html">Bologna</a>
+        <a href="/imprese-firenze.html">Firenze</a>
+        <a href="/imprese-genova.html">Genova</a>
+        <a href="/imprese-palermo.html">Palermo</a>
+        <a href="/imprese-bari.html">Bari</a>
+        <a href="/imprese-verona.html">Verona</a>
+        <a href="/imprese-venezia.html">Venezia</a>
+        <a href="/imprese-rieti.html">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
     </div>
 
   </article>
