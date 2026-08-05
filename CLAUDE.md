@@ -258,6 +258,42 @@ controllare che contenga le ultime modifiche** (es. cercare una stringa aggiunta
 recente). Se e' vecchio: ricostruire riapplicando le modifiche note, non sovrascrivere
 alla cieca.
 
+## Blog e guide — stato al 5 agosto 2026
+
+**28 articoli in tutto.** `blog.html` e' diviso in **12 sezioni per mestiere**, con barra di
+salto rapido in cima e, in ogni sezione, il link alla ricerca di quel mestiere. Ogni articolo
+e' un file HTML statico nella root; `blog_articoli` su Supabase serve solo a generare la card
+(colonna `url_esterno` che punta al file).
+
+Guide pubblicate ad agosto 2026: `quanto-costa-rifare-la-cucina`, `quanto-costa-abbattere-un-muro`,
+`come-leggere-un-preventivo-edile`, `come-trovare-clienti-impresa-edile`, `bonus-edilizi-2026`,
+piu' le 4 di inizio mese (muratore al giorno, caldaia, cartongesso, vasca in doccia).
+
+### `js/parole.js` — parole tecniche spiegate
+Una riga sola per pagina: `<script src="/js/parole.js"></script>` prima di `</body>`.
+Lo script gira col TreeWalker, marca **solo la prima occorrenza** di ogni parola nella pagina
+e la rende cliccabile (funziona **al tocco e al passaggio del mouse**, perche' le guide si
+leggono dal telefono). Le frasi stanno in cima al file, nell'oggetto `PAROLE`.
+Salta i tag in `VIETATI` (A, SCRIPT, H1, BUTTON...) per non rompere link e titoli.
+
+**Quando si crea una guida nuova, aggiungere sempre quella riga**, altrimenti in quella pagina
+le parole tecniche restano mute. (Successo il 5 agosto: 5 guide nuove erano senza.)
+
+### Cose ancora aperte sul blog
+- Prezzi da confermare con l'occhio da cantiere di Alex: cucina 500-1.250 EUR/mq,
+  tramezzo demolito 40-50 EUR/mq, muro portante con cerchiatura 2.000-7.000 EUR.
+- Sezioni del blog con **un solo articolo**: elettrico, infissi, pavimenti, pitture,
+  cartongesso. Sono mestieri molto cercati: e' li' che conviene mettere le prossime guide.
+- Le frasi di `js/parole.js` vanno riviste da Alex (soprattutto *trasmittanza* e *pendenza*,
+  dove ci sono dei numeri).
+
+## Come si passa il lavoro a una sessione nuova
+Le sessioni non si vedono fra loro: la chat non passa, **i file si'** (stessa cartella + git).
+Il ponte fra una sessione e l'altra e' **questo file, `CLAUDE.md`**: ogni sessione nuova lo
+legge da sola all'avvio. Quindi, prima di chiudere una sessione lunga, la frase da dire e':
+**"aggiorna CLAUDE.md con quello che abbiamo fatto oggi"**.
+Poi il solito `git add CLAUDE.md / commit / push`, cosi' resta anche nel repository.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
