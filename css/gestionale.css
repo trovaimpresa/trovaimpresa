@@ -1913,3 +1913,19 @@
 @media(max-width:560px){
   .tipo-btn{flex:1 1 100%;padding:14px 12px}
 }
+
+/* ============================================================
+   Documenti attaccati al cliente: righe grandi e leggibili
+   ============================================================ */
+.doc-riga{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+          padding:12px 14px;border:2px solid #e2e8f0;border-radius:12px;margin-bottom:10px;background:#fff}
+.doc-riga .doc-ico{font-size:24px;line-height:1;flex:0 0 auto}
+.doc-riga .doc-nome{flex:1 1 200px;min-width:0;font-size:16px;font-weight:700;color:#12233a;
+                    overflow-wrap:anywhere}
+.doc-riga .doc-nome small{display:block;font-weight:400;font-size:13px;color:#5b6b80;margin-top:2px}
+.doc-riga .btn{flex:0 0 auto}
+.doc-riga .b-del{color:#c0392b;border-color:#f0c4bf}
+.doc-riga .b-del:hover{background:#fdecea}
+@media(max-width:520px){
+  .doc-riga .btn{flex:1 1 45%}
+}

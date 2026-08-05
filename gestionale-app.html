@@ -176,6 +176,7 @@
       <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o societa': ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
       <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px">
       <div class="grid" id="cli-list"></div>
+      <input type="file" id="cli-doc-file" multiple style="display:none">
     </section>
 
     <section id="squadra">
@@ -2796,6 +2797,7 @@
   function cliVoci(c){
     return [
       {lab:"🗺 Mappa",action:"map",data:{q:cliIndirizzo(c)||c.nome}},
+      {lab:"📎 Documenti",action:"doc-cli",data:{id:c.id}},
       {sep:true},
       {lab:"✏ Modifica",action:"edit-cli",data:{id:c.id}},
       {lab:"🗑 Elimina",action:"del-cli",data:{id:c.id},del:true}
@@ -4143,7 +4145,124 @@
     const inp=document.getElementById("c-nome");    if(inp) inp.placeholder=L.ph;
     const lr=document.getElementById("lab-c-ref");  if(lr) lr.textContent=L.ref;
     const nf=document.getElementById("nota-c-fisc");if(nf) nf.textContent=L.fisc;
+    /* anche il titolo in cima segue il bottone: prima restava quello di partenza
+       e leggevi "Nuova azienda" con Privato acceso */
+    const ht=document.querySelector("#sheet .sh-head h3");
+    if(ht&&/^Nuov/.test(ht.textContent||"")){
+      ht.textContent={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio"}[t];
+    }
   };
+
+
+  /* ================= DOCUMENTI DEL CLIENTE =================
+     Riusa il deposito e la tabella che gia' portano i PDF delle fatture
+     (bucket gestionale-foto + gest_foto): cambia solo il collegamento,
+     che qui e' cliente_id invece di fattura_id.
+     Serve per tenere insieme al cliente il verbale del condominio, il
+     preventivo firmato, il capitolato: le carte che oggi si perdono. */
+  let docCliId=null, docCliNome="";
+
+  function docCliIcona(nome){
+    const n=String(nome||"").toLowerCase();
+    if(/\.(jpg|jpeg|png|webp|gif|heic)$/.test(n))return "🖼";
+    if(/\.pdf$/.test(n))return "📕";
+    if(/\.(doc|docx|odt)$/.test(n))return "📘";
+    if(/\.(xls|xlsx|csv)$/.test(n))return "📗";
+    return "📄";
+  }
+  function docCliPeso(b){
+    if(!b&&b!==0)return "";
+    return b>=1048576 ? (b/1048576).toFixed(1)+" MB" : Math.max(1,Math.round(b/1024))+" KB";
+  }
+
+  async function docCliApri(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const c=cliCache.find(x=>String(x.id)===String(id));
+    docCliId=id; docCliNome=(c&&c.nome)||"cliente";
+    openSheetGrande("Documenti di "+esc(docCliNome),
+      `<div class="sh-b">
+         <div class="sh-tit">Carica un documento</div>
+         <p class="sh-nota" style="margin-top:0">Verbali, preventivi firmati, capitolati, permessi, foto: qui restano attaccati al cliente e non si perdono. Puoi caricarne piu' di uno alla volta. Massimo 15 MB per file.</p>
+         <button class="btn-primary" data-action="doc-cli-scegli" style="margin-top:6px">Scegli i file dal computer</button>
+       </div>
+       <div class="sh-b">
+         <div class="sh-tit">Documenti gia' caricati</div>
+         <div id="doc-cli-lista"><div class="loading">Caricamento...</div></div>
+       </div>`,
+      `<button class="btn b-cancel" data-action="close">Chiudi</button>`);
+    renderDocCli();
+  }
+
+  async function renderDocCli(){
+    const box=$("#doc-cli-lista"); if(!box||!docCliId)return;
+    const {data,error}=await sb.from("gest_foto")
+      .select("id,storage_path,nome_file,created_at")
+      .eq("user_id",sbUid).eq("cliente_id",docCliId).eq("tipo","documento")
+      .order("created_at",{ascending:false});
+    if(error){
+      /* se la colonna non c'e' ancora, lo dico invece di lasciare la rotella */
+      box.innerHTML='<div class="campo-aiuto" style="color:var(--attesa)">Non riesco a leggere i documenti: '+esc(error.message)+'</div>';
+      return;
+    }
+    if(!data||!data.length){
+      box.innerHTML='<div class="campo-aiuto">Nessun documento per ora. Usa il pulsante qui sopra.</div>';
+      return;
+    }
+    box.innerHTML=data.map(d=>{
+      const nome=d.nome_file||String(d.storage_path||"").split("/").pop()||"documento";
+      const quando=d.created_at?new Date(d.created_at).toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}):"";
+      return '<div class="doc-riga">'
+        +   '<span class="doc-ico">'+docCliIcona(nome)+'</span>'
+        +   '<span class="doc-nome">'+esc(nome)+'<small>'+esc(quando)+'</small></span>'
+        +   '<button class="btn" data-action="doc-cli-apri" data-id="'+esc(d.id)+'">Apri</button>'
+        +   '<button class="btn b-del" data-action="doc-cli-del" data-id="'+esc(d.id)+'">Elimina</button>'
+        + '</div>';
+    }).join("");
+  }
+
+  async function uploadDocCliente(files){
+    if(!files||!files.length||!docCliId)return;
+    if(!sbUid){toast("Devi essere loggato");return;}
+    let ok=0, ko=0;
+    for(const file of Array.from(files)){
+      const p=await preparaFileUpload(file);
+      if(p.errore){toast(p.errore);ko++;continue;}
+      const safe=String(p.nome||"documento").replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=sbUid+"/clienti/"+docCliId+"/"+Date.now()+"_"+safe;
+      const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
+      if(up){toast("Non caricato: "+up.message);ko++;continue;}
+      const riga={user_id:sbUid,cliente_id:docCliId,tipo:"documento",operatore:"Capo",
+                  storage_path:path,nome_file:p.nome||safe};
+      let {error:ins}=await sb.from("gest_foto").insert(riga);
+      if(ins&&(ins.message||"").indexOf("nome_file")>=0){
+        /* database senza la colonna del nome: salvo lo stesso, il nome si legge dal path */
+        delete riga.nome_file;
+        ({error:ins}=await sb.from("gest_foto").insert(riga));
+      }
+      if(ins){toast("File su, ma non salvato: "+ins.message);ko++;continue;}
+      ok++;
+    }
+    if(ok)toast(ok===1?"Documento caricato ✔":ok+" documenti caricati ✔");
+    renderDocCli();
+  }
+
+  async function docCliScarica(id){
+    const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(!r||!r.storage_path){toast("Documento non trovato");return;}
+    const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(r.storage_path,3600);
+    if(su&&su.signedUrl)window.open(su.signedUrl,"_blank");
+    else toast("Non riesco ad aprire il documento");
+  }
+
+  async function docCliElimina(id){
+    if(!gconfirm("Eliminare questo documento?"))return;
+    const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    const {error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    if(r&&r.storage_path)await sb.storage.from("gestionale-foto").remove([r.storage_path]);
+    toast("Documento eliminato");
+    renderDocCli();
+  }
 
   async function saveCli(id){
     const v=q=>{const e=$(q);return e?String(e.value||"").trim():"";};
@@ -5865,6 +5984,10 @@
     if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
     if(a==="new-cli")return cliForm(null,t.dataset.tipo||"privato");
+    if(a==="doc-cli")return docCliApri(id);
+    if(a==="doc-cli-apri")return docCliScarica(id);
+    if(a==="doc-cli-del")return docCliElimina(id);
+    if(a==="doc-cli-scegli"){const i=$("#cli-doc-file");if(i)i.click();return;}
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
     if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
@@ -5975,6 +6098,7 @@
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#lf-video-file"))$("#lf-video-file").onchange=e=>{uploadLavoroVideo(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
+  if($("#cli-doc-file"))$("#cli-doc-file").onchange=e=>{uploadDocCliente(e.target.files);e.target.value="";};
 
   load().then(()=>{if(!cur)renderLanding();});
 })();
