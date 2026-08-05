@@ -294,6 +294,35 @@ legge da sola all'avvio. Quindi, prima di chiudere una sessione lunga, la frase 
 **"aggiorna CLAUDE.md con quello che abbiamo fatto oggi"**.
 Poi il solito `git add CLAUDE.md / commit / push`, cosi' resta anche nel repository.
 
+## Decisioni prese il 5 agosto 2026
+
+### Aiuti a comparsa sul sito: dove si' e dove no
+Discusso e deciso. **Non** sulle pagine rivolte ai clienti (home, `cerca-*`, pagine citta'):
+li' i pulsanti si spiegano da soli e un aiuto sopra fa sembrare il sito complicato.
+**Non** sui 4 pannelli: l'impresa ci entra tutti i giorni e dopo due giorni diventano rumore.
+**Si'**, se e quando si fara', solo dove un'impresa deve compilare qualcosa:
+`modifica-profilo.html` e i 4 form di registrazione. Motivo concreto, non teorico:
+un'utente vera (Chiara) si e' bloccata esattamente li'.
+Detto onestamente: **non e' il lavoro piu' importante in coda** — vale meno della guida
+sul bagno e del piano reclutamento. Farlo solo come lavoretto veloce, non come progetto.
+
+### Ordine di priorita' concordato
+1. Guida **bagno** (e' la ricerca piu' fatta di tutte, ed e' ancora corta).
+2. Piano reclutamento imprese (sblocca le 75 citta' vuote).
+3. Tutto il resto.
+
+### Posta e utenti veri
+Primo vero ritorno dagli iscritti dopo l'email di benvenuto: **Chiara Colucci, Andrea Sarti,
+Adnan Hassan**. Alex **non fa telefonate** (sua scelta, per la dislessia): si risponde sempre
+per email. A Chiara e' gia' stato risposto; **ad Andrea Sarti e Adnan Hassan no, aspettano**.
+
+Caso Chiara: la riga in `imprese` c'e' (riga 84), l'email e' confermata, il login funziona.
+Due ipotesi sono state verificate e **smentite**: il trigger accetta `professionista`, e le
+9 colonne del professionista esistono tutte. Il guaio era al salvataggio, e li' c'era un punto
+cieco: `modifica-profilo.html` non si accorgeva se l'UPDATE non scriveva niente.
+Ora controlla `.select('id')` e distingue "sessione scaduta" da "nessuna riga modificata",
+quindi al prossimo tentativo si vede l'errore vero invece del silenzio.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
@@ -312,11 +341,12 @@ Poi il solito `git add CLAUDE.md / commit / push`, cosi' resta anche nel reposit
   tetto, cappotto, imbiancare, fotovoltaico.
 - Domanda strategica aperta: TrovaImpresa è un marketplace o un software per imprese edili?
   Sono due aziende diverse e prima o poi cambia dove Alex mette le sue ore.
-- **Aiuti a comparsa**: correggere le frasi del menu dove sono imprecise (scritte da Claude
-  leggendo il codice, vanno riviste da Alex), poi estenderli una schermata alla volta —
-  Lavori, Preventivi, Fatture. Poi la versione per il **sito**: le parole tecniche delle
-  guide (trasmittanza, CILA, SCIA, bonifico parlante, massetto…) spiegate al passaggio del
-  mouse. Lì serve che funzioni **anche al tocco**, perché le guide si leggono dal telefono.
+- **Aiuti a comparsa nel gestionale**: correggere le frasi del menu dove sono imprecise
+  (scritte da Claude leggendo il codice, vanno riviste da Alex — le piu' incerte sono
+  *Carte*, *Scadenzario*, *Riepilogo*), poi estenderli una schermata alla volta —
+  Lavori, Preventivi, Fatture.
+  La versione per le guide del sito **e' fatta**: `js/parole.js` (vedi sezione Blog).
+- **Rispondere ad Andrea Sarti e Adnan Hassan** (hanno scritto e sono ancora senza risposta).
 - Nel repository è finito per sbaglio **`_to_delete/bonus-casa-2026.html`**: pagina messa
   da parte per la cancellazione, ora pubblicata (non collegata, non in sitemap). Da togliere.
 - **Prezzo del Premium**: oggi 5 €/mese. Il capo di Alex paga **700 €/anno** un gestionale
