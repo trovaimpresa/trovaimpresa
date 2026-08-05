@@ -1893,3 +1893,23 @@
   width:22px; height:22px; border-radius:50%; background:var(--attesa); color:#fff;
   font-weight:800; font-size:14px; text-align:center; line-height:22px;
 }
+
+
+/* ============================================================
+   Tre bottoni: che tipo di cliente e' (privato / azienda / condominio)
+   Testo grande e bottoni larghi: si deve capire a colpo d'occhio.
+   ============================================================ */
+.tipo-cli{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.tipo-btn{flex:1 1 150px;min-width:0;font-family:inherit;font-size:16px;font-weight:700;
+          padding:16px 12px;border-radius:12px;border:2px solid #e2e8f0;
+          background:#fff;color:#12233a;cursor:pointer;line-height:1.35;text-align:center;
+          transition:background .12s,border-color .12s}
+.tipo-btn small{display:block;font-weight:400;font-size:13px;opacity:.7;margin-top:4px}
+.tipo-btn:hover{border-color:#0066ff;background:#f5f9ff}
+.tipo-btn.on{background:#0066ff;border-color:#0066ff;color:#fff}
+.tipo-btn.on small{opacity:.92}
+.tipo-tag{display:inline-block;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;
+          background:#eef2f7;color:#4a5b70;margin-left:8px;vertical-align:middle}
+@media(max-width:560px){
+  .tipo-btn{flex:1 1 100%;padding:14px 12px}
+}
