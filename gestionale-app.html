@@ -4182,11 +4182,11 @@
     openSheetGrande("Documenti di "+esc(docCliNome),
       `<div class="sh-b">
          <div class="sh-tit">Carica un documento</div>
-         <p class="sh-nota" style="margin-top:0">Verbali, preventivi firmati, capitolati, permessi, foto: qui restano attaccati al cliente e non si perdono. Puoi caricarne piu' di uno alla volta. Massimo 15 MB per file.</p>
+         <p class="sh-nota" style="margin-top:0">Verbali, preventivi firmati, capitolati, permessi, foto: qui restano attaccati al cliente e non si perdono. Puoi caricarne pi&ugrave; di uno alla volta. Massimo 15 MB per file.</p>
          <button class="btn-primary" data-action="doc-cli-scegli" style="margin-top:6px">Scegli i file dal computer</button>
        </div>
        <div class="sh-b">
-         <div class="sh-tit">Documenti gia' caricati</div>
+         <div class="sh-tit">Documenti gi&agrave; caricati</div>
          <div id="doc-cli-lista"><div class="loading">Caricamento...</div></div>
        </div>`,
       `<button class="btn b-cancel" data-action="close">Chiudi</button>`);
@@ -4215,6 +4215,7 @@
         +   '<span class="doc-ico">'+docCliIcona(nome)+'</span>'
         +   '<span class="doc-nome">'+esc(nome)+'<small>'+esc(quando)+'</small></span>'
         +   '<button class="btn" data-action="doc-cli-apri" data-id="'+esc(d.id)+'">Apri</button>'
+        +   '<button class="btn b-mail" data-action="doc-cli-mail" data-id="'+esc(d.id)+'">Invia</button>'
         +   '<button class="btn b-del" data-action="doc-cli-del" data-id="'+esc(d.id)+'">Elimina</button>'
         + '</div>';
     }).join("");
@@ -4244,6 +4245,62 @@
     }
     if(ok)toast(ok===1?"Documento caricato ✔":ok+" documenti caricati ✔");
     renderDocCli();
+  }
+
+  /* Manda il documento al cliente per email, in allegato, con copia a te.
+     Il file NON passa dal browser: la funzione sul server lo prende dal
+     deposito e lo attacca, dopo aver controllato che sia davvero tuo. */
+  async function docCliMailForm(id){
+    const {data:r}=await sb.from("gest_foto").select("id,nome_file,storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(!r){toast("Documento non trovato");return;}
+    const nome=r.nome_file||String(r.storage_path||"").split("/").pop()||"documento";
+    const c=cliCache.find(x=>String(x.id)===String(docCliId))||{};
+    const mail=(c.email||"").trim();
+    const avviso=mail?"":'<div class="sh-nota" style="color:var(--attesa)">Questo cliente non ha una email salvata. Scrivila qui: poi conviene metterla anche nella sua scheda, cos&igrave; la prossima volta c&rsquo;&egrave; gi&agrave;.</div>';
+    openSheetGrande("Invia "+esc(nome),
+      '<div class="sh-b">'
+      + '<div class="sh-tit">A chi lo mando</div>'
+      + '<div class="field"><label>Email del cliente</label>'
+      +   '<input id="dm-a" type="email" value="'+esc(mail)+'" placeholder="cliente@email.it"></div>'
+      + avviso
+      + '</div>'
+      + '<div class="sh-b">'
+      + '<div class="sh-tit">Cosa scrivo</div>'
+      + '<div class="field"><label>Oggetto</label>'
+      +   '<input id="dm-ogg" value="'+esc(nome)+'" placeholder="Oggetto della email"></div>'
+      + '<div class="field"><label>Messaggio</label>'
+      +   '<textarea id="dm-msg" rows="6" placeholder="Due righe per accompagnare il documento">Buongiorno,\n\nin allegato trova il documento richiesto.\n\nResto a disposizione.</textarea></div>'
+      + '<label class="chk-riga"><input type="checkbox" id="dm-copia" checked> Manda una copia anche a me</label>'
+      + '</div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      + '<button class="btn-primary" data-action="doc-cli-invia" data-id="'+esc(id)+'">Invia</button>');
+  }
+
+  async function docCliInvia(id){
+    const a=(($("#dm-a")||{}).value||"").trim();
+    if(a.indexOf("@")<0){toast("Scrivi un indirizzo email valido");return;}
+    const oggetto=($("#dm-ogg")||{}).value||"";
+    const messaggio=($("#dm-msg")||{}).value||"";
+    const copia=!!(($("#dm-copia")||{}).checked);
+    const btn=document.querySelector('[data-action="doc-cli-invia"]');
+    if(btn){btn.disabled=true;btn.textContent="Invio in corso...";}
+    try{
+      const {data:s}=await sb.auth.getSession();
+      const tok=s&&s.session&&s.session.access_token;
+      if(!tok){toast("Sessione scaduta: rientra nel gestionale");return;}
+      const res=await fetch("/.netlify/functions/invia-documento-cliente",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({access_token:tok,doc_id:id,a:a,oggetto:oggetto,messaggio:messaggio,copia_a_me:copia})
+      });
+      const out=await res.json().catch(function(){return {};});
+      if(!res.ok||!out.success){toast("Non inviata: "+((out&&out.error)||res.status));return;}
+      toast("Documento inviato ✔");
+      docCliApri(docCliId);
+    }catch(e){
+      toast("Errore di rete: "+e.message);
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent="Invia";}
+    }
   }
 
   async function docCliScarica(id){
@@ -5987,6 +6044,8 @@
     if(a==="doc-cli")return docCliApri(id);
     if(a==="doc-cli-apri")return docCliScarica(id);
     if(a==="doc-cli-del")return docCliElimina(id);
+    if(a==="doc-cli-mail")return docCliMailForm(id);
+    if(a==="doc-cli-invia")return docCliInvia(id);
     if(a==="doc-cli-scegli"){const i=$("#cli-doc-file");if(i)i.click();return;}
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);

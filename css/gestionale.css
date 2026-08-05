@@ -1929,3 +1929,11 @@
 @media(max-width:520px){
   .doc-riga .btn{flex:1 1 45%}
 }
+
+/* pulsante Invia nella riga documento + riga con spunta */
+.doc-riga .b-mail{color:#0066ff;border-color:#b7d4ff}
+.doc-riga .b-mail:hover{background:#eaf2ff}
+.chk-riga{display:flex;align-items:center;gap:10px;font-size:16px;color:#12233a;
+          padding:12px 14px;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;margin-top:6px}
+.chk-riga input{width:20px;height:20px;accent-color:#0066ff;cursor:pointer}
+.chk-riga:hover{border-color:#0066ff;background:#f5f9ff}
