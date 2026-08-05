@@ -1937,3 +1937,22 @@
           padding:12px 14px;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;margin-top:6px}
 .chk-riga input{width:20px;height:20px;accent-color:#0066ff;cursor:pointer}
 .chk-riga:hover{border-color:#0066ff;background:#f5f9ff}
+
+/* ============================================================
+   Scheda cliente in sola lettura: righe etichetta + valore
+   Testo grande, valori selezionabili, niente campi da toccare
+   ============================================================ */
+.dato{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;
+      padding:11px 0;border-bottom:1px solid #eef2f7}
+.dato:last-child{border-bottom:none}
+.dato-lab{flex:0 0 160px;font-size:14.5px;font-weight:700;color:#5b6b80}
+.dato-val{flex:1 1 200px;min-width:0;font-size:17px;color:#12233a;overflow-wrap:anywhere;
+          -webkit-user-select:text;user-select:text}
+.dato-val.vuoto{color:#9aa8b8;font-style:italic;font-size:15.5px}
+.dato-val a{color:#0066ff;text-decoration:none;font-weight:600}
+.dato-val a:hover{text-decoration:underline}
+@media(max-width:600px){
+  .dato{padding:9px 0}
+  .dato-lab{flex:1 1 100%;font-size:13.5px}
+  .dato-val{flex:1 1 100%}
+}

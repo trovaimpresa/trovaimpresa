@@ -2796,10 +2796,9 @@
   let cliQ="", dipQ="";
   function cliVoci(c){
     return [
+      {lab:"👁 Apri scheda",action:"apri-cli",data:{id:c.id}},
       {lab:"🗺 Mappa",action:"map",data:{q:cliIndirizzo(c)||c.nome}},
-      {lab:"📎 Documenti",action:"doc-cli",data:{id:c.id}},
       {sep:true},
-      {lab:"✏ Modifica",action:"edit-cli",data:{id:c.id}},
       {lab:"🗑 Elimina",action:"del-cli",data:{id:c.id},del:true}
     ];
   }
@@ -4173,6 +4172,62 @@
   function docCliPeso(b){
     if(!b&&b!==0)return "";
     return b>=1048576 ? (b/1048576).toFixed(1)+" MB" : Math.max(1,Math.round(b/1024))+" KB";
+  }
+
+  /* Scheda del cliente in sola lettura: si apre, si legge, non si tocca niente.
+     Prima per vedere l'email o la partita IVA bisognava entrare in "Modifica",
+     col rischio di cambiare qualcosa per sbaglio. Modifica e Documenti stanno
+     qui dentro, in fondo. */
+  const _TIPO_LAB={privato:"Privato",azienda:"Azienda",condominio:"Condominio"};
+
+  function _rigaDato(etichetta,valore,link){
+    const v=(valore==null||String(valore).trim()==="")?"":String(valore).trim();
+    if(!v)return '<div class="dato"><span class="dato-lab">'+etichetta+'</span><span class="dato-val vuoto">non indicato</span></div>';
+    const dentro=link?'<a href="'+link+esc(v)+'">'+esc(v)+'</a>':esc(v);
+    return '<div class="dato"><span class="dato-lab">'+etichetta+'</span><span class="dato-val">'+dentro+'</span></div>';
+  }
+
+  async function cliScheda(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    let c=null;
+    const {data:r}=await sb.from("gest_clienti").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    c=r||cliCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Cliente non trovato");return;}
+
+    const tipo=_TIPO_LAB[c.tipo]||"Privato";
+    const tag='<span class="tipo-tag">'+tipo+'</span>';
+    const ind=cliIndirizzo(c);
+    const etNome=c.tipo==="azienda"?"Ragione sociale":(c.tipo==="condominio"?"Nome condominio":"Nome e cognome");
+    const etRef=c.tipo==="condominio"?"Amministratore":"Referente";
+
+    openSheetGrande(esc(c.nome||"Cliente")+tag,
+      '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
+      + '<div class="sh-b">'
+      +   '<div class="sh-tit">Chi &egrave;</div>'
+      +   _rigaDato(etNome,c.nome)
+      +   _rigaDato(etRef,c.referente)
+      +   _rigaDato("Telefono",c.telefono,"tel:")
+      +   _rigaDato("Email",c.email,"mailto:")
+      + '</div>'
+      + '<div class="sh-b">'
+      +   '<div class="sh-tit">Dove sta</div>'
+      +   _rigaDato("Indirizzo",ind)
+      + '</div>'
+      + '</div><div class="sh-col">'
+      + '<div class="sh-b">'
+      +   '<div class="sh-tit">Dati fiscali</div>'
+      +   _rigaDato("Partita IVA",c.piva)
+      +   _rigaDato("Codice fiscale",c.cod_fiscale)
+      + '</div>'
+      + '<div class="sh-b">'
+      +   '<div class="sh-tit">Dove mandargli la fattura</div>'
+      +   _rigaDato("Codice destinatario",c.sdi_codice)
+      +   _rigaDato("PEC",c.sdi_pec)
+      + '</div>'
+      + '</div></div>',
+      '<button class="btn b-cancel" data-action="close">Chiudi</button>'
+      + '<button class="btn" data-action="doc-cli" data-id="'+esc(c.id)+'">&#128206; Documenti</button>'
+      + '<button class="btn-primary" data-action="edit-cli" data-id="'+esc(c.id)+'">&#9998; Modifica</button>');
   }
 
   async function docCliApri(id){
@@ -6041,6 +6096,7 @@
     if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
     if(a==="new-cli")return cliForm(null,t.dataset.tipo||"privato");
+    if(a==="apri-cli")return cliScheda(id);
     if(a==="doc-cli")return docCliApri(id);
     if(a==="doc-cli-apri")return docCliScarica(id);
     if(a==="doc-cli-del")return docCliElimina(id);
