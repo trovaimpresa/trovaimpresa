@@ -114,7 +114,7 @@
       <div class="lav-head">
         <h2>Lavori</h2>
         <div class="lav-head-act">
-          <input type="text" id="f-search" class="lav-search" placeholder="Cerca cliente, indirizzo, lavoro">
+          <input type="text" id="f-search" class="lav-search" placeholder="Cerca cliente, indirizzo, lavoro" autocomplete="off" spellcheck="false">
           <button class="btn" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaLavoro&&window.AI.compilaLavoro()">&#10024; Compila con AI</button>
           <button class="btn-primary" data-action="new-job">+ Nuovo lavoro</button>
         </div>
@@ -174,14 +174,14 @@
 
     <section id="clienti">
       <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o societa': ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
-      <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px">
+      <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div class="grid" id="cli-list"></div>
       <input type="file" id="cli-doc-file" multiple style="display:none">
     </section>
 
     <section id="squadra">
       <div class="sec-head"><h2>Squadra</h2><button class="btn add" data-action="new-dip">+ Persona</button></div>
-      <input type="text" id="dip-search" class="lav-search" placeholder="Cerca nome, ruolo, telefono" style="margin-bottom:14px">
+      <input type="text" id="dip-search" class="lav-search" placeholder="Cerca nome, ruolo, telefono" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div style="background:var(--info-bg);border:1px solid rgba(37,99,235,.25);border-radius:12px;padding:14px 18px;margin-bottom:16px">
         <p style="margin:0;color:var(--info);font-weight:600;font-size:var(--f-md)">💡 Come entrano i collaboratori</p>
         <p style="margin:6px 0 0;color:var(--testo);font-size:var(--f-base)">Ogni giorno entrano da <strong>trovaimpresa.com/gestionale</strong> con la loro email e password. Dì loro di salvarlo tra i preferiti del browser.</p>
@@ -2833,7 +2833,7 @@
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
     if(!sb||!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Nessun condominio","Accedi per gestire i clienti.");return;}
-    const {data}=await sb.from("gest_clienti").select("id,nome,indirizzo,referente,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
+    const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
     cliCache=data||[];
     let L=cliCache;
     if(cliQ){const q=cliQ.toLowerCase();
@@ -6047,7 +6047,14 @@
     if(a==="doc-cli-mail")return docCliMailForm(id);
     if(a==="doc-cli-invia")return docCliInvia(id);
     if(a==="doc-cli-scegli"){const i=$("#cli-doc-file");if(i)i.click();return;}
-    if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
+    if(a==="edit-cli"){
+      let pieno=null;
+      if(sb&&sbUid){
+        const {data:r}=await sb.from("gest_clienti").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+        pieno=r||null;
+      }
+      return cliForm(pieno||cliCache.find(c=>c.id===id));
+    }
     if(a==="save-cli")return saveCli(id);
     if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
     if(a==="new-mezzo")return mezzoForm(null,"mezzo");
