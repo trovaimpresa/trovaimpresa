@@ -12,6 +12,7 @@
   <div class="landing-top">
     <div class="lt-actions">
       <button class="lt-btn" data-action="azienda">⚙ Dati azienda</button>
+      <button class="lt-btn" data-action="commercialista">📄 Commercialista</button>
       <button class="lt-btn" data-action="export-json">Backup (JSON)</button>
       <button class="lt-btn" data-action="export-excel">⬇ Esporta dati</button>
     </div>
@@ -72,7 +73,7 @@
       </div>
     </div>
     <div class="tb-actions">
-      <button class="tb-btn" data-action="azienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg><span>Dati azienda</span></button>
+      <button class="tb-btn" data-action="azienda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg><span>Dati azienda</span></button><button class="tb-btn" data-action="commercialista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg><span>Commercialista</span></button>
       <button class="tb-btn" data-action="export-json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span>Backup</span></button>
       <button class="tb-btn" data-action="export-excel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Esporta</span></button>
       <button class="tb-btn tb-help" onclick="window.AI&&window.AI.apriAiuto&&window.AI.apriAiuto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span>Aiuto</span></button>
@@ -4159,7 +4160,7 @@
      che qui e' cliente_id invece di fattura_id.
      Serve per tenere insieme al cliente il verbale del condominio, il
      preventivo firmato, il capitolato: le carte che oggi si perdono. */
-  let docCliId=null, docCliNome="";
+  let docCliId=null, docCliNome="", docCommAttivo=false;
 
   function docCliIcona(nome){
     const n=String(nome||"").toLowerCase();
@@ -4185,6 +4186,90 @@
     if(!v)return '<div class="dato"><span class="dato-lab">'+etichetta+'</span><span class="dato-val vuoto">non indicato</span></div>';
     const dentro=link?'<a href="'+link+esc(v)+'">'+esc(v)+'</a>':esc(v);
     return '<div class="dato"><span class="dato-lab">'+etichetta+'</span><span class="dato-val">'+dentro+'</span></div>';
+  }
+
+  /* ================= COMMERCIALISTA =================
+     Un reparto suo, di fianco ai Dati azienda. I dati stanno nella stessa
+     riga gest_azienda (colonne comm_*): il commercialista e' uno solo per
+     l'impresa, non serve una tabella a parte.
+
+     NOTA su cosa NON serve: se il commercialista ha la delega al cassetto
+     fiscale — e ormai ce l'hanno quasi tutti — le fatture elettroniche le
+     scarica da solo dall'Agenzia delle Entrate. Mandargliele sarebbe roba
+     che ha gia'. Quello che NON gli arriva sono scontrini, ricevute di carta
+     e spese di cassa: per quelli c'e' la sezione documenti qui sotto. */
+  async function commForm(){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    const a=az||{};
+    openSheetGrande("Il tuo commercialista",
+      '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
+      + '<div class="sh-b">'
+      +   '<div class="sh-tit">Chi &egrave;</div>'
+      +   '<div class="field"><label>Studio</label>'
+      +     '<input id="cm-studio" value="'+esc(a.comm_studio||"")+'" placeholder="Es. Studio Rossi &amp; Associati"></div>'
+      +   '<div class="field"><label>Nome della persona</label>'
+      +     '<input id="cm-nome" value="'+esc(a.comm_nome||"")+'" placeholder="Con chi parli di solito"></div>'
+      + '</div>'
+      + '<div class="sh-b">'
+      +   '<div class="sh-tit">Come lo raggiungi</div>'
+      +   '<div class="field"><label>Telefono</label>'
+      +     '<input id="cm-tel" type="tel" value="'+esc(a.comm_tel||"")+'" placeholder="Numero"></div>'
+      +   '<div class="field"><label>Email</label>'
+      +     '<input id="cm-email" type="email" value="'+esc(a.comm_email||"")+'" placeholder="studio@email.it"></div>'
+      +   '<div class="field"><label>PEC</label>'
+      +     '<input id="cm-pec" type="email" value="'+esc(a.comm_pec||"")+'" placeholder="studio@pec.it"></div>'
+      + '</div>'
+      + '</div><div class="sh-col">'
+      + '<div class="sh-b">'
+      +   '<div class="sh-tit">Documenti per lui</div>'
+      +   '<p class="sh-nota" style="margin-top:0">Scontrini, ricevute di carta, spese di cassa: le cose che <b>non</b> gli arrivano da sole. Le fatture elettroniche non servono, quelle se le scarica dal cassetto fiscale con la delega.</p>'
+      +   '<button type="button" class="btn" data-action="comm-doc">&#128206; Apri i documenti del commercialista</button>'
+      + '</div>'
+      + '<div class="sh-b">'
+      +   '<div class="sh-tit">Appunti</div>'
+      +   '<div class="field"><label>Note</label>'
+      +     '<textarea id="cm-note" rows="6" placeholder="Quello che ti serve ricordare: scadenze, come preferisce ricevere le cose, cosa ti chiede ogni volta">'+esc(a.comm_note||"")+'</textarea></div>'
+      + '</div>'
+      + '</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      + '<button class="btn-primary" data-action="save-comm">Salva</button>');
+  }
+
+  async function saveComm(){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const v=q=>{const e=$(q);return e?String(e.value||"").trim():"";};
+    const row={user_id:sbUid,
+      comm_studio:v("#cm-studio")||null, comm_nome:v("#cm-nome")||null,
+      comm_tel:v("#cm-tel")||null, comm_email:v("#cm-email")||null,
+      comm_pec:v("#cm-pec")||null, comm_note:v("#cm-note")||null};
+    let {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
+    /* se le colonne non ci sono ancora, lo dico chiaro invece di fallire in silenzio */
+    if(error){
+      const manca=/comm_/.test(error.message||"");
+      toast(manca?"Serve prima l'aggiornamento del database (sql/aggiungi-commercialista.sql)":"Errore: "+error.message);
+      return;
+    }
+    closeSheet();toast("Commercialista salvato ✔");
+  }
+
+  /* Documenti del commercialista: stesso deposito e stessa tabella dei documenti
+     cliente, ma legati a te invece che a un cliente (tipo "doc_commercialista"). */
+  async function docCommApri(){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    docCliId=null; docCommAttivo=true;
+    openSheetGrande("Documenti per il commercialista",
+      '<div class="sh-b">'
+      + '<div class="sh-tit">Carica un documento</div>'
+      + '<p class="sh-nota" style="margin-top:0">Scontrini, ricevute, spese di cassa: quello che il commercialista non trova nel cassetto fiscale. Puoi caricarne pi&ugrave; di uno alla volta. Massimo 15 MB per file.</p>'
+      + '<button class="btn-primary" data-action="doc-cli-scegli" style="margin-top:6px">Scegli i file dal computer</button>'
+      + '</div>'
+      + '<div class="sh-b">'
+      + '<div class="sh-tit">Documenti gi&agrave; caricati</div>'
+      + '<div id="doc-cli-lista"><div class="loading">Caricamento...</div></div>'
+      + '</div>',
+      '<button class="btn b-cancel" data-action="close">Chiudi</button>');
+    renderDocCli();
   }
 
   async function cliScheda(id){
@@ -4233,7 +4318,7 @@
   async function docCliApri(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const c=cliCache.find(x=>String(x.id)===String(id));
-    docCliId=id; docCliNome=(c&&c.nome)||"cliente";
+    docCliId=id; docCliNome=(c&&c.nome)||"cliente"; docCommAttivo=false;
     openSheetGrande("Documenti di "+esc(docCliNome),
       `<div class="sh-b">
          <div class="sh-tit">Carica un documento</div>
@@ -4249,11 +4334,13 @@
   }
 
   async function renderDocCli(){
-    const box=$("#doc-cli-lista"); if(!box||!docCliId)return;
-    const {data,error}=await sb.from("gest_foto")
-      .select("id,storage_path,nome_file,created_at")
-      .eq("user_id",sbUid).eq("cliente_id",docCliId).eq("tipo","documento")
-      .order("created_at",{ascending:false});
+    const box=$("#doc-cli-lista"); if(!box)return;
+    if(!docCommAttivo&&!docCliId)return;
+    let q=sb.from("gest_foto").select("id,storage_path,nome_file,created_at").eq("user_id",sbUid);
+    /* due gruppi distinti: quelli di un cliente e quelli del commercialista */
+    q = docCommAttivo ? q.eq("tipo","doc_commercialista")
+                      : q.eq("cliente_id",docCliId).eq("tipo","documento");
+    const {data,error}=await q.order("created_at",{ascending:false});
     if(error){
       /* se la colonna non c'e' ancora, lo dico invece di lasciare la rotella */
       box.innerHTML='<div class="campo-aiuto" style="color:var(--attesa)">Non riesco a leggere i documenti: '+esc(error.message)+'</div>';
@@ -4277,18 +4364,20 @@
   }
 
   async function uploadDocCliente(files){
-    if(!files||!files.length||!docCliId)return;
+    if(!files||!files.length)return;
+    if(!docCommAttivo&&!docCliId)return;
     if(!sbUid){toast("Devi essere loggato");return;}
     let ok=0, ko=0;
     for(const file of Array.from(files)){
       const p=await preparaFileUpload(file);
       if(p.errore){toast(p.errore);ko++;continue;}
       const safe=String(p.nome||"documento").replace(/[^a-zA-Z0-9._-]/g,"_");
-      const path=sbUid+"/clienti/"+docCliId+"/"+Date.now()+"_"+safe;
+      const path=sbUid+(docCommAttivo?"/commercialista/":"/clienti/"+docCliId+"/")+Date.now()+"_"+safe;
       const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
       if(up){toast("Non caricato: "+up.message);ko++;continue;}
-      const riga={user_id:sbUid,cliente_id:docCliId,tipo:"documento",operatore:"Capo",
-                  storage_path:path,nome_file:p.nome||safe};
+      const riga=docCommAttivo
+        ? {user_id:sbUid,tipo:"doc_commercialista",operatore:"Capo",storage_path:path,nome_file:p.nome||safe}
+        : {user_id:sbUid,cliente_id:docCliId,tipo:"documento",operatore:"Capo",storage_path:path,nome_file:p.nome||safe};
       let {error:ins}=await sb.from("gest_foto").insert(riga);
       if(ins&&(ins.message||"").indexOf("nome_file")>=0){
         /* database senza la colonna del nome: salvo lo stesso, il nome si legge dal path */
@@ -4324,7 +4413,7 @@
       + '<div class="field"><label>Oggetto</label>'
       +   '<input id="dm-ogg" value="'+esc(nome)+'" placeholder="Oggetto della email"></div>'
       + '<div class="field"><label>Messaggio</label>'
-      +   '<textarea id="dm-msg" rows="6" placeholder="Due righe per accompagnare il documento">Buongiorno,\n\nin allegato trova il documento richiesto.\n\nResto a disposizione.</textarea></div>'
+      +   '<textarea id="dm-msg" rows="6" placeholder="Due righe per accompagnare il documento">'+(docCommAttivo?"Buongiorno,\n\nin allegato le mando il documento per la contabilit\u00e0.\n\nGrazie.":"Buongiorno,\n\nin allegato trova il documento richiesto.\n\nResto a disposizione.")+'</textarea></div>'
       + '<label class="chk-riga"><input type="checkbox" id="dm-copia" checked> Manda una copia anche a me</label>'
       + '</div>',
       '<button class="btn b-cancel" data-action="close">Annulla</button>'
@@ -6096,6 +6185,9 @@
     if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
     if(a==="new-cli")return cliForm(null,t.dataset.tipo||"privato");
+    if(a==="commercialista")return commForm();
+    if(a==="save-comm")return saveComm();
+    if(a==="comm-doc")return docCommApri();
     if(a==="apri-cli")return cliScheda(id);
     if(a==="doc-cli")return docCliApri(id);
     if(a==="doc-cli-apri")return docCliScarica(id);
