@@ -49,7 +49,41 @@
     azienda:        'I tuoi dati: nome, partita IVA, sede, IBAN. Sono quelli che finiscono su preventivi e fatture.',
     commercialista: 'I contatti del tuo commercialista e i documenti da mandargli, come scontrini e ricevute.',
     'export-json':  'Scarica una copia di tutti i tuoi dati da tenere da parte, per sicurezza.',
-    'export-excel': 'Porta fuori i dati in un foglio di calcolo, per farci i conti per conto tuo.'
+    'export-excel': 'Porta fuori i dati in un foglio di calcolo, per farci i conti per conto tuo.',
+
+    /* --- creare cose nuove --- */
+    'new-job':          'Un cantiere nuovo: cosa c’è da fare, per chi e quando. Da qui poi nascono preventivo e fattura.',
+    'new-prev':         'Un preventivo nuovo. Quando il cliente lo accetta lo trasformi in lavoro senza riscrivere niente.',
+    'new-fattura':      'Una fattura nuova. Puoi partire da zero, da un preventivo accettato o da più lavori dello stesso cliente.',
+    'new-mezzo':        'Un furgone o una macchina, con le scadenze di bollo, assicurazione e revisione.',
+    'new-attrezzatura': 'Un’attrezzatura: betoniera, ponteggio, martello demolitore. Serve a sapere dove sta e chi ce l’ha.',
+    'new-dip':          'Una persona della squadra: contatti, ruolo e documenti.',
+    'new-carta':        'Una carta aziendale, per tenere il conto di cosa ci paghi.',
+    'new-scad':         'Una scadenza da non dimenticare, con l’avviso prima che arrivi.',
+    'new-panel':        'Un reparto nuovo, per esempio muratore o giardiniere. Ogni reparto ha i suoi lavori, i suoi clienti e i suoi numeri, separati dagli altri.',
+    'new-job-date':     'Crea un lavoro già fissato in questo giorno.',
+    'quick-cli':        'Aggiungi al volo un cliente che non hai ancora in anagrafica, senza uscire da qui.',
+
+    /* --- lavoro di tutti i giorni --- */
+    'carta-dettaglio':   'Tutti i movimenti fatti con questa carta, uno per uno.',
+    'save-rifornimento': 'Registra un pieno: litri, importo e chilometri. Serve per sapere quanto ti costa davvero il mezzo.',
+    'save-movimento':    'Aggiungi una spesa fatta con questa carta.',
+    'sq-wa':             'Manda un messaggio WhatsApp a questa persona, senza cercare il numero in rubrica.',
+    'mp-ricalcola':      'Ricalcola quanto distano i cantieri. Serve dopo che hai cambiato indirizzi o aggiunto lavori.',
+    'gal-carica':        'Carica foto e video del cantiere: restano attaccati al lavoro e li ritrovi anche fra due anni.',
+    'report-csv':        'Scarica i numeri di questa schermata in un foglio di calcolo.',
+
+    /* --- documenti e invii --- */
+    'doc-cli':           'I documenti attaccati a questo cliente: verbali, preventivi firmati, capitolati, permessi.',
+    'doc-cli-scegli':    'Scegli uno o più file dal computer. Le foto vengono alleggerite da sole, i PDF restano intatti.',
+    'doc-cli-apri':      'Apre il documento in una scheda nuova.',
+    'doc-cli-mail':      'Manda questo documento per email, con copia a te. L’indirizzo lo prende dalla scheda del cliente.',
+
+    /* --- fatture --- */
+    'fatt-riga-add':     'Aggiungi una voce alla fattura: descrizione, quantità, prezzo e IVA.',
+    'prev-riga-add':     'Aggiungi una voce al preventivo: descrizione, quantità e prezzo.',
+    'upload-fattura':    'Attacca alla fattura il suo PDF, così lo ritrovi qui invece che nelle cartelle del computer.',
+    'fatt':              'Crea la fattura di questo lavoro, con dentro già la voce giusta.'
   };
 
   /* ---------- il riquadro ---------- */

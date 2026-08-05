@@ -1264,12 +1264,26 @@
           });
         }
 
-        const { error } = await sb
+        /* .select('id') NON e' un vezzo: senza, una modifica bloccata dalle regole
+           di sicurezza del database non da' errore, aggiorna ZERO righe e risponde
+           OK. La pagina direbbe "salvato con successo" senza aver salvato niente.
+           Succede tipicamente quando la sessione e' scaduta mentre si compilava. */
+        const { data: righe, error } = await sb
           .from('imprese')
           .update(dati)
-          .eq('user_id', currentUser.id);
+          .eq('user_id', currentUser.id)
+          .select('id');
 
         if (error) throw new Error(error.message);
+
+        if (!righe || righe.length === 0) {
+          /* nessuna riga toccata: quasi sempre la sessione e' scaduta */
+          const { data: s } = await sb.auth.getSession();
+          if (!s || !s.session) {
+            throw new Error('la tua sessione e\u2019 scaduta mentre compilavi. Accedi di nuovo e riprova: i dati che hai scritto non sono andati persi se non chiudi questa pagina.');
+          }
+          throw new Error('il salvataggio non ha modificato nessun dato. Riprova, e se succede ancora scrivimi a info@trovaimpresa.com che lo sistemo io.');
+        }
 
         // Aggiorna dati locali
         Object.assign(impresaData, dati);
