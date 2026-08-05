@@ -117,10 +117,63 @@
       letter-spacing: 0.5px;
       align-self: flex-start;
     }
-    .card h2 { font-size: 19px; margin-bottom: 8px; color: #0047b3; }
+    .card h3 { font-size: 19px; margin-bottom: 8px; color: #0047b3; }
     .card .excerpt { font-size: 14px; color: #555; flex: 1; }
     .card .date { font-size: 12px; color: #999; margin-top: 14px; }
     .stato { text-align: center; padding: 60px 24px; color: #777; font-size: 16px; }
+
+    /* --- Barra salto rapido per mestiere --- */
+    .salta {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      padding: 18px 20px;
+      margin-bottom: 34px;
+    }
+    .salta h2 { font-size: 15px; color: #555; margin-bottom: 12px; font-weight: bold; }
+    .salta .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+    .salta a {
+      display: inline-block;
+      background: #f0f5ff;
+      color: #0047b3;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1.5px solid #d8e4ff;
+    }
+    .salta a:hover { background: #0066ff; color: #fff; border-color: #0066ff; }
+
+    /* --- Sezioni per mestiere --- */
+    .sezione { margin-bottom: 46px; scroll-margin-top: 90px; }
+    .sezione-testa {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 3px solid #ff8800;
+      padding-bottom: 10px;
+      margin-bottom: 22px;
+    }
+    .sezione-testa h2 {
+      font-size: 23px;
+      color: #0047b3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sezione-testa .icona { font-size: 26px; }
+    .sezione-testa .n { font-size: 13px; color: #888; font-weight: normal; }
+    .sezione-testa .trova {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ff8800;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sezione-testa .trova:hover { text-decoration: underline; }
     .cta-box {
       background: #fff;
       border-radius: 16px;
@@ -149,6 +202,8 @@
       .navbar .menu a { font-size: 13px; }
       .blog-header h1 { font-size: 26px; }
       .container { padding: 28px 16px; }
+      .sezione-testa h2 { font-size: 19px; }
+      .salta a { font-size: 13px; padding: 7px 12px; }
     }
   </style>
 <link rel="stylesheet" href="/css/barra-comune.css">
@@ -175,7 +230,12 @@
   </header>
 
   <div class="container">
-    <div id="lista" class="grid">
+    <div id="salta" class="salta" style="display:none;">
+      <h2>Vai al mestiere che ti serve</h2>
+      <div class="chips" id="salta-chips"></div>
+    </div>
+
+    <div id="lista">
       <div class="stato">Caricamento articoli...</div>
     </div>
 
@@ -194,6 +254,60 @@
 
     const CATEGORIE = { costi: 'Costi', bonus: 'Bonus fiscali', guide: 'Guide' };
 
+    /* ============================================================
+       GRUPPI PER MESTIERE
+       L'ordine di questo array = l'ordine delle sezioni nella pagina.
+       "trova" = link alla ricerca di quel mestiere (lascia '' per non mostrarlo).
+       ============================================================ */
+    const GRUPPI = [
+      { id: 'ristrutturazione', nome: 'Ristrutturazione e impresa edile', icona: '🏗️', trova: 'cerca-imprese.html', trovaTesto: 'Trova imprese edili →' },
+      { id: 'bagno',            nome: 'Bagno e idraulica',                icona: '🚿', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Idraulica'), trovaTesto: 'Trova un idraulico →' },
+      { id: 'elettrico',        nome: 'Impianti elettrici',               icona: '⚡', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Impianti elettrici'), trovaTesto: 'Trova un elettricista →' },
+      { id: 'clima',            nome: 'Riscaldamento e climatizzazione',  icona: '🔥', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Climatizzazione / Caldaie'), trovaTesto: 'Trova un termoidraulico →' },
+      { id: 'tetto',            nome: 'Tetto, facciata e isolamento',     icona: '🏠', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Coperture / Tetti'), trovaTesto: 'Trova chi fa tetti →' },
+      { id: 'infissi',          nome: 'Infissi e serramenti',             icona: '🪟', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Serramenti / Infissi'), trovaTesto: 'Trova un serramentista →' },
+      { id: 'pavimenti',        nome: 'Pavimenti e piastrelle',           icona: '🧱', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Pavimenti e piastrelle'), trovaTesto: 'Trova un piastrellista →' },
+      { id: 'pitture',          nome: 'Pitture e finiture',               icona: '🎨', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Pittura e tinteggiatura'), trovaTesto: 'Trova un imbianchino →' },
+      { id: 'cartongesso',      nome: 'Cartongesso',                      icona: '📐', trova: 'cerca-artigiani.html?mestiere=' + encodeURIComponent('Cartongesso'), trovaTesto: 'Trova un cartongessista →' },
+      { id: 'bonus',            nome: 'Bonus fiscali e permessi',         icona: '📄', trova: 'bandi.html', trovaTesto: 'Bandi e fondi perduti →' },
+      { id: 'strumenti',        nome: 'Strumenti gratuiti',               icona: '🧮', trova: 'calcolatori.html', trovaTesto: 'Tutti i calcolatori →' },
+      { id: 'imprese',          nome: 'Per le imprese',                   icona: '🧰', trova: 'subappalto.html', trovaTesto: 'Bacheca subappalti →' },
+      { id: 'altro',            nome: 'Altre guide',                      icona: '📚', trova: '', trovaTesto: '' }
+    ];
+
+    /* Rete di sicurezza: se in Supabase la colonna "mestiere" è vuota,
+       l'articolo viene messo nel gruppo giusto in base allo slug. */
+    const MAPPA_SLUG = {
+      'costi-ristrutturazione': 'ristrutturazione',
+      'quanto-costa-ristrutturare-casa': 'ristrutturazione',
+      'quanto-costa-un-muratore-al-giorno': 'ristrutturazione',
+      'quanto-costa-rifare-il-bagno': 'bagno',
+      'quanto-costa-rifare-impianto-idraulico': 'bagno',
+      'quanto-costa-trasformare-vasca-in-doccia': 'bagno',
+      'quanto-costa-rifare-impianto-elettrico': 'elettrico',
+      'quanto-costa-sostituire-la-caldaia': 'clima',
+      'quanto-costa-installare-un-condizionatore': 'clima',
+      'quanto-costa-impianto-fotovoltaico': 'clima',
+      'quanto-costa-rifare-il-tetto': 'tetto',
+      'quanto-costa-rifare-la-facciata': 'tetto',
+      'quanto-costa-cappotto-termico': 'tetto',
+      'quanto-costa-cambiare-gli-infissi': 'infissi',
+      'quanto-costa-posare-il-pavimento': 'pavimenti',
+      'quanto-costa-imbiancare-casa': 'pitture',
+      'quanto-costa-parete-cartongesso': 'cartongesso',
+      'bonus-ristrutturazione-2026': 'bonus',
+      'permessi-ristrutturazione-cila-scia': 'bonus',
+      'calcolatori': 'strumenti',
+      'controlla-preventivo-bagno': 'strumenti',
+      'trova-cantieri': 'imprese'
+    };
+
+    function gruppoDi(a) {
+      const m = (a.mestiere || '').trim();
+      if (m && GRUPPI.some(g => g.id === m)) return m;
+      return MAPPA_SLUG[a.slug] || 'altro';
+    }
+
     function escapeHtml(s) {
       const d = document.createElement('div');
       d.textContent = s || '';
@@ -206,13 +320,38 @@
       return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
+    function cardHTML(a) {
+      return `
+        <a class="card" href="${a.url_esterno ? escapeHtml(a.url_esterno) : 'articolo.html?slug=' + encodeURIComponent(a.slug)}">
+          <img class="cover" src="${a.immagine ? escapeHtml(a.immagine) : 'img/blog-placeholder.jpg'}" alt="${escapeHtml(a.titolo)}" onerror="this.style.display='none'">
+          <div class="body">
+            <span class="cat">${CATEGORIE[a.categoria] || 'Guida'}</span>
+            <h3>${escapeHtml(a.titolo)}</h3>
+            <p class="excerpt">${escapeHtml(a.meta_description)}</p>
+            <span class="date">${formatData(a.created_at)}</span>
+          </div>
+        </a>
+      `;
+    }
+
     async function caricaArticoli() {
       const box = document.getElementById('lista');
-      const { data, error } = await sb
+
+      // 1° tentativo con la colonna "mestiere"; se non esiste ancora nel DB, si ricarica senza.
+      let { data, error } = await sb
         .from('blog_articoli')
-        .select('titolo, slug, meta_description, immagine, categoria, created_at, url_esterno')
+        .select('titolo, slug, meta_description, immagine, categoria, created_at, url_esterno, mestiere')
         .eq('pubblicato', true)
         .order('created_at', { ascending: false });
+
+      if (error) {
+        const r = await sb
+          .from('blog_articoli')
+          .select('titolo, slug, meta_description, immagine, categoria, created_at, url_esterno')
+          .eq('pubblicato', true)
+          .order('created_at', { ascending: false });
+        data = r.data; error = r.error;
+      }
 
       if (error) {
         box.innerHTML = '<div class="stato">Errore nel caricamento degli articoli. Riprova più tardi.</div>';
@@ -223,17 +362,31 @@
         return;
       }
 
-      box.innerHTML = data.map(a => `
-        <a class="card" href="${a.url_esterno ? escapeHtml(a.url_esterno) : 'articolo.html?slug=' + encodeURIComponent(a.slug)}">
-          <img class="cover" src="${a.immagine ? escapeHtml(a.immagine) : 'img/blog-placeholder.jpg'}" alt="${escapeHtml(a.titolo)}" onerror="this.style.display='none'">
-          <div class="body">
-            <span class="cat">${CATEGORIE[a.categoria] || 'Guida'}</span>
-            <h2>${escapeHtml(a.titolo)}</h2>
-            <p class="excerpt">${escapeHtml(a.meta_description)}</p>
-            <span class="date">${formatData(a.created_at)}</span>
-          </div>
-        </a>
-      `).join('');
+      // Raggruppa per mestiere
+      const perGruppo = {};
+      data.forEach(a => {
+        const g = gruppoDi(a);
+        (perGruppo[g] = perGruppo[g] || []).push(a);
+      });
+
+      let html = '', chips = '';
+      GRUPPI.forEach(g => {
+        const arts = perGruppo[g.id];
+        if (!arts || !arts.length) return; // sezione vuota: non si mostra
+        chips += `<a href="#${g.id}">${g.icona} ${escapeHtml(g.nome)}</a>`;
+        html += `
+          <section class="sezione" id="${g.id}">
+            <div class="sezione-testa">
+              <h2><span class="icona">${g.icona}</span> ${escapeHtml(g.nome)} <span class="n">(${arts.length})</span></h2>
+              ${g.trova ? `<a class="trova" href="${g.trova}">${escapeHtml(g.trovaTesto)}</a>` : ''}
+            </div>
+            <div class="grid">${arts.map(cardHTML).join('')}</div>
+          </section>`;
+      });
+
+      box.innerHTML = html;
+      document.getElementById('salta-chips').innerHTML = chips;
+      document.getElementById('salta').style.display = 'block';
     }
 
     caricaArticoli();
