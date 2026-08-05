@@ -173,7 +173,7 @@
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli">+ Nuovo</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
+      <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o societa': ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
       <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px">
       <div class="grid" id="cli-list"></div>
     </section>
@@ -4056,8 +4056,9 @@
      codice fiscale, dove sta di preciso, e dove mandargliela. Stessa finestra
      grande a due colonne dei Dati azienda: a sinistra chi e' e dove sta,
      a destra il fisco. Tutti i campi nuovi sono facoltativi. */
-  function cliForm(c){
+  function cliForm(c,tipoNuovo){
     const isNew=!c;c=c||{};
+    if(isNew&&tipoNuovo)c.tipo=tipoNuovo;
     const priv=ruoloUtente==='professionista';
     /* che tipo di cliente e': privato (il caso piu' comune), azienda o condominio.
        Cambia solo le parole del modulo, non i campi: cosi' nessuno resta bloccato. */
@@ -4066,7 +4067,8 @@
                  azienda:{nome:'Ragione sociale',ph:'Es. Rossi Costruzioni Srl',ref:'Referente'},
                  condominio:{nome:'Nome condominio',ph:'Es. Condominio Via Roma 12',ref:'Amministratore'}};
     const Lt=LAB_T[tipoCli];
-    openSheetGrande(isNew?"Nuovo cliente":"Modifica cliente",
+    const T_TIT={privato:"Nuovo cliente privato",azienda:"Nuova azienda",condominio:"Nuovo condominio"};
+    openSheetGrande(isNew?(T_TIT[tipoCli]||"Nuovo cliente"):"Modifica cliente",
       `<div class="sh-cols sh-cols--fatt"><div class="sh-col">
 
       <div class="sh-b">
@@ -5862,7 +5864,7 @@
     if(a==="cal-prev"){cal.setMonth(cal.getMonth()-1);renderCal();return;}
     if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
-    if(a==="new-cli")return cliForm(null);
+    if(a==="new-cli")return cliForm(null,t.dataset.tipo||"privato");
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
     if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
