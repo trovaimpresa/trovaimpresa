@@ -173,6 +173,91 @@ molto approfondite che portano dentro il marketplace.
 La homepage prende 67 clic su 79. Le guide fanno 488 impressioni ma CTR 0,8% (posizione
 troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
 
+## Gestionale — come funziona (agosto 2026)
+
+### Documenti allegati: un solo meccanismo, due cassetti
+I file finiscono nel bucket **`gestionale-foto`** e la riga va in **`gest_foto`**.
+Cosa distingue i gruppi:
+
+- `cliente_id` valorizzato + `tipo='documento'` → documenti di quel **cliente**
+  (path `<uid>/clienti/<clienteId>/…`)
+- `tipo='doc_commercialista'`, senza cliente_id → documenti per il **commercialista**
+  (path `<uid>/commercialista/…`)
+
+Stesso codice per tutti e due: la variabile `docCommAttivo` decide il modo.
+Colonne aggiunte: `cliente_id`, `nome_file` (`sql/aggiungi-documenti-cliente.sql`).
+L'upload passa da `preparaFileUpload()` di `js/foto-upload.js` (comprime le immagini,
+lascia intatti i PDF, limite 15 MB).
+
+### Invio di un documento per email
+Function **`netlify/functions/invia-documento-cliente.js`**, con Resend.
+- Il file **non passa dal browser**: la function lo scarica dal bucket con la service key.
+- Verifica l'`access_token` dell'utente e controlla che la riga `gest_foto` sia sua,
+  altrimenti chiunque potrebbe farsi mandare i documenti di un altro cambiando un id.
+- Manda al destinatario + copia al mittente, `reply_to` = email dell'utente.
+- Limite allegato **10 MB** (la base64 gonfia di un terzo e molte caselle rifiutano oltre).
+
+### Reparto Commercialista
+Pulsante di fianco a "Dati azienda", nelle due barre (landing e reparto).
+I dati stanno in `gest_azienda`, colonne `comm_*` (`sql/aggiungi-commercialista.sql`):
+il commercialista è uno solo per impresa, non serviva una tabella nuova.
+
+**Deciso di NON fare l'invio delle fatture al commercialista.** Motivo: ormai
+tutti i commercialisti hanno la **delega al cassetto fiscale**, quindi le fatture
+elettroniche se le scaricano da soli dall'Agenzia delle Entrate. Mandargliele
+sarebbe roba che hanno già. Quello che invece NON gli arriva sono scontrini,
+ricevute di carta e spese di cassa: per quelli c'è la sezione documenti.
+Non riproporlo.
+
+### Tipi di cliente
+`gest_clienti.tipo` = `privato` | `azienda` | `condominio` (`sql/aggiungi-tipo-cliente.sql`).
+Tre pulsanti separati in cima alla sezione (`+ Privato`, `+ Azienda`, `+ Condominio`)
+e tre bottoni dentro al modulo per correggere il tipo. Cambiano **solo le etichette**,
+mai i campi: nessuno deve restare bloccato se il suo caso è strano.
+La sezione si chiama **Clienti** per tutti i mestieri (prima "Condomini / Clienti").
+La scheda si apre in **sola lettura** (`cliScheda`), con Modifica e Documenti dentro.
+
+### Aiuti a comparsa (tooltip)
+File **`js/aiuti.js`**, una riga sola in fondo a `gestionale-app.html`.
+- Le frasi stanno in cima al file: `AIUTI_TAB` (chiave = `data-tab`) e
+  `AIUTI_AZIONE` (chiave = `data-action`).
+- Per un pulsante qualsiasi basta scrivergli `data-aiuto="frase"` in HTML: vince su tutto.
+- **Solo col mouse**, di proposito: su telefono il passaggio sopra non esiste e su
+  pulsanti che fanno qualcosa un aiuto al tocco darebbe fastidio.
+- Fatti: le 16 voci del menu e i 4 pulsanti della barra. Da fare: le singole schermate.
+
+## TRAPPOLE DEL GESTIONALE (imparate sul campo, agosto 2026)
+
+### G1. Un modulo che si riempie da una lista parziale CANCELLA i dati
+`renderClienti()` caricava solo `id,nome,indirizzo,referente,telefono`. `cliCache`
+restava quindi senza email, tipo, città, partita IVA, PEC. Aprendo "Modifica" il
+modulo si riempiva da quella cache: i campi mancanti risultavano **vuoti**, e al
+salvataggio venivano riscritti vuoti nel database. Ogni modifica di un cliente
+**azzerava in silenzio** email, tipo e tutti i dati fiscali.
+
+Regola: **se un modulo si riempie da una lista caricata prima, quella lista deve
+avere tutti i campi.** Meglio ancora, come ora: alla Modifica si **rilegge la riga
+dal database**, senza fidarsi della cache.
+
+Sintomo: salvi, compare "Aggiornato" (nessun errore), ma riaprendo il campo è vuoto.
+
+### G2. Chrome riempie da solo le caselle di ricerca
+Le caselle `cli-search`, `dip-search`, `f-search` senza `autocomplete="off"` venivano
+riempite dal completamento automatico con parole scritte altrove. L'elenco risultava
+filtrato a insaputa dell'utente → sembrava "non salva niente" quando invece salvava.
+Su ogni casella di ricerca: `autocomplete="off" spellcheck="false"`.
+
+### G3. `gestionale-app.html` non ha `</body>` né `</html>`
+Finisce con i `<script src=…>`. Se serve agganciare uno script, si va **in fondo al file**,
+non "prima di `</body>`" — quel tag non c'è.
+
+### G4. Il ponte col computer di Alex a volte restituisce copie CONGELATE
+Piu' volte lo staging di `gestionale-app.html` e `CLAUDE.md` ha restituito la versione
+di ore prima, pur segnalando la dimensione giusta. **Prima di modificare un file grande,
+controllare che contenga le ultime modifiche** (es. cercare una stringa aggiunta di
+recente). Se e' vecchio: ricostruire riapplicando le modifiche note, non sovrascrivere
+alla cieca.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
@@ -191,3 +276,14 @@ troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
   tetto, cappotto, imbiancare, fotovoltaico.
 - Domanda strategica aperta: TrovaImpresa è un marketplace o un software per imprese edili?
   Sono due aziende diverse e prima o poi cambia dove Alex mette le sue ore.
+- **Aiuti a comparsa**: correggere le frasi del menu dove sono imprecise (scritte da Claude
+  leggendo il codice, vanno riviste da Alex), poi estenderli una schermata alla volta —
+  Lavori, Preventivi, Fatture. Poi la versione per il **sito**: le parole tecniche delle
+  guide (trasmittanza, CILA, SCIA, bonifico parlante, massetto…) spiegate al passaggio del
+  mouse. Lì serve che funzioni **anche al tocco**, perché le guide si leggono dal telefono.
+- Nel repository è finito per sbaglio **`_to_delete/bonus-casa-2026.html`**: pagina messa
+  da parte per la cancellazione, ora pubblicata (non collegata, non in sitemap). Da togliere.
+- **Prezzo del Premium**: oggi 5 €/mese. Il capo di Alex paga **700 €/anno** un gestionale
+  concorrente — comprato senza provarlo, scegliendo il più caro "per andare sul sicuro" —
+  e non riesce a usarlo bene. Due indicazioni: il mercato quei soldi ce li ha, e un prezzo
+  troppo basso non comunica convenienza ma poca serietà. Da valutare con calma.
