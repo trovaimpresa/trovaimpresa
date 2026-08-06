@@ -2813,12 +2813,44 @@
     toast("File XML scaricato ✅ — passalo dal validatore prima di mandarlo");
   }
 
+  /* ---- note del giorno: prima vivevano solo nel browser (localStorage),
+     ora su gest_note cosi' si vedono da tutti i dispositivi e non si perdono.
+     Se la tabella non c'e' ancora (migrazione SQL non eseguita) si torna al
+     vecchio modo e si avvisa: nessuna nota va persa. ---- */
+  let noteCache={}, noteSupaOk=true, noteAvvisato=false;
+  async function caricaNote(){
+    noteCache={};
+    const mid=curMestiere();
+    if(!sb||!sbUid||!mid){noteCache=Object.assign({},db().note||{});return;}
+    const {data,error}=await sb.from("gest_note").select("data,testo").eq("user_id",sbUid).eq("mestiere_id",mid);
+    if(error){
+      noteSupaOk=false;noteCache=Object.assign({},db().note||{});
+      if(!noteAvvisato){noteAvvisato=true;toast("Le note del calendario restano solo su questo dispositivo: manca la migrazione SQL (gest_note)");}
+      return;
+    }
+    noteSupaOk=true;
+    (data||[]).forEach(n=>{noteCache[n.data]=n.testo;});
+    /* migrazione automatica: le vecchie note del browser salgono su Supabase
+       una volta sola, poi il localStorage si svuota */
+    const vecchie=Object.entries(db().note||{}).filter(([ds,tx])=>tx&&String(tx).trim());
+    if(vecchie.length){
+      const righe=vecchie.map(([ds,tx])=>({user_id:sbUid,mestiere_id:mid,data:ds,testo:String(tx)}));
+      const {error:e2}=await sb.from("gest_note").upsert(righe,{onConflict:"user_id,mestiere_id,data",ignoreDuplicates:true});
+      if(!e2){
+        righe.forEach(r=>{if(!noteCache[r.data])noteCache[r.data]=r.testo;});
+        db().note={};await save();
+        toast("Le vecchie note del calendario sono state spostate su Supabase ✔");
+      }
+    }
+  }
+
   let calJobs=[];
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
     if(sb&&sbUid){const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];}
     else calJobs=[];
+    await caricaNote();
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
     let html=dow.map(d=>`<div class="cal-dow">${d}</div>`).join("");
@@ -2837,7 +2869,7 @@
       }).join("");
       const piu=jobs.length>MAX_CELLA?`<span class="cal-piu">+${jobs.length-MAX_CELLA}</span>`:"";
       const we=(lead+d-1)%7>=5?" we":"";
-      const note=db().note[ds]?`<span class="cal-note-mark">📌</span>`:"";
+      const note=noteCache[ds]?`<span class="cal-note-mark">📌</span>`:"";
       html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${piu}</div></div>`;
     }
     $("#cal-grid").innerHTML=html;
@@ -2852,7 +2884,7 @@
       :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
     openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
-        <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(db().note[ds]||"")}</textarea></div>
+        <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(noteCache[ds]||"")}</textarea></div>
       <div class="sheet-actions">
         <button class="btn b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
         <button class="btn-primary b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
@@ -6488,7 +6520,27 @@
     if(a==="upload-fattura")return chiediFatturaPdf(id);
     if(a==="open-fattura")return apriFatturaPdf(id);
     if(a==="open-day")return openDay(t.dataset.d);
-    if(a==="save-note"){const ds=t.dataset.d,v=$("#day-note").value.trim();if(v)db().note[ds]=v;else delete db().note[ds];await save();closeSheet();renderCal();toast("Nota salvata 📌");return;}
+    if(a==="save-note"){
+      const ds=t.dataset.d,v=$("#day-note").value.trim();
+      const midN=curMestiere();
+      if(!sb||!sbUid||!noteSupaOk||!midN){
+        /* vecchio modo: solo su questo dispositivo */
+        if(v)db().note[ds]=v;else delete db().note[ds];
+        await save();closeSheet();renderCal();
+        toast(noteSupaOk?"Nota salvata 📌":"Nota salvata solo su questo dispositivo (manca la migrazione SQL)");return;
+      }
+      if(v){
+        const {data:okN,error}=await sb.from("gest_note").upsert({user_id:sbUid,mestiere_id:midN,data:ds,testo:v},{onConflict:"user_id,mestiere_id,data"}).select("id");
+        if(error){toast("Nota non salvata: "+error.message);return;}
+        if(!okN||!okN.length){toast("Nota non salvata: nessuna riga modificata. Riprova.");return;}
+        noteCache[ds]=v;
+      }else{
+        const {error}=await sb.from("gest_note").delete().eq("user_id",sbUid).eq("mestiere_id",midN).eq("data",ds).select("id");
+        if(error){toast("Nota non eliminata: "+error.message);return;}
+        delete noteCache[ds];
+      }
+      closeSheet();renderCal();toast(v?"Nota salvata 📌":"Nota eliminata");return;
+    }
     if(a==="cal-prev"){cal.setMonth(cal.getMonth()-1);renderCal();return;}
     if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
