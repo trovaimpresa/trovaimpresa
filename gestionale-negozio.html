@@ -312,6 +312,7 @@
       <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
       <button data-tab="prodotti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg><span>Prodotti</span></button>
       <button data-tab="magazzino"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect x="6" y="10" width="12" height="12"/></svg><span>Magazzino</span></button>
+      <button data-tab="preventivi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg><span>Preventivi</span></button>
       <button data-tab="fornitori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18h-5"/><path d="M22 18h1a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.3-.7l-3.4-3.4a1 1 0 0 0-.7-.3H14" transform="translate(-2 0)"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Fornitori</span></button>
       <button data-tab="movimenti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg><span>Movimenti</span></button>
       <button data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg><span>Report</span></button>
@@ -419,6 +420,59 @@
     <section id="magazzino">
       <h2 style="margin:0 0 16px">Magazzino</h2>
       <div id="magazzino-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px"></div>
+    </section>
+
+    <!-- ===== PREVENTIVI — 6 agosto 2026 ===== -->
+    <section id="preventivi">
+      <h2 style="margin:0 0 16px">Preventivi</h2>
+
+      <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
+        <h3 id="pv-titolo-sez" style="margin:0 0 14px">Nuovo preventivo</h3>
+
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
+          <input id="pv-cliente" placeholder="Cliente (impresa, geometra, privato) *" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          <input id="pv-data" type="date" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        </div>
+        <input id="pv-titolo" placeholder="Oggetto (es. Fornitura materiale per villetta via Roma)" style="width:100%;padding:11px;margin-bottom:14px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+
+        <div style="font-weight:700;font-size:14px;color:#5b6672;margin-bottom:8px">Cosa gli vendi</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <select id="pv-scegli-prod" style="flex:1;min-width:200px;padding:11px;border:1px solid #ddd;border-radius:8px">
+            <option value="">— prendi un prodotto dal magazzino —</option>
+          </select>
+          <button type="button" id="pv-add-libera" style="padding:11px 16px;background:#fff;border:1.5px dashed #2e537d;color:#2e537d;border-radius:8px;font-weight:700;cursor:pointer">+ Riga libera</button>
+        </div>
+        <div id="pv-righe"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0 8px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Sconto sul totale</label>
+            <input id="pv-sconto" type="number" step="0.5" value="0" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">IVA</label>
+            <select id="pv-iva" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+              <option value="22">22%</option><option value="10">10%</option><option value="4">4%</option><option value="0">0%</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Offerta valida</label>
+            <select id="pv-validita" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+              <option value="15">15 giorni</option><option value="30" selected>30 giorni</option><option value="60">60 giorni</option><option value="90">90 giorni</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="pv-totali" style="background:#f7f9fb;border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:15px;line-height:2"></div>
+        <textarea id="pv-note" placeholder="Note: tempi di consegna, trasporto compreso o escluso, condizioni di pagamento..." style="width:100%;padding:11px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;min-height:70px;font-family:inherit"></textarea>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="pv-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer;font-weight:700">Salva preventivo</button>
+          <button id="pv-annulla" style="display:none;background:#fff;color:#5b6672;border:1px solid #ddd;border-radius:8px;padding:13px 20px;cursor:pointer">Annulla modifica</button>
+        </div>
+      </div>
+
+      <div id="preventivi-body"></div>
     </section>
 
     <section id="fornitori">
@@ -1810,6 +1864,97 @@
         </div>
       </div>`;}).join("");
   }
+  /* ============================================================
+     PREVENTIVI DEL NEGOZIO — 6 agosto 2026
+     Mancavano del tutto. Una rivendita fa offerte alle imprese ogni giorno.
+     Le righe si prendono dal magazzino (nome, prezzo e unita' arrivano da soli)
+     oppure si scrivono a mano (trasporto, scarico col camion gru, taglio a misura).
+     Tabelle: sql/neg-preventivi.sql
+     ============================================================ */
+  let pvRighe=[], pvEditId=null, pvProdCache=[];
+  const pvEur=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+
+  function pvRigaHtml(r,i){
+    return `<div class="pv-riga" data-i="${i}" style="display:grid;grid-template-columns:2fr 80px 70px 90px 70px 34px;gap:6px;align-items:center;margin-bottom:6px">
+      <input class="pv-desc" value="${(r.descrizione||"").replace(/"/g,"&quot;")}" placeholder="Descrizione" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-qta" type="number" step="0.01" value="${r.qta??1}" placeholder="Q.tà" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-um" value="${r.unita||"pz"}" placeholder="u.m." style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box;text-align:center">
+      <input class="pv-prezzo" type="number" step="0.01" value="${r.prezzo??0}" placeholder="€" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <input class="pv-sc" type="number" step="1" value="${r.sconto_perc??0}" placeholder="sc.%" style="padding:9px;border:1px solid #ddd;border-radius:7px;box-sizing:border-box">
+      <button type="button" class="pv-del" title="Togli la riga" style="padding:9px;background:#fff;border:1px solid #e0b4b4;color:#c62828;border-radius:7px;cursor:pointer">×</button>
+    </div>`;
+  }
+  function pvRenderRighe(){
+    const box=$("#pv-righe"); if(!box)return;
+    box.innerHTML = pvRighe.length
+      ? `<div style="display:grid;grid-template-columns:2fr 80px 70px 90px 70px 34px;gap:6px;font-size:12px;font-weight:700;color:#8a949e;margin-bottom:4px">
+           <span>Descrizione</span><span>Q.tà</span><span>U.m.</span><span>Prezzo</span><span>Sconto</span><span></span></div>`
+        + pvRighe.map(pvRigaHtml).join("")
+      : '<p style="color:#8a949e;font-size:14px;margin:4px 0 10px">Nessuna riga. Scegli un prodotto dal magazzino o aggiungi una riga libera.</p>';
+    pvTotali();
+  }
+  function pvLeggiRighe(){
+    const out=[];
+    $$("#pv-righe .pv-riga").forEach((d,i)=>{
+      const desc=d.querySelector(".pv-desc").value.trim();
+      if(!desc)return;
+      out.push({descrizione:desc,
+        qta:parseFloat(d.querySelector(".pv-qta").value)||0,
+        unita:d.querySelector(".pv-um").value.trim()||"pz",
+        prezzo:parseFloat(d.querySelector(".pv-prezzo").value)||0,
+        sconto_perc:parseFloat(d.querySelector(".pv-sc").value)||0,
+        prodotto_id:pvRighe[i]?pvRighe[i].prodotto_id:null,
+        ordine:i});
+    });
+    return out;
+  }
+  /* Il conto: ogni riga puo' avere il suo sconto, poi c'e' lo sconto generale, poi l'IVA. */
+  function pvCalcola(righe,scontoGen,ivaPerc){
+    let lordo=0, imponibile=0;
+    righe.forEach(r=>{
+      const tot=(+r.qta||0)*(+r.prezzo||0);
+      lordo+=tot;
+      imponibile+=tot*(1-(+r.sconto_perc||0)/100);
+    });
+    const scGen=imponibile*(+scontoGen||0)/100;
+    const netto=imponibile-scGen;
+    const iva=netto*(+ivaPerc||0)/100;
+    const r2=n=>Math.round(n*100)/100;
+    return {lordo:r2(lordo),scontoRighe:r2(lordo-imponibile),scontoGen:r2(scGen),netto:r2(netto),iva:r2(iva),totale:r2(netto+iva)};
+  }
+  function pvTotali(){
+    const box=$("#pv-totali"); if(!box)return;
+    const c=pvCalcola(pvLeggiRighe(), $("#pv-sconto")?$("#pv-sconto").value:0, $("#pv-iva")?$("#pv-iva").value:22);
+    const riga=(et,v,neg)=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${et}</span><strong>${neg?"− ":""}${pvEur(v)}</strong></div>`;
+    box.innerHTML = riga("Totale merce",c.lordo)
+      + (c.scontoRighe?riga("Sconti sulle righe",c.scontoRighe,true):"")
+      + (c.scontoGen?riga("Sconto sul totale",c.scontoGen,true):"")
+      + riga("Imponibile",c.netto)
+      + (c.iva?riga("IVA",c.iva):"")
+      + '<div style="border-top:2px solid #0066ff;margin:6px 0"></div>'
+      + `<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Totale</strong></span><strong>${pvEur(c.totale)}</strong></div>`;
+  }
+  async function pvCaricaProdotti(){
+    if(!(sb&&sbUid))return;
+    const {data}=await sb.from("neg_prodotti").select("*").eq("user_id",sbUid).order("nome");
+    pvProdCache=data||[];
+    const sel=$("#pv-scegli-prod"); if(!sel)return;
+    sel.innerHTML='<option value="">— prendi un prodotto dal magazzino —</option>'+
+      pvProdCache.map(p=>`<option value="${p.id}">${p.nome}${p.codice?" ("+p.codice+")":""} — ${pvEur(p.prezzo)}/${p.unita||"pz"}</option>`).join("");
+  }
+  function pvNuovo(){
+    pvRighe=[];pvEditId=null;
+    ["pv-cliente","pv-titolo","pv-note"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
+    if($("#pv-sconto"))$("#pv-sconto").value=0;
+    if($("#pv-iva"))$("#pv-iva").value="22";
+    if($("#pv-validita"))$("#pv-validita").value="30";
+    if($("#pv-data"))$("#pv-data").value=new Date().toISOString().slice(0,10);
+    if($("#pv-titolo-sez"))$("#pv-titolo-sez").textContent="Nuovo preventivo";
+    if($("#pv-save"))$("#pv-save").textContent="Salva preventivo";
+    if($("#pv-annulla"))$("#pv-annulla").style.display="none";
+    pvRenderRighe();
+  }
+
   $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
   $("#prodotti-body")?.addEventListener("click",async e=>{
     const ed=e.target.closest(".prod-edit"), del=e.target.closest(".prod-del");
@@ -1980,6 +2125,224 @@
       window.scrollTo({top:0,behavior:"smooth"});
     }
   });
+  /* --- eventi della sezione Preventivi --- */
+  $('[data-tab="preventivi"]')?.addEventListener("click",()=>{pvCaricaProdotti();pvCarica();if(!pvRighe.length&&!pvEditId)pvNuovo();});
+  $("#pv-scegli-prod")?.addEventListener("change",e=>{
+    const p=pvProdCache.find(x=>String(x.id)===String(e.target.value));
+    if(!p)return;
+    pvRighe=pvLeggiRighe();
+    pvRighe.push({descrizione:p.nome,qta:1,unita:p.unita||"pz",prezzo:+p.prezzo||0,sconto_perc:0,prodotto_id:p.id});
+    pvRenderRighe(); e.target.value="";
+  });
+  $("#pv-add-libera")?.addEventListener("click",()=>{
+    pvRighe=pvLeggiRighe();
+    pvRighe.push({descrizione:"",qta:1,unita:"pz",prezzo:0,sconto_perc:0,prodotto_id:null});
+    pvRenderRighe();
+    const ult=$$("#pv-righe .pv-desc"); if(ult.length)ult[ult.length-1].focus();
+  });
+  $("#pv-righe")?.addEventListener("input",pvTotali);
+  $("#pv-righe")?.addEventListener("click",e=>{
+    const del=e.target.closest(".pv-del"); if(!del)return;
+    const i=+del.closest(".pv-riga").dataset.i;
+    pvRighe=pvLeggiRighe().filter((_,k)=>k!==i);
+    pvRenderRighe();
+  });
+  ["pv-sconto","pv-iva"].forEach(id=>{const el=$("#"+id);if(el){el.addEventListener("input",pvTotali);el.addEventListener("change",pvTotali);}});
+  $("#pv-annulla")?.addEventListener("click",pvNuovo);
+
+  $("#pv-save")?.addEventListener("click",async()=>{
+    if(!(sb&&sbUid)){alert("Non connesso");return;}
+    const cliente=$("#pv-cliente").value.trim();
+    if(!cliente){alert("Scrivi a chi è destinato il preventivo");return;}
+    const righe=pvLeggiRighe();
+    if(!righe.length){alert("Aggiungi almeno una riga");return;}
+    const testata={user_id:sbUid,
+      titolo:$("#pv-titolo").value.trim()||null,
+      cliente_nome:cliente,
+      data:$("#pv-data").value||new Date().toISOString().slice(0,10),
+      validita_giorni:parseInt($("#pv-validita").value)||30,
+      note:$("#pv-note").value.trim()||null,
+      iva_perc:parseFloat($("#pv-iva").value)||0,
+      sconto_perc:parseFloat($("#pv-sconto").value)||0};
+    let pid=pvEditId, error;
+    if(pvEditId){
+      ({error}=await sb.from("neg_preventivi").update(testata).eq("id",pvEditId).eq("user_id",sbUid));
+      if(!error)await sb.from("neg_preventivo_righe").delete().eq("preventivo_id",pvEditId).eq("user_id",sbUid);
+    }else{
+      const {data:esistenti}=await sb.from("neg_preventivi").select("numero").eq("user_id",sbUid);
+      testata.numero=(esistenti||[]).reduce((m,x)=>Math.max(m,+x.numero||0),0)+1;
+      const r=await sb.from("neg_preventivi").insert(testata).select("id").single();
+      error=r.error; if(r.data)pid=r.data.id;
+    }
+    if(error){alert("Errore: "+error.message);return;}
+    const {error:e2}=await sb.from("neg_preventivo_righe").insert(righe.map(r=>({...r,user_id:sbUid,preventivo_id:pid})));
+    if(e2){alert("Errore nelle righe: "+e2.message);return;}
+    pvNuovo(); pvCarica();
+    alert("Preventivo salvato ✔");
+  });
+
+  async function pvCarica(){
+    if(!(sb&&sbUid))return;
+    const box=$("#preventivi-body"); if(!box)return;
+    const {data}=await sb.from("neg_preventivi").select("*").eq("user_id",sbUid).order("created_at",{ascending:false});
+    const P=data||[];
+    if(!P.length){box.innerHTML='<p style="color:#8a949e;padding:8px">Nessun preventivo. Il primo lo scrivi qui sopra.</p>';return;}
+    const {data:tutteRighe}=await sb.from("neg_preventivo_righe").select("*").eq("user_id",sbUid);
+    const perPrev={}; (tutteRighe||[]).forEach(r=>{(perPrev[r.preventivo_id]=perPrev[r.preventivo_id]||[]).push(r);});
+    const etichetta={bozza:["Bozza","#8a949e"],inviato:["Inviato","#0066ff"],accettato:["Accettato","#1e8e3e"],rifiutato:["Rifiutato","#c62828"]};
+    box.innerHTML=P.map(p=>{
+      const rr=perPrev[p.id]||[];
+      const c=pvCalcola(rr,p.sconto_perc,p.iva_perc);
+      const st=etichetta[p.stato||"bozza"]||etichetta.bozza;
+      const scad=p.data?new Date(new Date(p.data).getTime()+(p.validita_giorni||30)*86400000):null;
+      const scaduto=scad&&scad<new Date()&&p.stato!=="accettato";
+      return `<div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${st[1]};padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline">
+          <strong>N. ${p.numero||"—"} · ${p.cliente_nome||"—"}</strong>
+          <span style="color:${st[1]};font-weight:700;font-size:13px">${st[0]}${scaduto?" · scaduto":""}</span>
+        </div>
+        ${p.titolo?`<div style="color:#5b6672;font-size:14px;margin-top:3px">${p.titolo}</div>`:""}
+        <div style="color:#8a949e;font-size:13px;margin-top:4px">${rr.length} ${rr.length===1?"riga":"righe"} · valido ${p.validita_giorni||30} giorni</div>
+        <div style="font-size:18px;font-weight:800;color:#0a2a4d;margin-top:6px">${pvEur(c.totale)}</div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="pv-edit" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
+          <button class="pv-pdf" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #2e537d;color:#2e537d;background:#fff;border-radius:8px;cursor:pointer">PDF</button>
+          ${p.stato!=="accettato"?`<button class="pv-acc" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1e8e3e;color:#1e8e3e;background:#fff;border-radius:8px;cursor:pointer">Il cliente ha accettato</button>`:""}
+          <button class="pv-del-prev" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
+        </div>
+      </div>`;}).join("");
+  }
+
+  $("#preventivi-body")?.addEventListener("click",async e=>{
+    const ed=e.target.closest(".pv-edit"), pdf=e.target.closest(".pv-pdf"),
+          acc=e.target.closest(".pv-acc"), del=e.target.closest(".pv-del-prev");
+    if(del){
+      if(!confirm("Eliminare questo preventivo?"))return;
+      await sb.from("neg_preventivi").delete().eq("id",del.dataset.id).eq("user_id",sbUid);
+      if(pvEditId===del.dataset.id)pvNuovo();
+      pvCarica();return;
+    }
+    if(ed){
+      const {data:p}=await sb.from("neg_preventivi").select("*").eq("id",ed.dataset.id).maybeSingle();
+      if(!p)return;
+      const {data:rr}=await sb.from("neg_preventivo_righe").select("*").eq("preventivo_id",p.id).order("ordine");
+      pvEditId=p.id; pvRighe=rr||[];
+      $("#pv-cliente").value=p.cliente_nome||""; $("#pv-titolo").value=p.titolo||"";
+      $("#pv-data").value=p.data||""; $("#pv-note").value=p.note||"";
+      $("#pv-sconto").value=p.sconto_perc??0; $("#pv-iva").value=String(p.iva_perc??22);
+      $("#pv-validita").value=String(p.validita_giorni||30);
+      $("#pv-titolo-sez").textContent="Modifica preventivo N. "+(p.numero||"");
+      $("#pv-save").textContent="Salva modifica";
+      $("#pv-annulla").style.display="";
+      pvRenderRighe(); window.scrollTo({top:0,behavior:"smooth"});return;
+    }
+    if(acc)  return pvAccetta(acc.dataset.id);
+    if(pdf)  return pvPdf(pdf.dataset.id);
+  });
+
+  /* Il cliente ha detto di sì: il preventivo diventa vendita e la merce
+     esce dal magazzino. Si scaricano SOLO le righe prese dai prodotti:
+     le righe libere (trasporto, manodopera) non hanno giacenza. */
+  async function pvAccetta(id){
+    const {data:p}=await sb.from("neg_preventivi").select("*").eq("id",id).maybeSingle();
+    if(!p)return;
+    const {data:rr}=await sb.from("neg_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
+    const daScaricare=(rr||[]).filter(r=>r.prodotto_id);
+    const testo = daScaricare.length
+      ? "Segno il preventivo come accettato e tolgo dal magazzino:\n\n"+
+        daScaricare.map(r=>"· "+r.descrizione+": "+r.qta+" "+(r.unita||"pz")).join("\n")+"\n\nProcedo?"
+      : "Segno il preventivo come accettato.\n(Nessuna riga presa dal magazzino, quindi non c'è niente da scaricare.)\n\nProcedo?";
+    if(!confirm(testo))return;
+    for(const r of daScaricare){
+      const {data:prod}=await sb.from("neg_prodotti").select("quantita").eq("id",r.prodotto_id).maybeSingle();
+      if(!prod)continue;
+      const nuova=(+prod.quantita||0)-(+r.qta||0);
+      await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",r.prodotto_id).eq("user_id",sbUid);
+      await sb.from("neg_movimenti").insert({user_id:sbUid,tipo:"uscita",prodotto:r.descrizione,
+        quantita:+r.qta||0, importo:(+r.qta||0)*(+r.prezzo||0),
+        controparte:p.cliente_nome||null, data_mov:new Date().toISOString().slice(0,10),
+        note:"Da preventivo N. "+(p.numero||"")});
+    }
+    await sb.from("neg_preventivi").update({stato:"accettato"}).eq("id",id).eq("user_id",sbUid);
+    pvCarica(); loadProdotti&&loadProdotti();
+    alert(daScaricare.length?"Accettato. Merce scaricata dal magazzino ✔":"Preventivo segnato come accettato ✔");
+  }
+
+  /* PDF del preventivo, stessa impaginazione della fattura del negozio */
+  async function pvPdf(id){
+    if(!window.jspdf){alert("PDF non ancora pronto, riprova tra un attimo");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){alert("Compila prima i Dati azienda");return aziendaForm();}
+    const {data:p}=await sb.from("neg_preventivi").select("*").eq("id",id).maybeSingle();
+    if(!p)return;
+    const {data:rr}=await sb.from("neg_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
+    const righe=rr||[], c=pvCalcola(righe,p.sconto_perc,p.iva_perc);
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
+    const eu=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+    const gg=n=>{const d=new Date(n);return isNaN(d)?"":d.toLocaleDateString("it-IT");};
+    let y=20;
+    doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(az.nome,M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    let hy=y+6;
+    [az.piva?"P.IVA "+az.piva:"",az.indirizzo||"",[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("PREVENTIVO",R,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    doc.text("N. "+(p.numero||"")+"   del "+gg(p.data),R,y+5.5,{align:"right"});
+    doc.setTextColor(0);
+    y=Math.max(hy,y+15)+4;doc.setDrawColor(210);doc.line(M,y,R,y);y+=10;
+    doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Spett.le",M,y);y+=6;
+    doc.setFont("helvetica","normal");doc.setFontSize(12);doc.text(p.cliente_nome||"—",M,y);y+=8;
+    if(p.titolo){doc.setFont("helvetica","bold");doc.setFontSize(11);
+      const t=doc.splitTextToSize("Oggetto: "+p.titolo,R-M);doc.text(t,M,y);y+=t.length*5+4;}
+    doc.setFillColor(46,83,125);doc.rect(M,y,R-M,8,"F");
+    doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(9);
+    doc.text("Descrizione",M+2,y+5.5);
+    doc.text("Q.tà",R-72,y+5.5,{align:"right"});
+    doc.text("Prezzo",R-46,y+5.5,{align:"right"});
+    doc.text("Sc.%",R-26,y+5.5,{align:"right"});
+    doc.text("Totale",R-2,y+5.5,{align:"right"});
+    doc.setTextColor(0);doc.setFont("helvetica","normal");y+=8;
+    righe.forEach(r=>{
+      const tot=(+r.qta||0)*(+r.prezzo||0)*(1-(+r.sconto_perc||0)/100);
+      const lines=doc.splitTextToSize(r.descrizione||"",R-M-80);
+      const h=lines.length*5+4;
+      if(y+h>262){doc.addPage();y=20;}
+      doc.setDrawColor(215);doc.rect(M,y,R-M,h);
+      doc.setFontSize(9);doc.text(lines,M+2,y+5);
+      doc.text((+r.qta||0)+" "+(r.unita||"pz"),R-72,y+5,{align:"right"});
+      doc.text(eu(r.prezzo),R-46,y+5,{align:"right"});
+      doc.text((+r.sconto_perc||0)?String(+r.sconto_perc):"—",R-26,y+5,{align:"right"});
+      doc.text(eu(tot),R-2,y+5,{align:"right"});
+      y+=h;
+    });
+    y+=6;
+    const tot=[["Totale merce",c.lordo,false]];
+    if(c.scontoRighe)tot.push(["Sconti sulle righe",c.scontoRighe,true]);
+    if(c.scontoGen)  tot.push(["Sconto sul totale "+(+p.sconto_perc||0)+"%",c.scontoGen,true]);
+    tot.push(["Imponibile",c.netto,false]);
+    if(c.iva)tot.push(["IVA "+(+p.iva_perc||0)+"%",c.iva,false]);
+    const hBox=tot.length*6+16;
+    if(y+hBox>272){doc.addPage();y=20;}
+    doc.setDrawColor(46,83,125);doc.setLineWidth(.4);doc.rect(R-90,y,90,hBox);doc.setLineWidth(.2);
+    let ry=y+7;doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+    tot.forEach(t=>{doc.text(t[0],R-88,ry);doc.text((t[2]?"- ":"")+eu(t[1]),R-2,ry,{align:"right"});ry+=6;});
+    doc.setDrawColor(46,83,125);doc.line(R-88,ry-3,R-2,ry-3);
+    doc.setFont("helvetica","bold");doc.setFontSize(11.5);
+    doc.text("TOTALE",R-88,ry+4);doc.text(eu(c.totale),R-2,ry+4,{align:"right"});
+    y+=hBox+10;
+    if(p.note){
+      if(y>250){doc.addPage();y=20;}
+      doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Note",M,y);y+=5.5;
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+      const nl=doc.splitTextToSize(p.note,R-M);doc.text(nl,M,y);doc.setTextColor(0);
+    }
+    doc.setFontSize(7.5);doc.setTextColor(140);
+    doc.text("Offerta valida "+(p.validita_giorni||30)+" giorni dalla data del preventivo. I prezzi dei materiali possono variare oltre tale termine.",M,286,{maxWidth:R-M});
+    doc.save("preventivo-"+(p.numero||"")+"-"+(p.cliente_nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+  }
+
   /* 6 agosto 2026 — Margine dal vivo: quanto ci guadagni su ogni pezzo.
      Si aggiorna mentre scrivi il prezzo di acquisto o quello di vendita. */
   function mostraMargine(){
