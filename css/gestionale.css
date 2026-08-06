@@ -1881,6 +1881,15 @@
 }
 .fatt-errore b{ font-weight:800; }
 
+/* il Riepilogo quando i dati non arrivano: un avviso che resta,
+   invece di "Tutto in ordine" con gli zeri finti */
+.rie-errore{
+  background:var(--err-bg); border:2px solid var(--err); border-radius:12px;
+  padding:16px 18px; margin-bottom:16px; font-size:16px; line-height:1.55; color:var(--err);
+}
+.rie-errore b{ font-weight:800; }
+.rie-errore .btn{ margin-left:10px; padding:8px 18px; font-size:15px; }
+
 /* la lista di cosa manca prima di poter fare il file per lo SDI */
 .xml-manca{ margin:14px 0 0; padding-left:0; list-style:none; }
 .xml-manca li{

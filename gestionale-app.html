@@ -798,6 +798,9 @@
     const oggi=todayStr(), lim7=_giorniDopo(oggi,7), lim30=_giorniDopo(oggi,30);
 
     /* ---- primo giro di letture: tutto quello che non dipende dagli id dei lavori ---- */
+    /* se una lettura fallisce NON si fa finta di niente: prima il Riepilogo
+       mostrava "Tutto in ordine" con tutti zeri, come se i dati fossero spariti */
+    let erroreLettura=false, erroreLettura2=false;
     let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null,FT=[];
     try{
       const r=await Promise.all([
@@ -816,7 +819,18 @@
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
       MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
       AZ=r[9].data||null;FT=r[10].data||[];
-    }catch(e){}
+      const conErrore=r.find(x=>x&&x.error);
+      if(conErrore)erroreLettura=true;
+    }catch(e){erroreLettura=true;}
+
+    if(erroreLettura){
+      const ra0=$("#rie-alert");
+      if(ra0)ra0.innerHTML='<div class="rie-errore"><b>Non riesco a leggere i dati.</b> '
+        +'Forse la connessione fa i capricci: i numeri non sono aggiornati, ma i tuoi dati sono al sicuro. '
+        +'<button class="btn" data-action="rie-riprova">Riprova</button></div>';
+      G.innerHTML='<div class="rc-caricamento">Dati non caricati. Premi Riprova qui sopra.</div>';
+      return;
+    }
 
     const ids=L.map(l=>l.id);
     const cliMap=Object.fromEntries(CLI.map(c=>[c.id,c.nome||""]));
@@ -837,7 +851,8 @@
       ]);
       SP=q[0].data||[];nFoto=q[1].count||0;nVideo=q[2].count||0;PR=q[3].data||[];
       CM=(q[4].data||[]).filter(m=>m.tipo==="spesa");FR=q[5].data||[];
-    }catch(e){}
+      if(q.find(x=>x&&x.error))erroreLettura2=true;
+    }catch(e){erroreLettura2=true;}
 
     /* ---- calcoli (identici a prima) ---- */
     const aperti   = L.filter(l=>l.stato!=="fatto");
@@ -980,6 +995,12 @@
             + '</div>').join("")
           + '</div>';
       }
+      /* il secondo giro di letture e' andato male: i numeri di spese, foto e
+         totali possono essere incompleti. Meglio dirlo che far finta di niente. */
+      if(erroreLettura2)ra.insertAdjacentHTML("afterbegin",
+        '<div class="rie-errore"><b>Alcuni numeri non si sono caricati</b> (spese, foto o totali): '
+        +'quello che vedi può essere incompleto. '
+        +'<button class="btn" data-action="rie-riprova">Riprova</button></div>');
     }
 
     /* ---- le 12 schede, nello stesso ordine del menu ---- */
@@ -6338,6 +6359,7 @@
     /* click su una scheda del Riepilogo: entra nella sezione corrispondente,
        come se avessi cliccato la voce nel menu di sinistra. */
     if(a==="rie-go"){const b=document.querySelector('nav.tabs button[data-tab="'+t.dataset.go+'"]');if(b){b.click();window.scrollTo(0,0);}return;}
+    if(a==="rie-riprova"){const g=$("#rie-grid");if(g)g.innerHTML='<div class="rc-caricamento">Caricamento del riepilogo…</div>';renderRiepilogo();renderContatori();return;}
     /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
        che non e' una scheda del menu — quindi apro direttamente quella. */
     if(a==="rie-azienda")return aziendaForm();
