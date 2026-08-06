@@ -101,6 +101,13 @@ entrambe con lo stesso valore. Le richieste vecchie restano con il trattino.
 chi la nomina con `grep -rn "nomecolonna" netlify/functions *.html`. Una colonna citata in una
 query e assente dal DB non dà un avviso: fa fallire tutta la scrittura.
 
+### ⚠️ Il profilo pubblico è UNO SOLO per tutti e quattro i tipi
+`cerca-imprese`, `cerca-artigiani`, `cerca-negozi` e `cerca-professionisti` portano **tutte
+allo stesso `profilo-impresa.html`**. Quindi un negozio di ceramiche si presenta con
+"Richiedi un sopralluogo per un preventivo", che per lui non ha senso: vende materiale,
+non va in cantiere. Stessa cosa per il professionista (che però ha almeno il suo form
+"richiesta di incarico"). **Da differenziare: è il lavoro aperto più grosso sul sito.**
+
 ### Notifica email delle richieste (ricollegata — 6 agosto 2026)
 `netlify/functions/notifica-preventivo.js` (Resend) esisteva ed era completa, ma **nessuno la
 chiamava**: era stata staccata con la nota "la richiesta appare direttamente nel pannello".
@@ -111,6 +118,14 @@ subito dopo l'insert, in "best effort": se la mail non parte, il cliente vede co
   `richiesta-cliente.js` e mandava già due mail: una ad `info@trovaimpresa.com` e una alle
   imprese della zona. Non è stato toccato.
 - Serve `RESEND_API_KEY` nelle variabili di Netlify.
+
+**Stessa cosa per le richieste di INCARICO ai professionisti** (`submitIncarico`): anche
+quelle finivano solo nel pannello. Ora chiamano la stessa function — i professionisti
+stanno in `imprese` come tutti, quindi la trova per id. Due correzioni alla function:
+- **prima pretendeva `email_cliente`**: ma negli incarichi l'email è facoltativa, quindi
+  chi lasciava solo il telefono non faceva partire niente. Ora basta uno dei due recapiti.
+- **il pulsante dell'email portava tutti su `pannello-artigiano`**, anche negozi e
+  professionisti, che lì non trovavano nulla. Ora c'è la mappa `PANNELLI` per tipo.
 
 ### Form richiesta preventivo rifatto (6 agosto 2026)
 In `profilo-impresa.html`, sezione `#sec-preventivo`:
@@ -207,9 +222,50 @@ l'utente riceve l'avviso "manca la migrazione SQL", invece di perdere tutto il l
 È la lezione della colonna `condivisibile`: applicarlo sempre quando si aggiungono colonne.
 
 ### Cosa manca ancora al Gestionale Studio
-- Il gestionale per **negozi** e **noleggio** ha i suoi file (`gestionale-negozio.html`,
-  `gestionale-noleggio.html`) e non è stato toccato.
 - Nessuno l'ha ancora provato sul serio: al primo test vero aspettarsi ritocchi.
+
+## Gestionale Negozio e Noleggio (6 agosto 2026)
+`gestionale-negozio.html` e `gestionale-noleggio.html` erano in buona parte copie del
+gestionale imprese con sopra le sezioni di magazzino. **Condividono le tabelle
+`neg_prodotti`, `neg_movimenti` e `neg_fornitori`**: quando si tocca il form dei prodotti
+in uno, va toccato anche nell'altro, altrimenti divergono.
+
+### Pulizia fatta
+- Il pulsante grande della barra diceva **"+ Nuovo lavoro"**: ora è "+ Nuovo prodotto"
+  (negozio, azione `new-prod`) e "+ Nuovo noleggio" (noleggio, azione `new-nol`).
+- Nel negozio i clienti nel menu si chiamavano **"Condomini"** ed erano nascosti: ora si
+  chiamano "Clienti" e si vedono (servono per fatture e preventivi).
+- Le sezioni da cantiere (agenda operatore, lavori, squadra, galleria, scadenzario) erano
+  già nascoste con `display:none` da prima: lasciate così.
+
+### Campi del prodotto — `sql/neg-prodotti-campi.sql`
+Aggiunti `unita`, `prezzo_acquisto`, `iva_perc`, `fornitore_id`.
+- **Senza unità di misura "quantità 40" non vuol dire niente**: 40 pezzi? 40 mq? 40 sacchi?
+  Le voci: pz, mq, ml, mc, kg, q, t, sacco, bancale, conf, lt.
+- `mostraMargine()` calcola il guadagno mentre scrivi ("2,30 € al sacco, +51%") e avvisa
+  in rosso se il prezzo di vendita è sotto il costo.
+- **TRAPPOLA TROVATA**: `quantita` e `soglia_minima` erano `integer`. Il codice accettava
+  i decimali ma il database li rifiutava — 12,5 mq era impossibile. Portate a
+  `numeric(12,3)`, insieme a `neg_movimenti.quantita`. Se si aggiungono campi numerici,
+  **controllare sempre il tipo della colonna, non solo il codice**.
+
+### Preventivi del negozio — `sql/neg-preventivi.sql`
+Mancavano del tutto (zero occorrenze di "preventivo" nel file), eppure una rivendita fa
+offerte alle imprese ogni giorno. Due tabelle nuove: `neg_preventivi` +
+`neg_preventivo_righe`, con RLS "solo la propria roba".
+- Le righe si prendono dal magazzino (nome, prezzo e unità arrivano da soli) oppure sono
+  libere (trasporto, scarico col camion gru, taglio a misura).
+- **Ordine dei conti** (`pvCalcola`): prima gli sconti di riga, poi lo sconto generale sul
+  netto, e **l'IVA per ultima** su quello che resta. Verifica: 100 sacchi a 6,50 + 30 mq a
+  26,50 → merce 1.445,00, IVA 317,90, totale 1.762,90.
+- **"Il cliente ha accettato"** (`pvAccetta`): mostra cosa sta per uscire, chiede conferma,
+  scarica le giacenze e registra il movimento di uscita. **Scarica solo le righe con
+  `prodotto_id`**: le righe libere non hanno giacenza.
+- PDF con intestazione, righe con unità di misura, riepilogo sconti e in fondo la validità.
+
+### Cosa manca ancora al negozio
+- Il **DDT** (bolla di consegna): chi vende materiale ne compila una a ogni consegna.
+- Gli **ordini a fornitore**: i fornitori sono in elenco ma non si registra cosa hai ordinato.
 
 ## Registrazione (rifatta — luglio 2026)
 - Il profilo in `imprese` NON si crea più con insert manuale lato frontend: lo crea il **trigger `on_auth_user_created`** (function `crea_profilo_impresa`, security definer) leggendo `raw_user_meta_data`.
@@ -385,8 +441,11 @@ troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
 - ~~Logo rotto su 40 pagine~~ **RISOLTO il 6 agosto**: cercavano `/trovaimpresa_logo_transparent.png`
   che non esiste; sostituito con `/img/trovaimpresa-logo.svg` su tutte e 40. Controllato che
   non ci siano altre immagini mancanti nel sito: non ce ne sono.
-- **Da provare**: il Gestionale Studio (menu, campi pratica, parcella, PDF) non l'ha ancora
-  usato nessuno davvero.
+- **Da provare**: il Gestionale Studio (menu, campi pratica, parcella, PDF) e i preventivi
+  del negozio non li ha ancora usati nessuno davvero.
+- **Il lavoro aperto più grosso**: differenziare il profilo pubblico per negozi e
+  professionisti (oggi è uno solo per tutti, vedi sopra).
+- Mancano al negozio: **DDT** e **ordini a fornitore**.
 - **Prezzi da confermare ad Alessio**: guida cucina (500–1.250 €/mq, spostare lo scarico
   +30/50%, mobile 1.000–1.400 €/ml) e guida muro (tramezzo 40–50 €/mq, portante con
   cerchiatura 2.000–7.000 €, putrelle 2,25–8,00 €/kg).
