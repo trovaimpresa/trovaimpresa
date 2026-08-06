@@ -67,6 +67,20 @@
   .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
   .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
   .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .up-list li:before{content:"▲";color:#c0392b}
+  .down-list li:before{content:"▼";color:#1e8e3e}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14px;color:var(--muted);margin-top:8px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+  .cities{background:var(--bg-alt);border:1px solid var(--line);border-radius:18px;padding:24px;margin:40px 0}
+  .cities h2{margin-top:0}
+  .cities-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .cities-grid a{display:inline-block;padding:9px 16px;background:#fff;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;color:var(--primary-dark);transition:.15s}
+  .cities-grid a:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .cities .all-cities{font-size:15px}
   .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
   .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
   .faq summary::-webkit-details-marker{display:none}
@@ -135,7 +149,7 @@
 
   <article>
     <h1>Quanto costa rifare il bagno nel 2026</h1>
-    <p class="meta">Scritto da un muratore con 25 anni di cantiere · Aggiornato luglio 2026 · Lettura 6 min</p>
+    <p class="meta">Scritto da un muratore con 25 anni di cantiere · Aggiornato agosto 2026 · Lettura 9 min</p>
 
     <div class="answer">
       <strong>Risposta rapida:</strong> rifare il bagno da zero in Italia costa
@@ -146,6 +160,30 @@
     <p class="lead">Te lo dico da chi i bagni li ha rifatti per mestiere, non da chi copia listini online: il prezzo lo fanno tre cose — <strong>i metri quadri</strong>, <strong>quanto rompi</strong> (cioè se sposti scarichi e impianti) e <strong>il livello delle finiture</strong>. Tutto il resto è contorno.</p>
 
     <p>Un bagno piccolo dove tieni gli attacchi dove sono e cambi solo piastrelle e sanitari può stare sotto i 6.000 €. Se invece butti giù tutto, sposti il water, apri le tracce nuove per l'impianto e metti piastrelle di pregio o una doccia grande, arrivi tranquillamente a 12.000–15.000 €. Le cifre più alte che vedi in giro riguardano bagni grandi, di lusso, o zone come Milano dove la manodopera costa di più.</p>
+
+    <div class="esperienza">
+      💬 <strong>Parola di cantiere:</strong> nel bagno la voce che fa saltare il preventivo non sono le piastrelle, è <strong>lo scarico del water</strong>. Finché resta dov'è, il lavoro è prevedibile. Se lo sposti anche solo di un metro devi rifare la pendenza dello scarico, e per farla devi alzare il pavimento o rompere il solaio: due lavori completamente diversi, con due prezzi completamente diversi. Prima di innamorarti della nuova disposizione, chiedi all'impresa dove passa la colonna di scarico. Te lo dico perché ho visto progetti bellissimi morire in mezz'ora davanti a quella domanda.
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
+
+    <h2>Quanto costa in base ai metri quadri</h2>
+    <p>La domanda più frequente è "il mio bagno è piccolo, spenderò poco?". Solo in parte: molte voci sono fisse (il ponteggio del cantiere non c'è, ma allestimento, viaggi e attrezzatura sì), quindi il prezzo <em>al metro quadro</em> di un bagno piccolo è più alto. Ecco le forchette reali.</p>
+
+    <table>
+      <caption>Costi indicativi 2026 chiavi in mano, secondo dimensione e livello di finiture</caption>
+      <thead>
+        <tr><th>Dimensione</th><th>Economico</th><th>Standard</th><th style="text-align:right">Alto / lusso</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2 mq (bagno di servizio)</td><td class="num">~ 3.500 €</td><td class="num">4.000 – 5.000 €</td><td class="num" style="text-align:right">5.000 – 6.500 €</td></tr>
+        <tr><td>3 mq</td><td class="num">3.000 – 4.500 €</td><td class="num">3.500 – 6.000 €</td><td class="num" style="text-align:right">5.000 – 8.000 €</td></tr>
+        <tr><td>4 mq</td><td class="num">~ 5.000 €</td><td class="num">5.000 – 7.000 €</td><td class="num" style="text-align:right">7.000 – 10.000 €</td></tr>
+        <tr><td>5 – 6 mq (il più comune)</td><td class="num">4.500 – 6.000 €</td><td class="num">5.000 – 8.000 €</td><td class="num" style="text-align:right">8.000 – 12.000 €</td></tr>
+        <tr><td>7 mq e oltre</td><td class="num">6.500 – 8.500 €</td><td class="num">8.000 – 12.000 €</td><td class="num" style="text-align:right">12.000 – 18.000 €</td></tr>
+      </tbody>
+    </table>
+
+    <p>Tradotto al metro quadro siamo tra <strong>1.000 e 1.300 €/mq</strong> per un lavoro completo di livello medio. E c'è la geografia: lo stesso bagno da 5 mq che a Milano viene preventivato intorno agli <strong>8.000 €</strong>, a Firenze sta sui <strong>6.500 €</strong> e in molte zone del Sud sui <strong>5.000 €</strong>. Non è che al Sud si lavora peggio: è il costo della manodopera che cambia.</p>
 
     <h2>Prezzi reali del bagno, voce per voce</h2>
     <p>Questa è la tabella che uso per far capire alla gente dove finiscono i soldi. I range sono per un bagno standard di circa 5–6 mq. Sono prezzi di lavoro fatto bene, non del cognato che "te lo sistema".</p>
@@ -172,9 +210,63 @@
       <strong>Occhio:</strong> se sommi i minimi non ottieni per forza il preventivo più basso. Un'impresa seria ti dà un prezzo unico "chiavi in mano" e si prende lei il rischio degli imprevisti. Diffida da chi ti spacchetta tutto per farti sembrare basso il totale, e poi ti aggiunge gli extra a lavoro iniziato.
     </div>
 
-    <div class="note">
-      🏠 Stai rifacendo più di un bagno? Vedi la guida <a href="/quanto-costa-ristrutturare-casa.html">quanto costa ristrutturare casa al mq</a>, con prezzi voce per voce e calcolatore.<br>
-      📋 Se sposti gli scarichi serve la CILA: <a href="/permessi-ristrutturazione-cila-scia.html">quale permesso serve per i tuoi lavori</a>.
+    <h2>I prezzi degli extra, quelli che decidi tu</h2>
+    <p>Queste voci non ci sono in tutti i bagni: sono le scelte che fai tu e che spostano il totale. Le metto separate perché è qui che due preventivi identici sulla carta diventano diversi di 2.000 €.</p>
+
+    <table>
+      <caption>Extra più richiesti — fornitura e posa, prezzi indicativi 2026</caption>
+      <thead>
+        <tr><th>Extra</th><th>Note</th><th style="text-align:right">Costo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Box doccia (solo il box)</td><td>Angolare 120–250 €, rettangolare 200–500 €, frameless 250–550 €</td><td class="num" style="text-align:right">120 – 550 €</td></tr>
+        <tr><td>Montaggio del box doccia</td><td>Manodopera, box già acquistato</td><td class="num" style="text-align:right">200 – 400 €</td></tr>
+        <tr><td>Piatto doccia</td><td>Sollevato 100–200 €, con gradino 150–250 €, a filo pavimento 200–300 €</td><td class="num" style="text-align:right">100 – 300 €</td></tr>
+        <tr><td>Doccia a filo pavimento (lavoro)</td><td>Va incassata nel massetto: più impermeabilizzazione e più manodopera</td><td class="num" style="text-align:right">+ 400 – 900 €</td></tr>
+        <tr><td>Termoarredo / scaldasalviette</td><td>Il radiatore costa 100–350 €</td><td class="num" style="text-align:right">100 – 350 €</td></tr>
+        <tr><td>Installazione del termoarredo</td><td>60–120 € se elettrico e c'è già la presa; 300–500 € se servono tracce nuove</td><td class="num" style="text-align:right">60 – 500 €</td></tr>
+        <tr><td>Sanitari sospesi</td><td>Cassetta a incasso + telaio: si guadagna spazio e si pulisce meglio</td><td class="num" style="text-align:right">+ 500 – 800 €</td></tr>
+        <tr><td>Spostare lo scarico del water</td><td>Nuova pendenza, spesso rialzo del pavimento</td><td class="num" style="text-align:right">+ 800 – 2.000 €</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Cosa fa salire il prezzo</h2>
+    <ul class="checklist up-list">
+      <li><strong>Spostare gli scarichi.</strong> È la voce numero uno: cambia la pendenza, spesso obbliga a rialzare il pavimento o a demolire più del previsto.</li>
+      <li><strong>La doccia a filo pavimento.</strong> Bellissima, ma va incassata: più impermeabilizzazione, più manodopera, meno margine di errore.</li>
+      <li><strong>Formati grandi e mosaico.</strong> Una lastra 120x60 richiede due persone, piano perfetto e attrezzatura: la posa costa di più della piastrella 30x60.</li>
+      <li><strong>Il bagno piccolo.</strong> Sembra un paradosso, ma sotto i 4 mq il prezzo al mq sale: i costi fissi si spalmano su meno superficie e ci si lavora scomodi.</li>
+      <li><strong>Il palazzo senza ascensore.</strong> Calcinacci giù e materiale su a mano, per giorni: si paga in ore di manodopera.</li>
+      <li><strong>Le sorprese sotto le piastrelle.</strong> Tubi in ferro arrugginiti, solai ammalorati, vecchie infiltrazioni: si scoprono solo demolendo.</li>
+    </ul>
+
+    <h2>Cosa fa scendere il prezzo</h2>
+    <ul class="checklist down-list">
+      <li><strong>Lasciare gli attacchi dove sono.</strong> È il risparmio più grosso possibile, e nessuno se ne accorge guardando il bagno finito.</li>
+      <li><strong>Piastrelle di formato standard e in pronta consegna.</strong> Il gres 30x60 di fascia media costa poco e dura come quello caro.</li>
+      <li><strong>Fare più lavori insieme.</strong> Se rifai anche la cucina o l'impianto di casa, un cantiere solo costa meno di due.</li>
+      <li><strong>Decidere tutto prima di iniziare.</strong> Cambiare idea a lavori partiti è la voce di extra più frequente in assoluto.</li>
+      <li><strong>Bagno in periodi tranquilli.</strong> A gennaio o settembre le squadre sono meno cariche di quanto lo siano prima dell'estate.</li>
+    </ul>
+
+    <h2>Le voci che nei preventivi vengono dimenticate</h2>
+    <p>Controlla che ci siano scritte. Se mancano, non è detto che siano escluse — ma va chiarito <em>prima</em>:</p>
+    <ul class="checklist forget-list">
+      <li><strong>Lo smaltimento delle macerie in discarica</strong> — i calcinacci di un bagno pesano, e lo smaltimento è un costo vero.</li>
+      <li><strong>L'impermeabilizzazione della zona doccia</strong> — la guaina sotto le piastrelle. Non si vede, e chi corre la salta: poi l'acqua esce dal muro del vicino.</li>
+      <li><strong>La porta del bagno</strong> — quasi sempre esclusa, e quasi sempre va cambiata perché la vecchia non chiude più dopo il pavimento nuovo.</li>
+      <li><strong>Il ripristino del pavimento del corridoio</strong> — la soglia tra bagno e corridoio va raccordata.</li>
+      <li><strong>Il punto lavatrice</strong> — attacco acqua e scarico dedicati: se lo vuoi, va detto adesso.</li>
+      <li><strong>La ventilazione del bagno cieco</strong> — senza finestra serve l'aspiratore con scarico verso l'esterno. È obbligatorio, non è un optional.</li>
+      <li><strong>La pulizia finale del cantiere</strong> — un bagno appena fatto è pieno di polvere di taglio.</li>
+    </ul>
+
+    <div class="related">
+      🚿 Vuoi solo togliere la vasca? Costa molto meno: <a href="/quanto-costa-trasformare-vasca-in-doccia.html">quanto costa trasformare la vasca in doccia</a>.<br>
+      🔧 Se rifai anche i tubi di tutta casa: <a href="/quanto-costa-rifare-impianto-idraulico.html">quanto costa rifare l'impianto idraulico</a>.<br>
+      🧱 Solo pavimento e rivestimento: <a href="/quanto-costa-posare-il-pavimento.html">quanto costa posare il pavimento</a>.<br>
+      🏠 Stai rifacendo più di un bagno? <a href="/quanto-costa-ristrutturare-casa.html">Quanto costa ristrutturare casa al mq</a>.<br>
+      📋 Come si legge un preventivo edile: <a href="/come-leggere-un-preventivo-edile.html">le 8 voci che devono esserci</a>.
     </div>
 
     <!-- ================= CALCOLATORE ================= -->
@@ -203,12 +295,14 @@
           <label class="chk"><input type="checkbox" data-add="900"> Box doccia su misura / doccia grande <span class="price">+900 €</span></label>
           <label class="chk"><input type="checkbox" data-add="700"> Rifare impianto elettrico completo <span class="price">+700 €</span></label>
           <label class="chk"><input type="checkbox" data-add="600"> Sanitari sospesi <span class="price">+600 €</span></label>
+          <label class="chk"><input type="checkbox" data-add="650"> Doccia a filo pavimento <span class="price">+650 €</span></label>
+          <label class="chk"><input type="checkbox" data-add="400"> Termoarredo / scaldasalviette <span class="price">+400 €</span></label>
         </div>
       </div>
 
       <div class="result">
         <div class="lbl">Stima indicativa</div>
-        <div class="amount" id="out">7.200 – 9.400 €</div>
+        <div class="amount" id="out">6.600 – 8.600 €</div>
         <div class="hint">Prezzo orientativo chiavi in mano, IVA 10% inclusa. Per la cifra esatta serve un sopralluogo.</div>
       </div>
 
@@ -233,6 +327,46 @@
     <div class="note">
       <strong>Il mio consiglio pratico:</strong> chiedi sempre 3 preventivi e mettili in colonna sulle stesse voci. Non guardare solo il totale in fondo — guarda dove uno costa il doppio dell'altro. Lì c'è la storia vera.
     </div>
+
+    <h2>Quanto dura davvero il cantiere</h2>
+    <p>Il bagno è l'unica stanza che non puoi "usare a metà", quindi i tempi contano quanto i soldi. Questa è la scaletta reale di un bagno completo:</p>
+
+    <table>
+      <caption>Tempi indicativi per un bagno completo di 5–6 mq</caption>
+      <thead>
+        <tr><th>Fase</th><th>Cosa succede</th><th style="text-align:right">Giorni</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Demolizione</td><td>Giù piastrelle, sanitari e massetto; macerie in discarica</td><td class="num" style="text-align:right">2 – 3</td></tr>
+        <tr><td>Impianti</td><td>Tracce, tubi acqua e scarichi, punti luce e prese</td><td class="num" style="text-align:right">5 – 6</td></tr>
+        <tr><td>Intonaco, massetto, guaina</td><td>Ricostruzione dei sottofondi e impermeabilizzazione</td><td class="num" style="text-align:right">3</td></tr>
+        <tr><td>Asciugatura</td><td>Massetti e intonaci devono tirare: non si accorcia</td><td class="num" style="text-align:right">7 – 10</td></tr>
+        <tr><td>Piastrelle e sanitari</td><td>Posa, fughe, montaggio sanitari e box, silicone</td><td class="num" style="text-align:right">5</td></tr>
+        <tr class="total-row"><td colspan="2">Dall'inizio alla consegna</td><td class="num" style="text-align:right">circa 3 – 4 settimane</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>I tempi morti non sono lentezza.</strong> Quasi metà del calendario è attesa: massetti, intonaci e colle hanno tempi di presa fisici. Chi ti promette il bagno "in una settimana" o salta l'asciugatura — e allora le piastrelle si staccano dopo un anno — oppure ha semplicemente contato solo i giorni in cui c'è qualcuno a lavorare.
+    </div>
+
+    <h2>Permessi e detrazioni</h2>
+    <p>Se rifai il bagno <strong>senza toccare la posizione degli scarichi e senza spostare muri</strong>, sei in manutenzione ordinaria: nessuna pratica da presentare. Se invece <strong>sposti gli scarichi, apri o chiudi pareti, cambi la destinazione degli spazi</strong>, si passa alla manutenzione straordinaria e serve la <strong>CILA</strong>, presentata da un tecnico: mettine in conto <strong>500–700 €</strong> più circa 50 € di diritti di istruttoria del Comune. Vedi <a href="/permessi-ristrutturazione-cila-scia.html">quale pratica serve per i tuoi lavori</a>.</p>
+    <p>Sul lato soldi ci sono due vantaggi da non perdere: l'<strong>IVA agevolata al 10%</strong> sui lavori di manutenzione in abitazioni private, e il <strong>bonus ristrutturazione</strong>, che ti fa detrarre una parte della spesa — manodopera compresa — se paghi con <strong>bonifico parlante</strong>. Le percentuali cambiano con ogni legge di bilancio: le trovi aggiornate nella guida al <a href="/bonus-ristrutturazione-2026.html">bonus ristrutturazione 2026</a> e nella panoramica dei <a href="/bonus-edilizi-2026.html">bonus edilizi 2026</a>.</p>
+
+    <div class="note">
+      <strong>Se il bagno è in condominio:</strong> la colonna di scarico è parte comune. Puoi allacciarti, ma non spostarla né ridurne la sezione senza passare dall'assemblea. E i lavori rumorosi seguono gli orari del regolamento condominiale: informa i vicini prima, ti risparmi metà dei problemi.
+    </div>
+
+    <h2>Gli errori da evitare</h2>
+    <ul class="checklist err-list">
+      <li><strong>Scegliere l'impresa dal totale più basso.</strong> Nel bagno il preventivo più basso è quasi sempre quello a cui manca una voce, e quella voce te la ritrovi come extra a lavori iniziati.</li>
+      <li><strong>Comprare i sanitari prima del sopralluogo.</strong> Misure e attacchi vanno verificati sul posto: un lavabo troppo largo o una cassetta incompatibile bloccano il cantiere.</li>
+      <li><strong>Saltare l'impermeabilizzazione della doccia.</strong> Si risparmiano poche centinaia di euro e si rischia un'infiltrazione dal vicino di sotto, che costa dieci volte tanto.</li>
+      <li><strong>Non pensare alla ventilazione del bagno cieco.</strong> Senza aspiratore verso l'esterno arrivano muffa e condensa, e le piastrelle nuove non le fermano.</li>
+      <li><strong>Pagare in contanti senza fattura.</strong> Perdi la detrazione, perdi la garanzia e non hai nulla in mano se qualcosa va storto.</li>
+      <li><strong>Versare un acconto altissimo prima di iniziare.</strong> Un acconto ragionevole è il 20–30%; il saldo va a lavori finiti e verificati.</li>
+    </ul>
 
     <!-- CTA ripetuta -->
     <div class="cta-band">
@@ -263,6 +397,43 @@
         <summary>Conviene comprare io i sanitari o farli mettere all'impresa?</summary>
         <p>Dipende. Se compri tu, controlli marca e prezzo ma ti prendi il rischio di misure sbagliate o pezzi mancanti che bloccano il cantiere. Se li fornisce l'impresa, hai un solo responsabile se qualcosa non va. Il mio consiglio: <strong>fai scegliere i modelli a te, ma falli ordinare all'impresa</strong> — così se un pezzo è sbagliato è problema loro.</p>
       </details>
+      <details>
+        <summary>Posso spostare il water dove voglio?</summary>
+        <p>Non sempre. Lo scarico del water ha bisogno di una <strong>pendenza</strong> per funzionare, e la pendenza si ricava solo alzando il pavimento o intervenendo sul solaio. Più lo allontani dalla colonna di scarico, più il problema cresce. In condominio, poi, la colonna è parte comune: ci si può allacciare, ma non spostarla. Prima di decidere la nuova disposizione, chiedi all'impresa dove passa la colonna: costa <strong>800–2.000 €</strong> in più ed è la voce che fa saltare i preventivi.</p>
+      </details>
+      <details>
+        <summary>Serve un permesso per rifare il bagno?</summary>
+        <p>Se cambi solo piastrelle e sanitari lasciando gli impianti dove sono, no: è manutenzione ordinaria. Se sposti gli scarichi o tocchi le pareti, serve la <strong>CILA</strong> presentata da un tecnico: circa <strong>500–700 €</strong> più i diritti comunali. Il lato positivo è che con la pratica in regola i lavori rientrano nel bonus ristrutturazione.</p>
+      </details>
+      <details>
+        <summary>Quanto costa solo cambiare i sanitari, senza rifare tutto?</summary>
+        <p>Molto meno: sostituire WC, bidet e lavabo mantenendo gli attacchi esistenti costa in genere <strong>600–1.500 €</strong> tra sanitari e manodopera, senza demolizioni. Se vuoi solo eliminare la vasca, vedi la guida dedicata a <a href="/quanto-costa-trasformare-vasca-in-doccia.html">trasformare la vasca in doccia</a>: si parte da circa 1.000 €.</p>
+      </details>
+      <details>
+        <summary>Meglio la doccia a filo pavimento o con il piatto rialzato?</summary>
+        <p>Il filo pavimento è più bello, più comodo da pulire e accessibile a tutti, ma va <strong>incassato nel massetto</strong>: serve più impermeabilizzazione e una posa perfetta, e costa <strong>400–900 € in più</strong>. Il piatto appoggiato costa meno e si può montare ovunque. Se il bagno è al piano terra o hai spessore nel pavimento, il filo pavimento si fa senza problemi; in un appartamento con solaio basso può non essere fattibile.</p>
+      </details>
+    </div>
+
+    <!-- ====== TROVA IMPRESE PER QUESTO LAVORO NELLA TUA CITTÀ ====== -->
+    <div class="cities">
+      <h2>Trova chi ti rifà il bagno nella tua città</h2>
+      <p>Su TrovaImpresa ci sono imprese edili, idraulici e piastrellisti verificati in 106 città italiane. Scegli la tua e richiedi più preventivi gratis:</p>
+      <div class="cities-grid">
+        <a href="/imprese-roma.html">Roma</a>
+        <a href="/imprese-milano.html">Milano</a>
+        <a href="/imprese-napoli.html">Napoli</a>
+        <a href="/imprese-torino.html">Torino</a>
+        <a href="/imprese-bologna.html">Bologna</a>
+        <a href="/imprese-firenze.html">Firenze</a>
+        <a href="/imprese-genova.html">Genova</a>
+        <a href="/imprese-palermo.html">Palermo</a>
+        <a href="/imprese-bari.html">Bari</a>
+        <a href="/imprese-verona.html">Verona</a>
+        <a href="/imprese-venezia.html">Venezia</a>
+        <a href="/imprese-rieti.html">Rieti</a>
+      </div>
+      <p class="all-cities">La tua città non c'è? <a href="/citta.html">Vedi tutte le 106 città →</a></p>
     </div>
 
   </article>
@@ -284,7 +455,11 @@
     {"@type":"Question","name":"Quanto tempo ci vuole per rifare un bagno?","acceptedAnswer":{"@type":"Answer","text":"Un bagno completo richiede in media 2–3 settimane di lavoro effettivo, tra demolizione, impianti, tempi di asciugatura di massetti e colle, posa e montaggi."}},
     {"@type":"Question","name":"Nel prezzo del bagno è compresa l'IVA?","acceptedAnswer":{"@type":"Answer","text":"Sui lavori di ristrutturazione di un immobile abitativo l'IVA è agevolata al 10% (in alcuni casi 4%). I preventivi seri la indicano a parte o come inclusa."}},
     {"@type":"Question","name":"Ci sono detrazioni o bonus per rifare il bagno?","acceptedAnswer":{"@type":"Answer","text":"Sì, rifare il bagno rientra nel bonus ristrutturazioni, che consente di detrarre parte della spesa pagando con bonifico parlante. Percentuali e massimali variano di anno in anno con la legge di bilancio."}},
-    {"@type":"Question","name":"Conviene comprare io i sanitari o farli mettere all'impresa?","acceptedAnswer":{"@type":"Answer","text":"Meglio scegliere tu i modelli ma farli ordinare all'impresa: così controlli marca e prezzo, ma se un pezzo è sbagliato la responsabilità resta dell'impresa."}}
+    {"@type":"Question","name":"Conviene comprare io i sanitari o farli mettere all'impresa?","acceptedAnswer":{"@type":"Answer","text":"Meglio scegliere tu i modelli ma farli ordinare all'impresa: così controlli marca e prezzo, ma se un pezzo è sbagliato la responsabilità resta dell'impresa."}},
+    {"@type":"Question","name":"Posso spostare il water dove voglio?","acceptedAnswer":{"@type":"Answer","text":"Non sempre: lo scarico del water ha bisogno di una pendenza, che si ricava solo alzando il pavimento o intervenendo sul solaio. In condominio la colonna di scarico è parte comune e non si può spostare. Spostare lo scarico costa in genere 800-2.000 € in più."}},
+    {"@type":"Question","name":"Serve un permesso per rifare il bagno?","acceptedAnswer":{"@type":"Answer","text":"Se cambi solo piastrelle e sanitari lasciando gli impianti dove sono è manutenzione ordinaria e non serve alcuna pratica. Se sposti gli scarichi o tocchi le pareti serve la CILA presentata da un tecnico: circa 500-700 € più i diritti comunali."}},
+    {"@type":"Question","name":"Quanto costa solo cambiare i sanitari senza rifare tutto il bagno?","acceptedAnswer":{"@type":"Answer","text":"Sostituire WC, bidet e lavabo mantenendo gli attacchi esistenti costa in genere 600-1.500 € tra sanitari e manodopera, senza demolizioni."}},
+    {"@type":"Question","name":"Meglio la doccia a filo pavimento o con il piatto rialzato?","acceptedAnswer":{"@type":"Answer","text":"Il filo pavimento è più bello e accessibile ma va incassato nel massetto: serve più impermeabilizzazione e costa 400-900 € in più. Il piatto appoggiato costa meno e si può montare ovunque, anche dove il solaio non permette l'incasso."}}
   ]
 }
 </script>
