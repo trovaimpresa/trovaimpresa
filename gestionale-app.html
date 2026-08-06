@@ -381,9 +381,40 @@
       const fsearch=document.querySelector('#f-search'); /* placeholder in HTML statico: per-ruolo via JS, non dal translator */
       if(fsearch)fsearch.placeholder="Cerca cliente o pratica...";
       avviaLocalizzazionePratiche();
+      adattaMenuProfessionista();
       renderScadenze();
       if(!cur)renderLanding(); /* ruoloUtente noto solo ora: ridisegna le card landing coi contatori "pratiche" */
     }
+  }
+
+  /* ===== 6 agosto 2026 — Menu su misura per lo studio professionale =====
+     Un architetto o un geometra non ha furgoni, betoniere e carte carburante:
+     quelle sezioni si nascondono. "Squadra" diventa "Collaboratori" e il gruppo
+     "Azienda" diventa "Studio".
+     Si NASCONDE soltanto: i dati restano nel database e le sezioni tornano
+     visibili da sole se l'utente cambia tipo. Nessuna cancellazione. */
+  const TAB_NASCOSTI_PRO=['mezzi','attrezzature','carte'];
+  function adattaMenuProfessionista(){
+    if(ruoloUtente!=='professionista')return;
+    try{
+      TAB_NASCOSTI_PRO.forEach(function(t){
+        document.querySelectorAll('[data-tab="'+t+'"]').forEach(function(el){ el.style.display='none'; });
+      });
+      /* Squadra -> Collaboratori */
+      document.querySelectorAll('[data-tab="squadra"] span').forEach(function(s){
+        if(s.textContent.trim()==='Squadra')s.textContent='Collaboratori';
+      });
+      /* intestazione del gruppo: "Azienda" -> "Studio" */
+      document.querySelectorAll('.side-group').forEach(function(g){
+        if(g.textContent.trim()==='Azienda')g.textContent='Studio';
+      });
+      /* se l'utente era gia' dentro una sezione nascosta, lo riporto al riepilogo */
+      var attivo=document.querySelector('[data-tab].active');
+      if(attivo && TAB_NASCOSTI_PRO.indexOf(attivo.getAttribute('data-tab'))>=0){
+        var home=document.querySelector('[data-tab="riepilogo"]');
+        if(home)home.click();
+      }
+    }catch(_){}
   }
   /* Solo professionista: nei TESTI VISIBILI dell'interfaccia del reparto (#appview e i form in #sheet)
      traduce le etichette fisse lavoro→pratica con concordanza femminile corretta (vedi _FRASI),
