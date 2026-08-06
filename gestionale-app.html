@@ -1751,7 +1751,10 @@
     const ids=(fattLavori[fatturaId]||[]);
     if(!ids.length)return;
     const nuovo = stato==="pagata" ? "pagata" : (stato==="emessa" ? "emessa" : "none");
-    try{ await sb.from("gest_lavori").update({fatt_stato:nuovo}).in("id",ids).eq("user_id",sbUid); }catch(e){}
+    try{
+      const {error}=await sb.from("gest_lavori").update({fatt_stato:nuovo}).in("id",ids).eq("user_id",sbUid).select("id");
+      if(error)toast("Attenzione: i lavori collegati alla fattura non si sono aggiornati");
+    }catch(e){ toast("Attenzione: i lavori collegati alla fattura non si sono aggiornati"); }
   }
 
   /* ---- il numero, assegnato una volta sola ----
@@ -2126,9 +2129,15 @@
 
     let fid=id;
     if(id){
-      const {error}=await sb.from("gest_fatture").update(testata).eq("id",id).eq("user_id",sbUid);
+      const {data:okFat,error}=await sb.from("gest_fatture").update(testata).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){fattErrore(error.message);return;}
-      await sb.from("gest_fattura_righe").delete().eq("fattura_id",id).eq("user_id",sbUid);
+      if(!okFat||!okFat.length){fattErrore("Non salvata: nessuna riga modificata. Riprova.");return;}
+      const {error:eDel}=await sb.from("gest_fattura_righe").delete().eq("fattura_id",id).eq("user_id",sbUid);
+      if(eDel){fattErrore("Le vecchie voci non si sono cancellate: "+eDel.message);return;}
+      /* rete anti-doppioni: se per qualsiasi motivo le vecchie voci sono ancora
+         li', inserire le nuove le raddoppierebbe. Meglio fermarsi. */
+      const {data:resti}=await sb.from("gest_fattura_righe").select("id").eq("fattura_id",id).limit(1);
+      if(resti&&resti.length){fattErrore("Le vecchie voci non si sono cancellate. Riprova.");return;}
     }else{
       const {data:nf,error}=await sb.from("gest_fatture")
         .insert({...testata,user_id:sbUid,mestiere_id:curMestiere(),stato:"bozza"}).select().single();
@@ -2174,8 +2183,9 @@
     const patch={stato:v};
     if(v==="pagata")patch.data_pagata=todayStr();
     if(v==="emessa")patch.data_pagata=null;
-    const {error}=await sb.from("gest_fatture").update(patch).eq("id",id).eq("user_id",sbUid);
+    const {data:okSt,error}=await sb.from("gest_fatture").update(patch).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
+    if(!okSt||!okSt.length){toast("Non salvata: nessuna riga modificata. Riprova.");return;}
     await fattSincronizzaLavori(id,v);
     await renderFatture();renderRiepilogo();renderJobs();
     toast(v==="emessa"?("Fattura n. "+f.numero+"/"+f.anno+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
@@ -2188,8 +2198,9 @@
       : "Eliminare questa bozza di fattura?";
     if(!gconfirm(avviso))return;
     await fattSincronizzaLavori(id,"none");
-    const {error}=await sb.from("gest_fatture").delete().eq("id",id).eq("user_id",sbUid);
+    const {data:okEl,error}=await sb.from("gest_fatture").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
+    if(!okEl||!okEl.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
     await renderFatture();renderRiepilogo();renderJobs();toast("Fattura eliminata");
   }
 
@@ -3144,11 +3155,14 @@
     const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const extra=dipCampiExtra();
-    const {error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid);
+    const {data:okOp,error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
-    const {error:e2}=await sb.from("gest_membri").update({ruolo,permessi}).eq("operatore_id",id).eq("impresa_id",sbUid);
+    if(!okOp||!okOp.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+    const {data:okMem,error:e2}=await sb.from("gest_membri").update({ruolo,permessi}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
     if(e2){toast("Errore permessi: "+e2.message);return;}
-    closeSheet();renderDip();toast("Aggiornato ✔");
+    closeSheet();renderDip();
+    if(!okMem||!okMem.length){toast("Salvato, ma ruolo e permessi non aggiornati");return;}
+    toast("Aggiornato ✔");
   }
 
   /* ============================================================
@@ -4126,13 +4140,14 @@
         note:$("#j-note").value.trim()||null,
         ore:parseFloat($("#j-ore").value)||null
       }, leggiCampiPratica());
-      let {error}=await sb.from('gest_lavori').update(mod).eq('id', editing.realId);
+      let {data:okJob,error}=await sb.from('gest_lavori').update(mod).eq('id', editing.realId).eq('user_id',sbUid).select('id');
       if(error&&eColonnaPraticaMancante(error)){
-        const rip=await sb.from('gest_lavori').update(senzaCampiPratica(mod)).eq('id', editing.realId);
-        error=rip.error;
+        const rip=await sb.from('gest_lavori').update(senzaCampiPratica(mod)).eq('id', editing.realId).eq('user_id',sbUid).select('id');
+        okJob=rip.data;error=rip.error;
         if(!error)toast("Salvato, ma i dati della pratica non ancora: manca la migrazione SQL");
       }
       if(error){toast("Errore: "+error.message);return;}
+      if(!okJob||!okJob.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
       /* segnata emessa o pagata: e' questo il momento in cui la fattura prende il numero */
       /* il numero di fattura lo assegna la fattura quando la emetti, non il lavoro */
       for(const f of (editing.foto||[])){
@@ -4587,9 +4602,9 @@
       piva:v("#c-piva")||null, cod_fiscale:v("#c-cf").toUpperCase()||null,
       sdi_codice:v("#c-sdi").toUpperCase()||null, sdi_pec:v("#c-pec")||null};
 
-    let {error}=id
-      ?await sb.from("gest_clienti").update(row).eq("id",id).eq("user_id",sbUid)
-      :await sb.from("gest_clienti").insert({...row,user_id:sbUid,mestiere_id:curMestiere()});
+    let {data:okCli,error}=id
+      ?await sb.from("gest_clienti").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_clienti").insert({...row,user_id:sbUid,mestiere_id:curMestiere()}).select("id");
     /* se le colonne fiscali non ci sono ancora nel database, salvo il resto
        invece di far fallire tutto — stessa rete dei Dati azienda */
     const OPZ=["tipo","email","cap","citta","prov","piva","cod_fiscale","sdi_codice","sdi_pec"];
@@ -4598,11 +4613,12 @@
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);
       if(!c)break;
       delete row[c];tolte.push(c);
-      ({error}=id
-        ?await sb.from("gest_clienti").update(row).eq("id",id).eq("user_id",sbUid)
-        :await sb.from("gest_clienti").insert({...row,user_id:sbUid,mestiere_id:curMestiere()}));
+      ({data:okCli,error}=id
+        ?await sb.from("gest_clienti").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+        :await sb.from("gest_clienti").insert({...row,user_id:sbUid,mestiere_id:curMestiere()}).select("id"));
     }
     if(error){toast("Errore: "+error.message);return;}
+    if(!okCli||!okCli.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     if(tolte.length)toast("Salvato, ma i campi fiscali richiedono un aggiornamento del database.");
     closeSheet();renderClienti();renderFatture();toast(id?"Aggiornato":"Cliente aggiunto ✔");
   }
@@ -5943,14 +5959,19 @@
     const parcella=leggiCampiParcella();
     if(id){
       const mod=Object.assign({titolo,cliente_id,data,note},parcella);
-      let {error}=await sb.from("gest_preventivi").update(mod).eq("id",id).eq("user_id",sbUid);
+      let {data:okPrev,error}=await sb.from("gest_preventivi").update(mod).eq("id",id).eq("user_id",sbUid).select("id");
       if(error&&eColonnaParcellaMancante(error)){
-        const rip=await sb.from("gest_preventivi").update(senzaCampiParcella(mod)).eq("id",id).eq("user_id",sbUid);
-        error=rip.error;
+        const rip=await sb.from("gest_preventivi").update(senzaCampiParcella(mod)).eq("id",id).eq("user_id",sbUid).select("id");
+        okPrev=rip.data;error=rip.error;
         if(!error)toast("Salvato, ma i dati della parcella no: manca la migrazione SQL");
       }
       if(error){toast("Errore: "+error.message);return;}
-      await sb.from("gest_preventivo_righe").delete().eq("preventivo_id",id).eq("user_id",sbUid);
+      if(!okPrev||!okPrev.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+      const {error:eDelP}=await sb.from("gest_preventivo_righe").delete().eq("preventivo_id",id).eq("user_id",sbUid);
+      if(eDelP){toast("Le vecchie voci non si sono cancellate: "+eDelP.message);return;}
+      /* rete anti-doppioni: come per le fatture */
+      const {data:restiP}=await sb.from("gest_preventivo_righe").select("id").eq("preventivo_id",id).limit(1);
+      if(restiP&&restiP.length){toast("Le vecchie voci non si sono cancellate. Riprova.");return;}
     }else{
       const numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
       const nuovo=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),titolo,cliente_id,data,note,numero,stato:"bozza"},parcella);
@@ -5998,8 +6019,10 @@
     const {data:lav,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:curMestiere(),stato:"da_fare",
       descrizione:p.titolo,dove:"",data_prevista:todayStr(),cliente_id:p.cliente_id,importo:tot}).select("id").single();
     if(error){toast("Errore: "+error.message);return;}
-    await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:lav.id}).eq("id",id).eq("user_id",sbUid);
-    renderPreventivi();renderJobs();renderRiepilogo();toast("Lavoro creato dal preventivo ✔");
+    const {data:okAcc,error:eAcc}=await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:lav.id}).eq("id",id).eq("user_id",sbUid).select("id");
+    renderPreventivi();renderJobs();renderRiepilogo();
+    if(eAcc||!okAcc||!okAcc.length){toast("Lavoro creato, ma il preventivo non risulta accettato: aggiornagli lo stato a mano");return;}
+    toast("Lavoro creato dal preventivo ✔");
   }
   async function prevPdf(id){
     if(!window.jspdf){toast("PDF non ancora pronto, riprova tra un attimo");return;}
@@ -6281,7 +6304,7 @@
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
     if(a==="spesa-add")return spesaAdd();
-    if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).then(()=>renderSpeseBlock(speseLavoroId));return;}
+    if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="new-prev")return prevForm(null);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
     /* dal Riepilogo: prevCache puo' essere ancora vuota (scheda Preventivi mai aperta),
@@ -6291,9 +6314,9 @@
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     if(a==="prev-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();prevTotaleLive();}return;}
     if(a==="prev-filtro"){prevFilter=t.dataset.v;renderPreventivi();return;}
-    if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo aggiornato ✔");});return;}
+    if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non salvato: "+(res.error?res.error.message:"nessuna riga modificata. Riprova."));return;}renderPreventivi();renderRiepilogo();toast("Preventivo aggiornato ✔");});return;}
     if(a==="prev-to-lavoro")return prevToLavoro(id);
-    if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).then(()=>{renderPreventivi();renderRiepilogo();toast("Preventivo eliminato");});return;}
+    if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderPreventivi();renderRiepilogo();toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevPdf(id);
     if(a==="report-csv")return reportCsv();
     if(a==="lav-vista"){filter.vista=t.dataset.v;renderJobs();return;}
@@ -6422,16 +6445,18 @@
         if(paths.length)await sb.storage.from("gestionale-foto").remove(paths);
         await sb.from("gest_foto").delete().eq("lavoro_id",id).eq("user_id",sbUid);
       }
-      const {error}=await sb.from("gest_lavori").delete().eq("id",id).eq("user_id",sbUid);
+      const {data:okDel,error}=await sb.from("gest_lavori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
+      if(!okDel||!okDel.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
       renderAll();toast("Lavoro eliminato ✔");return;
     }
     if(a==="stato"){const l=db().lavori.find(x=>x.id===id);l.stato=t.dataset.v;if(l.stato==="fatto"&&!l.dataFatto)l.dataFatto=l.dataPrevista||todayStr();await save();renderAll();toast("Stato: "+statoLabel[l.stato]);return;}
     if(a==="stato-supa"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v, dp=t.dataset.dp||"";
-      const {error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid);
+      const {data:okSt2,error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
+      if(!okSt2||!okSt2.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
       renderJobs();renderContatori();toast("Stato: "+(statoLabel[v]||v));return;
     }
     /* Dal lavoro: prima questo pulsante scriveva a mano "fatturato" sul lavoro,
@@ -6517,11 +6542,12 @@
     if(a==="scad-stato"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v;
-      const {error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid);
+      const {data:okSc,error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
+      if(!okSc||!okSc.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
       renderScadenze();toast(v==="fatta"?"Scadenza completata ✔":"Riaperta");return;
     }
-    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderScadenze();toast("Scadenza eliminata");}return;}
+    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-edit")return squadraForm(dipCache.find(d=>d.id===id));
@@ -6531,8 +6557,9 @@
     if(a==="sq-revoca"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       if(!gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale."))return;
-      const {error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid);
+      const {data:okRev,error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
       if(error){toast("Errore: "+error.message);return;}
+      if(!okRev||!okRev.length){toast("Non rimosso: nessuna riga modificata. Riprova.");return;}
       renderDip();toast("Accesso rimosso");return;
     }
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
