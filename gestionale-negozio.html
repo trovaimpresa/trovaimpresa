@@ -306,7 +306,8 @@
       <div class="side-brand"><h1><span class="rep-dot" id="rep-dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:1px;background:#9aa7b2"></span><span id="panel-name">—</span></h1><small id="panel-sub">Reparto</small></div>
       <button class="burger" data-action="burger" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
     </div>
-    <button class="btn-new" data-action="new-job">+ Nuovo lavoro</button>
+    <!-- 6 agosto 2026: in una rivendita non si creano "lavori": si aggiungono prodotti. -->
+    <button class="btn-new" data-action="new-prod">+ Nuovo prodotto</button>
     <nav class="tabs">
       <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
       <button data-tab="prodotti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg><span>Prodotti</span></button>
@@ -319,7 +320,7 @@
       <button data-tab="lavori" style="display:none"><span>Lavori</span></button>
       <button data-tab="fatture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg><span>Fatture</span></button>
       <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
-      <button data-tab="clienti" style="display:none"><span>Condomini</span></button>
+      <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg><span>Clienti</span></button>
       <button data-tab="squadra" style="display:none"><span>Squadra</span></button>
       <button data-tab="scadenzario" id="tab-scadenzario" style="display:none"><span>Scadenzario</span></button>
     </nav>
@@ -356,11 +357,59 @@
       <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
         <h3 style="margin:0 0 12px">Nuovo prodotto</h3>
         <input id="np-nome" placeholder="Nome prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-prezzo" type="number" step="0.01" placeholder="Prezzo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-quantita" type="number" placeholder="Quantità" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-categoria" placeholder="Categoria" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-soglia" type="number" placeholder="Soglia minima" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-codice" placeholder="Codice" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <input id="np-codice" placeholder="Codice" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          <input id="np-categoria" placeholder="Categoria" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        </div>
+        <!-- 6 agosto 2026: unita di misura, prezzo di acquisto e IVA.
+             Senza unita "quantita 40" non dice niente (40 pezzi? 40 mq? 40 sacchi?),
+             e senza prezzo di acquisto non si vede il margine. -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Si vende a</label>
+            <select id="np-unita" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+              <option value="pz">pezzo</option>
+              <option value="mq">metro quadro (mq)</option>
+              <option value="ml">metro lineare (ml)</option>
+              <option value="mc">metro cubo (mc)</option>
+              <option value="kg">chilo (kg)</option>
+              <option value="q">quintale (q)</option>
+              <option value="t">tonnellata (t)</option>
+              <option value="sacco">sacco</option>
+              <option value="bancale">bancale</option>
+              <option value="conf">confezione</option>
+              <option value="lt">litro (lt)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Quantità</label>
+            <input id="np-quantita" type="number" step="0.01" placeholder="0" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Scorta minima</label>
+            <input id="np-soglia" type="number" step="0.01" placeholder="0" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo paghi</label>
+            <input id="np-acquisto" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo vendi</label>
+            <input id="np-prezzo" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">IVA</label>
+            <select id="np-iva" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+              <option value="22">22%</option>
+              <option value="10">10%</option>
+              <option value="4">4%</option>
+              <option value="0">0%</option>
+            </select>
+          </div>
+        </div>
+        <div id="np-margine" style="font-size:14px;color:#5b6672;margin-bottom:10px;min-height:20px"></div>
         <input id="np-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <button id="np-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi prodotto</button>
       </div>
@@ -1647,6 +1696,15 @@
     if(a==="pdf")return generaPdf(id);
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
+    /* 6 agosto 2026: il pulsante grande della barra porta alla scheda Prodotti,
+       con il cursore gia' nel campo del nome. */
+    if(a==="new-prod"){
+      $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="prodotti"));
+      $$("section").forEach(s=>s.classList.toggle("active",s.id==="prodotti"));
+      window.scrollTo({top:0,behavior:"smooth"});
+      const n=$("#np-nome"); if(n)setTimeout(function(){n.focus();},150);
+      return;
+    }
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",null,true,true);
@@ -1728,21 +1786,29 @@
   let editProdId=null;
   async function loadProdotti(){
     if(!(sb&&sbUid)) return;
+    /* "*" invece dell'elenco fisso: servono anche unita, prezzo_acquisto e iva_perc,
+       e con "*" non si rischia l'errore se la migrazione SQL non e' stata fatta. */
     const {data}=await sb.from("neg_prodotti")
-      .select("id,nome,prezzo,quantita,categoria,soglia_minima,codice,note")
+      .select("*")
       .eq("user_id",sbUid).order("nome");
     const prods=data||[], box=$("#prodotti-body");
     if(!box) return;
     if(!prods.length){box.innerHTML='<p style="color:#666;padding:8px">Nessun prodotto. Aggiungine uno.</p>';return;}
-    box.innerHTML=prods.map(p=>`
-      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #1565c0;padding:14px;margin-bottom:12px">
+    const eu=n=>(+n||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+    box.innerHTML=prods.map(p=>{
+      const um=p.unita||"pz";
+      const marg=(p.prezzo_acquisto!=null&&+p.prezzo_acquisto>0)?(+p.prezzo||0)-(+p.prezzo_acquisto):null;
+      const soglia=(p.quantita??0)<=(p.soglia_minima??0);
+      return `
+      <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid ${soglia?"#c62828":"#1565c0"};padding:14px;margin-bottom:12px">
         <strong>${p.nome||"—"}</strong>
-        <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${p.prezzo??0} · Q.tà ${p.quantita??0}${p.codice?" · cod. "+p.codice:""}</div>
+        <div style="color:#666;font-size:14px;margin-top:4px">${p.categoria?p.categoria+" · ":""}€ ${eu(p.prezzo)}/${um} · <strong style="color:${soglia?"#c62828":"#333"}">${p.quantita??0} ${um}</strong>${soglia?" ⚠️ sotto scorta":""}${p.codice?" · cod. "+p.codice:""}</div>
+        ${marg!=null?`<div style="color:${marg>0?"#1e8e3e":"#c0392b"};font-size:13px;margin-top:3px;font-weight:600">Guadagno € ${eu(marg)}/${um}</div>`:""}
         <div style="margin-top:10px;display:flex;gap:8px">
           <button class="prod-edit" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #1565c0;color:#1565c0;background:#fff;border-radius:8px;cursor:pointer">Modifica</button>
           <button class="prod-del" data-id="${p.id}" style="font-size:13px;padding:6px 12px;border:1px solid #c62828;color:#c62828;background:#fff;border-radius:8px;cursor:pointer">Elimina</button>
         </div>
-      </div>`).join("");
+      </div>`;}).join("");
   }
   $('[data-tab="prodotti"]')?.addEventListener("click",loadProdotti);
   $("#prodotti-body")?.addEventListener("click",async e=>{
@@ -1760,6 +1826,11 @@
       $("#np-quantita").value=data.quantita??""; $("#np-categoria").value=data.categoria||"";
       $("#np-soglia").value=data.soglia_minima??""; $("#np-codice").value=data.codice||"";
       $("#np-note").value=data.note||"";
+      /* campi aggiunti il 6 agosto 2026 — se il prodotto e' vecchio restano ai valori di partenza */
+      if($("#np-unita"))    $("#np-unita").value=data.unita||"pz";
+      if($("#np-acquisto")) $("#np-acquisto").value=data.prezzo_acquisto??"";
+      if($("#np-iva"))      $("#np-iva").value=(data.iva_perc??22);
+      mostraMargine();
       editProdId=data.id; $("#np-save").textContent="Salva modifica";
       window.scrollTo({top:0,behavior:"smooth"});
     }
@@ -1908,22 +1979,59 @@
       window.scrollTo({top:0,behavior:"smooth"});
     }
   });
+  /* 6 agosto 2026 — Margine dal vivo: quanto ci guadagni su ogni pezzo.
+     Si aggiorna mentre scrivi il prezzo di acquisto o quello di vendita. */
+  function mostraMargine(){
+    const box=$("#np-margine"); if(!box)return;
+    const acq=parseFloat($("#np-acquisto")?$("#np-acquisto").value:"")||0;
+    const ven=parseFloat($("#np-prezzo")?$("#np-prezzo").value:"")||0;
+    const um=$("#np-unita")?$("#np-unita").value:"pz";
+    if(!acq||!ven){box.textContent="";return;}
+    const marg=ven-acq, perc=acq>0?(marg/acq*100):0;
+    const col=marg>0?"#1e8e3e":(marg<0?"#c0392b":"#5b6672");
+    const eur=n=>n.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+    box.innerHTML='<span style="color:'+col+';font-weight:700">Guadagno: '+eur(marg)+' al '+um+
+      ' ('+(perc>=0?"+":"")+perc.toFixed(0)+'%)</span>'+
+      (marg<0?' <span style="color:#c0392b">— attenzione: lo vendi sotto costo</span>':"");
+  }
+  ["np-acquisto","np-prezzo","np-unita"].forEach(function(id){
+    const el=$("#"+id);
+    if(el){el.addEventListener("input",mostraMargine);el.addEventListener("change",mostraMargine);}
+  });
+
   $("#np-save")?.addEventListener("click",async()=>{
     const nome=$("#np-nome").value.trim();
     if(!nome){alert("Inserisci il nome");return;}
     if(!(sb&&sbUid)){alert("Non connesso");return;}
+    /* quantita e scorta ora accettano i decimali: 12,5 mq o 0,5 bancali sono normali */
     const dati={nome,
       prezzo:parseFloat($("#np-prezzo").value)||0,
-      quantita:parseInt($("#np-quantita").value)||0,
+      quantita:parseFloat($("#np-quantita").value)||0,
       categoria:$("#np-categoria").value.trim()||null,
-      soglia_minima:parseInt($("#np-soglia").value)||0,
+      soglia_minima:parseFloat($("#np-soglia").value)||0,
       codice:$("#np-codice").value.trim()||null,
-      note:$("#np-note").value.trim()||null};
+      note:$("#np-note").value.trim()||null,
+      unita:$("#np-unita")?$("#np-unita").value:"pz",
+      prezzo_acquisto:$("#np-acquisto")&&$("#np-acquisto").value!==""?parseFloat($("#np-acquisto").value):null,
+      iva_perc:$("#np-iva")?parseFloat($("#np-iva").value):22};
+    /* Se le colonne nuove non sono ancora state create su Supabase, il prodotto
+       si salva lo stesso senza di esse invece di andare perso (stessa regola
+       usata per le pratiche e per la parcella). */
+    const senzaNuovi=o=>{const c={...o};["unita","prezzo_acquisto","iva_perc"].forEach(k=>delete c[k]);return c;};
+    const eColonnaNuova=e=>/unita|prezzo_acquisto|iva_perc/i.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
     let error;
     if(editProdId){({error}=await sb.from("neg_prodotti").update(dati).eq("id",editProdId));}
     else {({error}=await sb.from("neg_prodotti").insert({user_id:sbUid,...dati}));}
+    if(error&&eColonnaNuova(error)){
+      if(editProdId){({error}=await sb.from("neg_prodotti").update(senzaNuovi(dati)).eq("id",editProdId));}
+      else {({error}=await sb.from("neg_prodotti").insert({user_id:sbUid,...senzaNuovi(dati)}));}
+      if(!error)alert("Prodotto salvato, ma unità di misura, prezzo di acquisto e IVA no: manca la migrazione SQL (sql/neg-prodotti-campi.sql).");
+    }
     if(error){alert("Errore: "+error.message);return;}
-    ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note"].forEach(id=>$("#"+id).value="");
+    ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note","np-acquisto"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
+    if($("#np-unita"))$("#np-unita").value="pz";
+    if($("#np-iva"))$("#np-iva").value="22";
+    mostraMargine();
     editProdId=null; $("#np-save").textContent="Aggiungi prodotto";
     loadProdotti();
   });
