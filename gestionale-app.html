@@ -605,8 +605,16 @@
     localizzaPratiche();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
+    /* getSession e onAuthStateChange sparano entrambi all'avvio: senza il
+       controllo su _authUidVisto tutto veniva disegnato DUE volte. */
+    let _authUidVisto="(mai)";
+    function _authRefresh(){
+      if(_authUidVisto===String(sbUid))return;
+      _authUidVisto=String(sbUid);
+      if(cur){renderAll();}else{renderLanding();}
+    }
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();_authRefresh();});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();_authRefresh();});
   }
 
   /* ---- RESTYLING PRO: emoji dell'interfaccia → icone SVG (Lucide-style) ----
@@ -764,7 +772,44 @@
 
   /* controllo segmentato (Agenda "Mostra", Galleria tipo foto): un solo pulsante acceso */
   function segmOn(sel,v){$$(sel+" button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));}
-  function renderAll(){if(!cur)return;renderRiepilogo();renderAgenda();renderCal();renderJobs();renderFatture();renderGalleria();renderClienti();renderDip();renderMezzi();renderAttrezzature();renderCarte();renderScadenze();renderPreventivi();renderReport();renderContatori();}
+  /* ============================================================
+     RENDER PIGRO — prima renderAll ridisegnava le 15 sezioni insieme
+     (~60 letture dal database) a ogni ingresso E a ogni salvataggio.
+     Ora ridisegna solo la sezione aperta; le altre vengono segnate
+     "da rifare" e si caricano alla prima apertura (vedi il click sui tab).
+     renderClienti e renderDip girano comunque: riempiono cliCache e
+     dipCache, che le tendine "Cliente" e "Chi ci va" del form lavoro
+     usano da qualsiasi sezione.
+     ============================================================ */
+  const RENDER_TAB={
+    riepilogo:renderRiepilogo, lavori:renderJobs, preventivi:renderPreventivi,
+    fatture:renderFatture, calendario:renderCal, agenda:renderAgenda,
+    mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
+    carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze,
+    report:renderReport, galleria:renderGalleria, mappa:renderMappa,
+    richieste:renderRichieste
+  };
+  const _tabSporchi=new Set();
+  function tabCorrente(){const b=document.querySelector("nav.tabs button.active");return (b&&b.dataset.tab)||"riepilogo";}
+  function renderAll(){
+    if(!cur)return;
+    Object.keys(RENDER_TAB).forEach(x=>_tabSporchi.add(x));
+    const t=tabCorrente();
+    _tabSporchi.delete(t);_tabSporchi.delete("clienti");_tabSporchi.delete("squadra");
+    renderClienti();renderDip();
+    if(t!=="clienti"&&t!=="squadra"){const fn=RENDER_TAB[t];if(fn)fn();}
+    renderContatori();
+  }
+  /* Dopo un salvataggio: ridisegna subito solo le sezioni che l'utente sta
+     guardando; le altre si segnano "da rifare" per la prossima apertura. */
+  function rinfresca(){
+    const t=tabCorrente();
+    for(const tb of arguments){
+      if(tb===t){_tabSporchi.delete(tb);const fn=RENDER_TAB[tb];if(fn)fn();}
+      else _tabSporchi.add(tb);
+    }
+    renderContatori();
+  }
 
   /* ============================================================
      CONTATORI DEL MENU (tappa 2)
@@ -2235,7 +2280,7 @@
     }
 
     closeSheet();
-    await renderFatture();renderRiepilogo();renderJobs();
+    rinfresca("fatture","riepilogo","lavori");
     toast(id?"Fattura aggiornata ✔":"Fattura creata ✔ — è una bozza, emettila quando è pronta");
     }catch(err){
       fattErrore((err&&(err.message||err.toString()))||"errore sconosciuto");
@@ -2264,7 +2309,7 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!okSt||!okSt.length){toast("Non salvata: nessuna riga modificata. Riprova.");return;}
     await fattSincronizzaLavori(id,v);
-    await renderFatture();renderRiepilogo();renderJobs();
+    rinfresca("fatture","riepilogo","lavori");
     toast(v==="emessa"?("Fattura n. "+f.numero+"/"+f.anno+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
   }
 
@@ -2278,7 +2323,7 @@
     const {data:okEl,error}=await sb.from("gest_fatture").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okEl||!okEl.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
-    await renderFatture();renderRiepilogo();renderJobs();toast("Fattura eliminata");
+    rinfresca("fatture","riepilogo","lavori");toast("Fattura eliminata");
   }
 
   /* ---------- le tre origini ----------
@@ -4233,7 +4278,7 @@
       if(error){toast("Errore: "+error.message);return;}
       const realId=data.id;
       /* il numero di fattura lo assegna la fattura quando la emetti */
-      closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
+      closeSheet();rinfresca("lavori","fatture","riepilogo");toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
     if(editing && editing.realId){
       const mod=Object.assign({
@@ -4729,7 +4774,7 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!okCli||!okCli.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     if(tolte.length)toast("Salvato, ma i campi fiscali richiedono un aggiornamento del database.");
-    closeSheet();renderClienti();renderFatture();toast(id?"Aggiornato":"Cliente aggiunto ✔");
+    closeSheet();renderClienti();rinfresca("fatture","riepilogo");toast(id?"Aggiornato":"Cliente aggiunto ✔");
   }
   function dipForm(d){
     const isNew=!d;d=d||{};
@@ -6095,7 +6140,7 @@
     }
     const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,user_id:sbUid,preventivo_id:pid})));
     if(e2){toast("Errore voci: "+e2.message);return;}
-    closeSheet();renderPreventivi();renderRiepilogo();toast(id?"Preventivo aggiornato ✔":"Preventivo creato ✔");
+    closeSheet();rinfresca("preventivi","riepilogo");toast(id?"Preventivo aggiornato ✔":"Preventivo creato ✔");
   }
   /* Ponte per js/ai-integrazione.js: salva un preventivo generato dall'AI.
      Riusa curMestiere() e la stessa formula del numero progressivo di savePrev. */
@@ -6115,7 +6160,7 @@
       if(error) return {ok:false, error:error.message};
       const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,preventivo_id:np.id})));
       if(e2) return {ok:false, error:e2.message};
-      renderPreventivi();renderRiepilogo();
+      rinfresca("preventivi","riepilogo");
       return {ok:true, id:np.id};
     }catch(e){ return {ok:false, error:(e&&e.message)||String(e)}; }
   };
@@ -6129,7 +6174,7 @@
       descrizione:p.titolo,dove:"",data_prevista:todayStr(),cliente_id:p.cliente_id,importo:tot}).select("id").single();
     if(error){toast("Errore: "+error.message);return;}
     const {data:okAcc,error:eAcc}=await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:lav.id}).eq("id",id).eq("user_id",sbUid).select("id");
-    renderPreventivi();renderJobs();renderRiepilogo();
+    rinfresca("preventivi","lavori","riepilogo");
     if(eAcc||!okAcc||!okAcc.length){toast("Lavoro creato, ma il preventivo non risulta accettato: aggiornagli lo stato a mano");return;}
     toast("Lavoro creato dal preventivo ✔");
   }
@@ -6423,9 +6468,9 @@
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     if(a==="prev-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();prevTotaleLive();}return;}
     if(a==="prev-filtro"){prevFilter=t.dataset.v;renderPreventivi();return;}
-    if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non salvato: "+(res.error?res.error.message:"nessuna riga modificata. Riprova."));return;}renderPreventivi();renderRiepilogo();toast("Preventivo aggiornato ✔");});return;}
+    if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non salvato: "+(res.error?res.error.message:"nessuna riga modificata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo aggiornato ✔");});return;}
     if(a==="prev-to-lavoro")return prevToLavoro(id);
-    if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderPreventivi();renderRiepilogo();toast("Preventivo eliminato");});return;}
+    if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevPdf(id);
     if(a==="report-csv")return reportCsv();
     if(a==="lav-vista"){filter.vista=t.dataset.v;renderJobs();return;}
@@ -6569,7 +6614,7 @@
       const {data:okSt2,error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okSt2||!okSt2.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-      renderJobs();renderContatori();toast("Stato: "+(statoLabel[v]||v));return;
+      rinfresca("lavori","riepilogo");toast("Stato: "+(statoLabel[v]||v));return;
     }
     /* Dal lavoro: prima questo pulsante scriveva a mano "fatturato" sul lavoro,
        e la fattura non esisteva da nessuna parte. Ora apre la fattura vera, con
@@ -6705,14 +6750,16 @@
     b.onclick=()=>{
       $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
       $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
-      /* Lavori si ridisegna all'apertura: altrimenti mostra quello che era stato reso
-         entrando nel reparto, con la forma (tabella o card) di quella larghezza. */
-      if(b.dataset.tab==="lavori")renderJobs();
-      if(b.dataset.tab==="agenda")renderAgenda();
-      if(b.dataset.tab==="mappa")renderMappa();
-      if(b.dataset.tab==="richieste")renderRichieste();
-      if(b.dataset.tab==="mezzi")renderMezzi();
-      if(b.dataset.tab==="attrezzature")renderAttrezzature();   /* la mappa si disegna solo quando la apri: non rallenta il resto */
+      /* Render pigro: la sezione si ridisegna all'apertura se e' segnata "da
+         rifare" (dopo un salvataggio o all'ingresso nel reparto). Alcune si
+         ridisegnano sempre: lavori/agenda cambiano forma con la larghezza
+         dello schermo, mappa e richieste si disegnano solo quando le apri. */
+      const tb=b.dataset.tab;
+      const SEMPRE=["lavori","agenda","mappa","richieste","mezzi","attrezzature"];
+      if(_tabSporchi.has(tb)||SEMPRE.includes(tb)){
+        _tabSporchi.delete(tb);
+        const fn=RENDER_TAB[tb];if(fn)fn();
+      }
       const sd=document.querySelector(".side");if(sd)sd.classList.remove("open"); /* chiude il menu hamburger su mobile */
       window.scrollTo({top:0,behavior:"smooth"});
     };
