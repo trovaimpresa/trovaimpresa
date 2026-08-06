@@ -75,8 +75,82 @@ Senza, una scrittura bloccata da RLS e' indistinguibile da una riuscita.
 - **Nessun pagamento**: l'impresa vede gratis i contatti (email/telefono) delle richieste indirizzate a lei. Rimossi pulsante "Sblocca a 5€", sezione "Richieste dalla tua zona" e i file `crea-checkout-lead.js`, `stripe-webhook-lead.js`, `sql/pay-per-lead.sql`, `sql/condivisione-lead.sql`.
 - Le richieste arrivano nella tabella `preventivi`; i pannelli leggono la vista `preventivi_safe` (esclude email/telefono). I contatti si ottengono dalla function `contatto-preventivo.js`, che ora li restituisce a chi ha la richiesta indirizzata (nessun gate di pagamento).
 - **ATTENZIONE**: se si aggiungono colonne nuove a `preventivi`, rieseguire il blocco `GRANT SELECT (colonne tranne email/telefono) ON public.preventivi TO anon, authenticated` e ricreare `preventivi_safe`, altrimenti il pannello va in 403 ("permission denied for table preventivi").
-- DB: le colonne `sbloccato`, `sbloccato_at`, `stripe_session_id`, `condivisibile` e la tabella `lead_sblocchi` restano ma sono **inutilizzate** (innocue). Si possono rimuovere in un secondo momento se si vuole pulire.
 - Env Stripe `STRIPE_WEBHOOK_SECRET_LEAD` non serve più (l'endpoint webhook lead su Stripe si può disattivare).
+
+### ⚠️ 6 agosto 2026 — il form dei preventivi era ROTTO da sempre
+La vecchia nota diceva che `sbloccato` e `condivisibile` erano "colonne inutilizzate ma innocue".
+Non era vero: erano state **rimosse dal database**, e due pezzi del sito le chiedevano ancora.
+
+**1. Nessun cliente poteva mandare una richiesta.** `profilo-impresa.html` scriveva la colonna
+`condivisibile`, che non esisteva più: PostgREST rispondeva **400** e la richiesta andava persa.
+In console: `Could not find the 'condivisibile' column of 'preventivi'`. Ecco perché la tabella
+`preventivi` era a **zero righe**: non era (solo) mancanza di traffico, era un bug.
+→ Risolto con `sql/preventivi-condivisibile.sql` (ricrea la colonna) **e** nel codice: se la
+colonna manca, l'insert viene ritentato senza, così la richiesta non si perde mai più.
+
+**2. L'impresa non vedeva i contatti del cliente.** `contatto-preventivo.js` faceva
+`select('id, impresa_id, sbloccato, email, telefono, nome')`: la colonna `sbloccato` non c'è
+più, la query falliva e il pannello mostrava "⚠️ Errore nel caricamento, riprova".
+→ Tolta dalla select. Aggiunto anche il log dell'errore, prima veniva ingoiato in silenzio.
+
+**3. `tipo_lavoro` e `categoria_lavoro` sono due colonne diverse.** Il pannello mostra "Lavoro"
+leggendo `tipo_lavoro`, che il form non riempiva mai (restava "—"). Ora il form scrive
+entrambe con lo stesso valore. Le richieste vecchie restano con il trattino.
+
+**Regola generale**: prima di dire che una colonna è "inutilizzata ma innocua", controllare
+chi la nomina con `grep -rn "nomecolonna" netlify/functions *.html`. Una colonna citata in una
+query e assente dal DB non dà un avviso: fa fallire tutta la scrittura.
+
+### Notifica email delle richieste (ricollegata — 6 agosto 2026)
+`netlify/functions/notifica-preventivo.js` (Resend) esisteva ed era completa, ma **nessuno la
+chiamava**: era stata staccata con la nota "la richiesta appare direttamente nel pannello".
+Molte imprese però nel pannello non entrano per giorni. Ora `profilo-impresa.html` la richiama
+subito dopo l'insert, in "best effort": se la mail non parte, il cliente vede comunque
+"Richiesta inviata" e la richiesta resta salvata. Doppia via: pannello **e** email.
+- L'altro form (quello che esce nelle pagine `cerca-*` quando non ci sono risultati) usa
+  `richiesta-cliente.js` e mandava già due mail: una ad `info@trovaimpresa.com` e una alle
+  imprese della zona. Non è stato toccato.
+- Serve `RESEND_API_KEY` nelle variabili di Netlify.
+
+### Form richiesta preventivo rifatto (6 agosto 2026)
+In `profilo-impresa.html`, sezione `#sec-preventivo`:
+- due passaggi numerati: **prima il lavoro, poi i contatti** (prima chiedeva nome/email/telefono
+  come prima cosa, ed è lì che la gente si ferma);
+- **telefono obbligatorio** con controllo di lunghezza, email con controllo del formato;
+- errori: il campo sbagliato prende la classe `.errore` (bordo rosso), la pagina ci scorre sopra
+  e il messaggio dice cosa fare;
+- foto, data, urgenza e budget nascosti dietro "Aggiungi altri dettagli" (`togglePrevExtra()`);
+- budget a fasce invece del campo libero;
+- città precompilata da `?citta=` o da `localStorage.ti_citta_scelta` (`precompilaCittaPreventivo()`);
+- tre righe in testa che dicono cosa succede (gratis, risponde l'impresa, dati non pubblicati);
+- campi più grandi: etichette 13,5px (erano 11), testo 16px (era 14), `.fr2` va a una colonna
+  sotto i 560px.
+
+## Piani e gestionale (deciso il 6 agosto 2026)
+Struttura confermata da Alessio, **non riproporne altre** senza che lo chieda lui:
+- **Free**: profilo pubblico visibile, con i blocchi che ha già. Le card riservate hanno
+  `data-premium="true"` e prendono il lucchetto 🔒 da `bloccaCardPremium()` nei 4 pannelli.
+- **Premium**: 5 €/mese o 49 €/anno, **gestionale incluso**. Nessun add-on separato da vendere.
+- **3 mesi di Premium regalati a ogni nuovo iscritto**: servono a far conoscere il Premium nel
+  periodo in cui le imprese non ricevono ancora clienti. In DB: `piano='premium'` +
+  `premium_pagato=false` + `premium_scadenza` valorizzata. `controlla-scadenze-premium.js`
+  avvisa 7 giorni prima; allo scadere si torna Free da soli.
+
+### Stato del gestionale
+- **Pronto**: imprese e artigiani. **Non pronto**: professionisti e negozi.
+- La modalità manutenzione è stata **tolta** il 6 agosto (`var MANUTENZIONE = false` in
+  `gestionale-app.html`). Per richiuderlo a tutti basta rimettere `true` in quella riga.
+- Da quella data l'accesso diretto a `/gestionale-app.html` controlla il piano: entra chi ha
+  `piano='premium'` non scaduto (funzione `haPremium(row)`), gli altri vedono la schermata che
+  spiega il Premium. Scorciatoia per Alessio sempre valida: `?chiave=apri`.
+- Se la lettura del piano fallisce (rete), **si entra**: meglio far passare qualcuno in più che
+  bloccare fuori chi paga. I dati restano comunque protetti da RLS.
+- Il vecchio paywall a 12 €/mese e 119 €/anno non si usa più: `crea-checkout-gestionale.js`
+  resta lì ma non è collegato a niente.
+- **AI: già spenta di suo.** Ogni utente nasce in `ai_accounts` con `plan='base'` e
+  `monthly_quota=0`, quindi le funzioni AI non partono per nessuno finché non gli si assegna
+  una quota. Il sistema crediti (quota mensile, crediti extra, log consumi, ricariche) è
+  costruito e pronto: quando si vorrà venderla, va solo collegato a Stripe.
 
 ## Registrazione (rifatta — luglio 2026)
 - Il profilo in `imprese` NON si crea più con insert manuale lato frontend: lo crea il **trigger `on_auth_user_created`** (function `crea_profilo_impresa`, security definer) leggendo `raw_user_meta_data`.
@@ -209,6 +283,23 @@ viveva solo nel DB — stesso slug, ora con pagina statica).
   pagine già a posto. Si aggiunge contenuto visibile, non si tocca la testa del file.
 - I 7 errori 404 non si sistemano (7 pagine su 848, impatto zero).
 
+### Dove siamo davvero (6 agosto 2026) — leggere prima di dare consigli
+- **Il lancio vero è il 20 luglio 2026**, non maggio. Il dominio era online da prima ma il sito
+  era in modifica. Da quella data gira una **campagna Meta da 8 €/giorno rivolta alle IMPRESE**
+  (non ai privati). Quindi i dati di Search Console, che vedono solo Google, raccontano una
+  parte sola della storia.
+- **49 imprese iscritte** in tre settimane (1 · 2 · 18 · 15 · 13 a settimana), cioè circa
+  **3 € per iscrizione**. Il canale funziona ed è a rubinetto: si apre e si chiude.
+- **1 solo cliente pagante**: 20 € per uno spazio pubblicitario su Roma.
+- **Zero richieste di preventivo** — ma vedi sopra: il form era rotto. Il numero non misurava
+  il traffico, misurava un bug.
+- Alessio fa il **muratore**, il sito lo porta avanti da solo nei ritagli. Evitare analisi
+  lunghe piene di numeri: servono cose da fare, spiegate a clic.
+- **La fase è "far crescere, non far pagare"**: riempire di imprese e di contenuti, la
+  monetizzazione viene dopo. Non riproporre cambi di prezzi o di modello.
+- Profilo admin di prova: `pintoalessio@icloud.com`, nome "luigi", ha **`is_test = true`** e
+  quindi non compare nelle ricerche. Metterlo a `false` per testare, poi rimetterlo a `true`.
+
 ### Stato SEO (3 mag – 31 lug 2026)
 79 clic totali, di cui **57 di brand** ("trovaimpresa"): SEO vera = 22 clic in 3 mesi.
 La homepage prende 67 clic su 79. Le guide fanno 488 impressioni ma CTR 0,8% (posizione
@@ -232,5 +323,10 @@ troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
 - Guide "quanto costa" ancora da arricchire: **bagno (priorità, è la ricerca più fatta)**,
   tetto, cappotto, imbiancare, fotovoltaico. Sono le più corte e le più vecchie: il modello
   da raggiungere è `quanto-costa-parete-cartongesso.html`.
-- Domanda strategica aperta: TrovaImpresa è un marketplace o un software per imprese edili?
-  Sono due aziende diverse e prima o poi cambia dove Alex mette le sue ore.
+- **Logo rotto su 40 pagine**: cercano `/trovaimpresa_logo_transparent.png`, che non esiste.
+  Il file giusto è `img/trovaimpresa-logo.svg`. Errore 404 in console, sostituzione meccanica.
+  Proposto il 6 agosto, Alessio non ha ancora deciso se farlo.
+- **Risposta alla domanda "marketplace o software"** (6 agosto 2026): **marketplace.** Le
+  entrate previste sono Premium + pubblicità, con il gestionale come extra più avanti. Il sito
+  è "una vetrina in più" per le imprese, gratis, e Alessio porta i privati con SEO e pubblicità.
+  La domanda è chiusa: non riaprirla a meno che non lo faccia lui.
