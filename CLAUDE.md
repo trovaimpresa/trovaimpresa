@@ -135,6 +135,13 @@ Sintomo: ci sono imprese in `imprese` con quella città, ma la pagina non ha la 
 
 Ad agosto 2026 era fermo da luglio: 46 imprese iscritte e **una sola** pagina città
 (Rieti) con contenuto. Rilanciato → **31 pagine città popolate** in un colpo.
+Rilanciato di nuovo il 6 agosto 2026 → **34 su 106** (72 ancora senza imprese).
+
+**Il numero da guardare non è quante città, ma quante imprese per città.** Al 6 agosto:
+Roma 6, Napoli 3, Torino 3, Sassari/Pavia/Venezia 2, **tutte le altre 1 sola**. Una pagina
+con una sola impresa vale poco per Google e ancora meno per il cliente, che chiede un
+preventivo e non può confrontare niente. La soglia utile è **3-4 imprese per città**:
+meglio concentrarsi sulle città già avviate che spargersi su quelle vuote.
 
 Blocco pronto da dare ad Alex:
 ```bash
@@ -160,8 +167,42 @@ molto approfondite che portano dentro il marketplace.
   Se non li sa, si cercano su prezziari/fonti di settore e si fanno confermare da lui.
 - Le guide sono **file HTML statici nella root**. La tabella Supabase `blog_articoli` serve
   solo a generare la card nel blog, con `url_esterno` che punta al file statico.
-  Per una guida nuova: creare l'HTML + INSERT in `blog_articoli` + voce in `sitemap.xml`
-  + card in `costi-ristrutturazione.html`.
+  Per una guida nuova: creare l'HTML + INSERT in `blog_articoli` (con `mestiere`, vedi sotto)
+  + voce in `sitemap.xml` + card in `costi-ristrutturazione.html`.
+- Come modello grafico conviene copiare **`quanto-costa-parete-cartongesso.html`**: è il file
+  più aggiornato e contiene tutto (style completo, navbar, calcolatore col suo JS, FAQ +
+  JSON-LD, sezione "Trova imprese nella tua città"). Il template in `docs/` è più vecchio.
+
+### Blog diviso per mestiere (agosto 2026)
+`blog.html` non è più una griglia unica ordinata per data: raggruppa gli articoli in
+**sezioni per mestiere**, con una barra di salto rapido in cima e, in ogni sezione, il link
+diretto alla ricerca di quel mestiere (es. "Trova un idraulico →" → `cerca-artigiani.html?mestiere=Idraulica`).
+Serviva a creare il ponte guida → marketplace, che prima non c'era.
+
+- Colonna **`mestiere`** su `blog_articoli` (`sql/blog-mestieri.sql`). Valori ammessi, che
+  devono coincidere con l'array `GRUPPI` dentro `blog.html`:
+  `ristrutturazione, bagno, elettrico, clima, tetto, infissi, pavimenti, pitture,
+  cartongesso, bonus, strumenti, imprese`.
+- **Rete di sicurezza**: se `mestiere` è vuoto, `blog.html` riconosce l'articolo dallo slug
+  tramite la mappa `MAPPA_SLUG`; gli slug sconosciuti finiscono in "Altre guide". La pagina
+  funziona anche se la colonna non esiste ancora (riprova la query senza).
+- Quando aggiungi una guida: valorizza `mestiere` nell'INSERT **e** aggiungi lo slug a
+  `MAPPA_SLUG` in `blog.html`. Se il mestiere è nuovo, aggiungi prima la voce in `GRUPPI`.
+
+### Guide pubblicate ad agosto 2026 (28 articoli in totale)
+Nuove il 5 agosto: `quanto-costa-rifare-la-cucina`, `quanto-costa-abbattere-un-muro`,
+`come-leggere-un-preventivo-edile` (con checklist interattiva al posto del calcolatore),
+`come-trovare-clienti-impresa-edile` (rivolta alle imprese, senza sezione città),
+`bonus-edilizi-2026` (panoramica di tutti i bonus; ha **sostituito** l'articolo omonimo che
+viveva solo nel DB — stesso slug, ora con pagina statica).
+
+- **Attenzione ai doppioni sui bonus**: esistono `bonus-edilizi-2026` (panoramica) e
+  `bonus-ristrutturazione-2026` (approfondimento). Non crearne un terzo: si cannibalizzano.
+- **Da far confermare ad Alex**: massimale ecobonus infissi (60.000 €, trovato su una sola
+  fonte) e percentuali del conto termico 3.0 (in pagina volutamente non scritte, si rimanda
+  al GSE). Prezzi cucina e muro: cercati su fonti di settore, in attesa del suo controllo.
+- **Sezioni del blog con un solo articolo** — elettrico, infissi, pavimenti, pitture,
+  cartongesso: sono mestieri molto cercati, è lì che conviene mettere le prossime guide.
 
 ### Regole di Alex sulle pagine esistenti
 - **NON toccare** title, meta description, canonical, JSON-LD, robots.txt, sitemap delle
@@ -173,164 +214,15 @@ molto approfondite che portano dentro il marketplace.
 La homepage prende 67 clic su 79. Le guide fanno 488 impressioni ma CTR 0,8% (posizione
 troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
 
-## Gestionale — come funziona (agosto 2026)
-
-### Documenti allegati: un solo meccanismo, due cassetti
-I file finiscono nel bucket **`gestionale-foto`** e la riga va in **`gest_foto`**.
-Cosa distingue i gruppi:
-
-- `cliente_id` valorizzato + `tipo='documento'` → documenti di quel **cliente**
-  (path `<uid>/clienti/<clienteId>/…`)
-- `tipo='doc_commercialista'`, senza cliente_id → documenti per il **commercialista**
-  (path `<uid>/commercialista/…`)
-
-Stesso codice per tutti e due: la variabile `docCommAttivo` decide il modo.
-Colonne aggiunte: `cliente_id`, `nome_file` (`sql/aggiungi-documenti-cliente.sql`).
-L'upload passa da `preparaFileUpload()` di `js/foto-upload.js` (comprime le immagini,
-lascia intatti i PDF, limite 15 MB).
-
-### Invio di un documento per email
-Function **`netlify/functions/invia-documento-cliente.js`**, con Resend.
-- Il file **non passa dal browser**: la function lo scarica dal bucket con la service key.
-- Verifica l'`access_token` dell'utente e controlla che la riga `gest_foto` sia sua,
-  altrimenti chiunque potrebbe farsi mandare i documenti di un altro cambiando un id.
-- Manda al destinatario + copia al mittente, `reply_to` = email dell'utente.
-- Limite allegato **10 MB** (la base64 gonfia di un terzo e molte caselle rifiutano oltre).
-
-### Reparto Commercialista
-Pulsante di fianco a "Dati azienda", nelle due barre (landing e reparto).
-I dati stanno in `gest_azienda`, colonne `comm_*` (`sql/aggiungi-commercialista.sql`):
-il commercialista è uno solo per impresa, non serviva una tabella nuova.
-
-**Deciso di NON fare l'invio delle fatture al commercialista.** Motivo: ormai
-tutti i commercialisti hanno la **delega al cassetto fiscale**, quindi le fatture
-elettroniche se le scaricano da soli dall'Agenzia delle Entrate. Mandargliele
-sarebbe roba che hanno già. Quello che invece NON gli arriva sono scontrini,
-ricevute di carta e spese di cassa: per quelli c'è la sezione documenti.
-Non riproporlo.
-
-### Tipi di cliente
-`gest_clienti.tipo` = `privato` | `azienda` | `condominio` (`sql/aggiungi-tipo-cliente.sql`).
-Tre pulsanti separati in cima alla sezione (`+ Privato`, `+ Azienda`, `+ Condominio`)
-e tre bottoni dentro al modulo per correggere il tipo. Cambiano **solo le etichette**,
-mai i campi: nessuno deve restare bloccato se il suo caso è strano.
-La sezione si chiama **Clienti** per tutti i mestieri (prima "Condomini / Clienti").
-La scheda si apre in **sola lettura** (`cliScheda`), con Modifica e Documenti dentro.
-
-### Aiuti a comparsa (tooltip)
-File **`js/aiuti.js`**, una riga sola in fondo a `gestionale-app.html`.
-- Le frasi stanno in cima al file: `AIUTI_TAB` (chiave = `data-tab`) e
-  `AIUTI_AZIONE` (chiave = `data-action`).
-- Per un pulsante qualsiasi basta scrivergli `data-aiuto="frase"` in HTML: vince su tutto.
-- **Solo col mouse**, di proposito: su telefono il passaggio sopra non esiste e su
-  pulsanti che fanno qualcosa un aiuto al tocco darebbe fastidio.
-- Fatti: le 16 voci del menu e i 4 pulsanti della barra. Da fare: le singole schermate.
-
-## TRAPPOLE DEL GESTIONALE (imparate sul campo, agosto 2026)
-
-### G1. Un modulo che si riempie da una lista parziale CANCELLA i dati
-`renderClienti()` caricava solo `id,nome,indirizzo,referente,telefono`. `cliCache`
-restava quindi senza email, tipo, città, partita IVA, PEC. Aprendo "Modifica" il
-modulo si riempiva da quella cache: i campi mancanti risultavano **vuoti**, e al
-salvataggio venivano riscritti vuoti nel database. Ogni modifica di un cliente
-**azzerava in silenzio** email, tipo e tutti i dati fiscali.
-
-Regola: **se un modulo si riempie da una lista caricata prima, quella lista deve
-avere tutti i campi.** Meglio ancora, come ora: alla Modifica si **rilegge la riga
-dal database**, senza fidarsi della cache.
-
-Sintomo: salvi, compare "Aggiornato" (nessun errore), ma riaprendo il campo è vuoto.
-
-### G2. Chrome riempie da solo le caselle di ricerca
-Le caselle `cli-search`, `dip-search`, `f-search` senza `autocomplete="off"` venivano
-riempite dal completamento automatico con parole scritte altrove. L'elenco risultava
-filtrato a insaputa dell'utente → sembrava "non salva niente" quando invece salvava.
-Su ogni casella di ricerca: `autocomplete="off" spellcheck="false"`.
-
-### G3. `gestionale-app.html` non ha `</body>` né `</html>`
-Finisce con i `<script src=…>`. Se serve agganciare uno script, si va **in fondo al file**,
-non "prima di `</body>`" — quel tag non c'è.
-
-### G4. Il ponte col computer di Alex a volte restituisce copie CONGELATE
-Piu' volte lo staging di `gestionale-app.html` e `CLAUDE.md` ha restituito la versione
-di ore prima, pur segnalando la dimensione giusta. **Prima di modificare un file grande,
-controllare che contenga le ultime modifiche** (es. cercare una stringa aggiunta di
-recente). Se e' vecchio: ricostruire riapplicando le modifiche note, non sovrascrivere
-alla cieca.
-
-## Blog e guide — stato al 5 agosto 2026
-
-**28 articoli in tutto.** `blog.html` e' diviso in **12 sezioni per mestiere**, con barra di
-salto rapido in cima e, in ogni sezione, il link alla ricerca di quel mestiere. Ogni articolo
-e' un file HTML statico nella root; `blog_articoli` su Supabase serve solo a generare la card
-(colonna `url_esterno` che punta al file).
-
-Guide pubblicate ad agosto 2026: `quanto-costa-rifare-la-cucina`, `quanto-costa-abbattere-un-muro`,
-`come-leggere-un-preventivo-edile`, `come-trovare-clienti-impresa-edile`, `bonus-edilizi-2026`,
-piu' le 4 di inizio mese (muratore al giorno, caldaia, cartongesso, vasca in doccia).
-
-### `js/parole.js` — parole tecniche spiegate
-Una riga sola per pagina: `<script src="/js/parole.js"></script>` prima di `</body>`.
-Lo script gira col TreeWalker, marca **solo la prima occorrenza** di ogni parola nella pagina
-e la rende cliccabile (funziona **al tocco e al passaggio del mouse**, perche' le guide si
-leggono dal telefono). Le frasi stanno in cima al file, nell'oggetto `PAROLE`.
-Salta i tag in `VIETATI` (A, SCRIPT, H1, BUTTON...) per non rompere link e titoli.
-
-**Quando si crea una guida nuova, aggiungere sempre quella riga**, altrimenti in quella pagina
-le parole tecniche restano mute. (Successo il 5 agosto: 5 guide nuove erano senza.)
-
-### Cose ancora aperte sul blog
-- Prezzi da confermare con l'occhio da cantiere di Alex: cucina 500-1.250 EUR/mq,
-  tramezzo demolito 40-50 EUR/mq, muro portante con cerchiatura 2.000-7.000 EUR.
-- Sezioni del blog con **un solo articolo**: elettrico, infissi, pavimenti, pitture,
-  cartongesso. Sono mestieri molto cercati: e' li' che conviene mettere le prossime guide.
-- Le frasi di `js/parole.js` vanno riviste da Alex (soprattutto *trasmittanza* e *pendenza*,
-  dove ci sono dei numeri).
-
-## Come si passa il lavoro a una sessione nuova
-Le sessioni non si vedono fra loro: la chat non passa, **i file si'** (stessa cartella + git).
-Il ponte fra una sessione e l'altra e' **questo file, `CLAUDE.md`**: ogni sessione nuova lo
-legge da sola all'avvio. Quindi, prima di chiudere una sessione lunga, la frase da dire e':
-**"aggiorna CLAUDE.md con quello che abbiamo fatto oggi"**.
-Poi il solito `git add CLAUDE.md / commit / push`, cosi' resta anche nel repository.
-
-## Decisioni prese il 5 agosto 2026
-
-### Aiuti a comparsa sul sito: dove si' e dove no
-Discusso e deciso. **Non** sulle pagine rivolte ai clienti (home, `cerca-*`, pagine citta'):
-li' i pulsanti si spiegano da soli e un aiuto sopra fa sembrare il sito complicato.
-**Non** sui 4 pannelli: l'impresa ci entra tutti i giorni e dopo due giorni diventano rumore.
-**Si'**, se e quando si fara', solo dove un'impresa deve compilare qualcosa:
-`modifica-profilo.html` e i 4 form di registrazione. Motivo concreto, non teorico:
-un'utente vera (Chiara) si e' bloccata esattamente li'.
-Detto onestamente: **non e' il lavoro piu' importante in coda** — vale meno della guida
-sul bagno e del piano reclutamento. Farlo solo come lavoretto veloce, non come progetto.
-
-### Ordine di priorita' concordato
-1. Guida **bagno** (e' la ricerca piu' fatta di tutte, ed e' ancora corta).
-2. Piano reclutamento imprese (sblocca le 75 citta' vuote).
-3. Tutto il resto.
-
-### Posta e utenti veri
-Primo vero ritorno dagli iscritti dopo l'email di benvenuto: **Chiara Colucci, Andrea Sarti,
-Adnan Hassan**. Alex **non fa telefonate** (sua scelta, per la dislessia): si risponde sempre
-per email. A Chiara e' gia' stato risposto; **ad Andrea Sarti e Adnan Hassan no, aspettano**.
-
-Caso Chiara: la riga in `imprese` c'e' (riga 84), l'email e' confermata, il login funziona.
-Due ipotesi sono state verificate e **smentite**: il trigger accetta `professionista`, e le
-9 colonne del professionista esistono tutte. Il guaio era al salvataggio, e li' c'era un punto
-cieco: `modifica-profilo.html` non si accorgeva se l'UPDATE non scriveva niente.
-Ora controlla `.select('id')` e distingue "sessione scaduta" da "nessuna riga modificata",
-quindi al prossimo tentativo si vede l'errore vero invece del silenzio.
-
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
 - **Deciso di NON mettere** spazi pubblicitari sulle pagine `cerca-*` e `risultati.html` (scelta di Alex, luglio 2026). Non riproporlo.
 - Eseguire `sql/trigger-candidato.sql` su Supabase e aggiungere il filtro sul `tipo` a `crea_profilo_impresa` (vedi sopra).
 - Se in futuro si vuole salvare i campi extra alla registrazione impresa, ampliare il trigger `crea_profilo_impresa` per leggerli da `raw_user_meta_data`.
-- **75 città sono ancora senza imprese** (agosto 2026): è la lista di lavoro per il reclutamento.
-  Obiettivo concreto, non "trovare imprese ovunque".
+- **72 città sono ancora senza imprese** (6 agosto 2026): è la lista di lavoro per il reclutamento.
+  Obiettivo concreto, non "trovare imprese ovunque". E vedi sopra: prima portare a 3-4 imprese
+  le città già avviate (Roma, Napoli, Torino), poi allargare.
 - **Piano reclutamento imprese: da finire.** Analisi fatta, decisioni aperte: (a) se regalare
   gli strumenti del gestionale o limitarsi a cambiare il messaggio (oggi l'offerta vende
   "visibilità", che a traffico zero non è credibile — gli strumenti sì); (b) quante ore a
@@ -338,18 +230,7 @@ quindi al prossimo tentativo si vede l'errore vero invece del silenzio.
   ancora fatti: email per la lista `reclutamento-lazio.csv`, volantino per le rivendite,
   traccia telefonata, riscrittura di `perche-registrarsi.html`.
 - Guide "quanto costa" ancora da arricchire: **bagno (priorità, è la ricerca più fatta)**,
-  tetto, cappotto, imbiancare, fotovoltaico.
+  tetto, cappotto, imbiancare, fotovoltaico. Sono le più corte e le più vecchie: il modello
+  da raggiungere è `quanto-costa-parete-cartongesso.html`.
 - Domanda strategica aperta: TrovaImpresa è un marketplace o un software per imprese edili?
   Sono due aziende diverse e prima o poi cambia dove Alex mette le sue ore.
-- **Aiuti a comparsa nel gestionale**: correggere le frasi del menu dove sono imprecise
-  (scritte da Claude leggendo il codice, vanno riviste da Alex — le piu' incerte sono
-  *Carte*, *Scadenzario*, *Riepilogo*), poi estenderli una schermata alla volta —
-  Lavori, Preventivi, Fatture.
-  La versione per le guide del sito **e' fatta**: `js/parole.js` (vedi sezione Blog).
-- **Rispondere ad Andrea Sarti e Adnan Hassan** (hanno scritto e sono ancora senza risposta).
-- Nel repository è finito per sbaglio **`_to_delete/bonus-casa-2026.html`**: pagina messa
-  da parte per la cancellazione, ora pubblicata (non collegata, non in sitemap). Da togliere.
-- **Prezzo del Premium**: oggi 5 €/mese. Il capo di Alex paga **700 €/anno** un gestionale
-  concorrente — comprato senza provarlo, scegliendo il più caro "per andare sul sicuro" —
-  e non riesce a usarlo bene. Due indicazioni: il mercato quei soldi ce li ha, e un prezzo
-  troppo basso non comunica convenienza ma poca serietà. Da valutare con calma.
