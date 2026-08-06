@@ -274,16 +274,32 @@ nav img{height:36px}
 .prev-card{background:white;border:1px solid rgba(0,0,0,0.08);border-top:4px solid #0066ff;
   border-radius:12px;padding:32px;box-shadow:0 2px 16px rgba(0,0,0,0.07)}
 .prev-sub{font-size:14px;color:#888;margin-bottom:24px}
+/* --- Form richiesta preventivo, rifatto agosto 2026 --- */
+.prev-rassicura{background:#f0f7f3;border:1px solid #cfe3d6;border-radius:10px;padding:16px 18px;margin-bottom:26px}
+.prev-rassicura-riga{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.6;color:#2c3e50;margin-bottom:8px}
+.prev-rassicura-riga:last-child{margin-bottom:0}
+.prev-rassicura-riga>span:first-child{color:#1e8e3e;font-weight:800;flex-shrink:0}
+.prev-step{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:800;color:#0a2a4d;margin:30px 0 18px;padding-bottom:12px;border-bottom:2px solid #eef2f7}
+.prev-step:first-of-type{margin-top:6px}
+.prev-step-n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#0066ff;color:#fff;font-size:16px;flex-shrink:0}
+.prev-aiuto{font-size:13.5px;line-height:1.6;color:#7a8896;margin:8px 0 0}
+.prev-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f7f9fb;border:1.5px dashed #c9d4e0;border-radius:10px;padding:15px 18px;font-family:inherit;font-size:15px;font-weight:700;color:#0047b3;cursor:pointer;text-align:left;margin-bottom:16px}
+.prev-toggle:hover{background:#eef4fb;border-color:#0066ff}
+.prev-toggle-nota{font-weight:400;color:#7a8896;font-size:13.5px}
+.prev-toggle-freccia{font-size:22px;line-height:1;color:#0066ff;flex-shrink:0}
 .fg{margin-bottom:14px}
-.fl{font-size:11px;font-weight:700;color:#555;margin-bottom:4px;display:block;
-  text-transform:uppercase;letter-spacing:0.5px}
-.fi2,.ft,.fs{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:8px;
-  font-family:inherit;font-size:14px;color:#333;outline:none;transition:border 0.2s}
-.fi2:focus,.ft:focus,.fs:focus{border-color:#0066ff}
-.ft{resize:vertical;min-height:90px}
-.fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fl{font-size:13.5px;font-weight:700;color:#3d4a57;margin-bottom:7px;display:block;
+  letter-spacing:0.2px}
+.fi2,.ft,.fs{width:100%;padding:14px 15px;border:1.5px solid #ddd;border-radius:8px;
+  font-family:inherit;font-size:16px;color:#333;outline:none;transition:border 0.2s}
+.fi2:focus,.ft:focus,.fs:focus{border-color:#0066ff;box-shadow:0 0 0 3px rgba(0,102,255,.12)}
+.fi2.errore,.ft.errore,.fs.errore{border-color:#c0392b;background:#fff6f5}
+.ft{resize:vertical;min-height:110px;line-height:1.6}
+.fg{margin-bottom:18px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.fr2{grid-template-columns:1fr}}
 .btn-sub{width:100%;background:#0066ff;color:white;border:none;border-radius:8px;
-  padding:14px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;
+  padding:17px;font-family:inherit;font-weight:700;font-size:17px;cursor:pointer;
   margin-top:8px;transition:background 0.3s}
 .btn-sub:hover{background:#0052cc}
 
@@ -556,23 +572,69 @@ nav img{height:36px}
     <a class="prev-back" onclick="hidePreventivo()">← Torna al profilo</a>
   </div>
   <div class="prev-card">
-    <p class="prev-sub">Gratuito, senza impegno — risposta entro 24 ore.</p>
-    <div class="fg"><label class="fl">Nome</label><input type="text" class="fi2" id="prev-nome" placeholder="Nome"></div>
-    <div class="fr2"><div class="fg"><label class="fl">Email</label><input type="email" class="fi2" id="prev-email" placeholder="email@esempio.it"></div><div class="fg"><label class="fl">WhatsApp</label><input type="tel" class="fi2" id="prev-telefono" placeholder="+39 000 000 0000"></div></div>
-    <div class="fg"><label class="fl">Città</label><input type="text" class="fi2" id="prev-citta" placeholder="Es. Roma" required></div>
-    <div class="fg"><label class="fl">Tipo di lavoro</label><select class="fs" id="prev-categoria" required><option value="">Seleziona...</option><option>Edilizia / Muratura</option><option>Ristrutturazione completa</option><option>Cartongesso</option><option>Pittura e tinteggiatura</option><option>Pavimenti e piastrelle</option><option>Falegnameria</option><option>Serramenti / Infissi</option><option>Idraulica</option><option>Impianti elettrici</option><option>Climatizzazione / Caldaie</option><option>Fotovoltaico / Pannelli solari</option><option>Antennista / Allarmi</option><option>Coperture / Tetti</option><option>Cappotti termici / Isolamento</option><option>Fabbro / Cancelli / Recinzioni</option><option>Marmi e pietre</option><option>Vetraio</option><option>Tende da sole / Zanzariere</option><option>Giardinaggio / Esterni</option><option>Spurghi / Spazzacamino</option><option>Pulizie / Disinfestazioni</option><option>Sgomberi / Traslochi</option><option>Altro</option></select></div>
-    <div class="fg"><label class="fl">Descrizione</label><textarea class="ft" id="prev-descrizione" placeholder="Descrivi il lavoro..."></textarea></div>
-    <div class="fg"><label class="fl">Allega una foto del lavoro</label><input type="file" class="fi2" id="prev-foto-file" accept="image/*"></div>
-    <div class="fr2"><div class="fg"><label class="fl">Data preferita per il sopralluogo</label><input type="date" class="fi2" id="prev-data"></div><div class="fg"><label class="fl">Urgenza</label><select class="fs" id="prev-urgenza"><option>Normale</option><option>Entro la settimana</option><option>Urgente</option></select></div></div>
-    <div class="fg"><label class="fl">Budget indicativo</label><input type="text" class="fi2" id="prev-budget" placeholder="Es. 500-1000€"></div>
-    <div class="fg" style="background:#f0f7f3;border:1px solid #cfd9e5;border-radius:8px;padding:12px 14px;margin-bottom:14px">
-      <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#333;cursor:pointer">
-        <input type="checkbox" id="prev-condivisibile" checked style="margin-top:2px;width:16px;height:16px;flex-shrink:0">
-        <span>Se l'impresa non risponde entro <strong>48 ore</strong>, autorizzo TrovaImpresa a inviare la mia richiesta anche ad altre imprese della zona (massimo 5), così ricevo comunque dei preventivi.</span>
+    <div class="prev-rassicura">
+      <div class="prev-rassicura-riga"><span>✓</span> <span>&Egrave; <strong>gratis</strong> e non ti impegna a niente</span></div>
+      <div class="prev-rassicura-riga"><span>✓</span> <span>Ti risponde <strong>direttamente l&rsquo;impresa</strong>, di solito entro 24-48 ore</span></div>
+      <div class="prev-rassicura-riga"><span>✓</span> <span>I tuoi dati <strong>non vengono pubblicati</strong>: li vede solo l&rsquo;impresa che contatti</span></div>
+    </div>
+
+    <!-- ===== 1. IL LAVORO ===== -->
+    <div class="prev-step"><span class="prev-step-n">1</span> Che lavoro devi fare?</div>
+
+    <div class="fg"><label class="fl">Tipo di lavoro *</label><select class="fs" id="prev-categoria" required><option value="">Seleziona...</option><option>Edilizia / Muratura</option><option>Ristrutturazione completa</option><option>Cartongesso</option><option>Pittura e tinteggiatura</option><option>Pavimenti e piastrelle</option><option>Falegnameria</option><option>Serramenti / Infissi</option><option>Idraulica</option><option>Impianti elettrici</option><option>Climatizzazione / Caldaie</option><option>Fotovoltaico / Pannelli solari</option><option>Antennista / Allarmi</option><option>Coperture / Tetti</option><option>Cappotti termici / Isolamento</option><option>Fabbro / Cancelli / Recinzioni</option><option>Marmi e pietre</option><option>Vetraio</option><option>Tende da sole / Zanzariere</option><option>Giardinaggio / Esterni</option><option>Spurghi / Spazzacamino</option><option>Pulizie / Disinfestazioni</option><option>Sgomberi / Traslochi</option><option>Altro</option></select></div>
+
+    <div class="fg">
+      <label class="fl">Racconta cosa ti serve</label>
+      <textarea class="ft" id="prev-descrizione" placeholder="Esempio: bagno di 5 mq da rifare completamente, vorrei togliere la vasca e mettere la doccia. Palazzo con ascensore, secondo piano."></textarea>
+      <p class="prev-aiuto">Pi&ugrave; sei preciso, pi&ugrave; il preventivo sar&agrave; vicino al prezzo vero. Scrivi le misure se le sai, e in che condizioni &egrave; adesso.</p>
+    </div>
+
+    <div class="fg"><label class="fl">Citt&agrave; o paese dove sono i lavori *</label><input type="text" class="fi2" id="prev-citta" placeholder="Es. Roma" required></div>
+
+    <!-- ===== 2. DETTAGLI FACOLTATIVI ===== -->
+    <button type="button" class="prev-toggle" id="prev-toggle-btn" onclick="togglePrevExtra()">
+      <span>Aggiungi altri dettagli <span class="prev-toggle-nota">(facoltativo: foto, quando, budget)</span></span>
+      <span class="prev-toggle-freccia" id="prev-toggle-freccia">+</span>
+    </button>
+
+    <div id="prev-extra" style="display:none">
+      <div class="fg"><label class="fl">Una foto aiuta molto</label><input type="file" class="fi2" id="prev-foto-file" accept="image/*"></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Quando vorresti il sopralluogo</label><input type="date" class="fi2" id="prev-data"></div>
+        <div class="fg"><label class="fl">Quanto va di fretta</label><select class="fs" id="prev-urgenza"><option>Normale</option><option>Entro la settimana</option><option>Urgente</option></select></div>
+      </div>
+      <div class="fg">
+        <label class="fl">Quanto pensavi di spendere</label>
+        <select class="fs" id="prev-budget">
+          <option value="">Non lo so ancora</option>
+          <option>Fino a 1.000 &euro;</option>
+          <option>1.000 &ndash; 5.000 &euro;</option>
+          <option>5.000 &ndash; 15.000 &euro;</option>
+          <option>15.000 &ndash; 30.000 &euro;</option>
+          <option>Oltre 30.000 &euro;</option>
+        </select>
+        <p class="prev-aiuto">Serve solo a capirci: nessuno ti terr&agrave; legato a questa cifra.</p>
+      </div>
+    </div>
+
+    <!-- ===== 3. I CONTATTI ===== -->
+    <div class="prev-step"><span class="prev-step-n">2</span> Come ti richiamano?</div>
+
+    <div class="fg"><label class="fl">Il tuo nome *</label><input type="text" class="fi2" id="prev-nome" placeholder="Nome e cognome"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Telefono *</label><input type="tel" class="fi2" id="prev-telefono" placeholder="333 123 4567"></div>
+      <div class="fg"><label class="fl">Email *</label><input type="email" class="fi2" id="prev-email" placeholder="nome@esempio.it"></div>
+    </div>
+
+    <div class="fg" style="background:#f0f7f3;border:1px solid #cfd9e5;border-radius:8px;padding:14px 16px;margin-bottom:16px">
+      <label style="display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.55;color:#333;cursor:pointer">
+        <input type="checkbox" id="prev-condivisibile" checked style="margin-top:3px;width:18px;height:18px;flex-shrink:0">
+        <span>Se l'impresa non risponde entro <strong>48 ore</strong>, autorizzo TrovaImpresa a inviare la mia richiesta anche ad altre imprese della zona (massimo 5), cos&igrave; ricevo comunque dei preventivi.</span>
       </label>
     </div>
-    <div id="prev-msg" style="display:none;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px"></div>
+    <div id="prev-msg" style="display:none;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.5;margin-bottom:12px"></div>
     <button class="btn-sub" onclick="submitPreventivo()">📋 Invia richiesta gratuita</button>
+    <p class="prev-aiuto" style="text-align:center;margin-top:12px">Nessun costo, nessun abbonamento, nessuna carta di credito.</p>
   </div>
 </div>
 
@@ -869,7 +931,7 @@ async function inviaRecensione(){
 }
 
 function mostraMsg(t,tipo){const m=document.getElementById('rec-msg');m.textContent=t;m.className='rec-msg '+tipo;m.style.display='block'}
-function showPreventivo(){document.getElementById('profilo-view').style.display='none';document.getElementById('sec-preventivo').classList.add('open');window.scrollTo(0,0)}
+function showPreventivo(){document.getElementById('profilo-view').style.display='none';document.getElementById('sec-preventivo').classList.add('open');window.scrollTo(0,0);try{precompilaCittaPreventivo();}catch(_){}}
 function hidePreventivo(){document.getElementById('sec-preventivo').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0)}
 
 // === AFFIDA UN INCARICO (solo professionisti) ===
@@ -908,6 +970,26 @@ async function submitIncarico(){
   }catch(e){setMsg('❌ '+e.message,false);btn.disabled=false;btn.textContent='📋 Invia richiesta di incarico';}
 }
 
+/* Apre e chiude il blocco dei dettagli facoltativi */
+function togglePrevExtra(){
+  var box=document.getElementById('prev-extra'), fre=document.getElementById('prev-toggle-freccia');
+  if(!box) return;
+  var aperto = box.style.display !== 'none';
+  box.style.display = aperto ? 'none' : 'block';
+  if(fre) fre.textContent = aperto ? '+' : '−';
+}
+
+/* Precompila la citta' con quella gia' scelta nel sito, cosi' non la riscrive */
+function precompilaCittaPreventivo(){
+  var campo=document.getElementById('prev-citta');
+  if(!campo || campo.value.trim()) return;
+  var c='';
+  try{
+    c = new URLSearchParams(location.search).get('citta') || localStorage.getItem('ti_citta_scelta') || '';
+  }catch(_){}
+  if(c) campo.value=c;
+}
+
 async function submitPreventivo(){
   const nome=document.getElementById('prev-nome').value.trim();const email=document.getElementById('prev-email').value.trim();
   const citta=document.getElementById('prev-citta').value.trim();
@@ -917,7 +999,24 @@ async function submitPreventivo(){
   const budget=document.getElementById('prev-budget').value.trim();
   const fotoFile=document.getElementById('prev-foto-file').files[0];
   const me=document.getElementById('prev-msg');const btn=document.querySelector('.btn-sub');
-  if(!nome||!email||!citta||!categoria){me.textContent='Compila tutti i campi obbligatori (nome, email, città, categoria).';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';return}
+  const telefonoV=document.getElementById('prev-telefono').value.trim();
+
+  /* --- Controllo dei campi, con il campo sbagliato evidenziato in rosso --- */
+  document.querySelectorAll('#sec-preventivo .errore').forEach(function(el){el.classList.remove('errore');});
+  function stop(msg, id){
+    me.textContent=msg;
+    me.style.cssText='display:block;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.5;margin-bottom:12px;background:#fff0f0;color:#c0392b;';
+    var el=document.getElementById(id);
+    if(el){ el.classList.add('errore'); try{ el.scrollIntoView({behavior:'smooth',block:'center'}); el.focus({preventScroll:true}); }catch(_){} }
+  }
+  if(!categoria)  return stop('Scegli che tipo di lavoro ti serve.','prev-categoria');
+  if(!citta)      return stop('Scrivi in che città o paese sono i lavori.','prev-citta');
+  if(!nome)       return stop('Scrivi il tuo nome, così sanno chi richiamare.','prev-nome');
+  if(!telefonoV)  return stop('Serve un numero di telefono: le imprese richiamano quasi sempre.','prev-telefono');
+  if(telefonoV.replace(/[^0-9]/g,'').length<8) return stop('Il numero di telefono sembra incompleto. Controllalo.','prev-telefono');
+  if(!email)      return stop('Scrivi la tua email: ci arriva la copia della richiesta.','prev-email');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return stop('L\'email non sembra scritta bene. Controllala.','prev-email');
+
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
     const p=new URLSearchParams(window.location.search);const iid=parseInt(p.get('id'));
@@ -933,7 +1032,16 @@ async function submitPreventivo(){
     }
     const telefono=document.getElementById('prev-telefono').value.trim();
     const descrizione=document.getElementById('prev-descrizione').value.trim();
-    const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,email,telefono,citta,categoria_lavoro:categoria,descrizione,data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,condivisibile:document.getElementById('prev-condivisibile').checked,created_at:new Date().toISOString()});
+    const riga={impresa_id:iid,nome,email,telefono,citta,categoria_lavoro:categoria,descrizione,data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,created_at:new Date().toISOString()};
+    /* La colonna "condivisibile" potrebbe non esistere nel database: se manca,
+       PostgREST risponde 400 e la richiesta andava persa. Ora si riprova senza,
+       cosi' la richiesta del cliente arriva comunque. */
+    const condivisibile=document.getElementById('prev-condivisibile').checked;
+    let {error}=await sc.from('preventivi').insert(Object.assign({condivisibile},riga));
+    if(error && /condivisibile/i.test(error.message||'')){
+      const rip=await sc.from('preventivi').insert(riga);
+      error=rip.error;
+    }
     if(error)throw error;
     /* AGOSTO 2026 — Doppio avviso: la richiesta resta nel pannello E arriva una mail all'impresa.
        Molte imprese non entrano nel pannello per giorni: senza mail la richiesta non la vedono mai.
