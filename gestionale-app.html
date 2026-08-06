@@ -1126,11 +1126,11 @@
     }));
 
     C.push(rieCard({
-      tab:"clienti", titolo:"Condomini", n:CLI.length,
-      lab:"condomini e clienti in anagrafica", tono:"neutro",
-      vuoto:"Nessun condominio registrato",
+      tab:"clienti", titolo:"Clienti", n:CLI.length,
+      lab:"clienti in anagrafica", tono:"neutro",
+      vuoto:"Nessun cliente registrato",
       righe: cliOrd.slice(0,2).map(k=>({
-        t:cliMap[k]||"Condominio",
+        t:cliMap[k]||"Cliente",
         v:perCli[k]+(perCli[k]===1?" lavoro aperto":" lavori aperti")}))
     }));
 
@@ -2076,7 +2076,7 @@
 
       + '<div class="sh-b"><div class="sh-tit">A chi e quando</div>'
       +   '<div class="field"><label>Cliente</label><select id="fa-cli"><option value="">— nessuno —</option>'+cliOpts+'</select>'
-      +     (fattCliCache.length?'':'<div class="campo-aiuto" style="color:var(--attesa)">In questo reparto non hai ancora nessun cliente in anagrafica, quindi la tendina è vuota. Puoi scrivere le voci lo stesso e salvare la bozza: il cliente lo aggiungi in <b>Condomini</b> e poi lo scegli qui. Per <b>emettere</b> la fattura il cliente serve.</div>')
+      +     (fattCliCache.length?'':'<div class="campo-aiuto" style="color:var(--attesa)">In questo reparto non hai ancora nessun cliente in anagrafica, quindi la tendina è vuota. Puoi scrivere le voci lo stesso e salvare la bozza: il cliente lo aggiungi in <b>Clienti</b> e poi lo scegli qui. Per <b>emettere</b> la fattura il cliente serve.</div>')
       +   '</div>'
       +   '<div class="row2">'
       +     '<div class="field"><label>Data</label><input type="date" id="fa-data" value="'+(f.data||todayStr())+'"></div>'
@@ -2651,18 +2651,18 @@
       const piva=(f.cli_piva||cli.piva||"").trim();
       const cf  =(f.cli_cod_fiscale||cli.cod_fiscale||"").trim();
       const pP=pulita(piva), pC=pulita(cf);
-      if(!pP&&!pC)                   m.push("Il cliente non ha né partita IVA né codice fiscale — apri la sua scheda in Condomini.");
+      if(!pP&&!pC)                   m.push("Il cliente non ha né partita IVA né codice fiscale — apri la sua scheda in Clienti.");
       if(pP&&!/^\d{11}$/.test(pP))
-        m.push("La partita IVA del cliente è di "+pP.length+" cifre invece di 11 — Condomini.");
+        m.push("La partita IVA del cliente è di "+pP.length+" cifre invece di 11 — Clienti.");
       else if(pP&&!pivaOk(pP))
-        m.push("La partita IVA del cliente ha 11 cifre ma non è valida: la cifra di controllo non torna. Ricontrollala — Condomini.");
+        m.push("La partita IVA del cliente ha 11 cifre ma non è valida: la cifra di controllo non torna. Ricontrollala — Clienti.");
       if(pC&&!/^(\d{11}|[A-Z0-9]{16})$/.test(pC))
-        m.push("Il codice fiscale del cliente non ha una forma valida: 11 cifre per un condominio o un'azienda, 16 caratteri per un privato — Condomini.");
-      if(!(f.cli_indirizzo||cli.indirizzo||"").trim()) m.push("Manca la via del cliente — Condomini.");
-      if(!/^\d{5}$/.test((f.cli_cap||cli.cap||"").trim())) m.push("Il CAP del cliente manca o non è di 5 cifre — Condomini.");
-      if(!(f.cli_citta||cli.citta||"").trim())          m.push("Manca la città del cliente — Condomini.");
+        m.push("Il codice fiscale del cliente non ha una forma valida: 11 cifre per un condominio o un'azienda, 16 caratteri per un privato — Clienti.");
+      if(!(f.cli_indirizzo||cli.indirizzo||"").trim()) m.push("Manca la via del cliente — Clienti.");
+      if(!/^\d{5}$/.test((f.cli_cap||cli.cap||"").trim())) m.push("Il CAP del cliente manca o non è di 5 cifre — Clienti.");
+      if(!(f.cli_citta||cli.citta||"").trim())          m.push("Manca la città del cliente — Clienti.");
       const prv=(f.cli_prov||cli.prov||"").trim();
-      if(prv&&!/^[A-Za-z]{2}$/.test(prv)) m.push("La provincia del cliente deve essere di 2 lettere, es. RI — Condomini.");
+      if(prv&&!/^[A-Za-z]{2}$/.test(prv)) m.push("La provincia del cliente deve essere di 2 lettere, es. RI — Clienti.");
       const sdi=(f.cli_sdi||cli.sdi_codice||"").trim();
       const pec=(f.cli_pec||cli.sdi_pec||"").trim();
       if(!sdi&&!pec)
@@ -2967,7 +2967,7 @@
   }
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
-    if(!sb||!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Nessun condominio","Accedi per gestire i clienti.");return;}
+    if(!sb||!sbUid){box.style.display="block";box.innerHTML=tabVuoto("Nessun cliente","Accedi per gestire i clienti.");return;}
     const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
     cliCache=data||[];
     let L=cliCache;
@@ -2987,7 +2987,7 @@
         celle:[`<span class="c-nome">${esc(c.nome||"—")}</span>`,esc(c.indirizzo||"—"),esc(c.referente||"—"),esc(c.telefono||"—")],
         menu:cliVoci(c)
       })),
-      totale:{testo:L.length+" "+(L.length===1?"condominio":"condomini"),valore:""},
+      totale:{testo:L.length+" "+(L.length===1?"cliente":"clienti"),valore:""},
       cards:()=>L.map(c=>cliCard(c)).join("")
     });
   }
@@ -4098,11 +4098,11 @@
     openSheetGrande(isNew?"Nuovo lavoro":"Modifica lavoro",
       `<div class="sh-cols sh-cols--3"><div class="sh-col">
       <div class="sh-b sh-b-a">
-      <div class="field"><label>Condominio / Cantiere</label>
+      <div class="field"><label>Cliente / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
-        <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo condominio</button></div>
+        <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo cliente</button></div>
       <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
-      <div class="field"><label>Dove (vuoto = indirizzo del condominio)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
+      <div class="field"><label>Dove (vuoto = indirizzo del cliente)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
       ${bloccoPratica(job)}
       <div class="row2">
         <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
@@ -4255,7 +4255,7 @@
       }
       closeSheet();renderAll();toast("Lavoro aggiornato ✔");return;
     }
-    const cli=$("#j-cli").value;if(!cli){toast("Scegli un condominio");return;}
+    const cli=$("#j-cli").value;if(!cli){toast("Scegli un cliente");return;}
     const id=editing.id, exists=db().lavori.some(l=>l.id===id), prev=db().lavori.find(l=>l.id===id);
     const stato=segVal("j-stato");
     /* lo stato della fattura non si tocca da qui: lo decide la fattura */
@@ -5466,7 +5466,7 @@
       /* 6) la lista sotto la carta */
       if(!righe.length){
         box.innerHTML=tabVuoto("Nessun cantiere da mostrare",
-          "Scrivi il campo «Dove» nei lavori, oppure l'indirizzo nei condomini.",
+          "Scrivi il campo «Dove» nei lavori, oppure l'indirizzo nelle schede clienti.",
           _SVGV+'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/></svg>');
         return;
       }
@@ -6601,7 +6601,7 @@
       return cliForm(pieno||cliCache.find(c=>c.id===id));
     }
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
+    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo cliente ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo cliente?")){const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}renderClienti();toast("Cliente eliminato");}return;}
     if(a==="new-mezzo")return mezzoForm(null,"mezzo");
     if(a==="edit-mezzo")return mezzoForm(mezziCache.find(m=>String(m.id)===String(id)));
     if(a==="save-mezzo")return saveMezzo(id||null);
