@@ -1273,18 +1273,16 @@
   }
   /* conImp: l'importo a destra del titolo. Lo chiede solo il Riepilogo, dove la
      lista serve a capire quanto vale il lavoro in arrivo. */
-  function jobCardSupa(l,withFoto,opTel,conImp){
+  /* Card lavoro: solo le 2-3 azioni piu' probabili in vista, tutto il resto
+     (Mappa, Foto, WhatsApp, PDF, fattura, Elimina) nel menu "...". Prima
+     c'erano fino a 7 pulsanti in fila, con Elimina a un dito da Segna fatto.
+     menuTab = registro TAB_MENU della sezione ("lav" o "ag"). */
+  function jobCardSupa(l,withFoto,opTel,conImp,menuTab){
     const fatto=l.stato==="fatto", dove=l.dove||"";
     const late=inRitardo(l.stato,l.data_prevista);
     const lavLab=fatto?"Fatto":(l.stato==="in_corso"?"In corso":"Da fare");
     const dp=esc(l.data_prevista||"");
-    const opLink=location.href.replace(/[^/]*$/,"")+"gestionale-operatore.html";
-    const isPro=ruoloUtente==='professionista';
-    const termCap=isPro?"Pratica":"Lavoro";
-    const intro=isPro?"Ciao! C'è una nuova pratica per te.":"Ciao! C'è un nuovo lavoro per te.";
-    const waText=encodeURIComponent(intro+"\n"+termCap+": "+(l.descrizione||termCap)+"\nDove: "+(dove||"—")+"\nData prevista: "+fdate(l.data_prevista)+"\nApri l'app operatore: "+opLink);
-    const waTel=waCleanTel(opTel);
-    const wa=waTel?("https://wa.me/"+waTel+"?text="+waText):("https://wa.me/?text="+waText);
+    const dots=menuTab?`<span class="job-menu"><button class="lav-dots" data-action="tab-menu" data-tab="${menuTab}" data-id="${esc(String(l.id))}" title="Altre azioni">&#8943;</button></span>`:"";
     return `<div class="job">
       <div class="job-top"><div class="job-cli">${esc(l.descrizione||"Lavoro")}</div>
         ${conImp&&+l.importo?`<span class="job-imp">${eur(l.importo)}</span>`:""}</div>
@@ -1297,13 +1295,10 @@
       </div>
       <div class="job-actions">
         <button class="btn btn-sm ja" data-action="edit-job" data-id="${esc(l.id)}">✏ Modifica</button>
-        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
         ${withFoto&&l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}">▶ Avvia</button>`:""}
         ${withFoto&&!fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}">✔ Segna fatto</button>`:""}
         ${withFoto&&fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}">↩ Riapri</button>`:""}
-        ${withFoto?`<button class="btn btn-sm ja" data-action="lf-open" data-id="${esc(l.id)}" data-desc="${esc(l.descrizione||"Lavoro")}">📷 Foto (cosa fare)</button>`:""}
-        ${withFoto?`<button class="btn btn-sm ja" data-action="sq-wa" data-wa="${esc(wa)}">Avvisa su WhatsApp</button>`:""}
-        <button class="btn btn-sm ja" data-action="del-job-supa" data-id="${esc(l.id)}">🗑 Elimina</button>
+        ${dots}
       </div></div>`;
   }
   /* Lavori: tabella ordinabile su desktop, card su mobile */
@@ -1456,6 +1451,9 @@
        sparisce. Appena c'e' qualcosa dentro, torna. */
     tabBottoneTesta(box, R.length>0);
     if(!R.length){box.style.display="block";box.innerHTML=cfg.vuoto||"";return;}
+    /* il registro dei menu "..." si riempie PRIMA del bivio schede/tabella:
+       prima stava solo nel ramo tabella, e nelle schede il menu restava vuoto */
+    TAB_MENU[cfg.id]={};R.forEach(r=>{if(r.menu&&r.menu.length)TAB_MENU[cfg.id][String(r.id)]=r.menu;});
     /* SCHEDE SEMPRE, non solo su schermo stretto.
        Prima sul computer usciva una tabella a righe e sul telefono le schede:
        due disegni diversi per la stessa cosa. Ora ogni sezione ha la stessa
@@ -1463,7 +1461,6 @@
        (Per tornare alle tabelle basta rimettere "!_deskTab()&&" qui davanti.) */
     if(cfg.cards){box.style.display="grid";box.classList.add("griglia-schede");box.innerHTML=cfg.cards();return;}
     box.classList.remove("griglia-schede");
-    TAB_MENU[cfg.id]={};R.forEach(r=>{if(r.menu&&r.menu.length)TAB_MENU[cfg.id][String(r.id)]=r.menu;});
     const freccia=k=>cfg.sortK===k?(cfg.sortD>0?" \u2191":" \u2193"):"";
     const cols=cfg.colonne.map(c=>`<col style="width:${c.w}">`).join("")+'<col style="width:36px">';
     const intest=cfg.colonne.map(c=>{
@@ -1620,7 +1617,7 @@
         };
       }),
       totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
-      cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"")).join("")
+      cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"",false,"lav")).join("")
     });
   }
 
@@ -5702,7 +5699,7 @@
         };
       }),
       totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
-      cards:()=>L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"")).join("")
+      cards:()=>L.map(l=>jobCardSupa(l,true,telMap[l.operatore_id]||"",false,"ag")).join("")
     });
   }
 
@@ -6413,11 +6410,13 @@
     /* un solo menu "..." per tutte le sezioni: le voci le ha gia' preparate
        renderTabella, qui si legge solo il registro. */
     if(a==="tab-menu"){
-      const cella=t.closest("td"), aperto=cella.querySelector(".lav-pop");
+      /* il menu vive in una cella <td> nella tabella, in .job-menu nelle schede */
+      const cella=t.closest("td")||t.closest(".job-menu")||t.parentElement;
+      const aperto=cella&&cella.querySelector(".lav-pop");
       tabChiudiPop();
       if(aperto)return;                                   /* secondo clic: chiude */
       const voci=(TAB_MENU[t.dataset.tab]||{})[String(id)];
-      if(voci&&voci.length)cella.insertAdjacentHTML("beforeend",tabPop(voci));
+      if(voci&&voci.length&&cella)cella.insertAdjacentHTML("beforeend",tabPop(voci));
       return;
     }
     if(a==="fatt-vista"){fattVista=t.dataset.v;renderFatture();return;}
