@@ -1,3 +1,12 @@
+// Ogni tipo di iscritto ha il suo pannello: il pulsante dell'email deve
+// portarlo dove sta davvero la richiesta.
+const PANNELLI = {
+  impresa: 'pannello-impresa.html',
+  artigiano: 'pannello-artigiano.html',
+  professionista: 'pannello-professionisti.html',
+  negozio: 'pannello-negozio.html'
+};
+
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -10,8 +19,11 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: 'JSON non valido' };
   }
 
-  if (!impresa_id || !nome || !email_cliente) {
-    return { statusCode: 400, body: 'Parametri mancanti: impresa_id, nome e email_cliente sono obbligatori' };
+  // 6 agosto 2026: prima l'email del cliente era obbligatoria, e le richieste di
+  // incarico ai professionisti (dove l'email e' facoltativa) non facevano partire
+  // nessun avviso. Ora basta uno dei due recapiti: email OPPURE telefono.
+  if (!impresa_id || !nome || (!email_cliente && !telefono)) {
+    return { statusCode: 400, body: 'Parametri mancanti: servono impresa_id, nome e almeno un recapito (email o telefono)' };
   }
 
   // I contatti del cliente sono disponibili direttamente nel pannello
@@ -29,7 +41,9 @@ exports.handler = async function(event) {
   };
 
   try {
-    const impresaRes = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${impresa_id}&select=nome,nome_attivita,email`, { headers: sbHeaders });
+    // "tipo" serve a mandare ognuno al SUO pannello: prima il pulsante dell'email
+    // portava tutti su pannello-artigiano, anche negozi e professionisti.
+    const impresaRes = await fetch(`${SUPABASE_URL}/rest/v1/imprese?id=eq.${impresa_id}&select=nome,nome_attivita,email,tipo`, { headers: sbHeaders });
     const imprese = await impresaRes.json();
     const impresa = imprese[0];
 
@@ -96,7 +110,7 @@ exports.handler = async function(event) {
             <p style="font-size:13px;color:#666;margin:0">Apri la richiesta dal pannello per vedere telefono ed email e rispondere subito.</p>
           </div>
           <div style="text-align:center;margin-bottom:28px">
-            <a href="https://trovaimpresa.com/pannello-artigiano.html"
+            <a href="https://trovaimpresa.com/${PANNELLI[impresa.tipo] || 'pannello-artigiano.html'}"
                style="display:inline-block;background:#0066ff;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:700">
               📂 Apri il pannello e rispondi →
             </a>

@@ -341,7 +341,7 @@ nav img{height:36px}
 <body>
 
 <nav>
-  <a href="index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
   <a href="javascript:history.back()" class="nav-back">← Torna ai risultati</a>
 </nav>
 
@@ -965,6 +965,28 @@ async function submitIncarico(){
     let richiedente_user_id=null;try{const {data:{user}}=await sc.auth.getUser();if(user)richiedente_user_id=user.id;}catch(e){}
     const {error}=await sc.from('incarichi_richieste').insert({professionista_id:prof.id,richiedente_user_id,nome,email:email||null,telefono,prestazione,comune,urgenza,note:note||null,documenti});
     if(error)throw error;
+    /* AGOSTO 2026 — Doppio avviso anche per gli incarichi.
+       Aveva lo stesso difetto delle richieste di preventivo: la richiesta finiva
+       solo nel pannello, e un professionista che non entra per giorni non la vedeva.
+       Si riusa notifica-preventivo.js: i professionisti stanno nella tabella
+       "imprese" come tutti, quindi la function li trova per id.
+       "Best effort": se la mail non parte, la richiesta resta comunque salvata. */
+    try{
+      fetch('/.netlify/functions/notifica-preventivo',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          impresa_id:prof.id,
+          nome:nome,
+          email_cliente:email||'',
+          telefono:telefono,
+          descrizione:note||'',
+          citta:comune,
+          categoria_lavoro:prestazione,
+          urgenza:urgenza||null
+        })
+      }).catch(function(){});
+    }catch(_){}
     setMsg('✅ Richiesta di incarico inviata! Il professionista ti contatterà con un preventivo di onorario.',true);
     btn.textContent='✅ Inviata';
   }catch(e){setMsg('❌ '+e.message,false);btn.disabled=false;btn.textContent='📋 Invia richiesta di incarico';}
