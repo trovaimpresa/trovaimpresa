@@ -931,9 +931,33 @@ async function submitPreventivo(){
         if(!upErr) fotoUrl=sc.storage.from('foto-lavori').getPublicUrl(path).data.publicUrl;
       }catch(_){}
     }
-    const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,email,telefono:document.getElementById('prev-telefono').value.trim(),citta,categoria_lavoro:categoria,descrizione:document.getElementById('prev-descrizione').value.trim(),data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,condivisibile:document.getElementById('prev-condivisibile').checked,created_at:new Date().toISOString()});
+    const telefono=document.getElementById('prev-telefono').value.trim();
+    const descrizione=document.getElementById('prev-descrizione').value.trim();
+    const {error}=await sc.from('preventivi').insert({impresa_id:iid,nome,email,telefono,citta,categoria_lavoro:categoria,descrizione,data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,condivisibile:document.getElementById('prev-condivisibile').checked,created_at:new Date().toISOString()});
     if(error)throw error;
-    // Email di notifica rimossa: la nuova richiesta appare direttamente nel pannello (badge sul bottone Preventivi).
+    /* AGOSTO 2026 — Doppio avviso: la richiesta resta nel pannello E arriva una mail all'impresa.
+       Molte imprese non entrano nel pannello per giorni: senza mail la richiesta non la vedono mai.
+       E' "best effort": se la mail non parte, il cliente vede comunque "Richiesta inviata"
+       e la richiesta resta salvata nel pannello. */
+    try{
+      fetch('/.netlify/functions/notifica-preventivo',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          impresa_id:iid,
+          nome:nome,
+          email_cliente:email,
+          telefono:telefono,
+          descrizione:descrizione,
+          citta:citta,
+          categoria_lavoro:categoria,
+          data_preferita:dataPreferita||null,
+          urgenza:urgenza||null,
+          budget:budget||null,
+          foto:fotoUrl
+        })
+      }).catch(function(){});
+    }catch(_){}
     me.textContent='✅ Richiesta inviata!';me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#e8f5ee;color:#0066ff;';
     btn.textContent='✅ Inviato';setTimeout(()=>hidePreventivo(),2000);
   }catch(e){me.textContent='Errore: '+e.message;me.style.cssText='display:block;padding:10px;border-radius:8px;font-size:13px;margin-bottom:10px;background:#fff0f0;color:#c0392b;';btn.disabled=false;btn.textContent='📋 Invia richiesta gratuita'}
