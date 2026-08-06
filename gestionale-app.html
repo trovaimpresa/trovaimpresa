@@ -1511,7 +1511,10 @@
     if(!sb||!sbUid){if(viste)viste.innerHTML="";box.style.display="block";box.innerHTML=lavVuoto("tutti");return;}
     const oggi=todayStr();
     const [{data:lav},{data:ops},{data:cls}]=await Promise.all([
-      sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
+      /* Per gli studi si legge tutta la riga ("*") invece dell'elenco fisso: servono
+         anche i campi della pratica per riaprirli in modifica. Con "*" non si rischia
+         l'errore "colonna inesistente" se la migrazione SQL non e' ancora stata fatta. */
+      sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
     ]);
@@ -3900,6 +3903,70 @@
   }
 
   /* FORM LAVORO (nessun campo "servizio": il reparto è già il pannello) */
+  /* ===== 6 agosto 2026 — Dati della pratica (solo studi professionali) =====
+     Per un'impresa un lavoro e' cosa/dove/quando. Per un geometra la pratica ha
+     anche il tipo, il Comune, il protocollo e i dati catastali.
+     Il blocco compare SOLO se ruoloUtente === 'professionista': per tutti gli
+     altri la funzione restituisce stringa vuota e il form resta identico a prima.
+     Colonne DB: sql/gest-pratiche-professionisti.sql */
+  const PRATICA_TIPI=["","CILA","CILAS","SCIA","SCIA alternativa al PdC","Permesso di Costruire","Autorizzazione paesaggistica","Agibilita'","Sanatoria","Accatastamento","Voltura","Altro"];
+  const PRATICA_STATI=[["da_preparare","Da preparare"],["depositata","Depositata"],["istruttoria","In istruttoria"],["integrazioni","Integrazioni richieste"],["approvata","Approvata"],["archiviata","Archiviata"]];
+  function bloccoPratica(job){
+    if(ruoloUtente!=='professionista')return "";
+    job=job||{};
+    const tipi=PRATICA_TIPI.map(t=>`<option value="${esc(t)}" ${t===(job.pratica_tipo||"")?"selected":""}>${t||"— scegli —"}</option>`).join("");
+    const stati=PRATICA_STATI.map(s=>`<option value="${s[0]}" ${s[0]===(job.pratica_stato||"da_preparare")?"selected":""}>${s[1]}</option>`).join("");
+    return `
+      <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:4px">
+        <label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">📄 Dati della pratica</label>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Tipo di pratica</label><select id="j-pr-tipo">${tipi}</select></div>
+        <div class="field"><label>A che punto sta</label><select id="j-pr-stato">${stati}</select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Comune</label><input id="j-pr-comune" value="${esc(job.pratica_comune||"")}" placeholder="Es. Rieti"></div>
+        <div class="field"><label>N. protocollo</label><input id="j-pr-prot" value="${esc(job.pratica_protocollo||"")}" placeholder="Es. 12345/2026"></div>
+      </div>
+      <div class="field"><label>Data di deposito</label><input type="date" id="j-pr-data" value="${esc(job.pratica_data_dep||"")}"></div>
+      <div class="field"><label>Dati catastali</label>
+        <div class="row3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <input id="j-cat-fog" value="${esc(job.catasto_foglio||"")}" placeholder="Foglio">
+          <input id="j-cat-par" value="${esc(job.catasto_particella||"")}" placeholder="Particella">
+          <input id="j-cat-sub" value="${esc(job.catasto_sub||"")}" placeholder="Sub">
+        </div>
+      </div>`;
+  }
+  /* Legge i campi della pratica dal form. Se non e' un professionista
+     restituisce un oggetto vuoto, cosi' non finisce niente nel salvataggio. */
+  function leggiCampiPratica(){
+    if(ruoloUtente!=='professionista')return {};
+    const v=id=>{const e=$("#"+id);return e?e.value.trim():"";};
+    return {
+      pratica_tipo:v("j-pr-tipo")||null,
+      pratica_stato:v("j-pr-stato")||null,
+      pratica_comune:v("j-pr-comune")||null,
+      pratica_protocollo:v("j-pr-prot")||null,
+      pratica_data_dep:v("j-pr-data")||null,
+      catasto_foglio:v("j-cat-fog")||null,
+      catasto_particella:v("j-cat-par")||null,
+      catasto_sub:v("j-cat-sub")||null
+    };
+  }
+  /* Le colonne della pratica potrebbero non essere ancora state create su Supabase.
+     In quel caso PostgREST risponde 400 e si perderebbe TUTTO il salvataggio:
+     qui si riprova senza quei campi, cosi' il lavoro si salva comunque.
+     (Stessa lezione della colonna "condivisibile" dei preventivi.) */
+  function eColonnaPraticaMancante(err){
+    const m=(err&&err.message)||"";
+    return /pratica_|catasto_/i.test(m) && /column|schema cache/i.test(m);
+  }
+  function senzaCampiPratica(obj){
+    const o=Object.assign({},obj);
+    Object.keys(o).forEach(k=>{ if(/^pratica_|^catasto_/.test(k))delete o[k]; });
+    return o;
+  }
+
   function jobForm(job,presetDate,preset,supa,fattura){
     const isNew=!job;
     const jid=job?job.id:uid();
@@ -3932,6 +3999,7 @@
         <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo condominio</button></div>
       <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
       <div class="field"><label>Dove (vuoto = indirizzo del condominio)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
+      ${bloccoPratica(job)}
       <div class="row2">
         <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
         <div class="field"><label>Chi ci va</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
@@ -4029,17 +4097,23 @@
       const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
       if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
-      const obj={user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
-        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id};
+      const obj=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
+        descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id},
+        leggiCampiPratica());
       /* niente scorciatoia "nasce gia' fatturato": la fattura si crea dalla sua sezione */
-      const {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();
+      let {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();
+      if(error&&eColonnaPraticaMancante(error)){
+        const rip=await sb.from('gest_lavori').insert(senzaCampiPratica(obj)).select('id').single();
+        data=rip.data;error=rip.error;
+        if(!error)toast("Salvato, ma i dati della pratica non ancora: manca la migrazione SQL");
+      }
       if(error){toast("Errore: "+error.message);return;}
       const realId=data.id;
       /* il numero di fattura lo assegna la fattura quando la emetti */
       closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
     if(editing && editing.realId){
-      const {error}=await sb.from('gest_lavori').update({
+      const mod=Object.assign({
         descrizione:$("#j-desc").value.trim(),
         dove:$("#j-dove").value.trim(),
         data_prevista:$("#j-data").value||null,
@@ -4051,7 +4125,13 @@
         lavoro_svolto:$("#j-svolto").value.trim()||null,
         note:$("#j-note").value.trim()||null,
         ore:parseFloat($("#j-ore").value)||null
-      }).eq('id', editing.realId);
+      }, leggiCampiPratica());
+      let {error}=await sb.from('gest_lavori').update(mod).eq('id', editing.realId);
+      if(error&&eColonnaPraticaMancante(error)){
+        const rip=await sb.from('gest_lavori').update(senzaCampiPratica(mod)).eq('id', editing.realId);
+        error=rip.error;
+        if(!error)toast("Salvato, ma i dati della pratica non ancora: manca la migrazione SQL");
+      }
       if(error){toast("Errore: "+error.message);return;}
       /* segnata emessa o pagata: e' questo il momento in cui la fattura prende il numero */
       /* il numero di fattura lo assegna la fattura quando la emetti, non il lavoro */
