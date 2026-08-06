@@ -221,7 +221,8 @@
         <button class="back" data-action="home">← Pannelli</button>
         <div><h1 id="panel-name">—</h1><small id="panel-sub">Reparto</small></div>
       </div>
-      <button class="btn-new" data-action="new-job">+ Nuovo lavoro</button>
+      <!-- 6 agosto 2026: in un noleggio non si creano "lavori": si registrano noleggi. -->
+      <button class="btn-new" data-action="new-nol">+ Nuovo noleggio</button>
     </div>
     <nav class="tabs">
       <button data-tab="riepilogo" class="active">Riepilogo</button>
@@ -338,11 +339,59 @@
       <div style="background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);border-top:4px solid #2e537d;padding:16px;margin-bottom:16px">
         <h3 style="margin:0 0 12px">Nuovo prodotto</h3>
         <input id="np-nome" placeholder="Nome prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-prezzo" type="number" step="0.01" placeholder="Prezzo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-quantita" type="number" placeholder="Quantità" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-categoria" placeholder="Categoria" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-soglia" type="number" placeholder="Soglia minima" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="np-codice" placeholder="Codice" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <input id="np-codice" placeholder="Codice" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          <input id="np-categoria" placeholder="Categoria" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        </div>
+        <!-- 6 agosto 2026: unita di misura, prezzo di acquisto e IVA.
+             Senza unita "quantita 40" non dice niente (40 pezzi? 40 mq? 40 sacchi?),
+             e senza prezzo di acquisto non si vede il margine. -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Si vende a</label>
+            <select id="np-unita" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+              <option value="pz">pezzo</option>
+              <option value="mq">metro quadro (mq)</option>
+              <option value="ml">metro lineare (ml)</option>
+              <option value="mc">metro cubo (mc)</option>
+              <option value="kg">chilo (kg)</option>
+              <option value="q">quintale (q)</option>
+              <option value="t">tonnellata (t)</option>
+              <option value="sacco">sacco</option>
+              <option value="bancale">bancale</option>
+              <option value="conf">confezione</option>
+              <option value="lt">litro (lt)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Quantità</label>
+            <input id="np-quantita" type="number" step="0.01" placeholder="0" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Scorta minima</label>
+            <input id="np-soglia" type="number" step="0.01" placeholder="0" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo paghi</label>
+            <input id="np-acquisto" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">Lo vendi</label>
+            <input id="np-prezzo" type="number" step="0.01" placeholder="€" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#5b6672;margin-bottom:4px">IVA</label>
+            <select id="np-iva" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+              <option value="22">22%</option>
+              <option value="10">10%</option>
+              <option value="4">4%</option>
+              <option value="0">0%</option>
+            </select>
+          </div>
+        </div>
+        <div id="np-margine" style="font-size:14px;color:#5b6672;margin-bottom:10px;min-height:20px"></div>
         <input id="np-note" placeholder="Note" style="width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <button id="np-save" style="background:#0066ff;color:#fff;border:none;border-radius:8px;padding:13px 24px;cursor:pointer">Aggiungi prodotto</button>
       </div>
@@ -378,7 +427,7 @@
           <option value="ordine">Ordine a fornitore (merce che entra)</option>
         </select>
         <input id="nm-prodotto" placeholder="Prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nm-quantita" type="number" placeholder="Quantità" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nm-quantita" type="number" step="0.01" placeholder="Quantità (anche con la virgola)" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <input id="nm-importo" type="number" step="0.01" placeholder="Importo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <input id="nm-controparte" placeholder="Cliente o fornitore" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <input id="nm-data" type="date" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
@@ -1834,6 +1883,15 @@
     if(a==="pdf")return generaPdf(id);
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
+    /* 6 agosto 2026: il pulsante grande porta al modulo del noleggio,
+       con il mezzo gia' pronto da scegliere. */
+    if(a==="new-nol"){
+      $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="noleggi"));
+      $$("section").forEach(s=>s.classList.toggle("active",s.id==="noleggi"));
+      window.scrollTo({top:0,behavior:"smooth"});
+      const m=$("#nn-mezzo"); if(m)setTimeout(function(){m.focus();},150);
+      return;
+    }
     if(a==="lf-open")return showLavoroFoto(t.dataset.id,t.dataset.desc);
     if(a==="lf-back"){$$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="lavori"));$$("section").forEach(s=>s.classList.toggle("active",s.id==="lavori"));renderJobs();window.scrollTo(0,0);return;}
     if(a==="new-fattura")return jobForm(null,"",null,true,true);
@@ -1946,6 +2004,11 @@
       $("#np-quantita").value=data.quantita??""; $("#np-categoria").value=data.categoria||"";
       $("#np-soglia").value=data.soglia_minima??""; $("#np-codice").value=data.codice||"";
       $("#np-note").value=data.note||"";
+      /* campi aggiunti il 6 agosto 2026 */
+      if($("#np-unita"))    $("#np-unita").value=data.unita||"pz";
+      if($("#np-acquisto")) $("#np-acquisto").value=data.prezzo_acquisto??"";
+      if($("#np-iva"))      $("#np-iva").value=(data.iva_perc??22);
+      mostraMargine();
       editProdId=data.id; $("#np-save").textContent="Salva modifica";
       window.scrollTo({top:0,behavior:"smooth"});
     }
@@ -2061,7 +2124,8 @@
     if(!prodotto){alert("Inserisci il prodotto");return;}
     if(!(sb&&sbUid)){alert("Non connesso");return;}
     const dati={tipo:$("#nm-tipo").value, prodotto,
-      quantita:parseInt($("#nm-quantita").value)||0,
+      /* decimali: si scaricano 12,5 mq o mezzo bancale */
+      quantita:parseFloat($("#nm-quantita").value)||0,
       importo:parseFloat($("#nm-importo").value)||0,
       controparte:$("#nm-controparte").value.trim()||null,
       data_mov:$("#nm-data").value||null,
@@ -2094,22 +2158,59 @@
       window.scrollTo({top:0,behavior:"smooth"});
     }
   });
+  /* 6 agosto 2026 — Margine dal vivo: quanto ci guadagni su ogni pezzo.
+     Si aggiorna mentre scrivi il prezzo di acquisto o quello di vendita. */
+  function mostraMargine(){
+    const box=$("#np-margine"); if(!box)return;
+    const acq=parseFloat($("#np-acquisto")?$("#np-acquisto").value:"")||0;
+    const ven=parseFloat($("#np-prezzo")?$("#np-prezzo").value:"")||0;
+    const um=$("#np-unita")?$("#np-unita").value:"pz";
+    if(!acq||!ven){box.textContent="";return;}
+    const marg=ven-acq, perc=acq>0?(marg/acq*100):0;
+    const col=marg>0?"#1e8e3e":(marg<0?"#c0392b":"#5b6672");
+    const eur=n=>n.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+    box.innerHTML='<span style="color:'+col+';font-weight:700">Guadagno: '+eur(marg)+' al '+um+
+      ' ('+(perc>=0?"+":"")+perc.toFixed(0)+'%)</span>'+
+      (marg<0?' <span style="color:#c0392b">— attenzione: lo vendi sotto costo</span>':"");
+  }
+  ["np-acquisto","np-prezzo","np-unita"].forEach(function(id){
+    const el=$("#"+id);
+    if(el){el.addEventListener("input",mostraMargine);el.addEventListener("change",mostraMargine);}
+  });
+
   $("#np-save")?.addEventListener("click",async()=>{
     const nome=$("#np-nome").value.trim();
     if(!nome){alert("Inserisci il nome");return;}
     if(!(sb&&sbUid)){alert("Non connesso");return;}
+    /* quantita e scorta ora accettano i decimali: 12,5 mq o 0,5 bancali sono normali */
     const dati={nome,
       prezzo:parseFloat($("#np-prezzo").value)||0,
-      quantita:parseInt($("#np-quantita").value)||0,
+      quantita:parseFloat($("#np-quantita").value)||0,
       categoria:$("#np-categoria").value.trim()||null,
-      soglia_minima:parseInt($("#np-soglia").value)||0,
+      soglia_minima:parseFloat($("#np-soglia").value)||0,
       codice:$("#np-codice").value.trim()||null,
-      note:$("#np-note").value.trim()||null};
+      note:$("#np-note").value.trim()||null,
+      unita:$("#np-unita")?$("#np-unita").value:"pz",
+      prezzo_acquisto:$("#np-acquisto")&&$("#np-acquisto").value!==""?parseFloat($("#np-acquisto").value):null,
+      iva_perc:$("#np-iva")?parseFloat($("#np-iva").value):22};
+    /* Se le colonne nuove non sono ancora state create su Supabase, il prodotto
+       si salva lo stesso senza di esse invece di andare perso (stessa regola
+       usata per le pratiche e per la parcella). */
+    const senzaNuovi=o=>{const c={...o};["unita","prezzo_acquisto","iva_perc"].forEach(k=>delete c[k]);return c;};
+    const eColonnaNuova=e=>/unita|prezzo_acquisto|iva_perc/i.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
     let error;
     if(editProdId){({error}=await sb.from("neg_prodotti").update(dati).eq("id",editProdId));}
     else {({error}=await sb.from("neg_prodotti").insert({user_id:sbUid,...dati}));}
+    if(error&&eColonnaNuova(error)){
+      if(editProdId){({error}=await sb.from("neg_prodotti").update(senzaNuovi(dati)).eq("id",editProdId));}
+      else {({error}=await sb.from("neg_prodotti").insert({user_id:sbUid,...senzaNuovi(dati)}));}
+      if(!error)alert("Prodotto salvato, ma unità di misura, prezzo di acquisto e IVA no: manca la migrazione SQL (sql/neg-prodotti-campi.sql).");
+    }
     if(error){alert("Errore: "+error.message);return;}
-    ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note"].forEach(id=>$("#"+id).value="");
+    ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note","np-acquisto"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
+    if($("#np-unita"))$("#np-unita").value="pz";
+    if($("#np-iva"))$("#np-iva").value="22";
+    mostraMargine();
     editProdId=null; $("#np-save").textContent="Aggiungi prodotto";
     loadProdotti();
   });
