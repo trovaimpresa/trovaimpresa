@@ -5795,6 +5795,102 @@
     const el=$("#prev-somma");if(el)el.textContent="Totale: "+eur2(t);
     return t;
   }
+  /* ===== 6 agosto 2026 — LA PARCELLA (solo studi professionali) =====
+     Il preventivo di un'impresa e' la somma delle voci e basta. La parcella no:
+       compenso  ->  + cassa (sul compenso)  ->  IVA su (compenso+cassa+spese)
+       ->  - ritenuta 20% (SOLO sul compenso)  =  da incassare
+     La cassa e' il "contributo integrativo": 4% Inarcassa (architetti e ingegneri),
+     5% Cassa Geometri e Periti. La ritenuta si applica SOLO se il cliente e'
+     sostituto d'imposta (azienda, professionista, condominio): con un privato no.
+     Le spese (bolli, diritti) entrano nell'IVA ma NON nella base della ritenuta.
+     Colonne DB: sql/gest-parcella-professionisti.sql
+     Riferimento del calcolo: Fiscozen, "Calcolo fattura con cassa professionale". */
+  function calcolaParcella(compenso, cassaPerc, ivaPerc, conRitenuta, ritPerc, spese){
+    compenso=+compenso||0; spese=+spese||0;
+    cassaPerc=+cassaPerc||0; ivaPerc=+ivaPerc||0; ritPerc=+ritPerc||0;
+    const cassa      = compenso*cassaPerc/100;
+    const imponibile = compenso + cassa + spese;
+    const iva        = imponibile*ivaPerc/100;
+    const ritenuta   = conRitenuta ? compenso*ritPerc/100 : 0;  /* solo sul compenso */
+    const totale     = imponibile + iva - ritenuta;
+    const r2=n=>Math.round(n*100)/100;
+    return {compenso:r2(compenso),cassa:r2(cassa),spese:r2(spese),imponibile:r2(imponibile),
+            iva:r2(iva),ritenuta:r2(ritenuta),totale:r2(totale)};
+  }
+  function bloccoParcella(p){
+    if(ruoloUtente!=='professionista')return "";
+    p=p||{};
+    const cassa=p.cassa_perc!=null?p.cassa_perc:4;
+    const iva=p.iva_perc!=null?p.iva_perc:22;
+    const rit=!!p.ritenuta;
+    const spese=p.spese_forfait!=null?p.spese_forfait:"";
+    const opzCassa=[[0,"Nessuna cassa"],[2,"2%"],[4,"4% — Inarcassa (architetti, ingegneri)"],[5,"5% — Geometri e periti"]]
+      .map(o=>`<option value="${o[0]}" ${(+cassa===o[0])?"selected":""}>${o[1]}</option>`).join("");
+    const opzIva=[[22,"22% — ordinaria"],[10,"10% — agevolata"],[0,"0% — esente / forfettario"]]
+      .map(o=>`<option value="${o[0]}" ${(+iva===o[0])?"selected":""}>${o[1]}</option>`).join("");
+    return `
+      <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">
+        <label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">🧾 Parcella</label>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Cassa previdenziale</label><select id="pv-cassa">${opzCassa}</select></div>
+        <div class="field"><label>IVA</label><select id="pv-iva">${opzIva}</select></div>
+      </div>
+      <div class="field"><label>Spese (bolli, diritti, copie)</label><input type="number" id="pv-spese" inputmode="decimal" value="${esc(spese)}" placeholder="0"></div>
+      <div class="field">
+        <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;cursor:pointer">
+          <input type="checkbox" id="pv-rit" ${rit?"checked":""} style="width:18px;height:18px;margin-top:2px;flex-shrink:0">
+          <span>Applica la ritenuta d'acconto del 20%</span>
+        </label>
+        <p style="font-size:13px;color:var(--testo-3,#7a8896);line-height:1.55;margin:8px 0 0">
+          Va messa solo se il cliente &egrave; <strong>azienda, professionista o condominio</strong>.
+          Se il cliente &egrave; un privato, lasciala vuota.
+        </p>
+      </div>
+      <div id="pv-riepilogo" class="prev-somma" style="text-align:left;line-height:1.9"></div>`;
+  }
+  /* Riscrive il riepilogo della parcella ogni volta che si tocca qualcosa */
+  function aggiornaRiepilogoParcella(){
+    if(ruoloUtente!=='professionista')return;
+    const box=$("#pv-riepilogo"); if(!box)return;
+    let compenso=0;
+    $$("#prev-righe [data-riga]").forEach(d=>{
+      compenso += (+d.querySelector(".pr-qta").value||1)*(+d.querySelector(".pr-prezzo").value||0);
+    });
+    const c=calcolaParcella(compenso, $("#pv-cassa")?$("#pv-cassa").value:0, $("#pv-iva")?$("#pv-iva").value:0,
+      $("#pv-rit")?$("#pv-rit").checked:false, 20, $("#pv-spese")?$("#pv-spese").value:0);
+    const riga=(et,val,neg)=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${et}</span><strong>${neg?"− ":""}${eur2(val)}</strong></div>`;
+    box.innerHTML =
+      riga("Compenso", c.compenso) +
+      (c.spese?riga("Spese", c.spese):"") +
+      (c.cassa?riga("Cassa previdenziale", c.cassa):"") +
+      `<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>` +
+      riga("Imponibile IVA", c.imponibile) +
+      (c.iva?riga("IVA", c.iva):"") +
+      (c.ritenuta?riga("Ritenuta d'acconto", c.ritenuta, true):"") +
+      `<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>` +
+      `<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Da incassare</strong></span><strong>${eur2(c.totale)}</strong></div>`;
+  }
+  function leggiCampiParcella(){
+    if(ruoloUtente!=='professionista')return {};
+    return {
+      cassa_perc:+($("#pv-cassa")?$("#pv-cassa").value:0)||0,
+      iva_perc:+($("#pv-iva")?$("#pv-iva").value:0)||0,
+      ritenuta:$("#pv-rit")?$("#pv-rit").checked:false,
+      ritenuta_perc:20,
+      spese_forfait:+($("#pv-spese")?$("#pv-spese").value:0)||0
+    };
+  }
+  function eColonnaParcellaMancante(err){
+    const m=(err&&err.message)||"";
+    return /cassa_perc|iva_perc|ritenuta|spese_forfait/i.test(m) && /column|schema cache/i.test(m);
+  }
+  function senzaCampiParcella(obj){
+    const o=Object.assign({},obj);
+    ["cassa_perc","iva_perc","ritenuta","ritenuta_perc","spese_forfait"].forEach(k=>delete o[k]);
+    return o;
+  }
+
   async function prevForm(p){
     const isNew=!p;p=p||{};
     let cl=[],righe=[];
@@ -5817,10 +5913,20 @@
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
         <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0))}</div></div>
+      ${bloccoParcella(p)}
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button>`);
     $("#prev-righe").addEventListener("input",prevTotaleLive);
+    /* parcella: il riepilogo si ricalcola sia cambiando le voci sia le percentuali */
+    if(ruoloUtente==='professionista'){
+      $("#prev-righe").addEventListener("input",aggiornaRiepilogoParcella);
+      ["pv-cassa","pv-iva","pv-spese","pv-rit"].forEach(function(id){
+        const el=$("#"+id); if(el)el.addEventListener("change",aggiornaRiepilogoParcella);
+        if(el&&el.tagName==="INPUT"&&el.type!=="checkbox")el.addEventListener("input",aggiornaRiepilogoParcella);
+      });
+      aggiornaRiepilogoParcella();
+    }
   }
   async function savePrev(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -5834,13 +5940,26 @@
     if(!righe.length){toast("Aggiungi almeno una voce");return;}
     const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=$("#pv-note").value.trim()||null;
     let pid=id;
+    const parcella=leggiCampiParcella();
     if(id){
-      const {error}=await sb.from("gest_preventivi").update({titolo,cliente_id,data,note}).eq("id",id).eq("user_id",sbUid);
+      const mod=Object.assign({titolo,cliente_id,data,note},parcella);
+      let {error}=await sb.from("gest_preventivi").update(mod).eq("id",id).eq("user_id",sbUid);
+      if(error&&eColonnaParcellaMancante(error)){
+        const rip=await sb.from("gest_preventivi").update(senzaCampiParcella(mod)).eq("id",id).eq("user_id",sbUid);
+        error=rip.error;
+        if(!error)toast("Salvato, ma i dati della parcella no: manca la migrazione SQL");
+      }
       if(error){toast("Errore: "+error.message);return;}
       await sb.from("gest_preventivo_righe").delete().eq("preventivo_id",id).eq("user_id",sbUid);
     }else{
       const numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
-      const {data:np,error}=await sb.from("gest_preventivi").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,cliente_id,data,note,numero,stato:"bozza"}).select().single();
+      const nuovo=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),titolo,cliente_id,data,note,numero,stato:"bozza"},parcella);
+      let {data:np,error}=await sb.from("gest_preventivi").insert(nuovo).select().single();
+      if(error&&eColonnaParcellaMancante(error)){
+        const rip=await sb.from("gest_preventivi").insert(senzaCampiParcella(nuovo)).select().single();
+        np=rip.data;error=rip.error;
+        if(!error)toast("Salvato, ma i dati della parcella no: manca la migrazione SQL");
+      }
       if(error){toast("Errore: "+error.message);return;}
       pid=np.id;
     }
