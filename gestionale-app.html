@@ -6016,7 +6016,8 @@
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
-    doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("PREVENTIVO",R,y,{align:"right"});
+    const isParcella = (ruoloUtente==='professionista');
+    doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text(isParcella?"PARCELLA":"PREVENTIVO",R,y,{align:"right"});
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     doc.text("N. "+p.numero+"   del "+fdate(p.data||todayStr()),R,y+5.5,{align:"right"});
     doc.setTextColor(0);
@@ -6048,18 +6049,48 @@
       y+=rowH;
     });
     y+=4;
-    doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-70,y,70,12);doc.setLineWidth(.2);
-    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("TOTALE",R-68,y+7.6);doc.text(eurPdf(tot),R-2,y+7.6,{align:"right"});
-    y+=22;
+    if(isParcella){
+      /* Riepilogo della parcella: compenso, spese, cassa, IVA, ritenuta, da incassare.
+         Stesse regole del riquadro nel gestionale (vedi calcolaParcella). */
+      const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
+      const righeTot=[["Compenso",cp.compenso,false]];
+      if(cp.spese)   righeTot.push(["Spese (bolli, diritti)",cp.spese,false]);
+      if(cp.cassa)   righeTot.push(["Cassa previdenziale "+(+p.cassa_perc||0)+"%",cp.cassa,false]);
+      righeTot.push(["Imponibile IVA",cp.imponibile,false]);
+      if(cp.iva)     righeTot.push(["IVA "+(+p.iva_perc||0)+"%",cp.iva,false]);
+      if(cp.ritenuta)righeTot.push(["Ritenuta d'acconto "+(+p.ritenuta_perc||20)+"%",cp.ritenuta,true]);
+      const hBox=righeTot.length*6+16;
+      if(y+hBox>272){doc.addPage();y=20;}
+      doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-90,y,90,hBox);doc.setLineWidth(.2);
+      let ry=y+7;
+      doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+      righeTot.forEach(function(r){
+        doc.text(r[0],R-88,ry);
+        doc.text((r[2]?"- ":"")+eurPdf(r[1]),R-2,ry,{align:"right"});
+        ry+=6;
+      });
+      doc.setDrawColor(31,111,92);doc.line(R-88,ry-3,R-2,ry-3);
+      doc.setFont("helvetica","bold");doc.setFontSize(11.5);
+      doc.text("NETTO A PAGARE",R-88,ry+4);
+      doc.text(eurPdf(cp.totale),R-2,ry+4,{align:"right"});
+      y+=hBox+10;
+    }else{
+      doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-70,y,70,12);doc.setLineWidth(.2);
+      doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("TOTALE",R-68,y+7.6);doc.text(eurPdf(tot),R-2,y+7.6,{align:"right"});
+      y+=22;
+    }
     if(p.note){
       doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Note e condizioni",M,y);y+=5.5;
       doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
       const nl=doc.splitTextToSize(p.note,R-M);doc.text(nl,M,y);y+=nl.length*4.5;doc.setTextColor(0);
     }
     doc.setFontSize(7.5);doc.setTextColor(140);
-    doc.text("Preventivo non vincolante, salvo diversa indicazione nelle note. Prezzi IVA esclusa dove non specificato.",M,286,{maxWidth:R-M});
-    doc.save("preventivo-"+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
-    toast("PDF preventivo scaricato ✅");
+    doc.text(isParcella
+      ? "Preventivo di parcella non vincolante, salvo diversa indicazione nelle note. La ritenuta d'acconto si applica solo se il committente e' sostituto d'imposta."
+      : "Preventivo non vincolante, salvo diversa indicazione nelle note. Prezzi IVA esclusa dove non specificato.",
+      M,286,{maxWidth:R-M});
+    doc.save((isParcella?"parcella-":"preventivo-")+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+    toast(isParcella?"PDF parcella scaricato ✅":"PDF preventivo scaricato ✅");
   }
 
   /* ---- REPORT & STATISTICHE ---- */
