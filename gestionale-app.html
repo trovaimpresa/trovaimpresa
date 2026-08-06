@@ -1,11 +1,18 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Gestionale — TrovaImpresa</title>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<div id="app-root">
 <link rel="stylesheet" href="/css/gestionale.css">
+</head>
+<body>
+<div id="app-root">
 
 <!-- LANDING -->
 <div id="landing">
@@ -22,7 +29,7 @@
     <p class="landing-sub">Ogni reparto è separato: lavori, clienti, squadra e calendario non si mischiano.</p>
     <div class="panels" id="panels"></div>
     <button class="new-rep-btn" data-action="new-panel">➕ Nuovo reparto</button>
-    <p style="text-align:center;font-size:12.5px;color:var(--testo-3);margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
+    <p style="text-align:center;font-size:14px;color:var(--testo-2);margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
     <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid var(--bordo)">
       <p style="color:var(--testo-2);font-size:var(--f-base);margin-bottom:10px">Sei un collaboratore o una segretaria?</p>
       <a href="gestionale-invito.html" style="display:inline-block;background:var(--blu);color:#fff;text-decoration:none;border-radius:8px;padding:13px 24px;font-weight:600">Entra qui →</a>
@@ -125,7 +132,7 @@
     </section>
 
     <section id="fatture">
-      <div class="sec-head"><h2>Fatture</h2><button class="btn add" data-action="new-fattura">+ Nuova</button></div>
+      <div class="sec-head"><h2>Fatture</h2><button class="btn add" data-action="new-fattura">+ Nuova fattura</button></div>
       <div class="fatt-summary" id="fatt-summary"></div>
       <div class="viste" id="fatt-viste"></div>
       <div id="fatt-body"></div>
@@ -205,7 +212,7 @@
     </section>
 
     <section id="carte">
-      <div class="sec-head"><h2>Carte aziendali</h2><button class="btn add" data-action="new-carta">+ Nuova</button></div>
+      <div class="sec-head"><h2>Carte aziendali</h2><button class="btn add" data-action="new-carta">+ Nuova carta</button></div>
       <div class="gal-intro">Le carte prepagate (tipo bancomat) che dai ai tuoi dipendenti per le spese sul lavoro. Il saldo si aggiorna da solo con le ricariche e le spese che registrate.</div>
       <div class="grid" id="carte-list"></div>
     </section>
@@ -221,7 +228,7 @@
     </section>
 
     <section id="scadenzario">
-      <div class="sec-head"><h2>Scadenzario</h2><button class="btn add" data-action="new-scad">+ Nuova</button></div>
+      <div class="sec-head"><h2>Scadenzario</h2><button class="btn add" data-action="new-scad">+ Nuova scadenza</button></div>
       <div class="viste" id="scad-viste"></div>
       <div class="grid" id="scad-list"></div>
     </section>
@@ -317,7 +324,37 @@
     backfillMestieri();
   }
   async function save(){try{await window.storage.set(KEY,JSON.stringify(state));}catch(e){toast("Errore salvataggio");}}
-  function toast(m){const t=$("#toast");t.textContent=_msgPro(m);t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
+  /* ---- gli errori del database arrivano in inglese tecnico: qui vengono
+     tradotti in italiano semplice prima di finire sotto gli occhi dell'utente ---- */
+  function traduciErrore(s){
+    const M=[
+      [/row-level security|violates row-level/i,"il database ha bloccato la scrittura. Esci e rientra, poi riprova"],
+      [/Failed to fetch|NetworkError|network error|fetch failed|Load failed/i,"la connessione non risponde. Controlla la rete e riprova"],
+      [/JWT|token.*expired|invalid claim|not authenticated|No API key|refresh_token/i,"la sessione è scaduta: esci e rientra"],
+      [/duplicate key|unique constraint/i,"esiste già un elemento uguale"],
+      [/Could not find the .+ column|column .* does not exist|schema cache/i,"manca un aggiornamento del database (colonna non trovata)"],
+      [/violates foreign key/i,"un collegamento non torna: ricarica la pagina e riprova"],
+      [/timeout|timed out|57014/i,"il database non ha risposto in tempo. Riprova"],
+      [/permission denied/i,"permessi insufficienti: esci e rientra, poi riprova"]
+    ];
+    for(const p of M){
+      if(p[0].test(s)){const i=s.indexOf(":");return (i>0&&i<30?s.slice(0,i+1)+" ":"Errore: ")+p[1];}
+    }
+    return s;
+  }
+  /* Il messaggio capisce da solo se e' un errore (resta 5 secondi, rosso)
+     o una conferma (verde). Prima tutto spariva in 1,9 secondi. */
+  function toast(m){
+    const t=$("#toast"), s=String(m);
+    const isErr=/^(errore|non salvat|non eliminat|non rimoss|nota non|attenzione|le vecchie voci)/i.test(s)||/manca la migrazione/i.test(s);
+    const isOk=/[✔✅📌]/.test(s);
+    t.textContent=_msgPro(isErr?traduciErrore(s):s);
+    t.classList.remove("ok","err");
+    if(isErr)t.classList.add("err");else if(isOk)t.classList.add("ok");
+    t.classList.add("show");
+    clearTimeout(t._t);
+    t._t=setTimeout(()=>t.classList.remove("show"),isErr?5000:2600);
+  }
   /* Solo professionista: i testi dei toast/confirm passano dalla mappa _FRASI (un solo punto qui).
      Artigiano e negozio restano invariati. Non tocca il contenuto utente già interpolato (numeri, nomi). */
   function _msgPro(m){return ruoloUtente==='professionista'?_swapPratiche(String(m)):m;}
@@ -6873,3 +6910,5 @@
 <script src="/js/ai-integrazione.js"></script>
 <script src="/js/fondatore.js"></script>
 <script src="/js/aiuti.js"></script>
+</body>
+</html>

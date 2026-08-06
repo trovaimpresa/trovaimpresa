@@ -8,7 +8,7 @@
     /* testo */
     --testo:      #0F172A;
     --testo-2:    #475569;
-    --testo-3:    #94A3B8;
+    --testo-3:    #64748B; /* era #94A3B8: troppo chiaro su bianco, non si leggeva */
 
     /* superfici */
     --sfondo:     #F8FAFC;
@@ -44,7 +44,7 @@
   .landing-top{background:var(--blu-scuro);color:#fff;padding:30px 16px 26px;text-align:center}
   .landing-top .mk{font-size:30px;margin-bottom:8px}
   .landing-top h1{font-size:23px;font-weight:800;letter-spacing:-.3px}
-  .landing-top small{display:block;font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-top:4px}
+  .landing-top small{display:block;font-size:13px;opacity:.9;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-top:4px}
   .landing-sub{font-size:15px;color:var(--muted);text-align:center;margin:24px 0 22px;font-weight:500}
   .panels{display:grid;grid-template-columns:1fr;gap:14px;max-width:560px;margin:0 auto}
   @media(min-width:640px){.panels{grid-template-columns:repeat(3,1fr)}}
@@ -224,8 +224,12 @@
   #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:80;display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
   #lightbox.open{display:flex}
   #lightbox img{max-width:100%;max-height:100%;border-radius:8px}
-  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:11px;font-size:14px;font-weight:600;z-index:90;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:14px 22px;border-radius:11px;font-size:16px;font-weight:600;line-height:1.45;text-align:center;max-width:min(92vw,560px);z-index:90;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  /* verde quando ha salvato, rosso quando qualcosa e' andato storto:
+     il colore si capisce anche prima di leggere */
+  .toast.ok{background:var(--ok)}
+  .toast.err{background:var(--err)}
   .wrap{max-width:1140px}
   header .top-in, nav.tabs{max-width:1140px}
   /* zoom rimosso: rendeva sfocati testi e click su alcuni browser */
@@ -292,7 +296,7 @@
   .side .back:hover{background:var(--bordo)}
   .side-brand{min-width:0}
   .side-brand h1{font-size:15.5px;font-weight:800;letter-spacing:-.2px;color:var(--testo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .side-brand small{display:block;font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side-brand small{display:block;font-size:12.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side .btn-new{width:100%;margin:0 0 14px;box-shadow:none}
   .side nav.tabs{display:flex;flex-direction:column;gap:0;margin:0;padding:0;max-width:none;overflow:visible}
   /* TAPPA 2 — ogni voce di menu e' una card. Il bordo colorato tutto attorno
@@ -307,7 +311,7 @@
   .side nav.tabs button.active{background:var(--blu-tenue);border-color:var(--blu);color:var(--testo)}
   .side nav.tabs button.active svg{color:var(--blu-scuro)}
   /* etichette dei due gruppi: sentence case, non maiuscolo */
-  .side-group{font-size:12px;font-weight:600;color:var(--testo-3);
+  .side-group{font-size:13.5px;font-weight:700;color:var(--testo-2);
     margin:14px 0 6px;padding:0 2px;letter-spacing:0;text-transform:none}
   .side nav.tabs .side-group:first-child{margin-top:0}
   .main{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column}
@@ -368,7 +372,7 @@
   /* pulsanti in cima alla landing + piede sidebar */
   .landing-top{position:relative}
   .lt-actions{position:absolute;top:12px;right:14px;display:flex;gap:8px}
-  .lt-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:9px;padding:8px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .lt-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:9px;padding:9px 15px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap}
   .lt-btn:hover{background:rgba(255,255,255,.24)}
   @media(max-width:640px){.lt-actions{position:static;justify-content:center;margin-bottom:12px}}
 
@@ -408,7 +412,7 @@
     .side .btn-new{margin:0 0 8px}
     .side nav.tabs{flex-direction:row;overflow-x:auto;gap:0;padding-bottom:2px;-webkit-overflow-scrolling:touch}
     .side nav.tabs button{flex:0 0 auto;width:auto;padding:10px 12px}
-    .side-group{font-size:11px;margin:10px 0 5px}
+    .side-group{font-size:12.5px;margin:10px 0 5px}
     .sheet{margin:0;min-height:100vh;border-radius:0}
     /* su 375px 28px per lato mangiavano il 15% della larghezza */
     .main .wrap{padding:16px 16px 40px}
@@ -500,7 +504,7 @@
   .tb-id strong{display:flex;align-items:center;font-size:15px;font-weight:600;color:#fff;
     line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tb-id strong #tb-panel-name{overflow:hidden;text-overflow:ellipsis}
-  .tb-id .tb-sub{display:block;font-size:11px;font-weight:500;color:#B5D4F4;line-height:1.3}
+  .tb-id .tb-sub{display:block;font-size:12.5px;font-weight:500;color:#B5D4F4;line-height:1.3}
   .tb-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
   .tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
     height:34px;padding:0 12px;border:none;border-radius:var(--r);
@@ -516,7 +520,7 @@
   /* contatori del menu: visibili solo se c'e' un numero (:empty li nasconde) */
   /* line-height fissa a 16px: col padding fa 20px, esattamente l'altezza
      dell'icona, cosi' le card col contatore non diventano piu' alte delle altre. */
-  .tab-cnt{flex:0 0 auto;margin-left:auto;font-size:12px;font-weight:700;
+  .tab-cnt{flex:0 0 auto;margin-left:auto;font-size:13px;font-weight:700;
     line-height:16px;border-radius:20px;padding:2px 8px}
   .tab-cnt:empty{display:none}
   .tab-cnt.attesa{background:var(--attesa-bg);color:var(--attesa)}
