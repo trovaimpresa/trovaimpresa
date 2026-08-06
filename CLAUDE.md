@@ -152,6 +152,65 @@ Struttura confermata da Alessio, **non riproporne altre** senza che lo chieda lu
   una quota. Il sistema crediti (quota mensile, crediti extra, log consumi, ricariche) è
   costruito e pronto: quando si vorrà venderla, va solo collegato a Stripe.
 
+## Gestionale Studio — la versione per i professionisti (6 agosto 2026)
+Non è un file a parte: è **lo stesso `gestionale-app.html`** che cambia faccia quando
+`ruoloUtente === 'professionista'` (letto da `imprese.tipo`). Artigiani, imprese e negozi
+non vedono niente di tutto questo: ogni funzione qui sotto restituisce vuoto per loro.
+
+**Cosa c'era già prima di oggi**: titolo "Gestionale Studio", lavori→pratiche in tutti i
+testi visibili (mappa `_FRASI` + `_swapPratiche`), reparti tipo Progettazione/Direzione
+lavori/Catasto, scadenzario con SCIA/CILA/Permesso/Agibilità.
+
+**Aggiunto il 6 agosto:**
+
+### 1. Menu su misura — `adattaMenuProfessionista()`
+Nasconde **Mezzi, Attrezzature e Carte** (`TAB_NASCOSTI_PRO`), rinomina *Squadra* in
+**Collaboratori** e il gruppo *Azienda* in **Studio**. Se l'utente era dentro una sezione
+nascosta viene riportato al Riepilogo. **Si nasconde soltanto**: i dati restano nel database
+e tornano visibili da soli se il profilo cambia tipo.
+
+### 2. Campi della pratica — `bloccoPratica()` / `leggiCampiPratica()`
+Nel form del lavoro compare "📄 Dati della pratica": tipo (CILA, CILAS, SCIA, PdC,
+paesaggistica, agibilità, sanatoria, accatastamento, voltura), stato (da preparare →
+depositata → istruttoria → integrazioni → approvata → archiviata), Comune, protocollo,
+data di deposito, e i catastali foglio/particella/sub.
+- Colonne su `gest_lavori`: `sql/gest-pratiche-professionisti.sql`
+- `renderJobs()` per i professionisti legge `select("*")` invece dell'elenco fisso: servono
+  i campi pratica per riaprirli in modifica, e con `*` non si rischia l'errore colonna assente.
+
+### 3. La parcella — `calcolaParcella()` / `bloccoParcella()`
+**La formula, che è la parte da non sbagliare:**
+```
+cassa      = compenso × cassa%          (4% Inarcassa, 5% Geometri)
+imponibile = compenso + cassa + spese
+IVA        = imponibile × iva%
+ritenuta   = compenso × 20%             ← SOLO sul compenso, mai su cassa e spese
+totale     = imponibile + IVA − ritenuta
+```
+Verifica: 1.000 € compenso, cassa 4%, IVA 22%, con ritenuta → **1.068,80 €**.
+Con 100 € di spese la ritenuta resta 200 €, non sale.
+- La **ritenuta si applica solo se il cliente è sostituto d'imposta** (azienda,
+  professionista, condominio). Con un privato NO: nel form c'è scritto sotto la casella.
+- Colonne su `gest_preventivi`: `sql/gest-parcella-professionisti.sql`
+- Il riepilogo si ricalcola dal vivo (`aggiornaRiepilogoParcella`) su ogni modifica.
+
+### 4. Il PDF — dentro `prevPdf()`
+Con `isParcella` il titolo diventa **PARCELLA**, il riquadro del totale diventa il riepilogo
+riga per riga fino a **NETTO A PAGARE**, e il file si salva come `parcella-N-cliente.pdf`.
+**Usa la stessa `calcolaParcella()` del form**: se un giorno si cambia la formula, va
+cambiata in un punto solo e i due restano allineati.
+
+### Paracadute contro le colonne mancanti
+Sia le pratiche sia la parcella hanno `eColonna...Mancante()` + `senzaCampi...()`: se la
+migrazione SQL non è stata eseguita, il salvataggio **viene ritentato senza quei campi** e
+l'utente riceve l'avviso "manca la migrazione SQL", invece di perdere tutto il lavoro.
+È la lezione della colonna `condivisibile`: applicarlo sempre quando si aggiungono colonne.
+
+### Cosa manca ancora al Gestionale Studio
+- Il gestionale per **negozi** e **noleggio** ha i suoi file (`gestionale-negozio.html`,
+  `gestionale-noleggio.html`) e non è stato toccato.
+- Nessuno l'ha ancora provato sul serio: al primo test vero aspettarsi ritocchi.
+
 ## Registrazione (rifatta — luglio 2026)
 - Il profilo in `imprese` NON si crea più con insert manuale lato frontend: lo crea il **trigger `on_auth_user_created`** (function `crea_profilo_impresa`, security definer) leggendo `raw_user_meta_data`.
 - I 4 form (`registrazione-impresa/artigiano/professionista/negozio`) + `attiva-profilo` passano i dati in `signUp({ options: { data: {...} } })` con chiavi ESATTE: `tipo, nome_attivita, nome, telefono, citta, provincia, regione, mestiere` (negozio senza `mestiere`).
@@ -323,9 +382,14 @@ troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
 - Guide "quanto costa" ancora da arricchire: **bagno (priorità, è la ricerca più fatta)**,
   tetto, cappotto, imbiancare, fotovoltaico. Sono le più corte e le più vecchie: il modello
   da raggiungere è `quanto-costa-parete-cartongesso.html`.
-- **Logo rotto su 40 pagine**: cercano `/trovaimpresa_logo_transparent.png`, che non esiste.
-  Il file giusto è `img/trovaimpresa-logo.svg`. Errore 404 in console, sostituzione meccanica.
-  Proposto il 6 agosto, Alessio non ha ancora deciso se farlo.
+- ~~Logo rotto su 40 pagine~~ **RISOLTO il 6 agosto**: cercavano `/trovaimpresa_logo_transparent.png`
+  che non esiste; sostituito con `/img/trovaimpresa-logo.svg` su tutte e 40. Controllato che
+  non ci siano altre immagini mancanti nel sito: non ce ne sono.
+- **Da provare**: il Gestionale Studio (menu, campi pratica, parcella, PDF) non l'ha ancora
+  usato nessuno davvero.
+- **Prezzi da confermare ad Alessio**: guida cucina (500–1.250 €/mq, spostare lo scarico
+  +30/50%, mobile 1.000–1.400 €/ml) e guida muro (tramezzo 40–50 €/mq, portante con
+  cerchiatura 2.000–7.000 €, putrelle 2,25–8,00 €/kg).
 - **Risposta alla domanda "marketplace o software"** (6 agosto 2026): **marketplace.** Le
   entrate previste sono Premium + pubblicità, con il gestionale come extra più avanti. Il sito
   è "una vetrina in più" per le imprese, gratis, e Alessio porta i privati con SEO e pubblicità.
