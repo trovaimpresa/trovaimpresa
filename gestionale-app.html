@@ -6364,14 +6364,16 @@
       </p>
     </div>
     <div id="gate-paywall" style="display:none;padding:28px 28px 32px;color:var(--testo);">
-      <p style="margin:0 0 12px;font-size:15px;line-height:1.6;">Il Gestionale &egrave; uno strumento professionale a parte: agenda, preventivi PDF, scadenze fiscali, squadra e cantieri, tutto in un unico posto.</p>
-      <p style="margin:0 0 18px;font-size:15px;line-height:1.6;">Attivalo per sbloccare l&rsquo;accesso completo:</p>
+      <p id="gate-paywall-titolo" style="margin:0 0 14px;font-size:20px;font-weight:800;line-height:1.4;">Il Gestionale &egrave; incluso nel piano Premium</p>
+      <p style="margin:0 0 12px;font-size:16px;line-height:1.7;">Cantieri, squadra, preventivi PDF, fatture, agenda, scadenze fiscali e mezzi: tutto in un unico posto.</p>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">Con il <strong>Premium</strong> lo sblocchi insieme a tutto il resto: <strong>5&euro; al mese</strong> oppure <strong>49&euro; l&rsquo;anno</strong>.</p>
       <div id="gate-btns">
-        <button onclick="attivaGestionale('mensile')" style="width:100%;padding:14px;margin-bottom:10px;border:none;border-radius:10px;background:var(--blu);color:#fff;font-size:var(--f-md);font-weight:700;cursor:pointer;">12&euro; / mese</button>
-        <button onclick="attivaGestionale('annuale')" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--blu-scuro);color:#fff;font-size:var(--f-md);font-weight:700;cursor:pointer;">119&euro; / anno &middot; risparmi 25&euro;</button>
+        <a href="/info-premium.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;margin-bottom:10px;border-radius:10px;background:var(--blu);color:#fff;font-size:17px;font-weight:700;">Scopri il Premium</a>
+        <a href="/prezzi.html" style="display:block;text-align:center;text-decoration:none;width:100%;padding:16px;border-radius:10px;background:var(--sfondo);color:var(--testo);font-size:16px;font-weight:700;">Vedi tutti i piani</a>
       </div>
-      <p style="margin:16px 0 0;font-size:12px;color:var(--testo-3);text-align:center;">Pagamento sicuro con Stripe &middot; disdici quando vuoi</p>
-      <p style="margin:14px 0 0;text-align:center;"><a href="#" onclick="history.back();return false;" style="color:var(--blu);font-size:var(--f-sm);text-decoration:none;">&larr; Torna indietro</a></p>
+      <p style="margin:18px 0 0;font-size:14px;color:var(--testo-3);text-align:center;line-height:1.6;">Pagamento sicuro con Stripe &middot; disdici quando vuoi</p>
+      <p style="margin:14px 0 0;font-size:15px;text-align:center;line-height:1.6;">Hai gi&agrave; il Premium? <a href="/login-impresa.html" style="color:var(--blu);font-weight:700;text-decoration:none;">Accedi</a></p>
+      <p style="margin:16px 0 0;text-align:center;"><a href="/" style="color:var(--blu);font-size:16px;text-decoration:none;font-weight:600;">&larr; Torna a TrovaImpresa</a></p>
     </div>
   </div>
 </div>
@@ -6381,11 +6383,30 @@
   var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
   var RETURN=location.origin+location.pathname;
   function q(id){return document.getElementById(id);}
-  /* ===== MANUTENZIONE — agosto 2026 =====
-     Il gestionale e' chiuso mentre lo sistemiamo. Entrano solo le email in AMMESSI.
-     Per riaprirlo a tutti: mettere MANUTENZIONE = false qui sotto. Nient'altro. */
-  var MANUTENZIONE = true;
+  /* ===== MANUTENZIONE =====
+     Se true, il gestionale e' chiuso a tutti tranne le email in AMMESSI.
+     Rimessa a false il 6 agosto 2026: aperto ai Premium. */
+  var MANUTENZIONE = false;
   var AMMESSI = ['pintoalessio@icloud.com'];   /* aggiungi qui altre email fra apici, separate da virgola */
+
+  /* ===== CHI PUO' ENTRARE — 6 agosto 2026 =====
+     Il gestionale e' incluso nel piano Premium (5 euro/mese o 49 euro/anno).
+     Chi e' Free vede la schermata che spiega come sbloccarlo.
+     Il blocco sulla card del pannello resta: questo chiude l'accesso diretto
+     di chi si scrive l'indirizzo a mano.
+     NOTA: e' un blocco lato pagina. I dati restano comunque protetti da RLS
+     su Supabase: ognuno vede solo i propri. */
+  function haPremium(row){
+    if(!row) return false;
+    var piano = String(row.piano||'').trim().toLowerCase();
+    if(piano !== 'premium') return false;
+    /* se c'e' una scadenza ed e' passata, non e' piu' Premium */
+    if(row.premium_scadenza){
+      var scad = new Date(row.premium_scadenza);
+      if(!isNaN(scad.getTime()) && scad.getTime() < Date.now()) return false;
+    }
+    return true;
+  }
 
   function showChecking(t){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='block';q('gate-checking').textContent=t;q('gate-paywall').style.display='none';q('gate-manutenzione').style.display='none';document.body.style.overflow='hidden';}
   function showPaywall(){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='none';q('gate-paywall').style.display='block';document.body.style.overflow='hidden';}
@@ -6439,11 +6460,6 @@
       }).then(function(){},function(){});
     }catch(_){}
   }
-  /* AGOSTO 2026 — Il gestionale e' incluso per tutti gli iscritti a TrovaImpresa.
-     Tolto l'abbonamento separato: non si controlla piu' gestionale_attivo e il
-     paywall non viene mai mostrato. showPaywall() e attivaGestionale() restano
-     definiti ma inutilizzati, per poterli riattivare in futuro senza riscrivere.
-     Qualsiasi errore di rete fa comunque entrare: nessuno resta bloccato fuori. */
   function ammesso(email){
     if(!MANUTENZIONE)return true;
     if(new URLSearchParams(location.search).get('chiave')==='apri')return true; /* scorciatoia per Alessio */
@@ -6458,27 +6474,36 @@
     window._gc=gc;
     showChecking('Apertura del gestionale…');
     var deciso=false;
-    var decidi=function(email){
+    var chiave=(new URLSearchParams(location.search).get('chiave')==='apri');
+    /* esito: 'ok' entra · 'manutenzione' · 'premium' mostra la schermata del Premium */
+    var decidi=function(email,esito){
       if(deciso)return; deciso=true;
-      if(ammesso(email)){hideGate();}else{showManutenzione();}
+      if(chiave){hideGate();return;}                       /* scorciatoia per Alessio */
+      if(!ammesso(email)){showManutenzione();return;}
+      if(esito==='premium'){showPaywall();return;}
+      hideGate();
     };
     gc.auth.getSession().then(function(r){
       var s=r.data && r.data.session;
-      if(!s){decidi('');return;}
+      /* senza login non si entra: si vede la schermata del Premium col link per accedere */
+      if(!s){decidi('','premium');return;}
       window._gestUid=s.user.id;
-      gc.from('imprese').select('email').eq('user_id',s.user.id).maybeSingle().then(function(res){
+      gc.from('imprese').select('email, piano, premium_scadenza').eq('user_id',s.user.id).maybeSingle().then(function(res){
         var row=res && res.data;
         window._gestEmail=(row&&row.email)||s.user.email||'';
-        registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail));
-        decidi(window._gestEmail);
+        var ok=haPremium(row);
+        window._gestPremium=ok;
+        registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
+        decidi(window._gestEmail, ok?'ok':'premium');
       },function(){
+        /* la lettura non e' riuscita (rete): si entra, per non bloccare chi paga */
         window._gestEmail=s.user.email||'';
         registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail));
-        decidi(window._gestEmail);
+        decidi(window._gestEmail,'ok');
       });
-    },function(){decidi('');});
-    /* rete lenta o bloccata: dopo 8 secondi decide comunque */
-    setTimeout(function(){decidi(window._gestEmail||'');},8000);
+    },function(){decidi('','premium');});
+    /* rete lenta o bloccata: dopo 8 secondi decide comunque e fa entrare */
+    setTimeout(function(){decidi(window._gestEmail||'','ok');},8000);
   }
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',start);}else{start();}
 })();
