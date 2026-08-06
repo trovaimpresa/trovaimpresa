@@ -445,7 +445,7 @@
           <option value="ordine">Ordine a fornitore (merce che entra)</option>
         </select>
         <input id="nm-prodotto" placeholder="Prodotto *" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
-        <input id="nm-quantita" type="number" placeholder="Quantità" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
+        <input id="nm-quantita" type="number" step="0.01" placeholder="Quantità (anche con la virgola)" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <input id="nm-importo" type="number" step="0.01" placeholder="Importo €" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <input id="nm-controparte" placeholder="Cliente o fornitore" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
         <input id="nm-data" type="date" style="width:100%;padding:10px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box">
@@ -1946,7 +1946,8 @@
     if(!prodotto){alert("Inserisci il prodotto");return;}
     if(!(sb&&sbUid)){alert("Non connesso");return;}
     const dati={tipo:$("#nm-tipo").value, prodotto,
-      quantita:parseInt($("#nm-quantita").value)||0,
+      /* decimali anche qui: si scaricano 12,5 mq o mezzo bancale */
+      quantita:parseFloat($("#nm-quantita").value)||0,
       importo:parseFloat($("#nm-importo").value)||0,
       controparte:$("#nm-controparte").value.trim()||null,
       data_mov:$("#nm-data").value||null,

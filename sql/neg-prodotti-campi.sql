@@ -31,3 +31,23 @@ SELECT column_name, data_type, column_default
 FROM information_schema.columns
 WHERE table_schema='public' AND table_name='neg_prodotti'
 ORDER BY ordinal_position;
+
+-- ============================================================
+-- AGGIUNTA del 6 agosto 2026 (dopo aver visto lo schema reale)
+-- quantita e soglia_minima erano "integer": con 12,5 mq il database
+-- rifiutava la scrittura. In una rivendita i mezzi bancali e i mq con
+-- la virgola sono la norma, quindi vanno a decimali.
+-- Da intero a numerico non si perde nulla: i valori esistenti restano uguali.
+-- ============================================================
+ALTER TABLE public.neg_prodotti
+  ALTER COLUMN quantita      TYPE numeric(12,3),
+  ALTER COLUMN soglia_minima TYPE numeric(12,3);
+
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema='public' AND table_name='neg_prodotti'
+  AND column_name IN ('quantita','soglia_minima');
+
+-- Stesso problema sui movimenti di magazzino: scaricare 12,5 mq non era possibile.
+ALTER TABLE public.neg_movimenti
+  ALTER COLUMN quantita TYPE numeric(12,3);
