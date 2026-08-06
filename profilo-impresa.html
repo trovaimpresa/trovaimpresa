@@ -1032,7 +1032,9 @@ async function submitPreventivo(){
     }
     const telefono=document.getElementById('prev-telefono').value.trim();
     const descrizione=document.getElementById('prev-descrizione').value.trim();
-    const riga={impresa_id:iid,nome,email,telefono,citta,categoria_lavoro:categoria,descrizione,data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,created_at:new Date().toISOString()};
+    /* tipo_lavoro e categoria_lavoro sono due colonne diverse: il pannello mostra
+       "Lavoro" leggendo tipo_lavoro, che il form non riempiva mai (restava "—"). */
+    const riga={impresa_id:iid,nome,email,telefono,citta,categoria_lavoro:categoria,tipo_lavoro:categoria,descrizione,data_preferita:dataPreferita||null,urgenza:urgenza||null,budget:budget||null,foto:fotoUrl,created_at:new Date().toISOString()};
     /* La colonna "condivisibile" potrebbe non esistere nel database: se manca,
        PostgREST risponde 400 e la richiesta andava persa. Ora si riprova senza,
        cosi' la richiesta del cliente arriva comunque. */

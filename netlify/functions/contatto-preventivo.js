@@ -37,11 +37,18 @@ exports.handler = async function (event) {
       .maybeSingle();
     if (!impresa) return { statusCode: 403, body: 'Impresa non trovata' };
 
-    const { data: prev } = await admin
+    // NOTA (6 agosto 2026): qui c'era anche la colonna "sbloccato", residuo del
+    // vecchio pay-per-lead. E' stata tolta dal database, quindi la query falliva
+    // e il pannello mostrava "Errore nel caricamento" al posto dei contatti.
+    const { data: prev, error: prevErr } = await admin
       .from('preventivi')
-      .select('id, impresa_id, sbloccato, email, telefono, nome')
+      .select('id, impresa_id, email, telefono, nome')
       .eq('id', preventivo_id)
       .maybeSingle();
+    if (prevErr) {
+      console.error('[contatto-preventivo] lettura fallita:', prevErr.message);
+      return { statusCode: 500, body: 'Errore lettura richiesta: ' + prevErr.message };
+    }
     if (!prev) return { statusCode: 404, body: 'Preventivo non trovato' };
 
     const isDiretta = String(prev.impresa_id) === String(impresa.id);
