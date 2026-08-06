@@ -1535,6 +1535,13 @@
   flex:0 0 auto; width:auto; height:42px; padding:0 16px;
   font-size:15px; font-weight:600; border-radius:10px;
 }
+/* il menu "..." della scheda: sta a destra, e il popup si aggancia a lui */
+.wrap section .job .job-menu{ position:relative; margin-left:auto; display:inline-flex; }
+.wrap section .job .job-menu .lav-dots{
+  width:42px; height:42px; font-size:22px;
+  border:1px solid var(--bordo-forte); border-radius:10px; background:var(--card);
+}
+.wrap section .job .job-menu .lav-pop{ right:0; top:46px; }
 
 /* il bordo a sinistra dice come sta il lavoro, come nel Riepilogo */
 .wrap section .job:has(.pall.ritardo){ border-left-color:var(--err); }

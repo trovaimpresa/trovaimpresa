@@ -224,6 +224,90 @@ l'utente riceve l'avviso "manca la migrazione SQL", invece di perdere tutto il l
 ### Cosa manca ancora al Gestionale Studio
 - Nessuno l'ha ancora provato sul serio: al primo test vero aspettarsi ritocchi.
 
+## Gestionale imprese/artigiani — revisione completa (6 agosto 2026, sera)
+Revisione totale di `gestionale-app.html` (3 analisi separate: bug, grafica, efficienza) e
+poi sistemato tutto in blocchi, con test di Alessio a ogni passo. Giudizio: da 7 a ~8/10.
+I punti di forza da non toccare: linguaggio "da cantiere", patente a crediti, scadenze
+sicurezza squadra, XML FatturaPA con pre-validazione in italiano, backup/export libero.
+
+### Blocco 1 — Salvataggi sicuri (niente più "Salvato ✔" falso)
+- Il pattern `.select('id')` + "Non salvato: nessuna riga modificata" (già presente in
+  mezzi/carte/scadenzario) è stato esteso a TUTTE le scritture vecchie: modifica lavoro
+  (`saveJob`), stati e delete preventivi, `savePrev`, `saveFattura`, `fattCambiaStato`,
+  `eliminaFattura`, `saveCli`, `squadraSave`, `stato-supa`, `scad-stato`, `sq-revoca`,
+  delete di lavori/spese/scadenze/clienti.
+- **Rete anti-doppioni** su fatture e preventivi: nel salvataggio (delete righe + re-insert)
+  ora si controlla l'esito della delete E si verifica con una select che non siano rimaste
+  righe vecchie prima di inserire le nuove. Prima una delete bloccata da RLS raddoppiava le voci.
+- `fattSincronizzaLavori` non è più muta: se il riflesso su `gest_lavori.fatt_stato` fallisce, avvisa.
+- `prevToLavoro`: se il preventivo non passa ad "accettato", avvisa (prima si rischiava il lavoro doppio).
+
+### Blocco 1b — Riepilogo onesto quando la rete manca
+- `renderRiepilogo`: flag `erroreLettura`/`erroreLettura2` + controllo `r.error` su ogni
+  query dei due `Promise.all` (prima i catch vuoti mostravano "Tutto in ordine" con gli zeri).
+- Fallimento totale → banner rosso fisso `.rie-errore` con pulsante **Riprova**
+  (`data-action="rie-riprova"`); fallimento parziale → avviso "alcuni numeri incompleti".
+
+### Blocco 1c — Note calendario su Supabase
+- Tabella **`gest_note`** (`sql/gest-note.sql`): una nota per giorno per reparto, RLS
+  owner-all + team-read. Prima stavano in localStorage e si perdevano cambiando dispositivo.
+- `caricaNote()` in `renderCal`: carica in `noteCache`, **migra da sola** le vecchie note del
+  browser (upsert ignoreDuplicates) e poi svuota il localStorage. Se la tabella non c'è
+  ancora, si torna al vecchio modo con avviso "manca la migrazione SQL" — nessun blocco.
+- ⚠️ VERIFICARE che Alessio abbia eseguito `sql/gest-note.sql` su Supabase.
+
+### Blocco 2 — Grafica e messaggi
+- Aggiunti `<!DOCTYPE html>`, `<head>`, `<title>Gestionale — TrovaImpresa</title>`, `noindex`
+  (prima il file iniziava con `<meta>` nudo → quirks mode).
+- **Toast rifatto** (`toast()` + `traduciErrore()`): errori rossi che restano 5s, conferme
+  verdi 2,6s; gli errori Supabase in inglese (RLS, Failed to fetch, JWT, duplicate key,
+  colonna mancante...) vengono tradotti in italiano semplice. CSS `.toast.ok`/`.toast.err`.
+- **Condomini → Clienti ovunque** per imprese/artigiani/negozi (Riepilogo, form lavoro,
+  conferme, avvisi XML, contatori). "Condominio" resta SOLO come tipo di cliente
+  (Privato/Azienda/Condominio) coi suoi campi. La mappa `_FRASI` dei professionisti ora
+  semplicemente non trova più le frasi vecchie: nessun danno.
+- **Card lavori**: da 7 pulsanti a 2-3 (Modifica + azione di stato) + menu "⋯" con tutto il
+  resto (Mappa, Foto, WhatsApp, PDF, fattura, Elimina in rosso in fondo). BUG TROVATO: in
+  modalità "schede sempre" il registro `TAB_MENU` non veniva mai riempito (stava solo nel ramo
+  tabella di `renderTabella`) → spostato prima del bivio; il gestore `tab-menu` ora funziona
+  anche nelle card (cerca `td` O `.job-menu`). `jobCardSupa` ha il 5° parametro `menuTab`
+  ("lav" o "ag").
+- Menu laterale leggibile: `--testo-3` scurito a #64748B (era #94A3B8, contrasto 2,8:1),
+  `.side-group` 13,5px, contatori/sottotitoli ingranditi, bottoni "+ Nuova fattura/carta/scadenza".
+
+### Blocco 3 — Velocità
+- **jsPDF e xlsx non si caricano più all'avvio** (~1,2MB): `caricaJsPDF()`/`caricaXLSX()`
+  al primo clic, stesso pattern di `mpCaricaLeaflet`. I guard nelle 4 funzioni PDF/Excel
+  sono diventati `if(!(await caricaJsPDF())){...}`.
+- **Render pigro**: `renderAll()` non ridisegna più le 15 sezioni (~60 query) — segna tutte
+  "da rifare" (`_tabSporchi`), ridisegna solo la sezione aperta + contatori + SEMPRE
+  `renderClienti`/`renderDip` (riempiono `cliCache`/`dipCache`, servono alle tendine del form
+  lavoro da qualsiasi sezione). Il click sui tab ridisegna se sporco o se nella lista `SEMPRE`
+  (lavori/agenda/mappa/richieste/mezzi/attrezzature). Mappa `RENDER_TAB` tab→funzione.
+- **`rinfresca("tab1","tab2",...)`**: dopo i salvataggi ridisegna solo la sezione corrente,
+  le altre le segna sporche. Usata in salvataggi/stati/delete di fatture, preventivi, lavori, clienti.
+- **Doppio render all'avvio eliminato**: `getSession` + `onAuthStateChange` passano entrambi
+  da `_authRefresh()` con guardia `_authUidVisto`.
+
+### Bug noti RESTANTI su gestionale-app (non urgenti)
+- Galleria: `galNomeOp()` cerca in `db().dipendenti` (vuoto) invece che in `dipCache` →
+  sotto le foto compare l'UUID dell'operatore invece del nome.
+- Calendario su mobile illeggibile (celle ~48px, testo 10,5px): conviene una lista per giorno sotto i 760px.
+- Campi obbligatori non segnati nei form (validazione = solo toast).
+- Un `matchMedia(...).addEventListener` NON protetto da try (i Safari vecchi non ce l'hanno)
+  vicino al listener dei tab; la copia protetta esiste più sopra. Da unificare.
+- `carbMap` assegnata senza `let/var` (globale implicita).
+
+### Funzioni future in ordine di valore (per quando Alessio le chiede)
+1. Email automatica delle scadenze (DURC, revisioni, visite mediche, fatture scadute):
+   Resend + scheduled function tipo `controlla-scadenze-premium.js`. ~1 giorno, valore enorme.
+2. Rapportino ore per operaio per giorno (il costo orario in Squadra c'è già, inutilizzato).
+3. Prima nota / cassa (entrate-uscite generiche: affitto, F24, leasing).
+4. Ponte marketplace→gestionale: richiesta dal sito → un clic → preventivo nel gestionale.
+5. PWA (manifest + service worker): icona in home, regge il cantiere senza campo.
+6. Nel form azienda c'è ancora scritto "la fattura elettronica la sto ancora costruendo":
+   FALSO, il generatore XML c'è ed è buono. Da correggere quel testo.
+
 ## Gestionale Negozio e Noleggio (6 agosto 2026)
 `gestionale-negozio.html` e `gestionale-noleggio.html` erano in buona parte copie del
 gestionale imprese con sopra le sezioni di magazzino. **Condividono le tabelle
@@ -419,6 +503,17 @@ viveva solo nel DB — stesso slug, ora con pagina statica).
 79 clic totali, di cui **57 di brand** ("trovaimpresa"): SEO vera = 22 clic in 3 mesi.
 La homepage prende 67 clic su 79. Le guide fanno 488 impressioni ma CTR 0,8% (posizione
 troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
+
+## PROSSIMI LAVORI CONCORDATI (7 agosto 2026)
+1. **Domani**: stessa revisione completa fatta su gestionale-app (bug + salvataggi sicuri +
+   grafica + velocità) anche su **gestionale professionisti (Studio), `gestionale-noleggio.html`
+   e `gestionale-negozio.html`**. Ricorda: negozio e noleggio condividono le tabelle `neg_*`
+   (toccarne uno = toccare anche l'altro), e lo Studio è dentro `gestionale-app.html`
+   (quindi ha già ereditato quasi tutti i fix di oggi — verificare i pezzi solo-professionista:
+   pratiche, parcella, `_FRASI`, menu adattato).
+2. **Poi**: lo stesso lavoro di revisione (bug, grafica, velocità, salvataggi sicuri) va fatto
+   anche sul **sito pubblico** (trovaimpresa.com: home, cerca-*, profilo-impresa, pannelli,
+   registrazioni...). Richiesto esplicitamente da Alessio il 6 agosto.
 
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
