@@ -107,6 +107,13 @@
     .seg button{min-width:0}
   }
 </style>
+<style>
+/* Le tabelle dei prezzi sbordavano dallo schermo del telefono: nessuna aveva un
+   contenitore scorrevole, quindi tutta la pagina slittava a destra. */
+@media (max-width: 700px) {
+  table { display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+}
+</style>
 </head>
 <body>
 
@@ -255,7 +262,24 @@
 <footer>
   <div class="wrap">
     <p>TrovaImpresa — trova imprese edili e artigiani verificati nella tua zona. I prezzi indicati sono stime orientative e possono variare per zona, materiali e condizioni del cantiere.</p>
-  </div>
+  
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>·
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>·
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>·
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>·
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>·
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+      <!-- P.IVA: appena Alessio la fornisce va aggiunta qui, subito dopo l'email -->
+    </p>
+</div>
 </footer>
 
 <script type="application/ld+json">
@@ -283,7 +307,7 @@
   var eurMq = 16;
 
   function fmt(n){ return Math.round(n/50)*50; }
-  function euro(n){ return n.toLocaleString('it-IT'); }
+  function euro(n){ return n.toLocaleString('it-IT',{useGrouping:'always'}); }
 
   function calc(){
     var add = 0;
@@ -314,5 +338,9 @@
 </script>
 
 <script src="/js/parole.js"></script>
+<!-- Senza questo, ogni pulsante "Trova un artigiano" di questa pagina portava
+     su una ricerca VUOTA che chiedeva di ridigitare la città: il lettore aveva
+     appena letto il prezzo ed era il momento buono per farlo entrare. -->
+<script src="/js/citta-obbligatoria.js"></script>
 </body>
 </html>

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <link rel="canonical" href="https://trovaimpresa.com/registrazione-professionista">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrazione Professionista - TrovaImpresa</title>
+  <meta name="description" content="Registrati gratis come professionista dell'edilizia (geometra, architetto, ingegnere) su TrovaImpresa e ricevi richieste di consulenza dalla tua zona.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { color: #111; }
+    html, body {
+      background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+    }
+    .container { max-width: 620px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .header { background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%); color: white; padding: 32px 24px; text-align: center; }
+    .header h1 { font-size: 24px; margin-bottom: 8px; }
+    .header p { font-size: 14px; opacity: 0.9; }
+    .steps { display: flex; justify-content: space-between; padding: 20px 24px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+    .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #e0e0e0; color: #333; font-size: 15px; }
+    .step.active .step-circle { background: #0066ff; color: white; }
+    .step-label { font-size: 11px; color: #999; text-align: center; }
+    .step.active .step-label { color: #0066ff; font-weight: 600; }
+    .content { padding: 32px; }
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+    .form-section h2 { font-size: 20px; color: #111; margin-bottom: 24px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #111; margin-bottom: 7px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0,102,255,0.1); }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .required { color: #ff6b6b; }
+    .buttons { display: flex; gap: 12px; margin-top: 28px; }
+    .btn-back { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #e0e0e0; color: #111; }
+    .btn-next { flex: 1; padding: 13px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #0066ff; color: white; }
+    .btn-next:hover { background: #0052cc; }
+    .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
+    .upload-area { border: 2px dashed #ddd; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; background: #fafafa; }
+    .upload-area:hover { border-color: #0066ff; background: rgba(0,102,255,0.05); }
+    .upload-area .upload-icon { font-size: 36px; margin-bottom: 8px; }
+    .upload-area p { font-size: 14px; color: #222; margin-bottom: 4px; }
+    .upload-area small { font-size: 12px; color: #aaa; }
+    .file-selected { display: none; align-items: center; gap: 10px; background: #e8f5e9; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
+    .file-selected span { font-size: 13px; color: #0066ff; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-selected button { background: none; border: none; color: #aaa; font-size: 18px; cursor: pointer; }
+    .file-selected button:hover { color: #f44336; }
+    #logo-input { display: none; }
+    .piano-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    .piano-card { border: 2px solid #ddd; border-radius: 10px; padding: 16px; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .piano-card:hover { border-color: #0066ff; }
+    .piano-card.selected { border-color: #0066ff; background: #e8f5e9; }
+    .piano-card.selected-premium { border-color: #7b1fa2; background: #f3e5f5; }
+    .piano-card .piano-icon { font-size: 28px; margin-bottom: 6px; }
+    .piano-card .piano-nome { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .piano-card .piano-prezzo { font-size: 13px; color: #888; margin-bottom: 8px; }
+    .piano-card ul { list-style: none; text-align: left; font-size: 12px; color: #222; }
+    .piano-card ul li { padding: 2px 0; }
+    .piano-card ul li::before { content: "✓ "; color: #0066ff; font-weight: 700; }
+    .piano-card.selected-premium ul li::before { color: #7b1fa2; }
+    .password-wrapper { position: relative; }
+    .password-wrapper input { padding-right: 44px; }
+    .toggle-pw {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #aaa;
+      padding: 0; display: flex; align-items: center; transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: #0066ff; }
+    .map-dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; color: #111; border-bottom: 1px solid #f0f0f0; }
+    .map-dd-item:hover { background: #e8f5e9; }
+    .map-dd-item:last-child { border-bottom: none; }
+    /* Prestazioni a checkbox raggruppate per categoria */
+    .prest-cat { border: 1px solid #e5e5e5; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+    .prest-cat-head { background: #f4f8ff; padding: 10px 14px; font-weight: 700; font-size: 13px; color: #0052cc; border-bottom: 1px solid #e5e5e5; }
+    .prest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; padding: 12px 14px; }
+    .prest-check { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #222; cursor: pointer; padding: 5px 4px; border-radius: 6px; line-height: 1.35; }
+    .prest-check:hover { background: #f0f7ff; }
+    .prest-check input { width: auto; margin-top: 2px; accent-color: #0066ff; flex-shrink: 0; }
+    @media (max-width: 768px) { .prest-grid { grid-template-columns: 1fr; } }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  /* MOBILE */
+  html, body { overflow-x: hidden; }
+  @media (max-width: 768px) {
+    body { padding: 10px !important; }
+    .container { margin: 16px auto !important; border-radius: 10px !important; }
+    .header { padding: 20px 16px !important; }
+    .header h1 { font-size: 1.3rem !important; }
+    .header p  { font-size: 0.85rem !important; }
+    .steps { padding: 12px 16px !important; gap: 6px; flex-wrap: wrap; }
+    .step  { font-size: 0.7rem !important; }
+    .content { padding: 16px !important; }
+    .form-section h2 { font-size: 1.05rem !important; }
+    .form-grid { grid-template-columns: 1fr !important; }
+    .nav-buttons { gap: 8px !important; }
+    .btn-prev, .btn-next { padding: 10px 16px !important; font-size: 0.85rem !important; }
+  }
+</style>
+<link rel="stylesheet" href="/css/mobile.css?v=3">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>👔 Registrazione Professionista</h1>
+      <p>Entra nella rete TrovaImpresa</p>
+    </div>
+
+    <div class="steps">
+      <div class="step active" id="step-1-indicator"><div class="step-circle">1</div><div class="step-label">Anagrafica</div></div>
+      <div class="step" id="step-2-indicator"><div class="step-circle">2</div><div class="step-label">Professione</div></div>
+      <div class="step" id="step-3-indicator"><div class="step-circle">3</div><div class="step-label">Contatti</div></div>
+      <div class="step" id="step-4-indicator"><div class="step-circle">4</div><div class="step-label">Logo</div></div>
+    </div>
+
+    <div class="content">
+
+      <!-- STEP 1 -->
+      <div class="form-section active" id="step-1">
+        <h2>I tuoi dati professionali</h2>
+        <div class="form-group">
+          <label>Nome / Ragione sociale <span class="required">*</span></label>
+          <input type="text" id="nome" placeholder="Es. Mario Rossi Geometra">
+        </div>
+        <div class="form-group">
+          <label>Partita IVA / Codice Fiscale</label>
+          <input type="text" id="partita_iva" placeholder="Es. 12345678901">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Indirizzo</label>
+            <input type="text" id="indirizzo" placeholder="Es. Via Roma 42">
+          </div>
+          <div class="form-group" style="max-width:100px;">
+            <label>Civico</label>
+            <input type="text" id="civico" placeholder="Es. 1">
+          </div>
+        </div>
+        <!-- Ordine corretto: Regione → Provincia → Città. Prima si incontrava
+             per prima la Città, che è una tendina bloccata finché non scegli la
+             regione: l'utente la toccava, non si apriva niente, e pensava che il
+             sito fosse rotto. -->
+        <div class="form-group">
+          <label>Regione <span class="required">*</span></label>
+          <select id="regione" required>
+            <option value="">-- Seleziona regione --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Provincia <span class="required">*</span></label>
+          <select id="provincia" disabled>
+            <option value="">-- prima scegli la regione --</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Città <span class="required">*</span></label>
+            <select id="citta" disabled required>
+              <option value="">-- prima scegli la provincia --</option>
+            </select>
+          </div>
+          <div class="form-group" style="max-width:110px;">
+            <label>CAP</label>
+            <input type="text" id="cap" placeholder="Es. 00100" maxlength="5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descrizione breve</label>
+          <textarea id="descrizione" placeholder="Descrivi la tua attività professionale e i servizi che offri..." maxlength="200" oninput="document.getElementById('desc-counter').textContent=this.value.length+'/200'"></textarea>
+          <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0/200</div>
+          <div style="font-size:11px;color:#888;margin-top:4px;">Max 200 caratteri (piano Free). Passa a Premium per descrizione illimitata.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Anno di inizio attività</label>
+            <input type="number" id="anno_fondazione" placeholder="Es. 2005" min="1900" max="2100">
+          </div>
+          <div class="form-group">
+            <label>Numero collaboratori</label>
+            <input type="number" id="dipendenti" placeholder="Es. 2" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <input type="tel" id="whatsapp" placeholder="Es. +39 333 1234567">
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="form-section" id="step-2">
+        <h2>Professione e specializzazioni</h2>
+        <div class="form-group">
+          <label>Professione principale <span class="required">*</span></label>
+          <select id="mestiere">
+            <option value="">— Seleziona —</option>
+            <option value="architetto">Architetto</option>
+            <option value="ingegnere_civile">Ingegnere civile</option>
+            <option value="ingegnere_strutturale">Ingegnere strutturale</option>
+            <option value="ingegnere_impiantistico">Ingegnere impiantistico</option>
+            <option value="geometra">Geometra</option>
+            <option value="perito_industriale">Perito industriale</option>
+            <option value="topografo">Topografo</option>
+            <option value="consulente_energetico">Consulente energetico</option>
+            <option value="consulente_sicurezza">Consulente sicurezza</option>
+            <option value="direttore_lavori">Direttore lavori</option>
+            <option value="collaudatore_strutture">Collaudatore strutture</option>
+            <option value="project_manager">Project manager</option>
+            <option value="amministratore_condominio">Amministratore di condominio</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prestazioni offerte</label>
+          <div style="font-size:12px;color:#888;margin-bottom:10px;">Seleziona i servizi che offri: i clienti ti troveranno cercando la singola prestazione.</div>
+          <div id="prestazioni-blocco"></div>
+        </div>
+        <div class="form-group">
+          <label>Comuni di competenza</label>
+          <input type="text" id="comuni_competenza" placeholder="Es. Roma, Fiumicino, Tivoli (separati da virgola)">
+          <div style="font-size:11px;color:#888;margin-top:4px;">Elenco dei comuni in cui accetti incarichi, separati da virgola.</div>
+        </div>
+        <div class="form-group">
+          <label>Altre competenze / specializzazioni</label>
+          <textarea id="specializzazioni" placeholder="Es. Pratiche catastali, APE, progettazione BIM, perizie..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Zone di lavoro</label>
+          <input type="text" id="zone" placeholder="Es. Roma e provincia, Lazio">
+        </div>
+        <div class="form-group">
+          <label>Anni di esperienza</label>
+          <input type="number" id="anni_esperienza" placeholder="Es. 10" min="0" max="60">
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="form-section" id="step-3">
+        <h2>Contatti e accesso</h2>
+        <div class="form-group">
+          <label>Email <span class="required">*</span></label>
+          <input type="email" id="email" placeholder="mario@studio.it">
+        </div>
+        <div class="form-group">
+          <label>Telefono <span class="required">*</span></label>
+          <input type="tel" id="telefono" placeholder="+39 06 1234567">
+        </div>
+        <div class="form-group">
+          <label>Sito web</label>
+          <input type="url" id="sito_web" placeholder="https://www.miosito.it">
+        </div>
+        <div class="form-group">
+          <label>Password <span class="required">*</span></label>
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="Almeno 8 caratteri" oninput="checkPwStrength(this.value)">
+            <button class="toggle-pw" type="button" onclick="togglePassword('password', this)" tabindex="-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div style="height:6px;border-radius:4px;background:#eee;margin-top:7px;overflow:hidden;"><div id="pw-strength-bar" style="height:100%;width:0;transition:width .2s,background .2s;"></div></div>
+          <div id="pw-strength-label" style="font-size:11px;color:#888;margin-top:3px;">Usa almeno 8 caratteri, con maiuscole, numeri e simboli.</div>
+        </div>
+        <div class="form-group">
+          <label>Conferma password <span class="required">*</span></label>
+          <div class="password-wrapper">
+            <input type="password" id="password2" placeholder="Ripeti la password">
+            <button class="toggle-pw" type="button" onclick="togglePassword('password2', this)" tabindex="-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- honeypot anti-bot: deve restare vuoto -->
+        <input type="text" id="website_hp" name="website_hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="form-section" id="step-4">
+        <h2>Scegli il tuo piano</h2>
+        <div class="piano-grid">
+          <div class="piano-card selected" id="card-free" onclick="selezionaPiano('free')">
+            <div class="piano-icon">🆓</div>
+            <div class="piano-nome">Free</div>
+            <div class="piano-prezzo">Gratis</div>
+            <ul>
+              <li>Profilo visibile nella tua città</li>
+              <li>Richieste di preventivo con contatti inclusi</li>
+              <li>Raccolta recensioni</li>
+              <li>Fino a 10 foto</li>
+              <li>1 annuncio di lavoro</li>
+            </ul>
+          </div>
+          <div class="piano-card" id="card-premium" onclick="selezionaPiano('premium')">
+            <div class="piano-icon">💎</div>
+            <div class="piano-nome" style="color:#7b1fa2;">Premium</div>
+            <div class="piano-prezzo">€5/mese</div>
+            <ul>
+              <li>Posizione #1 assoluta</li>
+              <li>Foto e video illimitati</li>
+              <li>Preventivi PDF con AI</li>
+              <li>Badge Premium in evidenza</li>
+              <li>Visibile in tutta Italia</li>
+            </ul>
+          </div>
+        </div>
+        <input type="hidden" id="piano_scelto" value="free">
+        <p style="font-size:15.5px;line-height:1.55;color:#555;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:12px 14px;margin-top:10px">
+          ℹ️ <b>Ti iscrivi con il piano gratuito.</b> Il Premium lo attivi quando vuoi dal tuo pannello —
+          e ai nuovi iscritti lo regaliamo per i primi 3 mesi.
+        </p>
+
+                <h2 style="margin-top:20px;">Logo</h2>
+        <!-- Il caricamento del logo qui non funzionava: il file veniva scelto,
+             compariva la spunta verde e poi non partiva mai (uploadLogo non era
+             collegata a niente, e prima della conferma email non c'e' nemmeno
+             una sessione per caricarlo). Meglio dirlo che fingere. -->
+        <div class="form-group">
+          <div style="background:#f0f5ff;border:1.5px solid #cfe0ff;border-radius:12px;padding:16px 18px;font-size:16px;line-height:1.55;color:#0a2a4d">
+            <b>🏗️ Il logo lo carichi tra un minuto.</b><br>
+            Appena confermi la mail ed entri nel tuo pannello trovi
+            <b>Modifica profilo</b>: da lì carichi logo, foto dei lavori,
+            descrizione, orari e zone in cui lavori. Così finisci di iscriverti
+            adesso e il resto lo sistemi con calma.
+          </div>
+        </div>
+<div class="form-group">
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer;">
+            <input type="checkbox" id="termini" style="width:auto;">
+            <span>Accetto i Termini di Servizio <span class="required">*</span></span>
+          </label>
+        </div>
+      </div>
+
+      <div id="form-msg" style="display:none;padding:12px 14px;border-radius:8px;font-size:13px;margin-top:8px;"></div>
+
+      <div class="buttons">
+        <button class="btn-back" id="btn-back" style="display:none;">← Indietro</button>
+        <button class="btn-next" id="btn-next">Avanti →</button>
+      </div>
+      <div style="text-align:center;margin-top:12px;"><span style="font-size:0.9rem;color:#555;">Sei già registrato? </span><a href="login-impresa.html" style="display:inline-block;margin-left:8px;padding:9px 22px;background:#f5a800;color:white;border-radius:8px;font-weight:600;text-decoration:none;font-size:0.9rem;">Accedi</a></div>
+        <p style="text-align:center;font-size:12px;color:#888;margin-top:12px;">🔒 I tuoi dati sono al sicuro. Non li vendiamo né condividiamo con terzi. <a href="/privacy-policy.html" style="color:#0066ff;">Privacy Policy</a></p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/foto-upload.js"></script>
+  <script src="js/geo-italia.js"></script>
+  <script>
+    // Popola cascata Regione → Provincia → Città
+    (function initGeo() {
+      const regSel = document.getElementById('regione');
+      const provSel = document.getElementById('provincia');
+      const cittaSel = document.getElementById('citta');
+      const geo = window.GEO_ITALIA || {};
+
+      Object.keys(geo).sort((a, b) => a.localeCompare(b, 'it')).forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r; opt.textContent = r;
+        regSel.appendChild(opt);
+      });
+
+      function resetSelect(sel, placeholder) {
+        sel.innerHTML = '<option value="">' + placeholder + '</option>';
+      }
+
+      regSel.addEventListener('change', function() {
+        resetSelect(provSel, '-- Seleziona provincia --');
+        resetSelect(cittaSel, '-- Seleziona città --');
+        cittaSel.disabled = true;
+        const province = geo[regSel.value];
+        if (!province) { provSel.disabled = true; return; }
+        Object.keys(province).sort((a, b) => a.localeCompare(b, 'it')).forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p; opt.textContent = p;
+          provSel.appendChild(opt);
+        });
+        provSel.disabled = false;
+      });
+
+      provSel.addEventListener('change', function() {
+        resetSelect(cittaSel, '-- Seleziona città --');
+        const citta = (geo[regSel.value] || {})[provSel.value];
+        if (!citta) { cittaSel.disabled = true; return; }
+        citta.slice().sort((a, b) => a.localeCompare(b, 'it')).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c; opt.textContent = c;
+          cittaSel.appendChild(opt);
+        });
+        cittaSel.disabled = false;
+      });
+    })();
+
+    function togglePassword(id, btn) {
+      const input = document.getElementById(id);
+      const svg = btn.querySelector('svg');
+      if (input.type === 'password') {
+        input.type = 'text';
+        svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+        btn.style.color = '#0066ff';
+      } else {
+        input.type = 'password';
+        svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        btn.style.color = '#aaa';
+      }
+    }
+
+    const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let currentStep = 1;
+
+    // === Catalogo prestazioni per categoria (condiviso con pannello e landing) ===
+    const PRESTAZIONI_CATALOGO = {
+      "Geometra": [
+        "Accatastamento e pratiche catastali (DOCFA)",
+        "Visure e volture catastali",
+        "Frazionamenti e tipo mappale (PREGEO)",
+        "Rilievi topografici",
+        "Pratiche edilizie (CILA, SCIA, permesso di costruire)",
+        "Sanatorie e condoni edilizi",
+        "Certificato di agibilità",
+        "Computo metrico estimativo",
+        "Direzione lavori",
+        "Successioni immobiliari",
+        "APE - Attestato di Prestazione Energetica",
+        "Perizie e stime immobiliari"
+      ],
+      "Ingegnere": [
+        "Progettazione strutturale (c.a., acciaio, legno)",
+        "Calcolo strutturale e relazioni di calcolo",
+        "Progettazione impianti (elettrico, termico, idraulico)",
+        "Direzione lavori strutturali",
+        "Collaudo statico",
+        "Pratiche sismiche e deposito al Genio Civile",
+        "Pratiche antincendio (SCIA VVF)",
+        "Progettazione BIM",
+        "Classificazione sismica e Sismabonus",
+        "Coordinamento sicurezza (CSP/CSE)"
+      ],
+      "Perito industriale": [
+        "Progettazione impianti elettrici",
+        "Progettazione impianti termici e climatizzazione",
+        "Dichiarazione di conformità impianti (DM 37/2008)",
+        "Progettazione impianto fotovoltaico",
+        "Pratiche antincendio",
+        "Collaudo e certificazione impianti",
+        "Consulenza efficientamento energetico",
+        "Direzione lavori impiantistici"
+      ],
+      "Perito estimatore": [
+        "Stime e valutazioni immobiliari",
+        "Perizie di stima per mutuo",
+        "Perizie giurate / asseverate",
+        "Consulenza tecnica (CTU e CTP)",
+        "Stime per successioni e divisioni",
+        "Perizie danni e assicurative",
+        "Stime di aziende e macchinari",
+        "Perizie estimative agrarie"
+      ]
+    };
+
+    (function renderPrestazioni() {
+      const box = document.getElementById('prestazioni-blocco');
+      if (!box) return;
+      box.innerHTML = Object.keys(PRESTAZIONI_CATALOGO).map(cat => {
+        const items = PRESTAZIONI_CATALOGO[cat].map(p =>
+          `<label class="prest-check"><input type="checkbox" class="prest-item" value="${p}"><span>${p}</span></label>`
+        ).join('');
+        return `<div class="prest-cat"><div class="prest-cat-head">${cat}</div><div class="prest-grid">${items}</div></div>`;
+      }).join('');
+    })();
+
+    function getPrestazioniSelezionate() {
+      return Array.from(document.querySelectorAll('.prest-item:checked')).map(c => c.value);
+    }
+    // Normalizzazione comuni: STESSA regola della query lato ricerca (professionisti.html)
+    function normalizzaComune(s){
+      return (s==null?'':String(s)).trim().toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g,'')
+        .replace(/['’`]/g,' ')
+        .replace(/[^a-z0-9\s-]/g,'')
+        .replace(/\s+/g,' ')
+        .trim();
+    }
+    function getComuniCompetenza() {
+      const arr = (document.getElementById('comuni_competenza').value || '')
+        .split(',').map(normalizzaComune).filter(Boolean);
+      return [...new Set(arr)];
+    }
+    /* il caricamento del logo non c'e' piu' in questo modulo: si fa dal pannello */
+
+    function goToStep(step, fromPopstate) {
+      document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      document.getElementById('step-' + step).classList.add('active');
+      document.getElementById('step-' + step + '-indicator').classList.add('active');
+      document.getElementById('btn-back').style.display = step === 1 ? 'none' : 'block';
+      document.getElementById('btn-next').textContent = step === 4 ? '✓ Completa Registrazione' : 'Avanti →';
+      currentStep = step;
+      if (!fromPopstate) history.pushState({step: step}, '');
+    }
+
+    document.getElementById('btn-next').addEventListener('click', function() {
+      if (currentStep < 4) { if (validateStep(currentStep)) goToStep(currentStep + 1); }
+      else submitForm();
+    });
+    document.getElementById('btn-back').addEventListener('click', function() {
+      if (currentStep > 1) goToStep(currentStep - 1);
+    });
+
+    // ---- Helper UI: messaggi, validazione, robustezza password ----
+    function showMsg(text, type) {
+      const el = document.getElementById('form-msg');
+      el.textContent = text;
+      el.style.display = 'block';
+      if (type === 'error') { el.style.background = '#fdecea'; el.style.color = '#b71c1c'; el.style.border = '1px solid #f5c6cb'; }
+      else if (type === 'success') { el.style.background = '#e6f4ea'; el.style.color = '#1e4620'; el.style.border = '1px solid #b7dfc0'; }
+      else { el.style.background = '#e8f0ff'; el.style.color = '#0052cc'; el.style.border = '1px solid #b3d1ff'; }
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function hideMsg() { const el = document.getElementById('form-msg'); if (el) el.style.display = 'none'; }
+    function markInvalid(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.borderColor = '#e53935';
+      el.focus();
+      const h = function(){ el.style.borderColor = '#ddd'; el.removeEventListener('input', h); el.removeEventListener('change', h); };
+      el.addEventListener('input', h); el.addEventListener('change', h);
+    }
+    function checkPwStrength(v) {
+      let score = 0;
+      if (v.length >= 8) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const steps = [
+        { w: '0%',   c: '#eee',     t: '' },
+        { w: '25%',  c: '#e53935',  t: 'Debole' },
+        { w: '50%',  c: '#fb8c00',  t: 'Media' },
+        { w: '75%',  c: '#fdd835',  t: 'Buona' },
+        { w: '100%', c: '#43a047',  t: 'Ottima' }
+      ];
+      const cfg = steps[v ? score : 0];
+      const bar = document.getElementById('pw-strength-bar');
+      const label = document.getElementById('pw-strength-label');
+      if (bar) { bar.style.width = cfg.w; bar.style.background = cfg.c; }
+      if (label) label.textContent = cfg.t ? 'Sicurezza password: ' + cfg.t : 'Usa almeno 8 caratteri, con maiuscole, numeri e simboli.';
+    }
+    function validateStep(step) {
+      hideMsg();
+      const need = (id, lbl) => { if (!document.getElementById(id).value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
+      if (step === 1) {
+        if (!need('nome', 'Nome / Ragione sociale')) return false;
+        if (!need('regione', 'Regione')) return false;
+        if (!need('provincia', 'Provincia')) return false;
+        if (!need('citta', 'Città')) return false;
+      } else if (step === 2) {
+        if (!document.getElementById('mestiere').value) { markInvalid('mestiere'); showMsg('Seleziona la professione principale.', 'error'); return false; }
+      } else if (step === 3) {
+        if (!need('email', 'Email')) return false;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
+        if (!need('telefono', 'Telefono')) return false;
+        const pw = document.getElementById('password').value;
+        if (pw.length < 8) { markInvalid('password'); showMsg('La password deve avere almeno 8 caratteri.', 'error'); return false; }
+        if (pw !== document.getElementById('password2').value) { markInvalid('password2'); showMsg('Le due password non coincidono.', 'error'); return false; }
+      }
+      return true;
+    }
+
+    history.replaceState({step: 1}, '');
+    window.onpopstate = function(e) {
+      if (e.state && typeof e.state.step !== 'undefined') {
+        goToStep(e.state.step, true);
+      }
+    };
+
+    /* Nome del file: UUID casuale dentro il prefisso "registrazioni/".
+       Prima era "<email>_<timestamp>.<ext>" nella radice del bucket: l'email
+       finiva dentro il nome di un file su un bucket pubblico, e senza una
+       cartella non c'era niente su cui scrivere una policy piu' stretta di
+       "chiunque scrive ovunque".
+       L'estensione va ripulita: arriva dal nome del file scelto dall'utente. */
+    function nomeCasualeFile(file, estDefault, forzaEst) {
+      const id = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      if (forzaEst) return 'registrazioni/' + id + '.' + forzaEst;
+      const pezzi = String(file.name || '').split('.');
+      const grezza = pezzi.length > 1 ? pezzi.pop() : '';
+      const ext = (String(grezza).toLowerCase().match(/^[a-z0-9]{1,5}$/) || [estDefault])[0];
+      return 'registrazioni/' + id + '.' + ext;
+    }
+
+    function selezionaPiano(piano) {
+      document.getElementById('piano_scelto').value = piano;
+      document.getElementById('card-free').className = 'piano-card' + (piano === 'free' ? ' selected' : '');
+      document.getElementById('card-premium').className = 'piano-card' + (piano === 'premium' ? ' selected-premium' : '');
+    }
+
+    /* ------------------------------------------------------------------
+       Il momento piu' fragile di tutto il percorso: l'utente ha finito, ma
+       il profilo si attiva solo cliccando il link nella mail. Prima veniva
+       sbattuto sul login dopo 4 secondi, dove senza conferma legge
+       "Email not confirmed" in inglese e non ha nessun modo di uscirne.
+       ------------------------------------------------------------------ */
+    function mostraSchermataConferma(email) {
+      const c = document.createElement('div');
+      c.id = 'schermata-conferma';
+      c.style.cssText = 'position:fixed;inset:0;z-index:100002;background:#fff;overflow-y:auto;' +
+        'display:flex;align-items:flex-start;justify-content:center;padding:28px 18px 40px';
+      c.innerHTML =
+        '<div style="max-width:520px;width:100%;text-align:center;font-family:inherit">' +
+        '<div style="font-size:56px;line-height:1;margin:18px 0 10px">📬</div>' +
+        '<h2 style="font-size:26px;margin:0 0 12px;color:#0a2a4d">Ci siamo quasi!</h2>' +
+        '<p style="font-size:18px;line-height:1.55;color:#333;margin:0 0 6px">Ti ho mandato una mail a</p>' +
+        '<p id="sc-email" style="font-size:20px;font-weight:800;color:#0066ff;word-break:break-all;margin:0 0 18px"></p>' +
+        '<p style="font-size:17px;line-height:1.6;color:#333;margin:0 0 8px">' +
+        'Aprila e <b>clicca sul link</b>: solo così il tuo profilo diventa attivo e i clienti possono trovarti.</p>' +
+        '<p style="font-size:16px;line-height:1.6;color:#b45309;background:#fffbeb;border:1.5px solid #fde68a;' +
+        'border-radius:12px;padding:12px 14px;margin:0 0 20px">⚠️ Se non la vedi, <b>guarda nella cartella SPAM</b>: ' +
+        'ci finisce spesso. Può metterci un paio di minuti.</p>' +
+        '<div id="sc-msg" style="font-size:16px;line-height:1.55;margin:0 0 14px"></div>' +
+        '<button type="button" id="sc-rimanda" style="width:100%;background:#0066ff;color:#fff;border:none;' +
+        'border-radius:12px;padding:16px;font-size:17px;font-weight:800;font-family:inherit;cursor:pointer;margin-bottom:10px">' +
+        '📨 Non mi è arrivata — rimandamela</button>' +
+        '<a href="login-impresa.html" style="display:block;background:#fff;color:#0066ff;border:2px solid #0066ff;' +
+        'border-radius:12px;padding:14px;font-size:16px;font-weight:700;text-decoration:none;margin-bottom:14px">' +
+        'Ho già confermato — vai all\'accesso</a>' +
+        '<p style="font-size:15px;color:#666;line-height:1.55;margin:0">Hai sbagliato indirizzo o non arriva proprio? ' +
+        'Scrivici a <a href="mailto:info@trovaimpresa.com" style="color:#0066ff">info@trovaimpresa.com</a>: ' +
+        'ti attiviamo noi il profilo a mano.</p>' +
+        '</div>';
+      document.body.appendChild(c);
+      document.getElementById('sc-email').textContent = email;
+
+      let attesa = false;
+      document.getElementById('sc-rimanda').onclick = async function () {
+        if (attesa) return;
+        const b = this, msg = document.getElementById('sc-msg');
+        attesa = true; b.disabled = true; b.textContent = '⏳ Invio in corso...';
+        try {
+          const { error } = await supabaseClient.auth.resend({
+            type: 'signup', email: email,
+            options: { emailRedirectTo: window.location.origin + '/login-impresa.html' }
+          });
+          if (error) throw error;
+          msg.innerHTML = '<span style="color:#15803d;font-weight:700">✅ Rimandata! Controlla la posta (e lo SPAM).</span>';
+        } catch (e) {
+          const t = /rate limit|too many|after/i.test(String(e.message || ''))
+            ? 'Ho già mandato una mail da poco. Aspetta un minuto e riprova.'
+            : 'Non sono riuscito a rimandarla. Riprova fra poco o scrivici a info@trovaimpresa.com.';
+          msg.innerHTML = '<span style="color:#DC2626;font-weight:700">' + t + '</span>';
+        }
+        b.textContent = '📨 Non mi è arrivata — rimandamela';
+        setTimeout(function () { attesa = false; b.disabled = false; }, 30000);
+      };
+    }
+
+
+    async function submitForm() {
+      hideMsg();
+      // Anti-bot: se il campo honeypot è pieno, è un bot → esci in silenzio.
+      if (document.getElementById('website_hp').value) { return; }
+      if (!document.getElementById('termini').checked) { showMsg('Devi accettare i Termini di Servizio per completare la registrazione.', 'error'); return; }
+      if (!validateStep(1)) { goToStep(1); return; }
+      if (!validateStep(2)) { goToStep(2); return; }
+      if (!validateStep(3)) { goToStep(3); return; }
+      const nome = document.getElementById('nome').value.trim();
+      const mestiere = document.getElementById('mestiere').value;
+      const email = document.getElementById('email').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const citta = document.getElementById('citta').value.trim();
+      const regione = document.getElementById('regione').value;
+      const password = document.getElementById('password').value.trim();
+      const btn = document.getElementById('btn-next');
+      btn.disabled = true;
+      try {
+        btn.textContent = '⏳ Creazione account...';
+        // Il profilo in "imprese" viene creato dal trigger on_auth_user_created
+        // leggendo questi dati da options.data: niente più insert manuale.
+        /* Timeout: su rete di cantiere la chiamata poteva restare appesa e il
+           pulsante restava "⏳ Creazione account..." per sempre, con l'utente
+           costretto a ricaricare e ricompilare tutto. */
+        const _stop = new AbortController();
+        const _timer = setTimeout(() => _stop.abort(), 25000);
+        const { data: authData, error: authError } = await Promise.race([
+          supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            /* il link della mail riporta qui, all'accesso, invece che sulla home */
+            emailRedirectTo: window.location.origin + '/login-impresa.html',
+            data: {
+              tipo: 'professionista',
+              nome_attivita: nome,
+              nome: nome,
+              telefono: telefono,
+              citta: citta,
+              provincia: document.getElementById('provincia').value,
+              regione: regione,
+              mestiere: mestiere,
+              prestazioni: getPrestazioniSelezionate(),
+              comuni_competenza: getComuniCompetenza()
+            }
+          }
+        }),
+          new Promise((_, no) => { _stop.signal.addEventListener('abort', () => no(new Error('TIMEOUT'))); })
+        ]).finally(() => clearTimeout(_timer));
+        if (authError) throw new Error(authError.message);
+        if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+          showMsg('⚠️ Questa email è già registrata su TrovaImpresa. Ti stiamo portando alla pagina di accesso...', 'error');
+          setTimeout(() => { window.location.href = 'login-impresa.html'; }, 2500);
+          return;
+        }
+        try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: nome, email: email, tipo: 'professionista' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
+        if (typeof fbq !== 'undefined') { fbq('track', 'CompleteRegistration'); }
+        btn.textContent = '✅ Account creato!';
+        /* Prima dopo 4,5 secondi si finiva sul login, cioe' l'unico posto dove
+           non si puo' fare niente finche' la mail non e' confermata. Ora si resta
+           qui, con l'indirizzo scritto grande e il modo di farsela rimandare. */
+        mostraSchermataConferma(email);
+      } catch (err) {
+        console.error(err);
+        if (err && err.message === 'TIMEOUT') {
+          btn.disabled = false;
+          btn.textContent = '✓ Completa Registrazione';
+          showMsg('La connessione è troppo lenta e non ho ricevuto risposta. I dati che hai scritto sono ancora qui: premi di nuovo il pulsante quando hai campo.', 'error');
+          return;
+        }
+        btn.disabled = false;
+        btn.textContent = '✓ Completa Registrazione';
+        if (err.message && (err.message.includes('23505') || /already registered|already exists|user already|duplicate|invalid login|credentials|imprese_email_key/i.test(err.message))) {
+          showMsg('⚠️ Questa email è già registrata su TrovaImpresa. Ti stiamo portando alla pagina di accesso...', 'error');
+          setTimeout(() => { window.location.href = 'login-impresa.html'; }, 2500);
+        } else {
+          showMsg('❌ Errore durante la registrazione. Riprova tra poco.', 'error');
+        }
+      }
+    }
+  </script>
+<script src="/cookie-banner.js"></script>
+<script src="/js/fb-browser-bar.js?v=2" defer></script>
+<footer style="background:#0a2a4d;color:white;font-size:0.8rem;padding:15px;text-align:center">© 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com" style="color:#a9c9f5">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html" style="color:#a9c9f5">Termini</a> | <a href="/cookie-policy.html" style="color:#a9c9f5">Cookie Policy</a> | <a href="/privacy-policy.html" style="color:#a9c9f5">Privacy</a> | <a href="/contatti.html" style="color:#a9c9f5">Contatti</a></foo

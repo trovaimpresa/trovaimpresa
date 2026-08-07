@@ -306,11 +306,28 @@
 
 <footer>
   TrovaImpresa — i valori dei calcolatori sono stime orientative basate sui prezzi medi di mercato 2026 e possono variare per zona, materiali e condizioni del cantiere.
+
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>·
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>·
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>·
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>·
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>·
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+      <!-- P.IVA: appena Alessio la fornisce va aggiunta qui, subito dopo l'email -->
+    </p>
 </footer>
 
 <script>
 (function(){
-  var euro = function(n){ return n.toLocaleString('it-IT'); };
+  var euro = function(n){ return n.toLocaleString('it-IT',{useGrouping:'always'}); };
   function checksSum(panel){
     var s=0; panel.querySelectorAll('[data-c=ex] input:checked').forEach(function(c){ s+=parseInt(c.dataset.add,10); }); return s;
   }
@@ -527,5 +544,9 @@
 })();
 </script>
 
+<!-- Senza questo, ogni pulsante "Trova un artigiano" di questa pagina portava
+     su una ricerca VUOTA che chiedeva di ridigitare la città: il lettore aveva
+     appena letto il prezzo ed era il momento buono per farlo entrare. -->
+<script src="/js/citta-obbligatoria.js"></script>
 </body>
 </html>

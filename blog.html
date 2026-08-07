@@ -250,7 +250,55 @@
   <script>
     const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    /* Se la libreria Supabase non arriva (CDN bloccata da un blocco pubblicita',
+       rete lenta, wifi pubblico), prima la pagina moriva qui con
+       "Cannot read properties of undefined (reading 'createClient')" e restava
+       su "Caricamento articoli..." per sempre. Ora si passa all'elenco di riserva. */
+    const sb = (window.supabase && window.supabase.createClient)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+      : null;
+
+    /* Elenco di riserva: le guide sono file HTML statici, esistono anche senza
+       database. Meglio un elenco semplice che una pagina vuota. */
+    const GUIDE_RISERVA = [
+      ['quanto-costa-rifare-il-bagno.html', 'Quanto costa rifare il bagno'],
+      ['quanto-costa-ristrutturare-casa.html', 'Quanto costa ristrutturare casa al mq'],
+      ['quanto-costa-rifare-la-cucina.html', 'Quanto costa rifare la cucina'],
+      ['quanto-costa-rifare-impianto-elettrico.html', "Quanto costa rifare l'impianto elettrico"],
+      ['quanto-costa-rifare-impianto-idraulico.html', "Quanto costa rifare l'impianto idraulico"],
+      ['quanto-costa-installare-un-condizionatore.html', 'Quanto costa installare un condizionatore'],
+      ['quanto-costa-sostituire-la-caldaia.html', 'Quanto costa sostituire la caldaia'],
+      ['quanto-costa-rifare-il-tetto.html', 'Quanto costa rifare il tetto'],
+      ['quanto-costa-rifare-la-facciata.html', 'Quanto costa rifare la facciata'],
+      ['quanto-costa-cappotto-termico.html', 'Quanto costa il cappotto termico'],
+      ['quanto-costa-cambiare-gli-infissi.html', 'Quanto costa cambiare gli infissi'],
+      ['quanto-costa-posare-il-pavimento.html', 'Quanto costa posare il pavimento'],
+      ['quanto-costa-imbiancare-casa.html', 'Quanto costa imbiancare casa'],
+      ['quanto-costa-parete-cartongesso.html', 'Quanto costa una parete in cartongesso'],
+      ['quanto-costa-abbattere-un-muro.html', 'Quanto costa abbattere un muro'],
+      ['quanto-costa-trasformare-vasca-in-doccia.html', 'Quanto costa trasformare la vasca in doccia'],
+      ['quanto-costa-impianto-fotovoltaico.html', 'Quanto costa un impianto fotovoltaico'],
+      ['quanto-costa-un-muratore-al-giorno.html', 'Quanto costa un muratore al giorno'],
+      ['bonus-edilizi-2026.html', 'Bonus edilizi 2026: quali restano'],
+      ['bonus-ristrutturazione-2026.html', 'Bonus ristrutturazione 2026'],
+      ['permessi-ristrutturazione-cila-scia.html', 'CILA, SCIA o permesso di costruire'],
+      ['come-leggere-un-preventivo-edile.html', 'Come leggere un preventivo edile'],
+      ['come-trovare-clienti-impresa-edile.html', "Come trovare clienti se hai un'impresa edile"],
+      ['calcolatori.html', 'Calcolatori dei costi'],
+      ['controlla-preventivo-bagno.html', 'Controlla se il preventivo del bagno è gonfiato'],
+      ['costi-ristrutturazione.html', 'Tutti i costi di ristrutturazione']
+    ];
+
+    function mostraRiserva(box, avviso) {
+      box.innerHTML =
+        '<div class="stato" style="padding:24px 24px 8px">' + escapeHtml(avviso) + '</div>' +
+        '<div style="max-width:760px;margin:0 auto 40px;padding:0 20px">' +
+        GUIDE_RISERVA.map(function (g) {
+          return '<a href="/' + g[0] + '" style="display:block;background:#fff;border:1px solid #e2e8f0;' +
+            'border-radius:12px;padding:15px 18px;margin-bottom:10px;text-decoration:none;' +
+            'color:#0a2a4d;font-weight:600;font-size:16px">' + escapeHtml(g[1]) + ' →</a>';
+        }).join('') + '</div>';
+    }
 
     const CATEGORIE = { costi: 'Costi', bonus: 'Bonus fiscali', guide: 'Guide' };
 
@@ -342,6 +390,11 @@
     async function caricaArticoli() {
       const box = document.getElementById('lista');
 
+      if (!sb) {
+        mostraRiserva(box, 'Elenco veloce delle guide:');
+        return;
+      }
+
       // 1° tentativo con la colonna "mestiere"; se non esiste ancora nel DB, si ricarica senza.
       let { data, error } = await sb
         .from('blog_articoli')
@@ -358,12 +411,10 @@
         data = r.data; error = r.error;
       }
 
-      if (error) {
-        box.innerHTML = '<div class="stato">Errore nel caricamento degli articoli. Riprova più tardi.</div>';
-        return;
-      }
-      if (!data || data.length === 0) {
-        box.innerHTML = '<div class="stato">Nessun articolo pubblicato per ora. Torna presto!</div>';
+      /* prima qui finiva tutto con "Errore nel caricamento" e la pagina restava
+         vuota: le guide pero' sono file veri, si possono mostrare lo stesso */
+      if (error || !data || data.length === 0) {
+        mostraRiserva(box, 'Elenco veloce delle guide:');
         return;
       }
 
@@ -397,5 +448,36 @@
     caricaArticoli();
   </script>
 
+<!-- Senza questo, ogni pulsante "Trova un artigiano" di questa pagina portava
+     su una ricerca VUOTA che chiedeva di ridigitare la città: il lettore aveva
+     appena letto il prezzo ed era il momento buono per farlo entrare. -->
+<script src="/js/citta-obbligatoria.js"></script>
+
+<!-- Footer di fiducia: chi arriva qui da Google vedeva una pagina senza contatti,
+     senza chi siamo e senza privacy. Per un pubblico che deve affidare migliaia
+     di euro di lavori è il primo motivo per non fidarsi. -->
+<footer style="background:#0a2a4d;color:#cbd8e6;padding:34px 20px;margin-top:44px;font-size:15.5px;line-height:1.7;text-align:center">
+  <div style="max-width:760px;margin:0 auto">
+    <p style="margin:0 0 14px;color:#fff;font-size:17px;font-weight:700">TrovaImpresa</p>
+    <p style="margin:0 0 16px">Guide scritte da chi in cantiere ci lavora davvero, e il posto dove trovare
+      l'impresa giusta nella tua città. <b>Per chi cerca è sempre gratis.</b></p>
+    <p style="margin:0 0 16px">
+      <a href="/chi-siamo.html" style="color:#7fb3ff;text-decoration:none;margin:0 10px">Chi siamo</a>
+      <a href="/contatti.html" style="color:#7fb3ff;text-decoration:none;margin:0 10px">Contatti</a>
+      <a href="/blog.html" style="color:#7fb3ff;text-decoration:none;margin:0 10px">Tutte le guide</a>
+      <a href="/prezzi.html" style="color:#7fb3ff;text-decoration:none;margin:0 10px">Per le imprese</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:14.5px">
+      <a href="/privacy-policy.html" style="color:#9db9d6;text-decoration:none;margin:0 8px">Privacy</a>·
+      <a href="/cookie-policy.html" style="color:#9db9d6;text-decoration:none;margin:0 8px">Cookie</a>·
+      <a href="/termini-condizioni.html" style="color:#9db9d6;text-decoration:none;margin:0 8px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:14px;color:#8fa6bd">
+      © 2026 TrovaImpresa — Alessio Pinto, Rieti (RI) —
+      <a href="mailto:info@trovaimpresa.com" style="color:#9db9d6">info@trovaimpresa.com</a>
+      <!-- P.IVA: appena Alessio la fornisce va aggiunta qui, subito dopo l'email -->
+    </p>
+  </div>
+</footer>
 </body>
 </html>
