@@ -342,7 +342,21 @@ nav img{height:36px}
 
 <nav>
   <a href="index.html"><img src="/trovaimpresa_logo_transparent.png" alt="TrovaImpresa"></a>
-  <a href="javascript:history.back()" class="nav-back">← Torna ai risultati</a>
+  <a href="cerca-imprese.html" class="nav-back" id="nav-back">← Torna ai risultati</a>
+<script>
+/* Prima era history.back(): chi apriva il profilo da un link ricevuto su
+   WhatsApp cliccava e non succedeva niente (non c'era nessuna pagina prima).
+   Ora: se arrivo dal sito torno indietro davvero, altrimenti vado alla
+   ricerca della mia citta'. La pagina giusta la sceglie il tipo di attivita'. */
+(function(){
+  var b=document.getElementById('nav-back'); if(!b)return;
+  var citta=''; try{citta=localStorage.getItem('ti_citta_scelta')||''}catch(e){}
+  window._backCitta=citta;
+  b.href='cerca-imprese.html'+(citta?('?citta='+encodeURIComponent(citta)):'');
+  var interno=document.referrer && document.referrer.indexOf(location.host)>-1;
+  if(interno)b.addEventListener('click',function(e){e.preventDefault();history.back();});
+})();
+</script>
 </nav>
 
 <div id="profilo-view">
@@ -772,6 +786,17 @@ async function caricaProfilo(id){
     const sl=document.getElementById('sito-link');const cs=document.getElementById('contact-sito');
     const sito=d.sito_web||'';
     if(sito&&sl){sl.href=sito.startsWith('http')?sito:'https://'+sito;sl.textContent=sito.replace(/^https?:\/\//,'');if(cs)cs.style.display=''}
+    /* il "torna ai risultati" punta alla ricerca giusta per questo tipo */
+    try{
+      const _nb=document.getElementById('nav-back');
+      if(_nb&&!(document.referrer&&document.referrer.indexOf(location.host)>-1)){
+        const _PG={impresa:'cerca-imprese.html',artigiano:'cerca-artigiani.html',
+                   negozio:'cerca-negozi.html',professionista:'cerca-professionisti.html'};
+        const _pg=_PG[String(d.tipo||'').toLowerCase()]||'cerca-imprese.html';
+        const _ct=window._backCitta||d.citta||'';
+        _nb.href=_pg+(_ct?('?citta='+encodeURIComponent(_ct)):'');
+      }
+    }catch(_){}
     const ci=document.getElementById('contact-indirizzo');
     if(ci){const lc=[d.indirizzo,d.citta].filter(Boolean).join(', ');if(lc)ci.innerHTML=`<div class="ci">📍</div><span>${_esc(lc)}</span>`}
     if(d.lat&&d.lng){

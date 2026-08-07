@@ -201,7 +201,7 @@
 
     <div class="filter-group">
       <div class="filter-label">Mestiere</div>
-      <select onchange="selectMestiere(this)" style="width:100%;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
+      <select id="mestiereSelect" onchange="selectMestiere(this)" style="width:100%;padding:12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#333;">
         <option value="tutti">Tutti i mestieri</option>
         <option value="Edilizia / Muratura">Edilizia / Muratura</option>
         <option value="Ristrutturazione completa">Ristrutturazione completa</option>
@@ -429,7 +429,13 @@
     const verificati = document.getElementById('soloVerificati').checked;
     const chips = [];
     const regione = document.getElementById('regioneSelect').value;
-    if (mestiereScelto !== 'tutti') chips.push({ label: mestiereScelto, reset: () => document.querySelector('#mestieri-list .filter-btn[data-mestiere="tutti"]').click() });
+    /* il filtro mestiere e' una tendina: prima questo cercava dei pulsanti che
+       non esistono e il clic sul chip andava in errore senza togliere niente */
+    if (mestiereScelto !== 'tutti') chips.push({ label: mestiereScelto, reset: () => {
+      var sel = document.getElementById('mestiereSelect');
+      if (sel) sel.value = 'tutti';
+      mestiereScelto = 'tutti'; paginaCorrente = 1; cerca();
+    } });
     if (citta) chips.push({ label: '📍 ' + citta, reset: () => { document.getElementById('cittaInput').value = ''; cerca(); } });
     if (regione) chips.push({ label: '🗺 ' + regione, reset: () => { document.getElementById('regioneSelect').value = ''; cerca(); } });
     if (valutazioneMin > 0) chips.push({ label: '★ ' + valutazioneMin + '+', reset: () => document.querySelector('.star-option[data-min="0"]').click() });
@@ -618,7 +624,8 @@
     const div = document.getElementById('risultati');
     if (!tuttiRisultati.length) {
       document.getElementById('risultatiCount').textContent = 'Nessun risultato';
-      div.innerHTML = '<div class="no-results"><h3>😕 Nessun artigiano trovato</h3><p>Prova a cambiare città o mestiere</p>' + formRichiestaClienteHTML() + '</div>';
+      var _dm = parseInt((document.getElementById('distanzaSlider')||{}).value || 100);
+      div.innerHTML = '<div class="no-results"><h3>😕 Nessun artigiano trovato</h3><p>Prova a cambiare città o mestiere</p>' + bottoneAllarga(_dm) + formRichiestaClienteHTML() + '</div>';
       document.getElementById('pagination').innerHTML = ''; return;
     }
     const totale = tuttiRisultati.length;
@@ -650,12 +657,31 @@
   function apriFiltri(){var s=document.querySelector('.sidebar');if(!s)return;s.classList.add('aperta');document.body.style.overflow='hidden';window.scrollTo(0,0);}
   function chiudiFiltri(){var s=document.querySelector('.sidebar');if(!s)return;s.classList.remove('aperta');document.body.style.overflow='';}
 
+  /* Chi arriva a zero risultati oggi se ne va. Se sta cercando stretto,
+     gli offro il gesto giusto invece di dirgli solo "prova a cambiare". */
+  function bottoneAllarga(distanzaMax){
+    if(distanzaMax>=100)return '';
+    var nuovo = distanzaMax<30 ? 30 : 100;
+    var testo = nuovo>=100 ? 'Cerca in tutta la zona' : 'Allarga la ricerca a 30 km';
+    return '<button type="button" onclick="allargaRicerca('+nuovo+')" style="display:block;margin:14px auto 0;'
+      + 'background:#0066ff;color:#fff;border:none;border-radius:12px;padding:14px 22px;'
+      + 'font-size:17px;font-weight:800;font-family:inherit;cursor:pointer">📍 '+testo+'</button>';
+  }
+  function allargaRicerca(km){
+    var sl=document.getElementById('distanzaSlider');
+    if(!sl)return;
+    sl.value=km;
+    var lab=document.getElementById('distanzaVal');
+    if(lab)lab.textContent = km>=100 ? 'Qualsiasi' : (km+' km');
+    cerca();
+  }
+
   function cardHTML(i) {
     const logo = i.logo_url ? `<img src="${_sx(i.logo_url)}" alt="logo" loading="lazy" width="56" height="56">` : `🔨`;
     const badge = i.piano === 'premium' ? '<span class="badge-premium">💎 PREMIUM</span>' : '';
     const desc = i.descrizione ? `<div class="card-desc">${_sx(i.descrizione)}</div>` : '';
     const distBadge = i._distKm !== null ? `<span style="display:inline-block;background:#e8f5ec;color:#0066ff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">📍 ${i._distKm}km</span>` : '';
-    const fzBadge = i._fuoriZona ? '<span style="display:inline-block;background:#f3e8ff;color:#7b1fa2;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">anche nella tua regione</span>' : '';
+    const fzBadge = i._fuoriZona ? '<span style="display:inline-block;background:#f3e8ff;color:#7b1fa2;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:10px;margin-left:6px;">anche nella tua regione</span>' : '';
     const ratingBadge = `<span style="display:inline-block;background:#e8f5ec;color:#0066ff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">⭐ ${i.valutazione_media>0?Number(i.valutazione_media).toFixed(1):'Nuovo'}</span>`;
     return `<a class="card${i.piano==='premium'?' premium':''}" href="profilo-impresa.html?id=${i.id}"><div class="card-header"><div class="card-logo">${logo}</div><div><div class="card-name">${_sx(i.nome||'Artigiano')}${badge}</div>${desc}<div class="card-tipo">🔧 ${_sx(i.mestiere||i.tipo||'Artigiano')}</div></div></div><div class="card-citta">📍 ${_sx(i.citta||'')}${distBadge}${ratingBadge}${fzBadge}</div></a>`;
   }
@@ -691,14 +717,14 @@
   if (params.get('citta')) document.getElementById('cittaInput').value = params.get('citta');
   if (params.get('mestiere')) {
     mestiereScelto = params.get('mestiere');
-    document.querySelectorAll('#mestieri-list .filter-btn').forEach(b => {
-      b.classList.remove('active');
-      if (b.dataset.mestiere === mestiereScelto) b.classList.add('active');
-    });
+    /* prima il filtro veniva applicato ma la tendina restava su "Tutti i mestieri":
+       l'utente non capiva perche' vedeva pochi risultati */
+    var _ms = document.getElementById('mestiereSelect');
+    if (_ms) _ms.value = mestiereScelto;
   }
   cerca();
   loadAnnunciCategoria();
-  async function loadAnnunciCategoria(){const container=document.getElementById('annunci-categoria');if(!container)return;const ora=new Date().toISOString();const{data:annunci}=await supabaseClient.from('annunci_pubblicitari').select('*').eq('attivo',true).eq('posizione','categoria').gt('data_fine',ora);if(!annunci||!annunci.length)return;/* prima partiva una chiamata per ogni sponsor: su rete mobile erano N attese in fila */const _ids=annunci.map(a=>a.impresa_id).filter(Boolean);const{data:_imprese}=await supabaseClient.from('imprese').select('id,nome,citta,tipo,logo_url,mestiere').in('id',_ids).eq('is_test',false);const _mappaImp={};(_imprese||[]).forEach(x=>{_mappaImp[String(x.id)]=x;});const cards=await Promise.all(annunci.map(async(ann)=>{const imp=_mappaImp[String(ann.impresa_id)];if(!imp)return'';const logo=imp.logo_url?`<img src="${_sx(imp.logo_url)}" loading="lazy" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`:`<div style="width:40px;height:40px;border-radius:50%;background:#fff3ee;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏗️</div>`;return`<a href="profilo-impresa.html?id=${imp.id}" style="display:flex;align-items:center;gap:14px;background:white;border-radius:14px;padding:16px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.07);text-decoration:none;color:inherit;border-left:4px solid #FF6B35;transition:box-shadow 0.2s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 10px rgba(0,0,0,0.07)';this.style.transform='translateY(0)'">${logo}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-weight:800;font-size:15px;color:#1a1a1a;">${_sx(imp.nome||'Impresa')}</span><span style="background:#FF6B35;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">Sponsorizzato</span></div><div style="font-size:13px;color:#555;">${_sx(imp.mestiere||imp.tipo||'')}${imp.citta?' · 📍 '+_sx(imp.citta):''}</div></div></a>`;}));const valide=cards.filter(Boolean);if(!valide.length)return;container.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">${valide.join('')}</div>`;}
+  async function loadAnnunciCategoria(){const container=document.getElementById('annunci-categoria');if(!container)return;const ora=new Date().toISOString();const{data:annunci}=await supabaseClient.from('annunci_pubblicitari').select('*').eq('attivo',true).eq('posizione','categoria').gt('data_fine',ora);if(!annunci||!annunci.length)return;/* prima partiva una chiamata per ogni sponsor: su rete mobile erano N attese in fila */const _ids=annunci.map(a=>a.impresa_id).filter(Boolean);const{data:_imprese}=await supabaseClient.from('imprese').select('id,nome,citta,tipo,logo_url,mestiere').in('id',_ids).eq('is_test',false);const _mappaImp={};(_imprese||[]).forEach(x=>{_mappaImp[String(x.id)]=x;});const cards=await Promise.all(annunci.map(async(ann)=>{const imp=_mappaImp[String(ann.impresa_id)];if(!imp)return'';const logo=imp.logo_url?`<img src="${_sx(imp.logo_url)}" loading="lazy" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`:`<div style="width:40px;height:40px;border-radius:50%;background:#fff3ee;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏗️</div>`;return`<a href="profilo-impresa.html?id=${imp.id}" style="display:flex;align-items:center;gap:14px;background:white;border-radius:14px;padding:16px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.07);text-decoration:none;color:inherit;border-left:4px solid #FF6B35;transition:box-shadow 0.2s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 10px rgba(0,0,0,0.07)';this.style.transform='translateY(0)'">${logo}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-weight:800;font-size:15px;color:#1a1a1a;">${_sx(imp.nome||'Impresa')}</span><span style="background:#FF6B35;color:white;font-size:12px;font-weight:700;padding:3px 9px;border-radius:10px;white-space:nowrap;">Sponsorizzato</span></div><div style="font-size:14px;color:#555;">${_sx(imp.mestiere||imp.tipo||'')}${imp.citta?' · 📍 '+_sx(imp.citta):''}</div></div></a>`;}));const valide=cards.filter(Boolean);if(!valide.length)return;container.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">${valide.join('')}</div>`;}
   let mappaRis=null,markersRis=null,iconaVerde;const geoCacheRis={};
   /* Leaflet non blocca piu' l'apertura della pagina: arriva solo quando il
      visitatore scorre fino alla mappa. Prima erano ~55KB da un altro sito
