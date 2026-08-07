@@ -534,6 +534,9 @@
     ['Squadra','Collaboratori'],
     /* condominio/amministratore → cliente: frasi esatte. Le più specifiche prima della parola
        nuda "Condomini", così "Condomini / Clienti" non diventa "Clienti / Clienti". */
+    /* frasi nuove dei fix di agosto 2026: vanno tradotte anche per il professionista */
+    ['Lavoro creato, ma il preventivo non risulta accettato','Pratica creata, ma il preventivo non risulta accettato'],
+    ['Attenzione: i lavori collegati alla fattura non si sono aggiornati','Attenzione: le pratiche collegate alla fattura non si sono aggiornate'],
     ['Dove (vuoto = indirizzo del condominio)','Dove (vuoto = indirizzo del cliente)'],
     ['Nome condominio / cliente','Nome cliente'],
     ['Condomini / Clienti','Clienti'],
@@ -764,6 +767,8 @@
   if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
+    /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
+    if(ruoloUtente==='professionista'&&TAB_NASCOSTI_PRO.indexOf(_deepTab)>=0){_deepTab=null;return;}
     const b=document.querySelector('nav.tabs button[data-tab="'+_deepTab+'"]');
     _deepTab=null;
     if(b)b.click();
@@ -1164,7 +1169,11 @@
         t:opeMap[k]||"Operatore", v:perOpe[k]+(perOpe[k]===1?" lavoro":" lavori")}))
     }));
 
-    C.push(rieCard({
+    /* il professionista ha Mezzi, Attrezzature e Carte nascosti nel menu:
+       le loro schede non devono comparire nemmeno nel Riepilogo, altrimenti
+       un clic lo porta in una sezione "fantasma" senza voce di menu */
+    const _proNascosto=t=>ruoloUtente==='professionista'&&TAB_NASCOSTI_PRO.indexOf(t)>=0;
+    if(!_proNascosto("mezzi"))C.push(rieCard({
       tab:"mezzi", titolo:"Mezzi", n:MZ.length,
       lab: mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine"):"mezzi in azienda",
       tono: mzAvvisa.some(v=>v.scadute>0)?"err":(mzAvvisa.length?"attesa":"ok"),
@@ -1183,7 +1192,7 @@
         v:(perOpe[o.id]||0)+((perOpe[o.id]||0)===1?" lavoro":" lavori")}))
     }));
 
-    C.push(rieCard({
+    if(!_proNascosto("carte"))C.push(rieCard({
       tab:"carte", titolo:"Carte", n:eur(saldoTot),
       lab:"saldo di "+carteAtt.length+(carteAtt.length===1?" carta attiva":" carte attive"),
       tono: saldoTot<0?"err":"neutro", vuoto:"Nessuna carta attiva",
@@ -4150,6 +4159,7 @@
           <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
         <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
+        ${bloccoPratica(job)}
         <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
           <button class="btn-primary b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
       fillOperai();fillClienti(job.cliente_id);return;
@@ -4270,15 +4280,19 @@
         leggiCampiPratica());
       /* niente scorciatoia "nasce gia' fatturato": la fattura si crea dalla sua sezione */
       let {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();
+      let avvisoPratica=false;
       if(error&&eColonnaPraticaMancante(error)){
         const rip=await sb.from('gest_lavori').insert(senzaCampiPratica(obj)).select('id').single();
         data=rip.data;error=rip.error;
-        if(!error)toast("Salvato, ma i dati della pratica non ancora: manca la migrazione SQL");
+        if(!error)avvisoPratica=true;
       }
       if(error){toast("Errore: "+error.message);return;}
       const realId=data.id;
       /* il numero di fattura lo assegna la fattura quando la emetti */
-      closeSheet();rinfresca("lavori","fatture","riepilogo");toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
+      closeSheet();rinfresca("lavori","fatture","riepilogo");
+      /* un solo messaggio: prima l'avviso "migrazione mancante" veniva coperto
+         subito dal toast verde e nessuno lo leggeva */
+      toast(avvisoPratica?"Creato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔"));return;
     }
     if(editing && editing.realId){
       const mod=Object.assign({
@@ -4295,10 +4309,11 @@
         ore:parseFloat($("#j-ore").value)||null
       }, leggiCampiPratica());
       let {data:okJob,error}=await sb.from('gest_lavori').update(mod).eq('id', editing.realId).eq('user_id',sbUid).select('id');
+      let avvisoPratica2=false;
       if(error&&eColonnaPraticaMancante(error)){
         const rip=await sb.from('gest_lavori').update(senzaCampiPratica(mod)).eq('id', editing.realId).eq('user_id',sbUid).select('id');
         okJob=rip.data;error=rip.error;
-        if(!error)toast("Salvato, ma i dati della pratica non ancora: manca la migrazione SQL");
+        if(!error)avvisoPratica2=true;
       }
       if(error){toast("Errore: "+error.message);return;}
       if(!okJob||!okJob.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
@@ -4317,7 +4332,8 @@
           f.uploaded=true;
         }catch(e){}
       }
-      closeSheet();renderAll();toast("Lavoro aggiornato ✔");return;
+      closeSheet();renderAll();
+      toast(avvisoPratica2?"Aggiornato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":"Lavoro aggiornato ✔");return;
     }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un cliente");return;}
     const id=editing.id, exists=db().lavori.some(l=>l.id===id), prev=db().lavori.find(l=>l.id===id);
@@ -4773,8 +4789,8 @@
     }
     if(error){toast("Errore: "+error.message);return;}
     if(!okCli||!okCli.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-    if(tolte.length)toast("Salvato, ma i campi fiscali richiedono un aggiornamento del database.");
-    closeSheet();renderClienti();rinfresca("fatture","riepilogo");toast(id?"Aggiornato":"Cliente aggiunto ✔");
+    closeSheet();renderClienti();rinfresca("fatture","riepilogo");
+    toast(tolte.length?"Attenzione: salvato, ma i campi fiscali richiedono un aggiornamento del database":(id?"Aggiornato":"Cliente aggiunto ✔"));
   }
   function dipForm(d){
     const isNew=!d;d=d||{};
@@ -6111,13 +6127,14 @@
     const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=$("#pv-note").value.trim()||null;
     let pid=id;
     const parcella=leggiCampiParcella();
+    let avvisoParcella=false;
     if(id){
       const mod=Object.assign({titolo,cliente_id,data,note},parcella);
       let {data:okPrev,error}=await sb.from("gest_preventivi").update(mod).eq("id",id).eq("user_id",sbUid).select("id");
       if(error&&eColonnaParcellaMancante(error)){
         const rip=await sb.from("gest_preventivi").update(senzaCampiParcella(mod)).eq("id",id).eq("user_id",sbUid).select("id");
         okPrev=rip.data;error=rip.error;
-        if(!error)toast("Salvato, ma i dati della parcella no: manca la migrazione SQL");
+        if(!error)avvisoParcella=true;
       }
       if(error){toast("Errore: "+error.message);return;}
       if(!okPrev||!okPrev.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
@@ -6133,14 +6150,15 @@
       if(error&&eColonnaParcellaMancante(error)){
         const rip=await sb.from("gest_preventivi").insert(senzaCampiParcella(nuovo)).select().single();
         np=rip.data;error=rip.error;
-        if(!error)toast("Salvato, ma i dati della parcella no: manca la migrazione SQL");
+        if(!error)avvisoParcella=true;
       }
       if(error){toast("Errore: "+error.message);return;}
       pid=np.id;
     }
     const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,user_id:sbUid,preventivo_id:pid})));
     if(e2){toast("Errore voci: "+e2.message);return;}
-    closeSheet();rinfresca("preventivi","riepilogo");toast(id?"Preventivo aggiornato ✔":"Preventivo creato ✔");
+    closeSheet();rinfresca("preventivi","riepilogo");
+    toast(avvisoParcella?"Salvato, ma i dati della parcella NON ci sono: manca la migrazione SQL":(id?"Preventivo aggiornato ✔":"Preventivo creato ✔"));
   }
   /* Ponte per js/ai-integrazione.js: salva un preventivo generato dall'AI.
      Riusa curMestiere() e la stessa formula del numero progressivo di savePrev. */
