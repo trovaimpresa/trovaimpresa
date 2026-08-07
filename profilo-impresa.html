@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="page-title">Profilo — TrovaImpresa</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<!-- Leaflet arriva solo se l'impresa ha una posizione sulla mappa: vedi caricaLeaflet() -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -632,7 +632,23 @@ nav img{height:36px}
   <button class="lb-btn lb-next" onclick="event.stopPropagation();cambiaFoto(1)">›</button>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* Leaflet a richiesta: la maggior parte dei profili non ha lat/lng, e chi ce l'ha
+   spesso non guarda la mappa. Prima erano 55KB bloccanti per tutti. */
+var _leafletProm=null;
+function caricaLeaflet(){
+  if(window.L)return Promise.resolve(true);
+  if(_leafletProm)return _leafletProm;
+  _leafletProm=new Promise(function(res){
+    var c=document.createElement('link');c.rel='stylesheet';
+    c.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(c);
+    var sc=document.createElement('script');sc.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    sc.onload=function(){res(true)};sc.onerror=function(){_leafletProm=null;res(false)};
+    document.head.appendChild(sc);
+  });
+  return _leafletProm;
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SU='https://nacvrsgkyfavykxjxszu.supabase.co';
@@ -760,6 +776,7 @@ async function caricaProfilo(id){
     if(ci){const lc=[d.indirizzo,d.citta].filter(Boolean).join(', ');if(lc)ci.innerHTML=`<div class="ci">📍</div><span>${_esc(lc)}</span>`}
     if(d.lat&&d.lng){
       document.getElementById('mappa-impresa').style.display='block';
+      if(!(await caricaLeaflet())){document.getElementById('mappa-impresa').style.display='none';}else{
       const ms=L.map('mappa-impresa',{zoomControl:false,scrollWheelZoom:false}).setView([d.lat,d.lng],15);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(ms);
       L.marker([d.lat,d.lng]).addTo(ms);setTimeout(()=>ms.invalidateSize(),200);
@@ -767,6 +784,7 @@ async function caricaProfilo(id){
       const mm=L.map('mappa-profilo',{zoomControl:true,scrollWheelZoom:false}).setView([d.lat,d.lng],15);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(mm);
       L.marker([d.lat,d.lng]).addTo(mm);setTimeout(()=>mm.invalidateSize(),300);
+      }
     }
     // Personalizzazione (JSONB) — applica solo le 5 chiavi header
     const pers = d.personalizzazione || {};

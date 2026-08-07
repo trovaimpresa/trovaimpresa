@@ -763,6 +763,10 @@
         .sezione-card p  { font-size: 13px !important; }
       }
     </style>
+<!-- apre in anticipo il collegamento verso database e CDN: fa risparmiare
+     qualche decimo di secondo a chi arriva da rete mobile -->
+<link rel="preconnect" href="https://nacvrsgkyfavykxjxszu.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="/css/mobile.css?v=11">
 <link rel="stylesheet" href="css/bacheca.css">
 <!-- HOMEPAGE 2026 -->
@@ -1407,7 +1411,8 @@
     });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- defer: sulla home serve solo alla pubblicita', non deve rallentare l'apertura -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // SUPABASE CONFIG
         const SUPABASE_URL = 'https://nacvrsgkyfavykxjxszu.supabase.co';

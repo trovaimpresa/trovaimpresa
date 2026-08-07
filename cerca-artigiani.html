@@ -13,8 +13,7 @@
   <meta property="og:description" content="Artigiani edili verificati vicino a te: confronta recensioni e richiedi preventivi gratuiti.">
   <meta property="og:url" content="https://trovaimpresa.com/cerca-artigiani">
   <meta property="og:image" content="https://trovaimpresa.com/logo.png">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet (mappa) si carica da solo quando serve: vedi caricaLeaflet() -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; font-size: 18px; }
@@ -699,12 +698,39 @@
   }
   cerca();
   loadAnnunciCategoria();
-  async function loadAnnunciCategoria(){const container=document.getElementById('annunci-categoria');if(!container)return;const ora=new Date().toISOString();const{data:annunci}=await supabaseClient.from('annunci_pubblicitari').select('*').eq('attivo',true).eq('posizione','categoria').gt('data_fine',ora);if(!annunci||!annunci.length)return;const cards=await Promise.all(annunci.map(async(ann)=>{const{data:imp}=await supabaseClient.from('imprese').select('id,nome,citta,tipo,logo_url,mestiere').eq('id',ann.impresa_id).eq('is_test',false).maybeSingle();if(!imp)return'';const logo=imp.logo_url?`<img src="${_sx(imp.logo_url)}" loading="lazy" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`:`<div style="width:40px;height:40px;border-radius:50%;background:#fff3ee;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏗️</div>`;return`<a href="profilo-impresa.html?id=${imp.id}" style="display:flex;align-items:center;gap:14px;background:white;border-radius:14px;padding:16px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.07);text-decoration:none;color:inherit;border-left:4px solid #FF6B35;transition:box-shadow 0.2s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 10px rgba(0,0,0,0.07)';this.style.transform='translateY(0)'">${logo}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-weight:800;font-size:15px;color:#1a1a1a;">${_sx(imp.nome||'Impresa')}</span><span style="background:#FF6B35;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">Sponsorizzato</span></div><div style="font-size:13px;color:#555;">${_sx(imp.mestiere||imp.tipo||'')}${imp.citta?' · 📍 '+_sx(imp.citta):''}</div></div></a>`;}));const valide=cards.filter(Boolean);if(!valide.length)return;container.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">${valide.join('')}</div>`;}
+  async function loadAnnunciCategoria(){const container=document.getElementById('annunci-categoria');if(!container)return;const ora=new Date().toISOString();const{data:annunci}=await supabaseClient.from('annunci_pubblicitari').select('*').eq('attivo',true).eq('posizione','categoria').gt('data_fine',ora);if(!annunci||!annunci.length)return;/* prima partiva una chiamata per ogni sponsor: su rete mobile erano N attese in fila */const _ids=annunci.map(a=>a.impresa_id).filter(Boolean);const{data:_imprese}=await supabaseClient.from('imprese').select('id,nome,citta,tipo,logo_url,mestiere').in('id',_ids).eq('is_test',false);const _mappaImp={};(_imprese||[]).forEach(x=>{_mappaImp[String(x.id)]=x;});const cards=await Promise.all(annunci.map(async(ann)=>{const imp=_mappaImp[String(ann.impresa_id)];if(!imp)return'';const logo=imp.logo_url?`<img src="${_sx(imp.logo_url)}" loading="lazy" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`:`<div style="width:40px;height:40px;border-radius:50%;background:#fff3ee;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏗️</div>`;return`<a href="profilo-impresa.html?id=${imp.id}" style="display:flex;align-items:center;gap:14px;background:white;border-radius:14px;padding:16px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.07);text-decoration:none;color:inherit;border-left:4px solid #FF6B35;transition:box-shadow 0.2s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 10px rgba(0,0,0,0.07)';this.style.transform='translateY(0)'">${logo}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-weight:800;font-size:15px;color:#1a1a1a;">${_sx(imp.nome||'Impresa')}</span><span style="background:#FF6B35;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">Sponsorizzato</span></div><div style="font-size:13px;color:#555;">${_sx(imp.mestiere||imp.tipo||'')}${imp.citta?' · 📍 '+_sx(imp.citta):''}</div></div></a>`;}));const valide=cards.filter(Boolean);if(!valide.length)return;container.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">${valide.join('')}</div>`;}
   let mappaRis=null,markersRis=null,iconaVerde;const geoCacheRis={};
-  function inizializzaMappaRis(){mappaRis=L.map('mappa-risultati').setView([41.9,12.5],6);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(mappaRis);markersRis=L.layerGroup().addTo(mappaRis);iconaVerde=L.divIcon({className:'',html:'<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#0066ff"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>',iconSize:[22,30],iconAnchor:[11,30],popupAnchor:[0,-30]});}
+  /* Leaflet non blocca piu' l'apertura della pagina: arriva solo quando il
+     visitatore scorre fino alla mappa. Prima erano ~55KB da un altro sito
+     scaricati prima ancora di vedere la lista, e le mappe le guarda in pochi. */
+  var _leafletProm=null;
+  function caricaLeaflet(){
+    if(window.L)return Promise.resolve(true);
+    if(_leafletProm)return _leafletProm;
+    _leafletProm=new Promise(function(res){
+      var c=document.createElement('link');c.rel='stylesheet';
+      c.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(c);
+      var s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      s.onload=function(){res(true)};s.onerror=function(){_leafletProm=null;res(false)};
+      document.head.appendChild(s);
+    });
+    return _leafletProm;
+  }
+  var _ultimiRis=[];
+  async function inizializzaMappaRis(){if(mappaRis)return true;if(!(await caricaLeaflet()))return false;mappaRis=L.map('mappa-risultati').setView([41.9,12.5],6);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(mappaRis);markersRis=L.layerGroup().addTo(mappaRis);iconaVerde=L.divIcon({className:'',html:'<svg width="22" height="30" viewBox="0 0 22 30" xmlns="http://www.w3.org/2000/svg"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19s11-10.75 11-19C22 4.925 17.075 0 11 0z" fill="#0066ff"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>',iconSize:[22,30],iconAnchor:[11,30],popupAnchor:[0,-30]});setTimeout(function(){try{mappaRis.invalidateSize()}catch(e){}},200);return true;}
   async function geocodificaRis(q){const k=q.toLowerCase().trim();if(geoCacheRis[k])return geoCacheRis[k];await new Promise(r=>setTimeout(r,1100));try{const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q+', Italia')}&format=json&limit=1`,{headers:{'Accept-Language':'it'}});const d=await res.json();if(d&&d[0]){const c=[parseFloat(d[0].lat),parseFloat(d[0].lon)];geoCacheRis[k]=c;return c;}}catch(e){}return null;}
-  async function aggiornaMappaRis(records){if(!mappaRis||!markersRis)return;markersRis.clearLayers();for(const r of records){if(!r.citta)continue;let c=r.lat&&r.lng?[r.lat,r.lng]:await geocodificaRis(r.citta);if(!c)continue;const nome=_sx(r.nome_attivita||r.nome_negozio||r.nome||'—');const tipo=_sx(r.mestiere||r.tipo||'');L.marker(c,{icon:iconaVerde}).addTo(markersRis).bindPopup(`<b>${nome}</b><br>${tipo?tipo+'<br>':''}📍 ${_sx(r.citta)}<br><a href="profilo-impresa.html?id=${encodeURIComponent(r.id)}" style="color:#0066ff;font-weight:700;">Vedi profilo →</a>`);}}
-  inizializzaMappaRis();
+  async function aggiornaMappaRis(records){_ultimiRis=records||[];if(!mappaRis||!markersRis)return;markersRis.clearLayers();for(const r of records){if(!r.citta)continue;let c=r.lat&&r.lng?[r.lat,r.lng]:await geocodificaRis(r.citta);if(!c)continue;const nome=_sx(r.nome_attivita||r.nome_negozio||r.nome||'—');const tipo=_sx(r.mestiere||r.tipo||'');L.marker(c,{icon:iconaVerde}).addTo(markersRis).bindPopup(`<b>${nome}</b><br>${tipo?tipo+'<br>':''}📍 ${_sx(r.citta)}<br><a href="profilo-impresa.html?id=${encodeURIComponent(r.id)}" style="color:#0066ff;font-weight:700;">Vedi profilo →</a>`);}}
+  /* la mappa si accende quando entra nello schermo, non prima */
+  (function(){
+    var box=document.getElementById('mappa-risultati');
+    if(!box)return;
+    function accendi(){inizializzaMappaRis().then(function(ok){if(ok)aggiornaMappaRis(_ultimiRis);});}
+    if(!('IntersectionObserver' in window)){accendi();return;}
+    var io=new IntersectionObserver(function(voci){
+      if(voci.some(function(v){return v.isIntersecting})){io.disconnect();accendi();}
+    },{rootMargin:'250px'});
+    io.observe(box);
+  })();
 </script>
 <script src="/cookie-banner.js"></script>
 <footer style="background:#0a2a4d;color:white;font-size:0.9rem;padding:18px;text-align:center">
