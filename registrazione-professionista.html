@@ -83,6 +83,17 @@
     .prest-check:hover { background: #f0f7ff; }
     .prest-check input { width: auto; margin-top: 2px; accent-color: #0066ff; flex-shrink: 0; }
     @media (max-width: 768px) { .prest-grid { grid-template-columns: 1fr; } }
+    /* Blocco "altri dettagli": i campi facoltativi non allungano il modulo. */
+    details.extra { border:1.5px solid #dbe6f5; border-radius:12px; background:#f7fafd;
+      margin:14px 0 4px; padding:0 14px; }
+    details.extra > summary { cursor:pointer; list-style:none; padding:14px 2px;
+      font-size:16.5px; font-weight:700; color:#0066ff; }
+    details.extra > summary::-webkit-details-marker { display:none; }
+    details.extra > summary::before { content:'➕ '; }
+    details.extra[open] > summary::before { content:'➖ '; }
+    details.extra > summary small { display:block; font-weight:500; color:#666;
+      font-size:14.5px; margin-top:3px; }
+    details.extra .form-group:last-child { margin-bottom:14px; }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
@@ -128,15 +139,36 @@
           <label>Nome / Ragione sociale <span class="required">*</span></label>
           <input type="text" id="nome" placeholder="Es. Mario Rossi Geometra">
         </div>
+        <details class="extra">
+          <summary>Aggiungi altri dettagli<small>Partita IVA, indirizzo, descrizione… Facoltativi: puoi metterli anche dopo dal tuo pannello.</small></summary>
         <div class="form-group">
           <label>Partita IVA / Codice Fiscale</label>
           <input type="text" id="partita_iva" placeholder="Es. 12345678901">
         </div>
-        <div class="form-row">
           <div class="form-group">
             <label>Indirizzo</label>
             <input type="text" id="indirizzo" placeholder="Es. Via Roma 42">
           </div>
+          <div class="form-group" style="max-width:110px;">
+            <label>CAP</label>
+            <input type="text" id="cap" placeholder="Es. 00100" maxlength="5">
+          </div>
+        <div class="form-group">
+          <label>Descrizione breve</label>
+          <textarea id="descrizione" placeholder="Descrivi la tua attività professionale e i servizi che offri..." maxlength="200" oninput="document.getElementById('desc-counter').textContent=this.value.length+'/200'"></textarea>
+          <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0/200</div>
+          <div style="font-size:11px;color:#888;margin-top:4px;">Max 200 caratteri (piano Free). Passa a Premium per descrizione illimitata.</div>
+        </div>
+          <div class="form-group">
+            <label>Anno di inizio attività</label>
+            <input type="number" id="anno_fondazione" placeholder="Es. 2005" min="1900" max="2100">
+          </div>
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <input type="tel" id="whatsapp" placeholder="Es. +39 333 1234567">
+        </div>
+        </details>
+        <div class="form-row">
           <div class="form-group" style="max-width:100px;">
             <label>Civico</label>
             <input type="text" id="civico" placeholder="Es. 1">
@@ -165,30 +197,12 @@
               <option value="">-- prima scegli la provincia --</option>
             </select>
           </div>
-          <div class="form-group" style="max-width:110px;">
-            <label>CAP</label>
-            <input type="text" id="cap" placeholder="Es. 00100" maxlength="5">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Descrizione breve</label>
-          <textarea id="descrizione" placeholder="Descrivi la tua attività professionale e i servizi che offri..." maxlength="200" oninput="document.getElementById('desc-counter').textContent=this.value.length+'/200'"></textarea>
-          <div id="desc-counter" style="text-align:right;font-size:11px;color:#aaa;margin-top:3px;">0/200</div>
-          <div style="font-size:11px;color:#888;margin-top:4px;">Max 200 caratteri (piano Free). Passa a Premium per descrizione illimitata.</div>
         </div>
         <div class="form-row">
-          <div class="form-group">
-            <label>Anno di inizio attività</label>
-            <input type="number" id="anno_fondazione" placeholder="Es. 2005" min="1900" max="2100">
-          </div>
           <div class="form-group">
             <label>Numero collaboratori</label>
             <input type="number" id="dipendenti" placeholder="Es. 2" min="0">
           </div>
-        </div>
-        <div class="form-group">
-          <label>WhatsApp</label>
-          <input type="tel" id="whatsapp" placeholder="Es. +39 333 1234567">
         </div>
       </div>
 
@@ -224,6 +238,8 @@
           <input type="text" id="comuni_competenza" placeholder="Es. Roma, Fiumicino, Tivoli (separati da virgola)">
           <div style="font-size:11px;color:#888;margin-top:4px;">Elenco dei comuni in cui accetti incarichi, separati da virgola.</div>
         </div>
+        <details class="extra">
+          <summary>Altre competenze e zone<small>Altre specializzazioni, zone in cui operi, anni di esperienza. Facoltativi.</small></summary>
         <div class="form-group">
           <label>Altre competenze / specializzazioni</label>
           <textarea id="specializzazioni" placeholder="Es. Pratiche catastali, APE, progettazione BIM, perizie..."></textarea>
@@ -236,6 +252,7 @@
           <label>Anni di esperienza</label>
           <input type="number" id="anni_esperienza" placeholder="Es. 10" min="0" max="60">
         </div>
+        </details>
       </div>
 
       <!-- STEP 3 -->
@@ -249,10 +266,13 @@
           <label>Telefono <span class="required">*</span></label>
           <input type="tel" id="telefono" placeholder="+39 06 1234567">
         </div>
+        <details class="extra">
+          <summary>Hai un sito web?<small>Facoltativo. Comparirà sulla tua pagina pubblica.</small></summary>
         <div class="form-group">
           <label>Sito web</label>
           <input type="url" id="sito_web" placeholder="https://www.miosito.it">
         </div>
+        </details>
         <div class="form-group">
           <label>Password <span class="required">*</span></label>
           <div class="password-wrapper">
@@ -695,6 +715,20 @@
             emailRedirectTo: window.location.origin + '/login-impresa.html',
             data: {
               tipo: 'professionista',
+              /* campi facoltativi: se compilati NON vanno persi
+                 (li salva sql/trigger-campi-extra.sql) */
+              piva: (document.getElementById('partita_iva')||{}).value || null,
+              indirizzo: [(document.getElementById('indirizzo')||{}).value, (document.getElementById('civico')||{}).value].filter(Boolean).join(' ') || null,
+              cap: (document.getElementById('cap')||{}).value || null,
+              descrizione: (document.getElementById('descrizione')||{}).value || null,
+              anno_fondazione: (document.getElementById('anno_fondazione')||{}).value || null,
+              dipendenti: (document.getElementById('dipendenti')||{}).value || null,
+              whatsapp: (document.getElementById('whatsapp')||{}).value || null,
+              sito_web: (document.getElementById('sito_web')||{}).value || null,
+              specializzazioni: (document.getElementById('specializzazioni')||{}).value || null,
+              zone: (document.getElementById('zone')||{}).value || null,
+              anni_esperienza: (document.getElementById('anni_esperienza')||{}).value || null,
+
               nome_attivita: nome,
               nome: nome,
               telefono: telefono,

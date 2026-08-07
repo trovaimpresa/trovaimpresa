@@ -3,6 +3,12 @@
 -- Da salvare come  sql/trigger-campi-extra.sql
 -- Incolla tutto in Supabase > SQL Editor > Run
 --
+-- AGGIORNATO l'8 agosto 2026: salva anche i campi del blocco facoltativo
+--   "Aggiungi altri dettagli" (P.IVA, indirizzo, CAP, descrizione, WhatsApp,
+--   sito, specializzazioni, zone, anno, dipendenti, anni di esperienza).
+--   Prima venivano chiesti nel modulo e buttati via.
+--   Si puo' rieseguire quante volte si vuole (create or replace).
+--
 -- PROBLEMA (trovato l'8 agosto 2026):
 --   Il form del NEGOZIO obbliga a scegliere la categoria (Ferramenta,
 --   Termoidraulica...) ma quel dato non arrivava mai nel profilo: la
@@ -50,9 +56,22 @@ begin
   end if;
 
   update public.imprese
-     set nome_negozio = coalesce(v_nomeneg,  nome_negozio),
-         tipo_negozio = coalesce(v_negozio,  tipo_negozio),
-         mestieri     = coalesce(v_mestieri, mestieri)
+     set nome_negozio     = coalesce(v_nomeneg,  nome_negozio),
+         tipo_negozio     = coalesce(v_negozio,  tipo_negozio),
+         mestieri         = coalesce(v_mestieri, mestieri),
+         -- campi facoltativi del modulo (blocco "Aggiungi altri dettagli"):
+         -- se l'impresa li compila non devono andare persi
+         piva             = coalesce(nullif(trim(coalesce(m->>'piva','')),''),             piva),
+         indirizzo        = coalesce(nullif(trim(coalesce(m->>'indirizzo','')),''),        indirizzo),
+         cap              = coalesce(nullif(trim(coalesce(m->>'cap','')),''),              cap),
+         descrizione      = coalesce(nullif(trim(coalesce(m->>'descrizione','')),''),      descrizione),
+         whatsapp         = coalesce(nullif(trim(coalesce(m->>'whatsapp','')),''),         whatsapp),
+         sito_web         = coalesce(nullif(trim(coalesce(m->>'sito_web','')),''),         sito_web),
+         specializzazioni = coalesce(nullif(trim(coalesce(m->>'specializzazioni','')),''), specializzazioni),
+         zone             = coalesce(nullif(trim(coalesce(m->>'zone','')),''),             zone),
+         anno_fondazione  = coalesce((nullif(regexp_replace(coalesce(m->>'anno_fondazione',''),'[^0-9]','','g'),''))::int,  anno_fondazione),
+         dipendenti       = coalesce((nullif(regexp_replace(coalesce(m->>'dipendenti',''),'[^0-9]','','g'),''))::int,       dipendenti),
+         anni_esperienza  = coalesce((nullif(regexp_replace(coalesce(m->>'anni_esperienza',''),'[^0-9]','','g'),''))::int,  anni_esperienza)
    where user_id = new.id;
 
   return new;
