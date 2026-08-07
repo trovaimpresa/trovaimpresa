@@ -121,8 +121,24 @@
     .loading, .no-results { text-align: center; padding: 50px; color: #111; background: white; border-radius: 14px; font-size: 18px; }
     .no-results h3 { font-size: 20px; color: #111; margin-bottom: 10px; }
 
+  /* pulsante "Filtri" (solo telefono) e barra di chiusura del pannello */
+  .filtri-btn{display:none;align-items:center;gap:8px;background:#fff;border:1.5px solid #0066ff;
+    color:#0066ff;font-weight:800;font-size:16px;padding:12px 18px;border-radius:12px;cursor:pointer;
+    font-family:inherit;margin-bottom:12px;width:100%;justify-content:center}
+  .filtri-azioni{display:none;position:fixed;left:0;right:0;bottom:0;z-index:1300;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:#fff;border-top:1px solid #e5e5e5;box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+  .filtri-azioni button{width:100%;background:#0066ff;color:#fff;border:none;border-radius:12px;
+    padding:15px;font-size:17px;font-weight:800;font-family:inherit;cursor:pointer}
+
     @media (max-width: 700px) {
-      .sidebar { display: none; }
+      /* I filtri non spariscono piu' sul telefono: diventano un pannello a
+         tutto schermo che si apre col pulsante "Filtri". Prima da mobile era
+         impossibile scegliere il mestiere o la distanza. */
+      .sidebar { position: fixed; inset: 0; z-index: 1200; width: auto; min-height: 0;
+        padding: 16px 16px 96px; overflow-y: auto; box-shadow: none; display: none; }
+      .sidebar.aperta { display: block; }
+      .filtri-btn { display: inline-flex !important; }
+      .filtri-azioni { display: block !important; }
       .results-col { padding: 16px; }
       /* Una colonna sola: due schede su un telefono lasciavano ~100px al nome
          dell'impresa. E "1fr" non impedisce alla colonna di allargarsi oltre
@@ -278,11 +294,13 @@
       <label class="check-option"><input type="checkbox" id="rispondeIn24h" onchange="cerca()"> Risponde in 24h</label>
       <label class="check-option"><input type="checkbox" id="preventivoOnline" onchange="cerca()"> Preventivo online</label>
     </div>
+    <div class="filtri-azioni"><button type="button" onclick="chiudiFiltri()">Mostra i artigiani</button></div>
   </div>
 
   <div class="results-col">
     <div id="activeFilters" class="active-filters"></div>
     <div class="results-header">
+      <button type="button" class="filtri-btn" onclick="apriFiltri()">⚙️ Filtri, mestiere e distanza</button>
       <div class="results-count" id="risultatiCount">Ricerca in corso...</div>
       <select class="sort-select" onchange="cambiaSorting(this.value)">
         <option value="piano">Ordina: Rilevanza</option>
@@ -628,6 +646,11 @@
      citta', logo...) vanno sempre "disinnescati" prima di finire nella pagina,
      altrimenti chi si registra puo' iniettare codice visto da tutti i clienti. */
   const _sx=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  /* apertura/chiusura del pannello filtri su telefono */
+  function apriFiltri(){var s=document.querySelector('.sidebar');if(!s)return;s.classList.add('aperta');document.body.style.overflow='hidden';window.scrollTo(0,0);}
+  function chiudiFiltri(){var s=document.querySelector('.sidebar');if(!s)return;s.classList.remove('aperta');document.body.style.overflow='';}
+
   function cardHTML(i) {
     const logo = i.logo_url ? `<img src="${_sx(i.logo_url)}" alt="logo" loading="lazy" width="56" height="56">` : `🔨`;
     const badge = i.piano === 'premium' ? '<span class="badge-premium">💎 PREMIUM</span>' : '';

@@ -189,16 +189,30 @@
   // sia da chiedere o già salvata. È lì che il cliente vede la sua zona per
   // intero e gli spazi pubblicitari principali. Da quel momento in poi la
   // navigazione è normale: dalla home città il clic va dritto alla ricerca.
+  //
+  // AGGIORNAMENTO 8 agosto 2026: il passaggio dalla home citta' resta (e' li' che
+  // vive la pubblicita' venduta), ma la meta' scelta dal cliente non si perde
+  // piu'. Viene passata come &vai=..., e la home citta' mostra in cima un
+  // pulsante grosso "Vedi gli artigiani di Roma". Prima l'utente cliccava la
+  // categoria, scriveva la citta' e si ritrovava al punto di partenza, senza
+  // capire che doveva ricliccare: e' li' che la gente se ne andava.
   function vaiA(url) {
     var c = leggi();
     if (c) {
-      if (homeNazionale()) { w.location.href = 'index.html?citta=' + encodeURIComponent(c); return; }
+      if (homeNazionale()) { w.location.href = homeConMeta(c, url); return; }
       w.location.href = conCitta(url, c);
       return;
     }
     chiedi(function (scelta) {
-      w.location.href = 'index.html?citta=' + encodeURIComponent(scelta);
+      w.location.href = homeConMeta(scelta, url);
     });
+  }
+
+  // index.html?citta=X&vai=pagina-scelta.html
+  function homeConMeta(citta, url) {
+    var base = 'index.html?citta=' + encodeURIComponent(citta);
+    var meta = String(url || '').split('?')[0].split('/').pop();
+    return meta ? base + '&vai=' + encodeURIComponent(meta) : base;
   }
 
   // ---------------------------------------------------------------- aggancio

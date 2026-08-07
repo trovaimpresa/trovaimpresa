@@ -1018,6 +1018,16 @@
                 <span>Stai cercando a <b id="citta-attiva-nome"></b></span>
                 <a href="index.html">cambia citt&agrave;</a>
             </div>
+
+            <!-- Riprende il filo: il cliente aveva cliccato una categoria prima di
+                 scegliere la citta'. Invece di lasciarlo ricominciare, gli diamo
+                 un solo pulsante grosso per andare dove voleva. -->
+            <a id="riprendi-ricerca" href="#" style="display:none;align-items:center;justify-content:center;gap:10px;
+               margin:18px auto 0;max-width:520px;background:#FF6B35;color:#fff;text-decoration:none;
+               font-weight:800;font-size:17px;line-height:1.35;padding:16px 20px;border-radius:14px;
+               box-shadow:0 6px 18px rgba(255,107,53,.28);text-align:center">
+               <span id="riprendi-testo">Continua la ricerca</span> <span aria-hidden="true">&rarr;</span>
+            </a>
         </div>
     </section>
 
@@ -1515,6 +1525,31 @@
     </script>
 
 <script src="/cookie-banner.js"></script>
+<script>
+/* Se arrivo qui da un clic su una categoria (?vai=...), mostro il pulsante che
+   riprende il filo del discorso invece di far ricominciare da capo. */
+(function(){
+  var ETICHETTE={
+    'cerca-artigiani.html':'Vedi gli artigiani',
+    'cerca-imprese.html':'Vedi le imprese edili',
+    'cerca-negozi.html':'Vedi i negozi',
+    'cerca-professionisti.html':'Vedi i professionisti',
+    'professionisti.html':'Vedi i professionisti'
+  };
+  function avvia(){
+    var p=new URLSearchParams(location.search);
+    var vai=p.get('vai'), citta=(p.get('citta')||'').trim();
+    if(!vai||!ETICHETTE[vai]||!citta)return;
+    var a=document.getElementById('riprendi-ricerca');
+    var t=document.getElementById('riprendi-testo');
+    if(!a||!t)return;
+    a.href=vai+'?citta='+encodeURIComponent(citta);
+    t.textContent=ETICHETTE[vai]+' di '+citta;
+    a.style.display='flex';
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',avvia);else avvia();
+})();
+</script>
 <script src="/js/citta-obbligatoria.js"></script>
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/pubblicita-spazi.js" defer></script>
