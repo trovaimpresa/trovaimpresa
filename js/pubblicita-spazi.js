@@ -105,7 +105,12 @@
       a.style.setProperty('display', 'flex', 'important');
       a.style.border = 'none';
       a.style.padding = '0';
-      a.innerHTML = '<img src="' + ann.logo_url + '" alt="Pubblicità" style="width:100%;height:100%;object-fit:contain;display:block;">';
+      var _im = document.createElement('img');
+      _im.src = ann.logo_url || '';         /* niente HTML costruito a mano */
+      _im.alt = 'Pubblicità';
+      _im.loading = 'lazy';
+      _im.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
+      a.innerHTML = ''; a.appendChild(_im);
     }
   }
 

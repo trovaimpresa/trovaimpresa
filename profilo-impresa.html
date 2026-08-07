@@ -379,11 +379,8 @@ nav img{height:36px}
     <div class="sc-num" id="stat-anni">—</div>
     <div class="sc-lbl">Anni esp.</div>
   </div>
-  <div class="sc" style="border-top-color:#6c3483">
-    <div class="sc-icon">🎯</div>
-    <div class="sc-num org" id="stat-piano">Free</div>
-    <div class="sc-lbl">Piano</div>
-  </div>
+  <!-- Statistica "Piano" tolta il 7/8/2026: al cliente non interessa quanto paga
+       l'impresa, e la scritta "Free" in arancione la faceva sembrare di serie B. -->
 </div>
 
 <!-- MAIN -->
@@ -509,7 +506,7 @@ nav img{height:36px}
   <div>
     <div class="sidebar-trust">
       <div class="st-icon">🛡️</div>
-      <div class="st-text" id="cta-trust-label"><strong>Preventivo gratuito</strong><span>Risposta entro 24 ore</span></div>
+      <div class="st-text" id="cta-trust-label"><strong>Preventivo gratuito</strong><span>Risposta entro 24-48 ore</span></div>
     </div>
 
     <a class="btn-prev" id="cta-principale" onclick="showPreventivo()">
@@ -527,7 +524,7 @@ nav img{height:36px}
       <li id="contact-tel"><div class="ci">📞</div><a href="#" id="tel-link">—</a></li>
       <li id="contact-email"><div class="ci">✉️</div><a href="#" id="email-link">—</a></li>
       <li id="contact-sito" style="display:none"><div class="ci">🌐</div><a href="#" id="sito-link" target="_blank">—</a></li>
-      <li><div class="ci">🕐</div><span>Lun–Ven 8:00–18:00</span></li>
+      <!-- orario fisso rimosso: era uguale per tutte le imprese, cioe' inventato -->
     </ul>
 
     <div id="mappa-impresa"></div>
@@ -671,7 +668,7 @@ async function caricaProfilo(id){
     }else{
       caricaFotoLavori(d.user_id);
     }
-    if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${d.logo_url}" alt="logo" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
+    if(d.logo_url&&d.logo_url!=='/img/logo.png')document.getElementById('avatar-wrap').innerHTML=`<img src="${_esc(d.logo_url)}" alt="logo" fetchpriority="high" style="max-width:200px;max-height:120px;object-fit:contain;border-radius:8px;">`;else if(d.logo_url==='/img/logo.png')document.getElementById('avatar-wrap').style.display='none';
     if(d.colore_header){const h=document.getElementById('hero-section');if(!d.colore_header.includes('gradient'))h.style.backgroundImage='none';h.style.background=d.colore_header}
     if(d.foto_copertina_url){document.getElementById('cover-foto-img').src=d.foto_copertina_url;document.getElementById('cover-foto').style.display='block'}
     const b=[];
@@ -760,7 +757,7 @@ async function caricaProfilo(id){
     const sito=d.sito_web||'';
     if(sito&&sl){sl.href=sito.startsWith('http')?sito:'https://'+sito;sl.textContent=sito.replace(/^https?:\/\//,'');if(cs)cs.style.display=''}
     const ci=document.getElementById('contact-indirizzo');
-    if(ci){const lc=[d.indirizzo,d.citta].filter(Boolean).join(', ');if(lc)ci.innerHTML=`<div class="ci">📍</div><span>${lc}</span>`}
+    if(ci){const lc=[d.indirizzo,d.citta].filter(Boolean).join(', ');if(lc)ci.innerHTML=`<div class="ci">📍</div><span>${_esc(lc)}</span>`}
     if(d.lat&&d.lng){
       document.getElementById('mappa-impresa').style.display='block';
       const ms=L.map('mappa-impresa',{zoomControl:false,scrollWheelZoom:false}).setView([d.lat,d.lng],15);
@@ -818,7 +815,9 @@ async function caricaProfilo(id){
           const nome = escHtml(c.nome || '');
           const cat  = escHtml(c.categoria || '');
           const scad = c.scadenza ? `<div style="font-size:12px;color:#555;margin-top:6px">📅 Scade: ${escHtml(c.scadenza)}</div>` : '';
-          const file = c.file_url ? `<a href="${c.file_url}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;padding:6px 12px;background:#daa520;color:white;border-radius:8px;text-decoration:none;font-weight:700;font-size:12px">📎 Vedi documento</a>` : '';
+          /* solo link http/https: un file_url tipo "javascript:" non deve diventare cliccabile */
+          const _fu=/^https?:\/\//i.test(String(c.file_url||''))?c.file_url:'';
+          const file = _fu ? `<a href="${recEsc(_fu)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;padding:6px 12px;background:#daa520;color:white;border-radius:8px;text-decoration:none;font-weight:700;font-size:12px">📎 Vedi documento</a>` : '';
           return `<div style="background:#fafafa;border:1px solid #eee;border-radius:12px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,0.06)">
             <div style="font-weight:800;color:#0052cc;font-size:14px;line-height:1.3">${nome}</div>
             ${cat ? `<div style="font-size:12px;color:#888;margin-top:4px">${cat}</div>` : ''}
@@ -873,7 +872,9 @@ async function caricaRecensioni(id){
       const votiHtml=voti.map(([lbl,v])=>{const n=parseInt(v)||0;const stars=n?'★'.repeat(n)+'☆'.repeat(5-n):'—';return`<div class="rec-voto-box"><div class="rv-lbl">${lbl}</div><div class="rv-st">${stars}</div></div>`}).join('');
       return`<div class="rec-item"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="rec-nome">${recEsc(r.nome_cliente)||'Cliente'}${r.verificata?'<span class="rec-verif">✅ Verificata</span>':''}</span><span class="rec-data">${quando}</span></div><div class="rec-stelle">${st} ${avg}/5</div><div class="rec-voti-grid">${votiHtml}</div><p class="rec-testo">${recEsc(r.testo)}</p></div>`;
     }).join('');
-    if(isFree&&data.length>3){div.innerHTML+=`<div style="margin-top:14px;padding:12px 14px;background:#fff8e1;border-left:3px solid #f5a623;border-radius:6px;font-size:13px;color:#666">📌 ${data.length} recensioni totali, solo le 3 più recenti sono visibili sul piano Free</div>`;}
+    /* al cliente non si dice che il sito gli nasconde delle recensioni: e' un segnale
+       che toglie fiducia proprio nel momento in cui sta decidendo. L'avviso resta
+       per l'impresa nel suo pannello. */
   }catch(e){console.error(e)}
 }
 

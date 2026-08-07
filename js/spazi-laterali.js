@@ -72,8 +72,12 @@
     a.href = ann.link_url || '#';
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
-    a.innerHTML = '<img src="' + ann.logo_url + '" alt="Pubblicità" '
-                + 'style="width:100%;height:100%;object-fit:cover;display:block">';
+    var _im = document.createElement('img');
+    _im.src = ann.logo_url || '';           /* niente HTML costruito a mano: nessuna iniezione possibile */
+    _im.alt = 'Pubblicità';
+    _im.loading = 'lazy';
+    _im.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+    a.innerHTML = ''; a.appendChild(_im);
   }
 
   async function riempi() {
@@ -110,10 +114,16 @@
   }
 
   function avvia() {
+    /* Sotto i 1400px questi spazi sono nascosti dal CSS: senza questa uscita
+       il controllo girava ogni 0,8 secondi per sempre anche sui telefoni,
+       consumando batteria per niente. */
+    try{ if (window.matchMedia && window.matchMedia('(max-width:1400px)').matches) return; }catch(e){}
     controlla();
     // La città può arrivare dopo (profilo dopo il fetch, filtri dopo l'input):
-    // la tengo d'occhio e ricarico se cambia.
-    setInterval(controlla, 800);
+    // la tengo d'occhio e ricarico se cambia. Si ferma da solo dopo 30 secondi:
+    // se a quel punto la città non è arrivata, non arriva più.
+    var _giri = 0;
+    var _t = setInterval(function(){ controlla(); if (++_giri > 38) clearInterval(_t); }, 800);
   }
 
   if (document.readyState === 'loading') {
