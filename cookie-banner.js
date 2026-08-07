@@ -53,9 +53,20 @@
     '#cb-accept-all { background: #2e78cc; color: #fff; }',
     '#cb-accept-essential { background: transparent; color: #f0f0f0; border: 1px solid #555 !important; }',
     '@media (max-width: 600px) {',
-    '  #cookie-banner { flex-direction: column; align-items: flex-start; padding: 16px; }',
+    /* Su telefono questo banner occupava due terzi dello schermo e copriva
+       tutto quello che c'era sotto (compreso il pannello "scegli la citta'").
+       Ora resta basso: testo piu' compatto, e se e' troppo lungo scorre dentro. */
+    '  #cookie-banner { flex-direction: column; align-items: stretch; padding: 14px 16px;',
+    '    gap: 10px; font-size: 14.5px; line-height: 1.45; max-height: 42vh; overflow-y: auto; }',
+    '  #cookie-banner p { flex: 0 0 auto; }',
     '  #cookie-banner .cb-buttons { width: 100%; }',
-    '  #cookie-banner button { flex: 1; }',
+    '  #cookie-banner button { flex: 1; padding: 13px 10px; font-size: 15px; }',
+    '}',
+    /* Le barre fisse in basso del sito (preventivo sul profilo, "mostra i risultati"
+       nei filtri) stanno anche loro attaccate al fondo: finche' c'e' il banner si
+       spostano sopra di lui, invece di finirci sotto e diventare non cliccabili. */
+    'body.cb-aperto .cta-bar-mobile, body.cb-aperto .filtri-azioni {',
+    '  bottom: var(--cb-altezza, 0px) !important;',
     '}'
   ].join('\n');
   document.head.appendChild(style);
@@ -80,6 +91,16 @@
 
   document.body.appendChild(banner);
 
+  /* segna al resto del sito che il banner c'e' e quanto e' alto */
+  function segnaAltezza() {
+    try {
+      document.body.classList.add('cb-aperto');
+      document.documentElement.style.setProperty('--cb-altezza', banner.offsetHeight + 'px');
+    } catch (e) {}
+  }
+  segnaAltezza();
+  window.addEventListener('resize', segnaAltezza);
+
   function saveConsent(value) {
     try {
       localStorage.setItem(STORAGE_KEY, value);
@@ -89,6 +110,10 @@
     banner.style.opacity = '0';
     setTimeout(function () {
       if (banner.parentNode) banner.parentNode.removeChild(banner);
+      try {
+        document.body.classList.remove('cb-aperto');
+        document.documentElement.style.removeProperty('--cb-altezza');
+      } catch (e) {}
     }, 320);
   }
 

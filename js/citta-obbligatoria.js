@@ -77,7 +77,9 @@
     var s = d.createElement('style');
     s.id = 'ti-cit-css';
     s.textContent = [
-      '.ti-cit-bg{position:fixed;inset:0;background:rgba(10,42,77,.55);z-index:9998;',
+      /* 100001: deve stare SOPRA il banner dei cookie (99999), altrimenti su telefono
+         il banner copriva il campo e il pulsante Continua e il visitatore restava bloccato */
+      '.ti-cit-bg{position:fixed;inset:0;background:rgba(10,42,77,.55);z-index:100001;',
       'display:flex;align-items:center;justify-content:center;padding:18px}',
       '.ti-cit-box{background:#fff;border-radius:16px;max-width:420px;width:100%;',
       'padding:26px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25);font-family:inherit}',

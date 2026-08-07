@@ -137,11 +137,7 @@ nav img{height:36px}
 .cw{background:#f5f5f5;border-radius:12px;padding:14px;border:1px solid #eee}
 .orologio{font-size:1.8rem;font-weight:800;color:#0066ff;letter-spacing:2px;
   text-align:center;display:flex;align-items:center;justify-content:center;height:100%;min-height:60px}
-.meteo-inner{display:flex;align-items:center;gap:10px}
-.meteo-icon{font-size:1.8rem}
-.meteo-citta{font-weight:700;font-size:13px;color:#333}
-.meteo-temp{font-size:1.3rem;font-weight:800;color:#0066ff}
-.meteo-cond{font-size:11px;color:#888}
+/* stili del vecchio widget meteo rimossi insieme al widget */
 .cal-head{display:flex;align-items:center;justify-content:space-between;
   background:#0066ff;border-radius:8px;padding:7px 10px;margin-bottom:8px}
 .cal-head button{background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer}
@@ -687,13 +683,36 @@ function formattaTipoNegozio(slug){if(!slug)return '';return TIPO_NEGOZIO_LABEL[
 
 async function caricaProfilo(id){
   try{
-    const r=await fetch(`${SU}/rest/v1/imprese?id=eq.${id}&select=*&limit=1`,{headers:{'apikey':SK}});
-    const data=await r.json();if(!data||!data.length)return;const d=data[0];window._pianoImpresa=(d.piano||'free').toLowerCase();
+    /* prima, se la lettura falliva o l'id non esisteva, la pagina restava su
+       "Caricamento..." per sempre: il visitatore non capiva e se ne andava */
+    function _profiloKo(msg){
+      var n=document.getElementById('profile-name');
+      if(n)n.textContent=msg;
+      var b=document.getElementById('profile-tipo-badge');
+      if(b)b.textContent='';
+      var barra=document.getElementById('cta-bar-mobile');
+      if(barra)barra.style.display='none';
+    }
+    let r,data;
+    try{
+      r=await fetch(`${SU}/rest/v1/imprese?id=eq.${id}&select=*&limit=1`,{headers:{'apikey':SK}});
+      if(!r.ok)throw new Error(r.status);
+      data=await r.json();
+    }catch(e){
+      _profiloKo('Non riesco a caricare questa scheda — controlla la connessione e ricarica la pagina');
+      return;
+    }
+    if(!data||!data.length){
+      _profiloKo('Questa scheda non è più disponibile');
+      return;
+    }
+    const d=data[0];window._pianoImpresa=(d.piano||'free').toLowerCase();
     const nome=d.nome||'';
     if(nome){document.title=nome+' — TrovaImpresa';document.getElementById('profile-name').textContent=nome}
     if(d.tipo){const categoria=d.tipo==='negozio'?(formattaTipoNegozio(d.tipo_negozio)||'Negozio'):(d.tipo.charAt(0).toUpperCase()+d.tipo.slice(1).toLowerCase());const tipoFmt='🔧 '+categoria;const mestieriArr=Array.isArray(d.mestieri)?d.mestieri.filter(Boolean):[];document.getElementById('profile-tipo-badge').textContent=mestieriArr.length?tipoFmt+' • '+mestieriArr.map(formattaMestiere).join(' · '):tipoFmt;}
+    /* le foto e la vetrina non devono poter bloccare i contatti: partono da sole */
     if(d.tipo==='negozio'){
-      caricaVetrina(d.user_id);
+      Promise.resolve().then(()=>caricaVetrina(d.user_id)).catch(()=>{});
       const _fg=document.getElementById('foto-lavori-grid');const _fc=_fg&&_fg.closest('.card');if(_fc)_fc.style.display='none';
     }else{
       caricaFotoLavori(d.user_id);
@@ -769,15 +788,26 @@ async function caricaProfilo(id){
     }
     if(_infoHasContent)document.getElementById('card-info').style.display='';
     // VALUTAZIONE + RECENSIONI: query live su feedback_clienti verificate
-    const rRev=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&select=stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita`,{headers:{'apikey':SK}});
-    const recs=await rRev.json();
+    /* Le stelle sono un di piu'. Prima, se questa chiamata falliva (rete di
+       cantiere), saltava tutto quello che viene dopo: numero di telefono,
+       indirizzo e il pulsante "Chiama". Ora al massimo restano i trattini. */
+    let recs=[];
+    try{
+      const rRev=await fetch(`${SU}/rest/v1/feedback_clienti?impresa_id=eq.${id}&select=stelle_qualita,stelle_puntualita,stelle_prezzo,stelle_professionalita`,{headers:{'apikey':SK}});
+      if(rRev.ok)recs=await rRev.json();
+    }catch(e){}
     const stelle=(Array.isArray(recs)?recs:[]).flatMap(r=>[r.stelle_qualita,r.stelle_puntualita,r.stelle_prezzo,r.stelle_professionalita]).filter(s=>s!=null);
     const nr=Array.isArray(recs)?recs.length:0;
     const voto=stelle.length?stelle.reduce((a,b)=>a+b,0)/stelle.length:null;
     document.getElementById('stat-rating').textContent=voto!=null?voto.toFixed(1):'—';
     document.getElementById('stat-recensioni').textContent=nr;
     if(d.anni_esperienza){document.getElementById('stat-anni').textContent=d.anni_esperienza+'+'}
-    if(d.piano)document.getElementById('stat-piano').textContent=d.piano.toUpperCase();
+    /* la statistica "Piano" e' stata tolta dalla pagina (al cliente non interessa
+       quanto paga l'impresa): senza questo controllo la riga andava in errore e
+       si portava dietro TUTTO quello che viene dopo — telefono, indirizzo,
+       pulsante Chiama e mappa. */
+    const _sp=document.getElementById('stat-piano');
+    if(_sp&&d.piano)_sp.textContent=d.piano.toUpperCase();
     const tel=d.telefono||'';
     if(tel){const th='tel:'+tel.replace(/[\s\-().]/g,'');document.getElementById('btn-tel').href=th;const tl=document.getElementById('tel-link');if(tl){tl.href=th;tl.textContent=tel}const cb=document.getElementById('cta-bar-tel');if(cb)cb.href=th}
     else{document.getElementById('btn-tel').style.display='none';document.getElementById('contact-tel').style.display='none';const cb=document.getElementById('cta-bar-tel');if(cb)cb.style.display='none'}
@@ -1422,8 +1452,12 @@ document.addEventListener('DOMContentLoaded',function(){
   .cta-bar-mobile{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:900;gap:10px;
     padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fff;
     border-top:1px solid #e5e5e5;box-shadow:0 -4px 16px rgba(0,0,0,.08)}
-  .cta-bar-mobile a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
-    padding:14px 8px;border-radius:12px;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer}
+  .cta-bar-mobile a{display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:14px 6px;border-radius:12px;font-weight:800;font-size:15.5px;line-height:1.2;
+    white-space:nowrap;text-decoration:none;cursor:pointer}
+  .cta-bar-mobile .cbm-prev{flex:1.6}
+  .cta-bar-mobile .cbm-call{flex:1}
+  @media(max-width:360px){ .cta-bar-mobile a{font-size:14.5px} }
   .cta-bar-mobile .cbm-prev{background:#FF6B35;color:#fff}
   .cta-bar-mobile .cbm-call{background:#eaf2fb;color:#2863a7;border:1.5px solid #2863a7}
   body{padding-bottom:78px}
