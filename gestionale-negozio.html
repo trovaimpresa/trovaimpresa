@@ -1,9 +1,16 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Gestionale Negozio — TrovaImpresa</title>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
 <div id="app-root">
 <style>
   :root{
@@ -194,7 +201,9 @@
   #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:80;display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
   #lightbox.open{display:flex}
   #lightbox img{max-width:100%;max-height:100%;border-radius:8px}
-  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:11px;font-size:14px;font-weight:600;z-index:90;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:14px 22px;border-radius:11px;font-size:16px;font-weight:600;line-height:1.45;text-align:center;max-width:min(92vw,560px);z-index:90;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+  .toast.ok{background:#059669}
+  .toast.err{background:#DC2626}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
   .wrap{max-width:1140px}
   header .top-in, nav.tabs{max-width:1140px}
@@ -538,7 +547,7 @@
         <button class="chip" data-stato="fatto">Fatti</button>
         <button class="chip" data-stato="da_incassare">Da incassare</button>
       </div>
-      <div class="filters"><input type="text" id="f-search" placeholder="Cerca condominio o lavoro..."></div>
+      <div class="filters"><input type="text" id="f-search" placeholder="Cerca cliente o lavoro..."></div>
       <div id="jobs-list"></div>
     </section>
 
@@ -564,7 +573,7 @@
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Condomini / Clienti</h2><button class="add" data-action="new-cli">+ Nuovo</button></div>
+      <div class="sec-head"><h2>Clienti</h2><button class="add" data-action="new-cli">+ Nuovo</button></div>
       <div class="grid" id="cli-list"></div>
     </section>
 
@@ -605,10 +614,10 @@
 <div class="toast" id="toast"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- jsPDF e xlsx si caricano al primo uso (caricaJsPDF/caricaXLSX): ~1,2MB in meno all'avvio -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/foto-upload.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <script>
 (function(){
   const KEY="gestionale_multiservizi_v5";
@@ -638,6 +647,26 @@
   const cliById=id=>db().clienti.find(c=>c.id===id);
   const dipById=id=>db().dipendenti.find(d=>d.id===id);
   const curMestiere=()=>{const p=(state.panels||[]).find(x=>x.id===cur);return p?p.mestiere_id:null;};
+
+  /* librerie pesanti caricate al primo uso */
+  function _caricaScript(src){
+    return new Promise(resolve=>{
+      const sc=document.createElement("script");
+      sc.src=src;sc.onload=()=>resolve(true);sc.onerror=()=>resolve(false);
+      document.head.appendChild(sc);
+    });
+  }
+  let _pdfProm=null,_xlsProm=null;
+  function caricaJsPDF(){
+    if(window.jspdf)return Promise.resolve(true);
+    if(!_pdfProm)_pdfProm=_caricaScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js").then(ok=>{if(!ok)_pdfProm=null;return ok;});
+    return _pdfProm;
+  }
+  function caricaXLSX(){
+    if(window.XLSX)return Promise.resolve(true);
+    if(!_xlsProm)_xlsProm=_caricaScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js").then(ok=>{if(!ok)_xlsProm=null;return ok;});
+    return _xlsProm;
+  }
   let cliCache=[]; /* clienti del reparto corrente, da gest_clienti (Supabase) */
   let dipCache=[]; /* squadra del reparto corrente: id,nome,telefono,ruolo,permessi (gest_operatori + gest_membri) */
 
@@ -656,7 +685,34 @@
     backfillMestieri();
   }
   async function save(){try{await window.storage.set(KEY,JSON.stringify(state));}catch(e){toast("Errore salvataggio");}}
-  function toast(m){const t=$("#toast");t.textContent=_msgPro(m);t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1900);}
+  /* errori del database tradotti in italiano semplice (stessa tabella di gestionale-app) */
+  function traduciErrore(s){
+    const M=[
+      [/row-level security|violates row-level/i,"il database ha bloccato la scrittura. Esci e rientra, poi riprova"],
+      [/Failed to fetch|NetworkError|network error|fetch failed|Load failed/i,"la connessione non risponde. Controlla la rete e riprova"],
+      [/JWT|token.*expired|invalid claim|not authenticated|No API key|refresh_token/i,"la sessione è scaduta: esci e rientra"],
+      [/duplicate key|unique constraint/i,"esiste già un elemento uguale"],
+      [/Could not find the .+ column|column .* does not exist|schema cache/i,"manca un aggiornamento del database (colonna non trovata)"],
+      [/violates foreign key/i,"un collegamento non torna: ricarica la pagina e riprova"],
+      [/timeout|timed out|57014/i,"il database non ha risposto in tempo. Riprova"],
+      [/permission denied/i,"permessi insufficienti: esci e rientra, poi riprova"]
+    ];
+    for(const pp of M){
+      if(pp[0].test(s)){const i=s.indexOf(":");return (i>0&&i<30?s.slice(0,i+1)+" ":"Errore: ")+pp[1];}
+    }
+    return s;
+  }
+  function toast(m){
+    const t=$("#toast"), s=String(m);
+    const isErr=/^(errore|non salvat|non eliminat|non rimoss|nota non|attenzione|le vecchie voci)/i.test(s)||/manca la migrazione/i.test(s);
+    const isOk=/[✔✅📌]/.test(s);
+    t.textContent=_msgPro(isErr?traduciErrore(s):s);
+    t.classList.remove("ok","err");
+    if(isErr)t.classList.add("err");else if(isOk)t.classList.add("ok");
+    t.classList.add("show");
+    clearTimeout(t._t);
+    t._t=setTimeout(()=>t.classList.remove("show"),isErr?5000:2600);
+  }
   /* Solo professionista: i testi dei toast/confirm passano dalla mappa _FRASI (un solo punto qui).
      Artigiano e negozio restano invariati. Non tocca il contenuto utente già interpolato (numeri, nomi). */
   function _msgPro(m){return ruoloUtente==='professionista'?_swapPratiche(String(m)):m;}
@@ -829,8 +885,16 @@
     localizzaPratiche();
   }
   if(sb){
-    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
-    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();if(cur){renderDip();renderGalleria();renderJobs();renderRiepilogo();renderCal();renderFatture();}else{renderLanding();}});
+    /* getSession e onAuthStateChange sparano entrambi all'avvio: senza la
+       guardia tutto veniva disegnato due volte */
+    let _authUidVisto="(mai)";
+    function _authRefresh(){
+      if(_authUidVisto===String(sbUid))return;
+      _authUidVisto=String(sbUid);
+      if(cur){renderAll();}else{renderLanding();}
+    }
+    sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();_authRefresh();});
+    sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();_authRefresh();});
   }
 
   /* LANDING */
@@ -885,7 +949,7 @@
     $$("#stato-chips .chip").forEach(c=>c.classList.toggle("on",c.dataset.stato==="tutti"));
     $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
-    renderAll();renderRiepilogoNegozio();window.scrollTo(0,0);
+    renderAll();window.scrollTo(0,0); /* renderRiepilogoNegozio è già dentro renderAll */
   }
   function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();window.scrollTo(0,0);}
 
@@ -1144,11 +1208,39 @@
   }
 
   let calJobs=[];
+  /* note del giorno su gest_note (stessa tabella di gestionale-app): visibili
+     da tutti i dispositivi. Se la tabella manca, si torna al vecchio localStorage. */
+  let noteCache={}, noteSupaOk=true, noteAvvisato=false;
+  async function caricaNote(){
+    noteCache={};
+    const mid=curMestiere();
+    if(!sb||!sbUid||!mid){noteCache=Object.assign({},db().note||{});return;}
+    const {data,error}=await sb.from("gest_note").select("data,testo").eq("user_id",sbUid).eq("mestiere_id",mid);
+    if(error){
+      noteSupaOk=false;noteCache=Object.assign({},db().note||{});
+      if(!noteAvvisato){noteAvvisato=true;toast("Le note del calendario restano solo su questo dispositivo: manca la migrazione SQL (gest_note)");}
+      return;
+    }
+    noteSupaOk=true;
+    (data||[]).forEach(n=>{noteCache[n.data]=n.testo;});
+    const vecchie=Object.entries(db().note||{}).filter(([ds,tx])=>tx&&String(tx).trim());
+    if(vecchie.length){
+      const righe=vecchie.map(([ds,tx])=>({user_id:sbUid,mestiere_id:mid,data:ds,testo:String(tx)}));
+      const {error:e2}=await sb.from("gest_note").upsert(righe,{onConflict:"user_id,mestiere_id,data",ignoreDuplicates:true});
+      if(!e2){
+        righe.forEach(r=>{if(!noteCache[r.data])noteCache[r.data]=r.testo;});
+        db().note={};await save();
+        toast("Le vecchie note del calendario sono state spostate su Supabase ✔");
+      }
+    }
+  }
+
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
     if(sb&&sbUid){const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];}
     else calJobs=[];
+    await caricaNote();
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
     let html=dow.map(d=>`<div class="cal-dow">${d}</div>`).join("");
@@ -1156,7 +1248,7 @@
     for(let d=1;d<=days;d++){
       const ds=ymd(y,m,d), jobs=calJobs.filter(l=>l.data_prevista===ds);
       const dots=jobs.slice(0,6).map(j=>`<i class="dot ${j.stato==='fatto'?'done':'todo'}"></i>`).join("");
-      const note=db().note[ds]?`<span class="cal-note-mark">📌</span>`:"";
+      const note=noteCache[ds]?`<span class="cal-note-mark">📌</span>`:"";
       html+=`<div class="cal-cell ${ds===todayStr()?"today":""}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-dots">${dots}</div></div>`;
     }
     $("#cal-grid").innerHTML=html;
@@ -1171,7 +1263,7 @@
       :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
     openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
-        <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(db().note[ds]||"")}</textarea></div>
+        <textarea id="day-note" placeholder="Es. chiamare il fornitore, preparare la consegna...">${esc(noteCache[ds]||"")}</textarea></div>
       <div class="sheet-actions">
         <button class="b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
         <button class="b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
@@ -1179,7 +1271,7 @@
 
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
-    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">🏢</div><p>Nessun condominio</p><small>Accedi per gestire i clienti</small></div>`;return;}
+    if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">🏢</div><p>Nessun cliente</p><small>Accedi per gestire i clienti</small></div>`;return;}
     const {data}=await sb.from("gest_clienti").select("id,nome,indirizzo,referente,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
     cliCache=data||[];
     box.innerHTML=cliCache.length?cliCache.map(c=>{
@@ -1188,7 +1280,7 @@
         <div class="card-acts"><button data-action="map" data-q="${esc(c.indirizzo||c.nome)}">🗺 Mappa</button>
         <button data-action="edit-cli" data-id="${c.id}">Modifica</button>
         <button class="del" data-action="del-cli" data-id="${c.id}">Elimina</button></div></div>`;
-    }).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun condominio</p><small>Aggiungi i clienti di questo reparto</small></div>`;
+    }).join(""):`<div class="empty"><div class="ic">🏢</div><p>Nessun cliente</p><small>Aggiungi i clienti di questo reparto</small></div>`;
   }
   async function renderDip(){
     const box=$("#dip-list");if(!box)return;
@@ -1364,11 +1456,11 @@
     const dipOpts=dipCache.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
     const dipSel=id=>dipCache.map(d=>`<option value="${d.id}" ${d.id===id?"selected":""}>${esc(d.nome)}</option>`).join("");
     openSheet(`<h3>${isNew?"Nuovo lavoro":"Modifica lavoro"}</h3>
-      <div class="field"><label>Condominio / Cantiere</label>
+      <div class="field"><label>Cliente / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
-        <button class="quick-add" data-action="quick-cli">+ Aggiungi nuovo condominio</button></div>
+        <button class="quick-add" data-action="quick-cli">+ Aggiungi nuovo cliente</button></div>
       <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
-      <div class="field"><label>Dove (vuoto = indirizzo del condominio)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
+      <div class="field"><label>Dove (vuoto = indirizzo del cliente)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
       <div class="row2">
         <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
         <div class="field"><label>Chi ci va</label><select id="j-dip"><option value="">— nessuno —</option>${dipSel(job.assegnatoId)}</select></div></div>
@@ -1425,7 +1517,7 @@
       if(error){toast("Errore: "+error.message);return;}
       closeSheet();renderJobs();renderFatture();toast(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔");return;
     }
-    const cli=$("#j-cli").value;if(!cli){toast("Scegli un condominio");return;}
+    const cli=$("#j-cli").value;if(!cli){toast("Scegli un cliente");return;}
     const id=editing.id, exists=db().lavori.some(l=>l.id===id), prev=db().lavori.find(l=>l.id===id);
     const stato=segVal("j-stato"), fattStato=segVal("j-fatt")||"none";
     const obj={id,clienteId:cli,descrizione:$("#j-desc").value.trim(),dove:$("#j-dove").value.trim(),
@@ -1439,8 +1531,8 @@
 
   function cliForm(c){
     const isNew=!c;c=c||{};
-    openSheet(`<h3>${isNew?"Nuovo condominio":"Modifica condominio"}</h3>
-      <div class="field"><label>Nome condominio / cliente</label><input id="c-nome" value="${esc(c.nome||"")}" placeholder="${ruoloUtente==='professionista'?'Es. Mario Rossi':'Es. Condominio Via Roma 12'}"></div>
+    openSheet(`<h3>${isNew?"Nuovo cliente":"Modifica cliente"}</h3>
+      <div class="field"><label>Nome cliente</label><input id="c-nome" value="${esc(c.nome||"")}" placeholder="${ruoloUtente==='professionista'?'Es. Mario Rossi':'Es. Condominio Via Roma 12'}"></div>
       <div class="field"><label>Indirizzo</label><input id="c-ind" value="${esc(c.indirizzo||"")}" placeholder="Via, numero, città"></div>
       <div class="row2"><div class="field"><label>Referente / Amministratore</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Nome"></div>
       <div class="field"><label>Telefono</label><input id="c-tel" value="${esc(c.telefono||"")}" placeholder="Numero"></div></div>
@@ -1456,7 +1548,7 @@
       :await sb.from("gest_clienti").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,indirizzo,referente,telefono}).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okCli||!okCli.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-    closeSheet();renderClienti();toast(id?"Aggiornato":"Condominio aggiunto ✔");
+    closeSheet();renderClienti();toast(id?"Aggiornato":"Cliente aggiunto ✔");
   }
   function dipForm(d){
     const isNew=!d;d=d||{};
@@ -1545,7 +1637,7 @@
 
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0)+" EUR";
   async function generaPdf(id){
-    if(!window.jspdf){toast("PDF non ancora pronto, riprova tra un attimo");return;}
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
@@ -1803,14 +1895,33 @@
     if(a==="upload-fattura")return chiediFatturaPdf(id);
     if(a==="open-fattura")return apriFatturaPdf(id);
     if(a==="open-day")return openDay(t.dataset.d);
-    if(a==="save-note"){const ds=t.dataset.d,v=$("#day-note").value.trim();if(v)db().note[ds]=v;else delete db().note[ds];await save();closeSheet();renderCal();toast("Nota salvata 📌");return;}
+    if(a==="save-note"){
+      const ds=t.dataset.d,v=$("#day-note").value.trim();
+      const midN=curMestiere();
+      if(!sb||!sbUid||!noteSupaOk||!midN){
+        if(v)db().note[ds]=v;else delete db().note[ds];
+        await save();closeSheet();renderCal();
+        toast(noteSupaOk?"Nota salvata 📌":"Nota salvata solo su questo dispositivo (manca la migrazione SQL)");return;
+      }
+      if(v){
+        const {data:okN,error}=await sb.from("gest_note").upsert({user_id:sbUid,mestiere_id:midN,data:ds,testo:v},{onConflict:"user_id,mestiere_id,data"}).select("id");
+        if(error){toast("Nota non salvata: "+error.message);return;}
+        if(!okN||!okN.length){toast("Nota non salvata: nessuna riga modificata. Riprova.");return;}
+        noteCache[ds]=v;
+      }else{
+        const {error}=await sb.from("gest_note").delete().eq("user_id",sbUid).eq("mestiere_id",midN).eq("data",ds).select("id");
+        if(error){toast("Nota non eliminata: "+error.message);return;}
+        delete noteCache[ds];
+      }
+      closeSheet();renderCal();toast(v?"Nota salvata 📌":"Nota eliminata");return;
+    }
     if(a==="cal-prev"){cal.setMonth(cal.getMonth()-1);renderCal();return;}
     if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
     if(a==="new-cli")return cliForm(null);
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}renderClienti();toast("Cliente eliminato");}return;}
+    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo cliente ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo cliente?")){const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}renderClienti();toast("Cliente eliminato");}return;}
     if(a==="new-scad")return scadForm(null);
     if(a==="edit-scad")return scadForm(scadCache.find(s=>s.id===id));
     if(a==="save-scad")return saveScad(id);
@@ -2323,7 +2434,7 @@
 
   /* PDF del preventivo, stessa impaginazione della fattura del negozio */
   async function pvPdf(id){
-    if(!window.jspdf){alert("PDF non ancora pronto, riprova tra un attimo");return;}
+    if(!(await caricaJsPDF())){alert("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){alert("Compila prima i Dati azienda");return aziendaForm();}
     const {data:p}=await sb.from("neg_preventivi").select("*").eq("id",id).maybeSingle();
@@ -2540,7 +2651,7 @@
     return {prod:prod.data||[],forn:forn.data||[],mov:mov.data||[],lav:(lav.data||[]).filter(l=>+l.importo>0),az:az.data||null};
   }
   async function esportaExcel(){
-    if(!window.XLSX){toast("Modulo Excel non ancora caricato, riprova tra un attimo");return;}
+    if(!(await caricaXLSX())){toast("Non riesco a scaricare il modulo Excel: controlla la connessione e riprova");return;}
     const D=await _fetchAllExportNeg();if(!D)return;
     const wb=XLSX.utils.book_new();
     const add=(nome,rows)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{Vuoto:"—"}]),nome);
@@ -2685,3 +2796,5 @@
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',start);}else{start();}
 })();
 </script>
+</body>
+</html>
