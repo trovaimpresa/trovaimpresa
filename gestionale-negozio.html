@@ -1267,11 +1267,14 @@
     const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
     const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
-    const {error}=await sb.from("gest_operatori").update({nome,telefono:telefono||null}).eq("id",id).eq("user_id",sbUid);
+    const {data:okOp,error}=await sb.from("gest_operatori").update({nome,telefono:telefono||null}).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
-    const {error:e2}=await sb.from("gest_membri").update({ruolo,permessi}).eq("operatore_id",id).eq("impresa_id",sbUid);
+    if(!okOp||!okOp.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+    const {data:okMem,error:e2}=await sb.from("gest_membri").update({ruolo,permessi}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
     if(e2){toast("Errore permessi: "+e2.message);return;}
-    closeSheet();renderDip();toast("Aggiornato ✔");
+    closeSheet();renderDip();
+    if(!okMem||!okMem.length){toast("Salvato, ma ruolo e permessi non aggiornati");return;}
+    toast("Aggiornato ✔");
   }
 
   /* SCADENZARIO (solo professionista): tabella gest_scadenze, isolamento user_id+mestiere_id come gest_lavori/gest_clienti */
@@ -1330,10 +1333,11 @@
     const tipo_pratica=$("#s-tipo")?$("#s-tipo").value:"";
     const cliente_id=($("#s-cli")&&$("#s-cli").value)?$("#s-cli").value:null;
     const note=$("#s-note").value.trim();
-    const {error}=id
-      ?await sb.from("gest_scadenze").update({titolo,tipo_pratica,cliente_id,data_scadenza,note}).eq("id",id).eq("user_id",sbUid)
-      :await sb.from("gest_scadenze").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,tipo_pratica,cliente_id,data_scadenza,note,stato:"aperta"});
+    const {data:okSc,error}=id
+      ?await sb.from("gest_scadenze").update({titolo,tipo_pratica,cliente_id,data_scadenza,note}).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_scadenze").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,tipo_pratica,cliente_id,data_scadenza,note,stato:"aperta"}).select("id");
     if(error){toast("Errore: "+error.message);return;}
+    if(!okSc||!okSc.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     closeSheet();renderScadenze();toast(id?"Aggiornato":"Scadenza aggiunta ✔");
   }
 
@@ -1447,10 +1451,11 @@
     const nome=$("#c-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const indirizzo=$("#c-ind").value.trim(),referente=$("#c-ref").value.trim(),telefono=$("#c-tel").value.trim();
-    const {error}=id
-      ?await sb.from("gest_clienti").update({nome,indirizzo,referente,telefono}).eq("id",id).eq("user_id",sbUid)
-      :await sb.from("gest_clienti").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,indirizzo,referente,telefono});
+    const {data:okCli,error}=id
+      ?await sb.from("gest_clienti").update({nome,indirizzo,referente,telefono}).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_clienti").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,indirizzo,referente,telefono}).select("id");
     if(error){toast("Errore: "+error.message);return;}
+    if(!okCli||!okCli.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
     closeSheet();renderClienti();toast(id?"Aggiornato":"Condominio aggiunto ✔");
   }
   function dipForm(d){
@@ -1502,8 +1507,9 @@
     const msg=n?`Stai per eliminare il reparto «${p.nome}» e le sue ${n} pratiche. L'operazione è definitiva. Continuare?`:`Stai per eliminare il reparto «${p.nome}». L'operazione è definitiva. Continuare?`;
     if(!gconfirm(msg))return;
     if(sb&&sbUid&&p.mestiere_id){
-      await sb.from("gest_lavori").delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
-      await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
+      const {error:eDl}=await sb.from("gest_lavori").delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
+      const {error:eDm}=await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
+      if(eDl||eDm){toast("Errore: il reparto NON è stato eliminato dal database. Riprova.");return;}
     }
     state.panels=(state.panels||[]).filter(x=>x.id!==id);
     delete state[id];
@@ -1550,8 +1556,12 @@
     let numFatt=lav.num_fatt;
     if(!numFatt){
       numFatt=az.num_fatt||1;
-      await sb.from("gest_lavori").update({num_fatt:numFatt}).eq("id",id).eq("user_id",sbUid);
-      await sb.from("gest_azienda").update({num_fatt:numFatt+1}).eq("user_id",sbUid);
+      /* il numero va scritto DAVVERO prima di stamparlo sul PDF: se una delle
+         due scritture fallisce, la prossima fattura uscirebbe con lo stesso numero */
+      const {data:okL,error:eL}=await sb.from("gest_lavori").update({num_fatt:numFatt}).eq("id",id).eq("user_id",sbUid).select("id");
+      if(eL||!okL||!okL.length){toast("Numero fattura non assegnato: riprova");return;}
+      const {data:okA,error:eA}=await sb.from("gest_azienda").update({num_fatt:numFatt+1}).eq("user_id",sbUid).select("num_fatt");
+      if(eA||!okA||!okA.length){toast("Attenzione: contatore fatture non aggiornato — controlla il numero della prossima fattura");}
     }
     const l={numFatt,dataFatto:lav.data_fatto,dataPrevista:lav.data_prevista,descrizione:lav.descrizione,lavoroSvolto:lav.lavoro_svolto,ore:lav.ore,importo:lav.importo,fattStato:lav.fatt_stato};
     const pp=(state.panels||[]).find(p=>p.id===cur), repNome=pp?pp.nome:"";
@@ -1777,15 +1787,17 @@
     if(a==="stato-supa"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v, dp=t.dataset.dp||"";
-      const {error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid);
+      const {data:okS1,error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
+      if(!okS1||!okS1.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
       renderJobs();toast("Stato: "+(statoLabel[v]||v));return;
     }
     if(a==="fatt"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v;
-      const {error}=await sb.from("gest_lavori").update({fatt_stato:v}).eq("id",id).eq("user_id",sbUid);
+      const {data:okS2,error}=await sb.from("gest_lavori").update({fatt_stato:v}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
+      if(!okS2||!okS2.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
       renderFatture();toast(v==="pagata"?"Fattura pagata ✅":v==="emessa"?"Fattura emessa 📄":"Aggiornato");return;
     }
     if(a==="upload-fattura")return chiediFatturaPdf(id);
@@ -1798,18 +1810,19 @@
     if(a==="new-cli")return cliForm(null);
     if(a==="edit-cli")return cliForm(cliCache.find(c=>c.id===id));
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderClienti();toast("Condominio eliminato");}return;}
+    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo condominio ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo condominio?")){const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}renderClienti();toast("Cliente eliminato");}return;}
     if(a==="new-scad")return scadForm(null);
     if(a==="edit-scad")return scadForm(scadCache.find(s=>s.id===id));
     if(a==="save-scad")return saveScad(id);
     if(a==="scad-stato"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v;
-      const {error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid);
+      const {data:okS3,error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
+      if(!okS3||!okS3.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
       renderScadenze();toast(v==="fatta"?"Scadenza completata ✔":"Riaperta");return;
     }
-    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid);if(error){toast("Errore: "+error.message);return;}renderScadenze();toast("Scadenza eliminata");}return;}
+    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-edit")return squadraForm(dipCache.find(d=>d.id===id));
@@ -1819,8 +1832,9 @@
     if(a==="sq-revoca"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       if(!gconfirm("Rimuovere l'accesso a "+t.dataset.nome+"? Non potrà più entrare nel gestionale."))return;
-      const {error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid);
+      const {data:okRev,error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
       if(error){toast("Errore: "+error.message);return;}
+      if(!okRev||!okRev.length){toast("Non rimosso: nessuna riga modificata. Riprova.");return;}
       renderDip();toast("Accesso rimosso");return;
     }
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
@@ -1960,8 +1974,9 @@
     const ed=e.target.closest(".prod-edit"), del=e.target.closest(".prod-del");
     if(del){
       if(!confirm("Eliminare questo prodotto?"))return;
-      const {error}=await sb.from("neg_prodotti").delete().eq("id",del.dataset.id);
+      const {data:okDpr,error}=await sb.from("neg_prodotti").delete().eq("id",del.dataset.id).eq("user_id",sbUid).select("id");
       if(error){alert("Errore: "+error.message);return;}
+      if(!okDpr||!okDpr.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
       loadProdotti();return;
     }
     if(ed){
@@ -2000,11 +2015,17 @@
   }
   $("#magazzino-body")?.addEventListener("click",async e=>{
     const b=e.target.closest(".mag-btn"); if(!b) return;
-    const id=b.dataset.id, d=parseInt(b.dataset.d);
-    const cur=parseInt(b.parentElement.querySelector("span").textContent)||0;
-    const nuova=Math.max(0,cur+d);
-    const {error}=await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",id);
+    if(!sb||!sbUid)return;
+    const id=b.dataset.id, d=parseFloat(b.dataset.d)||0;
+    /* la giacenza si rilegge dal database, non dal numero a schermo:
+       prima parseInt troncava i decimali (12,5 mq + un clic = 13) e il
+       valore a schermo poteva essere vecchio */
+    const {data:prod}=await sb.from("neg_prodotti").select("quantita").eq("id",id).maybeSingle();
+    if(!prod){alert("Prodotto non trovato, ricarico la lista");loadMagazzino();return;}
+    const nuova=Math.max(0,(parseFloat(prod.quantita)||0)+d);
+    const {data:okM,error}=await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){alert("Errore: "+error.message);return;}
+    if(!okM||!okM.length){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
     loadMagazzino();
   });
   $('[data-tab="magazzino"]')?.addEventListener("click",loadMagazzino);
@@ -2038,10 +2059,11 @@
       indirizzo:$("#nf-indirizzo").value.trim()||null,
       piva:$("#nf-piva").value.trim()||null,
       note:$("#nf-note").value.trim()||null};
-    let error;
-    if(editFornId){({error}=await sb.from("neg_fornitori").update(dati).eq("id",editFornId));}
+    let error,okF;
+    if(editFornId){({data:okF,error}=await sb.from("neg_fornitori").update(dati).eq("id",editFornId).eq("user_id",sbUid).select("id"));}
     else {({error}=await sb.from("neg_fornitori").insert({user_id:sbUid,...dati}));}
     if(error){alert("Errore: "+error.message);return;}
+    if(editFornId&&(!okF||!okF.length)){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
     ["nf-nome","nf-telefono","nf-email","nf-indirizzo","nf-piva","nf-note"].forEach(id=>$("#"+id).value="");
     editFornId=null; $("#nf-save").textContent="Aggiungi fornitore";
     loadFornitori();
@@ -2051,8 +2073,9 @@
     const ed=e.target.closest(".forn-edit"), del=e.target.closest(".forn-del");
     if(del){
       if(!confirm("Eliminare questo fornitore?"))return;
-      const {error}=await sb.from("neg_fornitori").delete().eq("id",del.dataset.id);
+      const {data:okDf,error}=await sb.from("neg_fornitori").delete().eq("id",del.dataset.id).eq("user_id",sbUid).select("id");
       if(error){alert("Errore: "+error.message);return;}
+      if(!okDf||!okDf.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
       loadFornitori();return;
     }
     if(ed){
@@ -2097,10 +2120,11 @@
       controparte:$("#nm-controparte").value.trim()||null,
       data_mov:$("#nm-data").value||null,
       note:$("#nm-note").value.trim()||null};
-    let error;
-    if(editMovId){({error}=await sb.from("neg_movimenti").update(dati).eq("id",editMovId));}
+    let error,okMv;
+    if(editMovId){({data:okMv,error}=await sb.from("neg_movimenti").update(dati).eq("id",editMovId).eq("user_id",sbUid).select("id"));}
     else {({error}=await sb.from("neg_movimenti").insert({user_id:sbUid,...dati}));}
     if(error){alert("Errore: "+error.message);return;}
+    if(editMovId&&(!okMv||!okMv.length)){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
     ["nm-prodotto","nm-quantita","nm-importo","nm-controparte","nm-data","nm-note"].forEach(id=>$("#"+id).value="");
     editMovId=null; $("#nm-save").textContent="Aggiungi movimento";
     loadMovimenti();
@@ -2110,8 +2134,9 @@
     const ed=e.target.closest(".mov-edit"), del=e.target.closest(".mov-del");
     if(del){
       if(!confirm("Eliminare questo movimento?"))return;
-      const {error}=await sb.from("neg_movimenti").delete().eq("id",del.dataset.id);
+      const {data:okDm2,error}=await sb.from("neg_movimenti").delete().eq("id",del.dataset.id).eq("user_id",sbUid).select("id");
       if(error){alert("Errore: "+error.message);return;}
+      if(!okDm2||!okDm2.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
       loadMovimenti();return;
     }
     if(ed){
@@ -2166,8 +2191,17 @@
       sconto_perc:parseFloat($("#pv-sconto").value)||0};
     let pid=pvEditId, error;
     if(pvEditId){
-      ({error}=await sb.from("neg_preventivi").update(testata).eq("id",pvEditId).eq("user_id",sbUid));
-      if(!error)await sb.from("neg_preventivo_righe").delete().eq("preventivo_id",pvEditId).eq("user_id",sbUid);
+      let okT;
+      ({data:okT,error}=await sb.from("neg_preventivi").update(testata).eq("id",pvEditId).eq("user_id",sbUid).select("id"));
+      if(!error&&(!okT||!okT.length)){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
+      if(!error){
+        /* rete anti-doppioni: se le vecchie voci non si cancellano davvero,
+           reinserire le nuove raddoppierebbe il totale. Meglio fermarsi. */
+        const {error:eDel}=await sb.from("neg_preventivo_righe").delete().eq("preventivo_id",pvEditId).eq("user_id",sbUid);
+        if(eDel){alert("Le vecchie voci non si sono cancellate: "+eDel.message);return;}
+        const {data:resti}=await sb.from("neg_preventivo_righe").select("id").eq("preventivo_id",pvEditId).limit(1);
+        if(resti&&resti.length){alert("Le vecchie voci non si sono cancellate. Riprova.");return;}
+      }
     }else{
       const {data:esistenti}=await sb.from("neg_preventivi").select("numero").eq("user_id",sbUid);
       testata.numero=(esistenti||[]).reduce((m,x)=>Math.max(m,+x.numero||0),0)+1;
@@ -2218,7 +2252,9 @@
           acc=e.target.closest(".pv-acc"), del=e.target.closest(".pv-del-prev");
     if(del){
       if(!confirm("Eliminare questo preventivo?"))return;
-      await sb.from("neg_preventivi").delete().eq("id",del.dataset.id).eq("user_id",sbUid);
+      const {data:okDpv,error:eDpv}=await sb.from("neg_preventivi").delete().eq("id",del.dataset.id).eq("user_id",sbUid).select("id");
+      if(eDpv){alert("Errore: "+eDpv.message);return;}
+      if(!okDpv||!okDpv.length){alert("Non eliminato: nessuna riga trovata. Riprova.");return;}
       if(pvEditId===del.dataset.id)pvNuovo();
       pvCarica();return;
     }
@@ -2243,9 +2279,13 @@
   /* Il cliente ha detto di sì: il preventivo diventa vendita e la merce
      esce dal magazzino. Si scaricano SOLO le righe prese dai prodotti:
      le righe libere (trasporto, manodopera) non hanno giacenza. */
+  let _pvAccettaInCorso=false;
   async function pvAccetta(id){
+    if(_pvAccettaInCorso)return;             /* doppio clic veloce: il secondo non parte */
+    if(!sb||!sbUid){alert("Devi essere loggato");return;}
     const {data:p}=await sb.from("neg_preventivi").select("*").eq("id",id).maybeSingle();
     if(!p)return;
+    if(p.stato==="accettato"){alert("Questo preventivo è già stato accettato: il magazzino era già stato scaricato.");pvCarica();return;}
     const {data:rr}=await sb.from("neg_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const daScaricare=(rr||[]).filter(r=>r.prodotto_id);
     const testo = daScaricare.length
@@ -2253,19 +2293,32 @@
         daScaricare.map(r=>"· "+r.descrizione+": "+r.qta+" "+(r.unita||"pz")).join("\n")+"\n\nProcedo?"
       : "Segno il preventivo come accettato.\n(Nessuna riga presa dal magazzino, quindi non c'è niente da scaricare.)\n\nProcedo?";
     if(!confirm(testo))return;
-    for(const r of daScaricare){
-      const {data:prod}=await sb.from("neg_prodotti").select("quantita").eq("id",r.prodotto_id).maybeSingle();
-      if(!prod)continue;
-      const nuova=(+prod.quantita||0)-(+r.qta||0);
-      await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",r.prodotto_id).eq("user_id",sbUid);
-      await sb.from("neg_movimenti").insert({user_id:sbUid,tipo:"uscita",prodotto:r.descrizione,
-        quantita:+r.qta||0, importo:(+r.qta||0)*(+r.prezzo||0),
-        controparte:p.cliente_nome||null, data_mov:new Date().toISOString().slice(0,10),
-        note:"Da preventivo N. "+(p.numero||"")});
-    }
-    await sb.from("neg_preventivi").update({stato:"accettato"}).eq("id",id).eq("user_id",sbUid);
-    pvCarica(); loadProdotti&&loadProdotti();
-    alert(daScaricare.length?"Accettato. Merce scaricata dal magazzino ✔":"Preventivo segnato come accettato ✔");
+    _pvAccettaInCorso=true;
+    try{
+      /* PRIMA lo stato, con verifica: fa da lucchetto. Se lo stato non passa
+         ad "accettato" (RLS, rete, o qualcun altro l'ha già fatto), il
+         magazzino NON si tocca — mai più scarichi doppi o finti. */
+      const {data:okSt,error:eSt}=await sb.from("neg_preventivi").update({stato:"accettato"})
+        .eq("id",id).eq("user_id",sbUid).neq("stato","accettato").select("id");
+      if(eSt){alert("Non accettato: "+eSt.message);return;}
+      if(!okSt||!okSt.length){alert("Non accettato: nessuna riga modificata (forse era già accettato). Ricarico la lista.");pvCarica();return;}
+      const falliti=[];
+      for(const r of daScaricare){
+        const {data:prod}=await sb.from("neg_prodotti").select("quantita").eq("id",r.prodotto_id).maybeSingle();
+        if(!prod){falliti.push(r.descrizione+" (prodotto non trovato)");continue;}
+        const nuova=(+prod.quantita||0)-(+r.qta||0);
+        const {data:okQ,error:eQ}=await sb.from("neg_prodotti").update({quantita:nuova}).eq("id",r.prodotto_id).eq("user_id",sbUid).select("id");
+        if(eQ||!okQ||!okQ.length){falliti.push(r.descrizione);continue;}
+        const {error:eM}=await sb.from("neg_movimenti").insert({user_id:sbUid,tipo:"uscita",prodotto:r.descrizione,
+          quantita:+r.qta||0, importo:(+r.qta||0)*(+r.prezzo||0),
+          controparte:p.cliente_nome||null, data_mov:new Date().toISOString().slice(0,10),
+          note:"Da preventivo N. "+(p.numero||"")});
+        if(eM)falliti.push(r.descrizione+" (movimento non registrato)");
+      }
+      pvCarica(); loadProdotti&&loadProdotti();
+      if(falliti.length)alert("Preventivo accettato, ma ATTENZIONE: queste righe NON sono state scaricate dal magazzino:\n\n· "+falliti.join("\n· ")+"\n\nControlla le giacenze a mano.");
+      else alert(daScaricare.length?"Accettato. Merce scaricata dal magazzino ✔":"Preventivo segnato come accettato ✔");
+    }finally{_pvAccettaInCorso=false;}
   }
 
   /* PDF del preventivo, stessa impaginazione della fattura del negozio */
@@ -2383,15 +2436,16 @@
        usata per le pratiche e per la parcella). */
     const senzaNuovi=o=>{const c={...o};["unita","prezzo_acquisto","iva_perc"].forEach(k=>delete c[k]);return c;};
     const eColonnaNuova=e=>/unita|prezzo_acquisto|iva_perc/i.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
-    let error;
-    if(editProdId){({error}=await sb.from("neg_prodotti").update(dati).eq("id",editProdId));}
+    let error,okPr;
+    if(editProdId){({data:okPr,error}=await sb.from("neg_prodotti").update(dati).eq("id",editProdId).eq("user_id",sbUid).select("id"));}
     else {({error}=await sb.from("neg_prodotti").insert({user_id:sbUid,...dati}));}
     if(error&&eColonnaNuova(error)){
-      if(editProdId){({error}=await sb.from("neg_prodotti").update(senzaNuovi(dati)).eq("id",editProdId));}
+      if(editProdId){({data:okPr,error}=await sb.from("neg_prodotti").update(senzaNuovi(dati)).eq("id",editProdId).eq("user_id",sbUid).select("id"));}
       else {({error}=await sb.from("neg_prodotti").insert({user_id:sbUid,...senzaNuovi(dati)}));}
       if(!error)alert("Prodotto salvato, ma unità di misura, prezzo di acquisto e IVA no: manca la migrazione SQL (sql/neg-prodotti-campi.sql).");
     }
     if(error){alert("Errore: "+error.message);return;}
+    if(editProdId&&(!okPr||!okPr.length)){alert("Non salvato: nessuna riga modificata. Riprova.");return;}
     ["np-nome","np-prezzo","np-quantita","np-categoria","np-soglia","np-codice","np-note","np-acquisto"].forEach(id=>{if($("#"+id))$("#"+id).value="";});
     if($("#np-unita"))$("#np-unita").value="pz";
     if($("#np-iva"))$("#np-iva").value="22";
