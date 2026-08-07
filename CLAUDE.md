@@ -7,6 +7,15 @@
 - Quindi: dopo aver modificato i file, dare **subito** ad Alex il blocco pronto da incollare (`git add ... / git commit -m "..." / git push`), senza tentativi a vuoto. Ad Alex di norma non serve `rm -f .git/index.lock`.
 - Deploy: Netlify pubblica in automatico a ogni push su `main`.
 
+### ⛔ REGOLA FISSA DI ALESSIO SULLE FINESTRE (8/8/2026 — non sgarrare mai più)
+**MAI usare `openSheet()` (la finestrella piccola) per form o schede nuove.**
+Alessio la ODIA. Qualsiasi form o scheda nuova va fatta con **`openSheetGrande()`
+a due colonne** (`sh-cols` / `sh-col` / `sh-b` / `sh-tit`), come Dati azienda,
+la scheda cliente e la scheda fornitore. Vale per TUTTI i gestionali.
+Sbagliato due volte coi Fornitori (form fornitore, poi form fattura): alla terza
+volta è un problema serio di fiducia. Prima di consegnare un form nuovo,
+controllare SEMPRE con `grep openSheet(` che non ce ne siano di piccoli.
+
 ## Preferenze di Alex
 - Rispondere **in italiano**, in modo semplice e pratico, conciso.
 - Soluzioni pronte da copiare/incollare, poca teoria.

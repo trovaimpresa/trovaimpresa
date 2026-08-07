@@ -4195,7 +4195,10 @@
       const {data:lv}=await sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("data_prevista",{ascending:false}).limit(100);
       lavOps+=(lv||[]).map(l=>'<option value="'+l.id+'" '+(String(f.lavoro_id||'')===String(l.id)?'selected':'')+'>'+esc(l.descrizione||'Lavoro')+'</option>').join("");
     }
-    openSheet('<h3>'+(isNew?'Fattura da pagare':'Modifica fattura')+'</h3>'
+    openSheetGrande(isNew?'Fattura da pagare':'Modifica fattura',
+      '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">La fattura</div>'
       +'<div class="field"><label>Fornitore</label><select id="ff-forn">'+fops+'</select></div>'
       +'<div class="row2">'
       +'<div class="field"><label>Numero fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'
@@ -4203,10 +4206,17 @@
       +'<div class="row2">'
       +'<div class="field"><label>Importo (€)</label><input type="number" step="0.01" id="ff-imp" inputmode="decimal" value="'+(f.importo||'')+'" placeholder="0"></div>'
       +'<div class="field"><label>Da pagare entro</label><input type="date" id="ff-scad" value="'+(f.scadenza||'')+'"></div></div>'
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Collegamenti e note</div>'
+      +'<p class="sh-nota" style="margin-top:0">Se questa fattura è materiale per un cantiere, collegala al lavoro: la spesa ti torna utile nel margine e nello "speso per fornitore".</p>'
       +'<div class="field"><label>Lavoro collegato (facoltativo)</label><select id="ff-lav">'+lavOps+'</select></div>'
       +'<div class="field"><label>Note</label><textarea id="ff-note" placeholder="Es. sabbia e cemento per il bagno di Via Roma">'+esc(f.note||'')+'</textarea></div>'
-      +'<div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>'
-      +'<button class="btn-primary b-save" data-action="save-fattf" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button></div>');
+      +'</div>'
+      +'</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="save-fattf" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button>');
   }
   async function saveFattf(id){
     if(!sbUid){toast("Devi essere loggato");return;}
