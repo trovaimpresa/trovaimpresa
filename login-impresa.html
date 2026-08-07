@@ -106,15 +106,26 @@
       if (e.key === 'Enter' && document.getElementById('step-2fa').style.display !== 'none') doVerify2FA();
     });
 
+    let resetInCorso = false;
     async function resetPassword(e) {
       e.preventDefault();
+      if (resetInCorso) return;
       const email = document.getElementById('email').value.trim();
-      if (!email) { alert('Inserisci la tua email nel campo sopra.'); return; }
+      const el = document.getElementById('errore');
+      if (!email) { showError('Scrivi prima la tua email nel campo qui sopra.'); return; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) { showError('Questa email non sembra scritta bene. Controllala.'); return; }
+      resetInCorso = true;
+      el.innerHTML = '<div>⏳ Invio in corso...</div>';
+      el.style.display = 'block';
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/reset-password.html'
       });
-      if (error) { alert('Errore: ' + error.message); }
-      else { alert('Email di reset inviata! Controlla la tua casella di posta.'); }
+      resetInCorso = false;
+      if (error) { showError(error.message); return; }
+      el.innerHTML = '';
+      const ok = document.createElement('div');
+      ok.textContent = '✅ Ti ho mandato l\'email per rifare la password a ' + email + '. Guarda anche nello SPAM.';
+      el.appendChild(ok);
     }
 
     function togglePassword() {
@@ -122,16 +133,72 @@
       input.type = input.type === 'password' ? 'text' : 'password';
     }
 
-    function showError(msg) {
+    /* Supabase risponde in inglese. Un muratore che legge "Email not confirmed"
+       non capisce e se ne va: qui diventa italiano, con scritto cosa fare. */
+    function traduciSupabase(msg) {
+      const m = String(msg || '');
+      if (/Email not confirmed/i.test(m))
+        return { testo: 'Devi ancora confermare la tua email. Apri la mail che ti abbiamo mandato e clicca il link (guarda anche nello SPAM).', rimanda: true };
+      if (/Invalid login credentials/i.test(m))
+        return { testo: 'Email o password non corretti. Controlla bene, oppure usa "Password dimenticata".' };
+      if (/Email rate limit|rate limit|too many/i.test(m))
+        return { testo: 'Troppi tentativi ravvicinati. Aspetta un paio di minuti e riprova.' };
+      if (/User already registered/i.test(m))
+        return { testo: 'Questa email è già registrata. Accedi da qui, oppure usa "Password dimenticata".' };
+      if (/Failed to fetch|NetworkError|network/i.test(m))
+        return { testo: 'La connessione non risponde. Controlla la rete e riprova.' };
+      if (/Password should be/i.test(m))
+        return { testo: 'La password è troppo corta: servono almeno 8 caratteri.' };
+      return { testo: m };
+    }
+
+    function showError(msg, opzioni) {
       const el = document.getElementById('errore');
-      el.textContent = msg;
+      const t = traduciSupabase(msg);
+      el.innerHTML = '';
+      const p = document.createElement('div');
+      p.textContent = t.testo;
+      el.appendChild(p);
+      /* se il problema è la mail non confermata, do il pulsante per rimandarla:
+         prima non esisteva da nessuna parte e l'iscritto restava chiuso fuori */
+      if (t.rimanda || (opzioni && opzioni.rimanda)) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = '📨 Rimandami l\'email di conferma';
+        b.style.cssText = 'margin-top:10px;background:#0066ff;color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer';
+        b.onclick = rimandaConferma;
+        el.appendChild(b);
+      }
       el.style.display = 'block';
+    }
+
+    async function rimandaConferma() {
+      const email = document.getElementById('email').value.trim();
+      const el = document.getElementById('errore');
+      if (!email) { showError('Scrivi prima la tua email qui sopra.'); return; }
+      el.innerHTML = '<div>⏳ Sto rimandando l\'email...</div>';
+      try {
+        const { error } = await supabaseClient.auth.resend({
+          type: 'signup',
+          email: email,
+          options: { emailRedirectTo: window.location.origin + '/login-impresa.html' }
+        });
+        if (error) throw error;
+        el.innerHTML = '';
+        const ok = document.createElement('div');
+        ok.textContent = '✅ Fatto! Ti ho rimandato l\'email a ' + email + '. Guarda anche nello SPAM: può metterci un paio di minuti.';
+        el.appendChild(ok);
+      } catch (e) {
+        showError(e.message || 'Non sono riuscito a rimandare l\'email. Riprova fra un minuto.');
+      }
     }
 
     async function doLogin() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const btn = document.getElementById('btn-login');
+      if (!email) { showError('Scrivi la tua email.'); return; }
+      if (!password) { showError('Scrivi la tua password.'); return; }
       btn.disabled = true;
       btn.innerHTML = '⏳ Accesso in corso...';
       document.getElementById('errore').style.display = 'none';
@@ -140,10 +207,17 @@
         if (error) throw error;
 
         // Verifica che esista il profilo in imprese per questo user_id
-        const { data: imp } = await supabaseClient.from('imprese').select('tipo, nome, benvenuto_inviato').eq('user_id', data.user.id).maybeSingle();
+        const { data: imp, error: errImp } = await supabaseClient.from('imprese').select('tipo, nome, benvenuto_inviato').eq('user_id', data.user.id).maybeSingle();
+        /* prima l'errore della query veniva ignorato: un problema di rete faceva
+           credere che il profilo non esistesse e buttava fuori l'utente */
+        if (errImp) {
+          throw new Error('Sei dentro, ma non riesco a leggere il tuo profilo in questo momento. Riprova fra un attimo: i tuoi dati sono al sicuro.');
+        }
         if (!imp) {
           await supabaseClient.auth.signOut();
-          throw new Error('Accesso riuscito, ma non abbiamo trovato nessun profilo impresa collegato a questo account. Se ti sei appena registrato, conferma prima la mail (controlla anche nello SPAM) e riprova. Se il problema persiste scrivici a info@trovaimpresa.com.');
+          /* qui la mail È già confermata (senza conferma il login non passa),
+             quindi il vecchio consiglio "conferma la mail" mandava in un vicolo cieco */
+          throw new Error('Il tuo account esiste, ma manca la scheda della tua attività: è un problema nostro, non tuo. Scrivici a info@trovaimpresa.com con questa email e te la sistemiamo noi (di solito in giornata).');
         }
 
         // Email di benvenuto (regalo 3 mesi Premium) al primo accesso, una sola volta.
