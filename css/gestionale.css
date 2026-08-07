@@ -1914,6 +1914,13 @@
 #fornitori .ff-acts{ display:flex; gap:8px; }
 #fornitori a.btn{ display:inline-flex; align-items:center; justify-content:center; text-decoration:none; }
 
+/* la tendina "fornitore" nella riga di aggiunta spesa, e il nome sotto la spesa */
+.spesa-add select{
+  height:40px; border:1px solid var(--bordo-forte); border-radius:9px;
+  padding:0 8px; font-family:inherit; font-size:15px; max-width:180px; background:var(--card);
+}
+.spesa-row small.sp-forn{ display:block; color:var(--testo-2); font-size:13.5px; margin-top:1px; }
+
 /* il Riepilogo quando i dati non arrivano: un avviso che resta,
    invece di "Tutto in ordine" con gli zeri finti */
 .rie-errore{

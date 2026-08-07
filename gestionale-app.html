@@ -3898,6 +3898,17 @@
       return;
     }
     fornCache=rf.data||[];fattfCache=rff.data||[];
+    /* quanto hai speso da ogni fornitore quest'anno (dalle spese dei lavori).
+       Lettura tollerante: se la colonna fornitore_id non c'e' ancora, si salta. */
+    const annoCorr=oggi.slice(0,4);let spesoForn={};
+    try{
+      const rsp=await sb.from("gest_spese").select("fornitore_id,importo,data,created_at").eq("user_id",sbUid).not("fornitore_id","is",null);
+      if(!rsp.error)(rsp.data||[]).forEach(x=>{
+        const d=(x.data||String(x.created_at||"").slice(0,10)||"");
+        if(d.slice(0,4)!==annoCorr)return;
+        const k=String(x.fornitore_id);spesoForn[k]=(spesoForn[k]||0)+(+x.importo||0);
+      });
+    }catch(e){}
     /* aperte prima (per scadenza), pagate in fondo */
     fattfCache.sort((a,b)=>((a.stato==="pagata")-(b.stato==="pagata"))||String(a.scadenza||"9999").localeCompare(String(b.scadenza||"9999")));
     const aperte=fattfCache.filter(f=>f.stato!=="pagata");
@@ -3923,6 +3934,7 @@
           +(f.categoria?'<div class="c-lab">'+esc(f.categoria)+'</div>':'')
           +'<div class="c-righe">'
           +'<div class="c-r"><span class="c-rt">Da pagare</span><span class="c-rv '+(ap?'':'ok')+'">'+(ap?eur(ap.tot)+' ('+ap.n+')':'niente')+'</span></div>'
+          +(spesoForn[String(f.id)]?'<div class="c-r"><span class="c-rt">Speso nel '+annoCorr+'</span><span class="c-rv">'+eur(spesoForn[String(f.id)])+'</span></div>':'')
           +(f.telefono?'<div class="c-r"><span class="c-rt">Telefono</span><span class="c-rv">'+esc(f.telefono)+'</span></div>':'')
           +'</div>'
           +'<div class="card-acts">'
@@ -4389,6 +4401,7 @@
         <div class="spesa-add">
           <input id="sp-desc" placeholder="Es. Cemento, noleggio piattaforma...">
           <input id="sp-imp" type="number" inputmode="decimal" placeholder="€">
+          <select id="sp-forn" title="Da quale fornitore (facoltativo)"><option value="">— fornitore —</option></select>
           <button type="button" class="btn" data-action="spesa-add">+ Aggiungi</button></div>
         <div class="margine-box" id="margine-box"></div></div>
       <div class="field" id="mezzi-wrap" style="display:none"><label>🚚 Mezzi e attrezzature usati in questo lavoro</label>
@@ -5988,10 +6001,27 @@
     wrap.style.display="block";
     /* created_at serve al grafico: la colonna "data" e' nullable (l'inserimento non la passa
        e arriva dal default del DB), quindi se manca la data della spesa si usa quella. */
-    const {data}=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
-    const sp=data||[];
+    /* fornitore_id e' arrivato con la Fase 2 dei Fornitori: se la colonna
+       manca (migrazione non eseguita) si rilegge senza, niente si rompe */
+    let conForn=true;
+    let r=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at,fornitore_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
+    if(r.error&&/fornitore_id/i.test(r.error.message||"")&&/column|schema cache/i.test(r.error.message||"")){
+      conForn=false;
+      r=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
+    }
+    const sp=r.data||[];
+    /* la tendina del fornitore, riempita dall'anagrafica (facoltativa) */
+    const selF=$("#sp-forn");let fMap={};
+    if(conForn){
+      if(!fornCache.length){const {data:fo}=await sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");fornCache=fo||fornCache;}
+      fMap=Object.fromEntries(fornCache.map(x=>[String(x.id),x.nome]));
+      if(selF){const curV=selF.value;selF.style.display=fornCache.length?"":"none";selF.innerHTML='<option value="">— fornitore —</option>'+fornCache.map(x=>'<option value="'+x.id+'">'+esc(x.nome)+'</option>').join("");if(curV)selF.value=curV;}
+    }else if(selF){selF.style.display="none";}
     const tot=sp.reduce((s,x)=>s+(+x.importo||0),0);
-    $("#spese-list").innerHTML=sp.length?sp.map(x=>`<div class="spesa-row"><span>${esc(x.descrizione)}</span><b>${eur2(x.importo)}</b><button type="button" class="sdel" data-action="spesa-del" data-id="${x.id}">🗑</button></div>`).join(""):`<p class="fatt-empty">Nessuna spesa registrata.</p>`;
+    $("#spese-list").innerHTML=sp.length?sp.map(x=>{
+      const nf=x.fornitore_id&&fMap[String(x.fornitore_id)];
+      return `<div class="spesa-row"><span>${esc(x.descrizione)}${nf?`<small class="sp-forn">da ${esc(nf)}</small>`:""}</span><b>${eur2(x.importo)}</b><button type="button" class="sdel" data-action="spesa-del" data-id="${x.id}">🗑</button></div>`;
+    }).join(""):`<p class="fatt-empty">Nessuna spesa registrata.</p>`;
     const imp=+($("#j-imp")?$("#j-imp").value:importo)||0;
     const marg=imp-tot;
     $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span><span>Spese: <span class="sp">−${eur2(tot)}</span></span><span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`;
@@ -6067,10 +6097,20 @@
     if(!sbUid||!speseLavoroId)return;
     const descrizione=$("#sp-desc").value.trim(), importo=+($("#sp-imp").value)||0;
     if(!descrizione){toast("Scrivi la descrizione della spesa");return;}
-    const {error}=await sb.from("gest_spese").insert({user_id:sbUid,lavoro_id:speseLavoroId,descrizione,importo});
+    const fornitore_id=($("#sp-forn")&&$("#sp-forn").value)||null;
+    const obj={user_id:sbUid,lavoro_id:speseLavoroId,descrizione,importo};
+    if(fornitore_id)obj.fornitore_id=fornitore_id;
+    let {error}=await sb.from("gest_spese").insert(obj);
+    let avvisoForn=false;
+    if(error&&fornitore_id&&/fornitore_id/i.test(error.message||"")&&/column|schema cache/i.test(error.message||"")){
+      delete obj.fornitore_id;
+      ({error}=await sb.from("gest_spese").insert(obj));
+      if(!error)avvisoForn=true;
+    }
     if(error){toast("Errore: "+error.message);return;}
-    $("#sp-desc").value="";$("#sp-imp").value="";
-    renderSpeseBlock(speseLavoroId);toast("Spesa aggiunta ✔");
+    $("#sp-desc").value="";$("#sp-imp").value="";if($("#sp-forn"))$("#sp-forn").value="";
+    renderSpeseBlock(speseLavoroId);
+    toast(avvisoForn?"Spesa salvata, ma senza fornitore: manca la migrazione SQL (gest-spese-fornitore)":"Spesa aggiunta ✔");
   }
 
   /* ---- PREVENTIVI ---- */
