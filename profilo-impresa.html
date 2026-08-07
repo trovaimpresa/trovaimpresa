@@ -391,38 +391,8 @@ nav img{height:36px}
   <div>
 
     <!-- CALENDARIO -->
-    <div class="card">
-      <div class="card-title">📅 Calendario & Orario</div>
-      <div class="cal-grid-2x2">
-        <div class="cw"><div class="orologio" id="cal-orologio">--:--:--</div></div>
-        <div class="cw">
-          <div class="meteo-inner">
-            <div class="meteo-icon" id="meteo-icona">⏳</div>
-            <div>
-              <div class="meteo-citta" id="meteo-citta">Rilevamento...</div>
-              <div class="meteo-temp" id="meteo-temp"></div>
-              <div class="meteo-cond" id="meteo-condizione"></div>
-            </div>
-          </div>
-        </div>
-        <div class="cw">
-          <div class="cal-head">
-            <button onclick="calPrev()">‹</button>
-            <span id="cal-label"></span>
-            <button onclick="calNext()">›</button>
-          </div>
-          <div class="cal-days-row">
-            <div class="cdh">L</div><div class="cdh">M</div><div class="cdh">M</div>
-            <div class="cdh">G</div><div class="cdh">V</div><div class="cdh">S</div><div class="cdh">D</div>
-          </div>
-          <div class="cal-cells" id="cal-griglia"></div>
-        </div>
-        <div class="cw" style="display:flex;flex-direction:column;gap:6px">
-          <div style="font-size:10px;font-weight:700;color:#0066ff;text-transform:uppercase;letter-spacing:1px">📝 Note</div>
-          <textarea class="note-ta" id="widget-note" placeholder="Scrivi i tuoi appunti..." oninput="localStorage.setItem('ti_note',this.value)"></textarea>
-        </div>
-      </div>
-    </div>
+    <!-- Widget calendario/meteo rimosso il 7/8/2026: chiedeva la geolocalizzazione
+         al cliente e occupava la prima schermata senza dire nulla sull'impresa. -->
 
     <!-- RECENSIONI -->
     <div class="card rec-card" style="border-top-color:#0066ff">
@@ -782,8 +752,8 @@ async function caricaProfilo(id){
     if(d.anni_esperienza){document.getElementById('stat-anni').textContent=d.anni_esperienza+'+'}
     if(d.piano)document.getElementById('stat-piano').textContent=d.piano.toUpperCase();
     const tel=d.telefono||'';
-    if(tel){const th='tel:'+tel.replace(/[\s\-().]/g,'');document.getElementById('btn-tel').href=th;const tl=document.getElementById('tel-link');if(tl){tl.href=th;tl.textContent=tel}}
-    else{document.getElementById('btn-tel').style.display='none';document.getElementById('contact-tel').style.display='none'}
+    if(tel){const th='tel:'+tel.replace(/[\s\-().]/g,'');document.getElementById('btn-tel').href=th;const tl=document.getElementById('tel-link');if(tl){tl.href=th;tl.textContent=tel}const cb=document.getElementById('cta-bar-tel');if(cb)cb.href=th}
+    else{document.getElementById('btn-tel').style.display='none';document.getElementById('contact-tel').style.display='none';const cb=document.getElementById('cta-bar-tel');if(cb)cb.style.display='none'}
     const el=document.getElementById('email-link');
     if(d.email&&el){el.href='mailto:'+d.email;el.textContent=d.email}else document.getElementById('contact-email').style.display='none';
     const sl=document.getElementById('sito-link');const cs=document.getElementById('contact-sito');
@@ -931,8 +901,8 @@ async function inviaRecensione(){
 }
 
 function mostraMsg(t,tipo){const m=document.getElementById('rec-msg');m.textContent=t;m.className='rec-msg '+tipo;m.style.display='block'}
-function showPreventivo(){document.getElementById('profilo-view').style.display='none';document.getElementById('sec-preventivo').classList.add('open');window.scrollTo(0,0);try{precompilaCittaPreventivo();}catch(_){}}
-function hidePreventivo(){document.getElementById('sec-preventivo').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0)}
+function showPreventivo(){document.getElementById('profilo-view').style.display='none';document.getElementById('sec-preventivo').classList.add('open');window.scrollTo(0,0);try{precompilaCittaPreventivo();}catch(_){}var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='none';}
+function hidePreventivo(){document.getElementById('sec-preventivo').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='';}
 
 // === AFFIDA UN INCARICO (solo professionisti) ===
 const PRESTAZIONI_CATALOGO={
@@ -942,8 +912,8 @@ const PRESTAZIONI_CATALOGO={
   "Perito estimatore":["Stime e valutazioni immobiliari","Perizie di stima per mutuo","Perizie giurate / asseverate","Consulenza tecnica (CTU e CTP)","Stime per successioni e divisioni","Perizie danni e assicurative","Stime di aziende e macchinari","Perizie estimative agrarie"]
 };
 function popolaIncPrestazioni(){const sel=document.getElementById('inc-prestazione');if(!sel||sel.dataset.done)return;sel.insertAdjacentHTML('beforeend',Object.keys(PRESTAZIONI_CATALOGO).map(cat=>`<optgroup label="${cat}">${PRESTAZIONI_CATALOGO[cat].map(p=>`<option value="${p}">${p}</option>`).join('')}</optgroup>`).join(''));sel.dataset.done='1';}
-function showIncarico(){popolaIncPrestazioni();document.getElementById('profilo-view').style.display='none';document.getElementById('sec-incarico').classList.add('open');window.scrollTo(0,0);}
-function hideIncarico(){document.getElementById('sec-incarico').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);}
+function showIncarico(){popolaIncPrestazioni();document.getElementById('profilo-view').style.display='none';document.getElementById('sec-incarico').classList.add('open');window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='none';}
+function hideIncarico(){document.getElementById('sec-incarico').classList.remove('open');document.getElementById('profilo-view').style.display='';window.scrollTo(0,0);var _cb=document.getElementById('cta-bar-mobile');if(_cb)_cb.style.display='';}
 async function submitIncarico(){
   const prof=window._incaricoProf;
   const me=document.getElementById('inc-msg');const btn=document.querySelector('#sec-incarico .btn-sub');
@@ -1214,30 +1184,7 @@ function showRecTab(id,btn){
   document.getElementById('rec-tab-form').style.display=id==='form'?'':'none';
 }
 
-(function(){
-  function tick(){var el=document.getElementById('cal-orologio');if(!el)return;var n=new Date();el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0')}
-  setInterval(tick,1000);tick();
-  var MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-  var oggi=new Date();var cA=oggi.getFullYear();var cM=oggi.getMonth();
-  function renderCal(){
-    var label=document.getElementById('cal-label');var griglia=document.getElementById('cal-griglia');if(!label||!griglia)return;
-    label.textContent=MESI[cM].slice(0,3)+' '+cA;
-    var primo=new Date(cA,cM,1);var offset=primo.getDay()-1;if(offset<0)offset=6;
-    var giorni=new Date(cA,cM+1,0).getDate();var html='';
-    for(var i=0;i<offset;i++)html+='<div class="cd"></div>';
-    for(var g=1;g<=giorni;g++){var isO=g===oggi.getDate()&&cM===oggi.getMonth()&&cA===oggi.getFullYear();html+=isO?`<div class="cd"><div class="cd oggi">${g}</div></div>`:`<div class="cd">${g}</div>`}
-    griglia.innerHTML=html;
-  }
-  window.calPrev=function(){cM--;if(cM<0){cM=11;cA--}renderCal()};
-  window.calNext=function(){cM++;if(cM>11){cM=0;cA++}renderCal()};
-  renderCal();
-  var noteEl=document.getElementById('widget-note');if(noteEl)noteEl.value=localStorage.getItem('ti_note')||'';
-  var WMO={113:'☀️',116:'⛅',119:'☁️',176:'🌦️',200:'⛈️',227:'❄️',263:'🌦️',293:'🌧️',353:'🌦️',386:'⛈️'};
-  async function caricaMeteo(lat,lon){
-    try{var r=await fetch('https://wttr.in/'+lat+','+lon+'?format=j1');var d=await r.json();var cur=d.current_condition[0];var area=d.nearest_area&&d.nearest_area[0];var citta=(area&&area.areaName&&area.areaName[0]&&area.areaName[0].value)||'';document.getElementById('meteo-icona').textContent=WMO[parseInt(cur.weatherCode,10)]||'🌡️';document.getElementById('meteo-citta').textContent=citta;document.getElementById('meteo-temp').textContent=cur.temp_C+'°C';document.getElementById('meteo-condizione').textContent=cur.weatherDesc&&cur.weatherDesc[0]&&cur.weatherDesc[0].value||''}catch(e){document.getElementById('meteo-icona').textContent='❌'}
-  }
-  if(navigator.geolocation)navigator.geolocation.getCurrentPosition(function(pos){caricaMeteo(pos.coords.latitude,pos.coords.longitude)},function(){document.getElementById('meteo-citta').textContent='Non disponibile'});
-})();
+/* widget orologio/meteo rimosso (7/8/2026): niente piu' richiesta di posizione al cliente */
 
 document.addEventListener('DOMContentLoaded',async()=>{
   const p=new URLSearchParams(window.location.search);const id=p.get('id');
@@ -1424,5 +1371,23 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <script src="/js/modal-fullscreen.js" defer></script>
 <script src="/js/spazi-laterali.js" data-spazi="profilo-sx-1,profilo-sx-2,profilo-dx-1,profilo-dx-2"></script>
+<!-- Barra fissa su mobile: il preventivo e la chiamata sempre a portata di pollice (7/8/2026) -->
+<style>
+.cta-bar-mobile{display:none}
+@media(max-width:768px){
+  .cta-bar-mobile{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:900;gap:10px;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fff;
+    border-top:1px solid #e5e5e5;box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+  .cta-bar-mobile a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:14px 8px;border-radius:12px;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer}
+  .cta-bar-mobile .cbm-prev{background:#FF6B35;color:#fff}
+  .cta-bar-mobile .cbm-call{background:#eaf2fb;color:#2863a7;border:1.5px solid #2863a7}
+  body{padding-bottom:78px}
+}
+</style>
+<div class="cta-bar-mobile" id="cta-bar-mobile">
+  <a class="cbm-prev" onclick="showPreventivo()">📋 Preventivo gratuito</a>
+  <a class="cbm-call" id="cta-bar-tel" href="#">📞 Chiama</a>
+</div>
 </body>
 </html>
