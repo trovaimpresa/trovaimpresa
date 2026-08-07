@@ -1892,6 +1892,28 @@
 }
 .fatt-errore b{ font-weight:800; }
 
+/* =========================================================================
+   FORNITORI — anagrafica a card (riusa .card) + lista fatture da pagare
+   ========================================================================= */
+#fornitori .ff-riass{
+  background:var(--attesa-bg); border:1.5px solid #f0d9a8; border-radius:12px;
+  padding:14px 18px; margin-bottom:16px; font-size:17px;
+}
+#fornitori .ff-riass.rit{ background:var(--err-bg); border-color:var(--err); color:var(--err); }
+#fornitori .ff-r{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  background:var(--card); border:1px solid var(--bordo); border-radius:12px;
+  padding:12px 16px; margin-bottom:10px; font-size:16px;
+}
+#fornitori .ff-r.rit{ border-left:4px solid var(--err); }
+#fornitori .ff-r.pag{ opacity:.6; }
+#fornitori .ff-info{ flex:1 1 200px; min-width:0; }
+#fornitori .ff-info small{ display:block; color:var(--testo-2); font-size:14px; margin-top:2px; }
+#fornitori .ff-q{ font-weight:700; font-size:15px; white-space:nowrap; }
+#fornitori .ff-imp{ font-weight:800; font-size:17px; white-space:nowrap; min-width:90px; text-align:right; }
+#fornitori .ff-acts{ display:flex; gap:8px; }
+#fornitori a.btn{ display:inline-flex; align-items:center; justify-content:center; text-decoration:none; }
+
 /* il Riepilogo quando i dati non arrivano: un avviso che resta,
    invece di "Tutto in ordine" con gli zeri finti */
 .rie-errore{

@@ -60,6 +60,7 @@
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
       <button data-tab="carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Carte</span></button>
       <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Clienti</span></button>
+      <button data-tab="fornitori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span>Fornitori</span><span class="tab-cnt" id="cnt-fornitori"></span></button>
       <button data-tab="scadenzario" id="tab-scadenzario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg><span>Scadenzario</span><span class="tab-cnt" id="cnt-scadenzario"></span></button>
       <button data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg><span>Report</span></button>
       <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
@@ -215,6 +216,15 @@
       <div class="sec-head"><h2>Carte aziendali</h2><button class="btn add" data-action="new-carta">+ Nuova carta</button></div>
       <div class="gal-intro">Le carte prepagate (tipo bancomat) che dai ai tuoi dipendenti per le spese sul lavoro. Il saldo si aggiorna da solo con le ricariche e le spese che registrate.</div>
       <div class="grid" id="carte-list"></div>
+    </section>
+
+    <section id="fornitori">
+      <div class="sec-head"><h2>Fornitori</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-forn">+ Nuovo fornitore</button><button class="btn add" data-action="new-fattf">+ Fattura da pagare</button></div></div>
+      <div class="gal-intro">Le rivendite e i negozi dove compri il materiale: contatti sempre a portata di mano e fatture da pagare con le loro scadenze, così sai sempre quanto devi e a chi.</div>
+      <div id="fattf-riass"></div>
+      <div class="grid" id="forn-list"></div>
+      <h3 id="fattf-tit" style="margin:24px 0 12px;font-size:19px;display:none">Fatture da pagare</h3>
+      <div id="fattf-list"></div>
     </section>
 
     <section id="richieste">
@@ -764,7 +774,7 @@
   }
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
@@ -792,7 +802,7 @@
     mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
     carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze,
     report:renderReport, galleria:renderGalleria, mappa:renderMappa,
-    richieste:renderRichieste
+    richieste:renderRichieste, fornitori:renderFornitori
   };
   const _tabSporchi=new Set();
   function tabCorrente(){const b=document.querySelector("nav.tabs button.active");return (b&&b.dataset.tab)||"riepilogo";}
@@ -831,17 +841,18 @@
     el.title=tipo==="err"?"Ci sono elementi in ritardo o scaduti":"In attesa";
   }
   async function renderContatori(){
-    ["#cnt-lavori","#cnt-preventivi","#cnt-mezzi","#cnt-scadenzario"].forEach(x=>setCnt(x,0));
+    ["#cnt-lavori","#cnt-preventivi","#cnt-mezzi","#cnt-scadenzario","#cnt-fornitori"].forEach(x=>setCnt(x,0));
     if(!sb||!sbUid||!cur)return;
     const mid=curMestiere();if(!mid)return;
     const oggi=todayStr(), lim30=_giorniDopo(oggi,30);
     try{
-      const [{data:lav},{data:pv},{data:mz},{data:vw},{data:sc}]=await Promise.all([
+      const [{data:lav},{data:pv},{data:mz},{data:vw},{data:sc},{data:ff}]=await Promise.all([
         sb.from("gest_lavori").select("stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_preventivi").select("stato").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi").select("id").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi_scadenze").select("mezzo_id,scadute,prossima_data").eq("user_id",sbUid),
-        sb.from("gest_scadenze").select("stato,data_scadenza").eq("user_id",sbUid).eq("mestiere_id",mid)
+        sb.from("gest_scadenze").select("stato,data_scadenza").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_fatture_fornitori").select("stato,scadenza").eq("user_id",sbUid).eq("mestiere_id",mid)
       ]);
       /* Lavori: aperti (da fare o in corso). Rosso se almeno uno e' in ritardo. */
       const aperti=(lav||[]).filter(l=>l.stato!=="fatto");
@@ -856,6 +867,10 @@
       /* Scadenzario: aperte, scadute o entro 30 giorni. */
       const sAperte=(sc||[]).filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30);
       setCnt("#cnt-scadenzario",sAperte.length,sAperte.some(x=>x.data_scadenza<oggi)?"err":"attesa");
+      /* Fornitori: fatture da pagare. Rosso se qualcuna e' scaduta.
+         (se la tabella non esiste ancora, ff e' undefined e il pallino resta spento) */
+      const ffAp=(ff||[]).filter(x=>x.stato!=="pagata");
+      setCnt("#cnt-fornitori",ffAp.length,ffAp.some(x=>x.scadenza&&x.scadenza<oggi)?"err":"attesa");
     }catch(e){}
   }
 
@@ -962,6 +977,18 @@
       CM=(q[4].data||[]).filter(m=>m.tipo==="spesa");FR=q[5].data||[];
       if(q.find(x=>x&&x.error))erroreLettura2=true;
     }catch(e){erroreLettura2=true;}
+
+    /* Fornitori: tabelle nuove (sql/gest-fornitori.sql). Lettura separata e
+       tollerante: se la migrazione non è stata eseguita, il Riepilogo non va
+       in errore e la scheda semplicemente non compare. */
+    let FFOR=[],FORNI=[],fornTabOk=true;
+    try{
+      const [rff2,rfo2]=await Promise.all([
+        sb.from("gest_fatture_fornitori").select("fornitore_id,importo,scadenza,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)
+      ]);
+      if(rff2.error||rfo2.error)fornTabOk=false;else{FFOR=rff2.data||[];FORNI=rfo2.data||[];}
+    }catch(e){fornTabOk=false;}
 
     /* ---- calcoli (identici a prima) ---- */
     const aperti   = L.filter(l=>l.stato!=="fatto");
@@ -1191,6 +1218,24 @@
         t:o.nome||"Operatore",
         v:(perOpe[o.id]||0)+((perOpe[o.id]||0)===1?" lavoro":" lavori")}))
     }));
+
+    if(fornTabOk){
+      const ffAp2=FFOR.filter(f=>f.stato!=="pagata");
+      const totFf=ffAp2.reduce((sm,f)=>sm+(+f.importo||0),0);
+      const ffRit=ffAp2.filter(f=>f.scadenza&&f.scadenza<oggi);
+      const ffOrd=ffAp2.filter(f=>f.scadenza).sort((a,b)=>a.scadenza.localeCompare(b.scadenza));
+      const fornNome=Object.fromEntries(FORNI.map(x=>[String(x.id),x.nome||"Fornitore"]));
+      C.push(rieCard({
+        tab:"fornitori", titolo:"Fornitori", n:eur(totFf),
+        lab: ffRit.length? ffRit.length+(ffRit.length===1?" fattura scaduta":" fatture scadute"):"da pagare ai fornitori",
+        tono: ffRit.length?"err":(ffAp2.length?"attesa":"ok"),
+        vuoto:"Nessuna fattura da pagare",
+        righe: ffOrd.slice(0,2).map(f=>{const q2=quando(f.scadenza);return{
+          t:fornNome[String(f.fornitore_id)]||"Fornitore",
+          v:q2.testo+" · "+eur(f.importo),
+          cls:f.scadenza<oggi?"q-passato":q2.classe};})
+      }));
+    }
 
     if(!_proNascosto("carte"))C.push(rieCard({
       tab:"carte", titolo:"Carte", n:eur(saldoTot),
@@ -3824,6 +3869,150 @@
     fatta:{lab:"Fatta ✔",bg:"#e6f6ec",fg:"#1b8a3f"},
     non_faremo:{lab:"Per ora non la facciamo",bg:"#fdecea",fg:"#b3261e"}
   };
+
+  /* ============================================================
+     FORNITORI — le rivendite dove l'impresa compra il materiale.
+     gest_fornitori (anagrafica) + gest_fatture_fornitori (da pagare).
+     DDL: sql/gest-fornitori.sql. Idea di Alessio, 7 agosto 2026.
+     Paracadute: se le tabelle non ci sono ancora (migrazione non
+     eseguita), la sezione lo dice invece di rompersi.
+     ============================================================ */
+  let fornCache=[],fattfCache=[];
+  const FORN_CATS=["Rivendita edile","Ferramenta","Colorificio","Termoidraulica","Materiale elettrico","Legname","Noleggio attrezzature","Cava / Inerti","Altro"];
+  async function renderFornitori(){
+    const box=$("#forn-list"),lst=$("#fattf-list"),rr=$("#fattf-riass"),tt=$("#fattf-tit");
+    if(!box||!cur)return;
+    if(!sb||!sbUid){box.innerHTML=tabVuoto("I tuoi fornitori","Accedi per gestirli.");if(lst)lst.innerHTML="";return;}
+    const mid=curMestiere(), oggi=todayStr();
+    const [rf,rff]=await Promise.all([
+      sb.from("gest_fornitori").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      sb.from("gest_fatture_fornitori").select("*").eq("user_id",sbUid).eq("mestiere_id",mid)
+    ]);
+    if(rf.error||rff.error){
+      const em=((rf.error||rff.error).message)||"";
+      const msg=/gest_fornitori|gest_fatture_fornitori|schema cache|does not exist/i.test(em)
+        ? "La sezione Fornitori ha bisogno di un aggiornamento del database: esegui sql/gest-fornitori.sql su Supabase (SQL Editor → Run)."
+        : "Non riesco a leggere i fornitori: controlla la connessione e riprova.";
+      box.innerHTML='<div class="rie-errore"><b>'+esc(msg)+'</b></div>';
+      if(lst)lst.innerHTML="";if(rr)rr.innerHTML="";if(tt)tt.style.display="none";
+      return;
+    }
+    fornCache=rf.data||[];fattfCache=rff.data||[];
+    /* aperte prima (per scadenza), pagate in fondo */
+    fattfCache.sort((a,b)=>((a.stato==="pagata")-(b.stato==="pagata"))||String(a.scadenza||"9999").localeCompare(String(b.scadenza||"9999")));
+    const aperte=fattfCache.filter(f=>f.stato!=="pagata");
+    const totAp=aperte.reduce((sm,f)=>sm+(+f.importo||0),0);
+    const scadute=aperte.filter(f=>f.scadenza&&f.scadenza<oggi);
+    if(rr)rr.innerHTML=aperte.length
+      ? '<div class="ff-riass'+(scadute.length?' rit':'')+'"><b>'+eur(totAp)+'</b> da pagare in '+aperte.length+(aperte.length===1?' fattura':' fatture')+(scadute.length?' — <b>'+scadute.length+(scadute.length===1?' scaduta':' scadute')+'</b>':'')+'</div>'
+      : "";
+    if(!fornCache.length){
+      box.innerHTML=tabVuoto("I tuoi fornitori",
+        "Le rivendite e i negozi dove compri il materiale. Qui tieni i contatti (chiama o scrivi su WhatsApp con un tocco) e le fatture da pagare con le scadenze: niente più brutte sorprese.",
+        _SVGV+'<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+        {t:"+ Aggiungi il primo fornitore",a:"new-forn"});
+      tabBottoneTesta(box,false);
+    }else{
+      tabBottoneTesta(box,true);
+      const perForn={};aperte.forEach(f=>{const k=String(f.fornitore_id||"");perForn[k]=perForn[k]||{n:0,tot:0};perForn[k].n++;perForn[k].tot+=(+f.importo||0);});
+      box.innerHTML=fornCache.map(f=>{
+        const ap=perForn[String(f.id)];
+        const waTel=waCleanTel(f.telefono||"");
+        return '<div class="card t-neutro">'
+          +'<div class="c-head"><h3>'+esc(f.nome)+'</h3></div>'
+          +(f.categoria?'<div class="c-lab">'+esc(f.categoria)+'</div>':'')
+          +'<div class="c-righe">'
+          +'<div class="c-r"><span class="c-rt">Da pagare</span><span class="c-rv '+(ap?'':'ok')+'">'+(ap?eur(ap.tot)+' ('+ap.n+')':'niente')+'</span></div>'
+          +(f.telefono?'<div class="c-r"><span class="c-rt">Telefono</span><span class="c-rv">'+esc(f.telefono)+'</span></div>':'')
+          +'</div>'
+          +'<div class="card-acts">'
+          +(f.telefono?'<a class="btn" href="tel:'+esc(f.telefono)+'">📞 Chiama</a>':'')
+          +(waTel?'<button class="btn" data-action="sq-wa" data-wa="https://wa.me/'+waTel+'">WhatsApp</button>':'')
+          +'<button class="btn" data-action="edit-forn" data-id="'+esc(String(f.id))+'">Modifica</button>'
+          +'<button class="btn btn-danger del" data-action="del-forn" data-id="'+esc(String(f.id))+'">Elimina</button>'
+          +'</div></div>';
+      }).join("");
+    }
+    if(tt)tt.style.display=fattfCache.length?"":"none";
+    if(lst)lst.innerHTML=fattfCache.map(f=>{
+      const nome=(fornCache.find(x=>String(x.id)===String(f.fornitore_id))||{}).nome||"Fornitore";
+      const pag=f.stato==="pagata";
+      const rit=!pag&&f.scadenza&&f.scadenza<oggi;
+      const q=f.scadenza?quando(f.scadenza,{neutro:pag}):{testo:"senza scadenza",classe:"q-vuoto"};
+      return '<div class="ff-r'+(rit?' rit':'')+(pag?' pag':'')+'">'
+        +'<div class="ff-info"><b>'+esc(nome)+'</b>'+(f.numero?' · n. '+esc(f.numero):'')+(f.note?'<small>'+esc(f.note)+'</small>':'')+'</div>'
+        +'<span class="ff-q '+(rit?'q-passato':q.classe)+'">'+(pag?'pagata':(rit?'scaduta '+q.testo:q.testo))+'</span>'
+        +'<span class="ff-imp">'+eur(f.importo)+'</span>'
+        +'<div class="ff-acts">'
+        +'<button class="btn btn-sm" data-action="fattf-stato" data-id="'+esc(String(f.id))+'" data-v="'+(pag?'da_pagare':'pagata')+'">'+(pag?'↩ Riapri':'✔ Pagata')+'</button>'
+        +'<button class="btn btn-sm" data-action="edit-fattf" data-id="'+esc(String(f.id))+'">Modifica</button>'
+        +'<button class="btn btn-sm btn-danger" data-action="del-fattf" data-id="'+esc(String(f.id))+'" title="Elimina">🗑</button>'
+        +'</div></div>';
+    }).join("");
+  }
+  function fornForm(f){
+    const isNew=!f;f=f||{};
+    const cats=FORN_CATS.map(c=>'<option value="'+c+'" '+(c===(f.categoria||"")?'selected':'')+'>'+c+'</option>').join("");
+    openSheet('<h3>'+(isNew?'Nuovo fornitore':'Modifica fornitore')+'</h3>'
+      +'<div class="field"><label>Nome</label><input id="fo-nome" value="'+esc(f.nome||'')+'" placeholder="Es. Edil Market Rossi"></div>'
+      +'<div class="field"><label>Tipo</label><select id="fo-cat"><option value="">— scegli —</option>'+cats+'</select></div>'
+      +'<div class="row2">'
+      +'<div class="field"><label>Telefono</label><input id="fo-tel" value="'+esc(f.telefono||'')+'" placeholder="Es. 340 1234567"></div>'
+      +'<div class="field"><label>Email</label><input id="fo-email" value="'+esc(f.email||'')+'" placeholder="ordini@..."></div></div>'
+      +'<div class="field"><label>Partita IVA</label><input id="fo-piva" value="'+esc(f.piva||'')+'"></div>'
+      +'<div class="field"><label>Indirizzo</label><input id="fo-ind" value="'+esc(f.indirizzo||'')+'"></div>'
+      +'<div class="field"><label>Note</label><textarea id="fo-note" placeholder="Es. chiedere di Marco, sconto 10% sui laterizi">'+esc(f.note||'')+'</textarea></div>'
+      +'<div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="save-forn" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button></div>');
+  }
+  async function saveForn(id){
+    const nome=$("#fo-nome").value.trim();if(!nome){toast("Scrivi il nome del fornitore");return;}
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const row={nome,categoria:$("#fo-cat").value||null,telefono:$("#fo-tel").value.trim()||null,
+      email:$("#fo-email").value.trim()||null,piva:$("#fo-piva").value.trim()||null,
+      indirizzo:$("#fo-ind").value.trim()||null,note:$("#fo-note").value.trim()||null};
+    const {data,error}=id
+      ?await sb.from("gest_fornitori").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_fornitori").insert(Object.assign({},row,{user_id:sbUid,mestiere_id:curMestiere()})).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+    closeSheet();renderFornitori();rinfresca("riepilogo");toast(id?"Aggiornato ✔":"Fornitore aggiunto ✔");
+  }
+  async function fattfForm(f){
+    const isNew=!f;f=f||{};
+    if(isNew&&!fornCache.length){toast("Prima aggiungi un fornitore");fornForm(null);return;}
+    const fops=fornCache.map(x=>'<option value="'+x.id+'" '+(String(f.fornitore_id||'')===String(x.id)?'selected':'')+'>'+esc(x.nome)+'</option>').join("");
+    let lavOps='<option value="">— nessuno —</option>';
+    if(sb&&sbUid){
+      const {data:lv}=await sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("data_prevista",{ascending:false}).limit(100);
+      lavOps+=(lv||[]).map(l=>'<option value="'+l.id+'" '+(String(f.lavoro_id||'')===String(l.id)?'selected':'')+'>'+esc(l.descrizione||'Lavoro')+'</option>').join("");
+    }
+    openSheet('<h3>'+(isNew?'Fattura da pagare':'Modifica fattura')+'</h3>'
+      +'<div class="field"><label>Fornitore</label><select id="ff-forn">'+fops+'</select></div>'
+      +'<div class="row2">'
+      +'<div class="field"><label>Numero fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'
+      +'<div class="field"><label>Data fattura</label><input type="date" id="ff-data" value="'+(f.data||todayStr())+'"></div></div>'
+      +'<div class="row2">'
+      +'<div class="field"><label>Importo (€)</label><input type="number" step="0.01" id="ff-imp" inputmode="decimal" value="'+(f.importo||'')+'" placeholder="0"></div>'
+      +'<div class="field"><label>Da pagare entro</label><input type="date" id="ff-scad" value="'+(f.scadenza||'')+'"></div></div>'
+      +'<div class="field"><label>Lavoro collegato (facoltativo)</label><select id="ff-lav">'+lavOps+'</select></div>'
+      +'<div class="field"><label>Note</label><textarea id="ff-note" placeholder="Es. sabbia e cemento per il bagno di Via Roma">'+esc(f.note||'')+'</textarea></div>'
+      +'<div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="save-fattf" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button></div>');
+  }
+  async function saveFattf(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const fornitore_id=$("#ff-forn").value;if(!fornitore_id){toast("Scegli il fornitore");return;}
+    const importo=parseFloat($("#ff-imp").value)||0;if(!(importo>0)){toast("Inserisci l'importo");return;}
+    const row={fornitore_id,numero:$("#ff-num").value.trim()||null,data:$("#ff-data").value||todayStr(),
+      importo,scadenza:$("#ff-scad").value||null,lavoro_id:$("#ff-lav").value||null,note:$("#ff-note").value.trim()||null};
+    const {data,error}=id
+      ?await sb.from("gest_fatture_fornitori").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_fatture_fornitori").insert(Object.assign({},row,{user_id:sbUid,mestiere_id:curMestiere(),stato:"da_pagare"})).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+    closeSheet();renderFornitori();rinfresca("riepilogo");toast(id?"Aggiornata ✔":"Fattura registrata ✔");
+  }
 
   async function renderRichieste(){
     const lista=$("#rq-lista");if(!lista)return;
@@ -6760,6 +6949,39 @@
     if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
     if(a==="save-dip")return saveDip(id);
     if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
+    /* ---- Fornitori ---- */
+    if(a==="new-forn")return fornForm(null);
+    if(a==="edit-forn")return fornForm(fornCache.find(x=>String(x.id)===String(id)));
+    if(a==="save-forn")return saveForn(id||null);
+    if(a==="del-forn"){
+      if(!sbUid){toast("Devi essere loggato");return;}
+      const nf=fattfCache.filter(x=>String(x.fornitore_id)===String(id)).length;
+      if(!gconfirm(nf?`Eliminare questo fornitore? Verranno eliminate anche le sue ${nf} fatture registrate.`:"Eliminare questo fornitore?"))return;
+      const {data:okDf2,error}=await sb.from("gest_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
+      if(error){toast("Errore: "+error.message);return;}
+      if(!okDf2||!okDf2.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
+      renderFornitori();rinfresca("riepilogo");toast("Fornitore eliminato");return;
+    }
+    if(a==="new-fattf")return fattfForm(null);
+    if(a==="edit-fattf")return fattfForm(fattfCache.find(x=>String(x.id)===String(id)));
+    if(a==="save-fattf")return saveFattf(id||null);
+    if(a==="del-fattf"){
+      if(!sbUid){toast("Devi essere loggato");return;}
+      if(!gconfirm("Eliminare questa fattura?"))return;
+      const {data:okDff,error}=await sb.from("gest_fatture_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
+      if(error){toast("Errore: "+error.message);return;}
+      if(!okDff||!okDff.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
+      renderFornitori();rinfresca("riepilogo");toast("Fattura eliminata");return;
+    }
+    if(a==="fattf-stato"){
+      if(!sbUid){toast("Devi essere loggato");return;}
+      const v=t.dataset.v;
+      const patch={stato:v,data_pagata:v==="pagata"?todayStr():null};
+      const {data:okFs,error}=await sb.from("gest_fatture_fornitori").update(patch).eq("id",id).eq("user_id",sbUid).select("id");
+      if(error){toast("Errore: "+error.message);return;}
+      if(!okFs||!okFs.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+      renderFornitori();rinfresca("riepilogo");toast(v==="pagata"?"Segnata pagata ✔":"Riaperta");return;
+    }
     if(a==="quick-cli")return cliForm(null);
     if(a==="close")return closeSheet();
   });
