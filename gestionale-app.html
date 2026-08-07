@@ -186,6 +186,7 @@
       <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div class="grid" id="cli-list"></div>
       <input type="file" id="cli-doc-file" multiple style="display:none">
+      <input type="file" id="forn-doc-file" multiple style="display:none">
     </section>
 
     <section id="squadra">
@@ -3929,19 +3930,21 @@
       box.innerHTML=fornCache.map(f=>{
         const ap=perForn[String(f.id)];
         const waTel=waCleanTel(f.telefono||"");
-        return '<div class="card t-neutro">'
+        /* la card si apre col click (scheda in sola lettura, come i Clienti);
+           sulla card restano solo le azioni rapide Chiama/WhatsApp */
+        return '<div class="card t-neutro" data-action="forn-scheda" data-id="'+esc(String(f.id))+'" style="cursor:pointer">'
           +'<div class="c-head"><h3>'+esc(f.nome)+'</h3></div>'
           +(f.categoria?'<div class="c-lab">'+esc(f.categoria)+'</div>':'')
+          +(f.trovaimpresa_id?'<div class="c-lab" style="color:var(--ok);font-weight:700">✓ Collegato a TrovaImpresa</div>':'')
           +'<div class="c-righe">'
           +'<div class="c-r"><span class="c-rt">Da pagare</span><span class="c-rv '+(ap?'':'ok')+'">'+(ap?eur(ap.tot)+' ('+ap.n+')':'niente')+'</span></div>'
           +(spesoForn[String(f.id)]?'<div class="c-r"><span class="c-rt">Speso nel '+annoCorr+'</span><span class="c-rv">'+eur(spesoForn[String(f.id)])+'</span></div>':'')
           +(f.telefono?'<div class="c-r"><span class="c-rt">Telefono</span><span class="c-rv">'+esc(f.telefono)+'</span></div>':'')
           +'</div>'
           +'<div class="card-acts">'
-          +(f.telefono?'<a class="btn" href="tel:'+esc(f.telefono)+'">📞 Chiama</a>':'')
+          +(f.telefono?'<a class="btn" href="tel:'+esc(f.telefono)+'" onclick="event.stopPropagation()">📞 Chiama</a>':'')
           +(waTel?'<button class="btn" data-action="sq-wa" data-wa="https://wa.me/'+waTel+'">WhatsApp</button>':'')
-          +'<button class="btn" data-action="edit-forn" data-id="'+esc(String(f.id))+'">Modifica</button>'
-          +'<button class="btn btn-danger del" data-action="del-forn" data-id="'+esc(String(f.id))+'">Elimina</button>'
+          +'<button class="btn" data-action="forn-scheda" data-id="'+esc(String(f.id))+'">Apri scheda</button>'
           +'</div></div>';
       }).join("");
     }
@@ -3962,36 +3965,229 @@
         +'</div></div>';
     }).join("");
   }
+  /* Scheda del fornitore in sola lettura: si apre col click sulla card,
+     si legge tutto, e Modifica/Elimina/Documenti stanno qui dentro. */
+  async function fornScheda(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const {data:f}=await sb.from("gest_fornitori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(!f){toast("Fornitore non trovato");return;}
+    const {data:ff}=await sb.from("gest_fatture_fornitori").select("*").eq("user_id",sbUid).eq("fornitore_id",id).order("scadenza",{ascending:true});
+    const fatture=(ff||[]).sort((a,b)=>((a.stato==="pagata")-(b.stato==="pagata"))||String(a.scadenza||"9999").localeCompare(String(b.scadenza||"9999")));
+    const oggi=todayStr();
+    const aperte=fatture.filter(x=>x.stato!=="pagata");
+    const totAp=aperte.reduce((sm,x)=>sm+(+x.importo||0),0);
+    const waTel=waCleanTel(f.telefono||"");
+    const tag=f.categoria?'<span class="tipo-tag">'+esc(f.categoria)+'</span>':'';
+    const righeFatt=fatture.length?fatture.map(x=>{
+      const pag=x.stato==="pagata", rit=!pag&&x.scadenza&&x.scadenza<oggi;
+      const q=x.scadenza?quando(x.scadenza,{neutro:pag}):{testo:"senza scadenza",classe:"q-vuoto"};
+      return '<div class="ff-r'+(rit?' rit':'')+(pag?' pag':'')+'" style="margin-bottom:8px">'
+        +'<div class="ff-info">'+(x.numero?'<b>n. '+esc(x.numero)+'</b>':'<b>Fattura</b>')+(x.note?'<small>'+esc(x.note)+'</small>':'')+'</div>'
+        +'<span class="ff-q '+(rit?'q-passato':q.classe)+'">'+(pag?'pagata':(rit?'scaduta':q.testo))+'</span>'
+        +'<span class="ff-imp">'+eur(x.importo)+'</span>'
+        +(pag?'':'<button class="btn btn-sm" data-action="fattf-stato" data-id="'+esc(String(x.id))+'" data-v="pagata" data-forn="'+esc(String(f.id))+'">✔ Pagata</button>')
+        +'</div>';
+    }).join(""):'<p class="sh-nota" style="margin-top:0">Nessuna fattura registrata per questo fornitore.</p>';
+    openSheetGrande(esc(f.nome||"Fornitore")+tag,
+      '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Contatti</div>'
+      +_rigaDato("Telefono",f.telefono,"tel:")
+      +_rigaDato("Email",f.email,"mailto:")
+      +_rigaDato("Indirizzo",f.indirizzo)
+      +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
+      +(f.telefono?'<a class="btn" href="tel:'+esc(f.telefono)+'" style="text-decoration:none">📞 Chiama</a>':'')
+      +(waTel?'<button class="btn" data-action="sq-wa" data-wa="https://wa.me/'+waTel+'">WhatsApp</button>':'')
+      +(f.trovaimpresa_id?'<a class="btn" href="/profilo-impresa.html?id='+esc(String(f.trovaimpresa_id))+'" target="_blank" style="text-decoration:none">🏪 Profilo TrovaImpresa</a>':'')
+      +'</div></div>'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Dati</div>'
+      +_rigaDato("Partita IVA",f.piva)
+      +_rigaDato("Note",f.note)
+      +(f.trovaimpresa_id?'<div class="dato"><span class="dato-lab">TrovaImpresa</span><span class="dato-val" style="color:var(--ok);font-weight:700">✓ Collegato</span></div>':'')
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Le sue fatture'+(aperte.length?' — da pagare '+eur(totAp):'')+'</div>'
+      +righeFatt
+      +'<button class="btn-primary" data-action="new-fattf-forn" data-id="'+esc(String(f.id))+'" style="margin-top:10px">+ Fattura per questo fornitore</button>'
+      +'</div>'
+      +'</div></div>',
+      '<button class="btn b-cancel" data-action="close">Chiudi</button>'
+      +'<button class="btn" data-action="forn-doc" data-id="'+esc(String(f.id))+'">&#128206; Documenti</button>'
+      +'<button class="btn btn-danger" data-action="del-forn" data-id="'+esc(String(f.id))+'">🗑 Elimina</button>'
+      +'<button class="btn-primary" data-action="edit-forn-full" data-id="'+esc(String(f.id))+'">&#9998; Modifica</button>');
+  }
+
+  /* ---- documenti del fornitore: listini, contratti, fatture in PDF/foto.
+     Stessa tabella gest_foto dei documenti cliente, con fornitore_id
+     (sql/gest-fornitori-plus.sql). ---- */
+  let docFornId=null, docFornNome="";
+  async function fornDocApri(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const f=fornCache.find(x=>String(x.id)===String(id));
+    docFornId=id; docFornNome=(f&&f.nome)||"fornitore";
+    openSheetGrande("Documenti di "+esc(docFornNome),
+      '<div class="sh-b">'
+      +'<div class="sh-tit">Carica un documento</div>'
+      +'<p class="sh-nota" style="margin-top:0">Listini, contratti, DDT, fatture in PDF o la foto fatta alla cassa: qui restano attaccati al fornitore e non si perdono. Massimo 15 MB per file.</p>'
+      +'<button class="btn-primary" data-action="forn-doc-scegli" style="margin-top:6px">Scegli i file dal computer</button>'
+      +'</div>'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Documenti gi&agrave; caricati</div>'
+      +'<div id="doc-forn-lista"><div class="loading">Caricamento...</div></div>'
+      +'</div>',
+      '<button class="btn b-cancel" data-action="close">Chiudi</button>');
+    renderDocForn();
+  }
+  async function renderDocForn(){
+    const box=$("#doc-forn-lista");if(!box||!docFornId)return;
+    const {data,error}=await sb.from("gest_foto").select("id,storage_path,nome_file,created_at")
+      .eq("user_id",sbUid).eq("fornitore_id",docFornId).eq("tipo","doc_fornitore")
+      .order("created_at",{ascending:false});
+    if(error){
+      const em=(error.message||"");
+      box.innerHTML='<div class="campo-aiuto" style="color:var(--attesa)">'+(/fornitore_id/i.test(em)&&/column|schema cache/i.test(em)
+        ?'I documenti del fornitore hanno bisogno di un aggiornamento del database: esegui sql/gest-fornitori-plus.sql su Supabase.'
+        :'Non riesco a leggere i documenti: '+esc(em))+'</div>';
+      return;
+    }
+    if(!data||!data.length){box.innerHTML='<div class="campo-aiuto">Nessun documento per ora. Usa il pulsante qui sopra.</div>';return;}
+    box.innerHTML=data.map(d=>{
+      const nome=d.nome_file||String(d.storage_path||"").split("/").pop()||"documento";
+      const quando2=d.created_at?new Date(d.created_at).toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}):"";
+      return '<div class="doc-riga">'
+        +'<span class="doc-ico">'+docCliIcona(nome)+'</span>'
+        +'<span class="doc-nome">'+esc(nome)+'<small>'+esc(quando2)+'</small></span>'
+        +'<button class="btn" data-action="doc-cli-apri" data-id="'+esc(d.id)+'">Apri</button>'
+        +'<button class="btn b-del" data-action="forn-doc-del" data-id="'+esc(d.id)+'">Elimina</button>'
+        +'</div>';
+    }).join("");
+  }
+  async function uploadDocFornitore(files){
+    if(!files||!files.length||!docFornId)return;
+    if(!sbUid){toast("Devi essere loggato");return;}
+    let ok=0,ko=0;
+    for(const file of Array.from(files)){
+      const pr=await preparaFileUpload(file);
+      if(pr.errore){toast(pr.errore);ko++;continue;}
+      const safe=String(pr.nome||"documento").replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path=sbUid+"/fornitori/"+docFornId+"/"+Date.now()+"_"+safe;
+      const {error:up}=await sb.storage.from("gestionale-foto").upload(path,pr.file);
+      if(up){toast("Non caricato: "+up.message);ko++;continue;}
+      const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,fornitore_id:docFornId,tipo:"doc_fornitore",operatore:"Capo",storage_path:path,nome_file:pr.nome||safe});
+      if(ins){
+        const em=(ins.message||"");
+        toast(/fornitore_id/i.test(em)&&/column|schema cache/i.test(em)
+          ?"Documento non registrato: esegui sql/gest-fornitori-plus.sql su Supabase"
+          :"Non registrato: "+em);
+        ko++;continue;
+      }
+      ok++;
+    }
+    if(ok)toast(ok+(ok===1?" documento caricato ✔":" documenti caricati ✔"));
+    renderDocForn();
+  }
+  async function fornDocElimina(id){
+    if(!gconfirm("Eliminare questo documento?"))return;
+    const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    const {data:okD,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!okD||!okD.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
+    if(r&&r.storage_path){try{await sb.storage.from("gestionale-foto").remove([r.storage_path]);}catch(e){}}
+    renderDocForn();toast("Documento eliminato");
+  }
+
+  let _tiRisultati=[];
   function fornForm(f){
-    const isNew=!f;f=f||{};
+    const isNew=!(f&&f.id);f=f||{};
     const cats=FORN_CATS.map(c=>'<option value="'+c+'" '+(c===(f.categoria||"")?'selected':'')+'>'+c+'</option>').join("");
-    openSheet('<h3>'+(isNew?'Nuovo fornitore':'Modifica fornitore')+'</h3>'
+    openSheetGrande(isNew?'Nuovo fornitore':'Modifica fornitore',
+      '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Chi è</div>'
       +'<div class="field"><label>Nome</label><input id="fo-nome" value="'+esc(f.nome||'')+'" placeholder="Es. Edil Market Rossi"></div>'
       +'<div class="field"><label>Tipo</label><select id="fo-cat"><option value="">— scegli —</option>'+cats+'</select></div>'
       +'<div class="row2">'
       +'<div class="field"><label>Telefono</label><input id="fo-tel" value="'+esc(f.telefono||'')+'" placeholder="Es. 340 1234567"></div>'
       +'<div class="field"><label>Email</label><input id="fo-email" value="'+esc(f.email||'')+'" placeholder="ordini@..."></div></div>'
+      +'<div class="row2">'
       +'<div class="field"><label>Partita IVA</label><input id="fo-piva" value="'+esc(f.piva||'')+'"></div>'
-      +'<div class="field"><label>Indirizzo</label><input id="fo-ind" value="'+esc(f.indirizzo||'')+'"></div>'
+      +'<div class="field"><label>Indirizzo</label><input id="fo-ind" value="'+esc(f.indirizzo||'')+'" placeholder="Via, città"></div></div>'
       +'<div class="field"><label>Note</label><textarea id="fo-note" placeholder="Es. chiedere di Marco, sconto 10% sui laterizi">'+esc(f.note||'')+'</textarea></div>'
-      +'<div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>'
-      +'<button class="btn-primary b-save" data-action="save-forn" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button></div>');
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">🔗 Collegamento TrovaImpresa</div>'
+      +'<p class="sh-nota" style="margin-top:0">Se questa rivendita è iscritta a TrovaImpresa, collegala: ti prendi i suoi contatti con un clic, e in futuro i suoi preventivi arriveranno direttamente qui.</p>'
+      +'<input type="hidden" id="fo-tid" value="'+esc(f.trovaimpresa_id||'')+'">'
+      +'<div id="fo-ti-stato">'+(f.trovaimpresa_id
+          ?'<div class="ff-riass" style="background:var(--ok-bg);border-color:var(--ok);color:var(--ok)">✓ Collegato a un negozio di TrovaImpresa <button type="button" class="btn btn-sm" data-action="forn-ti-scollega" style="margin-left:8px">Scollega</button></div>'
+          :'')+'</div>'
+      +'<div class="row2" style="align-items:end">'
+      +'<div class="field" style="margin-bottom:0"><label>Cerca il negozio</label><input id="fo-ti-q" placeholder="Nome della rivendita..."></div>'
+      +'<button type="button" class="btn" data-action="forn-ti-cerca" style="height:46px">🔎 Cerca</button></div>'
+      +'<div id="fo-ti-risultati" style="margin-top:10px"></div>'
+      +'</div>'
+      +'</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="save-forn" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button>');
+  }
+  async function fornTiCerca(){
+    const q=($("#fo-ti-q")&&$("#fo-ti-q").value.trim())||"";
+    const box=$("#fo-ti-risultati");if(!box)return;
+    if(q.length<2){box.innerHTML='<div class="campo-aiuto">Scrivi almeno 2 lettere del nome.</div>';return;}
+    box.innerHTML='<div class="loading">Cerco su TrovaImpresa...</div>';
+    const {data,error}=await sb.from("imprese")
+      .select("id,nome_attivita,citta,provincia,telefono,email,indirizzo")
+      .eq("tipo","negozio").or("is_test.is.null,is_test.eq.false")
+      .ilike("nome_attivita","%"+q+"%").limit(8);
+    if(error){box.innerHTML='<div class="campo-aiuto" style="color:var(--attesa)">Ricerca non riuscita, riprova.</div>';return;}
+    _tiRisultati=data||[];
+    if(!_tiRisultati.length){box.innerHTML='<div class="campo-aiuto">Nessun negozio trovato con questo nome. Puoi comunque salvare il fornitore senza collegamento.</div>';return;}
+    box.innerHTML=_tiRisultati.map((r,i)=>'<div class="doc-riga" style="cursor:pointer" data-action="forn-ti-scegli" data-i="'+i+'">'
+      +'<span class="doc-ico">🏪</span>'
+      +'<span class="doc-nome">'+esc(r.nome_attivita||"Negozio")+'<small>'+esc([r.citta,r.provincia].filter(Boolean).join(" ("))+(r.provincia?")":"")+'</small></span>'
+      +'<button type="button" class="btn">Collega</button></div>').join("");
+  }
+  function fornTiScegli(i){
+    const r=_tiRisultati[+i];if(!r)return;
+    if($("#fo-tid"))$("#fo-tid").value=r.id;
+    /* i campi vuoti si riempiono coi dati del negozio; quelli già scritti non si toccano */
+    if($("#fo-nome")&&!$("#fo-nome").value.trim())$("#fo-nome").value=r.nome_attivita||"";
+    if($("#fo-tel")&&!$("#fo-tel").value.trim())$("#fo-tel").value=r.telefono||"";
+    if($("#fo-email")&&!$("#fo-email").value.trim())$("#fo-email").value=r.email||"";
+    if($("#fo-ind")&&!$("#fo-ind").value.trim())$("#fo-ind").value=[r.indirizzo,r.citta].filter(Boolean).join(", ");
+    const st=$("#fo-ti-stato");
+    if(st)st.innerHTML='<div class="ff-riass" style="background:var(--ok-bg);border-color:var(--ok);color:var(--ok)">✓ Collegato a <b>'+esc(r.nome_attivita||"negozio")+'</b> <button type="button" class="btn btn-sm" data-action="forn-ti-scollega" style="margin-left:8px">Scollega</button></div>';
+    const box=$("#fo-ti-risultati");if(box)box.innerHTML="";
+    toast("Negozio collegato: ricordati di salvare ✔");
   }
   async function saveForn(id){
     const nome=$("#fo-nome").value.trim();if(!nome){toast("Scrivi il nome del fornitore");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const row={nome,categoria:$("#fo-cat").value||null,telefono:$("#fo-tel").value.trim()||null,
       email:$("#fo-email").value.trim()||null,piva:$("#fo-piva").value.trim()||null,
-      indirizzo:$("#fo-ind").value.trim()||null,note:$("#fo-note").value.trim()||null};
-    const {data,error}=id
+      indirizzo:$("#fo-ind").value.trim()||null,note:$("#fo-note").value.trim()||null,
+      trovaimpresa_id:($("#fo-tid")&&$("#fo-tid").value)||null};
+    let {data,error}=id
       ?await sb.from("gest_fornitori").update(row).eq("id",id).eq("user_id",sbUid).select("id")
       :await sb.from("gest_fornitori").insert(Object.assign({},row,{user_id:sbUid,mestiere_id:curMestiere()})).select("id");
+    let avvisoTi=false;
+    if(error&&/trovaimpresa_id/i.test(error.message||"")&&/column|schema cache/i.test(error.message||"")){
+      delete row.trovaimpresa_id;
+      ({data,error}=id
+        ?await sb.from("gest_fornitori").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+        :await sb.from("gest_fornitori").insert(Object.assign({},row,{user_id:sbUid,mestiere_id:curMestiere()})).select("id"));
+      if(!error)avvisoTi=true;
+    }
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-    closeSheet();renderFornitori();rinfresca("riepilogo");toast(id?"Aggiornato ✔":"Fornitore aggiunto ✔");
+    closeSheet();renderFornitori();rinfresca("riepilogo");
+    toast(avvisoTi?"Salvato, ma il collegamento TrovaImpresa no: manca la migrazione SQL (gest-fornitori-plus)":(id?"Aggiornato ✔":"Fornitore aggiunto ✔"));
   }
   async function fattfForm(f){
-    const isNew=!f;f=f||{};
+    const isNew=!(f&&f.id);f=f||{};
     if(isNew&&!fornCache.length){toast("Prima aggiungi un fornitore");fornForm(null);return;}
     const fops=fornCache.map(x=>'<option value="'+x.id+'" '+(String(f.fornitore_id||'')===String(x.id)?'selected':'')+'>'+esc(x.nome)+'</option>').join("");
     let lavOps='<option value="">— nessuno —</option>';
@@ -6991,7 +7187,23 @@
     if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
     /* ---- Fornitori ---- */
     if(a==="new-forn")return fornForm(null);
+    if(a==="forn-scheda")return fornScheda(id);
     if(a==="edit-forn")return fornForm(fornCache.find(x=>String(x.id)===String(id)));
+    if(a==="edit-forn-full"){
+      const {data:rf}=await sb.from("gest_fornitori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+      return fornForm(rf||fornCache.find(x=>String(x.id)===String(id)));
+    }
+    if(a==="forn-ti-cerca")return fornTiCerca();
+    if(a==="forn-ti-scegli")return fornTiScegli(t.dataset.i);
+    if(a==="forn-ti-scollega"){
+      if($("#fo-tid"))$("#fo-tid").value="";
+      const st=$("#fo-ti-stato");if(st)st.innerHTML="";
+      toast("Collegamento rimosso: ricordati di salvare");return;
+    }
+    if(a==="new-fattf-forn")return fattfForm({fornitore_id:id});
+    if(a==="forn-doc")return fornDocApri(id);
+    if(a==="forn-doc-scegli"){const i=$("#forn-doc-file");if(i)i.click();return;}
+    if(a==="forn-doc-del")return fornDocElimina(id);
     if(a==="save-forn")return saveForn(id||null);
     if(a==="del-forn"){
       if(!sbUid){toast("Devi essere loggato");return;}
@@ -7000,7 +7212,7 @@
       const {data:okDf2,error}=await sb.from("gest_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDf2||!okDf2.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
-      renderFornitori();rinfresca("riepilogo");toast("Fornitore eliminato");return;
+      closeSheet();renderFornitori();rinfresca("riepilogo");toast("Fornitore eliminato");return;
     }
     if(a==="new-fattf")return fattfForm(null);
     if(a==="edit-fattf")return fattfForm(fattfCache.find(x=>String(x.id)===String(id)));
@@ -7020,7 +7232,9 @@
       const {data:okFs,error}=await sb.from("gest_fatture_fornitori").update(patch).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okFs||!okFs.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-      renderFornitori();rinfresca("riepilogo");toast(v==="pagata"?"Segnata pagata ✔":"Riaperta");return;
+      renderFornitori();rinfresca("riepilogo");
+      if(t.dataset.forn)fornScheda(t.dataset.forn);   /* dalla scheda: si riapre aggiornata */
+      toast(v==="pagata"?"Segnata pagata ✔":"Riaperta");return;
     }
     if(a==="quick-cli")return cliForm(null);
     if(a==="close")return closeSheet();
@@ -7060,6 +7274,7 @@
   if($("#lf-video-file"))$("#lf-video-file").onchange=e=>{uploadLavoroVideo(e.target.files);e.target.value="";};
   if($("#fatt-pdf-file"))$("#fatt-pdf-file").onchange=e=>{uploadFatturaPdf(e.target.files[0]);e.target.value="";};
   if($("#cli-doc-file"))$("#cli-doc-file").onchange=e=>{uploadDocCliente(e.target.files);e.target.value="";};
+  if($("#forn-doc-file"))$("#forn-doc-file").onchange=e=>{uploadDocFornitore(e.target.files);e.target.value="";};
 
   load().then(()=>{if(!cur)renderLanding();});
 })();
