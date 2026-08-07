@@ -215,21 +215,22 @@
     .section h2 { font-size: 1.5rem; }
   }
 </style>
+<link rel="stylesheet" href="/css/mobile.css?v=3">
 </head>
 <body>
 
 <!-- NAVBAR -->
 <nav class="navbar">
   <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
-  <a href="/#registrati" class="nav-cta">Registrati gratis</a>
+  <a href="#scegli" class="nav-cta">Registrati gratis</a>
 </nav>
 
 <!-- HERO -->
 <header class="hero">
   <div class="free-badge">✓ 100% Gratis — Nessun costo di iscrizione</div>
   <h1>Tutto quello che ottieni<br>quando ti registri su TrovaImpresa</h1>
-  <p>Una pagina professionale con le foto dei tuoi lavori, chat diretta coi clienti, gestionale e preventivi. Visibile in 106 città italiane.</p>
-  <a href="/#registrati" class="btn-primary">Registrati gratis ora</a>
+  <p>Il gestionale per lavorare (preventivi, fatture, scadenze, cantieri) <b>più</b> la tua pagina pubblica con le foto dei lavori e le recensioni. Tutto gratis, in pochi minuti.</p>
+  <a href="#scegli" class="btn-primary">Registrati gratis ora</a>
 </header>
 
 <!-- DEMO INTERATTIVA TROVAIMPRESA -->
@@ -252,8 +253,8 @@
       </div>
       <div class="card b-green">
         <div class="icon">💬</div>
-        <h3>Chat diretta coi clienti</h3>
-        <p>I clienti ti scrivono direttamente dal sito. Rispondi, mandi preventivi e gestisci tutto da un unico posto.</p>
+        <h3>Le richieste arrivano dove le vedi</h3>
+        <p>Quando un cliente ti scrive o chiede un preventivo, ti arriva un'email e te lo ritrovi nel pannello: non devi stare attaccato al sito per non perdere una richiesta.</p>
       </div>
       <div class="card b-blue">
         <div class="icon">🛠️</div>
@@ -262,8 +263,8 @@
       </div>
       <div class="card b-orange">
         <div class="icon">🌍</div>
-        <h3>Visibile in 106 città</h3>
-        <p>La tua azienda compare nelle ricerche dei clienti in tutta Italia, con la tua zona in evidenza.</p>
+        <h3>Ci sei quando ti cercano</h3>
+        <p>Quando un cliente cerca nella tua città, la tua azienda è tra i risultati — con le tue foto, le recensioni e il pulsante per chiederti un preventivo. Siamo un sito giovane e cresciamo insieme alla tua zona.</p>
       </div>
     </div>
   </div>
@@ -306,11 +307,30 @@
   </div>
 </section>
 
+<!-- Scegliere qui il tipo di attività: prima tutti i pulsanti mandavano sulla
+     home (pesante), dove bisognava ritrovare la sezione e scegliere di nuovo. -->
+<section id="scegli" style="padding:44px 20px;background:#f7f9fa;border-top:1px solid #e5e7eb">
+  <h2 style="text-align:center;font-size:26px;margin:0 0 8px;color:#0a2a4d">Iniziamo: che attività hai?</h2>
+  <p style="text-align:center;font-size:17px;color:#555;margin:0 0 24px">Scegli e vai dritto al modulo. Ci vogliono un paio di minuti.</p>
+  <div style="max-width:620px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+    <a href="registrazione-artigiano.html" style="display:block;background:#fff;border:2px solid #0066ff;border-radius:14px;padding:18px;text-decoration:none;color:#0a2a4d">
+      <b style="font-size:19px">🔧 Artigiano</b><br><span style="font-size:15.5px;color:#555">Idraulico, elettricista, imbianchino, muratore…</span></a>
+    <a href="registrazione-impresa.html" style="display:block;background:#fff;border:2px solid #0066ff;border-radius:14px;padding:18px;text-decoration:none;color:#0a2a4d">
+      <b style="font-size:19px">🏗️ Impresa edile</b><br><span style="font-size:15.5px;color:#555">Cantieri e ristrutturazioni complete</span></a>
+    <a href="registrazione-negozio.html" style="display:block;background:#fff;border:2px solid #0066ff;border-radius:14px;padding:18px;text-decoration:none;color:#0a2a4d">
+      <b style="font-size:19px">🏪 Negozio edile</b><br><span style="font-size:15.5px;color:#555">Materiali, ferramenta, showroom, noleggio</span></a>
+    <a href="registrazione-professionista.html" style="display:block;background:#fff;border:2px solid #0066ff;border-radius:14px;padding:18px;text-decoration:none;color:#0a2a4d">
+      <b style="font-size:19px">📐 Professionista</b><br><span style="font-size:15.5px;color:#555">Geometra, architetto, ingegnere, perito</span></a>
+  </div>
+  <p style="text-align:center;font-size:15.5px;color:#666;margin:20px auto 0;max-width:520px;line-height:1.55">
+    📬 Dopo il modulo ti arriva <b>una mail di conferma</b>: aprila e clicca il link (guarda anche nello SPAM). Solo così il profilo diventa attivo.</p>
+</section>
+
 <!-- CTA FINALE -->
 <section class="cta-final">
   <h2>Pronto a farti trovare?</h2>
   <p>La registrazione è gratuita e ci vogliono pochi minuti.</p>
-  <a href="/#registrati" class="btn-primary">Registrati gratis ora</a>
+  <a href="#scegli" class="btn-primary">Registrati gratis ora</a>
   <div class="note">Nessuna carta di credito · Nessun costo di iscrizione</div>
 </section>
 
@@ -321,5 +341,8 @@
   <a href="/index.html">Home</a>
 </footer>
 
+<!-- mancava del tutto: senza questo, sulla pagina di atterraggio della campagna
+     Meta non c'e' consenso, quindi niente pixel e niente conversioni tracciate -->
+<script src="/cookie-banner.js"></script>
 </body>
 </html>

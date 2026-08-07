@@ -134,18 +134,8 @@
             <input type="text" id="civico" placeholder="Es. 1">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group" style="max-width:110px;">
-            <label>CAP</label>
-            <input type="text" id="cap" placeholder="Es. 00100" maxlength="5">
-          </div>
-          <div class="form-group">
-            <label>Città <span class="required">*</span></label>
-            <select id="citta" disabled required>
-              <option value="">-- Seleziona città --</option>
-            </select>
-          </div>
-        </div>
+        <!-- Ordine corretto: Regione → Provincia → Città (prima la Città veniva
+             per prima ma era bloccata: sembrava un sito rotto) -->
         <div class="form-group">
           <label>Regione <span class="required">*</span></label>
           <select id="regione" required>
@@ -153,10 +143,22 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Provincia</label>
+          <label>Provincia <span class="required">*</span></label>
           <select id="provincia" disabled>
-            <option value="">-- Seleziona provincia --</option>
+            <option value="">-- prima scegli la regione --</option>
           </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Città <span class="required">*</span></label>
+            <select id="citta" disabled required>
+              <option value="">-- prima scegli la provincia --</option>
+            </select>
+          </div>
+          <div class="form-group" style="max-width:110px;">
+            <label>CAP</label>
+            <input type="text" id="cap" placeholder="Es. 00100" maxlength="5">
+          </div>
         </div>
         <div class="form-group">
           <label>Descrizione breve</label>
