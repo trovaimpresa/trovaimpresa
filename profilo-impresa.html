@@ -663,9 +663,24 @@ function caricaLeaflet(){
 <script>
 const SU='https://nacvrsgkyfavykxjxszu.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
-const sc=window.supabase.createClient(SU,SK);
+/* Se la libreria Supabase non arriva (CDN bloccata da un blocco pubblicita' del
+   telefono, wifi pubblico, rete lenta) prima moriva TUTTA la pagina, e restava
+   su "Caricamento...". Non serviva: i dati della scheda (nome, telefono,
+   indirizzo, mappa) arrivano da una fetch normale, non da questa libreria.
+   Ora la scheda si vede lo stesso; solo il modulo del preventivo avvisa e
+   rimanda alla telefonata. */
+const sc=(window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SU,SK) : null;
 let sessioneUtente = null;
-sc.auth.onAuthStateChange((event, session) => { sessioneUtente = session; });
+if(sc) sc.auth.onAuthStateChange((event, session) => { sessioneUtente = session; });
+
+/* messaggio unico quando la libreria manca e serviva per scrivere sul database */
+function _senzaLibreria(){
+  var tel=document.getElementById('btn-tel');
+  var num=tel? (tel.getAttribute('href')||'').replace('tel:','') : '';
+  return 'Non riesco a inviare la richiesta in questo momento (connessione o blocco pubblicit\u00e0 del telefono).'
+    + (num? ' Puoi chiamare direttamente il ' + num + '.' : ' Riprova fra un attimo.');
+}
 
 function formattaMestiere(s){if(!s)return '';if(s==='amministratore_condominio')return 'Amministratore di condominio';const t=String(s).replace(/_/g,' ');return t.charAt(0).toUpperCase()+t.slice(1);}
 
@@ -1001,6 +1016,7 @@ async function submitIncarico(){
   const telefono=document.getElementById('inc-telefono').value.trim();
   const email=document.getElementById('inc-email').value.trim();
   if(!prestazione||!comune||!nome||!telefono){setMsg('Compila prestazione, comune, nome e telefono.',false);return;}
+  if(!sc){setMsg(_senzaLibreria(),false);return;}
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
     const files=document.getElementById('inc-file').files;
@@ -1082,6 +1098,7 @@ async function submitPreventivo(){
   if(telefonoV.replace(/[^0-9]/g,'').length<8) return stop('Il numero di telefono sembra incompleto. Controllalo.','prev-telefono');
   if(!email)      return stop('Scrivi la tua email: ci arriva la copia della richiesta.','prev-email');
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return stop('L\'email non sembra scritta bene. Controllala.','prev-email');
+  if(!sc) return stop(_senzaLibreria());
 
   btn.disabled=true;btn.textContent='⏳ Invio...';
   try{
@@ -1163,7 +1180,7 @@ function estraiVideoEmbed(url){
 async function caricaVideoLavori(id){
   const card=document.getElementById('card-video-lavori');
   const grid=document.getElementById('video-lavori-grid');
-  if(!card||!grid)return;
+  if(!card||!grid||!sc)return;   /* senza libreria si salta, non si rompe */
   try{
     const {data,error}=await sc.from('video_lavori').select('*').eq('impresa_id',id).order('created_at',{ascending:false});
     if(error||!Array.isArray(data)||!data.length)return;
@@ -1195,7 +1212,7 @@ async function caricaVideoLavori(id){
 async function caricaFotoLavori(ownerId){
   const grid=document.getElementById('foto-lavori-grid');if(!grid)return;
   const card=grid.closest('.card');
-  if(!ownerId){if(card)card.style.display='none';return}
+  if(!ownerId||!sc){if(card)card.style.display='none';return}
   const {data,error}=await sc.from('lavori_foto').select('*').eq('owner_id',ownerId).eq('pubblico',true).order('created_at',{ascending:false});
   const lavori=Array.isArray(data)?data:[];
   if(error||!lavori.length){if(card)card.style.display='none';return}
@@ -1209,7 +1226,7 @@ async function caricaFotoLavori(ownerId){
 async function caricaVetrina(userId){
   const grid=document.getElementById('vetrina-prodotti-grid');
   const card=document.getElementById('card-vetrina-prodotti');
-  if(!grid||!card||!userId)return;
+  if(!grid||!card||!userId||!sc)return;
   const {data,error}=await sc.from('vetrina_negozio').select('*').eq('negozio_id',userId).eq('in_vetrina',true).order('created_at',{ascending:false});
   if(error||!data||!data.length)return;
   function escHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}

@@ -120,6 +120,19 @@
 @media (max-width: 700px) {
   table { display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 }
+
+  /* CTA subito sotto la risposta rapida: e' li' che si ferma la maggior parte
+     dei lettori (ha la cifra, non gli serve altro). Prima quel punto era un
+     vicolo cieco: nessun link, il marketplace stava 5 schermate piu' giu'. */
+  .answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;
+    padding:18px 20px;margin:-6px 0 26px}
+  .answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+  .answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+  .answer-cta a{display:block;text-align:center;background:#FF6B35;color:#fff;
+    text-decoration:none;font-weight:800;font-size:16.5px;padding:15px 18px;
+    border-radius:12px;box-shadow:0 4px 14px rgba(255,107,53,.26)}
+  .answer-cta a:hover{background:#e85f2c}
+  .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
 </style>
 </head>
 <body>
@@ -145,6 +158,13 @@
       <span class="price-big">il 50% sulla prima casa, il 36% sulle altre</span>
       su una spesa massima di <strong>96.000 € per unità immobiliare</strong>, recuperati in <strong>10 rate annuali</strong> uguali. Devi pagare con bonifico parlante. Sotto trovi come funziona nel dettaglio e un calcolatore di quanto ti torna.
     </div>
+    <div class="answer-cta">
+      <b>Quanto costa a casa tua?</b>
+      <p>I prezzi qui sopra sono medie nazionali. Quello vero dipende dalla tua casa, dalla tua zona e da come è messa adesso: il modo più veloce per saperlo è chiederlo alle imprese della tua città.</p>
+      <a href="/cerca-imprese.html">Chiedi preventivi gratis nella tua città →</a>
+      <small>Gratis per chi cerca, senza impegno. Risposta di solito in 24-48 ore.</small>
+    </div>
+
 
     <p class="lead">Il bonus ristrutturazione è uno sconto sulle tasse (una detrazione IRPEF), non un contributo che ti arriva sul conto. Funziona così: fai i lavori, e ogni anno per 10 anni ti riprendi un pezzo della spesa scalandolo dalle tasse che devi pagare. Se non paghi abbastanza IRPEF, la parte non usata di quell'anno si perde (non si recupera dopo).</p>
 

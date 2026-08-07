@@ -210,11 +210,26 @@
     });
   }
 
-  // index.html?citta=X&vai=pagina-scelta.html
+  // index.html?citta=X&vai=pagina-scelta.html[&mest=Cartongesso]
+  //
+  // AGGIORNAMENTO 8 agosto 2026 (2): prima qui si buttava via tutto quello che
+  // stava dopo il "?" del link. Le guide che mandano a
+  // "cerca-artigiani.html?mestiere=Cartongesso" perdevano il mestiere per
+  // strada: chi aveva appena letto la guida sul cartongesso si ritrovava
+  // l'elenco di TUTTI gli artigiani della citta' e doveva rifiltrare a mano.
+  // Ora il mestiere viaggia come &mest= e la home citta' lo rimette nel link.
   function homeConMeta(citta, url) {
     var base = 'index.html?citta=' + encodeURIComponent(citta);
-    var meta = String(url || '').split('?')[0].split('/').pop();
-    return meta ? base + '&vai=' + encodeURIComponent(meta) : base;
+    var pezzi = String(url || '').split('?');
+    var meta = pezzi[0].split('/').pop();
+    if (!meta) return base;
+    base += '&vai=' + encodeURIComponent(meta);
+    var mest = '';
+    try {
+      if (pezzi[1]) mest = new URLSearchParams(pezzi[1]).get('mestiere') || '';
+    } catch (e) { mest = ''; }
+    if (mest) base += '&mest=' + encodeURIComponent(mest);
+    return base;
   }
 
   // ---------------------------------------------------------------- aggancio

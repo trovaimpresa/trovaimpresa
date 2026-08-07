@@ -1544,12 +1544,14 @@
   function avvia(){
     var p=new URLSearchParams(location.search);
     var vai=p.get('vai'), citta=(p.get('citta')||'').trim();
+    var mest=(p.get('mest')||'').trim();   /* mestiere scelto nella guida */
     if(!vai||!ETICHETTE[vai]||!citta)return;
     var a=document.getElementById('riprendi-ricerca');
     var t=document.getElementById('riprendi-testo');
     if(!a||!t)return;
-    a.href=vai+'?citta='+encodeURIComponent(citta);
-    t.textContent=ETICHETTE[vai]+' di '+citta;
+    a.href=vai+'?citta='+encodeURIComponent(citta)+(mest?'&mestiere='+encodeURIComponent(mest):'');
+    t.textContent=mest ? (ETICHETTE[vai]+' per '+mest+' a '+citta)
+                       : (ETICHETTE[vai]+' di '+citta);
     a.style.display='flex';
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',avvia);else avvia();

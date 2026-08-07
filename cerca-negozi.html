@@ -304,6 +304,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/geo-italia.js"></script>
 <script>
+  /* Se la libreria Supabase non arriva (CDN bloccata da un blocco pubblicita' del
+     telefono, wifi pubblico, rete lenta) prima la pagina moriva qui con
+     "supabase is not defined" e restava su "Ricerca in corso..." per sempre:
+     il cliente non capiva e se ne andava. Ora lo dice e da' un pulsante. */
+  if(!window.supabase||!window.supabase.createClient){
+    var _ris=document.getElementById('risultati');
+    if(_ris)_ris.innerHTML='<div class="no-results"><h3>Non riesco a caricare l&rsquo;elenco</h3>'+
+      '<p>Pu&ograve; essere la connessione oppure un blocco pubblicit&agrave; attivo sul telefono. Riprova fra un attimo.</p>'+
+      '<button type="button" onclick="location.reload()" style="background:#0066ff;color:#fff;border:none;border-radius:12px;padding:14px 22px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px">Riprova</button></div>';
+    var _rcz=document.getElementById('risultatiCount'); if(_rcz)_rcz.textContent='';
+    throw new Error('supabase-js non disponibile');
+  }
   const supabaseClient=supabase.createClient('https://nacvrsgkyfavykxjxszu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic');
   let tipoScelto='tutti',cittaScelta='',valutazioneMin=0;
   let cittaLat=null,cittaLng=null,cittaGeocoded='';

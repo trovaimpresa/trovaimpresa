@@ -678,13 +678,124 @@ Regola SEO rispettata: **mai toccati** title, meta, canonical, JSON-LD, sitemap.
 - **Blocco B** (registrazioni, login, i 4 pannelli) e **Blocco C** (blog, guide, pagine di
   servizio): non ancora revisionati.
 
+## SITO — BLOCCO B: registrazioni e login (8 agosto 2026)
+Percorso dell'IMPRESA, quello che porta le iscrizioni con la campagna Meta.
+
+### Login e recupero password
+- `login-impresa.html`: `traduciSupabase(msg)` → `{testo, rimanda}`. Gli errori Supabase in
+  inglese diventano italiano; quando l'errore è "email non confermata" compare il pulsante
+  **"📨 Rimandami l'email di conferma"** (`rimandaConferma()` con `auth.resend({type:'signup'})`).
+  Prima chi non trovava la mail di conferma restava fuori per sempre.
+- `reset-password.html`: prima aspettava SOLO l'evento `PASSWORD_RECOVERY`. Con link scaduto,
+  già usato o col flusso nuovo `?code=` (che emette `SIGNED_IN`) la pagina restava su
+  "⏳ Verifica del link in corso..." per sempre. Ora `decidi(ok)` accetta anche
+  `SIGNED_IN`/`INITIAL_SESSION`, e dopo **6 secondi** senza risposta controlla la sessione e
+  decide comunque. Errori `updateUser` tradotti (niente più "New password should be different").
+
+### I 4 form di registrazione: accorciati E finalmente salvano
+- **Accorciati**: i campi facoltativi sono dentro blocchi `<details class="extra">`
+  ("Aggiungi altri dettagli") — HTML nativo, zero rischio JS. Sopra restano solo i campi
+  che servono davvero per iscriversi.
+- **`mostraSchermataConferma(email)`**: pannello a tutta pagina dopo il signUp, con il
+  pulsante per rimandare la mail di conferma. Prima si veniva sbattuti su login-impresa.
+- `emailRedirectTo: window.location.origin + '/login-impresa.html'` e **AbortController a 25s**
+  sul signUp (prima, su rete lenta, il pulsante restava "⏳ Invio..." all'infinito).
+- **E ora SALVANO**: `sql/trigger-campi-extra.sql` (già eseguito) aggiunge il trigger
+  `on_auth_user_created_extra` → function `completa_profilo_extra()`. Gira **dopo**
+  `on_auth_user_created` (ordine alfabetico dei trigger a parità di evento) e completa la
+  riga con: `nome_negozio, tipo_negozio, mestieri` (2° e 3° mestiere dell'artigiano) e i
+  campi facoltativi `piva, indirizzo, cap, descrizione, whatsapp, sito_web, specializzazioni,
+  zone, anno_fondazione, dipendenti, anni_esperienza`.
+  - **NON tocca `crea_profilo_impresa`**: è il pezzo più delicato del sito.
+  - Ha `exception when others then return new;`: se qualcosa va storto la registrazione
+    NON si blocca. Meglio un campo mancante che un'iscrizione persa.
+  - ⚠️ Il bug che ha risolto: il form del NEGOZIO obbligava a scegliere la categoria
+    (Ferramenta, Termoidraulica...) ma `tipo_negozio` non arrivava mai nel profilo. La
+    ricerca negozi filtra proprio su quella colonna: **ogni negozio iscritto era invisibile**
+    quando un cliente filtrava per la sua categoria.
+
+### ⚠️ TRAPPOLA: i riferimenti orfani quando si toglie un pezzo dal form
+Togliendo il finto caricamento del logo era rimasto
+`document.getElementById('logo-input').addEventListener(...)`: su un id inesistente è un
+TypeError che avrebbe **ammazzato TUTTE le registrazioni**. Preso col grep prima di consegnare.
+Stessa cosa era già successa con `#stat-piano` nel profilo (vedi Blocco A).
+**REGOLA**: quando si rimuove un elemento da una pagina, `grep` dell'id in tutto il file
+prima di consegnare, e provare la pagina in un browser vero.
+
+## SITO — BLOCCO C: blog, guide e pagine di servizio (8 agosto 2026)
+28 file: `blog.html`, `articolo.html`, `calcolatori.html`, `costi-ristrutturazione.html`,
+`controlla-preventivo-bagno.html` e le 23 guide.
+
+### Passo 1 — le guide non erano collegate al marketplace
+- **`js/citta-obbligatoria.js` non era caricato su NESSUNA guida**: solo `index.html` lo
+  aveva. Quindi ogni pulsante "Trova un artigiano" in fondo alle guide portava su una
+  ricerca **vuota** che chiedeva di ridigitare la città, proprio nel momento in cui il
+  lettore aveva appena letto il prezzo. Aggiunto su tutte e 28 prima di `</body>`.
+  **Era il buco più costoso di tutto il Blocco C.**
+- **Footer senza Privacy / Cookie / Termini su 26 guide su 28**: c'era solo una riga di
+  disclaimer. Ora tutte hanno Chi siamo · Contatti · Tutte le guide · Per le imprese +
+  Privacy · Cookie · Termini + copyright (e il commento pronto per la P.IVA).
+- **Tabelle prezzi che spingevano la pagina di lato su telefono**: `table{display:block;
+  overflow-x:auto}` sotto i 700px. Sbordo misurato dopo: 0px su tutte e 28.
+- **Numeri senza separatore**: `toLocaleString('it-IT',{useGrouping:'always'})` — i
+  calcolatori scrivevano "6600" invece di "6.600".
+- **`blog.html` e `articolo.html` morivano** se la libreria Supabase non arrivava
+  (`Cannot read properties of undefined (reading 'createClient')`) e restavano su
+  "Caricamento..." per sempre. Ora `blog.html` ha `GUIDE_RISERVA` + `mostraRiserva()`:
+  mostra comunque l'elenco delle 26 guide, che **sono file HTML statici e non hanno
+  bisogno del database**. `articolo.html` dà un pulsante "Vai a tutte le guide".
+  Tolto anche `<title>Caricamento... | TrovaImpresa</title>`, che è il titolo che finiva
+  su Google e nelle anteprime WhatsApp.
+
+### Passo 2 — il CTA dentro la risposta rapida
+- Il box `.answer` ("Risposta rapida", con la cifra) è **dove si ferma la maggior parte dei
+  lettori**: aveva il prezzo e zero link, il marketplace stava 5 schermate più giù.
+  Aggiunto `.answer-cta` subito sotto, su 23 guide: "Quanto costa a casa tua?" + pulsante
+  arancione "Chiedi preventivi gratis nella tua città". Su
+  `come-trovare-clienti-impresa-edile.html` (guida B2B) il CTA porta invece a
+  `registrazione-impresa.html`.
+- **Il mestiere ora sopravvive al giro dalla home città**: `homeConMeta()` buttava via tutto
+  quello che stava dopo il "?" del link, quindi
+  `cerca-artigiani.html?mestiere=Cartongesso` perdeva il mestiere per strada. Ora viaggia
+  come `&mest=` e `index.html` lo rimette nel link del pulsante arancione, che dice
+  "Vedi gli artigiani per Cartongesso a Roma".
+  ⚠️ **Le guide NON usano ancora `?mestiere=`**: con ~49 imprese iscritte un filtro stretto
+  darebbe spesso zero risultati, e un elenco vuoto è peggio di un elenco generico.
+  L'impianto è pronto: quando le imprese saranno di più, basta aggiungere `?mestiere=X`
+  al link del CTA nelle guide. Valori validi = le `<option>` di cerca-artigiani/cerca-imprese.
+- `cerca-imprese.html`: il blocco che leggeva `?mestiere=` cercava dei `.chip` che in quella
+  pagina **non esistono** (il filtro è una tendina). Ad allineare la tendina ci pensa già
+  `/js/sync-filtro.js`, caricato su tutte e 4 le pagine cerca — quindi qui è rimasto solo
+  il filtro vero. Aggiunto `id="mestiereSelect"` per coerenza con cerca-artigiani.
+
+### Passo 2b — le 4 pagine cerca e il profilo non muoiono più senza la CDN
+Trovato provando le guide: se `cdn.jsdelivr.net` non risponde (blocco pubblicità del
+telefono, wifi pubblico, rete lenta) `supabase.createClient` va in errore e **tutta la
+pagina muore**: le 4 `cerca-*` restavano su "Ricerca in corso..." per sempre.
+- Guardia prima di `const supabaseClient = ...` su tutte e 4: messaggio chiaro
+  ("Non riesco a caricare l'elenco... può essere un blocco pubblicità") + pulsante **Riprova**.
+- `profilo-impresa.html`: `sc` può essere `null`. **I dati della scheda arrivano da una
+  `fetch` normale, non dalla libreria**, quindi la scheda (nome, telefono, indirizzo, mappa,
+  barra CTA) ora si vede lo stesso. Le letture facoltative (video, foto lavori, vetrina)
+  si saltano; i due form (preventivo e incarico) avvisano con `_senzaLibreria()` e
+  suggeriscono di **chiamare il numero**, invece di sembrare rotti.
+
+### Blocco C: cosa resta
+- TOC (indice) nelle guide lunghe; portare le guide vecchie (tetto, cappotto, imbiancare,
+  fotovoltaico, bagno) al modello di `quanto-costa-parete-cartongesso.html`.
+- `contatti.html`: posizione del messaggio, validazione email, consenso privacy.
+- `prezzi.html`: chiarezza sull'IVA e sul "3 mesi gratis".
+- `chi-siamo.html`: manca la foto e il racconto dei 25 anni in cantiere.
+
 ## PROSSIMI LAVORI CONCORDATI (aggiornato l'8 agosto 2026)
 1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto**.
 2. ~~Revisione sito pubblico, percorso cliente (Blocco A)~~ **FATTA il 7-8 agosto**
    (5 passi, vedi la sezione "SITO PUBBLICO" sopra).
-3. **Sito, Blocco B**: registrazioni, login e i 4 pannelli — è il percorso dell'IMPRESA,
-   e con la campagna Meta rivolta alle imprese è quello che porta le iscrizioni.
-4. **Sito, Blocco C**: blog, guide e pagine di servizio.
+3. ~~Sito, Blocco B: registrazioni e login~~ **FATTO l'8 agosto** (vedi sopra).
+   **RESTANO i 4 PANNELLI** (pannello-impresa/artigiano/professionisti/negozio): mai
+   revisionati, è **il pezzo aperto più grosso** del percorso impresa.
+4. ~~Sito, Blocco C: blog e guide~~ **FATTO l'8 agosto** (passi 1, 2 e 2b, vedi sopra).
+   Restano le pagine di servizio: contatti, prezzi, chi-siamo, e i TOC nelle guide lunghe.
 5. Coerenza fra le 4 pagine cerca + i due blocchi identici in home (dettagli sopra).
 6. **Messa in sicurezza minima del noleggio** (strada 2): piccola, ancora da fare.
 7. Code minori sul gestionale: galNomeOp (UUID in Galleria), calendario mobile a lista,
