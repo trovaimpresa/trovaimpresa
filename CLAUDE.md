@@ -576,16 +576,123 @@ viveva solo nel DB — stesso slug, ora con pagina statica).
 La homepage prende 67 clic su 79. Le guide fanno 488 impressioni ma CTR 0,8% (posizione
 troppo bassa). Dominio di 5 mesi: numeri normali per l'età, non un fallimento.
 
-## PROSSIMI LAVORI CONCORDATI (aggiornato il 7 agosto 2026)
-1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto** (vedi sezione sopra).
-2. **Messa in sicurezza minima del noleggio** (strada 2): salvataggi verificati, doctype,
-   toast. Piccola, ancora da fare.
-3. **Il prossimo lavoro grosso**: stessa revisione (bug, grafica, velocità, salvataggi
-   sicuri) sul **sito pubblico** (trovaimpresa.com: home, cerca-*, profilo-impresa,
-   pannelli, registrazioni...). Richiesto esplicitamente da Alessio il 6 agosto.
-4. Code minori sul gestionale: galNomeOp (UUID in Galleria), calendario mobile a lista,
+## SITO PUBBLICO — revisione del percorso cliente (7-8 agosto 2026)
+Stessa cura fatta sul gestionale, applicata al **Blocco A: il percorso del cliente**
+(home → cerca-* → profilo-impresa), cioè la strada che porta alle richieste di preventivo.
+Regola SEO rispettata: **mai toccati** title, meta, canonical, JSON-LD, sitemap.
+
+### Passo 1 — il preventivo raggiungibile + contatori veri
+- **`profilo-impresa.html`: barra fissa in basso su mobile** (`.cta-bar-mobile`, sotto 768px)
+  con "📋 Preventivo gratuito" + "📞 Chiama". Prima il CTA stava in una colonna che su
+  telefono finiva dopo ~5 schermate. Si nasconde con `showPreventivo/showIncarico` e
+  torna con `hidePreventivo/hideIncarico`; `#cta-bar-tel` segue lo stesso numero di `#btn-tel`.
+- **Tolto il widget calendario/meteo/note** dal profilo: chiedeva la **geolocalizzazione**
+  al cliente appena apriva (popup del browser = diffidenza immediata) e occupava la prima
+  schermata senza dire niente sull'impresa.
+- `#risultatiCount` esisteva ma non veniva mai aggiornato su 3 pagine su 4: restava
+  "Ricerca in corso..." per sempre. Ora dice "Trovate N imprese" / "Nessun risultato" /
+  "Scegli una città per iniziare" / "Errore di caricamento".
+- **BUG "Roma, RM"**: la query usava `cittaSafe` (senza virgole) ma `filtraDistanza`
+  riceveva `cittaScelta` (con la virgola) → confronto fallito → zero risultati con imprese
+  esistenti. Ora passano entrambi `cittaSafe`. (cerca-artigiani era già giusto.)
+- **Premium regionale ora su tutte e 4 le pagine**: la mappa città→regione (`window._C2R`,
+  costruita da `GEO_ITALIA`) era solo in cerca-artigiani; sulle altre il vantaggio Premium
+  scattava solo scegliendo la regione a mano, cioè quasi mai. Vantaggio venduto ma non dato.
+- Doppia `cerca()` all'avvio rimossa su imprese/negozi/professionisti.
+
+### Passo 2 — sicurezza e fiducia
+- **XSS (era il buco più grave)**: nome/descrizione/città/mestiere/orari/logo delle imprese
+  finivano in `innerHTML` senza escape su TUTTE le pagine di ricerca, nei popup mappa, negli
+  annunci sponsorizzati e in 3 punti del profilo. Chiunque si registrava poteva iniettare
+  script eseguito nel browser di **ogni cliente**. Aggiunta `_sx()` in ogni pagina cerca
+  (stessa forma di `_esc`/`recEsc` già presenti nel profilo) e applicata ovunque.
+  I banner pubblicitari (`spazi-laterali.js`, `pubblicita-spazi.js`) ora costruiscono
+  l'`<img>` con `createElement` invece che concatenando HTML.
+  `c.file_url` delle certificazioni: aperto solo se `^https?://` (bloccato `javascript:`).
+- **Fiducia** (segnali che facevano dubitare il cliente proprio mentre decideva):
+  tolta la statistica **"Piano: Free"** dal profilo; tolto l'avviso *"solo le 3 recensioni
+  più recenti sono visibili sul piano Free"*; tolto l'orario **"Lun–Ven 8:00–18:00"** che era
+  scritto fisso uguale per tutte le imprese (informazione inventata); "Risposta entro 24 ore"
+  allineato a "24-48 ore" come dice il form; tolto il **"P.IVA —"** vuoto dal footer della home
+  (⚠️ **Alessio deve ancora dare la P.IVA**: c'è un commento HTML pronto in `index.html`).
+- **`risultati.html` era una pagina zombie**: `#nav-search-input` non esiste → TypeError →
+  restava su "Caricamento..."; senza `?q` mostrava **tutte le imprese d'Italia** ignorando
+  `?citta=&tipo=&mestiere=`; filtri, checkbox e paginazione tutti finti. Sostituita con un
+  **instradamento** che porta alla pagina cerca giusta tenendo città/mestiere/regione.
+
+### Passo 3 — il filo dell'intenzione + filtri su telefono
+- **Il giro a vuoto della città**: cliccando una categoria dalla home nazionale, `vaiA()`
+  mandava sempre a `index.html?citta=X` — l'utente scriveva la città e si ritrovava al punto
+  di partenza, senza capire che doveva ricliccare la categoria. **La regola di Alessio (passare
+  dalla home città, dove vive la pubblicità venduta) è stata mantenuta**: ora la meta viaggia
+  come `&vai=cerca-artigiani.html` e la home città mostra in cima un pulsante arancione
+  "Vedi gli artigiani di Roma →" (`#riprendi-ricerca` in index.html + `homeConMeta()` nel js).
+  NB: le pagine cerca-* NON hanno spazi pubblicitari (scelta di Alessio di luglio) — è per
+  questo che il passaggio dalla home città serve.
+- **Filtri su mobile**: sotto 700px `.sidebar` era `display:none` **senza alternativa**: da
+  telefono era impossibile scegliere mestiere, valutazione o distanza. Ora è un pannello a
+  tutto schermo (`.sidebar.aperta`) aperto dal pulsante `.filtri-btn` sopra i risultati, con
+  barra fissa "Mostra i risultati" (`.filtri-azioni`) per chiudere. Su desktop invariato.
+
+### Passo 4 — velocità
+- **Leaflet non blocca più il primo caricamento**: tolto dal `<head>` delle 4 pagine cerca e
+  del profilo; ora `caricaLeaflet()` (CSS+JS iniettati a richiesta) + `IntersectionObserver`
+  sul `#mappa-risultati` con `rootMargin:250px`. `aggiornaMappaRis` salva i risultati in
+  `_ultimiRis` e li disegna quando la mappa si accende. Nel profilo la mappa parte solo se
+  l'impresa ha lat/lng, e se il download fallisce il riquadro si nasconde.
+  Effetto collaterale voluto: il **geocoding a 1,1s per impresa** non parte più se nessuno
+  guarda la mappa.
+- **Sponsor: N+1 eliminato** — `loadAnnunciCategoria` faceva una query per ogni annuncio;
+  ora una sola `.in('id', ids)` + mappa in memoria.
+- `index.html`: supabase-js in `defer` (lì serve solo alla pubblicità) + `preconnect` verso
+  Supabase e jsDelivr. Loghi delle card con `loading="lazy"` e width/height (niente salti).
+- **NON fatto di proposito**: ridurre le colonne di `select('*')` nelle ricerche. Con ~50
+  imprese il guadagno è nullo e il rischio di rompere un campo in silenzio è concreto.
+  Da fare quando la banca dati cresce (allora enumerare le colonne davvero usate da
+  cardHTML, filtraDistanza, ordinaFuoriZona e i popup mappa).
+
+### Passo 5 — rifiniture che fanno perdere clienti
+- **Zero risultati = pulsante, non solo consiglio**: `bottoneAllarga(distanzaMax)` +
+  `allargaRicerca(km)` mostrano "📍 Allarga la ricerca a 30 km" (o "Cerca in tutta la zona").
+  Con 49 imprese su 106 città la ricerca a vuoto è il caso più frequente.
+- **"← Torna ai risultati" era `history.back()`**: chi apriva il profilo da un link ricevuto
+  su WhatsApp cliccava e non succedeva NIENTE. Ora `#nav-back` punta alla pagina cerca giusta
+  per `d.tipo` con la città (`ti_citta_scelta` o quella dell'impresa), e usa `history.back()`
+  solo se `document.referrer` è dello stesso host.
+- **cerca-artigiani, chip mestiere**: `#mestieri-list .filter-btn` non esiste (il filtro è una
+  `<select>`) → il clic sul chip andava in errore e il filtro restava. Aggiunto
+  `id="mestiereSelect"`, chip riparato, e `?mestiere=` da URL ora aggiorna anche la tendina
+  (prima filtrava ma la tendina diceva "Tutti i mestieri").
+- Risultati troncati a 50: ora lo dice ("le prime 50 — restringi la zona"). Badge PREMIUM /
+  Sponsorizzato / "anche nella tua regione" portati da 10-11px a 12-12,5px.
+
+### Sito: cosa resta da fare (Blocco A e oltre)
+- **Coerenza fra le 4 pagine cerca**: sono quasi-copie divergenti (card con bordo sopra vs a
+  sinistra; paginazione solo su artigiani; mestieri come `<select>` su imprese/artigiani ma
+  chips su negozi/professionisti). Da unificare.
+- **Home**: i due blocchi "Cerca" e "Iscriviti" sono graficamente identici (stesse 4 tessere,
+  stesse icone) — un privato può finire per sbaglio nella registrazione impresa. Le tendine
+  `.tile-sel` dentro le tessere sono di fatto invisibili/inutili.
+- `professionisti.html` è una quinta pagina di ricerca separata da `cerca-professionisti.html`
+  (la home linka la prima, l'header le altre): capire quale tenere.
+- **Blocco B** (registrazioni, login, i 4 pannelli) e **Blocco C** (blog, guide, pagine di
+  servizio): non ancora revisionati.
+
+## PROSSIMI LAVORI CONCORDATI (aggiornato l'8 agosto 2026)
+1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto**.
+2. ~~Revisione sito pubblico, percorso cliente (Blocco A)~~ **FATTA il 7-8 agosto**
+   (5 passi, vedi la sezione "SITO PUBBLICO" sopra).
+3. **Sito, Blocco B**: registrazioni, login e i 4 pannelli — è il percorso dell'IMPRESA,
+   e con la campagna Meta rivolta alle imprese è quello che porta le iscrizioni.
+4. **Sito, Blocco C**: blog, guide e pagine di servizio.
+5. Coerenza fra le 4 pagine cerca + i due blocchi identici in home (dettagli sopra).
+6. **Messa in sicurezza minima del noleggio** (strada 2): piccola, ancora da fare.
+7. Code minori sul gestionale: galNomeOp (UUID in Galleria), calendario mobile a lista,
    campi obbligatori segnati nei form, esc() sulle card neg_* del negozio.
-5. Fornitori Fase 3 (ponte marketplace) quando ci saranno più negozi iscritti.
+8. Fornitori Fase 3 (ponte marketplace) quando ci saranno più negozi iscritti.
+
+⚠️ **Serve ad Alessio**: la **P.IVA** per il footer della home (c'è già il commento pronto
+in `index.html`) — un sito senza P.IVA visibile perde fiducia proprio con chi teme le truffe.
 
 ⚠️ NOTA per Claude: il 7 agosto il ponte col PC ha servito una copia VECCHIA di questo file
 (cache del mount). Prima di modificare CLAUDE.md, controllare che contenga le sezioni del
