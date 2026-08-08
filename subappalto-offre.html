@@ -13,7 +13,15 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f4f6f8; min-height:100vh; color:#1a1a1a; }
 
-    header { background:white; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 8px rgba(0,0,0,0.1); position:sticky; top:0; z-index:100; }
+    header { background:white; padding:10px 24px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 8px rgba(0,0,0,0.1); position:sticky; top:0; z-index:100; flex-wrap: wrap; gap: 14px; }
+    header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+    header nav a { color: #0066ff; text-decoration: none; font-weight: 600; font-size: 17px; padding: 6px 4px; border-radius: 8px; }
+    header nav a:hover { text-decoration: underline; }
+    header nav a.attivo { background: #eaf2ff; color: #0047b3; padding: 6px 14px; }
+    header nav a.due-righe { text-align: center; line-height: 1.15; }
+    .btn-pannello { background: #0066ff; color: #fff !important; border-radius: 10px; padding: 10px 18px !important; font-weight: 700; white-space: nowrap; }
+    .btn-pannello:hover { background: #0052cc; text-decoration: none !important; }
+    @media (max-width: 900px) { header nav a { font-size: 15.5px; } header nav { gap: 4px 12px; } }
     header a img { height:44px; }
     header nav a { color:#0066ff; text-decoration:none; font-weight:600; margin-left:20px; font-size:15px; }
     header nav a:hover { color:#1a3a5e; }
@@ -105,11 +113,16 @@
 <body>
 
 <header>
-  <a href="index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
   <nav>
-    <a href="cerca-artigiani.html">Artigiani</a>
-    <a href="cerca-imprese.html">Imprese</a>
-    <a href="professionisti.html">Professionisti</a>
+    <a href="/bandi.html">Bandi e fondi</a>
+    <a href="/blog.html">Guide e costi</a>
+    <a href="/offerte-lavoro.html" class="due-righe">Bacheca offerte<br>lavoro</a>
+    <a href="/candidature-lavoro.html" class="due-righe">Bacheca candidature<br>lavoro</a>
+    <a href="/subappalto.html" class="attivo">Subappalti</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/pubblicita.html">Pubblicit&agrave;</a>
+    <a href="/login-impresa.html" class="btn-pannello">Accedi al tuo pannello</a>
   </nav>
 </header>
 
