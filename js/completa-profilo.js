@@ -33,7 +33,11 @@
     { peso:  8, etichetta: 'Specializzazioni', chiavi: ['specializzazioni'] },
     { peso:  8, etichetta: 'Prestazioni',      chiavi: ['prestazioni'] },
     { peso:  5, etichetta: 'Partita IVA',      chiavi: ['partita_iva'] },
-    { peso:  5, etichetta: 'Sito web',         chiavi: ['sito_web'] }
+    { peso:  5, etichetta: 'Sito web',         chiavi: ['sito_web'] },
+    // Le foto non sono una colonna di "imprese": le contiamo a parte (vedi avvia())
+    // e le infiliamo nella riga come _foto. Per un'impresa edile sono la cosa che
+    // convince di piu' chi apre il profilo, quindi pesano parecchio.
+    { peso: 15, etichetta: 'Foto dei lavori',  chiavi: ['_foto'] }
   ];
 
   var CSS = [
@@ -147,9 +151,19 @@
       return sb.from('imprese').select('*').eq('user_id', user.id).maybeSingle()
         .then(function (r) {
           if (r.error || !r.data) return;
-          var esito = calcola(r.data);
+          // quante foto ha caricato: serve per la voce "Foto dei lavori"
+          return sb.from('lavori_foto').select('id', { count: 'exact', head: true })
+            .eq('impresa_id', r.data.id)
+            .then(function (f) { return { riga: r.data, foto: (f && f.count) || 0 }; })
+            .catch(function () { return { riga: r.data, foto: 0 }; });
+        })
+        .then(function (x) {
+          if (!x) return;
+          var riga = x.riga;
+          riga._foto = x.foto > 0 ? x.foto : '';   // vuoto = voce mancante
+          var esito = calcola(riga);
           if (!esito || esito.perc >= 100) return;
-          disegna(esito, r.data.nome_attivita || r.data.nome || '');
+          disegna(esito, riga.nome_attivita || riga.nome || '');
         });
     }).catch(function () { /* in silenzio: la fascia non deve mai disturbare il pannello */ });
   }
