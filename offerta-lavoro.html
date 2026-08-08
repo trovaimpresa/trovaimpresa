@@ -52,6 +52,12 @@
   .cta-box p { font-size: 17px; color: #334; margin-bottom: 16px; }
   .btn-candidati { display: inline-block; background: #FF6B35; color: white; text-decoration: none; font-size: 19px; font-weight: 700; padding: 16px 34px; border-radius: 12px; }
   .btn-candidati:hover { background: #e55a25; }
+  .btn-candidati:disabled, .btn-candidati[disabled] { background: #bbb; cursor: default; }
+  .btn-secondario { display:inline-block; background:#fff; color:#0066ff !important; border:2px solid #0066ff; text-decoration:none; font-size:17px; font-weight:700; padding:14px 26px; border-radius:12px; margin-left:10px; }
+  .btn-secondario:hover { background:#eaf2ff; }
+  .esito { margin-top:14px; font-size:17px; font-weight:600; }
+  .esito.ok { color:#1f7a4d; }
+  .esito.ko { color:#a32d2d; }
 
   .scaduta { background: #fdf0e0; border: 1px solid #f0d38a; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; font-size: 17px; color: #8a5a00; }
   .stato { background: white; border-radius: 16px; padding: 50px 30px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
@@ -240,16 +246,93 @@
         </ul>
 
         ${scaduta(o) ? '' : `
-        <div class="cta-box">
-          <p>Ti interessa questo lavoro? La candidatura è gratuita.</p>
-          <a class="btn-candidati" href="/registrazione-candidato.html?id=${encodeURIComponent(o.id)}">Candidati a questa offerta →</a>
+        <div class="cta-box" id="box-candidatura">
+          <p id="cta-testo">Ti interessa questo lavoro? La candidatura è gratuita.</p>
+          <div id="cta-azioni"><span class="esito">⏳ un attimo…</span></div>
+          <div class="esito" id="esito"></div>
         </div>`}
       </div>`;
 
     document.getElementById('contenuto').innerHTML = html;
     document.getElementById('bc').textContent = o.titolo || 'Offerta';
     scriviTestata(o);
-    if (!scaduta(o)) scriviJobPosting(o);
+    if (!scaduta(o)) { scriviJobPosting(o); preparaCandidatura(o); }
+  }
+
+
+  /* ---- CANDIDATURA ----
+     Prima il pulsante portava al modulo di registrazione e il collegamento con
+     l'annuncio si perdeva: nessuna candidatura veniva mai registrata.
+     Ora la candidatura viene creata davvero nella tabella `candidature`,
+     quella che il candidato vede nel suo pannello e l'impresa in "Candidature ricevute". */
+
+  async function statoUtente() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return { loggato: false };
+    const { data: cand } = await supabaseClient
+      .from('candidati_lavoro').select('id').eq('user_id', user.id).maybeSingle();
+    return { loggato: true, candidato: cand || null };
+  }
+
+  async function preparaCandidatura(o) {
+    const azioni = document.getElementById('cta-azioni');
+    const testo  = document.getElementById('cta-testo');
+    if (!azioni) return;
+
+    const st = await statoUtente();
+    const url = encodeURIComponent('offerta-lavoro.html?id=' + o.id);
+
+    if (!st.loggato) {
+      testo.textContent = 'Ti interessa questo lavoro? La candidatura è gratuita.';
+      azioni.innerHTML =
+        `<a class="btn-candidati" href="/registrazione-candidato.html?id=${encodeURIComponent(o.id)}">Iscriviti e candidati →</a>` +
+        `<a class="btn-secondario" href="/login-candidato.html?redirect=${url}">Ho già un account</a>`;
+      return;
+    }
+    if (!st.candidato) {
+      testo.textContent = 'Sei registrato come impresa: per candidarti serve un profilo da candidato.';
+      azioni.innerHTML = `<a class="btn-candidati" href="/registrazione-candidato.html?id=${encodeURIComponent(o.id)}">Crea il profilo candidato →</a>`;
+      return;
+    }
+
+    // già candidato a questa offerta?
+    const { data: gia } = await supabaseClient.from('candidature')
+      .select('id').eq('offerta_id', o.id).eq('candidato_id', st.candidato.id).maybeSingle();
+    if (gia) {
+      testo.textContent = 'Ti sei già candidato a questa offerta.';
+      azioni.innerHTML = '<a class="btn-secondario" href="/pannello-candidato.html">Vedi le tue candidature →</a>';
+      return;
+    }
+
+    testo.textContent = 'Ti interessa questo lavoro? La candidatura è gratuita e arriva subito all\'impresa.';
+    azioni.innerHTML = '<button class="btn-candidati" id="btn-cand">Candidati a questa offerta →</button>';
+    document.getElementById('btn-cand').onclick = () => inviaCandidatura(o, st.candidato.id);
+  }
+
+  async function inviaCandidatura(o, candidatoId) {
+    const btn = document.getElementById('btn-cand');
+    const esito = document.getElementById('esito');
+    btn.disabled = true; btn.textContent = '⏳ Invio…'; esito.textContent = '';
+    const { error } = await supabaseClient.from('candidature').insert({
+      offerta_id: o.id,
+      candidato_id: candidatoId,
+      impresa_id: o.impresa_id || null,
+      stato: 'inviata',
+      data_candidatura: new Date().toISOString()
+    });
+    if (error) {
+      if (error.code === '23505') {
+        document.getElementById('cta-testo').textContent = 'Ti sei già candidato a questa offerta.';
+        document.getElementById('cta-azioni').innerHTML = '<a class="btn-secondario" href="/pannello-candidato.html">Vedi le tue candidature →</a>';
+        return;
+      }
+      btn.disabled = false; btn.textContent = 'Candidati a questa offerta →';
+      esito.className = 'esito ko';
+      esito.textContent = 'Non è riuscito l\'invio: ' + esc(error.message);
+      return;
+    }
+    document.getElementById('cta-testo').textContent = '✅ Candidatura inviata! L\'impresa la vede nel suo pannello.';
+    document.getElementById('cta-azioni').innerHTML = '<a class="btn-secondario" href="/pannello-candidato.html">Vedi le tue candidature →</a>';
   }
 
   async function carica() {
