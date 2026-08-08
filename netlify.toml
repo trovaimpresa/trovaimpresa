@@ -55,3 +55,16 @@
   from = "/sitemap-offerte.xml"
   to = "/.netlify/functions/sitemap-offerte"
   status = 200
+
+# La bacheca candidature cambia indirizzo per essere coerente con /offerte-lavoro
+[[redirects]]
+  from = "/ricerca-candidati"
+  to = "/candidature-lavoro"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ricerca-candidati.html"
+  to = "/candidature-lavoro.html"
+  status = 301
+  force = true
