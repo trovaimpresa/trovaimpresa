@@ -920,6 +920,23 @@ fare concorrenza alla home su Google.
   (sezione "Iscriviti"), dentro un quadratino azzurro. Vale per tutto il sito.
 - Il link dell'inserzione va cambiato in **trovaimpresa.com/iscriviti.html**.
 
+**Modifiche fatte su Meta l'8 agosto 2026** (campagna "Nuova campagna Contatti",
+account act_1512448882327571, budget 10 EUR/giorno, obiettivo Advantage+ leads):
+1. **URL dell'inserzione**: da `trovaimpresa.com/#registrati` a **`/iscriviti.html`**. Pubblicato.
+2. **Età**: suggerimento **32-44** + controllo "Età minima" alzato a **25**
+   (⚠️ nei Controlli Meta non fa salire il minimo oltre 25: il muro vero non si puo'
+   mettere a 32 finche' resta acceso l'Advantage+).
+3. Eliminate 7 bozze vecchie (ne restano ~10, tutte con errori, da pulire).
+**NON fatto, deciso di aspettare**: spegnere l'Advantage+ per usare il pubblico classico
+con età 32-55 come muro vero. Da valutare solo se martedì i numeri non si muovono.
+
+**Riferimento da battere (15 giorni prima delle modifiche)**: 43% dei clic diventa una
+visita al sito · 5,35 EUR per iscrizione · 11% di conversione da chi arriva davvero.
+Migliori posizionamenti: Instagram Feed (2,61 EUR) e Facebook Feed (3,91). Peggiori:
+Reels (5,83-6,82, ma si mangiano il 42% del budget), in-stream e Audience Network (zero).
+Migliore fascia: **uomini 35-44, 11 iscrizioni su 20 a 2,98 EUR**.
+⚠️ L'apprendimento e' ripartito l'8 agosto: non toccare niente fino al 12-13 agosto.
+
 ⚠️ **NON usare git dal ponte col PC, nemmeno `git status`**: l'8 agosto un mio `git status`
 ha creato `.git/index.lock` che dal mio lato non si puo' cancellare, e ha bloccato tutti i
 commit di Alessio. Se ricapita: `rm -f .git/index.lock` dal suo Git Bash.
