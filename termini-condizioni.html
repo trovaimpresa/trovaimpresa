@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Termini e Condizioni – TrovaImpresa</title>
-  <meta name="description" content="Termini e Condizioni d'uso di TrovaImpresa: regole di utilizzo della piattaforma, registrazione, responsabilità e diritti degli utenti.">
+  <meta name="description" content="Termini e Condizioni d'uso di TrovaImpresa: regole di utilizzo della piattaforma, registrazione, recensioni, piani e prezzi, responsabilità e diritti degli utenti.">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
@@ -35,36 +35,60 @@
     }
 
     h1 { font-size: 2rem; color: #2c3e50; margin-bottom: 8px; }
-    .subtitle { color: #888; font-size: 0.95rem; margin-bottom: 36px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
+    .subtitle { color: #888; font-size: 1rem; margin-bottom: 32px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; line-height: 1.6; }
 
-    h2 { font-size: 1.15rem; color: #2c3e50; margin: 28px 0 10px; font-weight: 700; }
-    p { line-height: 1.75; color: #555; margin-bottom: 10px; font-size: 0.97rem; }
-    ul { margin: 8px 0 12px 20px; color: #555; line-height: 1.8; font-size: 0.97rem; }
-    li { margin-bottom: 4px; }
+    h2 { font-size: 1.28rem; color: #2c3e50; margin: 40px 0 12px; font-weight: 700; scroll-margin-top: 20px; }
+    h3 { font-size: 1.05rem; color: #2c3e50; margin: 22px 0 8px; font-weight: 700; }
+    p { line-height: 1.85; color: #555; margin-bottom: 12px; font-size: 1.05rem; }
+    ul { margin: 10px 0 14px 22px; color: #555; line-height: 1.85; font-size: 1.05rem; }
+    li { margin-bottom: 8px; }
     a { color: #2e78cc; text-decoration: none; }
     a:hover { text-decoration: underline; }
+    strong { color: #2c3e50; }
 
     .highlight-box {
-      background: #f0faf5;
+      background: #f0f6ff;
       border-left: 4px solid #2e78cc;
-      padding: 16px 20px;
+      padding: 18px 22px;
       border-radius: 6px;
-      margin: 20px 0;
-      font-size: 0.97rem;
+      margin: 22px 0;
+      font-size: 1.05rem;
+      line-height: 1.8;
       color: #2c3e50;
     }
+    .box-attenzione {
+      background: #fff8ee;
+      border-left: 4px solid #e67e22;
+      padding: 18px 22px;
+      border-radius: 6px;
+      margin: 22px 0;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: #2c3e50;
+    }
+
+    /* Indice */
+    .indice {
+      background: #fafbfc; border: 1px solid #e6ebf0; border-radius: 10px;
+      padding: 22px 26px; margin-bottom: 8px;
+    }
+    .indice h2 { margin: 0 0 12px; font-size: 1.05rem; }
+    .indice ol { margin: 0 0 0 20px; line-height: 2; font-size: 1rem; color: #2e78cc; }
+    .indice li { margin-bottom: 0; }
 
     footer {
       text-align: center;
       padding: 30px;
       color: #aaa;
       font-size: 0.85rem;
+      line-height: 1.8;
     }
     footer a { color: #2e78cc; }
 
     @media (max-width: 600px) {
       .container { padding: 28px 20px; margin: 20px 12px; }
       h1 { font-size: 1.5rem; }
+      .indice { padding: 18px 20px; }
     }
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
@@ -79,86 +103,184 @@
 </nav>
 
 <div class="container">
-  <h1>📋 Termini e Condizioni d'uso</h1>
-  <p class="subtitle">Ultimo aggiornamento: aprile 2026 &nbsp;|&nbsp; Leggere attentamente prima di utilizzare il servizio TrovaImpresa</p>
+  <h1>Termini e Condizioni d'uso</h1>
+  <p class="subtitle">Ultimo aggiornamento: agosto 2026 &nbsp;|&nbsp; Ti chiediamo di leggerli prima di usare TrovaImpresa. Sono scritti in italiano semplice: dove la legge ci obbliga a usare termini tecnici, li spieghiamo.</p>
 
   <div class="highlight-box">
-    <strong>Titolare del servizio:</strong> TrovaImpresa – Fondatore Alessio Pinto – Rieti (RI), Italia – <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>
+    <strong>Chi gestisce questo sito</strong><br>
+    Alessio Pinto — Rieti (RI), Italia<br>
+    Partita IVA 01285950570<br>
+    Email e punto di contatto: <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a><br>
+    Sito: trovaimpresa.com
   </div>
 
-  <p>I presenti Termini e Condizioni d'uso (di seguito "Termini") regolano l'accesso e l'utilizzo della piattaforma TrovaImpresa, accessibile all'indirizzo <strong>trovaimpresa.com</strong> (di seguito "Piattaforma" o "Servizio"). Utilizzando il Servizio, l'utente dichiara di aver letto, compreso e accettato integralmente i presenti Termini.</p>
+  <p>Questi Termini e Condizioni d'uso (di seguito i <strong>"Termini"</strong>) regolano l'accesso e l'utilizzo della piattaforma TrovaImpresa, raggiungibile all'indirizzo <strong>trovaimpresa.com</strong> (di seguito la <strong>"Piattaforma"</strong>). Usando la Piattaforma dichiari di averli letti e accettati.</p>
 
-  <h2>1. Oggetto del servizio</h2>
-  <p>TrovaImpresa è una piattaforma digitale che mette in contatto privati e professionisti che necessitano di lavori artigianali, edili o di manutenzione con imprese e artigiani locali registrati. Il Servizio consente:</p>
+  <p>In questi Termini chiamiamo <strong>"Cliente"</strong> chi cerca un lavoro da far fare (privato o azienda), <strong>"Impresa"</strong> chi si registra come impresa, artigiano, negozio o professionista, e <strong>"Utente"</strong> chiunque usi la Piattaforma.</p>
+
+  <div class="indice">
+    <h2>Indice</h2>
+    <ol>
+      <li><a href="#s1">Cosa fa TrovaImpresa (e cosa non fa)</a></li>
+      <li><a href="#s2">Registrazione e account</a></li>
+      <li><a href="#s3">Regole di comportamento</a></li>
+      <li><a href="#s4">Contenuti caricati dagli Utenti</a></li>
+      <li><a href="#s5">Recensioni</a></li>
+      <li><a href="#s6">Come segnalare un contenuto illecito o abusivo</a></li>
+      <li><a href="#s7">Piani e prezzi per le Imprese</a></li>
+      <li><a href="#s8">Pagamenti e fatturazione</a></li>
+      <li><a href="#s9">Durata, disdetta e diritto di recesso</a></li>
+      <li><a href="#s10">Il Gestionale e i dati che ci carichi</a></li>
+      <li><a href="#s11">Sospensione e chiusura dell'account</a></li>
+      <li><a href="#s12">Disponibilità del servizio</a></li>
+      <li><a href="#s13">Proprietà intellettuale</a></li>
+      <li><a href="#s14">Limitazione di responsabilità</a></li>
+      <li><a href="#s15">Dati personali</a></li>
+      <li><a href="#s16">Modifiche ai Termini</a></li>
+      <li><a href="#s17">Legge applicabile, foro e risoluzione delle controversie</a></li>
+      <li><a href="#s18">Contatti</a></li>
+    </ol>
+  </div>
+
+  <h2 id="s1">1. Cosa fa TrovaImpresa (e cosa non fa)</h2>
+  <p>TrovaImpresa è una piattaforma digitale che mette in contatto chi cerca lavori edili, artigianali o di manutenzione con imprese, artigiani, negozi e professionisti registrati. In particolare la Piattaforma consente:</p>
   <ul>
-    <li>Agli utenti di cercare imprese per categoria e zona, richiedere preventivi e lasciare recensioni.</li>
-    <li>Alle imprese di creare un profilo professionale, pubblicare annunci di lavoro, ricevere richieste di preventivo e gestire la propria presenza online.</li>
+    <li>al Cliente: di cercare per città e categoria, consultare i profili, richiedere preventivi gratuiti e lasciare recensioni;</li>
+    <li>all'Impresa: di pubblicare il proprio profilo con foto dei lavori e recapiti, ricevere richieste di preventivo, pubblicare annunci di lavoro e proposte di subappalto, e — nei piani che lo prevedono — usare gli strumenti gestionali.</li>
   </ul>
-  <p>TrovaImpresa agisce esclusivamente come intermediario e non è parte dei contratti stipulati tra utenti e imprese.</p>
 
-  <h2>2. Registrazione e account</h2>
-  <p>Per accedere a determinate funzionalità del Servizio è necessario creare un account. L'utente si impegna a:</p>
+  <div class="box-attenzione">
+    <strong>Punto importante.</strong> TrovaImpresa è solo il luogo dell'incontro: <strong>non esegue lavori, non vende lavori e non è parte del contratto</strong> che Cliente e Impresa stipulano fra loro. Prezzi, tempi, esecuzione, garanzie, contestazioni e pagamenti del lavoro riguardano esclusivamente Cliente e Impresa.
+  </div>
+
+  <p>TrovaImpresa non seleziona, non certifica e non garantisce le Imprese registrate: i dati dei profili sono inseriti dalle Imprese stesse. Prima di affidare un lavoro, invitiamo il Cliente a fare le verifiche che farebbe con qualsiasi altro fornitore (visura, referenze, documenti, assicurazione, preventivo scritto).</p>
+
+  <h2 id="s2">2. Registrazione e account</h2>
+  <p>Per cercare imprese e chiedere preventivi non serve registrarsi. Per pubblicare un profilo, lasciare recensioni o usare le funzioni riservate occorre creare un account. Registrandoti ti impegni a:</p>
   <ul>
-    <li>Fornire informazioni veritiere, accurate e aggiornate al momento della registrazione.</li>
-    <li>Mantenere riservate le proprie credenziali di accesso (email e password).</li>
-    <li>Notificare immediatamente TrovaImpresa in caso di accesso non autorizzato al proprio account scrivendo a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.</li>
-    <li>Non cedere, vendere o trasferire il proprio account a terzi.</li>
+    <li>fornire dati veri, esatti e aggiornati, e ad aggiornarli se cambiano;</li>
+    <li>custodire le tue credenziali e non condividerle con altri;</li>
+    <li>avvisarci subito a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a> se sospetti che qualcuno stia usando il tuo account;</li>
+    <li>non cedere, vendere o trasferire l'account a terzi.</li>
   </ul>
-  <p>TrovaImpresa si riserva il diritto di sospendere o cancellare account che violino i presenti Termini, senza obbligo di preavviso.</p>
+  <p>L'account è riservato a persone maggiorenni. Chi si registra come Impresa dichiara di farlo nell'esercizio della propria attività professionale e di essere in regola con gli obblighi previsti per l'attività che svolge.</p>
 
-  <h2>3. Obblighi dell'utente</h2>
-  <p>Utilizzando la Piattaforma, l'utente si impegna a non:</p>
+  <h2 id="s3">3. Regole di comportamento</h2>
+  <p>Usando la Piattaforma ti impegni a non:</p>
   <ul>
-    <li>Pubblicare contenuti falsi, ingannevoli, diffamatori, osceni o lesivi dei diritti di terzi.</li>
-    <li>Caricare virus, malware o qualsiasi codice dannoso.</li>
-    <li>Utilizzare il Servizio per finalità illegali o contrarie all'ordine pubblico.</li>
-    <li>Effettuare recensioni false o manipolate, proprie o di terzi.</li>
-    <li>Accedere alla Piattaforma con strumenti automatizzati (bot, scraper) senza previa autorizzazione scritta.</li>
-    <li>Raccogliere dati personali di altri utenti senza consenso.</li>
+    <li>pubblicare contenuti falsi, ingannevoli, diffamatori, offensivi, osceni o che violino diritti altrui;</li>
+    <li>spacciarti per un'altra persona o impresa, o pubblicare il profilo di un'attività che non è tua;</li>
+    <li>caricare foto di lavori che non hai eseguito, o immagini su cui non hai i diritti;</li>
+    <li>scrivere o far scrivere recensioni false, comprate o scambiate, né recensioni negative verso concorrenti;</li>
+    <li>usare la Piattaforma per scopi illegali, o per inviare pubblicità non richiesta agli altri Utenti;</li>
+    <li>raccogliere in blocco i dati degli altri Utenti, anche con strumenti automatici (bot, scraper), senza nostra autorizzazione scritta;</li>
+    <li>caricare virus o codice dannoso, o tentare di aggirare le misure di sicurezza della Piattaforma.</li>
   </ul>
-  <p>TrovaImpresa si riserva il diritto di rimuovere qualsiasi contenuto ritenuto in violazione dei presenti Termini.</p>
 
-  <h2>4. Responsabilità</h2>
-  <p>TrovaImpresa mette a disposizione la Piattaforma "così com'è" e non garantisce:</p>
+  <h2 id="s4">4. Contenuti caricati dagli Utenti</h2>
+  <p>Testi, foto, video e recensioni che carichi <strong>restano tuoi</strong>. Caricandoli ci concedi una licenza gratuita, non esclusiva e valida per il mondo intero a pubblicarli, mostrarli e ridimensionarli sulla Piattaforma e nelle anteprime che ne derivano (per esempio i risultati di ricerca e le condivisioni sui social), per il tempo in cui il contenuto resta pubblicato e per il tempo tecnicamente necessario a rimuoverlo dalle copie di servizio.</p>
+  <p>Caricando un contenuto dichiari di averne i diritti e che la sua pubblicazione non viola diritti di terzi. Se cancelli un contenuto o il tuo account, smettiamo di pubblicarlo.</p>
+
+  <h2 id="s5">5. Recensioni</h2>
+  <p>Le recensioni servono ad aiutare gli altri Utenti a scegliere. Per questo:</p>
   <ul>
-    <li>La continuità, l'assenza di errori o la disponibilità ininterrotta del Servizio.</li>
-    <li>La veridicità, la qualità o la legalità delle informazioni pubblicate dalle imprese registrate.</li>
-    <li>L'esito dei lavori o dei contratti conclusi tra utenti e imprese tramite la Piattaforma.</li>
+    <li>puoi recensire un'Impresa solo se hai avuto un rapporto reale con essa (un contatto, un preventivo, un lavoro);</li>
+    <li>la recensione deve riguardare la tua esperienza diretta e restare corretta nei toni;</li>
+    <li>è vietato pubblicare recensioni false o scritte dietro compenso, sia positive che negative;</li>
+    <li>l'Impresa non può recensire sé stessa né i propri concorrenti.</li>
   </ul>
-  <p>TrovaImpresa non è responsabile per danni diretti, indiretti, incidentali o consequenziali derivanti dall'utilizzo o dall'impossibilità di utilizzo del Servizio, né per eventuali controversie tra utenti e imprese.</p>
-  <p>L'utente utilizza il Servizio sotto la propria esclusiva responsabilità.</p>
 
-  <h2>5. Piani Free</h2>
-  <p>TrovaImpresa offre due tipologie di piani per le imprese registrate:</p>
+  <div class="box-attenzione">
+    <strong>Come trattiamo le recensioni.</strong> Le recensioni sono pubblicate così come le scrivono gli Utenti. <strong>Non svolgiamo una verifica preventiva</strong> che accerti che ogni recensione provenga da un cliente che ha effettivamente acquistato o utilizzato il servizio recensito: possiamo controllare che chi scrive abbia un account e sia entrato in contatto con l'Impresa tramite la Piattaforma, ma non siamo in grado di verificare ogni singolo rapporto avvenuto fuori dal sito. Non pubblichiamo recensioni dietro compenso e non alteriamo il punteggio delle Imprese in base al piano sottoscritto.
+  </div>
+
+  <p>Rimuoviamo le recensioni che risultino false, offensive, fuori tema, o che violino questi Termini o la legge, sia di nostra iniziativa sia a seguito di segnalazione (vedi il punto 6). L'Impresa recensita può segnalare una recensione che ritiene illecita e, se la segnalazione è fondata, la rimuoviamo; non rimuoviamo invece una recensione solo perché negativa.</p>
+
+  <h2 id="s6">6. Come segnalare un contenuto illecito o abusivo</h2>
+  <p>Chiunque può segnalarci un contenuto presente sulla Piattaforma che ritiene illecito o contrario a questi Termini — per esempio un profilo falso, una foto non propria, una recensione diffamatoria o un annuncio ingannevole.</p>
+  <p>La segnalazione va inviata a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>, che è anche il nostro <strong>punto di contatto</strong> per Utenti e autorità, indicando:</p>
   <ul>
-    <li><strong>Piano Free:</strong> accesso gratuito con funzionalità limitate. Permette la pubblicazione di 1 annuncio di lavoro attivo, caricamento fino a 10 foto, profilo base con visibilità standard.</li>
+    <li>il link esatto della pagina o del contenuto;</li>
+    <li>il motivo per cui lo ritieni illecito, spiegato con parole tue;</li>
+    <li>i tuoi recapiti (nome ed email), così possiamo risponderti;</li>
+    <li>se sei il titolare di un diritto violato (per esempio l'autore di una foto), indicalo.</li>
   </ul>
-  <p>TrovaImpresa si riserva di modificare le caratteristiche dei piani con ragionevole preavviso agli utenti interessati.</p>
+  <p>Esaminiamo le segnalazioni in modo tempestivo, diligente e non arbitrario, e comunichiamo l'esito a chi ha segnalato. Se rimuoviamo un contenuto o sospendiamo un account, spieghiamo il motivo all'Utente interessato, che può contestare la decisione rispondendo alla nostra comunicazione: in tal caso riesaminiamo il caso. Restano ferme le tutele previste dal Regolamento (UE) 2022/2065 (Digital Services Act).</p>
 
-  <h2>6. Pagamenti e rimborsi</h2>
-  <p>Salvo quanto previsto dalla normativa applicabile in materia di diritto di recesso per i consumatori (D.Lgs. 206/2005), i pagamenti effettuati non sono rimborsabili, a meno che non sia diversamente indicato al momento dell'acquisto o in caso di malfunzionamento grave imputabile a TrovaImpresa.</p>
-  <p>Per richiedere la disdetta dell'abbonamento o la cancellazione dell'account, l'utente può accedere alla pagina dedicata oppure contattare <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.</p>
+  <h2 id="s7">7. Piani e prezzi per le Imprese</h2>
+  <p>Per le Imprese sono disponibili due piani:</p>
+  <ul>
+    <li><strong>Gratuito</strong>: pubblicazione del profilo, visibilità nella propria città, raccolta recensioni e ricezione delle richieste di preventivo. È gratuito e non ha scadenza.</li>
+    <li><strong>Premium</strong>: in aggiunta al Gratuito, visibilità oltre la propria città, posizione prioritaria nei risultati, portfolio foto e video, strumenti gestionali (preventivi, agenda, scadenze), badge e altre funzioni indicate nella pagina <a href="/prezzi.html">Prezzi</a>.</li>
+  </ul>
+  <p>Il piano Premium costa <strong>€5 al mese</strong> oppure <strong>€49 all'anno</strong>. Si tratta di importi finali: l'operazione è effettuata senza applicazione dell'IVA ai sensi dell'art. 1, commi da 54 a 89, della Legge 190/2014 (regime forfettario), quindi al momento del pagamento non viene aggiunta alcuna imposta.</p>
+  <p><strong>Promozione "3 mesi in regalo"</strong>: alle Imprese che si registrano durante il periodo promozionale le funzioni Premium sono concesse gratuitamente per tre mesi. Non è richiesta la carta di credito e <strong>non è previsto alcun rinnovo automatico a pagamento</strong>: allo scadere dei tre mesi il profilo passa automaticamente al piano Gratuito e resta pubblicato, salvo che l'Impresa scelga di attivare il Premium a pagamento. La promozione può essere modificata o chiusa per le nuove registrazioni in qualsiasi momento, senza effetto su chi ne sta già usufruendo.</p>
+  <p>Possiamo modificare le funzioni comprese nei piani e i prezzi: le modifiche sono comunicate con almeno 30 giorni di preavviso via email e non incidono sui periodi già pagati.</p>
 
-  <h2>7. Proprietà intellettuale</h2>
-  <p>Tutti i contenuti presenti sulla Piattaforma che non siano stati caricati dagli utenti — inclusi testi, loghi, grafiche, codice sorgente, struttura e design — sono di proprietà esclusiva di TrovaImpresa e sono protetti dalla normativa italiana ed europea sul diritto d'autore e sulla proprietà intellettuale.</p>
-  <p>È vietata la riproduzione, distribuzione, modifica o utilizzo commerciale di tali contenuti senza espressa autorizzazione scritta di TrovaImpresa.</p>
-  <p>I contenuti caricati dagli utenti (foto, descrizioni, recensioni) rimangono di proprietà degli utenti stessi. Caricandoli sulla Piattaforma, l'utente concede a TrovaImpresa una licenza non esclusiva, gratuita e mondiale per utilizzarli ai fini dell'erogazione del Servizio.</p>
+  <h2 id="s8">8. Pagamenti e fatturazione</h2>
+  <p>I pagamenti del piano Premium avvengono tramite <strong>Stripe</strong>, fornitore di servizi di pagamento che gestisce direttamente i dati della carta: TrovaImpresa non conserva i numeri di carta. Sono accettate le carte di credito e debito supportate da Stripe.</p>
+  <p>Per ogni pagamento viene emessa regolare fattura, intestata ai dati forniti dall'Impresa: è responsabilità dell'Impresa inserire dati di fatturazione corretti e aggiornati.</p>
+  <p>In caso di mancato pagamento alla scadenza, le funzioni Premium vengono disattivate e il profilo torna al piano Gratuito. Il profilo resta comunque pubblicato.</p>
 
-  <h2>8. Modifiche al servizio</h2>
-  <p>TrovaImpresa si riserva il diritto di modificare, sospendere o interrompere, in tutto o in parte, il Servizio in qualsiasi momento, anche senza preavviso, per ragioni tecniche, commerciali o normative.</p>
-  <p>Le modifiche sostanziali ai presenti Termini saranno comunicate agli utenti registrati via email o tramite avviso sulla Piattaforma con almeno 15 giorni di anticipo. L'utilizzo continuato del Servizio dopo la data di entrata in vigore delle modifiche costituisce accettazione dei nuovi Termini.</p>
-  <p>La versione aggiornata dei Termini sarà sempre disponibile su questa pagina con indicazione della data di ultimo aggiornamento.</p>
+  <h2 id="s9">9. Durata, disdetta e diritto di recesso</h2>
+  <p>Il rapporto è a tempo indeterminato per il piano Gratuito. L'abbonamento Premium ha la durata scelta al momento dell'acquisto (mensile o annuale).</p>
+  <p><strong>Disdetta</strong>: puoi disdire l'abbonamento in qualsiasi momento dal tuo pannello o scrivendo a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>, senza penali. La disdetta ha effetto alla scadenza del periodo già pagato, durante il quale continui a usare il Premium.</p>
+  <p><strong>Diritto di recesso</strong>: il diritto di recesso di 14 giorni previsto dal Codice del Consumo (D.Lgs. 206/2005) spetta ai consumatori, cioè a chi agisce per scopi estranei alla propria attività professionale. Il piano Premium è rivolto a Imprese e professionisti che agiscono nell'esercizio della propria attività, ai quali quel diritto non si applica. Se sei un consumatore e hai acquistato un servizio a pagamento, puoi esercitare il recesso entro 14 giorni scrivendo a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.</p>
+  <p>Fuori dai casi sopra indicati, gli importi già pagati non sono rimborsabili, salvo malfunzionamenti gravi e prolungati imputabili a TrovaImpresa: in quel caso ti riconosciamo un rimborso proporzionato o un prolungamento equivalente dell'abbonamento.</p>
 
-  <h2>9. Legge applicabile e foro competente</h2>
-  <p>I presenti Termini sono regolati dalla <strong>legge italiana</strong>. Per qualsiasi controversia relativa all'interpretazione, all'esecuzione o alla risoluzione dei presenti Termini, le parti si impegnano a ricercare una soluzione bonaria. In caso di esito negativo, sarà competente in via esclusiva il <strong>Foro di Rieti</strong>, salvo diversa disposizione inderogabile di legge a tutela del consumatore (D.Lgs. 206/2005).</p>
-  <p>Per qualsiasi comunicazione o reclamo relativo al Servizio, l'utente può scrivere a: <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a></p>
+  <h2 id="s10">10. Il Gestionale e i dati che ci carichi</h2>
+  <p>Alle Imprese che ne hanno diritto la Piattaforma mette a disposizione strumenti gestionali (preventivi, clienti, fornitori, agenda, scadenze, foto dei cantieri e simili). I dati che l'Impresa inserisce nel Gestionale <strong>restano suoi</strong>: li trattiamo solo per farle funzionare il servizio e non li usiamo per altri scopi né li cediamo ad altre imprese.</p>
+  <p>L'Impresa è responsabile della correttezza dei dati inseriti e del rispetto della normativa applicabile verso i propri clienti e dipendenti. Ci impegniamo a usare misure tecniche ragionevoli per la conservazione dei dati, ma <strong>il Gestionale non sostituisce un sistema di backup</strong>: consigliamo di conservare copia dei documenti importanti.</p>
+  <p>Se l'account viene chiuso, i dati del Gestionale restano disponibili per 30 giorni per consentirne l'esportazione, poi vengono cancellati.</p>
+
+  <h2 id="s11">11. Sospensione e chiusura dell'account</h2>
+  <p>Possiamo sospendere o chiudere un account, e rimuovere i relativi contenuti, quando l'Utente viola questi Termini o la legge, quando il profilo risulta falso o ingannevole, o quando l'uso della Piattaforma danneggia gli altri Utenti. Salvo i casi urgenti o imposti dalla legge, prima di chiudere un account inviamo un avviso via email indicando il motivo e, dove possibile, un termine per rimediare.</p>
+  <p>Se l'account chiuso aveva un abbonamento Premium attivo e la chiusura non dipende da una violazione, rimborsiamo la quota relativa al periodo non goduto.</p>
+  <p>Puoi chiudere il tuo account quando vuoi, dal pannello o scrivendo a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.</p>
+
+  <h2 id="s12">12. Disponibilità del servizio</h2>
+  <p>Facciamo il possibile per tenere la Piattaforma sempre raggiungibile, ma non possiamo garantire un funzionamento ininterrotto e privo di errori: il servizio può essere sospeso per manutenzione, aggiornamenti, guasti dei fornitori tecnici o cause di forza maggiore. Quando la sospensione è programmata e prolungata, avvisiamo in anticipo.</p>
+
+  <h2 id="s13">13. Proprietà intellettuale</h2>
+  <p>Il nome TrovaImpresa, il logo, la grafica, i testi redazionali, il codice e la struttura della Piattaforma sono di titolarità di TrovaImpresa e sono protetti dalla normativa sul diritto d'autore e sui marchi. Non è consentito copiarli, riprodurli o usarli a fini commerciali senza nostro consenso scritto. Restano esclusi i contenuti caricati dagli Utenti, che restano loro (punto 4).</p>
+
+  <h2 id="s14">14. Limitazione di responsabilità</h2>
+  <p>TrovaImpresa mette a disposizione la Piattaforma e risponde secondo la legge del proprio operato. Nei limiti consentiti dalla legge, <strong>non rispondiamo</strong>:</p>
+  <ul>
+    <li>dell'esecuzione, della qualità, dei tempi o del prezzo dei lavori concordati fra Cliente e Impresa;</li>
+    <li>della veridicità delle informazioni inserite dalle Imprese nei propri profili;</li>
+    <li>dei danni derivanti dall'uso o dal mancato funzionamento della Piattaforma, se non nei casi di dolo o colpa grave;</li>
+    <li>delle controversie fra Utenti, alle quali restiamo estranei.</li>
+  </ul>
+  <p>Nulla in questi Termini esclude o limita la responsabilità che per legge non può essere esclusa o limitata, in particolare nei confronti dei consumatori.</p>
+
+  <h2 id="s15">15. Dati personali</h2>
+  <p>Il trattamento dei dati personali è descritto nella <a href="/privacy-policy.html">Privacy Policy</a> e nella <a href="/cookie-policy.html">Cookie Policy</a>, che formano parte integrante di questi Termini.</p>
+
+  <h2 id="s16">16. Modifiche ai Termini</h2>
+  <p>Possiamo modificare questi Termini per ragioni tecniche, normative o di servizio. Le modifiche rilevanti sono comunicate agli Utenti registrati via email o con avviso sulla Piattaforma <strong>almeno 15 giorni prima</strong> della loro entrata in vigore. Continuare a usare la Piattaforma dopo tale data significa accettarle; se non le accetti, puoi chiudere l'account senza costi. La versione aggiornata è sempre pubblicata su questa pagina con la data di ultimo aggiornamento.</p>
+
+  <h2 id="s17">17. Legge applicabile, foro e risoluzione delle controversie</h2>
+  <p>Questi Termini sono regolati dalla <strong>legge italiana</strong>.</p>
+  <p>Prima di rivolgersi al giudice, invitiamo a scriverci a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>: quasi tutto si risolve parlandone.</p>
+  <p>Per le controversie con Utenti che agiscono come <strong>consumatori</strong> è competente il giudice del luogo di residenza o domicilio del consumatore, se situato in Italia, come previsto dal Codice del Consumo. Il consumatore può inoltre rivolgersi a un organismo ADR (risoluzione alternativa delle controversie) iscritto nell'elenco tenuto dal Ministero delle Imprese e del Made in Italy.</p>
+  <p>Per le controversie con Utenti che agiscono nell'esercizio della propria attività professionale è competente in via esclusiva il <strong>Foro di Rieti</strong>.</p>
+
+  <h2 id="s18">18. Contatti</h2>
+  <p>Per qualsiasi domanda, segnalazione o reclamo su questi Termini o sul servizio, scrivi a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>. Rispondiamo entro 24 ore nei giorni lavorativi.</p>
+
+  <div class="highlight-box">
+    Alessio Pinto — Rieti (RI), Italia — P.IVA 01285950570 — <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>
+  </div>
 </div>
 
 <footer>
-  <p>© 2026 TrovaImpresa – <a href="/privacy-policy.html">Privacy Policy</a> – <a href="/cookie-policy.html">Cookie Policy</a> – <a href="/termini-condizioni.html">Termini e Condizioni</a> – <a href="/index.html">Home</a></p>
+  © 2026 TrovaImpresa — Alessio Pinto — Rieti (RI) — P.IVA 01285950570<br>
+  <a href="/privacy-policy.html">Privacy Policy</a> ·
+  <a href="/cookie-policy.html">Cookie Policy</a> ·
+  <a href="/termini-condizioni.html">Termini e Condizioni</a> ·
+  <a href="/index.html">Home</a>
 </footer>
 
-<script src="/cookie-banner.js"></script>
-<script src="/js/modal-fullscreen.js" defer></script>
 </body>
 </html>
