@@ -999,6 +999,18 @@ Regole usate, da mantenere:
    `admin-utilizzo`. ⚠️ NON toccare `google*.html`: sono i file di verifica di Search Console.
 3. **Arricchire le 4 guide vicine alla prima pagina** (infissi pos 8, idraulico/pavimento/
    cappotto pos 11) per farle scavalcare.
+   - **Infissi FATTA l'8 agosto** (33 -> 37,6 KB). La guida non era corta: mancavano le
+     risposte alle domande vere. Aggiunte due sezioni: **"Quanto costa una singola finestra"**
+     (tabella a pezzo: una anta, due ante, portafinestra 1 e 2 ante, scorrevole — PVC e
+     alluminio) con il riquadro *perche' una finestra piccola costa di piu' al mq*, e
+     **"Le marche dei profili"** (Salamander, Rehau, Schueco, Finstral, Veka — parole con cui
+     Google gia' la mostra) che spiega che contano piu' camere, vetro e posa del marchio.
+     ⚠️ Usare la classe CSS **`.esperienza`** per i riquadri, non `.box` (non esiste).
+   - **Metodo che ha funzionato, da ripetere sulle altre**: prendere da Search Console le
+     query vere della pagina, controllare con `grep` quali di quelle parole NON ci sono nel
+     testo, e scrivere una sezione per ognuna. Sugli infissi mancavano portafinestra, una/due
+     ante, i nomi dei profili.
+   - Da fare con lo stesso metodo: idraulico, pavimento, cappotto.
 4. La pagina **impianto elettrico** ha la domanda piu' alta di tutte (20+ query diverse) ma
    sta in posizione 45: e' quella con piu' potenziale inespresso.
 
@@ -1054,6 +1066,12 @@ in `index.html`) — un sito senza P.IVA visibile perde fiducia proprio con chi 
 - **Il lavoro aperto più grosso**: differenziare il profilo pubblico per negozi e
   professionisti (oggi è uno solo per tutti, vedi sopra).
 - Mancano al negozio: **DDT** e **ordini a fornitore**.
+- **Prezzi da confermare ad Alessio**: guida infissi, nuova tabella a pezzo dell'8 agosto
+  (finestra 1 anta 70x120 PVC 270-380 / alluminio 440-650; 2 ante 120x140 PVC 480-680 /
+  all. 770-1.150; portafinestra 1 anta 550-750 / 850-1.250; portafinestra 2 ante 800-1.150 /
+  1.300-1.950; scorrevole 240x230 PVC 1.400-2.200 / all. 2.500-4.500; zanzariere 60-150 €).
+  Ricavati dai €/mq gia' presenti nella guida piu' il rincaro del 20-30% sui pezzi piccoli:
+  **vanno verificati da Alessio, che il mestiere lo conosce.**
 - **Prezzi da confermare ad Alessio**: guida cucina (500–1.250 €/mq, spostare lo scarico
   +30/50%, mobile 1.000–1.400 €/ml) e guida muro (tramezzo 40–50 €/mq, portante con
   cerchiatura 2.000–7.000 €, putrelle 2,25–8,00 €/kg).
