@@ -1895,10 +1895,15 @@
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
-                <div class="dash-quick-card" data-card-id="mie-offerte" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('mie-offerte'); caricaMieOfferte()">
-          <div class="dash-quick-icon">📢</div>
-          <div class="dash-quick-label">Le mie offerte di lavoro</div>
-          <div class="dash-quick-sub">Gli annunci che hai pubblicato</div>
+                <div class="dash-quick-card" data-card-id="lavoro" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
+          <a href="javascript:void(0)" onclick="showSection('mie-offerte'); caricaMieOfferte()" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
+            <div class="dash-quick-icon">📢</div>
+            <div class="dash-quick-label">Le mie offerte di lavoro</div>
+          </a>
+          <a href="javascript:void(0)" onclick="showSection('candidature'); caricaCandidature()" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
+            <div class="dash-quick-icon">📥</div>
+            <div class="dash-quick-label">Candidature ricevute</div>
+          </a>
         </div>
         <div class="dash-quick-card" data-card-id="subappalto" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
