@@ -16,6 +16,29 @@ Sbagliato due volte coi Fornitori (form fornitore, poi form fattura): alla terza
 volta è un problema serio di fiducia. Prima di consegnare un form nuovo,
 controllare SEMPRE con `grep openSheet(` che non ce ne siano di piccoli.
 
+### ⛔ REGOLA FISSA SUL TONO DEL SITO PUBBLICO (8/8/2026 — non sgarrare mai più)
+**1. Il sito non parla di Alessio. Mai.** Niente racconto personale, niente foto, niente
+"mi chiamo", niente storia dei 25 anni in prima persona, niente "progetto portato avanti
+da solo" / "appena nato" (fa sembrare tutto piccolo e in difficoltà). Il nome di Alessio
+resta SOLO nel footer, dove serve per legge. Prima di scrivere qualsiasi testo che parla
+di lui o della sua attività: **chiederglielo**, mai scriverlo di iniziativa.
+
+**2. Il sito parla di cosa riceve l'impresa**: più visibilità e più contatti nella sua zona.
+Anche la pagina "Chi siamo" deve rispondere a "cosa ci guadagno io impresa", non a "chi sei tu".
+
+**3. Le imprese non cercano niente — è TrovaImpresa che offre.** Sono già al lavoro: il sito
+arriva e dà loro **una vetrina in più**, gratis, senza che l'abbiano chiesta. Un'impresa che
+"cerca lavoro" è un'impresa che non ne ha: è triste e la sminuisce davanti al cliente.
+- ✅ Giusto: "ti diamo", "ti regaliamo", "i clienti della tua zona ti trovano", "la tua
+  vetrina sempre online", "sei tu che scegli", "prendi anche questa".
+- ⛔ Vietato: "cerchi lavoro", "trova lavoro", "hai bisogno di clienti", "riempi l'agenda",
+  "aiutiamo le imprese in difficoltà", e ogni frase che metta l'impresa in posizione di chi
+  chiede invece che di chi viene cercato.
+- Coerente coi 3 mesi di Premium: sono un **regalo**, non uno sconto per convincerle.
+
+**Errore fatto l'8 agosto 2026**: scritta una "Chi siamo" in prima persona con la storia dei
+25 anni di cantiere e lo spazio foto. Bocciata due volte. Non riproporlo in nessuna forma.
+
 ## Preferenze di Alex
 - Rispondere **in italiano**, in modo semplice e pratico, conciso.
 - Soluzioni pronte da copiare/incollare, poca teoria.

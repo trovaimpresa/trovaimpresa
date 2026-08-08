@@ -6,9 +6,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chi siamo – TrovaImpresa</title>
-  <meta name="description" content="Chi siamo: TrovaImpresa è il marketplace italiano per trovare imprese edili, artigiani, negozi e professionisti verificati nella tua zona.">
+  <meta name="description" content="Chi siamo: TrovaImpresa è il marketplace italiano per trovare imprese edili, artigiani, negozi e professionisti nella tua zona.">
   <meta property="og:title" content="Chi siamo – TrovaImpresa">
-  <meta property="og:description" content="TrovaImpresa connette privati e imprese edili verificate in tutta Italia. Scopri chi siamo e perché lo facciamo.">
+  <meta property="og:description" content="TrovaImpresa collega privati e aziende con le imprese edili, gli artigiani, i negozi e i professionisti della loro zona.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://trovaimpresa.com/chi-siamo">
   <meta property="og:site_name" content="TrovaImpresa">
@@ -40,12 +40,23 @@
     }
 
     h1 { font-size: 2rem; color: #2c3e50; margin-bottom: 8px; }
-    .subtitle { color: #888; font-size: 0.95rem; margin-bottom: 36px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
+    .subtitle { color: #888; font-size: 1rem; margin-bottom: 36px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
 
-    h2 { font-size: 1.15rem; color: #2c3e50; margin: 28px 0 10px; font-weight: 700; }
-    p { line-height: 1.75; color: #555; margin-bottom: 10px; font-size: 0.97rem; }
-    ul { margin: 8px 0 12px 20px; color: #555; line-height: 1.8; font-size: 0.97rem; }
-    li { margin-bottom: 4px; }
+    h2 { font-size: 1.3rem; color: #2c3e50; margin: 40px 0 14px; font-weight: 700; }
+    p { line-height: 1.85; color: #555; margin-bottom: 14px; font-size: 1.05rem; }
+    ul { margin: 10px 0 14px 20px; color: #555; line-height: 1.9; font-size: 1.05rem; }
+    li { margin-bottom: 10px; }
+
+    .numeri {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0 8px;
+    }
+    .numeri div {
+      background: #fff; border: 1px solid #e3e9f0; border-radius: 12px;
+      padding: 18px 16px; text-align: center;
+    }
+    .numeri b { display: block; font-size: 1.6rem; color: #2e78cc; line-height: 1.2; }
+    .numeri span { font-size: 0.95rem; color: #666; line-height: 1.5; display: block; margin-top: 4px; }
+    @media (max-width: 600px) { .numeri { grid-template-columns: 1fr; } }
     a { color: #2e78cc; text-decoration: none; }
     a:hover { text-decoration: underline; }
 
@@ -98,27 +109,26 @@
 </nav>
 
 <div class="container">
-  <h1>👷 Chi siamo</h1>
-  <p class="subtitle">Il marketplace italiano per trovare imprese edili e artigiani verificati</p>
+  <h1>Chi siamo</h1>
+  <p class="subtitle">Il marketplace italiano per trovare imprese edili e artigiani della tua zona</p>
 
   <div class="highlight-box">
-    <strong>In breve:</strong> TrovaImpresa mette in contatto chi ha bisogno di lavori edili o artigianali con imprese, artigiani, negozi e professionisti verificati della propria zona. Gratis per chi cerca, semplice per chi offre.
+    <strong>In breve:</strong> TrovaImpresa mette in contatto privati e aziende con imprese edili, artigiani, negozi e professionisti della propria zona. Gratis per chi cerca, semplice per chi offre.
   </div>
 
   <h2>Cosa facciamo</h2>
-  <p>TrovaImpresa è una piattaforma digitale italiana che aiuta privati e aziende a trovare i professionisti giusti per costruzioni, ristrutturazioni e manutenzioni. Cercare e contattare le imprese è gratuito e senza impegno: scegli la città, la categoria e confronti profili, recensioni e preventivi in pochi clic.</p>
+  <p>TrovaImpresa è una piattaforma italiana che aiuta privati e aziende a trovare i professionisti giusti per costruzioni, ristrutturazioni e manutenzioni. Cercare e contattare le imprese è gratuito e senza impegno: scegli la città, la categoria e confronti profili, lavori svolti e recensioni in pochi clic.</p>
 
   <h2>Perché lo facciamo</h2>
-  <p>Trovare un'impresa affidabile spesso significa affidarsi al passaparola o a preventivi poco chiari. Vogliamo rendere questo processo più semplice e trasparente, dando visibilità alle imprese serie del territorio e permettendo ai clienti di scegliere con più informazioni e meno rischi.</p>
+  <p>Le imprese edili e gli artigiani italiani sono tra i più bravi al mondo. Mestiere imparato sul campo, mani che sanno quello che fanno, lavori a regola d'arte che restano in piedi per generazioni: è roba che all'estero ci invidiano da sempre.</p>
+  <p>TrovaImpresa è <strong>una vetrina in più</strong> per questi professionisti: le foto dei loro cantieri, le recensioni dei clienti soddisfatti e le richieste di preventivo della loro zona, tutto in un posto solo. Il lavoro fatto bene si vede.</p>
 
   <h2>Come funziona</h2>
   <ul>
-    <li><strong>Per i clienti:</strong> cerchi per città e categoria, confronti recensioni verificate e richiedi preventivi gratuiti.</li>
-    <li><strong>Per le imprese:</strong> crei un profilo professionale, ricevi richieste di preventivo e aumenti la tua visibilità online, anche con offerte di lavoro e subappalti.</li>
+    <li><strong>Per i clienti:</strong> cerchi per città e categoria, guardi i lavori già fatti e le recensioni, e chiedi preventivi gratuiti. Non paghi niente, né prima né dopo.</li>
+    <li><strong>Per le imprese:</strong> il tuo profilo con i tuoi lavori, le richieste di preventivo della tua zona che ti arrivano direttamente, e il tuo nome che esce su Google quando qualcuno cerca il tuo mestiere. E se ti serve personale, pubblichi le tue offerte di lavoro.</li>
   </ul>
 
-  <h2>Chi c'è dietro</h2>
-  <p>TrovaImpresa è un progetto indipendente fondato e gestito da <strong>Alessio Pinto</strong>, con sede operativa a Rieti (RI). Nasce dall'esperienza diretta nel mondo dell'edilizia, con l'obiettivo di dare uno strumento pratico e onesto sia a chi cerca sia a chi offre servizi.</p>
 
   <div class="highlight-box">
     Hai domande o vuoi collaborare con noi? Scrivici a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.
