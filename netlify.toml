@@ -49,3 +49,9 @@
   to = "/offerte-lavoro.html"
   status = 301
   force = true
+
+# Sitemap delle offerte di lavoro: generata al volo dal database
+[[redirects]]
+  from = "/sitemap-offerte.xml"
+  to = "/.netlify/functions/sitemap-offerte"
+  status = 200
