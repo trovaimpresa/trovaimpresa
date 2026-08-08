@@ -1020,7 +1020,20 @@ Regole usate, da mantenere:
      ⚠️ **Lezione**: le cifre nuove vanno sempre riallineate alla "Risposta rapida" in cima
      alla pagina, altrimenti la stessa pagina dice due numeri diversi. Qui l'ancora e'
      100 mq = 5.000-9.000 €, e la tabella e' stata ricalcolata su quella.
-   - Da fare con lo stesso metodo: idraulico, pavimento, cappotto.
+   - **Idraulico FATTA l'8 agosto** (31 -> 35,7 KB). Scoperta importante: la guida parlava
+     SOLO del rifacimento completo, ma fra le query c'e' **"costo idraulico ora"** — gente che
+     non vuole rifare niente, ha una perdita o uno scarico otturato e vuole sapere quanto
+     costa la chiamata. Mancavano del tutto: all'ora, diritto di chiamata, urgenza, sifone,
+     cassetta, disostruzione, scaldabagno. Aggiunte due sezioni: **"Quanto costa chiamare un
+     idraulico per un lavoro piccolo"** (diritto di chiamata 30-60 €, tariffa oraria 30-50 €/h,
+     maggiorazione festiva, + tabella di 8 interventi comuni a corpo) con il riquadro *le due
+     domande da fare al telefono*, e **"Cambiare i tubi vecchi"** (ferro zincato, piombo,
+     multistrato).
+     💡 **Intuizione da riusare sulle altre guide**: accanto all'intento "rifare tutto" c'e'
+     quasi sempre un intento **"riparazione / chiamata"** molto piu' cercato e molto piu'
+     vicino alla conversione (chi ha una perdita chiama oggi, chi rifa' il bagno ci pensa sei
+     mesi). Verificare se vale anche per elettricista, fabbro, condizionatore.
+   - Da fare con lo stesso metodo: pavimento, cappotto.
 4. La pagina **impianto elettrico** ha la domanda piu' alta di tutte (20+ query diverse) ma
    sta in posizione 45: e' quella con piu' potenziale inespresso.
 
