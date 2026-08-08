@@ -897,6 +897,33 @@ Corretto ovunque:
 ⚠️ **REGOLA**: ogni tendina obbligatoria di un modulo pubblico deve avere "Altro" con
 campo libero. Un elenco chiuso su un campo obbligatorio e' un iscritto perso, in silenzio.
 
+### Pubblicita' Meta: la diagnosi dell'8 agosto 2026
+Collegato **Supermetrics** (connettore Claude) all'account Meta Ads. Dati reali degli
+ultimi 15 giorni, campagna "Nuova campagna Contatti" (sempre ACTIVE, ~7,50 EUR/giorno):
+- spesa 111,83 EUR · 31.690 impression · **448 clic sul link** · **193 arrivi sul sito**
+  · 22 iscrizioni registrate dal pixel.
+- **Il 57% dei clic pagati non diventa mai una visita**: ~64 EUR su 112 buttati. Causa:
+  l'inserzione mandava sulla **homepage** (77 KB, 8 file JS di cui 3 bloccanti, Supabase
+  da CDN, Google Fonts, GA) e per giunta alla sezione `#registrati` che sta alla riga
+  1053 su 1300 — il telefono deve disegnare tutta la pagina sopra, piu' il banner cookie.
+- Chi invece arriva davvero converte all'**11%**: il sito funziona, il problema era la velocita'.
+- I due giorni senza iscritti (6-7 agosto) NON erano un guasto: spesa e clic regolari,
+  era normale oscillazione (anche il 28-29 luglio zero). Ad agosto l'edilizia e' ferma.
+- Il pixel copre quasi tutto: 14 conversioni contate contro 16 iscritti reali in 7 giorni.
+
+**Creata `iscriviti.html`**: pagina di atterraggio per la pubblicita', **8 KB**, CSS in
+linea, caratteri di sistema, zero script bloccanti, niente Supabase. Header + 3
+rassicurazioni + i 4 pulsanti di registrazione + "cosa ricevi". `cookie-banner.js`
+caricato con **defer** (a norma ma non blocca la prima schermata) e `noindex` per non
+fare concorrenza alla home su Google.
+- ⚠️ **Alessio NON vuole emoji**: usare le icone SVG a linea gia' presenti in `index.html`
+  (sezione "Iscriviti"), dentro un quadratino azzurro. Vale per tutto il sito.
+- Il link dell'inserzione va cambiato in **trovaimpresa.com/iscriviti.html**.
+
+⚠️ **NON usare git dal ponte col PC, nemmeno `git status`**: l'8 agosto un mio `git status`
+ha creato `.git/index.lock` che dal mio lato non si puo' cancellare, e ha bloccato tutti i
+commit di Alessio. Se ricapita: `rm -f .git/index.lock` dal suo Git Bash.
+
 ## PROSSIMI LAVORI CONCORDATI (aggiornato l'8 agosto 2026)
 1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto**.
 2. ~~Revisione sito pubblico, percorso cliente (Blocco A)~~ **FATTA il 7-8 agosto**
