@@ -6,11 +6,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Piani e prezzi — TrovaImpresa</title>
-<meta name="description" content="Piani per imprese e artigiani su TrovaImpresa: 3 mesi gratis, piano Free per sempre o Premium a €5/mese (€49/anno) con visibilità in tutta Italia e posizione prioritaria.">
+<meta name="description" content="Piani per imprese e artigiani su TrovaImpresa: 3 mesi di Premium in regalo senza carta di credito, piano Free per sempre o Premium a €5/mese o €49/anno, prezzo finale senza IVA da aggiungere, con visibilità in tutta Italia e posizione prioritaria.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TrovaImpresa">
 <meta property="og:title" content="Piani e prezzi — TrovaImpresa">
-<meta property="og:description" content="3 mesi gratis, piano Free per sempre o Premium a €5/mese con visibilità in tutta Italia.">
+<meta property="og:description" content="3 mesi di Premium in regalo, senza carta di credito. Poi piano Free per sempre o Premium a €5/mese, prezzo finale.">
 <meta property="og:url" content="https://trovaimpresa.com/prezzi">
 <meta property="og:image" content="https://trovaimpresa.com/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -119,14 +119,33 @@
   .piano-prezzo { margin-bottom:24px; }
   .prezzo-num { font-family:'Playfair Display',serif; font-size:3rem; font-weight:700; line-height:1; }
   .prezzo-num.gratis { color:var(--verde); }
-  .prezzo-periodo { font-size:0.82rem; color:var(--light); margin-top:4px; }
+  .prezzo-periodo { font-size:0.95rem; color:var(--mid); margin-top:6px; font-weight:600; }
+  .prezzo-nota { font-size:0.88rem; color:var(--light); margin-top:4px; line-height:1.5; }
   .prezzo-originale { font-size:0.82rem; color:var(--light); text-decoration:line-through; }
+
+  /* Rassicurazioni sotto l'hero */
+  .rassicura {
+    max-width:900px; margin:32px auto 0; padding:0 24px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
+  }
+  .rassicura div {
+    background:white; border:1px solid var(--border); border-radius:14px;
+    padding:16px 18px; font-size:0.95rem; font-weight:600; line-height:1.5;
+    box-shadow:var(--shadow); text-align:center;
+  }
+  .rassicura strong { display:block; font-size:1.05rem; margin-bottom:4px; color:var(--verde); }
+  @media(max-width:760px){ .rassicura { grid-template-columns:1fr; } }
+
+  .nota-iva {
+    max-width:1100px; margin:0 auto; padding:0 24px 40px;
+    font-size:0.92rem; color:var(--mid); line-height:1.7; text-align:center;
+  }
 
   .piano-features { margin-bottom:28px; }
   .feature {
     display:flex; align-items:flex-start; gap:10px;
-    padding:8px 0; border-bottom:1px solid var(--border);
-    font-size:0.88rem;
+    padding:10px 0; border-bottom:1px solid var(--border);
+    font-size:0.95rem;
   }
   .feature:last-child { border-bottom:none; }
   .feature-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
@@ -149,10 +168,10 @@
   .faq-title { font-family:'Playfair Display',serif; font-size:1.8rem; text-align:center; margin-bottom:32px; }
   .faq-item { background:white; border-radius:14px; margin-bottom:10px; overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--border); }
   .faq-q {
-    padding:18px 20px; font-weight:700; font-size:0.92rem; cursor:pointer;
-    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 20px; font-weight:700; font-size:1rem; cursor:pointer;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
   }
-  .faq-a { padding:0 20px 16px; font-size:0.88rem; color:var(--mid); line-height:1.7; display:none; }
+  .faq-a { padding:0 20px 18px; font-size:0.95rem; color:var(--mid); line-height:1.75; display:none; }
   .faq-a.open { display:block; }
 
 </style>
@@ -166,9 +185,15 @@
 <!-- HERO -->
 <div class="hero">
   <img src="logo.png" alt="TrovaImpresa" style="width:600px;max-width:90%;margin:0 auto 0;display:block;">
-  <div class="hero-badge">💰 Prezzi trasparenti, nessuna sorpresa</div>
-  <h1>I primi <em>3 mesi sono gratis</em></h1>
-  <p>Registrati gratis e prova tutto senza pagare. Dopo 3 mesi scegli tu: resta gratis o passa a Premium!</p>
+  <div class="hero-badge">🎁 Offerta di lancio · Prezzi trasparenti, nessuna sorpresa</div>
+  <h1>Ti regaliamo i primi <em>3 mesi di Premium</em></h1>
+  <p>Profilo in evidenza, preventivi, agenda e portfolio: tutto il Premium per 3 mesi, <strong>senza carta di credito</strong>. Finiti i 3 mesi non ti addebitiamo niente — se non fai nulla, il tuo profilo resta sul piano Gratuito.</p>
+</div>
+
+<div class="rassicura">
+  <div><strong>Nessuna carta</strong>Ti registri con la mail e basta</div>
+  <div><strong>Nessun addebito automatico</strong>Dopo i 3 mesi paghi solo se lo scegli tu</div>
+  <div><strong>Disdici quando vuoi</strong>Nessuna penale, nessun vincolo</div>
 </div>
 
 <!-- TOGGLE MENSILE/ANNUALE -->
@@ -193,6 +218,7 @@
     <div class="piano-prezzo">
       <div class="prezzo-num gratis">€0</div>
       <div class="prezzo-periodo">per sempre · anche dopo i 3 mesi</div>
+      <div class="prezzo-nota">Nessuna scadenza, nessuna carta, nessun addebito.</div>
     </div>
     <div class="piano-features">
       <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Profilo visibile nella tua città</span></div>
@@ -215,8 +241,9 @@
     <div class="piano-sub">Per dominare il mercato</div>
     <div class="piano-prezzo">
       <div class="prezzo-num" id="prezzo-display-premium">€5</div>
-      <div class="prezzo-periodo">al mese &nbsp;·&nbsp; oppure <strong>€49/anno</strong></div>
-      <div class="prezzo-periodo" style="margin-top:2px;">dopo i 3 mesi gratis</div>
+      <div class="prezzo-periodo" id="prezzo-periodo-premium">al mese &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere</div>
+      <div class="prezzo-nota" id="prezzo-alt-premium">Oppure <strong>€49 all'anno</strong> — risparmi €11</div>
+      <div class="prezzo-nota">Si paga <strong>solo dopo</strong> i 3 mesi in regalo, e solo se lo scegli tu.</div>
     </div>
     <div class="piano-features">
       <div class="feature"><span class="feature-icon">✅</span><span class="feature-text">Tutto del Gratuito +</span></div>
@@ -244,12 +271,35 @@
 
 </div>
 
+<p class="nota-iva">
+  I prezzi indicati sono <strong>quelli che paghi davvero</strong>: nessuna IVA da aggiungere, nessun costo di attivazione.
+  Per ogni pagamento ricevi regolare fattura.
+  <br><span style="font-size:0.82rem;color:var(--light);">Operazione senza applicazione dell'IVA ai sensi dell'art. 1, commi 54-89, Legge 190/2014 (regime forfettario).</span>
+  <!-- P.IVA TrovaImpresa: quando ce l'hai, aggiungila qui e nel footer della home -->
+</p>
+
 <!-- FAQ -->
 <div class="faq">
   <div class="faq-title">Domande frequenti</div>
   <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Serve la carta di credito per iniziare? <span>▼</span></div>
+    <div class="faq-a"><strong>No.</strong> Ti registri con la mail e i 3 mesi di Premium partono subito. La carta la inserisci solo il giorno in cui decidi tu di continuare con il Premium a pagamento — se quel giorno non arriva mai, non ti chiediamo mai niente.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Cosa succede quando finiscono i 3 mesi? <span>▼</span></div>
+    <div class="faq-a"><strong>Non ti viene addebitato nulla.</strong> Non c'è nessun rinnovo automatico: il tuo profilo passa da solo al piano Gratuito e resta online per sempre, con le funzioni base. Se vuoi tenere il Premium, sei tu ad attivarlo dal pannello.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Perché 3 mesi in regalo? Dov'è la fregatura? <span>▼</span></div>
+    <div class="faq-a">Nessuna fregatura: gli strumenti del Premium — preventivi, agenda, scadenze fiscali, portfolio dei lavori — si capiscono solo usandoli su un cantiere vero. Per questo te li diamo per 3 mesi senza chiederti un euro né la carta. Chi ci si trova bene resta, chi no torna sul Gratuito e non paga niente.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Ai prezzi va aggiunta l'IVA? <span>▼</span></div>
+    <div class="faq-a"><strong>No.</strong> €5 al mese e €49 all'anno sono i prezzi finali: alla cassa non si aggiunge niente. Operiamo in regime forfettario, quindi la fattura che ricevi è senza addebito di IVA (art. 1, commi 54-89, Legge 190/2014).</div>
+  </div>
+  <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Quando inizia il pagamento? <span>▼</span></div>
-    <div class="faq-a">I primi 3 mesi sono completamente gratuiti. Dopo puoi scegliere liberamente: restare nel piano gratuito per sempre (con i limiti base), oppure passare a Premium per avere tutti i vantaggi.</div>
+    <div class="faq-a">Solo dal giorno in cui attivi tu il Premium a pagamento, mai prima. Durante i 3 mesi in regalo non ti viene chiesto nessun pagamento.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Posso cancellare in qualsiasi momento? <span>▼</span></div>
@@ -268,16 +318,25 @@
 <script>
 let pianoAnnuale = false;
 
-// TOGGLE PIANO
+// TOGGLE PIANO — cambiano insieme numero, periodo e riga alternativa,
+// altrimenti sull'annuale si leggeva "€49 al mese".
 function togglePiano() {
   pianoAnnuale = !pianoAnnuale;
   const toggle = document.getElementById('toggle');
   toggle.classList.toggle('annuale', pianoAnnuale);
 
+  const num     = document.getElementById('prezzo-display-premium');
+  const periodo = document.getElementById('prezzo-periodo-premium');
+  const alt     = document.getElementById('prezzo-alt-premium');
+
   if (pianoAnnuale) {
-    document.getElementById('prezzo-display-premium').textContent = '€49';
+    num.textContent     = '€49';
+    periodo.innerHTML   = 'all\'anno &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere';
+    alt.innerHTML       = 'Sono <strong>€4,08 al mese</strong> — risparmi €11 rispetto al mensile';
   } else {
-    document.getElementById('prezzo-display-premium').textContent = '€5';
+    num.textContent     = '€5';
+    periodo.innerHTML   = 'al mese &nbsp;·&nbsp; prezzo finale, nessuna IVA da aggiungere';
+    alt.innerHTML       = 'Oppure <strong>€49 all\'anno</strong> — risparmi €11';
   }
 }
 
