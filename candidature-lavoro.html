@@ -125,6 +125,15 @@
     .contatti-bloccati a { background: #0066ff; color: white; text-decoration: none; font-weight: 700; padding: 10px 18px; border-radius: 9px; white-space: nowrap; }
     .contatti-bloccati a:hover { background: #0052cc; }
     .avviso-privacy { background: #fff8e6; border: 1px solid #f0d38a; border-radius: 10px; padding: 12px 18px; font-size: 16px; color: #7a5600; margin-bottom: 16px; }
+
+    /* barra azione: ogni bacheca ha il suo pulsante, quello che le appartiene */
+    .barra-azione { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;
+                    padding:12px 28px; background:#f0f5ff; color:#0a2a4d; border-bottom:1px solid #e3e8ef; }
+    .barra-azione .testo { font-size:1rem; font-weight:600; }
+    .btn-azione { background:#FF6B35; color:#fff !important; text-decoration:none; font-weight:700; font-size:17px;
+                  padding:12px 22px; border-radius:10px; white-space:nowrap; display:inline-block; }
+    .btn-azione:hover { background:#e55a25; }
+    @media (max-width:700px){ .barra-azione { padding:12px 18px; } .btn-azione { width:100%; text-align:center; } }
   </style>
 </head>
 <body>
@@ -151,7 +160,10 @@
   </div>
 </div>
 
-<h2 style="margin:0;padding:14px 28px;background:#f0f5ff;color:#0a2a4d;font-size:1rem;font-weight:600;border-bottom:1px solid #e3e8ef;">Operai, artigiani e tecnici disponibili al lavoro nella tua zona</h2>
+<div class="barra-azione">
+  <span class="testo">Operai, artigiani e tecnici disponibili al lavoro nella tua zona</span>
+  <a class="btn-azione" href="/registrazione-candidato.html">➕ Iscriviti e fatti trovare</a>
+</div>
 
 <div class="page-body">
 

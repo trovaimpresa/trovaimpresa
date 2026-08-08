@@ -103,6 +103,15 @@
       .sidebar { display: none; }
       .card-offerta-header { flex-direction: column; }
     }
+
+    /* barra azione: ogni bacheca ha il suo pulsante, quello che le appartiene */
+    .barra-azione { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;
+                    padding:12px 28px; background:#f0f5ff; color:#0a2a4d; border-bottom:1px solid #e3e8ef; }
+    .barra-azione .testo { font-size:1rem; font-weight:600; }
+    .btn-azione { background:#FF6B35; color:#fff !important; text-decoration:none; font-weight:700; font-size:17px;
+                  padding:12px 22px; border-radius:10px; white-space:nowrap; display:inline-block; }
+    .btn-azione:hover { background:#e55a25; }
+    @media (max-width:700px){ .barra-azione { padding:12px 18px; } .btn-azione { width:100%; text-align:center; } }
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
 </head>
@@ -130,7 +139,10 @@
   </div>
 </div>
 
-<h2 style="margin:0;padding:14px 28px;background:#f0f5ff;color:#0a2a4d;font-size:1rem;font-weight:600;border-bottom:1px solid #e3e8ef;">Lavoro per muratori, operai edili, artigiani e tecnici del settore nella tua città</h2>
+<div class="barra-azione">
+  <span class="testo">Lavoro per muratori, operai edili, artigiani e tecnici del settore nella tua città</span>
+  <a class="btn-azione" href="/offerte-registrazione.html">➕ Pubblica un'offerta di lavoro</a>
+</div>
 
 
 <div class="page-body">
