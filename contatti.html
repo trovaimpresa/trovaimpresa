@@ -74,6 +74,20 @@
 
   .required { color:var(--arancio); margin-left:2px; }
 
+  .consenso {
+    display:flex; gap:12px; align-items:flex-start;
+    background:#fafaf8; border:1.5px solid #ddd; border-radius:10px;
+    padding:14px 16px; margin-bottom:20px; cursor:pointer;
+  }
+  .consenso input { width:22px; height:22px; flex-shrink:0; margin-top:1px; accent-color:var(--verde); cursor:pointer; }
+  .consenso span { font-size:0.95rem; line-height:1.6; color:var(--mid); }
+  .consenso a { color:var(--verde); font-weight:600; }
+  .campo-errore { border-color:#cc0000 !important; background:#fff8f8; }
+  .errore-campo {
+    display:none; color:#cc0000; font-size:0.88rem;
+    font-weight:600; margin-top:6px;
+  }
+
   .btn-submit {
     width:100%; padding:15px;
     background:var(--verde); color:white;
@@ -128,21 +142,30 @@
 
 <div class="container">
   <div class="card">
-    <div class="msg success" id="msg-success">✅ Messaggio inviato! Ti risponderemo presto.</div>
-    <div class="msg error"   id="msg-error">❌ Errore nell'invio. Riprova o scrivi direttamente a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.</div>
-
     <div class="form-group">
       <label for="nome">Nome<span class="required">*</span></label>
       <input type="text" id="nome" placeholder="Il tuo nome" autocomplete="name">
+      <div class="errore-campo" id="err-nome">Scrivi il tuo nome.</div>
     </div>
     <div class="form-group">
       <label for="email">Email<span class="required">*</span></label>
       <input type="email" id="email" placeholder="La tua email" autocomplete="email">
+      <div class="errore-campo" id="err-email">Controlla l'email: deve essere tipo nome@esempio.it</div>
     </div>
     <div class="form-group">
       <label for="messaggio">Messaggio<span class="required">*</span></label>
       <textarea id="messaggio" placeholder="Scrivi qui il tuo messaggio..."></textarea>
+      <div class="errore-campo" id="err-messaggio">Scrivi il tuo messaggio (almeno 10 caratteri).</div>
     </div>
+
+    <label class="consenso" for="privacy">
+      <input type="checkbox" id="privacy">
+      <span>Ho letto e accetto la <a href="/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a> e acconsento al trattamento dei miei dati per ricevere una risposta.<span class="required">*</span></span>
+    </label>
+    <div class="errore-campo" id="err-privacy" style="margin:-12px 0 20px;">Devi accettare la Privacy Policy per inviare il messaggio.</div>
+
+    <div class="msg success" id="msg-success">✅ Messaggio inviato! Ti risponderemo entro 24 ore nei giorni lavorativi.</div>
+    <div class="msg error"   id="msg-error">❌ Errore nell'invio. Riprova o scrivi direttamente a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>.</div>
 
     <button class="btn-submit" id="btn-submit" onclick="inviaMessaggio()">📩 Invia messaggio</button>
   </div>
@@ -165,18 +188,39 @@
 </div>
 
 <script>
+function _mostraErrore(idCampo, idErrore, mostra) {
+  const campo  = document.getElementById(idCampo);
+  const errore = document.getElementById(idErrore);
+  if (errore) errore.style.display = mostra ? 'block' : 'none';
+  if (campo && campo.type !== 'checkbox') campo.classList.toggle('campo-errore', mostra);
+}
+
 async function inviaMessaggio() {
-  const nome     = document.getElementById('nome').value.trim();
-  const email    = document.getElementById('email').value.trim();
+  const nome      = document.getElementById('nome').value.trim();
+  const email     = document.getElementById('email').value.trim();
   const messaggio = document.getElementById('messaggio').value.trim();
+  const privacy   = document.getElementById('privacy').checked;
 
   const msgSuccess = document.getElementById('msg-success');
   const msgError   = document.getElementById('msg-error');
   msgSuccess.style.display = 'none';
   msgError.style.display   = 'none';
 
-  if (!nome || !email || !messaggio) {
-    alert('Compila tutti i campi obbligatori.');
+  // controlli campo per campo: l'errore appare sotto al campo sbagliato
+  const emailOk = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email);
+  const errori = [
+    ['nome',      'err-nome',      !nome],
+    ['email',     'err-email',     !emailOk],
+    ['messaggio', 'err-messaggio', messaggio.length < 10],
+    ['privacy',   'err-privacy',   !privacy]
+  ];
+  errori.forEach(function (e) { _mostraErrore(e[0], e[1], e[2]); });
+
+  const primoErrore = errori.find(function (e) { return e[2]; });
+  if (primoErrore) {
+    const el = document.getElementById(primoErrore[0]);
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (el && el.focus) el.focus({ preventScroll: true });
     return;
   }
 
@@ -196,11 +240,15 @@ async function inviaMessaggio() {
       document.getElementById('nome').value = '';
       document.getElementById('email').value = '';
       document.getElementById('messaggio').value = '';
+      document.getElementById('privacy').checked = false;
+      if (msgSuccess.scrollIntoView) msgSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
       msgError.style.display = 'block';
+      if (msgError.scrollIntoView) msgError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  } catch {
+  } catch (e) {
     msgError.style.display = 'block';
+    if (msgError.scrollIntoView) msgError.scrollIntoView({ behavior: 'smooth', block: 'center' });
   } finally {
     btn.disabled = false;
     btn.textContent = '📩 Invia messaggio';
