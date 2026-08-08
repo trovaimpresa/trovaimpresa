@@ -121,6 +121,10 @@
     .no-results h3 { font-size: 22px; margin-bottom: 8px; color: #1a1a1a; }
     .no-results p { color: #666; }
     .loading { padding: 40px; text-align: center; color: #666; font-size: 18px; }
+    .contatti-bloccati { background: #f0f5ff; border: 1.5px dashed #9dbcf0; border-radius: 10px; padding: 14px 18px; font-size: 16px; color: #234; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .contatti-bloccati a { background: #0066ff; color: white; text-decoration: none; font-weight: 700; padding: 10px 18px; border-radius: 9px; white-space: nowrap; }
+    .contatti-bloccati a:hover { background: #0052cc; }
+    .avviso-privacy { background: #fff8e6; border: 1px solid #f0d38a; border-radius: 10px; padding: 12px 18px; font-size: 16px; color: #7a5600; margin-bottom: 16px; }
   </style>
 </head>
 <body>
@@ -227,6 +231,19 @@
     return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
+  // I contatti dei candidati si vedono solo se chi guarda e' un'impresa registrata.
+  // Da sloggati la pagina legge una vista del database che i contatti non li contiene proprio.
+  let impresaLoggata = false;
+
+  async function verificaImpresa() {
+    try {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return false;
+      const { data } = await supabaseClient.from('imprese').select('id').eq('email', user.email).maybeSingle();
+      return !!data;
+    } catch (e) { return false; }
+  }
+
   const PER_PAGE = 10;
   let mestiereScelto = 'tutti', espScelta = 'tutti', sortBy = 'recenti';
   let tuttiRisultati = [], paginaCorrente = 1;
@@ -247,7 +264,8 @@
     document.getElementById('risultatiCount').textContent = 'Ricerca in corso...';
     document.getElementById('pagination').innerHTML = '';
     try {
-      let q = supabaseClient.from('candidati_lavoro').select('*');
+      const tabella = impresaLoggata ? 'candidati_lavoro' : 'candidati_lavoro_pubblici';
+      let q = supabaseClient.from(tabella).select('*');
       if (mestiereScelto !== 'tutti') q = q.ilike('mestiere', `%${mestiereScelto}%`);
       if (citta) q = q.ilike('citta', `%${citta}%`);
       if (espScelta === '0-2')  q = q.lte('anni_esperienza', 2);
@@ -265,7 +283,10 @@
     }
   }
 
-  function nomeDi(c) { return `${c.nome || ''} ${c.cognome || ''}`.trim() || 'Candidato'; }
+  function nomeDi(c) {
+    const secondo = c.cognome || c.iniziale_cognome || '';
+    return `${c.nome || ''} ${secondo}`.trim() || 'Candidato';
+  }
 
   function ordina(lista) {
     const l = lista.slice();
@@ -288,7 +309,9 @@
     const totPagine = Math.ceil(totale / PER_PAGE);
     const slice = lista.slice((pagina-1)*PER_PAGE, pagina*PER_PAGE);
     conteggio.innerHTML = totale === 1 ? 'Trovato <strong>1</strong> candidato' : `Trovati <strong>${totale}</strong> candidati`;
-    div.innerHTML = slice.map(cardHTML).join('');
+    const avviso = impresaLoggata ? '' :
+      '<div class="avviso-privacy">&#128274; Stai guardando da visitatore: per motivi di privacy vedi solo nome e iniziale. I contatti si vedono accedendo con un account impresa.</div>';
+    div.innerHTML = avviso + slice.map(cardHTML).join('');
 
     const pag = document.getElementById('pagination');
     if (totPagine <= 1) { pag.innerHTML = ''; return; }
@@ -321,11 +344,14 @@
         ${c.eta ? `<span class="badge badge-eta">&#127874; ${esc(c.eta)} anni</span>` : ''}
       </div>
       ${c.competenze ? `<div class="candidato-bio">${esc(String(c.competenze).slice(0,220))}${String(c.competenze).length>220?'&hellip;':''}</div>` : ''}
-      <div class="contatti">
+      ${impresaLoggata ? `<div class="contatti">
         ${c.telefono ? `<a class="btn-contatto" href="tel:${esc(c.telefono)}">&#9742;&#65039; Chiama</a>` : ''}
         ${c.email ? `<a class="btn-contatto" href="mailto:${esc(c.email)}">&#128231; Email</a>` : ''}
         ${tel ? `<a class="btn-contatto btn-wa" target="_blank" rel="noopener" href="https://wa.me/${tel}">&#128172; WhatsApp</a>` : ''}
-      </div>
+      </div>` : `<div class="contatti-bloccati">
+        <span>&#128274; Telefono ed email visibili alle imprese registrate</span>
+        <a href="/login-impresa.html">Accedi</a>
+      </div>`}
     </div>`;
   }
 
@@ -375,7 +401,7 @@
   document.getElementById('cittaInput').addEventListener('keydown', e => { if (e.key === 'Enter') cerca(); });
   inizializzaMappa();
   setTimeout(() => { if (map) map.invalidateSize(); }, 300);
-  cerca();
+  verificaImpresa().then(v => { impresaLoggata = v; cerca(); });
 </script>
 </body>
 </html>
