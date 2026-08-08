@@ -872,6 +872,31 @@ verde/rossa col confronto sul periodo precedente. Tooltip al passaggio del mouse
 - Funzioni nuove: `renderCrescita()`, `creRange()`, `apriMestieriCitta()`, `_creRaggruppa()`.
   I dati arrivano da `_creLista`, popolata con `impreseVere` (senza profili di prova).
 
+### Registrazioni: nessuno deve restare bloccato (8 agosto 2026, sera)
+**Segnalazione reale di Chiara Colucci, interior designer di Torino**: non riusciva a
+completare la registrazione e ha cancellato l'account. Pensava servisse il numero di albo;
+il blocco vero era un altro: in `registrazione-professionista.html` la tendina
+**"Professione principale" (obbligatoria)** aveva solo 14 voci tecniche — niente interior
+designer e **niente "Altro"**. Chi non si riconosce nell'elenco non puo' andare avanti e se ne va.
+
+Corretto ovunque:
+- **registrazione-professionista.html**: aggiunte 12 professioni (interior designer,
+  arredatore, home stager, progettista 3D, progettista del verde, geologo, termotecnico,
+  tecnico acustico, tecnico antincendio, restauratore, consulente pratiche edilizie;
+  "consulente energetico" rinominato "/ Certificatore APE").
+- **registrazione-impresa.html** e **registrazione-negozio.html**: non avevano "Altro"
+  per niente. Aggiunto.
+- **registrazione-artigiano.html**: aveva un "Altro" muto, che non permetteva di dire cosa.
+- In tutte e quattro: scegliendo **"Altro (scrivi quale)"** compare un campo di testo
+  obbligatorio; quello che scrive l'utente viene messo **in cima al campo
+  `specializzazioni`**, cosi' si vede sul profilo e lo trova la ricerca per testo.
+  Funzione `mostraAltroMestiere()` / `mostraAltroTipoNegozio()`.
+- Le stesse professioni aggiunte anche in `professionisti.html`, `cerca-professionisti.html`
+  e nelle 3 tendine di `modifica-profilo.html`, altrimenti chi si iscrive non e' cercabile.
+
+⚠️ **REGOLA**: ogni tendina obbligatoria di un modulo pubblico deve avere "Altro" con
+campo libero. Un elenco chiuso su un campo obbligatorio e' un iscritto perso, in silenzio.
+
 ## PROSSIMI LAVORI CONCORDATI (aggiornato l'8 agosto 2026)
 1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto**.
 2. ~~Revisione sito pubblico, percorso cliente (Blocco A)~~ **FATTA il 7-8 agosto**

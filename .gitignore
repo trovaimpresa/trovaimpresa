@@ -22,3 +22,6 @@ mintty.*.png
 
 # --- File di lock (facoltativo: si rigenera da solo) ---
 # package-lock.json
+
+# --- Cestino: file tolti dal sito, restano sul PC finche' non li cancelli tu ---
+_to_delete/

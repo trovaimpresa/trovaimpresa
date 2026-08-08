@@ -211,7 +211,7 @@
         <h2>Professione e specializzazioni</h2>
         <div class="form-group">
           <label>Professione principale <span class="required">*</span></label>
-          <select id="mestiere">
+          <select id="mestiere" onchange="mostraAltraProfessione()">
             <option value="">— Seleziona —</option>
             <option value="architetto">Architetto</option>
             <option value="ingegnere_civile">Ingegnere civile</option>
@@ -220,13 +220,29 @@
             <option value="geometra">Geometra</option>
             <option value="perito_industriale">Perito industriale</option>
             <option value="topografo">Topografo</option>
-            <option value="consulente_energetico">Consulente energetico</option>
+            <option value="geologo">Geologo</option>
+            <option value="interior_designer">Interior designer / Progettista d'interni</option>
+            <option value="arredatore">Arredatore e fornitore d'arredi</option>
+            <option value="home_stager">Home stager</option>
+            <option value="progettista_3d">Progettista 3D e rendering</option>
+            <option value="progettista_verde">Progettista di giardini e verde</option>
+            <option value="consulente_energetico">Consulente energetico / Certificatore APE</option>
+            <option value="termotecnico">Termotecnico</option>
             <option value="consulente_sicurezza">Consulente sicurezza</option>
+            <option value="tecnico_acustico">Tecnico acustico</option>
+            <option value="tecnico_antincendio">Tecnico antincendio</option>
+            <option value="restauratore">Restauratore</option>
+            <option value="consulente_pratiche">Consulente pratiche edilizie e bonus</option>
             <option value="direttore_lavori">Direttore lavori</option>
             <option value="collaudatore_strutture">Collaudatore strutture</option>
             <option value="project_manager">Project manager</option>
             <option value="amministratore_condominio">Amministratore di condominio</option>
+            <option value="altro">Altro (scrivi quale)</option>
           </select>
+        </div>
+        <div class="form-group" id="riga-altra-professione" style="display:none">
+          <label>Scrivi la tua professione <span class="required">*</span></label>
+          <input type="text" id="mestiere_altro" placeholder="Es. Interior designer, Lighting designer, Consulente domotica...">
         </div>
         <div class="form-group">
           <label>Prestazioni offerte</label>
@@ -569,6 +585,16 @@
       if (bar) { bar.style.width = cfg.w; bar.style.background = cfg.c; }
       if (label) label.textContent = cfg.t ? 'Sicurezza password: ' + cfg.t : 'Usa almeno 8 caratteri, con maiuscole, numeri e simboli.';
     }
+    // Nessuno deve restare bloccato perche' la sua professione non e' in elenco:
+    // con "Altro" scrive la sua e la registrazione va avanti.
+    function mostraAltraProfessione() {
+      const sel = document.getElementById('mestiere');
+      const riga = document.getElementById('riga-altra-professione');
+      if (!sel || !riga) return;
+      riga.style.display = sel.value === 'altro' ? '' : 'none';
+      if (sel.value === 'altro') { const c = document.getElementById('mestiere_altro'); if (c) c.focus(); }
+    }
+
     function validateStep(step) {
       hideMsg();
       const need = (id, lbl) => { if (!document.getElementById(id).value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
@@ -579,6 +605,9 @@
         if (!need('citta', 'Città')) return false;
       } else if (step === 2) {
         if (!document.getElementById('mestiere').value) { markInvalid('mestiere'); showMsg('Seleziona la professione principale.', 'error'); return false; }
+        if (document.getElementById('mestiere').value === 'altro' && !document.getElementById('mestiere_altro').value.trim()) {
+          markInvalid('mestiere_altro'); showMsg('Scrivi qual e\' la tua professione.', 'error'); return false;
+        }
       } else if (step === 3) {
         if (!need('email', 'Email')) return false;
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
@@ -690,6 +719,9 @@
       if (!validateStep(3)) { goToStep(3); return; }
       const nome = document.getElementById('nome').value.trim();
       const mestiere = document.getElementById('mestiere').value;
+      // Se ha scelto "Altro", la professione scritta da lui viene messa in cima alle
+      // specializzazioni: cosi' compare sul profilo e la ritrova la ricerca per testo.
+      const mestiereAltro = (document.getElementById('mestiere_altro') || {}).value || '';
       const email = document.getElementById('email').value.trim();
       const telefono = document.getElementById('telefono').value.trim();
       const citta = document.getElementById('citta').value.trim();
@@ -725,7 +757,9 @@
               dipendenti: (document.getElementById('dipendenti')||{}).value || null,
               whatsapp: (document.getElementById('whatsapp')||{}).value || null,
               sito_web: (document.getElementById('sito_web')||{}).value || null,
-              specializzazioni: (document.getElementById('specializzazioni')||{}).value || null,
+              specializzazioni: (mestiere === 'altro' && mestiereAltro.trim()
+                ? mestiereAltro.trim() + ((document.getElementById('specializzazioni')||{}).value ? '. ' + document.getElementById('specializzazioni').value : '')
+                : ((document.getElementById('specializzazioni')||{}).value || null)),
               zone: (document.getElementById('zone')||{}).value || null,
               anni_esperienza: (document.getElementById('anni_esperienza')||{}).value || null,
 

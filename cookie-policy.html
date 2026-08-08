@@ -6,88 +6,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cookie Policy – TrovaImpresa</title>
-  <meta name="description" content="Cookie Policy di TrovaImpresa: quali cookie utilizziamo, a cosa servono e come gestirli. Informativa conforme al GDPR e al Garante Privacy.">
+  <meta name="description" content="Cookie Policy di TrovaImpresa: quali cookie e strumenti di tracciamento usiamo, a cosa servono, quanto durano e come cambiare le tue scelte in ogni momento.">
+  <meta name="robots" content="index,follow">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
 
-    nav {
-      background: #fff;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
+    nav { background: #fff; padding: 14px 24px; display: flex; align-items: center;
+          justify-content: space-between; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
     .logo { font-size: 1.4rem; font-weight: 700; }
     .logo span:first-child { color: #2e78cc; }
     .logo span:last-child { color: #e67e22; }
     nav a { color: #555; text-decoration: none; font-size: 0.9rem; }
     nav a:hover { color: #2e78cc; }
 
-    .container {
-      max-width: 860px;
-      margin: 40px auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-      padding: 48px 56px;
-    }
+    .container { max-width: 860px; margin: 40px auto; background: #fff; border-radius: 12px;
+                 box-shadow: 0 4px 16px rgba(0,0,0,0.07); padding: 48px 56px; }
 
     h1 { font-size: 2rem; color: #2c3e50; margin-bottom: 8px; }
-    .subtitle { color: #888; font-size: 0.95rem; margin-bottom: 36px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
-
-    h2 { font-size: 1.15rem; color: #2c3e50; margin: 28px 0 10px; font-weight: 700; }
-    p { line-height: 1.75; color: #555; margin-bottom: 10px; font-size: 0.97rem; }
-    ul { margin: 8px 0 12px 20px; color: #555; line-height: 1.8; font-size: 0.97rem; }
-    li { margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 1rem; margin-bottom: 32px; border-bottom: 2px solid #f0f0f0;
+                padding-bottom: 20px; line-height: 1.6; }
+    h2 { font-size: 1.28rem; color: #2c3e50; margin: 40px 0 12px; font-weight: 700; }
+    h3 { font-size: 1.06rem; color: #2c3e50; margin: 26px 0 8px; font-weight: 700; }
+    p { line-height: 1.85; color: #555; margin-bottom: 12px; font-size: 1.05rem; }
+    ul { margin: 10px 0 14px 22px; color: #555; line-height: 1.85; font-size: 1.05rem; }
+    li { margin-bottom: 8px; }
     a { color: #2e78cc; text-decoration: none; }
     a:hover { text-decoration: underline; }
+    strong { color: #2c3e50; }
 
-    .highlight-box {
-      background: #f0faf5;
-      border-left: 4px solid #2e78cc;
-      padding: 16px 20px;
-      border-radius: 6px;
-      margin: 20px 0;
-      font-size: 0.97rem;
-      color: #2c3e50;
-    }
+    .highlight-box { background: #f0f6ff; border-left: 4px solid #2e78cc; padding: 18px 22px;
+                     border-radius: 6px; margin: 22px 0; font-size: 1.05rem; line-height: 1.8; color: #2c3e50; }
+    .box-attenzione { background: #fff8ee; border-left: 4px solid #e67e22; padding: 18px 22px;
+                      border-radius: 6px; margin: 22px 0; font-size: 1.05rem; line-height: 1.8; color: #2c3e50; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 16px 0 24px;
-      font-size: 0.93rem;
-      color: #555;
-    }
-    th {
-      background: #f0faf5;
-      color: #2c3e50;
-      font-weight: 700;
-      padding: 10px 14px;
-      text-align: left;
-      border-bottom: 2px solid #d4e0ed;
-    }
-    td {
-      padding: 9px 14px;
-      border-bottom: 1px solid #f0f0f0;
-      vertical-align: top;
-    }
-    tr:last-child td { border-bottom: none; }
+    .tab-wrap { overflow-x: auto; margin: 16px 0 22px; }
+    table { border-collapse: collapse; width: 100%; min-width: 600px; font-size: 0.98rem; }
+    th, td { border: 1px solid #e6ebf0; padding: 12px 14px; text-align: left; vertical-align: top; line-height: 1.6; }
+    th { background: #f5f8fc; color: #2c3e50; font-weight: 700; }
+    td { color: #555; }
+    code { background: #f2f5f8; padding: 2px 6px; border-radius: 4px; font-size: 0.94em; color: #2c3e50; }
 
-    footer {
-      text-align: center;
-      padding: 30px;
-      color: #aaa;
-      font-size: 0.85rem;
-    }
+    .btn-cookie { display: inline-block; background: #2e78cc; color: #fff; border: none;
+                  border-radius: 10px; padding: 15px 26px; font: inherit; font-size: 1.05rem;
+                  font-weight: 700; cursor: pointer; margin: 6px 0 4px; }
+    .btn-cookie:hover { background: #2766ae; }
+
+    footer { text-align: center; padding: 30px; color: #aaa; font-size: 0.85rem; line-height: 1.8; }
     footer a { color: #2e78cc; }
 
     @media (max-width: 600px) {
       .container { padding: 28px 20px; margin: 20px 12px; }
       h1 { font-size: 1.5rem; }
-      table { font-size: 0.82rem; }
     }
   </style>
 <link rel="stylesheet" href="/css/mobile.css?v=3">
@@ -95,163 +65,104 @@
 <body>
 
 <nav>
-  <div class="logo">
-    <span>Trova</span><span>Impresa</span>
-  </div>
+  <div class="logo"><span>Trova</span><span>Impresa</span></div>
   <a href="/index.html">← Torna alla Home</a>
 </nav>
 
 <div class="container">
-  <h1>🍪 Cookie Policy</h1>
-  <p class="subtitle">Ultimo aggiornamento: aprile 2026 &nbsp;|&nbsp; Documento conforme al Regolamento UE 2016/679 (GDPR) e al Provvedimento del Garante Privacy dell'8 maggio 2014</p>
+  <h1>Cookie Policy</h1>
+  <p class="subtitle">Ultimo aggiornamento: agosto 2026 &nbsp;|&nbsp; Informativa ai sensi dell'art. 122 del Codice Privacy e delle Linee guida del Garante del 10 giugno 2021</p>
 
   <div class="highlight-box">
-    <strong>In sintesi:</strong> TrovaImpresa utilizza esclusivamente cookie tecnici necessari al funzionamento del sito. Non utilizziamo cookie di profilazione o di marketing senza il tuo consenso esplicito.
+    <strong>In breve.</strong> Alcuni strumenti servono solo a far funzionare il sito e restano sempre attivi. Le statistiche di visita e il pixel pubblicitario partono <strong>soltanto se dici di sì</strong> al banner: se scegli "Solo essenziali" non vengono caricati affatto. Puoi cambiare idea quando vuoi con il pulsante qui sotto.
   </div>
 
-  <h2>1. Cosa sono i Cookie</h2>
-  <p>I cookie sono piccoli file di testo che i siti web visitati dall'utente inviano al suo dispositivo (computer, tablet, smartphone), dove vengono memorizzati per essere poi ritrasmessi agli stessi siti alla visita successiva. I cookie permettono al sito di riconoscere il dispositivo dell'utente e di ricordarne le preferenze o le azioni nel tempo.</p>
+  <button class="btn-cookie" onclick="if(window.riapriBannerCookie){riapriBannerCookie();}else{alert('Ricarica la pagina e riprova.');}">🍪 Cambia le tue scelte sui cookie</button>
 
-  <h2>2. Titolare del Trattamento</h2>
-  <p>Il Titolare del trattamento dei dati raccolti tramite cookie è:</p>
-  <p><strong>TrovaImpresa</strong><br>
-  Fondatore: Alessio Pinto<br>
-  Sede operativa: Rieti (RI), Italia<br>
-  Email: <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a></p>
+  <h2>1. Cosa sono i cookie</h2>
+  <p>I cookie sono piccoli file che un sito salva nel tuo browser per riconoscerti alla visita successiva o per ricordare le tue preferenze. Accanto ai cookie esistono strumenti simili che salvano informazioni nel browser senza essere tecnicamente cookie — il <code>localStorage</code> ne è l'esempio più comune. Il Garante li tratta allo stesso modo, quindi in questa pagina li elenchiamo tutti, chiamandoli per quello che sono.</p>
 
-  <h2>3. Tipologie di Cookie Utilizzati</h2>
+  <h2>2. Chi è il titolare</h2>
+  <p>Alessio Pinto — Via Dante Alighieri 5, 02100 Rieti (RI) — P.IVA 01285950570 — <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>. Il trattamento dei dati è descritto nella <a href="/privacy-policy.html">Privacy Policy</a>.</p>
 
-  <p>In base alla finalità, i cookie si distinguono nelle seguenti categorie:</p>
+  <h2>3. Cosa usiamo davvero</h2>
 
-  <h2>3.1 Cookie Tecnici (sempre attivi)</h2>
-  <p>Sono cookie strettamente necessari per il funzionamento del sito e per la fruizione dei servizi richiesti dall'utente. Senza questi cookie, alcune funzionalità del sito non sarebbero disponibili. Non richiedono il consenso dell'utente ai sensi dell'art. 122, comma 1, del Codice Privacy e del Provvedimento del Garante dell'8 maggio 2014.</p>
+  <h3>3.1 Strumenti tecnici — sempre attivi, non serve il consenso</h3>
+  <p>Senza questi il sito non funziona: ti mandano fuori dall'area riservata a ogni clic o dimenticano quello che hai scelto. Restano nel tuo browser e non vengono usati per seguirti in giro per la rete.</p>
+  <div class="tab-wrap">
+    <table>
+      <tr><th>Nome</th><th>Dove sta</th><th>A cosa serve</th><th>Quanto dura</th></tr>
+      <tr><td><code>sb-...-auth-token</code></td><td>localStorage</td><td>Ti tiene collegato dopo l'accesso (Supabase)</td><td>Fino alla scadenza della sessione o al logout</td></tr>
+      <tr><td><code>cookie_consent</code></td><td>localStorage</td><td>Ricorda la scelta che hai fatto sul banner</td><td>12 mesi</td></tr>
+      <tr><td><code>cookie_consent_date</code></td><td>localStorage</td><td>Data della scelta, per richiedertela quando scade</td><td>12 mesi</td></tr>
+      <tr><td>Preferenze di ricerca (città, filtri)</td><td>localStorage</td><td>Evita di farti riscrivere la città a ogni pagina</td><td>Finché non svuoti il browser</td></tr>
+    </table>
+  </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Nome cookie</th>
-        <th>Finalità</th>
-        <th>Durata</th>
-        <th>Tipo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>session</code></td>
-        <td>Gestione della sessione utente autenticato</td>
-        <td>Sessione</td>
-        <td>Tecnico – prima parte</td>
-      </tr>
-      <tr>
-        <td><code>sb-auth-token</code></td>
-        <td>Autenticazione tramite Supabase (mantenimento del login)</td>
-        <td>7 giorni</td>
-        <td>Tecnico – prima parte</td>
-      </tr>
-      <tr>
-        <td><code>cookie_consent</code></td>
-        <td>Memorizzazione delle preferenze cookie dell'utente</td>
-        <td>12 mesi</td>
-        <td>Tecnico – prima parte</td>
-      </tr>
-    </tbody>
-  </table>
+  <h3>3.2 Statistiche — solo con il tuo consenso</h3>
+  <p>Usiamo <strong>Google Analytics 4</strong> per sapere quante persone visitano il sito e quali pagine leggono. Serve a capire cosa funziona, non a riconoscere te.</p>
+  <div class="tab-wrap">
+    <table>
+      <tr><th>Nome</th><th>Chi lo mette</th><th>A cosa serve</th><th>Quanto dura</th></tr>
+      <tr><td><code>_ga</code></td><td>Google</td><td>Distingue i visitatori uno dall'altro</td><td>2 anni</td></tr>
+      <tr><td><code>_ga_&lt;ID&gt;</code></td><td>Google</td><td>Mantiene lo stato della sessione</td><td>2 anni</td></tr>
+    </table>
+  </div>
+  <p>L'indirizzo IP viene <strong>reso anonimo</strong> prima dell'analisi. Finché non accetti, Analytics è caricato in modalità di consenso negato: non scrive cookie e non raccoglie dati. Informativa di Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
 
-  <h2>3.2 Cookie Analitici (con anonimizzazione)</h2>
-  <p>TrovaImpresa potrebbe utilizzare cookie analitici con IP anonimizzato per raccogliere informazioni aggregate sull'utilizzo del sito (pagine visitate, tempo di permanenza, provenienza del traffico). Tali cookie non consentono di identificare direttamente l'utente.</p>
+  <h3>3.3 Marketing — solo se accetti tutto</h3>
+  <p>Se scegli "Accetta tutti" carichiamo il <strong>pixel di Meta (Facebook)</strong>, che ci permette di misurare i risultati delle campagne pubblicitarie. Se scegli "Solo essenziali", <strong>il pixel non viene proprio caricato</strong>: non è disattivato a metà, non parte.</p>
+  <div class="tab-wrap">
+    <table>
+      <tr><th>Nome</th><th>Chi lo mette</th><th>A cosa serve</th><th>Quanto dura</th></tr>
+      <tr><td><code>_fbp</code></td><td>Meta</td><td>Collega la visita alle campagne pubblicitarie</td><td>3 mesi</td></tr>
+      <tr><td><code>fr</code></td><td>Meta</td><td>Misura e personalizza gli annunci</td><td>3 mesi</td></tr>
+    </table>
+  </div>
+  <p>Informativa di Meta: <a href="https://www.facebook.com/privacy/policy" target="_blank" rel="noopener">facebook.com/privacy/policy</a>.</p>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Nome cookie</th>
-        <th>Finalità</th>
-        <th>Durata</th>
-        <th>Tipo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>_ga</code></td>
-        <td>Distinzione degli utenti (Google Analytics con IP anonimizzato)</td>
-        <td>2 anni</td>
-        <td>Analitico – terza parte</td>
-      </tr>
-      <tr>
-        <td><code>_ga_*</code></td>
-        <td>Mantenimento dello stato della sessione (Google Analytics)</td>
-        <td>2 anni</td>
-        <td>Analitico – terza parte</td>
-      </tr>
-    </tbody>
-  </table>
-  <p>Google Analytics è configurato con anonimizzazione dell'indirizzo IP (<code>anonymizeIp: true</code>). Per ulteriori informazioni: <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy di Google</a>.</p>
-
-  <h2>3.3 Cookie di Profilazione e Marketing</h2>
-  <p>TrovaImpresa <strong>non utilizza</strong> cookie di profilazione o di remarketing pubblicitario senza previo consenso esplicito dell'utente. Qualora in futuro venissero introdotti, la presente Cookie Policy sarà aggiornata e verrà richiesto il consenso tramite apposito banner.</p>
-
-  <h2>4. Cookie di Terze Parti</h2>
-  <p>Il sito potrebbe includere componenti provenienti da servizi di terze parti che installano propri cookie. I principali servizi di terze parti presenti sul sito sono:</p>
+  <h3>3.4 Servizi esterni che si caricano dentro le pagine</h3>
+  <p>Alcune parti del sito richiamano risorse ospitate altrove. Non scrivono cookie di profilazione, ma per funzionare ricevono il tuo <strong>indirizzo IP</strong>:</p>
   <ul>
-    <li><strong>Google Fonts</strong> – caricamento dei caratteri tipografici (non installa cookie di profilazione)</li>
-    <li><strong>Supabase</strong> – backend e autenticazione; informativa: <a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a></li>
-    <li><strong>Netlify</strong> – hosting del sito; informativa: <a href="https://www.netlify.com/privacy/" target="_blank">netlify.com/privacy</a></li>
-  </ul>
-  <p>TrovaImpresa non ha controllo diretto sui cookie installati da terze parti. Si consiglia di consultare le rispettive informative privacy.</p>
-
-  <h2>5. Durata dei Cookie</h2>
-  <p>I cookie si distinguono in base alla durata in:</p>
-  <ul>
-    <li><strong>Cookie di sessione:</strong> vengono eliminati automaticamente alla chiusura del browser.</li>
-    <li><strong>Cookie persistenti:</strong> rimangono memorizzati sul dispositivo per un periodo determinato, indicato nella tabella al punto 3.</li>
+    <li><strong>Google Fonts</strong> — i caratteri grafici del sito.</li>
+    <li><strong>jsDelivr</strong> e <strong>unpkg</strong> — librerie tecniche necessarie al funzionamento delle pagine.</li>
+    <li><strong>OpenStreetMap</strong> e <strong>Nominatim</strong> — le mappe e la ricerca degli indirizzi, quando apri una scheda che ne contiene una.</li>
+    <li><strong>YouTube</strong> — solo nelle pagine dove è presente un video incorporato, e solo quando avvii la riproduzione.</li>
   </ul>
 
-  <h2>6. Come Gestire i Cookie</h2>
-  <p>L'utente può gestire o disabilitare i cookie direttamente tramite le impostazioni del proprio browser. Di seguito i link alle guide ufficiali dei principali browser:</p>
+  <h2>4. Come cambiare idea</h2>
+  <p>La revoca deve essere facile quanto il consenso, e qui lo è: premi il pulsante <strong>"Cambia le tue scelte sui cookie"</strong> in cima a questa pagina. Il banner ricompare e puoi rifare la scelta. Trascorsi 12 mesi te la richiediamo comunque.</p>
+  <p>Puoi anche agire dal browser, dove trovi le impostazioni per bloccare o cancellare i cookie di qualsiasi sito:</p>
   <ul>
-    <li><a href="https://support.google.com/chrome/answer/95647" target="_blank">Google Chrome</a></li>
-    <li><a href="https://support.mozilla.org/it/kb/Attivare%20e%20disattivare%20i%20cookie" target="_blank">Mozilla Firefox</a></li>
-    <li><a href="https://support.apple.com/it-it/guide/safari/sfri11471/mac" target="_blank">Apple Safari</a></li>
-    <li><a href="https://support.microsoft.com/it-it/windows/eliminare-e-gestire-i-cookie-168dab11-0753-043d-7c16-ede5947fc64d" target="_blank">Microsoft Edge</a></li>
-  </ul>
-  <p>Si avverte che la disabilitazione dei cookie tecnici potrebbe compromettere il corretto funzionamento del sito o di alcune sue funzionalità, in particolare il login e la gestione del profilo.</p>
-  <p>Per gestire i cookie di terze parti in modo centralizzato, l'utente può anche utilizzare strumenti come <a href="https://www.youronlinechoices.com/it/" target="_blank">Your Online Choices</a>.</p>
-
-  <h2>7. Base Giuridica del Trattamento</h2>
-  <p>Il trattamento dei dati raccolti tramite cookie avviene sulla base di:</p>
-  <ul>
-    <li><strong>Art. 6, lett. b) GDPR</strong> – esecuzione di un contratto: per i cookie tecnici necessari all'erogazione del servizio richiesto.</li>
-    <li><strong>Art. 6, lett. a) GDPR</strong> – consenso: per i cookie analitici e di terze parti non strettamente necessari.</li>
-    <li><strong>Art. 122 D.Lgs. 196/2003 (Codice Privacy)</strong> – esclusione del consenso per i cookie tecnici.</li>
+    <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener">Google Chrome</a></li>
+    <li><a href="https://support.mozilla.org/it/kb/protezione-antitracciamento-avanzata-firefox-desktop" target="_blank" rel="noopener">Mozilla Firefox</a></li>
+    <li><a href="https://support.apple.com/it-it/guide/safari/sfri11471/mac" target="_blank" rel="noopener">Safari</a></li>
+    <li><a href="https://support.microsoft.com/it-it/microsoft-edge" target="_blank" rel="noopener">Microsoft Edge</a></li>
   </ul>
 
-  <h2>8. Diritti dell'Interessato</h2>
-  <p>Ai sensi degli artt. 15–22 del GDPR, l'utente ha il diritto di:</p>
-  <ul>
-    <li>Accedere ai propri dati personali raccolti tramite cookie</li>
-    <li>Richiederne la rettifica o la cancellazione</li>
-    <li>Opporsi al trattamento o richiederne la limitazione</li>
-    <li>Revocare il consenso in qualsiasi momento, senza pregiudizio per la liceità del trattamento basata sul consenso prestato prima della revoca</li>
-    <li>Proporre reclamo al <strong>Garante per la protezione dei dati personali</strong>: <a href="https://www.garanteprivacy.it" target="_blank">www.garanteprivacy.it</a></li>
-  </ul>
-  <p>Per esercitare i tuoi diritti scrivi a: <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a></p>
+  <div class="box-attenzione">
+    Se blocchi tutti i cookie dal browser, alcune funzioni smettono di funzionare: in particolare non riesci a restare collegato dopo l'accesso, perché è proprio uno di quegli strumenti a tenerti dentro.
+  </div>
 
-  <h2>9. Modifiche alla Cookie Policy</h2>
-  <p>TrovaImpresa si riserva il diritto di modificare la presente Cookie Policy in qualsiasi momento, anche in ragione di eventuali variazioni normative. Le modifiche saranno pubblicate su questa pagina con aggiornamento della data indicata in cima al documento. Si consiglia di consultare periodicamente questa pagina.</p>
+  <h2>5. I tuoi diritti</h2>
+  <p>Sui dati raccolti tramite questi strumenti puoi esercitare tutti i diritti previsti dal GDPR — accesso, rettifica, cancellazione, opposizione, revoca del consenso — scrivendo a <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>. Sono spiegati per esteso al punto 9 della <a href="/privacy-policy.html">Privacy Policy</a>. Puoi inoltre proporre reclamo al <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">Garante per la protezione dei dati personali</a>.</p>
 
-  <h2>10. Riferimenti Normativi</h2>
-  <ul>
-    <li>Regolamento UE 2016/679 (GDPR)</li>
-    <li>D.Lgs. 30 giugno 2003, n. 196 (Codice in materia di protezione dei dati personali), come modificato dal D.Lgs. 101/2018</li>
-    <li>Provvedimento del Garante Privacy dell'8 maggio 2014 – "Individuazione delle modalità semplificate per l'informativa e l'acquisizione del consenso per l'uso dei cookie"</li>
-    <li>Linee Guida del Garante Privacy sui cookie del 10 giugno 2021</li>
-  </ul>
+  <h2>6. Modifiche</h2>
+  <p>Se aggiungiamo o togliamo strumenti aggiorniamo questa pagina e la data in alto. Quando la modifica riguarda strumenti che richiedono il consenso, il banner ricompare per farti scegliere di nuovo.</p>
+
+  <div class="highlight-box">
+    Alessio Pinto — Via Dante Alighieri 5, 02100 Rieti (RI) — P.IVA 01285950570 — <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a>
+  </div>
 </div>
 
 <footer>
-  <p>© 2026 TrovaImpresa – <a href="/privacy-policy.html">Privacy Policy</a> – <a href="/cookie-policy.html">Cookie Policy</a> – <a href="/index.html">Home</a></p>
+  © 2026 TrovaImpresa — Alessio Pinto — Via Dante Alighieri 5, 02100 Rieti (RI) — P.IVA 01285950570<br>
+  <a href="/privacy-policy.html">Privacy Policy</a> ·
+  <a href="/cookie-policy.html">Cookie Policy</a> ·
+  <a href="/termini-condizioni.html">Termini e Condizioni</a> ·
+  <a href="/index.html">Home</a>
 </footer>
 
 <script src="/cookie-banner.js"></script>
-<script src="/js/modal-fullscreen.js" defer></script>
 </body>
 </html>

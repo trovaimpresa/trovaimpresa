@@ -201,7 +201,7 @@
         <h2>Tipo di negozio</h2>
         <div class="form-group">
           <label>Tipo negozio <span class="required">*</span></label>
-          <select id="tipo_negozio">
+          <select id="tipo_negozio" onchange="mostraAltroTipoNegozio()">
             <option value="">— Seleziona tipo negozio —</option>
             <option value="materiali_edili">Materiali edili</option>
             <option value="ferramenta">Ferramenta</option>
@@ -219,7 +219,12 @@
             <option value="climatizzazione_caldaie">Climatizzazione / Caldaie</option>
             <option value="stufe_camini">Stufe e camini</option>
             <option value="agenzia_immobiliare">Agenzia immobiliare</option>
+            <option value="altro">Altro (scrivi quale)</option>
           </select>
+        </div>
+        <div class="form-group" id="riga-altro-tipo_negozio" style="display:none">
+          <label>Scrivi che tipo di negozio hai <span class="required">*</span></label>
+          <input type="text" id="tipo_negozio_altro" placeholder="Es. Rivendita pellet, utensileria, vivaio, porte blindate...">
         </div>
         <details class="extra">
           <summary>Altri prodotti e zone<small>Altre categorie che tratti, zone di consegna, anni di attività. Facoltativi.</small></summary>
@@ -473,6 +478,17 @@
       if (bar) { bar.style.width = cfg.w; bar.style.background = cfg.c; }
       if (label) label.textContent = cfg.t ? 'Sicurezza password: ' + cfg.t : 'Usa almeno 8 caratteri, con maiuscole, numeri e simboli.';
     }
+    // Nessuno deve restare bloccato perche' il suo lavoro non e' in elenco:
+    // con "Altro" lo scrive con parole sue e la registrazione va avanti.
+    function mostraAltroTipoNegozio() {
+      const sel = document.getElementById('tipo_negozio');
+      const riga = document.getElementById('riga-altro-tipo_negozio');
+      if (!sel || !riga) return;
+      const e = (sel.value || '').toLowerCase().indexOf('altro') === 0;
+      riga.style.display = e ? '' : 'none';
+      if (e) { const c = document.getElementById('tipo_negozio_altro'); if (c) c.focus(); }
+    }
+
     function validateStep(step) {
       hideMsg();
       const need = (id, lbl) => { if (!document.getElementById(id).value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
@@ -483,6 +499,9 @@
         if (!need('citta', 'Città')) return false;
       } else if (step === 2) {
         if (!document.getElementById('tipo_negozio').value) { markInvalid('tipo_negozio'); showMsg('Seleziona il tipo di negozio.', 'error'); return false; }
+        if ((document.getElementById('tipo_negozio').value||'').toLowerCase().indexOf('altro') === 0 && !document.getElementById('tipo_negozio_altro').value.trim()) {
+          markInvalid('tipo_negozio_altro'); showMsg('Scrivi con parole tue di cosa ti occupi.', 'error'); return false;
+        }
       } else if (step === 3) {
         if (!need('email', 'Email')) return false;
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
@@ -628,7 +647,17 @@
               dipendenti: (document.getElementById('dipendenti')||{}).value || null,
               whatsapp: (document.getElementById('whatsapp')||{}).value || null,
               sito_web: (document.getElementById('sito_web')||{}).value || null,
-              specializzazioni: (document.getElementById('specializzazioni')||{}).value || null,
+              specializzazioni: (function(){
+                // Se ha scelto "Altro", il lavoro scritto da lui va in cima alle
+                // specializzazioni: cosi' compare sul profilo e lo trova la ricerca.
+                var base = (document.getElementById('specializzazioni')||{}).value || '';
+                var el = document.getElementById('tipo_negozio');
+                var alt = (document.getElementById('tipo_negozio_altro')||{}).value || '';
+                if (el && (el.value||'').toLowerCase().indexOf('altro') === 0 && alt.trim()) {
+                  return alt.trim() + (base ? '. ' + base : '');
+                }
+                return base || null;
+              })(),
               zone: (document.getElementById('zone')||{}).value || null,
               anni_esperienza: (document.getElementById('anni_esperienza')||{}).value || null,
 
