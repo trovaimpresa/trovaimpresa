@@ -1147,6 +1147,100 @@ aliquota **11,31%** contro 29-32% ordinario, per tutto il periodo formativo + 12
 - **Git Bash di Alessio rompe l'incolla su più righe** (`git pushcd`, `[200~cd`). → dargli
   **un comando su una riga sola** con `&&`.
 
+## BACHECHE LAVORO — SECONDA PARTE (8 agosto 2026, sera tardi)
+
+Continua la sezione sopra. Qui il giro si chiude davvero e il pannello viene ripulito.
+
+### IL BUCO PIU' GROSSO: nessuno poteva candidarsi
+La tabella `candidature` esisteva (offerta_id, candidato_id, impresa_id, stato, data),
+il **candidato** le vedeva nel suo pannello e l'**impresa** in "Candidature ricevute".
+Ma **l'unico punto del sito che le creava era `ricerca-offerte.html`**, la pagina doppione
+che avevamo appena reindirizzato. Il pulsante "Candidati" portava a
+`registrazione-candidato.html?id=` e quel modulo **il parametro id non lo leggeva nemmeno**:
+registrava la persona e perdeva il collegamento con l'annuncio.
+→ **Risolto in `offerta-lavoro.html`**: ora il pulsante crea davvero la riga in `candidature`.
+Gestisce 5 casi, tutti provati: visitatore sloggato (iscriviti / ho gia' un account),
+impresa loggata senza profilo candidato, candidato che si candida, candidato gia' candidato,
+doppione a livello DB (23505).
+
+### MODULO CANDIDATO: da 17 campi obbligatori a 7
+`registrazione-candidato.html`: obbligatori restano nome, mestiere, email, telefono,
+regione, provincia, citta' + password. Cognome, eta', sesso e anni di esperienza sono
+diventati **(facoltativo)**; il campo "conferma password" e' stato tolto.
+⚠️ **La password l'ho TENUTA di proposito**: generandola a caso la persona non rientrerebbe
+piu' nel pannello se non passando da "password dimenticata".
+⚠️ **Regione/provincia/citta' TENUTE**: sono 3 tendine collegate, la citta' esiste solo se
+scegli le prime due, e la zona e' l'unica cosa che serve davvero a un'impresa.
+Chi arriva da un annuncio (`?id=`) dopo la conferma email viene riportato **su quell'annuncio**.
+
+### GRAFICA UNIFICATA — 10 pagine su 10
+Tutte le pagine lavoro/subappalto hanno lo stesso menu (`Bacheca offerte<br>lavoro`,
+`Bacheca candidature<br>lavoro`, voce attiva evidenziata):
+offerte-lavoro, candidature-lavoro, offerta-lavoro, i 4 subappalto,
+offerte-registrazione, registrazione-candidato, trova-cantieri.
+⚠️ Su `offerte-registrazione`, `registrazione-candidato` e `trova-cantieri` il menu e'
+`header.sito` (classe diversa perche' quelle pagine hanno gia' un `.header` che e' il
+titolone). Hanno anche `html, body { padding-top:0 !important }` e
+`header.sito + * { margin-top:34px }`: senza, il menu finiva rientrato dentro il contenuto.
+
+### PULSANTE DI AZIONE SU OGNI BACHECA
+Le due bacheche non avevano **nessun pulsante per agire**: si poteva solo guardare, e per
+pubblicare bisognava passare dal pannello (che chi arriva da Google non ha).
+Ora ogni bacheca ha **un** pulsante arancione suo, nella barra chiara sotto quella blu:
+`.barra-azione` + `.btn-azione`. Offerte → "➕ Pubblica un'offerta di lavoro";
+Candidature → "➕ Iscriviti e fatti trovare".
+⚠️ Alessio ha bocciato due volte l'idea dei **due riquadri dentro la pagina** ("mischiato"):
+le due bacheche vanno tenute **separate**, una voce per ciascuna nel menu, un pulsante per
+ciascuna nella sua pagina.
+
+### PANNELLI: una sola card lavoro, con due bottoni
+Dopo vari giri (mea culpa, ci ho messo troppo a capire), la forma finale e' **una card con
+due bottoni, identica a quella dei subappalti**:
+`[ Le mie offerte di lavoro | Candidature ricevute ]  [ Cerco Subappaltatori | Sono Subappaltatore ]`
+- **Nuova sezione `sec-mie-offerte` + `caricaMieOfferte()` + `chiudiOfferta()`** su artigiano,
+  professionisti e negozio. ⚠️ `pannello-impresa` **ce l'aveva gia'**: era stata costruita
+  una volta sola e mai portata sugli altri.
+  Mostra ogni annuncio con Online/Chiusa, quante candidature ha ricevuto, "Vedi online" e
+  "Chiudi l'offerta" (`attiva = false`).
+- Tolte perche' ora stanno nel menu del sito: "Pubblica Offerta di Lavoro", "Ricerca Offerte",
+  "Ricerca Candidati", e la card `cerca-lavoro` con "Registrati · Invia CV" (era roba da
+  candidato dentro il pannello impresa).
+- Corretto: "Ricerca Candidati" puntava a `ricerca-candidati.html`, spostata in `_to_delete`
+  quel giorno stesso → ora `candidature-lavoro.html`.
+- Lo stato vuoto di "Candidature ricevute" non e' piu' un vicolo cieco: propone
+  "Le mie offerte" e "Pubblica un'offerta".
+
+### COMPLETAMENTO PROFILO: adesso conta anche le foto
+`js/completa-profilo.js` controllava 9 voci e **le foto non le guardava**: si arrivava al 100%
+con zero foto caricate. Aggiunta la voce **"Foto dei lavori", peso 15** (alto di proposito:
+per un'edile le foto convincono piu' di qualsiasi descrizione).
+Le foto stanno in `lavori_foto`, non fra le colonne di `imprese`, quindi si contano a parte
+(`select id, count exact, head` su `impresa_id`) e si iniettano nella riga come `_foto`.
+Se quella lettura fallisce, considera 0 e la fascia non si rompe.
+Verificato dal vivo: il profilo di Alessio e' passato da 93% a **81%** con "Foto dei lavori"
+fra le voci mancanti.
+
+### LA COSA PIU' UTILE IMPARATA OGGI
+**Il subappalto funziona meglio del lavoro perche' NON chiede l'account.**
+`subappalto-cerca` e `subappalto-offre` non hanno nessun controllo di login: compili,
+pubblichi, e il sistema genera un **token** (`crypto.randomUUID()`) che ti da' un link
+`subappalto-gestisci.html?token=...` per rigestire il tuo annuncio. Zero registrazione,
+zero password, zero email da confermare.
+→ **Prossimo lavoro consigliato**: applicare lo stesso schema all'**iscrizione candidato**.
+Un muratore che vuole solo farsi trovare non ha bisogno di un account: nome, telefono,
+mestiere, citta' e un link personale. Il modulo lungo resta per chi vuole il profilo completo.
+Per le OFFERTE invece l'account ha senso: l'impresa deve ricevere le candidature nel pannello.
+
+### AUDIT DELLE CARD DEL PANNELLO (fatto con controllo automatico)
+Verificate tutte le card: destinazione, esistenza del file, esistenza della funzione.
+⚠️ **15 funzioni sembravano mancanti ma era un falso allarme**: stanno in
+`strumenti-comuni.js` e `strumenti-cantiere.js`. Prima di gridare al bug, cercare anche li'.
+⚠️ **`pannello-impresa.html` ha un `<script>` aperto e mai chiuso** (22 aperti, 21 chiusi).
+C'era gia' prima dell'8 agosto, il browser lo tollera. Da sistemare con calma.
+Osservazione di modello: **16 card su 22 sono Premium**. Un'impresa appena iscritta apre il
+pannello e vede quasi solo lucchetti. In particolare "Foto dei lavori" e "Certificazioni"
+sono Premium ma servono proprio a completare il profilo — cioe' rallentano l'obiettivo.
+
 ## PROSSIMI LAVORI CONCORDATI (aggiornato l'8 agosto 2026)
 1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto**.
 2. ~~Revisione sito pubblico, percorso cliente (Blocco A)~~ **FATTA il 7-8 agosto**
@@ -1173,6 +1267,10 @@ aliquota **11,31%** contro 29-32% ordinario, per tutto il periodo formativo + 12
      ricerca-candidati prima di essere rifatta.
    - Search Console: `/sitemap-offerte.xml` darà "1 errore / 0 pagine" finché non c'è
      almeno un annuncio. È normale, non è un bug.
+   - **iscrizione candidato in stile subappalto** (token, senza account): è il pezzo che
+     più di ogni altro può riempire la bacheca candidature. Vedi la sezione sopra.
+   - `<script>` sbilanciato in `pannello-impresa.html` (pre-esistente).
+   - decidere se togliere il Premium da "Foto dei lavori" e "Certificazioni".
 
 ⚠️ **Serve ad Alessio**: la **P.IVA** per il footer della home (c'è già il commento pronto
 in `index.html`) — un sito senza P.IVA visibile perde fiducia proprio con chi teme le truffe.
