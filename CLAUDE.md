@@ -1043,8 +1043,22 @@ Regole usate, da mantenere:
      porte) e **"E se sotto c'e' il riscaldamento a pavimento"**.
      La query *"pavimento sottile da sovrapporre ad incastro"* era gia' in posizione 10 senza
      che la pagina nominasse mai il vinilico: ora c'e'.
-   - Da fare con lo stesso metodo: **cappotto** (query: "cappotto esterno termico prezzi",
-     "preventivi cappotto esterno", "isolamento termico a cappotto prezzi", tutte pos 31-47).
+   - **Cappotto FATTA l'8 agosto** (25 -> 30 KB). Era la piu' corta delle quattro, solo 5
+     sezioni. Mancavano le tre domande di chi valuta davvero. Aggiunte:
+     **"Cappotto interno: quando e' l'unica strada"** (tabella di confronto esterno/interno con
+     costo, ponteggio, spessore, abitabilita' + il riquadro sul rischio muffa, barriera al
+     vapore e ponti termici), **"L'insufflaggio: l'alternativa da 20 € al mq"** (15-30 €/mq,
+     va verificata l'intercapedine con la telecamera) e **"Il cappotto in condominio"**
+     (assemblea, millesimi, e il consiglio di chiedere il conto per appartamento invece del
+     totale: e' il motivo per cui i cappotti passano o non passano in assemblea).
+     ⚠️ In questa pagina la classe del riquadro e' **`.note`**, NON `.esperienza`: le guide non
+     hanno tutte lo stesso CSS. **Controllare sempre le classi disponibili prima di inserire**
+     (`grep -o "^\s*\.[a-z-]*" file.html | sort -u`), con un assert che blocca se mancano.
+   - ⚠️ Nella sezione detrazioni del cappotto NON sono state toccate le percentuali: le
+     aliquote 2026 vanno verificate da Alessio o dal commercialista, non inventate.
+
+**Le 4 guide vicine alla prima pagina sono tutte arricchite (8 agosto).** Prossimo controllo in
+Search Console fra 2-3 settimane: guardare se le posizioni 8-11 sono salite e se il CTR e' cresciuto.
 4. La pagina **impianto elettrico** ha la domanda piu' alta di tutte (20+ query diverse) ma
    sta in posizione 45: e' quella con piu' potenziale inespresso.
 
