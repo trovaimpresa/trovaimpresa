@@ -1884,29 +1884,10 @@
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
-        <div class="dash-quick-card" data-card-id="cerca-lavoro" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
-          <a href="registrazione-candidato.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
-            <div class="dash-quick-icon">🧑</div>
-            <div class="dash-quick-label">Registrati · Invia CV</div>
-          </a>
-          <a href="candidature-lavoro.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
-            <div class="dash-quick-icon">🔍</div>
-            <div class="dash-quick-label">Ricerca Candidati</div>
-          </a>
-        </div>
-        <div class="dash-quick-card" data-card-id="offerte-lavoro" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
-          <a href="offerte-registrazione.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
-            <div class="dash-quick-icon">💼</div>
-            <div class="dash-quick-label">Pubblica Offerta di Lavoro</div>
-          </a>
-          <a href="ricerca-offerte.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
-            <div class="dash-quick-icon">🔍</div>
-            <div class="dash-quick-label">Ricerca Offerte</div>
-          </a>
-          <a href="javascript:void(0)" onclick="showSection('candidature'); caricaCandidature()" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
-            <div class="dash-quick-icon">📥</div>
-            <div class="dash-quick-label">Candidature ricevute</div>
-          </a>
+        <div class="dash-quick-card" data-card-id="candidature" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('candidature'); caricaCandidature()">
+          <div class="dash-quick-icon">📥</div>
+          <div class="dash-quick-label">Candidature ricevute</div>
+          <div class="dash-quick-sub">Chi si è candidato alle tue offerte</div>
         </div>
         <div class="dash-quick-card" data-card-id="mie-offerte" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('mie-offerte', this)">
           <div class="dash-quick-icon">💼</div>
