@@ -1066,6 +1066,87 @@ Search Console fra 2-3 settimane: guardare se le posizioni 8-11 sono salite e se
 esistono e portano zero. Comprare clic mentre l'organico e' fermo sarebbe pagare due volte.
 E comunque servirebbero piu' imprese per citta' (oggi 1,5 di media) prima di portare clienti.
 
+## BACHECHE LAVORO E CANDIDATURE (8 agosto 2026, sera)
+
+Punto di partenza: la sezione lavoro **era già tutta costruita** (11 file: offerte-lavoro,
+registrazione/login/pannello-candidato, ricerca-candidati, ricerca-offerte, i 4 subappalto,
+trova-cantieri) ma **vuota e invisibile**. Non è stato costruito niente di nuovo lato
+funzioni: è stato sbloccato e collegato quello che c'era.
+
+### Cosa è stato fatto
+- **Le due bacheche sono separate, e stanno nel MENU** (non riquadri dentro la pagina —
+  provato, Alessio l'ha bocciato due volte): `Bacheca offerte<br>lavoro` e
+  `Bacheca candidature<br>lavoro`, su due righe, classe `.nav-2righe` (index) /
+  `.due-righe` (pagine lavoro). Menu presente solo in 5 file: index, bandi, blog,
+  offerte-lavoro, offerta-lavoro (+ candidature-lavoro).
+- **`ricerca-candidati.html` RIFATTA da zero** come `candidature-lavoro.html`, riusando
+  **lo stesso foglio di stile di offerte-lavoro** (header, top-bar blu, sidebar filtri,
+  card). Prima era graficamente un altro sito. Vecchio file in `_to_delete/`.
+- **Indirizzi allineati**: `/offerte-lavoro` e `/candidature-lavoro`. Redirect 301 in
+  netlify.toml per `/ricerca-candidati` e `/ricerca-offerte` (quest'ultima era un doppione
+  esatto di offerte-lavoro: due pagine che si facevano concorrenza su Google).
+- **PREMIUM TOLTO** su pubblicazione offerte e subappalti: rimosso `data-premium="true"`
+  dalle card `offerte-lavoro` (4 pannelli) e `subappalto` (3 pannelli — negozio non ce l'ha).
+  In `offerte-registrazione.html` il tetto mensile è passato da `? 999 : 1` a **`= 999`
+  (illimitato per tutti)**. Decisione di Alessio: *"non ci devo guadagnare sopra, se mi porta
+  traffico per me è un successo"*. Per rimettere un limite ai Free il codice originale è nel
+  commento sulla stessa riga.
+- **`offerta-lavoro.html` NUOVA**: una pagina per ogni annuncio (`?id=`), con markup
+  **JobPosting** (quello che porta gli annunci dentro Google Lavoro), title/description/
+  canonical costruiti dall'annuncio, `validThrough` a 90 giorni se l'impresa non mette la
+  scadenza. Le card della bacheca ora linkano qui ("Vedi offerta" al posto di "Candidati").
+- **`sitemap-offerte.xml`**: funzione Netlify (`netlify/functions/sitemap-offerte.js`) che
+  la genera al volo da Supabase, rewrite 200 in netlify.toml, dichiarata in robots.txt.
+  Se Supabase non risponde torna una sitemap **vuota ma valida**, non un 500 (un 500
+  ripetuto fa perdere fiducia a Google sull'intero file). Cache 1 ora.
+- **sitemap.xml**: aggiunte offerte-lavoro, candidature-lavoro, subappalto e i due articoli
+  nuovi (da 150 a 155 url). Nessuna delle tre bacheche c'era.
+- **PRIVACY CANDIDATI**: vista `candidati_lavoro_pubblici` (niente cognome intero, telefono,
+  email, CV) — `sql/candidati-vista-pubblica.sql`, **già eseguito da Alessio l'8 agosto**.
+  La pagina legge la vista se sei sloggato e la tabella vera se sei un'impresa loggata
+  (controllo su `imprese` per email). ⚠️ Il `revoke select ... from anon` in fondo al file
+  è **ancora commentato**: va eseguito dopo qualche giorno di verifica.
+- **esc() aggiunto** su `offerte-lavoro.html` e `candidature-lavoro.html`: prima titolo e
+  nome azienda finivano in innerHTML senza pulizia. Non era teorico — aprendo la
+  pubblicazione a tutti, chiunque poteva iniettare codice da un titolo.
+- **Bug corretti su candidature**: "2 candidatoi trovatoi" e il badge `undefined`
+  (leggeva `c.livello`, colonna che nel DB non esiste → ora `anni_esperienza`).
+
+### Guida "quanto costa un muratore" — prezzi corretti
+Alessio ha segnalato che erano gonfiati. Rifatti i conti con i suoi dati (manovale
+1.500-1.800 lordi/mese, muratore 2.000-2.400, +1.000 di contributi, su ~210 giornate):
+- costo impresa: **manovale 145-160 €/gg, specializzato 170-195 €** (erano 212 e 250)
+- prezzo cliente: **210-240 / 250-280 / squadra 450-500** (erano 260-280 / 300-330 / 550-600)
+- in tasca all'operaio: **69-81 / 89-105 €/gg** — su 100 € spesi dall'impresa ne arrivano 48
+Aggiornati **tutti e 15 i punti** della pagina (meta, risposta rapida, tabella, calcolatore,
+5 FAQ, JSON-LD). Aggiunta la sezione **"Perché in edilizia si lavora in nero"**.
+⚠️ Il caso personale di Alessio (2.400 €/mese, giornata 250 €) è rimasto invariato ma
+etichettato "fascia alta, 25 anni di anzianità": sta sopra la tabella nuova.
+
+### Due articoli nuovi (portano il pubblico alle bacheche)
+- `quanto-guadagna-un-muratore.html` → per gli OPERAI, porta a /offerte-lavoro
+- `come-trovare-operai-edili.html` → per le IMPRESE, porta a pubblicare e ai candidati
+Entrambi con FAQ + JSON-LD, si linkano a vicenda. **Le cifre condivise sono identiche nei
+due articoli e nella guida sui costi** — verificato riga per riga, se si toccano vanno
+allineate tutte e tre.
+Dati usati: 59,7% assunzioni artigiane di difficile reperimento (media naz. 47%), idraulici
+78,8%, tecnici cantiere 75,7%, elettricisti 71,8%. Apprendistato professionalizzante:
+aliquota **11,31%** contro 29-32% ordinario, per tutto il periodo formativo + 12 mesi.
+
+### ⚠️ TRAPPOLE NUOVE (imparate sul campo l'8 agosto)
+- **Il ponte col PC NON PUÒ CANCELLARE FILE.** Se Claude lancia `git` via device_bash, git
+  crea `.git/index.lock` e non riesce a rimuoverlo: **tutti i comandi git di Alessio si
+  bloccano**. È successo davvero. → **Claude non deve lanciare git dal suo lato.** Se il lock
+  resta, si toglie con `mv .git/index.lock _to_delete/`.
+- **Fine riga**: i file che passano dal container tornano in CRLF e git li segna come
+  riscritti per intero (diff illeggibile). → dopo ogni `device_commit_files` lanciare
+  `sed -i 's/\r$//'` sui file toccati.
+- **~120 file del repo hanno modifiche fantasma** (solo CRLF/LF, contenuto identico:
+  imprese-*.html, package-lock.json, robots.txt, i backup). → **mai `git add -A`**, sempre
+  la lista esplicita dei file, se no il commit è 20.000 righe di rumore.
+- **Git Bash di Alessio rompe l'incolla su più righe** (`git pushcd`, `[200~cd`). → dargli
+  **un comando su una riga sola** con `&&`.
+
 ## PROSSIMI LAVORI CONCORDATI (aggiornato l'8 agosto 2026)
 1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto**.
 2. ~~Revisione sito pubblico, percorso cliente (Blocco A)~~ **FATTA il 7-8 agosto**
@@ -1080,6 +1161,18 @@ E comunque servirebbero piu' imprese per citta' (oggi 1,5 di media) prima di por
 7. Code minori sul gestionale: galNomeOp (UUID in Galleria), calendario mobile a lista,
    campi obbligatori segnati nei form, esc() sulle card neg_* del negozio.
 8. Fornitori Fase 3 (ponte marketplace) quando ci saranno più negozi iscritti.
+9. **BACHECHE LAVORO — quello che resta** (vedi sezione sopra):
+   - **riempire la bacheca di annunci veri**: è l'unica cosa che manca davvero, e non è
+     codice. Si parte dalle 17 imprese di `reclutamento-lazio.csv` (reatino, telefoni ed
+     email già verificate).
+   - eseguire il `revoke` in fondo a `sql/candidati-vista-pubblica.sql` dopo qualche giorno.
+   - **semplificare `registrazione-candidato.html`**: oggi sono **17 campi obbligatori**
+     con password e CV. Un muratore quel form non lo compila. Il profilo lo crea un
+     trigger dal signUp, quindi si può scendere a 5 campi senza toccare il database.
+   - `subappalto.html` e le sue 3 pagine hanno ancora la grafica vecchia, come ce l'aveva
+     ricerca-candidati prima di essere rifatta.
+   - Search Console: `/sitemap-offerte.xml` darà "1 errore / 0 pagine" finché non c'è
+     almeno un annuncio. È normale, non è un bug.
 
 ⚠️ **Serve ad Alessio**: la **P.IVA** per il footer della home (c'è già il commento pronto
 in `index.html`) — un sito senza P.IVA visibile perde fiducia proprio con chi teme le truffe.
