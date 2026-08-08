@@ -986,9 +986,17 @@ Regole usate, da mantenere:
 ### Prossimi passi SEO, in ordine (concordati)
 1. ~~Titoli e descrizioni delle 9 guide~~ **FATTO l'8 agosto.** Ricontrollare il CTR in
    Search Console **fra 2-3 settimane** (Google ci mette a rileggere le pagine).
-2. **Il pasticcio .html / senza .html**: Search Console mostra sia `/imprese-cosenza.html`
-   sia `/imprese-agrigento`. Google li vede come due pagine diverse e divide il punteggio.
-   Da sistemare con una regola sola su tutte e 124 le pagine.
+2. ~~Il pasticcio .html / senza .html~~ **FATTO l'8 agosto.** Approfondendo si e' visto
+   che NON era una falla grave: il sito aveva **due convenzioni**, ognuna coerente al suo
+   interno — `sitemap.xml` (150 URL, senza .html) e `sitemap-seo.xml` (30 pagine categoria:
+   architetto, geometra, ferramenta, negozio-*, tutte CON .html), con i canonical allineati
+   a ciascuna. Uniformato tutto **senza .html**: corretti i 30 canonical e le 29 URL di
+   `sitemap-seo.xml`. ⚠️ **Regola da qui in avanti: URL sempre senza .html**, in canonical,
+   sitemap e link interni.
+   Resta aperto (piccolo): 12 pagine non hanno canonical; alcune andrebbero messe a
+   `noindex` perche' non devono finire su Google — `le-mie-inserzioni`, `conferma-recensione`,
+   `email-benvenuto-premium`, `email-completa-profilo`, `demo-arcade`, `importa-bandi`,
+   `admin-utilizzo`. ⚠️ NON toccare `google*.html`: sono i file di verifica di Search Console.
 3. **Arricchire le 4 guide vicine alla prima pagina** (infissi pos 8, idraulico/pavimento/
    cappotto pos 11) per farle scavalcare.
 4. La pagina **impianto elettrico** ha la domanda piu' alta di tutte (20+ query diverse) ma
