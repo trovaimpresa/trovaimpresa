@@ -810,6 +810,68 @@ pagina muore**: le 4 `cerca-*` restavano su "Ricerca in corso..." per sempre.
 - `prezzi.html`: chiarezza sull'IVA e sul "3 mesi gratis".
 - `chi-siamo.html`: manca la foto e il racconto dei 25 anni in cantiere.
 
+## LAVORO DELL'8 AGOSTO 2026 (pomeriggio)
+
+### Pagine di servizio (chiusura Blocco C)
+- **contatti.html**: la conferma d'invio stava in cima alla pagina, quindi da telefono
+  spariva fuori schermo dopo aver premuto Invia — spostata sopra al pulsante, con
+  `scrollIntoView`. Tolto `alert()`: gli errori appaiono sotto al campo sbagliato, col
+  bordo rosso. Email validata con regex (prima bastava una lettera). **Aggiunto il
+  consenso privacy obbligatorio** con link alla Privacy Policy: senza spunta non parte.
+- **prezzi.html**: **Alessio è in regime forfettario** — i prezzi (€5/mese, €49/anno)
+  sono FINALI, nessuna IVA da aggiungere. Dicitura art. 1 commi 54-89 L. 190/2014 in
+  fondo. Sistemato un bug: sull'annuale si leggeva "€49 al mese" (cambiava solo il
+  numero, non il periodo). I 3 mesi sono **un regalo di lancio**, senza carta e senza
+  rinnovo automatico. Tre FAQ nuove: carta, cosa succede dopo i 3 mesi, dov'è la fregatura.
+- **chi-siamo.html**: vedi la regola fissa sul tono in cima a questo file. Tolto ogni
+  riferimento ad Alessio. La sezione centrale ora **elogia le imprese**
+  ("tra i più bravi al mondo") e presenta TrovaImpresa come **"una vetrina in più"**,
+  mai come qualcosa che le imprese si meritano o di cui hanno bisogno.
+- **P.IVA inserita**: 01285950570, nel footer di index.html sotto l'email.
+  ⚠️ **Manca ancora l'indirizzo completo della sede** (via e civico) e il numero REA:
+  servono nei Termini per l'identificazione ex art. 7 D.Lgs. 70/2003.
+
+### Termini e Condizioni riscritti (termini-condizioni.html)
+I vecchi erano un modello generico con un buco: la sezione 5 si intitolava "Piani Free"
+e il Premium non era descritto affatto. Ora 18 sezioni con indice, scritte sul
+funzionamento reale del sito: intermediario non parte del contratto, recensioni (con la
+dichiarazione obbligatoria che NON c'è verifica preventiva, D.Lgs. 26/2023), procedura di
+segnalazione contenuti illeciti + punto di contatto (DSA, Reg. UE 2022/2065), piani e
+prezzi forfettari, recesso 14 giorni solo per i consumatori, dati del gestionale (30
+giorni per esportarli), foro di Rieti per i professionisti.
+- ⚠️ **NON inserire il link alla piattaforma ODR europea**: è stata dismessa il 20 luglio
+  2025 e non è più obbligatoria. Al suo posto il rimando agli organismi ADR del MIMIT.
+- Preparato **TrovaImpresa-Termini-per-avvocato.docx** con la bozza + 15 punti da far
+  verificare a un legale. Da fare: farlo rileggere.
+- `termini-servizio.html` è un doppione orfano, non linkato da nessuna pagina: da cancellare.
+
+### Pannello admin (admin.html)
+**22 bug corretti** in una passata. I tre gravi:
+1. `renderImprese`/`renderCharts` esplodevano se un'impresa aveva `mestieri` salvato come
+   testo invece che come lista → tabella e grafici bloccati su "Caricamento..." per
+   sempre. Aggiunto l'helper **`_arr()`**: usarlo SEMPRE sui campi mestieri/zone.
+2. `togglePassword` non era definita: l'occhio della password non faceva niente.
+3. Quattro `return` muti su errore del database: le tabelle restavano su "Caricamento..."
+   senza dire nulla. Aggiunto l'helper **`_erroreTabella(id, colonne, messaggio)`**.
+Altri: "Regala Premium" non scriveva `premium_scadenza` (il regalo diventava premium a
+vita e risultava "pagante"); "Elimina locandina" diceva sempre "✅ Eliminata!" anche se il
+server rifiutava; il filtro "Da controllare" era sparito ed è stato rimesso; il conteggio
+in alto non seguiva la ricerca; grafici e abbonamenti includevano i profili di prova
+mentre le statistiche no; "null null" e "Invalid Date"; `doLogout` non svuotava le
+credenziali. Nuovi helper riusabili: `_arr`, `_data`, `_nomeImp`, `_erroreTabella`, `_giorno`.
+
+### Dashboard admin rifatta
+Al posto delle due liste a barre (mestieri/città) c'è **"Crescita iscritti"**: colonne
+delle nuove imprese per settimana, con i pulsanti **30 giorni · 3 mesi · Tutto** (su
+"Tutto" raggruppa per mese). Sopra il numero grosso del periodo e la pillola
+verde/rossa col confronto sul periodo precedente. Tooltip al passaggio del mouse.
+- **Il grafico è SVG disegnato a mano, nessuna libreria esterna**: la CDN al sito è già
+  stata bloccata in passato, un grafico che dipende da una CDN sarebbe morto.
+- Mestieri e città sono ora dietro il pulsante "Vedi mestieri e città più richiesti",
+  che apre la modal grande (`modal-content.classList.add('largo')`).
+- Funzioni nuove: `renderCrescita()`, `creRange()`, `apriMestieriCitta()`, `_creRaggruppa()`.
+  I dati arrivano da `_creLista`, popolata con `impreseVere` (senza profili di prova).
+
 ## PROSSIMI LAVORI CONCORDATI (aggiornato l'8 agosto 2026)
 1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto**.
 2. ~~Revisione sito pubblico, percorso cliente (Blocco A)~~ **FATTA il 7-8 agosto**
