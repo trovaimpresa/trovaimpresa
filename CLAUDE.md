@@ -1033,7 +1033,18 @@ Regole usate, da mantenere:
      quasi sempre un intento **"riparazione / chiamata"** molto piu' cercato e molto piu'
      vicino alla conversione (chi ha una perdita chiama oggi, chi rifa' il bagno ci pensa sei
      mesi). Verificare se vale anche per elettricista, fabbro, condizionatore.
-   - Da fare con lo stesso metodo: pavimento, cappotto.
+   - **Pavimento FATTA l'8 agosto** (33 -> 37,6 KB). La sovrapposizione c'era gia' ed era
+     spiegata bene. Mancava invece **il prezzo della SOLA POSA** — ed e' la parola su cui la
+     pagina e' messa meglio di tutte: *"costo posa pavimento al mq"* **posizione 5**. Aggiunte
+     tre sezioni: **"Quanto costa la sola posa, formato per formato"** (30x60/60x60, 20x120
+     effetto legno, 120x120, mosaico, parquet flottante vs incollato, + il 20-30% per diagonale
+     e spina di pesce), **"I pavimenti sottili da mettere sopra al vecchio"** (resina, gres
+     sottile, vinilico/LVT, laminato, con lo SPESSORE in mm perche' il problema vero sono le
+     porte) e **"E se sotto c'e' il riscaldamento a pavimento"**.
+     La query *"pavimento sottile da sovrapporre ad incastro"* era gia' in posizione 10 senza
+     che la pagina nominasse mai il vinilico: ora c'e'.
+   - Da fare con lo stesso metodo: **cappotto** (query: "cappotto esterno termico prezzi",
+     "preventivi cappotto esterno", "isolamento termico a cappotto prezzi", tutte pos 31-47).
 4. La pagina **impianto elettrico** ha la domanda piu' alta di tutte (20+ query diverse) ma
    sta in posizione 45: e' quella con piu' potenziale inespresso.
 
