@@ -476,7 +476,7 @@
           <input id="imp-search" class="search-input" placeholder="🔍 Cerca impresa..." oninput="applicaFiltriImprese()">
           <select id="imp-filtro-tipo" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i tipi</option><option value="impresa">Impresa</option><option value="artigiano">Artigiano</option><option value="professionista">Professionista</option><option value="negozio">Negozio</option></select>
           <select id="imp-filtro-piano" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti i piani</option><option value="premium">Premium</option><option value="free">Free</option></select>
-          
+          <select id="imp-filtro-stato" onchange="applicaFiltriImprese()" style="padding:8px;border:1px solid var(--border);border-radius:8px"><option value="">Tutti gli stati</option><option value="verificata">Verificate</option><option value="attesa">Da controllare</option></select>
         </div>
       </div>
       <div class="table-wrap">
@@ -1051,6 +1051,32 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
+// Alcuni profili hanno mestieri/zone salvati come testo invece che come lista:
+// senza questa normalizzazione .slice().join() esplode e la tabella resta
+// bloccata su "Caricamento..." per sempre.
+function _arr(v){
+  if (Array.isArray(v)) return v.filter(Boolean);
+  if (v == null || v === '') return [];
+  return String(v).split(',').map(s => s.trim()).filter(Boolean);
+}
+// Data in formato italiano che non stampa mai "Invalid Date".
+function _data(d){ if(!d) return '–'; const x=new Date(d); return isNaN(x)?'–':x.toLocaleDateString('it-IT'); }
+// Nome da mostrare: mai "null null".
+function _nomeImp(i){ return i.nome_attivita || [i.nome, i.cognome].filter(Boolean).join(' ') || 'Senza nome'; }
+// Errore visibile dentro una tabella, invece del "Caricamento..." eterno.
+function _erroreTabella(idTabella, colonne, messaggio){
+  const tb = document.getElementById(idTabella);
+  if (tb) tb.innerHTML = '<tr><td colspan="'+colonne+'"><div class="empty-table"><div class="eicon">\u26a0\ufe0f</div>'
+    + esc(messaggio) + '</div></td></tr>';
+}
+// Mostra/nasconde la password nel form di accesso.
+function togglePassword(id, btn){
+  const c = document.getElementById(id);
+  if (!c) return;
+  c.type = c.type === 'password' ? 'text' : 'password';
+  if (btn) btn.style.opacity = c.type === 'text' ? '1' : '0.55';
+}
+
 let tutteImprese = [];
 
 // Credenziali admin tenute in memoria dopo il login: servono a ogni
@@ -1105,6 +1131,12 @@ async function doLogin() {
 }
 
 function doLogout() {
+  // Non basta nascondere il pannello: senza svuotare credenziali e dati,
+  // chi prende il computer rientra premendo Accedi.
+  adminU = null; adminP = null;
+  tutteImprese = [];
+  const pw = document.getElementById('login-pass'); if (pw) pw.value = '';
+  const us = document.getElementById('login-user'); if (us) us.value = '';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('admin-panel').style.display = 'none';
 }
@@ -1126,7 +1158,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'utilizzo') caricaUtilizzo();
   if (id === 'richieste') caricaRichieste();
   if (id === 'scrivi-tutti') contaDestinatari();
-  if (!fromPopstate) history.pushState({section: id}, '');
+  if (!fromPopstate && (!history.state || history.state.section !== id)) history.pushState({section: id}, '');
 }
 
 history.replaceState({section: 'dashboard'}, '');
@@ -1177,10 +1209,13 @@ function pubDurataLabel(a) {
   if (m % 12 === 0) return (m / 12) + ' anni';
   return m + ' mesi';
 }
+// Legge una data sia se e' 'AAAA-MM-GG' sia se e' un timestamp completo.
+function _giorno(v){ if(!v) return null; const d=new Date(String(v).slice(0,10)+'T00:00:00'); return isNaN(d)?null:d; }
+
 // Durata esatta in giorni del periodo acquistato
 function pubGiorniTotali(a) {
   if (!a.data_inizio || !a.data_fine) return null;
-  const i = new Date(a.data_inizio + 'T00:00:00'), f = new Date(a.data_fine + 'T00:00:00');
+  const i = _giorno(a.data_inizio), f = _giorno(a.data_fine);
   if (isNaN(i) || isNaN(f)) return null;
   const g = Math.round((f - i) / 86400000);
   return g > 0 ? g : null;
@@ -1189,7 +1224,7 @@ function pubGiorniTotali(a) {
 // Giorni che mancano alla scadenza (negativo = già scaduto)
 function pubGiorniResidui(a) {
   if (!a.data_fine) return null;
-  const f = new Date(a.data_fine + 'T00:00:00');
+  const f = _giorno(a.data_fine);
   if (isNaN(f)) return null;
   const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
   return Math.round((f - oggi) / 86400000);
@@ -1206,12 +1241,12 @@ function pubInScadenza(a, giorni) {
   return g !== null && g >= 0 && g <= (giorni || 30);
 }
 
-async function caricaPubblicitaClienti() {
+async function caricaPubblicitaClienti(segnaVisti = true) {
   const tb = document.getElementById('table-pubblicita');
   const { data: ann, error } = await sb.from('annunci_pubblicitari')
     .select('*').order('data_inizio', { ascending: false });
   if (error) {
-    tb.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="eicon">⚠️</div>Errore: ' + error.message + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="10" class="empty-table"><div class="eicon">⚠️</div>Errore: ' + esc(error.message) + '</td></tr>';
     return;
   }
   // Recupero i dati delle imprese collegate (nome, contatti)
@@ -1225,10 +1260,12 @@ async function caricaPubblicitaClienti() {
   _pubData = (ann || []).map(a => Object.assign({}, a, { _imp: impMap[a.impresa_id] || null }));
   renderPubblicitaClienti();
   // Aprendo la sezione, segno come "visti" tutti gli annunci pagati e azzero il badge.
-  const maxId = (ann || []).filter(a => a.stato === 'pagato').reduce((m, a) => Math.max(m, a.id || 0), 0);
-  if (maxId) localStorage.setItem('pub_last_seen_id', String(maxId));
-  const b = document.getElementById('badge-pubblicita');
-  if (b) b.style.display = 'none';
+  if (segnaVisti) {
+    const maxId = (ann || []).filter(a => a.stato === 'pagato').reduce((m, a) => Math.max(m, a.id || 0), 0);
+    if (maxId) localStorage.setItem('pub_last_seen_id', String(maxId));
+    const b = document.getElementById('badge-pubblicita');
+    if (b) b.style.display = 'none';
+  }
 }
 
 async function eliminaAnnuncioPub(id) {
@@ -1300,8 +1337,8 @@ function renderPubblicitaClienti() {
 
   tb.innerHTML = righe.map(a => {
     const i = a._imp || {};
-    const nome = i.nome_attivita || i.nome || ('Impresa #' + (a.impresa_id || '—'));
-    const contatti = [i.email, i.telefono].filter(Boolean).join('<br>') || '—';
+    const nome = esc(i.nome_attivita || i.nome || ('Impresa #' + (a.impresa_id || '—')));
+    const contatti = [i.email, i.telefono].filter(Boolean).map(esc).join('<br>') || '—';
     const stato = pubStatoReale(a);
     const badge = stato === 'pagato'
         ? '<span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">✅ Pagato</span>'
@@ -1334,15 +1371,15 @@ function renderPubblicitaClienti() {
     }
 
     const banner = a.logo_url
-      ? '<a href="' + a.logo_url + '" target="_blank"><img src="' + a.logo_url + '" style="height:38px;border-radius:6px;border:1px solid var(--border)"></a>'
+      ? '<a href="' + esc(a.logo_url) + '" target="_blank"><img src="' + esc(a.logo_url) + '" style="height:38px;border-radius:6px;border:1px solid var(--border)"></a>'
       : '—';
     const link = a.link_url
-      ? '<div style="font-size:11px"><a href="' + a.link_url + '" target="_blank" style="color:#0066ff">' + a.link_url + '</a></div>'
+      ? '<div style="font-size:11px"><a href="' + esc(a.link_url) + '" target="_blank" style="color:#0066ff">' + esc(a.link_url) + '</a></div>'
       : '';
     return '<tr>'
-      + '<td><strong>' + nome + '</strong>' + (i.tipo ? '<div style="font-size:11px;color:#888">' + i.tipo + '</div>' : '') + '</td>'
+      + '<td><strong>' + nome + '</strong>' + (i.tipo ? '<div style="font-size:11px;color:#888">' + esc(i.tipo) + '</div>' : '') + '</td>'
       + '<td style="font-size:12px">' + contatti + '</td>'
-      + '<td>' + pubSpazioLabel(a.spazio_id) + '<div style="font-size:12px;color:#888">📍 ' + (a.citta || '—') + '</div></td>'
+      + '<td>' + esc(pubSpazioLabel(a.spazio_id)) + '<div style="font-size:12px;color:#888">📍 ' + esc(a.citta || '—') + '</div></td>'
       + '<td style="font-size:12px">' + durataCol + '</td>'
       + '<td style="font-size:12px">' + periodo + '</td>'
       + '<td style="font-size:12px">' + scadCol + '</td>'
@@ -1358,9 +1395,10 @@ function renderPubblicitaClienti() {
 // Riusa _pubData (caricata da caricaPubblicitaClienti): se la sezione viene
 // aperta per prima, i dati vengono scaricati qui.
 async function caricaMappaSpazi() {
-  if (!_pubData.length) await caricaPubblicitaClienti();
+  if (!_pubData.length) await caricaPubblicitaClienti(false);
   const sel = document.getElementById('map-citta');
-  if (sel && !sel.options.length) {
+  if (sel) {
+    const scelta = sel.value; // ricostruisco sempre: se arriva un annuncio in una citta' nuova la tendina deve vederla
     // Città con almeno un annuncio, in cima; poi tutte le altre del listino.
     const conAnnunci = [...new Set(_pubData.map(a => (a.citta || '').trim()).filter(Boolean))]
       .sort((x, y) => x.localeCompare(y));
@@ -1369,12 +1407,13 @@ async function caricaMappaSpazi() {
     sel.innerHTML =
       (conAnnunci.length
         ? '<optgroup label="Con annunci">' +
-          conAnnunci.map(c => '<option value="' + c + '">' + c + '</option>').join('') +
+          conAnnunci.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('') +
           '</optgroup>'
         : '') +
       '<optgroup label="Tutte le città">' +
-      altre.map(c => '<option value="' + c + '">' + c + '</option>').join('') +
+      altre.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('') +
       '</optgroup>';
+    if (scelta) sel.value = scelta;
   }
   renderMappaSpazi();
 }
@@ -1433,7 +1472,7 @@ function renderMappaSpazi() {
           + '</tr>';
       }
       const i = a._imp || {};
-      const nome = i.nome_attivita || i.nome || ('Impresa #' + (a.impresa_id || '—'));
+      const nome = esc(i.nome_attivita || i.nome || ('Impresa #' + (a.impresa_id || '—')));
       const gg = pubGiorniResidui(a);
       const col = gg === null ? '#666' : gg <= 7 ? '#c92a2a' : gg <= 30 ? '#e67700' : '#1a7f43';
       const nota = gg === null ? '' : gg < 0 ? 'scaduto'
@@ -1444,7 +1483,7 @@ function renderMappaSpazi() {
         + '<td>€' + r.sp.prezzo + '</td>'
         + '<td><span style="background:#e7f6ec;color:#1a7f43;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:700">✅ Occupato</span></td>'
         + '<td><strong>' + nome + '</strong>'
-        + (i.email ? '<div style="font-size:11px;color:#888">' + i.email + '</div>' : '') + '</td>'
+        + (i.email ? '<div style="font-size:11px;color:#888">' + esc(i.email) + '</div>' : '') + '</td>'
         + '<td><strong>' + pubDurataLabel(a) + '</strong></td>'
         + '<td>' + pubDataIt(a.data_fine)
         + '<div style="font-size:11px;font-weight:700;color:' + col + '">' + nota + '</div></td>'
@@ -1493,7 +1532,11 @@ async function suppFetch(action, extra) {
 
 async function caricaSupportoAdmin() {
   const j = await suppFetch('list');
-  if (!j || !j.success) return;
+  if (!j || !j.success) {
+    const l = document.getElementById('supp-conv-list');
+    if (l) l.innerHTML = '<div class="loading">\u26a0\ufe0f Non riesco a caricare il supporto. Riprova fra poco.</div>';
+    return;
+  }
   _suppData = { messaggi: j.messaggi || [], utenti: j.utenti || {} };
   renderConvList();
   aggiornaBadgeSupporto();
@@ -1600,7 +1643,7 @@ function renderAbbonamenti() {
   const tbody = document.getElementById('table-abbonamenti');
   if (!tbody) return;
   const q = (document.getElementById('abb-search')?.value || '').toLowerCase().trim();
-  let lista = tutteImprese.slice();
+  let lista = tutteImprese.filter(i => !i.is_test);
   if (q) lista = lista.filter(i => ((i.nome_attivita || i.nome || '') + ' ' + (i.email || '')).toLowerCase().includes(q));
   if (!lista.length) { tbody.innerHTML = '<tr><td colspan="6" class="loading">Nessun risultato.</td></tr>'; return; }
   tbody.innerHTML = lista.map(i => {
@@ -1847,7 +1890,9 @@ async function adminWrite(action, table, id, patch) {
 
 async function togglePremium(id, attiva) {
   if (!confirm(attiva ? 'Regalare il Premium (3 mesi) a questa impresa?' : 'Togliere il Premium a questa impresa?')) return;
-  const patch = attiva ? { piano: 'premium' } : { piano: 'free', premium_scadenza: null };
+  const patch = attiva
+    ? { piano: 'premium', premium_scadenza: new Date(Date.now() + 90*24*3600*1000).toISOString().slice(0,10) }
+    : { piano: 'free', premium_scadenza: null };
   if (!await adminWrite('update', 'imprese', id, patch)) return;
   await caricaImprese();
   renderAbbonamenti();
@@ -1890,6 +1935,7 @@ async function eliminaLocandina(slot) {
       method: 'DELETE',
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
+    if (!res.ok) throw new Error('il server ha rifiutato la cancellazione (codice ' + res.status + ')');
     document.getElementById('loc-preview-' + slot).innerHTML = '<span style="color:#bbb; font-size:12px;">Nessuna immagine</span>';
     status.textContent = '✅ Eliminata!';
     status.style.color = '#c0392b';
@@ -1937,7 +1983,11 @@ async function caricaTutto() {
 // CARICA IMPRESE
 async function caricaImprese() {
   const { data, error } = await sb.from('imprese').select('*').order('created_at', { ascending: false });
-  if (error) { console.error(error); return; }
+  if (error) {
+    console.error(error);
+    _erroreTabella('table-imprese', 8, 'Non riesco a leggere le imprese: ' + (error.message || 'errore sconosciuto'));
+    return;
+  }
   tutteImprese = data || [];
 
   // I profili di prova (is_test) restano nell'elenco, cosi' li puoi ancora
@@ -1961,9 +2011,9 @@ async function caricaImprese() {
   // restano aggiornati se un giorno rimettiamo i riquadri
   _set('stat-verificate', verificate);
   _set('stat-attesa', attesa);
-  const oggiStr = new Date().toISOString().slice(0, 10);
+  const oggiStr = new Date().toLocaleDateString('sv-SE'); // 'sv-SE' = AAAA-MM-GG in ora locale
   const settimanaFa = new Date(Date.now() - 7 * 24 * 3600 * 1000);
-  _set('stat-oggi', impreseVere.filter(i => (i.created_at || '').slice(0, 10) === oggiStr).length);
+  _set('stat-oggi', impreseVere.filter(i => i.created_at && new Date(i.created_at).toLocaleDateString('sv-SE') === oggiStr).length);
   _set('stat-settimana', impreseVere.filter(i => i.created_at && new Date(i.created_at) >= settimanaFa).length);
   _set('stat-premium', impreseVere.filter(i => (i.piano || '').toLowerCase() === 'premium').length);
   _set('stat-gestionali', impreseVere.filter(i => i.gestionale_attivo === true).length);
@@ -1976,7 +2026,7 @@ async function caricaImprese() {
 
   renderImprese(tutteImprese);
   if (document.getElementById('table-daverif')) renderDaVerificare(tutteImprese.filter(i => !i.verificata));
-  renderCharts(tutteImprese);
+  renderCharts(impreseVere);
 }
 
 function renderImprese(lista) {
@@ -1987,15 +2037,15 @@ function renderImprese(lista) {
   }
   tbody.innerHTML = lista.map(i => `
     <tr>
-      <td><strong>${esc(i.nome_attivita || (i.nome + ' ' + i.cognome))}</strong><br><small style="color:var(--light)">${esc(i.email)}</small></td>
-      <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo) || '–'}</span></td>
+      <td><strong>${esc(_nomeImp(i))}</strong><br><small style="color:var(--light)">${esc(i.email)}</small></td>
+      <td><span class="badge ${(i.tipo||'').toLowerCase()==='artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo) || '–'}</span></td>
       <td>📍 ${esc(i.citta) || '–'}</td>
-      <td>${esc((i.mestieri||[]).slice(0,2).join(', '))}${(i.mestieri||[]).length>2?' +altri':''}</td>
+      <td>${esc(_arr(i.mestieri).slice(0,2).join(', '))}${_arr(i.mestieri).length>2?' +altri':''}</td>
       <td>${i.verificata
             ? '<span class="badge badge-v">✅ Verificata</span>'
             : '<span class="badge badge-att">Da controllare</span>'}</td>
       <td>${i.is_test?'<span style="background:#eef1f5;color:#5b6b80;font-weight:700;font-size:0.72rem;padding:2px 8px;border-radius:999px">PROVA</span><br>':''}${(i.piano||'').toLowerCase()==='premium'?'<span style="color:#7b1fa2;font-weight:700">💎 Premium</span>':'<span style="color:var(--light)">Free</span>'}${i.gestionale_attivo?'<br><span style="color:#0066ff;font-size:0.75rem;font-weight:700">🛠️ Gestionale</span>':''}</td>
-      <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${_data(i.created_at)}</td>
       <td>
         ${!i.verificata ? `<button class="action-btn btn-verifica" onclick="apriDettaglio('${i.id}')">🔍 Controlla</button> ` : ''}
         <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
@@ -2013,11 +2063,11 @@ function renderDaVerificare(lista) {
   }
   tbody.innerHTML = lista.map(i => `
     <tr>
-      <td><strong>${esc(i.nome_attivita || (i.nome + ' ' + i.cognome))}</strong></td>
-      <td><span class="badge ${i.tipo==='Artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo)||'–'}</span></td>
+      <td><strong>${esc(_nomeImp(i))}</strong></td>
+      <td><span class="badge ${(i.tipo||'').toLowerCase()==='artigiano'?'badge-art':'badge-imp'}">${esc(i.tipo)||'–'}</span></td>
       <td>${esc(i.email)}<br><small style="color:var(--light)">${esc(i.telefono)||''}</small></td>
       <td>📍 ${esc(i.citta)||'–'}</td>
-      <td style="font-size:0.78rem;color:var(--light)">${new Date(i.created_at).toLocaleDateString('it-IT')}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${_data(i.created_at)}</td>
       <td>
         <button class="action-btn btn-verifica" onclick="verificaImpresa('${i.id}')">✅ Verifica</button>
         <button class="action-btn btn-dettagli" onclick="apriDettaglio('${i.id}')">👁️ Dettagli</button>
@@ -2030,12 +2080,12 @@ function renderDaVerificare(lista) {
 function renderCharts(lista) {
   // Mestieri
   const mestCount = {};
-  lista.forEach(i => (i.mestieri||[]).forEach(m => mestCount[m] = (mestCount[m]||0)+1));
+  lista.forEach(i => _arr(i.mestieri).forEach(m => mestCount[m] = (mestCount[m]||0)+1));
   const topMest = Object.entries(mestCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const maxM = topMest[0]?.[1] || 1;
   document.getElementById('chart-mestieri').innerHTML = topMest.length ? topMest.map(([m,n])=>`
     <div class="bar-item">
-      <div class="bar-label"><span>${m}</span><span>${n}</span></div>
+      <div class="bar-label"><span>${esc(m)}</span><span>${n}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${(n/maxM*100).toFixed(0)}%"></div></div>
     </div>`).join('') : '<div class="loading">Nessun dato</div>';
 
@@ -2046,7 +2096,7 @@ function renderCharts(lista) {
   const maxC = topCitta[0]?.[1] || 1;
   document.getElementById('chart-citta').innerHTML = topCitta.length ? topCitta.map(([c,n])=>`
     <div class="bar-item">
-      <div class="bar-label"><span>📍 ${c}</span><span>${n}</span></div>
+      <div class="bar-label"><span>📍 ${esc(c)}</span><span>${n}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${(n/maxC*100).toFixed(0)}%;background:var(--arancio)"></div></div>
     </div>`).join('') : '<div class="loading">Nessun dato</div>';
 }
@@ -2054,7 +2104,11 @@ function renderCharts(lista) {
 // CARICA PREVENTIVI
 async function caricaPreventivi() {
   const { data, error } = await sb.from('preventivi_safe').select('*').order('created_at', { ascending: false });
-  if (error) return;
+  if (error) {
+    console.error(error);
+    _erroreTabella('table-preventivi', 7, 'Non riesco a leggere i preventivi: ' + (error.message || 'errore sconosciuto'));
+    return;
+  }
   document.getElementById('stat-preventivi').textContent = data?.length || 0;
   const tbody = document.getElementById('table-preventivi');
   if (!data?.length) {
@@ -2068,7 +2122,7 @@ async function caricaPreventivi() {
       <td>${esc(p.telefono)||'–'}</td>
       <td>${esc(p.tipo_lavoro)||'–'}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.descrizione)||'–'}</td>
-      <td style="font-size:0.78rem;color:var(--light)">${new Date(p.created_at).toLocaleDateString('it-IT')}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${_data(p.created_at)}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaPreventivo('${p.id}')">🗑️</button></td>
     </tr>`).join('');
 }
@@ -2093,14 +2147,14 @@ async function caricaRecensioni() {
   }
   tbody.innerHTML = data.map(r => {
     const sub = [r.stelle_qualita, r.stelle_puntualita, r.stelle_prezzo, r.stelle_professionalita].filter(s => s != null);
-    const voto = r.stelle ?? (sub.length ? Math.round(sub.reduce((a,b)=>a+b,0)/sub.length) : 0);
+    const voto = Math.max(0, Math.min(5, Math.round(r.stelle ?? (sub.length ? sub.reduce((a,b)=>a+b,0)/sub.length : 0))));
     const badge = r.verificata ? '<span style="display:inline-block;background:#e8f5ee;color:#0066ff;font-size:11px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ Verificata</span>' : '';
     return `
     <tr>
       <td><strong>${esc(r.nome_cliente)}</strong>${badge}</td>
       <td>${'★'.repeat(voto)}${'☆'.repeat(5-voto)}</td>
       <td style="max-width:200px">${esc(r.testo||'')}</td>
-      <td style="font-size:0.78rem;color:var(--light)">${new Date(r.created_at).toLocaleDateString('it-IT')}</td>
+      <td style="font-size:0.78rem;color:var(--light)">${_data(r.created_at)}</td>
       <td><button class="action-btn btn-elimina" onclick="eliminaRecensione('${r.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
@@ -2115,13 +2169,17 @@ function applicaFiltriImprese() {
   const f = tutteImprese.filter(i => {
     const testo = ((i.nome_attivita || '') + ' ' + (i.citta || '') + ' ' + (i.email || '')).toLowerCase();
     if (q && !testo.includes(q)) return false;
-    if (ft && (i.tipo || '') !== ft) return false;
+    if (ft && (i.tipo || '').toLowerCase() !== ft.toLowerCase()) return false;
     if (fp === 'premium' && (i.piano || '').toLowerCase() !== 'premium') return false;
     if (fp === 'free' && (i.piano || '').toLowerCase() === 'premium') return false;
     if (fs === 'verificata' && !i.verificata) return false;
     if (fs === 'attesa' && i.verificata) return false;
     return true;
   });
+  const c = document.getElementById('imprese-count');
+  if (c) c.textContent = (q || ft || fp || fs)
+    ? f.length + ' su ' + tutteImprese.length + ' imprese'
+    : f.length + ' imprese registrate';
   renderImprese(f);
 }
 function filtraImprese() { applicaFiltriImprese(); }
@@ -2203,7 +2261,7 @@ function apriDettaglio(id) {
   try {
   document.getElementById('modal-content').innerHTML = `
     <button class="modal-close" onclick="chiudiModal()">✕ Chiudi</button>
-    <div class="modal-title">${esc(i.nome_attivita || (i.nome + ' ' + i.cognome))}</div>
+    <div class="modal-title">${esc(_nomeImp(i))}</div>
     <div style="margin:-6px 0 16px">
       <a href="https://www.google.com/search?q=${encodeURIComponent((i.nome_attivita || '') + ' ' + (i.citta || ''))}" target="_blank"
          style="color:#0066ff;font-weight:700;font-size:14.5px;text-decoration:none">🔎 Cerca questa attività su Google</a>
@@ -2458,7 +2516,7 @@ async function caricaLead() {
     const data_fmt = new Date(l.created_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
     const statoBadge = l.stato === 'in_attesa' ? '<span class="badge badge-att">⏳ In attesa</span>' :
                        l.stato === 'contattato' ? '<span class="badge badge-a">📞 Contattato</span>' :
-                       `<span class="badge">${l.stato}</span>`;
+                       `<span class="badge">${esc(l.stato)}</span>`;
     return `<tr>
       <td style="font-weight:600">${esc(l.nome_attivita) || '–'}</td>
       <td>${esc(l.email) || '–'}</td>
