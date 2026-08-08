@@ -245,23 +245,31 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // Gli annunci li scrivono le imprese: quello che arriva dal database va ripulito prima
+  // di finire nella pagina, altrimenti basta un <script> in un titolo per fare danni.
+  function esc(v) {
+    if (v === null || v === undefined) return '';
+    return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
   function cardHTML(o) {
     const data = o.data_pubblicazione ? new Date(o.data_pubblicazione).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    const link = `/offerta-lavoro.html?id=${encodeURIComponent(o.id)}`;
     return `<div class="card-offerta">
       <div class="card-offerta-header">
         <div>
-          <div class="card-offerta-titolo">${o.titolo || 'Offerta di lavoro'}</div>
-          <div class="card-offerta-azienda">🏢 ${o.nome_azienda || ''}</div>
+          <div class="card-offerta-titolo"><a href="${link}" style="color:inherit;text-decoration:none">${esc(o.titolo || 'Offerta di lavoro')}</a></div>
+          <div class="card-offerta-azienda">🏢 ${esc(o.nome_azienda || '')}</div>
         </div>
-        <a class="btn-candidati" href="registrazione-candidato.html?id=${o.id}">Candidati</a>
+        <a class="btn-candidati" href="${link}">Vedi offerta</a>
       </div>
       <div class="card-offerta-badges">
-        ${o.tipo_offerta ? `<span class="badge badge-tipo">🔧 ${o.tipo_offerta}</span>` : ''}
-        ${o.tipo_contratto ? `<span class="badge badge-contratto">📋 ${o.tipo_contratto}</span>` : ''}
-        ${o.citta ? `<span class="badge badge-citta">📍 ${o.citta}</span>` : ''}
+        ${o.tipo_offerta ? `<span class="badge badge-tipo">🔧 ${esc(o.tipo_offerta)}</span>` : ''}
+        ${o.tipo_contratto ? `<span class="badge badge-contratto">📋 ${esc(o.tipo_contratto)}</span>` : ''}
+        ${o.citta ? `<span class="badge badge-citta">📍 ${esc(o.citta)}</span>` : ''}
       </div>
       <div class="card-offerta-meta">
-        ${o.citta ? `<span>📍 ${o.citta}</span>` : ''}
+        ${o.citta ? `<span>📍 ${esc(o.citta)}</span>` : ''}
         ${data ? `<span>📅 ${data}</span>` : ''}
       </div>
     </div>`;

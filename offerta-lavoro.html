@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offerta di lavoro — TrovaImpresa</title>
+<meta name="description" content="Offerta di lavoro nell'edilizia su TrovaImpresa.">
+<link rel="canonical" href="https://trovaimpresa.com/offerte-lavoro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Offerta di lavoro — TrovaImpresa">
+<meta property="og:description" content="Offerta di lavoro nell'edilizia su TrovaImpresa.">
+<link rel="icon" href="/favicon.ico">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f6f8; min-height: 100vh; font-size: 18px; color: #1f2933; }
+
+  header { background: white; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+  header a img { height: 44px; }
+  header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+  header nav a { color: #0066ff; text-decoration: none; font-weight: 600; font-size: 17px; padding: 6px 4px; border-radius: 8px; }
+  header nav a:hover { text-decoration: underline; }
+  header nav a.attivo { background: #eaf2ff; color: #0047b3; padding: 6px 14px; }
+  .btn-pannello { background: #0066ff; color: #fff !important; border-radius: 10px; padding: 10px 18px !important; font-weight: 700; white-space: nowrap; }
+  .btn-pannello:hover { background: #0052cc; text-decoration: none !important; }
+  @media (max-width: 900px) { header nav a { font-size: 15.5px; } header nav { gap: 4px 12px; } }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 26px 20px 70px; }
+  .breadcrumb { font-size: 16px; color: #566; margin-bottom: 18px; }
+  .breadcrumb a { color: #0066ff; text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+
+  .scheda { background: white; border-radius: 16px; padding: 30px 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); border-left: 6px solid #0066ff; }
+  h1 { font-size: 30px; line-height: 1.3; margin-bottom: 10px; color: #14202e; }
+  .azienda { font-size: 19px; color: #445; margin-bottom: 20px; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+  .badge { display: inline-block; font-size: 16px; font-weight: 600; padding: 8px 15px; border-radius: 999px; }
+  .b-tipo { background: #eaf2ff; color: #0047b3; }
+  .b-contratto { background: #fff2e6; color: #a8500a; }
+  .b-citta { background: #e8f5ee; color: #1f7a4d; }
+  .b-posti { background: #f0ecf9; color: #5b3fa8; }
+
+  h2 { font-size: 21px; margin: 28px 0 12px; color: #14202e; }
+  .descrizione { font-size: 18px; line-height: 1.75; white-space: pre-wrap; }
+
+  .dati { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .dati li { background: #f7f9fa; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; font-size: 16.5px; }
+  .dati b { display: block; color: #566; font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+
+  .cta-box { margin-top: 30px; background: #eaf2ff; border: 2px solid #0066ff; border-radius: 14px; padding: 24px; text-align: center; }
+  .cta-box p { font-size: 17px; color: #334; margin-bottom: 16px; }
+  .btn-candidati { display: inline-block; background: #FF6B35; color: white; text-decoration: none; font-size: 19px; font-weight: 700; padding: 16px 34px; border-radius: 12px; }
+  .btn-candidati:hover { background: #e55a25; }
+
+  .scaduta { background: #fdf0e0; border: 1px solid #f0d38a; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; font-size: 17px; color: #8a5a00; }
+  .stato { background: white; border-radius: 16px; padding: 50px 30px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .stato h2 { margin-top: 0; }
+  .stato a { color: #0066ff; font-weight: 700; }
+
+  .torna { display: inline-block; margin-top: 26px; color: #0066ff; text-decoration: none; font-weight: 600; font-size: 17px; }
+  .torna:hover { text-decoration: underline; }
+
+  footer { background: #0a2a4d; color: white; font-size: 0.9rem; padding: 18px; text-align: center; }
+  footer a { color: #a9c9f5; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/index.html"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <nav>
+    <a href="/bandi.html">Bandi e fondi</a>
+    <a href="/blog.html">Guide e costi</a>
+    <a href="/offerte-lavoro.html" class="attivo">Lavoro</a>
+    <a href="/subappalto.html">Subappalti</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/pubblicita.html">Pubblicità</a>
+    <a href="/login-impresa.html" class="btn-pannello">Accedi al tuo pannello</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/offerte-lavoro.html">Offerte di lavoro</a> › <span id="bc">…</span></nav>
+  <div id="contenuto"><div class="stato"><h2>⏳ Caricamento offerta…</h2></div></div>
+  <a class="torna" href="/offerte-lavoro.html">← Torna a tutte le offerte di lavoro</a>
+</div>
+
+<footer>
+  © 2026 TrovaImpresa – Alessio Pinto – Rieti (RI) – <a href="mailto:info@trovaimpresa.com">info@trovaimpresa.com</a> | <a href="/termini-condizioni.html">Termini</a> | <a href="/cookie-policy.html">Cookie Policy</a> | <a href="/privacy-policy.html">Privacy</a> | <a href="/contatti.html">Contatti</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseClient = supabase.createClient(
+    'https://nacvrsgkyfavykxjxszu.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
+  );
+
+  // Gli annunci li scrivono le imprese: tutto quello che arriva dal database va ripulito
+  // prima di finire nella pagina, altrimenti basta un <script> in una descrizione per fare danni.
+  function esc(v) {
+    if (v === null || v === undefined) return '';
+    return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function dataIta(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  // Corrispondenza fra i contratti italiani e i codici che Google si aspetta
+  const MAPPA_CONTRATTO = {
+    'tempo indeterminato': 'FULL_TIME',
+    'tempo determinato':   'TEMPORARY',
+    'apprendistato':       'FULL_TIME',
+    'partita iva':         'CONTRACTOR',
+    'occasionale':         'PART_TIME'
+  };
+
+  function mostraStato(titolo, testo) {
+    document.getElementById('contenuto').innerHTML =
+      `<div class="stato"><h2>${esc(titolo)}</h2><p>${esc(testo)}</p>
+       <p style="margin-top:18px"><a href="/offerte-lavoro.html">Vedi tutte le offerte di lavoro →</a></p></div>`;
+    document.getElementById('bc').textContent = 'Offerta non disponibile';
+  }
+
+  function scaduta(o) {
+    if (!o.data_scadenza_annuncio) return false;
+    const d = new Date(o.data_scadenza_annuncio);
+    return !isNaN(d) && d < new Date(new Date().toDateString());
+  }
+
+  function scriviTestata(o) {
+    const luogo = o.citta || o.provincia || o.regione || 'Italia';
+    const titolo = `${o.titolo || 'Offerta di lavoro'} a ${luogo} — TrovaImpresa`;
+    document.title = titolo;
+    const desc = `${o.titolo || 'Offerta di lavoro'}${o.nome_azienda ? ' presso ' + o.nome_azienda : ''} a ${luogo}. ${o.tipo_contratto || ''} nell'edilizia. Candidati gratis su TrovaImpresa.`.trim();
+
+    const set = (sel, attr, val) => { const el = document.querySelector(sel); if (el) el.setAttribute(attr, val); };
+    set('meta[name="description"]', 'content', desc);
+    set('meta[property="og:title"]', 'content', titolo);
+    set('meta[property="og:description"]', 'content', desc);
+    set('link[rel="canonical"]', 'href', `https://trovaimpresa.com/offerta-lavoro.html?id=${encodeURIComponent(o.id)}`);
+    set('meta[property="og:url"]', 'content', `https://trovaimpresa.com/offerta-lavoro.html?id=${encodeURIComponent(o.id)}`);
+  }
+
+  // Questo è il pezzo che fa comparire l'annuncio dentro i risultati di lavoro di Google
+  function scriviJobPosting(o) {
+    const descrizione = [o.descrizione, o.note_aggiuntive].filter(Boolean).join('\n\n');
+
+    // Google toglie gli annunci senza scadenza: se l'impresa non l'ha messa, mettiamo 90 giorni
+    let validThrough = o.data_scadenza_annuncio;
+    if (!validThrough && o.data_pubblicazione) {
+      const d = new Date(o.data_pubblicazione);
+      if (!isNaN(d)) { d.setDate(d.getDate() + 90); validThrough = d.toISOString(); }
+    }
+
+    const dati = {
+      '@context': 'https://schema.org',
+      '@type': 'JobPosting',
+      'title': o.titolo || 'Offerta di lavoro nell\'edilizia',
+      'description': descrizione || o.titolo || '',
+      'identifier': { '@type': 'PropertyValue', 'name': 'TrovaImpresa', 'value': String(o.id) },
+      'datePosted': o.data_pubblicazione || undefined,
+      'validThrough': validThrough || undefined,
+      'employmentType': MAPPA_CONTRATTO[(o.tipo_contratto || '').toLowerCase().trim()] || undefined,
+      'hiringOrganization': {
+        '@type': 'Organization',
+        'name': o.nome_azienda || 'Impresa edile',
+        'sameAs': 'https://trovaimpresa.com'
+      },
+      'jobLocation': {
+        '@type': 'Place',
+        'address': {
+          '@type': 'PostalAddress',
+          'addressLocality': o.citta || undefined,
+          'addressRegion': o.provincia || o.regione || undefined,
+          'addressCountry': 'IT'
+        }
+      },
+      'industry': 'Edilizia e costruzioni',
+      'directApply': true
+    };
+    if (o.posti_disponibili && o.posti_disponibili > 1) dati.totalJobOpenings = o.posti_disponibili;
+
+    // via le chiavi vuote, altrimenti Google segnala il markup come incompleto
+    Object.keys(dati).forEach(k => dati[k] === undefined && delete dati[k]);
+
+    const tag = document.createElement('script');
+    tag.type = 'application/ld+json';
+    tag.textContent = JSON.stringify(dati);
+    document.head.appendChild(tag);
+  }
+
+  function riga(etichetta, valore) {
+    if (!valore || (Array.isArray(valore) && !valore.length)) return '';
+    const v = Array.isArray(valore) ? valore.join(', ') : valore;
+    return `<li><b>${esc(etichetta)}</b>${esc(v)}</li>`;
+  }
+
+  function disegna(o) {
+    const luogo = [o.citta, o.provincia].filter(Boolean).join(' (') + (o.provincia ? ')' : '');
+    const extra = [];
+    if (o.auto_propria) extra.push('Auto propria richiesta');
+    if (o.disponibilita_trasferte) extra.push('Disponibilità a trasferte');
+    if (o.mezzi_forniti) extra.push('Mezzi forniti dall\'azienda');
+
+    const html = `
+      ${scaduta(o) ? '<div class="scaduta">⚠️ Questa offerta è scaduta il ' + esc(dataIta(o.data_scadenza_annuncio)) + '. Puoi comunque vedere le altre offerte attive.</div>' : ''}
+      <div class="scheda">
+        <h1>${esc(o.titolo || 'Offerta di lavoro')}</h1>
+        <div class="azienda">🏢 ${esc(o.nome_azienda || 'Impresa edile')}</div>
+
+        <div class="badges">
+          ${o.tipo_offerta ? `<span class="badge b-tipo">🔧 ${esc(o.tipo_offerta)}</span>` : ''}
+          ${o.tipo_contratto ? `<span class="badge b-contratto">📋 ${esc(o.tipo_contratto)}</span>` : ''}
+          ${luogo ? `<span class="badge b-citta">📍 ${esc(luogo)}</span>` : ''}
+          ${o.posti_disponibili > 1 ? `<span class="badge b-posti">👷 ${esc(o.posti_disponibili)} posti</span>` : ''}
+        </div>
+
+        <h2>Descrizione</h2>
+        <div class="descrizione">${esc(o.descrizione || 'Nessuna descrizione fornita.')}</div>
+        ${o.note_aggiuntive ? `<h2>Note</h2><div class="descrizione">${esc(o.note_aggiuntive)}</div>` : ''}
+
+        <h2>In breve</h2>
+        <ul class="dati">
+          ${riga('Mestiere', o.mestiere)}
+          ${riga('Esperienza richiesta', o.livello_esperienza)}
+          ${riga('Orario', o.orario)}
+          ${riga('Retribuzione', o.stipendio)}
+          ${riga('Patenti richieste', o.patenti_richieste)}
+          ${riga('Certificazioni', o.certificazioni_richieste)}
+          ${riga('Altro', extra)}
+          ${riga('Pubblicata il', dataIta(o.data_pubblicazione))}
+          ${riga('Scade il', dataIta(o.data_scadenza_annuncio))}
+        </ul>
+
+        ${scaduta(o) ? '' : `
+        <div class="cta-box">
+          <p>Ti interessa questo lavoro? La candidatura è gratuita.</p>
+          <a class="btn-candidati" href="/registrazione-candidato.html?id=${encodeURIComponent(o.id)}">Candidati a questa offerta →</a>
+        </div>`}
+      </div>`;
+
+    document.getElementById('contenuto').innerHTML = html;
+    document.getElementById('bc').textContent = o.titolo || 'Offerta';
+    scriviTestata(o);
+    if (!scaduta(o)) scriviJobPosting(o);
+  }
+
+  async function carica() {
+    const id = new URLSearchParams(location.search).get('id');
+    if (!id) { mostraStato('Offerta non trovata', 'Manca il riferimento dell\'annuncio.'); return; }
+    try {
+      const { data, error } = await supabaseClient
+        .from('offerte_lavoro').select('*').eq('id', id).eq('attiva', true).maybeSingle();
+      if (error) throw error;
+      if (!data) { mostraStato('Offerta non più disponibile', 'Questo annuncio è stato chiuso o rimosso dall\'impresa.'); return; }
+      disegna(data);
+    } catch (e) {
+      mostraStato('Errore nel caricamento', e.message || 'Riprova fra poco.');
+    }
+  }
+
+  carica();
+</script>
+</body>
+</html>
