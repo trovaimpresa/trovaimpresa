@@ -941,6 +941,63 @@ Migliore fascia: **uomini 35-44, 11 iscrizioni su 20 a 2,98 EUR**.
 ha creato `.git/index.lock` che dal mio lato non si puo' cancellare, e ha bloccato tutti i
 commit di Alessio. Se ricapita: `rm -f .git/index.lock` dal suo Git Bash.
 
+## SEO E TRAFFICO — la fotografia dell'8 agosto 2026
+Collegati a Claude via Supermetrics anche **Google Analytics 4** (proprieta' 541723327,
+account pintoluzemilia@gmail.com) e **Google Search Console**. Da qui in poi i dati veri
+si leggono da li', non a intuito.
+
+### Quanto traffico c'e' davvero (30 giorni, 9 luglio - 7 agosto)
+| Canale | Sessioni | Durata media | Engagement |
+|---|---|---|---|
+| Pubblicita' Meta | 740 (72%) | 42 secondi | 24% |
+| Diretto | 138 | 5 minuti | 64% |
+| **Google organico** | **82** | **7 minuti** | **65%** |
+| Social non pagato | 41 | 1 minuto | 54% |
+
+**34 visite al giorno in tutto.** Tolta la pubblicita' e il diretto restano 4-5 visitatori
+veri al giorno: **ecco perche' era arrivato un solo preventivo. Non e' il sito ad essere
+rotto, e' vuoto.** Il traffico da Google e' pochissimo ma di gran lunga il migliore
+(7 minuti di permanenza).
+
+### Le pagine SONO indicizzate: il problema e' la posizione
+Search Console, 28 giorni: **~2.000 impression, ~55 clic**. robots.txt e sitemap (150 URL,
+18 guide + 106 pagine citta') sono a posto. Le pagine ci sono, ma stanno troppo in basso:
+- infissi: 593 impression, 4 clic, **posizione 8**
+- condizionatore 176 (pos 26) · idraulico 159 (pos 11) · bagno 152 (pos 26)
+- pavimento 147 (pos 11) · elettrico 125 (pos 45) · cappotto 98 (pos 11) · tetto 95 (pos 33)
+**Quattro pagine sono fra la 8ª e l'11ª posizione: sono il tesoro, basta poco per scavalcare.**
+
+⚠️ **Su alcune parole sei gia' SECONDO e non ti clicca nessuno**: "costo serramenti",
+"preventivo infissi", "costo infissi in alluminio", "costo finestra alluminio doppio vetro"
+→ tutte posizione 2, zero clic. CTR della pagina infissi: **0,7% invece del 2,5% atteso**.
+
+### Cosa e' stato fatto (8 agosto): titoli e descrizioni riscritti
+Riscritti `<title>`, `meta description`, `og:title` e `og:description` di **9 guide**
+(infissi, condizionatore, idraulico, bagno, pavimento, elettrico, cappotto, tetto, facciata).
+Regole usate, da mantenere:
+- **la cifra dentro il titolo** ("Quanto costa cambiare gli infissi: 250-600 €/mq (2026)")
+- **tolto "| TrovaImpresa"**: mangia caratteri per un nome che nessuno ancora cerca
+- titoli **sotto i 62 caratteri**, altrimenti Google li taglia sul telefono
+- nella descrizione **le parole che la gente digita davvero**, prese da Search Console:
+  serramenti, montaggio climatizzatore, bagno "da zero", rifacimento tetto, coibentazione,
+  ponteggio, punto luce
+- ⚠️ nel titolo del bagno c'era "Guida di un muratore": tolto, il sito non parla di Alessio.
+
+### Prossimi passi SEO, in ordine (concordati)
+1. ~~Titoli e descrizioni delle 9 guide~~ **FATTO l'8 agosto.** Ricontrollare il CTR in
+   Search Console **fra 2-3 settimane** (Google ci mette a rileggere le pagine).
+2. **Il pasticcio .html / senza .html**: Search Console mostra sia `/imprese-cosenza.html`
+   sia `/imprese-agrigento`. Google li vede come due pagine diverse e divide il punteggio.
+   Da sistemare con una regola sola su tutte e 124 le pagine.
+3. **Arricchire le 4 guide vicine alla prima pagina** (infissi pos 8, idraulico/pavimento/
+   cappotto pos 11) per farle scavalcare.
+4. La pagina **impianto elettrico** ha la domanda piu' alta di tutte (20+ query diverse) ma
+   sta in posizione 45: e' quella con piu' potenziale inespresso.
+
+⚠️ **Deciso di NON aprire Google Ads adesso**: prima far rendere le 124 pagine che gia'
+esistono e portano zero. Comprare clic mentre l'organico e' fermo sarebbe pagare due volte.
+E comunque servirebbero piu' imprese per citta' (oggi 1,5 di media) prima di portare clienti.
+
 ## PROSSIMI LAVORI CONCORDATI (aggiornato l'8 agosto 2026)
 1. ~~Revisione Studio + negozio~~ **FATTA il 7 agosto**.
 2. ~~Revisione sito pubblico, percorso cliente (Blocco A)~~ **FATTA il 7-8 agosto**
