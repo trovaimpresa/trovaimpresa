@@ -1038,29 +1038,15 @@
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
-        <div class="dash-quick-card" data-card-id="cerca-lavoro" data-premium="true" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
-          <a href="registrazione-candidato.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
-            <div class="dash-quick-icon">🧑</div>
-            <div class="dash-quick-label">Registrati · Invia CV</div>
-          </a>
-          <a href="candidature-lavoro.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
-            <div class="dash-quick-icon">🔍</div>
-            <div class="dash-quick-label">Ricerca Candidati</div>
-          </a>
+                <div class="dash-quick-card" data-card-id="mie-offerte" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('mie-offerte'); caricaMieOfferte()">
+          <div class="dash-quick-icon">📢</div>
+          <div class="dash-quick-label">Le mie offerte di lavoro</div>
+          <div class="dash-quick-sub">Gli annunci che hai pubblicato</div>
         </div>
-        <div class="dash-quick-card" data-card-id="offerte-lavoro" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
-          <a href="offerte-registrazione.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
-            <div class="dash-quick-icon">💼</div>
-            <div class="dash-quick-label">Pubblica Offerta di Lavoro</div>
-          </a>
-          <a href="ricerca-offerte.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
-            <div class="dash-quick-icon">🔍</div>
-            <div class="dash-quick-label">Ricerca Offerte</div>
-          </a>
-          <a href="javascript:void(0)" onclick="showSection('candidature'); caricaCandidature()" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit">
-            <div class="dash-quick-icon">📥</div>
-            <div class="dash-quick-label">Candidature ricevute</div>
-          </a>
+<div class="dash-quick-card" data-card-id="candidature" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('candidature'); caricaCandidature()">
+          <div class="dash-quick-icon">📥</div>
+          <div class="dash-quick-label">Candidature ricevute</div>
+          <div class="dash-quick-sub">Chi si è candidato alle tue offerte</div>
         </div>
         <div class="dash-quick-card" data-card-id="subappalto" style="border-top-color:#7c3aed;padding:0;display:flex;cursor:default">
           <a href="subappalto-cerca.html" style="flex:1;padding:20px;text-align:center;text-decoration:none;color:inherit;border-right:1px solid #e5e7eb">
@@ -1467,6 +1453,22 @@
       <div class="profilo-card">
         <div id="contatore-preventivi-mese" style="background:#f0f9f4;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#0a2a4d;border-left:4px solid #0066ff;">📊 Caricamento...</div>
         <div id="lista-preventivi"><div class="empty-state"><div class="empty-icon">📋</div>Caricamento...</div></div>
+      </div>
+    </div>
+
+    <!-- LE MIE OFFERTE DI LAVORO -->
+    <div class="section" id="sec-mie-offerte">
+      <div class="topbar">
+        <div class="topbar-title" style="display:flex;align-items:center;gap:14px">
+          <span onclick="showSection('dashboard')" style="cursor:pointer;color:#7c3aed;font-size:1rem;font-weight:700">← Torna</span>
+          📢 Le mie offerte di lavoro
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <a href="offerte-registrazione.html" style="display:inline-block;background:#FF6B35;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:10px">➕ Pubblica una nuova offerta</a>
+      </div>
+      <div id="lista-mie-offerte">
+        <div class="empty-state"><div class="empty-icon">📢</div>Caricamento...</div>
       </div>
     </div>
 
@@ -2935,6 +2937,71 @@ async function caricaPreventivi() {
   }
 
 }
+
+
+  // ---- LE MIE OFFERTE DI LAVORO ----
+  // Mostra all'impresa gli annunci che ha pubblicato, con quante candidature
+  // ha ricevuto ognuno, e le permette di chiuderli quando ha trovato la persona.
+  async function caricaMieOfferte() {
+    const cont = document.getElementById('lista-mie-offerte');
+    cont.innerHTML = '<div class="empty-state"><div class="empty-icon">📢</div>Caricamento...</div>';
+
+    const { data, error } = await sb.from('offerte_lavoro')
+      .select('*')
+      .eq('impresa_id', impresaCorrente.id)
+      .order('data_pubblicazione', { ascending: false });
+
+    if (error) { cont.innerHTML = '<div class="empty-state">Errore nel caricamento. Riprova.</div>'; return; }
+    const lista = data || [];
+    if (!lista.length) {
+      cont.innerHTML = '<div class="empty-state"><div class="empty-icon">📢</div>Non hai ancora pubblicato nessuna offerta.<br><br>' +
+        '<a href="offerte-registrazione.html" style="color:#7c3aed;font-weight:700">Pubblica la prima →</a></div>';
+      return;
+    }
+
+    // quante candidature per ogni offerta
+    const { data: cand } = await sb.from('candidature')
+      .select('offerta_id').eq('impresa_id', impresaCorrente.id);
+    const conta = {};
+    (cand || []).forEach(c => { conta[c.offerta_id] = (conta[c.offerta_id] || 0) + 1; });
+
+    const esc = v => v == null ? '' : String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const dataIta = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('it-IT', {day:'2-digit', month:'short', year:'numeric'}); };
+
+    cont.innerHTML = lista.map(o => {
+      const n = conta[o.id] || 0;
+      const attiva = o.attiva !== false;
+      return `<div style="background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:20px 22px;margin-bottom:14px;border-left:5px solid ${attiva ? '#7c3aed' : '#ccc'}">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-start">
+          <div>
+            <div style="font-size:19px;font-weight:800;color:#1a1a1a">${esc(o.titolo || 'Offerta di lavoro')}</div>
+            <div style="font-size:15px;color:#666;margin-top:4px">
+              ${o.tipo_offerta ? '🔧 ' + esc(o.tipo_offerta) + ' · ' : ''}${o.citta ? '📍 ' + esc(o.citta) + ' · ' : ''}📅 ${dataIta(o.data_pubblicazione)}
+            </div>
+          </div>
+          <span style="background:${attiva ? '#ede9fe' : '#eee'};color:${attiva ? '#5b21b6' : '#777'};font-weight:700;font-size:14px;padding:6px 14px;border-radius:20px;white-space:nowrap">
+            ${attiva ? 'Online' : 'Chiusa'}
+          </span>
+        </div>
+        <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <a href="offerta-lavoro.html?id=${encodeURIComponent(o.id)}" target="_blank" rel="noopener"
+             style="background:#fff;border:2px solid #7c3aed;color:#7c3aed;text-decoration:none;font-weight:700;padding:9px 16px;border-radius:9px;font-size:15px">Vedi online ↗</a>
+          <a href="javascript:void(0)" onclick="showSection('candidature'); caricaCandidature()"
+             style="background:#7c3aed;color:#fff;text-decoration:none;font-weight:700;padding:9px 16px;border-radius:9px;font-size:15px">
+             ${n === 0 ? 'Nessuna candidatura' : n === 1 ? '1 candidatura' : n + ' candidature'}</a>
+          ${attiva ? `<a href="javascript:void(0)" onclick="chiudiOfferta('${o.id}')"
+             style="color:#c62828;font-weight:700;font-size:15px;margin-left:auto">Chiudi l'offerta</a>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function chiudiOfferta(id) {
+    if (!confirm("Vuoi chiudere questa offerta? Non sarà più visibile sulla bacheca.")) return;
+    const { error } = await sb.from('offerte_lavoro').update({ attiva: false }).eq('id', id);
+    if (error) { alert('Errore: ' + error.message); return; }
+    caricaMieOfferte();
+  }
 
 async function caricaCandidature() {
   const { data, error } = await sb.from('candidature')
