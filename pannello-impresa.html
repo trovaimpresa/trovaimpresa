@@ -1884,11 +1884,6 @@
           <div class="dash-quick-icon">🎬</div>
           <div class="dash-quick-label">Fai conoscere la tua azienda</div>
         </div>
-        <div class="dash-quick-card" data-card-id="candidature" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('candidature'); caricaCandidature()">
-          <div class="dash-quick-icon">📥</div>
-          <div class="dash-quick-label">Candidature ricevute</div>
-          <div class="dash-quick-sub">Chi si è candidato alle tue offerte</div>
-        </div>
         <div class="dash-quick-card" data-card-id="mie-offerte" style="border-top-color:#7c3aed;cursor:pointer" onclick="showSection('mie-offerte', this)">
           <div class="dash-quick-icon">💼</div>
           <div class="dash-quick-label">Le mie offerte</div>
@@ -5106,7 +5101,16 @@ async function caricaCandidature() {
   const container = document.getElementById('lista-candidature');
   if (error) { container.innerHTML = '<div class="empty-state">Errore nel caricamento. Riprova.</div>'; return; }
   const lista = data || [];
-  if (!lista.length) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div>Nessuna candidatura ancora.</div>'; return; }
+  if (!lista.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div>' +
+      '<div style="font-size:1.05rem;margin-bottom:6px">Nessuna candidatura ancora.</div>' +
+      '<div style="color:#777;font-size:0.95rem;margin-bottom:18px">Le candidature arrivano qui quando qualcuno risponde a una tua offerta di lavoro.</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">' +
+        '<a href="javascript:void(0)" onclick="showSection(\'mie-offerte\'); caricaMieOfferte()" style="background:#fff;border:2px solid #7c3aed;color:#7c3aed;text-decoration:none;font-weight:700;padding:11px 20px;border-radius:10px">Le mie offerte di lavoro</a>' +
+        '<a href="offerte-registrazione.html" style="background:#7c3aed;color:#fff;text-decoration:none;font-weight:700;padding:11px 20px;border-radius:10px">➕ Pubblica un\'offerta</a>' +
+      '</div></div>';
+    return;
+  }
   const badge = {
     inviata:   { txt: 'Nuova',     col: '#1565c0' },
     vista:     { txt: 'Vista',     col: '#e65100' },
