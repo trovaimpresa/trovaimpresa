@@ -1010,6 +1010,16 @@ Regole usate, da mantenere:
      query vere della pagina, controllare con `grep` quali di quelle parole NON ci sono nel
      testo, e scrivere una sezione per ognuna. Sugli infissi mancavano portafinestra, una/due
      ante, i nomi dei profili.
+   - **Impianto elettrico FATTA l'8 agosto** (34 -> 38,8 KB). Mancavano le parole piu' cercate:
+     bilocale, trilocale, canaline, "senza rompere i muri", citofono, antifurto, contatore.
+     Aggiunte tre sezioni: **prezzi per taglio di casa** (bilocale/trilocale/quattro locali/
+     villetta), **"Si puo' rifare l'impianto senza rompere i muri?"** (canaline, battiscopa
+     portacavi, controsoffitto — con la precisazione che l'impianto esterno prende la stessa
+     dichiarazione di conformita' DM 37/08) e **cosa conviene predisporre adesso** (presa TV,
+     videocitofono, antifurto, fotovoltaico, aumento contatore).
+     ⚠️ **Lezione**: le cifre nuove vanno sempre riallineate alla "Risposta rapida" in cima
+     alla pagina, altrimenti la stessa pagina dice due numeri diversi. Qui l'ancora e'
+     100 mq = 5.000-9.000 €, e la tabella e' stata ricalcolata su quella.
    - Da fare con lo stesso metodo: idraulico, pavimento, cappotto.
 4. La pagina **impianto elettrico** ha la domanda piu' alta di tutte (20+ query diverse) ma
    sta in posizione 45: e' quella con piu' potenziale inespresso.
