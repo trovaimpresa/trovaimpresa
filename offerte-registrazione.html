@@ -967,9 +967,9 @@
             return;
         }
 
-        // Gating mensile (Free=1, Pro=3, Premium=∞) — sicurezza per accesso URL diretto
+        // Pubblicazione illimitata per tutti i piani — la bacheca deve riempirsi
         if (impresaId) {
-            const _maxMese = (impresaPiano === 'premium') ? 999 : 1;
+            const _maxMese = 999; // illimitato per tutti. Per rimettere un tetto ai Free: (impresaPiano === 'premium') ? 999 : 5
             if (_maxMese !== Infinity) {
                 const _inizioMese = new Date(); _inizioMese.setDate(1); _inizioMese.setHours(0,0,0,0);
                 const { count } = await supabaseClient

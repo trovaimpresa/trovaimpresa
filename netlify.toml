@@ -36,3 +36,16 @@
   to = "/termini-condizioni.html"
   status = 301
   force = true
+
+# Doppione: /ricerca-offerte faceva la stessa ricerca di /offerte-lavoro
+[[redirects]]
+  from = "/ricerca-offerte"
+  to = "/offerte-lavoro"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/ricerca-offerte.html"
+  to = "/offerte-lavoro.html"
+  status = 301
+  force = true
