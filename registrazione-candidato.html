@@ -225,7 +225,7 @@
       </div>
       <div class="step" id="step-4-indicator">
         <div class="step-circle">4</div>
-        <div class="step-label">Documenti</div>
+        <div class="step-label">Accesso</div>
       </div>
     </div>
 
@@ -255,17 +255,17 @@
             <input type="text" id="nome" placeholder="Es. Mario">
           </div>
           <div class="form-group">
-            <label>Cognome <span class="required">*</span></label>
+            <label>Cognome <small style="color:#888;font-weight:400">(facoltativo)</small></label>
             <input type="text" id="cognome" placeholder="Es. Rossi">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Età <span class="required">*</span></label>
+            <label>Età <small style="color:#888;font-weight:400">(facoltativo)</small></label>
             <input type="number" id="eta" placeholder="Es. 35" min="18" max="100">
           </div>
           <div class="form-group">
-            <label>Sesso <span class="required">*</span></label>
+            <label>Sesso <small style="color:#888;font-weight:400">(facoltativo)</small></label>
             <select id="sesso">
               <option value="">-- Seleziona --</option>
               <option value="Uomo">Uomo</option>
@@ -284,7 +284,7 @@
           <input type="text" id="mestiere" placeholder="Es. Idraulico, Muratore, Elettricista...">
         </div>
         <div class="form-group">
-          <label>Anni di Esperienza <span class="required">*</span></label>
+          <label>Anni di Esperienza <small style="color:#888;font-weight:400">(facoltativo)</small></label>
           <input type="number" id="anni_esperienza" placeholder="Es. 5" min="0" max="60">
         </div>
         <div class="form-group">
@@ -340,13 +340,6 @@
           </div>
           <div style="height:6px;border-radius:4px;background:#eee;margin-top:7px;overflow:hidden;"><div id="pw-strength-bar" style="height:100%;width:0;transition:width .2s,background .2s;"></div></div>
           <div id="pw-strength-label" style="font-size:11px;color:#888;margin-top:3px;">Usa almeno 6 caratteri, meglio con maiuscole, numeri e simboli.</div>
-        </div>
-        <div class="form-group">
-          <label>Conferma password <span class="required">*</span></label>
-          <div class="password-wrapper">
-            <input type="password" id="password-conferma" placeholder="Ripeti la password" minlength="6" required>
-            <button class="toggle-pw" type="button" onclick="togglePw('password-conferma', this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-          </div>
         </div>
 
         <div class="form-group">
@@ -580,17 +573,20 @@
       if (bar) { bar.style.width = cfg.w; bar.style.background = cfg.c; }
       if (label) label.textContent = cfg.t ? 'Sicurezza password: ' + cfg.t : 'Usa almeno 6 caratteri, meglio con maiuscole, numeri e simboli.';
     }
+    // legge un campo senza rompersi se non c'e' piu' nel modulo
+    function val(id) { const el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; }
+
+    // se arrivo da un annuncio (?id=) me lo ricordo, cosi' dopo l'iscrizione torno li'
+    const OFFERTA_DI_PROVENIENZA = new URLSearchParams(location.search).get('id');
+
     function validateStep(step) {
       hideMsg();
       const need = (id, lbl) => { if (!document.getElementById(id).value.trim()) { markInvalid(id); showMsg('Compila il campo obbligatorio: ' + lbl + '.', 'error'); return false; } return true; };
       if (step === 1) {
+        // Obbligatorio solo il nome: cognome, età e sesso si aggiungono dopo dal pannello.
         if (!need('nome', 'Nome')) return false;
-        if (!need('cognome', 'Cognome')) return false;
-        if (!need('eta', 'Età')) return false;
-        if (!need('sesso', 'Sesso')) return false;
       } else if (step === 2) {
         if (!need('mestiere', 'Mestiere')) return false;
-        if (!need('anni_esperienza', 'Anni di esperienza')) return false;
       } else if (step === 3) {
         if (!need('email', 'Email')) return false;
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim())) { markInvalid('email'); showMsg('Inserisci un\'email valida.', 'error'); return false; }
@@ -662,9 +658,7 @@
       if (!validateStep(2)) { goToStep(2); return; }
       if (!validateStep(3)) { goToStep(3); return; }
       const pw = document.getElementById('password').value;
-      const pwConf = document.getElementById('password-conferma').value;
       if (pw.length < 6) { markInvalid('password'); showMsg('La password deve avere almeno 6 caratteri.', 'error'); return; }
-      if (pw !== pwConf) { markInvalid('password-conferma'); showMsg('Le due password non coincidono.', 'error'); return; }
       if (!document.getElementById('termini').checked) { showMsg('Devi accettare i Termini di Servizio per completare la registrazione.', 'error'); return; }
 
       const btnNext = document.getElementById('btn-next');
@@ -690,17 +684,17 @@
           options: {
             data: {
               tipo: 'candidato',
-              nome: document.getElementById('nome').value.trim(),
-              cognome: document.getElementById('cognome').value.trim(),
-              eta: document.getElementById('eta').value || '',
-              sesso: document.getElementById('sesso').value,
-              mestiere: document.getElementById('mestiere').value.trim(),
-              anni_esperienza: document.getElementById('anni_esperienza').value || '',
-              competenze: document.getElementById('competenze').value.trim(),
-              telefono: document.getElementById('telefono').value.trim(),
-              regione: document.getElementById('regione').value,
-              provincia: document.getElementById('provincia').value,
-              citta: document.getElementById('citta').value,
+              nome: val('nome'),
+              cognome: val('cognome'),
+              eta: val('eta'),
+              sesso: val('sesso'),
+              mestiere: val('mestiere'),
+              anni_esperienza: val('anni_esperienza'),
+              competenze: val('competenze'),
+              telefono: val('telefono'),
+              regione: val('regione'),
+              provincia: val('provincia'),
+              citta: val('citta'),
               cv: cvUrl || ''
             }
           }
@@ -712,10 +706,15 @@
           return;
         }
 
-        try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: document.getElementById('nome').value, email: email, tipo: 'candidato' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
+        try { await fetch('/.netlify/functions/invia-email-benvenuto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome: val('nome'), email: email, tipo: 'candidato' }) }); } catch (e) { console.warn('Email benvenuto fallita:', e); }
         btnNext.textContent = '✅ Account creato!';
-        showMsg('✅ Account creato! Ti abbiamo inviato una email di conferma: aprila e clicca sul link per attivare il profilo. Controlla anche nella cartella SPAM. Ti portiamo all\'accesso...', 'success');
-        setTimeout(() => { window.location.href = 'login-candidato.html'; }, 4500);
+        const tornaA = OFFERTA_DI_PROVENIENZA
+          ? 'login-candidato.html?redirect=' + encodeURIComponent('offerta-lavoro.html?id=' + OFFERTA_DI_PROVENIENZA)
+          : 'login-candidato.html';
+        showMsg(OFFERTA_DI_PROVENIENZA
+          ? '✅ Account creato! Ti abbiamo inviato una email di conferma: aprila e clicca sul link. Poi accedi e potrai candidarti all\'offerta. Controlla anche nella cartella SPAM.'
+          : '✅ Account creato! Ti abbiamo inviato una email di conferma: aprila e clicca sul link per attivare il profilo. Controlla anche nella cartella SPAM. Ti portiamo all\'accesso...', 'success');
+        setTimeout(() => { window.location.href = tornaA; }, 4500);
       } catch (err) {
         console.error('Errore:', err);
         btnNext.disabled = false;
