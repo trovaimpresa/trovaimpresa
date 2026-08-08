@@ -32,8 +32,10 @@
     /* LE DUE PORTE: chi cerca lavoro e chi cerca personale */
     .porte { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 22px 28px; background: #f4f6f8; }
     @media (max-width: 760px) { .porte { grid-template-columns: 1fr; padding: 18px; } }
-    .porta { display: block; text-decoration: none; background: white; border-radius: 16px; padding: 24px 26px; border: 2px solid #e3e8ef; border-top-width: 6px; transition: box-shadow .18s, transform .15s; }
-    .porta:hover { box-shadow: 0 8px 26px rgba(0,0,0,.13); transform: translateY(-2px); }
+    .porta { background: white; border-radius: 16px; padding: 24px 26px; border: 2px solid #e3e8ef; border-top-width: 6px; }
+    .porta.attiva { box-shadow: 0 4px 18px rgba(0,102,255,.13); }
+    .porta-sec { display: block; margin-top: 14px; font-size: 16px; font-weight: 600; text-decoration: none; color: #4a5666; }
+    .porta-sec:hover { text-decoration: underline; }
     .porta-operaio { border-top-color: #0066ff; }
     .porta-impresa { border-top-color: #FF6B35; }
     .porta-occhiello { font-size: 15px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 8px; }
@@ -41,7 +43,8 @@
     .porta-impresa .porta-occhiello { color: #d2541c; }
     .porta h3 { font-size: 24px; color: #14202e; margin-bottom: 8px; line-height: 1.3; }
     .porta p { font-size: 17px; color: #4a5666; line-height: 1.55; margin-bottom: 16px; }
-    .porta-btn { display: inline-block; color: white; font-weight: 700; font-size: 17px; padding: 13px 24px; border-radius: 10px; }
+    .porta-btn { display: inline-block; color: white !important; text-decoration: none; font-weight: 700; font-size: 17px; padding: 13px 24px; border-radius: 10px; }
+    .porta-btn:hover { filter: brightness(.92); }
     .porta-operaio .porta-btn { background: #0066ff; }
     .porta-impresa .porta-btn { background: #FF6B35; }
 
@@ -128,18 +131,20 @@
 <h2 style="margin:0;padding:14px 28px;background:#f0f5ff;color:#0a2a4d;font-size:1rem;font-weight:600;border-bottom:1px solid #e3e8ef;">Lavoro per muratori, operai edili, artigiani e tecnici del settore nella tua città</h2>
 
 <div class="porte">
-  <a class="porta porta-operaio" href="#risultati">
-    <div class="porta-occhiello">Cerchi lavoro</div>
-    <h3>Sono un operaio</h3>
-    <p>Guarda le offerte delle imprese edili nella tua zona e candidati gratis. Non serve pagare niente.</p>
-    <span class="porta-btn">Vedi le offerte ↓</span>
-  </a>
-  <a class="porta porta-impresa" href="/offerte-registrazione.html">
-    <div class="porta-occhiello">Cerchi personale</div>
-    <h3>Sono un'impresa</h3>
-    <p>Pubblica la tua richiesta di personale: muratori, manovali, elettricisti. Gratis e senza limiti.</p>
-    <span class="porta-btn">Pubblica la richiesta →</span>
-  </a>
+  <div class="porta porta-operaio attiva">
+    <div class="porta-occhiello">Bacheca 1 · sei qui</div>
+    <h3>Offerte di lavoro</h3>
+    <p>Le imprese edili cercano personale. Se cerchi lavoro, guarda qui sotto e candidati gratis.</p>
+    <a class="porta-btn" href="#risultati">Vedi le offerte ↓</a>
+    <a class="porta-sec" href="/offerte-registrazione.html">Sei un'impresa? Pubblica un'offerta →</a>
+  </div>
+  <div class="porta porta-impresa">
+    <div class="porta-occhiello">Bacheca 2</div>
+    <h3>Candidature</h3>
+    <p>Operai e artigiani disponibili al lavoro. Se cerchi personale, guarda chi si è iscritto nella tua zona.</p>
+    <a class="porta-btn" href="/ricerca-candidati.html">Vedi i candidati →</a>
+    <a class="porta-sec" href="/registrazione-candidato.html">Cerchi lavoro? Iscriviti gratis →</a>
+  </div>
 </div>
 
 <div class="page-body">
