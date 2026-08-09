@@ -4580,7 +4580,10 @@ function applicaPersonalizzazioneDashboard() {
     hero.style.background = `linear-gradient(135deg, ${pers.colore_header}, color-mix(in srgb, ${pers.colore_header} 60%, black))`;
   }
   if (pers.colore_sfondo) document.body.style.background = pers.colore_sfondo;
-  if (pers.nome_pannello) {
+  /* Vista FONDATORE attiva: ignoro il nome pannello salvato, cosi' Alessio
+     vede sempre il titolo vero del pannello in cui si trova (9/8/2026) */
+  const _vfAttiva = (function(){ try{ return String((impresaCorrente&&impresaCorrente.email)||'').trim().toLowerCase()===FONDATORE_EMAIL && !!sessionStorage.getItem('ti_vedi_tipo'); }catch(e){ return false; } })();
+  if (pers.nome_pannello && !_vfAttiva) {
     const w = document.getElementById('dash-welcome');
     if (w) w.textContent = pers.nome_pannello;
   }

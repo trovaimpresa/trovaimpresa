@@ -1334,6 +1334,14 @@ lo **rimbalza via** verso il pannello del suo tipo. La barra FONDATORE
 - `admin.html` → "Le mie viste": i 4 link dei pannelli hanno gia' `?vedi=` giusto,
   quindi entrano nella categoria corretta senza rimbalzi.
 
+**Ritocco dopo la prova di Alessio:** il riquadro blu del pannello mostrava
+"PANNELLO ARTIGIANO" anche in vista professionista. Non era un bug della vista:
+e' il **nome pannello salvato** nella personalizzazione Premium
+(`personalizzazione.nome_pannello`), unico per tutti i pannelli. Ora, quando la
+vista fondatore e' attiva, quel nome salvato viene ignorato e ogni pannello
+mostra il suo titolo di serie ("Pannello professionista", ecc.) — cosi' si
+capisce sempre dove ci si trova. Per gli utenti normali nulla cambia.
+
 **Trappole scoperte:**
 - `gestionale-noleggio.html` **non aveva** `</body></html>` (finiva con `</script>`):
   aggiunti in fondo insieme all'include di fondatore.js.
