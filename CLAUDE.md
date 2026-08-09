@@ -1516,12 +1516,27 @@ d'incarico: c'e' l'**IVA** invece di cassa e ritenuta, c'e' l'articolo
 **garanzia artt. 1667-1669 c.c.**; recesso art. 1671 (appalto) invece di quello
 generico. Anche qui memoria in `localStorage` (`gest_ordine_default`).
 
-### 4. RIMASTO IN CASSETTO
-**Attrezzature visibili ai professionisti**, rinominate "Strumenti": un geometra
-ha stazione totale, distanziometro laser, termocamera, con **taratura periodica
-obbligatoria**, e oggi non ha un posto dove tenerli. Alessio non l'ha scelto
-stavolta: e' pronto da fare, basta togliere 'attrezzature' da `TAB_NASCOSTI_PRO`
-e rinominare la voce come si fa gia' per Squadra -> Collaboratori.
+### 4. STRUMENTI per gli studi (fatto subito dopo, stessa giornata)
+`TAB_NASCOSTI_PRO` e' passato da `['mezzi','attrezzature','carte']` a
+`['mezzi','carte']`: **le Attrezzature restano visibili agli studi, rinominate
+"Strumenti"**. Motivo: stazione totale, distanziometro laser, termocamera e
+livello hanno la **taratura periodica obbligatoria**, ed e' esattamente il
+mestiere di quella sezione (scadenze delle verifiche). Una misura presa con uno
+strumento fuori taratura non vale.
+- `adattaMenuProfessionista()` rinomina voce di menu, titolo, pulsante e testo
+  introduttivo della sezione (stesso schema di Squadra -> Collaboratori).
+- `renderParcoMezzi()` ha la variabile `STRU` (= attrezzatura AND professionista)
+  per elenco vuoto, colonne e pulsanti.
+- `mezzoForm()`: per uno studio la **spunta "e' un'attrezzatura" non compare** —
+  sceglierebbe fra due cose di cui una (i Mezzi) non e' nemmeno nel suo menu. Al
+  suo posto un campo nascosto `m-cat` porta la categoria al salvataggio.
+  **Attenzione**: la forzatura vale solo per le righe NUOVE. Se modifica una riga
+  gia' salvata la categoria non si tocca, se no un mezzo registrato prima
+  diventerebbe uno strumento di nascosto.
+- `tipiScadenza()` per gli studi: aggiunti **"Taratura strumento"** e
+  **"Manutenzione strumento"** (senza, la sezione sarebbe stata monca).
+- Restano nascoste agli studi solo **Mezzi** (targa, bollo, revisione) e
+  **Carte carburante**.
 
 ### ⚠️ LEZIONE SUI SOLDI (7 bug trovati dalla verifica prima di consegnare)
 Il piu' insidioso: **il totale va sommato sull'IVA GIA' ARROTONDATA ai

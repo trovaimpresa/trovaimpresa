@@ -464,7 +464,12 @@
      "Azienda" diventa "Studio".
      Si NASCONDE soltanto: i dati restano nel database e le sezioni tornano
      visibili da sole se l'utente cambia tipo. Nessuna cancellazione. */
-  const TAB_NASCOSTI_PRO=['mezzi','attrezzature','carte'];
+  /* 9 agosto 2026 — le Attrezzature restano visibili agli studi, rinominate
+     "Strumenti": stazione totale, distanziometro laser, termocamera e livello
+     hanno la TARATURA PERIODICA obbligatoria, ed e' esattamente il mestiere di
+     questa sezione (scadenze delle verifiche). Restano nascosti solo i mezzi
+     con la targa e le carte carburante. */
+  const TAB_NASCOSTI_PRO=['mezzi','carte'];
   function adattaMenuProfessionista(){
     if(ruoloUtente!=='professionista')return;
     try{
@@ -475,6 +480,17 @@
       document.querySelectorAll('[data-tab="squadra"] span').forEach(function(s){
         if(s.textContent.trim()==='Squadra')s.textContent='Collaboratori';
       });
+      /* Attrezzature -> Strumenti (voce di menu, titolo e testo della sezione) */
+      document.querySelectorAll('[data-tab="attrezzature"] span').forEach(function(s){
+        if(s.textContent.trim()==='Attrezzature')s.textContent='Strumenti';
+      });
+      var _secA=document.querySelector('#attrezzature');
+      if(_secA){
+        var _h=_secA.querySelector('h2'); if(_h&&_h.textContent.trim()==='Attrezzature')_h.textContent='Strumenti';
+        var _b=_secA.querySelector('.btn.add'); if(_b)_b.textContent='+ Nuovo strumento';
+        var _i=_secA.querySelector('.gal-intro');
+        if(_i)_i.textContent="Stazione totale, distanziometro laser, termocamera, livello: gli strumenti dello studio, con le date delle tarature e delle verifiche. Il Riepilogo ti avvisa prima che scadano.";
+      }
       /* intestazione del gruppo: "Azienda" -> "Studio" */
       document.querySelectorAll('.side-group').forEach(function(g){
         if(g.textContent.trim()==='Azienda')g.textContent='Studio';
@@ -3415,6 +3431,8 @@
 
   async function renderParcoMezzi(cat){
     const attrezzo = (cat==="attrezzatura");
+    /* per uno studio le "attrezzature" sono gli strumenti di misura */
+    const STRU = attrezzo && ruoloUtente==='professionista';
     const box=$(attrezzo?"#attr-list":"#mezzi-list");if(!box)return;
     if(!cur){box.innerHTML="";return;}
     if(!sb||!sbUid){
@@ -3432,18 +3450,20 @@
       viste:attrezzo?"#attr-viste":"#mezzi-viste", visteDef:MEZZI_VISTE, vista:filtro, conta:conta,
       azioneVista:attrezzo?"attrezzo-filtro":"mezzo-filtro",
       vuoto:tabVuoto(
-        tutti.length?(attrezzo?"Nessuna attrezzatura con questo filtro":"Nessun mezzo con questo filtro")
-                    :(attrezzo?"Le attrezzature":"I mezzi"),
+        tutti.length?(attrezzo?(STRU?"Nessuno strumento con questo filtro":"Nessuna attrezzatura con questo filtro"):"Nessun mezzo con questo filtro")
+                    :(attrezzo?(STRU?"Gli strumenti dello studio":"Le attrezzature"):"I mezzi"),
         tutti.length?"Prova a cambiare filtro qui sopra."
           :(attrezzo
-            ? "Ponteggi, betoniere, trabattelli, trapani. Con le date delle verifiche periodiche: il Riepilogo ti avvisa prima che scadano."
+            ? (STRU
+               ? "Stazione totale, distanziometro laser, termocamera, livello. Con le date delle tarature: il Riepilogo ti avvisa prima che scadano."
+               : "Ponteggi, betoniere, trabattelli, trapani. Con le date delle verifiche periodiche: il Riepilogo ti avvisa prima che scadano.")
             : "Furgoni, escavatori, auto. Con le date di revisione, assicurazione e bollo, e i rifornimenti: il Riepilogo ti avvisa prima che scadano."),
         attrezzo
           ? _SVGV+'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
           : _SVGV+'<path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
-        tutti.length?null:{t:attrezzo?"+ Aggiungi la prima attrezzatura":"+ Aggiungi il primo mezzo",
+        tutti.length?null:{t:attrezzo?(STRU?"+ Aggiungi il primo strumento":"+ Aggiungi la prima attrezzatura"):"+ Aggiungi il primo mezzo",
                            a:attrezzo?"new-attrezzatura":"new-mezzo"}),
-      colonne:[{lab:attrezzo?"Attrezzatura":"Mezzo",w:"26%"},{lab:"Tipo",w:"16%",cls:"c-chi"},
+      colonne:[{lab:attrezzo?(STRU?"Strumento":"Attrezzatura"):"Mezzo",w:"26%"},{lab:"Tipo",w:"16%",cls:"c-chi"},
                {lab:attrezzo?"Matricola":"Targa",w:"16%",cls:"c-chi"},
                {lab:"Stato",w:"20%"},{lab:"Prossima scadenza",w:"22%",cls:"c-cli"}],
       righe:L.map(m=>{
@@ -3487,7 +3507,9 @@
   function mezzoCard(m,sc){
     const st=MEZZO_STATI[m.stato]||MEZZO_STATI.disponibile;
     const cat=m.tipo?((m.categoria==="attrezzatura"?"🔧 ":"🚚 ")+esc(m.tipo))
-                    :(m.categoria==="attrezzatura"?"🔧 Attrezzatura":"🚚 Mezzo");
+                    :(m.categoria==="attrezzatura"
+                      ?(ruoloUtente==='professionista'?"🔧 Strumento":"🔧 Attrezzatura")
+                      :"🚚 Mezzo");
     /* la barretta a sinistra dice come sta il mezzo senza leggere:
        rossa se ha scadenze gia' passate, arancione se una arriva entro 7 giorni */
     let scTesto="", tono="t-ok";
@@ -3519,33 +3541,47 @@
   }
   function mezzoForm(m,catIniziale){
     const isNew=!m;m=m||{};
-    const cat=m.categoria||catIniziale||"mezzo";
+    /* Uno studio non ha mezzi con la targa: quello che registra qui e' sempre
+       uno strumento. Quindi per lui la categoria e' decisa (attrezzatura) e la
+       spunta "e' un'attrezzatura" non compare: sceglierebbe fra due cose di cui
+       una non esiste nel suo menu. */
+    /* Se sta modificando una riga che gia' esiste, la categoria salvata NON si
+       tocca: un mezzo registrato prima resta un mezzo, non diventa uno
+       strumento di nascosto. La forzatura vale solo per le righe nuove. */
+    const cat=(ruoloUtente==='professionista')
+      ? (m.categoria||"attrezzatura")
+      : (m.categoria||catIniziale||"mezzo");
     const attrezzo=(cat==="attrezzatura");
+    const STRU=(ruoloUtente==='professionista')&&attrezzo;
     /* i tipi gia' usati diventano suggerimenti: non un elenco chiuso */
     const tipiUsati=[...new Set(mezziCache.map(x=>(x.tipo||"").trim()).filter(Boolean))].sort();
     const tipoSugg=tipiUsati.map(t=>`<option value="${esc(t)}">`).join("");
     const statoOpts=Object.keys(MEZZO_STATI)
       .map(k=>`<option value="${k}" ${((m.stato||"disponibile")===k)?"selected":""}>${MEZZO_STATI[k].lab}</option>`).join("");
     /* 9 agosto 2026 — finestra grande a due colonne (regola fissa sulle finestre) */
-    openSheetGrande(isNew?(attrezzo?"Nuova attrezzatura":"Nuovo mezzo"):(attrezzo?"Modifica attrezzatura":"Modifica mezzo"),
+    openSheetGrande(STRU?(isNew?"Nuovo strumento":"Modifica strumento")
+                        :(isNew?(attrezzo?"Nuova attrezzatura":"Nuovo mezzo"):(attrezzo?"Modifica attrezzatura":"Modifica mezzo")),
       `<div class="sh-cols"><div class="sh-col">
         <div class="sh-b">
         <div class="sh-tit">Che cos'è</div>
-        <div class="field"><label>Nome</label><input id="m-nome" value="${esc(m.nome||"")}" placeholder="${attrezzo?"Es. Ponteggio 6 m, Betoniera 350 l":"Es. Furgone Ducato, Fiat Doblo"}"></div>
+        <div class="field"><label>Nome</label><input id="m-nome" value="${esc(m.nome||"")}" placeholder="${STRU?"Es. Stazione totale Leica TS07":(attrezzo?"Es. Ponteggio 6 m, Betoniera 350 l":"Es. Furgone Ducato, Fiat Doblo")}"></div>
         <div class="row2">
           <div class="field"><label>Tipo</label>
-            <input id="m-tipo" list="m-tipo-sugg" value="${esc(m.tipo||"")}" placeholder="${attrezzo?"Es. ponteggio, betoniera, trapano":"Es. furgone, escavatore, auto"}" autocomplete="off">
+            <input id="m-tipo" list="m-tipo-sugg" value="${esc(m.tipo||"")}" placeholder="${STRU?"Es. stazione totale, distanziometro, termocamera":(attrezzo?"Es. ponteggio, betoniera, trapano":"Es. furgone, escavatore, auto")}" autocomplete="off">
             <datalist id="m-tipo-sugg">${tipoSugg}</datalist></div>
           <div class="field"><label>${attrezzo?"Matricola":"Targa"}</label><input id="m-targa" value="${esc(m.targa||"")}" placeholder="${attrezzo?"Es. MT-4471":"Es. AB123CD"}"></div></div>
         <div class="field"><label>Stato</label><select id="m-stato">${statoOpts}</select></div>
         </div>
         </div><div class="sh-col">
         <div class="sh-b">
-        <div class="sh-tit">Dove sta di casa</div>
-        <label style="display:flex;align-items:flex-start;gap:10px;font-size:1rem;margin:2px 0 12px;cursor:pointer">
+        <div class="sh-tit">${STRU?"La taratura":"Dove sta di casa"}</div>
+        ${STRU
+          ? `<input type="hidden" id="m-cat" value="${esc(cat)}">
+             <p class="sh-nota" style="margin-top:0">La <b>taratura</b> e le verifiche periodiche si aggiungono dopo, dal pulsante <b>＋ Scadenza</b> sulla scheda dello strumento: il Riepilogo ti avvisa prima che scadano, e una misura presa con uno strumento fuori taratura non vale.</p>`
+          : `<label style="display:flex;align-items:flex-start;gap:10px;font-size:1rem;margin:2px 0 12px;cursor:pointer">
           <input type="checkbox" id="m-attrezzo" ${attrezzo?"checked":""} style="width:20px;height:20px;flex-shrink:0;margin-top:2px">
           <span>È un'attrezzatura (non si guida) — sta fra le Attrezzature invece che fra i Mezzi</span></label>
-        <p class="sh-nota">Le scadenze (revisione, bollo, assicurazione, verifiche) si aggiungono dopo, dal pulsante <b>＋ Scadenza</b> sulla scheda.</p>
+        <p class="sh-nota">Le scadenze (revisione, bollo, assicurazione, verifiche) si aggiungono dopo, dal pulsante <b>＋ Scadenza</b> sulla scheda.</p>`}
         </div>
         <div class="sh-b">
         <div class="sh-tit">Note</div>
@@ -3558,7 +3594,11 @@
   async function saveMezzo(id){
     const nome=$("#m-nome").value.trim();if(!nome){toast("Scrivi il nome del mezzo");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
-    const categoria=$("#m-attrezzo").checked?"attrezzatura":"mezzo";
+    /* per lo studio la spunta non c'e': la categoria viaggia nel campo nascosto
+       messo dal modulo, cosi' il salvataggio non deve indovinarla */
+    const ckAttr=$("#m-attrezzo"), catFissa=$("#m-cat");
+    const categoria=ckAttr?(ckAttr.checked?"attrezzatura":"mezzo")
+                          :((catFissa&&catFissa.value)||"attrezzatura");
     const tipo=$("#m-tipo").value.trim()||null;
     const targa=$("#m-targa").value.trim(), stato=$("#m-stato").value, note=$("#m-note").value.trim();
     const {data,error}=id
@@ -3566,7 +3606,9 @@
       :await sb.from("gest_mezzi").insert({user_id:sbUid,mestiere_id:curMestiere(),nome,categoria,tipo,targa,stato,note}).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
-    closeSheet();renderMezzi();renderAttrezzature();toast(id?"Aggiornato":(categoria==="attrezzatura"?"Attrezzatura aggiunta ✔":"Mezzo aggiunto ✔"));
+    closeSheet();renderMezzi();renderAttrezzature();
+    const _pro=(ruoloUtente==='professionista');
+    toast(id?"Aggiornato":(categoria==="attrezzatura"?(_pro?"Strumento aggiunto ✔":"Attrezzatura aggiunta ✔"):"Mezzo aggiunto ✔"));
   }
 
   /* ============================================================
@@ -4349,7 +4391,11 @@
     ?["Presentazione pratica","Integrazione richiesta dal Comune","Silenzio-assenso",
       "Inizio lavori","Fine lavori","Proroga","Collaudo","Agibilità",
       "Variante","Deposito sismico","Accatastamento","Rinnovo polizza",
-      "Crediti formativi","Altro"]
+      "Crediti formativi",
+      /* 9 agosto 2026 — ora che gli studi hanno la sezione Strumenti: una misura
+         presa con uno strumento fuori taratura non vale, e la taratura scade */
+      "Taratura strumento","Manutenzione strumento",
+      "Altro"]
     :["DURC","Assicurazione","Revisione mezzo","Bollo","Tagliando","Manutenzione programmata","Certificazione",
       "Pagamento fornitore",
       /* 9 agosto 2026 — le date del cantiere: ora che le scadenze si attaccano
@@ -4545,7 +4591,7 @@
       +`<p class="sh-nota" style="margin-top:0">Collegala ${pro?"alla pratica":"al lavoro"}: la ritrovi dentro la sua scheda e capisci al volo di chi \u00e8.</p>`
       +`<div class="field"><label>${pro?"Pratica":"Lavoro"} (facoltativo)</label><select id="s-lav"><option value="">— ${pro?"nessuna":"nessuno"} —</option>${lavOpts}</select></div>`
       +`<div class="field"><label>Cliente (facoltativo)</label><select id="s-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>`
-      +`<div class="field"><label>Mezzo / attrezzatura (facoltativo)</label><select id="s-mezzo"><option value="">— nessuno —</option>${mezOpts}</select></div>`
+      +`<div class="field"><label>${pro?"Strumento":"Mezzo / attrezzatura"} (facoltativo)</label><select id="s-mezzo"><option value="">— nessuno —</option>${mezOpts}</select></div>`
       +'</div>'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Note</div>'
