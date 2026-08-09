@@ -1351,6 +1351,72 @@ capisce sempre dove ci si trova. Per gli utenti normali nulla cambia.
 **Backup locali** (`*.bak-viste`, piu' `admin.html.bak-scroll`): NON vanno committati.
 Fare `git add` SOLO dei file elencati, mai `git add .` finche' ci sono i backup.
 
+## 9 agosto 2026 — PROFESSIONISTI: primo strumento (scadenze delle pratiche)
+
+**Perche':** l'artigiano vive di cantiere, il tecnico vive di **date che non puo'
+bucare**. Analisi fatta con Alessio: i 5 strumenti che valgono di piu' per
+ingegneri/architetti/geometri/periti sono, in ordine:
+1. **scadenzario pratiche con promemoria email** (FATTO, vedi sotto)
+2. preventivo + **lettera d'incarico** PDF (obbligo di legge, `calcolaParcella()` c'e' gia')
+3. **ore per pratica** (timesheet) -> "quanto hai guadagnato all'ora su questa pratica"
+4. **verbale di sopralluogo** con foto (riusare il pattern dell'app operatore)
+5. **registro crediti formativi (CFP)** — unica voce di menu nuova, gruppo Studio
+Il **computo metrico NO**: contro PriMus si fa brutta figura, deciso di lasciarlo perdere.
+La carta vera vs i software: **le imprese sono gia' dentro TrovaImpresa** — un'impresa che
+vince una ristrutturazione ha bisogno di un tecnico per la CILA. Il gestionale apre la
+porta, gli incarichi la tengono aperta.
+
+### Cosa e' stato fatto (tutto e' gia' in produzione)
+
+**Database — `sql/gest-scadenze-pratiche.sql` (Alessio l'ha eseguito il 9/8):**
+- `gest_scadenze.lavoro_id` -> collega la scadenza alla pratica (on delete set null:
+  meglio una scadenza orfana che una sparita)
+- `gest_scadenze.avvisi` (text) -> le tappe email gia' spedite, es. "30,7"
+- `gest_scadenze.avvisa` (bool, default true) -> l'interruttore per spegnerle
+- due indici: `lavoro_id`, e `(data_scadenza, stato)` per la funzione delle email
+
+**gestionale-app.html:**
+- `tipiScadenza()` per i professionisti: da 5 a **14 tipi** veri (Presentazione pratica,
+  Integrazione richiesta dal Comune, Silenzio-assenso, Inizio/Fine lavori, Proroga,
+  Collaudo, Agibilita', Variante, Deposito sismico, Accatastamento, Rinnovo polizza,
+  Crediti formativi, Altro). Per imprese/artigiani l'elenco resta identico.
+- `scadForm()` convertita da `openSheet()` a **`openSheetGrande()` a due colonne**
+  (rispetta la regola fissa sulle finestre): sinistra "Che cosa scade" + "Promemoria
+  via email"; destra "A che cosa si riferisce" (Pratica/Cliente/Mezzo) + Note.
+- `renderScadenze()` legge `select("*")` invece dell'elenco fisso di colonne, cosi'
+  non si rompe se la migrazione non e' stata fatta.
+- `saveScad()` ha il **paracadute colonne mancanti**: toglie `lavoro_id`/`avvisa` e
+  riprova, e lo dice nel toast (stesso pattern dei Dati azienda).
+- **`bloccoScadenzePratica()` + `renderLavScadenze()`**: riquadro "Scadenze di questa
+  pratica" nella colonna destra della scheda pratica, con "+ Aggiungi una scadenza"
+  (azione `scad-da-pratica`) che apre il form gia' collegato a pratica e cliente.
+- **`proponiScadenzaPratica()`**: salvando una pratica con data futura, chiede con
+  Si'/No se creare la scadenza collegata. Non richiede due volte perche' controlla se
+  esiste gia' una scadenza con quella stessa data su quella pratica.
+
+**css/gestionale.css:** classi `.lav-media .lsc-r / .lsc-info / .lsc-q` per le righe
+del riquadro (righe alte, bordo rosso a sinistra se la data e' passata).
+
+**netlify/functions/promemoria-scadenze.js** (nuova, schedulata `15 6 * * *`):
+manda **una sola email al giorno per persona** con le scadenze a **30, 7 e 1 giorno**.
+Usa Resend e `SUPABASE_SERVICE_KEY` (gia' configurate). Niente doppioni: prima di
+mandare controlla `avvisi`, dopo aver mandato ci scrive la tappa. Se Resend fallisce
+NON segna niente, cosi' l'indirizzo riceve l'email il giorno dopo.
+
+### Trappole imparate stavolta
+- **Il tool Write scrive nel container di Claude, NON sul PC di Alessio.** Il file SQL
+  sembrava creato ma sul suo disco non c'era. Per i file del progetto usare SEMPRE
+  `device_bash` (python/heredoc): e' l'unico che scrive davvero in `~/Downloads/trovaimpresa`.
+- Le classi `.ff-r/.ff-info/.ff-q` sono **scoped a `#fornitori`** in gestionale.css:
+  riusate altrove escono senza grafica. Servono classi nuove.
+- I nomi delle pratiche NON si leggono da `lavCache` fuori dalla sezione Pratiche:
+  e' vuota finche' non la si apre, e ogni scadenza collegata sembrerebbe
+  "(pratica eliminata)". Vanno letti con una select dedicata.
+
+### Il prossimo passo
+Punto 2 della lista: **lettera d'incarico in PDF** dentro Preventivi, riusando
+`calcolaParcella()` e `prevPdf()` che ci sono gia'.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
