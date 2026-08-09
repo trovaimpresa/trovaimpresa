@@ -1474,6 +1474,71 @@ La lista strumenti professionisti continua con: **ore per pratica** (timesheet +
 "quanto hai guadagnato all'ora"), **verbale di sopralluogo** con foto,
 **registro crediti formativi**.
 
+## 9 agosto 2026 — TRAVASO fra gestionale impresa e professionista
+
+Confronto fatto su richiesta di Alessio: cosa ha l'uno che serve all'altro.
+Risultato: **4 buchi**, 3 chiusi (il quarto e' rimasto in cassetto).
+
+**Cosa aveva SOLO il professionista:** dati pratica, parcella completa con
+riepilogo dal vivo, PDF "PARCELLA", lettera d'incarico, 14 tipi di scadenza,
+blocco scadenze nella scheda.
+**Cosa ha SOLO l'impresa:** Mezzi, Attrezzature, Carte carburante.
+
+### 1. L'IVA nel preventivo di imprese e artigiani (il buco piu' grosso)
+La FATTURA dell'impresa aveva gia' l'IVA riga per riga; il PREVENTIVO no:
+mostrava la somma delle voci e il PDF diceva "prezzi IVA esclusa". Ma il cliente
+privato ragiona sul totale finito.
+- `bloccoIvaImpresa()` / `aggiornaRiepilogoIvaImpresa()` / `leggiCampiIvaImpresa()`
+  — aliquota (22 / 10 ristrutturazione / 4 prima casa / 0) piu' riepilogo dal vivo.
+- **Zero SQL**: riusa la colonna `iva_perc` che gia' esiste per la parcella. I due
+  non si pestano i piedi: `leggiCampiParcella()` esce vuota per le imprese e
+  `leggiCampiIvaImpresa()` esce vuota per i professionisti, e i due blocchi non
+  compaiono mai insieme (id diversi: `pv-iva` contro `pv-iva-imp`).
+- **Retrocompatibile**: preventivo vecchio con `iva_perc` null -> tutto come prima.
+- `prevPdf` ha un ramo nuovo col riquadro Imponibile / IVA / TOTALE finito.
+- L'aliquota scelta nel preventivo ora arriva anche in **fattura**
+  (`fattDaPreventivoConferma`): prima ripartiva sempre dal 10% di default.
+
+### 2. Blocco scadenze acceso anche per imprese e artigiani
+`bloccoScadenzePratica`, `renderLavScadenze` e `proponiScadenzaPratica` non
+escono piu' subito se non sei professionista: cambia solo la parola
+(pratica/lavoro). Aggiunti alla lista tipi dei non-professionisti: **Consegna
+lavori, SAL (stato avanzamento), Fine lavori, Verifica ponteggio**.
+La proposta automatica per le imprese usa "Consegna lavori" (esiste nella loro
+lista: se il tipo non ci fosse, riaprendo la scadenza la tendina mostrerebbe
+il valore sbagliato).
+
+### 3. Conferma d'ordine in PDF per le imprese (gemella della lettera d'incarico)
+`ordineForm()` / `ordinePdf()`, voce di menu "📝 Conferma d'ordine" nel
+preventivo per i non-professionisti. Differenze vere rispetto alla lettera
+d'incarico: c'e' l'**IVA** invece di cassa e ritenuta, c'e' l'articolo
+**varianti e lavori aggiuntivi** (dove finiscono quasi tutte le liti), e la
+**garanzia artt. 1667-1669 c.c.**; recesso art. 1671 (appalto) invece di quello
+generico. Anche qui memoria in `localStorage` (`gest_ordine_default`).
+
+### 4. RIMASTO IN CASSETTO
+**Attrezzature visibili ai professionisti**, rinominate "Strumenti": un geometra
+ha stazione totale, distanziometro laser, termocamera, con **taratura periodica
+obbligatoria**, e oggi non ha un posto dove tenerli. Alessio non l'ha scelto
+stavolta: e' pronto da fare, basta togliere 'attrezzature' da `TAB_NASCOSTI_PRO`
+e rinominare la voce come si fa gia' per Squadra -> Collaboratori.
+
+### ⚠️ LEZIONE SUI SOLDI (7 bug trovati dalla verifica prima di consegnare)
+Il piu' insidioso: **il totale va sommato sull'IVA GIA' ARROTONDATA ai
+centesimi**, non ricalcolato da `imponibile*perc/100`. Con imponibile 1.000,05
+al 10% il riquadro scriveva "IVA 100,01" e "TOTALE 1.100,05", ma la somma fa
+1.100,06: il cliente che rifa' il conto a mano trova l'errore. Succedeva
+nell'1% dei casi al 10%. Peggio: `prevPdf` e la conferma d'ordine usavano
+formule diverse, quindi due documenti dello stesso lavoro uscivano con importi
+diversi. **Regola: una sola formula, `Math.round((imponibile+ivaArrotondata)*100)/100`,
+usata identica in tutti i documenti.** Verificata su 900.000 casi, zero discordanze.
+Gli altri sei: la frase in fondo al PDF diceva il falso ("gli importi comprendono
+l'IVA" mentre le voci erano al netto); la conferma d'ordine si ricordava
+l'**indirizzo del cantiere** della volta prima (documento firmato con l'indirizzo
+sbagliato: ora quel campo non si memorizza); l'aliquota non arrivava in fattura;
+cancellando una voce i riepiloghi restavano col numero vecchio; e il messaggio
+d'errore parlava di "parcella" anche a un'impresa che non sa cosa sia.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
