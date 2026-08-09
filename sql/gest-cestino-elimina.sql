@@ -165,7 +165,9 @@ begin
   end if;
 
   create temp table if not exists _cascata_tmp(tabella text, id uuid, esito text, viva boolean, altrui boolean, storage_path text) on commit drop;
-  delete from _cascata_tmp;
+  -- "where true" non e' decorativo: Supabase tiene acceso pg_safeupdate, che
+  -- rifiuta QUALSIASI delete senza where, anche su una tabella temporanea.
+  delete from _cascata_tmp where true;
   insert into _cascata_tmp
   select distinct on (c.tabella, c.id) c.tabella, c.id, c.esito, c.viva, c.altrui, c.storage_path
     from public._gest_cascata(p_tabella, array[p_id], v_uid, 0) c

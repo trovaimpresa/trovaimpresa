@@ -2166,3 +2166,63 @@ c'e' PostgreSQL 16: per qualsiasi funzione SQL futura, prima si prova li'.
   nome. A schermo l'elenco preventivi ora dice "Nome (nel cestino)", quindi i due
   posti non concordano. Non e' un difetto nuovo, ma va sistemato.
 - Restano da testare dal vivo: il giro completo sul profilo Impresa.
+
+
+## 9 agosto 2026 (sera, 2) — I tooltip: fusi in aiuti.js, non aggiunti accanto
+
+Alex: *"non c'e' tooltip nel gestionale professionisti, mettiamolo"*.
+
+Prima cosa scoperta: **un sistema c'era gia'**, `js/aiuti.js`, con 17 spiegazioni
+per il menu (chiave = `data-tab`) e 35 per la barra in alto (chiave = `data-action`).
+Ma copriva solo quelle due zone e si spegneva da solo sui telefoni: nel file c'era
+scritto `if (!hover) return`, con la motivazione "sul telefono il passaggio sopra
+non esiste". Per un geometra in cantiere, che sta sul telefono, era come non averlo.
+
+**Non e' stato aggiunto un secondo sistema** (sarebbe stato: due riquadri diversi,
+due grafiche, due file da mantenere). Tutto fuso dentro `aiuti.js`:
+
+- restano i suoi dizionari, che agganciano per `data-tab` / `data-action` /
+  `data-aiuto` — piu' solido del cercare il testo;
+- aggiunto `AIUTI_TESTO`, chiave = il testo a schermo in minuscolo, per i posti che
+  un attributo non ce l'hanno: etichette dei form (cassa previdenziale, ritenuta,
+  aliquota, protocollo, codice destinatario…), i numeroni (`.fatt-tot > .l`) e i
+  pulsanti delle card;
+- aggiunto il **(i) toccabile**: un `<button>` vero, clic sul computer e tocco sul
+  telefono. Sul computer il menu continua a funzionare col solo passaggio del mouse
+  (il (i) li' non compare); sul telefono il (i) compare anche sul menu, perche' e'
+  l'unico modo.
+
+### Due trappole, tutte e due vere
+
+**1. Mai un pulsante dentro un pulsante.** Sulle card le azioni sono `<button>`:
+un (i) dentro "Elimina per sempre" avrebbe fatto partire l'eliminazione al tocco.
+Se ne mette **uno solo in fondo alla fila**, che spiega tutti i pulsanti insieme,
+con `stopPropagation()` sul clic. Verificato: 0 pulsanti premuti per sbaglio.
+
+**2. Il clic che richiudeva subito.** Sul computer: passi il mouse (si apre),
+clicchi, e il clic trovava la bolla gia' aperta e la chiudeva. Serve distinguere
+"aperta al passaggio" da "fissata col clic" (variabile `fissato`). E il passaggio
+del mouse si registra solo dove `(hover: hover)` e' vero, se no sui telefoni il
+browser lo simula al tocco e la bolla lampeggia.
+
+### Come si aggiungono altri aiuti
+
+Tre modi, in ordine di precedenza: `data-aiuto="..."` sull'elemento, oppure una
+riga in `AIUTI_TAB` / `AIUTI_AZIONE` (chiave = data-tab o data-action), oppure una
+riga in `AIUTI_TESTO` (chiave = il testo a schermo, minuscolo, senza "(facoltativo)"
+e senza due punti). Un MutationObserver ripassa a ogni cambio di schermata, quindi
+le pagine nuove ereditano gli aiuti senza doversene ricordare.
+
+### Provato in un browser vero, non solo letto
+
+Con Playwright, su finestra da computer e su telefono simulato: posizione dei (i),
+zero (i) dentro i pulsanti, apertura al clic e al tocco, chiusura con Escape e col
+clic fuori, nessuna azione fatta partire per sbaglio, aggancio del contenuto
+caricato dopo, nessun raddoppio, zero errori JavaScript.
+
+Un difetto trovato solo cosi': sul telefono il riquadro usciva a destra. Il vecchio
+`posiziona()` lo metteva a destra dell'elemento e non ricontrollava il bordo. Ora
+c'e' una stretta finale su entrambi i lati. (Attenzione, la prima misura diceva
+`innerWidth = 980` su uno schermo da 390: era la **paginetta di prova** senza il tag
+`<meta name="viewport">`. Il gestionale ce l'ha. Quando un numero non torna,
+sospettare prima del banco di prova che del codice.)

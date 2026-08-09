@@ -86,6 +86,49 @@
     'fatt':              'Crea la fattura di questo lavoro, con dentro già la voce giusta.'
   };
 
+  /* 9 agosto 2026 — le parole tecniche dei form, i numeri in alto e i pulsanti
+     delle card non hanno un data-tab ne' un data-action a cui agganciarsi:
+     qui la chiave e' il testo che si legge a schermo, in minuscolo. */
+  var AIUTI_TESTO = {
+    'cassa previdenziale': 'Il contributo per la tua cassa (Inarcassa, Geometri, EPPI, INPS). Si calcola SOLO sul compenso, non sulle spese, e si aggiunge in fattura: lo paga il cliente. La percentuale confermala al commercialista.',
+    'ritenuta d\'acconto': 'Una parte del tuo compenso che il cliente NON ti paga: la versa lui allo Stato per conto tuo, come anticipo delle tue tasse. Di solito il 20%, e solo sul compenso. Non e\u2019 un costo: la ritrovi nella dichiarazione dei redditi.',
+    'aliquota iva': 'La percentuale di IVA su questa voce. Le prestazioni professionali vanno al 22%. Il 10% e il 4% sono per chi esegue i lavori (ristrutturazione, prima casa), non per la parcella.',
+    'imponibile': 'La somma su cui si calcola l\u2019IVA: compenso + cassa + spese. Non e\u2019 quello che incassi.',
+    'imponibile iva': 'La somma su cui si calcola l\u2019IVA: compenso + cassa + spese. Non e\u2019 quello che incassi.',
+    'spese (bolli, diritti, visure)': 'Quello che hai anticipato per conto del cliente: marche da bollo, diritti di segreteria, visure. Glielo riaddebiti tal quale, non e\u2019 un tuo guadagno.',
+    'bollo (\u20ac)': 'La marca da bollo da 2 euro. Va sulle fatture senza IVA sopra i 77,47 euro (per esempio in forfettario). Se in fattura c\u2019e\u2019 l\u2019IVA, di solito non serve.',
+    'sconto (\u20ac)': 'Uno sconto in euro sul totale. Si toglie dopo l\u2019IVA.',
+    'codice destinatario': 'Il codice di 7 caratteri che dice allo SdI dove consegnare la fattura elettronica. Te lo da\u2019 il cliente. Se non ce l\u2019ha si mette 0000000 e gli arriva nel cassetto fiscale.',
+    'regime fiscale': 'Ordinario (con IVA) o forfettario (senza IVA, con la dicitura di legge). Cambia tutta la fattura: controllalo col commercialista.',
+    'giorni per il pagamento': 'Dopo quanti giorni dalla data scade il pagamento. Serve al gestionale per dirti quali fatture sono in ritardo.',
+    'iban': 'Il conto su cui vuoi essere pagato. Finisce stampato sulla fattura e dentro il file per lo SdI.',
+    'protocollo': 'Il numero che ti da\u2019 il Comune quando depositi la pratica. Scrivilo qui: lo ritrovi sulla card senza riaprire la mail.',
+    'a che punto sta': 'Lo stato della pratica in Comune: da presentare, depositata, in istruttoria, integrazioni, conclusa. E\u2019 diverso da \u201cda fare / in corso / fatto\u201d, che dice a che punto sei TU.',
+    'data prevista': 'Quando pensi di chiuderla. Con una scadenza collegata ti arriva l\u2019email 30 giorni prima, 7 giorni prima e il giorno prima.',
+    'importo (\u20ac)': 'Quanto vale, IVA esclusa. E\u2019 il numero che diventa la riga della fattura: cassa, spese e IVA si aggiungono dopo, non metterle qui.',
+    'che tipo di cliente \u00e8': 'Privato (codice fiscale), Azienda (partita IVA) o Condominio (con l\u2019amministratore). Cambia cosa ti serve per fatturare.',
+    'obiettivo crediti': 'Quanti CFP ti servono nel periodo. Per molti Ordini sono 30 all\u2019anno, ma controlla il tuo regolamento.',
+    'da incassare': 'Fatture gia\u2019 emesse che il cliente non ha ancora pagato. In rosso quelle scadute.',
+    'da fatturare': 'Lavoro finito e mai fatturato. Sono soldi tuoi fermi: clicca per emettere la fattura.',
+    'incassato': 'Quello che e\u2019 davvero entrato in cassa quest\u2019anno, al netto della ritenuta.',
+    'il credito pi\u00f9 vecchio': 'Da quanti giorni aspetti il pagamento piu\u2019 arretrato. Se supera i 60, e\u2019 ora di telefonare.',
+    'fatture emesse': 'Quante fatture hai numerato quest\u2019anno. La numerazione riparte da 1 ogni gennaio.',
+    'emetti': 'Da\u2019 il numero definitivo alla fattura e la rende ufficiale. Dopo non si dovrebbe piu\u2019 cambiare.',
+    'segna inviato': 'Segna che l\u2019hai mandata al cliente. Serve a te per ricordartene.',
+    'accettato \u2192 crea pratica': 'Il cliente ha detto di si\u2019: il preventivo diventa una pratica. Se ne hai gia\u2019 una aperta per quel cliente ti chiede se collegarla, invece di crearne una doppia.',
+    'accettato \u2192 crea lavoro': 'Il cliente ha detto di si\u2019: il preventivo diventa un lavoro. Se ne hai gia\u2019 uno aperto per quel cliente ti chiede se collegarlo, invece di crearne uno doppio.',
+    'rifiutato': 'Il cliente ha detto di no. Il preventivo resta negli archivi, non sparisce.',
+    'lettera d\'incarico': 'Il contratto da far firmare prima di iniziare: oggetto, compenso, tempi, recesso, foro e la doppia firma sulle clausole. Fattelo leggere una volta dal tuo legale.',
+    'crea il pdf': 'Genera il PDF della fattura da mandare al cliente.',
+    'allega un pdf tuo': 'Se la fattura la fa il commercialista, carica qui la sua: il gestionale usa quella.',
+    'rimetti a posto': 'Riporta la scheda dov\u2019era, con tutti i suoi dati.',
+    'elimina per sempre': 'Cancella davvero, senza ritorno. Se c\u2019e\u2019 ancora attaccato qualcosa che non e\u2019 nel cestino, si rifiuta e ti dice cosa.',
+    'segna fatto': 'Chiude il lavoro e lo manda in \u201cda fatturare\u201d.',
+    'avvia': 'Mette il lavoro in corso.'
+  };
+  /* queste finiscono con l'anno attaccato: "Incassato 2026" */
+  var PREFISSI = ['incassato', 'fatture emesse'];
+
   /* ---------- il riquadro ---------- */
   var RITARDO = 350;      /* ms prima di comparire: così non lampeggia mentre muovi il mouse */
   var box = null, timer = null, ancora = null;
@@ -99,7 +142,8 @@
       'box-shadow:0 6px 24px rgba(10,42,77,.28);pointer-events:none;opacity:0;transition:opacity .14s;' +
       'transform:translateY(4px)}' +
       '#ti-aiuto.on{opacity:1;transform:translateY(0)}' +
-      '@media (prefers-reduced-motion: reduce){#ti-aiuto{transition:none}}';
+      '@media (prefers-reduced-motion: reduce){#ti-aiuto{transition:none}}' +
+      '@media (max-width:560px){#ti-aiuto{max-width:calc(100vw - 20px)}}';
     document.head.appendChild(s);
     box = document.createElement('div');
     box.id = 'ti-aiuto';
@@ -119,6 +163,10 @@
       y = r.bottom + m;
     }
     if (y + b.height > window.innerHeight - m) y = Math.max(m, window.innerHeight - b.height - m);
+    /* 9 agosto 2026 — su telefono il riquadro usciva a destra: qui lo si
+       riporta dentro, sempre, qualunque strada abbia preso sopra. */
+    x = Math.min(x, window.innerWidth - b.width - m);
+    x = Math.max(m, x);
     box.style.left = Math.round(x) + 'px';
     box.style.top = Math.round(y) + 'px';
   }
@@ -135,7 +183,9 @@
   function nascondi() {
     clearTimeout(timer);
     if (box) box.classList.remove('on');
+    if (ancora && ancora.classList && ancora.classList.contains('ti-i')) ancora.setAttribute('aria-expanded', 'false');
     ancora = null;
+    fissato = false;
   }
 
   function testoDi(el) {
@@ -145,9 +195,110 @@
     return '';
   }
 
+  /* ===== 9 agosto 2026 — IL (i) TOCCABILE =====
+     Prima questo file si spegneva del tutto sui telefoni ("if (!hover) return"),
+     e un geometra in cantiere sta sul telefono. Adesso, dove serve, si aggiunge
+     un (i) che e' un pulsante vero: si tocca e la spiegazione compare.
+     Sui pulsanti delle card il (i) NON va dentro il pulsante (sarebbe un
+     pulsante dentro un pulsante e toccarlo farebbe partire l'azione): se ne
+     mette uno solo in fondo alla fila, che li spiega tutti insieme. */
+  var conMouse = !window.matchMedia || window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var fissato = false, obs = null, stoScrivendo = false;
+
+  function pulisci(t) {
+    return String(t || '').replace(/\u24d8|\u2139/g, '').replace(/\(facoltativo\)/gi, '')
+      .replace(/[*:]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+  function testoPerParola(t) {
+    var k = pulisci(t);
+    if (AIUTI_TESTO[k]) return AIUTI_TESTO[k];
+    for (var i = 0; i < PREFISSI.length; i++) if (k.indexOf(PREFISSI[i]) === 0) return AIUTI_TESTO[PREFISSI[i]];
+    return '';
+  }
+  function stileI() {
+    if (document.getElementById('ti-aiuto-css')) return;
+    var s2 = document.createElement('style');
+    s2.id = 'ti-aiuto-css';
+    s2.textContent =
+      '.ti-i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;' +
+      'min-width:17px;padding:0;margin:0 0 0 5px;border:1.5px solid currentColor;border-radius:50%;' +
+      'background:transparent;color:#8a94a6;font:700 11px/1 Georgia,serif;cursor:help;' +
+      'vertical-align:middle;opacity:.75;flex:none}' +
+      '.ti-i:hover,.ti-i[aria-expanded=true]{opacity:1;color:#0b4bc4}' +
+      '.ti-i:focus-visible{outline:2px solid #0b4bc4;outline-offset:2px}' +
+      '.job-actions>.ti-i{margin-left:auto;align-self:center}' +
+      '@media (max-width:560px){.ti-i{width:21px;height:21px;min-width:21px;font-size:12px;opacity:1}}';
+    document.head.appendChild(s2);
+  }
+  function creaI(testo) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'ti-i'; b.textContent = 'i';
+    b.setAttribute('aria-label', 'Cosa vuol dire'); b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();     /* non deve premere il pulsante sotto */
+      if (fissato && ancora === b) { nascondi(); return; }
+      mostra(b, testo); fissato = true; b.setAttribute('aria-expanded', 'true');
+    });
+    if (conMouse) {
+      b.addEventListener('mouseenter', function () { if (!fissato) mostra(b, testo); });
+      b.addEventListener('mouseleave', function () { if (!fissato) nascondi(); });
+    }
+    return b;
+  }
+  function attaccaI(el, testo) {
+    if (!el || el.dataset.tiI) return;
+    el.dataset.tiI = '1';
+    el.appendChild(document.createTextNode(' '));
+    el.appendChild(creaI(testo));
+  }
+  function passata() {
+    if (stoScrivendo) return;
+    stoScrivendo = true;
+    try {
+      stileI();
+      document.querySelectorAll('label:not([data-ti-i])').forEach(function (l) {
+        var t = testoPerParola(l.textContent); if (t) attaccaI(l, t);
+      });
+      document.querySelectorAll('.fatt-tot > .l:not([data-ti-i])').forEach(function (l) {
+        var t = testoPerParola(l.textContent); if (t) attaccaI(l, t);
+      });
+      document.querySelectorAll('.job-actions:not([data-ti-i])').forEach(function (riga) {
+        var voci = [];
+        riga.querySelectorAll('button, .btn').forEach(function (b) {
+          if (b.classList.contains('ti-i')) return;
+          var t = testoDi(b) || testoPerParola(b.textContent);
+          if (t) voci.push('\u2022 ' + b.textContent.trim() + ': ' + t);
+        });
+        riga.dataset.tiI = '1';
+        if (voci.length) riga.appendChild(creaI(voci.join('\n\n')));
+      });
+      /* menu e barra in alto: sul computer basta il passaggio del mouse che
+         c'era gia'. Sul telefono no, quindi li' serve il (i). */
+      if (!conMouse) {
+        document.querySelectorAll('[data-tab]:not([data-ti-i]),[data-aiuto]:not([data-ti-i])').forEach(function (el) {
+          var t = testoDi(el); if (!t) return;
+          var dove = el.querySelector('span:not(.tab-cnt)') || el;
+          if (dove.dataset.tiI) return;
+          attaccaI(dove, t);
+        });
+      }
+    } finally { stoScrivendo = false; }
+  }
+
   function avvia() {
-    /* solo dove esiste un vero passaggio del mouse */
-    if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    /* Il (i) va messo SEMPRE: e' l'unico aiuto che funziona al tocco.
+       Prima qui c'era un "return" che spegneva tutto sui telefoni. */
+    passata();
+    if (!obs) {
+      obs = new MutationObserver(function () { passata(); });
+      obs.observe(document.body, { childList: true, subtree: true });
+    }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('.ti-i')) nascondi();
+    });
+
+    /* il passaggio del mouse resta com'era, ma solo dove il mouse c'e' davvero */
+    if (!conMouse) return;
 
     document.addEventListener('mouseover', function (e) {
       var el = e.target.closest('[data-tab],[data-action],[data-aiuto]');
@@ -168,7 +319,6 @@
     });
 
     /* il riquadro non deve restare appeso quando succede altro */
-    document.addEventListener('click', nascondi, true);
     window.addEventListener('scroll', nascondi, true);
     window.addEventListener('blur', nascondi);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') nascondi(); });
