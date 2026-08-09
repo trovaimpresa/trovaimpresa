@@ -4564,15 +4564,17 @@
      Colonne DB: sql/gest-pratiche-professionisti.sql */
   const PRATICA_TIPI=["","CILA","CILAS","SCIA","SCIA alternativa al PdC","Permesso di Costruire","Autorizzazione paesaggistica","Agibilita'","Sanatoria","Accatastamento","Voltura","Altro"];
   const PRATICA_STATI=[["da_preparare","Da preparare"],["depositata","Depositata"],["istruttoria","In istruttoria"],["integrazioni","Integrazioni richieste"],["approvata","Approvata"],["archiviata","Archiviata"]];
-  function bloccoPratica(job){
+  /* dentroBox=true: il riquadro che lo contiene ha gia' il suo titolo, quindi
+     qui si salta l'intestazione interna (evita due titoli uno sull'altro). */
+  function bloccoPratica(job,dentroBox){
     if(ruoloUtente!=='professionista')return "";
     job=job||{};
     const tipi=PRATICA_TIPI.map(t=>`<option value="${esc(t)}" ${t===(job.pratica_tipo||"")?"selected":""}>${t||"— scegli —"}</option>`).join("");
     const stati=PRATICA_STATI.map(s=>`<option value="${s[0]}" ${s[0]===(job.pratica_stato||"da_preparare")?"selected":""}>${s[1]}</option>`).join("");
     return `
-      <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:4px">
+      ${dentroBox?"":`<div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:4px">
         <label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">📄 Dati della pratica</label>
-      </div>
+      </div>`}
       <div class="row2">
         <div class="field"><label>Tipo di pratica</label><select id="j-pr-tipo">${tipi}</select></div>
         <div class="field"><label>A che punto sta</label><select id="j-pr-stato">${stati}</select></div>
@@ -4627,17 +4629,32 @@
     editing={id:jid,foto:(job.foto||[]).slice(),supa:!!supa,fattura:!!fattura};
     fotoSupa={};   /* registro delle foto su Supabase: e' del lavoro aperto, non va ereditato */
     if(supa){
-      openSheet(`<h3>${fattura?"Nuova fattura":"Nuovo lavoro"}</h3>
-        <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
-        <div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
-        <div class="row2">
-          <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>
-          <div class="field"><label>Operaio</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>
-        <div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>
-        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>
-        ${bloccoPratica(job)}
-        <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-          <button class="btn-primary b-save" data-action="save-job">${fattura?"Crea fattura":"Crea lavoro"}</button></div>`);
+      /* 9 agosto 2026 — finestra GRANDE a due colonne anche qui.
+         Prima era la finestrella piccola: con i "Dati della pratica" in fondo
+         diventava una colonna lunghissima da scorrere. A sinistra il lavoro,
+         a destra i soldi e (per gli studi) il fascicolo della pratica. */
+      const pro=ruoloUtente==='professionista';
+      openSheetGrande(fattura?"Nuova fattura":(pro?"Nuova pratica":"Nuovo lavoro"),
+        '<div class="sh-cols"><div class="sh-col">'
+        +'<div class="sh-b">'
+        +`<div class="sh-tit">${pro?"La pratica":"Il lavoro"}</div>`
+        +`<div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="${pro?"Es. CILA per rifacimento bagno":"Es. taglio siepe e pulizia aiuole"}">${esc(job.descrizione||"")}</textarea></div>`
+        +`<div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>`
+        +'<div class="row2">'
+        +`<div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>`
+        +`<div class="field"><label>${pro?"Collaboratore":"Operaio"}</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>`
+        +'<div class="field"><label>Cliente</label><select id="j-cliente"><option value="">— nessuno —</option></select></div>'
+        +'</div>'
+        +'</div><div class="sh-col">'
+        +'<div class="sh-b">'
+        +`<div class="sh-tit">${pro?"Compenso":"Importo"}</div>`
+        +`<div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>`
+        +`<p class="sh-nota" style="margin-bottom:0">Puoi lasciarlo a zero adesso e metterlo dopo${pro?", quando fai la parcella":""}.</p>`
+        +'</div>'
+        +(pro?('<div class="sh-b"><div class="sh-tit">\ud83d\udcc4 Dati della pratica</div>'+bloccoPratica(job,true)+'</div>'):'')
+        +'</div></div>',
+        '<button class="btn b-cancel" data-action="close">Annulla</button>'
+        +`<button class="btn-primary b-save" data-action="save-job">${fattura?"Crea fattura":(pro?"Crea pratica":"Crea lavoro")}</button>`);
       fillOperai();fillClienti(job.cliente_id);return;
     }
     const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
