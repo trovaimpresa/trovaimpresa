@@ -1058,6 +1058,14 @@
 .spesa-add.ore-add{ grid-template-columns:auto 90px 1fr auto; }
 @media(max-width:700px){ .spesa-add.ore-add{ grid-template-columns:1fr 1fr; } }
 
+.c-imp .prev-iva{ display:block; font-size:12px; font-weight:600; color:var(--testo-3); margin-top:1px; }
+
+/* la pastiglia col tipo di pratica accanto al nome, nell'elenco Pratiche
+   (9 agosto 2026): CILA, SCIA, Permesso di Costruire... */
+.pra-tag{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:20px;
+          background:rgba(0,102,255,.10); color:var(--blu,#0066ff);
+          font-size:12.5px; font-weight:700; vertical-align:middle; white-space:nowrap; }
+
 /* --- cestino: la riga in cima con il conteggio e lo svuota --- */
 .cest-testa{ display:flex; align-items:center; justify-content:space-between; gap:14px;
              flex-wrap:wrap; background:var(--card); border:1px solid var(--bordo);

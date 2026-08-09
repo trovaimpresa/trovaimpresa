@@ -56,7 +56,7 @@
       <button data-tab="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span>Agenda operatore</span></button>
       <div class="side-group">Azienda</div>
       <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
-      <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Attrezzature</button>
+      <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Attrezzature</span></button>
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
       <button data-tab="crediti" id="tab-crediti" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg><span>Crediti formativi</span><span class="tab-cnt" id="cnt-crediti"></span></button>
       <button data-tab="carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Carte</span></button>
@@ -593,12 +593,13 @@
     ['Nome condominio / cliente','Nome cliente'],
     ['Condomini / Clienti','Clienti'],
     ['Condominio / Cantiere','Cliente'],
-    ['+ Aggiungi nuovo condominio','+ Aggiungi nuovo cliente'],
-    ['Nuovo condominio','Nuovo cliente'],
-    ['Modifica condominio','Modifica cliente'],
-    ['Nessun condominio','Nessun cliente'],
     ['Referente / Amministratore','Referente'],
-    ['Condomini','Clienti'],
+    /* 9 agosto 2026 — questa riga rompeva la parola: "Condomini" e' dentro
+       "Condominio", e con una sostituzione secca ogni "Condominio" diventava
+       "Clientio". Si vedeva nel pulsante, nella scheda cliente e perfino nei
+       NOMI scritti dall'utente ("Condominio Le Terrazze" -> "Clientio Le
+       Terrazze"). Per un tecnico il condominio e' un cliente legittimo:
+       la parola si lascia stare. */
     /* "Agenda operatore" → "Agenda" (togli "operatore"); operatore → collaboratore solo nelle
        etichette/filtri legati ai collaboratori. La parola nuda "Operatore" per ultima. */
     ['Agenda operatore','Agenda'],
@@ -618,11 +619,74 @@
     ['Condominio aggiunto ✔','Cliente aggiunto ✔'],
     ['Eliminare questo lavoro?','Eliminare questa pratica?'],
     ['Eliminare questo condominio?','Eliminare questo cliente?'],
-    ['Questo condominio ha','Questo cliente ha'],
     ['lavori collegati. Eliminarlo comunque?','pratiche collegate. Eliminarlo comunque?'],
     ['Lavoro eliminato','Pratica eliminata'],
-    ['Condominio eliminato','Cliente eliminato'],
     ['Persona eliminata','Collaboratore eliminato'],
+
+    /* ===== 9 agosto 2026 — LE PAROLE DA CANTIERE =====
+       "cantiere" non era nemmeno nel filtro: nessuna frase che lo conteneva
+       veniva mai tradotta. Un ingegnere leggeva "Chi va in cantiere", "Mansione
+       in cantiere", "Es. Muratore". Ordine: prima le frasi lunghe, poi le corte,
+       se no la corta mangia la lunga. */
+    ['Il cantiere più vicino','La pratica più vicina'],
+    ['cantieri aperti con un indirizzo','pratiche aperte con un indirizzo'],
+    ['Dove sono i tuoi cantieri','Dove sono le tue pratiche'],
+    ['Nessun cantiere da mostrare','Nessuna pratica da mostrare'],
+    ['Tutti i cantieri','Tutte le pratiche'],
+    ['le distanze dei cantieri','le distanze delle pratiche'],
+    ['con i cantieri','con le pratiche'],
+    ['senza distanza','senza distanza'],
+    ['Mansione in cantiere','Ruolo nello studio'],
+    ['mansione in cantiere','ruolo nello studio'],
+    ['Chi va in cantiere le vede dal telefono','Chi fa il sopralluogo le vede dal telefono'],
+    ['pronto per andare in cantiere','pronto per uscire'],
+    ['raggruppati per cantiere','raggruppati per pratica'],
+    ['materiale per un cantiere','materiale per una pratica'],
+    ['in cantiere con l\'app dell\'operaio','sul posto con l\'app del collaboratore'],
+    ['Cliente / Cantiere','Cliente'],
+    ['Cantiere','Pratica'],
+    ['cantieri','pratiche'],
+    ['cantiere','pratica'],
+
+    /* parole singole: minuscole e maiuscole erano trattate diversamente */
+    ['app operaio','app collaboratore'],
+    ['app dell\'operaio','app del collaboratore'],
+    ['Operaio','Collaboratore'],
+    ['operaio','collaboratore'],
+    ['operai','collaboratori'],
+    ['dipendenti','collaboratori'],
+    ['Muratore','Disegnatore CAD'],
+    ['la manodopera sui lavori','il tempo speso sulle pratiche'],
+    ['manodopera','tempo speso'],
+    ['Capo (io)','Io'],
+    ['imprese come la tua','studi come il tuo'],
+
+    /* i conteggi con l'aggettivo dietro: la regex numerica da sola faceva
+       "3 lavori finiti" -> "3 pratiche finiti" */
+    ['lavori finiti','pratiche finite'],
+    ['lavoro finito','pratica finita'],
+    ['lavori aperti','pratiche aperte'],
+    ['lavoro aperto','pratica aperta'],
+    ['lavori assegnati','pratiche assegnate'],
+    ['lavoro assegnato','pratica assegnata'],
+    ['lavori collegati','pratiche collegate'],
+    ['lavoro collegato','pratica collegata'],
+    ['a fine lavoro','a pratica chiusa'],
+    ['persone in squadra','persone nello studio'],
+    ['operatori','collaboratori'],
+    ['Nessun operatore registrato','Nessun collaboratore registrato'],
+
+    /* i suggerimenti grigi dentro le caselle (placeholder) e i title: prima il
+       traduttore non li guardava nemmeno, e un ingegnere leggeva "Es. taglio
+       siepe e pulizia aiuole" (9 agosto 2026) */
+    ['Es. taglio siepe e pulizia aiuole','Es. CILA per rifacimento bagno'],
+    ['Es. Cemento, noleggio piattaforma...','Es. bolli, diritti di segreteria, visure...'],
+    ['Es. chiamare amministratore, portare scala...','Es. richiamare il Comune, preparare la visura...'],
+    ['Es. Wahid','Es. Giulia'],
+    ['Compila quando il lavoro è finito','Compila quando la pratica è chiusa'],
+    ['Descrivi il lavoro, preparo io le voci di costo','Descrivi la pratica, preparo io le voci'],
+    ['Chi ci ha lavorato (facoltativo)','Chi ci ha messo mano (facoltativo)'],
+    ['le ore dei dipendenti giorno per giorno','le ore dei collaboratori giorno per giorno'],
   ];
   function _swapPratiche(s){
     for(const f of _FRASI){if(s.indexOf(f[0])>=0)s=s.split(f[0]).join(f[1]);}
@@ -643,6 +707,9 @@
     if(!_praticheObs)return;
     ['#appview','#sheet'].forEach(sel=>{const el=document.querySelector(sel);if(el)_praticheObs.observe(el,{childList:true,subtree:true,characterData:true});});
   }
+  /* le parole che fanno scattare la traduzione: in un posto solo, cosi'
+     testo e attributi usano lo stesso metro */
+  const _DA_TRADURRE=/lavor[oi]\b|squadr|condomin|amministrator|operai|operator|cantier|manodoper|dipendent|muratore|capo\b|siepe|cemento|imprese come la tua|Wahid/i;
   function localizzaPratiche(){
     if(ruoloUtente!=='professionista')return;
     if(_praticheObs)_praticheObs.disconnect(); /* si stacca durante la riscrittura: le mutazioni che genera (e quelle già in coda) vengono scartate → niente loop */
@@ -650,7 +717,21 @@
       const root=document.querySelector(sel);if(!root)return;
       const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
       const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
-      nodi.forEach(t=>{const v=t.nodeValue;if(v&&/lavor[oi]|squadr|condomin|amministrator|operai|operator/i.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+      nodi.forEach(t=>{const v=t.nodeValue;if(v&&_DA_TRADURRE.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+      /* 9 agosto 2026 — anche i suggerimenti grigi dentro le caselle e i
+         "title". Prima restavano fuori per costruzione (il traduttore guarda
+         solo i nodi di testo) e restituivano frasi da cantiere.
+         Nessun rischio di rimbalzo: l'osservatore guarda childList/subtree,
+         non gli attributi, quindi cambiarli non lo risveglia. */
+      root.querySelectorAll('[placeholder],[title]').forEach(function(el){
+        if(el.closest(_SKIP_UTENTE))return;
+        ['placeholder','title'].forEach(function(att){
+          const v=el.getAttribute(att);
+          if(!v||!_DA_TRADURRE.test(v))return;
+          const nv=_swapPratiche(v);
+          if(nv!==v)el.setAttribute(att,nv);
+        });
+      });
     });
     _osservaPratiche(); /* si riattacca solo a riscrittura conclusa */
   }
@@ -816,7 +897,7 @@
   }
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
@@ -967,7 +1048,7 @@
     /* se una lettura fallisce NON si fa finta di niente: prima il Riepilogo
        mostrava "Tutto in ordine" con tutti zeri, come se i dati fossero spariti */
     let erroreLettura=false, erroreLettura2=false;
-    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null,FT=[];
+    let L=[],CLI=[],PV=[],OPE=[],MZ=[],MZS=[],SC=[],CA=[],CAS=[],AZ=null,FT=[],FL=[],RIFR=[],FFO=[];
     try{
       const r=await Promise.all([
         sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,data_fatto,importo,fatt_stato,ore,cliente_id,operatore_id").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -980,11 +1061,22 @@
         sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid),
         sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
-        sb.from("gest_fatture").select("id,stato,data,data_pagata,anno,numero,sconto,bollo,ritenuta_perc").eq("user_id",sbUid).eq("mestiere_id",mid)
+        sb.from("gest_fatture").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
+        /* i lavori gia' dentro una fattura, anche solo in bozza: e' cosi' che
+           la sezione Fatture decide chi e' "da fatturare". Il Riepilogo usava
+           invece fatt_stato, che resta "none" finche' la fattura non viene
+           emessa: le due schermate si contraddicevano. (9/8/2026) */
+        sb.from("gest_fattura_lavori").select("lavoro_id").eq("user_id",sbUid),
+        /* i pieni pagati in contanti e le fatture dei fornitori: sono costi
+           veri e prima non entravano nell'utile (9/8/2026) */
+        sb.from("gest_rifornimenti").select("importo,data,movimento_id").eq("user_id",sbUid),
+        sb.from("gest_fatture_fornitori").select("importo,data").eq("user_id",sbUid).eq("mestiere_id",mid)
       ]);
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
       MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
-      AZ=r[9].data||null;FT=r[10].data||[];
+      AZ=r[9].data||null;FT=r[10].data||[];FL=(r[11]&&r[11].data)||[];
+      RIFR=(((r[12]&&r[12].data)||[])).filter(x=>!x.movimento_id);   /* quelli con carta sono gia' in CM */
+      FFO=((r[13]&&r[13].data)||[]);
       const conErrore=r.find(x=>x&&x.error);
       if(conErrore)erroreLettura=true;
     }catch(e){erroreLettura=true;}
@@ -1042,10 +1134,12 @@
     /* i conti delle fatture arrivano dalle fatture vere, non piu' dalle
        caselle sul lavoro: una fattura puo' tenerne dentro tre, e ha l'IVA. */
     const totFatt={};
+    const fattRigheRie={};
     FR.forEach(r=>{
       const imp=(+r.qta||0)*(+r.prezzo||0);
       const t=totFatt[r.fattura_id]=totFatt[r.fattura_id]||{imp:0,iva:0};
       t.imp+=imp; t.iva+=imp*(+r.iva||0)/100;
+      (fattRigheRie[r.fattura_id]=fattRigheRie[r.fattura_id]||[]).push(r);
     });
     const totaleFatt=f=>{
       const t=totFatt[f.id]||{imp:0,iva:0};
@@ -1056,18 +1150,30 @@
     /* "da fatturare" = lavori finiti con un importo che non stanno ancora
        dentro nessuna fattura. Qui basta il flag sul lavoro, che la fattura
        tiene aggiornato da sola. */
-    const daFatt   = L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")==="none"&&+l.importo>0);
+    const _giaInFatt=new Set(FL.map(x=>String(x.lavoro_id)));
+    const daFatt   = L.filter(l=>l.stato==="fatto"&&!_giaInFatt.has(String(l.id))&&(l.fatt_stato||"none")==="none"&&+l.importo>0);
     const totDaFatt= daFatt.reduce((s,l)=>s+(+l.importo||0),0);
     const ggPag    = (AZ&&+AZ.giorni_pagamento)||30;
     const scadenza = f=>f.data?_giorniDopo(f.data,ggPag):"";
     const scadute  = daInc.filter(f=>{const sc=scadenza(f);return sc&&sc<oggi;});
-    const incMese  = FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data)).reduce((s,f)=>s+totaleFatt(f),0);
+    /* 9 agosto 2026 — l'utile si fa sull'IMPONIBILE, non sul totale incassato.
+       Prima: incassato con dentro l'IVA meno spese al netto, quindi l'utile
+       usciva gonfiato di tutta l'IVA — che non e' tua, la giri allo Stato.
+       Il Report usa la stessa formula (fattImponibile), cosi' le due
+       schermate smettono di dare due utili diversi sugli stessi dati. */
+    const incMese  = FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data))
+                       .reduce((s,f)=>s+fattImponibile(f,(fattRigheRie&&fattRigheRie[f.id])||[]),0);
     const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
     const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
     /* anche le spese delle carte entrano nel conto: prima erano invisibili
        e l'utile risultava piu' alto del vero */
     const speseCarte= CM.filter(m=>thisMonth(m.data||(m.created_at||"").slice(0,10))).reduce((s,m)=>s+(+m.importo||0),0);
-    const speseMese = speseLav+speseCarte;
+    /* 9 agosto 2026 — gli stessi costi che conta il Report: se no il Riepilogo
+       dice un utile e il Report un altro. RIF = pieni pagati in contanti
+       (quelli con carta stanno gia' in CM), FFO = fatture dei fornitori. */
+    const speseRif  = RIFR.filter(r=>thisMonth(r.data)).reduce((s,r)=>s+(+r.importo||0),0);
+    const speseForn = FFO.filter(f=>thisMonth(f.data)).reduce((s,f)=>s+(+f.importo||0),0);
+    const speseMese = speseLav+speseCarte+speseRif+speseForn;
     const utile     = incMese-speseMese;
 
     /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
@@ -1080,6 +1186,17 @@
                    .sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")));
     rieprevCache=attesa;
     const totPrev={};PR.forEach(r=>{totPrev[r.preventivo_id]=(totPrev[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
+    /* 9 agosto 2026 — anche qui il numero che vede il cliente, come nella
+       lista Preventivi e nel PDF: tre schermate, un numero solo. */
+    PV.forEach(function(p){
+      const base=totPrev[p.id]||0;
+      if(ruoloUtente==='professionista'){
+        totPrev[p.id]=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait).totale;
+      }else if(p.iva_perc!=null&&p.iva_perc!==""){
+        const iva=Math.round(base*(+p.iva_perc||0))/100;
+        totPrev[p.id]=Math.round((base+iva)*100)/100;
+      }
+    });
 
     /* prossimi lavori, ordinati per data */
     const pross=aperti.slice().sort((a,b)=>(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
@@ -1137,9 +1254,13 @@
     /* patente a crediti: sotto 15 l'impresa non puo' operare in cantiere,
        quindi avviso gia' a 20 per dare il tempo di recuperarli. */
     const patC = AZ&&AZ.pat_crediti!=null ? +AZ.pat_crediti : null;
-    if(patC!=null&&patC<15)      DA.push({g:1,t:"Patente a crediti sotto il minimo — "+patC+(patC===1?" credito":" crediti"),
+    /* la patente a crediti serve a chi entra in cantiere: uno studio tecnico
+       non ce l'ha, e vedersi un allarme rosso su un adempimento che non lo
+       riguarda fa solo perdere fiducia nel resto degli avvisi (9/8/2026) */
+    const _patNo=(ruoloUtente==='professionista');
+    if(!_patNo&&patC!=null&&patC<15)      DA.push({g:1,t:"Patente a crediti sotto il minimo — "+patC+(patC===1?" credito":" crediti"),
                                   d:"Sotto 15 crediti non si può operare in cantiere",act:"rie-azienda"});
-    else if(patC!=null&&patC<20) DA.push({g:2,t:"Patente a crediti quasi al minimo — "+patC+" crediti",
+    else if(!_patNo&&patC!=null&&patC<20) DA.push({g:2,t:"Patente a crediti quasi al minimo — "+patC+" crediti",
                                   d:"Il minimo per operare in cantiere è 15",act:"rie-azienda"});
     if(lavOggi.length)   DA.push({g:2,t:nn(lavOggi.length,"lavoro in programma oggi","lavori in programma oggi"),
                                   d:(lavOggi[0].descrizione||"Lavoro")+(lavOggi.length>1?" e altri":""),go:"lavori"});
@@ -1312,8 +1433,10 @@
       lab:"utile di questo mese (incassato − spese)",
       tono: utile<0?"err":(utile>0?"ok":"neutro"),
       vuoto:"Nessun movimento questo mese",
-      righe:[{t:"Incassato questo mese",v:eur(incMese)},
+      righe:[{t:"Incassato questo mese (IVA esclusa)",v:eur(incMese)},
              {t:"Spese: lavori "+eur(speseLav)+" · carte",v:eur(speseCarte)}]
+        .concat(speseRif?[{t:"Rifornimenti in contanti",v:eur(speseRif)}]:[])
+        .concat(speseForn?[{t:"Fatture dei fornitori",v:eur(speseForn)}]:[])
     }));
 
     C.push(rieCard({
@@ -1455,6 +1578,9 @@
       <div class="job-meta">
         ${dove?`<span>📍 ${esc(dove)}</span>`:""}
         <span>📅 ${fdate(l.data_prevista)}</span>
+        ${(ruoloUtente==='professionista'&&l.pratica_tipo)?`<span>📄 ${esc(l.pratica_tipo)}</span>`:""}
+        ${(ruoloUtente==='professionista'&&l.pratica_stato)?`<span>🏛 ${esc((PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"")}</span>`:""}
+        ${(ruoloUtente==='professionista'&&l.pratica_protocollo)?`<span>N. ${esc(l.pratica_protocollo)}</span>`:""}
       </div>
       <div class="job-actions">
         <button class="btn btn-sm ja" data-action="edit-job" data-id="${esc(l.id)}">✏ Modifica</button>
@@ -1525,7 +1651,7 @@
     if(v==="ritardo")  return L.filter(l=>aperto(l)&&!!l.data_prevista&&l.data_prevista<oggi);
     if(v==="oggi")     return L.filter(l=>aperto(l)&&l.data_prevista===oggi);
     if(v==="prossimi") return L.filter(l=>aperto(l)&&(!l.data_prevista||l.data_prevista>oggi));
-    if(v==="incassare")return L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")!=="pagata");
+    if(v==="incassare")return L.filter(l=>l.stato==="fatto"&&(l.fatt_stato||"none")!=="pagata");   /* lo stato lo scrive la fattura quando viene emessa */
     if(v==="archivio") return L.filter(l=>l.stato==="fatto");
     return L;
   }
@@ -1543,6 +1669,10 @@
     return tabVuoto(e.t,e.s,e.i,e.b);
   }
   /* menu "..." della riga: nessuna azione della vecchia barra e' andata persa */
+  /* i lavori che stanno gia' dentro una fattura, anche solo in bozza: serve al
+     menu per non offrire "Crea fattura" su qualcosa che e' gia' fatturato.
+     Lo riempie renderFatture, che quella tabella la legge comunque. */
+  let _lavFatturati=new Set();
   function lavVoci(l,wa){
     const dp=l.data_prevista||"", fatto=l.stato==="fatto", fs=l.fatt_stato||"none";
     const v=[];
@@ -1556,7 +1686,7 @@
     v.push({lab:"\ud83d\udcac Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});
     v.push({sep:true});
     v.push({lab:"\ud83d\udcc4 Scarica PDF",action:"pdf",data:{id:l.id}});
-    if(fatto)v.push({lab:fs==="none"?"\ud83e\uddfe Crea fattura":"\ud83e\uddfe Apri fattura",action:"fatt",data:{id:l.id}});
+    if(fatto)v.push({lab:(fs==="none"&&!_lavFatturati.has(String(l.id)))?"\ud83e\uddfe Crea fattura":"\ud83e\uddfe Apri fattura",action:"fatt",data:{id:l.id}});
     v.push({sep:true});
     v.push({lab:"\ud83d\uddd1 Elimina",action:"del-job-supa",data:{id:l.id},del:true});
     return v;
@@ -1774,24 +1904,34 @@
     L.sort((a,b)=>(filter.vista==="tutti"?_fin(a)-_fin(b):0)
                 ||(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
     const tot=L.reduce((a,l)=>a+(+l.importo||0),0);
+    const _praPro=(ruoloUtente==='professionista');
     renderTabella({
       id:"lav", box:"#jobs-list",
       viste:"#lav-viste", visteDef:LAV_VISTE.map(v=>({k:v.k,lab:v.lab,err:v.k==="ritardo"})),
       vista:filter.vista, conta:conta, azioneVista:"lav-vista",
       vuoto:filter.q?tabVuotoCerca(filter.q):lavVuoto(filter.vista),
-      colonne:[{lab:"Lavoro",w:"36%"},{lab:"Cliente",w:"24%",cls:"c-cli"},{lab:"Quando",w:"17%"},
-               {lab:"Chi",w:"10%",cls:"c-chi"},{lab:"Importo",w:"13%",cls:"c-imp"}],
+      /* 9 agosto 2026 — per uno studio la colonna "Chi" conta poco (spesso e'
+         solo lui), mentre "a che punto sta la pratica" — Depositata, In
+         istruttoria, Integrazioni richieste — non si vedeva da NESSUNA parte
+         pur essendo salvata nel database. Adesso e' li'. */
+      colonne:_praPro
+        ? [{lab:"Pratica",w:"34%"},{lab:"Cliente",w:"22%",cls:"c-cli"},{lab:"Quando",w:"15%"},
+           {lab:"A che punto",w:"17%",cls:"c-chi"},{lab:"Importo",w:"12%",cls:"c-imp"}]
+        : [{lab:"Lavoro",w:"36%"},{lab:"Cliente",w:"24%",cls:"c-cli"},{lab:"Quando",w:"17%"},
+           {lab:"Chi",w:"10%",cls:"c-chi"},{lab:"Importo",w:"13%",cls:"c-imp"}],
       righe:L.map(l=>{
         const q=quando(l.data_prevista,{neutro:l.stato==="fatto"});
         const late=inRitardo(l.stato,l.data_prevista);
+        const _staPra=(PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"";
         return {
           id:l.id,
           click:{action:"edit-job",data:{id:l.id}},
           celle:[
-            `<span class="lav-bar ${late?"ritardo":l.stato}" title="${late?"In ritardo":(statoLabel[l.stato]||l.stato)}"></span><span class="c-nome">${esc(l.descrizione||"\u2014")}</span>`,
+            `<span class="lav-bar ${late?"ritardo":l.stato}" title="${late?"In ritardo":(statoLabel[l.stato]||l.stato)}"></span><span class="c-nome">${esc(l.descrizione||"\u2014")}</span>`
+              +((_praPro&&l.pratica_tipo)?`<span class="pra-tag">${esc(l.pratica_tipo)}</span>`:""),
             cellaCliente(cliName[l.cliente_id],l.dove),
             {h:q.testo,cls:q.classe},
-            esc(opName[l.operatore_id]||"\u2014"),
+            _praPro?(_staPra?esc(_staPra):"\u2014"):esc(opName[l.operatore_id]||"\u2014"),
             +l.importo?eur(l.importo):"\u2014"
           ],
           menu:lavVoci(l,_waLavoro(l,lavTel[l.operatore_id]||""))
@@ -1934,7 +2074,23 @@
   /* le aliquote che usa un'impresa edile: 22 ordinaria, 10 manutenzione e
      ristrutturazione, 4 prima casa, 0 quando l'IVA non si applica */
   const IVA_SCELTE=[22,10,4,0];
-  const IVA_DEF=10;
+  /* Le casse dei tecnici, col codice che lo SDI vuole nel file elettronico.
+     TC03 = Cassa Geometri, TC04 = Inarcassa (ingegneri e architetti),
+     TC17 = EPPI (periti industriali), TC22 = INPS gestione separata.
+     ⚠️ Da far confermare al commercialista la prima volta. */
+  const FATT_CASSE=[
+    [0,"Nessuna cassa",""],
+    [4,"4% — Inarcassa (ingegneri, architetti)","TC04"],
+    [5,"5% — Cassa Geometri","TC03"],
+    [5,"5% — EPPI (periti industriali)","TC17"],
+    [4,"4% — INPS gestione separata","TC22"]
+  ];
+  /* 10% e' l'aliquota della ristrutturazione: giusta per un'impresa edile,
+     sbagliata per uno studio tecnico, che di norma fattura al 22%.
+     Prima era 10 per tutti e un geometra emetteva fatture con l'IVA sbagliata
+     senza accorgersene (9 agosto 2026). */
+  const IVA_DEF_EDILE=10, IVA_DEF_STUDIO=22;
+  const ivaDefault=()=>ruoloUtente==='professionista'?IVA_DEF_STUDIO:IVA_DEF_EDILE;
   const FATT_TIPI=[["fattura","Fattura"],["acconto","Fattura di acconto"],["nota_credito","Nota di credito"]];
   const FATT_STATO_LAB={bozza:"Bozza",emessa:"Emessa, da incassare",pagata:"Pagata",annullata:"Annullata"};
   const FATT_TIPO_LAB={fattura:"Fattura",acconto:"Acconto",nota_credito:"Nota di credito"};
@@ -1949,11 +2105,32 @@
   /* i conti della fattura. Sono gli stessi della vista gest_fatture_totali su
      Supabase: qui li rifaccio in locale perche' le righe le ho gia' lette per
      disegnare la scheda, e una lettura in meno e' una lettura in meno. */
+  /* l'aliquota che comanda: quella su cui sta piu' imponibile. Serve per
+     applicare l'IVA anche alla cassa e alle spese, che non sono righe. */
+  function fattAliquotaPrevalente(R){
+    const per={};
+    (R||[]).forEach(r=>{const a=+r.iva||0;per[a]=(per[a]||0)+(+r.qta||0)*(+r.prezzo||0);});
+    const chiavi=Object.keys(per);
+    if(!chiavi.length)return 0;
+    return +chiavi.sort((a,b)=>per[b]-per[a])[0];
+  }
+  /* ===== 9 agosto 2026 — I CONTI DELLA FATTURA =====
+     Adesso sono ESATTAMENTE quelli della parcella (vedi calcolaParcella):
+       compenso  ->  + cassa (sul solo compenso)  ->  + spese
+       ->  IVA su tutto  ->  - ritenuta (sul SOLO compenso)
+     Prima mancava la cassa (un geometra non poteva fatturare il suo 5%) e la
+     ritenuta veniva calcolata su tutto l'imponibile: se metteva in fattura
+     bolli e diritti, gli trattenevano il 20% anche su quelli. */
   function fattConti(f){
     const R=fattRighe[f.id]||[];
-    const imponibile=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0),0);
-    const iva=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0)*(+r.iva||0)/100,0);
-    const ritenuta=imponibile*(+f.ritenuta_perc||0)/100;
+    const compenso=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0),0);
+    const ivaRighe=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0)*(+r.iva||0)/100,0);
+    const cassa=compenso*(+f.cassa_perc||0)/100;
+    const spese=+f.spese||0;
+    const aliqPrev=fattAliquotaPrevalente(R);
+    const imponibile=compenso+cassa+spese;
+    const iva=ivaRighe+(cassa+spese)*aliqPrev/100;
+    const ritenuta=compenso*(+f.ritenuta_perc||0)/100;   /* solo sul compenso */
     /* Due numeri diversi, e mescolarli e' un errore che lo SDI vede subito:
        - totale     = quanto vale il documento (imponibile + IVA - sconto + bollo)
        - daPagare   = quanto ti bonifica davvero il cliente, tolta la ritenuta
@@ -1961,7 +2138,18 @@
        cliente versa allo Stato al posto tuo. Il documento vale lo stesso. */
     const totale=imponibile+iva-(+f.sconto||0)+(+f.bollo||0);
     const daPagare=totale-ritenuta;
-    return {imponibile,iva,ritenuta,totale,daPagare};
+    return {compenso,cassa,spese,aliqPrev,imponibile,iva,ritenuta,totale,daPagare};
+  }
+  /* ===== 9 agosto 2026 — l'imponibile di una fattura, in UN POSTO SOLO =====
+     Report ed Excel lo ricalcolavano sommando solo qta*prezzo: senza la cassa
+     previdenziale e senza le spese, quindi per uno studio con la cassa al 5%
+     ogni numero usciva piu' basso del vero. Qui c'e' la formula giusta, la
+     stessa di fattConti, e la usano tutti. IVA esclusa: l'IVA non e' tua. */
+  function fattImponibile(f,righeDellaFattura){
+    const R=righeDellaFattura||[];
+    const compenso=R.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0);
+    const cassa=compenso*(+f.cassa_perc||0)/100;
+    return compenso+cassa+(+f.spese||0)-(+f.sconto||0);
   }
   function fattNumero(f){
     return f.numero ? "n. "+f.numero+"/"+f.anno : "bozza senza numero";
@@ -2100,6 +2288,8 @@
       ]);
       (rr||[]).forEach(r=>{(fattRighe[r.fattura_id]=fattRighe[r.fattura_id]||[]).push(r);});
       (fl||[]).forEach(x=>{(fattLavori[x.fattura_id]=fattLavori[x.fattura_id]||[]).push(x.lavoro_id);});
+      /* il registro per il menu dei Lavori: chi e' gia' dentro una fattura */
+      _lavFatturati=new Set((fl||[]).map(x=>String(x.lavoro_id)));
       (pdfs||[]).forEach(p=>{if(p.fattura_id&&!fatturaPdfCache[p.fattura_id])fatturaPdfCache[p.fattura_id]=p;});
     }
 
@@ -2186,7 +2376,7 @@
   /* ---------- il modulo ---------- */
   function fattRigaHtml(r){
     r=r||{};fattRigheCount++;
-    const iva=r.iva!=null?+r.iva:IVA_DEF;
+    const iva=r.iva!=null?+r.iva:ivaDefault();
     const opts=IVA_SCELTE.map(v=>'<option value="'+v+'"'+(+iva===v?" selected":"")+'>'+v+'%</option>').join("");
     return '<div class="fatt-riga" data-riga>'
       + '<input class="fr-desc" placeholder="Descrizione voce" value="'+esc(r.descrizione||"")+'">'
@@ -2208,13 +2398,28 @@
     const sconto=+($("#fa-sconto")||{}).value||0;
     const bollo =+($("#fa-bollo") ||{}).value||0;
     const rit   =+($("#fa-rit")   ||{}).value||0;
-    const ritE=imp*rit/100;
-    const tot=imp+iva-sconto+bollo;      /* quanto vale il documento */
+    /* cassa e spese: gli stessi conti di fattConti, se no l'anteprima dice un
+       numero e il PDF ne dice un altro (9/8/2026) */
+    const cassaP=+($("#fa-cassa")||{}).value||0;
+    const spese =+($("#fa-spese")||{}).value||0;
+    /* Array.from: $$ restituisce una NodeList, che non ha .map */
+    const aliqPrev=fattAliquotaPrevalente(Array.from($$("#fatt-righe [data-riga]")).map(d=>({
+      qta:+d.querySelector(".fr-qta").value||0,
+      prezzo:+d.querySelector(".fr-prezzo").value||0,
+      iva:+(d.querySelector(".fr-iva")||{}).value||0})));
+    const cassaE=imp*cassaP/100;
+    const imponibile=imp+cassaE+spese;
+    const ivaTot=iva+(cassaE+spese)*aliqPrev/100;
+    const ritE=imp*rit/100;              /* solo sul compenso */
+    const tot=imponibile+ivaTot-sconto+bollo;   /* quanto vale il documento */
     const netto=tot-ritE;                /* quanto ti bonificano davvero */
     const el=$("#fatt-somma");
     if(el)el.innerHTML=
-        '<div class="fs-r"><span>Imponibile</span><b>'+eur2(imp)+'</b></div>'
-      + (fattForfettario()?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(iva)+'</b></div>')
+        '<div class="fs-r"><span>'+(ruoloUtente==='professionista'?'Compenso':'Imponibile')+'</span><b>'+eur2(imp)+'</b></div>'
+      + (cassaE?'<div class="fs-r"><span>Cassa '+cassaP+'%</span><b>'+eur2(cassaE)+'</b></div>':"")
+      + (spese ?'<div class="fs-r"><span>Spese</span><b>'+eur2(spese)+'</b></div>':"")
+      + ((cassaE||spese)?'<div class="fs-r"><span>Imponibile IVA</span><b>'+eur2(imponibile)+'</b></div>':"")
+      + (fattForfettario()?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(ivaTot)+'</b></div>')
       + (sconto?'<div class="fs-r"><span>Sconto</span><b>−'+eur2(sconto)+'</b></div>':"")
       + (bollo ?'<div class="fs-r"><span>Bollo</span><b>'+eur2(bollo)+'</b></div>':"")
       + (ritE  ?'<div class="fs-r"><span>Ritenuta '+rit+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
@@ -2286,6 +2491,19 @@
       +     '<div class="field"><label>Sconto (€)</label><input type="number" step="0.01" id="fa-sconto" value="'+(+f.sconto||"")+'" placeholder="0"></div>'
       +     '<div class="field"><label>Bollo (€)</label><input type="number" step="0.01" id="fa-bollo" value="'+(+f.bollo||"")+'" placeholder="0"></div>'
       +   '</div>'
+      /* ===== 9 agosto 2026 — la cassa previdenziale =====
+         C'era nel preventivo e mancava in fattura: un geometra non poteva
+         riportare il suo 5%. Il codice TipoCassa e' quello che vuole lo SDI
+         nel file elettronico, per sapere DI QUALE cassa si tratta. */
+      +   (ruoloUtente==='professionista'
+            ? '<div class="row2">'
+              + '<div class="field"><label>Cassa previdenziale</label><select id="fa-cassa">'
+              +   FATT_CASSE.map(function(o){return '<option value="'+o[0]+'" data-tc="'+o[2]+'" '+((+f.cassa_perc||0)===o[0]&&(!f.cassa_tipo||f.cassa_tipo===o[2])?'selected':'')+'>'+o[1]+'</option>';}).join("")
+              + '</select></div>'
+              + '<div class="field"><label>Spese (bolli, diritti, visure)</label><input type="number" step="0.01" id="fa-spese" value="'+(+f.spese||"")+'" placeholder="0"></div>'
+              + '</div>'
+              + '<div class="sh-nota">La cassa si calcola sul compenso (non sulle spese). La ritenuta anche. Sono gli stessi conti della parcella del preventivo.</div>'
+            : '')
       +   '<div class="field"><label>Ritenuta d\'acconto (%)</label><input type="number" step="0.01" id="fa-rit" value="'+(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
       +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €. Scrivi 2 nel campo qui sopra.</div>':'')
       + '</div>'
@@ -2356,6 +2574,15 @@
       ritenuta_perc:+$("#fa-rit").value||0,
       note:$("#fa-note").value.trim()||null
     };
+    /* cassa e spese: i campi ci sono solo per gli studi. Si scrivono solo se
+       ci sono davvero, se no una fattura di un'impresa li azzererebbe. */
+    if($("#fa-cassa")){
+      const selC=$("#fa-cassa");
+      testata.cassa_perc=+selC.value||0;
+      const opt=selC.options[selC.selectedIndex];
+      testata.cassa_tipo=(opt&&opt.dataset.tc)||null;
+      testata.spese=+($("#fa-spese")?$("#fa-spese").value:0)||0;
+    }
     /* una copia dei dati del cliente resta dentro la fattura: se domani cambi
        l'indirizzo in anagrafica, la fattura gia' emessa non deve cambiare */
     const c=fattCliCache.find(x=>String(x.id)===String(cliente_id));
@@ -2368,8 +2595,18 @@
     testata.regime_fiscale=(fattAzienda&&fattAzienda.regime_fiscale)||null;
 
     let fid=id;
+    /* se sql/gest-fattura-cassa.sql non e' ancora stato eseguito, le tre
+       colonne nuove non esistono: invece di perdere TUTTA la fattura le
+       togliamo e riproviamo, dicendolo (stesso schema dei Dati azienda). */
+    let avvisoCassa=false;
+    const _senzaCassa=o=>{const x=Object.assign({},o);delete x.cassa_perc;delete x.cassa_tipo;delete x.spese;return x;};
+    const _eCassaMancante=e=>/cassa_perc|cassa_tipo|\bspese\b/.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
     if(id){
-      const {data:okFat,error}=await sb.from("gest_fatture").update(testata).eq("id",id).eq("user_id",sbUid).select("id");
+      let {data:okFat,error}=await sb.from("gest_fatture").update(testata).eq("id",id).eq("user_id",sbUid).select("id");
+      if(error&&_eCassaMancante(error)){
+        const rip=await sb.from("gest_fatture").update(_senzaCassa(testata)).eq("id",id).eq("user_id",sbUid).select("id");
+        okFat=rip.data;error=rip.error;if(!error)avvisoCassa=true;
+      }
       if(error){fattErrore(error.message);return;}
       if(!okFat||!okFat.length){fattErrore("Non salvata: nessuna riga modificata. Riprova.");return;}
       const {error:eDel}=await sb.from("gest_fattura_righe").delete().eq("fattura_id",id).eq("user_id",sbUid);
@@ -2379,8 +2616,12 @@
       const {data:resti}=await sb.from("gest_fattura_righe").select("id").eq("fattura_id",id).limit(1);
       if(resti&&resti.length){fattErrore("Le vecchie voci non si sono cancellate. Riprova.");return;}
     }else{
-      const {data:nf,error}=await sb.from("gest_fatture")
-        .insert({...testata,user_id:sbUid,mestiere_id:curMestiere(),stato:"bozza"}).select().single();
+      const nuova={...testata,user_id:sbUid,mestiere_id:curMestiere(),stato:"bozza"};
+      let {data:nf,error}=await sb.from("gest_fatture").insert(nuova).select().single();
+      if(error&&_eCassaMancante(error)){
+        const rip=await sb.from("gest_fatture").insert(_senzaCassa(nuova)).select().single();
+        nf=rip.data;error=rip.error;if(!error)avvisoCassa=true;
+      }
       if(error){fattErrore(error.message);return;}
       fid=nf.id;
     }
@@ -2398,6 +2639,7 @@
     }
 
     closeSheet();
+    if(avvisoCassa)toast("Salvata, ma cassa e spese NON sono state registrate: esegui sql/gest-fattura-cassa.sql su Supabase.");
     rinfresca("fatture","riepilogo","lavori");
     toast(id?"Fattura aggiornata ✔":"Fattura creata ✔ — è una bozza, emettila quando è pronta");
     }catch(err){
@@ -2473,23 +2715,30 @@
       +'<button class="btn-primary b-save" data-action="fatt-da-lavori-ok">Continua</button>');
   }
 
-  function fattDaLavoriConferma(){
-    const ck=$$("#fl-lista .fl-ck:checked");
+  async function fattDaLavoriConferma(){
+    const ck=Array.from($$("#fl-lista .fl-ck:checked"));
     if(!ck.length){toast("Spunta almeno un lavoro");return;}
     const cli=new Set(ck.map(c=>c.dataset.cli));
     if(cli.size>1){toast("Scegli lavori di un cliente solo: una fattura va a un cliente solo");return;}
     const ids=ck.map(c=>c.value);
     const lavori=fattLavLiberi.filter(l=>ids.includes(String(l.id)));
     const clienteId=[...cli][0]||null;
+    /* 9 agosto 2026 — ogni lavoro porta l'aliquota del SUO preventivo
+       accettato: prima partivano tutti dal 10% di default, e un preventivo
+       firmato al 22% diventava una fattura al 10%. */
+    const righeIva=[];
+    for(let i=0;i<lavori.length;i++){
+      const l=lavori[i];
+      const al=fattForfettario()?0:await _ivaDalPreventivo(l.id);
+      righeIva.push({descrizione:(l.descrizione||"Prestazione di servizi")+(l.dove?" — "+l.dove:""),
+        qta:1, prezzo:+l.importo||0, iva:al, ordine:i});
+    }
     closeSheet();
     fattForm(null,{
       cliente_id:clienteId||null,
       data:todayStr(),
       _lavori:ids,
-      _righe:lavori.map((l,i)=>({
-        descrizione:(l.descrizione||"Prestazione di servizi")+(l.dove?" — "+l.dove:""),
-        qta:1, prezzo:+l.importo||0, iva:fattForfettario()?0:IVA_DEF, ordine:i
-      }))
+      _righe:righeIva
     });
   }
 
@@ -2528,12 +2777,30 @@
       cliente_id:p.cliente_id||null,
       data:todayStr(),
       note:p.note||null,
+      /* 9 agosto 2026 — il lavoro nato dal preventivo accettato va agganciato
+         alla fattura, se no restava "da fatturare" per sempre e si poteva
+         fatturare due volte. `lavoro_id` sul preventivo veniva scritto e non
+         letto da nessuno: e' esattamente il dato che serviva qui. */
+      _lavori: p.lavoro_id ? [p.lavoro_id] : null,
+      /* 9 agosto 2026 — la parcella deve arrivare INTERA in fattura.
+         Prima passavano solo le righe: la ritenuta ripartiva da zero e il
+         cliente riceveva una fattura con un importo diverso da quello che
+         aveva firmato nella lettera d'incarico.
+         Le spese (bolli, diritti) diventano una riga a IVA 0: sono anticipi
+         fuori campo, non compenso. */
+      /* la parcella arriva INTERA: cassa, spese e ritenuta sono gli stessi tre
+         concetti che ora esistono anche in fattura, quindi i conti coincidono
+         al centesimo con quelli firmati nella lettera d'incarico. */
+      ritenuta_perc: p.ritenuta ? (+p.ritenuta_perc||20) : 0,
+      cassa_perc: +p.cassa_perc||0,
+      cassa_tipo: (FATT_CASSE.find(o=>o[0]===(+p.cassa_perc||0)&&o[2])||[])[2]||null,
+      spese: +p.spese_forfait||0,
       _righe:(rr||[]).map((r,i)=>({
         descrizione:r.descrizione, qta:+r.qta||1, prezzo:+r.prezzo||0,
         /* 9 agosto 2026 — l'aliquota promessa nel preventivo (e firmata nella
            conferma d'ordine) deve arrivare uguale in fattura: prima partiva
            sempre dal 10% di default anche se il preventivo diceva 22 o 4. */
-        iva:fattForfettario()?0:((p.iva_perc!=null&&p.iva_perc!=="")?(+p.iva_perc||0):IVA_DEF), ordine:i
+        iva:fattForfettario()?0:((p.iva_perc!=null&&p.iva_perc!=="")?(+p.iva_perc||0):ivaDefault()), ordine:i
       }))
     });
   }
@@ -2561,6 +2828,16 @@
   }
 
   /* dalla scheda di un lavoro: fattura con dentro quel lavoro solo */
+  /* l'aliquota del preventivo accettato per quel lavoro; se non c'e', il default */
+  async function _ivaDalPreventivo(lavoroId){
+    try{
+      const {data}=await sb.from("gest_preventivi").select("iva_perc")
+        .eq("user_id",sbUid).eq("lavoro_id",lavoroId).eq("stato","accettato").limit(1);
+      const v=data&&data[0]&&data[0].iva_perc;
+      if(v!=null&&v!=="")return +v||0;
+    }catch(e){}
+    return ivaDefault();
+  }
   async function fattDaUnLavoro(lavoroId){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
     /* se quel lavoro sta gia' dentro una fattura, non ne creo un'altra: apro quella */
@@ -2574,12 +2851,17 @@
     const {data:l}=await sb.from("gest_lavori").select("*").eq("id",lavoroId).eq("user_id",sbUid).maybeSingle();
     if(!l){toast("Lavoro non trovato");return;}
     closeSheet();
+    /* 9 agosto 2026 — l'aliquota promessa al cliente. Se quel lavoro nasce da
+       un preventivo accettato, l'IVA e' quella che il cliente ha firmato nella
+       conferma d'ordine: partire dal 10% di default significava mandargli una
+       fattura diversa dal foglio che ha in mano. */
+    const ivaLav=await _ivaDalPreventivo(l.id);
     fattForm(null,{
       cliente_id:l.cliente_id||null,
       data:todayStr(),
       _lavori:[l.id],
       _righe:[{descrizione:(l.descrizione||"Prestazione di servizi")+(l.dove?" — "+l.dove:""),
-               qta:1, prezzo:+l.importo||0, iva:fattForfettario()?0:IVA_DEF, ordine:0}]
+               qta:1, prezzo:+l.importo||0, iva:fattForfettario()?0:ivaLav, ordine:0}]
     });
   }
 
@@ -2687,7 +2969,14 @@
       doc.text(lab,Rx-70,y);doc.text(val,Rx-2,y,{align:"right"});
       y+=grosso?7:5.4;
     };
-    riga("Imponibile",eurPdf(c.imponibile));
+    /* 9 agosto 2026 — cassa e spese in chiaro: prima il PDF mostrava un solo
+       "Imponibile" e il cliente non capiva da dove usciva il totale. */
+    if(c.cassa||c.spese){
+      riga(ruoloUtente==='professionista'?"Compenso":"Imponibile voci",eurPdf(c.compenso));
+      if(c.cassa)riga("Cassa previdenziale "+(+f.cassa_perc||0)+"%",eurPdf(c.cassa));
+      if(c.spese)riga("Spese documentate",eurPdf(c.spese));
+    }
+    riga("Imponibile"+((c.cassa||c.spese)?" IVA":""),eurPdf(c.imponibile));
     if(!forf)riga("IVA",eurPdf(c.iva));
     if(+f.sconto)riga("Sconto","-"+eurPdf(f.sconto));
     if(+f.bollo)riga("Imposta di bollo",eurPdf(f.bollo));
@@ -2945,12 +3234,30 @@
     x+='        <Numero>'+xesc(String(f.numero))+'</Numero>\n';
     /* l'ordine di questi blocchi non e' a caso: lo schema li vuole cosi' */
     if(+f.ritenuta_perc){
+      /* 9 agosto 2026 — RT01 = persona fisica, RT02 = persona giuridica.
+         Era fisso a RT02: uno studio individuale (la gran parte dei tecnici)
+         e' persona fisica e il file usciva con il tipo sbagliato.
+         Si distingue dal codice fiscale: 16 caratteri = persona fisica. */
+      const _cfAz=String(az.cod_fiscale||"").replace(/\s/g,"");
+      const _tipoRit=(_cfAz.length===16)?"RT01":(az.piva&&_cfAz===String(az.piva)?"RT02":"RT01");
       x+='        <DatiRitenuta>\n';
-      x+='          <TipoRitenuta>RT02</TipoRitenuta>\n';
+      x+='          <TipoRitenuta>'+_tipoRit+'</TipoRitenuta>\n';
       x+='          <ImportoRitenuta>'+xnum(c.ritenuta)+'</ImportoRitenuta>\n';
       x+='          <AliquotaRitenuta>'+xnum(f.ritenuta_perc)+'</AliquotaRitenuta>\n';
       x+='          <CausalePagamento>A</CausalePagamento>\n';
       x+='        </DatiRitenuta>\n';
+    }
+    /* la cassa previdenziale: lo SDI la vuole qui, con il codice della cassa.
+       Va anche sommata all'imponibile del riepilogo IVA, piu' sotto. */
+    if(+f.cassa_perc&&c.cassa){
+      x+='        <DatiCassaPrevidenziale>\n';
+      x+='          <TipoCassa>'+xesc(f.cassa_tipo||"TC22")+'</TipoCassa>\n';
+      x+='          <AlCassa>'+xnum(f.cassa_perc)+'</AlCassa>\n';
+      x+='          <ImportoContributoCassa>'+xnum(c.cassa)+'</ImportoContributoCassa>\n';
+      x+='          <ImponibileCassa>'+xnum(c.compenso)+'</ImponibileCassa>\n';
+      x+='          <AliquotaIVA>'+xnum(forf?0:c.aliqPrev)+'</AliquotaIVA>\n';
+      if(forf)x+='          <Natura>N2.2</Natura>\n';
+      x+='        </DatiCassaPrevidenziale>\n';
     }
     if(+f.bollo){
       x+='        <DatiBollo>\n          <BolloVirtuale>SI</BolloVirtuale>\n          <ImportoBollo>'+xnum(f.bollo)+'</ImportoBollo>\n        </DatiBollo>\n';
@@ -2984,6 +3291,13 @@
       if(al===0) x+='        <Natura>N2.2</Natura>\n';
       x+='      </DettaglioLinee>\n';
     });
+    /* cassa e spese non sono righe, ma fanno imponibile: vanno sommate al
+       riepilogo dell'aliquota che comanda, se no lo SDI scarta il file perche'
+       la somma dei riepiloghi non torna con il totale del documento. */
+    if(c.cassa||c.spese){
+      const alp=forf?0:c.aliqPrev;
+      perAliq[alp]=(perAliq[alp]||0)+c.cassa+c.spese;
+    }
     Object.keys(perAliq).sort((a,b)=>b-a).forEach(al=>{
       const imp=perAliq[al], imposta=imp*(+al)/100;
       x+='      <DatiRiepilogo>\n';
@@ -3149,6 +3463,36 @@
             fisc?"🧾 "+fisc:""],
       azioni:cliVoci(c)
     });
+  }
+  /* ===== 9 agosto 2026 — l'avviso "ha N lavori collegati" diceva sempre 0 =====
+     Contava su db().lavori, lo store LOCALE, che col flusso Supabase resta
+     sempre vuoto: le pratiche stanno su gest_lavori. Quindi un cliente con
+     dieci pratiche e tre fatture si cancellava col messaggio generico. */
+  async function delCli(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const pro=ruoloUtente==='professionista';
+    let nLav=0,nFat=0;
+    try{
+      const [{count:cl},{count:cf}]=await Promise.all([
+        sb.from("gest_lavori").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("cliente_id",id),
+        sb.from("gest_fatture").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("cliente_id",id)
+      ]);
+      nLav=cl||0; nFat=cf||0;
+    }catch(e){}
+    const pezzi=[];
+    if(nLav)pezzi.push(nLav+" "+(pro?(nLav===1?"pratica":"pratiche"):(nLav===1?"lavoro":"lavori")));
+    if(nFat)pezzi.push(nFat+" "+(nFat===1?"fattura":"fatture"));
+    const msg=pezzi.length
+      ? "Questo cliente ha "+pezzi.join(" e ")+" collegate."
+        +(window.cestinoAttivo&&window.cestinoAttivo()
+          ? "\n\nFinisce nel Cestino e puoi rimetterlo a posto; "+(pro?"le pratiche":"i lavori")+" restano."
+          : "\n\nEliminarlo comunque?")
+      : "Eliminare questo cliente?";
+    if(!gconfirm(msg))return;
+    const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
+    renderClienti();toast("Cliente eliminato");
   }
   async function renderClienti(){
     const box=$("#cli-list");if(!box)return;
@@ -4332,7 +4676,7 @@
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Collegamenti e note</div>'
-      +'<p class="sh-nota" style="margin-top:0">Se questa fattura è materiale per un cantiere, collegala al lavoro: la spesa ti torna utile nel margine e nello "speso per fornitore".</p>'
+      +'<p class="sh-nota" style="margin-top:0">Puoi collegarla al lavoro per ritrovarla in fretta. <b>Attenzione:</b> per far entrare questa spesa nel margine del lavoro va scritta anche fra le <b>Spese</b> nella scheda del lavoro — qui resta solo il conto col fornitore.</p>'
       +'<div class="field"><label>Lavoro collegato (facoltativo)</label><select id="ff-lav">'+lavOps+'</select></div>'
       +'<div class="field"><label>Note</label><textarea id="ff-note" placeholder="Es. sabbia e cemento per il bagno di Via Roma">'+esc(f.note||'')+'</textarea></div>'
       +'</div>'
@@ -4408,6 +4752,10 @@
   async function renderMezziBlock(lavoroId){
     mezziLavoroId=lavoroId;
     const wrap=$("#mezzi-wrap");if(!wrap||!sb||!sbUid)return;
+    /* 9 agosto 2026 — a uno studio i Mezzi sono nascosti dal menu, ma questo
+       riquadro compariva lo stesso dentro la pratica, e diceva pure
+       "aggiungilo dalla scheda Mezzi": una scheda che lui non ha. */
+    if(ruoloUtente==='professionista'){wrap.style.display="none";return;}
     wrap.style.display="block";
     const [{data:usati},{data:tutti}]=await Promise.all([
       sb.from("gest_lavoro_mezzi").select("id,mezzo_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId),
@@ -4467,7 +4815,7 @@
       sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
       /* i nomi delle pratiche si leggono qui e non da lavCache: lavCache e' piena
          solo se l'utente ha gia' aperto la sezione Pratiche, altrimenti ogni
-         scadenza collegata sembrerebbe "(pratica eliminata)" pur esistendo. */
+         scadenza collegata sembrerebbe (ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)") pur esistendo. */
       sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",mid)
     ]);
     scadCache=sc||[];
@@ -4518,7 +4866,7 @@
         const fatta=s.stato==="fatta";
         const q=quando(s.data_scadenza,{neutro:fatta});
         const rif=s._persona?s._nome
-                 :s.lavoro_id?(lavMap[s.lavoro_id]||"(pratica eliminata)")
+                 :s.lavoro_id?(lavMap[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)"))
                  :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
                  :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
         if(s._persona){
@@ -4572,7 +4920,7 @@
     const fatta=s.stato==="fatta";
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
     const mezNome=s.mezzo_id?((mezMap||{})[s.mezzo_id]||"(mezzo eliminato)"):"";
-    const lavNome=s.lavoro_id?((lavMap||{})[s.lavoro_id]||"(pratica eliminata)"):"";
+    const lavNome=s.lavoro_id?((lavMap||{})[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)")):"";
     let bg="var(--sfondo)",fg="var(--testo-2)",lab="Aperta",tono="t-neutro";
     if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";tono="t-ok";}
     else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";tono="t-err";}
@@ -5048,6 +5396,27 @@
         note:$("#j-note").value.trim()||null,
         ore:parseFloat($("#j-ore").value)||null
       }, leggiCampiPratica());
+      /* 9 agosto 2026 — chiudendo dal modulo (invece che col pulsante "Segna
+         fatto" della scheda) la data di chiusura non veniva scritta: il Report
+         filtra su data_fatto, quindi quella pratica spariva dal grafico dei 12
+         mesi e dall'incassato dell'anno. Riaprendola, la data si toglie. */
+      if(mod.stato==="fatto"){
+        /* La data vera si chiede al DATABASE, non a lavCache: per le imprese
+           lavCache non contiene data_fatto (l'elenco delle colonne non la
+           include), quindi la guardia non scattava mai e ogni salvataggio
+           sovrascriveva la data di chiusura con quella prevista. Caso vero:
+           l'operaio chiude il lavoro oggi dall'app di cantiere, il capo apre
+           "Modifica" per scrivere le ore e la data reale spariva. (9/8/2026) */
+        let _gia=null;
+        try{
+          const {data:_p}=await sb.from("gest_lavori").select("data_fatto")
+            .eq("id",editing.realId).eq("user_id",sbUid).maybeSingle();
+          _gia=_p&&_p.data_fatto;
+        }catch(e){}
+        if(!_gia)mod.data_fatto=mod.data_prevista||todayStr();
+      }else{
+        mod.data_fatto=null;
+      }
       let {data:okJob,error}=await sb.from('gest_lavori').update(mod).eq('id', editing.realId).eq('user_id',sbUid).select('id');
       let avvisoPratica2=false;
       if(error&&eColonnaPraticaMancante(error)){
@@ -5074,7 +5443,9 @@
       }
       closeSheet();renderAll();
       toast(avvisoPratica2?"Aggiornato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":"Lavoro aggiornato ✔");
-      await proponiScadenzaPratica(editing.realId,mod);
+      /* NIENTE proposta di scadenza qui: si chiede solo alla CREAZIONE.
+         Prima si ripresentava a OGNI modifica, e rispondendo No tornava
+         identica al salvataggio dopo, all'infinito. (9/8/2026) */
       return;
     }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un cliente");return;}
@@ -5600,7 +5971,11 @@
       const {data}=await sb.from("gest_lavori").select("id").eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
       n=(data||[]).length;
     }
-    const msg=n?`Stai per eliminare il reparto «${p.nome}» e le sue ${n} pratiche. L'operazione è definitiva. Continuare?`:`Stai per eliminare il reparto «${p.nome}». L'operazione è definitiva. Continuare?`;
+    /* la parola giusta per chi legge: il traduttore lavoro->pratica gira solo
+       per i professionisti, quindi la stringa di partenza non puo' essere gia'
+       in linguaggio da studio tecnico (9/8/2026) */
+    const _pl=(ruoloUtente==='professionista')?(n===1?"pratica":"pratiche"):(n===1?"lavoro":"lavori");
+    const msg=n?`Stai per eliminare il reparto «${p.nome}» e ${n===1?"il suo":"i suoi"} ${n} ${_pl}. L'operazione è definitiva. Continuare?`:`Stai per eliminare il reparto «${p.nome}». Continuare?`;
     if(!gconfirm(msg))return;
     if(sb&&sbUid&&p.mestiere_id){
       await sb.from("gest_lavori").delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
@@ -5696,6 +6071,7 @@
         <div class="sh-nota">Questi tre te li dà il commercialista. Non servono ancora a niente: li chiederà la fattura elettronica, che sto ancora costruendo. Compilarli adesso ti fa risparmiare tempo dopo.</div>
       </div>
 
+      ${ruoloUtente==='professionista'?"":`
       <div class="sh-b">
         <div class="sh-tit">Patente a crediti</div>
         <div class="row2">
@@ -5705,7 +6081,7 @@
         <div class="field"><label>Crediti attuali</label>
           <input type="number" id="a-pat-c" inputmode="numeric" min="0" max="100" value="${a.pat_crediti!=null?a.pat_crediti:""}" placeholder="30" style="max-width:160px"></div>
         <div class="sh-nota">Si parte da 30 crediti; <b class="az-rosso">sotto 15 non si può operare in cantiere</b>. Il Riepilogo ti avvisa già sotto 20, così hai tempo di recuperarli. È dell'impresa, non del singolo dipendente. Aggiornalo tu quando cambia: non si può leggere da solo dal portale.</div>
-      </div>
+      </div>`}
 
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
@@ -5736,13 +6112,19 @@
       row.cfp_obiettivo=(cfp>0)?cfp:null;
     }
     /* patente a crediti: campi facoltativi. Vuoto = null, cosi' si puo' anche
-       svuotare un campo compilato per sbaglio. */
-    const patN=$("#a-pat-n")?$("#a-pat-n").value.trim():"";
-    const patD=$("#a-pat-d")?$("#a-pat-d").value:"";
-    const patC=$("#a-pat-c")?$("#a-pat-c").value.trim():"";
-    row.pat_numero  = patN||null;
-    row.pat_data    = patD||null;
-    row.pat_crediti = patC===""?null:Math.max(0,parseInt(patC,10)||0);
+       svuotare un campo compilato per sbaglio.
+       ATTENZIONE (9/8/2026): per gli studi il blocco non compare piu'. Se
+       scrivessimo lo stesso, i campi assenti risulterebbero vuoti e il
+       salvataggio AZZEREREBBE una patente gia' registrata. Quindi si tocca
+       solo se il blocco c'e' davvero. */
+    if($("#a-pat-n")||$("#a-pat-d")||$("#a-pat-c")){
+      const patN=$("#a-pat-n")?$("#a-pat-n").value.trim():"";
+      const patD=$("#a-pat-d")?$("#a-pat-d").value:"";
+      const patC=$("#a-pat-c")?$("#a-pat-c").value.trim():"";
+      row.pat_numero  = patN||null;
+      row.pat_data    = patD||null;
+      row.pat_crediti = patC===""?null:Math.max(0,parseInt(patC,10)||0);
+    }
 
     let {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
     /* se una colonna aggiunta di recente non c'e' ancora nel database, salvo
@@ -5788,10 +6170,20 @@
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
-    doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text("FATTURA",R,y,{align:"right"});
+    /* 9 agosto 2026 — questo NON e' una fattura.
+       La colonna num_fatt non si scrive piu' da nessuna parte (il numero lo
+       assegna la fattura vera su gest_fatture), quindi il documento usciva
+       intestato "FATTURA" con scritto "Non ancora emessa" e piu' sotto
+       "Causale: Fattura n. null". Il file si chiamava fattura-null.pdf.
+       Adesso e' quello che e' davvero: il riepilogo della pratica/lavoro.
+       Se un giorno servisse la copia di cortesia di una fattura, si prende
+       dalla sezione Fatture (fatturaPdf), che sa il numero vero. */
+    const _pro=(ruoloUtente==='professionista');
+    const _tit=_pro?"SCHEDA PRATICA":"SCHEDA LAVORO";
+    doc.setFont("helvetica","bold");doc.setFontSize(20);doc.text(_tit,R,y,{align:"right"});
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-    doc.text("Copia di cortesia",R,y+5.5,{align:"right"});
-    doc.text((l.numFatt?("N. "+l.numFatt):"Non ancora emessa")+"   del "+fdate(l.dataFatto||l.dataPrevista||todayStr()),R,y+10.5,{align:"right"});
+    doc.text("Riepilogo per il cliente",R,y+5.5,{align:"right"});
+    doc.text("del "+fdate(l.dataFatto||l.dataPrevista||todayStr()),R,y+10.5,{align:"right"});
     doc.setTextColor(0);
     y=Math.max(hy,y+15)+4;doc.setDrawColor(210);doc.line(M,y,R,y);y+=10;
     doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Cliente",M,y);y+=6;
@@ -5819,11 +6211,13 @@
     doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Pagamento",M,y);y+=5.5;
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     if(az.iban){doc.text("Bonifico — IBAN "+az.iban,M,y);y+=4.5;}
-    doc.text("Causale: Fattura n. "+l.numFatt,M,y);y+=5;
+    /* niente "Causale: Fattura n. null": qui va il riferimento vero */
+    doc.text((_pro?"Pratica: ":"Lavoro: ")+(l.descrizione||"—"),M,y);y+=5;
     doc.setTextColor(0);doc.setFont("helvetica","bold");doc.text("Stato: "+(l.fattStato==="pagata"?"PAGATA":"DA SALDARE"),M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(140);
     doc.text("Documento non fiscale (copia di cortesia). La fattura elettronica valida viene emessa tramite Sistema di Interscambio.",M,286,{maxWidth:R-M});
-    const fn="fattura-"+l.numFatt+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf";
+    const fn=(_pro?"pratica-":"lavoro-")+String(l.descrizione||"scheda").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)
+      +"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf";
     doc.save(fn);toast("PDF scaricato ✅");renderFatture();
   }
 
@@ -6523,7 +6917,9 @@
     if(sel)sel.innerHTML=[`<option value=""${agFilter.op===""?" selected":""}>Tutti</option>`]
       .concat(OPS.map(d=>`<option value="${esc(d.id)}"${agFilter.op===d.id?" selected":""}>${esc(d.nome)}</option>`)).join("");
     /* lavori del reparto (Supabase) */
-    const {data}=await sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,operatore_id,importo").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
+    /* "*" per i professionisti: le schede mostrano tipo pratica, stato e
+       protocollo, e con l'elenco fisso quei campi non arrivavano mai (9/8/2026) */
+    const {data}=await sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,importo").eq("user_id",sbUid).eq("mestiere_id",curMestiere());
     let L=data||[];
     if(agFilter.stato==="aperti")L=L.filter(l=>l.stato!=="fatto");
     if(agFilter.op)L=L.filter(l=>l.operatore_id===agFilter.op);
@@ -6593,9 +6989,22 @@
       const nf=x.fornitore_id&&fMap[String(x.fornitore_id)];
       return `<div class="spesa-row"><span>${esc(x.descrizione)}${nf?`<small class="sp-forn">da ${esc(nf)}</small>`:""}</span><b>${eur2(x.importo)}</b><button type="button" class="sdel" data-action="spesa-del" data-id="${x.id}">🗑</button></div>`;
     }).join(""):`<p class="fatt-empty">Nessuna spesa registrata.</p>`;
+    /* ===== 9 agosto 2026 — anche le fatture dei fornitori nel margine =====
+       Erano collegate al lavoro e non le leggeva nessuno. Stanno su una RIGA
+       LORO, non sommate alle Spese: se qualcuno segna la stessa cosa due volte
+       (una come Spesa e una come fattura fornitore) si vede subito. */
+    let totFF=0;
+    try{
+      const {data:ff}=await sb.from("gest_fatture_fornitori").select("importo")
+        .eq("user_id",sbUid).eq("lavoro_id",lavoroId);
+      totFF=(ff||[]).reduce((a,x)=>a+(+x.importo||0),0);
+    }catch(e){}
     const imp=+($("#j-imp")?$("#j-imp").value:importo)||0;
-    const marg=imp-tot;
-    $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span><span>Spese: <span class="sp">−${eur2(tot)}</span></span><span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`;
+    const marg=imp-tot-totFF;
+    $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span>`
+      +`<span>Spese: <span class="sp">−${eur2(tot)}</span></span>`
+      +(totFF?`<span>Fatture fornitori: <span class="sp">−${eur2(totFF)}</span></span>`:"")
+      +`<span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`;
     renderAndamentoSpese(sp,imp);
   }
 
@@ -6814,9 +7223,31 @@
       const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",prevCache.map(p=>p.id));
       (rr||[]).forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
     }
+    /* ===== 9 agosto 2026 — a schermo lo STESSO numero del PDF =====
+       Prima la colonna "Importo" mostrava l'imponibile (10.000) mentre il PDF
+       in mano al cliente diceva 11.000: al telefono si diceva la cifra
+       sbagliata. Ora si mostra il totale finito, quello che il cliente legge.
+       Per gli studi resta il "da incassare" della parcella (compenso + cassa
+       + spese + IVA - ritenuta): anche li' e' la cifra del documento. */
+    const totCli={};
+    prevCache.forEach(function(p){
+      const base=tot[p.id]||0;
+      if(ruoloUtente==='professionista'){
+        const c=calcolaParcella(base,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
+        totCli[p.id]=c.totale;
+      }else if(p.iva_perc!=null&&p.iva_perc!==""){
+        const iva=Math.round(base*(+p.iva_perc||0))/100;
+        totCli[p.id]=Math.round((base+iva)*100)/100;
+      }else{
+        totCli[p.id]=base;   /* aliquota non indicata: resta com'era */
+      }
+    });
+    const _conIva=p=>ruoloUtente==='professionista'
+      ? true
+      : (p.iva_perc!=null&&p.iva_perc!=="");
     const L=prevCache.filter(p=>prevFilter==="tutti"||p.stato===prevFilter);
     const conta={};PREV_VISTE.forEach(v=>conta[v.k]=prevCache.filter(p=>v.k==="tutti"||p.stato===v.k).length);
-    const somma=L.reduce((s,p)=>s+(tot[p.id]||0),0);
+    const somma=L.reduce((s,p)=>s+(totCli[p.id]||0),0);
     renderTabella({
       id:"prev", box:"#prev-list",
       viste:"#prev-viste", visteDef:PREV_VISTE, vista:prevFilter, conta:conta, azioneVista:"prev-filtro",
@@ -6837,13 +7268,13 @@
             `<span class="lav-bar ${PREV_BAR[p.stato]||"da_fare"}" title="${PREV_LAB[p.stato]||p.stato}"></span><span class="c-nome">${esc(p.titolo||"—")}</span>`,
             esc(cliMap[p.cliente_id]||"—"),
             {h:PREV_VERBO[p.stato]+" "+q.testo,cls:q.classe},
-            eur(tot[p.id]||0)
+            eur(totCli[p.id]||0)+(_conIva(p)?'<small class="prev-iva">'+(ruoloUtente==='professionista'?'da incassare':'IVA inclusa')+'</small>':"")
           ],
           menu:prevVoci(p)
         };
       }),
       totale:{testo:L.length+" "+(L.length===1?"preventivo":"preventivi"),valore:eur(somma)},
-      cards:()=>L.map(p=>prevCard(p,cliMap,tot)).join("")
+      cards:()=>L.map(p=>prevCard(p,cliMap,totCli)).join("")
     });
   }
   /* sotto 880px: la card di prima, con le stesse azioni del menu */
@@ -7180,18 +7611,68 @@
     }catch(e){ return {ok:false, error:(e&&e.message)||String(e)}; }
   };
   window.gestToast = function(m){ toast(m); };
+  /* ===== 9 agosto 2026 — il preventivo accettato non deve fare doppioni =====
+     Prima creava SEMPRE una riga nuova. Il percorso normale di un tecnico e':
+     apre la pratica (con Comune, protocollo, catastali) -> fa la parcella ->
+     il cliente accetta. Risultato: due pratiche per lo stesso incarico, quella
+     buona coi dati e una vuota, che era poi l'unica agganciata alla fattura.
+     Adesso, se c'e' gia' una pratica aperta per quel cliente, chiede. */
   async function prevToLavoro(id){
     const p=prevCache.find(x=>x.id===id);if(!p||!sbUid)return;
-    if(!gconfirm("Il cliente ha accettato? Creo il lavoro dal preventivo N. "+p.numero+"."))return;
+    const pro=ruoloUtente==='professionista';
+    const PAR=pro?"pratica":"lavoro";
+
+    /* le pratiche non chiuse dello stesso cliente: sono le candidate */
+    let candidate=[];
+    if(p.cliente_id){
+      const {data:cand}=await sb.from("gest_lavori").select("id,descrizione,data_prevista,importo")
+        .eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+        .eq("cliente_id",p.cliente_id).neq("stato","fatto")
+        .order("data_prevista",{ascending:false}).limit(20);
+      candidate=cand||[];
+    }
     const {data:rr}=await sb.from("gest_preventivo_righe").select("descrizione,qta,prezzo").eq("preventivo_id",id).order("ordine");
     const tot=(rr||[]).reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0);
+
+    if(!candidate.length){
+      if(!gconfirm("Il cliente ha accettato? Creo "+(pro?"la pratica":"il lavoro")+" dal preventivo N. "+p.numero+"."))return;
+      return _prevCreaLavoro(id,p,tot);
+    }
+    /* c'e' gia' qualcosa aperto per quel cliente: si sceglie */
+    openSheetGrande("Preventivo N. "+p.numero+" accettato",
+      '<div class="sh-b">'
+      +'<div class="sh-tit">A quale '+PAR+' lo collego?</div>'
+      +'<p class="sh-nota" style="margin-top:0">Per questo cliente hai gi&agrave; '+(candidate.length===1?('una '+PAR+' aperta'):(candidate.length+' '+(pro?'pratiche aperte':'lavori aperti')))+'. Collegando il preventivo a '+(pro?'quella giusta':'quello giusto')+' non nascono doppioni.</p>'
+      +'<div class="field"><label>'+(pro?'Pratica':'Lavoro')+'</label><select id="ptl-sel">'
+      +  candidate.map(function(l){return '<option value="'+l.id+'">'+esc(l.descrizione||"(senza nome)")+(l.data_prevista?" — "+fdate(l.data_prevista):"")+'</option>';}).join("")
+      +  '<option value="">— creane '+(pro?'una nuova':'uno nuovo')+' —</option>'
+      +'</select></div>'
+      +'<p class="sh-nota" style="margin-bottom:0">L\'importo del preventivo ('+eur2(tot)+') viene scritto su quello che scegli.</p>'
+      +'</div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="ptl-conferma" data-id="'+esc(String(id))+'" data-tot="'+tot+'">Collega</button>');
+  }
+  async function prevToLavoroConferma(id,tot){
+    const p=prevCache.find(x=>x.id===id);if(!p)return;
+    const scelto=$("#ptl-sel")?$("#ptl-sel").value:"";
+    closeSheet();
+    if(!scelto)return _prevCreaLavoro(id,p,tot);
+    /* si aggancia a quella che esiste, senza toccarne i dati della pratica */
+    const {error:eUp}=await sb.from("gest_lavori").update({importo:tot}).eq("id",scelto).eq("user_id",sbUid);
+    if(eUp){toast("Errore: "+eUp.message);return;}
+    const {data:okAcc,error:eAcc}=await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:scelto}).eq("id",id).eq("user_id",sbUid).select("id");
+    rinfresca("preventivi","lavori","riepilogo");
+    if(eAcc||!okAcc||!okAcc.length){toast("Collegato, ma il preventivo non risulta accettato: aggiornagli lo stato a mano");return;}
+    toast("Preventivo collegato ✔");
+  }
+  async function _prevCreaLavoro(id,p,tot){
     const {data:lav,error}=await sb.from("gest_lavori").insert({user_id:sbUid,mestiere_id:curMestiere(),stato:"da_fare",
       descrizione:p.titolo,dove:"",data_prevista:todayStr(),cliente_id:p.cliente_id,importo:tot}).select("id").single();
     if(error){toast("Errore: "+error.message);return;}
     const {data:okAcc,error:eAcc}=await sb.from("gest_preventivi").update({stato:"accettato",lavoro_id:lav.id}).eq("id",id).eq("user_id",sbUid).select("id");
     rinfresca("preventivi","lavori","riepilogo");
-    if(eAcc||!okAcc||!okAcc.length){toast("Lavoro creato, ma il preventivo non risulta accettato: aggiornagli lo stato a mano");return;}
-    toast("Lavoro creato dal preventivo ✔");
+    if(eAcc||!okAcc||!okAcc.length){toast("Creato, ma il preventivo non risulta accettato: aggiornagli lo stato a mano");return;}
+    toast(ruoloUtente==='professionista'?"Pratica creata dal preventivo ✔":"Lavoro creato dal preventivo ✔");
   }
   async function prevPdf(id){
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
@@ -8421,6 +8902,77 @@
        Prima il Report le ignorava del tutto: guardava solo le spese scritte dentro
        i lavori, quindi l'utile risultava piu' alto del vero. Ora entrano nel conto,
        ma restano una voce separata cosi' si capisce sempre da dove viene il numero. */
+    /* ===== 9 agosto 2026 — l'incassato si legge dalle FATTURE =====
+       Prima il Report lo calcolava da gest_lavori.fatt_stato, che pero' si
+       aggiorna solo per le fatture nate da un lavoro agganciato: una fattura
+       fatta da preventivo o da zero non toccava nessun lavoro. Risultato:
+       Riepilogo e Report davano due numeri diversi per la stessa cosa, e chi
+       fattura sempre da preventivo leggeva "Incassato 0".
+       Le fatture pagate sono la fonte vera: e' li' che stanno i soldi. */
+    let FT=[], FTR=[];
+    try{
+      /* "*" e non l'elenco delle colonne: chiedendo cassa_perc e spese, se la
+         migrazione della cassa non e' stata eseguita PostgREST risponde 400,
+         FT resta vuoto e tutto l'incassato del Report va a ZERO senza dirlo.
+         (9/8/2026 — trovato subito dopo averlo scritto.) */
+      const {data:ft}=await sb.from("gest_fatture").select("*")
+        .eq("user_id",sbUid).eq("mestiere_id",mid);
+      FT=ft||[];
+      if(FT.length){
+        const {data:fr}=await sb.from("gest_fattura_righe").select("fattura_id,qta,prezzo,iva")
+          .eq("user_id",sbUid).in("fattura_id",FT.map(f=>f.id));
+        FTR=fr||[];
+      }
+    }catch(e){ FT=[]; FTR=[]; }
+    /* l'imponibile di ogni fattura: e' il numero confrontabile con l'importo
+       dei lavori, senza IVA (che non e' tuo) */
+    const righePerFatt={};
+    FTR.forEach(r=>{(righePerFatt[r.fattura_id]=righePerFatt[r.fattura_id]||[]).push(r);});
+    const impFatt={};
+    FT.forEach(f=>{impFatt[f.id]=fattImponibile(f,righePerFatt[f.id]);});
+    const _dataInc=f=>String(f.data_pagata||f.data||"");
+    const pagate=FT.filter(f=>f.stato==="pagata");
+    /* Chi non usa la sezione Fatture (tante imprese segnano l'incasso sul
+       lavoro e basta) non deve vedere l'incassato crollare a zero: se non
+       c'e' NESSUNA fattura si torna al vecchio conteggio sui lavori.
+       Se le fatture ci sono comandano loro, se no si conterebbe due volte. */
+    const _daLavori=!FT.length;
+    const _incassoIn=(chiave,lung)=>_daLavori
+      ? L.filter(l=>l.fatt_stato==="pagata"&&(l.data_fatto||"").slice(0,lung)===chiave).reduce((s,l)=>s+(+l.importo||0),0)
+      : pagate.filter(f=>_dataInc(f).slice(0,lung)===chiave).reduce((s,f)=>s+(impFatt[f.id]||0),0);
+
+    /* ===== 9 agosto 2026 — i pieni pagati in contanti =====
+       Solo i rifornimenti con carta finivano nei costi, e ci finivano di
+       rimbalzo perche' creano un movimento carta. Quelli in contanti o coi
+       buoni non entravano da nessuna parte: un'impresa che fa meta' dei pieni
+       in contanti vedeva un utile piu' alto del vero.
+       Si contano quelli SENZA movimento_id: gli altri sono gia' dentro i
+       movimenti delle carte e conterebbero due volte. */
+    /* ===== 9 agosto 2026 — le fatture dei fornitori nei costi =====
+       Erano registrate, collegate al lavoro, e non le leggeva nessuno: il
+       margine guardava solo gest_spese. Ora entrano, ma su una RIGA LORO:
+       se qualcuno segna la stessa spesa due volte (una come Spesa del lavoro
+       e una come fattura fornitore) si vede subito da dove viene il numero. */
+    let FF=[];
+    try{
+      const {data:ff}=await sb.from("gest_fatture_fornitori").select("importo,data,lavoro_id,stato")
+        .eq("user_id",sbUid).eq("mestiere_id",mid);
+      FF=ff||[];
+    }catch(e){ FF=[]; }
+    const ffIn=(chiave,lung)=>FF.filter(f=>String(f.data||"").slice(0,lung)===chiave)
+                                .reduce((s,f)=>s+(+f.importo||0),0);
+    const totFF=FF.reduce((s,f)=>s+(+f.importo||0),0);
+
+    let RIF=[];
+    try{
+      const {data:rf}=await sb.from("gest_rifornimenti").select("importo,data,movimento_id,mezzo_id")
+        .eq("user_id",sbUid);
+      RIF=(rf||[]).filter(r=>!r.movimento_id);
+    }catch(e){ RIF=[]; }
+    const rifIn=(chiave,lung)=>RIF.filter(r=>String(r.data||"").slice(0,lung)===chiave)
+                                  .reduce((s,r)=>s+(+r.importo||0),0);
+    const totRif=RIF.reduce((s,r)=>s+(+r.importo||0),0);
+
     let CM=[], CARTE=[];
     try{
       const {data:ca}=await sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid);
@@ -8441,10 +8993,13 @@
     const H_BAR=160;
     const now=new Date(), mkeys=[];
     for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mkeys.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
-    const inc=mkeys.map(k=>L.filter(l=>l.fatt_stato==="pagata"&&(l.data_fatto||"").slice(0,7)===k).reduce((s,l)=>s+(+l.importo||0),0));
+    const inc=mkeys.map(k=>_incassoIn(k,7));
+    /* anche il grafico dei 12 mesi conta tutti i costi, se no la barra delle
+       spese dice una cosa e i totali storici piu' sotto ne dicono un'altra */
     const spm=mkeys.map(k=>
       SP.filter(x=>(x.data||"").slice(0,7)===k).reduce((s,x)=>s+(+x.importo||0),0)
-      +CM.filter(m=>String(m.data||m.created_at||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0));
+      +CM.filter(m=>String(m.data||m.created_at||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0)
+      +rifIn(k,7)+ffIn(k,7));
     const mx=Math.max(...inc,...spm,1);
     const hBar=v=>v>0?Math.max(Math.round(v/mx*H_BAR),2):0;
     const bars=mkeys.map((k,i)=>{
@@ -8462,10 +9017,12 @@
     const perOp={};
     L.forEach(l=>{if(!l.operatore_id||!(+l.ore))return;perOp[l.operatore_id]=(perOp[l.operatore_id]||0)+(+l.ore||0);});
     const opRows=Object.entries(perOp).sort((a,b)=>b[1]-a[1]);
-    const totInc=L.filter(l=>l.fatt_stato==="pagata").reduce((s,l)=>s+(+l.importo||0),0);
+    const totInc=_daLavori
+      ? L.filter(l=>l.fatt_stato==="pagata").reduce((s,l)=>s+(+l.importo||0),0)
+      : pagate.reduce((s,f)=>s+(impFatt[f.id]||0),0);
     const totSp=SP.reduce((s,x)=>s+(+x.importo||0),0);
     const anno=String(now.getFullYear());
-    const incAnno=L.filter(l=>l.fatt_stato==="pagata"&&(l.data_fatto||"").slice(0,4)===anno).reduce((s,l)=>s+(+l.importo||0),0);
+    const incAnno=_incassoIn(anno,4);
     /* guadagno/perdita per singolo lavoro (importo − spese) */
     const spPer={};SP.forEach(x=>{spPer[x.lavoro_id]=(spPer[x.lavoro_id]||0)+(+x.importo||0);});
     let ML=L.filter(l=>(+l.importo||0)>0||spPer[l.id]).map(l=>({d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0}));
@@ -8492,13 +9049,16 @@
             che e' la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
       <div class="rep-card"><h3 class="con-sub">${_ICO_LISTA}Totali storici</h3>
         <p class="rep-sub">Da quando usi il gestionale</p><table class="rep-table">
-        <tr><td>Incassato ${anno}</td><td>${eur(incAnno)}</td></tr>
-        <tr><td>Incassato totale</td><td>${eur(totInc)}</td></tr>
+        <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td><td>${eur(incAnno)}</td></tr>
+        <tr><td>Incassato totale <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td><td>${eur(totInc)}</td></tr>
         <tr><td>Spese nei lavori</td><td style="color:var(--testo)">−${eur(totSp)}</td></tr>
         <tr><td>Spese con le carte</td><td style="color:var(--testo)">−${eur(totCarte)}</td></tr>
-        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp-totCarte)}</td></tr></table></div>
+        ${totRif?`<tr><td>Rifornimenti pagati in contanti</td><td style="color:var(--testo)">−${eur(totRif)}</td></tr>`:""}
+        ${totFF?`<tr><td>Fatture dei fornitori</td><td style="color:var(--testo)">−${eur(totFF)}</td></tr>`:""}
+        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte-totRif-totFF>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp-totCarte-totRif-totFF)}</td></tr></table></div>
       <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per fatturato)</h3><table class="rep-table">
         ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
+      ${ruoloUtente==='professionista'?"":`
       <div class="rep-card"><h3>${_ICO_CARTA}Spese con le carte aziendali</h3>
         <p class="rep-sub">Soldi usciti dalle carte, non legati a un lavoro preciso. Sono compresi nel margine qui sopra.</p>
         <table class="rep-table">
@@ -8507,7 +9067,7 @@
               .map(m=>`<tr><td>${esc(m.causale||"Spesa")}<br><span style="font-size:13px;color:var(--testo-3)">${esc(carteNome[m.carta_id]||"")}</span></td><td>−${eur(m.importo)}</td></tr>`).join("")
             +`<tr><td><b>Totale</b></td><td><b>−${eur(totCarte)}</b></td></tr>`
           : `<tr><td colspan="2" style="color:var(--muted)">Nessuna spesa registrata sulle carte.</td></tr>`}
-        </table></div>
+        </table></div>`}
       <div class="rep-card"><h3>${_ICO_OROLOGIO}Ore per operatore</h3><table class="rep-table">
         ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||"—")}</td><td>${Math.round(v*10)/10} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
     </div>`;
@@ -8534,7 +9094,14 @@
   async function _fetchAllExport(){
     if(!sb||!sbUid){toast("Devi essere loggato");return null;}
     toast("Preparo l'esportazione…");
-    const [mest,lav,cli,ops,scad,prev,righe,spese,mezzi,lavMezzi,az]=await Promise.all([
+    /* 9 agosto 2026 — un file che si chiama "backup" e non contiene le FATTURE
+       non e' un backup. Mancavano anche ore, crediti formativi e fornitori.
+       Le tabelle nuove si leggono con .catch: se una migrazione non e' stata
+       fatta, il backup esce lo stesso con tutto il resto invece di fallire. */
+    const vuoto={data:[]};
+    const _opz=q=>q.then(r=>r&&!r.error?r:vuoto).catch(()=>vuoto);
+    const [mest,lav,cli,ops,scad,prev,righe,spese,mezzi,lavMezzi,az,
+           fatt,fattRig,fattLav,ore,cred,forn,fattForn]=await Promise.all([
       sb.from("gest_mestieri").select("*").eq("user_id",sbUid),
       sb.from("gest_lavori").select("*").eq("user_id",sbUid),
       sb.from("gest_clienti").select("*").eq("user_id",sbUid),
@@ -8545,9 +9112,20 @@
       sb.from("gest_spese").select("*").eq("user_id",sbUid),
       sb.from("gest_mezzi").select("*").eq("user_id",sbUid),
       sb.from("gest_lavoro_mezzi").select("*").eq("user_id",sbUid),
-      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle()
+      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+      _opz(sb.from("gest_fatture").select("*").eq("user_id",sbUid)),
+      _opz(sb.from("gest_fattura_righe").select("*").eq("user_id",sbUid)),
+      _opz(sb.from("gest_fattura_lavori").select("*").eq("user_id",sbUid)),
+      _opz(sb.from("gest_ore").select("*").eq("user_id",sbUid)),
+      _opz(sb.from("gest_crediti").select("*").eq("user_id",sbUid)),
+      _opz(sb.from("gest_fornitori").select("*").eq("user_id",sbUid)),
+      _opz(sb.from("gest_fatture_fornitori").select("*").eq("user_id",sbUid))
     ]);
-    return {mest:mest.data||[],lav:lav.data||[],cli:cli.data||[],ops:ops.data||[],scad:scad.data||[],prev:prev.data||[],righe:righe.data||[],spese:spese.data||[],mezzi:mezzi.data||[],lavMezzi:lavMezzi.data||[],az:az.data||null};
+    return {mest:mest.data||[],lav:lav.data||[],cli:cli.data||[],ops:ops.data||[],scad:scad.data||[],
+            prev:prev.data||[],righe:righe.data||[],spese:spese.data||[],mezzi:mezzi.data||[],
+            lavMezzi:lavMezzi.data||[],az:az.data||null,
+            fatt:fatt.data||[],fattRig:fattRig.data||[],fattLav:fattLav.data||[],
+            ore:ore.data||[],cred:cred.data||[],forn:forn.data||[],fattForn:fattForn.data||[]};
   }
   async function esportaExcel(){
     if(!(await caricaXLSX())){toast("Non riesco a scaricare il modulo Excel: controlla la connessione e riprova");return;}
@@ -8559,9 +9137,54 @@
     const pN=Object.fromEntries(D.prev.map(p=>[p.id,p.numero]));
     const wb=XLSX.utils.book_new();
     const add=(nome,rows)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{Vuoto:"—"}]),nome);
-    add("Lavori",D.lav.map(l=>({Reparto:mN[l.mestiere_id]||"",Descrizione:l.descrizione||"",Dove:l.dove||"",Cliente:cN[l.cliente_id]||"",Operatore:oN[l.operatore_id]||"",Stato:statoLabel[l.stato]||l.stato||"","Data prevista":l.data_prevista||"","Data fatto":l.data_fatto||"",Ore:+l.ore||0,"Importo €":+l.importo||0,"Stato fattura":l.fatt_stato||"none","N. fattura":l.num_fatt||"",Consuntivo:l.lavoro_svolto||"",Note:l.note||""})));
+    /* 9 agosto 2026 — il foglio prende il nome giusto per chi lo apre, e per gli
+       studi ci sono anche i dati della pratica: prima si salvavano nel database
+       e non uscivano da nessuna parte, nemmeno qui. */
+    const _pro=(ruoloUtente==='professionista');
+    add(_pro?"Pratiche":"Lavori",D.lav.map(l=>{
+      const r={Reparto:mN[l.mestiere_id]||"",Descrizione:l.descrizione||"",Dove:l.dove||"",
+        Cliente:cN[l.cliente_id]||"",[_pro?"Collaboratore":"Operatore"]:oN[l.operatore_id]||"",
+        Stato:statoLabel[l.stato]||l.stato||"","Data prevista":l.data_prevista||"",
+        "Data fatto":l.data_fatto||"",Ore:+l.ore||0,"Importo €":+l.importo||0,
+        "Stato fattura":l.fatt_stato||"none",Consuntivo:l.lavoro_svolto||"",Note:l.note||""};
+      if(_pro){
+        r["Tipo pratica"]=l.pratica_tipo||"";
+        r["A che punto"]=(PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"";
+        r["Comune"]=l.pratica_comune||"";
+        r["N. protocollo"]=l.pratica_protocollo||"";
+        r["Deposito"]=l.pratica_data_dep||"";
+        r["Foglio"]=l.catasto_foglio||"";
+        r["Particella"]=l.catasto_particella||"";
+        r["Sub"]=l.catasto_sub||"";
+      }
+      return r;
+    }));
+    /* le fatture mancavano del tutto dall'esportazione */
+    if((D.fatt||[]).length){
+      const rPerF={};(D.fattRig||[]).forEach(r=>{(rPerF[r.fattura_id]=rPerF[r.fattura_id]||[]).push(r);});
+      const impF={};(D.fatt||[]).forEach(f=>{impF[f.id]=fattImponibile(f,rPerF[f.id]);});
+      add("Fatture",D.fatt.map(f=>({Numero:f.numero||"",Anno:f.anno||"",Data:f.data||"",
+        Cliente:f.cli_nome||cN[f.cliente_id]||"",Stato:f.stato||"","Imponibile €":Math.round((impF[f.id]||0)*100)/100,
+        "Cassa %":+f.cassa_perc||0,"Spese €":+f.spese||0,"Ritenuta %":+f.ritenuta_perc||0,
+        "Sconto €":+f.sconto||0,"Bollo €":+f.bollo||0,Note:f.note||""})));
+    }
+    if((D.ore||[]).length)add(_pro?"Ore per pratica":"Ore per lavoro",
+      D.ore.map(o=>({[_pro?"Pratica":"Lavoro"]:lN[o.lavoro_id]||"",Data:o.data||"",Ore:+o.ore||0,
+        Chi:oN[o.operatore_id]||"",Nota:o.nota||""})));
+    if((D.cred||[]).length)add("Crediti formativi",
+      D.cred.map(c=>({Titolo:c.titolo||"",Ente:c.ente||"",Data:c.data||"",CFP:+c.crediti||0,Tipo:c.tipo||"",Note:c.note||""})));
+    /* i soldi in USCITA: erano scaricati dal database e poi buttati via */
+    if((D.forn||[]).length){
+      const fN=Object.fromEntries(D.forn.map(f=>[f.id,f.nome]));
+      add("Fornitori",D.forn.map(f=>({Nome:f.nome||"",Categoria:f.categoria||"",Telefono:f.telefono||"",
+        Email:f.email||"","P.IVA":f.piva||"",Indirizzo:f.indirizzo||"",Note:f.note||""})));
+      if((D.fattForn||[]).length)add("Fatture fornitori",D.fattForn.map(x=>({
+        Fornitore:fN[x.fornitore_id]||"",Numero:x.numero||"",Data:x.data||"",
+        "Importo €":+x.importo||0,Scadenza:x.scadenza||"",Stato:x.stato||"",
+        [_pro?"Pratica":"Lavoro"]:lN[x.lavoro_id]||"",Note:x.note||""})));
+    }
     add("Clienti",D.cli.map(c=>({Reparto:mN[c.mestiere_id]||"",Nome:c.nome||"",Indirizzo:c.indirizzo||"",Referente:c.referente||"",Telefono:c.telefono||""})));
-    add("Squadra",D.ops.map(o=>({Reparto:mN[o.mestiere_id]||"",Nome:o.nome||"",Telefono:o.telefono||""})));
+    add(_pro?"Collaboratori":"Squadra",D.ops.map(o=>({Reparto:mN[o.mestiere_id]||"",Nome:o.nome||"",Telefono:o.telefono||""})));
     const tot={};D.righe.forEach(r=>{tot[r.preventivo_id]=(tot[r.preventivo_id]||0)+(+r.qta||1)*(+r.prezzo||0);});
     add("Preventivi",D.prev.map(p=>({Numero:p.numero,Titolo:p.titolo||"",Reparto:mN[p.mestiere_id]||"",Cliente:cN[p.cliente_id]||"",Data:p.data||"",Stato:p.stato||"","Totale €":tot[p.id]||0,Note:p.note||""})));
     add("Voci preventivi",D.righe.map(r=>({"N. preventivo":pN[r.preventivo_id]||"",Descrizione:r.descrizione||"","Q.tà":+r.qta||1,"Prezzo €":+r.prezzo||0,"Totale €":(+r.qta||1)*(+r.prezzo||0)})));
@@ -8578,7 +9201,14 @@
   }
   async function esportaJson(){
     const D=await _fetchAllExport();if(!D)return;
-    const out={esportato_il:new Date().toISOString(),formato:"trovaimpresa-gestionale-v1",azienda:D.az,mestieri:D.mest,clienti:D.cli,operatori:D.ops,lavori:D.lav,spese:D.spese,preventivi:D.prev,preventivo_righe:D.righe,scadenze:D.scad,mezzi:D.mezzi,lavoro_mezzi:D.lavMezzi};
+    /* 9 agosto 2026 — mancavano fatture, righe fattura, collegamenti
+       fattura-lavoro, ore, crediti formativi, fornitori e fatture fornitori.
+       Un file che si chiama "backup" e non contiene le fatture non e' un backup. */
+    const out={esportato_il:new Date().toISOString(),formato:"trovaimpresa-gestionale-v2",
+      azienda:D.az,mestieri:D.mest,clienti:D.cli,operatori:D.ops,lavori:D.lav,spese:D.spese,
+      preventivi:D.prev,preventivo_righe:D.righe,scadenze:D.scad,mezzi:D.mezzi,lavoro_mezzi:D.lavMezzi,
+      fatture:D.fatt,fattura_righe:D.fattRig,fattura_lavori:D.fattLav,
+      ore:D.ore,crediti:D.cred,fornitori:D.forn,fatture_fornitori:D.fattForn};
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}));
     a.download="backup-gestionale-trovaimpresa-"+todayStr()+".json";a.click();URL.revokeObjectURL(a.href);
@@ -8601,6 +9231,7 @@
       }
       return;
     }
+    if(a==="ptl-conferma")return prevToLavoroConferma(id,+t.dataset.tot||0);
     if(a==="cest-ripristina")return cestRipristina(id);
     if(a==="cest-definitivo")return cestDefinitivo(id);
     if(a==="new-cred")return credForm(null);
@@ -8728,7 +9359,7 @@
     if(a==="fatt-pdf")return fatturaPdf(id);
     if(a==="fatt-xml")return fatturaXml(id);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
-    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);}return;}
+    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa e' stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();
@@ -8834,7 +9465,7 @@
       return cliForm(pieno||cliCache.find(c=>c.id===id));
     }
     if(a==="save-cli")return saveCli(id);
-    if(a==="del-cli"){if(!sbUid){toast("Devi essere loggato");return;}const n=db().lavori.filter(l=>l.clienteId===id).length;if(gconfirm(n?`Questo cliente ha ${n} lavori collegati. Eliminarlo comunque?`:"Eliminare questo cliente?")){const {data:okDc,error}=await sb.from("gest_clienti").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDc||!okDc.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}renderClienti();toast("Cliente eliminato");}return;}
+    if(a==="del-cli")return delCli(id);
     if(a==="new-mezzo")return mezzoForm(null,"mezzo");
     if(a==="edit-mezzo")return mezzoForm(mezziCache.find(m=>String(m.id)===String(id)));
     if(a==="save-mezzo")return saveMezzo(id||null);
@@ -8876,6 +9507,11 @@
        Il modulo della scadenza si apre SOPRA quello della pratica: chiudendolo
        si torna alla pratica, quindi qui non chiudo niente. */
     if(a==="scad-da-pratica"){
+      /* 9 agosto 2026 — la finestra e' UNA sola (#sheet): aprendo il modulo
+         della scadenza si riscrive quello della pratica, e quello che c'era
+         scritto e non ancora salvato va perso. Prima non lo diceva nessuno
+         (il commento qui sopra sosteneva pure il contrario). Ora si avvisa. */
+      if(!gconfirm("Apro il modulo della scadenza al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?"))return;
       const lavId=id;
       const l=(lavCache||[]).find(x=>String(x.id)===String(lavId));
       return scadForm(null,{lavoro_id:lavId,cliente_id:(l&&l.cliente_id)||null});
@@ -8972,7 +9608,12 @@
       if(t.dataset.forn)fornScheda(t.dataset.forn);   /* dalla scheda: si riapre aggiornata */
       toast(v==="pagata"?"Segnata pagata ✔":"Riaperta");return;
     }
-    if(a==="quick-cli")return cliForm(null);
+    if(a==="quick-cli"){
+      /* stesso motivo di scad-da-pratica: la finestra e' una sola e questa
+         prende il posto di quella aperta (9/8/2026) */
+      if(!gconfirm("Apro il modulo del cliente al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?"))return;
+      return cliForm(null);
+    }
     if(a==="close")return closeSheet();
   });
 

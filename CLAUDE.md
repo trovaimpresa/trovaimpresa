@@ -4,6 +4,16 @@
 - Modalità **Cowork**: Claude modifica i file direttamente nella cartella. Non servono prompt per Claude Code.
 - **Il `git push` lo fa Alex** dal suo Git Bash. Claude NON deve tentare il push dal proprio ambiente: fallisce sempre.
 - Motivo: nell'ambiente di Claude la cartella `.git` è vista tramite un mount con cache "congelata", che mostra un `index.lock` **fantasma** già rimosso lato Windows. Non è un problema reale sul PC di Alex — i suoi push funzionano regolarmente.
+- ⛔ **NESSUN COMANDO GIT DALLA CARTELLA COLLEGATA, NEMMENO IN SOLA LETTURA.**
+  Il 9 agosto 2026 Claude ha lanciato un innocuo `git status --short` per vedere
+  cosa restava da committare: quel comando ha **creato** `.git/index.lock` e non
+  è riuscito a rimuoverlo, perché dal ponte non si possono cancellare file.
+  Il lucchetto è rimasto e ha bloccato ogni `git add`/`git commit` di Alex per
+  ore — i suoi push dicevano "Everything up-to-date" perché i commit non erano
+  mai avvenuti. **Tre tornate di lavoro sono rimaste fuori senza che si vedesse.**
+  Quindi: niente `git status`, `git log`, `git diff` — niente. Per sapere cosa è
+  cambiato, si guardano i file. Se il lucchetto si ripresenta, l'unico che può
+  toglierlo è Alex: `rm -f .git/index.lock` da Git Bash.
 - Quindi: dopo aver modificato i file, dare **subito** ad Alex il blocco pronto da incollare (`git add ... / git commit -m "..." / git push`), senza tentativi a vuoto. Ad Alex di norma non serve `rm -f .git/index.lock`.
 - Deploy: Netlify pubblica in automatico a ogni push su `main`.
 
@@ -1715,6 +1725,251 @@ Il cliente era salvato benissimo: era solo nascosto dal filtro.
 "perche' tanto ce n'e' un altro", bisogna controllare TUTTI gli stati in cui
 quell'altro potrebbe non esserci. Qui gli stati vuoti erano due (mai inserito
 niente / la ricerca non trova niente) e il ragionamento valeva solo per il primo.
+
+## 9 agosto 2026 — CHECKUP DEL GESTIONALE PROFESSIONISTI (prima parte)
+
+Alessio: "ho paura di fare brutte figure con i clienti". Due revisioni
+indipendenti: **oltre 100 rilievi**. Qui la PRIMA ONDATA, gia' fatta: quello che
+vede il cliente e quello che perdeva dati. La seconda ondata e' in fondo.
+
+### Quello che vedeva il CLIENTE
+1. **Il PDF di una pratica usciva intestato "FATTURA"** con "Non ancora emessa",
+   "Causale: Fattura n. **null**" e file `fattura-null.pdf`. Causa: `generaPdf`
+   legge `lav.num_fatt`, colonna che **non si scrive piu' da nessuna parte** (il
+   numero lo assegna `fattAssegnaNumero` su `gest_fatture`). Ora si chiama
+   **SCHEDA PRATICA** / SCHEDA LAVORO, "Riepilogo per il cliente", e il
+   riferimento e' la descrizione, non un numero inventato.
+2. **Ritenuta e spese si perdevano passando dal preventivo alla fattura**: la
+   parcella diceva "netto 4.000", la fattura chiedeva 5.000.
+   `fattDaPreventivoConferma` ora passa `ritenuta_perc`, e le spese diventano
+   una riga a **IVA 0** (sono anticipi fuori campo, non compenso).
+3. **IVA di default 10%** (aliquota ristrutturazione) anche per gli studi, che
+   fatturano al 22%. Ora `ivaDefault()` da' 22 al professionista e 10 in edilizia.
+4. **"Condominio" diventava "Clientio"**: la regola `['Condomini','Clienti']`
+   spezzava la parola, anche dentro i NOMI dei clienti ("Condominio Le Terrazze"
+   -> "Clientio Le Terrazze"). Regola rimossa, insieme alle altre
+   condominio->cliente: per un tecnico il condominio e' un cliente legittimo.
+
+### Perdite di dati
+5. **"Cosa e' stato fatto" si cancellava a ogni riapertura.** `edit-job` non
+   traduceva `lavoro_svolto` -> `lavoroSvolto`: la casella si apriva vuota e al
+   primo Salva il consuntivo veniva sovrascritto con null. Aggiunte anche `note`.
+6. **`data_fatto` non veniva scritta** chiudendo dal modulo (solo il pulsante
+   della scheda lo faceva): la pratica spariva dal Report, che filtra su quella
+   data. Ora si scrive alla chiusura e si toglie riaprendo.
+7. **"+ Aggiungi scadenza" e "+ Aggiungi nuovo cliente" dentro un modulo aperto
+   lo distruggevano**: la finestra e' UNA sola (`#sheet`) e la seconda riscrive
+   la prima. Ora si avvisa prima. (Il vecchio commento sosteneva il contrario.)
+
+### Roba da cantiere davanti a un ingegnere
+8. **Il menu diceva "Attrezzature" e la pagina "Strumenti"**: mancava lo `<span>`
+   dentro il pulsante, e `adattaMenuProfessionista` cerca `[data-tab] span`.
+9. **Il riquadro "Mezzi e attrezzature" compariva dentro la pratica** di uno
+   studio, con scritto "aggiungilo dalla scheda Mezzi" — scheda che lui non ha.
+10. **La "Patente a crediti"** (Dati azienda + allarme rosso nel Riepilogo)
+    riguarda chi entra in cantiere: nascosta agli studi. **Attenzione**: i campi
+    nascosti NON vanno scritti nel salvataggio, se no azzerano il dato di chi la
+    patente ce l'ha davvero (guardia aggiunta in `saveAzienda`).
+11. **Report: la scheda "Spese con le carte aziendali"** compariva anche agli
+    studi (nel Riepilogo era gia' esclusa, nel Report no).
+
+### Il traduttore lavoro->pratica: allargato alla radice
+Invece di correggere ~80 scritte una per una:
+- **"cantiere" non era nemmeno nel filtro** (riga con la regex): nessuna frase
+  che lo conteneva veniva MAI tradotta. Aggiunte al filtro anche manodopera,
+  dipendenti, muratore, capo.
+- Aggiunte ~40 frasi: cantiere/cantieri con la concordanza giusta, operaio,
+  dipendenti, "3 lavori finiti" -> "3 pratiche **finite**" (la vecchia regex
+  numerica lasciava l'aggettivo al maschile), "imprese come la tua".
+- **Il traduttore ora guarda anche `placeholder` e `title`**, che prima
+  restavano fuori per costruzione: un ingegnere leggeva "Es. taglio siepe e
+  pulizia aiuole", "Es. Muratore", "Es. Cemento, noleggio piattaforma".
+  Nessun rischio di rimbalzo: l'osservatore guarda childList/subtree, non gli
+  attributi.
+
+**Come ho verificato**: estratti `_FRASI` e `_swapPratiche` dal file ed eseguiti
+con node su TUTTE le stringhe del gestionale che contengono parole da cantiere.
+Risultato: restano 2 sole occorrenze, entrambe nomi di colonna
+(`dipendente_id`), quindi invisibili. Controllato anche che NON si rompano
+"Buon lavoro", "Ore lavorate", "giorni lavorativi", "Ci stiamo lavorando",
+"Condominio Aurora". **Questo test va rifatto ogni volta che si tocca `_FRASI`.**
+
+### SECONDA ONDATA — LA CASSA PREVIDENZIALE IN FATTURA (fatta)
+Era il buco piu' grosso: il preventivo aveva la parcella completa, la fattura
+non sapeva nemmeno cosa fosse la cassa.
+
+**Database — `sql/gest-fattura-cassa.sql`**: `gest_fatture` guadagna
+`cassa_perc`, `cassa_tipo` (il codice che lo SDI vuole per sapere QUALE cassa)
+e `spese`. Sono gli stessi tre concetti del preventivo.
+
+**I conti (`fattConti`) ora sono IDENTICI a `calcolaParcella`:**
+compenso -> + cassa (sul solo compenso) -> + spese -> IVA su tutto ->
+- ritenuta (sul SOLO compenso).
+Due bug risolti insieme: mancava la cassa, e **la ritenuta si calcolava su tutto
+l'imponibile**, quindi mettendo bolli e diritti in fattura veniva trattenuto il
+20% anche su quelli.
+`fattTotaleLive` usa le stesse formule: prima l'anteprima e il PDF potevano dire
+numeri diversi.
+
+**Aliquota prevalente** (`fattAliquotaPrevalente`): cassa e spese non sono righe,
+quindi la loro IVA si applica con l'aliquota su cui sta piu' imponibile.
+
+**Il modulo** (solo studi) ha "Cassa previdenziale" con l'elenco `FATT_CASSE`
+— ognuna col suo codice: **TC04 Inarcassa, TC03 Geometri, TC17 EPPI periti,
+TC22 INPS gestione separata** — e il campo Spese. Paracadute se la migrazione
+manca: si tolgono le tre colonne, si salva il resto e lo si dice.
+
+**Il PDF** mostra Compenso / Cassa X% / Spese / Imponibile IVA invece di un solo
+"Imponibile" da cui il cliente non capiva come uscisse il totale.
+
+**L'XML per lo SDI**: aggiunto `DatiCassaPrevidenziale`, e **la cassa e le spese
+vengono sommate al riepilogo IVA** — senza, la somma dei riepiloghi non torna
+col totale del documento e lo SDI scarta il file.
+`TipoRitenuta` non e' piu' fisso a RT02: si sceglie dal codice fiscale
+dell'azienda (16 caratteri = persona fisica = RT01), perche' la gran parte dei
+tecnici ha studio individuale.
+
+**Verificato con node** su 4 casi (geometra 5% + IVA 22 + ritenuta + spese,
+Inarcassa 4%, cliente privato senza ritenuta, forfettario): parcella e fattura
+danno lo **stesso numero al centesimo**, e la somma dei riepiloghi IVA coincide
+col totale del documento. **Questo test va rifatto se si toccano quelle formule.**
+
+⚠️ **Da far confermare al commercialista**: i codici TipoCassa e la regola
+RT01/RT02.
+
+### TERZA ONDATA (fatta)
+
+**I dati della pratica non sono piu' invisibili.** Tipo, stato, Comune,
+protocollo e catastali si salvavano e non si rivedevano da nessuna parte.
+Ora: nell'**elenco Pratiche** la colonna "Chi" (che per uno studio conta poco)
+diventa **"A che punto"** con Depositata / In istruttoria / Integrazioni, e
+accanto al nome c'e' la pastiglia `.pra-tag` col tipo (CILA, SCIA...);
+nelle **schede** compaiono tipo, stato e protocollo; nell'**Excel** ci sono
+tutte le colonne `pratica_*` e `catasto_*`.
+⚠️ Le schede leggono `l.pratica_*`: ogni query che le alimenta deve fare
+`select("*")` per i professionisti. Corretta anche quella dell'**Agenda**, che
+aveva l'elenco fisso e quindi non mostrava mai quei campi.
+
+**Il preventivo accettato non fa piu' doppioni.** `prevToLavoro` creava SEMPRE
+una riga nuova: il percorso normale (apro la pratica coi dati catastali -> faccio
+la parcella -> il cliente accetta) produceva due pratiche, e quella agganciata
+alla fattura era la nuova, vuota. Ora, se il cliente ha gia' pratiche non chiuse,
+si apre una finestra per **scegliere a quale collegarlo** (o crearne una nuova).
+
+**Report: l'incassato si legge dalle FATTURE PAGATE**, non piu' da
+`gest_lavori.fatt_stato` — che si aggiorna solo per le fatture nate da un lavoro
+agganciato, quindi chi fattura da preventivo leggeva "Incassato 0" mentre il
+Riepilogo mostrava la cifra giusta.
+
+**Backup ed export completi.** Il JSON ora contiene fatture, righe fattura,
+collegamenti fattura-lavoro, ore, crediti, fornitori e fatture fornitori
+(formato `v2`); l'Excel ha i fogli Fatture, Ore, Crediti formativi, Fornitori e
+Fatture fornitori, e i nomi dei fogli seguono il ruolo (Pratiche/Collaboratori).
+
+**Elimina cliente**: l'avviso "ha N pratiche collegate" contava su `db().lavori`,
+lo store locale che col flusso Supabase resta sempre vuoto — diceva sempre 0.
+Ora conta davvero pratiche e fatture con `count:"exact"`.
+
+**Un difetto trovato dalla verifica**: `impFatt` sommava solo `qta*prezzo`,
+quindi Report ed Excel escludevano **cassa previdenziale e spese**: per uno
+studio col 5% ogni numero usciva piu' basso del vero. Creata la funzione
+**`fattImponibile(f,righe)`** — compenso + cassa + spese − sconto — usata da
+tutti e due. **Regola: l'imponibile di una fattura si calcola in un posto solo.**
+
+## 9 agosto 2026 — CHECKUP DEL GESTIONALE IMPRESE (+ regressioni di giornata)
+
+Due revisioni in parallelo: una sul percorso dell'impresa, una a caccia di
+**regressioni** causate dalle modifiche fatte oggi per i professionisti.
+
+### ⚠️ REGRESSIONI MIE, di poche ore prima
+1. **LE NOTE DEL CALENDARIO NON SI SALVAVANO PIU'.** La piu' grave.
+   `sql/gest-cestino.sql` aveva sostituito il vincolo `unique(user_id,
+   mestiere_id, data)` di `gest_note` con un indice unico **parziale**. Ma il
+   salvataggio usa `upsert ... ON CONFLICT`, e **Postgres non accetta un indice
+   parziale come arbitro di ON CONFLICT** (errore 42P10). Nessuna nota si
+   salvava piu', per tutti i ruoli.
+   **Risolto togliendo `gest_note` dal cestino** (`js/cestino.js`) e rimettendo
+   il vincolo intero con **`sql/gest-cestino-fix-note.sql`**, che rimette anche
+   in chiaro le note finite nel cestino in quelle ore.
+   **LEZIONE: prima di rendere parziale un vincolo di unicita', cercare tutti
+   gli `upsert`/`ON CONFLICT` che lo usano come arbitro.**
+2. **Report "Incassato" a zero** se `sql/gest-fattura-cassa.sql` non era stato
+   eseguito: la query chiedeva `cassa_perc` e `spese` per nome, PostgREST
+   rispondeva 400 e il `try/catch` non se ne accorgeva (PostgREST non lancia,
+   torna `{error}`). Ora la query fa `select("*")`.
+   **LEZIONE: mai chiedere per nome una colonna appena aggiunta in una query
+   che deve funzionare anche senza.**
+3. **La data di chiusura del lavoro veniva riscritta a ogni salvataggio.** La
+   guardia leggeva `lavCache`, che per le imprese NON contiene `data_fatto`
+   (l'elenco delle colonne non la include; solo i professionisti fanno `*`).
+   Caso vero: l'operaio chiude il lavoro oggi dall'app di cantiere, il capo apre
+   "Modifica" per le ore e la data vera spariva. Ora la si chiede al database.
+4. **Il Report azzerava l'incassato storico** di chi non usa la sezione Fatture:
+   ora, se non c'e' NESSUNA fattura, si torna al vecchio conteggio sui lavori.
+5. **La proposta di scadenza tornava a ogni salvataggio**, all'infinito se
+   rispondevi No: ora si chiede solo alla CREAZIONE.
+6. Nel riquadro dei conti un'impresa leggeva **"Compenso"** (parola da studio):
+   per lei e' "Imponibile".
+
+### I problemi veri del percorso impresa
+7. **La fattura nata da un preventivo accettato non si collegava al lavoro**:
+   `_lavori` non veniva passato, quindi il lavoro restava "da fatturare" per
+   sempre e si poteva fatturare due volte. `gest_preventivi.lavoro_id` veniva
+   scritto e **non letto da nessuno**: era proprio il dato che serviva.
+8. **L'IVA concordata si perdeva** se la fattura nasceva dal lavoro (la strada
+   normale): `fattDaUnLavoro` e `fattDaLavoriConferma` mettevano sempre il 10%.
+   Un preventivo firmato al 22% diventava una fattura al 10%. Aggiunta
+   `_ivaDalPreventivo(lavoroId)`, che va a prendere l'aliquota del preventivo
+   accettato di quel lavoro.
+9. **"Da fatturare" contato in due modi**: il Riepilogo su `fatt_stato`, la
+   sezione Fatture sulla tabella ponte. `fatt_stato` si scrive solo quando la
+   fattura viene EMESSA, quindi con una bozza aperta le due schermate si
+   contraddicevano. Ora il Riepilogo legge anche `gest_fattura_lavori`, e il
+   menu del lavoro non offre piu' "Crea fattura" su qualcosa gia' fatturato.
+10. **L'utile del mese conteneva l'IVA** (incassato lordo meno spese nette):
+    usciva gonfiato di tutta l'IVA, che non e' tua. Ora usa `fattImponibile`,
+    la stessa del Report, e l'etichetta dice "(IVA esclusa)".
+11. Un'impresa leggeva **"e le sue 3 pratiche"** eliminando un reparto, e
+    "(pratica eliminata)" nello scadenzario: il traduttore gira solo per i
+    professionisti, quindi la stringa di partenza non puo' essere gia' in
+    linguaggio da studio.
+12. **Deep link rotti** per `carte`, `attrezzature`, `richieste`: mancavano
+    dalla whitelist.
+13. La nota del modulo fattura fornitore prometteva che la spesa sarebbe
+    entrata nel margine del lavoro: **non e' vero**, `gest_fatture_fornitori.
+    lavoro_id` non e' letto da nessuna parte. Testo corretto per dire come
+    stanno le cose.
+
+### Le tre decisioni prese con Alessio (fatte)
+Erano rimaste aperte perche' ognuna cambia dei numeri: decise insieme.
+
+**1. I pieni pagati in contanti entrano nei costi.** Prima solo quelli con carta
+ci finivano, di rimbalzo, perche' `salvaRifornimento` crea un movimento carta.
+Ora Report e Riepilogo leggono `gest_rifornimenti` e contano **solo quelli con
+`movimento_id` vuoto**: gli altri sono gia' dentro i movimenti delle carte e
+conterebbero due volte. Verificato: 230 € di pieni, di cui 100 con carta ->
+contati 230, non 330.
+
+**2. Le fatture dei fornitori entrano nel margine, su una RIGA LORO.**
+`gest_fatture_fornitori.lavoro_id` veniva salvato e non letto da nessuno.
+Ora il riquadro del margine dice "Lavoro / Spese / **Fatture fornitori** /
+Margine", e lo stesso vale nei totali del Report e nell'utile del Riepilogo.
+Riga separata e non sommata alle Spese **apposta**: se qualcuno segna la stessa
+spesa due volte (una come Spesa del lavoro, una come fattura fornitore) il
+doppione si vede invece di sparire dentro un totale unico.
+
+**3. Nella lista Preventivi si vede il numero che vede il CLIENTE.** Prima la
+colonna diceva 10.000 (imponibile) e il PDF in mano al cliente 11.000: al
+telefono si diceva la cifra sbagliata. Ora la colonna mostra il totale finito
+con sotto in piccolo "IVA inclusa"; per gli studi mostra il **da incassare**
+della parcella (compenso + cassa + spese + IVA − ritenuta), che e' la cifra del
+documento. Allineati anche il totale della sezione e la scheda del Riepilogo:
+**tre schermate, un numero solo.** Verificato su 600.000 casi che il numero a
+schermo coincida sempre con quello del PDF.
+
+⚠️ Il Riepilogo e il Report ora contano gli STESSI costi (spese lavori, carte,
+rifornimenti in contanti, fatture fornitori): se un domani se ne aggiunge uno,
+va aggiunto in tutti e due, se no tornano a dare due utili diversi.
 
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.

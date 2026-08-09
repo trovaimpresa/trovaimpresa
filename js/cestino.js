@@ -42,13 +42,18 @@
      del database (gest_carte_saldo, gest_mezzi_carburante) che non stanno nei
      file del progetto. Nel cestino il movimento sparirebbe dall'elenco ma il
      saldo resterebbe scalato: meglio una cancellazione vera che un numero
-     sbagliato sui soldi. */
+     sbagliato sui soldi.
+     NON c'e' gest_note (tolta il 9/8/2026 poche ore dopo averla messa): la nota
+     del calendario si salva con un upsert su "un giorno = una nota", e un
+     vincolo di unicita' PARZIALE (quello che serve al cestino) non puo' fare
+     da arbitro a ON CONFLICT. Risultato: nessuna nota si salvava piu'.
+     Una nota e' una riga di testo: la cancellazione vera va benissimo. */
   var TABELLE = [
     "gest_lavori", "gest_clienti", "gest_preventivi", "gest_fatture",
     "gest_scadenze", "gest_mestieri", "gest_mezzi", "gest_operatori",
     "gest_carte",
     "gest_fornitori", "gest_fatture_fornitori", "gest_spese",
-    "gest_ore", "gest_crediti", "gest_note", "gest_foto", "gest_video"
+    "gest_ore", "gest_crediti", "gest_foto", "gest_video"
   ];
 
   var COL = "eliminato_il";
