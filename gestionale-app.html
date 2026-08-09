@@ -1614,7 +1614,17 @@
     /* Mai due bottoni che fanno la stessa cosa: quando la sezione e' vuota
        comanda quello grande in mezzo alla pagina, e quello piccolo in alto
        sparisce. Appena c'e' qualcosa dentro, torna. */
-    tabBottoneTesta(box, R.length>0);
+    /* 9 agosto 2026 — BUG SERIO risolto qui.
+       Il "+" in alto si nascondeva ogni volta che l'elenco era vuoto, perche'
+       in mezzo alla pagina compare il bottone grande. Ma quando l'elenco e'
+       vuoto per colpa di una RICERCA, il messaggio "Nessun risultato" non ha
+       nessun bottone: sparivano tutti e due e non si poteva piu' aggiungere
+       niente, senza capire perche'.
+       Adesso il "+" si nasconde solo se il messaggio in mezzo ha davvero il
+       suo bottone (lo si riconosce dalla classe lv-btn). */
+    const _vuotoHtml=cfg.vuoto||"";
+    const _vuotoHaBottone=_vuotoHtml.indexOf("lv-btn")>=0;
+    tabBottoneTesta(box, R.length>0 || !_vuotoHaBottone);
     if(!R.length){box.style.display="block";box.innerHTML=cfg.vuoto||"";return;}
     /* il registro dei menu "..." si riempie PRIMA del bivio schede/tabella:
        prima stava solo nel ramo tabella, e nelle schede il menu restava vuoto */
@@ -1693,8 +1703,14 @@
       ).join("")}</div></div>`;
   }
   function tabVuotoCerca(q){
-    return `<div class="lav-vuoto">${_SVGV}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><h3>Nessun risultato</h3><p>Niente trovato per \u00ab${esc(q)}\u00bb.</p></div>`;
+    /* il pulsante per togliere la ricerca: senza, chi cerca una cosa che non
+       c'e' resta davanti a una schermata vuota senza capire che basta
+       svuotare la casella qui sopra */
+    return `<div class="lav-vuoto">${_SVGV}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`
+      + `<h3>Nessun risultato</h3><p>Niente trovato per «${esc(q)}».</p>`
+      + `<button class="btn-primary lv-btn-cerca" data-action="cerca-azzera">Mostra tutti</button></div>`;
   }
+
   /* colonna Cliente: prima riga il nome (o "—" se il lavoro non ha cliente collegato),
      seconda riga l'indirizzo, che prima usurpava il posto del nome e confondeva. */
   function cellaCliente(nome,dove){
@@ -8574,6 +8590,17 @@
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
     if(a==="spesa-add")return spesaAdd();
+    /* "Mostra tutti": svuota la casella di ricerca della sezione in cui si sta */
+    if(a==="cerca-azzera"){
+      const sez=t.closest("section");
+      const campi=sez?sez.querySelectorAll(".lav-search"):[];
+      let fatto=false;
+      campi.forEach(function(el){ if(el.value){ el.value=""; el.dispatchEvent(new Event("input",{bubbles:true})); fatto=true; } });
+      if(!fatto&&sez){ /* la ricerca poteva stare nella barra in alto */
+        const g=$("#f-search"); if(g&&g.value){ g.value=""; g.dispatchEvent(new Event("input",{bubbles:true})); }
+      }
+      return;
+    }
     if(a==="cest-ripristina")return cestRipristina(id);
     if(a==="cest-definitivo")return cestDefinitivo(id);
     if(a==="new-cred")return credForm(null);

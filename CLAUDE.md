@@ -1686,6 +1686,36 @@ Questa e' la parte da rileggere prima di allargare il cestino ad altre tabelle.
 `js/cestino.js` (il motore). Va eseguito l'SQL PRIMA di usare il gestionale:
 senza, il cestino resta spento e le eliminazioni tornano definitive.
 
+## 9 agosto 2026 — BUG: con una ricerca senza risultati non si poteva piu' aggiungere
+
+Segnalato da Alessio subito dopo il deploy del cestino: "ho creato un cliente ma
+non c'e', e non si puo' aggiungerne uno nuovo".
+
+**Che cosa succedeva davvero.** Nella casella di ricerca dei Clienti era rimasto
+scritto un indirizzo. L'elenco quindi non mostrava niente ("Nessun risultato"),
+e per giunta **spariva anche il pulsante "+"**: `renderTabella` nascondeva il
+"+" in alto ogni volta che l'elenco era vuoto, perche' di norma compare il
+bottone grande in mezzo alla pagina — ma il messaggio "Nessun risultato" NON ha
+nessun bottone. Sparivano tutti e due: sezione bloccata, senza capire perche'.
+Il cliente era salvato benissimo: era solo nascosto dal filtro.
+
+**Le tre correzioni:**
+1. `renderTabella`: il "+" in alto si nasconde **solo se il messaggio in mezzo
+   ha davvero il suo bottone** (riconosciuto dalla classe `lv-btn`). Vale per
+   tutte le sezioni in una volta, senza toccarle una per una.
+2. `tabVuotoCerca()` ora ha il pulsante **"Mostra tutti"** (azione
+   `cerca-azzera`): svuota la casella di ricerca della sezione in cui ci si
+   trova e ridisegna. Prima da li' non si tornava indietro.
+3. La casella di ricerca era alta 34px con testo piccolo: **sembrava
+   un'etichetta, non un campo**. Ora e' alta 44px come gli altri campi e
+   **quando contiene qualcosa si accende** (bordo blu doppio, sfondo azzurro,
+   grassetto): si vede a colpo d'occhio che stai filtrando.
+
+**La lezione, valida oltre questo caso:** ogni volta che si nasconde un comando
+"perche' tanto ce n'e' un altro", bisogna controllare TUTTI gli stati in cui
+quell'altro potrebbe non esserci. Qui gli stati vuoti erano due (mai inserito
+niente / la ricerca non trova niente) e il ragionamento valeva solo per il primo.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
