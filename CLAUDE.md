@@ -1448,13 +1448,31 @@ iscritto). Nasce dal preventivo che c'e' gia': stesse voci, stessa parcella.
 obblighi del committente) sono un modello di base, non un parere legale. Vanno
 fatte leggere una volta a un consulente. Nel modulo c'e' gia' scritto.
 
+## 9 agosto 2026 — Finestre: la regola e' rispettata dappertutto
+
+Convertite in `openSheetGrande` a due colonne le ultime finestrelle piccole:
+- **mezzo / attrezzatura** (`mezzoForm`): sinistra "Che cos'e'", destra la spunta
+  attrezzatura + Note
+- **carta aziendale** (`cartaForm`): sinistra "La carta", destra Note. Tolti anche
+  gli `style="font-size:1.1rem"` scritti a mano su ogni campo: il testo grande
+  nelle finestre lo fa gia' il CSS (blocco "CAMPI DA COMPILARE"), uguale per tutte
+- **nuova persona** (`dipForm`): finestra grande ma **una colonna sola** — il campo
+  e' uno, due colonne sarebbero mezze vuote. (E' il modulo vecchio della modalita'
+  locale: quello vero e' `squadraForm`.)
+- **nuovo reparto** (`panelForm`): sinistra il nome, destra icona e colore
+
+**Resta di proposito con `openSheet()`** solo la finestra del **giorno del
+calendario**: e' l'elenco dei lavori di quel giorno con la nota, non un modulo di
+inserimento. Se un domani si vuole uniformare anche quella, e' l'unica rimasta.
+
+**Controllo da rifare dopo ogni modifica alle finestre:**
+`grep -n "openSheet(\`" gestionale-app.html` deve restituire **solo** la riga
+della finestra del giorno.
+
 ### Il prossimo passo
-Alessio ha chiesto di convertire **le 4 finestrelle piccole rimaste** in
-`openSheetGrande` (regola fissa sulle finestre): **mezzo**, **carta carburante**,
-**nuova persona**, **nuovo reparto**. La finestra del giorno del calendario e'
-un elenco, non un form: si puo' lasciare.
-Poi la lista strumenti professionisti continua con: **ore per pratica**,
-**verbale di sopralluogo**, **registro crediti formativi**.
+La lista strumenti professionisti continua con: **ore per pratica** (timesheet +
+"quanto hai guadagnato all'ora"), **verbale di sopralluogo** con foto,
+**registro crediti formativi**.
 
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.

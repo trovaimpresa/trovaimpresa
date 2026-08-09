@@ -3523,20 +3523,34 @@
     const tipoSugg=tipiUsati.map(t=>`<option value="${esc(t)}">`).join("");
     const statoOpts=Object.keys(MEZZO_STATI)
       .map(k=>`<option value="${k}" ${((m.stato||"disponibile")===k)?"selected":""}>${MEZZO_STATI[k].lab}</option>`).join("");
-    openSheet(`<h3>${isNew?(attrezzo?"Nuova attrezzatura":"Nuovo mezzo"):(attrezzo?"Modifica attrezzatura":"Modifica mezzo")}</h3>
-      <div class="field"><label>Nome</label><input id="m-nome" value="${esc(m.nome||"")}" placeholder="${attrezzo?"Es. Ponteggio 6 m, Betoniera 350 l":"Es. Furgone Ducato, Fiat Doblo"}"></div>
-      <div class="row2">
-        <div class="field"><label>Tipo</label>
-          <input id="m-tipo" list="m-tipo-sugg" value="${esc(m.tipo||"")}" placeholder="${attrezzo?"Es. ponteggio, betoniera, trapano":"Es. furgone, escavatore, auto"}" autocomplete="off">
-          <datalist id="m-tipo-sugg">${tipoSugg}</datalist></div>
-        <div class="field"><label>${attrezzo?"Matricola":"Targa"}</label><input id="m-targa" value="${esc(m.targa||"")}" placeholder="${attrezzo?"Es. MT-4471":"Es. AB123CD"}"></div></div>
-      <div class="field"><label>Stato</label><select id="m-stato">${statoOpts}</select></div>
-      <label style="display:flex;align-items:center;gap:10px;font-size:1rem;margin:4px 0 16px;cursor:pointer">
-        <input type="checkbox" id="m-attrezzo" ${attrezzo?"checked":""} style="width:20px;height:20px">
-        <span>È un'attrezzatura (non si guida) — sta fra le Attrezzature invece che fra i Mezzi</span></label>
-      <div class="field"><label>Note</label><textarea id="m-note" placeholder="Dove si trova, chi lo usa, promemoria...">${esc(m.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+    /* 9 agosto 2026 — finestra grande a due colonne (regola fissa sulle finestre) */
+    openSheetGrande(isNew?(attrezzo?"Nuova attrezzatura":"Nuovo mezzo"):(attrezzo?"Modifica attrezzatura":"Modifica mezzo"),
+      `<div class="sh-cols"><div class="sh-col">
+        <div class="sh-b">
+        <div class="sh-tit">Che cos'è</div>
+        <div class="field"><label>Nome</label><input id="m-nome" value="${esc(m.nome||"")}" placeholder="${attrezzo?"Es. Ponteggio 6 m, Betoniera 350 l":"Es. Furgone Ducato, Fiat Doblo"}"></div>
+        <div class="row2">
+          <div class="field"><label>Tipo</label>
+            <input id="m-tipo" list="m-tipo-sugg" value="${esc(m.tipo||"")}" placeholder="${attrezzo?"Es. ponteggio, betoniera, trapano":"Es. furgone, escavatore, auto"}" autocomplete="off">
+            <datalist id="m-tipo-sugg">${tipoSugg}</datalist></div>
+          <div class="field"><label>${attrezzo?"Matricola":"Targa"}</label><input id="m-targa" value="${esc(m.targa||"")}" placeholder="${attrezzo?"Es. MT-4471":"Es. AB123CD"}"></div></div>
+        <div class="field"><label>Stato</label><select id="m-stato">${statoOpts}</select></div>
+        </div>
+        </div><div class="sh-col">
+        <div class="sh-b">
+        <div class="sh-tit">Dove sta di casa</div>
+        <label style="display:flex;align-items:flex-start;gap:10px;font-size:1rem;margin:2px 0 12px;cursor:pointer">
+          <input type="checkbox" id="m-attrezzo" ${attrezzo?"checked":""} style="width:20px;height:20px;flex-shrink:0;margin-top:2px">
+          <span>È un'attrezzatura (non si guida) — sta fra le Attrezzature invece che fra i Mezzi</span></label>
+        <p class="sh-nota">Le scadenze (revisione, bollo, assicurazione, verifiche) si aggiungono dopo, dal pulsante <b>＋ Scadenza</b> sulla scheda.</p>
+        </div>
+        <div class="sh-b">
+        <div class="sh-tit">Note</div>
+        <div class="field"><textarea id="m-note" placeholder="Dove si trova, chi lo usa, promemoria...">${esc(m.note||"")}</textarea></div>
+        </div>
+        </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button>`);
   }
   async function saveMezzo(id){
     const nome=$("#m-nome").value.trim();if(!nome){toast("Scrivi il nome del mezzo");return;}
@@ -3603,15 +3617,28 @@
   function cartaForm(c){
     const isNew=!c;c=c||{};
     const dipOpts=`<option value="">— nessuno —</option>`+dipCache.map(d=>`<option value="${d.id}" ${String(c.dipendente_id||"")===String(d.id)?"selected":""}>${esc(d.nome)}</option>`).join("");
-    openSheet(`<h3 style="font-size:1.4rem">${isNew?"Nuova carta":"Modifica carta"}</h3>
-      <div class="field"><label style="font-size:1.05rem">Nome carta</label><input id="ct-nome" style="font-size:1.1rem;padding:12px" value="${esc(c.nome||"")}" placeholder="Es. Carta Mario, Carta cantiere Nord"></div>
-      <div class="field"><label style="font-size:1.05rem">Titolare (chi ce l'ha in tasca)</label><select id="ct-dip" style="font-size:1.1rem;padding:12px">${dipOpts}</select></div>
-      <div class="field"><label style="font-size:1.05rem">Stato</label><select id="ct-stato" style="font-size:1.1rem;padding:12px">
-        <option value="attiva" ${(c.stato||"attiva")==="attiva"?"selected":""}>Attiva</option>
-        <option value="bloccata" ${c.stato==="bloccata"?"selected":""}>Bloccata</option></select></div>
-      <div class="field"><label style="font-size:1.05rem">Note</label><textarea id="ct-note" style="font-size:1.1rem;padding:12px" placeholder="Numero carta, limite, promemoria...">${esc(c.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="btn b-cancel" style="font-size:1.05rem;padding:12px 18px" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" style="font-size:1.05rem;padding:12px 18px" data-action="save-carta" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+    /* 9 agosto 2026 — finestra grande a due colonne. Tolti gli stili scritti a
+       mano riga per riga: il testo grande nelle finestre lo fa gia' il CSS
+       (blocco "CAMPI DA COMPILARE" in gestionale.css), uguale per tutte. */
+    openSheetGrande(isNew?"Nuova carta":"Modifica carta",
+      `<div class="sh-cols"><div class="sh-col">
+        <div class="sh-b">
+        <div class="sh-tit">La carta</div>
+        <div class="field"><label>Nome carta</label><input id="ct-nome" value="${esc(c.nome||"")}" placeholder="Es. Carta Mario, Carta cantiere Nord"></div>
+        <div class="field"><label>Titolare (chi ce l'ha in tasca)</label><select id="ct-dip">${dipOpts}</select></div>
+        <div class="field"><label>Stato</label><select id="ct-stato">
+          <option value="attiva" ${(c.stato||"attiva")==="attiva"?"selected":""}>Attiva</option>
+          <option value="bloccata" ${c.stato==="bloccata"?"selected":""}>Bloccata</option></select></div>
+        </div>
+        </div><div class="sh-col">
+        <div class="sh-b">
+        <div class="sh-tit">Note</div>
+        <div class="field"><textarea id="ct-note" placeholder="Numero carta, limite, promemoria...">${esc(c.note||"")}</textarea></div>
+        <p class="sh-nota">Il saldo non si scrive qui: viene da solo dalle ricariche meno le spese, che si registrano dal pulsante <b>Movimenti</b>.</p>
+        </div>
+        </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="save-carta" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button>`);
   }
   async function saveCarta(id){
     const nome=$("#ct-nome").value.trim();if(!nome){toast("Scrivi il nome della carta");return;}
@@ -5389,10 +5416,17 @@
   }
   function dipForm(d){
     const isNew=!d;d=d||{};
-    openSheet(`<h3>${isNew?"Nuova persona":"Rinomina persona"}</h3>
-      <div class="field"><label>Nome</label><input id="d-nome" value="${esc(d.nome||"")}" placeholder="Es. Wahid"></div>
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" data-action="save-dip" data-id="${d.id||""}">${isNew?"Aggiungi":"Salva"}</button></div>`);
+    /* 9 agosto 2026 — finestra grande. Qui il campo e' uno solo, quindi niente
+       due colonne: sarebbero mezze vuote. Il modulo completo della persona
+       (telefono, documenti, scadenze) e' squadraForm. */
+    openSheetGrande(isNew?"Nuova persona":"Rinomina persona",
+      `<div class="sh-b">
+        <div class="sh-tit">Come si chiama</div>
+        <div class="field"><label>Nome</label><input id="d-nome" value="${esc(d.nome||"")}" placeholder="${ruoloUtente==='professionista'?'Es. Giulia':'Es. Wahid'}"></div>
+        <p class="sh-nota">Telefono, documenti e scadenze si aggiungono dopo, aprendo la sua scheda.</p>
+      </div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="save-dip" data-id="${d.id||""}">${isNew?"Aggiungi":"Salva"}</button>`);
   }
   async function saveDip(id){
     const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
@@ -5402,12 +5436,24 @@
 
   function panelForm(){
     nuovoSel={icon:"🛠️",col:0};
-    openSheet(`<h3>Nuovo reparto</h3>
-      <div class="field"><label>Nome del reparto</label><input id="p-nome" placeholder="${ruoloUtente==='professionista'?'Es. Progettazione, Direzione lavori, Catasto':'Es. Muratura, Idraulica, Giardini'}"></div>
-      <div class="field"><label>Icona</label><div class="picker" id="p-ic">${ICONE.map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")}</div></div>
-      <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}"></button>`).join("")}</div></div>
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" data-action="save-panel">Crea reparto</button></div>`);
+    /* 9 agosto 2026 — finestra grande a due colonne: a sinistra il nome,
+       a destra come lo si riconosce a colpo d'occhio (icona e colore). */
+    openSheetGrande("Nuovo reparto",
+      `<div class="sh-cols"><div class="sh-col">
+        <div class="sh-b">
+        <div class="sh-tit">Come si chiama</div>
+        <div class="field"><label>Nome del reparto</label><input id="p-nome" placeholder="${ruoloUtente==='professionista'?'Es. Progettazione, Direzione lavori, Catasto':'Es. Muratura, Idraulica, Giardini'}"></div>
+        <p class="sh-nota">Ogni reparto tiene i suoi ${ruoloUtente==='professionista'?'pratiche, clienti e collaboratori':'lavori, clienti e persone'} separati dagli altri: quello che sta in uno non si mischia con l'altro.</p>
+        </div>
+        </div><div class="sh-col">
+        <div class="sh-b">
+        <div class="sh-tit">Come lo riconosci</div>
+        <div class="field"><label>Icona</label><div class="picker" id="p-ic">${ICONE.map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")}</div></div>
+        <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}"></button>`).join("")}</div></div>
+        </div>
+        </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Annulla</button>
+       <button class="btn-primary b-save" data-action="save-panel">Crea reparto</button>`);
     $("#p-ic").onclick=e=>{const b=e.target.closest("[data-ic]");if(!b)return;nuovoSel.icon=b.dataset.ic;[...$("#p-ic").children].forEach(x=>x.classList.toggle("on",x===b));};
     $("#p-col").onclick=e=>{const b=e.target.closest("[data-col]");if(!b)return;nuovoSel.col=+b.dataset.col;[...$("#p-col").children].forEach(x=>x.classList.toggle("on",x===b));};
   }
