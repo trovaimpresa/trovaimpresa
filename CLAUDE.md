@@ -2248,3 +2248,45 @@ in `sql/`, non a memoria, e accendere le estensioni che Supabase ha accese. E qu
 il gestionale mostra un errore tradotto, l'unico modo per sapere cosa e' successo
 davvero e' Rete -> la riga rossa -> Response: li' c'e' il codice Postgres (42703 e
 compagnia), che dice esattamente dove guardare.
+
+
+## DOVE SIAMO RIMASTI — sera del 9 agosto 2026
+
+### Fatto e verificato dal vivo (profilo Professionista)
+Giro completo cliente -> pratica -> parcella -> lettera d'incarico -> accettazione
+-> fattura -> PDF -> cestino -> elimina per sempre. Tutti i numeri tornano
+(compenso 2.000, cassa 100, spese 150, imponibile 2.250, IVA 495, ritenuta 400,
+netto 2.345) dal form al PDF. Trovati e risolti lungo la strada: il Riepilogo IVA
+del PDF che dichiarava 440 invece di 495, 451 accenti, quattro frasi sgrammaticate,
+e tutta la storia dell'"Elimina per sempre" sicuro (tre giri di correzioni).
+
+### Da fare domani
+1. **Il giro di test sul profilo Impresa**, uguale a quello fatto per il
+   professionista. E' il profilo con piu' utenti, quindi conta di piu'.
+2. Se vuole vedere il blocco fiscale: creare una fattura, premere Emetti (cosi'
+   prende il numero), metterla nel cestino e provare a eliminarla per sempre.
+   Deve rifiutarsi nominando il numero.
+
+### Rimasto aperto, deciso di non farlo oggi
+- **I PDF stampano "—" al posto del nome se il cliente e' nel cestino.** Leggono
+  con `sb.from`, che filtra. Riguarda parcella, lettera d'incarico, conferma
+  d'ordine, verbale (6 punti). A schermo l'elenco preventivi dice "Nome (nel
+  cestino)", quindi i due posti non concordano. Non e' un difetto nuovo.
+- **Dati del profilo scritti male**: nome studio "alessio", citta' "rieti",
+  email con la P maiuscola. Escono cosi' sui PDF che il cliente firma. Si
+  sistemano dal Pannello, non e' codice.
+- Il titolo della scadenza automatica e' ridondante: "CILA — CILA prova".
+- Una ventina di file `.bak-*` da cancellare quando ci si fida.
+- Da far confermare a terzi: i codici TipoCassa e la regola RT01/RT02 al
+  commercialista, i modelli di lettera d'incarico e conferma d'ordine a un legale.
+
+### Come si lavora (riassunto delle lezioni di oggi)
+- Dopo ogni trasferimento di file: **`md5sum` da una parte e dall'altra**. Una
+  volta `array_agg` e' arrivato come `array_agh` e il file non partiva.
+- Le funzioni SQL si provano su un **PostgreSQL vero** (nel container c'e' il 16),
+  ricreando lo schema **dai file in `sql/`**, non a memoria, e con le estensioni
+  che Supabase tiene accese (pg_safeupdate).
+- Il JavaScript che tocca la pagina si prova con **Playwright**, non solo leggendo.
+- Quando il gestionale mostra un errore tradotto, quello vero sta in
+  **F12 -> Network -> la riga rossa -> Response**: c'e' il codice Postgres.
+- **Niente comandi git dalla cartella collegata**, nemmeno `git status`.
