@@ -1050,6 +1050,13 @@
 .spesa-add.ore-add{ grid-template-columns:auto 90px 1fr auto; }
 @media(max-width:700px){ .spesa-add.ore-add{ grid-template-columns:1fr 1fr; } }
 
+/* --- cestino: la riga in cima con il conteggio e lo svuota --- */
+.cest-testa{ display:flex; align-items:center; justify-content:space-between; gap:14px;
+             flex-wrap:wrap; background:var(--card); border:1px solid var(--bordo);
+             border-radius:12px; padding:14px 18px; margin-bottom:16px; font-size:17px; }
+.cest-testa .cest-nota{ font-size:14.5px; color:var(--testo-2); line-height:1.5; max-width:520px; }
+.cest-testa small{ font-size:14px; color:var(--testo-2); font-weight:600; }
+
 /* --- crediti formativi: il riquadro "a che punto sei" (9 agosto 2026).
        Numero grande e barra: si deve capire in un colpo d'occhio. --- */
 .cred-box{ background:var(--card); border:2px solid var(--bordo); border-radius:14px;

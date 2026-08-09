@@ -616,6 +616,7 @@
 
 <!-- jsPDF e xlsx si caricano al primo uso (caricaJsPDF/caricaXLSX): ~1,2MB in meno all'avvio -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/cestino.js"></script>
 <script src="/js/foto-upload.js"></script>
 
 <script>
@@ -746,6 +747,8 @@
   const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
   const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
   const sb=window.supabase?window.supabase.createClient(SUPA_URL,SUPA_KEY):null;
+  /* Da qui in poi "cancella" vuol dire "metti da parte": vedi js/cestino.js */
+  if(sb&&window.attivaCestino)window.attivaCestino(sb);
   let sbUid=null;
   const sbRand=()=>Math.random().toString(36).slice(2,8).toUpperCase();
   const inviteLink=c=>location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c;

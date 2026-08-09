@@ -66,6 +66,7 @@
       <button data-tab="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg><span>Report</span></button>
       <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
       <button data-tab="mappa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Mappa</span><span class="tab-cnt" id="cnt-mappa"></span></button>
+      <button data-tab="cestino"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg><span>Cestino</span><span class="tab-cnt" id="cnt-cestino"></span></button>
       <div class="side-group">TrovaImpresa</div>
       <button data-tab="richieste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Cosa ti manca?</button>
     </nav>
@@ -253,6 +254,14 @@
       <div class="grid" id="cred-list"></div>
     </section>
 
+    <section id="cestino">
+      <div class="sec-head"><h2>Cestino</h2></div>
+      <div class="gal-intro">Tutto quello che elimini dal gestionale passa di qui e resta a disposizione: finché è nel cestino non è perso. Clicca una riga per rimetterla a posto.</div>
+      <div id="cest-riass"></div>
+      <div class="viste" id="cest-viste"></div>
+      <div class="grid" id="cest-list"></div>
+    </section>
+
     <section id="preventivi">
       <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn add" title="Descrivi il lavoro, preparo io le voci di costo" onclick="window.AI&&window.AI.apri&&window.AI.apri()">✨ Genera con AI</button></div></div>
       <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
@@ -292,6 +301,7 @@
      al primo clic su un PDF o su Esporta, come gia' fa la mappa con Leaflet.
      Su un telefono in cantiere sono 1,2MB in meno da scaricare per aprire l'app. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/cestino.js"></script>
 <script src="/js/foto-upload.js"></script>
 <script>
 (function(){
@@ -430,6 +440,8 @@
   const SUPA_URL="https://nacvrsgkyfavykxjxszu.supabase.co";
   const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic";
   const sb=window.supabase?window.supabase.createClient(SUPA_URL,SUPA_KEY):null;
+  /* Da qui in poi "cancella" vuol dire "metti da parte": vedi js/cestino.js */
+  if(sb&&window.attivaCestino)window.attivaCestino(sb);
   let sbUid=null;
   const sbRand=()=>Math.random().toString(36).slice(2,8).toUpperCase();
   const inviteLink=c=>location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c;
@@ -804,7 +816,7 @@
   }
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
@@ -830,7 +842,7 @@
     riepilogo:renderRiepilogo, lavori:renderJobs, preventivi:renderPreventivi,
     fatture:renderFatture, calendario:renderCal, agenda:renderAgenda,
     mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
-    carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze, crediti:renderCrediti,
+    carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze, crediti:renderCrediti, cestino:renderCestino,
     report:renderReport, galleria:renderGalleria, mappa:renderMappa,
     richieste:renderRichieste, fornitori:renderFornitori
   };
@@ -1975,7 +1987,11 @@
   async function fattAssegnaNumero(f){
     if(f.numero)return f.numero;
     const anno=(f.data||todayStr()).slice(0,4);
-    const {data}=await sb.from("gest_fatture").select("numero")
+    /* sb.raw: si guardano ANCHE le fatture nel cestino. Se no, eliminata la
+       n.7 la fattura dopo riprendeva il 7 e sbatteva contro il numero gia'
+       occupato da quella nel cestino: non si emetteva piu' niente per tutto l'anno. */
+    const _sbF=(sb.raw||sb.from.bind(sb));
+    const {data}=await _sbF("gest_fatture").select("numero")
       .eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null)
       .order("numero",{ascending:false}).limit(1);
     const n=((data&&data[0]&&+data[0].numero)||0)+1;
@@ -3712,7 +3728,9 @@
   }
   async function delCarta(id){
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!gconfirm("Eliminare questa carta? Anche i movimenti registrati andranno persi."))return;
+    if(!gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
+        ? "Eliminare questa carta? Finisce nel Cestino e puoi rimetterla a posto. I movimenti restano registrati."
+        : "Eliminare questa carta? Anche i movimenti registrati andranno persi."))return;
     const {data,error}=await sb.from("gest_carte").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminata: nessuna riga rimossa");return;}
@@ -4181,7 +4199,8 @@
     const {data:okD,error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okD||!okD.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
-    if(r&&r.storage_path){try{await sb.storage.from("gestionale-foto").remove([r.storage_path]);}catch(e){}}
+    /* col cestino il file NON si tocca: se no il ripristino darebbe un'immagine rotta */
+    if(r&&r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){try{await sb.storage.from("gestionale-foto").remove([r.storage_path]);}catch(e){}}
     renderDocForn();toast("Documento eliminato");
   }
 
@@ -5463,7 +5482,8 @@
     const {data:r}=await sb.from("gest_foto").select("storage_path").eq("id",id).eq("user_id",sbUid).maybeSingle();
     const {error}=await sb.from("gest_foto").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
-    if(r&&r.storage_path)await sb.storage.from("gestionale-foto").remove([r.storage_path]);
+    /* col cestino il file NON si tocca: se no il ripristino darebbe un'immagine rotta */
+    if(r&&r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo()))await sb.storage.from("gestionale-foto").remove([r.storage_path]);
     toast("Documento eliminato");
     renderDocCli();
   }
@@ -5843,7 +5863,7 @@
       if(error){toast("Foto non eliminata: "+error.message);return;}
       if(!tolte||!tolte.length){toast("Foto non eliminata: non hai i permessi su questa riga");return;}
       let avviso="Foto eliminata";
-      if(sup.storage_path){
+      if(sup.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){
         const {error:eRm}=await sb.storage.from("gestionale-foto").remove([sup.storage_path]);
         /* la riga non c'e' piu': il file resta orfano nel bucket, ma la foto
            e' sparita davvero dall'app. Meglio dirlo che tacere. */
@@ -6412,7 +6432,7 @@
     if(error){toast("Foto non eliminata: "+error.message);return;}
     if(!tolte||!tolte.length){toast("Foto non eliminata: non hai i permessi su questa riga");return;}
     let avviso="Foto eliminata";
-    if(r.storage_path){
+    if(r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){
       const {error:eRm}=await sb.storage.from("gestionale-foto").remove([r.storage_path]);
       if(eRm)avviso="Riga eliminata, ma il file resta nel bucket: "+eRm.message;
     }
@@ -6426,7 +6446,7 @@
     if(error){toast("Video non eliminato: "+error.message);return;}
     if(!tolte||!tolte.length){toast("Video non eliminato: non hai i permessi su questa riga");return;}
     let avviso="Video eliminato";
-    if(r.storage_path){
+    if(r.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){
       const {error:eRm}=await sb.storage.from("gestionale-video").remove([r.storage_path]);
       if(eRm)avviso="Riga eliminata, ma il file resta nel bucket: "+eRm.message;
     }
@@ -7085,7 +7105,16 @@
       const {data:restiP}=await sb.from("gest_preventivo_righe").select("id").eq("preventivo_id",id).limit(1);
       if(restiP&&restiP.length){toast("Le vecchie voci non si sono cancellate. Riprova.");return;}
     }else{
-      const numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
+      /* si contano anche quelli nel cestino: eliminato l'ultimo, il prossimo
+         riprendeva lo stesso numero e nascevano due preventivi n.5 */
+      let numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
+      try{
+        const _sbP=(sb.raw||sb.from.bind(sb));
+        const {data:maxP}=await _sbP("gest_preventivi").select("numero")
+          .eq("user_id",sbUid).order("numero",{ascending:false}).limit(1);
+        const nMax=(maxP&&maxP[0]&&+maxP[0].numero)||0;
+        if(nMax+1>numero)numero=nMax+1;
+      }catch(e){}
       const nuovo=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),titolo,cliente_id,data,note,numero,stato:"bozza"},parcella);
       let {data:np,error}=await sb.from("gest_preventivi").insert(nuovo).select().single();
       if(error&&eColonnaParcellaMancante(error)){
@@ -7116,7 +7145,16 @@
         return {user_id:sbUid, descrizione:desc, qta:+v.quantita||1, prezzo:+v.prezzo_unitario||0, ordine:i};
       }).filter(r=>r.descrizione);
       if(!righe.length) return {ok:false, error:"Nessuna voce valida"};
-      const numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
+      /* si contano anche quelli nel cestino: eliminato l'ultimo, il prossimo
+         riprendeva lo stesso numero e nascevano due preventivi n.5 */
+      let numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
+      try{
+        const _sbP=(sb.raw||sb.from.bind(sb));
+        const {data:maxP}=await _sbP("gest_preventivi").select("numero")
+          .eq("user_id",sbUid).order("numero",{ascending:false}).limit(1);
+        const nMax=(maxP&&maxP[0]&&+maxP[0].numero)||0;
+        if(nMax+1>numero)numero=nMax+1;
+      }catch(e){}
       const {data:np,error}=await sb.from("gest_preventivi").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,note:note||null,data:todayStr(),stato:"bozza",numero}).select().single();
       if(error) return {ok:false, error:error.message};
       const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,preventivo_id:np.id})));
@@ -8201,6 +8239,153 @@
     renderCrediti();toast("Corso eliminato");
   }
 
+  /* ===== 9 agosto 2026 — LA SEZIONE CESTINO =====
+     Il motore (js/cestino.js) fa sparire le righe eliminate da tutto il
+     gestionale. Qui si vedono e si rimettono a posto.
+     Si legge con sb.raw(), la porta di servizio che salta il filtro. */
+  const CEST_COSE=[
+    {t:"gest_lavori",      lab:"Pratiche e lavori", labImp:"Lavori",        campo:"descrizione", ic:"🧰"},
+    {t:"gest_clienti",     lab:"Clienti",           campo:"nome",           ic:"👤"},
+    {t:"gest_preventivi",  lab:"Preventivi",        campo:"titolo",         ic:"📄"},
+    {t:"gest_fatture",     lab:"Fatture",           campo:"numero",         ic:"🧾"},
+    {t:"gest_scadenze",    lab:"Scadenze",          campo:"titolo",         ic:"⏰", foglia:true},
+    {t:"gest_mestieri",    lab:"Reparti",           campo:"nome",           ic:"🗂"},
+    {t:"gest_mezzi",       lab:"Mezzi e strumenti", campo:"nome",           ic:"🚚"},
+    {t:"gest_operatori",   lab:"Persone",           campo:"nome",           ic:"👷"},
+    {t:"gest_carte",       lab:"Carte aziendali",   campo:"nome",           ic:"💳"},
+    {t:"gest_fornitori",   lab:"Fornitori",         campo:"nome",           ic:"🏪"},
+    {t:"gest_fatture_fornitori", lab:"Fatture fornitori", campo:"numero",   ic:"🧾", foglia:true},
+    {t:"gest_spese",       lab:"Spese",             campo:"descrizione",    ic:"💶", foglia:true},
+    {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true},
+    {t:"gest_crediti",     lab:"Crediti formativi", campo:"titolo",         ic:"🎓", foglia:true},
+    {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true},
+    {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true},
+    {t:"gest_note",        lab:"Note",              campo:"testo",          ic:"📝", foglia:true}
+  ];
+  /* "foglia" = non ha figli nel database, quindi si puo' cancellare davvero
+     senza portarsi dietro altro. Le altre NO: eliminare per sempre un reparto
+     o un cliente farebbe scattare le cancellazioni a catena e si porterebbe
+     via anche roba viva che nel cestino non c'era mai entrata. */
+  let cestCache=[];
+
+  async function renderCestino(){
+    const box=$("#cest-list");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML="";return;}
+    if(!(window.cestinoAttivo&&window.cestinoAttivo())){
+      $("#cest-riass").innerHTML="";
+      const perRete=(window.cestinoMotivo&&window.cestinoMotivo()==="rete");
+      box.innerHTML=tabVuoto(perRete?"Non riesco a raggiungere il database":"Il cestino non è ancora acceso",
+        perRete
+          ? "Il cestino c'è ma in questo momento non riesco a controllarlo. Controlla la connessione e ricarica la pagina: finché non risponde, quello che elimini viene cancellato davvero."
+          : "Esegui sql/gest-cestino.sql su Supabase (SQL Editor → Run) e ricarica la pagina. Da quel momento tutto quello che elimini finisce qui e si può rimettere a posto.",
+        _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>');
+      return;
+    }
+    /* si chiede a tutte le tabelle insieme: sono piccole richieste in parallelo */
+    const risposte=await Promise.all(CEST_COSE.map(function(c){
+      return sb.raw(c.t).select("*").eq("user_id",sbUid)
+        .not("eliminato_il","is",null)
+        .order("eliminato_il",{ascending:false}).limit(200)
+        .then(r=>({c:c,righe:(r&&r.data)||[]}))
+        .catch(()=>({c:c,righe:[]}));
+    }));
+    cestCache=[];
+    risposte.forEach(function(x){
+      x.righe.forEach(function(r){
+        /* il nome si cerca su piu' colonne: non tutte le tabelle hanno lo
+           stesso campo, e "(senza nome)" ovunque renderebbe il cestino inutile */
+        const nome=[r[x.c.campo],r.nome,r.titolo,r.descrizione,r.nome_file,r.causale,r.testo,r.numero]
+          .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")
+          || (r.data?("del "+fdate(r.data)):"")
+          || "(senza nome)";
+        cestCache.push({tab:x.c.t, ic:x.c.ic, foglia:!!x.c.foglia,
+          tipo:(ruoloUtente!=='professionista'&&x.c.labImp)?x.c.labImp:x.c.lab,
+          nome:nome.slice(0,80),
+          quando:r.eliminato_il, id:r.id, path:r.storage_path||null});
+      });
+    });
+    cestCache.sort((a,b)=>String(b.quando||"").localeCompare(String(a.quando||"")));
+
+    $("#cest-riass").innerHTML=cestCache.length
+      ? '<div class="cest-testa"><div><b>'+cestCache.length+'</b> '
+        +(cestCache.length===1?'cosa eliminata':'cose eliminate')
+        +(cestCache.length>=200?' <small>(mostro le più recenti)</small>':'')
+        +'</div><div class="cest-nota">Restano qui finché non le rimetti a posto. Non occupano spazio e non si vedono da nessun\'altra parte.</div></div>'
+      : "";
+
+    renderTabella({
+      id:"cest", box:"#cest-list",
+      viste:"#cest-viste", visteDef:[], vista:"", conta:{}, azioneVista:"",
+      vuoto:tabVuoto("Il cestino è vuoto",
+        "Qui finisce tutto quello che elimini dal gestionale. Finché è qui non è perso: si rimette a posto con un clic.",
+        _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>'),
+      colonne:[{lab:"Che cos'era",w:"42%"},{lab:"Tipo",w:"26%",cls:"c-chi"},{lab:"Eliminato",w:"32%"}],
+      righe:cestCache.map(function(x,i){
+        const q=quando(String(x.quando||"").slice(0,10),{neutro:true});
+        return {
+          id:String(i),
+          click:{action:"cest-ripristina",data:{id:String(i)}},
+          celle:[
+            '<span class="lav-bar in_corso"></span><span class="c-nome">'+x.ic+' '+esc(x.nome)+'</span>',
+            esc(x.tipo),
+            {h:q.testo,cls:q.classe}
+          ],
+          menu:[{lab:"↩ Rimetti a posto",action:"cest-ripristina",data:{id:String(i)}}]
+            .concat(x.foglia?[{lab:"🗑 Elimina per sempre",action:"cest-definitivo",data:{id:String(i)},del:true}]:[])
+        };
+      }),
+      cards:()=>cestCache.map(function(x,i){
+        return schedaJob({
+          tono:"t-neutro", titolo:x.ic+" "+esc(x.nome),
+          destra:'<span class="stato" style="background:var(--sfondo);color:var(--testo-2)">'+esc(x.tipo)+'</span>',
+          meta:["🗑 eliminato "+quando(String(x.quando||"").slice(0,10),{neutro:true}).testo],
+          azioni:[{lab:"↩ Rimetti a posto",action:"cest-ripristina",data:{id:String(i)}}]
+            .concat(x.foglia?[{lab:"🗑 Elimina per sempre",action:"cest-definitivo",data:{id:String(i)},del:true}]:[])
+        });
+      }).join("")
+    });
+  }
+
+  async function cestRipristina(i){
+    const x=cestCache[+i];if(!x)return;
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const {data,error}=await sb.raw(x.tab).update({eliminato_il:null})
+      .eq("id",x.id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non ripristinato: nessuna riga trovata");return;}
+    /* rimesso a posto un reparto o una pratica cambia mezzo gestionale:
+       si ridisegna tutto invece di indovinare cosa e' cambiato */
+    renderCestino();
+    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report");
+    if(x.tab==="gest_mestieri")renderLanding();
+    toast("Rimesso a posto ✔");
+  }
+
+  /* "Elimina per sempre" c'e' SOLO sulle cose che non hanno figli nel
+     database (spese, ore, foto, note, scadenze...). Sulle altre no, e non e'
+     una dimenticanza: cancellare davvero un reparto o un cliente farebbe
+     scattare le cancellazioni a catena e si porterebbe via anche roba VIVA
+     che nel cestino non era mai entrata. Lo "svuota tutto" e' stato tolto per
+     lo stesso motivo: prometteva di cancellare N cose e ne cancellava di piu'. */
+  async function cestDefinitivo(i){
+    const x=cestCache[+i];if(!x)return;
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(!x.foglia){toast("Questa si può solo rimettere a posto");return;}
+    if(!gconfirm("Eliminare «"+x.nome+"» per sempre?\n\nQuesta volta sparisce davvero e non si recupera più."))return;
+    const {data,error}=await sb.raw(x.tab).delete().eq("id",x.id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non eliminato: nessuna riga trovata");return;}
+    /* il file nello storage se ne va solo adesso, non prima: e' l'unico
+       momento in cui siamo sicuri che nessuno lo vuole piu' indietro */
+    if(x.path){
+      const bucket=(x.tab==="gest_video")?"gestionale-video":"gestionale-foto";
+      try{ await sb.storage.from(bucket).remove([x.path]); }catch(e){}
+    }
+    renderCestino();
+    toast("Eliminato per sempre");
+  }
+
+
   /* ---- REPORT & STATISTICHE ---- */
   let repData=null;
   async function renderReport(){
@@ -8389,6 +8574,8 @@
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
     if(a==="spesa-add")return spesaAdd();
+    if(a==="cest-ripristina")return cestRipristina(id);
+    if(a==="cest-definitivo")return cestDefinitivo(id);
     if(a==="new-cred")return credForm(null);
     if(a==="edit-cred")return credForm(credCache.find(c=>String(c.id)===String(id)));
     if(a==="save-cred")return saveCred(id);
@@ -8542,9 +8729,12 @@
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;segmOn("#ag-stato",t.dataset.v);renderAgenda();return;}
     if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
     if(a==="del-job-supa"){
-      if(!confirm("Eliminare questo lavoro? L'azione non si può annullare."))return;
+      if(!gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
+          ? "Eliminare questo lavoro? Finisce nel Cestino: da lì puoi rimetterlo a posto."
+          : "Eliminare questo lavoro? L'azione non si può annullare."))return;
       const {data:foto}=await sb.from("gest_foto").select("storage_path").eq("lavoro_id",id).eq("user_id",sbUid);
-      if(foto&&foto.length){
+      /* col cestino il file NON si tocca: se no il ripristino darebbe un'immagine rotta */
+      if(foto&&foto.length&&!(window.cestinoAttivo&&window.cestinoAttivo())){
         const paths=foto.map(f=>f.storage_path).filter(Boolean);
         if(paths.length)await sb.storage.from("gestionale-foto").remove(paths);
         await sb.from("gest_foto").delete().eq("lavoro_id",id).eq("user_id",sbUid);
@@ -8580,7 +8770,10 @@
         toast(noteSupaOk?"Nota salvata 📌":"Nota salvata solo su questo dispositivo (manca la migrazione SQL)");return;
       }
       if(v){
-        const {data:okN,error}=await sb.from("gest_note").upsert({user_id:sbUid,mestiere_id:midN,data:ds,testo:v},{onConflict:"user_id,mestiere_id,data"}).select("id");
+        /* eliminato_il:null -> riscrivendo la nota di un giorno la si tira fuori dal
+           cestino. Senza, il salvataggio finiva sopra la riga eliminata: la nota
+           spariva alla ricarica e quel giorno non era piu' scrivibile. */
+        const {data:okN,error}=await sb.from("gest_note").upsert({user_id:sbUid,mestiere_id:midN,data:ds,testo:v,eliminato_il:null},{onConflict:"user_id,mestiere_id,data"}).select("id");
         if(error){toast("Nota non salvata: "+error.message);return;}
         if(!okN||!okN.length){toast("Nota non salvata: nessuna riga modificata. Riprova.");return;}
         noteCache[ds]=v;
@@ -8724,6 +8917,10 @@
       const {data:okDf2,error}=await sb.from("gest_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDf2||!okDf2.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
+      /* col cestino la catena del database non scatta piu': le sue fatture le
+         mettiamo via a mano, se no restavano vive e continuavano a contare
+         nel "da pagare" agganciate a un fornitore che non c'e' piu'. */
+      try{ await sb.from("gest_fatture_fornitori").delete().eq("fornitore_id",id).eq("user_id",sbUid); }catch(e){}
       closeSheet();renderFornitori();rinfresca("riepilogo");toast("Fornitore eliminato");return;
     }
     if(a==="new-fattf")return fattfForm(null);

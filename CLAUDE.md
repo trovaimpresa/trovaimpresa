@@ -1608,6 +1608,84 @@ sbagliato: ora quel campo non si memorizza); l'aliquota non arrivava in fattura;
 cancellando una voce i riepiloghi restavano col numero vecchio; e il messaggio
 d'errore parlava di "parcella" anche a un'impresa che non sa cosa sia.
 
+## 9 agosto 2026 — IL CESTINO (niente si cancella piu' davvero)
+
+Richiesta di Alessio: "se uno cancella per errore e' meglio poter recuperare".
+Scelta sua: **tutto, ovunque**.
+
+### Il controllo di partenza
+23 azioni di eliminazione su 21 tabelle. **Tutte avevano gia' la conferma**
+(sei sembravano scoperte ma la domanda sta dentro la funzione chiamata).
+Quello che mancava era il dopo. Tre casi facevano male: il **reparto** si
+portava via tutte le sue pratiche, la **carta** tutti i movimenti, il
+**cliente** i suoi documenti.
+
+### Come funziona
+**`js/cestino.js`** si mette in mezzo fra il gestionale e il database:
+- ogni `.select()` sulle tabelle del cestino riceve `.is("eliminato_il",null)`
+- ogni `.delete()` diventa `.update({eliminato_il:ora}).is("eliminato_il",null)`
+- `sb.raw(tabella)` e' la porta di servizio che salta il filtro (la usa il Cestino)
+
+**Il punto della scelta**: cosi' non e' stata toccata NESSUNA delle ~60 letture
+sparse nei quattro pannelli. Toccandole a mano, dimenticarne una avrebbe fatto
+ricomparire roba cancellata. Incluso in tutti e quattro i gestionali
+(app, negozio, noleggio, operatore) subito dopo `createClient`.
+
+Bonus: le cancellazioni a catena del database scattano solo su una delete VERA.
+Non cancellando mai, la catena non parte e i figli tornano su col padre.
+
+### ⚠️ LE COSE CHE UN SOFT DELETE ROMPE (15 problemi trovati dalla verifica)
+Questa e' la parte da rileggere prima di allargare il cestino ad altre tabelle.
+
+1. **I VINCOLI DI UNICITA'.** Il numero fattura e' unico per anno: la riga nel
+   cestino continuava a occupare il numero 7 e **non si emettevano piu' fatture
+   per tutto l'anno**. Risolto rifacendo il vincolo con `where eliminato_il is
+   null`, piu' `fattAssegnaNumero` che ora conta anche il cestino con `sb.raw`.
+   Stessa cosa per `gest_note` (una nota per giorno): eliminata una nota, quel
+   giorno non era piu' scrivibile. Anche i numeri dei **preventivi** ripartivano
+   da capo (li' non c'e' vincolo, quindi nascevano doppioni in silenzio).
+2. **LE VISTE DEL DATABASE NON SANNO DEL CESTINO.** `gest_mezzi_scadenze`
+   contava le scadenze eliminate e il pallino dei Mezzi restava rosso per
+   sempre: rifatta nel file SQL con il filtro.
+   **`gest_carte_saldo` e `gest_mezzi_carburante` non stanno nei file del
+   progetto** (create a mano in chat): non potendole vedere non le ho toccate,
+   e ho **tolto dal cestino `gest_carte_movimenti` e `gest_rifornimenti`**.
+   Meglio una cancellazione vera che un saldo carta sbagliato. Quando quelle
+   due viste finiranno nel progetto, si possono aggiungere.
+3. **LO "SVUOTA CESTINO" E' STATO TOLTO.** Cancellava davvero, quindi faceva
+   scattare le catene: svuotando il cestino con dentro un reparto si portava
+   via anche clienti, mezzi e fatture VIVI di quel reparto, mai entrati nel
+   cestino, e il messaggio diceva "N cose". Al suo posto c'e'
+   **"Elimina per sempre" su una riga sola, e solo sulle tabelle FOGLIA**
+   (spese, ore, crediti, note, foto, video, scadenze, fatture fornitori) che
+   non hanno figli. Sulle altre si puo' solo ripristinare.
+4. **I FILE NELLO STORAGE.** Le sei chiamate `storage.remove()` hanno la
+   guardia `window.cestinoAttivo()`: col cestino acceso il file NON si tocca,
+   se no il ripristino darebbe un'immagine rotta. Il file se ne va solo con
+   "Elimina per sempre".
+5. **LE CATENE CHE ORA VANNO FATTE A MANO.** Eliminando un fornitore le sue
+   fatture restavano vive e continuavano a contare nel "da pagare": ora si
+   mettono via esplicitamente. I messaggi di conferma di carta e lavoro sono
+   stati riscritti: promettevano cose che non succedono piu'.
+6. **La prova all'avvio** non deve spegnere il cestino per un problema di rete:
+   riprova una volta e si spegne solo se il database dice che la colonna non
+   c'e'. `window.cestinoMotivo()` distingue "migrazione" da "rete" e la sezione
+   dice la cosa giusta.
+
+### Cosa resta aperto
+- **La sezione Cestino esiste solo in `gestionale-app.html`.** Il motore gira
+  ovunque (quindi da negozio e noleggio non si perde niente: clienti, scadenze,
+  reparti e note finiscono nel cestino), ma per ripristinare bisogna aprire il
+  gestionale principale. Le tabelle `neg_*` e `nol_*` non sono nel cestino.
+- Le due viste da portare nel progetto (vedi punto 2).
+- Nessuna pulizia automatica: il cestino tiene tutto finche' non si interviene.
+  Sono righe, non file: non occupano niente.
+
+### File
+`sql/gest-cestino.sql` (colonne, vincoli rifatti, vista, indici) e
+`js/cestino.js` (il motore). Va eseguito l'SQL PRIMA di usare il gestionale:
+senza, il cestino resta spento e le eliminazioni tornano definitive.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.
