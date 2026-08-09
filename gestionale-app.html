@@ -4312,8 +4312,14 @@
   }
 
   /* SCADENZARIO (solo professionista): tabella gest_scadenze, isolamento user_id+mestiere_id come gest_lavori/gest_clienti */
+  /* 9 agosto 2026 — elenco allungato per gli studi: le date che un tecnico non
+     puo' bucare non sono solo "che pratica e'", ma "che cosa scade".
+     Per imprese e artigiani l'elenco resta identico a prima. */
   const tipiScadenza=()=>ruoloUtente==='professionista'
-    ?["SCIA","CILA","Permesso di Costruire","Agibilità","Altro"]
+    ?["Presentazione pratica","Integrazione richiesta dal Comune","Silenzio-assenso",
+      "Inizio lavori","Fine lavori","Proroga","Collaudo","Agibilità",
+      "Variante","Deposito sismico","Accatastamento","Rinnovo polizza",
+      "Crediti formativi","Altro"]
     :["DURC","Assicurazione","Revisione mezzo","Bollo","Tagliando","Manutenzione programmata","Certificazione","Pagamento fornitore","Altro"];
   let scadCache=[];
   function _giorniDopo(ds,n){const[y,m,d]=ds.split("-").map(Number);const dt=new Date(y,m-1,d+n);const mm=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");return dt.getFullYear()+"-"+mm+"-"+dd;}
@@ -4322,14 +4328,22 @@
     if(!cur){box.innerHTML="";return;}
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📅</div><p>Nessuna scadenza</p><small>Accedi per gestire lo scadenzario</small></div>`;return;}
     const mid=curMestiere();
-    const [{data:sc},{data:cl},{data:mz}]=await Promise.all([
-      sb.from("gest_scadenze").select("id,titolo,tipo_pratica,cliente_id,mezzo_id,data_scadenza,stato,note").eq("user_id",sbUid).eq("mestiere_id",mid).order("data_scadenza",{ascending:true}),
+    const [{data:sc},{data:cl},{data:mz},{data:lvNomi}]=await Promise.all([
+      /* "*" invece dell'elenco fisso: se sql/gest-scadenze-pratiche.sql non e' ancora
+         stato eseguito, le colonne nuove semplicemente non arrivano e la sezione
+         non si rompe (stessa scelta gia' fatta per le pratiche). */
+      sb.from("gest_scadenze").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("data_scadenza",{ascending:true}),
       sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
-      sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)
+      sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
+      /* i nomi delle pratiche si leggono qui e non da lavCache: lavCache e' piena
+         solo se l'utente ha gia' aperto la sezione Pratiche, altrimenti ogni
+         scadenza collegata sembrerebbe "(pratica eliminata)" pur esistendo. */
+      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",mid)
     ]);
     scadCache=sc||[];
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
     const mezMap=Object.fromEntries((mz||[]).map(m=>[m.id,m.nome]));
+    const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
     /* SCADENZE DELLE PERSONE — non sono righe di gest_scadenze.
@@ -4374,6 +4388,7 @@
         const fatta=s.stato==="fatta";
         const q=quando(s.data_scadenza,{neutro:fatta});
         const rif=s._persona?s._nome
+                 :s.lavoro_id?(lavMap[s.lavoro_id]||"(pratica eliminata)")
                  :s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)")
                  :s.mezzo_id?(mezMap[s.mezzo_id]||"(mezzo eliminato)"):"";
         if(s._persona){
@@ -4407,12 +4422,12 @@
           ]
         };
       }),
-      cards:()=>L.map(s=>scadCard(s,cliMap,oggi,lim,mezMap)).join("")
+      cards:()=>L.map(s=>scadCard(s,cliMap,oggi,lim,mezMap,lavMap)).join("")
     });
   }
   const SCAD_VISTE=[{k:"tutte",lab:"Tutte"},{k:"scadute",lab:"Scadute",err:true},{k:"prossime",lab:"Prossime"},{k:"fatte",lab:"Fatte"}];
   let scadVista="tutte";
-  function scadCard(s,cliMap,oggi,lim,mezMap){
+  function scadCard(s,cliMap,oggi,lim,mezMap,lavMap){
     if(s._persona){
       let bgP="var(--sfondo)",fgP="var(--testo-2)",labP="Aperta",tonoP="t-neutro";
       if(s.data_scadenza<oggi){bgP="var(--err-bg)";fgP="var(--err)";labP="Scaduta";tonoP="t-err";}
@@ -4427,6 +4442,7 @@
     const fatta=s.stato==="fatta";
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
     const mezNome=s.mezzo_id?((mezMap||{})[s.mezzo_id]||"(mezzo eliminato)"):"";
+    const lavNome=s.lavoro_id?((lavMap||{})[s.lavoro_id]||"(pratica eliminata)"):"";
     let bg="var(--sfondo)",fg="var(--testo-2)",lab="Aperta",tono="t-neutro";
     if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";tono="t-ok";}
     else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";tono="t-err";}
@@ -4435,9 +4451,11 @@
       tono, titolo:esc(s.titolo||"Scadenza"),
       destra:`<span class="stato" style="background:${bg};color:${fg}">${lab}</span>`,
       meta:[s.tipo_pratica?"📄 "+esc(s.tipo_pratica):"",
+            lavNome?"📁 "+esc(lavNome):"",
             cliNome?"👤 "+esc(cliNome):"",
             mezNome?"🚚 "+esc(mezNome):"",
-            "📅 "+fdate(s.data_scadenza)],
+            "📅 "+fdate(s.data_scadenza),
+            (s.avvisa===false?"🔕 nessuna email":"")],
       nota:s.note?"📝 "+esc(s.note):"",
       azioni:[
         fatta?{lab:"↩ Riapri",action:"scad-stato",data:{id:s.id,v:"aperta"}}
@@ -4458,18 +4476,49 @@
       ]);
       cl=dc||[];mz=dm||[];
     }
+    const pro=ruoloUtente==='professionista';
+    const PAROLA=pro?"pratica":"lavoro";
+    /* elenco pratiche/lavori del reparto: la scadenza si attacca a quella giusta.
+       Le piu' recenti in cima, massimo 100: oltre non serve e la tendina resta corta. */
+    let lv=[];
+    if(sb&&sbUid){
+      const {data:dl}=await sb.from("gest_lavori").select("id,descrizione,dove,data_prevista")
+        .eq("user_id",sbUid).eq("mestiere_id",mid).order("data_prevista",{ascending:false}).limit(100);
+      lv=dl||[];
+    }
     const tipoOpts=tipiScadenza().map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===s.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
     const mezOpts=mz.map(m=>`<option value="${m.id}" ${m.id===s.mezzo_id?"selected":""}>${esc(m.nome)}${m.targa?" ("+esc(m.targa)+")":""}</option>`).join("");
-    openSheet(`<h3>${isNew?"Nuova scadenza":"Modifica scadenza"}</h3>
-      <div class="field"><label>Titolo</label><input id="s-tit" value="${esc(s.titolo||"")}" placeholder="Es. Presentazione SCIA"></div>
-      <div class="field"><label>Tipo</label><select id="s-tipo">${tipoOpts}</select></div>
-      <div class="field"><label>Cliente</label><select id="s-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
-      <div class="field"><label>Mezzo / attrezzatura (facoltativo)</label><select id="s-mezzo"><option value="">— nessuno —</option>${mezOpts}</select></div>
-      <div class="field"><label>Data scadenza</label><input type="date" id="s-data" value="${s.data_scadenza||""}"></div>
-      <div class="field"><label>Note</label><textarea id="s-note" placeholder="Dettagli, riferimenti...">${esc(s.note||"")}</textarea></div>
-      <div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>
-      <button class="btn-primary b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button></div>`);
+    const lavOpts=lv.map(l=>`<option value="${l.id}" ${String(l.id)===String(s.lavoro_id||"")?"selected":""}>${esc(l.descrizione||("Senza nome"))}${l.dove?" — "+esc(l.dove):""}</option>`).join("");
+    const avvisaOn=s.avvisa!==false;
+    openSheetGrande(isNew?("Nuova scadenza"):("Modifica scadenza"),
+      '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Che cosa scade</div>'
+      +`<div class="field"><label>Titolo</label><input id="s-tit" value="${esc(s.titolo||"")}" placeholder="${pro?"Es. Fine lavori CILA Via Roma":"Es. Revisione furgone"}"></div>`
+      +`<div class="field"><label>Tipo</label><select id="s-tipo">${tipoOpts}</select></div>`
+      +`<div class="field"><label>Data scadenza</label><input type="date" id="s-data" value="${s.data_scadenza||""}"></div>`
+      +'</div>'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Promemoria via email</div>'
+      +`<label style="display:flex;align-items:center;gap:10px;font-size:1rem;margin:2px 0 10px;cursor:pointer"><input type="checkbox" id="s-avvisa" ${avvisaOn?"checked":""} style="width:20px;height:20px"><span>Avvisami per email</span></label>`
+      +'<p class="sh-nota">Ti arriva una email 30 giorni prima, 7 giorni prima e il giorno prima, all\'indirizzo con cui entri qui. Una sola email al giorno con tutte le scadenze vicine, non una per ognuna.</p>'
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b">'
+      +`<div class="sh-tit">A che cosa si riferisce</div>`
+      +`<p class="sh-nota" style="margin-top:0">Collegala ${pro?"alla pratica":"al lavoro"}: la ritrovi dentro la sua scheda e capisci al volo di chi \u00e8.</p>`
+      +`<div class="field"><label>${pro?"Pratica":"Lavoro"} (facoltativo)</label><select id="s-lav"><option value="">— ${pro?"nessuna":"nessuno"} —</option>${lavOpts}</select></div>`
+      +`<div class="field"><label>Cliente (facoltativo)</label><select id="s-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>`
+      +`<div class="field"><label>Mezzo / attrezzatura (facoltativo)</label><select id="s-mezzo"><option value="">— nessuno —</option>${mezOpts}</select></div>`
+      +'</div>'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Note</div>'
+      +`<div class="field"><textarea id="s-note" placeholder="Numero di protocollo, ufficio, riferimenti...">${esc(s.note||"")}</textarea></div>`
+      +'</div>'
+      +'</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +`<button class="btn-primary b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button>`);
   }
   async function saveScad(id){
     const titolo=$("#s-tit").value.trim();if(!titolo){toast("Scrivi il titolo");return;}
@@ -4478,13 +4527,32 @@
     const tipo_pratica=$("#s-tipo")?$("#s-tipo").value:"";
     const cliente_id=($("#s-cli")&&$("#s-cli").value)?$("#s-cli").value:null;
     const mezzo_id=($("#s-mezzo")&&$("#s-mezzo").value)?$("#s-mezzo").value:null;
+    const lavoro_id=($("#s-lav")&&$("#s-lav").value)?$("#s-lav").value:null;
+    const avvisa=$("#s-avvisa")?!!$("#s-avvisa").checked:true;
     const note=$("#s-note").value.trim();
-    const {data,error}=id
-      ?await sb.from("gest_scadenze").update({titolo,tipo_pratica,cliente_id,mezzo_id,data_scadenza,note}).eq("id",id).eq("user_id",sbUid).select("id")
-      :await sb.from("gest_scadenze").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,tipo_pratica,cliente_id,mezzo_id,data_scadenza,note,stato:"aperta"}).select("id");
+    const row={titolo,tipo_pratica,cliente_id,mezzo_id,lavoro_id,data_scadenza,note,avvisa};
+    /* Se sql/gest-scadenze-pratiche.sql non e' ancora stato eseguito, le colonne
+       nuove non esistono: invece di far fallire tutto il salvataggio le tolgo una
+       alla volta e riprovo (stessa scelta gia' fatta nei Dati azienda). */
+    const OPZ=["lavoro_id","avvisa"];
+    const tolte=[];
+    async function prova(){
+      return id
+        ? await sb.from("gest_scadenze").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+        : await sb.from("gest_scadenze").insert(Object.assign({},row,{user_id:sbUid,mestiere_id:curMestiere(),stato:"aperta"})).select("id");
+    }
+    let {data,error}=await prova();
+    while(error){
+      const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);
+      if(!c)break;
+      delete row[c];tolte.push(c);
+      ({data,error}=await prova());
+    }
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
-    closeSheet();renderScadenze();renderMezzi();toast(id?"Aggiornato":"Scadenza aggiunta ✔");
+    closeSheet();renderScadenze();renderMezzi();
+    if(tolte.length){toast("Salvata, ma il collegamento alla pratica richiede l'aggiornamento del database (sql/gest-scadenze-pratiche.sql).");}
+    else toast(id?"Aggiornato":"Scadenza aggiunta ✔");
   }
 
   /* FORM LAVORO (nessun campo "servizio": il reparto è già il pannello) */
