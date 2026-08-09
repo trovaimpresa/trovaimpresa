@@ -1,11 +1,11 @@
 /* Avviso LEGGERO mostrato solo dentro i browser interni di Facebook / Instagram.
-   La registrazione funziona anche qui, quindi e' solo un suggerimento opzionale,
+   La registrazione funziona anche qui, quindi è solo un suggerimento opzionale,
    chiudibile e ricordato (non blocca e non allarma). */
 (function () {
   var ua = navigator.userAgent || '';
   if (!/FBAN|FBAV|FB_IAB|Instagram|Messenger/i.test(ua)) return;
 
-  // Se l'utente l'ha gia' chiuso, non ripresentarlo
+  // Se l'utente l'ha già chiuso, non ripresentarlo
   try { if (localStorage.getItem('tiHintBrowserChiuso') === '1') return; } catch (e) {}
 
   var isAndroid = /Android/i.test(ua);

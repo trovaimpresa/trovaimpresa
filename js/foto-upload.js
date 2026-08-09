@@ -3,18 +3,18 @@
    Usata da: gestionale (bucket gestionale-foto), loghi-imprese,
    foto-lavori, cantieri-foto, registrazione-*.html
 
-   Perche' esiste: fino a luglio 2026 le foto andavano su a piena
+   Perché esiste: fino a luglio 2026 le foto andavano su a piena
    risoluzione. Una foto da telefono occupa 3-5 MB, e il piano free di
    Supabase da' 1 GB in tutto: bastavano 200 foto per riempirlo.
    La compressione c'era gia' (compress(), lato lungo 1200) ma la usava
    solo il vecchio flusso locale, non i due percorsi che caricano davvero.
-   Ad agosto 2026 e' stata agganciata anche a loghi/foto-lavori/cantieri,
+   Ad agosto 2026 è stata agganciata anche a loghi/foto-lavori/cantieri,
    che fino ad allora caricavano il file grezzo (i loghi arrivavano
    a 800-900 KB l'uno).
 
    Regole (una sola implementazione per tutti i punti di upload):
    - oltre 15 MB si rifiuta, con un messaggio leggibile
-   - se NON e' un'immagine (il PDF della fattura) passa intatto
+   - se NON è un'immagine (il PDF della fattura) passa intatto
    - default: le immagini scendono a 1600px sul lato lungo, JPEG 0.75
      (1600 e non 1200: in cantiere serve leggere i dettagli)
    - per i loghi si passano opzioni diverse (400px, WebP): il JPEG
@@ -32,14 +32,14 @@
    ============================================================ */
 (function(){
   var LATO_DEFAULT    = 1600;             /* px sul lato lungo */
-  var QUALITA_DEFAULT = 0.75;             /* qualita' di default */
+  var QUALITA_DEFAULT = 0.75;             /* qualità di default */
   var MAX_BYTE        = 15 * 1024 * 1024; /* 15 MB sul file ORIGINALE */
 
   function eImmagine(file){
     return !!(file && file.type && file.type.indexOf("image/") === 0);
   }
 
-  /* Il nome cambia estensione: dopo il canvas il contenuto e' in un altro
+  /* Il nome cambia estensione: dopo il canvas il contenuto è in un altro
      formato anche se l'originale era .png o .heic. Lasciare la vecchia
      estensione produrrebbe file che il browser poi rifiuta di mostrare. */
   function nomeConEstensione(nome, ext){
@@ -84,7 +84,7 @@
     var ext     = formato === "webp" ? "webp" : "jpg";
     var mime    = formato === "webp" ? "image/webp" : "image/jpeg";
 
-    /* il limite vale sull'originale: e' li' che si difende la connessione
+    /* il limite vale sull'originale: è li' che si difende la connessione
        di chi carica dal cantiere, non solo lo spazio nel bucket */
     if(file.size > MAX_BYTE){
       return { errore: (eImmagine(file) ? "Foto" : "File") + " troppo grande, massimo 15 MB" };
@@ -96,7 +96,7 @@
 
     try{
       var blob = await comprimiImmagine(file, lato, qualita, mime);
-      /* se il "compresso" pesa di piu' (foto gia' piccole, o gia' ottimizzate)
+      /* se il "compresso" pesa di piu' (foto già piccole, o già ottimizzate)
          si tiene l'originale: comprimere due volte peggiora e basta */
       if(!blob || blob.size >= file.size) return intatto;
       return { file: blob, nome: nomeConEstensione(file.name, ext), compressa: true,

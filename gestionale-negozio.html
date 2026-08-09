@@ -1154,7 +1154,7 @@
     if(!file||!fattUploadLavoroId)return;
     if(!sbUid){toast("Devi essere loggato");return;}
     if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
-    /* il PDF non e' un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
+    /* il PDF non è un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
     const p=await preparaFileUpload(file);
     if(p.errore){toast(p.errore);return;}
     const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
@@ -1859,7 +1859,7 @@
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
     /* 6 agosto 2026: il pulsante grande della barra porta alla scheda Prodotti,
-       con il cursore gia' nel campo del nome. */
+       con il cursore già nel campo del nome. */
     if(a==="new-prod"){
       $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="prodotti"));
       $$("section").forEach(s=>s.classList.toggle("active",s.id==="prodotti"));
@@ -1972,7 +1972,7 @@
   async function loadProdotti(){
     if(!(sb&&sbUid)) return;
     /* "*" invece dell'elenco fisso: servono anche unita, prezzo_acquisto e iva_perc,
-       e con "*" non si rischia l'errore se la migrazione SQL non e' stata fatta. */
+       e con "*" non si rischia l'errore se la migrazione SQL non è stata fatta. */
     const {data}=await sb.from("neg_prodotti")
       .select("*")
       .eq("user_id",sbUid).order("nome");
@@ -1998,7 +1998,7 @@
   /* ============================================================
      PREVENTIVI DEL NEGOZIO — 6 agosto 2026
      Mancavano del tutto. Una rivendita fa offerte alle imprese ogni giorno.
-     Le righe si prendono dal magazzino (nome, prezzo e unita' arrivano da soli)
+     Le righe si prendono dal magazzino (nome, prezzo e unità arrivano da soli)
      oppure si scrivono a mano (trasporto, scarico col camion gru, taglio a misura).
      Tabelle: sql/neg-preventivi.sql
      ============================================================ */
@@ -2039,7 +2039,7 @@
     });
     return out;
   }
-  /* Il conto: ogni riga puo' avere il suo sconto, poi c'e' lo sconto generale, poi l'IVA. */
+  /* Il conto: ogni riga può avere il suo sconto, poi c'e' lo sconto generale, poi l'IVA. */
   function pvCalcola(righe,scontoGen,ivaPerc){
     let lordo=0, imponibile=0;
     righe.forEach(r=>{
@@ -2103,7 +2103,7 @@
       $("#np-quantita").value=data.quantita??""; $("#np-categoria").value=data.categoria||"";
       $("#np-soglia").value=data.soglia_minima??""; $("#np-codice").value=data.codice||"";
       $("#np-note").value=data.note||"";
-      /* campi aggiunti il 6 agosto 2026 — se il prodotto e' vecchio restano ai valori di partenza */
+      /* campi aggiunti il 6 agosto 2026 — se il prodotto è vecchio restano ai valori di partenza */
       if($("#np-unita"))    $("#np-unita").value=data.unita||"pz";
       if($("#np-acquisto")) $("#np-acquisto").value=data.prezzo_acquisto??"";
       if($("#np-iva"))      $("#np-iva").value=(data.iva_perc??22);

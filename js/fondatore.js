@@ -8,12 +8,12 @@
    A cosa serve: provare il sito senza doversi fare un account finto
    per ogni categoria.
      - "Vedi come"  -> cambia la CATEGORIA mostrata (impresa/artigiano/
-                       professionista). E' solo una vista: i dati restano
+                       professionista). È solo una vista: i dati restano
                        i tuoi. Vale per il gestionale.
      - "Piano"      -> cambia DAVVERO il piano del tuo profilo nel
-                       database (free <-> premium), cosi' vedi il
+                       database (free <-> premium), così vedi il
                        comportamento vero su tutto il sito, ricerca
-                       compresa. E' reversibile con un altro clic.
+                       compresa. È reversibile con un altro clic.
      - Link rapidi  -> tutte le pagine di lavoro a portata di clic.
 
    Per aggiungere una pagina alla barra: aggiungi una riga in LINKS.
@@ -116,7 +116,7 @@
       + '</div>';
     document.body.appendChild(bar);
 
-    /* spinge giu' la pagina, cosi' la barra non copre niente */
+    /* spinge giu' la pagina, così la barra non copre niente */
     function spazio(){
       document.body.style.paddingTop = bar.offsetHeight + "px";
     }

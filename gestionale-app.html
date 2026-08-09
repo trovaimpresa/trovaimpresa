@@ -184,7 +184,7 @@
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o societa': ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
+      <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o società: ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
       <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div class="grid" id="cli-list"></div>
       <input type="file" id="cli-doc-file" multiple style="display:none">
@@ -297,8 +297,8 @@
 <div class="toast" id="toast"></div>
 </div>
 
-<!-- jsPDF (~350KB) e xlsx (~900KB) non si caricano piu' all'avvio: arrivano
-     al primo clic su un PDF o su Esporta, come gia' fa la mappa con Leaflet.
+<!-- jsPDF (~350KB) e xlsx (~900KB) non si caricano più all'avvio: arrivano
+     al primo clic su un PDF o su Esporta, come già fa la mappa con Leaflet.
      Su un telefono in cantiere sono 1,2MB in meno da scaricare per aprire l'app. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/cestino.js"></script>
@@ -320,7 +320,7 @@
 
   const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
   const uid=()=>"id"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  /* useGrouping:true e' esplicito apposta: senza, certi browser non mettono il
+  /* useGrouping:true è esplicito apposta: senza, certi browser non mettono il
      punto delle migliaia e usciva "1000,00 €" invece di "1.000,00 €". */
   const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0,useGrouping:true}).format(n||0);
   const fdate=d=>{if(!d)return"—";const[y,m,g]=d.split("-");return g+"/"+m+"/"+y;};
@@ -328,8 +328,8 @@
   const thisMonth=d=>d&&d.slice(0,7)===todayStr().slice(0,7);
   const ymd=(y,m,d)=>`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
   const statoLabel={da_fare:"Da fare",in_corso:"In corso",fatto:"Fatto"};
-  /* Lavoro in ritardo: data prevista gia' passata e non ancora fatto.
-     Il rosso (--err) e' riservato SOLO a questo caso; il "da fare" normale e' ambra (--attesa). */
+  /* Lavoro in ritardo: data prevista già passata e non ancora fatto.
+     Il rosso (--err) è riservato SOLO a questo caso; il "da fare" normale è ambra (--attesa). */
   const inRitardo=(stato,data)=>!!data&&stato!=="fatto"&&data<todayStr();
   const mesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
@@ -373,7 +373,7 @@
     }
     return s;
   }
-  /* Il messaggio capisce da solo se e' un errore (resta 5 secondi, rosso)
+  /* Il messaggio capisce da solo se è un errore (resta 5 secondi, rosso)
      o una conferma (verde). Prima tutto spariva in 1,9 secondi. */
   function toast(m){
     const t=$("#toast"), s=String(m);
@@ -458,7 +458,7 @@
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
     /* Barra FONDATORE: "Vedi come" fa provare le altre categorie senza cambiare
-       account. E' solo una vista: i dati mostrati restano i propri. */
+       account. È solo una vista: i dati mostrati restano i propri. */
     try{var _vq=new URLSearchParams(location.search).get("vedi");if(_vq!==null){_vq?sessionStorage.setItem("ti_vedi_tipo",_vq):sessionStorage.removeItem("ti_vedi_tipo");}}catch(_e){}
     try{var _vc=sessionStorage.getItem("ti_vedi_tipo");if(_vc)ruoloUtente=_vc;}catch(_e){}
     console.log('[gestionale] ruolo utente:',ruoloUtente||'(nessun profilo)');
@@ -487,7 +487,7 @@
      visibili da sole se l'utente cambia tipo. Nessuna cancellazione. */
   /* 9 agosto 2026 — le Attrezzature restano visibili agli studi, rinominate
      "Strumenti": stazione totale, distanziometro laser, termocamera e livello
-     hanno la TARATURA PERIODICA obbligatoria, ed e' esattamente il mestiere di
+     hanno la TARATURA PERIODICA obbligatoria, ed è esattamente il mestiere di
      questa sezione (scadenze delle verifiche). Restano nascosti solo i mezzi
      con la targa e le carte carburante. */
   const TAB_NASCOSTI_PRO=['mezzi','carte'];
@@ -519,7 +519,7 @@
       document.querySelectorAll('.side-group').forEach(function(g){
         if(g.textContent.trim()==='Azienda')g.textContent='Studio';
       });
-      /* se l'utente era gia' dentro una sezione nascosta, lo riporto al riepilogo */
+      /* se l'utente era già dentro una sezione nascosta, lo riporto al riepilogo */
       var attivo=document.querySelector('[data-tab].active');
       if(attivo && TAB_NASCOSTI_PRO.indexOf(attivo.getAttribute('data-tab'))>=0){
         var home=document.querySelector('[data-tab="riepilogo"]');
@@ -572,6 +572,10 @@
     ['Metti un importo nei lavori e registra le spese (dentro "Modifica" del lavoro) per vedere qui il margine.','Metti un importo nelle pratiche e registra le spese (dentro "Modifica" della pratica) per vedere qui il margine.'],
     ['trasformalo in lavoro','trasformalo in pratica'],
     ['Accettato → crea lavoro','Accettato → crea pratica'],
+    /* 9 agosto 2026 — frasi intere: sostituire la sola parola lasciava
+       articoli e aggettivi al maschile ("I pratiche ... da soli ... fatturati"). */
+    ['I lavori collegati si segnano da soli come fatturati','Le pratiche collegate si segnano da sole come fatturate'],
+    ['tutto quello che non ha un lavoro dietro','tutto quello che non ha una pratica dietro'],
     ['Lavoro creato dal preventivo','Pratica creata dal preventivo'],
     ['Il cliente ha accettato? Creo il lavoro dal preventivo','Il cliente ha accettato? Creo la pratica dal preventivo'],
     ['Le fatture nascono dai lavori finiti con un importo','Le fatture nascono dalle pratiche finite con un importo'],
@@ -594,11 +598,11 @@
     ['Condomini / Clienti','Clienti'],
     ['Condominio / Cantiere','Cliente'],
     ['Referente / Amministratore','Referente'],
-    /* 9 agosto 2026 — questa riga rompeva la parola: "Condomini" e' dentro
+    /* 9 agosto 2026 — questa riga rompeva la parola: "Condomini" è dentro
        "Condominio", e con una sostituzione secca ogni "Condominio" diventava
        "Clientio". Si vedeva nel pulsante, nella scheda cliente e perfino nei
        NOMI scritti dall'utente ("Condominio Le Terrazze" -> "Clientio Le
-       Terrazze"). Per un tecnico il condominio e' un cliente legittimo:
+       Terrazze"). Per un tecnico il condominio è un cliente legittimo:
        la parola si lascia stare. */
     /* "Agenda operatore" → "Agenda" (togli "operatore"); operatore → collaboratore solo nelle
        etichette/filtri legati ai collaboratori. La parola nuda "Operatore" per ultima. */
@@ -707,7 +711,7 @@
     if(!_praticheObs)return;
     ['#appview','#sheet'].forEach(sel=>{const el=document.querySelector(sel);if(el)_praticheObs.observe(el,{childList:true,subtree:true,characterData:true});});
   }
-  /* le parole che fanno scattare la traduzione: in un posto solo, cosi'
+  /* le parole che fanno scattare la traduzione: in un posto solo, così
      testo e attributi usano lo stesso metro */
   const _DA_TRADURRE=/lavor[oi]\b|squadr|condomin|amministrator|operai|operator|cantier|manodoper|dipendent|muratore|capo\b|siepe|cemento|imprese come la tua|Wahid/i;
   function localizzaPratiche(){
@@ -977,7 +981,7 @@
         sb.from("gest_scadenze").select("stato,data_scadenza").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_fatture_fornitori").select("stato,scadenza").eq("user_id",sbUid).eq("mestiere_id",mid)
       ]);
-      /* Lavori: aperti (da fare o in corso). Rosso se almeno uno e' in ritardo. */
+      /* Lavori: aperti (da fare o in corso). Rosso se almeno uno è in ritardo. */
       const aperti=(lav||[]).filter(l=>l.stato!=="fatto");
       setCnt("#cnt-lavori",aperti.length,aperti.some(l=>inRitardo(l.stato,l.data_prevista))?"err":"attesa");
       /* Preventivi: in attesa di risposta. */
@@ -990,8 +994,8 @@
       /* Scadenzario: aperte, scadute o entro 30 giorni. */
       const sAperte=(sc||[]).filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30);
       setCnt("#cnt-scadenzario",sAperte.length,sAperte.some(x=>x.data_scadenza<oggi)?"err":"attesa");
-      /* Fornitori: fatture da pagare. Rosso se qualcuna e' scaduta.
-         (se la tabella non esiste ancora, ff e' undefined e il pallino resta spento) */
+      /* Fornitori: fatture da pagare. Rosso se qualcuna è scaduta.
+         (se la tabella non esiste ancora, ff è undefined e il pallino resta spento) */
       const ffAp=(ff||[]).filter(x=>x.stato!=="pagata");
       setCnt("#cnt-fornitori",ffAp.length,ffAp.some(x=>x.scadenza&&x.scadenza<oggi)?"err":"attesa");
     }catch(e){}
@@ -1000,12 +1004,12 @@
   /* ================= RIEPILOGO A SCHEDE =================
      Una scheda per ogni voce del menu, nello stesso ordine del menu.
      Ogni scheda fa UNA cosa sola: dice come sta quella sezione con un numero
-     grande, e mostra sotto le due righe piu' importanti. Cliccando la scheda si
+     grande, e mostra sotto le due righe più importanti. Cliccando la scheda si
      entra nella sezione; cliccando una riga si apre direttamente quell'elemento.
      Nessun dato nuovo: sono gli stessi numeri di prima, solo raggruppati per
      sezione invece che sparsi. ===================================== */
 
-  /* l'icona della scheda e' clonata dal bottone del menu: cosi' menu e riepilogo
+  /* l'icona della scheda è clonata dal bottone del menu: così menu e riepilogo
      restano identici per sempre, anche se un domani cambio un'icona. */
   function rieIco(tab){
     const b=document.querySelector('nav.tabs button[data-tab="'+tab+'"] svg');
@@ -1062,7 +1066,7 @@
         sb.from("gest_carte_saldo").select("carta_id,saldo").eq("user_id",sbUid),
         sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
         sb.from("gest_fatture").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
-        /* i lavori gia' dentro una fattura, anche solo in bozza: e' cosi' che
+        /* i lavori già dentro una fattura, anche solo in bozza: è così che
            la sezione Fatture decide chi e' "da fatturare". Il Riepilogo usava
            invece fatt_stato, che resta "none" finche' la fattura non viene
            emessa: le due schermate si contraddicevano. (9/8/2026) */
@@ -1075,7 +1079,7 @@
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
       MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
       AZ=r[9].data||null;FT=r[10].data||[];FL=(r[11]&&r[11].data)||[];
-      RIFR=(((r[12]&&r[12].data)||[])).filter(x=>!x.movimento_id);   /* quelli con carta sono gia' in CM */
+      RIFR=(((r[12]&&r[12].data)||[])).filter(x=>!x.movimento_id);   /* quelli con carta sono già in CM */
       FFO=((r[13]&&r[13].data)||[]);
       const conErrore=r.find(x=>x&&x.error);
       if(conErrore)erroreLettura=true;
@@ -1131,8 +1135,8 @@
        che hai EMESSO e che non ti hanno pagato. I lavori finiti non ancora
        fatturati sono un'altra cosa e li conto a parte: prima finivano qui dentro
        e il numero del Riepilogo non tornava con quello di Fatture. */
-    /* i conti delle fatture arrivano dalle fatture vere, non piu' dalle
-       caselle sul lavoro: una fattura puo' tenerne dentro tre, e ha l'IVA. */
+    /* i conti delle fatture arrivano dalle fatture vere, non più dalle
+       caselle sul lavoro: una fattura può tenerne dentro tre, e ha l'IVA. */
     const totFatt={};
     const fattRigheRie={};
     FR.forEach(r=>{
@@ -1158,26 +1162,26 @@
     const scadute  = daInc.filter(f=>{const sc=scadenza(f);return sc&&sc<oggi;});
     /* 9 agosto 2026 — l'utile si fa sull'IMPONIBILE, non sul totale incassato.
        Prima: incassato con dentro l'IVA meno spese al netto, quindi l'utile
-       usciva gonfiato di tutta l'IVA — che non e' tua, la giri allo Stato.
-       Il Report usa la stessa formula (fattImponibile), cosi' le due
+       usciva gonfiato di tutta l'IVA — che non è tua, la giri allo Stato.
+       Il Report usa la stessa formula (fattImponibile), così le due
        schermate smettono di dare due utili diversi sugli stessi dati. */
     const incMese  = FT.filter(f=>f.stato==="pagata"&&thisMonth(f.data_pagata||f.data))
                        .reduce((s,f)=>s+fattImponibile(f,(fattRigheRie&&fattRigheRie[f.id])||[]),0);
     const oreMese  = L.filter(l=>thisMonth(l.data_fatto)||thisMonth(l.data_prevista)).reduce((s,l)=>s+(+l.ore||0),0);
     const speseLav = SP.filter(x=>thisMonth(x.data)).reduce((s,x)=>s+(+x.importo||0),0);
     /* anche le spese delle carte entrano nel conto: prima erano invisibili
-       e l'utile risultava piu' alto del vero */
+       e l'utile risultava più alto del vero */
     const speseCarte= CM.filter(m=>thisMonth(m.data||(m.created_at||"").slice(0,10))).reduce((s,m)=>s+(+m.importo||0),0);
     /* 9 agosto 2026 — gli stessi costi che conta il Report: se no il Riepilogo
        dice un utile e il Report un altro. RIF = pieni pagati in contanti
-       (quelli con carta stanno gia' in CM), FFO = fatture dei fornitori. */
+       (quelli con carta stanno già in CM), FFO = fatture dei fornitori. */
     const speseRif  = RIFR.filter(r=>thisMonth(r.data)).reduce((s,r)=>s+(+r.importo||0),0);
     const speseForn = FFO.filter(f=>thisMonth(f.data)).reduce((s,f)=>s+(+f.importo||0),0);
     const speseMese = speseLav+speseCarte+speseRif+speseForn;
     const utile     = incMese-speseMese;
 
     /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
-       (ora e' una riga dentro "Da sistemare oggi", piu' in basso) */
+       (ora è una riga dentro "Da sistemare oggi", più in basso) */
     const spPerL={};SP.forEach(x=>{spPerL[x.lavoro_id]=(spPerL[x.lavoro_id]||0)+(+x.importo||0);});
     const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id])&&((+l.importo||0)-(spPerL[l.id]||0))<0);
 
@@ -1224,8 +1228,8 @@
                      .sort((a,b)=>a.data_scadenza.localeCompare(b.data_scadenza));
 
     /* ---- "Da sistemare oggi": la scorciatoia in cima ----
-       Non calcola niente di nuovo: raccoglie i numeri gia' contati qui sopra
-       e li mette in fila dal piu' urgente. Le schede sotto restano identiche.
+       Non calcola niente di nuovo: raccoglie i numeri già contati qui sopra
+       e li mette in fila dal più urgente. Le schede sotto restano identiche.
        Se non c'e' niente di scaduto o in ritardo, lo dice e basta. */
     const lavOggi = aperti.filter(l=>l.data_prevista===oggi);
     /* le scadenze legate a un mezzo (revisione, assicurazione...) sono le stesse
@@ -1251,8 +1255,8 @@
                                   d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
     if(inPerdita.length) DA.push({g:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
                                   d:"Le spese superano l'importo del lavoro",go:"report"});
-    /* patente a crediti: sotto 15 l'impresa non puo' operare in cantiere,
-       quindi avviso gia' a 20 per dare il tempo di recuperarli. */
+    /* patente a crediti: sotto 15 l'impresa non può operare in cantiere,
+       quindi avviso già a 20 per dare il tempo di recuperarli. */
     const patC = AZ&&AZ.pat_crediti!=null ? +AZ.pat_crediti : null;
     /* la patente a crediti serve a chi entra in cantiere: uno studio tecnico
        non ce l'ha, e vedersi un allarme rosso su un adempimento che non lo
@@ -1268,7 +1272,7 @@
                                   d:"Fermi da più di una settimana: forse vanno sollecitati",go:"preventivi"});
 
     /* dati azienda mancanti: va in cima a tutto il resto. Senza nome e partita
-       IVA i PDF di preventivi e fatture escono senza intestazione, quindi e' la
+       IVA i PDF di preventivi e fatture escono senza intestazione, quindi è la
        prima cosa da fare appena ci si iscrive. */
     if(!AZ||!(AZ.nome||"").trim()||!(AZ.piva||"").trim()){
       DA.unshift({g:2,t:"Completa i dati della tua azienda",
@@ -1294,7 +1298,7 @@
             + '</div>').join("")
           + '</div>';
       }
-      /* il secondo giro di letture e' andato male: i numeri di spese, foto e
+      /* il secondo giro di letture è andato male: i numeri di spese, foto e
          totali possono essere incompleti. Meglio dirlo che far finta di niente. */
       if(erroreLettura2)ra.insertAdjacentHTML("afterbegin",
         '<div class="rie-errore"><b>Alcuni numeri non si sono caricati</b> (spese, foto o totali): '
@@ -1446,9 +1450,9 @@
       righe:(nFoto+nVideo)?[{t:"Foto",v:String(nFoto)},{t:"Video",v:String(nVideo)}]:[]
     }));
 
-    /* Mappa: quanti cantieri hanno un indirizzo e le distanze gia' calcolate.
+    /* Mappa: quanti cantieri hanno un indirizzo e le distanze già calcolate.
        Qui non chiamo nessun servizio esterno: leggo solo quello che la sezione
-       Mappa ha gia' messo da parte, altrimenti aprire il Riepilogo diventerebbe
+       Mappa ha già messo da parte, altrimenti aprire il Riepilogo diventerebbe
        lento e consumerebbe le richieste del servizio gratuito. */
     const conIndirizzo=aperti.filter(l=>{
       const c=CLI.find(x=>x.id===l.cliente_id);
@@ -1474,8 +1478,8 @@
   }
 
   /* ---- Riepilogo: preventivi che aspettano una risposta ----
-     Un preventivo in bozza o inviato e' lavoro potenziale fermo: senza questo blocco
-     lo si scopriva solo entrando nella scheda Preventivi. Dal piu' vecchio, cosi'
+     Un preventivo in bozza o inviato è lavoro potenziale fermo: senza questo blocco
+     lo si scopriva solo entrando nella scheda Preventivi. Dal più vecchio, così
      in cima c'e' sempre quello da sollecitare. Se non ce n'e' nessuno il blocco
      sparisce del tutto (titolo compreso): niente sezioni vuote nel Riepilogo. */
   const _ICO='<svg class="ic16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
@@ -1559,7 +1563,7 @@
   }
   /* conImp: l'importo a destra del titolo. Lo chiede solo il Riepilogo, dove la
      lista serve a capire quanto vale il lavoro in arrivo. */
-  /* Card lavoro: solo le 2-3 azioni piu' probabili in vista, tutto il resto
+  /* Card lavoro: solo le 2-3 azioni più probabili in vista, tutto il resto
      (Mappa, Foto, WhatsApp, PDF, fattura, Elimina) nel menu "...". Prima
      c'erano fino a 7 pulsanti in fila, con Elimina a un dito da Segna fatto.
      menuTab = registro TAB_MENU della sezione ("lav" o "ag"). */
@@ -1606,7 +1610,7 @@
      "QUANDO" IN PAROLE — distanza da oggi, non la data.
      Riutilizzabile: serve anche a Preventivi, Fatture, Scadenzario.
      Ritorna {testo, classe}; la classe porta il colore (.q-*).
-     opt.neutro = "qui una data passata non e' un problema" (lavoro gia' fatto,
+     opt.neutro = "qui una data passata non è un problema" (lavoro già fatto,
      fattura pagata...): il rosso resta riservato ai ritardi veri.
      ============================================================ */
   const MESI_BREVI=["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
@@ -1626,16 +1630,16 @@
   /* ============================================================
      LAVORI — viste al posto dei filtri di stato
      ============================================================ */
-  /* "Tutti" e' la vista di apertura: chi entra vede il lavoro del reparto per intero,
+  /* "Tutti" è la vista di apertura: chi entra vede il lavoro del reparto per intero,
      poi semmai restringe. Le altre viste servono a restringere, non a nascondere:
-     per questo la prima vista non la sceglie piu' il codice in base ai ritardi.
+     per questo la prima vista non la sceglie più il codice in base ai ritardi.
      Le viste dei lavori aperti coprono tutta la linea del tempo, senza buchi:
      ritardo (prima di oggi) + oggi + prossimi (dopo oggi) = tutti i non finiti.
      "Prossimi" non ha limite in avanti: prima si fermava a domenica e i lavori
-     piu' in la' sparivano da ogni vista pur restando nei contatori.
-     Il lavoro senza data sta in "Prossimi": non e' in ritardo e non e' di oggi,
+     più in la' sparivano da ogni vista pur restando nei contatori.
+     Il lavoro senza data sta in "Prossimi": non è in ritardo e non è di oggi,
      e senza questo finirebbe fuori da tutte le viste (stesso buco di prima).
-     Archivio raccoglie tutti i finiti; "Da incassare" e' un suo sottoinsieme e
+     Archivio raccoglie tutti i finiti; "Da incassare" è un suo sottoinsieme e
      per questo resta fuori dal conto della copertura. */
   const LAV_VISTE=[
     {k:"tutti",    lab:"Tutti"},
@@ -1668,9 +1672,9 @@
     const e=LAV_VUOTO[v]||LAV_VUOTO.tutti;
     return tabVuoto(e.t,e.s,e.i,e.b);
   }
-  /* menu "..." della riga: nessuna azione della vecchia barra e' andata persa */
-  /* i lavori che stanno gia' dentro una fattura, anche solo in bozza: serve al
-     menu per non offrire "Crea fattura" su qualcosa che e' gia' fatturato.
+  /* menu "..." della riga: nessuna azione della vecchia barra è andata persa */
+  /* i lavori che stanno già dentro una fattura, anche solo in bozza: serve al
+     menu per non offrire "Crea fattura" su qualcosa che è già fatturato.
      Lo riempie renderFatture, che quella tabella la legge comunque. */
   let _lavFatturati=new Set();
   function lavVoci(l,wa){
@@ -1680,7 +1684,7 @@
     if(!fatto)v.push({lab:"\u2714 Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
     else v.push({lab:"\u21a9 Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
     v.push({lab:"\ud83d\udcf7 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"}});
-    /* il verbale di sopralluogo e' roba da tecnici: nasce dalle foto della pratica */
+    /* il verbale di sopralluogo è roba da tecnici: nasce dalle foto della pratica */
     if(ruoloUtente==='professionista')v.push({lab:"\ud83d\udccb Verbale di sopralluogo",action:"verbale",data:{id:l.id}});
     if(l.dove)v.push({lab:"\ud83d\uddfa Mappa",action:"map",data:{q:l.dove}});
     v.push({lab:"\ud83d\udcac Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});
@@ -1696,10 +1700,10 @@
      TABELLA CONDIVISA \u2014 una sola implementazione per tutte le sezioni.
      Prima ogni scheda aveva la sua griglia di card con i pulsanti in fila:
      le stesse azioni cambiavano posto (e forma) da una sezione all'altra, e
-     in Squadra finivano incolonnate una sotto l'altra. Qui la riga e' sempre
+     in Squadra finivano incolonnate una sotto l'altra. Qui la riga è sempre
      uguale ovunque: click sulla riga = apri, "..." = tutto il resto.
      Le voci del menu restano <button data-action="..."> identici a prima,
-     cosi' i gestori del click gia' esistenti continuano a funzionare.
+     così i gestori del click già esistenti continuano a funzionare.
 
      cfg = {
        id          chiave del registro dei menu (una per sezione)
@@ -1723,7 +1727,7 @@
       : `<button${v.del?' class="del"':''} data-action="${v.action}"${tabAttr(v.data)}>${v.lab}</button>`
     ).join("")+'</div>';
   }
-  /* Nasconde il "+" in alto quando la sezione e' vuota e c'e' gia' il
+  /* Nasconde il "+" in alto quando la sezione è vuota e c'e' già il
      bottone grande dentro il riquadro vuoto. Vale per tutte le sezioni. */
   function tabBottoneTesta(box, mostra){
     const sez=box&&box.closest?box.closest("section"):null;
@@ -1741,15 +1745,15 @@
       return `<button class="vista${cfg.vista===v.k?" on":""}" data-action="${cfg.azioneVista}" data-v="${v.k}">${v.lab}${badge}</button>`;
     }).join("");
     const R=cfg.righe||[];
-    /* Mai due bottoni che fanno la stessa cosa: quando la sezione e' vuota
+    /* Mai due bottoni che fanno la stessa cosa: quando la sezione è vuota
        comanda quello grande in mezzo alla pagina, e quello piccolo in alto
        sparisce. Appena c'e' qualcosa dentro, torna. */
     /* 9 agosto 2026 — BUG SERIO risolto qui.
-       Il "+" in alto si nascondeva ogni volta che l'elenco era vuoto, perche'
-       in mezzo alla pagina compare il bottone grande. Ma quando l'elenco e'
+       Il "+" in alto si nascondeva ogni volta che l'elenco era vuoto, perché
+       in mezzo alla pagina compare il bottone grande. Ma quando l'elenco è
        vuoto per colpa di una RICERCA, il messaggio "Nessun risultato" non ha
-       nessun bottone: sparivano tutti e due e non si poteva piu' aggiungere
-       niente, senza capire perche'.
+       nessun bottone: sparivano tutti e due e non si poteva più aggiungere
+       niente, senza capire perché.
        Adesso il "+" si nasconde solo se il messaggio in mezzo ha davvero il
        suo bottone (lo si riconosce dalla classe lv-btn). */
     const _vuotoHtml=cfg.vuoto||"";
@@ -1800,10 +1804,10 @@
      ci si fa, e il pulsante fa partire la cosa da fare senza andarla a cercare.
        titolo  il nome di quello che manca
        sotto   a cosa serve questa sezione, in parole semplici
-       icona   svg gia' pronto (facoltativo)
+       icona   svg già pronto (facoltativo)
        btn     {t:"testo del pulsante", a:"azione"} — si mette SOLO quando la
-               sezione e' davvero vuota, mai quando e' un filtro a nascondere
-               tutto: li' un pulsante "aggiungi il primo" e' una bugia. */
+               sezione è davvero vuota, mai quando è un filtro a nascondere
+               tutto: li' un pulsante "aggiungi il primo" è una bugia. */
   function tabVuoto(titolo,sotto,icona,btn){
     const b=btn?`<button class="btn-primary lv-btn" data-action="${btn.a}">${btn.t}</button>`:"";
     return `<div class="lav-vuoto">${icona||_SVGV+'<circle cx="12" cy="12" r="9"/></svg>'}<h3>${titolo}</h3><p>${sotto}</p>${b}</div>`;
@@ -1817,7 +1821,7 @@
        tono    "t-err" | "t-attesa" | "t-ok" | "t-neutro" — il colore della
                barretta a sinistra: rosso scaduto, arancione in arrivo, verde a
                posto, grigio quando non c'e' nessuno stato da dire
-       titolo  il nome, in grande (gia' passato per esc)
+       titolo  il nome, in grande (già passato per esc)
        destra  la pastiglia di stato a destra del titolo, facoltativa
        meta    le righe di dettaglio, una per voce
        nota    il riquadro giallo in fondo (note libere), facoltativo
@@ -1854,7 +1858,7 @@
   /* ---- RIGA COMPATTA del Riepilogo ----
      Le due liste del Riepilogo (prossimi lavori, preventivi in attesa) erano card
      alte con i pulsanti in fila: tanta altezza per poche informazioni, e le stesse
-     azioni gia' presenti nella sezione vera. Qui la riga e' alta 44px, il click
+     azioni già presenti nella sezione vera. Qui la riga è alta 44px, il click
      apre l'elemento e non c'e' nessun pulsante.
      bar = classe di stato (.ritardo/.da_fare/.in_corso/.fatto)
      sub = [testo, ...] con eventuale {t,cls} per colorare il "quando". */
@@ -1879,7 +1883,7 @@
     const [{data:lav},{data:ops},{data:cls}]=await Promise.all([
       /* Per gli studi si legge tutta la riga ("*") invece dell'elenco fisso: servono
          anche i campi della pratica per riaprirli in modifica. Con "*" non si rischia
-         l'errore "colonna inesistente" se la migrazione SQL non e' ancora stata fatta. */
+         l'errore "colonna inesistente" se la migrazione SQL non è ancora stata fatta. */
       sb.from("gest_lavori").select(ruoloUtente==='professionista'?"*":"id,descrizione,dove,stato,data_prevista,operatore_id,cliente_id,importo,fatt_stato").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_operatori").select("id,nome,telefono").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
       sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
@@ -1899,7 +1903,7 @@
                   ||(cliName[l.cliente_id]||"").toLowerCase().includes(q));
     }
     /* In "Tutti" i finiti scendono in fondo: la lista serve a vedere cosa resta da fare.
-       Nelle altre viste i lavori sono gia' tutti aperti o tutti chiusi, quindi conta solo la data. */
+       Nelle altre viste i lavori sono già tutti aperti o tutti chiusi, quindi conta solo la data. */
     const _fin=l=>l.stato==="fatto"?1:0;
     L.sort((a,b)=>(filter.vista==="tutti"?_fin(a)-_fin(b):0)
                 ||(a.data_prevista||"9999").localeCompare(b.data_prevista||"9999"));
@@ -1910,10 +1914,10 @@
       viste:"#lav-viste", visteDef:LAV_VISTE.map(v=>({k:v.k,lab:v.lab,err:v.k==="ritardo"})),
       vista:filter.vista, conta:conta, azioneVista:"lav-vista",
       vuoto:filter.q?tabVuotoCerca(filter.q):lavVuoto(filter.vista),
-      /* 9 agosto 2026 — per uno studio la colonna "Chi" conta poco (spesso e'
+      /* 9 agosto 2026 — per uno studio la colonna "Chi" conta poco (spesso è
          solo lui), mentre "a che punto sta la pratica" — Depositata, In
          istruttoria, Integrazioni richieste — non si vedeva da NESSUNA parte
-         pur essendo salvata nel database. Adesso e' li'. */
+         pur essendo salvata nel database. Adesso è li'. */
       colonne:_praPro
         ? [{lab:"Pratica",w:"34%"},{lab:"Cliente",w:"22%",cls:"c-cli"},{lab:"Quando",w:"15%"},
            {lab:"A che punto",w:"17%",cls:"c-chi"},{lab:"Importo",w:"12%",cls:"c-imp"}]
@@ -1985,8 +1989,8 @@
   }
 
   /* video "prima": stessa logica delle foto "cosa fare", bucket/tabella dedicati
-     perche' gest_foto assume sempre <img> nel rendering. Nessuna compressione:
-     il video resta cosi' com'e', solo il limite di 50 MB lo blocca se troppo grande. */
+     perché gest_foto assume sempre <img> nel rendering. Nessuna compressione:
+     il video resta così com'e', solo il limite di 50 MB lo blocca se troppo grande. */
   async function renderLavoroVideo(){
     const grid=$("#lf-video-grid");if(!grid)return;
     if(!sb||!sbUid||!lfLavoroId){grid.innerHTML="";return;}
@@ -2017,8 +2021,8 @@
     toast("Video aggiunto ✔");renderLavoroVideo();
   }
   /* il PDF vero della fattura (quello del commercialista) si carica a mano e
-     ora si appoggia alla FATTURA, non al lavoro: una fattura puo' avere dentro
-     piu' lavori, ma il documento e' uno solo. */
+     ora si appoggia alla FATTURA, non al lavoro: una fattura può avere dentro
+     più lavori, ma il documento è uno solo. */
   let fattUploadId=null;
   function chiediFatturaPdf(fatturaId){
     fattUploadId=fatturaId;
@@ -2028,7 +2032,7 @@
     if(!file||!fattUploadId)return;
     if(!sbUid){toast("Devi essere loggato");return;}
     if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
-    /* il PDF non e' un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
+    /* il PDF non è un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
     const p=await preparaFileUpload(file);
     if(p.errore){toast(p.errore);return;}
     const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
@@ -2054,13 +2058,13 @@
      senza l'IVA riga per riga il file XML per lo SDI non si poteva nemmeno
      cominciare.
 
-     Ora la fattura e' una cosa a se': gest_fatture + gest_fattura_righe, sullo
-     stampo dei preventivi, piu' la tabella ponte gest_fattura_lavori che
-     permette di mettere piu' lavori nella stessa fattura.
+     Ora la fattura è una cosa a se': gest_fatture + gest_fattura_righe, sullo
+     stampo dei preventivi, più la tabella ponte gest_fattura_lavori che
+     permette di mettere più lavori nella stessa fattura.
 
-     La casella fatt_stato sul lavoro NON e' stata cancellata: adesso e'
+     La casella fatt_stato sul lavoro NON è stata cancellata: adesso è
      un riflesso. Quando una fattura passa a emessa o pagata, i lavori che ci
-     stanno dentro si aggiornano da soli. Cosi' Lavori, Report, Riepilogo ed
+     stanno dentro si aggiornano da soli. Così Lavori, Report, Riepilogo ed
      Esporta continuano a funzionare esattamente come prima.
      ========================================== */
 
@@ -2085,7 +2089,7 @@
     [5,"5% — EPPI (periti industriali)","TC17"],
     [4,"4% — INPS gestione separata","TC22"]
   ];
-  /* 10% e' l'aliquota della ristrutturazione: giusta per un'impresa edile,
+  /* 10% è l'aliquota della ristrutturazione: giusta per un'impresa edile,
      sbagliata per uno studio tecnico, che di norma fattura al 22%.
      Prima era 10 per tutti e un geometra emetteva fatture con l'IVA sbagliata
      senza accorgersene (9 agosto 2026). */
@@ -2103,9 +2107,9 @@
   function fattForfettario(){ return (fattAzienda&&fattAzienda.regime_fiscale)==="RF19"; }
 
   /* i conti della fattura. Sono gli stessi della vista gest_fatture_totali su
-     Supabase: qui li rifaccio in locale perche' le righe le ho gia' lette per
-     disegnare la scheda, e una lettura in meno e' una lettura in meno. */
-  /* l'aliquota che comanda: quella su cui sta piu' imponibile. Serve per
+     Supabase: qui li rifaccio in locale perché le righe le ho già lette per
+     disegnare la scheda, e una lettura in meno è una lettura in meno. */
+  /* l'aliquota che comanda: quella su cui sta più imponibile. Serve per
      applicare l'IVA anche alla cassa e alle spese, che non sono righe. */
   function fattAliquotaPrevalente(R){
     const per={};
@@ -2131,10 +2135,10 @@
     const imponibile=compenso+cassa+spese;
     const iva=ivaRighe+(cassa+spese)*aliqPrev/100;
     const ritenuta=compenso*(+f.ritenuta_perc||0)/100;   /* solo sul compenso */
-    /* Due numeri diversi, e mescolarli e' un errore che lo SDI vede subito:
+    /* Due numeri diversi, e mescolarli è un errore che lo SDI vede subito:
        - totale     = quanto vale il documento (imponibile + IVA - sconto + bollo)
        - daPagare   = quanto ti bonifica davvero il cliente, tolta la ritenuta
-       La ritenuta non e' uno sconto: e' una parte del tuo compenso che il
+       La ritenuta non è uno sconto: è una parte del tuo compenso che il
        cliente versa allo Stato al posto tuo. Il documento vale lo stesso. */
     const totale=imponibile+iva-(+f.sconto||0)+(+f.bollo||0);
     const daPagare=totale-ritenuta;
@@ -2143,8 +2147,8 @@
   /* ===== 9 agosto 2026 — l'imponibile di una fattura, in UN POSTO SOLO =====
      Report ed Excel lo ricalcolavano sommando solo qta*prezzo: senza la cassa
      previdenziale e senza le spese, quindi per uno studio con la cassa al 5%
-     ogni numero usciva piu' basso del vero. Qui c'e' la formula giusta, la
-     stessa di fattConti, e la usano tutti. IVA esclusa: l'IVA non e' tua. */
+     ogni numero usciva più basso del vero. Qui c'e' la formula giusta, la
+     stessa di fattConti, e la usano tutti. IVA esclusa: l'IVA non è tua. */
   function fattImponibile(f,righeDellaFattura){
     const R=righeDellaFattura||[];
     const compenso=R.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0);
@@ -2167,7 +2171,7 @@
   }
 
   /* ---- il riflesso sul lavoro ----
-     Il lavoro deve sapere se e' stato fatturato: lo usano la scheda del lavoro,
+     Il lavoro deve sapere se è stato fatturato: lo usano la scheda del lavoro,
      il Report, il Riepilogo e l'esportazione. Invece di duplicare il dato a
      mano, lo riscrivo qui ogni volta che la fattura cambia stato. */
   async function fattSincronizzaLavori(fatturaId,stato){
@@ -2183,7 +2187,7 @@
 
   /* ---- il numero, assegnato una volta sola ----
      Una bozza non consuma nessun numero: il numero si prende quando dichiari
-     la fattura emessa, ed e' il primo libero di quell'anno. Cosi' la
+     la fattura emessa, ed è il primo libero di quell'anno. Così la
      numerazione riparte da 1 ogni gennaio e non lascia buchi.
      Il vincolo unique(user_id, anno, numero) sul database fa da rete: se due
      salvataggi partissero insieme, il secondo viene rifiutato invece di
@@ -2192,8 +2196,8 @@
     if(f.numero)return f.numero;
     const anno=(f.data||todayStr()).slice(0,4);
     /* sb.raw: si guardano ANCHE le fatture nel cestino. Se no, eliminata la
-       n.7 la fattura dopo riprendeva il 7 e sbatteva contro il numero gia'
-       occupato da quella nel cestino: non si emetteva piu' niente per tutto l'anno. */
+       n.7 la fattura dopo riprendeva il 7 e sbatteva contro il numero già
+       occupato da quella nel cestino: non si emetteva più niente per tutto l'anno. */
     const _sbF=(sb.raw||sb.from.bind(sb));
     const {data}=await _sbF("gest_fatture").select("numero")
       .eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null)
@@ -2223,7 +2227,9 @@
       "🧾 "+esc(fattNumero(f)),
       "📅 "+fdate(f.data),
       "👤 "+esc(nome),
-      nLav?("🛠 "+nLav+(nLav===1?" lavoro":" lavori")):"",
+      /* 9 agosto 2026 — questa riga vive dentro .fatt-info, che il traduttore
+         salta apposta: la parola giusta va scelta qui. */
+      nLav?("🛠 "+nLav+(ruoloUtente==='professionista'?(nLav===1?" pratica":" pratiche"):(nLav===1?" lavoro":" lavori"))):"",
       f.stato==="emessa"&&gio!=null
         ? '<span'+(scaduta?' style="color:var(--err);font-weight:700"':'')+'>⏳ aspetti da '+gio+(gio===1?" giorno":" giorni")+'</span>'
         : "",
@@ -2288,7 +2294,7 @@
       ]);
       (rr||[]).forEach(r=>{(fattRighe[r.fattura_id]=fattRighe[r.fattura_id]||[]).push(r);});
       (fl||[]).forEach(x=>{(fattLavori[x.fattura_id]=fattLavori[x.fattura_id]||[]).push(x.lavoro_id);});
-      /* il registro per il menu dei Lavori: chi e' gia' dentro una fattura */
+      /* il registro per il menu dei Lavori: chi è già dentro una fattura */
       _lavFatturati=new Set((fl||[]).map(x=>String(x.lavoro_id)));
       (pdfs||[]).forEach(p=>{if(p.fattura_id&&!fatturaPdfCache[p.fattura_id])fatturaPdfCache[p.fattura_id]=p;});
     }
@@ -2344,7 +2350,7 @@
 
     let R=filtra(fattCache,fattVista);
     /* prima quelle che chiedono qualcosa: scadute, poi emesse, poi bozze,
-       poi le pagate. A parita', la piu' recente in cima. */
+       poi le pagate. A parita', la più recente in cima. */
     const rank=f=>fattScaduta(f,gg)?0:(f.stato==="emessa"?1:(f.stato==="bozza"?2:(f.stato==="pagata"?3:4)));
     R.sort((a,b)=>rank(a)-rank(b)
       || String(b.data||"").localeCompare(String(a.data||""))
@@ -2457,8 +2463,8 @@
                  : (f.numero ? "Fattura n. "+f.numero+"/"+f.anno : "Bozza di fattura");
 
     openSheetGrande(titolo,
-      /* colonna di sinistra piu' larga: le voci hanno bisogno di spazio per la
-         descrizione, che e' la cosa che il cliente legge davvero */
+      /* colonna di sinistra più larga: le voci hanno bisogno di spazio per la
+         descrizione, che è la cosa che il cliente legge davvero */
       '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
 
       + '<div class="sh-b"><div class="sh-tit">A chi e quando</div>'
@@ -2477,7 +2483,9 @@
       +   '<div id="fatt-righe">'+((righe.length?righe:[{}]).map(r=>fattRigaHtml(r)).join(""))+'</div>'
       +   '<button type="button" class="btn-ghost quick-add" data-action="fatt-riga-add">+ Aggiungi voce</button>'
       +   (fattForfettario()?'<div class="sh-nota">Sei in regime forfettario: la colonna IVA è nascosta e le voci vanno senza IVA.</div>'
-                            :'<div class="sh-nota">L\'aliquota si sceglie riga per riga. In edilizia il 10% è quello della manutenzione e ristrutturazione, il 4% della prima casa.</div>')
+                            :(ruoloUtente==='professionista'
+                              ?'<div class="sh-nota">Le prestazioni professionali vanno al 22%. Le aliquote ridotte (10%, 4%) valgono per chi esegue i lavori, non per la parcella.</div>'
+                              :'<div class="sh-nota">L\'aliquota si sceglie riga per riga. In edilizia il 10% è quello della manutenzione e ristrutturazione, il 4% della prima casa.</div>'))
       + '</div>'
 
       + '</div><div class="sh-col">'
@@ -2493,7 +2501,7 @@
       +   '</div>'
       /* ===== 9 agosto 2026 — la cassa previdenziale =====
          C'era nel preventivo e mancava in fattura: un geometra non poteva
-         riportare il suo 5%. Il codice TipoCassa e' quello che vuole lo SDI
+         riportare il suo 5%. Il codice TipoCassa è quello che vuole lo SDI
          nel file elettronico, per sapere DI QUALE cassa si tratta. */
       +   (ruoloUtente==='professionista'
             ? '<div class="row2">'
@@ -2528,9 +2536,9 @@
   }
   let fattLavoriInCorso=null;
 
-  /* Un salvataggio che fallisce con un messaggino che svanisce e' peggio di
-     uno che non fallisce: si perde quello che si e' scritto e non si capisce
-     perche'. Questo riquadro resta dentro il modulo finche' non si riprova. */
+  /* Un salvataggio che fallisce con un messaggino che svanisce è peggio di
+     uno che non fallisce: si perde quello che si è scritto e non si capisce
+     perché. Questo riquadro resta dentro il modulo finche' non si riprova. */
   function fattErrore(testo){
     const b=document.querySelector("#sheet .sh-body");
     if(!b){toast(testo);return;}
@@ -2584,7 +2592,7 @@
       testata.spese=+($("#fa-spese")?$("#fa-spese").value:0)||0;
     }
     /* una copia dei dati del cliente resta dentro la fattura: se domani cambi
-       l'indirizzo in anagrafica, la fattura gia' emessa non deve cambiare */
+       l'indirizzo in anagrafica, la fattura già emessa non deve cambiare */
     const c=fattCliCache.find(x=>String(x.id)===String(cliente_id));
     if(c){
       testata.cli_nome=c.nome||null; testata.cli_piva=c.piva||null;
@@ -2595,7 +2603,7 @@
     testata.regime_fiscale=(fattAzienda&&fattAzienda.regime_fiscale)||null;
 
     let fid=id;
-    /* se sql/gest-fattura-cassa.sql non e' ancora stato eseguito, le tre
+    /* se sql/gest-fattura-cassa.sql non è ancora stato eseguito, le tre
        colonne nuove non esistono: invece di perdere TUTTA la fattura le
        togliamo e riproviamo, dicendolo (stesso schema dei Dati azienda). */
     let avvisoCassa=false;
@@ -2651,7 +2659,7 @@
   async function fattCambiaStato(id,v){
     const f=fattCache.find(x=>String(x.id)===String(id));
     if(!f){toast("Fattura non trovata");return;}
-    /* una fattura senza cliente non e' una fattura: finche' e' bozza va bene,
+    /* una fattura senza cliente non è una fattura: finche' è bozza va bene,
        ma non deve poter prendere un numero */
     if(v==="emessa"&&!f.cliente_id){
       toast("Scegli il cliente prima di emetterla: una fattura deve dire a chi va");
@@ -2687,7 +2695,7 @@
   }
 
   /* ---------- le tre origini ----------
-     1. da uno o piu' lavori finiti  2. da un preventivo accettato  3. vuota */
+     1. da uno o più lavori finiti  2. da un preventivo accettato  3. vuota */
 
   function fattDaLavoriScegli(){
     if(!fattLavLiberi.length){toast("Non ci sono lavori finiti da fatturare");return;}
@@ -2780,7 +2788,7 @@
       /* 9 agosto 2026 — il lavoro nato dal preventivo accettato va agganciato
          alla fattura, se no restava "da fatturare" per sempre e si poteva
          fatturare due volte. `lavoro_id` sul preventivo veniva scritto e non
-         letto da nessuno: e' esattamente il dato che serviva qui. */
+         letto da nessuno: è esattamente il dato che serviva qui. */
       _lavori: p.lavoro_id ? [p.lavoro_id] : null,
       /* 9 agosto 2026 — la parcella deve arrivare INTERA in fattura.
          Prima passavano solo le righe: la ritenuta ripartiva da zero e il
@@ -2807,8 +2815,8 @@
 
 
 
-  /* Il pulsante "+ Nuova": prima creava un lavoro con la fattura gia' emessa.
-     Ora chiede da dove nasce la fattura, perche' le strade sono tre. */
+  /* Il pulsante "+ Nuova": prima creava un lavoro con la fattura già emessa.
+     Ora chiede da dove nasce la fattura, perché le strade sono tre. */
   function fattNuovaScegli(){
     const nLav=fattLavLiberi.length;
     openSheetGrande("Da dove nasce questa fattura",
@@ -2840,7 +2848,7 @@
   }
   async function fattDaUnLavoro(lavoroId){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
-    /* se quel lavoro sta gia' dentro una fattura, non ne creo un'altra: apro quella */
+    /* se quel lavoro sta già dentro una fattura, non ne creo un'altra: apro quella */
     const {data:gia}=await sb.from("gest_fattura_lavori").select("fattura_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId).limit(1);
     if(gia&&gia.length){
       const {data:f}=await sb.from("gest_fatture").select("*").eq("id",gia[0].fattura_id).maybeSingle();
@@ -2852,7 +2860,7 @@
     if(!l){toast("Lavoro non trovato");return;}
     closeSheet();
     /* 9 agosto 2026 — l'aliquota promessa al cliente. Se quel lavoro nasce da
-       un preventivo accettato, l'IVA e' quella che il cliente ha firmato nella
+       un preventivo accettato, l'IVA è quella che il cliente ha firmato nella
        conferma d'ordine: partire dal 10% di default significava mandargli una
        fattura diversa dal foglio che ha in mano. */
     const ivaLav=await _ivaDalPreventivo(l.id);
@@ -2870,7 +2878,7 @@
      senza IVA: non era una fattura, era una ricevuta. Questo ha le righe con
      l'aliquota, il riepilogo per aliquota che chiede lo SDI, e le diciture di
      legge per il forfettario. Resta una copia di cortesia: la fattura valida
-     e' quella elettronica. */
+     è quella elettronica. */
   async function fatturaPdf(id){
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
     const f=fattCache.find(x=>String(x.id)===String(id));
@@ -2950,7 +2958,17 @@
     });
     doc.setDrawColor(180);doc.line(M,y,Rx,y);y+=8;
 
-    /* riepilogo per aliquota: e' quello che chiede lo SDI, e serve al
+    /* 9 agosto 2026 — cassa e spese entrano nell'imponibile anche QUI.
+       Prima il riepilogo sommava solo le righe: su una parcella con cassa 100
+       e spese 150 il PDF dichiarava "imponibile 2.000, imposta 440" mentre
+       poco sotto addebitava 495. L'XML per lo SDI lo faceva già giusto
+       (vedi DatiRiepilogo): era il PDF, quello che legge il cliente, a mentire. */
+    if(c.cassa||c.spese){
+      const alp=forf?0:c.aliqPrev;
+      perAliq[alp]=(perAliq[alp]||0)+c.cassa+c.spese;
+    }
+
+    /* riepilogo per aliquota: è quello che chiede lo SDI, e serve al
        commercialista per controllare in due secondi */
     if(!forf&&Object.keys(perAliq).length){
       doc.setFontSize(8.5);doc.setTextColor(110);
@@ -3025,19 +3043,19 @@
 
 
   /* ================= FATTURA ELETTRONICA (XML per lo SDI) =================
-     Il PDF che il gestionale scarica e' una copia di cortesia: per lo Stato
-     non vale niente. La fattura che conta e' questo file XML, nel formato
+     Il PDF che il gestionale scarica è una copia di cortesia: per lo Stato
+     non vale niente. La fattura che conta è questo file XML, nel formato
      FatturaPA. Qui il gestionale lo GENERA e te lo fa scaricare: lo carichi
      sul portale del tuo commercialista, che lo manda allo SDI. L'invio
-     automatico e' un altro lavoro e viene dopo.
+     automatico è un altro lavoro e viene dopo.
 
      Formato: FatturaPA 1.2.2, attributo versione FPR12 (fattura fra privati).
      Le specifiche tecniche sono passate alla 1.9.1 il 15 maggio 2026, ma sono
-     ritocchi che non toccano una fattura edile: lo schema del file e' lo stesso.
+     ritocchi che non toccano una fattura edile: lo schema del file è lo stesso.
 
      REGOLA IMPORTANTE: questo file non si manda mai senza averlo prima passato
      dal validatore gratuito dell'Agenzia delle Entrate. Il gestionale controlla
-     quello che puo' controllare (campi mancanti, formati sbagliati), ma la
+     quello che può controllare (campi mancanti, formati sbagliati), ma la
      parola finale ce l'ha il validatore. ====================================== */
 
   const XML_TIPO={fattura:"TD01", acconto:"TD02", nota_credito:"TD04"};
@@ -3069,11 +3087,11 @@
     /* --- chi emette: te --- */
     if(!(az.nome||"").trim())        m.push("Manca il nome della tua azienda — Dati azienda.");
     const pulita=v=>String(v||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase();
-    /* La partita IVA non e' un numero qualsiasi: l'ultima cifra e' una cifra di
-       controllo calcolata dalle altre dieci. Cosi' una battitura sbagliata si
+    /* La partita IVA non è un numero qualsiasi: l'ultima cifra è una cifra di
+       controllo calcolata dalle altre dieci. Così una battitura sbagliata si
        becca subito, invece di scoprirla quando lo SDI scarta la fattura.
-       (Somma le cifre dispari cosi' come sono; raddoppia le pari e se viene
-       piu' di 9 toglie 9; il totale deve finire con zero.) */
+       (Somma le cifre dispari così come sono; raddoppia le pari e se viene
+       più di 9 toglie 9; il totale deve finire con zero.) */
     const pivaOk=v=>{
       if(!/^\d{11}$/.test(v))return false;
       let s=0;
@@ -3101,14 +3119,14 @@
       m.push("La provincia della tua sede deve essere di 2 lettere, es. RI — Dati azienda.");
     /* Anche l'IBAN ha la sua prova del nove: si spostano le prime quattro
        lettere in fondo, si trasformano le lettere in numeri, e il numerone
-       che viene fuori diviso 97 deve dare resto 1. Se una cifra e' sbagliata
+       che viene fuori diviso 97 deve dare resto 1. Se una cifra è sbagliata
        il resto cambia. Meglio scoprirlo qui che con un bonifico perso. */
     const ibanOk=v=>{
       if(!/^IT\d{2}[A-Z]\d{10}[A-Z0-9]{12}$/.test(v))return false;
       const r=v.slice(4)+v.slice(0,4);
       let n="";
       for(const ch of r) n += (ch>="A"&&ch<="Z") ? String(ch.charCodeAt(0)-55) : ch;
-      /* il numero e' troppo lungo per una divisione normale: si divide a pezzi */
+      /* il numero è troppo lungo per una divisione normale: si divide a pezzi */
       let resto=0;
       for(const ch of n) resto=(resto*10+(+ch))%97;
       return resto===1;
@@ -3232,11 +3250,11 @@
     x+='        <Divisa>EUR</Divisa>\n';
     x+='        <Data>'+xesc(f.data)+'</Data>\n';
     x+='        <Numero>'+xesc(String(f.numero))+'</Numero>\n';
-    /* l'ordine di questi blocchi non e' a caso: lo schema li vuole cosi' */
+    /* l'ordine di questi blocchi non è a caso: lo schema li vuole cosi' */
     if(+f.ritenuta_perc){
       /* 9 agosto 2026 — RT01 = persona fisica, RT02 = persona giuridica.
          Era fisso a RT02: uno studio individuale (la gran parte dei tecnici)
-         e' persona fisica e il file usciva con il tipo sbagliato.
+         è persona fisica e il file usciva con il tipo sbagliato.
          Si distingue dal codice fiscale: 16 caratteri = persona fisica. */
       const _cfAz=String(az.cod_fiscale||"").replace(/\s/g,"");
       const _tipoRit=(_cfAz.length===16)?"RT01":(az.piva&&_cfAz===String(az.piva)?"RT02":"RT01");
@@ -3248,7 +3266,7 @@
       x+='        </DatiRitenuta>\n';
     }
     /* la cassa previdenziale: lo SDI la vuole qui, con il codice della cassa.
-       Va anche sommata all'imponibile del riepilogo IVA, piu' sotto. */
+       Va anche sommata all'imponibile del riepilogo IVA, più sotto. */
     if(+f.cassa_perc&&c.cassa){
       x+='        <DatiCassaPrevidenziale>\n';
       x+='          <TipoCassa>'+xesc(f.cassa_tipo||"TC22")+'</TipoCassa>\n';
@@ -3267,7 +3285,7 @@
     }
     /* qui va il valore del DOCUMENTO, non quello che incassi: lo SDI lo
        confronta con la somma di imponibile e imposta, e se ci sottrai la
-       ritenuta il file viene segnalato. La ritenuta si toglie piu' sotto,
+       ritenuta il file viene segnalato. La ritenuta si toglie più sotto,
        nell'importo del pagamento. */
     x+='        <ImportoTotaleDocumento>'+xnum(c.totale)+'</ImportoTotaleDocumento>\n';
     if((f.note||"").trim()) x+='        <Causale>'+xesc(xtaglia(f.note,200))+'</Causale>\n';
@@ -3286,13 +3304,13 @@
       x+='        <PrezzoUnitario>'+xnum(r.prezzo)+'</PrezzoUnitario>\n';
       x+='        <PrezzoTotale>'+xnum(imp)+'</PrezzoTotale>\n';
       x+='        <AliquotaIVA>'+xnum(al)+'</AliquotaIVA>\n';
-      /* quando l'IVA e' zero lo SDI vuole sapere perche': in forfettario e'
+      /* quando l'IVA è zero lo SDI vuole sapere perché: in forfettario è
          il codice N2.2, "operazione non soggetta" */
       if(al===0) x+='        <Natura>N2.2</Natura>\n';
       x+='      </DettaglioLinee>\n';
     });
     /* cassa e spese non sono righe, ma fanno imponibile: vanno sommate al
-       riepilogo dell'aliquota che comanda, se no lo SDI scarta il file perche'
+       riepilogo dell'aliquota che comanda, se no lo SDI scarta il file perché
        la somma dei riepiloghi non torna con il totale del documento. */
     if(c.cassa||c.spese){
       const alp=forf?0:c.aliqPrev;
@@ -3350,7 +3368,7 @@
   }
 
   /* ---- note del giorno: prima vivevano solo nel browser (localStorage),
-     ora su gest_note cosi' si vedono da tutti i dispositivi e non si perdono.
+     ora su gest_note così si vedono da tutti i dispositivi e non si perdono.
      Se la tabella non c'e' ancora (migrazione SQL non eseguita) si torna al
      vecchio modo e si avvisa: nessuna nota va persa. ---- */
   let noteCache={}, noteSupaOk=true, noteAvvisato=false;
@@ -3392,7 +3410,7 @@
     let html=dow.map(d=>`<div class="cal-dow">${d}</div>`).join("");
     for(let i=0;i<lead;i++)html+=`<div class="cal-cell empty"></div>`;
     /* Prima nella cella c'erano solo pallini: si vedeva "quanti", mai "quali".
-       Ora ogni lavoro e' una righina con la barretta di stato e il titolo troncato,
+       Ora ogni lavoro è una righina con la barretta di stato e il titolo troncato,
        gli stessi colori della tabella Lavori. Oltre il quarto: "+N". */
     const MAX_CELLA=4;
     for(let d=1;d<=days;d++){
@@ -3427,7 +3445,7 @@
   }
 
   /* Condomini e Squadra sono rubriche: non hanno stati, quindi niente viste.
-     Al loro posto la sola ricerca, che qui e' l'unico modo utile di restringere. */
+     Al loro posto la sola ricerca, che qui è l'unico modo utile di restringere. */
   let cliQ="", dipQ="";
   function cliVoci(c){
     return [
@@ -3438,8 +3456,8 @@
     ];
   }
   /* l'indirizzo completo del cliente, rimesso insieme dai pezzi.
-     Se citta' e CAP non sono compilati resta quello che c'era prima: chi ha
-     gia' scritto tutto dentro "Via e numero" non perde niente. */
+     Se città e CAP non sono compilati resta quello che c'era prima: chi ha
+     già scritto tutto dentro "Via e numero" non perde niente. */
   function cliIndirizzo(c){
     if(!c)return "";
     const via=(c.indirizzo||"").trim();
@@ -3567,7 +3585,7 @@
   const SQ_RUOLO={operaio:"Operaio",preposto:"Preposto",segretaria:"Segretaria"};
 
   /* ---- SCHEDA PERSONA: mansione, costo orario, documenti di sicurezza ----
-     La mansione e' il mestiere in cantiere (muratore, manovale...), diversa dal
+     La mansione è il mestiere in cantiere (muratore, manovale...), diversa dal
      "ruolo nell'app" che decide solo cosa vede l'operatore sul telefono.
      Il costo orario servira' per il costo della manodopera sui lavori.
      Le scadenze (visita medica, formazione, documenti) generano gli avvisi. */
@@ -3602,7 +3620,7 @@
     return '<span class="stato da_fare" style="background:#fdf3e3;color:#b26a00" title="'+esc(a.map(function(x){return x.lab+" fra "+x.giorni+" gg";}).join(", "))+'">In scadenza</span>';
   }
   /* Legge tutti i campi nuovi dal modulo. Vuoto diventa null, non stringa vuota:
-     cosi' le colonne data non danno errore su Postgres. */
+     così le colonne data non danno errore su Postgres. */
   function dipCampiExtra(){
     const v=function(id){const e=$(id);return e?String(e.value||"").trim():"";};
     const n=function(x){x=String(x||"").replace(",",".").trim();if(x==="")return null;const f=parseFloat(x);return isNaN(f)?null:f;};
@@ -3641,7 +3659,7 @@
     const av=dipAvvisi(o);
     const scaduti=av.filter(x=>x.scaduto);
     /* la barretta dice lo stato dei documenti senza dover leggere:
-       rossa se qualcosa e' gia' scaduto, arancione se sta per scadere */
+       rossa se qualcosa è già scaduto, arancione se sta per scadere */
     const tono=scaduti.length?"t-err":(av.length?"t-attesa":(o.attivo?"t-ok":"t-neutro"));
     const nota=scaduti.length
       ? "⚠ "+esc(scaduti.map(x=>x.lab).join(", "))+" scadut"+(scaduti.length>1?"i":"o")
@@ -3800,7 +3818,7 @@
   /* giorni da oggi alla data ds (positivo = nel futuro) */
   function _giorniA(ds){if(!ds)return null;const[y,m,d]=ds.split("-").map(Number);const a=new Date(y,m-1,d);const o=new Date();o.setHours(0,0,0,0);return Math.round((a-o)/86400000);}
   /* Mezzi e attrezzature stanno in due sezioni diverse: un furgone e un
-     ponteggio non hanno niente in comune. La lettura dal database e' una
+     ponteggio non hanno niente in comune. La lettura dal database è una
      sola (mezziCache tiene tutto, serve anche altrove), poi ogni sezione
      disegna solo la sua categoria. */
   async function caricaMezziCache(){
@@ -3882,7 +3900,7 @@
   }
   const MEZZI_VISTE=[{k:"tutti",lab:"Tutti"},{k:"manutenzione",lab:"In manutenzione"}];
   /* colonna "Prossima scadenza": il tipo sopra, il quando sotto.
-     Rosso se e' gia' passata, ambra se casca entro 30 giorni: prima il rosso
+     Rosso se è già passata, ambra se casca entro 30 giorni: prima il rosso
      scattava solo col conteggio delle scadute e l'ambra a 7 giorni. */
   function cellaScadenza(sc){
     if(!sc||!sc.prossima_data){
@@ -3901,7 +3919,7 @@
                       ?(ruoloUtente==='professionista'?"🔧 Strumento":"🔧 Attrezzatura")
                       :"🚚 Mezzo");
     /* la barretta a sinistra dice come sta il mezzo senza leggere:
-       rossa se ha scadenze gia' passate, arancione se una arriva entro 7 giorni */
+       rossa se ha scadenze già passate, arancione se una arriva entro 7 giorni */
     let scTesto="", tono="t-ok";
     if(sc&&sc.scadute>0){
       tono="t-err";
@@ -3931,11 +3949,11 @@
   }
   function mezzoForm(m,catIniziale){
     const isNew=!m;m=m||{};
-    /* Uno studio non ha mezzi con la targa: quello che registra qui e' sempre
-       uno strumento. Quindi per lui la categoria e' decisa (attrezzatura) e la
+    /* Uno studio non ha mezzi con la targa: quello che registra qui è sempre
+       uno strumento. Quindi per lui la categoria è decisa (attrezzatura) e la
        spunta "e' un'attrezzatura" non compare: sceglierebbe fra due cose di cui
        una non esiste nel suo menu. */
-    /* Se sta modificando una riga che gia' esiste, la categoria salvata NON si
+    /* Se sta modificando una riga che già esiste, la categoria salvata NON si
        tocca: un mezzo registrato prima resta un mezzo, non diventa uno
        strumento di nascosto. La forzatura vale solo per le righe nuove. */
     const cat=(ruoloUtente==='professionista')
@@ -3943,7 +3961,7 @@
       : (m.categoria||catIniziale||"mezzo");
     const attrezzo=(cat==="attrezzatura");
     const STRU=(ruoloUtente==='professionista')&&attrezzo;
-    /* i tipi gia' usati diventano suggerimenti: non un elenco chiuso */
+    /* i tipi già usati diventano suggerimenti: non un elenco chiuso */
     const tipiUsati=[...new Set(mezziCache.map(x=>(x.tipo||"").trim()).filter(Boolean))].sort();
     const tipoSugg=tipiUsati.map(t=>`<option value="${esc(t)}">`).join("");
     const statoOpts=Object.keys(MEZZO_STATI)
@@ -3985,7 +4003,7 @@
     const nome=$("#m-nome").value.trim();if(!nome){toast("Scrivi il nome del mezzo");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     /* per lo studio la spunta non c'e': la categoria viaggia nel campo nascosto
-       messo dal modulo, cosi' il salvataggio non deve indovinarla */
+       messo dal modulo, così il salvataggio non deve indovinarla */
     const ckAttr=$("#m-attrezzo"), catFissa=$("#m-cat");
     const categoria=ckAttr?(ckAttr.checked?"attrezzatura":"mezzo")
                           :((catFissa&&catFissa.value)||"attrezzatura");
@@ -4006,7 +4024,7 @@
      (ricariche/spese). Il saldo NON si scrive mai a mano: arriva sempre
      dalla vista gest_carte_saldo (ricariche - spese). DDL: nella chat con
      l'utente, stesso schema di permessi di gest_mezzi (owner + team_read,
-     piu' un team_insert per i movimenti riservato al dipendente titolare
+     più un team_insert per i movimenti riservato al dipendente titolare
      della carta — vedi RLS "gest_carte_movimenti_team_insert").
      ============================================================ */
   let carteCache=[];
@@ -4053,7 +4071,7 @@
     const isNew=!c;c=c||{};
     const dipOpts=`<option value="">— nessuno —</option>`+dipCache.map(d=>`<option value="${d.id}" ${String(c.dipendente_id||"")===String(d.id)?"selected":""}>${esc(d.nome)}</option>`).join("");
     /* 9 agosto 2026 — finestra grande a due colonne. Tolti gli stili scritti a
-       mano riga per riga: il testo grande nelle finestre lo fa gia' il CSS
+       mano riga per riga: il testo grande nelle finestre lo fa già il CSS
        (blocco "CAMPI DA COMPILARE" in gestionale.css), uguale per tutte. */
     openSheetGrande(isNew?"Nuova carta":"Modifica carta",
       `<div class="sh-cols"><div class="sh-col">
@@ -4175,7 +4193,7 @@
      RIFORNIMENTI — un pieno per riga, agganciato al MEZZO.
      Le carte restano quello che sono (il portafoglio del dipendente):
      quando si paga con la carta creiamo anche il movimento di spesa e ci
-     teniamo il suo id in movimento_id, cosi' se cancelli il rifornimento
+     teniamo il suo id in movimento_id, così se cancelli il rifornimento
      sparisce anche dalla carta e il saldo resta giusto.
      Tabella: gest_rifornimenti + vista gest_mezzi_carburante.
      ============================================================ */
@@ -4327,7 +4345,7 @@
   /* ============================================================
      COSA TI MANCA? — le richieste dell'impresa (gest_richieste).
      Lei scrive, noi rispondiamo cambiando lo stato dal pannello admin.
-     Lo stato non lo puo' toccare: le regole del database glielo impediscono.
+     Lo stato non lo può toccare: le regole del database glielo impediscono.
      ============================================================ */
   const RQ_STATI={
     ricevuta:{lab:"Ricevuta",bg:"#eef2f7",fg:"#5b6b80"},
@@ -4782,7 +4800,7 @@
 
   /* SCADENZARIO (solo professionista): tabella gest_scadenze, isolamento user_id+mestiere_id come gest_lavori/gest_clienti */
   /* 9 agosto 2026 — elenco allungato per gli studi: le date che un tecnico non
-     puo' bucare non sono solo "che pratica e'", ma "che cosa scade".
+     può bucare non sono solo "che pratica e'", ma "che cosa scade".
      Per imprese e artigiani l'elenco resta identico a prima. */
   const tipiScadenza=()=>ruoloUtente==='professionista'
     ?["Presentazione pratica","Integrazione richiesta dal Comune","Silenzio-assenso",
@@ -4807,14 +4825,14 @@
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📅</div><p>Nessuna scadenza</p><small>Accedi per gestire lo scadenzario</small></div>`;return;}
     const mid=curMestiere();
     const [{data:sc},{data:cl},{data:mz},{data:lvNomi}]=await Promise.all([
-      /* "*" invece dell'elenco fisso: se sql/gest-scadenze-pratiche.sql non e' ancora
+      /* "*" invece dell'elenco fisso: se sql/gest-scadenze-pratiche.sql non è ancora
          stato eseguito, le colonne nuove semplicemente non arrivano e la sezione
-         non si rompe (stessa scelta gia' fatta per le pratiche). */
+         non si rompe (stessa scelta già fatta per le pratiche). */
       sb.from("gest_scadenze").select("*").eq("user_id",sbUid).eq("mestiere_id",mid).order("data_scadenza",{ascending:true}),
       sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
       sb.from("gest_mezzi").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
-      /* i nomi delle pratiche si leggono qui e non da lavCache: lavCache e' piena
-         solo se l'utente ha gia' aperto la sezione Pratiche, altrimenti ogni
+      /* i nomi delle pratiche si leggono qui e non da lavCache: lavCache è piena
+         solo se l'utente ha già aperto la sezione Pratiche, altrimenti ogni
          scadenza collegata sembrerebbe (ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)") pur esistendo. */
       sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",mid)
     ]);
@@ -4826,7 +4844,7 @@
 
     /* SCADENZE DELLE PERSONE — non sono righe di gest_scadenze.
        Si leggono dalle date della scheda persona (gest_operatori) e compaiono
-       qui in sola lettura: si risolvono aggiornando la data nella scheda, cosi'
+       qui in sola lettura: si risolvono aggiornando la data nella scheda, così
        il dato resta in un posto solo e non si creano doppioni da tenere allineati. */
     const SCAD_PERSONA=[["visita_medica_scadenza","Visita medica","Sicurezza"],
                         ["formazione_scadenza","Formazione sicurezza","Sicurezza"],
@@ -4957,7 +4975,7 @@
     const pro=ruoloUtente==='professionista';
     const PAROLA=pro?"pratica":"lavoro";
     /* elenco pratiche/lavori del reparto: la scadenza si attacca a quella giusta.
-       Le piu' recenti in cima, massimo 100: oltre non serve e la tendina resta corta. */
+       Le più recenti in cima, massimo 100: oltre non serve e la tendina resta corta. */
     let lv=[];
     if(sb&&sbUid){
       const {data:dl}=await sb.from("gest_lavori").select("id,descrizione,dove,data_prevista")
@@ -5009,9 +5027,9 @@
     const avvisa=$("#s-avvisa")?!!$("#s-avvisa").checked:true;
     const note=$("#s-note").value.trim();
     const row={titolo,tipo_pratica,cliente_id,mezzo_id,lavoro_id,data_scadenza,note,avvisa};
-    /* Se sql/gest-scadenze-pratiche.sql non e' ancora stato eseguito, le colonne
+    /* Se sql/gest-scadenze-pratiche.sql non è ancora stato eseguito, le colonne
        nuove non esistono: invece di far fallire tutto il salvataggio le tolgo una
-       alla volta e riprovo (stessa scelta gia' fatta nei Dati azienda). */
+       alla volta e riprovo (stessa scelta già fatta nei Dati azienda). */
     const OPZ=["lavoro_id","avvisa"];
     const tolte=[];
     async function prova(){
@@ -5035,14 +5053,14 @@
 
   /* FORM LAVORO (nessun campo "servizio": il reparto è già il pannello) */
   /* ===== 6 agosto 2026 — Dati della pratica (solo studi professionali) =====
-     Per un'impresa un lavoro e' cosa/dove/quando. Per un geometra la pratica ha
+     Per un'impresa un lavoro è cosa/dove/quando. Per un geometra la pratica ha
      anche il tipo, il Comune, il protocollo e i dati catastali.
      Il blocco compare SOLO se ruoloUtente === 'professionista': per tutti gli
      altri la funzione restituisce stringa vuota e il form resta identico a prima.
      Colonne DB: sql/gest-pratiche-professionisti.sql */
   const PRATICA_TIPI=["","CILA","CILAS","SCIA","SCIA alternativa al PdC","Permesso di Costruire","Autorizzazione paesaggistica","Agibilita'","Sanatoria","Accatastamento","Voltura","Altro"];
   const PRATICA_STATI=[["da_preparare","Da preparare"],["depositata","Depositata"],["istruttoria","In istruttoria"],["integrazioni","Integrazioni richieste"],["approvata","Approvata"],["archiviata","Archiviata"]];
-  /* dentroBox=true: il riquadro che lo contiene ha gia' il suo titolo, quindi
+  /* dentroBox=true: il riquadro che lo contiene ha già il suo titolo, quindi
      qui si salta l'intestazione interna (evita due titoli uno sull'altro). */
   function bloccoPratica(job,dentroBox){
     if(ruoloUtente!=='professionista')return "";
@@ -5070,8 +5088,8 @@
         </div>
       </div>`;
   }
-  /* Legge i campi della pratica dal form. Se non e' un professionista
-     restituisce un oggetto vuoto, cosi' non finisce niente nel salvataggio. */
+  /* Legge i campi della pratica dal form. Se non è un professionista
+     restituisce un oggetto vuoto, così non finisce niente nel salvataggio. */
   function leggiCampiPratica(){
     if(ruoloUtente!=='professionista')return {};
     const v=id=>{const e=$("#"+id);return e?e.value.trim():"";};
@@ -5088,7 +5106,7 @@
   }
   /* Le colonne della pratica potrebbero non essere ancora state create su Supabase.
      In quel caso PostgREST risponde 400 e si perderebbe TUTTO il salvataggio:
-     qui si riprova senza quei campi, cosi' il lavoro si salva comunque.
+     qui si riprova senza quei campi, così il lavoro si salva comunque.
      (Stessa lezione della colonna "condivisibile" dei preventivi.) */
   function eColonnaPraticaMancante(err){
     const m=(err&&err.message)||"";
@@ -5105,7 +5123,7 @@
     const jid=job?job.id:uid();
     job=job||Object.assign({id:jid,stato:"da_fare",fattStato:"none",dataPrevista:presetDate||""},preset||{});
     editing={id:jid,foto:(job.foto||[]).slice(),supa:!!supa,fattura:!!fattura};
-    fotoSupa={};   /* registro delle foto su Supabase: e' del lavoro aperto, non va ereditato */
+    fotoSupa={};   /* registro delle foto su Supabase: è del lavoro aperto, non va ereditato */
     if(supa){
       /* 9 agosto 2026 — finestra GRANDE a due colonne anche qui.
          Prima era la finestrella piccola: con i "Dati della pratica" in fondo
@@ -5215,8 +5233,8 @@
      Un tecnico che salva una pratica con una data ha appena scritto una cosa
      da non dimenticare. Invece di lasciargliela ricopiare a mano nello
      scadenzario, gliela propongo: decide sempre lui con Si'/No.
-     Si propone SOLO se: e' un professionista, c'e' una data non passata, e su
-     quella pratica non c'e' gia' una scadenza per quella stessa data (cosi'
+     Si propone SOLO se: è un professionista, c'e' una data non passata, e su
+     quella pratica non c'e' già una scadenza per quella stessa data (così
      salvando due volte non chiede due volte). */
   async function proponiScadenzaPratica(lavId,dati){
     try{
@@ -5248,9 +5266,9 @@
   }
 
   /* ===== 9 agosto 2026 — Scadenze dentro la scheda della pratica =====
-     Per un tecnico la pratica NON e' una riga di lavoro: e' un fascicolo con
+     Per un tecnico la pratica NON è una riga di lavoro: è un fascicolo con
      delle date che non si possono bucare. Qui, dentro la scheda, si vedono le
-     scadenze gia' collegate e se ne aggiunge una senza uscire e senza dover
+     scadenze già collegate e se ne aggiunge una senza uscire e senza dover
      poi ricordarsi di ricollegarla.
      Compare SOLO ai professionisti: per imprese e artigiani la funzione
      restituisce stringa vuota e la finestra resta identica a prima. */
@@ -5364,7 +5382,7 @@
       const obj=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
         descrizione,dove:$("#j-dove").value.trim(),data_prevista,operatore_id:operatore_id||null,importo,cliente_id},
         leggiCampiPratica());
-      /* niente scorciatoia "nasce gia' fatturato": la fattura si crea dalla sua sezione */
+      /* niente scorciatoia "nasce già fatturato": la fattura si crea dalla sua sezione */
       let {data,error}=await sb.from('gest_lavori').insert(obj).select('id').single();
       let avvisoPratica=false;
       if(error&&eColonnaPraticaMancante(error)){
@@ -5391,7 +5409,7 @@
         cliente_id:$("#j-cli").value||null,
         stato:segVal("j-stato"),
         importo:+($("#j-imp").value)||0,
-        /* fatt_stato non si scrive piu' da qui: e' il riflesso della fattura */
+        /* fatt_stato non si scrive più da qui: è il riflesso della fattura */
         lavoro_svolto:$("#j-svolto").value.trim()||null,
         note:$("#j-note").value.trim()||null,
         ore:parseFloat($("#j-ore").value)||null
@@ -5426,7 +5444,7 @@
       }
       if(error){toast("Errore: "+error.message);return;}
       if(!okJob||!okJob.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-      /* segnata emessa o pagata: e' questo il momento in cui la fattura prende il numero */
+      /* segnata emessa o pagata: è questo il momento in cui la fattura prende il numero */
       /* il numero di fattura lo assegna la fattura quando la emetti, non il lavoro */
       for(const f of (editing.foto||[])){
         if(f.uploaded) continue;
@@ -5465,14 +5483,14 @@
   /* Il cliente adesso finisce dentro una fattura, e la fattura elettronica
      vuole sapere di lui le stesse cose che vuole sapere di te: partita IVA o
      codice fiscale, dove sta di preciso, e dove mandargliela. Stessa finestra
-     grande a due colonne dei Dati azienda: a sinistra chi e' e dove sta,
+     grande a due colonne dei Dati azienda: a sinistra chi è e dove sta,
      a destra il fisco. Tutti i campi nuovi sono facoltativi. */
   function cliForm(c,tipoNuovo){
     const isNew=!c;c=c||{};
     if(isNew&&tipoNuovo)c.tipo=tipoNuovo;
     const priv=ruoloUtente==='professionista';
-    /* che tipo di cliente e': privato (il caso piu' comune), azienda o condominio.
-       Cambia solo le parole del modulo, non i campi: cosi' nessuno resta bloccato. */
+    /* che tipo di cliente è: privato (il caso più comune), azienda o condominio.
+       Cambia solo le parole del modulo, non i campi: così nessuno resta bloccato. */
     const tipoCli=(c.tipo==='azienda'||c.tipo==='condominio')?c.tipo:'privato';
     const LAB_T={privato:{nome:'Nome e cognome',ph:'Es. Mario Rossi',ref:'Referente (se diverso)'},
                  azienda:{nome:'Ragione sociale',ph:'Es. Rossi Costruzioni Srl',ref:'Referente'},
@@ -5538,7 +5556,7 @@
        <button class="btn-primary b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button>`);
   }
   /* Clic su Privato / Azienda / Condominio: cambia solo le parole del modulo.
-     Nessun campo sparisce, cosi' nessuno resta bloccato se il suo caso e' strano. */
+     Nessun campo sparisce, così nessuno resta bloccato se il suo caso è strano. */
   window.setTipoCliente=function(btn){
     const box=btn.closest(".tipo-cli");if(!box)return;
     const t=btn.dataset.t||"privato";
@@ -5564,9 +5582,9 @@
 
 
   /* ================= DOCUMENTI DEL CLIENTE =================
-     Riusa il deposito e la tabella che gia' portano i PDF delle fatture
+     Riusa il deposito e la tabella che già portano i PDF delle fatture
      (bucket gestionale-foto + gest_foto): cambia solo il collegamento,
-     che qui e' cliente_id invece di fattura_id.
+     che qui è cliente_id invece di fattura_id.
      Serve per tenere insieme al cliente il verbale del condominio, il
      preventivo firmato, il capitolato: le carte che oggi si perdono. */
   let docCliId=null, docCliNome="", docCommAttivo=false;
@@ -5599,13 +5617,13 @@
 
   /* ================= COMMERCIALISTA =================
      Un reparto suo, di fianco ai Dati azienda. I dati stanno nella stessa
-     riga gest_azienda (colonne comm_*): il commercialista e' uno solo per
+     riga gest_azienda (colonne comm_*): il commercialista è uno solo per
      l'impresa, non serve una tabella a parte.
 
      NOTA su cosa NON serve: se il commercialista ha la delega al cassetto
      fiscale — e ormai ce l'hanno quasi tutti — le fatture elettroniche le
      scarica da solo dall'Agenzia delle Entrate. Mandargliele sarebbe roba
-     che ha gia'. Quello che NON gli arriva sono scontrini, ricevute di carta
+     che ha già. Quello che NON gli arriva sono scontrini, ricevute di carta
      e spese di cassa: per quelli c'e' la sezione documenti qui sotto. */
   async function commForm(){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -5908,9 +5926,9 @@
   }
   function dipForm(d){
     const isNew=!d;d=d||{};
-    /* 9 agosto 2026 — finestra grande. Qui il campo e' uno solo, quindi niente
+    /* 9 agosto 2026 — finestra grande. Qui il campo è uno solo, quindi niente
        due colonne: sarebbero mezze vuote. Il modulo completo della persona
-       (telefono, documenti, scadenze) e' squadraForm. */
+       (telefono, documenti, scadenze) è squadraForm. */
     openSheetGrande(isNew?"Nuova persona":"Rinomina persona",
       `<div class="sh-b">
         <div class="sh-tit">Come si chiama</div>
@@ -5972,7 +5990,7 @@
       n=(data||[]).length;
     }
     /* la parola giusta per chi legge: il traduttore lavoro->pratica gira solo
-       per i professionisti, quindi la stringa di partenza non puo' essere gia'
+       per i professionisti, quindi la stringa di partenza non può essere già
        in linguaggio da studio tecnico (9/8/2026) */
     const _pl=(ruoloUtente==='professionista')?(n===1?"pratica":"pratiche"):(n===1?"lavoro":"lavori");
     const msg=n?`Stai per eliminare il reparto «${p.nome}» e ${n===1?"il suo":"i suoi"} ${n} ${_pl}. L'operazione è definitiva. Continuare?`:`Stai per eliminare il reparto «${p.nome}». Continuare?`;
@@ -5991,7 +6009,7 @@
   /* Regimi fiscali della fattura elettronica. Ne tengo pochi: sono quelli che
      usa davvero un'impresa edile o un artigiano. Gli altri li sa il commercialista. */
   const REGIMI=[
-    ["RF01","RF01 — Ordinario (il piu' comune)"],
+    ["RF01","RF01 — Ordinario (il più comune)"],
     ["RF19","RF19 — Forfettario"],
     ["RF02","RF02 — Minimi (vecchio regime)"],
     ["RF17","RF17 — IVA per cassa"],
@@ -5999,8 +6017,8 @@
   ];
 
   /* L'indirizzo completo, messo insieme dai pezzi. Serve ai PDF e alla Mappa.
-     Se citta' e CAP non sono ancora compilati, resta quello che c'era prima:
-     cosi' chi ha gia' scritto tutto dentro "Via e numero" non perde niente. */
+     Se città e CAP non sono ancora compilati, resta quello che c'era prima:
+     così chi ha già scritto tutto dentro "Via e numero" non perde niente. */
   function azIndirizzo(a){
     if(!a)return "";
     const via=(a.indirizzo||"").trim();
@@ -6094,7 +6112,7 @@
       nome:v("#a-nome"),piva:v("#a-piva"),indirizzo:v("#a-ind"),
       tel:v("#a-tel"),email:v("#a-email"),iban:v("#a-iban"),
       num_fatt:(aziendaRow&&aziendaRow.num_fatt!=null)?aziendaRow.num_fatt:1};
-    /* dove sei + dati fiscali: tutti facoltativi. Vuoto = null, cosi' si puo'
+    /* dove sei + dati fiscali: tutti facoltativi. Vuoto = null, così si può
        anche svuotare un campo compilato per sbaglio. */
     row.cod_fiscale    = v("#a-cf").toUpperCase()||null;
     row.cap            = v("#a-cap")||null;
@@ -6111,11 +6129,11 @@
       const cfp=parseInt($("#a-cfp").value,10);
       row.cfp_obiettivo=(cfp>0)?cfp:null;
     }
-    /* patente a crediti: campi facoltativi. Vuoto = null, cosi' si puo' anche
+    /* patente a crediti: campi facoltativi. Vuoto = null, così si può anche
        svuotare un campo compilato per sbaglio.
-       ATTENZIONE (9/8/2026): per gli studi il blocco non compare piu'. Se
+       ATTENZIONE (9/8/2026): per gli studi il blocco non compare più. Se
        scrivessimo lo stesso, i campi assenti risulterebbero vuoti e il
-       salvataggio AZZEREREBBE una patente gia' registrata. Quindi si tocca
+       salvataggio AZZEREREBBE una patente già registrata. Quindi si tocca
        solo se il blocco c'e' davvero. */
     if($("#a-pat-n")||$("#a-pat-d")||$("#a-pat-c")){
       const patN=$("#a-pat-n")?$("#a-pat-n").value.trim():"";
@@ -6147,7 +6165,7 @@
 
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0)+" EUR";
   /* Il vecchio contatore delle fatture (uno solo, sul lavoro, che non
-     ripartiva mai) e' stato tolto: adesso il numero lo assegna la fattura
+     ripartiva mai) è stato tolto: adesso il numero lo assegna la fattura
      quando la emetti, e riparte da 1 ogni anno. Vedi fattAssegnaNumero(). */
 
   async function generaPdf(id){
@@ -6170,12 +6188,12 @@
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
-    /* 9 agosto 2026 — questo NON e' una fattura.
-       La colonna num_fatt non si scrive piu' da nessuna parte (il numero lo
+    /* 9 agosto 2026 — questo NON è una fattura.
+       La colonna num_fatt non si scrive più da nessuna parte (il numero lo
        assegna la fattura vera su gest_fatture), quindi il documento usciva
-       intestato "FATTURA" con scritto "Non ancora emessa" e piu' sotto
+       intestato "FATTURA" con scritto "Non ancora emessa" e più sotto
        "Causale: Fattura n. null". Il file si chiamava fattura-null.pdf.
-       Adesso e' quello che e' davvero: il riepilogo della pratica/lavoro.
+       Adesso è quello che è davvero: il riepilogo della pratica/lavoro.
        Se un giorno servisse la copia di cortesia di una fattura, si prende
        dalla sezione Fatture (fatturaPdf), che sa il numero vero. */
     const _pro=(ruoloUtente==='professionista');
@@ -6253,16 +6271,16 @@
   }
   /* ---- FOTO DEL MODULO: locali (non ancora salvate) + quelle su Supabase ----
      Il blocco foto della scheda lavoro leggeva SOLO l'archivio locale: le foto
-     gia' su Supabase non comparivano piu' dopo un F5, e da un altro dispositivo
+     già su Supabase non comparivano più dopo un F5, e da un altro dispositivo
      mai. gest_lavori non ha una colonna foto, stanno in gest_foto.
      I tipi non coincidono: nel modulo sono "prima"/"dopo", nella tabella
-     "da_fare"/"fatto"/"lavoro". "lavoro" e' quello che scrive l'app operatore
-     dal cantiere, cioe' il caso piu' frequente: va letto insieme a "fatto". */
+     "da_fare"/"fatto"/"lavoro". "lavoro" è quello che scrive l'app operatore
+     dal cantiere, cioè il caso più frequente: va letto insieme a "fatto". */
   const FOTO_TIPO_UI={da_fare:"prima",fatto:"dopo",lavoro:"dopo"};
   let fotoSupa={};   /* id riga gest_foto -> {storage_path} : serve a deleteFoto */
 
   async function deleteFoto(id){
-    /* foto gia' su Supabase: si cancella la riga E il file, in quest'ordine.
+    /* foto già su Supabase: si cancella la riga E il file, in quest'ordine.
        La .select('id') fa da cancello: se la RLS blocca, PostgREST non da'
        errore, tocca zero righe e risponde OK — senza questo controllo la foto
        "sparirebbe" dallo schermo per poi ricomparire al render successivo. */
@@ -6275,8 +6293,8 @@
       let avviso="Foto eliminata";
       if(sup.storage_path&&!(window.cestinoAttivo&&window.cestinoAttivo())){
         const {error:eRm}=await sb.storage.from("gestionale-foto").remove([sup.storage_path]);
-        /* la riga non c'e' piu': il file resta orfano nel bucket, ma la foto
-           e' sparita davvero dall'app. Meglio dirlo che tacere. */
+        /* la riga non c'e' più: il file resta orfano nel bucket, ma la foto
+           è sparita davvero dall'app. Meglio dirlo che tacere. */
         if(eRm)avviso="Riga eliminata, ma il file resta nel bucket: "+eRm.message;
       }
       delete fotoSupa[id];delete fotoCache[id];
@@ -6289,8 +6307,8 @@
     delete fotoCache[id];syncEditingToJob();await save();renderFotoBlocks();renderGalleria();toast("Foto eliminata");
   }
   /* src="" = da riempire dopo (foto locale, hydrateFoto legge da IndexedDB).
-     Per quelle su Supabase l'URL firmato arriva gia' pronto.
-     onerror: se il file non c'e' piu' nel bucket la miniatura sparisce invece
+     Per quelle su Supabase l'URL firmato arriva già pronto.
+     onerror: se il file non c'e' più nel bucket la miniatura sparisce invece
      di restare l'icona di immagine rotta. */
   function fotoThumb(f,withDel,src){
     const opName=f.operatore==="Capo"?"Capo":(dipById(f.operatore)?dipById(f.operatore).nome:"");
@@ -6304,7 +6322,7 @@
   let _fotoRun=0;
   /* video dentro il modulo "Modifica lavoro": a differenza delle foto NON
      si mette in cache come base64 (troppo pesante per file fino a 50 MB),
-     si carica subito su Supabase. Per questo serve gia' un lavoro salvato
+     si carica subito su Supabase. Per questo serve già un lavoro salvato
      (editing.realId): se manca, si avvisa e basta. */
   async function uploadVideoLavoro(file,tipoDb,operatore,inputEl){
     if(!file)return;
@@ -6347,7 +6365,7 @@
     const p=$("#th-prima"),d=$("#th-dopo");if(!p&&!d)return;
     const run=++_fotoRun;   /* se parte un secondo render, il primo non sovrascrive */
     /* 1) subito le locali non ancora salvate: chi ha appena aggiunto una foto
-          la deve vedere senza aspettare la rete. Quelle gia' caricate (uploaded)
+          la deve vedere senza aspettare la rete. Quelle già caricate (uploaded)
           si saltano: arrivano da Supabase, altrimenti si vedrebbero doppie. */
     const loc=(editing.foto||[]).filter(f=>!f.uploaded);
     const dis=(box,tipo,extra)=>{if(box)box.innerHTML=loc.filter(f=>f.tipo===tipo).map(f=>fotoThumb(f,true)).join("")+(extra||"");};
@@ -6510,7 +6528,7 @@
        - i chilometri su strada e i minuti arrivano da OSRM
      Nominatim chiede al massimo una richiesta al secondo: per questo le
      chiamate sono in fila una dietro l'altra e ogni risultato viene messo
-     da parte sul computer, cosi' un indirizzo gia' cercato non si ricerca mai piu'.
+     da parte sul computer, così un indirizzo già cercato non si ricerca mai più.
      ========================================= */
 
   const MP_CACHE_KEY="ti_mappa_cache_v2";
@@ -6545,7 +6563,7 @@
     const q=mpChiave(indirizzo);
     if(!q)return null;
     const C=mpLeggiCache();
-    if(C.punti[q]!==undefined)return C.punti[q];       /* null incluso: gia' cercato e non trovato */
+    if(C.punti[q]!==undefined)return C.punti[q];       /* null incluso: già cercato e non trovato */
     try{
       let url="https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=it&q="+encodeURIComponent(indirizzo);
       /* spingo la ricerca verso la zona dell'ufficio: senza questo, una via che
@@ -6567,7 +6585,7 @@
   }
 
   /* due punti -> chilometri in linea d'aria.
-     E' la stessa identica formula che usa la mappa del sito (cerca-artigiani):
+     È la stessa identica formula che usa la mappa del sito (cerca-artigiani):
      nessun servizio esterno da interrogare, quindi il numero compare subito. */
   function mpDistanzaKm(a,b){
     if(!a||!b)return null;
@@ -6597,7 +6615,7 @@
       const {data:az}=await sb.from("gest_azienda").select("nome,indirizzo").eq("user_id",sbUid).maybeSingle();
       const partenzaTxt=azIndirizzo(az).trim();
       /* Anche senza l'indirizzo dell'ufficio la carta si vede lo stesso, con i pin
-         dei cantieri: mancano solo i chilometri, perche' non c'e' da dove misurarli. */
+         dei cantieri: mancano solo i chilometri, perché non c'e' da dove misurarli. */
       if(avviso)avviso.innerHTML = partenzaTxt
         ? '<div class="mp-ufficio"><span class="mp-u-lab">Ufficio</span><b>'
           +esc(az.nome||"La tua azienda")+'</b><span class="mp-u-ind">'+esc(partenzaTxt)+'</span></div>'
@@ -6610,10 +6628,10 @@
         sb.from("gest_clienti").select("id,nome,indirizzo").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
       ]);
       const cliMap=Object.fromEntries((cli||[]).map(c=>[c.id,c]));
-      /* ATTENZIONE: qui la lista dei lavori NON si puo' chiamare L.
+      /* ATTENZIONE: qui la lista dei lavori NON si può chiamare L.
          Leaflet, la libreria che disegna la carta, si chiama proprio L: chiamando
          L la lista dei lavori le si andava sopra, e L.map("mp-mappa") non creava
-         piu' la carta ma provava a scorrere la lista dei lavori. Da qui l'errore
+         più la carta ma provava a scorrere la lista dei lavori. Da qui l'errore
          «string "mp-mappa" is not a function». */
       let LAV=(lav||[]);
       if(mpVista==="aperti")LAV=LAV.filter(l=>l.stato!=="fatto");
@@ -6640,7 +6658,7 @@
         if(mpLayer)mpLayer.remove();
         mpLayer=L.layerGroup().addTo(mpMappa);
         setTimeout(()=>{try{mpMappa.invalidateSize();}catch(e){}},100);
-        /* se dopo 6 secondi non e' arrivata nessuna tessera, la carta e' bloccata */
+        /* se dopo 6 secondi non è arrivata nessuna tessera, la carta è bloccata */
         setTimeout(()=>{
           try{
             const t=document.querySelectorAll("#mp-mappa img.leaflet-tile-loaded").length;
@@ -6687,8 +6705,8 @@
         const q=v.ind+(haComune?", Italia":(comuneUff?", "+comuneUff+", Italia":", Italia"));
         const pt=await mpTrovaPunto(q,pPart);
         let km=(pt&&pPart)?mpDistanzaKm(pPart,pt):null;
-        /* rete di sicurezza: se l'indirizzo era incompleto e il risultato e'
-           lontanissimo, non e' il posto giusto. Meglio dire "non lo so". */
+        /* rete di sicurezza: se l'indirizzo era incompleto e il risultato è
+           lontanissimo, non è il posto giusto. Meglio dire "non lo so". */
         const sospetto=(!haComune&&km!=null&&km>80);
         if(sospetto)km=null;
         righe.push({...v,p:sospetto?null:pt,km,ipotesi,sospetto});
@@ -6745,7 +6763,7 @@
         +'</div>';
     }catch(err){
       /* Se qualcosa va storto voglio vederlo scritto qui, non restare davanti a
-         una pagina vuota senza sapere perche'. */
+         una pagina vuota senza sapere perché. */
       const m=(err&&(err.message||err.toString()))||"errore sconosciuto";
       if(box)box.innerHTML='<div class="mp-avviso"><b>La mappa si &egrave; fermata.</b><br>'
         +esc(m)+'<br><br>Manda questa schermata ad Alessio: con questa scritta si capisce cosa sistemare.</div>';
@@ -6966,9 +6984,9 @@
     speseLavoroId=lavoroId;
     const wrap=$("#spese-wrap");if(!wrap||!sb||!sbUid)return;
     wrap.style.display="block";
-    /* created_at serve al grafico: la colonna "data" e' nullable (l'inserimento non la passa
+    /* created_at serve al grafico: la colonna "data" è nullable (l'inserimento non la passa
        e arriva dal default del DB), quindi se manca la data della spesa si usa quella. */
-    /* fornitore_id e' arrivato con la Fase 2 dei Fornitori: se la colonna
+    /* fornitore_id è arrivato con la Fase 2 dei Fornitori: se la colonna
        manca (migrazione non eseguita) si rilegge senza, niente si rompe */
     let conForn=true;
     let r=await sb.from("gest_spese").select("id,descrizione,importo,data,created_at,fornitore_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("created_at");
@@ -7010,16 +7028,16 @@
 
   /* ---- ANDAMENTO SPESE / PREVENTIVO (dentro il lavoro) ----
      Il Report racconta com'e' andata a cose fatte; qui serve capire se il cantiere
-     sta sforando MENTRE e' ancora aperto. Si disegna solo dove c'e' davvero un
+     sta sforando MENTRE è ancora aperto. Si disegna solo dove c'e' davvero un
      andamento da leggere: almeno 3 spese e almeno 15 giorni fra la prima e l'ultima.
      Su un lavoro di mezza giornata sarebbe soltanto rumore.
-     SVG scritto a mano di proposito: una libreria di grafici peserebbe piu' di
+     SVG scritto a mano di proposito: una libreria di grafici peserebbe più di
      tutto il resto della pagina per una linea e un tratteggio. */
   const AND_MIN_SPESE=3, AND_MIN_GIORNI=15;
-  /* la data buona della spesa: "data" se c'e', altrimenti il giorno in cui e' stata registrata */
+  /* la data buona della spesa: "data" se c'e', altrimenti il giorno in cui è stata registrata */
   const _spData=x=>(x.data||String(x.created_at||"").slice(0,10)||"");
   const _diffGG=(a,b)=>Math.round((Date.parse(b+"T00:00:00")-Date.parse(a+"T00:00:00"))/86400000);
-  /* sotto l'80% si e' larghi, fino al 100% si sta stretti, oltre si e' sforato.
+  /* sotto l'80% si è larghi, fino al 100% si sta stretti, oltre si è sforato.
      Senza preventivo non c'e' niente da giudicare: colore neutro. */
   const _colSpesa=p=>p===null?"var(--blu)":p<80?"var(--ok)":p<=100?"var(--attesa)":"var(--err)";
   function renderAndamentoSpese(sp,imp){
@@ -7045,7 +7063,7 @@
     const W=Math.max(280,Math.min(900,wrap.clientWidth||600)), H=180;
     const PL=46,PR=12,PT=14,PB=22;                    /* spazio per le etichette */
     const x0=PL,x1=W-PR,y0=PT,y1=H-PB;
-    const yMax=Math.max(tot,imp||0)*1.08||1;          /* un po' d'aria sopra la linea piu' alta */
+    const yMax=Math.max(tot,imp||0)*1.08||1;          /* un po' d'aria sopra la linea più alta */
     const X=d=>x0+(x1-x0)*(_diffGG(t0,d)/span);
     const Y=v=>y1-(y1-y0)*(v/yMax);
     const LAB='style="fill:var(--testo-3);font-size:11px"';
@@ -7094,13 +7112,13 @@
   }
 
   /* ===== 9 agosto 2026 — IL REGISTRO DELLE ORE =====
-     Il campo "Ore lavorate" da solo e' un numero che nessuno aggiorna: te lo
+     Il campo "Ore lavorate" da solo è un numero che nessuno aggiorna: te lo
      ricordi a fine lavoro e tiri a indovinare. Qui si segna ogni volta che ci
      si mette mano (data, ore, chi, cosa) e il totale si fa da solo.
-     Il totale viene riscritto anche in gest_lavori.ore, cosi' tutto quello che
+     Il totale viene riscritto anche in gest_lavori.ore, così tutto quello che
      c'era prima (Report, riepiloghi, esportazioni) continua a funzionare
      senza sapere niente di questa tabella.
-     La riga che conta e' l'ultima: **quanto rende un'ora su questo lavoro**.
+     La riga che conta è l'ultima: **quanto rende un'ora su questo lavoro**.
      Tabella: sql/gest-ore-e-crediti.sql. Se manca, il riquadro lo dice. */
   let oreLavoroId=null, oreTabellaOk=true;
   function _oreManca(err){
@@ -7146,7 +7164,7 @@
     }).join(""):'<p class="fatt-empty">Nessuna ora registrata.</p>';
 
     /* il campo "Ore lavorate" diventa lo specchio del registro: si scrive da
-       solo e non si tocca piu' a mano, se no i due numeri litigano */
+       solo e non si tocca più a mano, se no i due numeri litigano */
     const campo=$("#j-ore");
     if(campo){
       if(righe.length){campo.value=tot;campo.readOnly=true;campo.title="Somma del registro qui sotto";campo.style.background="var(--sfondo,#f5f6f8)";}
@@ -7196,7 +7214,7 @@
     await _oreSalvaTotale();
     toast("Riga eliminata");
   }
-  /* il totale finisce anche in gest_lavori.ore: e' li' che lo cercano il
+  /* il totale finisce anche in gest_lavori.ore: è li' che lo cercano il
      Report e le esportazioni, che di gest_ore non sanno niente */
   async function _oreSalvaTotale(){
     if(!sbUid||!oreLavoroId)return;
@@ -7228,7 +7246,7 @@
        in mano al cliente diceva 11.000: al telefono si diceva la cifra
        sbagliata. Ora si mostra il totale finito, quello che il cliente legge.
        Per gli studi resta il "da incassare" della parcella (compenso + cassa
-       + spese + IVA - ritenuta): anche li' e' la cifra del documento. */
+       + spese + IVA - ritenuta): anche li' è la cifra del documento. */
     const totCli={};
     prevCache.forEach(function(p){
       const base=tot[p.id]||0;
@@ -7292,7 +7310,7 @@
   }
   /* Preventivi: viste, colore della barretta e verbo della colonna "Quando".
      Il verbo cambia con lo stato ("inviato 3 giorni fa", "creato 3 giorni fa"):
-     la data e' sempre p.data, quello che cambia e' cosa e' successo in quel giorno. */
+     la data è sempre p.data, quello che cambia è cosa è successo in quel giorno. */
   const PREV_VISTE=[
     {k:"tutti",lab:"Tutti"},{k:"bozza",lab:"Bozze"},{k:"inviato",lab:"Inviati"},
     {k:"accettato",lab:"Accettati"},{k:"rifiutato",lab:"Rifiutati"}
@@ -7302,9 +7320,9 @@
   const PREV_VERBO={bozza:"creato",inviato:"inviato",accettato:"accettato",rifiutato:"rifiutato"};
   function prevVoci(p){
     const v=[{lab:"📄 Scarica PDF",action:"prev-pdf",data:{id:p.id}}];
-    /* la lettera d'incarico e' un obbligo di legge per i tecnici: sta accanto al PDF */
+    /* la lettera d'incarico è un obbligo di legge per i tecnici: sta accanto al PDF */
     if(ruoloUtente==='professionista')v.push({lab:"📝 Lettera d'incarico",action:"prev-incarico",data:{id:p.id}});
-    /* per chi lavora in cantiere il gemello e' la conferma d'ordine */
+    /* per chi lavora in cantiere il gemello è la conferma d'ordine */
     else v.push({lab:"📝 Conferma d'ordine",action:"prev-ordine",data:{id:p.id}});
     if(p.stato==="bozza")v.push({lab:"📤 Segna inviato",action:"prev-stato",data:{id:p.id,v:"inviato"}});
     if(p.stato==="bozza"||p.stato==="inviato"){
@@ -7331,11 +7349,11 @@
     return t;
   }
   /* ===== 6 agosto 2026 — LA PARCELLA (solo studi professionali) =====
-     Il preventivo di un'impresa e' la somma delle voci e basta. La parcella no:
+     Il preventivo di un'impresa è la somma delle voci e basta. La parcella no:
        compenso  ->  + cassa (sul compenso)  ->  IVA su (compenso+cassa+spese)
        ->  - ritenuta 20% (SOLO sul compenso)  =  da incassare
-     La cassa e' il "contributo integrativo": 4% Inarcassa (architetti e ingegneri),
-     5% Cassa Geometri e Periti. La ritenuta si applica SOLO se il cliente e'
+     La cassa è il "contributo integrativo": 4% Inarcassa (architetti e ingegneri),
+     5% Cassa Geometri e Periti. La ritenuta si applica SOLO se il cliente è
      sostituto d'imposta (azienda, professionista, condominio): con un privato no.
      Le spese (bolli, diritti) entrano nell'IVA ma NON nella base della ritenuta.
      Colonne DB: sql/gest-parcella-professionisti.sql
@@ -7427,15 +7445,15 @@
   }
 
   /* ===== 9 agosto 2026 — L'IVA nel preventivo di imprese e artigiani =====
-     La FATTURA dell'impresa aveva gia' l'IVA riga per riga; il PREVENTIVO no:
+     La FATTURA dell'impresa aveva già l'IVA riga per riga; il PREVENTIVO no:
      mostrava solo la somma delle voci e il PDF se la cavava con "prezzi IVA
      esclusa". Ma un cliente privato ragiona sul totale finito: un preventivo
-     di 10.000 che in fattura diventa 11.000 e' una lite sicura.
+     di 10.000 che in fattura diventa 11.000 è una lite sicura.
      Riusa la colonna `iva_perc` che c'e' gia' (la usa la parcella): nessun SQL.
-     Retrocompatibile: sui preventivi vecchi iva_perc e' vuota e allora tutto
+     Retrocompatibile: sui preventivi vecchi iva_perc è vuota e allora tutto
      resta esattamente come prima, "IVA esclusa".
-     In edilizia il 10% e' il caso piu' comune (ristrutturazione), il 4% la
-     prima casa: le stesse aliquote gia' usate dalle fatture (IVA_SCELTE). */
+     In edilizia il 10% è il caso più comune (ristrutturazione), il 4% la
+     prima casa: le stesse aliquote già usate dalle fatture (IVA_SCELTE). */
   function bloccoIvaImpresa(p){
     if(ruoloUtente==='professionista')return "";   /* loro hanno la parcella */
     p=p||{};
@@ -7577,7 +7595,7 @@
     closeSheet();rinfresca("preventivi","riepilogo");
     toast(avvisoParcella?(ruoloUtente==='professionista'
             ?"Salvato, ma i dati della parcella NON ci sono: manca la migrazione SQL"
-            :"Salvato, ma l'aliquota IVA NON e' stata registrata: manca un aggiornamento del database"):(id?"Preventivo aggiornato ✔":"Preventivo creato ✔"));
+            :"Salvato, ma l'aliquota IVA NON è stata registrata: manca un aggiornamento del database"):(id?"Preventivo aggiornato ✔":"Preventivo creato ✔"));
   }
   /* Ponte per js/ai-integrazione.js: salva un preventivo generato dall'AI.
      Riusa curMestiere() e la stessa formula del numero progressivo di savePrev. */
@@ -7612,11 +7630,11 @@
   };
   window.gestToast = function(m){ toast(m); };
   /* ===== 9 agosto 2026 — il preventivo accettato non deve fare doppioni =====
-     Prima creava SEMPRE una riga nuova. Il percorso normale di un tecnico e':
+     Prima creava SEMPRE una riga nuova. Il percorso normale di un tecnico è:
      apre la pratica (con Comune, protocollo, catastali) -> fa la parcella ->
      il cliente accetta. Risultato: due pratiche per lo stesso incarico, quella
      buona coi dati e una vuota, che era poi l'unica agganciata alla fattura.
-     Adesso, se c'e' gia' una pratica aperta per quel cliente, chiede. */
+     Adesso, se c'e' già una pratica aperta per quel cliente, chiede. */
   async function prevToLavoro(id){
     const p=prevCache.find(x=>x.id===id);if(!p||!sbUid)return;
     const pro=ruoloUtente==='professionista';
@@ -7638,7 +7656,7 @@
       if(!gconfirm("Il cliente ha accettato? Creo "+(pro?"la pratica":"il lavoro")+" dal preventivo N. "+p.numero+"."))return;
       return _prevCreaLavoro(id,p,tot);
     }
-    /* c'e' gia' qualcosa aperto per quel cliente: si sceglie */
+    /* c'e' già qualcosa aperto per quel cliente: si sceglie */
     openSheetGrande("Preventivo N. "+p.numero+" accettato",
       '<div class="sh-b">'
       +'<div class="sh-tit">A quale '+PAR+' lo collego?</div>'
@@ -7647,7 +7665,9 @@
       +  candidate.map(function(l){return '<option value="'+l.id+'">'+esc(l.descrizione||"(senza nome)")+(l.data_prevista?" — "+fdate(l.data_prevista):"")+'</option>';}).join("")
       +  '<option value="">— creane '+(pro?'una nuova':'uno nuovo')+' —</option>'
       +'</select></div>'
-      +'<p class="sh-nota" style="margin-bottom:0">L\'importo del preventivo ('+eur2(tot)+') viene scritto su quello che scegli.</p>'
+      +'<p class="sh-nota" style="margin-bottom:0">'+(pro
+          ?'Il compenso del preventivo ('+eur2(tot)+') — senza cassa, spese e IVA — diventa l\'importo della pratica.'
+          :'Il totale delle voci del preventivo ('+eur2(tot)+'), IVA esclusa, diventa l\'importo del lavoro.')+'</p>'
       +'</div>',
       '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="ptl-conferma" data-id="'+esc(String(id))+'" data-tot="'+tot+'">Collega</button>');
@@ -7749,11 +7769,11 @@
       y+=hBox+10;
     }else if(p.iva_perc!=null&&p.iva_perc!==""){
       /* 9 agosto 2026 — impresa con l'aliquota indicata: il cliente vede il
-         totale FINITO, non solo l'imponibile. E' la cifra che gli interessa. */
+         totale FINITO, non solo l'imponibile. È la cifra che gli interessa. */
       const perc=+p.iva_perc||0;
       const ivaVal=Math.round(tot*perc)/100;
       /* stessa regola del riquadro nel gestionale e della conferma d'ordine:
-         si somma l'IVA gia' arrotondata, se no i tre documenti dello stesso
+         si somma l'IVA già arrotondata, se no i tre documenti dello stesso
          lavoro escono con totali diversi di un centesimo */
       const finito=Math.round((tot+ivaVal)*100)/100;
       const hBox=perc?30:18;
@@ -7780,9 +7800,9 @@
     doc.setFontSize(7.5);doc.setTextColor(140);
     const ivaIndicata=(!isParcella&&p.iva_perc!=null&&p.iva_perc!=="");
     doc.text(isParcella
-      ? "Preventivo di parcella non vincolante, salvo diversa indicazione nelle note. La ritenuta d'acconto si applica solo se il committente e' sostituto d'imposta."
+      ? "Preventivo di parcella non vincolante, salvo diversa indicazione nelle note. La ritenuta d'acconto si applica solo se il committente è sostituto d'imposta."
       : (ivaIndicata
-        ? "Preventivo non vincolante, salvo diversa indicazione nelle note. I prezzi delle singole voci sono al netto dell'IVA; il totale sopra riportato e' comprensivo di IVA al "+(+p.iva_perc||0)+"%."
+        ? "Preventivo non vincolante, salvo diversa indicazione nelle note. I prezzi delle singole voci sono al netto dell'IVA; il totale sopra riportato è comprensivo di IVA al "+(+p.iva_perc||0)+"%."
         : "Preventivo non vincolante, salvo diversa indicazione nelle note. Prezzi IVA esclusa dove non specificato."),
       M,286,{maxWidth:R-M});
     doc.save((isParcella?"parcella-":"preventivo-")+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
@@ -7790,12 +7810,12 @@
   }
 
   /* ===== 9 agosto 2026 — LETTERA D'INCARICO (solo studi professionali) =====
-     Un tecnico, per legge, deve mettere per iscritto al cliente che cosa fara'
+     Un tecnico, per legge, deve mettere per iscritto al cliente che cosa farà
      e quanto costa (art. 9 comma 4 del DL 1/2012). Molti lo fanno con un file
      Word riscritto ogni volta. Qui la lettera nasce dal preventivo che c'e'
-     gia': stesse voci, stessa parcella, zero cose da ribattere.
+     già: stesse voci, stessa parcella, zero cose da ribattere.
 
-     ATTENZIONE: e' un modello di base, non un parere legale. Le clausole
+     ATTENZIONE: è un modello di base, non un parere legale. Le clausole
      standard vanno fatte leggere una volta al proprio consulente; le parti che
      cambiano da incarico a incarico si scrivono nel modulo qui sotto. */
 
@@ -7817,14 +7837,14 @@
     ["accordi", "Come indicato nelle condizioni particolari"]
   ];
   const INC_PAG_TESTO={
-    "saldo":   "Il compenso sara' corrisposto in un'unica soluzione alla consegna degli elaborati.",
-    "50-50":   "Il compenso sara' corrisposto per il 50% alla sottoscrizione del presente incarico e per il restante 50% alla consegna degli elaborati.",
-    "30-40-30":"Il compenso sara' corrisposto per il 30% alla sottoscrizione del presente incarico, per il 40% durante lo svolgimento delle prestazioni e per il restante 30% alla consegna degli elaborati.",
-    "accordi": "Il compenso sara' corrisposto secondo quanto indicato nelle condizioni particolari."
+    "saldo":   "Il compenso sarà corrisposto in un'unica soluzione alla consegna degli elaborati.",
+    "50-50":   "Il compenso sarà corrisposto per il 50% alla sottoscrizione del presente incarico e per il restante 50% alla consegna degli elaborati.",
+    "30-40-30":"Il compenso sarà corrisposto per il 30% alla sottoscrizione del presente incarico, per il 40% durante lo svolgimento delle prestazioni e per il restante 30% alla consegna degli elaborati.",
+    "accordi": "Il compenso sarà corrisposto secondo quanto indicato nelle condizioni particolari."
   };
 
   async function incaricoForm(id){
-    if(ruoloUtente!=='professionista'){toast("La lettera d'incarico e' per gli studi professionali");return;}
+    if(ruoloUtente!=='professionista'){toast("La lettera d'incarico è per gli studi professionali");return;}
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
     const p=prevCache.find(x=>String(x.id)===String(id));
     if(!p){toast("Preventivo non trovato");return;}
@@ -7916,7 +7936,7 @@
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
     const M=18, R=210-M, L=R-M;
     let y=20;
-    /* salta pagina se non ci sta piu' niente */
+    /* salta pagina se non ci sta più niente */
     const spazio=h=>{ if(y+h>272){doc.addPage();y=20;} };
     /* Si stampa RIGA PER RIGA: un testo lungo (le condizioni particolari le
        scrive l'utente e possono essere lunghe quanto vuole) continua sulla
@@ -8007,7 +8027,7 @@
     doc.text("NETTO A PAGARE",M+2,y+2);
     doc.text(eurPdf(cp.totale),R-2,y+2,{align:"right"});
     y+=9;
-    paragrafo("Il compenso e' stato preventivamente concordato in forma scritta, ai sensi dell'art. 9, comma 4, del D.L. 24 gennaio 2012 n. 1, convertito con L. 27/2012. Sono esclusi oneri, diritti e bolli dovuti a enti terzi, se non espressamente indicati.",8.8,false,90);
+    paragrafo("Il compenso è stato preventivamente concordato in forma scritta, ai sensi dell'art. 9, comma 4, del D.L. 24 gennaio 2012 n. 1, convertito con L. 27/2012. Sono esclusi oneri, diritti e bolli dovuti a enti terzi, se non espressamente indicati.",8.8,false,90);
 
     titoletto("Modalita' di pagamento");
     let testoPag=INC_PAG_TESTO[dati.pagamento]||INC_PAG_TESTO.saldo;
@@ -8021,17 +8041,17 @@
     }
 
     titoletto("Obblighi del Committente");
-    paragrafo("Il Committente si impegna a fornire tempestivamente al Professionista tutta la documentazione necessaria (titoli di proprieta', visure, planimetrie, precedenti pratiche edilizie) e a consentire l'accesso ai luoghi per i sopralluoghi necessari.");
+    paragrafo("Il Committente si impegna a fornire tempestivamente al Professionista tutta la documentazione necessaria (titoli di proprietà, visure, planimetrie, precedenti pratiche edilizie) e a consentire l'accesso ai luoghi per i sopralluoghi necessari.");
 
     titoletto("Recesso");
-    paragrafo("Ciascuna delle parti puo' recedere dal presente incarico dandone comunicazione scritta all'altra. In caso di recesso, al Professionista spetta il compenso per le prestazioni gia' svolte fino a quel momento, oltre al rimborso delle spese sostenute.");
+    paragrafo("Ciascuna delle parti può recedere dal presente incarico dandone comunicazione scritta all'altra. In caso di recesso, al Professionista spetta il compenso per le prestazioni già svolte fino a quel momento, oltre al rimborso delle spese sostenute.");
 
     titoletto("Trattamento dei dati personali");
-    paragrafo("Le parti si autorizzano reciprocamente al trattamento dei dati personali per le sole finalita' connesse all'esecuzione del presente incarico, ai sensi del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003 come modificato.");
+    paragrafo("Le parti si autorizzano reciprocamente al trattamento dei dati personali per le sole finalità connesse all'esecuzione del presente incarico, ai sensi del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003 come modificato.");
 
     if(dati.foro){
       titoletto("Foro competente");
-      paragrafo("Per ogni controversia relativa al presente incarico sara' competente in via esclusiva il Foro di "+dati.foro+".");
+      paragrafo("Per ogni controversia relativa al presente incarico sarà competente in via esclusiva il Foro di "+dati.foro+".");
     }
 
     if(dati.note){
@@ -8040,14 +8060,14 @@
     }
 
     /* --- firme ---
-       Il blocco firme e' UNO SOLO: data, righe di firma e clausole 1341/1342
+       Il blocco firme è UNO SOLO: data, righe di firma e clausole 1341/1342
        stanno insieme o vanno tutte sulla pagina dopo. Firme su un foglio e
-       clausole sul foglio successivo non avrebbero senso: e' proprio
+       clausole sul foglio successivo non avrebbero senso: è proprio
        l'accostamento che l'art. 1341 c.c. richiede.
-       La larghezza del testo delle clausole e' 70 mm, quanto la colonna che
-       parte da R-70: prima era piu' larga della colonna e usciva dal foglio. */
+       La larghezza del testo delle clausole è 70 mm, quanto la colonna che
+       parte da R-70: prima era più larga della colonna e usciva dal foglio. */
     doc.setFont("helvetica","normal");doc.setFontSize(8);
-    const clausole=doc.splitTextToSize("Ai sensi degli artt. 1341 e 1342 c.c. il Committente dichiara di approvare specificamente le clausole relative a: modalita' di pagamento, recesso e foro competente.",70);
+    const clausole=doc.splitTextToSize("Ai sensi degli artt. 1341 e 1342 c.c. il Committente dichiara di approvare specificamente le clausole relative a: modalità di pagamento, recesso e foro competente.",70);
     const hFirme=6+12+5+12+clausole.length*3.6+14;
     y+=8;
     if(y+hFirme>280){doc.addPage();y=20;}
@@ -8078,10 +8098,10 @@
   }
 
   /* ===== 9 agosto 2026 — CONFERMA D'ORDINE (imprese e artigiani) =====
-     E' il gemello della lettera d'incarico, ma per chi lavora in cantiere.
-     Un preventivo accettato a voce non e' un accordo: quando il cliente
-     cambia idea a meta' lavoro, o non paga, senza un foglio firmato non c'e'
-     niente in mano. Questo foglio nasce dal preventivo gia' fatto.
+     È il gemello della lettera d'incarico, ma per chi lavora in cantiere.
+     Un preventivo accettato a voce non è un accordo: quando il cliente
+     cambia idea a metà lavoro, o non paga, senza un foglio firmato non c'e'
+     niente in mano. Questo foglio nasce dal preventivo già fatto.
 
      Differenze vere rispetto alla lettera d'incarico del professionista:
      - qui c'e' l'IVA (il tecnico ha la parcella con cassa e ritenuta)
@@ -8097,18 +8117,18 @@
   function ordScriviMem(o){ try{ localStorage.setItem(ORD_MEM,JSON.stringify(o)); }catch(e){} }
 
   const ORD_PAGAMENTI=[
-    ["30-40-30","30% alla firma, 40% a meta' lavori, 30% alla fine"],
+    ["30-40-30","30% alla firma, 40% a metà lavori, 30% alla fine"],
     ["50-50",   "50% alla firma, 50% alla fine dei lavori"],
     ["saldo",   "Tutto alla fine dei lavori"],
     ["sal",     "A stati di avanzamento, come da accordi"],
     ["accordi", "Come indicato nelle condizioni particolari"]
   ];
   const ORD_PAG_TESTO={
-    "30-40-30":"Il corrispettivo sara' pagato per il 30% alla sottoscrizione della presente, per il 40% a meta' dell'esecuzione delle opere e per il restante 30% alla fine dei lavori.",
-    "50-50":   "Il corrispettivo sara' pagato per il 50% alla sottoscrizione della presente e per il restante 50% alla fine dei lavori.",
-    "saldo":   "Il corrispettivo sara' pagato in un'unica soluzione alla fine dei lavori.",
-    "sal":     "Il corrispettivo sara' pagato per stati di avanzamento dei lavori, secondo quanto concordato fra le parti.",
-    "accordi": "Il corrispettivo sara' pagato secondo quanto indicato nelle condizioni particolari."
+    "30-40-30":"Il corrispettivo sarà pagato per il 30% alla sottoscrizione della presente, per il 40% a metà dell'esecuzione delle opere e per il restante 30% alla fine dei lavori.",
+    "50-50":   "Il corrispettivo sarà pagato per il 50% alla sottoscrizione della presente e per il restante 50% alla fine dei lavori.",
+    "saldo":   "Il corrispettivo sarà pagato in un'unica soluzione alla fine dei lavori.",
+    "sal":     "Il corrispettivo sarà pagato per stati di avanzamento dei lavori, secondo quanto concordato fra le parti.",
+    "accordi": "Il corrispettivo sarà pagato secondo quanto indicato nelle condizioni particolari."
   };
 
   async function ordineForm(id){
@@ -8139,7 +8159,7 @@
       +'<div class="sh-b">'
       +'<div class="sh-tit">Il lavoro</div>'
       +'<div class="field"><label>Oggetto dei lavori</label><input id="or-ogg" value="'+esc(p.titolo||"")+'" placeholder="Es. Rifacimento bagno completo"></div>'
-      /* l'indirizzo del cantiere NON si ricorda dalla volta prima: e' l'unica
+      /* l'indirizzo del cantiere NON si ricorda dalla volta prima: è l'unica
          cosa che cambia sempre, e un documento firmato con l'indirizzo del
          cliente precedente sarebbe un guaio serio */
       +'<div class="field"><label>Dove si lavora</label><input id="or-dove" value="" placeholder="Indirizzo del cantiere"></div>'
@@ -8272,8 +8292,8 @@
     doc.text("TOTALE",M+2,y+2);doc.text(eurPdf(totale),R-2,y+2,{align:"right"});
     y+=9;
     paragrafo(perc==null
-      ? "Il corrispettivo si intende IVA esclusa. Il prezzo e' fisso e invariabile per le opere sopra indicate."
-      : "Il prezzo e' fisso e invariabile per le opere sopra indicate, comprensivo di IVA nella misura riportata.",8.8,false,90);
+      ? "Il corrispettivo si intende IVA esclusa. Il prezzo è fisso e invariabile per le opere sopra indicate."
+      : "Il prezzo è fisso e invariabile per le opere sopra indicate, comprensivo di IVA nella misura riportata.",8.8,false,90);
 
     titoletto("Modalita' di pagamento");
     let tp=ORD_PAG_TESTO[dati.pagamento]||ORD_PAG_TESTO["30-40-30"];
@@ -8287,7 +8307,7 @@
     }
 
     titoletto("Varianti e lavori aggiuntivi");
-    paragrafo("Ogni lavorazione non prevista nella presente conferma d'ordine dovra' essere concordata per iscritto fra le parti, con indicazione del relativo prezzo, prima della sua esecuzione. In mancanza di accordo scritto, l'Impresa non e' tenuta a eseguirla e il Committente non e' tenuto a pagarla.");
+    paragrafo("Ogni lavorazione non prevista nella presente conferma d'ordine dovrà essere concordata per iscritto fra le parti, con indicazione del relativo prezzo, prima della sua esecuzione. In mancanza di accordo scritto, l'Impresa non è tenuta a eseguirla e il Committente non è tenuto a pagarla.");
 
     titoletto("Obblighi del Committente");
     paragrafo("Il Committente garantisce all'Impresa il libero accesso ai luoghi, la disponibilita' di acqua ed energia elettrica di cantiere, e dichiara di aver ottenuto ogni autorizzazione o titolo edilizio eventualmente necessario per le opere oggetto della presente.");
@@ -8296,14 +8316,14 @@
     paragrafo("L'Impresa garantisce le opere eseguite a regola d'arte ai sensi degli artt. 1667 e 1669 del codice civile. Eventuali difformita' o vizi dovranno essere denunciati dal Committente entro i termini di legge.");
 
     titoletto("Recesso");
-    paragrafo("Il Committente puo' recedere in qualunque momento, tenendo indenne l'Impresa delle spese sostenute, dei lavori eseguiti e del mancato guadagno, ai sensi dell'art. 1671 del codice civile.");
+    paragrafo("Il Committente può recedere in qualunque momento, tenendo indenne l'Impresa delle spese sostenute, dei lavori eseguiti e del mancato guadagno, ai sensi dell'art. 1671 del codice civile.");
 
     titoletto("Trattamento dei dati personali");
-    paragrafo("Le parti si autorizzano reciprocamente al trattamento dei dati personali per le sole finalita' connesse all'esecuzione dei presenti lavori, ai sensi del Regolamento UE 2016/679 (GDPR).");
+    paragrafo("Le parti si autorizzano reciprocamente al trattamento dei dati personali per le sole finalità connesse all'esecuzione dei presenti lavori, ai sensi del Regolamento UE 2016/679 (GDPR).");
 
     if(dati.foro){
       titoletto("Foro competente");
-      paragrafo("Per ogni controversia relativa alla presente sara' competente in via esclusiva il Foro di "+dati.foro+".");
+      paragrafo("Per ogni controversia relativa alla presente sarà competente in via esclusiva il Foro di "+dati.foro+".");
     }
 
     if(dati.note){
@@ -8313,7 +8333,7 @@
 
     /* firme: blocco unico, larghezza del testo = larghezza della colonna */
     doc.setFont("helvetica","normal");doc.setFontSize(8);
-    const clausole=doc.splitTextToSize("Ai sensi degli artt. 1341 e 1342 c.c. il Committente dichiara di approvare specificamente le clausole relative a: varianti e lavori aggiuntivi, modalita' di pagamento, recesso e foro competente.",70);
+    const clausole=doc.splitTextToSize("Ai sensi degli artt. 1341 e 1342 c.c. il Committente dichiara di approvare specificamente le clausole relative a: varianti e lavori aggiuntivi, modalità di pagamento, recesso e foro competente.",70);
     const hFirme=6+12+5+12+clausole.length*3.6+14;
     y+=8;
     if(y+hFirme>280){doc.addPage();y=20;}
@@ -8341,11 +8361,11 @@
   }
 
   /* ===== 9 agosto 2026 — VERBALE DI SOPRALLUOGO (studi professionali) =====
-     Oggi il sopralluogo si fa cosi': foto sparse nel telefono e due appunti su
+     Oggi il sopralluogo si fa così: foto sparse nel telefono e due appunti su
      un foglio, che poi vanno riscritti in ufficio. Qui il verbale nasce dalle
-     foto GIA' caricate in Galleria su quella pratica: si scrive cosa si e'
+     foto GIA' caricate in Galleria su quella pratica: si scrive cosa si è
      visto, si spuntano le foto che servono, ed esce un PDF firmabile.
-     A cosa serve davvero: e' la prova di com'era lo stato dei luoghi PRIMA.
+     A cosa serve davvero: è la prova di com'era lo stato dei luoghi PRIMA.
      Quando sei mesi dopo qualcuno dice "quella crepa c'era gia'?", il verbale
      con la data e le foto risponde da solo. */
 
@@ -8353,7 +8373,7 @@
   function verLeggiMem(){ try{ return JSON.parse(localStorage.getItem(VER_MEM)||"{}")||{}; }catch(e){ return {}; } }
   function verScriviMem(o){ try{ localStorage.setItem(VER_MEM,JSON.stringify(o)); }catch(e){} }
 
-  let verFoto=[];   /* le foto della pratica, con l'url firmato gia' pronto */
+  let verFoto=[];   /* le foto della pratica, con l'url firmato già pronto */
 
   async function verbaleForm(lavId){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
@@ -8363,7 +8383,7 @@
     let cli={};
     if(l&&l.cliente_id){const {data:c}=await sb.from("gest_clienti").select("*").eq("id",l.cliente_id).maybeSingle();cli=c||{};}
 
-    /* le foto gia' caricate su questa pratica */
+    /* le foto già caricate su questa pratica */
     verFoto=[];
     try{
       const {data:fs}=await sb.from("gest_foto").select("id,storage_path,tipo,created_at")
@@ -8381,7 +8401,7 @@
           return '<label class="ver-f"><input type="checkbox" class="ver-ck" data-i="'+i+'" checked>'
                 +'<img src="'+f.url+'" alt="foto '+(i+1)+'"></label>';
         }).join("")+'</div>'
-        +'<div class="campo-aiuto">Sono le foto gia' + String.fromCharCode(39) + ' caricate in Galleria su questa pratica. Togli la spunta a quelle che non vuoi nel verbale.</div>'
+        +'<div class="campo-aiuto">Sono le foto già caricate in Galleria su questa pratica. Togli la spunta a quelle che non vuoi nel verbale.</div>'
       : '<p class="sh-nota" style="margin-top:0">Non ci sono foto su questa pratica. Caricale dalla <b>Galleria</b> (o falle fare in cantiere con l' + String.fromCharCode(39) + 'app dell' + String.fromCharCode(39) + 'operaio) e poi torna qui: entrano nel verbale da sole.</p>';
 
     openSheetGrande("Verbale di sopralluogo",
@@ -8532,9 +8552,9 @@
       /* Le misure si calcolano PRIMA, tutte. Due cose che prima sbagliavano:
          1) col tetto di 70 mm si accorciava l'altezza ma non la larghezza, e
             una foto verticale del telefono usciva schiacciata: su un verbale
-            che deve provare lo stato dei luoghi e' un difetto serio;
+            che deve provare lo stato dei luoghi è un difetto serio;
          2) il salto pagina guardava solo la PRIMA foto della riga, quindi una
-            seconda foto piu' alta finiva sotto il bordo del foglio. */
+            seconda foto più alta finiva sotto il bordo del foglio. */
       const dim=immagini.map(function(im){
         let w=larg, h=larg*(im.h/im.w);
         if(h>HMAX){ h=HMAX; w=HMAX*(im.w/im.h); }   /* si scala anche la larghezza */
@@ -8590,7 +8610,7 @@
      anno per restare iscritti all'albo. Quasi tutti perdono il conto e a
      dicembre si trovano scoperti. Qui si segna un corso alla volta e il
      gestionale dice a che punto sei e quanti te ne mancano.
-     Nessun mestiere_id: l'obbligo e' della PERSONA iscritta all'albo, non del
+     Nessun mestiere_id: l'obbligo è della PERSONA iscritta all'albo, non del
      reparto, quindi i corsi si vedono uguali da tutti i reparti.
      Tabella: sql/gest-ore-e-crediti.sql. Se manca, la sezione lo dice. */
   const CRED_TIPI=["Aggiornamento professionale","Deontologia","Sicurezza",
@@ -8627,7 +8647,7 @@
     const mancano=Math.max(0,credObiettivo-fatti);
     const perc=credObiettivo?Math.min(100,Math.round(fatti/credObiettivo*100)):0;
 
-    /* il riquadro in cima: e' l'unica cosa che uno vuole sapere davvero */
+    /* il riquadro in cima: è l'unica cosa che uno vuole sapere davvero */
     const tono=mancano===0?"ok":(perc>=60?"attesa":"err");
     $("#cred-riass").innerHTML=
       '<div class="cred-box cred-'+tono+'">'
@@ -8725,7 +8745,7 @@
     credAnno=String(row.data).slice(0,4);
     closeSheet();renderCrediti();toast(id?"Aggiornato ✔":"Corso segnato ✔");
   }
-  /* funzione a parte: il gestore dei clic di questo blocco NON e' async,
+  /* funzione a parte: il gestore dei clic di questo blocco NON è async,
      quindi l'await deve stare qui dentro */
   async function delCred(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -8759,7 +8779,7 @@
     {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true},
     {t:"gest_note",        lab:"Note",              campo:"testo",          ic:"📝", foglia:true}
   ];
-  /* "foglia" = non ha figli nel database, quindi si puo' cancellare davvero
+  /* "foglia" = non ha figli nel database, quindi si può cancellare davvero
      senza portarsi dietro altro. Le altre NO: eliminare per sempre un reparto
      o un cliente farebbe scattare le cancellazioni a catena e si porterebbe
      via anche roba viva che nel cestino non c'era mai entrata. */
@@ -8789,7 +8809,7 @@
     cestCache=[];
     risposte.forEach(function(x){
       x.righe.forEach(function(r){
-        /* il nome si cerca su piu' colonne: non tutte le tabelle hanno lo
+        /* il nome si cerca su più colonne: non tutte le tabelle hanno lo
            stesso campo, e "(senza nome)" ovunque renderebbe il cestino inutile */
         const nome=[r[x.c.campo],r.nome,r.titolo,r.descrizione,r.nome_file,r.causale,r.testo,r.numero]
           .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")
@@ -8851,7 +8871,7 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non ripristinato: nessuna riga trovata");return;}
     /* rimesso a posto un reparto o una pratica cambia mezzo gestionale:
-       si ridisegna tutto invece di indovinare cosa e' cambiato */
+       si ridisegna tutto invece di indovinare cosa è cambiato */
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report");
     if(x.tab==="gest_mestieri")renderLanding();
@@ -8859,11 +8879,11 @@
   }
 
   /* "Elimina per sempre" c'e' SOLO sulle cose che non hanno figli nel
-     database (spese, ore, foto, note, scadenze...). Sulle altre no, e non e'
+     database (spese, ore, foto, note, scadenze...). Sulle altre no, e non è
      una dimenticanza: cancellare davvero un reparto o un cliente farebbe
      scattare le cancellazioni a catena e si porterebbe via anche roba VIVA
-     che nel cestino non era mai entrata. Lo "svuota tutto" e' stato tolto per
-     lo stesso motivo: prometteva di cancellare N cose e ne cancellava di piu'. */
+     che nel cestino non era mai entrata. Lo "svuota tutto" è stato tolto per
+     lo stesso motivo: prometteva di cancellare N cose e ne cancellava di più. */
   async function cestDefinitivo(i){
     const x=cestCache[+i];if(!x)return;
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -8872,8 +8892,8 @@
     const {data,error}=await sb.raw(x.tab).delete().eq("id",x.id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga trovata");return;}
-    /* il file nello storage se ne va solo adesso, non prima: e' l'unico
-       momento in cui siamo sicuri che nessuno lo vuole piu' indietro */
+    /* il file nello storage se ne va solo adesso, non prima: è l'unico
+       momento in cui siamo sicuri che nessuno lo vuole più indietro */
     if(x.path){
       const bucket=(x.tab==="gest_video")?"gestionale-video":"gestionale-foto";
       try{ await sb.storage.from(bucket).remove([x.path]); }catch(e){}
@@ -8900,19 +8920,19 @@
     if(L.length){const {data:sp}=await sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",L.map(l=>l.id));SP=sp||[];}
     /* ---- spese fatte con le carte aziendali ----
        Prima il Report le ignorava del tutto: guardava solo le spese scritte dentro
-       i lavori, quindi l'utile risultava piu' alto del vero. Ora entrano nel conto,
-       ma restano una voce separata cosi' si capisce sempre da dove viene il numero. */
+       i lavori, quindi l'utile risultava più alto del vero. Ora entrano nel conto,
+       ma restano una voce separata così si capisce sempre da dove viene il numero. */
     /* ===== 9 agosto 2026 — l'incassato si legge dalle FATTURE =====
        Prima il Report lo calcolava da gest_lavori.fatt_stato, che pero' si
        aggiorna solo per le fatture nate da un lavoro agganciato: una fattura
        fatta da preventivo o da zero non toccava nessun lavoro. Risultato:
        Riepilogo e Report davano due numeri diversi per la stessa cosa, e chi
        fattura sempre da preventivo leggeva "Incassato 0".
-       Le fatture pagate sono la fonte vera: e' li' che stanno i soldi. */
+       Le fatture pagate sono la fonte vera: è li' che stanno i soldi. */
     let FT=[], FTR=[];
     try{
       /* "*" e non l'elenco delle colonne: chiedendo cassa_perc e spese, se la
-         migrazione della cassa non e' stata eseguita PostgREST risponde 400,
+         migrazione della cassa non è stata eseguita PostgREST risponde 400,
          FT resta vuoto e tutto l'incassato del Report va a ZERO senza dirlo.
          (9/8/2026 — trovato subito dopo averlo scritto.) */
       const {data:ft}=await sb.from("gest_fatture").select("*")
@@ -8924,8 +8944,8 @@
         FTR=fr||[];
       }
     }catch(e){ FT=[]; FTR=[]; }
-    /* l'imponibile di ogni fattura: e' il numero confrontabile con l'importo
-       dei lavori, senza IVA (che non e' tuo) */
+    /* l'imponibile di ogni fattura: è il numero confrontabile con l'importo
+       dei lavori, senza IVA (che non è tuo) */
     const righePerFatt={};
     FTR.forEach(r=>{(righePerFatt[r.fattura_id]=righePerFatt[r.fattura_id]||[]).push(r);});
     const impFatt={};
@@ -8943,10 +8963,10 @@
 
     /* ===== 9 agosto 2026 — i pieni pagati in contanti =====
        Solo i rifornimenti con carta finivano nei costi, e ci finivano di
-       rimbalzo perche' creano un movimento carta. Quelli in contanti o coi
-       buoni non entravano da nessuna parte: un'impresa che fa meta' dei pieni
-       in contanti vedeva un utile piu' alto del vero.
-       Si contano quelli SENZA movimento_id: gli altri sono gia' dentro i
+       rimbalzo perché creano un movimento carta. Quelli in contanti o coi
+       buoni non entravano da nessuna parte: un'impresa che fa metà dei pieni
+       in contanti vedeva un utile più alto del vero.
+       Si contano quelli SENZA movimento_id: gli altri sono già dentro i
        movimenti delle carte e conterebbero due volte. */
     /* ===== 9 agosto 2026 — le fatture dei fornitori nei costi =====
        Erano registrate, collegate al lavoro, e non le leggeva nessuno: il
@@ -8995,7 +9015,7 @@
     for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);mkeys.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
     const inc=mkeys.map(k=>_incassoIn(k,7));
     /* anche il grafico dei 12 mesi conta tutti i costi, se no la barra delle
-       spese dice una cosa e i totali storici piu' sotto ne dicono un'altra */
+       spese dice una cosa e i totali storici più sotto ne dicono un'altra */
     const spm=mkeys.map(k=>
       SP.filter(x=>(x.data||"").slice(0,7)===k).reduce((s,x)=>s+(+x.importo||0),0)
       +CM.filter(m=>String(m.data||m.created_at||"").slice(0,7)===k).reduce((s,m)=>s+(+m.importo||0),0)
@@ -9045,8 +9065,8 @@
       <div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_TREND}Incassi e spese — ultimi 12 mesi</h3>
         <div class="rep-bar-wrap">${bars}</div>
         <div class="rep-legend"><span><i style="background:var(--blu)"></i>Incassato</span><span><i style="background:var(--testo-3)"></i>Spese</span></div></div>
-      ${/* Solo dati storici: da fare / in corso / fatti stanno gia' nel Riepilogo,
-            che e' la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
+      ${/* Solo dati storici: da fare / in corso / fatti stanno già nel Riepilogo,
+            che è la foto di adesso. Qui conta l'andamento nel tempo, non ripeterlo. */""}
       <div class="rep-card"><h3 class="con-sub">${_ICO_LISTA}Totali storici</h3>
         <p class="rep-sub">Da quando usi il gestionale</p><table class="rep-table">
         <tr><td>Incassato ${anno} <span style="font-size:13px;color:var(--testo-3)">(IVA esclusa)</span></td><td>${eur(incAnno)}</td></tr>
@@ -9095,8 +9115,8 @@
     if(!sb||!sbUid){toast("Devi essere loggato");return null;}
     toast("Preparo l'esportazione…");
     /* 9 agosto 2026 — un file che si chiama "backup" e non contiene le FATTURE
-       non e' un backup. Mancavano anche ore, crediti formativi e fornitori.
-       Le tabelle nuove si leggono con .catch: se una migrazione non e' stata
+       non è un backup. Mancavano anche ore, crediti formativi e fornitori.
+       Le tabelle nuove si leggono con .catch: se una migrazione non è stata
        fatta, il backup esce lo stesso con tutto il resto invece di fallire. */
     const vuoto={data:[]};
     const _opz=q=>q.then(r=>r&&!r.error?r:vuoto).catch(()=>vuoto);
@@ -9203,7 +9223,7 @@
     const D=await _fetchAllExport();if(!D)return;
     /* 9 agosto 2026 — mancavano fatture, righe fattura, collegamenti
        fattura-lavoro, ore, crediti formativi, fornitori e fatture fornitori.
-       Un file che si chiama "backup" e non contiene le fatture non e' un backup. */
+       Un file che si chiama "backup" e non contiene le fatture non è un backup. */
     const out={esportato_il:new Date().toISOString(),formato:"trovaimpresa-gestionale-v2",
       azienda:D.az,mestieri:D.mest,clienti:D.cli,operatori:D.ops,lavori:D.lav,spese:D.spese,
       preventivi:D.prev,preventivo_righe:D.righe,scadenze:D.scad,mezzi:D.mezzi,lavoro_mezzi:D.lavMezzi,
@@ -9246,8 +9266,8 @@
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="new-prev")return prevForm(null);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
-    /* dal Riepilogo: prevCache puo' essere ancora vuota (scheda Preventivi mai aperta),
-       quindi il preventivo si prende dalla lista gia' caricata per il blocco. */
+    /* dal Riepilogo: prevCache può essere ancora vuota (scheda Preventivi mai aperta),
+       quindi il preventivo si prende dalla lista già caricata per il blocco. */
     if(a==="rie-prev"){const p=rieprevCache.find(x=>String(x.id)===String(id));if(p)prevForm(p);return;}
     if(a==="save-prev")return savePrev(id||null);
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
@@ -9266,7 +9286,7 @@
     if(a==="ordine-pdf")return ordinePdf(id);
     if(a==="report-csv")return reportCsv();
     if(a==="lav-vista"){filter.vista=t.dataset.v;renderJobs();return;}
-    /* un solo menu "..." per tutte le sezioni: le voci le ha gia' preparate
+    /* un solo menu "..." per tutte le sezioni: le voci le ha già preparate
        renderTabella, qui si legge solo il registro. */
     if(a==="tab-menu"){
       /* il menu vive in una cella <td> nella tabella, in .job-menu nelle schede */
@@ -9288,7 +9308,7 @@
     if(a==="rie-go"){const b=document.querySelector('nav.tabs button[data-tab="'+t.dataset.go+'"]');if(b){b.click();window.scrollTo(0,0);}return;}
     if(a==="rie-riprova"){const g=$("#rie-grid");if(g)g.innerHTML='<div class="rc-caricamento">Caricamento del riepilogo…</div>';renderRiepilogo();renderContatori();return;}
     /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
-       che non e' una scheda del menu — quindi apro direttamente quella. */
+       che non è una scheda del menu — quindi apro direttamente quella. */
     if(a==="rie-azienda")return aziendaForm();
     if(a==="rie-go-fatture"){const b=document.querySelector('nav.tabs button[data-tab="fatture"]');if(b){b.click();window.scrollTo(0,0);}return;}
   });
@@ -9312,7 +9332,7 @@
       <div class="sh-body">${corpo}</div>
       <div class="sh-foot">${azioni}</div>`;
     $("#overlay").classList.add("open");
-    /* Il corpo scorre: senza questo il modulo si apre gia' scorso di qualche
+    /* Il corpo scorre: senza questo il modulo si apre già scorso di qualche
        riga (resta la posizione della volta prima) e la prima etichetta sparisce. */
     const _b=s.querySelector(".sh-body");
     if(_b){
@@ -9359,7 +9379,7 @@
     if(a==="fatt-pdf")return fatturaPdf(id);
     if(a==="fatt-xml")return fatturaXml(id);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
-    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa e' stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);}return;}
+    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();
@@ -9413,7 +9433,7 @@
     }
     /* Dal lavoro: prima questo pulsante scriveva a mano "fatturato" sul lavoro,
        e la fattura non esisteva da nessuna parte. Ora apre la fattura vera, con
-       il lavoro gia' dentro come voce. Lo stato del lavoro lo scrive la fattura. */
+       il lavoro già dentro come voce. Lo stato del lavoro lo scrive la fattura. */
     if(a==="fatt")return fattDaUnLavoro(id);
     if(a==="upload-fattura")return chiediFatturaPdf(id);
     if(a==="open-fattura")return apriFatturaPdf(id);
@@ -9430,7 +9450,7 @@
       if(v){
         /* eliminato_il:null -> riscrivendo la nota di un giorno la si tira fuori dal
            cestino. Senza, il salvataggio finiva sopra la riga eliminata: la nota
-           spariva alla ricarica e quel giorno non era piu' scrivibile. */
+           spariva alla ricarica e quel giorno non era più scrivibile. */
         const {data:okN,error}=await sb.from("gest_note").upsert({user_id:sbUid,mestiere_id:midN,data:ds,testo:v,eliminato_il:null},{onConflict:"user_id,mestiere_id,data"}).select("id");
         if(error){toast("Nota non salvata: "+error.message);return;}
         if(!okN||!okN.length){toast("Nota non salvata: nessuna riga modificata. Riprova.");return;}
@@ -9503,11 +9523,11 @@
       renderMezziBlock(mezziLavoroId);return;
     }
     if(a==="new-scad")return scadForm(null);
-    /* "+ Aggiungi una scadenza" dalla scheda della pratica: nasce gia' collegata.
+    /* "+ Aggiungi una scadenza" dalla scheda della pratica: nasce già collegata.
        Il modulo della scadenza si apre SOPRA quello della pratica: chiudendolo
        si torna alla pratica, quindi qui non chiudo niente. */
     if(a==="scad-da-pratica"){
-      /* 9 agosto 2026 — la finestra e' UNA sola (#sheet): aprendo il modulo
+      /* 9 agosto 2026 — la finestra è UNA sola (#sheet): aprendo il modulo
          della scadenza si riscrive quello della pratica, e quello che c'era
          scritto e non ancora salvato va perso. Prima non lo diceva nessuno
          (il commento qui sopra sosteneva pure il contrario). Ora si avvisa. */
@@ -9580,9 +9600,9 @@
       const {data:okDf2,error}=await sb.from("gest_fornitori").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okDf2||!okDf2.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
-      /* col cestino la catena del database non scatta piu': le sue fatture le
+      /* col cestino la catena del database non scatta più: le sue fatture le
          mettiamo via a mano, se no restavano vive e continuavano a contare
-         nel "da pagare" agganciate a un fornitore che non c'e' piu'. */
+         nel "da pagare" agganciate a un fornitore che non c'e' più. */
       try{ await sb.from("gest_fatture_fornitori").delete().eq("fornitore_id",id).eq("user_id",sbUid); }catch(e){}
       closeSheet();renderFornitori();rinfresca("riepilogo");toast("Fornitore eliminato");return;
     }
@@ -9609,7 +9629,7 @@
       toast(v==="pagata"?"Segnata pagata ✔":"Riaperta");return;
     }
     if(a==="quick-cli"){
-      /* stesso motivo di scad-da-pratica: la finestra e' una sola e questa
+      /* stesso motivo di scad-da-pratica: la finestra è una sola e questa
          prende il posto di quella aperta (9/8/2026) */
       if(!gconfirm("Apro il modulo del cliente al posto di questo.\n\nSe hai scritto qualcosa senza salvare, va perso. Continuare?"))return;
       return cliForm(null);
@@ -9621,7 +9641,7 @@
     b.onclick=()=>{
       $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
       $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
-      /* Render pigro: la sezione si ridisegna all'apertura se e' segnata "da
+      /* Render pigro: la sezione si ridisegna all'apertura se è segnata "da
          rifare" (dopo un salvataggio o all'ingresso nel reparto). Alcune si
          ridisegnano sempre: lavori/agenda cambiano forma con la larghezza
          dello schermo, mappa e richieste si disegnano solo quando le apri. */
@@ -9723,23 +9743,23 @@
   var RETURN=location.origin+location.pathname;
   function q(id){return document.getElementById(id);}
   /* ===== MANUTENZIONE =====
-     Se true, il gestionale e' chiuso a tutti tranne le email in AMMESSI.
+     Se true, il gestionale è chiuso a tutti tranne le email in AMMESSI.
      Rimessa a false il 6 agosto 2026: aperto ai Premium. */
   var MANUTENZIONE = false;
   var AMMESSI = ['pintoalessio@icloud.com'];   /* aggiungi qui altre email fra apici, separate da virgola */
 
   /* ===== CHI PUO' ENTRARE — 6 agosto 2026 =====
-     Il gestionale e' incluso nel piano Premium (5 euro/mese o 49 euro/anno).
-     Chi e' Free vede la schermata che spiega come sbloccarlo.
+     Il gestionale è incluso nel piano Premium (5 euro/mese o 49 euro/anno).
+     Chi è Free vede la schermata che spiega come sbloccarlo.
      Il blocco sulla card del pannello resta: questo chiude l'accesso diretto
      di chi si scrive l'indirizzo a mano.
-     NOTA: e' un blocco lato pagina. I dati restano comunque protetti da RLS
+     NOTA: è un blocco lato pagina. I dati restano comunque protetti da RLS
      su Supabase: ognuno vede solo i propri. */
   function haPremium(row){
     if(!row) return false;
     var piano = String(row.piano||'').trim().toLowerCase();
     if(piano !== 'premium') return false;
-    /* se c'e' una scadenza ed e' passata, non e' piu' Premium */
+    /* se c'e' una scadenza ed è passata, non è più Premium */
     if(row.premium_scadenza){
       var scad = new Date(row.premium_scadenza);
       if(!isNaN(scad.getTime()) && scad.getTime() < Date.now()) return false;
@@ -9751,7 +9771,7 @@
   function showPaywall(){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='none';q('gate-paywall').style.display='block';document.body.style.overflow='hidden';}
   function showManutenzione(){q('gate-gestionale').style.display='flex';q('gate-checking').style.display='none';q('gate-paywall').style.display='none';q('gate-manutenzione').style.display='block';document.body.style.overflow='hidden';}
 
-  /* "Avvisami quando e' pronto" */
+  /* "Avvisami quando è pronto" */
   window.avvisamiGestionale=function(){
     var btn=q('gate-avvisami-btn'), err=q('gate-avvisami-err');
     err.style.display='none';
@@ -9782,7 +9802,7 @@
       .catch(function(){alert('Errore di rete, riprova.');b.style.opacity='1';b.style.pointerEvents='auto';});
   };
   /* Traccia chi apre il gestionale. Una riga ogni 30 minuti per utente,
-     cosi' i refresh non riempiono la tabella. Se fallisce non blocca nulla. */
+     così i refresh non riempiono la tabella. Se fallisce non blocca nulla. */
   function registraAccesso(gc,uid,email,attivo){
     try{
       var k='ti_ultimo_accesso_'+uid;
@@ -9835,7 +9855,7 @@
         registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail)&&ok);
         decidi(window._gestEmail, ok?'ok':'premium');
       },function(){
-        /* la lettura non e' riuscita (rete): si entra, per non bloccare chi paga */
+        /* la lettura non è riuscita (rete): si entra, per non bloccare chi paga */
         window._gestEmail=s.user.email||'';
         registraAccesso(gc,s.user.id,window._gestEmail,ammesso(window._gestEmail));
         decidi(window._gestEmail,'ok');

@@ -13,7 +13,7 @@
    1) Scrivendo la frase qui sotto nella lista AIUTI, con la chiave giusta
       (il data-tab o il data-action del pulsante).
    2) Mettendo direttamente data-aiuto="la tua frase" sul pulsante in HTML.
-      Ha la precedenza su tutto: serve quando un pulsante e' un caso a se'.
+      Ha la precedenza su tutto: serve quando un pulsante è un caso a se'.
 
    PERCHE' SOLO COL MOUSE
    Sul telefono il "passaggio sopra" non esiste, e questi sono pulsanti che
@@ -24,7 +24,7 @@
   'use strict';
 
   /* ---------- le frasi ---------- */
-  /* menu di sinistra: la chiave e' il data-tab del pulsante */
+  /* menu di sinistra: la chiave è il data-tab del pulsante */
   var AIUTI_TAB = {
     riepilogo:    'Il colpo d’occhio: cosa c’è da fare oggi, cosa è in ritardo e come vanno gli incassi.',
     lavori:       'Tutti i cantieri: da fare, in corso e finiti. Da un lavoro nasce il preventivo e poi la fattura.',
@@ -44,7 +44,7 @@
     richieste:    'Le richieste di preventivo che arrivano dai clienti di TrovaImpresa.'
   };
 
-  /* barra in alto e pagina iniziale: la chiave e' il data-action */
+  /* barra in alto e pagina iniziale: la chiave è il data-action */
   var AIUTI_AZIONE = {
     azienda:        'I tuoi dati: nome, partita IVA, sede, IBAN. Sono quelli che finiscono su preventivi e fatture.',
     commercialista: 'I contatti del tuo commercialista e i documenti da mandargli, come scontrini e ricevute.',
@@ -87,7 +87,7 @@
   };
 
   /* ---------- il riquadro ---------- */
-  var RITARDO = 350;      /* ms prima di comparire: cosi' non lampeggia mentre muovi il mouse */
+  var RITARDO = 350;      /* ms prima di comparire: così non lampeggia mentre muovi il mouse */
   var box = null, timer = null, ancora = null;
 
   function creaBox() {

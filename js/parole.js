@@ -3,7 +3,7 @@
 
    Nelle guide ci sono parole che per un muratore sono ovvie e per chi
    legge no: trasmittanza, CILA, massetto, bonifico parlante. Chi non le
-   capisce non va a cercarle: salta la riga e capisce a meta'.
+   capisce non va a cercarle: salta la riga e capisce a metà.
 
    Questo script le trova da solo nel testo, le sottolinea leggermente e,
    toccandole o passandoci sopra, mostra due righe di spiegazione.

@@ -526,9 +526,9 @@
   }
 
   /* Numero scritto all'italiana -> numero che <input type="number"> accetta.
-     Serve perche' l'AI risponde come parla l'utente: "1000 euro", "€ 1.000",
-     "1.200,50". Un input numerico rifiuta in SILENZIO tutto cio' che non e' un
-     numero puro (el.value resta ''), ed e' cosi' che l'importo spariva prima di
+     Serve perché l'AI risponde come parla l'utente: "1000 euro", "€ 1.000",
+     "1.200,50". Un input numerico rifiuta in SILENZIO tutto cio' che non è un
+     numero puro (el.value resta ''), ed è così che l'importo spariva prima di
      arrivare al Salva. Peggio ancora "1.000": l'input lo accetta e lo legge
      come 1 euro, quindi i punti delle migliaia vanno tolti a mano. */
   function numeroIt(val) {
@@ -538,7 +538,7 @@
     if (!s) return '';
     const vir = s.lastIndexOf(','), pun = s.lastIndexOf('.');
     if (vir > -1 && pun > -1) {
-      // ci sono entrambi: l'ultimo e' il separatore decimale, l'altro le migliaia
+      // ci sono entrambi: l'ultimo è il separatore decimale, l'altro le migliaia
       s = vir > pun ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
     } else if (vir > -1) {
       s = s.replace(',', '.');                             // virgola = decimali

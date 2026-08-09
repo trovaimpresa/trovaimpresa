@@ -192,12 +192,12 @@
   // intero e gli spazi pubblicitari principali. Da quel momento in poi la
   // navigazione è normale: dalla home città il clic va dritto alla ricerca.
   //
-  // AGGIORNAMENTO 8 agosto 2026: il passaggio dalla home citta' resta (e' li' che
-  // vive la pubblicita' venduta), ma la meta' scelta dal cliente non si perde
-  // piu'. Viene passata come &vai=..., e la home citta' mostra in cima un
+  // AGGIORNAMENTO 8 agosto 2026: il passaggio dalla home città resta (è li' che
+  // vive la pubblicita' venduta), ma la metà scelta dal cliente non si perde
+  // più. Viene passata come &vai=..., e la home città mostra in cima un
   // pulsante grosso "Vedi gli artigiani di Roma". Prima l'utente cliccava la
-  // categoria, scriveva la citta' e si ritrovava al punto di partenza, senza
-  // capire che doveva ricliccare: e' li' che la gente se ne andava.
+  // categoria, scriveva la città e si ritrovava al punto di partenza, senza
+  // capire che doveva ricliccare: è li' che la gente se ne andava.
   function vaiA(url) {
     var c = leggi();
     if (c) {
@@ -216,8 +216,8 @@
   // stava dopo il "?" del link. Le guide che mandano a
   // "cerca-artigiani.html?mestiere=Cartongesso" perdevano il mestiere per
   // strada: chi aveva appena letto la guida sul cartongesso si ritrovava
-  // l'elenco di TUTTI gli artigiani della citta' e doveva rifiltrare a mano.
-  // Ora il mestiere viaggia come &mest= e la home citta' lo rimette nel link.
+  // l'elenco di TUTTI gli artigiani della città e doveva rifiltrare a mano.
+  // Ora il mestiere viaggia come &mest= e la home città lo rimette nel link.
   function homeConMeta(citta, url) {
     var base = 'index.html?citta=' + encodeURIComponent(citta);
     var pezzi = String(url || '').split('?');

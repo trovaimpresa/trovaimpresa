@@ -455,7 +455,7 @@ function chiediFatturaPdf(lavoroId){fattUploadLavoroId=lavoroId;$("#fatt-pdf-fil
 async function uploadFatturaPdf(file){
   if(!file||!fattUploadLavoroId)return;
   if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
-  /* il PDF non e' un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
+  /* il PDF non è un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
   const p=await preparaFileUpload(file);
   if(p.errore){toast(p.errore);return;}
   const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
@@ -634,7 +634,7 @@ $("#lv-video-file").onchange=async e=>{
   e.target.value="";
 };
 
-/* carta aziendale: la mostro solo se al mio operatoreId e' assegnata una
+/* carta aziendale: la mostro solo se al mio operatoreId è assegnata una
    carta attiva. Il saldo arriva dalla vista gest_carte_saldo (ricariche
    meno spese), non si scrive mai a mano. */
 let MIA_CARTA=null;

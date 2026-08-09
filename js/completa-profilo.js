@@ -3,18 +3,18 @@
 
    Mostra in cima al pannello una fascia con la percentuale di
    completamento del profilo e l'elenco di cosa manca.
-   Sparisce da sola quando il profilo e' al 100%.
+   Sparisce da sola quando il profilo è al 100%.
 
    COME SI USA
    Aggiungere UNA riga prima di </body> nei 4 pannelli:
        <script src="/js/completa-profilo.js"></script>
-   (i pannelli caricano gia' supabase-js, non serve altro)
+   (i pannelli caricano già supabase-js, non serve altro)
 
    NOTE
    - Non tocca il resto della pagina: si inserisce da solo in cima al body.
-   - E' difensivo: se una colonna non esiste nella tabella, la salta
-     invece di rompersi. Cosi' non si spacca se il database cambia.
-   - Si puo' chiudere, ma torna al prossimo accesso: e' voluto.
+   - È difensivo: se una colonna non esiste nella tabella, la salta
+     invece di rompersi. Così non si spacca se il database cambia.
+   - Si può chiudere, ma torna al prossimo accesso: è voluto.
    ============================================================ */
 (function () {
   'use strict';
@@ -23,7 +23,7 @@
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic';
 
   // Cosa conta, e quanto pesa. Totale 100.
-  // "chiavi" = come si chiama la colonna nel database (piu' di una se serve).
+  // "chiavi" = come si chiama la colonna nel database (più di una se serve).
   var VOCI = [
     { peso: 25, etichetta: 'Indirizzo',        chiavi: ['indirizzo'] },
     { peso: 25, etichetta: 'Descrizione',      chiavi: ['descrizione'] },
@@ -36,7 +36,7 @@
     { peso:  5, etichetta: 'Sito web',         chiavi: ['sito_web'] },
     // Le foto non sono una colonna di "imprese": le contiamo a parte (vedi avvia())
     // e le infiliamo nella riga come _foto. Per un'impresa edile sono la cosa che
-    // convince di piu' chi apre il profilo, quindi pesano parecchio.
+    // convince di più chi apre il profilo, quindi pesano parecchio.
     { peso: 15, etichetta: 'Foto dei lavori',  chiavi: ['_foto'] }
   ];
 
@@ -124,7 +124,7 @@
 
     document.body.insertBefore(barra, document.body.firstChild);
 
-    // riempimento animato, cosi' si nota
+    // riempimento animato, così si nota
     setTimeout(function () {
       var r = barra.querySelector('.ti-riemp');
       if (r) r.style.width = esito.perc + '%';

@@ -1223,7 +1223,7 @@
     if(!file||!fattUploadLavoroId)return;
     if(!sbUid){toast("Devi essere loggato");return;}
     if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
-    /* il PDF non e' un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
+    /* il PDF non è un'immagine: preparaFileUpload lo lascia intatto, applica solo il limite */
     const p=await preparaFileUpload(file);
     if(p.errore){toast(p.errore);return;}
     const safe=p.nome.replace(/[^a-zA-Z0-9._-]/g,"_");
@@ -1890,7 +1890,7 @@
     if(a==="map"){window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.dataset.q),"_blank");return;}
     if(a==="new-job")return jobForm(null,"",null,true);
     /* 6 agosto 2026: il pulsante grande porta al modulo del noleggio,
-       con il mezzo gia' pronto da scegliere. */
+       con il mezzo già pronto da scegliere. */
     if(a==="new-nol"){
       $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="noleggi"));
       $$("section").forEach(s=>s.classList.toggle("active",s.id==="noleggi"));

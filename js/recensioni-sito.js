@@ -136,7 +136,7 @@
         return new Date(d).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
       };
 
-      // Il codice AggregateRating per Google e' stato tolto apposta:
+      // Il codice AggregateRating per Google è stato tolto apposta:
       // Google non accetta le recensioni che un sito raccoglie su se stesso
       // per mostrare le stelline nei risultati, e in certi casi penalizza.
       // Il riquadro delle valutazioni resta e funziona come prima.

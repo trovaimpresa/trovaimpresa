@@ -2010,3 +2010,81 @@ va aggiunto in tutti e due, se no tornano a dare due utili diversi.
   entrate previste sono Premium + pubblicità, con il gestionale come extra più avanti. Il sito
   è "una vetrina in più" per le imprese, gratis, e Alessio porta i privati con SEO e pubblicità.
   La domanda è chiusa: non riaprirla a meno che non lo faccia lui.
+
+
+## 9 agosto 2026 (pomeriggio) — giro di test reale sul profilo Professionista
+
+Test end-to-end fatto insieme ad Alex sul sito in produzione: cliente → pratica →
+preventivo/parcella → lettera d'incarico → accettazione → fattura → PDF.
+Tutti i numeri della parcella (compenso 2.000, cassa 5% = 100, spese 150,
+imponibile 2.250, IVA 495, ritenuta 400, netto 2.345) sono risultati corretti
+dal form al PDF: le correzioni di stamattina su cassa e ritenuta reggono su dati veri.
+
+### BUG GROSSO trovato e risolto: il Riepilogo IVA del PDF fattura
+
+Nel PDF, il blocco "Riepilogo IVA" sommava **solo le righe**. Su una parcella con
+cassa e spese dichiarava "imponibile 2.000 · imposta 440" mentre due centimetri
+sotto addebitava 495. Due numeri diversi nello stesso documento.
+
+L'XML per lo SDI lo faceva **gia' giusto** (in `DatiRiepilogo` cassa e spese
+vengono aggiunte all'aliquota prevalente, se no lo SDI scarta il file): mancava
+lo stesso passaggio nel PDF, cioe' proprio nel documento che legge il cliente.
+
+Risolto replicando nel PDF le tre righe che l'XML aveva gia'. Verificato con node
+su 5 scenari (una aliquota, due aliquote, senza cassa, solo spese, cassa 2%):
+la somma dei riepiloghi coincide sempre con imponibile e IVA totali.
+
+**Regola:** PDF e XML devono partire dagli STESSI conti. Se si tocca `fattConti`
+o il riepilogo per aliquota, si controllano tutti e due.
+
+### Errori di lingua sistemati
+
+- **451 accenti** in 15 file: `e'`→`è`, `piu'`→`più`, `gia'`→`già`, `cosi'`→`così`,
+  `puo'`→`può`, `perche'`→`perché`, `Modalita'`→`Modalità`… Uscivano nei PDF
+  (lettera d'incarico, fattura, verbale) e nei suggerimenti a schermo.
+  jsPDF con helvetica gestisce benissimo gli accenti: erano scritti male nei modelli.
+- Il traduttore per professionisti sostituiva la sola parola e lasciava articoli e
+  aggettivi al maschile: *"I pratiche collegate si segnano da soli come fatturati"*.
+  Le frasi intere vanno in `_FRASI`, non ci si affida allo swap parola per parola.
+- "1 lavoro" nella card fattura vive dentro `.fatt-info`, che sta in `_SKIP_UTENTE`
+  (zona che il traduttore salta apposta): la parola giusta va scelta a monte, nel render.
+- Il suggerimento sulle aliquote parlava di edilizia (10% ristrutturazione, 4% prima
+  casa) anche a un geometra, che fattura sempre al 22%. Ora e' diverso per ruolo.
+- "L'importo del preventivo (2.000 €)" mentre la card diceva 2.345: il numero era
+  giusto (e' il compenso, che diventa la riga della fattura; cassa/spese/IVA si
+  aggiungono dopo, se no si conterebbero due volte) ma la parola era sbagliata.
+
+### Come si sostituisce testo in massa senza rompere niente
+
+Un `piu'` puo' essere un accento mancante **oppure** l'apostrofo che chiude una
+stringa JavaScript: `'Sono le foto gia' + String.fromCharCode(39) + ' caricate'`.
+Sostituirlo alla cieca rompe la pagina.
+
+Regola usata (verificata): si sostituisce solo se dopo l'apostrofo c'e' uno spazio
+seguito da una **lettera** (la frase continua), oppure `: . , ?` seguiti da
+spazio/fine riga. Mai se dopo c'e' `+`, `)`, `,`, `;`, `}`.
+
+E soprattutto **tre reti di sicurezza prima di scrivere il file**:
+1. `node --check` su ogni blocco `<script>`;
+2. confronto dello "scheletro" HTML (tag + nomi attributi) prima/dopo, che becca
+   le virgolette di attributo rovinate — cosa che `node --check` non vede;
+3. se una delle due fallisce, il file non viene scritto.
+
+Lezione personale: la prima analisi diceva "tutti e 390 i casi sono sicuri" ed era
+sbagliata, perche' il comando di controllo usava un `.*` goloso che leggeva
+l'ultimo apostrofo della riga invece del primo. Ha salvato la situazione il
+controllo automatico, non il ragionamento. **Le verifiche vanno messe prima della
+scrittura, non dopo.**
+
+### Non era un bug: preventivo accettato → pratica
+
+Sembrava che il gestionale creasse pratiche doppione. In realta' il controllo
+anti-doppione c'e' e funziona: cerca le pratiche aperte **dello stesso cliente**.
+Non scattava perche' la pratica di prova non aveva il cliente collegato.
+Collegato il cliente, la finestra "A quale pratica lo collego?" e' comparsa.
+
+### Da fare
+
+- Dati del profilo scritti male ("alessio", "rieti"): escono cosi' nei PDF firmati
+  dal cliente. Vanno sistemati dal Pannello, non sono un problema di codice.
+- Manca da testare: il Cestino (elimina e recupera) e tutto il giro sul profilo Impresa.

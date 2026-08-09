@@ -1,7 +1,7 @@
 // js/sync-filtro.js
 // Quando si arriva da un link tipo ?mestiere=Idraulica, i risultati vengono
-// gia' filtrati correttamente, ma la tendina dei filtri restava su "Tutti i
-// mestieri": il cliente vedeva pochi risultati senza capire il perche'.
+// già filtrati correttamente, ma la tendina dei filtri restava su "Tutti i
+// mestieri": il cliente vedeva pochi risultati senza capire il perché.
 // Questo file allinea il controllo visibile al filtro realmente applicato.
 
 (function () {
@@ -23,7 +23,7 @@
         return;
       }
     }
-    // Valore non presente tra le opzioni: lo aggiungo, cosi' resta visibile
+    // Valore non presente tra le opzioni: lo aggiungo, così resta visibile
     // invece di mostrare "Tutti" mentre i risultati sono filtrati.
     var o = document.createElement('option');
     o.value = valore;

@@ -1,7 +1,7 @@
 /* ============================================================
    IL CESTINO DEL GESTIONALE — TrovaImpresa (9 agosto 2026)
 
-   Richiesta di Alessio: "se uno cancella per errore e' meglio poter
+   Richiesta di Alessio: "se uno cancella per errore è meglio poter
    recuperare". Prima ogni Elimina era definitivo, e in tre casi si portava
    dietro altra roba: il reparto con tutte le sue pratiche, la carta con
    tutti i suoi movimenti, il cliente con i suoi documenti.
@@ -10,9 +10,9 @@
    Questo file si mette in mezzo fra il gestionale e il database:
      - ogni LETTURA di una tabella "col cestino" salta le righe eliminate
      - ogni CANCELLAZIONE diventa "scrivi la data in eliminato_il"
-   Il resto del gestionale non se ne accorge: non e' stata cambiata nemmeno
-   una delle sessanta letture sparse nei quattro pannelli. Ed e' proprio il
-   punto: cosi' non se ne puo' dimenticare nessuna.
+   Il resto del gestionale non se ne accorge: non è stata cambiata nemmeno
+   una delle sessanta letture sparse nei quattro pannelli. Ed è proprio il
+   punto: così non se ne può dimenticare nessuna.
 
    PERCHE' NON SCATTA PIU' LA CATENA
    Le cancellazioni a catena sono una regola del database e scattano solo su
@@ -26,7 +26,7 @@
    Per leggere ANCHE le righe eliminate (serve solo alla sezione Cestino):
        sb.raw("gest_lavori").select("*").not("eliminato_il","is",null)
 
-   SE LA MIGRAZIONE NON E' STATA FATTA
+   SE LA MIGRAZIONE NON È STATA FATTA
    All'avvio si fa una domanda di prova al database. Se la colonna non c'e',
    il cestino resta spento e il gestionale si comporta esattamente come
    prima: meglio un cestino che non c'e' che un pannello bianco.
@@ -37,7 +37,7 @@
   /* Le tabelle che entrano nel cestino.
      NON ci sono le righe di preventivi e fatture: vengono cancellate e
      riscritte a ogni salvataggio, il cestino si riempirebbe di fantasmi.
-     NON c'e' gest_lavoro_mezzi: e' solo un collegamento, si rifa' con un clic.
+     NON c'e' gest_lavoro_mezzi: è solo un collegamento, si rifa' con un clic.
      NON ci sono gest_carte_movimenti e gest_rifornimenti: alimentano due VISTE
      del database (gest_carte_saldo, gest_mezzi_carburante) che non stanno nei
      file del progetto. Nel cestino il movimento sparirebbe dall'elenco ma il
@@ -45,9 +45,9 @@
      sbagliato sui soldi.
      NON c'e' gest_note (tolta il 9/8/2026 poche ore dopo averla messa): la nota
      del calendario si salva con un upsert su "un giorno = una nota", e un
-     vincolo di unicita' PARZIALE (quello che serve al cestino) non puo' fare
-     da arbitro a ON CONFLICT. Risultato: nessuna nota si salvava piu'.
-     Una nota e' una riga di testo: la cancellazione vera va benissimo. */
+     vincolo di unicita' PARZIALE (quello che serve al cestino) non può fare
+     da arbitro a ON CONFLICT. Risultato: nessuna nota si salvava più.
+     Una nota è una riga di testo: la cancellazione vera va benissimo. */
   var TABELLE = [
     "gest_lavori", "gest_clienti", "gest_preventivi", "gest_fatture",
     "gest_scadenze", "gest_mestieri", "gest_mezzi", "gest_operatori",
@@ -131,7 +131,7 @@
         patch[COL] = new Date().toISOString();
         /* .is(COL,null): si mettono nel cestino solo le righe vive. Senza,
            eliminando un reparto si riscriveva la data anche sulle pratiche
-           gia' nel cestino, e risalivano in cima con una data sbagliata. */
+           già nel cestino, e risalivano in cima con una data sbagliata. */
         return fromOriginale(tabella).update(patch).is(COL, null);
       };
 
