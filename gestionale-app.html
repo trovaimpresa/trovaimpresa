@@ -438,6 +438,7 @@
     ruoloUtente=data&&data.tipo?data.tipo:null;
     /* Barra FONDATORE: "Vedi come" fa provare le altre categorie senza cambiare
        account. E' solo una vista: i dati mostrati restano i propri. */
+    try{var _vq=new URLSearchParams(location.search).get("vedi");if(_vq!==null){_vq?sessionStorage.setItem("ti_vedi_tipo",_vq):sessionStorage.removeItem("ti_vedi_tipo");}}catch(_e){}
     try{var _vc=sessionStorage.getItem("ti_vedi_tipo");if(_vc)ruoloUtente=_vc;}catch(_e){}
     console.log('[gestionale] ruolo utente:',ruoloUtente||'(nessun profilo)');
     /* scadenzario attivo per tutti i ruoli (imprese: DURC, assicurazioni, mezzi...) */

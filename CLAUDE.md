@@ -1309,6 +1309,40 @@ regge da sola perché ora scrolla. Ma se un domani si mette un altro pannello a 
 con `position:fixed`, ricordarsi sempre la coppia `min-height:0` + `overflow-y:auto`
 sul figlio che deve scrollare.
 
+## 9 agosto 2026 — Vista FONDATORE completata (un solo account per tutto)
+
+**Problema di Alessio:** col suo unico account (tipo `artigiano`) non poteva provare
+gli altri pannelli: ogni pannello controlla `impresaCorrente.tipo` e se non e' il suo
+lo **rimbalza via** verso il pannello del suo tipo. La barra FONDATORE
+(`js/fondatore.js`) esisteva ma era inclusa SOLO in `gestionale-app.html`.
+
+**Come funziona adesso:**
+- La vista si sceglie in 2 modi: barra FONDATORE ("Vedi come") **oppure** parametro
+  `?vedi=impresa|artigiano|professionista|negozio` nell'indirizzo. `?vedi=` vuoto
+  la cancella. Il parametro serve perche' i link di "Le mie viste" aprono in
+  `target="_blank"` e sessionStorage NON passa alla scheda nuova.
+- Nei 4 pannelli (`pannello-impresa/artigiano/professionisti/negozio.html`):
+  funzione `vistaFondatore(p)` definita dopo `let impresaCorrente = null;` e chiamata
+  nei **3 punti** dove si assegna `impresaCorrente` (sessione, INITIAL_SESSION, login),
+  SEMPRE prima del controllo che fa il rimbalzo. Cambia `p.tipo` **solo in memoria**
+  e **solo se `p.email` e' pintoalessio@icloud.com** — per gli altri utenti non fa nulla.
+  Il tipo vero nel database non viene MAI scritto.
+- `js/fondatore.js`: aggiunta la categoria **Negozio** al menu "Vedi come".
+- Barra fondatore ora inclusa anche in: 4 pannelli + `gestionale-negozio.html` +
+  `gestionale-noleggio.html` (prima solo gestionale-app).
+- `gestionale-app/negozio/noleggio`: leggono anche `?vedi=` oltre a sessionStorage.
+- `admin.html` → "Le mie viste": i 4 link dei pannelli hanno gia' `?vedi=` giusto,
+  quindi entrano nella categoria corretta senza rimbalzi.
+
+**Trappole scoperte:**
+- `gestionale-noleggio.html` **non aveva** `</body></html>` (finiva con `</script>`):
+  aggiunti in fondo insieme all'include di fondatore.js.
+- La vista e' per-scheda (sessionStorage): due schede possono avere due viste diverse.
+  E' voluto: comodo per confrontare.
+
+**Backup locali** (`*.bak-viste`, piu' `admin.html.bak-scroll`): NON vanno committati.
+Fare `git add` SOLO dei file elencati, mai `git add .` finche' ci sono i backup.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.

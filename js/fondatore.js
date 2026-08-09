@@ -43,7 +43,8 @@
     {v:"",               t:"Vedi come: come sono io"},
     {v:"impresa",        t:"Vedi come: Impresa"},
     {v:"artigiano",      t:"Vedi come: Artigiano"},
-    {v:"professionista", t:"Vedi come: Professionista"}
+    {v:"professionista", t:"Vedi come: Professionista"},
+    {v:"negozio",        t:"Vedi come: Negozio"}
   ];
 
   var CHIAVE_VISTA = "ti_vedi_tipo";

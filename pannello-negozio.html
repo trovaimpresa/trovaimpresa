@@ -2936,6 +2936,23 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let impresaCorrente = null;
+/* ===== Vista FONDATORE (9 agosto 2026) =====
+   Serve solo ad Alessio: prova ogni pannello col suo unico account.
+   ?vedi=impresa|artigiano|professionista|negozio nell'indirizzo (o la barra
+   fondatore) cambia la categoria SOLO in memoria, in questa scheda.
+   Il tipo vero nel database NON si tocca. Per chiunque altro non fa nulla. */
+const FONDATORE_EMAIL = 'pintoalessio@icloud.com';
+function vistaFondatore(p){
+  try{
+    if (!p || String(p.email||'').trim().toLowerCase() !== FONDATORE_EMAIL) return p;
+    const qp = new URLSearchParams(location.search).get('vedi');
+    if (qp !== null) { qp ? sessionStorage.setItem('ti_vedi_tipo', qp) : sessionStorage.removeItem('ti_vedi_tipo'); }
+    const v = sessionStorage.getItem('ti_vedi_tipo');
+    if (v) p.tipo = v;
+  }catch(e){}
+  return p;
+}
+
 
 // --- CHAT: manda il token vero dell'utente loggato, non la chiave pubblica ---
 async function chatHdr(extra){
@@ -2962,6 +2979,7 @@ async function caricaSessioneConDati(session) {
     data = data2;
   }
   impresaCorrente = data || { email: session.user.email, id: session.user.id };
+  impresaCorrente = vistaFondatore(impresaCorrente);
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'negozio') {
     const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
     window.location.href = file;
@@ -2997,6 +3015,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     return;
   }
   impresaCorrente = data;
+  impresaCorrente = vistaFondatore(impresaCorrente);
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'negozio') {
     const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
     window.location.href = file;
@@ -3036,6 +3055,7 @@ async function doLogin() {
     return;
   }
   impresaCorrente = data;
+  impresaCorrente = vistaFondatore(impresaCorrente);
   if (impresaCorrente.tipo && impresaCorrente.tipo !== 'negozio') {
     const file = impresaCorrente.tipo === 'professionista' ? 'pannello-professionisti.html' : `pannello-${impresaCorrente.tipo}.html`;
     window.location.href = file;
@@ -5790,6 +5810,7 @@ else iconizza();
 </script>
   <!-- Fascia completamento profilo (agosto 2026) -->
   <script src="/js/completa-profilo.js"></script>
+<script src="/js/fondatore.js"></script>
 </body>
 <script>
 function toggleSidebar() {

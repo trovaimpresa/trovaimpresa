@@ -761,6 +761,9 @@
     const {data,error}=await sb.from('imprese').select('tipo').eq('user_id',uid).maybeSingle();
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
+    /* Vista FONDATORE: stessa logica del gestionale principale (9/8/2026) */
+    try{var _vq=new URLSearchParams(location.search).get("vedi");if(_vq!==null){_vq?sessionStorage.setItem("ti_vedi_tipo",_vq):sessionStorage.removeItem("ti_vedi_tipo");}}catch(_e){}
+    try{var _vc=sessionStorage.getItem("ti_vedi_tipo");if(_vc)ruoloUtente=_vc;}catch(_e){}
     console.log('[gestionale] ruolo utente:',ruoloUtente||'(nessun profilo)');
     const _tabScad=document.querySelector('#tab-scadenzario');
     if(_tabScad)_tabScad.style.display=(ruoloUtente==='professionista')?'':'none';
@@ -2796,5 +2799,6 @@
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',start);}else{start();}
 })();
 </script>
+<script src="/js/fondatore.js"></script>
 </body>
 </html>
