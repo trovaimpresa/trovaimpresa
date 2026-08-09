@@ -50,6 +50,7 @@ declare
   ha_el  boolean;
   ha_uid boolean;
   ha_sp  boolean;
+  ha_id  boolean;
   figli  uuid[];
 begin
   if p_ids is null or cardinality(p_ids) = 0 then
@@ -93,10 +94,16 @@ begin
     select exists(select 1 from pg_attribute where attrelid=format('public.%I',r.figlio)::regclass and attname='eliminato_il' and not attisdropped) into ha_el;
     select exists(select 1 from pg_attribute where attrelid=format('public.%I',r.figlio)::regclass and attname='user_id'      and not attisdropped) into ha_uid;
     select exists(select 1 from pg_attribute where attrelid=format('public.%I',r.figlio)::regclass and attname='storage_path' and not attisdropped) into ha_sp;
+    -- Non tutte le tabelle hanno una colonna "id": le tabelle-ponte (per esempio
+    -- il collegamento fattura-lavoro) hanno come chiave la coppia delle due
+    -- colonne. Darlo per scontato faceva fallire tutto con "column t.id does not
+    -- exist". Se non c'e', si conta la riga lo stesso con un numero usa e getta.
+    select exists(select 1 from pg_attribute where attrelid=format('public.%I',r.figlio)::regclass and attname='id' and not attisdropped) into ha_id;
 
     return query execute format(
-      'select %L::text, t.id, %L::text, %s, %s, %s from public.%I t where t.%I = any($1)',
+      'select %L::text, %s, %L::text, %s, %s, %s from public.%I t where t.%I = any($1)',
       r.figlio,
+      case when ha_id then 't.id' else 'gen_random_uuid()' end,
       case when r.azione = 'c' then 'cancellata'
            when r.azione = 'n' then 'scollegata'
            else 'blocca' end,
@@ -109,8 +116,10 @@ begin
       (select attname from pg_attribute where attrelid=format('public.%I',r.figlio)::regclass and attnum=r.cols_figlio[1])
     ) using p_ids;
 
-    -- si scende solo dove il database cancella davvero
-    if r.azione = 'c' then
+    -- Si scende solo dove il database cancella davvero. E solo se la tabella ha
+    -- un "id": senza, nessuna chiave esterna puo' puntarla nel modo che questa
+    -- funzione accetta (colonna singola verso id), quindi sotto non c'e' niente.
+    if r.azione = 'c' and ha_id then
       execute format('select coalesce(array_agg(t.id), ''{}''::uuid[]) from public.%I t where t.%I = any($1)',
                      r.figlio,
                      (select attname from pg_attribute where attrelid=format('public.%I',r.figlio)::regclass and attnum=r.cols_figlio[1]))
@@ -137,6 +146,7 @@ as $$
 declare
   v_uid    uuid := auth.uid();
   v_n      bigint;
+  v_num    text;
   v_ostacoli jsonb;
   v_va     jsonb;
   v_scoll  jsonb;
@@ -162,6 +172,24 @@ begin
     into v_n using p_id, v_uid;
   if v_n is null then
     raise exception 'Questa riga non e'' nel cestino, oppure non e'' tua.';
+  end if;
+
+  -- ------------------------------------------------------------
+  -- Le fatture EMESSE non si cancellano per sempre.
+  -- Nel cestino ci possono stare quanto vuoi: si ritrovano, e il numero resta
+  -- spiegato. Cancellate davvero no: resterebbe un buco nella numerazione senza
+  -- piu' il documento a dire cos'era, e il commercialista i buchi li vede.
+  -- Se la fattura e' sbagliata la strada e' la nota di credito, non la gomma.
+  -- Le bozze (senza numero) non sono mai state emesse: quelle si cancellano.
+  -- Il controllo sta qui e non nella schermata cosi' vale comunque, anche se
+  -- un domani la schermata cambia.
+  -- ------------------------------------------------------------
+  if p_tabella = 'gest_fatture' then
+    execute 'select numero::text from public.gest_fatture where id=$1 and user_id=$2'
+      into v_num using p_id, v_uid;
+    if v_num is not null and v_num <> '' then
+      return jsonb_build_object('ok', false, 'fiscale', v_num);
+    end if;
   end if;
 
   create temp table if not exists _cascata_tmp(tabella text, id uuid, esito text, viva boolean, altrui boolean, storage_path text) on commit drop;

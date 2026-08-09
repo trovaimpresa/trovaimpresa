@@ -2226,3 +2226,25 @@ c'e' una stretta finale su entrambi i lati. (Attenzione, la prima misura diceva
 `innerWidth = 980` su uno schermo da 390: era la **paginetta di prova** senza il tag
 `<meta name="viewport">`. Il gestionale ce l'ha. Quando un numero non torna,
 sospettare prima del banco di prova che del codice.)
+
+### Due difetti che il banco di prova non poteva vedere (9 agosto, sera)
+
+La funzione girava su un PostgreSQL vero nel container, con 10 scenari e le RLS
+accese. Eppure in produzione si e' rotta due volte, e tutte e due le volte perche'
+**lo schema di prova non somigliava abbastanza a quello vero**:
+
+1. `DELETE requires a WHERE clause`. Supabase tiene acceso **pg_safeupdate**, che
+   rifiuta qualsiasi delete senza where — anche su una tabella temporanea interna.
+   In locale quell'estensione non c'era. Risolto con `delete from _cascata_tmp where true`.
+2. `column t.id does not exist` (42703). La funzione dava per scontato che ogni
+   tabella avesse una colonna `id`. Le **tabelle-ponte** (per esempio il collegamento
+   fattura-lavoro) hanno come chiave la coppia delle due colonne, e nel mio schema di
+   prova gliel'avevo messa io. Ora si controlla in `pg_attribute`: se `id` non c'e',
+   la riga si conta lo stesso con un `gen_random_uuid()` usa e getta, e sotto non si
+   scende (senza `id` nessuna chiave esterna puo' puntarla nel modo accettato).
+
+**Regola per la prossima funzione SQL:** ricreare lo schema di prova dai file veri
+in `sql/`, non a memoria, e accendere le estensioni che Supabase ha accese. E quando
+il gestionale mostra un errore tradotto, l'unico modo per sapere cosa e' successo
+davvero e' Rete -> la riga rossa -> Response: li' c'e' il codice Postgres (42703 e
+compagnia), che dice esattamente dove guardare.

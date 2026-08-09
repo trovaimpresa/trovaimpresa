@@ -8938,6 +8938,16 @@
       return;
     }
 
+    /* una fattura gia' emessa e' un documento fiscale: nel cestino ci resta,
+       cancellata per sempre no. Il rifiuto arriva dal database. */
+    if(prova.ok===false && prova.fiscale){
+      alert("Questa \u00e8 la fattura numero "+prova.fiscale+": \u00e8 un documento fiscale.\n\n"
+        +"Pu\u00f2 restare nel cestino quanto vuoi, ma non la cancello per sempre: "
+        +"resterebbe un buco nella numerazione senza pi\u00f9 il documento a spiegare cos'era, "
+        +"e i buchi il commercialista li vede.\n\n"
+        +"Se \u00e8 sbagliata, la strada giusta \u00e8 la nota di credito.");
+      return;
+    }
     if(prova.ok===false){
       alert("Non posso eliminare \u00ab"+x.nome+"\u00bb per sempre.\n\n"
         +"Ci sono ancora collegate delle cose che NON sono nel cestino:\n"
