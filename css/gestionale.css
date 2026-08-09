@@ -1036,6 +1036,35 @@
 .lav-media .lsc-info small{ display:block; color:var(--testo-2); font-size:14px; margin-top:2px; }
 .lav-media .lsc-q{ font-weight:700; font-size:15px; white-space:nowrap; }
 
+/* --- verbale di sopralluogo: la scelta delle foto (9 agosto 2026).
+       Miniature grandi abbastanza da capire cosa si sta spuntando. --- */
+.ver-foto{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin-bottom:10px; }
+.ver-f{ position:relative; display:block; cursor:pointer; border:2px solid var(--bordo); border-radius:10px; overflow:hidden; }
+.ver-f img{ display:block; width:100%; height:90px; object-fit:cover; }
+.ver-f input{ position:absolute; top:6px; left:6px; width:22px; height:22px; cursor:pointer; z-index:2; }
+.ver-f:has(input:not(:checked)){ opacity:.4; border-color:var(--bordo); }
+.ver-f:has(input:checked){ border-color:var(--blu,#0066ff); }
+
+/* la riga di aggiunta del registro ore ha 4 caselle (data, ore, chi, pulsante):
+   con le 3 colonne di .spesa-add il pulsante andava a capo da solo. */
+.spesa-add.ore-add{ grid-template-columns:auto 90px 1fr auto; }
+@media(max-width:700px){ .spesa-add.ore-add{ grid-template-columns:1fr 1fr; } }
+
+/* --- crediti formativi: il riquadro "a che punto sei" (9 agosto 2026).
+       Numero grande e barra: si deve capire in un colpo d'occhio. --- */
+.cred-box{ background:var(--card); border:2px solid var(--bordo); border-radius:14px;
+           padding:18px 20px; margin-bottom:16px; }
+.cred-box.cred-ok{  border-color:var(--ok);  background:var(--ok-bg); }
+.cred-box.cred-attesa{ border-color:var(--attesa); background:var(--attesa-bg); }
+.cred-box.cred-err{ border-color:var(--err); background:var(--err-bg); }
+.cred-num{ font-size:34px; font-weight:800; line-height:1.1; color:var(--testo); }
+.cred-num small{ font-size:16px; font-weight:600; color:var(--testo-2); }
+.cred-barra{ height:10px; background:rgba(0,0,0,.08); border-radius:6px; overflow:hidden; margin:12px 0 10px; }
+.cred-barra span{ display:block; height:100%; background:var(--blu,#0066ff); border-radius:6px; }
+.cred-box.cred-ok .cred-barra span{ background:var(--ok); }
+.cred-msg{ font-size:16px; line-height:1.5; color:var(--testo); }
+.cred-anni{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+
 /* =========================================================================
    CAMPI DA COMPILARE — testo piu' grande e caselle piu' alte in TUTTE le
    finestre (lavoro, preventivo, condominio, mezzo, carta, scadenza, persona,

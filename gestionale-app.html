@@ -58,6 +58,7 @@
       <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
       <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Attrezzature</button>
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
+      <button data-tab="crediti" id="tab-crediti" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg><span>Crediti formativi</span><span class="tab-cnt" id="cnt-crediti"></span></button>
       <button data-tab="carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Carte</span></button>
       <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Clienti</span></button>
       <button data-tab="fornitori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span>Fornitori</span><span class="tab-cnt" id="cnt-fornitori"></span></button>
@@ -242,6 +243,14 @@
       <div class="sec-head"><h2>Scadenzario</h2><button class="btn add" data-action="new-scad">+ Nuova scadenza</button></div>
       <div class="viste" id="scad-viste"></div>
       <div class="grid" id="scad-list"></div>
+    </section>
+
+    <section id="crediti">
+      <div class="sec-head"><h2>Crediti formativi</h2><button class="btn add" data-action="new-cred">+ Nuovo corso</button></div>
+      <div class="gal-intro">I CFP che devi fare ogni anno per restare iscritto all'albo. Segna i corsi mano a mano che li fai: qui vedi a che punto sei e quanti te ne mancano, senza rifare i conti a dicembre.</div>
+      <div id="cred-riass"></div>
+      <div class="viste" id="cred-viste"></div>
+      <div class="grid" id="cred-list"></div>
     </section>
 
     <section id="preventivi">
@@ -484,6 +493,9 @@
       document.querySelectorAll('[data-tab="attrezzature"] span').forEach(function(s){
         if(s.textContent.trim()==='Attrezzature')s.textContent='Strumenti';
       });
+      /* Crediti formativi: voce nascosta a tutti, accesa solo per gli studi */
+      var _tabC=document.querySelector('#tab-crediti');
+      if(_tabC)_tabC.style.display='';
       var _secA=document.querySelector('#attrezzature');
       if(_secA){
         var _h=_secA.querySelector('h2'); if(_h&&_h.textContent.trim()==='Attrezzature')_h.textContent='Strumenti';
@@ -792,7 +804,7 @@
   }
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
@@ -818,7 +830,7 @@
     riepilogo:renderRiepilogo, lavori:renderJobs, preventivi:renderPreventivi,
     fatture:renderFatture, calendario:renderCal, agenda:renderAgenda,
     mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
-    carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze,
+    carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze, crediti:renderCrediti,
     report:renderReport, galleria:renderGalleria, mappa:renderMappa,
     richieste:renderRichieste, fornitori:renderFornitori
   };
@@ -1526,6 +1538,8 @@
     if(!fatto)v.push({lab:"\u2714 Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
     else v.push({lab:"\u21a9 Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
     v.push({lab:"\ud83d\udcf7 Foto",action:"lf-open",data:{id:l.id,desc:l.descrizione||"Lavoro"}});
+    /* il verbale di sopralluogo e' roba da tecnici: nasce dalle foto della pratica */
+    if(ruoloUtente==='professionista')v.push({lab:"\ud83d\udccb Verbale di sopralluogo",action:"verbale",data:{id:l.id}});
     if(l.dove)v.push({lab:"\ud83d\uddfa Mappa",action:"map",data:{q:l.dove}});
     v.push({lab:"\ud83d\udcac Avvisa su WhatsApp",action:"sq-wa",data:{wa:wa}});
     v.push({sep:true});
@@ -4787,6 +4801,15 @@
       <div class="row2">
         <div class="field"><label>Ore lavorate</label><input type="number" id="j-ore" inputmode="decimal" step="0.5" value="${job.ore||""}" placeholder="0"></div>
         <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
+      <div class="field" id="ore-wrap" style="display:none"><label>⏱ Registro delle ore</label>
+        <div class="spese-list" id="ore-list"></div>
+        <div class="spesa-add ore-add">
+          <input id="or-data" type="date" title="Che giorno">
+          <input id="or-ore" type="number" inputmode="decimal" step="0.5" placeholder="Ore">
+          <select id="or-chi" title="Chi ci ha lavorato (facoltativo)"><option value="">— chi —</option></select>
+          <button type="button" class="btn" data-action="ore-add">+ Aggiungi</button></div>
+        <input id="or-nota" placeholder="Cosa hai fatto (facoltativo)" style="margin-top:6px;width:100%">
+        <div class="margine-box" id="ora-box"></div></div>
       <div class="field"><label>Fattura</label>
         <div class="j-fatt-info">${
           (job.fattStato||"none")==="pagata" ? "\u2714 Fatturato e incassato"
@@ -4801,6 +4824,9 @@
     bindSeg("j-stato");
     renderLavMedia();
     renderLavScadenze();
+    /* cambiando l'importo cambia quanto rende un'ora: il riquadro si rifa' */
+    const _imp=$("#j-imp");
+    if(_imp)_imp.addEventListener("input",function(){ if(oreLavoroId)renderOreBlock(oreLavoroId); });
   }
   /* ===== 9 agosto 2026 — La scadenza proposta da sola =====
      Un tecnico che salva una pratica con una data ha appena scritto una cosa
@@ -5615,6 +5641,11 @@
         <div class="field"><label>Entro quanti giorni ti devono pagare</label>
           <input type="number" id="a-gg" inputmode="numeric" value="${a.giorni_pagamento||30}" placeholder="30"></div>
         <div class="sh-nota">I giorni servono alle Fatture per dirti quando una fattura è scaduta. Di solito 30.</div>
+        ${ruoloUtente==='professionista'?`
+        <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">
+          <label>Crediti formativi da fare ogni anno (CFP)</label>
+          <input type="number" id="a-cfp" inputmode="numeric" value="${a.cfp_obiettivo!=null?a.cfp_obiettivo:30}" placeholder="30"></div>
+        <div class="sh-nota">Di norma <b>30</b> per ingegneri e architetti, <b>20</b> per i geometri. È l'obiettivo che vedi nella sezione Crediti formativi.</div>`:""}
       </div>
 
       </div><div class="sh-col">
@@ -5662,6 +5693,12 @@
     row.sdi_pec        = v("#a-pec")||null;
     const gg=parseInt($("#a-gg")?$("#a-gg").value:"",10);
     if(gg>0)row.giorni_pagamento=gg;
+    /* obiettivo CFP: il campo c'e' solo per gli studi, quindi si scrive solo
+       se esiste (se no un'impresa azzererebbe il valore senza saperlo) */
+    if($("#a-cfp")){
+      const cfp=parseInt($("#a-cfp").value,10);
+      row.cfp_obiettivo=(cfp>0)?cfp:null;
+    }
     /* patente a crediti: campi facoltativi. Vuoto = null, cosi' si puo' anche
        svuotare un campo compilato per sbaglio. */
     const patN=$("#a-pat-n")?$("#a-pat-n").value.trim():"";
@@ -5674,7 +5711,7 @@
     let {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
     /* se una colonna aggiunta di recente non c'e' ancora nel database, salvo
        tutto il resto lo stesso invece di far fallire il salvataggio */
-    const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti",
+    const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti","cfp_obiettivo",
                "cod_fiscale","cap","citta","prov","regime_fiscale","sdi_codice","sdi_pec"];
     const tolte=[];
     while(error){
@@ -6609,6 +6646,120 @@
     $("#sp-desc").value="";$("#sp-imp").value="";if($("#sp-forn"))$("#sp-forn").value="";
     renderSpeseBlock(speseLavoroId);
     toast(avvisoForn?"Spesa salvata, ma senza fornitore: manca la migrazione SQL (gest-spese-fornitore)":"Spesa aggiunta ✔");
+  }
+
+  /* ===== 9 agosto 2026 — IL REGISTRO DELLE ORE =====
+     Il campo "Ore lavorate" da solo e' un numero che nessuno aggiorna: te lo
+     ricordi a fine lavoro e tiri a indovinare. Qui si segna ogni volta che ci
+     si mette mano (data, ore, chi, cosa) e il totale si fa da solo.
+     Il totale viene riscritto anche in gest_lavori.ore, cosi' tutto quello che
+     c'era prima (Report, riepiloghi, esportazioni) continua a funzionare
+     senza sapere niente di questa tabella.
+     La riga che conta e' l'ultima: **quanto rende un'ora su questo lavoro**.
+     Tabella: sql/gest-ore-e-crediti.sql. Se manca, il riquadro lo dice. */
+  let oreLavoroId=null, oreTabellaOk=true;
+  function _oreManca(err){
+    const m=(err&&err.message)||"";
+    return /gest_ore/i.test(m)||/schema cache|does not exist|relation/i.test(m);
+  }
+  async function renderOreBlock(lavoroId){
+    oreLavoroId=lavoroId;
+    const wrap=$("#ore-wrap");if(!wrap||!sb||!sbUid)return;
+    wrap.style.display="block";
+    const pro=ruoloUtente==='professionista';
+    const {data,error}=await sb.from("gest_ore")
+      .select("id,data,ore,nota,operatore_id").eq("user_id",sbUid).eq("lavoro_id",lavoroId)
+      .order("data",{ascending:false});
+    if(error){
+      oreTabellaOk=false;
+      $("#ore-list").innerHTML='<p class="fatt-empty">Per tenere il registro delle ore serve l\'aggiornamento del database (sql/gest-ore-e-crediti.sql). Intanto puoi scrivere il totale nel campo "Ore lavorate" qui sopra.</p>';
+      const add=wrap.querySelector(".spesa-add"); if(add)add.style.display="none";
+      const nt=$("#or-nota"); if(nt)nt.style.display="none";
+      $("#ora-box").innerHTML="";
+      return;
+    }
+    oreTabellaOk=true;
+    const righe=data||[];
+    /* la tendina di chi ci ha lavorato: gli stessi nomi della squadra */
+    const selChi=$("#or-chi");
+    if(selChi){
+      const nomi=(dipCache||[]);
+      selChi.style.display=nomi.length?"":"none";
+      const v=selChi.value;
+      selChi.innerHTML='<option value="">— chi —</option>'+nomi.map(d=>'<option value="'+d.id+'">'+esc(d.nome)+'</option>').join("");
+      selChi.value=v;
+    }
+    const nomeDi=id=>{const d=(dipCache||[]).find(x=>String(x.id)===String(id));return d?d.nome:"";};
+    const tot=righe.reduce((s,x)=>s+(+x.ore||0),0);
+    $("#ore-list").innerHTML=righe.length?righe.map(x=>{
+      const chi=nomeDi(x.operatore_id);
+      return '<div class="spesa-row"><span>'+fdate(x.data)
+        +(x.nota?' — '+esc(x.nota):'')
+        +(chi?'<small class="sp-forn">'+esc(chi)+'</small>':'')
+        +'</span><b>'+_oreTesto(x.ore)+'</b>'
+        +'<button type="button" class="rdel" data-action="ore-del" data-id="'+esc(String(x.id))+'" title="Elimina">×</button></div>';
+    }).join(""):'<p class="fatt-empty">Nessuna ora registrata.</p>';
+
+    /* il campo "Ore lavorate" diventa lo specchio del registro: si scrive da
+       solo e non si tocca piu' a mano, se no i due numeri litigano */
+    const campo=$("#j-ore");
+    if(campo){
+      if(righe.length){campo.value=tot;campo.readOnly=true;campo.title="Somma del registro qui sotto";campo.style.background="var(--sfondo,#f5f6f8)";}
+      else{
+        /* cancellata l'ultima riga il campo si azzera DAVVERO: se restasse il
+           totale di prima, il registro direbbe "nessuna ora" e il Report
+           continuerebbe a contare le ore vecchie */
+        campo.value="";campo.readOnly=false;campo.title="";campo.style.background="";
+      }
+    }
+    /* quanto rende un'ora */
+    const imp=+($("#j-imp")?$("#j-imp").value:0)||0;
+    const box=$("#ora-box");
+    if(!box)return;
+    if(!tot){box.innerHTML='<span>Segna le ore qui sopra: ti dico quanto rende un\'ora.</span>';return;}
+    if(!imp){box.innerHTML='<span>Ore totali: <b>'+_oreTesto(tot)+'</b></span><span>Metti l\'importo per sapere quanto rendono.</span>';return;}
+    const perOra=imp/tot;
+    box.innerHTML='<span>'+(pro?'Compenso':'Lavoro')+': '+eur2(imp)+'</span>'
+      +'<span>Ore: <b>'+_oreTesto(tot)+'</b></span>'
+      +'<span>Rende <b>'+eur2(perOra)+' l\'ora</b></span>';
+  }
+  function _oreTesto(n){
+    const v=Math.round((+n||0)*100)/100;
+    return String(v).replace(".",",")+" h";
+  }
+  async function oreAdd(){
+    if(!sbUid||!oreLavoroId)return;
+    if(!oreTabellaOk){toast("Prima serve l'aggiornamento del database (sql/gest-ore-e-crediti.sql)");return;}
+    const ore=+($("#or-ore").value)||0;
+    if(!(ore>0)){toast("Scrivi quante ore");return;}
+    const obj={user_id:sbUid,mestiere_id:curMestiere(),lavoro_id:oreLavoroId,
+      data:$("#or-data").value||todayStr(), ore,
+      nota:$("#or-nota").value.trim()||null,
+      operatore_id:($("#or-chi")&&$("#or-chi").value)||null};
+    const {error}=await sb.from("gest_ore").insert(obj);
+    if(error){toast("Errore: "+error.message);return;}
+    $("#or-ore").value="";$("#or-nota").value="";
+    await renderOreBlock(oreLavoroId);
+    await _oreSalvaTotale();
+    toast("Ore aggiunte ✔");
+  }
+  async function oreDel(id){
+    if(!sbUid)return;
+    const {error}=await sb.from("gest_ore").delete().eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    await renderOreBlock(oreLavoroId);
+    await _oreSalvaTotale();
+    toast("Riga eliminata");
+  }
+  /* il totale finisce anche in gest_lavori.ore: e' li' che lo cercano il
+     Report e le esportazioni, che di gest_ore non sanno niente */
+  async function _oreSalvaTotale(){
+    if(!sbUid||!oreLavoroId)return;
+    const campo=$("#j-ore");
+    if(!campo)return;                       /* modulo chiuso: non tocco niente */
+    const v=String(campo.value||"").trim();
+    const tot=v===""?null:(+v||0);          /* vuoto = nessuna ora, non zero finto */
+    try{ await sb.from("gest_lavori").update({ore:tot}).eq("id",oreLavoroId).eq("user_id",sbUid); }catch(e){}
   }
 
   /* ---- PREVENTIVI ---- */
@@ -7654,6 +7805,402 @@
     toast("Conferma d'ordine scaricata ✅");
   }
 
+  /* ===== 9 agosto 2026 — VERBALE DI SOPRALLUOGO (studi professionali) =====
+     Oggi il sopralluogo si fa cosi': foto sparse nel telefono e due appunti su
+     un foglio, che poi vanno riscritti in ufficio. Qui il verbale nasce dalle
+     foto GIA' caricate in Galleria su quella pratica: si scrive cosa si e'
+     visto, si spuntano le foto che servono, ed esce un PDF firmabile.
+     A cosa serve davvero: e' la prova di com'era lo stato dei luoghi PRIMA.
+     Quando sei mesi dopo qualcuno dice "quella crepa c'era gia'?", il verbale
+     con la data e le foto risponde da solo. */
+
+  const VER_MEM="gest_verbale_default";
+  function verLeggiMem(){ try{ return JSON.parse(localStorage.getItem(VER_MEM)||"{}")||{}; }catch(e){ return {}; } }
+  function verScriviMem(o){ try{ localStorage.setItem(VER_MEM,JSON.stringify(o)); }catch(e){} }
+
+  let verFoto=[];   /* le foto della pratica, con l'url firmato gia' pronto */
+
+  async function verbaleForm(lavId){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const l=(lavCache||[]).find(x=>String(x.id)===String(lavId));
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    let cli={};
+    if(l&&l.cliente_id){const {data:c}=await sb.from("gest_clienti").select("*").eq("id",l.cliente_id).maybeSingle();cli=c||{};}
+
+    /* le foto gia' caricate su questa pratica */
+    verFoto=[];
+    try{
+      const {data:fs}=await sb.from("gest_foto").select("id,storage_path,tipo,created_at")
+        .eq("user_id",sbUid).eq("lavoro_id",lavId).neq("tipo","fattura")
+        .order("created_at",{ascending:true}).limit(12);
+      for(const f of (fs||[])){
+        const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
+        if(su&&su.signedUrl)verFoto.push({id:f.id,url:su.signedUrl});
+      }
+    }catch(e){}
+
+    const mem=verLeggiMem();
+    const fotoHtml=verFoto.length
+      ? '<div class="ver-foto">'+verFoto.map(function(f,i){
+          return '<label class="ver-f"><input type="checkbox" class="ver-ck" data-i="'+i+'" checked>'
+                +'<img src="'+f.url+'" alt="foto '+(i+1)+'"></label>';
+        }).join("")+'</div>'
+        +'<div class="campo-aiuto">Sono le foto gia' + String.fromCharCode(39) + ' caricate in Galleria su questa pratica. Togli la spunta a quelle che non vuoi nel verbale.</div>'
+      : '<p class="sh-nota" style="margin-top:0">Non ci sono foto su questa pratica. Caricale dalla <b>Galleria</b> (o falle fare in cantiere con l' + String.fromCharCode(39) + 'app dell' + String.fromCharCode(39) + 'operaio) e poi torna qui: entrano nel verbale da sole.</p>';
+
+    openSheetGrande("Verbale di sopralluogo",
+      '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Il sopralluogo</div>'
+      +'<div class="row2">'
+      +'<div class="field"><label>Data</label><input type="date" id="vb-data" value="'+todayStr()+'"></div>'
+      +'<div class="field"><label>Ora</label><input id="vb-ora" value="" placeholder="Es. 10:30"></div></div>'
+      +'<div class="field"><label>Luogo</label><input id="vb-luogo" value="'+esc((l&&l.dove)||cli.indirizzo||"")+'" placeholder="Indirizzo dell\'immobile"></div>'
+      +'<div class="field"><label>Presenti</label><textarea id="vb-presenti" rows="3" placeholder="Uno per riga. Es.&#10;Geom. Mario Rossi (tecnico incaricato)&#10;Sig. Luigi Bianchi (proprietario)">'+esc(mem.presenti||"")+'</textarea></div>'
+      +'</div>'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Che cosa hai visto</div>'
+      +'<div class="field"><textarea id="vb-rilievi" rows="8" placeholder="Lo stato dei luoghi, le misure prese, le criticita\' riscontrate. Una riga per punto: nel PDF diventano un elenco numerato."></textarea></div>'
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Le foto</div>'
+      +fotoHtml
+      +'</div>'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Conclusioni e firma</div>'
+      +'<div class="field"><label>Conclusioni (facoltativo)</label><textarea id="vb-concl" rows="3" placeholder="Es. si rende necessario un rilievo strumentale delle lesioni."></textarea></div>'
+      +'<div class="field"><label>Luogo della firma</label><input id="vb-firma-luogo" value="'+esc(mem.luogo||az.citta||"")+'" placeholder="Es. Rieti"></div>'
+      +'<p class="sh-nota" style="margin-bottom:0">Il verbale esce in PDF con le foto e le righe per la firma dei presenti. Vale come prova dello stato dei luoghi a quella data.</p>'
+      +'</div>'
+      +'</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="verbale-pdf" data-id="'+esc(String(lavId))+'">Scarica il verbale</button>');
+  }
+
+  /* le foto vanno messe nel PDF come dati, non come indirizzo: l'indirizzo
+     firmato scade dopo un'ora e il file resterebbe con i buchi */
+  function _fotoInDati(url){
+    return new Promise(function(res){
+      try{
+        fetch(url).then(r=>r.blob()).then(function(b){
+          const fr=new FileReader();
+          fr.onload=()=>res(String(fr.result||""));
+          fr.onerror=()=>res("");
+          fr.readAsDataURL(b);
+        }).catch(()=>res(""));
+      }catch(e){ res(""); }
+    });
+  }
+  function _misuraFoto(dataUrl){
+    return new Promise(function(res){
+      const im=new Image();
+      im.onload=()=>res({w:im.naturalWidth||4,h:im.naturalHeight||3});
+      im.onerror=()=>res({w:4,h:3});
+      im.src=dataUrl;
+    });
+  }
+
+  async function verbalePdf(lavId){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    const l=(lavCache||[]).find(x=>String(x.id)===String(lavId))||{};
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return;}
+    let cli={};
+    if(l.cliente_id){const {data:c}=await sb.from("gest_clienti").select("*").eq("id",l.cliente_id).maybeSingle();cli=c||{};}
+
+    const V=x=>{const e=$("#"+x);return e?e.value.trim():"";};
+    const dati={data:V("vb-data")||todayStr(), ora:V("vb-ora"), luogo:V("vb-luogo"),
+                presenti:V("vb-presenti"), rilievi:V("vb-rilievi"),
+                concl:V("vb-concl"), firmaLuogo:V("vb-firma-luogo")};
+    verScriviMem({presenti:dati.presenti,luogo:dati.firmaLuogo});
+
+    /* quali foto ha lasciato spuntate */
+    const scelte=[];
+    $$(".ver-ck").forEach(function(ck){ if(ck.checked){const f=verFoto[+ck.dataset.i]; if(f)scelte.push(f);} });
+
+    toast("Preparo il verbale…");
+    const immagini=[];
+    for(const f of scelte){
+      const d=await _fotoInDati(f.url);
+      if(!d)continue;
+      const m=await _misuraFoto(d);
+      immagini.push({d,w:m.w,h:m.h});
+    }
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    const M=18, R=210-M, L=R-M;
+    let y=20;
+    const paragrafo=(txt,size,grassetto,colore)=>{
+      const stile=()=>{doc.setFont("helvetica",grassetto?"bold":"normal");
+                       doc.setFontSize(size||9.5);
+                       doc.setTextColor(colore==null?0:colore);};
+      stile();
+      doc.splitTextToSize(String(txt),L).forEach(function(riga){
+        if(y+4.6>272){doc.addPage();y=20;stile();}
+        doc.text(riga,M,y); y+=4.6;
+      });
+      doc.setTextColor(0);
+    };
+    const titoletto=t=>{ y+=4; if(y+10>272){doc.addPage();y=20;} paragrafo(t,10.5,true); y+=1.5; };
+
+    /* intestazione */
+    doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    let hy=y+6;
+    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    doc.setTextColor(0);
+    y=hy+6;doc.setDrawColor(210);doc.line(M,y,R,y);y+=9;
+
+    doc.setFont("helvetica","bold");doc.setFontSize(15);
+    doc.text("VERBALE DI SOPRALLUOGO",105,y,{align:"center"});y+=8;
+
+    /* i dati in testa */
+    doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+    const testa=[["Data",fdate(dati.data)+(dati.ora?"  ore "+dati.ora:"")],
+                 ["Luogo",dati.luogo||"—"],
+                 ["Pratica",l.descrizione||"—"],
+                 ["Committente",cli.nome||"—"]];
+    testa.forEach(function(r){
+      if(y+6>272){doc.addPage();y=20;}
+      doc.setFont("helvetica","bold");doc.text(r[0],M,y);
+      doc.setFont("helvetica","normal");
+      doc.splitTextToSize(String(r[1]),L-32).forEach(function(riga,i){
+        doc.text(riga,M+32,y+(i*4.6));
+      });
+      y+=Math.max(6,doc.splitTextToSize(String(r[1]),L-32).length*4.6+1.4);
+    });
+    y+=2;doc.setDrawColor(210);doc.line(M,y,R,y);y+=4;
+
+    if(dati.presenti){
+      titoletto("Presenti al sopralluogo");
+      dati.presenti.split("\n").map(x=>x.trim()).filter(Boolean).forEach(function(r){
+        paragrafo(r.charAt(0)==="-"?r:("- "+r));
+      });
+    }
+
+    titoletto("Stato dei luoghi e rilievi");
+    if(dati.rilievi){
+      const punti=dati.rilievi.split("\n").map(x=>x.trim()).filter(Boolean);
+      if(punti.length>1)punti.forEach(function(r,i){ paragrafo((i+1)+". "+r.replace(/^[-\d.\s]+/,"")); });
+      else paragrafo(punti[0]);
+    }else{
+      paragrafo("—");
+    }
+
+    /* le foto: due per riga, mantenendo le proporzioni */
+    if(immagini.length){
+      titoletto("Documentazione fotografica");
+      const larg=(L-6)/2, HMAX=70;
+      /* Le misure si calcolano PRIMA, tutte. Due cose che prima sbagliavano:
+         1) col tetto di 70 mm si accorciava l'altezza ma non la larghezza, e
+            una foto verticale del telefono usciva schiacciata: su un verbale
+            che deve provare lo stato dei luoghi e' un difetto serio;
+         2) il salto pagina guardava solo la PRIMA foto della riga, quindi una
+            seconda foto piu' alta finiva sotto il bordo del foglio. */
+      const dim=immagini.map(function(im){
+        let w=larg, h=larg*(im.h/im.w);
+        if(h>HMAX){ h=HMAX; w=HMAX*(im.w/im.h); }   /* si scala anche la larghezza */
+        return {w:w,h:h};
+      });
+      for(let i=0;i<immagini.length;i+=2){
+        const a=dim[i], b=dim[i+1];
+        const hRiga=Math.max(a.h, b?b.h:0);
+        if(y+hRiga+10>272){doc.addPage();y=20;}
+        [i,i+1].forEach(function(k,col){
+          if(k>=immagini.length)return;
+          const d=dim[k];
+          /* centrata nella sua colonna: le verticali non restano appiccicate a sinistra */
+          const x=M+col*(larg+6)+(larg-d.w)/2;
+          try{ doc.addImage(immagini[k].d,"JPEG",x,y,d.w,d.h,undefined,"FAST"); }catch(e){}
+          doc.setFontSize(8);doc.setTextColor(120);
+          doc.text("Foto "+(k+1),M+col*(larg+6),y+hRiga+4);
+          doc.setTextColor(0);
+        });
+        y+=hRiga+10;
+      }
+    }
+
+    if(dati.concl){
+      titoletto("Conclusioni");
+      paragrafo(dati.concl);
+    }
+
+    /* firme dei presenti: blocco unico */
+    const hFirme=6+14+6+10;
+    y+=6;
+    if(y+hFirme>280){doc.addPage();y=20;}
+    paragrafo("Il presente verbale, redatto in contraddittorio fra i presenti, documenta lo stato dei luoghi alla data sopra indicata.",8.8,false,90);
+    y+=6;
+    paragrafo((dati.firmaLuogo?dati.firmaLuogo+", ":"")+"li "+fdate(dati.data),9.5,false);
+    y+=12;
+    doc.setDrawColor(120);
+    doc.line(M,y,M+70,y);
+    doc.line(R-70,y,R,y);
+    y+=5;
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    doc.text("Il tecnico",M,y);
+    doc.text("Il committente",R-70,y);
+    doc.setTextColor(0);
+
+    doc.save("verbale-sopralluogo-"+fdate(dati.data).replace(/\//g,"-")+"-"+String(l.descrizione||"pratica").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+    closeSheet();
+    toast("Verbale scaricato ✅");
+  }
+
+  /* ===== 9 agosto 2026 — CREDITI FORMATIVI (CFP) =====
+     Ingegneri, architetti, geometri e periti sono OBBLIGATI a fare corsi ogni
+     anno per restare iscritti all'albo. Quasi tutti perdono il conto e a
+     dicembre si trovano scoperti. Qui si segna un corso alla volta e il
+     gestionale dice a che punto sei e quanti te ne mancano.
+     Nessun mestiere_id: l'obbligo e' della PERSONA iscritta all'albo, non del
+     reparto, quindi i corsi si vedono uguali da tutti i reparti.
+     Tabella: sql/gest-ore-e-crediti.sql. Se manca, la sezione lo dice. */
+  const CRED_TIPI=["Aggiornamento professionale","Deontologia","Sicurezza",
+                   "Corso abilitante","Seminario / convegno","Altro"];
+  let credCache=[], credAnno=null, credObiettivo=30;
+
+  async function renderCrediti(){
+    const box=$("#cred-list");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML="";return;}
+    const {data,error}=await sb.from("gest_crediti")
+      .select("id,titolo,ente,data,crediti,tipo,note").eq("user_id",sbUid)
+      .order("data",{ascending:false});
+    if(error){
+      $("#cred-riass").innerHTML="";
+      box.innerHTML=tabVuoto("Serve un aggiornamento del database",
+        "Per tenere il registro dei crediti formativi esegui sql/gest-ore-e-crediti.sql su Supabase (SQL Editor → Run). Poi ricarica la pagina.",
+        _SVGV+'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>');
+      return;
+    }
+    credCache=data||[];
+    /* l'obiettivo annuo sta nei Dati azienda: 30 per ingegneri e architetti,
+       20 per i geometri. Ognuno mette il suo. */
+    credObiettivo=30;   /* si riparte sempre dal default, se no resta quello di prima */
+    try{
+      const {data:az}=await sb.from("gest_azienda").select("cfp_obiettivo").eq("user_id",sbUid).maybeSingle();
+      if(az&&az.cfp_obiettivo!=null&&+az.cfp_obiettivo>0)credObiettivo=+az.cfp_obiettivo;
+    }catch(e){}
+
+    const anni=[...new Set(credCache.map(c=>String(c.data||"").slice(0,4)).filter(Boolean))].sort().reverse();
+    const annoOggi=todayStr().slice(0,4);
+    if(!credAnno)credAnno=anni.includes(annoOggi)?annoOggi:(anni[0]||annoOggi);
+    const L=credCache.filter(c=>String(c.data||"").slice(0,4)===credAnno);
+    const fatti=L.reduce((s,c)=>s+(+c.crediti||0),0);
+    const mancano=Math.max(0,credObiettivo-fatti);
+    const perc=credObiettivo?Math.min(100,Math.round(fatti/credObiettivo*100)):0;
+
+    /* il riquadro in cima: e' l'unica cosa che uno vuole sapere davvero */
+    const tono=mancano===0?"ok":(perc>=60?"attesa":"err");
+    $("#cred-riass").innerHTML=
+      '<div class="cred-box cred-'+tono+'">'
+      +'<div class="cred-num">'+String(Math.round(fatti*100)/100).replace(".",",")+' <small>di '+credObiettivo+' CFP</small></div>'
+      +'<div class="cred-barra"><span style="width:'+perc+'%"></span></div>'
+      +'<div class="cred-msg">'+(mancano===0
+          ? "Obiettivo "+credAnno+" raggiunto: sei a posto."
+          : "Ti mancano <b>"+String(Math.round(mancano*100)/100).replace(".",",")+" crediti</b> per chiudere il "+credAnno+".")
+      +'</div>'
+      +'<div class="cred-anni">'+(anni.length?anni:[annoOggi]).map(function(a){
+          return '<button type="button" class="chip'+(a===credAnno?' on':'')+'" data-action="cred-anno" data-v="'+a+'">'+a+'</button>';
+        }).join("")+'</div>'
+      +'</div>';
+
+    renderTabella({
+      id:"cred", box:"#cred-list",
+      viste:"#cred-viste", visteDef:[], vista:"", conta:{}, azioneVista:"",
+      vuoto:tabVuoto("Nessun corso segnato nel "+credAnno,
+        "Ogni volta che fai un corso segnalo qui con la data e i crediti: a dicembre sai già se sei a posto, senza rincorrere gli attestati.",
+        _SVGV+'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+        {t:"+ Segna il primo corso",a:"new-cred"}),
+      colonne:[{lab:"Corso",w:"38%"},{lab:"Ente",w:"24%",cls:"c-chi"},
+               {lab:"Tipo",w:"18%",cls:"c-cli"},{lab:"Crediti",w:"10%"},{lab:"Quando",w:"10%"}],
+      righe:L.map(function(c){
+        return {
+          id:c.id,
+          click:{action:"edit-cred",data:{id:c.id}},
+          celle:[
+            '<span class="lav-bar fatto"></span><span class="c-nome">'+esc(c.titolo||"Corso")+'</span>',
+            esc(c.ente||"—"),
+            esc(c.tipo||"—"),
+            '<b>'+String(+c.crediti||0).replace(".",",")+'</b>',
+            fdate(c.data)
+          ],
+          menu:[
+            {lab:"✏ Modifica",action:"edit-cred",data:{id:c.id}},
+            {lab:"🗑 Elimina",action:"del-cred",data:{id:c.id},del:true}
+          ]
+        };
+      }),
+      cards:()=>L.map(function(c){
+        return schedaJob({
+          tono:"t-ok", titolo:esc(c.titolo||"Corso"),
+          destra:'<span class="stato" style="background:var(--ok-bg);color:var(--ok)">'+String(+c.crediti||0).replace(".",",")+' CFP</span>',
+          meta:[c.ente?"🏛 "+esc(c.ente):"", c.tipo?"📚 "+esc(c.tipo):"", "📅 "+fdate(c.data)],
+          nota:c.note?"📝 "+esc(c.note):"",
+          azioni:[
+            {lab:"✏ Modifica",action:"edit-cred",data:{id:c.id}},
+            {lab:"🗑 Elimina",action:"del-cred",data:{id:c.id},del:true}
+          ]});
+      }).join("")
+    });
+  }
+
+  function credForm(c){
+    const isNew=!c;c=c||{};
+    const tipoOpts=CRED_TIPI.map(t=>'<option value="'+esc(t)+'" '+(t===c.tipo?'selected':'')+'>'+esc(t)+'</option>').join("");
+    openSheetGrande(isNew?"Nuovo corso":"Modifica corso",
+      '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Il corso</div>'
+      +'<div class="field"><label>Titolo</label><input id="cr-tit" value="'+esc(c.titolo||"")+'" placeholder="Es. Aggiornamento sicurezza 40 ore"></div>'
+      +'<div class="field"><label>Ente che lo ha organizzato</label><input id="cr-ente" value="'+esc(c.ente||"")+'" placeholder="Es. Ordine Ingegneri di Rieti"></div>'
+      +'<div class="field"><label>Tipo</label><select id="cr-tipo">'+tipoOpts+'</select></div>'
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Quando e quanto</div>'
+      +'<div class="row2">'
+      +'<div class="field"><label>Data</label><input type="date" id="cr-data" value="'+(c.data||todayStr())+'"></div>'
+      +'<div class="field"><label>Crediti (CFP)</label><input type="number" step="0.5" inputmode="decimal" id="cr-cfp" value="'+(c.crediti!=null?c.crediti:"")+'" placeholder="0"></div></div>'
+      +'<div class="field"><label>Note</label><textarea id="cr-note" placeholder="Numero attestato, dove l\'hai salvato...">'+esc(c.note||"")+'</textarea></div>'
+      +'<p class="sh-nota" style="margin-bottom:0">L\'obiettivo annuo (di norma 30 CFP, 20 per i geometri) si imposta nei <b>Dati azienda</b>.</p>'
+      +'</div>'
+      +'</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="save-cred" data-id="'+(c.id||"")+'">'+(isNew?"Aggiungi":"Salva")+'</button>');
+  }
+
+  async function saveCred(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const titolo=$("#cr-tit").value.trim();
+    if(!titolo){toast("Scrivi il titolo del corso");return;}
+    const row={titolo, ente:$("#cr-ente").value.trim()||null,
+      tipo:$("#cr-tipo")?$("#cr-tipo").value:null,
+      data:$("#cr-data").value||todayStr(),
+      crediti:+($("#cr-cfp").value)||0,
+      note:$("#cr-note").value.trim()||null};
+    const {data,error}=id
+      ?await sb.from("gest_crediti").update(row).eq("id",id).eq("user_id",sbUid).select("id")
+      :await sb.from("gest_crediti").insert(Object.assign({user_id:sbUid},row)).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
+    /* l'anno mostrato segue il corso appena segnato, se no sembra sparito */
+    credAnno=String(row.data).slice(0,4);
+    closeSheet();renderCrediti();toast(id?"Aggiornato ✔":"Corso segnato ✔");
+  }
+  /* funzione a parte: il gestore dei clic di questo blocco NON e' async,
+     quindi l'await deve stare qui dentro */
+  async function delCred(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(!gconfirm("Eliminare questo corso dal registro?"))return;
+    const {data,error}=await sb.from("gest_crediti").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
+    renderCrediti();toast("Corso eliminato");
+  }
+
   /* ---- REPORT & STATISTICHE ---- */
   let repData=null;
   async function renderReport(){
@@ -7842,6 +8389,15 @@
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
     if(a==="spesa-add")return spesaAdd();
+    if(a==="new-cred")return credForm(null);
+    if(a==="edit-cred")return credForm(credCache.find(c=>String(c.id)===String(id)));
+    if(a==="save-cred")return saveCred(id);
+    if(a==="cred-anno"){credAnno=t.dataset.v;renderCrediti();return;}
+    if(a==="del-cred")return delCred(id);
+    if(a==="verbale")return verbaleForm(id);
+    if(a==="verbale-pdf")return verbalePdf(id);
+    if(a==="ore-add")return oreAdd();
+    if(a==="ore-del"){if(gconfirm("Eliminare questa riga di ore?"))return oreDel(id);return;}
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="new-prev")return prevForm(null);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
@@ -7958,7 +8514,7 @@
     if(a==="fatt-pdf")return fatturaPdf(id);
     if(a==="fatt-xml")return fatturaXml(id);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
-    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();}return;}
+    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();

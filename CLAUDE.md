@@ -1469,10 +1469,64 @@ inserimento. Se un domani si vuole uniformare anche quella, e' l'unica rimasta.
 `grep -n "openSheet(\`" gestionale-app.html` deve restituire **solo** la riga
 della finestra del giorno.
 
-### Il prossimo passo
-La lista strumenti professionisti continua con: **ore per pratica** (timesheet +
-"quanto hai guadagnato all'ora"), **verbale di sopralluogo** con foto,
-**registro crediti formativi**.
+## 9 agosto 2026 — ULTIMI TRE STRUMENTI: la lista professionisti e' CHIUSA
+
+Database: **`sql/gest-ore-e-crediti.sql`** (tabelle `gest_ore` e `gest_crediti`
+piu' la colonna `gest_azienda.cfp_obiettivo`). Tutte e tre le sezioni funzionano
+anche PRIMA di eseguirlo: lo dicono con una frase chiara invece di rompersi.
+
+### 3. REGISTRO DELLE ORE (serve a tutti, non solo agli studi)
+Il campo "Ore lavorate" da solo era un numero che nessuno aggiornava. Ora dentro
+la scheda del lavoro/pratica c'e' un registro: una riga per volta (data, ore,
+chi, cosa), e in fondo **quanto rende un'ora** — compenso diviso ore. E' il conto
+che nessuno fa mai e che dice se una pratica conviene.
+- `renderOreBlock` / `oreAdd` / `oreDel` / `_oreSalvaTotale`, sul modello del
+  blocco spese. Si accende da `edit-job` (come le spese: sul lavoro NUOVO non
+  c'e', perche' quel ramo del modulo non ha il campo).
+- **Il totale viene riscritto anche in `gest_lavori.ore`**: cosi' Report,
+  riepiloghi ed esportazioni continuano a funzionare senza sapere niente della
+  tabella nuova. Il campo `#j-ore` diventa readOnly quando ci sono righe.
+
+### 4. VERBALE DI SOPRALLUOGO con foto
+Voce "📋 Verbale di sopralluogo" nel menu della pratica (solo studi). Nasce dalle
+foto GIA' in Galleria su quella pratica: si spuntano quelle che servono, si
+scrive cosa si e' visto ed esce un PDF firmabile. A cosa serve davvero: e' la
+prova di com'erano i luoghi PRIMA — sei mesi dopo, alla domanda "quella crepa
+c'era gia'?", risponde il verbale con la data.
+- `verbaleForm` / `verbalePdf` / `_fotoInDati` / `_misuraFoto`.
+- Le foto entrano nel PDF **come dati, non come indirizzo**: gli url firmati di
+  Supabase scadono dopo un'ora e il file resterebbe coi buchi.
+
+### 5. CREDITI FORMATIVI (CFP)
+Voce nuova nel gruppo Studio (`#tab-crediti`, nascosta nell'HTML e accesa da
+`adattaMenuProfessionista`). Riquadro in cima con numero grande, barra e "ti
+mancano N crediti". L'obiettivo annuo si imposta nei **Dati azienda** (campo
+visibile solo agli studi): 30 per ingegneri e architetti, 20 per i geometri.
+Niente `mestiere_id`: l'obbligo e' della persona iscritta all'albo, non del
+reparto, quindi i corsi si vedono uguali da tutti i reparti.
+
+### ⚠️ LEZIONI (6 difetti trovati dalla verifica prima di consegnare)
+1. **Cancellando l'ultima riga di ore il totale vecchio restava nel database**:
+   il campo non veniva azzerato, e Report ed esportazioni continuavano a contare
+   ore che nel registro non c'erano piu'. Ora `campo.value=""` e
+   `_oreSalvaTotale` scrive **null**, non uno zero finto.
+2. **Le foto verticali uscivano schiacciate**: col tetto di 70 mm si accorciava
+   l'altezza ma NON la larghezza. **Regola: quando si mette un tetto a una
+   dimensione di un'immagine, va riscalata anche l'altra.** Su un verbale che
+   deve provare lo stato dei luoghi, misure deformate sono un difetto grave.
+3. **Il salto pagina guardava solo la prima foto della riga**: con la seconda
+   piu' alta, finiva sotto il bordo del foglio. Ora le misure si calcolano tutte
+   PRIMA e il controllo usa l'altezza della riga intera. Verificato con node.
+4. L'obiettivo CFP si leggeva dal database ma **non era impostabile da nessuna
+   parte**: aggiunto il campo nei Dati azienda (e in `OPZ` del paracadute).
+5. `.spesa-add` ha 3 colonne, la riga delle ore ne ha 4: classe `.ore-add`.
+6. `confirm()` invece di `gconfirm()`: per gli studi il messaggio non passava
+   dal traduttore lavoro→pratica.
+
+### Cosa resta aperto sui professionisti
+Niente della lista iniziale. Le idee successive, se serviranno: parcelle
+ricorrenti, scadenzario condiviso con il committente, firma digitale dei PDF.
+Il **computo metrico resta escluso** (contro PriMus si fa brutta figura).
 
 ## 9 agosto 2026 — TRAVASO fra gestionale impresa e professionista
 
