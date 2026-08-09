@@ -2088,3 +2088,81 @@ Collegato il cliente, la finestra "A quale pratica lo collego?" e' comparsa.
 - Dati del profilo scritti male ("alessio", "rieti"): escono cosi' nei PDF firmati
   dal cliente. Vanno sistemati dal Pannello, non sono un problema di codice.
 - Manca da testare: il Cestino (elimina e recupera) e tutto il giro sul profilo Impresa.
+
+
+## 9 agosto 2026 (sera) — "Elimina per sempre" sicuro, e la lezione sui controlli
+
+Domanda di Alex: *"le pratiche eliminate come si eliminano del tutto? dopo quanto
+tempo? anni? mesi?"*. Risposta: **mai**, non c'era nessuna pulizia automatica e
+non e' stata aggiunta. In un gestionale con fatture e pratiche un automatismo che
+cancella dopo N giorni e' una trappola: quando uno se ne accorge e' tardi.
+A cancellare deve essere sempre una persona.
+
+Quello che mancava era il pulsante manuale. Prima "Elimina per sempre" c'era solo
+sulle tabelle senza figli; su pratiche, clienti, fatture e reparti no, perche' la
+cancellazione a catena del database si sarebbe portata via anche roba viva.
+
+### La soluzione: decide Postgres, non il gestionale
+
+`sql/gest-cestino-elimina.sql` — funzione `gest_cestino_elimina(tabella, id, conferma)`.
+Il gestionale la chiama due volte: prima in anteprima, poi per confermare.
+L'elenco dei collegamenti NON e' scritto a mano: viene letto da `pg_constraint`,
+cioe' dal catalogo del database. Una tabella aggiunta domani viene vista da sola.
+
+**La regola e' "nel dubbio rifiuta".** Si ferma se trova:
+- una riga che non e' nel cestino (la perderesti)
+- una riga di un altro account
+- una chiave composita o che non punta a `id` (non la sa seguire)
+- una catena piu' profonda di 8 livelli
+- un vincolo `restrict` che farebbe fallire il delete
+
+Le righe che restano ma perdono il riferimento (`on delete set null`: la fattura
+di un cliente cancellato) non bloccano, ma vengono **elencate nella conferma**.
+La funzione restituisce anche gli `storage_path` dei file da togliere dal bucket.
+
+### Perche' SECURITY DEFINER e non INVOKER
+
+Questa e' la parte importante. Con `security invoker` la funzione legge filtrata
+dalle RLS, **ma il CASCADE del database le RLS non le guarda**: quello che la
+funzione non vede muore lo stesso. Nel test: reparto mio nel cestino -> mezzo di
+un altro account (invisibile) -> scadenza MIA viva. L'anteprima diceva
+"non succede niente" e la scadenza spariva. Ora la funzione gira con pieni poteri
+e i controlli di proprieta' li fa a mano contro `auth.uid()`.
+
+### Cosa e' stato corretto anche nel gestionale
+
+- La regola di ripiego conteneva `does not exist`, che compare in decine di errori
+  Postgres normali: qualsiasi errore vero avrebbe fatto cancellare aggirando il
+  controllo. Ristretta a `PGRST202|Could not find the function|schema cache`.
+- I file nello storage: eliminando un padre, le foto dei figli sparivano dal
+  database ma i file restavano nel bucket per sempre, irraggiungibili.
+- `rinfresca` non elencava carte, crediti e calendario: dopo un ripristino la
+  sezione restava vuota fino a un F5.
+- **Il backup non conteneva quello che sta nel cestino.** Da quando si puo'
+  eliminare per sempre era una trappola: scarichi il backup, svuoti il cestino,
+  e nel file non c'e' niente. Ora `_fetchAllExport` legge con `sb.raw`.
+  ATTENZIONE: la sostituzione va fatta SOLO dentro quella funzione. Nel resto del
+  file ci sono 26 letture con lo stesso schema che DEVONO restare filtrate, se no
+  le cose eliminate ricompaiono negli elenchi e nei PDF.
+- `gest_note` era ancora in `CEST_COSE` pur essendo stata tolta dal cestino.
+
+### Le due lezioni, che valgono per il futuro
+
+**1. Verificare che il file arrivato sia quello provato.** La prima versione della
+funzione era stata provata su un Postgres vero e funzionava, ma nel trasferimento
+`array_agg` era diventato `array_agh`: il file consegnato non partiva nemmeno.
+Non me ne ero accorto perche' non avevo confrontato le impronte.
+**Regola: dopo ogni trasferimento, `md5sum` da una parte e dall'altra.**
+
+**2. I revisori vanno fatti lavorare su codice ESEGUIBILE.** Il difetto delle RLS
+non si vedeva leggendo: e' saltato fuori solo installando Postgres nel container,
+ricreando lo schema con le RLS di Supabase e provando davvero. Ora nel container
+c'e' PostgreSQL 16: per qualsiasi funzione SQL futura, prima si prova li'.
+
+### Non risolto, documentato
+
+- I PDF (parcella, lettera d'incarico, conferma d'ordine, verbale) leggono il
+  cliente con `sb.from`: se il cliente e' nel cestino stampano "—" invece del
+  nome. A schermo l'elenco preventivi ora dice "Nome (nel cestino)", quindi i due
+  posti non concordano. Non e' un difetto nuovo, ma va sistemato.
+- Restano da testare dal vivo: il giro completo sul profilo Impresa.

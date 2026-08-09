@@ -3500,10 +3500,15 @@
     const pezzi=[];
     if(nLav)pezzi.push(nLav+" "+(pro?(nLav===1?"pratica":"pratiche"):(nLav===1?"lavoro":"lavori")));
     if(nFat)pezzi.push(nFat+" "+(nFat===1?"fattura":"fatture"));
+    /* 9 agosto 2026 — la rassicurazione elencava solo le pratiche anche quando
+       aveva appena contato una fattura: si costruisce da quello che ha trovato. */
+    const restano=[];
+    if(nLav)restano.push(pro?"le pratiche":"i lavori");
+    if(nFat)restano.push(nFat===1?"la fattura":"le fatture");
     const msg=pezzi.length
       ? "Questo cliente ha "+pezzi.join(" e ")+" collegate."
         +(window.cestinoAttivo&&window.cestinoAttivo()
-          ? "\n\nFinisce nel Cestino e puoi rimetterlo a posto; "+(pro?"le pratiche":"i lavori")+" restano."
+          ? "\n\nFinisce nel Cestino e puoi rimetterlo a posto; "+restano.join(" e ")+" restano."
           : "\n\nEliminarlo comunque?")
       : "Eliminare questo cliente?";
     if(!gconfirm(msg))return;
@@ -7232,10 +7237,16 @@
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo</p><small>Accedi per creare i preventivi</small></div>`;return;}
     const [{data:pv},{data:cl}]=await Promise.all([
       sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("created_at",{ascending:false}),
-      sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+      /* 9 agosto 2026 — si leggono ANCHE i clienti nel cestino: prima il
+         preventivo di un cliente cestinato mostrava un trattino e non si
+         capiva piu' di chi fosse. */
+      ((window.cestinoAttivo&&window.cestinoAttivo())
+        ? sb.raw("gest_clienti").select("id,nome,eliminato_il")
+        : sb.from("gest_clienti").select("id,nome")
+      ).eq("user_id",sbUid).eq("mestiere_id",curMestiere())
     ]);
     prevCache=pv||[];
-    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
+    const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,(c.nome||"")+(c.eliminato_il?" (nel cestino)":"")]));
     let tot={};
     if(prevCache.length){
       const {data:rr}=await sb.from("gest_preventivo_righe").select("preventivo_id,qta,prezzo").in("preventivo_id",prevCache.map(p=>p.id));
@@ -8776,8 +8787,10 @@
     {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true},
     {t:"gest_crediti",     lab:"Crediti formativi", campo:"titolo",         ic:"🎓", foglia:true},
     {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true},
-    {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true},
-    {t:"gest_note",        lab:"Note",              campo:"testo",          ic:"📝", foglia:true}
+    {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true}
+    /* gest_note NON c'e': e' stata tolta dal cestino il 9/8/2026 (vedi
+       js/cestino.js). Lasciarla qui voleva dire una richiesta in piu' a ogni
+       apertura, per una categoria che non si riempie mai. */
   ];
   /* "foglia" = non ha figli nel database, quindi si può cancellare davvero
      senza portarsi dietro altro. Le altre NO: eliminare per sempre un reparto
@@ -8848,7 +8861,7 @@
             {h:q.testo,cls:q.classe}
           ],
           menu:[{lab:"↩ Rimetti a posto",action:"cest-ripristina",data:{id:String(i)}}]
-            .concat(x.foglia?[{lab:"🗑 Elimina per sempre",action:"cest-definitivo",data:{id:String(i)},del:true}]:[])
+            .concat([{lab:"🗑 Elimina per sempre",action:"cest-definitivo",data:{id:String(i)},del:true}])
         };
       }),
       cards:()=>cestCache.map(function(x,i){
@@ -8857,7 +8870,7 @@
           destra:'<span class="stato" style="background:var(--sfondo);color:var(--testo-2)">'+esc(x.tipo)+'</span>',
           meta:["🗑 eliminato "+quando(String(x.quando||"").slice(0,10),{neutro:true}).testo],
           azioni:[{lab:"↩ Rimetti a posto",action:"cest-ripristina",data:{id:String(i)}}]
-            .concat(x.foglia?[{lab:"🗑 Elimina per sempre",action:"cest-definitivo",data:{id:String(i)},del:true}]:[])
+            .concat([{lab:"🗑 Elimina per sempre",action:"cest-definitivo",data:{id:String(i)},del:true}])
         });
       }).join("")
     });
@@ -8873,32 +8886,121 @@
     /* rimesso a posto un reparto o una pratica cambia mezzo gestionale:
        si ridisegna tutto invece di indovinare cosa è cambiato */
     renderCestino();
-    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report");
+    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
     if(x.tab==="gest_mestieri")renderLanding();
     toast("Rimesso a posto ✔");
   }
 
-  /* "Elimina per sempre" c'e' SOLO sulle cose che non hanno figli nel
-     database (spese, ore, foto, note, scadenze...). Sulle altre no, e non è
-     una dimenticanza: cancellare davvero un reparto o un cliente farebbe
-     scattare le cancellazioni a catena e si porterebbe via anche roba VIVA
-     che nel cestino non era mai entrata. Lo "svuota tutto" è stato tolto per
-     lo stesso motivo: prometteva di cancellare N cose e ne cancellava di più. */
+  /* ===== 9 agosto 2026 — ELIMINA PER SEMPRE, VERSIONE SICURA =====
+     Prima il pulsante c'era solo sulle cose senza figli, perche' cancellare
+     davvero una pratica o un reparto fa scattare le cancellazioni a catena del
+     database e si porta via anche roba VIVA, mai finita nel cestino.
+     Adesso c'e' su tutto, ma non decide il gestionale: decide Postgres.
+     La funzione gest_cestino_elimina (sql/gest-cestino-elimina.sql) legge dal
+     catalogo del database chi dipende da chi — quindi non le sfugge nemmeno una
+     tabella aggiunta domani — scende lungo tutta la catena e si RIFIUTA di
+     cancellare se trova anche una sola riga non ancora nel cestino.
+     Il controllo lo rifa' anche al momento della conferma: fra l'anteprima e
+     l'ok l'utente potrebbe aver ripristinato qualcosa in un'altra scheda. */
+  const CEST_NOMI={
+    gest_lavori:"pratiche/lavori", gest_clienti:"clienti", gest_preventivi:"preventivi",
+    gest_fatture:"fatture", gest_scadenze:"scadenze", gest_mestieri:"reparti",
+    gest_mezzi:"mezzi e strumenti", gest_operatori:"persone", gest_carte:"carte aziendali",
+    gest_fornitori:"fornitori", gest_fatture_fornitori:"fatture fornitori",
+    gest_spese:"spese", gest_ore:"ore lavorate", gest_crediti:"crediti formativi",
+    gest_foto:"foto e documenti", gest_video:"video", gest_note:"note",
+    gest_fattura_righe:"righe della fattura", gest_preventivo_righe:"righe del preventivo",
+    gest_fattura_lavori:"collegamenti fattura-lavoro", gest_lavoro_mezzi:"mezzi usati",
+    gest_carte_movimenti:"movimenti della carta", gest_rifornimenti:"rifornimenti"
+  };
+  function cestElenco(v){
+    return (v||[]).map(function(x){return "\u2022 "+x.n+" "+(CEST_NOMI[x.tabella]||x.tabella);}).join("\n");
+  }
+
   async function cestDefinitivo(i){
     const x=cestCache[+i];if(!x)return;
     if(!sbUid){toast("Devi essere loggato");return;}
-    if(!x.foglia){toast("Questa si può solo rimettere a posto");return;}
-    if(!gconfirm("Eliminare «"+x.nome+"» per sempre?\n\nQuesta volta sparisce davvero e non si recupera più."))return;
+
+    /* primo giro: non cancella niente, chiede solo cosa succederebbe */
+    const {data:prova,error:eProva}=await sb.rpc("gest_cestino_elimina",
+      {p_tabella:x.tab,p_id:x.id,p_conferma:false});
+
+    if(eProva||!prova){
+      /* Si ripiega sulla vecchia strada SOLO se la funzione non esiste ancora
+         (PGRST202 = "function not found"). Se invece il database ha risposto
+         con un errore vero, ripiegare vorrebbe dire cancellare aggirando il
+         controllo: meglio fermarsi e far vedere l'errore. */
+      const m=(eProva&&(eProva.code||"")+" "+(eProva.message||""))||"";
+      const nonEsiste=/PGRST202|Could not find the function|schema cache/i.test(m);
+      if(!nonEsiste&&eProva){toast("Errore: "+(eProva.message||"il database non risponde"));return;}
+      if(x.foglia)return cestDefinitivoFoglia(x);
+      toast("Per eliminare per sempre questa scheda esegui sql/gest-cestino-elimina.sql su Supabase");
+      return;
+    }
+
+    if(prova.ok===false){
+      alert("Non posso eliminare \u00ab"+x.nome+"\u00bb per sempre.\n\n"
+        +"Ci sono ancora collegate delle cose che NON sono nel cestino:\n"
+        +cestElenco(prova.vivi)
+        +"\n\nSe la cancellassi adesso sparirebbero anche loro. Mettile prima nel cestino, poi riprova.");
+      return;
+    }
+
+    const insieme=(prova.anteprima||[]).length
+      ? "\n\nInsieme a lei se ne va (\u00e8 gi\u00e0 tutto nel cestino):\n"+cestElenco(prova.anteprima)
+      : "";
+    /* le righe che sopravvivono ma perdono il riferimento: non bloccano, ma
+       l'utente deve saperlo prima, non scoprirlo dopo su una fattura senza cliente */
+    const scoll=(prova.scollegate||[]).length
+      ? "\n\nQueste restano ma perdono il collegamento:\n"+cestElenco(prova.scollegate)
+      : "";
+    if(!gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?"+insieme+scoll
+        +"\n\nQuesta volta sparisce davvero e non si recupera pi\u00f9."))return;
+
+    const {data:fatto,error}=await sb.rpc("gest_cestino_elimina",
+      {p_tabella:x.tab,p_id:x.id,p_conferma:true});
+    if(error){toast("Errore: "+error.message);return;}
+    if(!fatto||fatto.ok===false){
+      toast("Non eliminato: nel frattempo qualcosa \u00e8 tornato attivo");
+      renderCestino();return;
+    }
+    await cestPulisciFile(x, fatto.file);
+    renderCestino();
+    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
+    toast("Eliminato per sempre");
+  }
+
+  /* il file nello storage se ne va solo adesso, non prima: e' l'unico momento
+     in cui siamo sicuri che nessuno lo vuole piu' indietro */
+  async function cestPulisciFile(x, elenco){
+    /* 9 agosto 2026 — prima si cancellava solo il file della riga cliccata.
+       Eliminando un padre, le foto dei figli sparivano dal database ma i file
+       restavano nel bucket per sempre, senza piu' nessuna riga che li nominasse:
+       spazio occupato e foto di cantiere non piu' cancellabili da nessuna
+       schermata. Adesso la funzione del database restituisce anche i percorsi. */
+    const perBucket={};
+    const metti=(tab,path)=>{
+      if(!path)return;
+      const b=(tab==="gest_video")?"gestionale-video":"gestionale-foto";
+      (perBucket[b]=perBucket[b]||[]).push(path);
+    };
+    metti(x.tab,x.path);
+    (elenco||[]).forEach(r=>metti(r.tabella,r.path));
+    for(const b in perBucket){
+      try{ await sb.storage.from(b).remove(perBucket[b]); }catch(e){}
+    }
+  }
+
+  /* via di riserva: vale solo finche' non e' stato eseguito
+     sql/gest-cestino-elimina.sql, e solo sulle cose senza figli */
+  async function cestDefinitivoFoglia(x){
+    if(!gconfirm("Eliminare \u00ab"+x.nome+"\u00bb per sempre?\n\nQuesta volta sparisce davvero e non si recupera pi\u00f9."))return;
     const {data,error}=await sb.raw(x.tab).delete().eq("id",x.id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga trovata");return;}
-    /* il file nello storage se ne va solo adesso, non prima: è l'unico
-       momento in cui siamo sicuri che nessuno lo vuole più indietro */
-    if(x.path){
-      const bucket=(x.tab==="gest_video")?"gestionale-video":"gestionale-foto";
-      try{ await sb.storage.from(bucket).remove([x.path]); }catch(e){}
-    }
+    await cestPulisciFile(x);
     renderCestino();
+    rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
     toast("Eliminato per sempre");
   }
 
@@ -9120,26 +9222,32 @@
        fatta, il backup esce lo stesso con tutto il resto invece di fallire. */
     const vuoto={data:[]};
     const _opz=q=>q.then(r=>r&&!r.error?r:vuoto).catch(()=>vuoto);
+    /* 9 agosto 2026 — il backup legge con sb.raw, cioe' SENZA il filtro del
+       cestino. Da quando si puo' eliminare per sempre, un file chiamato
+       "backup" che non contiene le cose nel cestino sarebbe una trappola:
+       uno lo scarica, poi svuota il cestino convinto di essere coperto.
+       La colonna eliminato_il resta nel file, quindi si distingue cos'era cosa. */
+    const _tab=t=>((window.cestinoAttivo&&window.cestinoAttivo())?sb.raw(t):sb.from(t));
     const [mest,lav,cli,ops,scad,prev,righe,spese,mezzi,lavMezzi,az,
            fatt,fattRig,fattLav,ore,cred,forn,fattForn]=await Promise.all([
-      sb.from("gest_mestieri").select("*").eq("user_id",sbUid),
-      sb.from("gest_lavori").select("*").eq("user_id",sbUid),
-      sb.from("gest_clienti").select("*").eq("user_id",sbUid),
-      sb.from("gest_operatori").select("*").eq("user_id",sbUid),
-      sb.from("gest_scadenze").select("*").eq("user_id",sbUid),
-      sb.from("gest_preventivi").select("*").eq("user_id",sbUid),
-      sb.from("gest_preventivo_righe").select("*").eq("user_id",sbUid),
-      sb.from("gest_spese").select("*").eq("user_id",sbUid),
-      sb.from("gest_mezzi").select("*").eq("user_id",sbUid),
-      sb.from("gest_lavoro_mezzi").select("*").eq("user_id",sbUid),
-      sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
-      _opz(sb.from("gest_fatture").select("*").eq("user_id",sbUid)),
-      _opz(sb.from("gest_fattura_righe").select("*").eq("user_id",sbUid)),
-      _opz(sb.from("gest_fattura_lavori").select("*").eq("user_id",sbUid)),
-      _opz(sb.from("gest_ore").select("*").eq("user_id",sbUid)),
-      _opz(sb.from("gest_crediti").select("*").eq("user_id",sbUid)),
-      _opz(sb.from("gest_fornitori").select("*").eq("user_id",sbUid)),
-      _opz(sb.from("gest_fatture_fornitori").select("*").eq("user_id",sbUid))
+      _tab("gest_mestieri").select("*").eq("user_id",sbUid),
+      _tab("gest_lavori").select("*").eq("user_id",sbUid),
+      _tab("gest_clienti").select("*").eq("user_id",sbUid),
+      _tab("gest_operatori").select("*").eq("user_id",sbUid),
+      _tab("gest_scadenze").select("*").eq("user_id",sbUid),
+      _tab("gest_preventivi").select("*").eq("user_id",sbUid),
+      _tab("gest_preventivo_righe").select("*").eq("user_id",sbUid),
+      _tab("gest_spese").select("*").eq("user_id",sbUid),
+      _tab("gest_mezzi").select("*").eq("user_id",sbUid),
+      _tab("gest_lavoro_mezzi").select("*").eq("user_id",sbUid),
+      _tab("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle(),
+      _opz(_tab("gest_fatture").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_fattura_righe").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_fattura_lavori").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_ore").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_crediti").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_fornitori").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_fatture_fornitori").select("*").eq("user_id",sbUid))
     ]);
     return {mest:mest.data||[],lav:lav.data||[],cli:cli.data||[],ops:ops.data||[],scad:scad.data||[],
             prev:prev.data||[],righe:righe.data||[],spese:spese.data||[],mezzi:mezzi.data||[],
