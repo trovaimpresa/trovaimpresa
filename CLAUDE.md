@@ -1279,6 +1279,36 @@ in `index.html`) — un sito senza P.IVA visibile perde fiducia proprio con chi 
 (cache del mount). Prima di modificare CLAUDE.md, controllare che contenga le sezioni del
 6 e 7 agosto: se mancano, la copia è stantia — confrontare i byte con device_list_dir.
 
+## 9 agosto 2026 — sidebar admin che non scrollava
+
+**Sintomo (segnalato da Alessio):** dopo l'aggiornamento dell'8 agosto, nel pannello
+`/admin` la barra laterale non scrollava più; girando la rotellina sopra il menu si
+muoveva invece la zona centrale.
+
+**Causa:** `.sidebar` è `position:fixed` con `top:0; bottom:0` ma non aveva **nessun
+overflow**. Con 20+ voci di menu il contenuto usciva fuori dal riquadro senza scrollbar,
+quindi il browser passava lo scroll al contenitore sotto (il `.main`).
+
+**Fix in `admin.html` (CSS in testa al file):**
+- `.sidebar` → aggiunto `overflow:hidden` (il riquadro non deborda più).
+- `.sidebar-logo, .sidebar-footer` → `flex:0 0 auto` (logo in alto e logout in basso
+  restano sempre fermi, non si schiacciano).
+- `.sidebar-nav` → da `flex:1` a `flex:1 1 auto; min-height:0; overflow-y:auto`.
+  Il `min-height:0` è la riga che conta: senza, un figlio flex non si lascia
+  rimpicciolire e l'`overflow` non parte mai.
+- `overscroll-behavior:contain` → arrivati in fondo al menu lo scroll **non passa**
+  più al contenuto centrale (era esattamente il fastidio segnalato).
+- Scrollbar sottile 7px, grigia chiara, più scura al passaggio del mouse
+  (`::-webkit-scrollbar` + `scrollbar-width:thin` per Firefox).
+
+**Backup:** `admin.html.bak-scroll` nella cartella del progetto (cancellabile quando
+Alessio ha confermato che va bene).
+
+**Regola per il futuro:** ogni volta che si aggiungono voci al menu admin, la sidebar
+regge da sola perché ora scrolla. Ma se un domani si mette un altro pannello a colonne
+con `position:fixed`, ricordarsi sempre la coppia `min-height:0` + `overflow-y:auto`
+sul figlio che deve scrollare.
+
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.
 - (Opzionale) Pulizia righe `annunci_pubblicitari` rimaste in `pending`: acquisti mai completati, restano lì per sempre e ora il cliente se le vede in `le-mie-inserzioni.html`.

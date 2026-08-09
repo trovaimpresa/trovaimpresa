@@ -66,7 +66,9 @@
     position:fixed; top:0; left:0; bottom:0; z-index:100;
     display:flex; flex-direction:column;
     box-shadow:2px 0 12px rgba(0,0,0,0.04);
+    overflow:hidden;
   }
+  .sidebar-logo, .sidebar-footer { flex:0 0 auto; }
   .sidebar-logo {
     padding:24px 20px; border-bottom:1px solid var(--border);
     font-family:'Playfair Display',serif; font-size:1.1rem;
@@ -75,7 +77,17 @@
   .sidebar-logo .impresa { color:var(--arancio); }
   .sidebar-logo small { display:block; font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--light); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
 
-  .sidebar-nav { flex:1; padding:16px 12px; }
+  .sidebar-nav {
+    flex:1 1 auto; min-height:0; padding:16px 12px;
+    overflow-y:auto; overflow-x:hidden;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin; scrollbar-color:rgba(0,0,0,.22) transparent;
+  }
+  .sidebar-nav::-webkit-scrollbar { width:7px; }
+  .sidebar-nav::-webkit-scrollbar-track { background:transparent; }
+  .sidebar-nav::-webkit-scrollbar-thumb { background:rgba(0,0,0,.18); border-radius:4px; }
+  .sidebar-nav:hover::-webkit-scrollbar-thumb { background:rgba(0,0,0,.32); }
   .nav-item {
     display:flex; align-items:center; gap:10px;
     padding:11px 14px; border-radius:10px; cursor:pointer;
