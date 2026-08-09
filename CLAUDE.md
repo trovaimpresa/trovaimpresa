@@ -1413,9 +1413,48 @@ NON segna niente, cosi' l'indirizzo riceve l'email il giorno dopo.
   e' vuota finche' non la si apre, e ogni scadenza collegata sembrerebbe
   "(pratica eliminata)". Vanno letti con una select dedicata.
 
+### Strumento 2 — LETTERA D'INCARICO in PDF (9 agosto 2026, fatto)
+
+Obbligo di legge per i tecnici (art. 9 comma 4 DL 1/2012: compenso pattuito per
+iscritto). Nasce dal preventivo che c'e' gia': stesse voci, stessa parcella.
+
+- Voce **"📝 Lettera d'incarico"** nel menu del preventivo, accanto a "Scarica PDF",
+  solo per `ruoloUtente==='professionista'` (`prevVoci()`).
+- `incaricoForm(id)` — finestra GRANDE due colonne: a sinistra oggetto, prestazioni
+  (precompilate dalle voci del preventivo, modificabili) e tempi; a destra il
+  riepilogo della parcella in sola lettura, modalita' di pagamento, luogo e foro,
+  piu' le condizioni particolari (precompilate dalle note del preventivo).
+- `incaricoPdf(id)` — genera il PDF: intestazione studio, le due parti (committente
+  e professionista con P.IVA/C.F.), articoli **numerati da soli** (`nArt`), riquadro
+  del compenso, pagamento (con IBAN e giorni da Dati azienda), tempi, obblighi del
+  committente, recesso, GDPR, foro, condizioni particolari, e il blocco firme con
+  la doppia sottoscrizione artt. 1341/1342 c.c.
+- **Zero SQL**: le condizioni usate l'ultima volta (tempi, pagamento, luogo, foro)
+  restano in `localStorage` con chiave `gest_incarico_default`. Se un domani si
+  vogliono come impostazioni dello studio, si spostano in `gest_azienda`.
+
+**Bug trovati dalla verifica prima di consegnare** (tutti corretti, ma la lezione resta):
+- le clausole 1341/1342 uscivano dal foglio: `splitTextToSize` aveva larghezza
+  `L-72` (102 mm) ma il testo partiva da `R-70` (122 mm) -> 224 mm su un A4 di 210.
+  **Regola: la larghezza passata a splitTextToSize deve essere quella della colonna
+  in cui si scrive, non quella della pagina.** Verificato girando jsPDF davvero.
+- il blocco firme si spezzava in due pagine (data di qua, firme di la'): ora si
+  calcola l'altezza totale e si salta pagina UNA volta sola, prima.
+- `paragrafo()` stampava tutto il blocco dopo un solo controllo: un testo lungo
+  (le condizioni le scrive l'utente) usciva dal fondo. Ora stampa riga per riga
+  e cambia pagina da solo.
+
+⚠️ **Da far controllare ad Alessio**: le clausole standard (recesso, GDPR, foro,
+obblighi del committente) sono un modello di base, non un parere legale. Vanno
+fatte leggere una volta a un consulente. Nel modulo c'e' gia' scritto.
+
 ### Il prossimo passo
-Punto 2 della lista: **lettera d'incarico in PDF** dentro Preventivi, riusando
-`calcolaParcella()` e `prevPdf()` che ci sono gia'.
+Alessio ha chiesto di convertire **le 4 finestrelle piccole rimaste** in
+`openSheetGrande` (regola fissa sulle finestre): **mezzo**, **carta carburante**,
+**nuova persona**, **nuovo reparto**. La finestra del giorno del calendario e'
+un elenco, non un form: si puo' lasciare.
+Poi la lista strumenti professionisti continua con: **ore per pratica**,
+**verbale di sopralluogo**, **registro crediti formativi**.
 
 ## Da fare / opzionali
 - (Opzionale) Pulizia DB: droppare colonne/tabella del vecchio pay-per-lead ora inutilizzate.

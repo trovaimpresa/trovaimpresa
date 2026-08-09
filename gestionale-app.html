@@ -6579,6 +6579,8 @@
   const PREV_VERBO={bozza:"creato",inviato:"inviato",accettato:"accettato",rifiutato:"rifiutato"};
   function prevVoci(p){
     const v=[{lab:"📄 Scarica PDF",action:"prev-pdf",data:{id:p.id}}];
+    /* la lettera d'incarico e' un obbligo di legge per i tecnici: sta accanto al PDF */
+    if(ruoloUtente==='professionista')v.push({lab:"📝 Lettera d'incarico",action:"prev-incarico",data:{id:p.id}});
     if(p.stato==="bozza")v.push({lab:"📤 Segna inviato",action:"prev-stato",data:{id:p.id,v:"inviato"}});
     if(p.stato==="bozza"||p.stato==="inviato"){
       v.push({lab:"✔ Accettato → crea lavoro",action:"prev-to-lavoro",data:{id:p.id}});
@@ -6910,6 +6912,294 @@
     toast(isParcella?"PDF parcella scaricato ✅":"PDF preventivo scaricato ✅");
   }
 
+  /* ===== 9 agosto 2026 — LETTERA D'INCARICO (solo studi professionali) =====
+     Un tecnico, per legge, deve mettere per iscritto al cliente che cosa fara'
+     e quanto costa (art. 9 comma 4 del DL 1/2012). Molti lo fanno con un file
+     Word riscritto ogni volta. Qui la lettera nasce dal preventivo che c'e'
+     gia': stesse voci, stessa parcella, zero cose da ribattere.
+
+     ATTENZIONE: e' un modello di base, non un parere legale. Le clausole
+     standard vanno fatte leggere una volta al proprio consulente; le parti che
+     cambiano da incarico a incarico si scrivono nel modulo qui sotto. */
+
+  /* Le scelte dell'ultima volta restano sul dispositivo: chi fa dieci incarichi
+     uguali non riscrive dieci volte le stesse condizioni. Nessun dato del
+     cliente viene salvato qui, solo le condizioni generiche dello studio. */
+  const INC_MEM="gest_incarico_default";
+  function incLeggiMem(){
+    try{ return JSON.parse(localStorage.getItem(INC_MEM)||"{}")||{}; }catch(e){ return {}; }
+  }
+  function incScriviMem(o){
+    try{ localStorage.setItem(INC_MEM,JSON.stringify(o)); }catch(e){}
+  }
+
+  const INC_PAGAMENTI=[
+    ["saldo",   "Saldo unico alla consegna"],
+    ["50-50",   "50% alla firma, 50% alla consegna"],
+    ["30-40-30","30% alla firma, 40% durante, 30% alla consegna"],
+    ["accordi", "Come indicato nelle condizioni particolari"]
+  ];
+  const INC_PAG_TESTO={
+    "saldo":   "Il compenso sara' corrisposto in un'unica soluzione alla consegna degli elaborati.",
+    "50-50":   "Il compenso sara' corrisposto per il 50% alla sottoscrizione del presente incarico e per il restante 50% alla consegna degli elaborati.",
+    "30-40-30":"Il compenso sara' corrisposto per il 30% alla sottoscrizione del presente incarico, per il 40% durante lo svolgimento delle prestazioni e per il restante 30% alla consegna degli elaborati.",
+    "accordi": "Il compenso sara' corrisposto secondo quanto indicato nelle condizioni particolari."
+  };
+
+  async function incaricoForm(id){
+    if(ruoloUtente!=='professionista'){toast("La lettera d'incarico e' per gli studi professionali");return;}
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const p=prevCache.find(x=>String(x.id)===String(id));
+    if(!p){toast("Preventivo non trovato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
+    const righe=rr||[];
+    let tot=0; righe.forEach(r=>{tot+=(+r.qta||1)*(+r.prezzo||0);});
+    const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
+    const mem=incLeggiMem();
+
+    const prestazioni=righe.map(r=>"- "+(r.descrizione||"").trim()).filter(x=>x!=="-").join("\n");
+    const luogoDef=mem.luogo||az.citta||"";
+    const foroDef=mem.foro||az.citta||"";
+    const tempiDef=mem.tempi||"60 giorni dalla sottoscrizione del presente incarico";
+    const pagDef=mem.pagamento||"saldo";
+
+    const opzPag=INC_PAGAMENTI.map(o=>'<option value="'+o[0]+'" '+(o[0]===pagDef?'selected':'')+'>'+o[1]+'</option>').join("");
+    const riga=(et,val,neg)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+(neg?"− ":"")+eur2(val)+'</strong></div>';
+
+    openSheetGrande("Lettera d'incarico",
+      '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">L\'incarico</div>'
+      +'<div class="field"><label>Oggetto dell\'incarico</label><input id="in-ogg" value="'+esc(p.titolo||"")+'" placeholder="Es. Pratica CILA per ristrutturazione appartamento"></div>'
+      +'<div class="field"><label>Prestazioni comprese</label><textarea id="in-prest" rows="6" placeholder="Una prestazione per riga">'+esc(prestazioni)+'</textarea>'
+      +'<div class="campo-aiuto">Arrivano dalle voci del preventivo: puoi aggiungerne o toglierne.</div></div>'
+      +'<div class="field"><label>Tempi di esecuzione</label><input id="in-tempi" value="'+esc(tempiDef)+'" placeholder="Es. 60 giorni dalla sottoscrizione"></div>'
+      +'</div>'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Condizioni particolari</div>'
+      +'<div class="field"><textarea id="in-note" rows="4" placeholder="Quello che vale solo per questo incarico: esclusioni, oneri, sopralluoghi compresi...">'+esc(p.note||"")+'</textarea></div>'
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Il compenso concordato</div>'
+      +'<div class="prev-somma" style="text-align:left;line-height:1.9">'
+      +  riga("Compenso",cp.compenso)
+      +  (cp.spese?riga("Spese (bolli, diritti)",cp.spese):"")
+      +  (cp.cassa?riga("Cassa previdenziale",cp.cassa):"")
+      +  '<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>'
+      +  riga("Imponibile IVA",cp.imponibile)
+      +  (cp.iva?riga("IVA",cp.iva):"")
+      +  (cp.ritenuta?riga("Ritenuta d\'acconto",cp.ritenuta,true):"")
+      +  '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
+      +  '<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Netto a pagare</strong></span><strong>'+eur2(cp.totale)+'</strong></div>'
+      +'</div>'
+      +'<div class="campo-aiuto">Viene dalla parcella del preventivo. Per cambiarlo, modifica il preventivo.</div>'
+      +'</div>'
+      +'<div class="sh-b">'
+      +'<div class="sh-tit">Pagamento e firma</div>'
+      +'<div class="field"><label>Modalità di pagamento</label><select id="in-pag">'+opzPag+'</select></div>'
+      +'<div class="row2">'
+      +'<div class="field"><label>Luogo della firma</label><input id="in-luogo" value="'+esc(luogoDef)+'" placeholder="Es. Rieti"></div>'
+      +'<div class="field"><label>Foro competente</label><input id="in-foro" value="'+esc(foroDef)+'" placeholder="Es. Rieti"></div></div>'
+      +'<p class="sh-nota" style="margin-bottom:0">Il documento esce in PDF con due righe per la firma: tu e il committente. Le clausole standard (recesso, privacy, foro) sono un modello di base: fattelo leggere una volta dal tuo consulente.</p>'
+      +'</div>'
+      +'</div></div>',
+      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="incarico-pdf" data-id="'+esc(String(id))+'">Scarica la lettera</button>');
+  }
+
+  async function incaricoPdf(id){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    const p=prevCache.find(x=>String(x.id)===String(id));if(!p){toast("Preventivo non trovato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return;}
+    let c={};
+    if(p.cliente_id){
+      const {data:cl}=await sb.from("gest_clienti").select("*").eq("id",p.cliente_id).maybeSingle();
+      c=cl||{};
+    }
+    const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
+    let tot=0;(rr||[]).forEach(r=>{tot+=(+r.qta||1)*(+r.prezzo||0);});
+    const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
+
+    const V=x=>{const e=$("#"+x);return e?e.value.trim():"";};
+    const dati={
+      oggetto:V("in-ogg")||p.titolo||"Incarico professionale",
+      prestazioni:V("in-prest"),
+      tempi:V("in-tempi"),
+      note:V("in-note"),
+      pagamento:$("#in-pag")?$("#in-pag").value:"saldo",
+      luogo:V("in-luogo"),
+      foro:V("in-foro")
+    };
+    incScriviMem({tempi:dati.tempi,pagamento:dati.pagamento,luogo:dati.luogo,foro:dati.foro});
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    const M=18, R=210-M, L=R-M;
+    let y=20;
+    /* salta pagina se non ci sta piu' niente */
+    const spazio=h=>{ if(y+h>272){doc.addPage();y=20;} };
+    /* Si stampa RIGA PER RIGA: un testo lungo (le condizioni particolari le
+       scrive l'utente e possono essere lunghe quanto vuole) continua sulla
+       pagina dopo invece di uscire dal foglio. */
+    const paragrafo=(txt,size,grassetto,colore)=>{
+      const stile=()=>{doc.setFont("helvetica",grassetto?"bold":"normal");
+                       doc.setFontSize(size||9.5);
+                       doc.setTextColor(colore==null?0:colore);};
+      stile();
+      doc.splitTextToSize(String(txt),L).forEach(function(riga){
+        if(y+4.6>272){doc.addPage();y=20;stile();}
+        doc.text(riga,M,y); y+=4.6;
+      });
+      doc.setTextColor(0);
+    };
+    let nArt=0;
+    /* gli articoli si numerano da soli: se un pezzo non c'e' (niente tempi,
+       niente foro) i numeri restano in fila senza buchi */
+    const titoletto=t=>{ nArt++; y+=4; spazio(10); paragrafo(nArt+". "+t,10.5,true); y+=1.5; };
+
+    /* --- intestazione dello studio --- */
+    doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    let hy=y+6;
+    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
+    doc.setTextColor(0);
+    y=hy+6;
+    doc.setDrawColor(210);doc.line(M,y,R,y);y+=9;
+
+    doc.setFont("helvetica","bold");doc.setFontSize(15);
+    doc.text("LETTERA D'INCARICO PROFESSIONALE",105,y,{align:"center"});y+=6;
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    doc.text("Rif. preventivo n. "+(p.numero||"")+" del "+fdate(p.data||todayStr()),105,y,{align:"center"});
+    doc.setTextColor(0);y+=10;
+
+    /* --- le parti --- */
+    const cliRighe=[c.nome||"—"];
+    const cliInd=[(c.indirizzo||"").trim(),[(c.cap||"").trim(),(c.citta||"").trim()].filter(Boolean).join(" ")+((c.prov||"").trim()?" ("+String(c.prov).toUpperCase()+")":"")]
+      .filter(x=>x&&x.trim()).join(", ");
+    if(cliInd)cliRighe.push(cliInd);
+    if(c.piva)cliRighe.push("P.IVA "+c.piva);
+    if(c.cod_fiscale)cliRighe.push("C.F. "+c.cod_fiscale);
+    if(c.referente)cliRighe.push("Nella persona di "+c.referente);
+
+    const proRighe=[az.nome];
+    if(azIndirizzo(az))proRighe.push(azIndirizzo(az));
+    if(az.piva)proRighe.push("P.IVA "+az.piva);
+    if(az.cod_fiscale)proRighe.push("C.F. "+az.cod_fiscale);
+
+    paragrafo("Il giorno "+fdate(todayStr())+", tra:",9.5,false);
+    y+=2;
+    paragrafo("IL COMMITTENTE",9.5,true);
+    cliRighe.forEach(r=>paragrafo(r,9.5,false));
+    y+=3;
+    paragrafo("E IL PROFESSIONISTA INCARICATO",9.5,true);
+    proRighe.forEach(r=>paragrafo(r,9.5,false));
+    y+=3;
+    paragrafo("si conviene e si stipula quanto segue.",9.5,false);
+
+    /* --- articoli --- */
+    titoletto("Oggetto dell'incarico");
+    paragrafo("Il Committente affida al Professionista, che accetta, l'incarico avente ad oggetto: "+dati.oggetto+".");
+
+    if(dati.prestazioni){
+      titoletto("Prestazioni comprese");
+      dati.prestazioni.split("\n").map(x=>x.trim()).filter(Boolean).forEach(function(r){
+        paragrafo(r.charAt(0)==="-"?r:("- "+r));
+      });
+    }
+
+    titoletto("Compenso");
+    const vociC=[["Compenso",cp.compenso,false]];
+    if(cp.spese)   vociC.push(["Spese (bolli, diritti)",cp.spese,false]);
+    if(cp.cassa)   vociC.push(["Cassa previdenziale "+(+p.cassa_perc||0)+"%",cp.cassa,false]);
+    vociC.push(["Imponibile IVA",cp.imponibile,false]);
+    if(cp.iva)     vociC.push(["IVA "+(+p.iva_perc||0)+"%",cp.iva,false]);
+    if(cp.ritenuta)vociC.push(["Ritenuta d'acconto "+(+p.ritenuta_perc||20)+"%",cp.ritenuta,true]);
+    spazio(vociC.length*5.5+18);
+    doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+    vociC.forEach(function(v){
+      doc.text(v[0],M+2,y);
+      doc.text((v[2]?"- ":"")+eurPdf(v[1]),R-2,y,{align:"right"});
+      y+=5.5;
+    });
+    doc.setDrawColor(31,111,92);doc.line(M+2,y-2,R-2,y-2);y+=3;
+    doc.setFont("helvetica","bold");doc.setFontSize(11);
+    doc.text("NETTO A PAGARE",M+2,y+2);
+    doc.text(eurPdf(cp.totale),R-2,y+2,{align:"right"});
+    y+=9;
+    paragrafo("Il compenso e' stato preventivamente concordato in forma scritta, ai sensi dell'art. 9, comma 4, del D.L. 24 gennaio 2012 n. 1, convertito con L. 27/2012. Sono esclusi oneri, diritti e bolli dovuti a enti terzi, se non espressamente indicati.",8.8,false,90);
+
+    titoletto("Modalita' di pagamento");
+    let testoPag=INC_PAG_TESTO[dati.pagamento]||INC_PAG_TESTO.saldo;
+    if(az.iban)testoPag+=" Il pagamento avverra' tramite bonifico bancario sull'IBAN "+az.iban+".";
+    if(az.giorni_pagamento)testoPag+=" Le fatture si intendono da saldare entro "+az.giorni_pagamento+" giorni dalla data di emissione.";
+    paragrafo(testoPag);
+
+    if(dati.tempi){
+      titoletto("Tempi di esecuzione");
+      paragrafo("Il Professionista si impegna a concludere le prestazioni entro "+dati.tempi+", salvo i tempi tecnici degli enti competenti, i ritardi non imputabili al Professionista e le eventuali sospensioni dovute a mancata consegna di documenti da parte del Committente.");
+    }
+
+    titoletto("Obblighi del Committente");
+    paragrafo("Il Committente si impegna a fornire tempestivamente al Professionista tutta la documentazione necessaria (titoli di proprieta', visure, planimetrie, precedenti pratiche edilizie) e a consentire l'accesso ai luoghi per i sopralluoghi necessari.");
+
+    titoletto("Recesso");
+    paragrafo("Ciascuna delle parti puo' recedere dal presente incarico dandone comunicazione scritta all'altra. In caso di recesso, al Professionista spetta il compenso per le prestazioni gia' svolte fino a quel momento, oltre al rimborso delle spese sostenute.");
+
+    titoletto("Trattamento dei dati personali");
+    paragrafo("Le parti si autorizzano reciprocamente al trattamento dei dati personali per le sole finalita' connesse all'esecuzione del presente incarico, ai sensi del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003 come modificato.");
+
+    if(dati.foro){
+      titoletto("Foro competente");
+      paragrafo("Per ogni controversia relativa al presente incarico sara' competente in via esclusiva il Foro di "+dati.foro+".");
+    }
+
+    if(dati.note){
+      titoletto("Condizioni particolari");
+      paragrafo(dati.note);
+    }
+
+    /* --- firme ---
+       Il blocco firme e' UNO SOLO: data, righe di firma e clausole 1341/1342
+       stanno insieme o vanno tutte sulla pagina dopo. Firme su un foglio e
+       clausole sul foglio successivo non avrebbero senso: e' proprio
+       l'accostamento che l'art. 1341 c.c. richiede.
+       La larghezza del testo delle clausole e' 70 mm, quanto la colonna che
+       parte da R-70: prima era piu' larga della colonna e usciva dal foglio. */
+    doc.setFont("helvetica","normal");doc.setFontSize(8);
+    const clausole=doc.splitTextToSize("Ai sensi degli artt. 1341 e 1342 c.c. il Committente dichiara di approvare specificamente le clausole relative a: modalita' di pagamento, recesso e foro competente.",70);
+    const hFirme=6+12+5+12+clausole.length*3.6+14;
+    y+=8;
+    if(y+hFirme>280){doc.addPage();y=20;}
+
+    paragrafo((dati.luogo?dati.luogo+", ":"")+"li "+fdate(todayStr()),9.5,false);
+    y+=12;
+    doc.setDrawColor(120);
+    doc.line(M,y,M+70,y);
+    doc.line(R-70,y,R,y);
+    y+=5;
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    doc.text("Il Professionista",M,y);
+    doc.text("Il Committente",R-70,y);
+    doc.setTextColor(0);
+    y+=12;
+
+    doc.setFontSize(8);doc.setTextColor(120);
+    doc.text(clausole,R-70,y);
+    y+=clausole.length*3.6+8;
+    doc.setDrawColor(120);doc.line(R-70,y,R,y);
+    doc.text("Il Committente",R-70,y+4);
+    doc.setTextColor(0);
+
+    const nomeFile="incarico-"+(p.numero||"")+"-"+String(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf";
+    doc.save(nomeFile);
+    closeSheet();
+    toast("Lettera d'incarico scaricata ✅");
+  }
+
   /* ---- REPORT & STATISTICHE ---- */
   let repData=null;
   async function renderReport(){
@@ -7112,6 +7402,8 @@
     if(a==="prev-to-lavoro")return prevToLavoro(id);
     if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevPdf(id);
+    if(a==="prev-incarico")return incaricoForm(id);
+    if(a==="incarico-pdf")return incaricoPdf(id);
     if(a==="report-csv")return reportCsv();
     if(a==="lav-vista"){filter.vista=t.dataset.v;renderJobs();return;}
     /* un solo menu "..." per tutte le sezioni: le voci le ha gia' preparate
