@@ -1021,6 +1021,21 @@
 .lav-media .lm-btn{ display:inline-flex; height:38px; padding:0 16px; font-size:14px;
                     font-weight:600; color:var(--testo); }
 
+/* --- finestra Pratica: le scadenze collegate (9 agosto 2026).
+       Righe alte e leggibili: sono date da non bucare, devono saltare
+       all'occhio senza doverle cercare. --- */
+.lav-media .lsc-r{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  background:var(--card); border:1px solid var(--bordo); border-radius:12px;
+  padding:11px 14px; margin-bottom:8px; font-size:16px;
+}
+.lav-media .lsc-r.rit{ border-left:4px solid var(--err); }
+.lav-media .lsc-r.fatta{ opacity:.55; }
+.lav-media .lsc-info{ flex:1 1 160px; min-width:0; }
+.lav-media .lsc-info b{ color:var(--testo); font-weight:700; }
+.lav-media .lsc-info small{ display:block; color:var(--testo-2); font-size:14px; margin-top:2px; }
+.lav-media .lsc-q{ font-weight:700; font-size:15px; white-space:nowrap; }
+
 /* =========================================================================
    CAMPI DA COMPILARE — testo piu' grande e caselle piu' alte in TUTTE le
    finestre (lavoro, preventivo, condominio, mezzo, carta, scadenza, persona,

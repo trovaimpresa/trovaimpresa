@@ -4670,6 +4670,7 @@
         <div class="lav-media" id="lav-media">Sto controllando…</div>
       </div>
       </div>
+      ${bloccoScadenzePratica()}
       <div class="sh-b sh-b-d">
       <div class="field" id="spese-wrap" style="display:none"><label>💶 Spese e materiali di questo lavoro</label>
         <div class="spese-list" id="spese-list"></div>
@@ -4701,7 +4702,103 @@
        <button class="btn-primary b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button>`);
     bindSeg("j-stato");
     renderLavMedia();
+    renderLavScadenze();
   }
+  /* ===== 9 agosto 2026 — La scadenza proposta da sola =====
+     Un tecnico che salva una pratica con una data ha appena scritto una cosa
+     da non dimenticare. Invece di lasciargliela ricopiare a mano nello
+     scadenzario, gliela propongo: decide sempre lui con Si'/No.
+     Si propone SOLO se: e' un professionista, c'e' una data non passata, e su
+     quella pratica non c'e' gia' una scadenza per quella stessa data (cosi'
+     salvando due volte non chiede due volte). */
+  async function proponiScadenzaPratica(lavId,dati){
+    try{
+      if(ruoloUtente!=='professionista')return;
+      if(!sb||!sbUid||!lavId)return;
+      const data=(dati&&dati.data_prevista)||"";
+      if(!data||data<todayStr())return;
+      const {data:gia,error}=await sb.from("gest_scadenze").select("id,data_scadenza")
+        .eq("user_id",sbUid).eq("lavoro_id",lavId);
+      if(error)return;                                   /* colonna non ancora creata: zitto */
+      if((gia||[]).some(x=>x.data_scadenza===data))return;
+      const tipo=(dati&&dati.pratica_tipo)||"";
+      const desc=((dati&&dati.descrizione)||"Pratica").trim();
+      const titolo=(tipo?tipo+" — ":"")+desc;
+      if(!gconfirm("Vuoi che ti ricordi la data del "+fdate(data)+"?\n\n"
+        +"Creo la scadenza \""+titolo+"\" collegata a questa pratica e ti avviso per email 30 giorni prima, 7 giorni prima e il giorno prima."))return;
+      const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),
+        tipo_pratica:"Presentazione pratica",lavoro_id:lavId,
+        cliente_id:(dati&&dati.cliente_id)||null,data_scadenza:data,stato:"aperta",avvisa:true};
+      let {error:e2}=await sb.from("gest_scadenze").insert(row);
+      if(e2&&(e2.message||"").indexOf("avvisa")>=0){    /* database non ancora aggiornato del tutto */
+        delete row.avvisa;
+        ({error:e2}=await sb.from("gest_scadenze").insert(row));
+      }
+      if(e2){toast("Scadenza non creata: "+e2.message);return;}
+      rinfresca("scadenzario","riepilogo");
+      toast("Scadenza creata ✔ Te la ricordo per email");
+    }catch(_){}
+  }
+
+  /* ===== 9 agosto 2026 — Scadenze dentro la scheda della pratica =====
+     Per un tecnico la pratica NON e' una riga di lavoro: e' un fascicolo con
+     delle date che non si possono bucare. Qui, dentro la scheda, si vedono le
+     scadenze gia' collegate e se ne aggiunge una senza uscire e senza dover
+     poi ricordarsi di ricollegarla.
+     Compare SOLO ai professionisti: per imprese e artigiani la funzione
+     restituisce stringa vuota e la finestra resta identica a prima. */
+  function bloccoScadenzePratica(){
+    if(ruoloUtente!=='professionista')return "";
+    return '<div class="sh-b">'
+      +'<div class="field"><label>\u23F0 Scadenze di questa pratica</label>'
+      +'<div class="lav-media" id="lav-scad">Sto controllando…</div>'
+      +'</div></div>';
+  }
+  async function renderLavScadenze(){
+    const box=$("#lav-scad");if(!box)return;
+    const lav=editing&&editing.realId;
+    if(!lav){
+      box.innerHTML='<div class="lm-vuoto">Salva prima la pratica: poi qui potrai attaccarle le sue scadenze.</div>';
+      return;
+    }
+    if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
+    let righe=[];
+    try{
+      const {data,error}=await sb.from("gest_scadenze").select("*")
+        .eq("user_id",sbUid).eq("lavoro_id",lav).order("data_scadenza",{ascending:true});
+      /* colonna lavoro_id non ancora creata: lo dico invece di lasciare la rotella */
+      if(error){
+        box.innerHTML='<div class="lm-vuoto">Per collegare le scadenze alla pratica serve l\'aggiornamento del database (sql/gest-scadenze-pratiche.sql).</div>';
+        return;
+      }
+      righe=data||[];
+    }catch(e){
+      box.innerHTML='<div class="lm-vuoto">Non sono riuscito a leggere le scadenze.</div>';
+      return;
+    }
+    const oggi=todayStr();
+    const aperte=righe.filter(x=>x.stato!=="fatta");
+    const scadute=aperte.filter(x=>x.data_scadenza&&x.data_scadenza<oggi);
+    let testa;
+    if(!righe.length) testa='Nessuna scadenza su questa pratica';
+    else if(scadute.length) testa='<b style="color:var(--err)">'+scadute.length+(scadute.length===1?' scadenza passata':' scadenze passate')+'</b> su '+righe.length;
+    else testa='<b>'+aperte.length+(aperte.length===1?' scadenza aperta':' scadenze aperte')+'</b> su questa pratica';
+    const elenco=righe.slice(0,6).map(function(x){
+      const q=quando(x.data_scadenza,{neutro:x.stato==="fatta"});
+      const fatta=x.stato==="fatta";
+      const rit=!fatta&&x.data_scadenza&&x.data_scadenza<oggi;
+      return '<div class="lsc-r'+(rit?' rit':'')+(fatta?' fatta':'')+'">'
+        +'<div class="lsc-info"><b>'+esc(x.titolo||"Scadenza")+'</b>'
+        +(x.tipo_pratica?'<small>'+esc(x.tipo_pratica)+'</small>':'')+'</div>'
+        +'<span class="lsc-q '+(fatta?'':q.classe)+'">'+(fatta?'fatta':q.testo)+'</span>'
+        +'</div>';
+    }).join("");
+    box.innerHTML='<div class="lm-conta">'+testa+'</div>'
+      +elenco
+      +(righe.length>6?'<div class="lm-vuoto">…e altre '+(righe.length-6)+'</div>':'')
+      +'<button type="button" class="btn lm-btn" data-action="scad-da-pratica" data-id="'+esc(String(lav))+'">+ Aggiungi una scadenza</button>';
+  }
+
   /* ---- riga "Foto e video" della finestra Lavori ----
      Le foto e i video adesso sono mestiere della Galleria. Qui resta solo il
      conteggio e il collegamento: vedi a colpo d'occhio se il lavoro ha materiale
@@ -4769,7 +4866,9 @@
       closeSheet();rinfresca("lavori","fatture","riepilogo");
       /* un solo messaggio: prima l'avviso "migrazione mancante" veniva coperto
          subito dal toast verde e nessuno lo leggeva */
-      toast(avvisoPratica?"Creato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔"));return;
+      toast(avvisoPratica?"Creato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔"));
+      if(!editing.fattura)await proponiScadenzaPratica(realId,obj);
+      return;
     }
     if(editing && editing.realId){
       const mod=Object.assign({
@@ -4810,7 +4909,9 @@
         }catch(e){}
       }
       closeSheet();renderAll();
-      toast(avvisoPratica2?"Aggiornato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":"Lavoro aggiornato ✔");return;
+      toast(avvisoPratica2?"Aggiornato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":"Lavoro aggiornato ✔");
+      await proponiScadenzaPratica(editing.realId,mod);
+      return;
     }
     const cli=$("#j-cli").value;if(!cli){toast("Scegli un cliente");return;}
     const id=editing.id, exists=db().lavori.some(l=>l.id===id), prev=db().lavori.find(l=>l.id===id);
@@ -7227,6 +7328,14 @@
       renderMezziBlock(mezziLavoroId);return;
     }
     if(a==="new-scad")return scadForm(null);
+    /* "+ Aggiungi una scadenza" dalla scheda della pratica: nasce gia' collegata.
+       Il modulo della scadenza si apre SOPRA quello della pratica: chiudendolo
+       si torna alla pratica, quindi qui non chiudo niente. */
+    if(a==="scad-da-pratica"){
+      const lavId=id;
+      const l=(lavCache||[]).find(x=>String(x.id)===String(lavId));
+      return scadForm(null,{lavoro_id:lavId,cliente_id:(l&&l.cliente_id)||null});
+    }
     if(a==="scad-vista"){scadVista=t.dataset.v;renderScadenze();return;}
     if(a==="scad-persona"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
