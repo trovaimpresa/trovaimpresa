@@ -9327,6 +9327,15 @@
     if(!compTabellaOk){toast("Prima serve l'aggiornamento del database (sql/gest-computo-metrico.sql)");return;}
     c=c||{};
     const isNew=!c.id;
+    /* le tariffe che hai davvero nel Prezzario: servono alla tendina qui sotto */
+    await ppCarica();
+    const _fonti=ppFonti();
+    const _scritto=(c.prezzario||"");
+    const _daTendina=(_fonti.indexOf(_scritto)>=0);
+    const _mio=(!_daTendina&&(!!_scritto||!_fonti.length));
+    const przOpts='<option value=""'+((!_scritto&&_fonti.length)?' selected':'')+'>— non lo dico —</option>'
+      +_fonti.map(f=>'<option value="'+esc(f)+'"'+(f===_scritto?' selected':'')+'>'+esc(f)+'</option>').join("")
+      +'<option value="__mio__"'+(_mio?' selected':'')+'>— lo scrivo io —</option>';
     const mid=curMestiere();
 
     /* clienti e pratiche del reparto per le due tendine */
@@ -9390,7 +9399,19 @@
 
       +'<div class="sh-b"><div class="sh-tit">Da dove vengono i prezzi</div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Prezzario</label><input id="co-prz" value="'+esc(c.prezzario||"")+'" placeholder="Es. Tariffa Regione Lazio"></div>'
+      +  '</div>'
+      /* ⚠️ LA TARIFFA SI SCEGLIE QUI, IN UN POSTO SOLO. 10 agosto 2026.
+         Prima c'erano DUE punti che dicevano la stessa cosa senza parlarsi: qui
+         si scriveva a mano il nome che finisce sul PDF, e dentro la lavorazione
+         una tendina decideva dove cercare i prezzi. Si poteva stampare "Lazio"
+         sul documento e pescare i prezzi dall'Umbria, senza un avviso.
+         Adesso qui si sceglie fra le tariffe che hai davvero nel Prezzario, e
+         la ricerca dentro le lavorazioni segue questa. Chi non ha ancora
+         importato niente usa «lo scrivo io» e va avanti come prima. */
+      +  '<div class="field"><label>Prezzario</label><select id="co-prz-sel">'+przOpts+'</select>'
+      +    (_fonti.length?'':'<div class="sh-nota">Quando importerai una tariffa nella sezione Prezzario, la troverai qui dentro.</div>')+'</div>'
+      +  '<div class="row2" id="co-prz-mio"'+(_mio?'':' style="display:none"')+'>'
+      +    '<div class="field"><label>Come si chiama</label><input id="co-prz" value="'+esc(_daTendina?"":(c.prezzario||""))+'" placeholder="Es. Tariffa Regione Lazio"></div>'
       +    '<div class="field"><label>Anno</label><input type="number" id="co-prz-anno" value="'+(c.prezzario_anno||"")+'" placeholder="2023" style="max-width:130px"></div>'
       +  '</div>'
       +  '<div class="field"><label>Ribasso o sconto (%)</label><input type="number" step="0.001" id="co-rib" value="'+(c.ribasso_perc!=null?c.ribasso_perc:"")+'" placeholder="0" style="max-width:160px"></div>'
@@ -9411,6 +9432,11 @@
 
     bindSeg("co-tipo");
     bindSeg("co-stato");
+    const _ps=$("#co-prz-sel");
+    if(_ps)_ps.onchange=function(){
+      const box=$("#co-prz-mio");
+      if(box)box.style.display=(_ps.value==="__mio__")?"":"none";
+    };
     compCapNuovo=false;
     if(!isNew)renderCompVoci(c.id);
   }
@@ -9673,8 +9699,7 @@
          cliccano, ed entrano gia' fatte: codice, descrizione, unita', prezzo.
          Le voci usate di piu' salgono in cima da sole (usata_volte). */
       +'<div class="sh-b"><div class="sh-tit">Il tuo prezzario</div>'
-      +  '<div class="field"><label>Quale tariffa</label><select id="pp-fonte"><option value="">— tutte le tariffe —</option></select>'
-      +    '<div class="sh-nota" id="pp-fonte-nota"></div></div>'
+      +  '<div id="pp-fonte-box"></div>'
       +  '<div class="field"><label>Cerca una voce che usi già</label>'
       +    '<input id="pp-cerca"'+_noAuto()+' placeholder="Scrivi una parola: tramezzo, intonaco, pavimento…"></div>'
       +  '<div id="pp-lista"></div>'
@@ -9745,9 +9770,7 @@
        pausa, se no su un prezzario grosso si fanno dieci viaggi per una parola */
     const _ce=$("#pp-cerca");
     if(_ce){_ce.oninput=function(){clearTimeout(ppTimer);ppTimer=setTimeout(ppCerca,250);};}
-    const _cf=$("#pp-fonte");
-    if(_cf)_cf.onchange=function(){ppFonteScelta=_cf.value;ppCerca();};
-    ppFonteScelta=null;      /* la sceglie ppRiempiFonti dal prezzario del computo */
+    ppFonteScelta=null;      /* la prende ppRiempiFonti dal computo */
     ppCerca(true);
     if(!isNew)renderCompMisure(v.id);
   }
@@ -9799,20 +9822,27 @@
     return punti?best:null;
   }
   function ppRiempiFonti(){
-    const sel=$("#pp-fonte");if(!sel)return;
-    const fonti=ppFonti();
+    const box=$("#pp-fonte-box");if(!box)return;
     const comp=compCache.find(x=>String(x.id)===String(compVociCompId))||{};
-    const dich=[(comp.prezzario||""),(comp.prezzario_anno||"")].join(" ").trim();
-    if(ppFonteScelta===null)ppFonteScelta=_ppSceltaAuto(fonti,dich)||"";
-    const _vc=n=>n+(n===1?" voce":" voci");
-    sel.innerHTML='<option value="">— tutte le tariffe ('+_vc(ppTutte.length)+') —</option>'
-      +fonti.map(f=>'<option value="'+esc(f)+'"'+(f===ppFonteScelta?' selected':'')+'>'+esc(f)
-        +' ('+_vc(ppTutte.filter(x=>x.fonte===f).length)+')</option>').join("");
-    const nota=$("#pp-fonte-nota");
-    if(nota)nota.innerHTML=ppFonteScelta
-      ? 'Cerco solo dentro <b>'+esc(ppFonteScelta)+'</b>, che è la tariffa dichiarata su questo computo. Per guardare anche le altre metti «tutte».'
-      : (fonti.length>1?'Stai cercando in <b>tutte</b> le tariffe insieme: attento a non prendere il prezzo di una regione sbagliata.':'');
+    const dich=(comp.prezzario||"").trim();
+    const fonti=ppFonti();
+    /* la tariffa del computo: se l'hai scelta dalla tendina i nomi combaciano
+       in pieno; sui computi vecchi, dove era testo libero, si confrontano le
+       parole ("Tariffa Regione Lazio" con "tariffa-lazio-2023") */
+    const suaFonte=(fonti.indexOf(dich)>=0)?dich:_ppSceltaAuto(fonti,[dich,(comp.prezzario_anno||"")].join(" "));
+    if(ppFonteScelta===null)ppFonteScelta=suaFonte||"";
+    const n=ppFonteScelta?ppTutte.filter(x=>x.fonte===ppFonteScelta).length:ppTutte.length;
+    const _vc=k=>k+(k===1?" voce":" voci");
+    box.innerHTML='<div class="sh-nota" style="margin-bottom:10px">'
+      +(ppFonteScelta
+        ? 'Cerco dentro <b>'+esc(ppFonteScelta)+'</b> ('+_vc(n)+'), la tariffa di questo computo. '
+          +'<button type="button" class="btn-ghost quick-add" data-action="pp-tutte">cerca in tutte</button>'
+        : 'Cerco in <b>tutte le tariffe</b> ('+_vc(n)+'): attento a non prendere il prezzo di una regione sbagliata. '
+          +(suaFonte?'<button type="button" class="btn-ghost quick-add" data-action="pp-solo">torna a '+esc(suaFonte)+'</button>':''))
+      +'</div>';
+    box.dataset.sua=suaFonte||"";
   }
+
   function _ppPiatto(t){
     return String(t||"").toLowerCase()
       .replace(/[àáâä]/g,"a").replace(/[èéêë]/g,"e").replace(/[ìíîï]/g,"i")
@@ -10884,8 +10914,19 @@
       lavoro_id:($("#co-lav")&&$("#co-lav").value)||null,
       tipo:segVal("co-tipo")||"privato",
       stato:segVal("co-stato")||"bozza",
-      prezzario:txt("#co-prz"),
-      prezzario_anno:num("#co-prz-anno"),
+      /* dalla tendina esce il nome esatto della tariffa; con «lo scrivo io»
+         valgono i due campi di testo, come prima */
+      prezzario:(function(){const e=$("#co-prz-sel");
+        if(e&&e.value&&e.value!=="__mio__")return e.value;
+        if(e&&e.value==="")return null;
+        return txt("#co-prz");})(),
+      /* l'anno vale SOLO con «lo scrivo io»: scegliendo una tariffa dalla
+         tendina l'anno sta gia' nel suo nome, e con «non lo dico» non c'e'
+         niente da datare. Senza questo, dicendo "non lo dico" restava
+         appiccicato l'anno di prima. */
+      prezzario_anno:(function(){const e=$("#co-prz-sel");
+        if(e&&e.value!=="__mio__")return null;
+        return num("#co-prz-anno");})(),
       ribasso_perc:num("#co-rib"),
       note:txt("#co-note")
     };
@@ -11296,6 +11337,8 @@
     if(a==="pp-usa")return ppUsa(id);
     if(a==="pp-del")return ppDel(id);
     if(a==="pp-salva")return ppSalva();
+    if(a==="pp-tutte"){ppFonteScelta="";return ppCerca();}
+    if(a==="pp-solo"){const b=$("#pp-fonte-box");ppFonteScelta=(b&&b.dataset.sua)||"";return ppCerca();}
     if(a==="comp-prev")return computoAPreventivo(id);
     if(a==="new-prezzo")return prezzoForm(null);
     if(a==="edit-prezzo")return prezzoForm(id);

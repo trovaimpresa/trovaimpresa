@@ -2413,3 +2413,104 @@ id duplicati, zero testi sotto i 13px.
   la regola in cima a questo file. Stavolta **nessun `index.lock` e' stato creato** e non
   ha rotto niente — ma e' andata bene, non e' andata giusta. La regola resta: per sapere
   cosa e' cambiato **si guardano i file**.
+
+---
+
+# 10 agosto 2026 (sera) — IL COMPUTO METRICO, DA MOTORE A STRUMENTO
+
+Giornata partita da "stiamo testando il computo metrico" e finita con la funzione
+completa. Alessio ha fatto il collaudatore per tre ore: **quasi tutti i difetti gravi
+sono usciti da lì**, non dai controlli automatici. Vale la pena ricordarselo.
+
+## Cosa c'è adesso
+
+- **Calcolo** delle misure (parti × lungh. × largh. × alt.) coi vuoti da detrarre. Le
+  formule stanno **solo** nel database (viste `gest_computo_voci_calc` e
+  `gest_computo_totali`): il gestionale legge, non calcola.
+- **PDF** nel formato standard dei computi: tabella unica con `N. | Tariffa |
+  Descrizione | Dimensioni (P.U. lungh. largh. alt./peso) | Quantità | Prezzo (unit.
+  totale)`, misure riga per riga, "Sommano" per voce, "Sommano il capitolo", riepilogo
+  dei capitoli, **A riportare / Riporto** a piè di pagina, intestazione ripetuta.
+- **Ribasso** applicato davvero, con gli **oneri della sicurezza fuori dal ribasso**
+  (regola delle gare). Una sola funzione: `compRiepilogoDa()`.
+- **Da computo a preventivo** con un pulsante. Il ribasso diventa una riga negativa a
+  parte, non spalmato sui prezzi.
+- **Prezzario** (`gest_prezzi_propri`): sezione sua nel menù, ricerca che perdona
+  singolare/plurale, importazione da Excel/CSV, tariffe separate per regione.
+- **Correzione di una misura** cliccandoci sopra (prima si poteva solo cancellare).
+- La sezione si chiama **Computo metrico** (era "Computi metrici").
+
+## I difetti trovati — tutti sbagliavano i numeri IN SILENZIO
+
+Nessuno di questi dava errore a schermo. È il tipo peggiore: i numeri restano
+verosimili e arrivano al committente.
+
+1. **Doppio clic = misura doppia.** Supabase ci mette qualche decimo a rispondere e il
+   pulsante restava premibile. Riprodotto 5 volte su 5 con la latenza vera.
+   Chiavistello: `compMisSalvo`, non solo il pulsante spento.
+2. **L'autofill di Chrome cambiava le misure.** Scrivendo "porta" nella descrizione,
+   Chrome riempiva da solo lunghezza e altezza coi valori di settimane prima: porta alta
+   2,70 invece di 2,10. Successo **tre volte di fila**. Non basta `autocomplete="off"`
+   (Chrome lo ignora quando riconosce il campo): serve anche un **nome a caso** a ogni
+   disegno → `_noAuto()`.
+3. **Il ribasso non lo applicava nessuno.** Si scriveva, si salvava, e i totali
+   restavano pieni. Su una gara è la differenza fra vincere e non vincere.
+4. **I vuoti sommati invece che sottratti.** "Si detrae" stava sotto ai campi, lontano, e
+   si resettava a ogni misura: sfuggito 3 volte su 3. Spostato **sopra**, subito dopo la
+   descrizione, più un avviso se una misura si chiama porta/finestra/vuoto ed è in più.
+5. **Importazione che indovinava in silenzio.** Un file con colonne irriconoscibili
+   veniva importato lo stesso, prendendo l'intestazione come voce. Ora fa vedere come ha
+   capito la prima riga e chiede conferma.
+6. **Ricerca lettera per lettera.** Cercando "tramezzo" non trovava "tramezzi". Ora si
+   confronta la **radice** (via la vocale finale) e si ignorano accenti e maiuscole.
+7. **Grassetto che colava.** Il "Riporto" a inizio pagina lasciava il grassetto acceso:
+   la prima lavorazione dopo ogni cambio pagina usciva tutta in grassetto. **Trovato
+   guardando la pagina 2 di un PDF di prova**, non dai controlli automatici.
+8. **L'anno del prezzario restava appiccicato** scegliendo "non lo dico".
+
+## Le scelte che non vanno ribaltate senza pensarci
+
+- **Il prezzo entra nel computo come una fotografia.** Aggiornando il prezzario, i
+  computi già fatti non cambiano. Se no un computo consegnato due anni fa cambierebbe
+  totale da solo.
+- **Una tariffa nuova non sovrascrive la vecchia**: entra accanto ("Lazio 2025" vicino a
+  "Lazio 2023"), col confronto di cosa è cambiato, e la vecchia va nel cestino solo se lo
+  dici tu. Sovrascrivere i prezzi cambierebbe un computo in corso sotto gli occhi.
+- **La tariffa si sceglie in un posto solo**, sul computo. Prima c'erano due punti che
+  dicevano la stessa cosa senza parlarsi (il campo scritto a mano che finisce sul PDF, e
+  una tendina dentro la lavorazione): si poteva stampare "Lazio" e pescare i prezzi
+  dall'Umbria senza un avviso.
+- **Il confronto fra due tariffe si fa per CODICE**, non per descrizione: le descrizioni
+  le riscrivono a ogni revisione, i codici no.
+- **Doppioni solo dentro la stessa tariffa.** Lo stesso codice in due regioni è normale.
+
+## Da fare la prossima volta
+
+1. **L'archivio delle tariffe regionali dentro TrovaImpresa.** Oggi ogni utente importa
+   il file della sua Regione. Se le tariffe stessero già dentro, un tecnico aprirebbe il
+   gestionale e troverebbe la sua pronta — probabilmente è la ragione per cui uno studio
+   paga l'abbonamento. **Non è una funzione, è un pezzo di prodotto**: venti Regioni,
+   formati tutti diversi, aggiornamento annuale, e va verificato che si possano
+   ridistribuire in un servizio a pagamento.
+2. **Le voci salvate col pulsante ★ prendono `fonte:"mio"`**, che in mezzo a nomi come
+   "Tariffa Regione Lazio 2023" non dice niente. Meglio "Le mie voci".
+3. **Refuso nei dati di prova di Alessio**: nell'Oggetto del computo c'è scritto
+   "ifacimento" invece di "Rifacimento". È suo, si corregge dal campo.
+4. Provare l'importazione con una **tariffa regionale vera** (ventimila righe): il
+   caricamento va a blocchi di 200, non è mai stato provato oltre le 15 voci.
+
+## Lezioni
+
+- **Il collaudo a mano trova quello che i test non cercano.** L'autofill di Chrome e il
+  grassetto colato non sarebbero mai usciti da un controllo automatico: il primo perché
+  dipende da cosa il browser si ricorda, il secondo perché va **guardato**. Da qui in
+  poi: sui PDF, aprire almeno una pagina interna e guardarla.
+- **Un limite va detto, non nascosto.** Dove si tiene in memoria solo una parte
+  (500 voci nella ricerca, 5000 righe all'importazione, 8 risultati mostrati), il
+  gestionale lo scrive. Un taglio silenzioso si legge come "ho visto tutto".
+- **Quando l'utente si arrabbia, di solito ha ragione sul prodotto.** "Ma lo capiranno?
+  Perché lo hai messo lì?" ha smontato una scelta fatta perché era la strada più corta —
+  ed era giusto smontarla.
+- **Istruzioni ambigue fanno danni quanto il codice sbagliato.** "Cancella le tre misure
+  con la × a destra" è stato eseguito sulla schermata del computo, dove la × cancella
+  l'intera lavorazione. Dire sempre **su quale schermata** si sta parlando.
