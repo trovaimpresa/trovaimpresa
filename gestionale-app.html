@@ -9294,6 +9294,17 @@
 
       +'</div><div class="sh-col">'
 
+      /* Le lavorazioni stanno PER PRIME nella colonna di destra: prima erano in
+         fondo, fuori schermo, e sono la cosa che si riapre venti volte mentre il
+         resto si compila una volta sola. */
+      +'<div class="sh-b"><div class="sh-tit">Le lavorazioni</div>'
+      +  '<div class="lav-media" id="co-voci">'
+      +    (isNew
+        ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti i capitoli, le lavorazioni e le loro misure.</div>'
+        : '<div class="lm-vuoto">Sto caricando…</div>')
+      +  '</div>'
+      +'</div>'
+
       +'<div class="sh-b"><div class="sh-tit">A cosa serve questo computo</div>'
       +  '<div class="field"><div class="seg" id="co-tipo">'
       +    '<button data-v="privato"'+((c.tipo||"privato")==="privato"?' class="on"':'')+'>Lavori privati</button>'
@@ -9323,14 +9334,6 @@
       +  '<div class="field"><textarea id="co-note" placeholder="Esclusioni, condizioni, riferimenti...">'+esc(c.note||"")+'</textarea></div>'
       +'</div>'
 
-      +'<div class="sh-b"><div class="sh-tit">Le lavorazioni</div>'
-      +  '<div class="lav-media" id="co-voci">'
-      +    (isNew
-        ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti i capitoli, le lavorazioni e le loro misure.</div>'
-        : '<div class="lm-vuoto">Le lavorazioni con le misure arrivano nel prossimo aggiornamento. Le tabelle sono già pronte: quello che salvi ora non si perde.</div>')
-      +  '</div>'
-      +'</div>'
-
       +'</div></div>',
 
        '<button class="btn b-cancel" data-action="close">Annulla</button>'
@@ -9339,7 +9342,372 @@
 
     bindSeg("co-tipo");
     bindSeg("co-stato");
+    compCapNuovo=false;
+    if(!isNew)renderCompVoci(c.id);
   }
+
+  /* ============================================================
+     LE LAVORAZIONI E LE LORO MISURE
+     ============================================================
+     Il computo e' fatto a quattro livelli e le schermate sono DUE, non una:
+
+       scheda del COMPUTO      -> l'elenco delle lavorazioni, in sola lettura,
+                                  coi subtotali per capitolo
+       scheda della LAVORAZIONE -> la voce (codice, descrizione, unita', prezzo)
+                                  e sotto le sue MISURE
+
+     Perche' due e non una: una sola schermata con tre livelli di modifica
+     dentro diventa illeggibile, sul telefono impossibile. Cosi' si fa una
+     cosa per volta, e il pulsante "Torna al computo" riporta indietro.
+
+     LA QUANTITA' NON SI SCRIVE MAI. La somma delle misure la fa il database
+     (vista gest_computo_voci_calc). Qui si legge e si mostra.
+     ============================================================ */
+  let compVociCompId=null, compCapCache=[], compVociCache=[], compMisCache=[], compVoceId=null, compCapNuovo=false;
+
+  /* i numeri si scrivono come in cantiere: 3,20 va bene come 3.20 */
+  function _numIt(sel){
+    const v=String(($(sel)&&$(sel).value)||"").trim().replace(",",".");
+    if(v==="")return null;
+    const n=parseFloat(v);
+    return isFinite(n)?n:null;
+  }
+  /* un PREZZO si scrive sempre con due decimali: 18,50 e non 18,5.
+     _misTesto taglia gli zeri in coda — giusto per una misura, sbagliato qui. */
+  function _prezzoTesto(v){ return (+v||0).toFixed(2).replace(".",","); }
+  /* le misure si rileggono con la virgola e SEMPRE con due decimali: in un
+     computo si scrive 3,20 e non 3,2, come su carta. Il terzo decimale compare
+     solo se serve davvero (1,255), perche' in cantiere si misura al millimetro.
+     Prima tagliava tutti gli zeri in coda e usciva "lung. 3,2". */
+  function _misTesto(v){
+    const n=+v||0;
+    let s=n.toFixed(3);
+    if(s.charAt(s.length-1)==="0")s=s.slice(0,-1);
+    return s.replace(".",",");
+  }
+  /* le PARTI UGUALI sono un conteggio, non una misura: "1 parte", non "1,00 parte" */
+  function _partiTesto(v){
+    const n=(v==null||v==="")?1:(+v||0);
+    return Number.isInteger(n)?String(n):_misTesto(n);
+  }
+  const UNITA=["m","m²","m³","kg","q","t","cad","n.","corpo","ora","giorno","l"];
+
+  async function renderCompVoci(computoId){
+    const box=$("#co-voci");if(!box)return;
+    compVociCompId=computoId;
+    if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
+
+    const [rc,rv]=await Promise.all([
+      sb.from("gest_computo_capitoli").select("*").eq("user_id",sbUid).eq("computo_id",computoId).order("ordine"),
+      sb.from("gest_computo_voci_calc").select("*").eq("user_id",sbUid).eq("computo_id",computoId).order("ordine")
+    ]);
+    if(rc.error||rv.error){
+      const e=rc.error||rv.error;
+      box.innerHTML='<div class="lm-vuoto">'+(_compManca(e)
+        ? 'Per le lavorazioni serve l\'aggiornamento del database: esegui <b>sql/gest-computo-metrico.sql</b> su Supabase.'
+        : 'Non riesco a leggere le lavorazioni: '+esc(e.message))+'</div>';
+      return;
+    }
+    compCapCache=rc.data||[];
+    compVociCache=rv.data||[];
+
+    const senzaCap=compVociCache.filter(v=>!v.capitolo_id);
+    const gruppi=compCapCache.map(cap=>({cap:cap, voci:compVociCache.filter(v=>String(v.capitolo_id)===String(cap.id))}));
+    if(senzaCap.length||!compCapCache.length)gruppi.push({cap:null, voci:senzaCap});
+
+    const totale=compVociCache.reduce((s,v)=>s+(+v.importo||0),0);
+
+    const rigaVoce=v=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
+      +'<span>'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
+      +  '<small class="sp-forn">'+_misTesto(v.quantita)+(v.unita?" "+esc(v.unita):"")
+      +    ' × '+eur2(v.prezzo_unitario)
+      +    (v.quantita_manuale?' · a corpo':(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
+      +  '</small></span>'
+      +'<b>'+eur2(v.importo)+'</b>'
+      +'<button type="button" class="rdel" data-action="comp-voce-del" data-id="'+esc(String(v.id))+'" title="Elimina la lavorazione">×</button></div>';
+
+    let h="";
+    gruppi.forEach(g=>{
+      const sub=g.voci.reduce((s,v)=>s+(+v.importo||0),0);
+      if(g.cap){
+        h+='<div class="spesa-row" style="background:var(--sfondo,#f5f6f8)">'
+          +'<span><b>'+(g.cap.numero?esc(g.cap.numero)+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")+'</b></span>'
+          +'<b>'+eur2(sub)+'</b>'
+          +'<button type="button" class="rdel" data-action="comp-cap-del" data-id="'+esc(String(g.cap.id))+'" title="Elimina il capitolo (le lavorazioni restano)">×</button></div>';
+      }else if(compCapCache.length&&g.voci.length){
+        h+='<div class="spesa-row" style="background:var(--sfondo,#f5f6f8)"><span><b>Senza capitolo</b></span><b>'+eur2(sub)+'</b><span></span></div>';
+      }
+      h+= g.voci.length ? g.voci.map(rigaVoce).join("")
+        : '<p class="fatt-empty">Nessuna lavorazione'+(g.cap?" in questo capitolo":"")+'.</p>';
+    });
+
+    box.innerHTML=h
+      +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Totale del computo</b></span><b>'+eur2(totale)+'</b><span></span></div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'
+      +  '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Aggiungi lavorazione</button>'
+      +  (compCapNuovo?'':'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>')
+      +'</div>'
+      /* il capitolo si aggiunge con un campo qui dentro, non con una
+         finestrella del browser: e' la stessa forma delle misure e delle spese */
+      +(compCapNuovo
+        ? '<div style="margin-top:12px;border-top:1px solid var(--bordo);padding-top:12px">'
+          +'<div class="field"><label>Titolo del nuovo capitolo</label>'
+          +'<input id="cc-tit" placeholder="Es. Demolizioni e rimozioni"></div>'
+          +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+          +'<button type="button" class="btn-primary quick-add" data-action="comp-cap-salva">Aggiungi il capitolo</button>'
+          +'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-annulla">Annulla</button>'
+          +'</div></div>'
+        : '')
+      +'<div class="sh-nota">Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.</div>';
+    if(compCapNuovo){const i=$("#cc-tit");if(i)i.focus();}
+  }
+
+  async function compCapSalva(){
+    if(!compVociCompId)return;
+    const t=String(($("#cc-tit")&&$("#cc-tit").value)||"").trim();
+    if(!t){toast("Il capitolo ha bisogno di un titolo");return;}
+    const ord=compCapCache.reduce((m,c)=>Math.max(m,+c.ordine||0),0)+1;
+    const {error}=await sb.from("gest_computo_capitoli").insert({
+      user_id:sbUid, computo_id:compVociCompId, ordine:ord, numero:String(ord), titolo:t});
+    if(error){toast("Errore: "+error.message);return;}
+    compCapNuovo=false;
+    await renderCompVoci(compVociCompId);
+    toast("Capitolo aggiunto ✔");
+  }
+  async function compCapDel(id){
+    if(!gconfirm("Eliminare questo capitolo?\n\nLe lavorazioni che ci stanno dentro NON si perdono: restano nel computo, in fondo, senza capitolo."))return;
+    const {error}=await sb.from("gest_computo_capitoli").delete().eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    await renderCompVoci(compVociCompId);
+    toast("Capitolo eliminato");
+  }
+  async function compVoceDel(id){
+    const v=compVociCache.find(x=>String(x.id)===String(id))||{};
+    if(!gconfirm("Eliminare la lavorazione «"+(v.descrizione||"")+"»?\n\nSe ne vanno anche le sue misure, e non si recupera."))return;
+    const {error}=await sb.from("gest_computo_voci").delete().eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    await renderCompVoci(compVociCompId);
+    rinfresca("computi");
+    toast("Lavorazione eliminata");
+  }
+
+  /* ---- la scheda della singola lavorazione ---- */
+  async function compVoceForm(voceId){
+    if(!compVociCompId){toast("Apri prima il computo");return;}
+    const computoId=compVociCompId;
+    let v={};
+    if(voceId){
+      const {data,error}=await sb.from("gest_computo_voci").select("*").eq("id",voceId).eq("user_id",sbUid).maybeSingle();
+      if(error){toast("Errore: "+error.message);return;}
+      if(!data){toast("Lavorazione non trovata");return;}
+      v=data;
+    }
+    compVoceId=v.id||null;
+    const comp=compCache.find(x=>String(x.id)===String(computoId))||{};
+    const pubblico=(comp.tipo==="pubblico");
+    const isNew=!v.id;
+
+    const capOpts='<option value="">— senza capitolo —</option>'+compCapCache.map(c=>
+      '<option value="'+esc(String(c.id))+'"'+(String(c.id)===String(v.capitolo_id||"")?" selected":"")+'>'
+      +esc((c.numero?c.numero+" — ":"")+(c.titolo||""))+'</option>').join("");
+    const uniOpts='<option value="">— unità —</option>'+UNITA.map(u=>
+      '<option value="'+u+'"'+(u===(v.unita||"")?" selected":"")+'>'+u+'</option>').join("");
+
+    openSheetGrande(isNew?"Nuova lavorazione":"Lavorazione",
+       '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b"><div class="sh-tit">La lavorazione</div>'
+      +  '<div class="row2">'
+      +    '<div class="field"><label>Codice del prezzario</label><input id="cv-cod" value="'+esc(v.codice||"")+'" placeholder="A.01.002"></div>'
+      +    '<div class="field"><label>Unità di misura</label><select id="cv-uni">'+uniOpts+'</select></div>'
+      +  '</div>'
+      +  '<div class="field"><label>Descrizione</label><textarea id="cv-desc" rows="4" placeholder="Come la scrive il prezzario, per esteso">'+esc(v.descrizione||"")+'</textarea></div>'
+      +  '<div class="row2">'
+      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo" value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="18,50"></div>'
+      +    '<div class="field"><label>Capitolo</label><select id="cv-cap">'+capOpts+'</select></div>'
+      +  '</div>'
+      +'</div>'
+
+      /* Qui c'era una casellina da spuntare. Misurata nel browser: il CSS dei
+         campi la stirava a 56px di altezza e la mandava sotto al testo, storta.
+         Invece di combattere col foglio di stile, i DUE PULSANTI: e' il
+         componente che funziona gia' in tutto il gestionale, si tocca senza
+         mirare, e si capisce senza leggere. */
+      +'<div class="sh-b"><div class="sh-tit">Come si conta la quantità</div>'
+      +  '<div class="field"><div class="seg" id="cv-conta">'
+      +    '<button data-v="misure"'+(v.quantita_manuale?'':' class="on"')+'>Dalle misure</button>'
+      +    '<button data-v="corpo"'+(v.quantita_manuale?' class="on"':'')+'>A corpo</button>'
+      +  '</div>'
+      +  '<div class="sh-nota">Con <b>Dalle misure</b> la quantità la fa la somma delle misure qui a fianco, e non si scrive a mano. <b>A corpo</b> serve quando non c\'è niente da misurare: una voce a forfait, le spese generali.</div>'
+      +  '</div>'
+      +  '<div class="field" id="cv-qta-box" style="'+(v.quantita_manuale?"":"display:none")+'">'
+      +    '<label>Quantità</label><input type="text" inputmode="decimal" id="cv-qta" value="'+(v.quantita!=null?_misTesto(v.quantita):"")+'" placeholder="1" style="max-width:180px"></div>'
+      +'</div>'
+
+      +(pubblico
+        ? '<div class="sh-b"><div class="sh-tit">Solo per i lavori pubblici</div>'
+          +'<div class="row2">'
+          +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="cv-mano" value="'+(v.incidenza_manodopera!=null?String(v.incidenza_manodopera).replace(".",","):"")+'" placeholder="35"></div>'
+          +  '<div class="field"><label>Oneri della sicurezza (€)</label><input type="text" inputmode="decimal" id="cv-sic" value="'+(v.oneri_sicurezza!=null?String(v.oneri_sicurezza).replace(".",","):"")+'" placeholder="0"></div>'
+          +'</div>'
+          +'<div class="sh-nota">Sono le due cose che nelle gare vanno dichiarate. Gli oneri della sicurezza non sono soggetti a ribasso.</div>'
+          +'</div>'
+        : '')
+
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b"><div class="sh-tit">Le misure</div>'
+      +  '<div class="lav-media" id="cv-misure">'+(isNew
+          ? '<div class="lm-vuoto">Salva prima la lavorazione: poi qui ci scrivi le misure, una riga per ogni pezzo.</div>'
+          : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
+      +'</div>'
+      +'</div></div>',
+
+       '<button class="btn b-cancel" data-action="comp-torna">← Torna al computo</button>'
+      +'<button class="btn-primary b-save" data-action="comp-voce-salva" data-id="'+esc(String(v.id||""))+'">'+(isNew?"Crea lavorazione":"Salva")+'</button>');
+
+    bindSeg("cv-conta");
+    /* i due pulsanti accendono/spengono il campo della quantita' e sbiadiscono
+       le misure, che con "a corpo" non contano piu' */
+    $$("#cv-conta button").forEach(bt=>{
+      const prima=bt.onclick;
+      bt.onclick=()=>{ if(prima)prima();
+        const corpo=(segVal("cv-conta")==="corpo");
+        const box=$("#cv-qta-box"); if(box)box.style.display=corpo?"":"none";
+        const mis=$("#cv-misure");  if(mis)mis.style.opacity=corpo?"0.45":"1";
+      };
+    });
+    if(!isNew)renderCompMisure(v.id);
+  }
+
+  async function renderCompMisure(voceId){
+    const box=$("#cv-misure");if(!box)return;
+    const {data,error}=await sb.from("gest_computo_misure").select("*")
+      .eq("user_id",sbUid).eq("voce_id",voceId).order("ordine");
+    if(error){
+      box.innerHTML='<div class="lm-vuoto">Non riesco a leggere le misure: '+esc(error.message)+'</div>';
+      return;
+    }
+    compMisCache=data||[];
+    const tot=compMisCache.reduce((s,m)=>s+(+m.quantita||0),0);
+    const pezzo=(v,lab)=>v==null?"":(" "+lab+" "+_misTesto(v));
+    const righe=compMisCache.length?compMisCache.map(m=>
+      '<div class="spesa-row"><span>'+(m.detrai?'<b style="color:var(--err,#c0392b)">− </b>':'')
+        +esc(m.descrizione||"(senza nome)")
+        +'<small class="sp-forn">'+_partiTesto(m.parti)+(((m.parti==null?1:+m.parti)===1)?" parte":" parti")
+        + pezzo(m.lunghezza,"× lung.")+pezzo(m.larghezza,"× larg.")+pezzo(m.altezza,"× alt.")
+        +'</small></span>'
+      +'<b'+(m.detrai?' style="color:var(--err,#c0392b)"':'')+'>'+_misTesto(m.quantita)+'</b>'
+      +'<button type="button" class="rdel" data-action="comp-mis-del" data-id="'+esc(String(m.id))+'" title="Elimina la misura">×</button></div>'
+    ).join(""):'<p class="fatt-empty">Nessuna misura: la quantità è zero.</p>';
+
+    box.innerHTML=righe
+      +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misTesto(tot)+'</b><span></span></div>'
+      +'<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
+      +  '<div class="field"><label>Che cosa stai misurando</label><input id="cm-desc" placeholder="Es. tramezzo cucina, porta da detrarre"></div>'
+      +  '<div class="row2">'
+      +    '<div class="field"><label>Parti uguali</label><input type="text" inputmode="decimal" id="cm-parti" placeholder="1"></div>'
+      +    '<div class="field"><label>Lunghezza</label><input type="text" inputmode="decimal" id="cm-lung" placeholder="3,20"></div>'
+      +  '</div>'
+      +  '<div class="row2">'
+      +    '<div class="field"><label>Larghezza</label><input type="text" inputmode="decimal" id="cm-larg" placeholder="vuoto = non la uso"></div>'
+      +    '<div class="field"><label>Altezza o spessore</label><input type="text" inputmode="decimal" id="cm-alt" placeholder="2,70"></div>'
+      +  '</div>'
+      +  '<div class="field"><label>Questa misura</label><div class="seg" id="cm-verso">'
+      +    '<button data-v="piu" class="on">Si aggiunge</button>'
+      +    '<button data-v="meno">Si detrae</button>'
+      +  '</div>'
+      +  '<div class="sh-nota">«Si detrae» sono i vuoti: le porte, le finestre, i fori. Vengono sottratti dal totale.</div></div>'
+      +  '<button type="button" class="btn-primary quick-add" data-action="comp-mis-add" data-id="'+esc(String(voceId))+'">+ Aggiungi la misura</button>'
+      +  '<div class="sh-nota">Un campo <b>vuoto</b> non entra nel conto (vale 1): per i metri quadri riempi lunghezza e altezza e lascia stare la larghezza. Uno <b>zero</b> scritto invece vale zero davvero.</div>'
+      +'</div>';
+    bindSeg("cm-verso");
+  }
+
+  async function compMisAdd(voceId){
+    if(!sbUid||!voceId)return;
+    const desc=String(($("#cm-desc")&&$("#cm-desc").value)||"").trim();
+    const parti=_numIt("#cm-parti"), lung=_numIt("#cm-lung"), larg=_numIt("#cm-larg"), alt=_numIt("#cm-alt");
+    if(parti==null&&lung==null&&larg==null&&alt==null){
+      toast("Scrivi almeno una misura (o le parti uguali)");return;
+    }
+    const ord=compMisCache.reduce((m,x)=>Math.max(m,+x.ordine||0),0)+1;
+    const {error}=await sb.from("gest_computo_misure").insert({
+      user_id:sbUid, voce_id:voceId, ordine:ord,
+      descrizione:desc||null, parti:parti, lunghezza:lung, larghezza:larg, altezza:alt,
+      detrai:(segVal("cm-verso")==="meno")});
+    if(error){toast("Errore: "+error.message);return;}
+    await renderCompMisure(voceId);
+    rinfresca("computi");
+    toast("Misura aggiunta ✔");
+  }
+  async function compMisDel(id){
+    if(!sbUid)return;
+    const {error}=await sb.from("gest_computo_misure").delete().eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    await renderCompMisure(compVoceId);
+    rinfresca("computi");
+    toast("Misura eliminata");
+  }
+
+  async function compVoceSalva(id){
+    if(!sbUid||!compVociCompId)return;
+    const desc=String(($("#cv-desc")&&$("#cv-desc").value)||"").trim();
+    if(!desc){toast("Scrivi la descrizione della lavorazione");return;}
+    const aCorpo=(segVal("cv-conta")==="corpo");
+    const row={
+      user_id:sbUid, computo_id:compVociCompId,
+      capitolo_id:($("#cv-cap")&&$("#cv-cap").value)||null,
+      codice:String(($("#cv-cod")&&$("#cv-cod").value)||"").trim()||null,
+      descrizione:desc,
+      unita:($("#cv-uni")&&$("#cv-uni").value)||null,
+      prezzo_unitario:_numIt("#cv-prezzo")||0,
+      quantita_manuale:aCorpo,
+      quantita:aCorpo?(_numIt("#cv-qta")||0):0,
+      incidenza_manodopera:$("#cv-mano")?_numIt("#cv-mano"):undefined,
+      oneri_sicurezza:$("#cv-sic")?_numIt("#cv-sic"):undefined
+    };
+    /* i due campi delle gare esistono solo sui lavori pubblici: se il modulo
+       non li mostra non si scrivono, cosi' non azzerano quello che c'era */
+    if(row.incidenza_manodopera===undefined)delete row.incidenza_manodopera;
+    if(row.oneri_sicurezza===undefined)delete row.oneri_sicurezza;
+    if(!id){
+      row.ordine=compVociCache.reduce((m,x)=>Math.max(m,+x.ordine||0),0)+1;
+    }
+    let res;
+    if(id) res=await sb.from("gest_computo_voci").update(row).eq("id",id).eq("user_id",sbUid).select("id");
+    else   res=await sb.from("gest_computo_voci").insert(row).select("id");
+    if(res.error){toast("Errore: "+res.error.message);return;}
+    if(!res.data||!res.data.length){toast("Non salvata: nessuna riga scritta. Riprova.");return;}
+    const nuovoId=res.data[0].id;
+    rinfresca("computi");
+    /* appena creata si resta dentro: le misure sono il motivo per cui si e'
+       aperta questa schermata, e adesso si possono scrivere */
+    if(!id){ await compVoceForm(nuovoId); toast("Lavorazione creata ✔ Ora scrivici le misure"); return; }
+    toast("Lavorazione salvata ✔");
+    await compTornaAlComputo();
+  }
+
+  async function compTornaAlComputo(){
+    const c=compCache.find(x=>String(x.id)===String(compVociCompId));
+    if(!c){closeSheet();await renderComputi();return;}
+    await computoForm(c);
+    /* si torna DOVE si era: davanti alle lavorazioni, non in cima al modulo.
+       Senza questo, ogni volta che si chiude una lavorazione bisogna riscorrere
+       tutto il computo per ritrovare l'elenco. */
+    /* ⏱ 320 ms non e' un numero a caso: openSheetGrande riporta il modulo in
+       cima QUATTRO volte (subito, al frame dopo, a 80 ms e a 250 ms) per via
+       delle emoji che diventano icone e cambiano l'altezza. Uno scroll fatto
+       prima veniva cancellato dall'ultimo di quei quattro. Se un domani quei
+       tempi cambiano, va cambiato anche questo.
+       scrollIntoView e non scrollTop: non serve indovinare quale contenitore
+       scorre (sul computer .sh-body, e non e' detto che resti cosi'). */
+    setTimeout(()=>{
+      const box=$("#co-voci"); if(!box)return;
+      const blocco=box.closest(".sh-b")||box;
+      try{ blocco.scrollIntoView({block:"start",inline:"nearest"}); }catch(_){ blocco.scrollIntoView(true); }
+    },320);
+  }
+
+  /* ---- REPORT & STATISTICHE ---- */
 
   async function saveComputo(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -9767,6 +10135,17 @@
     if(a==="save-computo")return saveComputo(id);
     if(a==="del-computo")return delComputo(id);
     if(a==="comp-filtro"){compFiltro=t.dataset.v;renderComputi();return;}
+    if(a==="comp-cap-apri"){compCapNuovo=true;renderCompVoci(compVociCompId);return;}
+    if(a==="comp-cap-annulla"){compCapNuovo=false;renderCompVoci(compVociCompId);return;}
+    if(a==="comp-cap-salva")return compCapSalva();
+    if(a==="comp-cap-del")return compCapDel(id);
+    if(a==="comp-voce-new")return compVoceForm(null);
+    if(a==="comp-voce")return compVoceForm(id);
+    if(a==="comp-voce-del")return compVoceDel(id);
+    if(a==="comp-voce-salva")return compVoceSalva(id);
+    if(a==="comp-torna")return compTornaAlComputo();
+    if(a==="comp-mis-add")return compMisAdd(id);
+    if(a==="comp-mis-del")return compMisDel(id);
     if(a==="new-prev")return prevForm(null);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
     /* dal Riepilogo: prevCache può essere ancora vuota (scheda Preventivi mai aperta),
