@@ -443,6 +443,26 @@
   /* Da qui in poi "cancella" vuol dire "metti da parte": vedi js/cestino.js */
   if(sb&&window.attivaCestino)window.attivaCestino(sb);
   let sbUid=null;
+
+  /* ===== 10 agosto 2026 — IL CLIENTE DEI DOCUMENTI =====
+     Un documento gia' fatto non deve cambiare perche' hai messo il cliente nel
+     cestino. Ma preventivo, conferma d'ordine, lettera d'incarico e verbale il
+     nome del cliente lo rileggono ogni volta con sb.from, che dal 9 agosto salta
+     le righe nel cestino: al posto del nome usciva "—" e l'indirizzo vuoto, su
+     un foglio che il cliente firma.
+     Qui si legge dalla porta di servizio (sb.raw), quella che vede tutto: per un
+     DOCUMENTO il cliente serve com'era, cestino o no. A schermo invece resta il
+     filtro, e l'elenco dei preventivi continua a dire "Nome (nel cestino)".
+     sb.raw c'e' solo se il cestino e' acceso: se manca si usa sb.from, come prima. */
+  function _sbTutto(tab){ return (sb.raw?sb.raw(tab):sb.from(tab)); }
+  async function cliDelDocumento(clienteId,campi){
+    if(!clienteId)return {};
+    try{
+      const {data}=await _sbTutto("gest_clienti").select(campi||"*")
+        .eq("id",clienteId).eq("user_id",sbUid).maybeSingle();
+      return data||{};
+    }catch(e){ return {}; }
+  }
   const sbRand=()=>Math.random().toString(36).slice(2,8).toUpperCase();
   const inviteLink=c=>location.href.replace(/[^/]*$/,"")+"gestionale-invito.html?codice="+c;
   function copyLink(txt){
@@ -6181,7 +6201,7 @@
     const {data:lav}=await sb.from("gest_lavori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
     if(!lav){toast("Lavoro non trovato");return;}
     let c={};
-    if(lav.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,referente").eq("id",lav.cliente_id).maybeSingle();c=cl||{};}
+    c=await cliDelDocumento(lav.cliente_id,"nome,indirizzo,referente");
     /* il numero NON si assegna qui: scaricare il PDF non deve impegnare
        un numero di fattura. Lo assegna assegnaNumFatt() quando segni "Emessa". */
     const numFatt=lav.num_fatt||null;
@@ -7723,7 +7743,7 @@
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
     let c={};
-    if(p.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("nome,indirizzo,referente").eq("id",p.cliente_id).maybeSingle();c=cl||{};}
+    c=await cliDelDocumento(p.cliente_id,"nome,indirizzo,referente");
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
@@ -7935,11 +7955,7 @@
     const p=prevCache.find(x=>String(x.id)===String(id));if(!p){toast("Preventivo non trovato");return;}
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return;}
-    let c={};
-    if(p.cliente_id){
-      const {data:cl}=await sb.from("gest_clienti").select("*").eq("id",p.cliente_id).maybeSingle();
-      c=cl||{};
-    }
+    const c=await cliDelDocumento(p.cliente_id);
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     let tot=0;(rr||[]).forEach(r=>{tot+=(+r.qta||1)*(+r.prezzo||0);});
     const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
@@ -8226,7 +8242,7 @@
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return;}
     let c={};
-    if(p.cliente_id){const {data:cl}=await sb.from("gest_clienti").select("*").eq("id",p.cliente_id).maybeSingle();c=cl||{};}
+    c=await cliDelDocumento(p.cliente_id);
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     let imponibile=0;(rr||[]).forEach(r=>{imponibile+=(+r.qta||1)*(+r.prezzo||0);});
     const perc=(p.iva_perc==null||p.iva_perc==="")?null:(+p.iva_perc||0);
@@ -8404,7 +8420,7 @@
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
     let cli={};
-    if(l&&l.cliente_id){const {data:c}=await sb.from("gest_clienti").select("*").eq("id",l.cliente_id).maybeSingle();cli=c||{};}
+    if(l)cli=await cliDelDocumento(l.cliente_id);
 
     /* le foto già caricate su questa pratica */
     verFoto=[];
@@ -8486,7 +8502,7 @@
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return;}
     let cli={};
-    if(l.cliente_id){const {data:c}=await sb.from("gest_clienti").select("*").eq("id",l.cliente_id).maybeSingle();cli=c||{};}
+    cli=await cliDelDocumento(l.cliente_id);
 
     const V=x=>{const e=$("#"+x);return e?e.value.trim():"";};
     const dati={data:V("vb-data")||todayStr(), ora:V("vb-ora"), luogo:V("vb-luogo"),
