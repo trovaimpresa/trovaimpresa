@@ -58,7 +58,8 @@
       <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
       <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Attrezzature</span></button>
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
-      <button data-tab="computi" id="tab-computi" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/><path d="M13 13h5"/><path d="M13 17h5"/></svg><span>Computi metrici</span><span class="tab-cnt" id="cnt-computi"></span></button>
+      <button data-tab="computi" id="tab-computi" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/><path d="M13 13h5"/><path d="M13 17h5"/></svg><span>Computo metrico</span><span class="tab-cnt" id="cnt-computi"></span></button>
+      <button data-tab="prezzario" id="tab-prezzario" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 12 22l-9-9V3h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Prezzario</span><span class="tab-cnt" id="cnt-prezzario"></span></button>
       <button data-tab="crediti" id="tab-crediti" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg><span>Crediti formativi</span><span class="tab-cnt" id="cnt-crediti"></span></button>
       <button data-tab="carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Carte</span></button>
       <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Clienti</span></button>
@@ -275,10 +276,26 @@
          il bottone nasce con display:none. Accenderla anche per le imprese edili
          e' una riga, quando si decide. -->
     <section id="computi">
-      <div class="sec-head"><h2>Computi metrici</h2><button class="btn add" data-action="new-computo">+ Nuovo computo</button></div>
+      <div class="sec-head"><h2>Computo metrico</h2><button class="btn add" data-action="new-computo">+ Nuovo computo</button></div>
       <div class="gal-intro">Le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e i vuoti da detrarre. La quantità la calcola il gestionale, tu misuri.</div>
       <div class="viste" id="comp-viste"></div>
       <div class="grid" id="comp-list"></div>
+    </section>
+
+    <!-- ===== 10 agosto 2026 — IL PREZZARIO =====
+         Le voci che uno usa sempre, scritte una volta sola. Nel computo si
+         cercano per parola ed entrano gia' fatte. Qui si correggono e si
+         aggiornano i prezzi tutti insieme, che una volta l'anno serve a tutti. -->
+    <section id="prezzario">
+      <div class="sec-head"><h2>Prezzario</h2><button class="btn add" data-action="new-prezzo">+ Nuova voce</button></div>
+      <div class="gal-intro">Le voci che usi sempre, scritte una volta sola. Nel computo le ritrovi cercando una parola ed entrano già fatte, col loro prezzo. Quelle che usi di più stanno in cima.</div>
+      <div class="field" style="max-width:620px"><label>Cerca una voce</label><input id="pz-cerca" placeholder="Scrivi una parola: tramezzo, intonaco, pavimento…"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <button type="button" class="btn" data-action="pz-importa">⬆ Importa da Excel o CSV</button>
+        <input type="file" id="pz-file" accept=".xlsx,.xlsm,.xls,.csv" style="display:none">
+      </div>
+      <div id="pz-esito"></div>
+      <div id="pz-list"></div>
     </section>
 
     <section id="report">
@@ -540,9 +557,12 @@
       /* Crediti formativi: voce nascosta a tutti, accesa solo per gli studi */
       var _tabC=document.querySelector('#tab-crediti');
       if(_tabC)_tabC.style.display='';
-      /* Computi metrici: nascosta a tutti, accesa per gli studi tecnici */
+      /* Computo metrico: nascosta a tutti, accesa per gli studi tecnici */
       var _tabCo=document.querySelector('#tab-computi');
       if(_tabCo)_tabCo.style.display='';
+      /* il Prezzario va insieme al computo: senza computo non serve a niente */
+      var _tabPz=document.querySelector('#tab-prezzario');
+      if(_tabPz)_tabPz.style.display='';
       var _secA=document.querySelector('#attrezzature');
       if(_secA){
         var _h=_secA.querySelector('h2'); if(_h&&_h.textContent.trim()==='Attrezzature')_h.textContent='Strumenti';
@@ -975,6 +995,7 @@
      ============================================================ */
   const RENDER_TAB={
     riepilogo:renderRiepilogo, lavori:renderJobs, preventivi:renderPreventivi, computi:renderComputi,
+    prezzario:renderPrezzario,
     fatture:renderFatture, calendario:renderCal, agenda:renderAgenda,
     mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
     carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze, crediti:renderCrediti, cestino:renderCestino,
@@ -1495,7 +1516,7 @@
             impDi[c.id]=compRiepilogoDa(t.importo,t.oneri_sicurezza,t.importo_manodopera,c).netto;});
           const bozze=CO.filter(c=>c.stato==="bozza");
           C.push(rieCard({
-            tab:"computi", titolo:"Computi metrici", n:CO.length,
+            tab:"computi", titolo:"Computo metrico", n:CO.length,
             lab: CO.length===1?"computo nel reparto":"computi nel reparto",
             tono: bozze.length?"attesa":(CO.length?"ok":"neutro"),
             vuoto:"Nessun computo metrico",
@@ -8926,7 +8947,7 @@
     {t:"gest_spese",       lab:"Spese",             campo:"descrizione",    ic:"💶", foglia:true},
     {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true},
     {t:"gest_crediti",     lab:"Crediti formativi", campo:"titolo",         ic:"🎓", foglia:true},
-    {t:"gest_computi",     lab:"Computi metrici",   campo:"titolo",         ic:"📐"},
+    {t:"gest_computi",     lab:"Computo metrico",   campo:"titolo",         ic:"📐"},
     {t:"gest_prezzi_propri", lab:"Voci del tuo elenco prezzi", campo:"descrizione", ic:"🏷", foglia:true},
     {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true},
     {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true}
@@ -9630,6 +9651,7 @@
       v=data;
     }
     compVoceId=v.id||null;
+    compMisEditId=null;
     const comp=compCache.find(x=>String(x.id)===String(computoId))||{};
     const pubblico=(comp.tipo==="pubblico");
     const isNew=!v.id;
@@ -9878,7 +9900,9 @@
     const tot=compMisCache.reduce((s,m)=>s+(+m.quantita||0),0);
     const pezzo=(v,lab)=>v==null?"":(" "+lab+" "+_misTesto(v));
     const righe=compMisCache.length?compMisCache.map(m=>
-      '<div class="spesa-row"><span>'+(m.detrai?'<b style="color:var(--err,#c0392b)">− </b>':'')
+      '<div class="spesa-row" data-action="comp-mis-edit" data-id="'+esc(String(m.id))+'"'
+        +(String(m.id)===String(compMisEditId)?' style="cursor:pointer;background:var(--sfondo,#f5f6f8)"':' style="cursor:pointer"')
+        +'><span>'+(m.detrai?'<b style="color:var(--err,#c0392b)">− </b>':'')
         +esc(m.descrizione||"(senza nome)")
         +'<small class="sp-forn">'+_partiTesto(m.parti)+(((m.parti==null?1:+m.parti)===1)?" parte":" parti")
         + pezzo(m.lunghezza,"× lung.")+pezzo(m.larghezza,"× larg.")+pezzo(m.altezza,"× alt.")
@@ -9887,10 +9911,20 @@
       +'<button type="button" class="rdel" data-action="comp-mis-del" data-id="'+esc(String(m.id))+'" title="Elimina la misura">×</button></div>'
     ).join(""):'<p class="fatt-empty">Nessuna misura: la quantità è zero.</p>';
 
+    /* ⚠️ LA CORREZIONE DI UNA MISURA. 10 agosto 2026.
+       Prima una misura sbagliata si poteva solo cancellare e riscrivere da capo:
+       quattro campi e il verso, per cambiare un 2,70 in 2,10. Adesso ci clicchi
+       sopra, il modulo qui sotto si riempie con i suoi numeri, e il pulsante
+       diventa "Salva la misura". La riga in correzione resta evidenziata, se no
+       non si capisce piu' quale si sta toccando. */
+    const inCorr=compMisCache.find(m=>String(m.id)===String(compMisEditId))||null;
+    if(compMisEditId&&!inCorr)compMisEditId=null;   /* cancellata da un'altra parte */
+    const _v=(x)=>x==null?"":esc(_misTesto(x));
     box.innerHTML=righe
       +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misTesto(tot)+'</b><span></span></div>'
       +'<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
-      +  '<div class="field"><label>Che cosa stai misurando</label><input id="cm-desc"'+_noAuto()+' placeholder="Es. tramezzo cucina, porta da detrarre"></div>'
+      +  (inCorr?'<div class="sh-tit" style="margin-bottom:8px">Stai correggendo «'+esc(inCorr.descrizione||"(senza nome)")+'»</div>':'')
+      +  '<div class="field"><label>Che cosa stai misurando</label><input id="cm-desc"'+_noAuto()+' value="'+(inCorr?esc(inCorr.descrizione||""):"")+'" placeholder="Es. tramezzo cucina, porta da detrarre"></div>'
       /* ⚠️ QUESTO BLOCCO STA QUI SOPRA APPOSTA, non in fondo. 10 agosto 2026.
          Prima stava sotto ai quattro campi delle misure, a un dito dal pulsante
          "Aggiungi": bisognava scorrere per vederlo e sfuggiva sistematicamente.
@@ -9899,19 +9933,20 @@
          subito dopo aver scritto che cosa si sta misurando, che e' il momento
          in cui uno lo sa. */
       +  '<div class="field"><label>Questa misura</label><div class="seg" id="cm-verso">'
-      +    '<button data-v="piu" class="on">Si aggiunge</button>'
-      +    '<button data-v="meno">Si detrae</button>'
+      +    '<button data-v="piu"'+((inCorr&&inCorr.detrai)?'':' class="on"')+'>Si aggiunge</button>'
+      +    '<button data-v="meno"'+((inCorr&&inCorr.detrai)?' class="on"':'')+'>Si detrae</button>'
       +  '</div>'
       +  '<div class="sh-nota">«Si detrae» sono i vuoti: le porte, le finestre, i fori. Vengono sottratti dal totale.</div></div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Parti uguali</label><input type="text" inputmode="decimal" id="cm-parti"'+_noAuto()+' placeholder="1"></div>'
-      +    '<div class="field"><label>Lunghezza</label><input type="text" inputmode="decimal" id="cm-lung"'+_noAuto()+' placeholder="3,20"></div>'
+      +    '<div class="field"><label>Parti uguali</label><input type="text" inputmode="decimal" id="cm-parti"'+_noAuto()+' value="'+(inCorr?_v(inCorr.parti):"")+'" placeholder="1"></div>'
+      +    '<div class="field"><label>Lunghezza</label><input type="text" inputmode="decimal" id="cm-lung"'+_noAuto()+' value="'+(inCorr?_v(inCorr.lunghezza):"")+'" placeholder="3,20"></div>'
       +  '</div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Larghezza</label><input type="text" inputmode="decimal" id="cm-larg"'+_noAuto()+' placeholder="vuoto = non la uso"></div>'
-      +    '<div class="field"><label>Altezza o spessore</label><input type="text" inputmode="decimal" id="cm-alt"'+_noAuto()+' placeholder="2,70"></div>'
+      +    '<div class="field"><label>Larghezza</label><input type="text" inputmode="decimal" id="cm-larg"'+_noAuto()+' value="'+(inCorr?_v(inCorr.larghezza):"")+'" placeholder="vuoto = non la uso"></div>'
+      +    '<div class="field"><label>Altezza o spessore</label><input type="text" inputmode="decimal" id="cm-alt"'+_noAuto()+' value="'+(inCorr?_v(inCorr.altezza):"")+'" placeholder="2,70"></div>'
       +  '</div>'
-      +  '<button type="button" class="btn-primary quick-add" data-action="comp-mis-add" data-id="'+esc(String(voceId))+'">+ Aggiungi la misura</button>'
+      +  '<button type="button" class="btn-primary quick-add" data-action="comp-mis-add" data-id="'+esc(String(voceId))+'">'+(inCorr?"Salva la misura":"+ Aggiungi la misura")+'</button>'
+      +  (inCorr?' <button type="button" class="btn-ghost quick-add" data-action="comp-mis-annulla">Annulla la correzione</button>':'')
       +  '<div class="sh-nota">Un campo <b>vuoto</b> non entra nel conto (vale 1): per i metri quadri riempi lunghezza e altezza e lascia stare la larghezza. Uno <b>zero</b> scritto invece vale zero davvero.</div>'
       +'</div>';
     bindSeg("cm-verso");
@@ -9925,7 +9960,7 @@
      Riprodotto nel browser con la stessa lentezza della rete: 5 prove su 5.
      Il chiavistello e' la variabile, non il pulsante spento: se un domani il
      pulsante cambia forma, la doppia scrittura resta bloccata lo stesso. */
-  let compMisSalvo=false;
+  let compMisSalvo=false, compMisEditId=null;
   async function compMisAdd(voceId){
     if(!sbUid||!voceId)return;
     if(compMisSalvo)return;
@@ -9946,25 +9981,47 @@
     const bt=$('[data-action="comp-mis-add"]');
     compMisSalvo=true;
     if(bt){bt.disabled=true;bt.textContent="Sto salvando…";}
-    const ord=compMisCache.reduce((m,x)=>Math.max(m,+x.ordine||0),0)+1;
-    const {error}=await sb.from("gest_computo_misure").insert({
-      user_id:sbUid, voce_id:voceId, ordine:ord,
-      descrizione:desc||null, parti:parti, lunghezza:lung, larghezza:larg, altezza:alt,
-      detrai:(segVal("cm-verso")==="meno")});
+    const riga={descrizione:desc||null, parti:parti, lunghezza:lung, larghezza:larg, altezza:alt,
+                detrai:(segVal("cm-verso")==="meno")};
+    let error;
+    if(compMisEditId){
+      /* si CORREGGE una misura che c'e' gia': l'ordine non si tocca, se no la
+         riga corretta salta in fondo e il computo si rimescola sotto gli occhi */
+      const r=await sb.from("gest_computo_misure").update(riga)
+        .eq("id",compMisEditId).eq("user_id",sbUid).select("id");
+      error=r.error;
+      if(!error&&(!r.data||!r.data.length))error={message:"nessuna riga modificata. Riprova."};
+    }else{
+      const ord=compMisCache.reduce((m,x)=>Math.max(m,+x.ordine||0),0)+1;
+      const r=await sb.from("gest_computo_misure").insert(Object.assign(
+        {user_id:sbUid, voce_id:voceId, ordine:ord},riga));
+      error=r.error;
+    }
     if(error){
       /* il modulo NON si ridisegna quando c'e' un errore: il pulsante va
          riacceso a mano, se no resta spento e non si aggiunge piu' niente */
       compMisSalvo=false;
-      if(bt){bt.disabled=false;bt.textContent="+ Aggiungi la misura";}
+      if(bt){bt.disabled=false;bt.textContent=compMisEditId?"Salva la misura":"+ Aggiungi la misura";}
       toast("Errore: "+error.message);return;
     }
+    const correggeva=!!compMisEditId;
+    compMisEditId=null;
     await renderCompMisure(voceId);   /* ridisegna il pulsante pulito */
     compMisSalvo=false;
     rinfresca("computi");
-    toast("Misura aggiunta ✔");
+    toast(correggeva?"Misura corretta ✔":"Misura aggiunta ✔");
+  }
+  function compMisEdit(id){
+    compMisEditId=id;
+    renderCompMisure(compVoceId);
+  }
+  function compMisAnnulla(){
+    compMisEditId=null;
+    renderCompMisure(compVoceId);
   }
   async function compMisDel(id){
     if(!sbUid)return;
+    if(String(id)===String(compMisEditId))compMisEditId=null;
     const {error}=await sb.from("gest_computo_misure").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     await renderCompMisure(compVoceId);
@@ -10029,6 +10086,291 @@
       const blocco=box.closest(".sh-b")||box;
       try{ blocco.scrollIntoView({block:"start",inline:"nearest"}); }catch(_){ blocco.scrollIntoView(true); }
     },320);
+  }
+
+
+  /* ============================================================
+     LA SEZIONE PREZZARIO
+     ============================================================
+     La stessa tabella che il computo interroga (gest_prezzi_propri), qui vista
+     per intero: si correggono le voci, si aggiornano i prezzi, e si carica un
+     prezzario intero da un file invece di scrivere trecento righe a mano.
+
+     Non c'e' il mestiere_id: il prezzario e' della PERSONA, come i crediti
+     formativi. Le voci si vedono uguali da tutti i reparti — un prezzo di
+     demolizione non cambia perche' cambi cantiere. */
+  let pzCache=[], pzTimer=null;
+  const PZ_MAX=1000;
+
+  async function renderPrezzario(){
+    const box=$("#pz-list");if(!box)return;
+    const cnt=$("#cnt-prezzario");
+    if(!sb||!sbUid){box.innerHTML=tabVuoto("Prezzario","Accedi per usare il tuo prezzario.","");return;}
+    const {data,error}=await sb.from("gest_prezzi_propri").select("*")
+      .eq("user_id",sbUid).is("eliminato_il",null)
+      .order("usata_volte",{ascending:false}).limit(PZ_MAX);
+    if(error){
+      box.innerHTML='<div class="lm-vuoto">'+(_compManca(error)
+        ? 'Per il prezzario serve l\'aggiornamento del database: esegui <b>sql/gest-computo-metrico.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina.'
+        : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
+      return;
+    }
+    pzCache=data||[];
+    if(cnt)cnt.textContent=pzCache.length?String(pzCache.length):"";
+    const q=String(($("#pz-cerca")&&$("#pz-cerca").value)||"").trim();
+    const L=_ppFiltra(pzCache,q);
+
+    if(!pzCache.length){
+      box.innerHTML=tabVuoto("Il prezzario è vuoto",
+        "Puoi scrivere le voci una per una, oppure caricare tutto il tuo prezzario da un file Excel qui sopra. Poi nel computo le ritrovi cercando una parola.",
+        _SVGV+'<path d="M20.59 13.41 12 22l-9-9V3h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+        {t:"+ Scrivi la prima voce",a:"new-prezzo"});
+      return;
+    }
+    if(!L.length){
+      box.innerHTML='<p class="fatt-empty">Nessuna voce con questa parola. Hai '+pzCache.length+' voci nel prezzario.</p>';
+      return;
+    }
+    /* niente tagli silenziosi: se il prezzario e' piu' grande di quanto ne
+       tiriamo giu', si dice invece di far credere che siano tutte */
+    const avviso=(pzCache.length>=PZ_MAX)
+      ? '<div class="sh-nota">Il prezzario ha almeno '+PZ_MAX+' voci: qui sotto vedi le '+PZ_MAX+' che usi di più. Cerca una parola per trovare le altre.</div>' : "";
+    box.innerHTML=avviso+'<div class="lav-media">'+L.map(x=>
+      '<div class="spesa-row" data-action="edit-prezzo" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
+      +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
+      +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
+      +    (x.categoria?" · "+esc(x.categoria):"")
+      +    (x.fonte?" · "+esc(x.fonte):"")
+      +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):" · mai usata")
+      +  '</small></span>'
+      +'<b></b>'
+      +'<button type="button" class="rdel" data-action="del-prezzo" data-id="'+esc(String(x.id))+'" title="Metti nel cestino">×</button></div>').join("")
+      +'</div>'
+      +'<div class="sh-nota">'+L.length+(L.length===1?" voce":" voci")+(q?(" su "+pzCache.length):"")+'. Clicca una voce per correggerla.</div>';
+    const ce=$("#pz-cerca");
+    if(ce&&!ce._agganciato){
+      ce._agganciato=true;
+      ce.oninput=function(){clearTimeout(pzTimer);pzTimer=setTimeout(renderPrezzario,250);};
+    }
+  }
+
+  /* ---- la scheda di una voce del prezzario ---- */
+  function prezzoForm(id){
+    const x=(id?pzCache.find(v=>String(v.id)===String(id)):null)||{};
+    const isNew=!x.id;
+    const uniOpts='<option value="">— unità —</option>'+UNITA.map(u=>
+      '<option value="'+u+'"'+(u===(x.unita||"")?" selected":"")+'>'+u+'</option>').join("");
+    openSheetGrande(isNew?"Nuova voce del prezzario":"Voce del prezzario",
+       '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b"><div class="sh-tit">La voce</div>'
+      +  '<div class="row2">'
+      +    '<div class="field"><label>Codice del prezzario</label><input id="pz-cod"'+_noAuto()+' value="'+esc(x.codice||"")+'" placeholder="A.01.002"></div>'
+      +    '<div class="field"><label>Unità di misura</label><select id="pz-uni">'+uniOpts+'</select></div>'
+      +  '</div>'
+      +  '<div class="field"><label>Descrizione</label><textarea id="pz-desc" rows="5" placeholder="Come la scrive il prezzario, per esteso">'+esc(x.descrizione||"")+'</textarea></div>'
+      +  '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="pz-prezzo"'+_noAuto()+' value="'+(x.prezzo_unitario!=null?_prezzoTesto(x.prezzo_unitario):"")+'" placeholder="18,50" style="max-width:200px"></div>'
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b"><div class="sh-tit">Per ritrovarla</div>'
+      +  '<div class="field"><label>Categoria</label><input id="pz-cat"'+_noAuto()+' value="'+esc(x.categoria||"")+'" placeholder="Es. Demolizioni, Intonaci, Pavimenti"></div>'
+      +  '<div class="field"><label>Da dove viene questo prezzo</label><input id="pz-fonte"'+_noAuto()+' value="'+esc(x.fonte||"")+'" placeholder="Es. Tariffa Regione Lazio 2023, listino mio"></div>'
+      +  '<div class="sh-nota">La fonte serve quando fra sei mesi ti chiedi perché quel prezzo era proprio quello.</div>'
+      +'</div>'
+      +'<div class="sh-b"><div class="sh-tit">Solo per i lavori pubblici</div>'
+      +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="pz-mano"'+_noAuto()+' value="'+(x.incidenza_manodopera!=null?String(x.incidenza_manodopera).replace(".",","):"")+'" placeholder="35" style="max-width:160px"></div>'
+      +  '<div class="sh-nota">Se la scrivi qui, entra da sola nella lavorazione ogni volta che usi questa voce.</div>'
+      +'</div>'
+      +(isNew?'':'<div class="sh-b"><div class="sh-tit">Quanto la usi</div><div class="sh-nota">'
+        +((+x.usata_volte)?("L'hai usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")+": sta in cima alla ricerca."):"Non l'hai ancora mai usata in un computo.")
+        +'</div></div>')
+      +'</div></div>',
+
+       '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +(isNew?"":'<button class="btn btn-danger" data-action="del-prezzo" data-id="'+esc(String(x.id))+'">🗑 Metti nel cestino</button>')
+      +'<button class="btn-primary b-save" data-action="save-prezzo" data-id="'+esc(x.id||"")+'">'+(isNew?"Crea la voce":"Salva")+'</button>');
+  }
+
+  async function savePrezzo(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const desc=String(($("#pz-desc")&&$("#pz-desc").value)||"").trim();
+    if(!desc){toast("Scrivi almeno la descrizione della voce");return;}
+    const riga={
+      descrizione:desc,
+      codice:String(($("#pz-cod")&&$("#pz-cod").value)||"").trim()||null,
+      unita:($("#pz-uni")&&$("#pz-uni").value)||null,
+      prezzo_unitario:_numIt("#pz-prezzo")||0,
+      categoria:String(($("#pz-cat")&&$("#pz-cat").value)||"").trim()||null,
+      fonte:String(($("#pz-fonte")&&$("#pz-fonte").value)||"").trim()||null,
+      incidenza_manodopera:_numIt("#pz-mano")
+    };
+    let res;
+    if(id)res=await sb.from("gest_prezzi_propri").update(riga).eq("id",id).eq("user_id",sbUid).select("id");
+    else  res=await sb.from("gest_prezzi_propri").insert(Object.assign({user_id:sbUid},riga)).select("id");
+    if(res.error){
+      toast(_compManca(res.error)?"Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)":("Errore: "+res.error.message));
+      return;
+    }
+    if(!res.data||!res.data.length){toast("Non salvata: nessuna riga scritta. Riprova.");return;}
+    closeSheet();
+    ppTutte=[];                 /* la ricerca dentro il computo si rifa' */
+    rinfresca("prezzario");
+    toast(id?"Voce aggiornata ✔":"Voce creata ✔");
+  }
+  async function delPrezzo(id){
+    const x=pzCache.find(v=>String(v.id)===String(id))||{};
+    if(!gconfirm("Mettere «"+(x.descrizione||"")+"» nel cestino?\n\nLa ritrovi nel Cestino e la puoi rimettere a posto. I computi già fatti non cambiano."))return;
+    const {error}=await sb.from("gest_prezzi_propri").delete().eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    closeSheet();
+    ppTutte=[];
+    rinfresca("prezzario");
+    toast("Voce messa nel cestino");
+  }
+
+  /* ============================================================
+     IMPORTARE UN PREZZARIO DA UN FILE
+     ============================================================
+     Un tecnico ha la tariffa regionale in un foglio Excel scaricato dal sito
+     della Regione. Scrivere trecento voci a mano non lo fa nessuno: o si
+     importa, o il prezzario resta vuoto e la funzione non serve a niente.
+
+     Le colonne NON si prendono per posizione: ogni Regione mette le sue in un
+     ordine diverso. Si cerca l'intestazione per come e' scritta (codice /
+     tariffa / articolo, descrizione, unita' / u.m., prezzo / importo), e se
+     l'intestazione non c'e' si parte dalla prima riga.
+
+     I NUMERI ITALIANI: "1.234,56" e "1234.56" devono dare lo stesso numero.
+     Il punto delle migliaia insieme alla virgola dei decimali e' la trappola
+     classica: 1.234 letto male diventa 1,234 euro invece di 1.234. */
+  const PZ_IMP_MAX=5000;
+  function _pzNum(v){
+    if(v==null)return null;
+    if(typeof v==="number")return isFinite(v)?v:null;
+    let t=String(v).replace(/[€\s ]/g,"").trim();
+    if(!t)return null;
+    if(t.indexOf(",")>=0&&t.indexOf(".")>=0)t=t.replace(/\./g,"").replace(",",".");
+    else if(t.indexOf(",")>=0)t=t.replace(",",".");
+    const n=parseFloat(t);
+    return isFinite(n)?n:null;
+  }
+  function _pzCol(intest){
+    const C={};
+    intest.forEach((t,i)=>{
+      const x=_ppPiatto(String(t||""));
+      if(C.descrizione==null&&/descriz|lavoraz|denominaz|oggetto/.test(x))C.descrizione=i;
+      else if(C.codice==null&&/codic|tariff|articol|n\.?art|voce/.test(x))C.codice=i;
+      else if(C.unita==null&&/^u\.?m\.?$|unit|misura/.test(x))C.unita=i;
+      else if(C.prezzo==null&&/prezzo|importo|costo|euro|eur/.test(x))C.prezzo=i;
+      else if(C.categoria==null&&/categor|capitol|gruppo|famigl/.test(x))C.categoria=i;
+      else if(C.mano==null&&/manodoper|persona|incidenz/.test(x))C.mano=i;
+    });
+    return C;
+  }
+  function pzApriFile(){
+    const f=$("#pz-file");
+    if(!f)return;
+    f.value="";                 /* se no, ricaricando lo stesso file non scatta */
+    f.onchange=function(){ if(f.files&&f.files[0])pzImporta(f.files[0]); };
+    f.click();
+  }
+  function _pzEsito(html,tono){
+    const b=$("#pz-esito");if(!b)return;
+    b.innerHTML='<div class="sh-nota" style="border-left:4px solid var('+(tono==="err"?"--err,#c0392b":"--acc,#1f6f5c")+');padding-left:10px;margin-bottom:12px">'+html+'</div>';
+  }
+  async function pzImporta(file){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    _pzEsito("Sto leggendo <b>"+esc(file.name)+"</b>…");
+    if(!(await caricaXLSX())){_pzEsito("Non riesco a scaricare il modulo per leggere i file Excel: controlla la connessione e riprova.","err");return;}
+    let righe;
+    try{
+      const buf=await file.arrayBuffer();
+      const wb=XLSX.read(new Uint8Array(buf),{type:"array"});
+      const sh=wb.Sheets[wb.SheetNames[0]];
+      righe=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,defval:""});
+    }catch(e){
+      _pzEsito("Non riesco ad aprire il file: "+esc((e&&e.message)||String(e))+"<br>Se è un CSV, prova a riaprirlo con Excel e salvarlo come .xlsx.","err");
+      return;
+    }
+    if(!righe||!righe.length){_pzEsito("Il file è vuoto.","err");return;}
+
+    /* l'intestazione: la prima riga che parla di "descrizione" */
+    let iInt=-1;
+    for(let i=0;i<Math.min(righe.length,30);i++){
+      if((righe[i]||[]).some(c=>/descriz|lavoraz|denominaz/i.test(String(c||"")))){iInt=i;break;}
+    }
+    const C=(iInt>=0)?_pzCol(righe[iInt]):{codice:0,descrizione:1,unita:2,prezzo:3};
+    if(iInt>=0&&C.descrizione==null){
+      _pzEsito("Non trovo la colonna della descrizione. Il file deve avere una riga di intestazione con scritto <b>Descrizione</b> (e possibilmente Codice, U.M., Prezzo).","err");
+      return;
+    }
+    /* ⚠️ SENZA INTESTAZIONE NON SI TIRA A INDOVINARE IN SILENZIO. 10 agosto 2026.
+       Provandolo: un file con le colonne "Pippo | Pluto" veniva importato lo
+       stesso, prendendo l'intestazione come se fosse una voce. Nel prezzario
+       finiva spazzatura, senza un messaggio. Un prezzario sporco e' peggio di
+       un prezzario vuoto: le voci sbagliate poi finiscono nei computi.
+       Adesso, quando l'intestazione non si riconosce, si fa vedere la PRIMA
+       RIGA come l'abbiamo capita e si chiede conferma. */
+    if(iInt<0){
+      const pr=(dati0=>{for(let i=0;i<Math.min(righe.length,10);i++){
+        const r=righe[i]||[];if(r.some(c=>String(c||"").trim()))return r;}return [];})();
+      const mostra=(i,lab)=>lab+": "+(String((pr[i]!=null?pr[i]:"")).trim()||"(vuoto)");
+      if(!gconfirm("Il file non ha una riga di intestazione riconoscibile.\n\n"
+        +"Leggo le colonne in quest'ordine, e la prima riga verrebbe fuori così:\n\n"
+        +mostra(0,"Codice")+"\n"+mostra(1,"Descrizione")+"\n"+mostra(2,"Unità")+"\n"+mostra(3,"Prezzo")
+        +"\n\nSe non è così, annulla: metti nel file una riga con scritto Codice, Descrizione, U.M., Prezzo e riprova.\n\nVado avanti?")){
+        _pzEsito("Importazione annullata. Aggiungi al file una riga di intestazione con <b>Codice · Descrizione · U.M. · Prezzo</b> e riprova.","err");
+        return;
+      }
+    }
+    const dati=righe.slice(iInt>=0?iInt+1:0);
+    if(dati.length>PZ_IMP_MAX)_pzEsito("Il file ha "+dati.length+" righe: ne leggo le prime "+PZ_IMP_MAX+".");
+
+    /* quelle che ci sono gia', per non fare doppioni */
+    const {data:vecchie}=await sb.from("gest_prezzi_propri").select("codice,descrizione")
+      .eq("user_id",sbUid).is("eliminato_il",null).limit(20000);
+    const gia=new Set((vecchie||[]).map(x=>_ppPiatto((x.codice||"")+"§"+(x.descrizione||""))));
+
+    const nuove=[];let saltate=0,doppie=0;
+    dati.slice(0,PZ_IMP_MAX).forEach(r=>{
+      const desc=String((r[C.descrizione]!=null?r[C.descrizione]:"")).replace(/\s+/g," ").trim();
+      if(!desc||desc.length<3){saltate++;return;}
+      const cod=(C.codice!=null?String(r[C.codice]||"").trim():"")||null;
+      const chiave=_ppPiatto((cod||"")+"§"+desc);
+      if(gia.has(chiave)){doppie++;return;}
+      gia.add(chiave);
+      const prezzo=(C.prezzo!=null)?_pzNum(r[C.prezzo]):null;
+      nuove.push({user_id:sbUid, codice:cod, descrizione:desc,
+        unita:(C.unita!=null?String(r[C.unita]||"").trim():"")||null,
+        prezzo_unitario:prezzo||0,
+        categoria:(C.categoria!=null?String(r[C.categoria]||"").trim():"")||null,
+        incidenza_manodopera:(C.mano!=null?_pzNum(r[C.mano]):null),
+        fonte:file.name.replace(/\.(xlsx?|xlsm|csv)$/i,"").slice(0,60)});
+    });
+    if(!nuove.length){
+      _pzEsito("Non ho trovato niente di nuovo da importare. Righe lette: "+dati.length
+        +(doppie?(" · "+doppie+" c'erano già"):"")+(saltate?(" · "+saltate+" senza descrizione"):"")+".","err");
+      return;
+    }
+    /* a blocchi: mandarne tremila in una volta sola non passa */
+    let messe=0;
+    for(let i=0;i<nuove.length;i+=200){
+      const pezzo=nuove.slice(i,i+200);
+      const {error}=await sb.from("gest_prezzi_propri").insert(pezzo);
+      if(error){
+        _pzEsito("Importate "+messe+" voci, poi il database si è fermato: "+esc(error.message),"err");
+        ppTutte=[];rinfresca("prezzario");
+        return;
+      }
+      messe+=pezzo.length;
+      _pzEsito("Sto caricando… "+messe+" di "+nuove.length);
+    }
+    ppTutte=[];
+    _pzEsito("<b>Importate "+messe+" voci</b> da "+esc(file.name)+"."
+      +(doppie?(" "+doppie+" c'erano già e non le ho rifatte."):"")
+      +(saltate?(" "+saltate+" righe saltate perché senza descrizione."):"")
+      +" Adesso le ritrovi nel computo cercando una parola.");
+    rinfresca("prezzario");
+    toast("Prezzario importato: "+messe+" voci ✔");
   }
 
   /* ============================================================
@@ -10807,6 +11149,11 @@
     if(a==="pp-del")return ppDel(id);
     if(a==="pp-salva")return ppSalva();
     if(a==="comp-prev")return computoAPreventivo(id);
+    if(a==="new-prezzo")return prezzoForm(null);
+    if(a==="edit-prezzo")return prezzoForm(id);
+    if(a==="save-prezzo")return savePrezzo(id);
+    if(a==="del-prezzo")return delPrezzo(id);
+    if(a==="pz-importa")return pzApriFile();
     if(a==="comp-filtro"){compFiltro=t.dataset.v;renderComputi();return;}
     if(a==="comp-cap-apri"){compCapNuovo=true;renderCompVoci(compVociCompId);return;}
     if(a==="comp-cap-annulla"){compCapNuovo=false;renderCompVoci(compVociCompId);return;}
@@ -10818,6 +11165,8 @@
     if(a==="comp-voce-salva")return compVoceSalva(id);
     if(a==="comp-torna")return compTornaAlComputo();
     if(a==="comp-mis-add")return compMisAdd(id);
+    if(a==="comp-mis-edit")return compMisEdit(id);
+    if(a==="comp-mis-annulla")return compMisAnnulla();
     if(a==="comp-mis-del")return compMisDel(id);
     if(a==="new-prev")return prevForm(null);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
