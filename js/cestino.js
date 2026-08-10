@@ -48,12 +48,18 @@
      vincolo di unicita' PARZIALE (quello che serve al cestino) non può fare
      da arbitro a ON CONFLICT. Risultato: nessuna nota si salvava più.
      Una nota è una riga di testo: la cancellazione vera va benissimo. */
+  /* 10 agosto 2026 — aggiunti gest_computi e gest_prezzi_propri.
+     NON ci sono gest_computo_capitoli, gest_computo_voci e gest_computo_misure:
+     sono pezzi del computo e se ne vanno con lui, come le righe di una fattura.
+     Metterle qui sarebbe la trappola di gest_note: la funzione "Elimina per
+     sempre" le vedrebbe come cose vive e un computo non si svuoterebbe piu'. */
   var TABELLE = [
     "gest_lavori", "gest_clienti", "gest_preventivi", "gest_fatture",
     "gest_scadenze", "gest_mestieri", "gest_mezzi", "gest_operatori",
     "gest_carte",
     "gest_fornitori", "gest_fatture_fornitori", "gest_spese",
-    "gest_ore", "gest_crediti", "gest_foto", "gest_video"
+    "gest_ore", "gest_crediti", "gest_foto", "gest_video",
+    "gest_computi", "gest_prezzi_propri"
   ];
 
   var COL = "eliminato_il";

@@ -58,6 +58,7 @@
       <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
       <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Attrezzature</span></button>
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
+      <button data-tab="computi" id="tab-computi" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/><path d="M13 13h5"/><path d="M13 17h5"/></svg><span>Computi metrici</span><span class="tab-cnt" id="cnt-computi"></span></button>
       <button data-tab="crediti" id="tab-crediti" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg><span>Crediti formativi</span><span class="tab-cnt" id="cnt-crediti"></span></button>
       <button data-tab="carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Carte</span></button>
       <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Clienti</span></button>
@@ -267,6 +268,17 @@
       <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
       <div class="viste" id="prev-viste"></div>
       <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
+    </section>
+
+    <!-- ===== 10 agosto 2026 — COMPUTI METRICI =====
+         Per ora accesa solo per gli studi tecnici (vedi adattaMenuProfessionista):
+         il bottone nasce con display:none. Accenderla anche per le imprese edili
+         e' una riga, quando si decide. -->
+    <section id="computi">
+      <div class="sec-head"><h2>Computi metrici</h2><button class="btn add" data-action="new-computo">+ Nuovo computo</button></div>
+      <div class="gal-intro">Le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e i vuoti da detrarre. La quantità la calcola il gestionale, tu misuri.</div>
+      <div class="viste" id="comp-viste"></div>
+      <div class="grid" id="comp-list"></div>
     </section>
 
     <section id="report">
@@ -528,6 +540,9 @@
       /* Crediti formativi: voce nascosta a tutti, accesa solo per gli studi */
       var _tabC=document.querySelector('#tab-crediti');
       if(_tabC)_tabC.style.display='';
+      /* Computi metrici: nascosta a tutti, accesa per gli studi tecnici */
+      var _tabCo=document.querySelector('#tab-computi');
+      if(_tabCo)_tabCo.style.display='';
       var _secA=document.querySelector('#attrezzature');
       if(_secA){
         var _h=_secA.querySelector('h2'); if(_h&&_h.textContent.trim()==='Attrezzature')_h.textContent='Strumenti';
@@ -921,7 +936,7 @@
   }
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","computi"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
@@ -944,7 +959,7 @@
      usano da qualsiasi sezione.
      ============================================================ */
   const RENDER_TAB={
-    riepilogo:renderRiepilogo, lavori:renderJobs, preventivi:renderPreventivi,
+    riepilogo:renderRiepilogo, lavori:renderJobs, preventivi:renderPreventivi, computi:renderComputi,
     fatture:renderFatture, calendario:renderCal, agenda:renderAgenda,
     mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
     carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze, crediti:renderCrediti, cestino:renderCestino,
@@ -8861,6 +8876,8 @@
     {t:"gest_spese",       lab:"Spese",             campo:"descrizione",    ic:"💶", foglia:true},
     {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true},
     {t:"gest_crediti",     lab:"Crediti formativi", campo:"titolo",         ic:"🎓", foglia:true},
+    {t:"gest_computi",     lab:"Computi metrici",   campo:"titolo",         ic:"📐"},
+    {t:"gest_prezzi_propri", lab:"Voci del tuo elenco prezzi", campo:"descrizione", ic:"🏷", foglia:true},
     {t:"gest_foto",        lab:"Foto e documenti",  campo:"nome_file",      ic:"📷", foglia:true},
     {t:"gest_video",       lab:"Video",             campo:"nome_file",      ic:"🎬", foglia:true}
     /* gest_note NON c'e': e' stata tolta dal cestino il 9/8/2026 (vedi
@@ -8983,6 +9000,9 @@
     gest_mezzi:"mezzi e strumenti", gest_operatori:"persone", gest_carte:"carte aziendali",
     gest_fornitori:"fornitori", gest_fatture_fornitori:"fatture fornitori",
     gest_spese:"spese", gest_ore:"ore lavorate", gest_crediti:"crediti formativi",
+    gest_computi:"computi metrici", gest_computo_capitoli:"capitoli del computo",
+    gest_computo_voci:"voci del computo", gest_computo_misure:"misure del computo",
+    gest_prezzi_propri:"voci del tuo elenco prezzi",
     gest_foto:"foto e documenti", gest_video:"video", gest_note:"note",
     gest_fattura_righe:"righe della fattura", gest_preventivo_righe:"righe del preventivo",
     gest_fattura_lavori:"collegamenti fattura-lavoro", gest_lavoro_mezzi:"mezzi usati",
@@ -9101,6 +9121,271 @@
     toast("Eliminato per sempre");
   }
 
+
+  /* ============================================================
+     COMPUTI METRICI — 10 agosto 2026  (primo pezzo: l'elenco e la scheda)
+     Tabelle: sql/gest-computo-metrico.sql
+
+     Un computo e' fatto a quattro livelli: computo -> capitoli -> voci ->
+     misure. Qui ci sono i primi due passaggi: l'elenco dei computi e la
+     scheda del computo. Le lavorazioni con le loro misure sono il pezzo
+     dopo, e vanno DENTRO questa scheda (come le Ore dentro la pratica).
+
+     I TOTALI NON SI CALCOLANO QUI. Li legge dalla vista gest_computo_totali:
+     il conto lo fa il database, in un posto solo. Se un domani cambia la
+     regola, cambia in un punto e tutte le schermate la seguono.
+     ============================================================ */
+  let compCache=[], compTot={}, compCli={}, compFiltro="tutti", compTabellaOk=true;
+
+  const COMP_VISTE=[{k:"tutti",lab:"Tutti"},{k:"bozza",lab:"Bozze"},{k:"definitivo",lab:"Definitivi"}];
+  const COMP_STATO_LAB={bozza:"Bozza",definitivo:"Definitivo"};
+  const COMP_BAR={bozza:"da_fare",definitivo:"fatto"};
+
+  /* la tabella non c'e' ancora: lo si dice, invece di restare a girare */
+  function _compManca(err){
+    const m=(err&&(err.message||err.details||""))||"";
+    return /gest_comput|gest_prezzi_propri/i.test(m) || /schema cache|does not exist|relation/i.test(m);
+  }
+
+  async function renderComputi(){
+    const box=$("#comp-list");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML=tabVuoto("Nessun computo","Accedi per creare i computi metrici.",
+      _SVGV+'<path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>');return;}
+    const mid=curMestiere();
+
+    const [rc,rt,rl] = await Promise.all([
+      sb.from("gest_computi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid)
+        .order("data",{ascending:false}),
+      sb.from("gest_computo_totali").select("*").eq("user_id",sbUid),
+      /* i clienti si leggono ANCHE dal cestino: un computo di un cliente
+         cestinato deve dire il nome, non un trattino (lezione del 10 agosto) */
+      _sbTutto("gest_clienti").select("id,nome,eliminato_il").eq("user_id",sbUid).eq("mestiere_id",mid)
+    ]);
+
+    if(rc.error){
+      compTabellaOk=false;
+      $("#comp-viste").innerHTML="";
+      box.innerHTML=tabVuoto(
+        _compManca(rc.error)?"Il computo metrico non è ancora acceso":"Non riesco a leggere i computi",
+        _compManca(rc.error)
+          ? "Esegui <b>sql/gest-computo-metrico.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina."
+          : "Il database ha risposto: "+esc(rc.error.message),
+        _SVGV+'<path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>');
+      return;
+    }
+    compTabellaOk=true;
+    compCache=rc.data||[];
+    compTot={};(rt&&rt.data||[]).forEach(r=>{compTot[r.computo_id]=r;});
+    compCli={};(rl&&rl.data||[]).forEach(c=>{compCli[c.id]=(c.nome||"")+(c.eliminato_il?" (nel cestino)":"");});
+
+    const cnt=$("#cnt-computi");if(cnt)cnt.textContent=compCache.length?String(compCache.length):"";
+
+    const L=compCache.filter(c=>compFiltro==="tutti"||c.stato===compFiltro);
+    const conta={};COMP_VISTE.forEach(v=>conta[v.k]=compCache.filter(c=>v.k==="tutti"||c.stato===v.k).length);
+    const somma=L.reduce((s,c)=>s+(+((compTot[c.id]||{}).importo)||0),0);
+
+    renderTabella({
+      id:"comp", box:"#comp-list",
+      viste:"#comp-viste", visteDef:COMP_VISTE, vista:compFiltro, conta:conta, azioneVista:"comp-filtro",
+      vuoto:tabVuoto(
+        compCache.length?"Nessun computo con questo filtro":"Ancora nessun computo",
+        compCache.length?"Prova a cambiare vista qui sopra."
+          :"Un computo raccoglie le lavorazioni con le loro misure: parti uguali, lunghezza, larghezza, altezza, e i vuoti da detrarre. La quantità la calcola il gestionale.",
+        _SVGV+'<path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>',
+        compCache.length?null:{t:"+ Crea il primo computo",a:"new-computo"}),
+      /* La forma sono le SCHEDE, come tutte le altre sezioni (vedi schedaJob):
+         la prima versione usava la tabella e sul telefono l'importo finiva
+         fuori dallo schermo — cioe' l'unico numero che conta davvero.
+         Le colonne restano per il ripiego a tabella, che renderTabella tiene
+         ancora dentro. */
+      colonne:[{lab:"N.",w:"12%"},{lab:"Computo",w:"31%"},{lab:"Cliente",w:"22%",cls:"c-cli"},
+               {lab:"Quando",w:"15%"},{lab:"Importo",w:"20%",cls:"c-imp"}],
+      righe:L.map(c=>({
+        id:c.id,
+        click:{action:"edit-computo",data:{id:c.id}},
+        celle:[
+          esc(String(c.numero||"—")),
+          '<span class="c-nome">'+esc(c.titolo||"(senza titolo)")+'</span>',
+          esc(compCli[c.cliente_id]||"—"),
+          {h:quando(c.data,{neutro:true}).testo,cls:quando(c.data,{neutro:true}).classe},
+          {h:eur((compTot[c.id]||{}).importo||0),cls:"c-imp"}
+        ],
+        menu:compVoci(c)
+      })),
+      cards:()=>L.map(c=>compCard(c)).join(""),
+      totale: L.length?{testo:L.length+" "+(L.length===1?"computo":"computi"),valore:eur(somma)}:null
+    });
+  }
+
+  /* le azioni del computo: le stesse nel menu "..." e sui pulsanti della scheda */
+  function compVoci(c){
+    return [{lab:"✏ Apri il computo",action:"edit-computo",data:{id:c.id}},
+            {lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}];
+  }
+  /* la scheda dell'elenco: passa da schedaJob, la scheda unica di tutte le
+     sezioni, cosi' i Computi hanno la stessa forma di Pratiche e Preventivi */
+  function compCard(c){
+    const t=compTot[c.id]||{voci:0,importo:0};
+    const q=quando(c.data,{neutro:true});
+    const nVoci=+t.voci||0;
+    return schedaJob({
+      tono: c.stato==="definitivo" ? "t-ok" : "t-attesa",
+      titolo: (c.numero?("N. "+esc(String(c.numero))+" — "):"")+esc(c.titolo||"(senza titolo)"),
+      destra: '<span class="stato '+(COMP_BAR[c.stato]||"da_fare")+'">'+(COMP_STATO_LAB[c.stato]||esc(c.stato))+'</span>',
+      meta:[
+        c.cliente_id?("👤 "+esc(compCli[c.cliente_id]||"—")):"",
+        c.luogo?("📍 "+esc(c.luogo)):"",
+        "📅 "+esc(q.testo),
+        nVoci?("🧱 "+nVoci+(nVoci===1?" lavorazione":" lavorazioni")):"🧱 nessuna lavorazione",
+        '<b>'+eur(t.importo)+'</b>',
+        c.tipo==="pubblico"?"🏛 lavori pubblici":"",
+        c.prezzario?("🏷 "+esc(c.prezzario)+(c.prezzario_anno?(" "+c.prezzario_anno):"")):""
+      ],
+      nota: c.note?("📝 "+esc(c.note)):"",
+      azioni: compVoci(c)
+    });
+  }
+
+  /* ---- la scheda del computo ---- */
+  async function computoForm(c){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    if(!compTabellaOk){toast("Prima serve l'aggiornamento del database (sql/gest-computo-metrico.sql)");return;}
+    c=c||{};
+    const isNew=!c.id;
+    const mid=curMestiere();
+
+    /* clienti e pratiche del reparto per le due tendine */
+    const [rcl,rlv]=await Promise.all([
+      _sbTutto("gest_clienti").select("id,nome,eliminato_il").eq("user_id",sbUid).eq("mestiere_id",mid).order("nome"),
+      sb.from("gest_lavori").select("id,descrizione").eq("user_id",sbUid).eq("mestiere_id",mid).order("created_at",{ascending:false})
+    ]);
+    const pro=ruoloUtente==='professionista';
+    const cliOpts=(rcl.data||[]).map(x=>'<option value="'+esc(x.id)+'"'+(String(x.id)===String(c.cliente_id||"")?" selected":"")+'>'
+      +esc((x.nome||"")+(x.eliminato_il?" (nel cestino)":""))+'</option>').join("");
+    const lavOpts=(rlv.data||[]).map(x=>'<option value="'+esc(x.id)+'"'+(String(x.id)===String(c.lavoro_id||"")?" selected":"")+'>'
+      +esc(x.descrizione||"(senza nome)")+'</option>').join("");
+
+    openSheetGrande(isNew?"Nuovo computo metrico":("Computo "+(c.numero?("n. "+c.numero):"")+" — "+(c.titolo||"")),
+       '<div class="sh-cols"><div class="sh-col">'
+
+      +'<div class="sh-b"><div class="sh-tit">Che computo è</div>'
+      +  '<div class="row2">'
+      +    '<div class="field"><label>Numero</label><input id="co-num" value="'+esc(c.numero||"")+'" placeholder="01/2026" style="max-width:160px"></div>'
+      +    '<div class="field"><label>Data</label><input type="date" id="co-data" value="'+esc(c.data||todayStr())+'"></div>'
+      +  '</div>'
+      +  '<div class="field"><label>Titolo</label><input id="co-tit" value="'+esc(c.titolo||"")+'" placeholder="Es. Ristrutturazione appartamento"></div>'
+      +  '<div class="field"><label>Oggetto dei lavori (facoltativo)</label><textarea id="co-ogg" placeholder="Come lo scriveresti in testa al documento">'+esc(c.oggetto||"")+'</textarea></div>'
+      +  '<div class="field"><label>Dove</label><input id="co-luogo" value="'+esc(c.luogo||"")+'" placeholder="Es. via Roma 12, Rieti"></div>'
+      +'</div>'
+
+      +'<div class="sh-b"><div class="sh-tit">Per chi</div>'
+      +  '<div class="field"><label>Cliente</label><select id="co-cli"><option value="">— nessuno —</option>'+cliOpts+'</select></div>'
+      +  '<div class="field"><label>'+(pro?'Pratica collegata':'Lavoro collegato')+'</label><select id="co-lav"><option value="">— nessuna —</option>'+lavOpts+'</select>'
+      +    '<div class="sh-nota">Collegarlo serve a ritrovarlo: il computo resta anche se '+(pro?'la pratica':'il lavoro')+' finisce nel cestino.</div></div>'
+      +'</div>'
+
+      +'</div><div class="sh-col">'
+
+      +'<div class="sh-b"><div class="sh-tit">A cosa serve questo computo</div>'
+      +  '<div class="field"><div class="seg" id="co-tipo">'
+      +    '<button data-v="privato"'+((c.tipo||"privato")==="privato"?' class="on"':'')+'>Lavori privati</button>'
+      +    '<button data-v="pubblico"'+(c.tipo==="pubblico"?' class="on"':'')+'>Lavori pubblici</button>'
+      +  '</div>'
+      /* ⚠ Qui NON si scrive la parola "manodopera": per gli studi il gestionale
+         la riscrive in "tempo speso" (vedi _FRASI), e usciva "l'incidenza della
+         tempo speso". Il termine giusto per una gara e' "incidenza della
+         manodopera": va sistemato nella traduzione prima di metterlo sul PDF. */
+      +  '<div class="sh-nota">Sui <b>lavori pubblici</b> il gestionale ti chiede anche quanta parte del prezzo è costo del personale e gli oneri della sicurezza, che nelle gare vanno dichiarati. Sui lavori privati non ti disturba.</div></div>'
+      +  '<div class="field"><div class="seg" id="co-stato">'
+      +    '<button data-v="bozza"'+((c.stato||"bozza")==="bozza"?' class="on"':'')+'>Bozza</button>'
+      +    '<button data-v="definitivo"'+(c.stato==="definitivo"?' class="on"':'')+'>Definitivo</button>'
+      +  '</div></div>'
+      +'</div>'
+
+      +'<div class="sh-b"><div class="sh-tit">Da dove vengono i prezzi</div>'
+      +  '<div class="row2">'
+      +    '<div class="field"><label>Prezzario</label><input id="co-prz" value="'+esc(c.prezzario||"")+'" placeholder="Es. Tariffa Regione Lazio"></div>'
+      +    '<div class="field"><label>Anno</label><input type="number" id="co-prz-anno" value="'+(c.prezzario_anno||"")+'" placeholder="2023" style="max-width:130px"></div>'
+      +  '</div>'
+      +  '<div class="field"><label>Ribasso o sconto (%)</label><input type="number" step="0.001" id="co-rib" value="'+(c.ribasso_perc!=null?c.ribasso_perc:"")+'" placeholder="0" style="max-width:160px"></div>'
+      +  '<div class="sh-nota">Il prezzario finisce sul documento: un computo deve dire da dove vengono i prezzi, se no il primo che lo legge te lo chiede.</div>'
+      +'</div>'
+
+      +'<div class="sh-b"><div class="sh-tit">Note</div>'
+      +  '<div class="field"><textarea id="co-note" placeholder="Esclusioni, condizioni, riferimenti...">'+esc(c.note||"")+'</textarea></div>'
+      +'</div>'
+
+      +'<div class="sh-b"><div class="sh-tit">Le lavorazioni</div>'
+      +  '<div class="lav-media" id="co-voci">'
+      +    (isNew
+        ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti i capitoli, le lavorazioni e le loro misure.</div>'
+        : '<div class="lm-vuoto">Le lavorazioni con le misure arrivano nel prossimo aggiornamento. Le tabelle sono già pronte: quello che salvi ora non si perde.</div>')
+      +  '</div>'
+      +'</div>'
+
+      +'</div></div>',
+
+       '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +(isNew?"":'<button class="btn btn-danger" data-action="del-computo" data-id="'+esc(String(c.id))+'">🗑 Elimina</button>')
+      +'<button class="btn-primary b-save" data-action="save-computo" data-id="'+esc(c.id||"")+'">'+(isNew?"Crea computo":"Salva")+'</button>');
+
+    bindSeg("co-tipo");
+    bindSeg("co-stato");
+  }
+
+  async function saveComputo(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const titolo=($("#co-tit")&&$("#co-tit").value||"").trim();
+    if(!titolo){toast("Scrivi almeno il titolo del computo");return;}
+    const num=(x)=>{const v=String(($(x)&&$(x).value)||"").trim();return v===""?null:(+v);};
+    const txt=(x)=>{const v=String(($(x)&&$(x).value)||"").trim();return v===""?null:v;};
+    const row={
+      user_id:sbUid, mestiere_id:curMestiere(),
+      titolo:titolo,
+      numero:txt("#co-num"),
+      oggetto:txt("#co-ogg"),
+      luogo:txt("#co-luogo"),
+      data:($("#co-data")&&$("#co-data").value)||todayStr(),
+      cliente_id:($("#co-cli")&&$("#co-cli").value)||null,
+      lavoro_id:($("#co-lav")&&$("#co-lav").value)||null,
+      tipo:segVal("co-tipo")||"privato",
+      stato:segVal("co-stato")||"bozza",
+      prezzario:txt("#co-prz"),
+      prezzario_anno:num("#co-prz-anno"),
+      ribasso_perc:num("#co-rib"),
+      note:txt("#co-note")
+    };
+    let res;
+    if(id) res=await sb.from("gest_computi").update(row).eq("id",id).eq("user_id",sbUid).select("id");
+    else   res=await sb.from("gest_computi").insert(row).select("id");
+    if(res.error){
+      toast(_compManca(res.error)
+        ? "Prima serve l'aggiornamento del database: esegui sql/gest-computo-metrico.sql su Supabase"
+        : "Errore: "+res.error.message);
+      return;
+    }
+    if(!res.data||!res.data.length){toast("Non salvato: nessuna riga scritta. Riprova.");return;}
+    closeSheet();
+    await renderComputi();
+    rinfresca("riepilogo");
+    toast(id?"Computo salvato ✔":"Computo creato ✔");
+  }
+
+  async function delComputo(id){
+    if(!sbUid)return;
+    const c=compCache.find(x=>String(x.id)===String(id))||{};
+    const conCestino=(window.cestinoAttivo&&window.cestinoAttivo());
+    if(!gconfirm(conCestino
+      ? "Mettere il computo «"+(c.titolo||"")+"» nel cestino?\n\nLo ritrovi nel Cestino e lo puoi rimettere a posto quando vuoi."
+      : "Eliminare il computo «"+(c.titolo||"")+"»?\n\nSe ne vanno anche i suoi capitoli, le lavorazioni e le misure, e non si recupera."))return;
+    const {data,error}=await sb.from("gest_computi").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
+    closeSheet();
+    await renderComputi();
+    rinfresca("riepilogo","cestino");
+    toast(conCestino?"Messo nel cestino ✔":"Eliminato");
+  }
 
   /* ---- REPORT & STATISTICHE ---- */
   let repData=null;
@@ -9469,6 +9754,11 @@
     if(a==="ore-add")return oreAdd();
     if(a==="ore-del"){if(gconfirm("Eliminare questa riga di ore?"))return oreDel(id);return;}
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
+    if(a==="new-computo")return computoForm(null);
+    if(a==="edit-computo")return computoForm(compCache.find(c=>String(c.id)===String(id)));
+    if(a==="save-computo")return saveComputo(id);
+    if(a==="del-computo")return delComputo(id);
+    if(a==="comp-filtro"){compFiltro=t.dataset.v;renderComputi();return;}
     if(a==="new-prev")return prevForm(null);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
     /* dal Riepilogo: prevCache può essere ancora vuota (scheda Preventivi mai aperta),
