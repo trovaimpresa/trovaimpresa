@@ -9721,38 +9721,93 @@
        pausa, se no su un prezzario grosso si fanno dieci viaggi per una parola */
     const _ce=$("#pp-cerca");
     if(_ce){_ce.oninput=function(){clearTimeout(ppTimer);ppTimer=setTimeout(ppCerca,250);};}
-    ppCerca();
+    ppCerca(true);
     if(!isNew)renderCompMisure(v.id);
   }
 
   /* ---- il prezzario personale (tabella gest_prezzi_propri) ---- */
-  let ppCache=[], ppTimer=null;
-  async function ppCerca(){
+  /* ⚠️ LA RICERCA NON PUO' ESSERE "LETTERA PER LETTERA". 10 agosto 2026.
+     Prima il filtro era un ilike sul testo esatto. Provandolo dal vivo: la voce
+     salvata si chiamava "demolizione di tramezz-I", si e' cercato "tramezz-O" e
+     non usciva niente — con la voce li' dentro. In cantiere nessuno si ricorda
+     se l'aveva scritta al singolare o al plurale, e un prezzario che non trova
+     quello che ci hai messo dentro e' peggio che non averlo.
+
+     Adesso: le voci si tirano giu' una volta sola quando si apre la scheda e si
+     filtrano QUI. Ogni parola cercata viene ridotta alla RADICE (via la vocale
+     finale: tramezzo/tramezzi -> "tramezz", intonaco/intonaci -> "intonac") e
+     si tolgono gli accenti. Le parole possono stare in qualsiasi ordine.
+
+     IL LIMITE: si tengono in memoria le 500 voci piu' usate. Se il prezzario
+     fosse piu' grande, per le altre si va a chiedere al database. Meglio dirlo
+     che far finta che il limite non ci sia. */
+  let ppCache=[], ppTutte=[], ppTimer=null, ppTetto=false;
+  const PP_MAX=500;
+  function _ppPiatto(t){
+    return String(t||"").toLowerCase()
+      .replace(/[àáâä]/g,"a").replace(/[èéêë]/g,"e").replace(/[ìíîï]/g,"i")
+      .replace(/[òóôö]/g,"o").replace(/[ùúûü]/g,"u");
+  }
+  /* la radice: via la vocale finale, ma solo da parole abbastanza lunghe.
+     "muro"->"mur", "tramezzi"->"tramezz", ma "m2" e "kg" restano interi */
+  function _ppRadice(w){ return (w.length>=4 && /[aeio]$/.test(w)) ? w.slice(0,-1) : w; }
+  function _ppFiltra(elenco,q){
+    const parole=_ppPiatto(q).split(/[^a-z0-9.]+/).filter(Boolean).map(_ppRadice);
+    if(!parole.length)return elenco.slice();
+    return elenco.filter(x=>{
+      const testo=_ppPiatto((x.codice||"")+" "+(x.descrizione||"")+" "+(x.categoria||""));
+      return parole.every(p=>testo.indexOf(p)>=0);
+    });
+  }
+  async function ppCarica(){
+    if(!sb||!sbUid){ppTutte=[];return null;}
+    const {data,error}=await sb.from("gest_prezzi_propri").select("*")
+      .eq("user_id",sbUid).is("eliminato_il",null)
+      .order("usata_volte",{ascending:false}).limit(PP_MAX);
+    if(error)return error;
+    ppTutte=data||[];
+    ppTetto=(ppTutte.length>=PP_MAX);
+    return null;
+  }
+  async function ppCerca(ricarica){
     const box=$("#pp-lista");if(!box)return;
     if(!sb||!sbUid){box.innerHTML="";return;}
-    /* le parentesi e le virgole rompono il filtro "or" di Supabase: via */
-    const q=String(($("#pp-cerca")&&$("#pp-cerca").value)||"").trim().replace(/[,()%*]/g," ").trim();
-    let r=sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null);
-    if(q)r=r.or("descrizione.ilike.%"+q+"%,codice.ilike.%"+q+"%");
-    const {data,error}=await r.order("usata_volte",{ascending:false}).limit(8);
-    if(error){
-      box.innerHTML='<div class="sh-nota">'+(_compManca(error)
-        ? 'Per il prezzario serve l\'aggiornamento del database: esegui <b>sql/gest-computo-metrico.sql</b> su Supabase.'
-        : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
-      return;
+    if(ricarica||!ppTutte.length){
+      const error=await ppCarica();
+      if(error){
+        box.innerHTML='<div class="sh-nota">'+(_compManca(error)
+          ? 'Per il prezzario serve l\'aggiornamento del database: esegui <b>sql/gest-computo-metrico.sql</b> su Supabase.'
+          : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
+        return;
+      }
     }
-    ppCache=data||[];
+    const q=String(($("#pp-cerca")&&$("#pp-cerca").value)||"").trim();
+    let trovate=_ppFiltra(ppTutte,q);
+    /* prezzario piu' grande di quanto ne teniamo in memoria: le altre si
+       cercano dove stanno davvero, invece di dire "non c'e'" a vanvera */
+    if(!trovate.length && q && ppTetto){
+      const rad=_ppRadice(_ppPiatto(q).split(/[^a-z0-9.]+/).filter(Boolean)[0]||"");
+      if(rad){
+        const {data}=await sb.from("gest_prezzi_propri").select("*")
+          .eq("user_id",sbUid).is("eliminato_il",null)
+          .ilike("descrizione","%"+rad+"%").order("usata_volte",{ascending:false}).limit(8);
+        trovate=data||[];
+      }
+    }
+    ppCache=trovate.slice(0,8);
     if(!ppCache.length){
       box.innerHTML='<p class="fatt-empty">'+(q?"Nessuna voce con questa parola.":"Il prezzario è ancora vuoto: la prima voce la salvi da qui sotto.")+'</p>';
       return;
     }
+    /* niente tagli silenziosi: se ce ne sono più di otto, si dice */
+    const _extra=(trovate.length>ppCache.length)?('<div class="sh-nota">Ne ho trovate '+trovate.length+': qui sotto le 8 che usi di più. Scrivi una parola in più per restringere.</div>'):"";
     box.innerHTML=ppCache.map(x=>
       '<div class="spesa-row" data-action="pp-usa" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
       +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
       +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
       +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")+'</small></span>'
       +'<b></b>'
-      +'<button type="button" class="rdel" data-action="pp-del" data-id="'+esc(String(x.id))+'" title="Togli dal prezzario">×</button></div>').join("");
+      +'<button type="button" class="rdel" data-action="pp-del" data-id="'+esc(String(x.id))+'" title="Togli dal prezzario">×</button></div>').join("")+_extra;
   }
   /* riempie la lavorazione con la voce scelta. Il prezzo entra come una FOTO:
      se domani lo alzi nel prezzario, i computi già fatti non cambiano. */
@@ -9777,7 +9832,7 @@
        Scriverci la data a mano qui vorrebbe dire avere la regola in due posti. */
     const {error}=await sb.from("gest_prezzi_propri").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
-    await ppCerca();
+    await ppCerca(true);
     toast("Tolta dal prezzario");
   }
   /* salva nel prezzario quello che c'e' scritto adesso nella lavorazione.
@@ -9807,7 +9862,7 @@
       toast(_compManca(error)?"Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)":("Errore: "+error.message));
       return;
     }
-    await ppCerca();
+    await ppCerca(true);
     toast((gia&&gia.length)?"Prezzo aggiornato nel tuo prezzario ✔":"Voce salvata nel tuo prezzario ✔");
   }
 
