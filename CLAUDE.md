@@ -2250,7 +2250,7 @@ davvero e' Rete -> la riga rossa -> Response: li' c'e' il codice Postgres (42703
 compagnia), che dice esattamente dove guardare.
 
 
-## DOVE SIAMO RIMASTI — sera del 9 agosto 2026
+## Il punto della sera del 9 agosto 2026 (superato, tenuto per memoria)
 
 ### Fatto e verificato dal vivo (profilo Professionista)
 Giro completo cliente -> pratica -> parcella -> lettera d'incarico -> accettazione
@@ -2290,3 +2290,126 @@ e tutta la storia dell'"Elimina per sempre" sicuro (tre giri di correzioni).
 - Quando il gestionale mostra un errore tradotto, quello vero sta in
   **F12 -> Network -> la riga rossa -> Response**: c'e' il codice Postgres.
 - **Niente comandi git dalla cartella collegata**, nemmeno `git status`.
+
+
+## Il giro di test sul profilo IMPRESA — 10 agosto 2026
+
+Fatto quello che era in programma. **I numeri dell'impresa erano gia' giusti**: il
+problema vero stava nel cestino, e non si vedeva cliccando.
+
+### I due buchi che perdevano dati (riprodotti, non sospettati)
+
+Provata la funzione `gest_cestino_elimina` su un **PostgreSQL 16 vero** nel container,
+con lo schema ricostruito dai file in `sql/` e con **pg_safeupdate compilato e attivo**.
+Entrambi i difetti si aprono nello stesso momento: **svuotando per sempre un REPARTO**
+(`gest_mestieri`), che tira dietro fatture, fornitori, ore e mezzi.
+
+**1. `distinct on` senza priorita' sull'esito.** Una riga raggiungibile da due strade
+con azioni diverse veniva tenuta **a caso**. Nello schema vero le strade doppie ci sono:
+`gest_ore` sta sotto il reparto (cascade), sotto il lavoro (cascade) e sotto la persona
+(set null); `gest_fatture_fornitori` sotto reparto e fornitore (cascade) e sotto il
+lavoro (set null). Quando vinceva la copia "scollegata", una riga **VIVA** non veniva
+contata come ostacolo e il database la cancellava in silenzio. Riprodotto: fattura
+fornitore FT-99 mai messa nel cestino, annunciata come "resta ma perde il collegamento",
+poi **cancellata**. Anche i conteggi mentivano: anteprima 16, cancellate 40.
+
+**2. Il blocco fiscale si aggirava dal padre.** Il controllo `numero is not null` valeva
+solo con `p_tabella = 'gest_fatture'`. Svuotando il reparto, la fattura **emessa 7/2026**
+se ne andava comunque: il buco nella numerazione si apriva, cioe' esattamente la cosa che
+quel blocco doveva impedire. Ora il rifiuto guarda tutta la catena e risponde
+`{"ok":false,"fiscale":"7","fiscali":["7"]}`.
+
+**3. Il vicolo cieco delle note.** `gest-cestino.sql` aveva aggiunto `eliminato_il` a
+`gest_note`; poche ore dopo il fix delle note le ha tolte dal cestino, ma **la colonna e'
+rimasta** e da allora e' sempre vuota. Per la funzione una nota era quindi sempre "viva":
+un reparto con **una sola nota sul calendario** non si poteva svuotare mai, e non c'era
+modo di sbloccarsi. Risolto togliendo la colonna (`alter table gest_note drop column
+eliminato_il`). **Attenzione: se un domani si rilancia `gest-cestino.sql` la colonna
+torna — va rilanciato anche `gest-cestino-elimina-fix.sql`.**
+
+Corretto anche il motivo del rifiuto (era deciso su tutto il gruppo con `bool_or(altrui)`:
+2 lavori vivi tuoi + 1 di un altro account diventavano "altro account, n=3") e chiuso il
+caso della **vista** chiamata `gest_*` che passava i controlli senza avere chiavi esterne.
+Tutto in `sql/gest-cestino-elimina-fix.sql`, lanciato in produzione. `_gest_cascata` non
+e' stato toccato: era giusto.
+
+### Fatto anche
+
+- **I 6 documenti col cliente nel cestino** (era la voce in cima al "rimasto aperto"):
+  preventivo, conferma d'ordine dal lavoro e dal preventivo, lettera d'incarico, verbale
+  form e verbale PDF. Un punto solo, `cliDelDocumento()`, che legge da `sb.raw` — la porta
+  di servizio che vede tutto. Il ragionamento: **un documento gia' fatto non cambia perche'
+  hai spostato il cliente nel cestino**. A schermo il filtro resta, quindi l'elenco
+  preventivi continua a dire "Nome (nel cestino)": ora i due posti concordano. Le letture
+  della scheda cliente e del modulo di modifica sono rimaste filtrate di proposito.
+- **`titoloScadenza()`**: via il "CILA — CILA prova". Il tipo si mette davanti solo se
+  nella descrizione non c'e' gia'. Il confronto ignora maiuscole, accenti e punteggiatura
+  (becca anche `C.I.L.A. prova`) e cerca la parola intera, cosi' **SCIA non si nasconde in
+  "fascia"**. 24 casi provati.
+- **Ultima finestrella piccola convertita**: "Carica foto o video" della Galleria era
+  ancora `openSheet()`. Ora e' `openSheetGrande()` a due colonne. Le uniche
+  `openSheet()` rimaste sono la definizione della funzione e la vista del giorno del
+  calendario, che non e' un form.
+- **28 file `.bak-*` (11 MB)** spostati in `_to_delete/bak-9-agosto/`. Nel `.gitignore`
+  c'era solo `*.bak`, che **non** copre `.bak-viste`: aggiunti `*.bak-*` e `*.vecchia`.
+  Erano a un `git add .` di distanza da GitHub.
+- **`docs/da-confermare-al-commercialista.md`**: checklist con i codici veri che il file
+  XML scrive oggi (TipoCassa TC03/TC04/TC17/TC22, criterio RT01/RT02, CausalePagamento A,
+  TD01/RF01/TP02/MP05, EsigibilitaIVA I) piu' le domande aperte. In fondo la parte per il
+  legale.
+
+### Trovato scrivendo quel documento, e piu' urgente dei codici cassa
+
+**IVA allo 0% quando non si e' in forfettario: il file elettronico dichiara il falso.**
+Il codice scriveva sempre `Natura N2.2` con la dicitura "operazione non soggetta - regime
+forfettario", perche' il controllo era su `if(+al===0)` e non su `if(forf)`. Per un'impresa
+edile in regime ordinario lo zero e' quasi sempre l'**inversione contabile del subappalto**
+(art. 17 c.6 lett. a-ter DPR 633/72), che vuole un codice diverso (probabilmente N6.7).
+**Non e' stato indovinato**: aggiunto un controllo in `fattXmlControllo` che **blocca la
+creazione del file XML** e spiega perche'. Il PDF e l'emissione funzionano: si ferma solo
+la cosa che direbbe una bugia. Quando arriva la risposta del commercialista va messa una
+tendina con il motivo.
+
+### Verificato e a posto (profilo Impresa)
+
+Conti provati con le funzioni vere estratte dal file: 10% semplice, due aliquote 10+22
+insieme, ritenuta 4% del condominio, sconto, forfettario con bollo. In tutti i casi il
+Riepilogo IVA del PDF quadra col totale, Riepilogo e Fatture danno lo stesso "da
+incassare", e il totale del preventivo e' identico a quello della fattura che nasce da
+lui. Pagina caricata con Playwright su computer e telefono: zero errori JavaScript, zero
+id duplicati, zero testi sotto i 13px.
+
+### Da fare la prossima volta
+
+1. **Il giro cliccando sul profilo Impresa** con dati veri: reparto con cliente, lavoro,
+   ore e fattura emessa, tutto nel cestino, e provare a svuotare il reparto. Deve
+   rifiutarsi nominando il numero. (La funzione e' provata, la mano dell'utente no.)
+2. Portare la risposta del commercialista dentro il codice: tendina del motivo per l'IVA
+   a zero, ed eventuale correzione dello sconto (oggi si toglie **dopo** l'IVA).
+3. Svuotare `_to_delete/` quando ci si fida: dal ponte non si cancella, lo fa Alex.
+
+### Rimasto aperto
+
+- **Dati del profilo scritti male**: nome studio "alessio", citta' "rieti", email con la
+  P maiuscola. Escono cosi' sui PDF che il cliente firma. Si sistemano dal Pannello.
+- `fattImponibile()` (Report ed Excel) sottrae lo sconto, `fattConti().imponibile` no: due
+  numeri diversi con lo stesso nome. Non e' un errore — servono a due cose — ma il
+  commento dice "la stessa formula di fattConti" e non e' vero.
+- L'anteprima del conto in fattura conta una quantita' vuota come **0**, il salvataggio
+  come **1** (`||0` contro `||1`). Il totale cambia dopo aver salvato. Minore.
+
+### Lezioni di oggi
+
+- **Lo schema di prova va allineato alla mappa VERA delle chiavi esterne**, non a una
+  ricostruzione plausibile: la prima versione aveva `gest_fatture.cliente_id` in cascade
+  invece che set null, e con quello i due difetti gravi comparivano nel posto sbagliato.
+  La query giusta per averla e' in fondo a `sql/gest-cestino-elimina-fix.sql`.
+- **Un bug non deterministico va ripetuto piu' volte.** Il difetto 1 sbagliava 4 volte su
+  5: una prova sola avrebbe potuto assolverlo.
+- **Un difetto trovato va anche smentito.** Due sospetti sono caduti cosi': la quantita' 0
+  in `fattImponibile` (il salvataggio non scrive mai 0) e il "file orfano nello storage"
+  (il lato JS gia' passa `x.path`).
+- ⛔ **Il 10 agosto e' stato lanciato di nuovo `git log` dalla cartella collegata**, contro
+  la regola in cima a questo file. Stavolta **nessun `index.lock` e' stato creato** e non
+  ha rotto niente — ma e' andata bene, non e' andata giusta. La regola resta: per sapere
+  cosa e' cambiato **si guardano i file**.
