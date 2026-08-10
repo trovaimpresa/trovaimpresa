@@ -9804,9 +9804,10 @@
     const comp=compCache.find(x=>String(x.id)===String(compVociCompId))||{};
     const dich=[(comp.prezzario||""),(comp.prezzario_anno||"")].join(" ").trim();
     if(ppFonteScelta===null)ppFonteScelta=_ppSceltaAuto(fonti,dich)||"";
-    sel.innerHTML='<option value="">— tutte le tariffe ('+ppTutte.length+' voci) —</option>'
+    const _vc=n=>n+(n===1?" voce":" voci");
+    sel.innerHTML='<option value="">— tutte le tariffe ('+_vc(ppTutte.length)+') —</option>'
       +fonti.map(f=>'<option value="'+esc(f)+'"'+(f===ppFonteScelta?' selected':'')+'>'+esc(f)
-        +' ('+ppTutte.filter(x=>x.fonte===f).length+')</option>').join("");
+        +' ('+_vc(ppTutte.filter(x=>x.fonte===f).length)+')</option>').join("");
     const nota=$("#pp-fonte-nota");
     if(nota)nota.innerHTML=ppFonteScelta
       ? 'Cerco solo dentro <b>'+esc(ppFonteScelta)+'</b>, che è la tariffa dichiarata su questo computo. Per guardare anche le altre metti «tutte».'
