@@ -3132,6 +3132,21 @@
     if(azCf&&!/^(\d{11}|[A-Z0-9]{16})$/.test(azCf))
       m.push("Il tuo codice fiscale non ha una forma valida: 11 cifre per un'azienda, 16 caratteri per una persona — Dati azienda.");
     if(!(az.regime_fiscale||"").trim()) m.push("Manca il tuo regime fiscale — Dati azienda.");
+    /* ===== 10 agosto 2026 — IVA a zero senza essere in forfettario =====
+       Quando una voce ha l'aliquota 0 lo SDI pretende di sapere PERCHE'.
+       Il file scrive sempre Natura N2.2 con la dicitura del regime forfettario:
+       giusta per chi e' in forfettario, FALSA per un'impresa edile che mette lo
+       zero per un altro motivo — tipicamente l'inversione contabile del
+       subappalto edile, che vuole un codice diverso.
+       Finche' non e' chiaro quale sia il caso, meglio fermarsi qui che mandare
+       allo SDI un documento che dichiara una cosa non vera. */
+    if(!forf && (R||[]).some(r=>(+r.iva||0)===0) && (R||[]).length){
+      m.push("C'è una voce con IVA allo 0% ma tu non sei in regime forfettario. "
+        +"Il file elettronico scriverebbe «operazione non soggetta — regime forfettario», "
+        +"che nel tuo caso non è vero. Se è un'inversione contabile del subappalto edile "
+        +"(o un altro caso di IVA non applicata) serve un codice diverso: sentiamo il "
+        +"commercialista e lo aggiungiamo. Intanto il PDF puoi mandarlo, il file elettronico no.");
+    }
     if(!(az.indirizzo||"").trim())   m.push("Manca la via della tua sede — Dati azienda.");
     if(!/^\d{5}$/.test((az.cap||"").trim()))  m.push("Il CAP della tua sede manca o non è di 5 cifre — Dati azienda.");
     if(!(az.citta||"").trim())       m.push("Manca la città della tua sede — Dati azienda.");
@@ -5261,6 +5276,38 @@
      Si propone SOLO se: è un professionista, c'e' una data non passata, e su
      quella pratica non c'e' già una scadenza per quella stessa data (così
      salvando due volte non chiede due volte). */
+  /* ===== 10 agosto 2026 — il titolo della scadenza non si ripete =====
+     Veniva fuori "CILA — CILA prova": il tipo davanti piu' la descrizione, che
+     il tipo ce l'aveva gia' dentro perche' e' la prima cosa che uno scrive.
+     Regola: il tipo si mette davanti SOLO se nella descrizione non c'e' gia'.
+     Il confronto ignora maiuscole, accenti e punteggiatura, cosi' "Cila prova",
+     "C.I.L.A. prova" e "CILA prova" contano tutte come ripetizione. */
+  function _senzaAccenti(s){
+    return String(s||"").toLowerCase()
+      .replace(/[àáâä]/g,"a").replace(/[èéêë]/g,"e").replace(/[ìíîï]/g,"i")
+      .replace(/[òóôö]/g,"o").replace(/[ùúûü]/g,"u");
+  }
+  function _paroleChiave(s){
+    return _senzaAccenti(s).replace(/[^a-z0-9]+/g," ").trim();
+  }
+  function titoloScadenza(tipo,desc,pro){
+    tipo=String(tipo||"").trim();
+    desc=String(desc||"").trim();
+    if(!desc)return tipo||(pro?"Pratica":"Lavoro");
+    if(!tipo)return desc;
+    const t=_paroleChiave(tipo).replace(/ /g,""), d=_senzaAccenti(desc);
+    if(!t)return desc;
+    /* Si cerca il tipo dentro la descrizione lettera per lettera, lasciando
+       passare punti e spazi in mezzo: cosi' "CILA" trova anche "C.I.L.A." e
+       "Permesso di costruire". I due bordi "non lettera" servono a non trovarlo
+       dentro un'altra parola: se no "SCIA" si nasconderebbe in "fascia". */
+    const sep="[^a-z0-9]*";
+    const dentro="(?:^|[^a-z0-9])"+t.split("").join(sep)+"(?:[^a-z0-9]|$)";
+    let ripete=false;
+    try{ ripete=new RegExp(dentro).test(d); }catch(_){ ripete=(" "+_paroleChiave(desc)+" ").indexOf(" "+_paroleChiave(tipo)+" ")>=0; }
+    return ripete ? desc : (tipo+" — "+desc);
+  }
+
   async function proponiScadenzaPratica(lavId,dati){
     try{
       if(!sb||!sbUid||!lavId)return;
@@ -5271,9 +5318,9 @@
       if(error)return;                                   /* colonna non ancora creata: zitto */
       if((gia||[]).some(x=>x.data_scadenza===data))return;
       const pro=ruoloUtente==='professionista';
-      const tipo=(dati&&dati.pratica_tipo)||"";
-      const desc=((dati&&dati.descrizione)||(pro?"Pratica":"Lavoro")).trim();
-      const titolo=(tipo?tipo+" — ":"")+desc;
+      const tipo=String((dati&&dati.pratica_tipo)||"").trim();
+      const desc=String((dati&&dati.descrizione)||"").trim();
+      const titolo=titoloScadenza(tipo,desc,pro);
       if(!gconfirm("Vuoi che ti ricordi la data del "+fdate(data)+"?\n\n"
         +"Creo la scadenza \""+titolo+"\" collegata a "+(pro?"questa pratica":"questo lavoro")+" e ti avviso per email 30 giorni prima, 7 giorni prima e il giorno prima."))return;
       const row={user_id:sbUid,mestiere_id:curMestiere(),titolo:titolo.slice(0,120),

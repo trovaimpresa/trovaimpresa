@@ -19,6 +19,8 @@ mintty.*.png
 #     indicizzerebbe come contenuto duplicato. ---
 *-backup.html
 *.bak
+*.bak-*
+*.vecchia
 
 # --- File di lock (facoltativo: si rigenera da solo) ---
 # package-lock.json
