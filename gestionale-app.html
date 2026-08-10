@@ -6781,21 +6781,33 @@
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
     const lavOpts=(galLavCache||[]).map(l=>'<option value="'+esc(l.id)+'">'+esc(l.descrizione||"Lavoro")+'</option>').join("");
     const dipOpts=dipCache.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.nome)+'</option>').join("");
-    openSheet('<h3>Carica foto o video</h3>'
-      +'<div class="field"><label>Di quale lavoro?</label>'
-      +  '<select id="gu-lav"><option value="">— scegli il lavoro —</option>'+lavOpts+'</select></div>'
-      +'<div class="field"><label>Quando sono state fatte?</label><div class="seg" id="gu-quando">'
-      +  '<button data-v="prima" class="on">Prima del lavoro</button>'
-      +  '<button data-v="dopo">A lavoro finito</button></div></div>'
-      +'<div class="field"><label>Chi le ha fatte</label>'
-      +  '<select id="gu-op"><option value="Capo">Capo (io)</option>'+dipOpts+'</select></div>'
-      +'<div class="field"><label>Foto (puoi sceglierne pi&ugrave; di una)</label>'
-      +  '<input type="file" id="gu-foto" accept="image/*" multiple></div>'
-      +'<div class="field"><label>Video (uno per volta, massimo 50 MB)</label>'
-      +  '<input type="file" id="gu-video" accept="video/*"></div>'
-      +'<div id="gu-stato" class="gu-stato"></div>'
-      +'<div class="sheet-actions"><button class="btn b-cancel" data-action="close">Annulla</button>'
-      +  '<button class="btn-primary b-save" data-action="gal-carica">Carica</button></div>');
+    /* 10 agosto 2026 — era rimasta l'ultima finestrella piccola su un modulo.
+       Convertita a finestra grande a due colonne come tutte le altre. */
+    openSheetGrande('Carica foto o video',
+       '<div class="sh-cols"><div class="sh-col">'
+      +'<div class="sh-b"><div class="sh-tit">Di che lavoro si tratta</div>'
+      +  '<div class="field"><label>Il lavoro</label>'
+      +    '<select id="gu-lav"><option value="">— scegli il lavoro —</option>'+lavOpts+'</select></div>'
+      +  (lavOpts?'':'<div class="sh-nota" style="color:var(--attesa)">In questo reparto non hai ancora nessun lavoro: creane uno in <b>Lavori</b> e poi torna qui.</div>')
+      +  '<div class="field"><label>Quando sono state fatte?</label><div class="seg" id="gu-quando">'
+      +    '<button data-v="prima" class="on">Prima del lavoro</button>'
+      +    '<button data-v="dopo">A lavoro finito</button></div></div>'
+      +  '<div class="field"><label>Chi le ha fatte</label>'
+      +    '<select id="gu-op"><option value="Capo">Capo (io)</option>'+dipOpts+'</select></div>'
+      +'</div>'
+      +'</div><div class="sh-col">'
+      +'<div class="sh-b"><div class="sh-tit">I file</div>'
+      +  '<div class="field"><label>Foto (puoi sceglierne pi&ugrave; di una)</label>'
+      +    '<input type="file" id="gu-foto" accept="image/*" multiple></div>'
+      +  '<div class="field"><label>Video (uno per volta, massimo 50 MB)</label>'
+      +    '<input type="file" id="gu-video" accept="video/*"></div>'
+      +  '<div class="sh-nota">Le foto del prima e del dopo sono quelle che convincono il prossimo cliente: caricale sempre.</div>'
+      +  '<div id="gu-stato" class="gu-stato"></div>'
+      +'</div>'
+      +'</div></div>',
+
+       '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="gal-carica">Carica</button>');
     bindSeg("gu-quando");
   }
 
@@ -8143,7 +8155,7 @@
   };
 
   async function ordineForm(id){
-    if(ruoloUtente==='professionista'){toast("Per gli studi c'e' la lettera d'incarico");return;}
+    if(ruoloUtente==='professionista'){toast("Per gli studi c'è la lettera d'incarico");return;}
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
     const p=prevCache.find(x=>String(x.id)===String(id));
     if(!p){toast("Preventivo non trovato");return;}
@@ -8939,9 +8951,21 @@
     }
 
     /* una fattura gia' emessa e' un documento fiscale: nel cestino ci resta,
-       cancellata per sempre no. Il rifiuto arriva dal database. */
+       cancellata per sempre no. Il rifiuto arriva dal database.
+       10 agosto 2026 \u2014 il rifiuto arriva anche quando la fattura non e' quella
+       cliccata ma sta PIU' SOTTO nella catena (svuotando un reparto se ne
+       andrebbe con lui). In quel caso "Questa e' la fattura numero 7" non si
+       capisce: si dice quale scheda si stava svuotando e cosa c'e' dentro.
+       Il campo "fiscali" (elenco) arriva dalla versione corretta della funzione;
+       se il database ha ancora quella vecchia c'e' solo "fiscale" e si usa quello. */
     if(prova.ok===false && prova.fiscale){
-      alert("Questa \u00e8 la fattura numero "+prova.fiscale+": \u00e8 un documento fiscale.\n\n"
+      const _num=(prova.fiscali&&prova.fiscali.length?prova.fiscali:[prova.fiscale]);
+      const _elenco=_num.map(function(n){return "n. "+n;}).join(", ");
+      const _diretta=(x.tab==="gest_fatture");
+      alert((_diretta
+          ? "Questa \u00e8 la fattura "+_elenco+": \u00e8 un documento fiscale.\n\n"
+          : "Dentro \u00ab"+x.nome+"\u00bb c'\u00e8 una fattura gi\u00e0 emessa ("+_elenco+"), "
+            +"che \u00e8 un documento fiscale.\n\n")
         +"Pu\u00f2 restare nel cestino quanto vuoi, ma non la cancello per sempre: "
         +"resterebbe un buco nella numerazione senza pi\u00f9 il documento a spiegare cos'era, "
         +"e i buchi il commercialista li vede.\n\n"
