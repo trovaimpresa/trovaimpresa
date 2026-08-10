@@ -1482,13 +1482,17 @@
     if(ruoloUtente==='professionista'){
       try{
         const [rCo,rTo]=await Promise.all([
-          sb.from("gest_computi").select("id,numero,titolo,stato,data").eq("user_id",sbUid).eq("mestiere_id",mid)
+          sb.from("gest_computi").select("id,numero,titolo,stato,data,ribasso_perc").eq("user_id",sbUid).eq("mestiere_id",mid)
             .order("data",{ascending:false}),
-          sb.from("gest_computo_totali").select("computo_id,importo").eq("user_id",sbUid)
+          sb.from("gest_computo_totali").select("computo_id,importo,oneri_sicurezza,importo_manodopera").eq("user_id",sbUid)
         ]);
         if(!rCo.error){
           const CO=rCo.data||[];
-          const impDi={};(rTo&&rTo.data||[]).forEach(r=>{impDi[r.computo_id]=+r.importo||0;});
+          /* anche qui il numero e' quello NETTO: il Riepilogo, l'elenco dei
+             computi, la scheda e il PDF devono dire tutti la stessa cifra */
+          const totDi={};(rTo&&rTo.data||[]).forEach(r=>{totDi[r.computo_id]=r;});
+          const impDi={};CO.forEach(c=>{const t=totDi[c.id]||{};
+            impDi[c.id]=compRiepilogoDa(t.importo,t.oneri_sicurezza,t.importo_manodopera,c).netto;});
           const bozze=CO.filter(c=>c.stato==="bozza");
           C.push(rieCard({
             tab:"computi", titolo:"Computi metrici", n:CO.length,
@@ -9228,7 +9232,10 @@
 
     const L=compCache.filter(c=>compFiltro==="tutti"||c.stato===compFiltro);
     const conta={};COMP_VISTE.forEach(v=>conta[v.k]=compCache.filter(c=>v.k==="tutti"||c.stato===v.k).length);
-    const somma=L.reduce((s,c)=>s+(+((compTot[c.id]||{}).importo)||0),0);
+    /* il totale dell'elenco e' quello NETTO, ribasso compreso: se in fondo alla
+       lista comparisse la cifra piena mentre dentro il computo ce n'e' un'altra,
+       il primo a non fidarsi saresti tu. */
+    const somma=L.reduce((s,c)=>s+compNetto(c),0);
 
     renderTabella({
       id:"comp", box:"#comp-list",
@@ -9254,7 +9261,7 @@
           '<span class="c-nome">'+esc(c.titolo||"(senza titolo)")+'</span>',
           esc(compCli[c.cliente_id]||"—"),
           {h:quando(c.data,{neutro:true}).testo,cls:quando(c.data,{neutro:true}).classe},
-          {h:eur((compTot[c.id]||{}).importo||0),cls:"c-imp"}
+          {h:eur(compNetto(c)),cls:"c-imp"}
         ],
         menu:compVoci(c)
       })),
@@ -9266,6 +9273,7 @@
   /* le azioni del computo: le stesse nel menu "..." e sui pulsanti della scheda */
   function compVoci(c){
     return [{lab:"✏ Apri il computo",action:"edit-computo",data:{id:c.id}},
+            {lab:"📄 Scarica il PDF",action:"comp-pdf",data:{id:c.id}},
             {lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}];
   }
   /* la scheda dell'elenco: passa da schedaJob, la scheda unica di tutte le
@@ -9283,7 +9291,7 @@
         c.luogo?("📍 "+esc(c.luogo)):"",
         "📅 "+esc(q.testo),
         nVoci?("🧱 "+nVoci+(nVoci===1?" lavorazione":" lavorazioni")):"🧱 nessuna lavorazione",
-        '<b>'+eur(t.importo)+'</b>',
+        '<b>'+eur(compNetto(c))+'</b>'+((+c.ribasso_perc)?(' <small>ribasso '+_pct(c.ribasso_perc)+'%</small>'):''),
         c.tipo==="pubblico"?"🏛 lavori pubblici":"",
         c.prezzario?("🏷 "+esc(c.prezzario)+(c.prezzario_anno?(" "+c.prezzario_anno):"")):""
       ],
@@ -9375,6 +9383,7 @@
       +'</div></div>',
 
        '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +(isNew?"":'<button class="btn" data-action="comp-pdf" data-id="'+esc(String(c.id))+'">📄 PDF</button>')
       +(isNew?"":'<button class="btn btn-danger" data-action="del-computo" data-id="'+esc(String(c.id))+'">🗑 Elimina</button>')
       +'<button class="btn-primary b-save" data-action="save-computo" data-id="'+esc(c.id||"")+'">'+(isNew?"Crea computo":"Salva")+'</button>');
 
@@ -9430,6 +9439,53 @@
   }
   const UNITA=["m","m²","m³","kg","q","t","cad","n.","corpo","ora","giorno","l"];
 
+  /* una percentuale si scrive corta: 10 e non 10,000; 10,5 resta 10,5 */
+  function _pct(n){
+    const s=(+n||0).toFixed(3).replace(/0+$/,"").replace(/\.$/,"");
+    return s.replace(".",",");
+  }
+
+  /* ============================================================
+     IL RIEPILOGO DEI SOLDI — UNA FORMULA SOLA, IN TRE POSTI
+     ============================================================
+     L'elenco dei computi, la scheda del computo e il PDF devono dire lo stesso
+     numero. Prima il RIBASSO non lo applicava nessuno dei tre: lo scrivevi nel
+     modulo, si salvava, e non succedeva niente — il totale restava quello pieno.
+     Su una gara e' la differenza fra vincere e non vincere, e a schermo non si
+     vedeva niente di strano.
+
+     Adesso il conto sta SOLO qui dentro. Chi ha bisogno di un totale chiama
+     questa: non si riscrive la formula da nessun'altra parte. E' la stessa
+     lezione delle fatture, dove la stessa formula in tre posti dava tre numeri.
+
+     Gli ONERI DELLA SICUREZZA non sono soggetti a ribasso: e' la regola delle
+     gare pubbliche. Si tolgono dal totale, il ribasso si applica sul resto, poi
+     si rimettono. Sui lavori privati sono zero e la formula torna a essere il
+     semplice sconto sul totale. */
+  function compRiepilogoDa(lordo,sicurezza,manodopera,comp){
+    const c2=n=>Math.round((+n||0)*100)/100;
+    const L=c2(lordo), S=c2(sicurezza), MO=c2(manodopera);
+    const perc=(comp&&comp.ribasso_perc!=null&&comp.ribasso_perc!=="")?(+comp.ribasso_perc||0):0;
+    const soggetto=c2(L-S);
+    const ribasso=c2(soggetto*perc/100);
+    return {lordo:L, perc:perc, ribasso:ribasso, netto:c2(soggetto-ribasso+S),
+            sicurezza:S, manodopera:MO};
+  }
+  /* la stessa cosa partendo dalle voci gia' calcolate (vista gest_computo_voci_calc) */
+  function compRiepilogo(voci,comp){
+    const V=voci||[];
+    return compRiepilogoDa(
+      V.reduce((s,v)=>s+(+v.importo||0),0),
+      V.reduce((s,v)=>s+(+v.oneri_sicurezza||0),0),
+      V.reduce((s,v)=>s+(+v.importo||0)*(+v.incidenza_manodopera||0)/100,0),
+      comp);
+  }
+  /* dall'elenco: li' non ci sono le voci, ci sono i totali della vista */
+  function compNetto(c){
+    const t=compTot[c.id]||{};
+    return compRiepilogoDa(t.importo,t.oneri_sicurezza,t.importo_manodopera,c).netto;
+  }
+
   async function renderCompVoci(computoId){
     const box=$("#co-voci");if(!box)return;
     compVociCompId=computoId;
@@ -9453,7 +9509,8 @@
     const gruppi=compCapCache.map(cap=>({cap:cap, voci:compVociCache.filter(v=>String(v.capitolo_id)===String(cap.id))}));
     if(senzaCap.length||!compCapCache.length)gruppi.push({cap:null, voci:senzaCap});
 
-    const totale=compVociCache.reduce((s,v)=>s+(+v.importo||0),0);
+    const compQui=compCache.find(x=>String(x.id)===String(computoId))||{};
+    const rp=compRiepilogo(compVociCache,compQui);
 
     const rigaVoce=v=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
       +'<span>'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
@@ -9479,8 +9536,21 @@
         : '<p class="fatt-empty">Nessuna lavorazione'+(g.cap?" in questo capitolo":"")+'.</p>';
     });
 
-    box.innerHTML=h
-      +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Totale del computo</b></span><b>'+eur2(totale)+'</b><span></span></div>'
+    /* il piede dei totali: col ribasso diventa tre righe, senza resta una sola.
+       I numeri vengono da compRiepilogo, gli stessi che finiscono sul PDF. */
+    let piede='<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>'
+      +(rp.perc?"Totale dei lavori":"Totale del computo")+'</b></span><b>'+eur2(rp.lordo)+'</b><span></span></div>';
+    if(rp.perc){
+      piede+='<div class="spesa-row"><span>Ribasso '+_pct(rp.perc)+'%'
+        +(rp.sicurezza?'<small class="sp-forn">gli oneri della sicurezza non si ribassano</small>':'')
+        +'</span><b style="color:var(--err,#c0392b)">− '+eur2(rp.ribasso)+'</b><span></span></div>'
+        +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Totale del computo</b></span><b>'+eur2(rp.netto)+'</b><span></span></div>';
+    }
+    if(compQui.tipo==="pubblico"&&(rp.manodopera||rp.sicurezza)){
+      piede+='<div class="spesa-row"><span>di cui costo del personale</span><b>'+eur2(rp.manodopera)+'</b><span></span></div>'
+        +'<div class="spesa-row"><span>di cui oneri della sicurezza</span><b>'+eur2(rp.sicurezza)+'</b><span></span></div>';
+    }
+    box.innerHTML=h+piede
       +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'
       +  '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Aggiungi lavorazione</button>'
       +  (compCapNuovo?'':'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>')
@@ -9763,6 +9833,214 @@
       const blocco=box.closest(".sh-b")||box;
       try{ blocco.scrollIntoView({block:"start",inline:"nearest"}); }catch(_){ blocco.scrollIntoView(true); }
     },320);
+  }
+
+  /* ============================================================
+     IL PDF DEL COMPUTO METRICO
+     ============================================================
+     E' il motivo per cui un computo esiste: si consegna. Al committente, al
+     Comune, all'impresa che deve fare il prezzo. Finche' restava chiuso dentro
+     lo schermo, un tecnico lo guardava e chiudeva la scheda.
+
+     La differenza con un preventivo e' tutta qui: un preventivo dice "20,46 m2
+     a 18,50". Un computo deve far vedere COME sono venuti fuori quei 20,46 —
+     riga per riga, coi vuoti sottratti. Chi lo riceve deve poter rifare il
+     conto con la calcolatrice, se no non se lo fida.
+
+     Le lettere fuori dal Latin-1 (l'euro, il meno lungo, gli apici storti)
+     jsPDF con l'helvetica non le sa scrivere ed escono quadratini: per questo
+     si legge "EUR" e non il simbolo, e i meno sono trattini normali. */
+  async function computoPdf(id){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    const c=compCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Computo non trovato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    const cli=await cliDelDocumento(c.cliente_id,"nome,indirizzo,referente");
+
+    const [rc,rv]=await Promise.all([
+      sb.from("gest_computo_capitoli").select("*").eq("user_id",sbUid).eq("computo_id",id).order("ordine"),
+      sb.from("gest_computo_voci_calc").select("*").eq("user_id",sbUid).eq("computo_id",id).order("ordine")
+    ]);
+    if(rc.error||rv.error){toast("Non riesco a leggere il computo: "+((rc.error||rv.error).message));return;}
+    const capitoli=rc.data||[], voci=rv.data||[];
+    if(!voci.length){toast("Il computo è vuoto: aggiungi almeno una lavorazione");return;}
+
+    /* tutte le misure in una volta sola: una query per ogni voce su un computo
+       da cento voci vorrebbe dire cento viaggi e mezzo minuto di attesa */
+    const {data:mis}=await sb.from("gest_computo_misure").select("*")
+      .eq("user_id",sbUid).in("voce_id",voci.map(v=>v.id)).order("ordine");
+    const misDi={};(mis||[]).forEach(m=>{(misDi[m.voce_id]=misDi[m.voce_id]||[]).push(m);});
+
+    const pubblico=(c.tipo==="pubblico");
+    const rp=compRiepilogo(voci,c);
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    const M=14, R=196, VERDE=[31,111,92];
+    /* le colonne delle misure: x dove finisce il numero (allineato a destra) */
+    const cPar=M+92, cLun=M+112, cLar=M+132, cAlt=M+152, cQta=R-2;
+    let y=18;
+
+    const nuovaPagina=()=>{doc.addPage();y=18;};
+    const spazio=h=>{if(y+h>276)nuovaPagina();};
+
+    /* ---- intestazione ---- */
+    doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text(az.nome,M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+    let hy=y+5.5;
+    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4;});
+    doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(15);
+    doc.text("COMPUTO METRICO ESTIMATIVO",R,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+    doc.text((c.numero?"N. "+c.numero+"   ":"")+"del "+fdate(c.data||todayStr()),R,y+5.5,{align:"right"});
+    if(pubblico)doc.text("lavori pubblici",R,y+9.5,{align:"right"});
+    doc.setTextColor(0);
+    y=Math.max(hy,y+14)+3;doc.setDrawColor(210);doc.line(M,y,R,y);y+=7;
+
+    doc.setFont("helvetica","bold");doc.setFontSize(11);
+    const tit=doc.splitTextToSize(c.titolo||"Computo metrico",R-M);
+    doc.text(tit,M,y);y+=tit.length*5+1;
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    if(c.oggetto){const o=doc.splitTextToSize("Oggetto: "+c.oggetto,R-M);doc.text(o,M,y);y+=o.length*4.4;}
+    if(c.luogo){doc.text("Luogo: "+c.luogo,M,y);y+=4.4;}
+    if(cli.nome){doc.text("Committente: "+cli.nome+(cli.indirizzo?" - "+cli.indirizzo:""),M,y);y+=4.4;}
+    if(c.prezzario){doc.text("Prezzario: "+c.prezzario+(c.prezzario_anno?" "+c.prezzario_anno:""),M,y);y+=4.4;}
+    doc.setTextColor(0);y+=4;
+
+    /* ---- i capitoli, con dentro le lavorazioni ---- */
+    const senzaCap=voci.filter(v=>!v.capitolo_id);
+    const gruppi=capitoli.map(cap=>({cap:cap,voci:voci.filter(v=>String(v.capitolo_id)===String(cap.id))}));
+    if(senzaCap.length)gruppi.push({cap:null,voci:senzaCap});
+
+    const testaMisure=()=>{
+      doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(120);
+      doc.text("misura",M+4,y);
+      doc.text("parti",cPar,y,{align:"right"});doc.text("lungh.",cLun,y,{align:"right"});
+      doc.text("largh.",cLar,y,{align:"right"});doc.text("alt./sp.",cAlt,y,{align:"right"});
+      doc.text("quantità",cQta,y,{align:"right"});
+      doc.setTextColor(0);y+=3.6;
+    };
+
+    let n=0;
+    const sub=[];
+    gruppi.forEach(g=>{
+      let subTot=0;
+      spazio(16);
+      if(g.cap){
+        doc.setFillColor(VERDE[0],VERDE[1],VERDE[2]);doc.rect(M,y,R-M,7,"F");
+        doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(9.5);
+        doc.text((g.cap.numero?g.cap.numero+" - ":"")+(g.cap.titolo||"Capitolo"),M+2,y+4.9);
+        doc.setTextColor(0);y+=10;
+      }else if(capitoli.length){
+        doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text("Senza capitolo",M,y+4);y+=8;
+      }
+      g.voci.forEach(v=>{
+        n++;
+        const desc=doc.splitTextToSize((v.codice?v.codice+"  ":"")+(v.descrizione||"(senza descrizione)"),R-M-14);
+        const righeM=misDi[v.id]||[];
+        spazio(desc.length*4.4+(v.quantita_manuale?0:(righeM.length+1)*3.8)+14);
+        doc.setFont("helvetica","bold");doc.setFontSize(9);
+        doc.text(String(n),M,y+3);
+        doc.text(desc,M+9,y+3);
+        y+=desc.length*4.4+2;
+        doc.setFont("helvetica","normal");doc.setFontSize(8);
+        if(v.quantita_manuale){
+          doc.setTextColor(120);doc.text("a corpo",M+9,y+2);doc.setTextColor(0);y+=5;
+        }else if(righeM.length){
+          testaMisure();
+          righeM.forEach(m=>{
+            spazio(6);
+            const seg=m.detrai?"- ":"";
+            doc.setFontSize(8);
+            doc.text(seg+(m.descrizione||"(senza nome)"),M+4,y+2.6,{maxWidth:72});
+            doc.text(_partiTesto(m.parti),cPar,y+2.6,{align:"right"});
+            if(m.lunghezza!=null)doc.text(_misTesto(m.lunghezza),cLun,y+2.6,{align:"right"});
+            if(m.larghezza!=null)doc.text(_misTesto(m.larghezza),cLar,y+2.6,{align:"right"});
+            if(m.altezza!=null)  doc.text(_misTesto(m.altezza),  cAlt,y+2.6,{align:"right"});
+            doc.text(_misTesto(m.quantita),cQta,y+2.6,{align:"right"});
+            y+=3.8;
+          });
+        }else{
+          doc.setTextColor(120);doc.text("nessuna misura",M+9,y+2);doc.setTextColor(0);y+=5;
+        }
+        spazio(10);
+        doc.setDrawColor(215);doc.line(M+4,y+1,R,y+1);
+        doc.setFont("helvetica","bold");doc.setFontSize(9);
+        doc.text(_misTesto(v.quantita)+(v.unita?" "+v.unita:"")+"  x  "+eurPdf(v.prezzo_unitario),cAlt+8,y+5.6,{align:"right"});
+        doc.text(eurPdf(v.importo),cQta,y+5.6,{align:"right"});
+        y+=9;
+        if(pubblico&&(v.incidenza_manodopera||v.oneri_sicurezza)){
+          doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
+          doc.text([v.incidenza_manodopera?"costo del personale "+_pct(v.incidenza_manodopera)+"%":"",
+                    v.oneri_sicurezza?"oneri sicurezza "+eurPdf(v.oneri_sicurezza):""].filter(Boolean).join("   ·   "),M+9,y);
+          doc.setTextColor(0);y+=4.5;
+        }
+        subTot+=(+v.importo||0);
+      });
+      subTot=Math.round(subTot*100)/100;
+      sub.push({t:g.cap?((g.cap.numero?g.cap.numero+" - ":"")+(g.cap.titolo||"Capitolo")):"Senza capitolo",v:subTot});
+      spazio(12);
+      doc.setDrawColor(VERDE[0],VERDE[1],VERDE[2]);doc.setLineWidth(.4);doc.line(M,y,R,y);doc.setLineWidth(.2);
+      doc.setFont("helvetica","bold");doc.setFontSize(9.5);
+      doc.text(g.cap?"Sommano il capitolo":"Sommano le lavorazioni senza capitolo",M,y+5.5);
+      doc.text(eurPdf(subTot),cQta,y+5.5,{align:"right"});
+      y+=12;
+    });
+
+    /* ---- riepilogo dei capitoli e totale ---- */
+    spazio(30+sub.length*5.5);
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text("Riepilogo",M,y);y+=6;
+    doc.setFont("helvetica","normal");doc.setFontSize(9);
+    sub.forEach(s=>{spazio(8);doc.text(s.t,M,y,{maxWidth:120});doc.text(eurPdf(s.v),cQta,y,{align:"right"});y+=5.2;});
+    y+=2;
+
+    const righeTot=[["Totale dei lavori",rp.lordo,false]];
+    if(rp.perc){
+      if(rp.sicurezza)righeTot.push(["Oneri sicurezza (non soggetti a ribasso)",rp.sicurezza,false]);
+      righeTot.push(["Ribasso "+_pct(rp.perc)+"%",rp.ribasso,true]);
+    }
+    const hBox=righeTot.length*6+16;
+    spazio(hBox+6);
+    doc.setDrawColor(VERDE[0],VERDE[1],VERDE[2]);doc.setLineWidth(.4);doc.rect(R-92,y,92,hBox);doc.setLineWidth(.2);
+    let ry=y+7;doc.setFont("helvetica","normal");doc.setFontSize(9);
+    righeTot.forEach(r=>{doc.text(r[0],R-90,ry,{maxWidth:58});doc.text((r[2]?"- ":"")+eurPdf(r[1]),R-2,ry,{align:"right"});ry+=6;});
+    doc.setDrawColor(VERDE[0],VERDE[1],VERDE[2]);doc.line(R-90,ry-3,R-2,ry-3);
+    doc.setFont("helvetica","bold");doc.setFontSize(11.5);
+    doc.text("TOTALE",R-90,ry+4);doc.text(eurPdf(rp.netto),R-2,ry+4,{align:"right"});
+    y+=hBox+8;
+
+    if(pubblico&&(rp.manodopera||rp.sicurezza)){
+      spazio(14);
+      doc.setFont("helvetica","bold");doc.setFontSize(9);doc.text("Da dichiarare in gara",M,y);y+=5;
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+      doc.text("Costo del personale: "+eurPdf(rp.manodopera),M,y);y+=4.4;
+      doc.text("Oneri della sicurezza non soggetti a ribasso: "+eurPdf(rp.sicurezza),M,y);y+=4.4;
+      doc.setTextColor(0);y+=3;
+    }
+
+    if(c.note){
+      spazio(16);
+      doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text("Note",M,y);y+=5;
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+      const nl=doc.splitTextToSize(c.note,R-M);doc.text(nl,M,y);y+=nl.length*4.2;doc.setTextColor(0);
+    }
+
+    /* piede su OGNI pagina: un computo di venti fogli si sparpaglia in cantiere,
+       e senza il numero di pagina non si rimette insieme */
+    const np=doc.getNumberOfPages();
+    for(let p=1;p<=np;p++){
+      doc.setPage(p);
+      doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(140);
+      doc.text((c.numero?"Computo n. "+c.numero+"  ·  ":"")+(c.titolo||"")+
+        (c.prezzario?"  ·  prezzi da "+c.prezzario+(c.prezzario_anno?" "+c.prezzario_anno:""):""),M,289,{maxWidth:150});
+      doc.text("pag. "+p+" di "+np,R,289,{align:"right"});
+      doc.setTextColor(0);
+    }
+    doc.save("computo-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+      (c.titolo||"metrico").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+    toast("PDF del computo scaricato ✅");
   }
 
   /* ---- REPORT & STATISTICHE ---- */
@@ -10192,6 +10470,7 @@
     if(a==="edit-computo")return computoForm(compCache.find(c=>String(c.id)===String(id)));
     if(a==="save-computo")return saveComputo(id);
     if(a==="del-computo")return delComputo(id);
+    if(a==="comp-pdf")return computoPdf(id);
     if(a==="comp-filtro"){compFiltro=t.dataset.v;renderComputi();return;}
     if(a==="comp-cap-apri"){compCapNuovo=true;renderCompVoci(compVociCompId);return;}
     if(a==="comp-cap-annulla"){compCapNuovo=false;renderCompVoci(compVociCompId);return;}
