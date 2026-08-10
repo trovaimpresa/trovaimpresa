@@ -9384,6 +9384,7 @@
 
        '<button class="btn b-cancel" data-action="close">Annulla</button>'
       +(isNew?"":'<button class="btn" data-action="comp-pdf" data-id="'+esc(String(c.id))+'">📄 PDF</button>')
+      +(isNew?"":'<button class="btn" data-action="comp-prev" data-id="'+esc(String(c.id))+'">→ Crea il preventivo</button>')
       +(isNew?"":'<button class="btn btn-danger" data-action="del-computo" data-id="'+esc(String(c.id))+'">🗑 Elimina</button>')
       +'<button class="btn-primary b-save" data-action="save-computo" data-id="'+esc(c.id||"")+'">'+(isNew?"Crea computo":"Salva")+'</button>');
 
@@ -9641,6 +9642,20 @@
 
     openSheetGrande(isNew?"Nuova lavorazione":"Lavorazione",
        '<div class="sh-cols"><div class="sh-col">'
+      /* ============================================================
+         IL TUO PREZZARIO — il pezzo che fa risparmiare le giornate
+         ============================================================
+         Un tecnico ha trecento voci di tariffa regionale e le riusa sempre le
+         stesse. Riscriverle a mano a ogni computo e' il lavoro che gli fa
+         dire "questo programma non lo uso". Qui si cercano per parola, si
+         cliccano, ed entrano gia' fatte: codice, descrizione, unita', prezzo.
+         Le voci usate di piu' salgono in cima da sole (usata_volte). */
+      +'<div class="sh-b"><div class="sh-tit">Il tuo prezzario</div>'
+      +  '<div class="field"><label>Cerca una voce che usi già</label>'
+      +    '<input id="pp-cerca"'+_noAuto()+' placeholder="Scrivi una parola: tramezzo, intonaco, pavimento…"></div>'
+      +  '<div id="pp-lista"></div>'
+      +  '<div class="sh-nota">Clicca una voce e la lavorazione si riempie da sola. Quando ne scrivi una nuova, salvala nel prezzario col pulsante in fondo: la prossima volta la ritrovi.</div>'
+      +'</div>'
       +'<div class="sh-b"><div class="sh-tit">La lavorazione</div>'
       +  '<div class="row2">'
       +    '<div class="field"><label>Codice del prezzario</label><input id="cv-cod"'+_noAuto()+' value="'+esc(v.codice||"")+'" placeholder="A.01.002"></div>'
@@ -9688,6 +9703,7 @@
       +'</div></div>',
 
        '<button class="btn b-cancel" data-action="comp-torna">← Torna al computo</button>'
+      +'<button class="btn" data-action="pp-salva">★ Salva nel mio prezzario</button>'
       +'<button class="btn-primary b-save" data-action="comp-voce-salva" data-id="'+esc(String(v.id||""))+'">'+(isNew?"Crea lavorazione":"Salva")+'</button>');
 
     bindSeg("cv-conta");
@@ -9701,7 +9717,98 @@
         const mis=$("#cv-misure");  if(mis)mis.style.opacity=corpo?"0.45":"1";
       };
     });
+    /* la ricerca parte da sola mentre scrivi, ma non a ogni lettera: 250 ms di
+       pausa, se no su un prezzario grosso si fanno dieci viaggi per una parola */
+    const _ce=$("#pp-cerca");
+    if(_ce){_ce.oninput=function(){clearTimeout(ppTimer);ppTimer=setTimeout(ppCerca,250);};}
+    ppCerca();
     if(!isNew)renderCompMisure(v.id);
+  }
+
+  /* ---- il prezzario personale (tabella gest_prezzi_propri) ---- */
+  let ppCache=[], ppTimer=null;
+  async function ppCerca(){
+    const box=$("#pp-lista");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML="";return;}
+    /* le parentesi e le virgole rompono il filtro "or" di Supabase: via */
+    const q=String(($("#pp-cerca")&&$("#pp-cerca").value)||"").trim().replace(/[,()%*]/g," ").trim();
+    let r=sb.from("gest_prezzi_propri").select("*").eq("user_id",sbUid).is("eliminato_il",null);
+    if(q)r=r.or("descrizione.ilike.%"+q+"%,codice.ilike.%"+q+"%");
+    const {data,error}=await r.order("usata_volte",{ascending:false}).limit(8);
+    if(error){
+      box.innerHTML='<div class="sh-nota">'+(_compManca(error)
+        ? 'Per il prezzario serve l\'aggiornamento del database: esegui <b>sql/gest-computo-metrico.sql</b> su Supabase.'
+        : 'Non riesco a leggere il prezzario: '+esc(error.message))+'</div>';
+      return;
+    }
+    ppCache=data||[];
+    if(!ppCache.length){
+      box.innerHTML='<p class="fatt-empty">'+(q?"Nessuna voce con questa parola.":"Il prezzario è ancora vuoto: la prima voce la salvi da qui sotto.")+'</p>';
+      return;
+    }
+    box.innerHTML=ppCache.map(x=>
+      '<div class="spesa-row" data-action="pp-usa" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
+      +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
+      +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
+      +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")+'</small></span>'
+      +'<b></b>'
+      +'<button type="button" class="rdel" data-action="pp-del" data-id="'+esc(String(x.id))+'" title="Togli dal prezzario">×</button></div>').join("");
+  }
+  /* riempie la lavorazione con la voce scelta. Il prezzo entra come una FOTO:
+     se domani lo alzi nel prezzario, i computi già fatti non cambiano. */
+  async function ppUsa(id){
+    const x=ppCache.find(v=>String(v.id)===String(id));if(!x)return;
+    const set=(sel,val)=>{const e=$(sel);if(e)e.value=val;};
+    set("#cv-cod",x.codice||"");
+    set("#cv-desc",x.descrizione||"");
+    set("#cv-prezzo",x.prezzo_unitario!=null?_prezzoTesto(x.prezzo_unitario):"");
+    const u=$("#cv-uni");
+    if(u&&x.unita){const c=Array.prototype.slice.call(u.options).find(o=>o.value===x.unita);if(c)u.value=x.unita;}
+    const m=$("#cv-mano");if(m&&x.incidenza_manodopera!=null)m.value=String(x.incidenza_manodopera).replace(".",",");
+    sb.from("gest_prezzi_propri").update({usata_volte:(+x.usata_volte||0)+1}).eq("id",id).eq("user_id",sbUid)
+      .then(function(){},function(){});
+    toast("Voce presa dal prezzario ✔");
+  }
+  async function ppDel(id){
+    const x=ppCache.find(v=>String(v.id)===String(id))||{};
+    if(!gconfirm("Togliere «"+(x.descrizione||"")+"» dal tuo prezzario?\n\nVa nel cestino, i computi già fatti non cambiano."))return;
+    /* .delete() e' quello giusto: js/cestino.js lo trasforma da solo in una
+       data su eliminato_il, come per tutte le altre tabelle del gestionale.
+       Scriverci la data a mano qui vorrebbe dire avere la regola in due posti. */
+    const {error}=await sb.from("gest_prezzi_propri").delete().eq("id",id).eq("user_id",sbUid);
+    if(error){toast("Errore: "+error.message);return;}
+    await ppCerca();
+    toast("Tolta dal prezzario");
+  }
+  /* salva nel prezzario quello che c'e' scritto adesso nella lavorazione.
+     Se una voce con lo STESSO codice e la stessa descrizione c'e' gia', si
+     aggiorna il prezzo invece di fare un doppione: se no dopo un mese il
+     prezzario e' pieno di "tramezzo" uguali con prezzi diversi. */
+  async function ppSalva(){
+    if(!sbUid)return;
+    const desc=String(($("#cv-desc")&&$("#cv-desc").value)||"").trim();
+    if(!desc){toast("Scrivi prima la descrizione della lavorazione");return;}
+    const cod=String(($("#cv-cod")&&$("#cv-cod").value)||"").trim()||null;
+    const uni=($("#cv-uni")&&$("#cv-uni").value)||null;
+    const prezzo=_numIt("#cv-prezzo")||0;
+    const mano=$("#cv-mano")?_numIt("#cv-mano"):null;
+    let g=sb.from("gest_prezzi_propri").select("id").eq("user_id",sbUid).is("eliminato_il",null).eq("descrizione",desc);
+    g=cod?g.eq("codice",cod):g.is("codice",null);
+    const {data:gia}=await g.limit(1);
+    const riga={descrizione:desc, codice:cod, unita:uni, prezzo_unitario:prezzo};
+    if(mano!=null)riga.incidenza_manodopera=mano;
+    let error;
+    if(gia&&gia.length){
+      ({error}=await sb.from("gest_prezzi_propri").update(riga).eq("id",gia[0].id).eq("user_id",sbUid));
+    }else{
+      ({error}=await sb.from("gest_prezzi_propri").insert(Object.assign({user_id:sbUid,fonte:"mio"},riga)));
+    }
+    if(error){
+      toast(_compManca(error)?"Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)":("Errore: "+error.message));
+      return;
+    }
+    await ppCerca();
+    toast((gia&&gia.length)?"Prezzo aggiornato nel tuo prezzario ✔":"Voce salvata nel tuo prezzario ✔");
   }
 
   async function renderCompMisure(voceId){
@@ -9729,6 +9836,18 @@
       +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misTesto(tot)+'</b><span></span></div>'
       +'<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
       +  '<div class="field"><label>Che cosa stai misurando</label><input id="cm-desc"'+_noAuto()+' placeholder="Es. tramezzo cucina, porta da detrarre"></div>'
+      /* ⚠️ QUESTO BLOCCO STA QUI SOPRA APPOSTA, non in fondo. 10 agosto 2026.
+         Prima stava sotto ai quattro campi delle misure, a un dito dal pulsante
+         "Aggiungi": bisognava scorrere per vederlo e sfuggiva sistematicamente.
+         Provato dal vivo: tre porte su tre sono entrate SOMMATE invece che
+         sottratte, e il computo usciva 23,82 invece di 20,46. Adesso si decide
+         subito dopo aver scritto che cosa si sta misurando, che e' il momento
+         in cui uno lo sa. */
+      +  '<div class="field"><label>Questa misura</label><div class="seg" id="cm-verso">'
+      +    '<button data-v="piu" class="on">Si aggiunge</button>'
+      +    '<button data-v="meno">Si detrae</button>'
+      +  '</div>'
+      +  '<div class="sh-nota">«Si detrae» sono i vuoti: le porte, le finestre, i fori. Vengono sottratti dal totale.</div></div>'
       +  '<div class="row2">'
       +    '<div class="field"><label>Parti uguali</label><input type="text" inputmode="decimal" id="cm-parti"'+_noAuto()+' placeholder="1"></div>'
       +    '<div class="field"><label>Lunghezza</label><input type="text" inputmode="decimal" id="cm-lung"'+_noAuto()+' placeholder="3,20"></div>'
@@ -9737,11 +9856,6 @@
       +    '<div class="field"><label>Larghezza</label><input type="text" inputmode="decimal" id="cm-larg"'+_noAuto()+' placeholder="vuoto = non la uso"></div>'
       +    '<div class="field"><label>Altezza o spessore</label><input type="text" inputmode="decimal" id="cm-alt"'+_noAuto()+' placeholder="2,70"></div>'
       +  '</div>'
-      +  '<div class="field"><label>Questa misura</label><div class="seg" id="cm-verso">'
-      +    '<button data-v="piu" class="on">Si aggiunge</button>'
-      +    '<button data-v="meno">Si detrae</button>'
-      +  '</div>'
-      +  '<div class="sh-nota">«Si detrae» sono i vuoti: le porte, le finestre, i fori. Vengono sottratti dal totale.</div></div>'
       +  '<button type="button" class="btn-primary quick-add" data-action="comp-mis-add" data-id="'+esc(String(voceId))+'">+ Aggiungi la misura</button>'
       +  '<div class="sh-nota">Un campo <b>vuoto</b> non entra nel conto (vale 1): per i metri quadri riempi lunghezza e altezza e lascia stare la larghezza. Uno <b>zero</b> scritto invece vale zero davvero.</div>'
       +'</div>';
@@ -9764,6 +9878,15 @@
     const parti=_numIt("#cm-parti"), lung=_numIt("#cm-lung"), larg=_numIt("#cm-larg"), alt=_numIt("#cm-alt");
     if(parti==null&&lung==null&&larg==null&&alt==null){
       toast("Scrivi almeno una misura (o le parti uguali)");return;
+    }
+    /* ⚠️ La rete di sicurezza sui VUOTI. Una misura che si chiama "porta" o
+       "finestra" e viene SOMMATA e' quasi sempre un pulsante dimenticato, non
+       una scelta: il computo esce piu' grande del vero e non se ne accorge
+       nessuno, perche' il numero e' verosimile. Qui si chiede, e basta. */
+    if(segVal("cm-verso")!=="meno" && /porta|finestr|vuot|foro|fori|apertur|nicchi|detra|luce/i.test(desc)){
+      if(!gconfirm("Questa misura si chiama «"+desc+"»: sembra un vuoto da togliere.\n\n"
+        +"Così com'è viene SOMMATA, non sottratta.\n\n"
+        +"Vai avanti lo stesso e la aggiungo in più?"))return;
     }
     const bt=$('[data-action="comp-mis-add"]');
     compMisSalvo=true;
@@ -9851,6 +9974,84 @@
       const blocco=box.closest(".sh-b")||box;
       try{ blocco.scrollIntoView({block:"start",inline:"nearest"}); }catch(_){ blocco.scrollIntoView(true); }
     },320);
+  }
+
+  /* ============================================================
+     DAL COMPUTO AL PREVENTIVO
+     ============================================================
+     Un computo e' gia' un preventivo: voci, quantita', prezzi. Ribatterlo a
+     mano e' lavoro buttato, ed e' anche il punto dove nascono gli errori,
+     perche' i numeri si copiano a occhio.
+
+     Le quantita' entrano ARROTONDATE A TRE DECIMALI: nel computo stanno con
+     cinque, ma su un preventivo che legge il cliente "20,46 m²" e' la cifra
+     giusta, non "20,46000".
+
+     Il RIBASSO diventa una riga a parte in fondo, negativa, invece di essere
+     spalmato sui prezzi: cosi' il cliente vede quanto gli hai scontato, e il
+     totale del preventivo torna identico a quello del computo. Se lo
+     nascondessimo dentro i prezzi unitari, i due documenti direbbero la stessa
+     cifra finale ma prezzi diversi voce per voce, e la prima domanda del primo
+     che li confronta sarebbe "e allora quale dei due e' giusto?". */
+  async function computoAPreventivo(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const c=compCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Computo non trovato");return;}
+    if(c.preventivo_id){
+      if(!gconfirm("Da questo computo hai già creato un preventivo.\n\nNe faccio un altro?"))return;
+    }
+    const {data:vv,error:eV}=await sb.from("gest_computo_voci_calc").select("*")
+      .eq("user_id",sbUid).eq("computo_id",id).order("ordine");
+    if(eV){toast("Non riesco a leggere le lavorazioni: "+eV.message);return;}
+    const voci=vv||[];
+    if(!voci.length){toast("Il computo è vuoto: aggiungi almeno una lavorazione");return;}
+
+    const righe=voci.map((v,i)=>({
+      user_id:sbUid,
+      descrizione:(v.codice?v.codice+" — ":"")+(v.descrizione||"(senza descrizione)")+(v.unita?"  ("+v.unita+")":""),
+      qta:Math.round((+v.quantita||0)*1000)/1000,
+      prezzo:+v.prezzo_unitario||0,
+      ordine:i
+    })).filter(r=>r.descrizione);
+
+    const rp=compRiepilogo(voci,c);
+    if(rp.perc&&rp.ribasso){
+      righe.push({user_id:sbUid, descrizione:"Ribasso "+_pct(rp.perc)+"% sul totale dei lavori"
+        +(rp.sicurezza?" (oneri della sicurezza esclusi)":""),
+        qta:1, prezzo:-rp.ribasso, ordine:righe.length});
+    }
+
+    /* stessa formula del numero progressivo di savePrev: si contano anche i
+       preventivi nel cestino, se no il prossimo riprende un numero già usato */
+    let numero=prevCache.reduce((m,x)=>Math.max(m,+x.numero||0),0)+1;
+    try{
+      const _sbP=(sb.raw||sb.from.bind(sb));
+      const {data:maxP}=await _sbP("gest_preventivi").select("numero")
+        .eq("user_id",sbUid).order("numero",{ascending:false}).limit(1);
+      const nMax=(maxP&&maxP[0]&&+maxP[0].numero)||0;
+      if(nMax+1>numero)numero=nMax+1;
+    }catch(e){}
+
+    const {data:np,error}=await sb.from("gest_preventivi").insert({
+      user_id:sbUid, mestiere_id:curMestiere(),
+      titolo:c.titolo||"Preventivo da computo",
+      cliente_id:c.cliente_id||null,
+      data:todayStr(), stato:"bozza", numero:numero,
+      note:[c.oggetto?("Oggetto: "+c.oggetto):"", c.luogo?("Luogo: "+c.luogo):"",
+            c.prezzario?("Prezzi da "+c.prezzario+(c.prezzario_anno?" "+c.prezzario_anno:"")):"",
+            "Da computo metrico"+(c.numero?" n. "+c.numero:"")].filter(Boolean).join("\n")||null
+    }).select().single();
+    if(error){toast("Errore: "+error.message);return;}
+
+    const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,preventivo_id:np.id})));
+    if(e2){toast("Il preventivo è nato ma le voci no: "+e2.message);return;}
+
+    /* il collegamento serve a non rifarlo due volte per sbaglio */
+    await sb.from("gest_computi").update({preventivo_id:np.id}).eq("id",id).eq("user_id",sbUid);
+
+    closeSheet();
+    rinfresca("preventivi","computi","riepilogo");
+    toast("Preventivo n. "+numero+" creato dal computo ✔ Lo trovi in Preventivi");
   }
 
   /* ============================================================
@@ -10547,6 +10748,10 @@
     if(a==="save-computo")return saveComputo(id);
     if(a==="del-computo")return delComputo(id);
     if(a==="comp-pdf")return computoPdf(id);
+    if(a==="pp-usa")return ppUsa(id);
+    if(a==="pp-del")return ppDel(id);
+    if(a==="pp-salva")return ppSalva();
+    if(a==="comp-prev")return computoAPreventivo(id);
     if(a==="comp-filtro"){compFiltro=t.dataset.v;renderComputi();return;}
     if(a==="comp-cap-apri"){compCapNuovo=true;renderCompVoci(compVociCompId);return;}
     if(a==="comp-cap-annulla"){compCapNuovo=false;renderCompVoci(compVociCompId);return;}
