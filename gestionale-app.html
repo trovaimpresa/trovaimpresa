@@ -9660,20 +9660,40 @@
     bindSeg("cm-verso");
   }
 
+  /* ⚠️ Il chiavistello del doppio clic. 10 agosto 2026.
+     Difetto vero, trovato provando il computo: la porta da detrarre era entrata
+     DUE volte identica. Supabase ci mette qualche decimo di secondo a
+     rispondere, e in quel buco il pulsante restava premibile: chi non e' sicuro
+     che il clic abbia preso ne fa un secondo, e la misura si salva due volte.
+     Riprodotto nel browser con la stessa lentezza della rete: 5 prove su 5.
+     Il chiavistello e' la variabile, non il pulsante spento: se un domani il
+     pulsante cambia forma, la doppia scrittura resta bloccata lo stesso. */
+  let compMisSalvo=false;
   async function compMisAdd(voceId){
     if(!sbUid||!voceId)return;
+    if(compMisSalvo)return;
     const desc=String(($("#cm-desc")&&$("#cm-desc").value)||"").trim();
     const parti=_numIt("#cm-parti"), lung=_numIt("#cm-lung"), larg=_numIt("#cm-larg"), alt=_numIt("#cm-alt");
     if(parti==null&&lung==null&&larg==null&&alt==null){
       toast("Scrivi almeno una misura (o le parti uguali)");return;
     }
+    const bt=$('[data-action="comp-mis-add"]');
+    compMisSalvo=true;
+    if(bt){bt.disabled=true;bt.textContent="Sto salvando…";}
     const ord=compMisCache.reduce((m,x)=>Math.max(m,+x.ordine||0),0)+1;
     const {error}=await sb.from("gest_computo_misure").insert({
       user_id:sbUid, voce_id:voceId, ordine:ord,
       descrizione:desc||null, parti:parti, lunghezza:lung, larghezza:larg, altezza:alt,
       detrai:(segVal("cm-verso")==="meno")});
-    if(error){toast("Errore: "+error.message);return;}
-    await renderCompMisure(voceId);
+    if(error){
+      /* il modulo NON si ridisegna quando c'e' un errore: il pulsante va
+         riacceso a mano, se no resta spento e non si aggiunge piu' niente */
+      compMisSalvo=false;
+      if(bt){bt.disabled=false;bt.textContent="+ Aggiungi la misura";}
+      toast("Errore: "+error.message);return;
+    }
+    await renderCompMisure(voceId);   /* ridisegna il pulsante pulito */
+    compMisSalvo=false;
     rinfresca("computi");
     toast("Misura aggiunta ✔");
   }
