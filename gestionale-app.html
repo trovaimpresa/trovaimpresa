@@ -581,6 +581,13 @@
     ['Cambia filtro o aggiungi un nuovo lavoro','Cambia filtro o aggiungi una nuova pratica'],
     ['Nessun lavoro in questa data.','Nessuna pratica in questa data.'],
     ['Nessun lavoro qui','Nessuna pratica qui'],
+    /* 10 agosto 2026 — tre frasi uscivano sgrammaticate: le regole corte
+       ('lavoro aperto' -> 'pratica aperta') cambiavano il nome ma non
+       l'articolo davanti, e si leggeva "Nessun pratica aperta". Vanno QUI,
+       prima di quelle corte, perche' l'elenco si applica in ordine. */
+    ['Nessun lavoro aperto','Nessuna pratica aperta'],
+    ['Nessun lavoro assegnato','Nessuna pratica assegnata'],
+    ['Ancora nessun lavoro finito','Ancora nessuna pratica finita'],
     ['+ Lavoro in questa data','+ Pratica in questa data'],
     ['Questo operatore non ha lavori assegnati','Questo collaboratore non ha pratiche assegnate'],
     ['Assegna i lavori a una persona dalla scheda del lavoro','Assegna le pratiche a una persona dalla scheda della pratica'],
@@ -1464,6 +1471,37 @@
         t:cliMap[k]||"Cliente",
         v:perCli[k]+(perCli[k]===1?" lavoro aperto":" lavori aperti")}))
     }));
+
+    /* ===== 10 agosto 2026 — la scheda dei Computi metrici =====
+       Il Riepilogo ha una scheda per ogni voce del menu, e questa mancava: la
+       sezione c'era ma dal Riepilogo non si arrivava.
+       Si legge SOLO per gli studi tecnici (gli altri non hanno la sezione) e
+       dentro un try: se sql/gest-computo-metrico.sql non e' stato eseguito la
+       scheda non compare e il Riepilogo resta intero — meglio una scheda in
+       meno che un Riepilogo rotto. */
+    if(ruoloUtente==='professionista'){
+      try{
+        const [rCo,rTo]=await Promise.all([
+          sb.from("gest_computi").select("id,numero,titolo,stato,data").eq("user_id",sbUid).eq("mestiere_id",mid)
+            .order("data",{ascending:false}),
+          sb.from("gest_computo_totali").select("computo_id,importo").eq("user_id",sbUid)
+        ]);
+        if(!rCo.error){
+          const CO=rCo.data||[];
+          const impDi={};(rTo&&rTo.data||[]).forEach(r=>{impDi[r.computo_id]=+r.importo||0;});
+          const bozze=CO.filter(c=>c.stato==="bozza");
+          C.push(rieCard({
+            tab:"computi", titolo:"Computi metrici", n:CO.length,
+            lab: CO.length===1?"computo nel reparto":"computi nel reparto",
+            tono: bozze.length?"attesa":(CO.length?"ok":"neutro"),
+            vuoto:"Nessun computo metrico",
+            righe: CO.slice(0,2).map(c=>({
+              t:(c.numero?("N. "+c.numero+" — "):"")+(c.titolo||"Computo"),
+              v:eur(impDi[c.id]||0)}))
+          }));
+        }
+      }catch(_){}
+    }
 
     C.push(rieCard({
       tab:"scadenzario", titolo:"Scadenzario", n:scAperte.length,
