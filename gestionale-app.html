@@ -9439,6 +9439,24 @@
   }
   const UNITA=["m","m²","m³","kg","q","t","cad","n.","corpo","ora","giorno","l"];
 
+  /* ⚠️ IL RIEMPIMENTO AUTOMATICO DI CHROME VA SPENTO SUL COMPUTO. 10 agosto 2026.
+     Difetto vero, visto dal vivo: scrivendo "porta" nella descrizione della
+     misura, Chrome proponeva la tendina grigia e — cliccandola — riempiva DA
+     SOLO anche lunghezza e altezza con i valori di una misura di settimane
+     prima. Risultato: una porta alta 2,70 invece di 2,10, e un computo
+     sbagliato senza un solo messaggio d'errore. E' successo tre volte di fila.
+     Su un preventivo un valore di troppo si vede; su un computo metrico no,
+     perche' i numeri sono tutti plausibili.
+
+     Non basta autocomplete="off": Chrome lo ignora quando riconosce il campo
+     dal nome o dall'id. Per questo ogni campo prende anche un NOME A CASO a
+     ogni disegno: cosi' non somiglia a niente che Chrome abbia in memoria e
+     non ha niente da proporre. */
+  function _noAuto(){
+    return ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"'
+      +' name="n'+Math.random().toString(36).slice(2,10)+'"';
+  }
+
   /* una percentuale si scrive corta: 10 e non 10,000; 10,5 resta 10,5 */
   function _pct(n){
     const s=(+n||0).toFixed(3).replace(/0+$/,"").replace(/\.$/,"");
@@ -9560,7 +9578,7 @@
       +(compCapNuovo
         ? '<div style="margin-top:12px;border-top:1px solid var(--bordo);padding-top:12px">'
           +'<div class="field"><label>Titolo del nuovo capitolo</label>'
-          +'<input id="cc-tit" placeholder="Es. Demolizioni e rimozioni"></div>'
+          +'<input id="cc-tit"'+_noAuto()+' placeholder="Es. Demolizioni e rimozioni"></div>'
           +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
           +'<button type="button" class="btn-primary quick-add" data-action="comp-cap-salva">Aggiungi il capitolo</button>'
           +'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-annulla">Annulla</button>'
@@ -9625,12 +9643,12 @@
        '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">La lavorazione</div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Codice del prezzario</label><input id="cv-cod" value="'+esc(v.codice||"")+'" placeholder="A.01.002"></div>'
+      +    '<div class="field"><label>Codice del prezzario</label><input id="cv-cod"'+_noAuto()+' value="'+esc(v.codice||"")+'" placeholder="A.01.002"></div>'
       +    '<div class="field"><label>Unità di misura</label><select id="cv-uni">'+uniOpts+'</select></div>'
       +  '</div>'
       +  '<div class="field"><label>Descrizione</label><textarea id="cv-desc" rows="4" placeholder="Come la scrive il prezzario, per esteso">'+esc(v.descrizione||"")+'</textarea></div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo" value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="18,50"></div>'
+      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo"'+_noAuto()+' value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="18,50"></div>'
       +    '<div class="field"><label>Capitolo</label><select id="cv-cap">'+capOpts+'</select></div>'
       +  '</div>'
       +'</div>'
@@ -9648,14 +9666,14 @@
       +  '<div class="sh-nota">Con <b>Dalle misure</b> la quantità la fa la somma delle misure qui a fianco, e non si scrive a mano. <b>A corpo</b> serve quando non c\'è niente da misurare: una voce a forfait, le spese generali.</div>'
       +  '</div>'
       +  '<div class="field" id="cv-qta-box" style="'+(v.quantita_manuale?"":"display:none")+'">'
-      +    '<label>Quantità</label><input type="text" inputmode="decimal" id="cv-qta" value="'+(v.quantita!=null?_misTesto(v.quantita):"")+'" placeholder="1" style="max-width:180px"></div>'
+      +    '<label>Quantità</label><input type="text" inputmode="decimal" id="cv-qta"'+_noAuto()+' value="'+(v.quantita!=null?_misTesto(v.quantita):"")+'" placeholder="1" style="max-width:180px"></div>'
       +'</div>'
 
       +(pubblico
         ? '<div class="sh-b"><div class="sh-tit">Solo per i lavori pubblici</div>'
           +'<div class="row2">'
-          +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="cv-mano" value="'+(v.incidenza_manodopera!=null?String(v.incidenza_manodopera).replace(".",","):"")+'" placeholder="35"></div>'
-          +  '<div class="field"><label>Oneri della sicurezza (€)</label><input type="text" inputmode="decimal" id="cv-sic" value="'+(v.oneri_sicurezza!=null?String(v.oneri_sicurezza).replace(".",","):"")+'" placeholder="0"></div>'
+          +  '<div class="field"><label>Quanta parte del prezzo è costo del personale (%)</label><input type="text" inputmode="decimal" id="cv-mano"'+_noAuto()+' value="'+(v.incidenza_manodopera!=null?String(v.incidenza_manodopera).replace(".",","):"")+'" placeholder="35"></div>'
+          +  '<div class="field"><label>Oneri della sicurezza (€)</label><input type="text" inputmode="decimal" id="cv-sic"'+_noAuto()+' value="'+(v.oneri_sicurezza!=null?String(v.oneri_sicurezza).replace(".",","):"")+'" placeholder="0"></div>'
           +'</div>'
           +'<div class="sh-nota">Sono le due cose che nelle gare vanno dichiarate. Gli oneri della sicurezza non sono soggetti a ribasso.</div>'
           +'</div>'
@@ -9710,14 +9728,14 @@
     box.innerHTML=righe
       +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misTesto(tot)+'</b><span></span></div>'
       +'<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
-      +  '<div class="field"><label>Che cosa stai misurando</label><input id="cm-desc" placeholder="Es. tramezzo cucina, porta da detrarre"></div>'
+      +  '<div class="field"><label>Che cosa stai misurando</label><input id="cm-desc"'+_noAuto()+' placeholder="Es. tramezzo cucina, porta da detrarre"></div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Parti uguali</label><input type="text" inputmode="decimal" id="cm-parti" placeholder="1"></div>'
-      +    '<div class="field"><label>Lunghezza</label><input type="text" inputmode="decimal" id="cm-lung" placeholder="3,20"></div>'
+      +    '<div class="field"><label>Parti uguali</label><input type="text" inputmode="decimal" id="cm-parti"'+_noAuto()+' placeholder="1"></div>'
+      +    '<div class="field"><label>Lunghezza</label><input type="text" inputmode="decimal" id="cm-lung"'+_noAuto()+' placeholder="3,20"></div>'
       +  '</div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Larghezza</label><input type="text" inputmode="decimal" id="cm-larg" placeholder="vuoto = non la uso"></div>'
-      +    '<div class="field"><label>Altezza o spessore</label><input type="text" inputmode="decimal" id="cm-alt" placeholder="2,70"></div>'
+      +    '<div class="field"><label>Larghezza</label><input type="text" inputmode="decimal" id="cm-larg"'+_noAuto()+' placeholder="vuoto = non la uso"></div>'
+      +    '<div class="field"><label>Altezza o spessore</label><input type="text" inputmode="decimal" id="cm-alt"'+_noAuto()+' placeholder="2,70"></div>'
       +  '</div>'
       +  '<div class="field"><label>Questa misura</label><div class="seg" id="cm-verso">'
       +    '<button data-v="piu" class="on">Si aggiunge</button>'
