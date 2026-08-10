@@ -9673,6 +9673,8 @@
          cliccano, ed entrano gia' fatte: codice, descrizione, unita', prezzo.
          Le voci usate di piu' salgono in cima da sole (usata_volte). */
       +'<div class="sh-b"><div class="sh-tit">Il tuo prezzario</div>'
+      +  '<div class="field"><label>Quale tariffa</label><select id="pp-fonte"><option value="">— tutte le tariffe —</option></select>'
+      +    '<div class="sh-nota" id="pp-fonte-nota"></div></div>'
       +  '<div class="field"><label>Cerca una voce che usi già</label>'
       +    '<input id="pp-cerca"'+_noAuto()+' placeholder="Scrivi una parola: tramezzo, intonaco, pavimento…"></div>'
       +  '<div id="pp-lista"></div>'
@@ -9743,6 +9745,9 @@
        pausa, se no su un prezzario grosso si fanno dieci viaggi per una parola */
     const _ce=$("#pp-cerca");
     if(_ce){_ce.oninput=function(){clearTimeout(ppTimer);ppTimer=setTimeout(ppCerca,250);};}
+    const _cf=$("#pp-fonte");
+    if(_cf)_cf.onchange=function(){ppFonteScelta=_cf.value;ppCerca();};
+    ppFonteScelta=null;      /* la sceglie ppRiempiFonti dal prezzario del computo */
     ppCerca(true);
     if(!isNew)renderCompMisure(v.id);
   }
@@ -9763,8 +9768,50 @@
      IL LIMITE: si tengono in memoria le 500 voci piu' usate. Se il prezzario
      fosse piu' grande, per le altre si va a chiedere al database. Meglio dirlo
      che far finta che il limite non ci sia. */
-  let ppCache=[], ppTutte=[], ppTimer=null, ppTetto=false;
+  let ppCache=[], ppTutte=[], ppTimer=null, ppTetto=false, ppFonteScelta=null;
   const PP_MAX=500;
+
+  /* ⚠️ LA TARIFFA GIUSTA. 10 agosto 2026.
+     Chi lavora su due regioni si ritrova nel prezzario l'intonaco del Lazio a
+     24,00 e quello dell'Umbria a 22,40: cercando "intonaco" uscivano tutti e
+     due, identici a vedersi, e prendendo quello sbagliato nessuno avvisava —
+     mentre sul PDF resta scritta la tariffa dichiarata sul computo.
+     Adesso: la tendina si mette DA SOLA sulla tariffa che il computo dichiara
+     (campo "Prezzario"), e sotto ogni voce si vede da dove viene. */
+  function ppFonti(){
+    const s=new Set();
+    ppTutte.forEach(x=>{ if(x.fonte)s.add(x.fonte); });
+    return Array.from(s).sort((a,b)=>a.localeCompare(b,"it"));
+  }
+  /* la tariffa del computo e quella del prezzario non si chiamano mai uguali
+     ("Tariffa Regione Lazio" contro "tariffa-lazio-2023"): si confrontano le
+     parole, e vince quella che ne ha di piu' in comune */
+  function _ppSceltaAuto(fonti,dichiarata){
+    const paroleDi=t=>_ppPiatto(t).split(/[^a-z0-9]+/).filter(w=>w.length>=3).map(_ppRadice);
+    const P=paroleDi(dichiarata||"");
+    if(!P.length)return null;
+    let best=null,punti=0;
+    fonti.forEach(f=>{
+      const F=paroleDi(f);
+      const n=P.filter(w=>F.some(x=>x.indexOf(w)>=0||w.indexOf(x)>=0)).length;
+      if(n>punti){punti=n;best=f;}
+    });
+    return punti?best:null;
+  }
+  function ppRiempiFonti(){
+    const sel=$("#pp-fonte");if(!sel)return;
+    const fonti=ppFonti();
+    const comp=compCache.find(x=>String(x.id)===String(compVociCompId))||{};
+    const dich=[(comp.prezzario||""),(comp.prezzario_anno||"")].join(" ").trim();
+    if(ppFonteScelta===null)ppFonteScelta=_ppSceltaAuto(fonti,dich)||"";
+    sel.innerHTML='<option value="">— tutte le tariffe ('+ppTutte.length+' voci) —</option>'
+      +fonti.map(f=>'<option value="'+esc(f)+'"'+(f===ppFonteScelta?' selected':'')+'>'+esc(f)
+        +' ('+ppTutte.filter(x=>x.fonte===f).length+')</option>').join("");
+    const nota=$("#pp-fonte-nota");
+    if(nota)nota.innerHTML=ppFonteScelta
+      ? 'Cerco solo dentro <b>'+esc(ppFonteScelta)+'</b>, che è la tariffa dichiarata su questo computo. Per guardare anche le altre metti «tutte».'
+      : (fonti.length>1?'Stai cercando in <b>tutte</b> le tariffe insieme: attento a non prendere il prezzo di una regione sbagliata.':'');
+  }
   function _ppPiatto(t){
     return String(t||"").toLowerCase()
       .replace(/[àáâä]/g,"a").replace(/[èéêë]/g,"e").replace(/[ìíîï]/g,"i")
@@ -9803,8 +9850,10 @@
         return;
       }
     }
+    ppRiempiFonti();
     const q=String(($("#pp-cerca")&&$("#pp-cerca").value)||"").trim();
-    let trovate=_ppFiltra(ppTutte,q);
+    const base=ppFonteScelta?ppTutte.filter(x=>x.fonte===ppFonteScelta):ppTutte;
+    let trovate=_ppFiltra(base,q);
     /* prezzario piu' grande di quanto ne teniamo in memoria: le altre si
        cercano dove stanno davvero, invece di dire "non c'e'" a vanvera */
     if(!trovate.length && q && ppTetto){
@@ -9827,7 +9876,8 @@
       '<div class="spesa-row" data-action="pp-usa" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
       +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
       +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
-      +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")+'</small></span>'
+      +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")
+      +    ((!ppFonteScelta&&x.fonte)?(' · <b>'+esc(x.fonte)+'</b>'):"")+'</small></span>'
       +'<b></b>'
       +'<button type="button" class="rdel" data-action="pp-del" data-id="'+esc(String(x.id))+'" title="Togli dal prezzario">×</button></div>').join("")+_extra;
   }
@@ -10266,6 +10316,18 @@
     });
     return C;
   }
+  /* ⚠️ L'IMPORTAZIONE SI FA IN DUE TEMPI. 10 agosto 2026.
+     Prima il file entrava dritto e la tariffa prendeva il nome del FILE: chi
+     scarica dalla Regione si ritrovava scritto "prezzario_2023_def_rev2" su
+     ogni voce e sul menu a tendina. Adesso prima si legge, si fa vedere cosa
+     c'e' dentro e si chiede come si chiama; poi si importa.
+
+     E l'AGGIORNAMENTO fra due anni non sovrascrive niente: la tariffa nuova
+     entra come tariffa a se' ("Lazio 2025" accanto a "Lazio 2023"), col
+     confronto di cosa e' cambiato, e la vecchia si mette nel cestino solo se
+     lo dici tu. Sovrascrivere i prezzi sarebbe la cosa piu' pericolosa che
+     possiamo fare: un computo in corso cambierebbe totale sotto gli occhi. */
+  let pzPend=null;
   function pzApriFile(){
     const f=$("#pz-file");
     if(!f)return;
@@ -10277,8 +10339,13 @@
     const b=$("#pz-esito");if(!b)return;
     b.innerHTML='<div class="sh-nota" style="border-left:4px solid var('+(tono==="err"?"--err,#c0392b":"--acc,#1f6f5c")+');padding-left:10px;margin-bottom:12px">'+html+'</div>';
   }
+  function _pzNomeDaFile(nome){
+    return nome.replace(/\.(xlsx?|xlsm|csv)$/i,"").replace(/[_-]+/g," ")
+      .replace(/\s+/g," ").trim().slice(0,60);
+  }
   async function pzImporta(file){
     if(!sbUid){toast("Devi essere loggato");return;}
+    pzPend=null;
     _pzEsito("Sto leggendo <b>"+esc(file.name)+"</b>…");
     if(!(await caricaXLSX())){_pzEsito("Non riesco a scaricare il modulo per leggere i file Excel: controlla la connessione e riprova.","err");return;}
     let righe;
@@ -10303,15 +10370,10 @@
       _pzEsito("Non trovo la colonna della descrizione. Il file deve avere una riga di intestazione con scritto <b>Descrizione</b> (e possibilmente Codice, U.M., Prezzo).","err");
       return;
     }
-    /* ⚠️ SENZA INTESTAZIONE NON SI TIRA A INDOVINARE IN SILENZIO. 10 agosto 2026.
-       Provandolo: un file con le colonne "Pippo | Pluto" veniva importato lo
-       stesso, prendendo l'intestazione come se fosse una voce. Nel prezzario
-       finiva spazzatura, senza un messaggio. Un prezzario sporco e' peggio di
-       un prezzario vuoto: le voci sbagliate poi finiscono nei computi.
-       Adesso, quando l'intestazione non si riconosce, si fa vedere la PRIMA
-       RIGA come l'abbiamo capita e si chiede conferma. */
+    /* senza intestazione non si tira a indovinare in silenzio: si fa vedere
+       come sarebbe la prima riga e si chiede */
     if(iInt<0){
-      const pr=(dati0=>{for(let i=0;i<Math.min(righe.length,10);i++){
+      const pr=(function(){for(let i=0;i<Math.min(righe.length,10);i++){
         const r=righe[i]||[];if(r.some(c=>String(c||"").trim()))return r;}return [];})();
       const mostra=(i,lab)=>lab+": "+(String((pr[i]!=null?pr[i]:"")).trim()||"(vuoto)");
       if(!gconfirm("Il file non ha una riga di intestazione riconoscibile.\n\n"
@@ -10323,54 +10385,139 @@
       }
     }
     const dati=righe.slice(iInt>=0?iInt+1:0);
-    if(dati.length>PZ_IMP_MAX)_pzEsito("Il file ha "+dati.length+" righe: ne leggo le prime "+PZ_IMP_MAX+".");
 
-    /* quelle che ci sono gia', per non fare doppioni */
-    const {data:vecchie}=await sb.from("gest_prezzi_propri").select("codice,descrizione")
-      .eq("user_id",sbUid).is("eliminato_il",null).limit(20000);
-    const gia=new Set((vecchie||[]).map(x=>_ppPiatto((x.codice||"")+"§"+(x.descrizione||""))));
-
-    const nuove=[];let saltate=0,doppie=0;
+    const voci=[];let saltate=0;
     dati.slice(0,PZ_IMP_MAX).forEach(r=>{
       const desc=String((r[C.descrizione]!=null?r[C.descrizione]:"")).replace(/\s+/g," ").trim();
       if(!desc||desc.length<3){saltate++;return;}
-      const cod=(C.codice!=null?String(r[C.codice]||"").trim():"")||null;
-      const chiave=_ppPiatto((cod||"")+"§"+desc);
-      if(gia.has(chiave)){doppie++;return;}
-      gia.add(chiave);
-      const prezzo=(C.prezzo!=null)?_pzNum(r[C.prezzo]):null;
-      nuove.push({user_id:sbUid, codice:cod, descrizione:desc,
+      voci.push({
+        codice:(C.codice!=null?String(r[C.codice]||"").trim():"")||null,
+        descrizione:desc,
         unita:(C.unita!=null?String(r[C.unita]||"").trim():"")||null,
-        prezzo_unitario:prezzo||0,
+        prezzo_unitario:((C.prezzo!=null)?_pzNum(r[C.prezzo]):null)||0,
         categoria:(C.categoria!=null?String(r[C.categoria]||"").trim():"")||null,
-        incidenza_manodopera:(C.mano!=null?_pzNum(r[C.mano]):null),
-        fonte:file.name.replace(/\.(xlsx?|xlsm|csv)$/i,"").slice(0,60)});
+        incidenza_manodopera:(C.mano!=null?_pzNum(r[C.mano]):null)
+      });
+    });
+    if(!voci.length){_pzEsito("Nel file non ho trovato nessuna voce con una descrizione. Righe lette: "+dati.length+".","err");return;}
+
+    /* quello che c'e' gia' nel prezzario, per il confronto e per i doppioni */
+    const {data:vecchie}=await sb.from("gest_prezzi_propri")
+      .select("id,codice,descrizione,prezzo_unitario,fonte")
+      .eq("user_id",sbUid).is("eliminato_il",null).limit(20000);
+    pzPend={file:file.name, voci:voci, saltate:saltate, tagliate:Math.max(0,dati.length-PZ_IMP_MAX), vecchie:(vecchie||[])};
+
+    const fonti=Array.from(new Set(pzPend.vecchie.map(x=>x.fonte).filter(Boolean))).sort((a,b)=>a.localeCompare(b,"it"));
+    $("#pz-esito").innerHTML=
+      '<div class="sh-b" style="border-left:4px solid var(--acc,#1f6f5c)">'
+      +'<div class="sh-tit">Ho letto '+voci.length+' voci da '+esc(file.name)+'</div>'
+      +(pzPend.tagliate?('<div class="sh-nota">Il file ne ha '+dati.length+': ne leggo le prime '+PZ_IMP_MAX+'.</div>'):'')
+      +(saltate?('<div class="sh-nota">'+saltate+' righe non hanno una descrizione e le salto (titoli, righe vuote, totali).</div>'):'')
+      +'<div class="field"><label>Come si chiama questa tariffa?</label>'
+      +  '<input id="pz-nome"'+_noAuto()+' value="'+esc(_pzNomeDaFile(file.name))+'" placeholder="Es. Tariffa Regione Lazio 2025"></div>'
+      +'<div class="sh-nota">È il nome che vedrai nella tendina quando fai un computo, e quello che finisce sul documento.</div>'
+      +(fonti.length
+        ? '<div class="field"><label>Questa aggiorna una tariffa che hai già?</label><select id="pz-agg">'
+          +'<option value="">— no, è una tariffa nuova —</option>'
+          +fonti.map(f=>'<option value="'+esc(f)+'">'+esc(f)+'</option>').join("")
+          +'</select></div>'
+        : '')
+      +'<div id="pz-confronto"></div>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'
+      +  '<button type="button" class="btn-primary quick-add" data-action="pz-vai">Importa le '+voci.length+' voci</button>'
+      +  '<button type="button" class="btn-ghost quick-add" data-action="pz-annulla">Annulla</button>'
+      +'</div></div>';
+    const sa=$("#pz-agg");
+    if(sa)sa.onchange=pzConfronta;
+    const ni=$("#pz-nome");if(ni){ni.focus();ni.select();}
+  }
+
+  /* il confronto con la tariffa vecchia: si accoppiano per CODICE, che e'
+     l'unica cosa che resta uguale fra un anno e l'altro. Le descrizioni le
+     riscrivono sempre. */
+  function pzConfronta(){
+    const box=$("#pz-confronto");if(!box||!pzPend)return;
+    const vecchia=($("#pz-agg")&&$("#pz-agg").value)||"";
+    if(!vecchia){box.innerHTML="";return;}
+    const V=pzPend.vecchie.filter(x=>x.fonte===vecchia);
+    const chi=x=>_ppPiatto(x.codice||"").replace(/\s/g,"");
+    const mapV={};V.forEach(x=>{const k=chi(x);if(k)mapV[k]=x;});
+    let uguali=0,cambiati=0,nuove=0;const esempi=[];
+    pzPend.voci.forEach(n=>{
+      const k=chi(n);const v=k?mapV[k]:null;
+      if(!v){nuove++;return;}
+      const d=Math.round(((+n.prezzo_unitario||0)-(+v.prezzo_unitario||0))*100)/100;
+      if(d===0){uguali++;return;}
+      cambiati++;
+      if(esempi.length<3)esempi.push(esc(n.codice||"")+": "+eur2(v.prezzo_unitario)+" → <b>"+eur2(n.prezzo_unitario)+"</b>");
+    });
+    const codiciNuovi=new Set(pzPend.voci.map(chi).filter(Boolean));
+    const sparite=V.filter(x=>chi(x)&&!codiciNuovi.has(chi(x))).length;
+    box.innerHTML='<div class="sh-nota" style="border-left:3px solid var(--bordo);padding-left:10px">'
+      +'<b>Rispetto a «'+esc(vecchia)+'»</b> ('+V.length+' voci):<br>'
+      +cambiati+' prezzi cambiati · '+uguali+' uguali · '+nuove+' voci nuove · '+sparite+' non ci sono più'
+      +(esempi.length?('<br><small>'+esempi.join(' · ')+'</small>'):'')
+      +'</div>'
+      +'<div class="field"><label>E della vecchia che ne faccio?</label><div class="seg" id="pz-vecchia">'
+      +'<button data-v="tieni" class="on">Tienila</button>'
+      +'<button data-v="cestino">Mettila nel cestino</button></div>'
+      +'<div class="sh-nota">Tenerle tutte e due serve se hai computi in corso con i prezzi vecchi: le scegli dalla tendina. I computi già fatti non cambiano in nessun caso.</div></div>';
+    bindSeg("pz-vecchia");
+  }
+  function pzAnnullaImport(){
+    pzPend=null;
+    _pzEsito("Importazione annullata. Non ho toccato niente.");
+  }
+
+  async function pzEsegui(){
+    if(!pzPend){toast("Scegli prima un file");return;}
+    const nome=String(($("#pz-nome")&&$("#pz-nome").value)||"").trim();
+    if(!nome){toast("Dai un nome a questa tariffa");return;}
+    const vecchia=($("#pz-agg")&&$("#pz-agg").value)||"";
+    const inCestino=(vecchia&&segVal("pz-vecchia")==="cestino");
+
+    /* la vecchia va nel cestino PRIMA, con una sola richiesta: js/cestino.js
+       trasforma il delete in una data, quindi si recupera tutto */
+    if(inCestino){
+      _pzEsito("Metto «"+esc(vecchia)+"» nel cestino…");
+      const {error}=await sb.from("gest_prezzi_propri").delete()
+        .eq("user_id",sbUid).eq("fonte",vecchia);
+      if(error){_pzEsito("Non riesco a mettere via la tariffa vecchia: "+esc(error.message),"err");return;}
+    }
+    /* doppioni: solo dentro la STESSA tariffa. Lo stesso codice in due regioni
+       diverse e' normale e non va tolto. */
+    const gia=new Set(pzPend.vecchie.filter(x=>x.fonte===nome&&!(inCestino&&x.fonte===vecchia))
+      .map(x=>_ppPiatto((x.codice||"")+"§"+(x.descrizione||""))));
+    const nuove=[];let doppie=0;
+    pzPend.voci.forEach(v=>{
+      const k=_ppPiatto((v.codice||"")+"§"+v.descrizione);
+      if(gia.has(k)){doppie++;return;}
+      gia.add(k);
+      nuove.push(Object.assign({user_id:sbUid,fonte:nome},v));
     });
     if(!nuove.length){
-      _pzEsito("Non ho trovato niente di nuovo da importare. Righe lette: "+dati.length
-        +(doppie?(" · "+doppie+" c'erano già"):"")+(saltate?(" · "+saltate+" senza descrizione"):"")+".","err");
+      _pzEsito("Non c'era niente di nuovo da importare: tutte le "+doppie+" voci erano già dentro «"+esc(nome)+"».","err");
       return;
     }
-    /* a blocchi: mandarne tremila in una volta sola non passa */
     let messe=0;
     for(let i=0;i<nuove.length;i+=200){
       const pezzo=nuove.slice(i,i+200);
       const {error}=await sb.from("gest_prezzi_propri").insert(pezzo);
       if(error){
         _pzEsito("Importate "+messe+" voci, poi il database si è fermato: "+esc(error.message),"err");
-        ppTutte=[];rinfresca("prezzario");
+        ppTutte=[];pzPend=null;rinfresca("prezzario");
         return;
       }
       messe+=pezzo.length;
       _pzEsito("Sto caricando… "+messe+" di "+nuove.length);
     }
-    ppTutte=[];
-    _pzEsito("<b>Importate "+messe+" voci</b> da "+esc(file.name)+"."
+    ppTutte=[];pzPend=null;
+    _pzEsito("<b>Importate "+messe+" voci</b> nella tariffa «"+esc(nome)+"»."
       +(doppie?(" "+doppie+" c'erano già e non le ho rifatte."):"")
-      +(saltate?(" "+saltate+" righe saltate perché senza descrizione."):"")
-      +" Adesso le ritrovi nel computo cercando una parola.");
+      +(inCestino?(" La tariffa «"+esc(vecchia)+"» è nel Cestino: se serve la rimetti a posto da lì."):"")
+      +" Adesso la scegli dalla tendina quando fai un computo.");
     rinfresca("prezzario");
-    toast("Prezzario importato: "+messe+" voci ✔");
+    toast("Tariffa importata: "+messe+" voci ✔");
   }
 
   /* ============================================================
@@ -11154,6 +11301,8 @@
     if(a==="save-prezzo")return savePrezzo(id);
     if(a==="del-prezzo")return delPrezzo(id);
     if(a==="pz-importa")return pzApriFile();
+    if(a==="pz-vai")return pzEsegui();
+    if(a==="pz-annulla")return pzAnnullaImport();
     if(a==="comp-filtro"){compFiltro=t.dataset.v;renderComputi();return;}
     if(a==="comp-cap-apri"){compCapNuovo=true;renderCompVoci(compVociCompId);return;}
     if(a==="comp-cap-annulla"){compCapNuovo=false;renderCompVoci(compVociCompId);return;}
