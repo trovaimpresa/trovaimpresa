@@ -844,7 +844,15 @@
     "🏠":'<path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/>',
     "🪜":'<path d="M8 3v18"/><path d="M16 3v18"/><path d="M8 8h8"/><path d="M8 13h8"/><path d="M8 18h8"/>',
     "🏗":'<path d="M3 21h18"/><path d="M6 21V7l9-4v18"/><path d="M6 11h9"/><path d="M15 7h4v4"/>',
-    "🔌":'<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M6 8h12v4a6 6 0 0 1-12 0Z"/>'
+    "🔌":'<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M6 8h12v4a6 6 0 0 1-12 0Z"/>',
+    /* 10 agosto 2026 — le tre dei Computi metrici.
+       Senza di loro Windows disegnava 🏷 come un quadratino minuscolo in bianco
+       e nero, perche' e' un'emoji "da testo" che senza il selettore di variante
+       non diventa colorata. Come icona SVG il problema non esiste piu', e sta
+       in fila con tutte le altre. */
+    "📐":'<path d="M4 4v16h16"/><path d="M4 4 20 20"/>',
+    "🏷":'<path d="M20.6 12.4 12.4 20.6a2 2 0 0 1-2.8 0l-7.2-7.2A2 2 0 0 1 2 12V4a2 2 0 0 1 2-2h8a2 2 0 0 1 1.4.6l7.2 7.2a2 2 0 0 1 0 2.6Z"/><path d="M7 7h.01"/>',
+    "🏛":'<path d="M3 22h18"/><path d="m12 3 9 6H3Z"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/>'
   };
   const _EMO_KEYS=Object.keys(_ICONS).join("|");
   const _EMO_RE=new RegExp("("+_EMO_KEYS+")️?","g");
