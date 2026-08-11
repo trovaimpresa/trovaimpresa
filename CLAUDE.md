@@ -3058,3 +3058,96 @@ l'hover non esiste — servirebbe comunque qualcosa di visibile).
   supabase-js va in errore DOPO che la riga è stata scritta.
 - **Quando si copia una gerarchia, non fidarsi dell'ordine delle righe restituite**
   dall'insert multiplo: riappaiare per un dato stabile (qui ordine + titolo).
+
+# 11 agosto 2026 (sera, 4) — COMPUTO: SPOSTARE UNA LAVORAZIONE SU E GIÙ
+
+Era il punto 1 della lista «cosa resta» scritta due ore prima. Adesso è fatto.
+
+## Il problema, in una riga
+
+`ordine` si scriveva alla creazione della voce e non si toccava più. Una lavorazione
+dimenticata restava in fondo al suo capitolo **per sempre**, e l'unico modo di rimetterla al
+posto giusto era cancellarla e riscriverla — perdendo tutte le sue misure. Un computo si
+controlla contro i disegni seguendo l'ordine: se l'ordine non si tocca, non si controlla.
+
+## Cosa si vede adesso
+
+Ogni riga di lavorazione ha due frecce, ↑ e ↓, prima della ×. Compaiono **solo se il capitolo
+ha più di una lavorazione**. In cima la ↑ è spenta, in fondo la ↓: spente si vedono lo stesso
+(`opacity:.25`), così i pulsanti non ballano da una riga all'altra.
+
+Le frecce spostano **dentro il capitolo**. Per cambiare capitolo si apre la lavorazione e si
+sceglie dalla tendina: sono due gesti diversi, e tenerli separati evita di spostare una voce in
+un altro capitolo per sbaglio.
+
+## Il codice — `compVoceSposta(id, verso)`, righe ~9934
+
+`verso` = −1 in su, +1 in giù. La parte che conta è **come si riscrive `ordine`**, e perché non
+basta scambiare due numeri:
+
+- `ordine` è dell'**intero computo**, non del capitolo. Si prendono i numeri che il gruppo ha
+  GIÀ, si rimescolano le voci nell'ordine nuovo e si **ridistribuiscono gli stessi numeri**:
+  così il gruppo non invade lo spazio degli altri capitoli e non nascono doppioni.
+- Se due voci avessero per sbaglio lo stesso numero (computi vecchi), scambiarli non farebbe
+  niente e il pulsante sembrerebbe rotto → in quel caso si **rinumera** il gruppo da `min` in
+  poi prima di ridistribuire. Provato: due voci a `ordine=3` diventano 3 e 4 e si spostano.
+- Si scrive **solo** quello che cambia (`daScrivere`), con `.eq("user_id",sbUid).select("id")`:
+  se torna zero righe modificate lo dice invece di far finta di aver spostato.
+
+Nel `render`: `rigaVoce(v,i,tot)` + `bottoneFreccia(v,verso,primo,ultimo)`; il gruppo si disegna
+con `g.voci.map((v,i)=>rigaVoce(v,i,g.voci.length))`.
+
+Dispatcher (righe ~11951):
+
+    if(a==="comp-voce-su")return compVoceSposta(id,-1);
+    if(a==="comp-voce-giu")return compVoceSposta(id,1);
+
+## ⚠️ La freccia spenta è `disabled`, non «senza azione»
+
+La riga della lavorazione ha lei stessa `data-action="comp-voce"`. Un bottone senza azione
+lascia **rimbalzare il click sulla riga**: cliccavi la ↑ della prima voce e ti si apriva la
+lavorazione. Con `disabled` il click non parte proprio e non bulla. Provato apposta:
+«e non apre per sbaglio la lavorazione».
+
+## Provato con `/root/prova/sposta.py` — 25 controlli, tutti verdi
+
+Finto Supabase che scrive davvero (`scrivibile.py`), computo con 3 capitoli da 1, 2 e 3
+lavorazioni:
+
+- frecce assenti nel capitolo da una voce sola; ↑ spenta sulla prima, ↓ spenta sull'ultima,
+  vive in mezzo; le spente non hanno azione appesa
+- ↓ sposta e **l'ordine cambia nel database**; ↑ la riporta esatta dov'era
+- dal fondo alla cima un passo alla volta, e le frecce si spengono di conseguenza
+- misure, importi, capitolo di appartenenza e **totale del computo** invariati
+- l'unica tabella scritta è `gest_computo_voci`
+- il caso RIFIUTATO: la ↑ della prima non fa niente, **non scrive** e non apre la lavorazione
+- ordini duplicati nel database → rinumera invece di bloccarsi
+- il resto del computo funziona ancora (nuova lavorazione, riapertura, click sulla riga)
+
+Regressione: `collaudo.py` 39/39, `dup.py`, `rinomina.py`, `qzero.py` tutti verdi, `computo.py`
+genera il PDF senza errori JS.
+
+## Il nuovo ordine arriva anche sul PDF e sul preventivo
+
+Verificato che tutte e tre le letture di `gest_computo_voci_calc` che contano sono
+`.order("ordine")`: la schermata (riga ~9796), il PDF (~11033) e `computoAPreventivo` (~10933).
+Sposti a schermo, esce spostato dappertutto.
+
+## Una cosa imparata sul finto Supabase
+
+`scrivibile.py` **non ordinava**: rispondeva nell'ordine in cui le righe stanno nella lista
+Python. Una prova sull'ordine, lì sopra, non valeva niente — avrebbe detto «ok» comunque.
+Adesso onora `order=campo.desc` come PostgREST. Regola generale: **il finto database deve
+sbagliare dove sbaglia quello vero, e ordinare dove ordina quello vero**, se no il collaudo
+misura il finto.
+
+## Cosa resta della lista
+
+Il punto 1 è chiuso. Restano: duplicare una singola lavorazione con le misure; IVA / quadro
+economico; analisi prezzi ed elenco prezzi unitari; esportazione in Excel; unità di misura dei
+prezzari importati (`ppUsa`).
+
+## Da guardare, se dà fastidio
+
+In un capitolo con una lavorazione sola le frecce non ci sono, quindi la × di quella riga sta
+un po' più a destra delle altre. Si nota solo se i capitoli si guardano uno sotto l'altro.

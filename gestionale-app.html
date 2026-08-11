@@ -9812,14 +9812,41 @@
     const compQui=compCache.find(x=>String(x.id)===String(computoId))||{};
     const rp=compRiepilogo(compVociCache,compQui);
 
-    const rigaVoce=v=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
+    /* ⚠️ 11 agosto 2026 — LE FRECCE PER SPOSTARE UNA LAVORAZIONE.
+       Prima l'ordine era quello in cui le avevi scritte, PER SEMPRE: una voce
+       dimenticata restava in fondo al suo capitolo e l'unico modo di rimetterla
+       al posto giusto era cancellarla e riscriverla — perdendo tutte le sue
+       misure. Un computo si controlla contro i disegni seguendo l'ordine: se
+       l'ordine non si tocca, non si controlla.
+       Le frecce spostano DENTRO il capitolo. Per cambiare capitolo si apre la
+       lavorazione e si sceglie dalla tendina: sono due gesti diversi e tenerli
+       separati evita di spostare una voce in un altro capitolo per sbaglio.
+       In cima la freccia su è spenta, in fondo quella giù: spente si vedono
+       lo stesso, così i pulsanti non ballano da una riga all'altra. */
+    const frecciaSpenta='opacity:.25;cursor:default';
+    const frecciaViva='cursor:pointer';
+    const bottoneFreccia=(v,verso,primo,ultimo)=>{
+      const spenta=(verso<0?primo:ultimo);
+      /* La freccia spenta è disabled: così il click non rimbalza sulla riga
+         (che ha data-action="comp-voce") aprendo la lavorazione per sbaglio. */
+      return '<button type="button"'
+        +(spenta?' disabled':' data-action="comp-voce-'+(verso<0?"su":"giu")+'" data-id="'+esc(String(v.id))+'"')
+        +' title="'+(spenta?(verso<0?"È già la prima del capitolo":"È già l\'ultima del capitolo")
+                           :("Sposta "+(verso<0?"in su":"in giù")))+'"'
+        +' style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);'
+        +'color:var(--testo,#22303f);border-radius:8px;min-width:34px;height:34px;'
+        +'font-size:16px;line-height:1;flex:0 0 auto;'+(spenta?frecciaSpenta:frecciaViva)+'">'
+        +(verso<0?"↑":"↓")+'</button>';
+    };
+    const rigaVoce=(v,i,tot)=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
       +'<span>'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
       +  '<small class="sp-forn">'+_misTesto(v.quantita)+(v.unita?" "+esc(v.unita):"")
       +    ' × '+eur2(v.prezzo_unitario)
       +    (v.quantita_manuale?' · a corpo':(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
       +  '</small></span>'
       +'<b>'+eur2(v.importo)+'</b>'
-      +'<button type="button" class="rdel" data-action="comp-voce-del" data-id="'+esc(String(v.id))+'" title="Elimina la lavorazione">×</button></div>';
+      +(tot>1?bottoneFreccia(v,-1,i===0,i===tot-1)+bottoneFreccia(v,1,i===0,i===tot-1):"")
+      +'<button type="button" class="rdel" data-action="comp-voce-del" data-id="'+esc(String(v.id))+'" title="Elimina la lavorazione" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--err,#c0392b);border-radius:8px;min-width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;flex:0 0 auto">×</button></div>';
 
     let h="";
     gruppi.forEach(g=>{
@@ -9854,7 +9881,7 @@
       }else if(compCapCache.length&&g.voci.length){
         h+='<div class="spesa-row" style="background:var(--sfondo,#f5f6f8)"><span><b>Senza capitolo</b></span><b>'+eur2(sub)+'</b><span></span></div>';
       }
-      h+= g.voci.length ? g.voci.map(rigaVoce).join("")
+      h+= g.voci.length ? g.voci.map((v,i)=>rigaVoce(v,i,g.voci.length)).join("")
         : '<p class="fatt-empty">Nessuna lavorazione'+(g.cap?" in questo capitolo":"")+'.</p>';
     });
 
@@ -9891,6 +9918,50 @@
       +'<div class="sh-nota">Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.</div>';
     if(compCapNuovo){const i=$("#cc-tit");if(i)i.focus();}
     if(compCapEdit){const i=$("#ce-tit");if(i){i.focus();i.select();}}
+  }
+
+  /* Sposta una lavorazione di un posto dentro il suo capitolo.
+     verso = -1 in su, +1 in giù.
+
+     COME SI SCAMBIA L'ORDINE, e perché non basta scambiare due numeri.
+     Il campo "ordine" è dell'intero computo, non del capitolo. Si prendono i
+     numeri che il gruppo ha GIÀ, si rimescolano le lavorazioni nell'ordine
+     nuovo e si ridistribuiscono gli stessi numeri: così il gruppo non invade
+     lo spazio degli altri capitoli e non nascono doppioni.
+     Se due lavorazioni avessero per sbaglio lo stesso numero, scambiarli non
+     farebbe niente e il pulsante sembrerebbe rotto: in quel caso si rinumera
+     il gruppo da capo, a partire dal più piccolo. */
+  async function compVoceSposta(id,verso){
+    if(!sb||!sbUid||!compVociCompId)return;
+    const v=compVociCache.find(x=>String(x.id)===String(id));
+    if(!v)return;
+    const gruppo=compVociCache
+      .filter(x=>String(x.capitolo_id||"")===String(v.capitolo_id||""))
+      .slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0));
+    const i=gruppo.findIndex(x=>String(x.id)===String(id));
+    const j=i+verso;
+    if(i<0||j<0||j>=gruppo.length)return;      /* già in cima o in fondo */
+
+    let numeri=gruppo.map(x=>+x.ordine||0);
+    if(new Set(numeri).size!==numeri.length){
+      const m=Math.min.apply(null,numeri);
+      numeri=gruppo.map((_,k)=>m+k);
+    }
+    const nuovo=gruppo.slice();
+    nuovo.splice(j,0,nuovo.splice(i,1)[0]);
+
+    /* si scrive solo quello che cambia davvero */
+    const daScrivere=[];
+    nuovo.forEach((x,k)=>{ if((+x.ordine||0)!==numeri[k])daScrivere.push({id:x.id,ordine:numeri[k]}); });
+    if(!daScrivere.length)return;
+
+    const esiti=await Promise.all(daScrivere.map(r=>
+      sb.from("gest_computo_voci").update({ordine:r.ordine}).eq("id",r.id).eq("user_id",sbUid).select("id")));
+    const guaio=esiti.find(e=>e.error);
+    if(guaio){toast("Non spostata: "+guaio.error.message);return;}
+    if(esiti.some(e=>!e.data||!e.data.length)){toast("Non spostata: nessuna riga modificata. Riprova.");return;}
+
+    await renderCompVoci(compVociCompId);
   }
 
   /* Rinomina (e rinumera) un capitolo. Le lavorazioni non si toccano: restano
@@ -11879,6 +11950,8 @@
     if(a==="comp-voce-new")return compVoceForm(null);
     if(a==="comp-voce")return compVoceForm(id);
     if(a==="comp-voce-del")return compVoceDel(id);
+    if(a==="comp-voce-su")return compVoceSposta(id,-1);
+    if(a==="comp-voce-giu")return compVoceSposta(id,1);
     if(a==="comp-voce-salva")return compVoceSalva(id);
     if(a==="comp-torna")return compTornaAlComputo();
     if(a==="comp-mis-add")return compMisAdd(id);
