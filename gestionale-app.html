@@ -9482,6 +9482,7 @@
   function compVoci(c){
     return [{lab:"✏ Apri il computo",action:"edit-computo",data:{id:c.id}},
             {lab:"📄 Scarica il PDF",action:"comp-pdf",data:{id:c.id}},
+            {lab:"⧉ Duplica",action:"comp-dup",data:{id:c.id}},
             {lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}];
   }
   /* la scheda dell'elenco: passa da schedaJob, la scheda unica di tutte le
@@ -11256,6 +11257,174 @@
     toast(id?"Computo salvato ✔":"Computo creato ✔");
   }
 
+  /* ===== 11 agosto 2026 — DUPLICARE UN COMPUTO =====
+     Due appartamenti uguali, la stessa palazzina con tre scale, lo stesso tipo
+     di intervento su un altro edificio: senza questo si ribatte tutto da capo,
+     capitolo per capitolo, lavorazione per lavorazione, misura per misura. È
+     la funzione che fa la differenza fra "carino" e "me lo tengo".
+
+     COSA SI PORTA DIETRO
+     - il computo: titolo con «(copia)», oggetto, luogo, prezzario, ribasso,
+       tipo (privato/pubblico) e note
+     - il CLIENTE sì, la PRATICA no. Due appartamenti dello stesso condominio
+       hanno lo stesso cliente ma non lo stesso lavoro: agganciare due computi
+       alla stessa pratica farebbe contare due volte nel Riepilogo.
+     - tutti i capitoli, con numero, titolo e ordine
+     - tutte le lavorazioni, riattaccate al capitolo GIUSTO della copia (non a
+       quello dell'originale: è il punto dove è più facile sbagliare)
+     - le misure solo se lo chiedi
+
+     LA COPIA NASCE SEMPRE IN BOZZA e con la data di oggi, anche se
+     l'originale era definitivo: una copia appena fatta non è un documento
+     chiuso, e datarla come l'originale sarebbe una bugia sul foglio.
+
+     SE QUALCOSA VA STORTO A METÀ, la copia mezza fatta si butta via da sola:
+     restare con un computo con i capitoli e senza le lavorazioni sarebbe
+     peggio che non averlo copiato. */
+  async function compDuplica(id){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const c=compCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Computo non trovato");return;}
+
+    /* quante misure ci sono davvero: se non ce n'è nessuna non ha senso
+       chiedere se copiarle */
+    const {data:vv,error:eV}=await sb.from("gest_computo_voci")
+      .select("*").eq("computo_id",id).eq("user_id",sbUid).order("ordine");
+    if(eV){toast("Errore: "+eV.message);return;}
+    const voci=vv||[];
+    const idVoci=voci.map(v=>v.id);
+    let mis=[];
+    if(idVoci.length){
+      const {data:mm,error:eM}=await sb.from("gest_computo_misure")
+        .select("*").eq("user_id",sbUid).in("voce_id",idVoci).order("ordine");
+      if(eM){toast("Errore: "+eM.message);return;}
+      mis=mm||[];
+    }
+
+    let conMisure=false;
+    if(mis.length){
+      conMisure=gconfirm("Copio anche le misure?\n\n"
+        +"SÌ  → il computo nuovo arriva identico, con tutte le "+mis.length+" misure già dentro. "
+        +"Serve quando il lavoro è lo stesso (il secondo appartamento uguale) e devi solo correggere quello che cambia.\n\n"
+        +"NO  → arrivano capitoli, lavorazioni, prezzi e unità di misura, ma le quantità partono da zero. "
+        +"Serve quando è lo stesso tipo di lavoro su un edificio diverso.");
+    }else{
+      if(!gconfirm("Faccio una copia del computo «"+(c.titolo||"")+"»?"))return;
+    }
+
+    const {data:cap,error:eC}=await sb.from("gest_computo_capitoli")
+      .select("*").eq("computo_id",id).eq("user_id",sbUid).order("ordine");
+    if(eC){toast("Errore: "+eC.message);return;}
+    const capitoli=cap||[];
+
+    /* 1) il computo nuovo */
+    const {data:nuovo,error:e1}=await sb.from("gest_computi").insert({
+      user_id:sbUid, mestiere_id:curMestiere(),
+      cliente_id:c.cliente_id||null,
+      lavoro_id:null, preventivo_id:null,   /* la pratica NON si eredita */
+      numero:null,                          /* lo metti tu: non invento un numero doppio */
+      data:todayStr(), stato:"bozza",
+      titolo:((c.titolo||"Computo")+" (copia)").slice(0,200),
+      oggetto:c.oggetto||null, luogo:c.luogo||null, note:c.note||null,
+      tipo:c.tipo||"privato",
+      prezzario:c.prezzario||null, prezzario_anno:c.prezzario_anno||null,
+      ribasso_perc:c.ribasso_perc!=null?c.ribasso_perc:null
+    }).select("id").single();
+    if(e1||!nuovo){
+      toast(_compManca(e1)
+        ? "Prima serve l'aggiornamento del database: esegui sql/gest-computo-metrico.sql su Supabase"
+        : "Copia non riuscita: "+((e1&&e1.message)||"nessuna riga scritta"));
+      return;
+    }
+    const nid=nuovo.id;
+
+    /* Da qui in poi, se salta qualcosa si butta via la copia a metà.
+       ⚠️ SI PASSA DALLA PORTA DI SERVIZIO (sb.raw), NON DA sb.from.
+       Su gest_computi il Cestino trasforma ogni cancellazione in una data:
+       con sb.from la copia mezza fatta non sparirebbe, finirebbe NEL CESTINO,
+       e Alessio se la ritroverebbe lì come se l'avesse buttata lui. Qui invece
+       la riga è nata due secondi fa da noi ed è incompleta: va tolta davvero,
+       e i capitoli già scritti se ne vanno con lei a catena.
+       Trovato provando a far guastare il database a metà copia. */
+    const rinuncia=async(msg)=>{
+      try{
+        await (sb.raw?sb.raw("gest_computi"):sb.from("gest_computi"))
+          .delete().eq("id",nid).eq("user_id",sbUid);
+      }catch(_){}
+      toast("Copia non riuscita: "+msg+". Non è rimasto niente a metà.");
+    };
+
+    try{
+      /* 2) i capitoli, tenendo la mappa vecchio -> nuovo */
+      const mappaCap={};
+      if(capitoli.length){
+        const {data:nc,error:e2}=await sb.from("gest_computo_capitoli").insert(
+          capitoli.map(k=>({user_id:sbUid,computo_id:nid,ordine:k.ordine,
+                            numero:k.numero,titolo:k.titolo,note:k.note}))
+        ).select("id,ordine,titolo");
+        if(e2)throw e2;
+        /* si riappaiano per ordine+titolo: l'insert di piu' righe restituisce
+           le righe nell'ordine in cui gliele hai date, ma non c'e' scritto da
+           nessuna parte che sia garantito, e sbagliare qui vorrebbe dire
+           lavorazioni finite nel capitolo sbagliato */
+        (nc||[]).forEach(n=>{
+          const orig=capitoli.find(k=>k.ordine===n.ordine&&String(k.titolo||"")===String(n.titolo||"")
+                                      &&!mappaCap[k.id]);
+          if(orig)mappaCap[orig.id]=n.id;
+        });
+        capitoli.forEach((k,i)=>{ if(!mappaCap[k.id]&&nc&&nc[i])mappaCap[k.id]=nc[i].id; });
+      }
+
+      /* 3) le lavorazioni */
+      const mappaVoci={};
+      if(voci.length){
+        const {data:nv,error:e3}=await sb.from("gest_computo_voci").insert(
+          voci.map(v=>({user_id:sbUid,computo_id:nid,
+            capitolo_id:v.capitolo_id?(mappaCap[v.capitolo_id]||null):null,
+            ordine:v.ordine,codice:v.codice,descrizione:v.descrizione,unita:v.unita,
+            prezzo_unitario:v.prezzo_unitario,
+            quantita_manuale:!!v.quantita_manuale,
+            /* la quantità a mano si porta solo se è scritta a mano: quella
+               che viene dalle misure la ricalcola il database */
+            quantita:(conMisure||v.quantita_manuale)?(v.quantita||0):0,
+            incidenza_manodopera:v.incidenza_manodopera,
+            oneri_sicurezza:v.oneri_sicurezza,note:v.note}))
+        ).select("id,ordine,descrizione");
+        if(e3)throw e3;
+        (nv||[]).forEach(n=>{
+          const orig=voci.find(v=>v.ordine===n.ordine&&String(v.descrizione||"")===String(n.descrizione||"")
+                                  &&!mappaVoci[v.id]);
+          if(orig)mappaVoci[orig.id]=n.id;
+        });
+        voci.forEach((v,i)=>{ if(!mappaVoci[v.id]&&nv&&nv[i])mappaVoci[v.id]=nv[i].id; });
+      }
+
+      /* 4) le misure, solo se le hai volute */
+      if(conMisure&&mis.length){
+        const righe=mis.map(m=>({user_id:sbUid,voce_id:mappaVoci[m.voce_id],
+          ordine:m.ordine,descrizione:m.descrizione,parti:m.parti,
+          lunghezza:m.lunghezza,larghezza:m.larghezza,altezza:m.altezza,
+          detrai:!!m.detrai})).filter(r=>r.voce_id);
+        /* a blocchi di 200, come fa l'importazione del prezzario: un computo
+           grosso puo' avere migliaia di misure e in una volta sola non passa */
+        for(let i=0;i<righe.length;i+=200){
+          const {error:e4}=await sb.from("gest_computo_misure").insert(righe.slice(i,i+200));
+          if(e4)throw e4;
+        }
+      }
+    }catch(err){
+      await rinuncia((err&&err.message)||"errore del database");
+      return;
+    }
+
+    await renderComputi();
+    rinfresca("riepilogo");
+    toast("Computo duplicato ✔  "+(conMisure?"misure comprese":"senza le misure"));
+    /* si apre subito la copia: la prima cosa che si fa è cambiarle il titolo */
+    const copia=compCache.find(x=>String(x.id)===String(nid));
+    if(copia)computoForm(copia);
+  }
+
   async function delComputo(id){
     if(!sbUid)return;
     const c=compCache.find(x=>String(x.id)===String(id))||{};
@@ -11642,6 +11811,7 @@
     if(a==="new-computo")return computoForm(null);
     if(a==="edit-computo")return computoForm(compCache.find(c=>String(c.id)===String(id)));
     if(a==="save-computo")return saveComputo(id);
+    if(a==="comp-dup")return compDuplica(id);
     if(a==="del-computo")return delComputo(id);
     if(a==="comp-pdf")return computoPdf(id);
     if(a==="pp-usa")return ppUsa(id);
