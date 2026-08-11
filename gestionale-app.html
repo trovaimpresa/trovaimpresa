@@ -6377,6 +6377,20 @@
   }
 
   const eurPdf=n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0)+" EUR";
+  /* ⚠️ L'UNITÀ DI MISURA NEI PDF — 11 agosto 2026.
+     Il programma che scrive i PDF non sa disegnare il quadratino e il cubetto,
+     e invece di sbagliare LI BUTTA VIA IN SILENZIO: «m²» usciva stampato «m»,
+     «m³» usciva «m». A schermo si leggeva giusto, sul foglio consegnato al
+     cliente no. In un computo metrico è il difetto peggiore possibile:
+     73 metri quadri di intonaco e 73 metri lineari di cornice sono due lavori
+     e due prezzi diversi, e sulla carta si leggevano uguali.
+     Provato dal vivo: l'euro, i gradi e le lettere accentate li scrive
+     benissimo — spariscono SOLO gli esponenti.
+     Nei PDF si scrive quindi «mq» e «mc», come si è sempre scritto sui computi
+     di carta. A schermo restano m² e m³, che sono più belli. */
+  const _umPdf=u=>String(u==null?"":u)
+    .replace(/m²/g,"mq").replace(/m³/g,"mc")
+    .replace(/²/g,"2").replace(/³/g,"3");
   /* Il vecchio contatore delle fatture (uno solo, sul lavoro, che non
      ripartiva mai) è stato tolto: adesso il numero lo assegna la fattura
      quando la emetti, e riparte da 1 ogni anno. Vedi fattAssegnaNumero(). */
@@ -10809,13 +10823,34 @@
     const voci=vv||[];
     if(!voci.length){toast("Il computo è vuoto: aggiungi almeno una lavorazione");return;}
 
-    const righe=voci.map((v,i)=>({
+    /* ⚠️ LA QUANTITÀ ZERO DIVENTAVA UNO — 11 agosto 2026.
+       Una lavorazione inserita ma NON ANCORA MISURATA vale 0 € nel computo,
+       ed è giusto. Ma il preventivo, dovunque faccia i conti, scrive
+       (+r.qta||1): lo zero viene letto come "non scritto" e diventa 1. Quella
+       riga arrivava quindi al cliente a 1 × prezzo unitario. Una voce da
+       1.850 €/corpo gonfiava il preventivo di 1.850 €, e i due documenti dello
+       stesso lavoro smettevano di dire la stessa cifra. Nel PDF del preventivo
+       compariva pure «1» nella colonna quantità, come se fosse voluto.
+       Il ||1 del preventivo NON si tocca: serve alle righe scritte a mano,
+       dove lasciare la quantità vuota vuol dire "una". Si sistema qui, dove
+       si sa che 0 vuol dire "non ancora misurata": si avvisa e non si porta. */
+    const senzaMisure=voci.filter(v=>!(Math.round((+v.quantita||0)*1000)/1000));
+    if(senzaMisure.length){
+      const q=senzaMisure.length;
+      if(!gconfirm(q===1
+        ? "La lavorazione «"+String(senzaMisure[0].descrizione||"senza descrizione").slice(0,60)+"» non ha ancora le misure, quindi vale 0 €.\n\nNel preventivo non la porto: se ci finisse, il cliente se la vedrebbe conteggiata una volta a prezzo pieno.\n\nVuoi creare lo stesso il preventivo con le altre?"
+        : "Ci sono "+q+" lavorazioni senza misure, che valgono 0 €.\n\nNel preventivo non le porto: se ci finissero, il cliente se le vedrebbe conteggiate una volta a prezzo pieno ciascuna.\n\nVuoi creare lo stesso il preventivo con le altre?"))return;
+    }
+    const righe=voci
+      .filter(v=>Math.round((+v.quantita||0)*1000)/1000)
+      .map((v,i)=>({
       user_id:sbUid,
-      descrizione:(v.codice?v.codice+" — ":"")+(v.descrizione||"(senza descrizione)")+(v.unita?"  ("+v.unita+")":""),
+      descrizione:(v.codice?v.codice+" — ":"")+(v.descrizione||"(senza descrizione)")+(v.unita?"  ("+_umPdf(v.unita)+")":""),
       qta:Math.round((+v.quantita||0)*1000)/1000,
       prezzo:+v.prezzo_unitario||0,
       ordine:i
     })).filter(r=>r.descrizione);
+    if(!righe.length){toast("Nessuna lavorazione ha le misure: il preventivo sarebbe vuoto");return;}
 
     const rp=compRiepilogo(voci,c);
     if(rp.perc&&rp.ribasso){
@@ -10906,6 +10941,18 @@
     const M=X[0], R=X[10], FONDO=270;
     const mid=(a,b)=>(X[a]+X[b])/2;
 
+    /* ⚠️ IL METRO QUADRO CHE DIVENTAVA METRO — 11 agosto 2026.
+       Il programma che scrive i PDF non sa disegnare il quadratino e il
+       cubetto, e invece di sbagliare LI BUTTA VIA IN SILENZIO: "m²" usciva
+       stampato "m", "m³" usciva "m". A schermo si leggeva giusto, sul foglio
+       consegnato al cliente no. In un computo metrico e' il difetto peggiore
+       possibile: 73 metri quadri di intonaco e 73 metri lineari di cornice
+       sono due lavori e due prezzi diversi, e sulla carta si leggevano uguali.
+       Provato: l'euro, i gradi e le lettere accentate li scrive benissimo,
+       sono SOLO gli esponenti a sparire.
+       Nel PDF quindi si scrive "mq" e "mc", che e' come si e' sempre scritto
+       sui computi di carta. A schermo resta m² e m³, che e' piu' bello. */
+    const _um=_umPdf;
     const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
     const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3}).format(+n||0);
     const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
@@ -10964,6 +11011,16 @@
       doc.setFont("helvetica","normal");
     }
     const spazio=h=>{if(y+h>FONDO)nuovaPagina();};
+    /* ⚠️ DOPO CHE LA TABELLA È CHIUSA SI USA QUESTO, NON spazio() — 11/8/2026.
+       spazio() chiama nuovaPagina(), che richiude la tabella una seconda volta
+       (tirando le righe verticali giù nel vuoto), scrive «A riportare» quando
+       non c'è più niente da riportare, e apre il foglio dopo stampando
+       l'INTESTAZIONE DI UNA TABELLA VUOTA più un «Riporto». Il riepilogo dei
+       capitoli e il riquadro dei totali finivano stampati là sotto, e l'ultima
+       pagina sembrava un documento venuto male. Visto guardando il PDF, non
+       leggendo il codice.
+       Qui la tabella non c'è più: se non ci sta, si volta pagina e basta. */
+    const spazioFuoriTabella=h=>{if(y+h>FONDO){doc.addPage();y=16;}};
 
     /* ---- intestazione, solo sulla prima pagina ---- */
     y=14;
@@ -11043,7 +11100,7 @@
         doc.setDrawColor(110);doc.line(X[6],y+0.4,R,y+0.4);
         doc.setFont("helvetica","bold");doc.setFontSize(7.3);
         doc.text("Sommano",X[7]-1.5,y+3.6,{align:"right"});
-        doc.text((v.unita?v.unita+"  ":"")+_q3(v.quantita),X[8]-1.5,y+3.6,{align:"right"});
+        doc.text((v.unita?_um(v.unita)+"  ":"")+_q3(v.quantita),X[8]-1.5,y+3.6,{align:"right"});
         doc.text(_eur(v.prezzo_unitario),X[9]-1.5,y+3.6,{align:"right"});
         doc.text(_eur(v.importo),R-1.5,y+3.6,{align:"right"});
         y+=5;
@@ -11070,32 +11127,57 @@
     y+=9;
 
     /* ---- riepilogo dei capitoli e totale ---- */
-    spazio(24+sub.length*5);
+    spazioFuoriTabella(24+sub.length*5);
     doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Riepilogo dei capitoli",M,y);y+=5.5;
     doc.setFont("helvetica","normal");doc.setFontSize(8.5);
-    sub.forEach(s=>{spazio(8);doc.text(s.t,M+2,y,{maxWidth:120});doc.text(_eur(s.v),R-1.5,y,{align:"right"});y+=4.8;});
+    sub.forEach(s=>{spazioFuoriTabella(8);doc.text(s.t,M+2,y,{maxWidth:120});doc.text(_eur(s.v),R-1.5,y,{align:"right"});y+=4.8;});
     y+=3;
 
-    /* col ribasso il riquadro ha tre righe, senza ne ha una sola: ripetere due
-       volte lo stesso numero fa solo venire il dubbio che siano diversi */
+    /* ⚠️ IL RIQUADRO DEVE TORNARE CON LA CALCOLATRICE — 11 agosto 2026.
+       Prima usciva così:
+           Totale dei lavori                          8.468,05
+           Oneri sicurezza (non soggetti a ribasso)      75,00
+           Ribasso 10%                              -   839,31
+           TOTALE                                     7.628,74
+       Chi lo riceve somma e trova 7.703,74, cioè 75 euro in più. Il totale
+       scritto era quello giusto — gli oneri della sicurezza sono GIÀ DENTRO
+       il totale dei lavori, non si sommano una seconda volta — ma sul foglio
+       sembravano una somma. A schermo era scritto bene («di cui»); nel PDF
+       quel «di cui» non c'era. Su un computo per una gara è la prima cosa che
+       ti fanno rispiegare.
+       Adesso le righe si sommano una sotto l'altra, nell'ordine, e il conto
+       torna: si toglie la sicurezza dal ribassabile, si applica il ribasso,
+       si rimette la sicurezza. È il modo in cui il computo si è sempre
+       presentato su carta. */
     const righeTot=[];
     if(rp.perc){
-      righeTot.push(["Totale dei lavori",rp.lordo,false]);
-      if(rp.sicurezza)righeTot.push(["Oneri sicurezza (non soggetti a ribasso)",rp.sicurezza,false]);
-      righeTot.push(["Ribasso "+_pct(rp.perc)+"%",rp.ribasso,true]);
+      if(rp.sicurezza){
+        righeTot.push(["Totale dei lavori",rp.lordo,false]);
+        righeTot.push(["a dedurre oneri della sicurezza",rp.sicurezza,true]);
+        righeTot.push(["Importo soggetto a ribasso",rp.lordo-rp.sicurezza,false]);
+        righeTot.push(["Ribasso "+_pct(rp.perc)+"%",rp.ribasso,true]);
+        righeTot.push(["Oneri della sicurezza, non ribassabili",rp.sicurezza,false,true]);
+      }else{
+        righeTot.push(["Totale dei lavori",rp.lordo,false]);
+        righeTot.push(["Ribasso "+_pct(rp.perc)+"%",rp.ribasso,true]);
+      }
     }
     const hBox=righeTot.length*5.6+15;
-    spazio(hBox+4);
+    spazioFuoriTabella(hBox+4);
     doc.setDrawColor(31,111,92);doc.setLineWidth(.5);doc.rect(R-92,y,92,hBox);doc.setLineWidth(.2);
     let ry=y+6.5;doc.setFont("helvetica","normal");doc.setFontSize(8.5);
-    righeTot.forEach(r=>{doc.text(r[0],R-90,ry,{maxWidth:56});doc.text((r[2]?"- ":"")+_eur(r[1]),R-2,ry,{align:"right"});ry+=5.6;});
+    /* la colonna dell'etichetta è larga 62 mm, non 56: con 56 la riga
+       «Oneri della sicurezza, non ribassabili» andava a capo e finiva
+       stampata sopra la riga sotto */
+    righeTot.forEach(r=>{doc.text(r[0],R-90,ry,{maxWidth:62});
+      doc.text((r[2]?"- ":(r[3]?"+ ":""))+_eur(r[1]),R-2,ry,{align:"right"});ry+=5.6;});
     if(righeTot.length){doc.setDrawColor(31,111,92);doc.line(R-90,ry-2.8,R-2,ry-2.8);}
     doc.setFont("helvetica","bold");doc.setFontSize(11);
     doc.text("TOTALE",R-90,ry+4);doc.text(_eur(rp.netto),R-2,ry+4,{align:"right"});
     y+=hBox+7;
 
     if(pubblico&&(rp.manodopera||rp.sicurezza)){
-      spazio(14);
+      spazioFuoriTabella(14);
       doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.text("Da dichiarare in gara",M,y);y+=4.6;
       doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
       doc.text("Costo del personale: "+_eur(rp.manodopera),M,y);y+=4;
