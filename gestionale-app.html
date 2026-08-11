@@ -353,7 +353,16 @@
      punto delle migliaia e usciva "1000,00 €" invece di "1.000,00 €". */
   const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0,useGrouping:true}).format(n||0);
   const fdate=d=>{if(!d)return"—";const[y,m,g]=d.split("-");return g+"/"+m+"/"+y;};
-  const todayStr=()=>new Date().toISOString().slice(0,10);
+  /* 11 agosto 2026 — L'OROLOGIO DI GREENWICH FACEVA VIVERE IERI.
+     Prima: new Date().toISOString().slice(0,10). toISOString dà l'ora di
+     Greenwich, che d'estate è indietro di due ore rispetto all'Italia. Fra
+     mezzanotte e le due il gestionale era ancora al GIORNO PRIMA: una scadenza
+     segnata all'una di notte nasceva già di ieri, un lavoro di oggi risultava
+     "in ritardo", e la lettera d'incarico stampava la data sbagliata sul foglio
+     che firma il cliente. Adesso si legge l'orologio del telefono, come fa già
+     _giorniDopo. */
+  const todayStr=()=>{const d=new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
   const thisMonth=d=>d&&d.slice(0,7)===todayStr().slice(0,7);
   const ymd=(y,m,d)=>`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
   const statoLabel={da_fare:"Da fare",in_corso:"In corso",fatto:"Fatto"};
@@ -9624,12 +9633,56 @@
      ============================================================ */
   let compVociCompId=null, compCapCache=[], compVociCache=[], compMisCache=[], compVoceId=null, compCapNuovo=false;
 
+  /* ===== 11 agosto 2026 — COME SI LEGGE UN NUMERO SCRITTO A MANO =====
+     Prima qui c'era una riga sola: cambia la virgola in punto e leggi. Con
+     "3,20" funzionava. Con un PREZZO no, e questa funzione i prezzi li legge
+     davvero (prezzo unitario della lavorazione e prezzo del prezzario):
+
+        scrivi 1.250,00  ->  diventava 1,25
+        scrivi 1 250,00  ->  diventava 1
+
+     Un computo da 12.500 euro usciva da 12,50, e non se ne accorgeva nessuno
+     finche' non lo guardava il cliente.
+
+     LA REGOLA, in una riga: l'ULTIMO fra virgola e punto e' quello dei
+     decimali, tutti gli altri sono separatori delle migliaia.
+
+       1.250,00  -> l'ultimo e' la virgola -> 1250
+       1,250.00  -> l'ultimo e' il punto   -> 1250   (file in inglese)
+       3,20      -> una virgola sola       -> 3,20
+       3.20      -> un punto solo, 2 cifre -> 3,20
+       1.250     -> un punto solo, 3 cifre -> 1250   (migliaia)
+       0.500     -> comincia per zero      -> 0,50   (mai migliaia dopo lo 0)
+
+     Sta in un posto solo apposta: la usano sia i moduli (_numIt) sia
+     l'importazione del prezzario (_pzNum). Due copie della stessa regola si
+     disallineano, ed e' li' che si nascondono i difetti. */
+  function _numeroIt(testo){
+    /* via euro, spazi normali, spazi insecabili e apostrofi delle migliaia */
+    let t=String(testo==null?"":testo).replace(/[€\s '’]/g,"").trim();
+    if(t==="")return null;
+    const vir=t.lastIndexOf(","), pun=t.lastIndexOf(".");
+    if(vir>=0&&pun>=0){
+      if(vir>pun) t=t.replace(/\./g,"").replace(/,/g,".");   /* italiano */
+      else        t=t.replace(/,/g,"");                      /* inglese  */
+    }else if(vir>=0){
+      /* piu' virgole e nessun punto = migliaia all'inglese (1,250,000) */
+      t=((t.split(",").length-1)>1) ? t.replace(/,/g,"") : t.replace(",",".");
+    }else if(pun>=0){
+      const punti=t.split(".").length-1;
+      const dopo=t.length-pun-1;
+      /* prima dell'ultimo punto: se comincia per zero non sono migliaia
+         (0.500 e' mezzo metro, non cinquecento) */
+      const prima=t.slice(0,pun).replace(/\./g,"");
+      const zeroDavanti=prima==="0"||prima==="-0"||/^-?0/.test(prima);
+      if(punti>1||(dopo===3&&!zeroDavanti)) t=t.replace(/\./g,"");
+    }
+    const n=parseFloat(t);
+    return isFinite(n)?n:null;
+  }
   /* i numeri si scrivono come in cantiere: 3,20 va bene come 3.20 */
   function _numIt(sel){
-    const v=String(($(sel)&&$(sel).value)||"").trim().replace(",",".");
-    if(v==="")return null;
-    const n=parseFloat(v);
-    return isFinite(n)?n:null;
+    return _numeroIt(($(sel)&&$(sel).value)||"");
   }
   /* un PREZZO si scrive sempre con due decimali: 18,50 e non 18,5.
      _misTesto taglia gli zeri in coda — giusto per una misura, sbagliato qui. */
@@ -10488,26 +10541,37 @@
      Il punto delle migliaia insieme alla virgola dei decimali e' la trappola
      classica: 1.234 letto male diventa 1,234 euro invece di 1.234. */
   const PZ_IMP_MAX=5000;
+  /* 11 agosto 2026 — un tempo qui c'era una regola a parte, e sbagliava il
+     caso piu' comune dei file delle Regioni: "1.250" senza virgola diventava
+     1,25. Adesso si usa la STESSA regola dei moduli (_numeroIt): una sola, in
+     un posto solo. Due copie della stessa regola si disallineano. */
   function _pzNum(v){
     if(v==null)return null;
     if(typeof v==="number")return isFinite(v)?v:null;
-    let t=String(v).replace(/[€\s ]/g,"").trim();
-    if(!t)return null;
-    if(t.indexOf(",")>=0&&t.indexOf(".")>=0)t=t.replace(/\./g,"").replace(",",".");
-    else if(t.indexOf(",")>=0)t=t.replace(",",".");
-    const n=parseFloat(t);
-    return isFinite(n)?n:null;
+    return _numeroIt(v);
   }
+  /* 11 agosto 2026 — L'ORDINE DI QUESTI CONTROLLI CONTA, ED ERA SBAGLIATO.
+     L'unita' di misura veniva cercata PRIMA del prezzo, e cercava la parola
+     "unit": cosi' la colonna «Prezzo unitario» finiva presa per la colonna
+     dell'unita' di misura, il prezzo non si trovava piu' e si importava un
+     prezzario intero con TUTTI I PREZZI A ZERO. Ed e' la dicitura piu' comune
+     nei prezzari regionali.
+     Adesso: prima la manodopera (che dice "incidenza", non "prezzo"), poi il
+     prezzo; e l'unita' di misura si rifiuta di riconoscere un'intestazione
+     che parla di soldi.
+     Aggiunto anche «Cod.» abbreviato: prima si cercava "codic" con cinque
+     lettere e un'intestazione «Cod.» restava senza colonna. */
   function _pzCol(intest){
     const C={};
+    const soldi=/prezzo|importo|costo|euro|valore/;
     intest.forEach((t,i)=>{
-      const x=_ppPiatto(String(t||""));
+      const x=_ppPiatto(String(t||"")).trim();
       if(C.descrizione==null&&/descriz|lavoraz|denominaz|oggetto/.test(x))C.descrizione=i;
-      else if(C.codice==null&&/codic|tariff|articol|n\.?art|voce/.test(x))C.codice=i;
-      else if(C.unita==null&&/^u\.?m\.?$|unit|misura/.test(x))C.unita=i;
-      else if(C.prezzo==null&&/prezzo|importo|costo|euro|eur/.test(x))C.prezzo=i;
+      else if(C.codice==null&&/^cod\b|^cod\.|codic|tariff|articol|^art\b|^art\.|n\.?\s?art|^voce\b/.test(x))C.codice=i;
+      else if(C.mano==null&&/manodoper|incidenz|^mano\b/.test(x))C.mano=i;
+      else if(C.prezzo==null&&soldi.test(x))C.prezzo=i;
+      else if(C.unita==null&&!soldi.test(x)&&/^u\.?\s?m\.?$|^unita|unita di misura|^misura$|^um$/.test(x))C.unita=i;
       else if(C.categoria==null&&/categor|capitol|gruppo|famigl/.test(x))C.categoria=i;
-      else if(C.mano==null&&/manodoper|persona|incidenz/.test(x))C.mano=i;
     });
     return C;
   }
@@ -11723,8 +11787,18 @@
       }
       closeSheet();renderCal();toast(v?"Nota salvata 📌":"Nota eliminata");return;
     }
-    if(a==="cal-prev"){cal.setMonth(cal.getMonth()-1);renderCal();return;}
-    if(a==="cal-next"){cal.setMonth(cal.getMonth()+1);renderCal();return;}
+    /* 11 agosto 2026 — IL MESE CHE NON CAMBIAVA.
+       Prima: cal.setMonth(cal.getMonth()-1). Se oggi è il 31 marzo, chiedere
+       "il 31 del mese prima" vuol dire chiedere il 31 FEBBRAIO: febbraio non
+       ce l'ha, e il calendario ti sbatteva al 3 marzo. Premevi la freccia e
+       restavi nello stesso mese. Stessa cosa in avanti: dal 31 gennaio
+       saltavi febbraio di netto.
+       Adesso ci si sposta sempre al PRIMO del mese, che tutti i mesi hanno.
+       Il giorno non serve: il calendario usa solo l'anno e il mese, e
+       l'anno cambia da solo (mese -1 da gennaio = dicembre dell'anno prima).
+       Si vede solo nei giorni 29, 30 e 31: per questo sembrava capitare a caso. */
+    if(a==="cal-prev"){cal=new Date(cal.getFullYear(),cal.getMonth()-1,1);renderCal();return;}
+    if(a==="cal-next"){cal=new Date(cal.getFullYear(),cal.getMonth()+1,1);renderCal();return;}
     if(a==="cal-today"){cal=new Date();renderCal();return;}
     if(a==="new-cli")return cliForm(null,t.dataset.tipo||"privato");
     if(a==="commercialista")return commForm();
