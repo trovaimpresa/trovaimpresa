@@ -9625,7 +9625,7 @@
       const box=$("#co-prz-mio");
       if(box)box.style.display=(_ps.value==="__mio__")?"":"none";
     };
-    compCapNuovo=false;
+    compCapNuovo=false;compCapEdit=null;
     if(!isNew)renderCompVoci(c.id);
   }
 
@@ -9647,6 +9647,8 @@
      (vista gest_computo_voci_calc). Qui si legge e si mostra.
      ============================================================ */
   let compVociCompId=null, compCapCache=[], compVociCache=[], compMisCache=[], compVoceId=null, compCapNuovo=false;
+  /* quale capitolo si sta rinominando in questo momento (null = nessuno) */
+  let compCapEdit=null;
 
   /* ===== 11 agosto 2026 — COME SI LEGGE UN NUMERO SCRITTO A MANO =====
      Prima qui c'era una riga sola: cambia la virgola in punto e leggi. Con
@@ -9823,10 +9825,32 @@
     gruppi.forEach(g=>{
       const sub=g.voci.reduce((s,v)=>s+(+v.importo||0),0);
       if(g.cap){
-        h+='<div class="spesa-row" style="background:var(--sfondo,#f5f6f8)">'
-          +'<span><b>'+(g.cap.numero?esc(g.cap.numero)+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")+'</b></span>'
-          +'<b>'+eur2(sub)+'</b>'
-          +'<button type="button" class="rdel" data-action="comp-cap-del" data-id="'+esc(String(g.cap.id))+'" title="Elimina il capitolo (le lavorazioni restano)">×</button></div>';
+        /* ⚠️ 11 agosto 2026 — IL CAPITOLO SI RINOMINA CLICCANDOCI SOPRA.
+           Prima un capitolo si poteva SOLO cancellare: per correggere un
+           refuso nel titolo bisognava eliminarlo — e tutte le sue lavorazioni
+           finivano «senza capitolo» — poi rifarlo e riaprire una per una le
+           lavorazioni per riassegnarle dalla tendina. Su un computo da sessanta
+           voci era un pomeriggio. Si rinumera anche, perché il numero che il
+           gestionale mette da solo è max+1: cancellato il capitolo 2 di 3, il
+           prossimo nasce «4» in un computo che di capitoli ne ha tre. */
+        h+=(String(compCapEdit||"")===String(g.cap.id))
+          ? '<div style="background:var(--sfondo,#f5f6f8);border-radius:10px;padding:12px;margin:4px 0">'
+            +'<div class="row2">'
+            +'<div class="field"><label>Numero</label><input id="ce-num"'+_noAuto()
+            +' value="'+esc(g.cap.numero||"")+'" placeholder="1" style="max-width:120px"></div>'
+            +'<div class="field"><label>Titolo del capitolo</label><input id="ce-tit"'+_noAuto()
+            +' value="'+esc(g.cap.titolo||"")+'" placeholder="Es. Demolizioni e rimozioni"></div>'
+            +'</div>'
+            +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+            +'<button type="button" class="btn-primary quick-add" data-action="comp-cap-rinomina" data-id="'+esc(String(g.cap.id))+'">Salva il capitolo</button>'
+            +'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-edit-annulla">Annulla</button>'
+            +'</div></div>'
+          : '<div class="spesa-row" style="background:var(--sfondo,#f5f6f8)">'
+            +'<span data-action="comp-cap-edit" data-id="'+esc(String(g.cap.id))+'" style="cursor:pointer" title="Clicca per rinominare il capitolo">'
+            +  '<b>'+(g.cap.numero?esc(g.cap.numero)+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")+'</b>'
+            +  '<small class="sp-forn">clicca per rinominare</small></span>'
+            +'<b>'+eur2(sub)+'</b>'
+            +'<button type="button" class="rdel" data-action="comp-cap-del" data-id="'+esc(String(g.cap.id))+'" title="Elimina il capitolo (le lavorazioni restano)">×</button></div>';
       }else if(compCapCache.length&&g.voci.length){
         h+='<div class="spesa-row" style="background:var(--sfondo,#f5f6f8)"><span><b>Senza capitolo</b></span><b>'+eur2(sub)+'</b><span></span></div>';
       }
@@ -9866,6 +9890,23 @@
         : '')
       +'<div class="sh-nota">Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.</div>';
     if(compCapNuovo){const i=$("#cc-tit");if(i)i.focus();}
+    if(compCapEdit){const i=$("#ce-tit");if(i){i.focus();i.select();}}
+  }
+
+  /* Rinomina (e rinumera) un capitolo. Le lavorazioni non si toccano: restano
+     attaccate al capitolo, che è lo stesso — cambia solo come si chiama. */
+  async function compCapRinomina(id){
+    if(!sb||!sbUid)return;
+    const t=String(($("#ce-tit")&&$("#ce-tit").value)||"").trim();
+    const n=String(($("#ce-num")&&$("#ce-num").value)||"").trim();
+    if(!t){toast("Il capitolo ha bisogno di un titolo");return;}
+    const {data,error}=await sb.from("gest_computo_capitoli")
+      .update({titolo:t,numero:n||null}).eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Errore: "+error.message);return;}
+    if(!data||!data.length){toast("Capitolo non salvato: nessuna riga modificata. Riprova.");return;}
+    compCapEdit=null;
+    await renderCompVoci(compVociCompId);
+    toast("Capitolo rinominato ✔");
   }
 
   async function compCapSalva(){
@@ -11828,8 +11869,11 @@
     if(a==="pz-vai")return pzEsegui();
     if(a==="pz-annulla")return pzAnnullaImport();
     if(a==="comp-filtro"){compFiltro=t.dataset.v;renderComputi();return;}
-    if(a==="comp-cap-apri"){compCapNuovo=true;renderCompVoci(compVociCompId);return;}
+    if(a==="comp-cap-apri"){compCapNuovo=true;compCapEdit=null;renderCompVoci(compVociCompId);return;}
     if(a==="comp-cap-annulla"){compCapNuovo=false;renderCompVoci(compVociCompId);return;}
+    if(a==="comp-cap-edit"){compCapEdit=id;compCapNuovo=false;renderCompVoci(compVociCompId);return;}
+    if(a==="comp-cap-edit-annulla"){compCapEdit=null;renderCompVoci(compVociCompId);return;}
+    if(a==="comp-cap-rinomina")return compCapRinomina(id);
     if(a==="comp-cap-salva")return compCapSalva();
     if(a==="comp-cap-del")return compCapDel(id);
     if(a==="comp-voce-new")return compVoceForm(null);
