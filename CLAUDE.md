@@ -3151,3 +3151,114 @@ prezzari importati (`ppUsa`).
 
 In un capitolo con una lavorazione sola le frecce non ci sono, quindi la × di quella riga sta
 un po' più a destra delle altre. Si nota solo se i capitoli si guardano uno sotto l'altro.
+
+# 11 agosto 2026 (sera, 5) — GLI AIUTI: UNO DICEVA UNA BUGIA, TANTI NON DICEVANO NIENTE
+
+Segnalato da Alessio guardando lo schermo: «dove vedi il tooltip dice una cosa sbagliata, quel
+bottone serve per i clienti che fanno delle richieste… poi in alcuni bottoni mancano proprio le
+indicazioni».
+
+## 1. ⚠️ IL TOOLTIP CHE PROMETTEVA UNA COSA CHE IL PULSANTE NON FA
+
+`js/aiuti.js`, chiave `richieste`:
+
+    richieste: 'Le richieste di preventivo che arrivano dai clienti di TrovaImpresa.'
+
+La sezione però si chiama **«Cosa ti manca?»** ed è la cassetta dei suggerimenti verso di noi:
+l'utente scrive cosa gli serve e glielo costruiamo. Il `data-tab` è rimasto `richieste` da
+quando quella sezione faceva un'altra cosa; la frase non è mai stata aggiornata.
+
+Adesso: *«Manca qualcosa nel gestionale? Scrivilo qui: la richiesta arriva a noi, la leggiamo e
+la costruiamo.»* — combacia con l'intro della sezione stessa (verificato nella prova).
+
+**Da ricordare:** un aiuto sbagliato è peggio di nessun aiuto, perché promette una funzione che
+non esiste. Se un `data-tab` viene riusato per un'altra cosa, la sua chiave in `aiuti.js` va con
+lui.
+
+## 2. Cinque voci di menu su diciannove non dicevano niente
+
+Mancavano del tutto in `AIUTI_TAB`: **fornitori, computi, prezzario, crediti, cestino** — cioè
+tutte quelle aggiunte dopo che il file era stato scritto. Aggiunte.
+
+## 3. Le stesse voci, dette a uno studio tecnico — `AIUTI_TAB_STUDIO`
+
+Col ruolo `professionista` il menu si rinomina da solo (Attrezzature→Strumenti,
+Squadra→Collaboratori, Lavori→Pratiche) ma **gli aiuti restavano quelli dell'impresa edile**:
+un geometra sotto «Strumenti» leggeva *«Betoniere, ponteggi, utensili»*.
+
+Aggiunte due mappe parallele, `AIUTI_TAB_STUDIO` e `AIUTI_AZIONE_STUDIO`, con dentro **solo** le
+voci che cambiano davvero (7 + 6): per tutte le altre continua a valere la frase unica.
+
+⚠️ **`ruoloUtente` non è leggibile da `aiuti.js`** — è un `let` chiuso dentro lo `<script>` della
+pagina, non sta su `window`. Invece di aprirlo (accoppiamento inutile) il ruolo si riconosce
+**da come si chiama la voce a schermo**:
+
+    function menuDaStudio(){
+      var s=document.querySelector('[data-tab="attrezzature"] span');
+      return !!(s && s.textContent.trim()==='Strumenti');
+    }
+
+## 4. ⚠️ Il testo c'era già e non lo leggeva nessuno
+
+`AIUTI_TESTO` conteneva da mesi le spiegazioni di «Emetti», «Lettera d'incarico»,
+«Accettato → crea lavoro», «Elimina per sempre», «Rimetti a posto», «Segna fatto», «Avvia»…
+ma quella lista veniva consultata **solo** per le etichette dei form, i totali e la fila di
+pulsanti delle card. Passando il mouse sul pulsante vero non compariva niente.
+
+Una riga in fondo a `testoDi()`:
+
+    return testoPerParola(el.textContent);
+
+e `pulisci()` che toglie i simboletti **davanti** alla scritta («✕ Rifiutato», «⧉ Duplica»,
+«👁 Apri scheda», «‹ Indietro»):
+
+    .replace(/^[^a-z0-9à-ÿ]+/, '')
+
+Solo davanti: dentro no, se no si rompe la chiave `accettato → crea lavoro`.
+
+## 5. Pulsanti nuovi spiegati (18) e uno lasciato apposta
+
+Aggiunti: `new-forn`, `new-fattf`, `new-fattf-forn`, `new-computo`, `new-prezzo`, `new-cred`,
+`gal-nuovo`, `save-richiesta`, `cerca-azzera`, `pz-vai`, `pz-importa`, `edit-computo`,
+`comp-dup`, `comp-pdf`, `del-computo`, `prev-pdf`, `edit-prev`, `del-prev`, `apri-cli`,
+`del-cli`, `map`, `incarico-pdf`, `verbale-pdf`, `ordine-pdf`, le tre frecce del calendario
+(`cal-prev`/`cal-next`/`cal-today`, che a schermo sono solo «‹ › •»), e `data-aiuto` sul
+pulsante **Aiuto** della barra in alto (non aveva `data-action` a cui agganciarsi).
+
+⚠️ **NON è stato aggiunto `new-cli`.** Quei pulsanti hanno già un `title` loro, diverso per
+Privato / Azienda / Condominio — e `aiuti.js` il `title` lo TOGLIE quando trova una frase
+propria (`el.dataset.titleOff = el.title; el.removeAttribute('title')`, e non lo rimette mai).
+Aggiungendo la chiave avremmo perso la distinzione. C'è una prova apposta che lo controlla.
+
+## 6. Un difetto trovato per strada: il filtro della Mappa mezzo tradotto
+
+Sulla Mappa, da professionista, si leggeva **«Pratiche da fare»** accanto a **«Tutti i lavori»**.
+`'Tutti i lavori'` non era in `_FRASI`. Aggiunta **dopo** `'Tutti i lavori del reparto'`, che è
+più lunga e deve vincere (l'elenco si applica in ordine).
+
+## Provato con `/root/prova/aiuti.py` — 18 controlli, tutti verdi
+
+Passa il mouse su **ogni** voce del menu e su ogni pulsante della barra, come studio e come
+impresa, e stampa cosa compare. 19 voci su 19 parlano da professionista, 18 su 18 da impresa.
+Più `/tmp/censimento.py`, che gira tutte le sezioni e elenca i pulsanti ancora muti.
+
+## ⚠️ Due trappole della prova, non del gestionale
+
+- **`aiuti.js` nasconde il riquadro a ogni scroll** (giusto, se no resta appeso) e
+  `page.hover()` scorre da solo: gli eventi di scorrimento arrivavano DOPO il passaggio del
+  mouse e spegnevano l'aiuto delle ultime voci del menu. Si scorre prima, e si aspetta.
+- **Dopo uno scorrimento la voce può finire proprio sotto al puntatore fermo**, e allora
+  `mouseover` non riparte: entrare in un elemento è un evento, restarci dentro no. Nella prova
+  si porta via il mouse (`page.mouse.move(1400,12)`) prima di ogni passaggio.
+
+## Cosa resta muto, e perché va bene così
+
+Solo i **filtri** (`lav-vista`, `prev-filtro`, `fatt-vista`, `scad-vista`, `gal-tipo`,
+`gal-media`, `mp-vista`, `comp-filtro`, `attrezzo-filtro`, `ag-stato`, `cred-anno`). Dicono già
+il proprio nome — «Bozze», «Scadute», «Solo foto» — e un riquadro che ripete la scritta è
+rumore. Gli unici discutibili sono «Archivio» e «Da incassare» sui Lavori: se un utente ci
+inciampa, si aggiungono lì.
+
+## Regressione
+
+`collaudo.py` 39/39, `sposta.py`, `dup.py`, `rinomina.py`, `qzero.py` tutti verdi.

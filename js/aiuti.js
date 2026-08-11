@@ -41,8 +41,47 @@
     report:       'I numeri: quanto hai lavorato, quanto hai incassato, dove vanno i soldi.',
     galleria:     'Le foto e i video dei cantieri, tutti in un posto solo.',
     mappa:        'Dove sono i tuoi cantieri e quanto distano da te.',
-    richieste:    'Le richieste di preventivo che arrivano dai clienti di TrovaImpresa.'
+    fornitori:    'Le rivendite e i negozi dove compri il materiale, con le fatture da pagare e le loro scadenze.',
+    computi:      'Il computo metrico: le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e i vuoti da detrarre. La quantità la calcola il gestionale, tu misuri.',
+    prezzario:    'Le voci di prezzo che usi sempre, scritte una volta sola. Nel computo le ritrovi cercando una parola ed entrano già fatte, col loro prezzo.',
+    crediti:      'I CFP che devi fare ogni anno per restare iscritto all’albo. Segni i corsi mano a mano che li fai e vedi quanti te ne mancano.',
+    cestino:      'Tutto quello che elimini passa di qui e resta a disposizione: finché è nel cestino non è perso. Clicca una riga per rimetterla a posto.',
+
+    /* ⚠️ 11 agosto 2026 — QUESTA VOCE NON SONO LE RICHIESTE DEI CLIENTI.
+       Diceva «Le richieste di preventivo che arrivano dai clienti di
+       TrovaImpresa»: sbagliato, e sbagliato nel modo peggiore — prometteva una
+       cosa che quel pulsante non fa. La sezione si chiama «Cosa ti manca?» ed
+       e' la cassetta dei suggerimenti verso di NOI: l'utente scrive cosa gli
+       serve e noi glielo costruiamo. Il data-tab e' rimasto "richieste" da
+       quando la sezione faceva un'altra cosa, e la frase non e' mai stata
+       aggiornata. Se un giorno il tab viene rinominato, questa chiave va con lui. */
+    richieste:    'Manca qualcosa nel gestionale? Scrivilo qui: la richiesta arriva a noi, la leggiamo e la costruiamo.'
   };
+
+  /* ===== 11 agosto 2026 — LE STESSE VOCI, DETTE A UNO STUDIO TECNICO =====
+     Col ruolo «professionista» il menu cambia nome alle voci: Attrezzature
+     diventa Strumenti, Squadra diventa Collaboratori, i lavori diventano
+     pratiche. Le frasi di aiuto invece erano rimaste quelle dell'impresa
+     edile, e un geometra sotto «Strumenti» leggeva «betoniere, ponteggi,
+     utensili». Qui ci sono SOLO le voci che cambiano davvero: per tutte le
+     altre continua a valere la frase di sopra.
+     Il ruolo da qui non e' leggibile (ruoloUtente e' chiuso dentro la pagina),
+     quindi lo si riconosce da come si chiama la voce a schermo: se
+     «attrezzature» si legge «Strumenti», siamo in uno studio. */
+  var AIUTI_TAB_STUDIO = {
+    lavori:       'Tutte le pratiche: da fare, in corso e finite. Da una pratica nasce il preventivo e poi la fattura.',
+    attrezzature: 'Stazione totale, distanziometro laser, termocamera, livello: gli strumenti dello studio, con le date delle tarature e delle verifiche.',
+    squadra:      'I collaboratori dello studio: contatti, ruolo e documenti.',
+    agenda:       'Cosa deve fare chi collabora con te, giorno per giorno. È quello che vedono sul telefono.',
+    calendario:   'Il mese a colpo d’occhio: quando è prevista ogni pratica.',
+    galleria:     'Le foto e i video dei sopralluoghi e dei cantieri che segui, tutti in un posto solo.',
+    mappa:        'Dove sono le pratiche che segui e quanto distano da te.'
+  };
+
+  function menuDaStudio() {
+    var s = document.querySelector('[data-tab="attrezzature"] span');
+    return !!(s && s.textContent.trim() === 'Strumenti');
+  }
 
   /* barra in alto e pagina iniziale: la chiave è il data-action */
   var AIUTI_AZIONE = {
@@ -63,6 +102,37 @@
     'new-panel':        'Un reparto nuovo, per esempio muratore o giardiniere. Ogni reparto ha i suoi lavori, i suoi clienti e i suoi numeri, separati dagli altri.',
     'new-job-date':     'Crea un lavoro già fissato in questo giorno.',
     'quick-cli':        'Aggiungi al volo un cliente che non hai ancora in anagrafica, senza uscire da qui.',
+    /* 11 agosto 2026 — questi pulsanti c'erano da mesi e non spiegavano niente:
+       ci passavi sopra e non compariva nulla. Aggiunti tutti in una volta.
+       NON e' stato aggiunto 'new-cli': quei pulsanti hanno gia' un title loro,
+       diverso per Privato / Azienda / Condominio, e questo file il title lo
+       toglie quando trova una frase propria — avremmo perso la distinzione. */
+    'new-forn':         'Una rivendita o un negozio dove compri il materiale: contatti, referente e condizioni di pagamento.',
+    'new-fattf':        'Una fattura che devi pagare tu a un fornitore, con la sua scadenza. Serve a sapere sempre quanto devi e a chi.',
+    'new-fattf-forn':   'Una fattura da pagare già intestata a questo fornitore: non devi riselezionarlo.',
+    'new-computo':      'Un computo metrico nuovo: le lavorazioni, le misure e i totali, e da qui esce il PDF.',
+    'new-prezzo':       'Una voce di prezzo tua, da riusare nei computi senza riscriverla ogni volta.',
+    'new-cred':         'Un corso fatto, con i crediti formativi che ti ha dato e la data.',
+    'gal-nuovo':        'Carica foto o video e attaccali a un cantiere: li ritrovi qui anche fra due anni.',
+    'save-richiesta':   'Manda la richiesta a noi. La leggiamo di persona: non serve che sia scritta bene, bastano due righe.',
+    'cerca-azzera':     'Toglie la ricerca e rimette in vista tutto.',
+    /* le tre frecce del calendario: non c'e' scritto niente sopra, sono
+       «‹», «›» e «•». Senza aiuto uno le prova e basta. */
+    'cal-prev':         'Il mese prima.',
+    'cal-next':         'Il mese dopo.',
+    'cal-today':        'Torna al mese di oggi.',
+    'pz-importa':       'Porta dentro un prezzario che hai in Excel o CSV: lo leggo io e ti faccio scegliere quali colonne sono descrizione, unità e prezzo.',
+    'edit-computo':     'Apre il computo: capitoli, lavorazioni e misure, con i totali che si aggiornano da soli.',
+    'comp-dup':         'Fa una copia di questo computo. Ti chiede se copiare anche le misure: senza, ti restano le lavorazioni pronte da rimisurare.',
+    'comp-pdf':         'Il computo in PDF: capitoli, misure una per una, importi e il riquadro dei totali.',
+    'del-computo':      'Manda il computo nel Cestino. Non è perso: da lì lo rimetti a posto quando vuoi.',
+    'prev-pdf':         'Il preventivo in PDF, pronto da mandare al cliente.',
+    'edit-prev':        'Riapre il preventivo per cambiare voci, prezzi o condizioni.',
+    'del-prev':         'Manda il preventivo nel Cestino. Da lì lo rimetti a posto quando vuoi.',
+    'apri-cli':         'La scheda completa del cliente: lavori, preventivi, fatture e documenti, tutto insieme.',
+    'del-cli':          'Manda il cliente nel Cestino. I suoi lavori e le sue fatture restano dove sono.',
+    'map':              'Fa vedere dov’è questo indirizzo sulla mappa.',
+    'pz-vai':           'Porta dentro il tuo prezzario le voci trovate nel file. Quelle che hai già non vengono raddoppiate.',
 
     /* --- lavoro di tutti i giorni --- */
     'carta-dettaglio':   'Tutti i movimenti fatti con questa carta, uno per uno.',
@@ -83,7 +153,22 @@
     'fatt-riga-add':     'Aggiungi una voce alla fattura: descrizione, quantità, prezzo e IVA.',
     'prev-riga-add':     'Aggiungi una voce al preventivo: descrizione, quantità e prezzo.',
     'upload-fattura':    'Attacca alla fattura il suo PDF, così lo ritrovi qui invece che nelle cartelle del computer.',
-    'fatt':              'Crea la fattura di questo lavoro, con dentro già la voce giusta.'
+    'fatt':              'Crea la fattura di questo lavoro, con dentro già la voce giusta.',
+
+    /* --- i PDF che si scaricano --- */
+    'incarico-pdf':      'La lettera d’incarico da far firmare al cliente prima di iniziare: oggetto, compenso, tempi e gli estremi della tua polizza.',
+    'verbale-pdf':       'Il verbale di sopralluogo in PDF, con data, luogo e quello che hai rilevato.',
+    'ordine-pdf':        'La conferma d’ordine in PDF da mandare al fornitore.'
+  };
+
+  /* le stesse azioni, dette a uno studio tecnico (vedi AIUTI_TAB_STUDIO) */
+  var AIUTI_AZIONE_STUDIO = {
+    'new-job':          'Una pratica nuova: cosa c’è da fare, per chi e quando. Da qui poi nascono preventivo e fattura.',
+    'new-prev':         'Un preventivo nuovo. Quando il cliente lo accetta lo trasformi in pratica senza riscrivere niente.',
+    'new-attrezzatura': 'Uno strumento dello studio: stazione totale, distanziometro, termocamera. Con la data dell’ultima taratura.',
+    'new-dip':          'Un collaboratore dello studio: contatti, ruolo e documenti.',
+    'gal-carica':       'Carica foto e video del sopralluogo: restano attaccati alla pratica e li ritrovi anche fra due anni.',
+    'mp-ricalcola':     'Ricalcola quanto distano le pratiche. Serve dopo che hai cambiato indirizzi o ne hai aggiunte.'
   };
 
   /* 9 agosto 2026 — le parole tecniche dei form, i numeri in alto e i pulsanti
@@ -190,9 +275,23 @@
 
   function testoDi(el) {
     if (el.dataset.aiuto) return el.dataset.aiuto;              /* scritto a mano: vince su tutto */
-    if (el.dataset.tab && AIUTI_TAB[el.dataset.tab]) return AIUTI_TAB[el.dataset.tab];
-    if (el.dataset.action && AIUTI_AZIONE[el.dataset.action]) return AIUTI_AZIONE[el.dataset.action];
-    return '';
+    var studio = menuDaStudio();
+    if (el.dataset.tab) {
+      if (studio && AIUTI_TAB_STUDIO[el.dataset.tab]) return AIUTI_TAB_STUDIO[el.dataset.tab];
+      if (AIUTI_TAB[el.dataset.tab]) return AIUTI_TAB[el.dataset.tab];
+    }
+    if (el.dataset.action) {
+      if (studio && AIUTI_AZIONE_STUDIO[el.dataset.action]) return AIUTI_AZIONE_STUDIO[el.dataset.action];
+      if (AIUTI_AZIONE[el.dataset.action]) return AIUTI_AZIONE[el.dataset.action];
+    }
+    /* ⚠️ 11 agosto 2026 — L'ULTIMA SPIAGGIA: la scritta sul pulsante.
+       In AIUTI_TESTO c'erano gia' scritte da mesi le spiegazioni di «Emetti»,
+       «Lettera d'incarico», «Accettato → crea lavoro», «Elimina per sempre»,
+       «Rimetti a posto»... ma quella lista veniva consultata SOLO per le
+       etichette dei form e per la fila di pulsanti delle card. Passando il
+       mouse sul pulsante vero non compariva niente: il testo esisteva e non
+       lo leggeva nessuno. Bastava questa riga. */
+    return testoPerParola(el.textContent);
   }
 
   /* ===== 9 agosto 2026 — IL (i) TOCCABILE =====
@@ -207,7 +306,11 @@
 
   function pulisci(t) {
     return String(t || '').replace(/\u24d8|\u2139/g, '').replace(/\(facoltativo\)/gi, '')
-      .replace(/[*:]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+      .replace(/[*:]/g, '').replace(/\s+/g, ' ').trim().toLowerCase()
+      /* 11 agosto 2026 \u2014 via i simboletti DAVANTI alla scritta: \u00ab\u2715 Rifiutato\u00bb,
+         \u00ab\u29c9 Duplica\u00bb, \u00ab\ud83d\udc41 Apri scheda\u00bb, \u00ab\u2039 Indietro\u00bb, \u00ab+ Privato\u00bb. Solo davanti:
+         dentro no, se no si rompe la chiave \u00abaccettato \u2192 crea lavoro\u00bb. */
+      .replace(/^[^a-z0-9\u00e0-\u00ff]+/, '');
   }
   function testoPerParola(t) {
     var k = pulisci(t);
