@@ -2514,3 +2514,138 @@ verosimili e arrivano al committente.
 - **Istruzioni ambigue fanno danni quanto il codice sbagliato.** "Cancella le tre misure
   con la × a destra" è stato eseguito sulla schermata del computo, dove la × cancella
   l'intera lavorazione. Dire sempre **su quale schermata** si sta parlando.
+
+---
+
+# 11 agosto 2026 — LA POLIZZA SULLA LETTERA D'INCARICO, E L'EMAIL DEL LUNEDÌ
+
+Due lavori in una tornata. Tutti e due provati facendo girare le cose davvero, non
+leggendole: **39 prove nel browser** sul gestionale (26 PDF veri scaricati e letti) e
+**30 prove** sulla funzione Netlify fatta partire contro un finto Supabase.
+
+## 1. Gli estremi della polizza nella lettera d'incarico
+
+**Perché.** L'art. 9 comma 4 del DL 1/2012 non chiede solo il preventivo scritto: chiede
+che il professionista dica al cliente, per iscritto e al momento dell'incarico, **con
+quale polizza è assicurato e fino a quanto copre**. La lettera d'incarico usciva senza.
+In caso di contestazione è il professionista a restare scoperto.
+
+**Cosa c'è adesso**
+
+- **Dati azienda, colonna destra, riquadro «Polizza professionale»** — solo profilo
+  professionista, accanto a Fattura elettronica. Quattro campi: `pol_compagnia`,
+  `pol_numero`, `pol_massimale`, `pol_scadenza`. Si scrivono una volta e restano.
+- **`polizzaEstremi(az)`** — l'unico punto che decide se la polizza è completa e se è
+  scaduta. Il confronto della scadenza è fra testi `aaaa-mm-gg`, che si ordinano da soli:
+  niente fusi orari.
+- **`incaricoForm`** si ferma PRIMA di aprire il modulo se manca la polizza (messaggio che
+  elenca quali dei quattro campi mancano, poi apre i Dati azienda) o se il preventivo non
+  ha un cliente.
+- **`incaricoPdf`** ripete gli stessi due controlli. Non è pignoleria: fra l'apertura del
+  modulo e il clic su «Scarica» si possono aprire i Dati azienda in un'altra scheda e
+  svuotarli. Il controllo che conta è quello attaccato alla stampa.
+- **Polizza scaduta**: riga rossa dentro il modulo + `gconfirm` prima di stampare. Si può
+  stampare lo stesso — capita di consegnare il giorno del rinnovo, e bloccare tutto
+  sarebbe peggio del problema.
+- **PDF, articolo dopo il Compenso**: titolo, la frase di legge, i quattro dati e la nota
+  finale.
+- Migrazione: **`sql/gest-azienda-polizza.sql`**.
+
+**Il cliente mancante era un difetto vero, non un extra.** Fino a oggi la lettera si
+scaricava anche senza cliente: `cliDelDocumento` restituisce `{}` se `cliente_id` è nullo,
+e al posto del committente usciva un trattino. Restava in mano un foglio da firmare
+intestato a nessuno. Alla prova a clic di Alessio è saltato fuori al primo tentativo.
+
+## 2. Il riepilogo del lunedì (`netlify/functions/riepilogo-lunedi.js`)
+
+**Su Netlify, non su Supabase**, perché l'impianto c'era già: `promemoria-scadenze.js` usa
+lo stesso stampo, Resend è configurato e `SUPABASE_SERVICE_KEY` / `RESEND_API_KEY` sono già
+su Netlify. Su Supabase servivano estensioni nuove, chiavi in un altro posto e un secondo
+sistema di orari, per lo stesso risultato. Costo: **zero** fino a ~750 iscritti che usano
+il gestionale (Resend regala 3.000 email/mese).
+
+- Parte **lunedì 5:30 UTC** = 7:30 con l'ora legale. Da fine ottobre va messo `30 6 * * 1`,
+  se no diventa le 6:30.
+- Tre sezioni: scadenze dei prossimi 7 giorni, fatture emesse e non pagate, lavori (o
+  pratiche) con la data prevista passata. **Formule copiate verbatim dal Riepilogo**, non
+  riscritte a mente: totale fattura = imponibile + IVA − sconto + bollo − ritenuta, e
+  "scaduta" = emessa con `data + giorni_pagamento < oggi`.
+- **Sezione vuota = sezione che sparisce. Settimana pulita = nessuna email.** Tre email
+  "va tutto bene" di fila e la quarta non la apre più nessuno.
+- Interruttore: `gest_azienda.riepilogo_lunedi`, casella nei Dati azienda (tutti i ruoli,
+  accesa di partenza). Migrazione **`sql/gest-azienda-riepilogo-lunedi.sql`**.
+- **`const SOLO_A = 'pintoalessio@icloud.com'`** in cima al file: per un mese arriva solo
+  ad Alessio. Per aprirla a tutti si mette `null` — una riga, il resto è già scritto.
+
+## I difetti trovati facendo girare le cose
+
+1. **Il blocco della polizza si spezzava fra due pagine.** Titolo e frase in fondo al primo
+   foglio, i quattro dati sul secondo senza titolo: chi girava pagina leggeva «Generali,
+   500.000» senza sapere di cosa si parlasse. Ora si **misura** l'altezza prima di
+   scrivere. Due misure, non una: il **cuore** (titolo + frase + i quattro dati) non si
+   spezza mai, la nota finale può andare a capo — pretenderla attaccata costava mezza
+   pagina bianca e spesso un terzo foglio per ogni lettera.
+   **Trovato aprendo il PDF e guardandolo**, come dice la lezione del 10 agosto.
+2. **Gli importi dell'email senza il punto delle migliaia** — usciva `2550,00 €`. Manca
+   `useGrouping:true`, la stessa trappola già annotata a commento nel gestionale e non
+   copiata. Su Node senza ICU completo `Intl` non raggruppa da solo.
+3. **L'email elencava fatture e lavori già nel cestino.** Il gestionale li nasconde con
+   `js/cestino.js`, ma la funzione Netlify legge da fuori, senza quel filtro. Chiunque
+   scriva codice che legge le tabelle `gest_*` **da fuori dal browser** deve aggiungere
+   `.is('eliminato_il', null)`. Vale per tutte le tabelle in `CESTINO_TABELLE`.
+4. **Il massimale oltre i 12 interi faceva fallire il salvataggio** con un messaggio del
+   database che non spiegava niente: `numeric(12,2)` regge fino a 10 miliardi. Tetto
+   client-side a 999.999.999.
+
+## Le scelte che non vanno ribaltate senza pensarci
+
+- **Il riquadro polizza è solo per il profilo professionista**, e in `saveAzienda` si
+  scrive **solo se il riquadro c'è davvero** — stessa precauzione della patente a crediti
+  al contrario. Se scrivessimo sempre, un'impresa che salva i suoi dati azzererebbe una
+  polizza registrata dallo studio.
+- **La casella del riepilogo del lunedì invece è per tutti i ruoli**, quindi lì la
+  precauzione non serve.
+- **La polizza scaduta avvisa, non blocca.** Solo la polizza *mancante* blocca.
+- **I clienti nel cestino si leggono lo stesso** per l'email e per i documenti: se hai
+  buttato la scheda ma la fattura è ancora da incassare, il nome serve. È la stessa scelta
+  già fatta con `_sbTutto` / `sb.raw`.
+- **La lettera adesso può essere di 3 pagine** invece di 2: il blocco firme sta tutto
+  insieme per l'art. 1341 c.c. e con l'articolo nuovo scivola sul terzo foglio. È il prezzo
+  di un adempimento obbligatorio, non un difetto da sistemare.
+
+## Da fare la prossima volta
+
+1. **Lunedì 17 agosto: controllare l'email** e confrontarla col Riepilogo. Se i numeri
+   tornano, aprire a tutti (`SOLO_A = null`). Attenzione: se il gestionale di Alessio non
+   ha niente in scadenza, **l'email non parte** ed è il comportamento giusto — per la
+   prova serve almeno una scadenza dentro i 7 giorni.
+2. **Due email lo stesso lunedì.** `promemoria-scadenze.js` gira alle 6:15 tutti i giorni,
+   questa alle 7:30 il lunedì: le scadenze compaiono in tutte e due. Prima di aprire a
+   tutti, valutare se unirle.
+3. **`COSA-MANCA-AL-GESTIONALE.md` non esiste** — Alessio l'ha cercato e non c'è. Quello
+   che gli somiglia è `docs/ROADMAP-gestionale.md` (fermo al 31 luglio, numerato 0-5) più
+   `BACKLOG.md`. Offerto di scriverlo, non ancora fatto.
+4. **L'articolo della polizza non c'è nella conferma d'ordine** delle imprese, e va bene:
+   l'obbligo dell'art. 9 riguarda i professionisti. Se un giorno si vuole mettere la RC
+   dell'impresa, il riquadro dei Dati azienda va reso visibile anche agli altri ruoli.
+
+## Lezioni
+
+- **Provare la copia sbagliata è peggio che non provare.** La prima tornata di prove nel
+  browser girava su una copia del file fatta prima delle ultime modifiche, e dava tutto
+  verde su codice vecchio. Da qui in poi lo script di collaudo **ricopia il file vero e
+  stampa la sua impronta** prima di partire.
+- **Un difetto sul salto pagina si vede solo guardando la pagina.** Confermata la lezione
+  del 10 agosto: sui PDF aprire almeno una pagina interna. Qui in più è stata scritta una
+  prova che allunga la lettera riga per riga (22 varianti) finché il blocco cambia foglio,
+  e controlla che titolo e dati restino sempre insieme.
+- **Le trappole già annotate nel file vanno cercate, non ricordate.** Il punto delle
+  migliaia era scritto a commento nel gestionale dal primo giorno, ed è stato rifatto
+  uguale nella funzione nuova.
+- **Chi legge le tabelle da fuori dal browser non ha il cestino.** Ogni script, funzione
+  Netlify o Edge Function che tocca le `gest_*` parte senza quel filtro.
+- **Istruzioni parziali producono prove parziali.** Nella prova a clic era stato messo
+  l'accento solo sulla data di scadenza: Alessio ha compilato solo quella e la lettera si
+  è fermata dicendo che mancavano gli altri tre. Quando si chiede di compilare un modulo,
+  elencare **tutti** i campi, e avvisare che il campo Massimale accetta solo cifre
+  (scrivendo `500.000` il browser lo scarta e resta vuoto).
