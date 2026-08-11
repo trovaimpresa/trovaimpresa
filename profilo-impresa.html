@@ -6,6 +6,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="page-title">Profilo — TrovaImpresa</title>
+<script>
+/* Ogni scheda impresa deve valere come pagina a se' su Google.
+   Prima tutte dicevano "la pagina buona e' /profilo-impresa" (quella vuota),
+   e cosi' nessuna vetrina degli iscritti finiva nei risultati di ricerca. */
+(function(){
+  try{
+    var id=(new URLSearchParams(location.search).get('id')||'').trim();
+    var lnk=document.querySelector('link[rel="canonical"]');
+    if(/^[0-9]{1,12}$/.test(id)){
+      if(lnk)lnk.setAttribute('href','https://trovaimpresa.com/profilo-impresa?id='+id);
+    }else{
+      /* senza un id valido la pagina non mostra nessuna impresa: fuori da Google */
+      var m=document.createElement('meta');
+      m.setAttribute('name','robots');
+      m.setAttribute('content','noindex,follow');
+      document.head.appendChild(m);
+    }
+  }catch(e){}
+})();
+</script>
 <!-- Leaflet arriva solo se l'impresa ha una posizione sulla mappa: vedi caricaLeaflet() -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -718,6 +738,18 @@ async function caricaProfilo(id){
       return;
     }
     if(!data||!data.length){
+      /* scheda cancellata o id inesistente: non deve restare nei risultati Google.
+         Attenzione: qui e' il caso "risposta arrivata ma vuota". In caso di errore
+         di rete NON si mette noindex, altrimenti un problema momentaneo farebbe
+         sparire da Google anche le schede buone. */
+      try{
+        if(!document.querySelector('meta[name="robots"]')){
+          var _mr=document.createElement('meta');
+          _mr.setAttribute('name','robots');
+          _mr.setAttribute('content','noindex,follow');
+          document.head.appendChild(_mr);
+        }
+      }catch(_){}
       _profiloKo('Questa scheda non è più disponibile');
       return;
     }
