@@ -3262,3 +3262,132 @@ inciampa, si aggiungono lì.
 ## Regressione
 
 `collaudo.py` 39/39, `sposta.py`, `dup.py`, `rinomina.py`, `qzero.py` tutti verdi.
+
+# 11 agosto 2026 (sera, 6) — LE SCHEDE DELLE IMPRESE ERANO INVISIBILI SU GOOGLE
+
+Partito da due schermate di Search Console: **663 pagine non indicizzate** contro 357
+indicizzate, e la colonna grigia comparsa di colpo verso il 29 luglio. Sembrava un crollo.
+Non lo era: il 20 luglio erano state pubblicate le 29 pagine professioni/negozi
+(`genera-seo-pagine.js`), Google è tornato a girare tutto il sito e ha **contato** anche
+quello che prima non aveva mai aperto. Il verde non è sceso.
+
+Ma cercando la causa è saltato fuori un difetto vero, e grosso.
+
+## 1. Il difetto: ogni scheda impresa diceva a Google di non esistere
+
+`profilo-impresa.html` aveva il canonical **fisso**:
+
+    <link rel="canonical" href="https://trovaimpresa.com/profilo-impresa">
+
+Ogni scheda — `/profilo-impresa?id=46`, `?id=47`, tutte — diceva a Google: «la pagina buona
+è /profilo-impresa», cioè quella vuota, senza nessuna impresa dentro. Risultato:
+**nessuna vetrina degli iscritti poteva comparire nei risultati di ricerca.** Ed è
+esattamente la cosa che TrovaImpresa promette all'impresa quando si iscrive.
+
+Stessa malattia (ma voluta, e va lasciata così) sulle pagine di ricerca: i link
+`?citta=X&mestiere=Y` dalle 107 pagine città puntano tutti a `/cerca-artigiani`. Sono le
+~565 «Pagina alternativa con tag canonical appropriato» del rapporto.
+
+## 2. La correzione
+
+Uno script inline in `profilo-impresa.html`, messo **dopo** `<title>` e non prima —
+il canonical sta in cima al file, prima di `<meta charset>`, e infilare lì 700 byte di
+script avrebbe spinto il charset oltre il primo kilobyte, con gli accenti a rischio.
+
+Fa tre cose:
+
+- se `?id=` è un numero (`/^[0-9]{1,12}$/`), riscrive il canonical su sé stessa;
+- se l'id manca o è sporco, aggiunge `noindex,follow`: la pagina senza impresa non ha
+  niente da mostrare;
+- nel ramo «risposta arrivata ma vuota» di `caricaProfilo` (scheda cancellata) aggiunge
+  `noindex,follow`, con guardia `if(!document.querySelector('meta[name="robots"]'))` per
+  non metterne due.
+
+⚠️ **Il noindex NON va nel ramo dell'errore di rete.** `_profiloKo` viene chiamata anche
+quando Supabase non risponde: metterlo lì significherebbe che un guasto di mezz'ora fa
+uscire da Google tutte le schede buone. Provato apposta.
+
+**Provato con Playwright su 6 casi** (server locale, chiamate a Supabase intercettate):
+scheda vera → canonical con id e nessun robots; senza id → noindex; id inesistente →
+noindex; id sporco `<script>` → canonical base + noindex, nessuna injection; **rete KO →
+canonical con id e NESSUN noindex**; telefono 390×844 uguale. Zero errori JS, zero id
+duplicati. I 9 testi sotto 13px di quella pagina c'erano già prima (confrontato con
+l'originale): **non toccati**, segnalati ad Alessio.
+
+Commit `a69f375`.
+
+## 3. `admin.html`: mancava la porta del gestionale professionista
+
+In «Le mie viste» la colonna Gestionali non aveva il link al professionista. Non mancava
+il gestionale: è sempre `gestionale-app.html`, che alla riga 520 legge già `?vedi=` e lo
+salva in `sessionStorage.ti_vedi_tipo`. Mancava solo il collegamento.
+
+Aggiunto `/gestionale-app.html?vedi=professionista`.
+
+⚠️ **Ho dovuto cambiare anche il link di sopra** in `/gestionale-app.html?vedi=` (con
+l'uguale e niente dopo). Senza, restava incastrato: entri da professionista, torni su
+«impresa e artigiano» senza parametro, e la riga 520 non tocca la sessione — quindi
+continuavi a vedere «pratiche» al posto di «lavori». Il parametro vuoto **cancella**
+`ti_vedi_tipo` e fa tornare il ruolo vero dell'account.
+
+Provato estraendo le righe 520-521 verbatim e facendole girare su 5 scenari, compreso
+quello che dimostra il difetto col link vecchio. Confermato poi a schermo da Alessio:
+«Gestionale Studio / pratiche / collaboratori» contro «Gestionale Multiservizi / lavori /
+squadra». Commit `484ab42`.
+
+## 4. Una sbavatura segnalata e NON corretta
+
+Riga 958: il singolare è gestito solo per il professionista —
+`tot===1?'pratica totale':'pratiche totali'` — mentre per l'impresa è sempre
+`'lavori totali'`. Con un lavoro solo si legge **«1 lavori totali»**. Segnalato, non
+toccato: non era stato chiesto.
+
+## 5. I numeri veri del progetto (query fatte fare ad Alessio su Supabase)
+
+- **59 imprese iscritte**, di cui **57 negli ultimi 30 giorni**: il marketplace ha un mese.
+- Sparse su **35 città**: Roma 7, Napoli 4, Torino 4, tutto il resto **una sola impresa**.
+  Le 107 pagine città sono per **72** vuote — ed è quasi esattamente il numero delle
+  «Rilevate ma non indicizzate» (73) del rapporto Google.
+- Mestieri scritti in modo incoerente: *Idraulico* / *Idraulica*, *Edilizia / Muratura* /
+  *Muratura e strutture*, *Altro* / *Altro (scrivi quale)*. Chi filtra per uno non trova
+  l'altro. **Da sistemare.**
+
+Search Console, 3 mesi: 107 clic, 4.520 impressioni, posizione media 13,9. Ma **63 clic su
+107 sono query di marca** (`trovaimpresa`, `trova impresa`). Le pagine guida stanno tra
+l'8° e il 10° posto con CTR 0,4-1%: il contenuto è già più completo dei concorrenti, manca
+l'**autorità** (link in ingresso). Le query dove compare senza clic sono tutte «quanto
+costa X»: pubblico giusto, posizione troppo bassa.
+
+## 6. La campagna Meta: pagava tutta Italia
+
+«Nuova campagna Contatti», 8 €/giorno, 182 € in 30 giorni, 35 registrazioni dichiarate a
+5,21 €. Ma in **Luoghi** c'era `Inclusione: Italia` (pubblico stimato 8,6-10,1 milioni),
+non Roma come Alessio credeva: è una campagna Advantage+ e parte larga. Ecco perché gli
+iscritti erano sparsi su 35 città. Ristretta a **Roma, Lazio +40 km**.
+
+## 7. Decisioni prese, da non rimettere in discussione a cuor leggero
+
+- ⛔ **NON creare le 565 pagine mestiere+città.** Con 59 imprese sarebbero quasi tutte
+  vuote e trascinerebbero giù anche le pagine buone. Se ne riparla con centinaia di
+  iscritti per zona.
+- ⛔ **NON riscrivere le guide prezzi.** Controllata `quanto-costa-cambiare-gli-infissi`:
+  ha già title col prezzo, description con «casa di 100 mq», il capitolo sul totale di
+  casa e la FAQ in JSON-LD. Il problema non è il contenuto.
+- La strada per salire dal 9° al 4° posto sono **15-20 link veri**, e il bacino più a
+  portata sono i siti delle imprese già iscritte.
+
+## 8. Aperto
+
+- link `/cerca-artigiani.html?...` **con il .html** dentro le 107 pagine città, mentre la
+  sitemap li scrive senza: doppioni gratis per Google;
+- 7 pagine 404, 5 «duplicata senza canonico», 1 bloccata da robots.txt;
+- i mestieri doppi (punto 5);
+- «1 lavori totali» (punto 4);
+- i 9 testi sotto 13px in `profilo-impresa.html`;
+- la seconda gamba: campagna rivolta ai **clienti** di Roma. I primi 3 mesi Premium
+  regalati scadono **a metà ottobre**: se alle imprese non arriva nessuna richiesta entro
+  allora, non rinnova nessuno.
+
+⚠️ Nota per le prossime sessioni: dal container di Claude **non si arriva a Supabase**
+(il proxy blocca `*.supabase.co`, sia da curl sia da WebFetch). Per i dati veri si preparano
+query SQL pronte da incollare nel SQL Editor e le lancia Alessio.
