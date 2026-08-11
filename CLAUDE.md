@@ -2649,3 +2649,153 @@ il gestionale (Resend regala 3.000 email/mese).
   è fermata dicendo che mancavano gli altri tre. Quando si chiede di compilare un modulo,
   elencare **tutti** i campi, e avvisare che il campo Massimale accetta solo cifre
   (scrivendo `500.000` il browser lo scarta e resta vuoto).
+
+---
+
+# 11 agosto 2026 (pomeriggio) — I NUMERI CHE SBAGLIAVANO, E LE SPUNTE CHE NON PROTEGGEVANO NIENTE
+
+Tornata partita da un referto (`CONTROLLO-COMPLETO-gestionale.md`) che **non esiste nella
+cartella**: era stato prodotto altrove e mai salvato. I numeri di riga citati tornavano tutti,
+sfasati di 164 righe, cioè la conta di prima del lavoro del mattino. Verificati uno per uno
+prima di toccare qualsiasi cosa: **erano veri tutti e cinque**.
+
+## 1. Un solo posto dove si legge un numero scritto a mano
+
+`_numIt` faceva una cosa sola: virgola → punto. Ma `_numIt` legge anche i **prezzi**
+(`#cv-prezzo` della lavorazione e `#pz-prezzo` del prezzario), non solo le misure. Quindi:
+
+    scrivi 1.250,00  ->  salvava 1,25
+    scrivi 1 250,00  ->  salvava 1
+
+Un computo da 12.500 € usciva da 12,50, in silenzio, fino a quando lo guardava il cliente.
+
+Adesso c'è **`_numeroIt(testo)`**, in un posto solo, usata sia da `_numIt` sia da `_pzNum`.
+La regola: **l'ultimo fra virgola e punto è quello dei decimali, tutti gli altri sono
+migliaia**. Più due dettagli che sembrano pignoleria e non lo sono:
+
+- un punto solo con **3 cifre dopo** = migliaia (`1.250` → 1250), **tranne** se prima del
+  punto c'è uno zero (`0.500` → 0,50: dopo lo zero non esistono migliaia);
+- **più di una virgola** e nessun punto = migliaia all'inglese (`1,250,000`).
+
+## 2. `_pzCol` — l'ordine dei controlli contava, ed era sbagliato
+
+L'unità di misura veniva cercata **prima** del prezzo, e cercava la parola `unit`: la colonna
+**«Prezzo unitario»** finiva presa per la colonna dell'unità di misura.
+
+**Il difetto era condizionale, e me ne sono accorto solo facendolo girare.** Se nel file la
+colonna U.M. viene *prima*, `C.unita` è già occupata e il prezzo si trova lo stesso. Il buco
+si apre solo quando «Prezzo unitario» precede U.M., **o quando la colonna U.M. non c'è**: lì
+il prezzo non si trova più e si importa un prezzario intero con tutti i prezzi a zero.
+Nel messaggio ad Alessio l'avevo dato per sempre: corretto subito.
+
+Adesso il prezzo si cerca prima, l'unità di misura **rifiuta** un'intestazione che parla di
+soldi (`prezzo|importo|costo|euro|valore`), e `Cod.` abbreviato viene riconosciuto (prima si
+cercava `codic`, cinque lettere).
+
+## 3. `todayStr()` — l'orologio di Greenwich faceva vivere ieri
+
+`new Date().toISOString().slice(0,10)` dà la data UTC. In Italia d'estate, **fra mezzanotte e
+le due**, il gestionale era al giorno prima: una scadenza segnata all'una di notte nasceva
+già di ieri, un lavoro di oggi risultava "in ritardo", e la lettera d'incarico stampava la
+data sbagliata sul foglio che firma il cliente. Ora legge l'orologio locale, come faceva già
+`_giorniDopo`.
+
+## 4. Il calendario che non cambiava mese
+
+`cal.setMonth(cal.getMonth()-1)`: dal 31 marzo chiede il "31 febbraio", che non esiste, e
+finisce al 3 marzo. Premevi la freccia e restavi nello stesso mese. In avanti, dal 31 gennaio,
+**saltava febbraio di netto**. Adesso ci si sposta sempre al **primo** del mese
+(`new Date(y, m±1, 1)`), che tutti i mesi hanno, e l'anno cambia da solo. Si vedeva solo nei
+giorni 29, 30 e 31: per questo sembrava capitare a caso.
+
+## 5. IL BUCO GROSSO — le spunte dei permessi non proteggevano niente
+
+**Non era ricostruibile dai file**: le policy RLS e `gest_membri` non stanno in `sql/`, vivono
+solo su Supabase. Invece di provare regole inventate (l'errore del 9 agosto), sono state
+scritte **due query di sola lettura** per Alessio — `CONTROLLO-permessi-collaboratori.sql` e
+`CONTROLLO-collegamenti-tabelle.sql` — e lui ha incollato il risultato. Da lì lo schema di
+prova è stato ricostruito **dai dati veri**.
+
+Cosa dicevano le regole vere:
+
+    gest_puo_accedere(impresa) = sei il titolare OPPURE sei un collaboratore 'attivo'
+
+**Non nomina le spunte.** E le policy `*_team_read` dicevano tutte la stessa cosa. Nella app
+del dipendente le spunte fanno **solo** `classList.toggle("hidden", ...)`: nascondono i
+pulsanti del menu, i dati restano.
+
+Provato su PostgreSQL 16 con quelle regole e `auth.uid()` pilotabile — collaboratore attivo
+con spuntato **solo «Lavori»**:
+
+| tabella | doveva | leggeva |
+|---|---|---|
+| lavori | sì | sì |
+| clienti (nome, indirizzo, telefono, email, P.IVA) | **no** | **sì, tutti** |
+| fatture + righe (gli importi) | **no** | **sì, tutte** |
+| pagamenti | no | no (unica chiusa, e per caso: non ha policy di team) |
+
+**La correzione**: `sql/gest-permessi-collaboratori.sql`. Funzione nuova
+`gest_puo_sezione(impresa, sezione)` che guarda davvero la spunta, e le policy di lettura dei
+collaboratori riscritte per usarla. Mappa: `clienti`→gest_clienti · `fatture`→gest_fatture +
+righe + fattura_lavori · `lavori`→gest_lavori + lavoro_mezzi + mezzi + rifornimenti ·
+`calendario`→gest_scadenze · `note`→gest_note (**due** policy sovrapposte, sistemate
+entrambe: se no la più larga vince) · `foto`→gest_foto + gest_video.
+
+Le **carte prepagate** non usano una spunta: adesso un collaboratore vede solo **la propria**
+(`dipendente_id = m.operatore_id`), che è lo stesso criterio che la regola di scrittura usava
+già. Prima leggeva i movimenti delle carte di tutti.
+
+Eseguito su Supabase l'11 agosto: verificato con una query che tutte e 9 le policy sono
+quelle nuove.
+
+## Punti verificati e risultati NEGATIVI (tenuti per non rifarli)
+
+- **Il capitolo del computo cancellato**: *falso allarme*. `capitolo_id` è `on delete set
+  null`, le viste `gest_computo_voci_calc` / `gest_computo_totali` non toccano i capitoli, e
+  sia la schermata sia il PDF hanno già il gruppo «Senza capitolo». Provato: 3 lavorazioni e
+  3.700 € prima, 3 lavorazioni e 3.700 € dopo, misure intatte.
+- **Mezzi e carte fuori dal Cestino**: *funziona*. Mezzo con 2 pieni + 1 collegamento a lavoro
+  + 1 scadenza, carta con 2 movimenti: se ne vanno tutti col padre, e lavoro, cliente e
+  fattura restano.
+
+## Le scelte che non vanno ribaltate senza pensarci
+
+- **Una sola funzione per leggere i numeri.** `_numIt` e `_pzNum` chiamano `_numeroIt`. Non
+  rimetterne una seconda copia: è esattamente il difetto che si era annidato qui.
+- **`gest_puo_accedere` resta**, non è stata toccata: la usano ancora `mestieri_read` e
+  `operatori_read`, che devono restare aperte o la app del dipendente non si apre proprio.
+- **La polizza scaduta avvisa, non blocca. Le spunte invece bloccano.**
+- **Il file dei permessi ha in fondo il blocco per tornare indietro**, commentato. Se un
+  collaboratore resta fuori, si rimette tutto com'era in un Run.
+
+## Da fare la prossima volta
+
+1. **`gest_operatori` è l'ultima tabella aperta**: un collaboratore attivo legge telefono,
+   codice fiscale, data di nascita, documento e **costo orario** di tutta la squadra. Non c'è
+   una spunta per questo e non è stata toccata di iniziativa propria. Va chiusa, ma serve
+   decidere prima cosa deve restare visibile (probabilmente solo nome e mansione).
+2. **`gest_redeem_invito` è SECURITY DEFINER e accetta qualsiasi codice valido**: il codice
+   è `sbRand()`, 6 caratteri base36 (~2,2 miliardi). Non è un buco aperto, ma non c'è nessun
+   limite ai tentativi. Da guardare quando i collaboratori diventano tanti.
+3. **Provare la app del dipendente vera** con un secondo account: le prove dei permessi sono
+   state fatte sul database, non nella `gestionale-operatore.html`.
+4. Il referto `CONTROLLO-COMPLETO-gestionale.md` **non esiste nella cartella**: della PARTE 3
+   sono stati sistemati solo i punti 1-3, quelli riportati a mano nel messaggio.
+
+## Lezioni
+
+- **Quando le regole non stanno nei file, non si indovinano: si chiedono.** Due query di sola
+  lettura, cinque minuti di Alessio, e lo schema di prova è diventato quello vero. Con regole
+  inventate la prova avrebbe *assolto* un buco che c'era.
+- **Anche lo schema di prova va provato.** La prima ricostruzione non aveva le policy del
+  computo: il caso «cancellare il capitolo di un altro account» risultava permesso, e non era
+  vero. Un test che gira come superutente **salta l'RLS senza dirlo**: bisogna sempre
+  `set role authenticated`.
+- **Un difetto condizionale va raccontato come condizionale.** «Tutti i prezzi a zero» era
+  vero solo per certi ordini di colonne. Detto male, si perde fiducia in tutto il resto.
+- **La correzione va rotta apposta.** La prima versione di `gest_puo_sezione` convertiva la
+  spunta con `::boolean`: con un valore storto (`"forse"`) andava in **errore**, cioè rompeva
+  la lettura invece di negarla. Ora confronta e basta, senza conversioni.
+- **pg_safeupdate non si compila nel container** (mancano gli header di PostgreSQL, apt non
+  li scarica). Dichiarato nella scheda di collaudo invece di far finta: al suo posto,
+  controllo a mano che non ci siano `delete`/`update` senza `where`.
