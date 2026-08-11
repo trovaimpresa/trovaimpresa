@@ -2956,3 +2956,105 @@ Segnalato ad Alessio e lasciato lì. In ordine di quanto peserà:
   Per un documento che qualcun altro controlla, le due cose sono ugualmente importanti.
 - **Prima di correggere un sospetto, provare a smentirlo.** Sull'euro il sospetto era scritto
   nel codice stesso, e sarebbe stato naturale fidarsi.
+
+---
+
+# 11 agosto 2026 (sera, 3) — COMPUTO: DUPLICA E RINOMINA CAPITOLO
+
+I primi due buchi della lista «cosa manca», chiusi subito dopo il controllo.
+
+## Duplicare un computo — `compDuplica(id)`
+
+Il pulsante **⧉ Duplica** sta nelle azioni della scheda, accanto a PDF ed Elimina
+(`compVoci()`), e il dispatcher lo manda su `comp-dup`.
+
+**Le due scelte, decise con Alessio:**
+
+- **Le misure si chiedono ogni volta.** Un `gconfirm` con SÌ/NO spiegati: SÌ = copia
+  identica (il secondo appartamento uguale), NO = capitoli, lavorazioni, prezzi e unità ma
+  quantità a zero (stesso lavoro su un edificio diverso). Se di misure non ce n'è nessuna la
+  domanda non si fa e si chiede solo conferma.
+- **Cliente sì, pratica no.** Due appartamenti dello stesso condominio hanno lo stesso
+  cliente ma non lo stesso lavoro: due computi agganciati alla stessa pratica farebbero
+  contare doppio nel Riepilogo. `lavoro_id` e `preventivo_id` restano vuoti.
+
+La copia nasce sempre **in bozza, con la data di oggi e il numero VUOTO**: un numero inventato
+sarebbe un doppione, e datarla come l'originale sarebbe una bugia sul foglio. Finito, apre
+subito la copia, perché la prima cosa che si fa è cambiarle il titolo.
+
+**Il punto dove è più facile sbagliare** è riattaccare le lavorazioni al capitolo giusto
+*della copia*. Si tiene una mappa vecchio→nuovo, riappaiata per **ordine + titolo** e non
+fidandosi dell'ordine in cui l'insert restituisce le righe (non è garantito da nessuna parte,
+e sbagliare qui vuol dire lavorazioni finite nel capitolo sbagliato senza accorgersene).
+Le misure si scrivono **a blocchi di 200**, come fa l'importazione del prezzario.
+
+### ⚠️ IL DIFETTO TROVATO NELLA CORREZIONE STESSA — vale per tutto il gestionale
+
+Il ripiego («se salta a metà, butto via la copia incompleta») **non funzionava**:
+
+    sb.from("gest_computi").delete()...
+
+`js/cestino.js` intercetta ogni `delete` sulle tabelle del cestino e la trasforma in una
+data. Quindi la copia mezza fatta **non spariva: finiva NEL CESTINO**, con dentro i capitoli
+e senza le lavorazioni, come se l'avesse buttata l'utente.
+
+Adesso passa dalla **porta di servizio**:
+
+    (sb.raw?sb.raw("gest_computi"):sb.from("gest_computi")).delete()...
+
+**REGOLA: quando si annulla qualcosa che abbiamo appena creato noi, si usa `sb.raw`.** Il
+cestino serve a proteggere quello che l'utente ha fatto, non a conservare i nostri scarti.
+Trovato facendo guastare il database apposta a metà copia — non leggendo il codice.
+
+## Rinominare (e rinumerare) un capitolo
+
+Prima un capitolo si poteva **solo cancellare**: per un refuso nel titolo bisognava
+eliminarlo (e tutte le sue lavorazioni finivano «senza capitolo»), rifarlo, e riaprire una
+per una le lavorazioni per riassegnarle dalla tendina. Su un computo da sessanta voci: un
+pomeriggio.
+
+Adesso la riga grigia del capitolo si clicca (`comp-cap-edit`) e diventa **Numero + Titolo**
+già pieni, con Salva e Annulla. Stato nuovo: `compCapEdit` (id del capitolo in modifica),
+azzerato insieme a `compCapNuovo` quando si apre un computo.
+
+**Il numero c'è insieme al titolo di proposito**: il gestionale numera i capitoli con
+`max(ordine)+1`, quindi cancellato il capitolo 2 di 3 il prossimo nasce «4» in un computo che
+di capitoli ne ha tre. Adesso si corregge a mano. Il numero si può anche **svuotare**
+(diventa null, non la stringa "null").
+
+Le lavorazioni **non si muovono**: è lo stesso capitolo, cambia solo come si chiama. È il
+controllo su cui si è insistito di più nelle prove.
+
+## Cosa resta della lista «cosa manca al computo»
+
+Fatti: duplicare un computo, rinominare/rinumerare un capitolo.
+Restano, in ordine di quanto verranno chiesti:
+
+1. **Spostare una lavorazione su/giù** — `ordine` si scrive alla creazione e non si cambia
+   più. Una voce dimenticata resta in fondo per sempre.
+2. **Duplicare una singola lavorazione** con le sue misure (stessa parete su tre piani).
+3. **IVA / quadro economico** — il computo non ha aliquota, il preventivo sì.
+4. **Analisi prezzi** ed **elenco prezzi unitari** in appendice al PDF.
+5. **Esportazione in Excel** (`caricaXLSX()` c'è già in casa per l'importazione).
+6. **Unità di misura dei prezzari importati** — `ppUsa` applica l'unità solo se combacia con
+   la lista `UNITA`, e i prezzari regionali scrivono `mq`/`mc`/`ml`/`cad.`: le voci importate
+   arrivano senza unità, e un Salva successivo la scrive a null.
+
+## Da guardare, se dà fastidio
+
+Sotto **ogni** capitolo compare la scritta «clicca per rinominare». Su un computo con dieci
+capitoli si ripete dieci volte. È stata lasciata per farlo scoprire; se Alessio la trova
+rumorosa, si mostra solo al passaggio del mouse (ma attenzione: al tocco, sul telefono,
+l'hover non esiste — servirebbe comunque qualcosa di visibile).
+
+## Lezioni
+
+- **Il ripiego va provato rompendo qualcosa apposta.** «Se salta a metà pulisco» è la classica
+  riga che nessuno esegue mai in un test normale: bisogna far fallire il database di
+  proposito. Nel finto Supabase basta far rispondere 400 a una tabella scelta.
+- **Un finto database che SCRIVE trova cose che uno in sola lettura non vede.**
+  `/root/prova/scrivibile.py`: insert con id generato, delete con la catena, e — cosa che era
+  sfuggita — la risposta a `.single()` deve essere UN OGGETTO, non una lista, se no
+  supabase-js va in errore DOPO che la riga è stata scritta.
+- **Quando si copia una gerarchia, non fidarsi dell'ordine delle righe restituite**
+  dall'insert multiplo: riappaiare per un dato stabile (qui ordine + titolo).
