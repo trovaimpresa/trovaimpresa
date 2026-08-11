@@ -2799,3 +2799,34 @@ quelle nuove.
 - **pg_safeupdate non si compila nel container** (mancano gli header di PostgreSQL, apt non
   li scarica). Dichiarato nella scheda di collaudo invece di far finta: al suo posto,
   controllo a mano che non ci siano `delete`/`update` senza `where`.
+
+## 11 agosto 2026 (sera) — chiusa anche gest_operatori
+
+L'ultima tabella rimasta aperta, quella segnata come "da fare la prossima volta" poche ore
+prima. `operatori_read` diceva `gest_puo_accedere(user_id)`: un collaboratore attivo leggeva
+**tutte** le schede della squadra, e dentro una scheda ci sono telefono, email, codice
+fiscale, data di nascita, documento, visita medica, contatto di emergenza, tipo di contratto
+e **costo orario**. Cioe' quanto l'impresa paga ogni persona, saputo da tutti.
+
+**Prima di scrivere la regola e' stato letto il codice**, ed e' stata la cosa che ha fatto la
+differenza: `gestionale-operatore.html` legge `gest_operatori` in **un punto solo** e chiede
+soltanto il **proprio** nome (`select nome ... eq("id", MIO.operatoreId)`). Tutte le altre
+letture stanno in `gestionale-app.html`, cioe' nel pannello del titolare, gia' filtrate sul
+suo `user_id`. Quindi si poteva stringere al massimo senza rompere niente: **un collaboratore
+vede solo la propria scheda**. Nessuna modifica alle pagine.
+
+`sql/gest-operatori-scheda-privata.sql`. Provato sullo schema vero: prima il collaboratore
+Mario leggeva anche `Giuseppe Collega · 3405556677 · VRDGPP75B02H501X · 26 €/h`, dopo vede
+solo se stesso; il titolare vede tutti e due come prima; la lettura che fa la app del
+dipendente funziona ancora. Rifiutati: estraneo, collaboratore sospeso, collaboratore attivo
+senza scheda collegata, collaboratore che prova a cambiarsi il costo orario, collaboratore
+che prova a collegarsi alla scheda di un collega.
+
+**Le colonne non si nascondono una per una**: o si legge la riga o non si legge. Non esiste
+un "vede il nome ma non il costo orario" senza una vista apposta. Se un giorno serve la
+**rubrica della squadra** (nome e telefono dei colleghi, per chiamarsi in cantiere), si fa
+una vista con dentro solo quelle due colonne: una funzione decisa, non una porta lasciata
+aperta.
+
+Con questo il giro dei permessi e' chiuso: nessuna tabella `gest_*` lascia piu' leggere a un
+collaboratore roba che non gli spetta.
