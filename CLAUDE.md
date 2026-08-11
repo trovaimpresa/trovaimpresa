@@ -2830,3 +2830,129 @@ aperta.
 
 Con questo il giro dei permessi e' chiuso: nessuna tabella `gest_*` lascia piu' leggere a un
 collaboratore roba che non gli spetta.
+
+---
+
+# 11 agosto 2026 (sera, 2) — IL COMPUTO METRICO È CONSEGNABILE: TRE DIFETTI SUL PDF
+
+Domanda di Alessio: «il computo metrico è pronto? posso dire usatelo?». Risposta trovata
+costruendo un computo vero (3 capitoli, lavorazioni con misure e detrazioni, ribasso 10%,
+oneri della sicurezza), aprendolo nel gestionale e **generando davvero il PDF**.
+
+**A schermo i conti erano già giusti** e coerenti fra elenco, scheda e vista del database.
+Tutti e tre i difetti stavano nel **PDF**, cioè nell'unica cosa che finisce in mano al
+cliente o al Comune.
+
+## 1. ⚠️ IL METRO QUADRO CHE DIVENTAVA METRO — la trappola da ricordare
+
+`m²` usciva stampato **`m`**, `m³` usciva **`m`**. jsPDF con l'helvetica **non sa disegnare
+gli esponenti e invece di sbagliare li butta via in silenzio**.
+
+Provato in isolamento, e questa è la parte che serve sapere:
+
+    €  ->  stampa benissimo
+    °  ->  stampa benissimo
+    è ò à  ->  stampano benissimo
+    ²  ³  ->  SPARISCONO
+
+In un computo metrico è il difetto peggiore possibile: 73 metri quadri di intonaco e 73
+metri lineari di cornice sono due lavori e due prezzi diversi, e sulla carta si leggevano
+identici. E `UNITA` (riga ~9705) offre `m²` e `m³` come prime due voci: capita quasi sempre.
+
+**Correzione**: `_umPdf(u)` accanto a `eurPdf` (riga ~6391) — `m²`→`mq`, `m³`→`mc`, e
+qualsiasi altro esponente in cifra normale. Usata nel PDF del computo e nella descrizione
+che `computoAPreventivo` scrive nel preventivo. A schermo restano m² e m³.
+
+**REGOLA GENERALE: qualsiasi testo scritto in un PDF passa da `_umPdf` se può contenere
+un'unità di misura.** Vale per i PDF futuri, non solo per il computo.
+
+## 2. Il riquadro dei totali non tornava con la calcolatrice
+
+    Totale dei lavori                            8.468,05
+    Oneri sicurezza (non soggetti a ribasso)        75,00
+    Ribasso 10%                                -   839,31
+    TOTALE                                       7.628,74
+
+Chi lo riceve somma e trova 7.703,74: **75 euro in più**. Il TOTALE era quello giusto — gli
+oneri sono GIÀ DENTRO il totale dei lavori — ma stampati così sembravano una somma. A
+schermo era scritto bene («**di cui** oneri della sicurezza»); nel PDF quel «di cui» non
+c'era. Su un computo per una gara è la prima cosa che ti fanno rispiegare.
+
+Adesso le righe si sommano nell'ordine, e il conto torna riga per riga:
+
+    Totale dei lavori                            8.468,05
+    a dedurre oneri della sicurezza            -    75,00
+    Importo soggetto a ribasso                   8.393,05
+    Ribasso 10%                                -   839,31
+    Oneri della sicurezza, non ribassabili     +    75,00
+    TOTALE                                       7.628,74
+
+Sui lavori privati (niente oneri) il riquadro resta a due righe più il totale.
+La colonna dell'etichetta è passata da 56 a **62 mm**: con 56 la riga più lunga andava a
+capo e finiva stampata sopra quella sotto.
+
+## 3. La quantità zero diventava uno nel preventivo
+
+Una lavorazione inserita ma non ancora misurata vale 0 € nel computo. Ma il preventivo,
+**in tutti e dieci i punti dove fa i conti**, scrive `(+r.qta||1)`: lo zero viene letto come
+"non scritto" e diventa 1. La riga arrivava al cliente a 1 × prezzo unitario — una voce da
+1.850 €/corpo gonfiava il preventivo di 1.850 €, e nel PDF compariva pure «1» nella colonna
+quantità, come se fosse voluto.
+
+**Il `||1` del preventivo non si tocca**: serve alle righe scritte a mano, dove lasciare la
+quantità vuota vuol dire "una". Si è sistemato in `computoAPreventivo`, dove si sa che 0 vuol
+dire "non ancora misurata": avvisa con un gconfirm che dice quante sono e perché, e non le
+porta. Se il computo è tutto misurato non disturba.
+
+## 4. L'ultima pagina sporca (venuta via con la #2)
+
+Dopo `chiudiCorpo()` il codice chiamava ancora `spazio()`, che chiama `nuovaPagina()`, che
+**richiude la tabella una seconda volta** (righe verticali tirate giù nel vuoto), scrive
+«A riportare» quando non c'è più niente da riportare, e apre il foglio dopo stampando
+**l'intestazione di una tabella vuota** più un «Riporto». Riepilogo e totali finivano
+stampati là sotto.
+
+Aggiunto **`spazioFuoriTabella(h)`**: se non ci sta, volta pagina e basta. Da usare in tutto
+quello che viene dopo `chiudiCorpo()`.
+
+## Un sospetto verificato ed ERRATO — tenuto per non rifarlo
+
+Il commento a riga ~10872 dice che jsPDF non sa scrivere il simbolo **€** e che per questo
+altrove si scrive «EUR». **Non è vero**: provato, l'euro esce perfetto. Se non lo si
+controllava si sarebbe "corretto" qualcosa che funziona. Il commento resta lì e va letto con
+questa nota accanto: il problema erano gli **esponenti**, non l'euro.
+
+## Cosa NON è stato toccato, ma è stato trovato
+
+Segnalato ad Alessio e lasciato lì. In ordine di quanto peserà:
+
+1. **Duplicare un computo** — il più richiesto in assoluto. Due appartamenti uguali si
+   ribattono da capo. Non esiste nessuna azione `comp-dup`.
+2. **Rinominare un capitolo**: si può solo cancellare, e cancellandolo tutte le lavorazioni
+   finiscono «senza capitolo» e vanno riassegnate una per una dalla tendina.
+3. **Spostare una lavorazione su/giù**: `ordine` si scrive alla creazione e non si cambia
+   più. Una voce dimenticata resta in fondo per sempre.
+4. **IVA / quadro economico**: il computo non ha aliquota, il preventivo sì.
+5. **Analisi prezzi** ed **elenco prezzi unitari** in appendice: su un lavoro pubblico li
+   chiedono.
+6. **Esportazione in Excel**: `caricaXLSX()` c'è già in casa per l'importazione.
+7. **Unità di misura dei prezzari importati**: `ppUsa` (riga ~10141) applica l'unità solo se
+   combacia esattamente con la lista `UNITA`. I prezzari regionali scrivono `mq`, `mc`, `ml`,
+   `cad.` — quindi le voci importate arrivano **senza unità**, e riaprendo la voce e
+   premendo Salva l'unità viene scritta a null. Da guardare insieme al punto 5.
+8. **Sospetti non verificati**: da quante voci in su PostgREST comincia a tagliare le righe
+   senza dirlo (misure del PDF, `gest_computo_voci_calc`, `gest_computo_totali`); il ribasso
+   scritto con la virgola in un campo `type=number`; `ppSalva` che può sovrascrivere il
+   prezzo della tariffa di un'altra Regione perché cerca per descrizione+codice senza
+   filtrare la `fonte`.
+
+## Lezioni
+
+- **Il PDF si guarda, sempre.** Nessun controllo automatico avrebbe trovato il quadratino
+  che sparisce: il testo dentro il file PDF conteneva `m²` regolarmente — è il **disegno**
+  che perdeva l'esponente. Bisogna aprire la pagina e leggerla con gli occhi.
+- **Un riquadro di totali deve tornare con la calcolatrice, non solo essere giusto.** Il
+  numero finale era corretto: era la sequenza delle righe a essere impossibile da verificare.
+  Per un documento che qualcun altro controlla, le due cose sono ugualmente importanti.
+- **Prima di correggere un sospetto, provare a smentirlo.** Sull'euro il sospetto era scritto
+  nel codice stesso, e sarebbe stato naturale fidarsi.
