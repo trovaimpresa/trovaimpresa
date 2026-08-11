@@ -1,0 +1,360 @@
+// netlify/functions/riepilogo-lunedi.js
+//
+// 11 agosto 2026 — IL RIEPILOGO DEL LUNEDI' MATTINA.
+//
+// A CHE SERVE
+// Il Riepilogo del gestionale e' bellissimo, ma bisogna ricordarsi di aprirlo.
+// Il lunedi' mattina uno accende il telefono, non il gestionale. Questa
+// funzione gira una volta a settimana e manda UNA email con le tre cose che
+// fanno perdere soldi se sfuggono:
+//   1. le scadenze dei prossimi 7 giorni
+//   2. le fatture emesse che nessuno ha pagato
+//   3. i lavori (o le pratiche) con la data prevista gia' passata
+//
+// I CONTI SONO GLI STESSI DEL RIEPILOGO
+// Le formule qui sotto sono copiate dal Riepilogo di gestionale-app.html, non
+// riscritte a mente: il totale di una fattura e' imponibile + IVA - sconto +
+// bollo - ritenuta, e "scaduta" vuol dire emessa con la data superata dei
+// giorni di pagamento dei Dati azienda. Se le due schermate dessero numeri
+// diversi, la persona smetterebbe di fidarsi di tutte e due.
+//
+// CHI LA RICEVE (per adesso)
+// Solo l'indirizzo scritto in SOLO_A qui sotto. Serve a vedere quattro lunedi'
+// di fila che i numeri sono giusti prima di mandarla agli iscritti.
+// PER APRIRLA A TUTTI: metti  const SOLO_A = null;  e basta, il resto e' gia'
+// scritto per funzionare con tutti.
+//
+// CHI NON LA RICEVE MAI
+// - chi ha tolto la spunta "Mandami il riepilogo del lunedi'" nei Dati azienda
+// - chi in quella settimana non ha NIENTE da segnalare: niente email a vuoto.
+//   Tre email "va tutto bene" di fila e la quarta non la apre piu' nessuno.
+//
+// PRIMA DI FUNZIONARE VUOLE
+// - sql/gest-azienda-riepilogo-lunedi.sql eseguito su Supabase (la colonna
+//   dell'interruttore). Se non lo esegui parte lo stesso: senza la colonna
+//   considera tutti "accesi", come prima.
+// - SUPABASE_SERVICE_KEY e RESEND_API_KEY su Netlify: ci sono gia', le usano
+//   promemoria-scadenze.js e invia-promemoria.js.
+
+const { schedule } = require('@netlify/functions');
+const { createClient } = require('@supabase/supabase-js');
+
+// ---------------------------------------------------------------------------
+// L'UNICA RIGA DA CAMBIARE QUANDO VUOI APRIRLA A TUTTI: metti  null
+// ---------------------------------------------------------------------------
+const SOLO_A = 'pintoalessio@icloud.com';
+
+const SITO = 'https://trovaimpresa.com/gestionale-app.html';
+
+function esc(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function oggiISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+// stessa funzione del gestionale (_giorniDopo): niente fusi orari di mezzo
+function giorniDopo(ds, n) {
+  const [y, m, d] = String(ds).split('-').map(Number);
+  const dt = new Date(y, m - 1, d + n);
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  return dt.getFullYear() + '-' + mm + '-' + dd;
+}
+function dataIt(iso) {
+  if (!iso) return '';
+  const [a, m, g] = String(iso).split('-');
+  return g + '/' + m + '/' + a;
+}
+function quantiGiorni(da, a) {
+  const p = s => { const [y, m, d] = String(s).split('-').map(Number); return Date.UTC(y, m - 1, d); };
+  return Math.round((p(a) - p(da)) / 86400000);
+}
+// useGrouping:true e' esplicito apposta, come nel gestionale. Senza, qui
+// usciva "2550,00 €" invece di "2.550,00 €": trovato facendo girare davvero
+// la funzione, non leggendola.
+function euro(n) {
+  return new Intl.NumberFormat('it-IT',
+    { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: true })
+    .format(+n || 0) + ' €';
+}
+const GIORNI = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+function nomeGiorno(iso) {
+  const [y, m, d] = String(iso).split('-').map(Number);
+  return GIORNI[new Date(y, m - 1, d).getDay()];
+}
+function fra(n) {
+  return n === 0 ? 'oggi' : n === 1 ? 'domani' : 'fra ' + n + ' giorni';
+}
+function plurale(n, uno, tanti) { return n + ' ' + (n === 1 ? uno : tanti); }
+
+// ---------------------------------------------------------------------------
+// L'email. Testo grande e righe distanziate: si legge dal telefono, in piedi.
+// ---------------------------------------------------------------------------
+function sezione(colore, titolo, righe, bottone, link, coda) {
+  if (!righe.length) return '';   // sezione vuota = sezione che sparisce
+  return `
+  <div style="padding:18px 26px 6px">
+    <div style="font-size:19px;font-weight:800;color:#0a2a4d;border-left:5px solid ${colore};padding-left:12px;line-height:1.4">${titolo}</div>
+  </div>
+  <div style="padding:6px 26px">
+    <table style="width:100%;border-collapse:collapse">${righe.join('')}</table>
+    ${coda || ''}
+    <div style="margin:16px 0 22px">
+      <a href="${link}" style="display:inline-block;background:#0066ff;color:#ffffff;padding:13px 24px;border-radius:9px;font-size:16px;font-weight:700;text-decoration:none">${bottone} &rarr;</a>
+    </div>
+  </div>`;
+}
+function riga(titolo, sotto, evidenza, colore) {
+  return `<tr><td style="padding:16px 0;border-bottom:1px solid #edf1f6">
+    <div style="font-size:17px;font-weight:700;color:#0a2a4d;line-height:1.5">${esc(titolo)}</div>
+    ${sotto ? `<div style="font-size:15px;color:#5b6b7d;margin-top:5px">${esc(sotto)}</div>` : ''}
+    ${evidenza ? `<div style="font-size:16px;font-weight:700;color:${colore};margin-top:7px">${evidenza}</div>` : ''}
+  </td></tr>`;
+}
+
+function costruisciEmail(d) {
+  const parole = d.pro
+    ? { lavori: 'Pratiche in ritardo', lavoro: 'pratica', lavoriP: 'pratiche', apri: 'Apri le pratiche' }
+    : { lavori: 'Lavori in ritardo', lavoro: 'lavoro', lavoriP: 'lavori', apri: 'Apri i lavori' };
+
+  const rScad = d.scadenze.map(s => riga(
+    s.titolo || 'Scadenza',
+    s.tipo_pratica || s.reparto || '',
+    nomeGiorno(s.data_scadenza) + ' ' + dataIt(s.data_scadenza).slice(0, 5) + ' — ' + fra(s.giorni),
+    s.giorni <= 1 ? '#c62828' : s.giorni <= 3 ? '#e65100' : '#0066ff'));
+
+  const rFatt = d.fatture.map(f => riga(
+    'Fattura ' + (f.numero || '—') + (f.cliente ? ' — ' + f.cliente : ''),
+    '',
+    euro(f.totale) + ' &middot; scaduta da ' + plurale(f.giorniRitardo, 'giorno', 'giorni'),
+    '#c62828'));
+
+  const rLav = d.lavori.map(l => riga(
+    l.titolo || 'Senza titolo',
+    l.cliente || '',
+    'Doveva essere finit' + (d.pro ? 'a' : 'o') + ' il ' + dataIt(l.data_prevista)
+      + ' — ' + plurale(l.giorniRitardo, 'giorno fa', 'giorni fa'),
+    '#e65100'));
+
+  const codaFatt = d.fatture.length
+    ? `<div style="background:#fdf0f0;border-radius:10px;padding:14px 16px;margin-top:16px;font-size:17px;font-weight:800;color:#0a2a4d">In tutto ti devono ${euro(d.totaleScaduto)}</div>`
+    : '';
+
+  return `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:640px;margin:0 auto;color:#22303f;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #dfe5ee">
+  <div style="background:linear-gradient(135deg,#0a2a4d,#0066ff);padding:30px 26px">
+    <div style="color:#ffffff;font-size:24px;font-weight:800;line-height:1.3;margin:0">La tua settimana</div>
+    <div style="color:#c9dcff;font-size:16px;margin-top:8px">${esc(nomeGiorno(d.oggi) + ' ' + dataIt(d.oggi))}${d.azienda ? ' &middot; ' + esc(d.azienda) : ''}</div>
+  </div>
+  <div style="padding:26px 26px 8px">
+    <p style="font-size:17px;line-height:1.7;margin:0">Buongiorno. Ecco cosa ti aspetta questa settimana, preso dal tuo gestionale.</p>
+  </div>
+  ${sezione('#0066ff', 'Scadenze di questa settimana', rScad, 'Apri lo scadenzario', SITO + '#scadenzario')}
+  ${sezione('#c62828', 'Non ti hanno ancora pagato', rFatt, 'Apri le fatture', SITO + '#fatture', codaFatt)}
+  ${sezione('#e65100', parole.lavori, rLav, parole.apri, SITO + '#lavori')}
+  <div style="padding:6px 26px 28px;border-top:1px solid #edf1f6;margin-top:6px">
+    <p style="font-size:14px;color:#7a8798;line-height:1.7;margin:18px 0 0">
+      Ricevi questa email il lunedì mattina perché hai il riepilogo settimanale acceso.
+      Puoi spegnerlo quando vuoi dai <b>Dati azienda</b> del gestionale.
+    </p>
+  </div>
+</div>
+<p style="text-align:center;font-size:13px;color:#9aa5b1;margin-top:14px;font-family:system-ui,sans-serif">
+  TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#9aa5b1">trovaimpresa.com</a></p>`;
+}
+
+function oggetto(d) {
+  const pezzi = [];
+  if (d.scadenze.length) pezzi.push(plurale(d.scadenze.length, 'scadenza', 'scadenze'));
+  if (d.fatture.length)  pezzi.push(plurale(d.fatture.length, 'fattura scaduta', 'fatture scadute'));
+  if (d.lavori.length)   pezzi.push(plurale(d.lavori.length, d.pro ? 'pratica in ritardo' : 'lavoro in ritardo',
+                                                             d.pro ? 'pratiche in ritardo' : 'lavori in ritardo'));
+  return 'La tua settimana — ' + pezzi.join(', ');
+}
+
+// ---------------------------------------------------------------------------
+const handler = async function () {
+  const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nacvrsgkyfavykxjxszu.supabase.co';
+  const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+  if (!SUPABASE_KEY)            return { statusCode: 500, body: 'SUPABASE_SERVICE_KEY non configurata' };
+  if (!process.env.RESEND_API_KEY) return { statusCode: 500, body: 'RESEND_API_KEY non configurata' };
+
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  });
+
+  const oggi = oggiISO();
+  const fra7 = giorniDopo(oggi, 7);
+
+  try {
+    // -----------------------------------------------------------------------
+    // 1. Chi ha un gestionale. La riga gest_azienda e' quella che esiste solo
+    //    per chi lo usa davvero: e' il modo piu' onesto di fare l'elenco.
+    // -----------------------------------------------------------------------
+    let colonnaInterruttore = true;
+    let az = null;
+    {
+      const r = await sb.from('gest_azienda').select('user_id, nome, giorni_pagamento, riepilogo_lunedi');
+      if (r.error && /riepilogo_lunedi/.test(r.error.message || '')) {
+        // la migrazione non e' ancora stata eseguita: si tira dritto e si
+        // considerano tutti accesi, invece di non mandare niente a nessuno
+        colonnaInterruttore = false;
+        const r2 = await sb.from('gest_azienda').select('user_id, nome, giorni_pagamento');
+        if (r2.error) throw r2.error;
+        az = r2.data || [];
+      } else if (r.error) { throw r.error; }
+      else { az = r.data || []; }
+    }
+    const aziende = az.filter(a => colonnaInterruttore ? a.riepilogo_lunedi !== false : true);
+    if (!aziende.length) return { statusCode: 200, body: JSON.stringify({ ok: true, emailInviate: 0 }) };
+
+    const utenti = aziende.map(a => a.user_id);
+
+    // -----------------------------------------------------------------------
+    // 2. I dati, in tre letture sole invece di tre per persona
+    // -----------------------------------------------------------------------
+    // IL CESTINO. Dal 9 agosto cancellare vuol dire "scrivi la data in
+    // eliminato_il": la riga resta nel database. Il gestionale la nasconde da
+    // solo (js/cestino.js), ma qui si legge da fuori, senza quel filtro. Senza
+    // questa precauzione il lunedi' arriverebbe l'elenco delle fatture non
+    // pagate CON DENTRO quelle gia' buttate nel cestino.
+    // Se la colonna non esistesse (migrazione non fatta), si rilegge senza:
+    // meglio qualche riga di troppo che nessuna email.
+    const senzaCestino = async (costruisci) => {
+      const r = await costruisci(true);
+      if (r.error && /eliminato_il/.test(r.error.message || '')) return costruisci(false);
+      return r;
+    };
+    const vivi = (q, filtra) => filtra ? q.is('eliminato_il', null) : q;
+
+    const [qScad, qFatt, qLav, qCli, qImp, qMest] = await Promise.all([
+      senzaCestino(f => vivi(sb.from('gest_scadenze')
+        .select('user_id, mestiere_id, titolo, tipo_pratica, data_scadenza, stato')
+        .in('user_id', utenti).gte('data_scadenza', oggi).lte('data_scadenza', fra7), f)),
+      senzaCestino(f => vivi(sb.from('gest_fatture')
+        .select('id, user_id, numero, data, stato, sconto, bollo, ritenuta_perc, cliente_id')
+        .in('user_id', utenti).eq('stato', 'emessa'), f)),
+      senzaCestino(f => vivi(sb.from('gest_lavori')
+        .select('user_id, titolo, stato, data_prevista, cliente_id')
+        .in('user_id', utenti).neq('stato', 'fatto').lt('data_prevista', oggi), f)),
+      // i clienti si leggono TUTTI, cestino compreso: se hai buttato la scheda
+      // del cliente ma la sua fattura è ancora da incassare, il nome ti serve
+      // lo stesso (è la stessa scelta già fatta nei documenti PDF)
+      sb.from('gest_clienti').select('id, nome').in('user_id', utenti),
+      sb.from('imprese').select('user_id, tipo').in('user_id', utenti),
+      senzaCestino(f => vivi(sb.from('gest_mestieri').select('id, nome').in('user_id', utenti), f))
+    ]);
+    for (const q of [qScad, qFatt, qLav, qCli, qImp, qMest]) if (q.error) throw q.error;
+
+    // le righe delle fatture servono per il totale: si leggono solo per le
+    // fatture emesse trovate sopra
+    const idFatture = (qFatt.data || []).map(f => f.id);
+    let righeFatt = [];
+    if (idFatture.length) {
+      const q = await sb.from('gest_fattura_righe').select('fattura_id, qta, prezzo, iva')
+                        .in('fattura_id', idFatture);
+      if (q.error) throw q.error;
+      righeFatt = q.data || [];
+    }
+
+    const nomeCli  = Object.fromEntries((qCli.data  || []).map(c => [String(c.id), c.nome || '']));
+    const nomeMest = Object.fromEntries((qMest.data || []).map(m => [String(m.id), m.nome || '']));
+    const tipoUte  = Object.fromEntries((qImp.data  || []).map(i => [String(i.user_id), i.tipo || '']));
+
+    // totale fattura: STESSA formula del Riepilogo del gestionale
+    const somme = {};
+    righeFatt.forEach(r => {
+      const imp = (+r.qta || 0) * (+r.prezzo || 0);
+      const t = somme[r.fattura_id] = somme[r.fattura_id] || { imp: 0, iva: 0 };
+      t.imp += imp;
+      t.iva += imp * (+r.iva || 0) / 100;
+    });
+    const totaleFattura = f => {
+      const t = somme[f.id] || { imp: 0, iva: 0 };
+      return t.imp + t.iva - (+f.sconto || 0) + (+f.bollo || 0) - t.imp * (+f.ritenuta_perc || 0) / 100;
+    };
+
+    // -----------------------------------------------------------------------
+    // 3. Una busta per persona
+    // -----------------------------------------------------------------------
+    let inviate = 0, saltateVuote = 0, senzaEmail = 0;
+    const errori = [];
+
+    for (const a of aziende) {
+      const uid = a.user_id;
+      const ggPag = (+a.giorni_pagamento) || 30;
+
+      const scadenze = (qScad.data || [])
+        .filter(s => s.user_id === uid && s.stato !== 'fatta' && s.data_scadenza)
+        .map(s => ({ ...s, giorni: quantiGiorni(oggi, s.data_scadenza),
+                     reparto: nomeMest[String(s.mestiere_id)] || '' }))
+        .sort((x, y) => x.giorni - y.giorni);
+
+      const fatture = (qFatt.data || [])
+        .filter(f => f.user_id === uid && f.data && giorniDopo(f.data, ggPag) < oggi)
+        .map(f => ({ numero: f.numero, cliente: nomeCli[String(f.cliente_id)] || '',
+                     totale: totaleFattura(f),
+                     giorniRitardo: quantiGiorni(giorniDopo(f.data, ggPag), oggi) }))
+        .sort((x, y) => y.giorniRitardo - x.giorniRitardo);
+
+      const lavori = (qLav.data || [])
+        .filter(l => l.user_id === uid && l.data_prevista)
+        .map(l => ({ titolo: l.titolo, cliente: nomeCli[String(l.cliente_id)] || '',
+                     data_prevista: l.data_prevista,
+                     giorniRitardo: quantiGiorni(l.data_prevista, oggi) }))
+        .sort((x, y) => y.giorniRitardo - x.giorniRitardo);
+
+      // settimana pulita = nessuna email. Il silenzio e' un'informazione.
+      if (!scadenze.length && !fatture.length && !lavori.length) { saltateVuote++; continue; }
+
+      let email = null;
+      try {
+        const { data: u } = await sb.auth.admin.getUserById(uid);
+        email = u && u.user ? u.user.email : null;
+      } catch (e) { errori.push('getUserById ' + uid + ': ' + e.message); }
+      if (!email) { senzaEmail++; continue; }
+
+      // periodo di prova: parte solo verso un indirizzo
+      if (SOLO_A && String(email).trim().toLowerCase() !== SOLO_A.toLowerCase()) continue;
+
+      const d = {
+        oggi, azienda: a.nome || '', pro: tipoUte[String(uid)] === 'professionista',
+        scadenze, fatture, lavori,
+        totaleScaduto: fatture.reduce((s, f) => s + f.totale, 0)
+      };
+
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
+                   'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'TrovaImpresa <info@trovaimpresa.com>',
+          to: [email],
+          subject: oggetto(d),
+          html: costruisciEmail(d)
+        })
+      });
+      if (!res.ok) { errori.push('Resend ' + email + ': ' + (await res.text())); continue; }
+      inviate++;
+    }
+
+    return { statusCode: 200, body: JSON.stringify({
+      ok: true, emailInviate: inviate, settimanePulite: saltateVuote,
+      senzaEmail, interruttore: colonnaInterruttore ? 'attivo' : 'colonna mancante, tutti accesi',
+      errori
+    }) };
+  } catch (err) {
+    console.error('riepilogo-lunedi:', err.message);
+    return { statusCode: 500, body: 'Errore: ' + err.message };
+  }
+};
+
+// Lunedì alle 5:30 UTC = le 7:30 in Italia con l'ora legale (adesso).
+// Da fine ottobre, con l'ora solare, diventerebbe le 6:30: quando cambia
+// l'ora basta mettere  '30 6 * * 1'  qui sotto e torna alle 7:30.
+exports.handler = schedule('30 5 * * 1', handler);
+
+// Per provarla a mano senza aspettare lunedì:
+// exports.handler = handler;
+module.exports.eseguiOra = handler;

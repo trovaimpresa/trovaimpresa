@@ -6247,6 +6247,19 @@
         <div class="sh-nota">Questi tre te li dà il commercialista. Non servono ancora a niente: li chiederà la fattura elettronica, che sto ancora costruendo. Compilarli adesso ti fa risparmiare tempo dopo.</div>
       </div>
 
+      ${ruoloUtente==='professionista'?`
+      <div class="sh-b">
+        <div class="sh-tit">Polizza professionale</div>
+        <div class="field"><label>Compagnia assicurativa</label><input id="a-pol-comp" value="${esc(a.pol_compagnia||"")}" placeholder="Es. Generali Italia"></div>
+        <div class="field"><label>Numero di polizza</label><input id="a-pol-num" value="${esc(a.pol_numero||"")}" placeholder="Come sul certificato"></div>
+        <div class="row2">
+          <div class="field"><label>Massimale (€)</label>
+            <input type="number" id="a-pol-mass" inputmode="numeric" min="0" max="999999999" step="1000" value="${a.pol_massimale!=null?a.pol_massimale:""}" placeholder="500000"></div>
+          <div class="field"><label>Scadenza</label><input type="date" id="a-pol-scad" value="${esc(a.pol_scadenza||"")}"></div>
+        </div>
+        <div class="sh-nota">Li scrivi <b>una volta sola</b> e restano lì. Finiscono stampati in ogni lettera d'incarico, perché <b class="az-rosso">la legge lo pretende</b> (art. 9 comma 4 del DL 1/2012). Finché mancano, la lettera d'incarico non si scarica.</div>
+      </div>`:""}
+
       ${ruoloUtente==='professionista'?"":`
       <div class="sh-b">
         <div class="sh-tit">Patente a crediti</div>
@@ -6258,6 +6271,15 @@
           <input type="number" id="a-pat-c" inputmode="numeric" min="0" max="100" value="${a.pat_crediti!=null?a.pat_crediti:""}" placeholder="30" style="max-width:160px"></div>
         <div class="sh-nota">Si parte da 30 crediti; <b class="az-rosso">sotto 15 non si può operare in cantiere</b>. Il Riepilogo ti avvisa già sotto 20, così hai tempo di recuperarli. È dell'impresa, non del singolo dipendente. Aggiornalo tu quando cambia: non si può leggere da solo dal portale.</div>
       </div>`}
+
+      <div class="sh-b">
+        <div class="sh-tit">Email dal gestionale</div>
+        <label for="a-rieplun" style="display:flex;gap:12px;align-items:flex-start;font-size:16px;line-height:1.6;cursor:pointer;padding:4px 0">
+          <input type="checkbox" id="a-rieplun"${a.riepilogo_lunedi===false?"":" checked"} style="width:22px;height:22px;margin:2px 0 0;flex:0 0 auto;cursor:pointer">
+          <span>Mandami il <b>riepilogo del lunedì</b> mattina</span>
+        </label>
+        <div class="sh-nota">Un'email il lunedì alle 7:30 con le scadenze della settimana, le fatture che non ti hanno ancora pagato e ${ruoloUtente==='professionista'?"le pratiche":"i lavori"} in ritardo. <b>Se in una settimana non c'è niente da segnalare, non arriva niente</b>: nessuna email a vuoto.</div>
+      </div>
 
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
@@ -6301,12 +6323,31 @@
       row.pat_data    = patD||null;
       row.pat_crediti = patC===""?null:Math.max(0,parseInt(patC,10)||0);
     }
+    /* polizza professionale: stessa precauzione della patente al contrario.
+       Il riquadro c'e' solo per gli studi; se scrivessimo sempre, un'impresa
+       che salva i suoi dati cancellerebbe una polizza registrata dallo studio.
+       Quindi si tocca solo se i campi ci sono davvero. */
+    if($("#a-pol-comp")||$("#a-pol-num")||$("#a-pol-mass")||$("#a-pol-scad")){
+      const polM=$("#a-pol-mass")?String($("#a-pol-mass").value||"").trim():"";
+      row.pol_compagnia = v("#a-pol-comp")||null;
+      row.pol_numero    = v("#a-pol-num")||null;
+      /* il tetto non è pignoleria: la colonna regge fino a 10 miliardi, e un
+         dito appoggiato sullo zero farebbe fallire il salvataggio con un
+         messaggio del database che non spiega niente */
+      row.pol_massimale = polM===""?null:Math.min(999999999,Math.max(0,parseFloat(polM.replace(",","."))||0));
+      row.pol_scadenza  = ($("#a-pol-scad")?$("#a-pol-scad").value:"")||null;
+    }
+    /* riepilogo del lunedì: la casella c'e' per tutti i ruoli, quindi qui non
+       serve la precauzione della patente e della polizza */
+    if($("#a-rieplun"))row.riepilogo_lunedi=!!$("#a-rieplun").checked;
 
     let {error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"});
     /* se una colonna aggiunta di recente non c'e' ancora nel database, salvo
        tutto il resto lo stesso invece di far fallire il salvataggio */
     const OPZ=["giorni_pagamento","pat_numero","pat_data","pat_crediti","cfp_obiettivo",
-               "cod_fiscale","cap","citta","prov","regime_fiscale","sdi_codice","sdi_pec"];
+               "cod_fiscale","cap","citta","prov","regime_fiscale","sdi_codice","sdi_pec",
+               "pol_compagnia","pol_numero","pol_massimale","pol_scadenza",
+               "riepilogo_lunedi"];
     const tolte=[];
     while(error){
       const c=OPZ.find(x=>!tolte.includes(x)&&(error.message||"").indexOf(x)>=0);
@@ -6315,7 +6356,12 @@
       ({error}=await sb.from("gest_azienda").upsert(row,{onConflict:"user_id"}));
     }
     if(!error&&tolte.length){
-      toast("Salvato, ma alcuni campi nuovi richiedono un aggiornamento del database.");
+      /* se a cadere è la polizza lo dico chiaro: senza quelle colonne la
+         lettera d'incarico resterà bloccata, e un "alcuni campi" generico
+         lascerebbe cercare il motivo dalla parte sbagliata */
+      toast(tolte.some(x=>x.indexOf("pol_")===0)
+        ? "Salvato, ma la polizza non si è registrata: manca la migrazione del database (sql/gest-azienda-polizza.sql)."
+        : "Salvato, ma alcuni campi nuovi richiedono un aggiornamento del database.");
     }
     if(error){toast("Errore: "+error.message);return;}
     closeSheet();toast("Dati azienda salvati ✔");
@@ -8006,6 +8052,55 @@
     try{ localStorage.setItem(INC_MEM,JSON.stringify(o)); }catch(e){}
   }
 
+  /* ===== 11 agosto 2026 — GLI ESTREMI DELLA POLIZZA =====
+     L'art. 9 comma 4 del DL 1/2012 non chiede solo il preventivo scritto:
+     chiede che il professionista dica al cliente, PER ISCRITTO E AL MOMENTO
+     DELL'INCARICO, con quale polizza è assicurato e fino a quanto copre.
+     Una lettera senza questi quattro dati è una lettera incompleta, e in caso
+     di contestazione è il professionista a restare scoperto.
+
+     I dati si scrivono una volta sola nei Dati azienda. Qui si leggono e
+     basta: se manca anche uno solo dei quattro, la lettera non si stampa. */
+  function polizzaEstremi(az){
+    const a=az||{};
+    const comp=String(a.pol_compagnia||"").trim();
+    const num =String(a.pol_numero||"").trim();
+    const massG=(a.pol_massimale==null||a.pol_massimale==="")?null:(+a.pol_massimale||0);
+    const scad=String(a.pol_scadenza||"").trim();
+    const mancano=[];
+    if(!comp)mancano.push("la compagnia assicurativa");
+    if(!num)mancano.push("il numero di polizza");
+    if(!(massG>0))mancano.push("il massimale");
+    if(!scad)mancano.push("la scadenza");
+    /* scaduta = la data è già passata. Confronto fra testi aaaa-mm-gg, che si
+       ordinano da soli: nessun fuso orario di mezzo, nessun giorno perso. */
+    return {comp,num,mass:massG,scad,mancano,completa:mancano.length===0,
+            scaduta:!!scad&&scad<todayStr()};
+  }
+  /* Il messaggio che ferma la lettera. Modale, non un toast che sparisce in
+     due secondi: qui il lavoro si interrompe e va detto perché. */
+  function polizzaFerma(pol){
+    const l=pol.mancano;
+    const elenco=l.length===1?l[0]:l.slice(0,-1).join(", ")+" e "+l[l.length-1];
+    alert("Non posso preparare la lettera d'incarico.\n\n"
+      +"Nei Dati azienda manca "+elenco+".\n\n"
+      +"La legge (art. 9 comma 4 del DL 1/2012) vuole che gli estremi della tua "
+      +"polizza professionale siano scritti nella lettera che firma il cliente.\n\n"
+      +"Ti apro adesso i Dati azienda: compila il riquadro «Polizza professionale» "
+      +"e salva. Lo fai una volta sola, poi resta lì.");
+  }
+  /* Stesso discorso per il cliente. Fino a oggi la lettera usciva lo stesso:
+     al posto del committente compariva un trattino, e restava in mano un
+     foglio da firmare intestato a nessuno. */
+  function incaricoClienteOk(c){
+    if(c&&String(c.nome||"").trim())return true;
+    alert("Non posso preparare la lettera d'incarico.\n\n"
+      +"Questo preventivo non ha un cliente collegato, e la lettera deve dire "
+      +"chi è il committente che la firma.\n\n"
+      +"Apri il preventivo, scegli il cliente e salva: poi riprova.");
+    return false;
+  }
+
   const INC_PAGAMENTI=[
     ["saldo",   "Saldo unico alla consegna"],
     ["50-50",   "50% alla firma, 50% alla consegna"],
@@ -8026,6 +8121,12 @@
     if(!p){toast("Preventivo non trovato");return;}
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    /* I due sbarramenti, prima ancora di aprire il modulo: senza committente e
+       senza polizza la lettera non si può fare, e scoprirlo dopo aver
+       compilato tutto sarebbe la beffa. */
+    if(!incaricoClienteOk(await cliDelDocumento(p.cliente_id)))return;
+    const pol=polizzaEstremi(az);
+    if(!pol.completa){polizzaFerma(pol);return aziendaForm();}
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
     let tot=0; righe.forEach(r=>{tot+=(+r.qta||1)*(+r.prezzo||0);});
@@ -8040,6 +8141,7 @@
 
     const opzPag=INC_PAGAMENTI.map(o=>'<option value="'+o[0]+'" '+(o[0]===pagDef?'selected':'')+'>'+o[1]+'</option>').join("");
     const riga=(et,val,neg)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+(neg?"− ":"")+eur2(val)+'</strong></div>';
+    const rigaT=(et,val)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+esc(String(val))+'</strong></div>';
 
     openSheetGrande("Lettera d'incarico",
       '<div class="sh-cols"><div class="sh-col">'
@@ -8071,6 +8173,18 @@
       +'<div class="campo-aiuto">Viene dalla parcella del preventivo. Per cambiarlo, modifica il preventivo.</div>'
       +'</div>'
       +'<div class="sh-b">'
+      +'<div class="sh-tit">La tua polizza professionale</div>'
+      +'<div class="prev-somma" style="text-align:left;line-height:1.9">'
+      +  rigaT("Compagnia",pol.comp)
+      +  rigaT("Numero di polizza",pol.num)
+      +  rigaT("Massimale",eur2(pol.mass))
+      +  rigaT("Scadenza",fdate(pol.scad))
+      +'</div>'
+      +(pol.scaduta
+        ? '<p class="sh-nota az-rosso" style="font-weight:700;margin-bottom:0">Attenzione: questa polizza risulta <b>scaduta il '+fdate(pol.scad)+'</b>. Rinnovala e aggiorna i Dati azienda: consegnare una lettera con una polizza scaduta ti lascia scoperto.</p>'
+        : '<div class="campo-aiuto">Finisce stampata nella lettera, come vuole la legge. Per cambiarla vai in Dati azienda.</div>')
+      +'</div>'
+      +'<div class="sh-b">'
       +'<div class="sh-tit">Pagamento e firma</div>'
       +'<div class="field"><label>Modalità di pagamento</label><select id="in-pag">'+opzPag+'</select></div>'
       +'<div class="row2">'
@@ -8089,6 +8203,17 @@
     const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
     if(!az||!az.nome){toast("Compila prima i Dati azienda");return;}
     const c=await cliDelDocumento(p.cliente_id);
+    /* Gli stessi due sbarramenti del modulo, ripetuti qui. Non è pignoleria:
+       fra l'apertura del modulo e il clic su «Scarica» può passare del tempo,
+       e i Dati azienda si possono aprire e svuotare in un'altra scheda.
+       Il controllo che conta è quello attaccato al momento della stampa. */
+    if(!incaricoClienteOk(c))return;
+    const pol=polizzaEstremi(az);
+    if(!pol.completa){polizzaFerma(pol);closeSheet();aziendaForm();return;}
+    /* polizza scaduta: si avvisa e si lascia decidere. Può capitare di dover
+       consegnare la lettera il giorno stesso del rinnovo, e bloccare tutto
+       sarebbe peggio del problema. */
+    if(pol.scaduta&&!gconfirm("La tua polizza professionale risulta scaduta il "+fdate(pol.scad)+".\n\nSe stampi adesso, la lettera che firma il cliente riporterà questa data.\n\nVuoi stamparla lo stesso?"))return;
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     let tot=0;(rr||[]).forEach(r=>{tot+=(+r.qta||1)*(+r.prezzo||0);});
     const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
@@ -8200,6 +8325,45 @@
     doc.text(eurPdf(cp.totale),R-2,y+2,{align:"right"});
     y+=9;
     paragrafo("Il compenso è stato preventivamente concordato in forma scritta, ai sensi dell'art. 9, comma 4, del D.L. 24 gennaio 2012 n. 1, convertito con L. 27/2012. Sono esclusi oneri, diritti e bolli dovuti a enti terzi, se non espressamente indicati.",8.8,false,90);
+
+    /* --- LA POLIZZA (11 agosto 2026) ---
+       Sta subito dopo il compenso di proposito: la norma che obbliga a
+       scrivere l'uno obbliga a scrivere anche l'altra, ed è la stessa citata
+       due righe sopra. Tenerli attaccati fa capire al cliente che sono due
+       facce dello stesso adempimento. */
+    /* Il blocco sta tutto su UNA pagina: titolo, frase e i quattro dati.
+       Alla prima prova il titolo era rimasto in fondo al primo foglio e i
+       quattro valori erano finiti sul secondo, spaiati: chi girava pagina
+       trovava «Generali, 500.000» senza sapere di che si parlasse. Quindi
+       prima si misura quanto occupa, poi si decide se cambiare foglio. */
+    const polIntro="Ai sensi dell'art. 9, comma 4, del D.L. 24 gennaio 2012 n. 1, il Professionista rende noti al Committente gli estremi della polizza assicurativa stipulata per i danni provocati nell'esercizio dell'attività professionale:";
+    const polCoda="Il Professionista si impegna a comunicare tempestivamente al Committente ogni variazione o cessazione della polizza sopra indicata.";
+    const vociP=[["Compagnia",pol.comp],
+                 ["Numero di polizza",pol.num],
+                 ["Massimale",eurPdf(pol.mass)],
+                 ["Scadenza",fdate(pol.scad)]];
+    doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+    const nIntro=doc.splitTextToSize(polIntro,L).length;
+    doc.setFontSize(8.8);
+    const nCoda=doc.splitTextToSize(polCoda,L).length;
+    /* Due misure, non una. Il CUORE (titolo, frase e i quattro dati) non si
+       spezza mai. La nota finale invece è una frase compiuta che si legge
+       benissimo anche in cima al foglio dopo: pretenderla attaccata costava
+       mezza pagina bianca e, spesso, un terzo foglio in più per ogni lettera. */
+    const hCuore=4+4.6+1.5+nIntro*4.6+2+vociP.length*5.2;
+    const hTutto=hCuore+2+nCoda*4.6;
+    if(y+hTutto>272&&y+hCuore>272){doc.addPage();y=20;}
+    titoletto("Polizza assicurativa professionale");
+    paragrafo(polIntro);
+    y+=2;
+    doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(0);
+    vociP.forEach(function(v){
+      doc.text(v[0],M+2,y);
+      doc.setFont("helvetica","bold");doc.text(String(v[1]),M+54,y);doc.setFont("helvetica","normal");
+      y+=5.2;
+    });
+    y+=2;
+    paragrafo(polCoda,8.8,false,90);
 
     titoletto("Modalita' di pagamento");
     let testoPag=INC_PAG_TESTO[dati.pagamento]||INC_PAG_TESTO.saldo;
