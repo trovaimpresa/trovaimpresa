@@ -374,7 +374,11 @@
   const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
   const db=()=>state[cur];
   const cliById=id=>db().clienti.find(c=>c.id===id);
-  const dipById=id=>db().dipendenti.find(d=>d.id===id);
+  /* 12 agosto 2026 (sera) — dipById tolta: leggeva db().dipendenti, l'archivio
+     locale del primo gestionale, che da quando la squadra sta su Supabase resta
+     vuoto per sempre. Tornava sempre "niente", e chi la usava finiva per
+     stampare l'id della persona al posto del nome. La squadra vera e'
+     dipCache (gest_operatori). */
   const curMestiere=()=>{const p=(state.panels||[]).find(x=>x.id===cur);return p?p.mestiere_id:null;};
   let cliCache=[]; /* clienti del reparto corrente, da gest_clienti (Supabase) */
   let dipCache=[]; /* squadra del reparto corrente: id,nome,telefono,ruolo,permessi (gest_operatori + gest_membri) */
@@ -754,7 +758,16 @@
     ['lavoro collegato','pratica collegata'],
     ['a fine lavoro','a pratica chiusa'],
     ['persone in squadra','persone nello studio'],
+    /* 12 agosto 2026 (sera) — i singolari mancavano: da quando le etichette del
+       Riepilogo concordano ("1 persona in squadra", "1 operatore con..."), se
+       il singolare non sta in questo elenco lo studio tecnico legge la parola
+       da cantiere. */
+    ['persona in squadra','persona nello studio'],
+    ['operatore con lavori assegnati','collaboratore con pratiche assegnate'],
+    ['operatori con lavori assegnati','collaboratori con pratiche assegnate'],
+    ['cantiere aperto con un indirizzo','pratica aperta con un indirizzo'],
     ['operatori','collaboratori'],
+    ['operatore','collaboratore'],
     ['Nessun operatore registrato','Nessun collaboratore registrato'],
 
     /* i suggerimenti grigi dentro le caselle (placeholder) e i title: prima il
@@ -1169,6 +1182,13 @@
   }
 
   /* o = {tab, titolo, n, lab, tono, righe:[{t,v,cls,action,id}], vuoto} */
+  /* ===== 12 agosto 2026 (sera) — IL PLURALE =====
+     Le schede del Riepilogo scrivono il numero grande e sotto l'etichetta.
+     L'etichetta era fissa al plurale, quindi con UNA cosa sola si leggeva
+     «1 lavori aperti», «1 clienti in anagrafica», «1 scadenze entro 30
+     giorni». Su una prima pagina che deve dare il colpo d'occhio, e per chi
+     legge con fatica, e' un inciampo a ogni riga. */
+  function _plur(n,uno,tanti){ return (+n===1)?uno:tanti; }
   function rieCard(o){
     const righe=(o.righe||[]).filter(Boolean).slice(0,2);
     const corpo=righe.length
@@ -1508,7 +1528,7 @@
 
     C.push(rieCard({
       tab:"lavori", titolo:"Lavori", n:aperti.length,
-      lab: ritardo.length? ritardo.length+(ritardo.length===1?" in ritardo":" in ritardo"):"lavori aperti",
+      lab: ritardo.length? ritardo.length+" in ritardo":_plur(aperti.length,"lavoro aperto","lavori aperti"),
       tono: ritardo.length?"err":(aperti.length?"attesa":"ok"),
       vuoto:"Nessun lavoro aperto",
       righe: pross.slice(0,2).map(l=>{const q=quando(l.data_prevista);return{
@@ -1518,7 +1538,7 @@
 
     C.push(rieCard({
       tab:"preventivi", titolo:"Preventivi", n:attesa.length,
-      lab:"in attesa di risposta", tono:attesa.length?"attesa":"ok",
+      lab:_plur(attesa.length,"in attesa di risposta","in attesa di risposta"), tono:attesa.length?"attesa":"ok",
       vuoto:"Nessun preventivo in attesa",
       righe: attesa.slice(0,2).map(p=>({
         t:p.titolo||"Preventivo", v:totPrev[p.id]?eur(totPrev[p.id]):"",
@@ -1554,7 +1574,7 @@
 
     C.push(rieCard({
       tab:"agenda", titolo:"Agenda operatore", n:opeOrd.length,
-      lab:"operatori con lavori assegnati", tono:opeOrd.length?"info":"neutro",
+      lab:_plur(opeOrd.length,"operatore con lavori assegnati","operatori con lavori assegnati"), tono:opeOrd.length?"info":"neutro",
       vuoto:"Nessun lavoro assegnato",
       righe: opeOrd.slice(0,2).map(k=>({
         t:opeMap[k]||"Operatore", v:perOpe[k]+(perOpe[k]===1?" lavoro":" lavori")}))
@@ -1591,7 +1611,7 @@
 
     C.push(rieCard({
       tab:"squadra", titolo:"Squadra", n:OPE.length,
-      lab:"persone in squadra · "+(Math.round(oreMese*10)/10)+" h questo mese",
+      lab:_plur(OPE.length,"persona in squadra","persone in squadra")+" · "+(Math.round(oreMese*10)/10)+" h questo mese",
       tono:"neutro", vuoto:"Nessun operatore registrato",
       righe: OPE.slice(0,2).map(o=>({
         t:o.nome||"Operatore",
@@ -1627,7 +1647,7 @@
 
     C.push(rieCard({
       tab:"clienti", titolo:"Clienti", n:CLI.length,
-      lab:"clienti in anagrafica", tono:"neutro",
+      lab:_plur(CLI.length,"cliente in anagrafica","clienti in anagrafica"), tono:"neutro",
       vuoto:"Nessun cliente registrato",
       righe: cliOrd.slice(0,2).map(k=>({
         t:cliMap[k]||"Cliente",
@@ -1671,7 +1691,7 @@
 
     C.push(rieCard({
       tab:"scadenzario", titolo:"Scadenzario", n:scAperte.length,
-      lab:"scadenze entro 30 giorni",
+      lab:_plur(scAperte.length,"scadenza entro 30 giorni","scadenze entro 30 giorni"),
       tono: scAperte.some(x=>x.data_scadenza<oggi)?"err":(scAperte.length?"attesa":"ok"),
       vuoto:"Nessuna scadenza in arrivo",
       righe: scAperte.slice(0,2).map(x=>{const q=quando(x.data_scadenza);return{
@@ -1692,7 +1712,7 @@
 
     C.push(rieCard({
       tab:"galleria", titolo:"Galleria", n:(nFoto+nVideo),
-      lab:"foto e video caricati", tono:"neutro",
+      lab:_plur(nFoto+nVideo,"foto o video caricato","foto e video caricati"), tono:"neutro",
       vuoto:"Nessuna foto o video caricato",
       righe:(nFoto+nVideo)?[{t:"Foto",v:String(nFoto)},{t:"Video",v:String(nVideo)}]:[]
     }));
@@ -1720,7 +1740,7 @@
     }catch(e){}
     C.push(rieCard({
       tab:"mappa", titolo:"Mappa", n:conIndirizzo.length,
-      lab:"cantieri aperti con un indirizzo", tono:"neutro",
+      lab:_plur(conIndirizzo.length,"cantiere aperto con un indirizzo","cantieri aperti con un indirizzo"), tono:"neutro",
       vuoto:"Apri la Mappa per calcolare le distanze",
       righe:mpNote
     }));
@@ -1765,38 +1785,12 @@
       }).join("")+`</div>`;
   }
 
-  function jobCard(l){
-    const c=cliById(l.clienteId), d=dipById(l.assegnatoId), dove=l.dove||(c&&c.indirizzo)||"";
-    const fatto=l.stato==="fatto", fs=l.fattStato||"none";
-    const lavLab=fatto?"Fatto":(l.stato==="in_corso"?"In corso":"Da fare");
-    const fattDot=fs==="pagata"?"verde":(fs==="emessa"?"rosso":"grigio");
-    const late=inRitardo(l.stato,l.dataPrevista);
-    const fattLab=fs==="pagata"?"Pagata":(fs==="emessa"?"Emessa, da incassare":"Non fatturata");
-    return `<div class="job">
-      <div class="job-top"><div class="job-cli">${esc(c?c.nome:"(cliente eliminato)")}</div></div>
-      ${l.descrizione?`<div class="job-desc">${esc(l.descrizione)}</div>`:""}
-      <div class="stati">
-        <span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':'rosso')}"${late?' title="In ritardo"':''}></i><span class="lab">${lavLab}</span></span>
-        ${l.importo?`<span class="st"><i class="pall ${fattDot}"></i><span class="lab">${fattLab}</span></span>`:""}
-      </div>
-      ${l.lavoroSvolto?`<div class="job-done">✔ Fatto: ${esc(l.lavoroSvolto)}</div>`:""}
-      ${l.note?`<div class="job-note">📝 ${esc(l.note)}</div>`:""}
-      <div class="job-meta">
-        ${dove?`<span>📍 ${esc(dove)}</span>`:""}
-        <span>📅 ${fdate(l.dataPrevista)}</span>
-        ${d?`<span>👷 ${esc(d.nome)}</span>`:""}
-        ${l.ore?`<span>⏱ ${l.ore} h</span>`:""}
-        ${l.importo?`<span class="euro ${fs==='pagata'?'pg':'np'}">💶 ${eur(l.importo)}</span>`:""}
-      </div>
-      <div class="job-actions">
-        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
-        ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
-        ${!fatto?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
-        ${fatto?`<button class="btn btn-sm ja" data-action="fatt" data-id="${l.id}">${fs==="none"?"🧾 Crea fattura":"🧾 Apri fattura"}</button>`:""}
-        <button class="btn btn-sm ja" data-action="edit-job" data-id="${l.id}">✏ Modifica</button>
-        <button class="btn btn-sm btn-danger ja del" data-action="del-job" data-id="${l.id}">🗑</button>
-      </div></div>`;
-  }
+  /* 12 agosto 2026 (sera) — jobCard e agendaCard tolte: erano due schede
+     complete (un centinaio di righe) che NON le chiamava piu' nessuno da
+     quando le sezioni usano schedaJob. Restavano li' a somigliare al codice
+     vivo, con dentro azioni che non esistono piu' e letture dell'archivio
+     locale morto: la prossima volta che si cerca un difetto si finisce a
+     leggere queste invece di quelle vere. */
 
   /* Pulisce un numero per wa.me. Numeri vuoti → "" (link senza destinatario).
      - se l'originale inizia con "+" o "00" ha già il prefisso internazionale:
@@ -7249,7 +7243,8 @@
      onerror: se il file non c'e' più nel bucket la miniatura sparisce invece
      di restare l'icona di immagine rotta. */
   function fotoThumb(f,withDel,src){
-    const opName=f.operatore==="Capo"?"Capo":(dipById(f.operatore)?dipById(f.operatore).nome:"");
+    /* stessa storia di galNomeOp: dipById legge l'archivio locale morto */
+    const opName=galNomeOp(f.operatore);
     /* loading="lazy": la foto si scarica solo quando arriva davvero sotto gli
        occhi. In un lavoro con 40 foto prima partivano tutte insieme. */
     const img=src
@@ -7357,11 +7352,22 @@
   let galRigheFoto={};    /* id -> riga: serve per eliminare (storage_path) */
   let galRigheVideo={};
 
+  /* ===== 12 agosto 2026 (sera) — IL NOME DI CHI HA FATTO LA FOTO =====
+     Questa funzione leggeva db().dipendenti: l'archivio LOCALE del primo
+     gestionale, quello che sta nel browser. Da quando la squadra vive su
+     Supabase quell'elenco resta vuoto per sempre, quindi il nome non usciva
+     mai — e al suo posto veniva stampato l'ID della persona, cioe' una
+     striscia di lettere e numeri sopra la miniatura e dentro la tendina
+     «chi l'ha caricata».
+     Adesso legge la squadra vera (dipCache, da gest_operatori) e, se proprio
+     non trova il nome, NON stampa un codice: non stampa niente. */
+  const galNomiOp={};      /* riserva: id -> nome, letta una volta dal database */
   function galNomeOp(v){
     if(!v)return "";
     if(v==="Capo")return "Capo";
-    const d=dipById(v);
-    return d?d.nome:v;
+    const d=(dipCache||[]).find(x=>String(x.id)===String(v));
+    if(d&&d.nome)return d.nome;
+    return galNomiOp[String(v)]||"";
   }
 
   async function renderGalleria(){
@@ -7391,6 +7397,19 @@
     /* tendina "chi l'ha caricata" */
     const ops=new Set();
     tutteF.concat(tutteV).forEach(x=>{if(x.operatore)ops.add(x.operatore);});
+    /* i nomi di chi ha caricato: se la squadra non e' ancora stata letta (o la
+       persona e' di un altro reparto) si vanno a prendere qui, una volta sola.
+       Meglio una domanda in piu' che un codice stampato sopra una foto. */
+    {
+      const mancano=Array.from(ops).filter(o=>o!=="Capo"&&!galNomeOp(o));
+      if(mancano.length){
+        try{
+          const {data:nm}=await sb.from("gest_operatori").select("id,nome")
+            .eq("user_id",sbUid).in("id",mancano);
+          (nm||[]).forEach(function(o){ if(o&&o.nome)galNomiOp[String(o.id)]=o.nome; });
+        }catch(e){}
+      }
+    }
     if(selOp)selOp.innerHTML=['<option value=""'+(galFilter.op===""?" selected":"")+'>Tutti</option>']
       .concat(Array.from(ops).map(o=>'<option value="'+esc(o)+'"'+(galFilter.op===o?" selected":"")+'>'+esc(galNomeOp(o))+'</option>')).join("");
 
@@ -7901,29 +7920,6 @@
     renderGalleria();renderRiepilogo();toast(avviso);
   }
 
-  function agendaCard(l){
-    const c=cliById(l.clienteId), d=dipById(l.assegnatoId), dove=l.dove||(c&&c.indirizzo)||"";
-    const fatto=l.stato==="fatto", prima=(l.foto||[]).filter(f=>f.tipo==="prima");
-    const late=inRitardo(l.stato,l.dataPrevista);
-    return `<div class="job">
-      <div class="job-top"><div class="job-cli">${esc(c?c.nome:"—")}</div></div>
-      ${l.descrizione?`<div class="job-desc">${esc(l.descrizione)}</div>`:""}
-      <div class="stati"><span class="st"><i class="pall ${fatto?'verde':(late?'ritardo':'rosso')}"${late?' title="In ritardo"':''}></i><span class="lab">${fatto?'Fatto':(l.stato==='in_corso'?'In corso':'Da fare')}</span></span></div>
-      <div class="job-meta">
-        ${dove?`<span>📍 ${esc(dove)}</span>`:""}
-        <span>📅 ${fdate(l.dataPrevista)}</span>
-        ${d?`<span>👷 ${esc(d.nome)}</span>`:""}
-        ${l.ore?`<span>⏱ ${l.ore} h</span>`:""}
-      </div>
-      ${prima.length?`<div class="ag-foto-label">📷 Foto dal capo — cosa fare</div><div class="thumbs">${prima.map(f=>fotoThumb(f,false)).join("")}</div>`:""}
-      ${l.note?`<div class="job-note">📝 ${esc(l.note)}</div>`:""}
-      <div class="job-actions">
-        ${dove?`<button class="btn btn-sm ja" data-action="map" data-q="${esc(dove)}">🗺 Mappa</button>`:""}
-        ${l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="in_corso">▶ Avvia</button>`:""}
-        ${!fatto?`<button class="btn btn-sm ja" data-action="stato" data-id="${l.id}" data-v="fatto">✔ Segna fatto</button>`:""}
-        <button class="btn btn-sm ja" data-action="edit-job" data-id="${l.id}">✏ Apri scheda</button>
-      </div></div>`;
-  }
   /* menu "..." della riga Agenda: tutte le azioni che prima erano pulsanti nella card */
   function agVoci(l,wa){
     const dp=l.data_prevista||"", fatto=l.stato==="fatto";
@@ -8520,8 +8516,18 @@
        passa di la' intero, e non ci sono piu' due elenchi da tenere allineati.
        Quale cassa sia lo si dice in fattura, che e' l'unico posto dove serve
        (lo vuole il file elettronico). */
-    const opzIva=[[22,"22% — ordinaria"],[10,"10% — agevolata"],[0,"0% — esente / forfettario"]]
-      .map(o=>`<option value="${o[0]}" ${(+iva===o[0])?"selected":""}>${o[1]}</option>`).join("");
+    /* ===== 12 agosto 2026 (sera) — IL FORFETTARIO =====
+       In regime forfettario (RF19) non si applica l'IVA e non si subisce la
+       ritenuta d'acconto: la fattura lo sapeva gia' e metteva tutto a zero, il
+       preventivo no. Risultato: il cliente riceveva un preventivo con l'IVA al
+       22% e poi una fattura piu' bassa, per lo stesso lavoro. Adesso i due
+       documenti dicono lo stesso numero, e il perche' e' scritto sotto. */
+    const forf=fattForfettario();
+    const ivaVera=forf?0:iva;
+    const opzIva=(forf
+        ? [[0,"0% — sei in regime forfettario, l'IVA non si applica"]]
+        : [[22,"22% — ordinaria"],[10,"10% — agevolata"],[0,"0% — esente / forfettario"]])
+      .map(o=>`<option value="${o[0]}" ${(+ivaVera===o[0])?"selected":""}>${o[1]}</option>`).join("");
     return `
       <div class="field" style="border-top:1px solid var(--linea,#e5e7eb);padding-top:14px;margin-top:14px">
         <label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">🧾 Parcella</label>
@@ -8533,14 +8539,19 @@
       <div class="field"><label>Spese (bolli, diritti, copie)</label><input type="text" id="pv-spese" inputmode="decimal" value="${_numTesto(spese)}" placeholder="0"></div>
       <div class="field">
         <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;cursor:pointer">
-          <input type="checkbox" id="pv-rit" ${rit?"checked":""} style="width:18px;height:18px;margin-top:2px;flex-shrink:0">
+          <input type="checkbox" id="pv-rit" ${(!forf&&rit)?"checked":""} ${forf?"disabled":""} style="width:18px;height:18px;margin-top:2px;flex-shrink:0">
           <span>Applica la ritenuta d'acconto del 20%</span>
         </label>
         <p style="font-size:13px;color:var(--testo-3,#7a8896);line-height:1.55;margin:8px 0 0">
-          Va messa solo se il cliente &egrave; <strong>azienda, professionista o condominio</strong>.
-          Se il cliente &egrave; un privato, lasciala vuota.
+          ${forf
+            ? "In regime forfettario la ritenuta d'acconto <strong>non si applica</strong>: sulla fattura va scritto che il compenso non &egrave; soggetto a ritenuta."
+            : "Va messa solo se il cliente &egrave; <strong>azienda, professionista o condominio</strong>. Se il cliente &egrave; un privato, lasciala vuota."}
         </p>
       </div>
+      ${forf?`<p class="sh-nota" style="border-left:4px solid var(--blu,#0066ff);padding-left:10px;margin-top:12px">
+        <b>Sei in regime forfettario.</b> Niente IVA e niente ritenuta: il preventivo dice
+        gi&agrave; lo stesso numero della fattura. Ricorda il <b>bollo da 2 &euro;</b> quando
+        il totale supera i 77,47 &euro; &mdash; si aggiunge al momento della fattura.</p>`:""}
       <div id="pv-riepilogo" class="prev-somma" style="text-align:left;line-height:1.9"></div>`;
   }
   /* Riscrive il riepilogo della parcella ogni volta che si tocca qualcosa */
@@ -8567,10 +8578,13 @@
   }
   function leggiCampiParcella(){
     if(ruoloUtente!=='professionista')return {};
+    /* rete di sicurezza: in forfettario si salva zero comunque, anche se il
+       modulo fosse rimasto aperto da prima del cambio di regime */
+    const forf=fattForfettario();
     return {
       cassa_perc:_numIt("#pv-cassa")||0,
-      iva_perc:+($("#pv-iva")?$("#pv-iva").value:0)||0,
-      ritenuta:$("#pv-rit")?$("#pv-rit").checked:false,
+      iva_perc:forf?0:(+($("#pv-iva")?$("#pv-iva").value:0)||0),
+      ritenuta:forf?false:($("#pv-rit")?$("#pv-rit").checked:false),
       ritenuta_perc:20,
       spese_forfait:_numIt("#pv-spese")||0
     };
@@ -8642,6 +8656,15 @@
     let cl=[],righe=[];
     if(sb&&sbUid){
       const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");cl=data||[];
+      /* 12 agosto 2026 (sera) — serve sapere il REGIME FISCALE: un forfettario
+         non mette l'IVA e non subisce la ritenuta. Prima il preventivo non
+         guardava i dati dell'azienda, proponeva il 22% a tutti, e chi e' in
+         forfettario mandava al cliente un preventivo con l'IVA che poi in
+         fattura spariva: due numeri diversi per lo stesso lavoro. */
+      if(!fattAzienda){
+        const {data:_az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+        fattAzienda=_az||null;
+      }
       /* stessa rete di sicurezza della fattura: savePrev cancella le voci e le
          riscrive, quindi un modulo aperto vuoto per colpa della rete
          svuoterebbe il preventivo con un bel "Salvato" verde. */
@@ -13387,7 +13410,11 @@
     if(a==="gal-del-video"){if(confirm("Eliminare questo video?"))galDelVideo(t.dataset.id);return;}
     if(a==="gal-play"){const u=galVideoCache[t.dataset.id];if(u)window.open(u,"_blank");else toast("Video non ancora pronto, riprova tra un attimo");return;}
     if(a==="ag-stato"){agFilter.stato=t.dataset.v;segmOn("#ag-stato",t.dataset.v);renderAgenda();return;}
-    if(a==="del-job"){if(gconfirm("Eliminare questo lavoro?")){db().lavori=db().lavori.filter(l=>l.id!==id);await save();renderAll();toast("Lavoro eliminato");}return;}
+    /* 12 agosto 2026 (sera) — "del-job" tolto: era l'eliminazione dell'archivio
+       LOCALE, e l'unico pulsante che la chiamava stava dentro jobCard, che non
+       si disegna piu' da mesi. Se per sbaglio fosse tornata raggiungibile
+       avrebbe tolto il lavoro dallo schermo lasciandolo su Supabase. Quella
+       vera e' "del-job-supa". */
     if(a==="del-job-supa"){
       if(!gconfirm(window.cestinoAttivo&&window.cestinoAttivo()
           ? "Eliminare questo lavoro? Finisce nel Cestino: da lì puoi rimetterlo a posto."
@@ -13615,9 +13642,10 @@
       if(!okRev||!okRev.length){toast("Non rimosso: nessuna riga modificata. Riprova.");return;}
       renderDip();toast("Accesso rimosso");return;
     }
-    if(a==="edit-dip")return dipForm(db().dipendenti.find(d=>d.id===id));
     if(a==="save-dip")return saveDip(id);
-    if(a==="del-dip"){if(confirm("Eliminare questa persona?")){db().dipendenti=db().dipendenti.filter(d=>d.id!==id);await save();renderAll();toast("Persona eliminata");}return;}
+    /* 12 agosto 2026 (sera) — "edit-dip" e "del-dip" tolti: lavoravano sullo
+       stesso archivio locale morto (db().dipendenti, sempre vuoto). La squadra
+       vera si modifica con "sq-edit" e sta su gest_operatori. */
     /* ---- Fornitori ---- */
     if(a==="new-forn")return fornForm(null);
     if(a==="forn-scheda")return fornScheda(id);

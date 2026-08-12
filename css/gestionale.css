@@ -70,7 +70,7 @@
   .back{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:9px;padding:9px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
   .back:active{transform:translateY(1px)}
   .brand h1{font-size:18px;font-weight:700;letter-spacing:-.2px;line-height:1.1}
-  .brand small{display:block;font-size:11px;font-weight:500;opacity:.85;letter-spacing:.3px;text-transform:uppercase}
+  .brand small{display:block;font-size:13px;font-weight:500;opacity:.85;letter-spacing:.3px;text-transform:uppercase}
   .btn-new{background:var(--card);color:var(--accent-d);border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12)}
   .btn-new:active{transform:translateY(1px)}
   nav.tabs{display:flex;gap:2px;max-width:1040px;margin:12px auto 0;padding:0 16px;overflow-x:auto}
@@ -87,7 +87,7 @@
   @media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
   .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
   .kpi .n{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1}
-  .kpi .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px;text-transform:uppercase;letter-spacing:.4px}
+  .kpi .l{font-size:13px;color:var(--muted);font-weight:600;margin-top:6px;text-transform:uppercase;letter-spacing:.4px}
   .kpi.df .n{color:var(--dafare)} .kpi.ic .n{color:var(--incorso)} .kpi.ft .n{color:var(--fatto)} .kpi.eu .n{color:var(--accent-d)}
   .money-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
   @media(max-width:520px){.money-row{grid-template-columns:1fr 1fr}.money.ore{grid-column:span 2}}
@@ -99,12 +99,12 @@
   #k-daincassare{color:var(--attesa)}
   #k-spese{color:var(--testo)}
   #k-utile{color:var(--ok)} #k-utile.neg{color:var(--err)}
-  .money .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+  .money .l{font-size:13px;color:var(--muted);font-weight:600;margin-top:4px}
   .mini-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:24px 0 10px}
   .rie-intro{margin-bottom:16px}
   .rie-intro h2{font-size:20px;font-weight:700;letter-spacing:-.3px}
   .rie-intro p{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.45}
-  .kpi .sub,.money .sub{font-size:11px;color:var(--muted);font-weight:500;margin-top:3px;line-height:1.25}
+  .kpi .sub,.money .sub{font-size:13px;color:var(--muted);font-weight:500;margin-top:3px;line-height:1.25}
   .fatt-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
   /* Entrambi i totali sono soldi in attesa (emesse da incassare / finiti da fatturare):
      stesso numero del KPI "Da incassare" del Riepilogo, quindi stesso ambra. */
@@ -112,11 +112,11 @@
   .fatt-tot.alt{border-top-color:var(--attesa)}
   .fatt-tot .n{font-size:22px;font-weight:800;color:var(--attesa);letter-spacing:-.5px}
   .fatt-tot.alt .n{color:var(--attesa)}
-  .fatt-tot .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+  .fatt-tot .l{font-size:13px;color:var(--muted);font-weight:600;margin-top:4px}
   .fatt-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow)}
   .fatt-info{flex:1;min-width:0}
   .fatt-info b{font-size:14px;font-weight:700}
-  .fatt-info .sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .fatt-info .sub{font-size:13px;color:var(--muted);margin-top:2px}
   .fatt-imp{font-weight:800;font-size:15px;color:var(--accent-d);white-space:nowrap}
   .fatt-empty{font-size:13px;color:var(--muted);padding:2px 2px 6px;font-weight:500}
 
@@ -137,7 +137,7 @@
   .job-desc{font-size:14px;color:var(--testo);margin-top:3px;line-height:1.35}
   .job-done{font-size:13px;color:var(--fatto);margin-top:6px;line-height:1.35;background:var(--ok-bg);padding:7px 10px;border-radius:9px}
   .job-note{font-size:13px;color:var(--attesa);margin-top:6px;line-height:1.35;background:var(--attesa-bg);padding:7px 10px;border-radius:9px}
-  .job-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px;font-size:12.5px;color:var(--muted);font-weight:500}
+  .job-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px;font-size:13.5px;color:var(--muted);font-weight:500}
   .job-meta span{display:inline-flex;align-items:center;gap:4px}
   .euro{font-weight:700;font-size:14px} .euro.np{color:var(--attesa)} .euro.pg{color:var(--ok)}
   .stati{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
@@ -158,7 +158,7 @@
   .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .card h3{font-size:15px;font-weight:700;letter-spacing:-.2px}
   .card p{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
-  .card .cnt{font-size:12px;color:var(--accent-d);font-weight:700;margin-top:6px}
+  .card .cnt{font-size:13px;color:var(--accent-d);font-weight:700;margin-top:6px}
   .card-acts{display:flex;flex-direction:column;gap:6px}
 
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -166,11 +166,11 @@
   .cal-nav{display:flex;gap:6px}
   .cal-nav button{width:38px;height:38px;padding:0;font-size:18px}
   .cal-grid{display:grid;width:100%;grid-template-columns:repeat(7,1fr);gap:5px}
-  .cal-dow{text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:4px 0}
+  .cal-dow{text-align:center;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:4px 0}
   .cal-cell{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:110px;padding:5px;cursor:pointer;position:relative;display:flex;flex-direction:column;gap:3px}
   .cal-cell.empty{background:transparent;border:none;cursor:default}
   .cal-cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-  .cal-cell .dn{font-size:12px;font-weight:700;color:var(--testo)}
+  .cal-cell .dn{font-size:13px;font-weight:700;color:var(--testo)}
   .cal-dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
   .dot{width:8px;height:8px;border-radius:50%}
   .dot.todo{background:var(--attesa)} .dot.done{background:var(--ok)} .dot.ritardo{background:var(--err)}
@@ -189,7 +189,7 @@
   @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
   .sheet h3{font-size:18px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px}
   .field{margin-bottom:13px}
-  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--testo-2);margin-bottom:5px}
+  .field label{display:block;font-size:13.5px;font-weight:700;color:var(--testo-2);margin-bottom:5px}
   .field input,.field select,.field textarea{width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
   .field textarea{resize:vertical;min-height:58px}
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:var(--card)}
@@ -296,7 +296,9 @@
   .side .back:hover{background:var(--bordo)}
   .side-brand{min-width:0}
   .side-brand h1{font-size:15.5px;font-weight:800;letter-spacing:-.2px;color:var(--testo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .side-brand small{display:block;font-size:12.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 12 agosto 2026 (sera) — 12,5 px in TUTTO MAIUSCOLO nella colonna di
+     sinistra («REPARTO»): era l'ultimo testo sotto la soglia dei 13. */
+  .side-brand small{display:block;font-size:13.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .side .btn-new{width:100%;margin:0 0 14px;box-shadow:none}
   .side nav.tabs{display:flex;flex-direction:column;gap:0;margin:0;padding:0;max-width:none;overflow:visible}
   /* TAPPA 2 — ogni voce di menu e' una card. Il bordo colorato tutto attorno
@@ -324,9 +326,11 @@
   .kpi .n{font-size:28px;font-weight:700}
   .money .n{font-size:28px;font-weight:700}
   .sec-head h2{font-size:19px;font-weight:800;letter-spacing:-.3px}
-  .chip{border-radius:8px;font-size:12.5px;padding:6px 12px;background:var(--card)}
+  /* sotto gli 880 px i chip scendevano a 12,5 px: sono i pulsanti degli anni
+     nei Crediti e i filtri, cioe' roba che si legge di sfuggita sul telefono. */
+  .chip{border-radius:8px;font-size:13.5px;padding:7px 13px;background:var(--card)}
   .chip.on{background:var(--accent-d);border-color:var(--accent-d)}
-  .ja{border-radius:7px;font-size:12px;display:inline-flex;align-items:center;gap:5px}
+  .ja{border-radius:7px;font-size:13px;display:inline-flex;align-items:center;gap:5px}
   .stato{border-radius:7px}
   .mini-title{letter-spacing:.6px}
   .cal-cell{border-radius:8px}
@@ -362,7 +366,7 @@
   .panel-card h2{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--testo)}
   .panel-card .pc-ic{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:21px;margin-bottom:2px}
   .panel-card .pc-ic svg{width:22px;height:22px}
-  .panel-card .pc-meta{font-size:12.5px;font-weight:600;color:var(--muted);opacity:1}
+  .panel-card .pc-meta{font-size:13.5px;font-weight:600;color:var(--muted);opacity:1}
   .pc-del{background:var(--sfondo);color:var(--testo-3);width:30px;height:30px;border-radius:8px;font-size:13px}
   .pc-del:hover{background:var(--err-bg);color:var(--err)}
   .landing-top .mk svg{width:34px;height:34px}
@@ -412,7 +416,7 @@
     .side .btn-new{margin:0 0 8px}
     .side nav.tabs{flex-direction:row;overflow-x:auto;gap:0;padding-bottom:2px;-webkit-overflow-scrolling:touch}
     .side nav.tabs button{flex:0 0 auto;width:auto;padding:10px 12px}
-    .side-group{font-size:12.5px;margin:10px 0 5px}
+    .side-group{font-size:13.5px;margin:10px 0 5px}
     .sheet{margin:0;min-height:100vh;border-radius:0}
     /* su 375px 28px per lato mangiavano il 15% della larghezza */
     .main .wrap{padding:16px 16px 40px}
@@ -453,7 +457,7 @@
   .btn-ghost:hover{background:var(--sfondo)}
   /* unica variante di misura: azioni dense dentro card e righe di tabella.
      Serve a non alzare le righe (il layout non si tocca in questa tappa). */
-  .btn-sm{height:30px;padding:0 10px;font-size:12.5px;border-radius:8px}
+  .btn-sm{height:32px;padding:0 11px;font-size:13.5px;border-radius:8px}
   .btn:disabled,.btn-primary:disabled{opacity:.5;cursor:default}
   /* adattamenti ai contenitori esistenti (il layout non cambia) */
   .side .btn-new{height:42px;padding:0;font-size:var(--f-md)}
@@ -462,7 +466,7 @@
   .sheet-actions .btn-primary{border:none}
   .card-acts .btn{width:100%}
   .spesa-add .btn,.mezzo-add .btn{height:40px}
-  .field .btn-ghost{height:auto;padding:6px 0;font-size:12.5px;justify-content:flex-start}
+  .field .btn-ghost{height:auto;padding:6px 0;font-size:13.5px;justify-content:flex-start}
   .field .btn.up-btn{display:inline-flex;height:36px;font-size:var(--f-sm);color:var(--testo)}
 
   /* ---------- 4. CAMPI DEI FORM ---------- */
@@ -504,7 +508,10 @@
   .tb-id strong{display:flex;align-items:center;font-size:15px;font-weight:600;color:#fff;
     line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tb-id strong #tb-panel-name{overflow:hidden;text-overflow:ellipsis}
-  .tb-id .tb-sub{display:block;font-size:12.5px;font-weight:500;color:#B5D4F4;line-height:1.3}
+  /* 12 agosto 2026 (sera) — era 12,5 px: l'unico testo di tutto il gestionale
+     sotto la soglia dei 13. Sta scritto in cima alla pagina («Reparto attivo»)
+     su fondo blu, che e' gia' il caso peggiore da leggere. 13,5 px. */
+  .tb-id .tb-sub{display:block;font-size:13.5px;font-weight:500;color:#C8DFF8;line-height:1.35}
   .tb-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
   .tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
     height:34px;padding:0 12px;border:none;border-radius:var(--r);
@@ -1068,7 +1075,7 @@
    (9 agosto 2026): CILA, SCIA, Permesso di Costruire... */
 .pra-tag{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:20px;
           background:rgba(0,102,255,.10); color:var(--blu,#0066ff);
-          font-size:12.5px; font-weight:700; vertical-align:middle; white-space:nowrap; }
+          font-size:13.5px; font-weight:700; vertical-align:middle; white-space:nowrap; }
 
 /* --- cestino: la riga in cima con il conteggio e lo svuota --- */
 .cest-testa{ display:flex; align-items:center; justify-content:space-between; gap:14px;
