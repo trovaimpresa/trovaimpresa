@@ -1707,7 +1707,11 @@
     });
     let mpNote=[];
     try{
-      const C=JSON.parse(localStorage.getItem("ti_mappa_cache_v2")||"{}");
+      /* 12 agosto 2026 (sera) — il nome era scritto a mano e restava a v2
+         mentre la Mappa e' passata a v3: il Riepilogo leggeva la memoria
+         VECCHIA, cioe' le distanze sbagliate di prima. Adesso e' la stessa
+         costante per tutti e due, quindi non si possono piu' scollare. */
+      const C=JSON.parse(localStorage.getItem(MP_CACHE_KEY)||"{}");
       const km=Object.values(C.km||{}).filter(v=>typeof v==="number").sort((a,b)=>a-b);
       if(km.length){
         mpNote=[{t:"Il cantiere più vicino",v:mpFormattaKm(km[0])},
@@ -2015,7 +2019,23 @@
        due disegni diversi per la stessa cosa. Ora ogni sezione ha la stessa
        forma del Riepilogo, su qualunque schermo.
        (Per tornare alle tabelle basta rimettere "!_deskTab()&&" qui davanti.) */
-    if(cfg.cards){box.style.display="grid";box.classList.add("griglia-schede");box.innerHTML=cfg.cards();return;}
+    if(cfg.cards){
+      box.style.display="grid";box.classList.add("griglia-schede");
+      /* ===== 12 agosto 2026 (sera) — LA RIGA DEI TOTALI ESISTEVA E NON SI VEDEVA =====
+         Da quando le sezioni disegnano SEMPRE le schede (e non piu' la tabella
+         sul computer), questo ramo esce da qui: e con la tabella se n'e' andata
+         anche la riga dei totali. Quattro sezioni la calcolano da mesi e non la
+         mostra nessuno — Lavori/Pratiche (quanto valgono in tutto), Agenda,
+         Preventivi e Clienti (quanti sono). Adesso e' una fascia in cima alla
+         griglia, larga quanto la pagina, e cambia con i filtri: se guardi "In
+         ritardo", il totale e' di quelli in ritardo. */
+      const _t=cfg.totale
+        ? '<div class="tab-tot"><span>'+cfg.totale.testo+'</span>'
+          +(cfg.totale.valore?('<b>'+cfg.totale.valore+'</b>'):'')+'</div>'
+        : '';
+      box.innerHTML=_t+cfg.cards();
+      return;
+    }
     box.classList.remove("griglia-schede");
     const freccia=k=>cfg.sortK===k?(cfg.sortD>0?" \u2191":" \u2193"):"";
     const cols=cfg.colonne.map(c=>`<col style="width:${c.w}">`).join("")+'<col style="width:36px">';
@@ -7362,7 +7382,13 @@
      da parte sul computer, così un indirizzo già cercato non si ricerca mai più.
      ========================================= */
 
-  const MP_CACHE_KEY="ti_mappa_cache_v2";
+  /* 12 agosto 2026 (sera) — da v2 a v3: la memoria vecchia va buttata.
+     Dentro ci sono i punti calcolati con mezzo indirizzo (senza CAP e comune) e
+     gli indirizzi segnati "non trovato" per colpa di un errore 429 del servizio
+     mappe. Tenerla vorrebbe dire correggere il codice e continuare a leggere i
+     numeri sbagliati di ieri. Cambiando nome si riparte puliti: la prima
+     apertura della Mappa ci mette qualche secondo in piu', una volta sola. */
+  const MP_CACHE_KEY="ti_mappa_cache_v3";
   let mpCache=null, mpVista="aperti", mpMappa=null, mpLayer=null, mpInCorso=false;
 
   function mpLeggiCache(){
@@ -7395,6 +7421,7 @@
     if(!q)return null;
     const C=mpLeggiCache();
     if(C.punti[q]!==undefined)return C.punti[q];       /* null incluso: già cercato e non trovato */
+    let trovato;
     try{
       let url="https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=it&q="+encodeURIComponent(indirizzo);
       /* spingo la ricerca verso la zona dell'ufficio: senza questo, una via che
@@ -7404,12 +7431,29 @@
         url+="&viewbox="+(vicinoA.lon-d)+","+(vicinoA.lat+d)+","+(vicinoA.lon+d)+","+(vicinoA.lat-d);
       }
       const r=await fetch(url,{headers:{"Accept":"application/json"}});
+      /* ===== 12 agosto 2026 (sera) — UN GUASTO NON E' UNA RISPOSTA =====
+         Prima QUALSIASI cosa andasse storta veniva scritta in memoria come
+         "questo indirizzo non esiste", e ci restava per sempre. Il caso vero:
+         il servizio gratuito delle mappe risponde 429 «troppe richieste» —
+         succede di continuo se apri la Mappa con venti cantieri — e da quel
+         momento quei cantieri non comparivano MAI PIU', nemmeno il giorno
+         dopo, perche' la risposta sbagliata era ormai incisa. Adesso un
+         guasto non si scrive: si riprova la volta dopo. */
+      if(!r.ok){
+        await mpAspetta(r.status===429?2500:1100);
+        return null;                      /* non si scrive niente in memoria */
+      }
       const d0=await r.json();
       const a=(d0&&d0[0])?d0[0]:null;
       const ad=(a&&a.address)||{};
-      C.punti[q]=a?{lat:+a.lat,lon:+a.lon,nome:a.display_name||"",
-                    comune:ad.city||ad.town||ad.village||ad.municipality||""}:null;
-    }catch(e){C.punti[q]=null;}
+      trovato=a?{lat:+a.lat,lon:+a.lon,nome:a.display_name||"",
+                 comune:ad.city||ad.town||ad.village||ad.municipality||""}:null;
+    }catch(e){
+      /* rete caduta, richiesta bloccata: come sopra, non e' una risposta */
+      await mpAspetta(1100);
+      return null;
+    }
+    C.punti[q]=trovato;
     mpSalvaCache();
     await mpAspetta(1100);        /* il servizio gratuito accetta una richiesta al secondo */
     return C.punti[q];
@@ -7443,7 +7487,16 @@
       if(forza){mpCache={punti:{}};mpSalvaCache();}
 
       /* 1) da dove si parte: l'indirizzo dell'azienda */
-      const {data:az}=await sb.from("gest_azienda").select("nome,indirizzo").eq("user_id",sbUid).maybeSingle();
+      /* ===== 12 agosto 2026 (sera) — L'UFFICIO FINIVA A CASO IN ITALIA =====
+         Qui si leggevano SOLO «nome» e «indirizzo». Ma azIndirizzo() mette
+         insieme via + CAP + citta' + provincia: senza quelle tre colonne
+         l'indirizzo diventava un nudo «Via Roma 10», e il servizio delle mappe
+         lo piazzava nella prima Via Roma 10 che trovava in Italia. Da li' in
+         poi TUTTE le distanze erano sbagliate — e credibili, che e' peggio.
+         E siccome il punto dell'ufficio serve anche a restringere la ricerca
+         dei cantieri alla zona giusta, sbagliava pure quelli. */
+      const {data:az}=await sb.from("gest_azienda")
+        .select("nome,indirizzo,cap,citta,prov").eq("user_id",sbUid).maybeSingle();
       const partenzaTxt=azIndirizzo(az).trim();
       /* Anche senza l'indirizzo dell'ufficio la carta si vede lo stesso, con i pin
          dei cantieri: mancano solo i chilometri, perché non c'e' da dove misurarli. */
@@ -7456,7 +7509,10 @@
       /* 2) i lavori con un indirizzo */
       const [{data:lav},{data:cli}]=await Promise.all([
         sb.from("gest_lavori").select("id,descrizione,dove,stato,data_prevista,cliente_id").eq("user_id",sbUid).eq("mestiere_id",curMestiere()),
-        sb.from("gest_clienti").select("id,nome,indirizzo").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
+        /* stessa storia dell'ufficio: senza CAP, citta' e provincia l'indirizzo
+           del cliente e' mezzo indirizzo, e il pin finisce dall'altra parte
+           d'Italia */
+        sb.from("gest_clienti").select("id,nome,indirizzo,cap,citta,prov").eq("user_id",sbUid).eq("mestiere_id",curMestiere())
       ]);
       const cliMap=Object.fromEntries((cli||[]).map(c=>[c.id,c]));
       /* ATTENZIONE: qui la lista dei lavori NON si può chiamare L.
@@ -7468,7 +7524,9 @@
       if(mpVista==="aperti")LAV=LAV.filter(l=>l.stato!=="fatto");
       const voci=LAV.map(l=>{
         const c=cliMap[l.cliente_id];
-        const ind=(l.dove||"").trim()||((c&&c.indirizzo)||"").trim();
+        /* cliIndirizzo() mette insieme via + CAP + citta' + provincia: prima
+           qui si usava il solo c.indirizzo e si perdeva meta' indirizzo */
+        const ind=(l.dove||"").trim()||cliIndirizzo(c).trim();
         return {l,c,ind};
       }).filter(v=>v.ind);
 
@@ -9958,6 +10016,16 @@
   const CEST_FINESTRA=120000;
 
   let cestCache=[], cestQ="", cestTotale=null;
+  /* 12 agosto 2026 (sera) — IL CESTINO NON GUARDAVA IL REPARTO.
+     Chiedeva tutto quello che e' eliminato per QUESTO ACCOUNT, senza badare a
+     dove stava: se hai due reparti — poniamo "Edilizia" e "Impianti" — dentro
+     "Edilizia" ti trovavi i clienti e le fatture eliminate di "Impianti", con
+     lo stesso nome delle tue, e potevi rimetterle a posto o cancellarle per
+     sempre senza accorgerti che erano di un altro pannello.
+     Adesso si parte da questo reparto e c'e' la vista "Tutti i reparti" per
+     vedere il resto: niente diventa irraggiungibile, ma non si mescola piu'. */
+  let cestVista="reparto";
+  let cestQui=null;                /* quante ce ne sono in QUESTO reparto */
   const CEST_MAX=200;   /* quante se ne mostrano per tipo */
 
   async function renderCestino(soloDisegno){
@@ -9995,16 +10063,41 @@
        count:"exact" costa niente in piu' e serve a dire QUANTE ce ne sono
        davvero: prima si mostravano le prime 200 per tipo e le altre sparivano
        senza che nessuno lo dicesse. */
-    const risposte=await Promise.all(CEST_COSE.map(function(c){
-      return sb.raw(c.t).select("*",{count:"exact"}).eq("user_id",sbUid)
-        .not("eliminato_il","is",null)
-        .order("eliminato_il",{ascending:false}).limit(CEST_MAX)
-        .then(r=>({c:c,righe:(r&&r.data)||[],n:(r&&typeof r.count==="number")?r.count:((r&&r.data)||[]).length}))
-        .catch(()=>({c:c,righe:[],n:0}));
-    }));
-    cestTotale=risposte.reduce((s,x)=>s+(x.n||0),0);
-    cestContato=true;
-    setCnt("#cnt-cestino",cestTotale,"attesa");
+    const _mid=curMestiere();
+    /* «gest_mestieri» non si filtra mai per reparto: un reparto eliminato non
+       sta dentro nessun reparto, e filtrandolo non lo si potrebbe piu'
+       rimettere a posto. Le tabelle che il reparto non ce l'hanno proprio
+       (elenco prezzi, crediti formativi: sono della PERSONA, non del pannello)
+       si riconoscono dall'errore del database e si mostrano sempre. */
+    async function cestChiedi(c){
+      const q=function(conReparto){
+        let b=sb.raw(c.t).select("*",{count:"exact"}).eq("user_id",sbUid)
+          .not("eliminato_il","is",null);
+        if(conReparto)b=b.eq("mestiere_id",_mid);
+        return b.order("eliminato_il",{ascending:false}).limit(CEST_MAX);
+      };
+      const filtra=(cestVista!=="tutti")&&!!_mid&&c.t!=="gest_mestieri";
+      let r=null;
+      try{ r=await q(filtra); }catch(e){ r=null; }
+      if(filtra&&r&&r.error&&/mestiere_id|42703|column/i.test((r.error.message||"")+(r.error.code||""))){
+        try{ r=await q(false); }catch(e){ r=null; }
+      }
+      const righe=(r&&!r.error&&r.data)||[];
+      return {c:c, righe:righe, n:(r&&!r.error&&typeof r.count==="number")?r.count:righe.length};
+    }
+    const risposte=await Promise.all(CEST_COSE.map(cestChiedi));
+    cestQui=risposte.reduce((s,x)=>s+(x.n||0),0);
+    /* il pallino del menu conta TUTTO il cestino, non solo questo reparto:
+       e' un "hai roba buttata via", non un conteggio di sezione. Quindi si
+       aggiorna solo quando si sta guardando davvero tutto. */
+    if(cestVista==="tutti"){
+      cestTotale=cestQui;
+      cestContato=true;
+      setCnt("#cnt-cestino",cestTotale,"attesa");
+    }else if(cestTotale!=null&&cestTotale<cestQui){
+      cestTotale=cestQui;                       /* non puo' essercene meno del pezzo */
+      setCnt("#cnt-cestino",cestTotale,"attesa");
+    }
     cestCache=[];
     risposte.forEach(function(x){
       x.righe.forEach(function(r){
@@ -10032,28 +10125,40 @@
     const vis=cestCache.map((x,i)=>({x:x,i:i}))
       .filter(v=>!q||(v.x.nome+" "+v.x.tipo).toLowerCase().includes(q));
 
-    const nascoste=Math.max(0,(cestTotale==null?cestCache.length:cestTotale)-cestCache.length);
-    const totVero=(cestTotale==null?cestCache.length:cestTotale);
-    if($("#cest-riass"))$("#cest-riass").innerHTML=(totVero||q)
+    const totVero=(cestQui==null?cestCache.length:cestQui);
+    const nascoste=Math.max(0,totVero-cestCache.length);
+    /* quante ce ne sono negli ALTRI reparti: si dice, se no uno crede che il
+       cestino sia vuoto e invece sta solo guardando un pannello */
+    const altrove=(cestVista!=="tutti"&&cestTotale!=null)?Math.max(0,cestTotale-totVero):0;
+    if($("#cest-riass"))$("#cest-riass").innerHTML=(totVero||q||altrove)
       ? '<div class="cest-testa"><div><b>'+totVero+'</b> '
         +(totVero===1?'cosa eliminata':'cose eliminate')
+        +(cestVista!=="tutti"?' in questo reparto':'')
         +(nascoste?(' <small>— ne mostro '+cestCache.length+', le più recenti</small>'):'')
         +(q?(' <small>· trovate '+vis.length+' con «'+esc(cestQ)+'»</small>'):'')
         +'</div><div class="cest-nota">Restano qui finché non le rimetti a posto, e non si vedono da nessun\'altra parte del gestionale. '
-        +'Foto, video e documenti però continuano a occupare spazio finché non li elimini per sempre.</div></div>'
+        +'Foto, video e documenti però continuano a occupare spazio finché non li elimini per sempre.'
+        +(altrove?(' <b>Altre '+altrove+' stanno in altri reparti:</b> per vederle scegli «Tutti i reparti» qui sopra.'):'')
+        +'</div></div>'
       : "";
 
     renderTabella({
       id:"cest", box:"#cest-list",
-      viste:"#cest-viste", visteDef:[], vista:"", conta:{}, azioneVista:"",
+      viste:"#cest-viste",
+      visteDef:[{k:"reparto",lab:"Questo reparto"},{k:"tutti",lab:"Tutti i reparti"}],
+      vista:cestVista, conta:{}, azioneVista:"cest-vista",
       vuoto:q
         ? tabVuoto("Nessuna corrispondenza",
             "Nel cestino non c'è niente che si chiami «"+esc(cestQ)+"». Svuota la casella per rivedere tutto.",
             _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>',
             {t:"Mostra tutto",a:"cerca-azzera"})
-        : tabVuoto("Il cestino è vuoto",
+        : (altrove
+          ? tabVuoto("In questo reparto non hai eliminato niente",
+              "Ci sono però "+altrove+" cose eliminate in altri reparti: scegli «Tutti i reparti» qui sopra per vederle.",
+              _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>')
+          : tabVuoto("Il cestino è vuoto",
             "Qui finisce tutto quello che elimini dal gestionale. Finché è qui non è perso: si rimette a posto con un clic.",
-            _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>'),
+            _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>')),
       colonne:[{lab:"Che cos'era",w:"42%"},{lab:"Tipo",w:"26%",cls:"c-chi"},{lab:"Eliminato",w:"32%"}],
       righe:vis.map(function(v){
         const x=v.x, i=v.i;
@@ -12880,6 +12985,7 @@
       return;
     }
     if(a==="ptl-conferma")return prevToLavoroConferma(id,+t.dataset.tot||0);
+    if(a==="cest-vista"){cestVista=t.dataset.v||"reparto";renderCestino();return;}
     if(a==="cest-ripristina")return cestRipristina(id);
     if(a==="cest-definitivo")return cestDefinitivo(id);
     if(a==="new-cred")return credForm(null);

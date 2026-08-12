@@ -1562,6 +1562,18 @@
 @media(max-width:1180px){ .wrap section .griglia-schede{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:760px){  .wrap section .griglia-schede{ grid-template-columns:minmax(0,1fr); gap:16px; } }
 
+/* 12 agosto 2026 (sera) — la fascia dei totali sopra le schede.
+   Prende tutta la larghezza della griglia, testo grande: e' un numero che si
+   legge di sfuggita, non una nota a pie' di pagina. */
+.tab-tot{
+  grid-column:1/-1;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  background:var(--card); border:1px solid var(--bordo); border-radius:14px;
+  padding:14px 18px; margin-bottom:2px;
+  font-size:16px; line-height:1.4; color:var(--testo-2); font-weight:600;
+}
+.tab-tot b{ font-size:19px; color:var(--testo); font-weight:800; }
+
 /* la scheda di un lavoro / preventivo / fattura prende lo stampo del Riepilogo */
 .wrap section .job{
   display:flex; flex-direction:column;
