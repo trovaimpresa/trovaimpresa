@@ -1044,12 +1044,24 @@
      rinfresca() e chi direttamente renderQualcosa(): invece di correggerle una
      per una (e dimenticarne qualcuna), lo dice js/cestino.js, che e' l'unico
      punto da cui passano TUTTE le cancellazioni del gestionale. */
-  window.segnaCestinoDaRifare=function(){
+  window.segnaCestinoDaRifare=function(quante){
     try{
       _tabSporchi.add("cestino");
       /* il pallino sale subito: se no restava indietro finche' non si apriva
-         la sezione */
-      if(typeof cestTotale==="number"){cestTotale++;setCnt("#cnt-cestino",cestTotale,"attesa");}
+         la sezione.
+         12 agosto 2026 (sera) — prima saliva di UNO per ogni comando, non per
+         ogni riga: eliminavi un reparto con 40 pratiche e faceva +2 invece di
+         +41, e una cancellazione che non trovava niente lo faceva salire lo
+         stesso. Adesso js/cestino.js dice quante righe sono davvero finite nel
+         cestino; se non si puo' sapere (chi ha cancellato non ha chiesto
+         indietro le righe) si rilegge il numero vero invece di indovinare. */
+      if(typeof cestTotale==="number"){
+        if(typeof quante==="number"&&quante>=0){
+          if(quante>0){cestTotale+=quante;setCnt("#cnt-cestino",cestTotale,"attesa");}
+        }else{
+          cestContato=false;contaCestinoUnaVolta();
+        }
+      }
       if(tabCorrente()==="cestino"){_tabSporchi.delete("cestino");renderCestino();}
     }catch(e){}
   };
@@ -2795,7 +2807,19 @@
         fattAzienda=data||null;
       }
       if(f.id){
-        const {data:rr}=await sb.from("gest_fattura_righe").select("*").eq("fattura_id",f.id).order("ordine");
+        /* ===== 12 agosto 2026 (sera) — LA RETE DI SICUREZZA =====
+           L'errore di questa lettura non lo guardava nessuno. Se il database non
+           rispondeva (rete che cade, sessione scaduta, un secondo di Supabase
+           giu') il modulo si apriva SENZA RIGHE, come una fattura vuota. E il
+           Salva, che prima cancella tutte le righe e poi riscrive quelle del
+           modulo, le cancellava per davvero: fattura svuotata, e a schermo
+           "Salvato". Adesso, se non riesco a leggerle, il modulo non si apre. */
+        const {data:rr,error:erR}=await sb.from("gest_fattura_righe").select("*").eq("fattura_id",f.id).order("ordine");
+        if(erR){
+          toast("Non riesco a leggere le righe della fattura: "+(erR.message||"il database non risponde")
+                +". Non apro il modulo, se no rischi di svuotarla. Riprova fra un attimo.");
+          return;
+        }
         righe=rr||[];
       }
     }
@@ -2957,7 +2981,7 @@
     }
     testata.regime_fiscale=(fattAzienda&&fattAzienda.regime_fiscale)||null;
 
-    let fid=id;
+    let fid=id, vecchieRighe=[];
     /* se sql/gest-fattura-cassa.sql non è ancora stato eseguito, le tre
        colonne nuove non esistono: invece di perdere TUTTA la fattura le
        togliamo e riproviamo, dicendolo (stesso schema dei Dati azienda). */
@@ -2972,12 +2996,16 @@
       }
       if(error){fattErrore(error.message);return;}
       if(!okFat||!okFat.length){fattErrore("Non salvata: nessuna riga modificata. Riprova.");return;}
-      const {error:eDel}=await sb.from("gest_fattura_righe").delete().eq("fattura_id",id).eq("user_id",sbUid);
-      if(eDel){fattErrore("Le vecchie voci non si sono cancellate: "+eDel.message);return;}
-      /* rete anti-doppioni: se per qualsiasi motivo le vecchie voci sono ancora
-         li', inserire le nuove le raddoppierebbe. Meglio fermarsi. */
-      const {data:resti}=await sb.from("gest_fattura_righe").select("id").eq("fattura_id",id).limit(1);
-      if(resti&&resti.length){fattErrore("Le vecchie voci non si sono cancellate. Riprova.");return;}
+      /* ===== 12 agosto 2026 (sera) — PRIMA SI SCRIVE, POI SI CANCELLA =====
+         Qui le vecchie voci venivano cancellate SUBITO e le nuove scritte dopo.
+         Bastava che l'inserimento fallisse — la rete che cade a metà, una
+         descrizione troppo lunga, un permesso — per restare con una fattura
+         SENZA NESSUNA VOCE e senza modo di riaverle. Adesso si segnano da parte
+         gli id di quelle vecchie e si tolgono solo DOPO che le nuove sono
+         entrate: se qualcosa va storto, la fattura è ancora tutta lì. */
+      const {data:vecc,error:eVec}=await sb.from("gest_fattura_righe").select("id").eq("fattura_id",id).eq("user_id",sbUid);
+      if(eVec){fattErrore("Non riesco a leggere le voci di prima: "+eVec.message);return;}
+      vecchieRighe=(vecc||[]).map(r=>r.id);
     }else{
       const nuova={...testata,user_id:sbUid,mestiere_id:curMestiere(),stato:"bozza"};
       let {data:nf,error}=await sb.from("gest_fatture").insert(nuova).select().single();
@@ -2990,7 +3018,16 @@
     }
     const {error:e2}=await sb.from("gest_fattura_righe")
       .insert(righe.map(r=>({...r,user_id:sbUid,fattura_id:fid})));
-    if(e2){fattErrore("Le voci non sono state salvate: "+e2.message);return;}
+    if(e2){fattErrore("Le voci non sono state salvate: "+e2.message+" — quelle di prima sono ancora al loro posto.");return;}
+    /* adesso che le nuove ci sono, si tolgono quelle di prima */
+    if(vecchieRighe.length){
+      const {error:eDel}=await sb.from("gest_fattura_righe").delete().in("id",vecchieRighe).eq("user_id",sbUid);
+      if(eDel){
+        fattErrore("Le voci nuove sono salvate, ma le vecchie non si sono cancellate ("+eDel.message
+                  +"): adesso la fattura ha le voci doppie. Riapri e salva di nuovo.");
+        return;
+      }
+    }
 
     /* i lavori scelti nel selettore, agganciati adesso che la fattura esiste */
     if(fattLavoriInCorso&&fattLavoriInCorso.length){
@@ -3827,7 +3864,12 @@
         ]);
         calScad=(sc||[]).filter(x=>x.data_scadenza)
           .map(x=>({id:x.id,titolo:x.titolo||"Scadenza",data:x.data_scadenza,fatta:x.stato==="fatta"}))
-          .concat((per||[]).map(x=>({id:x.id,titolo:x.titolo+" · "+x._nome,data:x.data_scadenza,fatta:false})));
+          /* si portano dietro _persona e _opId: nel riquadro del giorno servono
+             per aprire la SCHEDA DELLA PERSONA invece del modulo scadenza (una
+             visita medica non e' una riga di gest_scadenze, e' una data sulla
+             scheda dell'operaio). */
+          .concat((per||[]).map(x=>({id:x.id,titolo:x.titolo+" · "+x._nome,data:x.data_scadenza,fatta:false,
+                                     _persona:true,_opId:x._opId})));
       }catch(e){ calScad=[]; }
     }
     await caricaNote();
@@ -3842,19 +3884,25 @@
     for(let d=1;d<=days;d++){
       const ds=ymd(y,m,d), jobs=calJobs.filter(l=>l.data_prevista===ds);
       const scaduto=ds<todayStr();
-      const righe=jobs.slice(0,MAX_CELLA).map(j=>{
+      /* le scadenze del giorno, sotto i lavori e con la loro barretta */
+      const sc=calScad.filter(x=>x.data===ds);
+      /* 12 agosto 2026 (sera) — i posti nella cella sono MAX_CELLA IN TUTTO, non
+         quattro per i lavori piu' altri quattro per le scadenze. Prima si
+         potevano vedere otto righe e il "+N" era calcolato lo stesso su
+         MAX_CELLA: con 2 lavori e 3 scadenze ne vedevi 5 e c'era scritto "+1". */
+      const nJobs=Math.min(jobs.length,MAX_CELLA);
+      const nSc=Math.min(sc.length,MAX_CELLA-nJobs);
+      const righe=jobs.slice(0,nJobs).map(j=>{
         const cls=j.stato==="fatto"?"fatto":(scaduto?"ritardo":(j.stato==="in_corso"?"in_corso":"da_fare"));
         const tit=j.descrizione||"Lavoro";
         return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${esc(tit)}</span></span>`;
       }).join("");
-      /* le scadenze del giorno, sotto i lavori e con la loro barretta */
-      const sc=calScad.filter(x=>x.data===ds);
-      const righeSc=sc.slice(0,MAX_CELLA).map(x=>{
+      const righeSc=sc.slice(0,nSc).map(x=>{
         const cls=x.fatta?"fatto":(scaduto?"ritardo":"scad");
         return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">⏰ ${esc(x.titolo)}</span></span>`;
       }).join("");
-      const tot=jobs.length+sc.length;
-      const piu=tot>MAX_CELLA?`<span class="cal-piu">+${tot-MAX_CELLA}</span>`:"";
+      const tot=jobs.length+sc.length, mostrate=nJobs+nSc;
+      const piu=tot>mostrate?`<span class="cal-piu">+${tot-mostrate}</span>`:"";
       const we=(lead+d-1)%7>=5?" we":"";
       const note=noteCache[ds]?`<span class="cal-note-mark">📌</span>`:"";
       html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${righeSc}${piu}</div></div>`;
@@ -3893,9 +3941,17 @@
       :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
     /* le scadenze di quel giorno: sola lettura, ma almeno si vedono */
     const scDel=calScad.filter(x=>x.data===ds);
+    /* 12 agosto 2026 (sera) — queste righe usano .day-job, che nel CSS ha la
+       manina (cursor:pointer): stamattina ho reso cliccabili i lavori e ho
+       aggiunto queste SENZA azione, ricreando lo stesso difetto che avevo
+       appena chiuso. Adesso si aprono: la scadenza vera nel suo modulo, quella
+       di una persona nella scheda della persona (li' si cambia la data). */
     const listSc=scDel.length?scDel.map(x=>{
       const late=!x.fatta&&ds<todayStr();
-      return `<div class="day-job"><i class="dot ${x.fatta?'done':(late?'ritardo':'todo')}"></i>
+      const azione=x._persona
+        ? `data-action="scad-persona" data-id="${esc(String(x._opId||""))}" title="Apri la scheda della persona"`
+        : `data-action="edit-scad" data-id="${esc(String(x.id))}" title="Apri la scadenza"`;
+      return `<div class="day-job" ${azione}><i class="dot ${x.fatta?'done':(late?'ritardo':'todo')}"></i>
         <div style="flex:1"><b style="font-size:14px">⏰ ${esc(x.titolo)}</b></div>
         <span class="stato ${x.fatta?'fatto':(late?'ritardo':'da_fare')}">${x.fatta?'Fatta':(late?'Scaduta':'Scadenza')}</span></div>`;}).join(""):"";
     openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}${listSc}</div>
@@ -5162,7 +5218,7 @@
       +'</div><div class="sh-col">'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Collegamenti e note</div>'
-      +'<p class="sh-nota" style="margin-top:0">Puoi collegarla al lavoro per ritrovarla in fretta. <b>Attenzione:</b> per far entrare questa spesa nel margine del lavoro va scritta anche fra le <b>Spese</b> nella scheda del lavoro — qui resta solo il conto col fornitore.</p>'
+      +'<p class="sh-nota" style="margin-top:0">Se la colleghi a un lavoro, il suo importo entra <b>da solo</b> nel margine di quel lavoro, su una riga sua. <b>Non riscriverla anche fra le Spese</b>: la conteresti due volte.</p>'
       +'<div class="field"><label>Lavoro collegato (facoltativo)</label><select id="ff-lav">'+lavOps+'</select></div>'
       +'<div class="field"><label>Note</label><textarea id="ff-note" placeholder="Es. sabbia e cemento per il bagno di Via Roma">'+esc(f.note||'')+'</textarea></div>'
       +'</div>'
@@ -5558,6 +5614,10 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
     closeSheet();renderScadenze();renderMezzi();
+    /* 12 agosto 2026 (sera) — da stamattina le scadenze si vedono sul calendario
+       e nel Riepilogo, ma nessuno diceva a quelle due schermate di ridisegnarsi:
+       creavi una scadenza, andavi sul calendario e non c'era. */
+    rinfresca("calendario","riepilogo");
     if(tolte.indexOf("ripeti_mesi")>=0&&tolte.length===1){toast("Salvata, ma per farla ripetere serve l'aggiornamento del database (sql/gest-scadenze-ripeti.sql).");}
     else if(tolte.length){toast("Salvata, ma il collegamento alla pratica richiede l'aggiornamento del database (sql/gest-scadenze-pratiche.sql).");}
     else toast(id?"Aggiornato":"Scadenza aggiunta ✔");
@@ -6613,13 +6673,42 @@
     if(!gconfirm(msg))return;
 
     if(sb&&sbUid&&p.mestiere_id){
-      /* prima i lavori: cosi' finiscono nel Cestino uno per uno e si possono
-         ripescare anche da soli. Poi il reparto. */
-      const r1=await sb.from("gest_lavori").delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
-      if(r1&&r1.error){toast("Errore: il reparto NON è stato eliminato — "+(r1.error.message||""));return;}
+      /* ===== 12 agosto 2026 (sera) — LA PROMESSA ADESSO E' VERA =====
+         Stamattina ho reso onesto il CONTEGGIO (il messaggio elenca tutte e 11
+         le cose che ci sono dentro) ma non la CANCELLAZIONE: si buttavano via
+         solo i lavori e il reparto. Clienti, preventivi, fatture, fornitori,
+         mezzi, persone, carte, scadenze e computi restavano VIVI nel database e
+         invisibili sullo schermo — il reparto da cui si raggiungono non c'era
+         piu' — e non stavano nemmeno nel Cestino, quindi non si potevano
+         rimettere a posto. E poi "Elimina per sempre" sul reparto si rifiutava,
+         perche' li trovava ancora vivi: vicolo cieco.
+         Adesso si svuota davvero, una tabella per volta, i figli prima e il
+         reparto per ultimo: cosi' ogni cosa e' ripescabile anche da sola.
+         Una tabella che nel database non esiste (migrazione mai eseguita) non
+         blocca niente: non c'e' niente da mettere via. Tutto il resto si'. */
+      const falliti=[], bloccate=[];
+      for(const v of REPARTO_CONTENUTO){
+        const r=await sb.from(v[0]).delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
+        const er=r&&r.error;
+        if(!er)continue;
+        const m=(er.code||"")+" "+(er.message||"");
+        if(/42P01|42703|does not exist|schema cache|could not find/i.test(m))continue;
+        if(String(er.code||"")==="CESTINO_BLOCCATO")bloccate.push(v[2]);
+        else falliti.push(v[2]+" ("+(er.message||"errore")+")");
+      }
+      if(bloccate.length){
+        alert("Il reparto NON è stato eliminato.\n\nSu queste parti il Cestino non è ancora installato, "
+          +"e per non perdere niente per sempre l'eliminazione è bloccata:\n  •  "+bloccate.join("\n  •  ")
+          +"\n\nEsegui i file della cartella sql/ su Supabase e riprova.");
+        renderLanding();return;
+      }
+      if(falliti.length){
+        toast("Il reparto NON è stato eliminato: non sono riuscito a mettere via "+falliti.join(", "));
+        renderLanding();return;
+      }
       const r2=await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
       if(r2&&r2.error){
-        /* i lavori sono gia' andati nel Cestino ma il reparto e' rimasto:
+        /* il contenuto e' gia' andato nel Cestino ma il reparto e' rimasto:
            NON lo tolgo dallo schermo, se no sparisce solo agli occhi */
         toast("Errore: il reparto è ancora lì — "+(r2.error.message||""));
         renderLanding();return;
@@ -6657,7 +6746,22 @@
 
   async function aziendaForm(){
     aziendaRow=null;
-    if(sb&&sbUid){const {data}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();aziendaRow=data||null;}
+    if(sb&&sbUid){
+      /* ===== 12 agosto 2026 (sera) — LA RETE DI SICUREZZA =====
+         Questi sono i dati che finiscono su OGNI fattura: ragione sociale,
+         P.IVA, IBAN, regime fiscale, codice SdI, polizza. L'errore della
+         lettura non lo guardava nessuno: se il database non rispondeva il
+         modulo si apriva tutto vuoto, e il Salva scriveva il vuoto sopra i dati
+         veri. Bastava aprire "Dati azienda" nel momento sbagliato, premere
+         Salva senza cambiare niente, e la partita IVA spariva. */
+      const {data,error:erA}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+      if(erA){
+        toast("Non riesco a leggere i dati dell'azienda: "+(erA.message||"il database non risponde")
+              +". Non apro il modulo, se no salvandolo li cancelli. Riprova fra un attimo.");
+        return;
+      }
+      aziendaRow=data||null;
+    }
     const a=aziendaRow||{};
     const reg=a.regime_fiscale||"RF01";
     /* Modulo lungo -> finestra grande a due colonne, come persona, lavoro e
@@ -7719,12 +7823,13 @@
     /* 12 agosto 2026 — la manodopera entra nel margine: ore x costo orario
        della persona che le ha fatte, media della squadra per le ore senza
        nome. Prima il costo orario si compilava e non serviva a niente. */
-    let md=0, oreSenzaNome=0;
+    let md=0, oreSenzaNome=0, mediaSquadra=0;
     try{
       const _l=[{id:lavoroId, ore:+($("#j-ore")?$("#j-ore").value:0)||0}];
       const _m=await caricaManodopera(curMestiere(),_l);
       md=_m.per[String(lavoroId)]||0;
       oreSenzaNome=_m.senzaNome[String(lavoroId)]||0;
+      mediaSquadra=(_m.tariffe&&+_m.tariffe.media)||0;
     }catch(e){}
     const imp=+($("#j-imp")?$("#j-imp").value:importo)||0;
     const marg=margineLavoro(imp,tot,totFF,md);
@@ -7733,7 +7838,14 @@
       +(totFF?`<span>Fatture fornitori: <span class="sp">−${eur2(totFF)}</span></span>`:"")
       +(md?`<span>Manodopera: <span class="sp">−${eur2(md)}</span></span>`:"")
       +`<span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`
-      +(oreSenzaNome?`<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore senza il nome di chi le ha fatte: contate al costo medio della squadra</span>`:"");
+      /* 12 agosto 2026 (sera) — la riga sotto diceva "contate al costo medio della
+         squadra" anche quando la media era ZERO, cioe' quando non le stava contando
+         affatto. Adesso il caso "nessun costo orario" ha la sua frase e dice cosa fare. */
+      +(oreSenzaNome
+          ? (mediaSquadra>0
+              ? `<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore senza il nome di chi le ha fatte: contate al costo medio della squadra (${eur2(mediaSquadra)} l'ora)</span>`
+              : `<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore registrate, ma nessuno in squadra ha il costo orario: la manodopera non entra nel margine. Scrivilo nella scheda della persona, in Squadra.</span>`)
+          : "");
     renderAndamentoSpese(sp,imp);
   }
 
@@ -8303,7 +8415,18 @@
     let cl=[],righe=[];
     if(sb&&sbUid){
       const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");cl=data||[];
-      if(p.id){const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",p.id).order("ordine");righe=rr||[];}
+      /* stessa rete di sicurezza della fattura: savePrev cancella le voci e le
+         riscrive, quindi un modulo aperto vuoto per colpa della rete
+         svuoterebbe il preventivo con un bel "Salvato" verde. */
+      if(p.id){
+        const {data:rr,error:erP}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",p.id).order("ordine");
+        if(erP){
+          toast("Non riesco a leggere le voci del preventivo: "+(erP.message||"il database non risponde")
+                +". Non apro il modulo, se no rischi di svuotarlo. Riprova fra un attimo.");
+          return;
+        }
+        righe=rr||[];
+      }
     }
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===p.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
     /* Modulo lungo -> modale grande: a sinistra l'intestazione del preventivo,
@@ -8353,7 +8476,7 @@
     });
     if(!righe.length){toast("Aggiungi almeno una voce");return;}
     const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=$("#pv-note").value.trim()||null;
-    let pid=id;
+    let pid=id, vecchieVoci=[];
     const parcella=Object.assign({},leggiCampiParcella(),leggiCampiIvaImpresa());
     let avvisoParcella=false;
     if(id){
@@ -8366,11 +8489,12 @@
       }
       if(error){toast("Errore: "+error.message);return;}
       if(!okPrev||!okPrev.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-      const {error:eDelP}=await sb.from("gest_preventivo_righe").delete().eq("preventivo_id",id).eq("user_id",sbUid);
-      if(eDelP){toast("Le vecchie voci non si sono cancellate: "+eDelP.message);return;}
-      /* rete anti-doppioni: come per le fatture */
-      const {data:restiP}=await sb.from("gest_preventivo_righe").select("id").eq("preventivo_id",id).limit(1);
-      if(restiP&&restiP.length){toast("Le vecchie voci non si sono cancellate. Riprova.");return;}
+      /* come per le fatture: prima si scrivono le nuove voci, poi si tolgono le
+         vecchie. Al contrario, un inserimento andato male lasciava il
+         preventivo COMPLETAMENTE VUOTO e non c'era modo di recuperarlo. */
+      const {data:veccP,error:eVecP}=await sb.from("gest_preventivo_righe").select("id").eq("preventivo_id",id).eq("user_id",sbUid);
+      if(eVecP){toast("Non riesco a leggere le voci di prima: "+eVecP.message);return;}
+      vecchieVoci=(veccP||[]).map(r=>r.id);
     }else{
       /* si contano anche quelli nel cestino: eliminato l'ultimo, il prossimo
          riprendeva lo stesso numero e nascevano due preventivi n.5 */
@@ -8393,7 +8517,11 @@
       pid=np.id;
     }
     const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,user_id:sbUid,preventivo_id:pid})));
-    if(e2){toast("Errore voci: "+e2.message);return;}
+    if(e2){toast("Errore voci: "+e2.message+" — quelle di prima sono ancora al loro posto.");return;}
+    if(vecchieVoci.length){
+      const {error:eDelP}=await sb.from("gest_preventivo_righe").delete().in("id",vecchieVoci).eq("user_id",sbUid);
+      if(eDelP){toast("Le voci nuove sono salvate, ma le vecchie non si sono cancellate: adesso sono doppie. Riapri e salva di nuovo.");return;}
+    }
     closeSheet();rinfresca("preventivi","riepilogo");
     toast(avvisoParcella?(ruoloUtente==='professionista'
             ?"Salvato, ma i dati della parcella NON ci sono: manca la migrazione SQL"
@@ -9733,7 +9861,14 @@
      parte, perche' il gestionale mostra solo la roba dei reparti vivi.
      ============================================================ */
   const CEST_FIGLI={
-    gest_mestieri :[["gest_lavori","mestiere_id","lavoro","lavori"]],
+    /* 12 agosto 2026 (sera) — qui c'era solo gest_lavori, perche' "elimina
+       reparto" metteva via solo quelli. Adesso mette via tutte e 11 le tabelle
+       del reparto, quindi il ripristino le deve tirare su tutte: se no il
+       reparto tornava su VUOTO e clienti, fatture e persone restavano nel
+       cestino uno per uno, da ripescare a mano.
+       L'elenco e' lo stesso di REPARTO_CONTENUTO, scritto in un posto solo,
+       cosi' cancellazione e ripristino non possono piu' scollarsi. */
+    gest_mestieri : REPARTO_CONTENUTO.map(function(v){return [v[0],"mestiere_id",v[1],v[2]];}),
     gest_fornitori:[["gest_fatture_fornitori","fornitore_id","fattura","fatture"]]
   };
   const CEST_PADRE={
@@ -9933,9 +10068,14 @@
 
     let extra=0;
     if(padreDaTirareSu){
+      /* la data si legge PRIMA di rimettere a posto il padre: e' quella che dice
+         "questi figli sono stati buttati via insieme a lui". Leggendola dopo,
+         il padre e' gia' tornato su e la data non c'e' piu': i figli
+         resterebbero tutti nel cestino, da ripescare a mano uno per uno. */
+      const quandoPadre=padreDaTirareSu.eliminato_il;
       const rp=await cestRiga(x.padre.tab,padreDaTirareSu.id);
       if(rp&&rp.error){toast("Errore: "+rp.error.message);return;}
-      extra+=1+await cestFigli(x.padre.tab,padreDaTirareSu.id,padreDaTirareSu.eliminato_il);
+      extra+=1+await cestFigli(x.padre.tab,padreDaTirareSu.id,quandoPadre);
     }
 
     const {data,error}=await cestRiga(x.tab,x.id);
@@ -12413,6 +12553,12 @@
        (riga sopra) e poi non lo usava. */
     const ffPer={};FF.forEach(x=>{if(x.lavoro_id)ffPer[x.lavoro_id]=(ffPer[x.lavoro_id]||0)+(+x.importo||0);});
     const _md=await caricaManodopera(mid,L);
+    /* 12 agosto 2026 (sera) — il costo della manodopera di TUTTI i lavori del
+       Report. Serve ai "Totali storici" qui sotto: la manodopera entrava nel
+       margine di ogni singolo lavoro ma NON nel margine totale, cosi' sommando
+       i lavori uno per uno non tornava mai col totale, e la differenza era
+       esattamente lo stipendio della squadra. */
+    const totMD=Object.keys(_md.per).reduce(function(s,k){return s+(+_md.per[k]||0);},0);
     let ML=L.filter(l=>(+l.importo||0)>0||spPer[l.id]||ffPer[l.id]||_md.per[String(l.id)])
       .map(l=>({d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0,
                 ff:ffPer[l.id]||0, md:_md.per[String(l.id)]||0}));
@@ -12447,7 +12593,8 @@
         <tr><td>Spese con le carte</td><td style="color:var(--testo)">−${eur(totCarte)}</td></tr>
         ${totRif?`<tr><td>Rifornimenti pagati in contanti</td><td style="color:var(--testo)">−${eur(totRif)}</td></tr>`:""}
         ${totFF?`<tr><td>Fatture dei fornitori</td><td style="color:var(--testo)">−${eur(totFF)}</td></tr>`:""}
-        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte-totRif-totFF>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp-totCarte-totRif-totFF)}</td></tr></table></div>
+        ${totMD?`<tr><td>Manodopera <span style="font-size:13px;color:var(--testo-3)">(ore × costo orario)</span></td><td style="color:var(--testo)">−${eur(totMD)}</td></tr>`:""}
+        <tr><td><b>Margine totale</b></td><td style="color:${totInc-totSp-totCarte-totRif-totFF-totMD>=0?'var(--ok)':'var(--err)'}">${eur(totInc-totSp-totCarte-totRif-totFF-totMD)}</td></tr></table></div>
       <div class="rep-card"><h3>${_ICO_TROFEO}Migliori clienti (per fatturato)</h3><table class="rep-table">
         ${topCli.length?topCli.map(([id,v])=>`<tr><td>${esc(cliMap[id]||"—")}</td><td>${eur(v)}</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Collega i clienti ai lavori per vedere la classifica.</td></tr>`}</table></div>
       ${ruoloUtente==='professionista'?"":`
@@ -12736,8 +12883,14 @@
     if(a==="rie-azienda")return aziendaForm();
     if(a==="rie-go-fatture"){const b=document.querySelector('nav.tabs button[data-tab="fatture"]');if(b){b.click();window.scrollTo(0,0);}return;}
   });
-  /* al cambio desktop/mobile ridisegna liste (tabella ↔ card) */
-  try{window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderFatture();}});}catch(e){}
+  /* al cambio desktop/mobile ridisegna liste (tabella ↔ card).
+     Come sopra: su iOS vecchi esiste solo addListener. */
+  try{
+    const _mqLis=window.matchMedia("(min-width:881px)");
+    const _mqLisCambio=()=>{if(cur){renderJobs();renderFatture();}};
+    if(_mqLis.addEventListener)_mqLis.addEventListener("change",_mqLisCambio);
+    else if(_mqLis.addListener)_mqLis.addListener(_mqLisCambio);
+  }catch(e){}
 
   function openSheet(html){const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");}
   /* Variante grande: SOLO i moduli lunghi (lavoro e preventivo). Intestazione e
@@ -12993,14 +13146,39 @@
       if(p)return squadraForm(p);
       toast("Persona non trovata");return;
     }
-    if(a==="edit-scad")return scadForm(scadCache.find(s=>s.id===id));
+    if(a==="edit-scad"){
+      const inCache=scadCache.find(s=>String(s.id)===String(id));
+      if(inCache)return scadForm(inCache);
+      /* 12 agosto 2026 (sera) — dal calendario si puo' aprire una scadenza senza
+         aver mai aperto lo Scadenzario: la memoria e' vuota e prima si apriva un
+         modulo NUOVO e vuoto, che salvando creava un DOPPIONE invece di
+         modificare quella. Adesso la scadenza si va a prendere. */
+      if(!sb||!sbUid){toast("Devi essere loggato");return;}
+      const {data:s1,error:e1}=await sb.from("gest_scadenze").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+      if(e1){toast("Non riesco ad aprire la scadenza: "+e1.message);return;}
+      if(!s1){toast("Questa scadenza non c'è più");rinfresca("calendario","scadenzario");return;}
+      return scadForm(s1);
+    }
     if(a==="save-scad")return saveScad(id);
     if(a==="scad-stato"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
       const v=t.dataset.v;
-      const {data:okSc,error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid).select("id");
+      /* 12 agosto 2026 (sera) — .neq("stato",v) e' la rete di sicurezza contro i
+         DOPPIONI: qui sotto, se la scadenza si ripete, "fatta" ne crea un'altra.
+         Senza questo controllo bastava premere "Segna fatta" due volte (o
+         cliccare due volte, o riaprire la scheda) per ritrovarsi due, tre
+         scadenze future identiche. Cosi' invece il database non tocca niente e
+         non nasce niente. */
+      const {data:okSc,error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid).neq("stato",v).select("id");
       if(error){toast("Errore: "+error.message);return;}
-      if(!okSc||!okSc.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
+      if(!okSc||!okSc.length){
+        const _g=scadCache.find(x=>String(x.id)===String(id));
+        if(_g&&String(_g.stato||"")===v){
+          toast(v==="fatta"?"Era già segnata fatta":"Era già aperta");
+          renderScadenze();return;
+        }
+        toast("Non salvato: nessuna riga modificata. Riprova.");return;
+      }
       /* ===== 12 agosto 2026 — la prossima nasce da sola =====
          Se questa scadenza si ripete, appena la segni fatta ne creo un'altra
          con la stessa roba e la data spostata avanti. Prima segnavi fatta la
@@ -13027,7 +13205,7 @@
       renderScadenze();rinfresca("riepilogo","calendario");
       toast(v==="fatta"?("Scadenza completata ✔"+_rip):"Riaperta");return;
     }
-    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();toast("Scadenza eliminata");}return;}
+    if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();rinfresca("calendario","riepilogo");toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
     if(a==="sq-edit")return squadraForm(dipCache.find(d=>d.id===id));
@@ -13129,8 +13307,17 @@
   });
   /* chiude il menu "..." a ogni clic fuori dal pulsante che lo apre */
   document.addEventListener("click",e=>{if(!e.target.closest(".lav-dots"))tabChiudiPop();});
-  /* la tabella si ridisegna al passaggio desktop/mobile: sotto 880px tornano le card */
-  window.matchMedia("(min-width:881px)").addEventListener("change",()=>{if(cur){renderJobs();renderAgenda();}});
+  /* la tabella si ridisegna al passaggio desktop/mobile: sotto 880px tornano le card.
+     ATTENZIONE: su iPhone e iPad vecchi (iOS 13 e prima) matchMedia non ha
+     addEventListener, ha solo il vecchio addListener. Senza questo controllo la riga
+     lanciava un errore e tutto quello che viene dopo -- compreso l'avvio -- non
+     partiva: schermata bianca. */
+  try{
+    const _mqTab=window.matchMedia("(min-width:881px)");
+    const _mqCambio=()=>{if(cur){renderJobs();renderAgenda();}};
+    if(_mqTab.addEventListener)_mqTab.addEventListener("change",_mqCambio);
+    else if(_mqTab.addListener)_mqTab.addListener(_mqCambio);
+  }catch(e){}
   /* i due filtri a tendina: l'elemento resta lo stesso a ogni render (cambiano solo
      le <option>), quindi il listener si aggancia una volta sola qui */
   if($("#ag-op-sel"))$("#ag-op-sel").onchange=e=>{agFilter.op=e.target.value;renderAgenda();};

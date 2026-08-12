@@ -327,7 +327,13 @@
         b.then = function (ok, ko) {
           return thenVero(function (r) {
             if (!(r && r.error)) {
-              try { if (typeof window.segnaCestinoDaRifare === "function") window.segnaCestinoDaRifare(); } catch (e) { }
+              /* 12 agosto 2026 (sera) — quante righe sono finite davvero nel
+                 cestino. Si sa solo se chi ha cancellato ha chiesto indietro le
+                 righe con .select(...): in quel caso r.data e' l'elenco. Se non
+                 lo si sa si passa null, e il gestionale rilegge il conteggio
+                 vero invece di aggiungere uno a caso. */
+              var quante = (r && r.data && typeof r.data.length === "number") ? r.data.length : null;
+              try { if (typeof window.segnaCestinoDaRifare === "function") window.segnaCestinoDaRifare(quante); } catch (e) { }
             }
             return ok ? ok(r) : r;
           }, ko);
