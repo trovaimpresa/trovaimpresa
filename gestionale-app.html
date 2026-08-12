@@ -713,6 +713,7 @@
     ['Dove sono i tuoi cantieri','Dove sono le tue pratiche'],
     ['Nessun cantiere da mostrare','Nessuna pratica da mostrare'],
     ['Tutti i cantieri','Tutte le pratiche'],
+    ['— scegli il lavoro —','— scegli la pratica —'],
     ['le distanze dei cantieri','le distanze delle pratiche'],
     ['con i cantieri','con le pratiche'],
     ['senza distanza','senza distanza'],
@@ -781,7 +782,15 @@
   /* Contenitori del CONTENUTO inserito dall'utente: i loro nodi di testo NON vanno tradotti
      (nomi reparti, titoli/descrizioni pratiche, note, dati cliente, nomi operatori).
      Restano traducibili le etichette fisse (tab "Lavori", "+ Nuovo lavoro", contatori, messaggi vuoti…). */
-  const _SKIP_UTENTE='.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
+  /* 12 agosto 2026 (sera) — «option» in questo elenco.
+     Le tendine sono piene di NOMI scritti dall'utente: clienti, pratiche,
+     collaboratori, fornitori, mezzi. Il traduttore ci passava sopra e li
+     riscriveva dentro la parola: un cliente che si chiama «Edilcantiere Srl»
+     diventava «Edilpratica Srl», «Condominio Le Terrazze» diventava un'altra
+     cosa ancora. Riguardava 27 tendine.
+     Le poche voci FISSE che avevano bisogno della traduzione (Tutti i cantieri,
+     scegli il lavoro, Capo) adesso sono tradotte alla fonte con _msgPro. */
+  const _SKIP_UTENTE='option,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
   let _praticheObs=null;
   function _osservaPratiche(){
     if(!_praticheObs)return;
@@ -7103,9 +7112,11 @@
      di restare l'icona di immagine rotta. */
   function fotoThumb(f,withDel,src){
     const opName=f.operatore==="Capo"?"Capo":(dipById(f.operatore)?dipById(f.operatore).nome:"");
+    /* loading="lazy": la foto si scarica solo quando arriva davvero sotto gli
+       occhi. In un lavoro con 40 foto prima partivano tutte insieme. */
     const img=src
-      ? `<img src="${esc(src)}" data-action="view-foto" data-id="${esc(f.id)}" onerror="this.closest('.thumb').remove()">`
-      : `<img data-foto="${esc(f.id)}" data-action="view-foto" data-id="${esc(f.id)}">`;
+      ? `<img src="${esc(src)}" loading="lazy" decoding="async" width="84" height="84" data-action="view-foto" data-id="${esc(f.id)}" onerror="this.closest('.thumb').remove()">`
+      : `<img data-foto="${esc(f.id)}" loading="lazy" decoding="async" width="84" height="84" data-action="view-foto" data-id="${esc(f.id)}">`;
     return `<div class="thumb">${img}
       ${opName?`<span class="thop">${esc(opName)}</span>`:""}
       ${withDel?`<button class="thdel" data-action="del-foto" data-id="${esc(f.id)}">×</button>`:""}</div>`;
@@ -7171,15 +7182,12 @@
         .eq("lavoro_id",lav).eq("user_id",sbUid);
       righe=(data||[]).filter(r=>FOTO_TIPO_UI[r.tipo]);   /* fuori le fatture e i tipi ignoti */
     }catch(e){return;}
-    /* firma in parallelo; chi non si firma (file cancellato dal bucket) si scarta */
-    const firmate=await Promise.all(righe.map(async r=>{
-      try{
-        const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(r.storage_path,3600);
-        return su&&su.signedUrl?{r,url:su.signedUrl}:null;
-      }catch(e){return null;}
-    }));
+    /* firma tutte insieme (una sola richiesta invece di una per foto) e riusa
+       quelle ancora valide; chi non si firma — file cancellato dal bucket — si
+       scarta come prima */
+    await galFirma("gestionale-foto",righe,fotoCache);
     if(run!==_fotoRun)return;                              /* render superato */
-    const ok=firmate.filter(Boolean);
+    const ok=righe.filter(r=>fotoCache[r.id]).map(r=>({r,url:fotoCache[r.id]}));
     fotoSupa={};
     ok.forEach(({r,url})=>{fotoSupa[r.id]=r;fotoCache[r.id]=url;});  /* fotoCache: fa funzionare view-foto */
     const html=t=>ok.filter(({r})=>FOTO_TIPO_UI[r.tipo]===t)
@@ -7224,7 +7232,7 @@
     const selOp=$("#gal-op-sel"), selLav=$("#gal-lav-sel");
     if(!sb||!sbUid){
       if(selOp)selOp.innerHTML='<option value="">Tutti</option>';
-      if(selLav)selLav.innerHTML='<option value="">Tutti i cantieri</option>';
+      if(selLav)selLav.innerHTML='<option value="">'+esc(_msgPro("Tutti i cantieri"))+'</option>';
       galVuoto(box);return;
     }
     const [{data:foto},{data:video},{data:lavori}]=await Promise.all([
@@ -7250,7 +7258,7 @@
 
     /* tendina cantiere: solo i lavori che hanno almeno una foto o un video */
     const conRoba=new Set(tutteF.map(f=>f.lavoro_id).concat(tutteV.map(v=>v.lavoro_id)));
-    if(selLav)selLav.innerHTML=['<option value=""'+(galFilter.lav===""?" selected":"")+'>Tutti i cantieri</option>']
+    if(selLav)selLav.innerHTML=['<option value=""'+(galFilter.lav===""?" selected":"")+'>'+esc(_msgPro("Tutti i cantieri"))+'</option>']
       .concat(lavArr.filter(l=>conRoba.has(l.id))
         .sort((a,b)=>String(b.data_prevista||"").localeCompare(String(a.data_prevista||"")))
         .map(l=>'<option value="'+esc(l.id)+'"'+(galFilter.lav===l.id?" selected":"")+'>'+esc(l.descrizione||"Lavoro")+'</option>')).join("");
@@ -7280,7 +7288,7 @@
         const q=quando(x), tag=q==="prima"?"Prima":"Finito", tcls=q==="prima"?"prima":"dopo";
         const op=galNomeOp(x.operatore);
         if(kind==="foto"){
-          html+='<div class="thumb"><img data-gfoto="'+esc(x.id)+'" data-action="view-foto" data-id="'+esc(x.id)+'" alt="">'
+          html+='<div class="thumb"><img data-gfoto="'+esc(x.id)+'" loading="lazy" decoding="async" width="150" height="150" data-action="view-foto" data-id="'+esc(x.id)+'" alt="">'
               + '<span class="thtag '+tcls+'">'+tag+'</span>'
               + (op?'<span class="thop">'+esc(op)+'</span>':"")
               + '<button class="thdel" data-action="gal-del-foto" data-id="'+esc(x.id)+'" title="Elimina">×</button></div>';
@@ -7297,18 +7305,50 @@
     box.style.display="block";
     box.innerHTML=html;
 
-    /* le immagini arrivano dopo: gli indirizzi vanno firmati uno per uno */
-    for(const f of F){
-      try{const {data:su}=await sb.storage.from("gestionale-foto").createSignedUrl(f.storage_path,3600);
-        if(su&&su.signedUrl){fotoCache[f.id]=su.signedUrl;
-          const im=box.querySelector('img[data-gfoto="'+f.id+'"]');if(im)im.src=su.signedUrl;}
-      }catch(e){}
-    }
-    for(const v of V){
-      try{const {data:su}=await sb.storage.from("gestionale-video").createSignedUrl(v.storage_path,3600);
-        if(su&&su.signedUrl)galVideoCache[v.id]=su.signedUrl;
-      }catch(e){}
-    }
+    /* ===== 12 agosto 2026 (sera) — LA GALLERIA PESAVA COME UN FILM =====
+       Prima, ogni volta che si apriva la Galleria o si toccava un filtro:
+         - si chiedeva un indirizzo firmato UNO PER UNO, in fila (60 foto = 60
+           viaggi di rete uno dietro l'altro);
+         - si scaricavano TUTTE le foto INTERE, anche quelle a tre schermate di
+           distanza, per farne quadratini da 150 px. Con foto da telefono sono
+           decine di megabyte per ogni sguardo, e in cantiere si paga a giga.
+       Adesso: le firme si chiedono TUTTE INSIEME, si riusano finche' valgono
+       (durano un'ora), e le immagini si scaricano solo quando arrivano davvero
+       sotto gli occhi (loading="lazy" sul tag img). */
+    await galFirma("gestionale-foto",F,fotoCache);
+    F.forEach(function(f){
+      if(!fotoCache[f.id])return;
+      const im=box.querySelector('img[data-gfoto="'+f.id+'"]');
+      if(im)im.src=fotoCache[f.id];
+    });
+    await galFirma("gestionale-video",V,galVideoCache);
+  }
+  /* Le firme durano un'ora: entro i 50 minuti si riusano invece di chiederne
+     di nuove a ogni ridisegno. Cosi' cambiare filtro quattro volte non rifa'
+     quattro volte lo stesso lavoro. */
+  const galFirmaTs={};
+  const GAL_FIRMA_MS=50*60*1000;
+  async function galFirma(bucket,righe,cache){
+    if(!sb||!righe||!righe.length)return;
+    const ora=Date.now();
+    const daFare=righe.filter(function(r){
+      return !(cache[r.id]&&(ora-(galFirmaTs[r.id]||0)<GAL_FIRMA_MS));
+    });
+    if(!daFare.length)return;
+    try{
+      const {data,error}=await sb.storage.from(bucket)
+        .createSignedUrls(daFare.map(r=>r.storage_path),3600);
+      if(error||!data)return;
+      /* le risposte tornano nello stesso ordine delle richieste; il path e' il
+         controllo di sicurezza, cosi' non si attacca l'indirizzo alla foto
+         sbagliata se un giorno l'ordine cambiasse */
+      data.forEach(function(x,i){
+        const r=daFare[i];
+        if(!x||!r||x.error||!x.signedUrl)return;
+        if(x.path&&String(x.path)!==String(r.storage_path))return;
+        cache[r.id]=x.signedUrl; galFirmaTs[r.id]=ora;
+      });
+    }catch(e){}
   }
 
   /* ================= MAPPA =================
@@ -7573,13 +7613,13 @@
        '<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">Di che lavoro si tratta</div>'
       +  '<div class="field"><label>Il lavoro</label>'
-      +    '<select id="gu-lav"><option value="">— scegli il lavoro —</option>'+lavOpts+'</select></div>'
+      +    '<select id="gu-lav"><option value="">'+esc(_msgPro("— scegli il lavoro —"))+'</option>'+lavOpts+'</select></div>'
       +  (lavOpts?'':'<div class="sh-nota" style="color:var(--attesa)">In questo reparto non hai ancora nessun lavoro: creane uno in <b>Lavori</b> e poi torna qui.</div>')
       +  '<div class="field"><label>Quando sono state fatte?</label><div class="seg" id="gu-quando">'
       +    '<button data-v="prima" class="on">Prima del lavoro</button>'
       +    '<button data-v="dopo">A lavoro finito</button></div></div>'
       +  '<div class="field"><label>Chi le ha fatte</label>'
-      +    '<select id="gu-op"><option value="Capo">Capo (io)</option>'+dipOpts+'</select></div>'
+      +    '<select id="gu-op"><option value="Capo">'+esc(_msgPro("Capo (io)"))+'</option>'+dipOpts+'</select></div>'
       +'</div>'
       +'</div><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">I file</div>'
@@ -9691,8 +9731,22 @@
     const mancano=Math.max(0,credObiettivo-fatti);
     const perc=credObiettivo?Math.min(100,Math.round(fatti/credObiettivo*100)):0;
 
+    /* ===== 12 agosto 2026 (sera) — I CREDITI PER TIPO =====
+       Il campo "Tipo" si compilava a ogni corso e non veniva contato da
+       nessuna parte. Cosi' il riquadro poteva dire "Obiettivo raggiunto: sei a
+       posto" a chi ha 30 crediti tutti di aggiornamento e ZERO di deontologia,
+       che quasi tutti gli Ordini chiedono a parte. Adesso il conto per tipo si
+       vede, e se manca la deontologia il riquadro lo dice invece di rassicurare
+       e basta. Non invento la quota: ogni Ordine ha la sua, quindi si avvisa e
+       si rimanda al regolamento. */
+    const perTipo={};
+    L.forEach(function(c){const t=(c.tipo||"Altro");perTipo[t]=(perTipo[t]||0)+(+c.crediti||0);});
+    const _n2=v=>String(Math.round(v*100)/100).replace(".",",");
+    const deont=perTipo["Deontologia"]||0;
+    const rigaTipi=Object.keys(perTipo).filter(t=>perTipo[t]>0).sort((a,b)=>perTipo[b]-perTipo[a])
+      .map(t=>'<span class="cred-tipo">'+esc(t)+': <b>'+_n2(perTipo[t])+'</b></span>').join("");
     /* il riquadro in cima: è l'unica cosa che uno vuole sapere davvero */
-    const tono=mancano===0?"ok":(perc>=60?"attesa":"err");
+    const tono=(mancano===0&&deont>0)?"ok":((mancano===0||perc>=60)?"attesa":"err");
     $("#cred-riass").innerHTML=
       '<div class="cred-box cred-'+tono+'">'
       +'<div class="cred-num">'+String(Math.round(fatti*100)/100).replace(".",",")+' <small>di '+credObiettivo+' CFP</small></div>'
@@ -9700,7 +9754,11 @@
       +'<div class="cred-msg">'+(mancano===0
           ? "Obiettivo "+credAnno+" raggiunto: sei a posto."
           : "Ti mancano <b>"+String(Math.round(mancano*100)/100).replace(".",",")+" crediti</b> per chiudere il "+credAnno+".")
+      +(deont===0&&fatti>0
+          ? '<br>Attenzione: nel '+credAnno+' non hai <b>nessun credito di Deontologia</b>. Quasi tutti gli Ordini ne chiedono una quota a parte: controlla il regolamento del tuo.'
+          : '')
       +'</div>'
+      +(rigaTipi?'<div class="cred-tipi">'+rigaTipi+'</div>':'')
       +'<div class="cred-anni">'+(anni.length?anni:[annoOggi]).map(function(a){
           return '<button type="button" class="chip'+(a===credAnno?' on':'')+'" data-action="cred-anno" data-v="'+a+'">'+a+'</button>';
         }).join("")+'</div>'
@@ -9762,7 +9820,13 @@
       +'<div class="sh-tit">Quando e quanto</div>'
       +'<div class="row2">'
       +'<div class="field"><label>Data</label><input type="date" id="cr-data" value="'+(c.data||todayStr())+'"></div>'
-      +'<div class="field"><label>Crediti (CFP)</label><input type="number" step="0.5" inputmode="decimal" id="cr-cfp" value="'+(c.crediti!=null?c.crediti:"")+'" placeholder="0"></div></div>'
+      /* 12 agosto 2026 (sera) — era type="number". Su tastiera italiana si
+         scrive "2,5", e una casella type=number con la virgola dentro NON
+         restituisce niente: il credito veniva salvato come ZERO. Mezzo credito
+         perso a ogni corso, e il gestionale poteva dirti "sei a posto" con i
+         CFP che non tornavano. Adesso e' una casella di testo letta da
+         _numIt, come i prezzi del computo: 2,5 e 2.5 vanno bene tutti e due. */
+      +'<div class="field"><label>Crediti (CFP)</label><input type="text" inputmode="decimal" id="cr-cfp"'+_noAuto()+' value="'+(c.crediti!=null?String(c.crediti).replace(".",","):"")+'" placeholder="Es. 2,5"></div></div>'
       +'<div class="field"><label>Note</label><textarea id="cr-note" placeholder="Numero attestato, dove l\'hai salvato...">'+esc(c.note||"")+'</textarea></div>'
       +'<p class="sh-nota" style="margin-bottom:0">L\'obiettivo annuo (di norma 30 CFP, 20 per i geometri) si imposta nei <b>Dati azienda</b>.</p>'
       +'</div>'
@@ -9778,7 +9842,7 @@
     const row={titolo, ente:$("#cr-ente").value.trim()||null,
       tipo:$("#cr-tipo")?$("#cr-tipo").value:null,
       data:$("#cr-data").value||todayStr(),
-      crediti:+($("#cr-cfp").value)||0,
+      crediti:_numIt("#cr-cfp")||0,
       note:$("#cr-note").value.trim()||null};
     const {data,error}=id
       ?await sb.from("gest_crediti").update(row).eq("id",id).eq("user_id",sbUid).select("id")
@@ -11542,7 +11606,13 @@
      lettere e un'intestazione «Cod.» restava senza colonna. */
   function _pzCol(intest){
     const C={};
-    const soldi=/prezzo|importo|costo|euro|valore/;
+    /* 12 agosto 2026 (sera) — l'elenco delle parole che vogliono dire "soldi"
+       era corto: i prezzari regionali scrivono anche «€», «€/U.M.», «EUR»,
+       «P.U.», «Prezzo unitario in euro», «Elenco prezzi». Se nessuna veniva
+       riconosciuta, la colonna del prezzo non si trovava e TUTTE le voci
+       entravano a 0,00 € senza un messaggio (piu' sotto adesso c'e' anche il
+       controllo finale che se ne accorge comunque). */
+    const soldi=/prezzo|importo|costo|euro|valore|€|\beur\b|^p\.?\s?u\.?$|unitar|tariffa unitaria|elenco prezzi/;
     intest.forEach((t,i)=>{
       const x=_ppPiatto(String(t||"")).trim();
       if(C.descrizione==null&&/descriz|lavoraz|denominaz|oggetto/.test(x))C.descrizione=i;
@@ -11639,6 +11709,26 @@
     });
     if(!voci.length){_pzEsito("Nel file non ho trovato nessuna voce con una descrizione. Righe lette: "+dati.length+".","err");return;}
 
+    /* ===== 12 agosto 2026 (sera) — IL PREZZARIO A ZERO =====
+       Per la descrizione il controllo c'era, per il PREZZO no: se la colonna
+       non veniva riconosciuta (o c'era ma con i numeri scritti in un modo che
+       non si legge) entravano centinaia di voci tutte a 0,00 € e nessuno
+       diceva niente. Poi le usavi in un computo e il totale veniva zero, senza
+       capire perche'. Adesso: se non ne ha nemmeno una col prezzo mi fermo; se
+       ne mancano piu' di una su quattro lo dico prima di importare. */
+    const conPrezzo=voci.filter(v=>(+v.prezzo_unitario||0)>0).length;
+    const _intest=(iInt>=0)?(righe[iInt]||[]).map(x=>String(x||"").trim()).filter(Boolean).join(" · "):"(nessuna riga di intestazione)";
+    if(conPrezzo===0){
+      _pzEsito("Ho letto <b>"+voci.length+" voci</b>, ma <b>nessuna ha un prezzo</b>: entrerebbero tutte a 0,00 € e il prezzario non servirebbe a niente."
+        +"<br><br>Le colonne che ho visto sono queste:<br><b>"+esc(_intest)+"</b>"
+        +"<br><br>"+(C.prezzo==null
+            ? "Nessuna di queste dice «prezzo». Rinomina la colonna dei soldi in <b>Prezzo</b> (oppure Prezzo unitario, Importo, €) e riprova."
+            : "La colonna «"+esc(String((righe[iInt]||[])[C.prezzo]||"").trim()||"prezzo")+"» c'è ma dentro non ci sono numeri leggibili: controlla che i prezzi non siano scritti come testo o con simboli strani.")
+        ,"err");
+      return;
+    }
+    const senzaPrezzo=voci.length-conPrezzo;
+
     /* quello che c'e' gia' nel prezzario, per il confronto e per i doppioni */
     const {data:vecchie}=await sb.from("gest_prezzi_propri")
       .select("id,codice,descrizione,prezzo_unitario,fonte")
@@ -11651,6 +11741,11 @@
       +'<div class="sh-tit">Ho letto '+voci.length+' voci da '+esc(file.name)+'</div>'
       +(pzPend.tagliate?('<div class="sh-nota">Il file ne ha '+dati.length+': ne leggo le prime '+PZ_IMP_MAX+'.</div>'):'')
       +(saltate?('<div class="sh-nota">'+saltate+' righe non hanno una descrizione e le salto (titoli, righe vuote, totali).</div>'):'')
+      +(senzaPrezzo>voci.length/4
+        ? ('<div class="sh-nota" style="border-left:4px solid var(--err,#c0392b);padding-left:10px">'
+           +'<b>Attenzione:</b> '+senzaPrezzo+' voci su '+voci.length+' entrerebbero a <b>0,00 €</b>. '
+           +'Spesso sono i titoli dei capitoli, ma se sono voci vere controlla la colonna del prezzo nel file.</div>')
+        : (senzaPrezzo?('<div class="sh-nota">'+senzaPrezzo+' voci non hanno un prezzo e entrano a 0,00 € (di solito sono i titoli dei capitoli).</div>'):''))
       +'<div class="field"><label>Come si chiama questa tariffa?</label>'
       +  '<input id="pz-nome"'+_noAuto()+' value="'+esc(_pzNomeDaFile(file.name))+'" placeholder="Es. Tariffa Regione Lazio 2025"></div>'
       +'<div class="sh-nota">È il nome che vedrai nella tendina quando fai un computo, e quello che finisce sul documento.</div>'

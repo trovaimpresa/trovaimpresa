@@ -1091,6 +1091,15 @@
 .cred-box.cred-ok .cred-barra span{ background:var(--ok); }
 .cred-msg{ font-size:16px; line-height:1.5; color:var(--testo); }
 .cred-anni{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+/* 12 agosto 2026 (sera) — i crediti divisi per tipo (Deontologia, Sicurezza...).
+   Non uso .chip apposta: sotto gli 880 px .chip scende a 12,5 px, e qui c'e'
+   un numero da leggere. 14 px fissi, larghi e distanziati. */
+.cred-tipi{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+.cred-tipo{
+  background:var(--card); border:1px solid var(--line); border-radius:999px;
+  padding:7px 14px; font-size:14px; line-height:1.4; color:var(--testo);
+}
+.cred-tipo b{ color:var(--testo); }
 
 /* =========================================================================
    CAMPI DA COMPILARE — testo piu' grande e caselle piu' alte in TUTTE le
