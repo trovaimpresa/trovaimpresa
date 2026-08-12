@@ -2421,25 +2421,42 @@
 
   /* ---- il numero, assegnato una volta sola ----
      Una bozza non consuma nessun numero: il numero si prende quando dichiari
-     la fattura emessa, ed è il primo libero di quell'anno. Così la
-     numerazione riparte da 1 ogni gennaio e non lascia buchi.
+     la fattura emessa, ed è il piu' alto dell'anno piu' uno. Cosi' riparte da
+     1 ogni gennaio.
      Il vincolo unique(user_id, anno, numero) sul database fa da rete: se due
      salvataggi partissero insieme, il secondo viene rifiutato invece di
-     creare due fatture con lo stesso numero. */
-  async function fattAssegnaNumero(f){
+     creare due fatture con lo stesso numero.
+
+     12 agosto 2026 — qui c'era scritto "ed e' il primo libero di quell'anno,
+     cosi' non lascia buchi". Non era vero: il codice prende il massimo piu'
+     uno, quindi eliminando la n.3 la prossima diventa la 6 e la 3 resta un
+     buco. Ma la cosa importante e' un'altra: riempire quel buco sarebbe
+     SBAGLIATO. Un numero gia' usato e' bruciato, e ridarlo a una fattura piu'
+     recente vorrebbe dire avere la n.3 con una data successiva alla n.4 —
+     un'irregolarita' che il commercialista vede subito. Il comportamento
+     giusto e' quello che il codice fa gia': andare avanti e basta.
+     Quello che mancava era dirlo: adesso i buchi si VEDONO (vedi il riquadro
+     "Fatture emesse" in cima alla sezione).
+
+     12 agosto 2026 — il numero non si scrive piu' qui. Prima si faceva una
+     scrittura per il numero e una seconda per lo stato: se la seconda falliva
+     (rete che cade) la fattura restava BOZZA con il numero gia' consumato, e
+     quel numero non lo usava piu' nessuno. Adesso questa funzione lo calcola
+     e basta; a scriverlo e' chi cambia lo stato, in una volta sola. */
+  async function fattProssimoNumero(f){
     if(f.numero)return f.numero;
     const anno=(f.data||todayStr()).slice(0,4);
     /* sb.raw: si guardano ANCHE le fatture nel cestino. Se no, eliminata la
        n.7 la fattura dopo riprendeva il 7 e sbatteva contro il numero già
        occupato da quella nel cestino: non si emetteva più niente per tutto l'anno. */
     const _sbF=(sb.raw||sb.from.bind(sb));
-    const {data}=await _sbF("gest_fatture").select("numero")
+    const {data,error}=await _sbF("gest_fatture").select("numero")
       .eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null)
       .order("numero",{ascending:false}).limit(1);
-    const n=((data&&data[0]&&+data[0].numero)||0)+1;
-    const {error}=await sb.from("gest_fatture").update({numero:n,anno:+anno}).eq("id",f.id).eq("user_id",sbUid);
+    /* se la lettura fallisce NON si tira a indovinare: dare per buono "0+1"
+       vorrebbe dire assegnare il numero 1 a una fattura di dicembre */
     if(error){toast("Numero non assegnato: "+error.message);return null;}
-    return n;
+    return ((data&&data[0]&&+data[0].numero)||0)+1;
   }
 
   /* ---------- la scheda della fattura ---------- */
@@ -2560,6 +2577,35 @@
     const attese = emesse.filter(f=>fattSegno(f)>0).map(f=>fattGiorniDa(f.data)).filter(x=>x!=null);
     const piuVecchio = attese.length?Math.max.apply(null,attese):null;
     const emesseAnno = fattCache.filter(f=>f.numero&&String(f.anno)===anno).length;
+    /* ===== 12 agosto 2026 — I BUCHI NELLA NUMERAZIONE SI DEVONO VEDERE =====
+       Elimini la n.3 e la prossima prende la 6: la 3 resta un buco per sempre,
+       e finora non lo diceva nessuno. Riempirlo sarebbe sbagliato (un numero
+       gia' usato e' bruciato, e ridarlo a una fattura piu' recente vuol dire
+       la n.3 con la data dopo la n.4), quindi la cosa giusta e' mostrarlo:
+       cosi' te ne accorgi tu, non il commercialista a marzo.
+       Si legge sull'ANNO INTERO dell'utente, non sul reparto: la serie dei
+       numeri e' una sola per partita IVA, e con due reparti guardare solo il
+       reparto farebbe vedere buchi che non esistono. */
+    let buchiTesto="numerate nel corso dell'anno", buchiTono="neutro";
+    try{
+      const _raw=(sb.raw||sb.from.bind(sb));
+      const [{data:vivi},{data:tutti}]=await Promise.all([
+        sb.from("gest_fatture").select("numero").eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null),
+        _raw("gest_fatture").select("numero").eq("user_id",sbUid).eq("anno",+anno).not("numero","is",null)
+      ]);
+      const setVivi=new Set((vivi||[]).map(x=>+x.numero));
+      const setTutti=new Set((tutti||[]).map(x=>+x.numero));
+      const massimo=setTutti.size?Math.max.apply(null,Array.from(setTutti)):0;
+      const buchi=[];
+      for(let n=1;n<=massimo;n++) if(!setVivi.has(n)) buchi.push({n:n, cestino:setTutti.has(n)});
+      if(buchi.length){
+        const nCest=buchi.filter(b=>b.cestino).length;
+        const elenco=buchi.slice(0,6).map(b=>"n."+b.n).join(", ")+(buchi.length>6?"…":"");
+        buchiTesto=(buchi.length===1?"manca la ":"mancano le ")+elenco
+          +(nCest?(nCest===buchi.length?" — "+(nCest===1?"è nel Cestino":"sono nel Cestino"):" — qualcuna è nel Cestino"):"");
+        buchiTono="err";
+      }
+    }catch(e){}
 
     const box=(n,l,sub,tono,azione)=>'<div class="fatt-tot'+(tono?" t-"+tono:"")
       +(azione?'" '+azione+' style="cursor:pointer':'')+'"><div class="n">'+n+'</div>'
@@ -2573,7 +2619,7 @@
       + box(piuVecchio==null?"—":(piuVecchio+" gg"),"Il credito più vecchio",
             piuVecchio==null?"nessuna fattura in attesa":"dalla data della fattura",
             (piuVecchio!=null&&piuVecchio>gg)?"err":"neutro")
-      + box(String(emesseAnno),"Fatture emesse "+anno,"numerate nel corso dell'anno","neutro");
+      + box(String(emesseAnno),"Fatture emesse "+anno,buchiTesto,buchiTono);
 
     const filtra=(A,v)=>
         v==="bozze"    ? A.filter(f=>f.stato==="bozza")
@@ -2909,17 +2955,22 @@
       toast("Scegli il cliente prima di emetterla: una fattura deve dire a chi va");
       fattForm(f);return;
     }
-    if(v==="emessa"&&!f.numero){
-      const n=await fattAssegnaNumero(f);
-      if(n==null)return;
-      f.numero=n;
-    }
     const patch={stato:v};
     if(v==="pagata")patch.data_pagata=todayStr();
     if(v==="emessa")patch.data_pagata=null;
+    /* numero e stato nella STESSA scrittura: se va storto non resta una bozza
+       con un numero gia' bruciato addosso */
+    let _nuovoNum=null;
+    if(v==="emessa"&&!f.numero){
+      _nuovoNum=await fattProssimoNumero(f);
+      if(_nuovoNum==null)return;
+      patch.numero=_nuovoNum;
+      patch.anno=+((f.data||todayStr()).slice(0,4));
+    }
     const {data:okSt,error}=await sb.from("gest_fatture").update(patch).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
     if(!okSt||!okSt.length){toast("Non salvata: nessuna riga modificata. Riprova.");return;}
+    if(_nuovoNum!=null){f.numero=_nuovoNum;f.anno=patch.anno;}
     await fattSincronizzaLavori(id,v);
     rinfresca("fatture","riepilogo","lavori");
     toast(v==="emessa"?("Fattura n. "+f.numero+"/"+f.anno+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
@@ -3206,8 +3257,22 @@
        spese sono gia' dentro, e lo sconto e' gia' ripartito. Prima il conto si
        rifaceva qui a mano, ed e' cosi' che PDF, Excel e file per lo SDI
        finivano per dire tre numeri diversi. */
+    /* ===== 12 agosto 2026 — IL TOTALE FINIVA FUORI PAGINA =====
+       Il salto pagina esisteva SOLO dentro l'elenco delle voci. Da qui in poi
+       (riepilogo IVA, totali, pagamento, note, stato) y cresceva senza che
+       nessuno guardasse il fondo del foglio: con una ventina di voci il
+       riquadro TOTALE veniva disegnato 8 mm oltre il bordo dell'A4, quindi
+       spariva, e il piè di pagina — che sta a quota fissa 283 — ci finiva
+       sopra. Una fattura lunga usciva senza il totale.
+       spazio(h) chiede: "ci stanno ancora h millimetri?". Se no, pagina nuova.
+       LIMITE 262: sotto ci deve restare posto per il piè di pagina. */
+    const LIMITE=262;
+    const spazio=h=>{ if(y+h>LIMITE){doc.addPage();y=20;} };
+
     const righeIva=(c.righeIva||[]);
     if(!forf&&righeIva.length){
+      /* il riepilogo IVA non si spezza a metà: o ci sta tutto o va di là */
+      spazio(9+righeIva.length*4.2);
       doc.setFontSize(8.5);doc.setTextColor(110);
       doc.text("Riepilogo IVA",M,y);y+=4.5;
       righeIva.forEach(ri=>{
@@ -3218,11 +3283,18 @@
 
     /* totali */
     const riga=(lab,val,grosso)=>{
+      spazio(grosso?9:6);
       doc.setFont("helvetica",grosso?"bold":"normal");
       doc.setFontSize(grosso?11.5:10);
       doc.text(lab,Rx-70,y);doc.text(val,Rx-2,y,{align:"right"});
       y+=grosso?7:5.4;
     };
+    /* il blocco dei totali si tiene insieme: quante righe saranno, piu' i due
+       riquadri. Se non ci stanno tutte, si parte da una pagina nuova invece di
+       spezzare il conto in due fogli. */
+    const _nRighe=1+(!forf?1:0)+(+f.bollo?1:0)+(c.ritenuta?1:0)
+                 +((c.cassa||c.spese||c.sconto)?(1+(c.cassa?1:0)+(c.spese?1:0)+(c.sconto?1:0)):0);
+    spazio(_nRighe*5.4+13+(c.ritenuta?13:0));
     /* 9 agosto 2026 — cassa e spese in chiaro: prima il PDF mostrava un solo
        "Imponibile" e il cliente non capiva da dove usciva il totale. */
     if(c.cassa||c.spese||c.sconto){
@@ -3248,6 +3320,7 @@
 
     /* pagamento e note */
     if(az.iban){
+      spazio(20);
       doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Pagamento",M,y);y+=5.5;
       doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
       doc.text("Bonifico — IBAN "+az.iban,M,y);y+=4.5;
@@ -3255,11 +3328,14 @@
       doc.setTextColor(0);y+=3;
     }
     if(f.note){
+      const _rn=doc.splitTextToSize(f.note,Rx-M);
+      spazio(12+_rn.length*4.4);
       doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Note",M,y);y+=5.5;
       doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
-      doc.splitTextToSize(f.note,Rx-M).forEach(t=>{doc.text(t,M,y);y+=4.4;});
+      _rn.forEach(t=>{ spazio(6); doc.text(t,M,y);y+=4.4; });
       doc.setTextColor(0);y+=3;
     }
+    spazio(8);
     doc.setFont("helvetica","bold");doc.setFontSize(10);
     doc.text("Stato: "+(f.stato==="pagata"?"PAGATA":(f.stato==="emessa"?"DA SALDARE":"BOZZA")),M,y);
 
@@ -3518,7 +3594,20 @@
       x+='          <CausalePagamento>A</CausalePagamento>\n';
       x+='        </DatiRitenuta>\n';
     }
-    /* la cassa previdenziale: lo SDI la vuole qui, con il codice della cassa.
+    /* ===== 12 agosto 2026 — BOLLO E CASSA ERANO INVERTITI =====
+       Lo schema FatturaPA vuole questi blocchi in un ordine preciso:
+           DatiRitenuta  ->  DatiBollo  ->  DatiCassaPrevidenziale
+       Qui la cassa usciva PRIMA del bollo. Un architetto o un geometra con
+       la cassa previdenziale E il bollo da 2 euro (il caso piu' comune fra
+       i tecnici giovani, e per i forfettari il bollo e' obbligatorio sopra
+       77,47 euro) si vedeva il file rifiutato dal validatore dell'Agenzia
+       come non conforme allo schema — e nel gestionale non c'era niente che
+       glielo dicesse. Il commento due righe sopra diceva gia' "l'ordine di
+       questi blocchi non e' a caso": era vero, ed era sbagliato lo stesso. */
+    if(+f.bollo){
+      x+='        <DatiBollo>\n          <BolloVirtuale>SI</BolloVirtuale>\n          <ImportoBollo>'+xnum(f.bollo)+'</ImportoBollo>\n        </DatiBollo>\n';
+    }
+    /* la cassa previdenziale, con il codice della cassa.
        Va anche sommata all'imponibile del riepilogo IVA, più sotto. */
     if(+f.cassa_perc&&c.cassa){
       x+='        <DatiCassaPrevidenziale>\n';
@@ -3529,9 +3618,6 @@
       x+='          <AliquotaIVA>'+xnum(forf?0:c.aliqPrev)+'</AliquotaIVA>\n';
       if(forf)x+='          <Natura>N2.2</Natura>\n';
       x+='        </DatiCassaPrevidenziale>\n';
-    }
-    if(+f.bollo){
-      x+='        <DatiBollo>\n          <BolloVirtuale>SI</BolloVirtuale>\n          <ImportoBollo>'+xnum(f.bollo)+'</ImportoBollo>\n        </DatiBollo>\n';
     }
     /* 12 agosto 2026 — lo sconto NON si dichiara piu' qui. Adesso e' gia'
        tolto dagli imponibili dei riepiloghi (vedi fattBasi), quindi ripeterlo
@@ -6593,7 +6679,7 @@
     .replace(/²/g,"2").replace(/³/g,"3");
   /* Il vecchio contatore delle fatture (uno solo, sul lavoro, che non
      ripartiva mai) è stato tolto: adesso il numero lo assegna la fattura
-     quando la emetti, e riparte da 1 ogni anno. Vedi fattAssegnaNumero(). */
+     quando la emetti, e riparte da 1 ogni anno. Vedi fattProssimoNumero(). */
 
   async function generaPdf(id){
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
