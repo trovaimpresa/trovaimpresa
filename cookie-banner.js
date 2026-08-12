@@ -16,6 +16,23 @@
     location.reload();
   };
 
+  // Evento "Lead" per Meta e Google. Va chiamato quando l'utente completa
+  // davvero una richiesta di preventivo o un contatto:
+  //   tiLead({ tipo: 'Richiesta preventivo', categoria: 'idraulica' })
+  // Definito qui in alto perche' serve anche a chi ha gia' dato il consenso
+  // e quindi non arriva in fondo a questo file.
+  window.tiLead = function (dati) {
+    dati = dati || {};
+    var payload = {
+      content_name: dati.tipo || 'Richiesta preventivo',
+      content_category: dati.categoria || 'generico',
+      value: dati.valore || 1,
+      currency: 'EUR'
+    };
+    if (typeof window.fbq === 'function') window.fbq('track', 'Lead', payload);
+    if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', payload);
+  };
+
   // Se l'utente ha già espresso una scelta, controlla se è scaduta
   try {
     var savedConsent = localStorage.getItem(STORAGE_KEY);
@@ -53,14 +70,15 @@
     '#cb-accept-all { background: #2e78cc; color: #fff; }',
     '#cb-accept-essential { background: transparent; color: #f0f0f0; border: 1px solid #555 !important; }',
     '@media (max-width: 600px) {',
-    /* Su telefono questo banner occupava due terzi dello schermo e copriva
-       tutto quello che c'era sotto (compreso il pannello "scegli la citta'").
-       Ora resta basso: testo piu' compatto, e se e' troppo lungo scorre dentro. */
-    '  #cookie-banner { flex-direction: column; align-items: stretch; padding: 14px 16px;',
-    '    gap: 10px; font-size: 14.5px; line-height: 1.45; max-height: 42vh; overflow-y: auto; }',
-    '  #cookie-banner p { flex: 0 0 auto; }',
-    '  #cookie-banner .cb-buttons { width: 100%; }',
-    '  #cookie-banner button { flex: 1; padding: 13px 10px; font-size: 15px; }',
+    /* Su telefono il banner deve restare una fascia bassa. Chi arriva dalle
+       inserzioni Meta vede prima il pannello "scegli la citta'", non il banner:
+       meta' di chi cliccava se ne andava senza mai vedere il sito. */
+    '  #cookie-banner { flex-direction: row; flex-wrap: wrap; align-items: center;',
+    '    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));',
+    '    gap: 8px; font-size: 13px; line-height: 1.35; }',
+    '  #cookie-banner p { flex: 1 1 100%; }',
+    '  #cookie-banner .cb-buttons { width: 100%; gap: 8px; }',
+    '  #cookie-banner button { flex: 1; padding: 11px 8px; font-size: 14px; }',
     '}',
     /* Le barre fisse in basso del sito (preventivo sul profilo, "mostra i risultati"
        nei filtri) stanno anche loro attaccate al fondo: finche' c'e' il banner si
@@ -78,11 +96,10 @@
   banner.setAttribute('aria-label', 'Consenso cookie');
   banner.innerHTML =
     '<p>' +
-      'Usiamo <strong>cookie tecnici</strong>, necessari al funzionamento del sito. ' +
-      'Solo con il tuo consenso usiamo anche cookie <strong>statistici</strong> (Google Analytics, IP anonimizzato) ' +
-      'e di <strong>profilazione pubblicitaria</strong> (Meta/Facebook), che possono seguirti su altri siti. ' +
-      'Puoi cambiare idea quando vuoi dal link in fondo alla pagina. ' +
-      'Dettagli nella <a href="/cookie-policy.html">Cookie Policy</a>.' +
+      'Usiamo <strong>cookie tecnici</strong> e, solo con il tuo consenso, cookie ' +
+      '<strong>statistici</strong> (Google Analytics) e di <strong>profilazione</strong> (Meta). ' +
+      'Puoi cambiare idea dal link in fondo alla pagina. ' +
+      '<a href="/cookie-policy.html">Cookie Policy</a>.' +
     '</p>' +
     '<div class="cb-buttons">' +
       '<button id="cb-accept-all" aria-label="Accetta tutti i cookie">Accetta tutti</button>' +
