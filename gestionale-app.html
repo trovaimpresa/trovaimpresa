@@ -2349,13 +2349,63 @@
      TC03 = Cassa Geometri, TC04 = Inarcassa (ingegneri e architetti),
      TC17 = EPPI (periti industriali), TC22 = INPS gestione separata.
      ⚠️ Da far confermare al commercialista la prima volta. */
-  const FATT_CASSE=[
-    [0,"Nessuna cassa",""],
-    [4,"4% — Inarcassa (ingegneri, architetti)","TC04"],
-    [5,"5% — Cassa Geometri","TC03"],
-    [5,"5% — EPPI (periti industriali)","TC17"],
-    [4,"4% — INPS gestione separata","TC22"]
+  /* 12 agosto 2026 (sera) — FATT_CASSE non si usa piu': le cinque combinazioni
+     fisse "percentuale + cassa" sono diventate due campi separati (vedi il
+     commento lungo qui sotto). La togliamo invece di lasciarla a fare
+     confusione: era anche la ragione per cui il 2% spariva. */
+  /* ============================================================
+     12 agosto 2026 (sera) — LA CASSA: QUALE, E QUANTO
+
+     Prima era UNA tendina sola che teneva insieme due cose diverse: la cassa
+     («chi») e la percentuale («quanto»). Cinque combinazioni fisse, e basta.
+     Da lì venivano due guai veri:
+       - il preventivo offriva il 2%, la tendina della fattura non ce l'aveva,
+         e passando in fattura quei soldi sparivano dal documento;
+       - se la cassa non era scritta, il file per lo SDI tirava a indovinare e
+         metteva TC22 (INPS) su una parcella di un geometra.
+     Adesso sono due campi: la cassa la scegli dall'elenco ufficiale, la
+     percentuale la scrivi tu — perché il contributo integrativo cambia da
+     cassa a cassa e nel tempo, e non è una cosa che il gestionale può
+     indovinare al posto tuo. Il primo valore proposto è quello dell'ULTIMA
+     fattura che hai fatto: viene dai tuoi dati, non da un'ipotesi mia.
+
+     L'elenco è quello delle specifiche della fattura elettronica (v1.2.2),
+     codice per codice.
+     ============================================================ */
+  const FATT_CASSE_TIPI=[
+    ["TC01","TC01 — Cassa forense (avvocati)"],
+    ["TC02","TC02 — Cassa dottori commercialisti"],
+    ["TC03","TC03 — Cassa Geometri"],
+    ["TC04","TC04 — Inarcassa (ingegneri e architetti)"],
+    ["TC05","TC05 — Cassa del notariato"],
+    ["TC06","TC06 — Cassa ragionieri e periti commerciali"],
+    ["TC07","TC07 — ENASARCO (agenti e rappresentanti)"],
+    ["TC08","TC08 — ENPACL (consulenti del lavoro)"],
+    ["TC09","TC09 — ENPAM (medici)"],
+    ["TC10","TC10 — ENPAF (farmacisti)"],
+    ["TC11","TC11 — ENPAV (veterinari)"],
+    ["TC12","TC12 — ENPAIA (impiegati dell'agricoltura)"],
+    ["TC13","TC13 — Fondo spedizionieri e agenzie marittime"],
+    ["TC14","TC14 — INPGI (giornalisti)"],
+    ["TC15","TC15 — ONAOSI (orfani sanitari)"],
+    ["TC16","TC16 — CASAGIT (giornalisti)"],
+    ["TC17","TC17 — EPPI (periti industriali)"],
+    ["TC18","TC18 — EPAP (pluricategoriale)"],
+    ["TC19","TC19 — ENPAB (biologi)"],
+    ["TC20","TC20 — ENPAPI (infermieri)"],
+    ["TC21","TC21 — ENPAP (psicologi)"],
+    ["TC22","TC22 — INPS (gestione separata)"]
   ];
+  /* l'ultima cassa e l'ultima percentuale che ha usato davvero: si leggono
+     dalle sue fatture, così la prossima è già compilata e non deve ricordarsi
+     niente. Se non ne ha ancora fatte, i campi restano vuoti. */
+  function fattUltimaCassa(){
+    const F=(typeof fattCache!=="undefined"&&fattCache)?fattCache:[];
+    const conCassa=F.filter(x=>x&&(+x.cassa_perc||0)>0&&x.cassa_tipo)
+      .sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")));
+    if(conCassa.length)return {tipo:conCassa[0].cassa_tipo, perc:+conCassa[0].cassa_perc||0};
+    return {tipo:"", perc:0};
+  }
   /* 10% è l'aliquota della ristrutturazione: giusta per un'impresa edile,
      sbagliata per uno studio tecnico, che di norma fattura al 22%.
      Prima era 10 per tutti e un geometra emetteva fatture con l'IVA sbagliata
@@ -2792,7 +2842,7 @@
       prezzo:_numRiga(d,".fr-prezzo",0),
       iva:+(d.querySelector(".fr-iva")||{}).value||0}));
     const f={
-      cassa_perc:+($("#fa-cassa")||{}).value||0,
+      cassa_perc:_numIt("#fa-cassa")||0,
       spese:_numIt("#fa-spese")||0,
       sconto:_numIt("#fa-sconto")||0,
       bollo:_numIt("#fa-bollo")||0,
@@ -2902,22 +2952,28 @@
       /* ===== 9 agosto 2026 — la cassa previdenziale =====
          C'era nel preventivo e mancava in fattura: un geometra non poteva
          riportare il suo 5%. Il codice TipoCassa è quello che vuole lo SDI
-         nel file elettronico, per sapere DI QUALE cassa si tratta. */
+         nel file elettronico, per sapere DI QUALE cassa si tratta.
+         12 agosto 2026 (sera): DUE campi invece di una tendina sola. Vedi il
+         commento lungo su FATT_CASSE_TIPI. */
       +   (ruoloUtente==='professionista'
-            ? '<div class="row2">'
-              + '<div class="field"><label>Cassa previdenziale</label><select id="fa-cassa">'
-              +   FATT_CASSE.map(function(o){return '<option value="'+o[0]+'" data-tc="'+o[2]+'" '+((+f.cassa_perc||0)===o[0]&&(!f.cassa_tipo||f.cassa_tipo===o[2])?'selected':'')+'>'+o[1]+'</option>';}).join("")
-              /* 12 agosto 2026 (sera) — una percentuale che non sta in elenco
-                 (per esempio il 2% dei preventivi vecchi) non deve sparire dal
-                 documento: si aggiunge una voce sua, selezionata, e si dice
-                 che per lo SDI va scelta la cassa vera. */
-              +   ((+f.cassa_perc||0)>0&&!FATT_CASSE.some(function(o){return o[0]===(+f.cassa_perc||0);})
-                    ? '<option value="'+(+f.cassa_perc)+'" data-tc="" selected>'+_pct(f.cassa_perc)+'% — cassa da scegliere</option>'
-                    : '')
-              + '</select></div>'
-              + '<div class="field"><label>Spese (bolli, diritti, visure)</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0"></div>'
-              + '</div>'
-              + '<div class="sh-nota">La cassa si calcola sul compenso (non sulle spese). La ritenuta anche. Sono gli stessi conti della parcella del preventivo.</div>'
+            ? (function(){
+                const _u=fattUltimaCassa();
+                /* fattura nuova: si parte da quello che ha usato l'ultima volta.
+                   Fattura già scritta: si mostra quello che c'e' dentro. */
+                const _tip=(f&&f.id)?(f.cassa_tipo||""):((f&&f.cassa_tipo)||_u.tipo||"");
+                const _prc=(f&&f.id)?(+f.cassa_perc||0):((+((f||{}).cassa_perc)||0)||_u.perc||0);
+                return '<div class="row2">'
+                + '<div class="field"><label>Quale cassa previdenziale</label><select id="fa-cassa-tipo">'
+                +   '<option value="">— nessuna cassa —</option>'
+                +   FATT_CASSE_TIPI.map(function(o){
+                        return '<option value="'+o[0]+'"'+(_tip===o[0]?' selected':'')+'>'+esc(o[1])+'</option>';
+                      }).join("")
+                + '</select></div>'
+                + '<div class="field"><label>Contributo cassa (%)</label><input type="text" inputmode="decimal" id="fa-cassa"'+_noAuto()+' value="'+_numTesto(_prc||"")+'" placeholder="Es. 4"></div>'
+                + '</div>'
+                + '<div class="field"><label>Spese (bolli, diritti, visure)</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0"></div>'
+                + '<div class="sh-nota">La cassa si calcola sul compenso (non sulle spese). La ritenuta anche. Sono gli stessi conti della parcella del preventivo. La percentuale la scrivi tu: cambia da cassa a cassa, e il gestionale non la indovina al posto tuo.</div>';
+              })()
             : '')
       +   '<div class="field"><label>Ritenuta d\'acconto (%)</label><input type="text" inputmode="decimal" id="fa-rit" value="'+_numTesto(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
       +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €. Scrivi 2 nel campo qui sopra.</div>':'')
@@ -2942,7 +2998,7 @@
        "5% Cassa Geometri" e scriveva 150 di spese, e il riquadro "Il conto"
        restava fermo sul numero di prima. La cassa e' una tendina, quindi
        serve anche "change". */
-    ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-spese"].forEach(id=>{
+    ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-cassa-tipo","#fa-spese"].forEach(id=>{
       const e=$(id);if(!e)return;
       e.addEventListener("input",fattTotaleLive);
       e.addEventListener("change",fattTotaleLive);
@@ -3000,10 +3056,9 @@
     /* cassa e spese: i campi ci sono solo per gli studi. Si scrivono solo se
        ci sono davvero, se no una fattura di un'impresa li azzererebbe. */
     if($("#fa-cassa")){
-      const selC=$("#fa-cassa");
-      testata.cassa_perc=+selC.value||0;
-      const opt=selC.options[selC.selectedIndex];
-      testata.cassa_tipo=(opt&&opt.dataset.tc)||null;
+      /* due campi, due dati: quanto e quale. */
+      testata.cassa_perc=_numIt("#fa-cassa")||0;
+      testata.cassa_tipo=($("#fa-cassa-tipo")&&$("#fa-cassa-tipo").value)||null;
       testata.spese=_numIt("#fa-spese")||0;
     }
     /* una copia dei dati del cliente resta dentro la fattura: se domani cambi
@@ -3225,11 +3280,14 @@
     if(eP||eR){toast("Non riesco a leggere il preventivo: "+((eP||eR).message||"il database non risponde"));return;}
     if(!p){toast("Preventivo non trovato");return;}
     if(!(rr||[]).length){toast("Questo preventivo non ha voci: aprilo, aggiungile e riprova.");return;}
-    /* se la cassa del preventivo non esiste fra quelle della fattura lo si dice
-       PRIMA, non si scopre dopo guardando un totale piu' basso */
+    /* la percentuale della cassa passa SEMPRE intera, qualunque sia. Quale
+       cassa sia lo dice la fattura: se non l'hai mai scritta, il modulo la
+       propone in bianco e il controllo del file elettronico te la chiede
+       prima di generarlo. */
     const _cp=+p.cassa_perc||0;
-    if(_cp>0&&!FATT_CASSE.some(function(o){return o[0]===_cp;})){
-      toast("Attenzione: la cassa al "+_pct(_cp)+"% resta nell'importo, ma per il file elettronico devi scegliere quale cassa è, nel modulo della fattura.");
+    const _uc=fattUltimaCassa();
+    if(_cp>0&&!_uc.tipo){
+      toast("La cassa al "+_pct(_cp)+"% è passata in fattura. Scegli anche QUALE cassa è: serve al file elettronico.");
     }
     closeSheet();
     fattForm(null,{
@@ -3252,7 +3310,12 @@
          al centesimo con quelli firmati nella lettera d'incarico. */
       ritenuta_perc: p.ritenuta ? (+p.ritenuta_perc||20) : 0,
       cassa_perc: +p.cassa_perc||0,
-      cassa_tipo: (FATT_CASSE.find(o=>o[0]===(+p.cassa_perc||0)&&o[2])||[])[2]||null,
+      /* 12 agosto 2026 (sera) — prima si cercava la cassa in base alla sola
+         percentuale: col 2% non trovava niente e la cassa restava vuota, e con
+         il 4% poteva scegliere Inarcassa a un consulente del lavoro. Adesso si
+         riprende quella che ha usato l'ultima volta — un suo dato, non
+         un'ipotesi — e se non ce n'e' resta da scegliere. */
+      cassa_tipo: _uc.tipo||null,
       spese: +p.spese_forfait||0,
       _righe:(rr||[]).map((r,i)=>({
         descrizione:r.descrizione, qta:+r.qta||1, prezzo:+r.prezzo||0,
@@ -3554,6 +3617,13 @@
 
     if(!f.numero) m.push("La fattura è ancora una bozza: prima va emessa, così prende il numero.");
 
+    /* 12 agosto 2026 (sera) — la cassa senza il suo codice.
+       Se c'e' una percentuale di cassa ma non e' scritto DI QUALE cassa si
+       tratta, il file non si puo' fare: lo SDI vuole il codice, e prima il
+       gestionale ne inventava uno (TC22, INPS) anche a un geometra. */
+    if((+f.cassa_perc||0)>0&&!(f.cassa_tipo||"").trim())
+      m.push("C'è il contributo cassa al "+_pct(f.cassa_perc)+"% ma non è scritto quale cassa è. Apri la fattura e scegli la cassa nel campo «Quale cassa previdenziale»: il file elettronico vuole il codice (per esempio TC03 per i geometri, TC04 per Inarcassa).");
+
     /* --- chi emette: te --- */
     if(!(az.nome||"").trim())        m.push("Manca il nome della tua azienda — Dati azienda.");
     const pulita=v=>String(v||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase();
@@ -3767,7 +3837,11 @@
        Va anche sommata all'imponibile del riepilogo IVA, più sotto. */
     if(+f.cassa_perc&&c.cassa){
       x+='        <DatiCassaPrevidenziale>\n';
-      x+='          <TipoCassa>'+xesc(f.cassa_tipo||"TC22")+'</TipoCassa>\n';
+      /* 12 agosto 2026 (sera) — qui c'era «f.cassa_tipo || "TC22"»: se la cassa
+         non era scritta il file dichiarava allo SDI che era INPS, che per un
+         geometra o un ingegnere e' FALSO. Adesso non si indovina: il controllo
+         qui sopra (fattXmlControllo) blocca il file e chiede di scegliere. */
+      x+='          <TipoCassa>'+xesc(f.cassa_tipo)+'</TipoCassa>\n';
       x+='          <AlCassa>'+xnum(f.cassa_perc)+'</AlCassa>\n';
       x+='          <ImportoContributoCassa>'+xnum(c.cassa)+'</ImportoContributoCassa>\n';
       x+='          <ImponibileCassa>'+xnum(c.compenso)+'</ImponibileCassa>\n';
@@ -8437,21 +8511,15 @@
     const rit=!!p.ritenuta;
     const spese=p.spese_forfait!=null?p.spese_forfait:"";
     /* ===== 12 agosto 2026 (sera) — LA CASSA AL 2% SPARIVA IN FATTURA =====
-       Qui c'erano quattro voci scritte a mano (0, 2, 4, 5%) e in fattura ce ne
-       sono altre (FATT_CASSE), col nome della cassa e il codice che vuole lo
-       SDI. Il 2% non esisteva di là: passando il preventivo in fattura la
-       tendina non trovava la sua voce, ripartiva da «Nessuna cassa» e quei
-       soldi sparivano dal documento senza dire niente. Su una parcella da
-       10.000 € sono 200 € in meno, e nessuno se ne accorgeva.
-       Adesso l'elenco e' UNO SOLO, lo stesso della fattura. Se un preventivo
-       vecchio ha una percentuale che non c'e' piu' in elenco, la voce viene
-       aggiunta lì per lì cosi' il numero non si perde. */
-    const _casseViste=FATT_CASSE.map(o=>[o[0],o[1]]);
-    if(+cassa>0&&!FATT_CASSE.some(o=>o[0]===+cassa)){
-      _casseViste.push([+cassa,_pct(cassa)+"% — cassa da scegliere in fattura"]);
-    }
-    const opzCassa=_casseViste
-      .map(o=>`<option value="${o[0]}" ${(+cassa===o[0])?"selected":""}>${esc(o[1])}</option>`).join("");
+       Qui c'erano quattro percentuali fisse (0, 2, 4, 5%) e in fattura ce
+       n'erano altre: il 2% non esisteva di la', quindi passando il preventivo
+       in fattura la tendina non trovava la sua voce, ripartiva da «Nessuna
+       cassa» e quei soldi sparivano dal documento senza dire niente. Su una
+       parcella da 10.000 € sono 200 €.
+       Adesso qui si scrive la PERCENTUALE, come in fattura: qualunque numero
+       passa di la' intero, e non ci sono piu' due elenchi da tenere allineati.
+       Quale cassa sia lo si dice in fattura, che e' l'unico posto dove serve
+       (lo vuole il file elettronico). */
     const opzIva=[[22,"22% — ordinaria"],[10,"10% — agevolata"],[0,"0% — esente / forfettario"]]
       .map(o=>`<option value="${o[0]}" ${(+iva===o[0])?"selected":""}>${o[1]}</option>`).join("");
     return `
@@ -8459,7 +8527,7 @@
         <label style="font-size:15px;font-weight:800;color:var(--blu,#0066ff)">🧾 Parcella</label>
       </div>
       <div class="row2">
-        <div class="field"><label>Cassa previdenziale</label><select id="pv-cassa">${opzCassa}</select></div>
+        <div class="field"><label>Contributo cassa (%)</label><input type="text" inputmode="decimal" id="pv-cassa" value="${_numTesto(cassa)}" placeholder="Es. 4" autocomplete="off"></div>
         <div class="field"><label>IVA</label><select id="pv-iva">${opzIva}</select></div>
       </div>
       <div class="field"><label>Spese (bolli, diritti, copie)</label><input type="text" id="pv-spese" inputmode="decimal" value="${_numTesto(spese)}" placeholder="0"></div>
@@ -8483,7 +8551,7 @@
     $$("#prev-righe [data-riga]").forEach(d=>{
       compenso += _numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);
     });
-    const c=calcolaParcella(compenso, $("#pv-cassa")?$("#pv-cassa").value:0, $("#pv-iva")?$("#pv-iva").value:0,
+    const c=calcolaParcella(compenso, _numIt("#pv-cassa")||0, $("#pv-iva")?$("#pv-iva").value:0,
       $("#pv-rit")?$("#pv-rit").checked:false, 20, _numIt("#pv-spese")||0);
     const riga=(et,val,neg)=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${et}</span><strong>${neg?"− ":""}${eur2(val)}</strong></div>`;
     box.innerHTML =
@@ -8500,7 +8568,7 @@
   function leggiCampiParcella(){
     if(ruoloUtente!=='professionista')return {};
     return {
-      cassa_perc:+($("#pv-cassa")?$("#pv-cassa").value:0)||0,
+      cassa_perc:_numIt("#pv-cassa")||0,
       iva_perc:+($("#pv-iva")?$("#pv-iva").value:0)||0,
       ritenuta:$("#pv-rit")?$("#pv-rit").checked:false,
       ritenuta_perc:20,
@@ -11345,9 +11413,19 @@
     if(!trovate.length && q && ppTetto){
       const rad=_ppRadice(_ppPiatto(q).split(/[^a-z0-9.]+/).filter(Boolean)[0]||"");
       if(rad){
-        const {data}=await sb.from("gest_prezzi_propri").select("*")
-          .eq("user_id",sbUid).is("eliminato_il",null)
-          .ilike("descrizione","%"+rad+"%").order("usata_volte",{ascending:false}).limit(8);
+        /* ===== 12 agosto 2026 (sera) — LA RICERCA DI RISERVA CAMBIAVA TARIFFA =====
+           Il riquadro sopra dice, testuale: «Cerco dentro Tariffa Regione Lazio,
+           la tariffa di questo computo». Poi, quando in memoria non trovava
+           niente, questa ricerca andava a chiedere al database SENZA il filtro
+           della tariffa: proponeva voci della Regione Umbria, dell'anno prima,
+           di qualunque altro prezzario. Le cliccavi e finivano dentro un computo
+           che dichiara un'altra tariffa — su una gara e' un errore che si paga.
+           Adesso cerca dentro la tariffa dichiarata, come promette. */
+        let qy=sb.from("gest_prezzi_propri").select("*")
+          .eq("user_id",sbUid).is("eliminato_il",null);
+        if(ppFonteScelta)qy=qy.eq("fonte",ppFonteScelta);
+        const {data}=await qy.ilike("descrizione","%"+rad+"%")
+          .order("usata_volte",{ascending:false}).limit(8);
         trovate=data||[];
       }
     }
@@ -11363,7 +11441,11 @@
       +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
       +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
       +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")
-      +    ((!ppFonteScelta&&x.fonte)?(' · <b>'+esc(x.fonte)+'</b>'):"")+'</small></span>'
+      /* la provenienza si vede SEMPRE quando non e' quella dichiarata dal
+         computo: prima, avendo scelto una tariffa, la riga non diceva da dove
+         veniva il prezzo e una voce di un'altra tariffa era indistinguibile */
+      +    ((x.fonte&&(!ppFonteScelta||x.fonte!==ppFonteScelta))
+             ?(' · <b'+((ppFonteScelta&&x.fonte!==ppFonteScelta)?' style="color:var(--err,#c0392b)"':'')+'>'+esc(x.fonte)+'</b>'):"")+'</small></span>'
       +'<b></b>'
       +'<button type="button" class="rdel" data-action="pp-del" data-id="'+esc(String(x.id))+'" title="Togli dal prezzario">×</button></div>').join("")+_extra;
   }
@@ -12440,10 +12522,28 @@
       doc.setTextColor(0);y+=2;
     }
     if(c.note){
-      spazio(15);
+      /* ===== 12 agosto 2026 (sera) — LE NOTE ROMPEVANO L'ULTIMA PAGINA =====
+         Due errori in tre righe.
+         1) «spazio(15)» e' la funzione della TABELLA, e qui la tabella e' chiusa
+            da un pezzo: chiamarla la richiudeva una seconda volta (righe
+            verticali tirate giu' nel vuoto), scriveva «A riportare» quando non
+            c'era piu' niente da riportare, e apriva un foglio con
+            l'intestazione di una tabella VUOTA. E' scritto a chiare lettere nel
+            commento di spazioFuoriTabella, venti righe piu' su, e qui era stato
+            usato lo stesso quello sbagliato.
+         2) le note lunghe non venivano mai spezzate: si stampavano tutte di
+            fila, uscivano dal foglio e passavano sopra il pie' di pagina.
+         Adesso: la funzione giusta, e le righe si stampano una per una
+         voltando pagina quando serve. */
+      spazioFuoriTabella(14);
       doc.setFont("helvetica","bold");doc.setFontSize(9);doc.text("Note",M,y);y+=4.6;
       doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
-      const nl=doc.splitTextToSize(c.note,R-M);doc.text(nl,M,y);y+=nl.length*3.9;doc.setTextColor(0);
+      const nl=doc.splitTextToSize(c.note,R-M);
+      nl.forEach(function(riga){
+        if(y+3.9>FONDO){doc.addPage();y=16;}
+        doc.text(riga,M,y);y+=3.9;
+      });
+      doc.setTextColor(0);
     }
 
     const np=doc.getNumberOfPages();
