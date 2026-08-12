@@ -3391,3 +3391,291 @@ iscritti erano sparsi su 35 città. Ristretta a **Roma, Lazio +40 km**.
 ⚠️ Nota per le prossime sessioni: dal container di Claude **non si arriva a Supabase**
 (il proxy blocca `*.supabase.co`, sia da curl sia da WebFetch). Per i dati veri si preparano
 query SQL pronte da incollare nel SQL Editor e le lancia Alessio.
+
+---
+
+# 12 agosto 2026 — CONTROLLO GENERALE DELLE 21 VOCI, E 7 TORNATE DI CORREZIONI
+
+Giornata lunga e diversa dalle altre: non si è partiti da una richiesta («fammi
+questa cosa»), ma da un **controllo di tutto il menu laterale**, voce per voce,
+su **tutti e due i profili** (impresa edile e studio tecnico). Alessio ha chiesto
+prima solo la ricerca — «adesso e solo ricerca, non ce fretta, fallo con calma e
+accurato» — poi si è lavorato alla lista fino a chiuderla.
+
+Le voci sono **21**, non 19 come pensava lui (mancavano all'appello Mezzi e
+Attrezzature, che sono due schede separate).
+
+---
+
+## ⚠️ LA LEZIONE DI OGGI (leggerla prima di rifare un controllo così)
+
+**Ai sub-agenti va data una copia COMPLETA del progetto.** Nel secondo giro di
+controllo la cartella data agli esaminatori non conteneva `netlify/` né il file
+SQL consegnato quella mattina. Sono usciti **due allarmi grossi e falsi**:
+
+1. «il file `sql/gest-scadenze-ripeti.sql` non esiste» → esisteva;
+2. «le email dei promemoria non le manda nessuno» → le manda
+   `netlify/functions/promemoria-scadenze.js`, riga finale:
+   `exports.handler = schedule('15 6 * * *', handler)` — ogni mattina alle 6:15.
+
+Sono stati verificati a mano prima di scriverli nel rapporto, e messi **in cima**
+al rapporto come errori miei. Ma un'ora di lavoro se n'è andata.
+
+**Altri due falsi allarmi**, scoperti provando invece di credere al rapporto:
+
+- «arrotondamenti diversi fra schermo e PDF nel Computo» → **non si riproduce**.
+  Provato con due capitoli e centesimi scomodi: riepilogo dei capitoli
+  1.440,32 + 5.943,55 = 7.383,87; TOTALE stampato 6.467,26; con la calcolatrice
+  (7.383,87 − 51,00) × 87,5% + 51,00 = 6.467,26. E a schermo 6.467 €. Torna tutto.
+- «i 7 permessi dei collaboratori scritti e mai letti dal JS» → **sbagliato a
+  metà**: `gestionale-operatore.html` ne leggeva **tre** (lavori, clienti,
+  fatture). Erano le altre quattro a non fare niente.
+
+Morale: il rapporto di un controllo è una lista di **sospetti**, non di fatti.
+Ogni riga va riprodotta prima di toccare il codice.
+
+---
+
+## LE COSE PIÙ GRAVI TROVATE E CHIUSE
+
+### 1. I numeri con la virgola sparivano (la più grossa di tutte)
+Dieci caselle erano `type="number"`. Su tastiera italiana si scrive «12,5»: una
+casella di quel tipo con la virgola dentro **non restituisce niente**, e il
+numero spariva senza un messaggio.
+
+```
+scritto            prima      dopo
+q.tà 2,5        →   1     →   2,5
+prezzo 1.250,50 →   0     →   1250,50
+sconto 12,50    →   0     →   12,50
+ribasso 12,5    → (niente)→   12,5
+```
+
+Erano **quantità e prezzo di ogni voce di fattura e preventivo** (le caselle più
+battute del gestionale), sconto, bollo, spese e ritenuta della fattura, importo e
+ore del lavoro, spese del preventivo, importo del movimento carta, euro e litri
+del rifornimento, ribasso del computo.
+
+Adesso sono `type="text" inputmode="decimal"` (sul telefono esce lo stesso il
+tastierino numerico), lette da `_numIt` / `_numRiga`, e il numero torna nella
+casella **scritto con la virgola** (`_numTesto`).
+
+### 2. I moduli che si aprivano vuoti e poi cancellavano i dati
+`aziendaForm`, `fattForm` e `prevForm` leggevano dal database **senza guardare
+l'errore**: se la lettura falliva il modulo si apriva vuoto, e il Salva scriveva
+il vuoto sopra i dati veri — con il messaggio «Salvato ✔».
+
+Provato rompendo apposta la connessione: prima il modulo si apriva e i dati si
+perdevano, adesso **il modulo non si apre** e dice perché.
+
+In più `saveFattura` e `savePrev` **cancellavano le righe PRIMA di scrivere le
+nuove**: un inserimento fallito lasciava la fattura senza nessuna voce. Adesso si
+scrive prima e si cancella dopo (provato rompendo la scrittura a metà: la fattura
+resta piena).
+
+### 3. «Elimina reparto» prometteva il Cestino e ci metteva 2 tabelle su 11
+Il messaggio elencava onestamente le 11 cose dentro il reparto e poi diceva «Va
+tutto nel Cestino». In realtà ci finivano solo `gest_lavori` e `gest_mestieri`:
+clienti, preventivi, fatture, fornitori, mezzi, persone, carte, scadenze e
+computi restavano **vivi e invisibili**. E poi «Elimina per sempre» si rifiutava,
+perché li trovava vivi: vicolo cieco.
+
+Adesso si svuotano tutte e 11 (figli prima, reparto per ultimo) e `CEST_FIGLI`
+per `gest_mestieri` è costruito **da `REPARTO_CONTENUTO`**, così cancellazione e
+ripristino non possono più scollarsi.
+
+### 4. Schermata bianca su iPhone vecchi — una riga
+`window.matchMedia(...).addEventListener` senza `try`: su iOS 13 e prima non
+esiste `addEventListener` su `matchMedia`, la riga lanciava, e tutto quello che
+veniva dopo — **compreso l'avvio dell'applicazione** — non partiva. La riga
+gemella 393 righe sopra il `try` ce l'aveva. Adesso c'è il `try` e il ripiego su
+`addListener`.
+
+### 5. La cassa previdenziale: due guai in uno
+- Il preventivo offriva il **2%**, la tendina della fattura no: passando in
+  fattura quei soldi **sparivano dal documento** (su 10.000 € sono 200 €).
+- Nel file per lo SDI c'era `f.cassa_tipo || "TC22"`: senza la cassa scritta, il
+  file **dichiarava all'Agenzia che era INPS** — falso per un geometra.
+
+Alessio non sapeva a quale cassa corrispondesse il suo 2%. Invece di indovinare,
+**si è tolta la domanda**: la tendina unica «percentuale + cassa» è diventata
+**due campi separati** — `#fa-cassa-tipo` (l'elenco ufficiale TC01…TC22, verificato
+sulle specifiche v1.2.2) e `#fa-cassa` (la percentuale, scritta a mano). Il primo
+valore proposto viene **dall'ultima fattura fatta davvero** (`fattUltimaCassa()`),
+non da un'ipotesi. Il vecchio `FATT_CASSE` è stato tolto.
+Se manca la cassa, `fattXmlControllo` **blocca il file** e la chiede.
+
+### 6. Il preventivo del forfettario diceva un numero, la fattura un altro
+Il preventivo proponeva il 22% a tutti e teneva la ritenuta; la fattura, che il
+regime RF19 lo sapeva già, metteva tutto a zero.
+
+```
+preventivo di 1.000 € in forfettario
+prima:  1.000 + cassa 40 + IVA 228,80 − ritenuta 200 = 1.068,80 €
+dopo:   1.000 + cassa 40                             = 1.040,00 €
+```
+
+`prevForm` adesso legge `gest_azienda` per sapere il regime; in forfettario l'IVA
+è bloccata a 0, la ritenuta è disattivata, e `leggiCampiParcella` scrive zero
+comunque (rete di sicurezza).
+
+### 7. La Mappa: mezzo indirizzo e cantieri bruciati per sempre
+- L'ufficio veniva letto con `.select("nome,indirizzo")`, ma `azIndirizzo()` mette
+  insieme via + CAP + città + provincia: partiva la ricerca di
+  «Via Verani 18, Italia» e il servizio lo piazzava nella prima che trovava in
+  Italia. E siccome il punto dell'ufficio serve anche a **indovinare il comune dei
+  cantieri**, il cliente di Fara in Sabina veniva cercato come «Via Roma 10, Rieti».
+- Peggio: un **errore 429** («troppe richieste», che il servizio gratuito dà di
+  continuo con venti cantieri) veniva scritto in memoria come «questo indirizzo
+  non esiste», **per sempre**.
+
+```
+prima:  « Via Verani 18, Italia »            « Via Roma 10, Rieti, Italia »
+dopo:   « Via Verani 18, 02100 Rieti (RI) »  « Via Roma 10, 02032 Fara in Sabina (RI) »
+429 → prima: 2 indirizzi bruciati · dopo: 0
+```
+
+Memoria della Mappa passata da `ti_mappa_cache_v2` a **v3** (i punti sbagliati di
+ieri vanno buttati), e il Riepilogo adesso legge la stessa costante invece di
+riscrivere il nome a mano.
+
+---
+
+## LE ALTRE COSE CHIUSE OGGI (in ordine sparso)
+
+- **Cestino**: errore di rete che non spegne più il cestino ma BLOCCA le
+  eliminazioni; prova di accensione su tutte e 18 le tabelle; ripristino a catena;
+  aggiornamento automatico; **filtro per reparto** con le viste «Questo reparto /
+  Tutti i reparti» (prima si vedeva e si cancellava roba di altri pannelli); il
+  pallino conta le **righe** e non i comandi.
+- **Fatture**: `fattBasi` unica funzione dei conti; lo sconto riduce l'imponibile
+  (1.000 fatture a caso, 0 discrepanze); nota di credito col segno; ordine dei
+  blocchi XML; buchi nella numerazione visibili; PDF che non esce dal foglio.
+- **Margine**: la manodopera entra nel margine — scheda lavoro, Report, CSV,
+  Riepilogo — **e nel «Margine totale»** dei Totali storici, che era rimasto fuori.
+- **Riga dei totali**: `renderTabella` esce nel ramo `cards` e con la tabella se ne
+  andava anche la riga dei totali. Quattro sezioni la calcolavano da mesi senza
+  mostrarla. Adesso è una fascia in cima alla griglia (`.tab-tot`).
+- **Ricerca clienti**: guardava 5 campi e non P.IVA, codice fiscale, comune, CAP,
+  provincia. Adesso li guarda tutti, e i numeri si confrontano senza spazi né punti.
+- **Prezzario**: la colonna del prezzo non veniva riconosciuta con `€/U.M.`, `€`,
+  `EUR`, `P.U.`, `Elenco prezzi` → **tutte le voci entravano a 0,00 €** in silenzio.
+  Provate 13 intestazioni regionali vere. E se dopo la lettura nessuna voce ha un
+  prezzo, l'importazione **si ferma**.
+- **Computo**: le note lunghe usavano `spazio()` (la funzione della tabella, con la
+  tabella già chiusa) e non venivano spezzate — su 18 righe di nota ne restava **1**
+  sul foglio e 17 finivano fuori. La ricerca di riserva nel prezzario **cambiava
+  tariffa** senza dirlo: diceva «cerco dentro Tariffa Lazio» e proponeva altro.
+- **Galleria**: `loading="lazy"` + firme in blocco riusate per un'ora → da 42
+  richieste e tutte le foto intere a **2 richieste** e solo quelle che si guardano;
+  `galNomeOp` leggeva `db().dipendenti` (archivio locale morto) e stampava **l'ID
+  della persona** sopra la miniatura.
+- **Crediti formativi**: 2,5 CFP si salvavano come 0; il **tipo** del corso non
+  veniva mai contato, quindi il riquadro poteva dire «sei a posto» con zero crediti
+  di deontologia.
+- **Traduttore studi tecnici**: `_SKIP_UTENTE` non conteneva `option`, quindi nelle
+  27 tendine un cliente «Edilcantiere Srl» diventava «**Edilpratica Srl**».
+- **Persone**: adesso si possono eliminare (era l'unica anagrafica senza «Elimina»,
+  ed è il motivo per cui la categoria «Persone» del Cestino non si è mai riempita).
+  Ore, foto e video **restano**: le ore sono il costo della manodopera di lavori
+  già chiusi. L'accesso dal telefono viene revocato.
+- **File orfani**: in 8 punti il file restava nel bucket quando la riga non si
+  scriveva. Adesso `_fileOrfano()` lo toglie.
+- **Backup JSON**: mancavano computi (con capitoli, voci, misure), prezzario,
+  carte, movimenti, rifornimenti, note del calendario, elenco foto e video.
+- **Dislessia**: da oggi **nessun testo sotto i 13 px** in tutto il gestionale
+  (ne sono stati alzati 20). La prova su 21 sezioni × 2 profili × 2 misure non ne
+  trova più.
+- **Plurali**: «1 lavori aperti» → «1 lavoro aperto», con i singolari aggiunti anche
+  al traduttore per gli studi.
+- **Codice morto**: tolte `jobCard`, `agendaCard`, `dipById` e tre gestori che
+  lavoravano sull'archivio locale morto — fra cui un «Elimina lavoro» che avrebbe
+  tolto il lavoro dallo schermo **lasciandolo su Supabase**.
+
+---
+
+## I PERMESSI DELLA SQUADRA — scelta di Alessio
+
+Alla domanda «li togliamo dal modulo o li facciamo funzionare?» ha risposto
+**farli funzionare davvero**. Quindi oggi è stato toccato per la prima volta
+`gestionale-operatore.html` (l'app che gli operai usano dal telefono): solo
+aggiunte, niente tolto.
+
+| permesso | cosa fa adesso |
+|---|---|
+| calendario | può girare fra i giorni. Senza, vede **solo oggi** |
+| lavori | agenda, scadenze, apre i lavori, li segna fatti |
+| foto | può **aggiungere** foto/video (quelle del capo le vede comunque) |
+| note | può scrivere cosa ha fatto |
+| clienti | vede l'elenco clienti |
+| fatture | vede le fatture |
+| pagamenti | vede la carta aziendale e registra le spese |
+
+Due cose importanti:
+
+- `permessiMai()` — una persona **senza permessi salvati** (creata prima che
+  esistessero) non perde niente: si comporta come prima. Provato.
+- Non è solo nascondere: `chiedoPermesso()` ferma anche **l'azione**.
+- ⚠️ **Da dire sempre ad Alessio**: questo decide cosa l'operaio vede e può fare
+  **dall'app**. Non è un lucchetto sul database: quello sono le regole RLS, che
+  vanno scritte in SQL. Per un operaio col telefono in mano basta; se un giorno
+  serve il lucchetto vero, è un file SQL a parte.
+
+---
+
+## COME È STATO PROVATO (vale la pena rifarlo così)
+
+Alessio non può collaudare: «continuiamo tanto non sono in grado di testare».
+Quindi ogni correzione è stata provata **col confronto prima/dopo**, servendo due
+copie del gestionale su due porte (`8898` = versione online, `8899` = nuova) e
+guidandole con Playwright. Gli script stanno in `/home/claude/work/`
+(`prova-serale*.js`, `prova-mappa.js`, `prova-computo.js`, `prova-permessi.js`,
+`prova-forfettario.js`, `prova-persone.js`, `prova-prezzario.js`).
+
+Tre attrezzi che sono serviti più di tutti, da riusare:
+
+1. **`stub-guasto.js`** — il finto Supabase con tre interruttori:
+   `window.__ROMPI` (una tabella non risponde), `window.__ROMPI_INSERT` (legge ma
+   non scrive), `window.__NO_COL` (una colonna non esiste, errore 42703). È così
+   che si dimostrano i difetti «se la rete cade», senza aspettare che cada.
+2. **`stub-preciso.js`** — come sopra, ma `select("a,b")` restituisce **solo quelle
+   colonne**, come fa PostgREST davvero. Senza questo, il difetto della Mappa
+   (mezzo indirizzo) **non si vedeva**: lo stub normale restituiva la riga intera e
+   il codice sembrava corretto.
+3. **Leggere i numeri dentro il PDF**: si intercetta il Blob e si spulciano le
+   coppie `x y Td (testo) Tj` nei byte del file. Così si sa a quale **quota in mm**
+   è finita ogni scritta, e si dimostra che qualcosa esce dal foglio.
+
+Controlli fissi prima di ogni consegna: `node --check` sui blocchi `<script>`,
+`grep openSheet(` (devono restare solo la definizione e la vista del giorno),
+accenti sbagliati nei testi visibili, prova delle 21 sezioni con **zero errori
+JavaScript**, le **1.000 fatture a caso** con scarto 0,0000 €, e `md5sum` da tutte
+e due le parti a ogni consegna.
+
+---
+
+## DOVE SIAMO RIMASTI
+
+**Chiuso**: tutta la lista grave del controllo delle 21 voci.
+
+**Da fare ad Alessio**, se non l'ha ancora fatto:
+- il push dell'ultima tornata (permessi + `gestionale-operatore.html`);
+- `sql/gest-scadenze-ripeti.sql` su Supabase, una volta sola: senza, le scadenze
+  non si ripetono (il gestionale funziona lo stesso e lo dice).
+
+**Restano aperte** (nessuna perde dati):
+- numerazione dei preventivi che non guarda né l'anno né il reparto;
+- i rifornimenti del Report contati su **tutti** i reparti;
+- eliminando un mezzo, le sue scadenze restano orfane;
+- `sql/gestionale-mezzi.sql` non crea la colonna `tipo`, che il codice legge e scrive;
+- `squadraAdd` crea doppioni se l'invito fallisce;
+- eliminare una carta fa salire l'utile del mese senza spiegazione;
+- «Incassato» del Report ≠ «Incassato» delle Fatture;
+- alla partenza, se il database non risponde, dopo 8 secondi compare «Ancora
+  nessun reparto, creane uno» — identico a quello che vede un utente nuovo, e
+  invita a creare doppioni;
+- il Riepilogo fa 25 letture in 6 ondate (`gest_operatori` letta 3 volte);
+- `gest_richieste` non ha nessun file in `sql/`;
+- nel Computo, se la lettura delle misure fallisce il PDF stampa «nessuna misura»
+  e sotto la quantità: un documento che si contraddice;
+- il lucchetto vero sui permessi (RLS), se lo si vuole.
