@@ -3767,17 +3767,40 @@
     $("#cal-grid").innerHTML=html;
   }
 
+  /* ===== 12 agosto 2026 — IL RIQUADRO DEL GIORNO =====
+     Tre cose che non andavano, tutte e tre qui dentro:
+
+     1) SUL TELEFONO NON SI CHIUDEVA. Questa finestra non aveva ne' la X ne'
+        un pulsante Chiudi: l'unico modo previsto era cliccare FUORI dal
+        foglio. Ma sotto gli 880 px il foglio e' largo quanto lo schermo e
+        alto quanto lo schermo (css/gestionale.css, .sheet dentro la media
+        query): un "fuori" non esiste. E in tutto il file non c'e' un solo
+        gestore del tasto Esc. Chi apriva un giorno solo per guardarlo restava
+        dentro, e doveva ricaricare la pagina o salvare una nota che non
+        voleva salvare. Adesso c'e' il pulsante Chiudi.
+     2) LE RIGHE SEMBRAVANO CLICCABILI E NON LO ERANO. Il CSS mette la manina
+        (.day-job ha cursor:pointer) ma non c'era nessuna azione: ci cliccavi
+        sopra e non succedeva niente. Dal calendario non si poteva aprire un
+        lavoro. Adesso si apre, come gia' si fa dal Riepilogo.
+     3) UN LAVORO "IN CORSO" VENIVA SCRITTO "DA FARE". Nella cella del
+        calendario la barretta blu c'e' e la legenda lo promette; appena
+        aprivi il giorno diventava "Da fare" col pallino ambra. */
   function openDay(ds){
     const jobs=calJobs.filter(l=>l.data_prevista===ds);
-    const list=jobs.length?jobs.map(j=>{const sf=j.stato==="fatto", late=inRitardo(j.stato,ds);
-      return `<div class="day-job"><i class="dot ${sf?'done':(late?'ritardo':'todo')}"></i>
+    const list=jobs.length?jobs.map(j=>{
+      const sf=j.stato==="fatto", inCorso=j.stato==="in_corso", late=inRitardo(j.stato,ds);
+      const cls=sf?'fatto':(late?'ritardo':(inCorso?'in_corso':'da_fare'));
+      const lab=sf?'Fatto':(inCorso?'In corso':'Da fare');
+      const dot=sf?'done':(late?'ritardo':(inCorso?'corso':'todo'));  /* .dot.corso esiste gia' nel CSS, la usa la legenda del calendario */
+      return `<div class="day-job" data-action="edit-job" data-id="${esc(String(j.id))}" title="Apri il lavoro"><i class="dot ${dot}"></i>
         <div style="flex:1"><b style="font-size:14px">${esc(j.descrizione||"(senza descrizione)")}</b></div>
-        <span class="stato ${sf?'fatto':(late?'ritardo':'da_fare')}">${sf?'Fatto':'Da fare'}</span></div>`;}).join("")
+        <span class="stato ${cls}">${lab}</span></div>`;}).join("")
       :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
     openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
         <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(noteCache[ds]||"")}</textarea></div>
       <div class="sheet-actions">
+        <button class="btn b-cancel" data-action="close">Chiudi</button>
         <button class="btn b-cancel" data-action="new-job-date" data-d="${ds}">+ Lavoro in questa data</button>
         <button class="btn-primary b-save" data-action="save-note" data-d="${ds}">Salva nota</button></div>`);
   }
@@ -5768,7 +5791,12 @@
       if(error){toast("Errore: "+error.message);return;}
       const realId=data.id;
       /* il numero di fattura lo assegna la fattura quando la emetti */
-      closeSheet();rinfresca("lavori","fatture","riepilogo");
+      /* 12 agosto 2026 — mancavano "calendario" e "agenda". Creavi un lavoro
+         dal calendario, cliccando il giorno 20: compariva "Lavoro creato ✔" e
+         il giorno 20 restava VUOTO, anche uscendo e rientrando, per tutta la
+         sessione. Il lavoro c'era (si vedeva in Lavori), ma il calendario non
+         veniva mai avvisato di ridisegnarsi. */
+      closeSheet();rinfresca("lavori","fatture","riepilogo","calendario","agenda");
       /* un solo messaggio: prima l'avviso "migrazione mancante" veniva coperto
          subito dal toast verde e nessuno lo leggeva */
       toast(avvisoPratica?"Creato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":(editing.fattura?"Fattura creata ✔":"Lavoro creato ✔"));
@@ -12518,7 +12546,17 @@
     if(a==="fatt-pdf")return fatturaPdf(id);
     if(a==="fatt-xml")return fatturaXml(id);
     if(a==="new-job-date"){closeSheet();return jobForm(null,t.dataset.d,null,true);}
-    if(a==="edit-job"){closeSheet();const{data}=await sb.from('gest_lavori').select('*').eq('id',id).single();jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);}return;}
+    if(a==="edit-job"){
+      closeSheet();
+      /* 12 agosto 2026 — maybeSingle + il controllo. Prima era .single(): se la
+         riga non c'era piu' (eliminata da un altro dispositivo, o finita nel
+         Cestino mentre l'elenco a schermo era vecchio) data restava null, e la
+         riga dopo leggeva data.data_prevista su null. Risultato: la finestra si
+         chiudeva e NON SUCCEDEVA NIENTE, senza un messaggio. Mancava anche il
+         filtro sull'utente, che c'e' in tutte le altre letture puntuali. */
+      const{data}=await sb.from('gest_lavori').select('*').eq('id',id).eq('user_id',sbUid).maybeSingle();
+      if(!data){toast("Questo lavoro non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
+      jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();
@@ -12568,7 +12606,11 @@
       const {data:okSt2,error}=await sb.from("gest_lavori").update({stato:v,data_fatto:v==="fatto"?(dp||todayStr()):null}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okSt2||!okSt2.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-      rinfresca("lavori","riepilogo");toast("Stato: "+(statoLabel[v]||v));return;
+      /* 12 agosto 2026 — mancavano "agenda" e "calendario". Nell'Agenda
+         premevi "✔ Segna fatto", compariva il messaggio, e la riga restava
+         li' com'era: sembrava che non avesse funzionato e si ripremeva. Sul
+         calendario il pallino restava del colore vecchio. */
+      rinfresca("lavori","riepilogo","agenda","calendario");toast("Stato: "+(statoLabel[v]||v));return;
     }
     /* Dal lavoro: prima questo pulsante scriveva a mano "fatturato" sul lavoro,
        e la fattura non esisteva da nessuna parte. Ora apre la fattura vera, con
