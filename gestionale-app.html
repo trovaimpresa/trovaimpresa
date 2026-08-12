@@ -1198,7 +1198,7 @@
         /* i pieni pagati in contanti e le fatture dei fornitori: sono costi
            veri e prima non entravano nell'utile (9/8/2026) */
         sb.from("gest_rifornimenti").select("importo,data,movimento_id").eq("user_id",sbUid),
-        sb.from("gest_fatture_fornitori").select("importo,data").eq("user_id",sbUid).eq("mestiere_id",mid)
+        sb.from("gest_fatture_fornitori").select("importo,data,lavoro_id").eq("user_id",sbUid).eq("mestiere_id",mid)
       ]);
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
       MZ=r[4].data||[];MZS=r[5].data||[];SC=r[6].data||[];CA=r[7].data||[];CAS=r[8].data||[];
@@ -1309,7 +1309,14 @@
     /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
        (ora è una riga dentro "Da sistemare oggi", più in basso) */
     const spPerL={};SP.forEach(x=>{spPerL[x.lavoro_id]=(spPerL[x.lavoro_id]||0)+(+x.importo||0);});
-    const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id])&&((+l.importo||0)-(spPerL[l.id]||0))<0);
+    /* 12 agosto 2026 — lo stesso conto della scheda del lavoro e del Report:
+       importo − spese − fatture dei fornitori − manodopera. Prima qui si
+       guardavano solo le spese, quindi un lavoro che nella sua scheda era in
+       perdita di 1.200 € nel Riepilogo non veniva segnalato mai. */
+    const ffPerL={};FFO.forEach(x=>{if(x.lavoro_id)ffPerL[x.lavoro_id]=(ffPerL[x.lavoro_id]||0)+(+x.importo||0);});
+    const mdRie=await caricaManodopera(mid,L);
+    const _margL=l=>margineLavoro(l.importo,spPerL[l.id],ffPerL[l.id],mdRie.per[String(l.id)]);
+    const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id]||ffPerL[l.id]||mdRie.per[String(l.id)])&&_margL(l)<0);
 
     /* preventivi in attesa (+ totale di ognuno) */
     const attesa=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato")
@@ -1380,7 +1387,7 @@
     if(mzScaduti.length) DA.push({g:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
                                   d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
     if(inPerdita.length) DA.push({g:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
-                                  d:"Le spese superano l'importo del lavoro",go:"report"});
+                                  d:"Fra spese, fornitori e manodopera esce più di quello che entra",go:"report"});
     /* patente a crediti: sotto 15 l'impresa non può operare in cantiere,
        quindi avviso già a 20 per dare il tempo di recuperarli. */
     const patC = AZ&&AZ.pat_crediti!=null ? +AZ.pat_crediti : null;
@@ -7570,13 +7577,110 @@
         .eq("user_id",sbUid).eq("lavoro_id",lavoroId);
       totFF=(ff||[]).reduce((a,x)=>a+(+x.importo||0),0);
     }catch(e){}
+    /* 12 agosto 2026 — la manodopera entra nel margine: ore x costo orario
+       della persona che le ha fatte, media della squadra per le ore senza
+       nome. Prima il costo orario si compilava e non serviva a niente. */
+    let md=0, oreSenzaNome=0;
+    try{
+      const _l=[{id:lavoroId, ore:+($("#j-ore")?$("#j-ore").value:0)||0}];
+      const _m=await caricaManodopera(curMestiere(),_l);
+      md=_m.per[String(lavoroId)]||0;
+      oreSenzaNome=_m.senzaNome[String(lavoroId)]||0;
+    }catch(e){}
     const imp=+($("#j-imp")?$("#j-imp").value:importo)||0;
-    const marg=imp-tot-totFF;
+    const marg=margineLavoro(imp,tot,totFF,md);
     $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span>`
       +`<span>Spese: <span class="sp">−${eur2(tot)}</span></span>`
       +(totFF?`<span>Fatture fornitori: <span class="sp">−${eur2(totFF)}</span></span>`:"")
-      +`<span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`;
+      +(md?`<span>Manodopera: <span class="sp">−${eur2(md)}</span></span>`:"")
+      +`<span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`
+      +(oreSenzaNome?`<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore senza il nome di chi le ha fatte: contate al costo medio della squadra</span>`:"");
     renderAndamentoSpese(sp,imp);
+  }
+
+  /* ============================================================
+     12 agosto 2026 — IL MARGINE DI UN LAVORO, IN UN POSTO SOLO
+
+     Due difetti in uno.
+
+     1) LA MANODOPERA NON ENTRAVA IN NIENTE. Il modulo Squadra dice, testuale:
+        "Il costo orario serve per calcolare la manodopera sui lavori". Lo
+        compilavi per ogni operaio e in tutto il progetto quel numero veniva
+        letto in due sole righe: quella che lo salva e quella che lo rimette
+        nel modulo. Nessun conto lo usava. Un lavoro da 3.000 € con 80 ore a
+        22 €/h (1.760 € di manodopera vera) risultava in guadagno di 3.000
+        invece che di 1.240.
+
+     2) LO STESSO MARGINE USCIVA CON QUATTRO NUMERI DIVERSI: la scheda del
+        lavoro toglieva anche le fatture dei fornitori, il Report no, il CSV
+        nemmeno, e il Riepilogo non segnalava mai quel lavoro fra quelli in
+        perdita. Quattro schermate, quattro risposte alla stessa domanda.
+
+     Adesso il conto e' uno solo:
+        margine = importo − spese − fatture dei fornitori − manodopera
+     e lo fanno tutte e quattro chiamando queste funzioni.
+
+     Le ore registrate SENZA dire chi le ha fatte si contano con la media dei
+     costi orari della squadra: se non lo facessimo, dimenticare un nome
+     farebbe risultare il lavoro piu' redditizio di quello che e'.
+     ============================================================ */
+  function costiOrari(operatori){
+    const per={}; let somma=0, n=0;
+    (operatori||[]).forEach(function(o){
+      if(!o||o.id==null)return;
+      const c=+o.costo_orario||0;
+      per[String(o.id)]=c;
+      if(c>0){somma+=c;n++;}
+    });
+    return {per:per, media:n?somma/n:0};
+  }
+  /* Costo della manodopera per ogni lavoro.
+     righeOre = le righe di gest_ore (lavoro_id, operatore_id, ore).
+     lavori   = serve per il ripiego: un lavoro che non ha righe ore ma ha il
+                totale scritto su gest_lavori.ore (le versioni vecchie facevano
+                cosi') non deve valere zero. */
+  function costoManodopera(righeOre, lavori, tariffe){
+    const perLav={}, conRighe={}, senzaNome={};
+    (righeOre||[]).forEach(function(o){
+      const h=+o.ore||0; if(!h)return;
+      const k=String(o.lavoro_id||"");
+      if(!k)return;
+      conRighe[k]=true;
+      const chi=(o.operatore_id!=null)?String(o.operatore_id):"";
+      let c;
+      if(chi&&tariffe.per[chi]!=null&&tariffe.per[chi]>0){ c=tariffe.per[chi]; }
+      else { c=tariffe.media; senzaNome[k]=(senzaNome[k]||0)+h; }
+      perLav[k]=(perLav[k]||0)+h*(+c||0);
+    });
+    (lavori||[]).forEach(function(l){
+      const k=String(l.id);
+      if(conRighe[k])return;
+      const h=+l.ore||0;
+      if(h>0){ perLav[k]=h*tariffe.media; senzaNome[k]=h; }
+    });
+    return {per:perLav, senzaNome:senzaNome};
+  }
+  function margineLavoro(importo,spese,fattForn,manodopera){
+    return (+importo||0)-(+spese||0)-(+fattForn||0)-(+manodopera||0);
+  }
+  /* legge in un colpo solo quello che serve alla manodopera di un reparto.
+     Se la tabella delle ore non c'e' ancora, torna tutto a zero senza rompere
+     niente: il margine resta quello di prima. */
+  async function caricaManodopera(mid,lavori){
+    const vuoto={per:{},senzaNome:{},tariffe:{per:{},media:0}};
+    if(!sb||!sbUid)return vuoto;
+    try{
+      const ids=(lavori||[]).map(l=>l.id).filter(Boolean);
+      const [{data:ops},ore]=await Promise.all([
+        sb.from("gest_operatori").select("id,costo_orario").eq("user_id",sbUid).eq("mestiere_id",mid),
+        ids.length
+          ? sb.from("gest_ore").select("lavoro_id,operatore_id,ore").eq("user_id",sbUid).in("lavoro_id",ids)
+          : Promise.resolve({data:[]})
+      ]);
+      const tariffe=costiOrari(ops||[]);
+      const md=costoManodopera((ore&&ore.data)||[],lavori,tariffe);
+      return {per:md.per, senzaNome:md.senzaNome, tariffe:tariffe};
+    }catch(e){ return vuoto; }
   }
 
   /* ---- ANDAMENTO SPESE / PREVENTIVO (dentro il lavoro) ----
@@ -12124,7 +12228,7 @@
     }catch(e){}
     const carteNome=Object.fromEntries(CARTE.map(c=>[c.id,c.nome||"Carta"]));
     const totCarte=CM.reduce((t,m)=>t+(+m.importo||0),0);
-    repData={L,cl:cl||[],ops:ops||[],SP};
+    repData={L,cl:cl||[],ops:ops||[],SP,FF:FF,md:null};   /* md arriva piu' sotto */
     const cliMap=Object.fromEntries((cl||[]).map(c=>[c.id,c.nome]));
     const opMap=Object.fromEntries((ops||[]).map(o=>[o.id,o.nome]));
     /* ultimi 12 mesi: a 6 il grafico era una fila di barrette minuscole e non si
@@ -12164,8 +12268,18 @@
     const incAnno=_incassoIn(anno,4);
     /* guadagno/perdita per singolo lavoro (importo − spese) */
     const spPer={};SP.forEach(x=>{spPer[x.lavoro_id]=(spPer[x.lavoro_id]||0)+(+x.importo||0);});
-    let ML=L.filter(l=>(+l.importo||0)>0||spPer[l.id]).map(l=>({d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0}));
-    ML.forEach(m=>m.marg=m.inc-m.sp);
+    /* 12 agosto 2026 — le fatture dei fornitori e la manodopera entrano anche
+       QUI. Prima il Report diceva "guadagno 9.000" su un lavoro che nella sua
+       scheda diceva 4.000: leggeva il lavoro_id delle fatture fornitori
+       (riga sopra) e poi non lo usava. */
+    const ffPer={};FF.forEach(x=>{if(x.lavoro_id)ffPer[x.lavoro_id]=(ffPer[x.lavoro_id]||0)+(+x.importo||0);});
+    const _md=await caricaManodopera(mid,L);
+    let ML=L.filter(l=>(+l.importo||0)>0||spPer[l.id]||ffPer[l.id]||_md.per[String(l.id)])
+      .map(l=>({d:l.descrizione||"Lavoro",inc:+l.importo||0,sp:spPer[l.id]||0,
+                ff:ffPer[l.id]||0, md:_md.per[String(l.id)]||0}));
+    ML.forEach(m=>m.marg=margineLavoro(m.inc,m.sp,m.ff,m.md));
+    /* il CSV deve dare lo STESSO margine del Report: gli passo gli stessi dati */
+    if(repData)repData.md=_md;
     ML.sort((a,b)=>a.marg-b.marg);
     const mlMax=Math.max(...ML.map(m=>Math.max(m.inc,m.sp)),1);
     const nPos=ML.filter(m=>m.marg>0).length,nNeg=ML.filter(m=>m.marg<0).length,nZero=ML.filter(m=>m.marg===0).length;
@@ -12173,7 +12287,7 @@
       const badge=m.marg>0?`<span class="mbadge pos">▲ Guadagno ${eur(m.marg)}</span>`:m.marg<0?`<span class="mbadge neg">▼ Perdita ${eur(Math.abs(m.marg))}</span>`:`<span class="mbadge zero">Pareggio</span>`;
       return `<div class="mlav"><div class="mlav-top"><b>${esc(m.d)}</b>${badge}</div>
       <div class="mlav-bars"><div class="mlav-bar inc" style="width:${Math.max(m.inc/mlMax*100,m.inc?1:0)}%"></div><div class="mlav-bar sp" style="width:${Math.max(m.sp/mlMax*100,m.sp?1:0)}%"></div></div>
-      <div class="mlav-sub">Incasso ${eur(m.inc)} · Spese ${eur(m.sp)}</div></div>`;
+      <div class="mlav-sub">Incasso ${eur(m.inc)} · Spese ${eur(m.sp)}${m.ff?" · Fornitori "+eur(m.ff):""}${m.md?" · Manodopera "+eur(m.md):""}</div></div>`;
     }).join("");
     const mlCard=`<div class="rep-card" style="grid-column:1/-1"><h3>${_ICO_EURO}Guadagno o perdita per lavoro</h3>
       <div class="rep-legend" style="margin:0 0 12px;flex-wrap:wrap"><span><i style="background:var(--blu)"></i>Incasso</span><span><i style="background:var(--testo-3)"></i>Spese</span><span style="margin-left:auto;font-weight:700">${nPos} in guadagno · ${nZero} in pareggio · ${nNeg} in perdita</span></div>
@@ -12216,11 +12330,15 @@
     const cliMap=Object.fromEntries(repData.cl.map(c=>[c.id,c.nome]));
     const opMap=Object.fromEntries(repData.ops.map(o=>[o.id,o.nome]));
     const speseMap={};repData.SP.forEach(x=>{speseMap[x.lavoro_id]=(speseMap[x.lavoro_id]||0)+(+x.importo||0);});
+    /* 12 agosto 2026 — stesse colonne che vede il Report: fatture dei
+       fornitori e manodopera. Prima il CSV dava un terzo numero ancora. */
+    const ffMap={};(repData.FF||[]).forEach(x=>{if(x.lavoro_id)ffMap[x.lavoro_id]=(ffMap[x.lavoro_id]||0)+(+x.importo||0);});
+    const mdMap=(repData.md&&repData.md.per)||{};
     const num=n=>String(+n||0).replace(".",",");
-    const rows=[["Descrizione","Stato","Data prevista","Data fatto","Cliente","Operatore","Ore","Importo","Spese","Margine","Fattura"]];
+    const rows=[["Descrizione","Stato","Data prevista","Data fatto","Cliente","Operatore","Ore","Importo","Spese","Fatture fornitori","Manodopera","Margine","Fattura"]];
     repData.L.forEach(l=>{
-      const sp=speseMap[l.id]||0;
-      rows.push([l.descrizione||"",statoLabel[l.stato]||l.stato,l.data_prevista||"",l.data_fatto||"",cliMap[l.cliente_id]||"",opMap[l.operatore_id]||"",num(l.ore),num(l.importo),num(sp),num((+l.importo||0)-sp),l.fatt_stato||"none"]);
+      const sp=speseMap[l.id]||0, ff=ffMap[l.id]||0, md=mdMap[String(l.id)]||0;
+      rows.push([l.descrizione||"",statoLabel[l.stato]||l.stato,l.data_prevista||"",l.data_fatto||"",cliMap[l.cliente_id]||"",opMap[l.operatore_id]||"",num(l.ore),num(l.importo),num(sp),num(ff),num(md),num(margineLavoro(l.importo,sp,ff,md)),l.fatt_stato||"none"]);
     });
     const csv="﻿"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
     const a=document.createElement("a");
