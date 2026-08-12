@@ -56,7 +56,7 @@
       <button data-tab="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span>Agenda operatore</span></button>
       <div class="side-group">Azienda</div>
       <button data-tab="mezzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg><span>Mezzi</span><span class="tab-cnt" id="cnt-mezzi"></span></button>
-      <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Attrezzature</span></button>
+      <button data-tab="attrezzature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span>Attrezzature</span><span class="tab-cnt" id="cnt-attrezzature"></span></button>
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
       <button data-tab="computi" id="tab-computi" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/><path d="M13 13h5"/><path d="M13 17h5"/></svg><span>Computo metrico</span><span class="tab-cnt" id="cnt-computi"></span></button>
       <button data-tab="prezzario" id="tab-prezzario" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 12 22l-9-9V3h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Prezzario</span><span class="tab-cnt" id="cnt-prezzario"></span></button>
@@ -1091,7 +1091,7 @@
     el.title=tipo==="err"?"Ci sono elementi in ritardo o scaduti":"In attesa";
   }
   async function renderContatori(){
-    ["#cnt-lavori","#cnt-preventivi","#cnt-mezzi","#cnt-scadenzario","#cnt-fornitori"].forEach(x=>setCnt(x,0));
+    ["#cnt-lavori","#cnt-preventivi","#cnt-mezzi","#cnt-attrezzature","#cnt-scadenzario","#cnt-fornitori"].forEach(x=>setCnt(x,0));
     if(!sb||!sbUid||!cur)return;
     const mid=curMestiere();if(!mid)return;
     const oggi=todayStr(), lim30=_giorniDopo(oggi,30);
@@ -1099,7 +1099,7 @@
       const [{data:lav},{data:pv},{data:mz},{data:vw},{data:sc},{data:ff}]=await Promise.all([
         sb.from("gest_lavori").select("stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_preventivi").select("stato").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_mezzi").select("id").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_mezzi").select("id,categoria").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi_scadenze").select("mezzo_id,scadute,prossima_data").eq("user_id",sbUid),
         sb.from("gest_scadenze").select("stato,data_scadenza").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_fatture_fornitori").select("stato,scadenza").eq("user_id",sbUid).eq("mestiere_id",mid)
@@ -1109,11 +1109,18 @@
       setCnt("#cnt-lavori",aperti.length,aperti.some(l=>inRitardo(l.stato,l.data_prevista))?"err":"attesa");
       /* Preventivi: in attesa di risposta. */
       setCnt("#cnt-preventivi",(pv||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato").length,"attesa");
-      /* Mezzi: la vista gest_mezzi_scadenze non ha mestiere_id, quindi filtro sui mezzi del reparto. */
-      const miei=new Set((mz||[]).map(m=>m.id));
-      const mrighe=(vw||[]).filter(v=>miei.has(v.mezzo_id));
-      const mAvvisa=mrighe.filter(v=>v.scadute>0||(v.prossima_data&&v.prossima_data<=lim30));
+      /* Mezzi e Attrezzature: la vista gest_mezzi_scadenze non ha mestiere_id,
+         quindi filtro sui mezzi del reparto.
+         12 agosto 2026 — due pallini, non uno: stanno nella stessa tabella ma
+         sono due sezioni diverse, e prima le tarature degli strumenti finivano
+         nel pallino dei Mezzi (che al professionista e' pure nascosto).
+         Attrezzature era l'unica sezione con delle scadenze e senza pallino. */
+      const _idVeicoli=new Set((mz||[]).filter(m=>m.categoria!=="attrezzatura").map(m=>m.id));
+      const _idStrum  =new Set((mz||[]).filter(m=>m.categoria==="attrezzatura").map(m=>m.id));
+      const _avvisa=ids=>(vw||[]).filter(v=>ids.has(v.mezzo_id)&&(v.scadute>0||(v.prossima_data&&v.prossima_data<=lim30)));
+      const mAvvisa=_avvisa(_idVeicoli), sAvvisa2=_avvisa(_idStrum);
       setCnt("#cnt-mezzi",mAvvisa.length,mAvvisa.some(v=>v.scadute>0)?"err":"attesa");
+      setCnt("#cnt-attrezzature",sAvvisa2.length,sAvvisa2.some(v=>v.scadute>0)?"err":"attesa");
       /* Scadenzario: aperte, scadute o entro 30 giorni. */
       const sAperte=(sc||[]).filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30);
       setCnt("#cnt-scadenzario",sAperte.length,sAperte.some(x=>x.data_scadenza<oggi)?"err":"attesa");
@@ -1183,7 +1190,7 @@
         sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_preventivi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_operatori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_mezzi").select("id,nome,targa").eq("user_id",sbUid).eq("mestiere_id",mid),
+        sb.from("gest_mezzi").select("id,nome,targa,categoria").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_mezzi_scadenze").select("mezzo_id,aperte,scadute,prossima_data,prossimo_titolo").eq("user_id",sbUid),
         sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_carte").select("id,nome,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
@@ -1343,11 +1350,32 @@
     /* agenda: lavori aperti raggruppati per operatore */
     const perOpe={};aperti.forEach(l=>{if(l.operatore_id)perOpe[l.operatore_id]=(perOpe[l.operatore_id]||0)+1;});
     const opeOrd=Object.keys(perOpe).sort((a,b)=>perOpe[b]-perOpe[a]);
-    /* mezzi che chiedono attenzione */
-    const miei=new Set(MZ.map(m=>m.id));
+    /* ===== 12 agosto 2026 — MEZZI E STRUMENTI SONO DUE COSE DIVERSE =====
+       Stanno nella stessa tabella, distinti dalla colonna "categoria", e qui
+       il Riepilogo li contava insieme: la scheda diceva "2 mezzi in azienda",
+       ci cliccavi sopra ed entrando nei Mezzi ne trovavi 1. L'altro era la
+       stazione totale. E la verifica del ponteggio scaduta compariva come
+       "1 mezzo con scadenza passata", portandoti nei Mezzi.
+
+       Ma la cosa grave era per il PROFESSIONISTA. La sezione Strumenti
+       promette TRE VOLTE "il Riepilogo ti avvisa prima che scadano" (e gli
+       aiuti una quarta). Non era vero: la scheda Strumenti nel Riepilogo non
+       esisteva, e l'unica che leggeva quelle scadenze — la scheda Mezzi — per
+       lui e' nascosta. Un ingegnere con la stazione totale fuori taratura non
+       lo scopriva mai dalla prima pagina, e una misura presa con uno strumento
+       fuori taratura non vale. */
+    const _pro=(ruoloUtente==='professionista');
+    const _attr=m=>m&&m.categoria==="attrezzatura";
+    const MZveicoli=MZ.filter(m=>!_attr(m));
+    const MZstrum  =MZ.filter(_attr);
     const mzNome=Object.fromEntries(MZ.map(m=>[m.id,m.nome||"Mezzo"]));
-    const mzAvvisa=MZS.filter(v=>miei.has(v.mezzo_id)&&(v.scadute>0||(v.prossima_data&&v.prossima_data<=lim30)))
-                      .sort((a,b)=>String(a.prossima_data||"9999").localeCompare(String(b.prossima_data||"9999")));
+    const _scadDi=elenco=>{
+      const ids=new Set(elenco.map(m=>m.id));
+      return MZS.filter(v=>ids.has(v.mezzo_id)&&(v.scadute>0||(v.prossima_data&&v.prossima_data<=lim30)))
+                .sort((a,b)=>String(a.prossima_data||"9999").localeCompare(String(b.prossima_data||"9999")));
+    };
+    const mzAvvisa=_scadDi(MZveicoli);
+    const stAvvisa=_scadDi(MZstrum);
     /* squadra: quanti lavori aperti ha ciascuno */
     /* carte: saldo per carta */
     const saldoMap=Object.fromEntries(CAS.map(x=>[x.carta_id,+x.saldo||0]));
@@ -1386,6 +1414,14 @@
                                   d:(scScadute[0].titolo||"Scadenza")+(scScadute.length>1?" e altre":""),go:"scadenzario"});
     if(mzScaduti.length) DA.push({g:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
                                   d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
+    /* strumenti e attrezzature: riga loro, e porta nella sezione giusta.
+       Per lo studio tecnico e' l'avviso della taratura, quello promesso. */
+    const stScaduti = stAvvisa.filter(v=>v.scadute>0);
+    if(stScaduti.length) DA.push({g:1,
+      t:nn(stScaduti.length, _pro?"strumento con scadenza passata":"attrezzatura con scadenza passata",
+                             _pro?"strumenti con scadenza passata":"attrezzature con scadenza passata"),
+      d:(mzNome[stScaduti[0].mezzo_id]||(_pro?"Strumento":"Attrezzatura"))+(stScaduti[0].prossimo_titolo?" · "+stScaduti[0].prossimo_titolo:""),
+      go:"attrezzature"});
     if(inPerdita.length) DA.push({g:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
                                   d:"Fra spese, fornitori e manodopera esce più di quello che entra",go:"report"});
     /* patente a crediti: sotto 15 l'impresa non può operare in cantiere,
@@ -1501,11 +1537,26 @@
        un clic lo porta in una sezione "fantasma" senza voce di menu */
     const _proNascosto=t=>ruoloUtente==='professionista'&&TAB_NASCOSTI_PRO.indexOf(t)>=0;
     if(!_proNascosto("mezzi"))C.push(rieCard({
-      tab:"mezzi", titolo:"Mezzi", n:MZ.length,
-      lab: mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine"):"mezzi in azienda",
+      tab:"mezzi", titolo:"Mezzi", n:MZveicoli.length,
+      lab: mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
+                          : (MZveicoli.length===1?"mezzo in azienda":"mezzi in azienda"),
       tono: mzAvvisa.some(v=>v.scadute>0)?"err":(mzAvvisa.length?"attesa":"ok"),
-      vuoto: MZ.length?"Nessuna scadenza in arrivo":"Nessun mezzo registrato",
+      vuoto: MZveicoli.length?"Nessuna scadenza in arrivo":"Nessun mezzo registrato",
       righe: mzAvvisa.slice(0,2).map(v=>{const q=quando(v.prossima_data);return{
+        t:mzNome[v.mezzo_id]+(v.prossimo_titolo?" · "+v.prossimo_titolo:""),
+        v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
+    }));
+
+    /* la scheda che mancava: Strumenti per lo studio, Attrezzature per
+       l'impresa. Le tarature e le verifiche periodiche si vedono da qui. */
+    C.push(rieCard({
+      tab:"attrezzature", titolo: _pro?"Strumenti":"Attrezzature", n:MZstrum.length,
+      lab: stAvvisa.length? stAvvisa.length+(stAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
+                          : (_pro?"strumenti dello studio":"attrezzature in azienda"),
+      tono: stAvvisa.some(v=>v.scadute>0)?"err":(stAvvisa.length?"attesa":"ok"),
+      vuoto: MZstrum.length?"Nessuna taratura o verifica in arrivo"
+                           :(_pro?"Nessuno strumento registrato":"Nessuna attrezzatura registrata"),
+      righe: stAvvisa.slice(0,2).map(v=>{const q=quando(v.prossima_data);return{
         t:mzNome[v.mezzo_id]+(v.prossimo_titolo?" · "+v.prossimo_titolo:""),
         v:v.scadute>0?"scaduta":q.testo, cls:v.scadute>0?"q-passato":q.classe};})
     }));
