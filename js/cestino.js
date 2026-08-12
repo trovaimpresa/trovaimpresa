@@ -26,11 +26,37 @@
    Per leggere ANCHE le righe eliminate (serve solo alla sezione Cestino):
        sb.raw("gest_lavori").select("*").not("eliminato_il","is",null)
 
-   SE LA MIGRAZIONE NON È STATA FATTA
-   All'avvio si fa una domanda di prova al database. Se la colonna non c'e',
-   il cestino resta spento e il gestionale si comporta esattamente come
-   prima: meglio un cestino che non c'e' che un pannello bianco.
-   ============================================================ */
+   ------------------------------------------------------------
+   12 agosto 2026 — DUE BUCHI CHIUSI
+
+   BUCO 1: un errore di rete spegneva il cestino.
+   Il commento qui sotto diceva "un errore di rete non deve spegnere il
+   cestino", ma il codice riprovava una volta sola e poi lo spegneva lo
+   stesso. Da quel momento, per tutta la sessione, ogni Elimina tornava
+   definitivo — mentre i messaggi di conferma continuavano a dire che la
+   roba finiva nel cestino.
+   Adesso: finché non c'e' una risposta CHIARA dal database, il cestino non
+   si spegne e l'eliminazione viene BLOCCATA con un messaggio ("aspetta un
+   attimo"). Si riprova da soli a 2s, 5s, 15s, 45s e poi ogni minuto.
+   Non si perde niente per colpa della rete: al massimo si aspetta.
+
+   BUCO 2: la prova di accensione guardava UNA tabella sola.
+   Chiedeva a gest_lavori e da quella decideva per tutte e 18. Se una
+   migrazione era passata a meta', il cestino si accendeva lo stesso e su
+   quelle tabelle la cancellazione restava vera, in silenzio.
+   Adesso: si chiede a tutte e 18 insieme (18 domande piccolissime sparate
+   in parallelo, un solo giro di rete, una volta per sessione). Ogni tabella
+   ha il suo stato:
+     - la colonna c'e'      -> cestino acceso su quella tabella
+     - la colonna NON c'e'  -> vedi sotto
+     - non si sa ancora     -> eliminazione BLOCCATA
+   Se la colonna manca su TUTTE e 18, vuol dire che la migrazione non e'
+   mai stata eseguita: il cestino resta spento come prima e il gestionale
+   si comporta come sempre (meglio un cestino che non c'e' che un pannello
+   bianco). Se invece manca solo su ALCUNE, la migrazione e' passata a
+   meta': su quelle tabelle l'eliminazione viene BLOCCATA, perche' li' e' il
+   posto dove i dati sparirebbero senza che nessuno se ne accorga.
+   ------------------------------------------------------------ */
 (function () {
   "use strict";
 
@@ -63,14 +89,106 @@
   ];
 
   var COL = "eliminato_il";
-  var attivo = false;          /* si accende solo se la colonna c'e' davvero */
-  var provaFatta = null;       /* la promessa della domanda di prova */
-  var motivo = "";             /* "migrazione" o "rete": cambia cosa dire all'utente */
 
-  window.CESTINO_TABELLE = TABELLE;
-  window.cestinoAttivo   = function () { return attivo; };
-  window.cestinoMotivo   = function () { return motivo; };
-  window.cestinoPronto   = function () { return provaFatta || Promise.resolve(false); };
+  /* Lo stato di OGNI tabella, non piu' uno solo per tutte:
+       "attesa" = non lo sappiamo ancora (rete)   -> si blocca
+       "ok"     = la colonna c'e'                 -> cestino acceso
+       "manca"  = la colonna non c'e'             -> vedi migrazioneMai() */
+  var stato = {};
+  TABELLE.forEach(function (t) { stato[t] = "attesa"; });
+
+  var motivo = "";             /* "", "rete", "migrazione", "migrazione-parziale" */
+  var provaFatta = null;       /* promessa: si risolve al primo giro completo */
+  var risolviProva = null;
+  var giaRisolta = false;
+
+  function quante(v) {
+    var n = 0;
+    TABELLE.forEach(function (t) { if (stato[t] === v) n++; });
+    return n;
+  }
+  /* La migrazione non e' MAI stata eseguita: la colonna manca su tutte e 18.
+     E' il caso "installazione vecchia": il gestionale deve funzionare come
+     prima, con le cancellazioni vere. */
+  function migrazioneMai() { return quante("manca") === TABELLE.length; }
+
+  /* Il cestino "e' acceso" per il resto del gestionale (messaggi di conferma,
+     pulizia dei file, ecc.). E' spento SOLO quando siamo sicuri che la
+     migrazione non e' mai stata fatta. In tutti gli altri casi e' acceso,
+     perche' o mette davvero le cose nel cestino, o blocca: in nessuno dei due
+     casi qualcosa sparisce per sempre, quindi dire "finisce nel cestino" non
+     e' mai una bugia. */
+  function attivo() { return !migrazioneMai(); }
+
+  /* Su questa tabella, adesso, cosa succede se il gestionale chiama .delete()?
+       "cestino" = diventa una data (soft delete)
+       "vera"    = cancellazione vera (migrazione mai fatta, o tabella fuori elenco)
+       "blocca"  = non si tocca niente e si avvisa */
+  function cosaFa(tabella) {
+    if (TABELLE.indexOf(tabella) < 0) return "vera";
+    if (stato[tabella] === "ok") return "cestino";
+    if (migrazioneMai()) return "vera";
+    return "blocca";                     /* "attesa" oppure migrazione a meta' */
+  }
+
+  window.CESTINO_TABELLE      = TABELLE;
+  window.cestinoAttivo        = function () { return attivo(); };
+  window.cestinoMotivo        = function () { return motivo; };
+  window.cestinoPronto        = function () { return provaFatta || Promise.resolve(false); };
+  /* nuove, per chi vuole sapere di piu' (nessuno le usa ancora: non rompono niente) */
+  window.cestinoTabellaAttiva = function (t) { return stato[t] === "ok"; };
+  window.cestinoStato         = function () {
+    return { motivo: motivo, attesa: quante("attesa"), ok: quante("ok"), manca: quante("manca"), tabelle: JSON.parse(JSON.stringify(stato)) };
+  };
+
+  /* ---- il messaggio all'utente quando un'eliminazione viene bloccata ----
+     Il gestionale ha la sua funzione toast(), ma sta dentro una chiusura e da
+     qui non si vede. Se un giorno diventa window.toast la usiamo; altrimenti
+     ci disegnamo un avviso nostro. Testo grande e riga larga: regola dislessia. */
+  var ultimoAvviso = 0;
+  function avvisa(testo) {
+    try {
+      if (typeof window.toast === "function") { window.toast(testo); return; }
+      var ora = Date.now();
+      if (ora - ultimoAvviso < 1200) return;   /* niente raffiche di avvisi uguali */
+      ultimoAvviso = ora;
+      var d = document.getElementById("cestino-avviso");
+      if (!d) {
+        d = document.createElement("div");
+        d.id = "cestino-avviso";
+        d.setAttribute("role", "status");
+        d.style.cssText = "position:fixed;left:50%;bottom:26px;transform:translateX(-50%);" +
+          "max-width:min(560px,92vw);z-index:2147483000;background:#b3261e;color:#fff;" +
+          "padding:16px 20px;border-radius:12px;font-size:17px;line-height:1.6;" +
+          "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;" +
+          "box-shadow:0 8px 30px rgba(0,0,0,.25);text-align:center;";
+        document.body.appendChild(d);
+      }
+      d.textContent = testo;
+      d.style.display = "block";
+      clearTimeout(d.__t);
+      d.__t = setTimeout(function () { d.style.display = "none"; }, 7000);
+    } catch (e) { /* se anche questo fallisce, resta il messaggio dell'errore */ }
+  }
+
+  /* ---- il finto "builder" che si restituisce quando si blocca ----
+     Deve comportarsi come una richiesta a Supabase: si possono attaccare
+     .eq(), .select(), ecc. e alla fine si legge {data,error}. Cosi' il
+     gestionale mostra il suo messaggio d'errore come fa sempre, senza che
+     nessuna delle sue 75 chiamate debba essere toccata. */
+  var METODI = ["select", "eq", "neq", "gt", "gte", "lt", "lte", "like", "ilike", "is",
+    "in", "not", "or", "and", "filter", "match", "contains", "containedBy",
+    "overlaps", "order", "limit", "range", "abortSignal", "throwOnError", "csv", "geojson"];
+  function bloccato(messaggio) {
+    var risposta = { data: null, error: { message: messaggio, code: "CESTINO_BLOCCATO" }, count: null, status: 503, statusText: "Service Unavailable" };
+    var b = {};
+    METODI.forEach(function (m) { b[m] = function () { return b; }; });
+    b.single = b.maybeSingle = function () { return b; };
+    b.then = function (ok, ko) { return Promise.resolve(risposta).then(ok, ko); };
+    b.catch = function (f) { return Promise.resolve(risposta).catch(f); };
+    b.finally = function (f) { return Promise.resolve(risposta).finally(f); };
+    return b;
+  }
 
   window.attivaCestino = function (sb) {
     if (!sb || sb.__cestino) return sb;    /* mai due volte sullo stesso client */
@@ -79,60 +197,119 @@
     var fromOriginale = sb.from.bind(sb);
     sb.raw = fromOriginale;                /* la porta di servizio, per il Cestino */
 
-    /* La domanda di prova: costa una riga e si fa una volta sola.
-       Finche' non ha risposto il cestino resta spento, quindi al massimo le
-       primissime letture non filtrano: succede solo nei millisecondi prima
-       del login, quando non c'e' ancora niente da mostrare. */
-    function prova() {
-      return fromOriginale("gest_lavori").select("id").is(COL, null).limit(1);
+    /* --------------------------------------------------------------
+       LA PROVA: una domanda piccolissima per OGNI tabella dell'elenco,
+       tutte insieme. Chiede una riga sola e una colonna sola.
+       Si fa una volta per sessione; poi si riprova solo su quelle che
+       non hanno risposto per colpa della rete.
+       -------------------------------------------------------------- */
+    function provaUna(t) {
+      return fromOriginale(t).select("id").is(COL, null).limit(1)
+        .then(function (r) { return { t: t, err: (r && r.error) || null }; },
+              function (e) { return { t: t, err: e || { message: "rete" } }; });
     }
     function eColonnaMancante(err) {
-      var m = (err && (err.message || err.details || "")) || "";
-      return m.indexOf(COL) >= 0 || m.indexOf("42703") >= 0;
+      var m = (err && (err.message || err.details || err.hint || "")) || "";
+      var c = (err && err.code) || "";
+      return c === "42703" || m.indexOf(COL) >= 0 || m.indexOf("42703") >= 0;
     }
-    /* Un errore di RETE non deve spegnere il cestino: se lo spegnessimo, da
-       quel momento ogni Elimina tornerebbe definitivo senza che nessuno lo
-       sappia. Si riprova una volta, e si spegne SOLO se il database dice
-       chiaramente che la colonna non c'e'. */
-    provaFatta = prova()
-      .then(function (r) {
-        if (!r || !r.error) { attivo = true; return true; }
-        if (eColonnaMancante(r.error)) {
-          console.warn("[cestino] spento: manca la colonna " + COL +
-                       ". Esegui sql/gest-cestino.sql su Supabase.");
-          motivo = "migrazione";
-          attivo = false; return false;
-        }
-        return new Promise(function (res) { setTimeout(res, 1500); }).then(prova).then(function (r2) {
-          if (!r2 || !r2.error) { attivo = true; return true; }
-          motivo = eColonnaMancante(r2.error) ? "migrazione" : "rete";
-          attivo = false;
-          console.warn("[cestino] spento (" + motivo + "):", r2.error && r2.error.message);
-          return false;
+    /* "la tabella non esiste" (42P01) non e' un problema di rete: quella
+       tabella non ci sara' mai, quindi non ha senso continuare a riprovare.
+       La trattiamo come "manca", cosi' non blocca niente. */
+    function eTabellaMancante(err) {
+      var m = (err && (err.message || "")) || "";
+      var c = (err && err.code) || "";
+      return c === "42P01" || /does not exist|schema cache|not find the table/i.test(m);
+    }
+
+    function giro() {
+      var daFare = TABELLE.filter(function (t) { return stato[t] === "attesa"; });
+      if (!daFare.length) return Promise.resolve();
+      return Promise.all(daFare.map(provaUna)).then(function (esiti) {
+        esiti.forEach(function (e) {
+          if (!e.err) { stato[e.t] = "ok"; return; }
+          if (eColonnaMancante(e.err) || eTabellaMancante(e.err)) { stato[e.t] = "manca"; return; }
+          /* qualsiasi altra cosa = rete/permessi: NON si decide, si riprova */
         });
-      })
-      .catch(function () { motivo = "rete"; attivo = false; return false; });
+        aggiornaMotivo();
+      });
+    }
+
+    function aggiornaMotivo() {
+      var attesa = quante("attesa"), manca = quante("manca");
+      if (attesa > 0)              motivo = "rete";
+      else if (migrazioneMai())    motivo = "migrazione";
+      else if (manca > 0)          motivo = "migrazione-parziale";
+      else                         motivo = "";
+
+      if (motivo === "migrazione") {
+        console.warn("[cestino] spento: manca la colonna " + COL +
+                     " su tutte le tabelle. Esegui sql/gest-cestino.sql su Supabase.");
+      } else if (motivo === "migrazione-parziale") {
+        console.warn("[cestino] MIGRAZIONE A META'. Manca la colonna " + COL + " su: " +
+                     TABELLE.filter(function (t) { return stato[t] === "manca"; }).join(", ") +
+                     ". Su quelle tabelle l'eliminazione e' BLOCCATA finche' non esegui sql/gest-cestino.sql.");
+      } else if (motivo === "rete") {
+        console.warn("[cestino] in attesa di risposta su " + quante("attesa") +
+                     " tabelle: l'eliminazione resta bloccata finche' non si sa.");
+      }
+
+      /* la promessa pubblica si risolve al primo giro che chiude tutto */
+      if (!giaRisolta && quante("attesa") === 0) {
+        giaRisolta = true;
+        if (risolviProva) risolviProva(quante("ok") > 0);
+      }
+    }
+
+    provaFatta = new Promise(function (res) { risolviProva = res; });
+
+    /* riprova da sola: 2s, 5s, 15s, 45s e poi ogni minuto, solo su quelle
+       rimaste in attesa. Se la rete torna, il cestino si accende da solo e
+       l'utente non deve fare niente. */
+    var RITARDI = [0, 2000, 5000, 15000, 45000];
+    var passo = 0;
+    (function ciclo() {
+      giro().then(function () {
+        if (quante("attesa") === 0) return;              /* finito */
+        var attesa = passo < RITARDI.length - 1 ? RITARDI[++passo] : 60000;
+        setTimeout(ciclo, attesa);
+      });
+    })();
 
     sb.from = function (tabella) {
       var q = fromOriginale(tabella);
       if (TABELLE.indexOf(tabella) < 0) return q;
 
-      /* --- LETTURA: salta le righe che stanno nel cestino --- */
+      /* --- LETTURA: salta le righe che stanno nel cestino ---
+         Si filtra solo se su QUESTA tabella sappiamo che la colonna c'e'.
+         Finche' non si sa, non si filtra: come prima. */
       var selectOriginale = q.select.bind(q);
       q.select = function () {
         var b = selectOriginale.apply(null, arguments);
-        if (!attivo) return b;
+        if (stato[tabella] !== "ok") return b;
         try { return b.is(COL, null); } catch (e) { return b; }
       };
 
-      /* --- CANCELLAZIONE: diventa una data --- */
+      /* --- CANCELLAZIONE --- */
       var deleteOriginale = q.delete.bind(q);
       q.delete = function () {
-        if (!attivo) return deleteOriginale.apply(null, arguments);
-        /* Si riparte da un builder pulito: i filtri (.eq, .in, ...) che il
-           chiamante mette DOPO il .delete() si attaccano all'update senza
-           accorgersi di niente, e .select("id") restituisce le righe toccate
-           esattamente come prima. */
+        var fa = cosaFa(tabella);
+
+        if (fa === "vera") return deleteOriginale.apply(null, arguments);
+
+        if (fa === "blocca") {
+          var testo = (stato[tabella] === "attesa")
+            ? "Aspetta un attimo: sto controllando che il cestino sia pronto. Riprova fra qualche secondo."
+            : "Su questa parte del gestionale il cestino non è ancora installato. Per non perdere niente per sempre, l'eliminazione è bloccata.";
+          console.warn("[cestino] eliminazione bloccata su " + tabella + " (stato: " + stato[tabella] + ")");
+          avvisa(testo);
+          return bloccato(testo);
+        }
+
+        /* fa === "cestino": si riparte da un builder pulito, cosi' i filtri
+           (.eq, .in, ...) che il chiamante mette DOPO il .delete() si
+           attaccano all'update senza accorgersi di niente, e .select("id")
+           restituisce le righe toccate esattamente come prima. */
         var patch = {};
         patch[COL] = new Date().toISOString();
         /* .is(COL,null): si mettono nel cestino solo le righe vive. Senza,
