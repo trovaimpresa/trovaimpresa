@@ -1269,9 +1269,10 @@
        1.800: 253 euro di differenza per una fattura sola, sul numero che vedi
        appena apri il gestionale. Adesso chiama la stessa fattBasi di tutti gli
        altri, quindi la domanda "quanto devo incassare" ha una risposta sola. */
+    /* col segno: una nota di credito abbassa il "da incassare", non lo alza */
     const totaleFatt=f=>{
       const b=fattBasi(f,fattRigheRie[f.id]||[]);
-      return b.imponibile+b.iva+(+f.bollo||0)-b.compenso*(+f.ritenuta_perc||0)/100;
+      return (b.imponibile+b.iva+(+f.bollo||0)-b.compenso*(+f.ritenuta_perc||0)/100)*fattSegno(f);
     };
     const daInc    = FT.filter(f=>f.stato==="emessa");
     const totDaInc = daInc.reduce((s,f)=>s+totaleFatt(f),0);
@@ -1283,7 +1284,8 @@
     const totDaFatt= daFatt.reduce((s,l)=>s+(+l.importo||0),0);
     const ggPag    = (AZ&&+AZ.giorni_pagamento)||30;
     const scadenza = f=>f.data?_giorniDopo(f.data,ggPag):"";
-    const scadute  = daInc.filter(f=>{const sc=scadenza(f);return sc&&sc<oggi;});
+    /* una nota di credito non e' un credito: non puo' essere scaduta */
+    const scadute  = daInc.filter(f=>{const sc=scadenza(f);return fattSegno(f)>0&&sc&&sc<oggi;});
     /* 9 agosto 2026 — l'utile si fa sull'IMPONIBILE, non sul totale incassato.
        Prima: incassato con dentro l'IVA meno spese al netto, quindi l'utile
        usciva gonfiato di tutta l'IVA — che non è tua, la giri allo Stato.
@@ -2340,9 +2342,25 @@
     return {righe:righe,compenso:compenso,cassa:cassa,spese:spese,aliqPrev:aliqPrev,
             sconto:sconto,pieno:pieno,imponibile:imponibile,iva:iva};
   }
+  /* ===== 12 agosto 2026 — LA NOTA DI CREDITO =====
+     Una nota di credito e' un documento che TOGLIE soldi: annulla o riduce una
+     fattura gia' emessa. Il gestionale la sapeva stampare (TD04 nel file per
+     lo SDI) ma poi la SOMMAVA come se fosse un incasso in piu'.
+     In pratica: fattura 10.000 + IVA e nota di credito 2.000 + IVA facevano
+     dire "Da incassare 14.640 €" invece di 9.760 €. Quasi 4.900 euro di
+     differenza con due soli documenti, sul numero che si guarda ogni giorno.
+
+     Il documento in se' resta POSITIVO — sul PDF e nel file per lo SDI gli
+     importi di una nota di credito si scrivono positivi, e' il tipo del
+     documento a dire che vanno sottratti. Quindi il segno non si tocca nei
+     conti del documento: si aggiunge a parte, e lo usano solo i totali.
+     Regola semplice: se stai SOMMANDO piu' documenti, usa i valori "firmati".
+     Se stai mostrando o stampando UN documento, usa quelli normali. */
+  function fattSegno(f){ return (f&&f.tipo==="nota_credito")?-1:1; }
   function fattConti(f){
     const R=fattRighe[f.id]||[];
     const b=fattBasi(f,R);
+    const segno=fattSegno(f);
     const ritenuta=b.compenso*(+f.ritenuta_perc||0)/100;   /* solo sul compenso */
     /* Due numeri diversi, e mescolarli è un errore che lo SDI vede subito:
        - totale     = quanto vale il documento (imponibile scontato + IVA + bollo)
@@ -2353,7 +2371,10 @@
     const daPagare=totale-ritenuta;
     return {compenso:b.compenso,cassa:b.cassa,spese:b.spese,aliqPrev:b.aliqPrev,
             sconto:b.sconto,pieno:b.pieno,righeIva:b.righe,
-            imponibile:b.imponibile,iva:b.iva,ritenuta:ritenuta,totale:totale,daPagare:daPagare};
+            imponibile:b.imponibile,iva:b.iva,ritenuta:ritenuta,totale:totale,daPagare:daPagare,
+            /* per i TOTALI: la nota di credito entra col meno */
+            segno:segno, totaleFirmato:totale*segno, daPagareFirmato:daPagare*segno,
+            imponibileFirmato:b.imponibile*segno};
   }
   /* ===== 9 agosto 2026 — l'imponibile di una fattura, in UN POSTO SOLO =====
      Report ed Excel lo ricalcolavano sommando solo qta*prezzo: senza la cassa
@@ -2363,7 +2384,10 @@
      file per lo SDI, quindi lo sconto e gli arrotondamenti sono identici
      ovunque. IVA esclusa: l'IVA non è tua. */
   function fattImponibile(f,righeDellaFattura){
-    return fattBasi(f,righeDellaFattura||[]).imponibile;
+    /* col segno: questa funzione la chiamano solo Riepilogo, Report ed Excel,
+       che SOMMANO piu' fatture. Una nota di credito deve abbassare il totale,
+       e nel foglio Excel deve comparire col meno, com'e' giusto che sia. */
+    return fattBasi(f,righeDellaFattura||[]).imponibile*fattSegno(f);
   }
   function fattNumero(f){
     return f.numero ? "n. "+f.numero+"/"+f.anno : "bozza senza numero";
@@ -2465,7 +2489,9 @@
     return schedaJob({
       tono,
       titolo:esc(f.cli_nome||(cli&&cli.nome)||"Fattura")+" — "+esc(statoLab),
-      destra:'<span class="job-imp">'+eur(c.daPagare)+'</span>',
+      /* col meno davanti: una nota di credito che mostra "2.000 €" come una
+         fattura normale e' il modo piu' facile per sbagliare i conti a occhio */
+      destra:'<span class="job-imp">'+(c.segno<0?"−":"")+eur(c.daPagare)+'</span>',
       meta,
       nota:f.note?"📝 "+esc(f.note):"",
       azioni:az
@@ -2521,13 +2547,17 @@
 
     const emesse = fattCache.filter(f=>f.stato==="emessa");
     const pagate = fattCache.filter(f=>f.stato==="pagata");
-    const scadute= emesse.filter(f=>fattScaduta(f,gg));
+    /* una nota di credito non e' un credito: non puo' essere "scaduta" e non
+       puo' essere "il credito piu' vecchio" */
+    const scadute= emesse.filter(f=>fattSegno(f)>0&&fattScaduta(f,gg));
 
-    const tInc  = emesse.reduce((s,f)=>s+conti[f.id].daPagare,0);
+    /* le note di credito entrano col meno: se no "da incassare" cresce proprio
+       quando hai appena restituito dei soldi */
+    const tInc  = emesse.reduce((s,f)=>s+conti[f.id].daPagareFirmato,0);
     const tFatt = fattLavLiberi.reduce((s,l)=>s+(+l.importo||0),0);
     const incAnno = pagate.filter(f=>String(f.data_pagata||f.data||"").slice(0,4)===anno)
-                          .reduce((s,f)=>s+conti[f.id].daPagare,0);
-    const attese = emesse.map(f=>fattGiorniDa(f.data)).filter(x=>x!=null);
+                          .reduce((s,f)=>s+conti[f.id].daPagareFirmato,0);
+    const attese = emesse.filter(f=>fattSegno(f)>0).map(f=>fattGiorniDa(f.data)).filter(x=>x!=null);
     const piuVecchio = attese.length?Math.max.apply(null,attese):null;
     const emesseAnno = fattCache.filter(f=>f.numero&&String(f.anno)===anno).length;
 
@@ -2548,7 +2578,7 @@
     const filtra=(A,v)=>
         v==="bozze"    ? A.filter(f=>f.stato==="bozza")
       : v==="incassare"? A.filter(f=>f.stato==="emessa")
-      : v==="scadute"  ? A.filter(f=>fattScaduta(f,gg))
+      : v==="scadute"  ? A.filter(f=>fattSegno(f)>0&&fattScaduta(f,gg))
       : v==="pagate"   ? A.filter(f=>f.stato==="pagata")
       : A.slice();
     const conta={};FATT_VISTE.forEach(v=>conta[v.k]=filtra(fattCache,v.k).length);
@@ -12164,7 +12194,11 @@
     if((D.fatt||[]).length){
       const rPerF={};(D.fattRig||[]).forEach(r=>{(rPerF[r.fattura_id]=rPerF[r.fattura_id]||[]).push(r);});
       const impF={};(D.fatt||[]).forEach(f=>{impF[f.id]=fattImponibile(f,rPerF[f.id]);});
+      /* la colonna Tipo mancava: nel foglio una nota di credito era
+         indistinguibile da una fattura, e l'imponibile col meno sembrava un
+         errore invece che una nota di credito */
       add("Fatture",D.fatt.map(f=>({Numero:f.numero||"",Anno:f.anno||"",Data:f.data||"",
+        Tipo:FATT_TIPO_LAB[f.tipo]||"Fattura",
         Cliente:f.cli_nome||cN[f.cliente_id]||"",Stato:f.stato||"","Imponibile €":Math.round((impF[f.id]||0)*100)/100,
         "Cassa %":+f.cassa_perc||0,"Spese €":+f.spese||0,"Ritenuta %":+f.ritenuta_perc||0,
         "Sconto €":+f.sconto||0,"Bollo €":+f.bollo||0,Note:f.note||""})));
