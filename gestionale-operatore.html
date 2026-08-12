@@ -290,6 +290,65 @@ function show(v){
   if(v==="agenda"||v==="clienti"||v==="scadenze"||v==="fatture"){curView=v;renderNav();}
 }
 function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
+
+/* ============================================================
+   12 agosto 2026 (sera) — I PERMESSI ADESSO COMANDANO DAVVERO
+
+   Nel gestionale del capo, sulla scheda di ogni persona, ci sono sette
+   caselle: Calendario, Lavori, Foto, Note, Clienti, Fatture, Pagamenti.
+   Si spuntavano, si salvavano... e qui dentro se ne leggevano SOLO TRE
+   (lavori, clienti, fatture), per accendere o spegnere i pulsanti in alto.
+   Le altre quattro non facevano niente: il capo toglieva la spunta a
+   «Pagamenti» e l'operaio poteva lo stesso spendere sulla carta aziendale;
+   toglieva «Foto» e l'operaio caricava foto lo stesso.
+
+   Adesso valgono tutte e sette:
+     calendario -> puo' girare fra i giorni e i mesi. Senza, vede solo oggi.
+     lavori     -> vede l'agenda e le scadenze, apre i lavori, li segna fatti.
+     foto       -> puo' AGGIUNGERE foto e video (quelle del capo le vede
+                   comunque: sono le istruzioni per lavorare).
+     note       -> puo' scrivere cosa ha fatto.
+     clienti    -> vede l'elenco dei clienti.
+     fatture    -> vede le fatture.
+     pagamenti  -> vede la sua carta aziendale e puo' registrare le spese.
+
+   ⚠️ DA DIRE CHIARO: questo decide cosa VEDE e cosa PUO' FARE DALL'APP.
+   Non e' un lucchetto sul database: chi sapesse scrivere codice potrebbe
+   comunque provare a chiamare Supabase da fuori. Il lucchetto vero sono le
+   regole RLS sul database, che vanno scritte in SQL. Per l'uso normale —
+   un operaio col telefono in mano — questo e' quello che serve.
+   ============================================================ */
+function puo(k){ return MIO.permessi && MIO.permessi[k]===true; }
+/* niente permessi salvati (persone create prima che esistessero): si lascia
+   tutto com'era, invece di chiudere fuori chi ieri lavorava */
+function permessiMai(){ return !MIO.permessi || Object.keys(MIO.permessi).length===0; }
+function applicaPermessi(){
+  const _mostra=(sel,si)=>{const e=$(sel);if(e)e.classList.toggle("hidden",!si);};
+  const tutto=permessiMai();
+  /* il calendario: senza il permesso resta solo il giorno di oggi */
+  const cal=document.querySelector("#view-agenda .cal");
+  if(cal)cal.style.display=(tutto||puo("calendario"))?"":"none";
+  /* foto e video: si vedono sempre quelle del capo, si AGGIUNGONO solo col permesso */
+  _mostra("#btn-foto",  tutto||puo("foto"));
+  _mostra("#btn-video", tutto||puo("foto"));
+  /* le note */
+  const note=$("#lv-note");
+  if(note)note.classList.toggle("hidden",!(tutto||puo("note")));
+  _mostra("#btn-salva", tutto||puo("note"));
+  /* la carta aziendale: il pannello lo accende caricaCartaMia, ma senza il
+     permesso non si accende per niente */
+  if(!(tutto||puo("pagamenti"))){
+    const cp=$("#carta-panel"); if(cp)cp.style.display="none";
+  }
+}
+/* rete di sicurezza sulle AZIONI: anche se un pulsante restasse raggiungibile
+   (schermo stretto, pagina rimasta aperta da prima), l'azione si ferma qui e
+   dice perche'. Nascondere e basta non e' una risposta. */
+function chiedoPermesso(k,cosa){
+  if(permessiMai()||puo(k))return true;
+  toast("Il capo non ti ha dato il permesso "+cosa+".");
+  return false;
+}
 let curView="agenda";
 function renderNav(){
   $("#nav-agenda").classList.toggle("hidden",MIO.permessi.lavori!==true);
@@ -300,6 +359,7 @@ function renderNav(){
   $("#nav-clienti").classList.toggle("active",curView==="clienti");
   $("#nav-scadenze").classList.toggle("active",curView==="scadenze");
   $("#nav-fatture").classList.toggle("active",curView==="fatture");
+  applicaPermessi();
 }
 
 /* ===== avvio ===== */
@@ -568,7 +628,7 @@ async function caricaFoto(lavoroId){
 }
 
 /* foto: carica */
-$("#btn-foto").onclick=()=>$("#lv-file").click();
+$("#btn-foto").onclick=()=>{ if(chiedoPermesso("foto","di aggiungere foto"))$("#lv-file").click(); };
 $("#lv-file").onchange=async e=>{
   const file=e.target.files[0];if(!file||!curLavoro)return;
   $("#btn-foto").disabled=true;$("#btn-foto").textContent="Carico…";
@@ -613,7 +673,7 @@ async function caricaVideo(lavoroId){
     if(su&&su.signedUrl){const d=document.createElement("div");d.className="vid-ph";d.textContent="▶️";d.onclick=()=>window.open(su.signedUrl,"_blank");grid.appendChild(d);}
   }
 }
-$("#btn-video").onclick=()=>$("#lv-video-file").click();
+$("#btn-video").onclick=()=>{ if(chiedoPermesso("foto","di aggiungere video"))$("#lv-video-file").click(); };
 $("#lv-video-file").onchange=async e=>{
   const file=e.target.files[0];if(!file||!curLavoro)return;
   if(file.size>52428800){
@@ -640,6 +700,9 @@ $("#lv-video-file").onchange=async e=>{
 let MIA_CARTA=null;
 async function caricaCartaMia(){
   if(!MIO.operatoreId)return;
+  /* senza il permesso «Pagamenti» la carta non si carica nemmeno: non si
+     chiede al database una cosa che non si deve vedere */
+  if(!(permessiMai()||puo("pagamenti"))){const cp=$("#carta-panel");if(cp)cp.style.display="none";return;}
   const {data}=await sb.from("gest_carte_saldo").select("carta_id,nome,saldo")
     .eq("user_id",MIO.impresaId).eq("dipendente_id",MIO.operatoreId).eq("stato","attiva").limit(1);
   const mia=(data&&data[0])||null;
@@ -654,13 +717,15 @@ async function caricaCartaMia(){
     <span>${m.tipo==="spesa"?"➖":"➕"} ${esc(m.causale||(m.tipo==="spesa"?"Spesa":"Ricarica"))}</span>
     <span style="font-weight:700">${eur(m.importo)}</span></div>`).join("");
 }
-$("#btn-carta-spesa").onclick=()=>{$("#carta-form").classList.remove("hidden");$("#btn-carta-spesa").style.display="none";};
+$("#btn-carta-spesa").onclick=()=>{ if(!chiedoPermesso("pagamenti","di usare la carta aziendale"))return;
+  $("#carta-form").classList.remove("hidden");$("#btn-carta-spesa").style.display="none";};
 $("#btn-carta-annulla").onclick=()=>{
   $("#carta-form").classList.add("hidden");$("#btn-carta-spesa").style.display="block";
   $("#carta-imp").value="";$("#carta-causale").value="";
 };
 $("#btn-carta-salva").onclick=async()=>{
   if(!MIA_CARTA)return;
+  if(!chiedoPermesso("pagamenti","di usare la carta aziendale"))return;
   const importo=+($("#carta-imp").value);
   if(!importo||importo<=0){toast("Inserisci un importo valido");return;}
   const causale=$("#carta-causale").value.trim()||null;
@@ -679,6 +744,7 @@ $("#btn-carta-salva").onclick=async()=>{
 /* salva note */
 $("#btn-salva").onclick=async()=>{
   if(!curLavoro)return;
+  if(!chiedoPermesso("note","di scrivere le note"))return;
   const txt=$("#lv-note").value;
   $("#btn-salva").disabled=true;
   const {error}=await sb.from("gest_lavori").update({lavoro_svolto:txt}).eq("id",curLavoro.id);
