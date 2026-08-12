@@ -1036,6 +1036,18 @@
     }
     renderContatori();
   }
+  /* 12 agosto 2026 — il Cestino non si aggiornava MAI dopo una cancellazione:
+     eliminavi un cliente, aprivi il Cestino e trovavi la lista di prima, senza
+     la cosa appena buttata. Le 34 cancellazioni sparse nel file chiamano chi
+     rinfresca() e chi direttamente renderQualcosa(): invece di correggerle una
+     per una (e dimenticarne qualcuna), lo dice js/cestino.js, che e' l'unico
+     punto da cui passano TUTTE le cancellazioni del gestionale. */
+  window.segnaCestinoDaRifare=function(){
+    try{
+      _tabSporchi.add("cestino");
+      if(tabCorrente()==="cestino"){_tabSporchi.delete("cestino");renderCestino();}
+    }catch(e){}
+  };
 
   /* ============================================================
      CONTATORI DEL MENU (tappa 2)
@@ -9228,6 +9240,49 @@
      senza portarsi dietro altro. Le altre NO: eliminare per sempre un reparto
      o un cliente farebbe scattare le cancellazioni a catena e si porterebbe
      via anche roba viva che nel cestino non c'era mai entrata. */
+
+  /* ============================================================
+     12 agosto 2026 — CHI STA DENTRO A CHI
+
+     Il ripristino toccava UNA riga sola. Ma ci sono due punti del gestionale
+     che mettono via padre e figli insieme:
+       - "elimina reparto"   -> il reparto E tutti i suoi lavori
+       - "elimina fornitore" -> il fornitore E tutte le sue fatture
+     Rimettendo a posto il padre tornava su solo lui, e i figli restavano nel
+     cestino uno per uno, da ripescare a mano. Nel frattempo i conti erano
+     sbagliati.
+
+     CEST_FIGLI dice cosa tirare su insieme al padre.
+     CEST_PADRE serve al contrario: se rimetti a posto un lavoro ma il suo
+     reparto e' ancora nel cestino, il lavoro torna e NON si vede da nessuna
+     parte, perche' il gestionale mostra solo la roba dei reparti vivi.
+     ============================================================ */
+  const CEST_FIGLI={
+    gest_mestieri :[["gest_lavori","mestiere_id","lavoro","lavori"]],
+    gest_fornitori:[["gest_fatture_fornitori","fornitore_id","fattura","fatture"]]
+  };
+  const CEST_PADRE={
+    gest_lavori           :["gest_mestieri","mestiere_id","reparto"],
+    gest_clienti          :["gest_mestieri","mestiere_id","reparto"],
+    gest_preventivi       :["gest_mestieri","mestiere_id","reparto"],
+    gest_fatture          :["gest_mestieri","mestiere_id","reparto"],
+    gest_mezzi            :["gest_mestieri","mestiere_id","reparto"],
+    gest_operatori        :["gest_mestieri","mestiere_id","reparto"],
+    gest_carte            :["gest_mestieri","mestiere_id","reparto"],
+    gest_scadenze         :["gest_mestieri","mestiere_id","reparto"],
+    gest_computi          :["gest_mestieri","mestiere_id","reparto"],
+    gest_fornitori        :["gest_mestieri","mestiere_id","reparto"],
+    gest_fatture_fornitori:["gest_fornitori","fornitore_id","fornitore"]
+  };
+  /* Quanto largo e' "nello stesso momento". I figli vengono messi via qualche
+     istante PRIMA del padre, ma con la rete lenta puo' passare piu' tempo: due
+     minuti stanno larghi senza rischiare niente. Il vincolo vero e' l'altro,
+     cioe' che il figlio punti proprio a quel padre: serve a non far resuscitare
+     un lavoro che era stato buttato via il mese scorso di proposito.
+     E comunque, nel dubbio, qui si sbaglia dalla parte giusta: al massimo torna
+     su una cosa in piu', che si puo' rieliminare. */
+  const CEST_FINESTRA=120000;
+
   let cestCache=[];
 
   async function renderCestino(){
@@ -9260,10 +9315,13 @@
           .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")
           || (r.data?("del "+fdate(r.data)):"")
           || "(senza nome)";
+        /* chi e' il "padre" di questa riga, se ce l'ha: serve al ripristino */
+        const _p=CEST_PADRE[x.c.t];
         cestCache.push({tab:x.c.t, ic:x.c.ic, foglia:!!x.c.foglia,
           tipo:(ruoloUtente!=='professionista'&&x.c.labImp)?x.c.labImp:x.c.lab,
           nome:nome.slice(0,80),
-          quando:r.eliminato_il, id:r.id, path:r.storage_path||null});
+          quando:r.eliminato_il, id:r.id, path:r.storage_path||null,
+          padre:(_p&&r[_p[1]])?{tab:_p[0], col:_p[1], id:r[_p[1]], lab:_p[2]}:null});
       });
     });
     cestCache.sort((a,b)=>String(b.quando||"").localeCompare(String(a.quando||"")));
@@ -9308,19 +9366,73 @@
     });
   }
 
+  /* rimette a posto UNA riga */
+  function cestRiga(tab,id){
+    return sb.raw(tab).update({eliminato_il:null}).eq("id",id).eq("user_id",sbUid).select("id");
+  }
+  /* rimette a posto i figli buttati via nello stesso momento del padre.
+     Torna quanti ne ha tirati su. Non fa rumore se qualcosa va storto: il
+     padre e' gia' tornato, e un figlio in meno si ripesca a mano. */
+  async function cestFigli(tab,id,quando){
+    const regole=CEST_FIGLI[tab];
+    if(!regole||!quando)return 0;
+    const t=new Date(quando).getTime();
+    if(!isFinite(t))return 0;
+    const da=new Date(t-CEST_FINESTRA).toISOString(), a=new Date(t+CEST_FINESTRA).toISOString();
+    let n=0;
+    for(const r of regole){
+      try{
+        const {data}=await sb.raw(r[0]).update({eliminato_il:null})
+          .eq("user_id",sbUid).eq(r[1],id)
+          .gte("eliminato_il",da).lte("eliminato_il",a)
+          .select("id");
+        n+=(data||[]).length;
+      }catch(e){}
+    }
+    return n;
+  }
   async function cestRipristina(i){
     const x=cestCache[+i];if(!x)return;
     if(!sbUid){toast("Devi essere loggato");return;}
-    const {data,error}=await sb.raw(x.tab).update({eliminato_il:null})
-      .eq("id",x.id).eq("user_id",sbUid).select("id");
+
+    /* Il padre e' ancora nel cestino? Allora rimettere a posto solo questo non
+       serve a niente: torna su ma non si vede da nessuna parte, perche' il
+       gestionale mostra solo la roba dei reparti (e dei fornitori) vivi. */
+    let padreDaTirareSu=null;
+    if(x.padre&&x.padre.id){
+      try{
+        const {data:pd}=await sb.raw(x.padre.tab).select("id,nome,eliminato_il")
+          .eq("id",x.padre.id).eq("user_id",sbUid).limit(1);
+        const p=(pd||[])[0];
+        if(p&&p.eliminato_il){
+          const q=p.nome?(" «"+p.nome+"»"):"";
+          if(gconfirm("Questa cosa sta dentro il "+x.padre.lab+q+", che è ancora nel cestino.\n\n"
+            +"Se rimetto a posto solo questa, non la vedrai da nessuna parte.\n\n"
+            +"Rimetto a posto anche il "+x.padre.lab+"?")) padreDaTirareSu=p;
+        }
+      }catch(e){}
+    }
+
+    let extra=0;
+    if(padreDaTirareSu){
+      const rp=await cestRiga(x.padre.tab,padreDaTirareSu.id);
+      if(rp&&rp.error){toast("Errore: "+rp.error.message);return;}
+      extra+=1+await cestFigli(x.padre.tab,padreDaTirareSu.id,padreDaTirareSu.eliminato_il);
+    }
+
+    const {data,error}=await cestRiga(x.tab,x.id);
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non ripristinato: nessuna riga trovata");return;}
+    extra+=await cestFigli(x.tab,x.id,x.quando);
+
     /* rimesso a posto un reparto o una pratica cambia mezzo gestionale:
        si ridisegna tutto invece di indovinare cosa è cambiato */
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
-    if(x.tab==="gest_mestieri")renderLanding();
-    toast("Rimesso a posto ✔");
+    if(x.tab==="gest_mestieri"||(padreDaTirareSu&&x.padre.tab==="gest_mestieri"))renderLanding();
+    toast(!extra?"Rimesso a posto ✔"
+      :extra===1?"Rimesso a posto ✔ — e con lui anche 1 cosa che ci stava dentro"
+      :"Rimesso a posto ✔ — e con lui anche altre "+extra+" cose che ci stavano dentro");
   }
 
   /* ===== 9 agosto 2026 — ELIMINA PER SEMPRE, VERSIONE SICURA =====

@@ -315,7 +315,24 @@
         /* .is(COL,null): si mettono nel cestino solo le righe vive. Senza,
            eliminando un reparto si riscriveva la data anche sulle pratiche
            già nel cestino, e risalivano in cima con una data sbagliata. */
-        return fromOriginale(tabella).update(patch).is(COL, null);
+        var b = fromOriginale(tabella).update(patch).is(COL, null);
+
+        /* 12 agosto 2026 — appena una cosa entra nel cestino lo diciamo alla
+           sezione Cestino, che se no restava ferma alla lista di prima.
+           Lo facciamo qui perche' e' l'unico punto da cui passano TUTTE le
+           cancellazioni del gestionale: cosi' non se ne puo' dimenticare
+           nessuna. I filtri che il chiamante attacca dopo (.eq, .select...)
+           tornano sempre lo stesso oggetto, quindi basta avvolgere il .then. */
+        var thenVero = b.then.bind(b);
+        b.then = function (ok, ko) {
+          return thenVero(function (r) {
+            if (!(r && r.error)) {
+              try { if (typeof window.segnaCestinoDaRifare === "function") window.segnaCestinoDaRifare(); } catch (e) { }
+            }
+            return ok ? ok(r) : r;
+          }, ko);
+        };
+        return b;
       };
 
       return q;
