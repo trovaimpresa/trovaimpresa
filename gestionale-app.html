@@ -1261,17 +1261,17 @@
        e il numero del Riepilogo non tornava con quello di Fatture. */
     /* i conti delle fatture arrivano dalle fatture vere, non più dalle
        caselle sul lavoro: una fattura può tenerne dentro tre, e ha l'IVA. */
-    const totFatt={};
     const fattRigheRie={};
-    FR.forEach(r=>{
-      const imp=(+r.qta||0)*(+r.prezzo||0);
-      const t=totFatt[r.fattura_id]=totFatt[r.fattura_id]||{imp:0,iva:0};
-      t.imp+=imp; t.iva+=imp*(+r.iva||0)/100;
-      (fattRigheRie[r.fattura_id]=fattRigheRie[r.fattura_id]||[]).push(r);
-    });
+    FR.forEach(r=>{ (fattRigheRie[r.fattura_id]=fattRigheRie[r.fattura_id]||[]).push(r); });
+    /* 12 agosto 2026 — qui c'era la QUARTA copia della formula, scritta a mano,
+       e si dimenticava la cassa previdenziale e le spese. Su una parcella con
+       cassa 4% e 150 di spese la sezione Fatture diceva 2.053 e il Riepilogo
+       1.800: 253 euro di differenza per una fattura sola, sul numero che vedi
+       appena apri il gestionale. Adesso chiama la stessa fattBasi di tutti gli
+       altri, quindi la domanda "quanto devo incassare" ha una risposta sola. */
     const totaleFatt=f=>{
-      const t=totFatt[f.id]||{imp:0,iva:0};
-      return t.imp+t.iva-(+f.sconto||0)+(+f.bollo||0)-t.imp*(+f.ritenuta_perc||0)/100;
+      const b=fattBasi(f,fattRigheRie[f.id]||[]);
+      return b.imponibile+b.iva+(+f.bollo||0)-b.compenso*(+f.ritenuta_perc||0)/100;
     };
     const daInc    = FT.filter(f=>f.stato==="emessa");
     const totDaInc = daInc.reduce((s,f)=>s+totaleFatt(f),0);
@@ -2284,35 +2284,86 @@
      Prima mancava la cassa (un geometra non poteva fatturare il suo 5%) e la
      ritenuta veniva calcolata su tutto l'imponibile: se metteva in fattura
      bolli e diritti, gli trattenevano il 20% anche su quelli. */
-  function fattConti(f){
-    const R=fattRighe[f.id]||[];
-    const compenso=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0),0);
-    const ivaRighe=R.reduce((s,r)=>s+(+r.qta||0)*(+r.prezzo||0)*(+r.iva||0)/100,0);
+  /* ============================================================
+     12 agosto 2026 — LO SCONTO, E I CONTI IN UN POSTO SOLO
+
+     Lo sconto toglieva i soldi dal TOTALE ma non dall'imponibile: l'IVA
+     restava calcolata sul prezzo pieno. Su una fattura da 15.000 con 500 di
+     sconto voleva dire tre cose, tutte sbagliate:
+       - al cliente venivano addebitati 70 euro di IVA che non doveva pagare
+       - il PDF diceva "imponibile 15.000" e il foglio Excel 14.500
+       - nel file per lo SDI la somma dei riepiloghi (17.100) non tornava con
+         il totale del documento (16.600): motivo di scarto
+
+     Adesso lo sconto si toglie dall'IMPONIBILE, ripartito in proporzione fra
+     le aliquote, e l'IVA si calcola su quello che il cliente paga davvero.
+     Nel file per lo SDI le basi partono gia' scontate, quindi il totale del
+     documento e' esattamente la somma dei riepiloghi (piu' il bollo, che si
+     dichiara a parte): il conto non puo' piu' non tornare.
+
+     Questa funzione e' l'UNICO posto dove si fa il conto. La usano la scheda,
+     il PDF, il file per lo SDI, l'anteprima nel modulo, il Report e l'Excel.
+     Se viene voglia di riscrivere la formula da qualche altra parte: e' cosi'
+     che erano nati i tre numeri diversi di prima.
+     ============================================================ */
+  function fattBasi(f,R,forf){
+    if(forf===undefined)forf=fattForfettario();
+    const c2=n=>Math.round((+n||0)*100)/100;
+    const basi={};                       /* aliquota -> imponibile pieno */
+    let compenso=0;
+    (R||[]).forEach(function(r){
+      const al=forf?0:(+r.iva||0);
+      const imp=(+r.qta||0)*(+r.prezzo||0);
+      basi[al]=(basi[al]||0)+imp;
+      compenso+=imp;
+    });
     const cassa=compenso*(+f.cassa_perc||0)/100;
     const spese=+f.spese||0;
-    const aliqPrev=fattAliquotaPrevalente(R);
-    const imponibile=compenso+cassa+spese;
-    const iva=ivaRighe+(cassa+spese)*aliqPrev/100;
-    const ritenuta=compenso*(+f.ritenuta_perc||0)/100;   /* solo sul compenso */
+    const aliqPrev=forf?0:fattAliquotaPrevalente(R||[]);
+    /* cassa e spese non sono righe ma fanno imponibile: vanno sull'aliquota
+       che comanda, quella su cui sta piu' roba */
+    if(cassa||spese)basi[aliqPrev]=(basi[aliqPrev]||0)+cassa+spese;
+    const pieno=compenso+cassa+spese;
+    /* uno sconto piu' grande del lavoro non esiste: si ferma li', se no
+       uscirebbero imponibili negativi e il file verrebbe scartato */
+    const sconto=Math.min(Math.max(+f.sconto||0,0),pieno);
+    const righe=Object.keys(basi).sort((a,b)=>b-a).map(function(al){
+      const quota=pieno>0?basi[al]/pieno:0;
+      const imponibile=c2(basi[al]-sconto*quota);
+      return {aliquota:+al, imponibile:imponibile, imposta:c2(imponibile*(+al)/100)};
+    });
+    /* i totali sono la somma dei riepiloghi GIA' ARROTONDATI: cosi' il totale
+       del documento non puo' discostarsi nemmeno di un centesimo da quello che
+       lo SDI ricalcola riga per riga */
+    const imponibile=c2(righe.reduce((s,r)=>s+r.imponibile,0));
+    const iva=c2(righe.reduce((s,r)=>s+r.imposta,0));
+    return {righe:righe,compenso:compenso,cassa:cassa,spese:spese,aliqPrev:aliqPrev,
+            sconto:sconto,pieno:pieno,imponibile:imponibile,iva:iva};
+  }
+  function fattConti(f){
+    const R=fattRighe[f.id]||[];
+    const b=fattBasi(f,R);
+    const ritenuta=b.compenso*(+f.ritenuta_perc||0)/100;   /* solo sul compenso */
     /* Due numeri diversi, e mescolarli è un errore che lo SDI vede subito:
-       - totale     = quanto vale il documento (imponibile + IVA - sconto + bollo)
+       - totale     = quanto vale il documento (imponibile scontato + IVA + bollo)
        - daPagare   = quanto ti bonifica davvero il cliente, tolta la ritenuta
        La ritenuta non è uno sconto: è una parte del tuo compenso che il
        cliente versa allo Stato al posto tuo. Il documento vale lo stesso. */
-    const totale=imponibile+iva-(+f.sconto||0)+(+f.bollo||0);
+    const totale=b.imponibile+b.iva+(+f.bollo||0);
     const daPagare=totale-ritenuta;
-    return {compenso,cassa,spese,aliqPrev,imponibile,iva,ritenuta,totale,daPagare};
+    return {compenso:b.compenso,cassa:b.cassa,spese:b.spese,aliqPrev:b.aliqPrev,
+            sconto:b.sconto,pieno:b.pieno,righeIva:b.righe,
+            imponibile:b.imponibile,iva:b.iva,ritenuta:ritenuta,totale:totale,daPagare:daPagare};
   }
   /* ===== 9 agosto 2026 — l'imponibile di una fattura, in UN POSTO SOLO =====
      Report ed Excel lo ricalcolavano sommando solo qta*prezzo: senza la cassa
      previdenziale e senza le spese, quindi per uno studio con la cassa al 5%
-     ogni numero usciva più basso del vero. Qui c'e' la formula giusta, la
-     stessa di fattConti, e la usano tutti. IVA esclusa: l'IVA non è tua. */
+     ogni numero usciva più basso del vero.
+     12 agosto 2026: adesso chiama fattBasi, la stessa che usano scheda, PDF e
+     file per lo SDI, quindi lo sconto e gli arrotondamenti sono identici
+     ovunque. IVA esclusa: l'IVA non è tua. */
   function fattImponibile(f,righeDellaFattura){
-    const R=righeDellaFattura||[];
-    const compenso=R.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0);
-    const cassa=compenso*(+f.cassa_perc||0)/100;
-    return compenso+cassa+(+f.spese||0)-(+f.sconto||0);
+    return fattBasi(f,righeDellaFattura||[]).imponibile;
   }
   function fattNumero(f){
     return f.numero ? "n. "+f.numero+"/"+f.anno : "bozza senza numero";
@@ -2553,41 +2604,37 @@
   /* i totali si rifanno a ogni tasto premuto: si vede il conto crescere
      mentre scrivi, invece di scoprirlo dopo aver salvato */
   function fattTotaleLive(){
-    let imp=0, iva=0;
-    $$("#fatt-righe [data-riga]").forEach(d=>{
-      const q=+d.querySelector(".fr-qta").value||0;
-      const p=+d.querySelector(".fr-prezzo").value||0;
-      const a=+(d.querySelector(".fr-iva")||{}).value||0;
-      imp+=q*p; iva+=q*p*a/100;
-    });
-    const sconto=+($("#fa-sconto")||{}).value||0;
-    const bollo =+($("#fa-bollo") ||{}).value||0;
-    const rit   =+($("#fa-rit")   ||{}).value||0;
-    /* cassa e spese: gli stessi conti di fattConti, se no l'anteprima dice un
-       numero e il PDF ne dice un altro (9/8/2026) */
-    const cassaP=+($("#fa-cassa")||{}).value||0;
-    const spese =+($("#fa-spese")||{}).value||0;
     /* Array.from: $$ restituisce una NodeList, che non ha .map */
-    const aliqPrev=fattAliquotaPrevalente(Array.from($$("#fatt-righe [data-riga]")).map(d=>({
+    const R=Array.from($$("#fatt-righe [data-riga]")).map(d=>({
       qta:+d.querySelector(".fr-qta").value||0,
       prezzo:+d.querySelector(".fr-prezzo").value||0,
-      iva:+(d.querySelector(".fr-iva")||{}).value||0})));
-    const cassaE=imp*cassaP/100;
-    const imponibile=imp+cassaE+spese;
-    const ivaTot=iva+(cassaE+spese)*aliqPrev/100;
-    const ritE=imp*rit/100;              /* solo sul compenso */
-    const tot=imponibile+ivaTot-sconto+bollo;   /* quanto vale il documento */
-    const netto=tot-ritE;                /* quanto ti bonificano davvero */
+      iva:+(d.querySelector(".fr-iva")||{}).value||0}));
+    const f={
+      cassa_perc:+($("#fa-cassa")||{}).value||0,
+      spese:+($("#fa-spese")||{}).value||0,
+      sconto:+($("#fa-sconto")||{}).value||0,
+      bollo:+($("#fa-bollo")||{}).value||0,
+      ritenuta_perc:+($("#fa-rit")||{}).value||0
+    };
+    /* 12 agosto 2026 — gli STESSI conti della scheda, del PDF e del file per
+       lo SDI. Prima la formula era riscritta qui a mano, e in forfettario
+       l'anteprima sommava un'IVA che il salvataggio poi azzerava: leggevi
+       1.832 e salvavi 1.502. */
+    const b=fattBasi(f,R);
+    const forf=fattForfettario();
+    const ritE=b.compenso*f.ritenuta_perc/100;   /* solo sul compenso */
+    const tot=b.imponibile+b.iva+f.bollo;        /* quanto vale il documento */
+    const netto=tot-ritE;                        /* quanto ti bonificano davvero */
     const el=$("#fatt-somma");
     if(el)el.innerHTML=
-        '<div class="fs-r"><span>'+(ruoloUtente==='professionista'?'Compenso':'Imponibile')+'</span><b>'+eur2(imp)+'</b></div>'
-      + (cassaE?'<div class="fs-r"><span>Cassa '+cassaP+'%</span><b>'+eur2(cassaE)+'</b></div>':"")
-      + (spese ?'<div class="fs-r"><span>Spese</span><b>'+eur2(spese)+'</b></div>':"")
-      + ((cassaE||spese)?'<div class="fs-r"><span>Imponibile IVA</span><b>'+eur2(imponibile)+'</b></div>':"")
-      + (fattForfettario()?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(ivaTot)+'</b></div>')
-      + (sconto?'<div class="fs-r"><span>Sconto</span><b>−'+eur2(sconto)+'</b></div>':"")
-      + (bollo ?'<div class="fs-r"><span>Bollo</span><b>'+eur2(bollo)+'</b></div>':"")
-      + (ritE  ?'<div class="fs-r"><span>Ritenuta '+rit+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
+        '<div class="fs-r"><span>'+(ruoloUtente==='professionista'?'Compenso':'Imponibile')+'</span><b>'+eur2(b.compenso)+'</b></div>'
+      + (b.cassa ?'<div class="fs-r"><span>Cassa '+f.cassa_perc+'%</span><b>'+eur2(b.cassa)+'</b></div>':"")
+      + (b.spese ?'<div class="fs-r"><span>Spese</span><b>'+eur2(b.spese)+'</b></div>':"")
+      + (b.sconto?'<div class="fs-r"><span>Sconto</span><b>−'+eur2(b.sconto)+'</b></div>':"")
+      + ((b.cassa||b.spese||b.sconto)?'<div class="fs-r"><span>Imponibile IVA</span><b>'+eur2(b.imponibile)+'</b></div>':"")
+      + (forf?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(b.iva)+'</b></div>')
+      + (f.bollo?'<div class="fs-r"><span>Bollo</span><b>'+eur2(f.bollo)+'</b></div>':"")
+      + (ritE   ?'<div class="fs-r"><span>Ritenuta '+f.ritenuta_perc+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
       + '<div class="fs-r fs-tot"><span>'+(ritE?"Totale fattura":"Totale")+'</span><b>'+eur2(tot)+'</b></div>'
       + (ritE?'<div class="fs-r fs-tot"><span>Netto a pagare</span><b>'+eur2(netto)+'</b></div>':"");
     return tot;
@@ -2690,7 +2737,15 @@
 
     const cont=$("#fatt-righe");
     if(cont)cont.addEventListener("input",fattTotaleLive);
-    ["#fa-sconto","#fa-bollo","#fa-rit"].forEach(id=>{const e=$(id);if(e)e.addEventListener("input",fattTotaleLive);});
+    /* 12 agosto 2026 — #fa-cassa e #fa-spese mancavano: un geometra sceglieva
+       "5% Cassa Geometri" e scriveva 150 di spese, e il riquadro "Il conto"
+       restava fermo sul numero di prima. La cassa e' una tendina, quindi
+       serve anche "change". */
+    ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-spese"].forEach(id=>{
+      const e=$(id);if(!e)return;
+      e.addEventListener("input",fattTotaleLive);
+      e.addEventListener("change",fattTotaleLive);
+    });
     fattTotaleLive();
   }
   let fattLavoriInCorso=null;
@@ -3098,11 +3153,9 @@
     doc.text("Importo",colT-2,y+5.5,{align:"right"});
     doc.setTextColor(0);doc.setFont("helvetica","normal");y+=8;
 
-    const perAliq={};
     R.forEach(r=>{
       const imp=(+r.qta||0)*(+r.prezzo||0);
       const al=forf?0:(+r.iva||0);
-      perAliq[al]=(perAliq[al]||0)+imp;
       const lines=doc.splitTextToSize(r.descrizione||"",colQ-M-8);
       const h=Math.max(lines.length*4.6+5, 9);
       if(y+h>262){doc.addPage();y=20;}
@@ -3117,24 +3170,18 @@
     });
     doc.setDrawColor(180);doc.line(M,y,Rx,y);y+=8;
 
-    /* 9 agosto 2026 — cassa e spese entrano nell'imponibile anche QUI.
-       Prima il riepilogo sommava solo le righe: su una parcella con cassa 100
-       e spese 150 il PDF dichiarava "imponibile 2.000, imposta 440" mentre
-       poco sotto addebitava 495. L'XML per lo SDI lo faceva già giusto
-       (vedi DatiRiepilogo): era il PDF, quello che legge il cliente, a mentire. */
-    if(c.cassa||c.spese){
-      const alp=forf?0:c.aliqPrev;
-      perAliq[alp]=(perAliq[alp]||0)+c.cassa+c.spese;
-    }
-
     /* riepilogo per aliquota: è quello che chiede lo SDI, e serve al
-       commercialista per controllare in due secondi */
-    if(!forf&&Object.keys(perAliq).length){
+       commercialista per controllare in due secondi.
+       12 agosto 2026 — le righe arrivano da fattConti (fattBasi): cassa e
+       spese sono gia' dentro, e lo sconto e' gia' ripartito. Prima il conto si
+       rifaceva qui a mano, ed e' cosi' che PDF, Excel e file per lo SDI
+       finivano per dire tre numeri diversi. */
+    const righeIva=(c.righeIva||[]);
+    if(!forf&&righeIva.length){
       doc.setFontSize(8.5);doc.setTextColor(110);
       doc.text("Riepilogo IVA",M,y);y+=4.5;
-      Object.keys(perAliq).sort((a,b)=>b-a).forEach(al=>{
-        const imp=perAliq[al], im=imp*(+al)/100;
-        doc.text("aliquota "+al+"%  ·  imponibile "+eurPdf(imp)+"  ·  imposta "+eurPdf(im),M,y);y+=4.2;
+      righeIva.forEach(ri=>{
+        doc.text("aliquota "+ri.aliquota+"%  ·  imponibile "+eurPdf(ri.imponibile)+"  ·  imposta "+eurPdf(ri.imposta),M,y);y+=4.2;
       });
       doc.setTextColor(0);y+=4;
     }
@@ -3148,14 +3195,16 @@
     };
     /* 9 agosto 2026 — cassa e spese in chiaro: prima il PDF mostrava un solo
        "Imponibile" e il cliente non capiva da dove usciva il totale. */
-    if(c.cassa||c.spese){
+    if(c.cassa||c.spese||c.sconto){
       riga(ruoloUtente==='professionista'?"Compenso":"Imponibile voci",eurPdf(c.compenso));
       if(c.cassa)riga("Cassa previdenziale "+(+f.cassa_perc||0)+"%",eurPdf(c.cassa));
       if(c.spese)riga("Spese documentate",eurPdf(c.spese));
+      /* lo sconto sta QUI, prima dell'imponibile: e' da li' che si toglie, ed
+         e' su quello che resta che si calcola l'IVA */
+      if(c.sconto)riga("Sconto","-"+eurPdf(c.sconto));
     }
-    riga("Imponibile"+((c.cassa||c.spese)?" IVA":""),eurPdf(c.imponibile));
+    riga("Imponibile"+((c.cassa||c.spese||c.sconto)?" IVA":""),eurPdf(c.imponibile));
     if(!forf)riga("IVA",eurPdf(c.iva));
-    if(+f.sconto)riga("Sconto","-"+eurPdf(f.sconto));
     if(+f.bollo)riga("Imposta di bollo",eurPdf(f.bollo));
     if(c.ritenuta)riga("Ritenuta d'acconto "+(+f.ritenuta_perc)+"%","-"+eurPdf(c.ritenuta));
     doc.setDrawColor(11,75,196);doc.setLineWidth(.4);
@@ -3454,9 +3503,12 @@
     if(+f.bollo){
       x+='        <DatiBollo>\n          <BolloVirtuale>SI</BolloVirtuale>\n          <ImportoBollo>'+xnum(f.bollo)+'</ImportoBollo>\n        </DatiBollo>\n';
     }
-    if(+f.sconto){
-      x+='        <ScontoMaggiorazione>\n          <Tipo>SC</Tipo>\n          <Importo>'+xnum(f.sconto)+'</Importo>\n        </ScontoMaggiorazione>\n';
-    }
+    /* 12 agosto 2026 — lo sconto NON si dichiara piu' qui. Adesso e' gia'
+       tolto dagli imponibili dei riepiloghi (vedi fattBasi), quindi ripeterlo
+       anche a livello di documento lo farebbe contare due volte e il totale
+       non tornerebbe piu' con la somma dei riepiloghi: e' esattamente il
+       controllo che fa scartare il file. Sul PDF che legge il cliente lo
+       sconto si vede, riga per riga. */
     /* qui va il valore del DOCUMENTO, non quello che incassi: lo SDI lo
        confronta con la somma di imponibile e imposta, e se ci sottrai la
        ritenuta il file viene segnalato. La ritenuta si toglie più sotto,
@@ -3466,11 +3518,9 @@
     x+='      </DatiGeneraliDocumento>\n    </DatiGenerali>\n';
 
     x+='    <DatiBeniServizi>\n';
-    const perAliq={};
     R.forEach((r,i)=>{
       const al=forf?0:(+r.iva||0);
       const imp=(+r.qta||0)*(+r.prezzo||0);
-      perAliq[al]=(perAliq[al]||0)+imp;
       x+='      <DettaglioLinee>\n';
       x+='        <NumeroLinea>'+(i+1)+'</NumeroLinea>\n';
       x+='        <Descrizione>'+xesc(xtaglia(r.descrizione,1000))+'</Descrizione>\n';
@@ -3483,20 +3533,18 @@
       if(al===0) x+='        <Natura>N2.2</Natura>\n';
       x+='      </DettaglioLinee>\n';
     });
-    /* cassa e spese non sono righe, ma fanno imponibile: vanno sommate al
-       riepilogo dell'aliquota che comanda, se no lo SDI scarta il file perché
-       la somma dei riepiloghi non torna con il totale del documento. */
-    if(c.cassa||c.spese){
-      const alp=forf?0:c.aliqPrev;
-      perAliq[alp]=(perAliq[alp]||0)+c.cassa+c.spese;
-    }
-    Object.keys(perAliq).sort((a,b)=>b-a).forEach(al=>{
-      const imp=perAliq[al], imposta=imp*(+al)/100;
+    /* I riepiloghi arrivano da fattConti (fattBasi), che ha gia' fatto due
+       cose: sommato cassa e spese all'aliquota che comanda (non sono righe ma
+       fanno imponibile) e tolto lo sconto in proporzione. Sono gli STESSI
+       numeri che il cliente legge sul PDF, e la loro somma e' esattamente
+       ImportoTotaleDocumento meno il bollo: e' il conto che fa lo SDI. */
+    (c.righeIva||[]).forEach(ri=>{
+      const al=ri.aliquota;
       x+='      <DatiRiepilogo>\n';
       x+='        <AliquotaIVA>'+xnum(al)+'</AliquotaIVA>\n';
       if(+al===0) x+='        <Natura>N2.2</Natura>\n';
-      x+='        <ImponibileImporto>'+xnum(imp)+'</ImponibileImporto>\n';
-      x+='        <Imposta>'+xnum(imposta)+'</Imposta>\n';
+      x+='        <ImponibileImporto>'+xnum(ri.imponibile)+'</ImponibileImporto>\n';
+      x+='        <Imposta>'+xnum(ri.imposta)+'</Imposta>\n';
       x+='        <EsigibilitaIVA>I</EsigibilitaIVA>\n';
       if(+al===0) x+='        <RiferimentoNormativo>Operazione non soggetta a IVA ai sensi dell\'art. 1, commi 54-89, L. 190/2014 - regime forfettario</RiferimentoNormativo>\n';
       x+='      </DatiRiepilogo>\n';
