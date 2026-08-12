@@ -120,7 +120,7 @@
       <div class="cal-head"><h2 id="cal-title">—</h2>
         <div class="cal-nav"><button class="btn" data-action="cal-prev">‹</button><button class="btn" data-action="cal-today">•</button><button class="btn" data-action="cal-next">›</button></div></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend"><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Da fare</span><span><i class="dot corso"></i>In corso</span><span><i class="dot done"></i>Fatto</span><span>📌 Nota</span></div>
+      <div class="cal-legend"><span><i class="dot ritardo"></i>In ritardo</span><span><i class="dot todo"></i>Da fare</span><span><i class="dot corso"></i>In corso</span><span><i class="dot done"></i>Fatto</span><span><i class="dot scad"></i>Scadenza</span><span>📌 Nota</span></div>
     </section>
 
     <section id="lavori">
@@ -1385,7 +1385,14 @@
     const perCli={};aperti.forEach(l=>{if(l.cliente_id)perCli[l.cliente_id]=(perCli[l.cliente_id]||0)+1;});
     const cliOrd=Object.keys(perCli).sort((a,b)=>perCli[b]-perCli[a]);
     /* scadenzario */
-    const scAperte=SC.filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30)
+    /* 12 agosto 2026 — anche le scadenze delle PERSONE (visita medica,
+       formazione sicurezza, documento, permesso di soggiorno). Prima il
+       Riepilogo leggeva solo gest_scadenze: per un'impresa edile mancavano
+       proprio quelle che portano le sanzioni, e lo Scadenzario intanto
+       prometteva che "quelle gia' passate finiscono in cima al Riepilogo". */
+    const SCP=await scadenzePersone(mid);
+    const scTutte=SC.concat(SCP);
+    const scAperte=scTutte.filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30)
                      .sort((a,b)=>a.data_scadenza.localeCompare(b.data_scadenza));
 
     /* ---- "Da sistemare oggi": la scorciatoia in cima ----
@@ -1411,7 +1418,7 @@
     if(ritardo.length)   DA.push({g:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
                                   d:"La data prevista è già passata",go:"lavori"});
     if(scScadute.length) DA.push({g:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),
-                                  d:(scScadute[0].titolo||"Scadenza")+(scScadute.length>1?" e altre":""),go:"scadenzario"});
+                                  d:(scScadute[0].titolo||"Scadenza")+(scScadute[0]._persona?" · "+scScadute[0]._nome:"")+(scScadute.length>1?" e altre":""),go:"scadenzario"});
     if(mzScaduti.length) DA.push({g:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
                                   d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
     /* strumenti e attrezzature: riga loro, e porta nella sezione giusta.
@@ -1647,7 +1654,7 @@
       tono: scAperte.some(x=>x.data_scadenza<oggi)?"err":(scAperte.length?"attesa":"ok"),
       vuoto:"Nessuna scadenza in arrivo",
       righe: scAperte.slice(0,2).map(x=>{const q=quando(x.data_scadenza);return{
-        t:x.titolo||"Scadenza", v:x.data_scadenza<oggi?"scaduta":q.testo,
+        t:(x.titolo||"Scadenza")+(x._persona?" · "+x._nome:""), v:x.data_scadenza<oggi?"scaduta":q.testo,
         cls:x.data_scadenza<oggi?"q-passato":q.classe};})
     }));
 
@@ -3794,12 +3801,35 @@
     }
   }
 
-  let calJobs=[];
+  let calJobs=[], calScad=[];
   async function renderCal(){
     const y=cal.getFullYear(), m=cal.getMonth();
     $("#cal-title").textContent=mesi[m]+" "+y;
     if(sb&&sbUid){const {data}=await sb.from("gest_lavori").select("id,descrizione,stato,data_prevista").eq("user_id",sbUid).eq("mestiere_id",curMestiere());calJobs=data||[];}
     else calJobs=[];
+    /* ===== 12 agosto 2026 — LE SCADENZE SUL CALENDARIO =====
+       Il calendario leggeva UNA tabella sola: i lavori. Le scadenze — DURC,
+       assicurazioni, revisioni, tarature, visite mediche — hanno tutte una
+       data e non si vedevano nel posto dove uno le va a cercare.
+       Ed era un controsenso preciso: quando crei una pratica con data futura
+       il gestionale ti propone "Vuoi che ti ricordi la data del ...?" e crea
+       una scadenza, che poi sul calendario non compariva.
+       Ci sono anche quelle delle PERSONE (visita medica, formazione, permesso
+       di soggiorno), che non sono righe di gest_scadenze ma date sulla scheda. */
+    calScad=[];
+    if(sb&&sbUid){
+      try{
+        const mid=curMestiere();
+        const [{data:sc},per]=await Promise.all([
+          sb.from("gest_scadenze").select("id,titolo,data_scadenza,stato,mezzo_id")
+            .eq("user_id",sbUid).eq("mestiere_id",mid),
+          scadenzePersone(mid)
+        ]);
+        calScad=(sc||[]).filter(x=>x.data_scadenza)
+          .map(x=>({id:x.id,titolo:x.titolo||"Scadenza",data:x.data_scadenza,fatta:x.stato==="fatta"}))
+          .concat((per||[]).map(x=>({id:x.id,titolo:x.titolo+" · "+x._nome,data:x.data_scadenza,fatta:false})));
+      }catch(e){ calScad=[]; }
+    }
     await caricaNote();
     const lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
     const dow=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
@@ -3817,10 +3847,17 @@
         const tit=j.descrizione||"Lavoro";
         return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">${esc(tit)}</span></span>`;
       }).join("");
-      const piu=jobs.length>MAX_CELLA?`<span class="cal-piu">+${jobs.length-MAX_CELLA}</span>`:"";
+      /* le scadenze del giorno, sotto i lavori e con la loro barretta */
+      const sc=calScad.filter(x=>x.data===ds);
+      const righeSc=sc.slice(0,MAX_CELLA).map(x=>{
+        const cls=x.fatta?"fatto":(scaduto?"ritardo":"scad");
+        return `<span class="cal-lav"><i class="cal-lav-bar ${cls}"></i><span class="cal-lav-t">⏰ ${esc(x.titolo)}</span></span>`;
+      }).join("");
+      const tot=jobs.length+sc.length;
+      const piu=tot>MAX_CELLA?`<span class="cal-piu">+${tot-MAX_CELLA}</span>`:"";
       const we=(lead+d-1)%7>=5?" we":"";
       const note=noteCache[ds]?`<span class="cal-note-mark">📌</span>`:"";
-      html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${piu}</div></div>`;
+      html+=`<div class="cal-cell${ds===todayStr()?" today":""}${we}" data-action="open-day" data-d="${ds}"><span class="dn">${d}</span>${note}<div class="cal-lavori">${righe}${righeSc}${piu}</div></div>`;
     }
     $("#cal-grid").innerHTML=html;
   }
@@ -3854,7 +3891,14 @@
         <div style="flex:1"><b style="font-size:14px">${esc(j.descrizione||"(senza descrizione)")}</b></div>
         <span class="stato ${cls}">${lab}</span></div>`;}).join("")
       :`<p style="color:var(--muted);font-size:14px;margin-bottom:12px">Nessun lavoro in questa data.</p>`;
-    openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}</div>
+    /* le scadenze di quel giorno: sola lettura, ma almeno si vedono */
+    const scDel=calScad.filter(x=>x.data===ds);
+    const listSc=scDel.length?scDel.map(x=>{
+      const late=!x.fatta&&ds<todayStr();
+      return `<div class="day-job"><i class="dot ${x.fatta?'done':(late?'ritardo':'todo')}"></i>
+        <div style="flex:1"><b style="font-size:14px">⏰ ${esc(x.titolo)}</b></div>
+        <span class="stato ${x.fatta?'fatto':(late?'ritardo':'da_fare')}">${x.fatta?'Fatta':(late?'Scaduta':'Scadenza')}</span></div>`;}).join(""):"";
+    openSheet(`<h3>${fdate(ds)}</h3><div class="day-jobs">${list}${listSc}</div>
       <div class="field"><label>📌 Nota / promemoria del giorno</label>
         <textarea id="day-note" placeholder="Es. chiamare amministratore, portare scala...">${esc(noteCache[ds]||"")}</textarea></div>
       <div class="sheet-actions">
@@ -5242,7 +5286,63 @@
       "Consegna lavori","SAL (stato avanzamento)","Fine lavori","Verifica ponteggio",
       "Altro"];
   let scadCache=[];
+  /* ===== 12 agosto 2026 — LE SCADENZE CHE SI RIPETONO =====
+     Segnavi "fatta" la revisione, il DURC, l'assicurazione, la taratura, la
+     visita medica... e non ti avvisava MAI PIU'. In tutto il gestionale non
+     esisteva il concetto di ricorrenza: ogni scadenza era una volta sola, e
+     lo Scadenzario diventava un elenco di cose gia' andate.
+     Adesso una scadenza puo' dire "mi ripeto ogni N mesi": quando la segni
+     fatta, quella dopo nasce da sola con la data giusta.
+
+     _mesiDopo tiene conto della fine mese: 31 gennaio + 1 mese non e' il
+     31 febbraio (che non esiste), e' il 28 — o il 29 negli anni bisestili. */
+  function _mesiDopo(ds,n){
+    const[y,m,d]=String(ds).split("-").map(Number);
+    if(!y||!m||!d)return ds;
+    const primo=new Date(y,m-1+(+n||0),1);
+    const ultimoDelMese=new Date(primo.getFullYear(),primo.getMonth()+1,0).getDate();
+    const dt=new Date(primo.getFullYear(),primo.getMonth(),Math.min(d,ultimoDelMese));
+    const mm=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");
+    return dt.getFullYear()+"-"+mm+"-"+dd;
+  }
+  const SCAD_RIPETI=[[0,"Non si ripete"],[3,"Ogni 3 mesi"],[6,"Ogni 6 mesi"],[12,"Ogni anno"],
+                     [24,"Ogni 2 anni"],[36,"Ogni 3 anni"],[60,"Ogni 5 anni"]];
   function _giorniDopo(ds,n){const[y,m,d]=ds.split("-").map(Number);const dt=new Date(y,m-1,d+n);const mm=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");return dt.getFullYear()+"-"+mm+"-"+dd;}
+  /* ============================================================
+     SCADENZE DELLE PERSONE — non sono righe di gest_scadenze.
+     Si leggono dalle date della scheda persona (gest_operatori) e compaiono
+     in sola lettura: si risolvono aggiornando la data nella scheda, cosi' il
+     dato resta in un posto solo e non si creano doppioni da tenere allineati.
+
+     12 agosto 2026 — questo pezzo stava DENTRO renderScadenze, e quindi lo
+     vedeva solo chi apriva lo Scadenzario. Il Riepilogo non ne sapeva niente:
+     visita medica scaduta, formazione sicurezza scaduta, permesso di soggiorno
+     scaduto — per un'impresa edile sono le scadenze che portano le sanzioni —
+     e in prima pagina non compariva NIENTE. Lo Scadenzario intanto promette,
+     testuale: "Quelle gia' passate finiscono in cima al Riepilogo, cosi' le
+     vedi appena apri". Adesso e' una funzione sola e la chiamano tutti e due.
+     ============================================================ */
+  const SCAD_PERSONA=[["visita_medica_scadenza","Visita medica","Sicurezza"],
+                      ["formazione_scadenza","Formazione sicurezza","Sicurezza"],
+                      ["documento_scadenza","Documento d'identita'","Documento"],
+                      ["permesso_scadenza","Permesso di soggiorno","Documento"]];
+  async function scadenzePersone(mid){
+    if(!sb||!sbUid)return [];
+    try{
+      const {data:ops}=await sb.from("gest_operatori")
+        .select("id,nome,visita_medica_scadenza,formazione_scadenza,documento_scadenza,permesso_scadenza")
+        .eq("user_id",sbUid).eq("mestiere_id",mid||curMestiere());
+      const out=[];
+      (ops||[]).forEach(function(o){
+        SCAD_PERSONA.forEach(function(t){
+          if(!o[t[0]])return;
+          out.push({id:"op:"+o.id+":"+t[0],_persona:true,_opId:o.id,_nome:o.nome||"Persona",
+            titolo:t[1],tipo_pratica:t[2],data_scadenza:o[t[0]],stato:"aperta"});
+        });
+      });
+      return out;
+    }catch(_){ return []; }
+  }
   async function renderScadenze(){
     const box=$("#scad-list");if(!box)return;
     if(!cur){box.innerHTML="";return;}
@@ -5266,27 +5366,7 @@
     const lavMap=Object.fromEntries((lvNomi||[]).map(l=>[l.id,l.descrizione||"Senza nome"]));
     const oggi=todayStr(),lim=_giorniDopo(oggi,7);
 
-    /* SCADENZE DELLE PERSONE — non sono righe di gest_scadenze.
-       Si leggono dalle date della scheda persona (gest_operatori) e compaiono
-       qui in sola lettura: si risolvono aggiornando la data nella scheda, così
-       il dato resta in un posto solo e non si creano doppioni da tenere allineati. */
-    const SCAD_PERSONA=[["visita_medica_scadenza","Visita medica","Sicurezza"],
-                        ["formazione_scadenza","Formazione sicurezza","Sicurezza"],
-                        ["documento_scadenza","Documento d'identita'","Documento"],
-                        ["permesso_scadenza","Permesso di soggiorno","Documento"]];
-    let scadPersone=[];
-    try{
-      const {data:ops}=await sb.from("gest_operatori")
-        .select("id,nome,visita_medica_scadenza,formazione_scadenza,documento_scadenza,permesso_scadenza")
-        .eq("user_id",sbUid).eq("mestiere_id",mid);
-      (ops||[]).forEach(function(o){
-        SCAD_PERSONA.forEach(function(t){
-          if(!o[t[0]])return;
-          scadPersone.push({id:"op:"+o.id+":"+t[0],_persona:true,_opId:o.id,_nome:o.nome||"Persona",
-            titolo:t[1],tipo_pratica:t[2],data_scadenza:o[t[0]],stato:"aperta"});
-        });
-      });
-    }catch(_){ scadPersone=[]; }
+    const scadPersone=await scadenzePersone(mid);
     const scadTutte=scadCache.concat(scadPersone).sort(function(a,b){
       return String(a.data_scadenza||"9999-99-99").localeCompare(String(b.data_scadenza||"9999-99-99"));
     });
@@ -5375,6 +5455,7 @@
             cliNome?"👤 "+esc(cliNome):"",
             mezNome?"🚚 "+esc(mezNome):"",
             "📅 "+fdate(s.data_scadenza),
+            ((+s.ripeti_mesi||0)?"🔁 "+((SCAD_RIPETI.find(r=>r[0]===+s.ripeti_mesi)||[0,""])[1]||"").toLowerCase():""),
             (s.avvisa===false?"🔕 nessuna email":"")],
       nota:s.note?"📝 "+esc(s.note):"",
       azioni:[
@@ -5422,6 +5503,9 @@
       +'<div class="sh-b">'
       +'<div class="sh-tit">Promemoria via email</div>'
       +`<label style="display:flex;align-items:center;gap:10px;font-size:1rem;margin:2px 0 10px;cursor:pointer"><input type="checkbox" id="s-avvisa" ${avvisaOn?"checked":""} style="width:20px;height:20px"><span>Avvisami per email</span></label>`
+      +`<div class="field"><label>Si ripete</label><select id="s-ripeti">`
+      +  SCAD_RIPETI.map(r=>'<option value="'+r[0]+'"'+((+s.ripeti_mesi||0)===r[0]?' selected':'')+'>'+r[1]+'</option>').join("")
+      +`</select><div class="sh-nota">Revisione, DURC, assicurazione, taratura, visita medica: quando la segni fatta, quella dell'anno dopo nasce da sola. Prima dovevi ricordartene tu.</div></div>`
       +'<p class="sh-nota">Ti arriva una email 30 giorni prima, 7 giorni prima e il giorno prima, all\'indirizzo con cui entri qui. Una sola email al giorno con tutte le scadenze vicine, non una per ognuna.</p>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -5450,11 +5534,14 @@
     const lavoro_id=($("#s-lav")&&$("#s-lav").value)?$("#s-lav").value:null;
     const avvisa=$("#s-avvisa")?!!$("#s-avvisa").checked:true;
     const note=$("#s-note").value.trim();
-    const row={titolo,tipo_pratica,cliente_id,mezzo_id,lavoro_id,data_scadenza,note,avvisa};
+    const ripeti_mesi=$("#s-ripeti")?(+$("#s-ripeti").value||0):0;
+    const row={titolo,tipo_pratica,cliente_id,mezzo_id,lavoro_id,data_scadenza,note,avvisa,ripeti_mesi};
     /* Se sql/gest-scadenze-pratiche.sql non è ancora stato eseguito, le colonne
        nuove non esistono: invece di far fallire tutto il salvataggio le tolgo una
        alla volta e riprovo (stessa scelta già fatta nei Dati azienda). */
-    const OPZ=["lavoro_id","avvisa"];
+    /* ripeti_mesi si toglie come le altre se la colonna non c'e' ancora:
+       chi non ha eseguito sql/gest-scadenze-ripeti.sql continua a salvare */
+    const OPZ=["lavoro_id","avvisa","ripeti_mesi"];
     const tolte=[];
     async function prova(){
       return id
@@ -5471,7 +5558,8 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non salvato: nessuna riga modificata");return;}
     closeSheet();renderScadenze();renderMezzi();
-    if(tolte.length){toast("Salvata, ma il collegamento alla pratica richiede l'aggiornamento del database (sql/gest-scadenze-pratiche.sql).");}
+    if(tolte.indexOf("ripeti_mesi")>=0&&tolte.length===1){toast("Salvata, ma per farla ripetere serve l'aggiornamento del database (sql/gest-scadenze-ripeti.sql).");}
+    else if(tolte.length){toast("Salvata, ma il collegamento alla pratica richiede l'aggiornamento del database (sql/gest-scadenze-pratiche.sql).");}
     else toast(id?"Aggiornato":"Scadenza aggiunta ✔");
   }
 
@@ -12913,7 +13001,31 @@
       const {data:okSc,error}=await sb.from("gest_scadenze").update({stato:v}).eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okSc||!okSc.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
-      renderScadenze();toast(v==="fatta"?"Scadenza completata ✔":"Riaperta");return;
+      /* ===== 12 agosto 2026 — la prossima nasce da sola =====
+         Se questa scadenza si ripete, appena la segni fatta ne creo un'altra
+         con la stessa roba e la data spostata avanti. Prima segnavi fatta la
+         revisione e non ti avvisava mai piu'. */
+      let _rip="";
+      if(v==="fatta"){
+        try{
+          const vecchia=scadCache.find(x=>String(x.id)===String(id));
+          const n=vecchia?(+vecchia.ripeti_mesi||0):0;
+          if(n>0&&vecchia.data_scadenza){
+            const nuovaData=_mesiDopo(vecchia.data_scadenza,n);
+            const {error:e2}=await sb.from("gest_scadenze").insert({
+              user_id:sbUid, mestiere_id:vecchia.mestiere_id||curMestiere(),
+              titolo:vecchia.titolo, tipo_pratica:vecchia.tipo_pratica||null,
+              cliente_id:vecchia.cliente_id||null, mezzo_id:vecchia.mezzo_id||null,
+              lavoro_id:vecchia.lavoro_id||null, note:vecchia.note||null,
+              avvisa:vecchia.avvisa!==false, ripeti_mesi:n,
+              data_scadenza:nuovaData, stato:"aperta"});
+            if(e2)_rip=" — ma la prossima non è stata creata: "+e2.message;
+            else  _rip=" — la prossima è il "+fdate(nuovaData);
+          }
+        }catch(e){}
+      }
+      renderScadenze();rinfresca("riepilogo","calendario");
+      toast(v==="fatta"?("Scadenza completata ✔"+_rip):"Riaperta");return;
     }
     if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
