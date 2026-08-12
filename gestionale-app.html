@@ -2242,7 +2242,7 @@
       const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
       if(up){toast("Foto non caricata: "+up.message);continue;}
       const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:lfLavoroId,tipo:"da_fare",operatore:"Capo",storage_path:path});
-      if(ins){toast("Foto su, ma non salvata: "+ins.message);continue;}
+      if(ins){await _fileOrfano("gestionale-foto",path);toast("Foto non salvata: "+ins.message);continue;}
       n++;
     }
     if(n)toast(n===1?"Foto aggiunta ✔":n+" foto aggiunte ✔");
@@ -2278,7 +2278,7 @@
     const {error:up}=await sb.storage.from("gestionale-video").upload(path,file);
     if(up){toast("Video non caricato: "+up.message);return;}
     const {error:ins}=await sb.from("gest_video").insert({user_id:sbUid,lavoro_id:lfLavoroId,tipo:"da_fare",operatore:"Capo",storage_path:path});
-    if(ins){toast("Video su, ma non salvato: "+ins.message);return;}
+    if(ins){await _fileOrfano("gestionale-video",path);toast("Video non salvato: "+ins.message);return;}
     toast("Video aggiunto ✔");renderLavoroVideo();
   }
   /* il PDF vero della fattura (quello del commercialista) si carica a mano e
@@ -2301,7 +2301,7 @@
     const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
     if(up){toast("Fattura non caricata: "+up.message);return;}
     const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,fattura_id:fattUploadId,tipo:"fattura",operatore:"Capo",storage_path:path});
-    if(ins){toast("File su, ma non salvato: "+ins.message);return;}
+    if(ins){await _fileOrfano("gestionale-foto",path);toast("File non salvato: "+ins.message);return;}
     toast("Fattura PDF caricata \u2714");renderFatture();
   }
   async function apriFatturaPdf(fotoId){
@@ -4317,6 +4317,10 @@
       v.push({sep:true});
       v.push({lab:"🚫 Rimuovi accesso",action:"sq-revoca",data:{id:o.id,nome:o.nome},del:true});
     }
+    /* 12 agosto 2026 (sera) — c'era solo «Rimuovi accesso», che toglie la
+       password ma lascia la persona in elenco per sempre. */
+    if(!o.codice)v.push({sep:true});
+    v.push({lab:"🗑 Elimina",action:"sq-del",data:{id:o.id},del:true});
     return v;
   }
   function dipCard(o){
@@ -4464,6 +4468,78 @@
     closeSheet();renderDip();
     if(!okMem||!okMem.length){toast("Salvato, ma ruolo e permessi non aggiornati");return;}
     toast("Aggiornato ✔");
+  }
+
+  /* ============================================================
+     12 agosto 2026 (sera) — LE PERSONE SI POSSONO ELIMINARE
+
+     Era l'unica anagrafica del gestionale senza «Elimina»: c'era «Rimuovi
+     accesso», che toglie la password ma lascia la persona nell'elenco per
+     sempre. Chi ha avuto dieci operai in tre anni si ritrova dieci schede da
+     scorrere ogni volta, e le loro scadenze — visita medica, formazione,
+     permesso di soggiorno — continuano a comparire in cima al Riepilogo come
+     se fossero ancora in ditta. Per questo la categoria «Persone» del Cestino
+     non si e' mai riempita: non si poteva mettere via niente.
+
+     COSA NON SI TOCCA, e perche':
+       - le ORE registrate restano. Sono il costo della manodopera dei lavori
+         gia' chiusi: cancellarle cambierebbe il margine di lavori vecchi.
+       - le FOTO e i VIDEO che ha caricato restano: sono la storia del cantiere.
+       - i LAVORI a suo nome restano, ma perdono il nome di chi li seguiva.
+     Tutto questo si dice PRIMA, coi numeri veri, non dopo.
+     ============================================================ */
+  async function dipElimina(id){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const o=(dipCache||[]).find(x=>String(x.id)===String(id))||{};
+    const nome=o.nome||"questa persona";
+    let ore=0,lav=0,file=0,incerto=false;
+    const _n=async function(tab,col,val){
+      try{
+        const {count,error}=await sb.from(tab).select("id",{count:"exact",head:true})
+          .eq("user_id",sbUid).eq(col,val);
+        if(error){incerto=true;return 0;}
+        return count||0;
+      }catch(e){incerto=true;return 0;}
+    };
+    /* ha l'accesso dal telefono? Non ci si puo' fidare di dipCache: li' dentro
+       il codice d'invito non viene copiato, quindi si guarda la tabella vera. */
+    const _haAccesso=async function(){
+      try{
+        const {data:m}=await sb.from("gest_membri").select("operatore_id,stato")
+          .eq("impresa_id",sbUid).eq("operatore_id",id).limit(1);
+        return !!(m&&m.length&&String(m[0].stato||"")!=="revocato");
+      }catch(e){ return false; }
+    };
+    const [a,b,c,d,acc]=await Promise.all([
+      _n("gest_ore","operatore_id",id),
+      _n("gest_lavori","operatore_id",id),
+      _n("gest_foto","operatore",String(id)),
+      _n("gest_video","operatore",String(id)),
+      _haAccesso()
+    ]);
+    ore=a;lav=b;file=c+d;
+    const voci=[];
+    if(ore) voci.push(ore+(ore===1?" ora registrata":" ore registrate")+" — servono al margine dei lavori");
+    if(file)voci.push(file+(file===1?" foto o video caricato":" foto e video caricati"));
+    if(lav) voci.push(lav+(lav===1?" lavoro a suo nome, che resterà senza nessuno assegnato"
+                                  :" lavori a suo nome, che resteranno senza nessuno assegnato"));
+    let msg="Eliminare «"+nome+"» dalla squadra?\n\n";
+    if(voci.length){
+      msg+="Quello che ha fatto RESTA dov'è:\n"+voci.map(v=>"  •  "+v).join("\n")+"\n\n";
+    }
+    if(incerto)msg+="ATTENZIONE: non sono riuscito a controllare tutto, la connessione non ha risposto.\n\n";
+    if(acc)msg+="Perde anche l'accesso al gestionale dal telefono.\n\n";
+    msg+=fraseCestino()+"\n\nContinuare?";
+    if(!gconfirm(msg))return;
+    /* prima si toglie l'accesso: una persona eliminata che entra ancora dal
+       telefono sarebbe la cosa peggiore di tutte */
+    try{ await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid); }catch(e){}
+    const {data:ok,error}=await sb.from("gest_operatori").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(error){toast("Non eliminata: "+error.message);return;}
+    if(!ok||!ok.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
+    renderDip();
+    rinfresca("riepilogo","agenda","squadra","scadenzario","galleria","lavori");
+    toast(_cestOn()?"Persona messa nel Cestino ✔ — la rimetti a posto da lì":"Persona eliminata");
   }
 
   /* ============================================================
@@ -5229,6 +5305,7 @@
         toast(/fornitore_id/i.test(em)&&/column|schema cache/i.test(em)
           ?"Documento non registrato: esegui sql/gest-fornitori-plus.sql su Supabase"
           :"Non registrato: "+em);
+        await _fileOrfano("gestionale-foto",path);
         ko++;continue;
       }
       ok++;
@@ -6561,7 +6638,7 @@
         delete riga.nome_file;
         ({error:ins}=await sb.from("gest_foto").insert(riga));
       }
-      if(ins){toast("File su, ma non salvato: "+ins.message);ko++;continue;}
+      if(ins){await _fileOrfano("gestionale-foto",path);toast("File non salvato: "+ins.message);ko++;continue;}
       ok++;
     }
     if(ok)toast(ok===1?"Documento caricato ✔":ok+" documenti caricati ✔");
@@ -7270,7 +7347,7 @@
     const {error:up}=await sb.storage.from("gestionale-video").upload(path,file);
     if(up){toast("Video non caricato: "+up.message);if(inputEl)inputEl.value="";return;}
     const {error:ins}=await sb.from("gest_video").insert({user_id:sbUid,lavoro_id:lav,tipo:tipoDb,operatore:operatore||"Capo",storage_path:path});
-    if(ins){toast("Video su, ma non salvato: "+ins.message);if(inputEl)inputEl.value="";return;}
+    if(ins){await _fileOrfano("gestionale-video",path);toast("Video non salvato: "+ins.message);if(inputEl)inputEl.value="";return;}
     toast("Video aggiunto ✔");if(inputEl)inputEl.value="";renderVideoBlocks();
   }
   async function renderVideoBlocks(){
@@ -7479,6 +7556,20 @@
       if(im)im.src=fotoCache[f.id];
     });
     await galFirma("gestionale-video",V,galVideoCache);
+  }
+  /* ===== 12 agosto 2026 (sera) — I FILE ORFANI NEL DEPOSITO =====
+     Otto punti del gestionale fanno la stessa identica cosa: caricano il file
+     nel bucket, poi scrivono la riga nel database che lo nomina. Se la riga
+     NON si scrive — rete che cade, permesso negato, una colonna che manca — il
+     messaggio lo diceva («Foto su, ma non salvata») ma il file restava
+     caricato, senza piu' nessuna riga che lo nominasse: invisibile nel
+     gestionale, impossibile da ritrovare, e a occupare spazio per sempre. Con
+     le foto da telefono sono megabyte a ogni tentativo andato male, e nel
+     deposito di Supabase lo spazio si paga.
+     Adesso, appena si sa che la riga non c'e', il file si toglie. */
+  async function _fileOrfano(bucket,path){
+    if(!sb||!path)return;
+    try{ await sb.storage.from(bucket).remove([path]); }catch(e){}
   }
   /* Le firme durano un'ora: entro i 50 minuti si riusano invece di chiederne
      di nuove a ogni ridisegno. Cosi' cambiare filtro quattro volte non rifa'
@@ -7866,7 +7957,7 @@
         const {error:up}=await sb.storage.from("gestionale-foto").upload(path,pr.file);
         if(up){errori.push("Foto non caricata: "+up.message);continue;}
         const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:lav,tipo:tipoDb,operatore:op,storage_path:path});
-        if(ins){errori.push("Foto su, ma non salvata: "+ins.message);continue;}
+        if(ins){await _fileOrfano("gestionale-foto",path);errori.push("Foto non salvata: "+ins.message);continue;}
         nF++;
       }
       if(vidFile){
@@ -7879,7 +7970,7 @@
           if(up){errori.push("Video non caricato: "+up.message);}
           else{
             const {error:ins}=await sb.from("gest_video").insert({user_id:sbUid,lavoro_id:lav,tipo:tipoDb,operatore:op,storage_path:path});
-            if(ins)errori.push("Video su, ma non salvato: "+ins.message); else nV++;
+            if(ins){await _fileOrfano("gestionale-video",path);errori.push("Video non salvato: "+ins.message);} else nV++;
           }
         }
       }
@@ -13066,7 +13157,8 @@
        La colonna eliminato_il resta nel file, quindi si distingue cos'era cosa. */
     const _tab=t=>((window.cestinoAttivo&&window.cestinoAttivo())?sb.raw(t):sb.from(t));
     const [mest,lav,cli,ops,scad,prev,righe,spese,mezzi,lavMezzi,az,
-           fatt,fattRig,fattLav,ore,cred,forn,fattForn]=await Promise.all([
+           fatt,fattRig,fattLav,ore,cred,forn,fattForn,
+           comp,compCap,compVoci,compMis,prezzi,carte,carteMov,rifor,note,foto,video]=await Promise.all([
       _tab("gest_mestieri").select("*").eq("user_id",sbUid),
       _tab("gest_lavori").select("*").eq("user_id",sbUid),
       _tab("gest_clienti").select("*").eq("user_id",sbUid),
@@ -13084,13 +13176,37 @@
       _opz(_tab("gest_ore").select("*").eq("user_id",sbUid)),
       _opz(_tab("gest_crediti").select("*").eq("user_id",sbUid)),
       _opz(_tab("gest_fornitori").select("*").eq("user_id",sbUid)),
-      _opz(_tab("gest_fatture_fornitori").select("*").eq("user_id",sbUid))
+      _opz(_tab("gest_fatture_fornitori").select("*").eq("user_id",sbUid)),
+      /* ===== 12 agosto 2026 (sera) — MANCAVA ANCORA UN PEZZO =====
+         Il backup non conteneva i COMPUTI METRICI (con capitoli, voci e
+         misure), il PREZZARIO personale, le CARTE aziendali coi loro
+         movimenti, i RIFORNIMENTI, le NOTE del calendario e l'elenco di FOTO e
+         VIDEO. Un computo da sessanta voci con tutte le misure e' settimane di
+         lavoro: se un giorno serve davvero ripartire da questo file, non ci
+         sarebbe stato. (Le foto e i video sono l'ELENCO, non i file: quelli
+         stanno nello storage e vanno scaricati a parte, ma senza l'elenco non
+         si saprebbe nemmeno cosa cercare.) */
+      _opz(_tab("gest_computi").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_computo_capitoli").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_computo_voci").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_computo_misure").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_prezzi_propri").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_carte").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_carte_movimenti").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_rifornimenti").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_note").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_foto").select("*").eq("user_id",sbUid)),
+      _opz(_tab("gest_video").select("*").eq("user_id",sbUid))
     ]);
     return {mest:mest.data||[],lav:lav.data||[],cli:cli.data||[],ops:ops.data||[],scad:scad.data||[],
             prev:prev.data||[],righe:righe.data||[],spese:spese.data||[],mezzi:mezzi.data||[],
             lavMezzi:lavMezzi.data||[],az:az.data||null,
             fatt:fatt.data||[],fattRig:fattRig.data||[],fattLav:fattLav.data||[],
-            ore:ore.data||[],cred:cred.data||[],forn:forn.data||[],fattForn:fattForn.data||[]};
+            ore:ore.data||[],cred:cred.data||[],forn:forn.data||[],fattForn:fattForn.data||[],
+            comp:comp.data||[],compCap:compCap.data||[],compVoci:compVoci.data||[],
+            compMis:compMis.data||[],prezzi:prezzi.data||[],carte:carte.data||[],
+            carteMov:carteMov.data||[],rifor:rifor.data||[],note:note.data||[],
+            foto:foto.data||[],video:video.data||[]};
   }
   async function esportaExcel(){
     if(!(await caricaXLSX())){toast("Non riesco a scaricare il modulo Excel: controlla la connessione e riprova");return;}
@@ -13177,7 +13293,12 @@
       azienda:D.az,mestieri:D.mest,clienti:D.cli,operatori:D.ops,lavori:D.lav,spese:D.spese,
       preventivi:D.prev,preventivo_righe:D.righe,scadenze:D.scad,mezzi:D.mezzi,lavoro_mezzi:D.lavMezzi,
       fatture:D.fatt,fattura_righe:D.fattRig,fattura_lavori:D.fattLav,
-      ore:D.ore,crediti:D.cred,fornitori:D.forn,fatture_fornitori:D.fattForn};
+      ore:D.ore,crediti:D.cred,fornitori:D.forn,fatture_fornitori:D.fattForn,
+      computi:D.comp,computo_capitoli:D.compCap,computo_voci:D.compVoci,computo_misure:D.compMis,
+      prezzario:D.prezzi,carte:D.carte,carte_movimenti:D.carteMov,rifornimenti:D.rifor,
+      note_calendario:D.note,
+      /* elenco dei file, non i file: quelli stanno nello storage */
+      foto:D.foto,video:D.video};
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}));
     a.download="backup-gestionale-trovaimpresa-"+todayStr()+".json";a.click();URL.revokeObjectURL(a.href);
@@ -13642,6 +13763,7 @@
       if(!okRev||!okRev.length){toast("Non rimosso: nessuna riga modificata. Riprova.");return;}
       renderDip();toast("Accesso rimosso");return;
     }
+    if(a==="sq-del")return dipElimina(id);
     if(a==="save-dip")return saveDip(id);
     /* 12 agosto 2026 (sera) — "edit-dip" e "del-dip" tolti: lavoravano sullo
        stesso archivio locale morto (db().dipendenti, sempre vuoto). La squadra
