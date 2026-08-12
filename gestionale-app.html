@@ -6152,27 +6152,105 @@
     state[id]={clienti:[],dipendenti:[],lavori:[],note:{}};
     await save();closeSheet();renderLanding();toast("Reparto creato ✔");
   }
+  /* ============================================================
+     12 agosto 2026 — ELIMINA REPARTO, riscritta. Era il punto piu'
+     pericoloso di tutto il gestionale, per tre motivi messi insieme:
+
+     1) contava SOLO i lavori. Ma il reparto (gest_mestieri) si porta dietro
+        tutto quello che ha dentro con la catena del database: clienti,
+        preventivi, fatture, fornitori, mezzi, persone, carte, scadenze,
+        computi. Chi leggeva "e i suoi 3 lavori" non poteva nemmeno
+        immaginare di perdere anche 40 clienti e 12 fatture.
+     2) diceva sempre "L'operazione e' definitiva", anche quando il Cestino
+        era acceso e quindi si poteva tornare indietro: il messaggio non
+        raccontava quello che succedeva davvero.
+     3) non guardava MAI se le cancellazioni erano andate a buon fine: il
+        reparto spariva dallo schermo anche quando nel database c'era ancora,
+        e ricompariva al primo ricaricamento.
+
+     Adesso: si conta tutto, si dice la verita' su cosa si puo' recuperare,
+     e se il database non risponde non si toglie niente dallo schermo.
+     ============================================================ */
+  /* Le tabelle che stanno dentro un reparto (hanno la colonna mestiere_id).
+     I nomi sono scritti in lingua "impresa": ci pensa gconfirm a girarli in
+     pratiche/collaboratori per gli studi tecnici. */
+  const REPARTO_CONTENUTO=[
+    ["gest_lavori",            "lavoro",               "lavori"],
+    ["gest_clienti",           "cliente",              "clienti"],
+    ["gest_preventivi",        "preventivo",           "preventivi"],
+    ["gest_fatture",           "fattura",              "fatture"],
+    ["gest_fatture_fornitori", "fattura di fornitore", "fatture di fornitori"],
+    ["gest_fornitori",         "fornitore",            "fornitori"],
+    ["gest_mezzi",             "mezzo o attrezzatura", "mezzi e attrezzature"],
+    ["gest_operatori",         "persona",              "persone"],
+    ["gest_carte",             "carta aziendale",      "carte aziendali"],
+    ["gest_scadenze",          "scadenza",             "scadenze"],
+    ["gest_computi",           "computo metrico",      "computi metrici"]
+  ];
+  /* Undici domande piccolissime (solo il conteggio, nessuna riga scaricata)
+     sparate tutte insieme: un solo giro di rete, e solo quando si preme
+     Elimina, che non e' cosa di tutti i giorni. */
+  async function contaReparto(mid){
+    const righe=await Promise.all(REPARTO_CONTENUTO.map(async function(v){
+      try{
+        const {count,error}=await sb.from(v[0]).select("id",{count:"exact",head:true})
+          .eq("user_id",sbUid).eq("mestiere_id",mid);
+        if(error)return {lab:null,n:0,ko:true};
+        const n=count||0;
+        return {lab:n?(n+" "+(n===1?v[1]:v[2])):null,n:n,ko:false};
+      }catch(e){return {lab:null,n:0,ko:true};}
+    }));
+    return {
+      voci:righe.map(r=>r.lab).filter(Boolean),
+      /* se anche una sola lettura e' fallita non si puo' giurare sull'elenco:
+         meglio dirlo che far credere che il reparto sia vuoto */
+      incerto:righe.some(r=>r.ko)
+    };
+  }
   async function delPanel(id){
     const p=(state.panels||[]).find(x=>x.id===id);
     if(!p)return;
-    let n=0;
-    if(sb&&sbUid&&p.mestiere_id){
-      const {data}=await sb.from("gest_lavori").select("id").eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
-      n=(data||[]).length;
+
+    /* Se il Cestino sta ancora facendo la sua prova di accensione,
+       l'eliminazione verrebbe bloccata a meta' strada: meglio dirlo prima di
+       far rispondere a una domanda inutile. */
+    const cst=window.cestinoStato&&window.cestinoStato();
+    if(cst&&cst.attesa>0){
+      toast("Attenzione: sto ancora controllando che il Cestino sia pronto. Riprova fra qualche secondo.");
+      return;
     }
-    /* la parola giusta per chi legge: il traduttore lavoro->pratica gira solo
-       per i professionisti, quindi la stringa di partenza non può essere già
-       in linguaggio da studio tecnico (9/8/2026) */
-    const _pl=(ruoloUtente==='professionista')?(n===1?"pratica":"pratiche"):(n===1?"lavoro":"lavori");
-    const msg=n?`Stai per eliminare il reparto «${p.nome}» e ${n===1?"il suo":"i suoi"} ${n} ${_pl}. L'operazione è definitiva. Continuare?`:`Stai per eliminare il reparto «${p.nome}». Continuare?`;
+    const conCestino=!!(window.cestinoAttivo&&window.cestinoAttivo());
+
+    let dentro={voci:[],incerto:false};
+    if(sb&&sbUid&&p.mestiere_id)dentro=await contaReparto(p.mestiere_id);
+
+    let msg="Stai per eliminare il reparto «"+p.nome+"».\n\n";
+    if(dentro.voci.length)   msg+="Dentro ci sono:\n"+dentro.voci.map(v=>"  •  "+v).join("\n")+"\n\n";
+    else if(dentro.incerto)  msg+="Non sono riuscito a controllare cosa c'è dentro: la connessione non ha risposto.\n\n";
+    else                     msg+="Il reparto è vuoto.\n\n";
+    if(dentro.incerto&&dentro.voci.length)msg+="ATTENZIONE: questo elenco potrebbe essere incompleto.\n\n";
+    msg+=conCestino
+      ? "Va tutto nel Cestino: se sbagli puoi rimetterlo a posto da lì.\n\nContinuare?"
+      : "ATTENZIONE: il Cestino non è attivo. Sparisce tutto per sempre e non si può tornare indietro.\n\nContinuare?";
     if(!gconfirm(msg))return;
+
     if(sb&&sbUid&&p.mestiere_id){
-      await sb.from("gest_lavori").delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
-      await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
+      /* prima i lavori: cosi' finiscono nel Cestino uno per uno e si possono
+         ripescare anche da soli. Poi il reparto. */
+      const r1=await sb.from("gest_lavori").delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
+      if(r1&&r1.error){toast("Errore: il reparto NON è stato eliminato — "+(r1.error.message||""));return;}
+      const r2=await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
+      if(r2&&r2.error){
+        /* i lavori sono gia' andati nel Cestino ma il reparto e' rimasto:
+           NON lo tolgo dallo schermo, se no sparisce solo agli occhi */
+        toast("Errore: il reparto è ancora lì — "+(r2.error.message||""));
+        renderLanding();return;
+      }
     }
     state.panels=(state.panels||[]).filter(x=>x.id!==id);
     delete state[id];
-    await save();renderLanding();toast("Reparto eliminato");
+    await save();renderLanding();
+    toast(conCestino?"Reparto messo nel Cestino ✔ — lo puoi rimettere a posto da lì":"Reparto eliminato");
   }
 
   let aziendaRow=null;
