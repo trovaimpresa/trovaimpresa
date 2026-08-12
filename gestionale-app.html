@@ -2778,8 +2778,8 @@
     const opts=IVA_SCELTE.map(v=>'<option value="'+v+'"'+(+iva===v?" selected":"")+'>'+v+'%</option>').join("");
     return '<div class="fatt-riga" data-riga>'
       + '<input class="fr-desc" placeholder="Descrizione voce" value="'+esc(r.descrizione||"")+'">'
-      + '<input class="fr-qta" type="number" inputmode="decimal" step="0.5" placeholder="Q.tà" value="'+(r.qta!=null?r.qta:1)+'">'
-      + '<input class="fr-prezzo" type="number" inputmode="decimal" step="0.01" placeholder="Prezzo €" value="'+(r.prezzo!=null?r.prezzo:"")+'">'
+      + '<input class="fr-qta" type="text" inputmode="decimal" placeholder="Q.tà" value="'+_numTesto(r.qta!=null?r.qta:1)+'">'
+      + '<input class="fr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="'+_numTesto(r.prezzo)+'">'
       + '<select class="fr-iva"'+(fattForfettario()?' style="display:none"':'')+'>'+opts+'</select>'
       + '<button type="button" class="rdel" data-action="fatt-riga-del">×</button></div>';
   }
@@ -2788,15 +2788,15 @@
   function fattTotaleLive(){
     /* Array.from: $$ restituisce una NodeList, che non ha .map */
     const R=Array.from($$("#fatt-righe [data-riga]")).map(d=>({
-      qta:+d.querySelector(".fr-qta").value||0,
-      prezzo:+d.querySelector(".fr-prezzo").value||0,
+      qta:_numRiga(d,".fr-qta",0),
+      prezzo:_numRiga(d,".fr-prezzo",0),
       iva:+(d.querySelector(".fr-iva")||{}).value||0}));
     const f={
       cassa_perc:+($("#fa-cassa")||{}).value||0,
-      spese:+($("#fa-spese")||{}).value||0,
-      sconto:+($("#fa-sconto")||{}).value||0,
-      bollo:+($("#fa-bollo")||{}).value||0,
-      ritenuta_perc:+($("#fa-rit")||{}).value||0
+      spese:_numIt("#fa-spese")||0,
+      sconto:_numIt("#fa-sconto")||0,
+      bollo:_numIt("#fa-bollo")||0,
+      ritenuta_perc:_numIt("#fa-rit")||0
     };
     /* 12 agosto 2026 — gli STESSI conti della scheda, del PDF e del file per
        lo SDI. Prima la formula era riscritta qui a mano, e in forfettario
@@ -2896,8 +2896,8 @@
 
       + '<div class="sh-b"><div class="sh-tit">In fondo alla fattura</div>'
       +   '<div class="row2">'
-      +     '<div class="field"><label>Sconto (€)</label><input type="number" step="0.01" id="fa-sconto" value="'+(+f.sconto||"")+'" placeholder="0"></div>'
-      +     '<div class="field"><label>Bollo (€)</label><input type="number" step="0.01" id="fa-bollo" value="'+(+f.bollo||"")+'" placeholder="0"></div>'
+      +     '<div class="field"><label>Sconto (€)</label><input type="text" inputmode="decimal" id="fa-sconto" value="'+_numTesto(+f.sconto||"")+'" placeholder="0"></div>'
+      +     '<div class="field"><label>Bollo (€)</label><input type="text" inputmode="decimal" id="fa-bollo" value="'+_numTesto(+f.bollo||"")+'" placeholder="0"></div>'
       +   '</div>'
       /* ===== 9 agosto 2026 — la cassa previdenziale =====
          C'era nel preventivo e mancava in fattura: un geometra non poteva
@@ -2907,12 +2907,19 @@
             ? '<div class="row2">'
               + '<div class="field"><label>Cassa previdenziale</label><select id="fa-cassa">'
               +   FATT_CASSE.map(function(o){return '<option value="'+o[0]+'" data-tc="'+o[2]+'" '+((+f.cassa_perc||0)===o[0]&&(!f.cassa_tipo||f.cassa_tipo===o[2])?'selected':'')+'>'+o[1]+'</option>';}).join("")
+              /* 12 agosto 2026 (sera) — una percentuale che non sta in elenco
+                 (per esempio il 2% dei preventivi vecchi) non deve sparire dal
+                 documento: si aggiunge una voce sua, selezionata, e si dice
+                 che per lo SDI va scelta la cassa vera. */
+              +   ((+f.cassa_perc||0)>0&&!FATT_CASSE.some(function(o){return o[0]===(+f.cassa_perc||0);})
+                    ? '<option value="'+(+f.cassa_perc)+'" data-tc="" selected>'+_pct(f.cassa_perc)+'% — cassa da scegliere</option>'
+                    : '')
               + '</select></div>'
-              + '<div class="field"><label>Spese (bolli, diritti, visure)</label><input type="number" step="0.01" id="fa-spese" value="'+(+f.spese||"")+'" placeholder="0"></div>'
+              + '<div class="field"><label>Spese (bolli, diritti, visure)</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0"></div>'
               + '</div>'
               + '<div class="sh-nota">La cassa si calcola sul compenso (non sulle spese). La ritenuta anche. Sono gli stessi conti della parcella del preventivo.</div>'
             : '')
-      +   '<div class="field"><label>Ritenuta d\'acconto (%)</label><input type="number" step="0.01" id="fa-rit" value="'+(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
+      +   '<div class="field"><label>Ritenuta d\'acconto (%)</label><input type="text" inputmode="decimal" id="fa-rit" value="'+_numTesto(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
       +   (fattForfettario()?'<div class="sh-nota">In forfettario serve il <b>bollo da 2 €</b> quando la fattura supera i 77,47 €. Scrivi 2 nel campo qui sopra.</div>':'')
       + '</div>'
 
@@ -2971,8 +2978,8 @@
       if(!descrizione)return;
       righe.push({
         descrizione,
-        qta:+d.querySelector(".fr-qta").value||1,
-        prezzo:+d.querySelector(".fr-prezzo").value||0,
+        qta:_numRiga(d,".fr-qta",1),
+        prezzo:_numRiga(d,".fr-prezzo",0),
         iva: fattForfettario()?0:(+(d.querySelector(".fr-iva")||{}).value||0),
         ordine:i
       });
@@ -2985,9 +2992,9 @@
       cliente_id, data,
       anno:+data.slice(0,4),
       tipo:$("#fa-tipo").value||"fattura",
-      sconto:+$("#fa-sconto").value||0,
-      bollo:+$("#fa-bollo").value||0,
-      ritenuta_perc:+$("#fa-rit").value||0,
+      sconto:_numIt("#fa-sconto")||0,
+      bollo:_numIt("#fa-bollo")||0,
+      ritenuta_perc:_numIt("#fa-rit")||0,
       note:$("#fa-note").value.trim()||null
     };
     /* cassa e spese: i campi ci sono solo per gli studi. Si scrivono solo se
@@ -2997,7 +3004,7 @@
       testata.cassa_perc=+selC.value||0;
       const opt=selC.options[selC.selectedIndex];
       testata.cassa_tipo=(opt&&opt.dataset.tc)||null;
-      testata.spese=+($("#fa-spese")?$("#fa-spese").value:0)||0;
+      testata.spese=_numIt("#fa-spese")||0;
     }
     /* una copia dei dati del cliente resta dentro la fattura: se domani cambi
        l'indirizzo in anagrafica, la fattura già emessa non deve cambiare */
@@ -3200,12 +3207,30 @@
   async function fattDaPreventivoConferma(){
     const sel=document.querySelector("#fp-lista .fp-ck:checked");
     if(!sel){toast("Scegli un preventivo");return;}
-    const pid=sel.value;
-    const [{data:p},{data:rr}]=await Promise.all([
+    return fattDaPreventivoId(sel.value);
+  }
+  /* ===== 12 agosto 2026 (sera) — LA FATTURA SI FA ANCHE DAL PREVENTIVO =====
+     Il passaggio preventivo -> fattura esisteva, ma solo partendo da Fatture:
+     "+ Nuova fattura" -> "Da un preventivo accettato" -> scegli nell'elenco.
+     Dal preventivo, che e' il posto dove uno sta guardando quando il cliente
+     dice "va bene", non si poteva fare: bisognava ricordarsi la strada lunga.
+     Ora il corpo di quella funzione sta qui, prende un id, e lo chiamano tutti
+     e due i punti: una sola strada, gli stessi conti. */
+  async function fattDaPreventivoId(pid){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const [{data:p,error:eP},{data:rr,error:eR}]=await Promise.all([
       sb.from("gest_preventivi").select("*").eq("id",pid).eq("user_id",sbUid).maybeSingle(),
       sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",pid).order("ordine")
     ]);
+    if(eP||eR){toast("Non riesco a leggere il preventivo: "+((eP||eR).message||"il database non risponde"));return;}
     if(!p){toast("Preventivo non trovato");return;}
+    if(!(rr||[]).length){toast("Questo preventivo non ha voci: aprilo, aggiungile e riprova.");return;}
+    /* se la cassa del preventivo non esiste fra quelle della fattura lo si dice
+       PRIMA, non si scopre dopo guardando un totale piu' basso */
+    const _cp=+p.cassa_perc||0;
+    if(_cp>0&&!FATT_CASSE.some(function(o){return o[0]===_cp;})){
+      toast("Attenzione: la cassa al "+_pct(_cp)+"% resta nell'importo, ma per il file elettronico devi scegliere quale cassa è, nel modulo della fattura.");
+    }
     closeSheet();
     fattForm(null,{
       cliente_id:p.cliente_id||null,
@@ -4071,8 +4096,24 @@
     const {data}=await sb.from("gest_clienti").select("*").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");
     cliCache=data||[];
     let L=cliCache;
-    if(cliQ){const q=cliQ.toLowerCase();
-      L=L.filter(c=>[c.nome,c.indirizzo,c.referente,c.telefono,c.email].some(x=>(x||"").toLowerCase().includes(q)));}
+    if(cliQ){
+      /* ===== 12 agosto 2026 (sera) — LA RICERCA CLIENTI GUARDAVA CINQUE CAMPI =====
+         E non quelli che si usano davvero. Il commercialista ti manda una
+         partita IVA e ti chiede di chi è: la incollavi qui e non trovava
+         NIENTE, perché la P.IVA non veniva nemmeno guardata. Stessa cosa per
+         codice fiscale, comune, CAP, provincia, codice SdI e note.
+         E un telefono scritto «333 111 2222» non trovava quello salvato
+         «3331112222»: adesso i numeri si confrontano senza spazi né punti. */
+      const q=cliQ.trim().toLowerCase();
+      const _cifre=s=>String(s||"").replace(/[\s.\-\/()]/g,"").toLowerCase();
+      const qn=_cifre(q);
+      L=L.filter(function(c){
+        const campi=[c.nome,c.indirizzo,c.citta,c.prov,c.cap,c.referente,c.telefono,
+                     c.email,c.piva,c.cod_fiscale,c.sdi_codice,c.sdi_pec,c.note];
+        if(campi.some(x=>String(x||"").toLowerCase().includes(q)))return true;
+        return qn.length>=3 && campi.some(x=>_cifre(x).includes(qn));
+      });
+    }
     renderTabella({
       id:"cli", box:"#cli-list",
       vuoto:cliQ?tabVuotoCerca(cliQ):tabVuoto("Qui tieni i tuoi clienti",
@@ -4084,7 +4125,9 @@
       righe:L.map(c=>({
         id:c.id,
         click:{action:"edit-cli",data:{id:c.id}},
-        celle:[`<span class="c-nome">${esc(c.nome||"—")}</span>`,esc(c.indirizzo||"—"),esc(c.referente||"—"),esc(c.telefono||"—")],
+        /* l'indirizzo completo (con CAP, comune e provincia), non la sola via:
+           due «Via Roma 10» di due paesi diversi erano indistinguibili */
+        celle:[`<span class="c-nome">${esc(c.nome||"—")}</span>`,esc(cliIndirizzo(c)||"—"),esc(c.referente||"—"),esc(c.telefono||"—")],
         menu:cliVoci(c)
       })),
       totale:{testo:L.length+" "+(L.length===1?"cliente":"clienti"),valore:""},
@@ -4682,7 +4725,7 @@
         <div class="row2">
           <div class="field"><label style="font-size:1rem">Tipo</label><select id="mv-tipo" style="font-size:1.05rem;padding:10px">
             <option value="ricarica" selected>Ricarica (aggiunge soldi)</option><option value="spesa">Spesa (toglie soldi)</option></select></div>
-          <div class="field"><label style="font-size:1rem">Importo (€)</label><input type="number" id="mv-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px"></div>
+          <div class="field"><label style="font-size:1rem">Importo (€)</label><input type="text" id="mv-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px"></div>
         </div>
         <div class="field"><label style="font-size:1rem">Per cosa</label><input id="mv-causale" placeholder="Es. Viti e tasselli, ricarica mensile..." style="font-size:1.05rem;padding:10px"></div>
         <button class="btn btn-primary" style="width:100%;font-size:1.05rem;padding:12px" data-action="save-movimento" data-id="${id}">+ Aggiungi movimento</button>
@@ -4721,8 +4764,8 @@
   }
   async function salvaMovimentoCarta(){
     if(!cartaAttivaId||!sbUid){toast("Devi essere loggato");return;}
-    const tipo=$("#mv-tipo").value, importoRaw=$("#mv-importo").value;
-    const importo=+importoRaw;
+    const tipo=$("#mv-tipo").value;
+    const importo=_numIt("#mv-importo")||0;
     if(!importo||importo<=0){toast("Inserisci un importo valido");return;}
     const causale=$("#mv-causale").value.trim()||null;
     const {error}=await sb.from("gest_carte_movimenti").insert({
@@ -4772,7 +4815,7 @@
         <div style="font-weight:700;color:#0a2a4d;margin-bottom:14px;font-size:1.1rem">➕ Nuovo pieno</div>
         <div class="row2">
           <div class="field"><label style="font-size:1rem">Giorno</label><input type="date" id="rf-data" value="${todayStr()}" style="font-size:1.05rem;padding:10px"></div>
-          <div class="field"><label style="font-size:1rem">Quanto hai speso (€)</label><input type="number" id="rf-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px"></div>
+          <div class="field"><label style="font-size:1rem">Quanto hai speso (€)</label><input type="text" id="rf-importo" inputmode="decimal" placeholder="0" style="font-size:1.05rem;padding:10px"></div>
         </div>
         <div class="field"><label style="font-size:1rem">Come hai pagato</label><select id="rf-pag" style="font-size:1.05rem;padding:10px">${optPag}</select></div>
         <div class="field" id="rf-carta-box"><label style="font-size:1rem">Con quale carta</label>
@@ -4783,7 +4826,7 @@
           <div class="field"><label style="font-size:1rem">Chi</label><select id="rf-chi" style="font-size:1.05rem;padding:10px">${optChi}</select></div>
         </div>
         <div class="row2">
-          <div class="field"><label style="font-size:1rem">Litri <span style="color:var(--testo-2);font-weight:400">(se vuoi)</span></label><input type="number" id="rf-litri" inputmode="decimal" placeholder="—" style="font-size:1.05rem;padding:10px"></div>
+          <div class="field"><label style="font-size:1rem">Litri <span style="color:var(--testo-2);font-weight:400">(se vuoi)</span></label><input type="text" id="rf-litri" inputmode="decimal" placeholder="—" style="font-size:1.05rem;padding:10px"></div>
           <div class="field"><label style="font-size:1rem">Chilometri <span style="color:var(--testo-2);font-weight:400">(se vuoi)</span></label><input type="number" id="rf-km" inputmode="numeric" placeholder="—" style="font-size:1.05rem;padding:10px"></div>
         </div>
         <small style="color:var(--testo-2);display:block;margin-bottom:12px">Litri e chilometri servono solo per sapere quanti km fa con un litro. Se hai fretta lasciali vuoti.</small>
@@ -4845,7 +4888,7 @@
 
   async function salvaRifornimento(){
     if(!rifMezzoId||!sbUid){toast("Devi essere loggato");return;}
-    const importo=+$("#rf-importo").value;
+    const importo=_numIt("#rf-importo")||0;
     if(!importo||importo<=0){toast("Scrivi quanto hai speso");return;}
     const pagamento=$("#rf-pag").value;
     const carta_id=(pagamento==="carta")?($("#rf-carta").value||null):null;
@@ -4853,8 +4896,9 @@
     const data=$("#rf-data").value||todayStr();
     const distributore=$("#rf-distr").value.trim()||null;
     const operatore_id=$("#rf-chi").value||null;
-    const litri=$("#rf-litri").value?+$("#rf-litri").value:null;
-    const km=$("#rf-km").value?parseInt($("#rf-km").value,10):null;
+    const litri=_numIt("#rf-litri");
+    const _km=_numIt("#rf-km");
+    const km=(_km==null)?null:Math.round(_km);
     const mezzoNome=(mezziCache.find(x=>String(x.id)===String(rifMezzoId))||{}).nome||"Mezzo";
 
     /* se ha pagato con la carta, la carta si scala qui: un posto solo */
@@ -5745,7 +5789,7 @@
         +'</div><div class="sh-col">'
         +'<div class="sh-b">'
         +`<div class="sh-tit">${pro?"Compenso":"Importo"}</div>`
-        +`<div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div>`
+        +`<div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0"></div>`
         +`<p class="sh-nota" style="margin-bottom:0">Puoi lasciarlo a zero adesso e metterlo dopo${pro?", quando fai la parcella":""}.</p>`
         +'</div>'
         +(pro?('<div class="sh-b"><div class="sh-tit">\ud83d\udcc4 Dati della pratica</div>'+bloccoPratica(job,true)+'</div>'):'')
@@ -5801,8 +5845,8 @@
           <button type="button" class="btn" data-action="lm-add">+ Aggiungi</button></div></div>
       <div class="field" id="andamento-wrap" style="display:none"></div>
       <div class="row2">
-        <div class="field"><label>Ore lavorate</label><input type="number" id="j-ore" inputmode="decimal" step="0.5" value="${job.ore||""}" placeholder="0"></div>
-        <div class="field"><label>Importo (€)</label><input type="number" id="j-imp" inputmode="decimal" value="${job.importo||""}" placeholder="0"></div></div>
+        <div class="field"><label>Ore lavorate</label><input type="text" id="j-ore" inputmode="decimal" value="${_numTesto(job.ore)}" placeholder="0"></div>
+        <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0"></div></div>
       <div class="field" id="ore-wrap" style="display:none"><label>⏱ Registro delle ore</label>
         <div class="spese-list" id="ore-list"></div>
         <div class="spesa-add ore-add">
@@ -6009,7 +6053,7 @@
       if(!sbUid){toast("Devi essere loggato");return;}
       const descrizione=$("#j-desc").value.trim(), data_prevista=$("#j-data").value, operatore_id=$("#j-operaio")?$("#j-operaio").value:"";
       if(!descrizione||!data_prevista){toast("Compila Descrizione e Data");return;}
-      const importo=+($("#j-imp")?$("#j-imp").value:0)||0;
+      const importo=_numIt("#j-imp")||0;
       if(editing.fattura&&!(importo>0)){toast("Inserisci l'importo");return;}
       const cliente_id=($("#j-cliente")&&$("#j-cliente").value)?$("#j-cliente").value:null;
       const obj=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),stato:editing.fattura?"fatto":"da_fare",
@@ -6046,11 +6090,11 @@
         operatore_id:$("#j-dip").value||null,
         cliente_id:$("#j-cli").value||null,
         stato:segVal("j-stato"),
-        importo:+($("#j-imp").value)||0,
+        importo:_numIt("#j-imp")||0,
         /* fatt_stato non si scrive più da qui: è il riflesso della fattura */
         lavoro_svolto:$("#j-svolto").value.trim()||null,
         note:$("#j-note").value.trim()||null,
-        ore:parseFloat($("#j-ore").value)||null
+        ore:_numIt("#j-ore")
       }, leggiCampiPratica());
       /* 9 agosto 2026 — chiudendo dal modulo (invece che col pulsante "Segna
          fatto" della scheda) la data di chiusura non veniva scritta: il Report
@@ -6111,7 +6155,7 @@
     const fattStato=(prev&&prev.fattStato)||"none";
     const obj={id,clienteId:cli,descrizione:$("#j-desc").value.trim(),dove:$("#j-dove").value.trim(),
       dataPrevista:$("#j-data").value,assegnatoId:$("#j-dip").value,stato,lavoroSvolto:$("#j-svolto").value.trim(),
-      note:$("#j-note").value.trim(),ore:$("#j-ore").value,importo:$("#j-imp").value,fattStato,pagato:fattStato==="pagata",
+      note:$("#j-note").value.trim(),ore:_numIt("#j-ore"),importo:_numIt("#j-imp"),fattStato,pagato:fattStato==="pagata",
       foto:editing.foto,numFatt:prev?prev.numFatt:undefined};
     obj.dataFatto=stato==="fatto"?(prev&&prev.dataFatto?prev.dataFatto:(obj.dataPrevista||todayStr())):"";
     if(exists)db().lavori=db().lavori.map(l=>l.id===id?obj:l);else db().lavori.push(obj);
@@ -7923,13 +7967,13 @@
        nome. Prima il costo orario si compilava e non serviva a niente. */
     let md=0, oreSenzaNome=0, mediaSquadra=0;
     try{
-      const _l=[{id:lavoroId, ore:+($("#j-ore")?$("#j-ore").value:0)||0}];
+      const _l=[{id:lavoroId, ore:_numIt("#j-ore")||0}];
       const _m=await caricaManodopera(curMestiere(),_l);
       md=_m.per[String(lavoroId)]||0;
       oreSenzaNome=_m.senzaNome[String(lavoroId)]||0;
       mediaSquadra=(_m.tariffe&&+_m.tariffe.media)||0;
     }catch(e){}
-    const imp=+($("#j-imp")?$("#j-imp").value:importo)||0;
+    const imp=($("#j-imp")?(_numIt("#j-imp")||0):(+importo||0));
     const marg=margineLavoro(imp,tot,totFF,md);
     $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span>`
       +`<span>Spese: <span class="sp">−${eur2(tot)}</span></span>`
@@ -8182,7 +8226,7 @@
       }
     }
     /* quanto rende un'ora */
-    const imp=+($("#j-imp")?$("#j-imp").value:0)||0;
+    const imp=_numIt("#j-imp")||0;
     const box=$("#ora-box");
     if(!box)return;
     if(!tot){box.innerHTML='<span>Segna le ore qui sopra: ti dico quanto rende un\'ora.</span>';return;}
@@ -8227,7 +8271,7 @@
     const campo=$("#j-ore");
     if(!campo)return;                       /* modulo chiuso: non tocco niente */
     const v=String(campo.value||"").trim();
-    const tot=v===""?null:(+v||0);          /* vuoto = nessuna ora, non zero finto */
+    const tot=v===""?null:(_numeroIt(v)||0);  /* vuoto = nessuna ora, non zero finto */
     try{ await sb.from("gest_lavori").update({ore:tot}).eq("id",oreLavoroId).eq("user_id",sbUid); }catch(e){}
   }
 
@@ -8341,6 +8385,9 @@
       v.push({lab:"✔ Accettato → crea lavoro",action:"prev-to-lavoro",data:{id:p.id}});
       v.push({lab:"✕ Rifiutato",action:"prev-stato",data:{id:p.id,v:"rifiutato"}});
     }
+    /* 12 agosto 2026 (sera) — la scorciatoia che mancava: dal preventivo alla
+       fattura, senza rifare la strada lunga da "Fatture -> + Nuova". */
+    v.push({lab:"\ud83e\uddfe Crea la fattura da qui",action:"prev-to-fatt",data:{id:p.id}});
     if(p.stato==="rifiutato")v.push({lab:"↩ Riapri",action:"prev-stato",data:{id:p.id,v:"bozza"}});
     v.push({sep:true});
     v.push({lab:"✏ Modifica",action:"edit-prev",data:{id:p.id}});
@@ -8351,12 +8398,12 @@
     r=r||{};prevRigheCount++;
     return `<div class="prev-riga" data-riga>
       <input class="pr-desc" placeholder="Descrizione voce" value="${esc(r.descrizione||"")}">
-      <input class="pr-qta" type="number" inputmode="decimal" step="0.5" placeholder="Q.tà" value="${r.qta!=null?r.qta:1}">
-      <input class="pr-prezzo" type="number" inputmode="decimal" step="0.01" placeholder="Prezzo €" value="${r.prezzo!=null?r.prezzo:""}">
+      <input class="pr-qta" type="text" inputmode="decimal" placeholder="Q.tà" value="${_numTesto(r.qta!=null?r.qta:1)}">
+      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="${_numTesto(r.prezzo)}">
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
   }
   function prevTotaleLive(){
-    let t=0;$$("#prev-righe [data-riga]").forEach(d=>{t+=(+d.querySelector(".pr-qta").value||1)*(+d.querySelector(".pr-prezzo").value||0);});
+    let t=0;$$("#prev-righe [data-riga]").forEach(d=>{t+=_numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);});
     const el=$("#prev-somma");if(el)el.textContent="Totale: "+eur2(t);
     return t;
   }
@@ -8389,8 +8436,22 @@
     const iva=p.iva_perc!=null?p.iva_perc:22;
     const rit=!!p.ritenuta;
     const spese=p.spese_forfait!=null?p.spese_forfait:"";
-    const opzCassa=[[0,"Nessuna cassa"],[2,"2%"],[4,"4% — Inarcassa (architetti, ingegneri)"],[5,"5% — Geometri e periti"]]
-      .map(o=>`<option value="${o[0]}" ${(+cassa===o[0])?"selected":""}>${o[1]}</option>`).join("");
+    /* ===== 12 agosto 2026 (sera) — LA CASSA AL 2% SPARIVA IN FATTURA =====
+       Qui c'erano quattro voci scritte a mano (0, 2, 4, 5%) e in fattura ce ne
+       sono altre (FATT_CASSE), col nome della cassa e il codice che vuole lo
+       SDI. Il 2% non esisteva di là: passando il preventivo in fattura la
+       tendina non trovava la sua voce, ripartiva da «Nessuna cassa» e quei
+       soldi sparivano dal documento senza dire niente. Su una parcella da
+       10.000 € sono 200 € in meno, e nessuno se ne accorgeva.
+       Adesso l'elenco e' UNO SOLO, lo stesso della fattura. Se un preventivo
+       vecchio ha una percentuale che non c'e' piu' in elenco, la voce viene
+       aggiunta lì per lì cosi' il numero non si perde. */
+    const _casseViste=FATT_CASSE.map(o=>[o[0],o[1]]);
+    if(+cassa>0&&!FATT_CASSE.some(o=>o[0]===+cassa)){
+      _casseViste.push([+cassa,_pct(cassa)+"% — cassa da scegliere in fattura"]);
+    }
+    const opzCassa=_casseViste
+      .map(o=>`<option value="${o[0]}" ${(+cassa===o[0])?"selected":""}>${esc(o[1])}</option>`).join("");
     const opzIva=[[22,"22% — ordinaria"],[10,"10% — agevolata"],[0,"0% — esente / forfettario"]]
       .map(o=>`<option value="${o[0]}" ${(+iva===o[0])?"selected":""}>${o[1]}</option>`).join("");
     return `
@@ -8401,7 +8462,7 @@
         <div class="field"><label>Cassa previdenziale</label><select id="pv-cassa">${opzCassa}</select></div>
         <div class="field"><label>IVA</label><select id="pv-iva">${opzIva}</select></div>
       </div>
-      <div class="field"><label>Spese (bolli, diritti, copie)</label><input type="number" id="pv-spese" inputmode="decimal" value="${esc(spese)}" placeholder="0"></div>
+      <div class="field"><label>Spese (bolli, diritti, copie)</label><input type="text" id="pv-spese" inputmode="decimal" value="${_numTesto(spese)}" placeholder="0"></div>
       <div class="field">
         <label style="display:flex;align-items:flex-start;gap:10px;font-weight:600;cursor:pointer">
           <input type="checkbox" id="pv-rit" ${rit?"checked":""} style="width:18px;height:18px;margin-top:2px;flex-shrink:0">
@@ -8420,10 +8481,10 @@
     const box=$("#pv-riepilogo"); if(!box)return;
     let compenso=0;
     $$("#prev-righe [data-riga]").forEach(d=>{
-      compenso += (+d.querySelector(".pr-qta").value||1)*(+d.querySelector(".pr-prezzo").value||0);
+      compenso += _numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);
     });
     const c=calcolaParcella(compenso, $("#pv-cassa")?$("#pv-cassa").value:0, $("#pv-iva")?$("#pv-iva").value:0,
-      $("#pv-rit")?$("#pv-rit").checked:false, 20, $("#pv-spese")?$("#pv-spese").value:0);
+      $("#pv-rit")?$("#pv-rit").checked:false, 20, _numIt("#pv-spese")||0);
     const riga=(et,val,neg)=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${et}</span><strong>${neg?"− ":""}${eur2(val)}</strong></div>`;
     box.innerHTML =
       riga("Compenso", c.compenso) +
@@ -8443,7 +8504,7 @@
       iva_perc:+($("#pv-iva")?$("#pv-iva").value:0)||0,
       ritenuta:$("#pv-rit")?$("#pv-rit").checked:false,
       ritenuta_perc:20,
-      spese_forfait:+($("#pv-spese")?$("#pv-spese").value:0)||0
+      spese_forfait:_numIt("#pv-spese")||0
     };
   }
   function eColonnaParcellaMancante(err){
@@ -8487,7 +8548,7 @@
     if(!sel||sel.value===""){box.innerHTML="";return;}
     let imponibile=0;
     $$("#prev-righe [data-riga]").forEach(d=>{
-      imponibile += (+d.querySelector(".pr-qta").value||1)*(+d.querySelector(".pr-prezzo").value||0);
+      imponibile += _numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);
     });
     /* il totale si somma sull'IVA GIA' arrotondata ai centesimi, se no le due
        righe non tornano: imponibile 1.000,05 + IVA 100,01 fa 1.100,06, non
@@ -8570,7 +8631,7 @@
     $$("#prev-righe [data-riga]").forEach((d,i)=>{
       const descrizione=d.querySelector(".pr-desc").value.trim();
       if(!descrizione)return;
-      righe.push({descrizione,qta:+d.querySelector(".pr-qta").value||1,prezzo:+d.querySelector(".pr-prezzo").value||0,ordine:i});
+      righe.push({descrizione,qta:_numRiga(d,".pr-qta",1),prezzo:_numRiga(d,".pr-prezzo",0),ordine:i});
     });
     if(!righe.length){toast("Aggiungi almeno una voce");return;}
     const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=$("#pv-note").value.trim()||null;
@@ -10623,7 +10684,12 @@
       +    '<div class="field"><label>Come si chiama</label><input id="co-prz" value="'+esc(_daTendina?"":(c.prezzario||""))+'" placeholder="Es. Tariffa Regione Lazio"></div>'
       +    '<div class="field"><label>Anno</label><input type="number" id="co-prz-anno" value="'+(c.prezzario_anno||"")+'" placeholder="2023" style="max-width:130px"></div>'
       +  '</div>'
-      +  '<div class="field"><label>Ribasso o sconto (%)</label><input type="number" step="0.001" id="co-rib" value="'+(c.ribasso_perc!=null?c.ribasso_perc:"")+'" placeholder="0" style="max-width:160px"></div>'
+      /* 12 agosto 2026 (sera) — era type="number". Un ribasso si scrive
+         «12,5», con la virgola: una casella type=number con la virgola dentro
+         non restituisce niente (o restituisce NaN), e il ribasso spariva senza
+         un messaggio. In una gara e' il numero piu' importante del documento.
+         Adesso e' testo, letta da _numIt come i prezzi: 12,5 e 12.5 vanno bene. */
+      +  '<div class="field"><label>Ribasso o sconto (%)</label><input type="text" inputmode="decimal" id="co-rib"'+_noAuto()+' value="'+(c.ribasso_perc!=null?String(c.ribasso_perc).replace(".",","):"")+'" placeholder="Es. 12,5" style="max-width:160px"></div>'
       +  '<div class="sh-nota">Il prezzario finisce sul documento: un computo deve dire da dove vengono i prezzi, se no il primo che lo legge te lo chiede.</div>'
       +'</div>'
 
@@ -10718,9 +10784,33 @@
     const n=parseFloat(t);
     return isFinite(n)?n:null;
   }
+  /* come _numIt ma per un campo dentro una riga (quantita' e prezzo delle
+     voci di fattura e preventivo): stessa regola italiana, 2,5 = 2.5 */
+  function _numRiga(riga,cls,seVuoto){
+    const el=riga&&riga.querySelector(cls);
+    const n=_numeroIt((el&&el.value)||"");
+    return (n==null||!isFinite(n))?(seVuoto||0):n;
+  }
   /* i numeri si scrivono come in cantiere: 3,20 va bene come 3.20 */
   function _numIt(sel){
     return _numeroIt(($(sel)&&$(sel).value)||"");
+  }
+  /* ===== 12 agosto 2026 (sera) — I NUMERI CON LA VIRGOLA =====
+     Dieci caselle importanti erano type="number": sconto, bollo, spese e
+     ritenuta della fattura, importo e ore del lavoro, spese del preventivo,
+     importo del movimento carta, euro e litri del rifornimento.
+     Su tastiera italiana si scrive «12,5»: una casella type=number con la
+     virgola dentro non restituisce NIENTE, e quel numero spariva senza un
+     messaggio — uno sconto di 12,50 € diventava zero e la fattura usciva
+     sbagliata, senza che nessuno se ne accorgesse.
+     Adesso sono caselle di testo col tastierino numerico (inputmode="decimal")
+     lette da _numIt, e il numero torna scritto con la virgola, come lo ha
+     scritto lui. _numTesto e' quello che lo rimette nella casella. */
+  function _numTesto(v){
+    if(v==null||v==="")return "";
+    const n=+v;
+    if(!isFinite(n))return "";
+    return String(n).replace(".",",");
   }
   /* un PREZZO si scrive sempre con due decimali: 18,50 e non 18,5.
      _misTesto taglia gli zeri in coda — giusto per una misura, sbagliato qui. */
@@ -12376,7 +12466,10 @@
     if(!sbUid){toast("Devi essere loggato");return;}
     const titolo=($("#co-tit")&&$("#co-tit").value||"").trim();
     if(!titolo){toast("Scrivi almeno il titolo del computo");return;}
-    const num=(x)=>{const v=String(($(x)&&$(x).value)||"").trim();return v===""?null:(+v);};
+    /* rete di sicurezza: qualunque numero di questo modulo si legge con la
+       regola italiana (12,5 = 12.5) e non finisce MAI nel database come NaN */
+    const num=(x)=>{const v=String(($(x)&&$(x).value)||"").trim();
+      if(v==="")return null;const n=_numeroIt(v);return (n==null||!isFinite(n))?null:n;};
     const txt=(x)=>{const v=String(($(x)&&$(x).value)||"").trim();return v===""?null:v;};
     const row={
       user_id:sbUid, mestiere_id:curMestiere(),
@@ -13050,6 +13143,7 @@
     if(a==="prev-filtro"){prevFilter=t.dataset.v;renderPreventivi();return;}
     if(a==="prev-stato"){sb.from("gest_preventivi").update({stato:t.dataset.v}).eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non salvato: "+(res.error?res.error.message:"nessuna riga modificata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo aggiornato ✔");});return;}
     if(a==="prev-to-lavoro")return prevToLavoro(id);
+    if(a==="prev-to-fatt")return fattDaPreventivoId(id);
     if(a==="del-prev"){if(gconfirm("Eliminare questo preventivo?"))sb.from("gest_preventivi").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminato: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}rinfresca("preventivi","riepilogo");toast("Preventivo eliminato");});return;}
     if(a==="prev-pdf")return prevPdf(id);
     if(a==="prev-incarico")return incaricoForm(id);
