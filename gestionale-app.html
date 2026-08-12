@@ -259,6 +259,7 @@
     <section id="cestino">
       <div class="sec-head"><h2>Cestino</h2></div>
       <div class="gal-intro">Tutto quello che elimini dal gestionale passa di qui e resta a disposizione: finché è nel cestino non è perso. Clicca una riga per rimetterla a posto.</div>
+      <input type="text" id="cest-search" class="lav-search" placeholder="Cerca nel cestino: nome o tipo" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div id="cest-riass"></div>
       <div class="viste" id="cest-viste"></div>
       <div class="grid" id="cest-list"></div>
@@ -972,6 +973,7 @@
     $("#landing").style.display="none";$("#appview").style.display="flex";
     filter={vista:"tutti",q:""};$("#f-search").value="";cal=new Date();
     cliQ="";dipQ="";if($("#cli-search"))$("#cli-search").value="";if($("#dip-search"))$("#dip-search").value="";
+    cestQ="";if($("#cest-search"))$("#cest-search").value="";
     prevFilter="tutti";fattVista="tutte";scadVista="tutte";
     galFilter={op:"",tipo:"",media:"",lav:""};segmOn("#gal-tipo","");segmOn("#gal-media","");
     mpVista="aperti";segmOn("#mp-vista","aperti");if(mpLayer){try{mpLayer.remove();}catch(e){}mpLayer=null;}
@@ -1045,9 +1047,34 @@
   window.segnaCestinoDaRifare=function(){
     try{
       _tabSporchi.add("cestino");
+      /* il pallino sale subito: se no restava indietro finche' non si apriva
+         la sezione */
+      if(typeof cestTotale==="number"){cestTotale++;setCnt("#cnt-cestino",cestTotale,"attesa");}
       if(tabCorrente()==="cestino"){_tabSporchi.delete("cestino");renderCestino();}
     }catch(e){}
   };
+  /* Il pallino del Cestino c'era nel menu dal primo giorno e non si e' mai
+     acceso: nessuno lo riempiva. Il conteggio vero costa 18 domandine (solo il
+     numero, nessuna riga scaricata), quindi si fa UNA volta per sessione; poi
+     si tiene aggiornato da solo — renderCestino lo riscrive esatto a ogni
+     apertura, e ogni cosa buttata via lo fa salire di uno. */
+  let cestContato=false;
+  async function contaCestinoUnaVolta(){
+    if(cestContato||!sb||!sbUid)return;
+    if(!(window.cestinoAttivo&&window.cestinoAttivo()))return;
+    const st=window.cestinoStato&&window.cestinoStato();
+    if(st&&st.attesa>0)return;              /* non si sa ancora: si riprova al giro dopo */
+    cestContato=true;
+    try{
+      const n=await Promise.all(CEST_COSE.map(function(c){
+        return sb.raw(c.t).select("id",{count:"exact",head:true})
+          .eq("user_id",sbUid).not("eliminato_il","is",null)
+          .then(x=>(x&&typeof x.count==="number")?x.count:0).catch(()=>0);
+      }));
+      cestTotale=n.reduce((a,b)=>a+b,0);
+      setCnt("#cnt-cestino",cestTotale,"attesa");
+    }catch(e){cestContato=false;}
+  }
 
   /* ============================================================
      CONTATORI DEL MENU (tappa 2)
@@ -1095,6 +1122,7 @@
       const ffAp=(ff||[]).filter(x=>x.stato!=="pagata");
       setCnt("#cnt-fornitori",ffAp.length,ffAp.some(x=>x.scadenza&&x.scadenza<oggi)?"err":"attesa");
     }catch(e){}
+    contaCestinoUnaVolta();   /* senza await: il pallino del Cestino arriva quando arriva */
   }
 
   /* ================= RIEPILOGO A SCHEDE =================
@@ -9241,6 +9269,18 @@
      o un cliente farebbe scattare le cancellazioni a catena e si porterebbe
      via anche roba viva che nel cestino non c'era mai entrata. */
 
+  /* 12 agosto 2026 — il Prezzario prometteva "va nel cestino" senza mai
+     controllare che il cestino fosse acceso. Se non lo e' (migrazione non
+     eseguita), la voce spariva per sempre mentre il messaggio diceva il
+     contrario. Una funzione sola, usata da tutti i messaggi che parlano di
+     cestino, cosi' non se ne puo' dimenticare uno. */
+  function _cestOn(){ return !!(window.cestinoAttivo&&window.cestinoAttivo()); }
+  function fraseCestino(){
+    return _cestOn()
+      ? "Va nel cestino: se sbagli la rimetti a posto da lì."
+      : "ATTENZIONE: il cestino non è attivo, quindi sparisce per sempre e non si può tornare indietro.";
+  }
+
   /* ============================================================
      12 agosto 2026 — CHI STA DENTRO A CHI
 
@@ -9283,29 +9323,54 @@
      su una cosa in piu', che si puo' rieliminare. */
   const CEST_FINESTRA=120000;
 
-  let cestCache=[];
+  let cestCache=[], cestQ="", cestTotale=null;
+  const CEST_MAX=200;   /* quante se ne mostrano per tipo */
 
-  async function renderCestino(){
+  async function renderCestino(soloDisegno){
     const box=$("#cest-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML="";return;}
-    if(!(window.cestinoAttivo&&window.cestinoAttivo())){
+    /* 12 agosto 2026 — tre stati, non piu' due. Nei primi secondi il cestino
+       sta ancora facendo la sua prova di accensione: prima qui compariva
+       "Il cestino non è ancora acceso", che è una bugia e spaventa. */
+    const cst=(window.cestinoStato&&window.cestinoStato())||null;
+    if(cst&&cst.attesa>0){
       $("#cest-riass").innerHTML="";
-      const perRete=(window.cestinoMotivo&&window.cestinoMotivo()==="rete");
-      box.innerHTML=tabVuoto(perRete?"Non riesco a raggiungere il database":"Il cestino non è ancora acceso",
-        perRete
-          ? "Il cestino c'è ma in questo momento non riesco a controllarlo. Controlla la connessione e ricarica la pagina: finché non risponde, quello che elimini viene cancellato davvero."
-          : "Esegui sql/gest-cestino.sql su Supabase (SQL Editor → Run) e ricarica la pagina. Da quel momento tutto quello che elimini finisce qui e si può rimettere a posto.",
+      box.innerHTML=tabVuoto("Sto controllando il cestino",
+        "Ci vuole un attimo. Finché non ho una risposta chiara dal database non lascio eliminare niente, così non si perde nulla per colpa della connessione. Riprova fra qualche secondo.",
         _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>');
       return;
     }
-    /* si chiede a tutte le tabelle insieme: sono piccole richieste in parallelo */
+    if(!(window.cestinoAttivo&&window.cestinoAttivo())){
+      $("#cest-riass").innerHTML="";
+      box.innerHTML=tabVuoto("Il cestino non è ancora acceso",
+        "Esegui sql/gest-cestino.sql su Supabase (SQL Editor → Run) e ricarica la pagina. Da quel momento tutto quello che elimini finisce qui e si può rimettere a posto.",
+        _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>');
+      return;
+    }
+    if(cst&&cst.motivo==="migrazione-parziale"){
+      /* la migrazione e' passata a meta': su alcune tabelle l'eliminazione e'
+         bloccata, e l'utente deve sapere perche' invece di pensare a un guasto */
+      $("#cest-riass").innerHTML='<div class="cest-testa"><div><b>Manca un pezzo di migrazione</b></div>'
+        +'<div class="cest-nota">Su alcune parti del gestionale il cestino non è installato, quindi lì l\'eliminazione è bloccata per non perdere niente. '
+        +'Esegui sql/gest-cestino.sql su Supabase e ricarica la pagina. Il dettaglio è in F12 → Console, riga [cestino].</div></div>';
+    }
+    /* soloDisegno = la ricerca: filtra quello che c'e' gia' in memoria, senza
+       ridomandare niente al database. Cosi' puo' girare a ogni lettera. */
+    if(!soloDisegno){
+    /* si chiede a tutte le tabelle insieme: sono piccole richieste in parallelo.
+       count:"exact" costa niente in piu' e serve a dire QUANTE ce ne sono
+       davvero: prima si mostravano le prime 200 per tipo e le altre sparivano
+       senza che nessuno lo dicesse. */
     const risposte=await Promise.all(CEST_COSE.map(function(c){
-      return sb.raw(c.t).select("*").eq("user_id",sbUid)
+      return sb.raw(c.t).select("*",{count:"exact"}).eq("user_id",sbUid)
         .not("eliminato_il","is",null)
-        .order("eliminato_il",{ascending:false}).limit(200)
-        .then(r=>({c:c,righe:(r&&r.data)||[]}))
-        .catch(()=>({c:c,righe:[]}));
+        .order("eliminato_il",{ascending:false}).limit(CEST_MAX)
+        .then(r=>({c:c,righe:(r&&r.data)||[],n:(r&&typeof r.count==="number")?r.count:((r&&r.data)||[]).length}))
+        .catch(()=>({c:c,righe:[],n:0}));
     }));
+    cestTotale=risposte.reduce((s,x)=>s+(x.n||0),0);
+    cestContato=true;
+    setCnt("#cnt-cestino",cestTotale,"attesa");
     cestCache=[];
     risposte.forEach(function(x){
       x.righe.forEach(function(r){
@@ -9325,22 +9390,39 @@
       });
     });
     cestCache.sort((a,b)=>String(b.quando||"").localeCompare(String(a.quando||"")));
+    }
 
-    $("#cest-riass").innerHTML=cestCache.length
-      ? '<div class="cest-testa"><div><b>'+cestCache.length+'</b> '
-        +(cestCache.length===1?'cosa eliminata':'cose eliminate')
-        +(cestCache.length>=200?' <small>(mostro le più recenti)</small>':'')
-        +'</div><div class="cest-nota">Restano qui finché non le rimetti a posto. Non occupano spazio e non si vedono da nessun\'altra parte.</div></div>'
+    /* la ricerca: cerca nel nome e nel tipo. Le posizioni restano quelle di
+       cestCache, se no "Rimetti a posto" ripescherebbe la riga sbagliata. */
+    const q=(cestQ||"").trim().toLowerCase();
+    const vis=cestCache.map((x,i)=>({x:x,i:i}))
+      .filter(v=>!q||(v.x.nome+" "+v.x.tipo).toLowerCase().includes(q));
+
+    const nascoste=Math.max(0,(cestTotale==null?cestCache.length:cestTotale)-cestCache.length);
+    const totVero=(cestTotale==null?cestCache.length:cestTotale);
+    if($("#cest-riass"))$("#cest-riass").innerHTML=(totVero||q)
+      ? '<div class="cest-testa"><div><b>'+totVero+'</b> '
+        +(totVero===1?'cosa eliminata':'cose eliminate')
+        +(nascoste?(' <small>— ne mostro '+cestCache.length+', le più recenti</small>'):'')
+        +(q?(' <small>· trovate '+vis.length+' con «'+esc(cestQ)+'»</small>'):'')
+        +'</div><div class="cest-nota">Restano qui finché non le rimetti a posto, e non si vedono da nessun\'altra parte del gestionale. '
+        +'Foto, video e documenti però continuano a occupare spazio finché non li elimini per sempre.</div></div>'
       : "";
 
     renderTabella({
       id:"cest", box:"#cest-list",
       viste:"#cest-viste", visteDef:[], vista:"", conta:{}, azioneVista:"",
-      vuoto:tabVuoto("Il cestino è vuoto",
-        "Qui finisce tutto quello che elimini dal gestionale. Finché è qui non è perso: si rimette a posto con un clic.",
-        _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>'),
+      vuoto:q
+        ? tabVuoto("Nessuna corrispondenza",
+            "Nel cestino non c'è niente che si chiami «"+esc(cestQ)+"». Svuota la casella per rivedere tutto.",
+            _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>',
+            {t:"Mostra tutto",a:"cerca-azzera"})
+        : tabVuoto("Il cestino è vuoto",
+            "Qui finisce tutto quello che elimini dal gestionale. Finché è qui non è perso: si rimette a posto con un clic.",
+            _SVGV+'<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>'),
       colonne:[{lab:"Che cos'era",w:"42%"},{lab:"Tipo",w:"26%",cls:"c-chi"},{lab:"Eliminato",w:"32%"}],
-      righe:cestCache.map(function(x,i){
+      righe:vis.map(function(v){
+        const x=v.x, i=v.i;
         const q=quando(String(x.quando||"").slice(0,10),{neutro:true});
         return {
           id:String(i),
@@ -9354,7 +9436,8 @@
             .concat([{lab:"🗑 Elimina per sempre",action:"cest-definitivo",data:{id:String(i)},del:true}])
         };
       }),
-      cards:()=>cestCache.map(function(x,i){
+      cards:()=>vis.map(function(v){
+        const x=v.x, i=v.i;
         return schedaJob({
           tono:"t-neutro", titolo:x.ic+" "+esc(x.nome),
           destra:'<span class="stato" style="background:var(--sfondo);color:var(--testo-2)">'+esc(x.tipo)+'</span>',
@@ -10467,7 +10550,7 @@
   }
   async function ppDel(id){
     const x=ppCache.find(v=>String(v.id)===String(id))||{};
-    if(!gconfirm("Togliere «"+(x.descrizione||"")+"» dal tuo prezzario?\n\nVa nel cestino, i computi già fatti non cambiano."))return;
+    if(!gconfirm("Togliere «"+(x.descrizione||"")+"» dal tuo prezzario?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano."))return;
     /* .delete() e' quello giusto: js/cestino.js lo trasforma da solo in una
        data su eliminato_il, come per tutte le altre tabelle del gestionale.
        Scriverci la data a mano qui vorrebbe dire avere la regola in due posti. */
@@ -10837,13 +10920,13 @@
   }
   async function delPrezzo(id){
     const x=pzCache.find(v=>String(v.id)===String(id))||{};
-    if(!gconfirm("Mettere «"+(x.descrizione||"")+"» nel cestino?\n\nLa ritrovi nel Cestino e la puoi rimettere a posto. I computi già fatti non cambiano."))return;
+    if(!gconfirm((_cestOn()?"Mettere «":"Eliminare «")+(x.descrizione||"")+"»?\n\n"+fraseCestino()+"\nI computi già fatti non cambiano."))return;
     const {error}=await sb.from("gest_prezzi_propri").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     closeSheet();
     ppTutte=[];
     rinfresca("prezzario");
-    toast("Voce messa nel cestino");
+    toast(_cestOn()?"Voce messa nel cestino":"Voce eliminata");
   }
 
   /* ============================================================
@@ -11040,7 +11123,7 @@
       +'</div>'
       +'<div class="field"><label>E della vecchia che ne faccio?</label><div class="seg" id="pz-vecchia">'
       +'<button data-v="tieni" class="on">Tienila</button>'
-      +'<button data-v="cestino">Mettila nel cestino</button></div>'
+      +'<button data-v="cestino">'+(_cestOn()?"Mettila nel cestino":"Eliminala per sempre")+'</button></div>'
       +'<div class="sh-nota">Tenerle tutte e due serve se hai computi in corso con i prezzi vecchi: le scegli dalla tendina. I computi già fatti non cambiano in nessun caso.</div></div>';
     bindSeg("pz-vecchia");
   }
@@ -11094,7 +11177,7 @@
     ppTutte=[];pzPend=null;
     _pzEsito("<b>Importate "+messe+" voci</b> nella tariffa «"+esc(nome)+"»."
       +(doppie?(" "+doppie+" c'erano già e non le ho rifatte."):"")
-      +(inCestino?(" La tariffa «"+esc(vecchia)+"» è nel Cestino: se serve la rimetti a posto da lì."):"")
+      +(inCestino?(_cestOn()?(" La tariffa «"+esc(vecchia)+"» è nel Cestino: se serve la rimetti a posto da lì."):(" La tariffa «"+esc(vecchia)+"» è stata eliminata per sempre: il cestino non era attivo.")):"")
       +" Adesso la scegli dalla tendina quando fai un computo.");
     rinfresca("prezzario");
     toast("Tariffa importata: "+messe+" voci ✔");
@@ -12564,6 +12647,9 @@
   if($("#gal-lav-sel"))$("#gal-lav-sel").onchange=e=>{galFilter.lav=e.target.value;renderGalleria();};
   $("#f-search").oninput=e=>{filter.q=e.target.value;renderJobs();};
   if($("#cli-search"))$("#cli-search").oninput=e=>{cliQ=e.target.value;renderClienti();};
+  /* la ricerca del Cestino non rilegge il database: filtra quello che c'e' gia'
+     in memoria, quindi puo' girare a ogni lettera senza pesare */
+  if($("#cest-search"))$("#cest-search").oninput=e=>{cestQ=e.target.value;renderCestino(true);};
   if($("#dip-search"))$("#dip-search").oninput=e=>{dipQ=e.target.value;renderDip();};
   if($("#lf-file"))$("#lf-file").onchange=e=>{uploadLavoroFoto(e.target.files);e.target.value="";};
   if($("#lf-video-file"))$("#lf-video-file").onchange=e=>{uploadLavoroVideo(e.target.files);e.target.value="";};
