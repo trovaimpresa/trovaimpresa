@@ -4822,7 +4822,24 @@
     $$("#d-perms input[data-perm]").forEach(ch=>ch.addEventListener("change",permAvviso));
     if(isNew){applyRuoloPreset();}
     else{
-      if(op.ruolo)$("#d-ruolo").value=op.ruolo;
+      /* 14 agosto 2026 — la tendina si tiene il ruolo che trova.
+         Prima: `$("#d-ruolo").value = op.ruolo`. Se nel database c'era un
+         valore che non e' una delle tre voci (una maiuscola, uno spazio,
+         una parola vecchia), il browser non trova l'opzione e mette il
+         valore a "": la tendina si apriva IN BIANCO e il primo Salva
+         scriveva davvero un ruolo vuoto. E il ruolo conta: "segretaria"
+         vede tutte le pratiche dello studio, gli altri solo le proprie.
+         Adesso il valore che non conosciamo diventa una voce sua, scritta
+         com'e', cosi' si vede e non si perde. */
+      if(op.ruolo){
+        const _sr=$("#d-ruolo");
+        if(_sr&&![..._sr.options].some(o=>o.value===op.ruolo)){
+          const _o=document.createElement("option");
+          _o.value=op.ruolo;_o.textContent=op.ruolo+" (ruolo non previsto)";
+          _sr.insertBefore(_o,_sr.firstChild);
+        }
+        if(_sr)_sr.value=op.ruolo;
+      }
       const perms=op.permessi||{};
       $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=!!perms[ch.dataset.perm]);
       permAvviso();
@@ -4839,7 +4856,8 @@
     const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
-    const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
+    /* 14 agosto 2026 — un ruolo vuoto non si scrive mai (vedi squadraForm) */
+    const ruolo=($("#d-ruolo")&&$("#d-ruolo").value)?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const mestiere_id=curMestiere();
     if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
@@ -4857,7 +4875,8 @@
     const nome=$("#d-nome").value.trim();if(!nome){toast("Scrivi il nome");return;}
     if(!sbUid){toast("Devi essere loggato");return;}
     const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
-    const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
+    /* 14 agosto 2026 — un ruolo vuoto non si scrive mai (vedi squadraForm) */
+    const ruolo=($("#d-ruolo")&&$("#d-ruolo").value)?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const _costoKo=dipCostoStorto(); if(_costoKo){toast(_costoKo);return;}
     const extra=dipCampiExtra();
