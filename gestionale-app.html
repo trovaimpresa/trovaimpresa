@@ -1277,7 +1277,16 @@
         sb.from("gest_fattura_lavori").select("lavoro_id").eq("user_id",sbUid),
         /* i pieni pagati in contanti e le fatture dei fornitori: sono costi
            veri e prima non entravano nell'utile (9/8/2026) */
-        sb.from("gest_rifornimenti").select("importo,data,movimento_id").eq("user_id",sbUid),
+        /* 13 agosto 2026 — mancava il filtro sul reparto: i pieni di TUTTI i
+           reparti finivano nei costi del reparto che stavi guardando. Con due
+           reparti, il gasolio dell'uno abbassava l'utile dell'altro. La riga
+           qui sotto (fatture fornitori) il filtro ce l'aveva gia'.
+           ⚠️ Si prendono anche quelli SENZA reparto: sono i pieni registrati
+           prima che la colonna esistesse, e farli sparire dai costi vorrebbe
+           dire alzare l'utile di un'impresa che non ha toccato niente. Quelli
+           restano contati in tutti i reparti finche' non gli si da' un reparto. */
+        sb.from("gest_rifornimenti").select("importo,data,movimento_id")
+          .eq("user_id",sbUid).or("mestiere_id.eq."+mid+",mestiere_id.is.null"),
         sb.from("gest_fatture_fornitori").select("importo,data,lavoro_id").eq("user_id",sbUid).eq("mestiere_id",mid)
       ]);
       L=r[0].data||[];CLI=r[1].data||[];PV=r[2].data||[];OPE=r[3].data||[];
@@ -1306,7 +1315,18 @@
     let SP=[],nFoto=0,nVideo=0,PR=[],CM=[],FR=[];
     try{
       const attesaIds=PV.filter(p=>p.stato==="bozza"||p.stato==="inviato").map(p=>p.id);
-      const carteIds=CA.map(c=>c.id);
+      /* ===== 13 agosto 2026 — LA CARTA ELIMINATA CHE ALZAVA L'UTILE =====
+         `CA` sono le carte VIVE: passa dal Cestino. Quindi i movimenti si
+         chiedevano solo per quelle, e mettendo una carta nel Cestino tutte le
+         spese gia' fatte con quella carta sparivano dai costi: l'utile del
+         mese saliva da solo, senza che nessuno avesse toccato un lavoro.
+         Ma quei soldi sono usciti davvero. Si legge dalla porta di servizio
+         (sb.raw), come si fa per le tariffe delle persone eliminate dal
+         13 agosto: mettere in ordine le carte non riscrive la storia. */
+      const _sbCarte=(sb.raw||sb.from.bind(sb));
+      const {data:carteTutte}=await _sbCarte("gest_carte").select("id")
+        .eq("user_id",sbUid).eq("mestiere_id",mid);
+      const carteIds=(carteTutte||[]).map(c=>c.id);
       const q=await Promise.all([
         ids.length?sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({data:[]}),
         ids.length?sb.from("gest_foto").select("id",{count:"exact",head:true}).eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({count:0}),
@@ -2966,7 +2986,13 @@
       + box(eur(tFatt),"Da fatturare",
             fattLavLiberi.length?(fattLavLiberi.length+(fattLavLiberi.length===1?" lavoro finito · clicca per fatturarlo":" lavori finiti · clicca per fatturarli")):"niente in attesa",
             "info", fattLavLiberi.length?'data-action="fatt-da-lavori"':"")
-      + box(eur(incAnno),"Incassato "+anno,"già entrato in cassa","ok")
+      /* 13 agosto 2026 — questo riquadro e quello del Report si chiamavano
+         tutti e due «Incassato 2026» e davano due numeri diversi: su una
+         fattura da 10.000 € al 22%, 12.200 € qui e 10.000 € là. Nessuno dei
+         due sbagliato — qui sono i soldi entrati davvero (IVA compresa,
+         ritenuta tolta), là è l'imponibile su cui si fa l'utile. Adesso si
+         chiamano con parole diverse, così non si confondono più. */
+      + box(eur(incAnno),"Entrato in cassa "+anno,"IVA compresa, ritenuta tolta","ok")
       + box(piuVecchio==null?"—":(piuVecchio+" gg"),"Il credito più vecchio",
             piuVecchio==null?"nessuna fattura in attesa":"dalla data della fattura",
             (piuVecchio!=null&&piuVecchio>gg)?"err":"neutro")
@@ -9545,16 +9571,30 @@
       if(eVecP){toast("Non riesco a leggere le voci di prima: "+eVecP.message);return;}
       vecchieVoci=(veccP||[]).map(r=>r.id);
     }else{
-      /* si contano anche quelli nel cestino: eliminato l'ultimo, il prossimo
-         riprendeva lo stesso numero e nascevano due preventivi n.5 */
-      let numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
+      /* ===== 13 agosto 2026 — IL NUMERO NON GUARDAVA NE' L'ANNO NE' IL REPARTO
+         Era un contatore unico che cresceva e basta: a gennaio non ripartiva da
+         1, e due reparti si passavano la stessa serie (il giardiniere faceva il
+         n.40 perche' l'edile era arrivato al 39). Le fatture ripartono da 1 ogni
+         anno; i preventivi adesso ripartono da 1 ogni anno DENTRO OGNI REPARTO,
+         che e' la promessa scritta sulla pagina di scelta: «ogni reparto e'
+         separato». Si continua a guardare anche nel Cestino, se no eliminato
+         l'ultimo il prossimo riprende lo stesso numero. */
+      const _annoPrev=String(data||todayStr()).slice(0,4);
+      const _midPrev=curMestiere();
+      let numero=prevCache.filter(p=>String(p.data||"").slice(0,4)===_annoPrev)
+                          .reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
       try{
         const _sbP=(sb.raw||sb.from.bind(sb));
-        const {data:maxP}=await _sbP("gest_preventivi").select("numero")
-          .eq("user_id",sbUid).order("numero",{ascending:false}).limit(1);
+        const {data:maxP,error:eP}=await _sbP("gest_preventivi").select("numero")
+          .eq("user_id",sbUid).eq("mestiere_id",_midPrev)
+          .gte("data",_annoPrev+"-01-01").lte("data",_annoPrev+"-12-31")
+          .order("numero",{ascending:false}).limit(1);
+        /* se la lettura non riesce non si tira a indovinare: dare per buono
+           «0+1» vorrebbe dire un preventivo n.1 a dicembre, sopra uno che c'e' gia' */
+        if(eP){toast("Numero non assegnato: "+eP.message);return;}
         const nMax=(maxP&&maxP[0]&&+maxP[0].numero)||0;
         if(nMax+1>numero)numero=nMax+1;
-      }catch(e){}
+      }catch(e){toast("Numero non assegnato: riprova");return;}
       const nuovo=Object.assign({user_id:sbUid,mestiere_id:curMestiere(),titolo,cliente_id,data,note,numero,stato:"bozza"},parcella);
       let {data:np,error}=await sb.from("gest_preventivi").insert(nuovo).select().single();
       if(error&&eColonnaParcellaMancante(error)){
@@ -9589,16 +9629,28 @@
         return {user_id:sbUid, descrizione:desc, qta:+v.quantita||1, prezzo:+v.prezzo_unitario||0, ordine:i};
       }).filter(r=>r.descrizione);
       if(!righe.length) return {ok:false, error:"Nessuna voce valida"};
-      /* si contano anche quelli nel cestino: eliminato l'ultimo, il prossimo
-         riprendeva lo stesso numero e nascevano due preventivi n.5 */
-      let numero=prevCache.reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
+      /* ===== 13 agosto 2026 — IL NUMERO NON GUARDAVA NE' L'ANNO NE' IL REPARTO
+         Era un contatore unico che cresceva e basta: a gennaio non ripartiva da
+         1, e due reparti si passavano la stessa serie (il giardiniere faceva il
+         n.40 perche' l'edile era arrivato al 39). Le fatture ripartono da 1 ogni
+         anno; i preventivi adesso ripartono da 1 ogni anno DENTRO OGNI REPARTO,
+         che e' la promessa scritta sulla pagina di scelta: «ogni reparto e'
+         separato». Si continua a guardare anche nel Cestino, se no eliminato
+         l'ultimo il prossimo riprende lo stesso numero. */
+      const _annoPrev=todayStr().slice(0,4);
+      const _midPrev=curMestiere();
+      let numero=prevCache.filter(p=>String(p.data||"").slice(0,4)===_annoPrev)
+                          .reduce((m,p)=>Math.max(m,+p.numero||0),0)+1;
       try{
         const _sbP=(sb.raw||sb.from.bind(sb));
-        const {data:maxP}=await _sbP("gest_preventivi").select("numero")
-          .eq("user_id",sbUid).order("numero",{ascending:false}).limit(1);
+        const {data:maxP,error:eP}=await _sbP("gest_preventivi").select("numero")
+          .eq("user_id",sbUid).eq("mestiere_id",_midPrev)
+          .gte("data",_annoPrev+"-01-01").lte("data",_annoPrev+"-12-31")
+          .order("numero",{ascending:false}).limit(1);
+        if(eP) return {ok:false, error:"Numero non assegnato: "+eP.message};
         const nMax=(maxP&&maxP[0]&&+maxP[0].numero)||0;
         if(nMax+1>numero)numero=nMax+1;
-      }catch(e){}
+      }catch(e){ return {ok:false, error:"Numero non assegnato: riprova"}; }
       const {data:np,error}=await sb.from("gest_preventivi").insert({user_id:sbUid,mestiere_id:curMestiere(),titolo,note:note||null,data:todayStr(),stato:"bozza",numero}).select().single();
       if(error) return {ok:false, error:error.message};
       const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,preventivo_id:np.id})));
@@ -13079,15 +13131,25 @@
     }
 
     /* stessa formula del numero progressivo di savePrev: si contano anche i
-       preventivi nel cestino, se no il prossimo riprende un numero già usato */
-    let numero=prevCache.reduce((m,x)=>Math.max(m,+x.numero||0),0)+1;
+       preventivi nel cestino, se no il prossimo riprende un numero già usato.
+       13 agosto 2026: come gli altri due posti, adesso guarda anche l'anno e il
+       reparto. Questo terzo era sfuggito: l'ha trovato la prova, non io. */
+    /* qui la data del preventivo e' sempre oggi: lo dice l'insert qui sotto
+       (data:todayStr()). Nessuna variabile `data` in questa funzione. */
+    const _annoPrev=todayStr().slice(0,4);
+    const _midPrev=curMestiere();
+    let numero=prevCache.filter(x=>String(x.data||"").slice(0,4)===_annoPrev)
+                        .reduce((m,x)=>Math.max(m,+x.numero||0),0)+1;
     try{
       const _sbP=(sb.raw||sb.from.bind(sb));
-      const {data:maxP}=await _sbP("gest_preventivi").select("numero")
-        .eq("user_id",sbUid).order("numero",{ascending:false}).limit(1);
+      const {data:maxP,error:eP}=await _sbP("gest_preventivi").select("numero")
+        .eq("user_id",sbUid).eq("mestiere_id",_midPrev)
+        .gte("data",_annoPrev+"-01-01").lte("data",_annoPrev+"-12-31")
+        .order("numero",{ascending:false}).limit(1);
+      if(eP){toast("Numero non assegnato: "+eP.message);return;}
       const nMax=(maxP&&maxP[0]&&+maxP[0].numero)||0;
       if(nMax+1>numero)numero=nMax+1;
-    }catch(e){}
+    }catch(e){toast("Numero non assegnato: riprova");return;}
 
     const {data:np,error}=await sb.from("gest_preventivi").insert({
       user_id:sbUid, mestiere_id:curMestiere(),
