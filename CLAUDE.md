@@ -3806,3 +3806,215 @@ vede quello che non dovrebbe:*
 - `1,00 parti` nel modulo di correzione della misura;
 - **`gestionale-negozio.html` e `gestionale-noleggio.html`: mai controllati**,
   e hanno gli stessi campi importo/ore ancora `type="number"`.
+
+---
+
+# 13 agosto 2026 (sera) — TRE GRUPPI CHIUSI, E UN BANCO DI PROVA CHE PARLA
+
+Giornata lunga. Sono stati chiusi **tre dei quattro gruppi** rimasti aperti dal
+rapporto del 12 agosto, ed è stato costruito il **banco di prova** che il
+LEGGIMI di quel giorno chiedeva come «prossimo passo».
+
+Tre spinte in produzione, tutte verificate prima di consegnarle:
+
+| commit | cosa |
+|---|---|
+| `cd4c67b` | i permessi degli operai |
+| `351768e` | i file che si perdono |
+| (ultimo) | i conti che non tornano fra due schermate |
+
+## GRUPPO 1 — i permessi degli operai (`cd4c67b`)
+
+Era l'unico gruppo dove il difetto non era un numero sbagliato ma **una persona
+che vedeva o faceva quello che non doveva**. Riprodotti tutti e 10 i sospetti
+sul file originale prima di toccare una riga: nessun falso allarme.
+
+- **«Carica fattura PDF» non chiedeva niente a nessuno.** Una persona con
+  Fatture ✔ e Foto ✘ caricava nel deposito delle foto e scriveva in `gest_foto`,
+  scavalcando il permesso col dito. Scelta di Alessio: quel pulsante lo comanda
+  la spunta **Fatture**, perché il PDF di una fattura non è una foto di
+  cantiere. Uguale nell'app e sul database.
+- **Le foto del capo sparivano.** La scheda persona promette «Quelle che
+  carichi tu le vede comunque», ma `foto_read` chiedeva la spunta «foto»:
+  appena si lanciava quel file, l'operaio senza Foto perdeva le istruzioni
+  fotografiche. Adesso legge chi ha «foto» **oppure** «lavori».
+- **Le Scadenze mute.** Il pulsante guardava «lavori», il database
+  «calendario»: la sezione si apriva e diceva «Nessuna scadenza» anche quando
+  ce n'erano. «calendario» non è un permesso sui dati — le scadenze le comanda
+  «lavori».
+- **Le note sparivano invece di bloccarsi.** Senza il permesso l'operaio non
+  rileggeva nemmeno quello che aveva scritto lui. Adesso la casella si legge,
+  è grigia, e sotto c'è scritto perché.
+- **«Solo Pagamenti», «solo Fatture», «solo Clienti» erano permessi morti.**
+  Adesso entrano. Chi ha solo Pagamenti apre l'app e trova la sua carta.
+- **La persona vecchia con la casella permessi vuota** non è più chiusa fuori.
+- **Nel pannello**: le sette caselle riordinate (prima le quattro che aprono
+  una schermata), il preset «Operaio» adesso comprende **Note**, e mentre
+  spunti compare un avviso quando la combinazione non apre niente.
+
+Serve aver lanciato `sql/gest-permessi-collaboratori.sql` (fatto, verificato
+sulle regole vive con una query).
+
+## GRUPPO 2 — i file che si perdono (`351768e`)
+
+Il peggiore **non era quello scritto nel rapporto**. Nel pannello, salvando un
+lavoro con delle foto, il giro non guardava né se il file era salito né se la
+riga era stata scritta, e in fondo metteva comunque `f.uploaded=true`.
+
+Fatto girare il pezzo vero, ritagliato dal file di oggi:
+
+- **caricamento fallito** (poco campo in cantiere) → la riga si scriveva lo
+  stesso e puntava a un file mai salito. Nel gestionale compariva una foto che
+  non si apre; quella vera restava nel telefono, marcata «già caricata»,
+  e **non si riprovava mai più**. Persa.
+- **riga rifiutata** → file orfano nel deposito, e marcata «già caricata».
+- in tutti e due i casi il messaggio diceva **«Lavoro aggiornato ✔»**.
+
+Adesso: niente riga se il file non sale, niente file se la riga non si scrive,
+«caricata» solo quando sono andate bene tutte e due, e il messaggio dice quante
+sono rimaste indietro (ci riprova al salvataggio dopo).
+
+Nell'app dell'operaio **la pulizia non c'era proprio**: provato, restavano 1
+foto e 1 video nel deposito a ogni tentativo andato male. Ed è lì che se ne
+accumulano di più, perché si carica dal cantiere.
+
+E `_fileOrfano` non guardava l'esito della `remove`: Supabase non lancia mai
+su errore, risponde `{error}` — quel `catch` non prendeva niente.
+
+## GRUPPO 3 — i conti che non tornano fra due schermate
+
+- **«Incassato 2026» era due cose con lo stesso nome.** Su 10.000 € al 22%: le
+  Fatture dicevano 12.200 €, il Report 10.000 €. Nessuno dei due sbagliato —
+  uno è la cassa, l'altro l'imponibile su cui si fa l'utile. Scarto misurato
+  fino a **2.200 € sulla stessa fattura**. Adesso nelle Fatture si chiama
+  «Entrato in cassa 2026 — IVA compresa, ritenuta tolta».
+- **I rifornimenti non guardavano il reparto**: il gasolio di un reparto
+  abbassava l'utile dell'altro. Tenuti dentro quelli senza reparto (sul
+  database di Alessio sono 0, controllato) per non far sparire costi vecchi.
+- **La carta nel Cestino faceva salire l'utile del mese**: i movimenti si
+  chiedevano solo per le carte vive. Adesso si leggono da `sb.raw`, come le
+  tariffe delle persone eliminate: **mettere in ordine le carte non riscrive
+  la storia**.
+- **Il numero dei preventivi** era un contatore unico: a gennaio non ripartiva
+  da 1 e due reparti si passavano la stessa serie. Adesso riparte da 1 ogni
+  anno **dentro ogni reparto**, e se la lettura non riesce si ferma invece di
+  dare un numero già usato.
+
+## IL BANCO DI PROVA — `prove-claude/banco-prove-13ago.zip`
+
+Il punto 0 del prompt. **Un comando, 49 prove, ~15 minuti**, una riga verde o
+rossa per ognuna, uscita diversa da zero se anche una sola è rossa.
+
+```
+node prova-tutto.js            il giro normale
+node prova-tutto.js --lista    elenca e basta
+node prova-tutto.js --tutto    anche archivio e diagnostiche
+```
+
+⚠️ **Gira nell'ambiente di Claude, non sul computer di Alessio** (serve
+Chromium in `/opt/pw-browsers`, PostgreSQL 16, python3). Lo zip va solo
+conservato e riallegato: se non c'è, va ricostruito da capo.
+
+Le tre cose che fa e che prima non faceva nessuno:
+
+1. **Rifà gli estratti dei conti dal gestionale di oggi.** `estratto.js`,
+   `xmlhead.js`, `xmlbody.js` erano copie a mano incollate il 13 agosto:
+   19 righe su 106 non si ritrovavano più nel file vero, e `xmlbody.js` non
+   conteneva **nessuno** `<ScontoMaggiorazione>` — era la copia di *prima*
+   della correzione dello sconto. Quelle prove dicevano «nessuna difformità»
+   controllando codice che non gira più. Adesso si ritagliano a ogni giro, e
+   se una funzione non si trova **la prova non parte**.
+2. **Controlla l'md5 di quello che le porte servono davvero**, scaricandolo dal
+   server. È l'ora persa del 13 agosto, che non si ripete.
+3. **Non spaccia per verde quello che non sa leggere.** Quattro colori:
+   passata · FALLITA · **già noto** (difetto aperto, ritrovato: giusto così) ·
+   **da capire** (gira, ma non è ancora scritto cosa vuol dire passata: non
+   conta come passata). Oggi sono 18 «da capire», tutte del Cestino, delle
+   persone e delle caselle.
+
+## ⚠️ LA LEZIONE DI OGGI — È CAMBIATA RISPETTO A IERI
+
+Ieri era: *«quando correggi, il difetto nuovo sta nella riga che hai appena
+toccato»*. Vale ancora. Ma oggi il tempo l'ha mangiato un'altra cosa.
+
+**Quattro volte su cinque, quando una prova diceva il falso, il bugiardo era
+la prova — non il gestionale.**
+
+1. **L'estratto vecchio**: le prove dei conti giravano su codice del 13 agosto
+   mattina e dicevano «nessuna difformità».
+2. **Il banco che sovrascriveva `gest_membri`**: il ruolo che mettevo per la
+   prova non arrivava mai al codice. Tre giri di «nessun difetto» falsi.
+3. **Il banco che scriveva nel dizionario condiviso**: una prova si portava
+   dietro i permessi di quella prima, e mi ha mostrato una riga rossa su una
+   correzione che funziona.
+4. **`t-orfani.js` classificata male**: contavo come difetto `foto1.jpg`, una
+   riga che sta nei dati finti dall'inizio. Ce l'avevo pure messa in lista.
+5. E **`t7-note-vuoto.js` mente per costruzione**: chiede «la nota si legge da
+   qualche parte?» guardando `document.body.innerText`, dove il contenuto di
+   una casella di testo **non compare mai**. Risponde NO anche quando la nota
+   si legge benissimo. Fidandosi si «correggerebbe» una cosa che funziona.
+
+**La domanda da farsi prima di ogni riga rossa, e prima di ogni riga verde:**
+*questo lo dice il gestionale, o lo dice la prova?*
+
+Di contorno, due difetti nel banco stesso: l'estrattore **perdeva la parola
+`async`** (ogni ritaglio di funzione asincrona veniva fuori spezzato), e il
+mio primo `prova-tutto.js` contava un link firmato come se fosse un
+caricamento.
+
+**Però il banco ha anche ripagato**, e nello stesso giorno: sul gruppo 3 ha
+trovato il **terzo** posto che assegna il numero al preventivo (ne avevo
+corretti 2 su 3, contando i posti se n'è accorto lui), e subito dopo il
+controllo della sintassi ha fermato una **pagina bianca** — correggendo quel
+terzo posto ci avevo messo una variabile che in quella funzione non esiste.
+
+## DOVE SIAMO RIMASTI
+
+**Da fare ad Alessio:**
+- il push del gruppo 3, se non è già stato fatto;
+- la **prova a clic sull'app dell'operaio** col link di un collaboratore: foto
+  del capo visibili, note leggibili e grigie, Scadenze non mute. È l'unico
+  pezzo di collaudo che non può fare Claude.
+
+**Restano aperte**, in ordine:
+
+*1. Le tre piccole del pannello (tutte provate):*
+- il **ruolo** che sparisce dalla tendina se non è una delle tre scelte, e che
+  un Salva qualsiasi **cancella** scrivendo `""`. Il ruolo conta: «segretaria»
+  vede tutte le pratiche dello studio, gli altri solo le proprie. Correzione
+  già scritta a parole: la tendina si tiene il valore che trova, e Salva non
+  scrive mai un ruolo vuoto;
+- la **barra del fondatore sul telefono**: 233 px su uno schermo da 360
+  (il 29%), e la X la chiude «fino al prossimo caricamento», quindi torna
+  sempre. Solo Alessio la vede;
+- i **4 account con `tipo` vuoto**: non sono né impresa né artigiano né
+  professionista, e vedono le etichette di partenza. Sono persone vere.
+
+*2. Il menu del telefono (visto da Alessio, NON riprodotto):*
+Sul pannello, aprendo il ☰ da iPhone, ogni voce diventa un riquadro alto con
+dentro una casellina vuota con una **«i»**. Nella prova a 390 px le righe sono
+alte 44 px e quelle «i» non ci sono. Sospetto principale: `js/aiuti.js` su
+dispositivo touch. **Serve una prova in modalità touch vera**, non un finto
+computer stretto.
+
+*3. `gestionale-negozio.html` e `gestionale-noleggio.html`:*
+Alessio li vuole fare **separatamente, da soli**, dopo aver finito impresa e
+professionisti. Trovato guardando (non ancora riprodotto): non hanno `_numIt`,
+e leggono con `parseFloat($("#nm-importo").value)||0`. Con `type="number"`, se
+scrivi `12,50` il valore diventa **vuoto** → si salva **0 €**. Una casella si
+chiama testualmente «Quantità (anche con la virgola)». Buona notizia: nel
+database **non c'è nessun account di tipo «negozio»** (34 artigiano, 27
+impresa, 1 professionista, 4 senza tipo), quindi oggi non fa danni a nessuno e
+si può lavorare con calma.
+
+*4. Le 18 prove «da capire» del banco*, da classificare una alla volta quando
+si lavora su quel gruppo.
+
+*5. Di contorno, trovato leggendo le regole del deposito:* `foto_team_delete`
+usa `gest_puo_accedere`, cioè «sei un collaboratore attivo» e basta — non
+guarda la spunta «foto». Un collaboratore può cancellare qualsiasi file di
+quel deposito. C'era già, non è una regressione, non è in lista.
+
+Più tutto quello che era già scritto nella sezione del 13 agosto mattina e non
+è stato toccato: i mezzi, `gest_richieste`, `squadraAdd`, il Riepilogo che fa
+25 letture, la Galleria, il ripristino dal Cestino, le percentuali col punto.
