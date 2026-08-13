@@ -55,6 +55,20 @@ as $$
   select _impresa = auth.uid()      -- il titolare passa sempre
       or exists (
            select 1 from gest_membri m
+            /* 13 agosto 2026 — LA CASELLA MAI TOCCATA.
+               Le persone create prima che i permessi esistessero hanno la
+               casella vuota (null oppure {}). Prima qui valevano zero permessi,
+               mentre l'app del telefono le faceva entrare "come prima": la
+               barra si riempiva di pulsanti e ogni sezione si apriva VUOTA.
+               Adesso "mai toccata" vuol dire questi permessi qui, gli stessi
+               scritti in gestionale-operatore.html (PERMESSI_PARTENZA).
+               Chi ha la casella scritta, anche con tutto a no, resta a no. */
+            cross join lateral (
+              select case when m.permessi is null or m.permessi = '{}'::jsonb
+                          then '{"calendario":true,"lavori":true,"foto":true,"note":true,
+                                 "clienti":false,"fatture":false,"pagamenti":false}'::jsonb
+                          else m.permessi end as p
+            ) x
             where m.impresa_id = _impresa
               and m.membro_id  = auth.uid()
               and m.stato      = 'attivo'
@@ -63,7 +77,7 @@ as $$
                  ERRORE e la lettura si romperebbe invece di rispondere "no".
                  Trovato provandolo. Qui si confronta e basta: tutto quello che
                  non e' un si secco vale no. */
-              and coalesce(m.permessi -> _sezione, 'false'::jsonb)
+              and coalesce(x.p -> _sezione, 'false'::jsonb)
                     in ('true'::jsonb, '"true"'::jsonb)
          );
 $$;
@@ -103,9 +117,13 @@ create policy "gest_fattura_lavori_team_read" on public.gest_fattura_lavori
 -- ---------------------------------------------------------------------
 -- 4. LAVORI — spunta "lavori"
 -- ---------------------------------------------------------------------
+-- 13 agosto 2026: anche la spunta "fatture". La sezione Fatture dell'app del
+-- dipendente e' costruita sui LAVORI (descrizione, importo, stato). Con la sola
+-- spunta "fatture" la sezione si apriva vuota e non lo spiegava a nessuno.
 drop policy if exists "lavori_read" on public.gest_lavori;
 create policy "lavori_read" on public.gest_lavori
-  for select using (gest_puo_sezione(user_id, 'lavori'));
+  for select using (gest_puo_sezione(user_id, 'lavori')
+                 or gest_puo_sezione(user_id, 'fatture'));
 
 drop policy if exists "lavori_update" on public.gest_lavori;
 create policy "lavori_update" on public.gest_lavori
@@ -118,11 +136,20 @@ create policy "gest_lavoro_mezzi_team_read" on public.gest_lavoro_mezzi
 
 
 -- ---------------------------------------------------------------------
--- 5. CALENDARIO E SCADENZE — spunta "calendario"
+-- 5. CALENDARIO E SCADENZE — spunta "lavori" oppure "calendario"
+--
+-- 13 agosto 2026. Prima chiedeva SOLO "calendario", ma nell'app del dipendente
+-- il pulsante «Scadenze» compare con la spunta "lavori", e la scheda della
+-- persona promette testualmente: «Lavori — vede l'agenda e le scadenze».
+-- Risultato con Lavori ✔ e Calendario ✘: il pulsante c'era, la sezione si
+-- apriva e restava muta, «Nessuna scadenza», senza dire perche'. Provato.
+-- "calendario" non e' un permesso sui dati (dice solo se puo' girare fra i
+-- giorni): le scadenze le comanda "lavori".
 -- ---------------------------------------------------------------------
 drop policy if exists "scadenze_team_read" on public.gest_scadenze;
 create policy "scadenze_team_read" on public.gest_scadenze
-  for select using (gest_puo_sezione(user_id, 'calendario'));
+  for select using (gest_puo_sezione(user_id, 'lavori')
+                 or gest_puo_sezione(user_id, 'calendario'));
 
 
 -- ---------------------------------------------------------------------
@@ -140,19 +167,49 @@ create policy "gest_note_team_read" on public.gest_note
 
 
 -- ---------------------------------------------------------------------
--- 7. FOTO E VIDEO — spunta "foto"
+-- 7. FOTO E VIDEO
+--
+-- 13 agosto 2026 — QUI C'ERANO DUE BUCHI, uno per verso.
+--
+-- (a) La LETTURA chiedeva la spunta "foto". Ma la scheda della persona dice,
+--     testualmente: «Può aggiungere foto e video. Quelle che carichi tu le
+--     vede comunque.» Nell'app era vero, sul database no: appena questo file
+--     veniva eseguito, l'operaio senza "foto" smetteva di vedere le foto di
+--     istruzioni del capo — proprio quelle che gli servono per lavorare.
+--     Adesso legge chi ha "foto" OPPURE "lavori": chi va in cantiere le vede.
+--
+-- (b) Le FATTURE IN PDF vivono anche loro in gest_foto (tipo='fattura'), e
+--     l'app dell'operaio le fa caricare dalla sezione Fatture. Una persona con
+--     Fatture ✔ e Foto ✘ scriveva qui dentro scavalcando il permesso foto; e
+--     con queste regole accese il file saliva nel deposito e la riga veniva
+--     rifiutata dopo, lasciando un file orfano. Il PDF di una fattura non e'
+--     una foto di cantiere: adesso lo comanda la spunta "fatture", uguale
+--     nell'app e qui.
 -- ---------------------------------------------------------------------
+-- le colonne sono scritte per esteso (gest_foto.tipo, non tipo) apposta: cosi'
+-- non c'e' modo che si confondano con una colonna omonima di un'altra tabella
+-- dentro una join.
 drop policy if exists "foto_read" on public.gest_foto;
 create policy "foto_read" on public.gest_foto
-  for select using (gest_puo_sezione(user_id, 'foto'));
+  for select using (
+    case when coalesce(gest_foto.tipo,'') = 'fattura'
+         then gest_puo_sezione(gest_foto.user_id, 'fatture')
+         else gest_puo_sezione(gest_foto.user_id, 'foto')
+           or gest_puo_sezione(gest_foto.user_id, 'lavori')
+    end);
 
 drop policy if exists "foto_insert" on public.gest_foto;
 create policy "foto_insert" on public.gest_foto
-  for insert with check (gest_puo_sezione(user_id, 'foto'));
+  for insert with check (
+    case when coalesce(gest_foto.tipo,'') = 'fattura'
+         then gest_puo_sezione(gest_foto.user_id, 'fatture')
+         else gest_puo_sezione(gest_foto.user_id, 'foto')
+    end);
 
 drop policy if exists "video_read" on public.gest_video;
 create policy "video_read" on public.gest_video
-  for select using (gest_puo_sezione(user_id, 'foto'));
+  for select using (gest_puo_sezione(user_id, 'foto')
+                 or gest_puo_sezione(user_id, 'lavori'));
 
 drop policy if exists "video_insert" on public.gest_video;
 create policy "video_insert" on public.gest_video

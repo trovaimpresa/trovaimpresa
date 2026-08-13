@@ -169,6 +169,7 @@
     <div class="day-title" id="day-title">Lavori di oggi</div>
     <div id="day-list"></div>
 
+    <div class="empty-state hidden" id="carta-nessuna">Il tuo capo non ti ha ancora assegnato una carta aziendale.<br>Appena te la assegna, qui vedrai il saldo.</div>
     <div class="panel" id="carta-panel" style="display:none">
       <div class="label">La tua carta aziendale</div>
       <div id="carta-info"></div>
@@ -241,6 +242,7 @@
     <div class="panel">
       <div class="label">Cosa hai fatto / note</div>
       <textarea id="lv-note" placeholder="Scrivi qui cosa hai fatto…"></textarea>
+      <div class="hidden" id="lv-note-ro" style="font-size:14px;color:var(--muted);margin-top:6px">Puoi leggere le note, ma non cambiarle: il permesso «Note» ce l'ha il tuo capo.</div>
       <div class="row-btns">
         <button class="btn-line" id="btn-salva">Salva note</button>
         <button class="btn-fill" id="btn-fatto">Segna come fatto</button>
@@ -359,43 +361,80 @@ function gate(msg){$("#gate-msg").textContent=msg;show("gate");}
    regole RLS sul database, che vanno scritte in SQL. Per l'uso normale —
    un operaio col telefono in mano — questo e' quello che serve.
    ============================================================ */
-function puo(k){ return MIO.permessi && MIO.permessi[k]===true; }
-/* niente permessi salvati (persone create prima che esistessero): si lascia
-   tutto com'era, invece di chiudere fuori chi ieri lavorava */
+/* 13 agosto 2026 — LA CASELLA MAI TOCCATA
+   Le persone create prima che i permessi esistessero hanno la casella vuota
+   ({} oppure niente). Prima qui si diceva «lasciamo tutto acceso», ma sul
+   database gest_puo_sezione rispondeva «no» a tutto: la barra si riempiva di
+   pulsanti e ogni sezione si apriva VUOTA, senza spiegare niente.
+   Adesso «mai toccata» vuol dire questi permessi qui, uguali identici anche
+   dentro sql/gest-permessi-collaboratori.sql. Sono quelli che quelle persone
+   avevano davvero: agenda, lavori, foto e note. Clienti, fatture e pagamenti
+   non li hanno mai avuti nella barra nemmeno prima, e restano chiusi. */
+const PERMESSI_PARTENZA={calendario:true,lavori:true,foto:true,note:true,
+                         clienti:false,fatture:false,pagamenti:false};
 function permessiMai(){ return !MIO.permessi || Object.keys(MIO.permessi).length===0; }
+function puo(k){
+  if(permessiMai())return PERMESSI_PARTENZA[k]===true;
+  return MIO.permessi[k]===true;
+}
+/* 13 agosto 2026 — QUALI SPUNTE APRONO DAVVERO UNA SCHERMATA
+   Lavori, Clienti, Fatture e Pagamenti hanno una loro sezione. Calendario,
+   Foto e Note invece cambiano solo quello che si puo' fare DENTRO una
+   sezione: da sole non aprono niente, e chi aveva soltanto quelle si
+   trovava il lucchetto senza capire perche'. */
+const SEZIONI_VERE=["lavori","clienti","fatture","pagamenti"];
+function qualcosaDaVedere(){ return SEZIONI_VERE.some(puo); }
 function applicaPermessi(){
   const _mostra=(sel,si)=>{const e=$(sel);if(e)e.classList.toggle("hidden",!si);};
-  const tutto=permessiMai();
-  /* il calendario: senza il permesso resta solo il giorno di oggi */
+  const vediLavori=puo("lavori");
+  /* il calendario: senza il permesso resta solo il giorno di oggi.
+     E chi non ha «Lavori» non ha nessun lavoro da guardare: niente calendario. */
   const cal=document.querySelector("#view-agenda .cal");
-  if(cal)cal.style.display=(tutto||puo("calendario"))?"":"none";
+  if(cal)cal.style.display=(vediLavori&&puo("calendario"))?"":"none";
+  /* l'elenco dei lavori del giorno: chi ha solo la carta aziendale non lo vede */
+  const dt=$("#day-title"); if(dt)dt.style.display=vediLavori?"":"none";
+  const dl=$("#day-list");  if(dl)dl.style.display=vediLavori?"":"none";
   /* foto e video: si vedono sempre quelle del capo, si AGGIUNGONO solo col permesso */
-  _mostra("#btn-foto",  tutto||puo("foto"));
-  _mostra("#btn-video", tutto||puo("foto"));
-  /* le note */
+  _mostra("#btn-foto",  puo("foto"));
+  _mostra("#btn-video", puo("foto"));
+  /* le note: senza il permesso restano LEGGIBILI e bloccate, non sparite.
+     Prima la casella veniva nascosta, e l'operaio non poteva piu' rileggere
+     nemmeno quello che aveva scritto lui: restava un riquadro intitolato
+     «Cosa hai fatto / note» con dentro il nulla. */
+  const scrivo=puo("note");
   const note=$("#lv-note");
-  if(note)note.classList.toggle("hidden",!(tutto||puo("note")));
-  _mostra("#btn-salva", tutto||puo("note"));
+  if(note){
+    note.classList.remove("hidden");
+    note.readOnly=!scrivo;
+    note.placeholder=scrivo?"Scrivi qui cosa hai fatto…":"Nessuna nota su questo lavoro.";
+    note.style.background=scrivo?"":"#f4f6f5";
+  }
+  _mostra("#lv-note-ro", !scrivo);
+  _mostra("#btn-salva", scrivo);
   /* la carta aziendale: il pannello lo accende caricaCartaMia, ma senza il
      permesso non si accende per niente */
-  if(!(tutto||puo("pagamenti"))){
+  if(!puo("pagamenti")){
     const cp=$("#carta-panel"); if(cp)cp.style.display="none";
+    const cn=$("#carta-nessuna"); if(cn)cn.classList.add("hidden");
   }
 }
 /* rete di sicurezza sulle AZIONI: anche se un pulsante restasse raggiungibile
    (schermo stretto, pagina rimasta aperta da prima), l'azione si ferma qui e
    dice perche'. Nascondere e basta non e' una risposta. */
 function chiedoPermesso(k,cosa){
-  if(permessiMai()||puo(k))return true;
+  if(puo(k))return true;
   toast("Il capo non ti ha dato il permesso "+cosa+".");
   return false;
 }
 let curView="agenda";
 function renderNav(){
-  $("#nav-agenda").classList.toggle("hidden",MIO.permessi.lavori!==true);
-  $("#nav-clienti").classList.toggle("hidden",MIO.permessi.clienti!==true);
-  $("#nav-scadenze").classList.toggle("hidden",MIO.permessi.lavori!==true);
-  $("#nav-fatture").classList.toggle("hidden",MIO.permessi.fatture!==true);
+  /* si passa da puo()/permessiMai(): letto cosi', chi ha i permessi a null
+     (persone di prima) si ritrovava la barra completamente vuota, perche'
+     MIO.permessi diventa {} e nessuna spunta risultava accesa. */
+  $("#nav-agenda").classList.toggle("hidden",!puo("lavori"));
+  $("#nav-clienti").classList.toggle("hidden",!puo("clienti"));
+  $("#nav-scadenze").classList.toggle("hidden",!puo("lavori"));
+  $("#nav-fatture").classList.toggle("hidden",!puo("fatture"));
   $("#nav-agenda").classList.toggle("active",curView==="agenda");
   $("#nav-clienti").classList.toggle("active",curView==="clienti");
   $("#nav-scadenze").classList.toggle("active",curView==="scadenze");
@@ -428,22 +467,43 @@ async function boot(session){
   $("#hd-name").textContent=MIO.nome||"Operatore";
   const perms=membri[0].permessi;
   MIO.permessi=perms||{};
-  if(perms && perms.lavori!==true && perms.clienti!==true){
+  /* 13 agosto 2026 — CHI ENTRA, E DOVE ATTERRA
+     Prima si entrava SOLO con «Lavori» o «Clienti». Conseguenze vere:
+     · chi aveva soltanto «Pagamenti» (o soltanto «Fatture») trovava il
+       lucchetto: la spunta era accesa e non serviva a niente;
+     · una persona vecchia con la casella dei permessi vuota ({}) finiva
+       anche lei fuori, proprio il caso che permessiMai() doveva proteggere,
+       perche' {} e' comunque un oggetto e passava il primo controllo.
+     Adesso entra chiunque abbia almeno una sezione vera, e si atterra sulla
+     prima che ha. Il lucchetto resta solo per chi non ne ha nessuna, e dice
+     cosa manca invece di «sezioni in arrivo». */
+  if(!qualcosaDaVedere()){
     const LABELS={calendario:"Calendario",lavori:"Lavori",foto:"Foto",note:"Note",clienti:"Clienti",fatture:"Fatture",pagamenti:"Pagamenti"};
-    const attivi=Object.keys(LABELS).filter(k=>perms[k]===true).map(k=>LABELS[k]);
-    gate(attivi.length?("Il tuo accesso: "+attivi.join(", ")+" — sezioni in arrivo"):"Il tuo accesso non include l'agenda — sezioni in arrivo");
+    const attivi=Object.keys(LABELS).filter(puo).map(k=>LABELS[k]);
+    gate(attivi.length
+      ? ("Per adesso hai solo: "+attivi.join(", ")+". Da sole queste spunte non aprono nessuna schermata: chiedi al tuo capo anche Lavori, Clienti, Fatture o Pagamenti.")
+      : "Il tuo capo non ti ha ancora dato nessun permesso. Chiediglielo e riapri questa pagina.");
     return;
   }
   renderNav();
-  if(!perms || perms.lavori===true){
+  if(puo("lavori")){
     await loadLavori();
     const n=new Date();calY=n.getFullYear();calM=n.getMonth();
     renderCal();renderDay();
     show("agenda");
     caricaCartaMia();
-  }else{
+  }else if(puo("clienti")){
     await loadClienti();
     show("clienti");
+  }else if(puo("fatture")){
+    await loadFatture();
+    show("fatture");
+  }else{
+    /* solo la carta aziendale: si apre l'agenda, che pero' resta con dentro
+       la sola carta (calendario ed elenco lavori li spegne applicaPermessi) */
+    show("agenda");
+    await caricaCartaMia();
+    if($("#carta-panel").style.display!=="block")$("#carta-nessuna").classList.remove("hidden");
   }
 }
 
@@ -552,7 +612,15 @@ function renderFattureSezione(){
   box.querySelectorAll("[data-fatt-up]").forEach(b=>b.onclick=()=>chiediFatturaPdf(b.dataset.fattUp));
   box.querySelectorAll("[data-fatt-open]").forEach(b=>b.onclick=()=>apriFatturaPdf(b.dataset.fattOpen));
 }
-function chiediFatturaPdf(lavoroId){fattUploadLavoroId=lavoroId;$("#fatt-pdf-file").click();}
+/* 13 agosto 2026 — questo pulsante non chiedeva NIENTE a nessuno: una persona
+   con «Fatture» ✔ e «Foto» ✘ caricava un file nel deposito delle foto e
+   scriveva la riga in gest_foto, scavalcando il permesso foto col dito.
+   La fattura in PDF pero' e' un documento della fattura, non una foto di
+   cantiere: adesso comanda la spunta «Fatture», qui e sul database. */
+function chiediFatturaPdf(lavoroId){
+  if(!chiedoPermesso("fatture","di caricare le fatture"))return;
+  fattUploadLavoroId=lavoroId;$("#fatt-pdf-file").click();
+}
 async function uploadFatturaPdf(file){
   if(!file||!fattUploadLavoroId)return;
   if(file.type!=="application/pdf"){toast("Carica un file PDF");return;}
@@ -564,7 +632,12 @@ async function uploadFatturaPdf(file){
   const {error:up}=await sb.storage.from("gestionale-foto").upload(path,p.file);
   if(up){toast("Fattura non caricata: "+up.message);return;}
   const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:fattUploadLavoroId,tipo:"fattura",operatore:MIO.nome,storage_path:path});
-  if(ins){toast("File su, ma non salvato: "+ins.message);return;}
+  if(ins){
+    /* la riga e' stata rifiutata: il file e' gia' salito e non lo collega piu'
+       niente. Si toglie subito, se no resta nel deposito e non lo trova nessuno. */
+    try{ await sb.storage.from("gestionale-foto").remove([path]); }catch(_){}
+    toast("Fattura non salvata: "+ins.message);return;
+  }
   toast("Fattura PDF caricata ✔");
   await loadFattPdf();renderFattureSezione();
 }

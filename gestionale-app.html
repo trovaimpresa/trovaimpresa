@@ -4679,19 +4679,40 @@
      a «Pagamenti» l'operaio poteva lo stesso spendere sulla carta aziendale.
      Adesso comandano tutte e sette, e sotto ognuna c'e' scritto cosa fa: una
      casella che non spieghi non la usa nessuno, o si usa male. */
+  /* 13 agosto 2026 — le descrizioni dicevano cose che il telefono non faceva.
+     «Foto» prometteva «quelle che carichi tu le vede comunque»: vero nell'app,
+     falso sul database, dove la regola di lettura chiedeva la spunta. Adesso
+     le due cose combaciano (vedi sql/gest-permessi-collaboratori.sql), e qui
+     sotto c'e' scritto anche quali caselle da sole non aprono niente. */
   const PERMS=[
-    {key:"calendario",label:"Calendario", d:"Può girare fra i giorni e i mesi. Senza, vede solo oggi."},
-    {key:"lavori",    label:"Lavori",     d:"Vede l'agenda e le scadenze, apre i lavori e li segna fatti."},
-    {key:"foto",      label:"Foto",       d:"Può aggiungere foto e video. Quelle che carichi tu le vede comunque."},
-    {key:"note",      label:"Note",       d:"Può scrivere cosa ha fatto sul lavoro."},
-    {key:"clienti",   label:"Clienti",    d:"Vede l'elenco dei clienti con i recapiti."},
-    {key:"fatture",   label:"Fatture",    d:"Vede le fatture."},
-    {key:"pagamenti", label:"Pagamenti",  d:"Vede la sua carta aziendale e registra le spese."}
+    {key:"lavori",    label:"Lavori",     d:"Vede l'agenda e le scadenze, apre i lavori e li segna fatti.", sez:true},
+    {key:"clienti",   label:"Clienti",    d:"Vede l'elenco dei clienti con i recapiti.", sez:true},
+    {key:"fatture",   label:"Fatture",    d:"Vede le fatture e può allegare la fattura in PDF.", sez:true},
+    {key:"pagamenti", label:"Pagamenti",  d:"Vede la sua carta aziendale e registra le spese.", sez:true},
+    {key:"calendario",label:"Calendario", d:"Può girare fra i giorni e i mesi. Senza, vede solo oggi. Va insieme a Lavori."},
+    {key:"foto",      label:"Foto",       d:"Può aggiungere foto e video. Quelle che carichi tu le vede comunque. Va insieme a Lavori."},
+    {key:"note",      label:"Note",       d:"Può scrivere cosa ha fatto sul lavoro. Senza, le legge e basta. Va insieme a Lavori."}
   ];
-  const RUOLO_PRESET={operaio:["calendario","lavori","foto"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
+  const RUOLO_PRESET={operaio:["calendario","lavori","foto","note"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
   function applyRuoloPreset(){
     const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
     $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm));
+    permAvviso();
+  }
+  /* l'avviso vivo sotto le caselle: Calendario, Foto e Note da sole non aprono
+     nessuna schermata, e chi le aveva soltanto trovava il lucchetto senza che
+     questa scheda glielo avesse mai detto. */
+  function permAvviso(){
+    const box=$("#d-perms-avviso"); if(!box)return;
+    const on={};$$("#d-perms input[data-perm]").forEach(ch=>on[ch.dataset.perm]=ch.checked);
+    const sezioni=PERMS.filter(p=>p.sez&&on[p.key]).map(p=>p.label);
+    const spente=PERMS.filter(p=>!p.sez&&on[p.key]).map(p=>p.label);
+    let t="";
+    if(!sezioni.length&&!spente.length) t="⚠️ Senza nessuna spunta questa persona apre l'app e trova il lucchetto.";
+    else if(!sezioni.length) t="⚠️ "+spente.join(" e ")+": da sole non aprono nessuna schermata. Accendi anche <b>Lavori</b>, Clienti, Fatture o Pagamenti, se no trova il lucchetto.";
+    else if(on.pagamenti&&sezioni.length===1) t="Vedrà solo la sua carta aziendale: niente agenda, niente lavori.";
+    else if((on.calendario||on.foto||on.note)&&!on.lavori) t="Calendario, Foto e Note lavorano dentro la scheda di un lavoro: senza <b>Lavori</b> restano spente.";
+    box.innerHTML=t;box.style.display=t?"":"none";
   }
   function squadraForm(op){
     const isNew=!op;op=op||{};
@@ -4743,7 +4764,8 @@
           <option value="segretaria">Segretaria</option></select></div>
         <div class="field"><label>Permessi</label><div id="d-perms">
           ${PERMS.map(p=>`<label class="perm-row"><span><b>${p.label}</b><small>${p.d}</small></span><input type="checkbox" data-perm="${p.key}"></label>`).join("")}</div>
-          <p class="sh-nota" style="margin:10px 0 0">Decide cosa vede e cosa può fare <b>dal telefono</b>. Il ruolo qui sopra riempie le caselle con la scelta più comune: poi le cambi come vuoi.</p></div>
+          <p class="sh-nota" id="d-perms-avviso" style="margin:10px 0 0;display:none;font-size:15px;background:#fff4e5;color:#8a4b00;border-radius:10px;padding:10px 12px"></p>
+          <p class="sh-nota" style="margin:10px 0 0">Decide cosa vede e cosa può fare <b>dal telefono</b>. Le prime quattro aprono una schermata; le ultime tre cambiano cosa può fare dentro. Il ruolo qui sopra riempie le caselle con la scelta più comune: poi le cambi come vuoi.</p></div>
       </div>
 
       <div class="sh-b">
@@ -4771,11 +4793,13 @@
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button>`);
     $("#d-ruolo").onchange=applyRuoloPreset;
+    $$("#d-perms input[data-perm]").forEach(ch=>ch.addEventListener("change",permAvviso));
     if(isNew){applyRuoloPreset();}
     else{
       if(op.ruolo)$("#d-ruolo").value=op.ruolo;
       const perms=op.permessi||{};
       $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=!!perms[ch.dataset.perm]);
+      permAvviso();
     }
   }
   async function ensureMestiere(){
