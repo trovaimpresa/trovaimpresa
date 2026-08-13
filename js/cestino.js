@@ -79,6 +79,10 @@
      sono pezzi del computo e se ne vanno con lui, come le righe di una fattura.
      Metterle qui sarebbe la trappola di gest_note: la funzione "Elimina per
      sempre" le vedrebbe come cose vive e un computo non si svuoterebbe piu'. */
+  /* ⚠️ QUESTO ELENCO HA UN GEMELLO: REPARTO_CONTENUTO in gestionale-app.html
+     (le tabelle che hanno la colonna mestiere_id). Una tabella che sta la' e
+     non qui viene cancellata PER SEMPRE mentre il messaggio dell'utente
+     promette il Cestino. Se ne aggiungi una di la', passa anche di qui. */
   var TABELLE = [
     "gest_lavori", "gest_clienti", "gest_preventivi", "gest_fatture",
     "gest_scadenze", "gest_mestieri", "gest_mezzi", "gest_operatori",

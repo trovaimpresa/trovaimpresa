@@ -25,7 +25,7 @@
   .h-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .h-hi{font-size:13px;opacity:.85;line-height:1.2;}
   .h-name{font-size:21px;font-weight:bold;line-height:1.2;}
-  .h-imp{font-size:12px;opacity:.8;margin-top:2px;}
+  .h-imp{font-size:13px;opacity:.8;margin-top:2px;}
   .esci{background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:bold;cursor:pointer;}
 
   .wrap{max-width:520px;margin:0 auto;padding:14px;}
@@ -41,7 +41,7 @@
   .cal-mese{font-weight:bold;font-size:16px;text-transform:capitalize;}
   .cal-nav{background:var(--green-l);color:var(--green-d);border:none;width:34px;height:34px;border-radius:9px;font-size:18px;font-weight:bold;cursor:pointer;}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-  .cal-dow{text-align:center;font-size:11px;color:var(--muted);font-weight:bold;padding:4px 0;}
+  .cal-dow{text-align:center;font-size:13px;color:var(--muted);font-weight:bold;padding:4px 0;}
   .cal-day{aspect-ratio:1;border:none;background:transparent;border-radius:10px;font-size:14px;color:var(--text);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;}
   .cal-day.empty{visibility:hidden;}
   .cal-day.oggi{outline:2px solid var(--green);}
@@ -54,7 +54,7 @@
   .job{background:var(--card);border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.07);border-left:5px solid var(--green);padding:14px;margin-bottom:10px;cursor:pointer;}
   .job h3{font-size:16px;margin-bottom:4px;}
   .job .where{font-size:13px;color:var(--muted);margin-bottom:8px;}
-  .badge{display:inline-block;font-size:11px;font-weight:bold;padding:3px 9px;border-radius:999px;}
+  .badge{display:inline-block;font-size:13px;font-weight:bold;padding:3px 9px;border-radius:999px;}
   .b-dafare{background:#fff3e8;color:var(--orange);}
   .b-corso{background:#e7f0fb;color:var(--blue);}
   .b-fatto{background:var(--green-l);color:var(--green-d);}
@@ -77,7 +77,7 @@
   .panel{background:var(--card);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:16px;margin-bottom:14px;}
   .panel h2{font-size:19px;margin-bottom:6px;}
   .meta{font-size:13px;color:var(--muted);margin-bottom:10px;}
-  .label{font-size:12px;font-weight:bold;color:var(--green-d);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+  .label{font-size:13px;font-weight:bold;color:var(--green-d);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
   .istr{background:var(--green-l);border-radius:12px;padding:13px;font-size:15px;line-height:1.5;white-space:pre-wrap;}
   .foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
   .foto-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#eee;}
@@ -175,7 +175,7 @@
       <div id="carta-storico"></div>
       <button class="btn-line" id="btn-carta-spesa" style="width:100%;margin-top:10px">💳 Registra una spesa</button>
       <div id="carta-form" class="hidden" style="margin-top:10px">
-        <input type="number" inputmode="decimal" id="carta-imp" placeholder="Importo speso (€)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box">
+        <input type="text" inputmode="decimal" id="carta-imp" placeholder="Importo speso (es. 12,50)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box">
         <input type="text" id="carta-causale" placeholder="Per cosa? (es. viti e tasselli)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font:inherit;box-sizing:border-box">
         <div class="row-btns">
           <button class="btn-line" id="btn-carta-annulla" style="flex:1">Annulla</button>
@@ -279,6 +279,47 @@ function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"
 function dataIt(s){if(!s)return"";const[a,m,g]=s.split("-");return g+"/"+m+"/"+a;}
 function eur(n){return "€ "+(Number(n)||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("on");setTimeout(()=>el.classList.remove("on"),2200);}
+/* ===== 13 agosto 2026 — I CENTESIMI DELL'OPERAIO =====
+   La casella dell'importo speso era type="number" con inputmode="decimal": il
+   telefono faceva uscire il tasto VIRGOLA su una casella che la virgola non la
+   accetta. L'operaio scriveva 12,50 e il browser restituiva "" — quindi o
+   "Inserisci un importo valido" senza capire perche', o, su altri browser,
+   1.250 € registrati sulla carta aziendale al posto di 12,50.
+   E' lo stesso difetto chiuso il 12 agosto nel pannello del titolare e lasciato
+   in piedi proprio nel file che si usa in cantiere, col guanto da lavoro.
+   Adesso la casella e' di testo e il numero si legge all'italiana: virgola e
+   punto valgono uguale, i punti delle migliaia si buttano, e se non c'e' un
+   numero vero torna null invece di zero. */
+/* ⚠️ COPIA VERBATIM di _numeroIt in gestionale-app.html (cerca "LA REGOLA DEI
+   NUMERI"). I due file non condividono codice, quindi la copia e' inevitabile:
+   se tocchi una, tocca anche l'altra. La prima versione scritta stanotte era
+   piu' corta e divergeva gia' — sulla STESSA tabella del database, con lo
+   stesso importo digitato: "1.250" dal pannello del titolare faceva 1250, dal
+   telefono dell'operaio 1,25. Su una carta carburante 1.250 e' un importo che
+   si scrive davvero. */
+function _numIt(v){
+  /* via euro, spazi normali, spazi insecabili e apostrofi delle migliaia */
+  let t=String(v==null?"":v).replace(/[€\s '’]/g,"").trim();
+  if(t==="")return null;
+  const vir=t.lastIndexOf(","), pun=t.lastIndexOf(".");
+  if(vir>=0&&pun>=0){
+    if(vir>pun) t=t.replace(/\./g,"").replace(/,/g,".");   /* italiano */
+    else        t=t.replace(/,/g,"");                      /* inglese  */
+  }else if(vir>=0){
+    /* piu' virgole e nessun punto = migliaia all'inglese (1,250,000) */
+    t=((t.split(",").length-1)>1) ? t.replace(/,/g,"") : t.replace(",",".");
+  }else if(pun>=0){
+    const punti=t.split(".").length-1;
+    const dopo=t.length-pun-1;
+    /* prima dell'ultimo punto: se comincia per zero non sono migliaia
+       (0.500 e' mezzo, non cinquecento) */
+    const prima=t.slice(0,pun).replace(/\./g,"");
+    const zeroDavanti=prima==="0"||prima==="-0"||/^-?0/.test(prima);
+    if(punti>1||(dopo===3&&!zeroDavanti)) t=t.replace(/\./g,"");
+  }
+  const n=parseFloat(t);
+  return isFinite(n)?n:null;
+}
 function show(v){
   $("#gate").classList.toggle("hidden",v!=="gate");
   $("#app").classList.toggle("hidden",v==="gate");
@@ -709,7 +750,7 @@ async function caricaCartaMia(){
   if(!mia){$("#carta-panel").style.display="none";return;}
   MIA_CARTA=mia;
   $("#carta-panel").style.display="block";
-  $("#carta-info").innerHTML=`<div style="font-size:24px;font-weight:800;color:var(--green-d)">${eur(mia.saldo)}</div><div style="font-size:12px;color:var(--muted)">Saldo disponibile — ${esc(mia.nome)}</div>`;
+  $("#carta-info").innerHTML=`<div style="font-size:24px;font-weight:800;color:var(--green-d)">${eur(mia.saldo)}</div><div style="font-size:13px;color:var(--muted)">Saldo disponibile — ${esc(mia.nome)}</div>`;
   const {data:mov}=await sb.from("gest_carte_movimenti").select("tipo,importo,causale,data").eq("carta_id",mia.carta_id).order("data",{ascending:false}).limit(5);
   const st=$("#carta-storico");
   if(!mov||!mov.length){st.innerHTML="";return;}
@@ -726,8 +767,11 @@ $("#btn-carta-annulla").onclick=()=>{
 $("#btn-carta-salva").onclick=async()=>{
   if(!MIA_CARTA)return;
   if(!chiedoPermesso("pagamenti","di usare la carta aziendale"))return;
-  const importo=+($("#carta-imp").value);
-  if(!importo||importo<=0){toast("Inserisci un importo valido");return;}
+  const importo=_numIt($("#carta-imp").value);
+  if(!importo||importo<=0){toast("Scrivi quanto hai speso, per esempio 12,50");return;}
+  /* un tetto ci vuole: senza, un dito appoggiato sullo zero manda al database
+     un numero che la colonna non regge, e l'errore arriva dopo */
+  if(importo>1000000){toast("Importo troppo alto: controlla quello che hai scritto");return;}
   const causale=$("#carta-causale").value.trim()||null;
   $("#btn-carta-salva").disabled=true;
   const {error}=await sb.from("gest_carte_movimenti").insert({

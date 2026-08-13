@@ -3679,3 +3679,130 @@ e due le parti a ogni consegna.
 - nel Computo, se la lettura delle misure fallisce il PDF stampa «nessuna misura»
   e sotto la quantità: un documento che si contraddice;
 - il lucchetto vero sui permessi (RLS), se lo si vuole.
+
+# 13 agosto 2026 — RICONTROLLO DEL 12, POI CINQUE CORREZIONI E LE SPESE ART. 15
+
+Giornata in due tempi. Prima il **ricontrollo** chiesto nel prompt: sono usciti
+**14 difetti nuovi** nati il 12 agosto (ne erano previsti 9) e 10 cose vecchie
+mai viste. Poi le correzioni, una alla volta, ognuna provata prima della
+successiva.
+
+## Chiuso oggi
+
+1. **Elimina reparto si fermava a metà.** Se una tabella bloccava, le precedenti
+   erano già nel Cestino e il messaggio diceva «il reparto NON è stato
+   eliminato»: vero per il reparto, falso per tutto il resto. Adesso si chiede a
+   tutte e 13 le tabelle PRIMA di toccarne una, e se qualcosa va storto lo
+   stesso si TORNA INDIETRO (`sb.raw` + `gte("eliminato_il", inizio)`).
+2. **`gest_ore` mancava da `REPARTO_CONTENUTO`.** Le ore restavano vive e
+   irraggiungibili e «Elimina per sempre» si rifiutava all'infinito: il vicolo
+   cieco che il 12 agosto si dava per chiuso era ancora aperto.
+3. **Eliminando una persona cambiava il margine di lavori già chiusi** (2.780 →
+   2.900 €). Le tariffe si leggono dalla porta di servizio; la media per le ore
+   senza nome resta sui soli vivi.
+4. **La revoca dell'accesso non veniva controllata.** Se falliva, l'ex
+   collaboratore entrava ancora dal telefono e non era più in elenco per essere
+   fermato. Adesso se la revoca non riesce non si elimina nessuno, e se fallisce
+   la cancellazione l'accesso torna com'era (anche «invitato», non «attivo»).
+5. **Lo sconto spariva dal file per lo SDI.** Righe col prezzo pieno, riepilogo
+   scontato, mille euro inspiegati. Adesso ogni riga porta il suo
+   `<ScontoMaggiorazione>` e i riepiloghi sono la somma delle righe.
+6. **Le spese anticipate art. 15** (risposta del commercialista): riga a IVA 0
+   con natura N1, due caselle separate in fattura, stesso conto nel preventivo.
+   Serve `sql/gest-fattura-spese-art15.sql`.
+
+Più, trovati strada facendo: quantità dei computi scritte a 2 decimali (l'89%
+delle righe non tornava col controllo dello SDI), cassa non arrotondata prima
+dell'imponibile, prezzi di riga negativi, righe scambiate fra XML e conti,
+imponibili negativi, `Math.floor(x*100)` che si mangiava un centesimo sul 4,6%
+degli importi.
+
+## ⚠️ LA LEZIONE DI OGGI
+
+**Metà dei difetti gravi di oggi li ho introdotti io correggendo.** Non sono
+arrivati ad Alessio solo perché ogni correzione è stata rifatta girare da un
+esaminatore diverso, e più volte: sulle fatture sono serviti **nove giri**.
+
+Tre esempi da ricordare:
+
+- `sb.from` staccato dall'oggetto perde il `this`: senza `js/cestino.js` la
+  manodopera spariva da TUTTI i margini. **Lo stub non lo mostrava** (il suo
+  `from` è una arrow function): è saltato fuori solo scaricando il bundle vero
+  di supabase-js e provandolo in pagina.
+- `Math.floor(n*100)/100` non è un arrotondamento per difetto: `0.29*100` fa
+  `28.999999999999996`. Serve `+1e-9`.
+- Una correzione che chiude un caso su 200.000 può aprirne uno al 15%: il cap
+  `c2(pieno)` ha prodotto imponibili negativi.
+
+**Morale: quando correggi, il posto dove cercare il difetto nuovo è la riga che
+hai appena toccato**, non quelle intorno.
+
+## Le fatture vecchie non si toccano
+
+Una fattura accettata dallo SDI non si corregge a posteriori. Ogni fattura si
+porta dietro `spese_regime`, scritto **una volta sola alla creazione** e mai più
+aggiornato, nemmeno risalvando. Senza il segno = conto di prima, verificato
+identico su 80.000 fatture e su tutti e diciotto i campi.
+
+## DOVE SIAMO RIMASTI
+
+**Da fare ad Alessio:**
+- il push (gestionale-app.html, js/cestino.js, sql/gest-fattura-spese-art15.sql);
+- lanciare `sql/gest-fattura-spese-art15.sql` su Supabase;
+- mandare al commercialista le due domande rimaste in
+  `prove-claude/DOMANDE-COMMERCIALISTA.md`: la base della ritenuta con lo sconto
+  (400 € su una fattura da 10.000) e la cassa sul rimborso spese imponibile.
+
+**Chiuso anche in serata**: le cinque caselle che perdevano i centesimi (spesa
+del lavoro, ore del registro, costo orario, fattura fornitore, carta
+dell'operaio), il pallino del Cestino che non scendeva, i testi sotto i 13 px
+nell'app dell'operaio, e il giro apri-e-risalva che troncava quantita', prezzi
+dei prezzari e misure del computo.
+
+**Restano aperte** (l'elenco completo con i numeri e in
+`prove-claude/RICONTROLLO-12ago-sera.md`), in ordine di rischio:
+
+*1. I permessi degli operai — il gruppo piu' grosso e l'unico dove qualcuno
+vede quello che non dovrebbe:*
+- «Carica fattura PDF» dall'app operaio scrive in gest_foto aggirando il permesso foto;
+- la policy `foto_read` di `sql/gest-permessi-collaboratori.sql` toglie
+  all'operaio le foto del capo, che la scheda persona gli promette;
+- Scadenze: il pulsante guarda «lavori», il database guarda «calendario» →
+  sezione muta senza spiegazione;
+- senza il permesso «note» l'operaio non puo' piu' nemmeno RILEGGERE le sue;
+- persona vecchia con `permessi = {}` resta chiusa fuori col lucchetto;
+- «solo Pagamenti» (o solo Fatture, o solo Foto) e' un permesso morto;
+- il lucchetto vero sul database (RLS), se lo si vuole.
+
+*2. I file che si perdono:*
+- `_fileOrfano` non c'e' nell'app dell'operaio — le foto da cantiere, che sono
+  quelle che generano piu' orfani;
+- in `salvaLavoro` una foto puo' restare orfana E venire marcata «gia'
+  caricata», quindi non si riprova mai piu';
+- `_fileOrfano` non guarda l'esito della `remove`.
+
+*3. I conti che non tornano fra due schermate:*
+- «Incassato» del Report != «Incassato» delle Fatture;
+- eliminare una carta fa salire l'utile del mese senza spiegazione;
+- i rifornimenti del Report contati su TUTTI i reparti;
+- numerazione dei preventivi che non guarda ne' l'anno ne' il reparto.
+
+*4. Il resto:*
+- eliminando un mezzo le sue scadenze restano orfane;
+- `sql/gestionale-mezzi.sql` non crea la colonna `tipo`, che il codice usa;
+- `gest_richieste` non ha nessun file in `sql/`;
+- `squadraAdd` crea doppioni se l'invito fallisce;
+- alla partenza, se il database non risponde, compare «Ancora nessun reparto»
+  (identico a quello che vede un utente nuovo) e la landing si svuota;
+- il Riepilogo fa 25 letture in 6 ondate;
+- nel Computo, se la lettura delle misure fallisce il PDF si contraddice;
+- il messaggio di eliminazione persona conta le RIGHE invece delle ore, e non
+  conta le foto caricate dal telefono;
+- Galleria: dopo l'eliminazione resta un'opzione vuota nella tendina;
+- il ripristino dal Cestino non ridà l'accesso dal telefono e non lo dice;
+- percentuali col punto («Cassa 12.5%») e prezzi di riga a un decimale (18,5);
+- i 274 colpi: 16 ridisegni del Cestino durante un'eliminazione (spreco, non
+  errore — con la prova di non-regressione scritta PRIMA del codice);
+- `1,00 parti` nel modulo di correzione della misura;
+- **`gestionale-negozio.html` e `gestionale-noleggio.html`: mai controllati**,
+  e hanno gli stessi campi importo/ore ancora `type="number"`.

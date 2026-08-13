@@ -1099,15 +1099,47 @@
     const st=window.cestinoStato&&window.cestinoStato();
     if(st&&st.attesa>0)return;              /* non si sa ancora: si riprova al giro dopo */
     cestContato=true;
+    const mioGiro=++cestGen;
     try{
       const n=await Promise.all(CEST_COSE.map(function(c){
         return sb.raw(c.t).select("id",{count:"exact",head:true})
           .eq("user_id",sbUid).not("eliminato_il","is",null)
-          .then(x=>(x&&typeof x.count==="number")?x.count:0).catch(()=>0);
+          .then(x=>(x&&typeof x.count==="number")?x.count:null).catch(()=>null);
       }));
+      /* 13 agosto 2026 — qui il catch restituiva ZERO, cioe' trasformava "non
+         ho potuto contare" in "non c'e' niente": con la rete giu' il pallino
+         spariva, e cestContato=true gli impediva di riprovare da solo. Adesso
+         una tabella che non risponde vale null, e se anche una sola e' null il
+         pallino non si tocca e si riprova al giro dopo. */
+      if(n.some(v=>v==null)){cestContato=false;return;}
+      /* se nel frattempo ne e' partito un altro, questo e' vecchio: i suoi
+         numeri sono di prima e non devono toccare il pallino */
+      if(mioGiro!==cestGen)return;
       cestTotale=n.reduce((a,b)=>a+b,0);
       setCnt("#cnt-cestino",cestTotale,"attesa");
     }catch(e){cestContato=false;}
+  }
+  /* 13 agosto 2026 — IL PALLINO NON SCENDEVA MAI.
+     Nella vista di partenza ("Questo reparto") il numero del menu poteva solo
+     salire: eliminavi un reparto, il pallino diceva 15, rimettevi tutto a
+     posto e il Cestino restava vuoto ma il pallino continuava a dire 15, con
+     l'intestazione che diceva "0 cose eliminate in questo reparto". Si
+     sistemava solo cliccando "Tutti i reparti".
+     Il conto vero esiste gia' (18 domande di solo conteggio, nessuna riga
+     scaricata): bastava rifarlo ogni volta che qualcosa esce dal Cestino. */
+  /* Serve un gettone: senza, due riconteggi che si accavallano (clic ripetuti,
+     o uno lento e uno veloce) scrivono nel pallino in ordine di ARRIVO e non di
+     partenza. Il vecchio, tornato per ultimo, rimetteva il numero di prima:
+     pallino 13 col Cestino vuoto, cioe' esattamente il difetto che questa
+     correzione doveva chiudere — e non si riparava piu' girando per il
+     gestionale. Misurato: capitava una volta su otto.
+     In vista "Tutti i reparti" non serve nemmeno contare: renderCestino, che
+     parte un istante dopo, il totale esatto ce l'ha gia' — erano 18 domande
+     buttate a ogni ripristino. */
+  let cestGen=0;
+  function _cestRicontaPallino(){
+    if(cestVista==="tutti")return;
+    cestContato=false; contaCestinoUnaVolta();
   }
 
   /* ============================================================
@@ -1318,10 +1350,11 @@
        appena apri il gestionale. Adesso chiama la stessa fattBasi di tutti gli
        altri, quindi la domanda "quanto devo incassare" ha una risposta sola. */
     /* col segno: una nota di credito abbassa il "da incassare", non lo alza */
-    const totaleFatt=f=>{
-      const b=fattBasi(f,fattRigheRie[f.id]||[]);
-      return (b.imponibile+b.iva+(+f.bollo||0)-b.compenso*(+f.ritenuta_perc||0)/100)*fattSegno(f);
-    };
+    /* 13 agosto 2026 — qui la formula del netto era RISCRITTA A MANO: la quarta
+       copia. Oggi, cambiando la base della ritenuta, si e' scollata e il
+       Riepilogo diceva 400 € meno del vero su tre fatture su quattro. Adesso
+       chiama fattConti come tutti gli altri: di copie ne resta UNA. */
+    const totaleFatt=f=>fattConti(f,fattRigheRie[f.id]||[]).daPagareFirmato;
     const daInc    = FT.filter(f=>f.stato==="emessa");
     const totDaInc = daInc.reduce((s,f)=>s+totaleFatt(f),0);
     /* "da fatturare" = lavori finiti con un importo che non stanno ancora
@@ -2458,39 +2491,180 @@
      Se viene voglia di riscrivere la formula da qualche altra parte: e' cosi'
      che erano nati i tre numeri diversi di prima.
      ============================================================ */
+  /* ===== 12 agosto 2026 (notte) — LO SCONTO ADESSO STA ANCHE SULLE RIGHE =====
+     La mattina del 12 lo sconto era stato tolto dagli imponibili dei riepiloghi
+     e, giustamente, era sparito il <ScontoMaggiorazione> di documento. Ma le
+     RIGHE del file per lo SDI erano rimaste col prezzo pieno, e nel file non
+     c'era piu' niente che spiegasse la differenza:
+
+        <PrezzoTotale>10000.00</PrezzoTotale>            <- la riga
+        <ImponibileImporto>9000.00</ImponibileImporto>   <- il riepilogo
+
+     mille euro che non tornano e che nessun campo dichiara. Il commercialista
+     apre la fattura e trova un buco.
+     Adesso lo sconto si ripartisce riga per riga, in proporzione: ogni riga
+     porta il suo <ScontoMaggiorazione> e il PrezzoTotale gia' scontato, e i
+     riepiloghi sono la SOMMA di quelle righe, non un conto fatto a parte. Cosi'
+     il file torna comunque lo si legga, e il totale del documento non cambia di
+     un centesimo rispetto a prima.
+     Le quote sono arrotondate al centesimo e l'ultima riga assorbe il resto: la
+     somma delle quote fa esattamente lo sconto scritto nel modulo.
+     Sul PDF che legge il cliente lo sconto resta dov'era, una riga sola sotto
+     il totale: e' piu' chiaro da leggere e i numeri sono gli stessi. */
   function fattBasi(f,R,forf){
     if(forf===undefined)forf=fattForfettario();
     const c2=n=>Math.round((+n||0)*100)/100;
-    const basi={};                       /* aliquota -> imponibile pieno */
+    /* arrotondamento al centesimo PER DIFETTO: serve dove un tetto non deve mai
+       superare il valore vero (lo sconto di una riga).
+       Quell'1e-9 non e' un vezzo: in virgola mobile 0,29 x 100 fa
+       28,999999999999996, e Math.floor da solo restituirebbe 28 — cioe' 0,28.
+       Succedeva sul 4,6% degli importi a due decimali, e su una fattura
+       azzerata dallo sconto si portava via un centesimo: totale 0,01 € invece
+       di zero. Un miliardesimo e' mille volte piu' piccolo di un millesimo di
+       centesimo: non puo' far salire un tetto sopra il valore vero. */
+    const _giu2=n=>Math.floor((+n||0)*100+1e-9)/100;
+    const RR=R||[];
     let compenso=0;
-    (R||[]).forEach(function(r){
-      const al=forf?0:(+r.iva||0);
+    const linee=RR.map(function(r){
       const imp=(+r.qta||0)*(+r.prezzo||0);
-      basi[al]=(basi[al]||0)+imp;
       compenso+=imp;
+      return {iva:forf?0:(+r.iva||0), pieno:imp, sconto:0, totale:imp};
     });
-    const cassa=compenso*(+f.cassa_perc||0)/100;
-    const spese=+f.spese||0;
-    const aliqPrev=forf?0:fattAliquotaPrevalente(R||[]);
-    /* cassa e spese non sono righe ma fanno imponibile: vanno sull'aliquota
-       che comanda, quella su cui sta piu' roba */
-    if(cassa||spese)basi[aliqPrev]=(basi[aliqPrev]||0)+cassa+spese;
-    const pieno=compenso+cassa+spese;
+    /* la cassa si arrotonda SUBITO al centesimo, non alla fine: nel file per lo
+       SDI <ImportoContributoCassa> e' scritto a due decimali, e se qui dentro
+       ne portasse cinque il riepilogo non tornerebbe con la somma delle righe
+       piu' la cassa dichiarata — un centesimo fuori su 234 fatture su 60.000 */
+    const cassa=c2(compenso*(+f.cassa_perc||0)/100);
+    /* ===== 13 agosto 2026 — LE DUE SPESE =====
+       Fino a ieri c'era una casella sola, "Spese", e finiva nell'imponibile con
+       l'IVA della fattura. Il commercialista: le spese anticipate in nome e per
+       conto del cliente (bolli, diritti, visure, con la ricevuta intestata a
+       lui e zero ricarico) sono ESCLUSE dalla base imponibile — art. 15, comma
+       1, n. 3 del DPR 633/72 — e vanno in una riga a IVA 0 con natura N1.
+       Su 150 € di spese sono 33 € di IVA in meno.
+       Le trasferte, il carburante e i materiali non sono art. 15: quelli hanno
+       la loro casella, prendono l'IVA normale ed entrano nella base della
+       ritenuta.
+         spese     = anticipate art. 15  (fuori IVA, fuori cassa, fuori ritenuta)
+         speseIva  = rimborso spese vive (IVA normale, dentro la ritenuta)
+       Sulla cassa del rimborso imponibile il commercialista ha confermato:
+       il contributo integrativo si calcola SOLO sul compenso professionale, i
+       rimborsi di spese vive restano fuori. Cosi' com'e' e' giusto.
+
+       ⚠️ LE FATTURE GIA' EMESSE NON SI TOCCANO. Una fattura accettata dallo SDI
+       non si puo' correggere a posteriori: se il gestionale le ricalcolasse,
+       non tornerebbe piu' ne' col file mandato all'Agenzia ne' col bonifico del
+       cliente. Percio' ogni fattura si porta dietro il regime con cui e' NATA
+       (spese_regime), scritto una volta alla creazione e mai piu' toccato.
+       Senza quel segno = fattura vecchia = conto di prima, identico. */
+    const art15=(f.spese_regime==="art15");
+    const spese=+f.spese||0;                     /* anticipate */
+    const speseIva=art15?(+f.spese_iva||0):0;    /* rimborso imponibile (solo dal nuovo regime) */
+    const aliqPrev=forf?0:fattAliquotaPrevalente(RR);
+    const pieno=compenso+cassa+spese+speseIva;
     /* uno sconto piu' grande del lavoro non esiste: si ferma li', se no
-       uscirebbero imponibili negativi e il file verrebbe scartato */
-    const sconto=Math.min(Math.max(+f.sconto||0,0),pieno);
-    const righe=Object.keys(basi).sort((a,b)=>b-a).map(function(al){
-      const quota=pieno>0?basi[al]/pieno:0;
-      const imponibile=c2(basi[al]-sconto*quota);
-      return {aliquota:+al, imponibile:imponibile, imposta:c2(imponibile*(+al)/100)};
+       uscirebbero imponibili negativi e il file verrebbe scartato.
+       Col regime nuovo lo sconto sta tutto sulle righe del lavoro (e' la
+       scelta fatta il 12 agosto: non tocca la cassa), quindi si ferma al
+       compenso; con quello vecchio si comporta come si e' sempre comportato. */
+    const sconto=Math.min(Math.max(+f.sconto||0,0),art15?compenso:pieno);
+    /* Lo sconto si toglie dalle RIGHE, che sono l'unico posto dove si puo'
+       dichiarare. Se e' piu' grande di tutte le righe messe insieme (capita
+       solo con una parcella fatta di sola cassa e spese) l'avanzo si toglie
+       dalla parte cassa+spese, che riga non e'. */
+    const scRighe=Math.min(sconto,compenso);
+    linee.forEach(function(l){
+      /* lo sconto di una riga non puo' essere negativo ne' piu' grande della
+         riga: senza questi due paletti uscivano PrezzoTotale negativi (con le
+         quantita' a decimali dei computi: 0,448 x 3,13) e righe scontate "al
+         contrario", cioe' con il prezzo totale piu' alto di quantita x prezzo */
+      /* il tetto e' il pieno arrotondato PER DIFETTO al centesimo: con c2 il
+         tetto poteva stare mezzo centesimo SOPRA il valore della riga e il
+         prezzo totale usciva a -0,01 (qta 16,95 x 1.699,90 = 28.813,305).
+         Per difetto invece lo sconto scritto nel file non supera mai la riga,
+         qualunque cosa faccia l'arrotondamento. */
+      const q=(compenso>0)?c2(scRighe*l.pieno/compenso):0;
+      l.sconto=Math.max(0,Math.min(q,_giu2(l.pieno)));
     });
+    /* Il resto dell'arrotondamento si mette sulle righe piu' capienti, non
+       sempre sull'ultima: sull'ultima, se era piccola, sfondava. Si gira finche'
+       c'e' resto e finche' qualcuna ha ancora spazio. */
+    let avanzo=c2(scRighe-linee.reduce((s,l)=>c2(s+l.sconto),0));
+    if(avanzo){
+      const ordine=linee.map((l,i)=>i).sort((a,b)=>linee[b].pieno-linee[a].pieno);
+      for(const i of ordine){
+        if(!avanzo)break;
+        const l=linee[i];
+        const nuovo=Math.max(0,Math.min(c2(l.sconto+avanzo),_giu2(l.pieno)));
+        avanzo=c2(avanzo-(nuovo-l.sconto));
+        l.sconto=nuovo;
+      }
+    }
+    /* quello che non e' entrato nelle righe (sconto piu' grande di tutte le
+       righe messe insieme, o righe tutte piene) si toglie dalla parte
+       cassa+spese, che riga non e'. Non puo' essere negativo e non puo' essere
+       piu' grande di cassa+spese: se no si toglieva da un secchio vuoto e
+       usciva un IMPONIBILE NEGATIVO, cioe' una fattura che vale meno di zero. */
+    const _dato=linee.reduce((s,l)=>c2(s+l.sconto),0);
+    /* Col regime NUOVO scResto non deve esistere: lo sconto tocca solo le
+       righe, punto. Se lo si lasciava vivo, i centesimi che il tetto per
+       difetto non riesce a distribuire (succede con le quantita' a tre decimali
+       dei computi) venivano tolti dal secchio del 22% mentre la riga delle
+       spese, che sta nel secchio art. 15, veniva scritta al netto: due
+       riepiloghi sbagliati in due direzioni opposte, su tre fatture su quattro.
+       Adesso lo sconto DICHIARATO e' quello davvero distribuito sulle righe:
+       non puo' valere piu' di quanto e' stato applicato.
+       Sulle fatture VECCHIE si comporta come si e' sempre comportato.
+       ⚠️ Sulle vecchie resta un caso che non si puo' chiudere: se lo sconto e'
+       cosi' grosso da sfondare anche le spese, l'avanzo va a togliere dal
+       riepilogo mentre la cassa continua a dichiarare il suo importo pieno nel
+       suo blocco. Per sistemarlo bisognerebbe o ridurre un dato fiscale gia'
+       dichiarato, o limitare lo sconto al compenso anche sulle vecchie — e
+       quello cambierebbe i totali di fatture gia' mandate allo SDI, che e'
+       proprio la cosa che non si fa. Riguarda solo fatture nate prima del
+       13 agosto 2026 con uno sconto che azzera la parcella. */
+    const scResto=art15?0:Math.min(Math.max(0,c2(sconto-_dato)),c2(cassa+spese));
+    const scontoVero=art15?_dato:sconto;
+    linee.forEach(function(l){ l.totale=c2(l.pieno-l.sconto); });
+
+    /* I riepiloghi non si contano piu' per sola ALIQUOTA ma per aliquota +
+       NATURA: da oggi la stessa fattura puo' avere due righe a zero che voglio
+       dire cose diverse — le prestazioni di un forfettario (N2.2, "non
+       soggetta") e le spese anticipate (N1, "escluse ex art. 15"). Metterle
+       nello stesso mucchio sarebbe una dichiarazione falsa. */
+    const natLinea=forf?"N2.2":"";
+    const basi={};   /* "aliquota|natura" -> {al, nat, imp} */
+    const _metti=function(al,nat,imp){
+      const k=al+"|"+nat;
+      if(!basi[k])basi[k]={al:+al,nat:nat,imp:0};
+      basi[k].imp=c2(basi[k].imp+imp);
+    };
+    linee.forEach(function(l){ _metti(l.iva,natLinea,l.totale); });
+    /* cassa e rimborso spese non sono righe ma fanno imponibile: vanno
+       sull'aliquota che comanda, quella su cui sta piu' roba */
+    if(cassa)   _metti(aliqPrev,natLinea,cassa);
+    if(speseIva)_metti(aliqPrev,natLinea,speseIva);
+    if(spese)   art15 ? _metti(0,"N1",spese) : _metti(aliqPrev,natLinea,spese);
+    if(scResto) _metti(aliqPrev,natLinea,-scResto);
+
+    const righe=Object.keys(basi).map(k=>basi[k])
+      .sort((a,b)=>(b.al-a.al)||(a.nat<b.nat?-1:a.nat>b.nat?1:0))
+      .map(function(b){
+        const imponibile=Math.max(0,c2(b.imp));
+        return {aliquota:b.al, natura:b.nat, imponibile:imponibile, imposta:c2(imponibile*b.al/100)};
+      });
     /* i totali sono la somma dei riepiloghi GIA' ARROTONDATI: cosi' il totale
        del documento non puo' discostarsi nemmeno di un centesimo da quello che
        lo SDI ricalcola riga per riga */
     const imponibile=c2(righe.reduce((s,r)=>s+r.imponibile,0));
     const iva=c2(righe.reduce((s,r)=>s+r.imposta,0));
-    return {righe:righe,compenso:compenso,cassa:cassa,spese:spese,aliqPrev:aliqPrev,
-            sconto:sconto,pieno:pieno,imponibile:imponibile,iva:iva};
+    /* il compenso che RESTA dopo lo sconto: e' la base della ritenuta (vedi
+       fattConti). Si somma dalle righe gia' scontate, non si ricalcola a parte. */
+    const compensoNetto=c2(linee.reduce((s,l)=>c2(s+l.totale),0));
+    return {righe:righe,linee:linee,compenso:compenso,compensoNetto:compensoNetto,
+            cassa:cassa,spese:spese,speseIva:speseIva,
+            art15:art15,scResto:scResto,aliqPrev:aliqPrev,natLinea:natLinea,
+            sconto:scontoVero,pieno:pieno,imponibile:imponibile,iva:iva};
   }
   /* ===== 12 agosto 2026 — LA NOTA DI CREDITO =====
      Una nota di credito e' un documento che TOGLIE soldi: annulla o riduce una
@@ -2507,11 +2681,37 @@
      Regola semplice: se stai SOMMANDO piu' documenti, usa i valori "firmati".
      Se stai mostrando o stampando UN documento, usa quelli normali. */
   function fattSegno(f){ return (f&&f.tipo==="nota_credito")?-1:1; }
-  function fattConti(f){
-    const R=fattRighe[f.id]||[];
+  /* righeDate: serve al Riepilogo, che le sue righe le ha gia' in mano e non
+     puo' pescarle da fattRighe (quella cache si riempie solo aprendo la sezione
+     Fatture). Prima il Riepilogo si riscriveva la formula del netto per conto
+     suo — quarta copia — e in due giorni si e' scollata due volte. */
+  function fattConti(f,righeDate){
+    /* stesso ordine che usa il file per lo SDI: da quando ogni riga porta il
+       suo sconto, "la riga numero 3" deve voler dire la stessa cosa nei due
+       posti, se no prezzi e sconti finiscono su righe diverse */
+    const R=(righeDate||fattRighe[f.id]||[]).slice().sort((a,b)=>(+a.ordine||0)-(+b.ordine||0));
     const b=fattBasi(f,R);
     const segno=fattSegno(f);
-    const ritenuta=b.compenso*(+f.ritenuta_perc||0)/100;   /* solo sul compenso */
+    /* ===== 13 agosto 2026 — LA BASE DELLA RITENUTA =====
+       Il commercialista, sulla domanda dello sconto: «la ritenuta va calcolata
+       sull'imponibile AL NETTO dello sconto. Applicarla sul lordo originario
+       creerebbe un credito d'imposta fittizio per te e un versamento sbagliato
+       da parte del cliente.»
+       Qui c'era b.compenso, cioe' il lordo. Fino all'11 agosto tornava lo
+       stesso, perche' lo sconto non riduceva l'imponibile; dalla mattina del 12
+       l'imponibile ha cominciato a scendere e la base della ritenuta e' rimasta
+       ferma. Su 10.000 con 2.000 di sconto il file dichiarava 2.000 di ritenuta
+       invece di 1.600: 400 € di netto sbagliati, e nessuno dei controlli
+       incrociati poteva accorgersene, perche' schermo, PDF, XML, Riepilogo e
+       Excel leggevano tutti lo stesso numero sbagliato.
+       Dentro ci va anche il rimborso delle spese vive (trasferte, carburante,
+       materiali), che e' soggetto a ritenuta. Restano fuori la cassa e le
+       spese anticipate art. 15: non sono compenso, sono soldi del cliente.
+       ⚠️ Le fatture nate prima del 13 agosto tengono la base di allora: sono
+       gia' state mandate allo SDI e il cliente ha gia' versato quella cifra
+       all'Erario. Il segno e' lo stesso delle spese, spese_regime. */
+    const baseRit=b.art15?((b.compensoNetto||0)+(b.speseIva||0)):b.compenso;
+    const ritenuta=baseRit*(+f.ritenuta_perc||0)/100;
     /* Due numeri diversi, e mescolarli è un errore che lo SDI vede subito:
        - totale     = quanto vale il documento (imponibile scontato + IVA + bollo)
        - daPagare   = quanto ti bonifica davvero il cliente, tolta la ritenuta
@@ -2519,8 +2719,9 @@
        cliente versa allo Stato al posto tuo. Il documento vale lo stesso. */
     const totale=b.imponibile+b.iva+(+f.bollo||0);
     const daPagare=totale-ritenuta;
-    return {compenso:b.compenso,cassa:b.cassa,spese:b.spese,aliqPrev:b.aliqPrev,
-            sconto:b.sconto,pieno:b.pieno,righeIva:b.righe,
+    return {compenso:b.compenso,cassa:b.cassa,spese:b.spese,speseIva:b.speseIva,art15:b.art15,
+            aliqPrev:b.aliqPrev,natLinea:b.natLinea,scResto:b.scResto,
+            sconto:b.sconto,pieno:b.pieno,righeIva:b.righe,linee:b.linee,
             imponibile:b.imponibile,iva:b.iva,ritenuta:ritenuta,totale:totale,daPagare:daPagare,
             /* per i TOTALI: la nota di credito entra col meno */
             segno:segno, totaleFirmato:totale*segno, daPagareFirmato:daPagare*segno,
@@ -2827,6 +3028,8 @@
       + '<select class="fr-iva"'+(fattForfettario()?' style="display:none"':'')+'>'+opts+'</select>'
       + '<button type="button" class="rdel" data-action="fatt-riga-del">×</button></div>';
   }
+  /* il regime delle spese del modulo aperto adesso — vedi fattForm */
+  let fattRegimeCorrente="art15";
   /* i totali si rifanno a ogni tasto premuto: si vede il conto crescere
      mentre scrivi, invece di scoprirlo dopo aver salvato */
   function fattTotaleLive(){
@@ -2838,6 +3041,12 @@
     const f={
       cassa_perc:_numIt("#fa-cassa")||0,
       spese:_numIt("#fa-spese")||0,
+      spese_iva:_numIt("#fa-spese-iva")||0,
+      /* il regime e' quello della fattura che si sta scrivendo: "art15" se e'
+         nuova, quello con cui e' nata se si sta correggendo una vecchia. Se
+         qui mettessi sempre il nuovo, riaprendo una fattura del mese scorso il
+         riquadro direbbe un numero e il salvataggio ne scriverebbe un altro. */
+      spese_regime:fattRegimeCorrente,
       sconto:_numIt("#fa-sconto")||0,
       bollo:_numIt("#fa-bollo")||0,
       ritenuta_perc:_numIt("#fa-rit")||0
@@ -2848,16 +3057,22 @@
        1.832 e salvavi 1.502. */
     const b=fattBasi(f,R);
     const forf=fattForfettario();
-    const ritE=b.compenso*f.ritenuta_perc/100;   /* solo sul compenso */
+    /* stessa base di fattConti: sul netto dopo lo sconto se la fattura e' nuova,
+       sul lordo se e' nata prima del 13 agosto */
+    const ritE=(b.art15?((b.compensoNetto||0)+(b.speseIva||0)):b.compenso)*f.ritenuta_perc/100;
     const tot=b.imponibile+b.iva+f.bollo;        /* quanto vale il documento */
     const netto=tot-ritE;                        /* quanto ti bonificano davvero */
     const el=$("#fatt-somma");
     if(el)el.innerHTML=
         '<div class="fs-r"><span>'+(ruoloUtente==='professionista'?'Compenso':'Imponibile')+'</span><b>'+eur2(b.compenso)+'</b></div>'
       + (b.cassa ?'<div class="fs-r"><span>Cassa '+f.cassa_perc+'%</span><b>'+eur2(b.cassa)+'</b></div>':"")
-      + (b.spese ?'<div class="fs-r"><span>Spese</span><b>'+eur2(b.spese)+'</b></div>':"")
+      + (b.speseIva?'<div class="fs-r"><span>Rimborso spese</span><b>'+eur2(b.speseIva)+'</b></div>':"")
+      + (b.spese ?'<div class="fs-r"><span>Spese anticipate'+(b.art15?' (fuori IVA)':'')+'</span><b>'+eur2(b.spese)+'</b></div>':"")
       + (b.sconto?'<div class="fs-r"><span>Sconto</span><b>−'+eur2(b.sconto)+'</b></div>':"")
-      + ((b.cassa||b.spese||b.sconto)?'<div class="fs-r"><span>Imponibile IVA</span><b>'+eur2(b.imponibile)+'</b></div>':"")
+      /* "Imponibile IVA" non si puo' piu' dire, da quando dentro ci sono anche
+         le spese art. 15 che l'IVA non ce l'hanno: su 5.550 di imponibile
+         l'IVA e' 1.188 e non 1.221, e chi fa il conto a mente non torna. */
+      + ((b.cassa||b.spese||b.speseIva||b.sconto)?'<div class="fs-r"><span>'+((b.spese&&b.art15)?'Totale imponibile':'Imponibile IVA')+'</span><b>'+eur2(b.imponibile)+'</b></div>':"")
       + (forf?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(b.iva)+'</b></div>')
       + (f.bollo?'<div class="fs-r"><span>Bollo</span><b>'+eur2(f.bollo)+'</b></div>':"")
       + (ritE   ?'<div class="fs-r"><span>Ritenuta '+f.ritenuta_perc+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
@@ -2869,6 +3084,11 @@
   async function fattForm(f,preset){
     const isNew=!f;
     f=f||preset||{};
+    /* con che regime delle spese lavora questo modulo: nuovo se la fattura sta
+       nascendo adesso, quello con cui e' nata se la stiamo correggendo.
+       Serve all'anteprima "Il conto", che se no direbbe un numero diverso da
+       quello che finisce nel database. */
+    fattRegimeCorrente=isNew?"art15":(f.spese_regime||null);
     let righe=[];
     if(sb&&sbUid){
       if(!fattCliCache.length){
@@ -2965,8 +3185,17 @@
                 + '</select></div>'
                 + '<div class="field"><label>Contributo cassa (%)</label><input type="text" inputmode="decimal" id="fa-cassa"'+_noAuto()+' value="'+_numTesto(_prc||"")+'" placeholder="Es. 4"></div>'
                 + '</div>'
-                + '<div class="field"><label>Spese (bolli, diritti, visure)</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0"></div>'
-                + '<div class="sh-nota">La cassa si calcola sul compenso (non sulle spese). La ritenuta anche. Sono gli stessi conti della parcella del preventivo. La percentuale la scrivi tu: cambia da cassa a cassa, e il gestionale non la indovina al posto tuo.</div>';
+                /* ⚠️ Su una fattura nata PRIMA del 13 agosto le spese seguono
+                   ancora il conto di allora (dentro l'imponibile, con l'IVA).
+                   Farle vedere con l'etichetta nuova sarebbe una bugia sullo
+                   schermo, e la casella del rimborso scriverebbe un numero che
+                   nessuno legge: qui il modulo si adatta alla fattura. */
+                + (fattRegimeCorrente==="art15"
+                    ? '<div class="field"><label>Spese anticipate (bolli, diritti, visure)</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0"></div>'
+                    + '<div class="field"><label>Rimborso spese (trasferte, materiali)</label><input type="text" inputmode="decimal" id="fa-spese-iva" value="'+_numTesto(+f.spese_iva||"")+'" placeholder="0"></div>'
+                    + '<div class="sh-nota">Le <b>spese anticipate</b> sono quelle che hai pagato tu per il cliente con la ricevuta intestata a lui e senza guadagnarci niente: bolli, diritti, visure. Sono escluse dall\'IVA (art. 15) e non entrano né nella cassa né nella ritenuta.<br><br>Il <b>rimborso spese</b> è per trasferte, carburante e materiali: quello l\'IVA ce l\'ha, ed entra nella ritenuta.<br><br>La cassa si calcola sul compenso. La percentuale la scrivi tu: cambia da cassa a cassa, e il gestionale non la indovina al posto tuo.</div>'
+                    : '<div class="field"><label>Spese documentate</label><input type="text" inputmode="decimal" id="fa-spese" value="'+_numTesto(+f.spese||"")+'" placeholder="0"></div>'
+                    + '<div class="sh-nota"><b>Questa fattura è nata prima del 13 agosto 2026</b>, quindi le spese seguono ancora il conto di allora: entrano nell\'imponibile e prendono l\'IVA. Non la cambio, perché è già stata mandata allo SDI così e deve restare uguale a quella che ha in mano il cliente.<br><br>Dalla prossima fattura nuova troverai due caselle separate: spese anticipate (escluse IVA, art. 15) e rimborso spese.<br><br>La cassa si calcola sul compenso. La percentuale la scrivi tu.</div>');
               })()
             : '')
       +   '<div class="field"><label>Ritenuta d\'acconto (%)</label><input type="text" inputmode="decimal" id="fa-rit" value="'+_numTesto(+f.ritenuta_perc||"")+'" placeholder="0" style="max-width:160px"></div>'
@@ -3054,7 +3283,18 @@
       testata.cassa_perc=_numIt("#fa-cassa")||0;
       testata.cassa_tipo=($("#fa-cassa-tipo")&&$("#fa-cassa-tipo").value)||null;
       testata.spese=_numIt("#fa-spese")||0;
+      /* la casella del rimborso c'e' solo sulle fatture nuove: su una vecchia
+         non si scrive niente in quella colonna, cosi' non resta un numero
+         appoggiato li' che nessuno legge */
+      if($("#fa-spese-iva"))testata.spese_iva=_numIt("#fa-spese-iva")||0;
     }
+    /* Il regime delle spese si scrive UNA VOLTA SOLA, quando la fattura nasce,
+       e non si tocca mai piu' — nemmeno se un giorno riapri e risalvi una
+       fattura vecchia. Una fattura accettata dallo SDI non si corregge a
+       posteriori: se il gestionale la ricalcolasse col conto nuovo non
+       tornerebbe piu' ne' col file mandato all'Agenzia ne' col bonifico del
+       cliente. Le vecchie restano vecchie, per sempre. */
+    if(!id)testata.spese_regime="art15";
     /* una copia dei dati del cliente resta dentro la fattura: se domani cambi
        l'indirizzo in anagrafica, la fattura già emessa non deve cambiare */
     const c=fattCliCache.find(x=>String(x.id)===String(cliente_id));
@@ -3071,8 +3311,8 @@
        colonne nuove non esistono: invece di perdere TUTTA la fattura le
        togliamo e riproviamo, dicendolo (stesso schema dei Dati azienda). */
     let avvisoCassa=false;
-    const _senzaCassa=o=>{const x=Object.assign({},o);delete x.cassa_perc;delete x.cassa_tipo;delete x.spese;return x;};
-    const _eCassaMancante=e=>/cassa_perc|cassa_tipo|\bspese\b/.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
+    const _senzaCassa=o=>{const x=Object.assign({},o);delete x.cassa_perc;delete x.cassa_tipo;delete x.spese;delete x.spese_iva;delete x.spese_regime;return x;};
+    const _eCassaMancante=e=>/cassa_perc|cassa_tipo|\bspese\b|spese_iva|spese_regime/.test((e&&e.message)||"")&&/column|schema cache/i.test((e&&e.message)||"");
     if(id){
       let {data:okFat,error}=await sb.from("gest_fatture").update(testata).eq("id",id).eq("user_id",sbUid).select("id");
       if(error&&_eCassaMancante(error)){
@@ -3505,20 +3745,24 @@
     /* il blocco dei totali si tiene insieme: quante righe saranno, piu' i due
        riquadri. Se non ci stanno tutte, si parte da una pagina nuova invece di
        spezzare il conto in due fogli. */
+    const _extra=(c.cassa||c.spese||c.speseIva||c.sconto);
     const _nRighe=1+(!forf?1:0)+(+f.bollo?1:0)+(c.ritenuta?1:0)
-                 +((c.cassa||c.spese||c.sconto)?(1+(c.cassa?1:0)+(c.spese?1:0)+(c.sconto?1:0)):0);
+                 +(_extra?(1+(c.cassa?1:0)+(c.spese?1:0)+(c.speseIva?1:0)+(c.sconto?1:0)):0);
     spazio(_nRighe*5.4+13+(c.ritenuta?13:0));
     /* 9 agosto 2026 — cassa e spese in chiaro: prima il PDF mostrava un solo
        "Imponibile" e il cliente non capiva da dove usciva il totale. */
-    if(c.cassa||c.spese||c.sconto){
+    if(_extra){
       riga(ruoloUtente==='professionista'?"Compenso":"Imponibile voci",eurPdf(c.compenso));
       if(c.cassa)riga("Cassa previdenziale "+(+f.cassa_perc||0)+"%",eurPdf(c.cassa));
-      if(c.spese)riga("Spese documentate",eurPdf(c.spese));
+      if(c.speseIva)riga("Rimborso spese",eurPdf(c.speseIva));
+      /* le spese anticipate vanno scritte per quello che sono: il cliente deve
+         capire perche' su quei soldi non c'e' l'IVA */
+      if(c.spese)riga(c.art15?"Spese anticipate (escluse art. 15)":"Spese documentate",eurPdf(c.spese));
       /* lo sconto sta QUI, prima dell'imponibile: e' da li' che si toglie, ed
          e' su quello che resta che si calcola l'IVA */
       if(c.sconto)riga("Sconto","-"+eurPdf(c.sconto));
     }
-    riga("Imponibile"+((c.cassa||c.spese||c.sconto)?" IVA":""),eurPdf(c.imponibile));
+    riga((c.spese&&c.art15)?"Totale imponibile":("Imponibile"+(_extra?" IVA":"")),eurPdf(c.imponibile));
     if(!forf)riga("IVA",eurPdf(c.iva));
     if(+f.bollo)riga("Imposta di bollo",eurPdf(f.bollo));
     if(c.ritenuta)riga("Ritenuta d'acconto "+(+f.ritenuta_perc)+"%","-"+eurPdf(c.ritenuta));
@@ -3596,6 +3840,18 @@
   }
   /* lo SDI vuole il punto come separatore dei decimali e due cifre esatte */
   const xnum=n=>(Math.round((+n||0)*100)/100).toFixed(2);
+  /* Le QUANTITA' non sono soldi: la colonna e' numeric(12,3) (metri quadri,
+     metri cubi, ore) e lo schema dello SDI ne accetta fino a otto decimali.
+     Scritte con xnum, cioe' arrotondate a due, il controllo che lo SDI fa su
+     ogni riga — quantita x prezzo meno lo sconto deve fare il prezzo totale —
+     non tornava piu': 2,675 x 3,74 diventava 2,68 x 3,74. */
+  /* Attenzione al formato: lo SDI vuole da DUE a otto decimali, quindi gli zeri
+     in coda si tolgono ma mai sotto il secondo — "2.5" verrebbe scartato. */
+  const xqta=n=>{
+    let s=(Math.round((+n||0)*1e6)/1e6).toFixed(6);
+    while(s.endsWith("0")&&s.charAt(s.length-3)!==".")s=s.slice(0,-1);
+    return s;
+  };
   /* la denominazione ha un limite di 80 caratteri; le descrizioni di 1000 */
   const xtaglia=(v,n)=>String(v==null?"":v).trim().slice(0,n);
 
@@ -3829,7 +4085,11 @@
     }
     /* la cassa previdenziale, con il codice della cassa.
        Va anche sommata all'imponibile del riepilogo IVA, più sotto. */
-    if(+f.cassa_perc&&c.cassa){
+    /* ...e solo se la cassa e' rimasta davvero dentro l'imponibile: su una
+       fattura azzerata dallo sconto l'imponibile va a zero, e dichiarare un
+       contributo cassa che non sta in nessun imponibile e' un file che non
+       torna. */
+    if(+f.cassa_perc&&c.cassa&&c.imponibile>0){
       x+='        <DatiCassaPrevidenziale>\n';
       /* 12 agosto 2026 (sera) — qui c'era «f.cassa_tipo || "TC22"»: se la cassa
          non era scritta il file dichiarava allo SDI che era INPS, che per un
@@ -3843,12 +4103,12 @@
       if(forf)x+='          <Natura>N2.2</Natura>\n';
       x+='        </DatiCassaPrevidenziale>\n';
     }
-    /* 12 agosto 2026 — lo sconto NON si dichiara piu' qui. Adesso e' gia'
-       tolto dagli imponibili dei riepiloghi (vedi fattBasi), quindi ripeterlo
-       anche a livello di documento lo farebbe contare due volte e il totale
-       non tornerebbe piu' con la somma dei riepiloghi: e' esattamente il
-       controllo che fa scartare il file. Sul PDF che legge il cliente lo
-       sconto si vede, riga per riga. */
+    /* 12 agosto 2026 — lo sconto NON si dichiara qui, a livello di documento:
+       lo dichiara ogni RIGA col suo <ScontoMaggiorazione> (piu' sotto), e i
+       riepiloghi sono la somma di quelle righe gia' scontate. Cosi' il file e'
+       coerente comunque lo si legga e non c'e' modo di contarlo due volte.
+       (Fino a stanotte non era dichiarato da nessuna parte: le righe avevano il
+       prezzo pieno e i riepiloghi l'imponibile scontato.) */
     /* qui va il valore del DOCUMENTO, non quello che incassi: lo SDI lo
        confronta con la somma di imponibile e imposta, e se ci sottrai la
        ritenuta il file viene segnalato. La ritenuta si toglie più sotto,
@@ -3860,33 +4120,76 @@
     x+='    <DatiBeniServizi>\n';
     R.forEach((r,i)=>{
       const al=forf?0:(+r.iva||0);
-      const imp=(+r.qta||0)*(+r.prezzo||0);
+      /* la riga gia' scontata la calcola fattBasi, in un posto solo: qui non si
+         rifa' il conto, se no le due copie prima o poi si scollano */
+      const L=(c.linee&&c.linee[i])||{pieno:(+r.qta||0)*(+r.prezzo||0),sconto:0,
+                                      totale:(+r.qta||0)*(+r.prezzo||0)};
       x+='      <DettaglioLinee>\n';
       x+='        <NumeroLinea>'+(i+1)+'</NumeroLinea>\n';
       x+='        <Descrizione>'+xesc(xtaglia(r.descrizione,1000))+'</Descrizione>\n';
-      x+='        <Quantita>'+xnum(r.qta)+'</Quantita>\n';
+      x+='        <Quantita>'+xqta(r.qta)+'</Quantita>\n';
       x+='        <PrezzoUnitario>'+xnum(r.prezzo)+'</PrezzoUnitario>\n';
-      x+='        <PrezzoTotale>'+xnum(imp)+'</PrezzoTotale>\n';
+      /* l'ordine dei campi dentro DettaglioLinee non e' libero: lo sconto sta
+         fra PrezzoUnitario e PrezzoTotale, e PrezzoTotale deve essere
+         quantita x prezzo MENO lo sconto, se no il file viene segnalato. */
+      if(L.sconto>0){
+        x+='        <ScontoMaggiorazione>\n';
+        x+='          <Tipo>SC</Tipo>\n';
+        x+='          <Importo>'+xnum(L.sconto)+'</Importo>\n';
+        x+='        </ScontoMaggiorazione>\n';
+      }
+      x+='        <PrezzoTotale>'+xnum(L.totale)+'</PrezzoTotale>\n';
       x+='        <AliquotaIVA>'+xnum(al)+'</AliquotaIVA>\n';
       /* quando l'IVA è zero lo SDI vuole sapere perché: in forfettario è
          il codice N2.2, "operazione non soggetta" */
       if(al===0) x+='        <Natura>N2.2</Natura>\n';
       x+='      </DettaglioLinee>\n';
     });
+    /* ===== 13 agosto 2026 — LE SPESE ADESSO SONO RIGHE =====
+       Cassa a parte (che ha il suo blocco), tutto quello che sta dentro
+       l'imponibile deve avere una riga che lo dichiari: se no chi somma le
+       righe trova dei soldi che non tornano e non sa da dove escono. Le spese
+       stavano solo dentro il riepilogo: 150 € inspiegati su ogni parcella.
+       E una parcella di sole spese generava un DatiBeniServizi senza nemmeno
+       una riga, che lo schema non accetta proprio. */
+    let _nl=R.length;
+    const _rigaExtra=function(desc,imp,al,nat){
+      _nl++;
+      x+='      <DettaglioLinee>\n';
+      x+='        <NumeroLinea>'+_nl+'</NumeroLinea>\n';
+      x+='        <Descrizione>'+xesc(xtaglia(desc,1000))+'</Descrizione>\n';
+      x+='        <Quantita>1.00</Quantita>\n';
+      x+='        <PrezzoUnitario>'+xnum(imp)+'</PrezzoUnitario>\n';
+      x+='        <PrezzoTotale>'+xnum(imp)+'</PrezzoTotale>\n';
+      x+='        <AliquotaIVA>'+xnum(al)+'</AliquotaIVA>\n';
+      if(nat) x+='        <Natura>'+nat+'</Natura>\n';
+      x+='      </DettaglioLinee>\n';
+    };
+    if(c.speseIva)_rigaExtra("Rimborso spese inerenti l'incarico",c.speseIva,forf?0:c.aliqPrev,forf?"N2.2":"");
+    /* sulle fatture vecchie uno sconto piu' grande delle righe veniva tolto
+       dalla parte cassa+spese: la riga qui va scritta al netto di quell'avanzo,
+       se no dichiara piu' di quello che sta nel riepilogo. Sulle fatture nuove
+       scResto e' sempre zero, perche' li' lo sconto si ferma al compenso. */
+    const _speseRiga=Math.max(0,(+c.spese||0)-(+c.scResto||0));
+    if(_speseRiga)_rigaExtra(c.art15
+                    ?"Spese anticipate in nome e per conto del cliente ex art. 15 DPR 633/72"
+                    :"Spese documentate",
+                  _speseRiga, c.art15?0:(forf?0:c.aliqPrev), c.art15?"N1":(forf?"N2.2":""));
     /* I riepiloghi arrivano da fattConti (fattBasi), che ha gia' fatto due
-       cose: sommato cassa e spese all'aliquota che comanda (non sono righe ma
-       fanno imponibile) e tolto lo sconto in proporzione. Sono gli STESSI
-       numeri che il cliente legge sul PDF, e la loro somma e' esattamente
-       ImportoTotaleDocumento meno il bollo: e' il conto che fa lo SDI. */
+       cose: messo cassa e spese sull'aliquota giusta (la cassa e il rimborso
+       su quella che comanda, le spese anticipate fuori campo) e tolto lo sconto
+       riga per riga. Sono gli STESSI numeri che il cliente legge sul PDF, e la
+       loro somma e' esattamente ImportoTotaleDocumento meno il bollo. */
     (c.righeIva||[]).forEach(ri=>{
-      const al=ri.aliquota;
+      const al=ri.aliquota, nat=ri.natura||"";
       x+='      <DatiRiepilogo>\n';
       x+='        <AliquotaIVA>'+xnum(al)+'</AliquotaIVA>\n';
-      if(+al===0) x+='        <Natura>N2.2</Natura>\n';
+      if(nat) x+='        <Natura>'+nat+'</Natura>\n';
       x+='        <ImponibileImporto>'+xnum(ri.imponibile)+'</ImponibileImporto>\n';
       x+='        <Imposta>'+xnum(ri.imposta)+'</Imposta>\n';
       x+='        <EsigibilitaIVA>I</EsigibilitaIVA>\n';
-      if(+al===0) x+='        <RiferimentoNormativo>Operazione non soggetta a IVA ai sensi dell\'art. 1, commi 54-89, L. 190/2014 - regime forfettario</RiferimentoNormativo>\n';
+      if(nat==="N2.2") x+='        <RiferimentoNormativo>Operazione non soggetta a IVA ai sensi dell\'art. 1, commi 54-89, L. 190/2014 - regime forfettario</RiferimentoNormativo>\n';
+      if(nat==="N1")   x+='        <RiferimentoNormativo>Spese anticipate in nome e per conto del cliente - escluse ex art. 15, comma 1, n. 3, DPR 633/72</RiferimentoNormativo>\n';
       x+='      </DatiRiepilogo>\n';
     });
     x+='    </DatiBeniServizi>\n';
@@ -3897,7 +4200,11 @@
       x+='      <DettaglioPagamento>\n';
       x+='        <ModalitaPagamento>MP05</ModalitaPagamento>\n';
       x+='        <DataScadenzaPagamento>'+xesc(_giorniDopo(f.data,gg))+'</DataScadenzaPagamento>\n';
-      x+='        <ImportoPagamento>'+xnum(c.daPagare)+'</ImportoPagamento>\n';
+      /* mai negativo: su una fattura vecchia azzerata dallo sconto la ritenuta
+         e' calcolata sul lordo e supera il documento. Il totale non si tocca
+         (e' gia' stato mandato allo SDI cosi'), ma un importo da pagare sotto
+         zero e' comunque una cosa che non esiste. */
+      x+='        <ImportoPagamento>'+xnum(Math.max(0,c.daPagare))+'</ImportoPagamento>\n';
       x+='        <IBAN>'+xesc(az.iban.replace(/\s+/g,"").toUpperCase())+'</IBAN>\n';
       x+='      </DettaglioPagamento>\n    </DatiPagamento>\n';
     }
@@ -4285,13 +4592,39 @@
   }
   /* Legge tutti i campi nuovi dal modulo. Vuoto diventa null, non stringa vuota:
      così le colonne data non danno errore su Postgres. */
+  /* 13 agosto 2026 — il costo orario scritto male non deve cancellare quello
+     buono. _numIt torna null sia per "casella vuota" (legittimo: nessun costo)
+     sia per "abc" o "o22,50" (un refuso). I due casi vanno distinti QUI, se no
+     un dito scivolato azzerava il costo con il messaggio "Aggiornato ✔" e da
+     quel momento i lavori di quella persona perdevano la manodopera. */
+  function dipCostoStorto(){
+    const e=$("#d-costo"); if(!e)return "";
+    const t=String(e.value||"").trim();
+    if(t==="")return "";                       /* vuoto = nessun costo, legittimo */
+    const n=_numIt("#d-costo");
+    if(n==null)return "Non ho capito il costo orario: scrivilo come 22,50";
+    /* un costo orario sotto zero entrerebbe nel margine dei lavori e lo
+       gonfierebbe: le altre due caselle dei soldi i negativi li rifiutano gia' */
+    if(n<0)return "Il costo orario non puo' essere negativo";
+    return "";
+  }
   function dipCampiExtra(){
     const v=function(id){const e=$(id);return e?String(e.value||"").trim():"";};
-    const n=function(x){x=String(x||"").replace(",",".").trim();if(x==="")return null;const f=parseFloat(x);return isNaN(f)?null:f;};
+    /* la vecchia n() e' stata tolta: era una terza copia della regola dei
+       numeri e per giunta codice morto, perche' la casella era type="number" e
+       la virgola non le arrivava mai. Adesso si usa _numIt come dappertutto. */
     const o=function(x){return x===""?null:x;};
     return {
       mansione:o(v("#d-mansione")),
-      costo_orario:n(v("#d-costo")),
+      /* 13 agosto 2026 — era type="number" col placeholder "Es. 22.50": chi
+         scriveva 22,50 come si scrive in italiano si vedeva CANCELLARE il costo
+         orario (null in colonna) con il messaggio "Aggiornato ✔", e da quel
+         momento i suoi lavori perdevano la manodopera dal margine. */
+      /* null vuol dire "nessun costo orario", ed e' legittimo se la casella e'
+         VUOTA. Se invece dentro c'e' scritto qualcosa che non e' un numero, il
+         null e' un refuso: lo intercetta dipCampiOk, qui sotto, se no si
+         cancellava il costo con il messaggio "Aggiornato ✔". */
+      costo_orario:_numIt("#d-costo"),
       visita_medica_scadenza:o(v("#d-visita")),
       formazione_scadenza:o(v("#d-formazione")),
       attestati:o(v("#d-attestati")),
@@ -4378,7 +4711,7 @@
             <input id="d-mansione" list="d-mansioni-list" value="${esc(op.mansione||"")}" placeholder="Es. Muratore">
             <datalist id="d-mansioni-list">${MANSIONI.map(m=>`<option value="${m}"></option>`).join("")}</datalist></div>
           <div class="field"><label>Costo orario (\u20ac)</label>
-            <input id="d-costo" type="number" step="0.50" min="0" value="${op.costo_orario!=null&&op.costo_orario!==""?esc(op.costo_orario):""}" placeholder="Es. 22.50"></div>
+            <input id="d-costo" type="text" inputmode="decimal" value="${op.costo_orario!=null&&op.costo_orario!==""?esc(_numTesto(op.costo_orario)):""}" placeholder="Es. 22,50"></div>
         </div>
         <div class="sh-nota">Il costo orario serve per calcolare la manodopera sui lavori.</div>
       </div>
@@ -4460,6 +4793,7 @@
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
     const mestiere_id=curMestiere();
     if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
+    const _costoKo=dipCostoStorto(); if(_costoKo){toast(_costoKo);return;}
     const extra=dipCampiExtra();
     const {data:op,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id,nome,telefono:telefono||null},extra)).select().single();
     if(error){toast("Errore: "+error.message);return;}
@@ -4475,6 +4809,7 @@
     const telefono=$("#d-tel")?$("#d-tel").value.trim():"";
     const ruolo=$("#d-ruolo")?$("#d-ruolo").value:"operaio";
     const permessi={};$$("#d-perms input[data-perm]").forEach(ch=>permessi[ch.dataset.perm]=ch.checked);
+    const _costoKo=dipCostoStorto(); if(_costoKo){toast(_costoKo);return;}
     const extra=dipCampiExtra();
     const {data:okOp,error}=await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",id).eq("user_id",sbUid).select("id");
     if(error){toast("Errore: "+error.message);return;}
@@ -4518,12 +4853,30 @@
       }catch(e){incerto=true;return 0;}
     };
     /* ha l'accesso dal telefono? Non ci si puo' fidare di dipCache: li' dentro
-       il codice d'invito non viene copiato, quindi si guarda la tabella vera. */
+       il codice d'invito non viene copiato, quindi si guarda la tabella vera.
+       Si tiene da parte anche lo stato di adesso: se piu' avanti l'eliminazione
+       fallisce bisogna rimettere l'accesso ESATTAMENTE com'era (poteva essere
+       "invitato", non per forza "attivo"). */
+    let statoPrima=null, membroLetto=false, statoLetto=false;
     const _haAccesso=async function(){
       try{
-        const {data:m}=await sb.from("gest_membri").select("operatore_id,stato")
+        const {data:m,error}=await sb.from("gest_membri").select("operatore_id,stato")
           .eq("impresa_id",sbUid).eq("operatore_id",id).limit(1);
-        return !!(m&&m.length&&String(m[0].stato||"")!=="revocato");
+        /* se la tabella degli accessi non esiste proprio (gestionale vecchio,
+           nessuno e' mai stato invitato) allora la risposta e' certa: nessun
+           accesso. Se invece e' la rete a non rispondere non si sa niente, e
+           piu' sotto l'eliminazione si ferma: dire "nessun accesso" per non
+           aver potuto guardare e' il modo di lasciare dentro un ex operaio. */
+        if(error){ membroLetto=_tabellaAssente(error); return false; }
+        membroLetto=true;
+        if(!(m&&m.length))return false;
+        /* statoLetto e non "se statoPrima non e' vuoto": una riga con stato
+           NULL o "" e' comunque una riga da rimettere com'era, e con il solo
+           controllo sul valore l'accesso non tornava e il messaggio diceva
+           che era tornato. */
+        statoPrima=(m[0].stato==null)?null:String(m[0].stato);
+        statoLetto=true;
+        return statoPrima!=="revocato";
       }catch(e){ return false; }
     };
     const [a,b,c,d,acc]=await Promise.all([
@@ -4547,12 +4900,67 @@
     if(acc)msg+="Perde anche l'accesso al gestionale dal telefono.\n\n";
     msg+=fraseCestino()+"\n\nContinuare?";
     if(!gconfirm(msg))return;
-    /* prima si toglie l'accesso: una persona eliminata che entra ancora dal
-       telefono sarebbe la cosa peggiore di tutte */
-    try{ await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid); }catch(e){}
+    /* ===== 12 agosto 2026 (notte) — L'ACCESSO DAL TELEFONO =====
+       Prima qui c'era una riga sola, dentro un try/catch che non serviva a
+       niente: Supabase su errore NON lancia, restituisce {error}, e quell'error
+       non lo leggeva nessuno. Due guai opposti, tutti e due provati:
+       1) se la revoca falliva, la persona finiva nel Cestino, il messaggio
+          diceva "Persona messa nel Cestino ✔" e la riga in gest_membri restava
+          ATTIVA: dal telefono continuava a entrare e a leggere tutto. E siccome
+          spariva dall'elenco, la voce "Rimuovi accesso" non era piu'
+          raggiungibile: non c'era piu' modo di fermarla.
+       2) se invece falliva la cancellazione, l'accesso era gia' stato tolto ma
+          il messaggio diceva "Non eliminata": il titolare leggeva "non e'
+          successo niente" e l'operaio la mattina dopo non entrava.
+       Adesso: la revoca si controlla davvero e, se non riesce, NON si elimina
+       nessuno. E se e' la cancellazione a fallire, l'accesso torna com'era. */
+    if(!membroLetto){
+      alert("Non ho eliminato «"+nome+"».\n\nNon sono riuscito a controllare se ha l'accesso "
+        +"al gestionale dal telefono: la connessione non ha risposto.\n\nNon elimino nessuno "
+        +"finché non lo so: se ce l'avesse, resterebbe dentro e tu non la vedresti più in "
+        +"elenco per fermarla. Riprova fra un momento.");
+      return;
+    }
+    if(acc){
+      const rev=await sb.from("gest_membri").update({stato:"revocato"})
+        .eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
+      if(rev&&rev.error){
+        alert("Non ho eliminato «"+nome+"».\n\nNon sono riuscito a togliergli l'accesso dal "
+          +"telefono: "+(rev.error.message||"la connessione non ha risposto")+"\n\nSe la "
+          +"eliminassi adesso, continuerebbe a entrare dal telefono e tu non la vedresti "
+          +"più in elenco per fermarla. Riprova fra un momento.");
+        return;
+      }
+      if(!(rev&&rev.data&&rev.data.length)){
+        alert("Non ho eliminato «"+nome+"».\n\nHo provato a togliergli l'accesso dal telefono "
+          +"ma non ho trovato nessuna riga da cambiare. Prima usa «🚫 Rimuovi accesso» sulla "
+          +"sua scheda, controlla che diventi «Nessun accesso», poi rielimina.");
+        return;
+      }
+    }
     const {data:ok,error}=await sb.from("gest_operatori").delete().eq("id",id).eq("user_id",sbUid).select("id");
-    if(error){toast("Non eliminata: "+error.message);return;}
-    if(!ok||!ok.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
+    /* la cancellazione non e' andata: l'accesso l'avevo gia' tolto, lo rimetto
+       com'era, se no la persona resta in squadra ma fuori dal telefono senza
+       che nessuno lo sappia */
+    const _rimettiAccesso=async function(){
+      if(!acc||!statoLetto)return true;
+      try{
+        const r=await sb.from("gest_membri").update({stato:statoPrima})
+          .eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
+        return !!(r&&!r.error&&r.data&&r.data.length);
+      }catch(e){ return false; }
+    };
+    if(error||!ok||!ok.length){
+      const tornato=await _rimettiAccesso();
+      const perche=error?(error.message||"errore"):"non ho trovato nessuna riga da eliminare";
+      alert("«"+nome+"» NON è stata eliminata: "+perche+"\n\n"
+        +(tornato
+          ? "L'accesso dal telefono è rimasto com'era. Riprova fra un momento."
+          : "⚠️ ATTENZIONE: le avevo già tolto l'accesso dal telefono e non sono riuscito a "
+            +"rimetterlo. La persona è ancora in squadra ma dal telefono non entra. Vai sulla "
+            +"sua scheda e rimandale il link d'invito."));
+      return;
+    }
     renderDip();
     rinfresca("riepilogo","agenda","squadra","scadenzario","galleria","lavori");
     toast(_cestOn()?"Persona messa nel Cestino ✔ — la rimetti a posto da lì":"Persona eliminata");
@@ -4926,7 +5334,11 @@
     if(!cartaAttivaId||!sbUid){toast("Devi essere loggato");return;}
     const tipo=$("#mv-tipo").value;
     const importo=_numIt("#mv-importo")||0;
-    if(!importo||importo<=0){toast("Inserisci un importo valido");return;}
+    if(!importo||importo<=0){toast("Scrivi l'importo, per esempio 12,50");return;}
+    /* lo stesso tetto che c'e' nell'app dell'operaio: e' la stessa colonna del
+       database, e un dito appoggiato sullo zero non deve passare da una parte
+       e fermarsi dall'altra */
+    if(importo>1000000){toast("Importo troppo alto: controlla quello che hai scritto");return;}
     const causale=$("#mv-causale").value.trim()||null;
     const {error}=await sb.from("gest_carte_movimenti").insert({
       user_id:sbUid,carta_id:cartaAttivaId,tipo,importo,causale,inserito_da:"Capo"
@@ -5446,7 +5858,7 @@
       +'<div class="field"><label>Numero fattura</label><input id="ff-num" value="'+esc(f.numero||'')+'" placeholder="Es. 124/2026"></div>'
       +'<div class="field"><label>Data fattura</label><input type="date" id="ff-data" value="'+(f.data||todayStr())+'"></div></div>'
       +'<div class="row2">'
-      +'<div class="field"><label>Importo (€)</label><input type="number" step="0.01" id="ff-imp" inputmode="decimal" value="'+(f.importo||'')+'" placeholder="0"></div>'
+      +'<div class="field"><label>Importo (€)</label><input type="text" id="ff-imp" inputmode="decimal" value="'+(f.importo||'')+'" placeholder="0"></div>'
       +'<div class="field"><label>Da pagare entro</label><input type="date" id="ff-scad" value="'+(f.scadenza||'')+'"></div></div>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -5463,7 +5875,7 @@
   async function saveFattf(id){
     if(!sbUid){toast("Devi essere loggato");return;}
     const fornitore_id=$("#ff-forn").value;if(!fornitore_id){toast("Scegli il fornitore");return;}
-    const importo=parseFloat($("#ff-imp").value)||0;if(!(importo>0)){toast("Inserisci l'importo");return;}
+    const importo=_numIt("#ff-imp")||0;if(!(importo>0)){toast("Scrivi l'importo della fattura, per esempio 1.200,50");return;}
     const row={fornitore_id,numero:$("#ff-num").value.trim()||null,data:$("#ff-data").value||todayStr(),
       importo,scadenza:$("#ff-scad").value||null,lavoro_id:$("#ff-lav").value||null,note:$("#ff-note").value.trim()||null};
     const {data,error}=id
@@ -5995,7 +6407,7 @@
         <div class="spese-list" id="spese-list"></div>
         <div class="spesa-add">
           <input id="sp-desc" placeholder="Es. Cemento, noleggio piattaforma...">
-          <input id="sp-imp" type="number" inputmode="decimal" placeholder="€">
+          <input id="sp-imp" type="text" inputmode="decimal" placeholder="€ (es. 12,50)">
           <select id="sp-forn" title="Da quale fornitore (facoltativo)"><option value="">— fornitore —</option></select>
           <button type="button" class="btn" data-action="spesa-add">+ Aggiungi</button></div>
         <div class="margine-box" id="margine-box"></div></div>
@@ -6012,7 +6424,7 @@
         <div class="spese-list" id="ore-list"></div>
         <div class="spesa-add ore-add">
           <input id="or-data" type="date" title="Che giorno">
-          <input id="or-ore" type="number" inputmode="decimal" step="0.5" placeholder="Ore">
+          <input id="or-ore" type="text" inputmode="decimal" placeholder="Ore (es. 2,5)">
           <select id="or-chi" title="Chi ci ha lavorato (facoltativo)"><option value="">— chi —</option></select>
           <button type="button" class="btn" data-action="ore-add">+ Aggiungi</button></div>
         <input id="or-nota" placeholder="Cosa hai fatto (facoltativo)" style="margin-top:6px;width:100%">
@@ -6845,9 +7257,27 @@
      ============================================================ */
   /* Le tabelle che stanno dentro un reparto (hanno la colonna mestiere_id).
      I nomi sono scritti in lingua "impresa": ci pensa gconfirm a girarli in
-     pratiche/collaboratori per gli studi tecnici. */
+     pratiche/collaboratori per gli studi tecnici.
+     ⚠️ SE AGGIUNGI UNA RIGA QUI, aggiungi la tabella anche a TABELLE in
+     js/cestino.js (riga 82) e la colonna eliminato_il in sql/gest-cestino.sql.
+     Una tabella che sta qui ma non li' viene cancellata PER SEMPRE mentre il
+     messaggio promette il Cestino. Se te ne dimentichi il gestionale sbaglia
+     dalla parte giusta — repartoBloccanti blocca l'eliminazione dei reparti —
+     ma con un messaggio che da' la colpa a una migrazione SQL che invece e' a
+     posto: la vera causa e' questa riga. */
   const REPARTO_CONTENUTO=[
     ["gest_lavori",            "lavoro",               "lavori"],
+    /* 12 agosto 2026 (notte) — LE ORE MANCAVANO DALL'ELENCO.
+       gest_ore ha la colonna mestiere_id (sql/gest-ore-e-crediti.sql riga 39)
+       e il gestionale ce la scrive davvero (oreAdd), ma qui dentro non c'era.
+       Eliminando il reparto le ore restavano VIVE e irraggiungibili — il loro
+       lavoro e il loro reparto erano nel Cestino — e poi "Elimina per sempre"
+       si rifiutava all'infinito ("1 ore lavorate non sono nel cestino"), senza
+       nessuna schermata da cui metterle via: il vicolo cieco che il commento
+       qui sopra dava per chiuso era ancora aperto.
+       Stando qui, le ore entrano da sole anche nel conteggio del messaggio e
+       in CEST_FIGLI, cioe' nel ripristino. */
+    ["gest_ore",               "ora lavorata",         "ore lavorate"],
     ["gest_clienti",           "cliente",              "clienti"],
     ["gest_preventivi",        "preventivo",           "preventivi"],
     ["gest_fatture",           "fattura",              "fatture"],
@@ -6859,25 +7289,58 @@
     ["gest_scadenze",          "scadenza",             "scadenze"],
     ["gest_computi",           "computo metrico",      "computi metrici"]
   ];
-  /* Undici domande piccolissime (solo il conteggio, nessuna riga scaricata)
+  /* Dodici domande piccolissime (solo il conteggio, nessuna riga scaricata)
      sparate tutte insieme: un solo giro di rete, e solo quando si preme
-     Elimina, che non e' cosa di tutti i giorni. */
+     Elimina, che non e' cosa di tutti i giorni.
+     Oltre al conteggio si porta a casa una cosa che serve subito dopo: la
+     tabella esiste nel database, oppure no? Le due cose si distinguono solo
+     qui, dal codice dell'errore: 42P01 (o "does not exist") = tabella che non
+     c'e' proprio. Il Cestino, che vede solo "colonna mancante", le tratta
+     tutte e due allo stesso modo e blocca. */
+  function _tabellaAssente(err){
+    const m=(err&&(err.message||err.details||""))||"";
+    const c=(err&&err.code)||"";
+    return c==="42P01"||/does not exist|schema cache|could not find the table/i.test(m);
+  }
   async function contaReparto(mid){
     const righe=await Promise.all(REPARTO_CONTENUTO.map(async function(v){
       try{
         const {count,error}=await sb.from(v[0]).select("id",{count:"exact",head:true})
           .eq("user_id",sbUid).eq("mestiere_id",mid);
-        if(error)return {lab:null,n:0,ko:true};
+        if(error)return {tab:v[0],lab:null,n:0,ko:!_tabellaAssente(error),assente:_tabellaAssente(error)};
         const n=count||0;
-        return {lab:n?(n+" "+(n===1?v[1]:v[2])):null,n:n,ko:false};
-      }catch(e){return {lab:null,n:0,ko:true};}
+        return {tab:v[0],lab:n?(n+" "+(n===1?v[1]:v[2])):null,n:n,ko:false,assente:false};
+      }catch(e){return {tab:v[0],lab:null,n:0,ko:true,assente:false};}
     }));
     return {
+      righe:righe,
       voci:righe.map(r=>r.lab).filter(Boolean),
       /* se anche una sola lettura e' fallita non si puo' giurare sull'elenco:
          meglio dirlo che far credere che il reparto sia vuoto */
       incerto:righe.some(r=>r.ko)
     };
+  }
+  /* 12 agosto 2026 (notte) — IL CONTROLLO CHE MANCAVA.
+     Prima si cancellava una tabella per volta e si scopriva solo alla settima
+     che il Cestino su quella parte non e' installato: le prime sei erano gia'
+     dentro il Cestino, il reparto era ancora sullo schermo — vivo e vuoto — e
+     il messaggio diceva "il reparto NON e' stato eliminato", che era vero solo
+     per il reparto. Adesso si chiede PRIMA, a tutte e tredici (le dodici del
+     contenuto piu' il reparto stesso), e se anche una sola bloccherebbe non si
+     tocca niente.
+     Le tabelle che nel database non esistono proprio non contano: non hanno
+     righe, non c'e' niente da mettere via. */
+  function repartoBloccanti(righe){
+    if(!(window.cestinoAttivo&&window.cestinoAttivo()))return [];   /* cancellazioni vere: non blocca nessuno */
+    if(typeof window.cestinoTabellaAttiva!=="function")return [];
+    const assenti={};
+    (righe||[]).forEach(function(r){ if(r.assente)assenti[r.tab]=true; });
+    const nome={};
+    REPARTO_CONTENUTO.forEach(function(v){ nome[v[0]]=v[2]; });
+    nome.gest_mestieri="il reparto stesso";
+    return REPARTO_CONTENUTO.map(v=>v[0]).concat(["gest_mestieri"])
+      .filter(t=>!assenti[t]&&!window.cestinoTabellaAttiva(t))
+      .map(t=>nome[t]||t);
   }
   async function delPanel(id){
     const p=(state.panels||[]).find(x=>x.id===id);
@@ -6893,8 +7356,21 @@
     }
     const conCestino=!!(window.cestinoAttivo&&window.cestinoAttivo());
 
-    let dentro={voci:[],incerto:false};
+    let dentro={righe:[],voci:[],incerto:false};
     if(sb&&sbUid&&p.mestiere_id)dentro=await contaReparto(p.mestiere_id);
+
+    /* Il controllo che manca a meta' strada: si chiede a tutte PRIMA, e se una
+       sola bloccherebbe non si tocca niente e non si fa nemmeno la domanda. */
+    if(sb&&sbUid&&p.mestiere_id){
+      const bloccanti=repartoBloccanti(dentro.righe);
+      if(bloccanti.length){
+        alert("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
+          +"Su queste parti il Cestino non è ancora installato, e per non perdere "
+          +"niente per sempre l'eliminazione è bloccata:\n  •  "+bloccanti.join("\n  •  ")
+          +"\n\nEsegui i file della cartella sql/ su Supabase e riprova.");
+        return;
+      }
+    }
 
     let msg="Stai per eliminare il reparto «"+p.nome+"».\n\n";
     if(dentro.voci.length)   msg+="Dentro ci sono:\n"+dentro.voci.map(v=>"  •  "+v).join("\n")+"\n\n";
@@ -6920,31 +7396,105 @@
          reparto per ultimo: cosi' ogni cosa e' ripescabile anche da sola.
          Una tabella che nel database non esiste (migrazione mai eseguita) non
          blocca niente: non c'e' niente da mettere via. Tutto il resto si'. */
-      const falliti=[], bloccate=[];
+      /* 12 agosto 2026 (notte) — E SE SI ROMPE LO STESSO A META'?
+         Il controllo qui sopra toglie di mezzo il caso che capitava davvero
+         (Cestino non installato su una parte). Resta la rete che cade fra la
+         terza e la quarta tabella: da un browser non si puo' fare una cosa
+         sola indivisibile, quindi si fa la seconda cosa migliore — si TORNA
+         INDIETRO. Si segna l'ora di partenza e, se qualcosa va storto, si
+         rimette a posto solo quello che e' finito nel Cestino da quell'ora in
+         poi (le righe gia' nel Cestino da prima non vengono ritimbrate, quindi
+         non rischiano di risalire). */
+      const inizio=new Date().toISOString();
+      const assenti={}; (dentro.righe||[]).forEach(function(r){ if(r.assente)assenti[r.tab]=true; });
+      const fatte=[]; let guasto="";
+
+      /* Quattro esiti diversi, non due. Le prime due volte che ho scritto
+         questa funzione rispondeva si'/no, e il "no" finiva sempre nello stesso
+         messaggio: "sono già nel Cestino, vai a riprenderle". Era una bugia in
+         due casi su quattro — quando non era stato toccato ancora niente, e
+         soprattutto quando il Cestino non e' installato e quelle righe erano
+         state cancellate PER SEMPRE. La bugia peggiore nel momento peggiore.
+           "niente" = non avevo ancora toccato niente
+           "ok"     = rimesso tutto a posto
+           "no"     = e' rimasta roba nel Cestino, si ripesca a mano
+           "persi"  = erano cancellazioni vere: non tornano piu' */
+      const rimaste=[];                          /* quelle che il rollback NON e' riuscito a riprendere */
+      async function tornaIndietro(){
+        if(!fatte.length)return "niente";
+        if(!conCestino)return "persi";           /* .delete() vera: non c'e' niente da annullare */
+        if(typeof sb.raw!=="function"){fatte.forEach(t=>rimaste.push(t));return "no";}
+        for(const t of fatte){
+          try{
+            const {error}=await sb.raw(t).update({eliminato_il:null})
+              .eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id).gte("eliminato_il",inizio);
+            if(error)rimaste.push(t);
+          }catch(e){rimaste.push(t);}
+        }
+        return rimaste.length?"no":"ok";
+      }
+      /* L'elenco da mostrare, con i numeri: chi deve decidere se tirare fuori un
+         backup vuole leggere "2 lavori", non "lavori". I conteggi sono quelli
+         gia' letti da contaReparto un momento fa. */
+      function elenca(tabelle){
+        const uno={}, tanti={}, quante={};
+        REPARTO_CONTENUTO.forEach(function(v){ uno[v[0]]=v[1]; tanti[v[0]]=v[2]; });
+        /* Solo i conteggi che sono arrivati davvero. Quando la lettura fallisce
+           contaReparto restituisce n:0 con ko:true — se si guardasse il numero
+           si scriverebbe "0 lavori" dentro il messaggio "cancellate PER SEMPRE",
+           cioe' si direbbe a chi ha appena perso due lavori che non ha perso
+           niente, e il backup non lo tirerebbe fuori. Il numero che non si sa
+           non si scrive. */
+        (dentro.righe||[]).forEach(function(r){ if(!r.ko)quante[r.tab]=r.n; });
+        return tabelle.map(function(t){
+          const n=quante[t];
+          /* "non so il numero" e non "non so quante": meta' delle etichette sono
+             maschili (lavori, preventivi, computi metrici) e la concordanza
+             sbagliata si nota subito. Cosi' va bene per tutte e dodici. */
+          if(typeof n!=="number")return (tanti[t]||t)+" (non so il numero)";
+          return n+" "+(n===1?(uno[t]||t):(tanti[t]||t));
+        }).join("\n  •  ");
+      }
+
       for(const v of REPARTO_CONTENUTO){
+        if(assenti[v[0]])continue;                  /* tabella che non esiste: niente da mettere via */
         const r=await sb.from(v[0]).delete().eq("user_id",sbUid).eq("mestiere_id",p.mestiere_id);
         const er=r&&r.error;
-        if(!er)continue;
+        if(!er){fatte.push(v[0]);continue;}
         const m=(er.code||"")+" "+(er.message||"");
         if(/42P01|42703|does not exist|schema cache|could not find/i.test(m))continue;
-        if(String(er.code||"")==="CESTINO_BLOCCATO")bloccate.push(v[2]);
-        else falliti.push(v[2]+" ("+(er.message||"errore")+")");
+        guasto=v[2]+" ("+(er.message||"errore")+")";
+        break;
       }
-      if(bloccate.length){
-        alert("Il reparto NON è stato eliminato.\n\nSu queste parti il Cestino non è ancora installato, "
-          +"e per non perdere niente per sempre l'eliminazione è bloccata:\n  •  "+bloccate.join("\n  •  ")
-          +"\n\nEsegui i file della cartella sql/ su Supabase e riprova.");
-        renderLanding();return;
+      if(!guasto){
+        const r2=await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
+        if(r2&&r2.error)guasto="il reparto stesso ("+(r2.error.message||"errore")+")";
       }
-      if(falliti.length){
-        toast("Il reparto NON è stato eliminato: non sono riuscito a mettere via "+falliti.join(", "));
-        renderLanding();return;
-      }
-      const r2=await sb.from("gest_mestieri").delete().eq("id",p.mestiere_id).eq("user_id",sbUid);
-      if(r2&&r2.error){
-        /* il contenuto e' gia' andato nel Cestino ma il reparto e' rimasto:
-           NON lo tolgo dallo schermo, se no sparisce solo agli occhi */
-        toast("Errore: il reparto è ancora lì — "+(r2.error.message||""));
+      if(guasto){
+        const esito=await tornaIndietro();
+        /* Il pallino del Cestino aveva cominciato a contare mentre le
+           cancellazioni erano ancora in volo e si era fermato su un numero di
+           mezzo: dopo un rollback riuscito diceva "12" con il Cestino vuoto,
+           cioe' il contrario del messaggio qui sotto. Adesso che non c'e' piu'
+           niente in volo si rifa' il conto vero (18 domande di solo conteggio).
+           Va fatto QUI, dopo tornaIndietro(), mai prima. */
+        cestContato=false;contaCestinoUnaVolta();
+        const testa="Il reparto NON è stato eliminato.\n\nMi sono fermato su: "+guasto+"\n\n";
+        let coda;
+        if(esito==="niente")     coda="Non ho fatto in tempo a toccare niente: dentro il reparto è "
+                                     +"tutto come prima. Riprova fra un momento.";
+        else if(esito==="ok")    coda="Ho rimesso a posto quello che era già finito nel Cestino: dentro "
+                                     +"il reparto è tutto come prima. Riprova fra un momento.";
+        else if(esito==="persi") coda="⚠️ ATTENZIONE: su questo gestionale il Cestino NON è installato, "
+                                     +"quindi queste cose sono già state cancellate PER SEMPRE e non "
+                                     +"posso rimetterle a posto:\n  •  "+elenca(fatte)
+                                     +"\n\nSe hai un backup, è il momento di usarlo. Per non farlo "
+                                     +"succedere più, esegui sql/gest-cestino.sql su Supabase.";
+        else                     coda="⚠️ ATTENZIONE: questa parte del contenuto è rimasta nel Cestino "
+                                     +"e non sono riuscito a rimetterla a posto da solo:\n  •  "+elenca(rimaste)
+                                     +"\n\nVai nel Cestino, scegli «Tutti i reparti» e premi «Rimetti a "
+                                     +"posto» su quelle cose. Il resto del reparto è già a posto.";
+        alert(testa+coda);
         renderLanding();return;
       }
     }
@@ -8163,7 +8713,13 @@
       +(oreSenzaNome
           ? (mediaSquadra>0
               ? `<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore senza il nome di chi le ha fatte: contate al costo medio della squadra (${eur2(mediaSquadra)} l'ora)</span>`
-              : `<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore registrate, ma nessuno in squadra ha il costo orario: la manodopera non entra nel margine. Scrivilo nella scheda della persona, in Squadra.</span>`)
+              /* 12 agosto 2026 (notte) — questa frase diceva "la manodopera non
+                 entra nel margine", e da quando la media si fa sui soli vivi
+                 poteva stare sotto una manodopera che invece c'era eccome (le
+                 ore INTESTATE a qualcuno si contano lo stesso, anche se quel
+                 qualcuno e' nel Cestino). Adesso parla solo delle ore che
+                 riguarda davvero, cioe' quelle senza nome. */
+              : `<span class="sp-forn" style="flex-basis:100%">${oreSenzaNome} ore senza il nome di chi le ha fatte: queste non entrano nel margine, perché nessuno di chi c'è adesso in squadra ha il costo orario. Scrivilo nella scheda della persona, in Squadra.</span>`)
           : "");
     renderAndamentoSpese(sp,imp);
   }
@@ -8194,12 +8750,25 @@
      costi orari della squadra: se non lo facessimo, dimenticare un nome
      farebbe risultare il lavoro piu' redditizio di quello che e'.
      ============================================================ */
-  function costiOrari(operatori){
+  /* 12 agosto 2026 (notte) — DUE ELENCHI, NON UNO.
+     "per" (la tariffa di ognuno) si costruisce su TUTTI, anche su chi sta nel
+     Cestino: le sue ore sono il costo di lavori gia' chiusi e quel conto non
+     deve muoversi piu'.
+     "media" invece si fa solo sui VIVI, perche' e' il prezzo con cui si contano
+     le ore registrate senza nome: quelle di oggi le fa la squadra di oggi. Se
+     si mettesse tutto insieme, dopo tre anni e dieci ex operai un'ora anonima
+     verrebbe pagata al costo medio di undici persone di cui una in ditta — e
+     l'avviso "nessuno in squadra ha il costo orario" non comparirebbe piu'
+     nemmeno quando e' vero. */
+  function costiOrari(tutti,vivi){
     const per={}; let somma=0, n=0;
-    (operatori||[]).forEach(function(o){
+    (tutti||[]).forEach(function(o){
       if(!o||o.id==null)return;
+      per[String(o.id)]=+o.costo_orario||0;
+    });
+    (vivi||tutti||[]).forEach(function(o){
+      if(!o)return;
       const c=+o.costo_orario||0;
-      per[String(o.id)]=c;
       if(c>0){somma+=c;n++;}
     });
     return {per:per, media:n?somma/n:0};
@@ -8235,19 +8804,51 @@
   }
   /* legge in un colpo solo quello che serve alla manodopera di un reparto.
      Se la tabella delle ore non c'e' ancora, torna tutto a zero senza rompere
-     niente: il margine resta quello di prima. */
+     niente: il margine resta quello di prima.
+
+     12 agosto 2026 (notte) — LE TARIFFE SI LEGGONO DALLA PORTA DI SERVIZIO.
+     Qui c'era sb.from("gest_operatori"), che passa dal Cestino e quindi salta
+     le persone eliminate. Le loro ore pero' restano — e devono restare, sono il
+     costo della manodopera di lavori gia' chiusi — cosi' cadevano nel ripiego
+     "media della squadra" e il margine di lavori FINITI cambiava da solo:
+     un lavoro da 3.000 € con 10 ore di una persona a 22 €/h passava da 2.780 €
+     di margine a 2.900 €, e se quella persona era l'unica in squadra a 3.000 €.
+     Un lavoro che era in perdita smetteva di esserlo.
+     Il messaggio di conferma dell'eliminazione promette il contrario, testuale:
+     "le ore registrate servono al margine dei lavori".
+     sb.raw vede anche chi sta nel Cestino, quindi la tariffa resta al suo posto
+     e i conti di ieri non si muovono. Qui escono solo numeri (la tariffa e la
+     media): nessun nome di persona eliminata finisce sullo schermo.
+     Resta un caso che non si puo' chiudere da qui: con "Elimina per sempre" la
+     riga sparisce davvero e il database mette a NULL gest_ore.operatore_id —
+     li' il ripiego sulla media e' l'unica cosa che rimane. */
   async function caricaManodopera(mid,lavori){
     const vuoto={per:{},senzaNome:{},tariffe:{per:{},media:0}};
     if(!sb||!sbUid)return vuoto;
     try{
+      /* .bind(sb) NON si tocca: sb.from staccato dall'oggetto perde il "this" e
+         dentro supabase-js fa "this.rest.from(...)" su undefined. Il try qui
+         sotto se lo mangiava in silenzio e la manodopera spariva da TUTTI i
+         margini — peggio del difetto che questa riga chiude. Con lo stub delle
+         prove non si vedeva: il suo from e' una arrow e il this non gli serve. */
+      const leggiTutti=(typeof sb.raw==="function")?sb.raw:sb.from.bind(sb);
       const ids=(lavori||[]).map(l=>l.id).filter(Boolean);
-      const [{data:ops},ore]=await Promise.all([
+      const [{data:ops},rVivi,ore]=await Promise.all([
+        leggiTutti("gest_operatori").select("id,costo_orario").eq("user_id",sbUid).eq("mestiere_id",mid),
         sb.from("gest_operatori").select("id,costo_orario").eq("user_id",sbUid).eq("mestiere_id",mid),
         ids.length
           ? sb.from("gest_ore").select("lavoro_id,operatore_id,ore").eq("user_id",sbUid).in("lavoro_id",ids)
           : Promise.resolve({data:[]})
       ]);
-      const tariffe=costiOrari(ops||[]);
+      /* "squadra vuota" e "non ho potuto leggere la squadra" sono due cose
+         diverse e vanno tenute separate: la prima e' un'informazione vera (media
+         zero, e l'avviso deve comparire), la seconda no. Scrivendo opsVivi||[]
+         diventavano la stessa cosa — l'array vuoto e' truthy — e se cadeva solo
+         questa lettura la media andava a zero in silenzio: le ore senza nome
+         sparivano dal margine e il gestionale diceva di scrivere un costo orario
+         che era gia' scritto. */
+      const opsVivi=(rVivi&&!rVivi.error&&rVivi.data)?rVivi.data:(ops||[]);
+      const tariffe=costiOrari(ops||[],opsVivi);
       const md=costoManodopera((ore&&ore.data)||[],lavori,tariffe);
       return {per:md.per, senzaNome:md.senzaNome, tariffe:tariffe};
     }catch(e){ return vuoto; }
@@ -8320,7 +8921,17 @@
   }
   async function spesaAdd(){
     if(!sbUid||!speseLavoroId)return;
-    const descrizione=$("#sp-desc").value.trim(), importo=+($("#sp-imp").value)||0;
+    /* 13 agosto 2026 — era type="number": scrivendo "12,50" la casella non
+       restituiva niente e la spesa entrava a ZERO con il messaggio "Spesa
+       aggiunta ✔". Zero euro nel margine del lavoro e nel Report, in silenzio. */
+    const descrizione=$("#sp-desc").value.trim();
+    /* 13 agosto 2026 — qui non c'era nessun controllo: vuoto, "abc" o un dito
+       scivolato entravano come 0 € con il messaggio "Spesa aggiunta ✔", e il
+       margine del lavoro se ne accorgeva soltanto a fine mese. */
+    const _spTesto=($("#sp-imp")&&$("#sp-imp").value||"").trim();
+    const importo=_numIt("#sp-imp");
+    if(_spTesto&&importo==null){toast("Non ho capito l'importo: scrivilo come 12,50");return;}
+    if(importo==null||importo<=0){toast("Scrivi quanto hai speso, per esempio 12,50");return;}
     if(!descrizione){toast("Scrivi la descrizione della spesa");return;}
     const fornitore_id=($("#sp-forn")&&$("#sp-forn").value)||null;
     const obj={user_id:sbUid,lavoro_id:speseLavoroId,descrizione,importo};
@@ -8394,7 +9005,11 @@
        solo e non si tocca più a mano, se no i due numeri litigano */
     const campo=$("#j-ore");
     if(campo){
-      if(righe.length){campo.value=tot;campo.readOnly=true;campo.title="Somma del registro qui sotto";campo.style.background="var(--sfondo,#f5f6f8)";}
+      /* 13 agosto 2026 — qui finiva il numero grezzo dentro una casella che dal
+         12 agosto e' di testo: si leggeva "7.5" invece di "7,5", e con piu'
+         righe usciva anche "3.8000000000000003". _numTesto scrive il numero
+         come lo scriverebbe una persona. */
+      if(righe.length){campo.value=_numTesto(tot);campo.readOnly=true;campo.title="Somma del registro qui sotto";campo.style.background="var(--sfondo,#f5f6f8)";}
       else{
         /* cancellata l'ultima riga il campo si azzera DAVVERO: se restasse il
            totale di prima, il registro direbbe "nessuna ora" e il Report
@@ -8420,8 +9035,11 @@
   async function oreAdd(){
     if(!sbUid||!oreLavoroId)return;
     if(!oreTabellaOk){toast("Prima serve l'aggiornamento del database (sql/gest-ore-e-crediti.sql)");return;}
-    const ore=+($("#or-ore").value)||0;
-    if(!(ore>0)){toast("Scrivi quante ore");return;}
+    /* mezz'ora si scrive "2,5": con type="number" non si poteva proprio */
+    const ore=_numIt("#or-ore")||0;
+    if(!(ore>0)){toast("Scrivi quante ore, per esempio 2,5");return;}
+    /* una riga sola di 1.250 ore e' un dito scivolato, non una giornata */
+    if(ore>24){toast("Sono tante: una riga sola non puo' avere piu' di 24 ore");return;}
     const obj={user_id:sbUid,mestiere_id:curMestiere(),lavoro_id:oreLavoroId,
       data:$("#or-data").value||todayStr(), ore,
       nota:$("#or-nota").value.trim()||null,
@@ -8598,12 +9216,24 @@
     compenso=+compenso||0; spese=+spese||0;
     cassaPerc=+cassaPerc||0; ivaPerc=+ivaPerc||0; ritPerc=+ritPerc||0;
     const cassa      = compenso*cassaPerc/100;
-    const imponibile = compenso + cassa + spese;
-    const iva        = imponibile*ivaPerc/100;
+    /* ===== 13 agosto 2026 — ANCHE QUI LE SPESE ESCONO DALL'IVA =====
+       La casella del preventivo dice "Spese (bolli, diritti, copie)": sono le
+       spese anticipate in nome e per conto del cliente, escluse dalla base
+       imponibile per l'art. 15 del DPR 633/72. L'IVA non ci va.
+       Prima ce la metteva, e da quando la FATTURA ha imparato la regola giusta
+       i due documenti si erano scollati: il cliente firmava un preventivo da
+       5.527 € e si vedeva arrivare una fattura da 5.494. Adesso tornano.
+       Attenzione: "imponibile" qui resta la somma di tutto quello che si
+       addebita, perche' e' il numero che si legge sul preventivo; l'IVA pero'
+       si calcola su baseIva, che le spese non le contiene. */
+    const baseIva    = compenso + cassa;
+    const imponibile = baseIva + spese;
+    const iva        = baseIva*ivaPerc/100;
     const ritenuta   = conRitenuta ? compenso*ritPerc/100 : 0;  /* solo sul compenso */
     const totale     = imponibile + iva - ritenuta;
     const r2=n=>Math.round(n*100)/100;
-    return {compenso:r2(compenso),cassa:r2(cassa),spese:r2(spese),imponibile:r2(imponibile),
+    return {compenso:r2(compenso),cassa:r2(cassa),spese:r2(spese),baseIva:r2(baseIva),
+            imponibile:r2(imponibile),
             iva:r2(iva),ritenuta:r2(ritenuta),totale:r2(totale)};
   }
   function bloccoParcella(p){
@@ -8677,7 +9307,10 @@
       (c.spese?riga("Spese", c.spese):"") +
       (c.cassa?riga("Cassa previdenziale", c.cassa):"") +
       `<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>` +
-      riga("Imponibile IVA", c.imponibile) +
+      /* 13 agosto 2026 — non e' piu' "Imponibile IVA": le spese anticipate
+         stanno dentro questo numero ma l'IVA non ce l'hanno (art. 15), quindi
+         chi provasse a farci sopra il 22% non tornerebbe. */
+      riga(c.spese?"Totale imponibile":"Imponibile IVA", c.imponibile) +
       (c.iva?riga("IVA", c.iva):"") +
       (c.ritenuta?riga("Ritenuta d'acconto", c.ritenuta, true):"") +
       `<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>` +
@@ -9036,7 +9669,7 @@
       const righeTot=[["Compenso",cp.compenso,false]];
       if(cp.spese)   righeTot.push(["Spese (bolli, diritti)",cp.spese,false]);
       if(cp.cassa)   righeTot.push(["Cassa previdenziale "+(+p.cassa_perc||0)+"%",cp.cassa,false]);
-      righeTot.push(["Imponibile IVA",cp.imponibile,false]);
+      righeTot.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
       if(cp.iva)     righeTot.push(["IVA "+(+p.iva_perc||0)+"%",cp.iva,false]);
       if(cp.ritenuta)righeTot.push(["Ritenuta d'acconto "+(+p.ritenuta_perc||20)+"%",cp.ritenuta,true]);
       const hBox=righeTot.length*6+16;
@@ -9229,7 +9862,7 @@
       +  (cp.spese?riga("Spese (bolli, diritti)",cp.spese):"")
       +  (cp.cassa?riga("Cassa previdenziale",cp.cassa):"")
       +  '<div style="border-top:1px solid var(--linea,#e5e7eb);margin:6px 0"></div>'
-      +  riga("Imponibile IVA",cp.imponibile)
+      +  riga(cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile)
       +  (cp.iva?riga("IVA",cp.iva):"")
       +  (cp.ritenuta?riga("Ritenuta d\'acconto",cp.ritenuta,true):"")
       +  '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
@@ -9374,7 +10007,7 @@
     const vociC=[["Compenso",cp.compenso,false]];
     if(cp.spese)   vociC.push(["Spese (bolli, diritti)",cp.spese,false]);
     if(cp.cassa)   vociC.push(["Cassa previdenziale "+(+p.cassa_perc||0)+"%",cp.cassa,false]);
-    vociC.push(["Imponibile IVA",cp.imponibile,false]);
+    vociC.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
     if(cp.iva)     vociC.push(["IVA "+(+p.iva_perc||0)+"%",cp.iva,false]);
     if(cp.ritenuta)vociC.push(["Ritenuta d'acconto "+(+p.ritenuta_perc||20)+"%",cp.ritenuta,true]);
     spazio(vociC.length*5.5+18);
@@ -10342,17 +10975,28 @@
         try{ r=await q(false); }catch(e){ r=null; }
       }
       const righe=(r&&!r.error&&r.data)||[];
-      return {c:c, righe:righe, n:(r&&!r.error&&typeof r.count==="number")?r.count:righe.length};
+      /* ko: questa tabella non ha risposto. "Non lo so" non e' "zero" — vedi
+         sotto, dove decide se il pallino si puo' scrivere. */
+      return {c:c, righe:righe, ko:!!(!r||r.error),
+              n:(r&&!r.error&&typeof r.count==="number")?r.count:righe.length};
     }
     const risposte=await Promise.all(CEST_COSE.map(cestChiedi));
     cestQui=risposte.reduce((s,x)=>s+(x.n||0),0);
     /* il pallino del menu conta TUTTO il cestino, non solo questo reparto:
        e' un "hai roba buttata via", non un conteggio di sezione. Quindi si
        aggiorna solo quando si sta guardando davvero tutto. */
-    if(cestVista==="tutti"){
+    /* 13 agosto 2026 — la stessa guardia che sta in contaCestinoUnaVolta.
+       Senza, una tabella che non rispondeva valeva zero, il totale finiva nel
+       pallino sottostimato e cestContato=true lo bloccava li' per tutta la
+       sessione: il menu diceva 10 con 12 cose nel Cestino, cioe' MENO del vero,
+       che e' il verso sbagliato in cui sbagliare. */
+    const _incerto=risposte.some(x=>x.ko);
+    if(cestVista==="tutti"&&!_incerto){
       cestTotale=cestQui;
       cestContato=true;
       setCnt("#cnt-cestino",cestTotale,"attesa");
+    }else if(cestVista==="tutti"){
+      cestContato=false;                        /* si riprova al giro dopo */
     }else if(cestTotale!=null&&cestTotale<cestQui){
       cestTotale=cestQui;                       /* non puo' essercene meno del pezzo */
       setCnt("#cnt-cestino",cestTotale,"attesa");
@@ -10513,6 +11157,7 @@
 
     /* rimesso a posto un reparto o una pratica cambia mezzo gestionale:
        si ridisegna tutto invece di indovinare cosa è cambiato */
+    _cestRicontaPallino();
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
     if(x.tab==="gest_mestieri"||(padreDaTirareSu&&x.padre.tab==="gest_mestieri"))renderLanding();
@@ -10617,9 +11262,11 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!fatto||fatto.ok===false){
       toast("Non eliminato: nel frattempo qualcosa \u00e8 tornato attivo");
+      _cestRicontaPallino();
       renderCestino();return;
     }
     await cestPulisciFile(x, fatto.file);
+    _cestRicontaPallino();
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
     toast("Eliminato per sempre");
@@ -10654,6 +11301,7 @@
     if(error){toast("Errore: "+error.message);return;}
     if(!data||!data.length){toast("Non eliminato: nessuna riga trovata");return;}
     await cestPulisciFile(x);
+    _cestRicontaPallino();
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
     toast("Eliminato per sempre");
@@ -11008,16 +11656,61 @@
     if(v==null||v==="")return "";
     const n=+v;
     if(!isFinite(n))return "";
-    return String(n).replace(".",",");
+    /* 13 agosto 2026 — via la CODA della virgola mobile, non i decimali veri.
+       Prima usciva il numero cosi' com'era e una somma si portava dietro la
+       coda: 0,1 + 0,2 finiva nella casella come "0,30000000000000004", con la
+       riga sotto che diceva "0,3 h". Diciotto cifre in una casella, e due
+       numeri diversi per la stessa cosa nella stessa schermata.
+       ⚠️ Il primo tentativo arrotondava al CENTESIMO, e quello era peggio del
+       male: le quantita' sono numeric(12,3) (metri quadri, metri cubi, ore),
+       quindi 12,345 diventava 12,35 solo ad APRIRE la fattura, e risalvando si
+       fissava — su 100 € a unita' sono 50 centesimi di documento cambiati
+       senza toccare niente. Sei decimali tolgono la coda binaria e non
+       toccano nessun dato vero: le colonne piu' fini che abbiamo sono a
+       quattro (i prezzi dei prezzari). */
+    return String(Math.round(n*1e6)/1e6).replace(".",",");
   }
-  /* un PREZZO si scrive sempre con due decimali: 18,50 e non 18,5.
-     _misTesto taglia gli zeri in coda — giusto per una misura, sbagliato qui. */
-  function _prezzoTesto(v){ return (+v||0).toFixed(2).replace(".",","); }
+  /* un PREZZO si scrive sempre con ALMENO due decimali: 18,50 e non 18,5.
+     _misTesto taglia gli zeri in coda — giusto per una misura, sbagliato qui.
+     13 agosto 2026 — ma "almeno due", non "esattamente due": questa funzione
+     riempie anche le caselle del Computo e del Prezzario, dove la colonna e'
+     numeric(14,4) perche' i prezzari regionali i quattro decimali li usano.
+     Con toFixed(2) bastava aprire una voce da 12,3456 e risalvarla per
+     ritrovarsela a 12,35, senza aver toccato niente. */
+  function _prezzoTesto(v){
+    const n=Math.round((+v||0)*1e4)/1e4;
+    let t=n.toFixed(4);
+    while(t.endsWith("0")&&t.charAt(t.length-3)!==".")t=t.slice(0,-1);
+    return t.replace(".",",");
+  }
   /* le misure si rileggono con la virgola e SEMPRE con due decimali: in un
      computo si scrive 3,20 e non 3,2, come su carta. Il terzo decimale compare
      solo se serve davvero (1,255), perche' in cantiere si misura al millimetro.
      Prima tagliava tutti gli zeri in coda e usciva "lung. 3,2". */
   function _misTesto(v){
+    /* 13 agosto 2026 — il minimo restano DUE decimali (3,20 e non 3,2), ma il
+       massimo non e' piu' tre: questa funzione riempie anche la casella della
+       quantita' di una voce di computo, e gest_computo_voci.quantita e'
+       numeric(16,5) — la colonna piu' fine di tutto il gestionale. Con tre
+       decimali fissi bastava aprire una voce da 0,44825 e risalvarla per
+       ritrovarsela a 0,448, senza aver toccato niente. */
+    const n=Math.round((+v||0)*1e5)/1e5;
+    let s=n.toFixed(5);
+    while(s.endsWith("0")&&s.charAt(s.length-3)!==".")s=s.slice(0,-1);
+    return s.replace(".",",");
+  }
+  /* La stessa misura, ma per le scritte che si LEGGONO e basta: tre decimali,
+     come si e' sempre visto. _misTesto ne tiene cinque perche' riempie anche la
+     casella della quantita' a corpo, dove i cinque servono per non perdere
+     niente riaprendo; ma nell'elenco delle misure il valore lo calcola il
+     database e nessuno lo riscrive, quindi le cifre in piu' sono solo rumore su
+     una schermata fatta per leggersi a colpo d'occhio — e la regola e' meno
+     confusione, non piu' precisione. */
+  function _misLetta(v){
+    /* identica alla _misTesto di prima, virgola per virgola: queste tre scritte
+       devono restare ESATTAMENTE come si sono sempre lette. Niente Math.round
+       davanti: cambierebbe i mezzi millimetri (6,7725 diventava 6,772 e non
+       6,773), e qui non sto correggendo niente, sto solo non cambiando. */
     const n=+v||0;
     let s=n.toFixed(3);
     if(s.charAt(s.length-1)==="0")s=s.slice(0,-1);
@@ -11149,7 +11842,7 @@
     };
     const rigaVoce=(v,i,tot)=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
       +'<span>'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
-      +  '<small class="sp-forn">'+_misTesto(v.quantita)+(v.unita?" "+esc(v.unita):"")
+      +  '<small class="sp-forn">'+_misLetta(v.quantita)+(v.unita?" "+esc(v.unita):"")
       +    ' × '+eur2(v.prezzo_unitario)
       +    (v.quantita_manuale?' · a corpo':(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
       +  '</small></span>'
@@ -11655,7 +12348,7 @@
         +'<small class="sp-forn">'+_partiTesto(m.parti)+(((m.parti==null?1:+m.parti)===1)?" parte":" parti")
         + pezzo(m.lunghezza,"× lung.")+pezzo(m.larghezza,"× larg.")+pezzo(m.altezza,"× alt.")
         +'</small></span>'
-      +'<b'+(m.detrai?' style="color:var(--err,#c0392b)"':'')+'>'+_misTesto(m.quantita)+'</b>'
+      +'<b'+(m.detrai?' style="color:var(--err,#c0392b)"':'')+'>'+_misLetta(m.quantita)+'</b>'
       +'<button type="button" class="rdel" data-action="comp-mis-del" data-id="'+esc(String(m.id))+'" title="Elimina la misura">×</button></div>'
     ).join(""):'<p class="fatt-empty">Nessuna misura: la quantità è zero.</p>';
 
@@ -11669,7 +12362,7 @@
     if(compMisEditId&&!inCorr)compMisEditId=null;   /* cancellata da un'altra parte */
     const _v=(x)=>x==null?"":esc(_misTesto(x));
     box.innerHTML=righe
-      +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misTesto(tot)+'</b><span></span></div>'
+      +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misLetta(tot)+'</b><span></span></div>'
       +'<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
       +  (inCorr?'<div class="sh-tit" style="margin-bottom:8px">Stai correggendo «'+esc(inCorr.descrizione||"(senza nome)")+'»</div>':'')
       +  '<div class="field"><label>Che cosa stai misurando</label><input id="cm-desc"'+_noAuto()+' value="'+(inCorr?esc(inCorr.descrizione||""):"")+'" placeholder="Es. tramezzo cucina, porta da detrarre"></div>'
