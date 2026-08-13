@@ -6725,6 +6725,26 @@
       if(!okJob||!okJob.length){toast("Non salvato: nessuna riga modificata. Riprova.");return;}
       /* segnata emessa o pagata: è questo il momento in cui la fattura prende il numero */
       /* il numero di fattura lo assegna la fattura quando la emetti, non il lavoro */
+      /* ===== 13 agosto 2026 — LE FOTO CHE SI PERDEVANO NEL SALVATAGGIO =====
+         Questo giro non guardava NIENTE: ne' se il file era davvero salito,
+         ne' se la riga era stata scritta. E in fondo metteva comunque
+         `f.uploaded=true`. Provato ritagliando questo pezzo e facendolo
+         girare (nuove/salvalavoro-foto.js), succedeva questo:
+
+         · caricamento fallito (poco campo in cantiere) -> si scriveva lo
+           stesso la riga, che puntava a un file MAI SALITO: nel gestionale
+           compariva una foto che non si apre. La foto vera restava solo nel
+           telefono e, marcata «gia' caricata», non si riprovava MAI PIU'.
+         · riga rifiutata -> il file restava nel deposito senza niente che lo
+           nominasse, e anche li' marcata «gia' caricata».
+         · in tutti e due i casi, nessun avviso: il messaggio diceva
+           «Lavoro aggiornato ✔».
+
+         Adesso: se il file non sale non si scrive la riga; se la riga non si
+         scrive si toglie il file; si marca «caricata» SOLO quando sono andate
+         bene tutte e due; e alla fine si dice quante sono rimaste indietro,
+         perche' quelle si riproveranno al prossimo salvataggio. */
+      let fotoKo=0;
       for(const f of (editing.foto||[])){
         if(f.uploaded) continue;
         try{
@@ -6732,14 +6752,19 @@
           if(!dataURL)continue;
           const blob=await (await fetch(dataURL)).blob();
           const path=sbUid+"/"+editing.realId+"/"+Date.now()+"_"+f.id+".jpg";
-          await sb.storage.from("gestionale-foto").upload(path,blob);
+          const {error:up}=await sb.storage.from("gestionale-foto").upload(path,blob);
+          if(up){fotoKo++;continue;}
           const tipoMap=f.tipo==="prima"?"da_fare":(f.tipo==="dopo"?"fatto":f.tipo);
-          await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:editing.realId,tipo:tipoMap,operatore:f.operatore||"Capo",storage_path:path});
+          const {error:ins}=await sb.from("gest_foto").insert({user_id:sbUid,lavoro_id:editing.realId,tipo:tipoMap,operatore:f.operatore||"Capo",storage_path:path});
+          if(ins){await _fileOrfano("gestionale-foto",path);fotoKo++;continue;}
           f.uploaded=true;
-        }catch(e){}
+        }catch(e){fotoKo++;}
       }
       closeSheet();renderAll();
-      toast(avvisoPratica2?"Aggiornato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":"Lavoro aggiornato ✔");
+      toast(fotoKo
+        ? (fotoKo===1?"Lavoro aggiornato, ma 1 foto non è salita: resta nel telefono e ci riprovo al prossimo salvataggio"
+                     :"Lavoro aggiornato, ma "+fotoKo+" foto non sono salite: restano nel telefono e ci riprovo al prossimo salvataggio")
+        : (avvisoPratica2?"Aggiornato, ma i dati della pratica NON sono salvati: manca la migrazione SQL":"Lavoro aggiornato ✔"));
       /* NIENTE proposta di scadenza qui: si chiede solo alla CREAZIONE.
          Prima si ripresentava a OGNI modifica, e rispondendo No tornava
          identica al salvataggio dopo, all'infinito. (9/8/2026) */
@@ -8157,9 +8182,19 @@
      le foto da telefono sono megabyte a ogni tentativo andato male, e nel
      deposito di Supabase lo spazio si paga.
      Adesso, appena si sa che la riga non c'e', il file si toglie. */
+  /* 13 agosto 2026 — prima questa funzione non guardava com'era andata.
+     Supabase non lancia mai su errore: risponde {error}. Quindi quel `catch`
+     non prendeva niente e, se la pulizia non riusciva (permesso sul deposito,
+     rete), il file restava li' e non lo sapeva nessuno — nemmeno il codice.
+     Adesso risponde: `true` se il file e' stato tolto davvero. Chi chiama puo'
+     dirlo, o almeno contarlo. */
   async function _fileOrfano(bucket,path){
-    if(!sb||!path)return;
-    try{ await sb.storage.from(bucket).remove([path]); }catch(e){}
+    if(!sb||!path)return false;
+    try{
+      const {error}=await sb.storage.from(bucket).remove([path]);
+      if(error){console.warn("[gestionale] file orfano NON tolto:",bucket,path,error.message);return false;}
+      return true;
+    }catch(e){console.warn("[gestionale] file orfano NON tolto:",bucket,path,e&&e.message);return false;}
   }
   /* Le firme durano un'ora: entro i 50 minuti si riusano invece di chiederne
      di nuove a ogni ridisegno. Cosi' cambiare filtro quattro volte non rifa'

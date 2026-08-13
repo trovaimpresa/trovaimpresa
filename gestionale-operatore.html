@@ -418,6 +418,24 @@ function applicaPermessi(){
     const cn=$("#carta-nessuna"); if(cn)cn.classList.add("hidden");
   }
 }
+/* ===== 13 agosto 2026 — I FILE CHE RESTAVANO NEL DEPOSITO =====
+   Nel pannello del titolare, da agosto, c'e' _fileOrfano: se la riga che
+   nomina un file non si scrive, il file caricato si toglie subito. Qui dentro
+   non c'era. E qui e' peggio che nel pannello: le foto le carica chi sta in
+   cantiere, spesso con poco campo, e ogni tentativo andato male lasciava
+   megabyte nel deposito che non nominava piu' nessuno — invisibili, e a
+   pagamento. Provato: 1 foto e 1 video rimasti dentro, con «Foto su, ma non
+   salvata» a schermo e zero pulizia.
+   Adesso appena si sa che la riga non c'e', il file si toglie. */
+async function _fileOrfano(bucket,path){
+  if(!sb||!path)return false;
+  try{
+    const {error}=await sb.storage.from(bucket).remove([path]);
+    if(error){console.warn("[operatore] file orfano NON tolto:",bucket,path,error.message);return false;}
+    return true;
+  }catch(e){console.warn("[operatore] file orfano NON tolto:",bucket,path,e&&e.message);return false;}
+}
+
 /* rete di sicurezza sulle AZIONI: anche se un pulsante restasse raggiungibile
    (schermo stretto, pagina rimasta aperta da prima), l'azione si ferma qui e
    dice perche'. Nascondere e basta non e' una risposta. */
@@ -635,8 +653,8 @@ async function uploadFatturaPdf(file){
   if(ins){
     /* la riga e' stata rifiutata: il file e' gia' salito e non lo collega piu'
        niente. Si toglie subito, se no resta nel deposito e non lo trova nessuno. */
-    try{ await sb.storage.from("gestionale-foto").remove([path]); }catch(_){}
-    toast("Fattura non salvata: "+ins.message);return;
+    await _fileOrfano("gestionale-foto",path);
+    toast("Fattura non salvata: "+ins.message+" — riprova");return;
   }
   toast("Fattura PDF caricata ✔");
   await loadFattPdf();renderFattureSezione();
@@ -760,7 +778,7 @@ $("#lv-file").onchange=async e=>{
   if(up){toast("Foto non caricata: "+up.message);}
   else{
     const {error:ins}=await sb.from("gest_foto").insert({user_id:MIO.impresaId,lavoro_id:curLavoro.id,tipo:"lavoro",operatore:MIO.nome,storage_path:path});
-    if(ins)toast("Foto su, ma non salvata: "+ins.message);
+    if(ins){await _fileOrfano("gestionale-foto",path);toast("Foto non salvata: "+ins.message+" — riprova");}
     else{toast("Foto aggiunta ✔");await caricaFoto(curLavoro.id);}
   }
   $("#btn-foto").disabled=false;$("#btn-foto").textContent="📷 Aggiungi foto";
@@ -801,7 +819,7 @@ $("#lv-video-file").onchange=async e=>{
   if(up){toast("Video non caricato: "+up.message);}
   else{
     const {error:ins}=await sb.from("gest_video").insert({user_id:MIO.impresaId,lavoro_id:curLavoro.id,tipo:"lavoro",operatore:MIO.nome,storage_path:path});
-    if(ins)toast("Video su, ma non salvato: "+ins.message);
+    if(ins){await _fileOrfano("gestionale-video",path);toast("Video non salvato: "+ins.message+" — riprova");}
     else{toast("Video aggiunto ✔");await caricaVideo(curLavoro.id);}
   }
   $("#btn-video").disabled=false;$("#btn-video").textContent="🎥 Aggiungi video (max 50 MB)";
