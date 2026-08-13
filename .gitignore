@@ -2,6 +2,10 @@
 .claude/
 setup-test-user.js
 
+# --- Attrezzi di prova di Claude: restano sul PC, non vanno pubblicati.
+#     Dentro ci sono i finti Supabase e le prove nel browser (12/8/2026). ---
+prove-claude/
+
 # --- Dipendenze e cache (NON vanno pubblicate) ---
 node_modules/
 __pycache__/
