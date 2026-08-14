@@ -5835,3 +5835,61 @@ che cambia i dati, e va chiesta prima, non fatta a sorpresa).
 ## DOVE SIAMO RIMASTI
 
 72 prove nel banco.
+
+---
+
+# 14 agosto 2026 (notte, 10) — L'ELENCO SI LEGGE, LE AZIONI STANNO DENTRO
+
+Alessio: «quello che non capisco e che non mi piace, e che **avevo già
+chiesto**, è che le funzioni modifica, elimina, rimuovi, copia devono stare
+dentro nelle funzioni, non fuori in anteprima. Perché sembra altro invece che
+la squadra».
+
+Aveva ragione, e l'aveva già detto. Con cinque pulsanti addosso a ogni riga
+— Modifica, Copia link, Invia su WhatsApp, Rimuovi accesso, Elimina — la
+Squadra non sembrava più l'elenco di chi lavora con te: sembrava un pannello
+di comandi. **Un elenco si legge**; le cose da fare si trovano dopo, quando
+sei entrato.
+
+## COSA CAMBIA
+
+L'anteprima adesso ha: **nome, stato, mansione, telefono** e la nota delle
+scadenze. Niente altro.
+
+Dentro la scheda, in fondo, c'è un blocco «Cosa puoi fare con …» con Copia
+link, Invia su WhatsApp, Rimuovi accesso ed Elimina. (Modifica non serve più
+come voce: la scheda **è** già aperta.)
+
+## LE TRE COSE CHE POTEVANO ROMPERSI, E CHE HO DOVUTO SISTEMARE
+
+1. **Il link d'invito non c'era, dentro la scheda.** «Copia link» e
+   «WhatsApp» vivevano sull'anteprima, dove il link era già calcolato da
+   `renderDip`. Dentro no: `dipCache` non teneva il `codice`. Adesso lo tiene,
+   e il link si ricostruisce lì.
+2. **«Rimuovi accesso» ed «Elimina» non chiudevano la scheda.** Da fuori non
+   serviva. Da dentro sì: se non si chiude, resti a guardare il modulo di una
+   persona che non c'è più — e premendo Salva la riscriveresti.
+3. **La riga vuota dei pulsanti.** Senza azioni, `schedaJob` stampava
+   comunque il contenitore: un gradino bianco in fondo a ogni scheda. Adesso
+   se non ci sono azioni non si stampa niente.
+
+## LA PROVA
+
+`nuove/scheda-si-apre-cliccando.py`, 7 controlli, e adesso pretende **tutte e
+due le cose**: che sull'elenco non ci sia **nessun** pulsante addosso alle
+schede, e che dentro ci siano **tutte e quattro** le azioni.
+
+Nei due versi: sul file di prima **6 problemi su 7**, sul corretto **0**.
+
+## ⚠️ DA RICORDARE
+
+Questa richiesta era già stata fatta e non era stata eseguita. Quando Alessio
+dice «avevo già chiesto», la cosa da fare non è spiegare: è farla, e
+controllare se la stessa cosa vale altrove. **Clienti** e **Computo** hanno
+ancora i pulsanti sull'anteprima — vanno guardati con lo stesso occhio, ma lì
+alcune scorciatoie (Scarica il PDF) forse servono davvero a colpo d'occhio, e
+va chiesto invece che deciso.
+
+## DOVE SIAMO RIMASTI
+
+72 prove nel banco, 0 rosse.

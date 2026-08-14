@@ -2318,9 +2318,12 @@
       <div class="job-top"><div class="job-cli">${o.titolo||""}</div>${o.destra||""}</div>
       ${meta.length?`<div class="job-meta">${meta.map(x=>`<span>${x}</span>`).join("")}</div>`:""}
       ${o.nota?`<div class="job-note">${o.nota}</div>`:""}
-      <div class="job-actions">${(o.azioni||[]).filter(x=>x&&!x.sep).map(a=>
-        `<button class="btn btn-sm ja${a.del?" btn-danger del":""}" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`
-      ).join("")}</div></div>`;
+      ${(() => { const az=(o.azioni||[]).filter(x=>x&&!x.sep);
+        /* senza azioni non si stampa la riga vuota: lascerebbe un gradino
+           bianco in fondo alla scheda */
+        return az.length?`<div class="job-actions">${az.map(a=>
+          `<button class="btn btn-sm ja${a.del?" btn-danger del":""}" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`
+        ).join("")}</div>`:""; })()}</div>`;
   }
   function tabVuotoCerca(q){
     /* il pulsante per togliere la ricerca: senza, chi cerca una cosa che non
@@ -4721,7 +4724,11 @@
     ]);
     const mB=Object.fromEntries((membri||[]).map(x=>[x.operatore_id,x]));
     /* dipCache alimenta il modulo di modifica: deve contenere tutti i campi della persona */
-    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return Object.assign({},o,{ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{}});});
+    /* 14 agosto notte: dentro dipCache entra anche il `codice` dell'invito.
+       Serve perche' «Copia link» e «Invia su WhatsApp» sono passati DENTRO la
+       scheda, e li' il link va ricostruito: prima stavano sull'anteprima, dove
+       il link era gia' calcolato. */
+    dipCache=(ops||[]).map(o=>{const inv=mB[o.id]||{};return Object.assign({},o,{ruolo:inv.ruolo||"operaio",permessi:inv.permessi||{},codice:inv.codice||""});});
     let L=(ops||[]).map(o=>{
       const inv=mB[o.id]||{}, dc=dipCache.find(d=>d.id===o.id)||{};
       const link=inviteLink(inv.codice||"");
@@ -4872,7 +4879,13 @@
       apri:{action:"sq-edit",data:{id:o.id}},
       destra:`<span class="stato ${o.attivo?"fatto":"bozza"}">${o.attivo?"Attivo":"Invitato"}</span>`,
       meta:[o.mansione?"👷 "+esc(o.mansione):"", o.telefono?"📞 "+esc(o.telefono):""],
-      nota, azioni:dipVoci(o)
+      nota
+      /* ⚠️ 14 agosto notte — NIENTE PULSANTI QUI SOPRA.
+         Modifica, Copia link, WhatsApp, Rimuovi accesso ed Elimina stanno
+         DENTRO la scheda, che adesso si apre cliccando. Con cinque pulsanti
+         addosso a ogni riga, la Squadra non sembrava piu' l'elenco di chi
+         lavora con te: sembrava un pannello di comandi. Un elenco si legge,
+         e le cose da fare si trovano dopo, quando sei entrato. */
     });
   }
   /* ===== 12 agosto 2026 (sera) — I PERMESSI ADESSO FANNO QUALCOSA =====
@@ -5051,6 +5064,19 @@ ${vecchi?`
           </div>
         </details>
       </div>
+
+      ${isNew?"":`
+      <div class="sh-b">
+        <div class="sh-tit">Cosa puoi fare con ${esc(op.nome||"questa persona")}</div>
+        <div class="sh-nota">Queste stavano sull'elenco, addosso a ogni riga. Sono qui perché l'elenco serve a leggere chi c'è, non a comandare.</div>
+        <div class="job-actions" style="margin-top:10px">
+          ${op.codice?`
+          <button class="btn btn-sm" data-action="sq-copy" data-link="${esc(inviteLink(op.codice))}">🔗 Copia link</button>
+          <button class="btn btn-sm" data-action="sq-wa" data-wa="${esc("https://wa.me/?text="+encodeURIComponent("Ciao! Ti ho aggiunto alla squadra. Apri questo link per collegarti: "+inviteLink(op.codice)))}">💬 Invia su WhatsApp</button>
+          <button class="btn btn-sm btn-danger del" data-action="sq-revoca" data-id="${esc(op.id||"")}" data-nome="${esc(op.nome||"")}">🚫 Rimuovi accesso</button>`:""}
+          <button class="btn btn-sm btn-danger del" data-action="sq-del" data-id="${esc(op.id||"")}">🗑 Elimina</button>
+        </div>
+      </div>`}
 
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
@@ -5324,6 +5350,10 @@ ${vecchi?`
             +"sua scheda e rimandale il link d'invito."));
       return;
     }
+    /* 14 agosto notte: «Elimina» adesso si preme anche DENTRO la scheda. Se
+       non si chiude, resti a guardare il modulo di una persona che non c'e'
+       piu' — e premendo Salva la riscriveresti. */
+    closeSheet();
     renderDip();
     rinfresca("riepilogo","agenda","squadra","scadenzario","galleria","lavori");
     toast(_cestOn()?"Persona messa nel Cestino ✔ — la rimetti a posto da lì":"Persona eliminata");
@@ -15117,7 +15147,7 @@ ${vecchi?`
       const {data:okRev,error}=await sb.from("gest_membri").update({stato:"revocato"}).eq("operatore_id",id).eq("impresa_id",sbUid).select("operatore_id");
       if(error){toast("Errore: "+error.message);return;}
       if(!okRev||!okRev.length){toast("Non rimosso: nessuna riga modificata. Riprova.");return;}
-      renderDip();toast("Accesso rimosso");return;
+      closeSheet();renderDip();toast("Accesso rimosso");return;
     }
     if(a==="sq-del")return dipElimina(id);
     if(a==="save-dip")return saveDip(id);
