@@ -5458,3 +5458,88 @@ prima **11 rossi su 12**, sul nuovo **0**.
 
 Resta la **c**: segnalazioni, messaggi di assistenza, e il resto del
 gestionale (le 18 prove «da capire», il Computo, le letture).
+
+---
+
+# 14 agosto 2026 (notte, 5) — ⚠️ HO SBAGLIATO IL TIPO DI `impresa_id`
+
+## COSA AVEVO SBAGLIATO
+
+In `pagamenti` avevo fatto `impresa_id uuid`. Su TrovaImpresa **`imprese.id`
+è un NUMERO**: 67, 68, 69.
+
+Non l'ho scoperto rileggendo il codice. L'ho visto in uno schermo che Alessio
+ha mandato per un'altra ragione: la riga vera di `annunci_pubblicitari` aveva
+`impresa_id  67`.
+
+## PERCHÉ ERA GRAVE
+
+Non per l'errore in sé — per **come sarebbe fallito**.
+
+Al prossimo annuncio pagato il webhook avrebbe provato a infilare `67` in una
+colonna `uuid`, PostgreSQL avrebbe rifiutato, e l'incasso **non sarebbe stato
+registrato in silenzio**. In silenzio perché quel pezzo, per progetto, non
+blocca il cliente: l'annuncio si attiva regolarmente, la pagina risponde
+`200`, e la riga non c'è. Tutto sembra funzionare.
+
+È lo stesso schema del difetto che stavamo tappando: un numero che manca e
+sembra giusto.
+
+E il file di recupero dell'annuncio avrebbe dato errore.
+
+## LA CORREZIONE — `sql/pagamenti-impresa-id.sql`
+
+`impresa_id` diventa **testo**. Non «numero»: qui dentro è solo un
+riferimento per ritrovare le cose, non una chiave su cui il database deve
+ragionare (nessun collegamento, apposta). Come testo ci sta il numero di oggi
+e ci starebbe un uuid domani.
+
+## ⚠️ E LA TRAPPOLA DENTRO LA CORREZIONE
+
+Cambiando il tipo di un parametro, `create or replace function` **non
+sostituisce niente: crea una SECONDA funzione** con lo stesso nome.
+Resterebbero tutte e due — e quella nuova nascerebbe **eseguibile da
+chiunque**, perché il `revoke` valeva solo per la vecchia. Cioè: un utente
+qualsiasi del sito potrebbe scriversi incassi finti.
+
+Quindi il file fa `drop function` con la firma vecchia, e la verifica in
+fondo pretende «una sola».
+
+## LE PROVE
+
+Riprodotto su PostgreSQL 16 prima di correggere:
+`ERROR: invalid input syntax for type uuid: "67"`.
+
+Controlli nuovi in tutti e due i collaudi:
+- `pagamenti-collaudo.sh` → 12 controlli. Sullo schema sbagliato: **4 problemi**.
+- `pagamenti-webhook.js` → 16 controlli. Sui file di prima: **10 problemi**.
+
+Il secondo controlla anche il caso in cui Stripe mandasse l'id come numero
+invece che come stringa.
+
+## LA LEZIONE — LA DICIOTTESIMA, E DIVERSA DALLE ALTRE
+
+Le altre diciassette erano prove che dicevano il falso. **Questa era un mio
+errore vero, che nessuna delle mie prove poteva trovare**: il banco gira su
+uno schema che scrivo io, e io lo scrivevo sbagliato allo stesso modo in
+tutti e due i posti. Verde da una parte, verde dall'altra, e il difetto in
+mezzo.
+
+Quello che l'ha trovato è stato guardare **un dato vero**. Quando una tabella
+del sito non sta in nessun file `sql/` (`imprese` è una di quelle — sta
+scritto qui sopra dal 14 agosto), il suo schema io non lo so: lo immagino. E
+immaginare, su una colonna che tocca i soldi, non basta.
+
+**Regola nuova:** prima di scrivere una colonna che punta a una tabella che
+non ho in `sql/`, farmi mandare una riga vera.
+
+## COSA DEVE FARE ALESSIO
+
+1. La query `sql/pagamenti-impresa-id.sql`.
+2. Il push.
+3. Poi si torna al recupero dell'annuncio.
+
+## DOVE SIAMO RIMASTI
+
+69 prove nel banco, 0 rosse (i controlli sono saliti da 24 a 28 fra le due
+prove dei pagamenti).

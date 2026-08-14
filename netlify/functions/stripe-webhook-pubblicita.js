@@ -58,7 +58,14 @@ exports.handler = async (event) => {
           p_centesimi:   session.amount_total,
           p_riferimento: session.id,
           p_email:       (session.customer_details && session.customer_details.email) || null,
-          p_impresa_id:  (session.metadata && session.metadata.impresa_id) || null,
+          // ⚠️ String(): su TrovaImpresa `imprese.id` e' un NUMERO (67, 68...),
+          // non un uuid, e la colonna e' testo. Mandarlo cosi' com'e' arriva
+          // dai metadata di Stripe (che e' gia' una stringa) va bene, ma se
+          // un domani arrivasse come numero PostgreSQL rifiuterebbe la riga —
+          // e l'incasso non verrebbe registrato IN SILENZIO, perche' questo
+          // pezzo per progetto non blocca il cliente.
+          p_impresa_id:  (session.metadata && session.metadata.impresa_id != null)
+                           ? String(session.metadata.impresa_id) : null,
           p_valuta:      session.currency || 'eur',
           p_tipo_evento: stripeEvent.type,
           p_quando:      stripeEvent.created

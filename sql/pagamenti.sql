@@ -50,7 +50,14 @@ create table if not exists public.pagamenti (
   -- dell'anno diventerebbe più BASSO continuando a sembrare giusto.
   -- Sono numeri che restano solo se nessuno li tiene per mano.
   user_id       uuid,
-  impresa_id    uuid,
+
+  -- ⚠️ TESTO, non uuid. Su TrovaImpresa `imprese.id` e' un NUMERO (67, 68,
+  -- ...), non un uuid: l'ho scoperto guardando una riga vera di
+  -- annunci_pubblicitari, dopo aver scritto questa tabella. Tenerlo come
+  -- testo vuol dire che ci sta qualunque forma abbia oggi e qualunque
+  -- forma prenda domani — e qui dentro e' solo un riferimento per
+  -- ritrovare le cose, non una chiave su cui il database deve ragionare.
+  impresa_id    text,
 
   -- l'email con cui ha pagato: nei webhook di Stripe è l'UNICA cosa che
   -- collega il pagamento alla persona (il cliente viene ritrovato per
@@ -119,7 +126,7 @@ create or replace function public.registra_pagamento(
   p_riferimento  text,
   p_email        text        default null,
   p_user_id      uuid        default null,
-  p_impresa_id   uuid        default null,
+  p_impresa_id   text        default null,
   p_valuta       text        default 'eur',
   p_tipo_evento  text        default null,
   p_quando       timestamptz default null
@@ -161,9 +168,9 @@ $$;
 -- la contabilità. È la stessa riga che sta sotto `add_credits_pack`, dove
 -- c'era scritto «senza questo revoke un utente si autoricarica crediti».
 revoke all on function public.registra_pagamento(
-  text, integer, text, text, uuid, uuid, text, text, timestamptz) from public, anon, authenticated;
+  text, integer, text, text, uuid, text, text, text, timestamptz) from public, anon, authenticated;
 grant execute on function public.registra_pagamento(
-  text, integer, text, text, uuid, uuid, text, text, timestamptz) to service_role;
+  text, integer, text, text, uuid, text, text, text, timestamptz) to service_role;
 
 -- ---------------------------------------------------------------------
 -- VERIFICA — deve dire «chiusa» e «solo il server»
@@ -174,9 +181,9 @@ select
        then 'ATTENZIONE: si legge dal browser'
        else 'chiusa' end                                        as tabella,
   case when has_function_privilege('anon',
-              'public.registra_pagamento(text,integer,text,text,uuid,uuid,text,text,timestamptz)','EXECUTE')
+              'public.registra_pagamento(text,integer,text,text,uuid,text,text,text,timestamptz)','EXECUTE')
          or has_function_privilege('authenticated',
-              'public.registra_pagamento(text,integer,text,text,uuid,uuid,text,text,timestamptz)','EXECUTE')
+              'public.registra_pagamento(text,integer,text,text,uuid,text,text,text,timestamptz)','EXECUTE')
        then 'ATTENZIONE: chiunque puo- scriversi incassi finti'
        else 'solo il server' end                                as chi_puo_scrivere,
   (select count(*) from public.pagamenti)                       as pagamenti_registrati,

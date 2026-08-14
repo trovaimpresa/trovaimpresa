@@ -84,7 +84,7 @@ begin
     p_centesimi   => v_centesimi,
     p_riferimento => v_sessione,
     p_email       => null,
-    p_impresa_id  => v_ann.impresa_id,
+    p_impresa_id  => v_ann.impresa_id::text,   -- ⚠️ ::text — imprese.id e' un numero, non un uuid
     p_valuta      => 'eur',
     p_tipo_evento => 'recuperato-a-mano-14ago2026',
     p_quando      => null
