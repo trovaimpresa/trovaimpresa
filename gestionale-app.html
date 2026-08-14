@@ -3112,7 +3112,7 @@
     return '<div class="fatt-riga" data-riga>'
       + '<input class="fr-desc" placeholder="Descrizione voce" value="'+esc(r.descrizione||"")+'">'
       + '<input class="fr-qta" type="text" inputmode="decimal" placeholder="Q.tà" value="'+_numTesto(r.qta!=null?r.qta:1)+'">'
-      + '<input class="fr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="'+_numTesto(r.prezzo)+'">'
+      + '<input class="fr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="'+_prezzoCasella(r.prezzo)+'">'
       + '<select class="fr-iva"'+(fattForfettario()?' style="display:none"':'')+'>'+opts+'</select>'
       + '<button type="button" class="rdel" data-action="fatt-riga-del">×</button></div>';
   }
@@ -3163,7 +3163,7 @@
       + ((b.cassa||b.spese||b.speseIva||b.sconto)?'<div class="fs-r"><span>'+((b.spese&&b.art15)?'Totale imponibile':'Imponibile IVA')+'</span><b>'+eur2(b.imponibile)+'</b></div>':"")
       + (forf?"":'<div class="fs-r"><span>IVA</span><b>'+eur2(b.iva)+'</b></div>')
       + (f.bollo?'<div class="fs-r"><span>Bollo</span><b>'+eur2(f.bollo)+'</b></div>':"")
-      + (ritE   ?'<div class="fs-r"><span>Ritenuta '+f.ritenuta_perc+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
+      + (ritE   ?'<div class="fs-r"><span>Ritenuta '+_pct(f.ritenuta_perc)+'%</span><b>−'+eur2(ritE)+'</b></div>':"")
       + '<div class="fs-r fs-tot"><span>'+(ritE?"Totale fattura":"Totale")+'</span><b>'+eur2(tot)+'</b></div>'
       + (ritE?'<div class="fs-r fs-tot"><span>Netto a pagare</span><b>'+eur2(netto)+'</b></div>':"");
     return tot;
@@ -3786,7 +3786,7 @@
       doc.text(lines,M+2,y+5.5);
       doc.text(String(+r.qta||0).replace(".",","),colQ,y+5.5,{align:"right"});
       doc.text(eurPdf(r.prezzo),colP,y+5.5,{align:"right"});
-      if(!forf)doc.text(al+"%",colI,y+5.5,{align:"right"});
+      if(!forf)doc.text(_pct(al)+"%",colI,y+5.5,{align:"right"});
       doc.text(eurPdf(imp),colT-2,y+5.5,{align:"right"});
       y+=h;
     });
@@ -3841,7 +3841,7 @@
        "Imponibile" e il cliente non capiva da dove usciva il totale. */
     if(_extra){
       riga(ruoloUtente==='professionista'?"Compenso":"Imponibile voci",eurPdf(c.compenso));
-      if(c.cassa)riga("Cassa previdenziale "+(+f.cassa_perc||0)+"%",eurPdf(c.cassa));
+      if(c.cassa)riga("Cassa previdenziale "+_pct(f.cassa_perc)+"%",eurPdf(c.cassa));
       if(c.speseIva)riga("Rimborso spese",eurPdf(c.speseIva));
       /* le spese anticipate vanno scritte per quello che sono: il cliente deve
          capire perche' su quei soldi non c'e' l'IVA */
@@ -3853,7 +3853,7 @@
     riga((c.spese&&c.art15)?"Totale imponibile":("Imponibile"+(_extra?" IVA":"")),eurPdf(c.imponibile));
     if(!forf)riga("IVA",eurPdf(c.iva));
     if(+f.bollo)riga("Imposta di bollo",eurPdf(f.bollo));
-    if(c.ritenuta)riga("Ritenuta d'acconto "+(+f.ritenuta_perc)+"%","-"+eurPdf(c.ritenuta));
+    if(c.ritenuta)riga("Ritenuta d'acconto "+_pct(f.ritenuta_perc)+"%","-"+eurPdf(c.ritenuta));
     doc.setDrawColor(11,75,196);doc.setLineWidth(.4);
     doc.rect(Rx-72,y-2,72,11);doc.setLineWidth(.2);
     y+=6;riga("TOTALE",eurPdf(c.totale),true);
@@ -4802,7 +4802,12 @@
     else if((on.calendario||on.foto||on.note)&&!on.lavori) t="Calendario, Foto e Note lavorano dentro la scheda di un lavoro: senza <b>Lavori</b> restano spente.";
     box.innerHTML=t;box.style.display=t?"":"none";
   }
+  /* la persona creata da un tentativo il cui invito non è partito: serve a
+     non doppiarla al secondo Aggiungi (vedi squadraAdd). Si azzera ogni
+     volta che si apre il modulo, così una scheda nuova riparte pulita. */
+  let _sqOpAppenaCreato=null;
   function squadraForm(op){
+    _sqOpAppenaCreato=null;
     const isNew=!op;op=op||{};
     const apriSic=dipAvvisi(op).length?" open":"";
     /* Modulo lungo -> finestra grande a due colonne, come lavoro e preventivo.
@@ -4925,11 +4930,35 @@
     if(!mestiere_id){toast("Apri un reparto prima di aggiungere una persona");return;}
     const _costoKo=dipCostoStorto(); if(_costoKo){toast(_costoKo);return;}
     const extra=dipCampiExtra();
-    const {data:op,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id,nome,telefono:telefono||null},extra)).select().single();
-    if(error){toast("Errore: "+error.message);return;}
+    /* ⚠️ I DOPPIONI QUANDO L'INVITO NON PARTE — 14 agosto 2026.
+       Qui si scrive in due tabelle: prima la persona (gest_operatori), poi
+       il suo invito (gest_membri). Se la seconda non riesce — la rete che
+       cade a metà, il caso di tutti i giorni in cantiere — la persona
+       resta scritta e la funzione esce con «Errore invito».
+       Chi legge quel messaggio ripreme Aggiungi, ed ecco il DOPPIONE:
+       riprodotto, due tentativi = due «Mario Bianchi» in squadra, uno dei
+       quali senza accesso. Poi bisogna capire quale eliminare.
+       Adesso la persona appena creata si tiene da parte: al secondo
+       tentativo non se ne fa un'altra, si riprova solo l'invito. */
+    let opId=_sqOpAppenaCreato;
+    if(!opId){
+      const {data:op,error}=await sb.from("gest_operatori").insert(Object.assign({user_id:sbUid,mestiere_id,nome,telefono:telefono||null},extra)).select().single();
+      if(error){toast("Errore: "+error.message);return;}
+      opId=op.id;
+      _sqOpAppenaCreato=opId;
+    }else{
+      /* la persona c'era già dal tentativo di prima: si aggiorna, se nel
+         frattempo ha corretto il nome o il telefono */
+      await sb.from("gest_operatori").update(Object.assign({nome,telefono:telefono||null},extra)).eq("id",opId).eq("user_id",sbUid);
+    }
     const codice=sbRand();
-    const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:op.id,codice,stato:"invitato",ruolo,permessi});
-    if(e2){toast("Errore invito: "+e2.message);return;}
+    const {error:e2}=await sb.from("gest_membri").insert({impresa_id:sbUid,operatore_id:opId,codice,stato:"invitato",ruolo,permessi});
+    if(e2){
+      toast("«"+nome+"» è salvata, ma l'invito non è partito: "+e2.message
+        +". Premi di nuovo Aggiungi per riprovare solo l'invito — la persona non viene doppiata.");
+      return;
+    }
+    _sqOpAppenaCreato=null;
     closeSheet();renderDip();toast("Persona aggiunta, invito creato ✔");
   }
   async function squadraSave(id){
@@ -9360,7 +9389,7 @@
     return `<div class="prev-riga" data-riga>
       <input class="pr-desc" placeholder="Descrizione voce" value="${esc(r.descrizione||"")}">
       <input class="pr-qta" type="text" inputmode="decimal" placeholder="Q.tà" value="${_numTesto(r.qta!=null?r.qta:1)}">
-      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="${_numTesto(r.prezzo)}">
+      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="${_prezzoCasella(r.prezzo)}">
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
   }
   function prevTotaleLive(){
@@ -9546,7 +9575,7 @@
     const tot=Math.round((imponibile+iva)*100)/100;
     const riga=(et,v)=>'<div style="display:flex;justify-content:space-between;gap:12px"><span>'+et+'</span><strong>'+eur2(v)+'</strong></div>';
     box.innerHTML = riga("Imponibile",imponibile)
-      + riga("IVA "+perc+"%",iva)
+      + riga("IVA "+_pct(perc)+"%",iva)
       + '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
       + '<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Totale per il cliente</strong></span><strong>'+eur2(tot)+'</strong></div>';
   }
@@ -9860,10 +9889,10 @@
       const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
       const righeTot=[["Compenso",cp.compenso,false]];
       if(cp.spese)   righeTot.push(["Spese (bolli, diritti)",cp.spese,false]);
-      if(cp.cassa)   righeTot.push(["Cassa previdenziale "+(+p.cassa_perc||0)+"%",cp.cassa,false]);
+      if(cp.cassa)   righeTot.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
       righeTot.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
-      if(cp.iva)     righeTot.push(["IVA "+(+p.iva_perc||0)+"%",cp.iva,false]);
-      if(cp.ritenuta)righeTot.push(["Ritenuta d'acconto "+(+p.ritenuta_perc||20)+"%",cp.ritenuta,true]);
+      if(cp.iva)     righeTot.push(["IVA "+_pct(p.iva_perc)+"%",cp.iva,false]);
+      if(cp.ritenuta)righeTot.push(["Ritenuta d'acconto "+_pct(p.ritenuta_perc!=null?p.ritenuta_perc:20)+"%",cp.ritenuta,true]);
       const hBox=righeTot.length*6+16;
       if(y+hBox>272){doc.addPage();y=20;}
       doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-90,y,90,hBox);doc.setLineWidth(.2);
@@ -9894,7 +9923,7 @@
       doc.setFont("helvetica","normal");doc.setFontSize(9.5);
       let ry=y+7;
       doc.text("Imponibile",R-88,ry);doc.text(eurPdf(tot),R-2,ry,{align:"right"});ry+=6;
-      if(perc){doc.text("IVA "+perc+"%",R-88,ry);doc.text(eurPdf(ivaVal),R-2,ry,{align:"right"});ry+=6;}
+      if(perc){doc.text("IVA "+_pct(perc)+"%",R-88,ry);doc.text(eurPdf(ivaVal),R-2,ry,{align:"right"});ry+=6;}
       doc.setDrawColor(31,111,92);doc.line(R-88,ry-3,R-2,ry-3);
       doc.setFont("helvetica","bold");doc.setFontSize(11.5);
       doc.text("TOTALE",R-88,ry+4);doc.text(eurPdf(finito),R-2,ry+4,{align:"right"});
@@ -10198,10 +10227,10 @@
     titoletto("Compenso");
     const vociC=[["Compenso",cp.compenso,false]];
     if(cp.spese)   vociC.push(["Spese (bolli, diritti)",cp.spese,false]);
-    if(cp.cassa)   vociC.push(["Cassa previdenziale "+(+p.cassa_perc||0)+"%",cp.cassa,false]);
+    if(cp.cassa)   vociC.push(["Cassa previdenziale "+_pct(p.cassa_perc)+"%",cp.cassa,false]);
     vociC.push([cp.spese?"Totale imponibile":"Imponibile IVA",cp.imponibile,false]);
-    if(cp.iva)     vociC.push(["IVA "+(+p.iva_perc||0)+"%",cp.iva,false]);
-    if(cp.ritenuta)vociC.push(["Ritenuta d'acconto "+(+p.ritenuta_perc||20)+"%",cp.ritenuta,true]);
+    if(cp.iva)     vociC.push(["IVA "+_pct(p.iva_perc)+"%",cp.iva,false]);
+    if(cp.ritenuta)vociC.push(["Ritenuta d'acconto "+_pct(p.ritenuta_perc!=null?p.ritenuta_perc:20)+"%",cp.ritenuta,true]);
     spazio(vociC.length*5.5+18);
     doc.setFont("helvetica","normal");doc.setFontSize(9.5);
     vociC.forEach(function(v){
@@ -10402,7 +10431,7 @@
       +'<div class="sh-tit">Il prezzo concordato</div>'
       +'<div class="prev-somma" style="text-align:left;line-height:1.9">'
       +  riga("Imponibile",imponibile)
-      +  (perc?riga("IVA "+perc+"%",ivaVal):"")
+      +  (perc?riga("IVA "+_pct(perc)+"%",ivaVal):"")
       +  '<div style="border-top:2px solid var(--blu,#0066ff);margin:6px 0"></div>'
       +  '<div style="display:flex;justify-content:space-between;gap:12px;font-size:17px"><span><strong>Totale</strong></span><strong>'+eur2(totale)+'</strong></div>'
       +'</div>'
@@ -10509,7 +10538,7 @@
 
     titoletto("Corrispettivo");
     const voci=[["Imponibile",imponibile]];
-    if(perc)voci.push(["IVA "+perc+"%",ivaVal]);
+    if(perc)voci.push(["IVA "+_pct(perc)+"%",ivaVal]);
     if(y+voci.length*5.5+18>272){doc.addPage();y=20;}
     doc.setFont("helvetica","normal");doc.setFontSize(9.5);
     voci.forEach(function(v){doc.text(v[0],M+2,y);doc.text(eurPdf(v[1]),R-2,y,{align:"right"});y+=5.5;});
@@ -11075,7 +11104,11 @@
        L'elenco e' lo stesso di REPARTO_CONTENUTO, scritto in un posto solo,
        cosi' cancellazione e ripristino non possono piu' scollarsi. */
     gest_mestieri : REPARTO_CONTENUTO.map(function(v){return [v[0],"mestiere_id",v[1],v[2]];}),
-    gest_fornitori:[["gest_fatture_fornitori","fornitore_id","fattura","fatture"]]
+    gest_fornitori:[["gest_fatture_fornitori","fornitore_id","fattura","fatture"]],
+    /* 14 agosto 2026 — le scadenze del mezzo (revisione, assicurazione,
+       bollo) vanno via con lui e tornano su con lui. Prima restavano vive
+       ad avvisare per un furgone gia' venduto. */
+    gest_mezzi    :[["gest_scadenze","mezzo_id","scadenza","scadenze"]]
   };
   const CEST_PADRE={
     gest_lavori           :["gest_mestieri","mestiere_id","reparto"],
@@ -11347,15 +11380,40 @@
     if(!data||!data.length){toast("Non ripristinato: nessuna riga trovata");return;}
     extra+=await cestFigli(x.tab,x.id,x.quando);
 
+    /* ⚠️ RIMETTERE A POSTO UNA PERSONA NON LE RIDAVA IL TELEFONO — 14/8/2026.
+       Eliminando una persona il gestionale le toglie l'accesso
+       (gest_membri.stato = 'revocato'): giusto, se no continuerebbe a entrare
+       da un elenco dove non compare più.
+       Ma «Rimetti a posto» rimetteva solo eliminato_il a null. Lo stato
+       restava 'revocato': la persona tornava in elenco, sembrava tutto a
+       posto, e la mattina dopo dal telefono non entrava. Il messaggio diceva
+       «Rimesso a posto ✔» e basta.
+       Riprodotto: nessuna scrittura su gest_membri, nessun avviso.
+       L'accesso NON si riaccende da soli — chi è stato eliminato può non
+       doverci più entrare — ma adesso si dice, con scritto cosa fare. */
+    let _avvisoAccesso="";
+    if(x.tab==="gest_operatori"){
+      try{
+        const rm=await sb.from("gest_membri").select("stato")
+          .eq("operatore_id",x.id).eq("impresa_id",sbUid).maybeSingle();
+        const st=rm&&rm.data&&rm.data.stato;
+        if(st==="revocato"){
+          _avvisoAccesso=" — ma dal telefono NON entra: quando l'hai eliminata "
+            +"le è stato tolto l'accesso. Apri la sua scheda e rimandale il link d'invito.";
+        }
+      }catch(e){}
+    }
+
     /* rimesso a posto un reparto o una pratica cambia mezzo gestionale:
        si ridisegna tutto invece di indovinare cosa è cambiato */
     _cestRicontaPallino();
     renderCestino();
     rinfresca("riepilogo","lavori","clienti","preventivi","fatture","scadenzario","mezzi","squadra","fornitori","galleria","report","carte","crediti","calendario");
     if(x.tab==="gest_mestieri"||(padreDaTirareSu&&x.padre.tab==="gest_mestieri"))renderLanding();
-    toast(!extra?"Rimesso a posto ✔"
+    toast((!extra?"Rimesso a posto ✔"
       :extra===1?"Rimesso a posto ✔ — e con lui anche 1 cosa che ci stava dentro"
-      :"Rimesso a posto ✔ — e con lui anche altre "+extra+" cose che ci stavano dentro");
+      :"Rimesso a posto ✔ — e con lui anche altre "+extra+" cose che ci stavano dentro")
+      +_avvisoAccesso);
   }
 
   /* ===== 9 agosto 2026 — ELIMINA PER SEMPRE, VERSIONE SICURA =====
@@ -11874,6 +11932,21 @@
     let t=n.toFixed(4);
     while(t.endsWith("0")&&t.charAt(t.length-3)!==".")t=t.slice(0,-1);
     return t.replace(".",",");
+  }
+  /* ⚠️ UN PREZZO SI SCRIVE CON DUE DECIMALI — 14 agosto 2026 (notte).
+     Le caselle del prezzo di riga (fatture e preventivi) usavano _numTesto,
+     che taglia gli zeri in coda: un prezzo di 18,50 € si rileggeva «18,5».
+     Sbagliato non e' il conto — il numero e' lo stesso — ma quello che si
+     legge: su un documento che va al cliente un prezzo si scrive sempre con
+     i centesimi, come su qualsiasi listino di questo mondo.
+     _prezzoTesto esiste dal 13 agosto apposta («almeno due decimali, ma non
+     esattamente due, che i prezzari regionali ne usano quattro»): qui non
+     veniva usata. E' la stessa storia del «1,00 parti» del Computo, al
+     contrario: la funzione giusta c'e', e nel posto sbagliato se ne usa
+     un'altra.
+     Il campo vuoto resta vuoto: «0,00» in una riga nuova sarebbe rumore. */
+  function _prezzoCasella(v){
+    return (v==null||v==="")?"":_prezzoTesto(v);
   }
   /* le misure si rileggono con la virgola e SEMPRE con due decimali: in un
      computo si scrive 3,20 e non 3,2, come su carta. Il terzo decimale compare
@@ -14657,11 +14730,26 @@
     if(a==="del-mezzo"){
       if(!sbUid){toast("Devi essere loggato");return;}
       const {count:usi}=await sb.from("gest_lavoro_mezzi").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("mezzo_id",id);
-      if(!gconfirm(usi?`Questo mezzo è collegato a ${usi} lavori. Eliminarlo comunque?`:"Eliminare questo mezzo?"))return;
+      /* ⚠️ LE SCADENZE DEL MEZZO BUTTATO — 14 agosto 2026.
+         gest_scadenze.mezzo_id ha «on delete cascade» nel database, ma col
+         Cestino quella catena NON scatta mai: eliminare scrive una data, non
+         cancella la riga. Risultato riprodotto: vendi il furgone, e il
+         gestionale continua a dirti «Revisione del furgone in scadenza» —
+         col nome del mezzo e tutto, come se niente fosse.
+         Si mettono via anche loro, come si fa già con le fatture del
+         fornitore. E tornano su insieme al mezzo, perché CEST_FIGLI adesso
+         sa che sono figlie sue. */
+      const {count:nSc}=await sb.from("gest_scadenze").select("id",{count:"exact",head:true}).eq("user_id",sbUid).eq("mezzo_id",id);
+      if(!gconfirm(
+          (usi?`Questo mezzo è collegato a ${usi} lavori. `:"")
+          +(nSc?`Ha ${nSc} ${nSc===1?"scadenza":"scadenze"} (revisione, assicurazione, bollo…): ${nSc===1?"va":"vanno"} nel Cestino insieme a lui e ${nSc===1?"torna":"tornano"} se lo rimetti a posto.\n\n`:"")
+          +"Eliminare questo mezzo?"))return;
       const {data,error}=await sb.from("gest_mezzi").delete().eq("id",id).eq("user_id",sbUid).select("id");
       if(error){toast("Errore: "+error.message);return;}
       if(!data||!data.length){toast("Non eliminato: nessuna riga rimossa");return;}
-      renderMezzi();renderAttrezzature();renderScadenze();toast("Eliminato");return;
+      try{ await sb.from("gest_scadenze").delete().eq("mezzo_id",id).eq("user_id",sbUid); }catch(e){}
+      renderMezzi();renderAttrezzature();renderScadenze();
+      toast(nSc?("Eliminato — con "+nSc+(nSc===1?" scadenza":" scadenze")):"Eliminato");return;
     }
     if(a==="new-carta")return cartaForm(null);
     if(a==="edit-carta")return cartaForm(carteCache.find(c=>String(c.id)===String(id)));

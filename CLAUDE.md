@@ -4609,3 +4609,135 @@ prezzario regionale, i capitoli che il preventivo perde per strada.
 *5. Le regole del deposito dei file* (bucket foto e video).
 
 *6. `gestionale-negozio.html` e `gestionale-noleggio.html`*, separatamente.
+
+---
+
+# 14 agosto 2026 (notte, 2) — RISCHIO DATI E RISCHIO CONTI: I CINQUE CHE ERANO SOLO SOSPETTI
+
+I tre «che fanno perdere roba» e i due «che fanno sbagliare i conti» erano in
+lista dal **13 agosto mattina** come *letti nel codice, non riprodotti*.
+Riprodotti tutti e cinque. **Nessuno era un falso allarme.**
+
+Il banco passa a **60 prove nel giro normale**.
+
+## RISCHIO DATI
+
+### 1. Il furgone venduto che continua ad avvisare
+
+`gest_scadenze.mezzo_id` ha `on delete cascade` nel database, ma col Cestino
+quella catena **non scatta mai**: eliminare scrive `eliminato_il`, non cancella
+la riga. Riprodotto: eliminato il mezzo, lo Scadenzario diceva ancora
+«Revisione del furgone — 01/09/2026», col nome del mezzo e tutto.
+
+Adesso le scadenze vanno nel Cestino **insieme al mezzo**, e tornano su con lui
+(`CEST_FIGLI.gest_mezzi`). Prima di eliminare lo dice, coi numeri: «Ha 3
+scadenze: vanno nel Cestino insieme a lui e tornano se lo rimetti a posto».
+
+È lo stesso trattamento che il fornitore aveva già dal 12 agosto per le sue
+fatture. I mezzi erano rimasti fuori.
+
+⚠️ **Vale da adesso.** I mezzi eliminati prima hanno lasciato le scadenze vive:
+`prove-claude/query-scadenze-orfane-14ago.sql` dice se ce ne sono.
+
+### 2. La persona che torna dal Cestino ma dal telefono non entra
+
+Eliminando una persona il gestionale le toglie l'accesso
+(`gest_membri.stato='revocato'`) — giusto, se no continuerebbe a entrare da un
+elenco dove non compare più.
+
+Ma «Rimetti a posto» rimetteva **solo** `eliminato_il` a null. Lo stato restava
+`revocato`: la persona tornava in elenco, sembrava tutto a posto, e la mattina
+dopo l'operaio non entrava. Il messaggio diceva «Rimesso a posto ✔».
+Riprodotto: **zero scritture su `gest_membri`, nessun avviso.**
+
+L'accesso **non** si riaccende da solo — chi è stato eliminato può non doverci
+più entrare, e riaccenderlo di nascosto sarebbe peggio. Ma adesso si dice:
+«Rimesso a posto ✔ — ma dal telefono NON entra: apri la sua scheda e rimandale
+il link d'invito».
+
+### 3. Le persone doppie quando l'invito non parte
+
+`squadraAdd` scrive in due tabelle: prima la persona, poi il suo invito. Se la
+seconda fallisce — la rete che cade in cantiere — la persona resta scritta e la
+funzione esce con «Errore invito». Chi ripreme Aggiungi si ritrova **due Mario
+Bianchi**, uno senza accesso, e deve capire quale eliminare.
+Riprodotto: due tentativi, due persone.
+
+Adesso la persona appena creata si tiene da parte (`_sqOpAppenaCreato`): al
+secondo tentativo non se ne fa un'altra, si riprova **solo l'invito**, e il
+messaggio lo dice. Provato: due tentativi falliti = **una persona sola**.
+
+## RISCHIO CONTI
+
+### 4. «Cassa previdenziale 12.5%» — col punto
+
+Su fatture, parcelle e incarichi le percentuali finivano stampate **col punto**:
+cassa, ritenuta d'acconto, IVA, aliquota di riga. In Italia un numero si scrive
+con la virgola, e questi sono documenti che vanno al cliente e al
+commercialista. `_pct` esisteva già dal Computo: **quattordici punti** non la
+usavano.
+
+### 5. I prezzi a un decimale: «18,5» invece di «18,50»
+
+Le caselle del prezzo di riga (fatture e preventivi) usavano `_numTesto`, che
+taglia gli zeri in coda. Un prezzo di 18,50 € si rileggeva «18,5».
+
+Non sbaglia un conto: sbaglia quello che si legge. `_prezzoTesto` esiste dal 13
+agosto apposta — *«un prezzo si scrive sempre con ALMENO due decimali»* — e lì
+non veniva usata. **È la stessa storia del «1,00 parti» del Computo, al
+contrario:** la funzione giusta c'è, e nel posto sbagliato se ne usa un'altra.
+
+I quattro decimali dei prezzari regionali non si perdono (12,3456 resta
+12,3456), e una riga nuova resta **vuota**, non «0,00».
+
+## ⚠️ LA LEZIONE — QUATTRO VOLTE, TUTTE MIE
+
+1. **la prova del mezzo** partiva da un mezzo *già* cestinato con la scadenza
+   viva: restava rossa anche dopo la correzione, perché quella è la macerie
+   lasciata da prima e nessuna modifica al codice torna indietro a sistemarla.
+   Si prova l'**azione**, non lo stato;
+2. **la prova dei doppioni** faceva fallire la creazione della persona: il finto
+   server rispondeva `[]` e il `.select().single()` del gestionale andava in
+   errore **prima** di arrivare all'invito. Misurava il banco;
+3. e poi, sistemata quella, **contava le chiamate che il suo stesso
+   intercettatore rubava**: `«0 persone create»` mentre ne creava due.
+   **Verde falso**, il peggiore dei quattro;
+4. **la prova dei numeri** pretendeva la funzione nuova (`_prezzoCasella`) e sul
+   file di prima non partiva nemmeno — cioè taceva proprio dove il difetto
+   c'era. Adesso, se non la trova, usa quella vecchia e diventa rossa. E il
+   primo tentativo di sistemarla ha fatto tre rosse false sul file **corretto**,
+   perché `let _prezzoCasella` e `function _prezzoCasella` dentro `eval` si
+   pestano: si ritaglia come espressione.
+
+**Conto della giornata intera: 13 difetti veri nel gestionale, 8 falsi allarmi
+nelle prove.** La proporzione regge da tre giorni.
+
+## COSA DEVE FARE ALESSIO
+
+1. Il push.
+2. Lanciare `prove-claude/query-scadenze-orfane-14ago.sql` (guarda e basta):
+   se torna righe, sono scadenze di mezzi buttati prima di oggi.
+
+## DOVE SIAMO RIMASTI
+
+**Restano aperte:**
+
+*1. Il resto del Computo* — il quadro economico completo delle gare,
+l'importazione di un prezzario regionale, i capitoli che il preventivo perde.
+
+*2. Il resto dei 13 del 13 agosto*, quelli che restano:
+- «Ancora nessun reparto» quando il database non risponde (identico a quello che
+  vede un utente nuovo);
+- il messaggio di eliminazione persona conta le righe invece delle ore e non
+  conta le foto caricate dal telefono;
+- la Galleria lascia un'opzione vuota nella tendina;
+- il Riepilogo fa 25 letture in 6 ondate;
+- i 274 colpi del Cestino;
+- `gest_richieste` senza nessun file in `sql/`;
+- `sql/gestionale-mezzi.sql` non crea la colonna `tipo` che il codice usa.
+
+*3. Le 18 prove «da capire» del banco.*
+
+*4. Le regole del deposito dei file* (bucket foto e video).
+
+*5. `gestionale-negozio.html` e `gestionale-noleggio.html`*, separatamente.
