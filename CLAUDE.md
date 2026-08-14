@@ -5152,3 +5152,102 @@ solo sul database. Se domani serve rifarla, non c'è da dove.
 prima del 14 agosto non c'è, e non si può recuperare — è la ragione per cui
 questa era una cosa da fare subito e non «quando ci sarà tempo». Ogni giorno
 che passava era gente di cui non sapremo mai niente.
+
+---
+
+# 14 agosto 2026 (notte, 2) — I SOLDI CHE SPARIVANO
+
+Alessio: «ok partiamo da acquisti».
+
+## IL DIFETTO, RIPRODOTTO
+
+`ai_credit_purchases` era agganciata all'account con la cascata:
+
+    user_id uuid not null references auth.users(id) on delete cascade
+
+Quindi «annulla iscrizione» si portava via anche la ricevuta.
+
+Riprodotto su un **PostgreSQL 16 vero**
+(`prove-claude/banco/gest/nuove/soldi-che-spariscono.sql`): Tony compra 50 €
+a marzo e 20 a giugno, poi si cancella. La tabella resta a **0 righe e 0
+euro**. Con la correzione, gli stessi due acquisti restano e il totale
+continua a dire 70.
+
+Il danno non è perdere una riga: è che **il totale dell'anno diventa più
+basso e continua a sembrare giusto**. Non se ne accorge nessuno, mai.
+
+## LA CORREZIONE — `sql/acquisti-non-spariscono.sql`
+
+Via il vincolo con la cascata, e `user_id` può restare vuoto.
+
+Due cose fatte apposta:
+
+1. **Il nome del vincolo non è scritto a mano.** Su un database vero può
+   chiamarsi in tanti modi: la query lo *cerca* e toglie quello. Scriverlo a
+   mano voleva dire una query che dà errore da te e che io non posso provare.
+2. **`drop not null` su `user_id`.** Serve al caso in cui qualcuno chieda di
+   cancellare anche quel numero: si svuota il campo e **la riga contabile
+   resta**. Senza, quella richiesta non si potrebbe esaudire in nessun modo
+   se non buttando via la ricevuta. Quasi me lo dimenticavo: è entrato nel
+   collaudo come controllo a sé.
+
+## E IL DIRITTO DI SPARIRE
+
+Resta intero: **qui dentro non c'è il nome di nessuno.** Importo, data,
+riferimento Stripe. La divisione è questa — TrovaImpresa tiene i NUMERI,
+Stripe tiene CHI (ce l'ha già, e per legge lo tiene lui). Si risale da
+`payment_reference`.
+
+## IL COLLAUDO — `nuove/soldi-collaudo.sh`
+
+10 controlli su PostgreSQL 16 vero, con la query **vera** di `sql/`, non una
+copia. Il primo è il più importante: pretende che **sullo schema di prima la
+sparizione succeda davvero**. Se non succede, lo schema di partenza non è
+quello del sito e nemmeno i verdi che vengono dopo valgono niente.
+
+Controlla anche quello che **deve** continuare a sparire (i crediti ancora da
+spendere: quelli sono roba sua) e che la ricarica dopo un pagamento funzioni
+ancora, webhook doppio compreso.
+
+Nei due versi: senza la query **4 problemi su 10**, con la query **0**.
+
+## ⚠️ QUELLO CHE HO TROVATO CERCANDO — È PIÙ GROSSO
+
+Cercando altre strade dei soldi, letto `stripe-webhook-abbonamenti.js`. Fa
+questo, e solo questo:
+
+    imprese.piano = 'premium', premium_pagato = true
+    imprese.gestionale_attivo = true
+
+**Degli abbonamenti non esiste nessuna riga da nessuna parte.** Non è che
+sparisce con la cascata: non viene *mai scritta*. Niente importo, niente
+data, niente riferimento Stripe. Solo una spunta sul profilo.
+
+Vuol dire che **anche adesso, con la persona ancora iscritta**, dal database
+non si può sapere quando ha pagato, quanto, né quante volte ha rinnovato. E
+quando si cancella, sparisce pure la spunta.
+
+Stessa cosa in piccolo per la pubblicità: `annunci_pubblicitari` tiene
+`stato='pagato'` e `stripe_session_id`, ma **non il prezzo pagato** — viene
+ricalcolato ogni volta da un listino che può cambiare.
+
+Quindi: la tabella sistemata stanotte era **la più piccola delle tre**, ed
+era l'unica che almeno esisteva.
+
+⚠️ Il passato non si recupera in nessun caso: quei pagamenti non sono mai
+stati scritti. L'unica fonte è Stripe.
+
+## COSA DEVE FARE ALESSIO
+
+1. La query `sql/acquisti-non-spariscono.sql`.
+2. La query `prove-claude/query-dove-sono-i-soldi-14ago.sql` (guarda e basta):
+   dice quanto è grande il buco degli abbonamenti.
+3. Il push.
+
+## DOVE SIAMO RIMASTI
+
+66 prove nel banco, 0 rosse.
+
+Delle tre cose in sospeso ne resta una e mezza: **segnalazioni** e **messaggi
+di assistenza**. E se ne è aggiunta una più grande delle tre: **gli
+abbonamenti non lasciano traccia**.
