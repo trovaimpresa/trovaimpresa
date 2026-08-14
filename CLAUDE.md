@@ -5695,3 +5695,70 @@ due cose da guardare:
 ## DOVE SIAMO RIMASTI
 
 70 prove nel banco. Le «da capire» sono scese da **18 a 9**.
+
+---
+
+# 14 agosto 2026 (notte, 8) — IL COSTO ORARIO CHE SI RISCRIVE SOPRA
+
+## LA CAUSA, TROVATA
+
+Non era la casella: era **da dove si aprivano le schede**.
+
+`sq-edit` apriva la scheda con quello che c'era in `dipCache`. E `dipCache`
+si riempie **solo** quando la sezione Squadra viene ridisegnata. Il **render
+pigro** (nel clic sui tab) ridisegna una sezione solo se è segnata «da
+rifare» oppure se sta in `SEMPRE = [lavori, agenda, mappa, richieste, mezzi,
+attrezzature]`.
+
+**«squadra» non è in quella lista.** Quindi: entri in Squadra, esci, rientri
+— e i dati sono ancora quelli di quando sei entrato la prima volta.
+
+## PERCHÉ NON ERA COSMETICO
+
+Il salvataggio manda **tutti** i campi del modulo. Quindi:
+
+1. cambi il costo orario dal telefono → nel database c'è 25;
+2. sul computer la scheda è già caricata e mostra 18;
+3. correggi il numero di telefono e premi Aggiorna;
+4. parte un update con `costo_orario: 18`. **Il 25 è perso.**
+
+In silenzio, su un numero che entra nel margine di ogni lavoro. E vale per
+tutta la scheda: mansione, documenti, scadenze della visita medica.
+
+## LA CORREZIONE
+
+`squadraApri(id)`: prima di aprire, la persona si **rilegge dal database**.
+
+Perché così e non aggiungendo «squadra» a `SEMPRE`: quella strada rilegge
+tutta la squadra **più** i membri a ogni apertura della sezione — due letture
+ogni volta, e stanotte c'è una rete di sicurezza che tiene fermi i conti
+delle letture. Così invece è **una lettura sola, e solo quando apri davvero
+una scheda**.
+
+Se la rilettura non riesce (rete giù, in cantiere succede), la scheda si apre
+**lo stesso** — bloccarla sarebbe peggio — ma con un riquadro arancione che
+lo dice: «quello che vedi potrebbe essere vecchio, salvando riscriveresti
+sopra». Non si fa credere che quei numeri siano quelli veri.
+
+Anche il percorso dallo Scadenzario («scad-persona») passa adesso di lì: era
+la stessa scheda con lo stesso rischio.
+
+## LA PROVA — `nuove/costo-orario-vecchio.py`
+
+Non guarda solo la casella: guarda **cosa parte verso il database quando
+salvi**. Cambia solo il telefono, e pretende che l'update NON contenga il
+costo vecchio.
+
+Il cambio del dato si fa **sul server finto, non dentro la pagina**: se lo
+cambiassi dentro la pagina misurerei me stesso invece del gestionale.
+
+Nei due versi: sul file di prima **2 problemi su 3**, sul corretto **0**.
+
+## DOVE SIAMO RIMASTI
+
+71 prove nel banco. Le «da capire» restano 9 (persone e caselle).
+
+⚠️ Da guardare quando si torna lì: lo stesso **render pigro** vale per tutte
+le sezioni che non stanno in `SEMPRE`. Squadra era la più pericolosa perché
+il suo modulo riscrive tutto, ma la domanda «quale altra scheda si apre con
+dati vecchi e li risalva?» non è ancora stata fatta fino in fondo.

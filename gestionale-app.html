@@ -4904,7 +4904,54 @@
      non doppiarla al secondo Aggiungi (vedi squadraAdd). Si azzera ogni
      volta che si apre il modulo, così una scheda nuova riparte pulita. */
   let _sqOpAppenaCreato=null;
-  function squadraForm(op){
+  /* ============================================================
+     APRIRE LA SCHEDA DI UNA PERSONA — 14 agosto 2026 (notte)
+
+     ⚠️ Prima si apriva con quello che c'era in `dipCache`, e dipCache si
+     riempie SOLO quando la sezione Squadra viene ridisegnata. Il "render
+     pigro" (vedi il clic sui tab) ridisegna una sezione solo se è segnata
+     "da rifare": «squadra» non sta fra quelle che si rifanno sempre. Quindi
+     entri in Squadra una volta, esci, rientri — e i dati sono ancora quelli
+     di quando sei entrato la prima volta.
+
+     Il giro che fa male: cambi il costo orario dal telefono; sul computer la
+     scheda mostra ancora quello vecchio perché era già caricata; correggi il
+     numero di telefono e premi Aggiorna; e il costo vecchio SI RISCRIVE
+     SOPRA a quello nuovo. In silenzio — e il costo orario entra nel margine
+     di ogni lavoro.
+
+     Riprodotto il 14 agosto: nel database 18,125 e nella casella 35.
+
+     Adesso, prima di aprirla, la persona si rilegge dal database. È UNA
+     lettura sola, e solo quando apri davvero una scheda: non tocca il conto
+     delle letture all'ingresso nel reparto.
+
+     Se la rilettura non riesce (rete giù, in cantiere succede) la scheda si
+     apre lo stesso con quello che c'è — bloccarla sarebbe peggio — ma lo
+     DICE, invece di far credere che quei numeri siano quelli veri.
+     ============================================================ */
+  async function squadraApri(id){
+    const cache=(dipCache||[]).find(d=>String(d.id)===String(id));
+    if(!sb||!sbUid)return squadraForm(cache);
+    let fresco=null,guasto=false;
+    try{
+      const {data,error}=await sb.from("gest_operatori").select("*").eq("id",id).maybeSingle();
+      if(error)guasto=true;
+      else if(data)fresco=data;
+      else if(!cache){toast("Persona non trovata");return;}
+    }catch(e){guasto=true;}
+    if(fresco){
+      /* la cache tiene ruolo e permessi, che stanno su gest_membri e non
+         arrivano da questa lettura: si parte da quella e ci si sovrascrive
+         sopra quello appena letto. */
+      const i=(dipCache||[]).findIndex(d=>String(d.id)===String(id));
+      if(i>=0)dipCache[i]=Object.assign({},dipCache[i],fresco);
+    }
+    const op=fresco?Object.assign({},cache||{},fresco):cache;
+    if(!op){toast("Persona non trovata");return;}
+    squadraForm(op,guasto);
+  }
+  function squadraForm(op,vecchi){
     _sqOpAppenaCreato=null;
     const isNew=!op;op=op||{};
     const apriSic=dipAvvisi(op).length?" open":"";
@@ -4913,7 +4960,15 @@
        e l'anagrafica. Sotto i 900px torna una colonna sola. */
     openSheetGrande(isNew?"Nuova persona":"Modifica persona",
       `<div class="sh-cols"><div class="sh-col">
-
+${vecchi?`
+      <div class="sh-b" style="background:#fff4e5;border:2px solid #ffd9a0">
+        <div style="font-size:15px;line-height:1.6;color:#7a4b00">
+          <b>Non sono riuscito a rileggere questa persona.</b><br>
+          Quello che vedi qui sotto potrebbe essere vecchio: se qualcuno l'ha
+          cambiata da un altro telefono, salvando adesso riscriveresti sopra.
+          Se puoi, chiudi e riprova quando la connessione torna.
+        </div>
+      </div>`:""}
       <div class="sh-b">
         <div class="sh-tit">Chi \u00e8</div>
         <div class="field"><label>Nome</label><input id="d-nome" value="${esc(op.nome||"")}" placeholder="Es. Wahid"></div>
@@ -14963,11 +15018,10 @@
     if(a==="scad-vista"){scadVista=t.dataset.v;renderScadenze();return;}
     if(a==="scad-persona"){
       if(!sb||!sbUid){toast("Devi essere loggato");return;}
-      const inCache=dipCache.find(d=>String(d.id)===String(id));
-      if(inCache)return squadraForm(inCache);
-      const {data:p}=await sb.from("gest_operatori").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
-      if(p)return squadraForm(p);
-      toast("Persona non trovata");return;
+      /* 14 agosto notte: passa dalla stessa porta di «sq-edit», che rilegge.
+         Prima, se la persona era in cache, si apriva con i dati vecchi: e' la
+         stessa scheda e lo stesso rischio di riscrivere sopra. */
+      return squadraApri(id);
     }
     if(a==="edit-scad"){
       const inCache=scadCache.find(s=>String(s.id)===String(id));
@@ -15031,7 +15085,7 @@
     if(a==="del-scad"){if(!sbUid){toast("Devi essere loggato");return;}if(gconfirm("Eliminare questa scadenza?")){const {data:okDs,error}=await sb.from("gest_scadenze").delete().eq("id",id).eq("user_id",sbUid).select("id");if(error){toast("Errore: "+error.message);return;}if(!okDs||!okDs.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}renderScadenze();rinfresca("calendario","riepilogo");toast("Scadenza eliminata");}return;}
     if(a==="new-dip")return squadraForm();
     if(a==="sq-add")return squadraAdd();
-    if(a==="sq-edit")return squadraForm(dipCache.find(d=>d.id===id));
+    if(a==="sq-edit")return squadraApri(id);
     if(a==="sq-save")return squadraSave(id);
     if(a==="sq-copy"){copyLink(t.dataset.link);return;}
     if(a==="sq-wa"){window.open(t.dataset.wa,"_blank");return;}
