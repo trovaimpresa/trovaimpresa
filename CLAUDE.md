@@ -4995,3 +4995,160 @@ negozio e noleggio.
 **E la cosa vera:** il gestionale adesso si lascia usare in 6 tocchi. Perché
 qualcuno li faccia, serve che sappia che esiste — e quella non è una riga di
 codice.
+
+---
+
+# 14 agosto 2026 (notte) — CHI SE N'È ANDATO
+
+Alessio: «vorrei avere una funzione dove mi dice se qualcuno se n'è andato,
+ha fatto annulla iscrizione — e nello stesso momento controllare se funziona
+annulla iscrizione».
+
+Due domande in una frase, ed è giusto che stiano insieme: la seconda è la
+condizione della prima.
+
+## LA COSA DA CAPIRE PRIMA DI TUTTO
+
+La domanda «se n'è andato qualcuno?» oggi **non aveva risposta**. Non è che
+il pannello non la mostrava: il dato non esisteva proprio.
+
+`elimina-account.js` faceva una cosa sola — `auth.admin.deleteUser()` — e da
+quel momento non restava nessun posto dove fosse scritto che quella persona
+c'era. Contare gli iscritti non basta: un numero fermo può voler dire nessuno
+entrato e nessuno uscito, oppure tre entrati e tre usciti. Sono due mondi
+diversi e da fuori si vedono uguali.
+
+## PRIMA METÀ: «ANNULLA ISCRIZIONE» FUNZIONA?
+
+Verificato sul database vero, non letto:
+
+- tutte e **49** le tabelle agganciate all'account hanno la cascata
+  (`confdeltype = 'c'` su tutte, nessuna che blocca): chi chiede di essere
+  cancellato viene cancellato davvero, e la cancellazione non può fallire per
+  colpa di un vincolo;
+- **0 profili rimasti senza account** (71 profili, 72 account: il tuo in più);
+- `imprese` sparisce con l'utente.
+
+Quindi sì, funziona. Il problema era l'altro: non restava niente.
+
+## SECONDA METÀ: LA RIGA DI CONGEDO
+
+`sql/iscrizioni-annullate.sql` — una tabella sola, scritta e letta **solo dal
+server**: RLS accesa, nessuna policy, `revoke all ... from anon, authenticated`.
+Dentro ci sono le email di persone che hanno chiesto di essere cancellate: è
+la lista peggiore da far uscire.
+
+**La scelta più importante del file:** `user_id` NON ha `references auth.users`.
+Con il collegamento, la riga sparirebbe *nello stesso momento* in cui l'account
+viene eliminato — cioè la tabella fatta per ricordare chi se n'è andato si
+dimenticherebbe esattamente di chi se n'è andato. E non si vedrebbe mai:
+resterebbe lì, vuota, e sembrerebbe che non se ne sia andato nessuno.
+
+`elimina-account.js` adesso scrive quella riga **prima** di cancellare.
+
+## ⚠️ LA REGOLA CHE NON SI TOCCA
+
+**Se la scrittura della riga fallisce, la cancellazione si fa lo stesso.**
+
+Il diritto di una persona a sparire viene prima di qualsiasi statistica — e
+viene anche prima della legge, che su questo non lascia margini. Non si fa mai
+fallire una cancellazione per non aver potuto prendere nota: sarebbe come non
+lasciar disdire un abbonamento perché il registro è pieno.
+
+Sta scritto nel codice in maiuscolo, e la prova `nuove/annulla-iscrizione.js`
+rompe la scrittura in quattro modi diversi (database che rifiuta, tabella che
+non esiste, connessione che cade, profilo illeggibile) e pretende che
+l'account sparisca comunque. Quei quattro controlli sono verdi anche sul file
+di prima, ed è giusto: sono la rete, non la novità.
+
+## LA SCHERMATA — E LA BUGIA CHE POTEVA DIRE
+
+`admin.html` → **👋 Chi se n'è andato**. In cima cinque numeri, sotto
+l'elenco con filtri.
+
+Il rischio vero di questa schermata non è mostrare male i dati: è che una
+**lista vuota vuol dire due cose opposte**.
+
+1. *La tabella non è ancora stata creata* (la query non è stata lanciata).
+   Qui «non se n'è andato nessuno» sarebbe la bugia peggiore possibile: si
+   legge come una buona notizia mentre vuol dire che non stiamo registrando
+   niente. Adesso dice quale file eseguire.
+2. *La tabella c'è ed è vuota.* Qui «nessuno» è vero — ma va detto **da
+   quando**: chi se n'è andato prima del 14 agosto non c'è e non si recupera.
+
+`nuove/admin-abbandoni.py`, 12 controlli, prova tutte e tre le situazioni.
+Nei due versi: sul pannello di prima **11 rossi su 12**, sul nuovo **0**.
+
+Altre due cose corrette lungo la strada, trovate dalla prova:
+- `_abDurata(44)` diceva «1 mesi» — sbagliato in italiano, e buttava via
+  l'informazione che serve di più (fra 31 e 59 giorni la differenza è tutta).
+  I giorni adesso si tengono fino a due mesi;
+- `.admin-badge` era a `0.78rem` = **12,48 px**, sotto la soglia dei 13.
+
+Sul database non si dà mai indietro un numero solo dove serve capire: la
+durata è la **mediana**, non la media — un account durato tre anni sposterebbe
+la media e farebbe sembrare che durano tutti tanto.
+
+## LA DOMANDA DEL PERCHÉ
+
+`cancella-iscrizione.html`: una tendina facoltativa, e **si vede che lo è**
+(«se ti va — non è obbligatorio»). Chi vuole solo andarsene preme il pulsante
+rosso e non gli si chiede niente. Non è un ostacolo per farlo restare — quelli
+fanno arrabbiare e basta — è l'unica occasione in cui si può sapere cosa non
+ha funzionato: dopo non c'è più nessuno a cui chiederlo.
+
+## ⚠️ LA LEZIONE — DUE BUGIE, TUTTE E DUE MIE
+
+La prova del pannello ha dato **10 rossi su 12** su un pannello che
+funzionava. Due cause, tutte e due nella prova:
+
+1. **La pagina aperta da file://.** Ogni `fetch('/.netlify/functions/...')`
+   diventava `file:///.netlify/...`: non esiste, e Playwright non intercetta
+   il disco. Poi il CDN di Supabase non rispondeva, `window.supabase` restava
+   `undefined`, la riga `.createClient(...)` esplodeva e da lì in poi tutto il
+   blocco `<script>` non veniva più eseguito. Le funzioni restavano (si issano
+   prima), le `let` no: ecco da dove veniva «Cannot access '_abFiltro' before
+   initialization». Sembrava un errore di ordine nel mio codice. Non lo era.
+2. **L'ordine delle rotte.** La rotta specifica registrata **prima** di quella
+   generale: in Playwright vince l'**ultima**, quindi la generale se la
+   mangiava e la pagina riceveva sempre una lista vuota. Tutte e tre le
+   situazioni sembravano «non se n'è andato nessuno». *È la stessa trappola in
+   cui ero già cascato stamattina con le rotte rotte del gestionale.*
+
+E un **verde bugiardo**, che è peggio: il controllo «non dice che non se n'è
+andato nessuno» passava anche sul pannello di prima, dove la sezione non
+esiste proprio — casella assente, testo vuoto, «nessuno» non compare, verde.
+Una riga verde che sarebbe verde anche a pannello spento non dice niente.
+
+Sono quindici e sedici. La regola regge: **quattro volte su cinque, quando una
+prova dice il falso, il bugiardo è la prova.**
+
+## ⚠️ TRE COSE VISTE, NON ANCORA DECISE
+
+Guardando le 49 tabelle che spariscono con l'account, tre non dovrebbero:
+
+1. **`ai_credit_purchases`** — gli acquisti. Sono scritture contabili: chi ha
+   pagato ha pagato, e quella riga serve a te anche dopo. **Questa è quella
+   con dentro i soldi.**
+2. **`segnalazioni`** — spariscono insieme a chi ha segnalato. Se uno segnala
+   un annuncio e poi si cancella, la segnalazione svanisce anche se il
+   problema resta.
+3. **`supporto_messaggi`** — la conversazione di assistenza sparisce.
+
+Nessuna delle tre è stata toccata: vanno decise, non indovinate.
+
+E una quarta: **la tabella `imprese` non sta in nessun file `sql/`.** Esiste
+solo sul database. Se domani serve rifarla, non c'è da dove.
+
+## COSA DEVE FARE ALESSIO
+
+1. La query `sql/iscrizioni-annullate.sql` (una sola, tutta insieme).
+2. Il push.
+3. I clic scritti nella chat.
+
+## DOVE SIAMO RIMASTI
+
+65 prove nel banco, 0 rosse. La lista parte da adesso: chi se n'è andato
+prima del 14 agosto non c'è, e non si può recuperare — è la ragione per cui
+questa era una cosa da fare subito e non «quando ci sarà tempo». Ogni giorno
+che passava era gente di cui non sapremo mai niente.

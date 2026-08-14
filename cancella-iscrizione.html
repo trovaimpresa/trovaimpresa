@@ -106,6 +106,28 @@
         <div class="icon">⚠️</div>
         <h2>Sei sicuro?</h2>
         <p>Stai per eliminare definitivamente il tuo profilo. Questa azione <strong>non può essere annullata</strong>.</p>
+
+        <!-- 14 agosto 2026 — la domanda del perché.
+             FACOLTATIVA, e si vede che lo è: chi vuole solo andarsene preme
+             direttamente il pulsante rosso e non gli si chiede niente.
+             Non è un ostacolo per farlo restare — quelli fanno arrabbiare e
+             basta — è l'unica occasione in cui si può sapere cosa non ha
+             funzionato, e dopo non c'è più nessuno a cui chiederlo. -->
+        <div style="text-align:left;background:#f7f9fc;border:1px solid #dde3ea;border-radius:12px;padding:16px;margin:4px 0 20px">
+          <div style="font-weight:700;font-size:15px;color:#0a2a4d;margin-bottom:4px">Ci dici perché? <span style="font-weight:500;color:#5b6b80">(se ti va — non è obbligatorio)</span></div>
+          <div style="font-size:14px;color:#5b6b80;margin-bottom:12px">Serve solo a noi per capire cosa non ha funzionato. Puoi anche non rispondere e andare avanti.</div>
+          <select id="motivo" style="width:100%;padding:11px;font-size:15px;border:1px solid #cbd2da;border-radius:9px;background:#fff;font-family:inherit">
+            <option value="">— preferisco non dirlo —</option>
+            <option value="non-serve">Non mi serviva</option>
+            <option value="complicato">Troppo complicato</option>
+            <option value="nessun-lavoro">Non mi è arrivato lavoro</option>
+            <option value="costo">Costa troppo</option>
+            <option value="chiuso">Ho chiuso l'attività</option>
+            <option value="altro">Altro</option>
+          </select>
+          <textarea id="motivo-libero" rows="2" placeholder="Vuoi aggiungere qualcosa? (facoltativo)"
+            style="width:100%;margin-top:10px;padding:11px;font-size:15px;border:1px solid #cbd2da;border-radius:9px;font-family:inherit;resize:vertical"></textarea>
+        </div>
         <button class="btn-annulla" onclick="annulla()">No, annulla</button>
         <button class="btn-confirm" id="btn-confirm" onclick="cancellaIscrizione()">Sì, elimina tutto</button>
       </div>
@@ -173,7 +195,13 @@
         const res = await fetch('/.netlify/functions/elimina-account', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ access_token: accessToken })
+          // il motivo viaggia con la richiesta: e' l'ultimo momento in cui
+          // esiste ancora qualcuno da cui saperlo
+          body: JSON.stringify({
+            access_token:  accessToken,
+            motivo:        (document.getElementById('motivo') || {}).value || null,
+            motivo_libero: ((document.getElementById('motivo-libero') || {}).value || '').trim() || null
+          })
         });
 
         if (!res.ok) {

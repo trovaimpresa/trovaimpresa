@@ -126,7 +126,8 @@
   .topbar-right { display:flex; align-items:center; gap:12px; }
   .admin-badge {
     background:var(--verde3); color:var(--verde2);
-    padding:6px 14px; border-radius:20px; font-size:0.78rem; font-weight:700;
+    /* 0.78rem faceva 12,48 px: sotto la soglia dei 13. */
+    padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;
   }
 
   /* STAT CARDS */
@@ -446,6 +447,9 @@
       </div>
       <div class="nav-item" onclick="showSection('utilizzo',this)">
         <span class="nav-icon">📈</span> Chi usa il gestionale
+      </div>
+      <div class="nav-item" onclick="showSection('abbandoni',this)">
+        <span class="nav-icon">👋</span> Chi se n'è andato
       </div>
       <div class="nav-item" onclick="showSection('mie-viste',this)">
         <span class="nav-icon">🧭</span> Le mie viste
@@ -1138,6 +1142,29 @@
       </div>
     </div>
 
+    <!-- CHI SE N'È ANDATO — 14 agosto 2026.
+         Il dato non esisteva: «annulla iscrizione» cancellava l'account e
+         con lui spariva ogni traccia. Adesso, prima di cancellare, il
+         server scrive una riga in iscrizioni_annullate. Qui si legge. -->
+    <div class="section" id="sec-abbandoni">
+      <div class="topbar">
+        <div class="topbar-title">👋 Chi se n'è andato</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+      <div style="padding:18px">
+        <div class="u-numeri" id="ab-numeri"></div>
+        <div class="u-filtri">
+          <button class="u-btn attivo" data-af="tutti" onclick="filtraAbbandoni('tutti',this)">Tutti</button>
+          <button class="u-btn" data-af="30" onclick="filtraAbbandoni('30',this)">Ultimi 30 giorni</button>
+          <button class="u-btn" data-af="subito" onclick="filtraAbbandoni('subito',this)">Andati entro una settimana</button>
+          <button class="u-btn" data-af="premium" onclick="filtraAbbandoni('premium',this)">Erano Premium</button>
+          <button class="u-btn" data-af="motivo" onclick="filtraAbbandoni('motivo',this)">Hanno detto perché</button>
+          <button class="u-btn" onclick="caricaAbbandoni()">Aggiorna</button>
+        </div>
+        <div id="ab-lista"><div class="loading">Caricamento...</div></div>
+      </div>
+    </div>
+
     <!-- LE MIE VISTE — tutto quello che serve ad Alessio per provare il sito
          da un posto solo, senza account finti. -->
     <div class="section" id="sec-mie-viste">
@@ -1331,6 +1358,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'pubblicita-clienti') caricaPubblicitaClienti();
   if (id === 'mappa-spazi') caricaMappaSpazi();
   if (id === 'utilizzo') caricaUtilizzo();
+  if (id === 'abbandoni') caricaAbbandoni();
   if (id === 'richieste') caricaRichieste();
   if (id === 'scrivi-tutti') contaDestinatari();
   if (!fromPopstate && (!history.state || history.state.section !== id)) history.pushState({section: id}, '');
@@ -2035,6 +2063,143 @@ function disegnaUtilizzo(){
         + ((Number(r.tentativi_totali)||0) > 0
             ? '<div><div class="k">Ha bussato senza entrare</div><div class="v">' + r.tentativi_totali + ' volte &middot; ' + _uQuando(r.ultimo_tentativo) + '</div></div>'
             : '')
+      + '</div></div>';
+  }).join('');
+}
+
+/* ============================================================
+   CHI SE N'È ANDATO — 14 agosto 2026
+
+   Il dato prima non esisteva: «annulla iscrizione» eliminava l'account e
+   con lui spariva ogni traccia (tutte e 49 le tabelle hanno la cascata,
+   verificato sul database vero). Adesso il server, PRIMA di cancellare,
+   scrive una riga in `iscrizioni_annullate`. Qui si legge e basta.
+
+   ⚠️ La lista parte dal giorno in cui è stata lanciata
+   sql/iscrizioni-annullate.sql: chi se n'è andato PRIMA non c'è, e non
+   c'è modo di recuperarlo. Sta scritto anche a schermo, se no una lista
+   vuota si legge come «non se n'è andato nessuno» — che è un'altra cosa.
+   ============================================================ */
+let _abbandoni = [], _abFiltro = 'tutti', _abConti = null, _abMancaTabella = false;
+
+async function caricaAbbandoni(){
+  const box = document.getElementById('ab-lista');
+  if(box) box.innerHTML = '<div class="loading">Caricamento...</div>';
+  try{
+    const res = await fetch('/.netlify/functions/admin-abbandoni', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json().catch(() => ({}));
+    if(!j.success) throw new Error(j.error || 'errore sconosciuto');
+    _abMancaTabella = !!j.manca_tabella;
+    _abbandoni = j.righe || [];
+    _abConti = j.conti || null;
+    disegnaAbbandoni();
+  }catch(e){
+    if(box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _uEsc(e.message) + '</div>';
+  }
+}
+
+function filtraAbbandoni(f, el){
+  _abFiltro = f;
+  document.querySelectorAll('#sec-abbandoni .u-btn').forEach(b => b.classList.remove('attivo'));
+  if(el) el.classList.add('attivo');
+  disegnaAbbandoni();
+}
+
+/* «3 giorni», non «3»: il numero da solo si legge male in mezzo agli altri */
+function _abDurata(g){
+  if(g == null) return 'non si sa';
+  if(g === 0)   return 'lo stesso giorno';
+  if(g === 1)   return '1 giorno';
+  // ⚠️ i giorni si tengono fino a due mesi. Con la soglia a 30, uno
+  // durato 44 giorni diventava «1 mesi»: sbagliato in italiano, e per
+  // giunta buttava via l'informazione che serve di più — nei primi mesi
+  // la differenza fra 31 e 59 giorni è tutta.
+  if(g < 60)    return g + ' giorni';
+  if(g < 365){ const m = Math.round(g/30); return m === 1 ? '1 mese' : m + ' mesi'; }
+  const a = Math.round(g/36.5)/10;
+  return (a === 1 ? '1 anno' : a.toString().replace('.', ',') + ' anni');
+}
+
+const _AB_MOTIVI = {
+  'non-serve':   'Non mi serviva',
+  'complicato':  'Troppo complicato',
+  'nessun-lavoro': 'Non mi è arrivato lavoro',
+  'costo':       'Costa troppo',
+  'chiuso':      'Ho chiuso l\'attività',
+  'altro':       'Altro'
+};
+
+function disegnaAbbandoni(){
+  const box = document.getElementById('ab-lista');
+  const num = document.getElementById('ab-numeri');
+  if(!box) return;
+
+  if(_abMancaTabella){
+    if(num) num.innerHTML = '';
+    box.innerHTML = '<div style="background:#fff4e5;border:2px solid #ffd9a0;padding:18px;border-radius:12px;line-height:1.7;font-size:15px">'
+      + '<b>Questa parte non è ancora accesa.</b><br>'
+      + 'Esegui <b>sql/iscrizioni-annullate.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina.<br>'
+      + 'Da quel momento, ogni volta che qualcuno annulla l\'iscrizione, qui resta scritto chi era e quanto è durato.'
+      + '</div>';
+    return;
+  }
+
+  const c = _abConti || {};
+  if(num){
+    num.innerHTML =
+        '<div class="u-num"><div class="k">Se ne sono andati in tutto</div><div class="v">' + (c.totale || 0) + '</div></div>'
+      + '<div class="u-num"><div class="k">Negli ultimi 30 giorni</div><div class="v">' + (c.ultimi_30 || 0) + '</div></div>'
+      + '<div class="u-num"><div class="k">Entro la prima settimana</div><div class="v">' + (c.entro_7_giorni || 0) + '</div></div>'
+      + '<div class="u-num"><div class="k">Erano Premium</div><div class="v">' + (c.erano_premium || 0) + '</div></div>'
+      + '<div class="u-num"><div class="k">Quanto duravano</div><div class="v">' + _abDurata(c.giorni_mediana) + '</div></div>';
+  }
+
+  const trenta = Date.now() - 30*24*3600*1000;
+  const righe = _abbandoni.filter(r => {
+    if(_abFiltro === '30')      return new Date(r.annullato_il).getTime() >= trenta;
+    if(_abFiltro === 'subito')  return r.giorni_iscritto != null && r.giorni_iscritto <= 7;
+    if(_abFiltro === 'premium') return String(r.piano || '').toLowerCase() === 'premium';
+    if(_abFiltro === 'motivo')  return !!(r.motivo || r.motivo_libero);
+    return true;
+  });
+
+  if(!_abbandoni.length){
+    box.innerHTML = '<div style="text-align:center;color:#5b6b80;padding:40px;font-size:16px;line-height:1.7">'
+      + '<b>Non se n\'è andato nessuno.</b><br>'
+      + '<span style="font-size:14px">La lista parte da quando è stata accesa questa parte: chi se n\'è andato prima non c\'è, e non si può recuperare.</span>'
+      + '</div>';
+    return;
+  }
+  if(!righe.length){
+    box.innerHTML = '<div style="text-align:center;color:#5b6b80;padding:40px;font-size:16px">Nessuno in questo gruppo.</div>';
+    return;
+  }
+
+  box.innerHTML = righe.map(r => {
+    const subito = (r.giorni_iscritto != null && r.giorni_iscritto <= 7);
+    const nome = r.nome_attivita || '(profilo mai completato)';
+    const prem = String(r.piano || '').toLowerCase() === 'premium'
+      ? '<span class="u-badge">Era Premium</span>' : '';
+    const perche = r.motivo || r.motivo_libero
+      ? '<div><div class="k">Perché se n\'è andato</div><div class="v">'
+        + _uEsc(_AB_MOTIVI[r.motivo] || r.motivo || '')
+        + (r.motivo_libero ? ' — «' + _uEsc(r.motivo_libero) + '»' : '')
+        + '</div></div>'
+      : '';
+    return '<div class="u-riga ' + (subito ? 'bussato' : 'ferma') + '">'
+      + '<div class="n">' + _uEsc(nome) + prem + '</div>'
+      + '<div class="s">' + _uEsc(r.tipo || 'tipo non indicato') + ' &middot; '
+        + _uEsc(r.citta || 'città non indicata') + ' &middot; ' + _uEsc(r.email || '') + '</div>'
+      + '<div class="u-stato ' + (subito ? 'bussato' : 'ferma') + '">'
+        + (subito ? 'Andato via subito' : 'Se n\'è andato') + '</div>'
+      + '<div class="u-det">'
+        + '<div><div class="k">Quando se n\'è andato</div><div class="v">' + _uQuando(r.annullato_il) + '</div></div>'
+        + '<div><div class="k">Era iscritto da</div><div class="v">' + _abDurata(r.giorni_iscritto) + '</div></div>'
+        + '<div><div class="k">Si era iscritto</div><div class="v">' + _uQuando(r.iscritto_il) + '</div></div>'
+        + perche
       + '</div></div>';
   }).join('');
 }
