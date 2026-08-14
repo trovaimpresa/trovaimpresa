@@ -1,16 +1,14 @@
 -- =====================================================================
 -- RECUPERA L'ANNUNCIO GIÀ PAGATO
 --
--- INCOLLA TUTTO QUESTO nell'SQL Editor, cambia le DUE RIGHE qui sotto,
--- e premi Run. Le due righe da sole non sono una query: servono tutte.
+-- INCOLLA TUTTO QUESTO nell'SQL Editor, cambia UNA RIGA qui sotto,
+-- e premi Run.
 -- =====================================================================
 do $$
 declare
   -- ┌───────────────────────────────────────────────────────────────┐
-  -- │  DA CAMBIARE — solo queste due righe                          │
+  -- │  DA CAMBIARE — una riga sola                                  │
   -- └───────────────────────────────────────────────────────────────┘
-
-  v_sessione   text    := 'METTI-QUI-IL-STRIPE-SESSION-ID';
 
   v_centesimi  integer := 0;     -- IN CENTESIMI: 49,00 euro si scrive 4900
 
@@ -18,32 +16,27 @@ declare
   -- │  da qui in giù non si tocca niente                            │
   -- └───────────────────────────────────────────────────────────────┘
   --
-  -- Il numero della sessione lo trovi con
-  -- prove-claude/query-annuncio-da-recuperare-14ago.sql (colonna
-  -- stripe_session_id). L'importo si legge su Stripe > Payments,
-  -- cercando quel numero: NON si ricalcola dal listino, che può essere
-  -- cambiato da allora. Un numero verosimile ma sbagliato dentro la
-  -- contabilità è peggio che non avere la riga, perché sembra giusto.
+  -- ⚠️ IL NUMERO DELLA SESSIONE NON SI RICOPIA A MANO.
+  -- È una cosa tipo «cs_live_a1hDc2trSOMnaSCDIxtWnn1Lb1GiXO2A3Zuezh...»:
+  -- quaranta caratteri a caso, dove l, 1 e I si somigliano tutti. Ricopiarlo
+  -- vuol dire sbagliarlo. Visto che l'annuncio pagato è UNO SOLO, questo
+  -- file se lo va a prendere da sé — e se un domani ce ne fosse più di uno
+  -- si ferma e lo dice, invece di indovinare quale.
+  --
+  -- L'importo invece va letto su Stripe > Payments (cerca quel numero, che
+  -- copi dal risultato della query, non dalle mie righe). NON si ricalcola
+  -- dal listino: può essere cambiato da allora, e un numero verosimile ma
+  -- sbagliato dentro la contabilità è peggio che non avere la riga, perché
+  -- sembra giusto.
   --
   -- ⚠️ I centesimi: se scrivi 49 invece di 4900 finiscono dentro 49
-  -- centesimi. La query se ne accorge solo perché sotto i 5 euro si
-  -- ferma e te lo chiede — sopra quella soglia non avrebbe modo di
-  -- saperlo. Ricontrolla quella riga.
-  --
-  -- Se lasci i valori come stanno, NON scrive niente e te lo dice.
+  -- centesimi. Sotto i 5 euro questo file si ferma e te lo chiede — sopra
+  -- quella soglia non avrebbe modo di saperlo. Ricontrolla quella riga.
 
+  v_quanti  integer;
   v_ann     record;
   v_esito   json;
 begin
-  if v_sessione is null or v_sessione = 'METTI-QUI-IL-STRIPE-SESSION-ID'
-     or btrim(v_sessione) = '' then
-    raise notice ' ';
-    raise notice '>>> NON HO SCRITTO NIENTE.';
-    raise notice '>>> Manca il numero della sessione Stripe: apri il file e';
-    raise notice '>>> riempi v_sessione (lo trovi con la query «guardare»).';
-    return;
-  end if;
-
   if v_centesimi is null or v_centesimi <= 0 then
     raise notice ' ';
     raise notice '>>> NON HO SCRITTO NIENTE.';
@@ -51,10 +44,6 @@ begin
     return;
   end if;
 
-  -- ⚠️ un controllo che sembra esagerato e non lo e': se per sbaglio si
-  -- scrive 49 invece di 4900, dentro la contabilita' finisce un incasso da
-  -- 49 centesimi e nessuno se ne accorge mai piu'. Sotto i 5 euro, per un
-  -- annuncio pubblicitario, e' quasi sicuramente questo l'errore.
   if v_centesimi < 500 then
     raise notice ' ';
     raise notice '>>> NON HO SCRITTO NIENTE.';
@@ -65,16 +54,31 @@ begin
     return;
   end if;
 
-  select * into v_ann
+  select count(*) into v_quanti
   from public.annunci_pubblicitari
-  where stripe_session_id = v_sessione;
+  where stato = 'pagato' and stripe_session_id is not null;
 
-  if not found then
+  if v_quanti = 0 then
     raise notice ' ';
     raise notice '>>> NON HO SCRITTO NIENTE.';
-    raise notice '>>> Nessun annuncio con quella sessione: ricontrolla il numero.';
+    raise notice '>>> Non trovo nessun annuncio pagato con un numero di sessione.';
     return;
   end if;
+
+  -- ⚠️ con piu' di un annuncio, l'importo che hai scritto varrebbe per uno
+  -- solo e non c'e' modo di sapere quale. Meglio fermarsi che scrivere la
+  -- cifra sbagliata sotto il nome di qualcun altro.
+  if v_quanti > 1 then
+    raise notice ' ';
+    raise notice '>>> NON HO SCRITTO NIENTE.';
+    raise notice '>>> Gli annunci pagati sono %, e questo file ne sa recuperare uno solo.', v_quanti;
+    raise notice '>>> Dimmelo e te lo rifaccio per tutti quanti.';
+    return;
+  end if;
+
+  select * into v_ann
+  from public.annunci_pubblicitari
+  where stato = 'pagato' and stripe_session_id is not null;
 
   -- si passa dalla funzione vera, non da un insert a mano: cosi' vale
   -- l'«unique» sul riferimento e rilanciare questo file non raddoppia
@@ -82,9 +86,10 @@ begin
   select public.registra_pagamento(
     p_prodotto    => 'pubblicita',
     p_centesimi   => v_centesimi,
-    p_riferimento => v_sessione,
+    p_riferimento => v_ann.stripe_session_id,
     p_email       => null,
-    p_impresa_id  => v_ann.impresa_id::text,   -- ⚠️ ::text — imprese.id e' un numero, non un uuid
+    -- ⚠️ ::text — imprese.id su TrovaImpresa e' un numero (67), non un uuid
+    p_impresa_id  => v_ann.impresa_id::text,
     p_valuta      => 'eur',
     p_tipo_evento => 'recuperato-a-mano-14ago2026',
     p_quando      => null
@@ -92,8 +97,8 @@ begin
 
   raise notice ' ';
   if (v_esito->>'ok') = 'true' then
-    raise notice '>>> SCRITTO: % euro per l''annuncio %',
-                 round(v_centesimi::numeric/100, 2), v_ann.id;
+    raise notice '>>> SCRITTO: % euro per l''annuncio dell''impresa %',
+                 round(v_centesimi::numeric/100, 2), v_ann.impresa_id;
   elsif (v_esito->>'reason') = 'already_processed' then
     raise notice '>>> C''ERA GIA'': niente di nuovo, e nessun doppione.';
   else
@@ -104,6 +109,6 @@ end $$;
 -- ---------------------------------------------------------------------
 -- VERIFICA — cosa c'è adesso nella tabella dei pagamenti
 -- ---------------------------------------------------------------------
-select prodotto, importo_eur, riferimento, tipo_evento, quando
+select prodotto, importo_eur, impresa_id, riferimento, tipo_evento, quando
 from public.pagamenti
 order by quando desc;
