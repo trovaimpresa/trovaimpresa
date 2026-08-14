@@ -5893,3 +5893,61 @@ va chiesto invece che deciso.
 ## DOVE SIAMO RIMASTI
 
 72 prove nel banco, 0 rosse.
+
+---
+
+# 14 agosto 2026 (notte, 11) — RIPRISTINATO: LE SCHEDE TORNANO COM'ERANO
+
+Alessio: «fermati. Tutte e 21 le card sono così e troppo lavoro».
+
+Aveva ragione, e l'errore di impostazione era mio: stavo rifacendo **una
+sezione alla volta a mano** — Squadra, Clienti, Computo, Fatture — con altre
+diciassette dietro. Sono diciassette occasioni di rompere qualcosa, e nel
+frattempo il gestionale sarebbe rimasto mezzo in un modo e mezzo nell'altro,
+che per chi lo usa è peggio di com'era.
+
+## COSA È STATO RIMESSO COM'ERA
+
+I tre commit `43e6175`, `06a78ab`, `65cbe81` (schede cliccabili + azioni
+dentro) sono stati annullati. `gestionale-app.html` è tornato **identico**
+alla versione del commit precedente: md5 `bb6584769470d5e14a8ed3a9c4e7a781`,
+byte per byte.
+
+**Resta in piedi la correzione del costo orario** (`squadraApri`): quello è
+un difetto vero — la scheda mostrava i dati vecchi e salvando li riscriveva
+sopra — non una scelta di grafica.
+
+## ⚠️ DUE LEZIONI, TUTTE E DUE MIE
+
+**1. La strada giusta era una sola modifica, non ventuno.** Tutte le schede
+passano da `schedaJob`, e anche i loro pulsanti. La regola «l'anteprima è
+pulita, le azioni stanno dentro» si scrive **lì**, una volta: la scheda si
+clicca, e i suoi pulsanti viaggiano con lei e vengono attaccati in fondo al
+modulo che si apre. Una cosa sola da fare e una sola da provare, e vale anche
+per le sezioni che nasceranno dopo.
+
+Quando una richiesta si ripete uguale su venti posti, la domanda giusta non è
+«da quale comincio»: è **«dov'è il posto unico da cui passano tutti?»**
+
+**2. Per tornare indietro c'era `git`, e non l'ho usato.** Ho smontato venti
+modifiche a mano, una per una, venti minuti. Alessio: «ma non bastava fare un
+torna indietro e basta invece che riscrivere?». Sì. Il git sta nella sua
+cartella (e lì non tocco niente, per la regola del lock), ma la cosa da dire
+era **«fallo tu con una riga»**, non mettersi a smontare.
+
+L'unica cosa fatta bene è stata la verifica: l'md5 alla fine combaciava.
+
+## COSA RESTA PRONTO
+
+`nuove/scheda-si-apre-cliccando.py` — 8 controlli, verde sul lavoro fatto e
+rosso sul file di prima — è ancora nel banco, **fuori dal comando**. Il
+giorno che si fa la modifica unica si riaccende quella riga e si vede subito
+se funziona su tutte.
+
+⚠️ E il **Cestino** resta fuori comunque: lì cliccare una riga la **rimette a
+posto**. Non è «entrare», è un'azione che cambia i dati, e non si mette a
+sorpresa sotto il dito.
+
+## DOVE SIAMO RIMASTI
+
+71 prove nel banco.
