@@ -174,6 +174,25 @@
       white-space: nowrap;
     }
     .sezione-testa .trova:hover { text-decoration: underline; }
+    /* la striscia in cima: bassa, per non spingere giù le guide */
+    .cta-alto {
+      display: flex; align-items: center; justify-content: center;
+      gap: 18px; flex-wrap: wrap;
+      background: #fff7ed; border: 2px solid #ffd9a0; border-radius: 14px;
+      padding: 14px 20px; margin: 22px 0 4px;
+    }
+    .cta-alto-t { color: #0a2a4d; font-size: 16px; line-height: 1.5; }
+    .cta-alto a {
+      background: #ff8800; color: #fff; text-decoration: none;
+      font-weight: 700; font-size: 16px; padding: 11px 24px;
+      border-radius: 10px; white-space: nowrap;
+    }
+    .cta-alto a:hover { background: #e67a00; }
+    @media (max-width: 600px) {
+      .cta-alto { flex-direction: column; text-align: center; gap: 12px; }
+      .cta-alto a { display: block; width: 100%; }
+    }
+
     .cta-box {
       background: #fff;
       border-radius: 16px;
@@ -230,6 +249,20 @@
   </header>
 
   <div class="container">
+
+    <!-- ⚠️ 14 agosto 2026 — LA STRISCIA IN CIMA.
+         Il riquadro «Devi fare dei lavori in casa?» stava SOLO in fondo alla
+         pagina. Chi legge le prime righe e se ne va non ha mai saputo che da
+         qui si arriva a cercare un'impresa: il link c'era, ma dove non lo
+         vedeva nessuno. Questa è la stessa cosa, corta, messa dove la gente
+         guarda per prima. Quella in fondo RESTA: prende chi arriva alla fine,
+         che è il momento in cui uno ha appena letto quanto costa una cosa ed
+         è più pronto a chiedere un preventivo. -->
+    <div class="cta-alto">
+      <div class="cta-alto-t"><b>Devi fare dei lavori?</b> Trova imprese edili e artigiani verificati nella tua zona. Preventivi gratis.</div>
+      <a href="index.html">Trova un'impresa</a>
+    </div>
+
     <div id="salta" class="salta" style="display:none;">
       <h2>Vai al mestiere che ti serve</h2>
       <div class="chips" id="salta-chips"></div>
