@@ -5603,3 +5603,95 @@ sul PostgreSQL del banco; a lui non arrivano.
 
 E più in generale: quando provo una cosa in un ambiente diverso da quello
 dove finirà, devo chiedermi anche **come si vedrà**, non solo se funziona.
+
+---
+
+# 14 agosto 2026 (notte, 7) — (c) LE PROVE CHE NON POTEVANO DIVENTARE ROSSE
+
+Nel banco c'erano **18 prove «da capire»**: giravano da giorni, e nessuno
+aveva mai scritto cosa vuol dire «passata». Non potevano diventare rosse.
+Diciotto buchi nella rete, e nove proprio sul **Cestino** — che è la rete di
+sicurezza di tutto il resto.
+
+## FATTE LE NOVE DEL CESTINO
+
+Ognuna ha adesso la sua regola (`nuove/regole-cestino.js`), scritta leggendo
+il log di quando funzionava e mettendoci dentro **la proprietà che conta**,
+non «gira»:
+
+- **t1** — buttato via un reparto, tutto quello che il messaggio aveva
+  promesso finisce nel Cestino, e **l'azienda non ci finisce mai**.
+- **t2** — «Rimetti a posto»: cestino vuoto, pallino spento, dati tutti vivi.
+  Se il pallino dicesse 3 e la lista fosse vuota, uno dei due mentirebbe.
+- **t3** — la cancellazione si rompe a metà: deve tornare tutto com'era, e il
+  reparto deve restare sulla schermata. Mezzo reparto nel cestino è il caso
+  che fa paura.
+- **t4** — dopo un'interruzione e il ripristino, niente resta indietro.
+- **t5** — con un finto Supabase **fedele** (una scrittura senza `.select()`
+  risponde `data: null`, come PostgREST vero — in produzione si passa sempre
+  di lì): il pallino deve dire quanto c'è **davvero**. Sette momenti, sette
+  confronti.
+- **t6** — le cose senza reparto (spese, crediti, prezzi, foto, video) devono
+  vedersi nel Cestino in tutte e due le viste. Se sparissero, uno le butta
+  via e non le ritrova più.
+- **r1** — giro intero: 22 cose tornate vive, cestino a zero, **ore
+  comprese** (sono quelle che tengono in piedi il margine dei lavori).
+- **r3** — dopo un rollback riuscito il pallino torna a zero.
+- **r5** — le 18 domande con la rete giù: il pericolo non è sbagliare il
+  numero, è **riciclare**. Su un telefono in cantiere vuol dire batteria e
+  traffico bruciati senza che nessuno lo sappia.
+
+## ⚠️ E LE REGOLE, CHI LE CONTROLLA?
+
+Una regola è codice come tutto il resto. Se dice sempre verde, quelle nove
+prove tornano esattamente quello che erano.
+
+Quindi c'è `nuove/regole-nei-due-versi.js`: fa girare le nove regole su
+**quindici log rotti apposta**, uno per ogni modo in cui quella cosa può
+andare storta davvero (l'azienda nel cestino, le ore che non tornano, il
+pallino che mente, la rete che ricicla), e pretende il **rosso**.
+24 controlli, 0 problemi.
+
+**Alla prima passata quattro regole su quindici non se ne accorgevano.** Non
+perché fossero cieche: perché rompevo la PRIMA occorrenza nel log, e quasi
+tutti stampano lo stato più volte — la regola guardava l'ultima e restava
+verde. Sembrava che la regola fosse rotta mentre era la rottura ad aver
+mancato il bersaglio. Adesso si rompe sempre l'ultima, e sta scritto nel file.
+
+## ⚠️ UN DIFETTO VERO, RIPRODOTTO — IL COSTO ORARIO
+
+Guardando il log di `caselle: t-dcosto.js` salta fuori questo:
+
+    DB 22.5     -> casella "35"
+    DB 12.5     -> casella "35"
+    DB 18.125   -> casella "35"
+
+La scheda della persona mostra **35** qualunque cosa ci sia nel database.
+
+Riprodotto a parte, con le sonde: c'è **un solo** operatore (`o1`), la scheda
+aperta è la sua, il database dice 18,125 — e la casella dice 35. E la
+navigazione avviene davvero: esce dalla sezione Squadra, va su Lavori, torna,
+riapre. Il selettore del tab esiste e viene cliccato (controllato).
+
+**Perché conta:** il costo orario entra nel margine di ogni lavoro. Il giro
+che fa male è questo — cambi il costo orario dal telefono; sul computer la
+scheda mostra ancora il vecchio perché era già caricata; tocchi il numero di
+telefono e premi Aggiorna; **il costo vecchio si riscrive sopra al nuovo**,
+in silenzio.
+
+Non l'ho corretto: è la prossima cosa.
+
+## RESTANO NOVE
+
+Cinque del gruppo «persone» e quattro di «caselle». Nei loro log ci sono già
+due cose da guardare:
+
+1. `caselle: t-prezzo4.js` stampa «prezzi rovinati: 0/6» **anche quando non è
+   riuscita ad aprire la voce di computo** («non ho aperto la voce di computo»).
+   È un verde che non prova niente, dentro una prova che sembra passata.
+2. `persone: t-finale.js` — dopo aver eliminato Wahid, la tendina «chi l'ha
+   caricata» mostra una voce con il nome **vuoto** (`o1 => ""`).
+
+## DOVE SIAMO RIMASTI
+
+70 prove nel banco. Le «da capire» sono scese da **18 a 9**.
