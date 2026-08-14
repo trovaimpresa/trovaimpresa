@@ -323,14 +323,17 @@
     var s2 = document.createElement('style');
     s2.id = 'ti-aiuto-css';
     s2.textContent =
-      '.ti-i{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;' +
-      'min-width:17px;padding:0;margin:0 0 0 5px;border:1.5px solid currentColor;border-radius:50%;' +
-      'background:transparent;color:#8a94a6;font:700 11px/1 Georgia,serif;cursor:help;' +
+      '.ti-i{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;' +
+      'min-width:19px;padding:0;margin:0 0 0 5px;border:1.5px solid currentColor;border-radius:50%;' +
+      /* ⚠️ 13 px e' il minimo in tutto il gestionale (regola dislessia), e
+         questa «i» stava a 11. Piccola com'era non si distingueva nemmeno
+         da un puntino sporco sullo schermo. 14 agosto 2026. */
+      'background:transparent;color:#8a94a6;font:700 13px/1 Georgia,serif;cursor:help;' +
       'vertical-align:middle;opacity:.75;flex:none}' +
       '.ti-i:hover,.ti-i[aria-expanded=true]{opacity:1;color:#0b4bc4}' +
       '.ti-i:focus-visible{outline:2px solid #0b4bc4;outline-offset:2px}' +
       '.job-actions>.ti-i{margin-left:auto;align-self:center}' +
-      '@media (max-width:560px){.ti-i{width:21px;height:21px;min-width:21px;font-size:12px;opacity:1}}';
+      '@media (max-width:560px){.ti-i{width:22px;height:22px;min-width:22px;font-size:13px;opacity:1}}';
     document.head.appendChild(s2);
   }
   function creaI(testo) {
@@ -375,10 +378,27 @@
         riga.dataset.tiI = '1';
         if (voci.length) riga.appendChild(creaI(voci.join('\n\n')));
       });
-      /* menu e barra in alto: sul computer basta il passaggio del mouse che
-         c'era gia'. Sul telefono no, quindi li' serve il (i). */
+      /* ⚠️ NEL MENU DI NAVIGAZIONE NON SI ATTACCA NIENTE — 14 agosto 2026.
+         Difetto vero, visto da Alessio sull'iPhone e riprodotto qui in
+         modalita' touch vera (nuove/touch-iphone.py): senza mouse questo
+         pezzo attaccava una (i) a TUTTE E 18 le voci del menu ☰. Ogni voce
+         passava da 42 a 69 px e diventava un riquadro alto con dentro una
+         casellina, cioe' il menu non si leggeva piu' a colpo d'occhio —
+         che e' esattamente quello che serve a chi ha la dislessia.
+         Le prove di prima non lo vedevano perche' giravano a 390 px su un
+         finto computer, dove hover:hover resta acceso e conMouse e' true.
+
+         Nel menu la (i) non serve: la voce ha gia' l'icona e il suo nome
+         («Fatture», «Cestino»), e appena entri la sezione si presenta da
+         sola con la sua riga di spiegazione. Le (i) restano dove servono
+         davvero: le etichette dei moduli, i totali della fattura, i
+         pulsanti del lavoro. Scelta di Alessio, 14 agosto sera.
+
+         Resta invece [data-aiuto] fuori dal menu: li' la (i) e' l'unico
+         aiuto che funziona al tocco, ed e' quello per cui era nata. */
       if (!conMouse) {
-        document.querySelectorAll('[data-tab]:not([data-ti-i]),[data-aiuto]:not([data-ti-i])').forEach(function (el) {
+        document.querySelectorAll('[data-aiuto]:not([data-ti-i])').forEach(function (el) {
+          if (el.closest('.side') || el.hasAttribute('data-tab')) return;   /* il menu no */
           var t = testoDi(el); if (!t) return;
           var dove = el.querySelector('span:not(.tab-cnt)') || el;
           if (dove.dataset.tiI) return;

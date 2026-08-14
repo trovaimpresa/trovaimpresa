@@ -4189,14 +4189,24 @@ E una cosa pratica, che è costata due giri: **l'SQL Editor di Supabase mostra
 solo il risultato dell'ULTIMA query.** Se ne servono tre, o se ne manda una
 sola, o si mandano una alla volta.
 
+## ✅ IL GRUPPO DEI PERMESSI È CHIUSO ANCHE A MANO
+
+**Alessio ha fatto la prova a clic sull'app dell'operaio**, quella rimasta in
+sospeso dal 13 sera: link di un collaboratore con **Lavori ✔, Foto ✘, Note ✘**.
+Foto del capo visibili, «Aggiungi foto» assente, casella delle note leggibile e
+grigia, Scadenze non mute.
+
+**Esito: va tutto bene.**
+
+Vuol dire che il gruppo 1 — il più grosso dei quattro, e l'unico dove qualcuno
+vedeva o faceva quello che non doveva — è chiuso in tutti e tre i modi:
+riprodotto prima di toccare il codice, provato dal banco dopo, e **confermato a
+mano sul telefono vero da chi lo usa**. Non è rimasto niente in sospeso.
+
 ## DOVE SIAMO RIMASTI
 
 **Da fare ad Alessio:**
-- il push della correzione del ruolo, se non è già stato fatto;
-- la **prova a clic sull'app dell'operaio** col link di un collaboratore con
-  Lavori ✔, Foto ✘, Note ✘: foto del capo visibili, note leggibili e grigie,
-  Scadenze non mute. È l'unico pezzo di collaudo che non può fare Claude, ed è
-  in sospeso dal 13 sera.
+- il push della correzione del ruolo, se non è già stato fatto.
 
 **Restano aperte**, in quest'ordine — deciso il 14 agosto, con il Computo
 spostato **prima** del resto:
@@ -4258,3 +4268,186 @@ professionista, 4 senza tipo), quindi oggi non fa danni a nessuno.
 negozio e noleggio compresi. Ma non è una data: il 12 agosto erano previsti 9
 difetti nuovi e ne sono usciti 14. Ogni zona guardata sul serio fa **crescere**
 la lista prima di farla scendere, e il Computo è la più grande mai toccata.
+
+
+---
+
+# 14 agosto 2026 (sera) — LE DUE PICCOLE, IL COMPUTO APERTO, E IL MENU DEL TELEFONO RIPRODOTTO
+
+Sessione lunga e produttiva: **chiusi i punti 1, 2 e 3** della lista del 14
+mattina. Il punto 3 (il menu ☰) era «visto ma non riprodotto» da due giorni:
+adesso è riprodotto, capito e corretto.
+
+Cinque correzioni, tutte provate nei due versi. **Quattro prove nuove** entrate
+nel banco, che passa da 51 a **56 prove nel giro normale**.
+
+| file | cosa cambia |
+|---|---|
+| `js/fondatore.js` | la barra sul telefono è una riga, e la X si ricorda |
+| `js/aiuti.js` | via le «i» dal menu ☰; mai sotto i 13 px |
+| `gestionale-app.html` | «Che lavoro fai?» a chi non l'ha mai detto · il PDF del computo non esce monco · «1,00 parti» → «1 parte» |
+
+## 1. LA BARRA DEL FONDATORE — da 233 px a 56
+
+Erano **233 px su uno schermo da 360**, cioè il 29%: i link andavano a capo sei
+volte. E la X la chiudeva «fino al prossimo caricamento», quindi tornava sempre.
+
+Adesso, sotto i 760 px: **una riga sola che scorre col dito** (`flex-wrap:nowrap`
++ `overflow-x:auto`), con la X ferma a destra, sopra tutto, sempre raggiungibile.
+**56 px, il 7% dello schermo.**
+
+E la X **si ricorda**: scrive in `localStorage` (`ti_barra_chiusa`), quindi la
+barra resta chiusa anche ricaricando. Per riaprirla c'è una **linguetta viola
+«F»** sul bordo sinistro, a metà altezza — che è anche l'unico modo di farla
+tornare, quindi non si perde niente.
+
+Provata nei due versi con `nuove/barra-fondatore.py`, che **c'era dal 13 agosto
+ma non era nel comando** — esattamente come `ruolo-vuoto.py` ieri. Adesso c'è.
+Sul file di prima: 1 problema su 9 → rossa. Sul corretto: 9 su 9 → verde.
+
+## 2. «CHE LAVORO FAI?» — i 4 account con il tipo vuoto
+
+Sono **registrazioni rimaste a metà**: `imprese.tipo` vuoto *e* `nome_attivita`
+vuoto. Il gestionale li trattava come «nessun profilo» e mostrava le etichette
+di partenza — quelle dell'impresa edile, **IVA al 10% compresa** — anche a un
+geometra. E loro non avevano nessun modo di accorgersene.
+
+Scelta di Alessio: **glielo chiede il gestionale**, non li sistemo io a mano.
+Appena entrano, se il tipo manca, compare una `openSheetGrande` con tre voci:
+Impresa edile · Artigiano · Studio tecnico, ognuna con scritto cosa cambia.
+Si sceglie una volta, si salva, la pagina si ricarica con le etichette giuste.
+
+Vale anche **per chi si registrerà male domani**: è il difetto che si ripara da
+solo, non una toppa sui 4 di oggi.
+
+Il salvataggio controlla **tutte e due le cose** — errore *e* zero righe
+aggiornate — perché Supabase non lancia mai e «zero righe» non è un errore.
+È lo stesso difetto già preso sul piano nella barra del fondatore.
+
+`nuove/tipo-mancante.py`: 15 controlli, compreso il caso brutto (la PATCH
+risponde 200 con zero righe: non deve dire «Fatto»). Sul file di prima 9
+problemi su 15, sul corretto 0.
+
+## 3. IL COMPUTO METRICO E IL PREZZARIO — prima apertura
+
+**Si aprono tutti, senza un solo errore JavaScript**, su computer e su telefono:
+elenco, scheda del computo, lavorazione con le sue misure, prezzario.
+`nuove/computo-ricognizione.py`, 22 controlli.
+
+Le **due cose già annotate erano vere tutte e due.**
+
+### Il PDF che si contraddiceva — riprodotto
+
+`computoPdf()` controllava l'errore su capitoli e voci, ma **non** sulla lettura
+delle misure. Riprodotto facendo rispondere **500 a quella sola query**:
+
+- il PDF **usciva lo stesso**;
+- dentro c'era «Quantità 20,46 mq» per ogni lavorazione, e **sotto nessuna
+  misura**: un computo metrico senza il computo delle misure;
+- e in fondo il messaggio diceva **«PDF del computo scaricato ✅»**.
+
+È il documento che si manda al cliente, con dentro un buco che non si vede.
+Adesso ci si ferma prima di disegnare qualsiasi cosa e si dice perché.
+`nuove/computo-pdf-misure.py` legge il PDF vero con `pdftotext` e controlla che
+le righe delle misure ci siano davvero — non che il file esista.
+
+### Il «1,00 parti» — vero
+
+`_partiTesto` esisteva dal 10 agosto apposta («le parti sono un conteggio, non
+una misura»), ma il **modulo di correzione** usava `_misTesto`. Risultato: nella
+riga sopra si leggeva «2 parti», e nella casella due dita più sotto «**2,00**».
+La stessa misura scritta in due modi a due dita di distanza.
+
+## 4. IL MENU ☰ SUL TELEFONO — RIPRODOTTO, ed era `aiuti.js`
+
+Era in lista dal 13 agosto come **«visto da Alessio, NON riprodotto»**. Il
+motivo per cui non si riproduceva è tutto qui: le prove giravano a 390 px su un
+**finto computer stretto**, dove `hover:hover` e `pointer:fine` restano
+**accesi**, quindi `conMouse` in `aiuti.js` è `true` e le «i» non le attacca
+nessuno. La prova misurava un telefono che non esiste.
+
+Con un iPhone vero secondo Playwright (`hasTouch`, `isMobile`, device
+descriptor), `nuove/touch-iphone.py`:
+
+| | finto computer 390px | iPhone vero |
+|---|---|---|
+| `hover:hover` | **true** | false |
+| voci del menu con la «i» | **0 su 18** | **18 su 18** |
+| voce più alta | 42 px | **69 px** |
+
+Cioè **esattamente quello che vedeva Alessio**: «ogni voce diventa un riquadro
+alto con dentro una casellina vuota con una i».
+
+**La correzione** (scelta di Alessio fra tre): le «i» spariscono **solo dalle
+voci del menu ☰** — lì il nome della sezione si spiega da sé, e appena entri la
+sezione si presenta con la sua riga. Restano dove servono davvero: le etichette
+dei moduli, i totali della fattura, i pulsanti del lavoro.
+
+E di contorno, un difetto che nessuno cercava: **la «i» era scritta a 11 px**
+(12 sotto i 560), cioè sotto il minimo di 13 di tutto il gestionale. Adesso 13,
+e il cerchietto da 17 a 19 px.
+
+## ⚠️ LA LEZIONE — TRE VOLTE ANCORA, E TUTTE E TRE ERANO MIE
+
+Non è cambiata, e stavolta ha colpito **solo le mie prove**:
+
+1. **la prova del computo diceva «le misure non ci sono»**: guardava i primi 600
+   caratteri di `#sheet`, che sono il **prezzario** (colonna sinistra). Le misure
+   stanno nella colonna destra, **oltre il taglio**. È il taglio a 160 caratteri
+   della query di stamattina, identico, a otto ore di distanza;
+2. **la prova touch cercava `.ham`**, che non esiste: il pulsante si chiama
+   `.burger`. Non apriva il menu, trovava 0 voci, e stampava **tre righe verdi**
+   su un menu chiuso — «0 «i» nel menu, 0 px di altezza, tutto a posto».
+   Aggiunta una riga che va **rossa se il menu non si è aperto**: senza quella,
+   tre controlli su sette erano verdi per costruzione;
+3. **le 4 righe rosse del giro del mattino** erano `sql-collaudo.sh` che cerca i
+   file in `../repo/sql` **ignorando `--repo`**. Sembravano le policy rotte.
+   Corretto dentro il banco (`env:` per prova, e `GEST_SQL` passato da lì).
+
+**E un errore mio, di metodo:** il primo giro del banco l'ho lanciato *mentre*
+modificavo i file. Quel giro non valeva niente ed è stato buttato: il giro buono
+è quello fatto alla fine, sui file fermi.
+
+## IL BANCO — 56 prove nel giro normale
+
+Quattro prove nuove nel gruppo `nuove`, tutte con la `leggi:` scritta a mano
+(stampano «N controlli, M con problemi» e non escono con un codice di errore:
+con `perEsito` sarebbero verdi per sempre):
+
+- `barra-fondatore.py` — c'era, non era nel comando;
+- `touch-iphone.py` — il menu su un telefono vero;
+- `computo-ricognizione.py` — Computo e Prezzario si aprono;
+- `computo-pdf-misure.py` — il PDF non esce senza le misure;
+- `tipo-mancante.py` — la domanda compare solo a chi serve, e salva davvero.
+
+Tutte provate **nei due versi**, rosse sul file di prima e verdi sul corretto:
+4 su 7 · 6 su 22 · 1 su 4 · 9 su 15.
+
+## DOVE SIAMO RIMASTI
+
+**Da fare ad Alessio:**
+- il push di questa sessione.
+
+**Restano aperte**, in quest'ordine:
+
+*1. Il resto del Computo metrico.* Oggi si è controllato che **si apra**, e le
+due cose annotate erano vere. Non è stata guardata a fondo: i conti del
+riepilogo, il ribasso d'asta, il quadro economico dei lavori pubblici, il
+passaggio computo → preventivo (`preventivo_id`), l'importazione di un
+prezzario regionale. **La lista crescerà ancora**: è la zona più grande e
+finora ne è stata aperta una stanza sola.
+
+*2. I 13 rimasti dal 13 agosto mattina* — letti nel codice, **non riprodotti**.
+Elenco completo nella sezione «13 agosto 2026», punto *4. Il resto*.
+
+*3. Le prove «da capire» del banco*, da classificare una alla volta quando si
+lavora su quel gruppo. Traguardo: una sessione intera con il banco tutto verde,
+0 rosse e 0 «da capire».
+
+*4. Le regole del deposito dei file* (bucket `gestionale-foto` e
+`gestionale-video`), mai guardate. Ci sta dentro `foto_team_delete`, che usa
+`gest_puo_accedere` senza guardare la spunta «foto». C'era già, non è una
+regressione.
+
+*5. `gestionale-negozio.html` e `gestionale-noleggio.html`*, separatamente e
+dopo aver finito impresa e professionisti. Confermato di nuovo il 14 sera.

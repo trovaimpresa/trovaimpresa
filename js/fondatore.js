@@ -48,9 +48,12 @@
   ];
 
   var CHIAVE_VISTA = "ti_vedi_tipo";
+  var CHIAVE_CHIUSA = "ti_barra_chiusa";   /* la X adesso si ricorda: la barra resta chiusa finché non la riapri dalla linguetta */
 
   function leggiVista(){ try{ return sessionStorage.getItem(CHIAVE_VISTA)||""; }catch(e){ return ""; } }
   function scriviVista(v){ try{ v?sessionStorage.setItem(CHIAVE_VISTA,v):sessionStorage.removeItem(CHIAVE_VISTA); }catch(e){} }
+  function barraChiusa(){ try{ return localStorage.getItem(CHIAVE_CHIUSA)==="1"; }catch(e){ return false; } }
+  function scriviChiusa(v){ try{ v?localStorage.setItem(CHIAVE_CHIUSA,"1"):localStorage.removeItem(CHIAVE_CHIUSA); }catch(e){} }
 
   function ammesso(email){
     var e = String(email||"").trim().toLowerCase();
@@ -77,7 +80,7 @@
       + 'background:#0a2a4d;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;'
       + 'font-size:14px;line-height:1.4;box-shadow:0 2px 10px rgba(0,0,0,.25)}'
       + '#ti-fondatore .ti-in{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 12px}'
-      + '#ti-fondatore .ti-tag{font-weight:800;letter-spacing:.03em;background:#7b1fa2;padding:4px 10px;border-radius:999px;font-size:12px;white-space:nowrap}'
+      + '#ti-fondatore .ti-tag{font-weight:800;letter-spacing:.03em;background:#7b1fa2;padding:4px 10px;border-radius:999px;font-size:13px;white-space:nowrap}'
       + '#ti-fondatore select{font-family:inherit;font-size:14px;font-weight:600;padding:6px 10px;border-radius:8px;border:none;background:#12395f;color:#fff;cursor:pointer}'
       + '#ti-fondatore button{font-family:inherit;font-size:14px;font-weight:700;padding:6px 12px;border-radius:8px;border:none;cursor:pointer}'
       + '#ti-fondatore .ti-piano{background:#fff;color:#0a2a4d}'
@@ -88,9 +91,39 @@
       + '#ti-fondatore .ti-sep{flex:1 1 auto}'
       + '#ti-fondatore .ti-x{background:none;color:#9fb6d0;font-size:18px;padding:2px 8px}'
       + '#ti-fondatore .ti-links{display:flex;flex-wrap:wrap;gap:2px;align-items:center}'
-      + '@media(max-width:760px){#ti-fondatore .ti-in{gap:6px;padding:6px 8px}#ti-fondatore a{padding:4px 7px;font-size:13px}}';
+      /* Sul telefono: UNA riga sola che si fa scorrere col dito, invece di
+         andare a capo sei volte e mangiarsi un terzo dello schermo.
+         La X sta ferma a destra, sopra tutto, sempre raggiungibile. */
+      + '@media(max-width:760px){'
+      +   '#ti-fondatore .ti-in{gap:6px;padding:6px 46px 6px 8px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}'
+      +   '#ti-fondatore .ti-links{flex-wrap:nowrap}'
+      +   '#ti-fondatore .ti-sep{display:none}'
+      +   '#ti-fondatore a{padding:4px 7px;font-size:13px}'
+      +   '#ti-fondatore .ti-x{position:absolute;top:0;right:0;bottom:0;background:#0a2a4d;padding:0 12px;font-size:20px;box-shadow:-6px 0 8px rgba(10,42,77,.9)}'
+      + '}'
+      /* La linguetta per riaprire la barra quando è chiusa: bordo sinistro, a metà schermo */
+      + '#ti-riapri{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147483000;'
+      + 'background:#7b1fa2;color:#fff;border:none;border-radius:0 10px 10px 0;padding:14px 9px;'
+      + 'font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;font-weight:800;'
+      + 'cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}';
     document.head.appendChild(css);
 
+    /* Se l'ultima volta hai premuto la X, la barra resta chiusa: compare solo
+       la linguetta viola sul bordo sinistro, che la riapre con un tocco. */
+    if(barraChiusa()){ linguetta(); } else { apriBarra(); }
+
+    function linguetta(){
+      if(document.getElementById("ti-riapri")) return;
+      var b = document.createElement("button");
+      b.id = "ti-riapri";
+      b.textContent = "F";
+      b.title = "Riapri la barra del fondatore";
+      b.onclick = function(){ scriviChiusa(false); b.remove(); apriBarra(); };
+      document.body.appendChild(b);
+    }
+
+    function apriBarra(){
+    if(document.getElementById("ti-fondatore")) return;
     var qui = location.pathname.replace(/\/$/,"") || "/index.html";
     var bar = document.createElement("div");
     bar.id = "ti-fondatore";
@@ -112,7 +145,7 @@
             }).join("")
       +   '</span>'
       +   '<span class="ti-sep"></span>'
-      +   '<button class="ti-x" id="ti-chiudi" title="Nascondi fino al prossimo caricamento">&times;</button>'
+      +   '<button class="ti-x" id="ti-chiudi" title="Nascondi la barra (la riapri dalla linguetta viola a sinistra)">&times;</button>'
       + '</div>';
     document.body.appendChild(bar);
 
@@ -125,6 +158,9 @@
 
     document.getElementById("ti-chiudi").onclick = function(){
       bar.remove(); document.body.style.paddingTop = "";
+      window.removeEventListener("resize", spazio);
+      scriviChiusa(true);        /* si ricorda: al prossimo caricamento resta chiusa */
+      linguetta();               /* e la linguetta per riaprirla è già lì */
     };
 
     document.getElementById("ti-vista").onchange = function(){
@@ -149,6 +185,7 @@
           alert("Non sono riuscito a cambiare il piano: "+((e&&e.message)||"riprova"));
         });
     };
+    }   /* fine apriBarra */
   }
 
   function avvia(){

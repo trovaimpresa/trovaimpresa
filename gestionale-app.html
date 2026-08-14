@@ -520,6 +520,17 @@
     const {data,error}=await sb.from('imprese').select('tipo').eq('user_id',uid).maybeSingle();
     if(error){console.log('[gestionale] ruolo utente: errore lettura',error.message);return;}
     ruoloUtente=data&&data.tipo?data.tipo:null;
+    /* ⚠️ CHI NON HA IL TIPO NON E' UN ERRORE: E' UNA REGISTRAZIONE A META'.
+       14 agosto 2026. Sul database ci sono 4 account veri con `tipo` vuoto
+       (e anche il nome dell'attività vuoto): si sono iscritti e non hanno
+       finito. Il gestionale li trattava come «né impresa né artigiano né
+       professionista» e mostrava le etichette di partenza — cioè quelle
+       dell'impresa edile anche a un geometra, con le aliquote sbagliate.
+       Non era scritto da nessuna parte, e loro non potevano saperlo.
+       Adesso glielo si chiede, una volta sola, appena entrano. Vale anche
+       per chi si registrerà male domani: la domanda si ripresenta finché
+       non risponde, e la risposta va nel database sua. */
+    if(!ruoloUtente&&!_tipoChiesto)_chiediTipo(uid);
     /* Barra FONDATORE: "Vedi come" fa provare le altre categorie senza cambiare
        account. È solo una vista: i dati mostrati restano i propri. */
     try{var _vq=new URLSearchParams(location.search).get("vedi");if(_vq!==null){_vq?sessionStorage.setItem("ti_vedi_tipo",_vq):sessionStorage.removeItem("ti_vedi_tipo");}}catch(_e){}
@@ -540,6 +551,50 @@
       renderScadenze();
       if(!cur)renderLanding(); /* ruoloUtente noto solo ora: ridisegna le card landing coi contatori "pratiche" */
     }
+  }
+
+  /* ===== 14 agosto 2026 — «Che lavoro fai?», per chi non l'ha mai detto =====
+     Sono le registrazioni rimaste a metà: `imprese.tipo` vuoto. Finché resta
+     vuoto il gestionale mostra le etichette dell'impresa edile a tutti, IVA
+     al 10% compresa — a un geometra sono sbagliate, e lui non ha nessun modo
+     di accorgersene.
+     Tre voci sole, scritte come le direbbe lui, e si sceglie una volta. */
+  let _tipoChiesto=false;
+  function _chiediTipo(uid){
+    _tipoChiesto=true;
+    const scelte=[
+      ["impresa","Impresa edile",
+       "Cantieri, squadra, mezzi. Lavori, preventivi e fatture con l'IVA al 10%."],
+      ["artigiano","Artigiano",
+       "Idraulico, elettricista, imbianchino, giardiniere: lavori tuoi, con o senza dipendenti."],
+      ["professionista","Studio tecnico",
+       "Geometra, architetto, ingegnere, perito. Pratiche invece di lavori, parcelle con cassa e ritenuta."]
+    ];
+    openSheetGrande("Che lavoro fai?",
+      '<div class="sh-b"><div class="sh-tit">Scegli come sei</div>'
+      + '<div class="sh-nota" style="margin-bottom:12px">Serve a chiamare le cose col loro nome e a mettere le aliquote giuste. Lo scegli una volta e si cambia quando vuoi.</div>'
+      + '<div class="fn-scelte">'
+      +   scelte.map(function(s){
+            return '<button type="button" class="fn-s" data-action="scegli-tipo" data-id="'+s[0]+'">'
+              + '<span class="fn-t">'+s[1]+'</span>'
+              + '<span class="fn-d">'+s[2]+'</span></button>';
+          }).join("")
+      + '</div></div>',
+      '<button class="btn b-cancel" data-action="close">Lo faccio dopo</button>');
+  }
+  async function _salvaTipo(t){
+    if(!sb||!sbUid||!t)return;
+    const {data,error}=await sb.from("imprese").update({tipo:t}).eq("user_id",sbUid).select("user_id");
+    /* ⚠️ come sul piano nella barra del fondatore: Supabase NON lancia mai su
+       errore, e zero righe aggiornate non è un errore. Se non si controllano
+       tutte e due le cose si dice «fatto» a chi non ha salvato niente. */
+    if(error||!data||!data.length){
+      toast("Non sono riuscito a salvare: "+((error&&error.message)||"nessuna riga aggiornata")+". Riprova.");
+      return;
+    }
+    closeSheet();
+    toast("Fatto ✔ Ricarico con le etichette giuste…");
+    setTimeout(function(){location.reload();},900);
   }
 
   /* ===== 6 agosto 2026 — Menu su misura per lo studio professionale =====
@@ -12491,6 +12546,14 @@
     const inCorr=compMisCache.find(m=>String(m.id)===String(compMisEditId))||null;
     if(compMisEditId&&!inCorr)compMisEditId=null;   /* cancellata da un'altra parte */
     const _v=(x)=>x==null?"":esc(_misTesto(x));
+    /* ⚠️ LE PARTI UGUALI SONO UN CONTEGGIO, NON UNA MISURA — 14 agosto 2026.
+       Il modulo di correzione riempiva anche questa casella con _misTesto, che
+       mette sempre due decimali: aprendo una misura da 1 parte ci si trovava
+       scritto «1,00 parti», da 2 «2,00 parti». Nell'elenco sopra si legge già
+       «1 parte» / «2 parti» (_partiTesto), quindi la stessa misura si leggeva
+       in due modi diversi a due dita di distanza. Riprodotto nel browser.
+       _partiTesto esisteva apposta dal 10 agosto: qui non veniva usata. */
+    const _vp=(x)=>x==null?"":esc(_partiTesto(x));
     box.innerHTML=righe
       +'<div class="spesa-row" style="border-top:2px solid var(--bordo)"><span><b>Quantità totale</b></span><b>'+_misLetta(tot)+'</b><span></span></div>'
       +'<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
@@ -12509,7 +12572,7 @@
       +  '</div>'
       +  '<div class="sh-nota">«Si detrae» sono i vuoti: le porte, le finestre, i fori. Vengono sottratti dal totale.</div></div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Parti uguali</label><input type="text" inputmode="decimal" id="cm-parti"'+_noAuto()+' value="'+(inCorr?_v(inCorr.parti):"")+'" placeholder="1"></div>'
+      +    '<div class="field"><label>Parti uguali</label><input type="text" inputmode="decimal" id="cm-parti"'+_noAuto()+' value="'+(inCorr?_vp(inCorr.parti):"")+'" placeholder="1"></div>'
       +    '<div class="field"><label>Lunghezza</label><input type="text" inputmode="decimal" id="cm-lung"'+_noAuto()+' value="'+(inCorr?_v(inCorr.lunghezza):"")+'" placeholder="3,20"></div>'
       +  '</div>'
       +  '<div class="row2">'
@@ -13225,8 +13288,24 @@
 
     /* tutte le misure in una volta sola: una query per ogni voce su un computo
        da cento voci vorrebbe dire cento viaggi e mezzo minuto di attesa */
-    const {data:mis}=await sb.from("gest_computo_misure").select("*")
+    /* ⚠️ IL PDF CHE SI CONTRADDICEVA — 14 agosto 2026.
+       Qui l'errore non si guardava: sopra, su capitoli e voci, sì; su questa
+       lettura no. Se la rete cade proprio qui (o la query va in timeout), mis
+       resta vuoto e il PDF esce LO STESSO: sotto ogni lavorazione c'è ancora
+       scritto «Quantità 20,46 mq», ma le righe delle misure che fanno quel
+       20,46 non ci sono. È un computo metrico senza il computo delle misure —
+       il documento dice una cosa e non la dimostra, e il messaggio in fondo
+       diceva pure «PDF del computo scaricato ✅».
+       Riprodotto facendo rispondere 500 a quella sola query: PDF scaricato,
+       quantità presenti, misure assenti, nessun avviso.
+       Adesso ci si ferma prima di disegnare qualsiasi cosa: meglio nessun PDF
+       che un PDF da mandare al cliente con dentro un buco che non si vede. */
+    const {data:mis,error:eMis}=await sb.from("gest_computo_misure").select("*")
       .eq("user_id",sbUid).in("voce_id",voci.map(v=>v.id)).order("ordine");
+    if(eMis){
+      toast("Non riesco a leggere le misure: il PDF verrebbe fuori senza le righe delle misure. Riprova fra un momento. ("+esc(eMis.message||"")+")");
+      return;
+    }
     const misDi={};(mis||[]).forEach(m=>{(misDi[m.voce_id]=misDi[m.voce_id]||[]).push(m);});
 
     const pubblico=(c.tipo==="pubblico");
@@ -14184,6 +14263,7 @@
     if(a==="ore-add")return oreAdd();
     if(a==="ore-del"){if(gconfirm("Eliminare questa riga di ore?"))return oreDel(id);return;}
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
+    if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="new-computo")return computoForm(null);
     if(a==="edit-computo")return computoForm(compCache.find(c=>String(c.id)===String(id)));
     if(a==="save-computo")return saveComputo(id);
