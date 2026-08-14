@@ -5251,3 +5251,126 @@ stati scritti. L'unica fonte è Stripe.
 Delle tre cose in sospeso ne resta una e mezza: **segnalazioni** e **messaggi
 di assistenza**. E se ne è aggiunta una più grande delle tre: **gli
 abbonamenti non lasciano traccia**.
+
+---
+
+# 14 agosto 2026 (notte, 3) — (a) I PAGAMENTI SI SCRIVONO
+
+Alessio: «facciamo a b c uno alla volta». Questa è la **a**.
+
+## PERCHÉ ADESSO CHE NON C'È NIENTE
+
+Contati sul database il 14 agosto: **0 Premium paganti, 1 gestionale attivo,
+1 annuncio pagato, 0 ricariche di crediti.**
+
+Il buco c'è ma dentro non ci è ancora caduto quasi niente — ed è per questo
+che è il momento giusto. Mettere le mani sul percorso dei pagamenti mentre i
+soldi passano davvero è un'altra cosa.
+
+⚠️ E i «premium» che si vedono in giro sono quelli **regalati** dal pannello:
+`premium_pagato` diventa `true` solo quando paga Stripe.
+
+## COSA C'ERA PRIMA
+
+    imprese.piano = 'premium', premium_pagato = true
+    imprese.gestionale_attivo = true
+
+Una spunta. Nessun importo, nessuna data, nessun numero di transazione.
+**Non era un dato che spariva con la cascata: non veniva mai scritto.** Anche
+con il cliente ancora iscritto e pagante non si poteva sapere quando aveva
+pagato, quanto, né quante volte aveva rinnovato.
+
+Per la pubblicità restava `stato='pagato'` e il numero della sessione, ma non
+il prezzo — ricalcolato ogni volta da un listino che può cambiare.
+
+## LA TABELLA — `sql/pagamenti.sql`
+
+Niente `references` a `auth.users` né a `imprese`: stessa lezione di
+`iscrizioni_annullate`.
+
+Tre scelte che contano:
+
+1. **I soldi si tengono in centesimi, interi.** Stripe li manda così, e sono
+   interi apposta: 19,99 non esiste come numero con la virgola nei computer,
+   e a forza di somme un centesimo si perde. Gli euro li calcola PostgreSQL
+   con `numeric`, che non sbaglia. Il collaudo somma 19,99 tre volte e
+   pretende esattamente 59,97.
+2. **`riferimento` UNIQUE.** È la riga che impedisce di contare due volte:
+   Stripe ripete gli avvisi di suo, e senza questo 99 euro diventano 198.
+3. **Una funzione, non un `insert` in due file.** `registra_pagamento()` sta
+   nel database: la regola è in un posto solo e vale per tutti e due i
+   webhook. Due copie della stessa cosa vuol dire correggerne una sola.
+   (Un modulo condiviso in `netlify/functions/` era l'altra strada: scartata
+   perché in quella cartella non c'è **nessun** file condiviso oggi, e
+   inaugurare quel modo proprio sul percorso dei soldi, senza poter provare
+   un deploy da qui, non valeva il rischio.)
+
+## ⚠️ CRITICO — IL REVOKE SULLA FUNZIONE
+
+`registra_pagamento` è `security definer`: scavalca RLS. Se resta eseguibile
+da un utente qualsiasi del sito, **quello si scrive incassi finti a piacere**
+e la contabilità diventa carta straccia. È la stessa riga che sta sotto
+`add_credits_pack` («senza questo revoke un utente si autoricarica crediti»).
+È il controllo più importante del collaudo.
+
+## I DUE WEBHOOK
+
+⚠️ **LA REGOLA CHE NON SI TOCCA: se prendere nota fallisce, l'attivazione si
+fa lo stesso.** Uno ha pagato, deve avere quello che ha pagato. Non gli si
+nega il Premium perché noi non siamo riusciti a scrivere una riga di appunti.
+È elimina-account.js visto dall'altra parte.
+
+E non si risponde mai «errore» a Stripe per colpa di quella riga: Stripe
+rimanderebbe l'avviso, e l'attivazione si rifarebbe a ripetizione per niente.
+
+**I rinnovi.** Un abbonamento che si rinnova NON rifà
+`checkout.session.completed`: quello succede solo la prima volta. L'anno dopo
+arriva `invoice.paid`. Senza quel pezzo si registrerebbe il primo pagamento e
+nessuno di quelli dopo — il modo più facile di avere una contabilità che
+sembra a posto e non lo è.
+
+⚠️ **Perché funzioni, `invoice.paid` va acceso anche dalla parte di Stripe**
+(Dashboard > Developers > Webhooks > l'endpoint degli abbonamenti > Select
+events). Se non lo si accende, il codice non fa danni: non arriva mai niente.
+
+**E la trappola che quasi mi sfuggiva:** quando uno si abbona, Stripe manda
+DUE avvisi per lo stesso pagamento — la sessione e la prima fattura. Hanno
+due numeri diversi, quindi l'UNIQUE non li riconosce come lo stesso incasso.
+Senza saltare `billing_reason = 'subscription_create'`, **ogni abbonamento
+nuovo verrebbe contato due volte**. È entrato nel collaudo come controllo a sé.
+
+## LE PROVE
+
+- `nuove/pagamenti-collaudo.sh` — 10 controlli su PostgreSQL 16 vero, con i
+  ruoli di Supabase creati apposta (`anon`, `authenticated`, `service_role`:
+  senza, il `grant` in fondo dà errore e la prova accuserebbe una query sana).
+  Senza la query: **7 problemi su 10**.
+- `nuove/pagamenti-webhook.js` — 14 controlli sui file veri. Sui file di
+  prima: **8 problemi su 14**. I 6 che restano verdi sono la rete
+  (l'attivazione avviene comunque, la disdetta, l'avviso senza email) — ed è
+  giusto che siano verdi anche prima.
+
+## ⚠️ LA LEZIONE — LA DICIASSETTESIMA
+
+Tre righe rosse sul lucchetto, su una query sana. Confrontavo con `"f"`:
+`has_table_privilege(...)::text` in PostgreSQL fa **`false`**, non `f`. Le
+lettere sole t/f sono come psql *stampa* un booleano, non come si converte.
+
+Sempre la stessa forma: prima di credere al rosso, chiedersi se a parlare è
+il database o la prova.
+
+## COSA DEVE FARE ALESSIO
+
+1. La query `sql/pagamenti.sql`.
+2. Su Stripe, accendere `invoice.paid` sull'endpoint degli abbonamenti.
+3. Il push.
+
+## DOVE SIAMO RIMASTI
+
+68 prove nel banco, 0 rosse.
+
+Restano la **b** (l'annuncio pagato che sparisce con l'impresa) e la **c**
+(segnalazioni, messaggi di assistenza, e il resto del gestionale).
+
+Da guardare, prima o poi: la tabella `pagamenti` non ha ancora una schermata
+nel pannello. Una tabella che nessuno guarda è a metà strada.

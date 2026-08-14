@@ -34,6 +34,42 @@ exports.handler = async (event) => {
         })
         .eq('id', annuncioId);
       if (error) return { statusCode: 500, body: 'Supabase Error: ' + error.message };
+
+      // -------------------------------------------------------------
+      // LA RIGA DELL'INCASSO — 14 agosto 2026
+      //
+      // Qui sulla riga dell'annuncio restava `stato='pagato'` e il numero
+      // della sessione, ma NON il prezzo: veniva ricalcolato ogni volta
+      // da un listino che puo' cambiare, quindi fra due anni non si
+      // sarebbe piu' saputo quanto era stato pagato davvero. E la riga
+      // dell'annuncio sparisce insieme all'impresa (cascata, verificato
+      // sul database il 14 agosto): con lei se ne andava l'unica traccia.
+      //
+      // L'importo NON si ricalcola: si prende quello che Stripe dice di
+      // aver incassato. Quello e' il numero vero.
+      //
+      // ⚠️ Se prendere nota fallisce, NON si risponde errore: l'annuncio
+      // e' gia' pagato e attivo, e un errore farebbe rimandare l'avviso a
+      // Stripe per niente.
+      // -------------------------------------------------------------
+      try {
+        const { data: reg, error: eReg } = await supabase.rpc('registra_pagamento', {
+          p_prodotto:    'pubblicita',
+          p_centesimi:   session.amount_total,
+          p_riferimento: session.id,
+          p_email:       (session.customer_details && session.customer_details.email) || null,
+          p_impresa_id:  (session.metadata && session.metadata.impresa_id) || null,
+          p_valuta:      session.currency || 'eur',
+          p_tipo_evento: stripeEvent.type,
+          p_quando:      stripeEvent.created
+                           ? new Date(stripeEvent.created * 1000).toISOString() : null
+        });
+        if (eReg) console.error('[pagamenti] NON segnato:', eReg.message);
+        else if (reg && reg.ok === false) console.log('[pagamenti] gia segnato:', reg.reason);
+        else console.log('[pagamenti] segnato: pubblicita', session.amount_total, session.id);
+      } catch (e) {
+        console.error('[pagamenti] eccezione:', e.message);
+      }
     }
   }
 
