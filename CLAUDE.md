@@ -5543,3 +5543,63 @@ non ho in `sql/`, farmi mandare una riga vera.
 
 69 prove nel banco, 0 rosse (i controlli sono saliti da 24 a 28 fra le due
 prove dei pagamenti).
+
+---
+
+# 14 agosto 2026 (notte, 6) — ⚠️ GLI AVVISI CHE ALESSIO NON HA MAI VISTO
+
+## LA DICIANNOVESIMA, E LA PIÙ IMBARAZZANTE
+
+`sql/recupera-annuncio-pagato.sql` parlava con `raise notice`. Quattro
+guardie, ognuna con il suo messaggio scritto in italiano semplice:
+«NON HO SCRITTO NIENTE», «hai scritto gli euro invece dei centesimi», e
+così via.
+
+**L'SQL Editor di Supabase i NOTICE non li mostra.**
+
+Sullo schermo di Alessio compariva soltanto:
+
+    Success. No rows returned
+
+che si legge come «fatto», e voleva dire «non ho scritto niente».
+
+Le protezioni c'erano ed erano giuste — a fermarsi si fermava davvero. Ma
+l'unica cosa che l'utente vedeva diceva il contrario. È esattamente la
+forma di bugia che stiamo cacciando da stanotte (elenco vuoto = buona
+notizia), scritta da me, dentro il file che doveva proteggerlo.
+
+E non l'ho scoperta provando: il file lo avevo provato sei volte su
+PostgreSQL 16, dove i notice **si vedono benissimo**. Il banco gira in un
+posto dove quel canale funziona, il cliente sta in un posto dove non
+funziona. Verde di qua, muto di là.
+
+## LA CORREZIONE
+
+Il file adesso è **un solo `select`** che risponde con una RIGA DI
+RISULTATO, che l'Editor mostra sempre:
+
+    NIENTE SCRITTO — manca l'importo: cambia lo 0 in cima...
+    NIENTE SCRITTO — 49 centesimi fanno 0,49 euro: hai scritto gli euro...
+    NIENTE SCRITTO — gli annunci pagati sono 2: ...
+    SCRITTO: 49,00 euro per l'annuncio dell'impresa 67 — guardalo nel pannello
+    C'ERA GIA' — nessun doppione
+
+Provato in sei casi su PostgreSQL 16: ognuno dà la sua riga.
+
+## GLI ALTRI FILE — CONTROLLATI, STANNO A POSTO
+
+`acquisti-non-spariscono.sql`, `pagamenti.sql`, `pagamenti-impresa-id.sql`
+e `iscrizioni-annullate.sql` usano i notice **in più**, ma finiscono tutti
+con un `select` di verifica: quello si vede, ed è quello che Alessio ha
+letto ogni volta («adesso restano», «chiusa», «solo il server»). Il danno
+riguardava solo il file del recupero, che di verifica finale non ne aveva
+una che dicesse com'era andata.
+
+## ⚠️ REGOLA NUOVA
+
+**Se una query deve dire qualcosa ad Alessio, glielo dice con una riga di
+risultato — mai con `raise notice`.** I notice servono a me quando provo
+sul PostgreSQL del banco; a lui non arrivano.
+
+E più in generale: quando provo una cosa in un ambiente diverso da quello
+dove finirà, devo chiedermi anche **come si vedrà**, non solo se funziona.
