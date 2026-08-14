@@ -4620,6 +4620,10 @@
     return schedaJob({
       tono:"t-neutro",                 /* un cliente non ha uno stato: barretta grigia */
       titolo:esc(c.nome)+tag,
+      /* 14 agosto notte: si apre cliccando la scheda, come in Squadra. E' la
+         stessa cosa che fa la prima voce del menu («Apri scheda»): chi vuole
+         solo leggere non deve cercare il pulsante. */
+      apri:{action:"apri-cli",data:{id:c.id}},
       meta:[ind?"📍 "+esc(ind):"",
             c.referente?"👤 "+esc(c.referente):"",
             c.telefono?"📞 "+esc(c.telefono):"",
@@ -11914,6 +11918,11 @@ ${vecchi?`
     return schedaJob({
       tono: c.stato==="definitivo" ? "t-ok" : "t-attesa",
       titolo: (c.numero?("N. "+esc(String(c.numero))+" — "):"")+esc(c.titolo||"(senza titolo)"),
+      /* 14 agosto notte: il clic apre il computo con dentro le lavorazioni —
+         cioe' la stessa cosa della prima voce del menu, «Apri il computo».
+         Da un computo si entra per guardare le voci, non per correggere il
+         titolo: se il clic aprisse solo i dati sarebbe un altro giro a vuoto. */
+      apri:{action:"edit-computo",data:{id:c.id}},
       destra: '<span class="stato '+(COMP_BAR[c.stato]||"da_fare")+'">'+(COMP_STATO_LAB[c.stato]||esc(c.stato))+'</span>',
       meta:[
         c.cliente_id?("👤 "+esc(compCli[c.cliente_id]||"—")):"",

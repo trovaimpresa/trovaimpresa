@@ -5809,12 +5809,28 @@ stessa forma: prima di credere al rosso, chiedersi chi sta parlando.
 
 Nei due versi: sul file di prima **2 problemi su 5**, sul corretto **0**.
 
-## DA FARE, STESSA COSA ALTROVE
+## FATTI SUBITO DOPO: CLIENTI E COMPUTO
 
-`schedaJob` lo usano anche **Clienti** (`cliCard`) e **Computo metrico**
-(`compCard`): lì la scheda ancora non si clicca. Adesso è una riga per
-sezione — ma va deciso cosa deve aprire il clic (su un computo, «modifica» o
-«apri le lavorazioni»?), quindi non l'ho fatto di mia iniziativa.
+La domanda «cosa deve aprire il clic?» se l'era già data il codice: tutti e
+due i menu hanno la voce «Apri» come **prima** azione.
+
+- **Clienti** → `apri-cli` («👁 Apri scheda»). È la scheda di **lettura**, non
+  il modulo di modifica: è esattamente quella che serve a chi vuole guardare.
+- **Computo** → `edit-computo` («✏ Apri il computo»), che apre il computo con
+  dentro le **lavorazioni**. Da un computo si entra per vedere le voci, non
+  per correggere il titolo: se il clic aprisse solo i dati sarebbe un altro
+  giro a vuoto.
+
+La prova adesso è 7 controlli e li copre tutti e tre. Nei due versi: sul file
+di prima **4 problemi su 7**, sul corretto **0**.
+
+## RESTANO FUORI, E SI SA PERCHÉ
+
+`schedaJob` lo usano anche **Fatture**, **Mezzi**, **Scadenzario**, **Crediti
+formativi** e le righe del **Cestino**. Lì il clic non c'è ancora. Non è una
+dimenticanza: per ognuna va deciso cosa deve aprire, e per il Cestino la
+domanda è diversa (cliccare una riga la rimette a posto? allora è un'azione
+che cambia i dati, e va chiesta prima, non fatta a sorpresa).
 
 ## DOVE SIAMO RIMASTI
 
