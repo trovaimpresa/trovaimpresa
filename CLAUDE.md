@@ -4741,3 +4741,139 @@ l'importazione di un prezzario regionale, i capitoli che il preventivo perde.
 *4. Le regole del deposito dei file* (bucket foto e video).
 
 *5. `gestionale-negozio.html` e `gestionale-noleggio.html`*, separatamente.
+
+---
+
+# 14 agosto 2026 (notte, 3) — I 7 FASTIDI: LA LISTA DEL 13 AGOSTO SI CHIUDE
+
+Chiusi gli ultimi 7 punti rimasti dal 13 agosto mattina. Due erano **più
+grossi** di come erano stati classificati; uno **non l'ho corretto**, e sotto
+c'è scritto perché.
+
+Il banco passa a **62 prove nel giro normale**.
+
+| file | cosa cambia |
+|---|---|
+| `gestionale-app.html` | i reparti che non si leggono · le ore vere · le foto dal telefono · il filtro della Galleria |
+| `sql/gest-buchi-schema.sql` | **DA LANCIARE**: `gest_mezzi.tipo` e `gest_richieste` |
+
+## 1. «ANCORA NESSUN REPARTO» — era peggio di un fastidio
+
+`renderLanding` non guardava l'errore della lettura dei reparti. Se la
+connessione cadeva, `mest` restava vuoto, la lista si svuotava, e al suo posto
+compariva **lo stesso identico messaggio che vede uno appena iscritto**:
+«Ancora nessun reparto. Creane uno qui sotto 👇».
+
+Uno con tre reparti pieni di lavori apre il gestionale e legge che non ha
+niente. La prima cosa che pensa è di aver perso tutto — e la seconda è di
+crearne un altro, che è il modo di fare davvero il danno.
+
+Adesso: i reparti **non si svuotano** (resta quello che il browser ha già in
+mano), si dice che è la connessione, c'è un pulsante **Riprova**, e il modulo
+«crea reparto» si **nasconde** finché il guasto è in corso.
+
+## 2. IL MESSAGGIO DI ELIMINAZIONE PERSONA — due numeri sbagliati su tre
+
+È il messaggio su cui si decide se eliminare una persona. Due dei tre numeri
+erano falsi:
+
+- **le ORE erano le RIGHE.** `_n()` conta con `count:"exact"`: dodici
+  registrazioni da otto ore diventavano «12 ore registrate» invece di **96**;
+- **le FOTO DAL TELEFONO non si contavano MAI.** L'app dell'operaio scrive
+  `operatore: MIO.nome` — il **nome**, «Wahid» — e qui si cercava
+  `operatore = <uuid>`. Due cose diverse: il conto tornava **zero sempre**, ed
+  è proprio dal telefono che se ne caricano di più.
+
+Adesso le ore si sommano davvero e le foto si cercano per nome (e per id, per
+la roba vecchia).
+
+## 3. LA GALLERIA CHE RESTAVA VUOTA
+
+Eliminata l'ultima foto di una persona, quella spariva dalla tendina ma
+`galFilter` restava puntato su di lei: tendina su «Tutti», Galleria **vuota**,
+e l'unico modo di uscirne era ricaricare la pagina. Adesso, se il valore scelto
+non esiste più, il filtro torna su «Tutti». Uguale per il cantiere.
+
+## 4-5. I DUE BUCHI NELLO SCHEMA — `sql/gest-buchi-schema.sql`
+
+`gest_mezzi.tipo` (mezzo / attrezzatura) e la tabella `gest_richieste` **non
+compaiono in nessun file di `sql/`**, benché il gestionale le usi tutti i
+giorni. Sul database di Alessio ci sono: il buco è nei file, che sono la fonte
+di verità dello schema. Chi rifacesse il database da zero avrebbe un gestionale
+che si apre e poi dà errore appena tocca la sezione sbagliata.
+
+Provato su un **PostgreSQL 16 vero**: creazione da zero, rilancio (idempotente),
+il vincolo che rifiuta un `tipo` inventato, e il lucchetto di `gest_richieste` —
+uno non legge le richieste di un altro, non ne scrive per conto di altri, e
+**non può riscriversi da solo la risposta** (nessuna policy di update).
+
+## 6-7. LE 25 LETTURE E I 274 COLPI — ⚠️ MISURATI, NON CORRETTI
+
+Questo è il punto onesto della sessione.
+
+**Misurato** con `nuove/quante-letture.py`:
+
+- aprendo un reparto: **25 letture**, e `gest_operatori` chiesta **5 volte** da
+  cinque punti diversi (contatori, lavori, squadra, galleria, manodopera);
+- il **Cestino non si ridisegna doppio**: 18 letture, una per tabella. I «274
+  colpi» non si riproducono all'apertura.
+
+**Non corretto**, di proposito. Ridurre quelle 5 letture vuol dire toccare
+**dodici punti** che chiedono la stessa cosa, in zone che oggi funzionano
+(squadra, lavori, galleria). In coda a una sessione lunga è esattamente il modo
+di infilare un difetto nuovo — ed è scritto qui dentro dal 12 agosto: *il
+difetto nuovo nasce nella riga che hai appena toccato*.
+
+Al suo posto c'è una **rete**: la prova fissa i numeri di oggi (25 letture, max
+5 sulla stessa tabella) e diventa rossa se qualcuno ne aggiunge. Non risolve lo
+spreco: impedisce che peggiori mentre nessuno guarda. Quando la riduzione si
+farà, si abbassa il tetto e la prova resta rossa finché non è vera.
+
+## ⚠️ LA LEZIONE — SEI RIGHE ROSSE FALSE, IN TRE MODI NUOVI
+
+1. **chiamavo le funzioni del gestionale dalla pagina** (`renderLanding()`,
+   `renderGalleria()`): stanno nel loro scope e da fuori non si vedono. È la
+   terza volta oggi che ci casco;
+2. **le rotte registrate nell'ordine sbagliato**: in Playwright vince
+   l'**ULTIMA** route registrata, non la prima. Le mie «rotte rotte» stavano
+   prima di quella generale, che se le mangiava: la prova misurava un
+   gestionale a cui non era caduto proprio niente, e chiamava rosso un
+   messaggio che non era mai comparso;
+3. **contavo un numero che il finto server non sa produrre**: `_nFile` usa
+   `count:"exact",head:true`, e l'harness non lo implementa. Il numero non
+   arriva mai. Adesso la prova guarda **cosa il gestionale chiede** (le foto
+   cercate per nome), non quanto conta.
+
+Aggiunto all'harness `rotte_extra=`: far cadere una lettura **dal primo
+caricamento**, che è il caso vero — prima si poteva romperla solo dopo, che è
+un caso più facile e diverso.
+
+**Conto della giornata: 20 difetti veri corretti, 14 falsi allarmi nelle
+prove.** Quattro su cinque, come dal 13 agosto.
+
+## COSA DEVE FARE ALESSIO
+
+1. Lanciare **`sql/gest-buchi-schema.sql`** su Supabase.
+2. Il push.
+
+## DOVE SIAMO RIMASTI
+
+**La lista dei 13 del 13 agosto è chiusa.** Restano:
+
+*1. La riduzione delle letture* (25 all'apertura, `gest_operatori` × 5): tocca
+dodici punti, va fatta con calma e da sola. La rete c'è già.
+
+*2. Il resto del Computo* — il quadro economico completo delle gare,
+l'importazione di un prezzario regionale, i capitoli che il preventivo perde.
+
+*3. Le 18 prove «da capire» del banco* — il traguardo: 0 rosse e 0 gialle.
+
+*4. Le regole del deposito dei file* (bucket `gestionale-foto` e
+`gestionale-video`), mai guardate. Ci sta dentro `foto_team_delete`.
+
+*5. `gestionale-negozio.html` e `gestionale-noleggio.html`*, separatamente e
+dopo impresa e professionisti.
+
+**E la cosa che non è codice:** al 14 agosto **nessuno usa ancora il
+gestionale**. Le tre zone dove si perdevano soldi o dati sono state guardate e
+chiuse; quello che manca adesso non è una correzione, è il primo che lo apre.

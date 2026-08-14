@@ -1005,10 +1005,26 @@
     if(sb&&sbUid){
       const {data}=await sb.from("gest_lavori").select("mestiere_id,stato").eq("user_id",sbUid);
       rows=data||[];
+      /* ⚠️ «ANCORA NESSUN REPARTO» QUANDO IL DATABASE NON RISPONDE — 14/8/2026.
+         Qui sotto l'errore della lettura dei reparti non veniva guardato: se
+         la connessione cadeva, «mest» restava vuoto, la lista si svuotava e
+         al suo posto compariva «Ancora nessun reparto. Creane uno qui sotto»
+         — cioè ESATTAMENTE quello che vede uno che si è appena iscritto.
+         Chi ha tre reparti pieni di lavori apre il gestionale e legge che non
+         ha niente: la prima cosa che pensa è di aver perso tutto.
+         Adesso, se la lettura fallisce, i reparti NON si svuotano (resta
+         quello che il browser ha già in mano) e si dice cos'è successo. */
       /* FONTE PRIMARIA dei reparti = gest_mestieri su Supabase (visibili da qualsiasi browser/account).
          state.panels resta come cache/fallback locale: lo idratiamo dai mestieri così entrata (cur/curMestiere)
          e contatori continuano a funzionare senza altre modifiche. */
-      const {data:mest}=await sb.from("gest_mestieri").select("id,nome,icona,colore,ordine").eq("user_id",sbUid).order("ordine",{ascending:true});
+      const {data:mest,error:eMest}=await sb.from("gest_mestieri").select("id,nome,icona,colore,ordine").eq("user_id",sbUid).order("ordine",{ascending:true});
+      if(eMest){
+        _landingGuasta=eMest.message||"la connessione non ha risposto";
+        ps=state.panels||[];        /* si tiene quello che c'è, non si svuota */
+        _landingDisegna(ps,rows);
+        return;
+      }
+      _landingGuasta=null;
       let changed=false;
       ps=(mest||[]).map(m=>{
         let p=(state.panels||[]).find(x=>x.mestiere_id===m.id);
@@ -1027,6 +1043,15 @@
       });
       if(changed)await save();
     }
+    _landingDisegna(ps,rows);
+    /* deep link + un solo reparto: entra da solo */
+    if(_deepTab&&ps.length===1)enterPanel(ps[0].id);
+  }
+
+  /* il guasto della lettura dei reparti: null = tutto a posto */
+  let _landingGuasta=null;
+  function _landingDisegna(ps,rows){
+    ps=ps||[]; rows=rows||[];
     $("#panels").innerHTML=ps.length?ps.map(p=>{
       const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
       const tot=mine.length, df=mine.filter(l=>l.stato!=="fatto").length;
@@ -1034,9 +1059,18 @@
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
         <span class="pc-ic" style="background:${p.as};color:${p.ad}">${p.icon}</span><h2>${esc(p.nome)}</h2>
         <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
-    }).join(""):`<div class="empty-rep">Ancora nessun reparto.<br>Creane uno qui sotto 👇</div>`;
-    /* deep link + un solo reparto: entra da solo */
-    if(_deepTab&&ps.length===1)enterPanel(ps[0].id);
+    }).join(""):(_landingGuasta
+      ? `<div class="empty-rep" style="border-color:var(--err,#c0392b)">
+           <b>Non riesco a leggere i tuoi reparti.</b><br>
+           Non vuol dire che non ci sono: è la connessione con il database che non ha risposto.<br>
+           <small style="opacity:.8">${esc(String(_landingGuasta))}</small><br>
+           <button class="btn" data-action="landing-riprova" style="margin-top:10px">Riprova</button>
+         </div>`
+      : `<div class="empty-rep">Ancora nessun reparto.<br>Creane uno qui sotto 👇</div>`);
+    /* col guasto in corso il modulo «crea reparto» si nasconde: se no si
+       finisce per crearne uno doppio credendo di aver perso il primo */
+    const _nuovo=document.querySelector("#nuovo-reparto,#panel-new,.landing-new");
+    if(_nuovo)_nuovo.style.display=_landingGuasta?"none":"";
   }
 
   function enterPanel(id){
@@ -5039,16 +5073,49 @@
         return statoPrima!=="revocato";
       }catch(e){ return false; }
     };
+    /* ⚠️ DUE NUMERI SBAGLIATI IN UN MESSAGGIO SOLO — 14 agosto 2026 (notte).
+       È il messaggio su cui si decide se eliminare una persona: se i numeri
+       non sono veri, la decisione si prende al buio.
+
+       1) LE ORE erano le RIGHE. _n() conta le righe con count:"exact": dodici
+          registrazioni da otto ore diventavano «12 ore registrate» invece di
+          96. Adesso si sommano le ore vere.
+
+       2) LE FOTO DAL TELEFONO non si contavano MAI. L'app dell'operaio scrive
+          `operatore: MIO.nome` — il NOME, «Wahid» — mentre qui si cercava
+          `operatore = <uuid della persona>`. Due cose diverse: il conto
+          tornava zero sempre, ed è proprio dal telefono che se ne caricano
+          di più. Adesso si cerca per nome (e per id, per la roba vecchia). */
+    const _sommaOre=async function(){
+      try{
+        const {data,error}=await sb.from("gest_ore").select("ore")
+          .eq("user_id",sbUid).eq("operatore_id",id);
+        if(error){incerto=true;return 0;}
+        return (data||[]).reduce((t,r)=>t+(+r.ore||0),0);
+      }catch(e){incerto=true;return 0;}
+    };
+    const _nFile=async function(tab){
+      try{
+        const q=[];
+        if(nome)q.push('operatore.eq."'+String(nome).replace(/"/g,'')+'"');
+        q.push("operatore.eq."+String(id));
+        const {count,error}=await sb.from(tab).select("id",{count:"exact",head:true})
+          .eq("user_id",sbUid).or(q.join(","));
+        if(error){incerto=true;return 0;}
+        return count||0;
+      }catch(e){incerto=true;return 0;}
+    };
     const [a,b,c,d,acc]=await Promise.all([
-      _n("gest_ore","operatore_id",id),
+      _sommaOre(),
       _n("gest_lavori","operatore_id",id),
-      _n("gest_foto","operatore",String(id)),
-      _n("gest_video","operatore",String(id)),
+      _nFile("gest_foto"),
+      _nFile("gest_video"),
       _haAccesso()
     ]);
     ore=a;lav=b;file=c+d;
     const voci=[];
-    if(ore) voci.push(ore+(ore===1?" ora registrata":" ore registrate")+" — servono al margine dei lavori");
+    /* «96 ore» e non «96,00 ore»: le ore si scrivono come si dicono */
+    if(ore) voci.push(_numTesto(Math.round(ore*100)/100)+(ore===1?" ora registrata":" ore registrate")+" — servono al margine dei lavori");
     if(file)voci.push(file+(file===1?" foto o video caricato":" foto e video caricati"));
     if(lav) voci.push(lav+(lav===1?" lavoro a suo nome, che resterà senza nessuno assegnato"
                                   :" lavori a suo nome, che resteranno senza nessuno assegnato"));
@@ -8238,11 +8305,19 @@
         }catch(e){}
       }
     }
+    /* ⚠️ IL FILTRO CHE PUNTA A CHI NON C'E' PIU' — 14 agosto 2026 (notte).
+       Eliminando l'ultima foto di una persona (o di un cantiere), quella
+       sparisce dalla tendina — ma galFilter restava puntato su di lei.
+       Risultato: la tendina mostra «Tutti», e la Galleria resta VUOTA senza
+       che si capisca perche'. L'unico modo di uscirne era ricaricare.
+       Se il valore scelto non esiste piu', il filtro torna su «Tutti». */
+    if(galFilter.op&&!ops.has(galFilter.op))galFilter.op="";
     if(selOp)selOp.innerHTML=['<option value=""'+(galFilter.op===""?" selected":"")+'>Tutti</option>']
       .concat(Array.from(ops).map(o=>'<option value="'+esc(o)+'"'+(galFilter.op===o?" selected":"")+'>'+esc(galNomeOp(o))+'</option>')).join("");
 
     /* tendina cantiere: solo i lavori che hanno almeno una foto o un video */
     const conRoba=new Set(tutteF.map(f=>f.lavoro_id).concat(tutteV.map(v=>v.lavoro_id)));
+    if(galFilter.lav&&!conRoba.has(galFilter.lav))galFilter.lav="";
     if(selLav)selLav.innerHTML=['<option value=""'+(galFilter.lav===""?" selected":"")+'>'+esc(_msgPro("Tutti i cantieri"))+'</option>']
       .concat(lavArr.filter(l=>conRoba.has(l.id))
         .sort((a,b)=>String(b.data_prevista||"").localeCompare(String(a.data_prevista||"")))
@@ -14425,6 +14500,7 @@
     if(a==="ore-del"){if(gconfirm("Eliminare questa riga di ore?"))return oreDel(id);return;}
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
+    if(a==="landing-riprova")return renderLanding();
     if(a==="new-computo")return computoForm(null);
     if(a==="edit-computo")return computoForm(compCache.find(c=>String(c.id)===String(id)));
     if(a==="save-computo")return saveComputo(id);
