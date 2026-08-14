@@ -448,6 +448,9 @@
       <div class="nav-item" onclick="showSection('utilizzo',this)">
         <span class="nav-icon">📈</span> Chi usa il gestionale
       </div>
+      <div class="nav-item" onclick="showSection('incassi',this)">
+        <span class="nav-icon">💶</span> Incassi
+      </div>
       <div class="nav-item" onclick="showSection('abbandoni',this)">
         <span class="nav-icon">👋</span> Chi se n'è andato
       </div>
@@ -1142,6 +1145,30 @@
       </div>
     </div>
 
+    <!-- INCASSI — 14 agosto 2026 (notte).
+         Prima di stasera dei pagamenti non restava scritto niente: solo
+         una spunta sul profilo. Adesso ogni incasso lascia una riga in
+         `pagamenti`, e questa è la schermata dove si guarda. -->
+    <div class="section" id="sec-incassi">
+      <div class="topbar">
+        <div class="topbar-title">💶 Incassi</div>
+        <div class="topbar-right"><span class="admin-badge">👤 Admin</span></div>
+      </div>
+      <div style="padding:18px">
+        <div class="u-numeri" id="pg-numeri"></div>
+        <div class="u-filtri">
+          <button class="u-btn attivo" data-pf="tutti" onclick="filtraPagamenti('tutti',this)">Tutti</button>
+          <button class="u-btn" data-pf="premium" onclick="filtraPagamenti('premium',this)">Premium</button>
+          <button class="u-btn" data-pf="gestionale" onclick="filtraPagamenti('gestionale',this)">Gestionale</button>
+          <button class="u-btn" data-pf="pubblicita" onclick="filtraPagamenti('pubblicita',this)">Pubblicità</button>
+          <button class="u-btn" data-pf="crediti-ai" onclick="filtraPagamenti('crediti-ai',this)">Crediti AI</button>
+          <button class="u-btn" onclick="caricaPagamenti()">Aggiorna</button>
+        </div>
+        <div id="pg-mesi"></div>
+        <div id="pg-lista"><div class="loading">Caricamento...</div></div>
+      </div>
+    </div>
+
     <!-- CHI SE N'È ANDATO — 14 agosto 2026.
          Il dato non esisteva: «annulla iscrizione» cancellava l'account e
          con lui spariva ogni traccia. Adesso, prima di cancellare, il
@@ -1359,6 +1386,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'mappa-spazi') caricaMappaSpazi();
   if (id === 'utilizzo') caricaUtilizzo();
   if (id === 'abbandoni') caricaAbbandoni();
+  if (id === 'incassi') caricaPagamenti();
   if (id === 'richieste') caricaRichieste();
   if (id === 'scrivi-tutti') contaDestinatari();
   if (!fromPopstate && (!history.state || history.state.section !== id)) history.pushState({section: id}, '');
@@ -2063,6 +2091,145 @@ function disegnaUtilizzo(){
         + ((Number(r.tentativi_totali)||0) > 0
             ? '<div><div class="k">Ha bussato senza entrare</div><div class="v">' + r.tentativi_totali + ' volte &middot; ' + _uQuando(r.ultimo_tentativo) + '</div></div>'
             : '')
+      + '</div></div>';
+  }).join('');
+}
+
+/* ============================================================
+   GLI INCASSI — 14 agosto 2026 (notte)
+
+   ⚠️ I soldi arrivano in CENTESIMI, interi, e si sommano interi. Si
+   dividono per 100 solo nell'ultimo momento, quando si scrivono a
+   schermo. Sommare qui gli euro con la virgola vuol dire che tre incassi
+   da 19,99 possono dare 59,970000000000006: e' come funzionano i numeri
+   con la virgola in JavaScript, e su una schermata di conti non e' una
+   cosa che si puo' lasciare al caso.
+
+   ⚠️ E una lista vuota NON vuol dire «non hai incassato niente» se la
+   tabella non e' ancora stata creata. Sono due cose diverse e la seconda
+   si legge come la prima: qui si distinguono.
+   ============================================================ */
+let _pagamenti = [], _pgFiltro = 'tutti', _pgConti = null, _pgMancaTabella = false;
+
+/* «1.234,56 €» — da centesimi interi, all'italiana */
+function _pgEuro(cent){
+  const n = Math.round(Number(cent) || 0);
+  const seg = n < 0 ? '-' : '';
+  const a = Math.abs(n);
+  const int = Math.floor(a / 100), dec = String(a % 100).padStart(2, '0');
+  return seg + int.toLocaleString('it-IT') + ',' + dec + ' €';
+}
+
+const _PG_NOMI = {
+  'premium':    'Premium',
+  'gestionale': 'Gestionale',
+  'pubblicita': 'Pubblicità',
+  'crediti-ai': 'Crediti AI'
+};
+function _pgMese(m){
+  if(!m || m === 'senza data') return 'senza data';
+  const [a, me] = m.split('-');
+  const nomi = ['gennaio','febbraio','marzo','aprile','maggio','giugno',
+                'luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  return (nomi[(+me) - 1] || m) + ' ' + a;
+}
+
+async function caricaPagamenti(){
+  const box = document.getElementById('pg-lista');
+  if(box) box.innerHTML = '<div class="loading">Caricamento...</div>';
+  try {
+    const res = await fetch('/.netlify/functions/admin-pagamenti', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ u: adminU, p: adminP })
+    });
+    const j = await res.json();
+    if(!res.ok) throw new Error(j.error || 'errore');
+    _pgMancaTabella = !!j.manca_tabella;
+    _pagamenti = j.righe || [];
+    _pgConti = j.conti || null;
+    disegnaPagamenti();
+  } catch(e) {
+    if(box) box.innerHTML = '<div style="background:#fdecea;border:2px solid #f5c2bd;color:#b3261e;padding:16px;border-radius:12px;font-weight:600">Non sono riuscito a leggere i dati: ' + _uEsc(e.message) + '</div>';
+  }
+}
+
+function filtraPagamenti(f, btn){
+  _pgFiltro = f;
+  document.querySelectorAll('#sec-incassi .u-btn').forEach(b => b.classList.remove('attivo'));
+  if(btn) btn.classList.add('attivo');
+  disegnaPagamenti();
+}
+
+function disegnaPagamenti(){
+  const box  = document.getElementById('pg-lista');
+  const num  = document.getElementById('pg-numeri');
+  const mesi = document.getElementById('pg-mesi');
+  if(!box) return;
+
+  if(_pgMancaTabella){
+    if(num)  num.innerHTML = '';
+    if(mesi) mesi.innerHTML = '';
+    box.innerHTML = '<div style="background:#fff4e5;border:2px solid #ffd9a0;padding:18px;border-radius:12px;line-height:1.7;font-size:15px">'
+      + '<b>Questa parte non è ancora accesa.</b><br>'
+      + 'Esegui <b>sql/pagamenti.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina.<br>'
+      + 'Finché non lo fai, gli incassi non vengono registrati da nessuna parte: '
+      + 'questa schermata resterebbe vuota anche se domani pagassero in dieci.'
+      + '</div>';
+    return;
+  }
+
+  const c = _pgConti || {};
+  if(num){
+    const perP = c.per_prodotto || {};
+    const chiavi = Object.keys(perP).sort((a,b) => perP[b] - perP[a]);
+    num.innerHTML =
+        '<div class="u-num"><div class="k">Incassato in tutto</div><div class="v">' + _pgEuro(c.totale_cent) + '</div></div>'
+      + '<div class="u-num"><div class="k">Questo mese</div><div class="v">' + _pgEuro(c.questo_mese_cent) + '</div></div>'
+      + '<div class="u-num"><div class="k">Ultimi 12 mesi</div><div class="v">' + _pgEuro(c.ultimi_12_cent) + '</div></div>'
+      + '<div class="u-num"><div class="k">Pagamenti registrati</div><div class="v">' + (c.quanti || 0) + '</div></div>'
+      + chiavi.map(k => '<div class="u-num"><div class="k">' + _uEsc(_PG_NOMI[k] || k)
+          + '</div><div class="v">' + _pgEuro(perP[k]) + '</div></div>').join('');
+  }
+
+  if(mesi){
+    const m = c.per_mese || [];
+    mesi.innerHTML = m.length
+      ? '<div style="margin:6px 0 18px;padding:14px 16px;background:#f7f9fc;border:1px solid #dde3ea;border-radius:12px">'
+        + '<div style="font-weight:700;font-size:15px;color:#0a2a4d;margin-bottom:8px">Mese per mese</div>'
+        + m.map(x => '<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:15px;border-bottom:1px solid #eef2f6">'
+            + '<span>' + _uEsc(_pgMese(x.mese)) + '</span><b>' + _pgEuro(x.cent) + '</b></div>').join('')
+        + '</div>'
+      : '';
+  }
+
+  const righe = _pagamenti.filter(r =>
+    _pgFiltro === 'tutti' ? true : (r.prodotto || '') === _pgFiltro);
+
+  if(!_pagamenti.length){
+    box.innerHTML = '<div style="text-align:center;color:#5b6b80;padding:40px;font-size:16px;line-height:1.7">'
+      + '<b>Ancora nessun incasso registrato.</b><br>'
+      + '<span style="font-size:14px">La registrazione parte da quando è stata accesa questa parte: '
+      + 'i pagamenti ricevuti prima non ci sono, perché allora non venivano scritti da nessuna parte.</span>'
+      + '</div>';
+    return;
+  }
+  if(!righe.length){
+    box.innerHTML = '<div style="text-align:center;color:#5b6b80;padding:40px;font-size:16px">Nessun incasso di questo tipo.</div>';
+    return;
+  }
+
+  box.innerHTML = righe.map(r => {
+    const cent = r.centesimi != null ? r.centesimi : Math.round(Number(r.importo_eur || 0) * 100);
+    const quando = r.quando ? new Date(r.quando).toLocaleDateString('it-IT') : 'senza data';
+    return '<div class="u-riga viva">'
+      + '<div class="n">' + _pgEuro(cent)
+        + '<span class="u-badge">' + _uEsc(_PG_NOMI[r.prodotto] || r.prodotto || 'altro') + '</span></div>'
+      + '<div class="s">' + _uEsc(r.email || 'email non registrata') + '</div>'
+      + '<div class="u-stato viva">' + _uEsc(quando) + '</div>'
+      + '<div class="u-det">'
+        + '<div><div class="k">Numero transazione</div><div class="v">' + _uEsc(r.riferimento || '') + '</div></div>'
+        + '<div><div class="k">Come è arrivato</div><div class="v">' + _uEsc(r.tipo_evento || 'non indicato') + '</div></div>'
       + '</div></div>';
   }).join('');
 }

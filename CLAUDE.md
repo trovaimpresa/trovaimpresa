@@ -5374,3 +5374,87 @@ Restano la **b** (l'annuncio pagato che sparisce con l'impresa) e la **c**
 
 Da guardare, prima o poi: la tabella `pagamenti` non ha ancora una schermata
 nel pannello. Una tabella che nessuno guarda è a metà strada.
+
+---
+
+# 14 agosto 2026 (notte, 4) — (b) L'ANNUNCIO GIÀ PAGATO, E LA SCHERMATA INCASSI
+
+## LA (b) SI È RISTRETTA DA SOLA
+
+Dopo la (a), i pagamenti *nuovi* della pubblicità finiscono già in
+`pagamenti`, che non sparisce con nessuno. Restava solo **l'annuncio pagato
+prima**, incassato quando quella tabella non esisteva: di quell'incasso c'è
+solo la riga dell'annuncio, e quella se ne va con l'impresa (cascata,
+verificato).
+
+⚠️ La riga dell'annuncio **resta giusto che sparisca**: l'annuncio è roba
+sua. È la *ricevuta* che deve restare, e adesso sta da un'altra parte.
+
+## ⚠️ L'IMPORTO NON SI INDOVINA
+
+Si poteva ricalcolare dal listino (mensile × mesi − sconto). Non l'ho fatto:
+il listino può essere cambiato da allora, e sarebbe venuto fuori un numero
+verosimile e forse sbagliato. **Un numero inventato dentro la tabella dei
+conti è peggio che non avere la riga** — perché una riga sbagliata sembra
+giusta e non la ricontrolla più nessuno.
+
+Quindi: due file. Uno guarda e tira fuori il numero della sessione Stripe,
+l'altro si riempie a mano con l'importo letto **su Stripe**.
+
+## `sql/recupera-annuncio-pagato.sql` — LE GUARDIE
+
+Il file **rifiuta di scrivere** in quattro casi, e lo dice a parole:
+
+1. sessione non riempita;
+2. importo a zero;
+3. **importo sotto i 5 euro** — se per sbaglio si scrive `49` invece di
+   `4900`, dentro la contabilità finisce un incasso da 49 centesimi e non se
+   ne accorge più nessuno. Per un annuncio pubblicitario, sotto i 5 euro è
+   quasi sicuramente questo l'errore;
+4. sessione che non corrisponde a nessun annuncio.
+
+Passa da `registra_pagamento`, non da un `insert` a mano: così vale l'UNIQUE
+e rilanciarlo non raddoppia l'incasso.
+
+Provato su PostgreSQL 16 in tutti e sei i casi (i quattro rifiuti, la
+scrittura giusta, e il rilancio che dice «c'era già»).
+
+⚠️ E la prima versione **non compilava**: due `%` in un `raise notice` e gli
+argomenti sulla riga sotto. Sarebbe arrivata ad Alessio come una query che
+dà errore. L'ha trovata la prova, non la rilettura.
+
+# LA SCHERMATA — «💶 Incassi» nel pannello
+
+Alessio: «facciamo una tabella pagamenti nel pannello». Una tabella di conti
+che nessuno guarda è a metà strada.
+
+In cima: incassato in tutto, questo mese, ultimi 12 mesi, quanti pagamenti, e
+un riquadro per prodotto. Sotto: mese per mese, e l'elenco con filtri.
+
+## ⚠️ I CENTESIMI, ANCHE QUI
+
+Il server somma **interi** e manda centesimi; la pagina divide per 100 una
+volta sola, alla fine. Sommare euro con la virgola in JavaScript vuol dire
+che tre incassi da 19,99 possono fare **59,970000000000006** — e su una
+schermata di conti quella coda di zeri distrugge la fiducia in tutto il
+resto. La prova somma proprio tre volte 19,99 e pretende `59,97` senza code.
+
+E come per gli abbandoni: **elenco vuoto ≠ non hai incassato niente.** Se la
+tabella non c'è, lo dice e nomina il file da lanciare.
+
+`nuove/admin-pagamenti.py`, 12 controlli. Nei due versi: sul pannello di
+prima **11 rossi su 12**, sul nuovo **0**.
+
+## COSA DEVE FARE ALESSIO
+
+1. `prove-claude/query-annuncio-da-recuperare-14ago.sql` (guarda e basta).
+2. Cercare quel numero su Stripe > Payments e leggere l'importo vero.
+3. Riempire e lanciare `sql/recupera-annuncio-pagato.sql`.
+4. Il push, e guardare **💶 Incassi** nel pannello.
+
+## DOVE SIAMO RIMASTI
+
+69 prove nel banco, 0 rosse.
+
+Resta la **c**: segnalazioni, messaggi di assistenza, e il resto del
+gestionale (le 18 prove «da capire», il Computo, le letture).
