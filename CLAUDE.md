@@ -4018,3 +4018,243 @@ quel deposito. C'era già, non è una regressione, non è in lista.
 Più tutto quello che era già scritto nella sezione del 13 agosto mattina e non
 è stato toccato: i mezzi, `gest_richieste`, `squadraAdd`, il Riepilogo che fa
 25 letture, la Galleria, il ripristino dal Cestino, le percentuali col punto.
+
+
+---
+
+# 14 agosto 2026 — LA PRIORITÀ 1 SI CHIUDE SENZA SCRIVERE UNA RIGA DI SQL
+
+Giornata corta e strana: **il lavoro grosso era guardare**, non correggere.
+La priorità 1 (il lucchetto sul database) si è chiusa **senza scrivere niente**,
+e l'unica correzione della giornata è una da tre righe che però nascondeva un
+meccanismo che si cancellava le prove da solo.
+
+Una spinta in produzione:
+
+| commit | cosa |
+|---|---|
+| (ultimo) | il ruolo della persona non si cancella più da solo |
+
+## IL BANCO HA MENTITO PER PRIMO — 4 righe rosse su 50
+
+Al primo giro della giornata, **4 prove del gruppo `nuove` erano rosse**, tutte
+con lo stesso messaggio: *«timeout aprendo gestionale-operatore.html»*. Detta
+così sembrava una pagina bianca nel gestionale.
+
+Non lo era. Nel log c'era la riga vera:
+
+```
+FileNotFoundError: .../servito/js/supabase-real.js
+```
+
+`nuove/harness.py` intercetta le chiamate a `cdn.jsdelivr.net` e al loro posto
+serve `servito/js/supabase-real.js`, cioè il bundle vero di supabase preso dal
+disco. **Nessuno lo metteva lì**: `prova-tutto.js` copiava la sonda ma non quel
+file. Senza supabase la pagina non finiva mai di caricare.
+
+Sistemato dentro `allestisci()`. Rifatto il gruppo: **8 su 8 verdi**, comprese
+le 19+12+8 prove del gruppo 1.
+
+## PRIORITÀ 1 — il lucchetto sul database: NESSUN BUCO
+
+Guardate tutte e **34** le tabelle `gest_*` leggendo le **regole vive**, non i
+file. Tre giri di query, perché i primi due mentivano (vedi la lezione).
+
+**Il risultato:**
+
+- **nessuna tabella col lucchetto spento.** Il caso peggiore — RLS spento più
+  `grant select to authenticated`, cioè chiunque sia entrato legge le righe di
+  tutti — **non esiste da nessuna parte**;
+- **nessun collaboratore legge i costi e i margini.** `gest_spese`, `gest_ore`,
+  `gest_computi`, `gest_prezzi_propri`, `gest_fornitori`,
+  `gest_fatture_fornitori`, `gest_crediti`: tutte con la sola regola del
+  proprietario. Le tre tabelle figlie del computo (`capitoli`, `voci`,
+  `misure`) sono anzi **più strette**: proprietario *e* computo padre suo;
+- `gest_spese` era l'unica che **non compare in nessun file di `sql/`** — era
+  il sospetto numero uno. Ha il lucchetto acceso e una regola sola, del
+  proprietario. A posto;
+- **`gest_operatori` è la regola NUOVA**: la correzione dell'11 agosto è viva
+  sul database. Un collaboratore vede **solo la propria scheda** — codice
+  fiscale, documenti e **costo orario** dei colleghi non li legge nessuno;
+- **le carte e i movimenti**: un dipendente vede solo la carta intestata a lui
+  (`gest_carte.dipendente_id = m.operatore_id`) e i movimenti di quella. Può
+  **aggiungerne** — giusto, è lui che spende — ma non modificarli né
+  cancellarli: quelle regole non ci sono;
+- **le foto**: la scelta a due strade del 13 agosto è viva
+  (`tipo='fattura'` → spunta *Fatture*, altrimenti *Foto* **oppure** *Lavori*);
+- **`gest_mestieri`** lo legge ogni collaboratore attivo senza guardare nessuna
+  spunta (usa ancora la vecchia `gest_puo_accedere`), ma dentro c'è solo
+  `id, user_id, nome, colore, icona, ordine, created_at, eliminato_il`: niente
+  che non veda già aprendo l'app. Va bene così;
+- **`gest_membri`** ha `membri_self`, che fa leggere a ognuno la propria riga.
+  È **solo lettura**: nessuno può alzarsi i permessi da solo.
+
+Di contorno, una conferma che vale: il fatto che `gest_lavori`, `gest_clienti`,
+`gest_fatture`, `gest_note`, `gest_scadenze` e le altre usino
+`gest_puo_sezione` **dimostra che il gruppo 1 del 13 agosto è atterrato davvero
+sul database**, non solo nei file.
+
+Le tre query stanno in `prove-claude/query-lucchetti-14ago.sql`,
+`query-chi-entra-14ago.sql`, `query-unica-14ago.sql`.
+
+**Non guardato:** le regole del **deposito dei file** (i bucket
+`gestionale-foto` e `gestionale-video`). Sono un altro posto. Lì dentro c'è già
+`foto_team_delete`, che usa `gest_puo_accedere` — «sei un collaboratore attivo»
+e basta, senza guardare la spunta «foto». C'era già, non è una regressione.
+
+## IL RUOLO CHE SI CANCELLA — il difetto che si cancella le impronte
+
+Il 13 sera era rimasto scritto: *«il caso mio (david, ruolo stringa vuota) non è
+stato riprodotto: con la stringa vuota la prova mostra Operaio, non il bianco.
+Manca un pezzo.»*
+
+Il pezzo era questo: **il `""` di david non è la causa, è il danno già fatto.**
+
+Riprodotto in un browser vero, un valore per volta:
+
+| cosa c'è in `gest_membri.ruolo` | la tendina mostra | Salva scrive |
+|---|---|---|
+| `"operaio"` / `"preposto"` / `"segretaria"` | la voce giusta | la voce giusta |
+| `"Operaio"` (maiuscola) | **BIANCO** | **`""`** |
+| `" "` (uno spazio) | **BIANCO** | **`""`** |
+| `"capo"` | **BIANCO** | **`""`** |
+| `""` | Operaio | `"operaio"` |
+| `null` | Operaio | `"operaio"` |
+
+Il giro completo è: nel database c'è un ruolo scritto diverso dalle tre voci →
+la tendina si apre in bianco → premi Salva anche solo per cambiare il telefono
+→ **scrive `""`** → riapri e adesso mostra «Operaio». **Il difetto si cancella
+le impronte da solo**, e quando siamo andati a guardare eravamo già dopo.
+
+Controllato che non ci fossero altre strade: nel gestionale **solo due punti**
+scrivono il ruolo (righe 4851 e 4867), tutti e due dalla tendina. Un `""` in
+`gest_membri` non può arrivare da nessun'altra parte.
+
+Sul database di Alessio c'è **una persona sola** in squadra, con quel `""` già
+scritto: nessuno è a rischio adesso.
+
+**La correzione**, tre punti:
+
+1. `squadraForm` — se il ruolo trovato non è fra le tre voci, gli si fa una voce
+   sua, scritta com'è, con accanto «(ruolo non previsto)». Il valore si vede e
+   non si perde;
+2. `squadraAdd` e 3. `squadraSave` — un ruolo vuoto non si scrive mai: al posto
+   di `""` va `operaio`.
+
+## LA PROVA DEL RUOLO È ENTRATA NEL BANCO
+
+`nuove/ruolo-vuoto.py` esisteva dal 13 agosto ma **non era nel comando**.
+Adesso è nel gruppo `nuove`.
+
+Attenzione a come si legge: quella prova **non esce con un codice di errore**,
+stampa in fondo «N casi, M con il difetto». Con `perEsito: true` sarebbe stata
+**verde per sempre** — l'esatto contrario di quello che serve. Quindi ha una
+`leggi:` scritta apposta: M deve essere 0, e se la riga del riepilogo non si
+trova la prova è rossa (vuol dire che non è arrivata in fondo).
+
+Provata nei due versi: sul file **di prima** 2 casi su 8 con il difetto → riga
+**rossa**; sul file **corretto** 8 casi, 0 → riga **verde**.
+Una prova che non diventa rossa sul file rotto non prova niente.
+
+**Giro completo a fine giornata: 33 passate, 0 FALLITE, 18 da capire.**
+
+## ⚠️ LA LEZIONE DI OGGI — è la stessa di ieri, tre volte in una mattina
+
+Quella del 13 sera non è cambiata, si è solo confermata:
+
+**Quattro volte su cinque, quando una prova dice il falso, il bugiardo è la
+prova — non il gestionale.**
+
+Oggi è successo tre volte, tutte prima di pranzo:
+
+1. **le 4 righe rosse del banco** erano un file mancante, non una pagina bianca;
+2. **la prima query di ricognizione cercava il nome della vecchia funzione**
+   (`gest_puo_accedere`) mentre il lavoro del 13 usa quella nuova
+   (`gest_puo_sezione`). Diceva «solo il titolare» su `gest_lavori`,
+   `gest_clienti`, `gest_fatture`, `gest_foto`, `gest_note`, `gest_scadenze` —
+   tabelle che i collaboratori leggono eccome. **L'errore è stato riprodotto**
+   su un PostgreSQL vero prima di dichiararlo. Corretto cambiando **metodo**,
+   non nome: la query nuova non cerca parole, **mostra il testo delle regole** e
+   nasconde solo quelle che sono *esattamente* «sono io il proprietario»;
+3. **la stessa query tagliava le condizioni a 160 caratteri**, e su
+   `gest_operatori` il pezzo che decideva tutto (`m.operatore_id =
+   gest_operatori.id`) stava **dopo il taglio**. Cioè: la differenza fra «vede
+   solo la propria scheda» e «legge il costo orario di tutti» era esattamente
+   nel pezzo tagliato via.
+
+**La domanda da farsi prima di ogni riga rossa, e prima di ogni riga verde:**
+*questo lo dice il gestionale, o lo dice la prova?*
+
+E una cosa pratica, che è costata due giri: **l'SQL Editor di Supabase mostra
+solo il risultato dell'ULTIMA query.** Se ne servono tre, o se ne manda una
+sola, o si mandano una alla volta.
+
+## DOVE SIAMO RIMASTI
+
+**Da fare ad Alessio:**
+- il push della correzione del ruolo, se non è già stato fatto;
+- la **prova a clic sull'app dell'operaio** col link di un collaboratore con
+  Lavori ✔, Foto ✘, Note ✘: foto del capo visibili, note leggibili e grigie,
+  Scadenze non mute. È l'unico pezzo di collaudo che non può fare Claude, ed è
+  in sospeso dal 13 sera.
+
+**Restano aperte**, in quest'ordine — deciso il 14 agosto, con il Computo
+spostato **prima** del resto:
+
+*1. Le due piccole del pannello (provate, mancano da correggere):*
+- la **barra del fondatore sul telefono**: 233 px su uno schermo da 360 (il
+  29%), e la X la chiude «fino al prossimo caricamento», quindi torna sempre.
+  Solo Alessio la vede. La prova sta in `nuove/barra-fondatore.py`;
+- i **4 account con `tipo` vuoto**: non sono né impresa né artigiano né
+  professionista, e vedono le etichette di partenza. Sono persone vere.
+
+*2. Il Computo metrico e il Prezzario — la zona grossa, mai aperta.*
+Messa qui di proposito, prima del resto: è la stanza al buio da cui escono i
+preventivi, cioè i soldi. Se lì dentro c'è qualcosa di grosso è meglio saperlo
+adesso che fra tre sessioni. Oggi si controlla solo che si apra senza errori.
+Schema in `sql/gest-computo-metrico.sql`. Due cose già annotate da verificare
+lì: il PDF che si contraddice se la lettura delle misure fallisce, e
+`1,00 parti` nel modulo di correzione della misura.
+Aspettarsi che la lista **cresca** prima di scendere.
+
+*3. Il menu del telefono (visto da Alessio, NON riprodotto):*
+Sul pannello, aprendo il ☰ da iPhone, ogni voce diventa un riquadro alto con
+dentro una casellina vuota con una **«i»**. Nella prova a 390 px le righe sono
+alte 44 px e quelle «i» non ci sono. Sospetto principale: `js/aiuti.js` su
+dispositivo touch. **Serve una prova in modalità touch vera** (`hasTouch`,
+`isMobile`, il device descriptor di un iPhone), non un finto computer stretto.
+
+*4. I 13 rimasti dal 13 agosto mattina* — letti nel codice, **non riprodotti**.
+L'elenco completo è nella sezione «13 agosto 2026», punto *4. Il resto*. In
+ordine di quanto fanno male:
+- *fanno perdere roba:* il mezzo eliminato lascia le scadenze orfane · il
+  ripristino dal Cestino non ridà l'accesso dal telefono e non lo dice ·
+  `squadraAdd` crea doppioni se l'invito fallisce;
+- *fanno sbagliare i conti:* percentuali col punto («Cassa 12.5%») · prezzi di
+  riga a un decimale (18,5);
+- *dicono una cosa per un'altra:* «Ancora nessun reparto» quando il database
+  non risponde · il messaggio di eliminazione persona conta le righe invece
+  delle ore;
+- *fastidi, non danni:* la Galleria lascia un'opzione vuota nella tendina · il
+  Riepilogo fa 25 letture in 6 ondate · i 274 colpi del Cestino ·
+  `gest_richieste` senza file in `sql/` · la colonna `tipo` dei mezzi.
+
+*5. Le 18 prove «da capire» del banco*, da classificare una alla volta quando si
+lavora su quel gruppo. **Il traguardo vero è questo:** una sessione intera e
+alla fine il banco tutto verde, 0 rosse e 0 «da capire».
+
+*6. Le regole del deposito dei file* (bucket `gestionale-foto` e
+`gestionale-video`), mai guardate. Ci sta dentro `foto_team_delete`.
+
+*7. `gestionale-negozio.html` e `gestionale-noleggio.html`:* Alessio li vuole
+fare **separatamente, da soli**, dopo aver finito impresa e professionisti.
+Confermato il 14 agosto. Trovato guardando (non riprodotto): non hanno `_numIt`,
+e leggono con `parseFloat($("#nm-importo").value)||0`. Con `type="number"`, se
+scrivi `12,50` il valore diventa **vuoto** → si salva **0 €**. Nel database non
+c'è nessun account di tipo «negozio» (34 artigiano, 27 impresa, 1
+professionista, 4 senza tipo), quindi oggi non fa danni a nessuno.
+
+**Quanto manca, stimato il 14 agosto:** 6–10 sessioni per la lista com'è oggi,
+negozio e noleggio compresi. Ma non è una data: il 12 agosto erano previsti 9
+difetti nuovi e ne sono usciti 14. Ogni zona guardata sul serio fa **crescere**
+la lista prima di farla scendere, e il Computo è la più grande mai toccata.
