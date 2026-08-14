@@ -1772,7 +1772,14 @@
     if(ruoloUtente==='professionista'){
       try{
         const [rCo,rTo]=await Promise.all([
-          sb.from("gest_computi").select("id,numero,titolo,stato,data,ribasso_perc").eq("user_id",sbUid).eq("mestiere_id",mid)
+          /* ⚠️ «tipo» SERVE, anche se qui non si mostra — 14 agosto 2026.
+             Da oggi compRiepilogoDa guarda il tipo del computo: gli oneri
+             della sicurezza restano fuori dal ribasso solo sui lavori
+             pubblici. Senza questa colonna il Riepilogo li avrebbe contati
+             come «privato» e avrebbe scritto una cifra diversa da quella
+             dell'elenco per lo stesso computo. Due schermate, due numeri:
+             e' il difetto delle fatture del 13 agosto, in un'altra stanza. */
+          sb.from("gest_computi").select("id,numero,titolo,stato,data,ribasso_perc,tipo").eq("user_id",sbUid).eq("mestiere_id",mid)
             .order("data",{ascending:false}),
           sb.from("gest_computo_totali").select("computo_id,importo,oneri_sicurezza,importo_manodopera").eq("user_id",sbUid)
         ]);
@@ -11951,8 +11958,37 @@
      semplice sconto sul totale. */
   function compRiepilogoDa(lordo,sicurezza,manodopera,comp){
     const c2=n=>Math.round((+n||0)*100)/100;
-    const L=c2(lordo), S=c2(sicurezza), MO=c2(manodopera);
-    const perc=(comp&&comp.ribasso_perc!=null&&comp.ribasso_perc!=="")?(+comp.ribasso_perc||0):0;
+    const L=c2(lordo);
+    /* ⚠️ GLI ONERI FANTASMA — 14 agosto 2026.
+       I due campi di gara (costo del personale e oneri della sicurezza) si
+       vedono SOLO sui computi «Lavori pubblici». Se poi il computo torna
+       «privato», spariscono dal modulo ma restano scritti nelle voci —
+       compVoceSalva li lascia apposta, per non azzerare il lavoro fatto.
+       Qui pero' venivano sommati lo stesso, e lo sconto finiva calcolato su
+       (totale − oneri) invece che sul totale.
+       Riprodotto nel browser: computo privato da 100.000 con 5.000 di oneri
+       rimasti e sconto 20% → il gestionale scriveva 81.000 invece di 80.000.
+       Mille euro di differenza, e nella schermata non c'era nessun numero
+       che li spiegasse: il campo che li causa non si vede piu'.
+       «Non soggetti a ribasso» e' una regola delle GARE PUBBLICHE. Su un
+       lavoro privato quei numeri non contano, punto. */
+    const pubblico=!!(comp&&comp.tipo==="pubblico");
+    let S=pubblico?c2(sicurezza):0;
+    /* e non possono essere piu' del totale: con oneri piu' grandi del lordo
+       la parte ribassabile diventava negativa e lo sconto FACEVA SALIRE il
+       conto (100 di lavori con 500 di oneri e sconto 10% → netto 140). */
+    if(S>L)S=L;
+    if(S<0)S=0;
+    const MO=pubblico?c2(manodopera):0;
+    /* lo sconto sta fra 0 e 100: sopra il 100 il totale andava sotto zero
+       (sconto 150% su 1.000 → −500 €, cioe' i soldi li dai tu al cliente),
+       sotto zero era un aumento travestito da sconto (−10% → 1.100 €).
+       Il paracadute sta qui perche' i numeri storti possono essere gia'
+       scritti nel database; al salvataggio c'e' anche l'avviso. */
+    let perc=(comp&&comp.ribasso_perc!=null&&comp.ribasso_perc!=="")?(+comp.ribasso_perc||0):0;
+    if(!isFinite(perc))perc=0;
+    if(perc<0)perc=0;
+    if(perc>100)perc=100;
     const soggetto=c2(L-S);
     const ribasso=c2(soggetto*perc/100);
     return {lordo:L, perc:perc, ribasso:ribasso, netto:c2(soggetto-ribasso+S),
@@ -13163,18 +13199,48 @@
      nascondessimo dentro i prezzi unitari, i due documenti direbbero la stessa
      cifra finale ma prezzi diversi voce per voce, e la prima domanda del primo
      che li confronta sarebbe "e allora quale dei due e' giusto?". */
+  /* ⚠️ IL CHIAVISTELLO DEL DOPPIO CLIC — 14 agosto 2026.
+     Difetto vero, riprodotto nel browser con la rete lenta di un cantiere:
+     due clic su «Crea il preventivo» facevano DUE preventivi, tutti e due
+     col NUMERO 1. Il numero progressivo si calcola prima di scrivere, e in
+     quel mezzo secondo il pulsante restava premibile — chi non è sicuro che
+     il clic abbia preso ne fa un secondo.
+     Due preventivi con lo stesso numero è la cosa che il commercialista
+     trova subito e non si sistema più: i numeri di un anno si rifanno tutti.
+     Il controllo su preventivo_id non bastava: quello guarda compCache, che
+     al secondo clic non è ancora stata riletta.
+     Il chiavistello è la variabile, non il pulsante spento: se un domani il
+     pulsante cambia forma, la doppia scrittura resta bloccata lo stesso.
+     (È lo stesso chiavistello di compMisAdd, dal 10 agosto: lì c'era, qui no.) */
+  let compPrevInCorso=false;
   async function computoAPreventivo(id){
     if(!sbUid){toast("Devi essere loggato");return;}
+    if(compPrevInCorso){toast("Sto già creando il preventivo, un attimo…");return;}
     const c=compCache.find(x=>String(x.id)===String(id));
     if(!c){toast("Computo non trovato");return;}
     if(c.preventivo_id){
       if(!gconfirm("Da questo computo hai già creato un preventivo.\n\nNe faccio un altro?"))return;
     }
+    compPrevInCorso=true;
+    const _btPrev=$('[data-action="comp-prev"]');
+    if(_btPrev){_btPrev.disabled=true;_btPrev.textContent="Sto creando il preventivo…";}
+    /* da qui in poi ogni uscita deve riaprire il chiavistello, se no il
+       pulsante resta bloccato per sempre e non si crea più niente */
+    const _libera=()=>{compPrevInCorso=false;
+      if(_btPrev){_btPrev.disabled=false;_btPrev.textContent="→ Crea il preventivo";}};
+    try{
+      return await _computoAPreventivo(id,c,_libera);
+    }catch(e){
+      _libera();
+      toast("Non sono riuscito a creare il preventivo: "+((e&&e.message)||"riprova"));
+    }
+  }
+  async function _computoAPreventivo(id,c,_libera){
     const {data:vv,error:eV}=await sb.from("gest_computo_voci_calc").select("*")
       .eq("user_id",sbUid).eq("computo_id",id).order("ordine");
-    if(eV){toast("Non riesco a leggere le lavorazioni: "+eV.message);return;}
+    if(eV){_libera();toast("Non riesco a leggere le lavorazioni: "+eV.message);return;}
     const voci=vv||[];
-    if(!voci.length){toast("Il computo è vuoto: aggiungi almeno una lavorazione");return;}
+    if(!voci.length){_libera();toast("Il computo è vuoto: aggiungi almeno una lavorazione");return;}
 
     /* ⚠️ LA QUANTITÀ ZERO DIVENTAVA UNO — 11 agosto 2026.
        Una lavorazione inserita ma NON ANCORA MISURATA vale 0 € nel computo,
@@ -13192,7 +13258,7 @@
       const q=senzaMisure.length;
       if(!gconfirm(q===1
         ? "La lavorazione «"+String(senzaMisure[0].descrizione||"senza descrizione").slice(0,60)+"» non ha ancora le misure, quindi vale 0 €.\n\nNel preventivo non la porto: se ci finisse, il cliente se la vedrebbe conteggiata una volta a prezzo pieno.\n\nVuoi creare lo stesso il preventivo con le altre?"
-        : "Ci sono "+q+" lavorazioni senza misure, che valgono 0 €.\n\nNel preventivo non le porto: se ci finissero, il cliente se le vedrebbe conteggiate una volta a prezzo pieno ciascuna.\n\nVuoi creare lo stesso il preventivo con le altre?"))return;
+        : "Ci sono "+q+" lavorazioni senza misure, che valgono 0 €.\n\nNel preventivo non le porto: se ci finissero, il cliente se le vedrebbe conteggiate una volta a prezzo pieno ciascuna.\n\nVuoi creare lo stesso il preventivo con le altre?")){_libera();return;}
     }
     const righe=voci
       .filter(v=>Math.round((+v.quantita||0)*1000)/1000)
@@ -13203,7 +13269,7 @@
       prezzo:+v.prezzo_unitario||0,
       ordine:i
     })).filter(r=>r.descrizione);
-    if(!righe.length){toast("Nessuna lavorazione ha le misure: il preventivo sarebbe vuoto");return;}
+    if(!righe.length){_libera();toast("Nessuna lavorazione ha le misure: il preventivo sarebbe vuoto");return;}
 
     const rp=compRiepilogo(voci,c);
     if(rp.perc&&rp.ribasso){
@@ -13228,10 +13294,10 @@
         .eq("user_id",sbUid).eq("mestiere_id",_midPrev)
         .gte("data",_annoPrev+"-01-01").lte("data",_annoPrev+"-12-31")
         .order("numero",{ascending:false}).limit(1);
-      if(eP){toast("Numero non assegnato: "+eP.message);return;}
+      if(eP){_libera();toast("Numero non assegnato: "+eP.message);return;}
       const nMax=(maxP&&maxP[0]&&+maxP[0].numero)||0;
       if(nMax+1>numero)numero=nMax+1;
-    }catch(e){toast("Numero non assegnato: riprova");return;}
+    }catch(e){_libera();toast("Numero non assegnato: riprova");return;}
 
     const {data:np,error}=await sb.from("gest_preventivi").insert({
       user_id:sbUid, mestiere_id:curMestiere(),
@@ -13242,16 +13308,23 @@
             c.prezzario?("Prezzi da "+c.prezzario+(c.prezzario_anno?" "+c.prezzario_anno:"")):"",
             "Da computo metrico"+(c.numero?" n. "+c.numero:"")].filter(Boolean).join("\n")||null
     }).select().single();
-    if(error){toast("Errore: "+error.message);return;}
+    if(error){_libera();toast("Errore: "+error.message);return;}
 
     const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,preventivo_id:np.id})));
-    if(e2){toast("Il preventivo è nato ma le voci no: "+e2.message);return;}
+    if(e2){_libera();toast("Il preventivo è nato ma le voci no: "+e2.message);return;}
 
     /* il collegamento serve a non rifarlo due volte per sbaglio */
     await sb.from("gest_computi").update({preventivo_id:np.id}).eq("id",id).eq("user_id",sbUid);
 
+    /* andata bene. Il collegamento si segna SUBITO anche nella copia che il
+       gestionale ha in mano: rinfresca() non e' asincrona e non aspetta la
+       rilettura, quindi senza questa riga un secondo clic poco dopo
+       ritroverebbe il computo ancora «senza preventivo» e ne farebbe un
+       altro in silenzio. Cosi' invece chiede conferma, com'e' giusto. */
+    c.preventivo_id=np.id;
     closeSheet();
     rinfresca("preventivi","computi","riepilogo");
+    _libera();
     toast("Preventivo n. "+numero+" creato dal computo ✔ Lo trovi in Preventivi");
   }
 
@@ -13613,6 +13686,21 @@
     const num=(x)=>{const v=String(($(x)&&$(x).value)||"").trim();
       if(v==="")return null;const n=_numeroIt(v);return (n==null||!isFinite(n))?null:n;};
     const txt=(x)=>{const v=String(($(x)&&$(x).value)||"").trim();return v===""?null:v;};
+    /* ⚠️ LO SCONTO FUORI SCALA — 14 agosto 2026.
+       Il campo accettava qualsiasi numero. Provato: 150 dava un totale di
+       −500 € (i soldi glieli daresti tu al cliente), −10 faceva SALIRE il
+       conto del 10% chiamandolo «ribasso». Nessun avviso, e sul PDF usciva
+       stampato «Ribasso -10,00%».
+       Qui si dice e si ferma, prima che finisca nel database. Nel conto c'e'
+       anche il paracadute (compRiepilogoDa), per i numeri gia' scritti. */
+    const _rib=num("#co-rib");
+    if(_rib!=null&&(_rib<0||_rib>100)){
+      toast(_rib<0
+        ? "Il ribasso non può essere negativo: sarebbe un aumento, non uno sconto. Scrivi un numero fra 0 e 100."
+        : "Il ribasso non può superare il 100%: il totale verrebbe negativo. Scrivi un numero fra 0 e 100.");
+      const _e=$("#co-rib"); if(_e){_e.focus();_e.select&&_e.select();}
+      return;
+    }
     const row={
       user_id:sbUid, mestiere_id:curMestiere(),
       titolo:titolo,
@@ -13637,7 +13725,7 @@
       prezzario_anno:(function(){const e=$("#co-prz-sel");
         if(e&&e.value!=="__mio__")return null;
         return num("#co-prz-anno");})(),
-      ribasso_perc:num("#co-rib"),
+      ribasso_perc:_rib,
       note:txt("#co-note")
     };
     let res;

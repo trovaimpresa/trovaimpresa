@@ -4451,3 +4451,161 @@ regressione.
 
 *5. `gestionale-negozio.html` e `gestionale-noleggio.html`*, separatamente e
 dopo aver finito impresa e professionisti. Confermato di nuovo il 14 sera.
+
+---
+
+# 14 agosto 2026 (notte) — IL COMPUTO METRICO A FONDO: CINQUE DIFETTI, TUTTI SUI SOLDI
+
+Sessione dedicata alla **zona a rischio soldi**, per prima e di proposito.
+Cinque difetti, tutti riprodotti prima di toccare una riga. Nessuno era un
+falso allarme; due invece erano falsi allarmi delle **mie prove**.
+
+Il banco passa da 56 a **58 prove nel giro normale**: **40 passate, 0 FALLITE.**
+
+| file | cosa cambia |
+|---|---|
+| `sql/gest-computo-quantita-3-decimali.sql` | **DA LANCIARE**: il computo torna con la calcolatrice |
+| `gestionale-app.html` | doppio preventivo · oneri fantasma · sconto senza limiti · il Riepilogo che leggeva un dato in meno |
+
+## 1. IL COMPUTO NON TORNAVA CON LA CALCOLATRICE
+
+Una soglia in marmo, 0,55 × 0,815 m, a 1.850 €/m². Sul documento consegnato:
+
+```
+Soglia in marmo    m2    0,448    1.850,00    829,26
+```
+
+Chi lo riceve prende la calcolatrice, fa 0,448 × 1.850 e trova **828,80**.
+
+La quantità vera è 0,44825 — cinque decimali, `numeric(16,5)`. Il documento ne
+stampa tre, perché in cantiere si misura al millimetro, ma **l'importo veniva
+calcolato sui cinque**. Il computo stampava un numero e ne usava un altro.
+
+Nel codice del PDF c'è scritto, parola per parola: *«Chi lo riceve deve poter
+rifare il conto con la calcolatrice, se no non se lo fida.»*
+
+Riprodotto su un **PostgreSQL 16 vero**, schema ricostruito dai file in `sql/`,
+con misure da cantiere:
+
+| voce | quantità vera | stampata | importo scritto | rifatto a mano |
+|---|---|---|---|---|
+| Soglia in marmo | 0,44825 | 0,448 | 829,26 | **828,80** |
+| Massetto | 1,08859 | 1,089 | 183,37 | **183,44** |
+| Cordolo | 21,375 | 21,375 | 2.014,59 | 2.014,59 |
+
+Totale del computo **3.027,22**, rifatto riga per riga **3.026,83**.
+
+**La correzione** sta nella vista, non nel gestionale: la quantità si chiude a
+tre decimali e l'importo si calcola su quella. Un posto solo, come da regola
+del file dello schema. Sistema **di riflesso** anche il preventivo creato dal
+computo, che le quantità le portava già a tre: prima computo e preventivo dello
+stesso lavoro chiudevano su due totali diversi.
+
+## 2. DUE CLIC = DUE PREVENTIVI CON LO STESSO NUMERO
+
+Riprodotto nel browser con la rete lenta di un cantiere (1,2 s di ritardo sulla
+scrittura): due clic su «Crea il preventivo» → **due preventivi, tutti e due
+numero 1**.
+
+Il numero progressivo si calcola **prima** di scrivere, e in quel mezzo secondo
+il pulsante resta premibile. Il controllo su `preventivo_id` non bastava:
+guarda `compCache`, che al secondo clic non è ancora stata riletta.
+
+Adesso c'è il chiavistello — la variabile, non il pulsante spento — come in
+`compMisAdd` dal 10 agosto. Lì c'era, qui no. E il collegamento si segna subito
+anche nella copia in memoria, perché `rinfresca()` non è asincrona e non aspetta
+la rilettura.
+
+Tutte le nove uscite della funzione riaprono il chiavistello: se no bastava un
+errore per bloccare il pulsante fino al ricaricamento.
+
+## 3. GLI ONERI DELLA SICUREZZA FANTASMA
+
+I due campi di gara si vedono **solo** sui computi «Lavori pubblici». Se il
+computo torna «privato» spariscono dal modulo, ma restano scritti nelle voci —
+`compVoceSalva` li lascia apposta, per non azzerare il lavoro fatto.
+
+`compRiepilogo` però li sommava **sempre**, e lo sconto finiva calcolato su
+(totale − oneri) invece che sul totale.
+
+Riprodotto nel browser: computo privato da 100.000 €, 5.000 € di oneri rimasti,
+sconto 20% → il gestionale scriveva **81.000 invece di 80.000**. Mille euro, e
+nella schermata non c'era **nessun numero che li spiegasse**: il campo che li
+causa non si vede più.
+
+«Non soggetti a ribasso» è una regola delle **gare pubbliche**. Su un lavoro
+privato quei numeri non contano, e adesso il conto guarda il tipo del computo.
+
+## 4. LO SCONTO SENZA LIMITI
+
+Il campo accettava qualsiasi numero:
+
+- **150%** → totale **−500 €** su un computo da 1.000: i soldi glieli daresti tu;
+- **−10%** → il conto **sale** del 10%, e sul PDF si stampava «Ribasso -10,00%».
+
+Adesso il salvataggio si ferma e lo dice, e nel conto c'è comunque il paracadute
+per i numeri già scritti nel database.
+
+E gli oneri più grandi del totale non fanno più salire il conto (100 € di lavori
+con 500 € di oneri e sconto 10% davano netto 140 €).
+
+## 5. TROVATO CORREGGENDO IL 3: IL RIEPILOGO LEGGEVA UN DATO IN MENO
+
+La query del Riepilogo chiedeva `id,numero,titolo,stato,data,ribasso_perc` —
+**senza `tipo`**. Da quando il conto guarda il tipo, il Riepilogo avrebbe
+trattato ogni computo come privato e mostrato, per lo stesso computo pubblico,
+una cifra diversa da quella dell'elenco.
+
+Due schermate, due numeri: è il difetto delle fatture del 13 agosto, in
+un'altra stanza. Trovato **mentre si correggeva**, che è dove il 12 agosto era
+già stato scritto di guardare: *«il difetto nuovo sta nella riga che hai appena
+toccato»*.
+
+## ⚠️ LA LEZIONE — DUE FALSI ALLARMI, TUTTI E DUE MIEI
+
+1. **«Il ribasso con la virgola vale zero»** sembrava il difetto più grosso di
+   tutti: passando `'12,5'` a `compRiepilogo` il conto dava 0. Ma nel gestionale
+   vero quella stringa **non arriva mai**: `computoSalva` legge il campo con
+   `_numeroIt` (la sua «rete di sicurezza») e nel database ci finisce il numero
+   12.5. La prova stava provando una cosa che non succede. Controllo tolto, e al
+   suo posto quello che prova il percorso vero, nel browser.
+2. **Quattro righe rosse su quattro** nella prova dei soldi: chiamava
+   `compNetto()` dalla pagina e riceveva sempre `null`, perché le funzioni del
+   gestionale stanno nel loro scope e da fuori non si vedono. Poi, sistemata
+   quella, la regex cercava `«81.000,00»` mentre `eur()` scrive **«81.000 €»**,
+   senza decimali. Due giri di rosso, zero difetti veri.
+
+**Il conto della sessione: 5 difetti veri nel gestionale, 2 falsi allarmi nelle
+prove.** La proporzione di ieri regge ancora.
+
+## COSA DEVE FARE ALESSIO
+
+1. **Lanciare `sql/gest-computo-quantita-3-decimali.sql`** su Supabase (SQL
+   Editor → Run). È una sola query, sicura da rilanciare. Senza quella, il
+   punto 1 resta aperto: i file HTML da soli non bastano.
+2. Il push.
+
+## DOVE SIAMO RIMASTI
+
+**Restano aperte**, in quest'ordine:
+
+*1. Rischio dati — i tre che fanno perdere roba* (letti, non ancora riprodotti):
+- **il mezzo eliminato e le sue scadenze.** Guardando il codice: `gest_mezzi`
+  passa dal Cestino (`js/cestino.js`), quindi l'eliminazione è una data e la
+  cascata `on delete cascade` di `mezzo_id` **non scatta**. Le scadenze restano
+  vive e continuano ad avvisare per un mezzo che non c'è più. Da riprodurre;
+- il ripristino dal Cestino non ridà l'accesso dal telefono e non lo dice;
+- `squadraAdd` crea doppioni se l'invito fallisce.
+
+*2. Rischio conti:* percentuali col punto («Cassa 12.5%») e prezzi di riga a un
+decimale (18,5).
+
+*3. Il resto del Computo,* che oggi ha aperto la stanza dei conti ma non tutte:
+il quadro economico dei lavori pubblici oltre il riquadro, l'importazione di un
+prezzario regionale, i capitoli che il preventivo perde per strada.
+
+*4. Le 18 prove «da capire» del banco.*
+
+*5. Le regole del deposito dei file* (bucket foto e video).
+
+*6. `gestionale-negozio.html` e `gestionale-noleggio.html`*, separatamente.
