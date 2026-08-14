@@ -5762,3 +5762,60 @@ Nei due versi: sul file di prima **2 problemi su 3**, sul corretto **0**.
 le sezioni che non stanno in `SEMPRE`. Squadra era la più pericolosa perché
 il suo modulo riscrive tutto, ma la domanda «quale altra scheda si apre con
 dati vecchi e li risalva?» non è ancora stata fatta fino in fondo.
+
+---
+
+# 14 agosto 2026 (notte, 9) — LA SCHEDA SI APRE CLICCANDOLA
+
+Alessio, guardando Squadra sul sito vero: «per entrare si deve premere
+Modifica, cosa che non è corretta, perché se uno vuole solo leggere non preme
+Modifica ma entra. Questa modifica è già stata fatta in altri settori».
+
+Ha ragione. E ha ragione anche sul «già fatta»: nel **Riepilogo** la scheda
+intera si clicca da sempre (`rie-go`).
+
+## PERCHÉ SI ERA PERSA
+
+`renderTabella` accetta un `click` per ogni riga, e Squadra ce l'ha:
+`click:{action:"sq-edit"}`. Ma quel `click` finisce **solo nel ramo tabella**.
+Da quando ogni sezione disegna **sempre le schede** (e non più la tabella sul
+computer), quel ramo non ci passa più nessuno: il `click` è rimasto scritto e
+non fa niente.
+
+Non era un pezzo mai fatto: era un pezzo diventato **irraggiungibile** quando
+è cambiato il disegno delle sezioni.
+
+## LA CORREZIONE
+
+`schedaJob` accetta `apri:{action,data}` e lo mette sulla scheda intera, con
+la classe `job-clic` — che nel CSS **esisteva già** (`cursor:pointer`) e non
+la usava nessuno: la strada era segnata a metà.
+
+I pulsanti dentro continuano a comandare, perché il gestionale cerca sempre
+il `data-action` **più interno**: premendo «Elimina» parte Elimina.
+
+## LA PROVA — e la trappola che aveva dentro
+
+`nuove/scheda-si-apre-cliccando.py`, 5 controlli. Non prova solo che si apra:
+prova che **«Copia link» continui a copiare e basta**. Il rischio di rendere
+cliccabile tutta la scheda è di rompere quello che ci sta sopra, e sarebbe
+stato uno scambio pessimo — un fastidio via, un guaio dentro.
+
+⚠️ Al primo giro accusava «Copia link» di aprire la scheda. Era falso:
+`closeSheet()` toglie la classe `open` dall'overlay ma **lascia il modulo nel
+DOM**, quindi cercare `#d-nome` non dice se la scheda è aperta, dice solo che
+è stata aperta una volta. La ventunesima prova bugiarda di oggi, e sempre la
+stessa forma: prima di credere al rosso, chiedersi chi sta parlando.
+
+Nei due versi: sul file di prima **2 problemi su 5**, sul corretto **0**.
+
+## DA FARE, STESSA COSA ALTROVE
+
+`schedaJob` lo usano anche **Clienti** (`cliCard`) e **Computo metrico**
+(`compCard`): lì la scheda ancora non si clicca. Adesso è una riga per
+sezione — ma va deciso cosa deve aprire il clic (su un computo, «modifica» o
+«apri le lavorazioni»?), quindi non l'ho fatto di mia iniziativa.
+
+## DOVE SIAMO RIMASTI
+
+72 prove nel banco.

@@ -2300,9 +2300,21 @@
        meta    le righe di dettaglio, una per voce
        nota    il riquadro giallo in fondo (note libere), facoltativo
        azioni  [{lab,action,data,del}] — gli stessi oggetti dei menu "..." */
+  /* ⚠️ 14 agosto 2026 (notte) — LA SCHEDA SI APRE CLICCANDOLA.
+     Prima, per vedere una persona, bisognava premere «Modifica». Ma chi vuole
+     solo LEGGERE non preme Modifica: prova a entrare e non succede niente.
+     È già così nel Riepilogo, dove la scheda intera si clicca (`rie-go`), e
+     nelle tabelle, dove la riga aveva `click`. Solo le schede erano rimaste
+     fuori — e da quando ogni sezione disegna sempre le schede, quel `click`
+     delle righe non lo usa più nessuno.
+
+     `apri` mette l'azione sulla scheda intera. I pulsanti dentro continuano a
+     funzionare come prima: il gestionale cerca sempre il `data-action` più
+     interno, quindi premendo «Elimina» parte Elimina, non l'apertura. */
   function schedaJob(o){
     const meta=(o.meta||[]).filter(Boolean);
-    return `<div class="job ${o.tono||"t-neutro"}">
+    const _apri=o.apri?` data-action="${o.apri.action}"${tabAttr(o.apri.data)}`:"";
+    return `<div class="job ${o.tono||"t-neutro"}${o.apri?" job-clic":""}"${_apri}>
       <div class="job-top"><div class="job-cli">${o.titolo||""}</div>${o.destra||""}</div>
       ${meta.length?`<div class="job-meta">${meta.map(x=>`<span>${x}</span>`).join("")}</div>`:""}
       ${o.nota?`<div class="job-note">${o.nota}</div>`:""}
@@ -4853,6 +4865,7 @@
       : (av.length?"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", ")):"");
     return schedaJob({
       tono, titolo:esc(o.nome),
+      apri:{action:"sq-edit",data:{id:o.id}},
       destra:`<span class="stato ${o.attivo?"fatto":"bozza"}">${o.attivo?"Attivo":"Invitato"}</span>`,
       meta:[o.mansione?"👷 "+esc(o.mansione):"", o.telefono?"📞 "+esc(o.telefono):""],
       nota, azioni:dipVoci(o)
