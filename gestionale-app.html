@@ -23,12 +23,22 @@
       <button class="lt-btn" data-action="export-json">Backup (JSON)</button>
       <button class="lt-btn" data-action="export-excel">⬇ Esporta dati</button>
     </div>
-    <div class="mk">🛠️</div><h1>Gestionale Multiservizi</h1><small>Scegli il reparto</small>
+    <!-- ⚠️ 14 agosto 2026 — QUESTA SCHERMATA NON PARLAVA A CHI LA APRE.
+         Diceva «Gestionale Multiservizi · Scegli il reparto», e sotto
+         spiegava che i reparti non si mischiano. Per un idraulico che
+         lavora da solo, e che ha aperto il gestionale perché il cliente
+         gli ha chiesto un prezzo, non c'era una sola parola sua: nella
+         prima schermata non comparivano mai «preventivo», «lavoro» o
+         «cliente», cioè le tre cose per cui era entrato.
+         I reparti restano, per chi ne ha davvero più di uno — ma non
+         sono più la prima cosa che ti si chiede. -->
+    <div class="mk">🛠️</div><h1>Il tuo gestionale</h1><small>Lavori, preventivi e fatture</small>
   </div>
   <div class="wrap">
-    <p class="landing-sub">Ogni reparto è separato: lavori, clienti, squadra e calendario non si mischiano.</p>
+    <p class="landing-sub">Apri il tuo lavoro qui sotto: dentro ci trovi lavori, preventivi, fatture e clienti.</p>
     <div class="panels" id="panels"></div>
-    <button class="new-rep-btn" data-action="new-panel">➕ Nuovo reparto</button>
+    <button class="new-rep-btn" data-action="new-panel">➕ Aggiungi un reparto</button>
+    <p class="landing-nota-rep">Un <b>reparto</b> serve solo se tieni separate due attività — per esempio idraulica e giardinaggio: lavori, clienti e calendario di una non si mischiano con l'altra. Se fai un mestiere solo, non te ne serve un secondo.</p>
     <p style="text-align:center;font-size:14px;color:var(--testo-2);margin-top:18px">🔓 I tuoi dati sono tuoi: esportali quando vuoi dal pulsante in alto. Nessun vincolo.</p>
     <div style="text-align:center;margin-top:36px;padding-top:20px;border-top:1px solid var(--bordo)">
       <p style="color:var(--testo-2);font-size:var(--f-base);margin-bottom:10px">Sei un collaboratore o una segretaria?</p>
@@ -1042,10 +1052,64 @@
         return p;
       });
       if(changed)await save();
+
+      /* ⚠️ IL PRIMO REPARTO SE LO CREA IL GESTIONALE — 14 agosto 2026.
+         Misurato prima di cambiare: dall'apertura al preventivo in PDF
+         c'erano 11 tocchi e 7 cose da scrivere, e i primi tre tocchi
+         servivano solo a creare un «reparto» — una parola che a un
+         idraulico che lavora da solo non dice niente. Chi apre il
+         gestionale dal cantiere perché il cliente gli ha chiesto un
+         prezzo, lì chiude.
+         Adesso il primo reparto si crea da solo, col nome della sua
+         attività. Chi ne vuole un secondo lo aggiunge come prima.
+
+         I TRE PALETTI, e sono tutti necessari:
+         1. SOLO se la lettura è andata bene. Se il database non risponde
+            si arriva qui con la lista vuota per un guasto, e creare un
+            reparto vorrebbe dire aggiungerne uno a chi ne ha già tre —
+            il difetto che ho appena corretto, girato al contrario;
+         2. SOLO se non ne ha nessuno (`mest` letto davvero, lunghezza 0);
+         3. SOLO una volta per sessione (`_repartoAuto`), se no due
+            renderLanding di fila ne fanno due. */
+      if(!eMest && (mest||[]).length===0 && !_repartoAuto){
+        _repartoAuto=true;
+        const _nome=await _nomePrimoReparto();
+        const {data:m1,error:e1}=await sb.from("gest_mestieri")
+          .insert({user_id:sbUid,nome:_nome,icona:"🛠️",colore:(COLORI[0]||{}).a||"#2e629e",ordine:0})
+          .select().single();
+        if(!e1&&m1){
+          const col=COLORI[0]||{a:"#2e629e",ad:"#2e629e",as:"#2e629e"};
+          const p1={id:uid(),nome:_nome,icon:"🛠️",a:col.a,ad:col.ad,as:col.as,mestiere_id:m1.id};
+          (state.panels=state.panels||[]).push(p1);
+          if(!state[p1.id])state[p1.id]={clienti:[],dipendenti:[],lavori:[],note:{}};
+          await save();
+          ps=[p1];
+          /* si entra dentro subito: restare sull'elenco con un reparto
+             solo vuol dire chiedergli un tocco per una scelta che non c'è */
+          _landingDisegna(ps,rows);
+          enterPanel(p1.id);
+          return;
+        }
+        /* se non riesce non si dice niente e non si blocca niente: resta
+           il pulsante «Nuovo reparto», com'era prima */
+      }
     }
     _landingDisegna(ps,rows);
     /* deep link + un solo reparto: entra da solo */
     if(_deepTab&&ps.length===1)enterPanel(ps[0].id);
+  }
+
+  /* una volta per sessione: due renderLanding di fila non fanno due reparti */
+  let _repartoAuto=false;
+  /* il nome del primo reparto: quello della sua attività, se ce l'ha.
+     Se non ce l'ha, una parola che va bene per chiunque — mai «Reparto 1». */
+  async function _nomePrimoReparto(){
+    try{
+      const {data}=await sb.from("imprese").select("nome_attivita").eq("user_id",sbUid).maybeSingle();
+      const n=String((data&&data.nome_attivita)||"").trim();
+      if(n)return n.slice(0,60);
+    }catch(e){}
+    return ruoloUtente==='professionista'?"Il mio studio":"I miei lavori";
   }
 
   /* il guasto della lettura dei reparti: null = tutto a posto */
@@ -9913,15 +9977,41 @@
   async function prevPdf(id){
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
     const p=prevCache.find(x=>x.id===id);if(!p)return;
-    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
-    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    const {data:azLetta}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    /* ⚠️ IL MURO ALLA FINE — tolto il 14 agosto 2026.
+       Qui c'era: niente Dati azienda, niente PDF. Lo stop arrivava nel
+       momento peggiore — hai scritto il preventivo, premi «Scarica PDF» e
+       ti si apre un modulo da 18 caselle. Misurato: erano gli ultimi 2
+       tocchi di 11, ed e' il punto in cui uno molla, perche' pensava di
+       aver finito.
+       Adesso il PDF ESCE lo stesso, ma si vede a un metro che non e' da
+       mandare: fascia rossa in cima a ogni pagina e la parola BOZZA nel
+       nome del file. Il preventivo intanto e' tuo, lo guardi, lo fai
+       vedere; i dati fiscali li metti quando lo mandi davvero.
+       Chi i dati ce l'ha non si accorge di niente: nessuna fascia. */
+    const az=azLetta||{};
+    const _mancaAz=!az.nome;
+    const _mancaPiva=!String(az.piva||"").trim();
+    const _bozza=_mancaAz||_mancaPiva;
     let c={};
     c=await cliDelDocumento(p.cliente_id,"nome,indirizzo,referente");
     const {data:rr}=await sb.from("gest_preventivo_righe").select("*").eq("preventivo_id",id).order("ordine");
     const righe=rr||[];
     const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"}), M=18, R=210-M;
     let y=20;
-    doc.setFont("helvetica","bold");doc.setFontSize(16);doc.text(az.nome,M,y);
+    if(_bozza){
+      /* la fascia si disegna PRIMA di tutto, in cima: se fosse in fondo
+         basterebbe non arrivarci a leggere */
+      doc.setFillColor(192,57,43);doc.rect(0,0,210,11,"F");
+      doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(10);
+      doc.text("BOZZA - NON DA CONSEGNARE: mancano "
+        +[_mancaAz?"il nome dell'attivita'":"", _mancaPiva?"la partita IVA":""].filter(Boolean).join(" e "),
+        105,7.2,{align:"center"});
+      doc.setTextColor(0);
+      y=26;
+    }
+    doc.setFont("helvetica","bold");doc.setFontSize(16);
+    doc.text(az.nome||"(il nome della tua attivita' va nei Dati azienda)",M,y);
     doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
     let hy=y+6;[az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")].filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=4.5;});
     doc.setTextColor(0);
@@ -10021,8 +10111,17 @@
         ? "Preventivo non vincolante, salvo diversa indicazione nelle note. I prezzi delle singole voci sono al netto dell'IVA; il totale sopra riportato è comprensivo di IVA al "+(+p.iva_perc||0)+"%."
         : "Preventivo non vincolante, salvo diversa indicazione nelle note. Prezzi IVA esclusa dove non specificato."),
       M,286,{maxWidth:R-M});
-    doc.save((isParcella?"parcella-":"preventivo-")+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
-    toast(isParcella?"PDF parcella scaricato ✅":"PDF preventivo scaricato ✅");
+    /* «BOZZA» sta anche nel NOME DEL FILE: e' quello che si legge nella
+       cartella dei download e nell'allegato dell'email, cioe' l'ultimo
+       posto in cui ci si puo' ancora accorgere prima di mandarlo. */
+    doc.save((_bozza?"BOZZA-":"")+(isParcella?"parcella-":"preventivo-")+p.numero+"-"+(c.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+    if(_bozza){
+      toast("Scaricato, ma è una BOZZA: senza "
+        +[_mancaAz?"il nome dell'attività":"", _mancaPiva?"la partita IVA":""].filter(Boolean).join(" e ")
+        +" non si manda al cliente. Li metti in Dati azienda quando vuoi.");
+    }else{
+      toast(isParcella?"PDF parcella scaricato ✅":"PDF preventivo scaricato ✅");
+    }
   }
 
   /* ===== 9 agosto 2026 — LETTERA D'INCARICO (solo studi professionali) =====

@@ -4877,3 +4877,121 @@ dopo impresa e professionisti.
 **E la cosa che non è codice:** al 14 agosto **nessuno usa ancora il
 gestionale**. Le tre zone dove si perdevano soldi o dati sono state guardate e
 chiuse; quello che manca adesso non è una correzione, è il primo che lo apre.
+
+---
+
+# 14 agosto 2026 — IL PRIMO MINUTO: DA 11 TOCCHI A 6
+
+Prima volta che si tocca il gestionale **non per correggere un difetto**, ma
+perché la strada era troppo lunga. Nasce da un fatto: al 14 agosto **nessuno
+dei 61 iscritti usa il gestionale**, e nessuno dei 20 difetti corretti oggi
+c'entrava con questo.
+
+## LA MISURA, PRIMA DI TOCCARE NIENTE
+
+`nuove/quanto-lontano-e-il-preventivo.py`: non cerca difetti, **conta una
+distanza**. Il caso è quello di Tony, idraulico, uno degli iscritti veri: apre
+il gestionale dal telefono, sotto un lavandino, perché il cliente gli ha
+chiesto quanto viene. Account nuovo, iPhone vero.
+
+**Prima: 11 tocchi · 7 cose da scrivere · 5 schermate · 2 muri.**
+
+E la prima schermata diceva «Gestionale Multiservizi — SCEGLI IL REPARTO», con
+sotto la spiegazione che i reparti non si mischiano. In tutta la schermata
+**non comparivano mai le parole «preventivo», «lavoro» o «cliente»**: nessuna
+delle tre cose per cui era entrato.
+
+**Dopo: 6 tocchi · 4 da scrivere · 4 schermate · 0 muri.**
+
+## 1. IL PRIMO REPARTO SE LO CREA IL GESTIONALE
+
+I primi tre tocchi servivano solo a creare un «reparto» — parola che a un
+idraulico che lavora da solo non dice niente. Adesso, all'account nuovo, il
+primo reparto si crea da solo col nome della sua attività
+(`imprese.nome_attivita`) e ci si entra dentro subito.
+
+**I tre paletti**, e sono la parte importante:
+
+1. **mai se la lettura è fallita.** Col database giù la lista arriva vuota per
+   un guasto, non perché non ha reparti: crearne uno vorrebbe dire aggiungerne
+   uno vuoto a chi ne ha tre pieni. È il difetto corretto stamattina, girato
+   al contrario;
+2. **mai a chi ne ha già uno**;
+3. **mai due**, anche con due `renderLanding` di fila (`_repartoAuto`).
+
+Senza nome attività: «I miei lavori» (o «Il mio studio» per i tecnici). Mai
+«Reparto 1».
+
+`nuove/primo-reparto.py`, 8 controlli: tutti e tre i paletti provati, più il
+nome e l'ingresso automatico.
+
+## 2. IL PDF NON SI FERMA PIÙ ALLA FINE
+
+`prevPdf` diceva: niente Dati azienda, niente PDF — e apriva un modulo da **18
+caselle**. Lo stop arrivava nel momento peggiore: preventivo scritto, salvato,
+premi «Scarica PDF» e scopri che devi fare altro. Erano gli ultimi 2 tocchi di
+11, ed è il punto in cui uno molla, perché pensava di aver finito.
+
+Adesso il PDF **esce lo stesso**, e si vede a un metro che non è da mandare:
+
+- **fascia rossa in cima a ogni pagina**: «BOZZA - NON DA CONSEGNARE: mancano
+  il nome dell'attività e la partita IVA»;
+- **«BOZZA-» nel nome del file** — è quello che si legge nella cartella dei
+  download e nell'allegato dell'email, gli ultimi due posti in cui ci si può
+  ancora accorgere;
+- il messaggio dice dove metterli, senza obbligare.
+
+Chi i dati ce li ha non vede nessuna differenza.
+
+## 3. LA PRIMA SCHERMATA PARLA DI QUELLO PER CUI È ENTRATO
+
+- «Gestionale Multiservizi / Scegli il reparto» → **«Il tuo gestionale /
+  Lavori, preventivi e fatture»**;
+- «Ogni reparto è separato: lavori, clienti, squadra e calendario non si
+  mischiano» → **«Apri il tuo lavoro qui sotto: dentro ci trovi lavori,
+  preventivi, fatture e clienti»**;
+- «➕ Nuovo reparto» → «➕ Aggiungi un reparto», con sotto la spiegazione:
+  *serve solo se tieni separate due attività, per esempio idraulica e
+  giardinaggio*.
+
+I reparti non spariscono: smettono di essere la prima cosa che ti si chiede.
+
+## ⚠️ LA LEZIONE — LA PROVA CHE SEGUE UN PERCORSO CHE NON ESISTE PIÙ
+
+Quattro modi nuovi di sbagliare, tutti nella prova della misura:
+
+1. **premeva «Nuovo reparto» anche dopo la correzione**, perché ripeteva un
+   percorso fisso invece di seguire quello che il gestionale offre: il numero
+   non sarebbe sceso mai. Adesso guarda se è già dentro e salta;
+2. **il finto server non risponde alle scritture**: il reparto automatico non
+   nasceva e la misura contava i tocchi di un gestionale a cui non era stato
+   dato modo di funzionare;
+3. **contava il muro del PDF cercando la parola «azienda» nel messaggio** — e
+   il messaggio nuovo la contiene per dire *dove* mettere i dati. Un muro che
+   non c'era più, contato per una parola;
+4. **contava il tocco del PDF due volte**, una per parte: il totale usciva 7
+   invece di 6. Una misura che gonfia il numero è sbagliata quanto una che lo
+   sgonfia.
+
+## COSA DEVE FARE ALESSIO
+
+Il push. Nessuna query questa volta.
+
+## DOVE SIAMO RIMASTI
+
+Il gestionale, dal punto di vista dei difetti, è in buona forma: 63 prove,
+0 rosse. Quello che resta è **lavoro scelto**:
+
+*1. Il resto del primo minuto.* La misura sta lì e si rilancia: quando si
+tocca qualcosa lungo quella strada, si rivede se il numero scende. Prossimi
+candidati: il menu ☰ (un tocco solo per arrivare ai Preventivi), e il titolo
+obbligatorio del preventivo.
+
+*2. La riduzione delle letture* (25 all'apertura, `gest_operatori` × 5).
+
+*3. Il resto del Computo,* le 18 prove «da capire», il deposito dei file,
+negozio e noleggio.
+
+**E la cosa vera:** il gestionale adesso si lascia usare in 6 tocchi. Perché
+qualcuno li faccia, serve che sappia che esiste — e quella non è una riga di
+codice.
