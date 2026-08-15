@@ -6602,95 +6602,75 @@ Adesso si accende per `data-tab==="riepilogo"`.
 
 ## DOVE SIAMO RIMASTI (15 agosto, sera — terza tornata)
 
-### La scheda completa: «Report completo» (era il punto 1)
+### ⚠️ IL «REPORT COMPLETO»: FATTO, MESSO ONLINE, E TOLTO IN SERATA
 
-Dentro il Riepilogo, dopo tutte le altre schede, c'è una card sua —
-**Report completo**, riconoscibile perché non ha il numero grande. Cliccandola
-si apre una pagina sola, `<section id="reportcompleto">`, con tutte le sezioni
-piene una sotto l'altra, in **sola lettura**, e due pulsanti in cima: **Crea
-PDF** e **Stampa**.
+Costruito un «Report completo» che apriva **tutte le sezioni una sotto
+l'altra, in sola lettura**, copiando l'HTML che le funzioni vere avevano
+prodotto. Provato, sabotato, messo in produzione (commit `1bb9d15`).
 
-⚠️ **LA REGOLA DA NON VIOLARE MAI IN QUESTO BLOCCO.** Il Report **non disegna
-niente**. Chiama le funzioni vere delle sezioni (`RENDER_TAB`), le lascia
-riempire i loro riquadri come fanno sempre, e poi **copia l'HTML che hanno
-prodotto** togliendo pulsanti, menu «...», caselle e id. Se qualcuno ci mette
-un modo suo di calcolare o di mostrare fatture, preventivi o computi, sta
-creando la **seconda copia**: fra un mese, cambiata una regola in una sezione,
-il Report stamperebbe il numero vecchio — su un foglio che finisce dal
-commercialista. È il difetto delle fatture del 13 agosto in un'altra stanza.
+**Alessio l'ha aperto e aveva ragione: era un doppione.** Da agosto le sezioni
+disegnano SCHEDE, quindi il foglio era la sezione Lavori senza i pulsanti, la
+sezione Preventivi senza i pulsanti, e così per tredici volte — stesse card,
+stesse posizioni, stesso ordine. A colpo d'occhio la faccia del Riepilogo,
+solo più lunga. Dieci fogli A4 per tre lavori. Parole sue: *«identiche card,
+identiche posizioni»*, *«non ho mai detto di fare una fotocopia»*.
 
-Le decisioni di contorno, e perché:
+**Tolto tutto**: sezione, scheda nel Riepilogo, blocco JS, CSS, regole di
+stampa e serie di prove l6. Il gestionale torna esattamente com'era prima.
 
-- **Quali sezioni entrano** lo dice il **Riepilogo**, non un elenco a parte:
-  `RIE_VISTE` / `RIE_PIENE` si riempiono dentro `rieCard()` dal campo `dati:`
-  che esisteva già. Una regola sola, e già coperta dalle prove.
-- **L'ordine e i nomi** si leggono dal menu (`nav.tabs button`): se un domani
-  «Lavori» diventa «Pratiche», il report cambia da solo. Vale anche per il
-  profilo: una voce che non è nel menu non entra nel foglio.
-- **Fuori:** Cestino, «Chiedi una funzione», «Assistenza diretta», Galleria
-  (centinaia di foto = foglio instampabile) e Mappa (scarica una libreria da
-  fuori e interroga un servizio esterno; e una carta stampata non si legge).
-  Deciso con Alessio.
-- **I filtri** si mettono su «tutto» prima di copiare e si rimettono com'erano
-  dopo: se no il foglio stampava «solo i lavori in ritardo» perché era acceso
-  quel filtro a schermo.
-- **Il PDF** lo scrive `jsPDF` percorrendo il testo **già scritto nel report**:
-  nessuna formula rifatta. Come negli altri PDF si legge `EUR` e non `€`.
+### ⚠️ LE TRE LEZIONI, CHE VALGONO PIÙ DEL CODICE BUTTATO
 
-### ⚠️ Un difetto vero, trovato da un sabotaggio e non a occhio
+**1. «Usa le stesse funzioni» era una regola sui CONTI, non su come si vede.**
+Alessio l'aveva scritta perché i numeri non si scollassero fra Report e
+sezioni. È stata presa come una regola sul disegno, e da lì è uscita la
+fotocopia. Le due cose non erano in conflitto: i numeri potevano arrivare
+dalle stesse funzioni e il foglio essere lo stesso un documento vero.
 
-Le regole `@media print` valevano **sempre**. Chi stava in Fatture e premeva
-**Ctrl+P** si stampava il Report completo al posto delle Fatture — e magari un
-Report mai aperto, quindi vuoto: un foglio sbagliato che esce dalla stampante
-senza che nessuno abbia sbagliato niente.
+**2. La misura giusta stava già nel suo messaggio, e non è stata usata:**
+*«in modo che diventi un foglio da portare in riunione o dal commercialista»*.
+Bastava chiedersi, prima di consegnare: **questo lo porteresti in riunione?**
+La risposta era no, e si vedeva a occhio. Sono state controllate per ore le
+cifre, e mai la sola frase che diceva a cosa doveva servire.
 
-Chiuso con il segno `body.report-aperto`, messo da `apriReportCompleto()` e
-tolto sia da «Torna al Riepilogo» sia da **qualunque voce di menu** (`repcSegna`
-nel gestore dei bottoni della barra laterale — la strada che si dimentica).
+**3. La domanda che non gli è stata fatta prima di cominciare:**
+*un'impresa smetterebbe di pagare se questa cosa non ci fosse?* No. Nessun
+iscritto l'aveva chiesta. E per il commercialista c'è già il pulsante
+**Esporta** (Excel con dentro tutto), che per lui è meglio di un foglio
+stampato: lo ordina, lo filtra, ci fa le somme.
 
-### Le prove l5, che erano andate perse
+⚠️ **Prima di costruire una funzione nuova, quella domanda va fatta a lui.**
 
-`banco_browser.js` risultava a 327 controlli, ma nell'ultimo zip salvato
-(`banco-lavoro4-15ago.zip`) c'erano solo `rompi_l3.py` e `rompi_l4.py`: la
-serie **l5** era rimasta nel computer della sessione precedente. **Riscritta
-da zero** insieme a `rompi_l5.py`, e questa volta la prova del cliente nuovo
-passa **dal modulo vero**, non scrivendo nel database di nascosto (era una
-delle bugie del banco del 15 agosto).
+### Cosa è rimasto di buono
 
-### Il banco, adesso
+Le prove **l5** (il Riepilogo che si riempie da solo), che erano andate perse
+perché non salvate in nessuno zip, sono state **riscritte** insieme a
+`rompi_l5.py` (10 sabotaggi, tutti visti). La prova del cliente nuovo passa
+dal **modulo vero**, non scrivendo nel database di nascosto — era una delle
+bugie del banco di questa giornata.
 
-`prove/banco_browser.js` → **441 controlli, 0 rossi** (`BANCO_SOLO=l3|l4|l5|l6`).
-Sabotaggi: `rompi_l5.py` **10 su 10 visti**, `rompi_l6.py` **24 su 24 visti**.
+`prove/banco_browser.js` → **296 controlli, 0 rossi** (`BANCO_SOLO=l3|l4|l5`).
+I due semi di prova (reparto pieno / reparto appena creato) sono rimasti come
+`SEME_PIENO` e `SEME_VUOTO`.
 
-⚠️ **Quattro sabotaggi non si vedevano, e le prove sono state rifatte:**
-un link cliccabile restava invisibile alla prova (contava `a[href]`, e l'href
-veniva tolto lo stesso da un'altra riga); «entrano le sezioni vuote» non si
-vedeva perché nel seme non c'era **nessuna** sezione che, aperta, disegna
-qualcosa pur essendo vuota — è nato il reparto «scarno» (un lavoro senza
-importo e senza data: Report e Calendario non devono entrare); «entra anche il
-Cestino» non si vedeva perché **il cestino era vuoto**; e la prova del PDF non
-si accorgeva se sparivano le righe delle tabelle — adesso confronta **tutte le
-cifre** del report con quelle del PDF, nello stesso ordine.
+### Cosa voleva davvero (parole sue, per la prossima volta)
 
-### Segnalati, non toccati
+*«Io volevo un pannello con un riepilogo di tutto quello che sta scritto nelle
+singole card»* → **una tabella**, righe e colonne, che si aggiorna da sola e
+in cui **si caricano solo le voci del gestionale che si compilano**.
 
-1. **Il Calendario scrive a 12 px** (10,5 sul telefono): `.cal-lav-t` in
-   `css/gestionale.css`, riga ~830. `.wrap section` corregge `.cal-dow` e
-   `.cal-cell .dn` ma non questa. Nel Report è portata a 13,5 px; **la sezione
-   vera è rimasta com'era**, in attesa del suo sì.
-2. **Agenda operatore, coi filtri su «tutto», mostra gli stessi lavori della
-   sezione Lavori**: nel foglio l'elenco esce due volte.
-3. Nel riquadro Fatture si legge *«1 lavoro finito · clicca per fatturarlo»* —
-   un invito a cliccare dentro un foglio di sola lettura.
+Ne è stata scritta e provata una versione (una tabella sola: Voce · Cosa ·
+Quando · Stato · Importo, totali per gruppo, 2 pagine A4) e gliene è stata
+mandata l'anteprima. **Ha deciso di non farla**, perché l'Excel di «Esporta»
+copre già il caso del commercialista. **Non ricostruirla senza che la chieda
+lui.**
 
 ### Cosa resta aperto, in ordine
 
-1. Le tre segnalazioni qui sopra (una riga a testa)
-2. Il **grafico** del Report completo, rimandato apposta
-3. La guida blog **«DURC scaduto»** — prima la Search Console (MCP
-   Supermetrics, `ds_id` GW), poi il titolo
-4. Il **deploy a mano della Edge Function `ai-generate`**: non risulta fatto
-5. Il `×` del registro ore a 12 px sul telefono; `gest_membri` non sta in
-   nessun file di `sql/`
-6. I due `.select('id')` mancanti, le prove Node portate su `harness.py`, le 9
-   prove «da capire» del 14 agosto
+1. Il gestionale **usato da un telefono vero in cantiere**: David che apre
+   l'app e segna le sue ore. È il collaudo che conta e non l'ha fatto nessuno.
+2. Il **Calendario scrive a 12 px** (10,5 sul telefono): `.cal-lav-t` in
+   `css/gestionale.css`, riga ~830. Segnalato, non toccato.
+3. Il **deploy a mano della Edge Function `ai-generate`**: non risulta fatto
+4. La guida blog **«DURC scaduto»**
+5. I due `.select('id')` mancanti, le prove Node su `harness.py`, le 9 prove
+   «da capire» del 14 agosto
