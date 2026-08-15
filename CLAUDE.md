@@ -5951,3 +5951,375 @@ sorpresa sotto il dito.
 ## DOVE SIAMO RIMASTI
 
 71 prove nel banco.
+
+---
+
+# 15 agosto 2026 — IL BLOG: LA PRIMA GUIDA PER CHI IL PREVENTIVO LO SCRIVE
+
+Alessio: «guarda cosa cerca la gente davvero, e dimmi qual è quella da scrivere,
+e perché».
+
+## I NUMERI VERI, NON LE STIME
+
+Letti da Search Console, 15 maggio - 13 agosto. **846 query**, e la prima cosa
+da sapere è questa: **nessuna riguarda un gestionale.** Non una. Né «software
+cantiere», né «gestionale edile».
+
+Le guide che portano tutto:
+
+    quanto-costa-rifare-impianto-idraulico   1.515 impressioni   pos. 8,5
+    quanto-costa-cambiare-gli-infissi        1.457               pos. 10,4
+    quanto-costa-un-muratore-al-giorno       1.179               pos. 8,4
+    quanto-costa-posare-il-pavimento           922               pos. 9,5
+    quanto-costa-cappotto-termico              507               pos. 10,2
+    quanto-guadagna-un-muratore                485               pos. 6,8
+
+Il filone imprese invece non esiste: «trovare clienti edilizia gratis» 9
+impressioni in posizione 41, «come trovare clienti per impresa edile» 2 in
+posizione 68. Circa 30 impressioni in tre mesi, tutte oltre la quarta pagina.
+
+## PERCHE' NON «QUANTO COSTA DAVVERO UN'ORA DI OPERAIO»
+
+Era la seconda scelta di Alessio, e sarebbe stato un errore. Le due guide che
+funzionano — `quanto-costa-un-muratore-al-giorno` e `quanto-guadagna-un-muratore`
+— **hanno già dentro** la tabella del costo per l'impresa, i contributi, la
+Cassa Edile e il ricarico 15%+10%. Un terzo articolo avrebbe fatto scegliere a
+Google fra tre pagine di casa, e avrebbe perso quella a posizione 8,4.
+
+## LA SCELTA, E COM'E' CAMBIATA IN CORSA
+
+Prima scelta: il **consuntivo di cantiere** — «ci ho guadagnato o rimesso».
+Verificato a mano che la prima pagina di Google è vuota di numeri: guidoalberti,
+infominds (4.000 parole, un H2 «Esempio di contabilità» **senza un solo
+importo**), biblus/ACCA, teamsystem («1 minuto di lettura», una pubblicità
+travestita da articolo). Zero euro in tutti.
+
+⚠️ **Poi è saltato fuori un fatto che cambiava tutto: Alessio non ha l'azienda.**
+Fa i preventivi per il suo capo. Niente fatture dei fornitori, niente ore vere:
+il consuntivo non si poteva fare, e **inventarlo era fuori discussione**.
+
+Quindi si è girato su quello che ha davvero in mano: **un preventivo vero**, di
+un lavoro preso. 18 voci, 34.200 € più IVA al 10%.
+
+## L'ARTICOLO — `come-fare-un-preventivo-edile.html`
+
+Le 18 voci pubblicate **in fasce, non in cifre esatte**: quei prezzi sono il
+listino del suo capo, e metterlo online era una decisione sua, non mia. Le
+fasce contengono il prezzo vero ma il loro centro non lo tradisce (controllato:
+nessun centro fascia coincide col prezzo).
+
+Impersonale, per sua scelta. Richiamo «Iscrivi la tua impresa gratis».
+
+## ⚠️ IL DIFETTO TROVATO DOPO, GUARDANDO LO SCHERMO
+
+Il gruppo «Per le imprese» del blog mostrava 3 guide, ma non quella giusta:
+**`come-trovare-operai-edili` era rimasto senza `mestiere`** e finiva nel gruppo
+di scarto. Stesso problema già capitato a `bonus-edilizi-2026`. Sistemato con
+`sql/blog-operai-nel-gruppo-imprese.sql`.
+
+## DOVE SIAMO RIMASTI
+
+Guida online, sitemap e blog aggiornati. Commit `7c780df`.
+
+---
+
+# 15 agosto 2026 (2) — LA FASE 1 NON C'ERA DA FARE
+
+Alessio ha dato un piano di quattro moduli, in ordine. La Fase 1 era
+«Scadenzario documenti con avvisi».
+
+**C'era già tutto e tre.**
+
+- `gest_scadenze` esiste, con `avvisa`, `avvisi` (le tappe già spedite),
+  `ripeti_mesi` (la scadenza dell'anno dopo nasce da sola)
+- i tipi ci sono, riga 6330 di `gestionale-app.html`: **DURC**, Assicurazione,
+  Revisione mezzo, Bollo, Tagliando, Certificazione…
+- l'email parte da sola: `netlify/functions/promemoria-scadenze.js`, esportata
+  con `schedule('15 6 * * *')` — ogni mattina, tappe a **30, 7 e 1 giorno**
+
+Verificato sul database vero con una query di sola lettura
+(`prove-claude/controlla-scadenzario.sql`): **14 colonne su 14, nessuna manca.**
+
+⚠️ **Se avessi costruito una sezione «Scadenze» nuova, Alessio si sarebbe
+ritrovato DUE scadenzari che non si parlano.** Il DURC scritto in uno e non
+nell'altro. Peggio di non averne nessuno.
+
+È la lezione del 14 agosto notte, sezione 11, applicata prima di rompere invece
+che dopo: **prima di fare la cosa, chiedersi se il posto c'è già.**
+
+---
+
+# 15 agosto 2026 (3) — IL RAPPORTINO DI CANTIERE (Fase 2a)
+
+## IL BUCO VERO, TROVATO GUARDANDO
+
+Anche la **Fase 3** (cruscotto del margine) era in gran parte costruita:
+`margineLavoro()` alla riga 9191 fa già *importo − spese − fatture fornitori −
+manodopera*, e la manodopera la calcola da `gest_ore` per costo orario. Si vede
+già dentro ogni lavoro, nel Riepilogo e nell'esportazione Excel.
+
+Il buco era uno solo, e stava in mezzo: **`gest_ore` non compare nemmeno una
+volta in `gestionale-operatore.html`.** Le ore le poteva scrivere solo il
+titolare, dal pannello, la sera, a mano.
+
+Quindi il margine era vero **solo per i lavori in cui qualcuno si era ricordato
+di inserirle**. Il gestionale lo diceva già da solo, riga 9111: *«X ore senza il
+nome di chi le ha fatte: queste non entrano nel margine»*.
+
+## `sql/gest-rapportini.sql`
+
+Una tabella sola, `gest_rapportini` (lavoro, data, chi l'ha scritto, materiali
+a parole, note), più **una colonna** `gest_ore.rapportino_id`.
+
+⚠️ **Niente seconda tabella delle ore.** Due posti dove stanno le ore vuol dire
+prima o poi due numeri diversi. Così invece le ore scritte dal telefono entrano
+nel margine **dal primo giorno**, senza ricollegare niente.
+
+⚠️ `rapportino_id` è **set null e non cascade**: buttando via un rapportino le
+ore restano. Se sparissero, il margine di un lavoro già chiuso cambierebbe da
+solo — è il difetto del 12 agosto con le tariffe delle persone eliminate.
+
+**⚠️ IL BUCO TROVATO PROVANDO.** Il capo squadra poteva scrivere ore «sciolte»,
+senza rapportino — e poi **non le rivedeva più**: non erano sue e non stavano
+sotto un suo rapportino, quindi la regola di lettura non gliele mostrava. Ore
+scritte, invisibili a chi le aveva scritte, impossibili da correggere.
+Chiuso alla radice: dal telefono `rapportino_id` è obbligatorio. Il titolare
+continua a scriverle sciolte come sempre.
+
+26 controlli su PostgreSQL 16.
+
+## `sql/gest-squadra-nomi.sql` — E IL BUCO PIU' GRAVE DELLA GIORNATA
+
+Il capo squadra scrive le ore di tutti, quindi gli servono i nomi dei colleghi.
+Ma dall'11 agosto un collaboratore vede **solo la propria scheda** in
+`gest_operatori` — giustamente, lì dentro c'è il costo orario.
+
+La porta era già stata disegnata in quel file: *«se un giorno serve la RUBRICA
+DELLA SQUADRA si fa una vista con dentro solo quelle due colonne»*. Fatta:
+`gest_squadra_nomi`, dentro **id, reparto e nome. E basta.**
+
+**⚠️ LA PRIMA VERSIONE SI POTEVA SCRIVERE.** Nella prova il capo squadra ci ha
+infilato dentro una persona finta, che è finita **davvero** in `gest_operatori`.
+In PostgreSQL una vista costruita su UNA tabella sola è modificabile, e togliere
+il permesso non basta: un `GRANT ALL` dato domani per un'altra ragione la
+riaprirebbe **in silenzio**.
+
+Chiusa con `select distinct`, che la rende non scrivibile **per costruzione**:
+il database rifiuta inserimento, modifica e cancellazione qualunque permesso ci
+sia. Riprovato tutti e tre: rifiutati.
+
+## LA SCHERMATA DAL TELEFONO
+
+Dentro la vista del lavoro, sotto «Cosa devi fare»: data di oggi già messa, la
+squadra un nome per riga con **−** e **+** da 52×52 px (mezz'ora per clic), i
+materiali a parole, le note, e un pulsante largo quanto lo schermo.
+
+⚠️ **I materiali senza prezzo, e non è una dimenticanza.** Il costo dei
+materiali sta già nelle spese e nelle fatture fornitori, e da lì entra già nel
+margine. Riscriverlo qui vorrebbe dire contarlo due volte. È la stessa regola
+che il gestionale già scrive all'utente alla riga 6213.
+
+## LA PROVA CHE PREMEVA DI PIU'
+
+Fatto finta che il database rifiutasse le ore **senza dare errore** — che è
+quello che succede quando un permesso blocca. Senza il controllo l'app avrebbe
+detto «Rapportino salvato ✔» con zero ore dentro. Con `.select("id")` dice:
+
+    Rapportino salvato, ma le ore NO: scritte 0 su 2 — dillo al capo
+
+## COSA E' STATO VISTO E NON TOCCATO
+
+Nell'app del dipendente, «Salva note» e «Segna come fatto» fanno
+`update(...).eq("id",...)` **senza `.select('id')`**. Un UPDATE che non tocca
+nessuna riga NON dà errore: se un giorno i permessi bloccassero quella
+scrittura, l'app direbbe «Salvato ✔» a vuoto. Stessa cosa in `oreAdd()` nel
+pannello. **Segnalato ad Alessio, non corretto.**
+
+## DOVE SIAMO RIMASTI
+
+Commit `7fcf4db`, `29dbbaa`, `c2b3a57`.
+
+---
+
+# 15 agosto 2026 (4) — I RAPPORTINI SI LEGGONO NEL PANNELLO
+
+Da quando la schermata del telefono è online, «Cosa avete usato» e «Com'è
+andata» finivano in `gest_rapportini` e **non li leggeva nessuno**. Una casella
+che chiede di scrivere promette un lettore: senza il riquadro, la promessa era
+falsa. Per questo è stato fatto subito, prima del «+ Rapido».
+
+Dentro il lavoro, sotto il Registro delle ore: quando, chi l'ha scritto, chi
+c'era e quante ore per uno, i materiali, le note. In fondo una riga che tiene
+**separate le ore arrivate dal cantiere da quelle messe a mano dal titolare**.
+
+⚠️ **Niente pulsante per eliminare un rapportino.** `gest_rapportini` non sta
+nell'elenco dentro `js/cestino.js`: una cancellazione da lì sarebbe **vera e
+definitiva** invece di finire nel Cestino. Il Cestino per i rapportini è una
+cosa a sé, da fare con calma.
+
+## UNA REGOLA PIEGATA, DETTA PRIMA
+
+Alessio chiede «tabelle con `renderTabella()`, mai card». Qui non è stata usata:
+`renderTabella()` è il disegnatore delle **sezioni** — costruisce i pulsanti
+delle viste, registra i menu «...» e produce card. Dentro il modulo del lavoro
+avrebbe fatto proprio quello che la regola vuole evitare. I tre riquadri
+accanto (Spese, Mezzi, Registro delle ore) usano tutti `spesa-row`: è stato
+usato quello.
+
+## DOVE SIAMO RIMASTI
+
+Commit `c2b3a57`. E un errore mio corretto subito dopo: avendo aggiunto la
+spunta «Rapportini», la frase sotto le caselle contava male — «le ultime tre»
+invece di «le altre quattro» (`baf158b`). Corretta facendo **contare al codice**
+quante spunte aprono una schermata e quante lavorano dentro, e pretendendo che
+la frase dica gli stessi numeri.
+
+---
+
+# 15 agosto 2026 (5) — UNA SCADENZA PUO' ESSERE DI UNA PERSONA
+
+Guardando la scheda di David sullo schermo di Alessio: **«Attestati e patentini»
+è un campo di testo libero, senza data.** Ci scrivi «patentino muletto» e quella
+cosa **non scade mai e non avvisa nessuno**.
+
+Il patentino del muletto scade. La piattaforma aerea scade. Il primo soccorso
+scade. E se scade e l'uomo sale lo stesso, in cantiere non è un fastidio: è il
+verbale.
+
+`sql/gest-scadenze-persona.sql`: **una colonna sola**, `operatore_id`. Da lì in
+poi funziona tutto quello che c'è già — l'elenco, i colori, il «si ripete», e
+l'email a 30/7/1 giorno. Non c'era da costruire niente: c'era solo da poter
+dire **a chi**.
+
+⚠️ **set null, non cascade**, come `gest_ore.operatore_id`: se una persona viene
+tolta dalla squadra la sua scadenza NON sparisce da sola. Il gestionale la
+mostra dicendo «(persona non più in squadra)». Una riga che sparisce in silenzio
+è peggio di una riga da buttare a mano.
+
+**⚠️ Un limite del file, trovato provandolo:** `add column if not exists` non
+aggiunge il collegamento se la colonna esiste già senza. Il file si limitava a
+dire «a metà» invece di sistemare. Adesso il collegamento lo aggiunge se manca.
+
+Aggiunti anche due tipi: **Patentino** e **Idoneità sanitaria**.
+
+Commit `589b4fb`, `6468f0c`.
+
+---
+
+# 15 agosto 2026 (6) — «+ RAPIDO»: TRE TOCCHI DAL CANTIERE
+
+Alessio ha dato un prompt per la nota vocale con l'AI. Tre cose non tornavano,
+dette prima di scrivere una riga:
+
+1. **il posto**: il prompt diceva `gestionale-app.html`, ma le mani sporche e i
+   ponteggi sono `gestionale-operatore.html` — dove l'assistente AI non è
+   nemmeno caricato (zero volte, controllato)
+2. **le ore erano appena state fatte**: «oggi io e Wahid 8 ore» è il rapportino
+   di un'ora prima
+3. **la misura**: 4 tipi di dato per 2 modi di inserirli fanno 8 strade
+
+E una cosa che nel prompt non c'era: **ogni nota vocale è un credito.** Tre al
+giorno per 20 giorni sono 60 crediti al mese per persona. I tre tocchi non
+costano niente, per sempre.
+
+⚠️ **La decisione migliore era già nel prompt di Alessio**, e va scritta perché
+non si perda: *«non registrare audio, apri una casella di testo e lascia che sia
+il microfono della tastiera del telefono a trascrivere»*. Niente file audio,
+niente permesso al microfono, niente trascrizione da pagare, e funziona su
+iPhone e Android perché non dipende da noi. **Non c'è una strada migliore.**
+
+## LA BUONA NOTIZIA PER LA VOCE, QUANDO SI FARA'
+
+`js/ai-integrazione.js` ha già `pannelloCompila(titolo, placeholder, onCompila)`:
+un pannello generico «descrivi a parole, ti riempio il modulo», con dentro **la
+casella di testo dove si detta**, i crediti, il messaggio quando finiscono, i
+numeri all'italiana (1.200,50) e il riempimento tollerante delle tendine.
+Riga 460: *«l'AI riempie il form, NON scrive mai nel DB»*.
+La nota vocale è **una terza voce lì dentro**, non una strada nuova.
+
+## COS'E' STATO FATTO
+
+Sopra l'elenco dei lavori, un pulsante blu largo quanto lo schermo. Tre tocchi:
+**cosa** (ore / materiale / nota / spesa), **quale lavoro** (gli 8 più recenti,
+gli aperti prima dei finiti), **conferma** con i valori già proposti — le ore
+arrivano con 8 già scritte.
+
+⚠️ **Le ore NON prendono una strada nuova**: creano un rapportino con dentro
+solo chi lo scrive. Alessio aveva chiesto di includerle contro il consiglio; si
+è fatto come voleva lui, ma da **una porta in più sulla stessa stanza**.
+
+## `sql/gest-spese-cantiere.sql`
+
+La spesa del cantiere (`gest_spese`, quella che entra nel margine) prima la
+poteva scrivere solo il titolare. Adesso anche chi ha la spunta **Pagamenti**.
+
+⚠️ **Nessuna spunta nuova.** «Pagamenti» dice già testualmente *«Vede la sua
+carta aziendale e registra le spese»*: è la stessa fiducia, non una in più.
+⚠️ **Scrivere sì, leggere no.** L'elenco delle spese di un cantiere, in fila,
+racconta i margini dell'impresa: non è roba da telefono di cantiere.
+Aggiunta la colonna `inserito_da`: una spesa arrivata dal cantiere non deve
+essere indistinguibile da una del titolare, perché quei soldi entrano nel
+margine.
+
+Commit `1304621`, `54347a7`.
+
+---
+
+# 15 agosto 2026 (7) — LE DUE LEZIONI, E IL BANCO
+
+## LA PRIMA: TRE VOLTE SU QUATTRO LA COSA C'ERA GIA'
+
+Lo **Scadenzario**, le **ore** (`gest_ore`, dal 9 agosto), il **margine**
+(`margineLavoro`, con la schermata dentro ogni lavoro). Tutti e tre costruiti,
+tutti e tre dati per mancanti dal piano.
+
+Scoperti solo perché si è andati a **guardare i file** invece di credere al
+piano. Il piano diceva quattro moduli: ne mancava **uno**, e stava in mezzo —
+l'ingresso dei dati dal cantiere.
+
+**La domanda da farsi prima di ogni modulo nuovo: «questa cosa c'è già?»**
+
+## LA SECONDA: OTTO PROVE BUGIARDE SU OTTO
+
+Ogni riga rossa di oggi era la prova, mai il gestionale:
+
+1. la sitemap «senza l'indirizzo nuovo» — il riassuntore non aveva letto tutto
+2. i file non trovati sotto `file://` — `/js/` e `/css/` puntano alla radice del disco
+3. i pulsanti misurati **0×0** — si misurava una schermata chiusa
+4. l'UPDATE «riuscito» che non toccava nessuna riga — **non dà errore**
+5. il conteggio delle righe viste, sbagliato nell'attesa
+6. `max(uuid)`, che PostgreSQL non sa fare
+7. la finestra rimasta aperta che copriva il clic — ed era voluta
+8. «Nessun dettaglio» preteso da un rapportino che un dettaglio ce l'aveva
+
+La regola del 14 agosto regge e si rafforza: **prima di credere al rosso,
+chiedersi chi sta parlando.**
+
+## IL BANCO — `prove-claude/banco-prove-15ago-rapportino.zip`
+
+Cinque prove nuove in `nuove/`, **fuori dal comando** e si sa perché: sono
+scritte in **Node**, mentre il banco apre le pagine con **Playwright da Python**
+appoggiandosi a `harness.py`, che usa il bundle vero di supabase-js.
+Registrarle così vorrebbe dire righe rosse **per colpa dell'ambiente**.
+
+⚠️ **Il lavoro che manca: portarle su `harness.py`.** Quel giorno si registrano
+in `prova-tutto.js`. Stessa scelta già fatta con `scheda-si-apre-cliccando.py`.
+Le istruzioni per lanciarle a mano sono in `nuove/LEGGIMI-15ago.md`.
+
+## DOVE SIAMO RIMASTI
+
+71 prove nel banco più 5 fuori dal comando. Nove push:
+`7c780df`, `7fcf4db`, `29dbbaa`, `c2b3a57`, `baf158b`, `589b4fb`, `6468f0c`,
+`1304621`, `54347a7`.
+
+⚠️ **Nessuno ha ancora usato niente di tutto questo da un telefono vero, in
+cantiere.** Il collaudo che conta è David che apre l'app e segna le sue ore.
+
+Cosa resta aperto, in ordine:
+
+1. **La voce** sopra il «+ Rapido», sugli stessi moduli (`pannelloCompila`)
+2. Le prove di oggi portate su `harness.py`
+3. Il **Cestino per i rapportini** (`js/cestino.js` non li conosce)
+4. I due `.select('id')` mancanti segnalati e non toccati
+5. Le 9 prove «da capire» del 14 agosto, il render pigro, le cascate di
+   `segnalazioni` e `supporto_messaggi`, l'annuncio pagato da recuperare
