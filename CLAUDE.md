@@ -17,6 +17,32 @@
 - Quindi: dopo aver modificato i file, dare **subito** ad Alex il blocco pronto da incollare (`git add ... / git commit -m "..." / git push`), senza tentativi a vuoto. Ad Alex di norma non serve `rm -f .git/index.lock`.
 - Deploy: Netlify pubblica in automatico a ogni push su `main`.
 
+### ⛔ REGOLA FISSA: PRIMA DI COSTRUIRE, CHIEDERE SE SERVE (15/8/2026)
+
+**Prima di scrivere una riga di una funzione nuova, chiedere ad Alessio se gli
+serve.** Non «come la vuoi»: **se la vuole**.
+
+La domanda da fargli è una sola:
+**un'impresa smetterebbe di pagare TrovaImpresa se questa cosa non ci fosse?**
+Se la risposta è no, la funzione va in fondo alla lista, e glielo si dice
+**prima**, non dopo aver consegnato.
+
+E se il lavoro è un foglio, una stampa o una schermata, prima di consegnarlo:
+**questo lo porteresti in riunione?** Se la risposta è no, non è finito.
+
+⚠️ Nasce dal 15 agosto 2026: una serata intera su un «Report completo» che era
+la fotocopia del Riepilogo — stesse card, stesse posizioni — e che nessun
+iscritto aveva chiesto. Costruito, provato, sabotato, messo online e tolto la
+sera stessa. La misura giusta stava già nel messaggio di Alessio («un foglio da
+portare in riunione o dal commercialista») e non è stata usata: sono state
+controllate per ore le cifre, e mai la frase che diceva a cosa doveva servire.
+
+⚠️ E attenzione a un altro inciampo della stessa giornata: quando Alessio dice
+**«usa le stesse funzioni»**, sta parlando dei **CONTI** — vuole che i numeri
+non si scollino fra due schermate. **Non sta dicendo come deve essere fatto il
+disegno.** Prendere quella regola come una regola sull'aspetto è esattamente
+quello che ha prodotto la fotocopia.
+
 ### ⛔ REGOLA FISSA DI ALESSIO SULLE FINESTRE (8/8/2026 — non sgarrare mai più)
 **MAI usare `openSheet()` (la finestrella piccola) per form o schede nuove.**
 Alessio la ODIA. Qualsiasi form o scheda nuova va fatta con **`openSheetGrande()`
