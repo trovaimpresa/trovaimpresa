@@ -6597,3 +6597,100 @@ Adesso si accende per `data-tab==="riepilogo"`.
    sistemato per i rapportini). `gest_membri` non sta in nessun file di `sql/`.
 5. I due `.select('id')` mancanti, le prove Node portate su `harness.py`, le 9
    prove «da capire» del 14 agosto.
+
+---
+
+## DOVE SIAMO RIMASTI (15 agosto, sera — terza tornata)
+
+### La scheda completa: «Report completo» (era il punto 1)
+
+Dentro il Riepilogo, dopo tutte le altre schede, c'è una card sua —
+**Report completo**, riconoscibile perché non ha il numero grande. Cliccandola
+si apre una pagina sola, `<section id="reportcompleto">`, con tutte le sezioni
+piene una sotto l'altra, in **sola lettura**, e due pulsanti in cima: **Crea
+PDF** e **Stampa**.
+
+⚠️ **LA REGOLA DA NON VIOLARE MAI IN QUESTO BLOCCO.** Il Report **non disegna
+niente**. Chiama le funzioni vere delle sezioni (`RENDER_TAB`), le lascia
+riempire i loro riquadri come fanno sempre, e poi **copia l'HTML che hanno
+prodotto** togliendo pulsanti, menu «...», caselle e id. Se qualcuno ci mette
+un modo suo di calcolare o di mostrare fatture, preventivi o computi, sta
+creando la **seconda copia**: fra un mese, cambiata una regola in una sezione,
+il Report stamperebbe il numero vecchio — su un foglio che finisce dal
+commercialista. È il difetto delle fatture del 13 agosto in un'altra stanza.
+
+Le decisioni di contorno, e perché:
+
+- **Quali sezioni entrano** lo dice il **Riepilogo**, non un elenco a parte:
+  `RIE_VISTE` / `RIE_PIENE` si riempiono dentro `rieCard()` dal campo `dati:`
+  che esisteva già. Una regola sola, e già coperta dalle prove.
+- **L'ordine e i nomi** si leggono dal menu (`nav.tabs button`): se un domani
+  «Lavori» diventa «Pratiche», il report cambia da solo. Vale anche per il
+  profilo: una voce che non è nel menu non entra nel foglio.
+- **Fuori:** Cestino, «Chiedi una funzione», «Assistenza diretta», Galleria
+  (centinaia di foto = foglio instampabile) e Mappa (scarica una libreria da
+  fuori e interroga un servizio esterno; e una carta stampata non si legge).
+  Deciso con Alessio.
+- **I filtri** si mettono su «tutto» prima di copiare e si rimettono com'erano
+  dopo: se no il foglio stampava «solo i lavori in ritardo» perché era acceso
+  quel filtro a schermo.
+- **Il PDF** lo scrive `jsPDF` percorrendo il testo **già scritto nel report**:
+  nessuna formula rifatta. Come negli altri PDF si legge `EUR` e non `€`.
+
+### ⚠️ Un difetto vero, trovato da un sabotaggio e non a occhio
+
+Le regole `@media print` valevano **sempre**. Chi stava in Fatture e premeva
+**Ctrl+P** si stampava il Report completo al posto delle Fatture — e magari un
+Report mai aperto, quindi vuoto: un foglio sbagliato che esce dalla stampante
+senza che nessuno abbia sbagliato niente.
+
+Chiuso con il segno `body.report-aperto`, messo da `apriReportCompleto()` e
+tolto sia da «Torna al Riepilogo» sia da **qualunque voce di menu** (`repcSegna`
+nel gestore dei bottoni della barra laterale — la strada che si dimentica).
+
+### Le prove l5, che erano andate perse
+
+`banco_browser.js` risultava a 327 controlli, ma nell'ultimo zip salvato
+(`banco-lavoro4-15ago.zip`) c'erano solo `rompi_l3.py` e `rompi_l4.py`: la
+serie **l5** era rimasta nel computer della sessione precedente. **Riscritta
+da zero** insieme a `rompi_l5.py`, e questa volta la prova del cliente nuovo
+passa **dal modulo vero**, non scrivendo nel database di nascosto (era una
+delle bugie del banco del 15 agosto).
+
+### Il banco, adesso
+
+`prove/banco_browser.js` → **441 controlli, 0 rossi** (`BANCO_SOLO=l3|l4|l5|l6`).
+Sabotaggi: `rompi_l5.py` **10 su 10 visti**, `rompi_l6.py` **24 su 24 visti**.
+
+⚠️ **Quattro sabotaggi non si vedevano, e le prove sono state rifatte:**
+un link cliccabile restava invisibile alla prova (contava `a[href]`, e l'href
+veniva tolto lo stesso da un'altra riga); «entrano le sezioni vuote» non si
+vedeva perché nel seme non c'era **nessuna** sezione che, aperta, disegna
+qualcosa pur essendo vuota — è nato il reparto «scarno» (un lavoro senza
+importo e senza data: Report e Calendario non devono entrare); «entra anche il
+Cestino» non si vedeva perché **il cestino era vuoto**; e la prova del PDF non
+si accorgeva se sparivano le righe delle tabelle — adesso confronta **tutte le
+cifre** del report con quelle del PDF, nello stesso ordine.
+
+### Segnalati, non toccati
+
+1. **Il Calendario scrive a 12 px** (10,5 sul telefono): `.cal-lav-t` in
+   `css/gestionale.css`, riga ~830. `.wrap section` corregge `.cal-dow` e
+   `.cal-cell .dn` ma non questa. Nel Report è portata a 13,5 px; **la sezione
+   vera è rimasta com'era**, in attesa del suo sì.
+2. **Agenda operatore, coi filtri su «tutto», mostra gli stessi lavori della
+   sezione Lavori**: nel foglio l'elenco esce due volte.
+3. Nel riquadro Fatture si legge *«1 lavoro finito · clicca per fatturarlo»* —
+   un invito a cliccare dentro un foglio di sola lettura.
+
+### Cosa resta aperto, in ordine
+
+1. Le tre segnalazioni qui sopra (una riga a testa)
+2. Il **grafico** del Report completo, rimandato apposta
+3. La guida blog **«DURC scaduto»** — prima la Search Console (MCP
+   Supermetrics, `ds_id` GW), poi il titolo
+4. Il **deploy a mano della Edge Function `ai-generate`**: non risulta fatto
+5. Il `×` del registro ore a 12 px sul telefono; `gest_membri` non sta in
+   nessun file di `sql/`
+6. I due `.select('id')` mancanti, le prove Node portate su `harness.py`, le 9
+   prove «da capire» del 14 agosto

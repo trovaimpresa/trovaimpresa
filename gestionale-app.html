@@ -358,6 +358,35 @@
       <div id="rep-body"></div>
     </section>
 
+    <!-- ===== 15 agosto 2026 — IL REPORT COMPLETO =====
+         Tutto il reparto in una pagina sola, in SOLA LETTURA, da stampare o da
+         salvare in PDF.
+
+         ⚠️ QUI DENTRO NON SI DISEGNA NIENTE DA CAPO. Il Report chiama le
+         funzioni vere delle sezioni (RENDER_TAB), le lascia riempire i loro
+         riquadri come fanno sempre, e poi si porta via l'HTML che hanno
+         prodotto togliendo pulsanti, menu "..." e caselle.
+
+         Perche' cosi' e non riscrivendolo: se il Report avesse un modo suo di
+         mostrare fatture, preventivi e computi, quella sarebbe una SECONDA
+         COPIA. Fra un mese si cambia una regola in una sezione e il Report
+         continua a stampare il numero vecchio — su un foglio che finisce in
+         riunione o dal commercialista. E' lo stesso difetto delle fatture del
+         13 agosto, spostato in un'altra stanza.
+         C'e' una prova apposta che confronta i numeri del Report con quelli
+         delle sezioni vere: prove/banco_browser.js, serie l6. -->
+    <section id="reportcompleto">
+      <div class="repc-barra">
+        <button class="btn" data-action="repc-indietro">&lsaquo; Torna al Riepilogo</button>
+        <div class="repc-barra-az">
+          <button class="btn-primary" data-action="repc-pdf">Crea PDF</button>
+          <button class="btn" data-action="repc-stampa">Stampa</button>
+        </div>
+      </div>
+      <div class="repc-testa" id="repc-testa"></div>
+      <div id="repc-corpo"></div>
+    </section>
+
     <section id="lavoro-foto">
       <div class="sec-head"><h2 id="lf-title">Foto — cosa fare</h2><button class="btn add" data-action="lf-back">‹ Indietro</button></div>
       <div class="gal-intro">Carica qui le foto di <b>cosa c'è da fare</b> per questo lavoro: le vedrà l'operaio nella sua agenda.</div>
@@ -1432,6 +1461,13 @@
      giorni». Su una prima pagina che deve dare il colpo d'occhio, e per chi
      legge con fatica, e' un inciampo a ogni riga. */
   function _plur(n,uno,tanti){ return (+n===1)?uno:tanti; }
+  /* ===== 15 agosto 2026 (sera) — CHI SA SE UNA SEZIONE E' PIENA =====
+     Lo sa gia' il Riepilogo: ogni scheda dichiara `dati:`, e se e' falso la
+     scheda non viene disegnata. Il Report completo usa LA STESSA decisione,
+     invece di rifarsi un elenco suo che fra un mese direbbe un'altra cosa.
+       RIE_VISTE  le sezioni per cui il Riepilogo ha una scheda (piena o vuota)
+       RIE_PIENE  quelle che hanno davvero qualcosa dentro */
+  const RIE_VISTE=new Set(), RIE_PIENE=new Set();
   function rieCard(o){
     /* ===== 15 agosto 2026 — IL RIEPILOGO CHE SI RIEMPIE DA SOLO =====
        Prima le 16 schede c'erano sempre tutte, anche appena aperto un reparto
@@ -1441,6 +1477,7 @@
        Adesso ogni scheda dichiara se la sua sezione ha davvero qualcosa
        dentro (o.dati). Se non ce l'ha, la scheda non viene proprio disegnata:
        compare il giorno che quel dato esiste. */
+    if(o.tab){RIE_VISTE.add(o.tab);if(o.dati!==false)RIE_PIENE.add(o.tab);}
     if(o.dati===false)return "";
     const righe=(o.righe||[]).filter(Boolean).slice(0,2);
     const corpo=righe.length
@@ -1467,6 +1504,7 @@
 
   async function renderRiepilogo(){
     const G=$("#rie-grid");if(!G)return;
+    RIE_VISTE.clear();RIE_PIENE.clear();
     if($("#rie-alert"))$("#rie-alert").innerHTML="";
     if(!sb||!sbUid||!cur){rieVuotoTotale();return;}
     const mid=curMestiere();
@@ -2037,6 +2075,9 @@
        come funziona e si offrono i due primi passi. Il riquadro «Tutto in
        ordine» qui sopra resta come prima. */
     const CV=C.filter(Boolean);
+    /* la scheda del Report completo: c'e' solo se nel reparto c'e' almeno
+       qualcosa, se no sarebbe il report del nulla */
+    if(CV.length)CV.push(repcScheda());
     G.innerHTML = CV.length ? CV.join("")
       : '<div class="rie-benvenuto">'
       +   '<div class="rb-tit">Questo reparto è ancora vuoto</div>'
@@ -15002,6 +15043,323 @@ ${vecchi?`
         ${opRows.length?opRows.map(([id,v])=>`<tr><td>${esc(opMap[id]||"—")}</td><td>${Math.round(v*10)/10} h</td></tr>`).join(""):`<tr><td colspan="2" style="color:var(--muted)">Segna le ore nei lavori per vedere il totale per persona.</td></tr>`}</table></div>
     </div>`;
   }
+
+  /* ============================================================
+     IL REPORT COMPLETO — 15 agosto 2026 (sera)
+     Tutto il reparto in una pagina sola, in sola lettura.
+
+     ⚠️ LA REGOLA DI QUESTO BLOCCO, IN UNA RIGA:
+     qui NON si disegna niente. Si chiamano le funzioni vere delle sezioni,
+     si aspetta che riempiano i loro riquadri, e si copia quello che hanno
+     scritto togliendo pulsanti, menu "..." e caselle.
+
+     Se un domani qualcuno mette qui dentro un modo suo di calcolare o di
+     mostrare fatture, preventivi o computi, sta creando la SECONDA COPIA:
+     il Report continuera' a stampare il numero vecchio quando la sezione
+     cambia regola, e quel foglio finisce dal commercialista.
+     La prova che lo impedisce e' in prove/banco_browser.js (serie l6):
+     confronta il numero della sezione vera con quello del Report.
+     ============================================================ */
+
+  /* i riquadri che ogni sezione riempie: sono quelli che il Report copia.
+     La chiave e' la voce di menu (data-tab), cosi' l'ordine del Report e'
+     l'ordine del menu senza doverlo riscrivere da nessuna parte. */
+  const REPC_BOX={
+    lavori:["#jobs-list"],
+    preventivi:["#prev-list"],
+    computi:["#comp-list"],
+    prezzario:["#pz-list"],
+    fatture:["#fatt-summary","#fatt-body"],
+    calendario:["#cal-grid"],
+    agenda:["#ag-body"],
+    mezzi:["#mezzi-list"],
+    attrezzature:["#attr-list"],
+    squadra:["#dip-list"],
+    crediti:["#cred-riass","#cred-list"],
+    carte:["#carte-list"],
+    clienti:["#cli-list"],
+    fornitori:["#fattf-riass","#forn-list","#fattf-list"],
+    scadenzario:["#scad-list"],
+    report:["#rep-body"]
+  };
+  /* Cosa resta fuori dal Report, e si sa perche':
+       riepilogo    e' la pagina da cui si parte
+       cestino      e' il ripostiglio, non il lavoro del reparto
+       richieste    «Chiedi una funzione»: e' posta per me, non dati suoi
+       assistenza   la chat: idem
+       galleria     puo' avere centinaia di foto, il foglio diventa instampabile
+       mappa        scarica una libreria da fuori e chiede gli indirizzi a un
+                    servizio esterno; e una carta geografica stampata non si legge
+     (deciso con Alessio il 15 agosto) */
+
+  /* la scheda dentro il Riepilogo. Non e' una sezione: e' un'azione, quindi
+     non ha il numero grande delle altre e ha un disegno suo. */
+  function repcScheda(){
+    return '<div class="rie-card rie-card-report" data-action="rie-report">'
+      +   '<div class="rc-head">'
+      +     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>'
+      +     '<span class="rc-tit">Report completo</span>'
+      +   '</div>'
+      +   '<div class="repc-card-txt">Tutto il reparto in <b>una pagina sola</b>, sezione dopo sezione.</div>'
+      +   '<div class="repc-card-sotto">Da leggere, da stampare o da salvare in PDF. Sola lettura: qui non si modifica niente.</div>'
+      +   '<div class="repc-card-apri">Apri il report &rsaquo;</div>'
+      + '</div>';
+  }
+
+  /* le sezioni che possono entrare, nell'ordine del menu.
+     Se una voce non e' nel menu di questo profilo, non entra nel report:
+     una sola regola, quella che l'utente vede gia' con i suoi occhi. */
+  function repcElenco(){
+    const out=[];
+    $$('nav.tabs button[data-tab]').forEach(function(b){
+      const t=b.dataset.tab;
+      if(!REPC_BOX[t])return;
+      if(b.style.display==="none")return;
+      if(ruoloUtente==='professionista'&&TAB_NASCOSTI_PRO.indexOf(t)>=0)return;
+      const s=b.querySelector("span");
+      out.push({tab:t, nome:(s?s.textContent:t).trim()||t, box:REPC_BOX[t]});
+    });
+    return out;
+  }
+
+  /* «questo riquadro e' vuoto» non lo decide il Report: lo dice il gestionale
+     stesso, che quando una sezione non ha niente dentro disegna il cartello di
+     tabVuoto() (classe .lav-vuoto) o la frase .fatt-empty. Niente secondo
+     elenco da tenere aggiornato. */
+  function repcSoloVuoto(el){
+    if(!el)return true;
+    const c=el.cloneNode(true);
+    c.querySelectorAll(".lav-vuoto,.fatt-empty,.rc-caricamento").forEach(function(x){x.remove();});
+    return !(c.textContent||"").replace(/\s+/g," ").trim();
+  }
+
+  /* toglie tutto quello con cui si potrebbe modificare qualcosa.
+     ⚠️ togliere gli id NON e' un dettaglio: due elementi con lo stesso id
+     nella stessa pagina fanno impazzire chiunque cerchi qualcosa per id,
+     e il banco ha una prova apposta contro i doppioni. */
+  function repcPulisci(el){
+    el.querySelectorAll("button,input,select,textarea,form,label,"
+      +".job-actions,.lav-dots,.viste,.filtri,.lav-search,.up-btn,a.btn,a.btn-primary")
+      .forEach(function(x){x.remove();});
+    /* i link rimasti (telefono, email) diventano testo: su un foglio stampato
+       un numero di telefono si legge, non si clicca */
+    el.querySelectorAll("a").forEach(function(a){
+      const s=document.createElement("span");
+      s.className="repc-eratesto";s.textContent=a.textContent;
+      if(a.parentNode)a.parentNode.replaceChild(s,a);
+    });
+    const tutti=[el].concat(Array.prototype.slice.call(el.querySelectorAll("*")));
+    tutti.forEach(function(x){
+      ["data-action","data-id","data-go","data-v","data-tab","data-tipo","data-aiuto",
+       "onclick","oninput","onchange","contenteditable","draggable","href","tabindex","role"]
+        .forEach(function(a){x.removeAttribute(a);});
+      if(x.id)x.removeAttribute("id");
+      if(x.classList)x.classList.remove("cliccabile");
+    });
+    return el;
+  }
+
+  let repcInCorso=false;
+  async function renderReportCompleto(){
+    const corpo=$("#repc-corpo"), testa=$("#repc-testa");
+    if(!corpo||repcInCorso)return;
+    repcInCorso=true;
+    corpo.innerHTML='<div class="rc-caricamento">Sto mettendo insieme il report…</div>';
+    if(testa)testa.innerHTML="";
+
+    /* ---- i filtri delle sezioni si mettono su «tutto», e poi si rimettono ----
+       Senza questo, il Report stamperebbe quello che era filtrato a schermo:
+       apri Lavori su «In ritardo», fai il Report, e ti porti in riunione un
+       foglio con dentro solo i lavori in ritardo. */
+    const memo={vista:filter.vista, q:filter.q, prev:prevFilter, fatt:fattVista,
+                scad:scadVista, mez:mezziFilter, att:attrezzFilter,
+                agOp:agFilter.op, agSt:agFilter.stato, cli:cliQ, dip:dipQ};
+    filter.vista="tutti";filter.q="";
+    prevFilter="tutti";fattVista="tutte";scadVista="tutte";
+    mezziFilter="tutti";attrezzFilter="tutti";
+    agFilter.op="";agFilter.stato="tutti";
+    cliQ="";dipQ="";
+
+    const dentro=document.createDocumentFragment();
+    let quante=0;
+    try{
+      const sez=repcElenco();
+      for(let i=0;i<sez.length;i++){
+        const s=sez[i];
+        /* le sezioni che nel Riepilogo hanno una scheda seguono la decisione
+           del Riepilogo: se li' la scheda non c'e', qui la sezione non entra. */
+        if(RIE_VISTE.has(s.tab)&&!RIE_PIENE.has(s.tab))continue;
+        const fn=RENDER_TAB[s.tab];
+        if(!fn)continue;
+        try{ await fn(); }catch(e){ continue; }
+        /* l'ho disegnata coi filtri di tutti: quando l'utente ci torna va
+           rifatta con i suoi */
+        _tabSporchi.add(s.tab);
+        const pezzi=[];
+        for(let j=0;j<s.box.length;j++){
+          const el=$(s.box[j]);
+          if(!el||repcSoloVuoto(el))continue;
+          const c=el.cloneNode(true);
+          repcPulisci(c);
+          c.classList.add("repc-box");
+          c.style.display="";
+          pezzi.push(c);
+        }
+        if(!pezzi.length)continue;
+        const blocco=document.createElement("div");
+        blocco.className="repc-sez";
+        const h=document.createElement("h3");
+        h.className="repc-tit";h.textContent=s.nome;
+        blocco.appendChild(h);
+        pezzi.forEach(function(p){blocco.appendChild(p);});
+        dentro.appendChild(blocco);
+        quante++;
+      }
+    }finally{
+      filter.vista=memo.vista;filter.q=memo.q;
+      prevFilter=memo.prev;fattVista=memo.fatt;scadVista=memo.scad;
+      mezziFilter=memo.mez;attrezzFilter=memo.att;
+      agFilter.op=memo.agOp;agFilter.stato=memo.agSt;
+      cliQ=memo.cli;dipQ=memo.dip;
+      repcInCorso=false;
+    }
+
+    /* l'intestazione: chi sei, quale reparto, di che giorno e' la foto */
+    if(testa){
+      let az=null;
+      try{ const r=await sb.from("gest_azienda").select("nome,piva").eq("user_id",sbUid).maybeSingle(); az=r.data||null; }catch(e){}
+      const p=(state.panels||[]).find(function(x){return x.id===cur;});
+      const oggiIt=todayStr().split("-").reverse().join("/");
+      testa.innerHTML='<div class="repc-h1">Report completo</div>'
+        + '<div class="repc-h2">'+esc((az&&az.nome)||"La tua azienda")
+        +   ((az&&az.piva)?' <span class="repc-piva">P. IVA '+esc(az.piva)+'</span>':'')+'</div>'
+        + '<div class="repc-h3">Reparto '+esc((p&&p.nome)||"—")+' · situazione al '+oggiIt+'</div>';
+    }
+
+    corpo.innerHTML="";
+    if(!quante){
+      corpo.innerHTML='<div class="lav-vuoto"><h3>Non c\'è ancora niente da mettere nel report</h3>'
+        + '<p>Appena inserisci un cliente, un preventivo o un lavoro, qui compare la sua sezione.</p></div>';
+      return;
+    }
+    corpo.appendChild(dentro);
+  }
+
+  /* ⚠️ 15 agosto 2026 (sera) — TROVATO DA UN SABOTAGGIO, NON A OCCHIO.
+     Le regole di stampa devono valere SOLO col Report aperto. Senza questo
+     segno sul corpo della pagina, chi era dentro Fatture e premeva Ctrl+P si
+     ritrovava stampato il Report completo al posto delle Fatture — e magari
+     un Report mai aperto, quindi vuoto. Un foglio sbagliato che esce dalla
+     stampante senza che nessuno abbia sbagliato niente. */
+  function repcSegna(aperto){
+    try{ document.body.classList.toggle("report-aperto",!!aperto); }catch(e){}
+  }
+  function apriReportCompleto(){
+    $$("nav.tabs button").forEach(function(x){x.classList.remove("active");});
+    $$("section").forEach(function(s){s.classList.toggle("active",s.id==="reportcompleto");});
+    const sd=document.querySelector(".side");if(sd)sd.classList.remove("open");
+    repcSegna(true);
+    window.scrollTo(0,0);
+    renderReportCompleto();
+  }
+  function chiudiReportCompleto(){
+    repcSegna(false);
+    $$("nav.tabs button").forEach(function(x){x.classList.toggle("active",x.dataset.tab==="riepilogo");});
+    $$("section").forEach(function(s){s.classList.toggle("active",s.id==="riepilogo");});
+    window.scrollTo(0,0);
+    renderRiepilogo();
+  }
+
+  /* ---- IL PDF ----
+     ⚠️ Non rifa' NESSUN conto: legge le stesse parole e gli stessi numeri che
+     stanno gia' scritti nel Report qui sopra, e li mette su un foglio A4.
+     Se domani cambia una formula, cambia il Report e cambia il PDF insieme.
+
+     Le lettere fuori dal Latin-1 (l'euro, il meno lungo, gli apici storti, le
+     frecce) jsPDF con l'helvetica non le sa scrivere ed escono quadratini:
+     per questo si legge "EUR" e non il simbolo, come negli altri PDF del
+     gestionale. */
+  function repcSanPdf(t){
+    return String(t==null?"":t)
+      .replace(/€/g,"EUR")
+      .replace(/[‐-―−]/g,"-")
+      .replace(/[‘’‚′]/g,"'")
+      .replace(/[“”„″]/g,'"')
+      .replace(/…/g,"...")
+      .replace(/[▲↑]/g,"+ ")
+      .replace(/[▼↓]/g,"- ")
+      .replace(/[‹›«»]/g,"")
+      .replace(/[^\x20-\x7E\xA0-\xFF]/g,"")
+      .replace(/\s+/g," ").trim();
+  }
+  const _REPC_BLOCCHI=/^(DIV|P|TABLE|THEAD|TBODY|TFOOT|TR|UL|OL|LI|H1|H2|H3|H4|H5|H6|SECTION|ARTICLE|FIELDSET)$/;
+  function _repcRighe(el,out,liv){
+    for(let i=0;i<el.children.length;i++){
+      const n=el.children[i];
+      if(n.tagName==="TR"){
+        const c=[];
+        for(let j=0;j<n.children.length;j++){
+          const x=(n.children[j].textContent||"").replace(/\s+/g," ").trim();
+          if(x)c.push(x);
+        }
+        const t=repcSanPdf(c.join("   "));
+        if(t)out.push({t:t,liv:liv});
+        continue;
+      }
+      const testo=(n.textContent||"").replace(/\s+/g," ").trim();
+      if(!testo)continue;
+      let haBlocchi=false;
+      for(let j=0;j<n.children.length;j++){
+        if(_REPC_BLOCCHI.test(n.children[j].tagName)){haBlocchi=true;break;}
+      }
+      if(haBlocchi){_repcRighe(n,out,liv+1);continue;}
+      out.push({t:repcSanPdf(testo),liv:liv,gr:/^H[1-6]$/.test(n.tagName)});
+    }
+  }
+  function repcRighePdf(){
+    const out=[], corpo=$("#repc-corpo");
+    if(!corpo)return out;
+    corpo.querySelectorAll(".repc-sez").forEach(function(sez){
+      const t=sez.querySelector(".repc-tit");
+      out.push({t:repcSanPdf(t?t.textContent:""), tit:true});
+      sez.querySelectorAll(".repc-box").forEach(function(b){_repcRighe(b,out,0);});
+      out.push({spazio:true});
+    });
+    return out;
+  }
+  async function repcPdf(){
+    const righe=repcRighePdf();
+    if(!righe.length){toast("Il report è ancora vuoto: non c'è niente da mettere nel PDF");return;}
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    const M=16, R=210-M, FONDO=282;
+    let y=M+4;
+    const testa=$("#repc-testa");
+    const cap=(testa?testa.textContent:"").replace(/\s+/g," ").replace(/^Report completo/,"").trim();
+    doc.setFont("helvetica","bold");doc.setFontSize(17);
+    doc.text("Report completo",M,y);y+=8;
+    doc.setFont("helvetica","normal");doc.setFontSize(10.5);
+    doc.splitTextToSize(repcSanPdf(cap),R-M).forEach(function(l){doc.text(l,M,y);y+=5;});
+    y+=2;doc.setDrawColor(170);doc.line(M,y,R,y);y+=8;
+    righe.forEach(function(r){
+      if(r.spazio){y+=5;return;}
+      if(!r.t)return;
+      const tit=!!r.tit, gr=tit||!!r.gr;
+      doc.setFont("helvetica",gr?"bold":"normal");
+      doc.setFontSize(tit?13.5:10.5);
+      const dx=M+Math.min(r.liv||0,3)*3;
+      const linee=doc.splitTextToSize(r.t,R-dx);
+      if(tit&&y+8>FONDO){doc.addPage();y=M+4;}
+      linee.forEach(function(l){
+        if(y>FONDO){doc.addPage();y=M+4;}
+        doc.text(l,dx,y);y+=tit?7:5;
+      });
+      if(tit)y+=2;
+    });
+    doc.save("report-completo-"+todayStr()+".pdf");
+    toast("PDF del report scaricato ✅");
+  }
+
   function reportCsv(){
     if(!repData||!repData.L.length){toast("Nessun dato da esportare");return;}
     const cliMap=Object.fromEntries(repData.cl.map(c=>[c.id,c.nome]));
@@ -15304,6 +15662,11 @@ ${vecchi?`
     /* click su una scheda del Riepilogo: entra nella sezione corrispondente,
        come se avessi cliccato la voce nel menu di sinistra. */
     if(a==="rie-go"){const b=document.querySelector('nav.tabs button[data-tab="'+t.dataset.go+'"]');if(b){b.click();window.scrollTo(0,0);}return;}
+    /* ---- Report completo (15 agosto 2026, sera) ---- */
+    if(a==="rie-report")return apriReportCompleto();
+    if(a==="repc-indietro")return chiudiReportCompleto();
+    if(a==="repc-pdf")return repcPdf();
+    if(a==="repc-stampa"){window.print();return;}
     if(a==="rie-riprova"){const g=$("#rie-grid");if(g)g.innerHTML='<div class="rc-caricamento">Caricamento del riepilogo…</div>';renderRiepilogo();renderContatori();return;}
     /* dal Riepilogo: la patente a crediti sta nella finestra Dati azienda,
        che non è una scheda del menu — quindi apro direttamente quella. */
@@ -15738,6 +16101,7 @@ ${vecchi?`
     b.onclick=()=>{
       $$("nav.tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
       $$("section").forEach(s=>s.classList.remove("active"));$("#"+b.dataset.tab).classList.add("active");
+      repcSegna(false);   /* si esce dal Report: la stampa torna quella normale */
       /* Render pigro: la sezione si ridisegna all'apertura se è segnata "da
          rifare" (dopo un salvataggio o all'ingresso nel reparto). Alcune si
          ridisegnano sempre: lavori/agenda cambiano forma con la larghezza

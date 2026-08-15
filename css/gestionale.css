@@ -2230,3 +2230,123 @@
   .dato-lab{flex:1 1 100%;font-size:13.5px}
   .dato-val{flex:1 1 100%}
 }
+
+/* ============================================================
+   IL REPORT COMPLETO — 15 agosto 2026 (sera)
+   Tutto il reparto in una pagina sola, in sola lettura.
+   Qui dentro non c'e' nessun disegno nuovo delle sezioni: il Report
+   copia quello che le sezioni vere hanno gia' disegnato. Queste regole
+   servono solo a dargli l'aria di un foglio, e a farlo stampare pulito.
+   ============================================================ */
+
+/* --- la scheda dentro il Riepilogo --- */
+.rie-card-report{
+  border-left-color:var(--info);
+  background:linear-gradient(180deg,var(--card) 0%,var(--blu-tenue) 100%);
+}
+.rie-card-report .rc-head svg{ color:var(--info); }
+.repc-card-txt{
+  font-size:18px; line-height:1.5; color:var(--testo); margin-top:2px;
+}
+.repc-card-sotto{
+  font-size:15.5px; line-height:1.5; color:var(--testo-2); margin-top:10px;
+}
+.repc-card-apri{
+  margin-top:auto; padding-top:16px;
+  font-size:16px; font-weight:700; color:var(--info);
+}
+
+/* --- la barra in cima al report --- */
+.repc-barra{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; flex-wrap:wrap; margin-bottom:22px;
+}
+.repc-barra-az{ display:flex; gap:10px; flex-wrap:wrap; }
+.repc-barra .btn,
+.repc-barra .btn-primary{ font-size:16px; padding:12px 20px; min-height:46px; }
+
+/* --- l'intestazione del foglio --- */
+.repc-testa{
+  border-bottom:3px solid var(--testo); padding-bottom:16px; margin-bottom:26px;
+}
+.repc-h1{ font-size:30px; font-weight:800; letter-spacing:-.5px; color:var(--testo); }
+.repc-h2{ font-size:20px; font-weight:700; color:var(--testo); margin-top:8px; }
+.repc-piva{ font-size:16px; font-weight:600; color:var(--testo-2); }
+.repc-h3{ font-size:16px; color:var(--testo-2); margin-top:6px; }
+
+/* --- una sezione dentro il foglio --- */
+.repc-sez{ margin-bottom:38px; }
+.repc-tit{
+  font-size:23px; font-weight:800; letter-spacing:-.3px; color:var(--testo);
+  border-bottom:1px solid var(--bordo); padding-bottom:10px; margin-bottom:18px;
+}
+.repc-box{ margin-bottom:14px; }
+.repc-box:last-child{ margin-bottom:0; }
+/* niente mano che invita a cliccare: qui non si clicca niente */
+#reportcompleto .job,
+#reportcompleto .rie-card,
+#reportcompleto .rc-r,
+#reportcompleto .ltab tbody tr{ cursor:default; }
+#reportcompleto .job:hover,
+#reportcompleto .rie-card:hover{ box-shadow:none; transform:none; }
+#reportcompleto .ltab tbody tr:hover{ background:none; }
+/* i link diventati testo restano testo, anche di colore */
+#reportcompleto .repc-eratesto{ color:inherit; font-weight:inherit; }
+
+/* ⚠️ 15 agosto 2026 — I 12 PX DEL CALENDARIO.
+   Nel Calendario il nome del lavoro dentro la casella del giorno e' scritto a
+   12 px (10,5 px sul telefono): sotto il minimo dei 13 px. Nella sezione non
+   se n'era accorto nessuno perche' il banco guarda solo la sezione aperta, e
+   il Calendario non lo apriva mai. Qui dentro finisce su un foglio da leggere
+   e da stampare, quindi si porta a una misura leggibile.
+   ⚠️ La sezione Calendario vera NON e' stata toccata: quella e' una modifica
+   che Alessio non ha chiesto, e gliel'ho segnalata a parte. */
+#reportcompleto .cal-lav-t{ font-size:13.5px; }
+#reportcompleto .cal-piu{ font-size:13px; }
+#reportcompleto .cal-note-mark{ font-size:13px; }
+#reportcompleto .cal-legend{ font-size:14px; }
+
+@media(max-width:760px){
+  .repc-h1{ font-size:25px; }
+  .repc-h2{ font-size:18px; }
+  .repc-tit{ font-size:20px; }
+  .repc-barra{ flex-direction:column; align-items:stretch; }
+  .repc-barra .btn,
+  .repc-barra .btn-primary{ width:100%; }
+}
+
+/* ============================================================
+   LA STAMPA — deve uscire un foglio, non una schermata.
+   Via il menu laterale, via la barra in alto, via i pulsanti: resta
+   solo il report. Cosi' si porta in riunione o dal commercialista.
+   ============================================================ */
+/* ⚠️ Tutto quello che c'e' qui sotto vale SOLO quando il Report e' aperto
+   (classe «report-aperto» sul corpo della pagina, messa e tolta dal
+   gestionale). Senza quel vincolo, chi stava in Fatture e premeva Ctrl+P si
+   stampava il Report al posto delle Fatture. Trovato da un sabotaggio. */
+@media print{
+  body.report-aperto{ background:#fff !important; }
+  body.report-aperto .side,
+  body.report-aperto .topbar,
+  body.report-aperto .repc-barra,
+  body.report-aperto .toast,
+  body.report-aperto .overlay,
+  body.report-aperto #lightbox,
+  body.report-aperto #gate-gestionale,
+  body.report-aperto #landing,
+  body.report-aperto .burger{ display:none !important; }
+  body.report-aperto #appview{ display:block !important; min-height:0 !important; }
+  body.report-aperto .main{ background:#fff !important; display:block !important; }
+  body.report-aperto .main .wrap{ max-width:none !important; width:auto !important; padding:0 !important; margin:0 !important; }
+  body.report-aperto section#reportcompleto{ display:block !important; padding:0 !important; animation:none !important; }
+  body.report-aperto .repc-testa{ margin-bottom:18px; }
+  body.report-aperto .repc-sez{ margin-bottom:26px; }
+  body.report-aperto .repc-tit{ page-break-after:avoid; break-after:avoid; }
+  body.report-aperto .job,
+  body.report-aperto .rep-card,
+  body.report-aperto .rie-card,
+  body.report-aperto .card,
+  body.report-aperto tr{ page-break-inside:avoid; break-inside:avoid; }
+  body.report-aperto .repc-box{ box-shadow:none !important; }
+  body.report-aperto a{ text-decoration:none !important; color:inherit !important; }
+}
