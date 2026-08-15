@@ -195,6 +195,56 @@ Regole:
   "marco" -> "Marco"). La descrizione inizia con la maiuscola.`,
   },
 
+  // -------------------------------------------------------------------
+  // IL RAPPORTINO DETTATO A VOCE DAL CANTIERE
+  //
+  // L'operaio tiene premuto il microfono della SUA tastiera e parla:
+  //   "oggi alle betulle io e marco otto ore, comprati due sacchi di
+  //    premiscelato quarantadue euro e cinquanta"
+  // Qui quella frase diventa i campi del rapportino. Poi il telefono
+  // RIEMPIE il form e lui controlla e salva: l'AI non scrive mai nel
+  // database, esattamente come per dati_cliente e dati_lavoro.
+  //
+  // ⚠️ I NOMI NON SI INVENTANO. Il telefono manda la lista vera della
+  // squadra di quel lavoro. Se uno non e' in lista, non entra: un'ora
+  // messa sulla persona sbagliata e' una busta paga sbagliata, ed e' un
+  // errore che salta fuori a fine mese quando non ci si ricorda piu'
+  // niente.
+  // -------------------------------------------------------------------
+  dati_rapportino: {
+    costo: 1,
+    maxTokens: 600,
+    system: `Trasformi in dati il racconto parlato di una giornata di cantiere.
+Oggi e' {{OGGI}} (formato AAAA-MM-GG).
+
+Rispondi SOLO con questo JSON, senza testo attorno:
+{"ore":[{"nome":"","ore":0}],"materiali":"","note":"","spesa":{"descrizione":"","importo":null}}
+
+Regole:
+- "ore": una voce per ogni persona di cui si parla. "ore" e' un numero,
+  anche con la mezz'ora ("sette e mezza" -> 7.5). Mai sopra 24, mai sotto 0.
+- I NOMI VANNO PRESI DALLA LISTA "SQUADRA" che trovi nel messaggio, e
+  ricopiati IDENTICI. Se chi parla nomina qualcuno che non e' in quella
+  lista, quella persona NON va messa: si ignora e basta.
+- "io", "me", "il sottoscritto" indicano CHI PARLA: nel messaggio trovi
+  "IO SONO: <nome>". Usa quel nome, ricopiato identico dalla lista.
+- Se dice un numero di ore senza dire per chi ("abbiamo fatto otto ore"),
+  mettile a tutte le persone nominate. Se non e' nominato nessuno,
+  mettile a chi parla.
+- "materiali": cosa e' stato usato o portato in cantiere, in una riga.
+- "note": quello che serve ricordare (problemi, ritardi, cose da finire).
+  Frasi corte. NON ripetere qui i materiali e le ore.
+- "spesa": SOLO se ha detto di aver comprato o pagato qualcosa.
+  "importo" e' un numero: "quarantadue e cinquanta" -> 42.5.
+  Se non ha parlato di soldi: {"descrizione":"","importo":null}.
+- Campo non deducibile = stringa vuota, oppure null per l'importo,
+  oppure lista vuota per le ore. NON INVENTARE MAI NIENTE: ne' nomi,
+  ne' ore, ne' prezzi. Meglio un campo vuoto che un campo sbagliato.
+- Il parlato del cantiere e' sgrammaticato e pieno di dialetto: sistemalo
+  tu, ma non aggiungere cose che non ha detto.
+- Maiuscole solo dove servono: i nomi propri e l'inizio delle frasi.`,
+  },
+
   descrizione_azienda: {
     costo: 1,
     maxTokens: 600,
