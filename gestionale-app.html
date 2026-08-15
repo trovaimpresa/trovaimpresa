@@ -73,7 +73,15 @@
            schermata dei reparti: in questo gestionale il tratteggio vuol già
            dire «qui si crea una cosa che non c'è». Nessun colore nuovo:
            «colore = stato» resta valido. -->
-      <button data-tab="richieste" class="tab-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><span class="cta-txt"><b>Chiedi una funzione</b><small>Ti manca qualcosa? La costruiamo</small></span></button>
+      <button data-tab="richieste" class="tab-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><span class="cta-txt"><b>Chiedi una funzione</b><small>Ti manca qualcosa? La costruiamo</small></span><span class="tab-cnt" id="cnt-richieste"></span></button>
+      <!-- ===== 15 agosto 2026 (12) — LA CHAT COL FONDATORE =====
+           Non e' un doppione di «Chiedi una funzione»: quella e' una lista di
+           cose da fare, con uno stato che si chiude (Ricevuta -> Fatta). Questa
+           e' una chiacchierata, e serve quando uno ha un problema ADESSO.
+           Tenerle separate e' una scelta: dentro una chat la richiesta di
+           lunedi' finisce sotto venti messaggi di mercoledi' e non la ritrova
+           piu' nessuno. -->
+      <button data-tab="assistenza" class="tab-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="cta-txt"><b>Assistenza diretta</b><small>Ti rispondo io, di persona</small></span><span class="tab-cnt" id="cnt-assistenza"></span></button>
       <div class="side-group">Lavoro</div>
       <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
       <button data-tab="lavori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Lavori</span><span class="tab-cnt" id="cnt-lavori"></span></button>
@@ -268,6 +276,23 @@
       </div>
       <button class="btn btn-primary" style="font-size:1.05rem;padding:13px 26px" data-action="save-richiesta">Manda la richiesta</button>
       <div id="rq-lista"></div>
+    </section>
+
+    <!-- ===== 15 agosto 2026 (12) — ASSISTENZA DIRETTA =====
+         La stessa chat che gira gia' nei quattro pannelli pubblici e nel
+         pannello admin: stessa tabella (supporto_messaggi), stesse regole.
+         Qui dentro cambia solo dove si vede. -->
+    <section id="assistenza">
+      <div class="sec-head"><h2>Assistenza diretta</h2></div>
+      <div class="gal-intro">Un problema col gestionale, un dubbio su come si usa, un consiglio: scrivi qui. Dall'altra parte non c'è un robot e non c'è un centralino — <b>leggo e rispondo io</b>. Se non sono davanti al computer ci metto qualche ora, ma la risposta arriva sempre.</div>
+      <div class="asst-wrap">
+        <div class="asst-msgs" id="asst-msgs"></div>
+        <div class="asst-scrivi">
+          <textarea id="asst-testo" rows="3" placeholder="Scrivi qui il tuo messaggio…"></textarea>
+          <button class="btn btn-primary" data-action="asst-invia">Invia</button>
+        </div>
+        <div class="asst-nota" id="asst-nota"></div>
+      </div>
     </section>
 
     <section id="scadenzario">
@@ -933,6 +958,10 @@
       if(_authUidVisto===String(sbUid))return;
       _authUidVisto=String(sbUid);
       if(cur){renderAll();}else{renderLanding();}
+      /* 15 agosto 2026 (12) — i numerini partono da qui, non dall'apertura
+         della sezione: devono salire mentre l'utente sta facendo tutt'altro.
+         Senza await: se la rete e' lenta il gestionale non aspetta un pallino. */
+      if(sbUid){ try{ asstVedetta(); asstLeggi(false); contaRichiesteNuove(); }catch(e){} }
     }
     sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();_authRefresh();});
     sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();_authRefresh();});
@@ -1189,7 +1218,7 @@
   }
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","computi"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","computi","assistenza"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
@@ -1218,7 +1247,8 @@
     mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
     carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze, crediti:renderCrediti, cestino:renderCestino,
     report:renderReport, galleria:renderGalleria, mappa:renderMappa,
-    richieste:renderRichieste, fornitori:renderFornitori
+    richieste:renderRichieste, fornitori:renderFornitori,
+    assistenza:renderAssistenza
   };
   const _tabSporchi=new Set();
   function tabCorrente(){const b=document.querySelector("nav.tabs button.active");return (b&&b.dataset.tab)||"riepilogo";}
@@ -6268,6 +6298,7 @@ ${vecchi?`
 
   async function renderRichieste(){
     const lista=$("#rq-lista");if(!lista)return;
+    _rqSegnaViste();          /* apri la sezione = hai visto le risposte */
     if(!sb||!sbUid){lista.innerHTML="";return;}
     const {data}=await sb.from("gest_richieste")
       .select("id,testo,stato,risposta,created_at")
@@ -6312,6 +6343,205 @@ ${vecchi?`
       });
     }catch(e){}
     renderRichieste();
+    _rqSegnaViste();
+  }
+
+  /* ============================================================
+     IL NUMERINO SU «CHIEDI UNA FUNZIONE» — 15 agosto 2026 (12)
+
+     Conta le richieste a cui il fondatore ha risposto e che l'utente non ha
+     ancora aperto. Prima l'impresa scriveva, la risposta arrivava, e lei non
+     lo sapeva: doveva ripassare di li' per caso.
+
+     ⚠️ Le "viste" stanno nel BROWSER, non nel database, e va detto invece di
+     farlo sembrare quello che non e': su gest_richieste l'utente non ha il
+     permesso di scrivere (solo leggere e inserire), e aprire quel permesso
+     per un numerino vorrebbe dire una regola nuova su una tabella che oggi e'
+     chiusa bene. Conseguenza vera: se apre il gestionale da un altro
+     computer, il numerino ricompare una volta. Meglio un numero in piu' che
+     una risposta non letta.
+     ============================================================ */
+  const RQ_VISTE="ti_risposte_viste_v1";
+  function _rqViste(){
+    try{return JSON.parse(localStorage.getItem(RQ_VISTE)||"[]");}catch(e){return [];}
+  }
+  function _rqSegnaViste(){
+    if(!sb||!sbUid)return;
+    sb.from("gest_richieste").select("id,risposta").eq("user_id",sbUid)
+      .then(({data,error})=>{
+        if(error||!data)return;
+        const con=data.filter(r=>String(r.risposta||"").trim()!=="").map(r=>String(r.id));
+        try{localStorage.setItem(RQ_VISTE,JSON.stringify(con));}catch(e){}
+        setCnt("#cnt-richieste",0);
+      });
+  }
+  async function contaRichiesteNuove(){
+    if(!sb||!sbUid){setCnt("#cnt-richieste",0);return;}
+    try{
+      const {data,error}=await sb.from("gest_richieste")
+        .select("id,risposta").eq("user_id",sbUid);
+      /* se la lettura non riesce NON si scrive zero: uno zero falso dice
+         "non hai risposte" ed e' la bugia peggiore proprio qui */
+      if(error||!data)return;
+      const viste=_rqViste();
+      const n=data.filter(r=>String(r.risposta||"").trim()!=="" && viste.indexOf(String(r.id))<0).length;
+      setCnt("#cnt-richieste",n,"attesa");
+      _pallinoMenu();
+    }catch(e){}
+  }
+
+  /* ============================================================
+     ASSISTENZA DIRETTA — la chat col fondatore. 15 agosto 2026 (12)
+
+     Stessa tabella dei quattro pannelli pubblici (supporto_messaggi) e stesso
+     pannello admin: chi scrive da qui e chi scrive dal pannello finiscono
+     nella stessa conversazione. Nessun doppione da tenere allineato.
+
+     COME ARRIVANO I MESSAGGI NUOVI, IN DUE MODI INSIEME
+     1) il collegamento vivo di Supabase, che avvisa da solo (gia' acceso sulla
+        tabella: verificato il 15 agosto);
+     2) un ricontrollo ogni 20 secondi, come rete di sicurezza.
+     Il secondo non e' un doppione inutile: in cantiere la linea cade, e quando
+     cade il collegamento vivo muore in silenzio — nessun errore, semplicemente
+     non arriva piu' niente. Il ricontrollo se ne accorge da solo.
+
+     ⚠️ IL LUCCHETTO NON LO METTE QUESTA PAGINA, LO METTE IL DATABASE.
+     Ognuno legge solo le righe dove user_id e' il suo (regola
+     supporto_select_own). Anche se qui ci fosse un errore, un'impresa non
+     potrebbe vedere la chat di un'altra.
+     ============================================================ */
+  let asstCache=[], asstCanale=null, asstTimer=null, asstAperta=false, asstInvio=false;
+
+  function _asstOra(d){
+    try{return new Date(d).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});}catch(e){return "";}
+  }
+  function _asstGiorno(d){
+    try{
+      const q=quando(String(d||"").slice(0,10),{neutro:true});
+      return q&&q.testo?q.testo:fdate(String(d||"").slice(0,10));
+    }catch(e){return "";}
+  }
+
+  function asstDisegna(){
+    const box=$("#asst-msgs");if(!box)return;
+    if(!asstCache.length){
+      box.innerHTML='<div class="asst-vuoto">Qui non c\'è ancora niente.<br>Scrivi il primo messaggio: <b>ti rispondo io</b>, non un robot.</div>';
+      return;
+    }
+    let ultimoGiorno="";
+    box.innerHTML=asstCache.map(m=>{
+      const g=String(m.created_at||"").slice(0,10);
+      let testa="";
+      if(g&&g!==ultimoGiorno){ultimoGiorno=g;testa='<div class="asst-giorno">'+esc(_asstGiorno(m.created_at))+'</div>';}
+      const mio=!m.da_admin;
+      return testa+'<div class="asst-msg '+(mio?"mio":"suo")+'">'+esc(m.messaggio||"")
+        +'<div class="asst-quando">'+(mio?"tu":"TrovaImpresa")+' · '+esc(_asstOra(m.created_at))+'</div></div>';
+    }).join("");
+    box.scrollTop=box.scrollHeight;
+  }
+
+  async function asstLeggi(segnaLetti){
+    if(!sb||!sbUid)return false;
+    const {data,error}=await sb.from("supporto_messaggi")
+      .select("id,messaggio,da_admin,letto,created_at")
+      .eq("user_id",sbUid).order("created_at",{ascending:true});
+    if(error||!data)return false;
+    asstCache=data;
+    if(asstAperta)asstDisegna();
+    const nonLetti=data.filter(m=>m.da_admin&&!m.letto).length;
+    if(segnaLetti&&nonLetti){
+      /* si scrive SOLO la colonna «letto»: e' l'unica su cui il database ci
+         lascia scrivere (sql/supporto-messaggi-lucchetto.sql), ed e' giusto
+         cosi' — il testo delle risposte non deve poterlo toccare nessuno. */
+      const r=await sb.from("supporto_messaggi").update({letto:true})
+        .eq("user_id",sbUid).eq("da_admin",true).eq("letto",false).select("id");
+      if(!r.error&&r.data){asstCache.forEach(m=>{if(m.da_admin)m.letto=true;});}
+      setCnt("#cnt-assistenza",0);
+    }else{
+      setCnt("#cnt-assistenza",nonLetti,"attesa");
+    }
+    _pallinoMenu();
+    return true;
+  }
+
+  async function renderAssistenza(){
+    const box=$("#asst-msgs");if(!box)return;
+    asstAperta=true;
+    if(!sb||!sbUid){box.innerHTML='<div class="asst-vuoto">Accedi per scrivere.</div>';return;}
+    if(!asstCache.length)box.innerHTML='<div class="asst-vuoto">Leggo…</div>';
+    const ok=await asstLeggi(true);
+    if(!ok){
+      box.innerHTML='<div class="asst-vuoto">Non riesco a leggere i messaggi: controlla la connessione e riprova.</div>';
+      return;
+    }
+    asstDisegna();
+    const nota=$("#asst-nota");
+    if(nota)nota.textContent="I messaggi nuovi compaiono da soli, non serve ricaricare la pagina.";
+    asstVedetta();
+  }
+
+  /* la vedetta gira anche quando la chat e' chiusa: il numerino sul pulsante
+     deve salire mentre l'utente sta facendo tutt'altro. Si accende una volta
+     sola per sessione. */
+  function asstVedetta(){
+    if(!sb||!sbUid)return;
+    if(!asstCanale){
+      try{
+        asstCanale=sb.channel("assistenza-"+sbUid)
+          .on("postgres_changes",
+              {event:"INSERT",schema:"public",table:"supporto_messaggi",filter:"user_id=eq."+sbUid},
+              function(){ asstLeggi(asstAperta&&tabCorrente()==="assistenza"); })
+          .subscribe();
+      }catch(e){ asstCanale=null; }   /* resta il ricontrollo qui sotto */
+    }
+    if(!asstTimer){
+      /* ⚠️ 20 secondi e non 2: e' una rete di sicurezza, non il motore. Con 2
+         secondi sarebbero 1800 richieste l'ora per ogni impresa collegata,
+         per una chat che riceve due messaggi al giorno. */
+      asstTimer=setInterval(function(){
+        if(document.hidden)return;      /* scheda in secondo piano: non si scomoda nessuno */
+        asstLeggi(asstAperta&&tabCorrente()==="assistenza");
+      },20000);
+    }
+  }
+
+  async function asstInvia(){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(asstInvio)return;               /* doppio clic: un messaggio solo */
+    const ta=$("#asst-testo");
+    const testo=(ta?ta.value:"").trim();
+    if(!testo){toast("Scrivi il messaggio, poi premi Invia");return;}
+    if(testo.length>2000){toast("Troppo lungo: massimo 2000 caratteri");return;}
+    asstInvio=true;
+    /* .select("id") non e' un vezzo: una scrittura fermata dai permessi NON
+       da' errore, torna riuscita a vuoto. Senza, la pagina direbbe "mandato"
+       e nel database non ci sarebbe niente. */
+    const {data,error}=await sb.from("supporto_messaggi")
+      .insert({user_id:sbUid,da_admin:false,messaggio:testo,letto:false}).select("id");
+    asstInvio=false;
+    if(error){toast("Non mandato: "+(error.message||"errore"));return;}
+    if(!data||!data.length){toast("Non mandato: il database non ha scritto niente. Riprova.");return;}
+    if(ta)ta.value="";
+    await asstLeggi(false);
+    asstDisegna();
+    toast("Mandato ✔");
+  }
+
+  /* ============================================================
+     IL PALLINO SULLE TRE LINEETTE — 15 agosto 2026 (12)
+     Sul telefono la barra laterale e' chiusa dietro il pulsante col menu:
+     il numerino ci sta dentro e non lo vedrebbe nessuno, cioe' proprio quando
+     serve di piu' (uno in cantiere che aspetta una risposta). Il pallino sta
+     fuori, sul pulsante che si vede sempre.
+     ============================================================ */
+  function _pallinoMenu(){
+    try{
+      const b=document.querySelector(".burger");if(!b)return;
+      const n=["#cnt-assistenza","#cnt-richieste"]
+        .reduce((s,x)=>{const e=$(x);return s+((e&&e.textContent.trim())?1:0);},0);
+      b.classList.toggle("ha-novita",n>0);
+      b.title=n>0?"Menu — c'è qualcosa di nuovo per te":"Menu";
+    }catch(e){}
   }
 
   /* ---- mezzi usati su un lavoro (gest_lavoro_mezzi): si salva subito,
@@ -14948,6 +15178,7 @@ ${vecchi?`
     if(a==="ore-add")return oreAdd();
     if(a==="ore-del"){if(gconfirm("Eliminare questa riga di ore?"))return oreDel(id);return;}
     if(a==="rap-del")return rapCestina(id);   /* la domanda la fa lui: gli serve il numero delle ore */
+    if(a==="asst-invia")return asstInvia();
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="landing-riprova")return renderLanding();
@@ -15471,7 +15702,7 @@ ${vecchi?`
          ridisegnano sempre: lavori/agenda cambiano forma con la larghezza
          dello schermo, mappa e richieste si disegnano solo quando le apri. */
       const tb=b.dataset.tab;
-      const SEMPRE=["lavori","agenda","mappa","richieste","mezzi","attrezzature"];
+      const SEMPRE=["lavori","agenda","mappa","richieste","mezzi","attrezzature","assistenza"];
       if(_tabSporchi.has(tb)||SEMPRE.includes(tb)){
         _tabSporchi.delete(tb);
         const fn=RENDER_TAB[tb];if(fn)fn();
