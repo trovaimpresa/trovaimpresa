@@ -55,8 +55,25 @@
       <div class="side-brand"><h1><span class="rep-dot" id="rep-dot"></span><span id="panel-name">—</span></h1><small id="panel-sub">Reparto</small></div>
       <button class="burger" data-action="burger" title="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></button>
     </div>
-    <button class="btn-primary btn-new" data-action="new-job">+ Nuovo lavoro</button>
+    <!-- 15 agosto 2026 (11) — QUI C'ERA «+ Nuovo lavoro», TOLTO.
+         Era un doppione: lo stesso pulsante sta gia' in cima alla sezione
+         Lavori (e in uno studio tecnico si chiama «+ Nuova pratica»), che e'
+         il posto dove uno va quando vuole aprire un lavoro nuovo. Nella barra
+         laterale rubava la prima riga — quella che si guarda per prima — a una
+         voce che vale di piu'. Il calendario continua ad averne uno suo, per
+         creare un lavoro gia' fissato in un giorno.
+         Chi lo cerca qui lo trova un clic piu' in la': Lavori -> + Nuovo lavoro. -->
     <nav class="tabs">
+      <!-- ===== 15 agosto 2026 (11) — «CHIEDI UNA FUNZIONE» IN CIMA =====
+           Stava in fondo, sotto l'etichetta TrovaImpresa, dopo il Cestino: si
+           vedeva appena. È la voce che dà più valore al gestionale — da lì si
+           chiede una parte NUOVA, che ancora non esiste — quindi sta in cima,
+           subito sotto «+ Nuovo lavoro».
+           Il bordo tratteggiato è lo stesso di «+ Nuovo reparto» nella
+           schermata dei reparti: in questo gestionale il tratteggio vuol già
+           dire «qui si crea una cosa che non c'è». Nessun colore nuovo:
+           «colore = stato» resta valido. -->
+      <button data-tab="richieste" class="tab-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><span class="cta-txt"><b>Chiedi una funzione</b><small>Ti manca qualcosa? La costruiamo</small></span></button>
       <div class="side-group">Lavoro</div>
       <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
       <button data-tab="lavori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Lavori</span><span class="tab-cnt" id="cnt-lavori"></span></button>
@@ -79,8 +96,9 @@
       <button data-tab="galleria"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg><span>Galleria</span></button>
       <button data-tab="mappa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Mappa</span><span class="tab-cnt" id="cnt-mappa"></span></button>
       <button data-tab="cestino"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg><span>Cestino</span><span class="tab-cnt" id="cnt-cestino"></span></button>
-      <div class="side-group">TrovaImpresa</div>
-      <button data-tab="richieste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Cosa ti manca?</button>
+      <!-- 15 agosto 2026 (11) — qui c'era «Cosa ti manca?», spostato in cima.
+           Con lui se ne va anche l'etichetta «TrovaImpresa», che senza nessuna
+           voce sotto sarebbe rimasta un titolo appeso al vuoto. -->
     </nav>
   </aside>
 
@@ -243,7 +261,7 @@
     </section>
 
     <section id="richieste">
-      <div class="sec-head"><h2>Cosa ti manca?</h2></div>
+      <div class="sec-head"><h2>Chiedi una funzione</h2></div>
       <div class="gal-intro">Questo gestionale lo scrivo io, da solo, per imprese come la tua. Se ti serve una cosa che qui non c'è, scrivimela qui sotto: la leggo di persona. Non serve che sia una richiesta ben scritta — bastano due righe.</div>
       <div class="field" style="margin-top:8px">
         <textarea id="rq-testo" rows="5" placeholder="Es. Mi servirebbe segnare le ore dei dipendenti giorno per giorno..." style="font-size:1.05rem;padding:14px;line-height:1.6"></textarea>
@@ -1154,7 +1172,17 @@
     mpVista="aperti";segmOn("#mp-vista","aperti");if(mpLayer){try{mpLayer.remove();}catch(e){}mpLayer=null;}
     agFilter={op:"",stato:"aperti"};segmOn("#ag-stato","aperti");
     mezziFilter="tutti";attrezzFilter="tutti";
-    $$("nav.tabs button").forEach((x,i)=>x.classList.toggle("active",i===0));
+    /* ⚠️ 15 agosto 2026 (11) — QUI C'ERA «la prima voce in alto», cioe' i===0.
+       Ha funzionato per mesi solo perche' il Riepilogo era il primo pulsante.
+       Appena in cima e' arrivato «Chiedi una funzione», entrare in un reparto
+       accendeva QUELLA voce mentre a schermo si apriva il Riepilogo: il menu
+       diceva una cosa e la pagina ne mostrava un'altra. E siccome
+       tabCorrente() legge proprio la voce accesa, il gestionale credeva
+       davvero di stare su «Chiedi una funzione»: il primo salvataggio avrebbe
+       ridisegnato la sezione sbagliata.
+       Adesso si accende per NOME, come fa gia' la riga qui sotto per la
+       sezione: chi sposta un pulsante non rompe piu' niente. */
+    $$("nav.tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="riepilogo"));
     $$("section").forEach((s,i)=>s.classList.toggle("active",s.id==="riepilogo"));
     renderAll();window.scrollTo(0,0);
     _applyDeepTab(); /* link diretto tipo #preventivi: apre subito la scheda richiesta */
@@ -6796,7 +6824,7 @@ ${vecchi?`
         <div class="margine-box" id="ora-box"></div></div>
       <div class="field" id="rap-wrap" style="display:none"><label>Rapportini dal cantiere</label>
         <div class="spese-list" id="rap-list"></div>
-        <div class="campo-aiuto">Li scrive chi sta in cantiere, dal telefono. Da qui si leggono e basta: per correggere le ore usa il registro qui sopra.</div></div>
+        <div class="campo-aiuto">Li scrive chi sta in cantiere, dal telefono. Con la <b>&times;</b> butti via un rapportino sbagliato: le sue ore vanno nel cestino insieme a lui, e da lì tornano su insieme. Per correggere le ore senza toccare il rapportino usa il registro qui sopra.</div></div>
       <div class="field"><label>Fattura</label>
         <div class="j-fatt-info">${
           (job.fattStato||"none")==="pagata" ? "\u2714 Fatturato e incassato"

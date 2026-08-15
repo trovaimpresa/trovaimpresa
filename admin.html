@@ -3388,6 +3388,12 @@ const RQ_STATI_ADM = {
 async function caricaRichieste() {
   const box = document.getElementById('lista-richieste');
   box.innerHTML = '<div class="loading">Caricamento...</div>';
+  // I nomi delle imprese servono qui sotto. Se apri questa sezione prima che
+  // l'elenco sia arrivato, si aspetta invece di scrivere solo le email: il
+  // nome che manca la prima volta e compare alla seconda sembra un guasto.
+  if (!tutteImprese || !tutteImprese.length) {
+    try { await caricaImprese(); } catch (e) { /* resta l'email, come prima */ }
+  }
   let data = null;
   try {
     const res = await fetch('/.netlify/functions/admin-dati', {
@@ -3406,13 +3412,28 @@ async function caricaRichieste() {
     box.innerHTML = '<div class="empty-table"><div class="eicon">💡</div>Nessuna richiesta ancora</div>';
     return;
   }
+  // 15 agosto 2026 — CHI L'HA MANDATA.
+  // Prima qui c'era solo l'email: per sapere di quale impresa fosse toccava
+  // andare a cercarla nell'elenco. Il nome sta in "imprese", che l'admin ha
+  // gia' in mano (tutteImprese, caricate con select *), quindi basta
+  // incrociare user_id: nessuna chiamata in piu' al server.
+  // Se il nome non si trova (profilo cancellato, oppure le imprese non sono
+  // ancora arrivate) NON si scrive niente di finto: resta l'email, come prima.
+  const nomeDiUser = {};
+  (tutteImprese || []).forEach(i => {
+    if (i.user_id) nomeDiUser[i.user_id] = i.nome_attivita || i.nome || '';
+  });
+
   box.innerHTML = data.map(r => {
     const st = RQ_STATI_ADM[r.stato] || RQ_STATI_ADM.ricevuta;
     const quando = r.created_at ? new Date(r.created_at).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+    const chi = (r.user_id && nomeDiUser[r.user_id]) ? nomeDiUser[r.user_id] : '';
     return '<div style="background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:14px">'
       + '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px">'
       +   '<span class="badge ' + st.cls + '">' + st.lab + '</span>'
-      +   '<span style="color:#5b6b80;font-size:14px">' + esc(r.email || '') + ' &middot; ' + quando + '</span>'
+      +   '<span style="color:#5b6b80;font-size:14px">'
+      +     (chi ? '<b style="color:#12233a">' + esc(chi) + '</b> &middot; ' : '')
+      +     esc(r.email || '') + ' &middot; ' + quando + '</span>'
       + '</div>'
       + '<div style="font-size:17px;line-height:1.6;margin-bottom:12px">' + esc(r.testo || '') + '</div>'
       + (r.risposta ? '<div style="background:#f4f8ff;border-left:4px solid #0066ff;border-radius:8px;padding:10px 14px;font-size:15px;margin-bottom:12px"><b>Risposta:</b> ' + esc(r.risposta) + '</div>' : '')

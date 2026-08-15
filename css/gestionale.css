@@ -326,6 +326,33 @@
   .side nav.tabs button:hover{border-color:var(--bordo-forte)}
   .side nav.tabs button.active{background:var(--blu-tenue);border-color:var(--blu);color:var(--testo)}
   .side nav.tabs button.active svg{color:var(--blu-scuro)}
+  /* ===== 15 agosto 2026 (11) — LE VOCI IN CIMA, QUELLE CHE NON SONO SEZIONI
+     «Chiedi una funzione» non è una parte del gestionale come Lavori o
+     Fatture: è il posto da cui si chiede una parte che ANCORA NON C'È.
+     Deve saltare all'occhio senza gridare, e senza usare un colore nuovo —
+     nel gestionale «colore = stato», e un verde o un arancione qui dentro
+     vorrebbero dire qualcosa che non c'entra.
+     Il tratteggio invece un significato ce l'ha già: è quello di
+     «+ Nuovo reparto» nella schermata dei reparti, cioè «qui si crea una
+     cosa che non esiste ancora». È l'unica voce del menu fatta così.
+     Due righe: il titolo dice cosa fa, il sottotitolo perché serve. */
+  .side nav.tabs button.tab-cta{
+    align-items:flex-start;
+    background:var(--card);
+    border:2px dashed var(--bordo-forte);
+    color:var(--accent-d);
+    padding:13px 14px;margin-bottom:10px}
+  .side nav.tabs button.tab-cta:hover{
+    border-color:var(--accent);background:var(--accent-soft)}
+  .side nav.tabs button.tab-cta.active{
+    background:var(--accent-soft);border-style:dashed;border-color:var(--accent);color:var(--accent-d)}
+  .side nav.tabs button.tab-cta svg{color:var(--accent-d);margin-top:1px}
+  .side nav.tabs button.tab-cta.active svg{color:var(--accent-d)}
+  .cta-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+  /* 15px e 13.5px: sopra la soglia dei 13 px, che nel gestionale non si passa mai */
+  .cta-txt b{font-size:15px;font-weight:800;line-height:1.25;letter-spacing:-.1px}
+  .cta-txt small{font-size:13.5px;font-weight:600;line-height:1.35;color:var(--testo-2)}
+
   /* etichette dei due gruppi: sentence case, non maiuscolo */
   .side-group{font-size:13.5px;font-weight:700;color:var(--testo-2);
     margin:14px 0 6px;padding:0 2px;letter-spacing:0;text-transform:none}
@@ -430,6 +457,16 @@
     .side .btn-new{margin:0 0 8px}
     .side nav.tabs{flex-direction:row;overflow-x:auto;gap:0;padding-bottom:2px;-webkit-overflow-scrolling:touch}
     .side nav.tabs button{flex:0 0 auto;width:auto;padding:10px 12px}
+    /* 15 agosto 2026 (11) — sul telefono il menu diventa una fila che scorre
+       di lato: qui il sottotitolo su due righe alzerebbe TUTTA la fila per
+       una voce sola. Resta il nome, che basta. Il sottotitolo si rilegge
+       dentro la sezione, dove c'è la spiegazione intera.
+       Quando invece il menu è aperto a tendina (.side.open) le voci tornano
+       una sotto l'altra: lì il sottotitolo ci sta e si vede. */
+    .side nav.tabs button.tab-cta{align-items:center;padding:10px 12px;margin-bottom:0}
+    .side nav.tabs button.tab-cta .cta-txt small{display:none}
+    .side.open nav.tabs button.tab-cta{align-items:flex-start;padding:13px 14px;margin-bottom:10px}
+    .side.open nav.tabs button.tab-cta .cta-txt small{display:block}
     .side-group{font-size:13.5px;margin:10px 0 5px}
     .sheet{margin:0;min-height:100vh;border-radius:0}
     /* su 375px 28px per lato mangiavano il 15% della larghezza */
