@@ -21,6 +21,18 @@ const MODEL = "claude-haiku-4-5-20251001";
 const PREZZO_INPUT_EUR_PER_MTOK  = 0.92;
 const PREZZO_OUTPUT_EUR_PER_MTOK = 4.60;
 
+// Che giorno e' in Italia, adesso. Sempre AAAA-MM-GG.
+// Se il fuso non fosse disponibile (non dovrebbe mai succedere) si ricade
+// sull'ora del server invece di rompere la chiamata: una data imprecisa e'
+// meglio di una funzione che non risponde.
+function oggiARoma(): string {
+  try {
+    return new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+  } catch (_) {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
 const CORS = {
   "Access-Control-Allow-Origin":  "*", // in produzione: "https://trovaimpresa.com"
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -361,7 +373,15 @@ Deno.serve(async (req) => {
           max_tokens: conf.maxTokens,
           // {{OGGI}} serve alle feature che devono interpretare date
           // relative ("giovedi prossimo"): il modello non sa che giorno e'.
-          system:     conf.system.replace("{{OGGI}}", new Date().toISOString().slice(0, 10)),
+          //
+          // ⚠️ 15 agosto 2026 — CON L'ORA DI ROMA, NON DI LONDRA.
+          // Prima qui c'era toISOString(), che da' sempre l'ora di Londra.
+          // In estate sono due ore avanti: fra mezzanotte e le due di notte
+          // il server credeva che fosse ancora ieri, e chi dettava un lavoro
+          // "domani" all'una se lo ritrovava con la data di un giorno prima.
+          // "sv-SE" non e' un vezzo svedese: e' l'unica lingua che scrive le
+          // date come AAAA-MM-GG, che e' il formato che serve qui.
+          system:     conf.system.replace("{{OGGI}}", oggiARoma()),
           messages:   [{ role: "user", content: input }],
         }),
       });

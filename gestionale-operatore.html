@@ -121,6 +121,20 @@
   .rv-ok[disabled]{opacity:.5;}
   .rv-nota{font-size:13px;color:var(--muted);line-height:1.5;margin-top:10px;}
 
+  /* LA VOCE — 15 agosto 2026
+     Il microfono e' quello della TASTIERA del telefono, non un pulsante
+     dentro l'app: quello di sistema c'e' su Android e su iPhone, funziona
+     nella lingua che ha impostato lui e non chiede permessi in piu'.
+     Un pulsante "parla" scritto qui dentro su iPhone non funzionerebbe, e
+     un pulsante che non fa niente e' peggio di un pulsante che non c'e'. */
+  .rv-mic{font-size:14px;line-height:1.55;color:var(--text);background:var(--bg);
+          border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+  .rv-sez{font-size:14px;font-weight:800;margin:16px 0 6px;color:var(--muted);
+          text-transform:uppercase;letter-spacing:.03em;}
+  .rv-scarti{font-size:14px;line-height:1.55;background:#fff6e5;border:1.5px solid #f0c36d;
+          border-radius:12px;padding:12px 14px;margin-bottom:10px;color:#6b4c00;}
+  .rv-vuoto{font-size:15px;color:var(--muted);padding:6px 0;}
+
   /* RAPPORTINO DI CANTIERE
      Si compila in cantiere, in piedi, spesso con i guanti: i pulsanti delle
      ore sono 52x52 px, cioe' sopra la misura minima perche' un dito li prenda
@@ -970,8 +984,13 @@ $("#btn-carta-salva").onclick=async()=>{
    solo chi lo scrive. Cosi' resta un posto solo da cui passano le ore, e il
    margine del lavoro le vede come tutte le altre.
    =================================================================== */
-const RV={passo:0,tipo:null,lavoro:null,ore:8,testo:"",importo:""};
+const RV={passo:0,tipo:null,lavoro:null,ore:8,testo:"",importo:"",
+          /* la voce: quello che ha detto, quello che l'AI ha capito,
+             le ore per persona e i nomi che ho buttato via */
+          detto:"",capito:null,vOre:{},vScarti:[]};
 const RV_TIPI=[
+  {k:"voce",      lab:"🎙 Racconta la giornata",
+                                   sub:"Parla e basta: ore, materiali e spese insieme", perm:"rapportini"},
   {k:"ore",       lab:"Ore",       sub:"Le tue ore su questo lavoro",              perm:"rapportini"},
   {k:"materiale", lab:"Materiale", sub:"Cosa avete consumato (senza prezzi)",      perm:"rapportini"},
   {k:"nota",      lab:"Nota",      sub:"Un appunto sulla giornata",                perm:"rapportini"},
@@ -981,6 +1000,7 @@ const RV_TIPI=[
 function rvChiudi(){ $("#rv-ov").classList.add("hidden"); RV.passo=0; }
 function rvApri(){
   RV.passo=1; RV.tipo=null; RV.lavoro=null; RV.ore=8; RV.testo=""; RV.importo="";
+  RV.detto=""; RV.capito=null; RV.vOre={}; RV.vScarti=[];
   $("#rv-ov").classList.remove("hidden");
   rvDisegna();
 }
@@ -1031,6 +1051,22 @@ function rvDisegna(){
 
   /* passo 3: la conferma, diversa per ogni cosa */
   const nome=RV.lavoro?rvNomeLavoro(RV.lavoro):"";
+
+  /* passo 4: quello che l'AI ha capito, da controllare prima di salvare */
+  if(RV.passo===4){ voceDisegnaControllo(nome); return; }
+
+  if(RV.tipo==="voce"){
+    tit.textContent="Racconta la giornata";
+    corpo.innerHTML='<div class="rv-nota">'+esc(nome)+' · oggi</div>'
+      /* il testo si ritrova tornando indietro: chi ha appena dettato tre righe
+         in piedi su un ponteggio non le ridetta perche' ha premuto la freccia */
+      +'<textarea class="rv-in" id="rv-detto" rows="5" placeholder="Es. oggi io e Marco otto ore, finito l’intonaco della scala. Comprati due sacchi di premiscelato, 42,50.">'+esc(RV.detto||"")+'</textarea>'
+      +'<div class="rv-mic">🎙 <b>Non scrivere: parla.</b> Tocca qui sopra, poi sulla tastiera del telefono tieni premuto il tasto del <b>microfono</b> e racconta com’è andata. Le parole compaiono da sole.</div>'
+      +'<button type="button" class="rv-ok" id="rv-pensa">Fammi vedere cosa hai capito</button>'
+      +'<div class="rv-nota">Costa 1 credito AI dell’impresa. Dopo puoi correggere tutto: niente viene salvato finché non confermi tu.</div>';
+    return;
+  }
+
   if(RV.tipo==="ore"){
     tit.textContent="Quante ore?";
     corpo.innerHTML='<div class="rv-nota">'+esc(nome)+' · oggi</div>'
@@ -1074,12 +1110,304 @@ $("#rv-corpo").addEventListener("click",async e=>{
     const c=$("#rv-ore"); if(c)c.textContent=String(RV.ore).replace(".",",");
     return;
   }
+  /* le ore della schermata di controllo: stessi pulsanti del rapportino grande */
+  const vp=e.target.closest(".rap-pm");
+  if(vp){
+    const riga=vp.closest(".rap-riga"); if(!riga)return;
+    const op=riga.dataset.op;
+    let v=(+RV.vOre[op]||0)+(parseFloat(vp.dataset.d)||0);
+    if(v<0)v=0; if(v>24)v=24;
+    RV.vOre[op]=Math.round(v*2)/2;
+    const cella=document.getElementById("vore-"+op);
+    if(cella){
+      cella.textContent=(RV.vOre[op]===0)?"0":String(RV.vOre[op]).replace(".",",");
+      cella.classList.toggle("zero",RV.vOre[op]===0);
+    }
+    return;
+  }
+  if(e.target.closest("#rv-pensa")){ await vocePensa(); return; }
+  if(e.target.closest("#rv-salva-voce")){ await voceSalva(); return; }
   if(e.target.closest("#rv-ok")) await rvSalva();
 });
 $("#btn-rapido").onclick=rvApri;
 $("#rv-x").onclick=rvChiudi;
 $("#rv-indietro").onclick=()=>{ RV.passo=Math.max(1,RV.passo-1); rvDisegna(); };
 $("#rv-ov").onclick=e=>{ if(e.target===$("#rv-ov"))rvChiudi(); };
+
+/* ===================================================================
+   LA VOCE — 15 agosto 2026
+   L'operaio detta con il microfono della sua tastiera, il server capisce,
+   e QUI si controlla riga per riga prima di far vedere qualcosa.
+
+   ⚠️ QUELLO CHE TIENE NON E' IL PROMPT, E' QUESTO FILTRO.
+   Al server e' scritto "non inventare nomi". Ma un prompt e' un desiderio,
+   non una garanzia: prima o poi un modello ci mette dentro un Marco che non
+   c'e'. Un'ora sulla persona sbagliata e' una busta paga sbagliata, e salta
+   fuori a fine mese quando nessuno si ricorda piu' niente.
+   Quindi: i nomi che non sono nella squadra di questo lavoro NON entrano, e
+   quelli buttati via si vedono scritti, non spariscono in silenzio.
+   =================================================================== */
+
+/* la gente di questo lavoro: la stessa regola del rapportino grande */
+function voceGente(){
+  const mid=RV.lavoro&&RV.lavoro.mestiere_id;
+  return (SQUADRA||[]).filter(p=>!mid||!p.mestiere_id||String(p.mestiere_id)===String(mid));
+}
+
+/* due nomi sono la stessa persona? Il parlato non ha accenti ne' maiuscole:
+   "DE LUCA", "de luca" e "De Lucà" devono cadere sulla stessa riga. */
+function voceStessoNome(a,b){
+  /* \u0300-\u036f sono gli accenti staccati da normalize("NFD"). Scritti con
+     il codice e non con il carattere vero: un accento invisibile dentro una
+     regola e' il tipo di riga che si rompe al primo salvataggio storto. */
+  const p=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+              .replace(/[^a-z0-9]+/g," ").trim();
+  return p(a)!==""&&p(a)===p(b);
+}
+
+async function vocePensa(){
+  const b=$("#rv-pensa");
+  const detto=(($("#rv-detto")||{}).value||"").trim();
+  RV.detto=detto;
+  if(detto.length<10){toast("Racconta qualcosa di piu’: almeno una frase intera.");return;}
+  if(detto.length>4000){toast("Troppo lungo. Racconta la giornata, non il mese.");return;}
+  if(!RV.lavoro){toast("Scegli il lavoro");return;}
+  if(!chiedoPermesso("rapportini","di scrivere il rapportino"))return;
+
+  if(SQUADRA===null)await caricaSquadra();
+  const gente=voceGente();
+  if(!gente.length){toast("Non riesco a leggere la squadra di questo lavoro. Segna a mano con «Ore».");return;}
+
+  if(b){b.disabled=true;b.textContent="Sto ascoltando…";}
+  const rimetti=()=>{const x=$("#rv-pensa"); if(x){x.disabled=false;x.textContent="Fammi vedere cosa hai capito";}};
+
+  let sess=null;
+  try{ sess=(await sb.auth.getSession()).data.session; }catch(_){}
+  const token=sess&&sess.access_token;
+  if(!token){rimetti();toast("Sessione scaduta: esci e rientra.");return;}
+
+  /* la lista vera va DENTRO il messaggio: il server non sa chi c'e' in
+     squadra, e senza lista i nomi se li inventerebbe per forza */
+  const messaggio="SQUADRA: "+gente.map(p=>p.nome).join("; ")
+    +"\nIO SONO: "+(MIO.nome||"")
+    +"\nDETTO: "+detto;
+
+  let risp=null;
+  try{
+    const r=await fetch(SUPA_URL+"/functions/v1/ai-generate",{
+      method:"POST",
+      headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+      body:JSON.stringify({feature:"dati_rapportino",input:messaggio})
+    });
+    risp=await r.json();
+    if(!r.ok){
+      rimetti();
+      /* 402 = crediti. Da oggi sono quelli dell'IMPRESA, non suoi: il
+         messaggio deve mandarlo dal capo, non farlo sentire in difetto. */
+      if(r.status===402){
+        toast(risp&&risp.reason==="plan_without_ai"
+          ? "L’impresa non ha le funzioni AI. Segna a mano con «Ore»."
+          : "L’impresa ha finito i crediti AI del mese. Dillo al capo, intanto segna a mano.");
+      }else if(r.status===400&&/non riconosciuta/i.test((risp&&risp.error)||"")){
+        /* l'app e' piu' avanti del server: succede se il telefono ha gia' la
+           pagina nuova e la funzione online e' ancora quella vecchia. Dirlo
+           in modo che si capisca, invece di sputare l'errore del server. */
+        toast("Questa cosa non è ancora accesa sul server. Segna a mano con «Ore», e dillo al capo.");
+      }else{
+        toast((risp&&risp.error)||"Il servizio non ha risposto. Riprova, oppure segna a mano.");
+      }
+      return;
+    }
+  }catch(err){
+    rimetti();
+    toast("Niente rete. Segna a mano con «Ore»: quello funziona anche senza campo.");
+    return;
+  }
+
+  const pulito=voceRipulisci(risp&&risp.result, gente);
+  if(!pulito){
+    rimetti();
+    toast("Non ho capito quello che hai detto. Riprova con parole piu’ semplici, o segna a mano.");
+    return;
+  }
+  RV.capito=pulito;
+  RV.vOre={};
+  gente.forEach(p=>{RV.vOre[p.id]=0;});
+  pulito.ore.forEach(o=>{RV.vOre[o.id]=o.ore;});
+  RV.vScarti=pulito.scarti;
+  RV.passo=4;
+  rvDisegna();
+}
+
+/* Prende quello che ha detto il server e lo riduce a cose vere.
+   Torna null se non c'e' niente di leggibile. */
+function voceRipulisci(grezzo, gente){
+  let j=null;
+  try{ j=JSON.parse(String(grezzo||"")); }catch(_){ return null; }
+  if(!j||typeof j!=="object")return null;
+
+  const ore=[], scarti=[];
+  if(Array.isArray(j.ore)){
+    j.ore.forEach(r=>{
+      if(!r||typeof r!=="object")return;
+      const p=gente.find(g=>voceStessoNome(g.nome,r.nome));
+      if(!p){
+        const n=String(r.nome||"").trim();
+        if(n&&scarti.indexOf(n)<0)scarti.push(n);
+        return;
+      }
+      let v=Number(r.ore);
+      if(!isFinite(v)||v<=0)return;
+      if(v>24)v=24;                       /* in un giorno non ce ne stanno di piu' */
+      v=Math.round(v*2)/2;                /* mezz'ora e' il passo dei pulsanti */
+      const gia=ore.find(x=>x.id===p.id); /* nominato due volte: si somma, non si raddoppia */
+      if(gia){ gia.ore=Math.min(24,Math.round((gia.ore+v)*2)/2); }
+      else   { ore.push({id:p.id,nome:p.nome,ore:v}); }
+    });
+  }
+
+  const testo=(v,max)=>String(v==null?"":v).replace(/\s+/g," ").trim().slice(0,max);
+  const materiali=testo(j.materiali,600);
+  const note=testo(j.note,1000);
+
+  let spesaImp=null, spesaDes="";
+  if(j.spesa&&typeof j.spesa==="object"){
+    const n=(typeof j.spesa.importo==="string")?_numIt(j.spesa.importo):Number(j.spesa.importo);
+    if(isFinite(n)&&n>0&&n<=1000000){
+      spesaImp=Math.round(n*100)/100;
+      spesaDes=testo(j.spesa.descrizione,200);
+    }
+  }
+
+  if(!ore.length&&!materiali&&!note&&spesaImp===null)return null;
+  return {ore:ore,materiali:materiali,note:note,spesaImp:spesaImp,spesaDes:spesaDes,scarti:scarti};
+}
+
+function voceDisegnaControllo(nomeLavoro){
+  const corpo=$("#rv-corpo"), tit=$("#rv-tit");
+  tit.textContent="Controlla, poi salva";
+  const c=RV.capito||{ore:[],materiali:"",note:"",spesaImp:null,spesaDes:"",scarti:[]};
+  const gente=voceGente();
+  const puoSpesa=puo("pagamenti");
+
+  let h='<div class="rv-nota">'+esc(nomeLavoro)+' · oggi</div>';
+
+  if(c.scarti&&c.scarti.length){
+    h+='<div class="rv-scarti"><b>Non ho messo le ore di: '+esc(c.scarti.join(", "))+'.</b><br>'
+      +'Queste persone non sono nella squadra di questo lavoro. Se ci hanno lavorato davvero, dillo al capo: le ore le mette lui.</div>';
+  }
+
+  h+='<div class="rv-sez">Ore</div>';
+  if(!gente.length){
+    h+='<div class="rv-vuoto">Squadra non leggibile.</div>';
+  }else{
+    h+=gente.map(p=>{
+      const v=+RV.vOre[p.id]||0;
+      return '<div class="rap-riga" data-op="'+esc(p.id)+'">'
+        +'<div class="rap-nome">'+esc(p.nome||"Senza nome")+'</div>'
+        +'<button type="button" class="rap-pm" data-d="-0.5" aria-label="Togli mezz’ora a '+esc(p.nome||"")+'">−</button>'
+        +'<div class="rap-ore'+(v===0?" zero":"")+'" id="vore-'+esc(p.id)+'">'+(v===0?"0":String(v).replace(".",","))+'</div>'
+        +'<button type="button" class="rap-pm" data-d="0.5" aria-label="Aggiungi mezz’ora a '+esc(p.nome||"")+'">+</button>'
+        +'</div>';
+    }).join("");
+  }
+
+  h+='<div class="rv-sez">Materiali</div>'
+    +'<textarea class="rv-in" id="rv-v-mat" rows="2" placeholder="Vuoto: non hai parlato di materiali">'+esc(c.materiali)+'</textarea>'
+    +'<div class="rv-sez">Note</div>'
+    +'<textarea class="rv-in" id="rv-v-note" rows="3" placeholder="Vuoto: non c’era niente da segnare">'+esc(c.note)+'</textarea>';
+
+  if(puoSpesa){
+    h+='<div class="rv-sez">Spesa</div>'
+      +'<input class="rv-in" id="rv-v-imp" type="text" inputmode="decimal" placeholder="Importo (es. 24,50)" value="'
+        +esc(c.spesaImp===null?"":String(c.spesaImp).replace(".",","))+'">'
+      +'<input class="rv-in" id="rv-v-des" type="text" placeholder="Per cosa?" value="'+esc(c.spesaDes)+'">';
+  }else if(c.spesaImp!==null){
+    /* ha parlato di soldi ma non ha il permesso: dirglielo, non ingoiarlo */
+    h+='<div class="rv-sez">Spesa</div>'
+      +'<div class="rv-scarti">Hai parlato di una spesa di '+esc(String(c.spesaImp).replace(".",","))
+      +' €, ma il capo non ti ha dato il permesso «Pagamenti»: non la salvo. Diglielo tu.</div>';
+  }
+
+  h+='<button type="button" class="rv-ok" id="rv-salva-voce">Salva tutto</button>'
+    +'<div class="rv-nota">Fino a qui non è stato salvato niente. Il credito AI è già stato usato per capire quello che hai detto.</div>';
+
+  corpo.innerHTML=h;
+}
+
+async function voceSalva(){
+  if(!RV.lavoro){toast("Scegli il lavoro");return;}
+  if(!chiedoPermesso("rapportini","di scrivere il rapportino"))return;
+  const b=$("#rv-salva-voce");
+  const rimetti=()=>{const x=$("#rv-salva-voce"); if(x){x.disabled=false;x.textContent="Salva tutto";}};
+  if(b){b.disabled=true;b.textContent="Salvo…";}
+
+  const materiali=(($("#rv-v-mat")||{}).value||"").trim();
+  const note=(($("#rv-v-note")||{}).value||"").trim();
+  const righe=Object.keys(RV.vOre).filter(k=>(+RV.vOre[k])>0).map(k=>({op:k,ore:+RV.vOre[k]}));
+
+  /* la spesa passa da due porte, non da una: le caselle non ci sono nemmeno
+     se manca il permesso, e comunque qui si ricontrolla. Nascondere un
+     pulsante non e' una difesa: una pagina rimasta aperta da prima, o un
+     permesso tolto nel frattempo, e la casella e' ancora li'. */
+  const puoSpesa=puo("pagamenti");
+  const imp=puoSpesa?_numIt((($("#rv-v-imp")||{}).value||"")):null;
+  const des=puoSpesa?(($("#rv-v-des")||{}).value||"").trim():"";
+  const vuoleSpesa=puo("pagamenti")&&puoSpesa&&imp!==null&&imp>0;
+  if(vuoleSpesa&&imp>1000000){rimetti();toast("Importo troppo alto: controlla quello che hai scritto.");return;}
+  if(vuoleSpesa&&!des){rimetti();toast("Scrivi per cosa hai speso.");return;}
+
+  if(!righe.length&&!materiali&&!note&&!vuoleSpesa){
+    rimetti();toast("Non c’è niente da salvare: metti almeno le ore di qualcuno.");return;
+  }
+
+  /* un rapportino solo, come quello grande: le ore ci si appendono sotto */
+  const rid=await rvNuovoRapportino({materiali:materiali||null,note:note||null});
+  if(!rid){rimetti();return;}
+
+  const oggi=ymd(new Date());
+  let oreScritte=0, oreFallite=[];
+  for(const r of righe){
+    const {data,error}=await sb.from("gest_ore").insert({
+      user_id:MIO.impresaId, mestiere_id:(RV.lavoro.mestiere_id||null),
+      lavoro_id:RV.lavoro.id, operatore_id:r.op,
+      data:oggi, ore:r.ore, rapportino_id:rid
+    }).select("id");
+    if(error||!data||!data.length){
+      const p=(SQUADRA||[]).find(x=>String(x.id)===String(r.op));
+      oreFallite.push((p&&p.nome)||"qualcuno");
+    }else oreScritte++;
+  }
+
+  let spesaOk=null;
+  if(vuoleSpesa){
+    const {data,error}=await sb.from("gest_spese").insert({
+      user_id:MIO.impresaId, lavoro_id:RV.lavoro.id,
+      descrizione:des, importo:imp, inserito_da:MIO.nome
+    }).select("id");
+    spesaOk=!(error||!data||!data.length);
+  }
+
+  /* ⚠️ Si dice "salvato" SOLO di quello che e' stato scritto davvero.
+     Un permesso che blocca non da' errore: senza questo conto l'app direbbe
+     "tutto a posto" con il database vuoto. */
+  if(oreFallite.length||spesaOk===false){
+    rimetti();
+    let m="Salvato solo in parte.";
+    if(oreFallite.length)m+=" Ore non scritte: "+oreFallite.join(", ")+".";
+    if(spesaOk===false)m+=" La spesa non è entrata.";
+    toast(m+" Dillo al capo.");
+    return;
+  }
+
+  rvChiudi();
+  const pezzi=[];
+  if(oreScritte)pezzi.push(oreScritte===1?"1 persona":oreScritte+" persone");
+  if(materiali)pezzi.push("materiali");
+  if(note)pezzi.push("note");
+  if(spesaOk)pezzi.push("spesa");
+  toast("Rapportino salvato ✔ "+(pezzi.length?"("+pezzi.join(", ")+")":""));
+}
 
 /* crea il rapportino e restituisce il suo id, oppure null. Stessa strada del
    rapportino grande: .select("id") perche' un permesso che blocca NON da'
