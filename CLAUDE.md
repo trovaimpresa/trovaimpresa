@@ -6323,3 +6323,190 @@ Cosa resta aperto, in ordine:
 4. I due `.select('id')` mancanti segnalati e non toccati
 5. Le 9 prove «da capire» del 14 agosto, il render pigro, le cascate di
    `segnalazioni` e `supporto_messaggi`, l'annuncio pagato da recuperare
+
+---
+
+# 15 agosto 2026 (8) — I CREDITI AI LI PAGA L'IMPRESA
+
+`sql/ai-crediti-collaboratori.sql` — lanciato, commit `04f8f2b`.
+
+## IL BLOCCO, TROVATO PRIMA DI SCRIVERE UNA RIGA
+
+`ai_accounts.user_id` è la **chiave primaria**, e `consume_ai_credit` partiva da
+`auth.uid()`. Quando David apre l'app del cantiere, chi è collegato è **David**,
+non l'impresa: il server cercava i crediti di David — piano `base`, quota 0 — e
+rispondeva *«Hai esaurito i crediti AI di questo mese»*. E non era nemmeno vero:
+David non li ha mai avuti.
+
+Con quella regola **la voce in cantiere non poteva funzionare per nessuno**.
+
+## LA REGOLA NUOVA, IN UNA RIGA
+
+`public.ai_conto_di(_chi)`: se chi preme è **collaboratore attivo di UNA sola
+impresa**, i crediti sono dell'impresa. In tutti gli altri casi sono suoi.
+
+- ⚠️ **Il titolare non cambia di una virgola.** In `gest_membri` non c'è come
+  membro di sé stesso: la ricerca non trova niente e si ricade su prima.
+- ⚠️ **Due imprese = nessuna.** Non si indovina a chi far pagare: paga lui.
+  Indovinare su chi paga è l'errore che non si scopre mai — i soldi spariscono
+  da una parte e nessuno guarda dall'altra.
+- ⚠️ **`ai_usage_log.usato_da`**: da oggi il registro dice anche CHI li ha
+  spesi, non solo di chi erano. Con quattro operai in squadra è la differenza
+  fra un registro e un mistero.
+- `refund_ai_credit` **non si tocca**: rimborsa partendo dalla riga di registro,
+  che è già intestata all'impresa. Si aggiusta da solo.
+
+## ⚠️ L'ERRORE MIO, DETTO PER PRIMO
+
+Avevo riscritto `get_ai_status` partendo da `sql/02-functions.sql`. **Sbagliato:
+la versione che gira è quella di `sql/03-assistente.sql`**, che restituisce anche
+`help_left`.
+
+Con la mia, nel pannello dell'Assistente la riga *«Domande gratuite rimaste
+questo mese»* sarebbe diventata un **trattino** — `js/ai-integrazione.js`, riga
+236. Nessun errore, nessun messaggio: solo un numero che sparisce.
+
+Trovato dal confronto **prima/dopo** su PostgreSQL vero, non rileggendo il file.
+
+**La lezione: quando una funzione esiste in più file di `sql/`, quella buona è
+l'ULTIMA, non la prima che si trova.**
+
+E l'aiuto gratis **resta di chi preme**: `consume_help_credit` non si tocca. Se
+le 30 domande le pagasse l'impresa, quattro operai le brucerebbero al titolare
+in una settimana.
+
+## IL BANCO — `prove-claude/banco-crediti-15ago.zip`
+
+Lo schema ricostruito **dai file veri**, le funzioni **copiate verbatim** (non
+riscritte a memoria: riscriverle vuol dire provare la propria memoria).
+
+- **12 scenari del titolare, prima e dopo: identici riga per riga**
+- **13 prove che devono fallire, tutte verdi**: estraneo, sospeso, invitato,
+  due imprese, il titolare che non può spendere i crediti di un altro
+- **File rotto di proposito 6 volte**, ogni volta la prova giusta è diventata rossa
+- **20 pulsanti premuti nello stesso istante**, 5 giri: sempre un credito solo
+
+⚠️ **Tre bugie del banco, prima che dicesse il vero:** `reset_stato()` non
+azzerava `help_used` e una prova si sporcava da sola; un sabotaggio toglieva e
+rimetteva la colonna (la funzione la scriveva lo stesso); una prova contava `t`
+mentre il database risponde `true`.
+
+---
+
+# 15 agosto 2026 (9) — LA VOCE DAL CANTIERE
+
+`supabase/functions/ai-generate/index.ts` + `gestionale-operatore.html`.
+
+## COM'E' FATTA, IN TRE PEZZI
+
+1. **La dettatura**: il microfono **della tastiera del telefono**. Nessun
+   pulsante «parla» dentro l'app.
+   ⚠️ **Perché:** `webkitSpeechRecognition` **non c'è su iPhone**. Un pulsante
+   scritto nella pagina lì non farebbe niente, e un pulsante che non fa niente è
+   peggio di un pulsante che non c'è. Quello di sistema c'è ovunque, parla la
+   lingua che ha impostato lui e non chiede permessi in più.
+2. **La comprensione**: `dati_rapportino`, prompt **sul server**, costo 1
+   credito. Torna `{ore:[{nome,ore}], materiali, note, spesa:{descrizione,importo}}`.
+3. **Il controllo**: il telefono riempie il form, lui corregge, poi salva.
+   **L'AI non scrive mai nel database** — stessa regola di `dati_cliente` e
+   `dati_lavoro`.
+
+## ⚠️ QUELLO CHE TIENE NON E' IL PROMPT, E' IL FILTRO
+
+Al server è scritto «non inventare nomi». **Un prompt è un desiderio, non una
+garanzia**: prima o poi un modello ci mette dentro un Marco che non c'è.
+
+La garanzia è `voceRipulisci()` dentro l'app:
+
+- i nomi si confrontano con la **squadra vera di quel lavoro**; chi non c'è
+  **non entra**, e viene **scritto in giallo** invece di sparire in silenzio
+- `voceStessoNome()` toglie accenti e maiuscole: «LUCA DE LUCA» cade su
+  «Luca De Lucà»
+- ore **> 24 → 24**, negative buttate, arrotondate alla **mezz'ora**
+- stesso nome due volte: si **somma**, non si sdoppia la riga
+- l'importo passa da `_numIt` (che sa leggere «42,50»), tetto 1.000.000
+- niente permesso «Pagamenti»: la spesa **non si salva**, e glielo si **dice**
+
+**Un'ora sulla persona sbagliata è una busta paga sbagliata, e salta fuori a
+fine mese quando nessuno si ricorda più niente.**
+
+## LE ALTRE TRE STRADE RESTANO
+
+«Racconta la giornata» è la **prima** scelta del + Rapido, non l'unica: Ore,
+Materiale e Nota restano identiche. Senza campo o senza crediti quelle tre sono
+l'unica cosa che funziona, e la voce non deve chiudere l'unica porta che si apre
+sempre.
+
+Messaggi diversi per ogni modo di fallire: crediti finiti (e sono **dell'impresa**,
+non suoi), piano senza AI, niente rete, risposta senza senso, **funzione non
+ancora messa online**. Ognuno finisce con *«segna a mano con Ore»*.
+
+## ⚠️ L'ORA DI ROMA, NON DI LONDRA
+
+`{{OGGI}}` usava `toISOString()`, che dà sempre l'ora di Londra. In estate sono
+due ore: **fra mezzanotte e le due di notte il server credeva che fosse ancora
+ieri**. Chi dettava un lavoro «domani» all'una se lo ritrovava con la data
+sbagliata di un giorno.
+
+Sistemato con `oggiARoma()`: `toLocaleDateString("sv-SE", {timeZone:"Europe/Rome"})`
+— `sv-SE` non è un vezzo svedese, è l'unica lingua che scrive AAAA-MM-GG.
+Provato su 6 momenti, compreso capodanno (dove sbagliava anche l'anno).
+
+**Segnalato prima e toccato solo dopo il suo sì**: `dati_lavoro` già girava.
+
+## IL DEPLOY: NESSUNA TRACCIA, RISCHIO CHIUSO CON UNA DATA
+
+Non esiste `supabase/config.toml`, né traccia di deploy in nessun file. Il
+rischio era sovrascrivere online una versione diversa da quella locale.
+
+Chiuso confrontando **due date**: Supabase diceva «updated 17 days ago» = 29
+luglio; il file locale aveva `mtime` **29 luglio 17:48**. Stessa cosa.
+
+## I BANCHI
+
+- `prove-claude/banco-voce-15ago.zip` — 48+12 controlli sulla Edge Function,
+  **senza chiamare l'AI**: una prova che confronta parole generate diventa rossa
+  da sola dopo una settimana. Si prova tutto quello che sta **intorno**.
+  12 sabotaggi.
+- `prove-claude/banco-voce-app-15ago.zip` — ~80 controlli nel browser su due
+  misure, con **server AI finto e pilotabile**: nome inventato, persona di un
+  altro reparto, 30 ore, ore negative, nome doppio, risposta non-JSON, 402,
+  niente rete, deploy mancante, e **il database che rifiuta senza dare errore**.
+  12 sabotaggi.
+
+⚠️ **Altre tre bugie dei banchi:** una prova **ricopiava** il codice della
+pulizia invece di **prenderlo dal file** (togliendolo dal file restava verde);
+`rompi.sh` in bash si mangiava le virgolette e due sabotaggi non toccavano
+niente (riscritto in Python, e adesso **dice** se non ha toccato niente); la
+sessione finta aveva il token ma non l'utente, e la prova accusava il gestionale
+di un errore suo.
+
+**Totale della giornata: 14 prove bugiarde, tutte mie, tutte trovate.**
+
+## DOVE SIAMO RIMASTI (fine 15 agosto)
+
+Push della giornata: `7c780df`, `7fcf4db`, `29dbbaa`, `c2b3a57`, `baf158b`,
+`589b4fb`, `6468f0c`, `1304621`, `54347a7`, `3c3e5c9`, `04f8f2b`.
+
+⚠️ **Da fare a mano, non è un push:** il **deploy della Edge Function**
+`ai-generate` dal pannello Supabase (Edge Functions → ai-generate → Code →
+Deploy). Finché non è fatto, «Racconta la giornata» dice *«Questa cosa non è
+ancora accesa sul server»* e non si rompe niente.
+
+⚠️ **Nessuno ha ancora dettato un rapportino da un telefono vero.**
+
+Cosa resta aperto, in ordine:
+
+1. **Il Cestino per i rapportini.** La colonna `eliminato_il` su
+   `gest_rapportini` **c'è già**. Mancano due elenchi: `TABELLE` in
+   `js/cestino.js` (riga ~86) e `CEST_NOMI` in `gestionale-app.html` (riga
+   ~11771). Oggi un rapportino eliminato **sparisce per sempre** mentre il
+   messaggio promette il cestino.
+2. **La guida blog «DURC scaduto: cosa rischi e come non dimenticarlo mai»** —
+   parla alle **imprese**, non ai proprietari di casa. Lo Scadenzario c'è già:
+   il gestionale entra alla fine, come risposta al problema, mai come vetrina.
+3. Le prove Node di oggi portate su `harness.py`
+4. I due `.select('id')` mancanti, segnalati e non toccati
+5. Le 9 prove «da capire» del 14 agosto, il render pigro (il punto unico è il
+   dispatcher intorno a riga 14628), le cascate di `segnalazioni` e
+   `supporto_messaggi`, l'annuncio pagato da recuperare
