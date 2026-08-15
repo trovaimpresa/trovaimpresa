@@ -6335,6 +6335,10 @@ ${vecchi?`
       "Altro"]
     :["DURC","Assicurazione","Revisione mezzo","Bollo","Tagliando","Manutenzione programmata","Certificazione",
       "Pagamento fornitore",
+      /* 15 agosto 2026 — le cose che scadono addosso a UNA PERSONA. Prima
+         finivano in "Attestati e patentini", un campo di testo libero: ci
+         scrivevi "muletto" e non scadeva mai. */
+      "Patentino","Idoneità sanitaria",
       /* 9 agosto 2026 — le date del cantiere: ora che le scadenze si attaccano
          al lavoro servono anche a imprese e artigiani */
       "Consegna lavori","SAL (stato avanzamento)","Fine lavori","Verifica ponteggio",
@@ -6497,6 +6501,9 @@ ${vecchi?`
     const cliNome=s.cliente_id?(cliMap[s.cliente_id]||"(cliente eliminato)"):"";
     const mezNome=s.mezzo_id?((mezMap||{})[s.mezzo_id]||"(mezzo eliminato)"):"";
     const lavNome=s.lavoro_id?((lavMap||{})[s.lavoro_id]||(ruoloUtente==='professionista'?"(pratica eliminata)":"(lavoro eliminato)")):"";
+    /* dipCache tiene solo chi c'e' adesso in squadra: se il nome non si trova,
+       quella persona e' stata tolta. Si dice, invece di lasciare il vuoto. */
+    const opeNome=s.operatore_id?(((dipCache||[]).find(o=>String(o.id)===String(s.operatore_id))||{}).nome||"(persona non più in squadra)"):"";
     let bg="var(--sfondo)",fg="var(--testo-2)",lab="Aperta",tono="t-neutro";
     if(fatta){bg="var(--ok-bg)";fg="var(--ok)";lab="Fatta";tono="t-ok";}
     else if(s.data_scadenza&&s.data_scadenza<oggi){bg="var(--err-bg)";fg="var(--err)";lab="Scaduta";tono="t-err";}
@@ -6508,6 +6515,7 @@ ${vecchi?`
             lavNome?"📁 "+esc(lavNome):"",
             cliNome?"👤 "+esc(cliNome):"",
             mezNome?"🚚 "+esc(mezNome):"",
+            opeNome?"👷 "+esc(opeNome):"",
             "📅 "+fdate(s.data_scadenza),
             ((+s.ripeti_mesi||0)?"🔁 "+((SCAD_RIPETI.find(r=>r[0]===+s.ripeti_mesi)||[0,""])[1]||"").toLowerCase():""),
             (s.avvisa===false?"🔕 nessuna email":"")],
@@ -6543,6 +6551,7 @@ ${vecchi?`
     }
     const tipoOpts=tipiScadenza().map(tp=>`<option value="${esc(tp)}" ${tp===s.tipo_pratica?"selected":""}>${esc(tp)}</option>`).join("");
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===s.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
+    const opeOpts=(dipCache||[]).map(o=>`<option value="${o.id}" ${String(o.id)===String(s.operatore_id||"")?"selected":""}>${esc(o.nome)}</option>`).join("");
     const mezOpts=mz.map(m=>`<option value="${m.id}" ${m.id===s.mezzo_id?"selected":""}>${esc(m.nome)}${m.targa?" ("+esc(m.targa)+")":""}</option>`).join("");
     const lavOpts=lv.map(l=>`<option value="${l.id}" ${String(l.id)===String(s.lavoro_id||"")?"selected":""}>${esc(l.descrizione||("Senza nome"))}${l.dove?" — "+esc(l.dove):""}</option>`).join("");
     const avvisaOn=s.avvisa!==false;
@@ -6569,6 +6578,9 @@ ${vecchi?`
       +`<div class="field"><label>${pro?"Pratica":"Lavoro"} (facoltativo)</label><select id="s-lav"><option value="">— ${pro?"nessuna":"nessuno"} —</option>${lavOpts}</select></div>`
       +`<div class="field"><label>Cliente (facoltativo)</label><select id="s-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>`
       +`<div class="field"><label>${pro?"Strumento":"Mezzo / attrezzatura"} (facoltativo)</label><select id="s-mezzo"><option value="">— nessuno —</option>${mezOpts}</select></div>`
+      /* 15 agosto 2026 — la persona. I nomi arrivano da dipCache, la squadra
+         gia' letta: nessuna domanda in piu' al database. */
+      +`<div class="field"><label>Persona (facoltativo)</label><select id="s-ope"><option value="">— nessuna —</option>${opeOpts}</select><div class="campo-aiuto">Per le cose che scadono addosso a una persona: patentino del muletto, piattaforma aerea, primo soccorso.</div></div>`
       +'</div>'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Note</div>'
@@ -6586,16 +6598,17 @@ ${vecchi?`
     const cliente_id=($("#s-cli")&&$("#s-cli").value)?$("#s-cli").value:null;
     const mezzo_id=($("#s-mezzo")&&$("#s-mezzo").value)?$("#s-mezzo").value:null;
     const lavoro_id=($("#s-lav")&&$("#s-lav").value)?$("#s-lav").value:null;
+    const operatore_id=($("#s-ope")&&$("#s-ope").value)?$("#s-ope").value:null;
     const avvisa=$("#s-avvisa")?!!$("#s-avvisa").checked:true;
     const note=$("#s-note").value.trim();
     const ripeti_mesi=$("#s-ripeti")?(+$("#s-ripeti").value||0):0;
-    const row={titolo,tipo_pratica,cliente_id,mezzo_id,lavoro_id,data_scadenza,note,avvisa,ripeti_mesi};
+    const row={titolo,tipo_pratica,cliente_id,mezzo_id,lavoro_id,operatore_id,data_scadenza,note,avvisa,ripeti_mesi};
     /* Se sql/gest-scadenze-pratiche.sql non è ancora stato eseguito, le colonne
        nuove non esistono: invece di far fallire tutto il salvataggio le tolgo una
        alla volta e riprovo (stessa scelta già fatta nei Dati azienda). */
     /* ripeti_mesi si toglie come le altre se la colonna non c'e' ancora:
        chi non ha eseguito sql/gest-scadenze-ripeti.sql continua a salvare */
-    const OPZ=["lavoro_id","avvisa","ripeti_mesi"];
+    const OPZ=["lavoro_id","avvisa","ripeti_mesi","operatore_id"];
     const tolte=[];
     async function prova(){
       return id
