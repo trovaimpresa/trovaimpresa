@@ -6510,3 +6510,90 @@ Cosa resta aperto, in ordine:
 5. Le 9 prove «da capire» del 14 agosto, il render pigro (il punto unico è il
    dispatcher intorno a riga 14628), le cascate di `segnalazioni` e
    `supporto_messaggi`, l'annuncio pagato da recuperare
+
+---
+
+## DOVE SIAMO RIMASTI (15 agosto, sera — seconda tornata)
+
+Tre lavori chiusi dopo quelli di sopra, tutti provati e tutti sabotati.
+
+### Cestino dei rapportini (era il punto 1 di ieri)
+
+Nuovo file `sql/gest-rapportini-cestino.sql`: la funzione
+`gest_rapportino_cestina(p_id, p_conferma)`, SECURITY DEFINER, che in **una
+sola transazione** mette nel cestino il rapportino **e le sue ore**. Serviva
+perché il collaboratore non ha (giustamente) il diritto di scrivere su
+`gest_ore`: senza la funzione, o non poteva cancellare il suo rapportino, o le
+ore restavano vive e il margine del lavoro usciva sbagliato.
+
+Prima chiamata senza conferma = **dice quante ore porta via**. Seconda con
+conferma = esegue. `gest_rapportini` aggiunto a `TABELLE` in `js/cestino.js`
+(ora 19) e alle liste del Cestino, con il nome vero: *«Rapportino del 14/08 —
+Villa Rossi»*, non un codice.
+
+### «Chiedi una funzione» e «Assistenza diretta» in cima al menu
+
+Due riquadri tratteggiati sopra tutto il resto, col numerino dei messaggi non
+letti e il pallino rosso sulle tre lineette quando il menu è chiuso. Nuova
+sezione chat `#assistenza`, e nell'admin **due liste separate** (supporto dal
+sito / supporto gestionale) che però mostrano sempre la **conversazione
+intera**, con l'etichetta arancione sui messaggi arrivati dall'altra parte.
+
+⚠️ **Due buchi veri chiusi su `supporto_messaggi`**: un'impresa poteva
+**riscrivere le risposte del fondatore** e poteva **svuotare la chat di tutti**
+(`TRUNCATE`). Sistemati con `sql/supporto-messaggi-lucchetto.sql` e
+`-anon.sql`. Poi TRUNCATE/TRIGGER/REFERENCES tolti su **94 tabelle**, comprese
+quelle future (`alter default privileges`). Non era un errore suo: è la postura
+predefinita di Supabase.
+
+### Il Riepilogo che si riempie da solo
+
+Prima c'erano sempre **16 schede**, anche in un reparto appena creato: una
+parete di «Nessun cliente registrato». Adesso ogni scheda dichiara `dati:` —
+se la sua sezione è vuota, la scheda **non viene disegnata**. Se non c'è
+proprio niente compare il cartello «Questo reparto è ancora vuoto» con i due
+pulsanti *Il primo cliente* / *Il primo preventivo*.
+
+Il riquadro «Tutto in ordine» è rimasto identico. Cestino e «Chiedi una
+funzione» non sono schede e non devono diventarlo: c'è una prova apposta.
+Corretta anche la riga sotto il titolo, che prometteva ancora «una scheda per
+ogni sezione del menu».
+
+### I banchi di questa tornata (in `prove/`)
+
+`banco_browser.js` è arrivato a **327 controlli** su due misure e quattro
+profili (`BANCO_SOLO=l3|l4|l5` per girarne solo un pezzo), più `banco_sql.py`
+(28), `banco_supporto.py` (22) e quattro serie di sabotaggi: `rompi.py`,
+`rompi_browser.py`, `rompi_l3.py`, `rompi_l4.py`, `rompi_l5.py` (16, tutti
+visti).
+
+⚠️ **Altre bugie dei banchi trovate oggi:** il banco girava come
+**superutente** del database e il sabotaggio «togli security definer» restava
+verde; una prova cercava un'etichetta dentro `innerHTML` e la trovava in un
+**commento**; una prova del telefono diceva «il pulsante non si vede» perché
+non apriva il menu a tre lineette; la prova del Riepilogo scriveva nel database
+**di nascosto** invece di usare il modulo, e accusava il gestionale di un
+difetto che non esiste (il Riepilogo si ridisegna quando qualcuno **salva**).
+
+⚠️ **Un difetto vero introdotto e trovato dai sabotaggi:** `enterPanel`
+accendeva la voce di menu **per posizione** (`i===0`). Aggiungendo i due
+riquadri in cima, entrando in un reparto restava acceso il riquadro sbagliato.
+Adesso si accende per `data-tab==="riepilogo"`.
+
+### Cosa resta aperto, in ordine
+
+1. **Scheda completa / «Report completo»** — una card sua dentro il Riepilogo
+   che apre tutte le sezioni piene, una sotto l'altra, **in sola lettura**
+   (niente Cestino, niente «Cosa ti manca?»), con **Crea PDF** e **Stampa**.
+   Deciso con lui: **niente grafico** per adesso, **niente interruttore
+   nascondi-importi** (*«è un lavoro che non serve a nessuno»*). jsPDF è già
+   nel file e si carica solo quando serve.
+2. **La guida blog «DURC scaduto»** — parla alle **imprese**. Prima si guarda
+   la Search Console (MCP Supermetrics, `ds_id` GW) per capire cosa cercano
+   davvero, poi si propone il titolo.
+3. Il **deploy a mano della Edge Function `ai-generate`** dal pannello
+   Supabase: **non risulta ancora fatto**.
+4. Il `×` del registro ore è **12 px** sul telefono (stesso difetto già
+   sistemato per i rapportini). `gest_membri` non sta in nessun file di `sql/`.
+5. I due `.select('id')` mancanti, le prove Node portate su `harness.py`, le 9
+   prove «da capire» del 14 agosto.
