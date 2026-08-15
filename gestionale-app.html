@@ -6516,8 +6516,17 @@ ${vecchi?`
     /* .select("id") non e' un vezzo: una scrittura fermata dai permessi NON
        da' errore, torna riuscita a vuoto. Senza, la pagina direbbe "mandato"
        e nel database non ci sarebbe niente. */
-    const {data,error}=await sb.from("supporto_messaggi")
-      .insert({user_id:sbUid,da_admin:false,messaggio:testo,letto:false}).select("id");
+    const riga={user_id:sbUid,da_admin:false,messaggio:testo,letto:false,origine:"gestionale"};
+    let {data,error}=await sb.from("supporto_messaggi").insert(riga).select("id");
+    /* 15 agosto 2026 (13) — «origine» dice al pannello admin che questo
+       messaggio arriva dal gestionale e non dal sito. Se la colonna non c'e'
+       ancora (sql/supporto-origine.sql non lanciato) si rimanda il messaggio
+       senza: meglio una conversazione senza etichetta che un'impresa che
+       preme Invia e non parte niente. */
+    if(error&&/origine|42703|PGRST204|schema cache/i.test((error.code||"")+" "+(error.message||""))){
+      delete riga.origine;
+      ({data,error}=await sb.from("supporto_messaggi").insert(riga).select("id"));
+    }
     asstInvio=false;
     if(error){toast("Non mandato: "+(error.message||"errore"));return;}
     if(!data||!data.length){toast("Non mandato: il database non ha scritto niente. Riprova.");return;}

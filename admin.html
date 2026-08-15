@@ -436,8 +436,15 @@
         <span class="nav-icon">📥</span> Candidature
       </div>
       <div class="nav-item" onclick="showSection('supporto',this)">
-        <span class="nav-icon">🎧</span> Supporto
+        <span class="nav-icon">🎧</span> Supporto dal sito
         <span class="nav-badge" id="badge-supporto" style="background:var(--rosso);display:none">0</span>
+      </div>
+      <!-- 15 agosto 2026 (13) — chi scrive dal SITO ha un problema col suo
+           profilo pubblico; chi scrive dal GESTIONALE ce l'ha aperto davanti e
+           non gli si salva una fattura. Due telefonate diverse, due liste. -->
+      <div class="nav-item" onclick="showSection('supporto-gest',this)">
+        <span class="nav-icon">🛠️</span> Supporto gestionale
+        <span class="nav-badge" id="badge-supporto-gest" style="background:var(--rosso);display:none">0</span>
       </div>
       <div class="nav-item" onclick="showSection('abbonamenti',this)">
         <span class="nav-icon">💎</span> Premium &amp; Gestionale
@@ -772,7 +779,7 @@
     <!-- SUPPORTO -->
     <div class="section" id="sec-supporto">
       <div class="topbar">
-        <div class="topbar-title">🎧 Supporto</div>
+        <div class="topbar-title">🎧 Supporto dal sito</div>
       </div>
       <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;padding:16px;align-items:start">
         <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
@@ -782,15 +789,44 @@
         <div style="background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;height:600px">
           <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px">
             <span id="supp-conv-nome">Seleziona una conversazione</span>
-            <button id="supp-del-btn" onclick="eliminaConvAdmin()" style="display:none;padding:6px 10px;border:1px solid #e0b4b4;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap">🗑 Elimina</button>
+            <button id="supp-del-btn" onclick="eliminaConvAdmin('sito')" style="display:none;padding:6px 10px;border:1px solid #e0b4b4;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap">🗑 Elimina</button>
           </div>
           <div id="supp-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f7f8fa"></div>
           <div style="padding:14px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:stretch">
             <textarea id="supp-reply-input" rows="3" placeholder="Scrivi una risposta..."
-              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();rispondiSupportoAdmin();}"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();rispondiSupportoAdmin('sito');}"
               style="flex:1;padding:14px;border:2px solid var(--border);border-radius:12px;resize:vertical;
                      min-height:96px;font-family:inherit;font-size:16px;line-height:1.6;color:#12233a;font-weight:500"></textarea>
-            <button onclick="rispondiSupportoAdmin()"
+            <button onclick="rispondiSupportoAdmin('sito')"
+              style="padding:14px 26px;background:var(--verde);color:#fff;border:none;border-radius:12px;
+                     font-weight:800;font-size:16px;cursor:pointer;white-space:nowrap">Invia</button>
+          </div>
+          <div style="padding:0 14px 12px;font-size:13px;color:#5b6b80">Invio con <b>Invio</b> &middot; per andare a capo <b>Maiusc + Invio</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-supporto-gest">
+      <div class="topbar">
+        <div class="topbar-title">🛠️ Supporto gestionale</div>
+      </div>
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;padding:16px;align-items:start">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="padding:12px 14px;font-weight:700;border-bottom:1px solid var(--border)">Conversazioni</div>
+          <div id="suppg-conv-list" style="overflow-y:auto;max-height:560px"><div class="loading" style="padding:16px">Caricamento...</div></div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;height:600px">
+          <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span id="suppg-conv-nome">Seleziona una conversazione</span>
+            <button id="suppg-del-btn" onclick="eliminaConvAdmin('gestionale')" style="display:none;padding:6px 10px;border:1px solid #e0b4b4;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap">🗑 Elimina</button>
+          </div>
+          <div id="suppg-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f7f8fa"></div>
+          <div style="padding:14px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:stretch">
+            <textarea id="suppg-reply-input" rows="3" placeholder="Scrivi una risposta..."
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();rispondiSupportoAdmin('gestionale');}"
+              style="flex:1;padding:14px;border:2px solid var(--border);border-radius:12px;resize:vertical;
+                     min-height:96px;font-family:inherit;font-size:16px;line-height:1.6;color:#12233a;font-weight:500"></textarea>
+            <button onclick="rispondiSupportoAdmin('gestionale')"
               style="padding:14px 26px;background:var(--verde);color:#fff;border:none;border-radius:12px;
                      font-weight:800;font-size:16px;cursor:pointer;white-space:nowrap">Invia</button>
           </div>
@@ -1380,7 +1416,7 @@ function showSection(id, el, fromPopstate) {
   if (id === 'offerte-lavoro') caricaOfferteLavoro();
   if (id === 'candidati') caricaCandidati();
   if (id === 'candidature') caricaCandidature();
-  if (id === 'supporto') caricaSupportoAdmin();
+  if (id === 'supporto' || id === 'supporto-gest') caricaSupportoAdmin();
   if (id === 'abbonamenti') renderAbbonamenti();
   if (id === 'pubblicita-clienti') caricaPubblicitaClienti();
   if (id === 'mappa-spazi') caricaMappaSpazi();
@@ -1749,8 +1785,29 @@ function pubCard(label, val, color) {
 }
 
 // ===== SUPPORTO (chat clienti) =====
+// 15 agosto 2026 (13) — DUE LISTE, UNA TABELLA SOLA.
+//
+// I messaggi stanno tutti in supporto_messaggi. Quello che cambia e' DOVE
+// l'impresa li ha scritti: dal sito (pannello pubblico) o dal gestionale.
+//
+// ⚠️ Una conversazione finisce in una lista o nell'altra guardando SOLO i
+// messaggi scritti dall'impresa, mai le tue risposte. Le tue partono dal
+// server e non portano l'origine: se contassero, ogni tua risposta
+// sposterebbe la conversazione nella lista sbagliata.
+//
+// ⚠️ Chi ti ha scritto da tutti e due i posti compare in TUTTE E DUE le
+// liste — e quando la apri vedi la conversazione INTERA, non solo i pezzi di
+// quella lista. Due sezioni servono a sapere da dove ti scrive, non a
+// nasconderti meta' di quello che ti ha gia' detto.
 let _suppData = { messaggi: [], utenti: {} };
-let _suppConvUid = null;
+const SUPP = {
+  sito:       { uid: null, lista: 'supp-conv-list',  nome: 'supp-conv-nome',  del: 'supp-del-btn',  msgs: 'supp-msgs',  input: 'supp-reply-input',  badge: 'badge-supporto',      etichetta: 'dal sito',       altra: 'scrive anche dal gestionale' },
+  gestionale: { uid: null, lista: 'suppg-conv-list', nome: 'suppg-conv-nome', del: 'suppg-del-btn', msgs: 'suppg-msgs', input: 'suppg-reply-input', badge: 'badge-supporto-gest', etichetta: 'dal gestionale', altra: 'scrive anche dal sito' }
+};
+// I messaggi di prima della colonna «origine» non ce l'hanno: erano tutti del
+// sito, perche' la chat nel gestionale e' nata il 15 agosto. Va letto cosi'
+// invece di farli sparire da tutte e due le liste.
+function _origine(m) { return (m && m.origine === 'gestionale') ? 'gestionale' : 'sito'; }
 
 async function suppFetch(action, extra) {
   const res = await fetch('/.netlify/functions/admin-supporto', {
@@ -1764,107 +1821,143 @@ async function suppFetch(action, extra) {
 async function caricaSupportoAdmin() {
   const j = await suppFetch('list');
   if (!j || !j.success) {
-    const l = document.getElementById('supp-conv-list');
-    if (l) l.innerHTML = '<div class="loading">\u26a0\ufe0f Non riesco a caricare il supporto. Riprova fra poco.</div>';
+    ['sito', 'gestionale'].forEach(q => {
+      const l = document.getElementById(SUPP[q].lista);
+      if (l) l.innerHTML = '<div class="loading">\u26a0\ufe0f Non riesco a caricare il supporto. Riprova fra poco.</div>';
+    });
     return;
   }
   _suppData = { messaggi: j.messaggi || [], utenti: j.utenti || {} };
-  renderConvList();
-  aggiornaBadgeSupporto();
-  if (_suppConvUid) apriConversazioneAdmin(_suppConvUid);
+  ['sito', 'gestionale'].forEach(q => {
+    renderConvList(q);
+    aggiornaBadgeSupporto(q);
+    if (SUPP[q].uid) apriConversazioneAdmin(SUPP[q].uid, q);
+  });
 }
 
-function convRaggruppate() {
+// le conversazioni di UNA lista: chi ha scritto almeno una volta da li'
+function convRaggruppate(q) {
   const map = {};
   _suppData.messaggi.forEach(m => {
-    const k = m.user_id;
-    if (!map[k]) map[k] = { user_id: k, ultimo: m, nonLetti: 0 };
-    map[k].ultimo = m;
-    if (!m.da_admin && !m.letto) map[k].nonLetti++;
+    if (m.da_admin) return;                       // le tue risposte non classificano
+    if (_origine(m) !== q) return;
+    if (!map[m.user_id]) map[m.user_id] = { user_id: m.user_id, ultimo: m, nonLetti: 0, anche: false };
+  });
+  // per ognuna: l'ultimo messaggio VERO della conversazione intera, i non
+  // letti di questa lista, e se scrive anche dall'altra parte
+  Object.keys(map).forEach(uid => {
+    const tutti = _suppData.messaggi.filter(m => m.user_id === uid);
+    map[uid].ultimo = tutti[tutti.length - 1] || map[uid].ultimo;
+    map[uid].nonLetti = tutti.filter(m => !m.da_admin && !m.letto && _origine(m) === q).length;
+    map[uid].anche = tutti.some(m => !m.da_admin && _origine(m) !== q);
   });
   return Object.values(map).sort((a, b) => new Date(b.ultimo.created_at) - new Date(a.ultimo.created_at));
 }
 
-function renderConvList() {
-  const box = document.getElementById('supp-conv-list');
+function renderConvList(q) {
+  const cfg = SUPP[q];
+  const box = document.getElementById(cfg.lista);
   if (!box) return;
-  const convs = convRaggruppate();
-  if (!convs.length) { box.innerHTML = '<div style="padding:16px;color:#888">Nessuna conversazione.</div>'; return; }
+  const convs = convRaggruppate(q);
+  if (!convs.length) {
+    box.innerHTML = '<div style="padding:16px;color:#888">Nessuna conversazione ' + esc(cfg.etichetta) + '.</div>';
+    return;
+  }
   box.innerHTML = convs.map(c => {
     const u = _suppData.utenti[c.user_id] || {};
     const nome = esc(u.nome || 'Utente');
     const anteprima = esc((c.ultimo.messaggio || '').slice(0, 42));
     const badge = c.nonLetti ? '<span style="background:#c0392b;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:6px">' + c.nonLetti + '</span>' : '';
-    const active = (c.user_id === _suppConvUid) ? 'background:var(--verde3)' : '';
-    return '<div onclick="apriConversazioneAdmin(\'' + c.user_id + '\')" style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;' + active + '">'
+    const anche = c.anche ? '<div style="font-size:11px;color:#b26a00;font-weight:600;margin-top:2px">' + esc(cfg.altra) + '</div>' : '';
+    const active = (c.user_id === cfg.uid) ? 'background:var(--verde3)' : '';
+    return '<div onclick="apriConversazioneAdmin(\'' + c.user_id + '\',\'' + q + '\')" style="padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;' + active + '">'
       + '<div style="font-weight:700;font-size:14px">' + nome + badge + '</div>'
-      + '<div style="font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + anteprima + '</div></div>';
+      + '<div style="font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + anteprima + '</div>'
+      + anche + '</div>';
   }).join('');
 }
 
-async function apriConversazioneAdmin(uid) {
-  _suppConvUid = uid;
+async function apriConversazioneAdmin(uid, q) {
+  q = q || 'sito';
+  const cfg = SUPP[q];
+  cfg.uid = uid;
   const u = _suppData.utenti[uid] || {};
-  document.getElementById('supp-conv-nome').textContent = (u.nome || 'Utente') + (u.email ? ' · ' + u.email : '');
-  document.getElementById('supp-del-btn').style.display = '';
+  document.getElementById(cfg.nome).textContent = (u.nome || 'Utente') + (u.email ? ' \u00b7 ' + u.email : '');
+  document.getElementById(cfg.del).style.display = '';
+  // ⚠️ la conversazione INTERA, non solo i messaggi di questa lista: dividere
+  // le sezioni serve a sapere da dove ti scrive, non a farti rispondere
+  // avendo letto meta' delle cose.
   const msgs = _suppData.messaggi.filter(m => m.user_id === uid);
-  const box = document.getElementById('supp-msgs');
+  const box = document.getElementById(cfg.msgs);
   box.innerHTML = msgs.map(m => {
     const admin = m.da_admin;
-    const style = 'max-width:75%;padding:12px 16px;border-radius:12px;font-size:15.5px;line-height:1.6;font-weight:500;white-space:pre-wrap;word-break:break-word;'
+    const style = 'max-width:75%;padding:12px 16px;border-radius:12px;font-size:15.5px;line-height:1.6;font-weight:500;white-space:pre-wrap;overflow-wrap:anywhere;'
       + (admin ? 'align-self:flex-end;background:var(--verde);color:#fff' : 'align-self:flex-start;background:#fff;color:#111;border:1px solid var(--border)');
-    // Il cestino compare solo sulle TUE risposte: i messaggi degli utenti non si cancellano.
-    if (!admin) return '<div style="' + style + '">' + esc(m.messaggio || '') + '</div>';
-    return '<div style="align-self:flex-end;display:flex;align-items:flex-start;gap:6px;max-width:80%">'
-      + '<button onclick="eliminaMsgAdmin(\'' + m.id + '\')" title="Elimina questo messaggio"'
+    // sui messaggi arrivati dall'ALTRA parte si scrive da dove: se no, dentro
+    // «Supporto gestionale» leggeresti frasi scritte dal sito senza saperlo
+    const da = (!admin && _origine(m) !== q)
+      ? '<div style="font-size:11px;color:#b26a00;font-weight:700;margin-top:5px">' + esc(SUPP[_origine(m)].etichetta) + '</div>' : '';
+    if (!admin) return '<div style="' + style + '">' + esc(m.messaggio || '') + da + '</div>';
+    // ⚠️ 15 agosto 2026 — QUI LE PAROLE SI SPEZZAVANO A META' («alessi / o»).
+    // La bolla diceva "largo al massimo il 75%", ma il 75% del contenitore —
+    // che a sua volta era largo quanto il suo contenuto, cioe' quanto la
+    // bolla. Il browser gira in tondo e stringe tutto al minimo.
+    // Adesso la larghezza la decide UNA cosa sola: il contenitore (80%).
+    // La bolla dentro prende quello che c'e', e le parole restano intere.
+    return '<div style="align-self:flex-end;display:flex;align-items:flex-start;gap:6px;max-width:80%;min-width:0">'
+      + '<button onclick="eliminaMsgAdmin(\'' + m.id + '\',\'' + q + '\')" title="Elimina questo messaggio"'
       + ' style="flex:0 0 auto;background:none;border:none;cursor:pointer;font-size:15px;opacity:.45;padding:6px 2px"'
-      + ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.45">🗑</button>'
-      + '<div style="' + style.replace('align-self:flex-end;','') + '">' + esc(m.messaggio || '') + '</div>'
+      + ' onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.45">\ud83d\uddd1</button>'
+      + '<div style="' + style.replace('align-self:flex-end;', '').replace('max-width:75%;', 'max-width:100%;min-width:0;') + '">' + esc(m.messaggio || '') + '</div>'
       + '</div>';
   }).join('');
   box.scrollTop = box.scrollHeight;
-  renderConvList();
+  renderConvList(q);
   await suppFetch('mark_read', { user_id: uid });
   _suppData.messaggi.forEach(m => { if (m.user_id === uid && !m.da_admin) m.letto = true; });
-  aggiornaBadgeSupporto();
+  ['sito', 'gestionale'].forEach(x => { renderConvList(x); aggiornaBadgeSupporto(x); });
 }
 
-async function rispondiSupportoAdmin() {
-  if (!_suppConvUid) return;
-  const inp = document.getElementById('supp-reply-input');
+async function rispondiSupportoAdmin(q) {
+  q = q || 'sito';
+  const cfg = SUPP[q];
+  if (!cfg.uid) return;
+  const inp = document.getElementById(cfg.input);
   const txt = (inp.value || '').trim();
   if (!txt) return;
   inp.value = '';
-  const j = await suppFetch('reply', { user_id: _suppConvUid, messaggio: txt });
+  const j = await suppFetch('reply', { user_id: cfg.uid, messaggio: txt });
   if (!j || !j.success) { alert('Errore invio: ' + ((j && j.error) || '')); inp.value = txt; return; }
   await caricaSupportoAdmin();
 }
 
 // Cancella una singola risposta scritta da te. Sparisce anche all'utente.
-async function eliminaMsgAdmin(id) {
+async function eliminaMsgAdmin(id, q) {
   if (!id) return;
   if (!confirm('Eliminare questo messaggio?\n\nSparisce anche all\'utente e non si torna indietro.')) return;
   const j = await suppFetch('delete_msg', { msg_id: id });
   if (!j || !j.success) { alert('Errore: ' + ((j && j.error) || 'non riuscito')); return; }
   await caricaSupportoAdmin();
-  if (_suppConvUid) await apriConversazioneAdmin(_suppConvUid);
 }
 
-async function eliminaConvAdmin() {
-  if (!_suppConvUid) return;
-  if (!confirm('Eliminare tutta la conversazione con questo utente?')) return;
-  const j = await suppFetch('delete_conv', { user_id: _suppConvUid });
+async function eliminaConvAdmin(q) {
+  q = q || 'sito';
+  const cfg = SUPP[q];
+  if (!cfg.uid) return;
+  if (!confirm('Eliminare tutta la conversazione con questo utente?\n\nVa via INTERA, anche i messaggi arrivati dall\'altra parte.')) return;
+  const j = await suppFetch('delete_conv', { user_id: cfg.uid });
   if (!j || !j.success) { alert('Errore eliminazione: ' + ((j && j.error) || '')); return; }
-  _suppConvUid = null;
-  document.getElementById('supp-conv-nome').textContent = 'Seleziona una conversazione';
-  document.getElementById('supp-del-btn').style.display = 'none';
-  document.getElementById('supp-msgs').innerHTML = '';
+  cfg.uid = null;
+  document.getElementById(cfg.nome).textContent = 'Seleziona una conversazione';
+  document.getElementById(cfg.del).style.display = 'none';
+  document.getElementById(cfg.msgs).innerHTML = '';
   await caricaSupportoAdmin();
 }
 
-function aggiornaBadgeSupporto() {
-  const tot = _suppData.messaggi.filter(m => !m.da_admin && !m.letto).length;
-  const b = document.getElementById('badge-supporto');
+function aggiornaBadgeSupporto(q) {
+  const cfg = SUPP[q];
+  const tot = _suppData.messaggi.filter(m => !m.da_admin && !m.letto && _origine(m) === q).length;
+  const b = document.getElementById(cfg.badge);
   if (!b) return;
   if (tot > 0) { b.textContent = tot; b.style.display = ''; } else { b.style.display = 'none'; }
 }
