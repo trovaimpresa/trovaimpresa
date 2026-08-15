@@ -1433,6 +1433,15 @@
      legge con fatica, e' un inciampo a ogni riga. */
   function _plur(n,uno,tanti){ return (+n===1)?uno:tanti; }
   function rieCard(o){
+    /* ===== 15 agosto 2026 — IL RIEPILOGO CHE SI RIEMPIE DA SOLO =====
+       Prima le 16 schede c'erano sempre tutte, anche appena aperto un reparto
+       nuovo: una parete di «Nessun cliente registrato», «Nessuna fattura»,
+       «Nessuna foto». Chi entrava la prima volta vedeva sedici caselle vuote e
+       non capiva da dove si comincia.
+       Adesso ogni scheda dichiara se la sua sezione ha davvero qualcosa
+       dentro (o.dati). Se non ce l'ha, la scheda non viene proprio disegnata:
+       compare il giorno che quel dato esiste. */
+    if(o.dati===false)return "";
     const righe=(o.righe||[]).filter(Boolean).slice(0,2);
     const corpo=righe.length
       ? '<div class="rc-list">'+righe.map(r=>{
@@ -1617,6 +1626,13 @@
     const speseForn = FFO.filter(f=>thisMonth(f.data)).reduce((s,f)=>s+(+f.importo||0),0);
     const speseMese = speseLav+speseCarte+speseRif+speseForn;
     const utile     = incMese-speseMese;
+    /* la scheda Report compare quando c'e' stato ALMENO UN movimento di soldi,
+       anche di mesi passati: una fattura pagata, una spesa, un movimento di
+       carta, un pieno, una fattura di un fornitore. Non basta l'utile del mese:
+       un'impresa che ha incassato a maggio e a giugno niente deve continuare a
+       vedere la sua scheda Report. */
+    const _ciSonoSoldi = FT.some(f=>f.stato==="pagata") || SP.length>0 || CM.length>0
+                       || RIFR.length>0 || FFO.length>0;
 
     /* lavori in perdita: il calcolo resta identico, cambia solo dove si vede
        (ora è una riga dentro "Da sistemare oggi", più in basso) */
@@ -1791,7 +1807,7 @@
     const C=[];
 
     C.push(rieCard({
-      tab:"lavori", titolo:"Lavori", n:aperti.length,
+      tab:"lavori", titolo:"Lavori", n:aperti.length, dati:L.length>0,
       lab: ritardo.length? ritardo.length+" in ritardo":_plur(aperti.length,"lavoro aperto","lavori aperti"),
       tono: ritardo.length?"err":(aperti.length?"attesa":"ok"),
       vuoto:"Nessun lavoro aperto",
@@ -1801,7 +1817,7 @@
     }));
 
     C.push(rieCard({
-      tab:"preventivi", titolo:"Preventivi", n:attesa.length,
+      tab:"preventivi", titolo:"Preventivi", n:attesa.length, dati:PV.length>0,
       lab:_plur(attesa.length,"in attesa di risposta","in attesa di risposta"), tono:attesa.length?"attesa":"ok",
       vuoto:"Nessun preventivo in attesa",
       righe: attesa.slice(0,2).map(p=>({
@@ -1810,7 +1826,7 @@
     }));
 
     C.push(rieCard({
-      tab:"fatture", titolo:"Fatture", n:eur(totDaInc),
+      tab:"fatture", titolo:"Fatture", n:eur(totDaInc), dati:(FT.length>0||daFatt.length>0),
       lab: scadute.length
             ? "da incassare · "+scadute.length+(scadute.length===1?" fattura scaduta":" fatture scadute")
             : "da incassare · da fatturare "+eur(totDaFatt),
@@ -1829,7 +1845,7 @@
     }));
 
     C.push(rieCard({
-      tab:"calendario", titolo:"Calendario", n:set7.length,
+      tab:"calendario", titolo:"Calendario", n:set7.length, dati:L.some(l=>!!l.data_prevista),
       lab:"nei prossimi 7 giorni", tono:set7.length?"info":"neutro",
       vuoto:"Nessun impegno questa settimana",
       righe: set7.slice(0,2).map(l=>{const q=quando(l.data_prevista);return{
@@ -1837,7 +1853,7 @@
     }));
 
     C.push(rieCard({
-      tab:"agenda", titolo:"Agenda operatore", n:opeOrd.length,
+      tab:"agenda", titolo:"Agenda operatore", n:opeOrd.length, dati:L.some(l=>!!l.operatore_id),
       lab:_plur(opeOrd.length,"operatore con lavori assegnati","operatori con lavori assegnati"), tono:opeOrd.length?"info":"neutro",
       vuoto:"Nessun lavoro assegnato",
       righe: opeOrd.slice(0,2).map(k=>({
@@ -1849,7 +1865,7 @@
        un clic lo porta in una sezione "fantasma" senza voce di menu */
     const _proNascosto=t=>ruoloUtente==='professionista'&&TAB_NASCOSTI_PRO.indexOf(t)>=0;
     if(!_proNascosto("mezzi"))C.push(rieCard({
-      tab:"mezzi", titolo:"Mezzi", n:MZveicoli.length,
+      tab:"mezzi", titolo:"Mezzi", n:MZveicoli.length, dati:MZveicoli.length>0,
       lab: mzAvvisa.length? mzAvvisa.length+(mzAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
                           : (MZveicoli.length===1?"mezzo in azienda":"mezzi in azienda"),
       tono: mzAvvisa.some(v=>v.scadute>0)?"err":(mzAvvisa.length?"attesa":"ok"),
@@ -1862,7 +1878,7 @@
     /* la scheda che mancava: Strumenti per lo studio, Attrezzature per
        l'impresa. Le tarature e le verifiche periodiche si vedono da qui. */
     C.push(rieCard({
-      tab:"attrezzature", titolo: _pro?"Strumenti":"Attrezzature", n:MZstrum.length,
+      tab:"attrezzature", titolo: _pro?"Strumenti":"Attrezzature", n:MZstrum.length, dati:MZstrum.length>0,
       lab: stAvvisa.length? stAvvisa.length+(stAvvisa.length===1?" con scadenza vicina":" con scadenze vicine")
                           : (_pro?"strumenti dello studio":"attrezzature in azienda"),
       tono: stAvvisa.some(v=>v.scadute>0)?"err":(stAvvisa.length?"attesa":"ok"),
@@ -1874,7 +1890,7 @@
     }));
 
     C.push(rieCard({
-      tab:"squadra", titolo:"Squadra", n:OPE.length,
+      tab:"squadra", titolo:"Squadra", n:OPE.length, dati:OPE.length>0,
       lab:_plur(OPE.length,"persona in squadra","persone in squadra")+" · "+(Math.round(oreMese*10)/10)+" h questo mese",
       tono:"neutro", vuoto:"Nessun operatore registrato",
       righe: OPE.slice(0,2).map(o=>({
@@ -1889,7 +1905,7 @@
       const ffOrd=ffAp2.filter(f=>f.scadenza).sort((a,b)=>a.scadenza.localeCompare(b.scadenza));
       const fornNome=Object.fromEntries(FORNI.map(x=>[String(x.id),x.nome||"Fornitore"]));
       C.push(rieCard({
-        tab:"fornitori", titolo:"Fornitori", n:eur(totFf),
+        tab:"fornitori", titolo:"Fornitori", n:eur(totFf), dati:(FFOR.length>0||FORNI.length>0),
         lab: ffRit.length? ffRit.length+(ffRit.length===1?" fattura scaduta":" fatture scadute"):"da pagare ai fornitori",
         tono: ffRit.length?"err":(ffAp2.length?"attesa":"ok"),
         vuoto:"Nessuna fattura da pagare",
@@ -1901,7 +1917,7 @@
     }
 
     if(!_proNascosto("carte"))C.push(rieCard({
-      tab:"carte", titolo:"Carte", n:eur(saldoTot),
+      tab:"carte", titolo:"Carte", n:eur(saldoTot), dati:CA.length>0,
       lab:"saldo di "+carteAtt.length+(carteAtt.length===1?" carta attiva":" carte attive"),
       tono: saldoTot<0?"err":"neutro", vuoto:"Nessuna carta attiva",
       righe: carteAtt.slice(0,2).map(c=>({
@@ -1910,7 +1926,7 @@
     }));
 
     C.push(rieCard({
-      tab:"clienti", titolo:"Clienti", n:CLI.length,
+      tab:"clienti", titolo:"Clienti", n:CLI.length, dati:CLI.length>0,
       lab:_plur(CLI.length,"cliente in anagrafica","clienti in anagrafica"), tono:"neutro",
       vuoto:"Nessun cliente registrato",
       righe: cliOrd.slice(0,2).map(k=>({
@@ -1948,7 +1964,7 @@
             impDi[c.id]=compRiepilogoDa(t.importo,t.oneri_sicurezza,t.importo_manodopera,c).netto;});
           const bozze=CO.filter(c=>c.stato==="bozza");
           C.push(rieCard({
-            tab:"computi", titolo:"Computo metrico", n:CO.length,
+            tab:"computi", titolo:"Computo metrico", n:CO.length, dati:CO.length>0,
             lab: CO.length===1?"computo nel reparto":"computi nel reparto",
             tono: bozze.length?"attesa":(CO.length?"ok":"neutro"),
             vuoto:"Nessun computo metrico",
@@ -1961,7 +1977,7 @@
     }
 
     C.push(rieCard({
-      tab:"scadenzario", titolo:"Scadenzario", n:scAperte.length,
+      tab:"scadenzario", titolo:"Scadenzario", n:scAperte.length, dati:scTutte.length>0,
       lab:_plur(scAperte.length,"scadenza entro 30 giorni","scadenze entro 30 giorni"),
       tono: scAperte.some(x=>x.data_scadenza<oggi)?"err":(scAperte.length?"attesa":"ok"),
       vuoto:"Nessuna scadenza in arrivo",
@@ -1971,7 +1987,7 @@
     }));
 
     C.push(rieCard({
-      tab:"report", titolo:"Report", n:eur(utile),
+      tab:"report", titolo:"Report", n:eur(utile), dati:_ciSonoSoldi,
       lab:"utile di questo mese (incassato − spese)",
       tono: utile<0?"err":(utile>0?"ok":"neutro"),
       vuoto:"Nessun movimento questo mese",
@@ -1982,7 +1998,7 @@
     }));
 
     C.push(rieCard({
-      tab:"galleria", titolo:"Galleria", n:(nFoto+nVideo),
+      tab:"galleria", titolo:"Galleria", n:(nFoto+nVideo), dati:(nFoto+nVideo)>0,
       lab:_plur(nFoto+nVideo,"foto o video caricato","foto e video caricati"), tono:"neutro",
       vuoto:"Nessuna foto o video caricato",
       righe:(nFoto+nVideo)?[{t:"Foto",v:String(nFoto)},{t:"Video",v:String(nVideo)}]:[]
@@ -2010,13 +2026,29 @@
       }
     }catch(e){}
     C.push(rieCard({
-      tab:"mappa", titolo:"Mappa", n:conIndirizzo.length,
+      tab:"mappa", titolo:"Mappa", n:conIndirizzo.length, dati:conIndirizzo.length>0,
       lab:_plur(conIndirizzo.length,"cantiere aperto con un indirizzo","cantieri aperti con un indirizzo"), tono:"neutro",
       vuoto:"Apri la Mappa per calcolare le distanze",
       righe:mpNote
     }));
 
-    G.innerHTML=C.join("");
+    /* ===== 15 agosto 2026 — il reparto nuovo =====
+       Se non c'e' NIENTE dentro, non si mostra una griglia vuota: si spiega
+       come funziona e si offrono i due primi passi. Il riquadro «Tutto in
+       ordine» qui sopra resta come prima. */
+    const CV=C.filter(Boolean);
+    G.innerHTML = CV.length ? CV.join("")
+      : '<div class="rie-benvenuto">'
+      +   '<div class="rb-tit">Questo reparto è ancora vuoto</div>'
+      +   '<div class="rb-txt">Le schede qui sotto compaiono da sole, una alla volta, '
+      +     'man mano che inserisci qualcosa. Registra un cliente e compare la scheda '
+      +     'Clienti, fai un preventivo e compare quella dei Preventivi.</div>'
+      +   '<div class="rb-txt">Si comincia da qui:</div>'
+      +   '<div class="rb-bottoni">'
+      +     '<button class="btn add" data-action="new-cli" data-tipo="privato">+ Il primo cliente</button>'
+      +     '<button class="btn add" data-action="new-prev">+ Il primo preventivo</button>'
+      +   '</div>'
+      + '</div>';
   }
 
   /* ---- Riepilogo: preventivi che aspettano una risposta ----

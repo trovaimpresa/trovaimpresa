@@ -973,6 +973,33 @@
 @media(max-width:1180px){ .rie-grid{ grid-template-columns:repeat(2,1fr); } }
 @media(max-width:760px){  .rie-grid{ grid-template-columns:1fr; gap:16px; } }
 
+/* --- reparto nuovo: nessuna scheda, si spiega come funziona (15/8/2026) ---
+   Occupa tutta la larghezza della griglia: non e' una scheda, e' un cartello. */
+.rie-benvenuto{
+  grid-column:1 / -1;
+  background:var(--card);
+  border:2px dashed var(--bordo-forte);
+  border-radius:16px;
+  padding:30px 28px;
+}
+.rie-benvenuto .rb-tit{
+  font-size:24px; font-weight:800; color:var(--testo);
+  letter-spacing:-.3px; margin-bottom:14px;
+}
+.rie-benvenuto .rb-txt{
+  font-size:17px; line-height:1.65; color:var(--testo-2);
+  max-width:62ch; margin-bottom:14px;
+}
+.rie-benvenuto .rb-bottoni{ display:flex; gap:14px; flex-wrap:wrap; margin-top:6px; }
+.rie-benvenuto .rb-bottoni .btn{ font-size:16px; padding:13px 20px; }
+@media(max-width:760px){
+  .rie-benvenuto{ padding:24px 20px; }
+  .rie-benvenuto .rb-tit{ font-size:21px; }
+  .rie-benvenuto .rb-txt{ font-size:16px; }
+  .rie-benvenuto .rb-bottoni{ flex-direction:column; }
+  .rie-benvenuto .rb-bottoni .btn{ width:100%; }
+}
+
 /* --- la scheda --- */
 .rie-card{
   background:var(--card);
