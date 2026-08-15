@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Come fare un preventivo edile: le 18 voci di un lavoro vero | TrovaImpresa</title>
+<meta name="description" content="Come si fa un preventivo edile che il cliente non discute dopo. Le 18 voci di una ristrutturazione vera da circa 34.000 €, una per una, e le voci che si dimenticano sempre.">
+<link rel="canonical" href="https://trovaimpresa.com/come-fare-un-preventivo-edile">
+<meta property="og:title" content="Come fare un preventivo edile: le 18 voci di un lavoro vero">
+<meta property="og:description" content="Non un elenco di regole: il preventivo vero di una ristrutturazione completa, voce per voce, con le cose che si dimenticano e le tre righe che evitano le discussioni.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://trovaimpresa.com/come-fare-un-preventivo-edile">
+<meta property="og:image" content="https://trovaimpresa.com/logo.png">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:760px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:44px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  caption{text-align:left;font-size:14.5px;color:var(--muted);margin-bottom:8px}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+  td.n{width:34px;color:var(--muted);font-weight:700}
+  .total-row{background:var(--primary-soft)!important;font-weight:700}
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"⚑";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .forget-list li:before{content:"✎";color:var(--accent-dark)}
+  .err-list li:before{content:"✕";color:#c0392b}
+  .ok-list li:before{content:"✔";color:#1e8e3e}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .esperienza .chi{font-size:14.5px;color:var(--muted);margin-top:8px}
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+  .clausola{background:#fff;border:1.5px dashed var(--primary);border-radius:12px;padding:14px 18px;margin:14px 0;font-size:16.5px;line-height:1.6}
+  .clausola b{display:block;color:var(--primary-dark);font-size:15px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"–"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-band .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px}
+  .cta-band .cta-dark:hover{background:var(--accent-dark)}
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .price-big{font-size:24px}
+    th,td{padding:10px}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+  @media (max-width: 700px){
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  }
+  .answer-cta{background:#fff7f3;border:1.5px solid #ffd9c8;border-radius:14px;
+    padding:18px 20px;margin:-6px 0 26px}
+  .answer-cta b{display:block;font-size:17px;color:#0a2a4d;margin-bottom:6px}
+  .answer-cta p{margin:0 0 14px;font-size:15.5px;line-height:1.6;color:#42546b}
+  .answer-cta a{display:block;text-align:center;background:#FF6B35;color:#fff;
+    text-decoration:none;font-weight:800;font-size:16.5px;padding:15px 18px;
+    border-radius:12px;box-shadow:0 4px 14px rgba(255,107,53,.26)}
+  .answer-cta a:hover{background:#e85f2c}
+  .answer-cta small{display:block;text-align:center;margin-top:10px;font-size:13.5px;color:#7a8a9c}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/blog.html">Guide e Costi</a>
+    <a href="/cerca-imprese.html" class="menu-btn">Trova un'impresa</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> › <a href="/blog.html">Guide</a> › Come fare un preventivo edile</nav>
+
+  <article>
+    <h1>Come fare un preventivo edile: le 18 voci di un lavoro vero</h1>
+    <p class="meta">Guida per le imprese edili · Aggiornato agosto 2026 · Lettura 8 min</p>
+
+    <div class="answer">
+      <strong>In breve:</strong> un preventivo edile che regge fino alla fine non si scrive per importi grossi, si scrive
+      <span class="price-big">per voci separate</span>
+      Una ristrutturazione completa di appartamento sta in <strong>circa 18 voci</strong>: tre di impianti, tre di ambienti finiti, sei di demolizioni e murature, quattro di finiture, due di cantiere. Qui sotto ci sono tutte, prese da un preventivo reale da <strong>circa 34.000 €</strong> più IVA, accettato dal cliente. Con accanto <strong>le voci che si dimenticano</strong> e le tre righe che evitano la discussione a lavori iniziati.
+    </div>
+    <div class="answer-cta">
+      <b>Hai un'impresa edile?</b>
+      <p>Su TrovaImpresa le imprese ricevono richieste di preventivo dai clienti della loro zona, e con il gestionale tengono insieme preventivi, computi, spese e scadenze. L'iscrizione è gratis.</p>
+      <a href="/registrazione-impresa.html">Iscrivi la tua impresa gratis →</a>
+      <small>Registrazione gratuita, nessuna carta richiesta.</small>
+    </div>
+
+    <p class="lead">La maggior parte delle guide sui preventivi edili spiega <em>cosa deve contenere</em> un preventivo: i dati dell'impresa, la descrizione dei lavori, l'IVA, la firma. Sono cose giuste e le sa già chiunque abbia fatto tre lavori. Il problema vero è un altro, e nasce sempre nello stesso punto: <strong>le voci che non hai scritto</strong>. Quelle si fanno lo stesso, perché il lavoro non sta in piedi senza, ma non le paga nessuno.</p>
+
+    <div class="esperienza">
+      💬 <strong>Dal cantiere:</strong> le discussioni con il cliente quasi mai nascono sul prezzo di una voce. Nascono su una cosa che lui dava per compresa e che nel preventivo non c'era scritta da nessuna parte — lo smaltimento delle macerie, il ripristino dopo le tracce, il montaggio dei sanitari che lui ha comprato. A quel punto ha ragione lui: se non è scritto che è escluso, è compreso.
+      <div class="chi">Dall'esperienza di 25 anni in cantiere del fondatore di TrovaImpresa.</div>
+    </div>
+
+    <h2>Le 18 voci di una ristrutturazione completa</h2>
+
+    <p>Questo è l'impianto di un preventivo reale: appartamento da ristrutturare per intero — salone ampliato, ingresso ridisegnato, cucina, due bagni, accesso alla terrazza. Lavoro preso, non un esercizio.</p>
+
+    <table>
+      <caption>Preventivo di ristrutturazione completa di appartamento. I prezzi sono indicati in fasce: sono ricavati da un preventivo reale del 2026 e adattati, perché il listino di un'impresa è un fatto suo. Servono a mostrare <strong>il peso relativo delle voci</strong>, non a essere copiati. Prezzi al netto di IVA.</caption>
+      <thead>
+        <tr><th>N.</th><th>Voce di lavorazione</th><th style="text-align:right">Fascia di prezzo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">1</td><td>Impianto elettrico — cablaggio del quadro e finiture</td><td class="num" style="text-align:right">1.100 – 1.550 €</td></tr>
+        <tr><td class="n">2</td><td>Impianto idrotermico — corpi scaldanti e caldaia</td><td class="num" style="text-align:right">5.100 – 6.900 €</td></tr>
+        <tr><td class="n">3</td><td>Demolizione della parete per l'ampliamento del salone</td><td class="num" style="text-align:right">700 – 1.050 €</td></tr>
+        <tr><td class="n">4</td><td>Bagno grande — spostamento parete, impianti completi e finiture</td><td class="num" style="text-align:right">5.600 – 7.600 €</td></tr>
+        <tr><td class="n">5</td><td>Demolizione e ricostruzione della parete in gasbeton</td><td class="num" style="text-align:right">850 – 1.250 €</td></tr>
+        <tr><td class="n">6</td><td>Divisorio di separazione dell'ingresso</td><td class="num" style="text-align:right">750 – 1.100 €</td></tr>
+        <tr><td class="n">7</td><td>Chiusura dei vani porta e apertura del nuovo vano verso la sala</td><td class="num" style="text-align:right">1.000 – 1.450 €</td></tr>
+        <tr><td class="n">8</td><td>Spostamento dell'impianto del gas verso caldaia e cucina</td><td class="num" style="text-align:right">1.250 – 1.700 €</td></tr>
+        <tr><td class="n">9</td><td>Demolizione e rifacimento della parete divisoria tra cucina e bagno</td><td class="num" style="text-align:right">1.350 – 1.900 €</td></tr>
+        <tr><td class="n">10</td><td>Cucina — impianti idrico ed elettrico e finiture</td><td class="num" style="text-align:right">2.800 – 3.800 €</td></tr>
+        <tr><td class="n">11</td><td>Scalini di accesso alla terrazza</td><td class="num" style="text-align:right">600 – 950 €</td></tr>
+        <tr><td class="n">12</td><td>Posa dei serramenti interni</td><td class="num" style="text-align:right">1.200 – 1.650 €</td></tr>
+        <tr><td class="n">13</td><td>Bagno piccolo — completamenti e finiture</td><td class="num" style="text-align:right">1.000 – 1.400 €</td></tr>
+        <tr><td class="n">14</td><td>Tinteggiatura generale e ripristini</td><td class="num" style="text-align:right">2.700 – 3.700 €</td></tr>
+        <tr><td class="n">15</td><td>Posa della pavimentazione in laminato</td><td class="num" style="text-align:right">1.550 – 2.200 €</td></tr>
+        <tr><td class="n">16</td><td>Posa del battiscopa</td><td class="num" style="text-align:right">500 – 700 €</td></tr>
+        <tr><td class="n">17</td><td>Smaltimento dei materiali di risulta</td><td class="num" style="text-align:right">750 – 1.050 €</td></tr>
+        <tr><td class="n">18</td><td>Allestimento e messa in sicurezza del cantiere</td><td class="num" style="text-align:right">500 – 750 €</td></tr>
+        <tr class="total-row"><td class="n"></td><td><strong>Totale lavori</strong> (IVA 10% esclusa)</td><td class="num" style="text-align:right">circa 34.000 €</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      ⚠️ <strong>L'IVA va scritta, non sottintesa.</strong> Su una ristrutturazione di questo tipo l'aliquota è normalmente il <strong>10%</strong>, e su 34.000 € fa <strong>3.400 €</strong>. Un cliente che legge «34.000» e poi si vede una fattura da 37.400 si sente preso in giro anche se hai ragione. Scrivi sempre imponibile, aliquota e totale, tutti e tre.
+    </div>
+
+    <h2>Come si distribuisce il peso</h2>
+
+    <p>Raggruppate, le 18 voci raccontano dove stanno davvero i soldi di una ristrutturazione. Serve saperlo per due motivi: per accorgersi se un preventivo è sbilanciato, e per capire dove si perde il margine se una voce è stimata male.</p>
+
+    <table>
+      <caption>Come si dividono le 18 voci per famiglia di lavorazione.</caption>
+      <thead>
+        <tr><th>Gruppo</th><th>Voci</th><th style="text-align:right">Peso</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Ambienti completi</strong> (due bagni e cucina)</td><td>4, 10, 13</td><td class="num" style="text-align:right">31%</td></tr>
+        <tr><td><strong>Impianti</strong> (elettrico, idrotermico, gas)</td><td>1, 2, 8</td><td class="num" style="text-align:right">25%</td></tr>
+        <tr><td><strong>Finiture</strong> (serramenti, tinta, pavimento, battiscopa)</td><td>12, 14, 15, 16</td><td class="num" style="text-align:right">20%</td></tr>
+        <tr><td><strong>Demolizioni e murature</strong></td><td>3, 5, 6, 7, 9, 11</td><td class="num" style="text-align:right">19%</td></tr>
+        <tr><td><strong>Cantiere</strong> (sicurezza e smaltimento)</td><td>17, 18</td><td class="num" style="text-align:right">5%</td></tr>
+      </tbody>
+    </table>
+
+    <p>Due cose da guardare in questa tabella. La prima: <strong>impianti e ambienti completi da soli fanno oltre la metà del lavoro</strong>. Sono anche le voci dove è più facile sbagliare la stima, perché dipendono da cosa si trova sotto l'intonaco. La seconda: <strong>il cantiere pesa il 5%</strong>, ed è la parte che quasi tutti tagliano per far scendere il totale. È il taglio sbagliato — è l'unica voce che non produce niente di visibile e senza la quale non si può neanche cominciare.</p>
+
+    <h2>Le voci che si dimenticano — e che paghi tu</h2>
+
+    <p>Queste non stanno nelle 18 perché in quel preventivo erano dentro le lavorazioni. Ma sono le voci che, quando mancano, si fanno gratis. Vale la pena scriverle, anche a zero, anche solo per dire che sono comprese.</p>
+
+    <ul class="checklist forget-list">
+      <li><strong>Il tiro in alto e il trasporto dei materiali.</strong> Terzo piano senza ascensore, sacchi di premiscelato e sanitari: sono giornate, non un dettaglio. Se il palazzo non ha l'ascensore, va scritto.</li>
+      <li><strong>Il ripristino dopo le tracce degli impianti.</strong> L'elettricista e l'idraulico aprono, qualcuno deve richiudere. Se la voce non c'è, chiude il muratore e nessuno gliel'ha pagata.</li>
+      <li><strong>La protezione di quello che resta.</strong> Pavimenti da coprire, mobili da spostare e rifasciare, infissi da proteggere. Su una ristrutturazione con la gente dentro è tanta roba.</li>
+      <li><strong>La pulizia finale.</strong> Non è «passare una scopa»: è togliere la polvere di demolizione da tutto. Su un appartamento intero sono due persone per una giornata piena.</li>
+      <li><strong>Gli allacci provvisori</strong> di acqua e corrente, e i consumi durante il cantiere. Piccola cifra, ma se non è detta la paga chi non se l'aspetta.</li>
+      <li><strong>Le assistenze murarie agli altri.</strong> Se il cliente porta il suo condizionatorista o il suo cucinista, qualcuno gli fa i fori e gli regge la scala. Va detto se è compreso o no.</li>
+      <li><strong>Il secondo trasporto in discarica.</strong> Le macerie non escono tutte insieme: escono con le demolizioni e poi di nuovo con le finiture. Un solo viaggio a preventivo vuol dire il secondo a carico tuo.</li>
+      <li><strong>I ponteggi interni e i trabattelli</strong> per i soffitti alti. Sembra scontato averli, ma il nolo si paga a settimana e le settimane si allungano.</li>
+    </ul>
+
+    <h2>Le tre righe che evitano la discussione dopo</h2>
+
+    <p>Un preventivo edile diventa contestabile quasi sempre per assenza, non per errore. Tre righe scritte in fondo tolgono di mezzo il 90% delle discussioni. Non servono parole difficili: servono parole chiare.</p>
+
+    <div class="clausola">
+      <b>1 · Cosa non è compreso</b>
+      «Sono esclusi dal presente preventivo: pratiche edilizie e oneri comunali, direzione lavori, smaltimento di materiali contenenti amianto, fornitura di sanitari, rubinetteria, pavimenti e rivestimenti, opere non descritte nelle voci sopra elencate.»
+    </div>
+
+    <div class="clausola">
+      <b>2 · Cosa succede se cambia qualcosa</b>
+      «Eventuali lavorazioni aggiuntive o modifiche richieste in corso d'opera saranno quantificate e approvate per iscritto prima della loro esecuzione. Non saranno eseguite lavorazioni extra senza approvazione scritta.»
+    </div>
+
+    <div class="clausola">
+      <b>3 · Fino a quando vale</b>
+      «Il presente preventivo ha validità 30 giorni dalla data di emissione. Oltre tale termine i prezzi saranno riverificati in base ai listini dei materiali in vigore.»
+    </div>
+
+    <p>La seconda è la più importante delle tre, ed è quella che manca più spesso. <strong>Le varianti concordate a voce sono il buco più grande di tutti</strong>: si fanno, si eseguono, e poi al saldo il cliente non ricorda di averle chieste. Con la riga scritta la richiesta extra diventa un foglio firmato prima di toccare il muro — e se il cliente non firma, quel lavoro non si fa.</p>
+
+    <div class="cta-band">
+      <h3>Tenere insieme 18 voci non si fa a memoria</h3>
+      <p>Con il gestionale di TrovaImpresa il preventivo nasce dal computo delle lavorazioni, le voci restano legate al lavoro, le spese e le ore si sommano da sole e le scadenze non si dimenticano. L'iscrizione dell'impresa è gratis.</p>
+      <a href="/registrazione-impresa.html" class="cta-dark">Iscrivi la tua impresa gratis →</a>
+    </div>
+
+    <h2>Gli errori che costano</h2>
+    <ul class="checklist err-list">
+      <li><strong>Una voce sola con scritto «ristrutturazione appartamento».</strong> Un importo unico non si può discutere per pezzi: o il cliente lo prende tutto o lo rifiuta tutto. E se a metà lavoro chiede di togliere qualcosa, non c'è niente da togliere.</li>
+      <li><strong>Copiare i prezzi da internet.</strong> I prezzi di un preventivo dipendono dalla tua zona, dai tuoi fornitori e da quanto costano le tue ore. Un prezzo preso da un altro è una cifra senza un costo dietro.</li>
+      <li><strong>Non mettere i tempi.</strong> Senza una durata prevista e senza cosa succede se si sfora, ogni ritardo diventa colpa dell'impresa — anche quello causato dal cliente che decide le piastrelle a lavori iniziati.</li>
+      <li><strong>Non chiedere acconti scaglionati.</strong> Su un lavoro da 34.000 € i materiali si comprano prima di incassare. Acconto alla firma e stati di avanzamento non sono sfiducia: sono come si tiene in piedi la cassa.</li>
+      <li><strong>Fare il preventivo senza sopralluogo.</strong> Su una ristrutturazione le sorprese stanno tutte sotto l'intonaco e sotto il pavimento. Un preventivo fatto sulle foto è una scommessa, e la perde l'impresa.</li>
+    </ul>
+
+    <div class="related">
+      Da leggere anche: <a href="/come-leggere-un-preventivo-edile.html">Come leggere un preventivo edile</a> — è la stessa cosa vista dall'altra parte, cioè quello che il tuo cliente controlla quando riceve il tuo preventivo. E <a href="/quanto-costa-un-muratore-al-giorno.html">quanto costa un muratore al giorno</a>, per la parte di manodopera.
+    </div>
+
+    <h2>Domande frequenti sul preventivo edile</h2>
+    <div class="faq">
+      <details open>
+        <summary>Cosa deve contenere un preventivo edile?</summary>
+        <p>Dati completi dell'impresa e del cliente, indirizzo del cantiere, <strong>le lavorazioni divise per voci separate</strong> con il relativo prezzo, imponibile e IVA indicati distintamente, tempi previsti, modalità di pagamento, cosa è escluso, come si gestiscono le varianti e la validità dell'offerta. Le voci separate sono la parte che conta: un importo unico non si può né discutere né modificare.</p>
+      </details>
+      <details>
+        <summary>Quante voci servono per una ristrutturazione completa?</summary>
+        <p>Per un appartamento intero, <strong>fra le 15 e le 25 voci</strong>. L'esempio di questa guida ne ha 18: tre di impianti, tre di ambienti finiti, sei di demolizioni e murature, quattro di finiture, due di cantiere. Meno di dieci vuol dire che qualcosa è stato accorpato, e quello che è accorpato non si riesce a discutere con il cliente.</p>
+      </details>
+      <details>
+        <summary>Quanto vale un preventivo edile e per quanto tempo?</summary>
+        <p>Un preventivo è una proposta: diventa vincolante quando il cliente lo accetta, e da quel momento vale come accordo. Per questo va scritta la <strong>validità</strong> — in genere 30 giorni. Senza quella riga, un cliente può tornare dopo otto mesi e pretendere gli stessi prezzi con i materiali nel frattempo aumentati.</p>
+      </details>
+      <details>
+        <summary>Come si gestiscono i lavori extra chiesti durante il cantiere?</summary>
+        <p>Con una riga nel preventivo che dice che <strong>le lavorazioni aggiuntive vanno quantificate e approvate per iscritto prima di eseguirle</strong>. È la clausola che evita più discussioni di tutte: le varianti concordate a voce si eseguono e poi, al saldo, il cliente non ricorda di averle chieste. Un foglio firmato prima di toccare il muro chiude la questione.</p>
+      </details>
+      <details>
+        <summary>Quale IVA si applica a un preventivo di ristrutturazione?</summary>
+        <p>Sugli interventi di manutenzione e ristrutturazione su immobili a uso abitativo l'aliquota è di norma il <strong>10%</strong>, con regole particolari per i cosiddetti beni significativi (caldaie, sanitari, infissi). Nel preventivo vanno sempre scritti imponibile, aliquota e totale separati. Per il caso specifico conviene verificare con il proprio commercialista o sul sito dell'Agenzia delle Entrate.</p>
+      </details>
+      <details>
+        <summary>Si può fare un preventivo edile senza sopralluogo?</summary>
+        <p>Si può, ma su una ristrutturazione è la strada più veloce per rimetterci. Quello che decide il costo — lo stato degli impianti, cosa c'è sotto il pavimento, com'è messo il massetto, se c'è l'ascensore — non si vede nelle foto. Se un preventivo va fatto a distanza, va scritto chiaramente che i prezzi sono soggetti a verifica dopo il sopralluogo.</p>
+      </details>
+    </div>
+
+    <div class="cta-band" style="background:var(--warn-bg);border-color:var(--warn-line)">
+      <h3>Cerchi lavori da preventivare?</h3>
+      <p>Su TrovaImpresa le imprese pubblicano i lavori da affidare in subappalto e le ricerche di personale. Le richieste dei clienti arrivano divise per città e per mestiere.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+        <a href="/subappalto.html" class="cta-dark">Bacheca subappalti →</a>
+        <a href="/offerte-lavoro.html" class="cta-dark">Pubblica un'offerta gratis →</a>
+      </div>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa — trova imprese edili e artigiani verificati nella tua zona. I prezzi indicati sono fasce orientative ricavate da un preventivo reale e adattate: servono a mostrare il peso delle voci, non a sostituire un preventivo fatto sul posto.</p>
+
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>·
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>·
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>·
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>·
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>·
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+</div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Cosa deve contenere un preventivo edile?","acceptedAnswer":{"@type":"Answer","text":"Dati completi dell'impresa e del cliente, indirizzo del cantiere, le lavorazioni divise per voci separate con il relativo prezzo, imponibile e IVA indicati distintamente, tempi previsti, modalità di pagamento, cosa è escluso, come si gestiscono le varianti e la validità dell'offerta. Le voci separate sono la parte che conta: un importo unico non si può né discutere né modificare."}},
+    {"@type":"Question","name":"Quante voci servono per una ristrutturazione completa?","acceptedAnswer":{"@type":"Answer","text":"Per un appartamento intero servono fra le 15 e le 25 voci. L'esempio di questa guida ne ha 18: tre di impianti, tre di ambienti finiti, sei di demolizioni e murature, quattro di finiture, due di cantiere. Meno di dieci voci vuol dire che qualcosa è stato accorpato, e quello che è accorpato non si riesce a discutere con il cliente."}},
+    {"@type":"Question","name":"Per quanto tempo vale un preventivo edile?","acceptedAnswer":{"@type":"Answer","text":"Un preventivo è una proposta e diventa vincolante quando il cliente lo accetta. Per questo va scritta la validità, in genere 30 giorni: senza quella riga un cliente può tornare dopo mesi e pretendere gli stessi prezzi con i materiali nel frattempo aumentati."}},
+    {"@type":"Question","name":"Come si gestiscono i lavori extra chiesti durante il cantiere?","acceptedAnswer":{"@type":"Answer","text":"Con una riga nel preventivo che stabilisce che le lavorazioni aggiuntive vanno quantificate e approvate per iscritto prima di eseguirle. Le varianti concordate a voce si eseguono e poi al saldo il cliente non ricorda di averle chieste: un foglio firmato prima di toccare il muro chiude la questione."}},
+    {"@type":"Question","name":"Quale IVA si applica a un preventivo di ristrutturazione?","acceptedAnswer":{"@type":"Answer","text":"Sugli interventi di manutenzione e ristrutturazione su immobili a uso abitativo l'aliquota è di norma il 10%, con regole particolari per i beni significativi come caldaie, sanitari e infissi. Nel preventivo vanno sempre scritti imponibile, aliquota e totale separati."}},
+    {"@type":"Question","name":"Si può fare un preventivo edile senza sopralluogo?","acceptedAnswer":{"@type":"Answer","text":"Si può, ma su una ristrutturazione è la strada più veloce per rimetterci: lo stato degli impianti, cosa c'è sotto il pavimento e com'è messo il massetto non si vedono nelle foto. Se il preventivo va fatto a distanza, va scritto che i prezzi sono soggetti a verifica dopo il sopralluogo."}}
+  ]
+}
+</script>
+
+</body>
+</html>
