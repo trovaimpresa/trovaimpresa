@@ -88,6 +88,39 @@
   .btn-fill{background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:bold;cursor:pointer;flex:1;min-width:140px;}
   .btn-fill[disabled],.btn-line[disabled]{opacity:.5;}
 
+  /* + RAPIDO
+     Tutto e' tarato per un dito con il guanto: nessun pulsante sotto i 56px
+     di altezza, la finestra sale dal basso (il pollice arriva li', non in
+     cima allo schermo) e non c'e' niente da scrivere se non vuoi. */
+  .rv-apri{width:100%;padding:18px;margin-bottom:14px;border:none;border-radius:16px;
+           background:var(--green);color:#fff;font:inherit;font-size:18px;font-weight:800;
+           box-shadow:0 6px 18px rgba(0,102,255,.28);cursor:pointer;}
+  .rv-apri:active{transform:translateY(1px);}
+  .rv-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:flex;align-items:flex-end;}
+  .rv-ov.hidden{display:none;}
+  .rv-box{background:var(--card);width:100%;max-height:88vh;overflow-y:auto;
+          border-radius:20px 20px 0 0;padding:14px 16px 22px;}
+  .rv-testa{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .rv-tit{flex:1;font-size:19px;font-weight:800;}
+  .rv-x,.rv-indietro{width:44px;height:44px;border:none;background:transparent;
+          font-size:28px;line-height:1;color:var(--muted);cursor:pointer;}
+  .rv-indietro.hidden{visibility:hidden;display:block;}
+  .rv-scelta{display:block;width:100%;min-height:64px;margin-bottom:10px;padding:14px 16px;
+          border:1.5px solid var(--line);border-radius:14px;background:var(--card);
+          font:inherit;font-size:17px;font-weight:700;text-align:left;color:var(--text);cursor:pointer;}
+  .rv-scelta small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:3px;}
+  .rv-scelta:active{border-color:var(--green);}
+  .rv-riga{display:flex;align-items:center;gap:12px;margin:14px 0;}
+  .rv-pm{width:64px;height:64px;flex:0 0 64px;border-radius:16px;border:1.5px solid var(--green);
+          background:var(--card);color:var(--green-d);font-size:30px;font-weight:800;line-height:1;cursor:pointer;}
+  .rv-num{flex:1;text-align:center;font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .rv-in{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:14px;
+          font:inherit;font-size:17px;box-sizing:border-box;margin-bottom:10px;}
+  .rv-ok{width:100%;min-height:58px;border:none;border-radius:14px;background:var(--green);
+          color:#fff;font:inherit;font-size:18px;font-weight:800;cursor:pointer;margin-top:6px;}
+  .rv-ok[disabled]{opacity:.5;}
+  .rv-nota{font-size:13px;color:var(--muted);line-height:1.5;margin-top:10px;}
+
   /* RAPPORTINO DI CANTIERE
      Si compila in cantiere, in piedi, spesso con i guanti: i pulsanti delle
      ore sono 52x52 px, cioe' sopra la misura minima perche' un dito li prenda
@@ -184,6 +217,9 @@
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
+    <!-- + RAPIDO — 15 agosto 2026. Tre tocchi: cosa, quale lavoro, conferma. -->
+    <button class="rv-apri hidden" id="btn-rapido">+ Rapido</button>
+
     <div class="day-title" id="day-title">Lavori di oggi</div>
     <div id="day-list"></div>
 
@@ -282,6 +318,18 @@
         <button class="btn-fill" id="btn-fatto">Segna come fatto</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- + RAPIDO: la finestra sale dal basso, cosi' i pulsanti stanno sotto il pollice -->
+<div class="rv-ov hidden" id="rv-ov">
+  <div class="rv-box">
+    <div class="rv-testa">
+      <button type="button" class="rv-indietro hidden" id="rv-indietro">‹</button>
+      <div class="rv-tit" id="rv-tit">Cosa vuoi segnare?</div>
+      <button type="button" class="rv-x" id="rv-x" aria-label="Chiudi">×</button>
+    </div>
+    <div class="rv-corpo" id="rv-corpo"></div>
   </div>
 </div>
 
@@ -431,6 +479,9 @@ function applicaPermessi(){
   /* foto e video: si vedono sempre quelle del capo, si AGGIUNGONO solo col permesso */
   _mostra("#btn-foto",  puo("foto"));
   _mostra("#btn-video", puo("foto"));
+  /* + Rapido: compare solo se c'e' almeno UNA cosa che questa persona puo'
+     segnare, e solo se vede i lavori (senza, non c'e' niente su cui segnarla) */
+  _mostra("#btn-rapido", vediLavori && (puo("rapportini")||puo("pagamenti")));
   /* le note: senza il permesso restano LEGGIBILI e bloccate, non sparite.
      Prima la casella veniva nascosta, e l'operaio non poteva piu' rileggere
      nemmeno quello che aveva scritto lui: restava un riquadro intitolato
@@ -910,6 +961,198 @@ $("#btn-carta-salva").onclick=async()=>{
   $("#carta-form").classList.add("hidden");$("#btn-carta-spesa").style.display="block";
   caricaCartaMia();
 };
+
+/* ===================================================================
+   + RAPIDO — 15 agosto 2026
+   Tre tocchi: cosa, quale lavoro, conferma. Niente AI, niente crediti,
+   e funziona anche con poco campo: sono tre scritture normali.
+   ⚠️ Le ore NON prendono una strada nuova: creano un rapportino con dentro
+   solo chi lo scrive. Cosi' resta un posto solo da cui passano le ore, e il
+   margine del lavoro le vede come tutte le altre.
+   =================================================================== */
+const RV={passo:0,tipo:null,lavoro:null,ore:8,testo:"",importo:""};
+const RV_TIPI=[
+  {k:"ore",       lab:"Ore",       sub:"Le tue ore su questo lavoro",              perm:"rapportini"},
+  {k:"materiale", lab:"Materiale", sub:"Cosa avete consumato (senza prezzi)",      perm:"rapportini"},
+  {k:"nota",      lab:"Nota",      sub:"Un appunto sulla giornata",                perm:"rapportini"},
+  {k:"spesa",     lab:"Spesa",     sub:"Soldi usciti per questo cantiere",         perm:"pagamenti"}
+];
+
+function rvChiudi(){ $("#rv-ov").classList.add("hidden"); RV.passo=0; }
+function rvApri(){
+  RV.passo=1; RV.tipo=null; RV.lavoro=null; RV.ore=8; RV.testo=""; RV.importo="";
+  $("#rv-ov").classList.remove("hidden");
+  rvDisegna();
+}
+/* i lavori piu' recenti, i finiti in fondo: in cantiere si segna quasi sempre
+   su quello di oggi o di ieri */
+function rvLavori(){
+  return (LAVORI||[]).slice()
+    .sort((a,b)=>{
+      const fa=(a.stato==="fatto")?1:0, fb=(b.stato==="fatto")?1:0;
+      if(fa!==fb)return fa-fb;
+      return String(b.data_prevista||"").localeCompare(String(a.data_prevista||""));
+    })
+    .slice(0,8);
+}
+function rvNomeLavoro(l){
+  const c=CLIENTI[l.cliente_id];
+  return (c&&c.nome) || (l.descrizione?l.descrizione.slice(0,40):"Lavoro senza nome");
+}
+function rvDisegna(){
+  const corpo=$("#rv-corpo"), tit=$("#rv-tit"), back=$("#rv-indietro");
+  back.classList.toggle("hidden", RV.passo<=1);
+
+  if(RV.passo===1){
+    tit.textContent="Cosa vuoi segnare?";
+    const usabili=RV_TIPI.filter(t=>puo(t.perm));
+    if(!usabili.length){
+      corpo.innerHTML='<div class="rv-nota">Il capo non ti ha dato nessun permesso per segnare le cose da qui. Servono «Rapportini» oppure «Pagamenti».</div>';
+      return;
+    }
+    corpo.innerHTML=usabili.map(t=>'<button type="button" class="rv-scelta" data-tipo="'+t.k+'">'+esc(t.lab)+'<small>'+esc(t.sub)+'</small></button>').join("");
+    return;
+  }
+
+  if(RV.passo===2){
+    tit.textContent="Su quale lavoro?";
+    const lv=rvLavori();
+    if(!lv.length){
+      corpo.innerHTML='<div class="rv-nota">Non hai nessun lavoro assegnato. Chiedi al capo di metterti su un cantiere.</div>';
+      return;
+    }
+    corpo.innerHTML=lv.map(l=>{
+      const dove=l.dove?" — "+l.dove:"";
+      return '<button type="button" class="rv-scelta" data-lav="'+esc(l.id)+'">'+esc(rvNomeLavoro(l))
+        +'<small>'+esc((l.data_prevista?dataIt(l.data_prevista):"senza data")+dove)+'</small></button>';
+    }).join("");
+    return;
+  }
+
+  /* passo 3: la conferma, diversa per ogni cosa */
+  const nome=RV.lavoro?rvNomeLavoro(RV.lavoro):"";
+  if(RV.tipo==="ore"){
+    tit.textContent="Quante ore?";
+    corpo.innerHTML='<div class="rv-nota">'+esc(nome)+' · oggi</div>'
+      +'<div class="rv-riga"><button type="button" class="rv-pm" data-d="-0.5" aria-label="Togli mezz\u2019ora">\u2212</button>'
+      +'<div class="rv-num" id="rv-ore">'+String(RV.ore).replace(".",",")+'</div>'
+      +'<button type="button" class="rv-pm" data-d="0.5" aria-label="Aggiungi mezz\u2019ora">+</button></div>'
+      +'<button type="button" class="rv-ok" id="rv-ok">Conferma</button>'
+      +'<div class="rv-nota">Sono le TUE ore. Per quelle di tutta la squadra c\u2019\u00e8 il rapportino, dentro il lavoro.</div>';
+    return;
+  }
+  if(RV.tipo==="materiale"||RV.tipo==="nota"){
+    const m=RV.tipo==="materiale";
+    tit.textContent=m?"Cosa avete usato?":"Cosa scrivi?";
+    corpo.innerHTML='<div class="rv-nota">'+esc(nome)+' \u00b7 oggi</div>'
+      +'<textarea class="rv-in" id="rv-testo" rows="3" placeholder="'+(m?"Es. 3 sacchi di premiscelato, 20 m di tubo":"Es. pioggia, fermi due ore")+'"></textarea>'
+      +'<button type="button" class="rv-ok" id="rv-ok">Conferma</button>'
+      +(m?'<div class="rv-nota">Scrivi le cose, non i prezzi: quelli stanno nelle spese, se no vengono contati due volte.</div>':'');
+    return;
+  }
+  if(RV.tipo==="spesa"){
+    tit.textContent="Quanto hai speso?";
+    corpo.innerHTML='<div class="rv-nota">'+esc(nome)+' \u00b7 oggi</div>'
+      +'<input class="rv-in" id="rv-imp" type="text" inputmode="decimal" placeholder="Importo (es. 24,50)">'
+      +'<input class="rv-in" id="rv-testo" type="text" placeholder="Per cosa? (es. viti e tasselli)">'
+      +'<button type="button" class="rv-ok" id="rv-ok">Conferma</button>'
+      +'<div class="rv-nota">Questi soldi entrano nel conto di questo cantiere. La carta aziendale \u00e8 un\u2019altra cosa e resta dov\u2019\u00e8.</div>';
+    return;
+  }
+}
+/* un ascolto solo sul contenitore: il contenuto viene rifatto a ogni passo */
+$("#rv-corpo").addEventListener("click",async e=>{
+  const t=e.target.closest("[data-tipo]");
+  if(t){ RV.tipo=t.dataset.tipo; RV.passo=2; rvDisegna(); return; }
+  const l=e.target.closest("[data-lav]");
+  if(l){ RV.lavoro=(LAVORI||[]).find(x=>String(x.id)===String(l.dataset.lav))||null; RV.passo=3; rvDisegna(); return; }
+  const pm=e.target.closest(".rv-pm");
+  if(pm){
+    let v=(+RV.ore||0)+(parseFloat(pm.dataset.d)||0);
+    if(v<0.5)v=0.5; if(v>24)v=24;
+    RV.ore=Math.round(v*2)/2;
+    const c=$("#rv-ore"); if(c)c.textContent=String(RV.ore).replace(".",",");
+    return;
+  }
+  if(e.target.closest("#rv-ok")) await rvSalva();
+});
+$("#btn-rapido").onclick=rvApri;
+$("#rv-x").onclick=rvChiudi;
+$("#rv-indietro").onclick=()=>{ RV.passo=Math.max(1,RV.passo-1); rvDisegna(); };
+$("#rv-ov").onclick=e=>{ if(e.target===$("#rv-ov"))rvChiudi(); };
+
+/* crea il rapportino e restituisce il suo id, oppure null. Stessa strada del
+   rapportino grande: .select("id") perche' un permesso che blocca NON da'
+   errore, torna riuscito a vuoto. */
+async function rvNuovoRapportino(campi){
+  const {data,error}=await sb.from("gest_rapportini").insert(Object.assign({
+    user_id:MIO.impresaId,
+    mestiere_id:(RV.lavoro&&RV.lavoro.mestiere_id)||null,
+    lavoro_id:RV.lavoro.id,
+    creato_da:MIO.operatoreId,
+    data:ymd(new Date())
+  },campi)).select("id");
+  if(error||!data||!data.length){
+    toast("Non salvato: "+((error&&error.message)||"il database non ha scritto niente"));
+    return null;
+  }
+  return data[0].id;
+}
+
+async function rvSalva(){
+  if(!RV.lavoro){toast("Scegli il lavoro");return;}
+  const b=$("#rv-ok"); if(b){b.disabled=true;b.textContent="Salvo\u2026";}
+  const rimetti=()=>{ if(b){b.disabled=false;b.textContent="Conferma";} };
+
+  if(RV.tipo==="ore"){
+    if(!chiedoPermesso("rapportini","di segnare le ore")){rimetti();return;}
+    const rid=await rvNuovoRapportino({});
+    if(!rid){rimetti();return;}
+    const {data,error}=await sb.from("gest_ore").insert({
+      user_id:MIO.impresaId, mestiere_id:(RV.lavoro.mestiere_id||null),
+      lavoro_id:RV.lavoro.id, operatore_id:MIO.operatoreId,
+      data:ymd(new Date()), ore:RV.ore, rapportino_id:rid
+    }).select("id");
+    if(error||!data||!data.length){
+      rimetti();
+      toast("Rapportino salvato, ma le ore NO: "+((error&&error.message)||"il database non ha scritto niente")+" \u2014 dillo al capo");
+      return;
+    }
+    rimetti(); rvChiudi(); toast(String(RV.ore).replace(".",",")+" ore segnate \u2714");
+    return;
+  }
+
+  if(RV.tipo==="materiale"||RV.tipo==="nota"){
+    if(!chiedoPermesso("rapportini","di scrivere il rapportino")){rimetti();return;}
+    const txt=(($("#rv-testo")||{}).value||"").trim();
+    if(!txt){toast("Scrivi qualcosa, poi conferma");rimetti();return;}
+    const rid=await rvNuovoRapportino(RV.tipo==="materiale"?{materiali:txt}:{note:txt});
+    if(!rid){rimetti();return;}
+    rimetti(); rvChiudi(); toast(RV.tipo==="materiale"?"Materiale segnato \u2714":"Nota segnata \u2714");
+    return;
+  }
+
+  if(RV.tipo==="spesa"){
+    if(!chiedoPermesso("pagamenti","di registrare le spese")){rimetti();return;}
+    const imp=_numIt(($("#rv-imp")||{}).value||"");
+    const txt=(($("#rv-testo")||{}).value||"").trim();
+    if(!(imp>0)){toast("Scrivi quanto hai speso, per esempio 24,50");rimetti();return;}
+    if(imp>1000000){toast("Importo troppo alto: controlla quello che hai scritto");rimetti();return;}
+    if(!txt){toast("Scrivi per cosa hai speso");rimetti();return;}
+    const {data,error}=await sb.from("gest_spese").insert({
+      user_id:MIO.impresaId, lavoro_id:RV.lavoro.id,
+      descrizione:txt, importo:imp, inserito_da:MIO.nome
+    }).select("id");
+    if(error||!data||!data.length){
+      rimetti();
+      toast("Non salvata: "+((error&&error.message)||"il database non ha scritto niente"));
+      return;
+    }
+    rimetti(); rvChiudi(); toast("Spesa segnata \u2714");
+    return;
+  }
+  rimetti();
+}
 
 /* ===================================================================
    RAPPORTINO DI CANTIERE — 15 agosto 2026
