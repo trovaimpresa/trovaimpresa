@@ -6781,6 +6781,9 @@ ${vecchi?`
           <button type="button" class="btn" data-action="ore-add">+ Aggiungi</button></div>
         <input id="or-nota" placeholder="Cosa hai fatto (facoltativo)" style="margin-top:6px;width:100%">
         <div class="margine-box" id="ora-box"></div></div>
+      <div class="field" id="rap-wrap" style="display:none"><label>Rapportini dal cantiere</label>
+        <div class="spese-list" id="rap-list"></div>
+        <div class="campo-aiuto">Li scrive chi sta in cantiere, dal telefono. Da qui si leggono e basta: per correggere le ore usa il registro qui sopra.</div></div>
       <div class="field"><label>Fattura</label>
         <div class="j-fatt-info">${
           (job.fattStato||"none")==="pagata" ? "\u2714 Fatturato e incassato"
@@ -9427,6 +9430,94 @@ ${vecchi?`
     const v=Math.round((+n||0)*100)/100;
     return String(v).replace(".",",")+" h";
   }
+
+  /* ============================================================
+     RAPPORTINI DAL CANTIERE — 15 agosto 2026
+     Il rapportino lo scrive chi sta in cantiere, dal telefono
+     (gestionale-operatore.html). Qui il titolare lo LEGGE: che giorno,
+     chi l'ha scritto, chi c'era e quante ore, cosa hanno usato,
+     com'e' andata.
+     ⚠️ Perche' e' stato fatto subito: da quando la schermata del
+     telefono e' online, "Cosa avete usato" e "Com'e' andata" finivano
+     nel database e non li leggeva NESSUNO. Una casella che chiede di
+     scrivere promette un lettore: senza questo riquadro la promessa
+     era falsa.
+     Qui si legge e basta. Le ore sbagliate si correggono nel registro
+     qui sopra, che c'e' da giorni. Il pulsante per eliminare un
+     rapportino NON c'e' apposta: gest_rapportini non sta nell'elenco
+     dentro js/cestino.js, quindi una cancellazione da qui sarebbe vera
+     e definitiva invece di finire nel Cestino.
+     ============================================================ */
+  async function renderRapportiniBlock(lavoroId){
+    const wrap=$("#rap-wrap"); if(!wrap||!sb||!sbUid)return;
+    const lista=$("#rap-list"); if(!lista)return;
+    wrap.style.display="block";
+    lista.innerHTML='<p class="fatt-empty">Leggo…</p>';
+
+    const [r1,r2]=await Promise.all([
+      sb.from("gest_rapportini").select("id,data,materiali,note,creato_da")
+        .eq("user_id",sbUid).eq("lavoro_id",lavoroId).order("data",{ascending:false}),
+      sb.from("gest_ore").select("ore,operatore_id,rapportino_id")
+        .eq("user_id",sbUid).eq("lavoro_id",lavoroId)
+    ]);
+
+    if(r1.error){
+      /* la tabella non c'e' ancora: lo dico e nomino il file, come fanno gli
+         altri riquadri. Mai lasciare un vuoto che sembra "non c'e' niente". */
+      lista.innerHTML='<p class="fatt-empty">Per leggere i rapportini serve l\'aggiornamento del database (sql/gest-rapportini.sql).</p>';
+      return;
+    }
+    const raps=r1.data||[];
+    /* se le ore non si leggono NON si finge che siano zero: un rapportino che
+       dice "0 h" quando le ore ci sono e' una bugia peggiore del non sapere */
+    const oreOk=!r2.error;
+    const ore=oreOk?(r2.data||[]):[];
+
+    if(!raps.length){
+      lista.innerHTML='<p class="fatt-empty">Nessun rapportino dal cantiere. Li scrive chi ha il permesso <b>Rapportini</b>, dal telefono, dentro il lavoro.</p>';
+      return;
+    }
+
+    const nomeDi=id=>{const d=(dipCache||[]).find(x=>String(x.id)===String(id));return d?d.nome:"";};
+    /* ore raggruppate per rapportino, e per persona dentro ognuno */
+    const perRap={}, perRapChi={};
+    ore.forEach(o=>{
+      const k=String(o.rapportino_id||"");
+      if(!k)return;                       /* le ore messe a mano dal pannello */
+      perRap[k]=(perRap[k]||0)+(+o.ore||0);
+      (perRapChi[k]=perRapChi[k]||[]).push({chi:o.operatore_id,ore:+o.ore||0});
+    });
+    const oreSciolte=ore.filter(o=>!o.rapportino_id).reduce((s,o)=>s+(+o.ore||0),0);
+    const totRap=Object.keys(perRap).reduce((s,k)=>s+perRap[k],0);
+
+    lista.innerHTML=raps.map(r=>{
+      const k=String(r.id);
+      const q=quando(r.data,{neutro:true});      /* colore = stato, come ovunque */
+      const chi=nomeDi(r.creato_da);
+      const dettaglio=(perRapChi[k]||[])
+        .sort((a,b)=>b.ore-a.ore)
+        .map(x=>{const n=nomeDi(x.chi); return (n||"chi non è più in squadra")+" "+_oreTesto(x.ore);})
+        .join(" · ");
+      const bits=[];
+      if(chi)        bits.push('<small class="sp-forn">Scritto da '+esc(chi)+'</small>');
+      if(dettaglio)  bits.push('<small class="sp-forn">'+esc(dettaglio)+'</small>');
+      if(r.materiali)bits.push('<small class="sp-forn">Usato: '+esc(r.materiali)+'</small>');
+      if(r.note)     bits.push('<small class="sp-forn">'+esc(r.note)+'</small>');
+      if(!bits.length)bits.push('<small class="sp-forn">Nessun dettaglio scritto.</small>');
+      const oreTxt=oreOk?_oreTesto(perRap[k]||0):"—";
+      return '<div class="spesa-row"><span><b class="'+q.classe+'">'+esc(q.testo)+'</b> · '
+        +esc(fdate(r.data))+bits.join("")+'</span><b>'+oreTxt+'</b></div>';
+    }).join("");
+
+    const coda=[];
+    coda.push(raps.length===1?"1 rapportino":raps.length+" rapportini");
+    if(oreOk)coda.push(_oreTesto(totRap)+" dal cantiere");
+    if(oreOk&&oreSciolte>0)coda.push(_oreTesto(oreSciolte)+" aggiunte da te qui sopra");
+    lista.insertAdjacentHTML("beforeend",'<div class="margine-box"><span>'+esc(coda.join(" · "))+'</span></div>');
+    if(!oreOk){
+      lista.insertAdjacentHTML("beforeend",'<p class="fatt-empty">Le ore di questi rapportini non riesco a leggerle: manca la colonna che li collega (sql/gest-rapportini.sql). I rapportini qui sopra sono giusti, le ore no.</p>');
+    }
+  }
   async function oreAdd(){
     if(!sbUid||!oreLavoroId)return;
     if(!oreTabellaOk){toast("Prima serve l'aggiornamento del database (sql/gest-ore-e-crediti.sql)");return;}
@@ -9443,6 +9534,7 @@ ${vecchi?`
     if(error){toast("Errore: "+error.message);return;}
     $("#or-ore").value="";$("#or-nota").value="";
     await renderOreBlock(oreLavoroId);
+    renderRapportiniBlock(oreLavoroId);   /* la riga «aggiunte da te» deve restare vera */
     await _oreSalvaTotale();
     toast("Ore aggiunte ✔");
   }
@@ -9451,6 +9543,7 @@ ${vecchi?`
     const {error}=await sb.from("gest_ore").delete().eq("id",id).eq("user_id",sbUid);
     if(error){toast("Errore: "+error.message);return;}
     await renderOreBlock(oreLavoroId);
+    renderRapportiniBlock(oreLavoroId);   /* la riga «aggiunte da te» deve restare vera */
     await _oreSalvaTotale();
     toast("Riga eliminata");
   }
@@ -14831,7 +14924,7 @@ ${vecchi?`
          filtro sull'utente, che c'e' in tutte le altre letture puntuali. */
       const{data}=await sb.from('gest_lavori').select('*').eq('id',id).eq('user_id',sbUid).maybeSingle();
       if(!data){toast("Questo lavoro non c'è più: forse è nel Cestino, o l'ha eliminato qualcun altro");return;}
-      jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);}return;}
+      jobForm({...data, dataPrevista:data.data_prevista, clienteId:data.cliente_id, assegnatoId:data.operatore_id, fattStato:data.fatt_stato, /* 9/8/2026: mancava la traduzione di questi due, e la casella 'Cosa è stato fatto' si apriva VUOTA: al primo Salva il consuntivo scritto la volta prima veniva cancellato. */ lavoroSvolto:data.lavoro_svolto, note:data.note});if(editing){editing.realId = data.id;renderSpeseBlock(data.id,+data.importo||0);renderMezziBlock(data.id);renderLavMedia();renderLavScadenze();renderOreBlock(data.id);renderRapportiniBlock(data.id);}return;}
     /* renderFotoBlocks va richiamato QUI: jobForm lo chiama alla fine, ma realId
        viene assegnato solo dopo, e senza quello non sa quale lavoro interrogare. */
     if(a==="save-job")return saveJob();
