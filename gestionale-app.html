@@ -84,6 +84,7 @@
       <button data-tab="assistenza" class="tab-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="cta-txt"><b>Assistenza diretta</b><small>Ti rispondo io, di persona</small></span><span class="tab-cnt" id="cnt-assistenza"></span></button>
       <div class="side-group">Lavoro</div>
       <button data-tab="riepilogo" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Riepilogo</span></button>
+      <button data-tab="dalsito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v10a2 2 0 0 1-2 2h-3l-3 3-3-3H6a2 2 0 0 1-2-2z"/><path d="M8 9h8"/></svg><span>Richieste dal sito</span><span class="tab-cnt" id="cnt-dalsito"></span></button>
       <button data-tab="lavori"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Lavori</span><span class="tab-cnt" id="cnt-lavori"></span></button>
       <button data-tab="preventivi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span>Preventivi</span><span class="tab-cnt" id="cnt-preventivi"></span></button>
       <button data-tab="fatture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg><span>Fatture</span></button>
@@ -266,6 +267,13 @@
       <div class="grid" id="forn-list"></div>
       <h3 id="fattf-tit" style="margin:24px 0 12px;font-size:19px;display:none">Fatture da pagare</h3>
       <div id="fattf-list"></div>
+    </section>
+
+    <section id="dalsito">
+      <div class="sec-head"><h2>Richieste dal sito</h2></div>
+      <div class="gal-intro">I clienti che ti scrivono dalla tua pagina su TrovaImpresa arrivano qui dentro. Apri la richiesta per vedere i suoi contatti, e con un clic gli fai il preventivo gia' compilato.</div>
+      <div class="viste" id="ds-viste"></div>
+      <div id="ds-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
     </section>
 
     <section id="richieste">
@@ -961,7 +969,7 @@
       /* 15 agosto 2026 (12) — i numerini partono da qui, non dall'apertura
          della sezione: devono salire mentre l'utente sta facendo tutt'altro.
          Senza await: se la rete e' lenta il gestionale non aspetta un pallino. */
-      if(sbUid){ try{ asstVedetta(); asstLeggi(false); contaRichiesteNuove(); }catch(e){} }
+      if(sbUid){ try{ asstVedetta(); asstLeggi(false); contaRichiesteNuove(); contaDalSito(); }catch(e){} }
     }
     sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();_authRefresh();});
     sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();_authRefresh();});
@@ -1218,7 +1226,7 @@
   }
   /* Deep link: gestionale-app.html#calendario / #scadenzario / #preventivi / #report ... */
   let _deepTab=(location.hash||"").replace("#","")||null;
-  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","computi","assistenza"].includes(_deepTab))_deepTab=null;
+  if(_deepTab&&!["riepilogo","agenda","calendario","lavori","preventivi","fatture","report","galleria","clienti","squadra","mezzi","scadenzario","mappa","fornitori","crediti","cestino","carte","attrezzature","richieste","dalsito","computi","assistenza"].includes(_deepTab))_deepTab=null;
   function _applyDeepTab(){
     if(!_deepTab)return;
     /* un link salvato tipo #mezzi non deve portare il professionista in una sezione nascosta */
@@ -1247,7 +1255,7 @@
     mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
     carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze, crediti:renderCrediti, cestino:renderCestino,
     report:renderReport, galleria:renderGalleria, mappa:renderMappa,
-    richieste:renderRichieste, fornitori:renderFornitori,
+    richieste:renderRichieste, dalsito:renderDalSito, fornitori:renderFornitori,
     assistenza:renderAssistenza
   };
   const _tabSporchi=new Set();
@@ -1259,7 +1267,7 @@
     _tabSporchi.delete(t);_tabSporchi.delete("clienti");_tabSporchi.delete("squadra");
     renderClienti();renderDip();
     if(t!=="clienti"&&t!=="squadra"){const fn=RENDER_TAB[t];if(fn)fn();}
-    renderContatori();
+    renderContatori();contaDalSito();
   }
   /* Dopo un salvataggio: ridisegna subito solo le sezioni che l'utente sta
      guardando; le altre si segnano "da rifare" per la prossima apertura. */
@@ -6328,6 +6336,287 @@ ${vecchi?`
     closeSheet();renderFornitori();rinfresca("riepilogo");toast(id?"Aggiornata ✔":"Fattura registrata ✔");
   }
 
+  /* ============================================================
+     RICHIESTE DAL SITO — 15 agosto 2026
+
+     Le richieste NON si copiano da nessuna parte: si leggono direttamente da
+     public.preventivi, che ha gia' la sua regola di sicurezza
+       preventivi_impresa_select -> EXISTS (imprese WHERE id=impresa_id AND user_id=auth.uid())
+     cioe' ogni impresa vede SOLO quelle arrivate a lei. Nessun filtro da
+     scrivere qui: se lo scrivessi a mano sarebbe una seconda copia della
+     regola, e le due copie prima o poi si scollano.
+
+     Lo stato sta in gest_dalsito. "nuova" NON si scrive: e' l'assenza di riga.
+
+     I contatti del cliente (email e telefono) NON sono leggibili dal
+     database: sono revocati per tutti. Si chiedono a contatto-preventivo.js,
+     esattamente come fa il pannello. Cosi' se un giorno torna una regola sui
+     piani, vale automaticamente anche qui.
+     ============================================================ */
+  const DS_STATI={
+    nuova:      {lab:"Nuova",            bar:"da_fare",  tono:"t-attesa", bg:"var(--attesa-bg)", fg:"var(--attesa)"},
+    vista:      {lab:"Vista",            bar:"in_corso", tono:"t-neutro", bg:"var(--info-bg)",   fg:"var(--info)"},
+    preventivo: {lab:"Preventivo fatto", bar:"fatto",    tono:"t-ok",     bg:"var(--ok-bg)",     fg:"var(--ok)"},
+    chiusa:     {lab:"Chiusa",           bar:"fatto",    tono:"t-neutro", bg:"var(--sfondo)",    fg:"var(--testo-2)"}
+  };
+  const DS_VISTE=[{k:"da_fare",lab:"Da fare"},{k:"nuove",lab:"Nuove"},{k:"chiuse",lab:"Chiuse"},{k:"tutte",lab:"Tutte"}];
+  let dsCache=[], dsFilter="da_fare";
+
+  const _dsData=r=>String(r.created_at||"").slice(0,10);
+  const _dsCosa=r=>r.categoria_lavoro||r.tipo_lavoro||"Richiesta di preventivo";
+  const _dsSt=r=>DS_STATI[r._stato]||DS_STATI.nuova;
+
+  async function dsCarica(){
+    if(!sb||!sbUid)return [];
+    const [r1,r2]=await Promise.all([
+      sb.from("preventivi")
+        .select("id,nome,cognome,citta,via,categoria_lavoro,tipo_lavoro,descrizione,data_preferita,urgenza,budget,foto,mq,piano,note_aggiuntive,risposta_at,created_at")
+        .order("created_at",{ascending:false}).limit(300),
+      sb.from("gest_dalsito").select("preventivo_id,stato,preventivo_creato_id").eq("user_id",sbUid)
+    ]);
+    if(r1.error){
+      toast("Non riesco a leggere le richieste dal sito: "+(r1.error.message||"il database non risponde"));
+      return [];
+    }
+    const m={};(r2.data||[]).forEach(s=>{m[String(s.preventivo_id)]=s;});
+    return (r1.data||[]).map(r=>{
+      const s=m[String(r.id)];
+      return Object.assign({},r,{_stato:(s&&s.stato)||"nuova",_prevId:(s&&s.preventivo_creato_id)||null});
+    });
+  }
+
+  /* Segna lo stato. Ogni scrittura verificata con .select("id"): senza,
+     una scrittura bloccata dalle regole e' identica a una riuscita. */
+  async function dsSegna(pid,stato,extra){
+    if(!sb||!sbUid)return false;
+    const riga=Object.assign({user_id:sbUid,preventivo_id:Number(pid),stato:stato,letta_il:new Date().toISOString()},extra||{});
+    const {data,error}=await sb.from("gest_dalsito")
+      .upsert(riga,{onConflict:"user_id,preventivo_id"}).select("id");
+    if(error||!data||!data.length){
+      toast("Non sono riuscito a salvare: "+((error&&error.message)||"nessuna riga scritta"));
+      return false;
+    }
+    return true;
+  }
+
+  function dsVoci(r){
+    const v=[];
+    if(r._stato!=="preventivo")v.push({lab:"🧾 Crea il preventivo",action:"ds-prev",data:{id:r.id}});
+    v.push({lab:"📇 Vedi i contatti",action:"ds-apri",data:{id:r.id}});
+    v.push({sep:true});
+    if(r._stato==="chiusa")v.push({lab:"↩ Riapri",action:"ds-riapri",data:{id:r.id}});
+    else v.push({lab:"✔ Segna chiusa",action:"ds-chiudi",data:{id:r.id}});
+    return v;
+  }
+
+  function dsCard(r){
+    const st=_dsSt(r), q=quando(_dsData(r),{neutro:true});
+    return schedaJob({
+      tono:st.tono,
+      titolo:esc(r.nome||"—"),
+      destra:`<span class="stato" style="background:${st.bg};color:${st.fg}">${st.lab}</span>`,
+      meta:[
+        "Arrivata "+q.testo,
+        esc(_dsCosa(r)),
+        r.citta?esc(r.citta):null,
+        r.urgenza?"Urgenza: "+esc(r.urgenza):null
+      ],
+      nota:r.descrizione?esc(r.descrizione):null,
+      azioni:dsVoci(r)
+    });
+  }
+
+  async function renderDalSito(){
+    const box=$("#ds-list");if(!box)return;
+    if(!sb||!sbUid){box.innerHTML="";return;}
+    dsCache=await dsCarica();
+    const aperte=dsCache.filter(r=>r._stato==="nuova"||r._stato==="vista");
+    const conta={
+      da_fare:aperte.length,
+      nuove:dsCache.filter(r=>r._stato==="nuova").length,
+      chiuse:dsCache.filter(r=>r._stato==="chiusa").length,
+      tutte:dsCache.length
+    };
+    let L=dsCache;
+    if(dsFilter==="da_fare")L=aperte;
+    else if(dsFilter==="nuove")L=dsCache.filter(r=>r._stato==="nuova");
+    else if(dsFilter==="chiuse")L=dsCache.filter(r=>r._stato==="chiusa");
+
+    renderTabella({
+      id:"ds", box:"#ds-list",
+      viste:"#ds-viste", visteDef:DS_VISTE, vista:dsFilter, conta:conta, azioneVista:"ds-filtro",
+      vuoto:tabVuoto(
+        dsCache.length?"Nessuna richiesta con questo filtro":"Ancora nessuna richiesta dal sito",
+        dsCache.length?"Prova a cambiare vista qui sopra."
+          :"Quando un cliente ti scrive dalla tua pagina su TrovaImpresa, la richiesta compare qui dentro: chi ha scritto, cosa gli serve e i suoi contatti. Da qui gli fai il preventivo con un clic.",
+        _SVGV+'<path d="M3 12h4l2 5 4-13 2 8h6"/></svg>',
+        null),
+      colonne:[{lab:"Arrivata",w:"18%"},{lab:"Chi ha scritto",w:"26%"},{lab:"Cosa chiede",w:"32%"},{lab:"Dove",w:"24%"}],
+      righe:L.map(r=>{
+        const st=_dsSt(r), q=quando(_dsData(r),{neutro:true});
+        return {
+          id:r.id,
+          click:{action:"ds-apri",data:{id:r.id}},
+          celle:[
+            {h:q.testo,cls:q.classe},
+            `<span class="lav-bar ${st.bar}" title="${st.lab}"></span><span class="c-nome">${esc(r.nome||"—")}</span>`,
+            esc(_dsCosa(r)),
+            esc(r.citta||"—")
+          ],
+          menu:dsVoci(r)
+        };
+      }),
+      totale:{testo:L.length+" "+(L.length===1?"richiesta":"richieste")},
+      cards:()=>L.map(dsCard).join("")
+    });
+    contaDalSito();
+  }
+
+  /* Il pallino sulla voce di menu: quante richieste non ancora aperte. */
+  async function contaDalSito(){
+    if(!sb||!sbUid){setCnt("#cnt-dalsito",0);return;}
+    try{
+      const L=dsCache.length?dsCache:await dsCarica();
+      const n=L.filter(r=>r._stato==="nuova").length;
+      setCnt("#cnt-dalsito",n,"attesa");
+    }catch(e){}
+  }
+
+  /* Apre la scheda della richiesta. Aprirla = averla vista. */
+  async function dsApri(pid){
+    const r=dsCache.find(x=>String(x.id)===String(pid));
+    if(!r){toast("Richiesta non trovata, riprova");return;}
+    const st=_dsSt(r), q=quando(_dsData(r),{neutro:true});
+    const riga=(et,v)=>v?`<div class="field"><label>${et}</label><div>${esc(String(v))}</div></div>`:"";
+    openSheetGrande("Richiesta dal sito — "+esc(r.nome||""),
+      `<div class="sh-cols"><div class="sh-col">
+        <div class="sh-b">
+        <div class="sh-tit">Chi ha scritto</div>
+        ${riga("Nome",[r.nome,r.cognome].filter(Boolean).join(" "))}
+        ${riga("Città",r.citta)}
+        ${riga("Indirizzo",r.via)}
+        <div class="field"><label>Contatti</label>
+          <div id="ds-contatti">
+            <button class="btn" type="button" data-action="ds-contatti" data-id="${esc(String(r.id))}">Mostra email e telefono</button>
+          </div></div>
+        </div>
+        <div class="sh-b">
+        <div class="sh-tit">Quando</div>
+        ${riga("Arrivata",q.testo)}
+        ${riga("Stato",st.lab)}
+        ${r.risposta_at?riga("Già risposto dal sito","sì"):""}
+        </div>
+        </div><div class="sh-col">
+        <div class="sh-b">
+        <div class="sh-tit">Cosa chiede</div>
+        ${riga("Lavoro",_dsCosa(r))}
+        ${riga("Descrizione",r.descrizione)}
+        ${riga("Quando gli servirebbe",r.data_preferita)}
+        ${riga("Urgenza",r.urgenza)}
+        ${riga("Budget",r.budget)}
+        ${riga("Metri quadri",r.mq)}
+        ${riga("Piano",r.piano)}
+        ${riga("Altro",r.note_aggiuntive)}
+        ${r.foto?`<div class="field"><label>Foto</label><a href="${esc(r.foto)}" target="_blank" rel="noopener">Apri la foto</a></div>`:""}
+        </div>
+        </div></div>`,
+      `<button class="btn b-cancel" data-action="close">Chiudi</button>
+       <button class="btn-primary b-save" data-action="ds-prev" data-id="${esc(String(r.id))}">Crea il preventivo</button>`);
+    if(r._stato==="nuova"){
+      if(await dsSegna(r.id,"vista")){r._stato="vista";contaDalSito();}
+    }
+  }
+
+  /* I contatti non stanno nel database: li da' solo la function, e solo a
+     chi ha quella richiesta indirizzata a se'. */
+  async function dsContatti(pid){
+    const box=$("#ds-contatti");if(!box)return;
+    box.innerHTML="Un attimo…";
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(!session)throw new Error("sessione scaduta, rientra");
+      const res=await fetch("/.netlify/functions/contatto-preventivo",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+        body:JSON.stringify({preventivo_id:Number(pid)})
+      });
+      if(!res.ok)throw new Error(await res.text());
+      const c=await res.json();
+      const tel=(c.telefono||"").replace(/[\s\-+]/g,"").replace(/^39/,"");
+      box.innerHTML=
+        (c.email?`<div><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>`:"")
+        +(c.telefono?`<div><a href="tel:${esc(c.telefono)}">${esc(c.telefono)}</a>`
+          +(tel?` · <a href="https://wa.me/39${esc(tel)}" target="_blank" rel="noopener">WhatsApp</a>`:"")+`</div>`:"")
+        +((!c.email&&!c.telefono)?"Nessun recapito nella richiesta":"");
+    }catch(e){
+      box.innerHTML='<span style="color:var(--err)">Non riesco a mostrarli: '+esc(e.message||"riprova")+"</span>";
+    }
+  }
+
+  /* Il pulsante che porta il cliente dentro il gestionale.
+     Prima cerca se il cliente c'e' gia' (stesso telefono, non eliminato):
+     senza il controllo, ogni richiesta creerebbe un doppione in rubrica. */
+  async function dsCreaPreventivo(pid){
+    const r=dsCache.find(x=>String(x.id)===String(pid));
+    if(!r){toast("Richiesta non trovata, riprova");return;}
+    const mid=curMestiere();
+    if(!mid){toast("Apri prima un reparto");return;}
+    let contatti={email:"",telefono:""};
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(session){
+        const res=await fetch("/.netlify/functions/contatto-preventivo",{
+          method:"POST",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+          body:JSON.stringify({preventivo_id:Number(r.id)})
+        });
+        if(res.ok)contatti=await res.json();
+      }
+    }catch(e){}
+
+    const nomeCli=[r.nome,r.cognome].filter(Boolean).join(" ").trim()||"Cliente dal sito";
+    let cliId=null;
+    const telSec=String(contatti.telefono||"").replace(/\D/g,"");
+    if(telSec){
+      const {data:gia}=await sb.from("gest_clienti")
+        .select("id,telefono").eq("user_id",sbUid).eq("mestiere_id",mid).is("eliminato_il",null);
+      const trovato=(gia||[]).find(c=>String(c.telefono||"").replace(/\D/g,"")===telSec);
+      if(trovato)cliId=trovato.id;
+    }
+    if(!cliId){
+      const {data:nuovo,error:eC}=await sb.from("gest_clienti").insert({
+        user_id:sbUid, mestiere_id:mid, nome:nomeCli, tipo:"privato",
+        email:contatti.email||null, telefono:contatti.telefono||null,
+        citta:r.citta||null, indirizzo:r.via||null
+      }).select("id");
+      if(eC||!nuovo||!nuovo.length){
+        toast("Non sono riuscito a creare il cliente: "+((eC&&eC.message)||"nessuna riga scritta"));
+        return;
+      }
+      cliId=nuovo[0].id;
+      toast("Cliente aggiunto in rubrica ✔");
+    }
+
+    closeSheet();
+    const desc=[_dsCosa(r),r.descrizione].filter(Boolean).join(" — ");
+    await prevForm(null,{
+      cliente_id:cliId,
+      titolo:_dsCosa(r),
+      note:"Richiesta arrivata da TrovaImpresa il "+fdate(_dsData(r))+".\n"+(desc||"")
+    });
+    if(await dsSegna(r.id,"preventivo")){r._stato="preventivo";}
+    rinfresca("dalsito","clienti");
+  }
+
+  async function dsChiudi(pid,riapri){
+    if(await dsSegna(pid,riapri?"vista":"chiusa")){
+      const r=dsCache.find(x=>String(x.id)===String(pid));
+      if(r)r._stato=riapri?"vista":"chiusa";
+      toast(riapri?"Riaperta":"Chiusa ✔");
+      rinfresca("dalsito");
+    }
+  }
+
   async function renderRichieste(){
     const lista=$("#rq-lista");if(!lista)return;
     _rqSegnaViste();          /* apri la sezione = hai visto le risposte */
@@ -10279,8 +10568,10 @@ ${vecchi?`
     return {iva_perc: sel.value===""?null:(+sel.value||0)};
   }
 
-  async function prevForm(p){
+  async function prevForm(p,preset){
     const isNew=!p;p=p||{};
+    /* precompilato: stessa idea di fattForm(f,preset). Vale solo sui nuovi. */
+    if(isNew&&preset)p=Object.assign({},preset);
     let cl=[],righe=[];
     if(sb&&sbUid){
       const {data}=await sb.from("gest_clienti").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",curMestiere()).order("nome");cl=data||[];
@@ -15263,6 +15554,12 @@ ${vecchi?`
     if(a==="comp-mis-annulla")return compMisAnnulla();
     if(a==="comp-mis-del")return compMisDel(id);
     if(a==="new-prev")return prevForm(null);
+    if(a==="ds-filtro"){dsFilter=t.dataset.v||"da_fare";renderDalSito();return;}
+    if(a==="ds-apri")return dsApri(id);
+    if(a==="ds-contatti")return dsContatti(id);
+    if(a==="ds-prev")return dsCreaPreventivo(id);
+    if(a==="ds-chiudi")return dsChiudi(id,false);
+    if(a==="ds-riapri")return dsChiudi(id,true);
     if(a==="edit-prev")return prevForm(prevCache.find(p=>p.id===id));
     /* dal Riepilogo: prevCache può essere ancora vuota (scheda Preventivi mai aperta),
        quindi il preventivo si prende dalla lista già caricata per il blocco. */
@@ -15744,7 +16041,7 @@ ${vecchi?`
          ridisegnano sempre: lavori/agenda cambiano forma con la larghezza
          dello schermo, mappa e richieste si disegnano solo quando le apri. */
       const tb=b.dataset.tab;
-      const SEMPRE=["lavori","agenda","mappa","richieste","mezzi","attrezzature","assistenza"];
+      const SEMPRE=["lavori","agenda","mappa","richieste","dalsito","mezzi","attrezzature","assistenza"];
       if(_tabSporchi.has(tb)||SEMPRE.includes(tb)){
         _tabSporchi.delete(tb);
         const fn=RENDER_TAB[tb];if(fn)fn();
