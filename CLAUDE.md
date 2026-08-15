@@ -6700,3 +6700,152 @@ lui.**
 4. La guida blog **«DURC scaduto»**
 5. I due `.select('id')` mancanti, le prove Node su `harness.py`, le 9 prove
    «da capire» del 14 agosto
+
+---
+
+## DOVE SIAMO RIMASTI (15 agosto, notte — quarta tornata)
+
+Due lavori: **il blog** e **il collegamento sito → gestionale**. Tutti e due
+online. In mezzo è nata una skill che cambia il modo di parlargli.
+
+### ⛔ REGOLA NUOVA: SCRIVI CORTO (skill `scrivi-corto`)
+
+Alessio è **dislessico**: legge lento e con fatica. A metà serata ha scritto:
+
+> «mi serve che scrivi molto di meno io cosi non capisco niente non riesco a
+> leggere tutto, scrivi solo l'essenziale»
+
+Erano messaggi pieni di tabelle, titoli e ragionamenti **giusti** — e
+illeggibili. **Un consiglio che non si riesce a leggere vale zero.**
+
+La regola è nella skill `scrivi-corto`, che lui ha installato: **massimo 10
+righe per messaggio, una domanda per volta**, i dettagli nel file e non in
+chat. Vale su qualunque argomento. Leggerla prima di rispondergli.
+
+### Lavoro 1 — Il blog
+
+Prima si sono guardati i numeri veri di Search Console (MCP Supermetrics,
+ds_id `GW`), non l'intuito. **Scoperta grossa: il sito sta decollando adesso.**
+
+| Mese | Impressioni | Clic | Posizione |
+|---|---|---|---|
+| Giugno | 137 | 18 | 17,9 |
+| Luglio | 1.055 | 50 | 22,6 |
+| **Agosto (14 giorni)** | **7.323** | **68** | **10,6** |
+
+L'85% lo fanno **6 guide**: impianto idraulico, infissi, muratore al giorno,
+posare il pavimento, cappotto, quanto guadagna un muratore. Tre di queste
+erano a **zero** fino a luglio: ci mettono **4-8 settimane** a partire.
+
+**Pubblicata `quanto-costa-un-idraulico.html`.** Non è un doppione di
+`quanto-costa-rifare-impianto-idraulico`: quella parla di **rifare
+l'impianto**, questa di **chiamare l'idraulico**. Il taglio l'ha trovato lui:
+*«non fanno mai a l'ora, fanno a riparazione»*. Da lì la guida si è spaccata in
+due mercati che **nessun concorrente separa** — urgenza (100-140 €) e
+programmato (70-95 €) — e questo spiega anche perché i siti di prezzi si
+contraddicono tutti: fanno la media di due cose diverse.
+
+Prezzi ricostruiti dal **CCNL Metalmeccanica Artigianato, 3° livello: 1.758
+€/mese dal 1° marzo 2026**, non copiati. Fonti scritte in fondo alla pagina.
+
+Accorciati i title di `quanto-costa-un-muratore-al-giorno` (72 → 52 caratteri)
+e `quanto-guadagna-un-muratore` (78 → 55), aggiungendo il **prezzo nel
+titolo**: erano gli unici due senza. I «25 anni di cantiere» sono usciti dalle
+**meta description** (scelta sua: «riscrivila più neutra» → *«tariffe vere di
+cantiere, non medie copiate»*). **Il corpo delle due pagine parla ancora di
+lui in prima persona: NON toccato, non l'ha chiesto.**
+
+**Detto no** a: guida «cambio caldaia» (doppione di
+`quanto-costa-sostituire-la-caldaia`, e tutto il gruppo caldaia fa **10
+impressioni in 3 mesi**), «DURC scaduto» (**8 impressioni**, e chi la cerca è
+un'impresa con un guaio burocratico, non un cliente), pitture e cartongesso
+(**1 impressione in due**).
+
+⚠️ **Errore da non rifare**: gli è stato detto che a posizione 10 il CTR
+normale è 2,5%. È un metro **pre-AI-Overview**: sulle ricerche «quanto costa»
+oggi il normale è vicino all'**1%**. Il guadagno promesso era gonfiato.
+
+### Lavoro 2 — Le richieste dal sito entrano nel gestionale
+
+**La scoperta che ha reso tutto facile: marketplace e gestionale sono lo
+STESSO account.**
+
+```
+auth.users.id
+  ├─→ imprese.user_id      (scheda marketplace)
+  └─→ gest_*.user_id       (gestionale)
+preventivi.impresa_id → imprese.id → imprese.user_id
+```
+
+Quindi **non si copia e non si sincronizza niente**: il gestionale legge
+`preventivi` direttamente, e la policy che c'è già
+`preventivi_impresa_select` fa il resto.
+
+**Nuova sezione `dalsito`, etichetta «Richieste dal sito».**
+⚠️ **`richieste` era già occupato** da «Chiedi una funzione»: usare lo stesso
+id avrebbe rotto tutte e due.
+
+- `sql/gest-dalsito.sql` — tabella `gest_dalsito` (stato) + `gest_dalsito_avvisi`
+  (registro email). **`nuova` non si scrive: è l'assenza di riga.**
+- **Nessuna colonna aggiunta a `preventivi`**: era la trappola del 6 agosto
+  (GRANT + `preventivi_safe` da rifare, pannello in 403).
+- I contatti passano da `contatto-preventivo.js`, **mai letti dal database**.
+- `prevForm(p)` ora accetta `prevForm(p,preset)`, come `fattForm(f,preset)`.
+- `netlify/functions/promemoria-dalsito.js` — email delle 24 ore, cron
+  `20 6 * * *`.
+
+### Cose trovate guardando lo schema vero (query su `pg_policies`)
+
+1. **`preventivi.stato` non lo usa nessuno.** Il pannello scrive `risposta`,
+   `prezzo_min`, `prezzo_max`, `risposta_at` — **mai `stato`**, che resta
+   `in_attesa` per sempre. Colonna morta ma pubblica: non toccarla.
+2. ⛔ **Sull'insert pubblico di `preventivi` non si deve MAI aggiungere
+   `.select()`.** Provato su Postgres vero: `INSERT ... RETURNING` viene
+   rifiutato dalla RLS, perché `anon` non può rileggere la riga appena
+   scritta. Oggi `profilo-impresa.html` fa `.insert()` senza `.select()` ed è
+   per questo che funziona. Aggiungerlo romperebbe **tutte** le richieste.
+3. **`gest_clienti` ha il GRANT SELECT ad `anon`** su nome, email, telefono,
+   piva, cod_fiscale. Sembrava grave: **provato, `set role anon` → 0 righe**,
+   la RLS regge. Il permesso però non dovrebbe esserci.
+4. **Policy doppie**: due SELECT identiche su `preventivi`, tre coppie su
+   `imprese`. Innocue, ma confondono.
+5. Il pannello fa `update` su `preventivi` **senza `.select('id')`**.
+6. **Non c'è più nessuna regola sui contatti oscurati.** Il pay-per-lead è
+   stato tolto a luglio: `contatto-preventivo.js` legge `imprese.piano` e
+   **non lo usa**. Alessio credeva ci fosse ancora.
+
+### Il collaudo (14 scenari su PostgreSQL 16 vero)
+
+Schema ricostruito con le **policy copiate da Supabase**, non a memoria.
+Impresa A vede 2 richieste, B ne vede 1, B non vede quelle di A, chi non ha
+fatto login vede 0, `email`/`telefono` danno *permission denied*, B non può
+segnarsi la richiesta di A né cancellarne lo stato, stato inventato rifiutato,
+doppione rifiutato, e **il cliente anonimo può ancora mandare la richiesta**.
+
+### ⚠️ Difetti miei, trovati DOPO averglieli mandati
+
+1. **«gia' compilato»** invece di «già» nella sezione nuova — proprio la regola
+   sugli accenti. Corretto.
+2. **La richiesta col preventivo fatto spariva.** Lo stato `preventivo` non
+   stava in nessuna vista tranne «Tutte». La vista «Chiuse» è diventata
+   **«Fatte»** (preventivo + chiusa). **Controllare sempre che ogni stato stia
+   in almeno una vista.**
+
+### Cosa resta aperto, in ordine
+
+1. **L'email delle 24 ore non è mai stata vista partire.** Il file è online e
+   provato a tavolino (singolare/plurale, escape, niente contatti dentro), ma
+   serve una richiesta vera lasciata lì un giorno.
+2. **I pulsanti sulle schede.** Parole sue: *«fuori ci deve essere solo apri e
+   poi dentro i vari bottoni elimina salva invia pdf»*. Vale per **tutto il
+   gestionale**, non solo per la sezione nuova — Preventivi, Mezzi, Scadenze
+   fanno tutte così. Una sezione per volta.
+3. **«Modifica» deve diventare «Apri».** *«chi cazzo preme modifica per
+   entrare, uno preme entra»*. Ha ragione: «Modifica» è quello che fai dopo.
+4. I suoi due prezzi da idraulico (rubinetto 150 €, lavandino 100 € — se erano
+   in urgenza i conti tornano al 2% e al 9%): **ha detto di lasciar perdere,
+   non riproporli.**
+5. Fra 3-4 settimane: guardare su Search Console se la guida dell'idraulico ha
+   attecchito e se i titoli nuovi del muratore hanno alzato i clic.
+6. ⚠️ Le richieste dalle pagine `cerca-*` mandano **telefono ed email in chiaro
+   via email a 5 imprese**, senza nessun controllo. Segnalato, non toccato.
