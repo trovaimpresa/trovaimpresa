@@ -6359,7 +6359,9 @@ ${vecchi?`
     preventivo: {lab:"Preventivo fatto", bar:"fatto",    tono:"t-ok",     bg:"var(--ok-bg)",     fg:"var(--ok)"},
     chiusa:     {lab:"Chiusa",           bar:"fatto",    tono:"t-neutro", bg:"var(--sfondo)",    fg:"var(--testo-2)"}
   };
-  const DS_VISTE=[{k:"da_fare",lab:"Da fare"},{k:"nuove",lab:"Nuove"},{k:"chiuse",lab:"Chiuse"},{k:"tutte",lab:"Tutte"}];
+  /* Le viste devono coprire TUTTI gli stati: una richiesta con il preventivo
+     gia' fatto finiva solo in "Tutte" e sembrava sparita. */
+  const DS_VISTE=[{k:"da_fare",lab:"Da fare"},{k:"nuove",lab:"Nuove"},{k:"fatte",lab:"Fatte"},{k:"tutte",lab:"Tutte"}];
   let dsCache=[], dsFilter="da_fare";
 
   const _dsData=r=>String(r.created_at||"").slice(0,10);
@@ -6434,13 +6436,13 @@ ${vecchi?`
     const conta={
       da_fare:aperte.length,
       nuove:dsCache.filter(r=>r._stato==="nuova").length,
-      chiuse:dsCache.filter(r=>r._stato==="chiusa").length,
+      fatte:dsCache.filter(r=>r._stato==="preventivo"||r._stato==="chiusa").length,
       tutte:dsCache.length
     };
     let L=dsCache;
     if(dsFilter==="da_fare")L=aperte;
     else if(dsFilter==="nuove")L=dsCache.filter(r=>r._stato==="nuova");
-    else if(dsFilter==="chiuse")L=dsCache.filter(r=>r._stato==="chiusa");
+    else if(dsFilter==="fatte")L=dsCache.filter(r=>r._stato==="preventivo"||r._stato==="chiusa");
 
     renderTabella({
       id:"ds", box:"#ds-list",
