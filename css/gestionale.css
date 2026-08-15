@@ -257,6 +257,14 @@
   .spesa-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;font-size:13.5px}
   .spesa-row b{margin-left:auto;white-space:nowrap}
   .spesa-row .sdel{border:none;background:none;color:var(--danger);font-size:15px;cursor:pointer}
+  /* 15 agosto 2026 — IL «BUTTA VIA» DEL RAPPORTINO.
+     Dentro una .spesa-row il pulsante non ha una misura sua e si schiaccia:
+     sul telefono restava largo 12 px, cioe' impossibile da prendere col dito.
+     Qui gliela diamo, e solo dentro l'elenco dei rapportini: il registro
+     delle ore qui sopra non viene toccato. */
+  #rap-list .rdel{flex:0 0 auto;min-width:44px;height:44px;border:1px solid var(--bordo-forte);
+    background:var(--card);color:var(--danger);border-radius:10px;font-size:20px;line-height:1;cursor:pointer}
+  #rap-list .rdel:hover{background:var(--err-bg,#fdecea)}
   .spesa-add{display:grid;grid-template-columns:1fr 100px auto;gap:6px;margin-top:8px}
   .spesa-add input{font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
   .spesa-add button{padding:0 14px}

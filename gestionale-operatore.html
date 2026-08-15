@@ -153,6 +153,19 @@
   #btn-rap-salva{width:100%;margin-top:16px;padding:16px;font-size:16px;}
   .rap-tot{font-size:15px;font-weight:700;color:var(--green-d);margin-top:12px;}
 
+  /* I RAPPORTINI GIA' SCRITTI — 15 agosto 2026
+     Il "butta via" e' grande come i piu' e i meno (52 px): stesso dito, stessi
+     guanti. E' rosso perche' e' l'unico pulsante di questo riquadro che leva
+     qualcosa. */
+  .rap-vecchi{margin-top:20px;border-top:1px solid var(--line);padding-top:14px;}
+  .rap-v-riga{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);}
+  .rap-v-riga:last-child{border-bottom:none;}
+  .rap-v-testo{flex:1;min-width:0;font-size:15px;line-height:1.45;overflow-wrap:anywhere;}
+  .rap-v-ore{min-width:64px;text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .rap-v-del{width:52px;height:52px;flex:0 0 52px;border-radius:14px;border:1.5px solid #d9a3a3;
+             background:var(--card);color:#b3261e;font-size:24px;font-weight:800;line-height:1;cursor:pointer;}
+  .rap-v-del[disabled]{opacity:.35;}
+
   /* TOAST */
   #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#17241d;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50;}
   #toast.on{opacity:1;}
@@ -297,6 +310,14 @@
       <textarea id="rap-note" placeholder="Intoppi, chi è passato, cosa serve domani…"></textarea>
 
       <button class="btn-fill" id="btn-rap-salva">Salva il rapportino</button>
+
+      <!-- I rapportini che ha gia' scritto LUI su questo lavoro: serve per
+           accorgersi di averne salvato due uguali e per buttare via quello
+           sbagliato. Quelli dei colleghi non compaiono: non li puo' toccare. -->
+      <div class="rap-vecchi" id="rap-vecchi" style="display:none">
+        <div class="label">Quelli che hai gi&agrave; scritto</div>
+        <div id="rap-vecchi-list"></div>
+      </div>
     </div>
 
     <div class="panel">
@@ -1545,7 +1566,124 @@ async function renderRapportino(){
       +'<button type="button" class="rap-pm" data-d="0.5" aria-label="Aggiungi mezz’ora a '+esc(p.nome||"")+'">+</button>'
       +'</div>';
   }).join("")+'<div class="rap-tot" id="rap-tot"></div>';
+
+  renderMieiRapportini();
 }
+
+/* ============================================================
+   I RAPPORTINI GIA' SCRITTI, E COME SI BUTTANO VIA — 15 agosto 2026
+
+   Perche' serve qui e non solo nel pannello del capo: chi sbaglia il
+   rapportino e' chi lo scrive, e se ne accorge sul momento (giorno sbagliato,
+   salvato due volte, lavoro sbagliato). Aspettare che se ne accorga il
+   titolare vuol dire tenersi in casa per giorni delle ore doppie che gonfiano
+   la manodopera di quel cantiere.
+
+   ⚠️ Si butta via con gest_rapportino_cestina, non con .delete():
+   le ore di gest_ore il collaboratore NON le puo' toccare (e' giusto cosi',
+   sono le paghe), quindi una cancellazione da qui lascerebbe il rapportino
+   nel Cestino e le ore vive. La funzione del database le mette via tutte e
+   due nello stesso istante.
+   Si vedono SOLO i suoi: quelli dei colleghi non li puo' toccare, e un
+   pulsante che non funziona e' peggio di un pulsante che non c'e'.
+   ============================================================ */
+function _oreTxt(n){
+  const v=Math.round((+n||0)*100)/100;
+  return String(v).replace(".",",")+" h";
+}
+
+async function renderMieiRapportini(){
+  const box=document.getElementById("rap-vecchi");
+  const lista=document.getElementById("rap-vecchi-list");
+  if(!box||!lista)return;
+  if(!sb||!curLavoro||!MIO.impresaId||!MIO.operatoreId){box.style.display="none";return;}
+
+  const [r1,r2]=await Promise.all([
+    sb.from("gest_rapportini").select("id,data,materiali,note")
+      .eq("user_id",MIO.impresaId).eq("lavoro_id",curLavoro.id)
+      .eq("creato_da",MIO.operatoreId)
+      .order("data",{ascending:false}).limit(10),
+    sb.from("gest_ore").select("ore,rapportino_id")
+      .eq("user_id",MIO.impresaId).eq("lavoro_id",curLavoro.id)
+  ]);
+
+  /* se la lettura non riesce si sparisce in silenzio: e' un riquadro in piu',
+     non deve rompere la schermata su cui si scrive il rapportino */
+  if(r1.error||!r1.data||!r1.data.length){box.style.display="none";return;}
+
+  const perRap={};
+  if(!r2.error)(r2.data||[]).forEach(o=>{
+    const k=String(o.rapportino_id||""); if(!k)return;
+    perRap[k]=(perRap[k]||0)+(+o.ore||0);
+  });
+
+  box.style.display="";
+  lista.innerHTML=r1.data.map(r=>{
+    const pezzi=[];
+    if(r.materiali)pezzi.push(esc(String(r.materiali).slice(0,60)));
+    if(r.note)pezzi.push(esc(String(r.note).slice(0,60)));
+    return '<div class="rap-v-riga">'
+      +'<div class="rap-v-testo"><b>'+dataIt(r.data)+'</b>'
+      +(pezzi.length?'<br>'+pezzi.join(" · "):"")+'</div>'
+      +'<div class="rap-v-ore">'+(r2.error?"—":_oreTxt(perRap[String(r.id)]||0))+'</div>'
+      +'<button type="button" class="rap-v-del" data-rap="'+esc(String(r.id))+'" '
+      +'aria-label="Butta via il rapportino del '+dataIt(r.data)+'">&times;</button>'
+      +'</div>';
+  }).join("");
+}
+
+async function rapButtaVia(id,bottone){
+  if(!id||!sb)return;
+  if(bottone)bottone.disabled=true;
+  try{
+    const prova=await sb.rpc("gest_rapportino_cestina",{p_id:id,p_conferma:false});
+    if(prova.error){
+      const m=(prova.error.code||"")+" "+(prova.error.message||"");
+      if(/PGRST202|Could not find the function|schema cache/i.test(m)){
+        alert("Non ho buttato via niente.\n\nQuesta cosa non è ancora accesa sul server: "
+             +"dillo al tuo capo, deve lanciare sql/gest-rapportini-cestino.sql su Supabase.");
+        return;
+      }
+      toast("Errore: "+(prova.error.message||"il database non risponde"));
+      return;
+    }
+    const p=prova.data||{};
+    if(!p.ok){
+      if(p.motivo==="gia"){toast("Era già nel cestino.");}
+      else if(p.motivo==="permesso"){toast("Questo rapportino non lo puoi buttare via: non l'hai scritto tu.");}
+      else{toast("Non l'ho trovato.");}
+      await renderMieiRapportini();
+      return;
+    }
+
+    const righe=+p.righe_ore||0, ore=+p.ore||0;
+    let msg="Butti via il rapportino del "+dataIt(p.data)+"?\n\n";
+    msg+= righe
+      ? ("Vanno via anche le ore che ci hai messo: "+righe+(righe===1?" riga":" righe")
+         +", "+_oreTxt(ore)+" in tutto.\n\n")
+      : "Non ci sono ore attaccate.\n\n";
+    msg+="Finisce nel Cestino: il tuo capo può rimetterlo a posto dal gestionale.";
+    if(!confirm(msg))return;
+
+    const fatto=await sb.rpc("gest_rapportino_cestina",{p_id:id,p_conferma:true});
+    if(fatto.error){toast("Non buttato via: "+(fatto.error.message||"errore"));return;}
+    const f=fatto.data||{};
+    if(!f.ok||!f.fatto){
+      toast(f.motivo==="gia"?"Era già nel cestino.":"Non buttato via: riprova.");
+    }else{
+      toast(righe?("Buttato via, con "+_oreTxt(ore)):"Buttato via");
+    }
+    await renderMieiRapportini();
+  }finally{
+    if(bottone)bottone.disabled=false;
+  }
+}
+
+/* un ascolto solo sul contenitore: le righe si rifanno a ogni apertura */
+document.getElementById("rap-vecchi-list").addEventListener("click",e=>{
+  const b=e.target.closest(".rap-v-del"); if(!b)return;
+  rapButtaVia(b.dataset.rap,b);
+});
 
 /* i pulsanti si ascoltano una volta sola, sul contenitore: le righe vengono
    rifatte a ogni apertura, e agganciare l'ascolto a ognuna le lascerebbe

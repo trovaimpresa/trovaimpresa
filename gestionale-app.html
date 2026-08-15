@@ -7671,6 +7671,13 @@ ${vecchi?`
        Stando qui, le ore entrano da sole anche nel conteggio del messaggio e
        in CEST_FIGLI, cioe' nel ripristino. */
     ["gest_ore",               "ora lavorata",         "ore lavorate"],
+    /* 15 agosto 2026 — I RAPPORTINI MANCAVANO DA QUESTO ELENCO.
+       Stessa storia delle ore qui sopra: gest_rapportini ha la colonna
+       mestiere_id (sql/gest-rapportini.sql) e il telefono ce la scrive
+       davvero. Senza questa riga, eliminando il reparto i rapportini
+       restavano VIVI e irraggiungibili — il loro lavoro nel Cestino — e poi
+       "Elimina per sempre" del reparto si sarebbe rifiutato all'infinito. */
+    ["gest_rapportini",        "rapportino",           "rapportini"],
     ["gest_clienti",           "cliente",              "clienti"],
     ["gest_preventivi",        "preventivo",           "preventivi"],
     ["gest_fatture",           "fattura",              "fatture"],
@@ -9455,11 +9462,18 @@ ${vecchi?`
      nel database e non li leggeva NESSUNO. Una casella che chiede di
      scrivere promette un lettore: senza questo riquadro la promessa
      era falsa.
-     Qui si legge e basta. Le ore sbagliate si correggono nel registro
-     qui sopra, che c'e' da giorni. Il pulsante per eliminare un
-     rapportino NON c'e' apposta: gest_rapportini non sta nell'elenco
-     dentro js/cestino.js, quindi una cancellazione da qui sarebbe vera
-     e definitiva invece di finire nel Cestino.
+     Le ore sbagliate si correggono nel registro qui sopra, che c'e' da
+     giorni.
+
+     15 agosto 2026 (10) — ADESSO IL RAPPORTINO SI PUO' BUTTARE VIA.
+     Prima il pulsante non c'era apposta, perche' gest_rapportini non stava
+     nell'elenco di js/cestino.js e una cancellazione da qui sarebbe stata
+     vera e definitiva mentre il messaggio prometteva il Cestino.
+     ⚠️ Il pulsante NON chiama .delete(): chiama gest_rapportino_cestina
+     (sql/gest-rapportini-cestino.sql), che mette via il rapportino E LE SUE
+     ORE nello stesso istante. Un rapportino buttato via con le ore ancora
+     vive e' manodopera che non si vede piu' da nessuna schermata e che
+     continua a mangiare il margine di quel lavoro.
      ============================================================ */
   async function renderRapportiniBlock(lavoroId){
     const wrap=$("#rap-wrap"); if(!wrap||!sb||!sbUid)return;
@@ -9519,7 +9533,8 @@ ${vecchi?`
       if(!bits.length)bits.push('<small class="sp-forn">Nessun dettaglio scritto.</small>');
       const oreTxt=oreOk?_oreTesto(perRap[k]||0):"—";
       return '<div class="spesa-row"><span><b class="'+q.classe+'">'+esc(q.testo)+'</b> · '
-        +esc(fdate(r.data))+bits.join("")+'</span><b>'+oreTxt+'</b></div>';
+        +esc(fdate(r.data))+bits.join("")+'</span><b>'+oreTxt+'</b>'
+        +'<button type="button" class="rdel" data-action="rap-del" data-id="'+esc(String(r.id))+'" title="Butta via questo rapportino">×</button></div>';
     }).join("");
 
     const coda=[];
@@ -9531,6 +9546,79 @@ ${vecchi?`
       lista.insertAdjacentHTML("beforeend",'<p class="fatt-empty">Le ore di questi rapportini non riesco a leggerle: manca la colonna che li collega (sql/gest-rapportini.sql). I rapportini qui sopra sono giusti, le ore no.</p>');
     }
   }
+  /* ============================================================
+     BUTTA VIA UN RAPPORTINO — 15 agosto 2026 (10)
+
+     Due giri, come "Elimina per sempre" del Cestino:
+       1) si chiede al database COSA succederebbe (non tocca niente)
+       2) si fa vedere il conto vero all'utente
+       3) solo dopo il suo si', si butta via
+     Il numero delle ore lo dice il DATABASE, non la schermata: se la
+     schermata avesse letto male (o non avesse letto affatto le ore, cosa che
+     succede quando manca la colonna rapportino_id) il messaggio direbbe "0
+     ore" mentre ne butta via otto.
+     ============================================================ */
+  async function rapCestina(id){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    if(!id)return;
+
+    const prova=await sb.rpc("gest_rapportino_cestina",{p_id:id,p_conferma:false});
+    if(prova.error){
+      const m=(prova.error.code||"")+" "+(prova.error.message||"");
+      if(/PGRST202|Could not find the function|schema cache/i.test(m)){
+        alert("Non ho buttato via niente.\n\nPer poter buttare via un rapportino serve un aggiornamento del database: "
+             +"esegui sql/gest-rapportini-cestino.sql su Supabase (SQL Editor → Run) e ricarica questa pagina.");
+        return;
+      }
+      toast("Errore: "+(prova.error.message||"il database non risponde"));
+      return;
+    }
+    const p=prova.data||{};
+    if(!p.ok){
+      if(p.motivo==="gia"){toast("Era già nel cestino.");renderRapportiniBlock(oreLavoroId);return;}
+      if(p.motivo==="permesso"){toast("Questo rapportino non lo puoi buttare via.");return;}
+      toast("Non l'ho trovato: forse l'ha già buttato via qualcun altro.");
+      renderRapportiniBlock(oreLavoroId);
+      return;
+    }
+
+    const righe=+p.righe_ore||0, ore=+p.ore||0;
+    let msg="Butto via il rapportino del "+fdate(p.data)+"?\n\n";
+    msg+= righe
+      ? ("Vanno nel cestino anche le sue ore: "+righe+(righe===1?" riga":" righe")
+         +", "+_oreTesto(ore)+" in tutto.\nIl margine di questo lavoro cambia.\n\n")
+      : "Non ci sono ore attaccate a questo rapportino.\n\n";
+    msg+="Se sbagli lo rimetti a posto dal Cestino, e le ore tornano su insieme a lui.";
+    if(!gconfirm(msg))return;
+
+    const fatto=await sb.rpc("gest_rapportino_cestina",{p_id:id,p_conferma:true});
+    if(fatto.error){toast("Non buttato via: "+(fatto.error.message||"errore"));return;}
+    const f=fatto.data||{};
+    if(!f.ok||!f.fatto){
+      /* fra l'anteprima e l'ok puo' essere cambiato qualcosa in un'altra
+         scheda: non si finge che sia andata bene */
+      toast(f.motivo==="gia"?"Era già nel cestino.":"Non buttato via: riprova.");
+      renderRapportiniBlock(oreLavoroId);
+      return;
+    }
+
+    /* le ore sono cambiate: il registro, il campo "Ore lavorate" e il totale
+       scritto su gest_lavori devono dire tutti lo stesso numero, se no Report
+       ed Excel continuano a contare le ore buttate via */
+    if(oreLavoroId){
+      await renderOreBlock(oreLavoroId);
+      await _oreSalvaTotale();
+      await renderRapportiniBlock(oreLavoroId);
+    }
+    /* lo stesso punto unico che usa js/cestino.js dopo ogni eliminazione: il
+       pallino del menu e la sezione Cestino si aggiornano da soli. Si passa
+       null apposta — qui le righe sono due tabelle diverse (il rapportino e le
+       sue ore), quindi si rifa' il conto vero invece di indovinare. */
+    try{ if(typeof window.segnaCestinoDaRifare==="function")window.segnaCestinoDaRifare(null); }catch(e){}
+    rinfresca("riepilogo");
+    toast(righe?("Nel cestino: rapportino e "+_oreTesto(ore)):"Rapportino nel cestino");
+  }
+
   async function oreAdd(){
     if(!sbUid||!oreLavoroId)return;
     if(!oreTabellaOk){toast("Prima serve l'aggiornamento del database (sql/gest-ore-e-crediti.sql)");return;}
@@ -11394,6 +11482,19 @@ ${vecchi?`
     {t:"gest_fatture_fornitori", lab:"Fatture fornitori", campo:"numero",   ic:"🧾", foglia:true},
     {t:"gest_spese",       lab:"Spese",             campo:"descrizione",    ic:"💶", foglia:true},
     {t:"gest_ore",         lab:"Ore lavorate",      campo:"nota",           ic:"⏱", foglia:true},
+    /* 15 agosto 2026 — il rapportino di cantiere.
+       ⚠️ "campo" non basta e per questo c'e' "nome": un rapportino non ha ne'
+       nome ne' titolo ne' descrizione, e il ripiego del Cestino avrebbe
+       scritto «del 14/08/2026» e basta. Con dieci rapportini dentro sarebbero
+       dieci righe quasi uguali e nessuno saprebbe cosa sta rimettendo a posto.
+       Il nome del lavoro lo va a prendere cestNomiLavori(), qui sotto.
+       NIENTE "foglia": sotto al rapportino ci sono le ore, quindi "Elimina per
+       sempre" deve passare dalla funzione del database che guarda la catena. */
+    {t:"gest_rapportini",  lab:"Rapportini di cantiere", campo:"materiali", ic:"📋",
+     nome:function(r){
+       const q=CEST_LAV[String(r.lavoro_id||"")];
+       return "Rapportino del "+fdate(r.data)+(q?(" — "+q):"");
+     }},
     {t:"gest_crediti",     lab:"Crediti formativi", campo:"titolo",         ic:"🎓", foglia:true},
     {t:"gest_computi",     lab:"Computo metrico",   campo:"titolo",         ic:"📐"},
     {t:"gest_prezzi_propri", lab:"Voci del tuo elenco prezzi", campo:"descrizione", ic:"🏷", foglia:true},
@@ -11446,6 +11547,12 @@ ${vecchi?`
        cosi' cancellazione e ripristino non possono piu' scollarsi. */
     gest_mestieri : REPARTO_CONTENUTO.map(function(v){return [v[0],"mestiere_id",v[1],v[2]];}),
     gest_fornitori:[["gest_fatture_fornitori","fornitore_id","fattura","fatture"]],
+    /* 15 agosto 2026 — le ore del rapportino tornano su con lui.
+       Se ne vanno insieme (gest_rapportino_cestina le mette via nello stesso
+       istante), quindi devono anche tornare insieme: rimettere a posto il
+       rapportino e lasciare le ore nel Cestino vorrebbe dire un margine che
+       resta sbagliato dopo che l'utente ha gia' rimediato all'errore. */
+    gest_rapportini:[["gest_ore","rapportino_id","ora lavorata","ore lavorate"]],
     /* 14 agosto 2026 — le scadenze del mezzo (revisione, assicurazione,
        bollo) vanno via con lui e tornano su con lui. Prima restavano vive
        ad avvisare per un furgone gia' venduto. */
@@ -11462,6 +11569,7 @@ ${vecchi?`
     gest_scadenze         :["gest_mestieri","mestiere_id","reparto"],
     gest_computi          :["gest_mestieri","mestiere_id","reparto"],
     gest_fornitori        :["gest_mestieri","mestiere_id","reparto"],
+    gest_rapportini       :["gest_mestieri","mestiere_id","reparto"],
     gest_fatture_fornitori:["gest_fornitori","fornitore_id","fornitore"]
   };
   /* Quanto largo e' "nello stesso momento". I figli vengono messi via qualche
@@ -11485,6 +11593,43 @@ ${vecchi?`
   let cestVista="reparto";
   let cestQui=null;                /* quante ce ne sono in QUESTO reparto */
   const CEST_MAX=200;   /* quante se ne mostrano per tipo */
+
+  /* ============================================================
+     15 agosto 2026 — DI CHE LAVORO ERA?
+
+     Un rapportino non ha un nome: ha una data e il lavoro a cui appartiene.
+     Nel Cestino «del 14/08/2026» ripetuto dieci volte non dice niente, e chi
+     preme "Rimetti a posto" non sa cosa sta ripescando.
+     Qui si vanno a prendere i nomi dei lavori, UNA volta sola per apertura del
+     Cestino, e solo se ci sono davvero righe che ne hanno bisogno.
+
+     sb.raw e non sb.from: il lavoro puo' essere finito nel Cestino anche lui
+     (per esempio eliminando tutto il reparto). Con sb.from tornerebbe niente,
+     e la riga tornerebbe a dire solo la data proprio nel caso in cui serve di
+     piu' capire cosa si sta rimettendo a posto.
+     ============================================================ */
+  let CEST_LAV={};
+  async function cestNomiLavori(risposte){
+    CEST_LAV={};
+    const ids={};
+    (risposte||[]).forEach(function(x){
+      if(x.c.t!=="gest_rapportini")return;
+      (x.righe||[]).forEach(function(r){ if(r.lavoro_id)ids[String(r.lavoro_id)]=true; });
+    });
+    const elenco=Object.keys(ids);
+    if(!elenco.length||!sb||!sbUid)return;
+    try{
+      const {data,error}=await sb.raw("gest_lavori")
+        .select("id,descrizione").eq("user_id",sbUid).in("id",elenco);
+      /* se la lettura non riesce non si inventa niente: la riga dira' solo la
+         data, che e' meno ma e' vero */
+      if(error||!data)return;
+      data.forEach(function(l){
+        const d=String(l.descrizione||"").trim();
+        if(d)CEST_LAV[String(l.id)]=d.slice(0,45);
+      });
+    }catch(e){}
+  }
 
   async function renderCestino(soloDisegno){
     const box=$("#cest-list");if(!box)return;
@@ -11567,12 +11712,21 @@ ${vecchi?`
       cestTotale=cestQui;                       /* non puo' essercene meno del pezzo */
       setCnt("#cnt-cestino",cestTotale,"attesa");
     }
+    /* 15 agosto 2026 — i nomi dei lavori, per le righe che da sole non
+       direbbero niente (oggi: i rapportini). Si chiede sb.raw perche' il
+       lavoro puo' essere nel Cestino anche lui: con sb.from tornerebbe vuoto
+       e la riga direbbe solo la data.
+       Una domanda sola, e solo se davvero c'e' qualcosa da nominare. */
+    await cestNomiLavori(risposte);
     cestCache=[];
     risposte.forEach(function(x){
       x.righe.forEach(function(r){
         /* il nome si cerca su più colonne: non tutte le tabelle hanno lo
-           stesso campo, e "(senza nome)" ovunque renderebbe il cestino inutile */
-        const nome=[r[x.c.campo],r.nome,r.titolo,r.descrizione,r.nome_file,r.causale,r.testo,r.numero]
+           stesso campo, e "(senza nome)" ovunque renderebbe il cestino inutile.
+           Se la tabella ha una sua regola ("nome" in CEST_COSE) vince quella:
+           certe righe non hanno nessuna colonna che le descriva. */
+        const nome=(x.c.nome?String(x.c.nome(r)||"").trim():"")
+          || [r[x.c.campo],r.nome,r.titolo,r.descrizione,r.nome_file,r.causale,r.testo,r.numero]
           .map(v=>String(v==null?"":v).trim()).find(v=>v!=="")
           || (r.data?("del "+fdate(r.data)):"")
           || "(senza nome)";
@@ -11777,6 +11931,7 @@ ${vecchi?`
     gest_computi:"computi metrici", gest_computo_capitoli:"capitoli del computo",
     gest_computo_voci:"voci del computo", gest_computo_misure:"misure del computo",
     gest_prezzi_propri:"voci del tuo elenco prezzi",
+    gest_rapportini:"rapportini di cantiere",
     gest_foto:"foto e documenti", gest_video:"video", gest_note:"note",
     gest_fattura_righe:"righe della fattura", gest_preventivo_righe:"righe del preventivo",
     gest_fattura_lavori:"collegamenti fattura-lavoro", gest_lavoro_mezzi:"mezzi usati",
@@ -14764,6 +14919,7 @@ ${vecchi?`
     if(a==="verbale-pdf")return verbalePdf(id);
     if(a==="ore-add")return oreAdd();
     if(a==="ore-del"){if(gconfirm("Eliminare questa riga di ore?"))return oreDel(id);return;}
+    if(a==="rap-del")return rapCestina(id);   /* la domanda la fa lui: gli serve il numero delle ore */
     if(a==="spesa-del"){if(confirm("Eliminare questa spesa?"))sb.from("gest_spese").delete().eq("id",id).eq("user_id",sbUid).select("id").then(res=>{if(res.error||!res.data||!res.data.length){toast("Non eliminata: "+(res.error?res.error.message:"nessuna riga trovata. Riprova."));return;}renderSpeseBlock(speseLavoroId);});return;}
     if(a==="scegli-tipo")return _salvaTipo(id);   /* 14 agosto: chi non ha mai detto che lavoro fa */
     if(a==="landing-riprova")return renderLanding();

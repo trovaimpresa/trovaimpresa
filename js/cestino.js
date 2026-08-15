@@ -41,16 +41,16 @@
    Non si perde niente per colpa della rete: al massimo si aspetta.
 
    BUCO 2: la prova di accensione guardava UNA tabella sola.
-   Chiedeva a gest_lavori e da quella decideva per tutte e 18. Se una
+   Chiedeva a gest_lavori e da quella decideva per tutte quante. Se una
    migrazione era passata a meta', il cestino si accendeva lo stesso e su
    quelle tabelle la cancellazione restava vera, in silenzio.
-   Adesso: si chiede a tutte e 18 insieme (18 domande piccolissime sparate
+   Adesso: si chiede a tutte insieme (una domanda piccolissima per tabella, sparate
    in parallelo, un solo giro di rete, una volta per sessione). Ogni tabella
    ha il suo stato:
      - la colonna c'e'      -> cestino acceso su quella tabella
      - la colonna NON c'e'  -> vedi sotto
      - non si sa ancora     -> eliminazione BLOCCATA
-   Se la colonna manca su TUTTE e 18, vuol dire che la migrazione non e'
+   Se la colonna manca su TUTTE, vuol dire che la migrazione non e'
    mai stata eseguita: il cestino resta spento come prima e il gestionale
    si comporta come sempre (meglio un cestino che non c'e' che un pannello
    bianco). Se invece manca solo su ALCUNE, la migrazione e' passata a
@@ -83,13 +83,22 @@
      (le tabelle che hanno la colonna mestiere_id). Una tabella che sta la' e
      non qui viene cancellata PER SEMPRE mentre il messaggio dell'utente
      promette il Cestino. Se ne aggiungi una di la', passa anche di qui. */
+  /* 15 agosto 2026 — aggiunta gest_rapportini (la giornata di cantiere).
+     Fino a oggi il rapportino non si poteva eliminare per niente, e nel
+     pannello c'era scritto il perche': senza questa riga il pulsante avrebbe
+     cancellato davvero. Adesso la riga c'e', e con lei il pulsante.
+     ⚠️ Le ORE del rapportino non passano di qui: le mette via la funzione
+     gest_rapportino_cestina (sql/gest-rapportini-cestino.sql), che tocca
+     rapportino e ore nello stesso istante. Due scritture separate lasciavano
+     scoperto il caso peggiore: rapportino sparito e ore ancora vive dentro il
+     margine del lavoro. */
   var TABELLE = [
     "gest_lavori", "gest_clienti", "gest_preventivi", "gest_fatture",
     "gest_scadenze", "gest_mestieri", "gest_mezzi", "gest_operatori",
     "gest_carte",
     "gest_fornitori", "gest_fatture_fornitori", "gest_spese",
     "gest_ore", "gest_crediti", "gest_foto", "gest_video",
-    "gest_computi", "gest_prezzi_propri"
+    "gest_computi", "gest_prezzi_propri", "gest_rapportini"
   ];
 
   var COL = "eliminato_il";
@@ -111,7 +120,7 @@
     TABELLE.forEach(function (t) { if (stato[t] === v) n++; });
     return n;
   }
-  /* La migrazione non e' MAI stata eseguita: la colonna manca su tutte e 18.
+  /* La migrazione non e' MAI stata eseguita: la colonna manca su tutte.
      E' il caso "installazione vecchia": il gestionale deve funzionare come
      prima, con le cancellazioni vere. */
   function migrazioneMai() { return quante("manca") === TABELLE.length; }
