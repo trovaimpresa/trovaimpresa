@@ -4877,9 +4877,15 @@
     {key:"pagamenti", label:"Pagamenti",  d:"Vede la sua carta aziendale e registra le spese.", sez:true},
     {key:"calendario",label:"Calendario", d:"Può girare fra i giorni e i mesi. Senza, vede solo oggi. Va insieme a Lavori."},
     {key:"foto",      label:"Foto",       d:"Può aggiungere foto e video. Quelle che carichi tu le vede comunque. Va insieme a Lavori."},
-    {key:"note",      label:"Note",       d:"Può scrivere cosa ha fatto sul lavoro. Senza, le legge e basta. Va insieme a Lavori."}
+    {key:"note",      label:"Note",       d:"Può scrivere cosa ha fatto sul lavoro. Senza, le legge e basta. Va insieme a Lavori."},
+    /* 15 agosto 2026 — il rapportino di fine giornata. Chi ce l'ha scrive le
+       ore di TUTTA la squadra su quel lavoro, quindi vede anche i nomi dei
+       colleghi (solo i nomi: costo orario, documenti e recapiti restano
+       chiusi, vedi sql/gest-squadra-nomi.sql). Va data a chi in cantiere
+       tiene il conto delle ore, di solito il capo squadra. */
+    {key:"rapportini",label:"Rapportini", d:"Può scrivere il rapportino di fine giornata: le ore di tutta la squadra su quel lavoro, i materiali usati. Vede i nomi dei colleghi, e solo i nomi. Va insieme a Lavori."}
   ];
-  const RUOLO_PRESET={operaio:["calendario","lavori","foto","note"],preposto:["calendario","lavori","foto","note","clienti"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
+  const RUOLO_PRESET={operaio:["calendario","lavori","foto","note"],preposto:["calendario","lavori","foto","note","clienti","rapportini"],segretaria:["calendario","lavori","foto","note","clienti","fatture","pagamenti"]};
   function applyRuoloPreset(){
     const on=RUOLO_PRESET[$("#d-ruolo").value]||[];
     $$("#d-perms input[data-perm]").forEach(ch=>ch.checked=on.includes(ch.dataset.perm));
