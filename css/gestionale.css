@@ -2342,3 +2342,36 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
     height:calc(100dvh - 46px); max-height:calc(100dvh - 46px);
   }
 }
+
+/* =========================================================================
+   16 agosto 2026 — LE ZONE DENTRO LA FINESTRA (versione con la RIGA BLU)
+   Come la neutra, ma ogni scheda ha una riga blu a sinistra e il titolo
+   blu: e' lo stesso blu del marchio, quindi non si confonde con i colori
+   di stato (verde/ambra/rosso), che restano liberi di dire quello che
+   dicono da sempre.
+   ========================================================================= */
+.sheet--grande:has(.sh-cols) .sh-body{ background:var(--sfondo); }
+.sheet--grande .sh-cols .sh-b{
+  background:var(--card);
+  border:1px solid var(--bordo);
+  border-left:5px solid var(--blu);
+  border-radius:14px;
+  padding:20px 22px 6px;
+  margin-bottom:18px;
+  box-shadow:0 1px 2px rgba(16,24,32,.05);
+}
+.sheet--grande .sh-cols .sh-b .sh-tit{ margin-top:0; color:var(--blu-scuro); border-bottom-color:var(--blu-tenue); }
+@media(min-width:901px){
+  .sheet--grande .sh-cols{ column-rule:none; }
+}
+@media(max-width:900px){
+  .sheet--grande .sh-cols .sh-b{ padding:16px 16px 4px; }
+}
+
+/* Sul telefono due caselle affiancate non ci stanno: quella della data ha una
+   larghezza minima sua (la mette il browser, col calendarietto dentro) e
+   schiaccia la vicina, che diventava un francobollo con dentro «— n».
+   Sotto i 560px una casella per riga: si legge e si tocca. */
+@media(max-width:560px){
+  .sheet .row2{ grid-template-columns:1fr; gap:0; }
+}
