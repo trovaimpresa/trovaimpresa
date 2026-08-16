@@ -259,24 +259,40 @@
                       color:var(--mid); padding:7px 14px; border-radius:8px; cursor:pointer; }
   .cre-range button.on { background:white; color:var(--verde); box-shadow:0 1px 4px rgba(0,0,0,.10); }
   .cre-hero { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:14px 0 2px; }
-  /* le caselle «cosa voglio vedere» */
-  .cre-tiles { display:flex; gap:0; flex-wrap:wrap; margin:16px 0 6px;
-               border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-  .cre-tile { flex:1 1 190px; min-width:170px; text-align:left; cursor:pointer;
-              background:#fbfcfd; border:none; border-right:1px solid var(--border);
-              border-bottom:3px solid transparent; padding:14px 18px; font:inherit;
-              display:flex; flex-direction:column; gap:4px; }
-  .cre-tile:last-child { border-right:none; }
-  .cre-tile:hover { background:#f4f7fb; }
-  .cre-tile .ct-k { display:flex; align-items:center; gap:8px; font-size:0.92rem; font-weight:700; color:var(--mid); }
-  .cre-tile .ct-dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto; opacity:.35; }
-  .cre-tile .ct-v { font-size:1.9rem; font-weight:800; line-height:1.05; letter-spacing:-.6px; color:#9aa5b3; }
-  .cre-tile.on { background:#fff; }
-  .cre-tile.on .ct-dot { opacity:1; }
-  .cre-tile.on .ct-v { color:#1a2430; }
-  .cre-tile[data-s="imprese"].on { border-bottom-color:#0066ff; }
-  .cre-tile[data-s="prev"].on    { border-bottom-color:#e8710a; }
-  .cre-tile .cre-delta { align-self:flex-start; margin-top:2px; }
+  /* ============================================================
+     16 agosto 2026 — LE CASELLE IN CIMA DIVENTANO INTERRUTTORI
+     Erano otto cartelli che dicevano un numero e basta. Adesso quelle
+     che hanno una data attaccata si spuntano, e la loro linea compare o
+     sparisce dal grafico qui sotto — come le caselle di Search Console.
+     Le altre (Profili da completare, Premium, Gestionali) restano
+     cartelli: di quelle il database non tiene la storia, quindi una
+     linea non si puo' disegnare e una spunta finta sarebbe una bugia.
+     ============================================================ */
+  .stat-card.sceglibile { position:relative; cursor:pointer; padding-left:46px;
+                          border-bottom:3px solid transparent; transition:border-color .15s, background .15s; }
+  .stat-card.sceglibile:hover { background:#f7f9fc; }
+  .stat-spunta { position:absolute; left:16px; top:50%; transform:translateY(-50%);
+                 width:22px; height:22px; border:2px solid var(--border); border-radius:6px;
+                 background:#fff; display:flex; align-items:center; justify-content:center; }
+  .stat-spunta::after { content:""; width:11px; height:6px; border-left:2.5px solid #fff;
+                        border-bottom:2.5px solid #fff; transform:rotate(-45deg) translate(1px,-1px);
+                        opacity:0; transition:opacity .12s; }
+  .stat-card.sceglibile.on .stat-spunta::after { opacity:1; }
+  /* il colore della spunta e della riga sotto e' quello della sua linea
+     sul grafico: cosi' si capisce quale casella e' quale linea */
+  .stat-card.sceglibile.on[data-serie="imprese"] { border-bottom-color:#0066ff; }
+  .stat-card.sceglibile.on[data-serie="imprese"] .stat-spunta { background:#0066ff; border-color:#0066ff; }
+  .stat-card.sceglibile.on[data-serie="prev"]    { border-bottom-color:#e8710a; }
+  .stat-card.sceglibile.on[data-serie="prev"] .stat-spunta { background:#e8710a; border-color:#e8710a; }
+  .stat-card.sceglibile.on[data-serie="citta"]   { border-bottom-color:#8b5cf6; }
+  .stat-card.sceglibile.on[data-serie="citta"] .stat-spunta { background:#8b5cf6; border-color:#8b5cf6; }
+  .stat-card.sceglibile.on[data-serie="rec"]     { border-bottom-color:#0f9e9e; }
+  .stat-card.sceglibile.on[data-serie="rec"] .stat-spunta { background:#0f9e9e; border-color:#0f9e9e; }
+  .stat-card.sceglibile.on[data-serie="segn"]    { border-bottom-color:#d81b60; }
+  .stat-card.sceglibile.on[data-serie="segn"] .stat-spunta { background:#d81b60; border-color:#d81b60; }
+  /* una casella che non si puo' disegnare non deve sembrare cliccabile */
+  .stat-card.sceglibile.spenta { cursor:default; opacity:.75; }
+  .stat-card.sceglibile.spenta .stat-spunta { opacity:.35; }
   /* con due linee la legenda c'e' sempre: il colore da solo non basta */
   .cre-leg { display:flex; gap:20px; flex-wrap:wrap; margin-top:10px; padding-left:40px;
              font-size:0.9rem; color:var(--mid); }
@@ -512,7 +528,9 @@
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card sceglibile" data-serie="imprese" onclick="creSerie('imprese')"
+             title="Mostra o nascondi questa linea sul grafico">
+          <span class="stat-spunta" aria-hidden="true"></span>
           <div class="stat-icon g">🏗️</div>
           <div><div class="stat-num" id="stat-totali">–</div><div class="stat-lbl">Totale imprese</div></div>
         </div>
@@ -520,11 +538,15 @@
           <div class="stat-icon o">📝</div>
           <div><div class="stat-num" id="stat-incompleti">–</div><div class="stat-lbl">Profili da completare</div></div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card sceglibile" data-serie="citta" onclick="creSerie('citta')"
+             title="Mostra o nascondi questa linea sul grafico">
+          <span class="stat-spunta" aria-hidden="true"></span>
           <div class="stat-icon g">🗺️</div>
           <div><div class="stat-num" id="stat-citta">–</div><div class="stat-lbl">Città coperte</div></div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card sceglibile" data-serie="prev" onclick="creSerie('prev')"
+             title="Mostra o nascondi questa linea sul grafico">
+          <span class="stat-spunta" aria-hidden="true"></span>
           <div class="stat-icon b">📋</div>
           <div><div class="stat-num" id="stat-preventivi">–</div><div class="stat-lbl">Preventivi ricevuti</div></div>
         </div>
@@ -544,6 +566,20 @@
           <div class="stat-icon r">🛠️</div>
           <div><div class="stat-num" id="stat-gestionali">–</div><div class="stat-lbl">Gestionali attivi</div></div>
         </div>
+        <!-- 16 agosto 2026 — due caselle nuove: sono dati che una data ce
+             l'hanno, quindi si possono mettere sul grafico. -->
+        <div class="stat-card sceglibile" data-serie="rec" onclick="creSerie('rec')"
+             title="Mostra o nascondi questa linea sul grafico">
+          <span class="stat-spunta" aria-hidden="true"></span>
+          <div class="stat-icon b">⭐</div>
+          <div><div class="stat-num" id="stat-recensioni">–</div><div class="stat-lbl">Recensioni</div></div>
+        </div>
+        <div class="stat-card sceglibile" data-serie="segn" onclick="creSerie('segn')"
+             title="Mostra o nascondi questa linea sul grafico">
+          <span class="stat-spunta" aria-hidden="true"></span>
+          <div class="stat-icon o">🚩</div>
+          <div><div class="stat-num" id="stat-segnalazioni">–</div><div class="stat-lbl">Segnalazioni</div></div>
+        </div>
       </div>
 
       <div class="cre-card">
@@ -561,20 +597,9 @@
           </div>
           </div>
         </div>
-        <!-- 16 agosto 2026 — le caselle da spuntare, come su Search Console:
-             si sceglie COSA vedere sul grafico. Almeno una resta sempre accesa,
-             se no il grafico sarebbe un foglio bianco. -->
-        <div class="cre-tiles" id="cre-tiles">
-          <button class="cre-tile on" data-s="imprese" onclick="creSerie('imprese')">
-            <span class="ct-k"><i class="ct-dot" style="background:#0066ff"></i>Nuove imprese</span>
-            <span class="ct-v" id="cre-v-imprese">–</span>
-            <span class="cre-delta pari" id="cre-delta">–</span>
-          </button>
-          <button class="cre-tile" data-s="prev" onclick="creSerie('prev')">
-            <span class="ct-k"><i class="ct-dot" style="background:#e8710a"></i>Preventivi ricevuti</span>
-            <span class="ct-v" id="cre-v-prev">–</span>
-          </button>
-        </div>
+        <!-- la SCELTA di cosa vedere sta nelle caselle in cima alla pagina:
+             qui resta solo il confronto col periodo prima. -->
+        <div class="cre-hero"><span class="cre-delta pari" id="cre-delta">–</span></div>
         <div class="cre-box">
           <div id="cre-svg"><div class="loading">Caricamento...</div></div>
           <div class="cre-tip" id="cre-tip"></div>
@@ -2723,7 +2748,8 @@ let _creRange = 90;      // 30 | 90 | 0 (=tutto, raggruppato per mese)
 let _creLista = [];      // imprese vere, senza profili di prova
 let _crePrevLista = [];  // preventivi ricevuti dal sito (per la seconda linea)
 /* quali linee sono accese sul grafico. Almeno una lo e' sempre. */
-let _creOn = { imprese:true, prev:false };
+let _creOn = { imprese:true, prev:false, citta:false, rec:false, segn:false };
+let _creRec = [], _creSegn = [];   /* recensioni e segnalazioni, per il grafico */
 
 function _creSet(id, v){ const e = document.getElementById(id); if (e) e.textContent = v; }
 function _lunedi(d){ const x=new Date(d); x.setHours(0,0,0,0); const g=(x.getDay()+6)%7; x.setDate(x.getDate()-g); return x; }
@@ -2760,14 +2786,48 @@ function _creEtichetta(d, perMese){
                  : d.getDate() + ' ' + _MESI[d.getMonth()];
 }
 
-function creSerie(k){
-  const altre = Object.keys(_creOn).filter(x=>x!==k);
-  /* spegnere l'ultima rimasta lascerebbe un foglio bianco: non si puo' */
-  if (_creOn[k] && !altre.some(x=>_creOn[x])) return;
-  _creOn[k] = !_creOn[k];
-  document.querySelectorAll('#cre-tiles .cre-tile').forEach(b=>{
-    b.classList.toggle('on', !!_creOn[b.dataset.s]);
+/* ============================================================
+   16 agosto 2026 — LE SERIE DEL GRAFICO, IN UN POSTO SOLO
+   Ogni voce dice: come si chiama, di che colore e' la sua linea, e da
+   quale elenco prende i dati. Aggiungerne una domani vuol dire
+   aggiungere una riga qui e una casella in cima. Nient'altro.
+   I cinque colori sono passati al controllo automatico: la coppia
+   peggiore resta distinguibile anche a chi non vede bene i colori
+   (differenza 9,4 sul minimo di 8).
+   «citta» non conta le righe: conta quante citta' NUOVE si sono
+   aggiunte in quel periodo, che e' la cosa che cresce davvero.
+   ============================================================ */
+const CRE_SERIE = [
+  { k:'imprese', lab:'Nuove imprese',      col:'#0066ff', fill:'rgba(0,102,255,.10)',  get:()=>_creLista },
+  { k:'prev',    lab:'Preventivi ricevuti', col:'#e8710a', fill:'rgba(232,113,10,.10)', get:()=>_crePrevLista },
+  { k:'citta',   lab:'Città nuove',        col:'#8b5cf6', fill:'rgba(139,92,246,.10)', get:()=>_creLista, citta:true },
+  { k:'rec',     lab:'Recensioni',         col:'#0f9e9e', fill:'rgba(15,158,158,.10)', get:()=>_creRec },
+  { k:'segn',    lab:'Segnalazioni',       col:'#d81b60', fill:'rgba(216,27,96,.10)',  get:()=>_creSegn }
+];
+/* una serie si puo' disegnare solo se i suoi dati hanno una data:
+   se no la casella resta un cartello, senza spunta finta. */
+function creDisponibile(x){
+  const l = x.get() || [];
+  return l.some(r => r && r.created_at);
+}
+function creAggiornaCaselle(){
+  CRE_SERIE.forEach(x => {
+    const c = document.querySelector('.stat-card[data-serie="'+x.k+'"]');
+    if (!c) return;
+    const ok = creDisponibile(x);
+    c.classList.toggle('spenta', !ok);
+    c.classList.toggle('on', ok && !!_creOn[x.k]);
+    if (!ok) c.title = 'Per questo dato il database non tiene la data, quindi non si puo\' disegnare';
   });
+}
+function creSerie(k){
+  const x = CRE_SERIE.find(z=>z.k===k);
+  if (!x || !creDisponibile(x)) return;
+  /* spegnere l'ultima rimasta lascerebbe un foglio bianco: non si puo' */
+  const altre = CRE_SERIE.filter(z=>z.k!==k && _creOn[z.k] && creDisponibile(z));
+  if (_creOn[k] && !altre.length) return;
+  _creOn[k] = !_creOn[k];
+  creAggiornaCaselle();
   renderCrescita();
 }
 
@@ -2782,56 +2842,41 @@ function renderCrescita(){
   const cont = document.getElementById('cre-svg');
   if (!cont) return;
   const perMese = _creRange === 0;
+  creAggiornaCaselle();
 
-  /* ============================================================
-     16 agosto 2026 — «MANCA COSA VOGLIO VEDERE», come su Search Console.
-     Le caselle in cima accendono e spengono le linee. Tutte e due stanno
-     sullo STESSO asse: due assi diversi sullo stesso grafico fanno vedere
-     un legame fra i numeri che non c'e' — e' l'errore piu' comune nei
-     grafici, e qui non si fa.
-     I due colori (blu #0066ff e arancio #e8710a) sono passati al controllo
-     automatico: restano distinguibili anche a chi non vede bene i colori
-     (differenza 33 su 8 richiesti). E quando le linee sono due c'e' la
-     legenda: il colore da solo non deve mai essere l'unica cosa che
-     distingue una linea dall'altra.
-     ============================================================ */
-  const TUTTE = [
-    { k:'imprese', lab:'Nuove imprese',      col:'#0066ff', fill:'rgba(0,102,255,.10)',  lista:_creLista,
-      uno:'nuova impresa', tanti:'nuove imprese' },
-    { k:'prev',    lab:'Preventivi ricevuti', col:'#e8710a', fill:'rgba(232,113,10,.10)', lista:_crePrevLista,
-      uno:'preventivo', tanti:'preventivi' }
-  ];
-  const serie = TUTTE.filter(x => _creOn[x.k]);
+  const attive = CRE_SERIE.filter(x => _creOn[x.k] && creDisponibile(x));
+  const serie  = attive.length ? attive : CRE_SERIE.filter(x => creDisponibile(x)).slice(0,1);
 
   const sub = document.getElementById('cre-sub');
-  if (sub) sub.textContent = perMese ? 'Mese per mese' : 'Settimana per settimana';
+  if (sub) sub.textContent = (perMese ? 'Quanti ne arrivano di nuovi, mese per mese'
+                                      : 'Quanti ne arrivano di nuovi, settimana per settimana')
+                           + ' — spunta le caselle qui sopra per aggiungere o togliere una linea';
 
-  /* ogni linea ha i suoi periodi; qui si mettono sullo stesso righello */
-  const grezzi = TUTTE.map(x => _creRaggruppa(x.lista, _creRange));
-  const chiaviOn = [];
-  TUTTE.forEach((x,i)=>{ if(_creOn[x.k]) grezzi[i].forEach(d=>chiaviOn.push(d.t.getTime())); });
-  const chiavi = [...new Set(chiaviOn)].sort((a,b)=>a-b);
-  const valore = (i,t) => { const f = grezzi[i].find(d=>d.t.getTime()===t); return f ? f.n : 0; };
-  const dati = chiavi.map(t => ({ t:new Date(t), v: TUTTE.map((x,i)=> valore(i,t)) }));
+  if (!serie.length){
+    cont.innerHTML = '<div class="loading">Niente da mostrare.</div>';
+    return;
+  }
 
-  /* i numeri nelle caselle: il totale del periodo, acceso o spento che sia */
-  TUTTE.forEach((x,i)=>{
-    const el = document.getElementById('cre-v-'+x.k);
-    if (el) el.textContent = grezzi[i].reduce((a,d)=>a+d.n, 0);
-  });
+  /* ogni serie ha i suoi periodi: qui si mettono tutte sullo stesso righello */
+  const grezzi = serie.map(x => x.citta ? _creCittaNuove(x.get(), _creRange)
+                                        : _creRaggruppa(x.get(), _creRange));
+  const chiavi = [...new Set(grezzi.flat().map(d => d.t.getTime()))].sort((a,b)=>a-b);
+  const dati = chiavi.map(t => ({
+    t: new Date(t),
+    v: grezzi.map(g => { const f = g.find(d => d.t.getTime()===t); return f ? f.n : 0; })
+  }));
 
   /* il confronto col periodo prima: sulla prima linea accesa */
   const d = document.getElementById('cre-delta');
   if (d){
-    const iP = TUTTE.findIndex(x=>_creOn[x.k]);
-    const g = iP >= 0 ? grezzi[iP] : [];
+    const g = grezzi[0] || [];
     if (g.length >= 2){
       const diff = g[g.length-1].n - g[g.length-2].n;
       d.className = 'cre-delta ' + (diff > 0 ? 'su' : diff < 0 ? 'giu' : 'pari');
-      d.textContent = diff === 0
-        ? '= come il periodo prima'
+      d.textContent = serie[0].lab + ': ' + (diff === 0
+        ? 'come il periodo prima'
         : (diff > 0 ? '▲ +' : '▼ ') + Math.abs(diff) +
-          (perMese ? ' sul mese scorso' : ' sulla settimana scorsa');
+          (perMese ? ' sul mese scorso' : ' sulla settimana scorsa'));
     } else { d.className = 'cre-delta pari'; d.textContent = '–'; }
   }
 
@@ -2843,7 +2888,7 @@ function renderCrescita(){
   const W = 1000, H = 210, mL = 40, mR = 18, mT = 20, mB = 34;
   const pw = W - mL - mR, ph = H - mT - mB;
   let max = 1;
-  dati.forEach(p => serie.forEach(x => { const n = p.v[TUTTE.indexOf(x)]; if (n > max) max = n; }));
+  dati.forEach(p => p.v.forEach(n => { if (n > max) max = n; }));
   const passo = max <= 4 ? 1 : max <= 10 ? 2 : max <= 25 ? 5 : 10;
   const cima = Math.ceil(max/passo)*passo;
   const y = v => mT + ph - (v/cima)*ph;
@@ -2851,51 +2896,53 @@ function renderCrescita(){
   const px = i => dati.length === 1 ? mL + pw/2 : mL + banda*i + banda/2;
   const ogni = dati.length > 10 ? Math.ceil(dati.length/7) : 1;
 
-  let s = '';
+  let out = '';
   for (let v=0; v<=cima; v+=passo){
-    s += '<line x1="'+mL+'" y1="'+y(v)+'" x2="'+(W-mR)+'" y2="'+y(v)+'" stroke="#eceff3" stroke-width="1"/>'
-       + '<text x="'+(mL-10)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="12" fill="#8a94a2">'+v+'</text>';
+    out += '<line x1="'+mL+'" y1="'+y(v)+'" x2="'+(W-mR)+'" y2="'+y(v)+'" stroke="#eceff3" stroke-width="1"/>'
+        +  '<text x="'+(mL-10)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="12" fill="#8a94a2">'+v+'</text>';
   }
 
-  serie.forEach(x => {
-    const ix = TUTTE.indexOf(x);
-    const pts = dati.map((p,i)=> px(i)+' '+y(p.v[ix]));
+  serie.forEach((x, ix) => {
     if (dati.length > 1){
-      /* la macchia sotto la linea solo quando la linea e' una: con due
-         si sovrapporrebbero e non si capirebbe piu' quale sta sopra */
+      /* la macchia sotto la linea solo quando la linea e' una: con due o
+         piu' si sovrapporrebbero e non si capirebbe quale sta sopra */
       if (serie.length === 1){
-        s += '<path d="M '+px(0)+' '+(mT+ph)+' L '+pts.join(' L ')+' L '+px(dati.length-1)+' '+(mT+ph)+' Z" fill="'+x.fill+'"/>';
+        out += '<path d="M '+px(0)+' '+(mT+ph)+' L '
+             + dati.map((p,i)=> px(i)+' '+y(p.v[ix])).join(' L ')
+             + ' L '+px(dati.length-1)+' '+(mT+ph)+' Z" fill="'+x.fill+'"/>';
       }
-      s += '<polyline points="'+dati.map((p,i)=> px(i)+','+y(p.v[ix])).join(' ')+'"'
-         + ' fill="none" stroke="'+x.col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+      out += '<polyline points="'+dati.map((p,i)=> px(i)+','+y(p.v[ix])).join(' ')+'"'
+          +  ' fill="none" stroke="'+x.col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
     }
     const iMax = dati.reduce((m,p,i)=> p.v[ix] > dati[m].v[ix] ? i : m, 0);
     dati.forEach((p,i)=>{
       const cx = px(i), cy = y(p.v[ix]);
       if (dati.length <= 24 || i === dati.length-1 || i === iMax){
-        s += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(i===dati.length-1?4.5:3.5)+'" fill="'+x.col+'" stroke="#fff" stroke-width="2"/>';
+        out += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(i===dati.length-1?4.5:3.5)+'" fill="'+x.col+'" stroke="#fff" stroke-width="2"/>';
       }
-      if ((i === iMax || i === dati.length-1) && p.v[ix] > 0){
-        s += '<text x="'+cx+'" y="'+(cy-11)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#1a2430">'+p.v[ix]+'</text>';
+      /* il numero scritto solo sul massimo e sull'ultimo, e solo con poche
+         linee: con quattro linee sarebbero otto numeri appiccicati */
+      if (serie.length <= 2 && (i === iMax || i === dati.length-1) && p.v[ix] > 0){
+        out += '<text x="'+cx+'" y="'+(cy-11)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#1a2430">'+p.v[ix]+'</text>';
       }
     });
   });
 
-  s += '<line id="cre-cross" x1="0" y1="'+mT+'" x2="0" y2="'+(mT+ph)+'" stroke="#c3ccd8" stroke-width="1" opacity="0"/>';
+  out += '<line id="cre-cross" x1="0" y1="'+mT+'" x2="0" y2="'+(mT+ph)+'" stroke="#c3ccd8" stroke-width="1" opacity="0"/>';
 
   dati.forEach((p,i)=>{
     const cx = px(i);
     if (i % ogni === 0 || i === dati.length-1){
-      s += '<text x="'+cx+'" y="'+(H-mB+22)+'" text-anchor="middle" font-size="12" fill="#8a94a2">'
-         + esc(_creEtichetta(p.t, perMese)) + '</text>';
+      out += '<text x="'+cx+'" y="'+(H-mB+22)+'" text-anchor="middle" font-size="12" fill="#8a94a2">'
+          +  esc(_creEtichetta(p.t, perMese)) + '</text>';
     }
-    const dettaglio = serie.map(x => x.lab + ': ' + p.v[TUTTE.indexOf(x)]).join(' | ');
-    s += '<rect x="'+(mL+banda*i)+'" y="'+mT+'" width="'+banda+'" height="'+ph+'" fill="transparent"'
-       + ' data-d="'+esc(dettaglio)+'" data-x="'+cx+'" data-l="'+esc(_creEtichetta(p.t, perMese))+'" style="cursor:pointer"/>';
+    const dett = serie.map((x,ix)=> x.lab + ': ' + p.v[ix]).join('\n');
+    out += '<rect x="'+(mL+banda*i)+'" y="'+mT+'" width="'+banda+'" height="'+ph+'" fill="transparent"'
+        +  ' data-d="'+esc(dett)+'" data-x="'+cx+'" data-l="'+esc(_creEtichetta(p.t, perMese))+'" style="cursor:pointer"/>';
   });
-  s += '<line x1="'+mL+'" y1="'+(mT+ph)+'" x2="'+(W-mR)+'" y2="'+(mT+ph)+'" stroke="#d7dce3" stroke-width="1"/>';
+  out += '<line x1="'+mL+'" y1="'+(mT+ph)+'" x2="'+(W-mR)+'" y2="'+(mT+ph)+'" stroke="#d7dce3" stroke-width="1"/>';
 
-  cont.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Andamento nel tempo">'+s+'</svg>'
+  cont.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Andamento nel tempo">'+out+'</svg>'
     + (serie.length > 1
         ? '<div class="cre-leg">' + serie.map(x =>
             '<span><i style="background:'+x.col+'"></i>'+esc(x.lab)+'</span>').join('') + '</div>'
@@ -2904,8 +2951,7 @@ function renderCrescita(){
   const box = cont.parentElement, tip = document.getElementById('cre-tip');
   cont.querySelectorAll('rect[data-d]').forEach(r => {
     r.addEventListener('mouseenter', () => {
-      tip.innerHTML = '<b>' + esc(r.dataset.l) + '</b><br>'
-                    + esc(r.dataset.d).split(' | ').join('<br>');
+      tip.innerHTML = '<b>' + esc(r.dataset.l) + '</b><br>' + esc(r.dataset.d).split('\n').join('<br>');
       const bb = r.getBoundingClientRect(), pb = box.getBoundingClientRect();
       tip.style.left = (bb.left - pb.left + bb.width/2) + 'px';
       tip.style.top  = (bb.top  - pb.top  + bb.height*0.45) + 'px';
@@ -2919,6 +2965,24 @@ function renderCrescita(){
       if (cr) cr.setAttribute('opacity','0');
     });
   });
+}
+
+/* Le CITTA' NUOVE non sono un conteggio di righe: una citta' che c'era gia'
+   non e' una citta' nuova. Qui si tiene l'elenco di quelle gia' viste e si
+   conta solo la prima volta che ne compare una. */
+function _creCittaNuove(lista, giorni){
+  const viste = new Set();
+  const primi = [];
+  (lista||[]).slice()
+    .filter(i => i && i.created_at && (i.citta||'').trim())
+    .sort((a,b)=> new Date(a.created_at) - new Date(b.created_at))
+    .forEach(i => {
+      const c = i.citta.trim().toLowerCase();
+      if (viste.has(c)) return;
+      viste.add(c);
+      primi.push({ created_at: i.created_at });
+    });
+  return _creRaggruppa(primi, giorni);
 }
 
 // Mestieri e citta': stessi conteggi di prima, ora dietro al pulsante.
@@ -2997,6 +3061,10 @@ async function caricaRecensioni() {
     if (!res.ok || !json.success) return;
     data = json.data;
   } catch { return; }
+  /* 16 agosto 2026 — le recensioni servono anche al grafico e alla casella in cima */
+  _creRec = data || [];
+  _set('stat-recensioni', _creRec.length);
+  renderCrescita();
   const tbody = document.getElementById('table-recensioni');
   if (!data?.length) {
     tbody.innerHTML = '<tr><td colspan="5"><div class="empty-table"><div class="eicon">⭐</div>Nessuna recensione ancora</div></td></tr>';
@@ -3192,6 +3260,10 @@ async function caricaSegnalazioni() {
     const json = await res.json();
     if (!res.ok || !json.success) throw new Error();
     data = json.data;
+    /* 16 agosto 2026 — anche le segnalazioni vanno nella casella e nel grafico */
+    _creSegn = data || [];
+    _set('stat-segnalazioni', _creSegn.length);
+    renderCrescita();
   } catch {
     tbody.innerHTML = '<tr><td colspan="6"><div class="empty-table"><div class="eicon">⚠️</div>Errore caricamento</div></td></tr>';
     return;
