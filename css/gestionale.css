@@ -63,6 +63,75 @@
     font-size:13.5px;line-height:1.55;color:var(--testo-2)}
   .landing-nota-rep b{color:var(--testo)}
 
+  /* ============================================================
+     16 agosto 2026 — LA STRISCIA DELL'AI sulla home.
+     Chiusa e' una riga sola: l'AI c'e' o non c'e', quanti crediti
+     restano, e dove se ne comprano altri. Si apre solo se uno vuole
+     sapere dove si usa.
+     ⚠️ Il colore dice lo stato, non decora: blu quando c'e', arancione
+        quando i crediti stanno finendo, grigio quando l'AI non c'e'.
+     ⚠️ Niente testo sotto i 13 px, nemmeno qui dentro. ============ */
+  .ai-str{max-width:900px;margin:0 auto 18px;background:var(--card);
+    border:1px solid var(--bordo);border-left:4px solid var(--blu);
+    border-radius:var(--r-card);box-shadow:var(--shadow);overflow:hidden}
+  .ai-str[hidden]{display:none}
+  .ai-str--pochi{border-left-color:var(--attesa)}
+  .ai-str--spenta{border-left-color:var(--bordo-forte)}
+
+  .ai-str-riga{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px}
+  .ai-str-mk{flex:0 0 auto;background:var(--blu-tenue);color:var(--blu-scuro);
+    font-size:13px;font-weight:800;letter-spacing:.6px;padding:5px 10px;border-radius:8px}
+  .ai-str--pochi  .ai-str-mk{background:var(--attesa-bg);color:var(--attesa)}
+  .ai-str--spenta .ai-str-mk{background:var(--sfondo);color:var(--testo-3)}
+  .ai-str-txt{flex:1 1 200px;font-size:15px;color:var(--testo-2);line-height:1.4}
+  .ai-str-txt b{color:var(--testo);font-size:16px}
+  .ai-str--pochi .ai-str-txt b{color:var(--attesa)}
+
+  .ai-str-piu{flex:0 0 auto;background:transparent;border:1px solid var(--bordo-forte);
+    color:var(--testo-2);border-radius:var(--r);padding:9px 14px;font-family:inherit;
+    font-size:14px;font-weight:700;cursor:pointer}
+  .ai-str-piu:hover{background:var(--sfondo);color:var(--testo)}
+  .ai-str-cta{flex:0 0 auto;background:var(--blu);color:#fff;text-decoration:none;
+    border-radius:var(--r);padding:10px 18px;font-size:14px;font-weight:800;white-space:nowrap}
+  .ai-str-cta:hover{background:var(--blu-hover)}
+  .ai-str--spenta .ai-str-cta{background:var(--blu-scuro)}
+
+  .ai-str-giu{border-top:1px solid var(--bordo);padding:16px;background:var(--sfondo)}
+  .ai-str-giu[hidden]{display:none}
+
+  .ai-str-conti{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:18px}
+  .ai-str-c{min-width:140px}
+  .ai-str-cn{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.1;color:var(--testo)}
+  .ai-str-ce{font-size:14px;font-weight:600;color:var(--testo-2);margin-top:2px}
+  .ai-str-cx{font-size:13px;color:var(--testo-3);margin-top:1px}
+
+  .ai-str-tit{font-size:16px;font-weight:800;color:var(--testo);margin-bottom:10px}
+  .ai-str-posti{list-style:none;margin:0;padding:0;display:grid;
+    grid-template-columns:1fr;gap:12px}
+  @media(min-width:760px){.ai-str-posti{grid-template-columns:1fr 1fr}}
+  .ai-str-p{background:var(--card);border:1px solid var(--bordo);
+    border-radius:var(--r);padding:14px 16px}
+  .ai-str-pt{font-size:15px;font-weight:800;color:var(--testo);margin-bottom:4px}
+  .ai-str-pc{font-size:14px;color:var(--testo-2);line-height:1.5}
+  .ai-str-pd{font-size:13.5px;color:var(--testo-3);line-height:1.5;margin-top:6px}
+  .ai-str-pp{font-size:13px;font-weight:700;color:var(--blu-scuro);
+    background:var(--blu-tenue);display:inline-block;padding:3px 9px;
+    border-radius:20px;margin-top:8px}
+  .ai-str-b{margin-top:10px;display:block;width:100%;background:var(--blu);color:#fff;
+    border:none;border-radius:var(--r);padding:11px 14px;font-family:inherit;
+    font-size:14px;font-weight:800;cursor:pointer}
+  .ai-str-b:hover{background:var(--blu-hover)}
+
+  /* Sul telefono: marchio e crediti sulla PRIMA riga, i due pulsanti
+     sulla seconda. I pulsanti restano alti 44 px: sotto quella misura un
+     dito sporco di malta non li prende, e risparmiare 10 px di altezza
+     non vale un pulsante che non si riesce a premere. */
+  @media(max-width:480px){
+    .ai-str-riga{gap:8px 10px;padding:10px 12px}
+    .ai-str-txt{flex:1 1 140px;order:1;font-size:14px}
+    .ai-str-piu,.ai-str-cta{flex:1 1 40%;order:3;text-align:center}
+  }
+
   .new-rep-btn{display:block;width:100%;max-width:560px;margin:16px auto 0;background:var(--card);border:2px dashed var(--bordo-forte);color:var(--accent-d);border-radius:14px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:var(--shadow)}
   .empty-rep{text-align:center;color:var(--muted);padding:30px 16px;font-weight:600;font-size:14px}
   .picker{display:flex;flex-wrap:wrap;gap:8px}.picker .pk{font-size:20px;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}.picker .pk.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,102,255,.2)}

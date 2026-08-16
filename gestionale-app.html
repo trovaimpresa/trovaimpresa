@@ -35,6 +35,28 @@
     <div class="mk">🛠️</div><h1>Il tuo gestionale</h1><small>Lavori, preventivi e fatture</small>
   </div>
   <div class="wrap">
+    <!-- ⚠️ 16 agosto 2026 — LA STRISCIA DELL'AI.
+         Fino a oggi l'AI stava in QUATTRO punti diversi del gestionale
+         (Preventivi, Lavori, Clienti, e il pulsante Aiuto in alto) e
+         nessuno diceva che esistessero: chi apriva la home non sapeva
+         di averla, non sapeva quanti crediti gli restassero e non aveva
+         nessun modo di comprarne altri. Le tre cose che deve sapere
+         stanno qui, in una riga sola.
+
+         ⚠️ SE LO STATO NON SI RIESCE A LEGGERE, LA STRISCIA NON COMPARE.
+         Scrivere «AI non attiva» perche' la rete non ha risposto sarebbe
+         una bugia, ed e' esattamente l'errore dei reparti che sparivano
+         il 14 agosto: uno che ce l'ha legge che non ce l'ha. Meglio non
+         dire niente che dire il falso. -->
+    <div id="ai-striscia" class="ai-str" hidden>
+      <div class="ai-str-riga">
+        <span class="ai-str-mk">AI</span>
+        <span class="ai-str-txt" id="ai-str-txt"></span>
+        <button type="button" class="ai-str-piu" id="ai-str-piu" aria-expanded="false" aria-controls="ai-str-giu">Dove si usa</button>
+        <a class="ai-str-cta" id="ai-str-cta" href="/ricarica-crediti.html">Ricarica</a>
+      </div>
+      <div class="ai-str-giu" id="ai-str-giu" hidden></div>
+    </div>
     <p class="landing-sub">Apri il tuo lavoro qui sotto: dentro ci trovi lavori, preventivi, fatture e clienti.</p>
     <div class="panels" id="panels"></div>
     <button class="new-rep-btn" data-action="new-panel">➕ Aggiungi un reparto</button>
@@ -991,7 +1013,7 @@
       /* 15 agosto 2026 (12) — i numerini partono da qui, non dall'apertura
          della sezione: devono salire mentre l'utente sta facendo tutt'altro.
          Senza await: se la rete e' lenta il gestionale non aspetta un pallino. */
-      if(sbUid){ try{ asstVedetta(); asstLeggi(false); contaRichiesteNuove(); contaDalSito(); }catch(e){} }
+      if(sbUid){ try{ asstVedetta(); asstLeggi(false); contaRichiesteNuove(); contaDalSito(); aiStrisciaCarica(); }catch(e){} }
     }
     sb.auth.onAuthStateChange((_e,s)=>{sbUid=s?s.user.id:null;logRuoloUtente(sbUid);backfillMestieri();_authRefresh();});
     sb.auth.getSession().then(({data})=>{sbUid=data.session?data.session.user.id:null;backfillMestieri();_authRefresh();});
@@ -1257,7 +1279,129 @@
     _deepTab=null;
     if(b)b.click();
   }
-  function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();window.scrollTo(0,0);}
+  function goHome(){cur=null;$("#appview").style.display="none";$("#landing").style.display="block";renderLanding();aiStrisciaCarica();window.scrollTo(0,0);}
+
+  /* ============================================================
+     LA STRISCIA DELL'AI SULLA HOME — 16 agosto 2026
+
+     Tre cose, e sono quelle che un'impresa deve sapere appena entra:
+       1. l'AI ce l'ho o no?
+       2. quanti crediti mi restano?
+       3. dove ne compro altri?
+
+     Chiusa e' una riga sola. Si apre solo se uno vuole sapere DOVE si
+     usa, perche' quello era il problema vero: i quattro pulsanti
+     esistevano gia' ma stavano dentro sezioni che devi aprire prima, e
+     nessuno ti diceva che c'erano.
+
+     ⚠️ I COSTI QUI SOTTO NON SONO INVENTATI: sono presi da
+     supabase/functions/ai-generate/index.ts, dove ogni funzione ha il
+     suo `costo`. Preventivo, cliente e lavoro costano 1; l'assistente
+     costa 0 e si mangia le 30 domande gratuite del mese.
+     Se un domani cambiano li', vanno cambiati anche qui: sono due posti,
+     e due posti si disallineano. E' il difetto numero 1 del giudizio.
+     ============================================================ */
+  let _aiStato=null;
+
+  const _aiCrediti=n=>(n===1?"1 credito":n+" crediti");
+
+  async function aiStrisciaCarica(){
+    const box=$("#ai-striscia"); if(!box)return;
+    if(!sb||!sbUid){box.hidden=true;return;}
+    let st=null;
+    try{const r=await sb.rpc("get_ai_status"); if(!r.error)st=r.data;}catch(e){}
+    _aiStato=st;
+    if(!st){box.hidden=true;return;}   /* vedi il commento nell'HTML */
+    _aiStrisciaDisegna();
+  }
+
+  function _aiStrisciaDisegna(){
+    const box=$("#ai-striscia"), st=_aiStato; if(!box||!st)return;
+    const txt=$("#ai-str-txt"), cta=$("#ai-str-cta"), piu=$("#ai-str-piu"), giu=$("#ai-str-giu");
+    if(!txt||!cta||!piu||!giu)return;
+
+    const attiva = st.has_ai===true;
+    const rest   = Number(st.remaining||0);
+    const mese   = Number(st.monthly_left||0);
+    const quota  = Number(st.monthly_quota||0);
+    const extra  = Number(st.credits_extra||0);
+    const aiuto  = Number(st.help_left||0);
+
+    /* colore = stato, mai decorazione: verde quando ce n'e', arancione
+       quando stanno finendo (sotto il 20% del mese), grigio quando l'AI
+       non c'e'. */
+    const pochi = attiva && quota>0 && rest<=Math.round(quota*0.2);
+    box.classList.toggle("ai-str--spenta", !attiva);
+    box.classList.toggle("ai-str--pochi", pochi);
+
+    if(attiva){
+      txt.innerHTML = "<b>"+_aiCrediti(rest)+"</b> da usare"
+        + (pochi ? " — stanno finendo" : "");
+      cta.textContent = "Ricarica";
+      cta.href = "/ricarica-crediti.html";
+    }else{
+      txt.innerHTML = "<b>non è attiva</b> — arriva con il Premium";
+      cta.textContent = "Vedi il Premium";
+      cta.href = "/prezzi.html";
+    }
+
+    const lavori = ruoloUtente==='professionista' ? "Pratiche" : "Lavori";
+    const rinnovo = st.renews_at ? quando(String(st.renews_at).slice(0,10)).testo : "";
+
+    const conto = (n,et,nota)=>
+      '<div class="ai-str-c"><div class="ai-str-cn">'+n+'</div>'
+      + '<div class="ai-str-ce">'+et+'</div>'
+      + (nota?'<div class="ai-str-cx">'+nota+'</div>':'')+'</div>';
+
+    const posto = (tit,cosa,dove,costo,bottone)=>
+      '<li class="ai-str-p"><div class="ai-str-pt">'+tit+'</div>'
+      + '<div class="ai-str-pc">'+cosa+'</div>'
+      + '<div class="ai-str-pd">'+dove+'</div>'
+      + '<div class="ai-str-pp">'+costo+'</div>'
+      + (bottone||'')+'</li>';
+
+    giu.innerHTML =
+      '<div class="ai-str-conti">'
+      + conto(mese, "dei "+quota+" di questo mese", rinnovo?("si rinnovano "+rinnovo):"")
+      + conto(extra, extra===1?"comprato":"comprati", "non scadono mai")
+      + conto(aiuto, "domande gratis", "all'assistente, ogni mese")
+      + '</div>'
+      + '<div class="ai-str-tit">Dove lavora l\'AI</div>'
+      + '<ul class="ai-str-posti">'
+      + posto("Preventivi — «Genera con AI»",
+              "Descrivi il lavoro a parole e ti prepara le voci di costo, una per una.",
+              "Entra in un reparto, apri Preventivi: sta in alto a destra.",
+              "1 credito")
+      + posto(lavori+" — «Compila con AI»",
+              "Scrivi com'è andata a parole e ti riempie il modulo da solo.",
+              "Entra in un reparto, apri "+lavori+": sta in alto a destra.",
+              "1 credito")
+      + posto("Clienti — «Compila con AI»",
+              "Incolli i dati come capita e ti mette ogni cosa al suo posto.",
+              "Entra in un reparto, apri Clienti: sta in alto a destra.",
+              "1 credito")
+      + posto("Aiuto — l'assistente del gestionale",
+              "Gli chiedi come si fa una cosa e te lo spiega, con le parole del gestionale.",
+              "In alto a destra dentro un reparto — oppure da qui:",
+              "gratis, "+aiuto+" domande rimaste questo mese",
+              '<button type="button" class="ai-str-b" id="ai-str-aiuto">Chiedi all\'assistente</button>')
+      + '</ul>';
+
+    const ba = giu.querySelector("#ai-str-aiuto");
+    if(ba) ba.onclick = function(){
+      if(window.AI && window.AI.apriAiuto) window.AI.apriAiuto();
+      else toast("L'assistente non si è ancora caricato, riprova fra un attimo");
+    };
+
+    piu.onclick = function(){
+      const apro = giu.hasAttribute("hidden");
+      if(apro) giu.removeAttribute("hidden"); else giu.setAttribute("hidden","");
+      piu.setAttribute("aria-expanded", apro?"true":"false");
+      piu.textContent = apro ? "Chiudi" : "Dove si usa";
+    };
+
+    box.hidden = false;
+  }
 
   /* controllo segmentato (Agenda "Mostra", Galleria tipo foto): un solo pulsante acceso */
   function segmOn(sel,v){$$(sel+" button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));}
