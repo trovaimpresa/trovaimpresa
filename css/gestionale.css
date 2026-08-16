@@ -2292,7 +2292,17 @@
   }
   /* i due contenitori spariscono: contano solo i blocchi */
   .sheet--grande .sh-cols > .sh-col{ display:contents; }
-  .sheet--grande .sh-cols .sh-b{
+  /* NIENTE SI SPEZZA A META'.
+     Con le colonne che si riempiono da sole, un pezzo puo' cominciare in
+     fondo a una colonna e finire in cima alla seguente. Nella finestra del
+     preventivo e' successo: l'etichetta «Note (compaiono sul PDF)» e' rimasta
+     nella prima colonna e la casella per scriverci e' saltata nella seconda.
+     Quindi: tutto quello che sta dentro una colonna resta intero — i blocchi
+     (.sh-b) e, dove i blocchi non ci sono, i singoli campi. */
+  .sheet--grande .sh-cols .sh-b,
+  .sheet--grande .sh-cols .sh-col > *,
+  .sheet--grande .sh-cols .field,
+  .sheet--grande .sh-cols .row2{
     break-inside:avoid;
     -webkit-column-break-inside:avoid;
     page-break-inside:avoid;

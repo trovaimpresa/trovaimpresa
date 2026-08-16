@@ -2290,6 +2290,21 @@
      Il primo dei due e' sempre quello che apre la scheda (edit-...),
      perche' e' quello che si usa piu' di tutti.
      ============================================================ */
+  /* 16 agosto 2026 (2) — FUORI SI APRE E BASTA.
+     Sulla scheda dell'elenco resta UN pulsante solo: «Apri». Tutto il
+     resto — PDF, cambio stato, elimina — sta DENTRO la finestra, in
+     fondo, accanto a Salva: si entra, si guarda, si decide.
+     Le azioni in fondo alla finestra chiudono la finestra prima di
+     partire (data-chiudi): se no cambi lo stato e resti davanti al
+     modulo che mostra ancora quello vecchio. */
+  function schedaApri(action,id,lab){
+    return `<button class="btn btn-sm ja" data-action="${action}" data-id="${esc(String(id))}">${lab||"Apri"}</button>`;
+  }
+  function azioniDentro(voci){
+    return (voci||[]).filter(x=>x&&!x.sep&&!(x.action&&/^edit-/.test(String(x.action))))
+      .map(a=>`<button class="btn${a.del?" btn-danger":""}" data-chiudi="1" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`)
+      .join("");
+  }
   const SCHEDA_MENU={}; let _schedaMenuN=0;
   const SCHEDA_BTN_MAX=2;
   function schedaAzioni(azioni){
@@ -10365,7 +10380,7 @@ ${vecchi?`
         <span>📅 ${fdate(p.data)}</span>
         <span class="prev-tot">${eur2(tot[p.id]||0)}</span></div>
       ${p.note?`<div class="job-note">📝 ${esc(p.note)}</div>`:""}
-      <div class="job-actions">${schedaAzioni(prevVoci(p))}</div></div>`;
+      <div class="job-actions">${schedaApri("edit-prev",p.id,"Apri")}</div></div>`;
   }
   /* Preventivi: viste, colore della barretta e verbo della colonna "Quando".
      Il verbo cambia con lo stato ("inviato 3 giorni fa", "creato 3 giorni fa"):
@@ -10631,7 +10646,7 @@ ${vecchi?`
     const cliOpts=cl.map(c=>`<option value="${c.id}" ${c.id===p.cliente_id?"selected":""}>${esc(c.nome)}</option>`).join("");
     /* Modulo lungo -> modale grande: a sinistra l'intestazione del preventivo,
        a destra le voci di costo, che sono la parte che ha bisogno di spazio. */
-    openSheetGrande(isNew?"Nuovo preventivo":"Modifica preventivo N. "+p.numero,
+    openSheetGrande(isNew?"Nuovo preventivo":"Preventivo N. "+p.numero,
       `<div class="sh-cols"><div class="sh-col">
       <div class="field"><label>Titolo</label><input id="pv-tit" value="${esc(p.titolo||"")}" placeholder="Es. Rifacimento bagno completo"></div>
       <div class="row2">
@@ -10647,6 +10662,7 @@ ${vecchi?`
       ${bloccoIvaImpresa(p)}
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
+       ${isNew?"":azioniDentro(prevVoci(p))}
        <button class="btn-primary b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button>`);
     $("#prev-righe").addEventListener("input",prevTotaleLive);
     /* parcella: il riepilogo si ricalcola sia cambiando le voci sia le percentuali */
@@ -15516,6 +15532,9 @@ ${vecchi?`
   document.addEventListener("click",e=>{
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
+    /* i pulsanti in fondo alla finestra: prima si chiude, poi si fa.
+       Se no si cambia lo stato e si resta davanti al modulo vecchio. */
+    if(t.dataset.chiudi){ const _ov=$("#overlay"); if(_ov)_ov.classList.remove("open"); }
     if(a==="spesa-add")return spesaAdd();
     /* "Mostra tutti": svuota la casella di ricerca della sezione in cui si sta */
     if(a==="cerca-azzera"){
