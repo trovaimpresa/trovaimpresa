@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestionale per imprese edili: preventivi, fatture, cantieri</title>
+<meta name="description" content="Gestionale per imprese edili e artigiani: preventivi in PDF, fatture elettroniche con IVA 10%, lavori e cantieri sempre in ordine. Tre mesi in regalo, poi 49 € l'anno.">
+<link rel="canonical" href="https://trovaimpresa.com/software-gestionale-imprese-edili">
+<meta property="og:title" content="Gestionale per imprese edili: preventivi, fatture, cantieri">
+<meta property="og:description" content="Preventivi, fatture elettroniche e cantieri in un posto solo. Pensato per chi in cantiere ci sta davvero. Tre mesi in regalo, poi 49 € l'anno.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trovaimpresa.com/software-gestionale-imprese-edili">
+<meta property="og:image" content="https://trovaimpresa.com/img/gestionale-lavori.webp">
+<meta property="og:site_name" content="TrovaImpresa">
+<style>
+  :root{
+    --primary:#0066ff;--primary-dark:#0047b3;--primary-soft:#eaf2ff;
+    --accent:#ff8800;--accent-dark:#e67a00;
+    --text:#1f2933;--muted:#6b7280;--line:#e5e7eb;--bg:#fff;--bg-alt:#f7f9fa;
+    --warn-bg:#fff8e6;--warn-line:#f0d38a;
+    --radius:14px;--maxw:780px;--font:'Trebuchet MS','Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.65;background:var(--bg);font-size:18px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .navbar .logo{display:flex;align-items:center}
+  .navbar .logo img{height:56px}
+  .navbar .menu{display:flex;gap:20px;align-items:center}
+  .navbar .menu a{text-decoration:none;color:var(--primary);font-weight:bold;font-size:15px}
+  .navbar .menu a:hover{color:var(--primary-dark)}
+  .navbar .menu a.menu-btn{background:var(--accent);color:#fff;padding:13px 18px;border-radius:8px;line-height:1.25}
+  .navbar .menu a.menu-btn:hover{background:var(--accent-dark);color:#fff}
+  .breadcrumb{font-size:14px;color:var(--muted);padding:18px 0 0}
+  .breadcrumb a{color:var(--muted);text-decoration:none}
+  h1{font-size:34px;line-height:1.2;letter-spacing:-.5px;margin:14px 0 10px}
+  h2{font-size:26px;line-height:1.25;letter-spacing:-.3px;margin:46px 0 12px}
+  h3{font-size:20px;margin:28px 0 8px}
+  .meta{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .lead{font-size:21px;line-height:1.55}
+  p{margin:14px 0}
+  a{color:var(--primary-dark)}
+  .answer{background:var(--primary-soft);border:1px solid #c3d8ff;border-left:5px solid var(--primary);border-radius:var(--radius);padding:20px 22px;margin:22px 0}
+  .answer strong{color:var(--primary-dark)}
+  .price-big{font-size:28px;font-weight:800;color:var(--primary-dark);display:block;margin-top:4px}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:16px;overflow:hidden;border-radius:var(--radius);border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  thead th{background:var(--primary);color:#fff;font-weight:600}
+  tbody tr:nth-child(even){background:var(--bg-alt)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+
+  .checklist{list-style:none;padding:0;margin:16px 0}
+  .checklist li{position:relative;padding:12px 0 12px 40px;border-bottom:1px solid var(--line)}
+  .checklist li:before{content:"\2691";position:absolute;left:6px;top:11px;color:var(--primary);font-size:20px}
+  .err-list li:before{content:"\2715";color:#c0392b}
+  .ok-list li:before{content:"\2713";color:#1e8e3e}
+
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:16px}
+  .esperienza{background:#eefbf1;border:1px solid #b7e4c3;border-left:5px solid #1e8e3e;border-radius:var(--radius);padding:16px 20px;margin:20px 0;font-size:17px}
+  .related{background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:22px 0;font-size:16px}
+  .related a{font-weight:bold}
+
+  figure{margin:26px 0}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 6px 22px rgba(16,42,77,.10)}
+  figure.tel img{max-width:330px;margin:0 auto}
+  figcaption{font-size:15px;color:var(--muted);margin-top:10px;text-align:center}
+
+  .faq details{border:1px solid var(--line);border-radius:var(--radius);margin:10px 0;padding:0 18px;background:var(--bg-alt)}
+  .faq summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;font-size:18px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary:after{content:"+";float:right;color:var(--primary);font-size:24px;line-height:1}
+  .faq details[open] summary:after{content:"\2013"}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{margin:14px 0}
+
+  .prezzo-box{border:2px solid var(--primary);border-radius:18px;padding:26px;margin:34px 0;background:linear-gradient(180deg,#fff,var(--bg-alt));text-align:center}
+  .prezzo-box .cifra{font-size:44px;font-weight:800;color:var(--primary-dark);line-height:1.1;margin:6px 0}
+  .prezzo-box .sotto{color:var(--muted);font-size:16px}
+  .prezzo-box ul{text-align:left;max-width:430px;margin:20px auto 0}
+
+  .cta-band{background:var(--primary-soft);border:1px solid #c3d8ff;border-radius:18px;padding:26px;margin:40px 0;text-align:center}
+  .cta-band h3{margin-top:0;color:var(--primary-dark)}
+  .cta-dark{display:inline-block;background:var(--accent);color:#fff;padding:15px 26px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px;font-size:17px}
+  .cta-dark:hover{background:var(--accent-dark);color:#fff}
+  .cta-sotto{display:block;margin-top:12px;font-size:15px;color:var(--muted)}
+
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:30px 0;color:var(--muted);font-size:14px}
+  @media(max-width:600px){
+    body{font-size:17px}
+    h1{font-size:26px}
+    h2{font-size:22px}
+    .lead{font-size:19px}
+    .prezzo-box .cifra{font-size:36px}
+    th,td{padding:10px}
+    table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .navbar .menu{gap:12px}.navbar .menu a{font-size:13px}.navbar .logo img{height:46px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/index.html" class="logo"><img src="/img/trovaimpresa-logo.svg" alt="TrovaImpresa"></a>
+  <div class="menu">
+    <a href="/index.html">Home</a>
+    <a href="/prezzi.html">Prezzi</a>
+    <a href="/#registrati" class="menu-btn">Provalo 3 mesi gratis</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <nav class="breadcrumb"><a href="/index.html">Home</a> &rsaquo; <a href="/prezzi.html">Per le imprese</a> &rsaquo; Gestionale per imprese edili</nav>
+
+  <article>
+    <h1>Gestionale per imprese edili: preventivi, fatture e cantieri</h1>
+    <p class="meta">Aggiornato agosto 2026 &middot; Lettura 6 min</p>
+
+    <div class="answer">
+      <strong>In due righe:</strong> è un gestionale per imprese edili e artigiani che tiene insieme
+      <strong>preventivi, fatture elettroniche, lavori e clienti</strong>. Funziona dal telefono in cantiere
+      e dal computer la sera. È dentro il Premium di TrovaImpresa:
+      <span class="price-big">3 mesi in regalo, poi 49 € l'anno</span>
+      Nessuna carta di credito per iniziare, nessun rinnovo automatico.
+    </div>
+
+    <p class="lead">Se hai un'impresa edile sai già come va: il preventivo scritto sul retro di una bolla,
+      la fattura che parte con due settimane di ritardo, e la domanda che torna sempre —
+      <strong>«questo lavoro me l'hanno pagato?»</strong> — a cui rispondi cercando nel telefono.
+      Questo programma serve a togliere quella domanda di mezzo.</p>
+
+    <h2>Il problema non è che non sai fare i conti</h2>
+
+    <p>È che i conti stanno in cinque posti diversi. Il preventivo su un foglio, la fattura in un
+      programma del commercialista, le date sul calendario del telefono, i clienti in rubrica,
+      e quanto hai ancora da incassare da nessuna parte — quello lo sai a memoria, finché regge.</p>
+
+    <p>Poi arriva la settimana in cui hai tre cantieri aperti, e la memoria non regge più.</p>
+
+    <ul class="checklist err-list">
+      <li><strong>Preventivi che non ritrovi.</strong> Il cliente richiama dopo due mesi e chiede
+        «quel prezzo vale ancora?». Tu non sai nemmeno più quale prezzo gli avevi fatto.</li>
+      <li><strong>Fatture dimenticate.</strong> Il lavoro è finito a luglio, la fattura la fai a ottobre,
+        e il cliente la paga a gennaio. Sono sei mesi di soldi tuoi in giro.</li>
+      <li><strong>Buchi nella numerazione.</strong> Te ne accorgi a fine anno, quando il commercialista
+        ti chiede dov'è finita la numero 7.</li>
+      <li><strong>Nessuno sa cosa deve fare.</strong> L'operaio ti chiama alle sette di mattina per
+        sapere in che cantiere andare.</li>
+    </ul>
+
+    <h2>Cosa fa, in concreto</h2>
+
+    <h3>I lavori, con lo stato a colpo d'occhio</h3>
+
+    <p>Ogni lavoro ha uno stato e un colore: <strong>da fare</strong>, <strong>in corso</strong>,
+      <strong>fatto</strong>. Sopra c'è quanto valgono in tutto, e i filtri ti fanno vedere subito
+      quelli in ritardo, quelli di oggi, e quelli finiti che non hai ancora fatturato.</p>
+
+    <figure>
+      <img src="/img/gestionale-lavori.webp" width="1440" height="971" loading="lazy"
+           alt="Elenco dei lavori nel gestionale per imprese edili, con stato in corso, da fare e fatto">
+      <figcaption>I lavori del reparto, con il totale in alto e il filtro «da incassare».</figcaption>
+    </figure>
+
+    <h3>I preventivi, con le voci e il PDF pronto</h3>
+
+    <p>Scrivi le voci una per una con quantità e prezzo, scegli l'IVA giusta, e scarichi il PDF da
+      mandare al cliente. Ogni preventivo ha il suo stato: bozza, inviato, accettato, rifiutato.
+      <strong>Quando il cliente accetta, con un click il preventivo diventa un lavoro</strong> — non
+      lo riscrivi da capo.</p>
+
+    <figure>
+      <img src="/img/gestionale-preventivi.webp" width="1440" height="1077" loading="lazy"
+           alt="Preventivi edili numerati con stato inviato, accettato e rifiutato, e importo con IVA">
+      <figcaption>I preventivi numerati, con lo stato e l'importo IVA compresa.</figcaption>
+    </figure>
+
+    <h3>Le fatture, con il file per lo SDI</h3>
+
+    <p>Fattura elettronica vera: il programma prepara il <strong>file XML per lo SDI</strong> e il PDF
+      per il cliente. In cima trovi quattro numeri che di solito nessuno ti dice:
+      quanto hai <strong>da incassare</strong>, quanto hai <strong>da fatturare</strong> (lavori finiti
+      e mai fatturati), quanto è <strong>entrato in cassa</strong> quest'anno, e da quanti giorni
+      aspetti il credito più vecchio.</p>
+
+    <figure>
+      <img src="/img/gestionale-fatture.webp" width="1440" height="1265" loading="lazy"
+           alt="Fatture elettroniche nel gestionale edile: da incassare, da fatturare, entrato in cassa">
+      <figcaption>Le fatture, con i buchi nella numerazione segnalati da soli.</figcaption>
+    </figure>
+
+    <h3>E il resto che serve a un'impresa</h3>
+
+    <ul class="checklist ok-list">
+      <li><strong>Clienti</strong> divisi fra privato, azienda e condominio, con referente e telefono.</li>
+      <li><strong>Calendario e agenda</strong>: l'operaio apre la sua agenda e vede solo i suoi lavori.</li>
+      <li><strong>Mappa dei cantieri aperti</strong>, per non fare quaranta chilometri a vuoto.</li>
+      <li><strong>Foto prima e dopo</strong>, che è anche il modo più veloce per farsi dire di sì dal prossimo cliente.</li>
+      <li><strong>Mezzi e attrezzature</strong> con revisione, bollo, assicurazione e tagliando.</li>
+      <li><strong>Scadenzario</strong> e <strong>report</strong> da mandare al commercialista.</li>
+      <li><strong>Reparti separati</strong>: se fai edilizia e giardinaggio, i due lavori non si mischiano.</li>
+      <li><strong>Esporta tutto</strong> in Excel o in JSON quando vuoi. I dati sono tuoi.</li>
+    </ul>
+
+    <h2>Dal telefono, in cantiere</h2>
+
+    <p>Non è un programma da ufficio con una app appiccicata sopra. È la stessa cosa: apri il telefono
+      col guanto ancora addosso, segni il lavoro fatto, scatti la foto. La sera, a casa, dal computer
+      trovi tutto già lì.</p>
+
+    <figure class="tel">
+      <img src="/img/gestionale-telefono.webp" width="780" height="1688" loading="lazy"
+           alt="Il gestionale per imprese edili sul telefono, in cantiere">
+      <figcaption>Lo stesso gestionale sul telefono. Niente da installare.</figcaption>
+    </figure>
+
+    <h2>Quello che i gestionali generici sbagliano</h2>
+
+    <p>I programmi di fatturazione generici sono fatti per chi vende scarpe o consulenza. In edilizia
+      il fisco è diverso, e le differenze non sono dettagli: sono errori che ti riprende il
+      commercialista.</p>
+
+    <table>
+      <thead>
+        <tr><th>La cosa</th><th>Perché in edilizia cambia</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>IVA al 10%</strong></td>
+          <td>Sulle manutenzioni e sui recuperi edilizi l'IVA è agevolata al 10%, non al 22%. Qui l'IVA la scegli riga per riga, perché nella stessa fattura possono starci tutte e due.</td>
+        </tr>
+        <tr>
+          <td><strong>Ritenuta d'acconto</strong></td>
+          <td>Il condominio trattiene la ritenuta, il committente privato no. La percentuale la scrivi tu, e il conto la toglie dal totale come si deve — la base è l'imponibile già scontato, non quello pieno.</td>
+        </tr>
+        <tr>
+          <td><strong>Forfettario e bollo</strong></td>
+          <td>In regime forfettario l'IVA non c'è, ma sopra i 77,47 € ci vuole il bollo da 2 €. Il programma te lo dice al momento giusto, invece di lasciartelo scoprire dopo.</td>
+        </tr>
+        <tr>
+          <td><strong>Cassa previdenziale</strong></td>
+          <td>Se sei geometra, architetto o ingegnere, la parcella ha il contributo cassa, e nel file elettronico ci vuole il codice giusto per quella cassa. C'è.</td>
+        </tr>
+        <tr>
+          <td><strong>Lavoro e fattura sono due cose</strong></td>
+          <td>In edilizia il lavoro finisce a giugno e la fattura parte a settembre. Qui i due sono collegati ma separati, e il programma ti dice quali lavori finiti non hai ancora fatturato.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Una cosa che non fa:</strong> non manda la fattura allo SDI al posto tuo e non fa da
+      intermediario fiscale. Prepara il file corretto, tu lo carichi dove lo carichi adesso — o lo
+      mandi al commercialista. Ci teniamo a dirtelo prima, non dopo.
+    </div>
+
+    <h2>L'aiuto AI, dentro il lavoro</h2>
+
+    <p>L'assistente non sta in una finestra a parte da riempire. Sta <strong>dentro il modulo</strong>,
+      mentre compili. Scrivi la frase come la diresti al telefono — «giovedì cappotto facciata sud,
+      condominio Le Betulle, via Verdi 12, 28.400 euro» — e le caselle sotto si riempiono da sole,
+      illuminate, così vedi esattamente cosa ha scritto lui.</p>
+
+    <figure>
+      <img src="/img/gestionale-ai.webp" width="1440" height="785" loading="lazy"
+           alt="L'assistente AI riempie le caselle del nuovo lavoro partendo da una frase scritta a mano">
+      <figcaption>Una frase scritta a mano, cinque caselle riempite. Il salvataggio resta tuo.</figcaption>
+    </figure>
+
+    <p><strong>Non salva niente da solo.</strong> Riempie, ti dice quante caselle ha toccato, e aspetta
+      che controlli tu. Serve a chi scrivere non è il suo mestiere: se hai la dislessia, o se
+      semplicemente alle otto di sera non hai voglia di compilare otto caselle, questa parte cambia
+      la giornata.</p>
+
+    <p>L'AI serve anche a generare un preventivo intero da una descrizione, a riempire la scheda di un
+      cliente nuovo, e a scrivere il report di fine mese. Nel Premium ci sono
+      <strong>100 crediti al mese</strong>, che si rinnovano ogni mese. Se finiscono puoi ricaricare
+      (150 crediti 19 €, 400 crediti 45 €, 1.000 crediti 99 €), e i crediti comprati non scadono mai.
+      Un preventivo o una compilazione costano 1 credito.</p>
+
+    <h2>Perché è fatto così</h2>
+
+    <div class="esperienza">
+      Questo gestionale non è nato in una riunione. È nato da venticinque anni di cantiere, e si vede
+      nelle scelte piccole: i pulsanti grandi abbastanza da premerli col guanto, il colore che dice
+      subito lo stato senza leggere, le parole normali al posto di «anagrafica» e «commessa», e nessuna
+      schermata che ti chiede sedici campi obbligatori prima di lasciarti salvare.
+    </div>
+
+    <p>La differenza si sente sulle cose noiose. Un preventivo accettato che diventa lavoro con un
+      click. Una fattura che si porta dietro i dati del cliente <em>congelati al momento
+      dell'emissione</em>, così se il cliente cambia indirizzo l'anno dopo, la fattura vecchia resta
+      com'era — perché quella l'ha già in mano lui.</p>
+
+    <div class="related">
+      Ti serve prima il resto? Leggi <a href="/come-fare-un-preventivo-edile.html">come si fa un preventivo edile</a>
+      e <a href="/come-trovare-clienti-impresa-edile.html">come trovare clienti per un'impresa edile</a>.
+    </div>
+
+    <h2>Quanto costa</h2>
+
+    <div class="prezzo-box">
+      <div class="sotto">Il gestionale è dentro il Premium di TrovaImpresa</div>
+      <div class="cifra">49 € all'anno</div>
+      <div class="sotto">oppure 5 € al mese &middot; prezzo finale, nessuna IVA da aggiungere</div>
+      <ul class="checklist ok-list">
+        <li><strong>I primi 3 mesi sono in regalo</strong>, e non serve la carta di credito.</li>
+        <li><strong>Nessun rinnovo automatico.</strong> Finiti i 3 mesi non ti addebitiamo niente: se non fai nulla, torni al piano gratuito.</li>
+        <li>Dentro c'è anche il profilo in evidenza sul marketplace, dove i clienti ti cercano.</li>
+        <li>Ricevi regolare fattura per ogni pagamento.</li>
+      </ul>
+      <p style="margin-top:22px"><a href="/#registrati" class="cta-dark">Provalo 3 mesi gratis</a>
+        <span class="cta-sotto">Ti registri con la mail e basta. <a href="/prezzi.html">Vedi tutti i prezzi</a></span></p>
+    </div>
+
+    <p>Per fare un paragone onesto: i gestionali per l'edilizia costano in genere fra i 20 e i 60 € al
+      mese per utente. Qui il conto è annuale e sta sotto il prezzo di un sacco di cemento al mese.
+      Il motivo è semplice: il gestionale non è il prodotto principale, è quello che ricevi
+      restando sul marketplace.</p>
+
+    <h2>Domande frequenti</h2>
+
+    <div class="faq">
+      <details>
+        <summary>Il gestionale per imprese edili si deve installare?</summary>
+        <p>No. Si apre dal browser, sul telefono e sul computer. Niente da scaricare, niente chiavette,
+          niente aggiornamenti da fare a mano. Basta la connessione.</p>
+      </details>
+      <details>
+        <summary>I dati del gestionale si possono esportare?</summary>
+        <p>Sono tuoi. Dal pulsante in alto esporti tutto quando vuoi, in Excel o in JSON, senza chiedere
+          permesso a nessuno e senza costi: se un giorno vai da un'altra parte, te li porti dietro.
+          Dove sono conservati e con quali garanzie è scritto per esteso nella
+          <a href="/privacy-policy.html">privacy policy</a>.</p>
+      </details>
+      <details>
+        <summary>Fa la fattura elettronica?</summary>
+        <p>Prepara il file XML nel formato che vuole lo SDI, con l'IVA riga per riga, la ritenuta,
+          il bollo e — per i tecnici — il codice della cassa previdenziale. Poi il file lo mandi tu,
+          dal canale che usi adesso, oppure lo giri al commercialista. Il programma non fa da
+          intermediario e non lo trasmette al posto tuo.</p>
+      </details>
+      <details>
+        <summary>Ci possono lavorare anche gli operai?</summary>
+        <p>Sì. C'è un accesso separato per collaboratori e segretaria: l'operaio entra nella sua agenda
+          e vede i lavori suoi, senza girare per il resto del programma.</p>
+      </details>
+      <details>
+        <summary>Quanto costa il gestionale per imprese edili?</summary>
+        <p>È compreso nel Premium di TrovaImpresa: <strong>49 € all'anno</strong> oppure 5 € al mese,
+          prezzo finale senza IVA da aggiungere. I primi 3 mesi sono in regalo, non serve la carta di
+          credito e non c'è rinnovo automatico.</p>
+      </details>
+      <details>
+        <summary>Serve la carta di credito per provarlo?</summary>
+        <p>No. Ti registri con la mail e i 3 mesi partono subito. La carta la metti solo il giorno in cui
+          decidi tu di continuare. Se quel giorno non arriva mai, non ti viene chiesto niente e il profilo
+          resta online sul piano gratuito.</p>
+      </details>
+      <details>
+        <summary>Va bene anche per un artigiano che lavora da solo?</summary>
+        <p>Sì, ed è il caso più comune. Le parti che non ti servono — squadra, mezzi, reparti — puoi
+          semplicemente non aprirle. Il minimo utile sono lavori, clienti e fatture.</p>
+      </details>
+      <details>
+        <summary>E se non sono capace col computer?</summary>
+        <p>È fatto apposta per chi il computer lo usa poco: parole normali, pulsanti grandi, e l'aiuto AI
+          che riempie le caselle da una frase scritta a mano. E l'assistenza risponde una persona, non
+          un modulo di contatto.</p>
+      </details>
+      <details>
+        <summary>Che differenza c'è rispetto a un gestionale di fatturazione generico?</summary>
+        <p>Un gestionale generico non sa cos'è l'IVA al 10% sulle manutenzioni, non collega il lavoro
+          alla fattura, e non ti dice quali cantieri finiti non hai ancora fatturato. Qui il lavoro è
+          il centro, e la fattura arriva da lì.</p>
+      </details>
+    </div>
+
+    <div class="cta-band">
+      <h3>Provalo con un lavoro vero</h3>
+      <p>Il modo più veloce per capire se ti serve è metterci dentro il prossimo preventivo che devi fare.
+        Ci metti dieci minuti, e i 3 mesi sono in regalo.</p>
+      <a href="/#registrati" class="cta-dark">Registrati e prova il gestionale</a>
+      <span class="cta-sotto">Nessuna carta di credito &middot; Nessun rinnovo automatico</span>
+    </div>
+
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>TrovaImpresa &mdash; il posto dove i clienti trovano imprese edili e artigiani verificati, e dove
+      le imprese tengono in ordine preventivi, fatture e cantieri.</p>
+    <p style="margin:16px 0 10px;font-size:14.5px">
+      <a href="/chi-siamo.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Chi siamo</a>&middot;
+      <a href="/contatti.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Contatti</a>&middot;
+      <a href="/blog.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Tutte le guide</a>&middot;
+      <a href="/prezzi.html" style="color:#0066ff;text-decoration:none;margin:0 8px">Per le imprese</a>
+    </p>
+    <p style="margin:0 0 10px;font-size:13.5px">
+      <a href="/privacy-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Privacy</a>&middot;
+      <a href="/cookie-policy.html" style="color:#667;text-decoration:none;margin:0 6px">Cookie</a>&middot;
+      <a href="/termini-condizioni.html" style="color:#667;text-decoration:none;margin:0 6px">Termini</a>
+    </p>
+    <p style="margin:0;font-size:13.5px">
+      &copy; 2026 TrovaImpresa &mdash; Alessio Pinto, Rieti (RI) &mdash;
+      <a href="mailto:info@trovaimpresa.com" style="color:#667">info@trovaimpresa.com</a>
+    </p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"Gestionale TrovaImpresa per imprese edili",
+  "applicationCategory":"BusinessApplication",
+  "applicationSubCategory":"Gestionale per imprese edili e artigiani",
+  "operatingSystem":"Web browser, Android, iOS",
+  "url":"https://trovaimpresa.com/software-gestionale-imprese-edili",
+  "inLanguage":"it-IT",
+  "description":"Gestionale per imprese edili e artigiani: preventivi in PDF, fatture elettroniche con IVA riga per riga, lavori e cantieri, clienti, calendario e agenda per gli operai. Funziona da telefono e da computer.",
+  "featureList":[
+    "Preventivi con voci di costo e PDF",
+    "Preventivo accettato che diventa lavoro",
+    "Fatture elettroniche con file XML per lo SDI",
+    "IVA al 10 per cento riga per riga",
+    "Ritenuta d'acconto e bollo per il regime forfettario",
+    "Lavori con stato da fare, in corso, fatto",
+    "Clienti privati, aziende e condomini",
+    "Calendario, agenda per gli operai e mappa dei cantieri",
+    "Foto prima e dopo, mezzi, attrezzature e scadenzario",
+    "Assistente AI che compila i moduli da una frase",
+    "Esportazione dei dati in Excel e JSON"
+  ],
+  "offers":{
+    "@type":"Offer",
+    "price":"49",
+    "priceCurrency":"EUR",
+    "url":"https://trovaimpresa.com/prezzi.html",
+    "availability":"https://schema.org/InStock",
+    "description":"Compreso nel piano Premium di TrovaImpresa: 49 euro all'anno oppure 5 euro al mese, con i primi 3 mesi in regalo e senza rinnovo automatico."
+  },
+  "publisher":{"@type":"Organization","name":"TrovaImpresa","url":"https://trovaimpresa.com"}
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Il gestionale per imprese edili si deve installare?","acceptedAnswer":{"@type":"Answer","text":"No. Si apre dal browser, sul telefono e sul computer. Non c'è niente da scaricare e nessun aggiornamento da fare a mano: basta la connessione."}},
+    {"@type":"Question","name":"Quanto costa il gestionale per imprese edili?","acceptedAnswer":{"@type":"Answer","text":"È compreso nel Premium di TrovaImpresa: 49 euro all'anno oppure 5 euro al mese, prezzo finale senza IVA da aggiungere. I primi 3 mesi sono in regalo, non serve la carta di credito e non c'è rinnovo automatico."}},
+    {"@type":"Question","name":"Fa la fattura elettronica?","acceptedAnswer":{"@type":"Answer","text":"Prepara il file XML nel formato richiesto dallo SDI, con l'IVA riga per riga, la ritenuta d'acconto, il bollo e il codice della cassa previdenziale per i tecnici. La trasmissione allo SDI resta a carico dell'utente o del suo commercialista: il programma non fa da intermediario."}},
+    {"@type":"Question","name":"I dati del gestionale si possono esportare?","acceptedAnswer":{"@type":"Answer","text":"Sì. I dati appartengono all'utente e si esportano quando si vuole in Excel o in JSON, senza costi aggiuntivi e senza dover chiedere autorizzazioni."}},
+    {"@type":"Question","name":"Serve la carta di credito per provare il gestionale?","acceptedAnswer":{"@type":"Answer","text":"No. Ci si registra con la mail e i 3 mesi di Premium partono subito. La carta si inserisce soltanto il giorno in cui si decide di continuare: se quel giorno non arriva, non viene chiesto nulla e il profilo resta online sul piano gratuito."}},
+    {"@type":"Question","name":"Ci possono lavorare anche gli operai?","acceptedAnswer":{"@type":"Answer","text":"Sì. C'è un accesso separato per collaboratori e segretaria: l'operaio entra nella propria agenda e vede soltanto i lavori assegnati a lui."}},
+    {"@type":"Question","name":"Va bene anche per un artigiano che lavora da solo?","acceptedAnswer":{"@type":"Answer","text":"Sì, ed è il caso più comune. Le sezioni che non servono, come squadra, mezzi e reparti, si possono semplicemente non usare: il minimo utile sono lavori, clienti e fatture."}},
+    {"@type":"Question","name":"Che differenza c'è rispetto a un gestionale di fatturazione generico?","acceptedAnswer":{"@type":"Answer","text":"Un gestionale generico non gestisce l'IVA agevolata al 10 per cento sulle manutenzioni, non collega il lavoro alla fattura e non segnala i lavori finiti e non ancora fatturati. In questo gestionale il centro è il lavoro, e la fattura nasce da lì."}}
+  ]
+}
+</script>
+
+</body>
+</html>
