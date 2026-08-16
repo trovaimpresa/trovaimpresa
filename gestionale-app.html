@@ -2305,9 +2305,11 @@
      Chiave = azione di apertura + id, cosi' due sezioni non si pestano i piedi. */
   const AZ_APRI={};
   let _azPendenti=null;
+  /* L'azione che «apre» non si chiama uguale dappertutto: edit-prev,
+     edit-mezzo, edit-scad, apri-cli, sq-edit... sono tutte quella. */
   function schedaUnPulsante(azioni){
     const az=(azioni||[]).filter(x=>x&&!x.sep);
-    const i=az.findIndex(x=>x.action&&/^edit-/.test(String(x.action)));
+    const i=az.findIndex(x=>x.action&&/^(edit-|apri-)|^sq-edit$/.test(String(x.action)));
     if(i<0)return null;                       /* niente apertura: si resta come prima */
     const apri=az[i], resto=az.filter((x,k)=>k!==i);
     /* senza id non si sa cosa aprire: meglio lasciare la scheda com'era
@@ -2331,7 +2333,7 @@
     return `<button class="${cls}${a.del?" btn-danger":""}" data-chiudi="1" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`;
   }
   function _azUtili(voci){
-    return (voci||[]).filter(x=>x&&!x.sep&&!(x.action&&/^edit-/.test(String(x.action))));
+    return (voci||[]).filter(x=>x&&!x.sep&&!(x.action&&/^(edit-|apri-)|^sq-edit$/.test(String(x.action))));
   }
   function azioniSopra(voci){
     const v=_azUtili(voci).filter(x=>!x.del);
@@ -2346,7 +2348,7 @@
   function schedaAzioni(azioni){
     const az=(azioni||[]).filter(x=>x&&!x.sep);
     if(!az.length)return "";
-    const i=az.findIndex(x=>x.action&&/^edit-/.test(String(x.action)));
+    const i=az.findIndex(x=>x.action&&/^(edit-|apri-)|^sq-edit$/.test(String(x.action)));
     if(i>0){const e=az.splice(i,1)[0];az.unshift(e);}
     const primi=az.slice(0,SCHEDA_BTN_MAX), resto=az.slice(SCHEDA_BTN_MAX);
     let h=primi.map(a=>`<button class="btn btn-sm ja${a.del?" btn-danger del":""}" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`).join("");
@@ -2488,7 +2490,7 @@
       <div class="job-top"><div class="job-cli">${o.titolo||""}</div>${o.destra||""}</div>
       ${meta.length?`<div class="job-meta">${meta.map(x=>`<span>${x}</span>`).join("")}</div>`:""}
       ${o.nota?`<div class="job-note">${o.nota}</div>`:""}
-      <div class="job-actions">${schedaAzioni(o.azioni)}</div></div>`;
+      <div class="job-actions">${schedaUnPulsante(o.azioni)||schedaAzioni(o.azioni)}</div></div>`;
   }
   function tabVuotoCerca(q){
     /* il pulsante per togliere la ricerca: senza, chi cerca una cosa che non
@@ -10683,19 +10685,31 @@ ${vecchi?`
     /* Modulo lungo -> modale grande: a sinistra l'intestazione del preventivo,
        a destra le voci di costo, che sono la parte che ha bisogno di spazio. */
     openSheetGrande(isNew?"Nuovo preventivo":"Preventivo N. "+p.numero,
+      /* 16 agosto 2026 — questa finestra non aveva le zone (le schede bianche
+         con la riga blu) perche' dentro aveva campi sciolti invece dei
+         blocchi .sh-b, che le altre finestre hanno gia'. Ora ce li ha:
+         «Che preventivo e'», «Le voci di costo» e il conto. */
       `<div class="sh-cols"><div class="sh-col">
+      <div class="sh-b">
+      <div class="sh-tit">Che preventivo è</div>
       <div class="field"><label>Titolo</label><input id="pv-tit" value="${esc(p.titolo||"")}" placeholder="Es. Rifacimento bagno completo"></div>
       <div class="row2">
         <div class="field"><label>Cliente</label><select id="pv-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
         <div class="field"><label>Data</label><input type="date" id="pv-data" value="${p.data||todayStr()}"></div></div>
       <div class="field"><label>Note (compaiono sul PDF)</label><textarea id="pv-note" placeholder="Condizioni, tempi, esclusioni...">${esc(p.note||"")}</textarea></div>
+      </div>
       </div><div class="sh-col">
-      <div class="field"><label>Voci del preventivo</label>
+      <div class="sh-b">
+      <div class="sh-tit">Le voci di costo</div>
+      <div class="field">
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
         <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0))}</div></div>
+      </div>
+      <div class="sh-b">
       ${bloccoParcella(p)}
       ${bloccoIvaImpresa(p)}
+      </div>
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button>`);
@@ -15572,7 +15586,7 @@ ${vecchi?`
     if(t.dataset.chiudi){ const _ov=$("#overlay"); if(_ov)_ov.classList.remove("open"); }
     /* «Apri» su una scheda: le altre azioni di quella scheda aspettano qui,
        e se le prende la finestra appena si apre (vedi openSheetGrande). */
-    if(/^edit-/.test(String(a))) _azPendenti=AZ_APRI[String(a)+":"+String(id==null?"":id)]||null;
+    if(/^(edit-|apri-)|^sq-edit$/.test(String(a))) _azPendenti=AZ_APRI[String(a)+":"+String(id==null?"":id)]||null;
     if(a==="spesa-add")return spesaAdd();
     /* "Mostra tutti": svuota la casella di ricerca della sezione in cui si sta */
     if(a==="cerca-azzera"){

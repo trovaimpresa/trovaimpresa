@@ -2438,3 +2438,11 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
   .sheet--grande .sh-foot{ gap:10px; }
   .sheet--grande .sh-foot .sh-foot-sx{ flex:0 0 auto; margin-right:auto; }
 }
+
+/* Dentro una scheda-zona, il primo pezzo non deve avere la riga di
+   separazione sopra: nel preventivo il blocco «IVA e totale» se la portava
+   dietro da quando stava in mezzo agli altri campi, e nella scheda diventava
+   una riga grigia appesa al vuoto. */
+.sheet--grande .sh-cols .sh-b > .field:first-child[style*="border-top"]{
+  border-top:none !important; padding-top:0 !important; margin-top:0 !important;
+}
