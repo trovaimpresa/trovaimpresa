@@ -156,6 +156,27 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* AI.dati — 16 agosto 2026                                            */
+  /*                                                                     */
+  /* La porta nuova, quella che usa il gestionale per riempire le caselle */
+  /* DENTRO il modulo. Qui non si disegna niente: si chiede all'AI e si   */
+  /* restituiscono i dati. Le finestre le fa chi chiama.                  */
+  /*                                                                     */
+  /* Restituisce l'oggetto con i dati, oppure null quando i crediti sono  */
+  /* finiti (in quel caso l'avviso l'ha gia' mostrato `genera`).          */
+  /* Lancia un errore, con parole comprensibili, in tutti gli altri casi. */
+  /* ------------------------------------------------------------------ */
+  AI.dati = async function (feature, testo) {
+    const risultato = await genera(feature, testo);
+    if (risultato === null) return null;
+    try {
+      return JSON.parse(risultato);
+    } catch (e) {
+      throw new Error('Non ho capito, prova a riscriverlo con parole tue');
+    }
+  };
+
+  /* ------------------------------------------------------------------ */
   /* PANNELLO GENERAZIONE                                                */
   /* ------------------------------------------------------------------ */
   function apriPannello() {
@@ -561,7 +582,19 @@
     return el;
   }
 
+  /* ⚠️ 16 agosto 2026 — QUESTI DUE PULSANTI NON APRONO PIU' UNA FINESTRELLA.
+     Aprono il modulo vero con la riga dell'AI gia' pronta: cosi' le due
+     strade (il pulsante in cima alla sezione e la riga dentro il modulo)
+     finiscono nello stesso posto, e chi scrive vede riempirsi le caselle
+     invece di ricevere un modulo pieno di roba che non ha scritto lui.
+
+     La vecchia finestrella resta qui sotto solo come rete di sicurezza:
+     serve se il browser ha in memoria una versione vecchia di
+     gestionale-app.html e il ponte `gestApriModuloAI` non c'e' ancora.
+     In quel caso l'AI continua a funzionare come prima invece di non
+     fare niente. */
   function compilaCliente() {
+    if (typeof window.gestApriModuloAI === 'function') { window.gestApriModuloAI('cliente'); return; }
     pannelloCompila(
       'Descrivi il cliente',
       'Condominio Le Betulle, via Verdi 12 Milano, amministratore Rossi, 02 1234567',
@@ -589,6 +622,7 @@
   }
 
   function compilaLavoro() {
+    if (typeof window.gestApriModuloAI === 'function') { window.gestApriModuloAI('lavoro'); return; }
     pannelloCompila(
       'Descrivi il lavoro',
       'Giovedì prossimo taglio siepe da Le Betulle, ci va Marco, 350 euro',
@@ -678,17 +712,17 @@
 .ai-note{margin-top:14px;padding:12px;background:#f9fafb;border-radius:9px;font-size:13px;
   line-height:1.55;color:#4b5563}
 .ai-azioni{display:flex;align-items:center;gap:8px;margin-top:18px;flex-wrap:wrap}
-.ai-disc{margin-top:12px;font-size:11.5px;color:#9ca3af;line-height:1.5}
+.ai-disc{margin-top:12px;font-size:13px;color:#9ca3af;line-height:1.5}
 
 .ai-piani{display:flex;gap:11px;margin-bottom:20px}
 .ai-piano{flex:1;border:1.5px solid #e5e7eb;border-radius:12px;padding:15px 10px;position:relative;background:#fafafa}
 .ai-piano.top{border-color:#0f766e;background:#f0fdfa}
 .ai-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#0f766e;color:#fff;
   font:700 9px/1 system-ui;padding:4px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.4px}
-.ai-pn{font-size:12px;font-weight:650;color:#6b7280;margin-bottom:5px}
+.ai-pn{font-size:13px;font-weight:650;color:#6b7280;margin-bottom:5px}
 .ai-pp{font-size:21px;font-weight:750;color:#111827}
-.ai-pp small{font-size:11px;font-weight:500;color:#9ca3af}
-.ai-pd{font-size:11.5px;color:#6b7280;margin-top:5px}
+.ai-pp small{font-size:13px;font-weight:500;color:#9ca3af}
+.ai-pd{font-size:13px;color:#6b7280;margin-top:5px}
 
 .ai-help-chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 16px}
 .ai-help-chip{background:#f0fdfa;border:1px solid #ccece6;color:#115e59;border-radius:999px;
@@ -697,7 +731,7 @@
 .ai-help-res{margin-top:20px;border-top:1px solid #e5e7eb;padding-top:18px}
 .ai-help-txt{white-space:pre-wrap;font-size:14.5px;line-height:1.6;color:#1f2937}
 .ai-help-res .ai-ghost{display:block;margin-top:10px}
-.ai-help-foot{margin-top:16px;font-size:11.5px;color:#9ca3af;text-align:center}
+.ai-help-foot{margin-top:16px;font-size:13px;color:#9ca3af;text-align:center}
 
 @media(max-width:560px){
   .ai-box{padding:24px 18px 18px;border-radius:14px}

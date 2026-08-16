@@ -132,6 +132,58 @@
     .ai-str-piu,.ai-str-cta{flex:1 1 40%;order:3;text-align:center}
   }
 
+  /* ============================================================
+     16 agosto 2026 — L'AI DENTRO IL MODULO.
+     Una riga chiusa in cima al modulo: la apri, scrivi a parole, e le
+     caselle qui sotto si riempiono davanti agli occhi.
+     ⚠️ Chiusa deve sparire nel modulo, non gridare: chi compila a mano
+        non se la deve trovare tra i piedi mille volte al giorno.
+     ⚠️ Niente testo sotto i 13 px. ============================== */
+  .ai-riga{border:1px solid var(--bordo);border-radius:var(--r);
+    background:var(--sfondo);margin-bottom:16px;overflow:hidden}
+  .ai-riga--aperta{border-color:var(--blu);background:var(--card)}
+
+  .ai-riga-apri{display:flex;align-items:center;gap:10px;width:100%;
+    background:transparent;border:none;padding:11px 13px;cursor:pointer;
+    font-family:inherit;text-align:left}
+  .ai-riga-apri:hover{background:var(--blu-tenue)}
+  .ai-riga-mk{flex:0 0 auto;background:var(--blu-tenue);color:var(--blu-scuro);
+    font-size:13px;font-weight:800;letter-spacing:.6px;padding:3px 8px;border-radius:6px}
+  .ai-riga--aperta .ai-riga-mk{background:var(--blu);color:#fff}
+  .ai-riga-t{flex:1 1 auto;font-size:14px;font-weight:700;color:var(--testo-2)}
+  .ai-riga--aperta .ai-riga-t{color:var(--testo)}
+  .ai-riga-c{flex:0 0 auto;font-size:13px;font-weight:700;color:var(--testo-3)}
+
+  .ai-riga-giu{padding:0 13px 13px}
+  .ai-riga-giu[hidden]{display:none}
+  .ai-riga-lab{display:block;font-size:13px;font-weight:600;
+    color:var(--testo-2);margin-bottom:5px}
+  .ai-riga-giu textarea{width:100%;font-family:inherit;font-size:15px;
+    line-height:1.5;color:var(--testo);background:var(--card);
+    border:1px solid var(--bordo-forte);border-radius:var(--r);
+    padding:10px 12px;resize:vertical;min-height:62px}
+  .ai-riga-giu textarea:focus{outline:none;border-color:var(--blu);
+    box-shadow:0 0 0 3px var(--blu-tenue)}
+  .ai-riga-az{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .ai-riga-go{background:var(--blu);color:#fff;border:none;border-radius:var(--r);
+    padding:11px 18px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer}
+  .ai-riga-go:hover{background:var(--blu-hover)}
+  .ai-riga-go:disabled{background:var(--bordo-forte);cursor:not-allowed}
+  .ai-riga-st{flex:1 1 200px;font-size:13.5px;line-height:1.45;color:var(--testo-2)}
+  .ai-riga-st--ok{color:var(--ok);font-weight:600}
+  .ai-riga-st--err{color:var(--err);font-weight:600}
+
+  /* la casella appena riempita si illumina per un attimo: e' cosi' che
+     si vede COSA ha fatto l'AI e dove, invece di ritrovarsi un modulo
+     pieno di roba senza sapere da dove e' uscita */
+  .ai-pieno{animation:aiPieno 2.6s ease-out}
+  @keyframes aiPieno{
+    0%   {background:var(--blu-tenue);box-shadow:0 0 0 3px var(--blu-tenue)}
+    70%  {background:var(--blu-tenue);box-shadow:0 0 0 3px var(--blu-tenue)}
+    100% {background:var(--card);box-shadow:none}
+  }
+  @media(prefers-reduced-motion:reduce){.ai-pieno{animation:none;background:var(--blu-tenue)}}
+
   .new-rep-btn{display:block;width:100%;max-width:560px;margin:16px auto 0;background:var(--card);border:2px dashed var(--bordo-forte);color:var(--accent-d);border-radius:14px;padding:16px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:var(--shadow)}
   .empty-rep{text-align:center;color:var(--muted);padding:30px 16px;font-weight:600;font-size:14px}
   .picker{display:flex;flex-wrap:wrap;gap:8px}.picker .pk{font-size:20px;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}.picker .pk.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,102,255,.2)}

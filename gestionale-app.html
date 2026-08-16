@@ -245,7 +245,7 @@
     </section>
 
     <section id="clienti">
-      <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o società: ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn add" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
+      <div class="sec-head"><h2>Clienti</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-cli" data-tipo="privato" title="Una persona: nome e cognome, codice fiscale">+ Privato</button><button class="btn add" data-action="new-cli" data-tipo="azienda" title="Ditta o società: ragione sociale, partita IVA">+ Azienda</button><button class="btn add" data-action="new-cli" data-tipo="condominio" title="Con amministratore: codice fiscale, niente partita IVA">+ Condominio</button><button class="btn" title="Scrivi a parole, compilo io il modulo" onclick="window.AI&&window.AI.compilaCliente&&window.AI.compilaCliente()">✨ Compila con AI</button></div></div>
       <input type="text" id="cli-search" class="lav-search" placeholder="Cerca nome, indirizzo, referente" style="margin-bottom:14px" autocomplete="off" spellcheck="false">
       <div class="grid" id="cli-list"></div>
       <input type="file" id="cli-doc-file" multiple style="display:none">
@@ -1402,6 +1402,176 @@
 
     box.hidden = false;
   }
+
+  /* ============================================================
+     L'AI DENTRO IL MODULO — 16 agosto 2026
+
+     Prima il giro era questo: si apriva una finestrella, si scriveva,
+     la finestrella SI CHIUDEVA, e poi compariva il modulo gia' pieno.
+     Non vedevi mai cosa aveva fatto ne' quali caselle aveva toccato: se
+     sbagliava una cosa ti ritrovavi in un modulo pieno di roba non tua e
+     dovevi ricominciare da capo. Era una scatola nera, non un aiuto.
+
+     Adesso la riga sta DENTRO il modulo, in cima, chiusa. La apri, scrivi
+     a parole, e le caselle qui sotto si riempiono davanti agli occhi —
+     illuminate per un attimo, cosi' vedi dove ha messo cosa. Se sbaglia,
+     correggi quella casella: sei gia' nel modulo.
+
+     ⚠️ NON SI SALVA NIENTE DA SOLO. L'AI riempie e basta: a premere
+        «Crea» sei sempre tu, dopo aver guardato.
+     ⚠️ I nomi delle caselle stanno in un posto solo (CAMPI qui sotto):
+        se domani il modulo cambia, si cambia qui.
+     ============================================================ */
+  const AI_MODULI = {
+    lavoro: {
+      feature: 'dati_lavoro',
+      titolo:  'Scrivilo a parole e te lo riempio io',
+      esempio: 'Giovedì prossimo taglio siepe da Le Betulle, ci va Marco, 350 euro',
+      campi: [
+        { id:'j-desc',    da:'descrizione', nome:'Cosa c\'è da fare' },
+        { id:'j-dove',    da:'dove',        nome:'Dove' },
+        { id:'j-data',    da:'data',        nome:'Data prevista' },
+        { id:'j-imp',     da:'importo',     nome:'Importo' },
+        { id:'j-cliente', da:'cliente',     nome:'Cliente',  tendina:true },
+        { id:'j-operaio', da:'operatore',   nome:'Chi ci va', tendina:true }
+      ]
+    },
+    cliente: {
+      feature: 'dati_cliente',
+      titolo:  'Scrivilo a parole e te lo riempio io',
+      esempio: 'Condominio Le Betulle, via Verdi 12 Milano, amministratore Rossi, 02 1234567',
+      campi: [
+        { id:'c-nome', da:'nome',      nome:'Nome' },
+        { id:'c-ind',  da:'indirizzo', nome:'Via e numero' },
+        { id:'c-ref',  da:'referente', nome:'Referente' },
+        { id:'c-tel',  da:'telefono',  nome:'Telefono' }
+      ]
+    }
+  };
+
+  function aiRigaHTML(tipo){
+    const m = AI_MODULI[tipo]; if(!m) return "";
+    const pro = ruoloUtente==='professionista' && tipo==='lavoro';
+    return '<div class="ai-riga" id="ai-riga">'
+      + '<button type="button" class="ai-riga-apri" id="ai-riga-apri" aria-expanded="false" aria-controls="ai-riga-giu">'
+      +   '<span class="ai-riga-mk">AI</span>'
+      +   '<span class="ai-riga-t">' + (pro ? 'Scrivi la pratica a parole e te la riempio io' : m.titolo) + '</span>'
+      +   '<span class="ai-riga-c">1 credito</span>'
+      + '</button>'
+      + '<div class="ai-riga-giu" id="ai-riga-giu" hidden>'
+      +   '<label class="ai-riga-lab" for="ai-riga-in">Scrivi come parleresti al telefono</label>'
+      +   '<textarea id="ai-riga-in" rows="2" placeholder="' + esc(m.esempio) + '"></textarea>'
+      +   '<div class="ai-riga-az">'
+      +     '<button type="button" class="ai-riga-go" id="ai-riga-go">Riempi le caselle</button>'
+      +     '<span class="ai-riga-st" id="ai-riga-st"></span>'
+      +   '</div>'
+      + '</div>'
+      + '</div>';
+  }
+
+  /* le tendine Cliente / Chi ci va si riempiono dopo, in un secondo momento:
+     si riprova per qualche secondo finche' l'opzione col nome giusto compare.
+     Confronto tollerante: minuscole, senza accenti, senza spazi ai bordi. */
+  function _aiNorm(s){
+    return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim();
+  }
+  function _aiTendina(sel, nome, entro, quandoFatto){
+    if(!sel||!nome) return;
+    const cerca=_aiNorm(nome), fine=Date.now()+(entro||3000);
+    (function prova(){
+      for(let i=0;i<sel.options.length;i++){
+        if(_aiNorm(sel.options[i].textContent)===cerca){
+          sel.value=sel.options[i].value;
+          sel.dispatchEvent(new Event("change",{bubbles:true}));
+          if(quandoFatto)quandoFatto();
+          return;
+        }
+      }
+      if(Date.now()<fine) setTimeout(prova,200);
+    })();
+  }
+
+  function _aiIllumina(el){
+    if(!el) return;
+    el.classList.add("ai-pieno");
+    setTimeout(()=>el.classList.remove("ai-pieno"),2600);
+  }
+
+  function aiRigaVia(tipo, apriSubito){
+    const m = AI_MODULI[tipo]; if(!m) return;
+    const riga=$("#ai-riga"), apri=$("#ai-riga-apri"), giu=$("#ai-riga-giu"),
+          inp=$("#ai-riga-in"), go=$("#ai-riga-go"), st=$("#ai-riga-st");
+    if(!riga||!apri||!giu||!inp||!go) return;
+
+    function mostra(si){
+      if(si) giu.removeAttribute("hidden"); else giu.setAttribute("hidden","");
+      apri.setAttribute("aria-expanded", si?"true":"false");
+      riga.classList.toggle("ai-riga--aperta", si);
+      if(si) setTimeout(()=>inp.focus(),60);
+    }
+    apri.onclick=()=>mostra(giu.hasAttribute("hidden"));
+
+    go.onclick=async function(){
+      const testo=inp.value.trim();
+      if(!testo){ st.className="ai-riga-st ai-riga-st--err"; st.textContent="Scrivi due righe qui sopra e riprovo."; inp.focus(); return; }
+      if(!window.AI||typeof window.AI.dati!=="function"){
+        st.className="ai-riga-st ai-riga-st--err";
+        st.textContent="L'assistente non si è caricato. Ricarica la pagina e riprova.";
+        return;
+      }
+      const prima=go.textContent;
+      go.disabled=true; go.textContent="Ci penso io...";
+      st.className="ai-riga-st"; st.textContent="";
+      try{
+        const d=await window.AI.dati(m.feature,testo);
+        if(d===null){ go.disabled=false; go.textContent=prima; return; }  /* crediti finiti: l'avviso l'ha già dato l'AI */
+        const messi=[];
+        m.campi.forEach(c=>{
+          const v=d[c.da];
+          if(v===undefined||v===null||String(v).trim()==="") return;
+          const el=document.getElementById(c.id);
+          if(!el) return;
+          if(c.tendina){
+            _aiTendina(el,v,3000,()=>_aiIllumina(el));
+            messi.push(c.nome);
+          }else{
+            el.value=String(v);
+            el.dispatchEvent(new Event("input",{bubbles:true}));
+            _aiIllumina(el);
+            messi.push(c.nome);
+          }
+        });
+        if(!messi.length){
+          st.className="ai-riga-st ai-riga-st--err";
+          st.textContent="Non ho capito niente di utile. Prova a scriverlo con più dettagli: cosa, dove, quando, quanto.";
+        }else{
+          st.className="ai-riga-st ai-riga-st--ok";
+          st.textContent="Ho riempito "+messi.length+(messi.length===1?" casella: ":" caselle: ")
+            + messi.join(", ") + ". Controlla e correggi quello che serve, poi salva tu.";
+        }
+      }catch(e){
+        st.className="ai-riga-st ai-riga-st--err";
+        st.textContent=(e&&e.message)?e.message:"Non ci sono riuscito. Riprova fra un attimo.";
+      }
+      go.disabled=false; go.textContent=prima;
+    };
+
+    inp.addEventListener("keydown",e=>{
+      /* Invio manda, Maiuscole+Invio va a capo: nel modulo si scrive una
+         frase sola, non un tema. */
+      if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); go.click(); }
+    });
+
+    if(apriSubito) mostra(true);
+  }
+
+  /* Il ponte per il pulsante «Compila con AI» che sta in cima alle sezioni:
+     non apre piu' una finestrella, apre il modulo con la riga gia' pronta.
+     Cosi' le due strade portano nello stesso posto. */
+  window.gestApriModuloAI=function(tipo){
+    if(tipo==='cliente'){ cliForm(null,'privato',true); return; }
+    jobForm(null,"",null,true,false,true);
+  };
 
   /* controllo segmentato (Agenda "Mostra", Galleria tipo foto): un solo pulsante acceso */
   function segmOn(sel,v){$$(sel+" button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));}
@@ -7566,7 +7736,7 @@ ${vecchi?`
     return o;
   }
 
-  function jobForm(job,presetDate,preset,supa,fattura){
+  function jobForm(job,presetDate,preset,supa,fattura,aiApri){
     const isNew=!job;
     const jid=job?job.id:uid();
     job=job||Object.assign({id:jid,stato:"da_fare",fattStato:"none",dataPrevista:presetDate||""},preset||{});
@@ -7582,6 +7752,7 @@ ${vecchi?`
         '<div class="sh-cols"><div class="sh-col">'
         +'<div class="sh-b">'
         +`<div class="sh-tit">${pro?"La pratica":"Il lavoro"}</div>`
+        +(isNew?aiRigaHTML('lavoro'):'')
         +`<div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="${pro?"Es. CILA per rifacimento bagno":"Es. taglio siepe e pulizia aiuole"}">${esc(job.descrizione||"")}</textarea></div>`
         +`<div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>`
         +'<div class="row2">'
@@ -7599,7 +7770,9 @@ ${vecchi?`
         +'</div></div>',
         '<button class="btn b-cancel" data-action="close">Annulla</button>'
         +`<button class="btn-primary b-save" data-action="save-job">${fattura?"Crea fattura":(pro?"Crea pratica":"Crea lavoro")}</button>`);
-      fillOperai();fillClienti(job.cliente_id);return;
+      fillOperai();fillClienti(job.cliente_id);
+      if(isNew)aiRigaVia('lavoro',!!aiApri);
+      return;
     }
     const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
     const dipOpts=dipCache.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join("");
@@ -7999,7 +8172,7 @@ ${vecchi?`
      codice fiscale, dove sta di preciso, e dove mandargliela. Stessa finestra
      grande a due colonne dei Dati azienda: a sinistra chi è e dove sta,
      a destra il fisco. Tutti i campi nuovi sono facoltativi. */
-  function cliForm(c,tipoNuovo){
+  function cliForm(c,tipoNuovo,aiApri){
     const isNew=!c;c=c||{};
     if(isNew&&tipoNuovo)c.tipo=tipoNuovo;
     const priv=ruoloUtente==='professionista';
@@ -8016,6 +8189,7 @@ ${vecchi?`
 
       <div class="sh-b">
         <div class="sh-tit">Chi è</div>
+        ${isNew?aiRigaHTML('cliente'):''}
         <div class="field"><label>Che tipo di cliente è</label>
           <div class="tipo-cli" id="c-tipo-box" data-tipo="${tipoCli}">
             <button type="button" class="tipo-btn${tipoCli==='privato'?' on':''}" data-t="privato" onclick="setTipoCliente(this)">Privato<small>una persona</small></button>
@@ -8068,6 +8242,7 @@ ${vecchi?`
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button>`);
+    if(isNew)aiRigaVia('cliente',!!aiApri);
   }
   /* Clic su Privato / Azienda / Condominio: cambia solo le parole del modulo.
      Nessun campo sparisce, così nessuno resta bloccato se il suo caso è strano. */
