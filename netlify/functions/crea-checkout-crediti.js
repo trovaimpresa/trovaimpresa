@@ -64,7 +64,7 @@ exports.handler = async (event) => {
     const { data: chi, error: erroreChi } = await supabase.auth.getUser(token);
     const utente = chi && chi.user;
     if (erroreChi || !utente || !utente.id) {
-      return rispondi(401, { error: 'La sessione e\' scaduta. Rientra e riprova.' });
+      return rispondi(401, { error: 'La sessione è scaduta. Rientra e riprova.' });
     }
 
     // ---- 2. il taglio -----------------------------------------------
@@ -80,7 +80,7 @@ exports.handler = async (event) => {
     if (!priceId) {
       // meglio dirlo chiaro adesso che scoprirlo da un pagamento a vuoto
       console.error('[crediti] manca la variabile Netlify ' + scelto.price);
-      return rispondi(500, { error: 'Ricarica non ancora disponibile. Riprova piu\' tardi.' });
+      return rispondi(500, { error: 'Ricarica non ancora disponibile. Riprova più tardi.' });
     }
 
     // ---- 3. il Premium ---------------------------------------------
