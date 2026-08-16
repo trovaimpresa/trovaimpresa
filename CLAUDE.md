@@ -7061,8 +7061,26 @@ fotografato che si trasforma in spesa → preventivo dettato a voce →
 - **Il calendario**: scrive a 12 px (sotto il minimo dei 13), taglia i nomi a
   metà, e ha caselle enormi e vuote.
 
-### Da non dimenticare
+### Da non dimenticare (i lavori vecchi ancora aperti)
 
-`prezzi.html` non nomina il gestionale nemmeno una volta e non esiste nessuna
-pagina pubblica che lo spieghi: resta **la cosa più importante rimasta**, più
-importante dell'AI.
+- **`prezzi.html` non nomina il gestionale nemmeno una volta** e non esiste
+  nessuna pagina pubblica che lo spieghi: resta **la cosa più importante
+  rimasta**, più importante dell'AI. È la funzione che vale di più e sul sito
+  non c'è scritto da nessuna parte.
+- ⚠️ **Le richieste dalle pagine `cerca-*` mandano telefono ed email in chiaro
+  a 5 imprese in una volta.** È un problema di privacy, non di grafica.
+- **L'email delle 24 ore**: non è mai stata vista partire davvero.
+- **Grafico admin, Premium e Gestionali**: per metterli sul grafico servono due
+  colonne nuove (`premium_dal`, `gestionale_dal`). Si riempiono da domani in
+  avanti, il passato non torna.
+- ⚠️ **Mistero non risolto**: `gestionale-app.html` non carica
+  `js/assistente-trovaimpresa.js` (cercato tre volte) eppure lì la nuvoletta si
+  vedeva. Dopo il push va controllato se è davvero sparita.
+
+### L'ordine completo, in una riga
+
+Blocco 0 crediti → Blocco 1 "Controlla i tuoi crediti" → Blocco 2 bollino AI →
+Blocco 3 controllore preventivi → fatture e pratiche → scontrino fotografato →
+preventivo dettato → "chiedi ai tuoi dati". In mezzo, quando serve una pausa
+dall'AI: sezioni allineate alle finestre, ricerca unica, "Fattura
+n. 12/undefined", calendario. E prima o poi, la pagina pubblica del gestionale.

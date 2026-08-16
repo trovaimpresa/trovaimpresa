@@ -2,55 +2,55 @@ Lavoriamo sul gestionale di TrovaImpresa (gestionale-app.html).
 
 Attiva le skill: trovaimpresa-gestionale, guida-passo-passo,
 collaudo-obbligatorio, consigliere-crescita.
-Leggi CLAUDE.md prima di toccare qualsiasi cosa, in fondo c'e' "DOVE SIAMO
-RIMASTI (15 agosto, sera - seconda tornata)": il Lavoro 1 del Riepilogo e'
-gia' fatto e in produzione.
+Leggi CLAUDE.md prima di toccare qualsiasi cosa: in fondo c'è
+"DOVE SIAMO REALMENTE RIMASTI (16 agosto, pomeriggio - il programma AI)".
+Lì dentro c'è l'elenco completo dei lavori e le decisioni già prese
+(100 crediti al mese, si parte dal Blocco 0).
 
-UN LAVORO SOLO: LA SCHEDA COMPLETA ("Report completo")
+UN LAVORO SOLO: BLOCCO 0 - CHIUDERE IL BUCO DEI CREDITI AI
 
-Dentro il Riepilogo, insieme alle altre schede, ci deve essere una sua card
-personale che si chiama "Report completo". Cliccandola si apre un report
-completo di tutto il reparto in una pagina sola.
+Oggi c'è un pulsante "Ricarica 150 crediti - 19 euro" che porta a
+ricarica-crediti.html, e quella pagina NON ESISTE. Chi clicca sbatte il muso.
+Il resto del sistema crediti invece c'è già (tabella ai_accounts, funzioni
+consume_ai_credit e get_ai_status, colonna credits_extra per i crediti
+comprati che non scadono).
 
-Come deve essere:
+Le cinque cose da fare, in quest'ordine:
 
-- Tutte le sezioni gia' aperte, con il loro contenuto vero, una sotto
-  l'altra. Fuori il Cestino e fuori "Cosa ti manca?" / "Chiedi una funzione".
-- Le sezioni vuote non si mostrano.
-- Tutto in SOLA LETTURA: niente pulsanti per modificare, niente menu "...",
-  niente caselle da compilare.
-- Non si modifica a mano: si aggiorna DA SOLO perche' legge gli stessi dati e
-  usa le stesse funzioni di calcolo delle sezioni vere. Se cambio una regola
-  in una sezione, il report deve dire subito il numero nuovo.
-- Due pulsanti in cima: "Crea PDF" e "Stampa". La stampa deve uscire pulita:
-  niente menu laterale, niente barre, in modo che diventi un foglio da
-  portare in riunione o dal commercialista.
-- NIENTE grafico per adesso: lo facciamo in un secondo momento.
-- NIENTE interruttore "nascondi importi": non serve a nessuno.
-- Niente librerie esterne pesanti. jsPDF c'e' gia' nel file e si carica solo
-  quando serve.
+1. SQL: portare quota_per_piano a 100 crediti al mese per il piano che paga
+   (oggi dà: base 0, ai 60, ai_pro 300).
+2. SQL: una funzione riservata al service_role che aggiunge i crediti
+   comprati a ai_accounts.credits_extra.
+3. netlify/functions/crea-checkout-crediti.js - pagamento singolo Stripe,
+   copiato da crea-checkout-gestionale.js. Tre tagli: 150, 400, 1000 crediti.
+4. ricarica-crediti.html - la pagina che manca, con i tre tagli.
+5. L'accredito dentro stripe-webhook-abbonamenti.js.
+
+IL PUNTO PIÙ DELICATO, dimmelo se lo vedi anche tu: se il webhook sbaglia,
+uno paga e non riceve i crediti. E se Stripe manda lo stesso webhook due
+volte (lo fa), non deve accreditare due volte. Voglio la prova del caso che
+deve essere RIFIUTATO, non solo di quello che deve funzionare.
 
 REGOLE CHE NON SI VIOLANO
 
-- Rispetta tutte le regole fisse di gestionale-app.html (skill
-  trovaimpresa-gestionale): colore = stato, tabelle con renderTabella() mai
-  card, date con quando(), niente emoji, variabili CSS, azioni nel menu "...",
-  ogni UPDATE/DELETE verificata con .select('id').
-- Questo lavoro NON tocca il salvataggio dei dati: e' tutta visualizzazione.
-  Non modificare le funzioni che scrivono su Supabase.
-- Il rischio vero, dimmelo se lo vedi: se riscrivi da capo il modo di
-  mostrare fatture, preventivi e computi, quella diventa una SECONDA COPIA.
-  Fra un mese cambio una regola in una sezione e il Report completo continua a
-  dire il numero vecchio - su un foglio che porto in riunione. Usa le stesse
-  funzioni, e mettici una prova che confronta i numeri del Report completo con
-  quelli delle sezioni vere.
+- Le funzioni SQL si provano su un PostgreSQL 16 vero nel container, con lo
+  schema ricostruito DAI FILE in sql/, chiavi esterne vere, pg_safeupdate
+  acceso e una finta auth.uid() pilotabile. Il 9 agosto una funzione provata
+  con 10 scenari è arrivata lo stesso in produzione con due buchi che
+  cancellavano dati, perché lo schema di prova non somigliava abbastanza a
+  quello vero.
+- Rispetta tutte le regole fisse del gestionale (skill
+  trovaimpresa-gestionale): mai openSheet() per un form, sempre
+  openSheetGrande() a due colonne; colore = stato; tabelle con
+  renderTabella(); date con quando(); niente emoji; variabili CSS; ogni
+  UPDATE/DELETE verificata con .select('id').
 - Prima di toccare qualsiasi file, spiegami cosa hai capito e quali file
   tocchi, e aspetta la mia conferma.
-- Io non sono in grado di collaudare il codice: la verifica e' tua, sempre.
-  Non chiedermi mai di fare da collaudatore. A me tocca solo la prova finale a
-  clic, e me la devi servire pronta e numerata.
-- Una prova che non diventa rossa sul file rotto non prova niente: si controlla
-  nei due versi.
+- Io non sono in grado di collaudare il codice: la verifica è tua, sempre.
+  Non chiedermi mai di fare da collaudatore. A me tocca solo la prova finale
+  a clic, e me la devi servire pronta e numerata.
+- Una prova che non diventa rossa sul file rotto non prova niente: si
+  controlla nei due versi.
 - NIENTE comandi git dalla mia cartella, nemmeno "git status": crea un
   .git/index.lock fantasma che mi blocca i commit per ore.
 - Il push lo faccio io. Tu dammi UN blocco solo, pronto da incollare.
@@ -59,8 +59,10 @@ REGOLE CHE NON SI VIOLANO
   con una RIGA DI RISULTATO, mai con raise notice.
 - Non mostrarmi mai una riga di codice da sola nella chat: io incollo quella.
   Dammi sempre il blocco intero.
-- Consegna cosi': scrivi nella mia cartella, mandami il file in chat, controlla
+- Consegna così: scrivi nella mia cartella, mandami il file in chat, controlla
   l'md5 da tutte e due le parti, e dimmi cosa cliccare.
+- Le chiavi Stripe stanno nelle variabili di Netlify: non scriverle mai nel
+  codice e non chiedermele in chat.
 - Parlami in italiano semplice. Ho la dislessia: testo grande, poca confusione.
   Nel gestionale niente testo sotto i 13 px.
 - Se hai sbagliato, dimmelo subito e per primo.
@@ -68,14 +70,20 @@ REGOLE CHE NON SI VIOLANO
 
 ALLA CONSEGNA
 
-Collaudo vero con scheda a spunte: provata la card nel Riepilogo, provato il
-report con poche sezioni piene e con tante, provato che e' davvero solo
-lettura (nessun pulsante di modifica, nessun menu "..."), provati "Crea PDF" e
-"Stampa", e provato che i numeri del report sono uguali a quelli delle sezioni
-vere. Spiegato a passaggi numerati, senza gergo.
+Collaudo vero con scheda a spunte: provata la pagina ricarica-crediti.html sul
+computer e sul telefono, provato il checkout in modalità test di Stripe,
+provato il webhook che arriva due volte (deve accreditare una volta sola),
+provato il webhook di un pagamento fallito (non deve accreditare niente),
+provato che dopo la ricarica i crediti si vedono davvero nel gestionale.
+Spiegato a passaggi numerati, senza gergo.
 
 I banchi stanno in prove/: banco_browser.js (327 controlli, BANCO_SOLO=l3|l4|l5),
 banco_sql.py, banco_supporto.py, e i sabotaggi rompi*.py. Aggiungi la tua serie
-(l6) e la tua rompi_l6.py.
+e la tua rompi_*.py.
 
-Fammi domande se vuoi, ma semplici e con le risposte gia' pronte da scegliere.
+DOPO IL BLOCCO 0, NELL'ORDINE (non farli adesso, sono scritti in CLAUDE.md):
+Blocco 1 "Controlla i tuoi crediti" - Blocco 2 il bollino "AI" - Blocco 3 il
+controllore dei preventivi - poi i quattro lavori di grafica rimasti (sezioni
+allineate alle finestre, ricerca unica, "Fattura n. 12/undefined", calendario).
+
+Fammi domande se vuoi, ma semplici e con le risposte già pronte da scegliere.
