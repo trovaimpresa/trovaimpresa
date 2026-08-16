@@ -6199,10 +6199,14 @@ ${vecchi?`
       +'<button class="btn-primary" data-action="new-fattf-forn" data-id="'+esc(String(f.id))+'" style="margin-top:10px">+ Fattura per questo fornitore</button>'
       +'</div>'
       +'</div></div>',
+      /* 16 agosto 2026 — «Documenti» ed «Elimina» salgono/scendono al loro
+         posto come in tutte le altre finestre: le azioni sul documento in
+         alto, Elimina in fondo a sinistra. In fondo a destra restano Chiudi
+         e Modifica, che qui e' il passo successivo (non c'e' un Salva). */
       '<button class="btn b-cancel" data-action="close">Chiudi</button>'
-      +'<button class="btn" data-action="forn-doc" data-id="'+esc(String(f.id))+'">&#128206; Documenti</button>'
-      +'<button class="btn btn-danger" data-action="del-forn" data-id="'+esc(String(f.id))+'">🗑 Elimina</button>'
-      +'<button class="btn-primary" data-action="edit-forn-full" data-id="'+esc(String(f.id))+'">&#9998; Modifica</button>');
+      +'<button class="btn-primary" data-action="edit-forn-full" data-id="'+esc(String(f.id))+'">&#9998; Modifica</button>',
+      [{lab:"\ud83d\udcce Documenti",action:"forn-doc",data:{id:f.id}},
+       {lab:"\ud83d\uddd1 Elimina",action:"del-forn",data:{id:f.id},del:true}]);
   }
 
   /* ---- documenti del fornitore: listini, contratti, fatture in PDF/foto.
@@ -12842,6 +12846,10 @@ ${vecchi?`
   function compVoci(c){
     return [{lab:"✏ Apri il computo",action:"edit-computo",data:{id:c.id}},
             {lab:"📄 Scarica il PDF",action:"comp-pdf",data:{id:c.id}},
+            /* 16 agosto 2026 — «Crea il preventivo» stava solo in fondo alla
+               finestra. Adesso che le azioni del documento stanno in alto,
+               sta in fila con le altre, se no era l'unica rimasta sotto. */
+            {lab:"→ Crea il preventivo",action:"comp-prev",data:{id:c.id}},
             {lab:"⧉ Duplica",action:"comp-dup",data:{id:c.id}},
             {lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}];
   }
@@ -12978,9 +12986,9 @@ ${vecchi?`
       +'</div></div>',
 
        '<button class="btn b-cancel" data-action="close">Annulla</button>'
-      +(isNew?"":'<button class="btn" data-action="comp-pdf" data-id="'+esc(String(c.id))+'">📄 PDF</button>')
-      +(isNew?"":'<button class="btn" data-action="comp-prev" data-id="'+esc(String(c.id))+'">→ Crea il preventivo</button>')
-      +(isNew?"":'<button class="btn btn-danger" data-action="del-computo" data-id="'+esc(String(c.id))+'">🗑 Elimina</button>')
+      /* PDF, «Crea il preventivo» ed Elimina non stanno piu' qui: arrivano
+         dalla scheda e si mettono in alto (Elimina in fondo a sinistra),
+         come in tutte le altre finestre. Prima uscivano doppi. */
       +'<button class="btn-primary b-save" data-action="save-computo" data-id="'+esc(c.id||"")+'">'+(isNew?"Crea computo":"Salva")+'</button>');
 
     bindSeg("co-tipo");
@@ -15739,13 +15747,26 @@ ${vecchi?`
      Il modulo lavoro aggiunge .sh-cols--3 e divide i due contenitori in quattro
      blocchi .sh-b-a/b/c/d: sopra i 1500px la griglia passa a tre colonne. */
   const _ICO_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
-  function openSheetGrande(titolo,corpo,azioni){
+  function openSheetGrande(titolo,corpo,azioni,azioniSue){
     /* le azioni della scheda da cui si e' arrivati: entrano dopo il primo
        pulsante (che e' sempre «Annulla»), cosi' «Salva» resta l'ultimo. */
     let _sopra="";
+    /* azioni che la finestra si porta da sola (non arrivano da una scheda):
+       vanno anche loro in alto, cosi' la regola e' una sola per tutti. */
+    if(azioniSue&&azioniSue.length){
+      _azPendenti=(_azPendenti||[]).concat(azioniSue);
+    }
     if(_azPendenti&&_azPendenti.length){
-      _sopra=azioniSopra(_azPendenti);
-      azioni=azioniElimina(_azPendenti)+(azioni||"");
+      /* 16 agosto 2026 — I DOPPIONI DEL COMPUTO.
+         Qualche finestra i suoi pulsanti in fondo li aveva gia' (il Computo
+         ha PDF, «Crea il preventivo» ed Elimina). Aggiungendoci sopra quelli
+         della scheda uscivano due «PDF» e due «Elimina» nella stessa
+         finestra: uno chiude e l'altro no, e non si capisce quale premere.
+         Quindi: se un'azione c'e' gia' in fondo, non la si rimette. */
+      const _gia=String(azioni||"");
+      const _nuove=_azPendenti.filter(x=>x&&x.action&&_gia.indexOf('data-action="'+x.action+'"')<0);
+      _sopra=azioniSopra(_nuove);
+      azioni=azioniElimina(_nuove)+(azioni||"");
     }
     _azPendenti=null;
     const s=$("#sheet");
