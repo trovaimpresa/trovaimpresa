@@ -2618,3 +2618,47 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
 @media(min-width:1600px){
   .sheet--grande .sh-cols{ column-count:2; column-gap:48px; }
 }
+
+/* ============================================================
+   16 agosto 2026 (8) — LE RIGHE DEGLI ELENCHI DENTRO LE FINESTRE
+   Le caselle da riempire sono cresciute, ma le RIGHE degli elenchi no:
+   erano rimaste a 13,5 px, cioe' mezze di quello che c'e' intorno.
+   Sono le lavorazioni del computo, le spese, il registro delle ore e i
+   rapportini: roba che si legge, non decorazione.
+   ============================================================ */
+.sheet .spesa-row{
+  font-size:17px; line-height:1.45;
+  padding:14px 16px; gap:12px;
+  border:1.5px solid var(--bordo); border-radius:12px; margin-bottom:10px;
+}
+.sheet .spesa-row small,
+.sheet .spesa-row small.sp-forn{ font-size:15px; margin-top:3px; }
+.sheet .spesa-row .sdel{ font-size:22px; min-width:40px; min-height:40px; }
+.sheet .spese-list{ margin-top:12px; }
+
+/* le spiegazioni sotto i campi: si leggono, quindi non stanno a 14 px */
+.sheet .campo-aiuto{ font-size:16px; line-height:1.5; margin-top:10px; }
+.sheet .sh-nota{ font-size:16px; line-height:1.55; }
+
+/* la riga per aggiungere (spesa, ora, rifornimento): stessa misura delle
+   caselle grandi, se no scrivi in un campo alto la meta' di quello sopra */
+.sheet .spesa-add{ gap:12px; margin-top:12px; }
+.sheet .spesa-add input,
+.sheet .spesa-add select{ font-size:19px; padding:15px 16px; min-height:62px; border-radius:12px; }
+.sheet .spesa-add .btn{ height:62px; font-size:18px; }
+@media(max-width:900px){
+  .sheet .spesa-row{ font-size:16px; padding:12px 13px; }
+  .sheet .spesa-add input, .sheet .spesa-add select{ font-size:18px; min-height:58px; }
+}
+
+/* La × che butta via una lavorazione o un capitolo del computo: era un
+   quadratino da 18 px con dentro una crocetta, praticamente impossibile da
+   prendere di fretta e invisibile accanto a un testo da 17 px.
+   (Usa la classe .rdel, la stessa delle righe del preventivo.) */
+.sheet .spesa-row .rdel{
+  flex:0 0 auto; width:44px; height:44px; min-width:44px;
+  font-size:22px; line-height:1; border-radius:11px;
+  border:1.5px solid var(--bordo-forte) !important; background:var(--card);
+  color:var(--err); cursor:pointer;
+}
+.sheet .spesa-row .rdel:hover{ background:var(--err-bg); border-color:var(--err) !important; }
