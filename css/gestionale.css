@@ -2230,3 +2230,115 @@
   .dato-lab{flex:1 1 100%;font-size:13.5px}
   .dato-val{flex:1 1 100%}
 }
+
+/* =========================================================================
+   16 agosto 2026 — LE FINESTRE IN CUI SI COMPILA
+   Tre cose sbagliate, viste dal vero su schermo largo (2560px):
+
+   1. LA FINESTRA NON SI APRIVA TUTTA. C'era un tetto di 1600px: su uno
+      schermo da 2560 la finestra ne prendeva 1600 e il resto restava
+      grigio, mentre dentro c'era da compilare mezzo modulo.
+
+   2. I BUCHI IN MEZZO. Le colonne erano caselle fisse di una griglia:
+      se la colonna di sinistra era lunga, quella di mezzo si allungava
+      con lei e restava mezzo schermo bianco fra un blocco e l'altro.
+      Adesso i blocchi si versano da soli nelle colonne, uno dietro
+      l'altro, come le colonne di un giornale, e si pareggiano da sole.
+      Un blocco non si spezza MAI a meta' (break-inside:avoid).
+
+   3. LE CASELLE PICCOLE. Su schermo grande 18px sembravano francobolli.
+
+   ATTENZIONE: «a tutto schermo» vale SOLO per le finestre lunghe, cioe'
+   quelle che hanno dentro le colonne (.sh-cols): lavoro, pratica,
+   preventivo, fattura, computo, cliente, dati azienda.
+   Le finestre corte — per esempio «Da dove nasce questa fattura», che ha
+   tre righe in croce — a tutto schermo diventavano un lenzuolo bianco
+   con tre righe in cima. Quelle restano una finestrella centrata, alta
+   quanto il suo contenuto.
+   ========================================================================= */
+
+/* ---- 1. le finestre LUNGHE: tutto lo schermo ---- */
+.sheet--grande:has(.sh-cols){
+  width:100%; max-width:none;
+  height:100vh; max-height:100vh;
+  margin:0; border-radius:0;
+}
+@supports (height:100dvh){
+  .sheet--grande:has(.sh-cols){ height:100dvh; max-height:100dvh; margin:0; }
+}
+
+/* ---- le finestre CORTE: finestrella centrata, alta quanto serve ---- */
+.sheet--grande:not(:has(.sh-cols)){
+  width:94%; max-width:880px;
+  height:auto; max-height:88vh;
+  margin:6vh auto; border-radius:16px;
+}
+@supports (height:88dvh){
+  .sheet--grande:not(:has(.sh-cols)){ max-height:88dvh; margin:6dvh auto; }
+}
+
+.sheet--grande .sh-head{ padding:16px 28px; }
+.sheet--grande .sh-body{ padding:24px 28px 32px; }
+.sheet--grande .sh-foot{ padding:14px 28px; }
+
+/* ---- 2. i blocchi si versano da soli nelle colonne ---- */
+@media(min-width:901px){
+  .sheet--grande .sh-cols{
+    display:block;
+    column-count:2;
+    column-gap:38px;
+    column-fill:balance;
+    column-rule:1px solid var(--bordo);
+  }
+  /* i due contenitori spariscono: contano solo i blocchi */
+  .sheet--grande .sh-cols > .sh-col{ display:contents; }
+  .sheet--grande .sh-cols .sh-b{
+    break-inside:avoid;
+    -webkit-column-break-inside:avoid;
+    page-break-inside:avoid;
+    min-width:0;
+  }
+}
+/* tre colonne solo quando ci stanno davvero larghe */
+@media(min-width:1600px){
+  .sheet--grande .sh-cols{ column-count:3; column-gap:42px; }
+}
+
+/* ---- 3. le caselle piu' grandi ---- */
+.sheet .field label,
+.sheet .field > label{ font-size:17px; margin-bottom:9px; }
+
+.sheet .field input,
+.sheet .field select,
+.sheet .field textarea,
+.sheet .spesa-add input,
+.sheet .mezzo-add select,
+.sheet .prev-riga input{
+  font-size:19px;
+  padding:15px 16px;
+  min-height:58px;
+  border-radius:12px;
+}
+.sheet .field input[type="date"]{ font-size:19px; min-height:58px; }
+.sheet .field textarea{ min-height:110px; }
+.sheet .field input::placeholder,
+.sheet .field textarea::placeholder,
+.sheet .spesa-add input::placeholder{ font-size:18px; }
+.sheet .field{ margin-bottom:24px; }
+.sheet .row2{ gap:20px; }
+.sheet .seg button{ min-height:54px; font-size:17px; }
+
+/* La barra viola FONDATORE sta incollata in cima allo schermo e sta sopra a
+   tutto. Con la finestra a tutto schermo si mangiava la riga del titolo —
+   e quindi anche la X per chiudere: restava solo Annulla.
+   Quando quella barra c'e', la finestra parte da sotto. Se non c'e'
+   (cioe' per chiunque non sia io) non cambia niente. */
+body:has(#ti-fondatore) .overlay{ top:46px; }
+body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
+  height:calc(100vh - 46px); max-height:calc(100vh - 46px);
+}
+@supports (height:100dvh){
+  body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
+    height:calc(100dvh - 46px); max-height:calc(100dvh - 46px);
+  }
+}
