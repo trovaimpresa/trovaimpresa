@@ -15799,7 +15799,10 @@ ${vecchi?`
     else if(_mqLis.addListener)_mqLis.addListener(_mqLisCambio);
   }catch(e){}
 
-  function openSheet(html){_azPendenti=null;const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");}
+  function openSheet(html){_azPendenti=null;const s=$("#sheet");s.className="sheet";
+    /* stessa freccia della finestra grande: si esce sempre uguale */
+    s.innerHTML='<div class="sh-back-riga">'+_BTN_INDIETRO+'</div>'+html;
+    $("#overlay").classList.add("open");}
   /* Variante grande: SOLO i moduli lunghi (lavoro e preventivo). Intestazione e
      piede restano fermi, scorre solo il corpo — prima per salvare bisognava
      arrivare in fondo a una colonna di dieci campi.
@@ -15808,6 +15811,13 @@ ${vecchi?`
      Il modulo lavoro aggiunge .sh-cols--3 e divide i due contenitori in quattro
      blocchi .sh-b-a/b/c/d: sopra i 1500px la griglia passa a tre colonne. */
   const _ICO_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+  /* 16 agosto 2026 (5) — SI ESCE SEMPRE ALLO STESSO MODO.
+     Prima da una finestra si usciva in tre modi diversi a seconda di dove
+     eri: la × in alto a destra, «Annulla» in fondo, oppure una freccia.
+     Tre gesti per la stessa cosa. Adesso in cima a sinistra c'e' una
+     freccia grande, uguale in tutte le finestre, e la × non c'e' piu'. */
+  const _ICO_INDIETRO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>';
+  const _BTN_INDIETRO='<button class="sh-back" data-action="close" title="Torna indietro" aria-label="Torna indietro">'+_ICO_INDIETRO+'<span>Indietro</span></button>';
   function openSheetGrande(titolo,corpo,azioni,azioniSue){
     /* le azioni della scheda da cui si e' arrivati: entrano dopo il primo
        pulsante (che e' sempre «Annulla»), cosi' «Salva» resta l'ultimo. */
@@ -15832,8 +15842,7 @@ ${vecchi?`
     _azPendenti=null;
     const s=$("#sheet");
     s.className="sheet sheet--grande";
-    s.innerHTML=`<div class="sh-head"><h3>${titolo}</h3>${_sopra}
-        <button class="sh-x" data-action="close" title="Chiudi" aria-label="Chiudi">${_ICO_X}</button></div>
+    s.innerHTML=`<div class="sh-head">${_BTN_INDIETRO}<h3>${titolo}</h3>${_sopra}</div>
       <div class="sh-body">${corpo}</div>
       <div class="sh-foot">${azioni}</div>`;
     $("#overlay").classList.add("open");

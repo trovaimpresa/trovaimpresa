@@ -2463,3 +2463,34 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
   color:var(--err); font-size:22px; line-height:1; cursor:pointer;
 }
 .nota-riga .rdel:hover{ background:var(--err-bg); border-color:var(--err); }
+
+/* ============================================================
+   16 agosto 2026 (5) — LA FRECCIA PER USCIRE, UGUALE DAPPERTUTTO
+   La × in alto a destra non c'e' piu'. In cima a sinistra, in tutte le
+   finestre, c'e' una freccia grande con scritto «Indietro»: si vede da
+   lontano, si tocca col dito e dice cosa fa senza doverlo indovinare.
+   ============================================================ */
+.sh-back{
+  flex:0 0 auto;
+  display:inline-flex; align-items:center; gap:9px;
+  height:46px; padding:0 18px 0 14px;
+  background:var(--sfondo); border:1.5px solid var(--bordo-forte); border-radius:12px;
+  color:var(--testo); font-family:inherit; font-size:16px; font-weight:700;
+  cursor:pointer; transition:background .15s, border-color .15s;
+}
+.sh-back:hover{ background:var(--blu-tenue); border-color:var(--blu); color:var(--blu-scuro); }
+.sh-back svg{ width:22px; height:22px; flex:0 0 auto; }
+.sh-back-riga{ margin-bottom:18px; }
+@media(max-width:900px){
+  .sh-back{ height:44px; padding:0 14px 0 11px; font-size:15px; }
+  .sh-back span{ display:inline; }
+  .sheet--grande .sh-head .sh-back{ order:0; }
+}
+
+/* La finestra del lavoro/pratica ha 4 blocchi, e uno (spese, mezzi, ore,
+   rapportini, fattura) e' alto da solo quanto gli altri tre. Su tre colonne
+   quella di mezzo restava mezza vuota. Con due colonne i blocchi si
+   dividono due e due e le colonne finiscono quasi alla stessa altezza. */
+@media(min-width:901px){
+  .sheet--grande .sh-cols--3{ column-count:2; column-gap:38px; }
+}
