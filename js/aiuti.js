@@ -175,6 +175,87 @@
      delle card non hanno un data-tab ne' un data-action a cui agganciarsi:
      qui la chiave e' il testo che si legge a schermo, in minuscolo. */
   var AIUTI_TESTO = {
+    /* ============================================================
+       16 agosto 2026 — LE PAROLE DIFFICILI DENTRO I MODULI
+       Il meccanismo c'era gia': la (i) compare da sola accanto a ogni
+       etichetta che trova qui dentro. Erano scritte 33 frasi su 179
+       etichette, per questo l'aiuto usciva solo in alcune zone.
+       Qui se ne aggiungono una sessantina: SOLO dove la parola e'
+       tecnica o si presta a due letture. Su «Citta'», «CAP» o «Anno»
+       non si mette niente: una (i) che non spiega e' un pallino in
+       piu' da scansare, e in questo gestionale e' il difetto peggiore.
+       ============================================================ */
+
+    /* ---- soldi e fisco ---- */
+    'contributo cassa (%)': 'La percentuale della tua cassa (4% Inarcassa, 5% Geometri e Periti). Si calcola SOLO sul compenso, mai sulle spese. Se la sbagli, sbaglia anche la fattura che nasce da questo preventivo.',
+    'applica la ritenuta d\'acconto del 20%': 'Spuntala solo se il cliente e’ azienda, professionista o condominio: sono loro che versano allo Stato il 20% del tuo compenso. Con un privato NO: la spunta di troppo ti fa incassare il 20% in meno.',
+    'ritenuta d\'acconto (%)': 'Quanto il cliente trattiene e versa per conto tuo. Di norma 20% sul compenso. Non e’ una tassa in piu’: e’ un anticipo, lo ritrovi nella dichiarazione.',
+    'spese (bolli, diritti, copie)': 'Quello che hai anticipato TU per il cliente. Ci va l’IVA sopra ma non la ritenuta, e non e’ guadagno: sono soldi che ti torni indietro.',
+    'spese anticipate (bolli, diritti, visure)': 'Quello che hai anticipato TU per il cliente. Ci va l’IVA sopra ma non la ritenuta, e non e’ guadagno: sono soldi che ti torni indietro.',
+    'spese documentate': 'Spese con la ricevuta in mano, riaddebitate al cliente tali e quali. Tienile separate dal compenso: sul conto si comportano in modo diverso.',
+    'rimborso spese (trasferte, materiali)': 'Benzina, pedaggi, materiali comprati per andare avanti. Se lo scrivi qui finisce sul documento come voce a parte, non mescolato al compenso.',
+    'iva': 'La percentuale che aggiungi al prezzo e che poi versi allo Stato. In edilizia 10% su manutenzione e ristrutturazione, 4% sulla prima casa, 22% tutto il resto. Nel dubbio chiedi al commercialista: sbagliarla si paga.',
+    'numero fattura': 'La numerazione deve essere continua, senza buchi e senza doppioni: e’ la prima cosa che guarda il commercialista. Riparte da 1 ogni gennaio.',
+    'data fattura': 'La data di emissione. Da qui parte il conto dei giorni per il pagamento e il trimestre in cui l’IVA va versata: non metterla a caso.',
+    'modalità di pagamento': 'Bonifico, contanti, assegno... Finisce stampato sulla fattura e dentro il file per lo SdI.',
+    'come si paga': 'Bonifico, contanti, assegno... Finisce stampato sulla fattura e dentro il file per lo SdI.',
+    'da pagare entro': 'La data entro cui il cliente deve pagare. Dopo quella, il gestionale te la segna in ritardo e te la fa vedere in rosso.',
+    'entro quanti giorni ti devono pagare': 'I giorni dalla data della fattura. 30 e’ lo standard, 60 con le aziende grandi. Serve al gestionale per dirti chi e’ in ritardo senza che tu conti i giorni.',
+    'pec': 'La casella di posta certificata del cliente. Serve a consegnargli la fattura elettronica quando non ha il codice destinatario.',
+    'partita iva': 'Le 11 cifre di un’azienda o di un professionista. Un privato non ce l’ha: a lui serve il codice fiscale.',
+    'codice fiscale': 'I 16 caratteri di una persona. Per un privato e’ obbligatorio in fattura: senza, lo SdI la rifiuta.',
+    'prezzo unitario (€)': 'Il prezzo di UNA unita’, IVA esclusa. Il totale della riga lo fa il gestionale: prezzo per quantita’.',
+    'quantità': 'Quante unita’: metri quadri, ore, pezzi. Moltiplicata per il prezzo unitario fa il totale della riga.',
+    'unità di misura': 'In cosa la misuri: m², m, kg, ore, corpo (a corpo). Finisce stampata sul documento accanto alla quantita’.',
+
+    /* ---- computo metrico ---- */
+    'parti uguali': 'Quante volte si ripete la stessa misura. Tre finestre identiche: scrivi 3 e la misuri una volta sola.',
+    'lunghezza': 'Il primo lato, in metri. Il gestionale moltiplica parti × lunghezza × larghezza × altezza: la quantita’ non la scrivi mai a mano.',
+    'larghezza': 'Il secondo lato, in metri. Lasciala vuota se stai misurando solo una lunghezza.',
+    'altezza o spessore': 'Il terzo lato, in metri. Per un muro e’ l’altezza, per un massetto lo spessore. Vuota se non serve.',
+    'questa misura': 'Il pezzo di opera che stai contando: «parete cucina», «vano finestra». Serve a te fra sei mesi, e al cliente che vuole capire da dove esce il numero.',
+    'che cosa stai misurando': 'Il pezzo di opera che stai contando. Se metti un numero NEGATIVO togli quella quantita’: e’ cosi’ che si detraggono i vuoti delle porte e delle finestre.',
+    'ribasso o sconto (%)': 'La percentuale che togli a tutti i prezzi del prezzario. Nelle gare pubbliche e’ il ribasso d’asta. Attenzione: si applica a TUTTO il computo, non a una voce sola.',
+    'oneri della sicurezza (€)': 'La parte di prezzo che serve alla sicurezza del cantiere. Nei lavori pubblici va dichiarata a parte e NON e’ soggetta a ribasso: e’ la prima cosa che controllano.',
+    'quanta parte del prezzo è costo del personale (%)': 'Quanto di quel prezzo e’ manodopera. Nelle gare pubbliche va dichiarato per legge. Sui lavori privati puoi lasciarlo stare.',
+    'prezzario': 'Il listino ufficiale da cui prendi i prezzi (Tariffa Regione Lazio, DEI, il tuo). Sul documento deve esserci scritto: e’ la prima cosa che ti chiede chi lo legge.',
+    'codice del prezzario': 'Il codice della voce sul listino (per esempio A.01.002). Serve a chi controlla per ritrovare la stessa voce sul prezzario ufficiale.',
+    'da dove viene questo prezzo': 'Dal prezzario ufficiale o deciso da te. Un computo che non dice da dove vengono i prezzi non regge a un controllo.',
+    'capitolo': 'Il raggruppamento delle lavorazioni: Demolizioni, Murature, Impianti. Serve a leggere il computo per fasi invece che come una lista lunghissima.',
+    'titolo del capitolo': 'Come si chiama questo gruppo di lavorazioni: Demolizioni, Murature, Impianti.',
+    'come si chiama questa tariffa?': 'Il nome del listino come lo scriveresti sul documento: «Tariffa Regione Lazio 2023», «Prezzario DEI», «Prezzi miei».',
+    'questa aggiorna una tariffa che hai già?': 'Se dici di si’, i prezzi nuovi prendono il posto di quelli vecchi. I computi gia’ fatti NON cambiano: si portano dietro i prezzi del giorno in cui li hai scritti.',
+
+    /* ---- pratiche e documenti ---- */
+    'tipo di pratica': 'CILA, SCIA, permesso di costruire, agibilita’... Cambia i tempi, i documenti e quello che il Comune ti chiede.',
+    'data di deposito': 'Il giorno in cui hai consegnato la pratica al Comune. Da li’ partono i termini: per la CILA si puo’ iniziare subito, per la SCIA no.',
+    'dati catastali': 'Foglio, particella, subalterno. Sono l’indirizzo dell’immobile per il catasto: senza, la pratica non si presenta.',
+    'oggetto dei lavori': 'Che lavoro e’, in una riga. Finisce in cima al documento: e’ la prima cosa che legge il cliente.',
+    'oggetto dell\'incarico': 'Cosa ti sei impegnato a fare, scritto chiaro. E’ la parte della lettera d’incarico che conta se un domani si discute.',
+    'opere comprese': 'Cosa e’ dentro il prezzo. Scriverlo evita la discussione peggiore: quella su cosa NON era compreso.',
+    'prestazioni comprese': 'Cosa e’ dentro il compenso: rilievo, progetto, pratica, direzione lavori. Quello che non scrivi, il cliente dara’ per scontato che sia incluso.',
+    'tempi di esecuzione': 'In quanto tempo lo fai, dall’inizio dei lavori. Mettilo in giorni lavorativi e di’ da quando partono.',
+    'foro competente': 'Il tribunale in cui si discute se finite in causa. Di solito quello della tua citta’.',
+    'luogo della firma': 'La citta’ dove il documento viene firmato. Va stampata accanto alla data.',
+    'conclusioni': 'Come e’ andato il sopralluogo e cosa proponi. E’ la parte che il cliente legge davvero: le altre le salta.',
+
+    /* ---- lavoro, squadra, mezzi ---- */
+    'cosa è stato fatto (consuntivo)': 'Cosa hai fatto DAVVERO, a lavoro finito. E’ diverso da «cosa c’e’ da fare»: serve quando il cliente contesta, e per fatturare quello che hai fatto e non quello che avevi previsto.',
+    'ore lavorate': 'Le ore che ci hai messo. Con il costo orario della persona, il gestionale ti dice quanto ti e’ costata la manodopera e quanto ci guadagni davvero.',
+    'costo orario (€)': 'Quanto ti costa un’ora di questa persona: paga, contributi e tutto il resto. Non e’ quello che le dai in busta: e’ quello che esce dalla cassa. Entra nel margine di ogni lavoro.',
+    'mansione in cantiere': 'Cosa fa in cantiere: muratore, aiuto, gruista. E’ diverso dal «ruolo nell’app», che dice cosa vede sul telefono.',
+    'permessi': 'Cosa vede e cosa puo’ fare dal telefono. Senza nessuna spunta apre l’app e trova il lucchetto: le spunte servono, non sono decorazione.',
+    'ruolo nell\'app': 'Riempie i permessi con la scelta piu’ comune per quel ruolo. Puoi sempre cambiarli uno per uno qui sotto.',
+    'tipo di contratto': 'Indeterminato, determinato, apprendistato, a chiamata. Serve a te per sapere chi hai in squadra e fino a quando.',
+    'massimale (€)': 'Il tetto massimo che l’assicurazione paga. Sotto quella cifra copre, sopra paghi tu.',
+    'numero di polizza': 'Il numero che identifica la tua assicurazione. Alcuni committenti lo chiedono prima di farti entrare in cantiere.',
+    'si ripete': 'Ogni quanto torna: revisione, bollo, visita medica. Il gestionale te la rimette da sola alla scadenza dopo, senza che te la ricordi tu.',
+    'rapportini di giornata': 'Li scrive chi sta in cantiere, dal telefono: ore, materiali, cosa e’ stato fatto. Tu li leggi qui la sera, senza telefonate.',
+    'note (compaiono sul pdf)': 'ATTENZIONE: queste le LEGGE IL CLIENTE, sono stampate sul documento. Le note che vuoi tenere per te vanno nel campo «Note» del lavoro, non qui.',
+    'titolare (chi ce l\'ha in tasca)': 'La persona che ha in mano la carta. Le spese che registra finiscono su di lui, e sul suo telefono vede solo la sua carta.',
+    'crediti (cfp)': 'I crediti formativi che ti da’ questo corso. Li conta il tuo Ordine: se non arrivi al minimo dell’anno rischi la sospensione.',
+    'crediti formativi da fare ogni anno (cfp)': 'Quanti CFP ti chiede il tuo Ordine ogni anno. Per molti sono 30, ma controlla il regolamento tuo: cambia da Ordine a Ordine.',
+
     'cassa previdenziale': 'Il contributo per la tua cassa (Inarcassa, Geometri, EPPI, INPS). Si calcola SOLO sul compenso, non sulle spese, e si aggiunge in fattura: lo paga il cliente. La percentuale confermala al commercialista.',
     'ritenuta d\'acconto': 'Una parte del tuo compenso che il cliente NON ti paga: la versa lui allo Stato per conto tuo, come anticipo delle tue tasse. Di solito il 20%, e solo sul compenso. Non e\u2019 un costo: la ritrovi nella dichiarazione dei redditi.',
     'aliquota iva': 'La percentuale di IVA su questa voce. Le prestazioni professionali vanno al 22%. Il 10% e il 4% sono per chi esegue i lavori (ristrutturazione, prima casa), non per la parcella.',
