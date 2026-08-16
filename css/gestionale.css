@@ -2698,3 +2698,17 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
   .side-group{ margin:12px 0 4px; }
   .side .btn-new{ margin-bottom:10px; }
 }
+
+/* La barra viola FONDATORE spinge in giu' tutta la pagina di 44 px, ma il
+   menu di sinistra e' alto 100vh e si incolla a top:0 — cioe' i suoi primi
+   44 px finiscono DIETRO la barra, e in cima si vedeva mezza «Chiedi una
+   funzione» tagliata. Stesso rimedio della finestra: quando la barra c'e',
+   il menu parte da sotto ed e' alto quel tanto in meno.
+   Per chiunque non sia io la barra non esiste e non cambia niente. */
+body:has(#ti-fondatore) .side{
+  top:46px;
+  height:calc(100vh - 46px);
+}
+@supports (height:100dvh){
+  body:has(#ti-fondatore) .side{ height:calc(100dvh - 46px); }
+}
