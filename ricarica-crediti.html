@@ -41,12 +41,33 @@
   .riquadro{background:var(--card);border:1px solid var(--bordo);
     border-radius:var(--r-card);padding:20px;box-shadow:var(--ombra);margin-bottom:20px}
 
-  /* ---- il contatore ---- */
-  .conto{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
-  .conto .voce{min-width:150px}
-  .conto .n{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1.1}
-  .conto .et{font-size:14px;color:var(--testo-2);font-weight:600;margin-top:2px}
-  .conto .nota{font-size:14px;color:var(--testo-3);margin-top:2px}
+  /* ---- il conto: 100 del mese + 150 comprati = 250 da usare ----
+     ⚠️ Il piu' e l'uguale non sono decorazione: sono l'unica cosa che dice
+        che il numero grande e' la somma degli altri due. Senza, si leggono
+        come tre cose separate — ed e' successo davvero. */
+  .conto{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-start}
+  .ct-voce{min-width:104px}
+  .ct-n{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.1;color:var(--testo)}
+  .ct-et{font-size:14px;color:var(--testo-2);font-weight:600;margin-top:2px}
+  .ct-nota{font-size:13px;color:var(--testo-3);margin-top:1px;line-height:1.4}
+  .ct-segno{font-size:26px;font-weight:800;color:var(--testo-3);line-height:1.3;
+    padding-top:2px;flex:0 0 auto}
+  .ct-voce--tot .ct-n{color:var(--blu-scuro)}
+  .ct-voce--tot .ct-et{color:var(--testo)}
+  .ct-tot{display:flex;gap:14px;align-items:flex-start}
+  /* ⚠️ Sul telefono i tre numeri non ci stanno su una riga: l'uguale restava
+     da solo in fondo alla prima riga e il totale finiva sotto, staccato da
+     lui. Si leggeva peggio di prima. Adesso il totale va a capo TUTTO
+     INSIEME al suo uguale, con una riga sopra: come il totale di una
+     fattura, che sta sotto e separato. */
+  @media(max-width:520px){
+    .conto{gap:10px 12px}
+    .ct-n{font-size:26px}
+    .ct-segno{font-size:22px}
+    .ct-voce{min-width:88px}
+    .ct-tot{flex:1 1 100%;margin-top:2px;padding-top:12px;
+      border-top:1px solid var(--bordo)}
+  }
 
   /* ---- i messaggi. Il colore dice lo stato, non decora. ---- */
   .avviso{border-radius:var(--r);padding:14px 16px;font-size:15px;
@@ -106,21 +127,31 @@
   <div id="avvisi"></div>
 
   <!-- il contatore -->
+  <!-- ⚠️ 16 agosto 2026, il pomeriggio — I TRE NUMERI ADESSO SI LEGGONO COME UN CONTO.
+       Prima erano tre numeri grossi in fila: 250, 100, 150. Il primo era la somma
+       degli altri due, ma non c'era niente che lo dicesse, e chiunque li legge come
+       tre cose separate. Alessio, che ha appena comprato 150 crediti, ha chiesto
+       «non dovrebbero essere 350?». Non aveva capito male lui: erano scritti male io.
+       Adesso c'e' il piu' e c'e' l'uguale, come su una fattura, e si legge da solo. -->
   <div class="riquadro nascosto" id="riquadro-conto">
     <div class="conto">
-      <div class="voce">
-        <div class="n" id="n-totale">-</div>
-        <div class="et">crediti che hai adesso</div>
+      <div class="ct-voce">
+        <div class="ct-n" id="n-mese">-</div>
+        <div class="ct-et">del mese</div>
+        <div class="ct-nota" id="nota-rinnovo"></div>
       </div>
-      <div class="voce">
-        <div class="n" id="n-mese">-</div>
-        <div class="et">dei 100 di questo mese</div>
-        <div class="nota" id="nota-rinnovo"></div>
+      <div class="ct-segno" aria-hidden="true">+</div>
+      <div class="ct-voce">
+        <div class="ct-n" id="n-comprati">-</div>
+        <div class="ct-et">comprati</div>
+        <div class="ct-nota">non scadono mai</div>
       </div>
-      <div class="voce">
-        <div class="n" id="n-comprati">-</div>
-        <div class="et">comprati</div>
-        <div class="nota">non scadono mai</div>
+      <div class="ct-tot">
+        <div class="ct-segno" aria-hidden="true">=</div>
+        <div class="ct-voce ct-voce--tot">
+          <div class="ct-n" id="n-totale">-</div>
+          <div class="ct-et">da usare adesso</div>
+        </div>
       </div>
     </div>
   </div>
@@ -214,6 +245,7 @@
   // 1. chi sei e quanti crediti hai
   // ------------------------------------------------------------------
   var sessione = null;
+  var compratiUltimo = 0;   /* quanti crediti comprati risultano all'ultima lettura */
 
   async function leggiStato(){
     var r = await sb.rpc('get_ai_status');
@@ -225,9 +257,10 @@
     if (!st) return;
     var mensili  = Number(st.monthly_left  || 0);
     var comprati = Number(st.credits_extra || 0);
-    q('n-totale').textContent   = mensili + comprati;
+    compratiUltimo = comprati;
     q('n-mese').textContent     = mensili;
     q('n-comprati').textContent = comprati;
+    q('n-totale').textContent   = mensili + comprati;
     q('nota-rinnovo').textContent = st.renews_at ? ('si rinnovano il ' + mese(st.renews_at)) : '';
     q('riquadro-conto').classList.remove('nascosto');
   }
@@ -270,28 +303,63 @@
   //    attimo dopo. Se leggessimo il conto una volta sola, uno che ha
   //    appena pagato vedrebbe il numero vecchio e penserebbe di aver
   //    buttato i soldi. Quindi si riguarda per una decina di secondi.
+  //
+  // ⚠️ E IL CONTO SI SEGNA PRIMA DI PARTIRE, NON AL RITORNO. 16 agosto, il
+  //    pomeriggio, difetto vero visto in produzione al primo pagamento.
+  //    Prima leggevo i crediti al ritorno e aspettavo che salissero. Ma il
+  //    webhook e' arrivato PRIMA che la pagina finisse di caricarsi: alla
+  //    prima lettura i 150 c'erano gia', quindi il numero da cui partivo era
+  //    gia' quello finale e non saliva piu'. Risultato: uno pagava, i crediti
+  //    gli arrivavano subito, e la pagina gli diceva «ci mettono piu' del
+  //    solito» — cioe' gli faceva credere che ci fosse un problema proprio
+  //    quando era andato tutto bene.
+  //    Adesso il numero di partenza viene segnato quando si preme «Ricarica»,
+  //    un attimo prima di andare su Stripe. Al ritorno si confronta con
+  //    quello, e la risposta e' giusta anche se l'accredito e' istantaneo.
+  var CHIAVE_PRIMA = 'ti_crediti_prima';
+
   async function dopoIlPagamento(){
     avviso('ok', 'Pagamento ricevuto, grazie',
            'Sto aspettando che i crediti arrivino nel conto: ci vuole qualche secondo.');
-    var partenza = null;
-    for (var i = 0; i < 10; i++){
+
+    var salvato = null;
+    try{
+      var v = sessionStorage.getItem(CHIAVE_PRIMA);
+      if (v !== null && v !== '') salvato = Number(v);
+    }catch(e){}
+
+    var partenza = salvato;
+    for (var i = 0; i < 8; i++){
       var st = await leggiStato();
       if (st){
-        if (partenza === null) partenza = Number(st.credits_extra || 0);
         mostraConto(st);
+        if (partenza === null) partenza = Number(st.credits_extra || 0);
         if (Number(st.credits_extra || 0) > partenza){
+          try{ sessionStorage.removeItem(CHIAVE_PRIMA); }catch(e){}
           pulisciAvvisi();
           avviso('ok', 'Crediti aggiunti',
                  'Sono già nel tuo conto e non scadono. Puoi tornare al gestionale.');
           return;
         }
       }
-      await new Promise(function(r){ setTimeout(r, 1500); });
+      await new Promise(function(r){ setTimeout(r, 1200); });
     }
+
     pulisciAvvisi();
-    avviso('attesa', 'Il pagamento è andato a buon fine',
-           'I crediti stanno arrivando ma ci mettono piu\' del solito. Ricarica questa ' +
-           'pagina fra un minuto: se ancora non li vedi, scrivimi e li sistemo io.');
+    if (salvato === null){
+      // ⚠️ Nessun numero di partenza: sei tornato da un altro browser o da
+      //    un'altra scheda. Non posso dire con certezza se i crediti sono
+      //    appena arrivati, e allora NON lo dico: dire «c'è un problema»
+      //    quando non lo so sarebbe la stessa bugia di prima, al contrario.
+      avviso('attesa', 'Il pagamento è andato a buon fine',
+             'Guarda il numero «comprati» qui sotto: se è quello che ti aspetti, ' +
+             'è tutto a posto e puoi tornare al gestionale. Se invece è rimasto ' +
+             'indietro, scrivimi e li sistemo io.');
+    } else {
+      avviso('attesa', 'Il pagamento è andato a buon fine',
+             'I crediti stanno arrivando ma ci mettono più del solito. Ricarica questa ' +
+             'pagina fra un minuto: se ancora non li vedi, scrivimi e li sistemo io.');
+    }
   }
 
   // ------------------------------------------------------------------
@@ -317,7 +385,16 @@
         });
         var dati = await res.json();
 
-        if (res.ok && dati.url){ window.location.href = dati.url; return; }
+        if (res.ok && dati.url){
+          // ⚠️ QUI SI SEGNA QUANTI CREDITI COMPRATI CI SONO ADESSO, prima di
+          //    andare su Stripe. E' l'unico momento in cui questo numero e'
+          //    sicuramente quello di PRIMA del pagamento. Al ritorno serve a
+          //    capire se i crediti sono arrivati, anche quando arrivano cosi'
+          //    in fretta che ci sono gia' al primo sguardo.
+          try{ sessionStorage.setItem(CHIAVE_PRIMA, String(compratiUltimo)); }catch(e){}
+          window.location.href = dati.url;
+          return;
+        }
 
         if (res.status === 401){
           avviso('attesa', 'La sessione è scaduta',
