@@ -56,7 +56,7 @@ const PAGINE_RICERCA = [
   const bolla = document.createElement('button');
   bolla.id = 'ti-bolla';
   bolla.setAttribute('aria-label', 'Assistente TrovaImpresa');
-  bolla.textContent = '💬';
+  bolla.innerHTML = '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5Z"/></svg>';
 
   const box = document.createElement('div');
   box.id = 'ti-box';
@@ -109,37 +109,57 @@ const PAGINE_RICERCA = [
     body.appendChild(d);
   }
   function bottoneIndietro() {
-    btn('↩️ Torna al menu', schermataIniziale, true);
+    btn('Torna al menu', schermataIniziale, true);
   }
 
   /* ---------- Menu iniziale ---------- */
   function schermataIniziale() {
     pulisci();
-    msg('Ciao! 👋 Dimmi cosa cerchi, oppure scegli un\'opzione qui sotto.');
+    msg('Ciao! Dimmi cosa cerchi, oppure scegli un\'opzione qui sotto.');
     const ta = document.createElement('textarea');
     ta.id = 'ti-input';
     ta.rows = 3;
     ta.placeholder = 'Cosa cerchi? Es: rifare il bagno a Rieti';
     body.appendChild(ta);
-    btn('🔍 Cerca', () => orienta(ta.value));
+    btn('Cerca', () => orienta(ta.value));
     sep('— oppure —');
-    btn('❓ Come funziona', ramoComeFunziona, true);
-    btn('🆓 È gratis cercare?', ramoGratis, true);
-    btn('📍 In quali città siete?', ramoCitta, true);
-    btn('💼 Offerte di lavoro', ramoLavoro, true);
-    btn('🔨 Subappalti', ramoSubappalti, true);
-    btn('🏗️ Registra la tua attività', ramoImpresa, true);
-    btn('💶 Prezzi e piani', ramoPrezzi, true);
-    btn('⭐ Premium: compari prima?', ramoPremium, true);
-    btn('🔑 Accedi', ramoAccedi, true);
-    btn('✉️ Contatti', ramoContatti, true);
+    btn('Come funziona', ramoComeFunziona, true);
+    btn('È gratis cercare?', ramoGratis, true);
+    btn('Il gestionale', ramoGestionale, true);
+    btn('Computo metrico', ramoComputo, true);
+    btn('In quali città siete?', ramoCitta, true);
+    btn('Offerte di lavoro', ramoLavoro, true);
+    btn('Subappalti', ramoSubappalti, true);
+    btn('Registra la tua attività', ramoImpresa, true);
+    btn('Prezzi e piani', ramoPrezzi, true);
+    btn('Premium: compari prima?', ramoPremium, true);
+    btn('Accedi', ramoAccedi, true);
+    btn('Contatti', ramoContatti, true);
     ta.focus();
   }
 
   /* ---------- Campo libero → AI (ai-orienta) ---------- */
+  /* ============================================================
+     16 agosto 2026 — «GLI HO CHIESTO DEL GESTIONALE E MI HA PORTATO
+     SUL PANNELLO PUBBLICO».
+     Il campo libero passa tutto a /.netlify/functions/ai-orienta, che
+     sa restituire SOLO le quattro pagine di ricerca. Qualunque cosa
+     scrivi — anche «come funziona il gestionale» — torna indietro come
+     una ricerca di imprese, e finisci su una pagina che non c'entra.
+     Adesso, prima di chiedere all'AI, si guarda se la domanda parla di
+     roba del gestionale: in quel caso risponde qui, senza uscire.
+     ATTENZIONE alle parole scelte: «preventivo» e «fattura» da sole NON
+     ci sono, perche' chi deve rifare il bagno scrive «vorrei un
+     preventivo» ed e' giusto che finisca sulla ricerca. Ci sono solo le
+     parole che usa chi il gestionale ce l'ha gia' o lo sta cercando.
+     ============================================================ */
+  const PAROLE_GESTIONALE = /gestional|computo|prezzario|scadenzario|rapportin|software|programma per|app per (le |la |il )?(impres|ditt|aziend|cantier|lavori)|gestire (i |le |il )?(lavori|cantieri|pratiche|clienti)/i;
+
   async function orienta(testo) {
     testo = (testo || '').trim();
     if (!testo) return;
+    if (/computo/i.test(testo)) { ramoComputo(); return; }
+    if (PAROLE_GESTIONALE.test(testo)) { ramoGestionale(); return; }
     pulisci();
     msg('Sto cercando...');
     try {
@@ -164,7 +184,7 @@ const PAGINE_RICERCA = [
     pulisci();
     if (!dato || !PAGINE_RICERCA.includes(dato.pagina)) return fallback();
     if (dato.motivo) msg(dato.motivo);
-    link('➡️ Vai alla ricerca', dato.pagina);
+    link('Vai alla ricerca', dato.pagina);
     bottoneIndietro();
   }
   function fallback() {
@@ -180,7 +200,7 @@ const PAGINE_RICERCA = [
   /* ---------- Come funziona ---------- */
   function ramoComeFunziona() {
     pulisci();
-    msg('TrovaImpresa ti aiuta a trovare artigiani, imprese, negozi e professionisti edili nella tua città.\n\nScrivi cosa ti serve o scegli una categoria, confronta i profili e contatta chi preferisci.\n\nSei un\'azienda? Registrati per farti trovare dai clienti.');
+    msg('TrovaImpresa ti aiuta a trovare artigiani, imprese, negozi e professionisti edili nella tua città.\n\nScrivi cosa ti serve o scegli una categoria, confronta i profili e contatta chi preferisci.\n\nSei un\'azienda? Registrati: ti diamo una vetrina nella tua zona, e con il Premium anche il gestionale per tenere in ordine lavori, preventivi e fatture.');
     bottoneIndietro();
   }
 
@@ -225,10 +245,30 @@ const PAGINE_RICERCA = [
     bottoneIndietro();
   }
 
+  /* ---------- Il gestionale (dentro il Premium) ---------- */
+  function ramoGestionale() {
+    pulisci();
+    msg('Il gestionale è il programma con cui imprese, artigiani e studi tecnici tengono in ordine il proprio lavoro: lavori e cantieri, preventivi, fatture, clienti, fornitori, calendario, squadra, mezzi, spese e scadenze.\n\nSi apre dal browser, senza installare niente, e funziona anche dal telefono in cantiere.\n\nÈ compreso nel piano Premium: 5 euro al mese oppure 49 euro all\'anno.');
+    link('Vedi i piani', PAGINA_PREZZI);
+    link('Entra nel tuo account', PAGINA_LOGIN_IMPRESA);
+    sep('— non sei ancora registrato? —');
+    btn('Registra la tua attività', ramoImpresa, true);
+    bottoneIndietro();
+  }
+
+  /* ---------- Computo metrico (studi tecnici e imprese) ---------- */
+  function ramoComputo() {
+    pulisci();
+    msg('Il computo metrico è dentro il gestionale. Scrivi le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e la quantità la calcola il programma: non si fa più a mano.\n\nI prezzi li prendi dal tuo prezzario (per esempio la tariffa della tua Regione) o li scrivi tu, e puoi applicare un ribasso su tutto. Dal computo finito esce il PDF, e con un clic diventa un preventivo.\n\nÈ compreso nel piano Premium.');
+    link('Vedi i piani', PAGINA_PREZZI);
+    link('Entra nel tuo account', PAGINA_LOGIN_IMPRESA);
+    bottoneIndietro();
+  }
+
   /* ---------- Prezzi e piani ---------- */
   function ramoPrezzi() {
     pulisci();
-    msg('Su TrovaImpresa hai due piani:\n\nFREE — €0\nProfilo base e visibilità nella tua città.\n\nPREMIUM — €5 al mese (oppure €49 all\'anno)\nPiù visibilità, foto dei lavori, preventivi con AI e strumenti avanzati.');
+    msg('Su TrovaImpresa hai due piani:\n\nFREE — €0\nProfilo base e visibilità nella tua città.\n\nPREMIUM — €5 al mese (oppure €49 all\'anno)\nPiù visibilità in tutta la regione, foto dei lavori, preventivi con AI e il gestionale completo: lavori, preventivi, fatture, computo metrico, clienti, scadenze.');
     link('Vedi tutti i dettagli', PAGINA_PREZZI);
     bottoneIndietro();
   }
