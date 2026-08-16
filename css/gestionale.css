@@ -2375,3 +2375,12 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
 @media(max-width:560px){
   .sheet .row2{ grid-template-columns:1fr; gap:0; }
 }
+
+/* La nota libera dentro una scheda (il riquadro giallo) poteva essere lunga
+   dieci righe: una scheda diventava alta il doppio delle vicine solo per
+   quella. Se ne vedono tre righe, il resto si legge aprendo la scheda. */
+.wrap section .job .job-note,
+.wrap section .job .job-done{
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
+  overflow:hidden;
+}

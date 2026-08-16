@@ -2276,6 +2276,36 @@
      ============================================================ */
   const TAB_MENU={};
   function tabChiudiPop(){document.querySelectorAll(".lav-pop").forEach(x=>x.remove());}
+
+  /* ============================================================
+     16 agosto 2026 — LE SCHEDE ERANO ALTE IL DOPPIO DEL NECESSARIO
+     Nei Lavori una scheda mostra due pulsanti e mette il resto sotto
+     i «...». Preventivi, Fatture, Clienti, Squadra, Mezzi, Scadenzario
+     e Richieste dal sito no: stampavano TUTTE le voci come pulsanti.
+     Un preventivo in bozza ne aveva sette, uno sotto l'altro: la scheda
+     diventava alta come mezzo schermo e ogni scheda era alta in modo
+     diverso dalla vicina, a seconda di quante voci aveva.
+     Adesso passano tutte di qui: due pulsanti in chiaro, il resto nel
+     menu «...». Cosi' le schede sono tutte della stessa altezza.
+     Il primo dei due e' sempre quello che apre la scheda (edit-...),
+     perche' e' quello che si usa piu' di tutti.
+     ============================================================ */
+  const SCHEDA_MENU={}; let _schedaMenuN=0;
+  const SCHEDA_BTN_MAX=2;
+  function schedaAzioni(azioni){
+    const az=(azioni||[]).filter(x=>x&&!x.sep);
+    if(!az.length)return "";
+    const i=az.findIndex(x=>x.action&&/^edit-/.test(String(x.action)));
+    if(i>0){const e=az.splice(i,1)[0];az.unshift(e);}
+    const primi=az.slice(0,SCHEDA_BTN_MAX), resto=az.slice(SCHEDA_BTN_MAX);
+    let h=primi.map(a=>`<button class="btn btn-sm ja${a.del?" btn-danger del":""}" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`).join("");
+    if(resto.length){
+      const k="sm"+(++_schedaMenuN);
+      SCHEDA_MENU[k]=resto;
+      h+=`<span class="job-menu"><button class="lav-dots" data-action="scheda-menu" data-k="${k}" title="Altre azioni">&#8943;</button></span>`;
+    }
+    return h;
+  }
   function tabAttr(d){return Object.keys(d||{}).map(k=>` data-${k}="${esc(String(d[k]))}"`).join("");}
   function tabPop(voci){
     return '<div class="lav-pop">'+(voci||[]).map(v=>v.sep
@@ -2319,6 +2349,9 @@
     /* il registro dei menu "..." si riempie PRIMA del bivio schede/tabella:
        prima stava solo nel ramo tabella, e nelle schede il menu restava vuoto */
     TAB_MENU[cfg.id]={};R.forEach(r=>{if(r.menu&&r.menu.length)TAB_MENU[cfg.id][String(r.id)]=r.menu;});
+    /* le voci finite nei «...» delle schede si rifanno a ogni ridisegno:
+       senza questa riga il registro cresce a ogni salvataggio e non si svuota mai */
+    Object.keys(SCHEDA_MENU).forEach(k=>{delete SCHEDA_MENU[k];});
     /* SCHEDE SEMPRE, non solo su schermo stretto.
        Prima sul computer usciva una tabella a righe e sul telefono le schede:
        due disegni diversi per la stessa cosa. Ora ogni sezione ha la stessa
@@ -2404,9 +2437,7 @@
       <div class="job-top"><div class="job-cli">${o.titolo||""}</div>${o.destra||""}</div>
       ${meta.length?`<div class="job-meta">${meta.map(x=>`<span>${x}</span>`).join("")}</div>`:""}
       ${o.nota?`<div class="job-note">${o.nota}</div>`:""}
-      <div class="job-actions">${(o.azioni||[]).filter(x=>x&&!x.sep).map(a=>
-        `<button class="btn btn-sm ja${a.del?" btn-danger del":""}" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`
-      ).join("")}</div></div>`;
+      <div class="job-actions">${schedaAzioni(o.azioni)}</div></div>`;
   }
   function tabVuotoCerca(q){
     /* il pulsante per togliere la ricerca: senza, chi cerca una cosa che non
@@ -10334,9 +10365,7 @@ ${vecchi?`
         <span>📅 ${fdate(p.data)}</span>
         <span class="prev-tot">${eur2(tot[p.id]||0)}</span></div>
       ${p.note?`<div class="job-note">📝 ${esc(p.note)}</div>`:""}
-      <div class="job-actions">${prevVoci(p).filter(x=>!x.sep)
-        .map(x=>`<button class="btn btn-sm ja${x.del?" btn-danger del":""}" data-action="${x.action}"${tabAttr(x.data)}>${x.lab}</button>`).join("")}
-      </div></div>`;
+      <div class="job-actions">${schedaAzioni(prevVoci(p))}</div></div>`;
   }
   /* Preventivi: viste, colore della barretta e verbo della colonna "Quando".
      Il verbo cambia con lo stato ("inviato 3 giorni fa", "creato 3 giorni fa"):
@@ -15593,6 +15622,17 @@ ${vecchi?`
       tabChiudiPop();
       if(aperto)return;                                   /* secondo clic: chiude */
       const voci=(TAB_MENU[t.dataset.tab]||{})[String(id)];
+      if(voci&&voci.length&&cella)cella.insertAdjacentHTML("beforeend",tabPop(voci));
+      return;
+    }
+    /* stesso menu, ma per le schede che si preparano le voci da sole
+       (Preventivi, Fatture, Clienti, Squadra, Mezzi, Scadenzario...) */
+    if(a==="scheda-menu"){
+      const cella=t.closest(".job-menu")||t.parentElement;
+      const aperto=cella&&cella.querySelector(".lav-pop");
+      tabChiudiPop();
+      if(aperto)return;
+      const voci=SCHEDA_MENU[t.dataset.k];
       if(voci&&voci.length&&cella)cella.insertAdjacentHTML("beforeend",tabPop(voci));
       return;
     }
