@@ -2494,3 +2494,73 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
 @media(min-width:901px){
   .sheet--grande .sh-cols--3{ column-count:2; column-gap:38px; }
 }
+
+/* ============================================================
+   16 agosto 2026 (6) — CASELLE PIU' GRANDI, PAGINA PIENA
+   Con la finestra a tutto schermo le caselle da 19px sembravano
+   francobolli appoggiati su un foglio bianco: la pagina pareva vuota
+   anche quando i dati c'erano tutti.
+   Qui si alza tutto di un gradino: testo 21px, caselle alte 66px,
+   piu' aria fra un campo e l'altro e schede piu' spesse. Vale in
+   TUTTE le finestre del gestionale, non solo in una.
+   ============================================================ */
+.sheet .field label,
+.sheet .field > label{ font-size:18px; margin-bottom:10px; }
+
+.sheet .field input,
+.sheet .field select,
+.sheet .field textarea,
+.sheet .spesa-add input,
+.sheet .mezzo-add select,
+.sheet .prev-riga input,
+.nota-riga .nt-txt{
+  font-size:21px;
+  padding:17px 18px;
+  min-height:66px;
+  border-radius:13px;
+}
+.sheet .field input[type="date"]{ font-size:21px; min-height:66px; }
+.sheet .field textarea,
+.nota-riga .nt-txt{ min-height:150px; line-height:1.5; }
+/* le note sono righe corte: alte quanto basta, non mezzo schermo */
+.nota-riga .nt-txt{ min-height:96px; }
+.sheet .field input::placeholder,
+.sheet .field textarea::placeholder,
+.sheet .spesa-add input::placeholder,
+.nota-riga .nt-txt::placeholder{ font-size:20px; }
+
+.sheet .field{ margin-bottom:28px; }
+.sheet .row2{ gap:22px; }
+.sheet .seg button{ min-height:60px; font-size:18px; }
+
+/* le schede-zona: piu' spesse, cosi' non galleggiano nel bianco */
+.sheet--grande .sh-cols .sh-b{ padding:26px 26px 10px; margin-bottom:22px; }
+.sheet--grande .sh-cols .sh-b .sh-tit{ font-size:21px; margin-bottom:18px; padding-bottom:11px; }
+
+/* i pulsantini «+ Aggiungi ...» crescono con le caselle */
+.sheet .field .btn-ghost,
+.sheet .quick-add{ font-size:17px; padding:10px 0; }
+.sheet .spesa-add .btn,
+.sheet .mezzo-add .btn{ height:60px; font-size:18px; }
+.nota-riga .rdel{ width:52px; height:52px; font-size:24px; }
+
+/* sul telefono un filo meno, se no una casella sola riempie lo schermo */
+@media(max-width:768px){
+  .sheet .field input, .sheet .field select, .sheet .field textarea,
+  .sheet .spesa-add input, .sheet .mezzo-add select, .nota-riga .nt-txt{
+    font-size:20px; padding:16px 15px; min-height:62px;
+  }
+  .sheet .field textarea{ min-height:130px; }
+  .sheet .field{ margin-bottom:22px; }
+  .sheet--grande .sh-cols .sh-b{ padding:18px 16px 6px; }
+}
+
+/* Le righe delle voci: le colonne della quantita' e del prezzo erano larghe
+   64 e 92 px, giuste per il testo da 14px di una volta. Con 21px il prezzo
+   usciva tagliato («344,1» invece di «344,10»). Qui si allargano insieme al
+   testo, e la × diventa un pulsante che si tocca col dito. */
+.sheet .prev-riga{ grid-template-columns:1fr 96px 140px 52px; gap:10px; margin-bottom:10px; }
+.sheet .prev-riga .rdel{ font-size:22px; border-radius:12px; }
+@media(max-width:900px){
+  .sheet .prev-riga{ grid-template-columns:1fr 80px 118px 48px; gap:8px; }
+}
