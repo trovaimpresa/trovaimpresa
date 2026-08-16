@@ -10442,7 +10442,10 @@ ${vecchi?`
         ${p.cliente_id?`<span>👤 ${esc(cliMap[p.cliente_id]||"—")}</span>`:""}
         <span>📅 ${fdate(p.data)}</span>
         <span class="prev-tot">${eur2(tot[p.id]||0)}</span></div>
-      ${p.note?`<div class="job-note">📝 ${esc(p.note)}</div>`:""}
+      ${/* 16 agosto 2026 — la nota non si mostra piu' in anteprima: era un
+            muro di testo giallo che faceva la scheda alta il doppio delle
+            vicine, e tagliato a meta' non si leggeva comunque. Si legge
+            aprendo il preventivo. */""}
       <div class="job-actions">${schedaUnPulsante(prevVoci(p))||schedaAzioni(prevVoci(p))}</div></div>`;
   }
   /* Preventivi: viste, colore della barretta e verbo della colonna "Quando".
@@ -10474,6 +10477,35 @@ ${vecchi?`
     v.push({lab:"✏ Modifica",action:"edit-prev",data:{id:p.id}});
     v.push({lab:"🗑 Elimina",action:"del-prev",data:{id:p.id},del:true});
     return v;
+  }
+  /* ============================================================
+     16 agosto 2026 — LE NOTE DEL PREVENTIVO, UNA PER RIGA
+     Prima era una casella sola con dentro tutto: per togliere una
+     condizione bisognava cercarla in mezzo al testo e cancellarla a mano,
+     stando attenti a non portarsi via la riga di sopra.
+     Adesso ogni nota ha la sua riga, con la × per buttarla via e il «+»
+     per aggiungerne una.
+     NON cambia niente nel database: sulla colonna «note» si continua a
+     scrivere il solito testo, con un a capo fra una nota e l'altra. Cosi'
+     i preventivi gia' fatti si riaprono senza perdere niente e il PDF
+     resta identico.
+     ============================================================ */
+  function prevNotaRigaHtml(txt){
+    return '<div class="nota-riga" data-nota>'
+      +'<textarea class="nt-txt" rows="2" placeholder="Es. Prezzi validi 30 giorni">'+esc(txt||"")+'</textarea>'
+      +'<button type="button" class="rdel" data-action="prev-nota-del" title="Togli questa nota">&times;</button></div>';
+  }
+  function prevNoteRighe(note){
+    const righe=String(note||"").split("\n").map(function(x){return x.trim();}).filter(Boolean);
+    if(!righe.length)return prevNotaRigaHtml("");
+    return righe.map(prevNotaRigaHtml).join("");
+  }
+  function prevNoteLette(){
+    const out=[];
+    $$("#pv-note-lista [data-nota] .nt-txt").forEach(function(t){
+      const v=(t.value||"").trim(); if(v)out.push(v);
+    });
+    return out.length?out.join("\n"):null;
   }
   function prevRigaHtml(r){
     r=r||{};prevRigheCount++;
@@ -10721,7 +10753,10 @@ ${vecchi?`
       <div class="row2">
         <div class="field"><label>Cliente</label><select id="pv-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
         <div class="field"><label>Data</label><input type="date" id="pv-data" value="${p.data||todayStr()}"></div></div>
-      <div class="field"><label>Note (compaiono sul PDF)</label><textarea id="pv-note" placeholder="Condizioni, tempi, esclusioni...">${esc(p.note||"")}</textarea></div>
+      <div class="field"><label>Note (compaiono sul PDF)</label>
+        <div id="pv-note-lista">${prevNoteRighe(p.note)}</div>
+        <button type="button" class="btn-ghost quick-add" data-action="prev-nota-add">+ Aggiungi nota</button>
+        <div class="campo-aiuto">Una nota per riga. Sul PDF escono una sotto l'altra, nell'ordine in cui stanno qui.</div></div>
       </div>
       </div><div class="sh-col">
       <div class="sh-b">
@@ -10765,7 +10800,7 @@ ${vecchi?`
       righe.push({descrizione,qta:_numRiga(d,".pr-qta",1),prezzo:_numRiga(d,".pr-prezzo",0),ordine:i});
     });
     if(!righe.length){toast("Aggiungi almeno una voce");return;}
-    const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=$("#pv-note").value.trim()||null;
+    const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=prevNoteLette();
     let pid=id, vecchieVoci=[];
     const parcella=Object.assign({},leggiCampiParcella(),leggiCampiIvaImpresa());
     let avvisoParcella=false;
@@ -15696,6 +15731,11 @@ ${vecchi?`
        quindi il preventivo si prende dalla lista già caricata per il blocco. */
     if(a==="rie-prev"){const p=rieprevCache.find(x=>String(x.id)===String(id));if(p)prevForm(p);return;}
     if(a==="save-prev")return savePrev(id||null);
+    if(a==="prev-nota-add"){const b=$("#pv-note-lista");if(b){b.insertAdjacentHTML("beforeend",prevNotaRigaHtml(""));const ult=b.querySelector("[data-nota]:last-child .nt-txt");if(ult)ult.focus();}return;}
+    if(a==="prev-nota-del"){const d=t.closest("[data-nota]");if(d){const b=$("#pv-note-lista");d.remove();
+      /* se le togli tutte resta una riga vuota: se no non hai piu' dove scrivere */
+      if(b&&!b.querySelector("[data-nota]"))b.insertAdjacentHTML("beforeend",prevNotaRigaHtml(""));}
+      return;}
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
     if(a==="prev-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();prevTotaleLive();
       /* anche i riepiloghi sotto: prima restavano col numero vecchio e sullo

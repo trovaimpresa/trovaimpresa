@@ -2446,3 +2446,20 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
 .sheet--grande .sh-cols .sh-b > .field:first-child[style*="border-top"]{
   border-top:none !important; padding-top:0 !important; margin-top:0 !important;
 }
+
+/* Le note del preventivo, una per riga: la casella si allarga, la × sta a
+   destra e non si confonde con il testo. Stessa forma delle righe delle
+   voci di costo, cosi' si capisce che si comportano allo stesso modo. */
+.nota-riga{ display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; }
+.nota-riga .nt-txt{
+  flex:1; min-width:0; font-family:inherit; font-size:19px; line-height:1.45;
+  padding:13px 14px; border:1.5px solid var(--bordo-forte); border-radius:12px;
+  background:var(--card); color:var(--testo); resize:vertical; min-height:64px;
+}
+.nota-riga .nt-txt:focus{ outline:none; border-color:var(--blu); box-shadow:0 0 0 3px rgba(0,102,255,.14); }
+.nota-riga .rdel{
+  flex:0 0 auto; width:46px; height:46px; margin-top:4px;
+  border:1.5px solid var(--bordo-forte); border-radius:11px; background:var(--card);
+  color:var(--err); font-size:22px; line-height:1; cursor:pointer;
+}
+.nota-riga .rdel:hover{ background:var(--err-bg); border-color:var(--err); }
