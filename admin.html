@@ -259,6 +259,29 @@
                       color:var(--mid); padding:7px 14px; border-radius:8px; cursor:pointer; }
   .cre-range button.on { background:white; color:var(--verde); box-shadow:0 1px 4px rgba(0,0,0,.10); }
   .cre-hero { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:14px 0 2px; }
+  /* le caselle «cosa voglio vedere» */
+  .cre-tiles { display:flex; gap:0; flex-wrap:wrap; margin:16px 0 6px;
+               border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .cre-tile { flex:1 1 190px; min-width:170px; text-align:left; cursor:pointer;
+              background:#fbfcfd; border:none; border-right:1px solid var(--border);
+              border-bottom:3px solid transparent; padding:14px 18px; font:inherit;
+              display:flex; flex-direction:column; gap:4px; }
+  .cre-tile:last-child { border-right:none; }
+  .cre-tile:hover { background:#f4f7fb; }
+  .cre-tile .ct-k { display:flex; align-items:center; gap:8px; font-size:0.92rem; font-weight:700; color:var(--mid); }
+  .cre-tile .ct-dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto; opacity:.35; }
+  .cre-tile .ct-v { font-size:1.9rem; font-weight:800; line-height:1.05; letter-spacing:-.6px; color:#9aa5b3; }
+  .cre-tile.on { background:#fff; }
+  .cre-tile.on .ct-dot { opacity:1; }
+  .cre-tile.on .ct-v { color:#1a2430; }
+  .cre-tile[data-s="imprese"].on { border-bottom-color:#0066ff; }
+  .cre-tile[data-s="prev"].on    { border-bottom-color:#e8710a; }
+  .cre-tile .cre-delta { align-self:flex-start; margin-top:2px; }
+  /* con due linee la legenda c'e' sempre: il colore da solo non basta */
+  .cre-leg { display:flex; gap:20px; flex-wrap:wrap; margin-top:10px; padding-left:40px;
+             font-size:0.9rem; color:var(--mid); }
+  .cre-leg span { display:inline-flex; align-items:center; gap:8px; }
+  .cre-leg i { width:14px; height:3px; border-radius:2px; display:inline-block; }
   .cre-hero b { font-size:2rem; line-height:1; font-weight:800; letter-spacing:-.8px; }
   .cre-azioni { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .cre-link { border:1px solid var(--border); background:#fff; border-radius:9px; padding:8px 14px;
@@ -538,10 +561,19 @@
           </div>
           </div>
         </div>
-        <div class="cre-hero">
-          <b id="cre-tot">–</b>
-          <span class="lbl" id="cre-tot-lbl">nuove imprese nel periodo</span>
-          <span class="cre-delta pari" id="cre-delta">–</span>
+        <!-- 16 agosto 2026 — le caselle da spuntare, come su Search Console:
+             si sceglie COSA vedere sul grafico. Almeno una resta sempre accesa,
+             se no il grafico sarebbe un foglio bianco. -->
+        <div class="cre-tiles" id="cre-tiles">
+          <button class="cre-tile on" data-s="imprese" onclick="creSerie('imprese')">
+            <span class="ct-k"><i class="ct-dot" style="background:#0066ff"></i>Nuove imprese</span>
+            <span class="ct-v" id="cre-v-imprese">–</span>
+            <span class="cre-delta pari" id="cre-delta">–</span>
+          </button>
+          <button class="cre-tile" data-s="prev" onclick="creSerie('prev')">
+            <span class="ct-k"><i class="ct-dot" style="background:#e8710a"></i>Preventivi ricevuti</span>
+            <span class="ct-v" id="cre-v-prev">–</span>
+          </button>
         </div>
         <div class="cre-box">
           <div id="cre-svg"><div class="loading">Caricamento...</div></div>
@@ -2689,6 +2721,9 @@ function renderDaVerificare(lista) {
 // funzionare anche se la CDN e' bloccata.
 let _creRange = 90;      // 30 | 90 | 0 (=tutto, raggruppato per mese)
 let _creLista = [];      // imprese vere, senza profili di prova
+let _crePrevLista = [];  // preventivi ricevuti dal sito (per la seconda linea)
+/* quali linee sono accese sul grafico. Almeno una lo e' sempre. */
+let _creOn = { imprese:true, prev:false };
 
 function _creSet(id, v){ const e = document.getElementById(id); if (e) e.textContent = v; }
 function _lunedi(d){ const x=new Date(d); x.setHours(0,0,0,0); const g=(x.getDay()+6)%7; x.setDate(x.getDate()-g); return x; }
@@ -2725,6 +2760,17 @@ function _creEtichetta(d, perMese){
                  : d.getDate() + ' ' + _MESI[d.getMonth()];
 }
 
+function creSerie(k){
+  const altre = Object.keys(_creOn).filter(x=>x!==k);
+  /* spegnere l'ultima rimasta lascerebbe un foglio bianco: non si puo' */
+  if (_creOn[k] && !altre.some(x=>_creOn[x])) return;
+  _creOn[k] = !_creOn[k];
+  document.querySelectorAll('#cre-tiles .cre-tile').forEach(b=>{
+    b.classList.toggle('on', !!_creOn[b.dataset.s]);
+  });
+  renderCrescita();
+}
+
 function creRange(giorni, btn){
   _creRange = giorni;
   document.querySelectorAll('#cre-range button').forEach(b => b.classList.remove('on'));
@@ -2736,63 +2782,73 @@ function renderCrescita(){
   const cont = document.getElementById('cre-svg');
   if (!cont) return;
   const perMese = _creRange === 0;
-  const dati = _creRaggruppa(_creLista, _creRange);
+
+  /* ============================================================
+     16 agosto 2026 — «MANCA COSA VOGLIO VEDERE», come su Search Console.
+     Le caselle in cima accendono e spengono le linee. Tutte e due stanno
+     sullo STESSO asse: due assi diversi sullo stesso grafico fanno vedere
+     un legame fra i numeri che non c'e' — e' l'errore piu' comune nei
+     grafici, e qui non si fa.
+     I due colori (blu #0066ff e arancio #e8710a) sono passati al controllo
+     automatico: restano distinguibili anche a chi non vede bene i colori
+     (differenza 33 su 8 richiesti). E quando le linee sono due c'e' la
+     legenda: il colore da solo non deve mai essere l'unica cosa che
+     distingue una linea dall'altra.
+     ============================================================ */
+  const TUTTE = [
+    { k:'imprese', lab:'Nuove imprese',      col:'#0066ff', fill:'rgba(0,102,255,.10)',  lista:_creLista,
+      uno:'nuova impresa', tanti:'nuove imprese' },
+    { k:'prev',    lab:'Preventivi ricevuti', col:'#e8710a', fill:'rgba(232,113,10,.10)', lista:_crePrevLista,
+      uno:'preventivo', tanti:'preventivi' }
+  ];
+  const serie = TUTTE.filter(x => _creOn[x.k]);
 
   const sub = document.getElementById('cre-sub');
-  if (sub) sub.textContent = perMese ? 'Nuove imprese registrate, mese per mese'
-                                     : 'Nuove imprese registrate, settimana per settimana';
+  if (sub) sub.textContent = perMese ? 'Mese per mese' : 'Settimana per settimana';
 
-  if (!dati.length){
-    cont.innerHTML = '<div class="loading">Nessuna iscrizione in questo periodo.</div>';
-    _creSet('cre-tot', 0);
-    const d0 = document.getElementById('cre-delta');
-    if (d0){ d0.className = 'cre-delta pari'; d0.textContent = '–'; }
-    return;
-  }
+  /* ogni linea ha i suoi periodi; qui si mettono sullo stesso righello */
+  const grezzi = TUTTE.map(x => _creRaggruppa(x.lista, _creRange));
+  const chiaviOn = [];
+  TUTTE.forEach((x,i)=>{ if(_creOn[x.k]) grezzi[i].forEach(d=>chiaviOn.push(d.t.getTime())); });
+  const chiavi = [...new Set(chiaviOn)].sort((a,b)=>a-b);
+  const valore = (i,t) => { const f = grezzi[i].find(d=>d.t.getTime()===t); return f ? f.n : 0; };
+  const dati = chiavi.map(t => ({ t:new Date(t), v: TUTTE.map((x,i)=> valore(i,t)) }));
 
-  const tot = dati.reduce((s,x)=>s+x.n, 0);
-  _creSet('cre-tot', tot);
-  const lbl = document.getElementById('cre-tot-lbl');
-  if (lbl) lbl.textContent = tot === 1 ? 'nuova impresa nel periodo' : 'nuove imprese nel periodo';
+  /* i numeri nelle caselle: il totale del periodo, acceso o spento che sia */
+  TUTTE.forEach((x,i)=>{
+    const el = document.getElementById('cre-v-'+x.k);
+    if (el) el.textContent = grezzi[i].reduce((a,d)=>a+d.n, 0);
+  });
 
+  /* il confronto col periodo prima: sulla prima linea accesa */
   const d = document.getElementById('cre-delta');
   if (d){
-    if (dati.length >= 2){
-      const diff = dati[dati.length-1].n - dati[dati.length-2].n;
+    const iP = TUTTE.findIndex(x=>_creOn[x.k]);
+    const g = iP >= 0 ? grezzi[iP] : [];
+    if (g.length >= 2){
+      const diff = g[g.length-1].n - g[g.length-2].n;
       d.className = 'cre-delta ' + (diff > 0 ? 'su' : diff < 0 ? 'giu' : 'pari');
       d.textContent = diff === 0
         ? '= come il periodo prima'
-        : (diff > 0 ? '\u25b2 +' : '\u25bc ') + Math.abs(diff) +
-          (perMese ? ' rispetto al mese scorso' : ' rispetto alla settimana scorsa');
+        : (diff > 0 ? '▲ +' : '▼ ') + Math.abs(diff) +
+          (perMese ? ' sul mese scorso' : ' sulla settimana scorsa');
     } else { d.className = 'cre-delta pari'; d.textContent = '–'; }
   }
 
-  /* ============================================================
-     16 agosto 2026 — DA BARRE A LINEA, COME SEARCH CONSOLE
-     Le barre erano alte 300 px su tutta la larghezza: un muro di blu che
-     diceva solo «questa e' piu' alta dell'altra», non l'andamento. Una
-     linea sottile lo dice a colpo d'occhio e ci sta in meno della meta'
-     dello spazio (210 px invece di 300).
-     Regole seguite (guida grafici):
-       - linea 2 px, giunzioni arrotondate;
-       - pallini da 8 px con l'anello bianco attorno, cosi' si vedono
-         anche dove la linea li attraversa;
-       - griglia a filo di capello, PIENA e mai tratteggiata (il
-         tratteggio si legge come «previsione», e qui non lo e');
-       - il numero scritto SOLO sul punto piu' alto e sull'ultimo, non su
-         tutti: un numero su ogni punto non lo legge nessuno;
-       - una serie sola, quindi niente legenda: lo dice gia' il titolo.
-     Il blu #0066ff e' passato al controllo del contrasto sul fondo bianco.
-     ============================================================ */
+  if (!dati.length){
+    cont.innerHTML = '<div class="loading">Niente in questo periodo.</div>';
+    return;
+  }
+
   const W = 1000, H = 210, mL = 40, mR = 18, mT = 20, mB = 34;
   const pw = W - mL - mR, ph = H - mT - mB;
-  const max = Math.max(1, ...dati.map(x=>x.n));
+  let max = 1;
+  dati.forEach(p => serie.forEach(x => { const n = p.v[TUTTE.indexOf(x)]; if (n > max) max = n; }));
   const passo = max <= 4 ? 1 : max <= 10 ? 2 : max <= 25 ? 5 : 10;
   const cima = Math.ceil(max/passo)*passo;
   const y = v => mT + ph - (v/cima)*ph;
   const banda = pw / Math.max(1, dati.length);
   const px = i => dati.length === 1 ? mL + pw/2 : mL + banda*i + banda/2;
-  const iMax = dati.reduce((m,x,i)=> x.n > dati[m].n ? i : m, 0);
   const ogni = dati.length > 10 ? Math.ceil(dati.length/7) : 1;
 
   let s = '';
@@ -2801,45 +2857,55 @@ function renderCrescita(){
        + '<text x="'+(mL-10)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="12" fill="#8a94a2">'+v+'</text>';
   }
 
-  /* la macchia sotto la linea da' il volume senza gridare */
-  const pts = dati.map((x,i)=> px(i)+' '+y(x.n));
-  if (dati.length > 1){
-    s += '<path d="M '+px(0)+' '+(mT+ph)+' L '+pts.join(' L ')+' L '+px(dati.length-1)+' '+(mT+ph)+' Z"'
-       + ' fill="rgba(0,102,255,.10)"/>';
-    s += '<polyline points="'+dati.map((x,i)=> px(i)+','+y(x.n)).join(' ')+'"'
-       + ' fill="none" stroke="#0066ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
-  }
+  serie.forEach(x => {
+    const ix = TUTTE.indexOf(x);
+    const pts = dati.map((p,i)=> px(i)+' '+y(p.v[ix]));
+    if (dati.length > 1){
+      /* la macchia sotto la linea solo quando la linea e' una: con due
+         si sovrapporrebbero e non si capirebbe piu' quale sta sopra */
+      if (serie.length === 1){
+        s += '<path d="M '+px(0)+' '+(mT+ph)+' L '+pts.join(' L ')+' L '+px(dati.length-1)+' '+(mT+ph)+' Z" fill="'+x.fill+'"/>';
+      }
+      s += '<polyline points="'+dati.map((p,i)=> px(i)+','+y(p.v[ix])).join(' ')+'"'
+         + ' fill="none" stroke="'+x.col+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+    }
+    const iMax = dati.reduce((m,p,i)=> p.v[ix] > dati[m].v[ix] ? i : m, 0);
+    dati.forEach((p,i)=>{
+      const cx = px(i), cy = y(p.v[ix]);
+      if (dati.length <= 24 || i === dati.length-1 || i === iMax){
+        s += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(i===dati.length-1?4.5:3.5)+'" fill="'+x.col+'" stroke="#fff" stroke-width="2"/>';
+      }
+      if ((i === iMax || i === dati.length-1) && p.v[ix] > 0){
+        s += '<text x="'+cx+'" y="'+(cy-11)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#1a2430">'+p.v[ix]+'</text>';
+      }
+    });
+  });
 
-  /* riga verticale che segue il mouse, come su Search Console */
   s += '<line id="cre-cross" x1="0" y1="'+mT+'" x2="0" y2="'+(mT+ph)+'" stroke="#c3ccd8" stroke-width="1" opacity="0"/>';
 
-  dati.forEach((x,i)=>{
-    const cx = px(i), cy = y(x.n);
-    /* con pochi punti si vedono tutti; con tanti solo l'ultimo, se no e' un rosario */
-    if (dati.length <= 24 || i === dati.length-1 || i === iMax){
-      s += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(i===dati.length-1?4.5:3.5)+'"'
-         + ' fill="#0066ff" stroke="#fff" stroke-width="2"/>';
-    }
-    if ((i === iMax || i === dati.length-1) && x.n > 0){
-      s += '<text x="'+cx+'" y="'+(cy-11)+'" text-anchor="middle" font-size="13" font-weight="700" fill="#1a2430">'+x.n+'</text>';
-    }
+  dati.forEach((p,i)=>{
+    const cx = px(i);
     if (i % ogni === 0 || i === dati.length-1){
       s += '<text x="'+cx+'" y="'+(H-mB+22)+'" text-anchor="middle" font-size="12" fill="#8a94a2">'
-         + esc(_creEtichetta(x.t, perMese)) + '</text>';
+         + esc(_creEtichetta(p.t, perMese)) + '</text>';
     }
+    const dettaglio = serie.map(x => x.lab + ': ' + p.v[TUTTE.indexOf(x)]).join(' | ');
     s += '<rect x="'+(mL+banda*i)+'" y="'+mT+'" width="'+banda+'" height="'+ph+'" fill="transparent"'
-       + ' data-n="'+x.n+'" data-x="'+cx+'" data-l="'+esc(_creEtichetta(x.t, perMese))+'" style="cursor:pointer"/>';
+       + ' data-d="'+esc(dettaglio)+'" data-x="'+cx+'" data-l="'+esc(_creEtichetta(p.t, perMese))+'" style="cursor:pointer"/>';
   });
   s += '<line x1="'+mL+'" y1="'+(mT+ph)+'" x2="'+(W-mR)+'" y2="'+(mT+ph)+'" stroke="#d7dce3" stroke-width="1"/>';
 
-  cont.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Nuove imprese registrate per periodo">'+s+'</svg>';
+  cont.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Andamento nel tempo">'+s+'</svg>'
+    + (serie.length > 1
+        ? '<div class="cre-leg">' + serie.map(x =>
+            '<span><i style="background:'+x.col+'"></i>'+esc(x.lab)+'</span>').join('') + '</div>'
+        : '');
 
   const box = cont.parentElement, tip = document.getElementById('cre-tip');
-  cont.querySelectorAll('rect[data-n]').forEach(r => {
+  cont.querySelectorAll('rect[data-d]').forEach(r => {
     r.addEventListener('mouseenter', () => {
-      const n = +r.dataset.n;
-      tip.innerHTML = '<b>'+n+'</b> ' + (n===1 ? 'nuova impresa' : 'nuove imprese')
-                    + '<br>' + (perMese ? 'in ' : 'settimana del ') + r.dataset.l;
+      tip.innerHTML = '<b>' + esc(r.dataset.l) + '</b><br>'
+                    + esc(r.dataset.d).split(' | ').join('<br>');
       const bb = r.getBoundingClientRect(), pb = box.getBoundingClientRect();
       tip.style.left = (bb.left - pb.left + bb.width/2) + 'px';
       tip.style.top  = (bb.top  - pb.top  + bb.height*0.45) + 'px';
@@ -2899,6 +2965,8 @@ async function caricaPreventivi() {
     return;
   }
   document.getElementById('stat-preventivi').textContent = data?.length || 0;
+  _crePrevLista = data || [];
+  renderCrescita();   /* la seconda linea del grafico si aggiorna da sola */
   const tbody = document.getElementById('table-preventivi');
   if (!data?.length) {
     tbody.innerHTML = '<tr><td colspan="7"><div class="empty-table"><div class="eicon">📋</div>Nessun preventivo ancora</div></td></tr>';
