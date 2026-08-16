@@ -27,8 +27,43 @@ const PAGINE_RICERCA = [
   'cerca-professionisti.html'
 ];
 
+/* ============================================================
+   16 agosto 2026 — DOVE SI FA VEDERE, E DOVE NO
+   L'assistente serve a ORIENTARSI: aiuta chi arriva e non sa dove
+   andare. Uno che e' gia' dentro il gestionale, o dentro un modulo di
+   registrazione, sa benissimo dove si trova — li' la nuvoletta non
+   aiuta, occupa l'angolo in basso a destra e basta (nel gestionale
+   copriva il pulsante Salva e la barra in basso del telefono).
+
+   Il paletto sta QUI DENTRO, non nelle pagine: cosi' vale a
+   prescindere da chi carica il file, oggi e domani. Se un giorno
+   qualcuno lo mette in una pagina nuova, l'assistente decide da solo
+   se e' il posto giusto.
+
+   Compare su:
+     - la homepage
+     - le pagine citta' (imprese-roma, imprese-rieti, ...)
+     - le quattro pagine di ricerca, dove uno sta ancora scegliendo
+   Ovunque altro: niente.
+   ============================================================ */
+const ASSISTENTE_DOVE = [
+  /^\/?(index\.html)?$/i,               /* la homepage, con o senza index.html */
+  /^\/imprese-[^\/]+$/i,                /* le pagine citta' */
+  /^\/cerca-(artigiani|imprese|negozi|professionisti)(\.html)?$/i
+];
+function assistenteQuiCiSta(){
+  try{
+    /* via lo .html finale e la barra in fondo: /imprese-roma.html, /imprese-roma
+       e /imprese-roma/ sono la stessa pagina */
+    var pth = location.pathname.replace(/\/+$/, '') || '/';
+    var senzaHtml = pth.replace(/\.html$/i, '');
+    return ASSISTENTE_DOVE.some(function(r){ return r.test(pth) || r.test(senzaHtml); });
+  }catch(e){ return false; }
+}
+
 (function () {
   if (window.__assistenteTI) return;
+  if (!assistenteQuiCiSta()) return;    /* qui non ci sta: non disegna niente */
   window.__assistenteTI = true;
 
   const css = `
