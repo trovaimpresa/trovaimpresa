@@ -2123,6 +2123,24 @@
      (Mappa, Foto, WhatsApp, PDF, fattura, Elimina) nel menu "...". Prima
      c'erano fino a 7 pulsanti in fila, con Elimina a un dito da Segna fatto.
      menuTab = registro TAB_MENU della sezione ("lav" o "ag"). */
+  /* 16 agosto 2026 (4) — anche i Lavori come tutte le altre sezioni: fuori
+     solo «Apri», dentro la finestra Avvia / Segna fatto / Riapri e tutte le
+     voci che prima stavano sotto i «...». */
+  function schedaAzioniLavoro(l,withFoto,fatto,dp,menuTab){
+    const az=[{lab:"✏ Modifica",action:"edit-job",data:{id:l.id}}];
+    if(withFoto&&l.stato==="da_fare")az.push({lab:"▶ Avvia",action:"stato-supa",data:{id:l.id,v:"in_corso",dp:dp}});
+    if(withFoto&&!fatto)az.push({lab:"✔ Segna fatto",action:"stato-supa",data:{id:l.id,v:"fatto",dp:dp}});
+    if(withFoto&&fatto)az.push({lab:"↩ Riapri",action:"stato-supa",data:{id:l.id,v:"da_fare",dp:dp}});
+    /* le voci che stavano nei «...»: le ha gia' preparate renderTabella */
+    const extra=menuTab?((TAB_MENU[menuTab]||{})[String(l.id)]||[]):[];
+    extra.forEach(function(v){
+      if(!v||v.sep)return;
+      /* niente doppioni con i tre pulsanti qui sopra */
+      if(v.action==="edit-job"||v.action==="stato-supa")return;
+      az.push(v);
+    });
+    return schedaUnPulsante(az)||schedaAzioni(az);
+  }
   function jobCardSupa(l,withFoto,opTel,conImp,menuTab){
     const fatto=l.stato==="fatto", dove=l.dove||"";
     const late=inRitardo(l.stato,l.data_prevista);
@@ -2142,13 +2160,7 @@
         ${(ruoloUtente==='professionista'&&l.pratica_stato)?`<span>🏛 ${esc((PRATICA_STATI.find(x=>x[0]===l.pratica_stato)||[])[1]||"")}</span>`:""}
         ${(ruoloUtente==='professionista'&&l.pratica_protocollo)?`<span>N. ${esc(l.pratica_protocollo)}</span>`:""}
       </div>
-      <div class="job-actions">
-        <button class="btn btn-sm ja" data-action="edit-job" data-id="${esc(l.id)}">✏ Modifica</button>
-        ${withFoto&&l.stato==="da_fare"?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="in_corso" data-dp="${dp}">▶ Avvia</button>`:""}
-        ${withFoto&&!fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="fatto" data-dp="${dp}">✔ Segna fatto</button>`:""}
-        ${withFoto&&fatto?`<button class="btn btn-sm ja" data-action="stato-supa" data-id="${esc(l.id)}" data-v="da_fare" data-dp="${dp}">↩ Riapri</button>`:""}
-        ${dots}
-      </div></div>`;
+      <div class="job-actions">${schedaAzioniLavoro(l,withFoto,fatto,dp,menuTab)}</div></div>`;
   }
   /* Lavori: tabella ordinabile su desktop, card su mobile */
   const _deskTab=()=>window.matchMedia("(min-width:881px)").matches;
@@ -2303,13 +2315,17 @@
   /* Il registro delle azioni: la scheda le mette da parte, la finestra che si
      apre se le prende e se le mette in fondo, accanto a Salva.
      Chiave = azione di apertura + id, cosi' due sezioni non si pestano i piedi. */
+  /* L'azione che «apre» non si chiama uguale dappertutto: edit-prev,
+     edit-mezzo, apri-cli, sq-edit, carta-dettaglio... sono tutte quella.
+     Qui c'e' l'elenco, in un posto solo. */
+  const AZ_APERTURA=/^(edit-|apri-)|^(sq-edit|carta-dettaglio)$/;
   const AZ_APRI={};
   let _azPendenti=null;
   /* L'azione che «apre» non si chiama uguale dappertutto: edit-prev,
      edit-mezzo, edit-scad, apri-cli, sq-edit... sono tutte quella. */
   function schedaUnPulsante(azioni){
     const az=(azioni||[]).filter(x=>x&&!x.sep);
-    const i=az.findIndex(x=>x.action&&/^(edit-|apri-)|^sq-edit$/.test(String(x.action)));
+    const i=az.findIndex(x=>x.action&&AZ_APERTURA.test(String(x.action)));
     if(i<0)return null;                       /* niente apertura: si resta come prima */
     const apri=az[i], resto=az.filter((x,k)=>k!==i);
     /* senza id non si sa cosa aprire: meglio lasciare la scheda com'era
@@ -2333,7 +2349,11 @@
     return `<button class="${cls}${a.del?" btn-danger":""}" data-chiudi="1" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`;
   }
   function _azUtili(voci){
-    return (voci||[]).filter(x=>x&&!x.sep&&!(x.action&&/^(edit-|apri-)|^sq-edit$/.test(String(x.action))));
+    /* NIENTE filtro sul nome dell'azione: l'azione che apre e' gia' stata
+       tolta da schedaUnPulsante. Filtrando anche qui, nelle Carte spariva
+       «Modifica» (edit-carta) solo perche' comincia per «edit-», mentre
+       quella che apre la carta e' «carta-dettaglio». */
+    return (voci||[]).filter(x=>x&&!x.sep);
   }
   function azioniSopra(voci){
     const v=_azUtili(voci).filter(x=>!x.del);
@@ -2348,7 +2368,7 @@
   function schedaAzioni(azioni){
     const az=(azioni||[]).filter(x=>x&&!x.sep);
     if(!az.length)return "";
-    const i=az.findIndex(x=>x.action&&/^(edit-|apri-)|^sq-edit$/.test(String(x.action)));
+    const i=az.findIndex(x=>x.action&&AZ_APERTURA.test(String(x.action)));
     if(i>0){const e=az.splice(i,1)[0];az.unshift(e);}
     const primi=az.slice(0,SCHEDA_BTN_MAX), resto=az.slice(SCHEDA_BTN_MAX);
     let h=primi.map(a=>`<button class="btn btn-sm ja${a.del?" btn-danger del":""}" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`).join("");
@@ -5759,10 +5779,11 @@ ${vecchi?`
           <div class="c-r"><span class="c-rt">Titolare</span><span class="c-rv">${nomeDip?esc(nomeDip):"nessuno"}</span></div>
           <div class="c-r"><span class="c-rt">Stato</span><span class="c-rv ${bloccata?"":"ok"}">${bloccata?"Bloccata":"Attiva"}</span></div>
         </div>
-        <div class="card-acts">
-          <button class="btn" data-action="carta-dettaglio" data-id="${c.id}">Movimenti</button>
-          <button class="btn" data-action="edit-carta" data-id="${c.id}">Modifica</button>
-          <button class="btn btn-danger del" data-action="del-carta" data-id="${c.id}">Elimina</button></div></div>`;
+        <div class="card-acts">${schedaUnPulsante([
+          {lab:"Apri",action:"carta-dettaglio",data:{id:c.id}},
+          {lab:"✏ Modifica",action:"edit-carta",data:{id:c.id}},
+          {lab:"🗑 Elimina",action:"del-carta",data:{id:c.id},del:true}
+        ])}</div></div>`;
     }).join("");
   }
   function cartaForm(c){
@@ -15594,7 +15615,7 @@ ${vecchi?`
     if(t.dataset.chiudi){ const _ov=$("#overlay"); if(_ov)_ov.classList.remove("open"); }
     /* «Apri» su una scheda: le altre azioni di quella scheda aspettano qui,
        e se le prende la finestra appena si apre (vedi openSheetGrande). */
-    if(/^(edit-|apri-)|^sq-edit$/.test(String(a))) _azPendenti=AZ_APRI[String(a)+":"+String(id==null?"":id)]||null;
+    if(AZ_APERTURA.test(String(a))) _azPendenti=AZ_APRI[String(a)+":"+String(id==null?"":id)]||null;
     if(a==="spesa-add")return spesaAdd();
     /* "Mostra tutti": svuota la casella di ricerca della sezione in cui si sta */
     if(a==="cerca-azzera"){
