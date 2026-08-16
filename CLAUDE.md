@@ -7084,3 +7084,80 @@ Blocco 3 controllore preventivi → fatture e pratiche → scontrino fotografato
 preventivo dettato → "chiedi ai tuoi dati". In mezzo, quando serve una pausa
 dall'AI: sezioni allineate alle finestre, ricerca unica, "Fattura
 n. 12/undefined", calendario. E prima o poi, la pagina pubblica del gestionale.
+
+---
+
+## IL GIUDIZIO SUL GESTIONALE (16 agosto — chiesto da Alessio, senza addolcirlo)
+
+Numeri veri del file al momento del giudizio: **1 MB, 16.541 righe, 433
+funzioni, 366 chiamate a Supabase, 23 sezioni**, `css/gestionale.css` 2.754
+righe.
+
+### Quello che è forte davvero
+
+- **Il mestiere è dentro il codice.** IVA 10 e 22 insieme, ritenuta 4% del
+  condominio, cassa del professionista, forfettario col bollo da 2 €. È la
+  parte che i software fatti dai programmatori sbagliano, perché non sono mai
+  stati in cantiere. È il vantaggio vero e non si copia in fretta.
+- **Il Cestino come strato unico.** Ogni cancellazione diventa una data, ogni
+  lettura salta le righe cancellate, e sta in un posto solo invece che in 48.
+  Scelta da persona esperta.
+- **`esc()` usata 479 volte** — il nome di un cliente non può rompere la
+  pagina. **87 `.select('id')`** dopo le scritture — si verifica che la
+  scrittura sia andata davvero. Disciplina che quasi nessuno ha.
+- **Un file solo per 4 profili.** Discutibile, ma per chi lavora da solo è la
+  scelta giusta: si mantiene una cosa, non quattro.
+
+### Quello che è debole
+
+1. **I conti esistono in più copie.** Il difetto più caro. Riepilogo, Fatture,
+   Report ed Excel calcolano la stessa cosa in punti diversi. Finché combaciano
+   non si vede; il giorno che cambia una regola in uno solo, il commercialista
+   vede due numeri. Non dà errore: dà il numero sbagliato, che è peggio.
+2. **Un file da 16.500 righe.** Non è estetica: ogni modifica tocca il vicino
+   di casa. E un telefono in cantiere scarica 1 MB prima di vedere qualcosa.
+3. **Nessuna rete di protezione automatica.** I banchi in `prove/` esistono ma
+   li lancia Claude. Se Alessio pusha da solo, niente lo ferma. **È la cosa che
+   manca di più**, perché è quella che lo protegge quando Claude non c'è.
+4. **Il pulsante «Ricarica crediti» che porta su una pagina inesistente** non è
+   un bug isolato: è il segno di una funzione data per finita senza provare
+   l'ultimo clic. La domanda giusta non è «sistemo quello» ma «quanti altri
+   pulsanti fanno lo stesso?».
+5. **Troppa larghezza, poca profondità.** Lavori, preventivi, fatture,
+   calendario, squadra, mezzi, carte, scadenzario, computo, cestino,
+   subappalto, offerte di lavoro. Una persona sola. Rischio concreto: 15 cose
+   al 60% invece di 5 al 95%. Se si deve scegliere, la catena
+   **preventivo → fattura → incasso** dev'essere perfetta, il resto aspetta.
+6. **Nessuno sa che esiste.** Non è un difetto tecnico: è **il** difetto.
+7. **Il cantiere non ha campo.** Sotto un ponteggio o in un seminterrato non
+   c'è linea, e tutto legge da Supabase in diretta. Foto e rapportini
+   dovrebbero salvarsi in locale e partire dopo.
+8. **L'AI adesso non è la priorità.** È la cosa più divertente da fare e la
+   terza per valore. E le prime cinque regole del controllore (condominio senza
+   ritenuta, IVA 22% su una ristrutturazione, prezzo a zero…) le fa il codice
+   normale: gratis, senza crediti e senza sbagliare mai.
+
+### Il voto, per essere netti
+
+| | |
+|---|---|
+| Conoscenza del mestiere | **8/10** — sopra la media del settore |
+| Solidità di quello che c'è | **6,5/10** — funziona, ma senza rete |
+| Manutenibilità | **4/10** — la parte che farà male fra sei mesi |
+| Prodotto sul mercato | **3/10** — perché nessuno sa che c'è |
+
+### Le tre cose da fare, in quest'ordine
+
+1. **La pagina pubblica del gestionale** + una riga in `prezzi.html`. Un giorno
+   di lavoro. È l'unica delle tre che porta soldi.
+2. **Il controllo automatico al push** (Netlify fa fallire la build): sintassi
+   dei blocchi `<script>`, nessun `openSheet(` sui form, nessun testo sotto i
+   13 px, nessun link interno morto, e i conti confrontati fra le schermate.
+   Mezza giornata. Protegge per sempre.
+3. **`js/conti.js`** — i calcoli in una copia sola, e tutte le schermate che
+   leggono da lì. Non una riscrittura: solo l'estrazione di `fattConti`,
+   `fattImponibile`, `calcolaParcella` e i totali del computo.
+
+Poi l'AI. E appena possibile, la faccenda delle pagine `cerca-*` che mandano
+telefono ed email in chiaro a 5 imprese: non è una funzione da migliorare, è
+una cosa da chiudere.

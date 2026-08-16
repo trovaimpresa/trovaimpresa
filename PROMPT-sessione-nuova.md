@@ -6,6 +6,9 @@ Leggi CLAUDE.md prima di toccare qualsiasi cosa: in fondo c'è
 "DOVE SIAMO REALMENTE RIMASTI (16 agosto, pomeriggio - il programma AI)".
 Lì dentro c'è l'elenco completo dei lavori e le decisioni già prese
 (100 crediti al mese, si parte dal Blocco 0).
+Subito dopo c'è "IL GIUDIZIO SUL GESTIONALE": leggilo, sono i punti deboli
+veri del progetto e le tre cose da fare per prime. Se quello che sto per
+chiederti va contro quel giudizio, dimmelo.
 
 UN LAVORO SOLO: BLOCCO 0 - CHIUDERE IL BUCO DEI CREDITI AI
 
