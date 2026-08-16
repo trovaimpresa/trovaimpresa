@@ -6990,3 +6990,79 @@ tutti e due i profili.
 7. Restano aperti dai giorni prima: l'email delle 24 ore mai vista partire, e
    ⚠️ le richieste dalle pagine `cerca-*` che mandano telefono ed email in
    chiaro a 5 imprese.
+
+---
+
+## DOVE SIAMO REALMENTE RIMASTI (16 agosto, pomeriggio — il programma AI)
+
+Niente codice scritto in questa parte: **solo decisioni**. La sessione era
+troppo piena e si riparte da capo con l'elenco qui sotto.
+
+### Quanto costa l'AI (conti fatti su Claude Haiku 4.5: 1 $/MTok in, 5 $/MTok out)
+
+Una chiamata media del gestionale (controllo di un preventivo, ~1.500 token
+dentro e ~600 fuori) costa circa **0,0045 $**, cioè meno di mezzo centesimo.
+Con **100 crediti al mese** il costo massimo per impresa è circa **0,45 $/mese**,
+**5,4 $/anno**. Su un Premium da 49 € (≈40 € netti dopo tasse e Stripe) è
+poco più del **13%** del margine, e solo se uno li usa tutti. Nella realtà la
+media sarà molto più bassa.
+
+**Decisione di Alessio: 100 crediti al mese** compresi nel Premium, più la
+possibilità di comprarne altri che non scadono.
+
+### L'elenco dei lavori, in ordine
+
+**BLOCCO 0 — chiudere il buco dei crediti** ← si parte da qui
+
+Il sistema dei crediti **esiste già** (tabella `ai_accounts`, funzioni
+`consume_ai_credit` e `get_ai_status`, colonna `credits_extra` per quelli
+comprati che non scadono). Quello che manca:
+
+- `quota_per_piano` oggi dà: base 0, ai 60, ai_pro 300 → va portato a **100**
+  per il piano che paga.
+- Serve una funzione SQL riservata al `service_role` che **aggiunge i crediti
+  comprati** a `ai_accounts.credits_extra`.
+- **`ricarica-crediti.html` NON ESISTE** eppure il pulsante «Ricarica 150
+  crediti — 19 €» ci punta: oggi chi clicca finisce su una pagina che non c'è.
+- Manca `netlify/functions/crea-checkout-crediti.js` (Stripe pagamento
+  singolo, da copiare da `crea-checkout-gestionale.js`).
+- Manca l'accredito dentro `stripe-webhook-abbonamenti.js`.
+  ⚠️ **Punto delicato**: se il webhook sbaglia, uno paga e non riceve i
+  crediti. Va provato anche il caso che deve essere rifiutato (webhook
+  ripetuto due volte non deve accreditare due volte).
+
+**BLOCCO 1 — «Controlla i tuoi crediti»**
+Una schermata sua: quanti ne restano, quando si rinnovano, dove sono finiti
+(quali funzioni li hanno consumati). Un contatore sempre visibile e un
+avviso quando si scende sotto il 20%.
+
+**BLOCCO 2 — il bollino «AI»**
+Come la (i) dei tooltip di `js/aiuti.js`, ma con scritto **AI**: si mette
+**solo dove l'intelligenza artificiale lavora davvero**, e toccandolo dice
+cosa fa e quanti crediti costa. Mai un bollino dove l'AI non c'è.
+
+**BLOCCO 3 — il controllore dei preventivi** (l'idea di Alessio)
+Prima le **regole fisse**, che non costano niente: condominio senza ritenuta
+4%, IVA al 22% su una ristrutturazione, preventivo senza note, prezzo a zero,
+cliente senza codice fiscale. Poi l'AI per il resto. **Gli avvisi non
+bloccano mai**: segnalano e basta, si può andare avanti lo stesso.
+
+**Poi, nell'ordine:** stesso controllore su fatture e pratiche → scontrino
+fotografato che si trasforma in spesa → preventivo dettato a voce →
+«chiedi ai tuoi dati» (domande in italiano sui propri numeri).
+
+### E in mezzo, i lavori di grafica rimasti (li ha chiesti lui: «aggiungi anche i lavori elencati da te»)
+
+- **Sezioni allineate alle finestre**: le pagine dietro sono ancora a 16-17 px
+  con le schede grigie, le finestre a 21 px su foglio bianco. Stona.
+- **Ricerca unica**: una casella sola, scrivi «Verdi» ed escono cliente,
+  lavori, preventivi e fatture.
+- **«Fattura n. 12/undefined»**: manca l'anno.
+- **Il calendario**: scrive a 12 px (sotto il minimo dei 13), taglia i nomi a
+  metà, e ha caselle enormi e vuote.
+
+### Da non dimenticare
+
+`prezzi.html` non nomina il gestionale nemmeno una volta e non esiste nessuna
+pagina pubblica che lo spieghi: resta **la cosa più importante rimasta**, più
+importante dell'AI.
