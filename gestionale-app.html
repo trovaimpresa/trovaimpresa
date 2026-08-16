@@ -2297,13 +2297,49 @@
      Le azioni in fondo alla finestra chiudono la finestra prima di
      partire (data-chiudi): se no cambi lo stato e resti davanti al
      modulo che mostra ancora quello vecchio. */
-  function schedaApri(action,id,lab){
-    return `<button class="btn btn-sm ja" data-action="${action}" data-id="${esc(String(id))}">${lab||"Apri"}</button>`;
+  function schedaApri(action,dati,lab){
+    return `<button class="btn btn-sm ja" data-action="${action}"${tabAttr(dati)}>${lab||"Apri"}</button>`;
   }
-  function azioniDentro(voci){
-    return (voci||[]).filter(x=>x&&!x.sep&&!(x.action&&/^edit-/.test(String(x.action))))
-      .map(a=>`<button class="btn${a.del?" btn-danger":""}" data-chiudi="1" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`)
-      .join("");
+  /* Il registro delle azioni: la scheda le mette da parte, la finestra che si
+     apre se le prende e se le mette in fondo, accanto a Salva.
+     Chiave = azione di apertura + id, cosi' due sezioni non si pestano i piedi. */
+  const AZ_APRI={};
+  let _azPendenti=null;
+  function schedaUnPulsante(azioni){
+    const az=(azioni||[]).filter(x=>x&&!x.sep);
+    const i=az.findIndex(x=>x.action&&/^edit-/.test(String(x.action)));
+    if(i<0)return null;                       /* niente apertura: si resta come prima */
+    const apri=az[i], resto=az.filter((x,k)=>k!==i);
+    /* senza id non si sa cosa aprire: meglio lasciare la scheda com'era
+       (due pulsanti e i «...») che dare un «Apri» che non apre niente */
+    const rid=apri.data&&apri.data.id;
+    if(rid==null||rid==="")return null;
+    AZ_APRI[String(apri.action)+":"+String(rid)]=resto;
+    return schedaApri(apri.action,apri.data,"Apri");
+  }
+  /* 16 agosto 2026 (3) — DOVE STANNO LE AZIONI DENTRO LA FINESTRA
+     Prima erano tutte e nove in fondo, in fila con Annulla e Salva. Ma sono
+     due cose diverse: «Annulla» e «Salva» riguardano quello che stai
+     SCRIVENDO, «Scarica PDF» / «Segna inviato» / «Accettato» riguardano il
+     DOCUMENTO e non c'entrano niente con i campi che stai compilando.
+     Quindi: le azioni sul documento vanno IN ALTO, accanto al titolo — le
+     vedi appena apri, prima di scendere nei campi. In fondo restano due
+     pulsanti soli, sempre negli stessi due posti.
+     «Elimina» sta in fondo A SINISTRA: in alto sarebbe a due centimetri
+     dalla X per chiudere, e un giorno di fretta ci finisci sopra. */
+  function _azBottone(a,cls){
+    return `<button class="${cls}${a.del?" btn-danger":""}" data-chiudi="1" data-action="${a.action}"${tabAttr(a.data)}>${a.lab}</button>`;
+  }
+  function _azUtili(voci){
+    return (voci||[]).filter(x=>x&&!x.sep&&!(x.action&&/^edit-/.test(String(x.action))));
+  }
+  function azioniSopra(voci){
+    const v=_azUtili(voci).filter(x=>!x.del);
+    return v.length?`<div class="sh-head-az">${v.map(a=>_azBottone(a,"btn btn-sm")).join("")}</div>`:"";
+  }
+  function azioniElimina(voci){
+    const v=_azUtili(voci).filter(x=>x.del);
+    return v.map(a=>_azBottone(a,"btn sh-foot-sx")).join("");
   }
   const SCHEDA_MENU={}; let _schedaMenuN=0;
   const SCHEDA_BTN_MAX=2;
@@ -10380,7 +10416,7 @@ ${vecchi?`
         <span>📅 ${fdate(p.data)}</span>
         <span class="prev-tot">${eur2(tot[p.id]||0)}</span></div>
       ${p.note?`<div class="job-note">📝 ${esc(p.note)}</div>`:""}
-      <div class="job-actions">${schedaApri("edit-prev",p.id,"Apri")}</div></div>`;
+      <div class="job-actions">${schedaUnPulsante(prevVoci(p))||schedaAzioni(prevVoci(p))}</div></div>`;
   }
   /* Preventivi: viste, colore della barretta e verbo della colonna "Quando".
      Il verbo cambia con lo stato ("inviato 3 giorni fa", "creato 3 giorni fa"):
@@ -10662,7 +10698,6 @@ ${vecchi?`
       ${bloccoIvaImpresa(p)}
       </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
-       ${isNew?"":azioniDentro(prevVoci(p))}
        <button class="btn-primary b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button>`);
     $("#prev-righe").addEventListener("input",prevTotaleLive);
     /* parcella: il riepilogo si ricalcola sia cambiando le voci sia le percentuali */
@@ -15535,6 +15570,9 @@ ${vecchi?`
     /* i pulsanti in fondo alla finestra: prima si chiude, poi si fa.
        Se no si cambia lo stato e si resta davanti al modulo vecchio. */
     if(t.dataset.chiudi){ const _ov=$("#overlay"); if(_ov)_ov.classList.remove("open"); }
+    /* «Apri» su una scheda: le altre azioni di quella scheda aspettano qui,
+       e se le prende la finestra appena si apre (vedi openSheetGrande). */
+    if(/^edit-/.test(String(a))) _azPendenti=AZ_APRI[String(a)+":"+String(id==null?"":id)]||null;
     if(a==="spesa-add")return spesaAdd();
     /* "Mostra tutti": svuota la casella di ricerca della sezione in cui si sta */
     if(a==="cerca-azzera"){
@@ -15678,7 +15716,7 @@ ${vecchi?`
     else if(_mqLis.addListener)_mqLis.addListener(_mqLisCambio);
   }catch(e){}
 
-  function openSheet(html){const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");}
+  function openSheet(html){_azPendenti=null;const s=$("#sheet");s.className="sheet";s.innerHTML=html;$("#overlay").classList.add("open");}
   /* Variante grande: SOLO i moduli lunghi (lavoro e preventivo). Intestazione e
      piede restano fermi, scorre solo il corpo — prima per salvare bisognava
      arrivare in fondo a una colonna di dieci campi.
@@ -15688,9 +15726,17 @@ ${vecchi?`
      blocchi .sh-b-a/b/c/d: sopra i 1500px la griglia passa a tre colonne. */
   const _ICO_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
   function openSheetGrande(titolo,corpo,azioni){
+    /* le azioni della scheda da cui si e' arrivati: entrano dopo il primo
+       pulsante (che e' sempre «Annulla»), cosi' «Salva» resta l'ultimo. */
+    let _sopra="";
+    if(_azPendenti&&_azPendenti.length){
+      _sopra=azioniSopra(_azPendenti);
+      azioni=azioniElimina(_azPendenti)+(azioni||"");
+    }
+    _azPendenti=null;
     const s=$("#sheet");
     s.className="sheet sheet--grande";
-    s.innerHTML=`<div class="sh-head"><h3>${titolo}</h3>
+    s.innerHTML=`<div class="sh-head"><h3>${titolo}</h3>${_sopra}
         <button class="sh-x" data-action="close" title="Chiudi" aria-label="Chiudi">${_ICO_X}</button></div>
       <div class="sh-body">${corpo}</div>
       <div class="sh-foot">${azioni}</div>`;

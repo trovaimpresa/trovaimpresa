@@ -2406,3 +2406,35 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
 @media(max-width:900px){
   .sheet--grande:has(.sh-cols) .sh-foot{ padding-right:84px; }
 }
+
+/* 16 agosto 2026 (3) — LE AZIONI SUL DOCUMENTO, IN ALTO ACCANTO AL TITOLO.
+   In fondo restano Annulla e Salva, sempre negli stessi due posti; Elimina
+   sta in fondo a sinistra, lontano dalla X e da Salva. */
+.sheet--grande .sh-head{ gap:16px; }
+.sheet--grande .sh-head h3{ flex:0 1 auto; }
+.sh-head-az{
+  flex:1 1 auto; min-width:0;
+  display:flex; align-items:center; gap:8px;
+  overflow-x:auto; padding-bottom:2px;
+  -webkit-overflow-scrolling:touch;
+}
+.sh-head-az .btn{ flex:0 0 auto; height:40px; padding:0 14px; font-size:15px; font-weight:600; white-space:nowrap; }
+.sh-foot .sh-foot-sx{ margin-right:auto; }
+@media(max-width:900px){
+  .sheet--grande .sh-head{ gap:10px; }
+  .sh-head-az .btn{ height:38px; padding:0 12px; font-size:14.5px; }
+}
+
+/* Sul telefono le azioni non stanno in fila col titolo: 390px non bastano
+   per tutti e due, e il titolo si riduceva a «P...» — cioe' non sapevi piu'
+   dentro quale preventivo eri. Quindi il titolo (con la X) si tiene la sua
+   riga, e le azioni vanno sotto, su una riga che scorre di lato. */
+@media(max-width:900px){
+  .sheet--grande .sh-head{ flex-wrap:wrap; row-gap:10px; }
+  .sheet--grande .sh-head h3{ flex:1 1 auto; order:1; }
+  .sheet--grande .sh-head .sh-x{ order:2; }
+  .sheet--grande .sh-head .sh-head-az{ order:3; flex:1 0 100%; }
+  /* in fondo: Elimina a sinistra, Annulla e Salva a destra, senza toccarsi */
+  .sheet--grande .sh-foot{ gap:10px; }
+  .sheet--grande .sh-foot .sh-foot-sx{ flex:0 0 auto; margin-right:auto; }
+}
