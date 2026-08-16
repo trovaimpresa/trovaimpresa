@@ -2394,3 +2394,15 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
   overflow:hidden;
 }
+
+/* IL FUMETTO DELLA CHAT COPRIVA «SALVA».
+   Il fumetto sta incollato in basso a destra dello schermo. Finche' la
+   finestra era stretta gli stava lontano; a tutto schermo il pulsante
+   Salva gli e' finito sotto e si leggeva «Salv».
+   Non lo sposto e non lo nascondo (e' un pezzo che non e' mio e domani
+   potrebbe cambiare): gli lascio il suo angolo libero, e i pulsanti si
+   fermano prima. */
+.sheet--grande:has(.sh-cols) .sh-foot{ padding-right:104px; }
+@media(max-width:900px){
+  .sheet--grande:has(.sh-cols) .sh-foot{ padding-right:84px; }
+}
