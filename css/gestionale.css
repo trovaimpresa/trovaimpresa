@@ -2607,3 +2607,14 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
 @media(max-width:900px){
   .sheet--grande .sh-cols .field.campo-titolo > label{ font-size:21px; }
 }
+
+/* SEMPRE DUE COLONNE, MAI TRE.
+   Sopra i 1600px si passava a tre colonne. Ma i blocchi si versano fino a
+   riempire l'altezza minima: se il primo blocco e' alto e gli altri due
+   corti, quei due stanno insieme nella seconda colonna e la terza resta
+   VUOTA — un terzo di schermo bianco a destra, come nella foto del
+   preventivo. Con due colonne larghe non succede: qualunque sia il numero
+   dei blocchi, la pagina si riempie da un bordo all'altro. */
+@media(min-width:1600px){
+  .sheet--grande .sh-cols{ column-count:2; column-gap:48px; }
+}
