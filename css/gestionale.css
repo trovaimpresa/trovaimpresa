@@ -2662,3 +2662,39 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
   color:var(--err); cursor:pointer;
 }
 .sheet .spesa-row .rdel:hover{ background:var(--err-bg); border-color:var(--err) !important; }
+
+/* ============================================================
+   16 agosto 2026 (9) — IL MENU DI SINISTRA
+   Venti voci, ognuna dentro un riquadro bianco con il bordo: alte 48 px
+   con 8 px di stacco, cioe' 56 px di passo. Su uno schermo da 900 se ne
+   vedevano DODICI su venti: per arrivare a Cestino, Report o Mappa
+   bisognava scorrere, ogni volta, tutto il giorno.
+   Il riquadro non serviva a niente: erano venti scatole identiche una
+   sotto l'altra, e venti bordi grigi sono venti righe in piu' da
+   scansare. Adesso il bordo ce l'ha SOLO la voce accesa — che e'
+   l'unica cosa che il bordo doveva dire.
+   Passo da 56 a 40 px: si vedono cinque voci in piu' senza toccare
+   niente, e il testo resta 15 px com'era.
+   ============================================================ */
+@media(min-width:881px){
+  .side nav.tabs button{
+    padding:9px 12px;
+    margin-bottom:2px;
+    background:transparent;
+    border-color:transparent;
+    border-radius:9px;
+  }
+  .side nav.tabs button:hover{
+    background:var(--sfondo);
+    border-color:transparent;
+  }
+  /* la voce accesa: e' l'unica che tiene il riquadro */
+  .side nav.tabs button.active{
+    background:var(--blu-tenue);
+    border-color:var(--blu);
+  }
+  /* le due voci col tratteggio in cima restano riconoscibili, solo piu' strette */
+  .side nav.tabs button.tab-cta{ padding:11px 12px; margin-bottom:6px; }
+  .side-group{ margin:12px 0 4px; }
+  .side .btn-new{ margin-bottom:10px; }
+}
