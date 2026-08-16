@@ -2712,3 +2712,43 @@ body:has(#ti-fondatore) .side{
 @supports (height:100dvh){
   body:has(#ti-fondatore) .side{ height:calc(100dvh - 46px); }
 }
+
+/* ============================================================
+   16 agosto 2026 (10) — LA BARRA IN BASSO, SOLO SUL TELEFONO
+   Sul computer non c'e' e non deve esserci: li' il menu di sinistra e'
+   sempre sotto gli occhi. Sul telefono invece il menu sta chiuso nel
+   burger, e cambiare sezione costava due tocchi.
+   L'ANGOLO IN BASSO A DESTRA RESTA LIBERO: li' ci sta il fumetto della
+   chat, che non e' roba mia e non posso spostare. Se i pulsanti
+   arrivassero fino al bordo, l'ultimo finirebbe sotto al fumetto.
+   ============================================================ */
+.barra-basso{ display:none; }
+@media(max-width:880px){
+  .barra-basso{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    gap:2px;
+    background:var(--card);
+    border-top:1.5px solid var(--bordo);
+    box-shadow:0 -3px 14px rgba(15,23,42,.10);
+    padding:6px 78px 6px 6px;                 /* 78px = l'angolo del fumetto */
+    padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .barra-basso button{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; min-height:56px; padding:6px 2px;
+    background:none; border:none; border-radius:10px;
+    font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--testo-2); cursor:pointer; line-height:1.15;
+    overflow:hidden;
+  }
+  .barra-basso button span{
+    max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .barra-basso button svg{ width:23px; height:23px; flex:0 0 auto; }
+  .barra-basso button.on{ background:var(--blu-tenue); color:var(--blu-scuro); }
+  .barra-basso button.on svg{ color:var(--blu-scuro); }
+  /* se no l'ultima scheda della lista finisce nascosta sotto la barra */
+  .main .wrap{ padding-bottom:104px; }
+}
