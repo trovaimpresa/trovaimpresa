@@ -1,5 +1,5 @@
 // =====================================================================
-// STRIPE — ABBONAMENTI (Premium e add-on Gestionale)
+// STRIPE — ABBONAMENTI (Premium, add-on Gestionale) e RICARICHE DI CREDITI AI
 //
 // 14 agosto 2026 (notte) — aggiunta la RIGA DELL'INCASSO, e basta.
 //
@@ -24,6 +24,21 @@
 // Se a Stripe si risponde con un errore, Stripe RIMANDA lo stesso avviso.
 // Rimandarlo perche' non siamo riusciti a scrivere una riga di appunti
 // vuol dire rifare l'attivazione a ripetizione per niente.
+//
+// ---------------------------------------------------------------------
+// 16 agosto 2026 — LE RICARICHE DI CREDITI AI (Blocco 0)
+//
+// Qui sopra c'e' scritto «non si risponde mai errore». Per i crediti vale
+// il contrario, ed e' voluto: se i crediti NON sono arrivati, a Stripe si
+// risponde errore APPOSTA, cosi' riprova. Sono due cose diverse:
+//   - la riga contabile e' un appunto nostro. Se manca, pazienza.
+//   - i crediti sono la merce. Se non arrivano, uno ha pagato per niente.
+//
+// ⚠️ E il doppio avviso? Stripe rimanda lo stesso evento piu' volte, e
+//    adesso lo fara' di sicuro, perche' gli stiamo chiedendo di riprovare.
+//    A tenere il conto e' il database: `add_credits_pack` accredita una
+//    volta sola per numero di transazione, e la seconda volta risponde
+//    'already_processed'. Qui quella risposta vale come «tutto a posto».
 // =====================================================================
 const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
@@ -62,6 +77,77 @@ async function segnaIncasso(supabase, dati) {
   }
 }
 
+// ---------------------------------------------------------------------
+// LA RICARICA DEI CREDITI AI
+//
+// Restituisce true  = a Stripe si puo' rispondere «ok».
+//              false = i crediti NON sono arrivati: Stripe deve riprovare.
+//
+// ⚠️ Il numero di crediti si legge dai metadata scritti dal SERVER in
+//    crea-checkout-crediti.js. Dal browser non arriva niente.
+// ⚠️ Il riferimento del pagamento e' l'id della sessione: e' lo stesso
+//    anche quando Stripe rimanda l'avviso, ed e' quello che impedisce il
+//    doppio accredito.
+// ---------------------------------------------------------------------
+async function accreditaCrediti(supabase, s, ev) {
+  const meta    = s.metadata || {};
+  const email   = meta.email || s.customer_email || null;
+  const userId  = meta.user_id || s.client_reference_id || null;
+  const crediti = parseInt(meta.crediti, 10);
+
+  // ⚠️ IL CASO CHE NON DEVE ACCREDITARE NIENTE.
+  // Con la carta `payment_status` e' 'paid' subito. Con i pagamenti che
+  // ci mettono giorni (bonifico, addebito) l'avviso arriva prima con
+  // 'unpaid': se accreditassimo qui, uno avrebbe i crediti senza aver
+  // pagato. Quando poi paga davvero arriva
+  // `checkout.session.async_payment_succeeded`, e li' si accredita.
+  if (s.payment_status !== 'paid') {
+    console.log('[crediti] avviso ricevuto ma non pagato (' + s.payment_status + '):', s.id);
+    return true;   // non e' un errore: non c'e' niente da fare
+  }
+
+  // l'incasso si segna comunque, anche se poi l'accredito va storto
+  await segnaIncasso(supabase, {
+    prodotto: 'crediti-ai', centesimi: s.amount_total, riferimento: s.id,
+    email, valuta: s.currency, tipo_evento: ev.type,
+    quando: ev.created ? new Date(ev.created * 1000).toISOString() : null
+  });
+
+  if (!userId || !(crediti > 0)) {
+    // dato mancante: riprovare non servirebbe a niente, il dato non
+    // arrivera' mai. Si risponde ok e si urla nel log.
+    console.error('[crediti] AVVISO SENZA DESTINATARIO — sessione ' + s.id +
+                  ' user_id=' + userId + ' crediti=' + meta.crediti +
+                  ' — questa persona ha pagato e NON ha ricevuto i crediti.');
+    return true;
+  }
+
+  const { data, error } = await supabase.rpc('add_credits_pack', {
+    p_user_id:           userId,
+    p_credits:           crediti,
+    p_amount_eur:        (s.amount_total || 0) / 100,
+    p_payment_provider:  'stripe',
+    p_payment_reference: s.id
+  });
+
+  if (error) {
+    console.error('[crediti] accredito fallito, faccio riprovare Stripe:', error.message);
+    return false;
+  }
+  if (data && data.ok === false) {
+    if (data.reason === 'already_processed') {
+      // e' il caso normale del doppio avviso: i crediti ci sono gia'.
+      console.log('[crediti] gia accreditati:', s.id);
+      return true;
+    }
+    console.error('[crediti] accredito rifiutato (' + data.reason + '), faccio riprovare Stripe:', s.id);
+    return false;
+  }
+
+  console.log('[crediti] accreditati ' + crediti + ' crediti a ' + userId + ' (' + s.id + ')');
+  return true;
+}
+
 exports.handler = async (event) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -71,11 +157,24 @@ exports.handler = async (event) => {
   } catch (e) {
     return { statusCode: 400, body: 'Webhook error' };
   }
-  if (ev.type === 'checkout.session.completed') {
+
+  // se resta false, a Stripe si risponde errore e lui riprova
+  let tuttoBene = true;
+
+  if (ev.type === 'checkout.session.completed' ||
+      ev.type === 'checkout.session.async_payment_succeeded') {
     const s = ev.data.object;
     const email = s.metadata && s.metadata.email;
     const prodotto = s.metadata && s.metadata.prodotto;
-    if (email && prodotto === 'gestionale') {
+
+    // ⚠️ QUESTO CONTROLLO VA PER PRIMO.
+    // Una ricarica di crediti porta con se' l'email, e senza questa riga
+    // finirebbe nel ramo qui sotto: 19 euro di crediti diventerebbero un
+    // Premium regalato.
+    if (prodotto === 'crediti-ai') {
+      tuttoBene = await accreditaCrediti(supabase, s, ev);
+
+    } else if (email && prodotto === 'gestionale') {
       // Add-on Gestionale attivato: NON tocca il piano Premium.
       await supabase.from('imprese').update({ gestionale_attivo: true, gestionale_scadenza: null }).eq('email', email);
       await segnaIncasso(supabase, {
@@ -106,6 +205,15 @@ exports.handler = async (event) => {
     }
   }
 
+  // Pagamento lento che poi non e' andato a buon fine: non si accredita
+  // niente. Sta qui solo per lasciarne traccia nel log.
+  if (ev.type === 'checkout.session.async_payment_failed') {
+    const s = ev.data.object;
+    if (s.metadata && s.metadata.prodotto === 'crediti-ai') {
+      console.log('[crediti] pagamento non riuscito, nessun accredito:', s.id);
+    }
+  }
+
   // -------------------------------------------------------------------
   // I RINNOVI
   //
@@ -119,6 +227,9 @@ exports.handler = async (event) => {
   // parte di Stripe (Dashboard > Developers > Webhooks > l'endpoint degli
   // abbonamenti > Select events). Se non lo si accende, questo codice non
   // fa danni: semplicemente non arriva mai niente.
+  //
+  // ⚠️ Le ricariche di crediti non passano di qui: sono pagamenti singoli,
+  // non abbonamenti, e non generano nessuna fattura ricorrente.
   // -------------------------------------------------------------------
   if (ev.type === 'invoice.paid' || ev.type === 'invoice.payment_succeeded') {
     const inv = ev.data.object;
@@ -150,5 +261,11 @@ exports.handler = async (event) => {
     }
   }
 
+  if (!tuttoBene) {
+    // ⚠️ APPOSTA. Stripe riprova per circa tre giorni, e ogni volta
+    // `add_credits_pack` fa un tentativo pulito. Se non ce la fa nemmeno
+    // dopo, Stripe ti manda un'email: e' il modo giusto di accorgersene.
+    return { statusCode: 500, body: 'crediti non accreditati' };
+  }
   return { statusCode: 200, body: 'ok' };
 };

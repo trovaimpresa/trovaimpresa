@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Ricarica crediti AI - TrovaImpresa</title>
+<style>
+  /* Stessi nomi e stessi colori di css/gestionale.css: se un domani cambi
+     il blu del marchio, si cambia in tutti e due i posti nello stesso modo.
+     ⚠️ Niente testo sotto i 13 px in nessun punto di questa pagina. */
+  :root{
+    --blu:#0066FF; --blu-scuro:#0B4BC4; --blu-hover:#0052D6; --blu-tenue:#E6F0FF;
+    --testo:#0F172A; --testo-2:#475569; --testo-3:#64748B;
+    --sfondo:#F8FAFC; --card:#FFFFFF; --bordo:#E2E8F0; --bordo-forte:#CBD5E1;
+    --ok:#059669; --ok-bg:#ECFDF5;
+    --attesa:#D97706; --attesa-bg:#FFFBEB;
+    --err:#DC2626; --err-bg:#FEF2F2;
+    --r:10px; --r-card:14px;
+    --ombra:0 1px 2px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--testo);background:var(--sfondo);min-height:100vh;
+    -webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;
+  }
+
+  .barra{background:var(--blu-scuro);color:#fff;padding:14px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .barra .marchio{font-size:17px;font-weight:800;letter-spacing:-.3px}
+  .barra a{color:#fff;text-decoration:none;font-size:14px;font-weight:700;
+    background:rgba(255,255,255,.15);padding:8px 14px;border-radius:var(--r)}
+  .barra a:hover{background:rgba(255,255,255,.28)}
+
+  .foglio{max-width:880px;margin:0 auto;padding:24px 16px 80px}
+
+  h1{font-size:26px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px}
+  .sotto{font-size:16px;color:var(--testo-2);margin-bottom:24px;max-width:620px}
+
+  .riquadro{background:var(--card);border:1px solid var(--bordo);
+    border-radius:var(--r-card);padding:20px;box-shadow:var(--ombra);margin-bottom:20px}
+
+  /* ---- il contatore ---- */
+  .conto{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+  .conto .voce{min-width:150px}
+  .conto .n{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1.1}
+  .conto .et{font-size:14px;color:var(--testo-2);font-weight:600;margin-top:2px}
+  .conto .nota{font-size:14px;color:var(--testo-3);margin-top:2px}
+
+  /* ---- i messaggi. Il colore dice lo stato, non decora. ---- */
+  .avviso{border-radius:var(--r);padding:14px 16px;font-size:15px;
+    margin-bottom:20px;border:1px solid;line-height:1.55}
+  .avviso strong{display:block;font-size:16px;margin-bottom:3px}
+  .avviso.ok{background:var(--ok-bg);border-color:var(--ok);color:#065F46}
+  .avviso.attesa{background:var(--attesa-bg);border-color:var(--attesa);color:#92400E}
+  .avviso.err{background:var(--err-bg);border-color:var(--err);color:#991B1B}
+
+  /* ---- i tre tagli ---- */
+  .tagli{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:720px){.tagli{grid-template-columns:repeat(3,1fr)}}
+
+  .taglio{background:var(--card);border:2px solid var(--bordo);border-radius:var(--r-card);
+    padding:22px 20px;display:flex;flex-direction:column;gap:6px;position:relative;
+    box-shadow:var(--ombra)}
+  .taglio.consigliato{border-color:var(--blu)}
+  .etichetta{position:absolute;top:-11px;left:20px;background:var(--blu);color:#fff;
+    font-size:13px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.2px}
+  .taglio .crediti{font-size:30px;font-weight:800;letter-spacing:-.8px;line-height:1.1}
+  .taglio .parola{font-size:15px;color:var(--testo-2);font-weight:600;margin-top:-4px}
+  .taglio .prezzo{font-size:22px;font-weight:800;margin-top:10px}
+  .taglio .unitario{font-size:14px;color:var(--testo-3)}
+  .taglio button{margin-top:16px;width:100%;background:var(--blu);color:#fff;border:none;
+    border-radius:var(--r);padding:14px 16px;font-family:inherit;font-size:16px;
+    font-weight:800;cursor:pointer}
+  .taglio button:hover{background:var(--blu-hover)}
+  .taglio button:disabled{background:var(--bordo-forte);cursor:not-allowed}
+
+  .spiega{margin-top:24px}
+  .spiega h2{font-size:18px;font-weight:800;margin-bottom:12px}
+  .spiega li{font-size:15px;color:var(--testo-2);margin:0 0 10px 20px;line-height:1.6}
+
+  .torna{display:inline-block;margin-top:8px;font-size:15px;font-weight:700;
+    color:var(--blu);text-decoration:none}
+  .torna:hover{text-decoration:underline}
+
+  .nascosto{display:none}
+</style>
+</head>
+<body>
+
+<div class="barra">
+  <div class="marchio">TrovaImpresa</div>
+  <a href="/gestionale-app.html">Torna al gestionale</a>
+</div>
+
+<div class="foglio">
+
+  <h1>Ricarica i crediti AI</h1>
+  <p class="sotto">
+    Ogni mese il Premium ti dà 100 crediti, e il primo del mese ripartono da 100.
+    Se ti servono prima, qui puoi comprarne altri: <strong>quelli comprati non scadono
+    mai</strong> e si usano solo quando i 100 del mese sono finiti.
+  </p>
+
+  <div id="avvisi"></div>
+
+  <!-- il contatore -->
+  <div class="riquadro nascosto" id="riquadro-conto">
+    <div class="conto">
+      <div class="voce">
+        <div class="n" id="n-totale">-</div>
+        <div class="et">crediti che hai adesso</div>
+      </div>
+      <div class="voce">
+        <div class="n" id="n-mese">-</div>
+        <div class="et">dei 100 di questo mese</div>
+        <div class="nota" id="nota-rinnovo"></div>
+      </div>
+      <div class="voce">
+        <div class="n" id="n-comprati">-</div>
+        <div class="et">comprati</div>
+        <div class="nota">non scadono mai</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- i tre tagli -->
+  <div class="tagli nascosto" id="tagli">
+
+    <div class="taglio">
+      <div class="crediti">150</div>
+      <div class="parola">crediti</div>
+      <div class="prezzo">19 &euro;</div>
+      <div class="unitario">circa 13 centesimi a credito</div>
+      <button type="button" data-taglio="150">Ricarica 150</button>
+    </div>
+
+    <div class="taglio consigliato">
+      <span class="etichetta">Il più scelto</span>
+      <div class="crediti">400</div>
+      <div class="parola">crediti</div>
+      <div class="prezzo">45 &euro;</div>
+      <div class="unitario">circa 11 centesimi a credito</div>
+      <button type="button" data-taglio="400">Ricarica 400</button>
+    </div>
+
+    <div class="taglio">
+      <div class="crediti">1.000</div>
+      <div class="parola">crediti</div>
+      <div class="prezzo">99 &euro;</div>
+      <div class="unitario">circa 10 centesimi a credito</div>
+      <button type="button" data-taglio="1000">Ricarica 1.000</button>
+    </div>
+
+  </div>
+
+  <div class="riquadro spiega">
+    <h2>Come funzionano</h2>
+    <ul>
+      <li>Un credito è <strong>una richiesta all'intelligenza artificiale</strong>: un
+          preventivo generato, una scheda cliente compilata, un controllo.</li>
+      <li>Si scala <strong>prima dai 100 del mese</strong>. I crediti comprati si toccano
+          solo quando i 100 sono finiti.</li>
+      <li>I 100 del mese <strong>non si accumulano</strong>: il primo del mese si torna a 100,
+          quelli avanzati non passano al mese dopo. I comprati invece restano.</li>
+      <li>Se un tuo operaio usa l'AI dall'app del cantiere, i crediti li mette l'impresa,
+          non lui.</li>
+      <li>Il pagamento è una tantum, <strong>non è un abbonamento</strong>: non si rinnova
+          da solo e non c'è niente da disdire.</li>
+    </ul>
+    <a class="torna" href="/gestionale-app.html">Torna al gestionale</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  'use strict';
+
+  var sb = supabase.createClient(
+    'https://nacvrsgkyfavykxjxszu.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3Zyc2dreWZhdnlreGp4c3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTczNTYsImV4cCI6MjA4OTE3MzM1Nn0.o5S0HeDtG-hlCo1zfk4ILqtog7MT8_2B0EyjdiVzBic'
+  );
+
+  var q = function(id){ return document.getElementById(id); };
+
+  // il nome del cliente non deve poter rompere la pagina
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function avviso(tipo, titolo, testo){
+    q('avvisi').innerHTML +=
+      '<div class="avviso ' + tipo + '"><strong>' + esc(titolo) + '</strong>' + esc(testo) + '</div>';
+  }
+  function pulisciAvvisi(){ q('avvisi').innerHTML = ''; }
+
+  function mese(d){
+    try{
+      return new Date(d).toLocaleDateString('it-IT', { day:'numeric', month:'long' });
+    }catch(e){ return ''; }
+  }
+
+  var bottoni = document.querySelectorAll('.taglio button');
+  function bloccaBottoni(si){
+    for (var i = 0; i < bottoni.length; i++) bottoni[i].disabled = si;
+  }
+
+  // ------------------------------------------------------------------
+  // 1. chi sei e quanti crediti hai
+  // ------------------------------------------------------------------
+  var sessione = null;
+
+  async function leggiStato(){
+    var r = await sb.rpc('get_ai_status');
+    if (r.error) return null;
+    return r.data;
+  }
+
+  function mostraConto(st){
+    if (!st) return;
+    var mensili  = Number(st.monthly_left  || 0);
+    var comprati = Number(st.credits_extra || 0);
+    q('n-totale').textContent   = mensili + comprati;
+    q('n-mese').textContent     = mensili;
+    q('n-comprati').textContent = comprati;
+    q('nota-rinnovo').textContent = st.renews_at ? ('si rinnovano il ' + mese(st.renews_at)) : '';
+    q('riquadro-conto').classList.remove('nascosto');
+  }
+
+  async function avvia(){
+    var s = await sb.auth.getSession();
+    sessione = s && s.data ? s.data.session : null;
+
+    if (!sessione) {
+      avviso('attesa', 'Prima devi entrare nel tuo gestionale',
+             'Da lì torna su questa pagina e la ricarica si apre da sola.');
+      q('avvisi').innerHTML +=
+        '<a class="torna" href="/login-impresa.html">Vai al login</a>';
+      return;
+    }
+
+    var st = await leggiStato();
+    mostraConto(st);
+
+    // ⚠️ chi non ha il Premium non deve poter comprare crediti che poi non
+    //    riuscirebbe a spendere: l'AI si ferma sul piano base PRIMA di
+    //    guardare i crediti comprati. Il pagamento e' bloccato anche dal
+    //    server (crea-checkout-crediti.js): questo qui e' solo la spiegazione.
+    if (!st || st.has_ai !== true) {
+      avviso('attesa', 'I crediti si usano con il Premium attivo',
+             'Senza Premium l\'assistente AI resta spento, e i crediti comprati ' +
+             'resterebbero fermi nel conto. Attiva il Premium e poi ricarica quando vuoi.');
+      q('avvisi').innerHTML +=
+        '<a class="torna" href="/prezzi.html">Vedi il Premium</a>';
+      return;
+    }
+
+    q('tagli').classList.remove('nascosto');
+  }
+
+  // ------------------------------------------------------------------
+  // 2. il ritorno dal pagamento
+  // ------------------------------------------------------------------
+  // ⚠️ Stripe rimanda qui SUBITO, ma i crediti li accredita il webhook un
+  //    attimo dopo. Se leggessimo il conto una volta sola, uno che ha
+  //    appena pagato vedrebbe il numero vecchio e penserebbe di aver
+  //    buttato i soldi. Quindi si riguarda per una decina di secondi.
+  async function dopoIlPagamento(){
+    avviso('ok', 'Pagamento ricevuto, grazie',
+           'Sto aspettando che i crediti arrivino nel conto: ci vuole qualche secondo.');
+    var partenza = null;
+    for (var i = 0; i < 10; i++){
+      var st = await leggiStato();
+      if (st){
+        if (partenza === null) partenza = Number(st.credits_extra || 0);
+        mostraConto(st);
+        if (Number(st.credits_extra || 0) > partenza){
+          pulisciAvvisi();
+          avviso('ok', 'Crediti aggiunti',
+                 'Sono già nel tuo conto e non scadono. Puoi tornare al gestionale.');
+          return;
+        }
+      }
+      await new Promise(function(r){ setTimeout(r, 1500); });
+    }
+    pulisciAvvisi();
+    avviso('attesa', 'Il pagamento è andato a buon fine',
+           'I crediti stanno arrivando ma ci mettono piu\' del solito. Ricarica questa ' +
+           'pagina fra un minuto: se ancora non li vedi, scrivimi e li sistemo io.');
+  }
+
+  // ------------------------------------------------------------------
+  // 3. il pulsante
+  // ------------------------------------------------------------------
+  for (var i = 0; i < bottoni.length; i++){
+    bottoni[i].addEventListener('click', async function(){
+      var b = this;
+      var taglio = b.getAttribute('data-taglio');
+      var testoPrima = b.textContent;
+      pulisciAvvisi();
+      bloccaBottoni(true);
+      b.textContent = 'Apro il pagamento...';
+      try{
+        var s = await sb.auth.getSession();
+        var tok = s && s.data && s.data.session ? s.data.session.access_token : null;
+        if (!tok) throw new Error('sessione');
+
+        var res = await fetch('/.netlify/functions/crea-checkout-crediti', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + tok },
+          body: JSON.stringify({ taglio: taglio })
+        });
+        var dati = await res.json();
+
+        if (res.ok && dati.url){ window.location.href = dati.url; return; }
+
+        if (res.status === 401){
+          avviso('attesa', 'La sessione è scaduta',
+                 'Rientra nel gestionale e riprova: non è stato addebitato niente.');
+        } else if (res.status === 403){
+          avviso('attesa', 'Serve il Premium attivo',
+                 dati.messaggio || 'I crediti si usano con il Premium attivo.');
+        } else {
+          avviso('err', 'Non sono riuscito ad aprire il pagamento',
+                 (dati.error || 'Riprova fra poco.') + ' Non è stato addebitato niente.');
+        }
+      }catch(e){
+        avviso('err', 'Non sono riuscito ad aprire il pagamento',
+               'Controlla la connessione e riprova. Non è stato addebitato niente.');
+      }
+      b.textContent = testoPrima;
+      bloccaBottoni(false);
+    });
+  }
+
+  // ------------------------------------------------------------------
+  var dove = new URLSearchParams(window.location.search).get('crediti');
+
+  avvia().then(function(){
+    if (dove === 'ok') return dopoIlPagamento();
+    if (dove === 'annullato'){
+      avviso('attesa', 'Ricarica annullata',
+             'Non è stato addebitato niente. Quando vuoi ricominci da qui.');
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>
