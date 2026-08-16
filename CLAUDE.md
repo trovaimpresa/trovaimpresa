@@ -6849,3 +6849,144 @@ doppione rifiutato, e **il cliente anonimo può ancora mandare la richiesta**.
    attecchito e se i titoli nuovi del muratore hanno alzato i clic.
 6. ⚠️ Le richieste dalle pagine `cerca-*` mandano **telefono ed email in chiaro
    via email a 5 imprese**, senza nessun controllo. Segnalato, non toccato.
+
+---
+
+## DOVE SIAMO RIMASTI (16 agosto, mattina — la grafica del gestionale)
+
+Giornata quasi tutta sul **vestito** del gestionale, più due cose sul sito.
+Il punto 2 e il punto 3 di «cosa resta aperto» di ieri sera sono **fatti**:
+fuori dalle schede c'è solo «Apri», e «Modifica» non si chiama più così.
+
+### Come ho lavorato (serve per la prossima volta)
+
+Ho montato un ambiente che **apre il gestionale davvero** con Playwright:
+Supabase intercettato e risposto con dati finti, `vendor/supabase.js` servito
+in locale (dal container il CDN non si raggiunge), profilo Premium finto per
+passare il cancello. Da lì screenshot su 2560, 1440 e 390 px, e controlli
+automatici: errori JS, campi che escono dalla finestra, testi sotto i 13 px,
+etichette staccate dalla loro casella. **Quasi tutti i difetti di oggi sono
+usciti così, non leggendo il codice.**
+
+### Cosa è cambiato, in ordine
+
+1. **Le finestre lunghe a tutto schermo.** C'era un tetto di 1600 px: su uno
+   schermo da 2560 restava un terzo grigio. Le finestre **corte** invece
+   («Da dove nasce questa fattura») restano finestrelle centrate: a tutto
+   schermo erano un lenzuolo bianco con tre righe in cima.
+2. **Le colonne si riempiono da sole** (`column-count`, non più griglia a
+   caselle fisse). Prima, se la colonna di sinistra era lunga, quella di mezzo
+   si allungava con lei e restava mezzo schermo bianco. **Sempre due colonne,
+   mai tre**: con tre, quella di destra restava vuota.
+3. **Le zone**: provate quattro versioni a schermo (riga blu a lato, fascia
+   col titolo, senza schede, numerate). Ha scelto **senza schede**: foglio
+   bianco, titolo 24 px con la riga blu spessa sotto. Motivo suo, ed è quello
+   giusto: *«è quella che se ci sono spazi vuoti non dà fastidio»* — senza
+   riquadri non ci sono scatole mezze vuote da guardare.
+4. **Caselle più grandi ovunque**: testo 21 px, alte 66 px. E poi anche le
+   **righe degli elenchi** (lavorazioni, spese, ore, rapportini), che erano
+   rimaste a 13,5 px, la metà di quello che avevano intorno.
+5. **Fuori solo «Apri»**, in tutte le sezioni. Le azioni stanno **in alto
+   accanto al titolo**, «Elimina» in fondo a sinistra (lontano dalla X e da
+   Salva), in fondo a destra Annulla e Salva.
+6. **Si esce sempre con la freccia «← Indietro»** in alto a sinistra. Le × non
+   esistono più: zero occorrenze nel file.
+7. **Le note del preventivo** diventano un elenco con «+» e «×». **Nel
+   database non cambia niente**: sulla colonna `note` si scrive il solito
+   testo con un a capo fra una nota e l'altra, quindi i preventivi vecchi si
+   riaprono interi e il PDF resta identico.
+8. **Aiuti (i) da 33 a 97 frasi**, solo sulle parole difficili (cassa,
+   ritenuta, parti uguali, oneri della sicurezza, dati catastali...). Su
+   «Città» e «CAP» **niente**: una (i) che non spiega è un pallino in più da
+   scansare.
+9. **Menu di sinistra**: via il riquadro da ogni voce, il bordo resta solo su
+   quella accesa. Passo da 56 a 42 px: da 12 voci visibili a 20 su 20.
+10. **Barra in basso sul telefono** (Riepilogo, Lavori, Preventivi, Fatture):
+    da due tocchi a uno.
+
+### Il meccanismo da capire prima di toccare le schede
+
+Le azioni di una scheda **non stanno più nel pulsante**: la scheda le mette in
+un registro (`AZ_APRI`, chiave `azione:id`), al clic su «Apri» finiscono in
+`_azPendenti`, e **`openSheetGrande` se le prende** e le mette in alto
+(`azioniSopra`) e in fondo a sinistra (`azioniElimina`). `openSheetGrande`
+accetta anche un quarto parametro per le azioni che la finestra si porta da
+sola (lo usa il fornitore).
+Chi «apre» non si chiama uguale dappertutto: `AZ_APERTURA` è la regola sola
+(`edit-*`, `apri-*`, `sq-edit`, `carta-dettaglio`).
+**Se un'azione c'è già in fondo alla finestra non viene rimessa in alto** —
+senza questo, il Computo usciva con due «PDF» e due «Elimina».
+
+### ⚠️ Difetti MIEI di oggi, trovati provando (e corretti)
+
+1. **La barra viola FONDATORE.** Spinge la pagina giù di 44 px, ma la finestra
+   e il menu sono alti 100vh e si incollano a top:0: i loro primi 44 px
+   finivano **dietro** la barra. Nella finestra spariva il titolo e la X;
+   nel menu spariva mezza «Chiedi una funzione». Corretto in due punti con
+   `body:has(#ti-fondatore)`. **Ricordarsene per ogni cosa alta 100vh.**
+2. **Il campo Note spezzato fra due colonne**: l'etichetta in una, la casella
+   in quella dopo. Il `break-inside:avoid` stava solo sui blocchi `.sh-b`, e
+   la finestra del preventivo di blocchi non ne aveva. Adesso c'è anche sui
+   campi, e **una prova automatica lo cerca in tutte le finestre**.
+3. **Il fumetto della chat copriva «Salva»** (si leggeva «Salv»): la finestra
+   a tutto schermo gli finiva sotto. Gli ho lasciato l'angolo libero.
+4. **«Modifica» spariva dalle Carte**: il mio filtro toglieva tutto quello che
+   comincia per `edit-`, ma lì l'azione che apre è `carta-dettaglio` e
+   `edit-carta` è un'altra cosa. L'azione che apre va tolta **una volta sola**,
+   dove viene scelta.
+5. **Il prezzo tagliato** nelle voci del preventivo («344,1» invece di
+   «344,10»): le colonne erano larghe 64 e 92 px, misure buone per il testo da
+   14 px di prima.
+6. **«e'» invece di «è»** nei testi nuovi dell'assistente. La solita regola.
+
+### Difetto vecchio trovato per strada
+
+**«Rapportini dal cantiere» diventava «Rapportini dal pratica»** sul profilo
+professionista: la regola di traduzione `cantiere → pratica` lo prendeva in
+pieno. Proteggere la frase intera **non funziona** (il traduttore ripassa
+dopo): ho cambiato la scritta in **«Rapportini di giornata»**, che va bene per
+tutti e due i profili.
+
+### Sito e admin
+
+- **Assistente TrovaImpresa**: via tutte le emoji, due voci nuove («Il
+  gestionale», «Computo metrico»), e il campo libero **risponde da solo** se
+  la domanda parla di gestionale/computo/prezzario — prima passava tutto a
+  `ai-orienta`, che sa restituire **solo le 4 pagine di ricerca**, e chiedendo
+  del gestionale finivi sul pannello pubblico. Attenzione: «preventivo» e
+  «fattura» da sole **non** attivano quella risposta, se no chi deve rifare il
+  bagno non arriva più alla ricerca.
+- **L'assistente adesso decide da solo dove disegnarsi** (`ASSISTENTE_DOVE`):
+  homepage, pagine città, pagine di ricerca. Ovunque altro non fa niente. Il
+  paletto sta dentro il file, non nelle pagine, così vale a prescindere da chi
+  lo carica. ⚠️ **MISTERO NON RISOLTO**: `gestionale-app.html` non lo carica
+  (cercato tre volte, anche negli altri script, in Netlify e nelle edge
+  functions) eppure lì la nuvoletta si vedeva, e cambiava quando cambiavo il
+  file. Da capire se dopo questo push sparisce davvero.
+- **Admin, grafico «Crescita iscritti»**: da barre a **linea**, e le 8 caselle
+  in cima sono diventate **interruttori** — si spuntano e la loro linea
+  compare o sparisce. Cinque serie: imprese, preventivi, città nuove,
+  recensioni, segnalazioni. Le altre caselle **non hanno la spunta** perché
+  quei dati la storia non ce l'hanno (Premium ha solo `premium_scadenza`,
+  Gestionali solo sì/no, Profili da completare è una fotografia di adesso).
+  **Un asse solo**, mai due: due scale fanno vedere un legame che non c'è.
+  Colori passati al controllo automatico (peggior coppia ΔE 9,4 su 8).
+
+### Cosa resta aperto
+
+1. **`prezzi.html` non nomina il gestionale nemmeno una volta**, e non esiste
+   nessuna pagina pubblica che lo spieghi. È la funzione che vale di più e sul
+   sito non c'è scritto da nessuna parte. **È la cosa più importante rimasta.**
+2. **La ricerca unica** nel gestionale: una casella sola dove scrivi «Verdi» e
+   escono cliente, lavori, preventivi e fatture. Oggi ogni sezione ha la sua.
+3. **Le sezioni allineate alle finestre**: le pagine dietro sono ancora a
+   16-17 px con le schede grigie, le finestre a 21 px su foglio bianco.
+4. **«Fattura n. 12/undefined»** — manca l'anno nel titolo.
+5. **Il calendario scrive a 12 px** (sotto il minimo) e taglia i nomi a metà,
+   con caselle enormi e vuote.
+6. Se si vogliono **Premium** e **Gestionali** sul grafico dell'admin servono
+   due colonne nuove (`premium_dal`, `gestionale_dal`): si riempiono da domani
+   in avanti, il passato non torna.
+7. Restano aperti dai giorni prima: l'email delle 24 ore mai vista partire, e
+   ⚠️ le richieste dalle pagine `cerca-*` che mandano telefono ed email in
+   chiaro a 5 imprese.
