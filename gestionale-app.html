@@ -750,6 +750,8 @@
     ['a lavoro finito','a pratica finita'],
     ['per questo lavoro','per questa pratica'],
     ['Modifica lavoro','Modifica pratica'],
+    /* 16 agosto 2026 — titolo della prima zona del modulo */
+    ['Il lavoro','La pratica'],
     ['Nuovo lavoro','Nuova pratica'],
     ['Crea lavoro','Crea pratica'],
     /* Testi nuovi 2026 (preventivi, spese/margine, report, tabelle) */
@@ -7443,6 +7445,7 @@ ${vecchi?`
     openSheetGrande(isNew?"Nuovo lavoro":"Modifica lavoro",
       `<div class="sh-cols sh-cols--3"><div class="sh-col">
       <div class="sh-b sh-b-a">
+      <div class="sh-tit">Il lavoro</div>
       <div class="field"><label>Cliente / Cantiere</label>
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
         <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo cliente</button></div>
@@ -7456,18 +7459,18 @@ ${vecchi?`
         ${["da_fare","in_corso","fatto"].map(s=>`<button data-v="${s}" class="${job.stato===s?"on":""}">${statoLabel[s]}</button>`).join("")}</div></div>
       </div>
       <div class="sh-b sh-b-b">
-      <div class="field"><label>Cosa è stato fatto (consuntivo)</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
+      <div class="field campo-titolo"><label>Cosa è stato fatto (consuntivo)</label><textarea id="j-svolto" placeholder="Compila quando il lavoro è finito">${esc(job.lavoroSvolto||"")}</textarea></div>
       <div class="field"><label>Note</label><textarea id="j-note" placeholder="Materiali, problemi, da ricordare...">${esc(job.note||"")}</textarea></div>
       </div>
       </div><div class="sh-col">
       <div class="sh-b sh-b-c">
-      <div class="field"><label>Foto e video</label>
+      <div class="field campo-titolo"><label>Foto e video</label>
         <div class="lav-media" id="lav-media">Sto controllando…</div>
       </div>
       </div>
       ${bloccoScadenzePratica()}
       <div class="sh-b sh-b-d">
-      <div class="field" id="spese-wrap" style="display:none"><label>💶 Spese e materiali di questo lavoro</label>
+      <div class="field campo-titolo" id="spese-wrap" style="display:none"><label>💶 Spese e materiali di questo lavoro</label>
         <div class="spese-list" id="spese-list"></div>
         <div class="spesa-add">
           <input id="sp-desc" placeholder="Es. Cemento, noleggio piattaforma...">
@@ -7475,7 +7478,7 @@ ${vecchi?`
           <select id="sp-forn" title="Da quale fornitore (facoltativo)"><option value="">— fornitore —</option></select>
           <button type="button" class="btn" data-action="spesa-add">+ Aggiungi</button></div>
         <div class="margine-box" id="margine-box"></div></div>
-      <div class="field" id="mezzi-wrap" style="display:none"><label>🚚 Mezzi e attrezzature usati in questo lavoro</label>
+      <div class="field campo-titolo" id="mezzi-wrap" style="display:none"><label>🚚 Mezzi e attrezzature usati in questo lavoro</label>
         <div class="spese-list" id="lm-list"></div>
         <div class="mezzo-add">
           <select id="lm-sel"></select>
@@ -7484,7 +7487,7 @@ ${vecchi?`
       <div class="row2">
         <div class="field"><label>Ore lavorate</label><input type="text" id="j-ore" inputmode="decimal" value="${_numTesto(job.ore)}" placeholder="0"></div>
         <div class="field"><label>Importo (€)</label><input type="text" id="j-imp" inputmode="decimal" value="${_numTesto(job.importo)}" placeholder="0"></div></div>
-      <div class="field" id="ore-wrap" style="display:none"><label>⏱ Registro delle ore</label>
+      <div class="field campo-titolo" id="ore-wrap" style="display:none"><label>⏱ Registro delle ore</label>
         <div class="spese-list" id="ore-list"></div>
         <div class="spesa-add ore-add">
           <input id="or-data" type="date" title="Che giorno">
@@ -7493,10 +7496,10 @@ ${vecchi?`
           <button type="button" class="btn" data-action="ore-add">+ Aggiungi</button></div>
         <input id="or-nota" placeholder="Cosa hai fatto (facoltativo)" style="margin-top:6px;width:100%">
         <div class="margine-box" id="ora-box"></div></div>
-      <div class="field" id="rap-wrap" style="display:none"><label>Rapportini dal cantiere</label>
+      <div class="field campo-titolo" id="rap-wrap" style="display:none"><label>Rapportini dal cantiere</label>
         <div class="spese-list" id="rap-list"></div>
         <div class="campo-aiuto">Li scrive chi sta in cantiere, dal telefono. Con la <b>&times;</b> butti via un rapportino sbagliato: le sue ore vanno nel cestino insieme a lui, e da lì tornano su insieme. Per correggere le ore senza toccare il rapportino usa il registro qui sopra.</div></div>
-      <div class="field"><label>Fattura</label>
+      <div class="field campo-titolo"><label>Fattura</label>
         <div class="j-fatt-info">${
           (job.fattStato||"none")==="pagata" ? "\u2714 Fatturato e incassato"
           : (job.fattStato||"none")==="emessa" ? "\ud83e\uddfe Fatturato, in attesa di incasso"
@@ -7595,7 +7598,7 @@ ${vecchi?`
        esattamente come una pratica. Cambia solo la parola. */
     const pro=ruoloUtente==='professionista';
     return '<div class="sh-b">'
-      +'<div class="field"><label>\u23F0 Scadenze di '+(pro?'questa pratica':'questo lavoro')+'</label>'
+      +'<div class="field campo-titolo"><label>\u23F0 Scadenze di '+(pro?'questa pratica':'questo lavoro')+'</label>'
       +'<div class="lav-media" id="lav-scad">Sto controllando…</div>'
       +'</div></div>';
   }
