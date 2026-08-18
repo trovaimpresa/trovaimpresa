@@ -14131,13 +14131,19 @@ ${vecchi?`
   /* le azioni del computo: le stesse nel menu "..." e sui pulsanti della scheda */
   function compVoci(c){
     return [{lab:"✏ Apri il computo",action:"edit-computo",data:{id:c.id}},
-            {lab:"📄 Scarica il PDF",action:"comp-pdf",data:{id:c.id}},
+            {lab:"📄 Scarica il PDF",action:"comp-pdf",data:{id:c.id}}]
+           .concat(c.tipo==="pubblico"
+             /* ⚠️ la lista di gara compare SOLO sui computi «Lavori pubblici»:
+                su un lavoro privato non serve a niente e sarebbe una porta
+                verso un documento che non c'entra. */
+             ? [{lab:"🏛 Lista per la gara",action:"comp-gara",data:{id:c.id}}] : [])
+           .concat([
             /* 16 agosto 2026 — «Crea il preventivo» stava solo in fondo alla
                finestra. Adesso che le azioni del documento stanno in alto,
                sta in fila con le altre, se no era l'unica rimasta sotto. */
             {lab:"→ Crea il preventivo",action:"comp-prev",data:{id:c.id}},
             {lab:"⧉ Duplica",action:"comp-dup",data:{id:c.id}},
-            {lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}];
+            {lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}]);
   }
   /* la scheda dell'elenco: passa da schedaJob, la scheda unica di tutte le
      sezioni, cosi' i Computi hanno la stessa forma di Pratiche e Preventivi */
@@ -15911,6 +15917,269 @@ ${vecchi?`
      Le lettere fuori dal Latin-1 (l'euro, il meno lungo, gli apici storti)
      jsPDF con l'helvetica non le sa scrivere ed escono quadratini: per questo
      si legge "EUR" e non il simbolo, e i meno sono trattini normali. */
+  /* ============================================================
+     IL PREZZO SCRITTO IN LETTERE — 18 agosto 2026
+
+     Sulla lista di gara ogni prezzo va scritto due volte: in cifre e in
+     lettere. Se le due non combaciano, in gara vale QUELLA IN LETTERE —
+     quindi qui uno zero di troppo non e' un dettaglio grafico, e' un
+     prezzo diverso.
+
+     Si scrive come si scrive in Italia: tutto attaccato, e i centesimi
+     dopo la barra. «18,50» -> «diciotto/50». «1.234,00» -> «milleduecento-
+     trentaquattro/00».
+     ============================================================ */
+  const _LU=["zero","uno","due","tre","quattro","cinque","sei","sette","otto","nove","dieci",
+    "undici","dodici","tredici","quattordici","quindici","sedici","diciassette","diciotto","diciannove"];
+  const _LD=["","","venti","trenta","quaranta","cinquanta","sessanta","settanta","ottanta","novanta"];
+
+  function _lettereFino999(n){
+    if(n===0) return "";
+    if(n<20) return _LU[n];
+    if(n<100){
+      const d=Math.floor(n/10), u=n%10;
+      let s=_LD[d];
+      /* «ventuno», non «ventiuno»; «ventotto», non «ventiotto» */
+      if(u===1||u===8) s=s.slice(0,-1);
+      return s+(u?_LU[u]:"");
+    }
+    const c=Math.floor(n/100), r=n%100;
+    let cento=(c===1?"cento":_LU[c]+"cento");
+    const resto=_lettereFino999(r);
+    /* «centotto», non «centootto»; «centottanta», non «centoottanta».
+       La o finale di cento cade davanti a una parola che comincia per o. */
+    if(resto.charAt(0)==="o") cento=cento.slice(0,-1);
+    return cento+resto;
+  }
+  function _lettereIntero(n){
+    n=Math.floor(Math.abs(n));
+    if(n===0) return "zero";
+    if(n>=1e9) return String(n);          /* oltre il miliardo non serve a nessuno */
+    let out="";
+    const mil=Math.floor(n/1e6), mila=Math.floor((n%1e6)/1000), resto=n%1000;
+    if(mil) out+=(mil===1?"unmilione":_lettereIntero(mil)+"milioni");
+    if(mila) out+=(mila===1?"mille":_lettereIntero(mila)+"mila");
+    if(resto) out+=_lettereFino999(resto);
+    return out;
+  }
+  /* «18,50» -> «diciotto/50» — come lo scrivono i computi di gara */
+  function prezzoInLettere(v){
+    const n=Math.round((+v||0)*100);
+    const seg=n<0?"meno ":"";
+    const a=Math.abs(n);
+    const euro=Math.floor(a/100), cent=a%100;
+    return seg+_lettereIntero(euro)+"/"+String(cent).padStart(2,"0");
+  }
+  /* per il totale: «diconsi euro ...» tutto a parole, centesimi compresi */
+  function euroInLettere(v){
+    const n=Math.round((+v||0)*100), a=Math.abs(n);
+    const euro=Math.floor(a/100), cent=a%100;
+    return (n<0?"meno ":"")+_lettereIntero(euro)+"/"+String(cent).padStart(2,"0");
+  }
+
+  /* ============================================================
+     LA LISTA PER LA GARA — 18 agosto 2026
+
+     Un computo, DUE STAMPE. Non due computi.
+       · «Scarica il PDF» = il Computo Metrico Estimativo, con le misure:
+         dice da dove viene ogni quantita'. E' il documento tuo e del
+         cliente.
+       · «Lista per la gara» = quello che si consegna alla stazione
+         appaltante: le misure NON ci vanno (le ha gia' fatte il
+         progettista), e ogni prezzo va scritto due volte, in cifre e in
+         lettere.
+
+     ⚠️ Gli stessi identici dati. Due computi separati vorrebbero dire
+        tenerli allineati a mano, e il giorno che cambi una misura ne
+        aggiorni uno solo — e' la trappola delle due copie.
+     ⚠️ In gara, se cifre e lettere non combaciano, vale QUELLA IN
+        LETTERE. Percio' il numero in lettere non e' un abbellimento:
+        e' il prezzo. Si scrive da `prezzoInLettere`, che ha il suo banco.
+     ⚠️ Ribasso, oneri di sicurezza aziendali e costi della manodopera
+        restano RIGHE VUOTE da riempire a penna, come nel modello vero:
+        sono dichiarazioni dell'impresa, non numeri che decide un
+        programma.
+     ============================================================ */
+  async function computoListaGara(id){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    const c=compCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Computo non trovato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    const cli=await cliDelDocumento(c.cliente_id,"nome,indirizzo,referente");
+
+    const [rc,rv]=await Promise.all([
+      sb.from("gest_computo_capitoli").select("*").eq("user_id",sbUid).eq("computo_id",id).order("ordine"),
+      sb.from("gest_computo_voci_calc").select("*").eq("user_id",sbUid).eq("computo_id",id).order("ordine")
+    ]);
+    if(rc.error||rv.error){toast("Non riesco a leggere il computo: "+((rc.error||rv.error).message));return;}
+    const capitoli=rc.data||[], voci=rv.data||[];
+    if(!voci.length){toast("Il computo è vuoto: aggiungi almeno una lavorazione");return;}
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    /* N. e Tariffa | LAVORI E FORNITURE | u.m. | Quantità | in cifre | in lettere | TOTALE */
+    const X=[10,28,112,124,142,160,182,200];
+    const M=X[0], R=X[7], FONDO=272;
+    const mid=(a,b)=>(X[a]+X[b])/2;
+    const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
+    const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
+    const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3}).format(+n||0);
+
+    let y=0, tabTop=0, totale=0;
+
+    function chiudiCorpo(){
+      doc.setDrawColor(110);doc.setLineWidth(.2);
+      for(let i=1;i<=6;i++)doc.line(X[i],tabTop,X[i],y);
+      doc.line(M,tabTop,M,y);doc.line(R,tabTop,R,y);doc.line(M,y,R,y);
+    }
+    function testaTabella(){
+      const h1=4.6,h2=4.4,H=h1+h2;
+      doc.setFillColor(238,241,243);doc.rect(M,y,R-M,H,"F");
+      doc.setDrawColor(110);doc.setLineWidth(.2);doc.rect(M,y,R-M,H);
+      doc.setFont("helvetica","bold");doc.setFontSize(6.6);doc.setTextColor(0);
+      doc.text("PREZZO UNITARIO (euro)",mid(4,6),y+3.2,{align:"center"});
+      doc.line(X[4],y+h1,X[6],y+h1);
+      const b=y+H-1.5;
+      doc.text("Num.Ord. / TARIFFA",mid(0,1),b,{align:"center"});
+      doc.text("LAVORI E FORNITURE PER L'ESECUZIONE DELL'APPALTO",mid(1,2),b,{align:"center"});
+      doc.text("unità",mid(2,3),b,{align:"center"});
+      doc.text("Quantità",mid(3,4),b,{align:"center"});
+      doc.text("in cifre",mid(4,5),b,{align:"center"});
+      doc.text("in lettere",mid(5,6),b,{align:"center"});
+      doc.text("TOTALE",mid(6,7),b,{align:"center"});
+      [1,2,3,4,6].forEach(i=>doc.line(X[i],y,X[i],y+H));
+      doc.line(X[5],y+h1,X[5],y+H);
+      y+=H;tabTop=y;
+    }
+    function nuovaPagina(){
+      chiudiCorpo();
+      doc.addPage();y=13;testaTabella();
+      doc.setFont("helvetica","normal");doc.setTextColor(0);
+    }
+    function spazio(h){ if(y+h>FONDO)nuovaPagina(); }
+
+    /* ---------- l'intestazione, come il modello vero ---------- */
+    y=14;
+    doc.setFont("helvetica","bold");doc.setFontSize(11);
+    doc.text(az.nome||"",M,y);
+    let hy=y+4.4;
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    [az.piva?("P.IVA "+az.piva):"", az.indirizzo||"",
+     [az.telefono?("Tel "+az.telefono):"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=3.8;});
+    doc.setTextColor(0);
+    y=hy+4;
+    doc.setFont("helvetica","bold");doc.setFontSize(11.5);
+    const tG=doc.splitTextToSize("LISTA DELLE LAVORAZIONI E FORNITURE PREVISTE PER L'ESECUZIONE DELL'OPERA O DEI LAVORI",R-M);
+    doc.text(tG,M,y);y+=tG.length*5+3;
+    doc.setDrawColor(180);doc.line(M,y,R,y);y+=6;
+
+    doc.setFont("helvetica","normal");doc.setFontSize(9);
+    const dati=[["OGGETTO:", c.oggetto||c.titolo||""],
+                ["COMMITTENTE:", (cli.nome||"")+(cli.indirizzo?" - "+cli.indirizzo:"")],
+                ["LUOGO:", c.luogo||""],
+                ["PREZZARIO:", (c.prezzario||"")+(c.prezzario_anno?" "+c.prezzario_anno:"")]];
+    dati.forEach(function(d){
+      if(!String(d[1]).trim()) return;
+      doc.setFont("helvetica","bold");doc.text(d[0],M,y);
+      doc.setFont("helvetica","normal");
+      const t=doc.splitTextToSize(String(d[1]),R-M-34);
+      doc.text(t,M+34,y);y+=Math.max(t.length*4.2,4.6);
+    });
+    y+=4;
+    testaTabella();
+
+    /* ---------- il corpo ---------- */
+    let n=0;
+    const perCap={}; voci.forEach(v=>{(perCap[v.capitolo_id||"_"]=perCap[v.capitolo_id||"_"]||[]).push(v);});
+    const gruppi=capitoli.map(cp=>({cap:cp,voci:perCap[cp.id]||[]}))
+                         .concat(perCap["_"]?[{cap:null,voci:perCap["_"]}]:[]);
+
+    gruppi.forEach(function(g){
+      if(!g.voci.length) return;
+      if(g.cap){
+        spazio(9);
+        doc.setFont("helvetica","bold");doc.setFontSize(8);
+        doc.text(String(g.cap.nome||"Capitolo"),X[1]+1.5,y+3.6);
+        y+=5.4;doc.setDrawColor(200);doc.line(X[1],y,R,y);
+      }
+      g.voci.forEach(function(v){
+        n++;
+        const pu=+v.prezzo_unitario||0, qta=+v.quantita||0, imp=Math.round(qta*pu*100)/100;
+        totale+=imp;
+        const desc=doc.splitTextToSize(String(v.descrizione||"(senza descrizione)"),X[2]-X[1]-3);
+        const cod=doc.splitTextToSize(String(v.codice||""),X[1]-X[0]-3);
+        const lettere=doc.splitTextToSize(prezzoInLettere(pu),X[6]-X[5]-3);
+        const righe=Math.max(desc.length,cod.length+1,lettere.length,1);
+        const H=righe*3.5+3.4;
+        spazio(H+4);
+        doc.setFont("helvetica","bold");doc.setFontSize(7.4);
+        doc.text(String(n),mid(0,1),y+3.4,{align:"center"});
+        doc.setFont("helvetica","normal");doc.setFontSize(6.8);
+        cod.forEach((r,i)=>doc.text(r,X[0]+1.5,y+7+i*3.2));
+        doc.setFontSize(7.4);
+        desc.forEach((r,i)=>doc.text(r,X[1]+1.5,y+3.4+i*3.5));
+        /* la riga del totale della voce, come «SOMMANO...» del modello */
+        const yb=y+H-1.4;
+        doc.setFont("helvetica","bold");
+        doc.text("SOMMANO",X[1]+1.5,yb);
+        doc.setFont("helvetica","normal");
+        doc.text(_umPdf(v.unita||""),mid(2,3),yb,{align:"center"});
+        doc.text(_q3(qta),X[4]-1.5,yb,{align:"right"});
+        doc.text(pu?_d2(pu):"",X[5]-1.5,yb,{align:"right"});
+        doc.setFontSize(6.4);
+        lettere.forEach((r,i)=>doc.text(r,X[5]+1.5,y+3.4+i*3.2));
+        doc.setFontSize(7.4);
+        doc.text(pu?_d2(imp):"",R-1.5,yb,{align:"right"});
+        y+=H;
+        doc.setDrawColor(215);doc.line(X[1],y,R,y);
+      });
+    });
+    chiudiCorpo();
+
+    /* ---------- il piede, con le righe da riempire a penna ---------- */
+    y+=6; spazio(60);
+    doc.setFont("helvetica","bold");doc.setFontSize(9);
+    doc.text("Parziale LAVORI A MISURA",X[1]+1.5,y);
+    doc.text(_eur(totale),R,y,{align:"right"});y+=6;
+    doc.setFontSize(11);
+    doc.text("T O T A L E",X[1]+1.5,y);
+    doc.text(_eur(totale),R,y,{align:"right"});y+=5.4;
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);
+    const dic=doc.splitTextToSize("(diconsi euro "+euroInLettere(totale)+")",R-M);
+    doc.text(dic,X[1]+1.5,y);y+=dic.length*4+4;
+
+    /* ⚠️ queste tre le riempie l'impresa a penna: sono dichiarazioni sue */
+    doc.setFontSize(9);
+    [["Pari a Ribasso del ______________ %",""],
+     ["(ribasso in lettere) ______________________________________________",""],
+     ["Oneri di sicurezza aziendali   euro ______________________________",""],
+     ["Costi della manodopera   euro ____________________________________",""]]
+      .forEach(function(r){ doc.text(r[0],M,y); y+=6.4; });
+
+    y+=6; spazio(26);
+    doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(c.data||todayStr()),M,y);
+    y+=14;
+    doc.setFont("helvetica","bold");
+    doc.text("IL CONCORRENTE",R-30,y,{align:"center"});
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
+    doc.text("(timbro e firma)",R-30,y+4,{align:"center"});
+    doc.setTextColor(0);
+
+    const np=doc.getNumberOfPages();
+    for(let p=1;p<=np;p++){
+      doc.setPage(p);
+      doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(140);
+      doc.text("LISTA DELLE LAVORAZIONI E FORNITURE"+(c.numero?"  ·  n. "+c.numero:"")+
+        (c.prezzario?"  ·  prezzi da "+c.prezzario+(c.prezzario_anno?" "+c.prezzario_anno:""):""),M,290,{maxWidth:150});
+      doc.text("Pag. "+p+" di "+np,R,290,{align:"right"});
+      doc.setTextColor(0);
+    }
+    doc.save("lista-gara-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+      (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+    toast("Lista per la gara scaricata ✅");
+  }
+
   async function computoPdf(id){
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
     const c=compCache.find(x=>String(x.id)===String(id));
@@ -16936,6 +17205,7 @@ ${vecchi?`
     if(a==="comp-dup")return compDuplica(id);
     if(a==="del-computo")return delComputo(id);
     if(a==="comp-pdf")return computoPdf(id);
+    if(a==="comp-gara")return computoListaGara(id);
     if(a==="pp-usa")return ppUsa(id);
     if(a==="pp-del")return ppDel(id);
     if(a==="pp-salva")return ppSalva();
