@@ -1819,6 +1819,27 @@
       caselle:"#j-desc,#j-cli,#j-cliente,#j-imp,#j-pr-tipo,#j-pr-stato,#j-pr-comune,#j-pr-prot,#j-pr-data",
       dentro:[],
       regole:ctrRegoleLavoro
+    },
+    /* ---- 19 agosto 2026: le quattro sezioni che erano scoperte ---- */
+    operatore:{
+      caselle:"#d-nome,#d-tel,#d-costo,#d-visita,#d-formazione,#d-doc-scad,#d-permesso,#d-cf,#d-email",
+      dentro:[],
+      regole:ctrRegoleOperatore
+    },
+    mezzo:{
+      caselle:"#m-nome,#m-targa,#m-stato,#m-note,#m-attrezzo",
+      dentro:[],
+      regole:ctrRegoleMezzo
+    },
+    carta:{
+      caselle:"#ct-nome,#ct-dip,#ct-stato,#ct-note",
+      dentro:[],
+      regole:ctrRegoleCarta
+    },
+    corso:{
+      caselle:"#cr-tit,#cr-ente,#cr-data,#cr-cfp",
+      dentro:[],
+      regole:ctrRegoleCorso
     }
   };
 
@@ -2185,6 +2206,163 @@
     return out;
   }
 
+  /* ============================================================
+     LE QUATTRO SEZIONI SCOPERTE — 19 agosto 2026
+     (squadra, mezzi e attrezzature, carte aziendali, corsi)
+
+     ⚠️ QUI IL ROSSO NON E' «il documento esce brutto»: e' «questa
+        persona non puo' stare in cantiere». Visita medica scaduta,
+        formazione scaduta, permesso di soggiorno scaduto: se arriva
+        un controllo, il cantiere si ferma e la multa la paga lui.
+        Sono le uniche cose di tutto il gestionale dove il rosso vuol
+        dire una cosa che costa soldi veri lo stesso giorno.
+     ⚠️ Trenta giorni prima si diventa arancio: un documento si
+        rinnova in tempo solo se lo sai in tempo. Per il permesso di
+        soggiorno sono sessanta, perche' il rinnovo e' piu' lento.
+     ⚠️ Come tutto il resto del controllore: SEGNA E BASTA. Non spegne
+        il Salva, non toglie la persona dalla squadra, non cambia
+        niente da solo.
+     ============================================================ */
+  const CTR_PREAVVISO=30;          /* giorni: da qui in poi e' arancio */
+  const CTR_PREAVVISO_PERM=60;     /* il permesso di soggiorno ha la coda lunga */
+
+  /* una scadenza sola, la stessa regola per tutte: scaduta = rosso,
+     vicina = arancio, lontana = niente. Scritta una volta, non cinque. */
+  function _ctrScad(sel,cosa,perche,preavviso){
+    const el=$(sel); if(!el||!el.value) return null;
+    const g=_giorniA(el.value);
+    if(g==null) return null;
+    if(g<0) return {el:el,grave:"rosso",
+      dice:cosa+" è scaduta da "+(-g===1?"1 giorno":(-g)+" giorni")+". "+perche};
+    if(g<=(preavviso||CTR_PREAVVISO)) return {el:el,grave:"arancio",
+      dice:cosa+(g===0?" scade oggi. ":(g===1?" scade domani. ":" scade fra "+g+" giorni. "))+"Muoviti adesso: dopo si fa in fretta a scordarsene."};
+    return null;
+  }
+
+  /* l'id della riga aperta adesso: sta sul pulsante Salva della finestra.
+     Se la finestra e' di una riga nuova torna "", e allora nessuna riga
+     della cache puo' essere «se stessa». */
+  function _ctrIoId(azione){
+    const b=document.querySelector('#sheet [data-action="'+azione+'"]');
+    return String((b&&b.dataset&&b.dataset.id)||"");
+  }
+
+  function ctrRegoleOperatore(){
+    const out=[];
+    const nome=$("#d-nome");
+    if(nome&&!nome.value.trim()) out.push({el:nome,grave:"rosso",
+      dice:"Manca il nome: nell'elenco della squadra e nei rapportini resta una riga senza nome."});
+
+    const tel=$("#d-tel");
+    if(tel&&!tel.value.trim()) out.push({el:tel,grave:"arancio",
+      dice:"Nessun telefono: dal cantiere non lo chiami, e il messaggio col lavoro assegnato non parte."});
+
+    /* ⚠️ il costo orario non e' un dato dell'anagrafica: e' quello che fa
+       il margine. Senza, ogni lavoro conta ZERO di manodopera e il
+       guadagno che vedi e' piu' alto del vero. */
+    const costo=$("#d-costo");
+    if(costo&&!costo.value.trim()) out.push({el:costo,grave:"arancio",
+      dice:"Senza costo orario le ore di questa persona valgono zero, e il margine dei lavori esce più alto del vero."});
+    else if(costo&&costo.value.trim()){
+      const c=_numeroIt(costo.value);
+      if(c!=null&&c<=0) out.push({el:costo,grave:"rosso",
+        dice:"Un costo orario a zero fa sparire la manodopera dal conto del lavoro."});
+      else if(c!=null&&c>200) out.push({el:costo,grave:"arancio",
+        dice:"Duecento euro l'ora sono tanti: hai messo il costo del giorno al posto di quello dell'ora?"});
+    }
+
+    /* le scadenze che fermano un cantiere */
+    [ _ctrScad("#d-visita","La visita medica","Se arriva un controllo, questa persona in cantiere non ci può stare."),
+      _ctrScad("#d-formazione","La formazione sulla sicurezza","Senza, in cantiere non ci può stare e la sanzione è a carico tuo."),
+      _ctrScad("#d-doc-scad","Il documento d'identità","Serve per il tesserino di riconoscimento."),
+      _ctrScad("#d-permesso","Il permesso di soggiorno","Senza permesso valido non può lavorare: è la cosa più grave di questo elenco.",CTR_PREAVVISO_PERM)
+    ].forEach(function(s){ if(s)out.push(s); });
+
+    const cf=$("#d-cf");
+    if(cf&&cf.value.trim()&&cf.value.trim().length!==16) out.push({el:cf,grave:"arancio",
+      dice:"Il codice fiscale di una persona è lungo 16 caratteri: questo ne ha "+cf.value.trim().length+"."});
+
+    const mail=$("#d-email");
+    if(mail&&mail.value.trim()&&!CTR_EMAIL.test(mail.value.trim())) out.push({el:mail,grave:"rosso",
+      dice:"Questa email non è scritta bene: gli inviti e le comunicazioni non arriveranno."});
+    return out;
+  }
+
+  function ctrRegoleMezzo(){
+    const out=[];
+    const nome=$("#m-nome");
+    if(nome&&!nome.value.trim()) out.push({el:nome,grave:"rosso",
+      dice:"Manca il nome: nell'elenco e nelle tendine dei lavori resta una riga senza nome."});
+    /* ⚠️ i doppioni si cercano nella cache della sezione, saltando la riga
+       che si sta modificando: se no un mezzo segnalerebbe se stesso. */
+    const _io=_ctrIoId("save-mezzo");
+    if(nome&&nome.value.trim()){
+      const n=nome.value.trim().toLowerCase();
+      const gia=(mezziCache||[]).some(x=>String(x.id)!==_io&&String(x.nome||"").trim().toLowerCase()===n);
+      if(gia) out.push({el:nome,grave:"arancio",
+        dice:"C'è già un mezzo con questo nome: nelle tendine ne vedrai due uguali e non saprai quale scegliere."});
+    }
+    const attrezzo=!!($("#m-attrezzo")&&$("#m-attrezzo").checked)
+                 || (($("#m-cat")&&$("#m-cat").value)==="attrezzatura");
+    const targa=$("#m-targa");
+    if(targa&&!targa.value.trim()&&!attrezzo) out.push({el:targa,grave:"arancio",
+      dice:"Senza targa non colleghi revisione, bollo e assicurazione, e su un rapportino non sai quale mezzo era."});
+    if(targa&&targa.value.trim()){
+      const t=targa.value.trim().toUpperCase();
+      const gia=(mezziCache||[]).some(x=>String(x.id)!==_io&&String(x.targa||"").trim().toUpperCase()===t);
+      if(gia) out.push({el:targa,grave:"rosso",
+        dice:"Questa targa è già su un altro mezzo: uno dei due è stato inserito due volte, e i costi si dividono fra due schede."});
+    }
+    const stato=$("#m-stato"), note=$("#m-note");
+    if(stato&&(stato.value==="manutenzione"||stato.value==="fuori_uso")&&note&&!note.value.trim())
+      out.push({el:note,grave:"arancio",
+        dice:"L'hai messo fermo ma non hai scritto perché: fra un mese non ti ricorderai se aspettava un pezzo o era da rottamare."});
+    return out;
+  }
+
+  function ctrRegoleCarta(){
+    const out=[];
+    const nome=$("#ct-nome");
+    if(nome&&!nome.value.trim()) out.push({el:nome,grave:"rosso",
+      dice:"Manca il nome: nell'elenco delle carte resta una riga senza nome."});
+    const dip=$("#ct-dip");
+    if(dip&&!dip.value) out.push({el:dip,grave:"arancio",
+      dice:"Nessun titolare: quando esce una spesa non sai chi l'ha fatta, e la carta non la chiedi indietro a nessuno."});
+    const stato=$("#ct-stato"), note=$("#ct-note");
+    if(stato&&stato.value==="bloccata"&&note&&!note.value.trim()) out.push({el:note,grave:"arancio",
+      dice:"L'hai bloccata ma non hai scritto perché: smarrita, rubata, o solo per ora?"});
+    return out;
+  }
+
+  function ctrRegoleCorso(){
+    const out=[];
+    const tit=$("#cr-tit");
+    if(tit&&!tit.value.trim()) out.push({el:tit,grave:"rosso",
+      dice:"Manca il titolo: nell'elenco dei corsi resta una riga senza nome, e all'Ordine non dimostri niente."});
+    const ente=$("#cr-ente");
+    if(ente&&!ente.value.trim()) out.push({el:ente,grave:"arancio",
+      dice:"Manca chi l'ha organizzato: sull'attestato c'è, e se te lo chiedono devi saperlo dire."});
+    const data=$("#cr-data");
+    if(data&&!data.value) out.push({el:data,grave:"rosso",
+      dice:"Senza data il corso non finisce in nessun anno, e nel conto dei crediti non entra."});
+    else if(data&&data.value>todayStr()) out.push({el:data,grave:"arancio",
+      dice:"Questa data è nel futuro: i crediti li stai contando prima di averli presi."});
+    const cfp=$("#cr-cfp");
+    if(cfp&&!cfp.value.trim()) out.push({el:cfp,grave:"arancio",
+      dice:"Senza crediti il corso non sposta il conto dell'anno: se davvero non ne dà, scrivi 0."});
+    else if(cfp&&cfp.value.trim()){
+      const n=_numeroIt(cfp.value);
+      /* ⚠️ 12 agosto 2026 la virgola aveva gia' fatto danni qui: «2,5» letto
+         come 25 e' mezzo credito che diventa venticinque. Un numero cosi'
+         grosso su un corso solo quasi sempre e' una virgola sbagliata. */
+      if(n!=null&&n>30) out.push({el:cfp,grave:"arancio",
+        dice:"Trenta crediti da un corso solo sono quasi un anno intero: controlla la virgola (2,5 e 25 si somigliano)."});
+      else if(n!=null&&n<0) out.push({el:cfp,grave:"rosso",
+        dice:"I crediti non possono essere negativi."});
+    }
+    return out;
+  }
+
   /* ---------- la macchina: da qui in giu' non c'e' niente di specifico ---------- */
 
   function ctrLista(tipo){
@@ -2256,6 +2434,14 @@
 
   function ctrSegna(s){
     if(!s||!s.el) return;
+    /* ⚠️ 19 agosto 2026 — UN AVVISO DENTRO UNA PIEGA CHIUSA NON LO VEDE
+       NESSUNO. Nella scheda della persona le scadenze (visita medica,
+       formazione, permesso di soggiorno) stanno dentro un blocco che si
+       apre e si chiude, e chiuso resta chiuso: il controllore avrebbe
+       segnato «DA CORREGGERE» in un posto invisibile. Adesso, se il campo
+       sta in una piega, la piega si apre. */
+    let _p=s.el.closest?s.el.closest("details"):null;
+    while(_p){ _p.open=true; _p=_p.parentElement?_p.parentElement.closest("details"):null; }
     s.el.classList.add("ctr-"+s.grave);
     const msg=document.createElement("div");
     msg.className="ctr-msg ctr-msg--"+s.grave;
@@ -6709,8 +6895,10 @@ ${vecchi?`
       </div>
 
       </div></div>`,
-      `<button class="btn b-cancel" data-action="close">Annulla</button>
+      ctrTastoHTML('operatore')
+      +`<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="${isNew?"sq-add":"sq-save"}" data-id="${op.id||""}">${isNew?"Aggiungi":"Salva"}</button>`);
+    ctrAscolta('operatore');
     $("#d-ruolo").onchange=applyRuoloPreset;
     $$("#d-perms input[data-perm]").forEach(ch=>ch.addEventListener("change",permAvviso));
     if(isNew){applyRuoloPreset();}
@@ -7179,8 +7367,10 @@ ${vecchi?`
         <div class="field"><textarea id="m-note" placeholder="Dove si trova, chi lo usa, promemoria...">${esc(m.note||"")}</textarea></div>
         </div>
         </div></div>`,
-      `<button class="btn b-cancel" data-action="close">Annulla</button>
+      ctrTastoHTML('mezzo')
+      +`<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-mezzo" data-id="${m.id||""}">${isNew?"Crea":"Salva"}</button>`);
+    ctrAscolta('mezzo');
   }
   async function saveMezzo(id){
     const nome=$("#m-nome").value.trim();if(!nome){toast("Scrivi il nome del mezzo");return;}
@@ -7274,8 +7464,10 @@ ${vecchi?`
         <p class="sh-nota">Il saldo non si scrive qui: viene da solo dalle ricariche meno le spese, che si registrano dal pulsante <b>Movimenti</b>.</p>
         </div>
         </div></div>`,
-      `<button class="btn b-cancel" data-action="close">Annulla</button>
+      ctrTastoHTML('carta')
+      +`<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-carta" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button>`);
+    ctrAscolta('carta');
   }
   async function saveCarta(id){
     const nome=$("#ct-nome").value.trim();if(!nome){toast("Scrivi il nome della carta");return;}
@@ -13730,8 +13922,10 @@ ${vecchi?`
       +'<p class="sh-nota" style="margin-bottom:0">L\'obiettivo annuo (di norma 30 CFP, 20 per i geometri) si imposta nei <b>Dati azienda</b>.</p>'
       +'</div>'
       +'</div></div>',
-      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      ctrTastoHTML('corso')
+      +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-cred" data-id="'+(c.id||"")+'">'+(isNew?"Aggiungi":"Salva")+'</button>');
+    ctrAscolta('corso');
   }
 
   async function saveCred(id){
