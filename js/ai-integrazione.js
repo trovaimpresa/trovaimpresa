@@ -199,7 +199,7 @@
 
         <textarea id="ai-in" rows="5" placeholder="Es. Rifacimento bagno 6 mq: demolizione rivestimenti, nuovo impianto idraulico, posa piastrelle pavimento e pareti, sanitari sospesi, box doccia 90x70. Zona Milano."></textarea>
 
-        <div class="ai-riga">
+        <div class="ai-fila">
           <span class="ai-crediti">Crediti: <b>${AI.stato.remaining}</b></span>
           <button id="ai-go" class="ai-cta">Genera preventivo</button>
         </div>
@@ -271,7 +271,7 @@
 
         <textarea id="ai-help-in" rows="3" placeholder="Es. Come faccio a..."></textarea>
 
-        <div class="ai-riga">
+        <div class="ai-fila">
           <span></span>
           <button id="ai-help-go" class="ai-cta">Chiedi</button>
         </div>
@@ -528,7 +528,7 @@
         <h3 class="ai-tit">${titolo}</h3>
         <p class="ai-sub">Scrivi come parleresti al telefono, ci penso io a mettere le cose al posto giusto.</p>
         <textarea id="ai-comp-in" rows="4" placeholder="${placeholder}"></textarea>
-        <div class="ai-riga"><span></span><button id="ai-comp-go" class="ai-cta">Compila il modulo</button></div>
+        <div class="ai-fila"><span></span><button id="ai-comp-go" class="ai-cta">Compila il modulo</button></div>
         <div id="ai-comp-out"></div>
       </div>`;
     document.body.appendChild(ov);
@@ -700,7 +700,16 @@
 #ai-in,#ai-help-in,#ai-comp-in{width:100%;border:1.5px solid #e5e7eb;border-radius:11px;padding:13px;font:14px/1.5 inherit;
   resize:vertical;box-sizing:border-box;color:#111827}
 #ai-in:focus,#ai-help-in:focus,#ai-comp-in:focus{outline:none;border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
-.ai-riga{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
+/* ⚠️ 18 agosto 2026 — QUESTA CLASSE SI CHIAMAVA `.ai-riga`, COME QUELLA
+   DELLA RIGA AI DENTRO I MODULI DEL GESTIONALE (css/gestionale.css).
+   Questo file lo stile se lo inietta a mano dentro <head> QUANDO PARTE,
+   cioe' DOPO il foglio di stile: stessa forza, ma arriva dopo, e vinceva
+   lui. Risultato: la riga dell'AI dentro il modulo del preventivo
+   diventava una fila orizzontale e la casella dove si scrive passava da
+   645 a 206 px — una fessura, con dentro un testo lungo.
+   Misurato nel browser, non a occhio. Rinominata in `.ai-fila`, che qui
+   dentro e' solo sua. */
+.ai-fila{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
 .ai-crediti{font-size:13px;color:#6b7280}
 .ai-cta{background:#0f766e;color:#fff;border:none;text-decoration:none;display:inline-block;
   padding:12px 22px;border-radius:10px;font:650 14px inherit;cursor:pointer;transition:background .15s ease}
