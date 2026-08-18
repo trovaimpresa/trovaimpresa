@@ -2983,7 +2983,7 @@
               .slice(0,2).map(f=>{
         const sc=scadenza(f), fuori=sc&&sc<oggi;
         const g=f.data?-_giorniA(f.data):null;
-        return {t:"Fattura n. "+(f.numero||"—")+"/"+f.anno,
+        return {t:"Fattura "+(f.numero?("n. "+f.numero+"/"+fattAnno(f)):"senza numero"),
                 v:eur(totaleFatt(f))+(g!=null?" · "+g+" gg":""),
                 cls:fuori?"q-passato":"",
                 action:"rie-go-fatture", id:f.id};
@@ -4261,7 +4261,7 @@
     return fattBasi(f,righeDellaFattura||[]).imponibile*fattSegno(f);
   }
   function fattNumero(f){
-    return f.numero ? "n. "+f.numero+"/"+f.anno : "bozza senza numero";
+    return fattNum(f);
   }
   function fattScadenza(f,gg){ return f.data?_giorniDopo(f.data,gg):""; }
   function fattScaduta(f,gg){
@@ -4544,6 +4544,34 @@
   }
 
   /* ---------- il modulo ---------- */
+  /* ============================================================
+     L'ANNO CHE MANCAVA — 18 agosto 2026
+
+     Su una fattura senza la colonna `anno` (le bozze vecchie, nate prima
+     che quella colonna esistesse) usciva «Fattura n. 12/undefined» —
+     addosso al documento, nel titolo della finestra, nel messaggio di
+     conferma e nella causale del PDF. Cinque posti, tutti con lo stesso
+     `f.numero+"/"+f.anno`.
+
+     L'anno pero' c'e' sempre: sta dentro la DATA. Quindi si legge da li'
+     quando la colonna e' vuota, e «undefined» non si vede piu' da
+     nessuna parte.
+     ⚠️ Non si tira a indovinare con l'anno di oggi: una fattura del 2025
+        riaperta nel 2026 diventerebbe «12/2026», cioe' un numero che non
+        e' mai esistito. Se non c'e' ne' anno ne' data, si scrive «—».
+     ============================================================ */
+  function fattAnno(f){
+    f=f||{};
+    if(f.anno) return String(f.anno);
+    const d=String(f.data||"");
+    return /^\d{4}/.test(d) ? d.slice(0,4) : "—";
+  }
+  /* «n. 12/2026», oppure «bozza senza numero» */
+  function fattNum(f){
+    f=f||{};
+    return f.numero ? ("n. "+f.numero+"/"+fattAnno(f)) : "bozza senza numero";
+  }
+
   function fattRigaHtml(r){
     r=r||{};fattRigheCount++;
     const iva=r.iva!=null?+r.iva:ivaDefault();
@@ -4651,7 +4679,7 @@
     const nLav=(preset&&preset._lavori?preset._lavori.length:(fattLavori[f.id]||[]).length);
 
     const titolo = isNew ? "Nuova fattura"
-                 : (f.numero ? "Fattura n. "+f.numero+"/"+f.anno : "Bozza di fattura");
+                 : (f.numero ? "Fattura n. "+f.numero+"/"+fattAnno(f) : "Bozza di fattura");
 
     openSheetGrande(titolo,
       /* colonna di sinistra più larga: le voci hanno bisogno di spazio per la
@@ -4929,13 +4957,13 @@
     if(_nuovoNum!=null){f.numero=_nuovoNum;f.anno=patch.anno;}
     await fattSincronizzaLavori(id,v);
     rinfresca("fatture","riepilogo","lavori");
-    toast(v==="emessa"?("Fattura n. "+f.numero+"/"+f.anno+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
+    toast(v==="emessa"?("Fattura n. "+f.numero+"/"+fattAnno(f)+" emessa ✔"):(v==="pagata"?"Segnata pagata ✔":"Aggiornata"));
   }
 
   async function eliminaFattura(id){
     const f=fattCache.find(x=>String(x.id)===String(id));
     const avviso=f&&f.numero
-      ? "Questa fattura ha il numero "+f.numero+"/"+f.anno+". Cancellarla lascia un buco nella numerazione, e i buchi il commercialista li vede. Se è sbagliata, di solito si fa una nota di credito.\n\nEliminare lo stesso?"
+      ? "Questa fattura ha il numero "+f.numero+"/"+fattAnno(f)+". Cancellarla lascia un buco nella numerazione, e i buchi il commercialista li vede. Se è sbagliata, di solito si fa una nota di credito.\n\nEliminare lo stesso?"
       : "Eliminare questa bozza di fattura?";
     if(!gconfirm(avviso))return;
     await fattSincronizzaLavori(id,"none");
@@ -5184,7 +5212,7 @@
     doc.setTextColor(0);doc.setFont("helvetica","bold");doc.setFontSize(13);
     doc.text(FATT_TIPO_LAB[f.tipo]||"Fattura",Rx,y,{align:"right"});
     doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(90);
-    doc.text(f.numero?("N. "+f.numero+" / "+f.anno):"Bozza — non ancora emessa",Rx,y+6,{align:"right"});
+    doc.text(f.numero?("N. "+f.numero+" / "+fattAnno(f)):"Bozza — non ancora emessa",Rx,y+6,{align:"right"});
     doc.text("del "+fdate(f.data),Rx,y+11,{align:"right"});
     doc.setTextColor(0);
 
@@ -5310,7 +5338,7 @@
       doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("Pagamento",M,y);y+=5.5;
       doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
       doc.text("Bonifico — IBAN "+az.iban,M,y);y+=4.5;
-      if(f.numero)doc.text("Causale: fattura n. "+f.numero+"/"+f.anno,M,y),y+=4.5;
+      if(f.numero)doc.text("Causale: fattura n. "+f.numero+"/"+fattAnno(f),M,y),y+=4.5;
       doc.setTextColor(0);y+=3;
     }
     if(f.note){
@@ -5337,7 +5365,7 @@
     });
 
     const nome=(f.cli_nome||cli.nome||"cliente").replace(/[^a-z0-9]+/gi,"-").toLowerCase();
-    doc.save("fattura-"+(f.numero?f.numero+"-"+f.anno:"bozza")+"-"+nome+".pdf");
+    doc.save("fattura-"+(f.numero?f.numero+"-"+fattAnno(f):"bozza")+"-"+nome+".pdf");
     toast("PDF scaricato ✅");
   }
 
@@ -5525,7 +5553,13 @@
 
     /* il progressivo dell'invio: identifica il file, non la fattura.
        Basta che sia diverso ogni volta e lungo al massimo 10 caratteri. */
-    const prog=String(f.anno).slice(2)+String(f.numero).padStart(5,"0");
+    /* ⚠️ qui NON si puo' usare fattAnno cosi' com'e': se l'anno non si sa
+       lui risponde «—», e nel progressivo del file elettronico ci vogliono
+       cifre. Se manca davvero si usa l'anno della data, e in ultima
+       spiaggia quello di oggi: il progressivo identifica l'INVIO, non la
+       fattura, quindi non falsa nessun numero. */
+    const _annoProg=(/^\d{4}$/.test(fattAnno(f))?fattAnno(f):String(new Date().getFullYear()));
+    const prog=_annoProg.slice(2)+String(f.numero).padStart(5,"0");
 
     const sede=(o,pref)=>
         "        <Indirizzo>"+xesc(xtaglia(o[pref+"indirizzo"],60))+"</Indirizzo>\n"
@@ -10986,10 +11020,15 @@ ${vecchi?`
     }catch(e){}
     const imp=($("#j-imp")?(_numIt("#j-imp")||0):(+importo||0));
     const marg=margineLavoro(imp,tot,totFF,md);
+    /* ⚠️ 18 agosto 2026 — «Spese: −0,00 €». Il meno era scritto a mano
+       davanti al numero, sempre, anche quando di spese non ce n'erano.
+       Un meno davanti a zero non vuol dire niente e si legge male: adesso
+       il meno compare solo quando c'e' davvero qualcosa da togliere. */
+    const _meno=n=>(n>0?"−":"")+eur2(n);
     $("#margine-box").innerHTML=`<span>Lavoro: ${eur2(imp)}</span>`
-      +`<span>Spese: <span class="sp">−${eur2(tot)}</span></span>`
-      +(totFF?`<span>Fatture fornitori: <span class="sp">−${eur2(totFF)}</span></span>`:"")
-      +(md?`<span>Manodopera: <span class="sp">−${eur2(md)}</span></span>`:"")
+      +`<span>Spese: <span class="sp">${_meno(tot)}</span></span>`
+      +(totFF?`<span>Fatture fornitori: <span class="sp">${_meno(totFF)}</span></span>`:"")
+      +(md?`<span>Manodopera: <span class="sp">${_meno(md)}</span></span>`:"")
       +`<span>Margine: <span class="${marg>=0?'pos':'neg'}">${eur2(marg)}</span></span>`
       /* 12 agosto 2026 (sera) — la riga sotto diceva "contate al costo medio della
          squadra" anche quando la media era ZERO, cioe' quando non le stava contando
