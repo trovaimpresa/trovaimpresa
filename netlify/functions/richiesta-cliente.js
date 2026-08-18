@@ -65,6 +65,19 @@ exports.handler = async function (event) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Nome e telefono sono obbligatori.' }) };
   }
 
+  /* ===== 16 agosto 2026 — IL CONSENSO SI CONTROLLA QUI, NON SOLO NEL BROWSER =====
+     Questa funzione manda nome, telefono ed email a un massimo di 5 imprese.
+     La spunta nella pagina si aggira con due clic dagli strumenti del browser:
+     l'unico posto dove il controllo conta davvero e' questo.
+     E si scrive anche COSA ha accettato: senza la frase esatta, il consenso
+     non si puo' dimostrare. */
+  const consenso = body.consenso === true || body.consenso === 'true';
+  const consensoTesto = (body.consenso_testo == null ? '' : String(body.consenso_testo)).trim().slice(0, 600);
+  if (!consenso) {
+    return { statusCode: 400, headers: corsHeaders,
+             body: JSON.stringify({ error: 'Serve la spunta: senza il tuo consenso non possiamo girare la richiesta alle imprese.' }) };
+  }
+
   const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   // Anti-doppione: stessa richiesta arrivata negli ultimi 2 minuti -> la ignoriamo
@@ -87,17 +100,32 @@ exports.handler = async function (event) {
 
   // Salvataggio richiesta (recuperiamo l'id per tracciare gli inoltri)
   let richiestaId = null;
-  try {
-    const { data: ins, error } = await supabaseAdmin
-      .from('richieste_clienti')
-      .insert({ nome, telefono, email: email || null, categoria, zona, ricerca })
-      .select('id')
-      .single();
-    if (error) throw error;
+  {
+    const base = { nome, telefono, email: email || null, categoria, zona, ricerca };
+    const conConsenso = Object.assign({}, base, {
+      consenso_at: new Date().toISOString(),
+      consenso_testo: consensoTesto || null
+    });
+
+    /* ⚠️ Paracadute colonne mancanti, come nei Dati azienda del gestionale:
+       se `sql/richieste-consenso.sql` non e' ancora stato lanciato, la
+       richiesta del cliente NON si deve perdere. Si riprova senza le due
+       colonne nuove e si scrive nei log che manca la migrazione. */
+    let ins = null, error = null;
+    ({ data: ins, error } = await supabaseAdmin
+      .from('richieste_clienti').insert(conConsenso).select('id').single());
+
+    if (error && /consenso_(at|testo)/.test(error.message || '')) {
+      console.error('[richiesta-cliente] manca sql/richieste-consenso.sql: salvo senza il consenso scritto');
+      ({ data: ins, error } = await supabaseAdmin
+        .from('richieste_clienti').insert(base).select('id').single());
+    }
+
+    if (error) {
+      console.error('[richiesta-cliente] errore insert:', error.message);
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: error.message }) };
+    }
     richiestaId = ins ? ins.id : null;
-  } catch (err) {
-    console.error('[richiesta-cliente] errore insert:', err.message);
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: err.message }) };
   }
 
   const esc = s => (s == null ? '' : String(s))
