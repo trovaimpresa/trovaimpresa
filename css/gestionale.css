@@ -2991,3 +2991,68 @@ body:has(#ti-fondatore) .side{
   /* col dito una tappa alta 27 px si sbaglia: sul telefono si alza */
   .filo-p{ padding:8px 12px; }
 }
+
+/* ============================================================
+   IL CALENDARIO — 18 agosto 2026
+
+   Era l'unico posto del gestionale che tradiva la regola del progetto:
+   scriveva i nomi dei lavori a **12 px**, e 10,5 sul telefono, sotto il
+   minimo di 13 che vale dappertutto. In più li tagliava a metà con i
+   puntini (`nowrap` + ellipsis), quindi «Rifacimento bagno via Roma»
+   diventava «Rifacim…» — e da lì non capisci di che lavoro si tratta.
+   E le caselle erano alte 112 px anche nei giorni vuoti: mezzo schermo
+   di riquadri bianchi.
+
+   Adesso: 13,5 px, i nomi vanno **a capo** (due righe, poi basta), e le
+   caselle si stringono. Tre voci per casella invece di quattro, perché
+   ora ognuna può occuparne due di righe.
+   ============================================================ */
+/* ⚠️ `.wrap section` e non `.cal-cell` e basta: piu' in basso nel file
+   c'e' gia' `.wrap section .cal-cell{min-height:132px}`, che e' piu'
+   forte. La prima versione di questa riga non entrava mai in gioco e le
+   caselle restavano a 132 px — l'ha trovato il banco misurando, non io
+   leggendo. Il numero del giorno lo lascio com'e': la' e' gia' 16 px. */
+.wrap section .cal-cell{ min-height:96px; }
+
+.cal-lavori{ gap:4px; margin-top:5px; }
+.cal-lav{ align-items:flex-start; gap:6px; }
+.cal-lav-bar{ width:3px; height:15px; margin-top:2px; }
+/* il nome va a capo invece di essere tagliato: due righe, poi si ferma */
+.cal-lav-t{
+  font-size:13.5px; line-height:1.3; color:var(--testo-2);
+  white-space:normal; text-overflow:clip; word-break:break-word;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.cal-piu{ font-size:13px; font-weight:700; color:var(--testo-2); padding-left:9px; }
+.cal-note-mark{ font-size:13px; top:5px; right:6px; }
+.cal-legend{ font-size:13.5px; color:var(--testo-2); }
+.cal-dow{ font-size:13.5px; }
+
+@media(max-width:880px){
+  /* sul telefono la casella si stringe, ma il testo NON scende sotto i 13 */
+  .wrap section .cal-cell{ min-height:72px; padding:5px; }
+  .cal-lav-t{ font-size:13px; -webkit-line-clamp:2; }
+  .cal-lav-bar{ height:14px; }
+}
+
+/* ============================================================
+   L'ARANCIONE — 18 agosto 2026 (chiesto da Alessio)
+
+   Sta su «✨ Genera con AI», e su un motivo: e' la cosa piu' nuova del
+   gestionale e nessuno sa che c'e'. Accanto al blu di «+ Nuovo
+   preventivo» si vede, e si capisce che sono due strade diverse per la
+   stessa cosa.
+
+   ⚠️ NON rompe il segno del controllore, e il perche' e' importante:
+      li' il colore non decide mai niente da solo — davanti alla frase
+      c'e' sempre la PAROLA («DA CORREGGERE» / «DA GUARDARE»). E' la
+      parola che porta il significato, il colore aiuta e basta. Percio'
+      l'arancione puo' vivere anche altrove.
+   ⚠️ Arancione SCURO, non acceso: bianco su #EA580C non si legge
+      abbastanza (3,3 a 1). Questo sta sopra il 4,5 a 1, ed e' quello
+      che serve a chi legge in fretta.
+   ============================================================ */
+.btn.btn-ai{ background:#C2410C; border-color:#C2410C; color:#fff; }
+.btn.btn-ai:hover{ background:#9A3412; border-color:#9A3412; color:#fff; }
+.btn.btn-ai:focus-visible{ outline:3px solid #FDBA74; outline-offset:2px; }

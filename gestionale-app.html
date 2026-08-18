@@ -349,7 +349,7 @@
     </section>
 
     <section id="preventivi">
-      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn" title="Descrivi il lavoro a parole, ti preparo le voci di costo" data-action="new-prev-ai">✨ Genera con AI</button></div></div>
+      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn btn-ai" title="Descrivi il lavoro a parole, ti preparo le voci di costo" data-action="new-prev-ai">✨ Genera con AI</button></div></div>
       <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click. Puoi scriverlo a mano, dettarlo all'AI, o farlo nascere da un <b>computo metrico</b> già fatto.</div>
       <div class="viste" id="prev-viste"></div>
       <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
@@ -5838,7 +5838,11 @@
     /* Prima nella cella c'erano solo pallini: si vedeva "quanti", mai "quali".
        Ora ogni lavoro è una righina con la barretta di stato e il titolo troncato,
        gli stessi colori della tabella Lavori. Oltre il quarto: "+N". */
-    const MAX_CELLA=4;
+    /* ⚠️ 18 agosto 2026 — da 4 a 3. I nomi adesso vanno a capo invece di
+       essere tagliati a meta', quindi ogni riga puo' occupare due righe
+       vere: con quattro voci la casella diventava una colonna. Tre si
+       leggono, e il «+N» dice quante ne restano — non si perde niente. */
+    const MAX_CELLA=3;
     for(let d=1;d<=days;d++){
       const ds=ymd(y,m,d), jobs=calJobs.filter(l=>l.data_prevista===ds);
       const scaduto=ds<todayStr();
