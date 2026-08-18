@@ -417,32 +417,48 @@
     const rinnovo = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1)
       .toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
 
+    /* ===== 16 agosto 2026 — PREZZI VERI E PORTE CHE ESISTONO =====
+       Qui c'erano due piani che non esistono piu' da nessuna parte:
+       «AI 299€/anno» e «AI Pro 599€/anno». Non sono mai stati in vendita:
+       l'AI sta dentro il Premium (100 crediti al mese) e i crediti in piu'
+       si comprano a pacchetti da /ricarica-crediti.html.
+
+       ⚠️ E soprattutto: due casi su tre mandavano su /abbonamento.html,
+       che NON ESISTE. Stesso identico difetto del pulsante «Ricarica
+       crediti» di ieri: una finestra data per finita senza provare
+       l'ultimo clic. Adesso si va su /prezzi.html, che c'e'.
+
+       I prezzi qui dentro devono restare uguali a quelli di prezzi.html e
+       di ricarica-crediti.html: se cambiano li', cambiano anche qui. */
     const c = motivo === 'no_credits' ? {
       occhio: 'Crediti esauriti',
       tit:    'Hai finito i crediti di questo mese',
       sub:    `Si rinnovano il ${rinnovo}. Se ti servono subito, ricarica: i crediti acquistati non scadono mai.`,
-      cta:    'Ricarica 150 crediti — 19€',
+      cta:    'Ricarica crediti',
       href:   '/ricarica-crediti.html',
       piani:  [
-        { n: '150 crediti', p: '19€',  d: 'non scadono' },
-        { n: 'AI Pro',      p: '599€', d: '600 al mese', top: true },
+        { n: '150 crediti',   p: '19€', d: 'non scadono mai' },
+        { n: '400 crediti',   p: '45€', d: 'non scadono mai', top: true },
+        { n: '1.000 crediti', p: '99€', d: 'non scadono mai' },
       ],
     } : motivo === 'subscription_expired' ? {
-      occhio: 'Abbonamento scaduto',
+      occhio: 'Premium scaduto',
       tit:    'Rinnova per continuare',
-      sub:    'I tuoi dati sono al sicuro. Rinnova e riprendi da dove avevi lasciato.',
-      cta:    'Rinnova ora',
-      href:   '/abbonamento.html',
-      piani:  [],
-    } : {
-      occhio: 'Funzione AI',
-      tit:    'Sblocca l\'assistente AI',
-      sub:    'Descrivi il lavoro a parole e ottieni un preventivo completo, voce per voce, in 15 secondi. Basta fogli di calcolo.',
+      sub:    'I tuoi dati sono al sicuro. Rinnova il Premium e riprendi da dove avevi lasciato.',
       cta:    'Vedi i piani',
-      href:   '/abbonamento.html',
+      href:   '/prezzi.html',
       piani:  [
-        { n: 'AI',     p: '299€', d: '150 preventivi/mese' },
-        { n: 'AI Pro', p: '599€', d: '600 preventivi/mese', top: true },
+        { n: 'Premium', p: '49€', u: '/anno', d: '100 crediti AI al mese', top: true },
+      ],
+    } : {
+      occhio: 'Assistente AI',
+      tit:    'L\'assistente AI è dentro il Premium',
+      sub:    'Scrivi il lavoro a parole e lui riempie le caselle, o ti prepara il preventivo voce per voce. Nel Premium ci sono 100 crediti al mese, che si rinnovano ogni mese.',
+      cta:    'Vedi il Premium',
+      href:   '/prezzi.html',
+      piani:  [
+        { n: 'Premium', p: '49€', u: '/anno', d: '100 crediti AI al mese', top: true },
+        { n: 'Premium', p: '5€',  u: '/mese', d: 'stessa cosa, mese per mese' },
       ],
     };
 
@@ -458,7 +474,7 @@
           <div class="ai-piano ${x.top ? 'top' : ''}">
             ${x.top ? '<span class="ai-tag">Consigliato</span>' : ''}
             <div class="ai-pn">${x.n}</div>
-            <div class="ai-pp">${x.p}<small>/anno</small></div>
+            <div class="ai-pp">${x.p}${x.u ? `<small>${x.u}</small>` : ''}</div>
             <div class="ai-pd">${x.d}</div>
           </div>`).join('')}</div>` : ''}
         <a class="ai-cta ai-cta--full" href="${c.href}">${c.cta}</a>
@@ -678,7 +694,7 @@
 .ai-x{position:absolute;top:10px;right:15px;background:none;border:none;font-size:27px;
   line-height:1;color:#9ca3af;cursor:pointer}
 .ai-x:hover{color:#111827}
-.ai-occhio{font:700 11px/1 system-ui;letter-spacing:1.2px;text-transform:uppercase;color:#0f766e;margin-bottom:9px}
+.ai-occhio{font:700 13px/1.2 system-ui;letter-spacing:1.2px;text-transform:uppercase;color:#0f766e;margin-bottom:9px}  /* 16 ago 2026: era 11px, sotto il minimo del progetto */
 .ai-tit{font-size:21px;font-weight:750;color:#111827;margin:0 0 8px}
 .ai-sub{font-size:14px;line-height:1.55;color:#4b5563;margin:0 0 18px}
 #ai-in,#ai-help-in,#ai-comp-in{width:100%;border:1.5px solid #e5e7eb;border-radius:11px;padding:13px;font:14px/1.5 inherit;
@@ -717,8 +733,10 @@
 .ai-piani{display:flex;gap:11px;margin-bottom:20px}
 .ai-piano{flex:1;border:1.5px solid #e5e7eb;border-radius:12px;padding:15px 10px;position:relative;background:#fafafa}
 .ai-piano.top{border-color:#0f766e;background:#f0fdfa}
-.ai-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:#0f766e;color:#fff;
-  font:700 9px/1 system-ui;padding:4px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.4px}
+.ai-tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#0f766e;color:#fff;
+  font:700 13px/1.2 system-ui;padding:4px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.4px}
+  /* 16 ago 2026: era 9px. Su un'etichetta piccola si nota poco, ma la regola
+     del progetto e' che sotto i 13 px non ci va niente, e vale anche qui. */
 .ai-pn{font-size:13px;font-weight:650;color:#6b7280;margin-bottom:5px}
 .ai-pp{font-size:21px;font-weight:750;color:#111827}
 .ai-pp small{font-size:13px;font-weight:500;color:#9ca3af}

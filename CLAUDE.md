@@ -7161,3 +7161,430 @@ righe.
 Poi l'AI. E appena possibile, la faccenda delle pagine `cerca-*` che mandano
 telefono ed email in chiaro a 5 imprese: non è una funzione da migliorare, è
 una cosa da chiudere.
+
+# 16 agosto 2026 — BLOCCO 0: IL BUCO DEI CREDITI AI SI CHIUDE, CON UN PAGAMENTO VERO
+
+Punto di partenza, dal controllo del 15 agosto sera: **il pulsante «Ricarica 150
+crediti — 19€» portava su una pagina che non esisteva.** Cinque cose da fare, in
+quest'ordine, tutte sullo stesso buco.
+
+## Quello che ho trovato prima di scrivere una riga
+
+Tre scoperte, tutte peggio del problema di partenza.
+
+**1. `add_credits_pack` c'era già.** Scritta il 15 agosto, mai chiamata da
+nessuno. Non andava creata: andava riscritta, perché aveva un difetto grosso —
+vedi sotto.
+
+**2. Nessuno aveva l'AI.** La tabella `ai_accounts` esisteva, la funzione
+`get_ai_status` esisteva, la Edge Function `ai-generate` esisteva. Ma **niente
+in tutto il progetto scriveva mai `plan = 'ai'`**. Zero righe. Ogni impresa
+Premium apriva l'assistente e si sentiva rispondere «funzione non disponibile»:
+la funzione c'era, la porta era chiusa a chiave e la chiave non l'aveva scritta
+nessuno.
+
+**3. Un pagamento di crediti avrebbe regalato il Premium.** Dentro
+`stripe-webhook-abbonamenti.js` il ramo che decide cosa fare col pagamento
+finiva su `else if (email)`, e Stripe l'email ce la mette sempre. Un acquisto di
+crediti da 19 € sarebbe passato per un acquisto di Premium: crediti non
+accreditati **e** un anno di Premium regalato. Il ramo `crediti-ai` deve stare
+**per primo**, e adesso ci sta.
+
+## Le cinque cose, e come sono fatte
+
+### 1 e 2 — `sql/ai-crediti-blocco0.sql`
+
+Tre pezzi in una query sola per l'SQL Editor, con una riga di risultato alla
+fine (mai `raise notice`).
+
+**La quota:** base 0, **ai 100**, ai_pro 300. Cento crediti al mese per chi paga
+il Premium.
+
+**`add_credits_pack` riscritta.** Il difetto della versione del 15: registrava la
+ricevuta del pagamento e poi accreditava, senza controllare che l'accredito
+fosse davvero avvenuto. Se l'`update` non toccava nessuna riga — utente
+sconosciuto, riga mancante — la ricevuta restava, Stripe al secondo tentativo si
+sentiva rispondere «già fatto», e **i soldi sparivano per sempre**. Adesso:
+
+```sql
+  update public.ai_accounts
+     set credits_extra = credits_extra + p_credits, updated_at = now()
+   where user_id = p_user_id
+  returning credits_extra into v_dopo;
+  get diagnostics v_righe = row_count;
+  if v_righe <> 1 or v_dopo is null then
+    raise exception 'crediti non accreditati' using errcode = 'TI001';
+  end if;
+```
+
+L'eccezione fa tornare indietro anche la ricevuta. Stripe riprova, e la seconda
+volta funziona. **La ricevuta e l'accredito vivono o muoiono insieme.**
+
+**`ai_allinea_piano` + trigger su `imprese`.** È la chiave che mancava. Rispecchia
+esattamente `haPremium()` di `gestionale-app.html` (riga 16426): piano `premium`
+**e** (`premium_scadenza` nulla **oppure** futura). Non tocca mai
+`credits_extra` (sono soldi veri, non si azzerano), non tocca mai `ai_pro`, e
+azzera `credits_used` solo quando cambia il mese.
+
+```sql
+create trigger trg_ai_allinea_piano
+  after insert or delete or update of piano, premium_scadenza, premium_pagato, user_id
+  on public.imprese for each row execute function public.ai_allinea_da_imprese();
+```
+
+La funzione del trigger **si mangia tutti gli errori**: se qualcosa va storto
+nell'allineamento dell'AI, il salvataggio del profilo dell'impresa non si deve
+bloccare mai. L'AI è un di più; il profilo è il lavoro.
+
+Risultato in produzione: `FATTO`, **76 imprese con l'AI attiva**, 0 ai_pro,
+0 crediti comprati, 0 premium senza AI.
+
+### 3 — `netlify/functions/crea-checkout-crediti.js` (nuovo)
+
+Tre tagli: 150 crediti 19 €, 400 crediti 45 €, 1.000 crediti 99 €.
+Copiato da `crea-checkout-gestionale.js`, con tre regole scritte nel file:
+
+- **quanti crediti lo decide il server**, mai il browser (se no chiunque compra
+  1.000 crediti a 19 €);
+- **chi compra si ricava dal token** di Supabase, mai da un'email nel corpo
+  della richiesta (se no si ricaricano i crediti a un altro);
+- **chi non ha il Premium viene respinto** con 403 `senza_premium`.
+
+### 4 — `ricarica-crediti.html` (nuovo)
+
+La pagina che mancava. Tre tagli, i crediti che hai adesso, e il ritorno da
+Stripe.
+
+### 5 — l'accredito dentro `stripe-webhook-abbonamenti.js`
+
+`accreditaCrediti(supabase, s, ev)`, su `checkout.session.completed` e
+`checkout.session.async_payment_succeeded`. Rifiuta se `payment_status !== 'paid'`.
+La chiave contro il doppio accredito è l'`id` della sessione Stripe passato come
+`p_payment_reference`: due webhook uguali, un accredito solo.
+
+**⚠️ Qui ho rotto di proposito la regola del file.** Tutto il resto di
+`stripe-webhook-abbonamenti.js` risponde sempre 200, anche quando qualcosa va
+storto, per non farsi martellare da Stripe. Per i crediti no: se l'accredito non
+riesce, la funzione **risponde 500 apposta**, così Stripe riprova. Il motivo è
+scritto nel file: qui dall'altra parte c'è uno che ha pagato. Meglio un
+tentativo in più che uno che ha pagato e non ha niente.
+
+## La prova che conta
+
+Il collaudo vero non è «il pagamento va a buon fine». È:
+
+- **due webhook uguali non devono accreditare due volte** — provato, il secondo
+  risponde `already_processed`;
+- **un webhook fallito non deve lasciare uno pagato e senza crediti** — provato,
+  la ricevuta torna indietro con l'accredito.
+
+E poi il giro intero, con soldi veri: pagina → Stripe → **19 € pagati davvero**
+→ webhook → crediti in conto. 100 del mese + 150 comprati = **250**.
+(I 19 € sono stati rimborsati dopo.)
+
+---
+
+# 16 agosto 2026 (2) — L'AI ESISTEVA E NON LA TROVAVA NESSUNO
+
+Alessio, con le foto in mano: *«compila con AI la trovo solo qui e in nessun
+altro posto»*, e poi *«a una grafica orribile minuscola e poco pratica non
+capisco come si usa»*.
+
+Aveva ragione due volte.
+
+## La striscia in cima al gestionale
+
+`#ai-striscia` nella home del gestionale: se l'AI è attiva, quanti crediti
+restano, dove si usano, e il pulsante per ricaricare. Tre informazioni che prima
+non stavano da nessuna parte.
+
+**Una regola dentro:** se `get_ai_status` non risponde, la striscia **sparisce
+del tutto**. Non dice mai «AI non attiva» per colpa di una connessione andata:
+sarebbe una bugia che fa smettere di provare.
+
+## L'AI dentro il modulo, non in una finestra a parte
+
+Prima l'assistente era una finestrella nera separata: scrivevi lì, e poi
+copiavi a mano. Adesso è una **riga dentro il modulo** che stai compilando.
+Scrivi la frase come la diresti al telefono, premi, e **le caselle sotto si
+riempiono e si illuminano**.
+
+Le regole, tutte provate:
+
+- parte **chiusa**: chi compila a mano non se la trova tra i piedi;
+- dice quanto costa (**1 credito**) prima che tu prema;
+- con la casella vuota **non chiama l'AI** e non brucia un credito;
+- se l'AI risponde male, lo dice **nella riga** e non tocca niente;
+- **non salva niente da sola**: riempie, dice quante caselle ha toccato, e
+  aspetta te.
+
+Compare solo sui moduli **nuovi** (`isNew`): su un lavoro che stai modificando
+riscriverebbe sopra a roba già controllata.
+
+## ⚠️ Un difetto vero, trovato dal banco e non da noi
+
+Il pulsante «Compila con AI» nella sezione Clienti aveva `class="btn add"`.
+Ma `tabBottoneTesta()` **nasconde `.sec-head .btn.add` quando la sezione è
+vuota**. Risultato: **chi non aveva ancora nessun cliente non vedeva il
+pulsante**. Cioè proprio chi ne aveva più bisogno. Cambiato in `class="btn"`.
+
+Non era un difetto di oggi: c'era già. L'ha trovato il banco di prova.
+
+---
+
+# 16 agosto 2026 (3) — I MIEI SBAGLI, DETTI PER PRIMI
+
+Cinque cose sbagliate mie, tutte trovate in produzione o da Alessio, non da me.
+
+**1. Gli accenti scritti con l'apostrofo nei messaggi del server.**
+«Riprova piu' tardi», «La sessione e' scaduta». La mia prova sugli accenti
+guardava la **pagina**, non i messaggi che arrivano dalla funzione Netlify.
+Corretti, e aggiunta la prova C11 che li raccoglie tutti e sei.
+
+**2. Il messaggio dopo il pagamento diceva una bugia.** `dopoIlPagamento()`
+leggeva il numero dei crediti **dopo** essere tornato da Stripe. Ma il webhook è
+più veloce del rientro: il numero di partenza era già quello finale, quindi non
+saliva mai, e dopo 15 secondi diceva «ci mettono più del solito» a uno che i
+crediti li aveva già. Adesso il numero **si salva prima** del salto su Stripe.
+
+**3. «piu'» con l'apostrofo dentro quel messaggio lì.** La mia prova sugli
+accenti guardava la pagina a circa 900 ms, e quel messaggio compare dopo 15
+secondi. Non l'ha mai visto.
+
+**4. Tre numeri illeggibili.** Alessio: *«non dovrebbero essere 350?»*, poi
+*«150 più 250?»*. Avevo messo tre numeri grossi in fila — 250, 100, 150 — dove
+il primo era la somma degli altri due, e **niente lo diceva**. Rifatto con il
+`+` e l'`=` in mezzo. Sul telefono l'`=` restava orfano in fondo alla riga di
+sopra: corretto con `.ct-tot`, e aggiunta la prova R10.
+
+**5. Il tempo.** Alessio: *«perché ci vuole così tanto?»*, *«ogni modifica devo
+fermarmi un'ora»*. Aveva ragione. La correzione erano 10 minuti, il banco 2, ma
+**i sabotaggi sono 9 minuti** e li ho fatti girare quattro volte mentre lui
+aspettava.
+
+> **Regola nuova, da qui in poi:** appena il banco è verde, **il file si
+> consegna**. I sabotaggi girano dopo, mentre lui fa il push e prova.
+
+## Le prove che non provavano niente
+
+I sabotaggi hanno smascherato **cinque prove mie che erano verdi e non
+controllavano niente**, e **due sabotaggi che erano finti loro** (rompevano solo
+uno di due pezzi, quindi il codice restava sano). Le più istruttive:
+
+- **9c** si aspettava un errore da RLS su un `update`. RLS **non dà errore**:
+  tocca zero righe e sta zitto. Cambiata a confrontare il numero.
+- **5a** modificava `nome`, che **non fa scattare il trigger** (`update of piano,
+  premium_scadenza, premium_pagato, user_id`). Cambiata a toccare
+  `premium_pagato = premium_pagato`.
+- **C8** leggeva l'ultima sessione Stripe creata; quando il codice rotto non ne
+  creava nessuna, rileggeva quella di prima e restava verde. Adesso pretende una
+  sessione **nuova**.
+- **M6b** era sempre vera, comunque andasse.
+- **M2c** controllava solo che il messaggio fosse lungo più di 5 caratteri: il
+  codice rotto rispondeva «Ho riempito 3 caselle» e passava.
+
+Totale della giornata sul Blocco 0: **289 prove, 50 sabotaggi**, tutti a posto.
+
+---
+
+# 16 agosto 2026 (4) — BLOCCO 1: LA PAGINA PUBBLICA DEL GESTIONALE
+
+Dal voto del 15 agosto: *«Nessuno sa che esiste. Non è un difetto tecnico: è
+**il** difetto.»* E la prima delle tre cose da fare era esattamente questa.
+
+**Fatta.** Punto 1 di quella lista: chiuso.
+
+## ⚠️ La trappola, trovata prima di scrivere una riga
+
+Il nome deciso era `gestionale-imprese-edili.html`. Ma `robots.txt`, in fondo,
+per **tutti** i motori dice:
+
+```
+User-agent: *
+Disallow: /gestionale-
+```
+
+Serve a tenere fuori `gestionale-app.html` e compagnia — giusto, sono pagine
+private. Ma **qualunque** indirizzo che comincia per `gestionale-` viene
+saltato. La pagina nuova sarebbe stata invisibile a Google, e tutto il blocco
+buttato.
+
+Indirizzo cambiato in **`/software-gestionale-imprese-edili`**: non tocca il
+blocco, e «software gestionale» è per di più quello che la gente scrive davvero
+su Google.
+
+**Adesso è una prova fissa** (`G0`), col suo sabotaggio: se un domani qualcuno
+tocca `robots.txt`, la prova diventa rossa.
+
+## I file
+
+| File | Cosa |
+|---|---|
+| `software-gestionale-imprese-edili.html` | **nuovo** — la pagina |
+| `prezzi.html` | la fascia del gestionale (prima la parola non c'era **zero volte**) |
+| `sitemap.xml` | la voce nuova |
+| `come-fare-un-preventivo-edile.html` | un link |
+| `come-trovare-clienti-impresa-edile.html` | un link |
+| `come-trovare-operai-edili.html` | un link |
+| `img/gestionale-*.webp` | **5 foto nuove**, 330 KB in tutto |
+
+## Le foto: fatte dal gestionale vero, con dati inventati
+
+`prove/foto_gestionale.js` apre `gestionale-app.html` **vero** in Chromium con
+un'impresa edile finta ma verosimile (Condominio Le Betulle, cappotto termico,
+ripristino balconi) e scatta cinque schermate. Pagina vera, CSS vero, js veri;
+finte solo le risposte di Supabase.
+
+**Nessun dato di clienti veri esce da lì.** E le foto si ritagliano dove finisce
+il contenuto: al primo giro tagliavo a un'altezza fissa e le schede dell'ultima
+riga restavano mozzate a metà — sembrava una pagina rotta.
+
+## Quello che la pagina dice, e quello che NON dice
+
+Sul mercato è normale scrivere che un gestionale «fa la fattura elettronica» e
+lasciar credere che la mandi lui. Qui c'è scritto il contrario, in un riquadro
+giallo:
+
+> *Non manda la fattura allo SDI al posto tuo e non fa da intermediario fiscale.
+> Prepara il file corretto, tu lo carichi dove lo carichi adesso.*
+
+Idem per l'AI: *«non salva niente da solo»*. **Tutte e due sono prove**
+(`G7a`, `G7b`) con i loro sabotaggi: se un domani qualcuno le toglie per far
+suonare meglio la pagina, il banco diventa rosso.
+
+E niente riferimenti ad Alessio nel testo — è una prova anche quella (`P7`).
+Il footer con nome e sede resta: è quello di tutto il sito, ed è un obbligo di
+legge.
+
+## Le prove che non provavano niente (di nuovo cinque)
+
+I sabotaggi hanno rifatto lo stesso lavoro di stamattina, e hanno trovato altre
+**cinque prove mie che erano verdi per finta**:
+
+| Dicevo di controllare | Perché era una bugia |
+|---|---|
+| «ci sono tutte e cinque le foto» | contavo solo **quante**. Scritto `gestionale-fattura` invece di `gestionale-fatture`: cinque foto, una rotta, prova verde |
+| «ogni domanda dello schema esiste nella pagina» | confrontavo «a parole in comune»: due domande diverse che parlano di gestionale, imprese ed edili passavano per uguali |
+| «la pagina dice che allo SDI mandi tu» | la frase sta in **tre** punti; ne toglievo uno e la prova non se ne accorgeva |
+| «prezzi.html nomina il gestionale» | la parola stava dentro l'**indirizzo del link**: cancellando tutti i testi restava verde |
+| «niente sborda di lato» | guardavo `document.scrollWidth`. ⚠️ Una fascia larga 1100 px dentro uno schermo da 390 **non lo fa crescere**: la pagina sbordava e la prova era verde |
+
+L'ultima è la più importante da ricordare, perché è generale:
+
+> **`scrollWidth` non basta per sapere se una pagina sborda.** Si guarda
+> elemento per elemento chi finisce oltre il bordo destro, saltando quelli che
+> stanno dentro una cosa che scorre di suo (le tabelle). Il controllo giusto è
+> `chiSborda()` in `prove/banco_pagina_gestionale.js`.
+
+E **cinque sabotaggi erano finti loro**: uno cambiava il blocco `GPTBot` di
+`robots.txt` invece di quello `*` (a Google non interessa), un altro toglieva la
+frase sullo SDI da uno solo dei tre punti in cui sta.
+
+Fine: **67 prove verdi, 28 sabotaggi, tutti giusti.**
+
+## Regola imparata sullo schema di Google
+
+Le domande dentro `FAQPage` devono stare nella pagina **identiche**, non
+«simili». Google toglie il riquadro se non combaciano. Quindi il testo del
+`<summary>` e il `name` dello schema si scrivono una volta sola e si copiano —
+e c'è la prova `P8` che li confronta carattere per carattere.
+
+---
+
+# 16 agosto 2026 (5) — QUELLO CHE RESTA APERTO
+
+Aggiornamento della lista del 15 agosto.
+
+**Chiuso:**
+
+1. ~~La pagina pubblica del gestionale + una riga in `prezzi.html`.~~ **Fatta.**
+2. Il buco dei crediti AI. **Chiuso, con un pagamento vero.**
+
+**Aperto, in ordine:**
+
+1. **Il controllo automatico al push.** Netlify fa fallire la build su:
+   sintassi dei `<script>`, nessun `openSheet(` sui form, nessun testo sotto i
+   13 px, **nessun link interno morto**, e i conti confrontati fra le schermate.
+   Mezza giornata, protegge per sempre. Il punto sui link morti non è teorico:
+   vedi qui sotto.
+2. **`js/conti.js`** — i calcoli in una copia sola.
+3. **Le pagine `cerca-*`** che mandano telefono ed email in chiaro a 5 imprese.
+   Non è una funzione da migliorare, è una cosa da chiudere.
+4. **L'email delle 24 ore** che non si è mai vista partire.
+5. Il grafico dell'admin, che vuole `premium_dal` / `gestionale_dal`.
+6. Il «Genera con AI» dei Preventivi: ancora la vecchia finestrella separata.
+
+---
+
+# 16 agosto 2026 (6) — LA FINESTRA DEI PIANI: PREZZI CHE NON ESISTONO E PORTE NEL VUOTO
+
+Alessio: *«poi i prezzi vecchi via, togliamoli»*. Dentro `mostraUpgrade()` di
+`js/ai-integrazione.js` c'erano due piani in vendita:
+
+```
+{ n: 'AI',     p: '299€', d: '150 preventivi/mese' },
+{ n: 'AI Pro', p: '599€', d: '600 preventivi/mese', top: true },
+```
+
+**Non sono mai esistiti.** L'AI sta dentro il Premium (100 crediti al mese) e i
+crediti in più si comprano a pacchetti da `/ricarica-crediti.html`. Quella
+finestra prometteva a un'impresa due abbonamenti che non poteva comprare.
+
+## ⚠️ Ma il difetto grosso era un altro, ed è lo stesso di ieri
+
+Cercando i prezzi ho trovato che **due casi su tre mandavano su
+`/abbonamento.html`**, e `abbonamento.html` **non esiste nella cartella**.
+
+Ieri: «Ricarica crediti» → pagina inesistente.
+Oggi: «Vedi i piani» → pagina inesistente.
+
+**Due volte in due giorni, stesso identico difetto: una funzione data per finita
+senza provare l'ultimo clic.**
+
+## Com'è adesso
+
+| Quando compare | Cosa dice | Dove manda |
+|---|---|---|
+| crediti finiti | i tre pacchetti veri: 150 a 19€, 400 a 45€, 1.000 a 99€ | `/ricarica-crediti.html` |
+| non ha l'AI | «L'assistente AI è dentro il Premium» — 49€/anno o 5€/mese | `/prezzi.html` |
+| Premium scaduto | Premium 49€/anno, 100 crediti AI al mese | `/prezzi.html` |
+
+Sotto i pacchetti di crediti **non c'è più il «/anno»**: era scritto fisso nel
+codice sotto ogni prezzo, ma i crediti si pagano una volta sola e non scadono.
+Dirlo «all'anno» era una bugia sui soldi.
+
+## Due misure sotto il minimo, rimaste lì da mesi
+
+Il banco ha trovato che dentro quella finestra `.ai-occhio` era a **11 px** e
+`.ai-tag` («Consigliato») a **9 px**. La regola del progetto è che nel gestionale
+sotto i 13 px non ci va niente, e valeva anche lì. Portate a 13.
+
+## Il banco
+
+`prove/banco_finestra_piani.js` — **68 prove**. Fa rispondere 402 alla funzione
+dell'AI con i tre motivi possibili e guarda la finestra che esce davvero.
+Le due che contano:
+
+- **`F2b`** — ⚠️ ogni indirizzo scritto in un `href:` dentro quel file deve
+  esistere davvero, confrontato con l'elenco vero della cartella. È la prova che
+  ieri non c'era e che avrebbe preso tutti e due i difetti.
+- **`F3`** — i prezzi scritti nella finestra devono essere **gli stessi** di
+  `prezzi.html` e di `ricarica-crediti.html`. Se un giorno cambia il prezzo del
+  Premium e qualcuno si dimentica di questa finestra, il banco diventa rosso.
+
+---
+
+# 16 agosto 2026 (7) — LA LEZIONE DELLA GIORNATA
+
+Tre volte in due giorni un pulsante ha portato su una pagina che non esiste.
+Non è sfortuna: è che **nessuno prova l'ultimo clic**, e non c'è niente che lo
+provi al posto nostro.
+
+Da qui in poi ogni banco nuovo ha dentro la stessa prova: **tutti i link interni
+di quello che tocco devono esistere**, confrontati con l'elenco vero della
+cartella (`prove/elenco-file.txt`). È tre righe di codice e ha già preso due
+difetti veri in un pomeriggio.
+
+E resta al primo posto della lista il controllo automatico al push, che quella
+stessa prova la deve fare su **tutte** le pagine, non solo su quelle che tocco
+io.
