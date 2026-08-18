@@ -3056,3 +3056,55 @@ body:has(#ti-fondatore) .side{
 .btn.btn-ai{ background:#C2410C; border-color:#C2410C; color:#fff; }
 .btn.btn-ai:hover{ background:#9A3412; border-color:#9A3412; color:#fff; }
 .btn.btn-ai:focus-visible{ outline:3px solid #FDBA74; outline-offset:2px; }
+
+/* ============================================================
+   LE SEZIONI SI ALLINEANO ALLE FINESTRE — 18 agosto 2026
+
+   Misurato, non a occhio: dentro le finestre si leggeva a 18-21 px
+   (etichette 18, caselle 21, titoli dei blocchi 19), mentre nelle
+   sezioni dietro si stava a 15-17 — testo di base 15, introduzione 17,
+   filtri 17, titolo della scheda 17, pulsanti 15.
+   Passavi da un modulo comodo a un elenco che dovevi avvicinare.
+
+   Qui sotto la sezione sale allo stesso passo. Non si toccano i numeri
+   che erano gia' grandi (cliente 21, importo 22): quelli stanno bene
+   dove sono, e ingrandirli avrebbe schiacciato il resto.
+   ============================================================ */
+#app-root{ font-size:16px; }
+
+.wrap section .gal-intro,
+.wrap section .rie-intro p{ font-size:18px; line-height:1.55; }
+.wrap section .viste .vista,
+.wrap section .viste button{ font-size:18px; }
+
+/* le schede degli elenchi */
+.wrap section .job{ font-size:17px; }
+.wrap section .job-top b{ font-size:19px; line-height:1.35; }
+/* ⚠️ `.wrap section .job .job-meta` e non `.wrap section .job-meta`: piu'
+   sopra c'e' gia' la prima forma, che e' piu' forte. Misurando si vedeva
+   che queste due righe non entravano in gioco — leggendo, no. */
+.wrap section .job .job-meta,
+.wrap section .job .st,
+.wrap section .job .lab{ font-size:17px; }
+.wrap section .job .job-actions .btn,
+.wrap section .job .job-actions .btn-primary{ font-size:17px; }
+
+/* la fascia dei totali sopra la griglia */
+.wrap section .tab-tot span{ font-size:18px; }
+.wrap section .tab-tot b{ font-size:22px; }
+
+/* i pulsanti in cima alla sezione */
+.wrap section .sec-head .btn,
+.wrap section .sec-head .btn-primary{ font-size:17px; }
+
+/* le note sotto le sezioni, che erano le piu' piccole di tutte */
+.wrap section .sh-nota,
+.wrap section .campo-aiuto{ font-size:16px; line-height:1.5; }
+
+@media(max-width:560px){
+  /* sul telefono si scende di un filo per non far uscire niente,
+     ma non si torna mai sotto i 15 nelle sezioni */
+  .wrap section .gal-intro{ font-size:17px; }
+  .wrap section .job-top b{ font-size:18px; }
+  .wrap section .tab-tot b{ font-size:20px; }
+}
