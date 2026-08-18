@@ -1708,6 +1708,20 @@
       caselle:"#pv-tit,#pv-cli,#pv-data,#pv-iva-imp,#pv-rit",
       dentro:["#prev-righe"],
       regole:ctrRegolePreventivo
+    },
+    fattura:{
+      caselle:"#fa-cli,#fa-data,#fa-bollo,#fa-sconto",
+      dentro:["#fatt-righe"],
+      regole:ctrRegoleFattura
+    },
+    lavoro:{
+      /* il modulo del lavoro esiste in due vestiti (semplice e collegato al
+         database): le caselle del cliente si chiamano #j-cli in uno e
+         #j-cliente nell'altro. Ci sono tutte e due: quella che non c'e'
+         semplicemente non viene trovata, e non fa danno. */
+      caselle:"#j-desc,#j-cli,#j-cliente,#j-imp,#j-pr-tipo,#j-pr-stato,#j-pr-comune,#j-pr-prot,#j-pr-data",
+      dentro:[],
+      regole:ctrRegoleLavoro
     }
   };
 
@@ -1785,6 +1799,110 @@
                +": di norma la ritenuta del 20% va applicata."});
       }
     }
+    return out;
+  }
+
+  /* ============================================================
+     LE REGOLE DELLA FATTURA — quella che va al commercialista
+
+     Qui l'errore non torna indietro dal cliente: torna dal
+     commercialista, mesi dopo, quando non ti ricordi piu' niente.
+     ============================================================ */
+  function ctrRegoleFattura(){
+    const out=[];
+
+    /* --- il cliente: su una fattura non e' un dettaglio --- */
+    const cli=$("#fa-cli");
+    if(cli&&!cli.value) out.push({el:cli,grave:"rosso",
+      dice:"Manca il cliente. Una fattura senza intestatario non si manda a nessuno e il commercialista te la rimanda indietro."});
+
+    /* --- le voci --- */
+    let conDescrizione=0, imponibile=0;
+    $$("#fatt-righe [data-riga]").forEach(function(r){
+      const cd=r.querySelector(".fr-desc"), cq=r.querySelector(".fr-qta"), cp=r.querySelector(".fr-prezzo");
+      const desc=cd?cd.value.trim():"";
+      const prezzoScritto=cp?cp.value.trim():"";
+      const qta=_numRiga(r,".fr-qta",null), prezzo=_numRiga(r,".fr-prezzo",null);
+      if(desc){ conDescrizione++; imponibile += (qta==null?1:qta)*(prezzo||0); }
+      /* stessa trappola del preventivo: salvando, la riga senza descrizione
+         viene buttata via — prezzo compreso, e senza dire niente */
+      if(!desc&&prezzoScritto&&cd) out.push({el:cd,grave:"rosso",
+        dice:"C'è un prezzo senza descrizione: salvando, questa riga viene buttata via e il prezzo sparisce senza dirtelo."});
+      if(desc&&!prezzoScritto&&cp) out.push({el:cp,grave:"rosso",
+        dice:"«"+desc+"» non ha prezzo: in fattura quella riga vale zero."});
+      if(desc&&prezzoScritto&&prezzo===0&&cp) out.push({el:cp,grave:"rosso",
+        dice:"«"+desc+"» ha prezzo zero: stai fatturando un lavoro a zero euro."});
+      if(desc&&qta===0&&cq) out.push({el:cq,grave:"arancio",
+        dice:"Quantità a zero: «"+desc+"» non somma niente nel totale."});
+    });
+    if(!conDescrizione){
+      const primo=$("#fatt-righe .fr-desc");
+      if(primo) out.push({el:primo,grave:"rosso",
+        dice:"La fattura non ha nemmeno una voce. Così non si salva."});
+    }
+
+    /* --- la data: una fattura col domani sopra non si emette --- */
+    const dt=$("#fa-data");
+    if(dt&&dt.value&&dt.value>todayStr()) out.push({el:dt,grave:"rosso",
+      dice:"La data è nel futuro. Una fattura si emette il giorno stesso o prima, non domani: al commercialista salta subito all'occhio."});
+
+    /* --- il bollo del forfettario: 2 € sopra i 77,47 € --- */
+    if(typeof fattForfettario==="function"&&fattForfettario()){
+      const bollo=$("#fa-bollo");
+      const sconto=_numIt("#fa-sconto")||0;
+      const netto=imponibile-sconto;
+      if(bollo&&netto>77.47&&!(_numIt("#fa-bollo")>0)) out.push({el:bollo,grave:"arancio",
+        dice:"Sei in forfettario e la fattura supera i 77,47 €: ci vuole la marca da bollo da 2 €. Scrivi 2 qui."});
+    }
+    return out;
+  }
+
+  /* ============================================================
+     LE REGOLE DEL LAVORO / DELLA PRATICA
+
+     Per un'impresa e' un lavoro: cosa, dove, per chi, quanto.
+     Per uno studio e' una pratica, e li' c'e' la cosa che fa piu'
+     danno di tutte: una pratica DEPOSITATA senza numero di
+     protocollo. Il giorno che il Comune chiama, quel numero non ce
+     l'hai, e non sai nemmeno dove cercarlo.
+     ============================================================ */
+  const CTR_PRATICA_DEPOSITATE=["depositata","istruttoria","integrazioni","approvata","archiviata"];
+
+  function ctrRegoleLavoro(){
+    const out=[];
+    const pro=(ruoloUtente==='professionista');
+    const PAROLA=pro?"La pratica":"Il lavoro";
+
+    /* --- cosa c'è da fare --- */
+    const desc=$("#j-desc");
+    if(desc&&!desc.value.trim()) out.push({el:desc,grave:"rosso",
+      dice:"Manca cosa c'è da fare. "+PAROLA+" resta una riga senza nome, e nell'elenco non la riconosci più."});
+
+    /* --- il cliente (il modulo ha due vestiti: #j-cli o #j-cliente) --- */
+    const cli=$("#j-cli")||$("#j-cliente");
+    if(cli&&!cli.value) out.push({el:cli,grave:"arancio",
+      dice:"Nessun cliente scelto: non ritrovi questa scheda cercando il suo nome, e il margine non finisce sotto di lui."});
+
+    /* --- l'importo --- */
+    const imp=$("#j-imp");
+    if(imp&&!imp.value.trim()) out.push({el:imp,grave:"arancio",
+      dice:"Senza importo il margine di questo lavoro non si calcola: le spese si vedono, i soldi che entrano no."});
+
+    if(!pro) return out;
+
+    /* --- da qui in giù solo gli studi professionali --- */
+    const tipo=$("#j-pr-tipo"), stato=$("#j-pr-stato"),
+          comune=$("#j-pr-comune"), prot=$("#j-pr-prot"), dataDep=$("#j-pr-data");
+    const depositata=stato&&CTR_PRATICA_DEPOSITATE.indexOf(stato.value)>=0;
+
+    if(depositata&&prot&&!prot.value.trim()) out.push({el:prot,grave:"rosso",
+      dice:"La pratica risulta già depositata ma il numero di protocollo non c'è. È il numero con cui il Comune la chiama: senza, quando ti telefonano non sai nemmeno dove cercarla."});
+    if(depositata&&dataDep&&!dataDep.value) out.push({el:dataDep,grave:"arancio",
+      dice:"Pratica depositata senza data di deposito: i termini dell'istruttoria si contano da lì."});
+    if(tipo&&!tipo.value) out.push({el:tipo,grave:"arancio",
+      dice:"Tipo di pratica non scelto: CILA, SCIA e Permesso di Costruire hanno tempi e allegati diversi."});
+    if(comune&&!comune.value.trim()) out.push({el:comune,grave:"arancio",
+      dice:"Manca il Comune: è il primo dato che serve per ritrovare la pratica."});
     return out;
   }
 
@@ -4258,8 +4376,10 @@
 
       + '</div></div>',
 
-      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      ctrTastoHTML('fattura')
+      +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-fatt" data-id="'+(f.id||"")+'">'+(isNew?"Crea fattura":"Salva")+'</button>');
+    ctrAscolta('fattura');
 
     /* i lavori scelti nel selettore viaggiano attaccati al modulo finche' non si salva */
     fattLavoriInCorso = (preset&&preset._lavori) ? preset._lavori.slice() : null;
@@ -8093,10 +8213,12 @@ ${vecchi?`
         +'</div>'
         +(pro?('<div class="sh-b"><div class="sh-tit">\ud83d\udcc4 Dati della pratica</div>'+bloccoPratica(job,true)+'</div>'):'')
         +'</div></div>',
-        '<button class="btn b-cancel" data-action="close">Annulla</button>'
+        ctrTastoHTML('lavoro')
+        +'<button class="btn b-cancel" data-action="close">Annulla</button>'
         +`<button class="btn-primary b-save" data-action="save-job">${fattura?"Crea fattura":(pro?"Crea pratica":"Crea lavoro")}</button>`);
       fillOperai();fillClienti(job.cliente_id);
       if(isNew)aiRigaVia('lavoro',!!aiApri);
+      ctrAscolta('lavoro');
       return;
     }
     const cliOpts=cliCache.map(c=>`<option value="${c.id}" ${c.id===job.clienteId?"selected":""}>${esc(c.nome)}</option>`).join("");
@@ -8170,8 +8292,10 @@ ${vecchi?`
           job.id?' <b>Salva</b>, poi usa il pulsante <b>Crea fattura</b> sulla scheda del lavoro.':''}</div></div>
       </div>
       </div></div>`,
-      `<button class="btn b-cancel" data-action="close">Annulla</button>
+      `${ctrTastoHTML('lavoro')}
+       <button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-job">${isNew?"Crea lavoro":"Salva"}</button>`);
+    ctrAscolta('lavoro');
     bindSeg("j-stato");
     renderLavMedia();
     renderLavScadenze();
