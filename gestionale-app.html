@@ -349,7 +349,7 @@
     </section>
 
     <section id="preventivi">
-      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn add" title="Descrivi il lavoro, preparo io le voci di costo" onclick="window.AI&&window.AI.apri&&window.AI.apri()">✨ Genera con AI</button></div></div>
+      <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn" title="Descrivi il lavoro a parole, ti preparo le voci di costo" data-action="new-prev-ai">✨ Genera con AI</button></div></div>
       <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
       <div class="viste" id="prev-viste"></div>
       <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
@@ -1446,6 +1446,25 @@
         { id:'c-ref',  da:'referente', nome:'Referente' },
         { id:'c-tel',  da:'telefono',  nome:'Telefono' }
       ]
+    },
+    /* ⚠️ 18 agosto 2026 — IL PREVENTIVO NON E' FATTO DI CASELLE SINGOLE.
+       Lavoro e Cliente hanno quattro caselle in croce; qui la sostanza sono
+       le VOCI DI COSTO, che sono righe che si aggiungono. Percio' oltre a
+       `campi` questo modulo ha `extra`: una funzione che riempie le righe e
+       le note. Tutto il resto (crediti, avvisi, illuminazione) resta uguale.
+
+       La feature del server e' `preventivo`, quella che c'era gia' dietro la
+       vecchia finestrella: risponde titolo, voci e note. Cliente e Data NON
+       li sa (non stanno nella sua risposta) e restano a chi scrive: sono un
+       clic sulla tendina e una data gia' compilata con oggi. */
+    preventivo: {
+      feature: 'preventivo',
+      titolo:  'Scrivi il lavoro a parole e ti preparo le voci',
+      esempio: 'Rifacimento bagno 6 mq: demolizione rivestimenti, impianto idraulico nuovo, piastrelle a pavimento e parete, sanitari sospesi, box doccia 90x70',
+      campi: [
+        { id:'pv-tit', da:'titolo', nome:'Titolo' }
+      ],
+      extra: aiRiempiPreventivo
     }
   };
 
@@ -1541,6 +1560,10 @@
             messi.push(c.nome);
           }
         });
+        /* i moduli che non sono fatti solo di caselle singole (il preventivo,
+           che ha le righe) si riempiono qui: `extra` aggiunge al conto quello
+           che ha messo, cosi' il messaggio finale resta uno solo. */
+        if(typeof m.extra==="function") m.extra(d,messi);
         if(!messi.length){
           st.className="ai-riga-st ai-riga-st--err";
           st.textContent="Non ho capito niente di utile. Prova a scriverlo con più dettagli: cosa, dove, quando, quanto.";
@@ -1565,11 +1588,87 @@
     if(apriSubito) mostra(true);
   }
 
+  /* ============================================================
+     LE VOCI DI COSTO SCRITTE DALL'AI — 18 agosto 2026
+
+     Lavoro e Cliente hanno solo caselle singole, e la riga dell'AI le
+     riempie una per una. Il preventivo no: le voci sono RIGHE, e vanno
+     aggiunte una sotto l'altra dentro #prev-righe.
+
+     ⚠️ QUELLO CHE HAI SCRITTO A MANO NON SI TOCCA. Si tolgono solo le
+        righe rimaste vuote (in un modulo nuovo ce n'e' una, vuota); se hai
+        gia' scritto due voci tue, le voci dell'AI si mettono IN FONDO alle
+        tue. Nessuno si e' mai visto cancellare quello che aveva scritto.
+     ⚠️ NON SI SALVA NIENTE DA SOLO, come dappertutto: qui si riempie e
+        basta, a premere «Crea preventivo» sei tu.
+     ⚠️ I totali qui sotto vanno rifatti a mano: si aggiornano sull'evento
+        "input", che scatta quando scrivi TU, non quando le righe le mette
+        il programma. Senza questa riga il totale restava a zero con le
+        voci sotto gia' scritte — due numeri diversi nella stessa finestra.
+     ============================================================ */
+  function aiRiempiPreventivo(d,messi){
+    /* ---------- le voci di costo ---------- */
+    const voci=(d&&Array.isArray(d.voci))?d.voci:[];
+    const box=$("#prev-righe");
+    if(box&&voci.length){
+      $$("#prev-righe [data-riga]").forEach(function(r){
+        const desc=r.querySelector(".pr-desc");
+        if(!desc||!desc.value.trim()) r.remove();
+      });
+      let messe=0;
+      voci.forEach(function(v){
+        let desc=String((v&&v.descrizione)||"").trim();
+        if(!desc) return;
+        /* l'unita' di misura non ha una casella sua nel preventivo: va in
+           coda alla descrizione, come faceva gia' il salvataggio dell'AI. */
+        if(v.unita) desc+=" ("+String(v.unita).trim()+")";
+        /* ⚠️ il prezzo che l'AI NON sa resta una casella VUOTA, non «0,00».
+           Zero e' un prezzo deciso, e in fondo al preventivo verrebbe
+           sommato come tale: una voce regalata senza che nessuno l'abbia
+           detto. Vuoto invece si vede subito che manca. Il conto non cambia
+           (una casella vuota vale zero lo stesso), cambia quello che leggi. */
+        const pz=(v.prezzo_unitario==null||v.prezzo_unitario===""||!isFinite(+v.prezzo_unitario))
+                   ? "" : (+v.prezzo_unitario);
+        box.insertAdjacentHTML("beforeend",prevRigaHtml({
+          descrizione: desc,
+          qta:    (v.quantita==null||v.quantita==="")?1:(+v.quantita||0),
+          prezzo: pz
+        }));
+        _aiIllumina(box.lastElementChild);
+        messe++;
+      });
+      if(messe){
+        prevTotaleLive();
+        if(ruoloUtente==='professionista') aggiornaRiepilogoParcella();
+        else aggiornaRiepilogoIvaImpresa();
+        messi.push(messe===1?"1 voce di costo":messe+" voci di costo");
+      }
+    }
+    /* ---------- le note che finiscono sul PDF ---------- */
+    const note=String((d&&d.note)||"").trim();
+    const boxN=$("#pv-note-lista");
+    if(note&&boxN){
+      const righe=note.split("\n").map(function(x){return x.trim();}).filter(Boolean);
+      if(righe.length){
+        $$("#pv-note-lista [data-nota]").forEach(function(n){
+          const t=n.querySelector(".nt-txt");
+          if(!t||!t.value.trim()) n.remove();
+        });
+        righe.forEach(function(r){
+          boxN.insertAdjacentHTML("beforeend",prevNotaRigaHtml(r));
+          _aiIllumina(boxN.lastElementChild);
+        });
+        messi.push(righe.length===1?"1 nota":righe.length+" note");
+      }
+    }
+  }
+
   /* Il ponte per il pulsante «Compila con AI» che sta in cima alle sezioni:
      non apre piu' una finestrella, apre il modulo con la riga gia' pronta.
      Cosi' le due strade portano nello stesso posto. */
   window.gestApriModuloAI=function(tipo){
     if(tipo==='cliente'){ cliForm(null,'privato',true); return; }
+    if(tipo==='preventivo'){ prevForm(null,null,true); return; }
     jobForm(null,"",null,true,false,true);
   };
 
@@ -11066,7 +11165,7 @@ ${vecchi?`
     return {iva_perc: sel.value===""?null:(+sel.value||0)};
   }
 
-  async function prevForm(p,preset){
+  async function prevForm(p,preset,aiApri){
     const isNew=!p;p=p||{};
     /* precompilato: stessa idea di fattForm(f,preset). Vale solo sui nuovi. */
     if(isNew&&preset)p=Object.assign({},preset);
@@ -11106,6 +11205,7 @@ ${vecchi?`
       `<div class="sh-cols"><div class="sh-col">
       <div class="sh-b">
       <div class="sh-tit">Che preventivo è</div>
+      ${isNew?aiRigaHTML('preventivo'):''}
       <div class="field"><label>Titolo</label><input id="pv-tit" value="${esc(p.titolo||"")}" placeholder="Es. Rifacimento bagno completo"></div>
       <div class="row2">
         <div class="field"><label>Cliente</label><select id="pv-cli"><option value="">— nessuno —</option>${cliOpts}</select></div>
@@ -11146,6 +11246,8 @@ ${vecchi?`
       if(selIva)selIva.addEventListener("change",aggiornaRiepilogoIvaImpresa);
       aggiornaRiepilogoIvaImpresa();
     }
+    /* la riga dell'AI si accende per ultima, quando le caselle ci sono gia' */
+    if(isNew)aiRigaVia('preventivo',!!aiApri);
   }
   async function savePrev(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -16077,6 +16179,8 @@ ${vecchi?`
     if(a==="comp-mis-annulla")return compMisAnnulla();
     if(a==="comp-mis-del")return compMisDel(id);
     if(a==="new-prev")return prevForm(null);
+    /* «✨ Genera con AI»: stesso modulo, con la riga dell'AI gia' aperta */
+    if(a==="new-prev-ai")return prevForm(null,null,true);
     if(a==="ds-filtro"){dsFilter=t.dataset.v||"da_fare";renderDalSito();return;}
     if(a==="ds-apri")return dsApri(id);
     if(a==="ds-contatti")return dsContatti(id);
