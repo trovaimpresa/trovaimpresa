@@ -23,6 +23,159 @@
 [context.branch-deploy]
   command = "echo 'Branch deploy disabilitato per risparmiare crediti'"
 
+# ======================================================================
+# 18 agosto 2026 — LA ROBA CHE NON DEVE STARE ONLINE
+# ======================================================================
+# `publish = "."` pubblica TUTTA la cartella, non solo le pagine. Quindi
+# fino a oggi chiunque poteva aprire nel browser:
+#   trovaimpresa.com/CLAUDE.md              (tutta la memoria del progetto)
+#   trovaimpresa.com/sql/01-schema.sql      (schema del database e lucchetti)
+#   trovaimpresa.com/netlify/functions/...  (il codice dei server)
+#   trovaimpresa.com/reclutamento-lazio.csv (nomi, telefoni ed email veri)
+#   trovaimpresa.com/backup/gestionale-app.backup-20260721.html
+#
+# Le chiavi non c'erano (stanno nelle variabili di Netlify), ma il resto
+# si', ed era tutto scaricabile senza password.
+#
+# Queste regole rispondono "non trovata" su quegli indirizzi. Servono tre
+# cose in ognuna, e vanno tutte e tre:
+#   status = 404   -> risponde come una pagina che non esiste
+#   force  = true  -> ⚠️ SENZA QUESTO NON SERVE A NIENTE: Netlify, se il
+#                     file esiste davvero, serve il file e salta la regola
+#   to = "/404.html" -> quello che si vede
+#
+# ⚠️ Stanno PRIME di tutte le altre apposta: Netlify tiene buona la prima
+#    regola che combacia.
+# ⚠️ NON tocca /.netlify/functions/... (col punto davanti), che e' l'indirizzo
+#    vero da cui girano le funzioni. Quello deve continuare a funzionare.
+# Il controllo al push guarda che questo elenco resti completo: se domani
+# nasce una cartella o un file da tenere fuori e qui non c'e', si ferma.
+# ======================================================================
+
+[[redirects]]
+  from = "/sql/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/tools/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/supabase/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/docs/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/backup/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/CLAUDE.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/BACKLOG.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/PROMPT-sessione-nuova.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+# ⚠️ Nomi, telefoni ed email di imprese vere: e' il file peggiore da lasciare
+#    a vista, ed e' l'unico che riguarda dati di altre persone.
+[[redirects]]
+  from = "/reclutamento-lazio.csv"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/sql-gestionale-upgrade.sql"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/capacitor.config.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/genera-imprese-citta.js"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/genera-seo-pagine.js"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/aggiorna-pagine-citta.py"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/aggiungi-canonical.py.py"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/aggiungi-schema.py.py"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/fix-prompt.txt"
+  to = "/404.html"
+  status = 404
+  force = true
+
+# ===== fine della roba tenuta fuori =====
+
 [[redirects]]
   from = "/gestionale"
   to = "/gestionale-invito.html"

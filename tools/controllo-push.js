@@ -154,6 +154,81 @@ function controllaLink(){
 }
 
 /* ------------------------------------------------------------------ */
+/* 1b. LA ROBA CHE NON DEVE STARE ONLINE                               */
+/*                                                                      */
+/* ⚠️ `publish = "."` pubblica TUTTA la cartella, non solo le pagine.   */
+/*    Il 18 agosto 2026 si e' scoperto che chiunque poteva scaricare     */
+/*    CLAUDE.md, lo schema del database, il codice delle funzioni e un   */
+/*    csv con nomi, telefoni ed email di imprese vere. Le chiavi no      */
+/*    (stanno nelle variabili di Netlify), ma tutto il resto si'.        */
+/*                                                                      */
+/*    Si chiude con delle regole in netlify.toml che rispondono 404.     */
+/*    Questo controllo guarda che quell'elenco resti COMPLETO: se        */
+/*    domani nasce una cartella o un file da tenere fuori e nessuno lo   */
+/*    aggiunge, la pubblicazione si ferma invece di metterlo a vista.    */
+/*                                                                      */
+/*    ⚠️ La regola deve avere tutte e tre le cose: status 404, force     */
+/*    true e una pagina esistente. Senza `force` Netlify serve il file   */
+/*    vero e la regola non fa NIENTE — sembra chiusa e non lo e'.        */
+/* ------------------------------------------------------------------ */
+const CARTELLE_PRIVATE = ['sql', 'tools', 'netlify', 'supabase', 'docs', 'backup'];
+const CODE_PRIVATE     = ['.md', '.sql', '.csv', '.py', '.txt', '.json'];
+/* Questi hanno un'estensione da tenere fuori ma sono fatti apposta per
+   stare online: sono i file che leggono Google e i motori. */
+const PUBBLICI_APPOSTA = new Set(['robots.txt', 'llms.txt']);
+/* Attrezzi da riga di comando: non li carica nessuna pagina, ma hanno
+   l'estensione .js come i file veri del sito, quindi vanno detti a mano. */
+const ATTREZZI_PRIVATI = ['genera-imprese-citta.js', 'genera-seo-pagine.js'];
+
+function rinviiChiusi(){
+  /* Restituisce gli indirizzi che netlify.toml chiude DAVVERO:
+     status 404 + force true + una pagina che esiste. */
+  const chiusi = new Set();
+  if (!esiste('netlify.toml')) return chiusi;
+  const blocchi = leggi('netlify.toml').split('[[redirects]]').slice(1);
+  for (const b of blocchi){
+    const da = (b.match(/from\s*=\s*"([^"]+)"/) || [])[1];
+    const a  = (b.match(/to\s*=\s*"([^"]+)"/) || [])[1];
+    const st = (b.match(/status\s*=\s*(\d+)/) || [])[1];
+    const fz = /force\s*=\s*true/.test(b);
+    if (!da || !a || st !== '404' || !fz) continue;
+    const meta = a.replace(/^\//, '');
+    if (!esiste(meta)) continue;
+    chiusi.add(da);
+  }
+  return chiusi;
+}
+
+function controllaRobaPrivata(){
+  if (!esiste('netlify.toml')) return;
+  const chiusi = rinviiChiusi();
+  const scoperti = [];
+
+  for (const c of CARTELLE_PRIVATE){
+    if (!esiste(c)) continue;                       // la cartella non c'e': niente da chiudere
+    if (!chiusi.has('/' + c + '/*')) scoperti.push('/' + c + '/*');
+  }
+
+  let voci = [];
+  try { voci = fs.readdirSync(RADI, { withFileTypes: true }); } catch(e){ voci = []; }
+  for (const v of voci){
+    if (!v.isFile()) continue;
+    if (v.name.startsWith('.')) continue;           // .gitignore e compagnia: Netlify non li serve
+    if (PUBBLICI_APPOSTA.has(v.name)) continue;
+    const daChiudere = CODE_PRIVATE.some(e => v.name.toLowerCase().endsWith(e))
+                       || ATTREZZI_PRIVATI.indexOf(v.name) >= 0;
+    if (!daChiudere) continue;
+    if (!chiusi.has('/' + v.name)) scoperti.push('/' + v.name);
+  }
+
+  if (scoperti.length)
+    errore('netlify.toml',
+      'questa roba finirebbe online e chiunque potrebbe scaricarla: ' + scoperti.join(' · ')
+      + '. Va aggiunta come rinvio con status = 404 e force = true (vedi il blocco '
+      + '"LA ROBA CHE NON DEVE STARE ONLINE" in netlify.toml)');
+}
+
+/* ------------------------------------------------------------------ */
 /* 2. I BLOCCHI <script> CHE NON SI LEGGONO                            */
 /*    Un errore di sintassi qui vuol dire pagina bianca.                */
 /* ------------------------------------------------------------------ */
@@ -282,6 +357,7 @@ function main(){
   const t0 = Date.now();
   controllaLink();
   controllaDoveVannoIRinvii();
+  controllaRobaPrivata();
   controllaScript();
   controllaSchema();
   controllaMisure();
