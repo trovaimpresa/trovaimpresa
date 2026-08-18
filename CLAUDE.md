@@ -7588,3 +7588,101 @@ difetti veri in un pomeriggio.
 E resta al primo posto della lista il controllo automatico al push, che quella
 stessa prova la deve fare su **tutte** le pagine, non solo su quelle che tocco
 io.
+
+
+---
+
+# 18 agosto 2026 — LA ROBA PRIVATA ERA SCARICABILE DA CHIUNQUE
+
+`publish = "."` pubblica TUTTA la cartella, non solo le pagine. Verificato
+dal vivo (non letto nel codice): fino a oggi chiunque poteva aprire
+
+    trovaimpresa.com/CLAUDE.md               (422 KB di memoria del progetto)
+    trovaimpresa.com/sql/01-schema.sql       (schema del database e lucchetti)
+    trovaimpresa.com/netlify/functions/...   (il codice dei server)
+    trovaimpresa.com/docs/*.md               (appunti interni)
+    trovaimpresa.com/backup/gestionale-app.backup-20260721.html
+    trovaimpresa.com/reclutamento-lazio.csv  <-- nomi, telefoni ed email VERI
+
+L'ultimo e' il peggiore: e' l'unico che riguarda dati di altre persone.
+
+**Le chiavi non c'erano** (stanno nelle variabili di Netlify: nel codice
+compare solo il nome, `process.env.SUPABASE_SERVICE_KEY`). Non erano
+online nemmeno `prove-claude/`, `node_modules/`, `.claude/`, `www/`,
+`android/`, `_to_delete/` e i `.bak`: li tiene fuori il `.gitignore`.
+Netlify esclude da solo `netlify.toml`.
+
+## La correzione — 20 rinvii in netlify.toml
+
+Rispondono 404 su `/sql/*`, `/tools/*`, `/netlify/*`, `/supabase/*`,
+`/docs/*`, `/backup/*`, `CLAUDE.md`, `BACKLOG.md`,
+`PROMPT-sessione-nuova.md`, `reclutamento-lazio.csv`,
+`sql-gestionale-upgrade.sql`, `package.json`, `package-lock.json`,
+`capacitor.config.json`, i due `genera-*.js`, i tre `.py`, `fix-prompt.txt`.
+
+Servono **tutte e tre** le cose in ogni regola, e sono la parte da ricordare:
+
+- `status = 404`
+- **`force = true`** -- ⚠️ SENZA QUESTO NON SERVE A NIENTE: se il file
+  esiste davvero, Netlify serve il file e salta la regola. Sembra chiusa
+  e non lo e'. E' il modo piu' facile di credersi al sicuro senza esserlo.
+- `to = "/404.html"` -- una pagina che esiste
+
+⚠️ Stanno **prime di tutte le altre**: Netlify tiene buona la prima regola
+che combacia. E **non toccano `/.netlify/functions/...`** (col punto
+davanti), che e' l'indirizzo vero da cui girano le funzioni: provato dopo
+il deploy, `sitemap-offerte.xml` risponde ancora.
+
+Restano pubblici apposta: `css/`, `img/`, `js/`, `videos/`,
+`locandine-meta/`, `logo.svg/`, `robots.txt`, `llms.txt`, le sitemap.
+
+## `404.html` nuovo
+
+Prima non c'era e Netlify serviva la sua pagina di sistema. Adesso c'e'
+una pagina in italiano con logo, "Questa pagina non c'e'" e tre vie
+d'uscita (home, guide, contatti). Serve anche a tutti i 404 normali.
+
+## Il controllo al push se ne accorge da solo — `controllaRobaPrivata()`
+
+L'elenco non resta completo da solo: fra un mese nasce una cartella nuova
+e nessuno si ricorda di chiuderla. Quindi il controllo **guarda la
+cartella vera** e pretende che tutto quello che non deve stare online sia
+chiuso davvero (404 + force + pagina esistente). Se manca qualcosa, la
+pubblicazione si ferma e dice quale.
+
+Cosa considera privato: le cartelle `sql tools netlify supabase docs
+backup`, e in radice ogni file `.md .sql .csv .py .txt .json` piu' i due
+`genera-*.js`. Fuori dall'elenco apposta: `robots.txt` e `llms.txt`.
+
+⚠️ Se serve aggiungere un attrezzo `.js` da riga di comando, va messo in
+`ATTREZZI_PRIVATI` dentro `tools/controllo-push.js`: l'estensione `.js` da
+sola non basta, se no accuserebbe i file veri del sito.
+
+## Come e' stato provato (nei due versi, sempre)
+
+- `prove/banco_controllo_push.py`: da 24 a **37 controlli, 0 rossi**.
+  I casi nuovi provano anche quello che **non** deve fermare niente
+  (`robots.txt`, una cartella che non c'e').
+- ⚠️ Sabotato il `netlify.toml` VERO due volte: tolto il blocco di
+  `/sql/*` -> rosso; tolto solo il `force = true` dal csv coi dati
+  personali -> rosso. **Il caso del `force` mancante e' quello che conta**,
+  perche' e' l'unico che sembra a posto guardandolo.
+- Il controllo fatto girare sulla **cartella vera** di Alessio (node dal
+  ponte): verde in 4 secondi.
+- `netlify.toml` letto con un parser TOML: 32 rinvii, nessun doppione.
+- Dopo il deploy, provati online uno per uno: `CLAUDE.md`, `sql/`,
+  `netlify/functions/`, `docs/`, `reclutamento-lazio.csv` -> tutti 404.
+  `prezzi.html`, `404.html` e `sitemap-offerte.xml` -> a posto.
+
+⚠️ **Trappola del banco, trovata subito:** il banco copia il controllo
+dentro il finto sito, quindi in ogni prova esiste una cartella `tools/` —
+che e' roba da tenere fuori. Senza chiuderla, tutte le prove con un
+netlify.toml diventavano rosse per quel motivo li' invece che per quello
+che stavano provando. Sistemato con `BASE_NETLIFY` dentro `sito()`.
+
+## La lezione
+
+Il difetto non era in una riga di codice: era in una **riga di
+configurazione scritta il primo giorno** (`publish = "."`) e mai piu'
+guardata. Nessuna prova la controllava perche' nessuno la considerava
+codice. Da qui in poi il controllo al push la guarda a ogni push.
