@@ -1695,6 +1695,47 @@
         `regole`. La macchina qui sotto non si tocca.
      ============================================================ */
   const CTR_PAROLA={rosso:"DA CORREGGERE",arancio:"DA GUARDARE"};
+
+  /* ============================================================
+     IL LETTORE — 18 agosto 2026
+
+     Le regole di Cliente e Fornitore non guardano piu' le caselle: le
+     CHIEDONO a un lettore. Cosi' le STESSE regole girano su due cose
+     diverse — il modulo aperto e la riga gia' salvata (la scheda) — e
+     non esistono due copie che fra un mese si scollano, con la scheda
+     che dice «tutto a posto» e il modulo che segna due errori.
+     E' la trappola delle tre copie della formula, gia' pagata ad agosto.
+
+     ⚠️ Le altre sei sezioni NON hanno una scheda di sola lettura: ti
+        portano dritto nel modulo. Li' il lettore non serve, e non e'
+        stato messo per non cambiare codice che gia' funziona.
+     ============================================================ */
+  function ctrDalModulo(){
+    return {
+      get: function(id){ const e=document.getElementById(id); return e?String(e.value||"").trim():""; },
+      tipo:function(){ const b=$("#c-tipo-box"); return (b&&b.dataset&&b.dataset.tipo)||"privato"; }
+    };
+  }
+  function ctrDallaRiga(mappa,r){
+    r=r||{};
+    return {
+      get: function(id){ const col=mappa[id]; if(!col) return ""; const v=r[col]; return (v==null)?"":String(v).trim(); },
+      tipo:function(){ return String(r.tipo||"privato"); }
+    };
+  }
+  /* quale colonna del database corrisponde a quale casella del modulo.
+     ⚠️ Serve anche a un'altra cosa: sulla scheda si mostrano SOLO gli
+     avvisi sui campi che stanno qui dentro. Un avviso su un dato che la
+     riga non contiene sarebbe un avviso inventato. */
+  const CTR_MAPPA={
+    cliente:{ "c-nome":"nome", "c-tel":"telefono", "c-email":"email",
+              "c-piva":"piva", "c-cf":"cod_fiscale",
+              "c-sdi":"sdi_codice", "c-pec":"sdi_pec" },
+    fornitore:{ "fo-nome":"nome", "fo-piva":"piva",
+                "fo-tel":"telefono", "fo-email":"email" }
+  };
+  /* dove si va a sistemare, cliccando la striscia */
+  const CTR_VAI={ cliente:"edit-cli", fornitore:"edit-forn-full" };
   /* quale computo e' aperto adesso: serve perche' le sue lavorazioni
      stanno in una cache, non nel modulo, e su un computo nuovo quella
      cache contiene ancora le voci di quello di prima. */
@@ -1938,6 +1979,9 @@
   /* solo le cifre: una partita IVA scritta «IT 012 345 678 90» ha 11 cifre
      vere, e non e' sbagliata. Si contano quelle, non i caratteri. */
   function ctrCifre(v){ return String(v||"").replace(/\D/g,""); }
+  /* un indirizzo scritto bene: qualcosa, la chiocciola, qualcosa, il punto,
+     qualcosa. Non serve di piu': il resto lo dice il server quando rimbalza. */
+  const CTR_EMAIL=/^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   function ctrVale(sel){ const e=$(sel); return e?String(e.value||"").trim():""; }
 
   /* ============================================================
@@ -1999,54 +2043,49 @@
      fatturargli: e li' e' tardi, perche' la fattura elettronica la
      rifiuta lo SDI, non il gestionale.
      ============================================================ */
-  function ctrRegoleCliente(){
+  function ctrRegoleCliente(L){
+    L=L||ctrDalModulo();
     const out=[];
-    const box=$("#c-tipo-box");
-    const tipo=(box&&box.dataset&&box.dataset.tipo)?box.dataset.tipo:"privato";
+    const tipo=L.tipo();
 
-    const nome=$("#c-nome");
-    if(nome&&!nome.value.trim()) out.push({el:nome,grave:"rosso",
+    if(!L.get("c-nome")) out.push({campo:"c-nome",grave:"rosso",
       dice:"Manca il nome. Senza, questa scheda non la ritrovi più e nei documenti esce vuota."});
 
     /* --- di che cosa ha bisogno, secondo quello che è --- */
-    const piva=$("#c-piva"), cf=$("#c-cf");
-    const nPiva=ctrCifre(piva&&piva.value), nCf=String((cf&&cf.value)||"").trim();
+    const nPiva=ctrCifre(L.get("c-piva")), nCf=L.get("c-cf");
 
     if(tipo==='azienda'){
-      if(piva&&!nPiva) out.push({el:piva,grave:"rosso",
+      if(!nPiva) out.push({campo:"c-piva",grave:"rosso",
         dice:"È un'azienda e la partita IVA non c'è: senza, la fattura elettronica non si può fare."});
-      else if(piva&&nPiva.length!==11) out.push({el:piva,grave:"rosso",
+      else if(nPiva.length!==11) out.push({campo:"c-piva",grave:"rosso",
         dice:"La partita IVA ha 11 cifre, questa ne ha "+nPiva.length+". Lo SDI la rifiuta."});
     }else{
-      if(cf&&!nCf) out.push({el:cf,grave:"arancio",
+      if(!nCf) out.push({campo:"c-cf",grave:"arancio",
         dice:(tipo==='condominio'
               ? "Un condominio ha il codice fiscale: senza, quando gli fatturi ti tocca cercarlo di corsa."
               : "Manca il codice fiscale: per fatturare a un privato serve, e il giorno che ti serve non ce l'hai.")});
-      else if(cf&&nCf.length!==16&&nCf.length!==11) out.push({el:cf,grave:"arancio",
+      else if(nCf.length!==16&&nCf.length!==11) out.push({campo:"c-cf",grave:"arancio",
         dice:"Il codice fiscale di una persona ha 16 caratteri (11 se è un condominio o un ente): questo ne ha "+nCf.length+"."});
-      if(piva&&nPiva&&nPiva.length!==11) out.push({el:piva,grave:"arancio",
+      if(nPiva&&nPiva.length!==11) out.push({campo:"c-piva",grave:"arancio",
         dice:"La partita IVA ha 11 cifre, questa ne ha "+nPiva.length+"."});
     }
 
     /* --- dove mandare la fattura elettronica --- */
     if(tipo!=='privato'){
-      const sdi=$("#c-sdi"), pec=$("#c-pec");
-      const hSdi=String((sdi&&sdi.value)||"").trim(), hPec=String((pec&&pec.value)||"").trim();
-      if(sdi&&!hSdi&&!hPec) out.push({el:sdi,grave:"arancio",
+      const hSdi=L.get("c-sdi"), hPec=L.get("c-pec");
+      if(!hSdi&&!hPec) out.push({campo:"c-sdi",grave:"arancio",
         dice:"Né codice SDI né PEC: la fattura elettronica non sa dove andare e finisce nel cassetto fiscale, dove il cliente non la guarda."});
-      else if(sdi&&hSdi&&hSdi.length!==7) out.push({el:sdi,grave:"arancio",
+      else if(hSdi&&hSdi.length!==7) out.push({campo:"c-sdi",grave:"arancio",
         dice:"Il codice SDI è di 7 caratteri, questo ne ha "+hSdi.length+"."});
     }
 
     /* --- come lo si chiama --- */
-    const tel=$("#c-tel"), mail=$("#c-email");
-    const hTel=String((tel&&tel.value)||"").trim(), hMail=String((mail&&mail.value)||"").trim();
-    if(tel&&!hTel&&!hMail) out.push({el:tel,grave:"arancio",
+    const hTel=L.get("c-tel"), hMail=L.get("c-email"), hPec2=L.get("c-pec");
+    if(!hTel&&!hMail) out.push({campo:"c-tel",grave:"arancio",
       dice:"Nessun telefono e nessuna email: questo cliente non lo puoi richiamare."});
-    if(mail&&hMail&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(hMail)) out.push({el:mail,grave:"rosso",
+    if(hMail&&!CTR_EMAIL.test(hMail)) out.push({campo:"c-email",grave:"rosso",
       dice:"Questa email non è scritta bene: le manca la chiocciola o il punto finale. Così non le arriva niente."});
-    const pec2=$("#c-pec"), hPec2=String((pec2&&pec2.value)||"").trim();
-    if(pec2&&hPec2&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(hPec2)) out.push({el:pec2,grave:"rosso",
+    if(hPec2&&!CTR_EMAIL.test(hPec2)) out.push({campo:"c-pec",grave:"rosso",
       dice:"Questa PEC non è scritta bene: la fattura elettronica non arriverebbe."});
     return out;
   }
@@ -2054,22 +2093,20 @@
   /* ============================================================
      IL FORNITORE
      ============================================================ */
-  function ctrRegoleFornitore(){
+  function ctrRegoleFornitore(L){
+    L=L||ctrDalModulo();
     const out=[];
-    const nome=$("#fo-nome");
-    if(nome&&!nome.value.trim()) out.push({el:nome,grave:"rosso",
+    if(!L.get("fo-nome")) out.push({campo:"fo-nome",grave:"rosso",
       dice:"Manca il nome del fornitore: senza, nelle spese esce una riga vuota."});
-    const piva=$("#fo-piva");
-    const n=ctrCifre(piva&&piva.value);
-    if(piva&&!n) out.push({el:piva,grave:"arancio",
+    const n=ctrCifre(L.get("fo-piva"));
+    if(!n) out.push({campo:"fo-piva",grave:"arancio",
       dice:"Senza partita IVA il commercialista non sa a chi attribuire le fatture di questo fornitore."});
-    else if(piva&&n.length!==11) out.push({el:piva,grave:"arancio",
+    else if(n.length!==11) out.push({campo:"fo-piva",grave:"arancio",
       dice:"La partita IVA ha 11 cifre, questa ne ha "+n.length+"."});
-    const tel=$("#fo-tel"), mail=$("#fo-email");
-    const hTel=String((tel&&tel.value)||"").trim(), hMail=String((mail&&mail.value)||"").trim();
-    if(tel&&!hTel&&!hMail) out.push({el:tel,grave:"arancio",
+    const hTel=L.get("fo-tel"), hMail=L.get("fo-email");
+    if(!hTel&&!hMail) out.push({campo:"fo-tel",grave:"arancio",
       dice:"Nessun telefono e nessuna email: il giorno che ti serve un pezzo non sai come chiamarlo."});
-    if(mail&&hMail&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(hMail)) out.push({el:mail,grave:"rosso",
+    if(hMail&&!CTR_EMAIL.test(hMail)) out.push({campo:"fo-email",grave:"rosso",
       dice:"Questa email non è scritta bene: le manca la chiocciola o il punto finale."});
     return out;
   }
@@ -2128,8 +2165,49 @@
     let l=[];
     /* ⚠️ se una regola esplode NON deve portarsi dietro il modulo: il
        controllore e' un aiuto, non un pezzo indispensabile. */
-    try{ l=doc.regole()||[]; }catch(e){ console.warn("[controllore]",e); l=[]; }
-    return l.filter(s=>s&&s.el&&document.body.contains(s.el));
+    try{ l=doc.regole(ctrDalModulo())||[]; }catch(e){ console.warn("[controllore]",e); l=[]; }
+    /* una regola puo' dire la casella in due modi: `el` quando l'elemento se
+       l'e' gia' trovato lei (le righe delle voci, che nascono e muoiono),
+       oppure `campo` col nome della casella — ed e' quel nome che permette
+       alle stesse regole di girare anche sulla riga salvata. */
+    return l.map(function(s){
+      if(!s) return null;
+      if(s.el) return s;
+      const el=s.campo?document.getElementById(s.campo):null;
+      return el?{el:el,grave:s.grave,dice:s.dice}:null;
+    }).filter(s=>s&&s.el&&document.body.contains(s.el));
+  }
+
+  /* ============================================================
+     LA STRISCIA SULLA SCHEDA — 18 agosto 2026
+
+     Sulla scheda non ci sono caselle da colorare: c'e' una striscia in
+     cima che dice quante cose ci sono e quali, e che cliccata apre
+     «Modifica» — dove i segni si accendono sulle caselle vere.
+
+     ⚠️ Si mostrano SOLO gli avvisi sui campi che stanno in CTR_MAPPA,
+        cioe' su dati che la riga salvata contiene davvero. Un avviso su
+        un dato che li' non c'e' sarebbe inventato.
+     ⚠️ Le regole sono LE STESSE del modulo, lette da un'altra parte: se
+        domani ne cambia una, cambiano tutte e due le schermate insieme.
+     ============================================================ */
+  function ctrStrisciaHTML(tipo,riga){
+    const mappa=CTR_MAPPA[tipo], doc=CTR_DOC[tipo];
+    if(!mappa||!doc||typeof doc.regole!=="function") return "";
+    let l=[];
+    try{ l=doc.regole(ctrDallaRiga(mappa,riga))||[]; }catch(e){ console.warn("[controllore]",e); return ""; }
+    l=l.filter(x=>x&&x.campo&&mappa[x.campo]&&x.dice);
+    if(!l.length) return "";
+    const rossi=l.filter(x=>x.grave==="rosso").length;
+    const grave=rossi?"rosso":"arancio";
+    const quante=l.length===1?"1 cosa da guardare":(l.length+" cose da guardare");
+    const vai=CTR_VAI[tipo]||"";
+    return '<div class="ctr-str ctr-str--'+grave+'">'
+      + '<div class="ctr-str-t"><span class="ctr-mk">'+CTR_PAROLA[grave]+'</span>'
+      +   '<span class="ctr-str-q">'+quante+'</span></div>'
+      + '<ul class="ctr-str-l">'+l.map(x=>'<li class="ctr-str-'+x.grave+'">'+esc(x.dice)+'</li>').join("")+'</ul>'
+      + (vai?'<button type="button" class="btn ctr-str-vai" data-action="'+vai+'" data-id="'+esc(String((riga&&riga.id)||""))+'">Aprilo e sistemalo</button>':'')
+      + '</div>';
   }
 
   function ctrTogli(el){
@@ -7192,7 +7270,8 @@ ${vecchi?`
         +'</div>';
     }).join(""):'<p class="sh-nota" style="margin-top:0">Nessuna fattura registrata per questo fornitore.</p>';
     openSheetGrande(esc(f.nome||"Fornitore")+tag,
-      '<div class="sh-cols"><div class="sh-col">'
+      ctrStrisciaHTML('fornitore',f)
+      +'<div class="sh-cols"><div class="sh-col">'
       +'<div class="sh-b">'
       +'<div class="sh-tit">Contatti</div>'
       +_rigaDato("Telefono",f.telefono,"tel:")
@@ -9074,7 +9153,10 @@ ${vecchi?`
     const etRef=c.tipo==="condominio"?"Amministratore":"Referente";
 
     openSheetGrande(esc(c.nome||"Cliente")+tag,
-      '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
+      /* la striscia sta PRIMA di tutto: se c'e' qualcosa da guardare, lo
+         vedi appena apri, non dopo aver scorso mezza scheda */
+      ctrStrisciaHTML('cliente',c)
+      + '<div class="sh-cols sh-cols--fatt"><div class="sh-col">'
       + '<div class="sh-b">'
       +   '<div class="sh-tit">Chi &egrave;</div>'
       +   _rigaDato(etNome,c.nome)

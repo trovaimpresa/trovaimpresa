@@ -2916,3 +2916,18 @@ body:has(#ti-fondatore) .side{
   .sheet--grande .sh-foot{ flex-wrap:wrap; }
   .sheet--grande .sh-foot .ctr-tasto{ flex:1 0 100%; margin-bottom:2px; }
 }
+
+/* la striscia in cima alla scheda: la scheda e' di sola lettura, quindi
+   qui non si colora nessuna casella — si dice quante cose ci sono, quali,
+   e si offre la porta per andarle a sistemare. */
+.ctr-str{ border:1px solid var(--bordo); border-left-width:5px; border-radius:var(--r-card);
+  background:var(--card); padding:14px 16px; margin:0 0 18px; }
+.ctr-str--rosso{ border-left-color:var(--err); background:var(--err-bg); }
+.ctr-str--arancio{ border-left-color:#D97706; background:#FFF7ED; }
+.ctr-str-t{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.ctr-str-q{ font-size:16px; font-weight:800; color:var(--testo); }
+.ctr-str-l{ margin:10px 0 0; padding-left:20px; }
+.ctr-str-l li{ font-size:14.5px; line-height:1.5; margin:5px 0; color:var(--testo-2); }
+.ctr-str-l li.ctr-str-rosso{ color:var(--err); font-weight:600; }
+.ctr-str-l li.ctr-str-arancio{ color:#B45309; font-weight:600; }
+.ctr-str-vai{ margin-top:12px; }
