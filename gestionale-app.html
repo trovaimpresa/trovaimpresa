@@ -15060,14 +15060,32 @@ ${vecchi?`
   }
   /* riempie la lavorazione con la voce scelta. Il prezzo entra come una FOTO:
      se domani lo alzi nel prezzario, i computi già fatti non cambiano. */
+  /* ============================================================
+     18 agosto 2026 — L'UNITÀ CHE NON STA NELLA TENDINA
+     ============================================================
+     La tendina ha dodici unità (m, m², m³, kg, cad…), ma un prezzario vero
+     ne usa anche altre: «mq/cm», «paio», «addetto», «cad/giorno». Prima,
+     se l'unità della voce non stava nella tendina, NON veniva impostata: la
+     lavorazione si prendeva quella rimasta da prima, e nessuno lo diceva.
+     Un prezzo al «mq/cm» finito su una riga in «m³» è un conto sbagliato
+     che sembra giusto. Adesso l'unità che manca si aggiunge alla tendina.
+     ============================================================ */
+  function _uniMetti(sel,unita){
+    const u=(typeof sel==="string")?$(sel):sel;
+    const v=String(unita==null?"":unita).trim();
+    if(!u||!v)return false;
+    const c=Array.prototype.slice.call(u.options).some(o=>o.value===v);
+    if(!c){const o=document.createElement("option");o.value=v;o.textContent=v;u.appendChild(o);}
+    u.value=v;
+    return true;
+  }
   async function ppUsa(id){
     const x=ppCache.find(v=>String(v.id)===String(id));if(!x)return;
     const set=(sel,val)=>{const e=$(sel);if(e)e.value=val;};
     set("#cv-cod",x.codice||"");
     set("#cv-desc",x.descrizione||"");
     set("#cv-prezzo",x.prezzo_unitario!=null?_prezzoTesto(x.prezzo_unitario):"");
-    const u=$("#cv-uni");
-    if(u&&x.unita){const c=Array.prototype.slice.call(u.options).find(o=>o.value===x.unita);if(c)u.value=x.unita;}
+    _uniMetti("#cv-uni",x.unita);
     const m=$("#cv-mano");if(m&&x.incidenza_manodopera!=null)m.value=String(x.incidenza_manodopera).replace(".",",");
     sb.from("gest_prezzi_propri").update({usata_volte:(+x.usata_volte||0)+1}).eq("id",id).eq("user_id",sbUid)
       .then(function(){},function(){});
