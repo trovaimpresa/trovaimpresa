@@ -2284,10 +2284,6 @@
     ctrToglieTutto();
     const l=ctrLista(tipo);
     l.forEach(ctrSegna);
-    /* fatto il giro gratis, compare il tasto dell'AI: prima non c'e',
-       cosi' il credito non si spende per sbaglio al primo clic */
-    const tastoAi=document.querySelector('.ctr-tasto-ai[data-ctr="'+tipo+'"]');
-    if(tastoAi)tastoAi.hidden=false;
     if(!l.length){ toast("Ho guardato tutto: non c'è niente da segnalare ✔"); return; }
     const rossi=l.filter(s=>s.grave==="rosso").length;
     const gialli=l.length-rossi;
@@ -2336,8 +2332,14 @@
   function ctrTastoHTML(tipo){
     return '<button type="button" class="btn ctr-tasto" data-action="ctr-guarda" data-ctr="'+tipo+'">'
          + 'Controlla prima di mandarlo</button>'
+         /* ⚠️ 19 agosto 2026 — IL TASTO DELL'AI SI VEDE SUBITO.
+            Prima compariva solo dopo il controllo gratis, per non far
+            spendere un credito per sbaglio. Ma nascosto vuol dire anche
+            che non sai che c'e': e una cosa che non sai che c'e' non la
+            usi mai. Il credito lo protegge il fatto che il tasto va
+            PREMUTO, non il fatto che sia invisibile. */
          + (CTR_AI_SEZIONI.indexOf(tipo)>=0
-            ? '<button type="button" class="btn ctr-tasto-ai" data-action="ctr-ai" data-ctr="'+tipo+'" hidden>'
+            ? '<button type="button" class="btn ctr-tasto-ai" data-action="ctr-ai" data-ctr="'+tipo+'">'
               + CTR_AI_LABEL+'</button>'
             : "");
   }
@@ -3543,6 +3545,61 @@
     {k:"incassare",lab:"Da incassare"},
     {k:"archivio", lab:"Archivio"}
   ];
+  /* ============================================================
+     LE CARD CON I NUMERI — 19 agosto 2026
+
+     ⚠️ LA REGOLA: si mostra SOLO un numero che risponde a una domanda.
+        «2 preventivi» non e' un numero: e' il conto delle righe, e si
+        legge gia' nella fascia sotto. «2 fermi da 34 giorni» invece e'
+        una domanda con la risposta dentro.
+     ⚠️ Le card che si possono cliccare fanno una cosa sola e prevedibile:
+        o filtrano la lista con un filtro CHE ESISTE GIA' (stessa formula,
+        quindi il numero e la lista non possono litigare), o aprono la
+        riga di cui parlano. Mai un filtro nuovo scritto qui: sarebbe la
+        seconda copia della stessa regola.
+     ⚠️ Una card senza risposta NON SI MOSTRA (zero preventivi in attesa =
+        niente card). Un muro di zeri fa smettere di guardare anche i
+        numeri veri.
+     ============================================================ */
+  const NUM_MIN_ESITI=3;   /* sotto tre esiti la percentuale non vuol dire niente */
+  function _ggDa(d){
+    if(!d)return null;
+    const a=Date.parse(String(d)+"T00:00:00"), b=Date.parse(todayStr()+"T00:00:00");
+    if(isNaN(a)||isNaN(b))return null;
+    return Math.round((b-a)/86400000);
+  }
+  function _ggCorto(n){
+    if(n==null)return "—";
+    if(n<=0)return "oggi";
+    return n+(n===1?" giorno":" giorni");
+  }
+  /* «negli ultimi 12 mesi»: si conta all'indietro dal mese di oggi, senza
+     inventarsi i giorni (il 31 marzo meno un mese non esiste) */
+  function _daMesi(mesi){
+    const d=new Date(todayStr()+"T00:00:00");
+    d.setMonth(d.getMonth()-mesi);
+    const p=n=>(n<10?"0":"")+n;
+    return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+  }
+  function numCard(o){
+    const cliccabile=!!o.action;
+    const tag=cliccabile?"button":"div";
+    const az=cliccabile
+      ? ' type="button" data-action="'+esc(o.action)+'"'
+        +(o.v!=null?' data-v="'+esc(String(o.v))+'"':"")
+        +(o.id!=null?' data-id="'+esc(String(o.id))+'"':"")
+      : "";
+    return '<'+tag+' class="num-c'+(o.tono?" num-c--"+o.tono:"")+(cliccabile?" num-c--vai":"")+'"'+az+'>'
+      +'<span class="num-d">'+esc(o.domanda)+'</span>'
+      +'<span class="num-n">'+esc(o.numero)+'</span>'
+      +(o.sotto?'<span class="num-s">'+esc(o.sotto)+'</span>':"")
+      +'</'+tag+'>';
+  }
+  function numFila(cards){
+    const v=(cards||[]).filter(Boolean);
+    return v.length?('<div class="num-fila">'+v.join("")+'</div>'):"";
+  }
+
   function lavFiltra(L,v,oggi){
     const aperto=l=>l.stato!=="fatto";
     if(v==="tutti")    return L.slice();
@@ -3770,7 +3827,9 @@
         ? '<div class="tab-tot"><span>'+cfg.totale.testo+'</span>'
           +(cfg.totale.valore?('<b>'+cfg.totale.valore+'</b>'):'')+'</div>'
         : '';
-      box.innerHTML=_t+cfg.cards();
+      /* le card con i numeri stanno SOPRA la fascia dei totali: prima le
+         domande («quanti sono fermi?»), poi il conto della lista */
+      box.innerHTML=(cfg.numeri||"")+_t+cfg.cards();
       return;
     }
     box.classList.remove("griglia-schede");
@@ -3943,9 +4002,48 @@
           menu:lavVoci(l,_waLavoro(l,lavTel[l.operatore_id]||""))
         };
       }),
+      numeri:lavNumeri(TUTTI,oggi,_praPro),
       totale:{testo:L.length+" "+(L.length===1?"lavoro":"lavori"),valore:eur(tot)},
       cards:()=>L.map(l=>jobCardSupa(l,true,lavTel[l.operatore_id]||"",false,"lav")).join("")
     });
+  }
+
+  /* ⚠️ i due conti qui sotto NON sono riscritti: chiamano lavFiltra, la
+     stessa funzione che fa le viste. Cosi' il numero sulla card e la lista
+     che esce cliccandola non possono dire due cose diverse.
+     ⚠️ Le card guardano SEMPRE tutti i lavori, non quelli filtrati a
+     schermo: «quanti sono in ritardo» e' una domanda sul reparto, non
+     sulla vista aperta adesso. La fascia dei totali qui sotto invece segue
+     il filtro — sono due cose diverse ed e' giusto cosi'. */
+  function lavNumeri(TUTTI,oggi,pro){
+    const ritardo=lavFiltra(TUTTI,"ritardo",oggi);
+    const daInc  =lavFiltra(TUTTI,"incassare",oggi);
+    const valInc =daInc.reduce((s,l)=>s+(+l.importo||0),0);
+    /* il piu' in ritardo di tutti: la card sopra dice quanti sono, questa
+       dice qual e' il peggiore e da quanto sta li' */
+    const peggio =ritardo.slice().sort((a,b)=>String(a.data_prevista||"9999").localeCompare(String(b.data_prevista||"9999")))[0];
+    const gg     =peggio?_ggDa(peggio.data_prevista):null;
+    /* uno / tanti scritti a mano: «pratica/pratiche» e «lavoro/lavori» non
+       si fanno con una regola, si scrivono */
+    const uno=pro?"pratica":"lavoro", tanti=pro?"pratiche":"lavori";
+    const quanti=n=>n+" "+(n===1?uno:tanti);
+    return numFila([
+      ritardo.length?numCard({
+        domanda:"In ritardo",
+        numero:String(ritardo.length),
+        sotto:quanti(ritardo.length)+" oltre la data",
+        tono:"err", action:"lav-vista", v:"ritardo"}):null,
+      peggio?numCard({
+        domanda:"Il più in ritardo",
+        numero:_ggCorto(gg),
+        sotto:(peggio.descrizione||("Senza nome")),
+        tono:"err", action:"edit-job", id:peggio.id}):null,
+      daInc.length?numCard({
+        domanda:"Finiti e non ancora incassati",
+        numero:eur(valInc),
+        sotto:quanti(daInc.length)+(daInc.length===1?" già fatto":" già fatti"),
+        tono:"attesa", action:"lav-vista", v:"incassare"}):null
+    ]);
   }
 
   let lfLavoroId=null;
@@ -11825,9 +11923,47 @@ ${vecchi?`
           menu:prevVoci(p)
         };
       }),
+      numeri:prevNumeri(prevCache,totCli),
       totale:{testo:L.length+" "+(L.length===1?"preventivo":"preventivi"),valore:eur(somma)},
       cards:()=>L.map(p=>prevCard(p,cliMap,totCli)).join("")
     });
+  }
+
+  /* ⚠️ «senza risposta» = bozza OPPURE inviato, la stessa identica scelta
+     che fa il Riepilogo. Se qui contassi solo gli inviati, le due schermate
+     direbbero due numeri diversi sulla stessa domanda, e chi le guarda non
+     saprebbe a quale credere. */
+  function prevNumeri(TUTTI,totCli){
+    const attesa=(TUTTI||[]).filter(p=>p.stato==="bozza"||p.stato==="inviato");
+    const valore=attesa.reduce((s,p)=>s+(+totCli[p.id]||0),0);
+    const vecchio=attesa.slice()
+      .sort((a,b)=>String(a.data||"9999").localeCompare(String(b.data||"9999")))[0];
+    const gg=vecchio?_ggDa(vecchio.data):null;
+    /* quanti ne accetti: si guardano SOLO quelli che una risposta l'hanno
+       avuta (accettato o rifiutato). Contare dentro anche quelli ancora in
+       attesa farebbe scendere la percentuale ogni volta che ne scrivi uno
+       nuovo, che non vuol dire niente. */
+    const daQuando=_daMesi(12);
+    const esiti=(TUTTI||[]).filter(p=>(p.stato==="accettato"||p.stato==="rifiutato")
+                                    && String(p.data||"")>=daQuando);
+    const acc=esiti.filter(p=>p.stato==="accettato").length;
+    return numFila([
+      attesa.length?numCard({
+        domanda:"In attesa di risposta",
+        numero:String(attesa.length),
+        sotto:eur(valore)+" fermi",
+        tono:"attesa"}):null,
+      vecchio?numCard({
+        domanda:"Il più vecchio senza risposta",
+        numero:_ggCorto(gg),
+        sotto:(vecchio.titolo||"Senza titolo"),
+        tono:(gg!=null&&gg>=14)?"err":"attesa",
+        action:"edit-prev", id:vecchio.id}):null,
+      (esiti.length>=NUM_MIN_ESITI)?numCard({
+        domanda:"Su 10 che mandi, quanti te ne accettano",
+        numero:String(Math.round(acc/esiti.length*10)),
+        sotto:acc+" su "+esiti.length+" negli ultimi 12 mesi"}):null
+    ]);
   }
   /* sotto 880px: la card di prima, con le stesse azioni del menu */
   function prevCard(p,cliMap,tot){

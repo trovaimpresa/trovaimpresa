@@ -3188,3 +3188,39 @@ body:has(#ti-fondatore) .side{
 @media(max-width:900px){
   .sheet--grande .sh-foot .ctr-tasto-ai{ flex:1 0 100%; margin-bottom:6px; }
 }
+
+/* ================================================================
+   LE CARD CON I NUMERI — 19 agosto 2026
+
+   Stanno in cima a Preventivi e Lavori/Pratiche. Sopra la domanda,
+   sotto la risposta: si leggono in un colpo d'occhio, senza rileggere.
+   Il colore dice lo stato (rosso = in ritardo, ambra = in attesa), ma
+   non decide da solo: la domanda e' sempre scritta per esteso.
+   Niente sotto i 13 px, come dappertutto.
+   ================================================================ */
+.num-fila{
+  grid-column:1/-1;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:12px; margin-bottom:6px;
+}
+.num-c{
+  display:flex; flex-direction:column; gap:2px; text-align:left;
+  background:var(--card); border:1px solid var(--bordo);
+  border-left:5px solid var(--bordo-forte); border-radius:14px;
+  padding:14px 16px; font-family:inherit; width:100%;
+}
+.num-c--vai{ cursor:pointer; }
+.num-c--vai:hover{ border-color:var(--blu); background:var(--blu-tenue); }
+.num-c--err{ border-left-color:var(--err); }
+.num-c--attesa{ border-left-color:var(--attesa); }
+
+.num-d{ font-size:15px; font-weight:600; color:var(--testo-2); line-height:1.4; }
+.num-n{ font-size:27px; font-weight:800; color:var(--ink); line-height:1.25; }
+.num-c--err .num-n{ color:var(--err); }
+.num-s{ font-size:15px; color:var(--testo-2); line-height:1.45;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+@media(max-width:560px){
+  .num-fila{ grid-template-columns:minmax(0,1fr); }
+  .num-n{ font-size:25px; }
+}
