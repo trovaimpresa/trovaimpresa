@@ -10875,7 +10875,23 @@ ${vecchi?`
   function calcolaParcella(compenso, cassaPerc, ivaPerc, conRitenuta, ritPerc, spese){
     compenso=+compenso||0; spese=+spese||0;
     cassaPerc=+cassaPerc||0; ivaPerc=+ivaPerc||0; ritPerc=+ritPerc||0;
-    const cassa      = compenso*cassaPerc/100;
+    /* ===== 16 agosto 2026 — IL PREVENTIVO E LA FATTURA DICEVANO DUE NUMERI =====
+       Su una parcella su quattro (26,78% misurato su 200.000 casi) il totale
+       del preventivo e quello della fattura nata da lui differivano di uno o
+       due centesimi. Il cliente firma 12.757,18 e riceve una fattura da
+       12.757,19: sembra una sciocchezza, ma e' il numero su cui si discute.
+
+       La causa: la FATTURA arrotonda al centesimo mano a mano (glielo impone
+       il file per lo SDI, dove ogni voce e' scritta a due decimali), il
+       preventivo arrotondava solo alla fine.
+
+       Si e' portato il preventivo a seguire la fattura, mai il contrario: la
+       fattura non si puo' toccare, e' quella che va all'Agenzia. L'ordine qui
+       sotto e' lo STESSO di `fattBasi`, riga per riga.
+       ⚠️ Se un giorno si tocca fattBasi, va toccata anche questa: c'e' la
+       prova `prove/banco_conti.js` che le confronta su 200.000 parcelle. */
+    const r2=n=>Math.round(n*100)/100;
+    const cassa      = r2(compenso*cassaPerc/100);
     /* ===== 13 agosto 2026 — ANCHE QUI LE SPESE ESCONO DALL'IVA =====
        La casella del preventivo dice "Spese (bolli, diritti, copie)": sono le
        spese anticipate in nome e per conto del cliente, escluse dalla base
@@ -10886,12 +10902,11 @@ ${vecchi?`
        Attenzione: "imponibile" qui resta la somma di tutto quello che si
        addebita, perche' e' il numero che si legge sul preventivo; l'IVA pero'
        si calcola su baseIva, che le spese non le contiene. */
-    const baseIva    = compenso + cassa;
-    const imponibile = baseIva + spese;
-    const iva        = baseIva*ivaPerc/100;
-    const ritenuta   = conRitenuta ? compenso*ritPerc/100 : 0;  /* solo sul compenso */
+    const baseIva    = r2(r2(compenso) + cassa);
+    const imponibile = r2(baseIva + spese);
+    const iva        = r2(baseIva*ivaPerc/100);
+    const ritenuta   = conRitenuta ? r2(compenso)*ritPerc/100 : 0;  /* solo sul compenso */
     const totale     = imponibile + iva - ritenuta;
-    const r2=n=>Math.round(n*100)/100;
     return {compenso:r2(compenso),cassa:r2(cassa),spese:r2(spese),baseIva:r2(baseIva),
             imponibile:r2(imponibile),
             iva:r2(iva),ritenuta:r2(ritenuta),totale:r2(totale)};
