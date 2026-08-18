@@ -34,6 +34,32 @@
   status = 301
   force = true
 
+# ===== 16 agosto 2026 — DUE PAGINE MORTE CHE FACEVANO 404 =====
+# Trovate in Search Console. Nessuna pagina del sito le linka: chi ci arriva
+# viene da fuori (vecchie email, o la memoria di Google).
+# Il rinvio per "registrazione.html" c'era gia', ma quello SENZA .html era
+# rimasto scoperto: Google lo visitava ancora il 2 agosto.
+[[redirects]]
+  from = "/registrazione"
+  to = "/#registrati"
+  status = 301
+  force = true
+
+# "disdetta.html" era il link per cancellarsi dalle email. Oggi quella pagina
+# si chiama cancella-iscrizione.html. Un link di disdetta rotto e' la cosa
+# peggiore da lasciare cosi': chi vuole andarsene deve poterlo fare.
+[[redirects]]
+  from = "/disdetta.html"
+  to = "/cancella-iscrizione.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/disdetta"
+  to = "/cancella-iscrizione.html"
+  status = 301
+  force = true
+
 # Pagina Termini duplicata: unifichiamo tutto su /termini-condizioni
 [[redirects]]
   from = "/termini-servizio"

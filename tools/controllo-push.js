@@ -86,6 +86,27 @@ function redirectDiNetlify(){
   return via;
 }
 
+/* ⚠️ Un rinvio che porta su una pagina che non esiste e' lo stesso difetto
+   dei pulsanti: la persona clicca e finisce nel vuoto, solo con un passaggio
+   in mezzo. Aggiunto il 16 agosto insieme ai due rinvii per /registrazione
+   e /disdetta.html. */
+function controllaDoveVannoIRinvii(){
+  if (!esiste('netlify.toml')) return;
+  const t = leggi('netlify.toml');
+  const blocchi = t.split('[[redirects]]').slice(1);
+  for (const b of blocchi){
+    const da = (b.match(/from\s*=\s*"([^"]+)"/) || [])[1];
+    const a  = (b.match(/to\s*=\s*"([^"]+)"/) || [])[1];
+    if (!da || !a) continue;
+    if (/^(https?:|#)/i.test(a)) continue;          // fuori dal sito, o un'ancora
+    const meta = a.split('#')[0].split('?')[0].replace(/^\//, '');
+    if (!meta) continue;                            // "/" e "/#registrati"
+    if (a.indexOf('/.netlify/') === 0) continue;    // lo serve Netlify
+    if (esiste(meta) || esiste(meta + '.html')) continue;
+    errore('netlify.toml', 'il rinvio da ' + da + ' porta a ' + a + ', che non esiste');
+  }
+}
+
 function controllaLink(){
   const redirect = redirectDiNetlify();
   const html = tuttiIFile(['.html']);
@@ -260,6 +281,7 @@ function guardaGliAccenti(){
 function main(){
   const t0 = Date.now();
   controllaLink();
+  controllaDoveVannoIRinvii();
   controllaScript();
   controllaSchema();
   controllaMisure();
