@@ -350,7 +350,7 @@
 
     <section id="preventivi">
       <div class="sec-head"><h2>Preventivi</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" data-action="new-prev">+ Nuovo preventivo</button><button class="btn" title="Descrivi il lavoro a parole, ti preparo le voci di costo" data-action="new-prev-ai">✨ Genera con AI</button></div></div>
-      <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click.</div>
+      <div class="gal-intro">Crea i preventivi con le voci di costo, scarica il PDF da mandare al cliente e, quando accetta, trasformalo in lavoro con un click. Puoi scriverlo a mano, dettarlo all'AI, o farlo nascere da un <b>computo metrico</b> già fatto.</div>
       <div class="viste" id="prev-viste"></div>
       <div id="prev-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
     </section>
@@ -361,7 +361,7 @@
          e' una riga, quando si decide. -->
     <section id="computi">
       <div class="sec-head"><h2>Computo metrico</h2><button class="btn add" data-action="new-computo">+ Nuovo computo</button></div>
-      <div class="gal-intro">Le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e i vuoti da detrarre. La quantità la calcola il gestionale, tu misuri.</div>
+      <div class="gal-intro">Le lavorazioni con le loro misure — parti uguali, lunghezza, larghezza, altezza — e i vuoti da detrarre. La quantità la calcola il gestionale, tu misuri. Le voci le peschi dal <b>prezzario</b>, così non le riscrivi ogni volta; quando è finito, con un clic diventa un <b>preventivo</b>.</div>
       <div class="viste" id="comp-viste"></div>
       <div class="grid" id="comp-list"></div>
     </section>
@@ -372,7 +372,7 @@
          aggiornano i prezzi tutti insieme, che una volta l'anno serve a tutti. -->
     <section id="prezzario">
       <div class="sec-head"><h2>Prezzario</h2><button class="btn add" data-action="new-prezzo">+ Nuova voce</button></div>
-      <div class="gal-intro">Le voci che usi sempre, scritte una volta sola. Nel computo le ritrovi cercando una parola ed entrano già fatte, col loro prezzo. Quelle che usi di più stanno in cima.</div>
+      <div class="gal-intro">Le voci che usi sempre, scritte una volta sola. Nel <b>computo metrico</b> le ritrovi cercando una parola ed entrano già fatte, col loro prezzo — e dal computo finiscono nel <b>preventivo</b>. Quelle che usi di più stanno in cima.</div>
       <div class="field" style="max-width:620px"><label>Cerca una voce</label><input id="pz-cerca" placeholder="Scrivi una parola: tramezzo, intonaco, pavimento…"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
         <button type="button" class="btn" data-action="pz-importa">⬆ Importa da Excel o CSV</button>
@@ -2321,6 +2321,59 @@
     if(tipo==='preventivo'){ prevForm(null,null,true); return; }
     jobForm(null,"",null,true,false,true);
   };
+
+  /* ============================================================
+     IL FILO — 18 agosto 2026 (domanda di Alessio: «e il cliente lo sa?»)
+
+     No, non lo sapeva. La strada Prezzario -> Computo -> Preventivo ->
+     Fattura esisteva, ma stava scritta mezza in una pagina sola: la si
+     scopriva per caso. Se non ce l'aveva chiara chi il gestionale l'ha
+     costruito, un iscritto non la trovava mai.
+
+     Adesso in cima a quelle sezioni c'e' una striscia sempre uguale, con
+     la tappa dove sei accesa e le altre da cliccare. Non e' una
+     funzione nuova: e' la stessa strada, disegnata.
+
+     ⚠️ Si mostrano SOLO le tappe che quel profilo ha davvero. Il Computo
+        e il Prezzario sono accesi solo per gli studi tecnici: a
+        un'impresa una freccia verso una pagina che non esiste sarebbe
+        peggio del silenzio.
+     ⚠️ Meno di due tappe = niente striscia: una freccia sola non e' una
+        strada.
+     ============================================================ */
+  const FILO=[
+    {tab:"prezzario",  lab:"Prezzario"},
+    {tab:"computi",    lab:"Computo metrico"},
+    {tab:"preventivi", lab:"Preventivo"},
+    {tab:"fatture",    lab:"Fattura"}
+  ];
+  function filoHTML(qui){
+    const passi=FILO.filter(function(p){
+      const b=document.querySelector('nav.tabs button[data-tab="'+p.tab+'"]');
+      return !!b && b.style.display!=="none";
+    });
+    if(passi.length<2) return "";
+    return '<div class="filo">'
+      + '<span class="filo-t">Come si incastrano</span>'
+      + passi.map(function(p,i){
+          return (i?'<span class="filo-fre">&rarr;</span>':'')
+            + (p.tab===qui
+               ? '<span class="filo-p filo-p--qui">'+p.lab+'</span>'
+               : '<button type="button" class="filo-p" data-action="rie-go" data-go="'+p.tab+'">'+p.lab+'</button>');
+        }).join("")
+      + '</div>';
+  }
+  /* la striscia si mette sotto la frase di apertura della sezione, e si
+     rifa' a ogni ridisegno: il profilo puo' cambiare mentre sei dentro */
+  function filoMetti(sez,qui){
+    const s=document.getElementById(sez); if(!s) return;
+    const vecchia=s.querySelector(".filo");
+    const html=filoHTML(qui);
+    if(!html){ if(vecchia)vecchia.remove(); return; }
+    if(vecchia){ vecchia.outerHTML=html; return; }
+    const dopo=s.querySelector(".gal-intro")||s.querySelector(".sec-head");
+    if(dopo) dopo.insertAdjacentHTML("afterend",html);
+  }
 
   /* controllo segmentato (Agenda "Mostra", Galleria tipo foto): un solo pulsante acceso */
   function segmOn(sel,v){$$(sel+" button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));}
@@ -4335,6 +4388,7 @@
 
   /* ---------- la sezione ---------- */
   async function renderFatture(){
+   filoMetti("fatture","fatture");
    try{
     const body=$("#fatt-body"), viste=$("#fatt-viste"), sum=$("#fatt-summary");
     if(!body)return;
@@ -11470,6 +11524,7 @@ ${vecchi?`
   /* ---- PREVENTIVI ---- */
   let prevCache=[], prevFilter="tutti", prevRigheCount=0;
   async function renderPreventivi(){
+    filoMetti("preventivi","preventivi");
     const box=$("#prev-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=`<div class="empty"><div class="ic">📑</div><p>Nessun preventivo</p><small>Accedi per creare i preventivi</small></div>`;return;}
     const [{data:pv},{data:cl}]=await Promise.all([
@@ -13957,6 +14012,7 @@ ${vecchi?`
   }
 
   async function renderComputi(){
+    filoMetti("computi","computi");
     const box=$("#comp-list");if(!box)return;
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Nessun computo","Accedi per creare i computi metrici.",
       _SVGV+'<path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>');return;}
@@ -15228,6 +15284,7 @@ ${vecchi?`
   const PZ_MAX=1000;
 
   async function renderPrezzario(){
+    filoMetti("prezzario","prezzario");
     const box=$("#pz-list");if(!box)return;
     const cnt=$("#cnt-prezzario");
     if(!sb||!sbUid){box.innerHTML=tabVuoto("Prezzario","Accedi per usare il tuo prezzario.","");return;}

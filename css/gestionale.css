@@ -2964,3 +2964,30 @@ body:has(#ti-fondatore) .side{
   .pz-griglia{ grid-template-columns:1fr; gap:12px; }
   .pz-prezzo{ font-size:22px; }
 }
+
+/* ============================================================
+   IL FILO — 18 agosto 2026
+   La strada Prezzario → Computo → Preventivo → Fattura, disegnata in
+   cima alla sezione invece che spiegata a parole. La tappa dove sei e'
+   accesa; le altre si cliccano.
+   ⚠️ Su una riga sola quando ci sta; sul telefono va a capo e basta,
+      niente barra che scorre di lato: quella non si vede che c'e'.
+   ============================================================ */
+.filo{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 8px;
+  margin:0 0 18px; padding:10px 12px; background:var(--card);
+  border:1px solid var(--bordo); border-radius:var(--r-card); }
+.filo-t{ flex:0 0 auto; font-size:13px; font-weight:800; letter-spacing:.4px;
+  text-transform:uppercase; color:var(--testo-3); margin-right:4px; }
+.filo-fre{ flex:0 0 auto; color:var(--testo-3); font-size:15px; }
+.filo-p{ flex:0 0 auto; font-family:inherit; font-size:14.5px; font-weight:700;
+  border:1px solid transparent; background:transparent; color:var(--blu);
+  padding:5px 10px; border-radius:8px; cursor:pointer; }
+.filo-p:hover{ background:var(--blu-tenue); }
+.filo-p--qui{ background:var(--blu); color:#fff; cursor:default;
+  border-color:var(--blu); }
+@media(max-width:560px){
+  .filo{ padding:10px; }
+  .filo-t{ flex:1 0 100%; margin:0 0 2px; }
+  /* col dito una tappa alta 27 px si sbaglia: sul telefono si alza */
+  .filo-p{ padding:8px 12px; }
+}
