@@ -3108,3 +3108,55 @@ body:has(#ti-fondatore) .side{
   .wrap section .job-top b{ font-size:18px; }
   .wrap section .tab-tot b{ font-size:20px; }
 }
+
+/* ================================================================
+   LA RICERCA UNICA — 19 agosto 2026
+   Una casella sola sotto la barra del reparto: si scrive un nome ed
+   escono insieme cliente, lavori, preventivi e fatture.
+   Le misure seguono la regola della sezione: niente sotto i 15 px.
+   ================================================================ */
+.ct-barra{ position:sticky; top:56px; z-index:24;
+  background:var(--card); border-bottom:1px solid var(--line); padding:10px 16px; }
+.ct-box{ position:relative; max-width:1040px; margin:0 auto; }
+.ct-lente{ position:absolute; left:15px; top:50%; transform:translateY(-50%);
+  width:21px; height:21px; color:var(--testo-3); pointer-events:none; }
+#ct-q{ width:100%; height:50px; padding:0 46px 0 46px;
+  border:2px solid var(--bordo-forte); border-radius:12px;
+  background:var(--card); color:var(--ink);
+  font-family:inherit; font-size:17px; font-weight:500; line-height:50px; }
+#ct-q::placeholder{ color:var(--testo-3); font-weight:500; }
+#ct-q:focus{ outline:none; border-color:var(--blu); box-shadow:0 0 0 3px var(--blu-tenue); }
+.ct-x{ position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:34px; height:34px; border:none; border-radius:9px;
+  background:transparent; color:var(--testo-2);
+  font-size:24px; line-height:1; cursor:pointer; }
+.ct-x:hover{ background:var(--sfondo); color:var(--ink); }
+
+.ct-pop{ display:none; position:absolute; left:0; right:0; top:calc(100% + 8px);
+  background:var(--card); border:1px solid var(--bordo-forte); border-radius:14px;
+  box-shadow:0 12px 32px rgba(15,23,42,.18);
+  max-height:min(70vh,540px); overflow-y:auto; z-index:26; padding:6px 0; }
+.ct-pop.aperta{ display:block; }
+
+.ct-gruppo + .ct-gruppo{ border-top:1px solid var(--line); margin-top:6px; padding-top:6px; }
+.ct-cap{ padding:10px 18px 6px; font-size:15px; font-weight:700;
+  color:var(--testo-2); letter-spacing:.3px; }
+.ct-cap b{ display:inline-block; margin-left:6px; padding:1px 9px; border-radius:20px;
+  background:var(--sfondo); color:var(--testo-2); font-size:15px; font-weight:700; }
+
+.ct-riga{ display:block; width:100%; text-align:left; border:none; background:transparent;
+  padding:11px 18px; font-family:inherit; cursor:pointer; }
+.ct-riga:hover,.ct-riga:focus{ background:var(--blu-tenue); outline:none; }
+.ct-t{ display:block; font-size:17px; font-weight:600; color:var(--ink); line-height:1.45; }
+.ct-s{ display:block; font-size:15px; color:var(--testo-2); line-height:1.5; margin-top:2px; }
+.ct-s span + span::before{ content:" · "; color:var(--testo-3); }
+
+.ct-vuoto,.ct-piu{ padding:14px 18px; font-size:16px; color:var(--testo-2); line-height:1.5; }
+.ct-piu{ padding-top:4px; }
+
+/* sul telefono la barra del reparto non e' piu' appiccicata in alto,
+   quindi non lo e' nemmeno la ricerca: se no resterebbe sospesa */
+@media(max-width:880px){
+  .ct-barra{ position:static; padding:10px 12px; }
+  .ct-pop{ max-height:min(64vh,460px); }
+}
