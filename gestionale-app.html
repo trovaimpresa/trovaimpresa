@@ -1695,6 +1695,10 @@
         `regole`. La macchina qui sotto non si tocca.
      ============================================================ */
   const CTR_PAROLA={rosso:"DA CORREGGERE",arancio:"DA GUARDARE"};
+  /* quale computo e' aperto adesso: serve perche' le sue lavorazioni
+     stanno in una cache, non nel modulo, e su un computo nuovo quella
+     cache contiene ancora le voci di quello di prima. */
+  let ctrComputoId=null;
 
   /* i titoli che non dicono niente al cliente */
   const CTR_TITOLI_VAGHI=["preventivo","preventivi","nuovo preventivo","lavoro","lavori",
@@ -1713,6 +1717,31 @@
       caselle:"#fa-cli,#fa-data,#fa-bollo,#fa-sconto",
       dentro:["#fatt-righe"],
       regole:ctrRegoleFattura
+    },
+    computo:{
+      caselle:"#co-tit,#co-cli,#co-num,#co-luogo,#co-rib,#co-prz,#co-prz-sel",
+      dentro:[],
+      regole:ctrRegoleComputo
+    },
+    cliente:{
+      caselle:"#c-nome,#c-tel,#c-email,#c-piva,#c-cf,#c-pec,#c-sdi,#c-citta",
+      dentro:[],
+      regole:ctrRegoleCliente
+    },
+    fornitore:{
+      caselle:"#fo-nome,#fo-piva,#fo-tel,#fo-email",
+      dentro:[],
+      regole:ctrRegoleFornitore
+    },
+    fattfornitore:{
+      caselle:"#ff-forn,#ff-num,#ff-data,#ff-imp,#ff-scad",
+      dentro:[],
+      regole:ctrRegoleFattFornitore
+    },
+    scadenza:{
+      caselle:"#s-tit,#s-data,#s-tipo",
+      dentro:[],
+      regole:ctrRegoleScadenza
     },
     lavoro:{
       /* il modulo del lavoro esiste in due vestiti (semplice e collegato al
@@ -1903,6 +1932,192 @@
       dice:"Tipo di pratica non scelto: CILA, SCIA e Permesso di Costruire hanno tempi e allegati diversi."});
     if(comune&&!comune.value.trim()) out.push({el:comune,grave:"arancio",
       dice:"Manca il Comune: è il primo dato che serve per ritrovare la pratica."});
+    return out;
+  }
+
+  /* solo le cifre: una partita IVA scritta «IT 012 345 678 90» ha 11 cifre
+     vere, e non e' sbagliata. Si contano quelle, non i caratteri. */
+  function ctrCifre(v){ return String(v||"").replace(/\D/g,""); }
+  function ctrVale(sel){ const e=$(sel); return e?String(e.value||"").trim():""; }
+
+  /* ============================================================
+     IL COMPUTO METRICO
+
+     ⚠️ Qui le lavorazioni NON sono caselle del modulo: sono righe gia'
+        salvate nel database, disegnate a parte da renderCompVoci in
+        compVociCache. Percio' si guarda la cache — ma solo se e' quella
+        del computo aperto (`ctrComputoId`), se no su un computo nuovo si
+        starebbe leggendo le voci di quello di prima.
+     ============================================================ */
+  function ctrRegoleComputo(){
+    const out=[];
+    const tit=$("#co-tit");
+    if(tit&&!tit.value.trim()) out.push({el:tit,grave:"rosso",
+      dice:"Manca il titolo. Nell'elenco dei computi resta una riga senza nome."});
+
+    const num=$("#co-num");
+    if(num&&!num.value.trim()) out.push({el:num,grave:"arancio",
+      dice:"Senza numero il computo non lo ritrovi, e sul documento il cliente non ha niente da citare."});
+
+    const cli=$("#co-cli");
+    if(cli&&!cli.value) out.push({el:cli,grave:"arancio",
+      dice:"Nessun cliente scelto: il documento esce senza intestatario."});
+
+    const luogo=$("#co-luogo");
+    if(luogo&&!luogo.value.trim()) out.push({el:luogo,grave:"arancio",
+      dice:"Manca dove sono i lavori. Su un computo l'indirizzo ci va sempre: è quello che lo lega al cantiere giusto."});
+
+    /* il prezzario: da dove vengono i prezzi è la prima cosa che ti chiedono */
+    const przSel=$("#co-prz-sel"), prz=$("#co-prz");
+    if(przSel&&!przSel.value&&prz&&!prz.value.trim()) out.push({el:przSel,grave:"arancio",
+      dice:"Non è indicato da dove vengono i prezzi. Su un computo è la prima cosa che ti chiedono: quale prezzario e di che anno."});
+
+    /* il ribasso: sopra il 100% il totale andrebbe sotto zero */
+    const rib=$("#co-rib");
+    if(rib&&rib.value.trim()){
+      const r=_numeroIt(rib.value);
+      if(r!=null&&r>100) out.push({el:rib,grave:"rosso",
+        dice:"Un ribasso oltre il 100% non esiste: vorrebbe dire pagare il cliente per lavorare."});
+      else if(r!=null&&r<0) out.push({el:rib,grave:"rosso",
+        dice:"Il ribasso non può essere negativo. Se stai aggiungendo qualcosa, va messo nelle lavorazioni."});
+    }
+
+    /* le lavorazioni, dalla cache del computo APERTO */
+    if(ctrComputoId&&String(compVociCompId||"")===String(ctrComputoId)
+       &&!((compVociCache||[]).length)){
+      const dove=$("#co-tit");
+      if(dove) out.push({el:dove,grave:"rosso",
+        dice:"Il computo non ha nemmeno una lavorazione: il totale è zero e il documento esce vuoto."});
+    }
+    return out;
+  }
+
+  /* ============================================================
+     IL CLIENTE
+
+     Un cliente compilato a meta' non si vede finche' non provi a
+     fatturargli: e li' e' tardi, perche' la fattura elettronica la
+     rifiuta lo SDI, non il gestionale.
+     ============================================================ */
+  function ctrRegoleCliente(){
+    const out=[];
+    const box=$("#c-tipo-box");
+    const tipo=(box&&box.dataset&&box.dataset.tipo)?box.dataset.tipo:"privato";
+
+    const nome=$("#c-nome");
+    if(nome&&!nome.value.trim()) out.push({el:nome,grave:"rosso",
+      dice:"Manca il nome. Senza, questa scheda non la ritrovi più e nei documenti esce vuota."});
+
+    /* --- di che cosa ha bisogno, secondo quello che è --- */
+    const piva=$("#c-piva"), cf=$("#c-cf");
+    const nPiva=ctrCifre(piva&&piva.value), nCf=String((cf&&cf.value)||"").trim();
+
+    if(tipo==='azienda'){
+      if(piva&&!nPiva) out.push({el:piva,grave:"rosso",
+        dice:"È un'azienda e la partita IVA non c'è: senza, la fattura elettronica non si può fare."});
+      else if(piva&&nPiva.length!==11) out.push({el:piva,grave:"rosso",
+        dice:"La partita IVA ha 11 cifre, questa ne ha "+nPiva.length+". Lo SDI la rifiuta."});
+    }else{
+      if(cf&&!nCf) out.push({el:cf,grave:"arancio",
+        dice:(tipo==='condominio'
+              ? "Un condominio ha il codice fiscale: senza, quando gli fatturi ti tocca cercarlo di corsa."
+              : "Manca il codice fiscale: per fatturare a un privato serve, e il giorno che ti serve non ce l'hai.")});
+      else if(cf&&nCf.length!==16&&nCf.length!==11) out.push({el:cf,grave:"arancio",
+        dice:"Il codice fiscale di una persona ha 16 caratteri (11 se è un condominio o un ente): questo ne ha "+nCf.length+"."});
+      if(piva&&nPiva&&nPiva.length!==11) out.push({el:piva,grave:"arancio",
+        dice:"La partita IVA ha 11 cifre, questa ne ha "+nPiva.length+"."});
+    }
+
+    /* --- dove mandare la fattura elettronica --- */
+    if(tipo!=='privato'){
+      const sdi=$("#c-sdi"), pec=$("#c-pec");
+      const hSdi=String((sdi&&sdi.value)||"").trim(), hPec=String((pec&&pec.value)||"").trim();
+      if(sdi&&!hSdi&&!hPec) out.push({el:sdi,grave:"arancio",
+        dice:"Né codice SDI né PEC: la fattura elettronica non sa dove andare e finisce nel cassetto fiscale, dove il cliente non la guarda."});
+      else if(sdi&&hSdi&&hSdi.length!==7) out.push({el:sdi,grave:"arancio",
+        dice:"Il codice SDI è di 7 caratteri, questo ne ha "+hSdi.length+"."});
+    }
+
+    /* --- come lo si chiama --- */
+    const tel=$("#c-tel"), mail=$("#c-email");
+    const hTel=String((tel&&tel.value)||"").trim(), hMail=String((mail&&mail.value)||"").trim();
+    if(tel&&!hTel&&!hMail) out.push({el:tel,grave:"arancio",
+      dice:"Nessun telefono e nessuna email: questo cliente non lo puoi richiamare."});
+    if(mail&&hMail&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(hMail)) out.push({el:mail,grave:"rosso",
+      dice:"Questa email non è scritta bene: le manca la chiocciola o il punto finale. Così non le arriva niente."});
+    const pec2=$("#c-pec"), hPec2=String((pec2&&pec2.value)||"").trim();
+    if(pec2&&hPec2&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(hPec2)) out.push({el:pec2,grave:"rosso",
+      dice:"Questa PEC non è scritta bene: la fattura elettronica non arriverebbe."});
+    return out;
+  }
+
+  /* ============================================================
+     IL FORNITORE
+     ============================================================ */
+  function ctrRegoleFornitore(){
+    const out=[];
+    const nome=$("#fo-nome");
+    if(nome&&!nome.value.trim()) out.push({el:nome,grave:"rosso",
+      dice:"Manca il nome del fornitore: senza, nelle spese esce una riga vuota."});
+    const piva=$("#fo-piva");
+    const n=ctrCifre(piva&&piva.value);
+    if(piva&&!n) out.push({el:piva,grave:"arancio",
+      dice:"Senza partita IVA il commercialista non sa a chi attribuire le fatture di questo fornitore."});
+    else if(piva&&n.length!==11) out.push({el:piva,grave:"arancio",
+      dice:"La partita IVA ha 11 cifre, questa ne ha "+n.length+"."});
+    const tel=$("#fo-tel"), mail=$("#fo-email");
+    const hTel=String((tel&&tel.value)||"").trim(), hMail=String((mail&&mail.value)||"").trim();
+    if(tel&&!hTel&&!hMail) out.push({el:tel,grave:"arancio",
+      dice:"Nessun telefono e nessuna email: il giorno che ti serve un pezzo non sai come chiamarlo."});
+    if(mail&&hMail&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(hMail)) out.push({el:mail,grave:"rosso",
+      dice:"Questa email non è scritta bene: le manca la chiocciola o il punto finale."});
+    return out;
+  }
+
+  /* ============================================================
+     LA FATTURA DA PAGARE (quella del fornitore)
+
+     Qui l'errore non lo vede nessuno finche' non arriva un sollecito.
+     ============================================================ */
+  function ctrRegoleFattFornitore(){
+    const out=[];
+    const forn=$("#ff-forn");
+    if(forn&&!forn.value) out.push({el:forn,grave:"rosso",
+      dice:"Manca il fornitore: questa spesa non finisce sotto nessuno e nel conto dei fornitori non la vedi."});
+    const num=$("#ff-num");
+    if(num&&!num.value.trim()) out.push({el:num,grave:"arancio",
+      dice:"Senza numero di fattura, se il fornitore ti sollecita non sai di quale sta parlando."});
+    const imp=$("#ff-imp");
+    if(imp){
+      const v=String(imp.value||"").trim();
+      const n=_numeroIt(v);
+      if(!v) out.push({el:imp,grave:"rosso",
+        dice:"Manca l'importo: questa fattura nel conto delle spese vale zero."});
+      else if(n===0) out.push({el:imp,grave:"rosso",
+        dice:"Importo a zero: una fattura da pagare di zero euro non esiste."});
+    }
+    const data=$("#ff-data"), scad=$("#ff-scad");
+    const d=String((data&&data.value)||""), sc=String((scad&&scad.value)||"");
+    if(scad&&!sc) out.push({el:scad,grave:"arancio",
+      dice:"Senza data di scadenza questa fattura non compare nello scadenzario, e te ne ricordi quando è tardi."});
+    else if(scad&&sc&&d&&sc<d) out.push({el:scad,grave:"rosso",
+      dice:"La scadenza è prima della data della fattura: uno dei due giorni è scritto sbagliato."});
+    return out;
+  }
+
+  /* ============================================================
+     LA SCADENZA
+     ============================================================ */
+  function ctrRegoleScadenza(){
+    const out=[];
+    const tit=$("#s-tit");
+    if(tit&&!tit.value.trim()) out.push({el:tit,grave:"rosso",
+      dice:"Manca il titolo: nell'elenco e nell'email di promemoria esce una riga senza nome, e non sai cosa scade."});
+    const data=$("#s-data");
+    if(data&&!data.value) out.push({el:data,grave:"rosso",
+      dice:"Manca la data: senza, non scade mai e il promemoria non parte."});
+    else if(data&&data.value&&data.value<todayStr()) out.push({el:data,grave:"arancio",
+      dice:"Questa data è già passata: il promemoria non ti arriverà più."});
     return out;
   }
 
@@ -7124,8 +7339,10 @@ ${vecchi?`
       +'<div id="fo-ti-risultati" style="margin-top:10px"></div>'
       +'</div>'
       +'</div></div>',
-      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      ctrTastoHTML('fornitore')
+      +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-forn" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button>');
+    ctrAscolta('fornitore');
   }
   async function fornTiCerca(){
     const q=($("#fo-ti-q")&&$("#fo-ti-q").value.trim())||"";
@@ -7209,8 +7426,10 @@ ${vecchi?`
       +'<div class="field"><label>Note</label><textarea id="ff-note" placeholder="Es. sabbia e cemento per il bagno di Via Roma">'+esc(f.note||'')+'</textarea></div>'
       +'</div>'
       +'</div></div>',
-      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      ctrTastoHTML('fattfornitore')
+      +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +'<button class="btn-primary b-save" data-action="save-fattf" data-id="'+(f.id||'')+'">'+(isNew?'Aggiungi':'Salva')+'</button>');
+    ctrAscolta('fattfornitore');
   }
   async function saveFattf(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -8067,8 +8286,10 @@ ${vecchi?`
       +`<div class="field"><textarea id="s-note" placeholder="Numero di protocollo, ufficio, riferimenti...">${esc(s.note||"")}</textarea></div>`
       +'</div>'
       +'</div></div>',
-      '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      ctrTastoHTML('scadenza')
+      +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       +`<button class="btn-primary b-save" data-action="save-scad" data-id="${s.id||""}">${isNew?"Crea":"Salva"}</button>`);
+    ctrAscolta('scadenza');
   }
   async function saveScad(id){
     const titolo=$("#s-tit").value.trim();if(!titolo){toast("Scrivi il titolo");return;}
@@ -8689,9 +8910,11 @@ ${vecchi?`
       </div>
 
       </div></div>`,
-      `<button class="btn b-cancel" data-action="close">Annulla</button>
+      `${ctrTastoHTML('cliente')}
+       <button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-cli" data-id="${c.id||""}">${isNew?"Crea":"Salva"}</button>`);
     if(isNew)aiRigaVia('cliente',!!aiApri);
+    ctrAscolta('cliente');
   }
   /* Clic su Privato / Azienda / Condominio: cambia solo le parole del modulo.
      Nessun campo sparisce, così nessuno resta bloccato se il suo caso è strano. */
@@ -13854,12 +14077,17 @@ ${vecchi?`
 
       +'</div></div>',
 
-       '<button class="btn b-cancel" data-action="close">Annulla</button>'
+       ctrTastoHTML('computo')
+      +'<button class="btn b-cancel" data-action="close">Annulla</button>'
       /* PDF, «Crea il preventivo» ed Elimina non stanno piu' qui: arrivano
          dalla scheda e si mettono in alto (Elimina in fondo a sinistra),
          come in tutte le altre finestre. Prima uscivano doppi. */
       +'<button class="btn-primary b-save" data-action="save-computo" data-id="'+esc(c.id||"")+'">'+(isNew?"Crea computo":"Salva")+'</button>');
 
+    /* quale computo e' aperto: le sue lavorazioni stanno in compVociCache,
+       non nel modulo, e su un computo nuovo la cache e' ancora quella vecchia */
+    ctrComputoId=(c&&c.id)?c.id:null;
+    ctrAscolta('computo');
     bindSeg("co-tipo");
     bindSeg("co-stato");
     const _ps=$("#co-prz-sel");

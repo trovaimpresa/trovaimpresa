@@ -7842,3 +7842,257 @@ minuti ho cercato un guasto che non c'era.
 - `profilo-impresa.html` ha un **altro** form (tabella `preventivi`), che
   manda i contatti all'impresa **scelta dal cliente**: li' e' 1 a 1 e
   voluto, non e' stato toccato.
+
+---
+
+# 18 agosto 2026 (3) — L'AI DENTRO IL MODULO DEI PREVENTIVI
+
+Il punto rimasto a meta' dal 16 agosto: Lavori e Clienti avevano gia' la
+riga dell'AI dentro il modulo, i Preventivi no — usavano ancora la
+vecchia finestrella separata, quella in cui scrivi da una parte e poi
+copi a mano.
+
+## Com'e' adesso
+
+Nel modulo del preventivo **nuovo** c'e' la riga «AI» in cima, chiusa,
+con scritto **1 credito**. La apri, scrivi il lavoro a parole, e si
+riempiono **Titolo, le voci di costo e le note**. Le voci compaiono una
+sotto l'altra, illuminate. Non salva niente da sola.
+
+## La differenza vera con Lavoro e Cliente
+
+Quelli hanno solo caselle singole. Il preventivo no: la sostanza sono le
+**RIGHE**. Percio' `AI_MODULI.preventivo` ha, oltre a `campi`, anche
+**`extra`** — una funzione (`aiRiempiPreventivo`) che aggiunge le righe e
+le note. La macchina di `aiRigaVia` non e' stata toccata: chiama `extra`
+se c'e', e il messaggio finale resta uno solo.
+
+⚠️ **Chi aggiunge una sezione nuova con delle righe** rifa' la stessa
+cosa: una voce in `AI_MODULI` con `extra`, e basta.
+
+## Le scelte da non ribaltare
+
+- **Quello che hai scritto a mano non si tocca.** Si tolgono solo le
+  righe rimaste vuote; se hai gia' due voci tue, quelle dell'AI vanno
+  **in fondo alle tue**.
+- **I totali vanno rifatti a mano** dopo aver messo le righe:
+  `prevTotaleLive()` + il riepilogo IVA/parcella. Si aggiornano
+  sull'evento `input`, che scatta quando scrivi TU, non quando le righe
+  le mette il programma. Senza, il totale restava a zero con le voci
+  gia' scritte sotto — due numeri diversi nella stessa finestra.
+- **Un prezzo che l'AI non sa resta una casella VUOTA, non «0,00».**
+  Zero e' un prezzo deciso, e verrebbe sommato come tale. Il conto non
+  cambia, cambia quello che leggi. **L'ha trovato il banco, non io.**
+- **Cliente e Data l'AI NON li riempie**: la feature `preventivo` del
+  server risponde solo titolo, voci e note. Per aggiungerli va
+  ripubblicata la edge function su Supabase — passaggio a parte dal push.
+
+## ⚠️ UN DIFETTO VERO, NON DI OGGI
+
+Il pulsante «✨ Genera con AI» in cima ai Preventivi aveva
+`class="btn add"`. Ma `tabBottoneTesta()` **nasconde `.sec-head .btn.add`
+quando la sezione e' vuota**: **chi non aveva ancora nessun preventivo non
+vedeva il pulsante.** E' lo **stesso identico difetto** trovato il 16
+agosto sui Clienti, nello stesso punto, e nessuno era andato a guardare
+se ci fosse anche altrove. Cambiato in `class="btn"`.
+
+⚠️ **Da qui in poi:** ogni pulsante nuovo in una `.sec-head` va guardato
+con la sezione VUOTA, non solo con la sezione piena.
+
+## Come e' stato provato
+
+- **`prove/banco_ai_preventivo.js` — 58 prove, 0 rosse.** Fa girare le
+  funzioni vere prese verbatim dal file, dentro Chromium.
+- **`prove/rompi_ai_preventivo.py` — 17 sabotaggi, tutti giusti.**
+
+## ⚠️ TRE SABOTAGGI MIEI ERANO FINTI (la stessa lezione, di nuovo)
+
+1. Uno assegnava un valore a `d`, che e' una **costante**: il file
+   partiva ma la riga esplodeva subito, e il banco restava verde perche'
+   il modulo non veniva toccato lo stesso. **E' identico all'errore del
+   16 agosto.** Riscritto come `if(false){...}`, che cambia il
+   comportamento senza impedire al programma di partire.
+2. Uno pretendeva rosse anche prove che chiamano la funzione
+   **direttamente** e quindi non passano dal pezzo rotto.
+3. Uno ha smascherato **una prova mia verde che non provava niente**: il
+   veleno per l'HTML era `<img src=x onerror=...>` **senza virgolette**,
+   e senza virgolette quella roba resta dentro `value="..."` comunque.
+   Cioe' passava anche togliendo `esc()`. Adesso il veleno le virgolette
+   ce le ha.
+
+Commit `9e18d95`.
+
+
+---
+
+# 18 agosto 2026 (4) — IL CONTROLLORE DEI DOCUMENTI (idea di Alessio)
+
+> «Non ci deve essere un blocco di invio ma solo una segnalazione.»
+> «Noi gli segnaliamo solamente, da solo si deve accorgere.»
+> «Piu' che la scrittura, anche la compilazione dei documenti da inviare
+> al commercialista, ai fornitori, ai clienti.»
+
+## Che cos'e'
+
+Una **macchina sola**, che vive dentro le finestre `openSheetGrande` e
+guarda il documento aperto. Ogni sezione ci porta solo **il suo elenco di
+regole**. In fondo alla finestra c'e' il tasto
+**«Controlla prima di mandarlo»**.
+
+Le parole del tasto le ha scelte lui («se hai dubbi fai controllare
+all'AI»), accorciate cosi' perche' dicono **quando** premerlo, non cosa
+c'e' dentro: un attimo prima di scaricare il PDF o di mandarlo al
+commercialista.
+
+## Le regole del disegno — da non ribaltare
+
+- **Non blocca MAI niente.** Nessun Salva spento, nessun PDF fermato,
+  nessuna schermata nascosta. Solo segni. C'e' una prova apposta (F1-F3)
+  che conta i pulsanti spenti e pretende zero.
+- **Niente tasto «Correggi».** Scelta di Alessio, ed e' quella giusta per
+  lui: ti segna dove e ti scrive accanto com'era giusto, ma a battere sei
+  tu — cosi' l'errore lo **vedi**, non te lo ritrovi cambiato alle spalle.
+- **Due gravita', e la PAROLA conta piu' del colore.**
+  `ROSSO = «DA CORREGGERE»` (il documento esce sbagliato),
+  `ARANCIO = «DA GUARDARE»` (si puo' mandare, ma e' meglio vederlo).
+  Il colore da solo non basta — a chi legge in fretta e a chi i colori
+  non li distingue. **Se fosse tutto rosso, dalla terza volta non lo
+  guarderebbe piu' nessuno.**
+- **Due momenti.** Da solo quando **esci** da una casella (solo quella);
+  col tasto, tutto insieme + un toast che conta e ricorda che non blocca.
+  **Mentre batti non succede niente**: un segno che si accende sotto le
+  dita e' un fastidio, non un aiuto.
+- **Il segno sparisce da solo** appena sistemi la casella.
+- **Vale anche sui documenti GIA' SALVATI**, non solo sui nuovi: il
+  momento in cui serve e' prima di «Scarica PDF».
+
+## ⚠️ NIENTE BOLLINO AI, PER ADESSO
+
+Oggi il tasto fa **solo le regole gratis** — codice normale, costo zero,
+immediate, non sbagliano mai. La parte AI (i refusi tipo «ifacimento»,
+le voci troppo vaghe) ha bisogno di **ripubblicare `ai-generate` su
+Supabase**, che e' un passaggio a parte dal push.
+**Finche' l'AI non lavora davvero, il tasto NON porta il bollino AI e non
+nomina i crediti**: un bollino dove l'AI non c'e' e' una bugia (regola
+del 16 agosto). C'e' la prova H3 che lo controlla.
+
+## Dove si aggiunge una sezione
+
+Si scrive **solo** la sua voce in **`CTR_DOC`**: `caselle` (dove
+attaccare l'orecchio), `dentro` (i contenitori delle righe, che nascono
+dopo), `regole` (la funzione che restituisce
+`[{el, grave:'rosso'|'arancio', dice:'...'}]`).
+**La macchina — `ctrLista` / `ctrSegna` / `ctrTogli` / `ctrGuardaUna` /
+`ctrGuardaTutto` / `ctrAscolta` / `ctrTastoHTML` — non si tocca.**
+
+## Le regole scritte oggi
+
+**Preventivo** — titolo mancante (rosso) o generico (arancio); voce senza
+prezzo, prezzo a zero, nessuna voce (rossi); quantita' a zero, cliente
+mancante, data indietro, IVA non indicata (arancioni); e per i
+professionisti la **ritenuta**: spuntata con un privato, o non spuntata
+con un condominio o un'azienda.
+
+**Fattura** — cliente mancante (**rosso**, non e' un dettaglio), voce
+senza prezzo, prezzo a zero, nessuna voce, **data nel futuro** (rossi);
+il **bollo da 2 € del forfettario sopra i 77,47 €** (arancio), e la
+soglia guarda l'imponibile **meno lo sconto**.
+
+**Lavoro / Pratica** — «cosa c'e' da fare» mancante (rosso), cliente e
+importo mancanti (arancioni); e per gli studi la cosa che fa piu' danno:
+**pratica DEPOSITATA senza numero di protocollo (rosso)** — e' il numero
+con cui il Comune la chiama. Piu' data di deposito, tipo di pratica e
+Comune (arancioni).
+
+⚠️ **La stessa frase cambia parola col ruolo**: «Il lavoro» per
+un'impresa, «La pratica» per uno studio.
+⚠️ **A un'impresa di protocolli e Comuni non si parla mai.**
+
+## ⚠️ LA TRAPPOLA CHE SI RIPETE IN DUE POSTI
+
+Sia `savePrev` sia `saveFattura` **buttano via le righe senza
+descrizione** — prezzo compreso, e **senza dire niente**. Percio' in tutte
+e due c'e' la regola rossa «c'e' un prezzo senza descrizione: salvando,
+questa riga viene buttata via». Non e' un avviso di comodo: e' un dato
+che spariva in silenzio.
+
+## Come e' stato provato
+
+- **`prove/banco_controllore.js` — 75 prove, 0 rosse.** Le domande sono
+  tre: segnala quello che deve? **sta zitto quando e' tutto a posto?**
+  non blocca mai niente?
+- **`prove/rompi_controllore.py` — 27 sabotaggi, tutti giusti.**
+
+## ⚠️ I MIEI ERRORI DI QUESTO PEZZO, DETTI PER PRIMI
+
+1. **Gli accenti scritti con l'apostrofo dentro gli avvisi** — «e'»,
+   «piu'», «quantita'» — cioe' proprio nelle frasi che legge Alessio.
+   E' il **terzo** giorno che questo inciampo torna. Adesso c'e' una
+   prova (H13) che raccoglie **tutte** le frasi `dice:"..."` dal file e
+   le passa al setaccio, non solo quelle che il banco fa comparire.
+2. **Due sabotaggi rompevano due regole insieme**: le frasi del
+   preventivo e della fattura ormai si somigliano, e la ricerca ne
+   pescava due. Vanno presi col commento sopra, che e' unico.
+3. **Una prova verde per il motivo sbagliato**: «a un'impresa non si
+   parla di protocolli» passava perche' nel modulo dell'impresa quelle
+   caselle **non esistono proprio** — quindi restava verde anche
+   togliendo il controllo sul ruolo. Adesso il banco mette in pagina il
+   blocco della pratica **apposta** (`forzaPratica`), con lo stato
+   «depositata» e il protocollo vuoto.
+
+## Poi, lo stesso giorno: TUTTE E OTTO LE SEZIONI
+
+Alessio: *«invece di farli uno a uno facciamoli tutti»*. E si e' visto
+che la macchina reggeva: cinque sezioni nuove sono state **solo elenchi
+di regole**, senza toccare una riga di `ctrLista` / `ctrSegna` /
+`ctrAscolta` / `ctrGuardaTutto`. E' la prova che il disegno era giusto.
+
+Coperte adesso: **preventivo, fattura, lavoro/pratica, computo metrico,
+cliente, fornitore, fattura da pagare, scadenza.**
+
+**Computo metrico** — titolo mancante (rosso); **ribasso oltre il 100%**
+(rosso: vorrebbe dire pagare il cliente per lavorare); numero, cliente,
+luogo dei lavori e **prezzario non indicato** (arancioni).
+⚠️ **Le lavorazioni NON sono caselle del modulo**: sono righe salvate,
+in `compVociCache`. Si guardano solo se `compVociCompId` corrisponde a
+`ctrComputoId` — il computo aperto — se no su un computo **nuovo** si
+leggerebbero le voci di quello di prima. C'e' la prova M9 apposta.
+
+**Cliente** — nome mancante (rosso); **azienda senza partita IVA**
+(rosso: la fattura elettronica non si puo' fare); partita IVA che non ha
+11 cifre (rosso, e dice **quante ne ha**); email o PEC senza chiocciola
+(rosso); codice fiscale mancante o di lunghezza strana, ne' SDI ne' PEC,
+nessun contatto (arancioni).
+⚠️ **Si contano le CIFRE, non i caratteri** (`ctrCifre`): «IT 012 345
+678 90» e' una partita IVA giusta, e segnarla sarebbe un falso allarme.
+⚠️ Il codice fiscale a **11** caratteri passa: condomini ed enti ce
+l'hanno cosi'.
+⚠️ Il tipo si legge da `#c-tipo-box` `data-tipo`, non dal database: nel
+modulo si puo' cambiare senza salvare.
+
+**Fornitore** — nome (rosso); partita IVA e contatti (arancioni).
+
+**Fattura da pagare** — fornitore e importo mancanti, importo a zero, e
+la **scadenza PRIMA della data della fattura** (rossi: uno dei due
+giorni e' scritto male); scadenza vuota (arancio: non entra nello
+scadenzario).
+
+**Scadenza** — titolo e data mancanti (rossi); data gia' passata
+(arancio: il promemoria non arrivera' piu').
+
+### Le prove che tengono insieme il tutto
+
+`banco_controllore.js`: **115 prove, 0 rosse**. In fondo, tre prove
+(H15/H16/H17) girano sull'elenco delle otto sezioni e pretendono che
+**ognuna** abbia il suo tasto, il suo orecchio sulle caselle e la sua
+voce in `CTR_DOC`. Una regola scritta e non attaccata a niente non si
+vede da fuori: da qui in poi il banco se ne accorge.
+
+## Resta aperto su questo pezzo
+
+- **La parte AI del controllo** (refusi, voci vaghe): serve la nuova
+  feature nella edge function `ai-generate` e la sua ripubblicazione.
+- **Le sezioni ancora scoperte** sono quelle dove non c'e' molto da
+  controllare: squadra, mezzi, carte aziendali, corsi.
+- **«Spese: −0,00 €»** dentro la scheda del lavoro: un meno davanti a
+  zero. Non rompe niente, si legge male.
