@@ -176,6 +176,18 @@
 
 # ===== fine della roba tenuta fuori =====
 
+# ===== 18 agosto 2026 — «VOGLIO CONTATTARLO» =====
+# Il pulsante dentro l'email che arriva all'impresa. Indirizzo corto perche'
+# finisce dentro un'email: /.netlify/functions/... si legge male e certi
+# programmi di posta lo spezzano a meta'.
+# ⚠️ Sta DOPO i blocchi qui sopra ma prima di tutto il resto: nessuno di
+#    quelli combacia con questo indirizzo, quindi non si pestano i piedi.
+[[redirects]]
+  from = "/prendi-richiesta"
+  to = "/.netlify/functions/prendi-richiesta"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/gestionale"
   to = "/gestionale-invito.html"

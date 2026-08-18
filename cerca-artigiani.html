@@ -598,7 +598,7 @@
          e senza la spunta il pulsante NON manda. */
       + '<label id="rc-cons-riga" for="rc-consenso" style="display:flex;gap:10px;align-items:flex-start;background:#f7f9fa;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;margin-bottom:12px;cursor:pointer">'
       +   '<input type="checkbox" id="rc-consenso" style="width:20px;height:20px;min-width:20px;margin:1px 0 0;accent-color:#0066ff;cursor:pointer">'
-      +   '<span id="rc-cons-testo" style="font-size:13px;line-height:1.55;color:#42546b">Ho letto la <a href="/privacy-policy.html" target="_blank" rel="noopener" style="color:#0066ff;font-weight:700">privacy policy</a> e accetto che il mio nome, il mio telefono e la mia email vengano inviati a un massimo di 5 attivit&agrave; iscritte della mia zona, che potranno contattarmi direttamente.</span>'
+      +   '<span id="rc-cons-testo" style="font-size:13px;line-height:1.55;color:#42546b">Ho letto la <a href="/privacy-policy.html" target="_blank" rel="noopener" style="color:#0066ff;font-weight:700">privacy policy</a> e accetto che la mia richiesta venga mandata a un massimo di 5 attivit&agrave; iscritte della mia zona, e che il mio nome, il mio telefono e la mia email vengano dati solo a quelle che chiederanno di contattarmi.</span>'
       + '</label>'
       + '<p id="rc-cons-err" style="display:none;font-size:13px;color:#c0392b;font-weight:700;margin:0 0 10px">Metti la spunta qui sopra per poter mandare la richiesta.</p>'
       + '<button id="rc-btn" onclick="inviaRichiestaCliente()" style="background:#0066ff;color:white;border:none;border-radius:8px;padding:13px 24px;font-size:15px;font-weight:700;cursor:pointer">Invia richiesta</button>'
@@ -650,7 +650,7 @@
       const res = await fetch('/.netlify/functions/richiesta-cliente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, telefono, email, categoria: 'artigiani', zona, ricerca , consenso: true, consenso_testo: "Ho letto la privacy policy e accetto che il mio nome, il mio telefono e la mia email vengano inviati a un massimo di 5 attivita iscritte della mia zona, che potranno contattarmi direttamente."})
+        body: JSON.stringify({ nome, telefono, email, categoria: 'artigiani', zona, ricerca , consenso: true, consenso_testo: "Ho letto la privacy policy e accetto che la mia richiesta venga mandata a un massimo di 5 attivita iscritte della mia zona, e che il mio nome, il mio telefono e la mia email vengano dati solo a quelle che chiederanno di contattarmi."})
       });
       if (!res.ok) throw new Error('invio fallito');
       document.getElementById('richiesta-cliente-box').innerHTML = '<p style="font-weight:700;color:#0066ff;font-size:15px">✅ Grazie! Ti ricontatteremo presto.</p>';

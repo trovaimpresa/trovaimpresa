@@ -1,4 +1,14 @@
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
+
+/* ⚠️ 18 agosto 2026 — I CONTATTI NON PARTONO PIU' DENTRO L'EMAIL.
+   Prima questa funzione mandava nome, telefono ed email del cliente a 5
+   imprese che non avevano chiesto niente. Adesso l'email dice solo zona,
+   categoria e cosa cerca, e porta un pulsante: i contatti li vede solo
+   chi clicca, e resta scritto chi e quando (netlify/functions/prendi-richiesta.js).
+   Il consenso che il cliente spunta nelle pagine «cerca» dice esattamente
+   questo: se si cambia una delle due parti, va cambiata anche l'altra. */
+const SITO = 'https://trovaimpresa.com';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -206,10 +216,16 @@ exports.handler = async function (event) {
 
       // Cap giornaliero per impresa
       const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
-      const { data: inviatiOggi } = await supabaseAdmin
+      const { data: inviatiOggi, error: errOggi } = await supabaseAdmin
         .from('richieste_inviate')
         .select('impresa_id')
         .gte('created_at', oggi.toISOString());
+      /* ⚠️ Questa lettura falliva da sempre in silenzio (la tabella non
+         esisteva), quindi il tetto di 3 email al giorno per impresa non ha
+         MAI funzionato. Adesso almeno si vede nei log. */
+      if (errOggi)
+        console.error('[richiesta-cliente] tetto giornaliero non applicato:', errOggi.message,
+                      '— hai lanciato sql/richieste-contatto-su-richiesta.sql?');
       const countMap = {};
       (inviatiOggi || []).forEach(r => { countMap[r.impresa_id] = (countMap[r.impresa_id] || 0) + 1; });
 
@@ -219,6 +235,28 @@ exports.handler = async function (event) {
 
       for (const im of selezionati) {
         const nomeImp = esc(im.nome_attivita || im.nome || 'Gentile impresa');
+
+        /* ⚠️ La riga di registro si scrive PRIMA dell'email, perche' e' lei
+           che contiene il codice del pulsante: senza, il link porterebbe
+           nel vuoto. E si guarda l'esito — Supabase non lancia mai, quindi
+           una scrittura non riuscita e' identica a una riuscita se nessuno
+           controlla. E' cosi' che questa tabella e' rimasta finta per
+           settimane senza che se ne accorgesse nessuno. */
+        const token = crypto.randomUUID();
+        const { data: segno, error: errSegno } = await supabaseAdmin
+          .from('richieste_inviate')
+          .insert({ richiesta_id: richiestaId, impresa_id: im.id,
+                    token, email_inviata_a: im.email })
+          .select('id')
+          .single();
+
+        if (errSegno || !segno) {
+          console.error('[richiesta-cliente] registro non scritto, non mando niente a',
+                        im.id, errSegno ? errSegno.message : 'nessuna riga');
+          continue;
+        }
+
+        const link = SITO + '/prendi-richiesta?t=' + encodeURIComponent(token);
         const htmlImp = `
           <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
             <div style="background:linear-gradient(135deg,#0066ff,#0a2a4d);padding:28px 24px;text-align:center;border-radius:12px 12px 0 0">
@@ -227,36 +265,46 @@ exports.handler = async function (event) {
             <div style="padding:32px 24px;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
               <p style="font-size:15px;margin-bottom:16px">Ciao <strong>${nomeImp}</strong>,</p>
               <p style="font-size:14px;line-height:1.6;margin-bottom:20px">
-                un cliente sta cercando un professionista nella tua zona. Contattalo direttamente prima che lo facciano gli altri.
+                un cliente sta cercando qualcuno nella tua zona. Ecco cosa ha scritto:
               </p>
               <div style="background:#f5f9ff;border-left:4px solid #0066ff;border-radius:6px;padding:8px 20px;margin-bottom:24px">
                 <table style="width:100%;border-collapse:collapse;font-size:14px">
-                  <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;width:130px">Cliente</td><td style="padding:10px 0;font-weight:700">${esc(nome)}</td></tr>
-                  <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Telefono</td><td style="padding:10px 0;font-weight:700">${esc(telefono)}</td></tr>
-                  ${email ? `<tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Email</td><td style="padding:10px 0"><a href="mailto:${esc(email)}">${esc(email)}</a></td></tr>` : ''}
-                  <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Zona</td><td style="padding:10px 0">${esc(zona) || '—'}</td></tr>
-                  <tr><td style="padding:10px 0;color:#666;vertical-align:top">Cosa cerca</td><td style="padding:10px 0;white-space:pre-wrap">${esc(ricerca) || '—'}</td></tr>
+                  <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;width:130px">Zona</td><td style="padding:10px 0;font-weight:700">${esc(zona) || '—'}</td></tr>
+                  <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666">Categoria</td><td style="padding:10px 0">${esc(categoria) || '—'}</td></tr>
+                  <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:10px 0;color:#666;vertical-align:top">Cosa cerca</td><td style="padding:10px 0;white-space:pre-wrap">${esc(ricerca) || '—'}</td></tr>
+                  <tr><td style="padding:10px 0;color:#666">Arrivata il</td><td style="padding:10px 0">${dataFmt}</td></tr>
                 </table>
               </div>
-              <div style="text-align:center;margin-bottom:24px">
-                <a href="tel:${esc(telefono)}" style="display:inline-block;background:#0066ff;color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">📞 Chiama il cliente</a>
+              <div style="text-align:center;margin-bottom:20px">
+                <a href="${esc(link)}" style="display:inline-block;background:#0066ff;color:white;padding:16px 34px;border-radius:8px;font-size:16px;font-weight:700;text-decoration:none">Voglio contattarlo</a>
               </div>
+              <p style="font-size:13px;line-height:1.6;color:#666;margin:0 0 16px">
+                Nome, telefono ed email del cliente compaiono solo se premi il pulsante.
+                Se il lavoro non ti interessa, non fare niente: i suoi dati restano dove sono.
+              </p>
               <p style="font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;margin:0">
                 Ricevi questa email perché sei iscritto a TrovaImpresa nella zona indicata dal cliente.
+                Il link vale 60 giorni ed è solo tuo.
               </p>
             </div>
             <p style="text-align:center;font-size:11px;color:#bbb;margin-top:12px">TrovaImpresa — <a href="https://trovaimpresa.com" style="color:#bbb">trovaimpresa.com</a></p>
           </div>
         `;
         try {
-          const r = await inviaEmail(im.email, 'Nuova richiesta cliente nella tua zona — TrovaImpresa', htmlImp, email || null);
-          if (r.ok) {
-            await supabaseAdmin.from('richieste_inviate').insert({ richiesta_id: richiestaId ? String(richiestaId) : null, impresa_id: im.id });
-          } else {
+          /* ⚠️ Niente `reply_to` con l'email del cliente: rimetterebbe il
+             suo indirizzo dentro l'email, cioe' proprio quello che stiamo
+             togliendo. Si risponde a noi. */
+          const r = await inviaEmail(im.email, 'Nuova richiesta cliente nella tua zona — TrovaImpresa', htmlImp, null);
+          if (!r.ok) {
             console.error('[richiesta-cliente] inoltro Resend fallito', im.id, await r.text());
+            /* L'email non e' partita: si toglie la riga, se no quel codice
+               resterebbe appeso e occuperebbe una delle 3 al giorno. */
+            await supabaseAdmin.from('richieste_inviate').delete().eq('id', segno.id);
           }
         } catch (e) {
           console.error('[richiesta-cliente] inoltro errore', im.id, e.message);
+          try { await supabaseAdmin.from('richieste_inviate').delete().eq('id', segno.id); }
+          catch (e2) { console.error('[richiesta-cliente] pulizia fallita', segno.id, e2.message); }
         }
       }
     }
