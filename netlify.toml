@@ -3,6 +3,16 @@
   functions = "netlify/functions"
   edge_functions = "netlify/edge-functions"
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ':!*.md' ':!docs/' ':!.gitignore' ':!*.sql'"
+  # ===== 16 agosto 2026 — IL CONTROLLO PRIMA DI PUBBLICARE =====
+  # Gira a ogni push, PRIMA che il sito vada online. Se trova un link che
+  # porta nel vuoto, uno <script> con un errore di sintassi, uno schema per
+  # Google rotto o una regola del progetto saltata, la pubblicazione si
+  # ferma e il sito online resta quello di prima.
+  # Nasce da tre pulsanti che in due giorni hanno portato su pagine che non
+  # esistevano. Cosa controlla e perche' e' scritto in tools/controllo-push.js.
+  # Per spegnerlo in fretta, se un giorno dovesse dare fastidio: mettere un
+  # cancelletto davanti alla riga qui sotto.
+  command = "node tools/controllo-push.js"
 
 [build.environment]
   NODE_VERSION = "22"
