@@ -2931,3 +2931,36 @@ body:has(#ti-fondatore) .side{
 .ctr-str-l li.ctr-str-rosso{ color:var(--err); font-weight:600; }
 .ctr-str-l li.ctr-str-arancio{ color:#B45309; font-weight:600; }
 .ctr-str-vai{ margin-top:12px; }
+
+/* ============================================================
+   IL PREZZARIO — 18 agosto 2026
+
+   Era rimasto indietro: le voci erano righe sottili prese in prestito
+   dalle spese, e il PREZZO — la sola cosa che cerchi quando apri questa
+   pagina — stava in coda a una riga grigia da 13 px, in mezzo all'unita',
+   alla categoria e al «mai usata».
+   Adesso ogni voce e' una scheda come nei Preventivi, e il prezzo sta
+   grande e da solo.
+   ============================================================ */
+.pz-griglia{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); }
+.pz-card{ position:relative; background:var(--card); border:1px solid var(--bordo);
+  border-radius:var(--r-card); padding:14px 16px 15px; cursor:pointer;
+  box-shadow:var(--shadow); transition:border-color .15s ease, box-shadow .15s ease; }
+.pz-card:hover{ border-color:var(--blu); box-shadow:0 6px 18px rgba(0,102,255,.10); }
+
+.pz-testa{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.pz-cod{ flex:1 1 auto; font-size:13.5px; font-weight:800; letter-spacing:.3px;
+  color:var(--blu-scuro); background:var(--blu-tenue); padding:3px 9px; border-radius:6px;
+  align-self:flex-start; }
+.pz-cod--no{ color:var(--testo-3); background:var(--sfondo); font-weight:600; }
+.pz-x{ flex:0 0 auto; min-width:36px; min-height:36px; font-size:20px; line-height:1; }
+
+.pz-desc{ font-size:16px; line-height:1.45; font-weight:600; color:var(--testo); }
+.pz-prezzo{ font-size:24px; font-weight:800; color:var(--blu); margin-top:10px; }
+.pz-prezzo small{ font-size:15px; font-weight:600; color:var(--testo-2); }
+.pz-meta{ font-size:13.5px; color:var(--testo-3); margin-top:6px; }
+
+@media(max-width:560px){
+  .pz-griglia{ grid-template-columns:1fr; gap:12px; }
+  .pz-prezzo{ font-size:22px; }
+}

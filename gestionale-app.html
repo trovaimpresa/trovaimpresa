@@ -15260,16 +15260,29 @@ ${vecchi?`
        tiriamo giu', si dice invece di far credere che siano tutte */
     const avviso=(pzCache.length>=PZ_MAX)
       ? '<div class="sh-nota">Il prezzario ha almeno '+PZ_MAX+' voci: qui sotto vedi le '+PZ_MAX+' che usi di più. Cerca una parola per trovare le altre.</div>' : "";
-    box.innerHTML=avviso+'<div class="lav-media">'+L.map(x=>
-      '<div class="spesa-row" data-action="edit-prezzo" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
-      +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
-      +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
-      +    (x.categoria?" · "+esc(x.categoria):"")
-      +    (x.fonte?" · "+esc(x.fonte):"")
-      +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):" · mai usata")
-      +  '</small></span>'
-      +'<b></b>'
-      +'<button type="button" class="rdel" data-action="del-prezzo" data-id="'+esc(String(x.id))+'" title="Metti nel cestino">×</button></div>').join("")
+    /* ===== 18 agosto 2026 — LE VOCI DIVENTANO SCHEDE =====
+       Prima erano righe sottili prese in prestito dalle spese: il PREZZO —
+       cioe' la sola cosa che cerchi quando apri il prezzario — stava in
+       fondo a una riga grigia piccola, in mezzo all'unita', alla categoria
+       e al «mai usata». Adesso ogni voce e' una scheda come nei Preventivi,
+       e il prezzo sta grande e da solo.
+       ⚠️ Il pulsante × resta DENTRO la scheda: il gestore dei clic prende
+       il `data-action` piu' interno, quindi cliccare la × cestina e non
+       apre la voce. */
+    box.innerHTML=avviso+'<div class="pz-griglia">'+L.map(x=>
+      '<div class="pz-card" data-action="edit-prezzo" data-id="'+esc(String(x.id))+'">'
+      +  '<div class="pz-testa">'
+      +    (x.codice?'<span class="pz-cod">'+esc(x.codice)+'</span>':'<span class="pz-cod pz-cod--no">senza codice</span>')
+      +    '<button type="button" class="rdel pz-x" data-action="del-prezzo" data-id="'+esc(String(x.id))+'" title="Metti nel cestino">&times;</button>'
+      +  '</div>'
+      +  '<div class="pz-desc">'+esc(x.descrizione||"(senza descrizione)")+'</div>'
+      +  '<div class="pz-prezzo">'+eur2(x.prezzo_unitario)+(x.unita?'<small> / '+esc(x.unita)+'</small>':'')+'</div>'
+      +  '<div class="pz-meta">'
+      +    (x.categoria?esc(x.categoria)+' · ':'')
+      +    (x.fonte?esc(x.fonte)+' · ':'')
+      +    ((+x.usata_volte)?("usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"mai usata")
+      +  '</div>'
+      +'</div>').join("")
       +'</div>'
       +'<div class="sh-nota">'+L.length+(L.length===1?" voce":" voci")+(q?(" su "+pzCache.length):"")+'. Clicca una voce per correggerla.</div>';
     const ce=$("#pz-cerca");
