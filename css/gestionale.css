@@ -2873,3 +2873,46 @@ body:has(#ti-fondatore) .side{
   /* se no l'ultima scheda della lista finisce nascosta sotto la barra */
   .main .wrap{ padding-bottom:104px; }
 }
+
+/* ============================================================
+   IL CONTROLLORE — 18 agosto 2026 (idea di Alessio)
+
+   «Non ci deve essere un blocco di invio ma solo una segnalazione.»
+   Percio' qui dentro non c'e' niente che spenga un pulsante o nasconda
+   una schermata: si segna la casella e si scrive sotto cosa non va.
+
+   ⚠️ IL COLORE DA SOLO NON BASTA. Vale per chi legge in fretta e vale
+      per chi i colori non li distingue: davanti a ogni frase c'e' la
+      PAROLA — «DA CORREGGERE» o «DA GUARDARE». Il colore aiuta, la
+      parola decide.
+   ⚠️ Niente sotto i 13 px, come dappertutto.
+   ============================================================ */
+.ctr-rosso{ border-color:var(--err) !important; box-shadow:0 0 0 3px var(--err-bg) !important; }
+.ctr-arancio{ border-color:#D97706 !important; box-shadow:0 0 0 3px #FFF7ED !important; }
+
+.ctr-msg{ display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap;
+  margin:8px 0 2px; font-size:14.5px; line-height:1.5; font-weight:600; }
+.ctr-msg--rosso{ color:var(--err); }
+.ctr-msg--arancio{ color:#B45309; }
+.ctr-msg b{ font-weight:800; }
+.ctr-mk{ flex:0 0 auto; font-size:13px; font-weight:800; letter-spacing:.5px;
+  padding:3px 8px; border-radius:6px; white-space:nowrap; }
+.ctr-msg--rosso .ctr-mk{ background:var(--err-bg); color:var(--err); }
+.ctr-msg--arancio .ctr-mk{ background:#FFF7ED; color:#B45309; }
+.ctr-msg-t{ flex:1 1 220px; min-width:0; }
+
+/* dentro le righe delle voci il messaggio sta sotto la riga, non di fianco:
+   li' lo spazio in larghezza e' gia' tutto occupato dalle tre caselle */
+#prev-righe .ctr-msg{ margin:2px 0 12px; }
+
+/* il tasto in fondo alla finestra, a sinistra, lontano da «Salva»:
+   non e' un'azione che chiude niente, e non deve stare in mezzo a quelle
+   che chiudono. */
+.ctr-tasto{ white-space:nowrap; }
+/* sul telefono i tre pulsanti in fila non ci stanno, e «Controlla prima di
+   mandarlo» si schiacciava a due lettere: la riga va a capo e lui si prende
+   tutta la larghezza, sopra Annulla e Salva. */
+@media(max-width:900px){
+  .sheet--grande .sh-foot{ flex-wrap:wrap; }
+  .sheet--grande .sh-foot .ctr-tasto{ flex:1 0 100%; margin-bottom:2px; }
+}

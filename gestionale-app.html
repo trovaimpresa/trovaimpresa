@@ -1663,6 +1663,232 @@
     }
   }
 
+  /* ============================================================
+     IL CONTROLLORE — 18 agosto 2026 (idea di Alessio)
+
+     «Non ci deve essere un blocco di invio ma solo una segnalazione.»
+     E' tutto qui: guarda il documento aperto e SEGNA. Non spegne mai il
+     Salva, non ferma mai un PDF, non corregge niente da solo. A battere
+     e' sempre lui — cosi' l'errore lo vede, invece di ritrovarsi il
+     modulo cambiato alle spalle.
+
+     DUE GRAVITA', e la parola conta piu' del colore:
+       ROSSO   «DA CORREGGERE» — cosi' il documento esce sbagliato
+       ARANCIO «DA GUARDARE»   — si puo' mandare, ma e' meglio vederlo
+     Se fosse tutto rosso, dalla terza volta non lo guarderebbe piu'.
+
+     DUE MOMENTI:
+       - da solo, quando ESCI da una casella: si segna solo quella;
+       - col tasto «Controlla prima di mandarlo»: tutto insieme.
+     Mentre batti non succede niente: un segno che si accende sotto le
+     dita e' un fastidio, non un aiuto.
+
+     ⚠️ QUESTE REGOLE SONO CODICE NORMALE, NON AI. Costano zero, sono
+        immediate e non sbagliano mai. L'AI arrivera' dentro lo stesso
+        tasto, per quello che una regola non sa vedere (i refusi, una
+        voce troppo vaga). Finche' non c'e', il tasto NON porta il
+        bollino AI e non nomina i crediti: un bollino dove l'AI non
+        lavora e' una bugia (regola del 16 agosto).
+
+     ⚠️ PER AGGIUNGERE UNA SEZIONE (fatture, computo metrico, fornitori,
+        scadenze...) si scrive SOLO la sua voce in CTR_DOC: `caselle` e
+        `regole`. La macchina qui sotto non si tocca.
+     ============================================================ */
+  const CTR_PAROLA={rosso:"DA CORREGGERE",arancio:"DA GUARDARE"};
+
+  /* i titoli che non dicono niente al cliente */
+  const CTR_TITOLI_VAGHI=["preventivo","preventivi","nuovo preventivo","lavoro","lavori",
+                          "vari","varie","offerta","computo","test","prova","boh","x"];
+
+  const CTR_DOC={
+    preventivo:{
+      /* dove attaccare l'orecchio: uscendo da una di queste si guarda
+         solo quella. Le righe delle voci nascono dopo, percio' si
+         ascolta il contenitore (vedi ctrAscolta). */
+      caselle:"#pv-tit,#pv-cli,#pv-data,#pv-iva-imp,#pv-rit",
+      dentro:["#prev-righe"],
+      regole:ctrRegolePreventivo
+    }
+  };
+
+  /* il tipo del cliente scelto (privato / azienda / condominio), se lo
+     sappiamo. Se cliCache non e' ancora arrivata NON si tira a indovinare:
+     meglio nessun avviso che un avviso sbagliato sulla ritenuta. */
+  function ctrTipoCliente(){
+    const sel=$("#pv-cli"); if(!sel||!sel.value) return null;
+    const c=(cliCache||[]).find(x=>String(x.id)===String(sel.value));
+    return (c&&c.tipo)?String(c.tipo):null;
+  }
+
+  function ctrRegolePreventivo(){
+    const out=[];
+
+    /* --- il titolo --- */
+    const tit=$("#pv-tit");
+    if(tit){
+      const v=tit.value.trim();
+      if(!v) out.push({el:tit,grave:"rosso",
+        dice:"Manca il titolo. Nell'elenco e sul PDF resta una riga senza nome, e fra un mese non sai più qual era."});
+      else if(CTR_TITOLI_VAGHI.indexOf(_aiNorm(v))>=0) out.push({el:tit,grave:"arancio",
+        dice:"«"+v+"» al cliente non dice niente. Scrivi cosa si fa: «Rifacimento bagno 6 mq»."});
+    }
+
+    /* --- le voci di costo --- */
+    let conDescrizione=0;
+    $$("#prev-righe [data-riga]").forEach(function(r){
+      const cd=r.querySelector(".pr-desc"), cq=r.querySelector(".pr-qta"), cp=r.querySelector(".pr-prezzo");
+      const desc=cd?cd.value.trim():"";
+      const prezzoScritto=cp?cp.value.trim():"";
+      const qta=_numRiga(r,".pr-qta",null), prezzo=_numRiga(r,".pr-prezzo",null);
+      if(desc) conDescrizione++;
+      /* ⚠️ questa e' la piu' importante di tutte: salvando, una riga senza
+         descrizione viene BUTTATA VIA (vedi savePrev) — prezzo compreso, e
+         senza dire niente a nessuno. */
+      if(!desc&&prezzoScritto&&cd) out.push({el:cd,grave:"rosso",
+        dice:"C'è un prezzo senza descrizione: salvando, questa riga viene buttata via e il prezzo sparisce senza dirtelo."});
+      if(desc&&!prezzoScritto&&cp) out.push({el:cp,grave:"rosso",
+        dice:"«"+desc+"» non ha prezzo: nel totale conta zero."});
+      if(desc&&prezzoScritto&&prezzo===0&&cp) out.push({el:cp,grave:"rosso",
+        dice:"«"+desc+"» ha prezzo zero: al cliente arriva come lavoro regalato."});
+      if(desc&&qta===0&&cq) out.push({el:cq,grave:"arancio",
+        dice:"Quantità a zero: «"+desc+"» non somma niente nel totale."});
+    });
+    if(!conDescrizione){
+      const primo=$("#prev-righe .pr-desc");
+      if(primo) out.push({el:primo,grave:"rosso",
+        dice:"Il preventivo non ha nemmeno una voce. Così non si salva, e al cliente non arriva niente."});
+    }
+
+    /* --- il cliente --- */
+    const cli=$("#pv-cli");
+    if(cli&&!cli.value) out.push({el:cli,grave:"arancio",
+      dice:"Nessun cliente scelto: il PDF esce senza intestatario, e nell'elenco non lo ritrovi cercando il suo nome."});
+
+    /* --- la data --- */
+    const dt=$("#pv-data");
+    if(dt&&dt.value&&dt.value<todayStr()) out.push({el:dt,grave:"arancio",
+      dice:"La data è indietro rispetto a oggi: sul PDF il cliente legge un preventivo già vecchio."});
+
+    /* --- IVA (imprese e artigiani) oppure ritenuta (professionisti) --- */
+    if(ruoloUtente!=='professionista'){
+      const iva=$("#pv-iva-imp");
+      if(iva&&iva.value==="") out.push({el:iva,grave:"arancio",
+        dice:"Senza aliquota IVA il cliente vede solo l'imponibile, e ti richiamerà per chiederti quanto viene finito."});
+    }else{
+      const rit=$("#pv-rit"), tipo=ctrTipoCliente();
+      /* in forfettario la casella e' spenta: non c'e' niente da dire */
+      if(rit&&!rit.disabled&&tipo){
+        if(rit.checked&&tipo==='privato') out.push({el:rit,grave:"arancio",
+          dice:"Il cliente è un privato: la ritenuta d'acconto non si applica. Con lui la casella va lasciata vuota."});
+        if(!rit.checked&&(tipo==='azienda'||tipo==='condominio')) out.push({el:rit,grave:"arancio",
+          dice:(tipo==='condominio'?"Il cliente è un condominio":"Il cliente è un'azienda")
+               +": di norma la ritenuta del 20% va applicata."});
+      }
+    }
+    return out;
+  }
+
+  /* ---------- la macchina: da qui in giu' non c'e' niente di specifico ---------- */
+
+  function ctrLista(tipo){
+    const doc=CTR_DOC[tipo]; if(!doc||typeof doc.regole!=="function") return [];
+    let l=[];
+    /* ⚠️ se una regola esplode NON deve portarsi dietro il modulo: il
+       controllore e' un aiuto, non un pezzo indispensabile. */
+    try{ l=doc.regole()||[]; }catch(e){ console.warn("[controllore]",e); l=[]; }
+    return l.filter(s=>s&&s.el&&document.body.contains(s.el));
+  }
+
+  function ctrTogli(el){
+    if(!el) return;
+    el.classList.remove("ctr-rosso","ctr-arancio");
+    const dopo=el.nextElementSibling;
+    if(dopo&&dopo.classList&&dopo.classList.contains("ctr-msg")) dopo.remove();
+    /* le voci hanno il messaggio sotto la RIGA, non sotto la casella */
+    const riga=el.closest?el.closest("[data-riga]"):null;
+    if(riga){
+      const d=riga.nextElementSibling;
+      if(d&&d.classList&&d.classList.contains("ctr-msg")&&d.dataset.per===el.className) d.remove();
+    }
+  }
+  function ctrToglieTutto(){
+    $$(".ctr-msg").forEach(x=>x.remove());
+    $$(".ctr-rosso,.ctr-arancio").forEach(x=>x.classList.remove("ctr-rosso","ctr-arancio"));
+  }
+
+  function ctrSegna(s){
+    if(!s||!s.el) return;
+    s.el.classList.add("ctr-"+s.grave);
+    const msg=document.createElement("div");
+    msg.className="ctr-msg ctr-msg--"+s.grave;
+    msg.dataset.per=s.el.className;
+    const mk=document.createElement("span");
+    mk.className="ctr-mk"; mk.textContent=CTR_PAROLA[s.grave]||"";
+    const tx=document.createElement("span");
+    tx.className="ctr-msg-t"; tx.textContent=s.dice;   /* testo, mai HTML */
+    msg.appendChild(mk); msg.appendChild(tx);
+    /* dentro una voce il messaggio va sotto tutta la riga: di fianco alle
+       tre caselle non ci sta, e a capo in mezzo diventa illeggibile */
+    const riga=s.el.closest?s.el.closest("[data-riga]"):null;
+    const dopo=riga||s.el;
+    dopo.parentNode.insertBefore(msg,dopo.nextSibling);
+  }
+
+  /* uscendo da una casella: si guarda SOLO quella */
+  function ctrGuardaUna(tipo,el){
+    if(!el) return;
+    ctrTogli(el);
+    ctrLista(tipo).filter(s=>s.el===el).forEach(ctrSegna);
+  }
+
+  /* il tasto: si guarda tutto insieme e si dice quante cose ci sono */
+  function ctrGuardaTutto(tipo){
+    ctrToglieTutto();
+    const l=ctrLista(tipo);
+    l.forEach(ctrSegna);
+    if(!l.length){ toast("Ho guardato tutto: non c'è niente da segnalare ✔"); return; }
+    const rossi=l.filter(s=>s.grave==="rosso").length;
+    const gialli=l.length-rossi;
+    const pezzi=[];
+    if(rossi)  pezzi.push(rossi+(rossi===1?" da correggere":" da correggere"));
+    if(gialli) pezzi.push(gialli+(gialli===1?" da guardare":" da guardare"));
+    toast("Te le ho segnate: "+pezzi.join(", ")+". Non ti fermo: puoi salvare lo stesso.");
+    /* portarlo sulla prima, se no su un modulo lungo non la trova */
+    const primo=$(".ctr-msg");
+    if(primo&&primo.scrollIntoView) primo.scrollIntoView({block:"center",behavior:"smooth"});
+  }
+
+  /* attacca l'orecchio alle caselle del modulo appena aperto */
+  function ctrAscolta(tipo){
+    const doc=CTR_DOC[tipo]; if(!doc) return;
+    $$(doc.caselle).forEach(function(el){
+      el.addEventListener("blur",()=>ctrGuardaUna(tipo,el));
+      /* le tendine e le spunte non hanno un "esco dalla casella" che si
+         sente: li' vale il cambio */
+      if(el.tagName==="SELECT"||el.type==="checkbox")
+        el.addEventListener("change",()=>ctrGuardaUna(tipo,el));
+    });
+    /* le voci di costo nascono e muoiono mentre scrivi: si ascolta il
+       contenitore, cosi' vale anche per le righe aggiunte dopo */
+    (doc.dentro||[]).forEach(function(sel){
+      const box=$(sel); if(!box) return;
+      box.addEventListener("focusout",function(e){
+        const el=e.target;
+        if(el&&el.tagName==="INPUT") ctrGuardaUna(tipo,el);
+      });
+    });
+  }
+
+  /* Il pezzo di HTML del tasto, uguale per tutte le sezioni.
+     ⚠️ Va messo per PRIMO fra le azioni in fondo: cosi' fra lui e «Salva»
+     resta sempre in mezzo «Annulla», e non si preme uno per l'altro.
+     Niente `sh-foot-sx` qui: quella la usa gia' «Elimina», e due margini
+     automatici nella stessa riga si spartiscono lo spazio a caso. */
+  function ctrTastoHTML(tipo){
+    return '<button type="button" class="btn ctr-tasto" data-action="ctr-guarda" data-ctr="'+tipo+'">'
+         + 'Controlla prima di mandarlo</button>';
+  }
+
   /* Il ponte per il pulsante «Compila con AI» che sta in cima alle sezioni:
      non apre piu' una finestrella, apre il modulo con la riga gia' pronta.
      Cosi' le due strade portano nello stesso posto. */
@@ -11228,7 +11454,8 @@ ${vecchi?`
       ${bloccoIvaImpresa(p)}
       </div>
       </div></div>`,
-      `<button class="btn b-cancel" data-action="close">Annulla</button>
+      `${ctrTastoHTML('preventivo')}
+       <button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-prev" data-id="${p.id||""}">${isNew?"Crea preventivo":"Salva"}</button>`);
     $("#prev-righe").addEventListener("input",prevTotaleLive);
     /* parcella: il riepilogo si ricalcola sia cambiando le voci sia le percentuali */
@@ -11248,6 +11475,9 @@ ${vecchi?`
     }
     /* la riga dell'AI si accende per ultima, quando le caselle ci sono gia' */
     if(isNew)aiRigaVia('preventivo',!!aiApri);
+    /* il controllore vale sui preventivi NUOVI e su quelli GIA' FATTI:
+       il momento in cui serve davvero e' un attimo prima di «Scarica PDF» */
+    ctrAscolta('preventivo');
   }
   async function savePrev(id){
     if(!sbUid){toast("Devi essere loggato");return;}
@@ -16181,6 +16411,9 @@ ${vecchi?`
     if(a==="new-prev")return prevForm(null);
     /* «✨ Genera con AI»: stesso modulo, con la riga dell'AI gia' aperta */
     if(a==="new-prev-ai")return prevForm(null,null,true);
+    /* «Controlla prima di mandarlo»: vale per qualunque sezione, il tipo
+       di documento se lo porta scritto addosso il pulsante */
+    if(a==="ctr-guarda"){ctrGuardaTutto(t.dataset.ctr||"preventivo");return;}
     if(a==="ds-filtro"){dsFilter=t.dataset.v||"da_fare";renderDalSito();return;}
     if(a==="ds-apri")return dsApri(id);
     if(a==="ds-contatti")return dsContatti(id);
