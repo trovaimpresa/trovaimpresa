@@ -2284,6 +2284,10 @@
     ctrToglieTutto();
     const l=ctrLista(tipo);
     l.forEach(ctrSegna);
+    /* fatto il giro gratis, compare il tasto dell'AI: prima non c'e',
+       cosi' il credito non si spende per sbaglio al primo clic */
+    const tastoAi=document.querySelector('.ctr-tasto-ai[data-ctr="'+tipo+'"]');
+    if(tastoAi)tastoAi.hidden=false;
     if(!l.length){ toast("Ho guardato tutto: non c'è niente da segnalare ✔"); return; }
     const rossi=l.filter(s=>s.grave==="rosso").length;
     const gialli=l.length-rossi;
@@ -2331,7 +2335,170 @@
      automatici nella stessa riga si spartiscono lo spazio a caso. */
   function ctrTastoHTML(tipo){
     return '<button type="button" class="btn ctr-tasto" data-action="ctr-guarda" data-ctr="'+tipo+'">'
-         + 'Controlla prima di mandarlo</button>';
+         + 'Controlla prima di mandarlo</button>'
+         + (CTR_AI_SEZIONI.indexOf(tipo)>=0
+            ? '<button type="button" class="btn ctr-tasto-ai" data-action="ctr-ai" data-ctr="'+tipo+'" hidden>'
+              + CTR_AI_LABEL+'</button>'
+            : "");
+  }
+
+  /* ============================================================
+     LA PARTE AI DEL CONTROLLORE — 19 agosto 2026
+
+     Le regole qui sopra sono codice normale: immediate, gratis, e non
+     sbagliano mai. Vedono i campi vuoti, i numeri impossibili, le
+     aliquote sbagliate. Quello che NON vedono e' come sono scritte le
+     cose: un refuso, una voce vaga («opere murarie»), la stessa
+     lavorazione contata due volte. Quello lo legge l'AI.
+
+     ⚠️ IL CREDITO SI SPENDE SOLO SE LO DECIDE LUI. Il tasto dell'AI
+        compare DOPO il controllo gratis, e va premuto a mano. Se
+        partisse dentro lo stesso tasto, ricontrollare un preventivo tre
+        volte costerebbe tre crediti senza che nessuno l'abbia chiesto.
+     ⚠️ ALL'AI NON VA NIENTE DEL CLIENTE: solo titolo, descrizioni delle
+        voci e note. Niente nome, indirizzo, telefono, partita IVA. La
+        regola sta scritta anche nel prompt della funzione, ma quella e'
+        una promessa: qui e' il codice che non glieli manda.
+     ⚠️ QUELLO CHE DICE L'AI E' SEMPRE «DA GUARDARE», MAI «DA
+        CORREGGERE», e sta in un riquadro suo, staccato dai segni delle
+        regole. Non e' un vezzo grafico: una regola non sbaglia, l'AI
+        si', e mischiarle vorrebbe dire far perdere fiducia anche ai
+        rossi veri.
+     ⚠️ NON CORREGGE E NON BLOCCA NIENTE, come tutto il controllore.
+     ============================================================ */
+  /* dove l'AI ha davvero qualcosa da leggere: le sezioni con le voci
+     scritte a mano. Su un cliente o su una scadenza non avrebbe testo su
+     cui lavorare, e un tasto che non serve e' un tasto che confonde. */
+  const CTR_AI_SEZIONI=["preventivo","fattura","computo"];
+  /* la scritta del tasto sta in un posto solo: dopo una lettura il tasto
+     torna com'era, e non si ritrova scritto due modi diversi */
+  const CTR_AI_LABEL="✨ Falla leggere anche all'AI · 1 credito";
+  const CTR_AI_MAX=40;      /* quante voci si mandano al massimo */
+  const CTR_AI_QUANTE=6;    /* quante segnalazioni si mostrano */
+  let ctrAiInCorso=false;
+
+  function _ctrPul(t){ return String(t==null?"":t).replace(/\s+/g," ").trim(); }
+  function _ctrVal(sel,dentro){
+    const e=(dentro||document).querySelector(sel);
+    return e?_ctrPul(e.value):"";
+  }
+  /* il testo che parte davvero. Torna anche `voci`, che serve a non
+     spendere un credito su un documento vuoto. */
+  function ctrAiTesto(tipo){
+    const r=[]; let voci=0, tagliate=0;
+    const metti=function(n,desc,extra){
+      voci++;
+      if(voci>CTR_AI_MAX){ tagliate++; return; }
+      r.push(n+". "+desc+(extra?"  ["+extra+"]":""));
+    };
+    if(tipo==="preventivo"){
+      const t=_ctrVal("#pv-tit"); if(t)r.push("Titolo: "+t);
+      r.push("Voci:");
+      $$("#prev-righe [data-riga]").forEach(function(d){
+        const desc=_ctrVal(".pr-desc",d); if(!desc)return;
+        metti(voci+1,desc,"quantità "+(_ctrVal(".pr-qta",d)||"—"));
+      });
+      const note=[];
+      $$("#pv-note-lista .nt-txt").forEach(function(n){ const v=_ctrPul(n.value); if(v)note.push(v); });
+      if(note.length)r.push("Note: "+note.join(" / "));
+    }else if(tipo==="fattura"){
+      r.push("Voci:");
+      $$("#fatt-righe [data-riga]").forEach(function(d){
+        const desc=_ctrVal(".fr-desc",d); if(!desc)return;
+        metti(voci+1,desc,"quantità "+(_ctrVal(".fr-qta",d)||"—"));
+      });
+      const n=_ctrVal("#fa-note"); if(n)r.push("Note: "+n);
+    }else if(tipo==="computo"){
+      const t=_ctrVal("#co-tit"); if(t)r.push("Titolo: "+t);
+      r.push("Lavorazioni:");
+      /* le lavorazioni del computo non stanno nel modulo: stanno nella
+         sezione, gia' lette dal database */
+      (compVociCache||[]).forEach(function(v){
+        const desc=_ctrPul(v.descrizione); if(!desc)return;
+        metti(voci+1,desc,"unità "+(_ctrPul(v.unita)||"—")+", quantità "+(v.quantita!=null?v.quantita:"—"));
+      });
+    }
+    return { testo:r.join("\n"), voci:voci, tagliate:tagliate };
+  }
+
+  function ctrAiRiquadro(html){
+    const corpo=document.querySelector("#sheet .sh-body"); if(!corpo)return null;
+    let box=corpo.querySelector(".ctr-ai");
+    if(!box){
+      box=document.createElement("div");
+      box.className="ctr-ai";
+      corpo.appendChild(box);
+    }
+    box.innerHTML=html;
+    return box;
+  }
+  async function ctrAiGuarda(tipo){
+    if(ctrAiInCorso)return;
+    if(!window.AI||typeof window.AI.dati!=="function"){
+      toast("L'AI non è disponibile in questo momento: riprova fra un attimo.");
+      return;
+    }
+    const d=ctrAiTesto(tipo);
+    /* ⚠️ un credito su un documento vuoto e' un credito buttato: meglio
+       dirglielo prima che dopo */
+    if(!d.voci){
+      toast("Non c'è ancora niente da rileggere: scrivi almeno una voce.");
+      return;
+    }
+    ctrAiInCorso=true;
+    const tasto=document.querySelector('.ctr-tasto-ai[data-ctr="'+tipo+'"]');
+    if(tasto){ tasto.disabled=true; tasto.textContent="Sto leggendo…"; }
+    const box=ctrAiRiquadro('<div class="ctr-ai-cap">L\'AI sta rileggendo il documento…</div>'
+      +'<div class="ctr-ai-sub">Ci mette una decina di secondi.</div>');
+    if(box&&box.scrollIntoView)box.scrollIntoView({block:"center",behavior:"smooth"});
+    try{
+      const out=await window.AI.dati("controllo_documento",d.testo);
+      /* null = crediti finiti: la finestra l'ha già mostrata AI.dati, qui
+         si toglie solo il riquadro invece di lasciarlo a «sto leggendo» */
+      if(out===null){ ctrAiRiquadroVia(); return; }
+      const segn=(out&&Array.isArray(out.segnalazioni))?out.segnalazioni:[];
+      ctrAiMostra(segn,d.tagliate);
+    }catch(e){
+      ctrAiRiquadro('<div class="ctr-ai-cap">L\'AI non è riuscita a rileggerlo</div>'
+        +'<div class="ctr-ai-sub">'+esc((e&&e.message)||"Riprova fra un attimo.")+'</div>');
+    }finally{
+      ctrAiInCorso=false;
+      if(tasto){ tasto.disabled=false; tasto.textContent=CTR_AI_LABEL; }
+    }
+  }
+  function ctrAiRiquadroVia(){
+    const box=document.querySelector("#sheet .sh-body .ctr-ai");
+    if(box)box.remove();
+  }
+  function ctrAiMostra(segn,tagliate){
+    const nota=tagliate
+      ? '<div class="ctr-ai-sub">Le voci erano tante: gliene ho fatte leggere le prime '+CTR_AI_MAX+', le altre '+tagliate+' no.</div>'
+      : "";
+    if(!segn.length){
+      ctrAiRiquadro('<div class="ctr-ai-cap">L\'AI l\'ha riletto: non ha trovato niente da dire</div>'
+        +'<div class="ctr-ai-sub">Ha guardato refusi, voci vaghe, voci doppie e unità che non tornano.</div>'+nota);
+      toast("L'AI l'ha riletto: niente da segnalare ✔");
+      return;
+    }
+    const righe=segn.slice(0,CTR_AI_QUANTE).map(function(s){
+      const dove=_ctrPul(s&&s.dove), che=_ctrPul(s&&s.problema);
+      if(!che)return "";
+      return '<div class="ctr-ai-riga"><span class="ctr-mk">DA GUARDARE</span>'
+        +(dove?'<b>'+esc(dove)+'</b> — ':'')+esc(che)+'</div>';
+    }).filter(Boolean).join("");
+    if(!righe){
+      ctrAiRiquadro('<div class="ctr-ai-cap">L\'AI l\'ha riletto: non ha trovato niente da dire</div>'+nota);
+      toast("L'AI l'ha riletto: niente da segnalare ✔");
+      return;
+    }
+    /* niente tagli silenziosi: se ne ha trovate più di sei, si dice */
+    const troppe=(segn.length>CTR_AI_QUANTE)
+      ? '<div class="ctr-ai-sub">Ne ha trovate '+segn.length+': qui sopra ci sono le prime '+CTR_AI_QUANTE+'.</div>' : "";
+    ctrAiRiquadro('<div class="ctr-ai-cap">L\'AI ha riletto il documento</div>'
+      +'<div class="ctr-ai-sub">Sono cose da guardare, non da correggere per forza: l\'AI può sbagliare. Puoi salvare e mandare lo stesso.</div>'
+      +righe+troppe+nota);
+    const n=segn.length;
+    toast("L'AI ha trovato "+n+(n===1?" cosa da guardare":" cose da guardare")+". Non ti fermo.");
   }
 
   /* Il ponte per il pulsante «Compila con AI» che sta in cima alle sezioni:
@@ -17482,8 +17649,10 @@ ${vecchi?`
     h+=ctBlocco("Preventivi", r.preventivi.map(p=>
         ctRiga("prev",p.id,p.titolo||"Preventivo",
           ctMeta(nome(p.cliente_id),CT_ST_PREV[p.stato]||p.stato||""))));
+    /* «Fattura bozza senza numero» si leggeva male: una bozza si chiama
+       «Bozza di fattura», come nel titolo del suo modulo */
     h+=ctBlocco("Fatture", r.fatture.map(f=>
-        ctRiga("fatt",f.id,"Fattura "+fattNum(f),
+        ctRiga("fatt",f.id,(f.numero?("Fattura "+fattNum(f)):"Bozza di fattura"),
           ctMeta(nome(f.cliente_id),CT_ST_FATT[f.stato]||f.stato||""))));
     if(!h)h='<div class="ct-vuoto">Nessun risultato per «'+esc(q)+'».</div>';
     /* niente tagli silenziosi: se il conto e' arrivato al tetto, si dice */
@@ -17650,6 +17819,8 @@ ${vecchi?`
     /* «Controlla prima di mandarlo»: vale per qualunque sezione, il tipo
        di documento se lo porta scritto addosso il pulsante */
     if(a==="ctr-guarda"){ctrGuardaTutto(t.dataset.ctr||"preventivo");return;}
+    /* la rilettura dell'AI: costa un credito, quindi parte solo da qui */
+    if(a==="ctr-ai"){ctrAiGuarda(t.dataset.ctr||"preventivo");return;}
     if(a==="ds-filtro"){dsFilter=t.dataset.v||"da_fare";renderDalSito();return;}
     if(a==="ds-apri")return dsApri(id);
     if(a==="ds-contatti")return dsContatti(id);

@@ -3160,3 +3160,31 @@ body:has(#ti-fondatore) .side{
   .ct-barra{ position:static; padding:10px 12px; }
   .ct-pop{ max-height:min(64vh,460px); }
 }
+
+/* ================================================================
+   LA PARTE AI DEL CONTROLLORE — 19 agosto 2026
+
+   Quello che dice l'AI sta in un riquadro SUO, staccato dai segni
+   delle regole. Non e' un vezzo: una regola non sbaglia mai, l'AI
+   si'. Se le due cose si mischiassero, il giorno che l'AI prende un
+   granchio l'utente smetterebbe di fidarsi anche dei rossi veri.
+   Niente sotto i 13 px, come dappertutto.
+   ================================================================ */
+.ctr-ai{ border:1px solid var(--bordo); border-left:5px solid #7C3AED;
+  border-radius:var(--r-card); background:#FAF7FF;
+  padding:16px 18px; margin:22px 0 4px; }
+.ctr-ai-cap{ font-size:17px; font-weight:800; color:var(--ink); line-height:1.45; }
+.ctr-ai-sub{ font-size:15px; color:var(--testo-2); line-height:1.55; margin-top:4px; }
+.ctr-ai-riga{ display:block; font-size:15.5px; line-height:1.6; font-weight:600;
+  color:#B45309; margin-top:12px; }
+.ctr-ai-riga .ctr-mk{ display:inline-block; margin-right:8px;
+  background:#FFF7ED; color:#B45309; vertical-align:baseline; }
+.ctr-ai-riga b{ font-weight:800; color:var(--ink); }
+
+/* il tasto dell'AI: si vede che costa, e non somiglia a «Salva» */
+.ctr-tasto-ai{ white-space:nowrap; border-color:#7C3AED; color:#5B21B6; font-weight:700; }
+.ctr-tasto-ai[hidden]{ display:none; }
+.ctr-tasto-ai:disabled{ opacity:.6; cursor:default; }
+@media(max-width:900px){
+  .sheet--grande .sh-foot .ctr-tasto-ai{ flex:1 0 100%; margin-bottom:6px; }
+}
