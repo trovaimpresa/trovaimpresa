@@ -2084,9 +2084,9 @@
     if(!hTel&&!hMail) out.push({campo:"c-tel",grave:"arancio",
       dice:"Nessun telefono e nessuna email: questo cliente non lo puoi richiamare."});
     if(hMail&&!CTR_EMAIL.test(hMail)) out.push({campo:"c-email",grave:"rosso",
-      dice:"Questa email non è scritta bene: le manca la chiocciola o il punto finale. Così non le arriva niente."});
+      dice:"Questa email non è scritta bene: «"+hMail+"». Le manca la chiocciola o il punto finale, e così non le arriva niente."});
     if(hPec2&&!CTR_EMAIL.test(hPec2)) out.push({campo:"c-pec",grave:"rosso",
-      dice:"Questa PEC non è scritta bene: la fattura elettronica non arriverebbe."});
+      dice:"Questa PEC non è scritta bene: «"+hPec2+"». La fattura elettronica non arriverebbe."});
     return out;
   }
 
@@ -2107,7 +2107,7 @@
     if(!hTel&&!hMail) out.push({campo:"fo-tel",grave:"arancio",
       dice:"Nessun telefono e nessuna email: il giorno che ti serve un pezzo non sai come chiamarlo."});
     if(hMail&&!CTR_EMAIL.test(hMail)) out.push({campo:"fo-email",grave:"rosso",
-      dice:"Questa email non è scritta bene: le manca la chiocciola o il punto finale."});
+      dice:"Questa email non è scritta bene: «"+hMail+"». Le manca la chiocciola o il punto finale."});
     return out;
   }
 
