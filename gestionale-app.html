@@ -1740,6 +1740,12 @@
      stanno in una cache, non nel modulo, e su un computo nuovo quella
      cache contiene ancora le voci di quello di prima. */
   let ctrComputoId=null;
+  /* ⚠️ 18 agosto 2026 — «Aprilo e sistemalo» apriva il modulo e basta: i
+     segni non si accendevano, e Alessio si ritrovava davanti al modulo
+     senza sapere DOVE erano le due cose che la striscia gli aveva appena
+     detto. Adesso il pulsante lascia scritto qui che tipo di documento
+     e' e, appena il modulo attacca l'orecchio, i segni compaiono da soli. */
+  let ctrAccendiSubito=null;
 
   /* i titoli che non dicono niente al cliente */
   const CTR_TITOLI_VAGHI=["preventivo","preventivi","nuovo preventivo","lavoro","lavori",
@@ -2206,7 +2212,7 @@
       + '<div class="ctr-str-t"><span class="ctr-mk">'+CTR_PAROLA[grave]+'</span>'
       +   '<span class="ctr-str-q">'+quante+'</span></div>'
       + '<ul class="ctr-str-l">'+l.map(x=>'<li class="ctr-str-'+x.grave+'">'+esc(x.dice)+'</li>').join("")+'</ul>'
-      + (vai?'<button type="button" class="btn ctr-str-vai" data-action="'+vai+'" data-id="'+esc(String((riga&&riga.id)||""))+'">Aprilo e sistemalo</button>':'')
+      + (vai?'<button type="button" class="btn ctr-str-vai" data-action="'+vai+'" data-ctr="'+tipo+'" data-id="'+esc(String((riga&&riga.id)||""))+'">Aprilo e sistemalo</button>':'')
       + '</div>';
   }
 
@@ -2272,6 +2278,13 @@
   /* attacca l'orecchio alle caselle del modulo appena aperto */
   function ctrAscolta(tipo){
     const doc=CTR_DOC[tipo]; if(!doc) return;
+    /* arrivati qui dalla striscia di una scheda: i segni si accendono subito,
+       senza premere niente. La memoria si svuota, cosi' la volta dopo che
+       apri lo stesso modulo a mano il modulo e' muto, com'e' giusto. */
+    if(ctrAccendiSubito===tipo){
+      ctrAccendiSubito=null;
+      setTimeout(function(){ ctrGuardaTutto(tipo); },0);
+    }
     $$(doc.caselle).forEach(function(el){
       el.addEventListener("blur",()=>ctrGuardaUna(tipo,el));
       /* le tendine e le spunte non hanno un "esco dalla casella" che si
@@ -16993,6 +17006,9 @@ ${vecchi?`
   document.addEventListener("click",async e=>{
     const t=e.target.closest("[data-action]");if(!t)return;
     const a=t.dataset.action,id=t.dataset.id;
+    /* se il clic arriva dalla striscia di una scheda, il modulo che sta per
+       aprirsi deve accendersi da solo: se no lo apri e non sai dove guardare */
+    if(t.classList&&t.classList.contains("ctr-str-vai")) ctrAccendiSubito=t.dataset.ctr||null;
     if(a==="enter")return enterPanel(t.dataset.p);
     if(a==="new-panel")return panelForm();
     if(a==="save-panel")return savePanel();
