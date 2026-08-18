@@ -6172,7 +6172,7 @@
     if(n==null)return "Non ho capito il costo orario: scrivilo come 22,50";
     /* un costo orario sotto zero entrerebbe nel margine dei lavori e lo
        gonfierebbe: le altre due caselle dei soldi i negativi li rifiutano gia' */
-    if(n<0)return "Il costo orario non puo' essere negativo";
+    if(n<0)return "Il costo orario non può essere negativo";
     return "";
   }
   function dipCampiExtra(){
@@ -11531,7 +11531,7 @@ ${vecchi?`
     const ore=_numIt("#or-ore")||0;
     if(!(ore>0)){toast("Scrivi quante ore, per esempio 2,5");return;}
     /* una riga sola di 1.250 ore e' un dito scivolato, non una giornata */
-    if(ore>24){toast("Sono tante: una riga sola non puo' avere piu' di 24 ore");return;}
+    if(ore>24){toast("Sono tante: una riga sola non può avere più di 24 ore");return;}
     const obj={user_id:sbUid,mestiere_id:curMestiere(),lavoro_id:oreLavoroId,
       data:$("#or-data").value||todayStr(), ore,
       nota:$("#or-nota").value.trim()||null,
@@ -14685,6 +14685,11 @@ ${vecchi?`
     box.innerHTML=h+piede
       +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'
       +  '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Aggiungi lavorazione</button>'
+      /* ⚠️ 18 agosto 2026 — quando il computo te lo manda gia' fatto un
+         progettista, le voci sono ottanta e riscriverle a mano e' una serata.
+         Qui si caricano da un Excel in un colpo. */
+      +  '<button type="button" class="btn-ghost quick-add" data-action="comp-importa">\u2b06 Importa le lavorazioni da Excel</button>'
+      +  '<input type="file" id="comp-file" accept=".xlsx,.xlsm,.xls,.csv" style="display:none">'
       +  (compCapNuovo?'':'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>')
       +'</div>'
       /* il capitolo si aggiunge con un campo qui dentro, non con una
@@ -15524,6 +15529,11 @@ ${vecchi?`
       else if(C.prezzo==null&&soldi.test(x))C.prezzo=i;
       else if(C.unita==null&&!soldi.test(x)&&/^u\.?\s?m\.?$|^unita|unita di misura|^misura$|^um$/.test(x))C.unita=i;
       else if(C.categoria==null&&/categor|capitol|gruppo|famigl/.test(x))C.categoria=i;
+      /* ⚠️ 18 agosto 2026 — la quantita' serve solo all'importazione dentro un
+         COMPUTO (il prezzario non ce l'ha, e infatti la ignora). Sta in fondo
+         all'elenco apposta: «quantita» non deve rubare la colonna a nessuno,
+         e soprattutto non deve farsi confondere con i soldi. */
+      else if(C.quantita==null&&!soldi.test(x)&&/quantit|^q\.?ta\.?$|^qta$|^somman/.test(x))C.quantita=i;
     });
     return C;
   }
@@ -16000,6 +16010,126 @@ ${vecchi?`
         sono dichiarazioni dell'impresa, non numeri che decide un
         programma.
      ============================================================ */
+  /* ============================================================
+     IMPORTARE LE LAVORAZIONI IN UN COMPUTO — 18 agosto 2026
+
+     Quando il computo te lo manda gia' fatto un progettista, le voci sono
+     ottanta e riscriverle a mano e' una serata buttata.
+
+     ⚠️ Entrano tutte come «A CORPO» (`quantita_manuale = true`), ed e' la
+        scelta giusta: in un computo di qualcun altro la quantita' e' GIA'
+        FATTA, le misure che la producono non ce le hai. Se entrassero come
+        «dalle misure», ognuna varrebbe ZERO e il preventivo le lascerebbe
+        fuori tutte — cioe' l'importazione sembrerebbe riuscita e il
+        documento uscirebbe vuoto.
+     ⚠️ Le voci si AGGIUNGONO in fondo, non sostituiscono niente. Un file
+        caricato due volte fa le voci doppie: meglio doppie e visibili che
+        una cancellazione che non hai chiesto.
+     ⚠️ Il prezzo puo' mancare: sulla lista di gara e' vuoto apposta, lo
+        scrivi tu dopo. Ma quante ne sono arrivate senza prezzo si DICE,
+        se no ti ritrovi un computo che vale zero e non sai perche'.
+     ============================================================ */
+  const COMP_IMP_MAX=2000;
+  function compApriFile(){
+    const f=$("#comp-file"); if(!f) return;
+    f.value="";
+    f.onchange=function(){ if(f.files&&f.files[0])compImporta(f.files[0]); };
+    f.click();
+  }
+  async function compImporta(file){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const cid=compVociCompId;
+    if(!cid){toast("Salva prima il computo, poi importa le lavorazioni");return;}
+    toast("Sto leggendo "+file.name+"…");
+    if(!(await caricaXLSX())){toast("Non riesco a scaricare il modulo per leggere i file Excel: controlla la connessione e riprova");return;}
+    let righe;
+    try{
+      const buf=await file.arrayBuffer();
+      const wb=XLSX.read(new Uint8Array(buf),{type:"array"});
+      righe=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:""});
+    }catch(e){
+      toast("Non riesco ad aprire il file: "+((e&&e.message)||e)+". Se è un CSV, riaprilo con Excel e salvalo come .xlsx.");
+      return;
+    }
+    if(!righe||!righe.length){toast("Il file è vuoto.");return;}
+
+    let iInt=-1;
+    for(let i=0;i<Math.min(righe.length,30);i++){
+      if((righe[i]||[]).some(c=>/descriz|lavoraz|denominaz/i.test(String(c||"")))){iInt=i;break;}
+    }
+    if(iInt<0){
+      toast("Il file non ha una riga di intestazione. Ci vuole una riga con scritto Descrizione (e possibilmente Codice, U.M., Quantità, Prezzo).");
+      return;
+    }
+    const C=_pzCol(righe[iInt]);
+    if(C.descrizione==null){toast("Non trovo la colonna della descrizione.");return;}
+    /* ⚠️ senza la quantita' non si importa NIENTE: entrerebbero ottanta voci
+       tutte a zero, e sembrerebbe che l'importazione sia andata bene. */
+    if(C.quantita==null){
+      toast("Non trovo la colonna della quantità. Nel file ci vuole una colonna con scritto «Quantità»: senza, le lavorazioni entrerebbero tutte a zero.");
+      return;
+    }
+
+    const dati=righe.slice(iInt+1);
+    const voci=[]; let saltate=0, senzaPrezzo=0, senzaQta=0;
+    dati.slice(0,COMP_IMP_MAX).forEach(function(r){
+      const desc=String(r[C.descrizione]!=null?r[C.descrizione]:"").replace(/\s+/g," ").trim();
+      if(!desc||desc.length<3){saltate++;return;}
+      const q=_pzNum(r[C.quantita]);
+      const p=(C.prezzo!=null)?_pzNum(r[C.prezzo]):null;
+      /* ⚠️ 18 agosto 2026 — UNA RIGA SENZA QUANTITA' NON E' UNA LAVORAZIONE.
+         In fondo a un file ci sono quasi sempre «TOTALE», «Ribasso %»,
+         «Oneri di sicurezza»: hanno la descrizione e basta. Prima entravano
+         come lavorazioni da zero, e il computo si ritrovava quattro voci
+         finte in fondo che il preventivo poi buttava fuori in silenzio.
+         Adesso si saltano, e quante se ne saltano si DICE. */
+      if(q==null||!isFinite(q)){ senzaQta++; return; }
+      if(!p) senzaPrezzo++;
+      voci.push({
+        codice:(C.codice!=null?String(r[C.codice]||"").trim():"")||null,
+        descrizione:desc,
+        unita:(C.unita!=null?String(r[C.unita]||"").trim():"")||null,
+        quantita_manuale:true,
+        quantita:(q!=null&&isFinite(q))?q:0,
+        prezzo_unitario:p||0
+      });
+    });
+    if(!voci.length){toast("Nel file non ho trovato nessuna lavorazione con una descrizione. Righe lette: "+dati.length+".");return;}
+
+    const avvisi=[];
+    if(senzaQta) avvisi.push(senzaQta+(senzaQta===1
+        ? " riga saltata perché senza quantità (di solito è il totale in fondo)"
+        : " righe saltate perché senza quantità (di solito sono i totali in fondo)"));
+    if(senzaPrezzo) avvisi.push(senzaPrezzo+(senzaPrezzo===1?" senza prezzo":" senza prezzo"));
+    if(saltate) avvisi.push(saltate+(saltate===1?" riga saltata perché senza descrizione":" righe saltate perché senza descrizione"));
+    if(!gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
+      +"Entrano come «A corpo»: la quantità è quella del file, le misure non ci sono.\n"
+      +(avvisi.length?("\n⚠ "+avvisi.join("\n⚠ ")+"\n"):"")
+      +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?")) { toast("Importazione annullata"); return; }
+
+    /* si parte dopo l'ultima voce che c'e' gia', se no l'ordine si accavalla */
+    let ordine=(compVociCache||[]).reduce(function(m,v){return Math.max(m,+v.ordine||0);},0)+1;
+    const righeDb=voci.map(function(v,i){
+      return Object.assign({}, v, {user_id:sbUid, computo_id:cid, ordine:ordine+i});
+    });
+    /* a blocchi di 200, come fa l'importazione del prezzario: un pacchetto
+       solo da mille righe il database lo rifiuta */
+    let messe=0;
+    for(let i=0;i<righeDb.length;i+=200){
+      const {error}=await sb.from("gest_computo_voci").insert(righeDb.slice(i,i+200)).select("id");
+      if(error){
+        toast("Errore dopo "+messe+(messe===1?" lavorazione":" lavorazioni")+": "+error.message
+              +(messe?" — quelle già entrate restano, ricarica e riprova con le altre.":""));
+        await renderCompVoci(cid);
+        return;
+      }
+      messe+=Math.min(200,righeDb.length-i);
+    }
+    await renderCompVoci(cid);
+    toast(messe+(messe===1?" lavorazione importata ✔":" lavorazioni importate ✔")
+          +(senzaPrezzo?("  ·  "+senzaPrezzo+" senza prezzo: scrivilo tu"):""));
+  }
+
   async function computoListaGara(id){
     if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
     const c=compCache.find(x=>String(x.id)===String(id));
@@ -17206,6 +17336,7 @@ ${vecchi?`
     if(a==="del-computo")return delComputo(id);
     if(a==="comp-pdf")return computoPdf(id);
     if(a==="comp-gara")return computoListaGara(id);
+    if(a==="comp-importa")return compApriFile();
     if(a==="pp-usa")return ppUsa(id);
     if(a==="pp-del")return ppDel(id);
     if(a==="pp-salva")return ppSalva();
