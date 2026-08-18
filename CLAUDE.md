@@ -7686,3 +7686,159 @@ Il difetto non era in una riga di codice: era in una **riga di
 configurazione scritta il primo giorno** (`publish = "."`) e mai piu'
 guardata. Nessuna prova la controllava perche' nessuno la considerava
 codice. Da qui in poi il controllo al push la guarda a ogni push.
+
+
+---
+
+# 18 agosto 2026 (2) — IL TELEFONO DEL CLIENTE NON PARTE PIU' A 5 IMPRESE
+
+La seconda meta' del lavoro sulla privacy, rimasta aperta dal 16 agosto.
+
+## Com'era
+
+Il cliente lasciava la richiesta su una pagina «cerca», e **subito**
+partivano 5 email con dentro **nome, telefono ed email in chiaro**, piu' il
+pulsante «Chiama il cliente». Le imprese non avevano chiesto niente: se lo
+trovavano in casella. Chi non apriva nemmeno l'email si era comunque preso
+i dati di una persona.
+
+## Com'e' adesso
+
+L'impresa riceve **zona, categoria, cosa cerca e la data**. Niente contatti.
+In fondo un pulsante **«Voglio contattarlo»** che porta su
+`/prendi-richiesta?t=<codice>`. I contatti compaiono **solo a chi clicca**,
+e resta scritto chi e quando (`richieste_inviate.contatto_visto_at`).
+
+**Scelta di Alessio, fra tre proposte: chi clicca, vede.** Tutte e 5 possono
+vederli, ma solo se lo chiedono davvero. Nessuna impresa perde un lavoro
+perche' e' arrivata seconda, e il cliente non finisce in mano a chi non era
+interessato.
+
+## ⚠️ DUE PASSAGGI, E NON E' UN CAPRICCIO
+
+Aprire il link (GET) mostra **solo** il riepilogo e il pulsante. I contatti
+escono al **POST**, cioe' dopo un clic vero.
+
+Il motivo: molti sistemi di posta aziendali **aprono da soli i link** delle
+email per controllarli. Con un passaggio solo, quel controllo automatico
+avrebbe scoperto i contatti e li avrebbe segnati come «chiesti da
+un'impresa» — che e' esattamente la bugia che questo lavoro serve a
+togliere.
+
+Il link vale **60 giorni**: un'email vecchia di un anno non deve continuare
+ad aprire il telefono di una persona. Scaduto, risponde come a un codice
+sbagliato: chi provasse i codici a caso non deve capire se ci e' andato
+vicino.
+
+## ⚠️ COSA HO TROVATO PREPARANDO IL LAVORO: `richieste_inviate` NON ESISTEVA
+
+Il codice ci scriveva dentro **da sempre**. PostgREST pero' non lancia:
+risponde `{error}` e basta, e quella riga non veniva mai controllata.
+Conseguenze, tutte in silenzio:
+
+- non c'era **nessuna traccia** di chi avesse ricevuto cosa;
+- il tetto di **3 email al giorno per impresa non ha MAI funzionato**,
+  perche' la lettura falliva e il conteggio restava vuoto.
+
+E' la stessa forma di difetto del 12 agosto: una scrittura che fallisce e
+una che riesce sono identiche, se nessuno guarda l'esito.
+
+## I file
+
+| file | cosa |
+|---|---|
+| `sql/richieste-contatto-su-richiesta.sql` | crea la tabella vera, col lucchetto |
+| `netlify/functions/prendi-richiesta.js` | **nuovo** — la pagina «Voglio contattarlo» |
+| `netlify/functions/richiesta-cliente.js` | l'email senza contatti, col codice |
+| `netlify.toml` | il rinvio `/prendi-richiesta` |
+| 4 x `cerca-*.html` | **la frase del consenso** |
+| `sql/prova-prendi-richiesta.sql` (+ `-pulisci`) | la prova dal vivo |
+
+## ⚠️ IL CONSENSO DEVE DIRE QUELLO CHE SUCCEDE DAVVERO
+
+La frase spuntata dal cliente diceva «...che potranno contattarmi
+direttamente». Adesso dice:
+
+> «...accetto che la **mia richiesta** venga mandata a un massimo di 5
+> attivita' iscritte della mia zona, e che il mio nome, il mio telefono e
+> la mia email vengano dati **solo a quelle che chiederanno di
+> contattarmi**.»
+
+**Un consenso che descrive il falso non vale niente**, e la frase accettata
+si salva in `richieste_clienti.consenso_testo`: se un domani qualcuno
+rimettesse il vecchio giro senza cambiare la frase, il cliente avrebbe
+accettato una cosa e gliene succederebbe un'altra. Ci sono due prove
+apposta (`P5b`, `P5c`) col loro sabotaggio.
+
+## Le scelte da non ribaltare a cuor leggero
+
+- **La riga di registro si scrive PRIMA dell'email**, ed e' lei a contenere
+  il codice: se non si scrive, **l'email non parte**. Meglio nessuna email
+  che un'email col pulsante che porta nel vuoto.
+- **Se l'email non parte, la riga si toglie**: se no il codice resta appeso
+  e occupa una delle 3 al giorno.
+- **Niente `reply_to` con l'email del cliente**: rimetterebbe dentro
+  l'email proprio quello che stiamo togliendo.
+- **La nostra copia a info@ resta intera**: e' la copia di Alessio.
+- **`impresa_id` e' un NUMERO** (bigint), non un uuid — lezione del 14
+  agosto, quando una colonna uuid al posto di un numero fece fallire una
+  scrittura in silenzio. E **niente chiave esterna verso `imprese`**: se
+  un'impresa si cancella, la riga di registro deve restare.
+- **Il permesso al server si da' a mano** (`grant ... to service_role`), non
+  si da' per scontato: il 15 agosto sono stati stretti anche i permessi
+  automatici sulle tabelle nuove.
+
+## ⚠️ L'INDICE PARZIALE — un mio errore, corretto lo stesso giorno
+
+La prima versione della migrazione aveva
+`create unique index ... (token) where token is not null`. In PostgreSQL un
+indice unico **lascia gia' passare quanti NULL vuoi**, quindi la parte
+«parziale» non serviva a niente — e in cambio rompeva `on conflict (token)`,
+che un indice parziale non lo accetta come arbitro. E' la trappola del
+9 agosto (le note del calendario). Non ha rotto niente nel codice vero, ma
+era una mina: l'ho vista solo perche' la query di prova la usava, girando
+su un PostgreSQL 16 vero. Il file adesso toglie da solo l'indice vecchio.
+
+## Come e' stato provato
+
+- **`prove/banco_contatto_su_richiesta.js` — 41 prove, 0 rosse.** Fa girare
+  le DUE FUNZIONI VERE contro un finto PostgREST e un finto Resend. Le
+  domande sono sempre le stesse: *il telefono esce da dove non deve?*
+- **`prove/rompi_contatto_su_richiesta.py` — 16 sabotaggi, tutti giusti**:
+  telefono rimesso nell'email, nome rimesso, `reply_to` rimesso, codice
+  uguale per tutte, email mandata senza registro, tetti saltati, contatti
+  mostrati gia' al GET, scadenza tolta, codice inventato che apre, noindex
+  tolto, database giu' spacciato per link sbagliato.
+- **`prove/banco_consenso.js` — da 138 a 154 prove**, con `P5b`/`P5c` nuove.
+  **15 sabotaggi**, compreso «il consenso torna a promettere il vecchio giro».
+- **SQL su PostgreSQL 16 vero**: rilanciabile, il pubblico non legge e non
+  scrive, il server si', il token doppio viene rifiutato.
+- **Prova dal vivo sul sito online**: creata una richiesta finta (telefono
+  399 000 0000, che non esiste), aperto il link → si vedono solo zona,
+  categoria e cosa cerca; premuto il pulsante → compaiono nome, telefono ed
+  email. Poi buttata via.
+
+## ⚠️ DUE SABOTAGGI MIEI ERANO FINTI (e la lezione del giorno, ancora)
+
+1. «il link scaduto continua ad aprire il telefono» pretendeva rossa anche
+   `D5`, che guardava il **GET** — dove i contatti non escono comunque. La
+   prova e' stata spostata sul **POST**, che e' il punto dove la porta deve
+   essere chiusa davvero.
+2. «un codice inventato apre lo stesso la pagina» assegnava un valore a una
+   **costante**: il file non partiva proprio e il banco moriva prima di dire
+   qualcosa. **Un sabotaggio deve cambiare il COMPORTAMENTO, non impedire al
+   programma di partire.** Riscritto togliendo il filtro sul token.
+
+E il solito: **quando un controllo dice che qualcosa e' rotto, il primo
+sospettato e' il controllo.** WebFetch mi ha risposto «pagina non trovata»
+su una pagina che nel browser di Alessio funzionava benissimo — e per venti
+minuti ho cercato un guasto che non c'era.
+
+## Resta aperto
+
+- L'email vera alle imprese **non e' ancora stata vista partire** da una
+  richiesta vera. Il giro e' provato pezzo per pezzo e dal vivo sulla
+  pagina, ma la prima richiesta vera va guardata.
+- `profilo-impresa.html` ha un **altro** form (tabella `preventivi`), che
+  manda i contatti all'impresa **scelta dal cliente**: li' e' 1 a 1 e
+  voluto, non e' stato toccato.

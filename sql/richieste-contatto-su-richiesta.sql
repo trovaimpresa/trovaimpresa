@@ -47,8 +47,18 @@ comment on column public.richieste_inviate.contatto_visto_at is
 
 -- Il token e' l'unica chiave del link: due righe con lo stesso token
 -- vorrebbero dire due imprese che aprono la stessa porta.
-create unique index if not exists richieste_inviate_token_uniq
-  on public.richieste_inviate (token) where token is not null;
+--
+-- ⚠️ L'indice e' INTERO, non parziale, ed e' una scelta: in PostgreSQL un
+--    indice unico lascia passare quanti NULL vuoi anche senza scrivere
+--    `where token is not null`, quindi la parte "parziale" non serviva a
+--    niente — e in cambio rompeva `on conflict (token)`, che un indice
+--    parziale non lo accetta come arbitro. E' la stessa trappola che il 9
+--    agosto aveva bloccato il salvataggio delle note del calendario.
+--    La prima versione di questo file, del 18 agosto mattina, ce l'aveva:
+--    se l'hai gia' lanciata, la riga qui sotto la toglie da sola.
+drop index if exists public.richieste_inviate_token_uniq;
+create unique index if not exists richieste_inviate_token_key
+  on public.richieste_inviate (token);
 
 create index if not exists richieste_inviate_giorno_idx
   on public.richieste_inviate (impresa_id, created_at);
