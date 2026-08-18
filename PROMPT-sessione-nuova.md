@@ -1,92 +1,100 @@
-Lavoriamo sul gestionale di TrovaImpresa (gestionale-app.html).
+# Prompt per la sessione nuova — 18 agosto 2026, pomeriggio
 
-Attiva le skill: trovaimpresa-gestionale, guida-passo-passo,
-collaudo-obbligatorio, consigliere-crescita.
-Leggi CLAUDE.md prima di toccare qualsiasi cosa: in fondo c'è
-"DOVE SIAMO REALMENTE RIMASTI (16 agosto, pomeriggio - il programma AI)".
-Lì dentro c'è l'elenco completo dei lavori e le decisioni già prese
-(100 crediti al mese, si parte dal Blocco 0).
-Subito dopo c'è "IL GIUDIZIO SUL GESTIONALE": leggilo, sono i punti deboli
-veri del progetto e le tre cose da fare per prime. Se quello che sto per
-chiederti va contro quel giudizio, dimmelo.
+Copia e incolla tutto quello che sta sotto la riga.
 
-UN LAVORO SOLO: BLOCCO 0 - CHIUDERE IL BUCO DEI CREDITI AI
+---
 
-Oggi c'è un pulsante "Ricarica 150 crediti - 19 euro" che porta a
-ricarica-crediti.html, e quella pagina NON ESISTE. Chi clicca sbatte il muso.
-Il resto del sistema crediti invece c'è già (tabella ai_accounts, funzioni
-consume_ai_credit e get_ai_status, colonna credits_extra per i crediti
-comprati che non scadono).
+Ciao. Riprendiamo il lavoro su TrovaImpresa.
 
-Le cinque cose da fare, in quest'ordine:
+**Prima di rispondermi leggi `CLAUDE.md`**, che sta nella cartella del
+progetto: e' la memoria di tutto. In particolare la testa del file (le regole
+fisse) e le ultime due sezioni, del 18 agosto.
 
-1. SQL: portare quota_per_piano a 100 crediti al mese per il piano che paga
-   (oggi dà: base 0, ai 60, ai_pro 300).
-2. SQL: una funzione riservata al service_role che aggiunge i crediti
-   comprati a ai_accounts.credits_extra.
-3. netlify/functions/crea-checkout-crediti.js - pagamento singolo Stripe,
-   copiato da crea-checkout-gestionale.js. Tre tagli: 150, 400, 1000 crediti.
-4. ricarica-crediti.html - la pagina che manca, con i tre tagli.
-5. L'accredito dentro stripe-webhook-abbonamenti.js.
+## Come si lavora con me — le regole che non si sgarrano
 
-IL PUNTO PIÙ DELICATO, dimmelo se lo vedi anche tu: se il webhook sbaglia,
-uno paga e non riceve i crediti. E se Stripe manda lo stesso webhook due
-volte (lo fa), non deve accreditare due volte. Voglio la prova del caso che
-deve essere RIFIUTATO, non solo di quello che deve funzionare.
+- **Parlami in italiano semplice, e scrivi CORTO.** Ho la dislessia: testo
+  grande, poca confusione, **massimo 10 righe per messaggio, una domanda per
+  volta**. I dettagli mettili nei file, non in chat.
+- ⛔ **NIENTE comandi git dalla mia cartella, nemmeno `git status`**: crea un
+  `.git/index.lock` fantasma che mi blocca i commit per ore.
+- **Il push lo faccio io.** Dammi **un blocco solo, su UNA RIGA**, pronto da
+  incollare in Git Bash.
+- **Le chiavi Stripe e Supabase stanno nelle variabili di Netlify**: non
+  scriverle mai nel codice e non chiedermele in chat.
+- **Le query per Supabase scrivimele per l'SQL Editor**, dove sono collegato
+  come postgres. **UNA query alla volta.** Se una query deve dirmi qualcosa,
+  me lo dice con una **RIGA DI RISULTATO**, mai con `raise notice` (l'SQL
+  Editor i notice non li fa vedere).
+- **Non mostrarmi mai una riga di codice da sola in chat**: io incollo quella.
+  Dammi sempre il blocco intero, o meglio il file.
+- ⛔ **NON aprire `gestionale-negozio.html` e `gestionale-noleggio.html`.**
+- **Io non sono in grado di collaudare il codice: la verifica e' tua, sempre.**
+  Non chiedermi mai di fare da collaudatore. Posso aprire una pagina e dirti
+  cosa vedo, quello si'.
+- **Una prova che non diventa rossa sul file rotto non prova niente**: i banchi
+  si controllano nei due versi, sempre col loro file di sabotaggi.
+- **Prima di toccare qualsiasi file, spiegami cosa hai capito e quali file
+  tocchi, e aspetta la mia conferma.**
+- **Consegna cosi'**: scrivi nella mia cartella, mandami il file in chat,
+  controlla l'md5 da tutte e due le parti, e dimmi cosa cliccare.
+- **Se hai sbagliato, dimmelo subito e per primo.**
+- Il sito pubblico non parla mai di me: il mio nome resta solo nel footer.
 
-REGOLE CHE NON SI VIOLANO
+## Dove siamo
 
-- Le funzioni SQL si provano su un PostgreSQL 16 vero nel container, con lo
-  schema ricostruito DAI FILE in sql/, chiavi esterne vere, pg_safeupdate
-  acceso e una finta auth.uid() pilotabile. Il 9 agosto una funzione provata
-  con 10 scenari è arrivata lo stesso in produzione con due buchi che
-  cancellavano dati, perché lo schema di prova non somigliava abbastanza a
-  quello vero.
-- Rispetta tutte le regole fisse del gestionale (skill
-  trovaimpresa-gestionale): mai openSheet() per un form, sempre
-  openSheetGrande() a due colonne; colore = stato; tabelle con
-  renderTabella(); date con quando(); niente emoji; variabili CSS; ogni
-  UPDATE/DELETE verificata con .select('id').
-- Prima di toccare qualsiasi file, spiegami cosa hai capito e quali file
-  tocchi, e aspetta la mia conferma.
-- Io non sono in grado di collaudare il codice: la verifica è tua, sempre.
-  Non chiedermi mai di fare da collaudatore. A me tocca solo la prova finale
-  a clic, e me la devi servire pronta e numerata.
-- Una prova che non diventa rossa sul file rotto non prova niente: si
-  controlla nei due versi.
-- NIENTE comandi git dalla mia cartella, nemmeno "git status": crea un
-  .git/index.lock fantasma che mi blocca i commit per ore.
-- Il push lo faccio io. Tu dammi UN blocco solo, pronto da incollare.
-- Le query per Supabase scrivimele per l'SQL Editor, dove sono collegato come
-  postgres. UNA query alla volta. Se una query deve dirmi qualcosa, me lo dice
-  con una RIGA DI RISULTATO, mai con raise notice.
-- Non mostrarmi mai una riga di codice da sola nella chat: io incollo quella.
-  Dammi sempre il blocco intero.
-- Consegna così: scrivi nella mia cartella, mandami il file in chat, controlla
-  l'md5 da tutte e due le parti, e dimmi cosa cliccare.
-- Le chiavi Stripe stanno nelle variabili di Netlify: non scriverle mai nel
-  codice e non chiedermele in chat.
-- Parlami in italiano semplice. Ho la dislessia: testo grande, poca confusione.
-  Nel gestionale niente testo sotto i 13 px.
-- Se hai sbagliato, dimmelo subito e per primo.
-- NON aprire gestionale-negozio.html e gestionale-noleggio.html.
+Oggi, 18 agosto, sono stati chiusi due punti di una lista di quattro che
+avevamo deciso di fare **uno alla volta**:
 
-ALLA CONSEGNA
+1. ✅ **La roba privata scaricabile dal sito.** `CLAUDE.md`, lo schema del
+   database, il codice delle funzioni e un csv con nomi, telefoni ed email di
+   imprese vere erano aperti a chiunque. Chiusi con 20 rinvii in
+   `netlify.toml`, piu' un `404.html` nuovo e un controllo automatico al push
+   che se ne accorge se domani nasce qualcosa di nuovo da tenere fuori.
+2. ✅ **Il telefono del cliente mandato a 5 imprese.** Adesso l'impresa riceve
+   la richiesta **senza contatti** e un pulsante «Voglio contattarlo»: nome,
+   telefono ed email compaiono solo a chi clicca, e resta scritto chi e
+   quando. Provato dal vivo sul sito.
 
-Collaudo vero con scheda a spunte: provata la pagina ricarica-crediti.html sul
-computer e sul telefono, provato il checkout in modalità test di Stripe,
-provato il webhook che arriva due volte (deve accreditare una volta sola),
-provato il webhook di un pagamento fallito (non deve accreditare niente),
-provato che dopo la ricarica i crediti si vedono davvero nel gestionale.
-Spiegato a passaggi numerati, senza gergo.
+**Ultimo push: `af747df`.**
 
-I banchi stanno in prove/: banco_browser.js (327 controlli, BANCO_SOLO=l3|l4|l5),
-banco_sql.py, banco_supporto.py, e i sabotaggi rompi*.py. Aggiungi la tua serie
-e la tua rompi_*.py.
+## ⚠️ LA PRIMA COSA DA FARE
 
-DOPO IL BLOCCO 0, NELL'ORDINE (non farli adesso, sono scritti in CLAUDE.md):
-Blocco 1 "Controlla i tuoi crediti" - Blocco 2 il bollino "AI" - Blocco 3 il
-controllore dei preventivi - poi i quattro lavori di grafica rimasti (sezioni
-allineate alle finestre, ricerca unica, "Fattura n. 12/undefined", calendario).
+Nel database e' rimasta una **richiesta finta** creata per la prova dal vivo
+(nome «PROVA — non chiamare», telefono 3990000000). Va buttata via:
 
-Fammi domande se vuoi, ma semplici e con le risposte già pronte da scegliere.
+> lanciami `sql/prova-prendi-richiesta-pulisci.sql` nell'SQL Editor e guarda
+> la riga che risponde (dice anche se il pulsante era stato premuto).
+
+## Cosa resta, in ordine
+
+3. **Le 95 pagine citta' vuote.** In Search Console stanno come «Rilevata, ma
+   attualmente non indicizzata»: sono le pagine citta' senza nessuna impresa
+   dentro. O si riempiono o si tolgono dalla sitemap. Da capire **con i numeri
+   veri**, non a intuito (Search Console e il database).
+4. **Il calendario del gestionale e' illeggibile**: scrive a 12 px (10,5 sul
+   telefono, sotto il minimo dei 13 di tutto il progetto), taglia i nomi a
+   meta' e ha caselle enormi e vuote. `.cal-lav-t` in `css/gestionale.css`.
+
+E poi, dalla lista lunga in fondo a `CLAUDE.md`:
+
+- l'**email delle 24 ore** e l'email vera alle imprese non sono mai state
+  viste partire da una richiesta vera;
+- il grafico dell'admin vuole due colonne nuove (`premium_dal`,
+  `gestionale_dal`);
+- il «Genera con AI» dei Preventivi usa ancora la vecchia finestrella
+  separata;
+- le sezioni del gestionale sono ancora a 16-17 px con le schede grigie,
+  mentre le finestre sono a 21 px su foglio bianco: stonano;
+- la **ricerca unica** nel gestionale (una casella sola per cliente, lavori,
+  preventivi e fatture);
+- «Fattura n. 12/undefined»: manca l'anno nel titolo.
+
+## I banchi di prova
+
+Stanno nel container di Claude, non nella mia cartella (`prove/`). Se servono
+vanno rifatti. Quelli di oggi: `banco_contatto_su_richiesta.js` (41 prove) +
+`rompi_contatto_su_richiesta.py` (16 sabotaggi), `banco_consenso.js` (154) +
+`rompi_consenso.py` (15), `banco_controllo_push.py` (37).
+
+**Partiamo dal punto 3.** Prima dimmi cosa hai capito e cosa vorresti toccare,
+e aspetta il mio ok.
