@@ -6608,16 +6608,22 @@
   function dipAvvisi(o){
     if(!o)return [];
     const oggi=new Date();oggi.setHours(0,0,0,0);
-    const voci=[["Visita medica",o.visita_medica_scadenza],["Formazione sicurezza",o.formazione_scadenza],
-                ["Documento",o.documento_scadenza],["Permesso di soggiorno",o.permesso_scadenza]];
+    /* ⚠️ 19 agosto 2026 — «Visita medica scaduto». Il participio era uno
+       solo per tutte e quattro, e su due usciva col genere sbagliato.
+       Adesso ogni voce si porta dietro il suo: e' l'unico modo, in
+       italiano, di non doverci pensare ogni volta che se ne aggiunge una. */
+    const voci=[["Visita medica",o.visita_medica_scadenza,"scaduta"],
+                ["Formazione sicurezza",o.formazione_scadenza,"scaduta"],
+                ["Documento",o.documento_scadenza,"scaduto"],
+                ["Permesso di soggiorno",o.permesso_scadenza,"scaduto"]];
     const out=[];
     voci.forEach(function(v){
       if(!v[1])return;
       const d=new Date(String(v[1])+"T00:00:00");
       if(isNaN(d))return;
       const g=Math.round((d-oggi)/86400000);
-      if(g<0)out.push({lab:v[0],giorni:g,scaduto:true});
-      else if(g<=30)out.push({lab:v[0],giorni:g,scaduto:false});
+      if(g<0)out.push({lab:v[0],giorni:g,scaduto:true,fin:v[2]||"scaduto"});
+      else if(g<=30)out.push({lab:v[0],giorni:g,scaduto:false,fin:v[2]||"scaduto"});
     });
     return out;
   }
@@ -6702,7 +6708,9 @@
        rossa se qualcosa è già scaduto, arancione se sta per scadere */
     const tono=scaduti.length?"t-err":(av.length?"t-attesa":(o.attivo?"t-ok":"t-neutro"));
     const nota=scaduti.length
-      ? "⚠ "+esc(scaduti.map(x=>x.lab).join(", "))+" scadut"+(scaduti.length>1?"i":"o")
+      ? "⚠ "+esc(scaduti.length===1
+                 ? (scaduti[0].lab+" "+scaduti[0].fin)
+                 : (scaduti.map(x=>x.lab).join(", ")+" scaduti"))
       : (av.length?"⏳ "+esc(av.map(x=>x.lab+" fra "+x.giorni+" gg").join(", ")):"");
     return schedaJob({
       tono, titolo:esc(o.nome),
