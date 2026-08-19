@@ -15593,8 +15593,19 @@ ${vecchi?`
          Qui si caricano da un Excel in un colpo. */
       +  '<button type="button" class="btn-ghost quick-add" data-action="comp-importa">\u2b06 Importa le lavorazioni da Excel</button>'
       +  '<input type="file" id="comp-file" accept=".xlsx,.xlsm,.xls,.csv" style="display:none">'
+      /* ⚠️ 19 agosto 2026 — un computo importato arriva con le lavorazioni e i
+         prezzi vuoti. Questo pulsante cerca il codice nel prezzario e riempie
+         SOLO le righe a zero. Si vede solo se qualcosa a zero c'è davvero: se
+         no sarebbe un pulsante che non fa mai niente. */
+      +  (Array.from(compVociCache).some(function(v){return !(+v.prezzo_unitario);})
+          ? '<button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
+          : '')
       +  (compCapNuovo?'':'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>')
       +'</div>'
+      /* il resoconto dell'ultima passata del prezzario: sta qui sotto e non in
+         una finestrella, perché è un elenco che si legge con calma. Si vede
+         solo sul computo su cui è stato fatto. */
+      +((compPrzEsito&&String(compPrzEsitoId||"")===String(computoId))?compPrzEsito:"")
       /* il capitolo si aggiunge con un campo qui dentro, non con una
          finestrella del browser: e' la stessa forma delle misure e delle spese */
       +(compCapNuovo
@@ -17109,6 +17120,292 @@ ${vecchi?`
     await renderCompVoci(cid);
     toast(messe+(messe===1?" lavorazione importata ✔":" lavorazioni importate ✔")
           +(senzaPrezzo?("  ·  "+senzaPrezzo+" senza prezzo: scrivilo tu"):""));
+  }
+
+  /* ============================================================
+     19 agosto 2026 — «PRENDI I PREZZI DAL PREZZARIO»
+     ============================================================
+     Un computo importato da Excel arriva con le lavorazioni ma SENZA i
+     prezzi: sulla lista di gara sono vuoti apposta. Ottantasette righe a
+     0,00 € vogliono dire un preventivo che vale zero. Qui si cerca il
+     CODICE dentro il prezzario e si riempie il prezzo.
+
+     Le tre regole che tengono in piedi la cosa:
+
+     1. SI TOCCA SOLO QUELLO CHE È A ZERO. Un prezzo già scritto è una
+        decisione presa: non si sovrascrive mai, nemmeno se il prezzario
+        dice un altro numero.
+     2. SI CERCA SOLO DENTRO LA TARIFFA DICHIARATA DAL COMPUTO. Sul PDF
+        resta scritto «Tariffa Regione Lazio 2023»: pescare il prezzo
+        dall'Umbria, su una gara, è un errore che si paga. Se il computo
+        non dichiara nessuna tariffa non si tira a indovinare: si dice e
+        ci si ferma.
+     3. NEL DUBBIO NON SI RIEMPIE, SI DICE. Un codice come A03.01.019.a
+        nel prezzario ha tre sotto-varianti (.1 .2 .3) con prezzi diversi:
+        sceglierne una a caso è PEGGIO che lasciare la riga a zero, perché
+        lo zero si vede e il prezzo sbagliato no. Stessa cosa quando
+        l'unità di misura non combacia: un prezzo al «mq/cm» finito su una
+        riga in «m³» è un conto sbagliato che sembra giusto (è la trappola
+        chiusa il 18 agosto con _uniMetti).
+
+     ⚠️ I CODICI NON SI CERCANO IN MEMORIA. In memoria ce ne stanno 500
+        (PP_MAX) e un prezzario regionale ne ha 12.762: cercare lì dentro
+        riempirebbe quattro voci su ottanta e sembrerebbe che il prezzario
+        non c'entri niente. Si chiedono al database, a blocchi, per codice.
+     ============================================================ */
+  let compPrzEsito="", compPrzEsitoId=null;
+  const PRZ_BLOCCO=30;      /* quanti codici per viaggio (2 filtri a testa) */
+  const PRZ_TETTO=500;      /* quante righe al massimo per viaggio */
+
+  /* le unità si confrontano appiattite: «m2», «mq», «M²» sono la stessa cosa,
+     «mq/cm» e «m³» no. Nel dubbio si preferisce dire «diverse» e non riempire. */
+  function _uniPiatta(u){
+    let s=_ppPiatto(String(u==null?"":u)).replace(/\s+/g,"").replace(/\./g,"");
+    s=s.replace(/²/g,"2").replace(/³/g,"3");
+    if(s==="mq")s="m2";
+    if(s==="mc")s="m3";
+    if(s==="ml")s="m";
+    if(s==="n"||s==="nr"||s==="num"||s==="pz"||s==="pezzi"||s==="pezzo")s="cad";
+    if(s==="kilogrammi"||s==="kg")s="kg";
+    return s;
+  }
+  /* un codice buono per andare a cercare: lettere, numeri, punto, trattino,
+     barra. ⚠️ La percentuale e il trattino basso, dentro un LIKE, sono JOLLY:
+     un codice che li contiene pescherebbe mezzo prezzario e riempirebbe la
+     riga col prezzo di un'altra lavorazione. Quelli non si cercano. */
+  function _codPulito(c){
+    const s=String(c==null?"":c).trim();
+    return (s && /^[A-Za-z0-9.\-\/]{2,60}$/.test(s)) ? s : "";
+  }
+  const _codChiave=c=>String(c==null?"":c).trim().toUpperCase();
+
+  function _przRigaHtml(v,motivo){
+    return '<div class="spesa-row"><span>'
+      +(v.codice?'<b>'+esc(String(v.codice))+'</b> · ':'')
+      +esc(String(v.descrizione||"(senza descrizione)").slice(0,110))
+      +'<small class="sp-forn">'+motivo+'</small></span><b></b><span></span></div>';
+  }
+  function _przGruppo(titolo,elenco){
+    if(!elenco||!elenco.length)return "";
+    return '<div style="margin-top:12px"><div style="font-weight:700;margin-bottom:6px">'+titolo+'</div>'
+      +elenco.join("")+'</div>';
+  }
+
+  async function compPrezziDaPrezzario(){
+    if(!sb||!sbUid){toast("Devi essere loggato");return;}
+    const cid=compVociCompId;
+    if(!cid){toast("Apri prima il computo");return;}
+    const comp=compCache.find(x=>String(x.id)===String(cid))||{};
+
+    /* ---- 1. quali lavorazioni sono a zero ---- */
+    const tutte=Array.from(compVociCache||[]);
+    if(!tutte.length){toast("Questo computo non ha ancora lavorazioni");return;}
+    const aZero=tutte.filter(function(v){return !(+v.prezzo_unitario);});
+    if(!aZero.length){toast("Nessuna lavorazione a 0,00 €: non c'è niente da riempire");return;}
+
+    /* ---- 2. dentro quale tariffa si cerca ---- */
+    const errP=await ppCarica();
+    if(errP){
+      toast(_compManca(errP)
+        ? "Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)"
+        : ("Non riesco a leggere il prezzario: "+errP.message));
+      return;
+    }
+    const fonti=ppFonti();
+    const dich=String(comp.prezzario||"").trim();
+    /* stessa regola della ricerca dentro la lavorazione: nome uguale, oppure
+       le parole in comune. Una regola sola, in un posto solo. */
+    const fonte=(fonti.indexOf(dich)>=0)?dich:_ppSceltaAuto(fonti,[dich,(comp.prezzario_anno||"")].join(" "));
+    if(!fonte){
+      compPrzEsitoId=cid;
+      compPrzEsito='<div class="sh-nota" style="border-left:4px solid var(--err,#c0392b);padding-left:10px;margin-top:14px">'
+        +'<b>Non so dove cercare i prezzi.</b><br>'
+        +(fonti.length
+          ? 'Questo computo non dice da quale prezzario vengono i prezzi, oppure il nome scritto non somiglia a nessuna delle tariffe che hai. Aprilo, vai su <b>Da dove vengono i prezzi</b> e scegli la tariffa dalla tendina.'
+          : 'Il tuo prezzario è ancora vuoto: prima importa una tariffa nella sezione <b>Prezzario</b>, poi torna qui.')
+        +'<br><br>Non ho toccato nessuna lavorazione.'
+        +'<div style="margin-top:10px"><button type="button" class="btn-ghost quick-add" data-action="comp-prz-chiudi">Ho capito</button></div></div>';
+      await renderCompVoci(cid);
+      toast("Non so da quale prezzario prendere i prezzi");
+      return;
+    }
+
+    /* ---- 3. i codici da cercare ---- */
+    const senzaCodice=[], codStrano=[], daCercare=[];
+    aZero.forEach(function(v){
+      const scritto=String(v.codice==null?"":v.codice).trim();
+      if(!scritto){senzaCodice.push(v);return;}
+      if(!_codPulito(scritto)){codStrano.push(v);return;}
+      daCercare.push(v);
+    });
+    if(!daCercare.length){
+      compPrzEsitoId=cid;
+      compPrzEsito=_przResoconto(fonte,aZero.length,0,
+        {varianti:[],doppioni:[],unita:[],zeroLi:[],mancanti:[],falliti:[]},senzaCodice,codStrano);
+      await renderCompVoci(cid);
+      toast("Nessuna delle lavorazioni a zero ha un codice: non c'è niente da cercare");
+      return;
+    }
+
+    toast("Sto cercando "+daCercare.length+(daCercare.length===1?" codice":" codici")+" dentro «"+fonte+"»…");
+
+    /* ---- 4. si chiede al database, a blocchi ----
+       Per ogni codice si chiedono DUE cose in un colpo:
+         · il codice preciso            (ilike senza jolly = uguale, maiuscole a parte)
+         · le sue sotto-varianti        (codice.*)
+       Le maiuscole non contano apposta: un ingegnere scrive A03.01.019.A dove
+       la Regione scrive A03.01.019.a, e con un confronto secco non si
+       troverebbe NIENTE su tutto il computo. */
+    const chiavi=[]; const visti={};
+    daCercare.forEach(function(v){
+      const k=_codPulito(v.codice);
+      if(!visti[_codChiave(k)]){visti[_codChiave(k)]=1;chiavi.push(k);}
+    });
+    const trovate={};
+    for(let i=0;i<chiavi.length;i+=PRZ_BLOCCO){
+      const pezzo=chiavi.slice(i,i+PRZ_BLOCCO);
+      const filtro=pezzo.map(function(c){return "codice.ilike."+c+",codice.ilike."+c+".*";}).join(",");
+      const {data,error}=await sb.from("gest_prezzi_propri")
+        .select("codice,descrizione,unita,prezzo_unitario,fonte")
+        .eq("user_id",sbUid).is("eliminato_il",null).eq("fonte",fonte)
+        .or(filtro).order("codice").limit(PRZ_TETTO);
+      if(error){
+        toast(_compManca(error)
+          ? "Per il prezzario serve l'aggiornamento del database (sql/gest-computo-metrico.sql)"
+          : ("Non riesco a leggere il prezzario: "+error.message));
+        return;
+      }
+      (data||[]).forEach(function(r){
+        const k=_codChiave(r.codice);
+        (trovate[k]=trovate[k]||[]).push(r);
+      });
+    }
+
+    /* ---- 5. si decide voce per voce ---- */
+    const pieni=[], esiti={varianti:[],doppioni:[],unita:[],zeroLi:[],mancanti:[],falliti:[]};
+    daCercare.forEach(function(v){
+      const k=_codChiave(v.codice);
+      const esatte=trovate[k]||[];
+      /* le sotto-varianti stanno sotto una chiave diversa: si raccolgono
+         guardando tutte le chiavi che cominciano col codice più un punto */
+      let figlie=[];
+      Object.keys(trovate).forEach(function(kk){
+        if(kk!==k&&kk.indexOf(k+".")===0)figlie=figlie.concat(trovate[kk]);
+      });
+      if(!esatte.length){
+        if(figlie.length)esiti.varianti.push({v:v,n:figlie.length});
+        else esiti.mancanti.push({v:v});
+        return;
+      }
+      const prezzi=[];
+      esatte.forEach(function(r){const p=+r.prezzo_unitario||0;if(prezzi.indexOf(p)<0)prezzi.push(p);});
+      if(prezzi.length>1){esiti.doppioni.push({v:v,n:esatte.length});return;}
+      if(!(prezzi[0]>0)){
+        /* il codice c'è ma vale zero (o meno di zero) anche nel prezzario: se
+           ha sotto-varianti è la voce madre, e il prezzo vero sta nelle figlie */
+        if(figlie.length)esiti.varianti.push({v:v,n:figlie.length});
+        else esiti.zeroLi.push({v:v});
+        return;
+      }
+      const scelta=esatte[0];
+      const uV=_uniPiatta(v.unita), uP=_uniPiatta(scelta.unita);
+      if(uV&&uP&&uV!==uP){esiti.unita.push({v:v,pu:scelta.unita});return;}
+      pieni.push({v:v,prezzo:prezzi[0],riga:scelta});
+    });
+
+    if(!pieni.length){
+      compPrzEsitoId=cid;
+      compPrzEsito=_przResoconto(fonte,aZero.length,0,esiti,senzaCodice,codStrano);
+      await renderCompVoci(cid);
+      toast("Nessun prezzo riempito: guarda l'elenco sotto le lavorazioni");
+      return;
+    }
+
+    /* ---- 6. si chiede, poi si scrive ---- */
+    const restano=aZero.length-pieni.length;
+    if(!gconfirm("Ho trovato il prezzo per "+pieni.length+(pieni.length===1?" lavorazione":" lavorazioni")
+      +" su "+aZero.length+" a 0,00 €.\n\n"
+      +"Li prendo da «"+fonte+"», solo dove il codice e l'unità di misura combaciano.\n"
+      +(restano?("\nLe altre "+restano+" le lascio a zero e ti dico una per una perché.\n"):"")
+      +"\nI prezzi già scritti non li tocco. Vado?")){toast("Non ho toccato niente");return;}
+
+    let messe=0;
+    for(let i=0;i<pieni.length;i+=10){
+      const pezzo=pieni.slice(i,i+10);
+      const res=await Promise.all(pezzo.map(function(x){
+        return sb.from("gest_computo_voci").update({prezzo_unitario:x.prezzo})
+          .eq("id",x.v.id).eq("user_id",sbUid).select("id");
+      }));
+      res.forEach(function(r,j){
+        /* ⚠️ non basta che non ci sia l'errore: se non torna nessuna riga il
+           prezzo NON è stato scritto (permessi, riga sparita). Va detto. */
+        if(r.error||!r.data||!r.data.length)esiti.falliti.push({v:pezzo[j].v,msg:(r.error&&r.error.message)||"nessuna riga scritta"});
+        else messe++;
+      });
+    }
+
+    compPrzEsitoId=cid;
+    compPrzEsito=_przResoconto(fonte,aZero.length,messe,esiti,senzaCodice,codStrano);
+    await renderCompVoci(cid);
+    rinfresca("computi");
+    toast(messe
+      ? (messe+(messe===1?" prezzo riempito ✔":" prezzi riempiti ✔")+(aZero.length-messe?("  ·  "+(aZero.length-messe)+" ancora a zero: leggi sotto"):""))
+      : "Nessun prezzo scritto: leggi l'elenco sotto le lavorazioni");
+  }
+
+  /* il resoconto: quante ne ha riempite e, una per una, perché le altre no.
+     ⚠️ Niente tagli silenziosi: se un gruppo è lungo si scrive quante sono e
+     se ne mostrano venti, non si accorciano di nascosto. */
+  function _przResoconto(fonte,quanteAZero,messe,esiti,senzaCodice,codStrano){
+    const TETTO=20;
+    const taglia=function(elenco,fai){
+      const righe=elenco.slice(0,TETTO).map(fai);
+      if(elenco.length>TETTO)righe.push('<div class="sh-nota">…e altre '+(elenco.length-TETTO)+'. Sono tutte ancora a 0,00 € nell\'elenco qui sopra.</div>');
+      return righe;
+    };
+    let h='<div style="margin-top:14px;border:1px solid var(--bordo,#e3e7ec);border-radius:12px;padding:14px">'
+      +'<div style="font-size:17px;font-weight:800;margin-bottom:4px">Prezzi presi da «'+esc(fonte)+'»</div>'
+      +'<div style="margin-bottom:8px">'
+      +'<b>'+messe+'</b> '+(messe===1?"prezzo riempito":"prezzi riempiti")
+      +' su <b>'+quanteAZero+'</b> '+(quanteAZero===1?"lavorazione che era":"lavorazioni che erano")+' a 0,00 €.'
+      +'</div>';
+
+    h+=_przGruppo("Hanno sotto-varianti: il prezzo scegli tu",
+      taglia(esiti.varianti,function(x){
+        return _przRigaHtml(x.v,"nel prezzario questo codice ha "+x.n+(x.n===1?" variante":" varianti")+" con prezzi diversi — apri la lavorazione e cercala a mano");
+      }));
+    h+=_przGruppo("Il codice c'è più volte con prezzi diversi",
+      taglia(esiti.doppioni,function(x){
+        return _przRigaHtml(x.v,x.n+" voci con lo stesso codice e prezzi diversi — apri la lavorazione e scegli");
+      }));
+    h+=_przGruppo("L'unità di misura non combacia",
+      taglia(esiti.unita,function(x){
+        return _przRigaHtml(x.v,"qui è «"+esc(String(x.v.unita||"—"))+"», nel prezzario è «"+esc(String(x.pu||"—"))+"» — un prezzo messo così sarebbe sbagliato senza vedersi");
+      }));
+    h+=_przGruppo("Nel prezzario valgono zero anche loro",
+      taglia(esiti.zeroLi,function(x){
+        return _przRigaHtml(x.v,"il codice c'è, ma nel prezzario il prezzo è 0,00 €");
+      }));
+    h+=_przGruppo("Il codice non è in questo prezzario",
+      taglia(esiti.mancanti,function(x){
+        return _przRigaHtml(x.v,"nessuna voce con questo codice dentro «"+esc(fonte)+"»");
+      }));
+    h+=_przGruppo("Senza codice: non c'è niente da cercare",
+      taglia(senzaCodice,function(v){
+        return _przRigaHtml(v,"scrivi il codice del prezzario nella lavorazione, poi rifai la ricerca");
+      }));
+    h+=_przGruppo("Codice scritto in un modo che non posso cercare",
+      taglia(codStrano,function(v){
+        return _przRigaHtml(v,"nel codice ci sono caratteri che non posso usare per cercare (spazi, %, _): correggilo nella lavorazione");
+      }));
+    h+=_przGruppo("Il prezzo NON è stato scritto",
+      taglia(esiti.falliti,function(x){
+        return _przRigaHtml(x.v,"il database non ha scritto la riga: "+esc(String(x.msg||"")));
+      }));
+
+    h+='<div style="margin-top:12px"><button type="button" class="btn-ghost quick-add" data-action="comp-prz-chiudi">Chiudi questo elenco</button></div>'
+      +'</div>';
+    return h;
   }
 
   async function computoListaGara(id){
@@ -18659,6 +18956,8 @@ ${vecchi?`
     if(a==="comp-pdf")return computoPdf(id);
     if(a==="comp-gara")return computoListaGara(id);
     if(a==="comp-importa")return compApriFile();
+    if(a==="comp-prezzi")return compPrezziDaPrezzario();
+    if(a==="comp-prz-chiudi"){compPrzEsito="";compPrzEsitoId=null;return renderCompVoci(compVociCompId);}
     if(a==="pp-usa")return ppUsa(id);
     if(a==="pp-del")return ppDel(id);
     if(a==="pp-salva")return ppSalva();
