@@ -8096,3 +8096,382 @@ vede da fuori: da qui in poi il banco se ne accorge.
   controllare: squadra, mezzi, carte aziendali, corsi.
 - **«Spese: −0,00 €»** dentro la scheda del lavoro: un meno davanti a
   zero. Non rompe niente, si legge male.
+
+---
+
+# 18 agosto 2026 (5) — LA GIORNATA LUNGA: GRAFICA, GARA, IMPORTAZIONI
+
+Sei pezzi, tutti chiesti da Alessio nella stessa serata. Qui in ordine.
+
+## 1. «Il filo» — come si incastrano le sezioni
+
+Alessio: *«non lo capisco, non so come funziona»*, riferito al Prezzario.
+Il problema non era il codice: era che **quattro sezioni sono una catena
+sola** (Prezzario → Computo metrico → Preventivo → Fattura) e da dentro
+una non si vedeva.
+
+`FILO` + `filoHTML(qui)` + `filoMetti(sez,qui)`: una striscia sotto la
+frase di apertura, con i quattro passi e quello di adesso acceso. I passi
+**riusano** `data-action="rie-go"`, che gia' c'era.
+⚠️ Mostra solo i passi il cui pulsante di menu **non e' `display:none`**:
+al negozio o al noleggio non si parla di computi metrici. Se restano meno
+di due passi, la striscia non compare per niente.
+Banco: `banco_filo.js`, 26 prove.
+
+## 2. Le schede del Prezzario, il calendario, le scritte
+
+- **Prezzario**: era l'unica sezione con le righe prese in prestito dalle
+  spese (`.spesa-row`). Adesso ha le sue schede (`.pz-griglia`/`.pz-card`).
+- **Calendario**: `MAX_CELLA` da 4 a 3 e celle piu' alte, il titolo del
+  lavoro su due righe invece che troncato.
+- **Le scritte delle sezioni**: erano 15-17 px mentre nelle finestre erano
+  18-21. Adesso il passo e' lo stesso. Banco `banco_scritte.js` (19 prove)
+  **misurando in Chromium**, non leggendo il CSS.
+
+⚠️ **DUE VOLTE, LO STESSO INCIAMPO**: una regola scritta in fondo al CSS
+non entrava in gioco perche' piu' sotto ce n'era una piu' forte
+(`.wrap section .job-meta`). Si e' visto solo **misurando**. Regola per
+sempre: quando si tocca il CSS, si misura prima e dopo.
+
+⚠️ **LA CASELLA DELL'AI SCHIACCIATA** (segnalata da lui con una foto):
+645 px → 206 px. Causa: `js/ai-integrazione.js` inietta il suo `<style>`
+a runtime, quindi **dopo** `gestionale.css`, e la sua classe `.ai-riga`
+aveva lo stesso nome di quella del modulo. Rinominata `.ai-fila`.
+
+## 3. «Fattura n. 12/undefined» e «Spese: −0,00 €»
+
+`fattAnno(f)` (anno scritto → anno della data → «—», mai `undefined`) e
+`fattNum(f)`, usate in **sette** posti compreso il PDF e il nome del file
+scaricato. `const _meno=n=>(n>0?"−":"")+eur2(n)`.
+Banco `banco_anno_meno.js`, 23 prove. La prova D8 cerca **ogni** `f.anno`
+attaccato a una scritta: quella e' la rete.
+
+## 4. La lista delle lavorazioni per la GARA (lavori pubblici)
+
+Alessio ha portato il computo di un ingegnere (`CME per impresa.pdf`,
+Magliano Sabina). Studiato: **non e' un computo metrico**, e' la *Lista
+delle lavorazioni* di una gara — zero misure in 17 pagine, prezzi vuoti
+da riempire. Il nostro computo e' **piu' completo**, non meno.
+
+Mancava solo il foglio da consegnare: `computoListaGara(id)`, secondo PDF
+del **solo** computo «lavori pubblici». Niente misure, prezzo **in cifre
+e in lettere**, in fondo Ribasso / Oneri / Manodopera come righe vuote da
+firmare e lo spazio per il timbro.
+
+⚠️ **In gara, se cifre e lettere non combaciano vale quello in LETTERE.**
+Per questo `prezzoInLettere` ha il suo banco (`banco_gara.js`, 66 prove)
+che rilegge al contrario tutti i numeri da 0 a 99 e cerca le doppie
+vocali da 0 a 1200: `ventuno`, `ventotto`, `centotto`, `centottanta`.
+
+## 5. Importare le lavorazioni in un computo (Excel)
+
+Alessio: *«ma se inserisco nel mio computo il computo di questa persona
+posso fare un preventivo?»*. Adesso si':
+**⬆ Importa le lavorazioni da Excel**, accanto a «+ Aggiungi lavorazione».
+
+⚠️ **LA REGOLA CHE TIENE IN PIEDI TUTTO**: le voci entrano con
+`quantita_manuale:true` («a corpo»). Se entrassero «dalle misure»
+varrebbero **zero** — le misure non ci sono — e il preventivo le
+butterebbe fuori **tutte**, con l'importazione che sembra riuscita.
+
+⚠️ **Le righe senza quantita' si saltano** (TOTALE, Ribasso %, Oneri,
+Manodopera stanno in fondo a quasi tutti i file): prima entravano come
+lavorazioni da zero euro. Quante se ne saltano **si dice** nella domanda
+di conferma. Senza colonna della quantita' non si importa **niente**.
+
+Banco `banco_importa_computo.js` (45 prove): il gruppo E fa girare
+`compImporta` **per davvero**, con un finto database che registra cosa gli
+arriva, sul vero file delle 87 lavorazioni.
+Sabotaggi: `rompi_importa_computo.py`, **11 su 11**.
+
+## 6. Il Prezzario Regione Lazio 2023 (era in lista da giorni)
+
+⚠️ **DETTO PER PRIMO**: «l'importazione di un prezzario regionale» stava
+nella lista «resta aperto» in **tre** punti del diario, dal 13 agosto, e
+non era mai stata fatta. Alessio se n'e' accorto lui.
+
+Dai CSV open-data della Regione (lo zip lo ha scaricato lui: dal ponte i
+file zip non si prendono) sono usciti **quattro Excel**, 12.762 voci, con
+il codice nel formato dei computi (`A03.01.009.a`), la descrizione
+completa (voce madre **+** variante) e l'unita' della tendina:
+
+- `prezzario-lazio-2023-edili-e-sicurezza.xlsx` — 4.501 (parti A, G, H, S)
+- `prezzario-lazio-2023-impianti-elettrici.xlsx` — 2.797 (D)
+- `prezzario-lazio-2023-impianti-tecnologici.xlsx` — 2.915 (E)
+- `prezzario-lazio-2023-strade-verde-mare.xlsx` — 2.549 (B, C, F)
+
+Quattro e non uno perche' `PZ_IMP_MAX` e' 5.000. Si importano tutti con
+**lo stesso nome di tariffa**: i doppioni li salta da solo.
+
+Lo script che li costruisce sta nel contenitore (`lazio_parse.py`,
+`lazio_excel.py`), non nella cartella di Alessio.
+⚠️ Dentro lo zip ci sono **due alfabeti** (cp1252 e utf-8) e **due
+formati** di colonne (la PARTE E ha il codice attaccato: `E01001a`).
+
+⚠️ **UN DIFETTO VERO TROVATO QUI**: `ppUsa` impostava l'unita' **solo se
+stava gia' nella tendina**. Il prezzario vero usa anche `mq/cm`, `paio`,
+`addetto`: quelle voci entravano nel computo con **l'unita' rimasta da
+prima**, in silenzio. Adesso c'e' `_uniMetti`, che l'unita' che manca la
+aggiunge. Banco `banco_prezzario_lazio.js`, 51 prove, di cui cinque
+prezzi **controllati a mano** riga per riga sul CSV della Regione.
+
+## Come e' stato provato, in tutto
+
+Dieci banchi, tutti verdi nella stessa serata: `banco_ai_preventivo` 60,
+`banco_controllore` 139, `banco_prezzario` 23, `banco_filo` 26,
+`banco_calendario` 22, `banco_scritte` 19, `banco_anno_meno` 23,
+`banco_gara` 66, `banco_importa_computo` 45, `banco_prezzario_lazio` 51.
+Piu' i sabotaggi: `rompi_ai_preventivo` 17, `rompi_controllore` 47,
+`rompi_importa_computo` 11.
+
+## ⚠️ I MIEI ERRORI DI OGGI, DETTI PER PRIMI
+
+1. **Il prezzario regionale dimenticato in lista per cinque giorni.**
+2. **Un Excel consegnato con quattro righe finte in fondo** (i totali):
+   sarebbero entrate come lavorazioni. Rifatto con i totali su un foglio
+   a parte, e l'importazione adesso le salta comunque.
+3. **Accenti scritti con l'apostrofo** in due messaggi che vede l'utente
+   («non puo'», «piu'»). Terza volta questo mese.
+4. **Quattro sabotaggi finti** (pezzo ambiguo, attese sbagliate, banco che
+   esplodeva invece di segnare rosso). Riscritti, adesso 11 su 11.
+
+---
+
+## 18 agosto 2026, sera — quello che era stato fatto
+
+L'AI dentro il modulo dei preventivi · il controllore dei documenti su otto
+sezioni · il filo · schede del Prezzario · calendario · scritte piu' grandi ·
+`n. 12/undefined` e `−0,00 €` · lista per la gara con i prezzi in lettere ·
+importazione delle lavorazioni da Excel · Prezzario Regione Lazio 2023
+(4 file, 12.762 voci) · `_uniMetti`.
+
+*(La lista delle cose da fare che stava qui e' stata sostituita da quella in
+fondo, del 19 agosto: i punti 2-10 sono stati chiusi nel frattempo.)*
+
+---
+
+## 19 agosto 2026 — I CAPITOLI, IL QUADRO ECONOMICO, E TRE VOLTE IL BANCO CHE MENTE
+
+Giornata lunga. Tre difetti veri trovati e chiusi, due dei quali **fatti da me
+in giornata** — e tutti e tre erano passati **con il banco verde**, sempre per
+lo stesso motivo. È la lezione più importante del giorno e sta in fondo.
+
+### 1. Le nove prove «da capire» → `banco_persone_e_numeri.js`
+
+Le nove prove rimaste in sospeso dal banco del 15 agosto (`persone:
+t-manodopera, t2-prezzo, t3-duelett, t-operatore, t-finale` · `caselle:
+t-dcosto, t-qta3, t-prezzo4, t-carta`) erano **fotografie**: stampavano un log
+e chi lo leggeva decideva. Un log non diventa rosso da solo, e infatti in
+quattro giorni nessuno se n'era accorto.
+
+Riscritte tutte e nove in **un banco solo**, contro il codice di oggi:
+**125 prove verdi, 26 sabotaggi su 26 presi.** Il banco del 15 agosto si può
+archiviare. Cosa prova:
+
+- **andata e ritorno delle caselle**: un numero scritto, salvato, riletto e
+  rimesso nella casella deve tornare identico (12 valori, più prezzi a quattro
+  decimali e quantità a cinque);
+- **la virgola italiana**, con una tavola scritta a mano da come si scrive un
+  numero in Italia, **non copiata da quello che il gestionale risponde oggi**;
+- **pannello e telefono d'accordo**: `_numeroIt` e la sua copia in
+  `gestionale-operatore.html` devono dare lo stesso numero su ogni caso —
+  «1.250» su una carta carburante aveva già fatto 1250 da una parte e 1,25
+  dall'altra;
+- **il Cestino e il costo orario**: la tariffa di chi sta nel Cestino resta,
+  la media la fa solo la squadra viva, e se la lettura dei vivi fallisce la
+  media **non** va a zero (zero = manodopera gratis su ogni lavoro);
+- **il margine di un lavoro chiuso non si muove** quando una persona finisce
+  nel Cestino (3.000 € con 10 h a 22 €/h → 2.780 €, non 2.900 €);
+- **il messaggio prima di eliminare una persona** dice il vero: 24 ore e non
+  «3 righe», le foto caricate dal telefono contate, i singolari giusti;
+- **chi è revocato non entra** dal telefono (`gest_membri.stato = attivo`).
+
+### 2. I capitoli che il preventivo perdeva — E DUE MODI DI SBAGLIARE
+
+**Il difetto di partenza, riprodotto al banco prima di toccare niente:**
+`_computoAPreventivo` leggeva le lavorazioni con `.order("ordine")` e le
+buttava in un elenco piatto. Ma `ordine` è il contatore di **tutto il computo**
+(max+1 su `compVociCache`), mentre le frecce su/giù spostano solo **dentro** un
+capitolo. Quindi:
+
+    computo    →  A01 A02 A03 | B01 B02        (come si vede a schermo)
+    preventivo →  A01 A02 B01 B02 A03          (com'era)
+
+Sul foglio che legge il cliente le demolizioni finivano dopo gli intonaci. E i
+capitoli non arrivavano affatto: 87 righe attaccate.
+
+**La soluzione:** una colonna `sezione boolean` su `gest_preventivo_righe`
+(`sql/gest-preventivo-sezioni.sql`). Una riga di capitolo è una riga come le
+altre, con `sezione = true`, **qta 0 e prezzo 0** — regola che non si tocca,
+perché in sette punti il totale si fa con `(+qta||1)*(+prezzo||0)` e con quei
+due zeri il conto fa zero anche dove nessuno sa dei capitoli.
+
+Toccati: `prevRigaHtml` (riga larga, filo blu), `savePrev`, `prevPdf` (fascia
+grigia, colonne dei numeri vuote), `ordineForm` e `incaricoForm` (titolo senza
+trattino), `fattDaPreventivoId` (i titoli **non** passano in fattura: nel file
+elettronico sarebbero DettaglioLinee da 0 €), `compDuplica`.
+
+#### ⚠️⚠️ IL PRIMO INGANNO: LE CHIAVI DEVONO COMBACIARE
+
+Consegnato, provato sul sito con Alessio davanti: **i capitoli non c'erano.**
+88 righe, zero titoli, e la colonna esisteva eccome.
+
+Il perché sta dentro **supabase-js**. Quando gli si passa un ELENCO di righe,
+lui mette in fondo all'indirizzo `?columns=<unione di TUTTE le chiavi che
+trova>` (`PostgrestQueryBuilder.insert`, riga 1123). PostgREST poi scrive OGNI
+riga con quell'elenco di colonne, e le righe a cui una chiave manca **se la
+prendono a NULL**: il DEFAULT della colonna NON entra in gioco.
+
+Io scrivevo `sezione` **solo sulla riga del capitolo**, apposta, per non
+rompere chi non aveva ancora eseguito la migrazione. Risultato: le altre righe
+arrivavano con `sezione` a NULL, la colonna è `NOT NULL`, tutta la scrittura
+saltava con il **23502** — e il messaggio del 23502 nomina «sezione», quindi
+finiva dritto nel ripiego che toglie i capitoli e li dà per persi.
+
+**LA REGOLA: chi scrive righe di preventivo mette `sezione` su TUTTE, mai su
+alcune sì e altre no.** Vale per qualunque scrittura di più righe insieme, non
+solo per questa colonna.
+
+Il banco era verde perché il finto Supabase accettava chiavi diverse. Adesso
+rifiuta come quello vero.
+
+#### La quantità col punto
+
+Sul PDF del preventivo la quantità usciva `20.46` col punto dell'inglese,
+mentre la riga sotto diceva `20,46`. Adesso passa da `_numTesto`, come tutto
+il resto (`1` resta `1`, non `1,00`). Stessa cosa nel PDF della fattura, dove
+la virgola c'era ma non la rete contro la coda della virgola mobile.
+
+**Banco `banco_computo_preventivo.js`: 68 prove verdi, 31 sabotaggi su 31.**
+
+### 3. Il quadro economico dei lavori pubblici
+
+Il computo dice quanto costano i LAVORI; il quadro economico dice quanto costa
+l'OPERA. È il numero che finisce nella delibera.
+
+Sta dentro il computo, **solo sui Lavori pubblici**, subito sotto le
+lavorazioni. Colonna `quadro_economico jsonb` su `gest_computi`
+(`sql/gest-computo-quadro.sql`) — non una tabella nuova: è un elenco corto che
+si legge e si scrive sempre tutto insieme col suo computo.
+
+- **A · LAVORI** viene dal computo, non si scrive niente.
+- **B · SOMME A DISPOSIZIONE**: undici righe standard che arrivano già scritte
+  a zero (lavori in economia, rilievi, allacciamenti, imprevisti 5%,
+  acquisizione aree, accantonamenti artt. 60 e 120, spese tecniche, incentivi
+  art. 45 al 2%, commissioni e collaudi, IVA sui lavori 10%, IVA e cassa sulle
+  spese tecniche). Ogni riga **o in euro o in percentuale del Totale A**: se
+  c'è la percentuale, la casella dell'euro si spegne.
+- **TOTALE = A + B**, anche sul PDF, in un riquadro suo.
+
+⚠️ **IL COSTO DELLA MANODOPERA NON SI SOMMA**: sta dentro i lavori, è un «di
+cui». Sta su una riga sua, indentata e in grigio, fuori da ogni somma. È la
+stessa trappola degli oneri della sicurezza chiusa l'11 agosto, e il banco la
+prova rifacendo il gesto di chi somma le righe **con la calcolatrice**.
+
+Trovato mentre si guardava la fotografia: `_eur` dei due PDF del computo non
+aveva `useGrouping:true`, quindi Intl in italiano lasciava il punto delle
+migliaia solo dai cinque numeri in su — sullo stesso foglio «€ 97.000,00» e
+«€ 3000,00». Sistemato.
+
+Riferimenti: D.Lgs. 36/2023 come modificato dal D.Lgs. 209/2024; incentivi
+art. 45 (il 2% è il tetto); imprevisti di norma fra il 5 e il 10%.
+
+**Banco `banco_quadro_economico.js`: 91 prove verdi, 37 sabotaggi su 37.**
+
+#### ⚠️⚠️ IL SECONDO INGANNO: `$$` È UNA NodeList
+
+Consegnato, e il computo di Alessio è rimasto a **«Sto caricando…» per
+sempre**.
+
+Nel gestionale `$$` è `document.querySelectorAll` e basta (riga 471): una
+**NodeList**. Ha `forEach`, **non ha `filter` e non ha `map`**. In `qeAggiorna`
+c'era un `.filter`. Non dava un numero sbagliato: **spaccava la funzione** — e
+siccome `compForm` la chiama PRIMA di `renderCompVoci`, le lavorazioni non
+partivano nemmeno.
+
+Una riga sola che spegne una schermata intera. Nel file ci sono già due posti
+che fanno la cosa giusta (`Array.from($$(...))`, righe 5113 e 10820): guardarli
+prima di scrivere.
+
+### ⚠️⚠️⚠️ LA LEZIONE DEL GIORNO: IL BANCO PIÙ GENTILE DEL MONDO VERO
+
+Tre difetti, tre volte il banco verde. Sempre per la stessa ragione: **il finto
+era più generoso del vero.**
+
+| dove | il finto faceva | il vero fa |
+|---|---|---|
+| `sb.insert([…])` | accettava righe con chiavi diverse | `?columns=` unione → NULL → 23502 |
+| `$$` | restituiva un Array (con `filter`) | NodeList: solo `forEach` |
+| `eur2` / `_eur` nelle fotografie | scritti a mano, diversi da quelli veri | quelli del file |
+
+**Regola, da qui in avanti: un finto non deve MAI essere più permissivo
+dell'oggetto che imita.** Se accetta qualcosa che il browser o il database
+rifiutano, il banco non prova il gestionale: prova sé stesso. Quando si scrive
+un finto, la domanda è «cosa **rifiuta** quello vero?», non «cosa accetta».
+
+E le fotografie: gli aiuti (`eur2`, `_eur`, `_numTesto`) si **ritagliano dal
+file**, non si riscrivono a mano — se no la foto mostra i numeri del banco.
+
+### I banchi di oggi (stanno nel container, in `prove/`)
+
+| banco | prove | sabotaggi |
+|---|---|---|
+| `banco_persone_e_numeri.js` | 125 | 26 |
+| `banco_computo_preventivo.js` | 68 | 31 |
+| `banco_quadro_economico.js` | 91 | 37 |
+| (dal 18 agosto) ricerca · collegamenti · schermo · controllore AI · numeri · controllore sezioni · operatore · ondate | 352 | 96 |
+
+`_modulo_preventivo.js` sono gli attrezzi condivisi (DOM vero con jsdom, jsPDF
+finto, finto Supabase severo). `jsdom` e `jspdf` vanno installati con `npm i`.
+
+⚠️ Un ritaglio finisce **prima** del commento che apre la sezione dopo, non
+dentro: chiudere il taglio a metà di un `/* … */` commenta via tutto il pezzo
+seguente senza un errore. Successo oggi con `compRiepilogoDa`.
+
+### Un difetto vecchio, trovato e NON toccato
+
+A 390 px (telefono) la casella della descrizione nelle voci del preventivo si
+schiaccia a due dita: `.sheet .prev-riga` a `1fr 80px 118px 48px` non lascia
+spazio. Vale per **tutte** le righe, anche quelle di prima. Detto ad Alessio,
+lasciato lì.
+
+---
+
+## DOVE SIAMO RIMASTI (19 agosto 2026, mezzogiorno)
+
+**Fatto oggi:** le 9 prove «da capire» riscritte · i capitoli dal computo al
+preventivo (schermo + PDF + conferma d'ordine + lettera d'incarico) · la
+quantità con la virgola sui PDF · il quadro economico dei lavori pubblici
+(schermo + PDF) · il punto delle migliaia sui PDF del computo.
+
+**Due migrazioni SQL eseguite oggi:** `sql/gest-preventivo-sezioni.sql` e
+`sql/gest-computo-quadro.sql`.
+
+**Da fare, in ordine di quanto pesa davvero:**
+
+1. **«Prendi i prezzi dal prezzario»** dentro il computo. Il prezzario
+   regionale c'e' e le lavorazioni importate hanno prezzo 0,00: un pulsante
+   che cerca il **codice** e riempie solo le voci a zero, **solo dentro la
+   tariffa dichiarata dal computo**, e dice quante ne ha riempite e quante no.
+   ⚠️ Un codice come `A03.01.019.a` ha tre sotto-varianti con prezzi diversi
+   (`.1 .2 .3`): quelle **non** si riempiono da sole, si dicono e basta. Sui
+   codici del computo di Magliano Sabina il colpo riesce su circa 43 voci su
+   87. **È il punto 1 da giorni e non è mai stato fatto: adesso pesa il
+   doppio, perché un preventivo nato da quel computo esce con 87 righe a
+   0,00 €.**
+2. **La contabilita' dei lavori (SAL)** — chiesta da Alessio il 19 agosto.
+3. **L'analisi dei prezzi** — chiesta da Alessio il 19 agosto.
+4. **Le regole del deposito dei file** (bucket foto e video), mai guardate.
+   Ci sta dentro `foto_team_delete`, che usa `gest_puo_accedere` senza
+   guardare la spunta «foto».
+5. **Il difetto del telefono** sulle righe del preventivo (qui sopra).
+
+**Sul sito (fermo da giorni):**
+
+6. **95 pagine citta' vuote** in Search Console.
+7. **L'email vera alle imprese** non e' mai stata vista partire da una
+   richiesta reale.
+8. **Il grafico dell'admin** vuole `premium_dal` e `gestionale_dal`.
+
+**Roba di prova da buttare:** i preventivi n. 4, 5 e 6 del reparto «progetto
+casa» sono nati dalle prove di oggi.
