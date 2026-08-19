@@ -8437,34 +8437,161 @@ lasciato lì.
 
 ---
 
-## DOVE SIAMO RIMASTI (19 agosto 2026, mezzogiorno)
+# 19 agosto 2026 (2) — «PRENDI I PREZZI DAL PREZZARIO» (il punto 1, finalmente)
 
-**Fatto oggi:** le 9 prove «da capire» riscritte · i capitoli dal computo al
-preventivo (schermo + PDF + conferma d'ordine + lettera d'incarico) · la
-quantità con la virgola sui PDF · il quadro economico dei lavori pubblici
-(schermo + PDF) · il punto delle migliaia sui PDF del computo.
+Era il punto 1 della lista da sei giorni. Adesso c'e', ed e' stato provato sul
+computo vero di Magliano Sabina: **41 prezzi riempiti su 87**.
+
+## Che cos'e'
+
+Un pulsante in fondo alle lavorazioni del computo. Cerca il **codice** dentro
+il prezzario e riempie il prezzo. Tre regole lo tengono in piedi:
+
+1. **Si tocca solo quello che e' a ZERO.** Un prezzo gia' scritto e' una
+   decisione presa: non si sovrascrive mai, nemmeno se il prezzario dice
+   un altro numero.
+2. **Si cerca solo dentro la tariffa dichiarata dal computo.** Sul PDF resta
+   scritto «Tariffa Regione Lazio»: pescare il prezzo dall'Umbria, su una
+   gara, e' un errore che si paga. Se il computo non dichiara nessuna
+   tariffa non si tira a indovinare: si dice e ci si ferma.
+3. **Nel dubbio non si riempie, si dice.** `A03.01.019.a` nel prezzario ha
+   tre sotto-varianti (`.1 .2 .3`) con prezzi diversi: sceglierne una a caso
+   e' PEGGIO che lasciare la riga a zero, perche' lo zero si vede e il
+   prezzo sbagliato no. Stessa cosa quando l'unita' di misura non combacia
+   (scelta di Alessio: «non riempio e te lo dico»).
+
+Alla fine un resoconto sotto le lavorazioni dice quante ne ha riempite e,
+**una per una, perche' le altre no**: sotto-varianti · doppioni con prezzi
+diversi · unita' diversa · vale zero anche nel prezzario · codice non
+trovato · senza codice · codice non cercabile · non scritta dal database.
+
+## Le tre trappole trovate PRIMA di consegnare
+
+- ⚠️ **I codici non si cercano in memoria.** In memoria ce ne stanno 500
+  (`PP_MAX`) e il prezzario del Lazio ne ha 12.762: cercare li' dentro
+  avrebbe riempito quattro voci su ottanta e sarebbe sembrato che il
+  prezzario non c'entrasse niente. Si chiedono al database a blocchi di 30,
+  con `or=(codice.ilike.X,codice.ilike.X.*)` — il codice preciso e le sue
+  sotto-varianti in un viaggio solo.
+- ⚠️ **Le maiuscole non contano, apposta.** Un ingegnere scrive
+  `A03.01.019.A` dove la Regione scrive `.a`: con un confronto secco non si
+  sarebbe trovato NIENTE su tutto il computo. Per questo `ilike` e non `like`.
+- ⚠️ **I codici con `%` o `_` non vanno al database.** Dentro un LIKE sono
+  JOLLY: un codice cosi' pescherebbe mezzo prezzario e riempirebbe la riga
+  col prezzo di un'altra lavorazione. Si dicono e basta (`_codPulito`).
+
+E un difetto trovato al banco: il finto accettava un prezzo **negativo** dal
+prezzario e lo scriveva. Adesso un prezzo che non e' maggiore di zero non si usa.
+
+## Il prezzario del Lazio adesso e' dentro
+
+I quattro Excel del 18 agosto sono stati importati tutti con lo stesso nome
+di tariffa, **`Tariffa Regione Lazio`**, identico a quello dichiarato sul
+computo: e' cosi' che il pulsante sa dove cercare. I doppioni li salta da solo.
+
+⚠️ Alla prima prova era stato scelto il file sbagliato (il computo di
+Magliano invece del prezzario): il gestionale se n'e' accorto — «87 voci, ma
+nessuna ha un prezzo» — e non ha importato niente. Il controllo del 12 agosto
+ha funzionato sul campo.
+
+## LA GRAFICA — due cose dette da Alessio guardando lo schermo
+
+**1. «non si capisce niente, e' tutto unito e niente li distingue».**
+I quattro pulsanti in fondo alle lavorazioni erano `.btn-ghost`: sfondo
+trasparente, NIENTE bordo, testo grigio, a 14 px l'uno dall'altro. Sembravano
+una riga di testo. Adesso hanno bordo, sfondo, 12 px di distanza e 46 px di
+altezza (il dito). Classe `.comp-azioni`, solo per quella fila: nessun'altra
+schermata cambia.
+
+**2. «stona» — e aveva ragione.**
+L'arancione era stato messo su UN pulsante solo, per farlo staccare dagli
+altri tre bianchi. Risultato: sembrava un avviso, non un'azione. Adesso sono
+**tutti e quattro arancioni uguali** (scelta sua, la variante D di quattro
+mostrate a schermo). ⚠️ **La regola: in una fila di pulsanti, o sono tutti
+uguali o quello diverso sembra un allarme.** C'e' una prova apposta: se un
+domani uno torna vestito diverso, il banco diventa rosso.
+
+L'arancione e' **#FF6B35, quello del sito**, non il #C2410C scuro del pulsante
+AI del 18 agosto («arancione chiaro come nel sito, non scuro come ieri»).
+⚠️ Sul sito quell'arancione sta come FILO a sinistra e come segno delle icone,
+mai come sfondo pieno col bianco sopra: bianco su #FF6B35 sta a 3,1 a 1.
+Qui fa il bordo e la tinta leggera, il testo resta scuro (#9A3412 su #FFF3EC,
+oltre 7 a 1).
+
+**3. «perche' mi devo sforzare per vedere il prezzario?»**
+Il codice sopra ogni scheda e la riga grigia sotto stavano a 13,5 px. Portati
+a 15. Le note delle sezioni a 15,5.
+
+**4. Le descrizioni tagliate a meta' parola.** Nel resoconto un taglio secco a
+110 lettere dava «…e l'avvicinamento del», e sembra che manchi un pezzo del
+gestionale, non della frase. Adesso `_przAccorcia` torna indietro all'ultimo
+spazio.
+
+## Come e' stato provato
+
+| banco | prove | sabotaggi |
+|---|---|---|
+| `banco_prezzi_prezzario.js` | 72 | 22 |
+| `banco_schermata_prezzi.js` (renderCompVoci vera, jsdom) | 15 | 10 |
+
+Piu' la fotografia col CSS vero (`foto_pulsanti.js`): i quattro pulsanti
+devono avere **lo stesso identico vestito**, essere alti almeno 44 px e non
+uscire di lato, su 1440×900 e su 390×844.
+
+Il finto Supabase (`_finto_supabase.js`) e' severo come chiesto dalla lezione
+di stamattina: rifiuta un `or` con una virgola dentro un valore, un indirizzo
+oltre gli 8000 caratteri, un `insert` di righe con chiavi diverse, e tratta
+`%` e `_` dentro un `ilike` come JOLLY veri.
+
+⚠️ **Quello che il banco NON poteva provare** era il filtro vero contro
+PostgREST. Detto ad Alessio prima di consegnare, nella riga onesta della
+scheda. Provato poi sul campo: 41 su 87, e i codici veri con le maiuscole
+diverse si sono trovati.
+
+## ⚠️ I MIEI ERRORI DI OGGI, DETTI PER PRIMI
+
+1. **Gli ho detto «colonna di sinistra»** dove le lavorazioni stanno a destra:
+   ha cercato il pulsante per due schermate.
+2. **Ho messo la scheda di collaudo in un riquadro di codice subito sotto la
+   riga del git**: ha incollato tutto in Git Bash e la shell si e' impantanata
+   al prompt `>`. **Da adesso: la riga del git da sola, la scheda come testo
+   normale.**
+3. **Il pulsante e' finito in fondo a 88 righe.** Per trovarlo ci e' voluto il
+   Ctrl+F. Resta da mettere anche in cima all'elenco.
+
+---
+
+## DOVE SIAMO RIMASTI (19 agosto 2026, ora di pranzo)
+
+**Fatto stamattina:** le 9 prove «da capire» riscritte · i capitoli dal computo
+al preventivo (schermo + PDF + conferma d'ordine + lettera d'incarico) · la
+quantita' con la virgola sui PDF · il quadro economico dei lavori pubblici ·
+il punto delle migliaia sui PDF del computo.
+
+**Fatto a meta' giornata:** «Prendi i prezzi dal prezzario» · il prezzario del
+Lazio importato davvero (4 file, tariffa «Tariffa Regione Lazio») · i quattro
+pulsanti del computo che adesso sembrano pulsanti, tutti arancioni uguali ·
+il testo del Prezzario piu' grande · le descrizioni che non si spezzano.
 
 **Due migrazioni SQL eseguite oggi:** `sql/gest-preventivo-sezioni.sql` e
-`sql/gest-computo-quadro.sql`.
+`sql/gest-computo-quadro.sql`. Per il pulsante dei prezzi **non serviva
+nessuna migrazione**: si scrive solo `prezzo_unitario`.
 
 **Da fare, in ordine di quanto pesa davvero:**
 
-1. **«Prendi i prezzi dal prezzario»** dentro il computo. Il prezzario
-   regionale c'e' e le lavorazioni importate hanno prezzo 0,00: un pulsante
-   che cerca il **codice** e riempie solo le voci a zero, **solo dentro la
-   tariffa dichiarata dal computo**, e dice quante ne ha riempite e quante no.
-   ⚠️ Un codice come `A03.01.019.a` ha tre sotto-varianti con prezzi diversi
-   (`.1 .2 .3`): quelle **non** si riempiono da sole, si dicono e basta. Sui
-   codici del computo di Magliano Sabina il colpo riesce su circa 43 voci su
-   87. **È il punto 1 da giorni e non è mai stato fatto: adesso pesa il
-   doppio, perché un preventivo nato da quel computo esce con 87 righe a
-   0,00 €.**
+1. **Le regole del deposito dei file** (bucket `gestionale-foto` e
+   `gestionale-video`), mai guardate. Dentro c'e' `foto_team_delete`, che usa
+   `gest_puo_accedere` senza guardare la spunta «foto»: chi non ha il permesso
+   sulle foto puo' cancellarle. C'era gia', non e' una regressione — ma sono
+   dati veri di clienti veri e viene prima delle funzioni nuove.
 2. **La contabilita' dei lavori (SAL)** — chiesta da Alessio il 19 agosto.
-3. **L'analisi dei prezzi** — chiesta da Alessio il 19 agosto.
-4. **Le regole del deposito dei file** (bucket foto e video), mai guardate.
-   Ci sta dentro `foto_team_delete`, che usa `gest_puo_accedere` senza
-   guardare la spunta «foto».
-5. **Il difetto del telefono** sulle righe del preventivo (qui sopra).
+3. **L'analisi dei prezzi** — chiesta da Alessio il 19 agosto. Su un lavoro
+   pubblico la chiedono in appendice, insieme all'elenco dei prezzi unitari.
+4. **Il difetto del telefono** sulle righe del preventivo: a 390 px
+   `.sheet .prev-riga` a `1fr 80px 118px 48px` schiaccia la descrizione a due
+   dita. Vale per tutte le righe, anche quelle di prima.
+5. **Il pulsante dei prezzi anche in cima** all'elenco delle lavorazioni: in
+   fondo a 88 righe non lo trova nessuno.
 
 **Sul sito (fermo da giorni):**
 
@@ -8473,5 +8600,19 @@ quantità con la virgola sui PDF · il quadro economico dei lavori pubblici
    richiesta reale.
 8. **Il grafico dell'admin** vuole `premium_dal` e `gestionale_dal`.
 
+**⚠️ NETLIFY — cosa e' successo il 19 agosto.** Il sito e' andato in pausa a
+meta' mattina: «This site was paused as it reached its usage limits». Non era
+un difetto del codice. Sul piano gratuito ci sono **300 crediti al mese** e
+**ogni push ne costa 15** (un deploy): cioe' circa **venti push al mese**.
+Il traffico c'entra poco (1 GB = 20 crediti). Piani: Personal 9 $/mese
+(1.000 crediti), Pro 20 $/mese (da 3.000). **Regola pratica: raggruppare le
+modifiche in un push solo, non uno per correzione.**
+
 **Roba di prova da buttare:** i preventivi n. 4, 5 e 6 del reparto «progetto
-casa» sono nati dalle prove di oggi.
+casa» sono nati dalle prove di stamattina.
+
+**⚠️ I banchi di prova sono di nuovo spariti** con la fine della sessione di
+ieri (~760 prove ricostruite da zero). Quelli di oggi stanno nel container, in
+`prove/`, come vuole la regola di Alessio. La proposta di tenerli in `prove/`
+nella sua cartella, fuori dal deploy con un rinvio in `netlify.toml`, resta
+sul tavolo: **non si sposta niente finche' non lo dice lui.**
