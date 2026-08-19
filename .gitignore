@@ -6,6 +6,15 @@ setup-test-user.js
 #     Dentro ci sono i finti Supabase e le prove nel browser (12/8/2026). ---
 prove-claude/
 
+# --- I fogli sui prezzi e sui conti: RESTANO SUL PC. ---
+#     19 agosto 2026. Dentro ci sono quanto spendi in pubblicita', quanto
+#     costa portare un cliente, i margini e il confronto coi concorrenti.
+#     CLAUDE.md e PROMPT-sessione-nuova.md hanno un rinvio a 404 in
+#     netlify.toml; questi no, quindi finirebbero online leggibili da
+#     chiunque su trovaimpresa.com/IL-PREZZO-la-decisione.md
+IL-PREZZO-*.md
+COSA-RESTA-DA-FARE.md
+
 # --- Dipendenze e cache (NON vanno pubblicate) ---
 node_modules/
 __pycache__/

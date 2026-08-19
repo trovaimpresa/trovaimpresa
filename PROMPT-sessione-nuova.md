@@ -152,6 +152,26 @@ impresa lo userà davvero, fatti spiegare da lei come lo fa, e correggi.
 **Migrazioni SQL eseguite il 19 agosto sera:** `sql/conteggio-visite.sql` ·
 `sql/mappa-posizioni.sql` · `sql/gest-sal.sql`
 
+### ⛔ IL PREZZO — deciso la sera del 19 agosto
+
+**Il piano gratuito resta esattamente com'è. Il Premium passa da →49← € l'anno
+a →29← € al mese, oppure →249← € l'anno.** Un piano solo, con dentro tutto:
+visibilità e gestionale. I tre mesi di prova restano, e adesso valgono →87← €.
+
+Perché: 49 € l'anno fanno 4 € al mese, e **la pubblicità era in perdita** —
+un'impresa iscritta costa →5,47← €, se paga una su dieci un cliente costa
+→54,70← € e ne rendeva 49. Adesso ne rende 249-348, e si ripaga in due mesi.
+
+Da →816← clienti paganti a **→115-161←**.
+
+⚠️ **Va detto alle imprese PRIMA**, non quando gli chiedi i soldi.
+⚠️ **Niente sconti**: il regalo sono i tre mesi, non il prezzo tagliato.
+⚠️ **Dentro il database la parola `premium` resta com'è**: cambia solo il
+prezzo e quello che si legge a schermo.
+
+Tutti i conti stanno in `IL-PREZZO-la-decisione.md` e
+`IL-PREZZO-i-conti-veri.md`, nella cartella del progetto.
+
 ## ⛔ DA DOVE SI RIPARTE
 
 **1. Leggere il contatore delle visite.** La query sta in fondo a
@@ -169,6 +189,16 @@ declared (at assistente-trovaimpresa.js:1:1)`. Nei file compare **una volta
 sola** — controllato. La seconda copia la mette qualcun altro, quasi
 sicuramente l'iniezione di Netlify, la stessa strada del pixel. **Guarda lì,
 non nel codice.**
+
+**4. Il prezzo nuovo sul sito.** Quattro pezzi, e il terzo è il più grosso:
+   a) le pagine `prezzi.html`, `info-premium.html`, `info-free.html` — da 49 €
+      l'anno a 29 € al mese o 249 € l'anno;
+   b) il riquadro nei quattro pannelli che dice alle 87 imprese che il
+      gestionale è aperto ed è compreso nei loro tre mesi;
+   c) **il pagamento mensile su Stripe** — oggi c'è solo l'annuale, e un
+      abbonamento ricorrente è un'altra cosa da costruire;
+   d) l'avviso del prezzo nuovo dentro il pannello, prima che scadano i tre
+      mesi di regalo delle imprese di luglio.
 
 **Poi, in ordine libero:** l'analisi dei prezzi (lavori pubblici) · la
 descrizione schiacciata a 390 px sui preventivi (`.sheet .prev-riga` a

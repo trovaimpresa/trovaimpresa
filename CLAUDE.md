@@ -8943,3 +8943,90 @@ grafico dell'admin (`premium_dal`, `gestionale_dal`).
 **Decisione che resta ad Alessio:** l'indirizzo sta nel blocco FACOLTATIVO
 della registrazione, e 61 imprese su 87 non l'hanno scritto. Senza indirizzo
 il pallino resta sulla zona. **Non si cambia il modulo senza il suo via.**
+
+---
+
+# 19 agosto 2026 (5), TARDA SERA — IL PREZZO
+
+Alessio ha chiesto un parere sul business, dicendo «di business non ne so
+niente». Non era una domanda tecnica ed e' la piu' importante della giornata.
+
+## Com'era e cosa non tornava
+
+Un piano solo, **Premium 49 € all'anno**. Cioe' **4 € al mese**, per un
+prodotto che dentro ha computo metrico, prezzario regionale (12.762 voci),
+preventivi, fatture con casse e ritenute, SAL, quadro economico.
+[CantieriCloud](https://cantiericloud.com/), concorrente diretto, chiede
+**49 € al MESE** per un gestionale che fa meno cose.
+
+⛔ **Il conto che ha deciso tutto:** portare un'impresa iscritta con la
+pubblicita' costa **5,47 €**. Se paga una su dieci — percentuale normale — un
+cliente pagante costa **54,70 €**. Il prezzo era **49 €**.
+**Ogni euro di pubblicita' era un euro perso**, e non per colpa della
+pubblicita'.
+
+## La decisione
+
+**Il piano gratuito resta esattamente com'e'. Il Premium passa a 29 € al mese,
+oppure 249 € l'anno.** Un piano solo, con dentro tutto — visibilita' e
+gestionale. I tre mesi di prova restano: adesso valgono **87 €**, prima 12.
+
+Per 40.000 € di incassi l'anno servono **115-161** clienti paganti invece di
+**816**.
+
+⚠️ Strade scartate lungo la discussione, e vale la pena sapere perche':
+- **29 € al mese col gestionale a parte e la vetrina gratis**: scartata perche'
+  Alessio non voleva due prodotti da spiegare.
+- **49 € al mese**: proposta da me (stesso prezzo del concorrente, ma con piu'
+  roba dentro). Scartata da lui.
+- **Regalare anche la visibilita'**: gliel'ho sconsigliato e l'ha tenuta a
+  pagamento. ⛔ **Priorita' nei risultati, visibilita' regionale e spazi
+  pubblicitari sono POSTI, e i posti sono limitati: se ce l'hanno tutti non ce
+  l'ha nessuno.** Regalarle non le svaluta — le fa smettere di esistere. Sono
+  l'unica cosa davvero scarsa che TrovaImpresa ha.
+- **Tenere le 87 imprese al vecchio prezzo**: proposto da me, scartato da lui
+  con una ragione giusta — **nessuno ha ancora pagato**, quindi non si rompe
+  nessuna promessa.
+
+## Le regole del cambio
+
+1. **Il prezzo nuovo vale per tutti.** Nessuno ha ancora pagato.
+2. **Va detto PRIMA**, non quando gli chiedi i soldi. Fra due mesi le imprese
+   di luglio arrivano in fondo ai tre mesi di regalo: se scoprono il prezzo
+   nuovo al momento di pagare, se ne vanno e lo raccontano in giro.
+3. **Niente sconti sul prezzo.** Il regalo sono i tre mesi, non il prezzo
+   tagliato: uno sconto dice che non valeva quello che chiedevi.
+4. **Dentro il database `premium` resta `premium`.** Cambia solo il prezzo e
+   quello che si legge a schermo. Rinominare `piano='premium'`, `premium_dal`
+   e il resto vorrebbe dire toccare mezzo gestionale per niente.
+
+## Il mercato — i numeri, non le impressioni
+
+**717.000** imprese edili attive in Italia; solo il **20%** usa un software per
+i cantieri (**143.000**); il 60% e' fermo a carta ed Excel (**430.000**).
+Ne servono 115-161: **una impresa ogni 4.500** di quelle che gia' usano
+qualcosa.
+⚠️ Il rovescio: il **71%** delle imprese edili ha meno di due dipendenti. Sono
+proprio i suoi, e sono i piu' difficili da far pagare.
+
+## ⚠️ LA COSA PIU' IMPORTANTE, E NON E' IL PREZZO
+
+**Il gestionale e' aperto da una settimana e le 87 imprese iscritte non lo
+sanno.** Era chiuso per lavori fino a poco fa. Quindi:
+
+- il «una su dieci pagera'» **non e' un dato suo**: e' una media di settore;
+- nessuna di quelle 87 ha detto no al gestionale — **non gliel'hanno ancora
+  fatto vedere.**
+
+**Prima del prezzo va fatto vedere il prodotto**, e va contato quante lo
+aprono. Costa zero e si sa in due settimane. Se non lo apre nessuno, il prezzo
+giusto non serve a niente e il problema e' un altro.
+
+Alessio **non vuole mandare email**: l'avviso va messo **dentro il pannello**,
+dove le imprese passano gia'.
+
+## I fogli
+
+`IL-PREZZO-i-conti-veri.md` (i conti e le tre strade) e
+`IL-PREZZO-la-decisione.md` (la decisione presa, le regole, cosa fare nel
+sito). Stanno nella cartella del progetto.
