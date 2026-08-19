@@ -98,7 +98,11 @@
     "gest_carte",
     "gest_fornitori", "gest_fatture_fornitori", "gest_spese",
     "gest_ore", "gest_crediti", "gest_foto", "gest_video",
-    "gest_computi", "gest_prezzi_propri", "gest_rapportini"
+    "gest_computi", "gest_prezzi_propri", "gest_rapportini",
+    /* 19 agosto 2026 — gli stati di avanzamento (SAL). Le loro RIGHE non
+       ci vanno: sono pezzi del SAL e se ne vanno con lui, come le righe di
+       una fattura (vedi la nota 3 in sql/gest-computo-metrico.sql). */
+    "gest_sal"
   ];
 
   var COL = "eliminato_il";
