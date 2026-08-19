@@ -8561,58 +8561,184 @@ diverse si sono trovati.
 
 ---
 
-## DOVE SIAMO RIMASTI (19 agosto 2026, ora di pranzo)
+# 19 agosto 2026 (3) — LE REGOLE DEL DEPOSITO DEI FILE
+
+Stava in lista dal 13 agosto, in tre punti del diario, e nel diario era
+scritta piccola: «`foto_team_delete` usa `gest_puo_accedere` senza guardare
+la spunta foto». Guardandola sul serio era **piu' grossa di cosi'**.
+
+## ⚠️ IL DEPOSITO «FOTO» NON HA DENTRO SOLO LE FOTO
+
+Seguendo i percorsi che costruisce l'app, dentro `gestionale-foto` finiscono
+CINQUE cose diverse:
+
+    <impresa>/<lavoro>/…          le foto (e i video, nell'altro deposito)
+    <impresa>/fatture/<id>/…      i PDF delle fatture
+    <impresa>/clienti/<id>/…      i documenti dei clienti
+    <impresa>/fornitori/<id>/…    i documenti dei fornitori
+    <impresa>/commercialista/…    i documenti del commercialista
+
+E la regola era una sola per tutte e cinque: `gest_puo_accedere`, cioe' «sei
+un collaboratore attivo». **Quindi un operaio con TUTTE le spunte tolte
+poteva scaricare le fatture e i documenti del commercialista, e
+cancellarli.** Riprodotto al banco prima di toccare niente: 7 file su 7,
+legge e cancella, con tutte le spunte a no.
+
+Sulle tabelle `gest_foto`/`gest_video` la spunta c'era dal 13 agosto. Nel
+deposito no — e chi passa dal deposito **scavalca la tabella**. La lezione
+generale: *quando una regola sta in due posti (tabella e deposito), sistemarne
+uno solo non serve a niente.*
+
+## Com'e' adesso — `sql/gest-deposito-file.sql`
+
+- **cancellare dal deposito: SOLO il titolare.** Non e' una restrizione
+  inventata: sulle tabelle solo `foto_owner`/`video_owner` cancellano (i
+  collaboratori non hanno nessuna regola di DELETE), e
+  `gestionale-operatore.html` dal deposito **non cancella mai** — carica e
+  basta, controllato riga per riga.
+- **fornitori e commercialista: solo il titolare**, anche in lettura. Nell'app
+  dell'operaio quelle due sezioni non esistono nemmeno.
+- **fatture -> spunta «fatture»**, **clienti -> spunta «clienti»**.
+- **cartella di un lavoro** -> leggere: `foto` o `lavori` o `fatture`;
+  caricare: `foto` o `fatture`.
+- Le sei regole chiamano **una funzione sola**, `gest_puo_file`: sei copie
+  della stessa condizione si disallineano (lezione di `compRiepilogoDa`).
+
+### ⚠️ LA TRAPPOLA CHE IL BANCO HA PRESO PRIMA DELLA CONSEGNA
+
+`gestionale-operatore.html` carica i PDF delle fatture **dentro la cartella
+del lavoro** (`MIO.impresaId+"/"+lavoro+"/…"`), NON dentro `fatture/`. Se
+sulla cartella del lavoro avessi chiesto solo la spunta «foto», una persona
+con **Fatture ✔ e Foto ✘ non avrebbe piu' potuto caricare una fattura dal
+telefono**: file rifiutato, e lei senza capire perche'. E' la stessa trappola
+chiusa il 13 agosto sulle tabelle, presa dall'altro verso.
+
+### ⚠️ IL PERCORSO STORTO
+
+Le regole di prima facevano `((storage.foldername(name))[1])::uuid` a occhi
+chiusi. Basta **un** file il cui percorso non comincia con un uuid e la
+lettura di TUTTO il deposito va in errore — non «salta quel file»: fallisce
+la Galleria intera. Adesso quel pezzo diventa «nessuna impresa», cioe' un no,
+senza errori. Provato con un file `cartella_strana/…` dentro il deposito.
+
+## Il secondo buco, trovato leggendo — `sql/gest-deposito-incarichi.sql`
+
+`docinc_insert_any` sul deposito `documenti-incarichi` diceva una cosa sola:
+«il file va in quel deposito». Ed era aperta anche ad **`anon`**. La chiave
+pubblica del sito sta dentro la pagina (e ci deve stare), quindi **chiunque,
+dal mondo, poteva caricare file li' dentro, in cartelle inesistenti, grandi
+quanto voleva.** Non e' un dato che esce: e' un deposito che ti riempiono, e
+la banda si paga.
+
+Il caricamento senza account **serve e resta** (un cliente che manda un
+incarico non ha un account). Adesso pero':
+
+- si carica **solo dentro la cartella di un professionista che esiste**;
+- **i 10 MB li fa rispettare il database** (`file_size_limit` sul bucket).
+  Prima quel limite stava scritto solo dentro `profilo-impresa.html`.
+
+⚠️ **NIENTE elenco di tipi di file permessi, ed e' una scelta.** La pagina
+accetta i `.dwg`, che il browser manda come `application/octet-stream`. Un
+elenco dovrebbe per forza accettare «octet-stream», cioe' qualunque file:
+sembrerebbe un controllo e non lo sarebbe.
+
+⚠️ **Quello che NON e' chiuso:** uno puo' ancora caricare tanti file da 10 MB
+nella cartella di un professionista vero. Contro quello ci vuole un conteggio
+delle richieste, non una regola del database. Detto invece che nascosto.
+
+## Come sono stati provati
+
+Su un **PostgreSQL 16 vero**, con `gest_puo_accedere`, `gest_puo_sezione` e
+`storage.foldername` **copiate VERBATIM dal database di produzione** (fatte
+leggere ad Alessio con tre query di sola lettura, apposta per non ricostruirle
+a memoria — e' l'errore del 9 agosto).
+
+| banco | prove | sabotaggi |
+|---|---|---|
+| deposito foto e video | 392 | 11 |
+| deposito incarichi | 127 | 6 |
+
+I sabotaggi rompono **il file vero che va su Supabase**, non una copia: lo
+script lo patcha, rimonta il database da zero e ricontrolla.
+
+### ⚠️ DUE VOLTE IL FINTO ERA SBAGLIATO, E SE NE E' ACCORTO IL BANCO
+
+1. **Chi non ha fatto il login non e' «authenticated con l'uid vuoto»: e' un
+   altro RUOLO (`anon`).** Una regola scritta `to authenticated` per lui non
+   esiste proprio. Il banco lo faceva passare da `authenticated`, cioe'
+   provava la cosa sbagliata. Corretto: se non c'e' uid, `set role anon`.
+2. **Il finto `storage.buckets` era piu' POVERO del vero** (mancavano
+   `file_size_limit` e `allowed_mime_types`) e `imprese` non era leggibile
+   dai ruoli `anon`/`authenticated`, mentre sul sito lo e'. Le prove dicevano
+   «no» dove il database vero dice «si».
+
+   E' il rovescio della lezione del mattino: un finto non deve essere **piu'
+   permissivo** del vero, ma nemmeno **piu' povero** — nel primo caso non
+   trova i difetti, nel secondo ne inventa.
+
+### ⚠️ IL BANCO SEGNA ROSSO, NON ESPLODE
+
+Il sabotaggio del percorso storto faceva morire lo script con un messaggio di
+psql invece di contare una prova rossa. Adesso l'errore dentro una regola
+**e' un no, e si conta**. E l'ordine in cui si montano i pezzi del banco
+conta: prima il pilota che non esplode, poi le attese.
+
+---
+
+## DOVE SIAMO RIMASTI (19 agosto 2026, primo pomeriggio)
 
 **Fatto stamattina:** le 9 prove «da capire» riscritte · i capitoli dal computo
-al preventivo (schermo + PDF + conferma d'ordine + lettera d'incarico) · la
-quantita' con la virgola sui PDF · il quadro economico dei lavori pubblici ·
-il punto delle migliaia sui PDF del computo.
+al preventivo · la quantita' con la virgola sui PDF · il quadro economico dei
+lavori pubblici · il punto delle migliaia sui PDF del computo.
 
-**Fatto a meta' giornata:** «Prendi i prezzi dal prezzario» · il prezzario del
-Lazio importato davvero (4 file, tariffa «Tariffa Regione Lazio») · i quattro
-pulsanti del computo che adesso sembrano pulsanti, tutti arancioni uguali ·
-il testo del Prezzario piu' grande · le descrizioni che non si spezzano.
+**Fatto a mezzogiorno:** «Prendi i prezzi dal prezzario» (41 su 87 sul computo
+vero) · il prezzario del Lazio importato davvero, tariffa «Tariffa Regione
+Lazio» · i quattro pulsanti del computo tutti arancioni uguali · il testo del
+Prezzario piu' grande · le descrizioni che non si spezzano.
 
-**Due migrazioni SQL eseguite oggi:** `sql/gest-preventivo-sezioni.sql` e
-`sql/gest-computo-quadro.sql`. Per il pulsante dei prezzi **non serviva
-nessuna migrazione**: si scrive solo `prezzo_unitario`.
+**Fatto nel pomeriggio:** le regole dei due depositi di file.
 
-**Da fare, in ordine di quanto pesa davvero:**
+**Migrazioni SQL eseguite oggi:** `sql/gest-preventivo-sezioni.sql` ·
+`sql/gest-computo-quadro.sql` · `sql/gest-deposito-file.sql` ·
+`sql/gest-deposito-incarichi.sql`.
 
-1. **Le regole del deposito dei file** (bucket `gestionale-foto` e
-   `gestionale-video`), mai guardate. Dentro c'e' `foto_team_delete`, che usa
-   `gest_puo_accedere` senza guardare la spunta «foto»: chi non ha il permesso
-   sulle foto puo' cancellarle. C'era gia', non e' una regressione — ma sono
-   dati veri di clienti veri e viene prima delle funzioni nuove.
-2. **La contabilita' dei lavori (SAL)** — chiesta da Alessio il 19 agosto.
-3. **L'analisi dei prezzi** — chiesta da Alessio il 19 agosto. Su un lavoro
-   pubblico la chiedono in appendice, insieme all'elenco dei prezzi unitari.
-4. **Il difetto del telefono** sulle righe del preventivo: a 390 px
-   `.sheet .prev-riga` a `1fr 80px 118px 48px` schiaccia la descrizione a due
-   dita. Vale per tutte le righe, anche quelle di prima.
-5. **Il pulsante dei prezzi anche in cima** all'elenco delle lavorazioni: in
-   fondo a 88 righe non lo trova nessuno.
+**Da fare, in ordine:**
+
+1. **La contabilita' dei lavori (SAL)** — chiesta da Alessio il 19 agosto.
+2. **L'analisi dei prezzi** — chiesta da Alessio il 19 agosto. Su un lavoro
+   pubblico la chiedono in appendice, con l'elenco dei prezzi unitari.
+3. **Il difetto del telefono** sulle righe del preventivo: a 390 px
+   `.sheet .prev-riga` a `1fr 80px 118px 48px` schiaccia la descrizione.
+4. **Il pulsante dei prezzi anche in cima** all'elenco delle lavorazioni: in
+   fondo a 88 righe non lo trova nessuno (ci e' voluto il Ctrl+F).
+5. **`cv-candidati/registrazioni`**: stessa famiglia del deposito incarichi.
+   La cartella e' gia' bloccata, manca solo il limite di misura.
+6. **Il conteggio delle richieste** per fermare chi insiste a caricare file:
+   non si fa con una regola del database.
 
 **Sul sito (fermo da giorni):**
 
-6. **95 pagine citta' vuote** in Search Console.
-7. **L'email vera alle imprese** non e' mai stata vista partire da una
+7. **95 pagine citta' vuote** in Search Console.
+8. **L'email vera alle imprese** non e' mai stata vista partire da una
    richiesta reale.
-8. **Il grafico dell'admin** vuole `premium_dal` e `gestionale_dal`.
+9. **Il grafico dell'admin** vuole `premium_dal` e `gestionale_dal`.
 
-**⚠️ NETLIFY — cosa e' successo il 19 agosto.** Il sito e' andato in pausa a
-meta' mattina: «This site was paused as it reached its usage limits». Non era
-un difetto del codice. Sul piano gratuito ci sono **300 crediti al mese** e
-**ogni push ne costa 15** (un deploy): cioe' circa **venti push al mese**.
-Il traffico c'entra poco (1 GB = 20 crediti). Piani: Personal 9 $/mese
-(1.000 crediti), Pro 20 $/mese (da 3.000). **Regola pratica: raggruppare le
-modifiche in un push solo, non uno per correzione.**
+**⚠️ NETLIFY.** Il sito e' andato in pausa il 19 agosto a meta' mattina: «This
+site was paused as it reached its usage limits». Non era un difetto del
+codice. Sul piano gratuito ci sono **300 crediti al mese** e **ogni push ne
+costa 15** (un deploy): circa **venti push al mese**. Il traffico c'entra poco
+(1 GB = 20 crediti). Piani: Personal 9 $/mese (1.000 crediti), Pro 20 $/mese
+(da 3.000). **Regola pratica: raggruppare le modifiche in un push solo.**
+Il 19 agosto ne sono partiti tre per tre cose che potevano viaggiare insieme.
 
 **Roba di prova da buttare:** i preventivi n. 4, 5 e 6 del reparto «progetto
-casa» sono nati dalle prove di stamattina.
+casa» sono nati dalle prove del 19 agosto.
 
-**⚠️ I banchi di prova sono di nuovo spariti** con la fine della sessione di
-ieri (~760 prove ricostruite da zero). Quelli di oggi stanno nel container, in
-`prove/`, come vuole la regola di Alessio. La proposta di tenerli in `prove/`
-nella sua cartella, fuori dal deploy con un rinvio in `netlify.toml`, resta
-sul tavolo: **non si sposta niente finche' non lo dice lui.**
+**⚠️ I banchi di prova stanno nel container, in `prove/`**, come vuole la
+regola di Alessio, e spariscono a fine sessione. Quelli del deposito
+(`banco_deposito*.sql`, `banco_incarichi*.sql`, `gira_banco*.sh`,
+`rompi_deposito.py`, `rompi_incarichi.py`) valgono piu' degli altri, perche'
+ricostruirli vuol dire rifarsi dare dal database le tre funzioni verbatim.
+La proposta di tenerli in `prove/` nella cartella di Alessio, fuori dal deploy
+con un rinvio in `netlify.toml`, resta sul tavolo: **non si sposta niente
+finche' non lo dice lui.**
