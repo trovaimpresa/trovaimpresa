@@ -3287,3 +3287,81 @@ body:has(#ti-fondatore) .side{
   .qe-riga .qe-d{ grid-column:1 / -1; }
   .qe-riga .qe-v{ text-align:left; padding-left:2px; }
 }
+
+/* ============================================================
+   19 agosto 2026 — I PULSANTI DEL COMPUTO SEMBRANO PULSANTI
+   ============================================================
+   Detto da Alessio guardando lo schermo: «non si capisce niente, è tutto
+   unito e niente li distingue». Aveva ragione: erano quattro .btn-ghost
+   — sfondo trasparente, NIENTE bordo, testo grigio — a 14 px l'uno
+   dall'altro. Sembravano una riga di testo, non quattro cose da cliccare.
+
+   La classe sta solo su questa fila: nessun'altra schermata del gestionale
+   cambia aspetto.
+
+   ⚠️ height:auto serve: .btn-ghost nasce a 38 px fissi, e con un testo
+      lungo su due righe si taglierebbe.
+   ============================================================ */
+.comp-azioni{ display:flex; gap:12px; flex-wrap:wrap; margin-top:16px; }
+.comp-azioni .quick-add{
+  margin:0; height:auto; min-height:46px; padding:11px 16px;
+  font-size:16px; font-weight:700; line-height:1.25;
+  background:var(--card); color:var(--testo);
+  border:1.5px solid var(--bordo-forte); border-radius:10px;
+  cursor:pointer; white-space:normal; text-align:center;
+}
+.comp-azioni .quick-add + .quick-add{ margin-left:0; }
+.comp-azioni .quick-add:hover{
+  background:var(--blu-tenue); border-color:var(--blu); color:var(--blu);
+}
+.comp-azioni .quick-add:focus-visible{ outline:3px solid var(--blu); outline-offset:2px; }
+
+/* ============================================================
+   L'ARANCIONE CHIARO — chiesto da Alessio il 19 agosto
+   ============================================================
+   È l'arancione del sito (#FF6B35), NON quello scuro del pulsante AI
+   (#C2410C, del 18 agosto): «arancione chiaro come nel sito, non scuro
+   come ieri».
+   ⚠️ Sul sito quell'arancione sta come FILO a sinistra e come segno delle
+      icone, mai come sfondo pieno col bianco sopra — e c'è un motivo:
+      bianco su #FF6B35 sta a 3,1 a 1, sotto il minimo per leggersi.
+      Qui l'arancione fa il bordo e la tinta leggera, il testo resta
+      scuro (#9A3412 su #FFF3EC: oltre 7 a 1).
+   ============================================================ */
+.comp-azioni .quick-add.az-prz{
+  background:#FFF3EC; border-color:#FF6B35; color:#9A3412;
+}
+.comp-azioni .quick-add.az-prz:hover{
+  background:#FFE7D9; border-color:#E2551F; color:#7C2D12;
+}
+
+/* il resoconto di «Prendi i prezzi dal prezzario»: stessa forma delle
+   schede del sito — filo arancione a sinistra, angoli tondi a destra */
+.prz-box{
+  border:1px solid var(--bordo); border-left:6px solid #FF6B35;
+  border-radius:0 var(--r-card) var(--r-card) 0;
+  background:var(--card); padding:16px 18px; margin-top:18px;
+}
+.prz-tit{ font-size:19px; font-weight:800; color:var(--testo); margin-bottom:4px; }
+.prz-conta{ font-size:17px; color:var(--testo-2); margin-bottom:12px; }
+.prz-gruppo{ font-size:16px; font-weight:800; color:#9A3412; margin:18px 0 8px; }
+.prz-gruppo:first-of-type{ margin-top:6px; }
+
+/* ============================================================
+   IL TESTO PICCOLO DEL PREZZARIO — 19 agosto 2026
+   ============================================================
+   Alessio: «perché mi devo sforzare per vedere il prezzario?».
+   Il codice e la riga grigia sotto stavano a 13,5 px, sotto la misura
+   che gli serve per leggere a colpo d'occhio. Portati a 15.
+   ============================================================ */
+.pz-cod{ font-size:15px; }
+.pz-meta{ font-size:15px; }
+.wrap section .sh-nota{ font-size:15.5px; }
+
+@media(max-width:900px){
+  /* sul telefono uno sotto l'altro, larghi tutta la riga: quattro
+     pulsanti affiancati diventerebbero quattro francobolli */
+  .comp-azioni .quick-add{ flex:1 1 100%; }
+  .prz-box{ padding:14px; }
+  .prz-tit{ font-size:18px; }
+}

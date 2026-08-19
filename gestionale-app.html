@@ -15586,7 +15586,12 @@ ${vecchi?`
         +'<div class="spesa-row"><span>di cui oneri della sicurezza</span><b>'+eur2(rp.sicurezza)+'</b><span></span></div>';
     }
     box.innerHTML=h+piede
-      +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'
+      /* ⚠️ 19 agosto 2026 — detto da Alessio guardando lo schermo: «non si
+         capisce niente, è tutto unito e niente li distingue». Erano quattro
+         pulsanti senza bordo, testo grigio, a 14 px l'uno dall'altro: una
+         riga di testo, non quattro cose da cliccare. La classe comp-azioni
+         dà loro un bordo vero e dello spazio (css/gestionale.css). */
+      +'<div class="comp-azioni">'
       +  '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Aggiungi lavorazione</button>'
       /* ⚠️ 18 agosto 2026 — quando il computo te lo manda gia' fatto un
          progettista, le voci sono ottanta e riscriverle a mano e' una serata.
@@ -15598,7 +15603,7 @@ ${vecchi?`
          SOLO le righe a zero. Si vede solo se qualcosa a zero c'è davvero: se
          no sarebbe un pulsante che non fa mai niente. */
       +  (Array.from(compVociCache).some(function(v){return !(+v.prezzo_unitario);})
-          ? '<button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
+          ? '<button type="button" class="btn-ghost quick-add az-prz" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
           : '')
       +  (compCapNuovo?'':'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>')
       +'</div>'
@@ -17179,16 +17184,27 @@ ${vecchi?`
   }
   const _codChiave=c=>String(c==null?"":c).trim().toUpperCase();
 
+  /* ⚠️ 19 agosto 2026 — le descrizioni del prezzario regionale sono lunghe
+     otto righe: nell'elenco vanno accorciate. Ma un taglio secco a 110
+     lettere spezza a metà parola («…e l'avvicinamento del»), e sembra che
+     manchi un pezzo del gestionale, non della frase. Qui si torna indietro
+     fino all'ultimo spazio e si mettono i tre puntini. */
+  function _przAccorcia(t,quante){
+    const s=String(t==null?"":t).replace(/\s+/g," ").trim();
+    if(s.length<=quante)return s;
+    const tagliato=s.slice(0,quante);
+    const spazio=tagliato.lastIndexOf(" ");
+    return (spazio>quante*0.5?tagliato.slice(0,spazio):tagliato).replace(/[ ,;.:]+$/,"")+"…";
+  }
   function _przRigaHtml(v,motivo){
     return '<div class="spesa-row"><span>'
       +(v.codice?'<b>'+esc(String(v.codice))+'</b> · ':'')
-      +esc(String(v.descrizione||"(senza descrizione)").slice(0,110))
+      +esc(_przAccorcia(v.descrizione||"(senza descrizione)",110))
       +'<small class="sp-forn">'+motivo+'</small></span><b></b><span></span></div>';
   }
   function _przGruppo(titolo,elenco){
     if(!elenco||!elenco.length)return "";
-    return '<div style="margin-top:12px"><div style="font-weight:700;margin-bottom:6px">'+titolo+'</div>'
-      +elenco.join("")+'</div>';
+    return '<div class="prz-gruppo">'+titolo+'</div>'+elenco.join("");
   }
 
   async function compPrezziDaPrezzario(){
@@ -17363,9 +17379,9 @@ ${vecchi?`
       if(elenco.length>TETTO)righe.push('<div class="sh-nota">…e altre '+(elenco.length-TETTO)+'. Sono tutte ancora a 0,00 € nell\'elenco qui sopra.</div>');
       return righe;
     };
-    let h='<div style="margin-top:14px;border:1px solid var(--bordo,#e3e7ec);border-radius:12px;padding:14px">'
-      +'<div style="font-size:17px;font-weight:800;margin-bottom:4px">Prezzi presi da «'+esc(fonte)+'»</div>'
-      +'<div style="margin-bottom:8px">'
+    let h='<div class="prz-box">'
+      +'<div class="prz-tit">Prezzi presi da «'+esc(fonte)+'»</div>'
+      +'<div class="prz-conta">'
       +'<b>'+messe+'</b> '+(messe===1?"prezzo riempito":"prezzi riempiti")
       +' su <b>'+quanteAZero+'</b> '+(quanteAZero===1?"lavorazione che era":"lavorazioni che erano")+' a 0,00 €.'
       +'</div>';
