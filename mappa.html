@@ -218,7 +218,10 @@ async function caricaImprese() {
   // Paginazione: Supabase restituisce max 1000 righe per chiamata
   while (true) {
     const res = await fetch(
-      `${SUPA_URL}/rest/v1/imprese?select=id,nome,ragione_sociale,nome_impresa,tipo,categoria,citta,provincia,indirizzo,via,telefono,email,sito_web&order=id.asc&limit=${pageSize}&offset=${from}`,
+      // lat/lng arrivano dal database: se ci sono, la mappa e' immediata e
+      // non si chiede niente a OpenStreetMap (prima erano 1,1 secondi a impresa).
+      // posizione_da dice se il pallino e' sull'indirizzo vero o solo sulla zona.
+      `${SUPA_URL}/rest/v1/imprese?select=id,nome,nome_attivita,nome_negozio,ragione_sociale,nome_impresa,tipo,categoria,citta,provincia,indirizzo,via,telefono,email,sito_web,lat,lng,posizione_da&is_test=not.is.true&order=id.asc&limit=${pageSize}&offset=${from}`,
       { headers: { 'apikey': SUPA_KEY, 'Accept': 'application/json' } }
     );
     if (!res.ok) throw new Error('Errore Supabase: ' + res.status);
@@ -258,12 +261,19 @@ async function geocodifica(query) {
 
 // ── POPUP HTML ────────────────────────────────────────────────────────────────
 function buildPopup(d) {
-  const nome = d.nome || d.ragione_sociale || d.nome_impresa || 'Impresa';
+  const nome = d.nome || d.nome_attivita || d.nome_negozio || d.ragione_sociale || d.nome_impresa || 'Impresa';
   const tipo = d.tipo || d.categoria || '';
   const tel = d.telefono || '';
   const telHref = tel ? 'tel:' + tel.replace(/[\s\-().]/g, '') : '';
   const profiloHref = `/profilo-impresa.html?id=${d.id}`;
-  const citta = [d.indirizzo || d.via, d.citta, d.provincia].filter(Boolean).join(', ');
+  // Se il pallino sta sulla zona e non sull'indirizzo, non si scrive un
+  // indirizzo che non abbiamo: si dice "zona di X", che e' la verita'.
+  let citta;
+  if (d.posizione_da === 'citta' && d.citta) {
+    citta = 'zona di ' + d.citta + (d.provincia ? ' (' + d.provincia + ')' : '');
+  } else {
+    citta = [d.indirizzo || d.via, d.citta, d.provincia].filter(Boolean).join(', ');
+  }
 
   return `<div>
     <div class="popup-nome">${escHtml(nome)}</div>
@@ -303,7 +313,7 @@ function filtraMarker(query) {
 
     for (let i = 0; i < imprese.length; i++) {
       const d = imprese[i];
-      const nome = d.nome || d.ragione_sociale || d.nome_impresa || '';
+      const nome = d.nome || d.nome_attivita || d.nome_negozio || d.ragione_sociale || d.nome_impresa || '';
       if (!nome) { saltate++; continue; }
 
       // Costruisce la query per Nominatim: indirizzo + città, oppure solo città
@@ -315,10 +325,22 @@ function filtraMarker(query) {
       const queryDettagliata = [via, citta, prov, 'Italia'].filter(Boolean).join(', ');
       const queryCitta = [citta, prov, 'Italia'].filter(Boolean).join(', ');
 
-      // Prima prova indirizzo completo, poi solo città
-      let coords = await geocodifica(queryDettagliata);
-      if (!coords && citta) {
-        coords = await geocodifica(queryCitta);
+      // 1) La posizione e' gia' nel database: si usa e basta, nessuna attesa.
+      //    E' il caso normale da agosto 2026 (tools/riempi-mappa.html le ha
+      //    riempite tutte): la mappa compare subito invece che in un minuto e mezzo.
+      let coords = null;
+      let daDatabase = false;
+      const dbLat = parseFloat(d.lat), dbLng = parseFloat(d.lng);
+      if (isFinite(dbLat) && isFinite(dbLng)) {
+        coords = { lat: dbLat, lon: dbLng };
+        daDatabase = true;
+      } else {
+        // 2) Solo per chi non ce l'ha: si chiede a OpenStreetMap.
+        //    Prima prova indirizzo completo, poi solo città
+        coords = await geocodifica(queryDettagliata);
+        if (!coords && citta) {
+          coords = await geocodifica(queryCitta);
+        }
       }
 
       statusEl.textContent = `⏳ Geocodifica ${i + 1} / ${imprese.length}…`;
@@ -338,9 +360,9 @@ function filtraMarker(query) {
         saltate++;
       }
 
-      // Rispetta il rate limit di Nominatim: 1 richiesta al secondo
-      // (la cache evita richieste duplicate, ma per le prime dobbiamo aspettare)
-      await sleep(1100);
+      // L'attesa serve SOLO se si e' chiesto qualcosa a OpenStreetMap.
+      // Chi aveva gia' la posizione nel database non fa aspettare nessuno.
+      if (!daDatabase) await sleep(1100);
     }
 
     statusEl.textContent = `✅ ${geocodificate} imprese sulla mappa${saltate ? ' · ' + saltate + ' senza posizione' : ''}`;

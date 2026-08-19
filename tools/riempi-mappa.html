@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riempi la mappa — TrovaImpresa</title>
+<!--
+  ============================================================
+  QUESTA PAGINA NON VA ONLINE.
+  In netlify.toml /tools/* risponde 404, quindi resta solo sul
+  computer di Alessio. Si apre con un doppio clic sul file.
+
+  COSA FA
+  Le imprese senza lat/lng non compaiono sulla mappa. Questa
+  pagina le prende una per una, chiede a OpenStreetMap dove
+  stanno, e scrive la posizione nel database.
+
+  - chi ha l'INDIRIZZO va sul punto vero      -> posizione_da = 'indirizzo'
+  - chi ha solo la CITTA' va nella sua zona   -> posizione_da = 'citta'
+    e le imprese della stessa citta' vengono sparpagliate di poco
+    (200-800 metri) cosi' non si coprono a vicenda: senza questo,
+    dieci imprese di Roma diventano un pallino solo.
+
+  REGOLE DI OPENSTREETMAP: una richiesta al secondo, non di piu'.
+  Per questo ci mette qualche minuto. Le citta' gia' chieste non si
+  richiedono: dieci imprese di Roma costano UNA richiesta sola.
+
+  LA PASSWORD non sta qui dentro: la digita Alessio nel riquadro,
+  e viene verificata dal server (netlify/functions/admin-dati.js).
+
+  SI PUO' RILANCIARE quante volte si vuole: salta chi ha gia' la
+  posizione, quindi non rifa' mai il lavoro gia' fatto.
+  ============================================================
+-->
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 18px; line-height: 1.6; color: #1a1a2e;
+    background: #f4f6fa; margin: 0; padding: 24px;
+  }
+  .foglio { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 30px; margin: 0 0 6px; color: #0a2a4d; }
+  .sotto { font-size: 18px; color: #55607a; margin: 0 0 24px; }
+  .riquadro {
+    background: #fff; border: 1px solid #dde3ee; border-radius: 14px;
+    padding: 22px; margin-bottom: 20px;
+  }
+  label { display: block; font-weight: 700; margin: 14px 0 6px; font-size: 17px; }
+  input {
+    width: 100%; padding: 14px; font-size: 18px; font-family: inherit;
+    border: 2px solid #ccd4e4; border-radius: 10px; color: #1a1a2e;
+  }
+  input:focus { outline: none; border-color: #0066ff; }
+  button {
+    margin-top: 20px; width: 100%; padding: 18px;
+    font-size: 20px; font-weight: 700; font-family: inherit;
+    background: #0066ff; color: #fff; border: 0; border-radius: 10px;
+    cursor: pointer;
+  }
+  button:disabled { background: #9db4d8; cursor: default; }
+  #stato { font-size: 20px; font-weight: 700; margin: 0 0 14px; }
+  .barra { height: 16px; background: #e4e9f4; border-radius: 8px; overflow: hidden; }
+  .barra > i { display: block; height: 100%; width: 0; background: #16a34a; transition: width .2s; }
+  #righe { margin-top: 18px; max-height: 460px; overflow: auto; font-size: 16px; }
+  #righe div { padding: 8px 10px; border-bottom: 1px solid #eef1f7; }
+  .ok   { color: #14532d; background: #f0fdf4; }
+  .zona { color: #7c4a03; background: #fffbeb; }
+  .ko   { color: #7f1d1d; background: #fef2f2; font-weight: 700; }
+  .nota { font-size: 17px; color: #55607a; }
+  b.n { font-size: 22px; color: #0a2a4d; }
+</style>
+</head>
+<body>
+<div class="foglio">
+
+  <h1>Riempi la mappa</h1>
+  <p class="sotto">Mette la posizione alle imprese che non ce l'hanno, cosi' compaiono sulla mappa.</p>
+
+  <div class="riquadro" id="riquadro-avvio">
+    <p class="nota">Utente e password sono quelli del pannello admin. Restano su questo computer.</p>
+    <label for="u">Utente</label>
+    <input id="u" type="text" autocomplete="off">
+    <label for="p">Password</label>
+    <input id="p" type="password" autocomplete="off">
+    <button id="via">Comincia</button>
+  </div>
+
+  <div class="riquadro" id="riquadro-lavoro" style="display:none">
+    <p id="stato">Preparo…</p>
+    <div class="barra"><i id="avanzamento"></i></div>
+    <div id="righe"></div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var FUNZIONE = 'https://trovaimpresa.com/.netlify/functions/admin-dati';
+  var PAUSA_MS = 1100;          // regola di OpenStreetMap: una richiesta al secondo
+  var METRI_PER_GRADO = 111320;
+
+  var el = function (id) { return document.getElementById(id); };
+
+  function scrivi(classe, testo) {
+    var d = document.createElement('div');
+    d.className = classe;
+    d.textContent = testo;
+    el('righe').appendChild(d);
+    el('righe').scrollTop = el('righe').scrollHeight;
+  }
+
+  function aspetta(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  // ----------------------------------------------------------
+  // Lo spostamento: le imprese della stessa citta' non devono
+  // finire tutte sullo stesso pallino.
+  // i = quale impresa (da 0), n = quante sono in quella citta'.
+  // Una sola impresa -> resta sul centro, senza spostamento.
+  // Il conto e' sempre lo stesso: rilanciando, ognuna torna al
+  // suo posto e non balla per la mappa.
+  // ----------------------------------------------------------
+  function spostamento(i, n, lat) {
+    if (n <= 1) return { dlat: 0, dlng: 0 };
+    var giro  = Math.floor(i / 8);          // anello: 0, 1, 2…
+    var posto = i % 8;                      // 8 posti per anello
+    var metri = 300 + 250 * giro;
+    var angolo = (posto / 8) * 2 * Math.PI + giro * (Math.PI / 8);
+    var dlat = (metri * Math.cos(angolo)) / METRI_PER_GRADO;
+    var coseno = Math.cos(lat * Math.PI / 180);
+    if (Math.abs(coseno) < 0.01) coseno = 0.01;   // ai poli non ci andiamo, ma non si divide per zero
+    var dlng = (metri * Math.sin(angolo)) / (METRI_PER_GRADO * coseno);
+    return { dlat: dlat, dlng: dlng };
+  }
+
+  // ----------------------------------------------------------
+  // Il dialogo con il server (password verificata la' dentro).
+  // ----------------------------------------------------------
+  async function admin(u, p, action, extra) {
+    var corpo = { u: u, p: p, action: action, table: 'imprese' };
+    for (var k in extra) { if (Object.prototype.hasOwnProperty.call(extra, k)) corpo[k] = extra[k]; }
+    var r = await fetch(FUNZIONE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo)
+    });
+    var d = null;
+    try { d = await r.json(); } catch (e) { d = null; }
+    if (!r.ok || !d || d.error) throw new Error((d && d.error) || ('errore ' + r.status));
+    return d;
+  }
+
+  // ----------------------------------------------------------
+  // OpenStreetMap. Se non trova niente restituisce null: non e'
+  // un errore, e' una risposta.
+  // ----------------------------------------------------------
+  async function chiediPosizione(domanda) {
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=it&q='
+            + encodeURIComponent(domanda);
+    var r = await fetch(url, { headers: { 'Accept-Language': 'it' } });
+    if (!r.ok) throw new Error('OpenStreetMap ha risposto ' + r.status);
+    var d = await r.json();
+    if (!Array.isArray(d) || !d.length) return null;
+    var lat = parseFloat(d[0].lat), lng = parseFloat(d[0].lon);
+    if (!isFinite(lat) || !isFinite(lng)) return null;
+    return { lat: lat, lng: lng };
+  }
+
+  function pulita(s) { return (s === null || s === undefined) ? '' : String(s).trim(); }
+
+  function nomeDi(i) {
+    return pulita(i.nome_attivita) || pulita(i.nome_negozio) || pulita(i.nome) || ('impresa ' + i.id);
+  }
+
+  // Chi va lavorato: chi non ha ancora la posizione e ha almeno la citta'.
+  function daFare(tutte) {
+    return (tutte || []).filter(function (i) {
+      if (i.is_test) return false;
+      if (i.lat !== null && i.lat !== undefined && i.lng !== null && i.lng !== undefined) return false;
+      return !!(pulita(i.citta) || pulita(i.indirizzo));
+    });
+  }
+
+  // Raggruppate per citta', cosi' si sa quante sono e si sparpagliano.
+  function perCitta(lista) {
+    var gruppi = {};
+    lista.forEach(function (i) {
+      var c = pulita(i.citta).toLowerCase() || '(senza citta)';
+      (gruppi[c] = gruppi[c] || []).push(i);
+    });
+    return gruppi;
+  }
+
+  // ----------------------------------------------------------
+  // Il lavoro vero.
+  // ----------------------------------------------------------
+  async function avvia() {
+    var u = el('u').value.trim();
+    var p = el('p').value;
+    if (!u || !p) { alert('Servono utente e password.'); return; }
+
+    el('riquadro-avvio').style.display = 'none';
+    el('riquadro-lavoro').style.display = 'block';
+    el('stato').textContent = 'Leggo le imprese…';
+
+    var tutte;
+    try {
+      tutte = (await admin(u, p, 'list')).data || [];
+    } catch (e) {
+      el('stato').textContent = 'Non riesco a leggere: ' + e.message;
+      scrivi('ko', 'Controlla utente e password, e che il sito sia online.');
+      return;
+    }
+
+    var lista = daFare(tutte);
+    var gruppi = perCitta(lista);
+    var quante = lista.length;
+
+    if (!quante) {
+      el('stato').textContent = 'Non c’e’ niente da fare: hanno gia’ tutte la posizione.';
+      el('avanzamento').style.width = '100%';
+      return;
+    }
+
+    el('stato').textContent = 'Da sistemare: ' + quante + ' imprese.';
+
+    var memoriaCitta = {};      // citta' gia' chiesta -> posizione (una richiesta sola per citta')
+    var fatte = 0, precise = 0, zona = 0, saltate = 0, errori = 0, chieste = 0;
+
+    for (var chiave in gruppi) {
+      if (!Object.prototype.hasOwnProperty.call(gruppi, chiave)) continue;
+      var gruppo = gruppi[chiave];
+
+      for (var i = 0; i < gruppo.length; i++) {
+        var imp = gruppo[i];
+        var nome = nomeDi(imp);
+        var citta = pulita(imp.citta);
+        var indirizzo = pulita(imp.indirizzo);
+        var posto = null, da = null;
+
+        try {
+          // 1) se c'e' l'indirizzo, si prova il punto vero
+          if (indirizzo && citta) {
+            if (chieste++) await aspetta(PAUSA_MS);
+            posto = await chiediPosizione(indirizzo + ', ' + citta + ', Italia');
+            if (posto) da = 'indirizzo';
+          }
+
+          // 2) altrimenti (o se l'indirizzo non l'ha trovato) la citta'
+          if (!posto && citta) {
+            var k = citta.toLowerCase();
+            if (Object.prototype.hasOwnProperty.call(memoriaCitta, k)) {
+              posto = memoriaCitta[k];
+            } else {
+              if (chieste++) await aspetta(PAUSA_MS);
+              posto = await chiediPosizione(citta + ', Italia');
+              memoriaCitta[k] = posto;
+            }
+            if (posto) {
+              var s = spostamento(i, gruppo.length, posto.lat);
+              posto = { lat: posto.lat + s.dlat, lng: posto.lng + s.dlng };
+              da = 'citta';
+            }
+          }
+
+          if (!posto) {
+            saltate++;
+            scrivi('ko', '— ' + nome + ' (' + (citta || 'senza citta’') + '): posizione non trovata');
+            continue;
+          }
+
+          var esito = await admin(u, p, 'update', {
+            id: imp.id,
+            patch: {
+              lat: Number(posto.lat.toFixed(6)),
+              lng: Number(posto.lng.toFixed(6)),
+              posizione_da: da,
+              posizione_il: new Date().toISOString()
+            }
+          });
+
+          if (!esito.count) {
+            errori++;
+            scrivi('ko', '✗ ' + nome + ': il database non ha scritto niente');
+          } else {
+            fatte++;
+            if (da === 'indirizzo') { precise++; scrivi('ok',   '✓ ' + nome + ' — indirizzo preciso'); }
+            else                    { zona++;    scrivi('zona', '● ' + nome + ' — zona di ' + citta); }
+          }
+
+        } catch (e) {
+          errori++;
+          scrivi('ko', '✗ ' + nome + ': ' + e.message);
+        }
+
+        var visti = fatte + saltate + errori;
+        el('avanzamento').style.width = Math.round(visti / quante * 100) + '%';
+        el('stato').textContent = 'Sistemate ' + fatte + ' su ' + quante + '…';
+      }
+    }
+
+    el('avanzamento').style.width = '100%';
+    el('stato').innerHTML =
+      'Finito: <b class="n">' + fatte + '</b> imprese messe sulla mappa ' +
+      '(<b class="n">' + precise + '</b> sull’indirizzo, <b class="n">' + zona + '</b> sulla zona)' +
+      (saltate ? ' · ' + saltate + ' senza posizione' : '') +
+      (errori  ? ' · ' + errori  + ' errori' : '');
+  }
+
+  el('via').addEventListener('click', function () {
+    el('via').disabled = true;
+    avvia();
+  });
+
+  // serve al banco di prova: prova le funzioni VERE di questo file,
+  // non copie riscritte a mano.
+  window.RM = { spostamento: spostamento, daFare: daFare, perCitta: perCitta,
+                chiediPosizione: chiediPosizione, nomeDi: nomeDi, avvia: avvia };
+})();
+</script>
+</body>
+</html>
