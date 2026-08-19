@@ -15430,9 +15430,20 @@ ${vecchi?`
        apposta, indentata e con il verbo, così non la si somma per sbaglio. */
     if(rp.manodopera)a+=riga("di cui costo della manodopera (non soggetto a ribasso)",rp.manodopera,"qe-r--dicui");
     const elA=$("#co-qe-a"); if(elA)elA.innerHTML=a;
-    /* ---- il valore calcolato accanto a ogni riga di B ---- */
-    const nodi=$$("#co-qe-righe [data-qe]").filter(function(d){
-      const e=d.querySelector(".qe-d"); return e&&e.value.trim();
+    /* ---- il valore calcolato accanto a ogni riga di B ----
+       ⚠️ 19 agosto 2026 — «$$» È querySelectorAll E BASTA (riga 471), quindi
+       restituisce una NodeList: ha forEach, NON ha filter e non ha map.
+       Qui c'era un .filter, e sul sito vero non dava un numero sbagliato:
+       spaccava qeAggiorna, che veniva chiamata da compForm PRIMA di
+       renderCompVoci — quindi le lavorazioni non partivano nemmeno e il
+       computo restava a «Sto caricando…» per sempre.
+       Un difetto di una riga che spegne una schermata intera. Il banco non
+       l'aveva visto perché il suo finto $$ restituiva un elenco vero: adesso
+       è avaro come il browser. */
+    const nodi=[];
+    $$("#co-qe-righe [data-qe]").forEach(function(d){
+      const e=d.querySelector(".qe-d");
+      if(e&&e.value.trim())nodi.push(d);
     });
     nodi.forEach(function(d,i){
       const v=d.querySelector(".qe-v"), eu=d.querySelector(".qe-e");
