@@ -16308,7 +16308,7 @@ ${vecchi?`
      Le tabelle e le viste stanno in sql/gest-sal.sql.
      ============================================================ */
   let salCache=[], salTot={}, salVociCache=[], salRigheCache={}, salPrec={},
-      salComputoId=null, salApertoId=null;
+      salComputoId=null, salApertoId=null, salApertoDati=null;
 
   function _salManca(err){
     const m=(err&&(err.message||err.details||""))||"";
@@ -16367,6 +16367,9 @@ ${vecchi?`
           +    (k.ritenuta?(' · trattenuto '+eur2(k.ritenuta)):'')
           +  '</small></span>'
           +'<b>'+eur2(k.netto)+'</b>'
+          /* ⚠️ il pulsante deve SEMBRARE un pulsante: bordo e sfondo, come la ×
+             qui accanto. Regola .quick-add del 19 agosto 2026. */
+          +'<button type="button" data-action="sal-pdf" data-id="'+esc(String(s.id))+'" title="Scarica il foglio da consegnare" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--testo,#22303f);border-radius:8px;min-width:34px;height:34px;font-size:16px;line-height:1;cursor:pointer;flex:0 0 auto">📄</button>'
           +'<button type="button" class="rdel" data-action="sal-del" data-id="'+esc(String(s.id))+'" title="Butta questo SAL nel cestino" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--err,#c0392b);border-radius:8px;min-width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;flex:0 0 auto">×</button></div>';
       });
     }
@@ -16394,6 +16397,9 @@ ${vecchi?`
           stato:"bozza" };
     }
     salApertoId=s.id||null;
+    /* la fotografia di com'era quando l'hai aperto: serve al PDF per capire
+       se hai scritto qualcosa senza salvare (vedi salModifiche()) */
+    salApertoDati=s;
     const isNew=!s.id;
 
     /* le lavorazioni del computo, con la quantita' vera calcolata dal database */
@@ -16480,6 +16486,9 @@ ${vecchi?`
       +'</div></div>',
 
        '<button class="btn b-cancel" data-action="comp-torna">← Torna al computo</button>'
+      /* il PDF solo su un SAL che esiste gia': su uno appena aperto non c'e'
+         ancora niente di salvato da mettere sul foglio */
+      +(isNew?"":'<button class="btn" data-action="sal-pdf" data-id="'+esc(String(s.id))+'">📄 PDF</button>')
       +'<button class="btn-primary b-save" data-action="sal-salva" data-id="'+esc(String(s.id||""))+'">'+(isNew?"Crea il SAL":"Salva")+'</button>');
 
     bindSeg("sal-stato");
@@ -16607,6 +16616,298 @@ ${vecchi?`
     if(!res.data||!res.data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
     toast("Nel cestino ✔");
     await renderSalList(salComputoId);
+  }
+
+
+  /* ============================================================
+     IL PDF DELLO STATO DI AVANZAMENTO — 19 agosto 2026
+     ============================================================
+     Un SAL che resta dentro lo schermo non serve a niente: e' il foglio che si
+     consegna al committente (o al direttore dei lavori) per farsi pagare
+     l'acconto. Deve dire quattro cose, in quest'ordine, e deve farle rifare
+     con la calcolatrice a chi lo riceve:
+
+        quanto hai fatto DALL'INIZIO  -  quanto ti hanno gia' liquidato
+        =  quanto vale questo SAL  -  la ritenuta di garanzia
+        =  quanto ti devono adesso
+
+     ⚠️ I CONTI NON SI RIFANNO QUI. Il lordo, il ribasso e il netto passano da
+     compRiepilogoDa(); la differenza col SAL precedente e la ritenuta passano
+     da salConti(). Sono le stesse due funzioni che disegnano il riquadro a
+     schermo: se il foglio e lo schermo dicessero due numeri diversi, il
+     documento non varrebbe niente. E' la lezione delle fatture, dove la stessa
+     formula in tre posti dava tre numeri.
+
+     ⚠️ IL FOGLIO NASCE DA QUELLO CHE E' SALVATO, non da quello che hai appena
+     scritto nelle caselle. Se ci sono modifiche non salvate ci si ferma e lo si
+     dice: un documento che non e' quello che hai davanti e' peggio di nessun
+     documento.
+
+     ⚠️ E ci si ferma anche se una lettura va storta o se la somma delle righe
+     stampate non fa il totale del riquadro. E' la lezione del PDF del computo
+     del 14 agosto 2026: l'errore non guardato faceva uscire un foglio con
+     dentro un buco che non si vede, e il messaggio diceva pure «scaricato ✅».
+
+     ⚠️ «mq» e «mc» al posto di m² e m³: jsPDF gli esponenti li butta via in
+     silenzio e 73 metri quadri diventano 73 metri (vedi _umPdf). */
+
+  /* C'e' qualcosa scritto nelle caselle e non ancora salvato?
+     Vale solo se la scheda aperta e' proprio quella di questo SAL. */
+  function salModifiche(id){
+    if(!$("#sal-voci"))return false;                       /* scheda non aperta */
+    if(String(salApertoId||"")!==String(id))return false;  /* scheda di un altro SAL */
+    const s=salApertoDati||{};
+    const val=k=>{const e=$("#"+k);return e?String(e.value==null?"":e.value):null;};
+    const q5=n=>Math.round((+n||0)*1e5)/1e5;
+
+    if(val("sal-num") !==null && (parseInt(val("sal-num")||"0",10)||0)!==(+s.numero||0))return true;
+    if(val("sal-data")!==null && (val("sal-data")||"")!==(s.data||""))return true;
+    if(val("sal-dal") !==null && (val("sal-dal")||"") !==(s.periodo_dal||""))return true;
+    if(val("sal-al")  !==null && (val("sal-al")||"")  !==(s.periodo_al||""))return true;
+    if(val("sal-note")!==null && String(val("sal-note")||"").trim()!==String(s.note||"").trim())return true;
+    if($("#sal-rit")  && q5(_numDa(val("sal-rit")||"0"))!==q5(s.ritenuta_perc))return true;
+    if($("#sal-stato")&& (segVal("sal-stato")||"bozza")!==(s.stato||"bozza"))return true;
+
+    /* le quantita': quelle scritte adesso contro quelle lette dal database.
+       Le righe a zero non si salvano, quindi qui non si contano nemmeno. */
+    const ora={};
+    $$("#sal-voci .sal-riga").forEach(function(r){
+      const inp=r.querySelector(".sal-q");
+      const q=q5(_numDa(inp?inp.value:""));
+      if(q>0)ora[String(r.dataset.voce)]=q;
+    });
+    const salvate={};
+    Object.keys(salRigheCache).forEach(function(v){
+      const q=q5(salRigheCache[v]); if(q>0)salvate[v]=q;
+    });
+    const chiavi=Object.keys(ora);
+    if(chiavi.length!==Object.keys(salvate).length)return true;
+    for(let i=0;i<chiavi.length;i++){ if(salvate[chiavi[i]]!==ora[chiavi[i]])return true; }
+    return false;
+  }
+
+  async function salPdf(id){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    if(!sb||!sbUid){toast("Devi essere collegato");return;}
+    if(salModifiche(id)){
+      toast("Hai delle modifiche non salvate: premi prima Salva, poi scarica il PDF. Il foglio esce da quello che è salvato, non da quello che vedi nelle caselle.");
+      return;
+    }
+
+    const rs=await sb.from("gest_sal").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(rs.error){toast("Non riesco a leggere lo stato di avanzamento: "+rs.error.message);return;}
+    const s=rs.data; if(!s){toast("Stato di avanzamento non trovato");return;}
+
+    const rcp=await sb.from("gest_computi").select("*").eq("id",s.computo_id).eq("user_id",sbUid).maybeSingle();
+    if(rcp.error){toast("Non riesco a leggere il computo: "+rcp.error.message);return;}
+    const comp=rcp.data; if(!comp){toast("Il computo di questo stato di avanzamento non si trova");return;}
+
+    const [rt,rr]=await Promise.all([
+      sb.from("gest_sal_totali").select("*").eq("sal_id",s.id).eq("user_id",sbUid).maybeSingle(),
+      sb.from("gest_sal_righe_calc").select("*").eq("sal_id",s.id).eq("user_id",sbUid).order("ordine")
+    ]);
+    if(rt.error){toast("Non riesco a leggere i totali del SAL: il foglio uscirebbe senza il conto. Riprova fra un momento. ("+(rt.error.message||"")+")");return;}
+    if(rr.error){toast("Non riesco a leggere le lavorazioni del SAL: il foglio uscirebbe senza le righe. Riprova fra un momento. ("+(rr.error.message||"")+")");return;}
+    const t=rt.data;
+    if(!t){toast("I totali di questo SAL non si trovano. Se hai appena eseguito sql/gest-sal.sql, riapri il computo e riprova.");return;}
+    const righe=rr.data||[];
+    if(!righe.length){toast("Questo stato di avanzamento non ha nessuna lavorazione contata: scrivi almeno una quantità, salva, e poi scarica il PDF.");return;}
+
+    const {data:azLetta}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    const az=azLetta||{};
+    const cli=await cliDelDocumento(comp.cliente_id,"nome,indirizzo,referente");
+
+    /* ---- i conti: le stesse funzioni della schermata, nessuna copia ---- */
+    const oggi =compRiepilogoDa(t.maturato,            t.oneri_sicurezza,           t.importo_manodopera, comp);
+    const prima=compRiepilogoDa(t.maturato_precedente, t.oneri_sicurezza_precedenti,t.manodopera_precedente, comp);
+    const k=salConti(t,comp);
+
+    /* ⚠️ la somma delle righe che sto per stampare DEVE fare il totale del
+       riquadro. Se non lo fa, il foglio si contraddice da solo e non esce. */
+    const sommaRighe=Math.round(righe.reduce((a,r)=>a+(+r.importo||0),0)*100)/100;
+    if(Math.abs(sommaRighe-oggi.lordo)>0.01){
+      toast("Non stampo il foglio: la somma delle righe ("+eur2(sommaRighe)+") non fa il totale del SAL ("+eur2(oggi.lordo)+"). Riapri il SAL, salvalo di nuovo e riprova.");
+      return;
+    }
+
+    /* la fascia rossa: un SAL in bozza, o senza dati fiscali, non si consegna */
+    const motivi=[];
+    if((s.stato||"bozza")!=="emesso")motivi.push("è ancora una BOZZA");
+    if(!az.nome)motivi.push("manca il nome dell'attività");
+    if(!String(az.piva||"").trim())motivi.push("manca la partita IVA");
+    const _bozza=motivi.length>0;
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+
+    /* le colonne: X[i] e' il bordo SINISTRO della colonna i, X[7] il bordo destro */
+    const X=[12,20,44,116,128,150,172,198];
+    const M=X[0], R=X[7], FONDO=262;
+    const mid=(a,b)=>(X[a]+X[b])/2;
+    /* ⚠️ useGrouping:true non si toglie: senza, sullo stesso foglio si legge
+       «€ 97.000,00» e due righe sotto «€ 3000,00» (19 agosto 2026). */
+    const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
+    let y=20, tabTop=0;
+
+    function testaTabella(){
+      const H=7;
+      doc.setFillColor(238,241,243);doc.rect(M,y,R-M,H,"F");
+      doc.setDrawColor(110);doc.setLineWidth(.2);doc.rect(M,y,R-M,H);
+      doc.setFont("helvetica","bold");doc.setFontSize(7);doc.setTextColor(0);
+      const b=y+H-2.4;
+      doc.text("N.",mid(0,1),b,{align:"center"});
+      doc.text("Tariffa",mid(1,2),b,{align:"center"});
+      doc.text("Descrizione dei lavori",mid(2,3),b,{align:"center"});
+      doc.text("U.M.",mid(3,4),b,{align:"center"});
+      doc.text("Q.tà eseguita",mid(4,5),b,{align:"center"});
+      doc.text("Prezzo unit.",mid(5,6),b,{align:"center"});
+      doc.text("Importo",mid(6,7),b,{align:"center"});
+      for(let i=1;i<=6;i++)doc.line(X[i],y,X[i],y+H);
+      y+=H;tabTop=y;
+    }
+    function chiudiCorpo(){
+      doc.setDrawColor(110);doc.setLineWidth(.2);
+      for(let i=1;i<=6;i++)doc.line(X[i],tabTop,X[i],y);
+      doc.line(M,tabTop,M,y);doc.line(R,tabTop,R,y);doc.line(M,y,R,y);
+    }
+    function nuovaPagina(){ chiudiCorpo();doc.addPage();y=16;testaTabella(); }
+
+    /* ---- intestazione ---- */
+    if(_bozza){
+      /* la fascia si disegna PRIMA di tutto: in fondo basterebbe non arrivarci */
+      doc.setFillColor(192,57,43);doc.rect(0,0,210,11,"F");
+      doc.setTextColor(255);doc.setFont("helvetica","bold");doc.setFontSize(9);
+      doc.text("NON DA CONSEGNARE: "+motivi.join(" · "),105,7.2,{align:"center"});
+      doc.setTextColor(0);y=26;
+    }
+    doc.setFont("helvetica","bold");doc.setFontSize(15);
+    doc.text(az.nome||"(il nome della tua attività va nei Dati azienda)",M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+    let hy=y+5.5;
+    [az.piva?"P.IVA "+az.piva:"", azIndirizzo(az),
+     [az.tel?"Tel "+az.tel:"", az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(function(r){doc.text(r,M,hy);hy+=4.2;});
+    doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(14);
+    doc.text("STATO DI AVANZAMENTO LAVORI",R,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90);
+    doc.text("N. "+(s.numero||1)+"   del "+fdate(s.data||todayStr()),R,y+5.5,{align:"right"});
+    if(s.periodo_dal||s.periodo_al){
+      doc.text("Periodo "+(s.periodo_dal?"dal "+fdate(s.periodo_dal):"")
+        +(s.periodo_al?(s.periodo_dal?" al ":"fino al ")+fdate(s.periodo_al):""),R,y+10,{align:"right"});
+    }
+    doc.setTextColor(0);
+    y=Math.max(hy,y+14)+3;doc.setDrawColor(210);doc.line(M,y,R,y);y+=8;
+
+    doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text("Spett.le",M,y);y+=5.5;
+    doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(cli.nome||"—",M,y);y+=5;
+    doc.setFontSize(8.5);doc.setTextColor(90);
+    if(cli.indirizzo){doc.text(String(cli.indirizzo),M,y);y+=4.2;}
+    if(cli.referente){doc.text("Rif. "+cli.referente,M,y);y+=4.2;}
+    doc.setTextColor(0);y+=4;
+
+    doc.setFont("helvetica","bold");doc.setFontSize(10.5);
+    const ogg=doc.splitTextToSize("Lavori: "+(comp.oggetto||comp.titolo||"—"),R-M);
+    doc.text(ogg,M,y);y+=ogg.length*5+1;
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+    const sotto=[comp.luogo?"Luogo: "+comp.luogo:"",
+                 comp.numero?"Computo n. "+comp.numero:"",
+                 comp.tipo==="pubblico"?"Lavori pubblici":""].filter(Boolean).join("   ·   ");
+    if(sotto){doc.text(sotto,M,y);y+=4.2;}
+    doc.setTextColor(0);y+=4;
+
+    /* ---- la tabella ---- */
+    testaTabella();
+    doc.setFont("helvetica","normal");
+    righe.forEach(function(r,i){
+      const desc=doc.splitTextToSize(String(r.descrizione||"(senza descrizione)"),X[3]-X[2]-5);
+      /* la riga dell'avviso «oltre il computo» si porta dietro la sua altezza:
+         senza, finiva appiccicata sotto l'ultima riga della descrizione */
+      const h=Math.max(desc.length*3.6+3, 7)+(r.oltre_computo?3.4:0);
+      if(y+h>FONDO)nuovaPagina();
+      doc.setDrawColor(190);doc.setLineWidth(.15);doc.line(M,y+h,R,y+h);
+      doc.setFontSize(7.6);
+      doc.text(String(i+1),mid(0,1),y+4,{align:"center"});
+      if(r.codice)doc.text(String(r.codice),X[1]+1.5,y+4);
+      doc.text(desc,X[2]+1.5,y+4);
+      doc.text(_umPdf(r.unita||""),mid(3,4),y+4,{align:"center"});
+      doc.text(_misLetta(r.quantita_eseguita),X[5]-1.5,y+4,{align:"right"});
+      doc.text(_eur(r.prezzo_unitario),X[6]-1.5,y+4,{align:"right"});
+      doc.setFont("helvetica","bold");
+      doc.text(_eur(r.importo),R-1.5,y+4,{align:"right"});
+      doc.setFont("helvetica","normal");
+      /* ⚠️ contato piu' del previsto: non e' vietato (i lavori cambiano), ma sul
+         foglio si scrive, non si nasconde. Chi lo firma deve saperlo. */
+      if(r.oltre_computo){
+        doc.setTextColor(192,57,43);doc.setFontSize(6.4);
+        doc.text("oltre il computo (previsti "+_misLetta(r.quantita_computo)+")",X[2]+1.5,y+h-1.4);
+        doc.setTextColor(0);doc.setFontSize(7.6);
+      }
+      y+=h;
+    });
+    chiudiCorpo();
+    y+=8;
+
+    /* ---- il riquadro dei conti ---- */
+    const voci=[];
+    voci.push(["Lavori eseguiti dall'inizio",oggi.lordo,false,false]);
+    if(oggi.perc)voci.push(["Ribasso "+_pct(oggi.perc)+"%",oggi.ribasso,true,false]);
+    voci.push(["Importo maturato a tutto il "+fdate(s.data||todayStr()),k.maturato,false,false]);
+    voci.push([(t.numero_precedente!=null?"Già liquidato (fino al SAL n. "+t.numero_precedente+")":"Già liquidato in precedenza"),k.precedente,true,false]);
+    voci.push(["Importo del presente stato di avanzamento",k.lordo,false,true]);
+    if(k.ritenuta)voci.push(["Ritenuta di garanzia "+_pct(k.perc)+"%",k.ritenuta,true,false]);
+
+    const hBox=voci.length*6+16;
+    if(y+hBox>272){doc.addPage();y=20;}
+    doc.setDrawColor(31,111,92);doc.setLineWidth(.4);doc.rect(R-108,y,108,hBox);doc.setLineWidth(.2);
+    let ry=y+7;
+    doc.setFontSize(9);
+    voci.forEach(function(v){
+      doc.setFont("helvetica",v[3]?"bold":"normal");
+      doc.text(String(v[0]),R-106,ry);
+      doc.text((v[2]?"- ":"")+_eur(v[1]),R-2,ry,{align:"right"});
+      ry+=6;
+    });
+    doc.setDrawColor(31,111,92);doc.line(R-106,ry-3,R-2,ry-3);
+    doc.setFont("helvetica","bold");doc.setFontSize(11.5);
+    doc.text("NETTO DA PAGARE",R-106,ry+4);
+    doc.text(_eur(k.netto),R-2,ry+4,{align:"right"});
+    y+=hBox+8;
+
+    /* sui lavori pubblici i due numeri che l'ente chiede sempre */
+    if(comp.tipo==="pubblico"){
+      if(y+12>282){doc.addPage();y=20;}
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+      doc.text("Di cui maturati: oneri della sicurezza (non soggetti a ribasso) "+_eur(oggi.sicurezza)
+        +"   ·   costo del personale "+_eur(oggi.manodopera),M,y,{maxWidth:R-M});
+      doc.setTextColor(0);y+=8;
+    }
+
+    if(s.note){
+      const nl=doc.splitTextToSize(String(s.note),R-M);
+      if(y+nl.length*4.5+8>282){doc.addPage();y=20;}
+      doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text("Note",M,y);y+=5;
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90);
+      doc.text(nl,M,y);y+=nl.length*4.5;doc.setTextColor(0);
+    }
+
+    /* la nota in fondo e il numero di pagina, su ogni foglio */
+    const np=doc.getNumberOfPages();
+    for(let i=1;i<=np;i++){
+      doc.setPage(i);
+      doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(140);
+      if(i===np){
+        doc.text("Le quantità indicate sono quelle eseguite dall'inizio dei lavori; l'importo del presente stato di avanzamento è "
+          +"la differenza rispetto a quanto già liquidato. Importi al netto dell'IVA.",M,286,{maxWidth:R-M-24});
+      }
+      doc.text("Pag. "+i+" di "+np,R,289,{align:"right"});
+      doc.setTextColor(0);
+    }
+
+    doc.save((_bozza?"BOZZA-":"")+"SAL-"+(s.numero||1)+"-"
+      +String(comp.titolo||cli.nome||"lavori").replace(/[^a-z0-9]+/gi,"-").toLowerCase().replace(/^-|-$/g,"")+".pdf");
+    toast(_bozza
+      ? ("Scaricato, ma sul foglio c'è la fascia rossa: "+motivi.join(" · ")+".")
+      : "PDF dello stato di avanzamento scaricato ✅");
   }
 
 
@@ -19328,6 +19629,7 @@ ${vecchi?`
     if(a==="sal-nuovo")return salForm(null);
     if(a==="sal-apri")return salForm(id);
     if(a==="sal-salva")return salSalva(id);
+    if(a==="sal-pdf")return salPdf(id);
     if(a==="sal-del")return salElimina(id);
     if(a==="new-prezzo")return prezzoForm(null);
     if(a==="edit-prezzo")return prezzoForm(id);
