@@ -5629,7 +5629,11 @@
          un'ipotesi — e se non ce n'e' resta da scegliere. */
       cassa_tipo: _uc.tipo||null,
       spese: +p.spese_forfait||0,
-      _righe:(rr||[]).map((r,i)=>({
+      /* i titoli dei capitoli NON passano in fattura: una fattura elettronica
+         ha righe di DettaglioLinee, e una riga da 0 € col nome di un capitolo
+         è rumore dentro un file che va allo SDI. Il conto non cambia (una
+         riga di capitolo vale sempre zero), cambia solo che non c'è. */
+      _righe:(rr||[]).filter(r=>!_rigaSezione(r)).map((r,i)=>({
         descrizione:r.descrizione, qta:+r.qta||1, prezzo:+r.prezzo||0,
         /* 9 agosto 2026 — l'aliquota promessa nel preventivo (e firmata nella
            conferma d'ordine) deve arrivare uguale in fattura: prima partiva
@@ -12287,8 +12291,64 @@ ${vecchi?`
     });
     return out.length?out.join("\n"):null;
   }
+  /* ============================================================
+     19 agosto 2026 — I CAPITOLI DENTRO IL PREVENTIVO
+     ============================================================
+     Un computo si legge per capitoli: «1 Demolizioni», «2 Opere murarie», e
+     dentro ognuno le sue lavorazioni. Il preventivo che ne nasceva era un
+     elenco piatto: gli 87 righi di un computo vero arrivavano al cliente
+     tutti attaccati, senza un titolo che dicesse dove finisce una parte e
+     dove comincia l'altra.
+
+     Una RIGA DI CAPITOLO è una riga di preventivo come le altre, con
+     sezione = true. Regola che non si tocca: una riga di capitolo ha
+     SEMPRE qta 0 e prezzo 0.
+
+     Non è pignoleria, è la rete di sicurezza. In sette posti diversi il
+     totale del preventivo si fa con (+r.qta||1)*(+r.prezzo||0) — il ||1
+     serve alle righe scritte a mano, dove quantità vuota vuol dire "una".
+     Con qta 0 e prezzo 0 quel conto fa 1 × 0 = 0: anche il punto del
+     gestionale che non sa niente dei capitoli somma zero e non sbaglia
+     un centesimo. Se un domani una riga di capitolo nascesse con un
+     prezzo dentro, quel prezzo finirebbe nel totale che firma il cliente.
+
+     LA COLONNA POTREBBE NON ESSERCI: chi non ha ancora eseguito
+     sql/gest-preventivo-sezioni.sql non deve ritrovarsi il preventivo
+     rotto. _scriviRighePrev riprova senza i capitoli e lo dice. */
+  function _rigaSezione(r){ return !!(r&&r.sezione); }
+  /* la colonna «sezione» manca: PostgREST risponde 42703 (undefined column) */
+  function _eSezioneMancante(e){
+    if(!e)return false;
+    const t=(String(e.message||"")+" "+String(e.code||"")+" "+String(e.details||"")).toLowerCase();
+    return t.indexOf("sezione")>=0 || t.indexOf("42703")>=0;
+  }
+  /* Scrive le voci di un preventivo. Torna {error, persi}: «persi» sono i
+     capitoli lasciati fuori perché la colonna non c'è ancora — le
+     lavorazioni si salvano lo stesso, che è la cosa che conta. */
+  async function _scriviRighePrev(righe){
+    if(!righe||!righe.length)return {error:null,persi:0};
+    const {error}=await sb.from("gest_preventivo_righe").insert(righe);
+    if(!error)return {error:null,persi:0};
+    if(!_eSezioneMancante(error))return {error:error,persi:0};
+    const senza=righe.filter(r=>!_rigaSezione(r))
+                     .map(r=>{const x=Object.assign({},r);delete x.sezione;return x;});
+    if(!senza.length)return {error:error,persi:0};
+    const r2=await sb.from("gest_preventivo_righe").insert(senza);
+    return {error:r2.error, persi:r2.error?0:(righe.length-senza.length)};
+  }
+  const AVVISO_SEZIONI="I capitoli non sono stati salvati: manca l'aggiornamento del database "
+    +"(esegui sql/gest-preventivo-sezioni.sql su Supabase). Le lavorazioni ci sono tutte.";
+
   function prevRigaHtml(r){
     r=r||{};prevRigheCount++;
+    /* la riga di capitolo si scrive e si cancella come tutte le altre: una
+       casella sola, larga, e la × dove sta sempre. Non ha né quantità né
+       prezzo, e quello che non c'è non si può sbagliare. */
+    if(_rigaSezione(r)){
+      return `<div class="prev-riga prev-riga-cap" data-riga data-sezione>
+      <input class="pr-desc" placeholder="Titolo del capitolo" value="${esc(r.descrizione||"")}">
+      <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
+    }
     return `<div class="prev-riga" data-riga>
       <input class="pr-desc" placeholder="Descrizione voce" value="${esc(r.descrizione||"")}">
       <input class="pr-qta" type="text" inputmode="decimal" placeholder="Q.tà" value="${_numTesto(r.qta!=null?r.qta:1)}">
@@ -12296,7 +12356,12 @@ ${vecchi?`
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
   }
   function prevTotaleLive(){
-    let t=0;$$("#prev-righe [data-riga]").forEach(d=>{t+=_numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);});
+    /* le righe di capitolo si saltano apposta. Senza il salto il conto
+       tornerebbe comunque (non hanno .pr-qta né .pr-prezzo, quindi 1 × 0),
+       ma è meglio che qui si legga la regola invece di fidarsi di un caso. */
+    let t=0;$$("#prev-righe [data-riga]").forEach(d=>{
+      if(d.hasAttribute("data-sezione"))return;
+      t+=_numRiga(d,".pr-qta",1)*_numRiga(d,".pr-prezzo",0);});
     const el=$("#prev-somma");if(el)el.textContent="Totale: "+eur2(t);
     return t;
   }
@@ -12560,6 +12625,7 @@ ${vecchi?`
       <div class="field">
         <div id="prev-righe">${(righe.length?righe:[{}]).map(r=>prevRigaHtml(r)).join("")}</div>
         <button type="button" class="btn-ghost quick-add" data-action="prev-riga-add">+ Aggiungi voce</button>
+        <button type="button" class="btn-ghost quick-add" data-action="prev-cap-add">+ Aggiungi capitolo</button>
         <div class="prev-somma" id="prev-somma">Totale: ${eur2(righe.reduce((s,r)=>s+(+r.qta||1)*(+r.prezzo||0),0))}</div></div>
       </div>
       <div class="sh-b">
@@ -12597,11 +12663,20 @@ ${vecchi?`
     const titolo=$("#pv-tit").value.trim();if(!titolo){toast("Scrivi il titolo del preventivo");return;}
     const righe=[];
     $$("#prev-righe [data-riga]").forEach((d,i)=>{
-      const descrizione=d.querySelector(".pr-desc").value.trim();
+      const el=d.querySelector(".pr-desc");
+      const descrizione=el?el.value.trim():"";
       if(!descrizione)return;
+      /* «sezione» si scrive SOLO sulle righe di capitolo: una voce normale non
+         nomina la colonna, così un preventivo senza capitoli si salva anche
+         dove sql/gest-preventivo-sezioni.sql non è ancora stato eseguito. */
+      if(d.hasAttribute("data-sezione")){
+        righe.push({descrizione,qta:0,prezzo:0,sezione:true,ordine:i});
+        return;
+      }
       righe.push({descrizione,qta:_numRiga(d,".pr-qta",1),prezzo:_numRiga(d,".pr-prezzo",0),ordine:i});
     });
-    if(!righe.length){toast("Aggiungi almeno una voce");return;}
+    /* un preventivo fatto di soli titoli non è un preventivo */
+    if(!righe.filter(r=>!_rigaSezione(r)).length){toast("Aggiungi almeno una voce");return;}
     const cliente_id=$("#pv-cli").value||null, data=$("#pv-data").value||todayStr(), note=prevNoteLette();
     let pid=id, vecchieVoci=[];
     const parcella=Object.assign({},leggiCampiParcella(),leggiCampiIvaImpresa());
@@ -12657,16 +12732,16 @@ ${vecchi?`
       if(error){toast("Errore: "+error.message);return;}
       pid=np.id;
     }
-    const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,user_id:sbUid,preventivo_id:pid})));
+    const {error:e2,persi:persiSez}=await _scriviRighePrev(righe.map(r=>({...r,user_id:sbUid,preventivo_id:pid})));
     if(e2){toast("Errore voci: "+e2.message+" — quelle di prima sono ancora al loro posto.");return;}
     if(vecchieVoci.length){
       const {error:eDelP}=await sb.from("gest_preventivo_righe").delete().in("id",vecchieVoci).eq("user_id",sbUid);
       if(eDelP){toast("Le voci nuove sono salvate, ma le vecchie non si sono cancellate: adesso sono doppie. Riapri e salva di nuovo.");return;}
     }
     closeSheet();rinfresca("preventivi","riepilogo");
-    toast(avvisoParcella?(ruoloUtente==='professionista'
+    toast(persiSez?AVVISO_SEZIONI:(avvisoParcella?(ruoloUtente==='professionista'
             ?"Salvato, ma i dati della parcella NON ci sono: manca la migrazione SQL"
-            :"Salvato, ma l'aliquota IVA NON è stata registrata: manca un aggiornamento del database"):(id?"Preventivo aggiornato ✔":"Preventivo creato ✔"));
+            :"Salvato, ma l'aliquota IVA NON è stata registrata: manca un aggiornamento del database"):(id?"Preventivo aggiornato ✔":"Preventivo creato ✔")));
   }
   /* Ponte per js/ai-integrazione.js: salva un preventivo generato dall'AI.
      Riusa curMestiere() e la stessa formula del numero progressivo di savePrev. */
@@ -12839,6 +12914,23 @@ ${vecchi?`
     doc.setTextColor(0);doc.setFont("helvetica","normal");y+=8;
     let tot=0;
     righe.forEach(r=>{
+      /* ⚠️ 19 agosto 2026 — LA RIGA DI CAPITOLO SUL FOGLIO DEL CLIENTE.
+         Esce come una fascia grigia col titolo in grassetto e le tre colonne
+         dei numeri VUOTE. Se uscisse come una riga normale, il cliente
+         leggerebbe «1 Demolizioni · 1 · 0,00 · 0,00» e si chiederebbe che
+         cos'è quella voce da zero euro. Un titolo non ha una quantità. */
+      if(_rigaSezione(r)){
+        const tl=doc.splitTextToSize(String(r.descrizione||""),R-M-8);
+        const th=tl.length*5+4;
+        if(y+th>270){doc.addPage();y=20;}
+        doc.setFillColor(238,241,244);doc.rect(M,y,R-M,th,"F");
+        doc.setDrawColor(210);doc.rect(M,y,R-M,th);
+        doc.setFont("helvetica","bold");doc.setFontSize(9.5);
+        doc.text(tl,M+2,y+5);
+        doc.setFont("helvetica","normal");
+        y+=th;
+        return;
+      }
       const rt=(+r.qta||1)*(+r.prezzo||0);tot+=rt;
       const lines=doc.splitTextToSize(r.descrizione,R-M-72);
       const rowH=lines.length*5+4;
@@ -13029,7 +13121,11 @@ ${vecchi?`
     const cp=calcolaParcella(tot,p.cassa_perc,p.iva_perc,!!p.ritenuta,p.ritenuta_perc||20,p.spese_forfait);
     const mem=incLeggiMem();
 
-    const prestazioni=righe.map(r=>"- "+(r.descrizione||"").trim()).filter(x=>x!=="-").join("\n");
+    /* i titoli dei capitoli restano, ma senza il trattino: in un elenco di
+       prestazioni un titolo non è una prestazione, è quello che le tiene
+       insieme. Toglierli spezzerebbe il filo fra la lettera e il preventivo. */
+    const prestazioni=righe.map(r=>(_rigaSezione(r)?"":"- ")+(r.descrizione||"").trim())
+                           .filter(x=>x!=="-"&&x!=="").join("\n");
     const luogoDef=mem.luogo||az.citta||"";
     const foroDef=mem.foro||az.citta||"";
     const tempiDef=mem.tempi||"60 giorni dalla sottoscrizione del presente incarico";
@@ -13378,7 +13474,11 @@ ${vecchi?`
     const totale=Math.round((imponibile+ivaVal)*100)/100;
     const mem=ordLeggiMem();
 
-    const opere=righe.map(r=>"- "+(r.descrizione||"").trim()).filter(x=>x!=="-").join("\n");
+    /* come nella lettera d'incarico: i titoli dei capitoli restano, senza il
+       trattino davanti, così le opere comprese si leggono nello stesso ordine
+       e con gli stessi capitoli del preventivo che il cliente ha in mano. */
+    const opere=righe.map(r=>(_rigaSezione(r)?"":"- ")+(r.descrizione||"").trim())
+                     .filter(x=>x!=="-"&&x!=="").join("\n");
     const luogoDef=mem.luogo||az.citta||"";
     const foroDef=mem.foro||az.citta||"";
     const tempiDef=mem.tempi||"30 giorni lavorativi dall'inizio dei lavori";
@@ -16413,9 +16513,19 @@ ${vecchi?`
     }
   }
   async function _computoAPreventivo(id,c,_libera){
-    const {data:vv,error:eV}=await sb.from("gest_computo_voci_calc").select("*")
-      .eq("user_id",sbUid).eq("computo_id",id).order("ordine");
+    /* ⚠️ 19 agosto 2026 — I CAPITOLI SI LEGGONO INSIEME ALLE LAVORAZIONI.
+       Se la lettura dei capitoli non riesce, il preventivo si fa lo stesso,
+       piatto: meglio un preventivo senza titoli che nessun preventivo. */
+    const [rv,rc]=await Promise.all([
+      sb.from("gest_computo_voci_calc").select("*")
+        .eq("user_id",sbUid).eq("computo_id",id).order("ordine"),
+      sb.from("gest_computo_capitoli").select("*")
+        .eq("user_id",sbUid).eq("computo_id",id).order("ordine")
+        .then(r=>r,e=>({data:null,error:e}))
+    ]);
+    const {data:vv,error:eV}=rv;
     if(eV){_libera();toast("Non riesco a leggere le lavorazioni: "+eV.message);return;}
+    const capitoli=(rc&&!rc.error&&rc.data)?rc.data:[];
     const voci=vv||[];
     if(!voci.length){_libera();toast("Il computo è vuoto: aggiungi almeno una lavorazione");return;}
 
@@ -16437,16 +16547,56 @@ ${vecchi?`
         ? "La lavorazione «"+String(senzaMisure[0].descrizione||"senza descrizione").slice(0,60)+"» non ha ancora le misure, quindi vale 0 €.\n\nNel preventivo non la porto: se ci finisse, il cliente se la vedrebbe conteggiata una volta a prezzo pieno.\n\nVuoi creare lo stesso il preventivo con le altre?"
         : "Ci sono "+q+" lavorazioni senza misure, che valgono 0 €.\n\nNel preventivo non le porto: se ci finissero, il cliente se le vedrebbe conteggiate una volta a prezzo pieno ciascuna.\n\nVuoi creare lo stesso il preventivo con le altre?")){_libera();return;}
     }
-    const righe=voci
-      .filter(v=>Math.round((+v.quantita||0)*1000)/1000)
-      .map((v,i)=>({
-      user_id:sbUid,
-      descrizione:(v.codice?v.codice+" — ":"")+(v.descrizione||"(senza descrizione)")+(v.unita?"  ("+_umPdf(v.unita)+")":""),
-      qta:Math.round((+v.quantita||0)*1000)/1000,
-      prezzo:+v.prezzo_unitario||0,
-      ordine:i
-    })).filter(r=>r.descrizione);
-    if(!righe.length){_libera();toast("Nessuna lavorazione ha le misure: il preventivo sarebbe vuoto");return;}
+    /* ⚠️ 19 agosto 2026 — L'ORDINE DEL COMPUTO NON ARRIVAVA AL PREVENTIVO.
+       Difetto vero, riprodotto al banco (prove/banco_computo_preventivo.js).
+       Qui si leggevano le lavorazioni con .order("ordine") e si buttavano in
+       un elenco piatto. Ma `ordine` è il contatore di TUTTO il computo
+       (max+1 su compVociCache, vedi compVoceSalva), mentre le frecce su/giù
+       spostano soltanto DENTRO un capitolo. Quindi una lavorazione aggiunta
+       DOPO a un capitolo di sopra prende un numero più alto di tutte quelle
+       dei capitoli sotto:
+
+         computo   →  A01 A02 A03 | B01 B02        (come si vede a schermo)
+         preventivo→  A01 A02 B01 B02 A03          (com'era)
+
+       Sul foglio che legge il cliente le demolizioni finivano dopo gli
+       intonaci. E i CAPITOLI non arrivavano affatto: 87 righe attaccate,
+       senza un titolo che dicesse dove finisce una parte.
+
+       Adesso si raggruppa per capitolo, nell'ordine dei capitoli, e dentro
+       ognuno per `ordine` — le stesse due chiavi con cui renderCompVoci
+       disegna la schermata. Le lavorazioni senza capitolo vanno in fondo,
+       esattamente come nel computo. */
+    const _q=v=>Math.round((+v.quantita||0)*1000)/1000;
+    const _misurate=voci.filter(_q);
+    const _perOrdine=(a,b)=>(+a.ordine||0)-(+b.ordine||0);
+    const gruppi=capitoli.slice().sort(_perOrdine).map(k=>({
+      cap:k, voci:_misurate.filter(v=>String(v.capitolo_id||"")===String(k.id)).sort(_perOrdine)
+    })).filter(g=>g.voci.length);
+    const orfane=_misurate.filter(v=>!v.capitolo_id
+      ||!capitoli.some(k=>String(k.id)===String(v.capitolo_id))).sort(_perOrdine);
+    if(orfane.length)gruppi.push({cap:null, voci:orfane});
+
+    const righe=[];
+    gruppi.forEach(g=>{
+      /* il titolo esce solo se i capitoli ci sono davvero: su un computo
+         senza capitoli il preventivo resta identico a prima, e «Senza
+         capitolo» non è un titolo da far leggere a un cliente. */
+      if(g.cap){
+        righe.push({user_id:sbUid, sezione:true, qta:0, prezzo:0,
+          descrizione:(g.cap.numero?String(g.cap.numero)+" — ":"")
+                     +(g.cap.titolo||"(capitolo senza titolo)"),
+          ordine:righe.length});
+      }
+      g.voci.forEach(v=>{
+        righe.push({user_id:sbUid,
+          descrizione:(v.codice?v.codice+" — ":"")+(v.descrizione||"(senza descrizione)")+(v.unita?"  ("+_umPdf(v.unita)+")":""),
+          qta:_q(v),
+          prezzo:+v.prezzo_unitario||0,
+          ordine:righe.length});
+      });
+    });
+    if(!righe.filter(r=>!_rigaSezione(r)).length){_libera();toast("Nessuna lavorazione ha le misure: il preventivo sarebbe vuoto");return;}
 
     const rp=compRiepilogo(voci,c);
     if(rp.perc&&rp.ribasso){
@@ -16487,7 +16637,7 @@ ${vecchi?`
     }).select().single();
     if(error){_libera();toast("Errore: "+error.message);return;}
 
-    const {error:e2}=await sb.from("gest_preventivo_righe").insert(righe.map(r=>({...r,preventivo_id:np.id})));
+    const {error:e2,persi:persiSez}=await _scriviRighePrev(righe.map(r=>({...r,preventivo_id:np.id})));
     if(e2){_libera();toast("Il preventivo è nato ma le voci no: "+e2.message);return;}
 
     /* il collegamento serve a non rifarlo due volte per sbaglio */
@@ -16502,7 +16652,9 @@ ${vecchi?`
     closeSheet();
     rinfresca("preventivi","computi","riepilogo");
     _libera();
-    toast("Preventivo n. "+numero+" creato dal computo ✔ Lo trovi in Preventivi");
+    toast(persiSez
+      ? ("Preventivo n. "+numero+" creato dal computo ✔ — ma "+AVVISO_SEZIONI)
+      : ("Preventivo n. "+numero+" creato dal computo ✔ Lo trovi in Preventivi"));
   }
 
   /* ============================================================
@@ -18225,6 +18377,10 @@ ${vecchi?`
       if(b&&!b.querySelector("[data-nota]"))b.insertAdjacentHTML("beforeend",prevNotaRigaHtml(""));}
       return;}
     if(a==="prev-riga-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml());return;}
+    /* un capitolo si può aggiungere anche a mano, non solo arrivando da un
+       computo: chi scrive il preventivo a mano ha lo stesso bisogno di
+       dividere «Demolizioni» da «Opere murarie». */
+    if(a==="prev-cap-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml({sezione:true}));return;}
     if(a==="prev-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();prevTotaleLive();
       /* anche i riepiloghi sotto: prima restavano col numero vecchio e sullo
          schermo comparivano due totali diversi */

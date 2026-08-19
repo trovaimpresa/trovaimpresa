@@ -3224,3 +3224,28 @@ body:has(#ti-fondatore) .side{
   .num-fila{ grid-template-columns:minmax(0,1fr); }
   .num-n{ font-size:25px; }
 }
+
+/* ============================================================
+   LA RIGA DI CAPITOLO DENTRO IL PREVENTIVO — 19 agosto 2026
+   ============================================================
+   Un capitolo non ha quantità né prezzo: la sua riga ha una casella
+   sola, larga quanto tutte e tre. Si vede a colpo d'occhio che è un
+   titolo e non una voce da pagare — sfondo grigio, filo blu a
+   sinistra, scritta in grassetto. */
+/* ⚠️ la regola larga sta in «.sheet .prev-riga» (due classi): con la sola
+   «.prev-riga-cap» il titolo restava stretto quanto la descrizione e la ×
+   larga come la colonna della quantità. Visto in fotografia, non a mente. */
+.prev-riga-cap,
+.sheet .prev-riga-cap{ grid-template-columns:1fr 52px; }
+.prev-riga-cap input,
+.sheet .prev-riga-cap input{
+  font-weight:700; background:var(--sfondo,#f5f6f8);
+  border-left:4px solid var(--blu,#0066ff);
+}
+.prev-riga-cap input::placeholder{ font-weight:600; }
+@media(max-width:768px){
+  .sheet .prev-riga-cap{ grid-template-columns:1fr 48px; }
+}
+/* due pulsanti di fila («+ Aggiungi voce» e «+ Aggiungi capitolo») non
+   devono attaccarsi: senza questo si leggono come una parola sola. */
+.quick-add + .quick-add{ margin-left:14px; }
