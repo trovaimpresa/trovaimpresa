@@ -16423,9 +16423,17 @@ ${vecchi?`
         +' style="border-bottom:1px solid var(--bordo,#e6e9ee);padding:10px 2px">'
         +'<div style="font-size:15px">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")+'</div>'
         +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px">'
+        /* ⚠️ la casella NON sta dentro un .field, quindi il CSS del gestionale
+           non la veste: senza queste misure scritte qui esce alta due
+           millimetri e con un filo di bordo, illeggibile. Visto sullo
+           schermo di Alessio il 19 agosto. */
         +  '<input type="text" inputmode="decimal" class="sal-q"'+_noAuto()
         +    ' value="'+(fatto!=null?_misTesto(fatto):"")+'" placeholder="0"'
-        +    ' style="max-width:130px;font-size:16px" aria-label="Quantità fatta finora">'
+        +    ' aria-label="Quantità fatta finora"'
+        +    ' style="width:140px;height:46px;padding:0 12px;font-family:inherit;'
+        +      'font-size:17px;font-weight:700;color:var(--testo,#22303f);'
+        +      'background:var(--card,#fff);border:1.5px solid var(--bordo-forte,#cbd2da);'
+        +      'border-radius:10px">'
         +  '<small style="color:var(--testo2,#5a6672)">'
         +    'su '+_misLetta(v.quantita)+(v.unita?" "+esc(v.unita):"")
         +    ' previsti × '+eur2(v.prezzo_unitario)

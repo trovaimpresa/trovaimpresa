@@ -3251,6 +3251,48 @@ body:has(#ti-fondatore) .side{
 .quick-add + .quick-add{ margin-left:14px; }
 
 /* ============================================================
+   19 agosto 2026 (sera) — I PULSANTI CHE NON SI VEDEVANO
+   ============================================================
+   Detto da Alessio guardando lo schermo, tre volte di fila e su tre
+   schermate diverse: «questi bottoni restano sempre invisibili».
+   Aveva ragione. .btn-ghost nasce SENZA SFONDO e SENZA BORDO: su una
+   pagina piena di caselle bianche col bordo, «+ Aggiungi voce» e
+   «+ Aggiungi nuovo cliente» si leggono come una scritta, non come una
+   cosa da cliccare. Erano cosi' in 19 punti del gestionale — fatture,
+   preventivi, computo, pratiche, quadro economico, SAL.
+
+   Adesso hanno il bordo e lo sfondo, e si capisce che si cliccano.
+
+   ⚠️ I QUATTRO ARANCIONI DEL COMPUTO NON CAMBIANO: .comp-azioni
+      .quick-add sta piu' sotto in questo file e vince lui. Se un domani
+      questa regola viene spostata sotto quella, gli arancioni
+      diventerebbero blu — e la fila del computo tornerebbe come prima.
+
+   ⚠️ height:auto: .btn-ghost nasce a 38 px fissi e un testo lungo su due
+      righe si taglierebbe. Su un telefono a 390 px va a capo, non esce.
+   ============================================================ */
+.quick-add,
+.sheet .quick-add{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  margin-top:6px; height:auto; min-height:46px; padding:11px 16px;
+  background:var(--card,#fff);
+  border:1.5px solid var(--accent,#0066ff);
+  border-radius:10px;
+  color:var(--accent,#0066ff);
+  font-family:inherit; font-size:17px; font-weight:700; line-height:1.25;
+  white-space:normal; text-align:center; cursor:pointer;
+}
+.quick-add:hover,
+.sheet .quick-add:hover{ background:#EAF2FF; border-color:#0052CC; color:#0052CC; }
+.quick-add:focus-visible,
+.sheet .quick-add:focus-visible{ outline:3px solid var(--accent,#0066ff); outline-offset:2px; }
+@media(max-width:768px){
+  .quick-add,
+  .sheet .quick-add{ width:100%; }
+  .quick-add + .quick-add{ margin-left:0; }
+}
+
+/* ============================================================
    IL QUADRO ECONOMICO — 19 agosto 2026
    ============================================================
    Tre colonne per la parte B: la voce, l'euro, la percentuale — e
