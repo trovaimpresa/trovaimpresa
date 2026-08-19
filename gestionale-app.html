@@ -2994,6 +2994,64 @@
     const mid=curMestiere();
     const oggi=todayStr(), lim7=_giorniDopo(oggi,7), lim30=_giorniDopo(oggi,30);
 
+    /* ============================================================
+       ⚠️ 19 agosto 2026 — LE SEI ANDATE E RITORNI
+
+       Le letture del Riepilogo erano ventiquattro, ma il problema non
+       erano quelle: erano le SEI ONDATE. Sei volte «chiedo, aspetto la
+       risposta, poi chiedo la prossima» — e su una linea da cantiere
+       ogni attesa e' un pezzo di secondo in cui non si vede niente,
+       uno dopo l'altro, prima ancora del primo numero.
+
+       Tre di quelle ondate non aspettavano NESSUNA delle altre: le
+       carte (tutte, anche quelle nel Cestino), i fornitori e i computi.
+       Stavano dopo solo perche' erano scritte dopo.
+
+       Adesso PARTONO SUBITO, qui, insieme alla prima ondata, e si
+       aspettano piu' giu' dove servono. ⚠️ Nessuna lettura in piu' e
+       nessuna in meno, nessun try spostato, nessun `if` tolto: cambia
+       solo QUANDO partono. Le due ondate che restano sono quelle che
+       aspettano davvero (servono gli id dei lavori e delle fatture).
+       Da sei andate e ritorni a due.
+
+       ⚠️ IL PEZZO DELICATO: fornitori e computi hanno una loro rete —
+       se la migrazione non e' stata eseguita, la scheda non compare e
+       il Riepilogo resta intero. Metterle dentro la Promise.all della
+       prima ondata avrebbe fatto scattare l'errore GROSSO («Non riesco
+       a leggere i dati») a chi non ha eseguito un file SQL: schermata
+       vuota per una scheda in meno. Per questo si avviano a parte e si
+       aspettano dentro il loro try, com'erano.
+       ============================================================ */
+    /* una lettura avviata e non ancora aspettata non deve poter urlare da
+       sola: qui qualunque inciampo diventa un {error} da guardare dopo */
+    const _avvia=p=>Promise.resolve(p).catch(e=>({error:e||new Error("lettura non riuscita")}));
+    /* ⚠️ sb.raw vede anche le carte nel Cestino: le spese fatte con una carta
+       poi eliminata sono uscite davvero e restano nei costi (13 agosto) */
+    const _sbCarte=(sb.raw||sb.from.bind(sb));
+    const pCarteTutte=_avvia(_sbCarte("gest_carte").select("id")
+      .eq("user_id",sbUid).eq("mestiere_id",mid));
+    const pForn=Promise.all([
+      _avvia(sb.from("gest_fatture_fornitori").select("fornitore_id,importo,scadenza,stato").eq("user_id",sbUid).eq("mestiere_id",mid)),
+      _avvia(sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid))
+    ]);
+    /* i computi si leggono SOLO per gli studi tecnici, come prima: agli altri
+       la sezione non c'e', e due letture inutili sono due letture inutili */
+    const pComputi=(ruoloUtente==='professionista')?Promise.all([
+      /* ⚠️ «tipo» SERVE, anche se qui non si mostra — 14 agosto 2026.
+         Da oggi compRiepilogoDa guarda il tipo del computo: gli oneri
+         della sicurezza restano fuori dal ribasso solo sui lavori
+         pubblici. Senza questa colonna il Riepilogo li avrebbe contati
+         come «privato» e avrebbe scritto una cifra diversa da quella
+         dell'elenco per lo stesso computo. Due schermate, due numeri:
+         e' il difetto delle fatture del 13 agosto, in un'altra stanza. */
+      _avvia(sb.from("gest_computi").select("id,numero,titolo,stato,data,ribasso_perc,tipo").eq("user_id",sbUid).eq("mestiere_id",mid)
+        .order("data",{ascending:false})),
+      _avvia(sb.from("gest_computo_totali").select("computo_id,importo,oneri_sicurezza,importo_manodopera").eq("user_id",sbUid))
+    ]):null;
+    /* le scadenze delle persone (visita medica, formazione, documento,
+       permesso): una lettura sola, e non aspetta niente nemmeno lei */
+    const pScadPers=scadenzePersone(mid);
+
     /* ---- primo giro di letture: tutto quello che non dipende dagli id dei lavori ---- */
     /* se una lettura fallisce NON si fa finta di niente: prima il Riepilogo
        mostrava "Tutto in ordine" con tutti zeri, come se i dati fossero spariti */
@@ -3052,6 +3110,13 @@
     const ids=L.map(l=>l.id);
     const cliMap=Object.fromEntries(CLI.map(c=>[c.id,c.nome||""]));
     const opeMap=Object.fromEntries(OPE.map(o=>[o.id,o.nome||""]));
+    /* la manodopera ha bisogno dei lavori, quindi prima non poteva partire —
+       ma non ha bisogno di NIENT'ALTRO: parte adesso e cammina insieme al
+       secondo giro, invece di aspettare che finisca. Le sue tre letture non
+       sono un'ondata in piu': sono dentro la stessa.
+       ⚠️ caricaManodopera si mangia i suoi errori da sola e torna sempre
+       qualcosa: lasciarla correre senza aspettarla non lascia grida in giro. */
+    const pMd=caricaManodopera(mid,L);
 
     /* ---- secondo giro: quello che ha bisogno degli id dei lavori ---- */
     let SP=[],nFoto=0,nVideo=0,PR=[],CM=[],FR=[];
@@ -3065,9 +3130,7 @@
          Ma quei soldi sono usciti davvero. Si legge dalla porta di servizio
          (sb.raw), come si fa per le tariffe delle persone eliminate dal
          13 agosto: mettere in ordine le carte non riscrive la storia. */
-      const _sbCarte=(sb.raw||sb.from.bind(sb));
-      const {data:carteTutte}=await _sbCarte("gest_carte").select("id")
-        .eq("user_id",sbUid).eq("mestiere_id",mid);
+      const {data:carteTutte}=await pCarteTutte;   /* partita in cima, qui si aspetta */
       const carteIds=(carteTutte||[]).map(c=>c.id);
       const q=await Promise.all([
         ids.length?sb.from("gest_spese").select("importo,data,lavoro_id").eq("user_id",sbUid).in("lavoro_id",ids):Promise.resolve({data:[]}),
@@ -3087,10 +3150,7 @@
        in errore e la scheda semplicemente non compare. */
     let FFOR=[],FORNI=[],fornTabOk=true;
     try{
-      const [rff2,rfo2]=await Promise.all([
-        sb.from("gest_fatture_fornitori").select("fornitore_id,importo,scadenza,stato").eq("user_id",sbUid).eq("mestiere_id",mid),
-        sb.from("gest_fornitori").select("id,nome").eq("user_id",sbUid).eq("mestiere_id",mid)
-      ]);
+      const [rff2,rfo2]=await pForn;               /* partita in cima, qui si aspetta */
       if(rff2.error||rfo2.error)fornTabOk=false;else{FFOR=rff2.data||[];FORNI=rfo2.data||[];}
     }catch(e){fornTabOk=false;}
 
@@ -3164,7 +3224,7 @@
        guardavano solo le spese, quindi un lavoro che nella sua scheda era in
        perdita di 1.200 € nel Riepilogo non veniva segnalato mai. */
     const ffPerL={};FFO.forEach(x=>{if(x.lavoro_id)ffPerL[x.lavoro_id]=(ffPerL[x.lavoro_id]||0)+(+x.importo||0);});
-    const mdRie=await caricaManodopera(mid,L);
+    const mdRie=await pMd;                        /* partita piu' su, qui si aspetta */
     const _margL=l=>margineLavoro(l.importo,spPerL[l.id],ffPerL[l.id],mdRie.per[String(l.id)]);
     const inPerdita=L.filter(l=>((+l.importo||0)>0||spPerL[l.id]||ffPerL[l.id]||mdRie.per[String(l.id)])&&_margL(l)<0);
 
@@ -3233,7 +3293,7 @@
        Riepilogo leggeva solo gest_scadenze: per un'impresa edile mancavano
        proprio quelle che portano le sanzioni, e lo Scadenzario intanto
        prometteva che "quelle gia' passate finiscono in cima al Riepilogo". */
-    const SCP=await scadenzePersone(mid);
+    const SCP=await pScadPers;                    /* partita in cima, qui si aspetta */
     const scTutte=SC.concat(SCP);
     const scAperte=scTutte.filter(x=>x.stato!=="fatta"&&x.data_scadenza&&x.data_scadenza<=lim30)
                      .sort((a,b)=>a.data_scadenza.localeCompare(b.data_scadenza));
@@ -3465,18 +3525,7 @@
        meno che un Riepilogo rotto. */
     if(ruoloUtente==='professionista'){
       try{
-        const [rCo,rTo]=await Promise.all([
-          /* ⚠️ «tipo» SERVE, anche se qui non si mostra — 14 agosto 2026.
-             Da oggi compRiepilogoDa guarda il tipo del computo: gli oneri
-             della sicurezza restano fuori dal ribasso solo sui lavori
-             pubblici. Senza questa colonna il Riepilogo li avrebbe contati
-             come «privato» e avrebbe scritto una cifra diversa da quella
-             dell'elenco per lo stesso computo. Due schermate, due numeri:
-             e' il difetto delle fatture del 13 agosto, in un'altra stanza. */
-          sb.from("gest_computi").select("id,numero,titolo,stato,data,ribasso_perc,tipo").eq("user_id",sbUid).eq("mestiere_id",mid)
-            .order("data",{ascending:false}),
-          sb.from("gest_computo_totali").select("computo_id,importo,oneri_sicurezza,importo_manodopera").eq("user_id",sbUid)
-        ]);
+        const [rCo,rTo]=await pComputi;            /* partita in cima, qui si aspetta */
         if(!rCo.error){
           const CO=rCo.data||[];
           /* anche qui il numero e' quello NETTO: il Riepilogo, l'elenco dei
