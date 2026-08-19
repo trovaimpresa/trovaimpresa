@@ -5292,6 +5292,10 @@
 
     /* i lavori scelti nel selettore viaggiano attaccati al modulo finche' non si salva */
     fattLavoriInCorso = (preset&&preset._lavori) ? preset._lavori.slice() : null;
+    /* lo stato di avanzamento da cui nasce questa fattura, se ce n'e' uno:
+       viaggia attaccato al modulo e si scrive solo quando la fattura e' salvata
+       davvero. Serve a non chiedere due volte lo stesso acconto. */
+    fattSalInCorso = (preset&&preset._sal) ? String(preset._sal) : null;
 
     const cont=$("#fatt-righe");
     if(cont)cont.addEventListener("input",fattTotaleLive);
@@ -5306,7 +5310,7 @@
     });
     fattTotaleLive();
   }
-  let fattLavoriInCorso=null;
+  let fattLavoriInCorso=null, fattSalInCorso=null;
 
   /* Un salvataggio che fallisce con un messaggino che svanisce è peggio di
      uno che non fallisce: si perde quello che si è scritto e non si capisce
@@ -5439,6 +5443,27 @@
       if(e3&&!/duplicate|unique/i.test(e3.message||""))toast("Lavori non collegati: "+e3.message);
       fattLavori[fid]=(fattLavori[fid]||[]).concat(fattLavoriInCorso);
       fattLavoriInCorso=null;
+    }
+
+    /* ⚠️ 19 agosto 2026 — LO STATO DI AVANZAMENTO SI SEGNA COME FATTURATO.
+       Senza, niente impedisce di creare DUE fatture per lo stesso SAL: gli
+       stessi soldi chiesti due volte al committente, e nessuno che se ne
+       accorga finche' non arriva lui a dirlo.
+       Se la fattura non si e' salvata, qui non ci si arriva nemmeno: il
+       collegamento si scrive solo dopo, mai prima.
+       E se la colonna non c'e' ancora (migrazione non eseguita) la fattura
+       resta buona lo stesso: si dice cosa manca e perche' e' importante. */
+    if(fattSalInCorso){
+      const {data:okSal,error:e4}=await sb.from("gest_sal")
+        .update({fattura_id:fid}).eq("id",fattSalInCorso).eq("user_id",sbUid).select("id");
+      if(e4){
+        toast(/fattura_id|column|schema cache/i.test(e4.message||"")
+          ? "Fattura salvata, ma lo stato di avanzamento non se la ricorda: esegui sql/gest-sal-fattura.sql su Supabase, se no rischi di fatturare due volte lo stesso acconto."
+          : "Fattura salvata, ma non sono riuscito a collegarla al SAL: "+e4.message);
+      }else if(!okSal||!okSal.length){
+        toast("Fattura salvata, ma il collegamento allo stato di avanzamento non è stato scritto. Riapri il SAL e controlla.");
+      }
+      fattSalInCorso=null;
     }
 
     closeSheet();
@@ -16365,6 +16390,7 @@ ${vecchi?`
           +    ' · fatto finora '+eur2(k.maturato)
           +    (k.precedente?(' · già chiesto '+eur2(k.precedente)):'')
           +    (k.ritenuta?(' · trattenuto '+eur2(k.ritenuta)):'')
+          +    (s.fattura_id?' · <b>già fatturato</b>':'')
           +  '</small></span>'
           +'<b>'+eur2(k.netto)+'</b>'
           /* ⚠️ 19 agosto 2026 — LA PRIMA VOLTA L'HO FATTO SBAGLIATO.
@@ -16469,6 +16495,11 @@ ${vecchi?`
       +'</div><div class="sh-col">'
       +'<div class="sh-b"><div class="sh-tit">Il conto</div>'
       +  '<div id="sal-conto" class="qe-tot"></div>'
+      /* il pulsante sta QUI e non in fondo alla finestra: nel piede ci sono
+         gia' tre pulsanti e su un telefono da 390 px il quarto usciva fuori.
+         Classe .quick-add, quella coi bordi che si vedono. */
+      +  (isNew?'':'<button type="button" class="quick-add" data-action="sal-fattura" data-id="'+esc(String(s.id))+'">→ Crea la fattura di questo acconto</button>')
+      +  (s.fattura_id?'<div class="sh-nota">Da questo stato di avanzamento hai <b>già creato una fattura</b>. Se ne fai un\'altra, stai chiedendo due volte gli stessi soldi.</div>':'')
       +'</div>'
       +'<div class="sh-b"><div class="sh-tit">La scheda</div>'
       +  '<div class="row2">'
@@ -16690,6 +16721,124 @@ ${vecchi?`
     if(chiavi.length!==Object.keys(salvate).length)return true;
     for(let i=0;i<chiavi.length;i++){ if(salvate[chiavi[i]]!==ora[chiavi[i]])return true; }
     return false;
+  }
+
+  /* ============================================================
+     DAL SAL ALLA FATTURA — 19 agosto 2026
+     ============================================================
+     Il SAL dice quanto ti devono; la fattura e' come glielo chiedi. Fino a
+     stasera bisognava riscrivere a mano l'importo dentro una fattura nuova,
+     e un numero ribattuto a mano e' un numero che prima o poi si sbaglia.
+
+     ⚠️ LA CIFRA LA SCEGLI TU, OGNI VOLTA. Sono due modi veri, e cambiano da
+     committente a committente:
+       - INTERA: fatturi tutto l'avanzamento, ed e' il committente che
+         trattiene la ritenuta di garanzia quando paga;
+       - AL NETTO: la ritenuta te la togli tu dalla fattura, e la riavrai a
+         fine lavori con una fattura a parte.
+     Non e' una cosa da decidere al posto suo, e nemmeno una da chiedere una
+     volta sola: si chiede a ogni fattura.
+
+     ⚠️ I CONTI NON SI RIFANNO QUI: l'importo esce da salConti(), la stessa
+     funzione del riquadro a schermo e del PDF.
+
+     ⚠️ NON SI SCRIVE NIENTE NEL DATABASE. Si apre il modulo della fattura
+     gia' compilato: la controlla lui e la salva lui. Il collegamento SAL ->
+     fattura si scrive solo DOPO che la fattura esiste (vedi fattSalInCorso).
+     ============================================================ */
+  let salFattDati=null;
+
+  async function salAFattura(id){
+    if(!sb||!sbUid){toast("Devi essere collegato");return;}
+    if(salModifiche(id)){
+      toast("Hai delle modifiche non salvate: premi prima Salva, poi crea la fattura. La fattura nasce da quello che è salvato.");
+      return;
+    }
+
+    const rs=await sb.from("gest_sal").select("*").eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(rs.error){toast("Non riesco a leggere lo stato di avanzamento: "+rs.error.message);return;}
+    const s=rs.data; if(!s){toast("Stato di avanzamento non trovato");return;}
+    if(s.fattura_id&&!gconfirm("Da questo stato di avanzamento hai già creato una fattura.\n\nSe ne fai un'altra stai chiedendo due volte gli stessi soldi.\n\nNe faccio un'altra lo stesso?"))return;
+
+    const rcp=await sb.from("gest_computi").select("*").eq("id",s.computo_id).eq("user_id",sbUid).maybeSingle();
+    if(rcp.error){toast("Non riesco a leggere il computo: "+rcp.error.message);return;}
+    const comp=rcp.data; if(!comp){toast("Il computo di questo stato di avanzamento non si trova");return;}
+
+    const rt=await sb.from("gest_sal_totali").select("*").eq("sal_id",s.id).eq("user_id",sbUid).maybeSingle();
+    if(rt.error){toast("Non riesco a leggere i totali del SAL: senza quelli l'importo della fattura sarebbe sbagliato. Riprova fra un momento. ("+(rt.error.message||"")+")");return;}
+    if(!rt.data){toast("I totali di questo SAL non si trovano. Riapri il computo e riprova.");return;}
+    const k=salConti(rt.data,comp);
+
+    /* ⚠️ zero e negativo si fermano QUI. Un SAL negativo vuol dire che hai
+       contato meno del SAL precedente: una fattura in negativo non e' una
+       fattura, e' una nota di credito, ed e' un'altra cosa. */
+    if(!(k.lordo>0)){
+      toast(k.lordo<0
+        ? "Questo stato di avanzamento è negativo ("+eur2(k.lordo)+"): hai contato meno del SAL precedente. Controlla le quantità — su un importo negativo non si fa una fattura."
+        : "Questo stato di avanzamento vale 0 €: non c'è ancora niente da fatturare.");
+      return;
+    }
+
+    salFattDati={sal:s,comp:comp,k:k};
+
+    openSheetGrande("La fattura di questo acconto",
+       '<div class="sh-b"><div class="sh-tit">Per quale cifra la faccio?</div>'
+      +'<div class="fn-scelte">'
+      +  '<button type="button" class="fn-s" data-action="sal-fatt-intero">'
+      +    '<span class="fn-t">Per l\'intero · '+eur2(k.lordo)+'</span>'
+      +    '<span class="fn-d">Fatturi tutto l\'avanzamento. È il committente che trattiene la ritenuta di garanzia quando ti paga.</span></button>'
+      +  '<button type="button" class="fn-s" data-action="sal-fatt-netto">'
+      +    '<span class="fn-t">Al netto della ritenuta · '+eur2(k.netto)+'</span>'
+      +    '<span class="fn-d">'+(k.ritenuta
+             ? 'La ritenuta di garanzia del '+_pct(k.perc)+'% ('+eur2(k.ritenuta)+') la togli tu dalla fattura. La riavrai a fine lavori, a collaudo fatto, con una fattura a parte.'
+             : 'Su questo SAL la ritenuta di garanzia è 0, quindi la cifra è la stessa di sopra.')+'</span></button>'
+      +'</div>'
+      +'<div class="sh-nota">Non salvo niente adesso: si apre la fattura già scritta, la controlli tu e la salvi tu.</div>'
+      +'</div>',
+       '<button class="btn b-cancel" data-action="close">Annulla</button>');
+  }
+
+  async function salFatturaCon(modo){
+    const d=salFattDati;
+    if(!d){toast("Riapri lo stato di avanzamento e riprova");return;}
+    const s=d.sal, comp=d.comp, k=d.k;
+    const importo=(modo==="netto")?k.netto:k.lordo;
+    if(!(importo>0)){toast("Non c'è niente da fatturare");return;}
+
+    const periodo=(s.periodo_dal||s.periodo_al)
+      ? (" — lavori eseguiti "
+         +(s.periodo_dal?"dal "+fdate(s.periodo_dal):"")
+         +(s.periodo_al?((s.periodo_dal?" al ":"fino al ")+fdate(s.periodo_al)):""))
+      : "";
+    /* la descrizione e' quello che il committente legge sulla fattura: deve
+       bastare da sola a dire di quale avanzamento si tratta, senza avere
+       sotto mano il SAL. E se la ritenuta e' gia' stata tolta, lo dice. */
+    const desc="Stato avanzamento lavori n. "+(s.numero||1)+" del "+fdate(s.data||todayStr())
+      +(comp.titolo?" — "+comp.titolo:"")
+      +periodo
+      +((modo==="netto"&&k.ritenuta)
+        ? " (importo al netto della ritenuta di garanzia del "+_pct(k.perc)+"%, pari a "+eur2(k.ritenuta)+")"
+        : "");
+
+    closeSheet();
+    await fattForm(null,{
+      cliente_id:comp.cliente_id||null,
+      data:todayStr(),
+      /* un SAL e' un acconto: il tipo giusto e' quello, non "fattura" */
+      tipo:"acconto",
+      _sal:s.id,
+      _righe:[{descrizione:desc, qta:1, prezzo:importo,
+               iva:fattForfettario()?0:ivaDefault(), ordine:0}]
+    });
+    /* ⚠️ il cliente del computo puo' non stare nell'anagrafica di QUESTO
+       reparto: la tendina delle fatture legge solo i clienti del reparto
+       corrente. In quel caso resterebbe su «nessuno» e la fattura si
+       salverebbe senza cliente senza che nessuno lo dica. */
+    const sel=$("#fa-cli");
+    if(comp.cliente_id&&sel&&!sel.value){
+      toast("Attenzione: il cliente del computo non è nell'anagrafica di questo reparto, quindi la tendina è su «nessuno». Sceglilo a mano prima di emetterla.");
+    }
+    salFattDati=null;
   }
 
   async function salPdf(id){
@@ -19644,6 +19793,9 @@ ${vecchi?`
     if(a==="sal-apri")return salForm(id);
     if(a==="sal-salva")return salSalva(id);
     if(a==="sal-pdf")return salPdf(id);
+    if(a==="sal-fattura")return salAFattura(id);
+    if(a==="sal-fatt-intero")return salFatturaCon("intero");
+    if(a==="sal-fatt-netto")return salFatturaCon("netto");
     if(a==="sal-del")return salElimina(id);
     if(a==="new-prezzo")return prezzoForm(null);
     if(a==="edit-prezzo")return prezzoForm(id);
