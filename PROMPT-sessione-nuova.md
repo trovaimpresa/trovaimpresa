@@ -1,4 +1,4 @@
-# Prompt per la sessione nuova — 19 agosto 2026
+# Prompt per la sessione nuova — 19 agosto 2026, sera
 
 Copia e incolla tutto quello che sta sotto la riga.
 
@@ -8,8 +8,8 @@ Ciao. Riprendiamo il lavoro su TrovaImpresa.
 
 **Prima di rispondermi leggi `CLAUDE.md`**, che sta nella cartella del
 progetto: e' la memoria di tutto. In particolare la testa del file (le regole
-fisse) e **l'ultima sezione, quella del 19 agosto** — dentro c'e' la lezione
-che e' costata l'intera mattinata.
+fisse) e **le tre sezioni del 19 agosto** — dentro ci sono le lezioni che sono
+costate la giornata.
 
 ## Come si lavora con me — le regole che non si sgarrano
 
@@ -20,7 +20,13 @@ che e' costata l'intera mattinata.
   `.git/index.lock` fantasma che mi blocca i commit per ore. Per sapere cosa
   e' cambiato, guarda i file.
 - **Il push lo faccio io.** Dammi **un blocco solo, su UNA RIGA**, pronto da
-  incollare in Git Bash.
+  incollare in Git Bash. ⛔ **La riga del git dammela DA SOLA**: il 19 agosto
+  me l'hai messa attaccata alla scheda di collaudo, ho incollato tutto in Git
+  Bash e la shell si e' impantanata. La scheda scrivimela come testo normale,
+  fuori dal riquadro.
+- ⚠️ **Raggruppa le modifiche in UN push solo.** Netlify: 300 crediti al mese
+  sul piano gratuito e **ogni push ne costa 15** — cioe' venti push al mese. Il
+  19 agosto il sito e' andato in pausa a meta' mattina per questo.
 - **Le chiavi Stripe e Supabase stanno nelle variabili di Netlify**: non
   scriverle mai nel codice e non chiedermele in chat.
 - **Le query per Supabase scrivimele per l'SQL Editor**, dove sono collegato
@@ -36,122 +42,118 @@ che e' costata l'intera mattinata.
   si controllano nei due versi, sempre col loro file di sabotaggi.
 - **Prima di toccare qualsiasi file, spiegami cosa hai capito e quali file
   tocchi, e aspetta la mia conferma.**
-- **Consegna cosi'**: scrivi nella mia cartella, mandami il file in chat,
+- **Consegna cosi':** scrivi nella mia cartella, mandami il file in chat,
   controlla l'md5 da tutte e due le parti, e dimmi cosa cliccare.
 - **Se hai sbagliato, dimmelo subito e per primo.**
-- Il sito pubblico non parla mai di me: il mio nome resta solo nel footer.
-- ⛔ Per un modulo nuovo mai `openSheet()` (la finestrella piccola): sempre
+- **Il sito pubblico non parla mai di me:** il mio nome resta solo nel footer.
+- ⛔ **Per un modulo nuovo mai `openSheet()`** (la finestrella piccola): sempre
   `openSheetGrande()`.
-- I banchi di prova stanno nel tuo contenitore, in `prove/`, non nella mia
+- **I banchi di prova stanno nel tuo contenitore, in `prove/`**, non nella mia
   cartella.
 
-## ⚠️⚠️ LEGGI QUESTO PRIMA DI SCRIVERE UNA RIGA
+## ⚠️⚠️ LE LEZIONI DEL 19 AGOSTO — leggi prima di scrivere una riga
 
-Il 19 agosto tre difetti sono arrivati sul sito **con il banco verde**, sempre
-per la stessa ragione: **il finto era piu' generoso del vero.**
+**1. Un finto non deve MAI essere piu' permissivo dell'oggetto che imita.**
+Tre difetti sono arrivati sul sito col banco verde, sempre per questo:
+`sb.insert([…])` finto accettava righe con chiavi diverse (quello vero manda
+`?columns=` con l'unione delle chiavi e scrive NULL); `$$` finto restituiva un
+Array mentre nel gestionale e' una NodeList (ha `forEach`, non ha `filter`);
+gli aiuti delle fotografie erano riscritti a mano invece che ritagliati dal
+file. Quando scrivi un finto la domanda e' **«cosa RIFIUTA quello vero?»**,
+non «cosa accetta». E gli aiuti si **ritagliano dal file**, non si riscrivono.
 
-- `sb.insert([…])` finto accettava righe con chiavi diverse. Quello vero no:
-  supabase-js manda `?columns=<unione delle chiavi>` e PostgREST scrive a NULL
-  quelle che mancano. Una riga senza `sezione` in mezzo a righe che ce l'hanno
-  fa saltare tutta la scrittura.
-- `$$` finto restituiva un Array. Nel gestionale `$$` e' `querySelectorAll` e
-  basta: una **NodeList**, che ha `forEach` ma **non** ha `filter` ne' `map`.
-  Un `.filter` ha spento una schermata intera.
-- gli aiuti delle fotografie (`eur2`, `_eur`) erano riscritti a mano e diversi
-  da quelli veri: la foto mostrava i numeri del banco, non del gestionale.
+**2. Ma nemmeno piu' POVERO del vero.** Nel pomeriggio e' successo il
+contrario: il finto `storage.buckets` non aveva le colonne che Supabase ha, e
+una tabella non era leggibile dai ruoli che sul sito la leggono. Le prove
+dicevano «no» dove il database vero dice «si», cioe' inventavano difetti.
 
-**Regola: un finto non deve MAI essere piu' permissivo dell'oggetto che imita.**
-Quando ne scrivi uno, la domanda e' «cosa **rifiuta** quello vero?», non «cosa
-accetta». E gli aiuti si **ritagliano dal file**, non si riscrivono.
+**3. Chi non ha fatto il login non e' «loggato con l'uid vuoto»: e' un altro
+RUOLO (`anon`).** Una regola scritta `to authenticated` per lui non esiste
+proprio. Provarlo da `authenticated` vuol dire provare la cosa sbagliata.
+
+**4. Il banco segna rosso, non esplode.** Se una regola va in errore, l'errore
+dev'essere contato come una prova rossa, non far morire lo script.
+
+**5. Una regola che sta in due posti non si sistema a meta'.** Le foto avevano
+la spunta sulla tabella ma non sul deposito dei file: chi passava dal deposito
+scavalcava la tabella.
+
+**6. In una fila di pulsanti, o sono tutti uguali o quello diverso sembra un
+allarme.** Detto da me guardando lo schermo: «stona».
 
 ## Dove siamo
 
-Ieri e oggi il gestionale ha fatto molta strada. Oggi in particolare:
+Il 19 agosto e' stata una giornata lunga. In sintesi:
 
-- le nove prove del banco rimaste «da capire» sono state riscritte
-  (`banco_persone_e_numeri.js`, 125 prove);
-- il preventivo che nasce da un computo adesso **tiene i capitoli e il loro
-  ordine**, a schermo, sul PDF, nella conferma d'ordine e nella lettera
-  d'incarico;
-- **il quadro economico dei lavori pubblici** e' dentro il computo e sul PDF:
-  parte A dai lavori, parte B da scrivere (in euro o in percentuale del
-  Totale A), totale A+B.
+- **mattina:** i capitoli dal computo al preventivo (schermo, PDF, conferma
+  d'ordine, lettera d'incarico) · il quadro economico dei lavori pubblici ·
+  le 9 prove «da capire» riscritte;
+- **mezzogiorno:** «**Prendi i prezzi dal prezzario**» dentro il computo —
+  cerca il codice, riempie solo le voci a 0,00 €, solo dentro la tariffa
+  dichiarata, e dice una per una perche' non ha riempito le altre. Sul computo
+  vero di Magliano Sabina: **41 prezzi su 87**. Il prezzario della Regione
+  Lazio e' finalmente dentro (4 file, 12.762 voci, tariffa «Tariffa Regione
+  Lazio»);
+- **pomeriggio:** **le regole dei due depositi di file**. Il deposito «foto»
+  non aveva dentro solo le foto — anche le fatture, i documenti dei clienti,
+  dei fornitori e del commercialista — e qualsiasi collaboratore, anche con
+  tutte le spunte tolte, poteva scaricarli e cancellarli. Chiuso. E chiuso
+  anche il secondo buco: su `documenti-incarichi` chiunque, anche senza
+  account, poteva caricare file dove voleva e grandi quanto voleva.
 
-Due migrazioni SQL sono gia' state eseguite: `sql/gest-preventivo-sezioni.sql`
-e `sql/gest-computo-quadro.sql`.
+**Migrazioni SQL gia' eseguite il 19 agosto:** `sql/gest-preventivo-sezioni.sql`
+· `sql/gest-computo-quadro.sql` · `sql/gest-deposito-file.sql` ·
+`sql/gest-deposito-incarichi.sql`.
 
 ## ⛔ DA DOVE SI RIPARTE
 
-### 1. «Prendi i prezzi dal prezzario» dentro il computo
+**1. La contabilita' dei lavori (SAL).** E' il lavoro di questa sessione.
+Chiesta da me il 19 agosto e mai cominciata. Serve una migrazione SQL nuova.
+Prima di scrivere una riga, spiegami cosa hai capito e chiedimi come lavoro io
+con gli stati di avanzamento — non darlo per scontato.
 
-E' il punto 1 della lista da giorni e non e' mai stato fatto. **Adesso pesa il
-doppio**, perche' un preventivo nato dal computo importato esce con 87 righe a
-**0,00 €**: le lavorazioni prese dall'Excel non hanno il prezzo.
-
-Serve un pulsante che cerchi il **codice** nel prezzario e riempia **solo le
-voci a zero**, **solo dentro la tariffa dichiarata dal computo**, e che dica
-quante ne ha riempite e quante no.
-
-⚠️ Un codice come `A03.01.019.a` ha tre sotto-varianti con prezzi diversi
-(`.1 .2 .3`): quelle **non** si riempiono da sole, si dicono e basta. Sui
-codici del computo di Magliano Sabina il colpo riesce su circa 43 voci su 87.
-
-### 2. La contabilita' dei lavori (SAL)
-
-Chiesta da me il 19 agosto. Ne parliamo quando ci arriviamo.
-
-### 3. L'analisi dei prezzi
-
-Chiesta da me il 19 agosto. Su un lavoro pubblico la chiedono in appendice,
+**2. L'analisi dei prezzi.** Su un lavoro pubblico la chiedono in appendice,
 insieme all'elenco dei prezzi unitari.
 
-### 4. Le regole del deposito dei file
+**3. Il difetto del telefono sui preventivi.** A 390 px la casella della
+descrizione nelle voci si schiaccia a due dita: `.sheet .prev-riga` a
+`1fr 80px 118px 48px` non lascia spazio. Vale per tutte le righe.
 
-Bucket `gestionale-foto` e `gestionale-video`, mai guardate. Ci sta dentro
-`foto_team_delete`, che usa `gest_puo_accedere` senza guardare la spunta
-«foto». C'era gia', non e' una regressione.
+**4. Il pulsante «Prendi i prezzi dal prezzario» anche in cima** all'elenco
+delle lavorazioni: in fondo a 88 righe non lo trova nessuno — per trovarlo mi
+e' servito il Ctrl+F.
 
-## Tre cose che mi sono state dette il 19 agosto, e che decido io
+**5. `cv-candidati/registrazioni`:** stessa famiglia del deposito incarichi.
+La cartella e' gia' bloccata, manca solo il limite di misura.
 
-Alla fine della sessione ho chiesto un parere su cosa migliorerei del
-gestionale. Le tre risposte, che restano **decisioni mie**:
-
-1. **I prezzi a zero non sono una funzione mancante, sono un difetto.** Vedi
-   il punto 1 qui sopra.
-2. **I banchi di prova spariscono a ogni sessione** (~760 prove ricostruite da
-   zero ogni volta). La regola «i banchi stanno nel tuo contenitore» e' mia e
-   resta mia, ma la proposta era: tenerli in `prove/` nella mia cartella,
-   fuori dal deploy con un rinvio in `netlify.toml` come gia' fatto per
-   `CLAUDE.md`. **Se non te lo dico io, non spostarli.**
-3. **Gli stessi aiuti riscritti in posti diversi**: `_eur` esiste due volte
-   (e per mesi le due copie si sono comportate diversamente), `_numeroIt` ha
-   una copia in `gestionale-operatore.html`. E' la lezione di
-   `compRiepilogoDa` («una formula sola, in tre posti»), non ancora finita.
-   Da fare **poco per volta**, quando si passa di li' per altro.
-
-⛔ **E una cosa da NON fare: spezzare `gestionale-app.html` in venti file.**
-19.000 righe in un file solo si cercano in un secondo, e quel lavoro mi
-fermerebbe per giorni senza dare niente a nessuna impresa. Se me lo proponi,
-la risposta e' no.
-
-## Un difetto vecchio, gia' visto e lasciato li'
-
-A 390 px (telefono) la casella della descrizione nelle voci del preventivo si
-schiaccia a due dita: `.sheet .prev-riga` a `1fr 80px 118px 48px` non lascia
-spazio. Vale per **tutte** le righe, anche quelle di prima.
+**6. Il conteggio delle richieste** per fermare chi insiste a caricare file:
+non si fa con una regola del database, e' un lavoro a parte.
 
 ## Il sito — quando il gestionale e' a posto
 
 - Le **95 pagine citta' vuote** in Search Console.
-- L'**email vera alle imprese**, mai vista partire da una richiesta reale.
-- Il **grafico dell'admin**, che vuole `premium_dal` e `gestionale_dal`.
+- **L'email vera alle imprese**, mai vista partire da una richiesta reale.
+- **Il grafico dell'admin**, che vuole `premium_dal` e `gestionale_dal`.
+
+## ⛔ E una cosa da NON fare
+
+**Non spezzare `gestionale-app.html` in venti file.** 19.000 righe in un file
+solo si cercano in un secondo, e quel lavoro mi fermerebbe per giorni senza
+dare niente a nessuna impresa. Se me lo proponi, la risposta e' no.
 
 ## Roba di prova da buttare
 
-Nel reparto «progetto casa» i preventivi **n. 4, 5 e 6** sono nati dalle prove
-del 19 agosto: si possono eliminare.
+Nel reparto «progetto casa» i preventivi n. 4, 5 e 6 sono nati dalle prove del
+19 agosto: si possono eliminare.
+
+## Una decisione che resta mia
+
+I banchi di prova spariscono a ogni sessione. La regola «i banchi stanno nel
+tuo contenitore» e' mia e resta mia. La proposta era: tenerli in `prove/` nella
+mia cartella, fuori dal deploy con un rinvio in `netlify.toml` come gia' fatto
+per `CLAUDE.md`. **Se non te lo dico io, non spostarli.**
 
 ---
 
-**Partiamo dal punto 1, «Prendi i prezzi dal prezzario».** Prima dimmi cosa hai
-capito e quali file vuoi toccare, e aspetta il mio ok.
+Partiamo dal punto 1, il SAL. Prima dimmi cosa hai capito e quali file vuoi
+toccare, e aspetta il mio ok.
