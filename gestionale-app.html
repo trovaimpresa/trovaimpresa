@@ -14941,6 +14941,20 @@ ${vecchi?`
       +  '</div>'
       +'</div>'
 
+      /* 19 agosto 2026 — il quadro economico sta SUBITO SOTTO le lavorazioni:
+         i suoi numeri nascono da quelle, e guardarli lontani dal totale che li
+         genera è il modo più veloce per non accorgersi di una cifra storta.
+         Si vede solo sui Lavori pubblici: su un lavoro privato non esiste. */
+      +'<div class="sh-b" id="co-qe-box"'+(c.tipo==="pubblico"?"":' style="display:none"')+'>'
+      +  '<div class="sh-tit">Quadro economico</div>'
+      +  '<div id="co-qe-a" class="qe-a"></div>'
+      +  '<div class="qe-cap">B · Somme a disposizione della stazione appaltante</div>'
+      +  '<div id="co-qe-righe">'+qeRighe(c).map(r=>qeRigaHtml(r)).join("")+'</div>'
+      +  '<button type="button" class="btn-ghost quick-add" data-action="qe-riga-add">+ Aggiungi voce</button>'
+      +  '<div id="co-qe-tot" class="qe-tot"></div>'
+      +  '<div class="sh-nota">Ogni riga o è in <b>euro</b> o è in <b>percentuale del Totale A</b>: se scrivi la percentuale, l\'euro non conta più. La lista è quella standard — cancella quello che non ti serve e aggiungi il tuo.</div>'
+      +'</div>'
+
       +'<div class="sh-b"><div class="sh-tit">A cosa serve questo computo</div>'
       +  '<div class="field"><div class="seg" id="co-tipo">'
       +    '<button data-v="privato"'+((c.tipo||"privato")==="privato"?' class="on"':'')+'>Lavori privati</button>'
@@ -15002,6 +15016,13 @@ ${vecchi?`
     ctrAscolta('computo');
     bindSeg("co-tipo");
     bindSeg("co-stato");
+    /* il quadro economico si accende e si spegne col tipo di lavoro, ma NON si
+       ridisegna: si nasconde e basta. Ridisegnarlo butterebbe via quello che
+       stai scrivendo appena tocchi «Lavori privati» per sbaglio. */
+    $$("#co-tipo button").forEach(b=>b.addEventListener("click",qeMostra));
+    const _qb=$("#co-qe-righe");
+    if(_qb)_qb.addEventListener("input",qeAggiorna);
+    qeAggiorna();
     const _ps=$("#co-prz-sel");
     if(_ps)_ps.onchange=function(){
       const box=$("#co-prz-mio");
@@ -15275,6 +15296,165 @@ ${vecchi?`
       V.reduce((s,v)=>s+(+v.importo||0)*(+v.incidenza_manodopera||0)/100,0),
       comp);
   }
+  /* ============================================================
+     19 agosto 2026 — IL QUADRO ECONOMICO DEI LAVORI PUBBLICI
+     ============================================================
+     Il computo dice quanto costano i LAVORI. Il quadro economico dice quanto
+     costa l'OPERA: è il numero che finisce nella delibera, e senza quello un
+     progetto per un ente pubblico non si consegna.
+
+     Due parti, e la differenza fra le due è tutta qui:
+
+       A · LAVORI — non si scrive niente, viene dal computo.
+       B · SOMME A DISPOSIZIONE della stazione appaltante — si scrive: spese
+           tecniche, imprevisti, allacciamenti, IVA, incentivi.
+
+       TOTALE = A + B
+
+     ⚠️ IL COSTO DELLA MANODOPERA NON SI SOMMA. Sta DENTRO i lavori: è un
+     «di cui», non un addendo. È lo stesso inganno degli oneri della sicurezza
+     chiuso l'11 agosto sul PDF del computo — chi riceve il foglio somma le
+     righe con la calcolatrice, e se il conto non torna te lo fa rispiegare.
+     Qui la manodopera si scrive su una riga sua, indentata, che dice «di cui»
+     e non entra in nessuna somma.
+
+     LE PERCENTUALI si contano sul TOTALE A, cioè lo stesso numero che si legge
+     in fondo alle lavorazioni. Una riga o è in euro o è in percentuale: se c'è
+     la percentuale, l'euro scritto a mano non conta più (e si vede, perché il
+     gestionale riscrive il valore calcolato accanto).
+
+     LA LISTA È UN PUNTO DI PARTENZA, non una legge: ogni stazione appaltante
+     piega il quadro economico a modo suo. Le righe si cancellano e se ne
+     aggiungono.
+
+     Riferimenti: D.Lgs. 36/2023 come modificato dal D.Lgs. 209/2024;
+     incentivi per funzioni tecniche art. 45 (il 2% è il tetto, non un
+     obbligo); imprevisti di norma fra il 5 e il 10%. */
+  const QE_VOCI=[
+    {d:"Lavori in economia, esclusi dall'appalto"},
+    {d:"Rilievi, accertamenti e indagini"},
+    {d:"Allacciamenti ai pubblici servizi"},
+    {d:"Imprevisti", p:5},
+    {d:"Acquisizione aree o immobili"},
+    {d:"Accantonamenti (artt. 60 e 120): revisione prezzi e accordo bonario"},
+    {d:"Spese tecniche: progettazione, direzione lavori, CSP e CSE, contabilità"},
+    {d:"Incentivi per funzioni tecniche (art. 45)", p:2},
+    {d:"Commissioni giudicatrici, pubblicità, collaudi e prove di laboratorio"},
+    {d:"IVA sui lavori", p:10},
+    {d:"IVA e cassa previdenziale sulle spese tecniche"}
+  ];
+  /* il tetto di legge dell'art. 45: sopra si avvisa, non si blocca (il quadro
+     economico si scrive anche per opere dove la percentuale è un'altra) */
+  const QE_INCENTIVI_MAX=2;
+  /* le righe di un computo: quelle salvate, o l'elenco standard tutto a zero.
+     Una riga senza descrizione non è una riga: si butta in lettura, se no
+     bastava un Salva di troppo per riempire il quadro di vuoti. */
+  function qeRighe(c){
+    const dentro=c&&c.quadro_economico;
+    const l=Array.isArray(dentro)?dentro:(dentro&&Array.isArray(dentro.righe)?dentro.righe:null);
+    if(!l)return QE_VOCI.map(v=>({d:v.d, e:null, p:(v.p!=null?v.p:null)}));
+    return l.filter(r=>r&&String(r.d||"").trim())
+            .map(r=>({d:String(r.d), e:(r.e==null||r.e==="")?null:(+r.e||0),
+                      p:(r.p==null||r.p==="")?null:(+r.p||0)}));
+  }
+  /* il conto. totaleA è il «Totale del computo»: lo stesso numero che si legge
+     in fondo alle lavorazioni, ribasso già applicato se c'è. */
+  function qeCalcola(righe,totaleA){
+    const c2=n=>{const v=+n; return isFinite(v)?Math.round(v*100)/100:0;};
+    const A=c2(totaleA);
+    const out=(righe||[]).map(function(r){
+      let p=(r&&r.p!=null&&r.p!=="")?+r.p:null;
+      if(p!=null&&!isFinite(p))p=null;
+      /* una percentuale negativa è un aumento travestito, e sopra il 100 è
+         un errore di battitura: stessi paracadute del ribasso d'asta */
+      if(p!=null){ if(p<0)p=0; if(p>100)p=100; }
+      const importo=(p!=null)?c2(A*p/100):c2(r&&r.e);
+      return {d:(r&&r.d)||"", p:p, e:(p!=null)?null:c2(r&&r.e), importo:importo};
+    });
+    const B=c2(out.reduce((s,r)=>s+r.importo,0));
+    return {righe:out, totaleA:A, totaleB:B, totale:c2(A+B)};
+  }
+  /* ---- il quadro economico dentro il modulo del computo ---- */
+  function qeRigaHtml(r){
+    r=r||{};
+    const inPerc=(r.p!=null&&r.p!=="");
+    return '<div class="qe-riga" data-qe>'
+      +'<input class="qe-d" placeholder="Voce del quadro economico" value="'+esc(r.d||"")+'">'
+      +'<input class="qe-e" type="text" inputmode="decimal" placeholder="€" value="'+(inPerc?"":_numTesto(r.e))+'">'
+      +'<input class="qe-p" type="text" inputmode="decimal" placeholder="%" value="'+(inPerc?_numTesto(r.p):"")+'">'
+      +'<span class="qe-v"></span>'
+      +'<button type="button" class="rdel" data-action="qe-riga-del">×</button></div>';
+  }
+  /* il Totale A si legge SEMPRE dal modulo aperto, non dalla riga salvata: il
+     ribasso lo puoi aver appena scritto e non ancora salvato, e un quadro
+     economico che si basa sul numero di ieri è peggio di uno vuoto. */
+  function qeBaseA(){
+    const e=$("#co-rib");
+    let rib=null;
+    if(e){const n=_numeroIt(e.value); rib=(n==null||!isFinite(n))?null:n;}
+    const mie=(String(compVociCompId||"")===String(ctrComputoId||""))?(compVociCache||[]):[];
+    return compRiepilogo(mie,{tipo:segVal("co-tipo")||"privato", ribasso_perc:rib});
+  }
+  function qeLetto(){
+    const out=[];
+    $$("#co-qe-righe [data-qe]").forEach(function(d){
+      const el=d.querySelector(".qe-d");
+      const desc=el?el.value.trim():"";
+      if(!desc)return;
+      const leggi=function(cls){
+        const x=d.querySelector(cls);
+        const n=_numeroIt((x&&x.value)||"");
+        return (n==null||!isFinite(n))?null:n;
+      };
+      const p=leggi(".qe-p");
+      out.push({d:desc, e:(p!=null)?null:leggi(".qe-e"), p:p});
+    });
+    return out;
+  }
+  function qeMostra(){
+    const box=$("#co-qe-box"); if(!box)return;
+    box.style.display=(segVal("co-tipo")==="pubblico")?"":"none";
+    qeAggiorna();
+  }
+  function qeAggiorna(){
+    const box=$("#co-qe-righe"); if(!box)return;
+    const rp=qeBaseA();
+    const q=qeCalcola(qeLetto(),rp.netto);
+    /* ---- A: i numeri del computo, senza scrivere niente ---- */
+    const riga=(et,v,cls)=>'<div class="qe-r'+(cls?" "+cls:"")+'"><span>'+esc(et)+'</span><b>'+eur2(v)+'</b></div>';
+    let a=riga("Lavori a corpo e a misura",Math.round((rp.lordo-rp.sicurezza)*100)/100);
+    if(rp.sicurezza)a+=riga("Oneri della sicurezza, non soggetti a ribasso",rp.sicurezza);
+    if(rp.perc&&rp.ribasso)a+=riga("Ribasso d'asta "+_pct(rp.perc)+"% sulla parte ribassabile",-rp.ribasso);
+    a+=riga("Totale A · LAVORI",q.totaleA,"qe-r--tot");
+    /* ⚠️ «di cui»: la manodopera sta GIÀ dentro i lavori. Sta sotto il Totale A
+       apposta, indentata e con il verbo, così non la si somma per sbaglio. */
+    if(rp.manodopera)a+=riga("di cui costo della manodopera (non soggetto a ribasso)",rp.manodopera,"qe-r--dicui");
+    const elA=$("#co-qe-a"); if(elA)elA.innerHTML=a;
+    /* ---- il valore calcolato accanto a ogni riga di B ---- */
+    const nodi=$$("#co-qe-righe [data-qe]").filter(function(d){
+      const e=d.querySelector(".qe-d"); return e&&e.value.trim();
+    });
+    nodi.forEach(function(d,i){
+      const v=d.querySelector(".qe-v"), eu=d.querySelector(".qe-e");
+      const r=q.righe[i]; if(!r)return;
+      const inPerc=(r.p!=null);
+      if(eu){eu.classList.toggle("qe-spenta",inPerc); eu.placeholder=inPerc?"—":"€";}
+      if(v)v.textContent=eur2(r.importo);
+    });
+    /* ---- i totali ---- */
+    const t=$("#co-qe-tot");
+    if(t){
+      let h=riga("Totale B · SOMME A DISPOSIZIONE",q.totaleB,"qe-r--tot");
+      h+='<div class="qe-r qe-r--gran"><span>TOTALE QUADRO ECONOMICO</span><b>'+eur2(q.totale)+'</b></div>';
+      /* il 2% dell'art. 45 è un tetto: si dice, non si blocca */
+      const inc=q.righe.find(r=>/incentiv/i.test(r.d||""));
+      if(inc&&inc.p!=null&&inc.p>QE_INCENTIVI_MAX)
+        h+='<div class="qe-avv">Gli incentivi per funzioni tecniche sono al '+_pct(inc.p)+'%: l\'art. 45 mette il tetto al '+QE_INCENTIVI_MAX+'%.</div>';
+      if(!q.totaleA)
+        h+='<div class="qe-avv">Il Totale A è zero: finché il computo non ha lavorazioni con le misure, le percentuali non hanno su cosa contarsi.</div>';
+      t.innerHTML=h;
+    }
+  }
   /* dall'elenco: li' non ci sono le voci, ci sono i totali della vista */
   function compNetto(c){
     const t=compTot[c.id]||{};
@@ -15418,6 +15598,10 @@ ${vecchi?`
       +'<div class="sh-nota">Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.</div>';
     if(compCapNuovo){const i=$("#cc-tit");if(i)i.focus();}
     if(compCapEdit){const i=$("#ce-tit");if(i){i.focus();i.select();}}
+    /* le lavorazioni sono appena cambiate, quindi è cambiato il Totale A: il
+       quadro economico si rifà i conti da solo. Senza questa riga restava
+       fermo sui numeri di quando si era aperta la finestra. */
+    qeAggiorna();
   }
 
   /* Sposta una lavorazione di un posto dentro il suo capitolo.
@@ -16937,7 +17121,13 @@ ${vecchi?`
     const X=[10,28,112,124,142,160,182,200];
     const M=X[0], R=X[7], FONDO=272;
     const mid=(a,b)=>(X[a]+X[b])/2;
-    const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
+    /* ⚠️ 19 agosto 2026 — «useGrouping:true» NON si toglie.
+       Senza, Intl in italiano lascia il punto delle migliaia solo dai cinque
+       numeri in su: sullo stesso foglio si leggeva «€ 97.000,00» e, due righe
+       sotto, «€ 3000,00». Su un documento che va a un ente è la prima cosa che
+       si nota, e fa sembrare sbagliato un numero che è giusto.
+       Trovato guardando la fotografia del quadro economico, non a mente. */
+    const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
     const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
     const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3}).format(+n||0);
 
@@ -17158,7 +17348,13 @@ ${vecchi?`
        Nel PDF quindi si scrive "mq" e "mc", che e' come si e' sempre scritto
        sui computi di carta. A schermo resta m² e m³, che e' piu' bello. */
     const _um=_umPdf;
-    const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
+    /* ⚠️ 19 agosto 2026 — «useGrouping:true» NON si toglie.
+       Senza, Intl in italiano lascia il punto delle migliaia solo dai cinque
+       numeri in su: sullo stesso foglio si leggeva «€ 97.000,00» e, due righe
+       sotto, «€ 3000,00». Su un documento che va a un ente è la prima cosa che
+       si nota, e fa sembrare sbagliato un numero che è giusto.
+       Trovato guardando la fotografia del quadro economico, non a mente. */
+    const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
     const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3}).format(+n||0);
     const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
     const _pu =n=>(n==null||+n===1)?"":(Number.isInteger(+n)?String(+n):_q3(n));
@@ -17389,6 +17585,68 @@ ${vecchi?`
       doc.text("Oneri della sicurezza non soggetti a ribasso: "+_eur(rp.sicurezza),M,y);y+=4;
       doc.setTextColor(0);y+=2;
     }
+
+    /* ============================================================
+       IL QUADRO ECONOMICO — 19 agosto 2026
+       ============================================================
+       Il computo dice quanto costano i lavori; questo dice quanto costa
+       l'opera. È il foglio che finisce nella delibera.
+
+       Esce solo sui LAVORI PUBBLICI e solo se c'è davvero qualcosa nella
+       parte B: su un computo pubblico appena nato, un quadro economico con
+       undici righe a zero sarebbe una pagina in più che dice il nulla.
+
+       ⚠️ Le righe si sommano una sotto l'altra, nell'ordine, e il conto deve
+       tornare con la calcolatrice — è la lezione dell'11 agosto sul riquadro
+       del totale. Per questo la manodopera sta su una riga «di cui», staccata
+       dalla somma: sta già dentro i lavori e sommarla due volte gonfierebbe
+       l'opera del costo del personale. */
+    const qe=qeCalcola(qeRighe(c),rp.netto);
+    const qeB=qe.righe.filter(r=>r.importo);
+    if(pubblico&&qeB.length){
+      spazioFuoriTabella(30);
+      doc.setFont("helvetica","bold");doc.setFontSize(10);
+      doc.text("Quadro economico",M,y);y+=6;
+      const qriga=function(et,v,grassetto,indent){
+        spazioFuoriTabella(8);
+        doc.setFont("helvetica",grassetto?"bold":"normal");doc.setFontSize(grassetto?9:8.5);
+        if(indent)doc.setTextColor(110);
+        doc.text(et,M+(indent?6:2),y,{maxWidth:R-M-40});
+        doc.text(_eur(v),R-1.5,y,{align:"right"});
+        doc.setTextColor(0);
+        y+=5;
+      };
+      /* i due titoli di sezione non portano un importo: il loro totale sta in
+         fondo alla sezione, dove si legge dopo aver visto gli addendi */
+      const qtitolo=function(t){
+        spazioFuoriTabella(8);
+        doc.setFont("helvetica","bold");doc.setFontSize(9);
+        doc.text(t,M+2,y);y+=5;
+      };
+      qtitolo("A · LAVORI");
+      qriga("Lavori a corpo e a misura",Math.round((rp.lordo-rp.sicurezza)*100)/100);
+      if(rp.sicurezza)qriga("Oneri della sicurezza, non soggetti a ribasso",rp.sicurezza);
+      if(rp.perc&&rp.ribasso)qriga("Ribasso d'asta "+_pct(rp.perc)+"% sulla parte ribassabile",-rp.ribasso);
+      spazioFuoriTabella(8);
+      doc.setDrawColor(150);doc.line(M+2,y-3.2,R-1.5,y-3.2);
+      qriga("Totale A",qe.totaleA,true);
+      if(rp.manodopera)qriga("di cui costo della manodopera, non soggetto a ribasso",rp.manodopera,false,true);
+      y+=2;
+      qtitolo("B · SOMME A DISPOSIZIONE DELLA STAZIONE APPALTANTE");
+      qeB.forEach(function(r){
+        qriga(r.d+(r.p!=null?"   ("+_pct(r.p)+"% di A)":""),r.importo);
+      });
+      spazioFuoriTabella(8);
+      doc.setDrawColor(150);doc.line(M+2,y-3.2,R-1.5,y-3.2);
+      qriga("Totale B",qe.totaleB,true);
+      y+=3;
+      spazioFuoriTabella(16);
+      doc.setDrawColor(31,111,92);doc.setLineWidth(.5);doc.rect(M,y,R-M,11);doc.setLineWidth(.2);
+      doc.setFont("helvetica","bold");doc.setFontSize(11);
+      doc.text("TOTALE QUADRO ECONOMICO  (A + B)",M+3,y+7.2);
+      doc.text(_eur(qe.totale),R-3,y+7.2,{align:"right"});
+      y+=17;
+    }
     if(c.note){
       /* ===== 12 agosto 2026 (sera) — LE NOTE ROMPEVANO L'ULTIMA PAGINA =====
          Due errori in tre righe.
@@ -17479,11 +17737,31 @@ ${vecchi?`
         if(e&&e.value!=="__mio__")return null;
         return num("#co-prz-anno");})(),
       ribasso_perc:_rib,
-      note:txt("#co-note")
+      note:txt("#co-note"),
+      /* il quadro economico si scrive ANCHE se adesso il computo è privato:
+         chi passa da pubblico a privato per due minuti non deve ritrovarsi il
+         lavoro di mezz'ora buttato via. È la stessa scelta degli oneri della
+         sicurezza, che restano scritti nelle voci e semplicemente non contano. */
+      quadro_economico:($("#co-qe-righe")?qeLetto():undefined)
     };
+    if(row.quadro_economico===undefined)delete row.quadro_economico;
     let res;
-    if(id) res=await sb.from("gest_computi").update(row).eq("id",id).eq("user_id",sbUid).select("id");
-    else   res=await sb.from("gest_computi").insert(row).select("id");
+    const _scrivi=async function(r){
+      return id ? await sb.from("gest_computi").update(r).eq("id",id).eq("user_id",sbUid).select("id")
+                : await sb.from("gest_computi").insert(r).select("id");
+    };
+    res=await _scrivi(row);
+    /* ⚠️ la colonna può non esserci ancora (sql/gest-computo-quadro.sql): il
+       computo si salva lo stesso, senza il quadro economico, e si dice. Senza
+       questo ripiego un aggiornamento non eseguito bloccava il Salva di TUTTI
+       i computi, anche di chi il quadro economico non lo usa. */
+    let qePerso=false;
+    if(res.error&&"quadro_economico" in row
+       &&/quadro_economico/i.test(String(res.error.message||"")+" "+String(res.error.code||""))){
+      const senza=Object.assign({},row); delete senza.quadro_economico;
+      res=await _scrivi(senza);
+      if(!res.error)qePerso=true;
+    }
     if(res.error){
       toast(_compManca(res.error)
         ? "Prima serve l'aggiornamento del database: esegui sql/gest-computo-metrico.sql su Supabase"
@@ -17494,7 +17772,9 @@ ${vecchi?`
     closeSheet();
     await renderComputi();
     rinfresca("riepilogo");
-    toast(id?"Computo salvato ✔":"Computo creato ✔");
+    toast(qePerso
+      ? "Computo salvato, ma il quadro economico NO: manca l'aggiornamento del database (esegui sql/gest-computo-quadro.sql su Supabase)."
+      : (id?"Computo salvato ✔":"Computo creato ✔"));
   }
 
   /* ===== 11 agosto 2026 — DUPLICARE UN COMPUTO =====
@@ -17558,7 +17838,7 @@ ${vecchi?`
     const capitoli=cap||[];
 
     /* 1) il computo nuovo */
-    const {data:nuovo,error:e1}=await sb.from("gest_computi").insert({
+    const {data:nuovo,error:e1}=await sb.from("gest_computi").insert(Object.assign({
       user_id:sbUid, mestiere_id:curMestiere(),
       cliente_id:c.cliente_id||null,
       lavoro_id:null, preventivo_id:null,   /* la pratica NON si eredita */
@@ -17569,7 +17849,14 @@ ${vecchi?`
       tipo:c.tipo||"privato",
       prezzario:c.prezzario||null, prezzario_anno:c.prezzario_anno||null,
       ribasso_perc:c.ribasso_perc!=null?c.ribasso_perc:null
-    }).select("id").single();
+    },
+    /* il quadro economico si porta dietro come il ribasso: due appartamenti
+       uguali hanno le stesse spese tecniche e la stessa IVA, e riscriverle
+       undici righe alla volta è esattamente quello che «Duplica» evita.
+       Si nomina la colonna SOLO se c'è: su un database senza l'aggiornamento
+       la riga di partenza quella chiave non ce l'ha, e la copia non si rompe. */
+    ("quadro_economico" in c)?{quadro_economico:c.quadro_economico||null}:{}
+    )).select("id").single();
     if(e1||!nuovo){
       toast(_compManca(e1)
         ? "Prima serve l'aggiornamento del database: esegui sql/gest-computo-metrico.sql su Supabase"
@@ -18422,6 +18709,8 @@ ${vecchi?`
        computo: chi scrive il preventivo a mano ha lo stesso bisogno di
        dividere «Demolizioni» da «Opere murarie». */
     if(a==="prev-cap-add"){$("#prev-righe").insertAdjacentHTML("beforeend",prevRigaHtml({sezione:true}));return;}
+    if(a==="qe-riga-add"){$("#co-qe-righe").insertAdjacentHTML("beforeend",qeRigaHtml());qeAggiorna();return;}
+    if(a==="qe-riga-del"){const d=t.closest("[data-qe]");if(d){d.remove();qeAggiorna();}return;}
     if(a==="prev-riga-del"){const d=t.closest("[data-riga]");if(d){d.remove();prevTotaleLive();
       /* anche i riepiloghi sotto: prima restavano col numero vecchio e sullo
          schermo comparivano due totali diversi */

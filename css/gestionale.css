@@ -3249,3 +3249,41 @@ body:has(#ti-fondatore) .side{
 /* due pulsanti di fila («+ Aggiungi voce» e «+ Aggiungi capitolo») non
    devono attaccarsi: senza questo si leggono come una parola sola. */
 .quick-add + .quick-add{ margin-left:14px; }
+
+/* ============================================================
+   IL QUADRO ECONOMICO — 19 agosto 2026
+   ============================================================
+   Tre colonne per la parte B: la voce, l'euro, la percentuale — e
+   accanto il valore che ne esce, che si legge e basta. Quando la
+   percentuale è scritta, la casella dell'euro si spegne: non è
+   disabilitata (su un telefono una casella disabilitata non si
+   capisce perché non risponde), è grigia e col trattino, così si
+   vede che quel numero non conta più. */
+.qe-a{ margin-bottom:10px; }
+.qe-cap{ font-weight:700; font-size:15px; color:var(--ink); margin:14px 0 8px; }
+.qe-r{ display:flex; justify-content:space-between; gap:12px; align-items:baseline;
+  padding:5px 2px; font-size:15px; line-height:1.4; }
+.qe-r b{ white-space:nowrap; }
+.qe-r--tot{ border-top:1px solid var(--bordo-forte); font-weight:700; margin-top:4px; }
+.qe-r--dicui{ color:var(--testo-2); font-size:14px; padding-left:16px; }
+.qe-r--gran{ border-top:2px solid var(--blu,#0066ff); margin-top:6px; padding-top:9px;
+  font-size:17px; font-weight:800; color:var(--ink); }
+.qe-riga{ display:grid; grid-template-columns:1fr 92px 66px 96px 34px; gap:6px;
+  margin-bottom:6px; align-items:center; }
+.qe-riga input{ width:100%; font-family:inherit; font-size:14px; padding:9px 10px;
+  border:1px solid var(--line); border-radius:9px; background:var(--card); }
+.sheet .qe-riga input{ font-size:17px; padding:12px 13px; border:1.5px solid var(--bordo-forte);
+  border-radius:11px; min-height:50px; }
+.qe-riga .qe-spenta{ background:var(--sfondo,#f5f6f8); color:var(--testo-3); }
+.qe-riga .qe-v{ text-align:right; font-weight:700; font-size:15px; white-space:nowrap; }
+.qe-riga .rdel{ border:1px solid var(--bordo-forte); background:var(--card);
+  color:var(--danger); border-radius:8px; cursor:pointer; font-size:15px; }
+.qe-tot{ margin-top:10px; }
+.qe-avv{ margin-top:8px; padding:9px 11px; border-radius:10px;
+  background:var(--attesa-bg,#fff6e5); color:var(--testo,#22303f);
+  border-left:4px solid var(--attesa,#e08c00); font-size:14px; line-height:1.45; }
+@media(max-width:768px){
+  .qe-riga{ grid-template-columns:1fr 48px; }
+  .qe-riga .qe-d{ grid-column:1 / -1; }
+  .qe-riga .qe-v{ text-align:left; padding-left:2px; }
+}
