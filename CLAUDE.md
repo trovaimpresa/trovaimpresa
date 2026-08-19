@@ -8742,3 +8742,204 @@ ricostruirli vuol dire rifarsi dare dal database le tre funzioni verbatim.
 La proposta di tenerli in `prove/` nella cartella di Alessio, fuori dal deploy
 con un rinvio in `netlify.toml`, resta sul tavolo: **non si sposta niente
 finche' non lo dice lui.**
+
+---
+
+# 19 agosto 2026 (4), SERA — IL PIXEL DIETRO IL BANNER, LA MAPPA, IL SAL
+
+## ⛔⛔ IL 62% NON ERA GENTE PERSA: ERA IL PIXEL DIETRO IL BANNER DEI COOKIE
+
+Il punto 1 della lista («su 854 che cliccano ne arrivano 326») e' stato
+chiuso in dieci minuti, e la risposta non c'entrava niente con la velocita'.
+
+**Il pixel di Meta sta dentro `cookie-banner.js` e parte SOLO dopo il clic su
+«Accetta tutti».** Chi sceglie «Solo tecnici», o chi il banner non lo tocca,
+per Meta **non e' mai arrivato**. →326← su →854← fa il **38%**: e' la
+percentuale di chi accetta i cookie, non di chi arriva.
+
+⚠️ **La nota vecchia del diario diceva «lo inietta Netlify». Era sbagliata.**
+Nasceva da una prova fatta bene ma letta male: Alessio aveva scritto
+`typeof fbq` sul suo computer e gli aveva risposto `'function'` — perche' LUI
+aveva gia' accettato, e la scelta resta salvata un anno in `localStorage`.
+**Una prova fatta da chi ha gia' dato il consenso non prova niente sul
+visitatore nuovo.** Cercare la seconda copia del pixel nei file (`grep -rl
+connect.facebook.net`) l'ha chiusa: c'e' un posto solo, ed e' cookie-banner.js.
+
+Provato con un browser vero, 9 prove verdi, nei due versi: visitatore nuovo →
+`fbq` non esiste; «Solo tecnici» → non esiste; «Accetta tutti» → esiste e
+chiama facebook; consenso gia' salvato → parte da solo.
+
+**Corollario che vale anche per i →44← iscritti:** pure quelli sono
+sotto-contati, perche' `CompleteRegistration` sta dentro lo stesso
+`if (typeof fbq !== 'undefined')`.
+
+## Il contatore delle visite — `sql/conteggio-visite.sql` + `js/conta-visita.js`
+
+Serve un numero che non dipenda dai cookie. Scrive **due righe per apertura**
+di pagina nella tabella `public.visite_sito`:
+
+- `fase = 'arrivo'` -> il browser ha eseguito lo script (subito, `async`, in testa)
+- `fase = 'visto'`  -> la pagina si e' disegnata E la persona era ancora li' dopo 2 secondi
+
+**`arrivo − visto` = quanti se ne vanno prima di vedere il sito.** E' li' che
+si misura la lentezza, quando i dati ci saranno.
+
+Legge `fbclid`, il codice che Meta attacca a ogni clic: `arrivo` con
+`da_meta = true` e' il numero da confrontare con gli 854.
+
+⚠️ **`ms_attesa` comprende i 2 secondi di attesa.** Per sapere quanto ci ha
+messo la pagina, togliere 2000. Sul computer di Alessio: →3380← ms, cioe'
+circa **1,4 secondi** di caricamento.
+
+Niente cookie, niente IP, niente nome. L'id di sessione e' un numero a caso in
+`sessionStorage` che muore chiudendo la scheda: statistica di prima parte, non
+profilazione, e infatti gira **prima** del banner.
+
+⚠️ `anon` sulla tabella puo' SOLO scrivere, colonna per colonna: `creato_il` e
+`id` non sono scrivibili, cosi' nessuno si inventa la data di una visita.
+Nessuna policy di lettura: le vede solo `postgres`.
+
+**Deciso: non toccare la campagna Meta per una settimana e rimisurare.**
+
+## LA MAPPA — da →4← imprese a →86←
+
+Il diario diceva «lat e lng vuote per TUTTE». Il valore vero era **4**.
+Guardare il valore, non la nota (lezione 8 del mattino, di nuovo).
+
+Numeri veri: 87 imprese · 86 con la citta' · **26** con l'indirizzo · 4 con la
+posizione. Quindi la mappa si poteva riempire quasi tutta.
+
+**Deciso da Alessio:** chi ha l'indirizzo va sul punto vero; chi ha solo la
+citta' va sulla sua zona, **sparpagliato di poco** (300 m + 250 m per anello,
+8 posti per anello) cosi' dieci imprese di Roma non diventano un pallino solo.
+Sulla scheda si scrive «**zona di Roma (RM)**», mai un indirizzo che non
+abbiamo. Chi e' solo nella sua citta' resta sul centro esatto.
+
+⚠️ **Il riempimento lo lancia Alessio**, non Claude: il container non ha
+internet e OpenStreetMap serve. Percio' `tools/riempi-mappa.html`, che **non
+va online** (`/tools/*` e' gia' un 404 in netlify.toml) e si apre col doppio
+clic. Password digitata da lui, verificata da `admin-dati.js`. Si puo'
+rilanciare: salta chi ha gia' la posizione. Risultato: **81 + 4 = 85**, poi
+86 al secondo giro (una richiesta a OpenStreetMap era fallita).
+
+⚠️ **`mappa.html` NON usava `lat`/`lng`.** Chiedeva la posizione di ogni
+impresa mentre l'utente aspettava: 86 × 1,1 s = **un minuto e mezzo di schermo
+vuoto**. Nessun visitatore aspetta tanto — ecco perche' sembrava vuota.
+Adesso legge le posizioni dal database e i pallini compaiono subito; il giro
+lento resta solo per chi la posizione non ce l'ha.
+Il banco l'ha girato anche sul file di PRIMA: **12 prove rosse**. Un banco che
+non diventa rosso sul file rotto non prova niente.
+
+⚠️ Correzione detta per prima: «le pagine di ricerca usano gia' lat e lng» era
+vero per `cerca-imprese.html`, **falso per `mappa.html`**. E il sospetto che
+la mappa fosse vuota per il nome sbagliato (`nome` invece di `nome_attivita`)
+e' caduto guardando i dati: `nome` c'e' ed e' pieno su 86 su 87.
+
+## LA CONTABILITA' DEI LAVORI (SAL) — `sql/gest-sal.sql`
+
+⚠️ **Alessio ha detto «non lo so, non e' il mio lavoro».** Gli e' stato
+proposto di fermarsi (regola del 15 agosto: se non puo' collaudarlo e nessuno
+l'ha chiesto, va in fondo alla lista). Ha risposto: «facciamo SAL poi i
+clienti si adeguano». **Costruito su sua decisione esplicita.** Quando la
+prima impresa lo usera' davvero, farsi spiegare da LEI come lo fa.
+
+**Le quantita' sono PROGRESSIVE**: in ogni SAL si scrive quanto si e' fatto
+DALL'INIZIO, non da ultima volta. Se un mese sbagli a contare, il mese dopo si
+raddrizza da solo. E' anche come lo chiede l'Allegato II.14 del D.Lgs.
+36/2023: il SAL dice il corrispettivo maturato e gli acconti gia' corrisposti.
+
+    questo SAL = maturato di oggi − maturato del SAL precedente
+
+⚠️ **IL PRECEDENTE E' UNO SOLO, NON LA SOMMA DI TUTTI.** Il maturato del SAL
+n.2 comprende gia' dentro il n.1: sommarli conterebbe il lavoro due volte.
+Il sabotaggio «somma tutti i precedenti» e' quello che ha fatto diventare
+rossa la prova 8.
+
+⚠️ **Il ribasso non si ricalcola nel SAL:** passa da `compRiepilogoDa()`, che
+resta l'unico posto dove quella formula esiste. La vista del database da' i
+tre numeri grezzi (lordo, oneri sicurezza, manodopera) maturati, e basta.
+
+Provato su un PostgreSQL 16 vero, con lo schema **ricostruito dai file in
+`sql/`**, ruoli `anon`/`authenticated`/`service_role` e `auth.uid()` finta
+pilotabile: **24 prove verdi**, 7 sabotaggi presi tutti. Fra le prove che
+contano: un altro utente non puo' agganciare al proprio SAL una voce del
+computo di Alessio (ne leggerebbe descrizione e prezzo dalla vista).
+Sullo schermo altre **24 prove**, con le funzioni **ritagliate dal file**
+consegnato, e i due lati danno lo stesso numero: 6.000 e 14.000.
+
+Aggiunta `gest_sal` a `CEST_COSE` e all'elenco `TABELLE` di `js/cestino.js`.
+
+**Manca il PDF.** Il SAL si compila e fa i conti, ma non si stampa: e' il
+prossimo giro.
+
+## ⛔ I PULSANTI CHE NON SI VEDEVANO — 19 in tutto il gestionale
+
+Detto da Alessio guardando lo schermo, **tre volte su tre schermate diverse**:
+«questi bottoni restano sempre invisibili». Aveva ragione.
+
+`.btn-ghost` nasce **senza sfondo e senza bordo**. Su una pagina piena di
+caselle bianche col bordo, «+ Aggiungi voce», «+ Aggiungi nota», «+ Aggiungi
+nuovo cliente» si leggono come una scritta, non come una cosa da cliccare.
+Erano cosi' in **19 punti**: fatture, preventivi, computo, pratiche, quadro
+economico, SAL.
+
+Sistemati **tutti insieme con una regola sola** su `.quick-add` in
+`css/gestionale.css`: bordo blu 1,5 px, sfondo bianco, 46 px di altezza,
+17 px di testo, larghezza piena sotto i 768 px.
+
+⚠️ **La regola sta PRIMA di `.comp-azioni .quick-add` nel file, e ci deve
+restare.** I quattro arancioni del computo hanno la stessa specificita': se un
+domani questa regola finisse sotto la loro, diventerebbero blu e la fila del
+computo tornerebbe come prima. Il banco lo controlla apposta.
+
+9 prove verdi con un browser vero (bordo, sfondo, 46 px, 17 px, colore, i
+quattro arancioni ancora arancioni, telefono a 390 px). Col foglio di stile
+di prima **5 diventano rosse**.
+
+⚠️ Stessa famiglia: la casella della quantita' nel SAL era **alta due
+millimetri**, perche' non sta dentro un `.field` e il CSS del gestionale non
+la vestiva. Adesso le misure sono scritte nel tag.
+
+## Migrazioni SQL eseguite oggi (sera)
+
+`sql/conteggio-visite.sql` · `sql/mappa-posizioni.sql` · `sql/gest-sal.sql`
+
+## ⚠️ DUE ERRORI MIEI DI STASERA, DETTI PER PRIMI
+
+1. **La riga del git con una virgoletta di troppo alla fine** (`git push"`).
+   Alessio l'ha incollata e Git Bash e' rimasto fermo sul prompt `>` — ed e'
+   ESATTAMENTE l'inciampo gia' scritto nel diario di mezzogiorno. Poi, nel
+   correggerla, ho storpiato il nome di un file. **La riga del git va riletta
+   carattere per carattere prima di mandarla, sempre.**
+2. **Dopo il lavoro, `tools/riempi-mappa.html` nasconde il riquadro con
+   «Comincia» e non lo rimette.** Alessio ha scritto «non si puo'»: sulla
+   pagina non c'era piu' niente da cliccare, e nessuno gli aveva detto che
+   bastava un F5. Da rimettere quando si ritocca quella pagina.
+
+## DOVE SIAMO RIMASTI (19 agosto 2026, sera)
+
+**Le tre che vengono prima:**
+
+1. **Leggere il contatore delle visite fra 2-3 giorni.** La query sta in fondo
+   a `sql/conteggio-visite.sql`. E' l'unica cosa che risponde davvero alla
+   domanda degli →854← clic.
+2. **Il PDF dello stato di avanzamento.**
+3. **L'errore JavaScript sulla homepage** (`assistente-trovaimpresa.js`
+   caricato due volte). Nei file compare **una volta sola** — controllato: la
+   seconda copia la mette qualcun altro, quasi sicuramente l'iniezione di
+   Netlify, la stessa strada del pixel. **Guardare li', non nel codice.**
+
+**Poi:** l'analisi dei prezzi · la descrizione schiacciata a 390 px sui
+preventivi (`.sheet .prev-riga` a `1fr 80px 118px 48px`) · il pulsante del
+prezzario anche in cima · il limite di misura su `cv-candidati/registrazioni`
+· il conteggio delle richieste di caricamento.
+
+**Sul sito:** le 95 pagine citta' vuote · l'email vera alle imprese · il
+grafico dell'admin (`premium_dal`, `gestionale_dal`).
+
+**Pulizie:** i preventivi n. 4, 5 e 6 del reparto «progetto casa» · e in
+`imprese` c'e' **una riga completamente vuota**, trovata riempiendo la mappa.
+
+**Decisione che resta ad Alessio:** l'indirizzo sta nel blocco FACOLTATIVO
+della registrazione, e 61 imprese su 87 non l'hanno scritto. Senza indirizzo
+il pallino resta sulla zona. **Non si cambia il modulo senza il suo via.**
