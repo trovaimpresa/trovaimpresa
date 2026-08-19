@@ -111,6 +111,29 @@ Bucket `gestionale-foto` e `gestionale-video`, mai guardate. Ci sta dentro
 `foto_team_delete`, che usa `gest_puo_accedere` senza guardare la spunta
 «foto». C'era gia', non e' una regressione.
 
+## Tre cose che mi sono state dette il 19 agosto, e che decido io
+
+Alla fine della sessione ho chiesto un parere su cosa migliorerei del
+gestionale. Le tre risposte, che restano **decisioni mie**:
+
+1. **I prezzi a zero non sono una funzione mancante, sono un difetto.** Vedi
+   il punto 1 qui sopra.
+2. **I banchi di prova spariscono a ogni sessione** (~760 prove ricostruite da
+   zero ogni volta). La regola «i banchi stanno nel tuo contenitore» e' mia e
+   resta mia, ma la proposta era: tenerli in `prove/` nella mia cartella,
+   fuori dal deploy con un rinvio in `netlify.toml` come gia' fatto per
+   `CLAUDE.md`. **Se non te lo dico io, non spostarli.**
+3. **Gli stessi aiuti riscritti in posti diversi**: `_eur` esiste due volte
+   (e per mesi le due copie si sono comportate diversamente), `_numeroIt` ha
+   una copia in `gestionale-operatore.html`. E' la lezione di
+   `compRiepilogoDa` («una formula sola, in tre posti»), non ancora finita.
+   Da fare **poco per volta**, quando si passa di li' per altro.
+
+⛔ **E una cosa da NON fare: spezzare `gestionale-app.html` in venti file.**
+19.000 righe in un file solo si cercano in un secondo, e quel lavoro mi
+fermerebbe per giorni senza dare niente a nessuna impresa. Se me lo proponi,
+la risposta e' no.
+
 ## Un difetto vecchio, gia' visto e lasciato li'
 
 A 390 px (telefono) la casella della descrizione nelle voci del preventivo si
