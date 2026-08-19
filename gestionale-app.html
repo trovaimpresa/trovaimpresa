@@ -16367,9 +16367,15 @@ ${vecchi?`
           +    (k.ritenuta?(' · trattenuto '+eur2(k.ritenuta)):'')
           +  '</small></span>'
           +'<b>'+eur2(k.netto)+'</b>'
-          /* ⚠️ il pulsante deve SEMBRARE un pulsante: bordo e sfondo, come la ×
-             qui accanto. Regola .quick-add del 19 agosto 2026. */
-          +'<button type="button" data-action="sal-pdf" data-id="'+esc(String(s.id))+'" title="Scarica il foglio da consegnare" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--testo,#22303f);border-radius:8px;min-width:34px;height:34px;font-size:16px;line-height:1;cursor:pointer;flex:0 0 auto">📄</button>'
+          /* ⚠️ 19 agosto 2026 — LA PRIMA VOLTA L'HO FATTO SBAGLIATO.
+             Era un quadratino da 34 px con dentro la sola faccina del foglio:
+             Alessio l'ha guardato e ha detto «si vede troppo piccolo, quasi
+             non si vede». Aveva ragione, e la regola c'era gia': .quick-add
+             (bordo blu, sfondo, 46 px, testo da 17) esiste da stasera apposta
+             perche' i pulsanti si vedano. Un'icona da sola non e' un pulsante:
+             ci vuole scritto PDF. margin-top:0 solo perche' qui sta dentro una
+             riga, non sotto un elenco. */
+          +'<button type="button" class="quick-add" data-action="sal-pdf" data-id="'+esc(String(s.id))+'" title="Scarica il foglio da consegnare al committente" style="margin-top:0;flex:0 0 auto">📄 PDF</button>'
           +'<button type="button" class="rdel" data-action="sal-del" data-id="'+esc(String(s.id))+'" title="Butta questo SAL nel cestino" style="border:1px solid var(--bordo-forte,#cbd2da);background:var(--card,#fff);color:var(--err,#c0392b);border-radius:8px;min-width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;flex:0 0 auto">×</button></div>';
       });
     }
@@ -16798,12 +16804,20 @@ ${vecchi?`
     doc.setTextColor(0);
     y=Math.max(hy,y+14)+3;doc.setDrawColor(210);doc.line(M,y,R,y);y+=8;
 
-    doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text("Spett.le",M,y);y+=5.5;
-    doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(cli.nome||"—",M,y);y+=5;
-    doc.setFontSize(8.5);doc.setTextColor(90);
-    if(cli.indirizzo){doc.text(String(cli.indirizzo),M,y);y+=4.2;}
-    if(cli.referente){doc.text("Rif. "+cli.referente,M,y);y+=4.2;}
-    doc.setTextColor(0);y+=4;
+    /* ⚠️ 19 agosto 2026 — «Spett.le» E SOTTO UN TRATTINO.
+       Sul computo il cliente e' facoltativo: se non c'e', qui usciva la
+       scritta «Spett.le» con sotto una lineetta. Su un foglio che si
+       consegna sembra un documento lasciato a meta'. Se il cliente non
+       c'e', non si scrive niente: il foglio comincia dai lavori.
+       Visto sul PDF vero di Alessio, non a mente. */
+    if(cli.nome){
+      doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text("Spett.le",M,y);y+=5.5;
+      doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(String(cli.nome),M,y);y+=5;
+      doc.setFontSize(8.5);doc.setTextColor(90);
+      if(cli.indirizzo){doc.text(String(cli.indirizzo),M,y);y+=4.2;}
+      if(cli.referente){doc.text("Rif. "+cli.referente,M,y);y+=4.2;}
+      doc.setTextColor(0);y+=4;
+    }
 
     doc.setFont("helvetica","bold");doc.setFontSize(10.5);
     const ogg=doc.splitTextToSize("Lavori: "+(comp.oggetto||comp.titolo||"—"),R-M);
