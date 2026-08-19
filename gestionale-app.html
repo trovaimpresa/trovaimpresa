@@ -12322,7 +12322,29 @@ ${vecchi?`
     const t=(String(e.message||"")+" "+String(e.code||"")+" "+String(e.details||"")).toLowerCase();
     return t.indexOf("sezione")>=0 || t.indexOf("42703")>=0;
   }
-  /* Scrive le voci di un preventivo. Torna {error, persi}: «persi» sono i
+  /* ⚠️⚠️ 19 agosto 2026 — LE CHIAVI DEVONO COMBACIARE. Difetto vero, visto
+     sul sito con Alessio davanti: il computo aveva il suo capitolo, il
+     preventivo nasceva senza, e il banco era VERDE.
+
+     Il perché sta dentro supabase-js. Quando gli si passa un ELENCO di
+     righe, lui mette in fondo all'indirizzo ?columns=<unione di TUTTE le
+     chiavi che trova> (PostgrestQueryBuilder.insert). PostgREST poi scrive
+     OGNI riga con quell'elenco di colonne, e le righe a cui una chiave
+     manca se la prendono a NULL: il DEFAULT della colonna NON entra in
+     gioco. Su «sezione boolean NOT NULL default false» quel NULL fa saltare
+     tutta la scrittura con il 23502 — e il messaggio del 23502 nomina
+     «sezione», quindi finiva dritto nel ripiego qui sotto, che toglie i
+     capitoli e li dà per persi. Risultato: 88 righe, zero titoli, e un
+     avviso che diceva «manca l'aggiornamento del database» mentre la
+     colonna c'era eccome.
+
+     LA REGOLA, in una riga: chi scrive righe di preventivo mette «sezione»
+     su TUTTE, mai su alcune sì e altre no.
+
+     Il banco adesso lo prova: il finto Supabase rifiuta le righe con le
+     chiavi diverse esattamente come quello vero.
+
+     Scrive le voci di un preventivo. Torna {error, persi}: «persi» sono i
      capitoli lasciati fuori perché la colonna non c'è ancora — le
      lavorazioni si salvano lo stesso, che è la cosa che conta. */
   async function _scriviRighePrev(righe){
@@ -12666,14 +12688,15 @@ ${vecchi?`
       const el=d.querySelector(".pr-desc");
       const descrizione=el?el.value.trim():"";
       if(!descrizione)return;
-      /* «sezione» si scrive SOLO sulle righe di capitolo: una voce normale non
-         nomina la colonna, così un preventivo senza capitoli si salva anche
-         dove sql/gest-preventivo-sezioni.sql non è ancora stato eseguito. */
+      /* «sezione» si scrive su TUTTE le righe, non solo sui capitoli: in una
+         scrittura di piu' righe insieme le chiavi devono combaciare (vedi
+         _scriviRighePrev). Se la colonna non c'è ancora, _scriviRighePrev
+         riscrive senza e lo dice. */
       if(d.hasAttribute("data-sezione")){
         righe.push({descrizione,qta:0,prezzo:0,sezione:true,ordine:i});
         return;
       }
-      righe.push({descrizione,qta:_numRiga(d,".pr-qta",1),prezzo:_numRiga(d,".pr-prezzo",0),ordine:i});
+      righe.push({descrizione,qta:_numRiga(d,".pr-qta",1),prezzo:_numRiga(d,".pr-prezzo",0),sezione:false,ordine:i});
     });
     /* un preventivo fatto di soli titoli non è un preventivo */
     if(!righe.filter(r=>!_rigaSezione(r)).length){toast("Aggiungi almeno una voce");return;}
@@ -16589,7 +16612,11 @@ ${vecchi?`
           ordine:righe.length});
       }
       g.voci.forEach(v=>{
-        righe.push({user_id:sbUid,
+        /* ⚠️ «sezione:false» NON si toglie, anche se il database ha già il
+           suo default. Vedi la spiegazione lunga su _scriviRighePrev: in una
+           scrittura di piu' righe insieme, tutte devono avere le STESSE
+           chiavi, se no le altre finiscono a NULL e salta tutto. */
+        righe.push({user_id:sbUid, sezione:false,
           descrizione:(v.codice?v.codice+" — ":"")+(v.descrizione||"(senza descrizione)")+(v.unita?"  ("+_umPdf(v.unita)+")":""),
           qta:_q(v),
           prezzo:+v.prezzo_unitario||0,
