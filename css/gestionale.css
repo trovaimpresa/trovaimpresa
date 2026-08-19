@@ -3306,15 +3306,15 @@ body:has(#ti-fondatore) .side{
 .comp-azioni .quick-add{
   margin:0; height:auto; min-height:46px; padding:11px 16px;
   font-size:16px; font-weight:700; line-height:1.25;
-  background:var(--card); color:var(--testo);
-  border:1.5px solid var(--bordo-forte); border-radius:10px;
+  border-radius:10px; border:1.5px solid;
   cursor:pointer; white-space:normal; text-align:center;
+  /* i colori arrivano dal blocco dell'arancione qui sotto: TUTTI E QUATTRO
+     uguali, di proposito (vedi il perche' li') */
+  background:#FFF3EC; border-color:#FF6B35; color:#9A3412;
 }
 .comp-azioni .quick-add + .quick-add{ margin-left:0; }
-.comp-azioni .quick-add:hover{
-  background:var(--blu-tenue); border-color:var(--blu); color:var(--blu);
-}
-.comp-azioni .quick-add:focus-visible{ outline:3px solid var(--blu); outline-offset:2px; }
+.comp-azioni .quick-add:hover{ background:#FFE7D9; border-color:#E2551F; color:#7C2D12; }
+.comp-azioni .quick-add:focus-visible{ outline:3px solid #C2410C; outline-offset:2px; }
 
 /* ============================================================
    L'ARANCIONE CHIARO — chiesto da Alessio il 19 agosto
@@ -3322,18 +3322,19 @@ body:has(#ti-fondatore) .side{
    È l'arancione del sito (#FF6B35), NON quello scuro del pulsante AI
    (#C2410C, del 18 agosto): «arancione chiaro come nel sito, non scuro
    come ieri».
+
+   ⚠️ TUTTI E QUATTRO I PULSANTI, NON UNO SOLO. Prima l'arancione stava
+      solo su «Prendi i prezzi dal prezzario» e gli altri tre erano
+      bianchi. Alessio, guardandolo: «stona». Aveva ragione — un pulsante
+      diverso dagli altri sembra un avviso, non un'azione. Adesso sono
+      uguali fra loro: la fila si legge come una fila.
+
    ⚠️ Sul sito quell'arancione sta come FILO a sinistra e come segno delle
       icone, mai come sfondo pieno col bianco sopra — e c'è un motivo:
       bianco su #FF6B35 sta a 3,1 a 1, sotto il minimo per leggersi.
       Qui l'arancione fa il bordo e la tinta leggera, il testo resta
       scuro (#9A3412 su #FFF3EC: oltre 7 a 1).
    ============================================================ */
-.comp-azioni .quick-add.az-prz{
-  background:#FFF3EC; border-color:#FF6B35; color:#9A3412;
-}
-.comp-azioni .quick-add.az-prz:hover{
-  background:#FFE7D9; border-color:#E2551F; color:#7C2D12;
-}
 
 /* il resoconto di «Prendi i prezzi dal prezzario»: stessa forma delle
    schede del sito — filo arancione a sinistra, angoli tondi a destra */

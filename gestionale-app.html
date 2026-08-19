@@ -15603,7 +15603,7 @@ ${vecchi?`
          SOLO le righe a zero. Si vede solo se qualcosa a zero c'è davvero: se
          no sarebbe un pulsante che non fa mai niente. */
       +  (Array.from(compVociCache).some(function(v){return !(+v.prezzo_unitario);})
-          ? '<button type="button" class="btn-ghost quick-add az-prz" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
+          ? '<button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
           : '')
       +  (compCapNuovo?'':'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>')
       +'</div>'
