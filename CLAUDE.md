@@ -9030,3 +9030,222 @@ dove le imprese passano gia'.
 `IL-PREZZO-i-conti-veri.md` (i conti e le tre strade) e
 `IL-PREZZO-la-decisione.md` (la decisione presa, le regole, cosa fare nel
 sito). Stanno nella cartella del progetto.
+
+---
+
+# 19 agosto 2026 (6), NOTTE — IL SAL SI CHIUDE: IL FOGLIO E LA FATTURA
+
+Il SAL aveva il database e la schermata, e gli mancavano le due cose per cui
+esiste: il **foglio da consegnare** e la **fattura per farsi pagare**.
+Adesso ci sono tutte e due.
+
+## 1. Il PDF dello stato di avanzamento — `salPdf()`
+
+Il foglio A4 che si consegna al committente o al direttore dei lavori.
+Intestazione (azienda / cliente / lavori / periodo), la tabella delle
+lavorazioni (N. · Tariffa · Descrizione · U.M. · Q.tà eseguita · Prezzo
+unitario · Importo) e in fondo il riquadro dei conti:
+
+    Lavori eseguiti dall'inizio  −  Ribasso  =  Importo maturato
+    −  Gia' liquidato coi SAL prima  =  Importo di questo SAL
+    −  Ritenuta di garanzia  =  NETTO DA PAGARE
+
+Sui lavori pubblici stampa anche oneri della sicurezza maturati e costo del
+personale, che l'ente chiede sempre.
+
+**⛔ Il PDF NON esce** (e lo dice, invece di uscire monco) quando:
+- una delle letture va in errore — e' la lezione del PDF del computo del
+  14 agosto: un errore non guardato faceva uscire un foglio col buco dentro e
+  il messaggio diceva pure «scaricato ✅»;
+- il SAL non ha nessuna lavorazione contata;
+- **ci sono modifiche non salvate nelle caselle** — il foglio nasce da quello
+  che sta nel database, e un documento che non e' quello che hai davanti e'
+  peggio di nessun documento (`salModifiche()`);
+- **la somma delle righe stampate non fa il totale del riquadro**: un foglio
+  che si contraddice da solo non si consegna.
+
+Fascia rossa «NON DA CONSEGNARE» e prefisso `BOZZA-` nel nome del file se il
+SAL e' ancora in bozza, o se mancano nome attivita' / partita IVA.
+
+⚠️ I conti passano da `salConti()` e `compRiepilogoDa()`, le stesse due
+funzioni del riquadro a schermo. **Nessuna formula copiata.**
+
+## 2. La fattura dell'acconto — `salAFattura()` / `salFatturaCon()`
+
+Pulsante **«→ Crea la fattura di questo acconto»** dentro la scheda del SAL,
+sotto «Il conto» (nel piede non ci stava: su un telefono da 390 px il quarto
+pulsante usciva fuori).
+
+**⚠️ La cifra la sceglie Alessio, OGNI VOLTA**, perche' sono due modi veri e
+cambiano da committente a committente:
+- **per l'intero**: fattura tutto l'avanzamento, e la ritenuta di garanzia la
+  trattiene il committente quando paga;
+- **al netto**: la ritenuta se la toglie lui dalla fattura, e la riavra' a
+  fine lavori con una fattura a parte.
+Deciso da lui stasera: **non si sceglie una volta sola, si chiede sempre.**
+
+La fattura nasce di tipo **acconto**, con una riga sola, e la descrizione basta
+da sola a dire di quale avanzamento si tratta:
+«Stato avanzamento lavori n. 2 del 05/08/2026 — Titolo — lavori eseguiti dal
+01/07/2026 al 31/07/2026 (importo al netto della ritenuta di garanzia dello
+0,5%, pari a 201,03 €)».
+
+**Non si scrive niente nel database**: si apre `fattForm()` gia' compilato, la
+controlla lui e la salva lui.
+
+**⛔ RIFIUTA di partire** se il SAL vale 0 € o e' **negativo** (una fattura in
+negativo e' una nota di credito, ed e' un'altra cosa), se ci sono modifiche non
+salvate, e **avvisa** se il cliente del computo non sta nell'anagrafica di
+quel reparto (la tendina resterebbe su «nessuno» in silenzio).
+
+### `sql/gest-sal-fattura.sql` — ESEGUITA il 19/8 sera
+Aggiunge `gest_sal.fattura_id` (`on delete set null`). Serve a non chiedere
+**due volte gli stessi soldi**: il SAL dice «gia' fatturato» e chiede conferma
+prima di farne un'altra. Stessa idea di `gest_computi.preventivo_id`.
+Il collegamento si scrive **solo dopo** che la fattura esiste
+(`fattSalInCorso`, in fondo a `fattSalva`).
+
+## 3. Le lezioni di stasera
+
+1. **⛔ IL PULSANTE PICCOLO, ANCORA.** Il pulsante del PDF nell'elenco dei SAL
+   era un quadratino da 34 px con dentro la sola icona del foglio. Alessio ha
+   guardato lo schermo e ha detto «si vede troppo piccolo, quasi non si vede».
+   **La regola `.quick-add` era stata scritta la sera prima apposta, e non e'
+   stata usata.** Un'icona da sola non e' un pulsante: ci vuole scritto PDF,
+   il bordo e lo sfondo. Adesso e' 99×46 px, bordo blu, testo da 17.
+2. **«Spett.le» e sotto un trattino.** Sul computo il cliente e' facoltativo:
+   senza cliente il foglio scriveva «Spett.le» e una lineetta. Trovato
+   **guardando il PDF vero di Alessio**, non a mente. Se il cliente non c'e',
+   non si scrive niente.
+3. **⚠️ IL BANCO CHE COPIAVA MALE (lezione n. 2 della lista, di nuovo).**
+   Il banco segnava rosso su «m² invece di mq». Era **falso**: l'estrattore
+   tagliava `const _umPdf` alla prima riga, perche' quella riga chiude gia'
+   tutte le parentesi, e il `.replace()` delle due righe sotto restava fuori.
+   **Il finto era piu' povero del vero e ha inventato un difetto che non
+   c'era.** Prima di credere a una rossa, guardare cosa sta provando davvero.
+4. **⚠️ IL SABOTAGGIO CHE COLPIVA LA FUNZIONE SBAGLIATA.** Il sabotaggio
+   «il PDF esce anche con modifiche non salvate» cercava `if(salModifiche(id)){`
+   — che da stasera compare **due volte** (salPdf e salAFattura). Rompeva
+   l'altra, e il banco restava **tutto verde su un file rotto**. Un pezzo da
+   sabotare deve essere **unico**, se no il sabotaggio assolve invece di
+   accusare.
+
+## 4. Come sono stati provati (per rifarlo domani)
+
+I banchi stanno nel contenitore di Claude, in `prove/sal-pdf/`, non nella
+cartella di Alessio. Si ricostruiscono cosi':
+
+- `estrai.py` tira fuori le funzioni **verbatim** da `gestionale-app.html`
+  (mai riscritte a mano). ⚠️ per i `const` aspetta il punto e virgola, se no
+  taglia (vedi lezione 3).
+- I dati NON sono inventati: schema vero ricreato **dai file di `sql/`** su un
+  PostgreSQL 16, e `dati.json` esce dalle viste vere `gest_sal_totali` e
+  `gest_sal_righe_calc`.
+- `banco.js` (57 prove, PDF letto davvero con pdf-parse) · `banco-fattura.js`
+  (39 prove) · `sabotaggi.js` (17 sabotaggi sul file vero: **17 visti, 0
+  sfuggiti**) · `browser.js` (apre il file di adesso E quello di prima e
+  confronta errori JS, id doppi e testi sotto i 13 px, a 1440×900 e 390×844).
+- jsPDF gira in Node con `jspdf/dist/jspdf.node.js`. ⚠️ `save()` e' una
+  proprieta' **dell'oggetto**, non del prototipo: si intercetta alla
+  costruzione.
+- Chromium gia' installato: `executablePath: '/opt/pw-browsers/chromium'`.
+  **Non lanciare `playwright install`.**
+
+## 5. Il contatore delle visite — prima lettura (4 ore e mezza)
+
+| | |
+|---|---|
+| arrivi | 13 (di cui 5 da Meta) |
+| visti | 9 (di cui 1 da Meta) |
+| persone diverse | 10 (4 da Meta) |
+
+**Il conto al giorno:** 5 arrivi da Meta in 4,5 ore fanno ~**27 al giorno**.
+Meta dice **854 clic in 30 giorni**, cioe' **28 al giorno**: **combaciano**.
+Ma Meta conta solo **326 arrivi**, cioe' 11 al giorno — il **38%**.
+→ **La gente sul sito ci arriva davvero. Il 62% non e' gente persa, e' gente
+che non accetta i cookie.** (Con 5 righe non e' una prova: e' il primo indizio,
+e va nella direzione giusta.)
+
+⚠️ **Da guardare fra due giorni:** dei 5 arrivati da Meta, **solo 1** e'
+arrivato a «visto». Se il rapporto reggesse anche sui numeri grandi, vorrebbe
+dire che se ne vanno prima che la pagina si disegni — e li' il problema
+sarebbe la velocita', non la pubblicita'. Con 5 righe non prova niente.
+
+## 6. ⛔ IL COMPUTO METRICO NON LO VEDE NESSUNA IMPRESA
+
+Trovato stasera guardando il codice, dopo una domanda di Alessio.
+
+`#tab-computi`, `#tab-prezzario` nascono con `display:none` e li accende
+**solo** `adattaMenuProfessionista()`, che parte solo se
+`ruoloUtente === 'professionista'`. Quindi **Computo metrico, Prezzario e
+(dentro il computo) SAL si vedono solo dagli studi tecnici.**
+Un'impresa edile o un artigiano quelle tre voci nel menu **non le ha**.
+
+Non e' un difetto: e' scritto nel file dal 10 agosto — *«per ora accesa solo
+per gli studi tecnici, accenderla anche per le imprese edili e' una riga,
+quando si decide»*. Quel «quando si decide» non e' mai arrivato.
+
+⚠️ **Perche' conta per i soldi:** il computo col prezzario da 12.762 voci e il
+SAL sono la cosa piu' grossa costruita finora, e le **87 imprese iscritte non
+possono nemmeno vederla**.
+
+**I due lati della questione, senza sconti:**
+- Il computo metrico *estimativo* (quello che va in Comune o in gara) lo redige
+  il **tecnico**, non l'impresa. Su questo Alessio ha ragione.
+- Ma l'impresa fa **la stessa cosa con un altro nome** — «metratura», «i conti
+  del cantiere» — per farsi il preventivo, e oggi la fa su Excel.
+- E sul **SAL** la differenza e' netta: sui lavori **pubblici** la contabilita'
+  la tiene il direttore dei lavori; sui lavori **privati**, che sono quasi
+  tutto quello che fanno le 87 imprese, **non c'e' nessun direttore dei
+  lavori** e il SAL se lo fa l'impresa da sola.
+- ⚠️ Il rovescio: il **71%** delle imprese edili ha meno di due dipendenti, e
+  molte fanno preventivi **a corpo**, una cifra sola. A quelle, tre voci in
+  piu' nel menu sono solo confusione.
+
+**⛔ LA DECISIONE RESTA AD ALESSIO, E LA RISPOSTA NON STA NEL CODICE.**
+La domanda da fare a **una** delle 87 imprese, prima di accendere niente:
+> «Tu quando fai un preventivo, misuri le lavorazioni una per una o dai una
+> cifra a corpo?»
+
+---
+
+## DOVE SIAMO RIMASTI (19 agosto 2026, notte)
+
+**Il SAL e' finito**: database, schermata, PDF, fattura dell'acconto.
+⚠️ Resta la nota di sempre: **il SAL non e' il mestiere di Alessio.** Quando la
+prima impresa lo usera' davvero, farsi spiegare da lei come lo fa, e correggere.
+
+**Chiesto da Alessio per domani, in cima:**
+
+1. **La sezione «Stati di avanzamento» nel menu** (mezza giornata). Tutti i SAL
+   di tutti i computi in un elenco solo: quali hai chiesto e quali no, il PDF,
+   la fattura. **Il SAL resta attaccato al suo computo** — cambia solo che lo
+   trovi anche da fuori. ⛔ Scartata la strada B (un SAL che vive senza
+   computo): senza il computo dietro spariscono il «su 20,46 previsti», il
+   controllo «hai contato piu' del computo» e il ribasso — diventa una fattura
+   con le date.
+2. **Ragionare su cosa fare per le imprese** (vedi il punto 6 qui sopra).
+
+**Poi, dalla lista di prima:**
+- **Il prezzo nuovo sul sito** — `prezzi.html`, `info-premium.html`,
+  `info-free.html` · il riquadro nei quattro pannelli che dice alle 87 imprese
+  che il gestionale e' aperto · **il pagamento mensile su Stripe** (il pezzo
+  piu' grosso: oggi c'e' solo l'annuale) · l'avviso prima che scadano i tre
+  mesi di regalo delle imprese di luglio.
+- **L'errore JavaScript sulla homepage** (`PAGINE_REGISTRAZIONE` dichiarato due
+  volte). Nei file compare **una volta sola**: guardare l'iniezione di Netlify,
+  non il codice.
+- **Rileggere il contatore delle visite** fra un paio di giorni: la query sta in
+  fondo a `sql/conteggio-visite.sql`.
+- L'analisi dei prezzi · la descrizione schiacciata a 390 px sui preventivi
+  (`.sheet .prev-riga` a `1fr 80px 118px 48px`) · il pulsante del prezzario
+  anche in cima · il limite di misura su `cv-candidati/registrazioni` · il
+  conteggio delle richieste di caricamento file.
+- **Sul sito:** le 95 pagine citta' vuote · l'email vera alle imprese · il
+  grafico dell'admin (`premium_dal`, `gestionale_dal`).
+- **Meta:** campagna ferma per una settimana, poi rimisurare. Non toccare
+  pubblico, creativita', budget o evento: fa ripartire l'apprendimento da zero.
+- **Pulizie:** i preventivi n. 4, 5 e 6 del reparto «progetto casa» · la riga
+  completamente vuota in `imprese`.
+- **Manca ancora:** il SAL non diventa fattura con un clic *dal cestino*, e non
+  c'e' il passaggio SAL → nota di credito. Nessuno dei due e' stato chiesto.
