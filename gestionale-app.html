@@ -5778,7 +5778,12 @@
       doc.setDrawColor(220);doc.line(M,y,Rx,y);
       doc.setFontSize(9.5);
       doc.text(lines,M+2,y+5.5);
-      doc.text(String(+r.qta||0).replace(".",","),colQ,y+5.5,{align:"right"});
+      /* la virgola c'era già, ma non la rete contro la coda della virgola
+         mobile: una quantità nata da una somma poteva uscire in fattura come
+         «0,30000000000000004». _numTesto fa tutte e due le cose, ed è lo
+         stesso che scrive la quantità sul preventivo — i due documenti dello
+         stesso lavoro devono dire il numero nello stesso modo. */
+      doc.text(_numTesto(+r.qta||0),colQ,y+5.5,{align:"right"});
       doc.text(eurPdf(r.prezzo),colP,y+5.5,{align:"right"});
       if(!forf)doc.text(_pct(al)+"%",colI,y+5.5,{align:"right"});
       doc.text(eurPdf(imp),colT-2,y+5.5,{align:"right"});
@@ -12960,7 +12965,16 @@ ${vecchi?`
       if(y+rowH>270){doc.addPage();y=20;}
       doc.setDrawColor(210);doc.rect(M,y,R-M,rowH);
       doc.setFontSize(9.5);doc.text(lines,M+2,y+5);
-      doc.text(String(+r.qta||1),R-60,y+5,{align:"right"});
+      /* ⚠️ 19 agosto 2026 — LA QUANTITÀ USCIVA COL PUNTO.
+         Sul PDF si leggeva «20.46 mq»: il numero grezzo di JavaScript, con
+         il punto dell'inglese, su un documento che va a un cliente italiano
+         — e nella riga sotto lo stesso valore si legge «20,46». Due modi di
+         scrivere lo stesso numero nella stessa pagina.
+         _numTesto è quello che il gestionale usa dappertutto: mette la
+         virgola e toglie la coda della virgola mobile (0,1+0,2 non diventa
+         0,30000000000000004), senza aggiungere decimali che non ci sono —
+         una quantità di 1 resta «1», non «1,00». */
+      doc.text(_numTesto(+r.qta||1),R-60,y+5,{align:"right"});
       doc.text(eurPdf(r.prezzo),R-32,y+5,{align:"right"});
       doc.text(eurPdf(rt),R-2,y+5,{align:"right"});
       y+=rowH;
