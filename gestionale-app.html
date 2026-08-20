@@ -15924,6 +15924,37 @@ ${vecchi?`
              uguali:N.length-cambiate.length-aggiunte.length };
   }
 
+  /* ============================================================
+     ⚠️ 21 agosto 2026 — LA VISTA CHE NON DICEVA DA DOVE VIENE UNA RIGA
+     ============================================================
+     Il 20 agosto e' stata aggiunta la colonna «origine_id» alla TABELLA
+     gest_computo_voci. Ma il gestionale non legge la tabella: legge la
+     VISTA gest_computo_voci_calc, che elenca le colonne una per una — e
+     origine_id non c'era. Risultato: alla schermata arrivava sempre
+     vuoto, e varConfronta faceva l'unica cosa che poteva fare: dichiarare
+     AGGIUNTA ogni riga della variante e TOLTA ogni riga dell'originale.
+     Su una variante appena creata, identica al computo di partenza, la
+     pagina elencava tutte le lavorazioni due volte invece di dire «non e'
+     cambiato niente». E il totale in fondo restava GIUSTO — le righe
+     uguali si annullano comunque — quindi dai numeri non si vedeva.
+
+     Risolto con sql/gest-variante-origine-vista.sql. Ma il gestionale non
+     deve fidarsi che l'aggiornamento sia stato eseguito: se la colonna non
+     arriva, NON si mostra un confronto sbagliato, si dice cosa eseguire.
+     E' la stessa scelta gia' fatta per «giorni» e «insieme» del
+     cronoprogramma: meglio una pagina che dice cosa fare, che una pagina
+     che racconta una bugia con l'aria di essere giusta.
+
+     ⛔ SI GUARDA SE LA CHIAVE C'E', non se ha un valore. Su un computo di
+        partenza origine_id e' legittimamente vuoto su TUTTE le righe:
+        controllare il valore direbbe «vista vecchia» ogni volta.
+     ============================================================ */
+  function varVistaSenzaOrigine(orig,nuove){
+    const riga=((nuove||[])[0])||((orig||[])[0]);
+    if(!riga)return false;                    /* niente righe: niente da dire */
+    return !Object.prototype.hasOwnProperty.call(riga,"origine_id");
+  }
+
   async function renderVariante(c){
     const box=$("#co-var"); if(!box)return;
     if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
@@ -15948,6 +15979,14 @@ ${vecchi?`
       return;
     }
     const orig=rO.data||[];
+    if(varVistaSenzaOrigine(orig,rN.data)){
+      box.innerHTML='<div class="co-vuoto">'
+        +'<div class="co-vuoto-ic">🔧</div>'
+        +'<h4>Manca un aggiornamento del database</h4>'
+        +'<p>Senza, non posso dire quale riga nasce da quale: elencherei <b>tutte</b> le lavorazioni come aggiunte e tolte, e sarebbe una bugia.<br>Esegui <b>sql/gest-variante-origine-vista.sql</b> su Supabase, poi riapri questa pagina.</p>'
+        +'</div>';
+      return;
+    }
     const part=compCache.find(x=>String(x.id)===String(c.variante_di));
     if(!orig.length&&!part){
       box.innerHTML='<div class="co-vuoto">'
@@ -20766,6 +20805,12 @@ ${vecchi?`
       return;
     }
     const orig=rO.data||[], nuove=rN.data||[];
+    /* ⚠️ senza origine_id il confronto direbbe che e' cambiato TUTTO:
+       un foglio del genere non si stampa, si dice cosa eseguire. */
+    if(varVistaSenzaOrigine(orig,nuove)){
+      toast("Per la variante serve l'aggiornamento del database: esegui sql/gest-variante-origine-vista.sql su Supabase");
+      return;
+    }
     const part=(rP&&!rP.error)?rP.data:null;
     if(!orig.length&&!part){
       toast("Il computo di partenza non c'è più: non c'è niente con cui confrontare questa variante.");
