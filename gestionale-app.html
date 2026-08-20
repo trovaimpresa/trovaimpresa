@@ -17492,8 +17492,26 @@ ${vecchi?`
       +'<div class="field"><label>Descrizione</label><input id="an-desc"'+_noAuto()
       +' value="'+(inCorr?esc(inCorr.descrizione||""):"")+'" placeholder="Es. Pietra locale a spacco, sp. 3-5 cm"></div>'
       +'<div class="row2">'
-      +  '<div class="field"><label>Unità</label><input id="an-uni"'+_noAuto()
-      +  ' value="'+(inCorr?esc(inCorr.unita||""):"")+'" placeholder="mq, ora, kg…"></div>'
+      /* ⚠️ 21 agosto 2026 — UNA TENDINA, NON UNA CASELLA.
+         Qui c'era una casella da scrivere a mano, e nella lavorazione qui a
+         sinistra l'unità si sceglie da una tendina: due modi diversi per la
+         stessa cosa nella stessa schermata. E il quadratino di «m²» sulla
+         tastiera non si sa fare (Alt+0178 col tastierino): Alessio ha
+         scritto «m2», che non è sbagliato ma non è quello che c'è scritto
+         due dita più in là. Adesso si sceglie, e chi ha bisogno di «sacco»
+         o «viaggio» prende «— la scrivo io —».
+         È lo stesso modo del campo prezzario del computo. */
+      +  '<div class="field"><label>Unità</label>'
+      +    '<select id="an-uni-sel">'
+      +      '<option value=""'+((inCorr&&inCorr.unita)?'':' selected')+'>— unità —</option>'
+      +      UNITA.map(function(u){
+             return '<option value="'+u+'"'+((inCorr&&inCorr.unita===u)?' selected':'')+'>'+u+'</option>';
+           }).join("")
+      +      '<option value="__mia__"'+((inCorr&&inCorr.unita&&UNITA.indexOf(inCorr.unita)<0)?' selected':'')+'>— la scrivo io —</option>'
+      +    '</select>'
+      +    '<input id="an-uni" class="an-uni-mia"'+_noAuto()
+      +    ' style="margin-top:8px;'+((inCorr&&inCorr.unita&&UNITA.indexOf(inCorr.unita)<0)?'':'display:none')+'"'
+      +    ' value="'+(inCorr?esc(inCorr.unita||""):"")+'" placeholder="sacco, viaggio, q.li…"></div>'
       +  '<div class="field"><label>Quantità per '+esc(perUno)+'</label><input type="text" inputmode="decimal" id="an-qta"'+_noAuto()
       +  ' value="'+(inCorr?_v(inCorr.quantita):"")+'" placeholder="1,05"></div>'
       +'</div>'
@@ -17507,12 +17525,29 @@ ${vecchi?`
 
     box.innerHTML=h;
     bindSeg("an-tipo");
+    /* la casella «la scrivo io» si accende e si spegne con la tendina */
+    const _us=$("#an-uni-sel");
+    if(_us)_us.onchange=function(){
+      const box2=$("#an-uni");
+      if(box2){ box2.style.display=(_us.value==="__mia__")?"":"none";
+                if(_us.value==="__mia__")box2.focus(); }
+    };
     /* le due percentuali si salvano appena le cambi: sono due numeri, e un
        pulsante «salva» in più per due numeri è un pulsante che non si preme */
     ["an-sp","an-ut"].forEach(function(k){
       const e=$("#"+k);
       if(e)e.addEventListener("change",function(){ anPerc(voceId); });
     });
+  }
+
+  /* l'unità della riga: dalla tendina, o dalla casella se hai scelto «la
+     scrivo io». Sta in una funzione sola perché la leggono sia il salvataggio
+     sia il banco: se un domani cambia la tendina, cambia in un posto. */
+  function anUnita(){
+    const sel=$("#an-uni-sel"), mia=$("#an-uni");
+    const v=(sel&&sel.value)||"";
+    if(v==="__mia__")return String((mia&&mia.value)||"").trim()||null;
+    return v||null;
   }
 
   /* ⚠️ il chiavistello del doppio clic, come per le misure: Supabase ci mette
@@ -17526,8 +17561,7 @@ ${vecchi?`
     if(q==null||!(q>0)){toast("Scrivi la quantità che serve per una unità di lavorazione");return;}
     if(p==null||p<0){toast("Scrivi il prezzo, e non può essere negativo");return;}
     const riga={ tipo:(segVal("an-tipo")||"materiale"), descrizione:desc,
-                 unita:String(($("#an-uni")&&$("#an-uni").value)||"").trim()||null,
-                 quantita:q, prezzo_unitario:p };
+                 unita:anUnita(), quantita:q, prezzo_unitario:p };
     anSalvo=true;
     const bt=$('[data-action="an-add"]'); if(bt)bt.disabled=true;
     let res;
