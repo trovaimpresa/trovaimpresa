@@ -10619,3 +10619,171 @@ visto li ha visti **Alessio in una foto dello schermo** — i tre pulsanti con
 lo stesso nome e la scritta incollata. Un banco legge la pagina che gli dici
 di leggere; una foto mostra la schermata intera. **Chiedere la foto dopo ogni
 consegna, sempre.**
+
+---
+
+## DOVE SIAMO RIMASTI (21 agosto 2026, sera)
+
+⛔ **IL DIFETTO PIÙ GRAVE DELLA GIORNATA, e non l'ha visto nessun banco.**
+
+### La variante non confrontava niente
+
+`gest_computo_voci.origine_id` è stata aggiunta il 20 agosto e viene
+scritta giusta. **Ma il gestionale non legge la tabella: legge la VISTA**
+`gest_computo_voci_calc`, che elenca le colonne UNA PER UNA — e
+`origine_id` non era fra quelle.
+
+Risultato: alla pagina «Cosa è cambiato» arrivava sempre vuoto, e
+`varConfronta` faceva l'unica cosa che poteva: **AGGIUNTA ogni riga della
+variante, TOLTA ogni riga dell'originale**. Su una variante appena creata,
+identica al computo di partenza, la pagina elencava tutte le lavorazioni
+**due volte** invece di dire «non è cambiato niente». Su quella di Alessio:
+88 righe elencate due volte.
+
+⚠️ **E IL TOTALE IN FONDO ERA GIUSTO.** Le righe uguali si annullano
+comunque, quindi la differenza finale tornava — ed è per questo che né i
+numeri né la «prova del nove» del PDF se ne sono accorti.
+
+**Risolto con `sql/gest-variante-origine-vista.sql`** ✅ (già eseguito su
+Supabase il 21 agosto sera). Usa `create or replace` e mette `origine_id`
+**in fondo**: così `gest_computo_totali`, `gest_sal_righe_calc` e
+`gest_sal_totali` restano dove sono invece di essere buttate giù e
+riscritte a memoria.
+
+### ⛔ LE DUE REGOLE CHE NASCONO DA QUI
+
+**1. UNA COLONNA AGGIUNTA A UNA TABELLA NON ARRIVA DA SOLA IN UNA VISTA.**
+Le viste del gestionale elencano le colonne per nome. Chi aggiunge una
+colonna che il gestionale deve **leggere** si deve chiedere **da dove la
+legge**: se la legge da una vista, va aggiunta anche lì.
+
+**2. IL GESTIONALE NON DEVE MAI MENTIRE SE MANCA UN AGGIORNAMENTO.**
+`varVistaSenzaOrigine(orig,nuove)` guarda se la **colonna** è arrivata (non
+il valore: su un computo normale `origine_id` è legittimamente vuoto su
+tutte le righe). Se non c'è, la pagina 7 mostra il riquadro «esegui
+`sql/gest-variante-origine-vista.sql`» e il PDF si rifiuta di stampare.
+Meglio una pagina che dice cosa fare, che una pagina che racconta una bugia
+con l'aria di essere giusta.
+
+### ⛔ E LA REGOLA SUL BANCO CHE MI HA INGANNATO
+
+Il finto Supabase del banco restituiva le righe **con** `origine_id`,
+perché gliel'avevo scritto io. La vista vera non ce l'aveva. **È la lezione
+del 9 agosto, ripetuta: «lo schema di prova non somigliava abbastanza a
+quello vero».**
+
+Adesso `banco-fogli.js` ha `COLONNE_VISTA` — le 17 colonne lette da un
+**PostgreSQL 16 vero** con lo schema ricostruito dai file di `sql/` — e il
+finto Supabase **taglia tutto quello che la vista non espone**. Con sopra
+il sabotaggio «togli l'avviso»: se il banco resta verde, non si è imparato
+niente.
+
+⚠️ **REGOLA GENERALE PER I BANCHI:** un finto database deve restituire
+**esattamente le colonne che restituisce quello vero**, né una in più né
+una in meno. Una colonna di troppo nasconde un difetto; una di meno ne
+inventa uno.
+
+### Lo zero non è «in più», e non è rosso
+
+Il colore si sceglieva con `diff>=0`, e lo zero ci finiva dentro: si
+leggeva **«In più + 0,00 € (+0%)» in rosso**. Capita anche per davvero, non
+solo su una variante appena creata: se togli 500 € da una lavorazione e ne
+aggiungi 500 su un'altra, la differenza è zero.
+Adesso: **«Nessuna differenza — 0,00 €»**, in nero, senza percentuale.
+Schermo e foglio stampato. ⚠️ La soglia è il **centesimo**, non lo zero
+esatto: due millesimi di euro si stampano comunque «0,00», e un documento
+che scrive «IN PIÙ € 0,00» si contraddice da solo.
+
+### Le prove, a fine giornata
+**238 verdi · 48 sabotaggi, 46 accusati** (2 dichiarati).
+`banco.js` 70 · `banco-fogli.js` 124 · `banco-parole.js` 24 ·
+`banco-uguale.js` 4 (19.580 barre ieri contro oggi) · `apri.js` 16.
+
+⚠️ **Nel contenitore c'è anche un PostgreSQL 16 vero**, con
+`pg_safeupdate` compilato a mano (non sta nei repo: si prende da
+`github.com/eradman/pg-safeupdate` e si compila con
+`postgresql-server-dev-16`). Lo schema si ricostruisce dai file di `sql/`
+eseguiti in fila: `gest-computo-metrico` → `quantita-3-decimali` →
+`quadro` → `sal` → `cronoprogramma` → `variante`. Servono prima un
+`auth.users`, un `auth.uid()` pilotabile con
+`set_config('request.jwt.claim.sub', ...)` e i ruoli `anon` /
+`authenticated`, e quattro tabelle madri segnaposto (`gest_mestieri`,
+`gest_clienti`, `gest_lavori`, `gest_preventivi`) — **dichiarate come tali**,
+perché quello che conta sono le chiavi esterne del lato che referenzia, che
+vengono dai file veri.
+
+### ⚠️ IL CONTO DELLA GIORNATA
+**Tre difetti trovati da Alessio guardando le foto dello schermo. Zero
+trovati dai banchi.** I tre pulsanti con lo stesso nome, la scritta
+incollata, lo zero rosso. Il quarto — la variante che non confrontava — l'ho
+trovato leggendo lo schema del database, non provando il codice.
+**Chiedere la foto dopo ogni consegna. Sempre.**
+
+**LA PROSSIMA: l'analisi dei prezzi.** La decisione è già presa: **l'analisi
+comanda il prezzo** (niente «usa questo prezzo» da premere). Serve un
+`sql/gest-analisi-prezzi.sql` con la tabella delle righe, le due percentuali
+sulla lavorazione (spese generali 13-17%, utile 10%) e la vista che fa il
+conto; poi `gest_computo_voci_calc` prende il prezzo da lì con un
+`coalesce`, **sempre con `create or replace` e le colonne nuove in fondo**.
+⚠️ Il prezzo dell'analisi va chiuso a **2 decimali**, non a 4: è quello che
+si stampa, e l'importo deve tornare con la calcolatrice.
+
+---
+
+## L'ANALISI DEI PREZZI — il database, fatto il 21 agosto sera
+
+✅ **`sql/gest-analisi-prezzi.sql` eseguito su Supabase.** Manca solo la
+schermata: il conto e le regole sono già tutti nel database.
+
+**Cosa c'è adesso**
+- `gest_analisi_righe` — le righe dell'analisi, attaccate alla LAVORAZIONE
+  (`voce_id`, `on delete cascade`). `tipo` = materiale · manodopera · nolo ·
+  altro, con un check che rifiuta tutto il resto.
+- `gest_computo_voci.an_spese_perc` / `an_utile_perc` — vuote vuol dire le
+  percentuali di legge, **15%** e **10%**, scritte nella vista e non nel
+  codice.
+- `gest_analisi_totali` — il conto: costi → spese generali → utile → prezzo.
+- `gest_computo_voci_calc` — il prezzo **viene dall'analisi se c'è**, se no
+  resta quello scritto a mano (`coalesce`). Nuova colonna in fondo:
+  `prezzo_da_analisi`.
+
+**⛔ LE REGOLE DA NON PERDERE**
+1. **L'analisi è per UNA unità di misura.** Se la lavorazione è al metro
+   quadro, l'analisi dice quanto costa un metro quadro. È l'errore più
+   facile da fare, e su un documento di gara si vede subito perché il prezzo
+   esce fuori scala di cento volte. **Va scritto sulla schermata**, non solo
+   nel file SQL.
+2. **L'utile è il 10% di (costi + spese generali)**, non dei soli costi. Su
+   una gara pubblica è la differenza fra un documento accettato e uno
+   contestato.
+3. **Il prezzo si chiude a DUE decimali**, non a quattro: è quello che si
+   stampa, e l'importo si calcola su quello. Se ne avesse quattro, il foglio
+   non tornerebbe più con la calcolatrice.
+4. **`gest_analisi_totali` elenca SOLO le lavorazioni che hanno davvero
+   delle righe** (`join`, non `left join`). Con un `left join` ogni
+   lavorazione entrerebbe con costi a zero e il prezzo scritto a mano
+   verrebbe schiacciato a zero.
+5. Il file **si ferma da solo** se `gest-variante-origine-vista.sql` non è
+   stato eseguito, invece di togliere alla variante la colonna che le serve.
+
+**Come è stato provato** — `banco-analisi.sql` su un **PostgreSQL 16 vero**
+(schema ricostruito dai file di `sql/`, `pg_safeupdate` acceso, `auth.uid()`
+pilotabile): **36 verdi**. `sabotaggi-analisi.sh`: **16 su 16 accusati**.
+Provati anche: il caso che deve essere RIFIUTATO (tipo inventato, numeri
+negativi, 150% di spese, riga attaccata a una lavorazione che non esiste),
+la riga di un altro account (non la vede e non la scrive, nemmeno
+firmandola col nome di Alessio), la cancellazione a cascata, e un `delete`
+senza `where`.
+
+⚠️ **DUE TRAPPOLE DEL BANCO, non del gestionale** (valgono per tutti i banchi
+SQL futuri):
+- **In SQL il vuoto non è falso.** Una prova che risponde `NULL` non è né
+  verde né rossa: spariva dal conto. Un sabotaggio vero è rimasto verde per
+  questo. Ogni esito va passato da `coalesce(cond,false)`.
+- **Un banco che scrive mentre finge di essere un altro account** ha bisogno
+  del permesso di scrivere sulla sua tabella dei risultati: senza, le prove
+  della RLS — le più importanti — sparivano in silenzio.
+
+**DA FARE DOMANI:** la schermata dell'analisi dentro la scheda della
+lavorazione (sotto le misure), e poi il PDF «Analisi dei prezzi», che in una
+gara si consegna.
