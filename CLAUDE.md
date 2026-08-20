@@ -9836,6 +9836,135 @@ si chiama «🏛 Lista per la gara», fra privati «📋 Lista da far prezzare»
 
 ---
 
+# 20 agosto 2026 (2), SERA — LA SCALA DEL COMPUTO
+
+## Perché
+
+Alessio apre il «Computo da prezzare» appena finito, quello per le imprese, e
+scrive: **«è troppo difficile, nessuno lo capisce e troppo complicato»**. Poi:
+«non è per me» — cioè: io lo capisco perché l'abbiamo fatto insieme, è
+l'impresa che non lo capirà. Poi si ferma e dice la cosa che conta:
+
+> «io volevo un gestionale **schematico a gradoni** che poi tutti compilati
+> finivano nel riepilogo. Adesso funzioni dentro altre funzioni, si capiscono?
+> Come facciamo a fargli capire i passaggi da fare se uno è alle prime armi?»
+
+E ancora, guardando lo schermo:
+
+> «aggiungi lavorazione, aggiungi capitolo, messi lì non li capisco, forse
+> perché non sono geometra» · «oppure sono messi così in basso da non essere
+> abbastanza visibili» · «stati avanzamento SAL è in cima in bella vista, poi
+> scrollare e ci sono tre funzioni che sembrano quasi non servire».
+
+E infine la frase che decide tutto:
+
+> **«a me serve che il primo che lo userà, che pagherà, è contento di ciò che
+> ha acquistato»**.
+
+Ha anche detto una cosa che va scritta e non nascosta: **«nessuno usa il
+gestionale»**. Non si aggiungono altre funzioni finché quella che c'è non si
+capisce da sola.
+
+**L'idea è sua:** «e se aperto il computo in alto ci sono le varie funzioni,
+navbar, per capirci del computo si cerca cosa si vuole, tutti sono a bella
+vista e si apre la pagina per intero». Gli ho fatto vedere tre disegni finti
+(`mock/computo-navbar.html`, A · B · C) e ha scelto **la A**: barra numerata,
+le voci che non è ancora il momento di usare restano visibili ma spente.
+
+## Cos'era prima
+
+La finestra del computo era **una pagina sola**, lunghissima, in due colonne:
+
+- sette caselle di anagrafica (numero, data, titolo, oggetto, dove, cliente,
+  lavoro), poi il tipo, lo stato, il prezzario, il ribasso, le note;
+- **in alto a destra, in bella vista, gli Stati di avanzamento** — cioè
+  l'ULTIMA cosa che si fa, offerta su un computo ancora vuoto;
+- **le lavorazioni in fondo a sinistra**, sotto tutto, con tre pulsantini
+  arancioni identici (`+ Aggiungi lavorazione`, `⬆ Carica qui il computo del
+  geometra`, `+ Aggiungi capitolo`) messi **dopo** una riga che diceva
+  «Totale del computo 0,00 €».
+
+L'ordine sullo schermo era **il contrario dell'ordine del lavoro**.
+
+## Cos'è adesso
+
+In cima alla finestra c'è una barra:
+
+**1 Lavorazioni · 2 Prezzi · 3 Ribasso e totale · 4 La scheda · 5 Acconti (SAL)**
+
+- si apre sulle **Lavorazioni**, non sull'anagrafica;
+- il numero **1 diventa una spunta verde** appena una lavorazione c'è;
+- su un computo **senza lavorazioni**, le voci **2, 3 e 5 sono spente** e, se le
+  premi, dicono perché: *«Prima mettici le lavorazioni: senza quelle qui non
+  c'è niente da fare»*. Restano **visibili**, non nascoste: chi apre un computo
+  nuovo deve vedere che dopo c'è altro, se no crede di aver finito;
+- su un computo **appena creato e non ancora salvato** l'unica voce accesa è
+  la **4 La scheda**, e si apre lì;
+- **dopo «Crea computo» la finestra non si chiude più**: si riapre da sola sul
+  computo nuovo, sulla pagina **1 Lavorazioni**, con scritto «adesso mettici le
+  lavorazioni». Prima ti lasciava davanti a un elenco senza dirti cosa fare.
+
+E al posto dei tre pulsantini, sul computo vuoto c'è **una cassetta sola con
+due strade**: `⬆ Carica qui il computo del geometra` (pieno di blu, perché è la
+prima cosa da fare) e `+ Le scrivo io, una per una`. Il capitolo sta sotto,
+piccolo, con scritto che si può mettere anche dopo. La riga «Totale del computo
+0,00 €» su un computo vuoto non c'è più: non diceva niente.
+
+## ⛔ LA COSA DA NON TOCCARE MAI
+
+**Le pagine ci sono TUTTE nel documento e si nascondono col CSS** (`.copag` /
+`.copag.on`). Non si ridisegnano al cambio di voce.
+
+Il motivo è serio: `saveComputo` legge le caselle **per id** (`co-tit`,
+`co-num`, `co-rib`, `co-note`…). Se una pagina non fosse disegnata, quelle
+caselle non esisterebbero, il salvataggio le leggerebbe **vuote** e ti
+**cancellerebbe il titolo perché stavi guardando il ribasso**.
+
+Nel banco c'è una prova apposta, e il sabotaggio che la rompe («cambiando
+pagina le caselle nascoste vengono buttate via») la fa diventare rossa.
+
+**Seconda cosa:** una pagina è fatta di **più blocchi** — la 4 ne ha tre (Che
+computo è / Per chi, A cosa serve, Note) e la 3 ne ha due (Quadro economico, Il
+ribasso). `compPag` li accende **tutti**. Accenderne uno solo era il primo
+errore da fare, e c'è il sabotaggio anche per quello.
+
+## Un errore mio, trovato guardando la foto
+
+Nel CSS c'era una regola che teneva il pulsante **Salva** lontano dal fumetto
+della chat, e stava agganciata a **`.sh-cols`** — le due colonne. Il computo le
+due colonne non ce le ha più: senza accorgersene, il Salva del computo sarebbe
+tornato **sotto il fumetto**. Adesso la regola vale per `.sh-cols` **e** per
+`.copag`.
+
+**La lezione:** *una regola agganciata al nome di un pezzo si rompe il giorno
+che quel pezzo cambia nome.* E non l'ha trovata il banco: l'ho vista in una
+foto dello schermo.
+
+Sempre dalla foto: in fondo al computo ci sono **cinque** pulsanti, e senza il
+ritorno a capo le parole si sovrapponevano — «Controlla prima di mandarlo»
+finiva **sopra** «Falla leggere anche all'AI». Adesso il piede va a capo. Un
+pulsante che non si legge non è un pulsante.
+
+## Come è stato provato
+
+- **`prove/banco-navbar.js` — 59 prove**, il gestionale vero in Chromium.
+  Guarda **il pixel, non la classe**: chiede al browser se una cosa *si vede*
+  (`offsetParent`), perché una classe `on` con il CSS sbagliato non mostra
+  niente e il banco resterebbe verde lo stesso.
+  Le prove che contano di più: le caselle nascoste **esistono ancora e hanno
+  ancora il loro valore**; si scrive un ribasso stando sulla pagina 3, si
+  salva, e **titolo e numero sono ancora nel database**.
+- **`prove/sabotaggi-navbar.py` — 18 sabotaggi, 18 visti.**
+  Uno era **non unico** al primo giro: `const corpo=document.querySelector(
+  "#sheet .sh-body")` compare **due volte** nel file (c'è anche in
+  `openSheetGrande`), il sabotaggio ne cambiava una sola e il banco restava
+  verde. **È la trappola del 19 agosto che torna**, e l'ha presa il controllo
+  di unicità dello script. L'ancora adesso è lunga, con il commento sopra.
+- Gli altri banchi girano ancora tutti verdi: SAL 88, Riepilogo 34, PDF nel
+  browser 14, lettore PDF 20. **215 prove verdi in tutto.**
+
+---
+
 ## DOVE SIAMO RIMASTI (20 agosto 2026, notte)
 
 **Fatto oggi, tutto in `gestionale-app.html` + `css/gestionale.css`, nessuna
@@ -9845,7 +9974,9 @@ migrazione SQL:**
 2. il **Riepilogo neutro** con le icone colorate e i pallini rosso/verde;
 3. il **computo aperto alle imprese** come «Computo da prezzare»;
 4. **il computo che arriva in PDF**, con la conferma riga per riga;
-5. la **«Lista da far prezzare»** anche sui lavori privati.
+5. la **«Lista da far prezzare»** anche sui lavori privati;
+6. **la scala del computo** — la barra numerata 1·2·3·4·5, la cassetta al posto
+   dei tre pulsantini, la finestra che si riapre dopo «Crea computo».
 
 **Da fare, in cima:**
 

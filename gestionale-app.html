@@ -15145,9 +15145,52 @@ ${vecchi?`
       +esc(x.descrizione||"(senza nome)")+'</option>').join("");
 
     openSheetGrande(isNew?_cm('nuovo'):("Computo "+(c.numero?("n. "+c.numero):"")+" — "+(c.titolo||"")),
-       '<div class="sh-cols"><div class="sh-col">'
+       /* ============================================================
+          20 agosto 2026 — LA SCALA DEL COMPUTO
+          ============================================================
+          Idea di Alessio, dopo aver provato a caricare il computo del
+          geometra e averci messo dieci minuti a trovare il pulsante:
+          «io volevo un gestionale schematico A GRADONI... adesso funzioni
+          dentro altre funzioni, si capiscono?».
 
+          Prima questa finestra era UNA pagina lunga: sette caselle di
+          anagrafica, poi in fondo a sinistra le lavorazioni con tre
+          pulsantini uguali, e in alto a destra — in bella vista — il SAL,
+          cioe' l'ULTIMA cosa che fai, offerta su un computo vuoto.
+          L'ordine sullo schermo era il contrario dell'ordine del lavoro.
+
+          Adesso c'e' una barra: 1 Lavorazioni · 2 Prezzi · 3 Ribasso e
+          totale · 4 La scheda · 5 Acconti (SAL). Una per volta, e si apre
+          sulle LAVORAZIONI, non sull'anagrafica.
+
+          ⛔ LE PAGINE CI SONO TUTTE NEL DOCUMENTO, si nascondono col CSS.
+          Non si ridisegnano al cambio di voce, e il motivo e' serio:
+          compSalva legge le caselle per id (co-num, co-tit, co-rib...). Se
+          una pagina non fosse disegnata, quelle caselle non esisterebbero e
+          il salvataggio SVUOTEREBBE i campi che non hai davanti — cioe' ti
+          cancellerebbe il titolo perche' stavi guardando i prezzi.
+
+          ⚠️ La barra la vedono anche gli studi tecnici, uguale: due
+          schermate diverse per la stessa cosa sono due cose da tenere
+          allineate, e prima o poi si scollano.
+          ============================================================ */
+       '<div class="conav" id="co-nav">'
+      +  [[1,"Lavorazioni"],[2,"Prezzi"],[3,"Ribasso e totale"],[4,"La scheda"],[5,"Acconti (SAL)"]]
+         .map(function(v){
+           /* su un computo che non e' ancora stato salvato l'unica cosa che
+              si puo' fare e' dargli un nome: le altre voci sono spente e lo
+              dicono, invece di far premere pulsanti che rispondono «salva
+              prima il computo». */
+           const spento=isNew&&v[0]!==4;
+           const qui=(isNew?4:1)===v[0];
+           return '<button type="button" class="conav-v'+(qui?" on":"")+(spento?" spento":"")+'" data-action="co-pag" data-p="'+v[0]+'">'
+                + '<span class="conav-n">'+v[0]+'</span>'+v[1]+'</button>';
+         }).join("")
+      +'</div>'
+
+      +'<div class="copag'+(isNew?" on":"")+'" data-p="4">'
       +'<div class="sh-b"><div class="sh-tit">Che computo è</div>'
+      + (isNew?'<div class="sh-nota">Dai un titolo e premi <b>Crea computo</b> qui sotto: subito dopo si accende <b>1 Lavorazioni</b> e ci metti dentro il foglio del geometra.</div>':'')
       +  '<div class="row2">'
       +    '<div class="field"><label>Numero</label><input id="co-num" value="'+esc(c.numero||"")+'" placeholder="01/2026" style="max-width:160px"></div>'
       +    '<div class="field"><label>Data</label><input type="date" id="co-data" value="'+esc(c.data||todayStr())+'"></div>'
@@ -15163,12 +15206,11 @@ ${vecchi?`
       +    '<div class="sh-nota">Collegarlo serve a ritrovarlo: il computo resta anche se '+(pro?'la pratica':'il lavoro')+' finisce nel cestino.</div></div>'
       +'</div>'
 
-      +'</div><div class="sh-col">'
+      +'</div>'   /* <- fine pagina 4, il resto della scheda sta piu' sotto */
 
-      /* Le lavorazioni stanno PER PRIME nella colonna di destra: prima erano in
-         fondo, fuori schermo, e sono la cosa che si riapre venti volte mentre il
-         resto si compila una volta sola. */
+      +'<div class="copag'+(isNew?"":" on")+'" data-p="1">'
       +'<div class="sh-b"><div class="sh-tit">Le lavorazioni</div>'
+      +  '<div class="sh-nota">Da qui comincia tutto: il conto del lavoro, riga per riga.</div>'
       +  '<div class="lav-media" id="co-voci">'
       +    (isNew
         ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti i capitoli, le lavorazioni e le loro misure.</div>'
@@ -15180,6 +15222,9 @@ ${vecchi?`
          i suoi numeri nascono da quelle, e guardarli lontani dal totale che li
          genera è il modo più veloce per non accorgersi di una cifra storta.
          Si vede solo sui Lavori pubblici: su un lavoro privato non esiste. */
+      +'</div>'   /* <- fine pagina 1 */
+
+      +'<div class="copag" data-p="3">'
       +'<div class="sh-b" id="co-qe-box"'+(c.tipo==="pubblico"?"":' style="display:none"')+'>'
       +  '<div class="sh-tit">Quadro economico</div>'
       +  '<div id="co-qe-a" class="qe-a"></div>'
@@ -15194,6 +15239,9 @@ ${vecchi?`
          economico: i SAL nascono dalle stesse lavorazioni, e tenerli nella
          scheda del computo evita di dover cercare il lavoro in un'altra
          sezione ogni volta che si chiede un acconto. */
+      +'</div>'   /* <- fine pagina 3 (il ribasso ci arriva piu' sotto) */
+
+      +'<div class="copag" data-p="5">'
       +'<div class="sh-b"><div class="sh-tit">Stati di avanzamento (SAL)</div>'
       +  '<div class="lav-media" id="co-sal">'+(isNew
           ? '<div class="lm-vuoto">Salva prima il computo: poi qui dentro ci metti gli stati di avanzamento.</div>'
@@ -15201,6 +15249,9 @@ ${vecchi?`
       +  '<div class="sh-nota">Serve per farsi pagare a pezzi mentre il lavoro va avanti: conti quello che hai fatto e chiedi un acconto.</div>'
       +'</div>'
 
+      +'</div>'   /* <- fine pagina 5 */
+
+      +'<div class="copag" data-p="4">'
       +'<div class="sh-b"><div class="sh-tit">A cosa serve questo computo</div>'
       +  '<div class="field"><div class="seg" id="co-tipo">'
       +    '<button data-v="privato"'+((c.tipo||"privato")==="privato"?' class="on"':'')+'>Lavori privati</button>'
@@ -15217,6 +15268,9 @@ ${vecchi?`
       +  '</div></div>'
       +'</div>'
 
+      +'</div>'   /* <- fine pagina 4 (secondo pezzo) */
+
+      +'<div class="copag" data-p="2">'
       +'<div class="sh-b"><div class="sh-tit">Da dove vengono i prezzi</div>'
       +  '<div class="row2">'
       +  '</div>'
@@ -15239,15 +15293,22 @@ ${vecchi?`
          non restituisce niente (o restituisce NaN), e il ribasso spariva senza
          un messaggio. In una gara e' il numero piu' importante del documento.
          Adesso e' testo, letta da _numIt come i prezzi: 12,5 e 12.5 vanno bene. */
-      +  '<div class="field"><label>Ribasso o sconto (%)</label><input type="text" inputmode="decimal" id="co-rib"'+_noAuto()+' value="'+(c.ribasso_perc!=null?String(c.ribasso_perc).replace(".",","):"")+'" placeholder="Es. 12,5" style="max-width:160px"></div>'
       +  '<div class="sh-nota">Il prezzario finisce sul documento: un computo deve dire da dove vengono i prezzi, se no il primo che lo legge te lo chiede.</div>'
-      +'</div>'
+      +'</div></div>'   /* <- fine pagina 2 */
 
+      /* il ribasso sta con il totale, non coi prezzi: e' l'ultima cosa che si
+         tocca, e si guarda insieme alla cifra che cambia */
+      +'<div class="copag" data-p="3">'
+      +'<div class="sh-b"><div class="sh-tit">Il ribasso</div>'
+      +  '<div class="field"><label>Ribasso o sconto (%)</label><input type="text" inputmode="decimal" id="co-rib"'+_noAuto()+' value="'+(c.ribasso_perc!=null?String(c.ribasso_perc).replace(".",","):"")+'" placeholder="Es. 12,5" style="max-width:160px"></div>'
+      +  '<div class="sh-nota">Lo sconto che fai sul totale. Il conto col ribasso lo trovi in fondo alle <b>Lavorazioni</b>.</div>'
+      +'</div></div>'
+
+      +'<div class="copag" data-p="4">'
       +'<div class="sh-b"><div class="sh-tit">Note</div>'
       +  '<div class="field"><textarea id="co-note" placeholder="Esclusioni, condizioni, riferimenti...">'+esc(c.note||"")+'</textarea></div>'
       +'</div>'
-
-      +'</div></div>',
+      +'</div>',
 
        ctrTastoHTML('computo')
       +'<button class="btn b-cancel" data-action="close">Annulla</button>'
@@ -15275,6 +15336,10 @@ ${vecchi?`
       if(box)box.style.display=(_ps.value==="__mio__")?"":"none";
     };
     compCapNuovo=false;compCapEdit=null;
+    /* la pagina di partenza si accende da qui e NON dall'html: una pagina e'
+       fatta di piu' blocchi (la 4 ne ha tre, la 3 ne ha due) e scrivere " on"
+       a mano nel primo blocco lasciava spenti gli altri. Un posto solo. */
+    compPag(isNew?4:1,true);
     if(!isNew){renderCompVoci(c.id);renderSalList(c.id);}
   }
 
@@ -15718,6 +15783,55 @@ ${vecchi?`
     return compRiepilogoDa(t.importo,t.oneri_sicurezza,t.importo_manodopera,c).netto;
   }
 
+  /* ============================================================
+     20 agosto 2026 — LA BARRA DEL COMPUTO: cambiare pagina
+     ============================================================
+     compPag(n)          -> mostra la pagina n (tutti i suoi blocchi)
+     compNavAggiorna(q)  -> con q lavorazioni decide quali voci sono accese
+
+     ⛔ NON si ridisegna niente: si accende e si spegne la classe "on".
+        Le caselle del modulo devono restare nel documento anche mentre
+        guardi un'altra pagina, se no saveComputo le legge vuote e ti
+        cancella quello che non hai davanti (titolo, ribasso, note...).
+
+     Una voce spenta NON e' muta: dice perche' e' spenta (data-perche).
+     Un pulsante che non fa niente e non spiega e' peggio di un pulsante
+     che non c'e'. */
+  function compPag(n,forza){
+    const nav=$("#co-nav"); if(!nav)return;
+    const b=nav.querySelector('.conav-v[data-p="'+n+'"]');
+    if(!b)return;
+    if(!forza&&b.classList.contains("spento")){
+      toast(b.dataset.perche||"Prima serve salvare il computo.");
+      return;
+    }
+    $$("#co-nav .conav-v").forEach(function(x){x.classList.toggle("on",x===b);});
+    $$(".copag").forEach(function(x){x.classList.toggle("on",String(x.dataset.p)===String(n));});
+    /* si torna in cima: cambiando voce restando a meta' pagina sembra che
+       non sia successo niente */
+    const corpo=document.querySelector("#sheet .sh-body");
+    if(corpo)corpo.scrollTop=0;
+  }
+
+  /* quante lavorazioni ci sono adesso: senza lavorazioni prezzi, ribasso e
+     SAL non hanno niente su cui lavorare, e restano spenti con la loro
+     spiegazione. Appena ce n'e' una, il numero 1 diventa una spunta verde. */
+  function compNavAggiorna(quante){
+    const nav=$("#co-nav"); if(!nav)return;
+    const ce=(+quante||0)>0;
+    [2,3,5].forEach(function(n){
+      const b=nav.querySelector('.conav-v[data-p="'+n+'"]');
+      if(!b)return;
+      b.classList.toggle("spento",!ce);
+      b.dataset.perche="Prima mettici le lavorazioni: senza quelle qui non c'è niente da fare.";
+    });
+    const b1=nav.querySelector('.conav-v[data-p="1"]');
+    if(b1){
+      const n1=b1.querySelector(".conav-n");
+      if(n1){ n1.classList.toggle("fatto",ce); n1.textContent=ce?"\u2713":"1"; }
+    }
+  }
+
   async function renderCompVoci(computoId){
     const box=$("#co-voci");if(!box)return;
     compVociCompId=computoId;
@@ -15736,6 +15850,7 @@ ${vecchi?`
     }
     compCapCache=rc.data||[];
     compVociCache=rv.data||[];
+    compNavAggiorna(compVociCache.length);
 
     const senzaCap=compVociCache.filter(v=>!v.capitolo_id);
     const gruppi=compCapCache.map(cap=>({cap:cap, voci:compVociCache.filter(v=>String(v.capitolo_id)===String(cap.id))}));
@@ -15831,12 +15946,40 @@ ${vecchi?`
       piede+='<div class="spesa-row"><span>di cui costo del personale</span><b>'+eur2(rp.manodopera)+'</b><span></span></div>'
         +'<div class="spesa-row"><span>di cui oneri della sicurezza</span><b>'+eur2(rp.sicurezza)+'</b><span></span></div>';
     }
-    box.innerHTML=h+piede
-      /* ⚠️ 19 agosto 2026 — detto da Alessio guardando lo schermo: «non si
-         capisce niente, è tutto unito e niente li distingue». Erano quattro
-         pulsanti senza bordo, testo grigio, a 14 px l'uno dall'altro: una
-         riga di testo, non quattro cose da cliccare. La classe comp-azioni
-         dà loro un bordo vero e dello spazio (css/gestionale.css). */
+    /* ⚠️ 20 agosto 2026 — UN COMPUTO VUOTO NON È UNA PAGINA VUOTA.
+       Detto da Alessio guardando lo schermo: «aggiungi lavorazione,
+       aggiungi capitolo, messi lì non li capisco, forse perché non sono
+       geometra», «oppure sono messi così in basso da non essere
+       abbastanza visibili».
+       Erano tre pulsantini identici sotto una riga «Totale del computo
+       0,00 €»: tre strade con la stessa faccia, e la più importante —
+       caricare il file che ti ha mandato il geometra — stava in mezzo,
+       in fondo, dopo un totale che diceva zero.
+       Su un computo ancora senza niente adesso c'è UNA cassetta grande
+       con DUE strade, e si vede subito qual è la prima.
+       ⛔ La casella del file (#comp-file) deve esserci in UNO dei due
+          rami, mai in tutti e due: due caselle con lo stesso id e il
+          caricamento prende quella sbagliata. */
+    const _niente=!compVociCache.length&&!compCapCache.length;
+    const _fileIn='<input type="file" id="comp-file" accept=".xlsx,.xlsm,.xls,.csv,.pdf" style="display:none">';
+    const _cassetta=
+       '<div class="co-vuoto">'
+      +  '<div class="co-vuoto-ic">\ud83d\udcd0</div>'
+      +  '<h4>Qui dentro non c\'è ancora niente</h4>'
+      +  '<p>'+(ruoloUtente==='professionista'
+            ? 'Le lavorazioni sono le righe del computo. Puoi importarle da un Excel oppure scriverle una per una.'
+            : 'Se il geometra ti ha mandato il suo computo, caricalo: le lavorazioni entrano da sole con le loro quantità. Se no, scrivile tu, una per una.')+'</p>'
+      +  '<div class="co-vuoto-due">'
+      +    '<button type="button" class="btn-primary" data-action="comp-importa">\u2b06 '
+      +      (ruoloUtente==='professionista'?'Importa le lavorazioni da Excel':'Carica qui il computo del geometra')+'</button>'
+      +    '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Le scrivo io, una per una</button>'
+      +  '</div>'
+      +  _fileIn
+      +  (compCapNuovo?'':'<div class="co-vuoto-poi"><button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>'
+      +    '<span>I capitoli servono a raggruppare le lavorazioni (Demolizioni, Murature…). Si possono mettere anche dopo.</span></div>')
+      +'</div>';
+
+    box.innerHTML=(_niente ? _cassetta : (h+piede
       +'<div class="comp-azioni">'
       +  '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Aggiungi lavorazione</button>'
       /* ⚠️ 18 agosto 2026 — quando il computo te lo manda gia' fatto un
@@ -15864,6 +16007,7 @@ ${vecchi?`
       /* il resoconto dell'ultima passata del prezzario: sta qui sotto e non in
          una finestrella, perché è un elenco che si legge con calma. Si vede
          solo sul computo su cui è stato fatto. */
+      ))
       +((compPrzEsito&&String(compPrzEsitoId||"")===String(computoId))?compPrzEsito:"")
       /* il capitolo si aggiunge con un campo qui dentro, non con una
          finestrella del browser: e' la stessa forma delle misure e delle spese */
@@ -15876,7 +16020,7 @@ ${vecchi?`
           +'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-annulla">Annulla</button>'
           +'</div></div>'
         : '')
-      +'<div class="sh-nota">Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.</div>';
+      +(_niente?'':'<div class="sh-nota">Clicca una lavorazione per aprirla e scriverci le misure. La quantità la calcola il gestionale dalle misure: non si scrive a mano.</div>');
     if(compCapNuovo){const i=$("#cc-tit");if(i)i.focus();}
     if(compCapEdit){const i=$("#ce-tit");if(i){i.focus();i.select();}}
     /* le lavorazioni sono appena cambiate, quindi è cambiato il Totale A: il
@@ -19741,6 +19885,22 @@ ${vecchi?`
       return;
     }
     if(!res.data||!res.data.length){toast("Non salvato: nessuna riga scritta. Riprova.");return;}
+    /* ⚠️ 20 agosto 2026 — DOPO «Crea computo» LA FINESTRA SI RIAPRE.
+       Prima si chiudeva: restavi davanti all'elenco con una riga nuova e
+       nessuna idea di cosa fare adesso. Il computo appena creato e' VUOTO —
+       il passo successivo e' sempre lo stesso, mettergli dentro le
+       lavorazioni — quindi ce lo si porta dentro noi, sulla pagina 1.
+       Solo alla CREAZIONE (!id): su un Salva normale chiudere e' giusto. */
+    if(!id&&!qePerso&&res.data[0]&&res.data[0].id){
+      await renderComputi();
+      rinfresca("riepilogo");
+      const nuovo=(compCache||[]).find(x=>String(x.id)===String(res.data[0].id));
+      if(nuovo){
+        toast("Computo creato ✔ — adesso mettici le lavorazioni");
+        await computoForm(nuovo);
+        return;
+      }
+    }
     closeSheet();
     await renderComputi();
     rinfresca("riepilogo");
@@ -20619,6 +20779,7 @@ ${vecchi?`
     if(a==="del-computo")return delComputo(id);
     if(a==="comp-pdf")return computoPdf(id);
     if(a==="comp-gara")return computoListaGara(id);
+    if(a==="co-pag")return compPag(+t.dataset.p);
     if(a==="comp-importa")return compApriFile();
     if(a==="cp-metti")return compPdfMetti();
     if(a==="cp-tutte"){$$("#cp-lista .cp-ck").forEach(x=>{x.checked=true;});return;}

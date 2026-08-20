@@ -1029,7 +1029,12 @@
   .sheet--grande .sh-body{flex:1 1 auto; min-height:0; overflow-y:auto; padding:20px 22px}
   /* piede fisso: Salva e Annulla sempre a portata di clic */
   .sheet--grande .sh-foot{
-    flex:0 0 auto; display:flex; gap:10px; justify-content:flex-end;
+    /* 20 agosto 2026 — «flex-wrap:wrap». Nel computo in fondo ci sono cinque
+       pulsanti: senza il ritorno a capo si stringevano l'uno sull'altro e le
+       parole si sovrapponevano («Controlla prima di mandarla» finiva SOPRA
+       «Falla leggere anche all'AI»). Meglio due righe che due scritte
+       incastrate: un pulsante che non si legge non e' un pulsante. */
+    flex:0 0 auto; display:flex; flex-wrap:wrap; row-gap:10px; gap:10px; justify-content:flex-end;
     padding:13px 22px; border-top:1px solid var(--bordo); background:var(--card);
   }
   .sheet--grande .sh-foot .btn,.sheet--grande .sh-foot .btn-primary{min-width:124px}
@@ -1307,6 +1312,80 @@
 @media(max-width:760px){
   .cp-riga .cp-campi{ grid-template-columns:1fr 1fr; }
   .cp-riga{ padding:13px 13px; }
+}
+
+/* ================================================================
+   20 agosto 2026 — LA BARRA DEL COMPUTO (la «scala»)
+   ================================================================
+   Idea di Alessio: «io volevo un gestionale schematico a gradoni».
+   La finestra del computo era una pagina sola, lunghissima, con il SAL
+   in bella vista in cima (l'ultima cosa che fai) e le lavorazioni
+   sepolte in fondo. Adesso in alto c'e' una barra numerata e si vede
+   una pagina per volta.
+
+   PERCHE' IL NUMERO NEL PALLINO: dice l'ORDINE. Una barra con cinque
+   parole non dice da dove si comincia; «1 Lavorazioni» si'.
+   Quando le lavorazioni ci sono, l'1 diventa una spunta verde.
+
+   PERCHE' LE VOCI SPENTE RESTANO VISIBILI (grigie, non nascoste):
+   chi apre un computo nuovo deve vedere che dopo c'e' altro, se no
+   crede di aver finito. Premendole dicono perche' sono spente.
+
+   ⛔ .copag NON si ridisegna: si nasconde con display:none. Le caselle
+      del modulo devono restare nel documento anche mentre guardi
+      un'altra pagina, se no il salvataggio le legge vuote.
+   ================================================================ */
+.conav{
+  display:flex; gap:0; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  border-bottom:1px solid var(--bordo); background:#FBFCFD;
+  margin:-4px -4px 18px; padding:0 4px;
+  position:sticky; top:-1px; z-index:4;
+}
+.conav-v{
+  flex:0 0 auto; display:flex; align-items:center; gap:9px; white-space:nowrap;
+  font-family:inherit; font-size:15.5px; font-weight:600; color:var(--testo-2);
+  background:none; border:none; border-bottom:3px solid transparent;
+  padding:14px 15px; cursor:pointer;
+}
+.conav-v:hover{ color:var(--testo); }
+.conav-n{
+  display:grid; place-items:center; width:25px; height:25px; flex:0 0 25px;
+  border-radius:50%; background:#E9EDF2; color:var(--testo-2);
+  font-size:14px; font-weight:800;
+}
+.conav-v.on{ color:var(--blu); border-bottom-color:var(--blu); }
+.conav-v.on .conav-n{ background:var(--blu); color:#fff; }
+.conav-n.fatto{ background:var(--ok); color:#fff; }
+.conav-v.on .conav-n.fatto{ background:var(--ok); color:#fff; }
+.conav-v.spento{ color:var(--testo-3); }
+.conav-v.spento .conav-n{ background:#F0F2F5; color:var(--testo-3); }
+
+/* una pagina per volta */
+.copag{ display:none; }
+.copag.on{ display:block; }
+
+/* ---- il computo ancora vuoto: UNA cassetta, DUE strade ----
+   Prima erano tre pulsantini identici sotto un «Totale 0,00 €».
+   Alessio: «aggiungi lavorazione, aggiungi capitolo, messi lì non li
+   capisco», «sono messi così in basso da non essere abbastanza visibili».
+   Il primo pulsante è pieno di blu perché è la prima cosa da fare;
+   il secondo è la strada lunga; il capitolo sta sotto, piccolo, perché
+   si può fare anche dopo. */
+.co-vuoto{
+  border:2px dashed var(--bordo-forte); border-radius:var(--r-card);
+  background:#FBFCFD; padding:34px 24px; text-align:center;
+}
+.co-vuoto-ic{ font-size:38px; line-height:1; }
+.co-vuoto h4{ margin:12px 0 6px; font-size:20px; font-weight:800; color:var(--testo); }
+.co-vuoto p{ margin:0 auto 20px; max-width:560px; font-size:15.5px; line-height:1.55; color:var(--testo-2); }
+.co-vuoto-due{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.co-vuoto-due .btn-primary{ font-size:16.5px; padding:14px 22px; }
+.co-vuoto-poi{ margin-top:22px; padding-top:18px; border-top:1px solid var(--bordo); }
+.co-vuoto-poi span{ display:block; margin-top:8px; font-size:14px; color:var(--testo-3); }
+
+@media(max-width:760px){
+  .conav{ margin:-4px -14px 14px; padding:0 8px; }
+  .conav-v{ font-size:15px; padding:13px 11px; gap:7px; }
 }
 
 /* ⚠️ 20 agosto 2026 — l'ICONA NON si spegne piu' sulle schede vuote.
@@ -2635,9 +2714,17 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
    Non lo sposto e non lo nascondo (e' un pezzo che non e' mio e domani
    potrebbe cambiare): gli lascio il suo angolo libero, e i pulsanti si
    fermano prima. */
-.sheet--grande:has(.sh-cols) .sh-foot{ padding-right:104px; }
+/* ⚠️ 20 agosto 2026 — ERRORE MIO, e me ne sono accorto guardando la foto.
+   Questa regola era agganciata a .sh-cols. La finestra del computo le due
+   colonne non ce le ha piu' (adesso ha la barra e le pagine .copag): senza
+   aggiungere .copag qui, il «Salva» del computo tornava sotto il fumetto
+   della chat. Una regola agganciata al NOME di un pezzo si rompe il giorno
+   che quel pezzo cambia nome: qui vale per tutte e due. */
+.sheet--grande:has(.sh-cols) .sh-foot,
+.sheet--grande:has(.copag)   .sh-foot{ padding-right:104px; }
 @media(max-width:900px){
-  .sheet--grande:has(.sh-cols) .sh-foot{ padding-right:84px; }
+  .sheet--grande:has(.sh-cols) .sh-foot,
+  .sheet--grande:has(.copag)   .sh-foot{ padding-right:84px; }
 }
 
 /* 16 agosto 2026 (3) — LE AZIONI SUL DOCUMENTO, IN ALTO ACCANTO AL TITOLO.
