@@ -10456,3 +10456,166 @@ pratica comincia il», il Salva sotto il fumetto della chat, il codice di
 tariffa colorato di rosso, il testo del prezzario riscritto. **Chiedere le
 foto è la prova più economica che abbiamo.** Chiederle sempre, dopo ogni
 consegna.
+
+---
+
+## DOVE SIAMO RIMASTI (21 agosto 2026)
+
+**Fatto oggi: i due PDF che mancavano.** Due push.
+
+1. **Il PDF del cronoprogramma** (voce 6) — foglio **orizzontale**: le fasi,
+   i giorni, le date, le barre sul calendario con i mesi scritti sopra, il
+   riquadro coi giorni di lavoro e la data di consegna, e la firma.
+2. **Il PDF del computo di variante** (voce 7) — cambiate, aggiunte, tolte,
+   ognuna con «prima» e «adesso», e in fondo partenza · variante · differenza
+   con la percentuale. Due firme: committente e impresa.
+3. I pulsanti: **«Scarica il cronoprogramma»** in fondo alla pagina 6 e
+   **«Scarica il computo di variante»** in fondo alla pagina 7.
+
+⛔ **NIENTE SQL.** I due fogli non chiedono al database niente che non ci
+fosse già: `sql/gest-computo-cronoprogramma.sql` e
+`sql/gest-computo-variante.sql` erano già stati eseguiti il 20 agosto.
+
+---
+
+### LE REGOLE NUOVE (nate da difetti veri di oggi)
+
+**1. Una formula sta in UN POSTO SOLO, e adesso i posti sono due: lo schermo
+e la carta.** Il foglio stampato NON rifà nessun conto: chiama `cronoDate`,
+`cronoScala`, `_cgBarraPerc`, `_cgGiorniLav`, `varConfronta` — le stesse che
+disegnano lo schermo. Per farlo sono state estratte funzioni nuove da quelle
+che c'erano:
+
+- `_cgBarraPerc(r,primo,arco)` → dove comincia e quanto è larga una barra, in
+  percentuale. La usano `_cgBarra` (schermo) e `cronoPdf` (carta).
+- `_cgGiorniLav(primo,ultimo)` → i giorni di lavoro. La usano `_cgTotale`
+  (la riga blu) e `cronoPdf`.
+- `cronoScala(righe)` → primo giorno, ultimo giorno, arco. Erano tre righe
+  copiate in `renderCrono` e `cronoAnteprima`: col PDF sarebbero diventate
+  tre copie.
+- `_cgGiorno(y,m,g)` → **l'ora di tutte le date del cronoprogramma si decide
+  qui**: mezzogiorno. Prima stava dentro `_cgData`; `cronoMesi` se la sarebbe
+  scritta per conto suo, e bastava cambiarne una per far ballare di un'ora i
+  conti dei giorni.
+
+**2. Il foglio esce da quello che è SALVATO, non dalle caselle.**
+`cronoModifiche(id)` confronta le caselle con le durate lette dal database:
+se qualcosa è cambiato, ci si ferma e si dice di salvare. Senza, bastava
+cambiare i giorni di una fase e premere subito il PDF per portare in gara un
+calendario diverso da quello sullo schermo. È la stessa rete che ha già il
+SAL (`salModifiche`).
+
+**3. Prima di stampare la variante si fa la prova del nove.** Le righe
+stampate (cambiate + aggiunte − tolte) devono fare **esattamente** la
+differenza del riquadro in fondo. Se non la fanno, il foglio non esce: meglio
+nessun PDF che un PDF che non dimostra il suo stesso totale.
+
+**4. ⚠️ IL NOME DI UN PULSANTE SI GUARDA SULLA SCHERMATA INTERA, NON SULLA
+PAGINA DA SOLA.** I due pulsanti nuovi si chiamavano tutti e due «Scarica il
+PDF» — e in cima alla stessa schermata c'era già un «Scarica il PDF» che
+scarica il computo metrico. Tre pulsanti, stesso nome, tre documenti diversi.
+Visto da Alessio in una foto; il banco leggeva la pagina 6 da sola.
+
+**5. `.sh-nota` nasce con `margin-top:-4px`.** Sta bene sotto una casella,
+non sotto una fila di pulsanti: lì la scritta grigia risulta incollata.
+Rimediato con `.cg-salva + .sh-nota` e `.var-stampa + .sh-nota`.
+
+---
+
+### DIFETTI VECCHI TROVATI PER STRADA
+
+- ✅ **«Lista per la gara»: sopra ogni gruppo c'era scritto sempre
+  «Capitolo».** Il codice cercava `g.cap.nome`, ma nel database il capitolo
+  si chiama `titolo` (e `numero`). Nel PDF del computo era già giusto: era
+  sbagliato solo lì. Sistemato.
+- ✅ **Le migliaia senza il punto sul foglio della variante.** Sul primo
+  foglio uscito dal banco si leggeva «€ 11.001,00» nel riquadro e «2220,00»
+  due colonne più su. È lo stesso difetto del 19 agosto sul quadro economico:
+  `Intl` in italiano mette il punto solo dai cinque numeri in su.
+  ⚠️ **`useGrouping:true` va messo su OGNI helper di numeri di OGNI PDF**,
+  non solo su quello dei totali.
+- ✅ **«le 1 righe rimaste uguali».** Il singolare mancava.
+
+⛔ **RESTANO DUE RIGHE, nella sola «Lista per la gara» (`computoListaGara`):**
+il **telefono non si stampa mai** (il codice cerca `az.telefono`, la colonna
+si chiama `az.tel`) e l'indirizzo esce **senza CAP, città e provincia**
+(usa `az.indirizzo` invece di `azIndirizzo(az)`). Detto ad Alessio, non
+ancora fatto.
+
+---
+
+### COME SONO STATI PROVATI
+
+I banchi stanno nel contenitore di Claude, in `prove/`, e vanno rifatti ogni
+sessione. Le funzioni si prendono **dal file vero** con `estrai.js` /
+`estrai-pdf.js`: niente copia-incolla a mano.
+
+- **`banco.js` — 70 verdi.** Le date, il parallelo, i mesi, il confronto
+  della variante. Su una ristrutturazione bagno vera (sei fasi) e su un
+  rifacimento tetto vero. Compreso il giro su **sette fusi orari** con l'ora
+  legale che cambia di notte.
+- **`banco-fogli.js` — 101 verdi.** `cronoPdf` e `variantePdf` girano per
+  davvero con **jsPDF 2.5.1** (la stessa versione che scarica il gestionale),
+  e il PDF si **rilegge** con `pdftotext`: se una cosa non c'è scritta sopra,
+  non c'è. ⚠️ **Le barre non stanno nel testo**: si leggono i rettangoli dal
+  flusso del PDF e si confrontano coi numeri di `_cgBarraPerc`. Senza questo,
+  un sabotaggio che sposta tutte le barre lasciava il banco verde.
+  Provati anche 40 fasi e 45 righe cambiate: il foglio si spezza e
+  l'intestazione si ripete.
+- **`banco-parole.js` — 23 verdi.** I messaggi dei due fogli si prendono dal
+  file vero e si fanno passare dal traduttore vero (`_swapPratiche`): se uno
+  cambia per uno studio tecnico, è rosso. Nasce da «Il pratica comincia il».
+- **`banco-uguale.js` — 4 verdi.** ⚠️ **La versione di IERI contro quella di
+  OGGI**, su 4.000 cantieri finti: **19.580 barre confrontate, tutte
+  identiche**, più 800 confronti di variante. È la prova che il riordino
+  delle funzioni non ha cambiato niente a schermo.
+- **`apri.js` — 16 verdi.** La pagina si apre in Chromium a 1440×900 e
+  390×844: zero errori JavaScript, zero id doppi, niente testo sotto i 13 px.
+- **`sabotaggi.js` — 22 su 22 accusati.**
+- **`sabotaggi-fogli.js` — 22 su 22 accusati.**
+
+**Totale: 214 verdi · 44 sabotaggi, 42 accusati.**
+
+⚠️ **I DUE SABOTAGGI DICHIARATI**, che il banco NON fa diventare rossi:
+1. tutte le date tenute a **mezzanotte** invece che a mezzogiorno (era già
+   dichiarato il 20 agosto: provato su cinque fusi e sette anni, zero
+   differenze — il mezzogiorno resta perché non costa niente);
+2. l'`i>0` tolto dal controllo del parallelo: sulla prima fase i due rami
+   finiscono nello stesso punto.
+Non si scrive «provata» una cosa che il banco non accusa.
+
+⚠️ **UNA TRAPPOLA DEL BANCO, non del gestionale:** `JSON.stringify(Infinity)`
+vale `"null"`. Il sabotaggio «la percentuale si calcola anche con la partenza
+a zero» restava verde perché il confronto passava da `JSON.stringify`. Su
+`Infinity`, `NaN` e `-0` si confronta con `===`, mai con `JSON.stringify`.
+
+⚠️ **E UNA DI jsPDF:** `class X extends jsPDF` **non funziona** — il
+costruttore restituisce un oggetto suo e il `save` della sottoclasse non
+viene mai chiamato. Il PDF si generava e il banco non lo vedeva. Si avvolge
+l'istanza, non si eredita.
+
+---
+
+**DA FARE, IN QUESTO ORDINE** — la direzione non cambia: «prima si
+costruisce la casa poi si vende». Il gestionale è chiuso
+(`MANUTENZIONE = true`). Prezzo, clienti e incasso NON sono l'argomento.
+
+1. **L'analisi dei prezzi** — quando una lavorazione non sta nel prezzario:
+   materiali, manodopera, noli, spese generali, utile. Piccola-media, e apre
+   i professionisti. **È la prossima.**
+2. Le due righe della «Lista per la gara» (telefono e indirizzo, qui sopra).
+3. Il POS (⚠️ solo con un consulente vero) · la contabilità pubblica
+   completa (⚠️ prima **contare** quanti studi fanno direzione lavori) · i
+   formati di scambio · il computo da una foto (⚠️ prima **chiedere a
+   un'impresa come le arriva il computo**).
+4. Il sito e le cose rotte: l'errore JavaScript sulla homepage
+   (`PAGINE_REGISTRAZIONE`, ⚠️ guardare **l'iniezione di Netlify**) · il
+   contatore delle visite · la descrizione schiacciata a 390 px sui
+   preventivi · il limite di misura su `cv-candidati`/`registrazioni` · le 95
+   pagine città vuote · l'email vera alle 87 imprese · il grafico dell'admin.
+
+⚠️ **LA COSA PIÙ UTILE, ANCORA OGGI:** i due difetti che i banchi non hanno
+visto li ha visti **Alessio in una foto dello schermo** — i tre pulsanti con
+lo stesso nome e la scritta incollata. Un banco legge la pagina che gli dici
+di leggere; una foto mostra la schermata intera. **Chiedere la foto dopo ogni
+consegna, sempre.**
