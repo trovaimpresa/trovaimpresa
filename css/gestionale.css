@@ -1457,6 +1457,52 @@
 .var-stampa + .sh-nota{ margin-top:14px; }
 
 /* ================================================================
+   21 agosto 2026 — L'ANALISI DEI PREZZI
+   ================================================================
+   I gruppi (Materiali · Manodopera · Noli) separati, e in fondo il
+   conto: costi → spese generali → utile → prezzo. Il prezzo in
+   fondo è la cosa che si guarda: sta su fondo blu e in grande.
+   ================================================================ */
+.an-grp{
+  display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  margin:18px 0 6px; padding-bottom:6px; border-bottom:1px solid var(--bordo);
+  font-size:15px; font-weight:800; letter-spacing:.02em; color:var(--testo-2);
+  text-transform:uppercase;
+}
+/* ⚠️ il totale del gruppo si allinea con gli IMPORTI delle righe, non col
+   pulsante di eliminazione: 16 di bordo + 44 di pulsante + 12 di stacco.
+   Due colonne di numeri che non si allineano si leggono male, e qui i
+   numeri sono la cosa che si guarda. */
+.an-grp b{ font-size:17px; color:var(--testo); margin-right:73px; }
+@media(max-width:760px){ .an-grp b{ margin-right:70px; } }
+
+.an-conto{
+  margin-top:20px; border:1px solid var(--bordo); border-radius:var(--r-card);
+  overflow:hidden; background:var(--card);
+}
+.an-r{
+  display:flex; justify-content:space-between; align-items:center; gap:14px;
+  padding:13px 16px; font-size:17px; border-bottom:1px solid var(--bordo);
+}
+.an-r:last-child{ border-bottom:none; }
+.an-lab{ display:flex; align-items:center; gap:8px; }
+/* la casella della percentuale sta DENTRO la riga: si cambia dove si legge,
+   senza andarla a cercare da un'altra parte */
+.an-r input.an-perc{
+  width:86px; text-align:right; font-size:17px; padding:9px 11px;
+  border:1px solid var(--bordo-forte); border-radius:10px; background:var(--card);
+  font-family:inherit; color:var(--testo);
+}
+.an-r.an-tot{ background:var(--blu-tenue); padding:18px 16px; }
+.an-r.an-tot span{ font-size:18px; font-weight:800; color:var(--blu-scuro); }
+.an-r.an-tot b{ font-size:24px; color:var(--blu-scuro); }
+
+@media(max-width:760px){
+  .an-r{ font-size:16px; padding:12px 13px; }
+  .an-r.an-tot b{ font-size:21px; }
+}
+
+/* ================================================================
    20 agosto 2026 — IL COMPUTO DI VARIANTE: cosa è cambiato
    ================================================================
    Tre elenchi (cambiate · aggiunte · tolte) e in fondo i tre numeri.

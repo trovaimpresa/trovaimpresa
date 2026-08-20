@@ -16883,7 +16883,12 @@ ${vecchi?`
       +  '</div>'
       +  '<div class="field"><label>Descrizione</label><textarea id="cv-desc" rows="4" placeholder="Come la scrive il prezzario, per esteso">'+esc(v.descrizione||"")+'</textarea></div>'
       +  '<div class="row2">'
-      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo"'+_noAuto()+' value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="18,50"></div>'
+      +    '<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="cv-prezzo"'+_noAuto()+' value="'+(v.prezzo_unitario!=null?_prezzoTesto(v.prezzo_unitario):"")+'" placeholder="18,50">'
+      /* ⚠️ se la lavorazione ha l'analisi, questa casella non comanda piu'
+         niente: si spegne e mostra il prezzo costruito (vedi
+         anPrezzoCasella). Una casella che si puo' scrivere e che non serve
+         a nulla e' peggio che non averla. */
+      +      '<div class="sh-nota" id="cv-prezzo-nota" style="display:none;margin-top:6px">Questo prezzo lo fa <b>l\'analisi</b> qui a fianco: per cambiarlo, cambia le sue righe.</div></div>'
       +    '<div class="field"><label>Capitolo</label><select id="cv-cap">'+capOpts+'</select></div>'
       +  '</div>'
       +'</div>'
@@ -16920,6 +16925,18 @@ ${vecchi?`
           ? '<div class="lm-vuoto">Salva prima la lavorazione: poi qui ci scrivi le misure, una riga per ogni pezzo.</div>'
           : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
       +'</div>'
+      /* ============================================================
+         21 agosto 2026 — L'ANALISI DEI PREZZI, sotto le misure.
+         Sta qui e non a sinistra perche' e' la stessa domanda: le misure
+         dicono QUANTO, l'analisi dice QUANTO COSTA. E perche' a sinistra
+         c'e' l'anagrafica della lavorazione, che si compila una volta
+         sola; queste due si guardano insieme e si toccano di continuo.
+         ============================================================ */
+      +'<div class="sh-b"><div class="sh-tit">Come è fatto il prezzo</div>'
+      +  '<div class="lav-media" id="cv-analisi">'+(isNew
+          ? '<div class="lm-vuoto">Salva prima la lavorazione: poi, se non sta nel prezzario, qui ci costruisci il prezzo.</div>'
+          : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
+      +'</div>'
       +'</div></div>',
 
        '<button class="btn b-cancel" data-action="comp-torna">← Torna al computo</button>'
@@ -16943,7 +16960,8 @@ ${vecchi?`
     if(_ce){_ce.oninput=function(){clearTimeout(ppTimer);ppTimer=setTimeout(ppCerca,250);};}
     ppFonteScelta=null;      /* la prende ppRiempiFonti dal computo */
     ppCerca(true);
-    if(!isNew)renderCompMisure(v.id);
+    anEditId=null;
+    if(!isNew){renderCompMisure(v.id);renderAnalisi(v.id);}
   }
 
   /* ---- il prezzario personale (tabella gest_prezzi_propri) ---- */
@@ -17321,6 +17339,260 @@ ${vecchi?`
     toast("Misura eliminata");
   }
 
+  /* ============================================================
+     21 agosto 2026 — L'ANALISI DEI PREZZI
+     ============================================================
+     Quando una lavorazione NON sta nel prezzario, il prezzo non te lo puoi
+     inventare: lo devi costruire e far vedere come. Si mettono in fila i
+     costi diretti — materiali, Manodopera, noli — poi le SPESE GENERALI
+     (13-17%) e l'UTILE dell'impresa (10%). Sui lavori pubblici quelle due
+     percentuali le dice la legge.
+
+     ⛔ L'ANALISI E' SEMPRE PER UNA UNITA' DI MISURA.
+        Se la lavorazione si misura al metro quadro, qui dentro si scrive
+        quanto costa UN metro quadro. La quantita' totale la mette il
+        computo con le misure, qui sopra. E' l'errore piu' facile da fare
+        e sul foglio si vede subito, perche' il prezzo esce fuori scala di
+        cento volte: per questo la frase sta in cima al blocco e non in
+        fondo, dove non la legge nessuno.
+
+     ⛔ IL CONTO NON E' QUI. Lo fa il database (vista gest_analisi_totali,
+        vedi sql/gest-analisi-prezzi.sql). Questa schermata LEGGE il
+        risultato, non lo rifa'. E' la stessa scelta della quantita' delle
+        lavorazioni e delle date del cronoprogramma: un conto scritto in
+        due posti prima o poi dice due cose diverse.
+
+     ⚠️ «Manodopera» va scritta con la MAIUSCOLA. Per gli studi tecnici il
+        gestionale riscrive «manodopera» in «tempo speso» (vedi _FRASI), e
+        su un'analisi dei prezzi il termine giusto e' quello di legge.
+        Con la maiuscola il traduttore non la tocca. Provato nel banco
+        delle parole.
+     ============================================================ */
+  let anCache=[], anTot=null, anEditId=null, anSalvo=false, anAttiva=false;
+
+  const AN_TIPI=[["materiale","Materiali"],["manodopera","Manodopera"],
+                 ["nolo","Noli e mezzi"],["altro","Altro"]];
+
+  /* ⚠️ UNA TABELLA, NON UNA FILA DI SOSTITUZIONI. 21 agosto 2026.
+     Qui c'era «uni.replace(...).replace(...)» una decina di volte per
+     trasformare «m²» in «metro quadro». Le sostituzioni dopo la prima
+     mordevano DENTRO la parola gia' scritta: la «t» di «metro» diventava
+     «tonnellata», la «l» diventava «litro», la «q» «quintale», e sullo
+     schermo si leggeva «un metonnelitrolataro quintaleuadro». Visto nella
+     schermata vera, non nel codice.
+     Con la tabella c'e' anche l'articolo giusto: un'ora, una tonnellata. */
+  const AN_UNO={ "m":"un metro", "m²":"un metro quadro", "m³":"un metro cubo",
+                 "kg":"un chilo", "q":"un quintale", "t":"una tonnellata",
+                 "cad":"un pezzo", "n.":"un pezzo", "corpo":"un corpo",
+                 "ora":"un'ora", "giorno":"una giornata", "l":"un litro" };
+  const _anLab=t=>(AN_TIPI.find(x=>x[0]===t)||["","Altro"])[1];
+
+  /* la casella «Prezzo unitario» qui a fianco: se il prezzo lo costruisce
+     l'analisi, quella casella non comanda piu' niente. Si spegne e mostra
+     il numero vero, invece di restare scrivibile e non servire a nulla. */
+  function anPrezzoCasella(){
+    const inp=$("#cv-prezzo"), nota=$("#cv-prezzo-nota");
+    if(!inp)return;
+    if(anAttiva&&anTot){
+      inp.value=_prezzoTesto(anTot.prezzo);
+      inp.disabled=true;
+      inp.style.opacity="0.65";
+      if(nota){nota.style.display="";}
+    }else{
+      inp.disabled=false;
+      inp.style.opacity="";
+      if(nota){nota.style.display="none";}
+    }
+  }
+
+  async function renderAnalisi(voceId){
+    const box=$("#cv-analisi"); if(!box)return;
+    if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
+
+    const [rr,rt]=await Promise.all([
+      sb.from("gest_analisi_righe").select("*").eq("user_id",sbUid).eq("voce_id",voceId).order("ordine"),
+      sb.from("gest_analisi_totali").select("*").eq("user_id",sbUid).eq("voce_id",voceId).maybeSingle()
+    ]);
+    /* ⚠️ se l'aggiornamento del database non e' stato eseguito NON si mostra
+       una schermata vuota che sembra funzionante: si dice cosa eseguire.
+       Stessa scelta del cronoprogramma e della variante. */
+    if(rr.error){
+      anAttiva=false; anTot=null; anPrezzoCasella();
+      box.innerHTML='<div class="lm-vuoto">'
+        +(/gest_analisi|does not exist|schema cache|relation/i.test(String(rr.error.message||""))
+          ? 'Per l\'analisi dei prezzi serve l\'aggiornamento del database: esegui <b>sql/gest-analisi-prezzi.sql</b> su Supabase.'
+          : 'Non riesco a leggere l\'analisi: '+esc(rr.error.message))+'</div>';
+      return;
+    }
+    anCache=rr.data||[];
+    anTot=(rt&&!rt.error)?(rt.data||null):null;
+    anAttiva=!!(anTot&&(+anTot.righe||0)>0);
+    anPrezzoCasella();
+
+    const uni=(($("#cv-uni")&&$("#cv-uni").value)||"").trim();
+    const perUno=AN_UNO[uni]||(uni?("una unità di "+uni):"una unità");
+
+    let h='<div class="sh-nota" style="margin-top:0"><b>Serve solo se la lavorazione non sta nel prezzario.</b><br>'
+      +'Qui dentro si scrive quello che serve per fare <b>'+esc(perUno)+'</b>: non tutta la lavorazione. '
+      +'La quantità totale la mettono le misure qui sopra.</div>';
+
+    if(!anCache.length){
+      h+='<div class="co-vuoto"><div class="co-vuoto-ic">🧮</div>'
+        +'<h4>Il prezzo si costruisce</h4>'
+        +'<p>Aggiungi qui sotto i materiali, le ore e i noli che servono per <b>'+esc(perUno)+'</b>. '
+        +'Il gestionale ci mette le spese generali e l\'utile, e il prezzo della lavorazione diventa quello.</p></div>';
+    }else{
+      /* le righe, raggruppate: su un'analisi di gara i tre gruppi vanno
+         separati, non messi in fila uno dietro l'altro */
+      AN_TIPI.forEach(function(t){
+        const righe=anCache.filter(r=>r.tipo===t[0]);
+        if(!righe.length)return;
+        const sub=righe.reduce((s,r)=>s+(+r.quantita||0)*(+r.prezzo_unitario||0),0);
+        h+='<div class="an-grp"><span>'+t[1]+'</span><b>'+eur2(sub)+'</b></div>';
+        righe.forEach(function(r){
+          const imp=(+r.quantita||0)*(+r.prezzo_unitario||0);
+          h+='<div class="spesa-row" data-action="an-edit" data-id="'+esc(String(r.id))+'"'
+            +(String(r.id)===String(anEditId)?' style="cursor:pointer;background:var(--sfondo,#f5f6f8)"':' style="cursor:pointer"')
+            +'><span>'+esc(r.descrizione||"(senza nome)")
+            +'<small class="sp-forn">'+_misTesto(r.quantita)+(r.unita?" "+esc(r.unita):"")
+            +' × '+eur2(r.prezzo_unitario)+'</small></span>'
+            +'<b>'+eur2(imp)+'</b>'
+            +'<button type="button" class="rdel" data-action="an-del" data-id="'+esc(String(r.id))+'" title="Elimina la riga">×</button></div>';
+        });
+      });
+
+      /* il conto: viene dal database, non si rifà qui */
+      const t=anTot||{};
+      h+='<div class="an-conto">'
+        +'<div class="an-r"><span>Costi diretti</span><b>'+eur2(t.costi)+'</b></div>'
+        +'<div class="an-r"><span class="an-lab">Spese generali'
+        +  '<input type="text" inputmode="decimal" class="an-perc" id="an-sp"'+_noAuto()
+        +  ' value="'+esc(_pct(t.spese_perc))+'" title="dal 13 al 17%">%</span><b>'+eur2(t.spese)+'</b></div>'
+        +'<div class="an-r"><span class="an-lab">Utile'
+        +  '<input type="text" inputmode="decimal" class="an-perc" id="an-ut"'+_noAuto()
+        +  ' value="'+esc(_pct(t.utile_perc))+'" title="di legge il 10%">%</span><b>'+eur2(t.utile)+'</b></div>'
+        +'<div class="an-r an-tot"><span>Prezzo per '+esc(perUno)+'</span><b>'+eur2(t.prezzo)+'</b></div>'
+        +'</div>'
+        +'<div class="sh-nota">L\'utile si calcola su <b>costi + spese generali</b>, come vuole un\'analisi. '
+        +'Le percentuali si salvano da sole appena le cambi.</div>';
+    }
+
+    /* il modulo per aggiungere (o correggere) una riga */
+    const inCorr=anCache.find(r=>String(r.id)===String(anEditId))||null;
+    if(anEditId&&!inCorr)anEditId=null;
+    const _v=x=>x==null?"":esc(_misTesto(x));
+    h+='<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
+      +(inCorr?'<div class="sh-tit" style="margin-bottom:8px">Stai correggendo «'+esc(inCorr.descrizione||"(senza nome)")+'»</div>':'')
+      +'<div class="field"><label>Che cosa serve</label><div class="seg" id="an-tipo">'
+      + AN_TIPI.map(function(t){
+          const on=(inCorr?inCorr.tipo:"materiale")===t[0];
+          return '<button data-v="'+t[0]+'"'+(on?' class="on"':'')+'>'+t[1]+'</button>';
+        }).join("")
+      +'</div></div>'
+      +'<div class="field"><label>Descrizione</label><input id="an-desc"'+_noAuto()
+      +' value="'+(inCorr?esc(inCorr.descrizione||""):"")+'" placeholder="Es. Pietra locale a spacco, sp. 3-5 cm"></div>'
+      +'<div class="row2">'
+      +  '<div class="field"><label>Unità</label><input id="an-uni"'+_noAuto()
+      +  ' value="'+(inCorr?esc(inCorr.unita||""):"")+'" placeholder="mq, ora, kg…"></div>'
+      +  '<div class="field"><label>Quantità per '+esc(perUno)+'</label><input type="text" inputmode="decimal" id="an-qta"'+_noAuto()
+      +  ' value="'+(inCorr?_v(inCorr.quantita):"")+'" placeholder="1,05"></div>'
+      +'</div>'
+      +'<div class="field"><label>Prezzo unitario (€)</label><input type="text" inputmode="decimal" id="an-prezzo"'+_noAuto()
+      +' value="'+(inCorr?esc(_prezzoTesto(inCorr.prezzo_unitario)):"")+'" placeholder="42,00" style="max-width:200px"></div>'
+      +'<button type="button" class="btn-primary quick-add" data-action="an-add" data-id="'+esc(String(voceId))+'">'
+      + (inCorr?"Salva la riga":"+ Aggiungi al prezzo")+'</button>'
+      + (inCorr?' <button type="button" class="btn-ghost quick-add" data-action="an-annulla">Annulla la correzione</button>':'')
+      +'<div class="sh-nota">Per la Manodopera la quantità sono le <b>ore</b>: 0,85 ore di muratore per '+esc(perUno)+', non otto ore di giornata.</div>'
+      +'</div>';
+
+    box.innerHTML=h;
+    bindSeg("an-tipo");
+    /* le due percentuali si salvano appena le cambi: sono due numeri, e un
+       pulsante «salva» in più per due numeri è un pulsante che non si preme */
+    ["an-sp","an-ut"].forEach(function(k){
+      const e=$("#"+k);
+      if(e)e.addEventListener("change",function(){ anPerc(voceId); });
+    });
+  }
+
+  /* ⚠️ il chiavistello del doppio clic, come per le misure: Supabase ci mette
+     qualche decimo di secondo, e in quel buco il pulsante resta premibile. */
+  async function anAdd(voceId){
+    if(!sbUid||!voceId)return;
+    if(anSalvo)return;
+    const desc=String(($("#an-desc")&&$("#an-desc").value)||"").trim();
+    if(!desc){toast("Scrivi che cosa serve");return;}
+    const q=_numIt("#an-qta"), p=_numIt("#an-prezzo");
+    if(q==null||!(q>0)){toast("Scrivi la quantità che serve per una unità di lavorazione");return;}
+    if(p==null||p<0){toast("Scrivi il prezzo, e non può essere negativo");return;}
+    const riga={ tipo:(segVal("an-tipo")||"materiale"), descrizione:desc,
+                 unita:String(($("#an-uni")&&$("#an-uni").value)||"").trim()||null,
+                 quantita:q, prezzo_unitario:p };
+    anSalvo=true;
+    const bt=$('[data-action="an-add"]'); if(bt)bt.disabled=true;
+    let res;
+    if(anEditId){
+      res=await sb.from("gest_analisi_righe").update(riga).eq("id",anEditId).eq("user_id",sbUid).select("id");
+    }else{
+      riga.user_id=sbUid; riga.voce_id=voceId;
+      riga.ordine=anCache.reduce((m,x)=>Math.max(m,+x.ordine||0),0)+1;
+      res=await sb.from("gest_analisi_righe").insert(riga).select("id");
+    }
+    anSalvo=false; if(bt)bt.disabled=false;
+    if(res.error){
+      toast(/gest_analisi|does not exist|schema cache|relation/i.test(String(res.error.message||""))
+        ? "Per l'analisi dei prezzi serve l'aggiornamento del database: esegui sql/gest-analisi-prezzi.sql su Supabase"
+        : "Errore: "+res.error.message);
+      return;
+    }
+    if(!res.data||!res.data.length){toast("Non salvata: nessuna riga scritta. Riprova.");return;}
+    anEditId=null;
+    await renderAnalisi(voceId);
+    rinfresca("computi");
+    toast("Prezzo aggiornato ✔");
+  }
+
+  function anEdit(id){ anEditId=(String(anEditId||"")===String(id))?null:id; renderAnalisi(compVoceId); }
+  function anAnnulla(){ anEditId=null; renderAnalisi(compVoceId); }
+
+  async function anDel(id){
+    if(!sbUid)return;
+    const r=anCache.find(x=>String(x.id)===String(id))||{};
+    if(!gconfirm("Tolgo «"+(r.descrizione||"")+"» dal prezzo?"))return;
+    const res=await sb.from("gest_analisi_righe").delete().eq("id",id).eq("user_id",sbUid).select("id");
+    if(res.error){toast("Errore: "+res.error.message);return;}
+    if(!res.data||!res.data.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
+    if(String(anEditId||"")===String(id))anEditId=null;
+    await renderAnalisi(compVoceId);
+    rinfresca("computi");
+    toast("Riga tolta");
+  }
+
+  /* le due percentuali stanno sulla LAVORAZIONE, non sulle righe */
+  async function anPerc(voceId){
+    if(!sbUid||!voceId)return;
+    const sp=_numIt("#an-sp"), ut=_numIt("#an-ut");
+    for(const x of [["Le spese generali",sp],["L'utile",ut]]){
+      if(x[1]!=null&&(!isFinite(x[1])||x[1]<0||x[1]>100)){
+        toast(x[0]+" devono stare fra 0 e 100. Controlla il numero.");
+        await renderAnalisi(voceId);
+        return;
+      }
+    }
+    const res=await sb.from("gest_computo_voci")
+      .update({an_spese_perc:sp, an_utile_perc:ut})
+      .eq("id",voceId).eq("user_id",sbUid).select("id");
+    if(res.error){
+      toast(/an_spese_perc|an_utile_perc/i.test(String(res.error.message||""))
+        ? "Per l'analisi dei prezzi serve l'aggiornamento del database: esegui sql/gest-analisi-prezzi.sql su Supabase"
+        : "Errore: "+res.error.message);
+      return;
+    }
+    await renderAnalisi(voceId);
+    rinfresca("computi");
+    toast("Percentuali salvate ✔");
+  }
+
   async function compVoceSalva(id){
     if(!sbUid||!compVociCompId)return;
     const desc=String(($("#cv-desc")&&$("#cv-desc").value)||"").trim();
@@ -17332,7 +17604,12 @@ ${vecchi?`
       codice:String(($("#cv-cod")&&$("#cv-cod").value)||"").trim()||null,
       descrizione:desc,
       unita:($("#cv-uni")&&$("#cv-uni").value)||null,
-      prezzo_unitario:_numIt("#cv-prezzo")||0,
+      /* ⚠️ se il prezzo lo costruisce l'analisi, la casella qui accanto e'
+         spenta e mostra il numero calcolato: riscriverlo qui vorrebbe dire
+         schiacciare il prezzo scritto a mano con quello dell'analisi, e il
+         giorno che cancelli le righe dell'analisi ti ritroveresti come
+         «prezzo tuo» l'ultimo numero che aveva calcolato lei. */
+      prezzo_unitario:anAttiva?undefined:(_numIt("#cv-prezzo")||0),
       quantita_manuale:aCorpo,
       quantita:aCorpo?(_numIt("#cv-qta")||0):0,
       incidenza_manodopera:$("#cv-mano")?_numIt("#cv-mano"):undefined,
@@ -17342,6 +17619,7 @@ ${vecchi?`
        non li mostra non si scrivono, cosi' non azzerano quello che c'era */
     if(row.incidenza_manodopera===undefined)delete row.incidenza_manodopera;
     if(row.oneri_sicurezza===undefined)delete row.oneri_sicurezza;
+    if(row.prezzo_unitario===undefined)delete row.prezzo_unitario;
     if(!id){
       row.ordine=compVociCache.reduce((m,x)=>Math.max(m,+x.ordine||0),0)+1;
     }
@@ -22144,6 +22422,10 @@ ${vecchi?`
     if(a==="comp-voce-giu")return compVoceSposta(id,1);
     if(a==="comp-voce-salva")return compVoceSalva(id);
     if(a==="comp-torna")return compTornaAlComputo();
+    if(a==="an-add")return anAdd(id);
+    if(a==="an-edit")return anEdit(id);
+    if(a==="an-del")return anDel(id);
+    if(a==="an-annulla")return anAnnulla();
     if(a==="comp-mis-add")return compMisAdd(id);
     if(a==="comp-mis-edit")return compMisEdit(id);
     if(a==="comp-mis-annulla")return compMisAnnulla();
