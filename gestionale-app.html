@@ -1101,7 +1101,23 @@
      cosa ancora. Riguardava 27 tendine.
      Le poche voci FISSE che avevano bisogno della traduzione (Tutti i cantieri,
      scegli il lavoro, Capo) adesso sono tradotte alla fonte con _msgPro. */
-  const _SKIP_UTENTE='option,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
+  /* ⚠️ 20 agosto 2026 (sera) — «.cm-testo» E IL TESTO DEL PREZZARIO.
+     Visto da Alessio in una foto: dentro una lavorazione c'era scritto
+     «nell'ambito DEL PRATICA dei materiali riutilizzabili». Nel testo vero
+     della Regione Lazio c'e' «nell'ambito del CANTIERE».
+
+     ⛔ IL TESTO DEL COMPUTO NON E' NOSTRO. Le descrizioni arrivano dal
+        prezzario ufficiale o dal PDF del progettista: in una gara sono un
+        riferimento con un valore legale, e riscriverne una parola e' come
+        correggere il capitolato di qualcun altro. Vale anche per i titoli
+        dei capitoli, che li scrive l'utente.
+
+     La classe «cm-testo» si mette su OGNI pezzo che contiene testo del
+     computo (lavorazioni, capitoli, confronto della variante, SAL,
+     conferma del PDF, cronoprogramma). Una classe sola, un posto solo:
+     chi domani disegna una schermata nuova col testo di una lavorazione
+     dentro se la mette e non ci pensa piu'. */
+  const _SKIP_UTENTE='option,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
   let _praticheObs=null;
   function _osservaPratiche(){
     if(!_praticheObs)return;
@@ -15948,8 +15964,10 @@ ${vecchi?`
     const riga=function(t,dx,sx,cls){
       return '<div class="spesa-row'+(cls?' '+cls:'')+'"><span>'+t+(sx?'<small class="sp-forn">'+sx+'</small>':'')+'</span><b>'+dx+'</b><span></span></div>';
     };
+    /* «cm-testo»: e' testo del computo, non nostro — non si traduce */
     const nomeVoce=function(v){
-      return (v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)");
+      return '<span class="cm-testo">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')
+        +esc(v.descrizione||"(senza descrizione)")+'</span>';
     };
 
     let h='<div class="sh-nota">Rispetto a <b>'+esc(nome)+'</b>. Le lavorazioni rimaste uguali non compaiono: qui c\'è solo quello che è cambiato'
@@ -16209,7 +16227,7 @@ ${vecchi?`
       const senza=!(r.giorni>0);
       const barra=_cgBarra(r,primo,arco);
       h+='<div class="cg-riga'+(senza?" senza":"")+'">'
-        +  '<div class="cg-tit"><b>'+(c.numero?esc(c.numero)+" — ":"")+esc(c.titolo||"(capitolo senza titolo)")+'</b>'
+        +  '<div class="cg-tit"><b class="cm-testo">'+(c.numero?esc(c.numero)+" — ":"")+esc(c.titolo||"(capitolo senza titolo)")+'</b>'
         +    '<span class="cg-date">'+_cgTesto(r)+'</span></div>' 
         +  '<div class="cg-campi">'
         +    '<label class="cg-gg-l">giorni <input type="number" min="0" max="2000" class="cg-gg" data-id="'+esc(String(c.id))+'" value="'+(c.giorni!=null?String(c.giorni):"")+'" placeholder="—"></label>'
@@ -16413,7 +16431,7 @@ ${vecchi?`
         +(verso<0?"↑":"↓")+'</button>';
     };
     const rigaVoce=(v,i,tot)=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
-      +'<span>'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
+      +'<span class="cm-testo">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
       +  '<small class="sp-forn">'+_misLetta(v.quantita)+(v.unita?" "+esc(v.unita):"")
       +    ' × '+eur2(v.prezzo_unitario)
       +    (v.quantita_manuale?' · a corpo':(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
@@ -16447,7 +16465,7 @@ ${vecchi?`
             +'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-edit-annulla">Annulla</button>'
             +'</div></div>'
           : '<div class="spesa-row" style="background:var(--sfondo,#f5f6f8)">'
-            +'<span data-action="comp-cap-edit" data-id="'+esc(String(g.cap.id))+'" style="cursor:pointer" title="Clicca per rinominare il capitolo">'
+            +'<span class="cm-testo" data-action="comp-cap-edit" data-id="'+esc(String(g.cap.id))+'" style="cursor:pointer" title="Clicca per rinominare il capitolo">'
             +  '<b>'+(g.cap.numero?esc(g.cap.numero)+" — ":"")+esc(g.cap.titolo||"(capitolo senza titolo)")+'</b>'
             +  '<small class="sp-forn">clicca per rinominare</small></span>'
             +'<b>'+eur2(sub)+'</b>'
@@ -17551,7 +17569,7 @@ ${vecchi?`
         +' data-sic="'+esc(String(v.oneri_sicurezza||0))+'" data-mano="'+esc(String(v.incidenza_manodopera||0))+'"'
         +' data-qta="'+esc(String(v.quantita||0))+'"'
         +' style="border-bottom:1px solid var(--bordo,#e6e9ee);padding:10px 2px">'
-        +'<div style="font-size:15px">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")+'</div>'
+        +'<div class="cm-testo" style="font-size:15px">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")+'</div>'
         +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px">'
         /* ⚠️ la casella NON sta dentro un .field, quindi il CSS del gestionale
            non la veste: senza queste misure scritte qui esce alta due
@@ -19393,7 +19411,7 @@ ${vecchi?`
       +  '<div class="field"><label>Quantità</label><input class="cp-qta" inputmode="decimal" value="'+esc(_misTesto(v.quantita))+'"'+_noAuto()+'></div>'
       +  '<div class="field"><label>Prezzo unitario</label><input class="cp-prz" inputmode="decimal" value="'+(v.prezzo?esc(String(v.prezzo).replace(".",",")):"")+'" placeholder="lo metti tu"'+_noAuto()+'></div>'
       +'</div>'
-      +'<div class="cp-desc">'+esc(v.descrizione||"(senza descrizione)")+'</div>'
+      +'<div class="cp-desc cm-testo">'+esc(v.descrizione||"(senza descrizione)")+'</div>'
       /* ⚠️ IL PEZZO DI FOGLIO ORIGINALE, sotto ogni riga. E' l'unica cosa che
          permette di accorgersi se ho letto male: senza, si dovrebbe credermi
          sulla parola. */

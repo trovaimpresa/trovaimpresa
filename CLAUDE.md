@@ -10240,67 +10240,157 @@ la pena continuare a chiedere le foto.
   database.
 - **`prove/sabotaggi-variante-browser.py` — 13 sabotaggi, 13 accusati.**
 - **Telefono 390×844**: niente sotto i 13 px, niente che esce.
-- Tutti gli altri banchi restano verdi. **376 prove verdi in tutto.**
+- Tutti gli altri banchi restano verdi. **379 prove verdi in tutto.**
 
 ⚠️ **Prima del push va eseguito `sql/gest-computo-variante.sql` su Supabase.**
 
 ---
 
+# 20 agosto 2026 (5), SERA — ⛔ IL TESTO DEL PREZZARIO NON SI TOCCA
+
+Alessio manda la foto di una variante appena creata, da **professionista**.
+Dentro una lavorazione, in mezzo alla descrizione lunga del prezzario:
+
+> «…nei siti che verranno indicati dalla Direzione dei lavori nell'ambito
+> **del pratica** dei materiali riutilizzabili…»
+
+Nel testo vero della Regione Lazio c'è «nell'ambito **del cantiere**».
+
+## Cosa succedeva
+
+Per gli studi tecnici il gestionale riscrive *cantiere* → *pratica*
+(`_FRASI` + `localizzaPratiche`). Il traduttore cammina sui nodi di testo e
+salta i contenitori elencati in `_SKIP_UTENTE`. **Le lavorazioni del computo
+non erano in quell'elenco**, quindi passava anche sul testo del computo.
+
+⛔ **Il testo del computo NON È NOSTRO.** Le descrizioni arrivano dal
+**prezzario ufficiale** o dal **PDF del progettista**: in una gara hanno un
+valore legale. Riscriverne una parola è come correggere il capitolato di
+qualcun altro. Vale anche per i titoli dei capitoli, che li scrive l'utente.
+
+Non era un difetto di oggi — c'è da quando esistono le lavorazioni. Si è
+visto adesso perché il computo è arrivato in mano a un professionista.
+
+## Come è stato aggiustato
+
+Una classe sola, **`.cm-testo`**, aggiunta a `_SKIP_UTENTE`, e messa su ogni
+pezzo che contiene testo del computo:
+
+- la lavorazione nell'elenco (`renderCompVoci`)
+- il titolo del capitolo
+- il confronto della variante (`nomeVoce`)
+- il cronoprogramma (i titoli delle fasi)
+- la conferma del PDF (`.cp-desc`)
+- il SAL (la riga della lavorazione)
+
+**Un posto solo:** chi domani disegna una schermata nuova col testo di una
+lavorazione dentro si mette `cm-testo` e non ci pensa più.
+
+## Provato
+
+`prove/banco-crono-browser.js` apre il computo **da professionista** con una
+lavorazione che contiene *«nell'ambito del cantiere»* e *«Direzione dei
+lavori»*, e controlla che restino **identiche, parola per parola**. Due
+sabotaggi (togliere `.cm-testo` dall'elenco, e toglierlo dalla lavorazione)
+lo fanno diventare rosso.
+
+**Sempre dalla stessa foto:** la barra delle voci aveva una barra di
+scorrimento che non serviva — il padding grande stava su tutti e due i lati e
+si sommava alla larghezza. Adesso sta solo a sinistra, che è quello che serve
+per allineare le voci al contenuto centrato.
+
+⚠️ **Fanno QUATTRO difetti in un giorno trovati guardando le foto e non dal
+banco** («Il pratica comincia il», il Salva sotto il fumetto, il codice di
+tariffa colorato, il testo del prezzario). *Chiedere le foto è la prova più
+economica che abbiamo.*
+
+---
+
 ## DOVE SIAMO RIMASTI (20 agosto 2026, notte)
 
-**Fatto oggi, tutto in `gestionale-app.html` + `css/gestionale.css`, nessuna
-migrazione SQL:**
+**Fatto oggi — dieci cose, tutte online.** Cinque push:
+`2bbfd23` · `f572d83` · `214a03a` · `430cdf3` · (+1 finale).
 
 1. la sezione **«Stati di avanzamento»** nel menù;
 2. il **Riepilogo neutro** con le icone colorate e i pallini rosso/verde;
 3. il **computo aperto alle imprese** come «Computo da prezzare»;
 4. **il computo che arriva in PDF**, con la conferma riga per riga;
 5. la **«Lista da far prezzare»** anche sui lavori privati;
-6. **la scala del computo** — la barra numerata 1·2·3·4·5, la cassetta al posto
-   dei tre pulsantini, la finestra che si riapre dopo «Crea computo»;
-7. **a pagina piena** — il computo e la conferma del PDF;
-8. **il cronoprogramma** — voce 6 della barra (⚠️ vuole
-   `sql/gest-computo-cronoprogramma.sql` eseguito su Supabase);
-9. **il computo di variante** — voce 7, solo sulle varianti (⚠️ vuole
-   `sql/gest-computo-variante.sql` eseguito su Supabase).
+6. **la scala del computo** — la barra numerata, la cassetta al posto dei tre
+   pulsantini, la finestra che si riapre dopo «Crea computo»;
+7. **a pagina piena** — il computo e la conferma del PDF (classe `sh-lunga`);
+8. **il cronoprogramma** — voce 6 (`sql/gest-computo-cronoprogramma.sql` ✅ già
+   eseguito su Supabase);
+9. **il computo di variante** — voce 7, solo sulle varianti
+   (`sql/gest-computo-variante.sql` ✅ già eseguito su Supabase);
+10. ⛔ **il testo del prezzario non si tocca più** (`.cm-testo`).
 
-**Da fare, in cima:**
+**379 prove verdi · 80 sabotaggi, 79 accusano.** L'unico che non accusa è
+dichiarato nel codice (il mezzogiorno delle date del cronoprogramma).
 
-1. **Il prezzo nuovo sul sito** — `prezzi.html`, `info-premium.html`,
-   `info-free.html` · il riquadro nei quattro pannelli · **il pagamento mensile
-   su Stripe** (il pezzo più grosso) · l'avviso prima che scadano i tre mesi di
-   regalo delle imprese di luglio.
-   ⚠️ Il riquadro dentro il gestionale dice ancora **«5€ al mese oppure 49€
-   l'anno»**.
-2. **L'errore JavaScript sulla homepage** (`PAGINE_REGISTRAZIONE` due volte):
-   guardare l'iniezione di Netlify, non il codice.
-3. **Rileggere il contatore delle visite** (query in fondo a
-   `sql/conteggio-visite.sql`).
+---
 
-4. **Il computo caricato da una FOTO o da una scansione.** Oggi il gestionale
-   si accorge che dentro non c'è testo e lo dice. Per leggerlo servirebbe l'AI,
-   con la conferma riga per riga come adesso e il numero originale accanto.
-   ⚠️ Prima di farlo: **chiedere a una delle 87 imprese come le arriva il
-   computo.** Se arriva in PDF o in Excel — come i due fogli di Alessio — la
-   foto non serve a nessuno.
+**DA FARE, IN QUESTO ORDINE**
 
-⚠️ **Gli artigiani non pagheranno mai** — detto da Alessio il 20 agosto:
-«saranno sempre esclusi dal Premium, sono clienti non paganti». Chi paga sono
-le **imprese** e i **professionisti**. Va tenuto presente quando si scrive il
-prezzo nuovo sulle pagine dell'artigiano.
+**1. IL PREZZO NUOVO — 29 € al mese oppure 249 € l'anno.**
+È il punto in cima: ogni giorno che resta com'è sono soldi persi.
 
-⚠️ **E c'è la lista `prove-claude/COSA-HA-PRIMUS-CHE-NOI-NO.md`**, scritta il
-20 agosto: cronoprogramma, analisi dei prezzi, contabilità pubblica completa,
-POS, varianti, formati di scambio. Con scritto a chi servono davvero e quanto
-sono grosse. Il primo consigliato è il **cronoprogramma**, perché nasce dalle
-lavorazioni del computo che c'è già.
+Due decisioni che Alessio voleva prendere **a mente fresca** e che vanno
+chieste PRIMA di scrivere:
+   a) cosa si legge **grande**: «249 € l'anno» (con sotto «sono 20,75 € al
+      mese — risparmi 99 €») oppure «29 € al mese»?
+   b) nelle pagine dell'**artigiano** il prezzo si **toglie**?
+      ⚠️ Alessio, 20 agosto: *«gli artigiani saranno sempre esclusi dal
+      Premium, non pagheranno mai — sono clienti non paganti»*. Chi paga sono
+      le **imprese** e i **professionisti**.
 
-Poi, in ordine libero: l'analisi dei prezzi · la descrizione schiacciata a
-390 px sui preventivi · il pulsante del prezzario anche in cima · il limite di
-misura su `cv-candidati/registrazioni` · il conteggio delle richieste di
-caricamento file · le 95 pagine città vuote · l'email vera alle imprese · il
-grafico dell'admin.
+Il prezzo vecchio (5 €/mese · 49 €/anno) è scritto in **17 posti**, già
+trovati: `prezzi.html` (anche il testo per Google) · `info-premium.html` ·
+`software-gestionale-imprese-edili.html` (7 punti, comprese le domande e
+risposte) · i quattro **pannelli** · le quattro **registrazioni** ·
+`pubblicita.html` · `termini-condizioni.html` · `admin.html` ·
+`js/assistente-trovaimpresa.js` · `js/ai-integrazione.js` ·
+`netlify/functions/ai-claude.js` · `netlify/functions/controlla-scadenze-premium.js`.
+
+✅ **Buona notizia: il pagamento MENSILE su Stripe c'è già.** In
+`netlify/functions/crea-checkout-abbonamento.js` ci sono tutti e due i price
+id (mensile e annuale): quando Alessio avrà creato i due prezzi nuovi su
+Stripe, bastano **due righe**.
+⛔ Le chiavi Stripe stanno nelle variabili Netlify: non si scrivono nel codice
+e non si chiedono in chat. I *price id* invece sono pubblici e stanno lì.
+
+**2. L'avviso alle imprese di luglio** — hanno tre mesi in regalo che stanno
+per scadere. La mail c'è (`controlla-scadenze-premium.js`) ma dice il prezzo
+vecchio.
+
+**3. L'errore JavaScript sulla homepage** (`PAGINE_REGISTRAZIONE` due volte):
+⚠️ guardare **l'iniezione di Netlify**, non il codice.
+
+**4. Rileggere il contatore delle visite** (query in fondo a
+`sql/conteggio-visite.sql`).
+
+**5. Poi, dal gestionale:** l'analisi dei prezzi · la contabilità pubblica
+completa (⚠️ prima **contare** quanti studi fanno davvero direzione lavori) ·
+il POS (⚠️ solo con un consulente vero) · i formati di scambio · il computo da
+una foto (⚠️ prima **chiedere a un'impresa come le arriva il computo**).
+
+**6. Il sito:** le 95 pagine città vuote · l'email vera alle 87 imprese · il
+grafico dell'admin · la descrizione schiacciata a 390 px sui preventivi · il
+limite di misura su `cv-candidati`/`registrazioni` · il conteggio delle
+richieste di caricamento file · il pulsante del prezzario anche in cima.
 
 **Meta:** campagna ferma per una settimana dal 19 agosto, poi rimisurare.
 **Pulizie:** i preventivi n. 4, 5 e 6 del reparto «progetto casa» · la riga
 completamente vuota in `imprese`.
+
+⚠️ **Le due liste lunghe stanno in `prove-claude/`:**
+`LAVORI-DA-FARE.md` (tutti i lavori, con le crocette) ·
+`COSA-HA-PRIMUS-CHE-NOI-NO.md` e `CHI-USA-COSA.md` (a chi serve cosa, imprese
+contro professionisti).
+
+⚠️ **LA COSA PIÙ UTILE IMPARATA OGGI:** quattro difetti su quattro li ha
+trovati **Alessio guardando le foto dello schermo**, non i banchi — «Il
+pratica comincia il», il Salva sotto il fumetto della chat, il codice di
+tariffa colorato di rosso, il testo del prezzario riscritto. **Chiedere le
+foto è la prova più economica che abbiamo.** Chiederle sempre, dopo ogni
+consegna.

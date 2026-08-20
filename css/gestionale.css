@@ -1342,7 +1342,13 @@
      riallinea al contenuto centrato, cosi' il «1 Lavorazioni» sta sopra la
      parola «Le lavorazioni» e non a un palmo di distanza */
   margin:-24px -28px 30px;
-  padding:0 max(28px, calc((100% - 1060px) / 2));
+  /* ⚠️ il padding grande sta SOLO a sinistra, quello che serve ad
+     allineare le voci al contenuto centrato. Mettendolo anche a destra si
+     sommava alla larghezza delle voci e faceva comparire una barra di
+     scorrimento che non serviva a niente: con sette voci ci stanno tutte.
+     Visto in una foto di Alessio, non dal banco. */
+  padding-left:max(28px, calc((100% - 1060px) / 2));
+  padding-right:28px;
   position:sticky; top:-1px; z-index:4;
 }
 .conav-v{
