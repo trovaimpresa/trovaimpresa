@@ -1442,9 +1442,14 @@
 }
 .cg-tot b{ color:var(--blu-scuro); }
 
-/* l'unico pulsante della pagina: blu pieno, e con aria intorno */
-.cg-salva{ margin-top:18px; }
-.cg-salva .btn-primary{ font-size:17px; padding:14px 22px; }
+/* i pulsanti in fondo alla pagina, in fila e con aria intorno.
+   ⚠️ 21 agosto 2026 — adesso sono due: Salva (blu pieno) e Scarica il PDF
+   (secondario). Il blu pieno resta UNO SOLO per schermata. Su flex-wrap:
+   sul telefono vanno a capo invece di stringersi. */
+.cg-salva, .var-stampa{ margin-top:18px; display:flex; flex-wrap:wrap; gap:12px; }
+.cg-salva .btn-primary,
+.cg-salva .btn,
+.var-stampa .btn{ font-size:17px; padding:14px 22px; }
 
 /* ================================================================
    20 agosto 2026 — IL COMPUTO DI VARIANTE: cosa è cambiato

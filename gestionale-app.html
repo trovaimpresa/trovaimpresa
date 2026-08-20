@@ -16022,6 +16022,18 @@ ${vecchi?`
       +  '</b></div>'
       +'</div>'
       +'<div class="sh-nota">Sono gli importi delle lavorazioni, <b>senza il ribasso</b>: il ribasso è lo stesso sui due computi e non cambia la differenza in percentuale.</div>';
+
+    /* ⚠️ 21 agosto 2026 — IL FOGLIO STAMPATO.
+       Sui lavori privati la variante detta a voce e' dove nascono le liti;
+       sui lavori pubblici e' un documento che si consegna. In tutti e due i
+       casi a schermo non basta: ci vuole un foglio con sopra una firma.
+       Il pulsante c'e' SOLO se qualcosa e' cambiato davvero: su due computi
+       identici stamperebbe un foglio che non dice niente. */
+    if(r.cambiate.length||r.aggiunte.length||r.tolte.length){
+      h+='<div class="var-stampa">'
+        +  '<button type="button" class="btn" data-action="var-pdf">📄 Scarica il PDF</button>'
+        +'</div>';
+    }
     box.innerHTML=h;
   }
 
@@ -16056,11 +16068,20 @@ ${vecchi?`
      l'ora legale i conti a mezzanotte sono l'unico posto dove un giorno
      puo' sparire — ma non si scrive «provata» una cosa che il banco non
      accusa. */
+  /* ⚠️ 21 agosto 2026 — L'ORA DI TUTTE LE DATE SI DECIDE QUI, IN UN POSTO
+     SOLO. Prima il mezzogiorno era scritto dentro _cgData; poi e' arrivato
+     cronoMesi, che costruisce il primo giorno di ogni mese, e se l'avesse
+     scritto per conto suo basterebbe cambiarne una delle due per far
+     ballare di un'ora i conti dei giorni — e i mesi del calendario
+     stampato non coprirebbero piu' esattamente il cantiere.
+     Stessa lezione della formula della barra: due copie non si aggiustano
+     insieme. */
+  function _cgGiorno(y,m,g){ return new Date(y,m,g,12,0,0); }
   function _cgData(t){
     if(!t)return null;
     const p=String(t).split("-");
     if(p.length!==3)return null;
-    const d=new Date(+p[0],(+p[1])-1,+p[2],12,0,0);
+    const d=_cgGiorno(+p[0],(+p[1])-1,+p[2]);
     return isNaN(d.getTime())?null:d;
   }
   function _cgIso(d){
@@ -16158,22 +16179,110 @@ ${vecchi?`
       ? (fdate(_cgIso(r.inizio))+" \u2192 "+fdate(_cgIso(r.fine)))
       : "manca la durata";
   }
-  function _cgBarra(r,primo,arco){
-    if(!(r.giorni>0)||!arco||!r.inizio||!r.fine||!primo)return "";
+  /* DOVE COMINCIA E QUANTO E' LUNGA UNA BARRA, in percentuale dell'arco.
+     \u26a0\ufe0f 21 agosto 2026 \u2014 QUESTA FORMULA STA IN UN POSTO SOLO, e adesso il
+     motivo e' doppio: la usano il disegno a schermo (_cgBarra) e il foglio
+     stampato (cronoPdf). Se il PDF se la riscrivesse per conto suo, prima o
+     poi il calendario sullo schermo e quello sulla carta direbbero due cose
+     diverse \u2014 ed e' esattamente il difetto gia' preso il 20 agosto, quando
+     la formula viveva in renderCrono e in cronoAnteprima e rompendone una
+     sola il banco restava verde. */
+  function _cgBarraPerc(r,primo,arco){
+    if(!(r.giorni>0)||!arco||!r.inizio||!r.fine||!primo)return null;
     const off=_cgQuanti(primo,r.inizio), dur=_cgQuanti(r.inizio,r.fine)+1;
     /* la larghezza minima e' 1,2%: una fase di un giorno su un cantiere
        di un anno sarebbe un filo invisibile, e sembrerebbe non esserci */
-    return '<i class="cg-barra'+(r.parallelo?" par":"")+'" style="left:'
-      +(off*100/arco).toFixed(3)+'%;width:'+Math.max(1.2,dur*100/arco).toFixed(3)+'%"></i>';
+    return { sx:(off*100/arco), larg:Math.max(1.2,dur*100/arco) };
   }
-  /* quanti giorni di lavoro dura tutto il cantiere, e cosa c'e' scritto
-     nella riga blu in fondo */
-  function _cgTotale(primo,ultimo){
-    if(!primo||!ultimo)return "Scrivi la data di inizio e i giorni di ogni fase: il calendario si disegna da solo.";
+  function _cgBarra(r,primo,arco){
+    const b=_cgBarraPerc(r,primo,arco);
+    if(!b)return "";
+    return '<i class="cg-barra'+(r.parallelo?" par":"")+'" style="left:'
+      +b.sx.toFixed(3)+'%;width:'+b.larg.toFixed(3)+'%"></i>';
+  }
+  /* quanti giorni di LAVORO dura tutto il cantiere (sabato e domenica non
+     si contano). Anche questo in un posto solo: lo legge la riga blu in
+     fondo alla schermata e lo stampa il foglio. */
+  function _cgGiorniLav(primo,ultimo){
+    if(!primo||!ultimo)return 0;
     let n=0, x=_cgPrimoLav(new Date(primo.getTime()));
     while(x.getTime()<=ultimo.getTime()&&n<4000){ n++; x=_cgDopo(x); }
+    return n;
+  }
+  /* cosa c'e' scritto nella riga blu in fondo */
+  function _cgTotale(primo,ultimo){
+    if(!primo||!ultimo)return "Scrivi la data di inizio e i giorni di ogni fase: il calendario si disegna da solo.";
+    const n=_cgGiorniLav(primo,ultimo);
     return '<b>'+n+(n===1?' giorno':' giorni')+' di lavoro</b> \u2014 dal '
       +fdate(_cgIso(primo))+' al <b>'+fdate(_cgIso(ultimo))+'</b>';
+  }
+  /* LA SCALA DEL DISEGNO: il primo giorno, l'ultimo, e quanti giorni di
+     calendario ci stanno in mezzo. Erano tre righe copiate in renderCrono e
+     in cronoAnteprima; col foglio stampato diventerebbero tre copie, e tre
+     copie non si aggiustano insieme.
+     Il +1 c'e' perche' un lavoro che comincia e finisce lo stesso giorno
+     dura un giorno, non zero. */
+  function cronoScala(righe){
+    const primo=(righe||[]).reduce(function(m,r){return (r.inizio&&(!m||r.inizio.getTime()<m.getTime()))?r.inizio:m;},null);
+    const ultimo=cronoUltimo(righe);
+    return { primo:primo, ultimo:ultimo,
+             arco:(primo&&ultimo)?Math.max(1,_cgQuanti(primo,ultimo)+1):0 };
+  }
+  /* I MESI da scrivere sopra il calendario del foglio stampato: uno per ogni
+     mese toccato dal cantiere, tagliato agli estremi veri. Serve solo al PDF
+     \u2014 a schermo la barra non ha l'intestazione.
+     Il paletto a 600 giri e' la stessa rete di _cgFine: 600 mesi sono
+     cinquant'anni, oltre non e' un cantiere ma un errore di battitura. */
+  function cronoMesi(primo,ultimo){
+    const out=[];
+    if(!primo||!ultimo)return out;
+    let x=_cgGiorno(primo.getFullYear(),primo.getMonth(),1);
+    let giri=0;
+    while(x.getTime()<=ultimo.getTime()&&giri<600){
+      /* il giorno 0 del mese dopo e' l'ultimo giorno di questo */
+      const fineMese=_cgGiorno(x.getFullYear(),x.getMonth()+1,0);
+      out.push({ y:x.getFullYear(), m:x.getMonth(),
+                 da:(x.getTime()<primo.getTime())?primo:x,
+                 a:(fineMese.getTime()>ultimo.getTime())?ultimo:fineMese });
+      x=_cgGiorno(x.getFullYear(),x.getMonth()+1,1);
+      giri++;
+    }
+    return out;
+  }
+
+  /* le durate come stanno nel database, per sapere se le caselle sono state
+     toccate senza salvare (vedi cronoModifiche) */
+  let cronoCapCache=[], cronoCapCacheId=null;
+
+  /* C'E' QUALCOSA SCRITTO E NON SALVATO?
+     ⚠️ 21 agosto 2026 — il foglio stampato esce da quello che e' SALVATO,
+     non da quello che si vede nelle caselle. Senza questo controllo bastava
+     cambiare i giorni di una fase, premere subito Scarica il PDF, e portare
+     in gara un calendario diverso da quello sullo schermo — senza un solo
+     avviso. E' la stessa rete che ha gia' il SAL (salModifiche). */
+  function cronoModifiche(id){
+    if(!$("#co-crono"))return false;                          /* scheda non aperta */
+    if(String(ctrComputoId||"")!==String(id))return false;    /* scheda di un altro computo */
+    if(String(cronoCapCacheId||"")!==String(id))return false; /* la cache e' di un altro */
+    const c=compCache.find(x=>String(x.id)===String(id))||{};
+    const inizio=($("#co-inizio")&&$("#co-inizio").value)||"";
+    if(inizio!==String(c.data_inizio||""))return true;
+    const righe=Array.from($$("#co-crono .cg-riga")).map(function(r){
+      const g=r.querySelector(".cg-gg"), k=r.querySelector(".cg-ins");
+      return { id:String((g&&g.dataset.id)||""),
+               giorni:(g&&g.value!=="")?Math.round(+g.value):null,
+               insieme:!!(k&&k.checked) };
+    }).filter(function(x){return x.id;});
+    /* nessuna riga a schermo = la pagina non e' ancora stata disegnata:
+       non si puo' dire che sia cambiato qualcosa */
+    if(!righe.length)return false;
+    for(const x of righe){
+      const s=cronoCapCache.find(function(y){return y.id===x.id;});
+      if(!s)return true;
+      if((s.giorni==null?null:+s.giorni)!==(x.giorni==null?null:+x.giorni))return true;
+      if(!!s.insieme!==!!x.insieme)return true;
+    }
+    return false;
   }
 
   async function renderCrono(computoId){
@@ -16197,6 +16306,13 @@ ${vecchi?`
       return;
     }
     const caps=rc.data||[];
+    /* ⚠️ 21 agosto 2026 — le durate COME SONO SALVATE, messe da parte.
+       Servono a cronoModifiche: il foglio stampato nasce da quello che e'
+       nel database, e se nelle caselle c'e' scritto qualcosa di diverso
+       bisogna dirlo PRIMA di stampare, non consegnare un foglio che non
+       somiglia allo schermo. E' la stessa rete che ha gia' il SAL. */
+    cronoCapCache=caps.map(function(c){return {id:String(c.id),giorni:(c.giorni==null?null:+c.giorni),insieme:!!c.insieme};});
+    cronoCapCacheId=String(computoId||"");
 
     /* ⚠️ SENZA CAPITOLI NON C'E' CRONOPROGRAMMA, e va detto chiaro.
        I computi che arrivano dal PDF del geometra nascono senza
@@ -16214,12 +16330,9 @@ ${vecchi?`
 
     const inizio=($("#co-inizio")&&$("#co-inizio").value)||"";
     const righe=cronoDate(caps,inizio);
-    const primo=righe.reduce(function(m,r){return (r.inizio&&(!m||r.inizio.getTime()<m.getTime()))?r.inizio:m;},null);
-    const ultimo=cronoUltimo(righe);
-    /* la scala del disegno: quanti giorni di calendario da capo a fondo.
-       Il +1 c'e' perche' un lavoro che comincia e finisce lo stesso
-       giorno dura un giorno, non zero. */
-    const arco=(primo&&ultimo)?Math.max(1,_cgQuanti(primo,ultimo)+1):0;
+    /* la scala del disegno sta in cronoScala: la stessa che usa il foglio
+       stampato, cosi' le barre non si possono scollare */
+    const sc=cronoScala(righe), primo=sc.primo, ultimo=sc.ultimo, arco=sc.arco;
 
     let h='<div class="cg-righe">';
     righe.forEach(function(r,i){
@@ -16246,7 +16359,11 @@ ${vecchi?`
          SALVARE: blu pieno, come «Crea computo». */
       +'<div class="cg-salva">'
       +  '<button type="button" class="btn-primary" data-action="crono-salva">Salva il cronoprogramma</button>'
-      +'</div>' 
+      /* ⚠️ il blu pieno resta UNO SOLO per schermata, ed e' il Salva: questo
+         e' secondario (.btn). In una gara il cronoprogramma va consegnato
+         stampato, non fatto vedere sullo schermo. */
+      +  '<button type="button" class="btn" data-action="crono-pdf">📄 Scarica il PDF</button>'
+      +'</div>'
       +'<div class="sh-nota">I giorni sono <b>giorni di lavoro</b>: sabato e domenica non si contano. Una fase comincia quando finisce quella prima, a meno che non metti la spunta «insieme al precedente».</div>';
     box.innerHTML=h;
 
@@ -16267,9 +16384,7 @@ ${vecchi?`
       return { id:(g&&g.dataset.id)||"", giorni:(g&&g.value!=="")?+g.value:null, insieme:!!(k&&k.checked) };
     });
     const righe=cronoDate(caps,($("#co-inizio")&&$("#co-inizio").value)||"");
-    const primo=righe.reduce(function(m,r){return (r.inizio&&(!m||r.inizio.getTime()<m.getTime()))?r.inizio:m;},null);
-    const ultimo=cronoUltimo(righe);
-    const arco=(primo&&ultimo)?Math.max(1,_cgQuanti(primo,ultimo)+1):0;
+    const sc=cronoScala(righe), primo=sc.primo, ultimo=sc.ultimo, arco=sc.arco;
     $$("#co-crono .cg-riga").forEach(function(el,i){
       const r=righe[i]; if(!r)return;
       el.classList.toggle("senza",!(r.giorni>0));
@@ -19872,7 +19987,14 @@ ${vecchi?`
       if(g.cap){
         spazio(9);
         doc.setFont("helvetica","bold");doc.setFontSize(8);
-        doc.text(String(g.cap.nome||"Capitolo"),X[1]+1.5,y+3.6);
+        /* ⚠️ 21 agosto 2026 — QUI C'ERA SCRITTO «g.cap.nome».
+           Quella colonna non esiste: nel database il capitolo si chiama
+           «titolo» (e «numero»). Risultato: sopra ogni gruppo di
+           lavorazioni la Lista per la gara stampava la parola
+           «Capitolo», sempre, invece di Demolizioni, Murature,
+           Impianti. Nel PDF del computo era gia' giusto: era sbagliato
+           solo qui. Trovato leggendo, non da un banco. */
+        doc.text(String((g.cap.numero?g.cap.numero+" - ":"")+(g.cap.titolo||"Capitolo")),X[1]+1.5,y+3.6);
         y+=5.4;doc.setDrawColor(200);doc.line(X[1],y,R,y);
       }
       g.voci.forEach(function(v){
@@ -20350,6 +20472,528 @@ ${vecchi?`
     doc.save("computo-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
       (c.titolo||"metrico").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
     toast("PDF del computo scaricato ✅");
+  }
+
+  /* ============================================================
+     21 agosto 2026 — IL CRONOPROGRAMMA IN PDF
+     ============================================================
+     A schermo il calendario c'e' dal 20 agosto. Ma in una gara il
+     cronoprogramma e' un documento che si CONSEGNA: va stampato, con
+     l'intestazione dell'azienda, il committente e una firma sotto.
+
+     ⛔ IL FOGLIO NON RIFA' NESSUN CONTO.
+        Le date le decide cronoDate, la scala cronoScala, la posizione
+        e la larghezza di ogni barra _cgBarraPerc, i giorni totali
+        _cgGiorniLav — le stesse funzioni che disegnano lo schermo.
+        Se il PDF se le riscrivesse, il foglio consegnato e la
+        schermata direbbero prima o poi due cose diverse, e nessuno se
+        ne accorgerebbe fino alla gara. E' la lezione gia' pagata il
+        20 agosto, quando la formula della barra viveva in due posti e
+        rompendone uno solo il banco restava verde.
+
+     ⛔ IL FOGLIO ESCE DA QUELLO CHE E' SALVATO, non dalle caselle.
+        cronoModifiche dice se qualcuno ha cambiato i giorni senza
+        premere Salva: in quel caso ci si ferma e si dice cosa fare.
+        Stessa rete del SAL (salModifiche).
+
+     Il foglio e' ORIZZONTALE: un calendario di quattro mesi su una
+     pagina in piedi diventa una striscia di due centimetri.
+     ============================================================ */
+  async function cronoPdf(id){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    if(!sb||!sbUid){toast("Devi essere collegato");return;}
+    if(cronoModifiche(id)){
+      toast("Hai delle modifiche non salvate: premi prima «Salva il cronoprogramma», poi scarica il PDF. Il foglio esce da quello che è salvato, non da quello che vedi nelle caselle.");
+      return;
+    }
+    const c=compCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Computo non trovato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    const cli=await cliDelDocumento(c.cliente_id,"nome,indirizzo,referente");
+
+    /* ⚠️ LA DATA DI PARTENZA SI RILEGGE DAL DATABASE, non dalla cache.
+       compCache la aggiorna quando salvi, ma se il computo e' stato
+       toccato da un'altra scheda (o da un altro dispositivo) la copia in
+       memoria e' vecchia — e un calendario che parte dal giorno sbagliato
+       ha tutte le date sbagliate, una per una, senza sembrarlo. */
+    const rcp=await sb.from("gest_computi").select("data_inizio")
+      .eq("id",id).eq("user_id",sbUid).maybeSingle();
+    if(rcp.error){
+      toast(/data_inizio/i.test(String(rcp.error.message||""))
+        ? "Per il cronoprogramma serve l'aggiornamento del database: esegui sql/gest-computo-cronoprogramma.sql su Supabase"
+        : "Non riesco a leggere il computo: "+(rcp.error.message||""));
+      return;
+    }
+    const inizioTesto=(rcp.data&&rcp.data.data_inizio)||"";
+
+    /* ⚠️ le colonne per NOME, non con «*»: con «*» il database risponde bene
+       anche quando l'aggiornamento non e' stato eseguito, e uscirebbe un
+       foglio con tutte le fasi «senza durata» invece di dire cosa fare. */
+    const rc=await sb.from("gest_computo_capitoli")
+      .select("id,numero,titolo,ordine,giorni,insieme")
+      .eq("user_id",sbUid).eq("computo_id",id).order("ordine");
+    if(rc.error){
+      toast(/giorni|insieme/i.test(String(rc.error.message||""))
+        ? "Per il cronoprogramma serve l'aggiornamento del database: esegui sql/gest-computo-cronoprogramma.sql su Supabase"
+        : "Non riesco a leggere i capitoli: "+(rc.error.message||""));
+      return;
+    }
+    const caps=rc.data||[];
+    if(!caps.length){toast("Questo computo non ha capitoli: il cronoprogramma si fa a fasi, e le fasi sono i capitoli.");return;}
+    if(!inizioTesto){toast("Manca la data di partenza: scrivila in «Si comincia il», premi Salva, poi scarica il PDF.");return;}
+
+    const righe=cronoDate(caps,inizioTesto);
+    const sc=cronoScala(righe);
+    if(!sc.primo||!sc.ultimo){toast("Nessuna fase ha una durata: scrivi i giorni di almeno una fase, premi Salva, poi scarica il PDF.");return;}
+    const giorniLav=_cgGiorniLav(sc.primo,sc.ultimo);
+    const mesi=cronoMesi(sc.primo,sc.ultimo);
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4",orientation:"landscape"});
+    /* N. | FASE | giorni | inizio | fine | il calendario
+       X[i] e' il bordo SINISTRO della colonna i; X[6] e' il bordo destro. */
+    const X=[10,18,104,120,142,164,287];
+    const M=X[0], R=X[6], GX=X[5], GW=R-GX;
+    const FONDO=176;                       /* il foglio orizzontale e' alto 210 */
+    const mid=(a,b)=>(X[a]+X[b])/2;
+    /* dove cade sul foglio un giorno del calendario */
+    const gx=d=>GX+_cgQuanti(sc.primo,d)*GW/sc.arco;
+    /* le righe verticali che separano un mese dall'altro (la prima no: e' il
+       bordo della colonna) */
+    const sepMesi=mesi.map(ms=>gx(ms.da)).filter(x=>x>GX+0.2);
+
+    let y=0, tabTop=0;
+
+    function chiudiCorpo(){
+      doc.setDrawColor(110);doc.setLineWidth(.2);
+      for(let i=1;i<=5;i++)doc.line(X[i],tabTop,X[i],y);
+      doc.line(M,tabTop,M,y);doc.line(R,tabTop,R,y);doc.line(M,y,R,y);
+    }
+    /* ⚠️ LE RIGHE DEI MESI VANNO SOTTO LE BARRE, NON SOPRA.
+       Disegnate alla fine, passavano sopra le barre e una fase lunga
+       sembrava spezzata in due. Visto guardando il foglio stampato, non il
+       codice: nel testo del PDF non si vede niente di tutto questo. */
+    function grigliaMesi(alt){
+      doc.setDrawColor(215);
+      sepMesi.forEach(x=>doc.line(x,y,x,y+alt));
+      doc.setDrawColor(110);
+    }
+    function testaTabella(){
+      const h1=4.6,h2=4.4,H=h1+h2;
+      doc.setFillColor(238,241,243);doc.rect(M,y,R-M,H,"F");
+      doc.setDrawColor(110);doc.setLineWidth(.2);doc.rect(M,y,R-M,H);
+      doc.setFont("helvetica","bold");doc.setFontSize(6.6);doc.setTextColor(0);
+      doc.text("CALENDARIO",mid(5,6),y+3.2,{align:"center"});
+      doc.line(X[5],y+h1,X[6],y+h1);
+      const b=y+H-1.5;
+      doc.text("N.",mid(0,1),b,{align:"center"});
+      doc.text("FASE",mid(1,2),b,{align:"center"});
+      doc.text("giorni",mid(2,3),b,{align:"center"});
+      doc.text("inizio",mid(3,4),b,{align:"center"});
+      doc.text("fine",mid(4,5),b,{align:"center"});
+      /* il nome del mese si scrive solo se ci sta: sotto i 9 mm «set 26»
+         finirebbe addosso a quello dopo */
+      doc.setFontSize(6);
+      mesi.forEach(function(ms){
+        const x1=gx(ms.da), x2=gx(ms.a)+GW/sc.arco;
+        if(x1>GX+0.2){doc.setDrawColor(150);doc.line(x1,y+h1,x1,y+H);doc.setDrawColor(110);}
+        if(x2-x1>=9)doc.text(MESI_BREVI[ms.m]+" "+String(ms.y).slice(2),(x1+x2)/2,b,{align:"center"});
+      });
+      doc.setFontSize(6.6);
+      [1,2,3,4,5].forEach(i=>doc.line(X[i],y,X[i],y+H));
+      y+=H;tabTop=y;
+    }
+    function nuovaPagina(){
+      chiudiCorpo();
+      doc.addPage();y=13;testaTabella();
+      doc.setFont("helvetica","normal");doc.setTextColor(0);
+    }
+    const spazio=h=>{if(y+h>FONDO)nuovaPagina();};
+    /* ⚠️ DOPO CHE LA TABELLA E' CHIUSA SI USA QUESTO, NON spazio() — e' lo
+       stesso inciampo del PDF del computo dell'11 agosto: spazio() chiama
+       nuovaPagina(), che richiude una tabella che non c'e' piu' e apre il
+       foglio dopo con l'intestazione di una tabella vuota. */
+    const spazioFuoriTabella=h=>{if(y+h>FONDO){doc.addPage();y=16;}};
+
+    /* ---- intestazione, solo sulla prima pagina ---- */
+    y=14;
+    doc.setFont("helvetica","bold");doc.setFontSize(13);doc.text(az.nome,M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    let hy=y+4.8;
+    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=3.8;});
+    doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(13);
+    doc.text("CRONOPROGRAMMA DEI LAVORI",R,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    doc.text((c.numero?"Computo n. "+c.numero+"     ":"")+"del "+fdate(c.data||todayStr()),R,y+4.8,{align:"right"});
+    if(c.tipo==="pubblico")doc.text("lavori pubblici",R,y+8.6,{align:"right"});
+    doc.setTextColor(0);
+    y=Math.max(hy,y+13)+1;doc.setDrawColor(180);doc.line(M,y,R,y);y+=6;
+
+    doc.setFont("helvetica","bold");doc.setFontSize(10.5);
+    const tit=doc.splitTextToSize(c.titolo||_cm('nome'),R-M);
+    doc.text(tit,M,y);y+=tit.length*4.6+0.5;
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    if(c.oggetto){const o=doc.splitTextToSize("Oggetto: "+c.oggetto,R-M);doc.text(o,M,y);y+=o.length*3.9;}
+    if(c.luogo){doc.text("Luogo: "+c.luogo,M,y);y+=3.9;}
+    if(cli.nome){doc.text("Committente: "+cli.nome+(cli.indirizzo?" - "+cli.indirizzo:""),M,y);y+=3.9;}
+    doc.text("Si comincia il "+fdate(inizioTesto)+"   ·   consegna prevista il "+fdate(_cgIso(sc.ultimo)),M,y);y+=3.9;
+    doc.setTextColor(0);y+=4;
+
+    testaTabella();
+
+    /* ---- il corpo: una riga per fase ---- */
+    let n=0;
+    righe.forEach(function(r){
+      n++;
+      const cp=r.cap||{};
+      /* il titolo del capitolo lo scrive l'utente: si stampa com'e' */
+      const tt=doc.splitTextToSize(String((cp.numero?cp.numero+" - ":"")+(cp.titolo||"(capitolo senza titolo)")),X[2]-X[1]-3);
+      const H=Math.max(tt.length*3.6+3.4,7.6);
+      spazio(H+2);
+      grigliaMesi(H);
+      const yb=y+H/2+1.2;
+      doc.setFont("helvetica","bold");doc.setFontSize(7.4);
+      doc.text(String(n),mid(0,1),yb,{align:"center"});
+      doc.setFont("helvetica","normal");
+      tt.forEach((t,i)=>doc.text(t,X[1]+1.5,y+4.2+i*3.6));
+      doc.setFont("helvetica","bold");
+      doc.text(r.giorni>0?String(r.giorni):"-",mid(2,3),yb,{align:"center"});
+      doc.setFont("helvetica","normal");
+      doc.text(r.inizio?fdate(_cgIso(r.inizio)):"-",mid(3,4),yb,{align:"center"});
+      doc.text(r.fine?fdate(_cgIso(r.fine)):"-",mid(4,5),yb,{align:"center"});
+      /* LA BARRA: posizione e larghezza vengono da _cgBarraPerc, la stessa
+         che disegna lo schermo. Qui si converte solo da percentuale a
+         millimetri. */
+      const b=_cgBarraPerc(r,sc.primo,sc.arco);
+      if(b){
+        /* le fasi in parallelo in blu scuro: a schermo sono a righe, e le
+           righe diagonali su una stampante in bianco e nero spariscono */
+        if(r.parallelo)doc.setFillColor(11,75,196);else doc.setFillColor(0,102,255);
+        doc.rect(GX+b.sx*GW/100, y+H/2-1.9, b.larg*GW/100, 3.8, "F");
+      }
+      y+=H;
+      doc.setDrawColor(215);doc.line(M,y,R,y);
+    });
+    chiudiCorpo();
+
+    /* ---- il riquadro con i giorni totali ---- */
+    y+=6;spazioFuoriTabella(18);
+    doc.setDrawColor(11,75,196);doc.setLineWidth(.5);doc.rect(M,y,R-M,11);doc.setLineWidth(.2);
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(0);
+    doc.text(giorniLav+(giorniLav===1?" giorno":" giorni")+" di lavoro",M+3,y+7.2);
+    doc.text("dal "+fdate(_cgIso(sc.primo))+" al "+fdate(_cgIso(sc.ultimo)),R-3,y+7.2,{align:"right"});
+    y+=17;
+
+    spazioFuoriTabella(14);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    const nota=doc.splitTextToSize("I giorni indicati sono giorni di lavoro: sabato e domenica non si contano. Ogni fase comincia quando finisce quella precedente; le fasi in blu scuro cominciano insieme alla precedente e si svolgono in parallelo.",R-M);
+    nota.forEach(function(riga){ if(y+3.9>FONDO+14){doc.addPage();y=16;} doc.text(riga,M,y);y+=3.9; });
+    doc.setTextColor(0);y+=6;
+
+    spazioFuoriTabella(24);
+    doc.setFontSize(9);
+    doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(todayStr()),M,y);
+    y+=14;
+    doc.setFont("helvetica","bold");
+    doc.text("TIMBRO E FIRMA",R-40,y,{align:"center"});
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
+    doc.text("____________________________",R-40,y+4.6,{align:"center"});
+    doc.setTextColor(0);
+
+    const np=doc.getNumberOfPages();
+    for(let p=1;p<=np;p++){
+      doc.setPage(p);
+      doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(140);
+      doc.text("CRONOPROGRAMMA"+(c.numero?"  ·  computo n. "+c.numero:"")+(c.titolo?"  ·  "+c.titolo:""),M,203,{maxWidth:210});
+      doc.text("Pag. "+p+" di "+np,R,203,{align:"right"});
+      doc.setTextColor(0);
+    }
+    doc.save("cronoprogramma-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+      (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+    toast("Cronoprogramma scaricato ✅");
+  }
+
+  /* ============================================================
+     21 agosto 2026 — IL COMPUTO DI VARIANTE IN PDF
+     ============================================================
+     Sui privati e' il foglio che toglie le liti: nero su bianco, cosa e'
+     cambiato e quanto costa in piu' o in meno, con una firma sotto. Sui
+     pubblici e' un documento vero da consegnare.
+
+     ⛔ IL CONFRONTO NON SI RIFA' QUI: lo fa varConfronta, la stessa che
+        disegna la pagina «Cosa e' cambiato». Il foglio e lo schermo non
+        possono dire due cose diverse.
+
+     ⛔ SI ACCOPPIA PER origine_id, mai per codice ne' per descrizione —
+        il motivo lungo sta sopra varConfronta.
+
+     ⚠️ E CI SI FERMA SE I CONTI NON TORNANO. Le righe stampate
+        (cambiate + aggiunte - tolte) devono fare esattamente la
+        differenza scritta nel riquadro in fondo. Se non la fanno, il
+        foglio direbbe una cifra che le sue stesse righe non dimostrano:
+        meglio nessun PDF che un PDF cosi'. E' la lezione del computo del
+        14 agosto, dove il foglio usciva con dentro un buco che non si
+        vedeva e il messaggio diceva pure «scaricato ✅».
+     ============================================================ */
+  async function variantePdf(id){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    if(!sb||!sbUid){toast("Devi essere collegato");return;}
+    const c=compCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Computo non trovato");return;}
+    if(!c.variante_di){toast("Questo computo non è una variante: non c'è niente da confrontare.");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    const cli=await cliDelDocumento(c.cliente_id,"nome,indirizzo,referente");
+
+    const [rO,rN,rP]=await Promise.all([
+      sb.from("gest_computo_voci_calc").select("*").eq("user_id",sbUid).eq("computo_id",c.variante_di).order("ordine"),
+      sb.from("gest_computo_voci_calc").select("*").eq("user_id",sbUid).eq("computo_id",c.id).order("ordine"),
+      sb.from("gest_computi").select("id,numero,titolo,data").eq("id",c.variante_di).eq("user_id",sbUid).maybeSingle()
+    ]);
+    if(rO.error||rN.error){
+      const e=rO.error||rN.error;
+      toast(/origine_id|variante_di/i.test(String(e.message||""))
+        ? "Per la variante serve l'aggiornamento del database: esegui sql/gest-computo-variante.sql su Supabase"
+        : "Non riesco a leggere il confronto: "+(e.message||""));
+      return;
+    }
+    const orig=rO.data||[], nuove=rN.data||[];
+    const part=(rP&&!rP.error)?rP.data:null;
+    if(!orig.length&&!part){
+      toast("Il computo di partenza non c'è più: non c'è niente con cui confrontare questa variante.");
+      return;
+    }
+
+    const r=varConfronta(orig,nuove);
+    if(!r.cambiate.length&&!r.aggiunte.length&&!r.tolte.length){
+      toast("Per ora non è cambiato niente: il foglio direbbe soltanto che i due computi sono uguali.");
+      return;
+    }
+
+    /* ⚠️ LA PROVA DEL NOVE, PRIMA DI DISEGNARE QUALSIASI COSA.
+       Le righe rimaste identiche si annullano fra i due computi, quindi la
+       somma di quelle stampate DEVE fare la differenza del riquadro. Se non
+       la fa, o il confronto ha perso una riga o il riquadro dice un'altra
+       cosa: in tutti e due i casi il foglio non si stampa. */
+    const _imp=v=>(+v.quantita||0)*(+v.prezzo_unitario||0);
+    const sommaStampata=
+        r.cambiate.reduce((s,x)=>s+(x.impB-x.impA),0)
+      + r.aggiunte.reduce((s,v)=>s+_imp(v),0)
+      - r.tolte.reduce((s,v)=>s+_imp(v),0);
+    if(Math.abs(sommaStampata-r.diff)>0.05){
+      toast("Errore: le righe del confronto non fanno la differenza in fondo. Non ti do un foglio che non dimostra il suo stesso totale — riapri il computo e riprova.");
+      return;
+    }
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    /* N. | Tariffa | Descrizione | u.m. | Quantità | Prezzo unit. | Importo | Differenza */
+    const X=[10,17,36,104,114,132,152,174,200];
+    const M=X[0], R=X[8], FONDO=268;
+    const mid=(a,b)=>(X[a]+X[b])/2;
+    /* ⚠️ «useGrouping:true» NON si toglie: senza, sullo stesso foglio si legge
+       «€ 97.000,00» e due righe sotto «€ 3000,00». */
+    const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
+    /* ⚠️ 21 agosto 2026 — «useGrouping:true» ANCHE QUI, e non e' un dettaglio.
+       Senza, Intl in italiano mette il punto delle migliaia solo dai cinque
+       numeri in su: sul primo foglio uscito dal banco si leggeva
+       «€ 11.001,00» nel riquadro in fondo e «2220,00» due colonne piu' su,
+       sulla stessa pagina. E' lo stesso difetto trovato il 19 agosto sul
+       quadro economico, guardando una fotografia. */
+    const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
+    const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3,useGrouping:true}).format(+n||0);
+
+    let y=0, tabTop=0, nRiga=0;
+
+    function chiudiCorpo(){
+      doc.setDrawColor(110);doc.setLineWidth(.2);
+      for(let i=1;i<=7;i++)doc.line(X[i],tabTop,X[i],y);
+      doc.line(M,tabTop,M,y);doc.line(R,tabTop,R,y);doc.line(M,y,R,y);
+    }
+    function testaTabella(){
+      const H=6.4;
+      doc.setFillColor(238,241,243);doc.rect(M,y,R-M,H,"F");
+      doc.setDrawColor(110);doc.setLineWidth(.2);doc.rect(M,y,R-M,H);
+      doc.setFont("helvetica","bold");doc.setFontSize(6.6);doc.setTextColor(0);
+      const b=y+H-2.1;
+      doc.text("N.",mid(0,1),b,{align:"center"});
+      doc.text("Tariffa",mid(1,2),b,{align:"center"});
+      doc.text("Descrizione dei lavori",mid(2,3),b,{align:"center"});
+      doc.text("u.m.",mid(3,4),b,{align:"center"});
+      doc.text("Quantità",mid(4,5),b,{align:"center"});
+      doc.text("Prezzo unit.",mid(5,6),b,{align:"center"});
+      doc.text("Importo",mid(6,7),b,{align:"center"});
+      doc.text("Differenza",mid(7,8),b,{align:"center"});
+      [1,2,3,4,5,6,7].forEach(i=>doc.line(X[i],y,X[i],y+H));
+      y+=H;tabTop=y;
+    }
+    function nuovaPagina(){
+      chiudiCorpo();
+      doc.addPage();y=13;testaTabella();
+      doc.setFont("helvetica","normal");doc.setTextColor(0);
+    }
+    const spazio=h=>{if(y+h>FONDO)nuovaPagina();};
+    const spazioFuoriTabella=h=>{if(y+h>FONDO){doc.addPage();y=16;}};
+
+    /* il titolo di un gruppo (Cambiate · Aggiunte · Tolte) */
+    function gruppo(t,quante){
+      spazio(9);
+      doc.setFillColor(246,247,249);doc.rect(M,y,R-M,5.6,"F");
+      doc.setFont("helvetica","bold");doc.setFontSize(7.6);doc.setTextColor(0);
+      doc.text(t+"  ("+quante+")",X[1]+1.5,y+3.9);
+      y+=5.6;doc.setDrawColor(200);doc.line(M,y,R,y);
+    }
+
+    /* UNA VOCE. «linee» sono le righe di numeri sotto la descrizione:
+       una sola (aggiunta o tolta) oppure due (prima / adesso). */
+    function voce(v,linee,diff){
+      nRiga++;
+      /* ⛔ la descrizione arriva dal prezzario: si stampa com'e', non si
+         tocca e non passa da nessuna traduzione (regola del 20 agosto). */
+      const desc=doc.splitTextToSize(String(v.descrizione||"(senza descrizione)"),X[3]-X[2]-3);
+      const cod=doc.splitTextToSize(String(v.codice||""),X[2]-X[1]-3);
+      const H=3.6+Math.max(desc.length,cod.length,1)*3.5+linee.length*3.8+1.6;
+      spazio(H+2);
+      doc.setFont("helvetica","bold");doc.setFontSize(7.4);
+      doc.text(String(nRiga),mid(0,1),y+4.6,{align:"center"});
+      doc.setFont("helvetica","normal");doc.setFontSize(6.8);
+      cod.forEach((t,i)=>doc.text(t,X[1]+1.5,y+4.6+i*3.2));
+      doc.setFontSize(7.4);
+      desc.forEach((t,i)=>doc.text(t,X[2]+1.5,y+4.6+i*3.5));
+
+      let yl=y+3.6+Math.max(desc.length,cod.length,1)*3.5+2.8;
+      linee.forEach(function(L){
+        doc.setFontSize(7);
+        doc.setTextColor(L.et==="adesso"?0:120);
+        doc.text(L.et,X[2]+4,yl);
+        doc.text(_umPdf(v.unita||""),mid(3,4),yl,{align:"center"});
+        doc.text(_q3(L.q),X[5]-1.5,yl,{align:"right"});
+        doc.text(_d2(L.p),X[6]-1.5,yl,{align:"right"});
+        doc.text(_d2(L.imp),X[7]-1.5,yl,{align:"right"});
+        doc.setTextColor(0);
+        yl+=3.8;
+      });
+      /* la differenza, in fondo alla voce e in grassetto: e' l'unica cosa
+         che si guarda davvero */
+      doc.setFont("helvetica","bold");doc.setFontSize(8);
+      doc.text((diff>=0?"+ ":"- ")+_d2(Math.abs(diff)),R-1.5,yl-3.8,{align:"right"});
+      doc.setFont("helvetica","normal");
+      y+=H;
+      doc.setDrawColor(215);doc.line(M,y,R,y);
+    }
+
+    /* ---- intestazione ---- */
+    y=14;
+    doc.setFont("helvetica","bold");doc.setFontSize(13);doc.text(az.nome,M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    let hy=y+4.8;
+    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=3.8;});
+    doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(13);
+    doc.text("COMPUTO DI VARIANTE",R,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    doc.text((c.numero?"N. "+c.numero+"     ":"")+"del "+fdate(c.data||todayStr()),R,y+4.8,{align:"right"});
+    if(c.tipo==="pubblico")doc.text("lavori pubblici",R,y+8.6,{align:"right"});
+    doc.setTextColor(0);
+    y=Math.max(hy,y+13)+1;doc.setDrawColor(180);doc.line(M,y,R,y);y+=6;
+
+    doc.setFont("helvetica","bold");doc.setFontSize(10.5);
+    const tit=doc.splitTextToSize(c.titolo||_cm('nome'),R-M);
+    doc.text(tit,M,y);y+=tit.length*4.6+0.5;
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    if(c.oggetto){const o=doc.splitTextToSize("Oggetto: "+c.oggetto,R-M);doc.text(o,M,y);y+=o.length*3.9;}
+    if(c.luogo){doc.text("Luogo: "+c.luogo,M,y);y+=3.9;}
+    if(cli.nome){doc.text("Committente: "+cli.nome+(cli.indirizzo?" - "+cli.indirizzo:""),M,y);y+=3.9;}
+    doc.text("Variante del computo: "+(part
+        ? ((part.numero?"n. "+part.numero+" - ":"")+(part.titolo||"(senza titolo)")+(part.data?"  ·  del "+fdate(part.data):""))
+        : "(non più presente)"),M,y);y+=3.9;
+    /* ⚠️ il singolare: usciva «le 1 righe rimaste uguali». Visto leggendo il
+       foglio vero uscito dal banco, non il codice. */
+    doc.text("Qui sotto c'è solo quello che è cambiato"
+      +(r.uguali>0
+        ? (r.uguali===1?": la riga rimasta uguale non è elencata."
+                       :": le "+r.uguali+" righe rimaste uguali non sono elencate.")
+        : "."),M,y);y+=3.9;
+    doc.setTextColor(0);y+=4;
+
+    testaTabella();
+
+    /* ---- il corpo ---- */
+    if(r.cambiate.length){
+      gruppo("CAMBIATE",r.cambiate.length);
+      r.cambiate.forEach(function(x){
+        voce(x.voce,
+             [{et:"prima", q:x.qA,p:x.pA,imp:x.impA},
+              {et:"adesso",q:x.qB,p:x.pB,imp:x.impB}],
+             x.impB-x.impA);
+      });
+    }
+    if(r.aggiunte.length){
+      gruppo("AGGIUNTE",r.aggiunte.length);
+      r.aggiunte.forEach(function(v){
+        const q=+v.quantita||0, p=+v.prezzo_unitario||0;
+        voce(v,[{et:"adesso",q:q,p:p,imp:q*p}],q*p);
+      });
+    }
+    if(r.tolte.length){
+      gruppo("TOLTE",r.tolte.length);
+      r.tolte.forEach(function(v){
+        const q=+v.quantita||0, p=+v.prezzo_unitario||0;
+        voce(v,[{et:"prima",q:q,p:p,imp:q*p}],-(q*p));
+      });
+    }
+    chiudiCorpo();
+
+    /* ---- i tre numeri che contano ---- */
+    y+=7;spazioFuoriTabella(34);
+    doc.setFont("helvetica","normal");doc.setFontSize(9.5);
+    const conto=[["Computo di partenza",r.impOrig],["Variante",r.impVar]];
+    conto.forEach(function(k){
+      doc.text(k[0],X[2],y);
+      doc.text(_eur(k[1]),R-1.5,y,{align:"right"});
+      y+=5.6;
+    });
+    doc.setDrawColor(150);doc.line(X[2],y-3.2,R-1.5,y-3.2);
+    y+=1;
+    doc.setDrawColor(11,75,196);doc.setLineWidth(.5);doc.rect(M,y,R-M,11);doc.setLineWidth(.2);
+    doc.setFont("helvetica","bold");doc.setFontSize(11);
+    doc.text(r.diff>=0?"IN PIÙ":"IN MENO",M+3,y+7.2);
+    doc.text((r.diff>=0?"+ ":"- ")+_eur(Math.abs(r.diff))
+      +(r.perc!=null?"   ("+(r.diff>=0?"+":"-")+_pct(Math.abs(r.perc))+"%)":""),R-3,y+7.2,{align:"right"});
+    y+=17;
+
+    spazioFuoriTabella(14);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    const nota=doc.splitTextToSize("Sono gli importi delle lavorazioni, senza il ribasso: il ribasso è lo stesso sui due computi e non cambia la differenza in percentuale.",R-M);
+    nota.forEach(function(riga){ if(y+3.9>FONDO+10){doc.addPage();y=16;} doc.text(riga,M,y);y+=3.9; });
+    doc.setTextColor(0);y+=6;
+
+    /* le due firme: una variante la accettano in due */
+    spazioFuoriTabella(28);
+    doc.setFontSize(9);
+    doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(todayStr()),M,y);
+    y+=14;
+    doc.setFont("helvetica","bold");
+    doc.text("IL COMMITTENTE",M+35,y,{align:"center"});
+    doc.text("TIMBRO E FIRMA",R-35,y,{align:"center"});
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
+    doc.text("____________________________",M+35,y+4.6,{align:"center"});
+    doc.text("____________________________",R-35,y+4.6,{align:"center"});
+    doc.setTextColor(0);
+
+    const np=doc.getNumberOfPages();
+    for(let p=1;p<=np;p++){
+      doc.setPage(p);
+      doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(140);
+      doc.text("COMPUTO DI VARIANTE"+(c.numero?"  ·  n. "+c.numero:"")+(c.titolo?"  ·  "+c.titolo:""),M,290,{maxWidth:150});
+      doc.text("Pag. "+p+" di "+np,R,290,{align:"right"});
+      doc.setTextColor(0);
+    }
+    doc.save("variante-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+      (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+    toast("Computo di variante scaricato ✅");
   }
 
   /* ---- REPORT & STATISTICHE ---- */
@@ -21383,6 +22027,10 @@ ${vecchi?`
     if(a==="comp-gara")return computoListaGara(id);
     if(a==="co-pag")return compPag(+t.dataset.p);
     if(a==="crono-salva")return cronoSalva();
+    /* i due pulsanti stanno DENTRO la scheda del computo aperto: l'id e'
+       quello, non serve leggerlo dal pulsante */
+    if(a==="crono-pdf")return cronoPdf(ctrComputoId);
+    if(a==="var-pdf")return variantePdf(ctrComputoId);
     if(a==="comp-importa")return compApriFile();
     if(a==="cp-metti")return compPdfMetti();
     if(a==="cp-tutte"){$$("#cp-lista .cp-ck").forEach(x=>{x.checked=true;});return;}
