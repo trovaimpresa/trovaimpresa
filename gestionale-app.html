@@ -22080,15 +22080,28 @@ ${vecchi?`
 
     <!-- SCHERMATA DI MANUTENZIONE -->
     <div id="gate-manutenzione" style="display:none;padding:30px 30px 34px;color:var(--testo);">
-      <div style="font-size:22px;font-weight:800;line-height:1.35;margin-bottom:18px;">Ci stiamo lavorando</div>
+      <!-- ⛔ 20 agosto 2026 — QUI DENTRO NON SI PROMETTE NIENTE E NON SI
+           REGALA NIENTE. Il testo di prima diceva che il gestionale sarebbe
+           stato compreso senza pagare nulla in pi&ugrave;: quella riga la
+           leggevano le imprese entrate a luglio, e legava le mani.
+           Cambiare il prezzo dopo aver scritto una cosa del genere non &egrave;
+           un problema di comunicazione: &egrave; parola data che non torna.
+           Adesso si dice cosa c'&egrave; dentro, PERCHE' &egrave; chiuso, e dove
+           andr&agrave; a finire. Senza cifre, e senza promesse.
+           ⚠️ Chi tocca questo testo: non rimetterci dentro un impegno. -->
+      <div style="font-size:22px;font-weight:800;line-height:1.35;margin-bottom:18px;">Il gestionale sta arrivando</div>
 
       <p style="margin:0 0 16px;font-size:17px;line-height:1.7;">
-        Stiamo mettendo a punto il gestionale per le imprese: lavori, preventivi, fatture,
-        squadra, mezzi e scadenze, tutto in un unico posto.
+        Stiamo finendo il gestionale per le imprese: lavori e cantieri, preventivi,
+        computo metrico, fatture, squadra, mezzi e scadenze. Tutto in un posto solo,
+        dal computer e dal telefono in cantiere.
+      </p>
+      <p style="margin:0 0 16px;font-size:17px;line-height:1.7;">
+        Vogliamo darvelo finito, non a met&agrave;: per questo per ora &egrave; chiuso.
       </p>
       <p style="margin:0 0 24px;font-size:17px;line-height:1.7;">
-        Quando sar&agrave; pronto sar&agrave; <b>incluso gratuitamente</b> per chi &egrave; iscritto a TrovaImpresa.
-        Non dovrai pagare nulla in pi&ugrave;.
+        Quando sar&agrave; pronto entrer&agrave; nel piano <b>Premium</b>, insieme alla vetrina
+        su TrovaImpresa.
       </p>
 
       <div id="gate-avvisami-box" style="background:var(--sfondo);border-radius:12px;padding:20px;">
@@ -22137,8 +22150,13 @@ ${vecchi?`
   function q(id){return document.getElementById(id);}
   /* ===== MANUTENZIONE =====
      Se true, il gestionale è chiuso a tutti tranne le email in AMMESSI.
-     Rimessa a false il 6 agosto 2026: aperto ai Premium. */
-  var MANUTENZIONE = false;
+     Rimessa a false il 6 agosto 2026: aperto ai Premium.
+     ⛔ RIMESSA A TRUE IL 20 AGOSTO 2026, deciso da Alessio:
+        «prima si costruisce la casa poi si vende».
+        Il gestionale si finisce con calma e si apre quando vale i soldi
+        che si chiedono, non prima. Per riaprirlo: rimettere false —
+        ma prima ricontrollare il testo della schermata qui sotto. */
+  var MANUTENZIONE = true;
   var AMMESSI = ['pintoalessio@icloud.com'];   /* aggiungi qui altre email fra apici, separate da virgola */
 
   /* ===== CHI PUO' ENTRARE — 6 agosto 2026 =====

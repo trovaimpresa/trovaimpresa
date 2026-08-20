@@ -10306,6 +10306,62 @@ economica che abbiamo.*
 
 ---
 
+# 20 agosto 2026 (6), SERA — IL GESTIONALE TORNA CHIUSO
+
+## La decisione di Alessio, con le sue parole
+
+> «io voglio solamente fare un bel gestionale completo e metterlo a pagamento.
+> Tra un mese inizio a incassare, tra un anno, non importa.»
+>
+> «**prima si costruisce la casa poi si vende**»
+
+⛔ **E una cosa che avevo sbagliato io, due volte di fila.** Gli ho fatto
+domande sui clienti — quanti sono, chi usa il gestionale, quanti pagherebbero
+— quando lui mi aveva già detto cosa voleva. Risposta: *«non mi interessa,
+come te lo devo dire»*. È la seconda volta in due giorni (ieri: «non dico
+fermati a lavorare ma ad ascoltarmi»).
+**Quando Alessio dice cosa vuole, si fa quello. I numeri si portano solo se
+li chiede.**
+
+## Cosa è stato fatto
+
+**`var MANUTENZIONE = true;`** (riga ~22141). Il gestionale è chiuso a tutti
+tranne le email in `AMMESSI` (oggi solo la sua) e a chi ha il link
+`?chiave=apri`. Si finisce con calma e si riapre quando vale i soldi che si
+chiedono.
+
+**E la schermata è stata riscritta.** Prima diceva che il gestionale sarebbe
+stato compreso senza pagare nulla in più: quella riga la leggevano le imprese
+entrate a luglio e legava le mani sul prezzo. Adesso dice **cosa c'è dentro**,
+**perché è chiuso** («vogliamo darvelo finito, non a metà») e **dove andrà a
+finire** (il Premium). ⛔ **Nessuna cifra e nessuna promessa.**
+
+⚠️ **Chi tocca quel testo: non rimetterci dentro un impegno.** Ci sono quattro
+sabotaggi apposta che diventano rossi se ricompare «gratis», «non dovrai
+pagare nulla», una cifra in euro, o se sparisce il perché.
+
+## Una cosa che è cambiata nei banchi
+
+Con la porta chiusa, i banchi entravano «di straforo»: il gate copriva la
+pagina ma loro leggevano il DOM sotto e restavano verdi. Adesso **entrano
+dalla porta prevista**, con `?chiave=apri` nell'indirizzo. Così se un domani
+la porta si rompe, i banchi se ne accorgono invece di scavalcarla.
+
+## Provato
+
+- **`prove/banco-gate.js` — 19 prove.** Un'impresa qualunque trova chiuso;
+  non legge nessuna promessa né cifra; Alessio entra; la chiave apre anche a
+  chi **non** ha il Premium (e senza chiave quello vede la schermata del
+  Premium, non la manutenzione).
+- **`prove/sabotaggi-gate.py` — 9 sabotaggi, 9 accusati.** Uno restava verde:
+  la chiave è gestita in **due posti** (`ammesso()` e `decidi()`) e rompendone
+  uno l'altro rimediava. I due però fanno cose diverse — uno salta la
+  manutenzione, l'altro anche il Premium — e la prova che li distingue adesso
+  c'è.
+- Tutti gli altri banchi restano verdi.
+
+---
+
 ## DOVE SIAMO RIMASTI (20 agosto 2026, notte)
 
 **Fatto oggi — dieci cose, tutte online.** Cinque push:
@@ -10323,7 +10379,9 @@ economica che abbiamo.*
    eseguito su Supabase);
 9. **il computo di variante** — voce 7, solo sulle varianti
    (`sql/gest-computo-variante.sql` ✅ già eseguito su Supabase);
-10. ⛔ **il testo del prezzario non si tocca più** (`.cm-testo`).
+10. ⛔ **il testo del prezzario non si tocca più** (`.cm-testo`);
+11. ⛔ **il gestionale è tornato CHIUSO** (`MANUTENZIONE = true`) con la
+    schermata riscritta senza promesse.
 
 **379 prove verdi · 80 sabotaggi, 79 accusano.** L'unico che non accusa è
 dichiarato nel codice (il mezzogiorno delle date del cronoprogramma).
@@ -10332,32 +10390,36 @@ dichiarato nel codice (il mezzogiorno delle date del cronoprogramma).
 
 **DA FARE, IN QUESTO ORDINE**
 
-**1. IL PREZZO NUOVO — 29 € al mese oppure 249 € l'anno.**
-È il punto in cima: ogni giorno che resta com'è sono soldi persi.
+⛔ **LA DIREZIONE, decisa da Alessio la sera del 20 agosto:
+«prima si costruisce la casa poi si vende».**
+Il gestionale è chiuso. **Si costruisce.** Il prezzo, i clienti e l'incasso
+NON sono l'argomento: non riportarli finché non li tira fuori lui.
 
-Due decisioni che Alessio voleva prendere **a mente fresca** e che vanno
-chieste PRIMA di scrivere:
-   a) cosa si legge **grande**: «249 € l'anno» (con sotto «sono 20,75 € al
-      mese — risparmi 99 €») oppure «29 € al mese»?
-   b) nelle pagine dell'**artigiano** il prezzo si **toglie**?
-      ⚠️ Alessio, 20 agosto: *«gli artigiani saranno sempre esclusi dal
-      Premium, non pagheranno mai — sono clienti non paganti»*. Chi paga sono
-      le **imprese** e i **professionisti**.
+**1. FINIRE IL GESTIONALE.** Cosa manca, dalla lista
+`prove-claude/CHI-USA-COSA.md` (c'è scritto a chi serve ogni cosa, impresa o
+professionista):
+   - **l'analisi dei prezzi** — quando una lavorazione non sta nel prezzario.
+     Piccola-media, e apre i professionisti;
+   - **il PDF del cronoprogramma** e **il PDF della variante** — oggi si
+     vedono solo a schermo, e in una gara vanno consegnati stampati;
+   - **il POS** (piano di sicurezza) — è l'unica cosa che un'impresa è
+     obbligata per legge ad avere. ⚠️ Grosso, e si fa **con un consulente
+     vero** che controlla i modelli, o non si fa;
+   - **la contabilità pubblica completa** — sei documenti, solo per chi fa
+     direzione lavori su appalti pubblici;
+   - **i formati di scambio** — dopo il lettore del PDF serve molto meno.
 
-Il prezzo vecchio (5 €/mese · 49 €/anno) è scritto in **17 posti**, già
-trovati: `prezzi.html` (anche il testo per Google) · `info-premium.html` ·
-`software-gestionale-imprese-edili.html` (7 punti, comprese le domande e
-risposte) · i quattro **pannelli** · le quattro **registrazioni** ·
-`pubblicita.html` · `termini-condizioni.html` · `admin.html` ·
-`js/assistente-trovaimpresa.js` · `js/ai-integrazione.js` ·
-`netlify/functions/ai-claude.js` · `netlify/functions/controlla-scadenze-premium.js`.
-
-✅ **Buona notizia: il pagamento MENSILE su Stripe c'è già.** In
-`netlify/functions/crea-checkout-abbonamento.js` ci sono tutti e due i price
-id (mensile e annuale): quando Alessio avrà creato i due prezzi nuovi su
-Stripe, bastano **due righe**.
-⛔ Le chiavi Stripe stanno nelle variabili Netlify: non si scrivono nel codice
-e non si chiedono in chat. I *price id* invece sono pubblici e stanno lì.
+**QUANDO IL PREZZO TORNERÀ ATTUALE** (e solo allora): 29 € al mese oppure
+249 € l'anno, il prezzo vecchio è in **17 posti** già trovati — `prezzi.html`
+(anche il testo per Google) · `info-premium.html` ·
+`software-gestionale-imprese-edili.html` (7 punti) · i quattro **pannelli** ·
+le quattro **registrazioni** · `pubblicita.html` · `termini-condizioni.html` ·
+`admin.html` · `js/assistente-trovaimpresa.js` · `js/ai-integrazione.js` ·
+`netlify/functions/ai-claude.js` ·
+`netlify/functions/controlla-scadenze-premium.js`.
+✅ Il pagamento **mensile su Stripe c'è già**: in
+`netlify/functions/crea-checkout-abbonamento.js` ci sono i due price id.
+⚠️ Gli **artigiani non pagheranno mai**: sono clienti non paganti.
 
 **2. L'avviso alle imprese di luglio** — hanno tre mesi in regalo che stanno
 per scadere. La mail c'è (`controlla-scadenze-premium.js`) ma dice il prezzo
