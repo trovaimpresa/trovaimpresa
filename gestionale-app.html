@@ -20972,6 +20972,17 @@ ${vecchi?`
     $("#overlay").classList.add("open");
     /* Il corpo scorre: senza questo il modulo si apre già scorso di qualche
        riga (resta la posizione della volta prima) e la prima etichetta sparisce. */
+    /* ⚠️ 20 agosto 2026 — «RICORDA A PAGINA PIENA» (detto da Alessio).
+       Le finestre lunghe (lavoro, preventivo, fattura, computo...) prendono
+       tutto lo schermo; quelle corte restano una finestrella centrata.
+       Prima il CSS lo capiva guardando se dentro c'era «.sh-cols», le due
+       colonne. Il computo le colonne non ce le ha piu' — ha le pagine
+       «.copag» — e da un momento all'altro si e' rimpicciolito a 880 px in
+       mezzo allo schermo: ERRORE MIO, e non l'ha visto nessun banco.
+       ⛔ Adesso il nome da guardare e' UNO SOLO: la classe «sh-lunga», messa
+          qui. Chi domani inventa una terza forma di finestra la aggiunge in
+          questa riga, non in dieci regole del CSS sparse per il file. */
+    if(s.querySelector(".sh-cols,.copag")) s.classList.add("sh-lunga");
     const _b=s.querySelector(".sh-body");
     if(_b){
       /* Le emoji diventano icone SVG subito dopo l'apertura: il contenuto cambia

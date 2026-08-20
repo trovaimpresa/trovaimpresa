@@ -9928,6 +9928,39 @@ computo è / Per chi, A cosa serve, Note) e la 3 ne ha due (Quadro economico, Il
 ribasso). `compPag` li accende **tutti**. Accenderne uno solo era il primo
 errore da fare, e c'è il sabotaggio anche per quello.
 
+## ⛔ «RICORDA A PAGINA PIENA» — il secondo errore, stesso giorno
+
+Alessio manda la foto del gestionale vero, online, e scrive tre parole:
+**«ricorda a pagina piena»**. La finestra del computo si era rimpicciolita a
+una finestrella da 880 px in mezzo allo schermo.
+
+**Perché.** Nel CSS c'erano **dieci regole** che capivano «questa finestra è
+lunga, prende tutto lo schermo» guardando se dentro c'era **`.sh-cols`** — le
+due colonne. Il computo le colonne non ce le ha più: ha le pagine `.copag`.
+Da un momento all'altro il computo è diventato una «finestra corta».
+
+**Come è stato aggiustato — e questa è la parte che conta.** Non aggiungendo
+`.copag` a dieci regole (una regola che vive in dieci posti non si aggiusta
+mai del tutto). Adesso il nome è **UNO SOLO**: `openSheetGrande` mette la
+classe **`sh-lunga`** sulla finestra —
+
+```
+if(s.querySelector(".sh-cols,.copag")) s.classList.add("sh-lunga");
+```
+
+— e tutte e dieci le regole guardano quella. **Chi domani inventa una terza
+forma di finestra la aggiunge in QUELLA riga, non nel CSS.**
+
+**A pagina piena la finestra è larga, il testo no.** Su un monitor da 27" una
+riga larga due metri non si legge: la barra sta larga quanto lo schermo (dice
+«dove sono» e si vede da lontano), il contenuto sta al centro dentro
+1060 px. C'è la prova, e il sabotaggio che la toglie diventa rosso.
+
+⚠️ **La lezione, di nuovo:** *una regola agganciata al nome di un pezzo si
+rompe il giorno che quel pezzo cambia nome.* Due volte nello stesso giorno,
+per la stessa causa. E **nessuno dei due l'ha trovato un banco**: li ha
+trovati Alessio guardando lo schermo.
+
 ## Un errore mio, trovato guardando la foto
 
 Nel CSS c'era una regola che teneva il pulsante **Salva** lontano dal fumetto
@@ -9947,21 +9980,21 @@ pulsante che non si legge non è un pulsante.
 
 ## Come è stato provato
 
-- **`prove/banco-navbar.js` — 59 prove**, il gestionale vero in Chromium.
+- **`prove/banco-navbar.js` — 66 prove**, il gestionale vero in Chromium.
   Guarda **il pixel, non la classe**: chiede al browser se una cosa *si vede*
   (`offsetParent`), perché una classe `on` con il CSS sbagliato non mostra
   niente e il banco resterebbe verde lo stesso.
   Le prove che contano di più: le caselle nascoste **esistono ancora e hanno
   ancora il loro valore**; si scrive un ribasso stando sulla pagina 3, si
   salva, e **titolo e numero sono ancora nel database**.
-- **`prove/sabotaggi-navbar.py` — 18 sabotaggi, 18 visti.**
+- **`prove/sabotaggi-navbar.py` — 21 sabotaggi, 21 visti.**
   Uno era **non unico** al primo giro: `const corpo=document.querySelector(
   "#sheet .sh-body")` compare **due volte** nel file (c'è anche in
   `openSheetGrande`), il sabotaggio ne cambiava una sola e il banco restava
   verde. **È la trappola del 19 agosto che torna**, e l'ha presa il controllo
   di unicità dello script. L'ancora adesso è lunga, con il commento sopra.
 - Gli altri banchi girano ancora tutti verdi: SAL 88, Riepilogo 34, PDF nel
-  browser 14, lettore PDF 20. **215 prove verdi in tutto.**
+  browser 14, lettore PDF 20. **222 prove verdi in tutto.**
 
 ---
 

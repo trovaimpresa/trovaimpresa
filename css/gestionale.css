@@ -1338,7 +1338,11 @@
 .conav{
   display:flex; gap:0; overflow-x:auto; -webkit-overflow-scrolling:touch;
   border-bottom:1px solid var(--bordo); background:#FBFCFD;
-  margin:-4px -4px 18px; padding:0 4px;
+  /* i margini negativi la portano ai bordi della finestra: il padding la
+     riallinea al contenuto centrato, cosi' il «1 Lavorazioni» sta sopra la
+     parola «Le lavorazioni» e non a un palmo di distanza */
+  margin:-24px -28px 30px;
+  padding:0 max(28px, calc((100% - 1060px) / 2));
   position:sticky; top:-1px; z-index:4;
 }
 .conav-v{
@@ -1360,8 +1364,12 @@
 .conav-v.spento{ color:var(--testo-3); }
 .conav-v.spento .conav-n{ background:#F0F2F5; color:var(--testo-3); }
 
-/* una pagina per volta */
-.copag{ display:none; }
+/* una pagina per volta.
+   ⚠️ La finestra e' a tutto schermo, ma il testo NO: su un monitor da 27"
+   una riga larga due metri non si legge. La barra sta larga quanto lo
+   schermo (dice «dove sono» e si vede da lontano), il contenuto sta al
+   centro dentro una larghezza che l'occhio riesce a seguire. */
+.copag{ display:none; max-width:1060px; margin-left:auto; margin-right:auto; }
 .copag.on{ display:block; }
 
 /* ---- il computo ancora vuoto: UNA cassetta, DUE strade ----
@@ -1384,7 +1392,7 @@
 .co-vuoto-poi span{ display:block; margin-top:8px; font-size:14px; color:var(--testo-3); }
 
 @media(max-width:760px){
-  .conav{ margin:-4px -14px 14px; padding:0 8px; }
+  .conav{ margin:-20px -16px 16px; padding:0 8px; }
   .conav-v{ font-size:15px; padding:13px 11px; gap:7px; }
 }
 
@@ -2570,23 +2578,23 @@
    ========================================================================= */
 
 /* ---- 1. le finestre LUNGHE: tutto lo schermo ---- */
-.sheet--grande:has(.sh-cols){
+.sheet--grande.sh-lunga{
   width:100%; max-width:none;
   height:100vh; max-height:100vh;
   margin:0; border-radius:0;
 }
 @supports (height:100dvh){
-  .sheet--grande:has(.sh-cols){ height:100dvh; max-height:100dvh; margin:0; }
+  .sheet--grande.sh-lunga{ height:100dvh; max-height:100dvh; margin:0; }
 }
 
 /* ---- le finestre CORTE: finestrella centrata, alta quanto serve ---- */
-.sheet--grande:not(:has(.sh-cols)){
+.sheet--grande:not(.sh-lunga){
   width:94%; max-width:880px;
   height:auto; max-height:88vh;
   margin:6vh auto; border-radius:16px;
 }
 @supports (height:88dvh){
-  .sheet--grande:not(:has(.sh-cols)){ max-height:88dvh; margin:6dvh auto; }
+  .sheet--grande:not(.sh-lunga){ max-height:88dvh; margin:6dvh auto; }
 }
 
 .sheet--grande .sh-head{ padding:16px 28px; }
@@ -2656,11 +2664,11 @@
    Quando quella barra c'e', la finestra parte da sotto. Se non c'e'
    (cioe' per chiunque non sia io) non cambia niente. */
 body:has(#ti-fondatore) .overlay{ top:46px; }
-body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
+body:has(#ti-fondatore) .sheet--grande.sh-lunga{
   height:calc(100vh - 46px); max-height:calc(100vh - 46px);
 }
 @supports (height:100dvh){
-  body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
+  body:has(#ti-fondatore) .sheet--grande.sh-lunga{
     height:calc(100dvh - 46px); max-height:calc(100dvh - 46px);
   }
 }
@@ -2672,8 +2680,8 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
    di stato (verde/ambra/rosso), che restano liberi di dire quello che
    dicono da sempre.
    ========================================================================= */
-.sheet--grande:has(.sh-cols) .sh-body{ background:var(--sfondo); }
-.sheet--grande .sh-cols .sh-b{
+.sheet--grande.sh-lunga .sh-body{ background:var(--sfondo); }
+.sheet--grande.sh-lunga .sh-b{
   background:var(--card);
   border:1px solid var(--bordo);
   border-left:5px solid var(--blu);
@@ -2682,12 +2690,12 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
   margin-bottom:18px;
   box-shadow:0 1px 2px rgba(16,24,32,.05);
 }
-.sheet--grande .sh-cols .sh-b .sh-tit{ margin-top:0; color:var(--blu-scuro); border-bottom-color:var(--blu-tenue); }
+.sheet--grande.sh-lunga .sh-b .sh-tit{ margin-top:0; color:var(--blu-scuro); border-bottom-color:var(--blu-tenue); }
 @media(min-width:901px){
   .sheet--grande .sh-cols{ column-rule:none; }
 }
 @media(max-width:900px){
-  .sheet--grande .sh-cols .sh-b{ padding:16px 16px 4px; }
+  .sheet--grande.sh-lunga .sh-b{ padding:16px 16px 4px; }
 }
 
 /* Sul telefono due caselle affiancate non ci stanno: quella della data ha una
@@ -2714,17 +2722,14 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
    Non lo sposto e non lo nascondo (e' un pezzo che non e' mio e domani
    potrebbe cambiare): gli lascio il suo angolo libero, e i pulsanti si
    fermano prima. */
-/* ⚠️ 20 agosto 2026 — ERRORE MIO, e me ne sono accorto guardando la foto.
-   Questa regola era agganciata a .sh-cols. La finestra del computo le due
-   colonne non ce le ha piu' (adesso ha la barra e le pagine .copag): senza
-   aggiungere .copag qui, il «Salva» del computo tornava sotto il fumetto
-   della chat. Una regola agganciata al NOME di un pezzo si rompe il giorno
-   che quel pezzo cambia nome: qui vale per tutte e due. */
-.sheet--grande:has(.sh-cols) .sh-foot,
-.sheet--grande:has(.copag)   .sh-foot{ padding-right:104px; }
+/* ⚠️ 20 agosto 2026 — ERRORE MIO. Questa regola, e altre nove, erano
+   agganciate a «.sh-cols»: il giorno che il computo ha smesso di avere le
+   due colonne si e' rimpicciolito in mezzo allo schermo e il «Salva» e'
+   tornato sotto il fumetto della chat. Adesso il nome e' UNO SOLO
+   («sh-lunga», messa da openSheetGrande). */
+.sheet--grande.sh-lunga .sh-foot{ padding-right:104px; }
 @media(max-width:900px){
-  .sheet--grande:has(.sh-cols) .sh-foot,
-  .sheet--grande:has(.copag)   .sh-foot{ padding-right:84px; }
+  .sheet--grande.sh-lunga .sh-foot{ padding-right:84px; }
 }
 
 /* 16 agosto 2026 (3) — LE AZIONI SUL DOCUMENTO, IN ALTO ACCANTO AL TITOLO.
@@ -2763,7 +2768,7 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
    separazione sopra: nel preventivo il blocco «IVA e totale» se la portava
    dietro da quando stava in mezzo agli altri campi, e nella scheda diventava
    una riga grigia appesa al vuoto. */
-.sheet--grande .sh-cols .sh-b > .field:first-child[style*="border-top"]{
+.sheet--grande.sh-lunga .sh-b > .field:first-child[style*="border-top"]{
   border-top:none !important; padding-top:0 !important; margin-top:0 !important;
 }
 
@@ -2854,8 +2859,8 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
 .sheet .seg button{ min-height:60px; font-size:18px; }
 
 /* le schede-zona: piu' spesse, cosi' non galleggiano nel bianco */
-.sheet--grande .sh-cols .sh-b{ padding:26px 26px 10px; margin-bottom:22px; }
-.sheet--grande .sh-cols .sh-b .sh-tit{ font-size:21px; margin-bottom:18px; padding-bottom:11px; }
+.sheet--grande.sh-lunga .sh-b{ padding:26px 26px 10px; margin-bottom:22px; }
+.sheet--grande.sh-lunga .sh-b .sh-tit{ font-size:21px; margin-bottom:18px; padding-bottom:11px; }
 
 /* i pulsantini «+ Aggiungi ...» crescono con le caselle */
 .sheet .field .btn-ghost,
@@ -2872,7 +2877,7 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
   }
   .sheet .field textarea{ min-height:130px; }
   .sheet .field{ margin-bottom:22px; }
-  .sheet--grande .sh-cols .sh-b{ padding:18px 16px 6px; }
+  .sheet--grande.sh-lunga .sh-b{ padding:18px 16px 6px; }
 }
 
 /* Le righe delle voci: le colonne della quantita' e del prezzo erano larghe
@@ -2894,12 +2899,12 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
    Le colonne restano separate da una riga sottile: senza le schede, due
    colonne appiccicate si leggerebbero come una sola.
    ============================================================ */
-.sheet--grande:has(.sh-cols) .sh-body{ background:var(--card); }
-.sheet--grande .sh-cols .sh-b{
+.sheet--grande.sh-lunga .sh-body{ background:var(--card); }
+.sheet--grande.sh-lunga .sh-b{
   background:none; border:none; border-left:none; box-shadow:none;
   padding:0; margin-bottom:44px;
 }
-.sheet--grande .sh-cols .sh-b .sh-tit{
+.sheet--grande.sh-lunga .sh-b .sh-tit{
   font-size:24px; font-weight:800; color:var(--testo);
   border-bottom:3px solid var(--blu);
   padding-bottom:12px; margin-bottom:24px;
@@ -2908,8 +2913,8 @@ body:has(#ti-fondatore) .sheet--grande:has(.sh-cols){
   .sheet--grande .sh-cols{ column-rule:1px solid var(--bordo); }
 }
 @media(max-width:900px){
-  .sheet--grande .sh-cols .sh-b{ margin-bottom:36px; }
-  .sheet--grande .sh-cols .sh-b .sh-tit{ font-size:21px; }
+  .sheet--grande.sh-lunga .sh-b{ margin-bottom:36px; }
+  .sheet--grande.sh-lunga .sh-b .sh-tit{ font-size:21px; }
 }
 
 /* Nella finestra del lavoro/pratica i titoli delle zone («Spese e materiali»,
