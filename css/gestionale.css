@@ -1376,6 +1376,78 @@
    larga tutto lo schermo, il testo al centro (la conferma del PDF) */
 .sh-centro{ max-width:1060px; margin-left:auto; margin-right:auto; }
 
+/* ================================================================
+   20 agosto 2026 (sera) — IL CRONOPROGRAMMA
+   ================================================================
+   Una riga per fase: titolo e date a sinistra, i giorni al centro, la
+   barra sul calendario a destra. Le barre stanno tutte sulla stessa
+   scala, se no confrontarle non vuol dire niente.
+
+   La fase «insieme al precedente» ha la barra a righe: guardando il
+   foglio si deve capire che quelle due settimane sono le STESSE, non
+   una dopo l'altra.
+
+   Una fase senza durata resta grigia e non ha barra — e' una riga
+   ancora da riempire, non una fase da zero giorni.
+   ================================================================ */
+.cg-righe{ display:flex; flex-direction:column; gap:2px; }
+.cg-riga{
+  display:grid; grid-template-columns:minmax(200px,1.1fr) auto minmax(220px,2fr);
+  gap:16px; align-items:center;
+  padding:12px 14px; border-radius:10px;
+}
+.cg-riga:nth-child(odd){ background:var(--sfondo); }
+.cg-tit{ min-width:0; }
+.cg-tit b{ display:block; font-size:16px; color:var(--testo); word-break:break-word; }
+.cg-date{ display:block; margin-top:3px; font-size:14px; color:var(--testo-2); }
+.cg-riga.senza .cg-tit b{ color:var(--testo-2); }
+.cg-riga.senza .cg-date{ color:var(--attesa); font-weight:600; }
+
+.cg-campi{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.cg-gg-l,.cg-ins-l{ display:inline-flex; align-items:center; gap:8px;
+  font-size:14.5px; color:var(--testo-2); white-space:nowrap; cursor:pointer; }
+.cg-gg{
+  width:78px; font-family:inherit; font-size:16px; font-weight:700; text-align:center;
+  padding:9px 8px; border:1.5px solid var(--bordo-forte); border-radius:9px;
+  background:var(--card); color:var(--testo);
+}
+.cg-gg:focus{ outline:none; border-color:var(--blu); }
+.cg-ins-l input{ width:20px; height:20px; accent-color:var(--blu); cursor:pointer; }
+
+/* il calendario: la striscia e' il cantiere intero, la barra e' la fase */
+.cg-scala{
+  position:relative; height:26px; border-radius:7px;
+  background:repeating-linear-gradient(90deg,#EDF1F6 0 1px,transparent 1px 100%) , #F4F7FA;
+  background-size:calc(100% / 12) 100%, auto;
+  border:1px solid var(--bordo);
+}
+.cg-barra{
+  position:absolute; top:4px; bottom:4px; min-width:6px;
+  background:var(--blu); border-radius:5px;
+}
+.cg-barra.par{
+  background:repeating-linear-gradient(45deg,var(--blu) 0 6px,var(--blu-scuro) 6px 12px);
+}
+
+.cg-tot{
+  margin-top:18px; padding:16px 18px; border-radius:12px;
+  background:var(--blu-tenue); color:var(--blu-scuro);
+  font-size:17px; line-height:1.5;
+}
+.cg-tot b{ color:var(--blu-scuro); }
+
+/* l'unico pulsante della pagina: blu pieno, e con aria intorno */
+.cg-salva{ margin-top:18px; }
+.cg-salva .btn-primary{ font-size:17px; padding:14px 22px; }
+
+/* sul telefono le tre colonne non ci stanno: una sotto l'altra, e la
+   barra resta larga tutta la riga (e' la cosa che si guarda) */
+@media(max-width:760px){
+  .cg-riga{ grid-template-columns:1fr; gap:10px; padding:14px 12px; }
+  .cg-riga:nth-child(odd){ background:var(--sfondo); }
+  .cg-scala{ height:22px; }
+}
+
 /* ---- il computo ancora vuoto: UNA cassetta, DUE strade ----
    Prima erano tre pulsantini identici sotto un «Totale 0,00 €».
    Alessio: «aggiungi lavorazione, aggiungi capitolo, messi lì non li

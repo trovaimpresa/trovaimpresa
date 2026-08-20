@@ -15175,7 +15175,7 @@ ${vecchi?`
           allineate, e prima o poi si scollano.
           ============================================================ */
        '<div class="conav" id="co-nav">'
-      +  [[1,"Lavorazioni"],[2,"Prezzi"],[3,"Ribasso e totale"],[4,"La scheda"],[5,"Acconti (SAL)"]]
+      +  [[1,"Lavorazioni"],[2,"Prezzi"],[3,"Ribasso e totale"],[4,"La scheda"],[5,"Acconti (SAL)"],[6,"Cronoprogramma"]]
          .map(function(v){
            /* su un computo che non e' ancora stato salvato l'unica cosa che
               si puo' fare e' dargli un nome: le altre voci sono spente e lo
@@ -15250,6 +15250,29 @@ ${vecchi?`
       +'</div>'
 
       +'</div>'   /* <- fine pagina 5 */
+
+      /* ============================================================
+         20 agosto 2026 (sera) — IL CRONOPROGRAMMA
+         ============================================================
+         Le fasi del lavoro sul calendario. Sui lavori pubblici e'
+         obbligatorio; a un'impresa serve per sapere quando mandare la
+         squadra e quando ordinare i materiali.
+
+         ⛔ LE DATE NON SI SCRIVONO, SI CALCOLANO. Nel database stanno
+            solo la data di partenza e le durate: chi comincia quando lo
+            decide la catena (vedi cronoDate). Se le date fossero
+            scritte, spostare l'inizio del cantiere di un giorno le
+            lascerebbe tutte sbagliate senza che nessuno se ne accorga.
+         ============================================================ */
+      +'<div class="copag" data-p="6">'
+      +'<div class="sh-b"><div class="sh-tit">Cronoprogramma</div>'
+      +  '<div class="field" style="max-width:280px"><label>Il cantiere comincia il</label>'
+      +    '<input type="date" id="co-inizio" value="'+esc(c.data_inizio||"")+'"></div>'
+      +  '<div class="lav-media" id="co-crono">'+(isNew
+          ? '<div class="lm-vuoto">Salva prima il computo.</div>'
+          : '<div class="lm-vuoto">Sto caricando…</div>')+'</div>'
+      +'</div>'
+      +'</div>'   /* <- fine pagina 6 */
 
       +'<div class="copag" data-p="4">'
       +'<div class="sh-b"><div class="sh-tit">A cosa serve questo computo</div>'
@@ -15340,7 +15363,11 @@ ${vecchi?`
        fatta di piu' blocchi (la 4 ne ha tre, la 3 ne ha due) e scrivere " on"
        a mano nel primo blocco lasciava spenti gli altri. Un posto solo. */
     compPag(isNew?4:1,true);
-    if(!isNew){renderCompVoci(c.id);renderSalList(c.id);}
+    /* la data di inizio ridisegna il calendario mentre la scrivi, senza
+       salvare: cosi' si vede subito dove cade la consegna */
+    const _ci=$("#co-inizio");
+    if(_ci)_ci.addEventListener("change",function(){ cronoAnteprima(); });
+    if(!isNew){renderCompVoci(c.id);renderSalList(c.id);renderCrono(c.id);}
   }
 
   /* ============================================================
@@ -15784,6 +15811,309 @@ ${vecchi?`
   }
 
   /* ============================================================
+     20 agosto 2026 (sera) — IL CRONOPROGRAMMA
+     ============================================================
+     Le fasi del lavoro sul calendario: quando comincia ognuna e quanto
+     dura. Sui lavori pubblici e' obbligatorio; a un'impresa serve per
+     sapere quando mandare la squadra e quando ordinare i materiali.
+
+     LA DURATA STA SUL CAPITOLO, NON SULLA SINGOLA LAVORAZIONE.
+     Su un computo da 87 righe scrivere 87 durate e' una serata di
+     lavoro, e nessuno programma la singola voce di prezzario: in
+     cantiere si ragiona per fasi. Sei numeri invece di ottantasette.
+
+     ⛔ LE DATE NON SI SCRIVONO NEL DATABASE, SI CALCOLANO.
+        Nel database stanno solo la data di partenza (gest_computi.
+        data_inizio) e le durate (gest_computo_capitoli.giorni). Chi
+        comincia quando lo decide cronoDate. Se le date fossero scritte,
+        basterebbe spostare l'inizio del cantiere di un giorno per
+        averle tutte sbagliate senza che nessuno se ne accorga: e'
+        la stessa scelta della quantita' delle lavorazioni, che il
+        gestionale legge e non scrive mai.
+     ============================================================ */
+
+  /* Una data da «2026-09-14», tenuta a MEZZOGIORNO.
+     ⚠️ ONESTA': il mezzogiorno e' una cintura, e il banco NON la fa
+     diventare rossa. Ho provato a metterla a mezzanotte e a far girare
+     tutto su cinque fusi orari con l'ora legale che cambia di notte
+     (Santiago, Beirut, L'Avana, San Paolo, Teheran), sette anni di date:
+     zero differenze. La lascio perche' non costa niente e perche' con
+     l'ora legale i conti a mezzanotte sono l'unico posto dove un giorno
+     puo' sparire — ma non si scrive «provata» una cosa che il banco non
+     accusa. */
+  function _cgData(t){
+    if(!t)return null;
+    const p=String(t).split("-");
+    if(p.length!==3)return null;
+    const d=new Date(+p[0],(+p[1])-1,+p[2],12,0,0);
+    return isNaN(d.getTime())?null:d;
+  }
+  function _cgIso(d){
+    if(!d)return "";
+    const m=String(d.getMonth()+1).padStart(2,"0"), g=String(d.getDate()).padStart(2,"0");
+    return d.getFullYear()+"-"+m+"-"+g;
+  }
+  /* sabato e domenica non sono giorni di lavoro: una durata di 5 giorni
+     scritta da un capomastro vuol dire una settimana, non «lunedi' a
+     venerdi' contando il weekend». Se il cantiere comincia di sabato,
+     comincia davvero il lunedi'. */
+  function _cgFeriale(d){ const g=d.getDay(); return g!==0&&g!==6; }
+  function _cgPrimoLav(d){
+    const x=new Date(d.getTime());
+    let giri=0;
+    while(!_cgFeriale(x)&&giri<10){ x.setDate(x.getDate()+1); giri++; }
+    return x;
+  }
+  function _cgDopo(d){ const x=new Date(d.getTime()); x.setDate(x.getDate()+1); return _cgPrimoLav(x); }
+  /* il giorno in cui si finisce partendo da «inizio» e lavorando n giorni:
+     il primo giorno e' compreso, quindi n=1 finisce il giorno stesso */
+  function _cgFine(inizio,n){
+    if(!(n>0))return null;
+    let x=new Date(inizio.getTime()), fatti=1;
+    /* il paletto a 4000 giri e' una rete contro una durata assurda
+       arrivata da fuori (il database ne accetta al massimo 2000, ma
+       questa funzione la chiama anche l'anteprima, che legge quello che
+       stai scrivendo). 4000 giorni di lavoro sono gia' piu' di quindici
+       anni: oltre, non e' un cantiere, e' un errore di battitura. */
+    let giri=0;
+    while(fatti<n&&giri<4000){ x=_cgDopo(x); fatti++; giri++; }
+    return x;
+  }
+  /* quanti giorni di calendario passano fra due date (per disegnare le barre) */
+  function _cgQuanti(a,b){ return Math.round((b.getTime()-a.getTime())/86400000); }
+
+  /* ============================================================
+     IL CONTO — una funzione sola, e la SOLA che decide le date.
+     Ogni capitolo comincia quando finisce il precedente. Con la spunta
+     «insieme» comincia invece nello stesso giorno del precedente: e' il
+     caso vero delle fasi in parallelo (mentre l'idraulico fa i tubi,
+     l'elettricista tira i cavi).
+     ⚠️ Dopo un gruppo in parallelo si riparte dal PIU' LUNGO dei due,
+        non dall'ultimo scritto: se le murature durano 12 giorni e gli
+        impianti 20, gli intonaci non cominciano dopo 12.
+     Un capitolo senza durata non occupa tempo e non sposta niente: e'
+     una riga ancora da riempire, non una fase da zero giorni.
+     ============================================================ */
+  function cronoDate(caps,inizioTesto){
+    const out=[];
+    const base=_cgData(inizioTesto);
+    if(!base)return caps.map(function(c){return {cap:c,inizio:null,fine:null,giorni:(+c.giorni||0)};});
+    let cursore=_cgPrimoLav(base);
+    let gruppoInizio=cursore, gruppoFine=null;
+    (caps||[]).forEach(function(c,i){
+      const gg=Math.max(0,+c.giorni||0);
+      /* ⚠️ ONESTA': «i>0» non cambia il risultato — sulla PRIMA fase i due
+         rami finiscono nello stesso punto, e infatti il sabotaggio che lo
+         toglie lascia il banco verde. Resta scritto perche' dice
+         l'intenzione (insieme a chi, se prima non c'e' nessuno?), non
+         perche' serva al conto. */
+      const parallelo=(i>0&&!!c.insieme);
+      let inizio;
+      if(parallelo){
+        inizio=gruppoInizio;
+      }else{
+        if(gruppoFine)cursore=_cgDopo(gruppoFine);
+        inizio=cursore; gruppoInizio=inizio; gruppoFine=null;
+      }
+      const fine=gg>0?_cgFine(inizio,gg):null;
+      if(fine&&(!gruppoFine||fine.getTime()>gruppoFine.getTime()))gruppoFine=fine;
+      out.push({cap:c, inizio:(gg>0?inizio:null), fine:fine, giorni:gg, parallelo:parallelo});
+    });
+    return out;
+  }
+
+  /* la fine di tutto il cantiere: la data piu' lontana fra tutte le fasi */
+  function cronoUltimo(righe){
+    let f=null;
+    (righe||[]).forEach(function(r){ if(r.fine&&(!f||r.fine.getTime()>f.getTime()))f=r.fine; });
+    return f;
+  }
+
+  /* ============================================================
+     COME SI DISEGNA UNA RIGA — in un posto solo.
+     ⚠️ Queste tre funzioni nascono da un difetto vero, trovato dal
+     sabotaggio «le barre non sono piu' proporzionali»: la formula della
+     barra era scritta DUE volte, in renderCrono e in cronoAnteprima.
+     Rompendola in una sola delle due il banco restava verde, perche' a
+     schermo vinceva l'altra. E' la lezione che torna: una regola che
+     vive in due posti non si puo' aggiustare a meta'.
+     ============================================================ */
+  function _cgTesto(r){
+    return (r.giorni>0&&r.inizio&&r.fine)
+      ? (fdate(_cgIso(r.inizio))+" \u2192 "+fdate(_cgIso(r.fine)))
+      : "manca la durata";
+  }
+  function _cgBarra(r,primo,arco){
+    if(!(r.giorni>0)||!arco||!r.inizio||!r.fine||!primo)return "";
+    const off=_cgQuanti(primo,r.inizio), dur=_cgQuanti(r.inizio,r.fine)+1;
+    /* la larghezza minima e' 1,2%: una fase di un giorno su un cantiere
+       di un anno sarebbe un filo invisibile, e sembrerebbe non esserci */
+    return '<i class="cg-barra'+(r.parallelo?" par":"")+'" style="left:'
+      +(off*100/arco).toFixed(3)+'%;width:'+Math.max(1.2,dur*100/arco).toFixed(3)+'%"></i>';
+  }
+  /* quanti giorni di lavoro dura tutto il cantiere, e cosa c'e' scritto
+     nella riga blu in fondo */
+  function _cgTotale(primo,ultimo){
+    if(!primo||!ultimo)return "Scrivi la data di inizio e i giorni di ogni fase: il calendario si disegna da solo.";
+    let n=0, x=_cgPrimoLav(new Date(primo.getTime()));
+    while(x.getTime()<=ultimo.getTime()&&n<4000){ n++; x=_cgDopo(x); }
+    return '<b>'+n+(n===1?' giorno':' giorni')+' di lavoro</b> \u2014 dal '
+      +fdate(_cgIso(primo))+' al <b>'+fdate(_cgIso(ultimo))+'</b>';
+  }
+
+  async function renderCrono(computoId){
+    const box=$("#co-crono"); if(!box)return;
+    if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
+
+    /* ⚠️ le colonne si chiedono PER NOME, non con «*». Con «*» il
+       database risponde bene anche quando l'aggiornamento non e' stato
+       eseguito: si vedrebbe la pagina vuota e l'errore salterebbe fuori
+       solo al Salva, dopo aver scritto dodici durate. Chiedendole per
+       nome, se mancano lo si sa subito e si dice cosa fare. */
+    const rc=await sb.from("gest_computo_capitoli")
+      .select("id,numero,titolo,ordine,giorni,insieme")
+      .eq("user_id",sbUid).eq("computo_id",computoId).order("ordine");
+    if(rc.error){
+      /* la colonna «giorni» puo' non esserci ancora: si dice cosa fare,
+         non si mostra un errore del database */
+      box.innerHTML='<div class="lm-vuoto">'+(/giorni|insieme/i.test(String(rc.error.message||""))
+        ? 'Per il cronoprogramma serve l\'aggiornamento del database: esegui <b>sql/gest-computo-cronoprogramma.sql</b> su Supabase.'
+        : 'Non riesco a leggere i capitoli: '+esc(rc.error.message))+'</div>';
+      return;
+    }
+    const caps=rc.data||[];
+
+    /* ⚠️ SENZA CAPITOLI NON C'E' CRONOPROGRAMMA, e va detto chiaro.
+       I computi che arrivano dal PDF del geometra nascono senza
+       capitoli: qui si finiva davanti a una pagina vuota senza capire
+       perche'. Adesso lo dice, e il pulsante per rimediare sta qui. */
+    if(!caps.length){
+      box.innerHTML='<div class="co-vuoto">'
+        +'<div class="co-vuoto-ic">📅</div>'
+        +'<h4>Il cronoprogramma si fa a fasi</h4>'
+        +'<p>Le fasi sono i <b>capitoli</b> del computo: Demolizioni, Murature, Impianti… A ognuno dai quanti giorni dura, e il calendario si disegna da solo.<br>Questo computo non ha ancora capitoli.</p>'
+        +'<div class="co-vuoto-due"><button type="button" class="btn-primary" data-action="co-pag" data-p="1">Vai alle lavorazioni e crea i capitoli</button></div>'
+        +'</div>';
+      return;
+    }
+
+    const inizio=($("#co-inizio")&&$("#co-inizio").value)||"";
+    const righe=cronoDate(caps,inizio);
+    const primo=righe.reduce(function(m,r){return (r.inizio&&(!m||r.inizio.getTime()<m.getTime()))?r.inizio:m;},null);
+    const ultimo=cronoUltimo(righe);
+    /* la scala del disegno: quanti giorni di calendario da capo a fondo.
+       Il +1 c'e' perche' un lavoro che comincia e finisce lo stesso
+       giorno dura un giorno, non zero. */
+    const arco=(primo&&ultimo)?Math.max(1,_cgQuanti(primo,ultimo)+1):0;
+
+    let h='<div class="cg-righe">';
+    righe.forEach(function(r,i){
+      const c=r.cap;
+      const senza=!(r.giorni>0);
+      const barra=_cgBarra(r,primo,arco);
+      h+='<div class="cg-riga'+(senza?" senza":"")+'">'
+        +  '<div class="cg-tit"><b>'+(c.numero?esc(c.numero)+" — ":"")+esc(c.titolo||"(capitolo senza titolo)")+'</b>'
+        +    '<span class="cg-date">'+_cgTesto(r)+'</span></div>' 
+        +  '<div class="cg-campi">'
+        +    '<label class="cg-gg-l">giorni <input type="number" min="0" max="2000" class="cg-gg" data-id="'+esc(String(c.id))+'" value="'+(c.giorni!=null?String(c.giorni):"")+'" placeholder="—"></label>'
+        +    (i>0?'<label class="cg-ins-l"><input type="checkbox" class="cg-ins" data-id="'+esc(String(c.id))+'"'+(c.insieme?" checked":"")+'> insieme al precedente</label>':'')
+        +  '</div>'
+        +  '<div class="cg-scala">'+barra+'</div>'
+        +'</div>';
+    });
+    h+='</div>';
+
+    /* il totale: quanti giorni di lavoro in tutto, e quando si consegna */
+    h+='<div class="cg-tot">'+_cgTotale(primo,ultimo)+'</div>' 
+      /* ⚠️ NON dentro «comp-azioni»: li' dentro .quick-add fa i pulsanti
+         arancioni con lo sfondo chiaro, che sono le azioni di contorno
+         del computo. Questo e' l'unico pulsante della pagina e serve a
+         SALVARE: blu pieno, come «Crea computo». */
+      +'<div class="cg-salva">'
+      +  '<button type="button" class="btn-primary" data-action="crono-salva">Salva il cronoprogramma</button>'
+      +'</div>' 
+      +'<div class="sh-nota">I giorni sono <b>giorni di lavoro</b>: sabato e domenica non si contano. Una fase comincia quando finisce quella prima, a meno che non metti la spunta «insieme al precedente».</div>';
+    box.innerHTML=h;
+
+    /* si ridisegna mentre si scrive, senza salvare: cosi' si vede subito
+       se la consegna cade dopo Natale */
+    $$("#co-crono .cg-gg").forEach(function(e){ e.addEventListener("input",cronoAnteprima); });
+    $$("#co-crono .cg-ins").forEach(function(e){ e.addEventListener("change",cronoAnteprima); });
+  }
+
+  /* l'anteprima NON tocca il database: rifa' i conti con quello che c'e'
+     scritto adesso nelle caselle e riscrive solo le date e le barre */
+  function cronoAnteprima(){
+    const box=$("#co-crono"); if(!box)return;
+    /* ⚠️ $$ restituisce una NodeList, che NON ha .map — solo forEach.
+       Senza Array.from qui saltava tutto per aria al primo tasto. */
+    const caps=Array.from($$("#co-crono .cg-riga")).map(function(r,i){
+      const g=r.querySelector(".cg-gg"), k=r.querySelector(".cg-ins");
+      return { id:(g&&g.dataset.id)||"", giorni:(g&&g.value!=="")?+g.value:null, insieme:!!(k&&k.checked) };
+    });
+    const righe=cronoDate(caps,($("#co-inizio")&&$("#co-inizio").value)||"");
+    const primo=righe.reduce(function(m,r){return (r.inizio&&(!m||r.inizio.getTime()<m.getTime()))?r.inizio:m;},null);
+    const ultimo=cronoUltimo(righe);
+    const arco=(primo&&ultimo)?Math.max(1,_cgQuanti(primo,ultimo)+1):0;
+    $$("#co-crono .cg-riga").forEach(function(el,i){
+      const r=righe[i]; if(!r)return;
+      el.classList.toggle("senza",!(r.giorni>0));
+      const t=el.querySelector(".cg-date");
+      if(t)t.textContent=_cgTesto(r);
+      const sc=el.querySelector(".cg-scala");
+      if(sc)sc.innerHTML=_cgBarra(r,primo,arco);
+    });
+    const t=$("#co-crono .cg-tot");
+    if(t)t.innerHTML=_cgTotale(primo,ultimo);
+  }
+
+  /* Salva: la data di partenza sul computo, le durate sui capitoli.
+     ⚠️ Si scrive SOLO quello che e' cambiato davvero: su un computo con
+     dodici capitoli, riscriverli tutti a ogni Salva vuol dire dodici
+     scritture per cambiare un numero. */
+  async function cronoSalva(){
+    if(!sb||!sbUid||!ctrComputoId){toast("Apri prima un computo");return;}
+    const inizio=($("#co-inizio")&&$("#co-inizio").value)||null;
+    const righe=Array.from($$("#co-crono .cg-riga")).map(function(r){
+      const g=r.querySelector(".cg-gg"), k=r.querySelector(".cg-ins");
+      return { id:(g&&g.dataset.id)||"", giorni:(g&&g.value!=="")?Math.round(+g.value):null, insieme:!!(k&&k.checked) };
+    }).filter(function(x){return x.id;});
+
+    for(const x of righe){
+      if(x.giorni!=null&&(!isFinite(x.giorni)||x.giorni<0||x.giorni>2000)){
+        toast("I giorni di una fase vanno da 0 a 2000. Controlla il numero.");
+        return;
+      }
+    }
+
+    const rC=await sb.from("gest_computi").update({data_inizio:inizio})
+      .eq("id",ctrComputoId).eq("user_id",sbUid).select("id");
+    if(rC.error){
+      toast(/data_inizio/i.test(String(rC.error.message||""))
+        ? "Prima serve l'aggiornamento del database: esegui sql/gest-computo-cronoprogramma.sql su Supabase"
+        : "Errore: "+rC.error.message);
+      return;
+    }
+    for(const x of righe){
+      const r=await sb.from("gest_computo_capitoli")
+        .update({giorni:x.giorni, insieme:x.insieme})
+        .eq("id",x.id).eq("user_id",sbUid).select("id");
+      if(r.error){
+        toast(/giorni|insieme/i.test(String(r.error.message||""))
+          ? "Prima serve l'aggiornamento del database: esegui sql/gest-computo-cronoprogramma.sql su Supabase"
+          : "Errore: "+r.error.message);
+        return;
+      }
+    }
+    /* la cache del computo deve sapere la data nuova, se no riaprendo la
+       finestra il cronoprogramma torna a quella di prima */
+    const cc=compCache.find(x=>String(x.id)===String(ctrComputoId));
+    if(cc)cc.data_inizio=inizio;
+    toast("Cronoprogramma salvato ✔");
+    await renderCrono(ctrComputoId);
+  }
+
+  /* ============================================================
      20 agosto 2026 — LA BARRA DEL COMPUTO: cambiare pagina
      ============================================================
      compPag(n)          -> mostra la pagina n (tutti i suoi blocchi)
@@ -15819,7 +16149,7 @@ ${vecchi?`
   function compNavAggiorna(quante){
     const nav=$("#co-nav"); if(!nav)return;
     const ce=(+quante||0)>0;
-    [2,3,5].forEach(function(n){
+    [2,3,5,6].forEach(function(n){
       const b=nav.querySelector('.conav-v[data-p="'+n+'"]');
       if(!b)return;
       b.classList.toggle("spento",!ce);
@@ -19859,6 +20189,9 @@ ${vecchi?`
         return num("#co-prz-anno");})(),
       ribasso_perc:_rib,
       note:txt("#co-note"),
+      /* la data di partenza del cantiere: il resto del cronoprogramma
+         (le durate) sta sui capitoli e si salva dalla pagina 6 */
+      data_inizio:($("#co-inizio")?(($("#co-inizio").value||"")||null):undefined),
       /* il quadro economico si scrive ANCHE se adesso il computo è privato:
          chi passa da pubblico a privato per due minuti non deve ritrovarsi il
          lavoro di mezz'ora buttato via. È la stessa scelta degli oneri della
@@ -19866,6 +20199,7 @@ ${vecchi?`
       quadro_economico:($("#co-qe-righe")?qeLetto():undefined)
     };
     if(row.quadro_economico===undefined)delete row.quadro_economico;
+    if(row.data_inizio===undefined)delete row.data_inizio;
     let res;
     const _scrivi=async function(r){
       return id ? await sb.from("gest_computi").update(r).eq("id",id).eq("user_id",sbUid).select("id")
@@ -19882,6 +20216,18 @@ ${vecchi?`
       const senza=Object.assign({},row); delete senza.quadro_economico;
       res=await _scrivi(senza);
       if(!res.error)qePerso=true;
+    }
+    /* ⚠️ stesso ripiego per la data di inizio del cronoprogramma
+       (sql/gest-computo-cronoprogramma.sql): finche' quell'aggiornamento
+       non e' stato eseguito, il computo si salva lo stesso. Senza questo,
+       un solo file SQL non eseguito bloccherebbe il Salva di TUTTI i
+       computi — anche di chi il cronoprogramma non lo usa. */
+    let crPerso=false;
+    if(res.error&&"data_inizio" in row
+       &&/data_inizio/i.test(String(res.error.message||"")+" "+String(res.error.code||""))){
+      const senza=Object.assign({},row); delete senza.data_inizio;
+      res=await _scrivi(senza);
+      if(!res.error)crPerso=true;
     }
     if(res.error){
       toast(_compManca(res.error)
@@ -19911,7 +20257,9 @@ ${vecchi?`
     rinfresca("riepilogo");
     toast(qePerso
       ? "Computo salvato, ma il quadro economico NO: manca l'aggiornamento del database (esegui sql/gest-computo-quadro.sql su Supabase)."
-      : (id?"Computo salvato ✔":"Computo creato ✔"));
+      : (crPerso
+        ? "Computo salvato, ma la data di inizio NO: manca l'aggiornamento del database (esegui sql/gest-computo-cronoprogramma.sql su Supabase)."
+        : (id?"Computo salvato ✔":"Computo creato ✔")));
   }
 
   /* ===== 11 agosto 2026 — DUPLICARE UN COMPUTO =====
@@ -20785,6 +21133,7 @@ ${vecchi?`
     if(a==="comp-pdf")return computoPdf(id);
     if(a==="comp-gara")return computoListaGara(id);
     if(a==="co-pag")return compPag(+t.dataset.p);
+    if(a==="crono-salva")return cronoSalva();
     if(a==="comp-importa")return compApriFile();
     if(a==="cp-metti")return compPdfMetti();
     if(a==="cp-tutte"){$$("#cp-lista .cp-ck").forEach(x=>{x.checked=true;});return;}

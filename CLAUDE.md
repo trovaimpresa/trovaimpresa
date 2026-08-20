@@ -10022,6 +10022,107 @@ pulsante che non si legge non è un pulsante.
 
 ---
 
+# 20 agosto 2026 (3), SERA — IL CRONOPROGRAMMA
+
+## Perché questo e non altro
+
+Alessio: «fai una lista di questi lavori perché io ho **sia imprese sia
+professionisti** nel mio gestionale». Rifatta la lista di PriMus guardando a
+chi serve ogni cosa (`prove-claude/CHI-USA-COSA.md`), ne è uscita una sola
+voce che serve **forte a tutti e due** e che **nasce dal computo che c'è già**:
+il cronoprogramma. Ha scelto quello.
+
+## Com'è fatto
+
+Voce **6 Cronoprogramma** nella barra del computo. Dentro: la data di inizio
+del cantiere, una riga per **capitolo** con i giorni che dura, e le barre sul
+calendario.
+
+**La durata sta sul CAPITOLO, non sulla singola lavorazione** — scelto da
+Alessio fra tre modi. Su un computo da 87 righe scrivere 87 durate è una
+serata; in cantiere si ragiona per fasi (Demolizioni, Murature, Impianti):
+sei numeri invece di ottantasette.
+
+Le regole del conto:
+
+- i giorni sono **giorni di lavoro**: sabato e domenica non si contano. Un
+  cantiere che comincia di sabato comincia il lunedì;
+- ogni fase comincia **quando finisce quella prima**;
+- con la spunta **«insieme al precedente»** comincia invece nello stesso
+  giorno (l'idraulico e l'elettricista che lavorano insieme). La barra di una
+  fase in parallelo è **a righe**, per vederlo a colpo d'occhio;
+- ⚠️ **dopo un gruppo in parallelo si riparte dalla fase PIÙ LUNGA**, non
+  dall'ultima scritta. È il punto dove è più facile sbagliare, e il
+  cronoprogramma direbbe una settimana in meno;
+- una fase **senza durata** non ha date e **non sposta le altre**: è una riga
+  ancora da riempire, non una fase da zero giorni;
+- scrivendo un numero il calendario **si rifà subito, senza salvare**.
+
+## ⛔ LE DATE NON SI SCRIVONO, SI CALCOLANO
+
+Nel database ci sono **solo** la data di partenza e le durate:
+
+    gest_computi.data_inizio        quando comincia il cantiere
+    gest_computo_capitoli.giorni    quanti giorni di lavoro dura la fase
+    gest_computo_capitoli.insieme   comincia insieme alla precedente
+
+Chi comincia quando lo decide `cronoDate`, e basta. Se le date fossero
+scritte, spostare l'inizio del cantiere di un giorno le lascerebbe **tutte
+sbagliate** senza che nessuno se ne accorga. È la stessa scelta della quantità
+delle lavorazioni, che il gestionale legge e non scrive mai.
+
+## Un computo senza capitoli lo dice
+
+I computi che arrivano dal **PDF del geometra nascono senza capitoli** — e
+senza capitoli non c'è niente da mettere sul calendario. Prima si sarebbe
+vista una pagina vuota senza capire perché. Adesso c'è una cassetta che
+spiega e un pulsante che porta alle Lavorazioni, dove i capitoli si creano.
+
+## ⚠️ UN DIFETTO TROVATO DA UN SABOTAGGIO, non da me
+
+Il sabotaggio «le barre non sono più proporzionali» **restava verde**. Motivo:
+la formula della barra era scritta **DUE volte** — in `renderCrono` e in
+`cronoAnteprima`. Rompendone una, a schermo vinceva l'altra.
+
+È la lezione che torna: **una regola che vive in due posti non si può
+aggiustare a metà.** Adesso disegnare una riga è in un posto solo
+(`_cgTesto`, `_cgBarra`, `_cgTotale`) e il sabotaggio accusa.
+
+Nota: il difetto non l'ha trovato il banco «normale» — l'ha trovato il
+sabotaggio, cioè la prova che il banco stesso funzioni.
+
+## Come è stato provato
+
+- **Il file SQL su un PostgreSQL 16 vero**, schema ricostruito dai file di
+  `sql/`: eseguito **due volte** (la seconda non deve rompere niente), colonne
+  controllate una per una, e il paletto sulle durate provato **nel verso che
+  deve fallire** — 5 entra, −1 e 5000 vengono rifiutati, «vuoto» entra.
+- **`prove/banco-crono.js` — 40 prove** sul conto delle date, con le funzioni
+  estratte **VERBATIM** dal gestionale (`prove/estrai-crono.py`). C'è dentro un
+  cantiere vero di sette fasi con due in parallelo, e la prova che spostando
+  l'inizio di **un** giorno tutto si sposta di **un** giorno.
+- **`prove/sabotaggi-crono.py` — 11 sabotaggi, 10 accusati.**
+  ⚠️ Uno **NON è provato** e sta scritto anche nel codice: tenere la data a
+  mezzogiorno invece che a mezzanotte. Ho fatto girare le date su cinque fusi
+  con il cambio d'ora di notte (Santiago, Beirut, L'Avana, San Paolo, Teheran)
+  per sette anni: **zero differenze**. La cintura resta perché non costa
+  niente, ma non si scrive «provata» una cosa che il banco non fa diventare
+  rossa.
+- **`prove/banco-crono-browser.js` — 40 prove** nel gestionale vero in
+  Chromium. La più importante: scrivendo un numero il calendario si rifà **ma
+  nel database non deve essere scritto niente** finché non premi Salva.
+- **`prove/sabotaggi-crono-browser.py` — 14 sabotaggi, 14 accusati.**
+- **Telefono 390×844**: nessun testo sotto i 13 px, niente che esce dallo
+  schermo (regola dislessia).
+- Gli altri banchi restano verdi: SAL 88, Riepilogo 34, barra del computo 66,
+  PDF nel browser 17, lettore PDF 20. **305 prove verdi in tutto.**
+
+⚠️ **Prima del push va eseguito `sql/gest-computo-cronoprogramma.sql` su
+Supabase.** Senza, il computo si salva lo stesso (c'è il ripiego, come per il
+quadro economico) ma il cronoprogramma dice che manca l'aggiornamento.
+
+---
+
 ## DOVE SIAMO RIMASTI (20 agosto 2026, notte)
 
 **Fatto oggi, tutto in `gestionale-app.html` + `css/gestionale.css`, nessuna
@@ -10033,7 +10134,10 @@ migrazione SQL:**
 4. **il computo che arriva in PDF**, con la conferma riga per riga;
 5. la **«Lista da far prezzare»** anche sui lavori privati;
 6. **la scala del computo** — la barra numerata 1·2·3·4·5, la cassetta al posto
-   dei tre pulsantini, la finestra che si riapre dopo «Crea computo».
+   dei tre pulsantini, la finestra che si riapre dopo «Crea computo»;
+7. **a pagina piena** — il computo e la conferma del PDF;
+8. **il cronoprogramma** — voce 6 della barra (⚠️ vuole
+   `sql/gest-computo-cronoprogramma.sql` eseguito su Supabase).
 
 **Da fare, in cima:**
 
@@ -10054,6 +10158,11 @@ migrazione SQL:**
    ⚠️ Prima di farlo: **chiedere a una delle 87 imprese come le arriva il
    computo.** Se arriva in PDF o in Excel — come i due fogli di Alessio — la
    foto non serve a nessuno.
+
+⚠️ **Gli artigiani non pagheranno mai** — detto da Alessio il 20 agosto:
+«saranno sempre esclusi dal Premium, sono clienti non paganti». Chi paga sono
+le **imprese** e i **professionisti**. Va tenuto presente quando si scrive il
+prezzo nuovo sulle pagine dell'artigiano.
 
 ⚠️ **E c'è la lista `prove-claude/COSA-HA-PRIMUS-CHE-NOI-NO.md`**, scritta il
 20 agosto: cronoprogramma, analisi dei prezzi, contabilità pubblica completa,
