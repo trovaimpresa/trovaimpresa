@@ -694,6 +694,8 @@
       adattaMenuProfessionista();
       renderScadenze();
       if(!cur)renderLanding(); /* ruoloUtente noto solo ora: ridisegna le card landing coi contatori "pratiche" */
+    } else {
+      adattaMenuImpresa();
     }
   }
 
@@ -801,6 +803,64 @@
       }
     }catch(_){}
   }
+  /* ============================================================
+     20 agosto 2026 — IL COMPUTO SI APRE ANCHE ALLE IMPRESE
+     ============================================================
+     Fino a ieri Computo metrico e Prezzario li accendeva SOLO
+     adattaMenuProfessionista(): le 87 imprese iscritte non vedevano nemmeno
+     la voce. Era scritto nel file dal 10 agosto — «accenderla anche per le
+     imprese edili e' una riga, quando si decide» — e quel «quando si decide»
+     e' arrivato il 20 agosto.
+
+     ⛔ LA DECISIONE E' DI ALESSIO, ED E' NATA DA UNA COSA CHE HA DETTO LUI:
+        «a volte il geometra ci consegna il computo SENZA PREZZI e il
+        preventivo ce lo dobbiamo fare noi sul suo computo».
+        Il computo *estimativo* lo redige il tecnico — su questo non si
+        discute. Ma IL PREZZO LO FA L'IMPRESA, e oggi lo fa su Excel.
+
+     ⚠️ E QUINDI SI CHIAMA IN UN ALTRO MODO. «Computo metrico» e' la parola
+     del tecnico, di una cosa che lui CREA. L'impresa quel documento se lo
+     trova in mano e ci deve mettere i prezzi: per lei si chiama «Computo da
+     prezzare». Stessa sezione, due nomi — come «pratica» e «lavoro». Gli
+     studi tecnici non si accorgono di niente.
+
+     ⚠️ IL PREZZARIO SI ACCENDE INSIEME, per forza: senza, il pulsante
+     «Prendi i prezzi dal prezzario» non ha da dove pescarli e sarebbe un
+     pulsante che non fa mai niente.
+     ⚠️ Anche gli «Stati di avanzamento», deciso da Alessio: sui lavori
+     PRIVATI non c'e' nessun direttore dei lavori e il SAL se lo fa l'impresa
+     da sola. Il riquadro dei SAL sta dentro il computo comunque: lasciare la
+     voce spenta l'avrebbe solo resa piu' difficile da trovare.
+     ============================================================ */
+  function adattaMenuImpresa(){
+    if(ruoloUtente==='professionista')return;
+    try{
+      ['#tab-computi','#tab-prezzario','#tab-sal'].forEach(function(sel){
+        var b=document.querySelector(sel);
+        if(b)b.style.display='';
+      });
+      /* la voce del menu */
+      document.querySelectorAll('[data-tab="computi"] span').forEach(function(x){
+        if(x.textContent.trim()==='Computo metrico')x.textContent='Computo da prezzare';
+      });
+      /* il titolo e la frase di apertura della sezione */
+      var sez=document.querySelector('#computi');
+      if(sez){
+        var h=sez.querySelector('h2');
+        if(h&&h.textContent.trim()==='Computo metrico')h.textContent='Computo da prezzare';
+        var bt=sez.querySelector('.btn.add');
+        if(bt&&bt.textContent.trim()==='+ Nuovo computo')bt.textContent='+ Nuovo computo da prezzare';
+        var i=sez.querySelector('.gal-intro');
+        /* ⚠️ scritto dal punto di vista di chi il computo lo RICEVE, non di
+           chi lo fa. E senza mettere l'impresa in posizione di chi chiede. */
+        if(i)i.innerHTML='Il computo che ti manda il geometra arriva quasi sempre <b>senza prezzi</b>: '
+          +'qui lo carichi, ci metti <b>i tuoi</b> prezzi presi dal tuo prezzario, aggiungi il ribasso '
+          +'e con un clic diventa un <b>preventivo</b> da mandare al cliente. '
+          +'Puoi anche partire da zero e farti tu le metrature del cantiere.';
+      }
+    }catch(_){}
+  }
+
   /* Solo professionista: nei TESTI VISIBILI dell'interfaccia del reparto (#appview e i form in #sheet)
      traduce le etichette fisse lavoro→pratica con concordanza femminile corretta (vedi _FRASI),
      più swap a parola solo per conteggi nudi e tab/intestazione.
@@ -2743,12 +2803,21 @@
      ⚠️ Meno di due tappe = niente striscia: una freccia sola non e' una
         strada.
      ============================================================ */
+  /* ⚠️ 20 agosto 2026 — IL NOME DEL COMPUTO STA IN QUATTRO POSTI: la voce del
+     menu, il titolo della sezione, la scheda del Riepilogo e QUESTA STRISCIA.
+     Il quarto me l'ero dimenticato: la striscia scriveva «Computo metrico»
+     anche all'impresa, due centimetri sotto un titolo che diceva «Computo da
+     prezzare». Trovato guardando la foto della pagina vera, non dal banco.
+     Una regola che sta in quattro posti non si sistema in tre. */
   const FILO=[
     {tab:"prezzario",  lab:"Prezzario"},
-    {tab:"computi",    lab:"Computo metrico"},
+    {tab:"computi",    lab:"Computo metrico", labImpresa:"Computo da prezzare"},
     {tab:"preventivi", lab:"Preventivo"},
     {tab:"fatture",    lab:"Fattura"}
   ];
+  function filoLab(p){
+    return (ruoloUtente!=='professionista'&&p.labImpresa)?p.labImpresa:p.lab;
+  }
   function filoHTML(qui){
     const passi=FILO.filter(function(p){
       const b=document.querySelector('nav.tabs button[data-tab="'+p.tab+'"]');
@@ -2760,8 +2829,8 @@
       + passi.map(function(p,i){
           return (i?'<span class="filo-fre">&rarr;</span>':'')
             + (p.tab===qui
-               ? '<span class="filo-p filo-p--qui">'+p.lab+'</span>'
-               : '<button type="button" class="filo-p" data-action="rie-go" data-go="'+p.tab+'">'+p.lab+'</button>');
+               ? '<span class="filo-p filo-p--qui">'+filoLab(p)+'</span>'
+               : '<button type="button" class="filo-p" data-action="rie-go" data-go="'+p.tab+'">'+filoLab(p)+'</button>');
         }).join("")
       + '</div>';
   }
@@ -3084,7 +3153,12 @@
     ]);
     /* i computi si leggono SOLO per gli studi tecnici, come prima: agli altri
        la sezione non c'e', e due letture inutili sono due letture inutili */
-    const pComputi=(ruoloUtente==='professionista')?Promise.all([
+    /* ⚠️ 20 agosto 2026 — prima partiva SOLO per gli studi tecnici. Da oggi
+       il computo ce l'hanno anche le imprese, e senza questa lettura la loro
+       scheda del Riepilogo non sarebbe mai comparsa: la sezione nel menu e
+       nessuna scheda che ci porta. Una regola che sta in due posti non si
+       sistema a meta'. */
+    const pComputi=Promise.all([
       /* ⚠️ «tipo» SERVE, anche se qui non si mostra — 14 agosto 2026.
          Da oggi compRiepilogoDa guarda il tipo del computo: gli oneri
          della sicurezza restano fuori dal ribasso solo sui lavori
@@ -3095,7 +3169,7 @@
       _avvia(sb.from("gest_computi").select("id,numero,titolo,stato,data,ribasso_perc,tipo").eq("user_id",sbUid).eq("mestiere_id",mid)
         .order("data",{ascending:false})),
       _avvia(sb.from("gest_computo_totali").select("computo_id,importo,oneri_sicurezza,importo_manodopera").eq("user_id",sbUid))
-    ]):null;
+    ]);
     /* le scadenze delle persone (visita medica, formazione, documento,
        permesso): una lettura sola, e non aspetta niente nemmeno lei */
     const pScadPers=scadenzePersone(mid);
@@ -3576,7 +3650,7 @@
        dentro un try: se sql/gest-computo-metrico.sql non e' stato eseguito la
        scheda non compare e il Riepilogo resta intero — meglio una scheda in
        meno che un Riepilogo rotto. */
-    if(ruoloUtente==='professionista'){
+    {
       try{
         const [rCo,rTo]=await pComputi;            /* partita in cima, qui si aspetta */
         if(!rCo.error){
@@ -3588,7 +3662,10 @@
             impDi[c.id]=compRiepilogoDa(t.importo,t.oneri_sicurezza,t.importo_manodopera,c).netto;});
           const bozze=CO.filter(c=>c.stato==="bozza");
           C.push(rieCard({
-            tab:"computi", titolo:"Computo metrico", n:CO.length, dati:CO.length>0,
+            /* ⚠️ il titolo lo scrive rieCard, non il menu: se cambiassi solo
+               la voce del menu qui resterebbe la parola del tecnico. */
+            tab:"computi", titolo:(ruoloUtente==='professionista'?"Computo metrico":"Computo da prezzare"),
+            n:CO.length, dati:CO.length>0,
             lab: CO.length===1?"computo nel reparto":"computi nel reparto",
             tono: bozze.length?"attesa":(CO.length?"ok":"neutro"),
             vuoto:"Nessun computo metrico",
@@ -15730,7 +15807,15 @@ ${vecchi?`
       /* ⚠️ 18 agosto 2026 — quando il computo te lo manda gia' fatto un
          progettista, le voci sono ottanta e riscriverle a mano e' una serata.
          Qui si caricano da un Excel in un colpo. */
-      +  '<button type="button" class="btn-ghost quick-add" data-action="comp-importa">\u2b06 Importa le lavorazioni da Excel</button>'
+      /* ⚠️ 20 agosto 2026 — il pulsante si chiama in due modi, come la
+         sezione. Il tecnico IMPORTA delle lavorazioni dentro un computo che
+         sta facendo lui; l'impresa CARICA il computo che le ha mandato il
+         geometra. E' la stessa cosa per il codice, non e' la stessa cosa per
+         la persona che ce l'ha davanti. */
+      +  '<button type="button" class="btn-ghost quick-add" data-action="comp-importa">\u2b06 '
+      +    (ruoloUtente==='professionista'
+            ? 'Importa le lavorazioni da Excel'
+            : 'Carica qui il computo del geometra')+'</button>'
       +  '<input type="file" id="comp-file" accept=".xlsx,.xlsm,.xls,.csv" style="display:none">'
       /* ⚠️ 19 agosto 2026 — un computo importato arriva con le lavorazioni e i
          prezzi vuoti. Questo pulsante cerca il codice nel prezzario e riempie

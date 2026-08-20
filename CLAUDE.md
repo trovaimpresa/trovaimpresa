@@ -9537,3 +9537,140 @@ grafico dell'admin.
 **Meta:** campagna ferma per una settimana dal 19 agosto, poi rimisurare.
 **Pulizie:** i preventivi n. 4, 5 e 6 del reparto «progetto casa» · la riga
 completamente vuota in `imprese`.
+
+---
+
+# 20 agosto 2026 (3) — IL COMPUTO SI APRE ALLE IMPRESE: «COMPUTO DA PREZZARE»
+
+Il «quando si decide» scritto nel file il 10 agosto è arrivato oggi, e non è
+arrivato dal codice: è arrivato da una frase di Alessio.
+
+> «A volte il geometra o l'ingegnere ci consegna il computo **senza prezzi** e
+> il preventivo ce lo dobbiamo fare noi sul suo computo.»
+
+Il computo *estimativo* lo redige il tecnico — su questo il punto 6 del 19
+agosto aveva ragione. Ma **il prezzo lo fa l'impresa**, e oggi lo fa su Excel.
+
+## ⚠️ LA SORPRESA: ERA GIÀ TUTTO COSTRUITO
+
+Cercando cosa mancasse, non mancava niente. Dentro un computo c'erano già:
+
+- **⬆ Importa le lavorazioni da Excel** (18 agosto) — il file del tecnico entra
+  in un colpo, con le quantità, e salta da solo le righe «TOTALE» in fondo;
+- **€ Prendi i prezzi dal prezzario** (19 agosto) — cerca il codice nel
+  prezzario e riempie **solo le righe a zero**, cioè esattamente quelle che il
+  tecnico ha lasciato vuote;
+- il **ribasso** in percentuale, il **PDF**, e **«Crea il preventivo»**.
+
+**Non c'era una funzione da costruire: c'era una porta da aprire.** È il
+contrario del 15 agosto (il «Report completo» costruito e buttato la sera
+stessa): quella volta si era costruito senza chiedere, questa volta si è
+guardato prima.
+
+## ⛔ E SI CHIAMA IN UN ALTRO MODO — deciso da Alessio
+
+Domanda sua: *«come lo chiamiamo? perché non è un vero computo dove si crea»*.
+Aveva ragione: **«Computo metrico» è la parola del tecnico**, di una cosa che
+lui CREA. L'impresa quel documento se lo trova in mano.
+
+| | studio tecnico | impresa e artigiano |
+|---|---|---|
+| voce del menù | Computo metrico | **Computo da prezzare** |
+| titolo della sezione | Computo metrico | **Computo da prezzare** |
+| scheda del Riepilogo | Computo metrico | **Computo da prezzare** |
+| striscia «Come si incastrano» | Computo metrico | **Computo da prezzare** |
+| il pulsante del file | ⬆ Importa le lavorazioni da Excel | **⬆ Carica qui il computo del geometra** |
+
+Stessa sezione, due nomi — come «pratica» e «lavoro». Lo studio tecnico non si
+accorge di niente. La frase di apertura per l'impresa è riscritta dal punto di
+vista di chi il computo lo **riceve**, non di chi lo fa.
+
+**Si accendono tre voci insieme** (`adattaMenuImpresa()`):
+- **Computo da prezzare**;
+- **Prezzario** — per forza: senza, «Prendi i prezzi dal prezzario» non ha da
+  dove pescarli e sarebbe un pulsante che non fa mai niente;
+- **Stati di avanzamento** — deciso da Alessio (*«diamola anche a loro, forse
+  gli può servire un giorno»*). Sui lavori **privati** non c'è nessun direttore
+  dei lavori e il SAL se lo fa l'impresa da sola; e il riquadro dei SAL sta
+  dentro il computo comunque.
+
+## ⚠️ IL NOME STA IN QUATTRO POSTI, E IL QUARTO ME L'ERO DIMENTICATO
+
+Menù, titolo della sezione, scheda del Riepilogo, **e la striscia «Come si
+incastrano»**. La striscia scriveva ancora «Computo metrico» due centimetri
+sotto un titolo che diceva «Computo da prezzare».
+
+**Non l'ha trovato il banco: l'ho visto guardando la fotografia della pagina
+vera.** Il banco controllava tre posti su quattro ed era tutto verde. *Una
+regola che sta in quattro posti non si sistema in tre.*
+
+Stessa storia per la **scheda del Riepilogo**: quella l'ha trovata il banco.
+`renderRiepilogo` leggeva i computi solo se `ruoloUtente === 'professionista'`
+— l'impresa avrebbe avuto la sezione nel menù e nessuna scheda che ci porta.
+Adesso la lettura parte per tutti.
+
+## Come è stato provato
+
+- `prove/banco-sal-elenco.js`: **80 prove**. Il giro dell'**impresa** e quello
+  dello **studio tecnico** sono tutti e due obbligatori: se controllassi solo
+  l'impresa, uno che cambia il nome **per tutti** resterebbe verde.
+- `prove/banco-riepilogo.js`: **34 prove**. Controlla anche che le tre voci del
+  menù siano **accese davvero**: una scheda che porta in una sezione spenta è
+  una porta sul vuoto.
+- `prove/sabotaggi.py`: **18 sabotaggi** · `prove/sabotaggi-riepilogo.py`:
+  **17 sabotaggi**. Tutti visti, nessuno sfuggito. Fra questi, nei due versi:
+  «l'impresa legge la parola del tecnico» e «la striscia dice la parola
+  dell'impresa **anche allo studio tecnico**».
+
+## Resta aperto su questo pezzo
+
+Alessio: *«facciamole tutte, perché se le può anche caricare da sole»* — cioè
+caricare il computo anche in **PDF** e in **foto/scansione**, non solo Excel.
+Deciso di farlo **dopo**, e in quest'ordine, per un motivo solo:
+
+⚠️ **L'Excel ha le quantità già scritte; il PDF no.** Su un PDF l'AI legge una
+tabella stampata, e se sbaglia una cifra — 20,46 che diventa 2046 — il
+preventivo che l'impresa manda al cliente è sbagliato e **ci rimette lei**.
+Quando si farà: **conferma riga per riga obbligatoria** prima che entri, col
+numero originale scritto accanto. La foto è la stessa strada, ma peggio
+(ombre, fogli storti).
+
+---
+
+## DOVE SIAMO RIMASTI (20 agosto 2026, notte)
+
+**Fatto oggi, tutto in `gestionale-app.html` + `css/gestionale.css`, nessuna
+migrazione SQL:**
+
+1. la sezione **«Stati di avanzamento»** nel menù;
+2. il **Riepilogo neutro** con le icone colorate e i pallini rosso/verde;
+3. il **computo aperto alle imprese** come «Computo da prezzare».
+
+**Da fare, in cima:**
+
+1. **Il caricamento del computo in PDF** (e poi la foto), con la conferma riga
+   per riga. Vedi qui sopra.
+2. **Il prezzo nuovo sul sito** — `prezzi.html`, `info-premium.html`,
+   `info-free.html` · il riquadro nei quattro pannelli · **il pagamento mensile
+   su Stripe** (il pezzo più grosso) · l'avviso prima che scadano i tre mesi di
+   regalo delle imprese di luglio.
+   ⚠️ Il riquadro dentro il gestionale dice ancora **«5€ al mese oppure 49€
+   l'anno»**.
+3. **L'errore JavaScript sulla homepage** (`PAGINE_REGISTRAZIONE` due volte):
+   guardare l'iniezione di Netlify, non il codice.
+4. **Rileggere il contatore delle visite** (query in fondo a
+   `sql/conteggio-visite.sql`).
+
+⚠️ **Da chiedere a una delle 87 imprese, adesso che la porta è aperta:** «l'hai
+vista la voce nuova? il computo del geometra come ti arriva, in Excel o in
+PDF?». La risposta decide se il punto 1 serve davvero o se l'Excel basta.
+
+Poi, in ordine libero: l'analisi dei prezzi · la descrizione schiacciata a
+390 px sui preventivi · il pulsante del prezzario anche in cima · il limite di
+misura su `cv-candidati/registrazioni` · il conteggio delle richieste di
+caricamento file · le 95 pagine città vuote · l'email vera alle imprese · il
+grafico dell'admin.
+
+**Meta:** campagna ferma per una settimana dal 19 agosto, poi rimisurare.
+**Pulizie:** i preventivi n. 4, 5 e 6 del reparto «progetto casa» · la riga
+completamente vuota in `imprese`.
