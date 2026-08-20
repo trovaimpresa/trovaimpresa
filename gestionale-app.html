@@ -15266,7 +15266,14 @@ ${vecchi?`
          ============================================================ */
       +'<div class="copag" data-p="6">'
       +'<div class="sh-b"><div class="sh-tit">Cronoprogramma</div>'
-      +  '<div class="field" style="max-width:280px"><label>Il cantiere comincia il</label>'
+      /* ⚠️ NON scrivere «Il cantiere comincia il»: per gli studi tecnici il
+         gestionale riscrive «cantiere» in «pratica» (vedi _FRASI) e usciva
+         «Il pratica comincia il». Se l'ho visto io in una foto, l'avrebbe
+         visto anche il primo che paga.
+         Qui e nelle altre scritte del cronoprogramma NON si usano parole
+         che passano dalla traduzione: cosi' la frase e' giusta per tutti e
+         due senza doverla tenere allineata in due posti. */
+      +  '<div class="field" style="max-width:280px"><label>Si comincia il</label>' 
       +    '<input type="date" id="co-inizio" value="'+esc(c.data_inizio||"")+'"></div>'
       +  '<div class="lav-media" id="co-crono">'+(isNew
           ? '<div class="lm-vuoto">Salva prima il computo.</div>'

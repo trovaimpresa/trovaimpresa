@@ -10091,6 +10091,26 @@ aggiustare a metà.** Adesso disegnare una riga è in un posto solo
 Nota: il difetto non l'ha trovato il banco «normale» — l'ha trovato il
 sabotaggio, cioè la prova che il banco stesso funzioni.
 
+## ⚠️ «IL PRATICA COMINCIA IL» — l'ha visto Alessio, non il banco
+
+Prima foto del cronoprogramma online, da **professionista**: sull'etichetta
+c'era scritto **«Il pratica comincia il»**.
+
+Avevo scritto «Il **cantiere** comincia il». Per gli studi tecnici il
+gestionale riscrive *cantiere* in *pratica* (`_FRASI`, regola corta
+`['cantiere','pratica']`) e l'articolo maschile restava lì.
+
+**È la terza volta che questa trappola morde** (la prima: «l'incidenza della
+tempo speso»; la seconda: «Nessun pratica aperta»). La regola per la prossima:
+⛔ **nelle scritte nuove non si usano parole che passano dalla traduzione.**
+Adesso l'etichetta è **«Si comincia il»**: giusta per tutti e due, e non c'è
+niente da tenere allineato in due posti.
+
+**E adesso il banco lo vede.** `prove/banco-crono-browser.js` apre il computo
+**da professionista**, passa su **tutte e sei le pagine** della barra e cerca
+un articolo maschile davanti a una parola femminile (e il contrario). Il
+sabotaggio che rimette l'etichetta vecchia lo fa diventare rosso.
+
 ## Come è stato provato
 
 - **Il file SQL su un PostgreSQL 16 vero**, schema ricostruito dai file di
@@ -10108,14 +10128,14 @@ sabotaggio, cioè la prova che il banco stesso funzioni.
   per sette anni: **zero differenze**. La cintura resta perché non costa
   niente, ma non si scrive «provata» una cosa che il banco non fa diventare
   rossa.
-- **`prove/banco-crono-browser.js` — 40 prove** nel gestionale vero in
+- **`prove/banco-crono-browser.js` — 41 prove** nel gestionale vero in
   Chromium. La più importante: scrivendo un numero il calendario si rifà **ma
   nel database non deve essere scritto niente** finché non premi Salva.
-- **`prove/sabotaggi-crono-browser.py` — 14 sabotaggi, 14 accusati.**
+- **`prove/sabotaggi-crono-browser.py` — 15 sabotaggi, 15 accusati.**
 - **Telefono 390×844**: nessun testo sotto i 13 px, niente che esce dallo
   schermo (regola dislessia).
 - Gli altri banchi restano verdi: SAL 88, Riepilogo 34, barra del computo 66,
-  PDF nel browser 17, lettore PDF 20. **305 prove verdi in tutto.**
+  PDF nel browser 17, lettore PDF 20. **306 prove verdi in tutto.**
 
 ⚠️ **Prima del push va eseguito `sql/gest-computo-cronoprogramma.sql` su
 Supabase.** Senza, il computo si salva lo stesso (c'è il ripiego, come per il
