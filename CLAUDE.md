@@ -10787,3 +10787,71 @@ SQL futuri):
 **DA FARE DOMANI:** la schermata dell'analisi dentro la scheda della
 lavorazione (sotto le misure), e poi il PDF «Analisi dei prezzi», che in una
 gara si consegna.
+
+---
+
+## L'ANALISI DEI PREZZI — la schermata, fatta il 21 agosto notte
+
+✅ **Online.** Dentro la scheda della lavorazione, colonna di destra, sotto
+«Le misure»: **«Come è fatto il prezzo»**.
+
+- in cima, grande: **serve solo se la lavorazione non sta nel prezzario**, e
+  quello che scrivi è per **una unità** (cambia da solo con l'unità di misura
+  della lavorazione: «un metro quadro», «un'ora», «una tonnellata»)
+- righe raggruppate **Materiali · Manodopera · Noli e mezzi · Altro**, ognuna
+  col suo totale
+- in fondo **costi diretti → spese generali % → utile % → prezzo**, in blu
+- le due percentuali si cambiano lì dentro e **si salvano da sole**
+- la casella «Prezzo unitario» a sinistra **si spegne** e mostra il prezzo
+  costruito, con sotto scritto perché
+- ⚠️ `compVoceSalva` **non scrive `prezzo_unitario`** quando l'analisi
+  comanda (`anAttiva`): se no il prezzo scritto a mano verrebbe schiacciato,
+  e togliendo l'analisi ti ritroveresti come «prezzo tuo» l'ultimo numero
+  calcolato da lei.
+
+### ⛔ TRE DIFETTI DELLA SERA, TUTTI VISTI DA ALESSIO IN UNA FOTO
+
+**1. «un metonnelitrolataro quintaleuadro».** Per scrivere «un metro quadro»
+al posto di «m²» avevo messo una fila di `.replace()`. Quelli dopo il primo
+mordevano DENTRO la parola già scritta: la «t» di «metro» diventava
+«tonnellata», la «l» «litro», la «q» «quintale».
+⛔ **Una fila di `.replace()` su una parola che i `.replace()` prima hanno
+già scritto è sempre sbagliata. Ci vuole una tabella** (`AN_UNO`).
+
+**2. L'unità si scriveva a mano.** Nella lavorazione l'unità è una tendina;
+nell'analisi l'avevo fatta a testo libero — e il quadratino di «m²» sulla
+tastiera non si sa fare (Alt+0178 col tastierino). Alessio ha scritto «m2».
+⛔ **Due modi diversi per la stessa cosa nella stessa schermata sono un
+difetto**, anche quando funzionano tutti e due. Adesso è una tendina con le
+stesse unità + «— la scrivo io —» per sacco, viaggio, q.li.
+
+**3. «Muratore» diventava «Disegnatore CAD».** Alessio ha scritto «Muratore»
+nella Manodopera e sullo schermo si leggeva «Disegnatore CAD»: le righe
+dell'analisi le scrive l'utente, ma non avevano la protezione `.cm-testo`.
+Nel database era salvato giusto — mentiva solo lo schermo.
+⛔ **OGNI testo scritto dall'utente che finisce a schermo va dentro
+`.cm-testo`.** E ⚠️ **anche le domande di `gconfirm` passano dal
+traduttore**: nella domanda prima di eliminare NON si mette il nome scritto
+da lui («Tolgo questa riga dal prezzo?», non «Tolgo «Muratore»…»).
+
+⚠️ «Manodopera» con la MAIUSCOLA non viene tradotta, «manodopera» minuscola
+sì (diventa «tempo speso»). Nelle etichette va sempre maiuscola.
+
+### Come è stata provata
+`banco-analisi-schermo.js` — **43 verdi**: renderAnalisi e le sue sorelle
+sono estratte verbatim dal file vero e girano in **Chromium col CSS vero**,
+poi si LEGGE quello che c'è scritto sullo schermo. Compreso il caso «il
+database non è stato aggiornato», il telefono a 390 px, e il giro dal
+traduttore vero per lo studio tecnico.
+`sabotaggi-analisi-schermo.js` — **17 su 17 accusati**.
+
+**A fine giornata: 295 verdi · 65 sabotaggi, 65 accusati** (più 36 verdi e
+16 sabotaggi sul PostgreSQL vero).
+
+⚠️ **IL CONTO VERO DELLA GIORNATA: sei difetti trovati da Alessio guardando
+le foto dello schermo. Zero dai banchi.** I banchi provano quello che gli
+dici di provare; una foto mostra la schermata intera. **Chiedere la foto
+dopo ogni consegna, sempre, e guardarla davvero.**
+
+**DA FARE:** il **PDF dell'analisi dei prezzi**, che in una gara si
+consegna. Poi le due righe della «Lista per la gara» (telefono e indirizzo).
