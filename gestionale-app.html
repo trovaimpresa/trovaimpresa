@@ -16469,6 +16469,11 @@ ${vecchi?`
     if(k==="fatt")return L.filter(s=>!!s.fattura_id);
     return L;
   }
+  /* due cifre sono «la stessa» se lo sono al centesimo: sono tutte e due
+     gia' arrotondate da c2(), ma confrontare due numeri con la virgola con
+     === e' il modo piu' facile per farsi fregare da 0,1+0,2 */
+  function _salUguali(a,b){return Math.round((+a||0)*100)===Math.round((+b||0)*100);}
+
   /* la scheda dell'elenco: stessa forma di tutte le altre sezioni */
   function salCard(s){
     const comp=salTuttiComp[String(s.computo_id)]||{};
@@ -16488,7 +16493,12 @@ ${vecchi?`
         comp.cliente_id?("👤 "+esc(salTuttiCli[comp.cliente_id]||"—")):"",
         "📅 "+esc(q.testo),
         periodo,
-        "🧱 fatto finora "+eur2(k.maturato),
+        /* ⚠️ 20 agosto 2026 — LO STESSO NUMERO DUE VOLTE CONFONDE.
+           Su un SAL senza ribasso, senza un SAL prima e senza ritenuta,
+           «fatto finora» e il totale in grassetto sono la STESSA cifra:
+           uno dei due non aggiunge niente. In quel caso sparisce.
+           (Visto sullo schermo di Alessio: 231,25 € scritto due volte.) */
+        _salUguali(k.maturato,k.netto)?"":("🧱 fatto finora "+eur2(k.maturato)),
         k.precedente?("↩ già chiesto "+eur2(k.precedente)):"",
         k.ritenuta?("🔒 trattenuto "+eur2(k.ritenuta)+" ("+_pct(k.perc)+"%)"):"",
         '<b>'+eur2(k.netto)+'</b>',

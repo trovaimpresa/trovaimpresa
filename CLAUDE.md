@@ -9322,13 +9322,27 @@ Alessio. Si rimonta cosi':
 - **I numeri attesi sono rifatti a mano** dentro il banco, non ripresi da
   `salConti()`: se li prendessi da li' proverei solo che `salConti()` e'
   uguale a se stessa.
-- `prove/banco-sal-elenco.js`: **67 prove**, su computer 1440×900 e telefono
+- `prove/banco-sal-elenco.js`: **71 prove**, su computer 1440×900 e telefono
   390×844, piu' il giro da **impresa edile** (la voce deve restare spenta).
   Zero errori JavaScript, zero id doppi, niente sotto i 13 px, niente che
   sborda.
-- `prove/sabotaggi.py`: **13 sabotaggi sul file vero — 13 visti, 0 sfuggiti.**
+- `prove/sabotaggi.py`: **15 sabotaggi sul file vero — 15 visti, 0 sfuggiti.**
   Lo script controlla da solo che il pezzo da rompere sia **unico** nel file:
   se compare due volte e' rosso lui (la lezione del 19 agosto).
+
+## Poi, guardando lo schermo: LO STESSO NUMERO DUE VOLTE
+
+Alessio ha aperto la sezione e sulla scheda c'era **231,25 € scritto due
+volte**: una come «fatto finora» e una in fondo, in grassetto. Su un SAL
+senza ribasso, senza un SAL prima e senza ritenuta le due cifre **sono la
+stessa cifra**, e una delle due non aggiunge niente.
+→ Adesso «fatto finora» si scrive **solo quando dice una cosa diversa dal
+totale** (`_salUguali()`, confronto al centesimo). Due sabotaggi apposta, nei
+due versi: sparisce quando non deve, e resta quando non deve.
+
+⚠️ E il banco aveva un terzo buco: `.job-meta span` prendeva ogni riga **due
+volte**, perche' le emoji che diventano icone stanno dentro uno `<span>`
+annidato. Adesso e' `.job-meta > span`.
 
 ## ⚠️ Due errori miei di oggi, detti per primi
 
