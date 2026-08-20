@@ -1450,6 +1450,11 @@
 .cg-salva .btn-primary,
 .cg-salva .btn,
 .var-stampa .btn{ font-size:17px; padding:14px 22px; }
+/* ⚠️ .sh-nota nasce con margin-top NEGATIVO (-4px): sta bene sotto una
+   casella, ma sotto una fila di pulsanti la scritta grigia risulta
+   incollata. Visto da Alessio nella foto dello schermo. */
+.cg-salva + .sh-nota,
+.var-stampa + .sh-nota{ margin-top:14px; }
 
 /* ================================================================
    20 agosto 2026 — IL COMPUTO DI VARIANTE: cosa è cambiato

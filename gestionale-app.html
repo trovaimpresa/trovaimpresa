@@ -16031,7 +16031,7 @@ ${vecchi?`
        identici stamperebbe un foglio che non dice niente. */
     if(r.cambiate.length||r.aggiunte.length||r.tolte.length){
       h+='<div class="var-stampa">'
-        +  '<button type="button" class="btn" data-action="var-pdf">📄 Scarica il PDF</button>'
+        +  '<button type="button" class="btn" data-action="var-pdf">📄 Scarica il computo di variante</button>'
         +'</div>';
     }
     box.innerHTML=h;
@@ -16362,7 +16362,13 @@ ${vecchi?`
       /* ⚠️ il blu pieno resta UNO SOLO per schermata, ed e' il Salva: questo
          e' secondario (.btn). In una gara il cronoprogramma va consegnato
          stampato, non fatto vedere sullo schermo. */
-      +  '<button type="button" class="btn" data-action="crono-pdf">📄 Scarica il PDF</button>'
+      /* ⚠️ 21 agosto 2026 — IL NOME DICE COSA ESCE, e non e' un vezzo.
+         Nella cassetta in cima alla stessa schermata c'e' gia' un
+         «Scarica il PDF», ed e' il COMPUTO METRICO. Due pulsanti con lo
+         stesso nome sulla stessa pagina che scaricano due documenti
+         diversi: visto da Alessio in una foto dello schermo, non dal
+         banco — il banco leggeva la pagina 6 da sola. */
+      +  '<button type="button" class="btn" data-action="crono-pdf">📄 Scarica il cronoprogramma</button>'
       +'</div>'
       +'<div class="sh-nota">I giorni sono <b>giorni di lavoro</b>: sabato e domenica non si contano. Una fase comincia quando finisce quella prima, a meno che non metti la spunta «insieme al precedente».</div>';
     box.innerHTML=h;
