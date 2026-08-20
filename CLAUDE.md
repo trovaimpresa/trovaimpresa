@@ -10855,3 +10855,63 @@ dopo ogni consegna, sempre, e guardarla davvero.**
 
 **DA FARE:** il **PDF dell'analisi dei prezzi**, che in una gara si
 consegna. Poi le due righe della «Lista per la gara» (telefono e indirizzo).
+
+---
+
+## ⛔ SPEZZARE `gestionale-app.html` — LA REGOLA È CAMBIATA (21 agosto 2026, notte)
+
+⚠️ **PIÙ SU IN QUESTO FILE, E NEI PROMPT VECCHI, C'È SCRITTO «non spezzare
+gestionale-app.html in venti file, è no». QUELLA REGOLA NON VALE PIÙ.**
+Deciso da Alessio la sera del 21 agosto, con questa motivazione, che è sua:
+
+> «se serve, serve — meglio oggi che ci stiamo lavorando e nessuno lo ha già
+> acquistato»
+
+Il file è a **1,3 MB e 23.000 righe**. Ogni modifica va ragionata su tutto, e
+ogni funzione nuova lo rende più grosso. Il rischio non è oggi: è il giorno che
+qualcuno tocca una riga senza leggere i commenti sopra, e ne rompe un'altra a
+diecimila righe di distanza. **Se si rompe adesso si rompe ad Alessio; fra sei
+mesi si romperebbe a chi ha pagato.**
+
+### COME SI FA
+
+**⛔ NON venti file. Tre o quattro**, e solo pezzi che stanno in piedi da soli
+(per esempio: tutti i PDF; tutti i conti del computo). Non è una novità:
+`js/cestino.js` e `js/aiuti.js` fanno già così.
+
+**⛔ SPEZZARE NON VUOL DIRE RISCRIVERE.** È un **taglio puro**: le funzioni si
+spostano di file **senza cambiare un carattere dentro**. Se durante il taglio
+si trova qualcosa da sistemare, si scrive e si fa **dopo, in un push a parte**.
+Mescolare uno spostamento e una correzione vuol dire non sapere più quale delle
+due ha rotto le cose.
+
+**⛔ LA PROVA, e non se ne accettano altre al posto di questa:**
+si **rimettono insieme i pezzi** nell'ordine di caricamento e si confronta col
+file di partenza, **carattere per carattere**. Se la somma dei pezzi è identica
+all'originale, il gestionale non *può* comportarsi diversamente: è una prova
+che o è verde o è rossa, senza forse.
+Sopra ci vanno comunque **tutti i banchi** (stessi numeri di prima) e la pagina
+aperta in Chromium a 1440×900 e 390×844, zero errori JavaScript.
+
+### ⚠️ LE COSE DA GUARDARE PRIMA DI TAGLIARE
+
+- **L'ordine di caricamento.** I `<script src>` si eseguono in fila: chi usa
+  una costante deve essere caricato dopo chi la dichiara.
+- **Quello che parte da solo** appena il file è letto: `new MutationObserver`,
+  `setTimeout(_iconizza,0)`, gli osservatori delle traduzioni. Devono partire
+  ancora dopo le cose che usano.
+- **`const` e `let` in cima al blocco.** Fra `<script>` classici lo spazio dei
+  nomi è condiviso: un nome dichiarato due volte è un errore che spegne tutta
+  la pagina.
+- **Niente nomi doppi.** In un file solo due funzioni con lo stesso nome si
+  sovrascrivono in silenzio; separandole l'errore diventa rumoroso, ed è meglio
+  saperlo prima.
+
+### PERCHÉ NON È UN LAVORO «DI PULIZIA»
+
+Quando è stata aggiunta l'analisi dei prezzi (21 agosto) sono state controllate
+quattro cose che con l'analisi non c'entravano niente: che `compVoceSalva` non
+riscrivesse il prezzo, che il traduttore non riscrivesse «Muratore» (**non
+controllata, e infatti il difetto è uscito**), che l'id `an-uni` non fosse già
+usato, che la classe CSS nuova non si scontrasse. **In un file solo, ogni
+modifica è una modifica a tutto.** Questo è il costo che si paga ogni volta.
