@@ -9249,3 +9249,145 @@ prima impresa lo usera' davvero, farsi spiegare da lei come lo fa, e correggere.
   completamente vuota in `imprese`.
 - **Manca ancora:** il SAL non diventa fattura con un clic *dal cestino*, e non
   c'e' il passaggio SAL → nota di credito. Nessuno dei due e' stato chiesto.
+
+---
+
+# 20 agosto 2026 — LA SEZIONE «STATI DI AVANZAMENTO» (il punto 1)
+
+Prima, per vedere un SAL bisognava entrare nel computo giusto: con dieci
+computi si girava fra dieci schede. Adesso c'e' una voce nel menu, sotto
+«Prezzario», che li mostra **tutti insieme**.
+
+⛔ **NON e' un SAL che vive senza computo.** La strada B resta scartata. Qui
+non si crea niente e non si calcola niente di nuovo: si LEGGE. La riga apre
+lo stesso SAL di sempre, dentro il suo computo, con la stessa `salForm()`.
+
+## Cosa c'e' nell'elenco
+
+Ogni riga: **SAL n. X — titolo del computo**, il cliente, la data, il periodo,
+quanto e' stato fatto finora, quanto era gia' stato chiesto, quanto e'
+trattenuto di ritenuta, e in grassetto **quanto vale questo SAL**.
+Il bollino in alto a destra dice a colpo d'occhio come sta: **Bozza**,
+**Emesso**, **Fatturato**.
+
+Tre filtri in cima — **Tutti · Da fatturare · Fatturati** — ed e' quello il
+«quali ho chiesto e quali no». La fascia col totale cambia col filtro.
+
+I pulsanti della scheda: **Apri** e **PDF** (scritti, con bordo e sfondo — la
+regola dei pulsanti del 19 agosto). Sotto i «...»: **Crea la fattura
+dell'acconto** ed **Elimina**, come in tutte le altre sezioni.
+
+⚠️ Si vedono **solo i SAL del reparto in cui sei**, e solo quelli il cui
+computo e' vivo: un computo nel cestino si porta dietro i suoi SAL.
+
+## ⛔ La voce e' accesa SOLO agli studi tecnici
+
+Come il Computo metrico e il Prezzario (punto 6 del 19 agosto). `#tab-sal`
+nasce con `display:none` e lo accende **solo** `adattaMenuProfessionista()`.
+**Non e' stata cambiata la decisione**: le 87 imprese non vedono niente di
+nuovo. Se un domani il computo si accende anche a loro, questa voce va accesa
+**nello stesso punto** — una regola che sta in due posti non si sistema a
+meta'.
+
+## Le tre cose che si potevano sbagliare (e dove stanno nel codice)
+
+1. **IL RIBASSO STA SUL COMPUTO, NON SUL SAL.** `salAggiorna()` prende il
+   ribasso e il tipo di lavoro da `compCache`. Aprendo un SAL dall'elenco,
+   `compCache` poteva non avere quel computo: il conto sarebbe uscito **senza
+   ribasso, cioe' piu' alto del vero**, senza nessun errore a schermo.
+   → `salApriDaElenco()` rimette in piedi le tre cose che la scheda si aspetta
+   di trovare pronte: `salComputoId`, `compCache` (il computo) e `salCache`
+   (i SAL di quel computo, che servono a trovare il **SAL precedente**).
+2. **«← Torna» deve sapere da dove sei arrivato.** I punti che tornano
+   indietro erano DUE (il pulsante in fondo e la fine di `salSalva`): stanno
+   tutti e due in `salTorna()`, una funzione sola.
+3. **`salElimina` ridisegnava l'elenco sbagliato.** Chiamava `renderSalList()`,
+   che esce subito se `#co-sal` non c'e': dall'elenco generale la riga appena
+   buttata sarebbe rimasta li' a schermo come se non fosse successo niente.
+
+## Come e' stato provato (per rifarlo domani)
+
+Il banco sta nel contenitore di Claude, in `prove/`, non nella cartella di
+Alessio. Si rimonta cosi':
+
+- **I dati non sono inventati.** Schema ricreato **dai file di `sql/`**
+  (`gest-computo-metrico` → `quantita-3-decimali` → `quadro` →
+  `gestionale-fatture` → `gest-sal` → `gest-sal-fattura`) su un PostgreSQL 16,
+  e `prove/dati.json` esce dalle **viste vere** `gest_sal_totali`,
+  `gest_sal_righe_calc`, `gest_computo_voci_calc`.
+  ⚠️ `gest_mestieri` / `gest_clienti` / `gest_lavori` / `gest_preventivi` non
+  stanno in nessun file di `sql/`: nel banco sono tabelle di contorno finte
+  (`prove/00-prelude.sql`), e va detto. Il verso che conta — cosa succede al
+  SAL quando cancelli il computo — e' scritto nel file vero.
+- **I numeri attesi sono rifatti a mano** dentro il banco, non ripresi da
+  `salConti()`: se li prendessi da li' proverei solo che `salConti()` e'
+  uguale a se stessa.
+- `prove/banco-sal-elenco.js`: **67 prove**, su computer 1440×900 e telefono
+  390×844, piu' il giro da **impresa edile** (la voce deve restare spenta).
+  Zero errori JavaScript, zero id doppi, niente sotto i 13 px, niente che
+  sborda.
+- `prove/sabotaggi.py`: **13 sabotaggi sul file vero — 13 visti, 0 sfuggiti.**
+  Lo script controlla da solo che il pezzo da rompere sia **unico** nel file:
+  se compare due volte e' rosso lui (la lezione del 19 agosto).
+
+## ⚠️ Due errori miei di oggi, detti per primi
+
+1. **Ho scritto la prima spiegazione troppo lunga e troppo tecnica.** Alessio
+   ha risposto «non ho capito», e aveva ragione: nomi di funzioni e file al
+   posto di cosa cambia per lui.
+2. **Il banco ha segnato quattro rosse false**, tutte colpa del banco e non
+   del codice: lo spazio unificatore prima del simbolo dell'euro, le emoji che
+   il gestionale trasforma in icone (nel testo del pulsante resta la sola
+   parola, ed e' giusto cosi'), e la barra dei filtri che «sbordava» pur
+   avendo `overflow-x:auto` da sempre. È di nuovo la lezione n. 2: **prima di
+   credere a una rossa, guardare cosa sta provando davvero.**
+   ⚠️ E il finto Supabase aveva un buco: `.order()` non ordinava niente. Se non
+   l'avessi sistemato, la prova sull'ordine dell'elenco sarebbe stata verde per
+   caso. Adesso ordina davvero.
+
+## Una cosa detta da Alessio oggi, da non perdere
+
+> «A volte il geometra o l'ingegnere ci consegna il computo **senza prezzi** e
+> il preventivo ce lo dobbiamo fare noi sul suo computo. Si puo' fare che
+> l'impresa lo carica, lo riempie **col suo prezzario**, mette il ribasso e
+> scarica il PDF?»
+
+⚠️ **È la risposta vera al punto 6 di ieri**, e non e' venuta dal codice: e'
+venuta da lui. Il computo *estimativo* lo redige il tecnico — ma **il prezzo
+lo fa l'impresa**, e oggi lo fa su Excel. Non e' «accendere il computo alle
+imprese»: e' un'altra cosa, piu' piccola e piu' utile — **carica il computo
+del tecnico, prezzalo col tuo, stampa**. Da progettare insieme prima di
+scrivere una riga.
+
+---
+
+## DOVE SIAMO RIMASTI (20 agosto 2026)
+
+**Fatto oggi:** la sezione «Stati di avanzamento» nel menu (punto 1).
+Toccato **un solo file**: `gestionale-app.html`. Nessuna migrazione SQL nuova.
+
+**Da fare, in cima:**
+
+1. **Ragionare insieme sul «computo del tecnico da prezzare»** (qui sopra).
+   Prima di tutto, la domanda a una delle 87 imprese resta quella di ieri:
+   «quando fai un preventivo, misuri le lavorazioni una per una o dai una
+   cifra a corpo?»
+2. **Il prezzo nuovo sul sito** — `prezzi.html`, `info-premium.html`,
+   `info-free.html` · il riquadro nei quattro pannelli · **il pagamento
+   mensile su Stripe** (il pezzo piu' grosso) · l'avviso prima che scadano i
+   tre mesi di regalo delle imprese di luglio.
+3. **L'errore JavaScript sulla homepage** (`PAGINE_REGISTRAZIONE` due volte):
+   guardare l'iniezione di Netlify, non il codice.
+4. **Rileggere il contatore delle visite** (la query in fondo a
+   `sql/conteggio-visite.sql`): dei 5 arrivati da Meta solo 1 e' arrivato a
+   «visto».
+
+Poi, in ordine libero: l'analisi dei prezzi · la descrizione schiacciata a
+390 px sui preventivi · il pulsante del prezzario anche in cima · il limite di
+misura su `cv-candidati/registrazioni` · il conteggio delle richieste di
+caricamento file · le 95 pagine citta' vuote · l'email vera alle imprese · il
+grafico dell'admin.
+
+**Meta:** campagna ferma per una settimana dal 19 agosto, poi rimisurare.
+**Pulizie:** i preventivi n. 4, 5 e 6 del reparto «progetto casa» · la riga
+completamente vuota in `imprese`.

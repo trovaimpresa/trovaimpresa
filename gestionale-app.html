@@ -118,6 +118,15 @@
       <button data-tab="squadra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg><span>Squadra</span></button>
       <button data-tab="computi" id="tab-computi" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/><path d="M13 13h5"/><path d="M13 17h5"/></svg><span>Computo metrico</span><span class="tab-cnt" id="cnt-computi"></span></button>
       <button data-tab="prezzario" id="tab-prezzario" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 12 22l-9-9V3h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Prezzario</span><span class="tab-cnt" id="cnt-prezzario"></span></button>
+      <!-- 20 agosto 2026 — GLI STATI DI AVANZAMENTO, TUTTI IN UN POSTO SOLO.
+           Prima per vedere un SAL bisognava entrare nel computo giusto: con
+           dieci computi si girava fra dieci schede. Qui ci sono tutti, di
+           tutti i computi del reparto, con quali sono gia' stati fatturati.
+           ⛔ NON e' un SAL che vive senza computo: la riga apre lo stesso SAL
+           di sempre, dentro il suo computo. Senza il computo dietro
+           sparirebbero il «su 20,46 previsti», il controllo «hai contato piu'
+           del computo» e il ribasso. -->
+      <button data-tab="sal" id="tab-sal" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>Stati di avanzamento</span><span class="tab-cnt" id="cnt-sal"></span></button>
       <button data-tab="crediti" id="tab-crediti" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg><span>Crediti formativi</span><span class="tab-cnt" id="cnt-crediti"></span></button>
       <button data-tab="carte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Carte</span></button>
       <button data-tab="clienti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M12 14h.01"/></svg><span>Clienti</span></button>
@@ -397,6 +406,17 @@
       </div>
       <div id="pz-esito"></div>
       <div id="pz-list"></div>
+    </section>
+
+    <!-- ===== 20 agosto 2026 — STATI DI AVANZAMENTO (elenco unico) =====
+         Il SAL resta attaccato al suo computo: qui si trova soltanto piu' in
+         fretta. Nessuna formula nuova — i conti passano da salConti() e
+         compRiepilogoDa(), le stesse dello schermo e del PDF. -->
+    <section id="sal">
+      <div class="sec-head"><h2>Stati di avanzamento</h2></div>
+      <div class="gal-intro">Tutti gli stati di avanzamento, di tutti i computi, in un elenco solo: quanto vale ognuno, quali hai <b>già fatturato</b> e quali no. Da qui scarichi il <b>foglio da consegnare</b> e crei la <b>fattura dell'acconto</b>. Ogni SAL resta attaccato al suo computo: lo apri e sei dentro quello.</div>
+      <div class="viste" id="sal-viste"></div>
+      <div class="grid" id="sal-list"></div>
     </section>
 
     <section id="report">
@@ -756,6 +776,12 @@
       /* il Prezzario va insieme al computo: senza computo non serve a niente */
       var _tabPz=document.querySelector('#tab-prezzario');
       if(_tabPz)_tabPz.style.display='';
+      /* Gli stati di avanzamento stanno dentro il computo: si accendono
+         insieme a lui. Se un domani il computo si accende anche alle imprese
+         edili, questa voce va accesa nello stesso punto -- una regola che sta
+         in due posti non si sistema a meta'. */
+      var _tabSal=document.querySelector('#tab-sal');
+      if(_tabSal)_tabSal.style.display='';
       var _secA=document.querySelector('#attrezzature');
       if(_secA){
         var _h=_secA.querySelector('h2'); if(_h&&_h.textContent.trim()==='Attrezzature')_h.textContent='Strumenti';
@@ -2764,7 +2790,7 @@
      ============================================================ */
   const RENDER_TAB={
     riepilogo:renderRiepilogo, lavori:renderJobs, preventivi:renderPreventivi, computi:renderComputi,
-    prezzario:renderPrezzario,
+    prezzario:renderPrezzario, sal:renderSalTutti,
     fatture:renderFatture, calendario:renderCal, agenda:renderAgenda,
     mezzi:renderMezzi, attrezzature:renderAttrezzature, squadra:renderDip,
     carte:renderCarte, clienti:renderClienti, scadenzario:renderScadenze, crediti:renderCrediti, cestino:renderCestino,
@@ -16333,7 +16359,7 @@ ${vecchi?`
      Le tabelle e le viste stanno in sql/gest-sal.sql.
      ============================================================ */
   let salCache=[], salTot={}, salVociCache=[], salRigheCache={}, salPrec={},
-      salComputoId=null, salApertoId=null, salApertoDati=null;
+      salComputoId=null, salApertoId=null, salApertoDati=null, salDaElenco=false;
 
   function _salManca(err){
     const m=(err&&(err.message||err.details||""))||"";
@@ -16360,6 +16386,9 @@ ${vecchi?`
   async function renderSalList(computoId){
     const box=$("#co-sal"); if(!box)return;
     salComputoId=computoId;
+    /* si sta entrando da DENTRO il computo: il tasto «torna» del SAL deve
+       riportare al computo, non all'elenco generale (vedi salTorna) */
+    salDaElenco=false;
     if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
 
     const [rs,rt]=await Promise.all([
@@ -16407,6 +16436,198 @@ ${vecchi?`
     }
     h+='<button type="button" class="btn-ghost quick-add" data-action="sal-nuovo">+ Nuovo stato di avanzamento</button>';
     box.innerHTML=h;
+  }
+
+  /* ============================================================
+     L'ELENCO UNICO DEGLI STATI DI AVANZAMENTO — 20 agosto 2026
+     ============================================================
+     Chiesto da Alessio: «tutti i SAL di tutti i computi in un elenco solo,
+     quali ho chiesto e quali no, il PDF, la fattura».
+
+     ⛔ NON e' un SAL che vive per conto suo. Qui non si crea niente e non si
+     calcola niente di nuovo: si LEGGE. La riga apre lo stesso SAL di sempre,
+     dentro il suo computo, con la stessa funzione salForm(). Un SAL senza
+     computo dietro perderebbe il «su 20,46 previsti», il controllo «hai
+     contato piu' del computo» e il ribasso: diventerebbe una fattura con le
+     date (strada B, scartata il 19 agosto).
+
+     ⚠️ I conti passano da salConti() + compRiepilogoDa(), le stesse due
+     funzioni del riquadro a schermo e del PDF. Nessuna formula copiata: se
+     questo elenco dicesse un numero e la scheda un altro, non ci si potrebbe
+     fidare di nessuno dei due.
+
+     ⚠️ IL RIBASSO STA SUL COMPUTO, NON SUL SAL. Per questo ogni SAL va
+     appaiato al suo computo PRIMA di fare il conto: con un computo mancante
+     il netto uscirebbe senza ribasso, cioe' piu' alto del vero. Se il computo
+     non c'e' (o e' nel cestino) il SAL non si mostra proprio.
+     ============================================================ */
+  const SAL_VISTE=[{k:"tutti",lab:"Tutti"},{k:"da",lab:"Da fatturare"},{k:"fatt",lab:"Fatturati"}];
+  let salTuttiCache=[], salTuttiComp={}, salTuttiTot={}, salTuttiCli={}, salFiltro="tutti";
+
+  function salFiltra(L,k){
+    if(k==="da")  return L.filter(s=>!s.fattura_id);
+    if(k==="fatt")return L.filter(s=>!!s.fattura_id);
+    return L;
+  }
+  /* la scheda dell'elenco: stessa forma di tutte le altre sezioni */
+  function salCard(s){
+    const comp=salTuttiComp[String(s.computo_id)]||{};
+    const k=salConti(salTuttiTot[String(s.id)],comp);
+    const q=quando(s.data,{neutro:true});
+    const fatturato=!!s.fattura_id;
+    const bozza=(s.stato||"bozza")!=="emesso";
+    const periodo=(s.periodo_dal||s.periodo_al)
+      ? ("🗓 dal "+(s.periodo_dal?fdate(s.periodo_dal):"—")+" al "+(s.periodo_al?fdate(s.periodo_al):"—"))
+      : "";
+    return schedaJob({
+      tono: fatturato?"t-ok":"t-attesa",
+      titolo: "SAL n. "+esc(String(s.numero||"—"))+" — "+esc(comp.titolo||"(computo senza titolo)"),
+      destra: '<span class="stato '+(fatturato?"fatto":(bozza?"da_fare":"in_corso"))+'">'
+              +(fatturato?"Fatturato":(bozza?"Bozza":"Emesso"))+'</span>',
+      meta:[
+        comp.cliente_id?("👤 "+esc(salTuttiCli[comp.cliente_id]||"—")):"",
+        "📅 "+esc(q.testo),
+        periodo,
+        "🧱 fatto finora "+eur2(k.maturato),
+        k.precedente?("↩ già chiesto "+eur2(k.precedente)):"",
+        k.ritenuta?("🔒 trattenuto "+eur2(k.ritenuta)+" ("+_pct(k.perc)+"%)"):"",
+        '<b>'+eur2(k.netto)+'</b>',
+        comp.tipo==="pubblico"?"🏛 lavori pubblici":""
+      ],
+      nota: s.note?("📝 "+esc(s.note)):"",
+      azioni: salVoci(s)
+    });
+  }
+  /* le azioni: le stesse nella scheda e nel menu «...».
+     ⚠️ «sal-el-apri» NON comincia per edit-/apri-: e' voluto. Le azioni che
+     combaciano con AZ_APERTURA fanno comparire UN pulsante solo («Apri») e
+     mandano tutto il resto sotto i «...». Qui il PDF e' la ragione per cui
+     questo elenco esiste, e deve restare un pulsante che si vede, con la
+     parola scritta (la lezione dei pulsanti piccoli del 19 agosto). */
+  function salVoci(s){
+    return [{lab:"✏ Apri",action:"sal-el-apri",data:{id:s.id}},
+            {lab:"📄 PDF",action:"sal-pdf",data:{id:s.id}},
+            {lab:(s.fattura_id?"🧾 Rifai la fattura dell'acconto":"🧾 Crea la fattura dell'acconto"),
+             action:"sal-fattura",data:{id:s.id}},
+            {lab:"🗑 Elimina",action:"sal-del",data:{id:s.id},del:true}];
+  }
+
+  async function renderSalTutti(){
+    const box=$("#sal-list"); if(!box)return;
+    const viste=$("#sal-viste");
+    if(!sb||!sbUid){
+      if(viste)viste.innerHTML="";
+      box.style.display="block";
+      box.innerHTML=tabVuoto("Nessuno stato di avanzamento","Accedi per vedere la contabilità dei lavori.",_SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>');
+      return;
+    }
+    const mid=curMestiere();
+
+    /* Tutto in una volta sola. I computi si leggono con sb (che salta quelli
+       nel cestino): un SAL il cui computo e' nel cestino non compare qui. */
+    const [rc,rs,rt,rcl]=await Promise.all([
+      sb.from("gest_computi").select("*").eq("user_id",sbUid).eq("mestiere_id",mid),
+      sb.from("gest_sal").select("*").eq("user_id",sbUid).order("data",{ascending:false}),
+      sb.from("gest_sal_totali").select("*").eq("user_id",sbUid),
+      _sbTutto("gest_clienti").select("id,nome,eliminato_il").eq("user_id",sbUid).eq("mestiere_id",mid)
+    ]);
+
+    /* ⚠️ un errore non si ingoia: senza i computi il ribasso sparisce e i
+       numeri sarebbero piu' alti del vero; senza i totali non c'e' nessun
+       numero. In tutti e due i casi si dice cosa e' successo. */
+    if(rs.error||rc.error||rt.error){
+      const err=rs.error||rc.error||rt.error;
+      if(viste)viste.innerHTML="";
+      box.style.display="block";
+      box.innerHTML=tabVuoto(
+        _salManca(err)?"La contabilità dei lavori non è ancora accesa":"Non riesco a leggere gli stati di avanzamento",
+        _salManca(err)
+          ? "Esegui <b>sql/gest-sal.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina."
+          : "Il database ha risposto: "+esc(err.message||""),
+        _SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>');
+      return;
+    }
+
+    salTuttiComp={};(rc.data||[]).forEach(c=>{salTuttiComp[String(c.id)]=c;});
+    salTuttiTot={};(rt.data||[]).forEach(t=>{salTuttiTot[String(t.sal_id)]=t;});
+    salTuttiCli={};(rcl&&rcl.data||[]).forEach(c=>{salTuttiCli[c.id]=(c.nome||"")+(c.eliminato_il?" (nel cestino)":"");});
+    /* solo i SAL dei computi DI QUESTO REPARTO: il gestionale lavora un
+       reparto alla volta, e un SAL senza il suo computo non si sa contare */
+    salTuttiCache=(rs.data||[]).filter(x=>!!salTuttiComp[String(x.computo_id)]);
+
+    const cnt=$("#cnt-sal");if(cnt)cnt.textContent=salTuttiCache.length?String(salTuttiCache.length):"";
+
+    const conta={};SAL_VISTE.forEach(v=>conta[v.k]=salFiltra(salTuttiCache,v.k).length);
+    const L=salFiltra(salTuttiCache,salFiltro);
+    const somma=L.reduce((a,s)=>a+salConti(salTuttiTot[String(s.id)],salTuttiComp[String(s.computo_id)]||{}).netto,0);
+
+    renderTabella({
+      id:"sal", box:"#sal-list",
+      viste:"#sal-viste", visteDef:SAL_VISTE, vista:salFiltro, conta:conta, azioneVista:"sal-filtro",
+      vuoto:tabVuoto(
+        salTuttiCache.length?"Nessuno stato di avanzamento con questo filtro":"Ancora nessuno stato di avanzamento",
+        salTuttiCache.length?"Prova a cambiare vista qui sopra."
+          :"Uno stato di avanzamento è il conto di quello che hai fatto finora, per farti pagare un acconto mentre il lavoro va avanti. Nasce dentro un computo metrico: apri il computo e creane uno.",
+        _SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',
+        salTuttiCache.length?null:{t:"Vai ai computi",a:"sal-vai-computi"}),
+      colonne:[{lab:"N.",w:"10%"},{lab:"Computo",w:"34%"},{lab:"Cliente",w:"20%",cls:"c-cli"},
+               {lab:"Quando",w:"16%"},{lab:"Importo",w:"20%",cls:"c-imp"}],
+      righe:L.map(s=>{
+        const comp=salTuttiComp[String(s.computo_id)]||{};
+        const q=quando(s.data,{neutro:true});
+        return {
+          id:s.id,
+          click:{action:"sal-el-apri",data:{id:s.id}},
+          celle:[
+            esc(String(s.numero||"—")),
+            '<span class="c-nome">'+esc(comp.titolo||"(computo senza titolo)")+'</span>',
+            esc(salTuttiCli[comp.cliente_id]||"—"),
+            {h:q.testo,cls:q.classe},
+            {h:eur2(salConti(salTuttiTot[String(s.id)],comp).netto),cls:"c-imp"}
+          ],
+          menu:salVoci(s)
+        };
+      }),
+      cards:()=>L.map(s=>salCard(s)).join(""),
+      totale: L.length?{testo:L.length+" "+(L.length===1?"stato di avanzamento":"stati di avanzamento"),valore:eur2(somma)}:null
+    });
+  }
+
+  /* Aprire un SAL dall'elenco generale = aprirlo dentro il suo computo.
+     ⚠️ Prima di chiamare salForm bisogna rimettere in piedi le tre cose che
+     la scheda si aspetta di trovare gia' pronte, perche' di solito ci si
+     arriva da dentro il computo:
+       salComputoId  quale computo si sta guardando;
+       compCache     deve contenere quel computo — da li' salAggiorna prende
+                     RIBASSO e tipo di lavoro. Senza, il conto a schermo
+                     uscirebbe senza ribasso, cioe' piu' alto del vero;
+       salCache      i SAL di quel computo, che servono a trovare il SAL
+                     PRECEDENTE («l'ultima volta») e a proporre il numero.
+     Chi salta uno di questi tre pezzi non vede un errore: vede un numero
+     sbagliato, che e' peggio. */
+  async function salApriDaElenco(id){
+    const s=salTuttiCache.find(x=>String(x.id)===String(id));
+    if(!s){toast("Stato di avanzamento non trovato: riapri la sezione");return;}
+    const comp=salTuttiComp[String(s.computo_id)];
+    if(!comp){toast("Il computo di questo stato di avanzamento non si trova (potrebbe essere nel cestino)");return;}
+
+    const i=compCache.findIndex(x=>String(x.id)===String(comp.id));
+    if(i<0)compCache.push(comp); else compCache[i]=comp;
+
+    salComputoId=comp.id;
+    salCache=salTuttiCache.filter(x=>String(x.computo_id)===String(comp.id));
+    salTot={};salCache.forEach(x=>{if(salTuttiTot[String(x.id)])salTot[String(x.id)]=salTuttiTot[String(x.id)];});
+    salDaElenco=true;
+    await salForm(id);
+  }
+
+  /* «← Torna»: dove si torna dipende da dove si era.
+     Sta in una funzione sola perche' i punti che tornano indietro sono DUE
+     (il pulsante in fondo alla scheda e la fine di salSalva): una regola che
+     sta in due posti non si sistema a meta'. */
+  async function salTorna(){
+    if(salDaElenco){ closeSheet(); await renderSalTutti(); window.scrollTo(0,0); return; }
+    await compTornaAlComputo();
   }
 
   /* ---- la scheda di un SAL ---- */
@@ -16522,7 +16743,7 @@ ${vecchi?`
       +'</div>'
       +'</div></div>',
 
-       '<button class="btn b-cancel" data-action="comp-torna">← Torna al computo</button>'
+       '<button class="btn b-cancel" data-action="sal-torna">'+(salDaElenco?"← Torna all'elenco":"← Torna al computo")+'</button>'
       /* il PDF solo su un SAL che esiste gia': su uno appena aperto non c'e'
          ancora niente di salvato da mettere sul foglio */
       +(isNew?"":'<button class="btn" data-action="sal-pdf" data-id="'+esc(String(s.id))+'">📄 PDF</button>')
@@ -16640,10 +16861,13 @@ ${vecchi?`
       }
     }
 
-    rinfresca("computi");
+    /* anche l'elenco unico va segnato «da rifare»: se non lo si fa, uno
+       salva un SAL, apre «Stati di avanzamento» e trova ancora i numeri di
+       prima. */
+    rinfresca("computi","sal");
     if(!id){ salCache.push({id:salId,numero:numero}); toast("SAL creato ✔"); await salForm(salId); return; }
     toast("SAL salvato ✔");
-    await compTornaAlComputo();
+    await salTorna();
   }
 
   async function salElimina(id){
@@ -16652,6 +16876,11 @@ ${vecchi?`
     if(res.error){toast("Errore: "+res.error.message);return;}
     if(!res.data||!res.data.length){toast("Non eliminato: nessuna riga trovata. Riprova.");return;}
     toast("Nel cestino ✔");
+    /* ⚠️ dall'elenco unico #co-sal non esiste: renderSalList uscirebbe subito
+       e la riga appena buttata resterebbe li' a schermo, come se non fosse
+       successo niente. */
+    if(salDaElenco){ await renderSalTutti(); _tabSporchi.add("computi"); return; }
+    _tabSporchi.add("sal");
     await renderSalList(salComputoId);
   }
 
@@ -19790,6 +20019,10 @@ ${vecchi?`
     if(a==="pp-solo"){const b=$("#pp-fonte-box");ppFonteScelta=(b&&b.dataset.sua)||"";return ppCerca();}
     if(a==="comp-prev")return computoAPreventivo(id);
     if(a==="sal-nuovo")return salForm(null);
+    if(a==="sal-el-apri")return salApriDaElenco(id);
+    if(a==="sal-torna")return salTorna();
+    if(a==="sal-filtro"){salFiltro=t.dataset.v||"tutti";renderSalTutti();return;}
+    if(a==="sal-vai-computi"){const b=document.querySelector('nav.tabs button[data-tab="computi"]');if(b){b.click();window.scrollTo(0,0);}return;}
     if(a==="sal-apri")return salForm(id);
     if(a==="sal-salva")return salSalva(id);
     if(a==="sal-pdf")return salPdf(id);
