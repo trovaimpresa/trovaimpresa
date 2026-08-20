@@ -1497,6 +1497,9 @@
 .var-r.var-tot small{ font-size:16px; font-weight:700; }
 .var-r.var-tot.su   b{ color:var(--err); }
 .var-r.var-tot.giu  b{ color:var(--ok); }
+/* ⚠️ 21 agosto 2026 — la differenza ZERO resta nera. Il rosso vuol dire
+   «costa di più» e su «+ 0,00 €» diceva una cosa che non era vera. */
+.var-r.var-tot.pari b{ color:var(--testo); }
 
 @media(max-width:760px){
   .var-r{ padding:13px 14px; font-size:16px; }

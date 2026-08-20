@@ -16051,13 +16051,23 @@ ${vecchi?`
     }
 
     /* i tre numeri che contano, in fondo e in grande */
+    /* ⚠️ 21 agosto 2026 — LO ZERO NON È «IN PIÙ», E NON È ROSSO.
+       Il colore si sceglieva con «diff>=0», e lo zero ci finiva dentro: su
+       una variante ancora identica si leggeva «In più + 0,00 € (+0%)» in
+       rosso, cioè il colore che vuol dire «costa di più». E capita anche
+       per davvero, non solo su una variante appena creata: se togli 500 €
+       da una lavorazione e ne aggiungi 500 su un'altra, la differenza è
+       zero. Visto da Alessio in una foto dello schermo.
+       Il centesimo è la soglia: sotto, sul documento si legge comunque
+       «0,00» — dire che è cambiato qualcosa sarebbe una bugia stampata. */
+    const _pari=Math.abs(r.diff)<0.005;
     h+='<div class="var-conto">'
       +  '<div class="var-r"><span>Computo di partenza</span><b>'+eur2(r.impOrig)+'</b></div>'
       +  '<div class="var-r"><span>Variante</span><b>'+eur2(r.impVar)+'</b></div>'
-      +  '<div class="var-r var-tot'+(r.diff>=0?' su':' giu')+'"><span>'
-      +    (r.diff>=0?'In più':'In meno')+'</span><b>'
-      +    (r.diff>=0?'+ ':'− ')+eur2(Math.abs(r.diff))
-      +    (r.perc!=null?' <small>('+(r.diff>=0?'+':'−')+_pct(Math.abs(r.perc))+'%)</small>':'')
+      +  '<div class="var-r var-tot'+(_pari?' pari':(r.diff>0?' su':' giu'))+'"><span>'
+      +    (_pari?'Nessuna differenza':(r.diff>0?'In più':'In meno'))+'</span><b>'
+      +    (_pari?eur2(0):((r.diff>0?'+ ':'− ')+eur2(Math.abs(r.diff))))
+      +    ((!_pari&&r.perc!=null)?' <small>('+(r.diff>0?'+':'−')+_pct(Math.abs(r.perc))+'%)</small>':'')
       +  '</b></div>'
       +'</div>'
       +'<div class="sh-nota">Sono gli importi delle lavorazioni, <b>senza il ribasso</b>: il ribasso è lo stesso sui due computi e non cambia la differenza in percentuale.</div>';
@@ -21010,9 +21020,15 @@ ${vecchi?`
     y+=1;
     doc.setDrawColor(11,75,196);doc.setLineWidth(.5);doc.rect(M,y,R-M,11);doc.setLineWidth(.2);
     doc.setFont("helvetica","bold");doc.setFontSize(11);
-    doc.text(r.diff>=0?"IN PIÙ":"IN MENO",M+3,y+7.2);
-    doc.text((r.diff>=0?"+ ":"- ")+_eur(Math.abs(r.diff))
-      +(r.perc!=null?"   ("+(r.diff>=0?"+":"-")+_pct(Math.abs(r.perc))+"%)":""),R-3,y+7.2,{align:"right"});
+    /* ⚠️ lo zero non è «in più»: stessa regola dello schermo. Succede quando
+       quello che è stato tolto pareggia esattamente quello che è stato
+       aggiunto — e su un documento «IN PIÙ € 0,00» è una contraddizione. */
+    const pari=Math.abs(r.diff)<0.005;
+    doc.text(pari?"NESSUNA DIFFERENZA":(r.diff>0?"IN PIÙ":"IN MENO"),M+3,y+7.2);
+    doc.text(pari?_eur(0)
+                :((r.diff>0?"+ ":"- ")+_eur(Math.abs(r.diff))
+                  +(r.perc!=null?"   ("+(r.diff>0?"+":"-")+_pct(Math.abs(r.perc))+"%)":"")),
+             R-3,y+7.2,{align:"right"});
     y+=17;
 
     spazioFuoriTabella(14);
