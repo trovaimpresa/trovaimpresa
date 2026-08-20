@@ -17453,7 +17453,16 @@ ${vecchi?`
           const imp=(+r.quantita||0)*(+r.prezzo_unitario||0);
           h+='<div class="spesa-row" data-action="an-edit" data-id="'+esc(String(r.id))+'"'
             +(String(r.id)===String(anEditId)?' style="cursor:pointer;background:var(--sfondo,#f5f6f8)"':' style="cursor:pointer"')
-            +'><span>'+esc(r.descrizione||"(senza nome)")
+            /* ⛔ «cm-testo»: QUESTO L'HA SCRITTO LUI, non lo traduciamo.
+               21 agosto 2026 — visto da Alessio in una foto: aveva scritto
+               «Muratore» nella Manodopera e sullo schermo si leggeva
+               «Disegnatore CAD». Per gli studi tecnici il gestionale
+               riscrive le parole da cantiere (_FRASI), ma le righe
+               dell'analisi le scrive l'utente: sono contenuto suo, come le
+               descrizioni del prezzario. Nel database era salvato giusto —
+               mentiva solo lo schermo, che è il posto peggiore dove
+               mentire. Stessa protezione del 20 agosto. */
+            +'><span class="cm-testo">'+esc(r.descrizione||"(senza nome)")
             +'<small class="sp-forn">'+_misTesto(r.quantita)+(r.unita?" "+esc(r.unita):"")
             +' × '+eur2(r.prezzo_unitario)+'</small></span>'
             +'<b>'+eur2(imp)+'</b>'
@@ -17482,7 +17491,7 @@ ${vecchi?`
     if(anEditId&&!inCorr)anEditId=null;
     const _v=x=>x==null?"":esc(_misTesto(x));
     h+='<div style="margin-top:14px;border-top:1px solid var(--bordo);padding-top:14px">'
-      +(inCorr?'<div class="sh-tit" style="margin-bottom:8px">Stai correggendo «'+esc(inCorr.descrizione||"(senza nome)")+'»</div>':'')
+      +(inCorr?'<div class="sh-tit" style="margin-bottom:8px">Stai correggendo «<span class="cm-testo">'+esc(inCorr.descrizione||"(senza nome)")+'</span>»</div>':'')
       +'<div class="field"><label>Che cosa serve</label><div class="seg" id="an-tipo">'
       + AN_TIPI.map(function(t){
           const on=(inCorr?inCorr.tipo:"materiale")===t[0];
@@ -17591,8 +17600,12 @@ ${vecchi?`
 
   async function anDel(id){
     if(!sbUid)return;
-    const r=anCache.find(x=>String(x.id)===String(id))||{};
-    if(!gconfirm("Tolgo «"+(r.descrizione||"")+"» dal prezzo?"))return;
+    /* ⚠️ la domanda NON contiene il nome della riga: gconfirm passa dal
+       traduttore (_msgPro), e un «Muratore» scritto da lui ci uscirebbe
+       riscritto — la stessa bugia di sopra, ma dentro una domanda a cui si
+       risponde sì. Quale riga si sta togliendo si vede già: è quella su cui
+       hai premuto la ×. */
+    if(!gconfirm("Tolgo questa riga dal prezzo?"))return;
     const res=await sb.from("gest_analisi_righe").delete().eq("id",id).eq("user_id",sbUid).select("id");
     if(res.error){toast("Errore: "+res.error.message);return;}
     if(!res.data||!res.data.length){toast("Non eliminata: nessuna riga trovata. Riprova.");return;}
