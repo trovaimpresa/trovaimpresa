@@ -9961,6 +9961,26 @@ rompe il giorno che quel pezzo cambia nome.* Due volte nello stesso giorno,
 per la stessa causa. E **nessuno dei due l'ha trovato un banco**: li ha
 trovati Alessio guardando lo schermo.
 
+**E subito dopo, terza volta:** «perché queste finestre piccole?». La
+conferma del computo letto dal PDF — **88 righe da controllare una per una** —
+si apriva in una finestrella da 880 px con una barretta di scorrimento lunga
+un dito. Quella finestra non aveva né le colonne né le pagine, quindi il
+gestionale non la considerava lunga. Adesso il segnale è `.cp-riga`, aggiunto
+in **quella riga sola**, e il contenuto sta al centro con `.sh-centro`.
+
+Ho controllato **tutte** le chiamate a `openSheetGrande` una per una: le altre
+«— NIENTE —» (scegli un lavoro, scegli un preventivo, che tipo di fattura, il
+dettaglio della carta) sono davvero corte, e a tutto schermo diventerebbero un
+lenzuolo bianco con tre righe in cima. Restano finestrelle **apposta**.
+
+**Ultima cosa dello stesso giro:** la casella del file (`#comp-file`) era
+scritta **due volte** — una nella cassetta del computo vuoto, una nella fila
+dei pulsanti — ognuna con la sua lista di formati accettati
+(`.xlsx .xls .csv .pdf`). Due liste che devono restare uguali per sempre sono
+una lista che prima o poi si scolla: adesso la casella è **una sola**
+(`_fileIn`), usata da tutti e due i rami. Se ne è accorto un sabotaggio, che
+è diventato «non unico» invece di accusare.
+
 ## Un errore mio, trovato guardando la foto
 
 Nel CSS c'era una regola che teneva il pulsante **Salva** lontano dal fumetto
@@ -9987,14 +10007,18 @@ pulsante che non si legge non è un pulsante.
   Le prove che contano di più: le caselle nascoste **esistono ancora e hanno
   ancora il loro valore**; si scrive un ribasso stando sulla pagina 3, si
   salva, e **titolo e numero sono ancora nel database**.
-- **`prove/sabotaggi-navbar.py` — 21 sabotaggi, 21 visti.**
+- **`prove/sabotaggi-navbar.py` — 21 sabotaggi, 21 visti.** (`SOLO="..."` per
+  ripassarne uno solo senza rifare tutto il giro.)
   Uno era **non unico** al primo giro: `const corpo=document.querySelector(
   "#sheet .sh-body")` compare **due volte** nel file (c'è anche in
   `openSheetGrande`), il sabotaggio ne cambiava una sola e il banco restava
   verde. **È la trappola del 19 agosto che torna**, e l'ha presa il controllo
   di unicità dello script. L'ancora adesso è lunga, con il commento sopra.
+- **`prove/banco-pdf-browser.js`** ha tre prove in più: la conferma del PDF
+  deve stare a pagina piena. **`prove/sabotaggi-pdf-browser.py` — 7 sabotaggi,
+  7 visti.**
 - Gli altri banchi girano ancora tutti verdi: SAL 88, Riepilogo 34, PDF nel
-  browser 14, lettore PDF 20. **222 prove verdi in tutto.**
+  browser 17, lettore PDF 20. **225 prove verdi in tutto.**
 
 ---
 

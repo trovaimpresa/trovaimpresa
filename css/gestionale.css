@@ -1372,6 +1372,10 @@
 .copag{ display:none; max-width:1060px; margin-left:auto; margin-right:auto; }
 .copag.on{ display:block; }
 
+/* stessa cosa per una finestra lunga che non ha ne' colonne ne' pagine:
+   larga tutto lo schermo, il testo al centro (la conferma del PDF) */
+.sh-centro{ max-width:1060px; margin-left:auto; margin-right:auto; }
+
 /* ---- il computo ancora vuoto: UNA cassetta, DUE strade ----
    Prima erano tre pulsantini identici sotto un «Totale 0,00 €».
    Alessio: «aggiungi lavorazione, aggiungi capitolo, messi lì non li

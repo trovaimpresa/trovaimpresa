@@ -15994,7 +15994,10 @@ ${vecchi?`
       +    (ruoloUtente==='professionista'
             ? 'Importa le lavorazioni da Excel'
             : 'Carica qui il computo del geometra')+'</button>'
-      +  '<input type="file" id="comp-file" accept=".xlsx,.xlsm,.xls,.csv,.pdf" style="display:none">'
+      /* ⛔ la stessa casella del ramo vuoto, NON una copia: l'elenco dei
+         formati accettati (.xlsx .xls .csv .pdf) deve stare in UN posto
+         solo, se no un giorno il PDF entra da una parte e dall'altra no. */
+      +  _fileIn
       /* ⚠️ 19 agosto 2026 — un computo importato arriva con le lavorazioni e i
          prezzi vuoti. Questo pulsante cerca il codice nel prezzario e riempie
          SOLO le righe a zero. Si vede solo se qualcosa a zero c'è davvero: se
@@ -18871,7 +18874,9 @@ ${vecchi?`
       +'</div>';
 
     openSheetGrande("Controlla quello che ho letto",
-       '<div class="sh-b"><div class="sh-tit">'+V.length+(V.length===1?" lavorazione letta":" lavorazioni lette")+' da «'+esc(cpLette.nome)+'»</div>'
+       /* «sh-centro»: la finestra e' larga quanto lo schermo, ma queste
+          righe si leggono una sotto l'altra e restano al centro. */
+       '<div class="sh-b sh-centro"><div class="sh-tit">'+V.length+(V.length===1?" lavorazione letta":" lavorazioni lette")+' da «'+esc(cpLette.nome)+'»</div>'
       +  '<div class="sh-nota">Il PDF è un foglio <b>stampato</b>: l\'ho letto, non me l\'ha detto nessuno. Guarda le quantità prima di farle entrare — sotto ogni riga c\'è <b>il pezzo di foglio</b> da cui l\'ho presa.<br>Chi non ti convince, togli la spunta e non entra.</div>'
       +  (avvisi.length?('<div class="sh-nota">⚠ '+avvisi.join("<br>⚠ ")+'</div>'):'')
       +  '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">'
@@ -20982,7 +20987,14 @@ ${vecchi?`
        ⛔ Adesso il nome da guardare e' UNO SOLO: la classe «sh-lunga», messa
           qui. Chi domani inventa una terza forma di finestra la aggiunge in
           questa riga, non in dieci regole del CSS sparse per il file. */
-    if(s.querySelector(".sh-cols,.copag")) s.classList.add("sh-lunga");
+    /* ⚠️ 20 agosto 2026 (2) — visto da Alessio: «perché queste finestre
+       piccole?». La conferma del computo letto dal PDF (.cp-riga) e' lunga
+       88 righe e si apriva in una finestrella da 880 px con dentro una
+       barretta di scorrimento lunga un dito. Le finestre qui sotto sono
+       TUTTE quelle lunghe del gestionale: le altre (scegli un lavoro, scegli
+       un preventivo, il tipo di fattura) sono tre righe in croce e a tutto
+       schermo diventerebbero un lenzuolo bianco. */
+    if(s.querySelector(".sh-cols,.copag,.cp-riga")) s.classList.add("sh-lunga");
     const _b=s.querySelector(".sh-body");
     if(_b){
       /* Le emoji diventano icone SVG subito dopo l'apertura: il contenuto cambia
