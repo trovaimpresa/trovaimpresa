@@ -9637,6 +9637,82 @@ numero originale scritto accanto. La foto è la stessa strada, ma peggio
 
 ---
 
+# 20 agosto 2026 (4) — ⚠️ IL MIO ERRORE: LA PAROLA STAVA IN DIECI POSTI, NON QUATTRO
+
+Poche ore dopo aver consegnato «Computo da prezzare», Alessio ha mandato le
+fotografie della pagina vera. Dentro c'era questo:
+
+- il titolo della finestra diceva ancora **«Nuovo computo metrico»**;
+- la pagina vuota diceva ancora *«Un computo raccoglie le lavorazioni con le
+  loro misure: parti uguali, lunghezza, larghezza, altezza, e i vuoti da
+  detrarre»* — che è il discorso del tecnico, non di chi il computo lo riceve.
+
+**Avevo scritto io, il giorno prima, che «il nome sta in quattro posti».** Ne
+stava in **dieci**. E il banco era verde su tutte e 80 le prove, perché
+controllava esattamente i quattro che avevo cambiato io: **una prova scritta
+sui punti che conosci non trova quello che ti sei dimenticato.**
+
+## La correzione: non rincorrere le parole, spostarle
+
+C'è una tabella sola, `_CM`, con le parole delle due categorie, e una funzione
+`_cm(k)` che dà quella giusta. Chi deve scrivere «computo» la chiede a lei:
+menù, titolo, pulsante «+ Nuovo», pagina vuota, spiegazione, titolo della
+finestra, scheda del Riepilogo, striscia «Come si incastrano», elenco del
+Cestino, e i due documenti (PDF e nota del preventivo).
+
+⚠️ **Nei MESSAGGI del Cestino la parola è quella neutra** — «2 computi» — e non
+passa da `_cm`. Un elenco di conferma non deve inseguire nessuna traduzione.
+
+⚠️ **`get lab()`, non `lab:`.** La lista delle sezioni del Cestino è un `const`
+e si costruisce **all'avvio**, quando il ruolo dell'utente non si sa ancora:
+scritta `lab:_cm('nome')` restava congelata sulla parola dell'impresa **anche
+per lo studio tecnico**. Col getter la parola si chiede quando si disegna.
+Questo l'ha trovato il banco nuovo.
+
+## La prova che adesso non si può dimenticare niente
+
+Invece di controllare dei punti scelti da me, il banco **apre le schermate e
+legge tutta la pagina** (`document.body.innerText`) cercando la parola
+sbagliata, in quattro giri:
+
+| chi | dove passa | non deve mai comparire |
+|---|---|---|
+| impresa | Riepilogo · sezione · finestra del computo nuovo · Cestino | «computo metrico» |
+| impresa senza nemmeno un computo | idem, con la pagina vuota | «computo metrico» |
+| studio tecnico | idem | «da prezzare» |
+| studio tecnico senza computi | idem | «da prezzare» |
+
+Un posto nuovo dimenticato domani lo trova da sola.
+
+## ⚠️ E UN SABOTAGGIO ERA DIVENTATO DOPPIO — la trappola del 19 agosto, di nuovo
+
+Il sabotaggio «l'elenco non è più ordinato dal più recente» cercava
+`sb.from("gest_sal")...order("data",{ascending:false})`, che da oggi compare
+**due volte**: la stessa lettura sta anche nella scheda del Riepilogo.
+Rompeva l'altra, e il banco restava verde su un file rotto — **assolveva invece
+di accusare**. Lo script se n'è accorto da solo (controlla l'unicità del pezzo)
+e adesso l'ancora si porta dietro la riga di sopra, che è sua.
+
+## Come è stato provato
+
+`prove/banco-sal-elenco.js` **88 prove** · `prove/banco-riepilogo.js` **34
+prove** · `prove/sabotaggi.py` **24 sabotaggi** · `prove/sabotaggi-riepilogo.py`
+**17 sabotaggi**. Tutti visti, nessuno sfuggito. Fra i sabotaggi, i due
+centrali sono sul cuore della cosa: `_cm()` che dà sempre la parola del tecnico,
+e `_cm()` che dà sempre quella dell'impresa.
+
+## La lezione, scritta perché non si ripeta
+
+> **Quando una parola cambia per ruolo, non cambiarla nei posti: spostala in un
+> posto.** E la prova non deve guardare i punti che conosci — deve leggere la
+> pagina intera e cercare quello che non ci deve stare.
+
+Nasce dal 20 agosto 2026, ed è la sorella della lezione n. 5 («una regola che
+sta in due posti non si sistema a metà»): lì erano due, qui erano dieci, e il
+rimedio non è contarli meglio — è non averne più di uno.
+
+---
+
 ## DOVE SIAMO RIMASTI (20 agosto 2026, notte)
 
 **Fatto oggi, tutto in `gestionale-app.html` + `css/gestionale.css`, nessuna

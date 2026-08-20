@@ -832,6 +832,37 @@
      da sola. Il riquadro dei SAL sta dentro il computo comunque: lasciare la
      voce spenta l'avrebbe solo resa piu' difficile da trovare.
      ============================================================ */
+  /* ============================================================
+     ⛔ LA PAROLA DEL COMPUTO STA QUI DENTRO, E SOLO QUI
+     ============================================================
+     20 agosto 2026, secondo giro. La prima volta avevo cambiato il nome in
+     QUATTRO posti e mi ero convinto che bastasse. Alessio ha mandato la
+     fotografia della pagina vera: il titolo della finestra diceva ancora
+     «Nuovo computo metrico» e la pagina vuota parlava di «vuoti da
+     detrarre». Erano DIECI posti, non quattro.
+
+     Rincorrere le parole una per una non funziona: la volta dopo se ne
+     dimentica un'altra. Adesso la parola sta in questa tabella, e chi la
+     deve scrivere la chiede a _cm(). Un posto nuovo che si dimentica di
+     chiedergliela lo trova il banco, che legge tutta la pagina e cerca la
+     parola sbagliata.
+     ============================================================ */
+  const _CM={
+    pro:{
+      nome:"Computo metrico", uno:"computo metrico", tanti:"computi metrici",
+      nuovo:"Nuovo computo metrico", crea:"+ Nuovo computo",
+      primo:"+ Crea il primo computo", vuoto:"Ancora nessun computo",
+      spiega:"Un computo raccoglie le lavorazioni con le loro misure: parti uguali, lunghezza, larghezza, altezza, e i vuoti da detrarre. La quantità la calcola il gestionale."
+    },
+    imp:{
+      nome:"Computo da prezzare", uno:"computo da prezzare", tanti:"computi da prezzare",
+      nuovo:"Nuovo computo da prezzare", crea:"+ Nuovo computo da prezzare",
+      primo:"+ Crea il primo computo da prezzare", vuoto:"Ancora nessun computo da prezzare",
+      spiega:"Il computo che ti manda il geometra arriva quasi sempre senza prezzi. Creane uno qui e dentro ci carichi il suo file: le lavorazioni entrano con le loro quantità, e i prezzi ce li metti tu."
+    }
+  };
+  function _cm(k){ return (ruoloUtente==='professionista'?_CM.pro:_CM.imp)[k]; }
+
   function adattaMenuImpresa(){
     if(ruoloUtente==='professionista')return;
     try{
@@ -841,15 +872,15 @@
       });
       /* la voce del menu */
       document.querySelectorAll('[data-tab="computi"] span').forEach(function(x){
-        if(x.textContent.trim()==='Computo metrico')x.textContent='Computo da prezzare';
+        if(x.textContent.trim()===_CM.pro.nome)x.textContent=_cm('nome');
       });
       /* il titolo e la frase di apertura della sezione */
       var sez=document.querySelector('#computi');
       if(sez){
         var h=sez.querySelector('h2');
-        if(h&&h.textContent.trim()==='Computo metrico')h.textContent='Computo da prezzare';
+        if(h&&h.textContent.trim()===_CM.pro.nome)h.textContent=_cm('nome');
         var bt=sez.querySelector('.btn.add');
-        if(bt&&bt.textContent.trim()==='+ Nuovo computo')bt.textContent='+ Nuovo computo da prezzare';
+        if(bt&&bt.textContent.trim()===_CM.pro.crea)bt.textContent=_cm('crea');
         var i=sez.querySelector('.gal-intro');
         /* ⚠️ scritto dal punto di vista di chi il computo lo RICEVE, non di
            chi lo fa. E senza mettere l'impresa in posizione di chi chiede. */
@@ -2811,13 +2842,11 @@
      Una regola che sta in quattro posti non si sistema in tre. */
   const FILO=[
     {tab:"prezzario",  lab:"Prezzario"},
-    {tab:"computi",    lab:"Computo metrico", labImpresa:"Computo da prezzare"},
+    {tab:"computi",    lab:"Computo metrico"},
     {tab:"preventivi", lab:"Preventivo"},
     {tab:"fatture",    lab:"Fattura"}
   ];
-  function filoLab(p){
-    return (ruoloUtente!=='professionista'&&p.labImpresa)?p.labImpresa:p.lab;
-  }
+  function filoLab(p){ return p.tab==="computi" ? _cm('nome') : p.lab; }
   function filoHTML(qui){
     const passi=FILO.filter(function(p){
       const b=document.querySelector('nav.tabs button[data-tab="'+p.tab+'"]');
@@ -3664,11 +3693,10 @@
           C.push(rieCard({
             /* ⚠️ il titolo lo scrive rieCard, non il menu: se cambiassi solo
                la voce del menu qui resterebbe la parola del tecnico. */
-            tab:"computi", titolo:(ruoloUtente==='professionista'?"Computo metrico":"Computo da prezzare"),
-            n:CO.length, dati:CO.length>0,
-            lab: CO.length===1?"computo nel reparto":"computi nel reparto",
+            tab:"computi", titolo:_cm('nome'), n:CO.length, dati:CO.length>0,
+            lab: CO.length===1?(_cm('uno')+" nel reparto"):(_cm('tanti')+" nel reparto"),
             tono: bozze.length?"attesa":(CO.length?"ok":"neutro"),
-            vuoto:"Nessun computo metrico",
+            vuoto:"Nessun "+_cm('uno'),
             righe: CO.slice(0,2).map(c=>({
               t:(c.numero?("N. "+c.numero+" — "):"")+(c.titolo||"Computo"),
               v:eur(impDi[c.id]||0)}))
@@ -10326,7 +10354,7 @@ ${vecchi?`
     ["gest_operatori",         "persona",              "persone"],
     ["gest_carte",             "carta aziendale",      "carte aziendali"],
     ["gest_scadenze",          "scadenza",             "scadenze"],
-    ["gest_computi",           "computo metrico",      "computi metrici"]
+    ["gest_computi",           "computo",              "computi"]
   ];
   /* Dodici domande piccolissime (solo il conteggio, nessuna riga scaricata)
      sparate tutte insieme: un solo giro di rete, e solo quando si preme
@@ -14378,7 +14406,11 @@ ${vecchi?`
        return "Rapportino del "+fdate(r.data)+(q?(" — "+q):"");
      }},
     {t:"gest_crediti",     lab:"Crediti formativi", campo:"titolo",         ic:"🎓", foglia:true},
-    {t:"gest_computi",     lab:"Computo metrico",   campo:"titolo",         ic:"📐"},
+    /* ⚠️ 20 agosto 2026 — «get lab», non «lab». Questa lista e' un const e si
+       costruisce all'AVVIO, quando il ruolo dell'utente non si sa ancora:
+       scritta come lab:_cm('nome') restava congelata sulla parola sbagliata
+       per sempre. Col getter la parola si chiede quando si disegna. */
+    {t:"gest_computi",     get lab(){return _cm('nome');}, campo:"titolo",   ic:"📐"},
     /* Il SAL non ha ne' nome ne' titolo: senza "nome" il Cestino scriverebbe
        dieci righe uguali e non si saprebbe quale si sta rimettendo a posto.
        NIENTE "foglia": sotto al SAL ci sono le sue righe. */
@@ -14815,7 +14847,7 @@ ${vecchi?`
     gest_mezzi:"mezzi e strumenti", gest_operatori:"persone", gest_carte:"carte aziendali",
     gest_fornitori:"fornitori", gest_fatture_fornitori:"fatture fornitori",
     gest_spese:"spese", gest_ore:"ore lavorate", gest_crediti:"crediti formativi",
-    gest_computi:"computi metrici", gest_computo_capitoli:"capitoli del computo",
+    gest_computi:"computi", gest_computo_capitoli:"capitoli del computo",
     gest_computo_voci:"voci del computo", gest_computo_misure:"misure del computo",
     gest_prezzi_propri:"voci del tuo elenco prezzi",
     gest_rapportini:"rapportini di cantiere",
@@ -14986,7 +15018,7 @@ ${vecchi?`
       compTabellaOk=false;
       $("#comp-viste").innerHTML="";
       box.innerHTML=tabVuoto(
-        _compManca(rc.error)?"Il computo metrico non è ancora acceso":"Non riesco a leggere i computi",
+        _compManca(rc.error)?"Questa sezione non è ancora accesa":"Non riesco a leggere i computi",
         _compManca(rc.error)
           ? "Esegui <b>sql/gest-computo-metrico.sql</b> su Supabase (SQL Editor → Run) e ricarica la pagina."
           : "Il database ha risposto: "+esc(rc.error.message),
@@ -15011,11 +15043,10 @@ ${vecchi?`
       id:"comp", box:"#comp-list",
       viste:"#comp-viste", visteDef:COMP_VISTE, vista:compFiltro, conta:conta, azioneVista:"comp-filtro",
       vuoto:tabVuoto(
-        compCache.length?"Nessun computo con questo filtro":"Ancora nessun computo",
-        compCache.length?"Prova a cambiare vista qui sopra."
-          :"Un computo raccoglie le lavorazioni con le loro misure: parti uguali, lunghezza, larghezza, altezza, e i vuoti da detrarre. La quantità la calcola il gestionale.",
+        compCache.length?("Nessun "+_cm('uno')+" con questo filtro"):_cm('vuoto'),
+        compCache.length?"Prova a cambiare vista qui sopra.":_cm('spiega'),
         _SVGV+'<path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 9v12"/></svg>',
-        compCache.length?null:{t:"+ Crea il primo computo",a:"new-computo"}),
+        compCache.length?null:{t:_cm('primo'),a:"new-computo"}),
       /* La forma sono le SCHEDE, come tutte le altre sezioni (vedi schedaJob):
          la prima versione usava la tabella e sul telefono l'importo finiva
          fuori dallo schermo — cioe' l'unico numero che conta davvero.
@@ -15109,7 +15140,7 @@ ${vecchi?`
     const lavOpts=(rlv.data||[]).map(x=>'<option value="'+esc(x.id)+'"'+(String(x.id)===String(c.lavoro_id||"")?" selected":"")+'>'
       +esc(x.descrizione||"(senza nome)")+'</option>').join("");
 
-    openSheetGrande(isNew?"Nuovo computo metrico":("Computo "+(c.numero?("n. "+c.numero):"")+" — "+(c.titolo||"")),
+    openSheetGrande(isNew?_cm('nuovo'):("Computo "+(c.numero?("n. "+c.numero):"")+" — "+(c.titolo||"")),
        '<div class="sh-cols"><div class="sh-col">'
 
       +'<div class="sh-b"><div class="sh-tit">Che computo è</div>'
@@ -16729,7 +16760,7 @@ ${vecchi?`
       vuoto:tabVuoto(
         salTuttiCache.length?"Nessuno stato di avanzamento con questo filtro":"Ancora nessuno stato di avanzamento",
         salTuttiCache.length?"Prova a cambiare vista qui sopra."
-          :"Uno stato di avanzamento è il conto di quello che hai fatto finora, per farti pagare un acconto mentre il lavoro va avanti. Nasce dentro un computo metrico: apri il computo e creane uno.",
+          :"Uno stato di avanzamento è il conto di quello che hai fatto finora, per farti pagare un acconto mentre il lavoro va avanti. Nasce dentro un computo: aprilo e creane uno.",
         _SVGV+'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',
         salTuttiCache.length?null:{t:"Vai ai computi",a:"sal-vai-computi"}),
       colonne:[{lab:"N.",w:"10%"},{lab:"Computo",w:"34%"},{lab:"Cliente",w:"20%",cls:"c-cli"},
@@ -18085,7 +18116,7 @@ ${vecchi?`
       data:todayStr(), stato:"bozza", numero:numero,
       note:[c.oggetto?("Oggetto: "+c.oggetto):"", c.luogo?("Luogo: "+c.luogo):"",
             c.prezzario?("Prezzi da "+c.prezzario+(c.prezzario_anno?" "+c.prezzario_anno:"")):"",
-            "Da computo metrico"+(c.numero?" n. "+c.numero:"")].filter(Boolean).join("\n")||null
+            "Da "+_cm('uno')+(c.numero?" n. "+c.numero:"")].filter(Boolean).join("\n")||null
     }).select().single();
     if(error){_libera();toast("Errore: "+error.message);return;}
 
@@ -18964,7 +18995,7 @@ ${vecchi?`
     y=Math.max(hy,y+13)+1;doc.setDrawColor(180);doc.line(M,y,R,y);y+=6;
 
     doc.setFont("helvetica","bold");doc.setFontSize(10.5);
-    const tit=doc.splitTextToSize(c.titolo||"Computo metrico",R-M);
+    const tit=doc.splitTextToSize(c.titolo||_cm('nome'),R-M);
     doc.text(tit,M,y);y+=tit.length*4.6+0.5;
     doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
     if(c.oggetto){const o=doc.splitTextToSize("Oggetto: "+c.oggetto,R-M);doc.text(o,M,y);y+=o.length*3.9;}
