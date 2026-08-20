@@ -1278,6 +1278,37 @@
        dritto alle schede che hanno davvero qualcosa da dire --- */
 .rie-card.vuota{ background:#FCFDFE; padding:20px 22px 16px; }
 .rie-card.vuota .rc-n{ font-size:34px; color:var(--testo-3); }
+/* ============================================================
+   20 agosto 2026 — LA SCHERMATA «CONTROLLA QUELLO CHE HO LETTO»
+   Quella che si apre quando si carica il computo del geometra in PDF.
+   ⚠️ Niente sotto i 13 px, nemmeno la riga del foglio originale: e' proprio
+   quella che va letta con attenzione, ed e' la piu' facile da rimpicciolire
+   «tanto e' un dettaglio». Non lo e': e' la prova. */
+.cp-riga{
+  border:1px solid var(--bordo); border-left:5px solid var(--bordo-forte);
+  border-radius:12px; padding:14px 16px; margin-bottom:14px; background:var(--card);
+}
+.cp-riga .cp-si{ display:inline-flex; align-items:center; gap:9px; cursor:pointer;
+  font-size:16px; font-weight:600; color:var(--testo); }
+.cp-riga .cp-si input{ width:22px; height:22px; accent-color:var(--blu); cursor:pointer; }
+/* la riga tolta si vede a colpo d'occhio che e' fuori */
+.cp-riga:has(.cp-ck:not(:checked)){ opacity:.55; border-left-color:var(--bordo); background:#FAFBFC; }
+.cp-riga .cp-num{ font-size:16px; font-weight:700; color:var(--testo-2); margin:6px 0 2px; }
+.cp-riga .cp-campi{ display:grid; grid-template-columns:1.6fr .8fr 1fr 1fr; gap:10px; margin:6px 0 8px; }
+.cp-riga .cp-campi .field{ margin:0; }
+.cp-riga .cp-desc{
+  font-size:16px; line-height:1.45; color:var(--testo);
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+}
+.cp-riga .cp-orig{
+  margin-top:8px; padding-top:8px; border-top:1px dashed var(--bordo);
+  font-size:14px; color:var(--testo-2); word-break:break-word;
+}
+@media(max-width:760px){
+  .cp-riga .cp-campi{ grid-template-columns:1fr 1fr; }
+  .cp-riga{ padding:13px 13px; }
+}
+
 /* ⚠️ 20 agosto 2026 — l'ICONA NON si spegne piu' sulle schede vuote.
    Prima diventava grigia insieme al titolo, e proprio li' si rompeva
    l'aggancio col menu: la scheda Fatture aveva l'icona grigia mentre nel

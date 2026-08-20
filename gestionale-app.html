@@ -15075,11 +15075,15 @@ ${vecchi?`
   function compVoci(c){
     return [{lab:"✏ Apri il computo",action:"edit-computo",data:{id:c.id}},
             {lab:"📄 Scarica il PDF",action:"comp-pdf",data:{id:c.id}}]
-           .concat(c.tipo==="pubblico"
-             /* ⚠️ la lista di gara compare SOLO sui computi «Lavori pubblici»:
-                su un lavoro privato non serve a niente e sarebbe una porta
-                verso un documento che non c'entra. */
-             ? [{lab:"🏛 Lista per la gara",action:"comp-gara",data:{id:c.id}}] : [])
+           /* ⚠️ 20 agosto 2026 — LA LISTA C'E' ANCHE SUI LAVORI PRIVATI.
+              Fino a ieri compariva solo sui «Lavori pubblici», con la nota che
+              su un privato «non serve a niente». Non era vero, e l'ha detto
+              Alessio: e' il foglio con le due colonne dei prezzi VUOTE, quello
+              che si manda a un subappaltatore per farsi fare i prezzi da lui.
+              E' lo stesso documento che il geometra manda all'impresa.
+              Cambia solo il nome: in una gara si chiama cosi', fra privati no. */
+           .concat([{lab:(c.tipo==="pubblico"?"🏛 Lista per la gara":"📋 Lista da far prezzare"),
+                     action:"comp-gara",data:{id:c.id}}])
            .concat([
             /* 16 agosto 2026 — «Crea il preventivo» stava solo in fondo alla
                finestra. Adesso che le azioni del documento stanno in alto,
@@ -15847,7 +15851,7 @@ ${vecchi?`
       +    (ruoloUtente==='professionista'
             ? 'Importa le lavorazioni da Excel'
             : 'Carica qui il computo del geometra')+'</button>'
-      +  '<input type="file" id="comp-file" accept=".xlsx,.xlsm,.xls,.csv" style="display:none">'
+      +  '<input type="file" id="comp-file" accept=".xlsx,.xlsm,.xls,.csv,.pdf" style="display:none">'
       /* ⚠️ 19 agosto 2026 — un computo importato arriva con le lavorazioni e i
          prezzi vuoti. Questo pulsante cerca il codice nel prezzario e riempie
          SOLO le righe a zero. Si vede solo se qualcosa a zero c'è davvero: se
@@ -18261,7 +18265,14 @@ ${vecchi?`
   function compApriFile(){
     const f=$("#comp-file"); if(!f) return;
     f.value="";
-    f.onchange=function(){ if(f.files&&f.files[0])compImporta(f.files[0]); };
+    /* ⚠️ 20 agosto 2026 — due strade, una porta sola. Il geometra manda
+       l'Excel o il PDF, e chi carica non deve sapere la differenza: la
+       riconosce il gestionale dal nome del file. */
+    f.onchange=function(){
+      const file=f.files&&f.files[0]; if(!file)return;
+      if(/\.pdf$/i.test(file.name||"")) compImportaPdf(file);
+      else compImporta(file);
+    };
     f.click();
   }
   async function compImporta(file){
@@ -18335,6 +18346,19 @@ ${vecchi?`
       +(avvisi.length?("\n⚠ "+avvisi.join("\n⚠ ")+"\n"):"")
       +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?")) { toast("Importazione annullata"); return; }
 
+    const messe=await _compScriviVoci(cid,voci);
+    if(messe==null)return;
+    toast(messe+(messe===1?" lavorazione importata ✔":" lavorazioni importate ✔")
+          +(senzaPrezzo?("  ·  "+senzaPrezzo+" senza prezzo: scrivilo tu"):""));
+  }
+
+  /* ⚠️ 20 agosto 2026 — LA SCRITTURA STA IN UN POSTO SOLO.
+     Da oggi le lavorazioni entrano da DUE porte, l'Excel e il PDF. Il modo di
+     scriverle nel database (l'ordine che riprende da dove eravamo, i blocchi
+     da 200, cosa si dice se il database si ferma a meta') deve restare uno:
+     una regola che sta in due posti non si sistema a meta'.
+     Torna quante ne ha scritte, oppure null se si e' fermata. */
+  async function _compScriviVoci(cid,voci){
     /* si parte dopo l'ultima voce che c'e' gia', se no l'ordine si accavalla */
     let ordine=(compVociCache||[]).reduce(function(m,v){return Math.max(m,+v.ordine||0);},0)+1;
     const righeDb=voci.map(function(v,i){
@@ -18349,13 +18373,406 @@ ${vecchi?`
         toast("Errore dopo "+messe+(messe===1?" lavorazione":" lavorazioni")+": "+error.message
               +(messe?" — quelle già entrate restano, ricarica e riprova con le altre.":""));
         await renderCompVoci(cid);
-        return;
+        return null;
       }
       messe+=Math.min(200,righeDb.length-i);
     }
     await renderCompVoci(cid);
-    toast(messe+(messe===1?" lavorazione importata ✔":" lavorazioni importate ✔")
-          +(senzaPrezzo?("  ·  "+senzaPrezzo+" senza prezzo: scrivilo tu"):""));
+    return messe;
+  }
+
+  /* ============================================================
+     20 agosto 2026 — IL COMPUTO CHE ARRIVA IN PDF
+     ============================================================
+     Chiesto da Alessio: «a volte il geometra ci consegna il computo senza
+     prezzi e il preventivo ce lo dobbiamo fare noi sul suo computo».
+     L'Excel si leggeva gia' dal 18 agosto. Questo legge il PDF.
+
+     ⛔ NON SI FIDA DI UN MODELLO. Un computo italiano lo stampano PriMus,
+     STR, Blumatica e questo gestionale, e ognuno lo impagina a modo suo: un
+     lettore costruito sulle colonne di PriMus non leggerebbe il primo foglio
+     stampato da un altro programma. Si fida invece di UNA COSA SOLA, che c'e'
+     in tutti perche' e' come si scrive un computo in italiano:
+
+         SOMMANO... mq 174,06                  (PriMus)
+         Sommano mq 20,460 € 18,50 € 378,51    (questo gestionale)
+
+     La riga «Sommano» CHIUDE una lavorazione e porta con se' unita' di misura
+     e quantita'. Quello che sta sopra, fino alla lavorazione prima, e' la
+     descrizione.
+
+     ⛔ NIENTE ENTRA SENZA CHE ALESSIO L'ABBIA GUARDATO. Il PDF non e' un
+     Excel: qui si legge un foglio STAMPATO, e se sbaglio una cifra — 20,46
+     che diventa 2046 — il preventivo che l'impresa manda al cliente e'
+     sbagliato e ci rimette lei. Percio' si apre sempre la schermata di
+     conferma, con accanto a ogni riga IL PEZZO DI FOGLIO da cui l'ho preso.
+
+     ⚠️ TRE COSE CHE AVREI SBAGLIATO SENZA I FOGLI VERI DI ALESSIO:
+     1. il foglio di PriMus e' orizzontale, ma dentro il PDF e' una pagina
+        verticale girata di 90 gradi: senza Util.transform si leggevano ZERO
+        righe su un foglio pieno;
+     2. PriMus scrive le migliaia con l'apostrofo tipografico: «mq 1´344,00»;
+     3. mi ero fatto un elenco mio delle unita' di misura (mq, mc, cad...) e
+        il foglio vero aveva «ton» e «cadauno»: cinque lavorazioni su
+        ottantasette scartate in silenzio.
+     Il banco sta in prove/: legge i due PDF veri e controlla che le tariffe
+     in comune diano le STESSE quantita' nei due fogli.
+     ============================================================ */
+
+  /* ⛔ SOTTO QUESTE LETTERE, IL PDF E' UNA FOTOGRAFIA. Un foglio scritto da
+     un programma ne ha decine di migliaia; una scansione ne ha zero. Sta qui
+     e non dentro compImportaPdf perche' il banco possa provarla davvero. */
+  const CP_MIN_LETTERE=80;
+  let _pdfProm2=null;
+  const CP_PDFJS="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+  const CP_PDFJS_W="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  function caricaPdfJs(){
+    if(window.pdfjsLib)return Promise.resolve(true);
+    if(!_pdfProm2)_pdfProm2=_caricaScript(CP_PDFJS).then(function(ok){
+      /* ⚠️ «il file e' arrivato» non vuol dire «la libreria c'e'». Se arriva
+         una pagina di errore, o un file vuoto, lo script si carica lo stesso e
+         window.pdfjsLib resta vuoto: senza questo controllo l'utente si
+         beccava «Cannot read properties of undefined», che non vuol dire
+         niente. Trovato dal banco nel browser. */
+      if(!ok||!window.pdfjsLib||!window.pdfjsLib.getDocument){_pdfProm2=null;return false;}
+      try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc=CP_PDFJS_W; }catch(e){}
+      return true;
+    });
+    return _pdfProm2;
+  }
+
+  /* --- numeri all'italiana: 1.234,56 · e l'apostrofo di PriMus: 1´344,00 --- */
+  function _cpNum(s){
+    if(s==null)return null;
+    let t=String(s).trim().replace(/[€\s´’′']/g,"");
+    if(!t)return null;
+    if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) t=t.replace(/\./g,"").replace(",",".");
+    else if(/^-?\d+,\d+$/.test(t)) t=t.replace(",",".");
+    else if(/^-?\d+(\.\d+)?$/.test(t)) { /* gia' all'inglese */ }
+    else return null;
+    const n=parseFloat(t);
+    return isFinite(n)?n:null;
+  }
+  const _cpEDec = s => /^-?\d{1,3}(\.\d{3})*,\d+$/.test(String(s).trim());
+
+  /* ⚠️ NIENTE ELENCO DI UNITA' SCRITTO DA ME: non puo' prevedere quello che
+     scrive un geometra. Dopo «Sommano» viene una parola corta di lettere e
+     SUBITO DOPO un numero — «Sommano il capitolo € 378,51» non passa perche'
+     dopo «il» non c'e' un numero ma «capitolo». */
+  function _cpUnita(s){
+    const t=String(s||"").trim().toLowerCase().replace(/[.…]+$/,"");
+    if(!t||t.length>10)return false;
+    return /^[a-zà-ù%²³0-9\/]+$/i.test(t) && /[a-zà-ù%²³]/i.test(t);
+  }
+
+  function _cpRighe(parole){
+    const R=[];
+    parole.slice().sort((a,b)=>(a.y-b.y)||(a.x-b.x)).forEach(p=>{
+      const u=R[R.length-1];
+      if(u&&Math.abs(u.y-p.y)<=2.2){u.parole.push(p);u.y=(u.y+p.y)/2;}
+      else R.push({y:p.y,parole:[p]});
+    });
+    R.forEach(r=>{
+      r.parole.sort((a,b)=>a.x-b.x);
+      r.testo=r.parole.map(p=>p.t).join(" ").replace(/\s+/g," ").trim();
+    });
+    return R;
+  }
+
+  /* l'intestazione e il piede: le righe che si ripetono uguali su quasi tutte
+     le pagine. Non un elenco di frasi scritto da me — quello varrebbe solo
+     per PriMus. */
+  function _cpTeste(pagine){
+    const conta={};
+    pagine.forEach(p=>{
+      const bordo=p.righe.filter(r=>r.y<p.altezza*0.28||r.y>p.altezza*0.90);
+      const viste={};
+      bordo.forEach(r=>{
+        const k=r.testo.replace(/\d+/g,"#").toLowerCase();
+        if(k.length>3&&!viste[k]){viste[k]=1;conta[k]=(conta[k]||0)+1;}
+      });
+    });
+    const soglia=Math.max(3,Math.ceil(pagine.length*0.6));
+    const teste={};
+    Object.keys(conta).forEach(k=>{ if(conta[k]>=soglia)teste[k]=1; });
+    return teste;
+  }
+
+  /* dove comincia la colonna della descrizione: la x da cui parte la maggior
+     parte del testo lungo. A sinistra ci sono il numero e il codice. */
+  function _cpXDesc(righe){
+    const conta={};
+    righe.forEach(r=>{
+      if(r.parole.length<4)return;
+      const lettere=r.parole.filter(p=>/[a-zà-ù]{3}/i.test(p.t)).length;
+      if(lettere<3)return;
+      const prima=r.parole.find(p=>/[a-zà-ù]{3}/i.test(p.t));
+      if(!prima)return;
+      const k=Math.round(prima.x/3)*3;
+      conta[k]=(conta[k]||0)+lettere;
+    });
+    let best=0,bestN=-1;
+    Object.keys(conta).forEach(k=>{ if(conta[k]>bestN){bestN=conta[k];best=+k;} });
+    return best;
+  }
+
+  function _cpSommano(r){
+    const P=r.parole;
+    const i=P.findIndex(p=>/^sommano/i.test(p.t.replace(/[.…]+$/,"")));
+    if(i<0)return null;
+    const dopo=P.slice(i+1).map(p=>p.t).filter(t=>t!=="€"&&t!=="");
+    if(!dopo.length)return null;
+    if(!_cpUnita(dopo[0]))return null;
+    const q=_cpNum(dopo[1]);
+    if(q===null)return null;
+    return {unita:dopo[0].replace(/[.…]+$/,""), quantita:q,
+            prezzo:dopo.length>2?_cpNum(dopo[2]):null, originale:r.testo};
+  }
+
+  /* la riga delle misure — «tramezzo cucina 2 3,20 2,70 17,280» — non e'
+     descrizione, e' il conto della quantita'.
+     ⚠️ La prima versione bastava che ci fossero due numeri e buttava via
+     descrizioni vere: su PriMus «8 pedate di larghezza cm 60» spariva.
+     Servono DUE cose insieme: numeri scritti con la virgola (una misura, non
+     «cm 60») E incolonnati a destra, dove stanno le colonne delle dimensioni. */
+  function _cpMisure(r,xDesc){
+    const dec=r.parole.filter(p=>_cpEDec(p.t));
+    if(dec.length<2)return false;
+    return dec.filter(p=>p.x>xDesc+120).length>=2;
+  }
+
+  function _cpLeggi(pagine){
+    const teste=_cpTeste(pagine);
+    const tutte=[];
+    pagine.forEach(p=>p.righe.forEach(r=>{
+      const k=r.testo.replace(/\d+/g,"#").toLowerCase();
+      if((r.y<p.altezza*0.28||r.y>p.altezza*0.90)&&teste[k])return;
+      if(!r.testo)return;
+      tutte.push(r);
+    }));
+    const xDesc=_cpXDesc(tutte), xSin=xDesc-4;
+
+    const voci=[]; let corr=null, ultimoN=0;
+    const nuova=()=>({numero:null,tariffa:[],desc:[],originali:[]});
+
+    /* ⚠️ COME SI RICONOSCE IL NUMERO DELLA LAVORAZIONE. «Il primo intero nella
+       colonna di sinistra» ne perdeva cinque su ottantasette: quella colonna e'
+       stretta e i codici lunghi ci vanno a capo dentro, quindi ci si trovano
+       pezzi come «0» o «2», che sono la coda di S01.01.001.10 e S01.01.002.42.
+       La regola vera non dipende dall'impaginazione: I NUMERI SALGONO. */
+    /* ⚠️ ONESTA': QUESTA REGOLA IL BANCO NON RIESCE A PROVARLA.
+       Sabotandola (facendo passare qualunque intero) le prove restano verdi,
+       perche' sui DUE fogli veri che ho la protegge gia' l'altra regola qui
+       sotto (numero + testo accanto). Resta scritta perche' serve al caso in
+       cui un pezzo di codice andato a capo finisca su una riga che ha ANCHE
+       la descrizione — non l'ho visto succedere, e non posso dire che sia
+       provata. Se un giorno arriva un foglio che la fa scattare, si vedra'.
+       ⛔ Non si scrive «provata» quello che il banco non fa diventare rosso. */
+    function eNumLav(t){
+      if(!/^\d{1,4}$/.test(t))return false;
+      const n=+t;
+      return n>ultimoN && n<=ultimoN+50;
+    }
+    function chiudi(v,som,testo){
+      v.originali.push(testo);
+      if(v.numero!==null)ultimoN=v.numero;
+      voci.push({numero:v.numero, tariffa:v.tariffa.join("").trim()||null,
+        descrizione:v.desc.join(" ").replace(/\s+/g," ").trim(),
+        unita:som.unita, quantita:som.quantita, prezzo:som.prezzo,
+        originali:v.originali.concat()});
+    }
+
+    tutte.forEach(r=>{
+      const sin=r.parole.filter(p=>p.x<xSin);
+      const des=r.parole.filter(p=>p.x>=xSin);
+      const som=_cpSommano(r);
+
+      if(som){
+        const v=corr||nuova();
+        /* il codice PUO' FINIRE SULLA RIGA DEL «SOMMANO»: la colonna e'
+           stretta e i codici lunghi ci vanno a capo */
+        sin.forEach(p=>v.tariffa.push(p.t));
+        chiudi(v,som,r.testo);
+        corr=null;
+        return;
+      }
+
+      /* una riga fatta SOLO di colonna di sinistra, subito dopo una
+         lavorazione chiusa, e' la coda del codice di QUELLA */
+      if(!corr&&!des.length&&sin.length&&voci.length){
+        const pezzo=sin.map(p=>p.t).join("");
+        if(sin.length<=2&&/^[0-9A-Za-z.\-\/]{1,12}$/.test(pezzo)&&/\d/.test(pezzo)){
+          const u=voci[voci.length-1];
+          if(u.tariffa)u.tariffa=(u.tariffa+pezzo).trim();
+        }
+        return;
+      }
+
+      /* ⛔ QUI COMINCIA UNA LAVORAZIONE, e solo qui: un numero che sale nella
+         colonna stretta E del testo accanto. Serve a tenere fuori la carta
+         intestata: il «5» di «Via Dante Alighieri, 5» era diventato il numero
+         della lavorazione n. 1, e da li' in poi il 2, il 3 e il 4 venivano
+         scartati perche' «non salivano». */
+      const numLav=sin.find(p=>eNumLav(p.t));
+      if(numLav&&des.length){
+        corr=nuova(); corr.numero=+numLav.t;
+        sin.forEach(p=>{ if(p!==numLav)corr.tariffa.push(p.t); });
+        if(!_cpMisure(r,xDesc))corr.desc.push(des.map(p=>p.t).join(" "));
+        corr.originali.push(r.testo);
+        return;
+      }
+
+      /* fuori da una lavorazione non si raccoglie niente: carta intestata,
+         titoli dei capitoli e righe di riporto restano fuori */
+      if(!corr)return;
+
+      sin.forEach(p=>corr.tariffa.push(p.t));
+      if(des.length&&!_cpMisure(r,xDesc))corr.desc.push(des.map(p=>p.t).join(" "));
+      corr.originali.push(r.testo);
+    });
+    return {voci:voci, xDesc:xDesc};
+  }
+
+  /* --- le parole di un PDF, pagina per pagina --- */
+  async function _cpParole(file){
+    const buf=await file.arrayBuffer();
+    const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
+    const pagine=[];
+    let lettere=0;
+    for(let i=1;i<=doc.numPages;i++){
+      const p=await doc.getPage(i);
+      const vp=p.getViewport({scale:1});
+      const c=await p.getTextContent();
+      const parole=[];
+      c.items.forEach(function(it){
+        const t=(it.str||"").trim(); if(!t)return;
+        lettere+=t.length;
+        /* ⚠️ LA PAGINA PUO' ESSERE GIRATA. Il foglio di PriMus e' orizzontale,
+           e dentro il PDF e' una pagina verticale con «/Rotate 90»: prendendo
+           it.transform cosi' com'e', la prima riga finiva a y = -221 e il
+           lettore non trovava piu' niente. Util.transform applica la rotazione
+           e mette la y che cresce verso il basso, come si legge. */
+        const tx=window.pdfjsLib.Util.transform(vp.transform,it.transform);
+        const parti=t.split(/\s+/).filter(Boolean);
+        const larg=it.width||0;
+        let acc=0;
+        parti.forEach(function(w){
+          const q=larg*(w.length/Math.max(t.replace(/\s/g,"").length,1));
+          parole.push({t:w,x:tx[4]+acc,y:tx[5]});
+          acc+=q+larg*0.02;
+        });
+      });
+      pagine.push({altezza:vp.height,larghezza:vp.width,righe:_cpRighe(parole)});
+    }
+    return {pagine:pagine, lettere:lettere, quante:doc.numPages};
+  }
+
+  let cpLette=null;
+
+  async function compImportaPdf(file){
+    if(!sbUid){toast("Devi essere loggato");return;}
+    const cid=compVociCompId;
+    if(!cid){toast("Salva prima il computo, poi carica il foglio del geometra");return;}
+    toast("Sto leggendo "+file.name+"…");
+    if(!(await caricaPdfJs())){toast("Non riesco a scaricare il modulo per leggere i PDF: controlla la connessione e riprova");return;}
+
+    let letto;
+    try{ letto=await _cpParole(file); }
+    catch(e){ toast("Non riesco ad aprire il PDF: "+((e&&e.message)||e)); return; }
+
+    /* ⚠️ UNA SCANSIONE NON E' UN PDF DA LEGGERE: e' una fotografia. Dentro non
+       c'e' nessuna lettera, e inventarsi i numeri sarebbe la cosa peggiore che
+       posso fare. Lo si dice, e si dice anche cosa fare. */
+    if(letto.lettere<CP_MIN_LETTERE){
+      toast("Questo PDF non ha testo dentro: è la fotografia (o la scansione) di un foglio. Non posso leggerne i numeri senza inventarmeli. Chiedi al geometra il file originale, in PDF o in Excel.");
+      return;
+    }
+
+    const r=_cpLeggi(letto.pagine);
+    if(!r.voci.length){
+      toast("Nel PDF non ho trovato nessuna riga «Sommano»: è quella che chiude una lavorazione e porta la quantità. Se il foglio è fatto in un altro modo, mandami il file e lo faccio leggere.");
+      return;
+    }
+    cpLette={cid:cid, nome:file.name, voci:r.voci, pagine:letto.quante};
+    compPdfConferma();
+  }
+
+  /* ---- la schermata di conferma: NIENTE entra senza passare da qui ---- */
+  function compPdfConferma(){
+    if(!cpLette)return;
+    const V=cpLette.voci;
+    const senzaPrezzo=V.filter(v=>!(+v.prezzo)).length;
+    const senzaTar=V.filter(v=>!v.tariffa).length;
+    const qtaZero=V.filter(v=>!(+v.quantita>0)).length;
+
+    const avvisi=[];
+    if(senzaPrezzo)avvisi.push("<b>"+senzaPrezzo+"</b> "+(senzaPrezzo===1?"riga è senza prezzo":"righe sono senza prezzo")+": sul foglio del geometra è normale, i prezzi ce li metti tu dopo col pulsante «Prendi i prezzi dal prezzario».");
+    if(senzaTar)avvisi.push("<b>"+senzaTar+"</b> "+(senzaTar===1?"riga è senza codice":"righe sono senza codice")+" di tariffa: quelle il prezzario non le può cercare.");
+    if(qtaZero)avvisi.push("<b>"+qtaZero+"</b> "+(qtaZero===1?"riga ha quantità zero":"righe hanno quantità zero")+": controllale, o toglile.");
+
+    const riga=(v,i)=>'<div class="cp-riga" data-i="'+i+'">'
+      +'<label class="cp-si"><input type="checkbox" class="cp-ck" checked> <span>la prendo</span></label>'
+      +'<div class="cp-num">'+(v.numero!=null?("n. "+esc(String(v.numero))):"—")+'</div>'
+      +'<div class="cp-campi">'
+      +  '<div class="field"><label>Codice di tariffa</label><input class="cp-tar" value="'+esc(v.tariffa||"")+'"'+_noAuto()+'></div>'
+      +  '<div class="field"><label>U.M.</label><input class="cp-um" value="'+esc(v.unita||"")+'"'+_noAuto()+'></div>'
+      +  '<div class="field"><label>Quantità</label><input class="cp-qta" inputmode="decimal" value="'+esc(_misTesto(v.quantita))+'"'+_noAuto()+'></div>'
+      +  '<div class="field"><label>Prezzo unitario</label><input class="cp-prz" inputmode="decimal" value="'+(v.prezzo?esc(String(v.prezzo).replace(".",",")):"")+'" placeholder="lo metti tu"'+_noAuto()+'></div>'
+      +'</div>'
+      +'<div class="cp-desc">'+esc(v.descrizione||"(senza descrizione)")+'</div>'
+      /* ⚠️ IL PEZZO DI FOGLIO ORIGINALE, sotto ogni riga. E' l'unica cosa che
+         permette di accorgersi se ho letto male: senza, si dovrebbe credermi
+         sulla parola. */
+      +'<div class="cp-orig">Sul foglio: '+esc((v.originali||[]).slice(-1)[0]||"")+'</div>'
+      +'</div>';
+
+    openSheetGrande("Controlla quello che ho letto",
+       '<div class="sh-b"><div class="sh-tit">'+V.length+(V.length===1?" lavorazione letta":" lavorazioni lette")+' da «'+esc(cpLette.nome)+'»</div>'
+      +  '<div class="sh-nota">Il PDF è un foglio <b>stampato</b>: l\'ho letto, non me l\'ha detto nessuno. Guarda le quantità prima di farle entrare — sotto ogni riga c\'è <b>il pezzo di foglio</b> da cui l\'ho presa.<br>Chi non ti convince, togli la spunta e non entra.</div>'
+      +  (avvisi.length?('<div class="sh-nota">⚠ '+avvisi.join("<br>⚠ ")+'</div>'):'')
+      +  '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0">'
+      +    '<button type="button" class="btn-ghost quick-add" data-action="cp-tutte">Segna tutte</button>'
+      +    '<button type="button" class="btn-ghost quick-add" data-action="cp-nessuna">Togli tutte</button>'
+      +  '</div>'
+      +  '<div id="cp-lista">'+V.map(riga).join("")+'</div>'
+      +'</div>',
+       '<button class="btn b-cancel" data-action="close">Annulla</button>'
+      +'<button class="btn-primary b-save" data-action="cp-metti">Metti dentro le lavorazioni segnate</button>');
+  }
+
+  async function compPdfMetti(){
+    if(!cpLette){toast("Non c'è niente da mettere dentro");return;}
+    const cid=cpLette.cid;
+    const voci=[];
+    let tolte=0;
+    $$("#cp-lista .cp-riga").forEach(function(r){
+      const ck=r.querySelector(".cp-ck");
+      if(!ck||!ck.checked){tolte++;return;}
+      const q=_numDa((r.querySelector(".cp-qta")||{}).value||"");
+      const p=_numDa((r.querySelector(".cp-prz")||{}).value||"");
+      const d=cpLette.voci[+r.dataset.i]||{};
+      voci.push({
+        codice:String((r.querySelector(".cp-tar")||{}).value||"").trim()||null,
+        descrizione:String(d.descrizione||"").trim()||"(senza descrizione)",
+        unita:String((r.querySelector(".cp-um")||{}).value||"").trim()||null,
+        quantita_manuale:true,
+        quantita:(q!=null&&isFinite(q))?q:0,
+        prezzo_unitario:(p!=null&&isFinite(p))?p:0
+      });
+    });
+    if(!voci.length){toast("Non hai segnato nessuna riga: non entra niente.");return;}
+    if(!gconfirm("Sto per aggiungere "+voci.length+(voci.length===1?" lavorazione":" lavorazioni")+" a questo computo.\n\n"
+      +"Entrano come «A corpo»: la quantità è quella del foglio, le misure non ci sono.\n"
+      +(tolte?("\n⚠ "+tolte+(tolte===1?" riga l'hai tolta":" righe le hai tolte")+" e non entra"+(tolte===1?"":"no")+".\n"):"")
+      +"\nLe aggiungo in fondo a quelle che ci sono già. Vado?")){toast("Non ho messo dentro niente");return;}
+
+    const messe=await _compScriviVoci(cid,voci);
+    if(messe==null)return;
+    cpLette=null;
+    closeSheet();
+    const senzaPrezzo=voci.filter(v=>!(+v.prezzo_unitario)).length;
+    toast(messe+(messe===1?" lavorazione dal PDF ✔":" lavorazioni dal PDF ✔")
+          +(senzaPrezzo?("  ·  "+senzaPrezzo+" senza prezzo: premi «Prendi i prezzi dal prezzario»"):""));
   }
 
   /* ============================================================
@@ -20203,6 +20620,9 @@ ${vecchi?`
     if(a==="comp-pdf")return computoPdf(id);
     if(a==="comp-gara")return computoListaGara(id);
     if(a==="comp-importa")return compApriFile();
+    if(a==="cp-metti")return compPdfMetti();
+    if(a==="cp-tutte"){$$("#cp-lista .cp-ck").forEach(x=>{x.checked=true;});return;}
+    if(a==="cp-nessuna"){$$("#cp-lista .cp-ck").forEach(x=>{x.checked=false;});return;}
     if(a==="comp-prezzi")return compPrezziDaPrezzario();
     if(a==="comp-prz-chiudi"){compPrzEsito="";compPrzEsitoId=null;return renderCompVoci(compVociCompId);}
     if(a==="pp-usa")return ppUsa(id);

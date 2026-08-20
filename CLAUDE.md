@@ -9713,6 +9713,129 @@ rimedio non è contarli meglio — è non averne più di uno.
 
 ---
 
+# 20 agosto 2026 (5) — IL COMPUTO CHE ARRIVA IN PDF
+
+L'Excel si leggeva dal 18 agosto. Da oggi lo stesso pulsante — **«⬆ Carica qui
+il computo del geometra»** — legge anche il **PDF**.
+
+## ⛔ NON SI FIDA DI UN MODELLO
+
+Un computo italiano lo stampano PriMus, STR, Blumatica e questo gestionale, e
+ognuno lo impagina a modo suo. Un lettore costruito sulle colonne di PriMus non
+leggerebbe il primo foglio stampato da un altro programma.
+
+Si fida di **una cosa sola**, che c'è in tutti perché è come si scrive un
+computo in italiano, non come lo stampa un programma:
+
+```
+SOMMANO... mq 174,06                    (PriMus)
+Sommano mq 20,460 € 18,50 € 378,51      (questo gestionale)
+```
+
+La riga «Sommano» **chiude** una lavorazione e porta con sé unità di misura e
+quantità. Quello che sta sopra, fino alla lavorazione prima, è la descrizione.
+
+## ⛔ NIENTE ENTRA SENZA CHE ALESSIO L'ABBIA GUARDATO
+
+Il PDF non è un Excel: è un foglio **stampato**. Se leggo male una cifra —
+20,46 che diventa 2046 — il preventivo che l'impresa manda al cliente è
+sbagliato e **ci rimette lei**.
+
+Quindi si apre **sempre** la schermata «Controlla quello che ho letto»:
+- una riga per lavorazione, con **codice, U.M., quantità e prezzo modificabili**;
+- **sotto ogni riga, il pezzo di foglio da cui l'ho presa** (`Sul foglio:
+  SOMMANO... mq 174,06`) — senza quello bisognerebbe credermi sulla parola;
+- una spunta «la prendo»: chi non convince, si toglie e non entra;
+- e la conferma finale dice quante ne sono state tolte.
+
+⚠️ Nel banco c'è una prova apposta: **dopo aver letto il PDF, nel computo non
+deve essere entrato ancora niente.** Se un domani qualcuno salta la conferma,
+diventa rossa.
+
+## ⚠️ TRE COSE CHE AVREI SBAGLIATO SENZA I FOGLI VERI
+
+Alessio ha mandato due PDF: la **lista di gara di PriMus** che gli ha dato il
+suo geometra (87 lavorazioni, prezzi vuoti) e il **computo stampato dal suo
+gestionale** (88 lavorazioni, coi prezzi). Sono **lo stesso lavoro**.
+
+1. **Il foglio di PriMus è girato.** È orizzontale, ma dentro il PDF è una
+   pagina verticale con `/Rotate 90`: prendendo `it.transform` così com'è, la
+   prima riga finiva a `y = −221` e il lettore trovava **zero righe su un
+   foglio pieno**. Si raddrizza con `pdfjsLib.Util.transform(vp.transform, …)`.
+2. **PriMus scrive le migliaia con l'apostrofo tipografico:** `mq 1´344,00`.
+   Senza toglierlo, quel numero non si legge e la lavorazione veniva scartata
+   **in silenzio**.
+3. **Mi ero fatto un elenco mio delle unità di misura** (mq, mc, cad…) e il
+   foglio vero aveva **`ton`** e **`cadauno`**: cinque lavorazioni su
+   ottantasette scartate in silenzio. *Un elenco di parole mie non può
+   prevedere quello che scrive un geometra.* Adesso la regola non elenca
+   niente: dopo «Sommano» viene una parola corta di lettere e **subito dopo un
+   numero** — così «Sommano il capitolo € 378,51» resta fuori lo stesso.
+
+E due che ha trovato il banco:
+
+4. **La descrizione veniva tagliata.** Bastavano due numeri per buttare via una
+   riga, e su PriMus «8 pedate di larghezza cm 60» spariva: la lavorazione
+   arrivava monca e sembrava colpa del PDF. È la lezione n. 2 del 19 agosto.
+   Adesso servono **due cose insieme**: numeri con la virgola all'italiana
+   **e** incolonnati a destra, dove stanno le dimensioni.
+5. **La carta intestata entrava dentro la prima lavorazione.** Il «5» di «Via
+   Dante Alighieri, 5» era diventato il **numero della lavorazione n. 1**, e da
+   lì in poi il 2, il 3 e il 4 venivano scartati perché «non salivano».
+   Adesso una lavorazione comincia **solo** con un numero nella colonna stretta
+   **e** del testo accanto.
+
+## ⛔ LA SCANSIONE SI DICE, NON SI INDOVINA
+
+Se dentro il PDF non ci sono lettere (`CP_MIN_LETTERE = 80`), è la fotografia
+di un foglio. Il gestionale **lo dice** e si ferma: *«non posso leggerne i
+numeri senza inventarmeli, chiedi al geometra il file originale»*. Inventare
+una quantità sarebbe la cosa peggiore che può fare.
+
+## ⚠️ ONESTÀ: TRE REGOLE CHE IL BANCO NON RIESCE A PROVARE
+
+Sabotandole, le prove restano **verdi**: sui due fogli veri che ho, quelle
+strade sono già protette da un'altra regola. Sono la regola dei numeri che
+salgono, quella del «numero + testo accanto» e il controllo dell'unità dopo
+«Sommano». **Restano scritte come cintura in più, ma nel codice c'è scritto che
+non sono provate.** ⛔ Non si scrive «provata» una cosa che il banco non fa
+diventare rossa.
+
+## Come è stato provato
+
+- **`prove/banco-computo-pdf.js` — 20 prove.** Le funzioni sono tirate fuori
+  **verbatim** da `gestionale-app.html` da `prove/estrai-lettore-pdf.py` (un
+  pezzo intero fra due segni, non funzione per funzione: tagliando sui nomi un
+  `const` che finisce due righe sotto resta monco). Girano con la **stessa
+  pdf.js 3.11.174** che carica il gestionale.
+  **La prova più forte non l'ho scritta io:** i due fogli sono lo stesso
+  lavoro, hanno **68 tariffe in comune**, e le quantità devono combaciare
+  tutte. Combaciano. E la somma delle righe lette fa **43.495,58 €** contro
+  **43.495,59 €** stampato sul foglio di Alessio: un centesimo, per gli
+  arrotondamenti riga per riga.
+- **`prove/banco-pdf-browser.js` — 14 prove.** Il gestionale vero in Chromium:
+  si carica il PDF vero dentro `<input type=file>`, si toglie la spunta a una
+  riga, si corregge la quantità di un'altra, e si controlla che entrino 86
+  lavorazioni **con la correzione scritta a mano**, non quella letta.
+- **`prove/sabotaggi-pdf.py` — 10 sabotaggi, 10 visti.**
+- **`prove/sabotaggi-pdf-browser.py` — 6 sabotaggi, 6 visti.**
+
+⚠️ **I due PDF non escono da questo computer.** Dentro ci sono i nomi e
+l'indirizzo dei clienti veri del geometra: stanno in `prove/`, nel contenitore
+di Claude, e non finiscono in nessun push.
+
+## Altro, dallo stesso giorno
+
+**La «Lista da far prezzare» adesso c'è anche sui lavori privati.** Fino a ieri
+compariva solo sui computi «Lavori pubblici», con scritto che su un privato
+«non serve a niente». Non era vero: è il foglio con le due colonne dei prezzi
+vuote, quello che si manda a un subappaltatore per farsi fare i prezzi da lui —
+lo stesso che il geometra manda all'impresa. Cambia solo il nome: in una gara
+si chiama «🏛 Lista per la gara», fra privati «📋 Lista da far prezzare».
+
+
+---
+
 ## DOVE SIAMO RIMASTI (20 agosto 2026, notte)
 
 **Fatto oggi, tutto in `gestionale-app.html` + `css/gestionale.css`, nessuna
@@ -9720,26 +9843,35 @@ migrazione SQL:**
 
 1. la sezione **«Stati di avanzamento»** nel menù;
 2. il **Riepilogo neutro** con le icone colorate e i pallini rosso/verde;
-3. il **computo aperto alle imprese** come «Computo da prezzare».
+3. il **computo aperto alle imprese** come «Computo da prezzare»;
+4. **il computo che arriva in PDF**, con la conferma riga per riga;
+5. la **«Lista da far prezzare»** anche sui lavori privati.
 
 **Da fare, in cima:**
 
-1. **Il caricamento del computo in PDF** (e poi la foto), con la conferma riga
-   per riga. Vedi qui sopra.
-2. **Il prezzo nuovo sul sito** — `prezzi.html`, `info-premium.html`,
+1. **Il prezzo nuovo sul sito** — `prezzi.html`, `info-premium.html`,
    `info-free.html` · il riquadro nei quattro pannelli · **il pagamento mensile
    su Stripe** (il pezzo più grosso) · l'avviso prima che scadano i tre mesi di
    regalo delle imprese di luglio.
    ⚠️ Il riquadro dentro il gestionale dice ancora **«5€ al mese oppure 49€
    l'anno»**.
-3. **L'errore JavaScript sulla homepage** (`PAGINE_REGISTRAZIONE` due volte):
+2. **L'errore JavaScript sulla homepage** (`PAGINE_REGISTRAZIONE` due volte):
    guardare l'iniezione di Netlify, non il codice.
-4. **Rileggere il contatore delle visite** (query in fondo a
+3. **Rileggere il contatore delle visite** (query in fondo a
    `sql/conteggio-visite.sql`).
 
-⚠️ **Da chiedere a una delle 87 imprese, adesso che la porta è aperta:** «l'hai
-vista la voce nuova? il computo del geometra come ti arriva, in Excel o in
-PDF?». La risposta decide se il punto 1 serve davvero o se l'Excel basta.
+4. **Il computo caricato da una FOTO o da una scansione.** Oggi il gestionale
+   si accorge che dentro non c'è testo e lo dice. Per leggerlo servirebbe l'AI,
+   con la conferma riga per riga come adesso e il numero originale accanto.
+   ⚠️ Prima di farlo: **chiedere a una delle 87 imprese come le arriva il
+   computo.** Se arriva in PDF o in Excel — come i due fogli di Alessio — la
+   foto non serve a nessuno.
+
+⚠️ **E c'è la lista `prove-claude/COSA-HA-PRIMUS-CHE-NOI-NO.md`**, scritta il
+20 agosto: cronoprogramma, analisi dei prezzi, contabilità pubblica completa,
+POS, varianti, formati di scambio. Con scritto a chi servono davvero e quanto
+sono grosse. Il primo consigliato è il **cronoprogramma**, perché nasce dalle
+lavorazioni del computo che c'è già.
 
 Poi, in ordine libero: l'analisi dei prezzi · la descrizione schiacciata a
 390 px sui preventivi · il pulsante del prezzario anche in cima · il limite di
