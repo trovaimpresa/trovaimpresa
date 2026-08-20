@@ -9405,3 +9405,135 @@ grafico dell'admin.
 **Meta:** campagna ferma per una settimana dal 19 agosto, poi rimisurare.
 **Pulizie:** i preventivi n. 4, 5 e 6 del reparto «progetto casa» · la riga
 completamente vuota in `imprese`.
+
+---
+
+# 20 agosto 2026 (2) — IL RIEPILOGO NEUTRO: LE ICONE E I PALLINI
+
+Alessio, guardando il Riepilogo: *«queste card le dobbiamo differenziare
+l'una dall'altra… vorrei che ad occhio le card attive nel riepilogo siano
+collegate visibilmente ai bottoni laterali»*.
+
+Sono state disegnate **quattro schermate finte** e le ha scelte lui guardando
+(idea **C**). Il disegno sta nel contenitore di Claude, `mock/riepilogo-idee.html`
+— **fuori dalla cartella di Alessio apposta**: lì dentro sarebbe finito online
+col primo push.
+
+## La regola, in una riga
+
+**Il colore fa due lavori, e due soltanto:**
+
+- **l'ICONA dice QUALE sezione** — lo stesso colore sulla card e sulla voce
+  del menù, così l'occhio le appaia da solo;
+- **il PALLINO dice come va** — **rosso se va male, verde se è a posto**.
+
+Tutto il resto è neutro: la barretta a sinistra delle card, il numero grande,
+la fascia «Da sistemare oggi» e le righe dentro di lei.
+
+⚠️ **Perché neutro.** Prima la barretta e il numero cambiavano colore col
+«tono» della scheda (rosso, arancione, verde, blu): con otto schede accese la
+pagina era a scacchi e il colore non si notava più. **Un colore che dice due
+cose non ne dice nessuna.**
+
+## ⛔ QUANDO SI ACCENDE IL ROSSO — la regola sta in UN POSTO SOLO
+
+Il pallino di una scheda è rosso **quando la fascia «Da sistemare oggi» nomina
+quella sezione come un problema** (`_rieMale`, costruito dalla stessa lista
+`DA`), più i casi già segnati da `tono:"err"` (scaduto, in ritardo, in
+perdita). Così le due cose **non si possono scollare**: se la fascia dice
+«1 lavoro in ritardo», la scheda Lavori ha il pallino rosso, sempre.
+
+⚠️ **IL ROSSO NON SI ACCENDE PERCHÉ UNA SEZIONE HA ROBA DENTRO.** Due computi
+non sono un problema, un computo in bozza nemmeno, e un preventivo mandato ieri
+neppure. Se si accendesse così sarebbero rossi quasi tutti e non direbbe più
+niente. È rosso il preventivo fermo da **più di una settimana**, non quello di
+ieri. (Nel primo disegno era sbagliato proprio così, ed è stato corretto prima
+di mostrarglielo.)
+
+Due eccezioni scritte a mano, `male:` sulla scheda:
+- **Scadenzario:** rosso già a **sette giorni**, non solo da scaduta — una
+  scadenza che scade lunedì non si sistema lunedì.
+- **Stati di avanzamento:** rosso se c'è un SAL **emesso e non ancora
+  fatturato**. Vuol dire **soldi non chiesti**: il conto è già stato consegnato
+  al committente. Un SAL in bozza no: è un lavoro in corso.
+
+## Anche il Riepilogo ha la sua scheda «Stati di avanzamento»
+
+Ogni voce del menù ha la sua scheda, e questa è nata insieme alla sezione.
+Dentro un `try` suo: se `sql/gest-sal.sql` non fosse stato eseguito la scheda
+non compare e il Riepilogo resta intero. I conti passano da `salConti()` +
+`compRiepilogoDa()`, come nell'elenco, nella scheda e nel PDF.
+
+## ⚠️ Due trappole trovate DAL BANCO, non a occhio
+
+1. **L'icona si spegneva sulle schede vuote.** `.rie-card.vuota .rc-head svg`
+   la rimetteva grigia: la scheda Fatture aveva l'icona grigia mentre nel menù
+   era verde — cioè l'aggancio si rompeva proprio dove serviva. E la regola
+   stava in **DUE posti** nel CSS: tolta la prima, la scheda restava grigia lo
+   stesso. *Una regola che sta in due posti non si sistema a metà.*
+2. **Il banco era cieco su due cose.** Guardava la *classe* del pallino e non
+   il colore: se rosso e verde fossero stati dipinti uguali sarebbe rimasto
+   tutto verde. E riconosceva «icona ancora grigia» da un codice colore scritto
+   a mano. Adesso confronta i colori veri e riconosce il grigio perché è lo
+   stesso della scritta smorta sotto il numero. **Trovate tutte e due dai
+   sabotaggi, non guardando lo schermo.**
+
+## Come è stato provato
+
+- `prove/banco-riepilogo.js`: **32 prove**, computer 1440×900 e telefono
+  390×844, più il giro da **impresa edile** e un giro apposta con la **scadenza
+  fra 5 giorni** (senza quello, togliere la regola dei sette giorni non faceva
+  diventare rossa nessuna prova).
+  I dati sono scelti caso per caso perché il rosso e il verde siano tutti e due
+  rappresentati: un lavoro in ritardo, un preventivo fermo da 20 giorni, un SAL
+  emesso non fatturato → rossi; clienti, computi (**uno in bozza apposta**),
+  scadenza a 20 giorni, calendario, fatture → verdi.
+- `prove/sabotaggi-riepilogo.py`: **15 sabotaggi sui file veri — 15 visti, 0
+  sfuggiti.** Rompe sia `gestionale-app.html` sia `css/gestionale.css`, e
+  controlla da solo che ogni pezzo da rompere sia **unico**.
+
+⚠️ **Una voce nuova nel menù va aggiunta anche nel blocco dei colori in
+`css/gestionale.css`**, se no la sua icona resta grigia mentre tutte le altre
+hanno un colore. Il banco se ne accorge.
+
+## Una cosa lasciata com'era, e va detta
+
+Le scritte piccole rosse dentro le schede (**«4 giorni fa»**, **«scaduta»**)
+sono rimaste colorate. Non sono decorazione: dicono *quale* riga è il problema,
+e toglierle avrebbe tolto un'informazione. Se Alessio le vuole nere, è una
+riga.
+
+---
+
+## DOVE SIAMO RIMASTI (20 agosto 2026, sera)
+
+**Fatto oggi:** la sezione «Stati di avanzamento» nel menù (punto 1) e il
+Riepilogo neutro con le icone colorate e i pallini.
+File toccati: `gestionale-app.html` e `css/gestionale.css`. Nessuna migrazione
+SQL nuova, in tutta la giornata.
+
+**Da fare, in cima:**
+
+1. **Ragionare insieme sul «computo del tecnico da prezzare»** — l'idea di
+   Alessio del 20 agosto (vedi la sezione precedente). È la risposta vera al
+   punto 6 del 19 agosto.
+2. **Il prezzo nuovo sul sito** — `prezzi.html`, `info-premium.html`,
+   `info-free.html` · il riquadro nei quattro pannelli · **il pagamento mensile
+   su Stripe** (il pezzo più grosso) · l'avviso prima che scadano i tre mesi di
+   regalo delle imprese di luglio.
+   ⚠️ Il riquadro dentro il gestionale dice ancora **«5€ al mese oppure 49€
+   l'anno»**: si è visto nel banco. Va cambiato insieme al resto.
+3. **L'errore JavaScript sulla homepage** (`PAGINE_REGISTRAZIONE` due volte):
+   guardare l'iniezione di Netlify, non il codice.
+4. **Rileggere il contatore delle visite** (query in fondo a
+   `sql/conteggio-visite.sql`).
+
+Poi, in ordine libero: l'analisi dei prezzi · la descrizione schiacciata a
+390 px sui preventivi · il pulsante del prezzario anche in cima · il limite di
+misura su `cv-candidati/registrazioni` · il conteggio delle richieste di
+caricamento file · le 95 pagine città vuote · l'email vera alle imprese · il
+grafico dell'admin.
+
+**Meta:** campagna ferma per una settimana dal 19 agosto, poi rimisurare.
+**Pulizie:** i preventivi n. 4, 5 e 6 del reparto «progetto casa» · la riga
+completamente vuota in `imprese`.

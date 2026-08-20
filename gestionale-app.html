@@ -2980,6 +2980,24 @@
      giorni». Su una prima pagina che deve dare il colpo d'occhio, e per chi
      legge con fatica, e' un inciampo a ogni riga. */
   function _plur(n,uno,tanti){ return (+n===1)?uno:tanti; }
+
+  /* ===== 20 agosto 2026 — IL PALLINO ROSSO O VERDE SU OGNI SCHEDA =====
+     Chiesto da Alessio: «rosso se va male, verde se ok».
+
+     ⛔ LA REGOLA STA IN UN POSTO SOLO, e quel posto e' la fascia «Da
+     sistemare oggi» qui sopra. Il pallino di una scheda e' rosso quando la
+     fascia nomina quella sezione come un problema: cosi' le due cose non si
+     possono scollare. Se la fascia dice «1 lavoro in ritardo», la scheda
+     Lavori ha il pallino rosso, sempre.
+     Piu' i casi che la fascia non racconta ma che sono comunque «va male»:
+     quelli erano gia' segnati da tono:"err" (scaduto, in ritardo, in perdita).
+
+     ⚠️ IL ROSSO NON SI ACCENDE PERCHE' UNA SEZIONE HA ROBA DENTRO. Due
+     computi non sono un problema, e un preventivo mandato ieri nemmeno. Se il
+     rosso si accendesse cosi' sarebbero rossi quasi tutti e non direbbe piu'
+     niente: e' rosso il preventivo fermo da PIU' DI UNA SETTIMANA, non quello
+     di ieri. */
+  let _rieMale=new Set();
   function rieCard(o){
     /* ===== 15 agosto 2026 — IL RIEPILOGO CHE SI RIEMPIE DA SOLO =====
        Prima le 16 schede c'erano sempre tutte, anche appena aperto un reparto
@@ -3000,8 +3018,12 @@
                + '</div>';
         }).join("")+'</div>'
       : '<div class="rc-vuoto">'+esc(o.vuoto||"Niente da segnalare")+'</div>';
+    const male=(o.male!=null)?!!o.male:(o.tono==="err"||_rieMale.has(o.tab));
     return '<div class="rie-card t-'+(o.tono||"neutro")+(righe.length?"":" vuota")+'" data-action="rie-go" data-go="'+o.tab+'">'
-         +   '<div class="rc-head">'+rieIco(o.tab)+'<span class="rc-tit">'+esc(o.titolo)+'</span></div>'
+         +   '<div class="rc-head">'+rieIco(o.tab)+'<span class="rc-tit">'+esc(o.titolo)+'</span>'
+         +     '<i class="rc-pall '+(male?"male":"bene")+'"'
+         +       ' title="'+(male?"Qui c\u2019\u00e8 qualcosa che va male":"Qui \u00e8 tutto a posto")+'"'
+         +       ' aria-label="'+(male?"qualcosa che va male":"tutto a posto")+'"></i></div>'
          +   '<div class="rc-n">'+esc(String(o.n))+'</div>'
          +   '<div class="rc-l">'+esc(o.lab||"")+'</div>'
          +   corpo
@@ -3340,25 +3362,25 @@
 
     const DA=[];
     const nn=(n,uno,tanti)=>n+" "+(n===1?uno:tanti);
-    if(scadute.length)   DA.push({g:1,t:nn(scadute.length,"fattura scaduta","fatture scadute"),
+    if(scadute.length)   DA.push({g:1,male:1,t:nn(scadute.length,"fattura scaduta","fatture scadute"),
                                   d:"Non ti hanno ancora pagato: "+eur(totScadute),go:"fatture"});
-    if(daFatt.length)    DA.push({g:2,t:nn(daFatt.length,"lavoro finito da fatturare","lavori finiti da fatturare"),
+    if(daFatt.length)    DA.push({g:2,male:1,t:nn(daFatt.length,"lavoro finito da fatturare","lavori finiti da fatturare"),
                                   d:"Valgono "+eur(totDaFatt)+" e non sono ancora in nessuna fattura",go:"fatture"});
-    if(ritardo.length)   DA.push({g:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
+    if(ritardo.length)   DA.push({g:1,male:1,t:nn(ritardo.length,"lavoro in ritardo","lavori in ritardo"),
                                   d:"La data prevista è già passata",go:"lavori"});
-    if(scScadute.length) DA.push({g:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),
+    if(scScadute.length) DA.push({g:1,male:1,t:nn(scScadute.length,"scadenza passata","scadenze passate"),
                                   d:(scScadute[0].titolo||"Scadenza")+(scScadute[0]._persona?" · "+scScadute[0]._nome:"")+(scScadute.length>1?" e altre":""),go:"scadenzario"});
-    if(mzScaduti.length) DA.push({g:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
+    if(mzScaduti.length) DA.push({g:1,male:1,t:nn(mzScaduti.length,"mezzo con scadenza passata","mezzi con scadenza passata"),
                                   d:(mzNome[mzScaduti[0].mezzo_id]||"Mezzo")+(mzScaduti[0].prossimo_titolo?" · "+mzScaduti[0].prossimo_titolo:""),go:"mezzi"});
     /* strumenti e attrezzature: riga loro, e porta nella sezione giusta.
        Per lo studio tecnico e' l'avviso della taratura, quello promesso. */
     const stScaduti = stAvvisa.filter(v=>v.scadute>0);
-    if(stScaduti.length) DA.push({g:1,
+    if(stScaduti.length) DA.push({g:1,male:1,
       t:nn(stScaduti.length, _pro?"strumento con scadenza passata":"attrezzatura con scadenza passata",
                              _pro?"strumenti con scadenza passata":"attrezzature con scadenza passata"),
       d:(mzNome[stScaduti[0].mezzo_id]||(_pro?"Strumento":"Attrezzatura"))+(stScaduti[0].prossimo_titolo?" · "+stScaduti[0].prossimo_titolo:""),
       go:"attrezzature"});
-    if(inPerdita.length) DA.push({g:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
+    if(inPerdita.length) DA.push({g:1,male:1,t:nn(inPerdita.length,"lavoro in perdita","lavori in perdita"),
                                   d:"Fra spese, fornitori e manodopera esce più di quello che entra",go:"report"});
     /* patente a crediti: sotto 15 l'impresa non può operare in cantiere,
        quindi avviso già a 20 per dare il tempo di recuperarli. */
@@ -3367,13 +3389,13 @@
        non ce l'ha, e vedersi un allarme rosso su un adempimento che non lo
        riguarda fa solo perdere fiducia nel resto degli avvisi (9/8/2026) */
     const _patNo=(ruoloUtente==='professionista');
-    if(!_patNo&&patC!=null&&patC<15)      DA.push({g:1,t:"Patente a crediti sotto il minimo — "+patC+(patC===1?" credito":" crediti"),
+    if(!_patNo&&patC!=null&&patC<15)      DA.push({g:1,male:1,t:"Patente a crediti sotto il minimo — "+patC+(patC===1?" credito":" crediti"),
                                   d:"Sotto 15 crediti non si può operare in cantiere",act:"rie-azienda"});
     else if(!_patNo&&patC!=null&&patC<20) DA.push({g:2,t:"Patente a crediti quasi al minimo — "+patC+" crediti",
                                   d:"Il minimo per operare in cantiere è 15",act:"rie-azienda"});
     if(lavOggi.length)   DA.push({g:2,t:nn(lavOggi.length,"lavoro in programma oggi","lavori in programma oggi"),
                                   d:(lavOggi[0].descrizione||"Lavoro")+(lavOggi.length>1?" e altri":""),go:"lavori"});
-    if(prevFermi.length) DA.push({g:2,t:nn(prevFermi.length,"preventivo senza risposta","preventivi senza risposta"),
+    if(prevFermi.length) DA.push({g:2,male:1,t:nn(prevFermi.length,"preventivo senza risposta","preventivi senza risposta"),
                                   d:"Fermi da più di una settimana: forse vanno sollecitati",go:"preventivi"});
 
     /* dati azienda mancanti: va in cima a tutto il resto. Senza nome e partita
@@ -3383,6 +3405,11 @@
       DA.unshift({g:2,t:"Completa i dati della tua azienda",
                   d:"Nome e partita IVA compaiono in cima a ogni preventivo e fattura",act:"rie-azienda"});
     }
+
+    /* ⛔ QUALI SEZIONI VANNO MALE: si prende da qui e da nessun'altra parte,
+       cioe' dalla stessa lista che leggi nella fascia. «Lavoro in programma
+       oggi» NON e' un guaio, e infatti non ha il segno «male». */
+    _rieMale=new Set(DA.filter(x=>x.male&&x.go).map(x=>x.go));
 
     const ra=$("#rie-alert");
     if(ra){
@@ -3569,6 +3596,43 @@
               t:(c.numero?("N. "+c.numero+" — "):"")+(c.titolo||"Computo"),
               v:eur(impDi[c.id]||0)}))
           }));
+
+          /* ===== 20 agosto 2026 — la scheda degli STATI DI AVANZAMENTO =====
+             Ogni voce del menu ha la sua scheda, e questa e' nata insieme alla
+             sezione. Try suo: se sql/gest-sal.sql non fosse stato eseguito la
+             scheda non compare e il Riepilogo resta intero.
+             ⚠️ Solo i SAL dei computi DI QUESTO REPARTO, e solo di computi
+             vivi: e' la stessa regola dell'elenco (renderSalTutti). */
+          try{
+            const [rSa,rSt]=await Promise.all([
+              sb.from("gest_sal").select("*").eq("user_id",sbUid).order("data",{ascending:false}),
+              sb.from("gest_sal_totali").select("*").eq("user_id",sbUid)
+            ]);
+            if(!rSa.error&&!rSt.error){
+              const compDi={};CO.forEach(c=>{compDi[String(c.id)]=c;});
+              const totSa={};(rSt.data||[]).forEach(t=>{totSa[String(t.sal_id)]=t;});
+              const SA=(rSa.data||[]).filter(x=>!!compDi[String(x.computo_id)]);
+              /* ⚠️ «va male» qui vuol dire SOLDI NON CHIESTI: un SAL emesso e'
+                 un conto gia' consegnato al committente, e finche' non diventa
+                 fattura quei soldi non li ha chiesti nessuno. Un SAL in BOZZA
+                 non e' un problema: e' un lavoro ancora in corso. */
+              const daFatt2=SA.filter(x=>x.stato==="emesso"&&!x.fattura_id);
+              C.push(rieCard({
+                tab:"sal", titolo:"Stati di avanzamento", n:SA.length, dati:SA.length>0,
+                lab: daFatt2.length
+                      ? daFatt2.length+(daFatt2.length===1?" emesso e non ancora fatturato":" emessi e non ancora fatturati")
+                      : _plur(SA.length,"stato di avanzamento","stati di avanzamento"),
+                tono: daFatt2.length?"attesa":(SA.length?"ok":"neutro"),
+                male: daFatt2.length>0,
+                vuoto:"Nessuno stato di avanzamento",
+                /* i conti passano da salConti + compRiepilogoDa, come nell'elenco,
+                   nella scheda e nel PDF: nessuna formula copiata */
+                righe: SA.slice(0,2).map(x=>({
+                  t:"SAL n. "+(x.numero||"")+" — "+((compDi[String(x.computo_id)]||{}).titolo||"Computo"),
+                  v:eur2(salConti(totSa[String(x.id)],compDi[String(x.computo_id)]||{}).netto)}))
+              }));
+            }
+          }catch(_){}
         }
       }catch(_){}
     }
@@ -3577,6 +3641,9 @@
       tab:"scadenzario", titolo:"Scadenzario", n:scAperte.length, dati:scTutte.length>0,
       lab:_plur(scAperte.length,"scadenza entro 30 giorni","scadenze entro 30 giorni"),
       tono: scAperte.some(x=>x.data_scadenza<oggi)?"err":(scAperte.length?"attesa":"ok"),
+      /* rosso gia' a sette giorni: una scadenza che scade lunedi' non si
+         sistema lunedi'. Trenta giorni invece sono ancora tempo. */
+      male: scAperte.some(x=>x.data_scadenza<=lim7),
       vuoto:"Nessuna scadenza in arrivo",
       righe: scAperte.slice(0,2).map(x=>{const q=quando(x.data_scadenza);return{
         t:(x.titolo||"Scadenza")+(x._persona?" · "+x._nome:""), v:x.data_scadenza<oggi?"scaduta":q.testo,

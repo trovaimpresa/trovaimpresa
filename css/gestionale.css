@@ -1141,7 +1141,56 @@
 
 /* riga del titolo: icona identica a quella del menu + nome sezione */
 .rie-card .rc-head{ display:flex; align-items:center; gap:11px; margin-bottom:14px; }
-.rie-card .rc-head svg{ width:24px; height:24px; flex:0 0 24px; color:var(--testo-2); }
+.rie-card .rc-head svg{
+  width:24px; height:24px; flex:0 0 24px; color:var(--testo-2);
+  box-sizing:content-box; padding:6px; border-radius:9px; background:#f1f3f6;
+}
+
+/* ============================================================
+   20 agosto 2026 — L'ICONA COLORATA, LA STESSA NEI DUE POSTI
+
+   Alessio: «vorrei che a occhio le card del riepilogo siano collegate
+   visibilmente ai bottoni laterali».
+   L'aggancio c'era gia' ed era l'icona (rieIco() copia proprio quella del
+   menu), ma era grigia in tutti e due i posti e non si notava. Adesso ogni
+   sezione ha il SUO colore, e ce l'ha nei due posti insieme.
+
+   ⛔ IL COLORE QUI DICE «QUALE SEZIONE», E BASTA. Non dice come va: quello
+   e' il lavoro del pallino. Se un domani si aggiunge un colore che vuol dire
+   qualcos'altro, questi due lavori si mangiano a vicenda.
+   ⚠️ Una voce nuova nel menu va aggiunta anche qui, se no la sua icona resta
+   grigia mentre tutte le altre hanno un colore.
+   ============================================================ */
+.side nav.tabs button[data-tab] svg{
+  box-sizing:content-box; padding:4px; border-radius:8px; background:transparent;
+}
+.side nav.tabs button.tab-cta svg{ padding:0; background:none; }
+.rie-card[data-go="lavori"]      .rc-head svg,.side nav.tabs button[data-tab="lavori"]      svg{ color:#e8833a; background:#fdf1e6; }
+.rie-card[data-go="preventivi"]  .rc-head svg,.side nav.tabs button[data-tab="preventivi"]  svg{ color:#d9534f; background:#fdeceb; }
+.rie-card[data-go="fatture"]     .rc-head svg,.side nav.tabs button[data-tab="fatture"]     svg{ color:#2fa46a; background:#e8f6ef; }
+.rie-card[data-go="calendario"]  .rc-head svg,.side nav.tabs button[data-tab="calendario"]  svg{ color:#7b5cd6; background:#f0ecfb; }
+.rie-card[data-go="agenda"]      .rc-head svg,.side nav.tabs button[data-tab="agenda"]      svg{ color:#5b73d6; background:#eceffb; }
+.rie-card[data-go="mezzi"]       .rc-head svg,.side nav.tabs button[data-tab="mezzi"]       svg{ color:#3f8fbf; background:#e9f2f8; }
+.rie-card[data-go="attrezzature"].rc-head svg,.side nav.tabs button[data-tab="attrezzature"]svg{ color:#0f8f8f; background:#e6f4f4; }
+.rie-card[data-go="squadra"]     .rc-head svg,.side nav.tabs button[data-tab="squadra"]     svg{ color:#c2569b; background:#fbecf5; }
+.rie-card[data-go="carte"]       .rc-head svg,.side nav.tabs button[data-tab="carte"]       svg{ color:#6b7a8d; background:#eef1f4; }
+.rie-card[data-go="clienti"]     .rc-head svg,.side nav.tabs button[data-tab="clienti"]     svg{ color:#3f6fd8; background:#eaf0fc; }
+.rie-card[data-go="fornitori"]   .rc-head svg,.side nav.tabs button[data-tab="fornitori"]   svg{ color:#0f8f6f; background:#e6f4f0; }
+.rie-card[data-go="computi"]     .rc-head svg,.side nav.tabs button[data-tab="computi"]     svg{ color:#b8631f; background:#fbeee4; }
+.rie-card[data-go="prezzario"]   .rc-head svg,.side nav.tabs button[data-tab="prezzario"]   svg{ color:#a2731c; background:#faf1e0; }
+.rie-card[data-go="sal"]         .rc-head svg,.side nav.tabs button[data-tab="sal"]         svg{ color:#1f8fb8; background:#e6f3f8; }
+.rie-card[data-go="crediti"]     .rc-head svg,.side nav.tabs button[data-tab="crediti"]     svg{ color:#7a8f2c; background:#f2f6e3; }
+.rie-card[data-go="scadenzario"] .rc-head svg,.side nav.tabs button[data-tab="scadenzario"] svg{ color:#c0392b; background:#fbeceb; }
+.rie-card[data-go="report"]      .rc-head svg,.side nav.tabs button[data-tab="report"]      svg{ color:#2f7fa4; background:#e8f1f6; }
+.rie-card[data-go="galleria"]    .rc-head svg,.side nav.tabs button[data-tab="galleria"]    svg{ color:#c78a1e; background:#faf2e1; }
+.rie-card[data-go="mappa"]       .rc-head svg,.side nav.tabs button[data-tab="mappa"]       svg{ color:#2e9e7e; background:#e7f5f1; }
+.rie-card[data-go="dalsito"]     .rc-head svg,.side nav.tabs button[data-tab="dalsito"]     svg{ color:#0066ff; background:#e9f0ff; }
+.rie-card[data-go="riepilogo"]   .rc-head svg,.side nav.tabs button[data-tab="riepilogo"]   svg{ color:#0066ff; background:#e9f0ff; }
+.rie-card[data-go="cestino"]     .rc-head svg,.side nav.tabs button[data-tab="cestino"]     svg{ color:#8a94a0; background:#f0f2f5; }
+/* la voce accesa: il fondo azzurro della riga si mangerebbe il colore
+   dell'icona, quindi li' l'icona resta col suo colore e perde solo il
+   riquadrino, se no sono due sfondi uno dentro l'altro */
+.side nav.tabs button.active svg{ background:transparent; }
 .rie-card .rc-tit{
   font-size:18px; font-weight:700; color:var(--testo);
   letter-spacing:-.2px;
@@ -1188,15 +1237,37 @@
 }
 
 /* il bordo colorato a sinistra dice come sta la sezione, senza leggere */
-.rie-card.t-err   { border-left-color:var(--err); }
-.rie-card.t-err    .rc-n{ color:var(--err); }
-.rie-card.t-attesa{ border-left-color:var(--attesa); }
-.rie-card.t-attesa .rc-n{ color:var(--attesa); }
-.rie-card.t-ok    { border-left-color:var(--ok); }
-.rie-card.t-ok     .rc-n{ color:var(--ok); }
-.rie-card.t-info  { border-left-color:var(--info); }
-.rie-card.t-info   .rc-n{ color:var(--info); }
+/* ===== 20 agosto 2026 — LE SCHEDE DIVENTANO NEUTRE (scelta di Alessio) =====
+   Prima la barretta a sinistra e il numero grande cambiavano colore col
+   «tono» della scheda: rosso, arancione, verde, blu. Otto schede accese
+   insieme facevano una pagina a scacchi e il colore non si notava piu'.
+   Adesso il colore fa DUE lavori soli, e si vedono:
+     · l'ICONA dice QUALE sezione (stesso colore nel menu, vedi sotto);
+     · il PALLINO dice se li' dentro qualcosa va male.
+   Le classi t-* restano (le usa il resto del gestionale) ma qui non
+   colorano piu' niente. */
+.rie-card.t-err,
+.rie-card.t-attesa,
+.rie-card.t-ok,
+.rie-card.t-info,
 .rie-card.t-neutro{ border-left-color:var(--bordo-forte); }
+.rie-card.t-err    .rc-n,
+.rie-card.t-attesa .rc-n,
+.rie-card.t-ok     .rc-n,
+.rie-card.t-info   .rc-n{ color:var(--testo); }
+
+/* ---- il pallino: rosso se va male, verde se e' a posto ----
+   ⚠️ 13 px e non 8: sullo schermo di Alessio un pallino piccolo non si vede.
+   E non e' l'unico segno che c'e' un problema — la fascia «Da sistemare
+   oggi» in cima lo scrive anche a parole, perche' chi non distingue bene
+   rosso e verde deve poterlo comunque leggere. */
+.rie-card .rc-pall{
+  margin-left:auto; flex:0 0 13px; width:13px; height:13px; border-radius:50%;
+  box-shadow:0 0 0 3px var(--card);
+}
+.rie-card .rc-pall.male{ background:var(--err); }
+.rie-card .rc-pall.bene{ background:var(--ok); }
+.rie-card.vuota .rc-pall{ box-shadow:0 0 0 3px #FCFDFE; }
 
 .rc-caricamento{ padding:40px 4px; font-size:17px; color:var(--testo-3); }
 
@@ -1207,7 +1278,11 @@
        dritto alle schede che hanno davvero qualcosa da dire --- */
 .rie-card.vuota{ background:#FCFDFE; padding:20px 22px 16px; }
 .rie-card.vuota .rc-n{ font-size:34px; color:var(--testo-3); }
-.rie-card.vuota .rc-head svg,
+/* ⚠️ 20 agosto 2026 — l'ICONA NON si spegne piu' sulle schede vuote.
+   Prima diventava grigia insieme al titolo, e proprio li' si rompeva
+   l'aggancio col menu: la scheda Fatture aveva l'icona grigia mentre nel
+   menu era verde. Il colore dell'icona dice «quale sezione», e quella
+   non cambia se dentro non c'e' niente. */
 .rie-card.vuota .rc-tit{ color:var(--testo-2); }
 .rie-card.vuota .rc-l{ font-size:15px; }
 .rie-card.vuota .rc-vuoto{ margin-top:14px; padding-top:12px; font-size:15px; }
@@ -1525,7 +1600,9 @@
 
 .rie-card.vuota{ background:var(--card); padding:22px 22px 18px; }
 .rie-card.vuota .rc-n{ font-size:44px; color:var(--testo-3); }   /* solo il grigio resta: dice "qui non c'e' niente" */
-.rie-card.vuota .rc-head svg{ color:var(--testo-2); }
+/* ⚠️ 20/8/2026 — qui c'era una SECONDA riga che rispegneva l'icona sulle
+   schede vuote. Una regola che sta in due posti non si sistema a meta': la
+   prima l'avevo tolta e la scheda Fatture restava lo stesso grigia. */
 .rie-card.vuota .rc-tit{ color:var(--testo); }
 .rie-card.vuota .rc-l{ font-size:16px; }
 .rie-card.vuota .rc-vuoto{ margin-top:18px; padding-top:14px; font-size:16px; }
@@ -2012,15 +2089,17 @@
    che va a capo da solo. */
 .rie-warn{ display:block; }
 
+/* ⚠️ 20 agosto 2026 — anche questa fascia e' neutra: il colore lo porta
+   il PALLINO qui dentro, che il problema lo dice gia' da solo. */
 #riepilogo .rie-oggi{
   background:var(--card);
   border:1px solid var(--bordo);
-  border-left:6px solid var(--err);
+  border-left:6px solid var(--bordo-forte);
   border-radius:16px;
   padding:20px 22px 14px;
   margin-bottom:26px;
 }
-#riepilogo .rie-oggi.tutto-ok{ border-left-color:var(--ok); padding-bottom:20px; }
+#riepilogo .rie-oggi.tutto-ok{ padding-bottom:20px; }
 
 #riepilogo .ro-tit{
   display:flex; align-items:center; gap:10px;
@@ -2044,8 +2123,10 @@
 #riepilogo .ro-testo .ro-dett{ display:block; font-size:16px; font-weight:500; color:var(--testo-2); margin-top:3px; }
 #riepilogo .ro-freccia{ flex:0 0 auto; font-size:22px; color:var(--testo-3); font-weight:700; }
 
-#riepilogo .ro-riga.grave .ro-testo{ color:var(--err); }
-#riepilogo .ro-riga.attesa .ro-testo{ color:var(--attesa); }
+/* le righe restano nere: quello che dicono lo dicono le PAROLE
+   («fattura scaduta», «lavoro in ritardo»), non il colore. */
+#riepilogo .ro-riga.grave .ro-testo,
+#riepilogo .ro-riga.attesa .ro-testo{ color:var(--testo); }
 
 @media(max-width:760px){
   #riepilogo .rie-oggi{ padding:18px 18px 12px; margin-bottom:20px; }
