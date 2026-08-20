@@ -15089,8 +15089,14 @@ ${vecchi?`
                finestra. Adesso che le azioni del documento stanno in alto,
                sta in fila con le altre, se no era l'unica rimasta sotto. */
             {lab:"→ Crea il preventivo",action:"comp-prev",data:{id:c.id}},
-            {lab:"⧉ Duplica",action:"comp-dup",data:{id:c.id}},
-            {lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}]);
+            {lab:"⧉ Duplica",action:"comp-dup",data:{id:c.id}}])
+           /* 20 agosto 2026 — LA VARIANTE. E' una copia, ma che si RICORDA
+              da dove viene: cosi' puo' dire cosa e' cambiato.
+              ⛔ Su una variante non si offre di rifarne un'altra: una
+              variante della variante non e' piu' un confronto, e' una
+              catena in cui non si capisce piu' rispetto a cosa. */
+           .concat(c.variante_di?[]:[{lab:"± Crea la variante",action:"comp-variante",data:{id:c.id}}])
+           .concat([{lab:"🗑 Elimina",action:"del-computo",data:{id:c.id},del:true}]);
   }
   /* la scheda dell'elenco: passa da schedaJob, la scheda unica di tutte le
      sezioni, cosi' i Computi hanno la stessa forma di Pratiche e Preventivi */
@@ -15175,7 +15181,11 @@ ${vecchi?`
           allineate, e prima o poi si scollano.
           ============================================================ */
        '<div class="conav" id="co-nav">'
+      /* la 7 c'e' SOLO su una variante: su un computo normale non ci
+         sarebbe niente da confrontare, e una voce che non fa mai niente
+         e' peggio di una voce che non c'e' */
       +  [[1,"Lavorazioni"],[2,"Prezzi"],[3,"Ribasso e totale"],[4,"La scheda"],[5,"Acconti (SAL)"],[6,"Cronoprogramma"]]
+         .concat(c.variante_di?[[7,"Cosa è cambiato"]]:[])
          .map(function(v){
            /* su un computo che non e' ancora stato salvato l'unica cosa che
               si puo' fare e' dargli un nome: le altre voci sono spente e lo
@@ -15281,6 +15291,25 @@ ${vecchi?`
       +'</div>'
       +'</div>'   /* <- fine pagina 6 */
 
+      /* ============================================================
+         20 agosto 2026 — IL COMPUTO DI VARIANTE
+         ============================================================
+         I lavori cambiano in corsa. Questa pagina dice COSA e' cambiato
+         rispetto al computo di partenza, e quanto costa in piu' o in meno.
+         Sui lavori privati oggi si fa a voce, ed e' li' che nascono le liti.
+
+         ⛔ Il confronto NON e' scritto nel database: si rifa' ogni volta
+            dalle due colonne variante_di e origine_id. Scriverlo vorrebbe
+            dire che al primo cambio di quantita' sarebbe vecchio.
+         ============================================================ */
+      +(c.variante_di
+        ? '<div class="copag" data-p="7">'
+         +'<div class="sh-b"><div class="sh-tit">Cosa è cambiato</div>'
+         +  '<div class="lav-media" id="co-var"><div class="lm-vuoto">Sto caricando…</div></div>'
+         +'</div>'
+         +'</div>'
+        : '')
+
       +'<div class="copag" data-p="4">'
       +'<div class="sh-b"><div class="sh-tit">A cosa serve questo computo</div>'
       +  '<div class="field"><div class="seg" id="co-tipo">'
@@ -15374,7 +15403,8 @@ ${vecchi?`
        salvare: cosi' si vede subito dove cade la consegna */
     const _ci=$("#co-inizio");
     if(_ci)_ci.addEventListener("change",function(){ cronoAnteprima(); });
-    if(!isNew){renderCompVoci(c.id);renderSalList(c.id);renderCrono(c.id);}
+    if(!isNew){renderCompVoci(c.id);renderSalList(c.id);renderCrono(c.id);
+               if(c.variante_di)renderVariante(c);}
   }
 
   /* ============================================================
@@ -15815,6 +15845,166 @@ ${vecchi?`
   function compNetto(c){
     const t=compTot[c.id]||{};
     return compRiepilogoDa(t.importo,t.oneri_sicurezza,t.importo_manodopera,c).netto;
+  }
+
+  /* ============================================================
+     20 agosto 2026 — IL CONFRONTO DELLA VARIANTE
+     ============================================================
+     varConfronta(orig, nuove) mette a fianco le lavorazioni del computo
+     di partenza e quelle della variante, e dice cosa e' cambiato.
+
+     ⛔ SI ACCOPPIANO PER origine_id, NON PER CODICE NE' PER DESCRIZIONE.
+        Due lavorazioni possono avere lo stesso codice di tariffa in due
+        capitoli diversi (la stessa demolizione al piano terra e al
+        primo), e una descrizione si puo' correggere. Accoppiando per
+        codice, due righe uguali si confonderebbero fra loro; accoppiando
+        per descrizione, una riga a cui hai corretto un refuso
+        risulterebbe «tolta» e «nuova» insieme — e la variante direbbe
+        una bugia proprio nel documento che serve a non litigare.
+
+     Una riga finisce in uno di tre elenchi:
+       CAMBIATE  ha un'origine, e quantita' o prezzo sono diversi
+       NUOVE     non ha origine (l'hai aggiunta nella variante)
+       TOLTE     era nell'originale e nella variante non c'e' piu'
+
+     Le righe rimaste identiche non compaiono: in un elenco di ottantasette
+     righe, le sei che sono cambiate devono saltare all'occhio.
+     ============================================================ */
+  function varConfronta(orig,nuove){
+    const O=Array.from(orig||[]), N=Array.from(nuove||[]);
+    const perId={}; O.forEach(function(v){ perId[String(v.id)]=v; });
+    const usate={};
+    const cambiate=[], aggiunte=[];
+
+    N.forEach(function(v){
+      const o=v.origine_id?perId[String(v.origine_id)]:null;
+      if(!o){ aggiunte.push(v); return; }
+      usate[String(o.id)]=true;
+      const qA=+o.quantita||0,  qB=+v.quantita||0;
+      const pA=+o.prezzo_unitario||0, pB=+v.prezzo_unitario||0;
+      /* ⚠️ i soldi si confrontano al centesimo, non con «===»: due numeri
+         che vengono dal database possono differire di un miliardesimo per
+         come sono stati scritti, e una riga mai toccata comparirebbe fra
+         quelle cambiate. La quantita' ha tre decimali (vedi la vista). */
+      const dQ=Math.abs(qA-qB)>0.0005, dP=Math.abs(pA-pB)>0.005;
+      if(dQ||dP)cambiate.push({voce:v, prima:o, qA:qA, qB:qB, pA:pA, pB:pB,
+                               impA:qA*pA, impB:qB*pB, dQ:dQ, dP:dP});
+    });
+
+    const tolte=O.filter(function(o){ return !usate[String(o.id)]; });
+
+    /* i tre numeri in fondo: quanto valevano le lavorazioni prima, quanto
+       valgono adesso, e la differenza. Sono gli importi delle righe, senza
+       ribasso: il ribasso lo aggiunge chi legge, ed e' lo stesso sui due. */
+    const somma=function(a,f){ return a.reduce(function(s,x){ return s+(+f(x)||0); },0); };
+    const impOrig=somma(O,function(v){ return (+v.quantita||0)*(+v.prezzo_unitario||0); });
+    const impVar =somma(N,function(v){ return (+v.quantita||0)*(+v.prezzo_unitario||0); });
+
+    return { cambiate:cambiate, aggiunte:aggiunte, tolte:tolte,
+             impOrig:impOrig, impVar:impVar, diff:impVar-impOrig,
+             /* la percentuale non esiste se prima non c'era niente: dividere
+                per zero darebbe «Infinity%» stampato sul documento */
+             perc:(impOrig>0)?((impVar-impOrig)*100/impOrig):null,
+             uguali:N.length-cambiate.length-aggiunte.length };
+  }
+
+  async function renderVariante(c){
+    const box=$("#co-var"); if(!box)return;
+    if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
+
+    /* ⚠️ IL COMPUTO DI PARTENZA PUO' NON ESSERCI PIU'. La colonna e'
+       «on delete set null»: cancellandolo la variante resta ma non ha
+       piu' con cosa confrontarsi. Va detto, non vanno mostrati numeri
+       inventati. */
+    if(!c.variante_di){
+      box.innerHTML='<div class="lm-vuoto">Questo computo non è una variante.</div>';
+      return;
+    }
+    const [rO,rN]=await Promise.all([
+      sb.from("gest_computo_voci_calc").select("*").eq("user_id",sbUid).eq("computo_id",c.variante_di).order("ordine"),
+      sb.from("gest_computo_voci_calc").select("*").eq("user_id",sbUid).eq("computo_id",c.id).order("ordine")
+    ]);
+    if(rO.error||rN.error){
+      const e=rO.error||rN.error;
+      box.innerHTML='<div class="lm-vuoto">'+(/origine_id|variante_di/i.test(String(e.message||""))
+        ? 'Per la variante serve l\'aggiornamento del database: esegui <b>sql/gest-computo-variante.sql</b> su Supabase.'
+        : 'Non riesco a leggere il confronto: '+esc(e.message))+'</div>';
+      return;
+    }
+    const orig=rO.data||[];
+    const part=compCache.find(x=>String(x.id)===String(c.variante_di));
+    if(!orig.length&&!part){
+      box.innerHTML='<div class="co-vuoto">'
+        +'<div class="co-vuoto-ic">🔍</div>'
+        +'<h4>Il computo di partenza non c\'è più</h4>'
+        +'<p>Questa variante resta e funziona come un computo normale, ma non c\'è più niente con cui confrontarla. Se il computo di partenza è nel <b>Cestino</b>, rimettilo a posto e qui torna tutto.</p>'
+        +'</div>';
+      return;
+    }
+
+    const r=varConfronta(orig,rN.data||[]);
+    const nome=part?(part.titolo||"(senza titolo)"):"il computo di partenza";
+
+    const riga=function(t,dx,sx,cls){
+      return '<div class="spesa-row'+(cls?' '+cls:'')+'"><span>'+t+(sx?'<small class="sp-forn">'+sx+'</small>':'')+'</span><b>'+dx+'</b><span></span></div>';
+    };
+    const nomeVoce=function(v){
+      return (v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)");
+    };
+
+    let h='<div class="sh-nota">Rispetto a <b>'+esc(nome)+'</b>. Le lavorazioni rimaste uguali non compaiono: qui c\'è solo quello che è cambiato'
+      +(r.uguali>0?' ('+r.uguali+(r.uguali===1?' riga uguale':' righe uguali')+' non elencate)':'')+'.</div>';
+
+    if(!r.cambiate.length&&!r.aggiunte.length&&!r.tolte.length){
+      h+='<div class="co-vuoto"><div class="co-vuoto-ic">✅</div>'
+        +'<h4>Per ora non è cambiato niente</h4>'
+        +'<p>La variante è ancora identica al computo di partenza. Vai su <b>1 Lavorazioni</b>, cambia le quantità come sono andate davvero, e qui compare l\'elenco delle differenze.</p></div>';
+    }
+
+    if(r.cambiate.length){
+      h+='<div class="var-tit">Cambiate <span class="var-n">'+r.cambiate.length+'</span></div>';
+      r.cambiate.forEach(function(x){
+        const d=x.impB-x.impA;
+        const dettaglio=[];
+        if(x.dQ)dettaglio.push('quantità '+_misTesto(x.qA)+' → <b>'+_misTesto(x.qB)+'</b>'+(x.voce.unita?' '+esc(x.voce.unita):''));
+        if(x.dP)dettaglio.push('prezzo '+eur2(x.pA)+' → <b>'+eur2(x.pB)+'</b>');
+        h+=riga(nomeVoce(x.voce),
+                (d>=0?'+ ':'− ')+eur2(Math.abs(d)),
+                dettaglio.join(' · '),
+                d>=0?'var-piu':'var-meno');
+      });
+    }
+    if(r.aggiunte.length){
+      h+='<div class="var-tit">Aggiunte <span class="var-n">'+r.aggiunte.length+'</span></div>';
+      r.aggiunte.forEach(function(v){
+        const imp=(+v.quantita||0)*(+v.prezzo_unitario||0);
+        h+=riga(nomeVoce(v),'+ '+eur2(imp),
+                _misTesto(v.quantita)+(v.unita?' '+esc(v.unita):'')+' × '+eur2(v.prezzo_unitario),
+                'var-piu');
+      });
+    }
+    if(r.tolte.length){
+      h+='<div class="var-tit">Tolte <span class="var-n">'+r.tolte.length+'</span></div>';
+      r.tolte.forEach(function(v){
+        const imp=(+v.quantita||0)*(+v.prezzo_unitario||0);
+        h+=riga(nomeVoce(v),'− '+eur2(imp),
+                'era '+_misTesto(v.quantita)+(v.unita?' '+esc(v.unita):'')+' × '+eur2(v.prezzo_unitario),
+                'var-meno');
+      });
+    }
+
+    /* i tre numeri che contano, in fondo e in grande */
+    h+='<div class="var-conto">'
+      +  '<div class="var-r"><span>Computo di partenza</span><b>'+eur2(r.impOrig)+'</b></div>'
+      +  '<div class="var-r"><span>Variante</span><b>'+eur2(r.impVar)+'</b></div>'
+      +  '<div class="var-r var-tot'+(r.diff>=0?' su':' giu')+'"><span>'
+      +    (r.diff>=0?'In più':'In meno')+'</span><b>'
+      +    (r.diff>=0?'+ ':'− ')+eur2(Math.abs(r.diff))
+      +    (r.perc!=null?' <small>('+(r.diff>=0?'+':'−')+_pct(Math.abs(r.perc))+'%)</small>':'')
+      +  '</b></div>'
+      +'</div>'
+      +'<div class="sh-nota">Sono gli importi delle lavorazioni, <b>senza il ribasso</b>: il ribasso è lo stesso sui due computi e non cambia la differenza in percentuale.</div>';
+    box.innerHTML=h;
   }
 
   /* ============================================================
@@ -20293,7 +20483,20 @@ ${vecchi?`
      SE QUALCOSA VA STORTO A METÀ, la copia mezza fatta si butta via da sola:
      restare con un computo con i capitoli e senza le lavorazioni sarebbe
      peggio che non averlo copiato. */
-  async function compDuplica(id){
+  /* ============================================================
+     20 agosto 2026 — DUPLICA, E LA VARIANTE
+     ============================================================
+     Sono la stessa cosa con due differenze:
+
+     - la COPIA e' un computo che non c'entra piu' niente con l'originale
+       (il secondo appartamento uguale). Chiede se copiare le misure.
+     - la VARIANTE si RICORDA da dove viene (variante_di) e ogni sua riga
+       si ricorda da quale riga (origine_id): e' quello che le permette di
+       dire cosa e' cambiato. Le misure si copiano SEMPRE, senza chiedere:
+       una variante nasce dal lavoro vero, e partire dalle quantita' a zero
+       vorrebbe dire riscriverle tutte per poterne cambiare due.
+     ============================================================ */
+  async function compDuplica(id,variante){
     if(!sb||!sbUid){toast("Devi essere loggato");return;}
     const c=compCache.find(x=>String(x.id)===String(id));
     if(!c){toast("Computo non trovato");return;}
@@ -20314,7 +20517,16 @@ ${vecchi?`
     }
 
     let conMisure=false;
-    if(mis.length){
+    if(variante){
+      /* le misure ci sono sempre: sono il punto di partenza di quello che
+         cambierai. E si chiede una volta sola, con parole chiare. */
+      conMisure=true;
+      if(!gconfirm("Faccio la variante del computo «"+(c.titolo||"")+"»?\n\n"
+        +"Nasce una COPIA con dentro tutto: capitoli, lavorazioni, prezzi e misure. "
+        +"Li cambi come sono andati davvero i lavori.\n\n"
+        +"Il computo di partenza NON si tocca, e nella variante trovi la pagina "
+        +"«Cosa è cambiato» con le differenze e quanto costa in più o in meno."))return;
+    }else if(mis.length){
       conMisure=gconfirm("Copio anche le misure?\n\n"
         +"SÌ  → il computo nuovo arriva identico, con tutte le "+mis.length+" misure già dentro. "
         +"Serve quando il lavoro è lo stesso (il secondo appartamento uguale) e devi solo correggere quello che cambia.\n\n"
@@ -20336,12 +20548,16 @@ ${vecchi?`
       lavoro_id:null, preventivo_id:null,   /* la pratica NON si eredita */
       numero:null,                          /* lo metti tu: non invento un numero doppio */
       data:todayStr(), stato:"bozza",
-      titolo:((c.titolo||"Computo")+" (copia)").slice(0,200),
+      titolo:((c.titolo||"Computo")+(variante?" (variante)":" (copia)")).slice(0,200),
       oggetto:c.oggetto||null, luogo:c.luogo||null, note:c.note||null,
       tipo:c.tipo||"privato",
       prezzario:c.prezzario||null, prezzario_anno:c.prezzario_anno||null,
       ribasso_perc:c.ribasso_perc!=null?c.ribasso_perc:null
     },
+    /* la colonna si nomina SOLO quando serve davvero: su un database senza
+       l'aggiornamento (sql/gest-computo-variante.sql) una copia normale
+       continua a funzionare come prima */
+    variante?{variante_di:id}:{},
     /* il quadro economico si porta dietro come il ribasso: due appartamenti
        uguali hanno le stesse spese tecniche e la stessa IVA, e riscriverle
        undici righe alla volta è esattamente quello che «Duplica» evita.
@@ -20398,7 +20614,7 @@ ${vecchi?`
       const mappaVoci={};
       if(voci.length){
         const {data:nv,error:e3}=await sb.from("gest_computo_voci").insert(
-          voci.map(v=>({user_id:sbUid,computo_id:nid,
+          voci.map(v=>Object.assign({user_id:sbUid,computo_id:nid,
             capitolo_id:v.capitolo_id?(mappaCap[v.capitolo_id]||null):null,
             ordine:v.ordine,codice:v.codice,descrizione:v.descrizione,unita:v.unita,
             prezzo_unitario:v.prezzo_unitario,
@@ -20407,7 +20623,14 @@ ${vecchi?`
                che viene dalle misure la ricalcola il database */
             quantita:(conMisure||v.quantita_manuale)?(v.quantita||0):0,
             incidenza_manodopera:v.incidenza_manodopera,
-            oneri_sicurezza:v.oneri_sicurezza,note:v.note}))
+            /* ⚠️ da quale riga viene questa riga. Serve SOLO alla variante,
+               e serve a lei per non dire bugie: due lavorazioni possono
+               avere lo stesso codice in due capitoli diversi, e una
+               descrizione si puo' correggere. Confrontando per codice o
+               per descrizione, una riga corretta risulterebbe «tolta» e
+               «nuova» insieme. */
+            oneri_sicurezza:v.oneri_sicurezza,note:v.note},
+            variante?{origine_id:v.id}:{}))
         ).select("id,ordine,descrizione");
         if(e3)throw e3;
         (nv||[]).forEach(n=>{
@@ -21136,6 +21359,7 @@ ${vecchi?`
     if(a==="edit-computo")return computoForm(compCache.find(c=>String(c.id)===String(id)));
     if(a==="save-computo")return saveComputo(id);
     if(a==="comp-dup")return compDuplica(id);
+    if(a==="comp-variante")return compDuplica(id,true);
     if(a==="del-computo")return delComputo(id);
     if(a==="comp-pdf")return computoPdf(id);
     if(a==="comp-gara")return computoListaGara(id);

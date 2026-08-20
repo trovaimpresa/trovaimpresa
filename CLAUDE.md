@@ -10143,6 +10143,109 @@ quadro economico) ma il cronoprogramma dice che manca l'aggiornamento.
 
 ---
 
+# 20 agosto 2026 (4), SERA — IL COMPUTO DI VARIANTE
+
+## Perché
+
+I lavori cambiano in corsa: il muro che sotto l'intonaco era diverso, il
+cliente che aggiunge un bagno, la quantità vera che non è quella disegnata.
+**Sui lavori privati oggi si fa a voce, ed è lì che nascono le liti.**
+
+Era il più piccolo della lista, perché «Duplica» c'era già: mancava solo
+farsi ricordare da dove viene la copia.
+
+## Com'è fatto
+
+Dalla scheda del computo: **«± Crea la variante»**, accanto a «Duplica». Fa
+una copia **con le misure, sempre** (una variante nasce dal lavoro vero) e si
+ricorda **da quale computo viene** e **da quale riga viene ogni riga**.
+
+Nella variante compare la voce **7 Cosa è cambiato** — solo lì: su un computo
+normale non ci sarebbe niente da confrontare. Dentro, tre elenchi
+(**cambiate · aggiunte · tolte**) e in fondo i tre numeri: computo di
+partenza, variante, differenza in euro e in percentuale.
+
+Le lavorazioni **rimaste uguali non compaiono**: in un elenco di ottantasette
+righe, le sei cambiate devono saltare all'occhio.
+
+⛔ **Su una variante non si offre di rifarne un'altra.** Una variante della
+variante non è più un confronto, è una catena in cui non si capisce più
+rispetto a cosa.
+
+## ⛔ PERCHÉ SI CONFRONTA PER origine_id E NON PER CODICE
+
+È la scelta più importante della funzione, e sta in `varConfronta`.
+
+- **Per codice non si può:** due lavorazioni possono avere lo **stesso codice
+  di tariffa** in due capitoli diversi (la stessa demolizione al piano terra e
+  al primo piano). Si confonderebbero fra loro.
+- **Per descrizione nemmeno:** correggere un refuso in una descrizione farebbe
+  risultare quella riga **«tolta» e «nuova» insieme** — e la variante direbbe
+  una bugia proprio nel documento che serve a non litigare.
+
+Con `origine_id` ogni riga sa da dove viene, sempre. Nel banco ci sono le due
+prove apposta, e i due sabotaggi che rimettono i modi sbagliati.
+
+⚠️ **I soldi si confrontano al centesimo, non con «uguale».** Due numeri che
+vengono dal database possono differire di un miliardesimo per come sono stati
+scritti: una riga mai toccata comparirebbe fra quelle cambiate. Soglie:
+**0,005 € sul prezzo**, **0,0005 sulla quantità** (che ha tre decimali).
+
+## ⚠️ UN DIFETTO DEL BANCO, NON DEL GESTIONALE
+
+Provando il pulsante «Crea la variante» le lavorazioni nascevano **senza
+`computo_id`**. Sembrava un difetto grosso. Non lo era: era il **finto
+Supabase** che onorava `.single()` **solo in lettura**. Un
+
+    insert(...).select("id").single()
+
+tornava un ARRAY invece della riga, il gestionale leggeva `nuovo.id` =
+`undefined`, e `JSON.stringify` buttava via la chiave. In produzione Supabase
+la riga la restituisce, e infatti «Duplica» funziona da giorni.
+
+**È la lezione numero uno che torna:** *un finto non deve mai essere più
+povero del vero* — se no non trova i difetti, **li inventa**. Adesso
+`prove/finto-supabase.js` onora `.single()` anche dopo insert, update e
+delete.
+
+## Due cose viste in una foto, non dal banco
+
+1. Il **rosso e il verde tingevano anche il codice di tariffa** («A.01» usciva
+   rosso). Il colore lì deve dire **una cosa sola**: se quella riga fa salire
+   o scendere il conto. Risolto con `> b`, il figlio diretto.
+2. (dal giro prima) «Il pratica comincia il».
+
+Fanno tre cose in un giorno trovate guardando lo schermo e non il banco. Vale
+la pena continuare a chiedere le foto.
+
+## Come è stato provato
+
+- **Il file SQL su un PostgreSQL 16 vero**: eseguito due volte, i due
+  `on delete set null` controllati **nel verso che conta** (cancellato il
+  computo di partenza, la variante **resta** con `variante_di` vuoto), e il
+  paletto «un computo non può essere la variante di sé stesso» provato nel
+  verso che deve **fallire**.
+- **`prove/banco-variante.js` — 30 prove** sul confronto, funzione estratta
+  **verbatim**. Dentro: due righe con lo stesso codice, una descrizione
+  corretta, il miliardesimo, la percentuale che non deve diventare
+  «Infinity%», e una variante vera con i conti rifatti a mano.
+  ⚠️ **Tre numeri li avevo scritti a mente e li avevo sbagliati: il banco mi
+  ha corretto.** È il motivo per cui i conti non si guardano, si fanno girare.
+- **`prove/sabotaggi-variante.py` — 12 sabotaggi, 12 accusati.** Tre erano
+  scritti male e non potevano accusare (uno non cambiava il comportamento, uno
+  rompeva l'estrazione, uno confrontava `Infinity` con `JSON.stringify` — che
+  lo trasforma in `null`). Riscritti.
+- **`prove/banco-variante-browser.js` — 40 prove** nel gestionale vero,
+  compreso **premere il pulsante** e guardare cosa finisce davvero nel
+  database.
+- **`prove/sabotaggi-variante-browser.py` — 13 sabotaggi, 13 accusati.**
+- **Telefono 390×844**: niente sotto i 13 px, niente che esce.
+- Tutti gli altri banchi restano verdi. **376 prove verdi in tutto.**
+
+⚠️ **Prima del push va eseguito `sql/gest-computo-variante.sql` su Supabase.**
+
+---
+
 ## DOVE SIAMO RIMASTI (20 agosto 2026, notte)
 
 **Fatto oggi, tutto in `gestionale-app.html` + `css/gestionale.css`, nessuna
@@ -10157,7 +10260,9 @@ migrazione SQL:**
    dei tre pulsantini, la finestra che si riapre dopo «Crea computo»;
 7. **a pagina piena** — il computo e la conferma del PDF;
 8. **il cronoprogramma** — voce 6 della barra (⚠️ vuole
-   `sql/gest-computo-cronoprogramma.sql` eseguito su Supabase).
+   `sql/gest-computo-cronoprogramma.sql` eseguito su Supabase);
+9. **il computo di variante** — voce 7, solo sulle varianti (⚠️ vuole
+   `sql/gest-computo-variante.sql` eseguito su Supabase).
 
 **Da fare, in cima:**
 

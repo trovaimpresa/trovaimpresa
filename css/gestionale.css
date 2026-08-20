@@ -1440,6 +1440,53 @@
 .cg-salva{ margin-top:18px; }
 .cg-salva .btn-primary{ font-size:17px; padding:14px 22px; }
 
+/* ================================================================
+   20 agosto 2026 — IL COMPUTO DI VARIANTE: cosa è cambiato
+   ================================================================
+   Tre elenchi (cambiate · aggiunte · tolte) e in fondo i tre numeri.
+   Il verde e il rosso qui NON decorano: dicono se quella riga fa
+   salire o scendere il conto. È l'unica cosa che si guarda davvero.
+   ================================================================ */
+.var-tit{
+  margin:22px 0 8px; font-size:19px; font-weight:800; color:var(--testo);
+  display:flex; align-items:center; gap:10px;
+}
+.var-n{
+  display:inline-grid; place-items:center; min-width:26px; height:26px; padding:0 8px;
+  border-radius:999px; background:var(--bordo); color:var(--testo-2);
+  font-size:14px; font-weight:800;
+}
+/* ⚠️ «> b», il figlio DIRETTO: senza il maggiore, il rosso e il verde
+   prendevano anche il codice di tariffa dentro la riga («A.01» usciva
+   rosso). Il colore qui deve dire una cosa sola — se quella riga fa
+   salire o scendere il conto — e se tinge anche altro non la dice piu'.
+   Visto in una foto, non dal banco. */
+.spesa-row.var-piu  > b{ color:var(--err); }
+.spesa-row.var-meno > b{ color:var(--ok); }
+
+.var-conto{
+  margin-top:26px; border:1px solid var(--bordo); border-radius:var(--r-card);
+  overflow:hidden; background:var(--card);
+}
+.var-r{
+  display:flex; justify-content:space-between; align-items:center; gap:16px;
+  padding:14px 18px; font-size:17px; border-bottom:1px solid var(--bordo);
+}
+.var-r:last-child{ border-bottom:none; }
+.var-r span{ color:var(--testo-2); }
+.var-r b{ font-size:18px; color:var(--testo); white-space:nowrap; }
+.var-r.var-tot{ background:var(--sfondo); padding:18px; }
+.var-r.var-tot span{ font-size:18px; font-weight:800; color:var(--testo); }
+.var-r.var-tot b{ font-size:23px; }
+.var-r.var-tot small{ font-size:16px; font-weight:700; }
+.var-r.var-tot.su   b{ color:var(--err); }
+.var-r.var-tot.giu  b{ color:var(--ok); }
+
+@media(max-width:760px){
+  .var-r{ padding:13px 14px; font-size:16px; }
+  .var-r.var-tot b{ font-size:20px; }
+}
+
 /* sul telefono le tre colonne non ci stanno: una sotto l'altra, e la
    barra resta larga tutta la riga (e' la cosa che si guarda) */
 @media(max-width:760px){
