@@ -3834,3 +3834,40 @@ body:has(#ti-fondatore) .side{
   .prz-box{ padding:14px; }
   .prz-tit{ font-size:18px; }
 }
+
+
+/* =====================================================================
+   21 agosto 2026 — LA FINESTRA «NUOVO REPARTO»
+   =====================================================================
+   Alessio: «miglioriamo questo reparto, e troppo sempliciotto, anche le
+   emoji sono orribili, aggiungiamo piu opzioni».
+   Erano 14 iconcine grigie in fila senza un titolo, e mezza finestra vuota.
+   Adesso: 50 emoji A COLORI divise in sei gruppi, e la card che si vede
+   mentre la scegli.
+   ===================================================================== */
+
+/* ---- le icone, in gruppi con il nome sopra ---- */
+.picker .pk-gruppo{ width:100%; margin-bottom:14px; }
+.picker .pk-gruppo:last-child{ margin-bottom:0; }
+.picker .pk-tit{
+  display:block; font-size:13px; font-weight:800; letter-spacing:.5px;
+  text-transform:uppercase; color:var(--testo-3); margin-bottom:7px;
+}
+.picker .pk-fila{ display:flex; flex-wrap:wrap; gap:8px; }
+/* ⚠️ 46px e non 42: dentro c'e' un'emoji vera, non un tratto grigio, e sotto
+   i 22px certe emoji (la gru, la cassetta) diventano una macchia. */
+.picker .pk{ width:46px; height:46px; font-size:23px; line-height:1;
+  display:inline-flex; align-items:center; justify-content:center; }
+.picker .pk:hover{ border-color:var(--bordo-forte); background:var(--sfondo); }
+.picker .pk.on{ background:var(--blu-tenue); }
+
+/* ---- l'anteprima: la card com'e' nella pagina di apertura ---- */
+.p-prev-box{ max-width:280px; margin:2px 0 12px; }
+.p-prev-box .panel-card{ cursor:default; box-shadow:0 1px 3px rgba(16,24,32,.06); }
+.p-prev-box .panel-card:hover{ transform:none; box-shadow:0 1px 3px rgba(16,24,32,.06); }
+/* il nome non ancora scritto: grigio, cosi' non si scambia per un nome vero.
+   E' la lezione dei segnaposto senza «Es.» del 21 agosto. */
+.p-prev-box .pc-vuoto{ color:var(--testo-3); font-weight:600; }
+
+/* ⛔ .no-ico non ha bisogno di regole sue: e' solo il cartello che dice a
+   _iconizza di non passare di qui. Dentro non ci finiscono mai .emic. */

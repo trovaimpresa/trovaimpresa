@@ -505,12 +505,46 @@
 <script src="/js/gest-computo-pdf.js"></script>
 <script>
   const KEY="gestionale_multiservizi_v5";
-  const ICONE=["🌳","🧹","🧱","🔧","⚡","🎨","🚿","🪚","🛠️","🌿","🏠","🪜","🏗️","🔌"];
+  /* ⚠️ 21 agosto 2026 — LE ICONE DEL REPARTO: 14 -> 50, E DIVISE PER MESTIERE.
+     Erano quattordici in fila, senza un titolo: chi apriva la finestra doveva
+     guardarle una per una. Adesso stanno in sei gruppi con il nome sopra.
+     ⛔ SI SCRIVONO CON IL SELETTORE DI VARIANTE (il carattere invisibile dopo
+        certe emoji: 🏗️ ⛏️ ❄️ ☀️ 🖌️ 🏛️ 🗺️ 🛠️ 🏷️ 🪶). Senza, Windows le
+        disegna in BIANCO E NERO come quadratini: e' esattamente quello che e'
+        successo il 10 agosto con 🏷, ed e' il motivo per cui erano state
+        tolte tutte. Il problema era la scrittura, non le emoji.
+     ⛔ NON TOGLIERE un'icona da questa lista: i reparti gia' creati tengono
+        l'emoji dentro `gest_mestieri.icona`, e se sparisce di qui la card
+        resta senza niente. Aggiungere si', togliere no. */
+  const ICONE_GRUPPI=[
+    ["Muratura e struttura", ["🧱","🏗️","🪜","🚧","⛏️","🪨","🏠","🏢","🏭"]],
+    ["Impianti",             ["🔌","⚡","💡","🚿","💧","🔥","❄️","🛁","📡","🔋"]],
+    ["Finiture",             ["🎨","🖌️","🪵","🪚","🚪","🪟","🧽","🪞"]],
+    ["Esterni e verde",      ["🌳","🌿","🌱","🪴","🧹","🏊","🚜","☀️"]],
+    ["Studio tecnico",       ["📐","📏","📋","🏛️","🗺️","📷","🔍","📊","🦺","📝"]],
+    ["Generiche",            ["🛠️","🔧","🧰","🚚","📦","🏷️","🔨","⭐"]]
+  ];
+  /* la lista piatta, per chi deve solo sapere se un'emoji e' delle nostre */
+  const ICONE=ICONE_GRUPPI.reduce((t,g)=>t.concat(g[1]),[]);
   const COLORI=[
     {a:"#2e629e",ad:"#1f497a",as:"#e6f4ec"},{a:"#2570c4",ad:"#1a539a",as:"#e6eefa"},
     {a:"#c0703a",ad:"#9c5526",as:"#f7ece2"},{a:"#7c3aed",ad:"#5b27b0",as:"#efe8fb"},
     {a:"#d6336c",ad:"#a51f52",as:"#fbe6ee"},{a:"#2a609d",ad:"#1f7268",as:"#e6f4f2"},
-    {a:"#d99e00",ad:"#a87a00",as:"#fbf2d9"},{a:"#5a6670",ad:"#3f4850",as:"#eceef0"}
+    {a:"#d99e00",ad:"#a87a00",as:"#fbf2d9"},{a:"#5a6670",ad:"#3f4850",as:"#eceef0"},
+    /* ⚠️ 21 agosto 2026 — QUATTRO TINTE CHE NON C'ERANO.
+       Degli otto qui sopra, QUATTRO erano lo stesso blu (#2e629e #2570c4
+       #2a609d #5a6670) e due erano incoerenti: pallino blu e sfondo verde.
+       ⛔ Quei otto NON si toccano, e non e' pigrizia: `a` e' la chiave con
+          cui i reparti gia' creati si ritrovano la palette
+          (`COLORI.find(c=>c.a===m.colore)` in renderLanding). Cambiarne uno
+          scollegherebbe i reparti che l'hanno gia' addosso, e l'icona
+          finirebbe scura su scuro. Se un giorno vanno sistemati, serve
+          prima spostare i dati nel database — e' un lavoro suo.
+       Qui sotto invece si AGGIUNGE, e aggiungere non rompe niente: verde,
+       rosso mattone, verde-acqua e indaco. Ogni terna e' della stessa tinta
+       (pallino, testo, sfondo), come dev'essere. */
+    {a:"#2f9e5f",ad:"#1e7444",as:"#e4f5eb"},{a:"#c0392b",ad:"#93281c",as:"#fae7e4"},
+    {a:"#0f8b8d",ad:"#0a6668",as:"#e0f2f2"},{a:"#4f46e5",ad:"#3730a3",as:"#eae8fd"}
   ];
   let nuovoSel={icon:"🛠️",col:0};
   let state={};
@@ -1310,7 +1344,14 @@
   const _EMO_TEST=new RegExp("("+_EMO_KEYS+")");
   const _svgIcon=e=>'<svg class="emic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+_ICONS[e]+'</svg>';
   /* select: le <option> sono testo, non markup — sostituirle con uno <span> le distruggerebbe */
-  const _ICO_SKIP='textarea,script,style,select';
+  /* ⚠️ 21 agosto 2026 — «.no-ico»: QUI LE EMOJI RESTANO EMOJI.
+     Alessio, guardando le card dei reparti a colori: «queste per esempio mi
+     piacciono». Nel gestionale non le vedeva mai, perche' _iconizza le
+     sostituisce TUTTE con un disegnino grigio a tratto. Va bene dentro i
+     menu e i pulsanti, dove il grigio sta in fila con il resto; NON va bene
+     dove l'icona e' una scelta dell'utente — la tendina del reparto e la
+     card che ne esce. Li' l'emoji si vede com'e', a colori. */
+  const _ICO_SKIP='textarea,script,style,select,.no-ico';
   let _icoObs=null;
   function _iconizza(){
     if(_icoObs)_icoObs.disconnect();
@@ -1452,7 +1493,7 @@
             accanto al nome quando entri dentro (vedi enterPanel). */
       return `<div class="panel-card" data-action="enter" data-p="${p.id}">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
-        <span class="pc-ic" style="background:${p.as};color:${p.ad}">${p.icon}</span><h2>${esc(p.nome)}</h2>
+        <span class="pc-ic no-ico" style="background:${p.as};color:${p.ad}">${p.icon}</span><h2>${esc(p.nome)}</h2>
         <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
     }).join(""):(_landingGuasta
       ? `<div class="empty-rep" style="border-color:var(--err,#c0392b)">
@@ -8391,8 +8432,24 @@ ${vecchi?`
     await save();closeSheet();renderAll();toast("Salvato ✔");
   }
 
+  /* ⚠️ 21 agosto 2026 — L'ANTEPRIMA. Alessio: «e troppo sempliciotto».
+     La finestra chiedeva tre cose (nome, icona, colore) e non faceva vedere
+     che cosa ne usciva: la card la scoprivi dopo aver premuto «Crea reparto».
+     Adesso la card sta lì mentre scegli, ed è la STESSA che disegna la
+     pagina iniziale — stesse classi, stesso CSS. */
+  function _panelAnteprima(){
+    const box=$("#p-prev"); if(!box)return;
+    const c=COLORI[nuovoSel.col]||COLORI[0];
+    const nome=($("#p-nome")&&$("#p-nome").value.trim())||"";
+    const vuoto=!nome;
+    box.innerHTML=`<div class="panel-card">
+      <span class="pc-ic no-ico" style="background:${c.as};color:${c.ad}">${nuovoSel.icon}</span>
+      <h2${vuoto?' class="pc-vuoto"':''}>${vuoto?"Il nome del reparto":esc(nome)}</h2>
+      <span class="pc-meta">0 da fare · 0 ${ruoloUtente==='professionista'?'pratiche totali':'lavori totali'}</span></div>`;
+  }
+
   function panelForm(){
-    nuovoSel={icon:"🛠️",col:0};
+    nuovoSel={icon:"🔨",col:0};
     /* 9 agosto 2026 — finestra grande a due colonne: a sinistra il nome,
        a destra come lo si riconosce a colpo d'occhio (icona e colore). */
     openSheetGrande("Nuovo reparto",
@@ -8402,17 +8459,31 @@ ${vecchi?`
         <div class="field"><label>Nome del reparto</label><input id="p-nome" placeholder="${ruoloUtente==='professionista'?'Es. Progettazione, Direzione lavori, Catasto':'Es. Muratura, Idraulica, Giardini'}"></div>
         <p class="sh-nota">Ogni reparto tiene i suoi ${ruoloUtente==='professionista'?'pratiche, clienti e collaboratori':'lavori, clienti e persone'} separati dagli altri: quello che sta in uno non si mischia con l'altro.</p>
         </div>
+        <div class="sh-b">
+        <div class="sh-tit">Come verrà</div>
+        <div class="p-prev-box" id="p-prev"></div>
+        <p class="sh-nota">È la scheda che troverai nella pagina di apertura, insieme agli altri reparti.</p>
+        </div>
         </div><div class="sh-col">
         <div class="sh-b">
         <div class="sh-tit">Come lo riconosci</div>
-        <div class="field"><label>Icona</label><div class="picker" id="p-ic">${ICONE.map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")}</div></div>
+        <div class="field"><label>Icona</label>
+          <div class="picker no-ico" id="p-ic">${ICONE_GRUPPI.map(g=>
+            `<div class="pk-gruppo"><span class="pk-tit">${g[0]}</span><div class="pk-fila">`
+            + g[1].map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")
+            + `</div></div>`).join("")}</div></div>
         <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}"></button>`).join("")}</div></div>
         </div>
         </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>
        <button class="btn-primary b-save" data-action="save-panel">Crea reparto</button>`);
-    $("#p-ic").onclick=e=>{const b=e.target.closest("[data-ic]");if(!b)return;nuovoSel.icon=b.dataset.ic;[...$("#p-ic").children].forEach(x=>x.classList.toggle("on",x===b));};
-    $("#p-col").onclick=e=>{const b=e.target.closest("[data-col]");if(!b)return;nuovoSel.col=+b.dataset.col;[...$("#p-col").children].forEach(x=>x.classList.toggle("on",x===b));};
+    $("#p-ic").onclick=e=>{const b=e.target.closest("[data-ic]");if(!b)return;nuovoSel.icon=b.dataset.ic;
+      /* ⛔ querySelectorAll e non .children: adesso i bottoni stanno dentro i
+         gruppi, e i figli diretti del picker sono i gruppi, non i bottoni. */
+      $("#p-ic").querySelectorAll("[data-ic]").forEach(x=>x.classList.toggle("on",x===b));_panelAnteprima();};
+    $("#p-col").onclick=e=>{const b=e.target.closest("[data-col]");if(!b)return;nuovoSel.col=+b.dataset.col;[...$("#p-col").children].forEach(x=>x.classList.toggle("on",x===b));_panelAnteprima();};
+    if($("#p-nome"))$("#p-nome").oninput=_panelAnteprima;
+    _panelAnteprima();
   }
   async function savePanel(){
     const nome=$("#p-nome").value.trim();if(!nome){toast("Scrivi il nome del reparto");return;}

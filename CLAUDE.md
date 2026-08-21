@@ -11719,3 +11719,83 @@ nuovi — «tolgo la barretta» e «la faccio chiara come gli altri bordi» —
 **accusati tutti e due**.
 
 **banco-landing: 31 verdi su 31 · sabotaggi-landing: 7 su 7 accusati.**
+
+
+# 21 agosto 2026 (4) — LA FINESTRA «NUOVO REPARTO»
+
+Alessio: *«miglioriamo questo reparto e troppo sempliciotto, anche le emoji
+sono orribili, aggiungiamo piu opzioni»*. E poi, rimandandomi la foto delle
+card a colori: *«queste per esempio mi piacciono»*.
+
+## ⛔ AVEVO CAPITO MALE, E ME L'HA CORRETTO LUI
+
+Credevo volesse **altre** emoji. Voleva **le emoji**. Nel gestionale non le
+vede mai: `_iconizza` le sostituisce TUTTE con un disegnino grigio a tratto.
+Nella tendina del reparto vedeva quattordici tratti grigi tutti uguali.
+
+## LA REGOLA NUOVA: `.no-ico`
+
+`_ICO_SKIP` adesso contiene anche `.no-ico`. Dove c'e' quella classe,
+**l'emoji resta emoji**. Sono due posti soli, e sono i due dove l'icona e'
+una **scelta dell'utente**: la tendina e la card che ne esce.
+
+⛔ **Nel resto del gestionale non cambia niente**: menu, pulsanti e schede
+tengono i disegnini grigi, e il banco lo controlla (se sparissero anche
+fuori, sarebbe rosso).
+
+## COSA C'E' DENTRO ADESSO
+
+- **53 icone** (erano 14), in **sei gruppi col nome sopra**: Muratura e
+  struttura · Impianti · Finiture · Esterni e verde · Studio tecnico ·
+  Generiche
+- **12 colori** (erano 8)
+- **l'anteprima**: la card si vede **mentre** scegli, ed e' la stessa che
+  disegna la pagina iniziale (stesse classi, stesso CSS)
+- i bottoni delle icone da 42 a **46 px**, emoji a **23 px**: sotto i 22
+  certe emoji diventano una macchia
+
+## ⛔ LE DUE COSE CHE NON SI POSSONO FARE, E PERCHE'
+
+1. **Non si toglie un'icona dalla lista.** I reparti gia' creati tengono la
+   loro emoji dentro `gest_mestieri.icona`: se sparisce di li', quella card
+   resta senza niente. Nella prima stesura avevo perso **🏠**, che il
+   reparto «progetto casa» usa. L'ha trovato il banco.
+2. **Non si toccano i primi 8 colori.** `a` e' la chiave con cui i reparti
+   si ritrovano la palette (`COLORI.find(c=>c.a===m.colore)`). Cambiarne uno
+   li scollega e l'icona finisce scura su scuro.
+   ⚠️ Quindi i **quattro blu quasi uguali restano**, e restano anche i due
+   incoerenti (pallino blu, sfondo verde). Sistemarli vuol dire prima
+   spostare i dati nel database: e' un lavoro suo, non un ritocco.
+   I quattro aggiunti in fondo (verde, rosso mattone, verde-acqua, indaco)
+   hanno le tre tinte coerenti, come dev'essere.
+
+⛔ **Le emoji si scrivono col selettore di variante** (🏗️ ⛏️ ❄️ ☀️ 🖌️ 🏛️
+🗺️ 🛠️ 🏷️). Senza, Windows le disegna in bianco e nero: era il problema del
+10 agosto con 🏷, e allora si era risposto togliendo TUTTE le emoji. Il
+difetto era la scrittura, non le emoji.
+
+## IL BANCO — e i quattro sabotaggi che l'hanno rifatto
+
+`prove/banco-reparto.js` estrae **verbatim** `panelForm`, `_panelAnteprima`,
+`_iconizza`, `_ICONS`, `_ICO_SKIP`, `ICONE_GRUPPI` e `COLORI`, e li fa girare
+in Chromium col CSS vero. L'unica cosa finta e' `openSheetGrande`.
+
+**22 verdi su 22 · 11 sabotaggi, 11 accusati.**
+
+⛔ **Ma alla prima corsa i sabotaggi accusati erano 7 su 11**, e tutti e
+quattro i buchi erano **del banco**, non del codice:
+
+1. `_ICO_SKIP` lo **riscrivevo a mano** nel banco: provavo la mia copia, non
+   quella del gestionale. Adesso si estrae dal file.
+2. il MutationObserver era **vuoto** (`()=>{}`): nel gestionale vero
+   **richiama `_iconizza`**. Con l'osservatore spento il banco guardava
+   un'anteprima che nessuno aveva mai provato a trasformare.
+3. l'anteprima partiva con **🔨**, che `_ICONS` non conosce: non c'era niente
+   da trasformare, e il sabotaggio passava. Adesso il banco sceglie prima
+   un'emoji che `_iconizza` conosce davvero (🧱).
+4. non misuravo **la dimensione** dei bottoni, e non controllavo che l'icona
+   cliccata fosse **quella accesa**.
+
+⚠️ La lezione e' la stessa di stamattina coi dati tutti uguali: **un banco
+che gira su una copia addomesticata del mondo non prova niente.** Le quattro
+prove nuove sono nate da qui.
