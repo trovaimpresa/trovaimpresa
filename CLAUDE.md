@@ -12545,3 +12545,81 @@ unico» e «tolgo il selettore di variante».
 
 ⚠️ E il conto della giornata, di nuovo: **il difetto più visibile di oggi
 l'ha trovato una foto dello schermo di Alessio, non un banco.**
+
+
+# 21 agosto 2026 (14) — LE →7← PAGINE «NON TROVATE»: NE ERA ROTTA →1←
+
+`netlify.toml` · `robots.txt`.
+
+## ⛔ UN ELENCO NON SI CONTA, SI LEGGE RIGA PER RIGA
+
+Search Console diceva **683 pagine non indicizzate, 9 motivi**. Guardati:
+
+| motivo | pagine | cos'è |
+|---|---|---|
+| Pagina alternativa con tag canonical appropriato | **574** | ⛔ **non è un difetto**: è Google che ha capito e ha unito i doppioni. Sono i `.html` sistemati oggi: quel numero scende da solo. |
+| Rilevata, ma non indicizzata | 81 | le pagine città vuote: Google le conosce e non le apre |
+| Scansionata, ma non indicizzata | 12 | le ha aperte e non le ha ritenute utili |
+| Non trovata (404) | 7 | ← guardate una per una, sotto |
+| Duplicata senza URL canonico | 5 | da guardare un'altra volta |
+| le altre quattro | 1 ciascuna | |
+
+⚠️ **E prima di questa tabella avevo detto ad Alessio che «Google tiene
+fuori due terzi del sito». Era sbagliato**, e gliel'ho detto subito: 574 su
+683 sono il sistema che funziona, non un guasto. **Non si commenta un numero
+senza aver visto da cosa è fatto.**
+
+## LE SETTE «NON TROVATE», UNA PER UNA
+
+| indirizzo | esito |
+|---|---|
+| `/registrazione` | ✅ già sistemata il **16 agosto** |
+| `/registrazione.html` | ✅ già sistemata il 16 agosto |
+| `/disdetta.html` | ✅ già sistemata il 16 agosto |
+| `/rest/v1/candidati_lavoro` | non è una pagina |
+| `/rest/v1/candidati_lavoro?user_id=eq` | non è una pagina |
+| `/storage/v1/object/public/cv-candidati/` | non è una pagina |
+| `/auth/v1/signup` | non è una pagina |
+| **`/preventivo.html`** | ⛔ **l'unico difetto vero** |
+
+⚠️ Le date di scansione delle prime tre erano **più vecchie della
+correzione**: Google mostra l'ultima volta che ci è passato, non lo stato di
+adesso. Rifarle sarebbe stato lavoro doppio.
+
+## LE QUATTRO DI SUPABASE — DA DOVE ARRIVANO
+
+Non sono link: **Googlebot legge il JavaScript dentro le pagine e prende per
+link le stringhe che sembrano indirizzi.** In `registrazione-candidato.html`
+ci sono scritte `'/rest/v1/candidati_lavoro?user_id=eq.'` e
+`'/storage/v1/object/public/cv-candidati/'`, che nel codice si concatenano a
+`SUPABASE_URL` — ma il crawler vede solo il pezzo.
+⚠️ **`SUPABASE_URL` non è vuota**: è una costante scritta a mano nel file.
+Controllato prima di dire che era un difetto.
+
+Chiuse in `robots.txt` con tre righe. ⛔ **Dentro il gruppo `User-agent: *`
+che c'era già**, non in un gruppo nuovo: due gruppi con lo stesso nome sono
+ambigui e ogni motore li tratta a modo suo. **Alla prima stesura l'avevo
+fatto sbagliato**, ed è diventato un sabotaggio del banco.
+
+## LA CORREZIONE VERA
+
+`/preventivo.html` e `/preventivo` → **301 su `/cerca-imprese`**: era la
+vecchia pagina della richiesta di preventivo, e oggi quel mestiere lo fa la
+ricerca delle imprese.
+
+## I BANCHI
+
+`prove/banco-404.js` — **39 verdi**. Controlla il rinvio nuovo, che i quattro
+vecchi (registrazione, disdetta) siano ancora al loro posto, che i 106 delle
+città e le 22 del 404 non si siano rotti, che `netlify.toml` sia ancora un
+TOML valido letto da `tomllib`, e che `robots.txt` abbia **un solo** gruppo
+`User-agent: *`.
+
+⛔ **E il verso opposto, che qui è quello che conta di più:** nove indirizzi
+che devono restare APERTI a Google (la home, una pagina città, una guida,
+`/cerca-imprese`, `/prezzi`, `/blog`…) vengono controllati uno per uno. Un
+`Disallow: /` scritto per sbaglio spegnerebbe il sito su Google in una notte.
+
+`prove/sabotaggi-404.js` — **11 su 11 accusati**, fra cui «chiudo tutto il
+sito», «chiudo per sbaglio le pagine città» e «le tre righe in un gruppo
+nuovo» (l'errore che avevo fatto davvero).

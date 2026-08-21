@@ -39,6 +39,18 @@ Disallow: /admin
 Disallow: /pannello-
 Disallow: /login-
 Disallow: /gestionale-
+# ⚠️ 21 agosto 2026 — GLI INDIRIZZI TECNICI DI SUPABASE.
+# Google li trovava leggendo il codice delle pagine: dentro il JavaScript
+# ci sono scritte come '/rest/v1/candidati_lavoro?user_id=eq.' e
+# '/storage/v1/object/public/cv-candidati/', e il crawler le prendeva per
+# link del sito. Da soli rispondono 404: non fanno danno, ma sporcavano il
+# rapporto di Search Console (4 delle 7 pagine «non trovate» erano queste).
+# ⛔ Queste righe stanno DENTRO il gruppo «User-agent: *» qui sopra: due
+#    gruppi con lo stesso nome sono ambigui, e ogni motore li tratta a modo
+#    suo. Se domani se ne aggiunge un'altra, va messa qui, non piu' in giu'.
+Disallow: /rest/
+Disallow: /storage/
+Disallow: /auth/
 
 Sitemap: https://trovaimpresa.com/sitemap.xml
 Sitemap: https://trovaimpresa.com/sitemap-seo.xml

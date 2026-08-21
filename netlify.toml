@@ -241,6 +241,26 @@
   status = 301
   force = true
 
+# ===== 21 agosto 2026 — L'ULTIMA PAGINA MORTA =====
+# Trovata in Search Console, riga «Non trovata (404)»: Google la visita
+# ancora. Era la vecchia pagina della richiesta di preventivo; oggi quel
+# mestiere lo fa la ricerca delle imprese, dove il preventivo si chiede a
+# chi lo deve fare.
+# ⚠️ Delle sette pagine di quell'elenco, tre erano gia' sistemate il 16
+#    agosto e quattro non sono pagine (sono indirizzi dell'API di Supabase
+#    che Google pesca leggendo il codice: li chiude robots.txt).
+[[redirects]]
+  from = "/preventivo.html"
+  to = "/cerca-imprese"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/preventivo"
+  to = "/cerca-imprese"
+  status = 301
+  force = true
+
 # Pagina Termini duplicata: unifichiamo tutto su /termini-condizioni
 [[redirects]]
   from = "/termini-servizio"
