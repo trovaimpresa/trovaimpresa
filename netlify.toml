@@ -106,6 +106,22 @@
   status = 404
   force = true
 
+# ⚠️ 21 agosto 2026 — I DUE FILE SUL PREZZO.
+# Sono del 19 agosto e stavano in root senza rinvio: il controllo prima di
+# pubblicare li ha visti e ha fermato il deploy. Dentro ci sono i conti veri
+# e la decisione sul prezzo del gestionale — roba che non deve stare online.
+[[redirects]]
+  from = "/IL-PREZZO-i-conti-veri.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/IL-PREZZO-la-decisione.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
 # ⚠️ Nomi, telefoni ed email di imprese vere: e' il file peggiore da lasciare
 #    a vista, ed e' l'unico che riguarda dati di altre persone.
 [[redirects]]

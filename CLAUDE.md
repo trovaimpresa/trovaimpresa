@@ -11857,3 +11857,38 @@ disegno).
 fulmine» all'inizio **concatenava** i due disegni invece di sostituirli, e
 cosi' il risultato non era uguale a nessuno dei due e la prova non poteva
 accusarlo.
+
+
+## ⛔ 21 agosto 2026 — IL DEPLOY SI E' FERMATO, ED E' COLPA MIA
+
+Alessio ha pushato, e Netlify ha risposto **Deploy failed** su `main@30d4fca`.
+Non era un guasto: era `tools/controllo-push.js` che faceva il suo mestiere.
+
+Due cose bloccavano:
+
+1. **`css/gestionale.css` riga 3859: un testo da 12 px.** Il titolino dei
+   gruppi di icone che avevo scritto io. ⛔ **Niente testo sotto i 13 px** e'
+   una regola del progetto — e sta scritta, per giunta, dentro il CSS della
+   striscia dell'AI che avevo letto quella mattina stessa. Portato a 13.
+2. **`netlify.toml`**: `IL-PREZZO-i-conti-veri.md` e `IL-PREZZO-la-decisione.md`
+   (del 19 agosto) stavano in root senza rinvio, e sarebbero finiti online
+   scaricabili da chiunque. Aggiunti al blocco «LA ROBA CHE NON DEVE STARE
+   ONLINE».
+
+## ⛔ LA REGOLA CHE MI MANCAVA: PRIMA DI DARGLI IL BLOCCO GIT, ESEGUIRE IL CONTROLLO
+
+    node tools/controllo-push.js
+
+Gira in 5 secondi sulla sua cartella e dice esattamente cosa fermerebbe la
+pubblicazione. **Va eseguito PRIMA di consegnare**, insieme all'md5 — non
+dopo, quando il deploy e' gia' rosso e lui sta guardando lo schermo.
+
+⚠️ Da oggi la consegna e' quattro cose, non tre:
+  1. i banchi verdi e i sabotaggi accusati
+  2. **`node tools/controllo-push.js` → «il sito puo' andare online»**
+  3. md5 uguale sui due lati
+  4. il blocco git
+
+⚠️ Il sito online **non e' mai cambiato**: il controllo si e' fermato prima di
+pubblicare, che e' esattamente il motivo per cui esiste. Nessun danno — solo
+mezz'ora persa e una schermata rossa che si poteva evitare.
