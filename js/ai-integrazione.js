@@ -207,6 +207,13 @@
         <div id="ai-out"></div>
       </div>`;
     document.body.appendChild(ov);
+    /* ⛔ 22 agosto 2026 — LE FINESTRE DELL'AI STANNO FUORI DAL GESTIONALE.
+       Si attaccano a document.body, cioe' fuori da #appview e #sheet: il
+       traduttore delle parole (studi tecnici: «lavoro» -> «pratica») non le
+       ha mai viste, e l'AI parlava da impresa edile a un geometra.
+       Visto da Alessio in una foto. Le parole restano in un posto solo
+       (_FRASI, nel gestionale): qui si chiede solo di passarci sopra. */
+    if(window.gestTraduci)window.gestTraduci(ov);
 
     ov.querySelector('.ai-x').onclick = chiudiTutto;
     ov.onclick = e => { if (e.target === ov) chiudiTutto(); };
@@ -280,6 +287,7 @@
         <p class="ai-help-foot" id="ai-help-foot">Domande gratuite rimaste questo mese: ${helpLeft}</p>
       </div>`;
     document.body.appendChild(ov);
+    if(window.gestTraduci)window.gestTraduci(ov);   /* vedi la nota sopra apriPannello */
 
     ov.querySelector('.ai-x').onclick = chiudiTutto;
     ov.onclick = e => { if (e.target === ov) chiudiTutto(); };
@@ -481,6 +489,7 @@
         <button class="ai-ghost ai-dopo">Più tardi</button>
       </div>`;
     document.body.appendChild(ov);
+    if(window.gestTraduci)window.gestTraduci(ov);   /* vedi la nota sopra apriPannello */
 
     ov.querySelector('.ai-x').onclick    = chiudiTutto;
     ov.querySelector('.ai-dopo').onclick = chiudiTutto;
@@ -532,6 +541,7 @@
         <div id="ai-comp-out"></div>
       </div>`;
     document.body.appendChild(ov);
+    if(window.gestTraduci)window.gestTraduci(ov);   /* vedi la nota sopra apriPannello */
 
     ov.querySelector('.ai-x').onclick = chiudiTutto;
     ov.onclick = e => { if (e.target === ov) chiudiTutto(); };

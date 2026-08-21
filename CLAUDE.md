@@ -11438,3 +11438,51 @@ non cominciano con «Es.». Il banco li elenca senza far diventare rosso niente
 (guarda solo i Dati azienda). Il più sospetto è il codice fiscale del cliente:
 **«RSSMRA80A01H501U»**, che sembra un dato vero identico a quelli veri.
 Messo in lista come n. 27.
+
+---
+
+## ✅ IL TRADUTTORE DENTRO LE FINESTRE DELL'AI (n. 23 — 22 agosto 2026)
+
+**Erano DUE cose sbagliate, non una**, e la seconda non l'avevo vista:
+
+1. ⛔ **Le finestre dell'AI si attaccano a `document.body`**, cioè fuori da
+   `#appview` e `#sheet`: l'osservatore delle traduzioni non le ha mai viste.
+2. ⛔ **E anche se le avesse viste non sarebbe cambiato niente:** nessuna di
+   quelle frasi era in **`_FRASI`**. `_swapPratiche` le lasciava intatte tutte
+   e cinque. Provato prima di scrivere una riga di codice — ed è per questo
+   che la diagnosi di stamattina («il traduttore non ci arriva») era **metà**.
+
+### Come è stato risolto
+- **Cinque frasi nuove in `_FRASI`** (le parole restano in un posto solo).
+  ⛔ **DALLE PIÙ LUNGHE ALLE PIÙ CORTE:** l'elenco si applica in ordine e
+  «Descrivi il lavoro» è l'inizio di «Descrivi il lavoro come lo racconteresti
+  al cliente». Se stesse prima, la lunga non scatterebbe mai e uscirebbe
+  «Descrivi **la pratica** come **lo** racconteresti».
+- **`_traduciDentro(root)`** — il walker, staccato da `localizzaPratiche()`,
+  che continua a chiamarlo sui suoi due contenitori.
+- **`window.gestTraduci(elemento)`** — il ponte per chi vive fuori dal blocco.
+  Non fa niente se non è uno studio tecnico.
+- **`js/ai-integrazione.js`**: dopo ognuno dei **quattro**
+  `document.body.appendChild(ov)`, `if(window.gestTraduci)window.gestTraduci(ov)`.
+
+⛔ **Perché non ho allargato l'osservatore a tutta la pagina:** si
+risveglierebbe a ogni respiro del DOM. Chi crea una finestra sua la fa
+tradurre quando l'ha attaccata: una riga, e nessun costo continuo.
+
+### Come è stato provato
+`prove/banco-ai-parole.js` — **28 verdi**. Il traduttore e il ponte sono presi
+**verbatim dal file vero** (`estrai.js` sa estrarre anche un
+`window.nome=function(){…}`), e la traduzione gira **in Chromium** su una
+finestra finta: titolo, testo, `placeholder`, `title`.
+Fra le prove: l'ordine delle frasi lunghe/corte, quello che **non** si deve
+toccare (le domande sui clienti, le fatture, l'esempio col condominio), e
+**per un'impresa edile non cambia niente**.
+`prove/sabotaggi-ai-parole.js` — **8 su 8 accusati**.
+
+⚠️ **UN LIMITE DICHIARATO, non una prova verde:** il `placeholder` di una
+**textarea** non viene tradotto, perché `textarea` sta in `_SKIP_UTENTE` (che
+serve a proteggere quello che l'utente scrive DENTRO). Ma il suggerimento
+grigio l'abbiamo scritto noi: dentro un preventivo, a un geometra, l'AI
+suggerisce ancora «Giovedì prossimo taglio siepe da Le Betulle».
+⛔ Non si scrive «provata» una cosa che il banco non accusa: **n. 28 in
+lista**, e va fatto in un push suo perché tocca tutto il gestionale.

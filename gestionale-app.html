@@ -963,6 +963,18 @@
     ['Il lavoro','La pratica'],
     ['Nuovo lavoro','Nuova pratica'],
     ['Crea lavoro','Crea pratica'],
+    /* ⚠️ 22 agosto 2026 — LE FRASI DELLE FINESTRE DELL'AI.
+       Per uno studio tecnico l'AI diceva ancora «lavoro»: nessuna di queste
+       frasi era in elenco, quindi il traduttore non le avrebbe cambiate
+       nemmeno se ci fosse arrivato. Visto da Alessio in una foto.
+       ⛔ DALLE PIU' LUNGHE ALLE PIU' CORTE: l'elenco si applica in ordine, e
+          «Descrivi il lavoro» e' l'inizio delle due sopra. Se stesse prima,
+          quelle due non scatterebbero mai. */
+    ['Descrivi il lavoro come lo racconteresti al cliente','Descrivi la pratica come la racconteresti al cliente'],
+    ['Descrivi il lavoro un po\' più nel dettaglio','Descrivi la pratica un po\' più nel dettaglio'],
+    ['Scrivi il lavoro a parole','Scrivi la pratica a parole'],
+    ['Come creo il mio primo lavoro?','Come creo la mia prima pratica?'],
+    ['Descrivi il lavoro','Descrivi la pratica'],
     /* Testi nuovi 2026 (preventivi, spese/margine, report, tabelle) */
     ['Spese e materiali di questo lavoro','Spese e materiali di questa pratica'],
     ['Guadagno o perdita per lavoro','Guadagno o perdita per pratica'],
@@ -1155,6 +1167,35 @@
   /* le parole che fanno scattare la traduzione: in un posto solo, così
      testo e attributi usano lo stesso metro */
   const _DA_TRADURRE=/lavor[oi]\b|squadr|condomin|amministrator|operai|operator|cantier|manodoper|dipendent|muratore|capo\b|siepe|cemento|imprese come la tua|Wahid/i;
+  /* ⛔ 22 agosto 2026 — IL TRADUTTORE SU UN PEZZO DI PAGINA QUALSIASI.
+     Le finestre dell'AI (js/ai-integrazione.js) si attaccano direttamente a
+     document.body, cioe' FUORI da #appview e #sheet: l'osservatore non le ha
+     mai viste, e per uno studio tecnico l'AI parlava da impresa edile.
+     Invece di far guardare tutta la pagina all'osservatore (che si
+     risveglierebbe a ogni respiro), chi crea una finestra sua chiama questa
+     quando l'ha attaccata. Il conto delle parole resta in un posto solo. */
+  function _traduciDentro(root){
+    if(!root)return;
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+    const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
+    nodi.forEach(t=>{const v=t.nodeValue;if(v&&_DA_TRADURRE.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+    root.querySelectorAll('[placeholder],[title]').forEach(function(el){
+      if(el.closest(_SKIP_UTENTE))return;
+      ['placeholder','title'].forEach(function(att){
+        const v=el.getAttribute(att);
+        if(!v||!_DA_TRADURRE.test(v))return;
+        const nv=_swapPratiche(v);
+        if(nv!==v)el.setAttribute(att,nv);
+      });
+    });
+  }
+  /* il ponte per chi sta fuori dal blocco: window.gestTraduci(elemento).
+     Non fa niente se non e' uno studio tecnico. */
+  window.gestTraduci=function(el){
+    if(ruoloUtente!=='professionista')return;
+    try{ _traduciDentro(el); }catch(e){}
+  };
+
   function localizzaPratiche(){
     if(ruoloUtente!=='professionista')return;
     if(_praticheObs)_praticheObs.disconnect(); /* si stacca durante la riscrittura: le mutazioni che genera (e quelle già in coda) vengono scartate → niente loop */
