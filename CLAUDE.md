@@ -11974,3 +11974,83 @@ parole** e numeri diversi, sembra un errore del gestionale.
 ⛔ **Quando due conti diversi stanno sulla stessa schermata, il titolo deve
 dire cosa li distingue.** Adesso: «1 preventivo **fermo da piu' di una
 settimana**», e la riga sotto non lo ripete piu' — dice cosa fare.
+
+
+# 21 agosto 2026 (8) — I SEGNAPOSTO CHE SEMBRANO DATI (n. 27, chiuso)
+
+`gestionale-app.html`, **22 caselle**. Nessun altro file toccato.
+
+## ⛔ I «51» NON ERANO 51 — E IL FILTRO DEL BANCO NE NASCONDEVA TRE
+
+`prove/banco-suggerimenti.js` diceva «51 senza Es.». Guardandoli uno per uno:
+**7 falsi allarmi** (scritti `${...}`, con «Es.» dentro tutti i rami),
+**24 istruzioni** che vanno bene così («Una prestazione per riga»).
+Restavano **19** veri.
+
+⛔ **Ma il filtro di quel banco escludeva `^\d+$`, `^0000`, `^IT\.\.`**, e così
+si teneva fuori proprio la famiglia di difetti che cercava:
+
+- `c-cap` diceva **`02100`** — lo **stesso identico difetto** dei Dati azienda
+  del 22 agosto, sulla scheda del CLIENTE, e nessuno l'aveva visto;
+- `a-piva` diceva **`01234567890`**;
+- `a-pol-mass` diceva **`500000`**.
+
+⚠️ **Un filtro che toglie rumore toglie anche prove.** Erano 22, non 19.
+
+## LE DUE FAMIGLIE
+
+1. **Sembrano un dato vero**: `RSSMRA80A01H501U` (codice fiscale cliente),
+   `02100`, `Rieti`, `RI`, `01234567890`, `500000`.
+2. **Ripetono l'etichetta**: sopra c'era scritto «Telefono», dentro «Numero».
+   La casella non diceva niente di nuovo, e a colpo d'occhio sembrava piena.
+   `Foglio` · `Particella` · `Sub` · `Nome` · `Numero` (×2) · `Via, città` ·
+   `Indirizzo / scala / piano` (×2) · `Titolo del capitolo` ·
+   `Descrizione voce` · `Q.tà` · `Prezzo €` · `Indirizzo del cantiere` ·
+   `Indirizzo dell'immobile` · `Nome della rivendita...`
+
+## ⚠️ LE DUE CASELLE STRETTE — chieste prima, misurate dopo
+
+`Q.tà` → «Es. 12» e `Prezzo €` → «Es. 24,00» stanno nella riga del preventivo,
+quella schiacciata a 390 px. **Non ho deciso a occhio**: il banco le apre in
+Chromium a 1440x900 e a 390x844 e misura `scrollWidth <= clientWidth`.
+A 390 px: 78≤78 e 116≤116. Ci stanno.
+
+## IL BANCO — e la guardia che serve a domani
+
+`prove/banco-segnaposto.js` — **99 verdi su 99**. Quattro parti:
+
+1. le 22 caselle dicono il testo nuovo **e** il vecchio non c'è più;
+2. ⛔ **LA GUARDIA**: ogni segnaposto del gestionale o comincia con «Es. », o
+   sta nell'elenco delle ISTRUZIONI scritto dentro il banco. **Un segnaposto
+   nuovo fuori elenco fa diventare il banco rosso.** Ed è provata anche al
+   contrario: le si dà «Mario Rossi» inventato e deve accusarlo;
+3. i ternari `${...?...:...}` **si cercano nel file**, non si elencano a mano:
+   ogni ramo dopo il `?` deve dire «Es. ». Così vale anche per quelli che
+   nasceranno domani;
+4. Chromium col CSS vero: casella vuota, segnaposto intero, grigio e non nero,
+   testo mai sotto i 13 px.
+
+`prove/sabotaggi-segnaposto.js` — **14 su 14 accusati**.
+Con la guardia in cima («se il banco è già rosso mi fermo») e il ripristino
+dei file anche se lo script viene ammazzato.
+
+## ⛔ TRE ANCORE AMBIGUE, TROVATE DALLA GUARDIA E NON DA ME
+
+Alla prima corsa: **11 su 14, e 3 «ANCORA AMBIGUA (colpa mia)»**.
+`placeholder="Es. 02100"` sta **in due schede** (cliente e Dati azienda), e
+`placeholder="Es. Rieti"` **otto volte**. Il sabotaggio colpiva la prima, che
+era l'altra scheda. Rimediato mettendo nell'ancora **l'id del campo**:
+`id="c-cap" value="${esc(c.cap||"")}" placeholder="Es. 02100"`.
+
+⚠️ È la stessa trappola di `doc.text("Pag. "...)` — e questa volta se n'è
+accorta la guardia, non Alessio.
+
+## RESTA FUORI, ED È UNA SCELTA
+
+- **n. 28**, il segnaposto della `textarea` che non si traduce: è un altro
+  difetto (`_SKIP_UTENTE`), va nel suo push. Si vede su `j-desc` riga 7694.
+- `IT..` sull'IBAN e `0` / `—` / `30` sulle caselle dei numeri: sono
+  istruzioni, non dati. Lasciati, e messi nell'elenco del banco.
+
+**Consegna: banchi verdi · `node tools/controllo-push.js` verde · md5 uguale ·
+un push solo.**

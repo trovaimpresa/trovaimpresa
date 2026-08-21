@@ -5453,7 +5453,7 @@ ${vecchi?`
           <summary class="sh-tit sh-tit--click">\ud83d\udc64 Dati anagrafici e contratto</summary>
           <div class="row2">
             <div class="field"><label>Data di nascita</label><input id="d-nascita" type="date" value="${esc(op.data_nascita||"")}"></div>
-            <div class="field"><label>Codice fiscale</label><input id="d-cf" value="${esc(op.codice_fiscale||"")}" style="text-transform:uppercase" placeholder="RSSMRA80A01H501U"></div>
+            <div class="field"><label>Codice fiscale</label><input id="d-cf" value="${esc(op.codice_fiscale||"")}" style="text-transform:uppercase" placeholder="Es. RSSMRA80A01H501U"></div>
           </div>
           <div class="field"><label>Email</label><input id="d-email" type="email" value="${esc(op.email||"")}" placeholder="nome@email.it"></div>
           <div class="row2">
@@ -6559,7 +6559,7 @@ ${vecchi?`
       +'<div class="field"><label>Email</label><input id="fo-email" value="'+esc(f.email||'')+'" placeholder="ordini@..."></div></div>'
       +'<div class="row2">'
       +'<div class="field"><label>Partita IVA</label><input id="fo-piva" value="'+esc(f.piva||'')+'"></div>'
-      +'<div class="field"><label>Indirizzo</label><input id="fo-ind" value="'+esc(f.indirizzo||'')+'" placeholder="Via, città"></div></div>'
+      +'<div class="field"><label>Indirizzo</label><input id="fo-ind" value="'+esc(f.indirizzo||'')+'" placeholder="Es. Via Roma 12, Rieti"></div></div>'
       +'<div class="field"><label>Note</label><textarea id="fo-note" placeholder="Es. chiedere di Marco, sconto 10% sui laterizi">'+esc(f.note||'')+'</textarea></div>'
       +'</div>'
       +'</div><div class="sh-col">'
@@ -6571,7 +6571,7 @@ ${vecchi?`
           ?'<div class="ff-riass" style="background:var(--ok-bg);border-color:var(--ok);color:var(--ok)">✓ Collegato a un negozio di TrovaImpresa <button type="button" class="btn btn-sm" data-action="forn-ti-scollega" style="margin-left:8px">Scollega</button></div>'
           :'')+'</div>'
       +'<div class="row2" style="align-items:end">'
-      +'<div class="field" style="margin-bottom:0"><label>Cerca il negozio</label><input id="fo-ti-q" placeholder="Nome della rivendita..."></div>'
+      +'<div class="field" style="margin-bottom:0"><label>Cerca il negozio</label><input id="fo-ti-q" placeholder="Es. Edilcentro Rieti"></div>'
       +'<button type="button" class="btn" data-action="forn-ti-cerca" style="height:46px">🔎 Cerca</button></div>'
       +'<div id="fo-ti-risultati" style="margin-top:10px"></div>'
       +'</div>'
@@ -7603,9 +7603,9 @@ ${vecchi?`
       <div class="field"><label>Data di deposito</label><input type="date" id="j-pr-data" value="${esc(job.pratica_data_dep||"")}"></div>
       <div class="field"><label>Dati catastali</label>
         <div class="row3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <input id="j-cat-fog" value="${esc(job.catasto_foglio||"")}" placeholder="Foglio">
-          <input id="j-cat-par" value="${esc(job.catasto_particella||"")}" placeholder="Particella">
-          <input id="j-cat-sub" value="${esc(job.catasto_sub||"")}" placeholder="Sub">
+          <input id="j-cat-fog" value="${esc(job.catasto_foglio||"")}" placeholder="Es. 12">
+          <input id="j-cat-par" value="${esc(job.catasto_particella||"")}" placeholder="Es. 345">
+          <input id="j-cat-sub" value="${esc(job.catasto_sub||"")}" placeholder="Es. 2">
         </div>
       </div>`;
   }
@@ -7657,7 +7657,7 @@ ${vecchi?`
         +`<div class="sh-tit">${pro?"La pratica":"Il lavoro"}</div>`
         +(isNew?aiRigaHTML('lavoro'):'')
         +`<div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="${pro?"Es. CILA per rifacimento bagno":"Es. taglio siepe e pulizia aiuole"}">${esc(job.descrizione||"")}</textarea></div>`
-        +`<div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>`
+        +`<div class="field"><label>Dove</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Es. Via Roma 12, scala B, piano 3"></div>`
         +'<div class="row2">'
         +`<div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||todayStr()}"></div>`
         +`<div class="field"><label>${pro?"Collaboratore":"Operaio"}</label><select id="j-operaio"><option value="">— nessuno —</option></select></div></div>`
@@ -7692,7 +7692,7 @@ ${vecchi?`
         <select id="j-cli"><option value="">— scegli —</option>${cliOpts}</select>
         <button class="btn-ghost quick-add" data-action="quick-cli">+ Aggiungi nuovo cliente</button></div>
       <div class="field"><label>Cosa c'è da fare</label><textarea id="j-desc" placeholder="Es. taglio siepe e pulizia aiuole">${esc(job.descrizione||"")}</textarea></div>
-      <div class="field"><label>Dove (vuoto = indirizzo del cliente)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Indirizzo / scala / piano"></div>
+      <div class="field"><label>Dove (vuoto = indirizzo del cliente)</label><input id="j-dove" value="${esc(job.dove||"")}" placeholder="Es. Via Roma 12, scala B, piano 3"></div>
       ${bloccoPratica(job)}
       <div class="row2">
         <div class="field"><label>Data prevista</label><input type="date" id="j-data" value="${job.dataPrevista||""}"></div>
@@ -8107,8 +8107,8 @@ ${vecchi?`
         <div class="field"><label id="lab-c-nome">${Lt.nome}</label>
           <input id="c-nome" value="${esc(c.nome||"")}" placeholder="${Lt.ph}"></div>
         <div class="row2">
-          <div class="field"><label id="lab-c-ref">${Lt.ref}</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Nome"></div>
-          <div class="field"><label>Telefono</label><input id="c-tel" type="tel" value="${esc(c.telefono||"")}" placeholder="Numero"></div>
+          <div class="field"><label id="lab-c-ref">${Lt.ref}</label><input id="c-ref" value="${esc(c.referente||"")}" placeholder="Es. Mario Rossi"></div>
+          <div class="field"><label>Telefono</label><input id="c-tel" type="tel" value="${esc(c.telefono||"")}" placeholder="Es. 0746 123456"></div>
         </div>
         <div class="field"><label>Email</label>
           <input id="c-email" type="email" value="${esc(c.email||"")}" placeholder="cliente@email.it"></div>
@@ -8119,11 +8119,11 @@ ${vecchi?`
         <div class="sh-tit">Dove sta</div>
         <div class="field"><label>Via e numero</label><input id="c-ind" value="${esc(c.indirizzo||"")}" placeholder="Es. Via Roma, 12"></div>
         <div class="row2">
-          <div class="field"><label>CAP</label><input id="c-cap" value="${esc(c.cap||"")}" placeholder="02100" inputmode="numeric"></div>
-          <div class="field"><label>Città</label><input id="c-citta" value="${esc(c.citta||"")}" placeholder="Rieti"></div>
+          <div class="field"><label>CAP</label><input id="c-cap" value="${esc(c.cap||"")}" placeholder="Es. 02100" inputmode="numeric"></div>
+          <div class="field"><label>Città</label><input id="c-citta" value="${esc(c.citta||"")}" placeholder="Es. Rieti"></div>
         </div>
         <div class="field"><label>Provincia</label>
-          <input id="c-prov" value="${esc(c.prov||"")}" placeholder="RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+          <input id="c-prov" value="${esc(c.prov||"")}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
         <div class="sh-nota">L'indirizzo finisce sul PDF della fattura e serve alla Mappa per calcolare la distanza del cantiere.</div>
       </div>
 
@@ -8239,7 +8239,7 @@ ${vecchi?`
       + '<div class="sh-b">'
       +   '<div class="sh-tit">Come lo raggiungi</div>'
       +   '<div class="field"><label>Telefono</label>'
-      +     '<input id="cm-tel" type="tel" value="'+esc(a.comm_tel||"")+'" placeholder="Numero"></div>'
+      +     '<input id="cm-tel" type="tel" value="'+esc(a.comm_tel||"")+'" placeholder="Es. 320 1234567"></div>'
       +   '<div class="field"><label>Email</label>'
       +     '<input id="cm-email" type="email" value="'+esc(a.comm_email||"")+'" placeholder="studio@email.it"></div>'
       +   '<div class="field"><label>PEC</label>'
@@ -8982,7 +8982,7 @@ ${vecchi?`
         <div class="sh-tit">Chi sei</div>
         <div class="field"><label>Nome / Ragione sociale</label><input id="a-nome" value="${esc(a.nome||"")}" placeholder="Es. Multiservizi Rossi srl"></div>
         <div class="row2">
-          <div class="field"><label>Partita IVA</label><input id="a-piva" value="${esc(a.piva||"")}" placeholder="01234567890"></div>
+          <div class="field"><label>Partita IVA</label><input id="a-piva" value="${esc(a.piva||"")}" placeholder="Es. 01234567890"></div>
           <div class="field"><label>Codice fiscale</label><input id="a-cf" value="${esc(a.cod_fiscale||"")}" placeholder="Se diverso dalla P.IVA"></div>
         </div>
         <div class="sh-nota">Compaiono in cima a ogni PDF di preventivo e fattura.</div>
@@ -9045,7 +9045,7 @@ ${vecchi?`
         <div class="field"><label>Numero di polizza</label><input id="a-pol-num" value="${esc(a.pol_numero||"")}" placeholder="Come sul certificato"></div>
         <div class="row2">
           <div class="field"><label>Massimale (€)</label>
-            <input type="number" id="a-pol-mass" inputmode="numeric" min="0" max="999999999" step="1000" value="${a.pol_massimale!=null?a.pol_massimale:""}" placeholder="500000"></div>
+            <input type="number" id="a-pol-mass" inputmode="numeric" min="0" max="999999999" step="1000" value="${a.pol_massimale!=null?a.pol_massimale:""}" placeholder="Es. 500000"></div>
           <div class="field"><label>Scadenza</label><input type="date" id="a-pol-scad" value="${esc(a.pol_scadenza||"")}"></div>
         </div>
         <div class="sh-nota">Li scrivi <b>una volta sola</b> e restano lì. Finiscono stampati in ogni lettera d'incarico, perché <b class="az-rosso">la legge lo pretende</b> (art. 9 comma 4 del DL 1/2012). Finché mancano, la lettera d'incarico non si scarica.</div>
@@ -10963,13 +10963,13 @@ ${vecchi?`
        prezzo, e quello che non c'è non si può sbagliare. */
     if(_rigaSezione(r)){
       return `<div class="prev-riga prev-riga-cap" data-riga data-sezione>
-      <input class="pr-desc" placeholder="Titolo del capitolo" value="${esc(r.descrizione||"")}">
+      <input class="pr-desc" placeholder="Es. Opere murarie" value="${esc(r.descrizione||"")}">
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
     }
     return `<div class="prev-riga" data-riga>
-      <input class="pr-desc" placeholder="Descrizione voce" value="${esc(r.descrizione||"")}">
-      <input class="pr-qta" type="text" inputmode="decimal" placeholder="Q.tà" value="${_numTesto(r.qta!=null?r.qta:1)}">
-      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Prezzo €" value="${_prezzoCasella(r.prezzo)}">
+      <input class="pr-desc" placeholder="Es. Demolizione tramezzo" value="${esc(r.descrizione||"")}">
+      <input class="pr-qta" type="text" inputmode="decimal" placeholder="Es. 12" value="${_numTesto(r.qta!=null?r.qta:1)}">
+      <input class="pr-prezzo" type="text" inputmode="decimal" placeholder="Es. 24,00" value="${_prezzoCasella(r.prezzo)}">
       <button type="button" class="rdel" data-action="prev-riga-del">×</button></div>`;
   }
   function prevTotaleLive(){
@@ -12121,7 +12121,7 @@ ${vecchi?`
       /* l'indirizzo del cantiere NON si ricorda dalla volta prima: è l'unica
          cosa che cambia sempre, e un documento firmato con l'indirizzo del
          cliente precedente sarebbe un guaio serio */
-      +'<div class="field"><label>Dove si lavora</label><input id="or-dove" value="" placeholder="Indirizzo del cantiere"></div>'
+      +'<div class="field"><label>Dove si lavora</label><input id="or-dove" value="" placeholder="Es. Via Roma 12, Rieti"></div>'
       +'<div class="field"><label>Opere comprese</label><textarea id="or-opere" rows="6" placeholder="Una lavorazione per riga">'+esc(opere)+'</textarea>'
       +'<div class="campo-aiuto">Arrivano dalle voci del preventivo: puoi aggiungerne o toglierne.</div></div>'
       +'<div class="field"><label>Tempi di esecuzione</label><input id="or-tempi" value="'+esc(tempiDef)+'" placeholder="Es. 30 giorni lavorativi dall\'inizio"></div>'
@@ -12370,7 +12370,7 @@ ${vecchi?`
       +'<div class="row2">'
       +'<div class="field"><label>Data</label><input type="date" id="vb-data" value="'+todayStr()+'"></div>'
       +'<div class="field"><label>Ora</label><input id="vb-ora" value="" placeholder="Es. 10:30"></div></div>'
-      +'<div class="field"><label>Luogo</label><input id="vb-luogo" value="'+esc((l&&l.dove)||cli.indirizzo||"")+'" placeholder="Indirizzo dell\'immobile"></div>'
+      +'<div class="field"><label>Luogo</label><input id="vb-luogo" value="'+esc((l&&l.dove)||cli.indirizzo||"")+'" placeholder="Es. Via Roma 12, Rieti"></div>'
       +'<div class="field"><label>Presenti</label><textarea id="vb-presenti" rows="3" placeholder="Uno per riga. Es.&#10;Geom. Mario Rossi (tecnico incaricato)&#10;Sig. Luigi Bianchi (proprietario)">'+esc(mem.presenti||"")+'</textarea></div>'
       +'</div>'
       +'<div class="sh-b">'
