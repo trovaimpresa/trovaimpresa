@@ -957,8 +957,16 @@
        si nota, e fa sembrare sbagliato un numero che è giusto.
        Trovato guardando la fotografia del quadro economico, non a mente. */
     const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
-    const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
-    const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3}).format(+n||0);
+    /* ⚠️ 22 agosto 2026 — TERZA VOLTA. «useGrouping:true» mancava qui: sul
+       foglio si leggeva «1140,77» nella colonna TOTALE e, due righe sotto,
+       «12.639,88». Intl in italiano mette il punto delle migliaia da solo
+       SOLO dai cinque numeri in su, quindi il difetto si vede unicamente sui
+       numeri di quattro cifre — ed e' per questo che e' sopravvissuto al 19
+       agosto (quadro economico) e al 21 (variante).
+       Visto guardando il foglio stampato. Adesso c'e' prove/banco-migliaia.js
+       che li conta tutti, in tutti i file. */
+    const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
+    const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3,useGrouping:true}).format(+n||0);
 
     let y=0, tabTop=0, totale=0;
 
@@ -999,8 +1007,19 @@
     doc.text(az.nome||"",M,y);
     let hy=y+4.4;
     doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
-    [az.piva?("P.IVA "+az.piva):"", az.indirizzo||"",
-     [az.telefono?("Tel "+az.telefono):"",az.email||""].filter(Boolean).join("   ")]
+    /* ⚠️ 22 agosto 2026 — DUE RIGHE SBAGLIATE, SOLO IN QUESTO FOGLIO.
+       ⛔ «az.telefono» NON ESISTE: nella tabella gest_azienda la colonna si
+          chiama «az.tel». Il numero non veniva stampato MAI, e non se ne
+          accorgeva nessuno perche' non usciva un errore: usciva un vuoto.
+          Su una lista che va alla stazione appaltante, l'impresa consegnava
+          un documento senza il proprio telefono.
+       ⛔ «az.indirizzo» e' la SOLA VIA: il CAP, la citta' e la provincia
+          stanno in colonne loro. Ci vuole azIndirizzo(az), che le mette
+          insieme — la stessa che usano gli altri quattro fogli.
+       Negli altri PDF era gia' giusto: sbagliava solo qui. Trovato il 21
+       agosto leggendo il codice, sistemato oggi in un push suo. */
+    [az.piva?("P.IVA "+az.piva):"", azIndirizzo(az),
+     [az.tel?("Tel "+az.tel):"",az.email||""].filter(Boolean).join("   ")]
       .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=3.8;});
     doc.setTextColor(0);
     y=hy+4;
@@ -1191,8 +1210,11 @@
        si nota, e fa sembrare sbagliato un numero che è giusto.
        Trovato guardando la fotografia del quadro economico, non a mente. */
     const _eur=n=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
-    const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3}).format(+n||0);
-    const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n||0);
+    const _q3 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3,useGrouping:true}).format(+n||0);
+    /* ⚠️ «useGrouping:true» anche qui, e mancava: vedi la nota lunga sopra
+       computoListaGara. Su questo foglio un totale di 3.482,94 usciva
+       «3482,94». prove/banco-migliaia.js li conta tutti. */
+    const _d2 =n=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n||0);
     const _pu =n=>(n==null||+n===1)?"":(Number.isInteger(+n)?String(+n):_q3(n));
 
     let y=0, tabTop=0, riporto=0;

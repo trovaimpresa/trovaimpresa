@@ -11349,3 +11349,56 @@ numeri stampati fa sempre il prezzo. Il centesimo nasceva dall'**utile** e
 dalle **righe**, non dalle spese generali.
 ⛔ Un sabotaggio che non può rompere niente non è una prova: è un numero
 gonfiato. Si toglie e si scrive perché.
+
+---
+
+## ✅ LE DUE RIGHE DELLA «LISTA PER LA GARA» (22 agosto 2026) — e una terza
+
+**n. 21 e 22 della lista, chiuse.** Nell'intestazione di `computoListaGara`:
+
+- ⛔ **`az.telefono` NON ESISTE**: nella tabella `gest_azienda` la colonna si
+  chiama **`az.tel`**. Il numero non veniva stampato **mai**, e non usciva
+  nessun errore: usciva un **vuoto**. L'impresa consegnava alla stazione
+  appaltante un documento senza il proprio telefono.
+- ⛔ **`az.indirizzo` è la SOLA VIA**: CAP, città e provincia stanno in
+  colonne loro. Ci vuole **`azIndirizzo(az)`**, la stessa che usano gli altri
+  quattro fogli.
+
+Negli altri PDF era già giusto: sbagliava solo lì.
+
+⚠️ **LA PROVA CHE CONTA:** l'intestazione della Lista è adesso **identica**,
+carattere per carattere, a quella dell'Analisi dei prezzi. Sono due fogli che
+l'impresa consegna **insieme**: non possono avere due intestazioni diverse.
+`prove/banco-lista-gara.js` le confronta.
+
+### ⛔ E LA TERZA VOLTA DEL PUNTO DELLE MIGLIAIA
+
+Guardando il foglio stampato: nella colonna TOTALE si leggeva **«1140,77»** e
+due righe sotto **«12.639,88»**.
+
+⚠️ **Intl in italiano mette il punto da solo SOLO dai cinque numeri in su**:
+il difetto si vede **unicamente sui numeri di quattro cifre**. È per questo
+che è sopravvissuto al **19 agosto** (quadro economico) e al **21**
+(variante) — quelle volte i numeri sbagliati erano di cinque cifre.
+
+Mancava in **quattro punti**: `_d2` e `_q3` di `computoListaGara` e gli stessi
+due di **`computoPdf`** (lì un totale di 3.482,94 usciva «3482,94»).
+Sistemati tutti e quattro.
+
+⛔ **`prove/banco-migliaia.js`** — conta i **17** formattatori di numeri di
+tutti e cinque i file e diventa rosso se a uno manca `useGrouping`. Le
+percentuali (`_pc`, `_pct`, `_perc`) sono l'unica eccezione, dichiarata per
+nome: 15,00 % non vuole il punto e non arriva mai a mille.
+**Una regola scritta in CLAUDE.md non basta: ci vuole il banco.** È la
+seconda volta oggi che lo imparo (l'altra era `AN_COL` dichiarata due volte).
+
+### Come è stato provato
+`banco-lista-gara.js` **20 verdi** — il telefono, l'indirizzo intero,
+l'intestazione confrontata con l'altro foglio, l'azienda che ha solo la via
+(niente virgola appesa), l'azienda senza telefono (niente «Tel» a vuoto), e
+nessun numero di quattro cifre senza il punto.
+`sabotaggi-lista-gara.js` **7 su 7 accusati**, compresi i due difetti veri
+rimessi al loro posto.
+
+**A fine giornata: 207 verdi · 52 sabotaggi, 52 accusati** (di cui 16 verdi e
+9 sabotaggi su un PostgreSQL 16 vero).
