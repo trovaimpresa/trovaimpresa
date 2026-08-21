@@ -8716,12 +8716,22 @@ ${vecchi?`
 
       <div class="sh-b">
         <div class="sh-tit">Dove sei</div>
+        <!-- ⚠️ 22 agosto 2026 — «Es.» DAVANTI A TUTTI E TRE, e non e' un dettaglio.
+             La via lo aveva («Es. Via Dante Alighieri, 5»), CAP, Citta' e
+             Provincia no: dicevano «02100», «Rieti», «RI» e basta. Un
+             suggerimento senza «Es.» sembra una casella gia' compilata, e
+             quelle tre sono rimaste vuote per mesi — con l'indirizzo che
+             usciva a meta' su OGNI PDF (preventivi, fatture, computo, SAL,
+             lista per la gara, analisi dei prezzi).
+             Peggio: l'esempio era l'indirizzo VERO di Alessio, quindi la
+             schermata sembrava piena anche a lui. Visto in una foto il 22
+             agosto, mentre cercavamo perche' l'indirizzo usciva corto. -->
         <div class="field"><label>Via e numero</label><input id="a-ind" value="${esc(a.indirizzo||"")}" placeholder="Es. Via Dante Alighieri, 5"></div>
         <div class="row2">
-          <div class="field"><label>CAP</label><input id="a-cap" value="${esc(a.cap||"")}" placeholder="02100" inputmode="numeric"></div>
-          <div class="field"><label>Città</label><input id="a-citta" value="${esc(a.citta||"")}" placeholder="Rieti"></div>
+          <div class="field"><label>CAP</label><input id="a-cap" value="${esc(a.cap||"")}" placeholder="Es. 02100" inputmode="numeric"></div>
+          <div class="field"><label>Città</label><input id="a-citta" value="${esc(a.citta||"")}" placeholder="Es. Rieti"></div>
         </div>
-        <div class="field"><label>Provincia</label><input id="a-prov" value="${esc(a.prov||"")}" placeholder="RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
+        <div class="field"><label>Provincia</label><input id="a-prov" value="${esc(a.prov||"")}" placeholder="Es. RI" maxlength="2" style="max-width:120px;text-transform:uppercase"></div>
         <div class="sh-nota">La Mappa parte da qui per calcolare le distanze dei cantieri.</div>
       </div>
 

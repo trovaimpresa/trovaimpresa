@@ -11402,3 +11402,39 @@ rimessi al loro posto.
 
 **A fine giornata: 207 verdi · 52 sabotaggi, 52 accusati** (di cui 16 verdi e
 9 sabotaggi su un PostgreSQL 16 vero).
+
+---
+
+## ⛔ UN SUGGERIMENTO SENZA «Es.» SEMBRA UNA CASELLA GIÀ COMPILATA (22 agosto 2026)
+
+Nei **Dati azienda**, sotto «Dove sei», le caselle dicevano:
+
+| casella | suggerimento | com'era |
+|---|---|---|
+| Via e numero | «**Es.** Via Dante Alighieri, 5» | ✅ si capiva |
+| CAP | «02100» | ⛔ sembrava scritto |
+| Città | «Rieti» | ⛔ sembrava scritto |
+| Provincia | «RI» | ⛔ sembrava scritto |
+
+**Conseguenza:** quelle tre caselle sono rimaste **vuote per mesi**, e
+`azIndirizzo(az)` stampava la sola via su **OGNI** PDF — preventivi, fatture,
+computo metrico, SAL, lista per la gara, analisi dei prezzi.
+
+⚠️ **E la coincidenza peggiora tutto: l'esempio era l'indirizzo VERO di
+Alessio.** La schermata sembrava piena anche a lui. Trovato il 22 agosto
+guardando una sua foto, mentre cercavamo perché l'indirizzo usciva corto —
+non era il codice, era una casella vuota che sembrava piena.
+
+⛔ **REGOLA: un `placeholder` che potrebbe essere scambiato per un valore va
+scritto «Es. …».** Vale doppio quando l'esempio è verosimile: un CAP, una
+città, una targa, un codice fiscale.
+
+✅ Sistemato: «Es. 02100», «Es. Rieti», «Es. RI».
+`prove/banco-suggerimenti.js` — **9 verdi**: prende il blocco «Dove sei» dal
+file vero e controlla che tutte e quattro le caselle comincino con «Es. ».
+
+⚠️ **RESTA DA GUARDARE:** nel gestionale ci sono **118 suggerimenti**, e ~51
+non cominciano con «Es.». Il banco li elenca senza far diventare rosso niente
+(guarda solo i Dati azienda). Il più sospetto è il codice fiscale del cliente:
+**«RSSMRA80A01H501U»**, che sembra un dato vero identico a quelli veri.
+Messo in lista come n. 27.
