@@ -11015,3 +11015,120 @@ Niente correzioni per strada. Restano da fare, in un push a parte:
 le due righe della **«Lista per la gara»** (`az.telefono` → `az.tel`,
 `az.indirizzo` → `azIndirizzo(az)`), che adesso stanno in
 `js/gest-computo-pdf.js`.
+
+---
+
+## ⛔ L'APICE INVERSO DENTRO IL CSS — il difetto del 18 agosto, trovato il 22
+
+**Visto da Alessio in una foto della Console**, un minuto dopo il push dello
+spezzamento. La scritta rossa era:
+
+```
+Uncaught (in promise) ReferenceError: riga is not defined
+    at stili (ai-integrazione.js:703:52)
+    at HTMLDocument.avvia (ai-integrazione.js:778:5)
+```
+
+⚠️ **NON c'entrava niente con lo spezzamento.** `js/ai-integrazione.js` è del
+18 agosto, non è stato toccato e non era nel commit. Ma è comparsa lì, dopo
+quel push, e per un minuto è sembrata colpa sua.
+
+### Cos'era
+
+`stili()` scrive tutto il CSS dell'AI dentro una **stringa a template**, fra
+due apici inversi (righe 679 → 766). Il 18 agosto, per spiegare perché la
+classe era stata rinominata, è stato scritto **dentro quel CSS** un commento
+con i nomi delle classi fra apici inversi:
+
+> QUESTA CLASSE SI CHIAMAVA \`.ai-riga\`, COME QUELLA …
+> Rinominata in \`.ai-fila\`, che qui dentro è solo sua.
+
+Per JavaScript **quel primo apice CHIUDE la stringa**. Da lì in poi il
+commento non è più un commento: `.ai-riga` diventa `.ai` **meno** `riga`, e
+`riga` non esiste. Colonna 52 della riga 703: esattamente il primo apice.
+
+⛔ **E il file passava `node --check`**: non è un errore di sintassi, è un
+errore che salta fuori solo **quando la funzione gira**.
+
+### Cosa rompeva, dal 18 al 22 agosto
+
+`stili()` moriva **prima** di `document.head.appendChild(s)`. Quindi:
+**l'AI del gestionale era senza NESSUNO stile, e `caricaStato()` non partiva
+mai** — niente contatore dei crediti. Su ogni iscritto, per quattro giorni.
+
+### ⛔ LE REGOLE CHE NASCONO DA QUI
+
+**1. Dentro una stringa a template non si scrive MAI un apice inverso, nemmeno
+dentro un commento.** Un commento dentro un template non è un commento: è
+testo, e l'apice è un carattere che chiude. Per citare un nome lì dentro si
+usano le virgolette basse « ».
+
+**2. Il banco deve fare il LOGIN.** `ai-integrazione.js` comincia con
+`if(!getToken()) return;`. Il banco che apriva la pagina non era loggato,
+quindi `stili()` **non partiva nemmeno**, e il difetto restava invisibile.
+Adesso `prove/banco-ai-stili.js` mette un finto token in `localStorage`
+(`sb-…-auth-token`) prima di caricare la pagina. **Senza login, di quel file
+non si prova niente.**
+
+**3. `Uncaught (in promise)` non passa da `pageerror`.** Il primo banco
+scritto per questo difetto restava verde sulla riga «nessun errore» perché
+raccoglieva solo `pageerror`. Va aggiunto un ascoltatore su
+`unhandledrejection`. ⚠️ E il messaggio è `riga is not defined`: **non
+contiene la parola `ReferenceError`**, quindi filtrare su quella parola non
+basta.
+
+### Come è stato provato
+`prove/banco-ai-stili.js` — **7 verdi** sul file sistemato, **6 rosse** su
+quello di ieri. Fa il login finto, apre la pagina in Chromium, e poi
+**rilegge il foglio di stile installato**: ci deve essere `.ai-fila` (che
+stava dopo il punto di rottura), l'ultima regola `.ai-help-foot`, e il pezzo
+`@media(max-width:560px)` che sta in fondo a tutto. Se il CSS è troncato,
+è rosso.
+`prove/trappola-backtick.js` — passa al setaccio **tutti** i file js della
+pagina cercando la stessa trappola: **è solo lì**. I quattro pezzi nuovi
+sono puliti.
+`prove/sabotaggi-rattoppi.js` — **8 su 8 accusati**.
+
+---
+
+## ⛔ «1 preventivo senza risposta — Fermi da più di una settimana» (22 agosto)
+
+Sempre dalla stessa foto. Il **titolo** il singolare ce l'aveva (`nn()`), la
+**riga sotto** no: era una stringa fissa al plurale.
+⚠️ **Stessa famiglia di «le 1 righe rimaste uguali» del 21 agosto.**
+
+⛔ **REGOLA: quando un titolo passa da `nn()`, la riga sotto deve passare
+dallo stesso numero.** Un avviso che dice «1» in alto e «vanno» sotto si
+contraddice da solo.
+
+`prove/banco-plurale.js` — **12 verdi**, **4 rosse** sul file di prima.
+Prende `nn()` e il blocco dell'avviso **verbatim dal file vero** e li fa
+girare con 1, 2, 3 e 10: titolo e riga sotto devono essere sempre dello
+stesso numero.
+
+---
+
+## ⛔ UN BANCO SEMPRE ROSSO NON PROVA NIENTE, COME UNO SEMPRE VERDE (22 agosto)
+
+**Sbaglio mio, e va scritto.** La prima tornata di `sabotaggi-apri.js` è stata
+**interrotta a metà** (troppo lenta, due minuti di tetto) mentre il quarto
+sabotaggio era ancora in piedi: ha lasciato in giro un `gest-fatture.js` con
+una parentesi in meno. La tornata dopo ha preso **quel file rotto** come punto
+di partenza — e ha dichiarato «**8 su 8 accusati**» mentre il banco era rosso
+comunque, con o senza sabotaggi. Quel numero, dato ad Alessio, non valeva
+niente.
+
+⛔ **REGOLA: prima di sabotare, il banco va fatto girare SENZA sabotaggi e
+deve essere VERDE.** Se è già rosso, ci si ferma. La guardia è adesso in cima
+a `sabotaggi-apri.js` e a `sabotaggi-rattoppi.js`.
+⛔ **E chi sabota ripristina i file anche se viene ammazzato**: un tetto di
+tempo troppo corto è un modo di sporcare i file di lavoro.
+
+Rifatto da capo con la partenza pulita: `apri.js` **18 verdi**,
+`sabotaggi-apri.js` **8 su 8**, questa volta per davvero.
+
+**Il conto del secondo push del 22 agosto: 37 verdi · 16 sabotaggi, 16
+accusati.**
+
+⚠️ **E il conto vero della giornata, di nuovo: due difetti, tutti e due
+trovati da Alessio in una foto dello schermo. Zero dai banchi.**

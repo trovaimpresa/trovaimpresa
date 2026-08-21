@@ -3544,7 +3544,12 @@
     if(lavOggi.length)   DA.push({g:2,t:nn(lavOggi.length,"lavoro in programma oggi","lavori in programma oggi"),
                                   d:(lavOggi[0].descrizione||"Lavoro")+(lavOggi.length>1?" e altri":""),go:"lavori"});
     if(prevFermi.length) DA.push({g:2,male:1,t:nn(prevFermi.length,"preventivo senza risposta","preventivi senza risposta"),
-                                  d:"Fermi da più di una settimana: forse vanno sollecitati",go:"preventivi"});
+                                  /* ⚠️ 21 agosto 2026 — con UNO si leggeva "Fermi ... vanno sollecitati".
+                                     Il titolo il singolare ce l'aveva (nn), la riga sotto no. Visto da
+                                     Alessio in una foto. Stessa famiglia di "le 1 righe rimaste uguali". */
+                                  d:prevFermi.length===1
+                                      ? "Fermo da più di una settimana: forse va sollecitato"
+                                      : "Fermi da più di una settimana: forse vanno sollecitati",go:"preventivi"});
 
     /* dati azienda mancanti: va in cima a tutto il resto. Senza nome e partita
        IVA i PDF di preventivi e fatture escono senza intestazione, quindi è la

@@ -700,14 +700,14 @@
 #ai-in,#ai-help-in,#ai-comp-in{width:100%;border:1.5px solid #e5e7eb;border-radius:11px;padding:13px;font:14px/1.5 inherit;
   resize:vertical;box-sizing:border-box;color:#111827}
 #ai-in:focus,#ai-help-in:focus,#ai-comp-in:focus{outline:none;border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
-/* ⚠️ 18 agosto 2026 — QUESTA CLASSE SI CHIAMAVA `.ai-riga`, COME QUELLA
+/* ⚠️ 18 agosto 2026 — QUESTA CLASSE SI CHIAMAVA «.ai-riga», COME QUELLA
    DELLA RIGA AI DENTRO I MODULI DEL GESTIONALE (css/gestionale.css).
    Questo file lo stile se lo inietta a mano dentro <head> QUANDO PARTE,
    cioe' DOPO il foglio di stile: stessa forza, ma arriva dopo, e vinceva
    lui. Risultato: la riga dell'AI dentro il modulo del preventivo
    diventava una fila orizzontale e la casella dove si scrive passava da
    645 a 206 px — una fessura, con dentro un testo lungo.
-   Misurato nel browser, non a occhio. Rinominata in `.ai-fila`, che qui
+   Misurato nel browser, non a occhio. Rinominata in «.ai-fila», che qui
    dentro e' solo sua. */
 .ai-fila{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
 .ai-crediti{font-size:13px;color:#6b7280}
