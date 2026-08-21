@@ -823,6 +823,35 @@
     (navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(txt).then(ok).catch(fb):fb();
   }
   let ruoloUtente=null;
+
+  /* ⛔ 21 agosto 2026 — COME SI CHIAMA IL GESTIONALE.
+     Uno solo, ma ognuno legge il nome del suo mestiere: e' la scelta di
+     Alessio del 21 agosto, presa dopo aver guardato cosa costerebbe
+     dividerlo davvero (24.000 righe da tenere in due copie, per l'1% che
+     e' diverso).
+     ⚠️ I nomi delle chiavi sono quelli veri del database (`imprese.tipo`),
+        gli stessi delle tre scelte di _chiediTipo(): impresa · artigiano ·
+        professionista. Il negozio ha un gestionale suo, non passa di qui.
+     ⚠️ Chi non ha ancora scelto il tipo (registrazione a meta') NON deve
+        vedere un nome sbagliato: legge «Il tuo gestionale», come prima. */
+  const _NOMI_GESTIONALE={
+    impresa:'Gestionale impresa',
+    artigiano:'Gestionale artigiano',
+    professionista:'Gestionale studio'
+  };
+  function nomeGestionale(){
+    return _NOMI_GESTIONALE[String(ruoloUtente||'').trim().toLowerCase()]||'Il tuo gestionale';
+  }
+  function applicaNomeGestionale(){
+    const nome=nomeGestionale();
+    /* titolo grande della schermata iniziale (statico nell'HTML, fuori dal translator) */
+    const lt=document.querySelector('.landing-top h1');
+    if(lt)lt.textContent=nome;
+    /* e il nome della scheda del browser, che si vede quando si tengono
+       aperte piu' pagine */
+    document.title=nome+' — TrovaImpresa';
+  }
+
   /* Legge la categoria (tipo) dell'utente loggato — stesso metodo dei pannelli: tabella 'imprese', campo 'tipo', chiave user_id */
   async function logRuoloUtente(uid){
     if(!sb||!uid){console.log('[gestionale] ruolo utente: nessun utente loggato');return;}
@@ -848,11 +877,18 @@
     /* scadenzario attivo per tutti i ruoli (imprese: DURC, assicurazioni, mezzi...) */
     const _tabScad=document.querySelector('#tab-scadenzario');
     if(_tabScad)_tabScad.style.display='';
+    /* ⛔ 21 agosto 2026 — IL NOME DEL GESTIONALE STA IN UN POSTO SOLO (qui sotto).
+       Chi si registra come impresa apre il «Gestionale impresa», l'artigiano il
+       «Gestionale artigiano», lo studio tecnico il «Gestionale studio».
+       ⚠️ Prima il nome dello studio («Gestionale Studio») stava scritto qui
+          dentro il ramo del professionista: se domani si aggiunge un nome
+          nuovo si finisce con la stessa regola in due posti — ed e' la
+          lezione che e' gia' costata una giornata. Adesso il nome lo decide
+          nomeGestionale() e basta. */
+    applicaNomeGestionale();
     if(ruoloUtente==='professionista'){
       const sub=document.querySelector('.landing-sub');
       if(sub)sub.textContent="Ogni reparto è separato: pratiche, clienti, collaboratori e calendario non si mischiano.";
-      const lt=document.querySelector('.landing-top h1'); /* titolo landing statico: adattato per ruolo via JS, fuori dal translator */
-      if(lt)lt.textContent="Gestionale Studio";
       const fsearch=document.querySelector('#f-search'); /* placeholder in HTML statico: per-ruolo via JS, non dal translator */
       if(fsearch)fsearch.placeholder="Cerca cliente o pratica...";
       /* la ricerca unica: allo studio tecnico non si dice «lavoro», si dice
