@@ -12927,3 +12927,101 @@ del 21 agosto sul PDF del SAL, ricomparsa identica:
 - **«le due righe della Lista per la gara»**: fatte.
 
 ⛔ **Quando una cosa si chiude, va tolta dalla lista lo stesso giorno.**
+
+
+# ⛔ 21 agosto 2026, SERA — IL PUSH DELLA SICUREZZA, E DUE MIEI SBAGLI
+
+## COSA È ONLINE E FUNZIONA
+
+Push `755b6ba` (12 file) + `73359e8` (memoria) + `51d2520` (il ritorno indietro).
+
+1. **`netlify/functions/ai-orienta.js`** — la nuvoletta del sito aveva un rubinetto
+   aperto: nessun controllo, nessun tetto, `claude-opus-4-5` con 1000 token per un
+   JSON di tre righe, e il testo del visitatore incollato **dentro** le istruzioni.
+   Adesso: solo dal nostro sito (Origin), testo tagliato a 300 caratteri, tetto di
+   **15 al giorno per indirizzo e 400 in tutto** (`sql/ai-orienta-tetto.sql`),
+   `max_tokens` **200**, il modello cambiabile da Netlify (`AI_ORIENTA_MODELLO`), e
+   **la pagina la decide la function**, non il modello. Col tetto pieno non dà
+   errore: risponde una cosa che il browser non riconosce e la nuvoletta mostra da
+   sola i quattro pulsanti. ✅ Provato in produzione: il contatore ha registrato.
+2. **`js/gest-fatture.js`** — la partita IVA scritta coi punti finiva nel file
+   elettronico così com'era (lo SDI scarta). Ora passa da `xpul()`, come nel
+   controllo. E `#fa-spese-iva` è entrato nell'elenco dei campi che aggiornano
+   «Il conto».
+3. **`js/gest-sal-prezzario.js`** — i due `toISOString()` rimasti: il SAL nasceva
+   con la data di ieri fra mezzanotte e le due. Ora `todayStr()`.
+4. **`gestionale-app.html`** — se uno dei quattro file esterni non arriva, adesso
+   compare un avviso rosso in cima invece di lasciare la pagina muta (`_rt()`).
+
+**Nel database, già eseguiti:** `blocco-piano-premium.sql` ·
+`blocco-recensioni-finte.sql` · `ai-orienta-tetto.sql`.
+
+## ⛔ SBAGLIO N. 1 — HO CONCLUSO DA UN INDIZIO SOLO
+
+Il preventivo AI del pannello ha risposto **504** (tempo scaduto). Ho visto che la
+mia modifica a `ai-claude.js` aggiungeva un passaggio prima di chiamare il
+modello, ho visto un 504 anche sull'assistente di supporto, e **ho concluso che
+il mio codice bloccava la function**. Ho fatto rimettere il file com'era.
+
+**Il ritorno indietro non ha risolto niente**: col codice vecchio il preventivo dà
+504 uguale. Quindi la mia modifica non c'entrava, e quel push è stato sprecato.
+
+⛔ **LA REGOLA: quando una function va in timeout, si guarda il REGISTRO DI
+NETLIFY prima di toccare il codice.** Lì c'è scritto quanti secondi ci ha messo e
+dove si è fermata. Io ho tirato a indovinare da un sintomo, e ho indovinato male.
+È la stessa famiglia della lezione del 21 mattina («una diagnosi che spiega bene i
+sintomi non è una diagnosi»): allora bastarono trenta secondi di `created_at`,
+qui bastava aprire il registro.
+
+## ⛔ SBAGLIO N. 2 — `HEAD~1` QUANDO I COMMIT ERANO DUE
+
+Per il ritorno indietro gli avevo dato `git checkout HEAD~1 -- ...`. Ma Alessio
+aveva fatto **due** commit (i 12 file, poi `CLAUDE.md`), quindi `HEAD~1` era
+proprio il commit con la modifica dentro: git ha risposto «nothing to commit».
+⛔ **Per tornare indietro si usa il numero del commit, non `HEAD~1`.** Il numero
+si legge nella riga del push precedente (`e236d97..755b6ba`).
+
+## ⛔ IL DIFETTO VERO, CHE RESTA APERTO: IL PREVENTIVO AI VA IN TIMEOUT
+
+`netlify/functions/ai-claude.js`, azione `preventivo`: `claude-sonnet-4-5` con
+`max_tokens: 4096`. Le chiamate riuscite scrivono **~2.300 token**, che sono
+decine di secondi di scrittura; Netlify taglia la function molto prima.
+
+- ✅ 17:20 del 21 agosto: riuscito, descrizione corta.
+- ⛔ 19:45: 504, con «ristrutturazione completa chiavi in mano, demolizione,
+  mattonelle, sanitari, rubinetteria e impianti» — cioè un lavoro grosso.
+
+⚠️ **Non è rotto da stasera: è fragile da sempre, e cade proprio sui lavori
+grossi**, che sono quelli che contano. In `ai_richieste` non resta traccia delle
+volte che cade, perché la riga si scrive DOPO la risposta del modello: quindi il
+difetto è invisibile nei conti.
+
+**Da fare, e prima di tutto guardare il registro di Netlify:** o si accorcia
+quello che il modello deve scrivere, o il preventivo si costruisce a pezzi
+(prima le voci, poi i prezzi), o si passa a una function che lavora in
+background e il pannello ripassa a ritirare. ⚠️ L'assistente di **supporto**
+invece funziona: è haiku e scrive quattro righe.
+
+## ⛔ LA FALLA CHE È TORNATA APERTA, E VA CHIUSA
+
+Con il ritorno indietro, `ai-claude.js` **si fida di nuovo dell'`impresa_id` che
+gli manda il browser**: con l'id di un altro iscritto (pubblico) si bruciano le
+sue 30 chiamate al giorno e gli si scrivono righe in `ai_richieste`.
+
+⚠️ **I quattro pannelli però mandano già il gettone della sessione**
+(`_aiIntestazioni()`, 12 punti, tuttora online e innocui): quando si rifà il
+controllo lato function, **dal lato browser non c'è più niente da fare**.
+Il controllo nuovo deve avere un **tempo massimo** (4 secondi) e non poter restare
+appeso.
+
+## COSE VISTE NELLE FOTO, PICCOLE, DA SISTEMARE
+
+- `index.html` — il pulsante arancione dice «Vedi gli artigiani di **roma**»:
+  la città arriva dall'indirizzo minuscola e non viene rimessa in maiuscolo.
+- `pannello-*.html` — nella pagina «Preventivo AI» spunta a sinistra **una mappa
+  dell'Europa** larga un terzo dello schermo. Non c'entra niente.
+- `pannello-*.html` — la risposta dell'assistente mostra il **cancelletto** `#`
+  del titolo invece di trasformarlo: `chiediSupportoAI` converte solo `**grassetto**`.
+- La striscia arancione «Non ho trovato la risposta · Contatta assistenza» sembra
+  un secondo modo di chiedere all'AI: è invece il messaggio che arriva ad Alessio.
+  Meglio «Scrivi al team di TrovaImpresa».
