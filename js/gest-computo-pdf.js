@@ -679,6 +679,28 @@
     if(s==="kilogrammi"||s==="kg")s="kg";
     return s;
   }
+
+  /* ⚠️ 21 agosto 2026 — «m²» E «mq» NELLA STESSA LISTA.
+     Visto da Alessio: una lavorazione diceva «20,46 m²» e quella sotto
+     «174,06 mq». La prima scelta dalla tendina, la seconda arrivata da un
+     prezzario importato. Sono la stessa unita' scritta in due modi, e sullo
+     stesso schermo sembrano due cose diverse.
+     Sul foglio stampato era gia' a posto dal 22 agosto (_umPdf, che va
+     nell'altro verso: jSPDF il quadratino non lo sa disegnare).
+
+     ⛔ SI CAMBIA SOLO QUELLO CHE SI LEGGE, MAI QUELLO CHE C'E' NEL DATABASE.
+        La casella U.M. della scheda continua a mostrare quello che l'utente
+        (o il prezzario) ha scritto: li' si sta correggendo un dato, e un dato
+        non si riscrive alle spalle di chi lo guarda.
+     ⛔ E SOLO m2/m3. «ml» e «m» si appiattiscono tutte e due su «m», ma per
+        chi legge NON sono la stessa parola: quelle si lasciano com'erano.
+        Un'unita' che non e' in tabella si scrive come l'ha scritta lui. */
+  const UM_SCHERMO={m2:"m²",m3:"m³"};
+  function _umSchermo(u){
+    const t=String(u==null?"":u).trim();
+    if(!t)return "";
+    return UM_SCHERMO[_uniPiatta(t)]||t;
+  }
   /* un codice buono per andare a cercare: lettere, numeri, punto, trattino,
      barra. ⚠️ La percentuale e il trattino basso, dentro un LIKE, sono JOLLY:
      un codice che li contiene pescherebbe mezzo prezzario e riempirebbe la
@@ -1045,9 +1067,12 @@
 
     /* ---------- il corpo ---------- */
     let n=0;
-    const perCap={}; voci.forEach(v=>{(perCap[v.capitolo_id||"_"]=perCap[v.capitolo_id||"_"]||[]).push(v);});
-    const gruppi=capitoli.map(cp=>({cap:cp,voci:perCap[cp.id]||[]}))
-                         .concat(perCap["_"]?[{cap:null,voci:perCap["_"]}]:[]);
+    /* ⛔ 21 agosto 2026 — un raggruppamento solo per tutti e tre i fogli.
+       Qui c'era una copia scritta a mano, e un'altra dentro computoPdf: tre
+       posti che dovevano dare lo STESSO ordine, perche' il numero della
+       lavorazione dev'essere lo stesso su tutti i documenti che si
+       consegnano insieme. Adesso e' _compGruppi, e basta. */
+    const gruppi=_compGruppi(voci,capitoli);
 
     gruppi.forEach(function(g){
       if(!g.voci.length) return;
@@ -1310,9 +1335,9 @@
     testaTabella();
 
     /* ---- il corpo ---- */
-    const senzaCap=voci.filter(v=>!v.capitolo_id);
-    const gruppi=capitoli.map(cap=>({cap:cap,voci:voci.filter(v=>String(v.capitolo_id)===String(cap.id))}));
-    if(senzaCap.length)gruppi.push({cap:null,voci:senzaCap});
+    /* ⛔ 21 agosto 2026 — vedi computoListaGara: il raggruppamento sta in
+       _compGruppi, in un posto solo. */
+    const gruppi=_compGruppi(voci,capitoli);
 
     let n=0;const sub=[];
     gruppi.forEach(g=>{
@@ -2110,13 +2135,13 @@
   /* Le voci raggruppate per capitolo, nell'ordine in cui vengono numerate
      sui fogli: i capitoli in ordine (anche quelli vuoti), e in fondo le
      voci senza capitolo.
-     ⚠️ Questo stesso raggruppamento e' scritto a mano dentro computoPdf e
-     dentro computoListaGara. NON le ho toccate oggi: spostare un pezzo di
-     un documento che funziona e aggiungerne uno nuovo nello stesso push
-     vuol dire non sapere piu' quale dei due ha rotto le cose. Il banco
-     (banco-analisi-pdf.js) tiene le due copie verbatim e controlla che
-     diano lo stesso ordine di questa: se un domani una delle tre cambia,
-     diventa rosso. L'unificazione va fatta in un push suo. */
+     ⛔ 21 agosto 2026 — ADESSO E' L'UNICA. Fino a ieri lo stesso
+     raggruppamento era scritto a mano anche dentro computoPdf e dentro
+     computoListaGara: tre copie che dovevano dare lo stesso ordine, perche'
+     il numero della lavorazione dev'essere lo stesso su tutti i documenti
+     che si consegnano insieme. Adesso le altre due chiamano questa.
+     ⚠️ Il banco non confronta piu' tre copie: controlla che di copie ce ne
+     sia UNA, e che i tre fogli numerino le lavorazioni allo stesso modo. */
   function _compGruppi(voci,capitoli){
     const senzaCap=(voci||[]).filter(v=>!v.capitolo_id);
     const gruppi=(capitoli||[]).map(cap=>({cap:cap,

@@ -12134,3 +12134,77 @@ fra cui «rimetto textarea negli attributi» (il difetto di partenza),
 «rimetto il giro scritto due volte» e «tolgo la frase della carta».
 
 **Consegna: banchi verdi · controllo-push verde · md5 uguale · un push solo.**
+
+
+# 21 agosto 2026 (10) — TRE LAVORI, UN PUSH SOLO
+
+`gestionale-app.html` · `js/gest-computo.js` · `js/gest-computo-pdf.js`.
+Niente SQL, niente CSS.
+
+## n. 26 — «m²» e «mq» nella stessa lista
+
+Nell'elenco delle lavorazioni una riga diceva «20,46 m²» e quella sotto
+«174,06 mq»: la prima scelta dalla tendina, la seconda arrivata da un
+prezzario importato.
+
+Nasce **`_umSchermo(u)`** accanto a `_uniPiatta`, e la usano tutti e **sei**
+i posti dove un'unità si LEGGE (elenco lavorazioni, confronto della variante
+×2, prezzario, analisi, spese).
+
+⛔ **SI CAMBIA SOLO QUELLO CHE SI LEGGE.** Nel database resta quello che ha
+scritto il prezzario, e la **casella U.M. della scheda** continua a mostrarlo
+tale e quale: lì si sta CORREGGENDO un dato, e un dato non si riscrive alle
+spalle di chi lo guarda. Il banco lo controlla, ed è un sabotaggio.
+
+⛔ **IN TABELLA CI SONO SOLO `m2` E `m3`.** `_uniPiatta` appiattisce «ml» e
+«m» tutte e due su «m» — giusto per CONFRONTARE, sbagliato per SCRIVERE: a
+schermo «ml» e «m» sono due parole diverse. Un'unità che non è in tabella si
+scrive come l'ha scritta lui. Anche questo è un sabotaggio («metto anche m
+in tabella»).
+
+⚠️ Sul foglio stampato si va **nell'altro verso** (`_umPdf`: «m²» → «mq»),
+perché jsPDF il quadratino non lo sa disegnare. Le due direzioni convivono, e
+il banco controlla tutte e due.
+
+## n. 5 — la gru, il cantiere, il piccone
+
+Rifatte in `ICO_REPARTO`. Il **cantiere** adesso è un **cono stradale** (la
+transenna a 26 px era un rettangolo con dentro dei graffi). Le chiavi restano
+le emoji: nessun dato da spostare.
+
+⚠️ **Il piccone mi ha preso cinque tentativi.** Le prime due versioni erano
+un piccone *verticale*: uscivano un ombrello e una palma. Un attrezzo si
+riconosce dalla **posa**, non dai dettagli — il manico va in diagonale.
+Le ho disegnate tutte e cinque e le ho guardate prima di proporne una.
+
+## n. 6 — un raggruppamento solo
+
+`_compGruppi` era scritta a mano **anche** dentro `computoPdf` e dentro
+`computoListaGara`: tre copie che dovevano dare lo stesso ordine, perché il
+numero della lavorazione dev'essere lo stesso su tutti i documenti che si
+consegnano insieme. Adesso le altre due la chiamano.
+
+⚠️ **`banco-analisi-pdf.js` è diventato rosso da solo**, e ha fatto il suo
+mestiere: teneva le due copie verbatim. Riscritto: adesso controlla che di
+copie ce ne sia **UNA** (`perCap[` non esiste più, `senzaCap` compare una
+volta sola) e confronta l'ordine con un raggruppamento **rifatto a mano nel
+banco** — ⛔ una funzione confrontata con se stessa non prova niente.
+
+## I BANCHI
+
+| banco | verdi |
+|---|---|
+| `prove/banco-unita.js` | 48 |
+| `prove/banco-icone.js` | 20 |
+| `prove/banco-analisi-pdf.js` | 107 |
+
+`prove/sabotaggi-unita-icone-gruppi.js` — **14 su 14 accusati**.
+
+⛔ **UNA PROVA CHE HO DOVUTO BUTTARE.** La prima stesura di `banco-icone.js`
+leggeva tutti i numeri dentro il path e chiedeva che stessero fra 0 e 24:
+ha accusato **45 icone su 57, tutte sane**. In un path SVG i numeri dopo una
+«c» sono **spostamenti**, non posizioni. La misura vera la sa dare solo il
+browser: adesso il banco apre le 57 icone in Chromium e legge il `getBBox` —
+nessuna vuota, nessuna che sborda, nessuna grande come un francobollo.
+
+**Consegna: banchi verdi · controllo-push verde · md5 uguale · un push solo.**

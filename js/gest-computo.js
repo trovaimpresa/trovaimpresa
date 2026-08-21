@@ -1044,7 +1044,7 @@
       r.cambiate.forEach(function(x){
         const d=x.impB-x.impA;
         const dettaglio=[];
-        if(x.dQ)dettaglio.push('quantità '+_misTesto(x.qA)+' → <b>'+_misTesto(x.qB)+'</b>'+(x.voce.unita?' '+esc(x.voce.unita):''));
+        if(x.dQ)dettaglio.push('quantità '+_misTesto(x.qA)+' → <b>'+_misTesto(x.qB)+'</b>'+(x.voce.unita?' '+esc(_umSchermo(x.voce.unita)):''));
         if(x.dP)dettaglio.push('prezzo '+eur2(x.pA)+' → <b>'+eur2(x.pB)+'</b>');
         h+=riga(nomeVoce(x.voce),
                 (d>=0?'+ ':'− ')+eur2(Math.abs(d)),
@@ -1057,7 +1057,7 @@
       r.aggiunte.forEach(function(v){
         const imp=(+v.quantita||0)*(+v.prezzo_unitario||0);
         h+=riga(nomeVoce(v),'+ '+eur2(imp),
-                _misTesto(v.quantita)+(v.unita?' '+esc(v.unita):'')+' × '+eur2(v.prezzo_unitario),
+                _misTesto(v.quantita)+(v.unita?' '+esc(_umSchermo(v.unita)):'')+' × '+eur2(v.prezzo_unitario),
                 'var-piu');
       });
     }
@@ -1066,7 +1066,7 @@
       r.tolte.forEach(function(v){
         const imp=(+v.quantita||0)*(+v.prezzo_unitario||0);
         h+=riga(nomeVoce(v),'− '+eur2(imp),
-                'era '+_misTesto(v.quantita)+(v.unita?' '+esc(v.unita):'')+' × '+eur2(v.prezzo_unitario),
+                'era '+_misTesto(v.quantita)+(v.unita?' '+esc(_umSchermo(v.unita)):'')+' × '+eur2(v.prezzo_unitario),
                 'var-meno');
       });
     }
@@ -1623,7 +1623,7 @@
     };
     const rigaVoce=(v,i,tot)=>'<div class="spesa-row" data-action="comp-voce" data-id="'+esc(String(v.id))+'" style="cursor:pointer;align-items:flex-start">'
       +'<span class="cm-testo">'+(v.codice?'<b>'+esc(v.codice)+'</b> · ':'')+esc(v.descrizione||"(senza descrizione)")
-      +  '<small class="sp-forn">'+_misLetta(v.quantita)+(v.unita?" "+esc(v.unita):"")
+      +  '<small class="sp-forn">'+_misLetta(v.quantita)+(v.unita?" "+esc(_umSchermo(v.unita)):"")
       +    ' × '+eur2(v.prezzo_unitario)
       +    (v.quantita_manuale?' · a corpo':(' · '+(+v.misure||0)+((+v.misure===1)?" misura":" misure")))
       +  '</small></span>'
@@ -2126,7 +2126,7 @@
     box.innerHTML=ppCache.map(x=>
       '<div class="spesa-row" data-action="pp-usa" data-id="'+esc(String(x.id))+'" style="cursor:pointer;align-items:flex-start">'
       +'<span>'+(x.codice?'<b>'+esc(x.codice)+'</b> · ':'')+esc(x.descrizione||"(senza descrizione)")
-      +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(x.unita):"")
+      +  '<small class="sp-forn">'+eur2(x.prezzo_unitario)+(x.unita?" / "+esc(_umSchermo(x.unita)):"")
       +    ((+x.usata_volte)?(" · usata "+(+x.usata_volte)+((+x.usata_volte===1)?" volta":" volte")):"")
       /* la provenienza si vede SEMPRE quando non e' quella dichiarata dal
          computo: prima, avendo scelto una tariffa, la riga non diceva da dove
@@ -2497,7 +2497,7 @@
                mentiva solo lo schermo, che è il posto peggiore dove
                mentire. Stessa protezione del 20 agosto. */
             +'><span class="cm-testo">'+esc(r.descrizione||"(senza nome)")
-            +'<small class="sp-forn">'+_misTesto(r.quantita)+(r.unita?" "+esc(r.unita):"")
+            +'<small class="sp-forn">'+_misTesto(r.quantita)+(r.unita?" "+esc(_umSchermo(r.unita)):"")
             +' × '+eur2(r.prezzo_unitario)+'</small></span>'
             +'<b>'+eur2(imp)+'</b>'
             +'<button type="button" class="rdel" data-action="an-del" data-id="'+esc(String(r.id))+'" title="Elimina la riga">×</button></div>';
