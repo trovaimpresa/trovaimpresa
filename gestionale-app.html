@@ -517,13 +517,119 @@
         l'emoji dentro `gest_mestieri.icona`, e se sparisce di qui la card
         resta senza niente. Aggiungere si', togliere no. */
   const ICONE_GRUPPI=[
-    ["Muratura e struttura", ["🧱","🏗️","🪜","🚧","⛏️","🪨","🏠","🏢","🏭"]],
+    ["Muratura e struttura", ["🧱","🏗️","🚧","⛏️","🏠","🏢","🏭"]],
     ["Impianti",             ["🔌","⚡","💡","🚿","💧","🔥","❄️","🛁","📡","🔋"]],
-    ["Finiture",             ["🎨","🖌️","🪵","🪚","🚪","🪟","🧽","🪞"]],
-    ["Esterni e verde",      ["🌳","🌿","🌱","🪴","🧹","🏊","🚜","☀️"]],
+    ["Finiture",             ["🎨","🖌️","🚪","🧽","🖼️","🛋️","🧴"]],
+    ["Esterni e verde",      ["🌳","🌿","🌱","🌻","🧹","🏊","🚜","☀️"]],
     ["Studio tecnico",       ["📐","📏","📋","🏛️","🗺️","📷","🔍","📊","🦺","📝"]],
     ["Generiche",            ["🛠️","🔧","🧰","🚚","📦","🏷️","🔨","⭐"]]
   ];
+
+  /* ⛔ 21 agosto 2026 — LE SETTE CHE IL COMPUTER NON SA DISEGNARE.
+     Alessio ha aperto la tendina e sette icone erano QUADRATINI BIANCHI:
+     scala, pietra, legno, sega, finestra, specchio, pianta in vaso. Stanno
+     tutte nel blocco Unicode U+1FA70..U+1FAFF (2019-2021), e il Segoe UI
+     Emoji del suo Windows non ce l'ha. Tolte dalla lista.
+     ⛔ NIENTE EMOJI DI QUEL BLOCCO, mai: il banco lo controlla numero per
+        numero. (La prima volta fu il 10 agosto con 🏷.)
+     E poi il passo vero: le emoji non le disegniamo noi, percio' non si
+     possono migliorare. Adesso le disegniamo. Vedi qui sotto. */
+
+  /* =====================================================================
+     21 agosto 2026 — LE ICONE DEL REPARTO, DISEGNATE DA NOI
+     =====================================================================
+     Alessio ha scelto lo stile 2 fra tre proposte: disegno a tratto, del
+     colore del reparto.
+
+     ⛔ PERCHE' NON PIU' LE EMOJI. Le emoji non le disegniamo noi: le
+        disegna Windows. Quindi non si possono migliorare, e quelle che il
+        computer non ha escono come QUADRATINI BIANCHI — ne sono usciti
+        sette in faccia ad Alessio il 21 agosto (scala, pietra, legno,
+        sega, finestra, specchio, pianta). Con un disegno nostro il
+        problema non esiste: e' identico su ogni computer.
+
+     ⛔ LA CHIAVE RESTA L'EMOJI, e non e' pigrizia: i reparti gia' creati
+        hanno l'emoji dentro `gest_mestieri.icona`. Tenendola come chiave
+        non serve spostare nessun dato: cambia solo cosa si disegna.
+
+     ⚠️ Chiave sconosciuta (un reparto vecchio con un'emoji che non e' piu'
+        in lista) -> si disegna il martello. Mai un buco. */
+  const ICO_REPARTO={
+    /* ---- muratura e struttura ---- */
+    "🧱":'<rect x="2" y="5" width="20" height="14" rx="1"/><path d="M2 12h20"/><path d="M9 5v7"/><path d="M16 5v7"/><path d="M5.5 12v7"/><path d="M12.5 12v7"/><path d="M19 12v7"/>',
+    "🏗️":'<path d="M3 21h18"/><path d="M6 21V4h14"/><path d="M6 4 2 8"/><path d="M20 4v5"/><path d="M17 9h6l-3 4z"/>',
+    "🚧":'<rect x="2" y="7" width="20" height="9" rx="1"/><path d="m6 7 4 9"/><path d="m12 7 4 9"/><path d="M5 16v5"/><path d="M19 16v5"/>',
+    "⛏️":'<path d="m3 21 9-9"/><path d="M8 6c4-2 9 0 11 5"/><path d="m8 6 7 7"/><path d="M12 12 9.5 9.5"/>',
+    "🏠":'<path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V13h6v9"/>',
+    "🏢":'<rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 6h1"/><path d="M14 6h1"/><path d="M9 10h1"/><path d="M14 10h1"/><path d="M9 14h1"/><path d="M14 14h1"/><path d="M10 22v-4h4v4"/>',
+    "🏭":'<path d="M3 21h18"/><path d="M4 21V10l6 4V10l6 4V6h4v15"/><path d="M8 21v-4"/><path d="M14 21v-4"/>',
+    /* ---- impianti ---- */
+    "🔌":'<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M6 8h12v4a6 6 0 0 1-12 0Z"/>',
+    "⚡":'<path d="M13 2 3 14h7l-1 8 11-12h-7l1-8z"/>',
+    "💡":'<path d="M15 14c.2-1 .7-1.7 1.5-2.5A5 5 0 0 0 12 3a5 5 0 0 0-4.5 8.5c.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    "🚿":'<path d="M4 21V6a3 3 0 0 1 3-3h1"/><path d="M8 3h4"/><path d="M10 3v4"/><path d="M6 7h8l-2 4H8Z"/><path d="M8 15v.01"/><path d="M11 17v.01"/><path d="M14 14v.01"/><path d="M12 21v.01"/><path d="M16 19v.01"/>',
+    "💧":'<path d="M12 2.7c3.5 3.6 6 6.7 6 10.1a6 6 0 0 1-12 0c0-3.4 2.5-6.5 6-10.1Z"/>',
+    "🔥":'<path d="M12 2c1 4-2 5-2 8a4 4 0 0 0 8 0c0-2-1-3-2-4 3 2 5 5 5 8a9 9 0 0 1-18 0c0-5 5-7 9-12Z"/>',
+    "❄️":'<path d="M12 2v20"/><path d="m4 7 16 10"/><path d="m20 7-16 10"/><path d="M9 5l3-3 3 3"/><path d="M9 19l3 3 3-3"/>',
+    "🛁":'<path d="M3 12h18v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 12V5a2 2 0 0 1 4 0"/><path d="M7 19l-1 3"/><path d="M17 19l1 3"/>',
+    "📡":'<path d="M4 20 20 4"/><path d="M12 12a9 9 0 0 0-9-9"/><path d="M9 15a5 5 0 0 0-5-5"/><path d="M6 18a2 2 0 0 0-2-2"/><path d="m14 10 6 6-3 3-6-6z"/>',
+    "🔋":'<rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><path d="M9 10v4"/><path d="M7 12h4"/>',
+    /* ---- finiture ---- */
+    "🎨":'<path d="M12 2a10 10 0 0 0 0 20 2 2 0 0 0 0-4 4 4 0 0 1 4-4h2a4 4 0 0 0 4-4c0-4.4-4.5-8-10-8Z"/><path d="M7.5 10v.01"/><path d="M10 6.5v.01"/><path d="M14.5 6.5v.01"/><path d="M17.5 10v.01"/>',
+    "🖌️":'<path d="M14 3 21 10"/><path d="m17 6-8.5 8.5a3 3 0 0 0-.8 1.4L7 19l3-.7a3 3 0 0 0 1.4-.8L20 9"/><path d="M6 18c-1.5.5-2.5 2-3 4 2-.5 3.5-1.5 4-3"/>',
+    "🚪":'<rect x="5" y="2" width="14" height="20" rx="1"/><path d="M15 12v.01"/><path d="M3 22h18"/>',
+    "🧽":'<rect x="3" y="8" width="18" height="12" rx="3"/><path d="M3 14h18"/><path d="M8 8V6a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3v2"/>',
+    "🖼️":'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 16-5-5-6 6-2-2-5 5"/>',
+    "🛋️":'<path d="M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M2 14a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4H2Z"/><path d="M6 18v2"/><path d="M18 18v2"/>',
+    "🧴":'<path d="M9 7h6a3 3 0 0 1 3 3v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-9a3 3 0 0 1 3-3Z"/><path d="M10 7V4h4v3"/><path d="M6 12h12"/>',
+    /* ---- esterni e verde ---- */
+    "🌳":'<path d="M12 20v-6"/><path d="M9 14a5 5 0 0 1-2-9.5 4.5 4.5 0 0 1 8-1 4 4 0 0 1 2 7.6A4 4 0 0 1 15 14Z"/><path d="M8 20h8"/>',
+    "🌿":'<path d="M4 21c2-7 7-12 15-13"/><path d="M19 8c0 6-4 10-9 10-2 0-3-1-3-3 0-5 5-8 12-7Z"/>',
+    "🌱":'<path d="M12 21v-8"/><path d="M12 13C12 8 8 6 4 6c0 5 4 7 8 7Z"/><path d="M12 13c0-4 3-6 7-6 0 4-3 6-7 6Z"/>',
+    "🌻":'<circle cx="12" cy="12" r="3"/><path d="M12 5V2"/><path d="M12 22v-3"/><path d="M5 12H2"/><path d="M22 12h-3"/><path d="m7 7-2-2"/><path d="m19 19-2-2"/><path d="m7 17-2 2"/><path d="m19 5-2 2"/>',
+    "🧹":'<path d="m9.5 14.5 8-8a2.1 2.1 0 1 1 3 3l-8 8"/><path d="M9 15c-2 0-5 1-6 6 3 0 6-1 8-4Z"/><path d="m12 12 3 3"/>',
+    "🏊":'<path d="M2 18c1.5 0 1.5 1.5 3 1.5S6.5 18 8 18s1.5 1.5 3 1.5 1.5-1.5 3-1.5 1.5 1.5 3 1.5 1.5-1.5 3-1.5"/><path d="M2 13c1.5 0 1.5 1.5 3 1.5S6.5 13 8 13s1.5 1.5 3 1.5 1.5-1.5 3-1.5 1.5 1.5 3 1.5 1.5-1.5 3-1.5"/><circle cx="17" cy="6" r="2"/><path d="m5 10 5-3 4 2"/>',
+    "🚜":'<circle cx="7" cy="17" r="4"/><circle cx="18" cy="18" r="3"/><path d="M7 13V8h5l2 5"/><path d="M12 8V5h4"/><path d="M11 17h4"/>',
+    "☀️":'<circle cx="12" cy="12" r="4"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="m4.9 4.9 2.1 2.1"/><path d="m17 17 2.1 2.1"/><path d="m4.9 19.1 2.1-2.1"/><path d="m17 7 2.1-2.1"/>',
+    /* ---- studio tecnico ---- */
+    "📐":'<path d="M4 4v16h16"/><path d="M4 4 20 20"/><path d="M4 12h4"/><path d="M12 12v4"/>',
+    "📏":'<rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 8v3"/><path d="M10 8v5"/><path d="M14 8v3"/><path d="M18 8v5"/>',
+    "📋":'<rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6"/><path d="M9 15h4"/>',
+    "🏛️":'<path d="M3 22h18"/><path d="m12 3 9 6H3Z"/><path d="M6 19v-8"/><path d="M10 19v-8"/><path d="M14 19v-8"/><path d="M18 19v-8"/>',
+    "🗺️":'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15"/><path d="M15 6v15"/>',
+    "📷":'<path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="4"/>',
+    "🔍":'<circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/>',
+    "📊":'<path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12.5" y="8" width="3" height="10"/><rect x="18" y="5" width="3" height="13"/>',
+    "🦺":'<path d="M8 3 4 5v16h16V5l-4-2"/><path d="M8 3v7l4 3 4-3V3"/><path d="M4 12h4"/><path d="M16 12h4"/>',
+    "📝":'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>',
+    /* ---- generiche ---- */
+    "🛠️":'<path d="m15 12-8.5 8.5a2.1 2.1 0 1 1-3-3L12 9"/><path d="m17.6 3.2 3.4 3.3-2 2-3.4-3.4z"/><path d="m14 7 3 3"/>',
+    "🔧":'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-8 8l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 8-8l-3.8 3.8z"/>',
+    "🧰":'<rect x="2" y="8" width="20" height="12" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M2 13h20"/><path d="M10 13v3h4v-3"/>',
+    "🚚":'<path d="M2 6h11v11H2Z"/><path d="M13 9h4l3 3v5h-7Z"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>',
+    "📦":'<path d="M3 8 12 3l9 5v8l-9 5-9-5Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/>',
+    "🏷️":'<path d="M20.6 12.4 12.4 20.6a2 2 0 0 1-2.8 0l-7.2-7.2A2 2 0 0 1 2 12V4a2 2 0 0 1 2-2h8a2 2 0 0 1 1.4.6l7.2 7.2a2 2 0 0 1 0 2.6Z"/><path d="M7 7h.01"/>',
+    "🔨":'<path d="m14 8-9 9a2.1 2.1 0 0 0 3 3l9-9"/><path d="M11 5 16 0"/><path d="m12 3 5 5-3 3-5-5z"/>',
+    "⭐":'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9z"/>',
+    /* ---- ⛔ FUORI LISTA, MA IL DISEGNO CI VUOLE LO STESSO ----
+       Queste sette sono le emoji che Windows non sa disegnare: tolte dalla
+       tendina il 21 agosto. Ma DUE di loro (la scala e la sega) erano fra
+       le quattordici di prima, e un reparto puo\' averle gia\' salvate nel
+       database. Se non avessero un disegno cadrebbero sulla riserva, e chi
+       si era scelto la scala si ritroverebbe un martello.
+       ⛔ Non si sceglie piu\', ma si disegna ancora. */
+    "🪜":'<path d="M8 3v18"/><path d="M16 3v18"/><path d="M8 7.5h8"/><path d="M8 12h8"/><path d="M8 16.5h8"/>',
+    "🪚":'<path d="M3 16h8l7-7-3-3-8 8z"/><path d="m18 6 3-3"/><path d="M5.5 16v2.5"/><path d="M9 16v2.5"/>',
+    "🪨":'<path d="M4 15 8 6l7-2 5 6-3 8H7z"/><path d="m8 6 4 5"/>',
+    "🪵":'<path d="M6 6h12a3 3 0 0 1 0 12H6a3 3 0 0 1 0-12Z"/><path d="M6 6a3 3 0 0 1 0 12"/><circle cx="6" cy="12" r="1.5"/>',
+    "🪟":'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/><path d="M3 12h18"/>',
+    "🪞":'<path d="M12 2c4 0 7 3.6 7 8s-3 8-7 8-7-3.6-7-8 3-8 7-8Z"/><path d="M12 18v3"/><path d="M9 21h6"/>',
+    "🪴":'<path d="M6 13h12l-1.5 8h-9Z"/><path d="M12 13V9"/><path d="M12 9C12 5.5 9.5 3 6 3c0 3.5 2.5 6 6 6Z"/><path d="M12 10c0-3 2-5 5-5 0 3-2 5-5 5Z"/>'
+  };
+  /* ⚠️ chiave sconosciuta -> martello: un reparto vecchio non resta mai senza */
+  const icoRep=e=>'<svg class="ico-rep" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    +'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    +(ICO_REPARTO[e]||ICO_REPARTO["🔨"])+'</svg>';
   /* la lista piatta, per chi deve solo sapere se un'emoji e' delle nostre */
   const ICONE=ICONE_GRUPPI.reduce((t,g)=>t.concat(g[1]),[]);
   const COLORI=[
@@ -1493,7 +1599,7 @@
             accanto al nome quando entri dentro (vedi enterPanel). */
       return `<div class="panel-card" data-action="enter" data-p="${p.id}">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
-        <span class="pc-ic no-ico" style="background:${p.as};color:${p.ad}">${p.icon}</span><h2>${esc(p.nome)}</h2>
+        <span class="pc-ic no-ico" style="background:${p.as};color:${p.ad}">${icoRep(p.icon)}</span><h2>${esc(p.nome)}</h2>
         <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
     }).join(""):(_landingGuasta
       ? `<div class="empty-rep" style="border-color:var(--err,#c0392b)">
@@ -8440,10 +8546,14 @@ ${vecchi?`
   function _panelAnteprima(){
     const box=$("#p-prev"); if(!box)return;
     const c=COLORI[nuovoSel.col]||COLORI[0];
+    /* ⚠️ 21 agosto 2026 — anche le icone della tendina prendono il colore
+       scelto: se no scegli il verde e continui a vedere disegni blu, e non
+       capisci come verra' finche' non guardi l'anteprima. */
+    const ic=$("#p-ic"); if(ic)ic.style.color=c.ad;
     const nome=($("#p-nome")&&$("#p-nome").value.trim())||"";
     const vuoto=!nome;
     box.innerHTML=`<div class="panel-card">
-      <span class="pc-ic no-ico" style="background:${c.as};color:${c.ad}">${nuovoSel.icon}</span>
+      <span class="pc-ic no-ico" style="background:${c.as};color:${c.ad}">${icoRep(nuovoSel.icon)}</span>
       <h2${vuoto?' class="pc-vuoto"':''}>${vuoto?"Il nome del reparto":esc(nome)}</h2>
       <span class="pc-meta">0 da fare · 0 ${ruoloUtente==='professionista'?'pratiche totali':'lavori totali'}</span></div>`;
   }
@@ -8462,6 +8572,7 @@ ${vecchi?`
         <div class="sh-b">
         <div class="sh-tit">Come verrà</div>
         <div class="p-prev-box" id="p-prev"></div>
+        <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}" title="colore ${i+1}"></button>`).join("")}</div></div>
         <p class="sh-nota">È la scheda che troverai nella pagina di apertura, insieme agli altri reparti.</p>
         </div>
         </div><div class="sh-col">
@@ -8470,9 +8581,8 @@ ${vecchi?`
         <div class="field"><label>Icona</label>
           <div class="picker no-ico" id="p-ic">${ICONE_GRUPPI.map(g=>
             `<div class="pk-gruppo"><span class="pk-tit">${g[0]}</span><div class="pk-fila">`
-            + g[1].map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${i}</button>`).join("")
+            + g[1].map(i=>`<button type="button" class="pk ${i===nuovoSel.icon?'on':''}" data-ic="${i}">${icoRep(i)}</button>`).join("")
             + `</div></div>`).join("")}</div></div>
-        <div class="field"><label>Colore</label><div class="colors" id="p-col">${COLORI.map((c,i)=>`<button type="button" class="cl ${i===0?'on':''}" data-col="${i}" style="background:${c.a}"></button>`).join("")}</div></div>
         </div>
         </div></div>`,
       `<button class="btn b-cancel" data-action="close">Annulla</button>

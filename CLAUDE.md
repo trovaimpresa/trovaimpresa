@@ -11799,3 +11799,61 @@ quattro i buchi erano **del banco**, non del codice:
 ⚠️ La lezione e' la stessa di stamattina coi dati tutti uguali: **un banco
 che gira su una copia addomesticata del mondo non prova niente.** Le quattro
 prove nuove sono nate da qui.
+
+
+# 21 agosto 2026 (5) — LE ICONE DEL REPARTO LE DISEGNIAMO NOI
+
+Alessio, in tre colpi: *«le emoji sono brutte, avevo chiesto di cambiarle»* ·
+*«bisogna scrollare»* · *«i colori spostali e cambiamo quei cerchi cosi
+bruttini»*.
+
+## ⛔ IL PUNTO CHE MI ERA SFUGGITO PER DUE GIRI
+
+**Le emoji non le disegniamo noi: le disegna Windows.** Quindi non si possono
+migliorare, e quelle che il computer non ha escono come **quadratini bianchi**
+— ne sono usciti **sette** nella sua tendina (scala, pietra, legno, sega,
+finestra, specchio, pianta), tutte del blocco Unicode U+1FA70..U+1FAFF.
+
+Gli ho messo davanti **tre schermate**: emoji · disegno a tratto colorato ·
+disegno bianco su fondo pieno. **Ha scelto la 2.**
+
+## COM'E' ADESSO
+
+- **50 icone disegnate da noi** (`ICO_REPARTO`), a tratto, **del colore del
+  reparto** — anche quelle della tendina, che seguono il colore scelto
+- ⛔ **la chiave resta l'emoji**: i reparti gia' creati hanno l'emoji dentro
+  `gest_mestieri.icona`, e cosi' **non serve spostare nessun dato**
+- ⛔ **sette disegni fuori lista**: le emoji che Windows non ha non si possono
+  piu' SCEGLIERE, ma il disegno ce l'hanno lo stesso — se no chi si era preso
+  la scala si ritroverebbe la riserva (il martello)
+- **a sinistra** nome, anteprima e colori · **a destra** le icone: ci sta tutto
+  senza scorrere
+- **i colori sono piastrelle** 44x34 con la **spunta** su quello scelto: i
+  pallini da 30px non si vedevano e non dicevano se erano accesi
+
+## IL BANCO
+
+`prove/banco-reparto.js` — **27 verdi su 27**. Fra le prove nuove:
+- **ogni icona ha un disegno suo**, e nessuna cade sulla riserva (e' la prova
+  che non me ne sono dimenticata nessuna)
+- **non ci sono due icone col disegno identico** (il copia-incolla sbagliato)
+- **nessuna emoji del blocco U+1FA70..U+1FAFF** nella lista — controllata
+  numero per numero, cosi' i quadratini non tornano una terza volta
+- le piastrelle dei colori sono larghe almeno 40px e hanno la spunta
+
+`prove/sabotaggi-reparto.js` — **15 su 15 accusati**.
+
+## ⛔ TRE SABOTAGGI TOLTI, E VA DETTO
+
+I tre su `.no-ico` **non venivano piu' accusati**, e non perche' il banco
+fosse cieco: da quando le icone sono disegni, togliere `.no-ico` non rompe
+niente — non c'e' nessuna emoji da trasformare. **Un sabotaggio che non puo'
+fare danno non prova niente**, e tenerlo in lista gonfia il punteggio. Sono
+stati sostituiti con altri che il danno lo fanno davvero (rimettere le emoji,
+rimettere in lista la scala, togliere un disegno, dare a due icone lo stesso
+disegno).
+
+⚠️ E uno l'ho dovuto riscrivere due volte: «do alla lampadina il disegno del
+fulmine» all'inizio **concatenava** i due disegni invece di sostituirli, e
+cosi' il risultato non era uguale a nessuno dei due e la prova non poteva
+accusarlo.
