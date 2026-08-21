@@ -12676,3 +12676,254 @@ da qui — ma la decisione è sua e oggi è: i prezzi restano.
 Della busta paga sono stati presi **solo** netto, ore e paga oraria. Codice
 fiscale, indirizzo, nome dell'azienda: non usati, non scritti da nessuna
 parte, non finiscono online. Nemmeno qui.
+
+
+# ⛔ 21 agosto 2026 — CONTROLLO TOTALE DEL GESTIONALE, PRIMA DI APRIRLO
+
+Chiesto da Alessio: *«prima di metterlo online devi fare un controllo totale sul
+gestionale imprese e professionisti … dimmi se ci sono falle»*.
+
+Il rapporto intero sta in **`prove-claude/CONTROLLO-GESTIONALE.md`** (non va
+online, `prove-claude/` è in `.gitignore`). Qui resta solo quello che serve a
+chi riprende il lavoro.
+
+## COME È STATO FATTO
+
+Sei controlli in parallelo, ognuno sul suo pezzo: integrità del codice ·
+database · sicurezza · professionisti · regole del progetto · conti e documenti.
+La pagina **aperta davvero in Chromium** a 1440×900 e 390×844, le misure lette
+dal browser e non dal CSS, i conti delle fatture **rifatti con Node** sulle
+funzioni vere estratte dai file.
+
+## ⛔ UN ERRORE MIO, DETTO PER PRIMO
+
+Nel rapporto avevo messo fra le cose che fermano l'apertura che **email e
+telefono delle imprese sono scaricabili da chiunque**. Guardando le pagine
+pubbliche: sono **pubblici per scelta** — sono il pulsante «Chiama» e il link
+mail su `profilo-impresa.html`. Non è una falla, è il prodotto.
+⚠️ Quello che resta davvero è che un concorrente **scarica tutta la lista in
+un colpo** (`select('*')` su `imprese`, `to anon using (true)`), e per chiudere
+quello serve una vista tipo `preventivi_safe` e toccare molte pagine pubbliche:
+non è una correzione da mezz'ora. Rimandato, e scritto perché non torni fra le
+«cose veloci».
+
+⛔ **La lezione: prima di chiamare falla una cosa, si guarda a cosa serve.**
+
+## CHIUSO OGGI — NEL DATABASE (tre query, già eseguite)
+
+**1. `sql/blocco-piano-premium.sql`** — chiunque si regalava il Premium.
+La regola `imprese_update_owner` lascia modificare TUTTE le colonne della
+propria riga, `piano` e `premium_pagato` comprese: dalla console del browser
+si scriveva `piano='premium', premium_pagato=true` e il Premium non scadeva
+più (il controllo notturno guarda solo chi ha una `premium_scadenza` scritta).
+- Un guardiano `before insert or update` rimette il piano com'era.
+- ⚠️ Passano: `service_role` (Stripe, il controllo notturno), l'SQL Editor, e
+  **l'account del fondatore** — l'eccezione è legata alla mail
+  `pintoalessio@icloud.com`, e serve al pulsante «Piano» di `js/fondatore.js`.
+  Deciso da Alessio: *«lascialo solo per me»*.
+- ⚠️ Sull'INSERT non si blocca il piano (se no salterebbe il regalo dei 3 mesi):
+  si forza solo `premium_pagato=false`, così nessuno nasce «già pagante» e
+  quindi senza scadenza.
+- Banco su **PostgreSQL 16 vero** con finto Supabase (ruoli, `auth.uid()`, e il
+  trigger del regalo copiato dal file vero): **9 verdi · 6 sabotaggi su 6**.
+
+**2. `sql/blocco-recensioni-finte.sql`** — le recensioni le scriveva chiunque.
+`rls-batch5-feedback.sql` aveva `for insert to anon, authenticated with check
+(true)`: senza account si scrivevano cento stelline a sé stessi o cento
+recensioni brutte a un concorrente.
+- ⚠️ Si è potuto chiudere perché **nessuna pagina scrive le recensioni dal
+  browser**: passano da `netlify/functions/recensione-invia.js`, che gira con
+  `service_role`. La lettura resta aperta a tutti.
+- Banco nei due versi: **prima** della correzione le prove 1 e 2 sono ROSSE
+  (l'anonimo scrive davvero), **dopo** sono verdi e le altre due restano verdi.
+
+**3. `sql/ai-orienta-tetto.sql`** — il contatore del tetto dell'AI (sotto).
+Tabella `ai_orienta_uso` + funzione `ai_orienta_segna(_ip)`, che conta in una
+chiamata sola quante ne ha fatte quell'indirizzo oggi e quante in tutto.
+Il `+1` è dentro l'`insert … on conflict do update`, quindi due richieste nello
+stesso istante non si sovrascrivono. **6 verdi.**
+
+## CHIUSO OGGI — NEI FILE (un push solo, 9 file + 3 sql)
+
+**4. `netlify/functions/ai-orienta.js` — era un rubinetto aperto.**
+Nessun controllo, nessun tetto, nessun limite di lunghezza, `claude-opus-4-5`
+con **1000 token** per un JSON di tre righe, e il testo del visitatore
+**incollato dentro le istruzioni**.
+⚠️ Qui **non si può chiedere un accesso**: chi scrive nella nuvoletta è un
+visitatore. Quindi non una porta ma un tetto, e tre reti:
+1. da dove arriva (Origin/Referer): solo il nostro sito e le anteprime Netlify;
+2. quante ne ha già fatte oggi (il contatore del punto 3): 15 per indirizzo,
+   400 in tutto — cambiabili dalle variabili di Netlify (`AI_ORIENTA_TETTO_IP`,
+   `AI_ORIENTA_TETTO_GIORNO`) **senza push**;
+3. la risposta è accettata **solo** se è una delle quattro categorie previste, e
+   **la pagina la decide la function**, non il modello.
+- max_tokens **200**, e il modello si cambia da Netlify (`AI_ORIENTA_MODELLO`).
+- ⚠️ Col tetto pieno **non dà errore**: risponde una cosa che il browser non
+  riconosce, e la nuvoletta mostra da sola i quattro pulsanti (`fallback()` in
+  `js/assistente-trovaimpresa.js`). Il visitatore non si accorge di niente.
+- ⚠️ Se il contatore non risponde si va avanti lo stesso: meglio un assistente
+  che funziona che uno rotto. Il tetto vero sulla spesa restano i 200 token.
+- **14 verdi · 7 sabotaggi su 7.**
+
+**5. `netlify/functions/ai-claude.js` — si fidava del browser.**
+L'impresa arrivava come `impresa_id` nel messaggio e nessuno controllava chi
+chiamasse. Gli id delle imprese sono pubblici, quindi con l'id di un altro si
+bruciavano le sue 30 chiamate al giorno **e gli si scrivevano righe in
+`ai_richieste`** (prompt e risposta scelti da chi chiamava) che lui si ritrova
+nel pannello.
+- Adesso l'impresa si ricava dall'**accesso** (`auth.getUser(token)`), come già
+  fa `crea-checkout-crediti.js`. L'`impresa_id` del messaggio è **ignorato**.
+- ⚠️ Aggiunto anche il controllo della **scadenza** del Premium, che prima non
+  c'era: chi aveva finito i tre mesi continuava finché il controllo notturno
+  non passava.
+- ⛔ Ha richiesto **12 punti in 4 file**: `pannello-impresa` · `artigiano` ·
+  `professionisti` · `negozio`, tre chiamate per pannello. Nasce
+  `_aiIntestazioni()` in ognuno, che attacca `Authorization: Bearer <token>`.
+  **Una chiamata nuova a `ai-claude` che non passa da lì torna 401.**
+- **12 verdi · 4 sabotaggi su 4.**
+
+**6. `gestionale-app.html` — se un pezzo non arriva, adesso lo dice.**
+Da quando il file è spezzato, `RENDER_TAB` (riga ~3161) era **l'unico punto del
+blocco che nominava subito le funzioni dei quattro file esterni**. Se uno dei
+quattro non arrivava (rete di cantiere, un 503), quella riga lanciava
+ReferenceError e **da lì in giù non veniva eseguito più niente**: la pagina
+iniziale si disegnava lo stesso e poi nessuna scheda si apriva, senza un
+messaggio. Provato davvero con un 503 finto su `js/gest-computo.js`.
+- Adesso i nomi si cercano a runtime (`_rt(nome)`): se manca, compare un avviso
+  rosso in cima e la singola scheda dice cosa fare.
+- ⚠️ Chi sposta una funzione di sezione in un altro file non deve fare niente
+  lì: basta che resti una funzione di primo livello.
+
+**7. `js/gest-fatture.js` — la partita IVA coi punti faceva scartare l'XML.**
+`fattXmlControlla` valida con `pulita()` (riga ~1603), quindi `012.345.678.97`
+**passa il controllo**; poi `fattXmlCostruisci` la scriveva nel file così
+com'era. Lo SDI scarta: `IdCodice` vuole 11 cifre. ⚠️ E **il nome del file era
+già giusto** (lì le cifre si estraevano a parte): il file si chiamava bene e
+dentro era sbagliato.
+- Nasce `xpul()` dentro `fattXmlCostruisci`, usata su partita IVA e codice
+  fiscale, di chi emette e di chi riceve.
+- ⚠️ **Il banco carica il file vero in una VM e genera l'XML per davvero**, poi
+  lo rilegge: niente copia-incolla di funzioni a mano.
+
+**8. `js/gest-fatture.js` — «Rimborso spese» non aggiornava il conto.**
+`#fa-spese-iva` mancava dall'elenco dei campi ascoltati. Stesso difetto già
+preso il 12 agosto su `#fa-cassa` e `#fa-spese`, su un campo aggiunto dopo.
+⚠️ **Se domani nasce un altro campo che entra nel conto, la sua riga va aggiunta
+in quell'elenco**, se no il riquadro mente di nuovo.
+
+**9. `js/gest-sal-prezzario.js` — il SAL nasceva con la data di ieri.**
+Due punti (righe ~324 e ~498) usavano `toISOString().slice(0,10)`, cioè l'ora di
+Greenwich: d'estate, fra mezzanotte e le due, uno stato di avanzamento aperto
+oggi portava la data di **ieri**. È un documento contabile che si firma.
+Era la correzione dell'11 agosto (`todayStr()`): questi due erano rimasti
+indietro **perché stanno in un altro file**.
+
+**Fatture (7 e 8): 8 verdi · 4 su 4. SAL (9): 4 verdi · 2 su 2.
+Le pagine aperte in Chromium, vecchio contro nuovo: 18 verdi, zero errori nuovi.**
+
+## ⛔ LE REGOLE NUOVE DI OGGI
+
+**1. UN SABOTAGGIO CHE NON PUÒ FARE DANNO VA RISCRITTO, NON CONTATO.**
+«Tolgo il controllo dell'accesso» in `ai-claude` restava **verde**: senza gettone
+il secondo controllo (`getUser`) blocca lo stesso. Il sabotaggio era sul punto
+sbagliato. Riscritto sul controllo che il danno lo fa davvero, ed è rosso.
+
+**2. UN BANCO SU UN DATABASE SPORCO DÀ VERDI E ROSSI FINTI.**
+La prima corsa del banco del piano dava rosso su prove sane: il database di
+prova teneva ancora lo stato della corsa precedente. E una prova era **verde per
+il motivo sbagliato** (`set local` fuori da una transazione non fa niente, quindi
+`auth.uid()` era nullo e l'update non toccava nessuna riga). Adesso il banco
+**ricostruisce il database da zero a ogni corsa** e ha una controprova in cima
+che verifica che il finto Supabase stia davvero fingendo la persona giusta.
+
+**3. CERCARE UNA SCRITTA NEL FILE NON È CONTROLLARE.**
+La prova sul «Rimborso spese» cercava `"#fa-spese-iva"` in tutto il file — e c'è
+anche nel modulo e nel salvataggio, quindi restava verde col sabotaggio addosso.
+Adesso **estrae l'elenco dei campi ascoltati** e guarda dentro quello.
+È la stessa lezione del 21 agosto sulle regole del 404.
+
+## ⛔ COSA RESTA, IN ORDINE
+
+**Prima di aprire a chiunque**
+1. **Il paywall del gestionale vive solo nel browser.** `haPremium()` mostra o
+   nasconde il cancello in JavaScript; nel database **nessuna policy `gest_*`
+   nomina il piano**. Un account free usa il gestionale intero saltando il
+   cancello. È il punto 1.1 del rapporto, ed è un lavoro vero: o una funzione
+   `ha_premium()` dentro ~40 policy, o un altro disegno.
+2. **`sql/gest-computo-metrico.sql` è una mina.** Riga ~298: cancella e ricrea
+   `gest_computo_voci_calc` con la versione **vecchia** (senza `origine_id` e
+   senza `prezzo_da_analisi`), non ha guardie, e in cima c'è scritto «Sicuro da
+   rilanciare» — mentre il gestionale, in **14 messaggi d'errore**, invita
+   l'utente a eseguirlo. Chi lo fa: la variante torna a elencare tutto due
+   volte e **tutti i prezzi costruiti con l'analisi tornano in silenzio a quelli
+   scritti a mano**. Stesso innesco in `gest-computo-quantita-3-decimali.sql`.
+   Serve una guardia in cima a tutti e due.
+3. **La lista delle imprese scaricabile in blocco** (il punto 1.5 corretto qui
+   sopra): vista pubblica + pagine da cambiare.
+
+**Prima di far fare una fattura vera**
+4. **Il totale del preventivo non è la somma di quello che si stampa.**
+   `gestionale-app.html:11593` somma i numeri pieni, le righe si stampano
+   arrotondate. Provato: sei righe da 2,675 m² × 3,74 € → il foglio scrive
+   **60,03**, la colonna sommata a mano fa **60,00**, e la fattura dice
+   **60,00**. La parte fattura è già giusta: è il preventivo che non segue la
+   regola «si somma quello che si stampa».
+5. **I dati che si perdono senza dirlo.** I due che contano:
+   `gestionale-app.html:10739` (le **ore del lavoro** scritte dentro un `catch`
+   vuoto → Report ed esportazioni sbagliano ore e margine) e
+   `gestionale-operatore.html:1888` (il collaboratore legge «Segnato come
+   fatto» e per il titolare il lavoro resta aperto). Poi il fornitore eliminato
+   che resta nel «da pagare», le scadenze del mezzo eliminato, e il computo che
+   può generare **due preventivi**.
+
+**Prima di far entrare un geometra**
+6. **La ricerca in alto riscrive i nomi dei clienti.** `gestionale-app.html:14257`:
+   `.ct-t` e `.ct-s` non sono in `_SKIP_UTENTE`, quindi un cliente
+   «Edilcantiere Srl» appare «Edilpratica Srl». Nel database è giusto: mente lo
+   schermo. Stessa cosa in `rigaCompatta` (`.riga-sub`, nome cliente) e nei
+   titoli delle finestre (`.sh-head h3`).
+7. **Sul telefono il menù resta «Lavori» per sempre**: `#barra-basso` (riga 458)
+   sta **fuori** da `#appview`, che è dove guarda `localizzaPratiche`.
+8. **Quattro frasi sgrammaticate**: «Nessun rapportino dal **pratica**», «lo lega
+   al **pratica** giusto», «fa sparire **la tempo speso**», «**all'**collaboratore»
+   (due punti). Più i cinque avvisi vuoti della schermata principale
+   (righe 4332-4337) che non sono in `_FRASI`.
+9. **`js/aiuti-gestionale.js` non è caricato da nessuna pagina**: sessanta
+   spiegazioni scritte apposta per lo studio (protocollo, cassa, ritenuta,
+   imponibile) sono spente. Nessun `<script src>` lo include.
+
+**Legge, non interfaccia — non cominciare senza chiederglielo**
+10. **Alla Pubblica Amministrazione non si può fatturare**: formato fisso
+    `FPR12` (serve `FPA12`), il codice destinatario è preteso di 7 caratteri
+    mentre quello degli uffici pubblici ne ha 6, e manca la **scissione dei
+    pagamenti**. Per un'impresa edile i lavori pubblici sono metà del mestiere.
+11. **Il subappaltatore edile non può emettere nemmeno una fattura**: qualunque
+    riga a IVA 0% blocca il file, e il **reverse charge** (art. 17 c.6 lett. a)
+    vuole `N6.7`, che nel progetto non esiste.
+    ⚠️ Tutti e due vogliono prima una risposta del commercialista.
+
+**Da guardare su Supabase (non si sa dai file)**
+12. `gest_carte_saldo` e `gest_mezzi_carburante` sono viste **create a mano**, non
+    in `sql/`, e vengono interrogate per id senza filtro sull'utente: se non sono
+    `security_invoker` mostrano saldi e consumi **di tutti**.
+    `select relname, reloptions from pg_class where relname in (...)`.
+13. Tre file SQL citati nei messaggi d'errore del gestionale **non esistono**
+    nella cartella: `aggiungi-commercialista.sql`, `supporto-origine.sql`,
+    `supporto-messaggi-lucchetto.sql`. All'utente viene consigliato un rimedio
+    che non può eseguire.
+
+✅ **`gest_membri` è a posto**, controllato con una query: RLS accesa e
+l'inserimento ristretto a `impresa_id = auth.uid()`. Era il punto da cui
+dipendeva tutto il sistema dei collaboratori, ed era l'unico non verificabile
+dai file.
+
+## ⛔ DUE VOCI DA TOGLIERE DALLE LISTE (erano già fatte)
+
+Il prompt di questa sessione le dava per aperte, e non lo erano — è la lezione
+del 21 agosto sul PDF del SAL, ricomparsa identica:
+- **«non spezzare `gestionale-app.html`»**: è già spezzato in quattro file
+  dentro `js/`, e la regola l'ha cambiata Alessio la sera del 21.
+- **«l'analisi dei prezzi»**: fatta tutta — database, schermata e PDF.
+- **«le due righe della Lista per la gara»**: fatte.
+
+⛔ **Quando una cosa si chiude, va tolta dalla lista lo stesso giorno.**
