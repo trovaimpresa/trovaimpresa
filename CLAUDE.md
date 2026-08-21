@@ -11651,3 +11651,45 @@ guardasse solo la prima direbbe «verde» anche dopo aver spento tutto.
 sette che rimettono il colore dov'era, e i **due che spengono la pastiglia e
 il pallino** — quelli servono a dimostrare che la terza parte del banco non
 e' una formalita'.
+
+
+## 21 agosto 2026 (3) — ANCHE LA PAGINA INIZIALE DEL GESTIONALE
+
+*«sistema anche la pagina iniziale del gestionale»*.
+
+Le card dei reparti (giardiniere, pulizia, progetto casa, elettricista) avevano
+una **riga colorata in cima**, scritta a mano dentro l'HTML:
+
+    style="border-top:4px solid ${p.a}"
+
+Quattro reparti = quattro righe di quattro colori diversi. E il colore del
+reparto **lo diceva gia' l'icona**, due centimetri sotto.
+
+⛔ **Tolta la riga, tenuta l'icona.** Il colore del reparto non si perde:
+resta sull'icona e sul pallino accanto al nome quando entri dentro — dove
+`enterPanel` gia' scriveva, dal 20 agosto, *«il colore del reparto resta solo
+come pallino accanto al nome»*. La landing era rimasta indietro.
+
+⚠️ **La striscia dell'AI («249 crediti da usare») NON e' stata toccata**, ed
+e' una scelta: quando i crediti stanno finendo diventa arancione **e scrive
+«— stanno finendo»**. Colore e parola insieme: rispetta gia' la regola.
+
+## IL BANCO
+
+`prove/banco-landing.js` — **estrae `_landingDisegna` verbatim** da
+gestionale-app.html e la fa girare per davvero in Chromium col CSS vero, su
+quattro reparti finti. Misura il bordo calcolato, non legge il file.
+**19 verdi su 19.**
+
+`prove/sabotaggi-landing.js` — **5 su 5 accusati**.
+
+## ⛔ UN SABOTAGGIO NON ACCUSATO — ed era colpa dei DATI, non del banco
+
+«conto i lavori sbagliati: da fare diventa il totale» **non veniva accusato**.
+Non perche' il banco fosse cieco: perche' i miei lavori di prova erano
+**tutti «da_fare»**, e allora «3 da fare» e «3 totali» danno lo stesso numero
+qualunque cosa si scriva.
+
+⛔ **Un dato di prova tutto uguale non prova niente.** Aggiunto un lavoro
+«fatto»: adesso il giardiniere dice «3 da fare · 4 pratiche totali», i due
+numeri sono diversi, e il sabotaggio viene accusato.

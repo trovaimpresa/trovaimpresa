@@ -1442,7 +1442,15 @@
     $("#panels").innerHTML=ps.length?ps.map(p=>{
       const mine=p.mestiere_id?rows.filter(l=>l.mestiere_id===p.mestiere_id):[];
       const tot=mine.length, df=mine.filter(l=>l.stato!=="fatto").length;
-      return `<div class="panel-card" data-action="enter" data-p="${p.id}" style="border-top:4px solid ${p.a}">
+      /* ⚠️ 21 agosto 2026 — LA RIGA COLORATA IN CIMA ALLA CARD NON C'E' PIU'.
+         Qui sopra c'era style="border-top:4px solid ${p.a}": quattro reparti
+         facevano quattro righe di quattro colori diversi, e la stessa cosa la
+         diceva gia' l'icona qui sotto, che il colore del reparto ce l'ha (e lo
+         tiene). Un colore che dice due volte la stessa cosa non ne dice
+         nessuna: e' la regola del Riepilogo del 20 agosto, portata anche qui.
+         ⛔ Il colore del reparto NON si perde: resta sull'icona e sul pallino
+            accanto al nome quando entri dentro (vedi enterPanel). */
+      return `<div class="panel-card" data-action="enter" data-p="${p.id}">
         <button class="pc-del" data-action="del-panel" data-id="${p.id}" title="Elimina reparto">🗑</button>
         <span class="pc-ic" style="background:${p.as};color:${p.ad}">${p.icon}</span><h2>${esc(p.nome)}</h2>
         <span class="pc-meta">${df} da fare · ${tot} ${ruoloUtente==='professionista'?(tot===1?'pratica totale':'pratiche totali'):'lavori totali'}</span></div>`;
