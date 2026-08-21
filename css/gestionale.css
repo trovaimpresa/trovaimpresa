@@ -2165,15 +2165,31 @@
   height:44px; padding:0 18px; font-size:15px; font-weight:600; border-radius:10px;
 }
 
-/* il bordo colorato dice come sta, come nel Riepilogo */
-.wrap section .card.t-err{ border-left-color:var(--err); }
-.wrap section .card.t-err .c-num{ color:var(--err); }
-.wrap section .card.t-err .c-lab{ color:var(--err); font-weight:600; }
-.wrap section .card.t-attesa{ border-left-color:var(--attesa); }
-.wrap section .card.t-attesa .c-num{ color:var(--attesa); }
-.wrap section .card.t-ok{ border-left-color:var(--ok); }
-.wrap section .card.t-ok .c-num{ color:var(--ok); }
+/* ===== 21 agosto 2026 — LE STRISCE DELLE SEZIONI DIVENTANO NEUTRE =====
+   Alessio, guardando il gestionale sezione per sezione: «le voglio come il
+   riepilogo». Il 20 agosto il Riepilogo e' diventato neutro; le 19 pagine che
+   si aprono dal menu di sinistra erano rimaste a scacchi — barretta arancione
+   sulle Pratiche, cinque barrette di quattro colori diversi sulle Fatture,
+   arancione sui Computi.
+
+   ⛔ LA REGOLA, ED E' LA STESSA DEL RIEPILOGO:
+      IL COLORE STA SOLO DOVE C'E' ANCHE LA PAROLA.
+      Restano colorati la pastiglia di stato («Bozza», «Accettato»,
+      «Scaduta») e il pallino che le sta accanto: li' il colore accompagna
+      un testo, e chi non distingue rosso e verde legge comunque.
+      Barrette a sinistra e numeri grandi: neutri.
+
+   ⚠️ Le classi t-* NON si tolgono: le usa il resto del gestionale (e il
+      Riepilogo se ne serve ancora). Qui semplicemente non colorano piu'. */
+
+.wrap section .card.t-err,
+.wrap section .card.t-attesa,
+.wrap section .card.t-ok,
 .wrap section .card.t-neutro{ border-left-color:var(--bordo-forte); }
+.wrap section .card.t-err .c-num,
+.wrap section .card.t-attesa .c-num,
+.wrap section .card.t-ok .c-num{ color:var(--testo); }
+.wrap section .card.t-err .c-lab{ color:var(--testo-2); font-weight:600; }
 
 /* i pulsanti della scheda stanno in fila, non uno sotto l'altro */
 .wrap section .card-acts .btn{ flex:0 0 auto; width:auto; }
@@ -2265,10 +2281,12 @@
 }
 .wrap section .job .job-menu .lav-pop{ right:0; top:46px; }
 
-/* il bordo a sinistra dice come sta il lavoro, come nel Riepilogo */
-.wrap section .job:has(.pall.ritardo){ border-left-color:var(--err); }
-.wrap section .job:has(.pall.rosso){ border-left-color:var(--attesa); }
-.wrap section .job:has(.pall.verde){ border-left-color:var(--ok); }
+/* 21 agosto 2026 — neutra: lo stato lo dice gia' il pallino con la sua
+   parola accanto, due righe piu' su. Vedi la regola completa alla voce
+   «LE STRISCE DELLE SEZIONI DIVENTANO NEUTRE». */
+.wrap section .job:has(.pall.ritardo),
+.wrap section .job:has(.pall.rosso),
+.wrap section .job:has(.pall.verde){ border-left-color:var(--bordo-forte); }
 
 /* Dove e quando stanno sotto al contenuto, non a mezz'aria: e' l'ultima riga
    (i pulsanti) che si aggancia in fondo, cosi' le schede restano allineate
@@ -2295,10 +2313,16 @@
 #fatture .fatt-tot .n{ font-size:30px; font-weight:800; letter-spacing:-1px; color:var(--testo); line-height:1.1; }
 #fatture .fatt-tot .l{ font-size:16px; font-weight:600; color:var(--testo-2); margin-top:8px; }
 #fatture .fatt-tot .sub{ font-size:14px; color:var(--testo-3); margin-top:4px; line-height:1.35; }
-#fatture .fatt-tot.t-err{ border-left-color:var(--err); }      #fatture .fatt-tot.t-err .n{ color:var(--err); }
-#fatture .fatt-tot.t-attesa{ border-left-color:var(--attesa); } #fatture .fatt-tot.t-attesa .n{ color:var(--attesa); }
-#fatture .fatt-tot.t-ok{ border-left-color:var(--ok); }         #fatture .fatt-tot.t-ok .n{ color:var(--ok); }
-#fatture .fatt-tot.t-info{ border-left-color:var(--info); }     #fatture .fatt-tot.t-info .n{ color:var(--info); }
+/* 21 agosto 2026 — neutri. Erano cinque riquadri di quattro colori diversi
+   in fila: la stessa pagina a scacchi che il Riepilogo si e' tolto il 20. */
+#fatture .fatt-tot.t-err,
+#fatture .fatt-tot.t-attesa,
+#fatture .fatt-tot.t-ok,
+#fatture .fatt-tot.t-info{ border-left-color:var(--bordo-forte); }
+#fatture .fatt-tot.t-err .n,
+#fatture .fatt-tot.t-attesa .n,
+#fatture .fatt-tot.t-ok .n,
+#fatture .fatt-tot.t-info .n{ color:var(--testo); }
 
 /* le righe di dettaglio dentro la scheda della fattura */
 .wrap section .job .job-righe{
@@ -2317,11 +2341,12 @@
 .wrap section .job .job-rv.q-passato{ color:var(--err); }
 .wrap section .job .job-rv.q-vuoto{ color:var(--testo-3); font-weight:600; }
 
-/* il bordo colorato della scheda fattura */
-.wrap section .job.t-err{ border-left-color:var(--err); }
-.wrap section .job.t-attesa{ border-left-color:var(--attesa); }
-.wrap section .job.t-ok{ border-left-color:var(--ok); }
-.wrap section .job.t-info{ border-left-color:var(--info); }
+/* 21 agosto 2026 — neutro anche qui: la pastiglia accanto al titolo dice
+   gia' «Bozza», «Emessa», «Scaduta», e quella resta colorata. */
+.wrap section .job.t-err,
+.wrap section .job.t-attesa,
+.wrap section .job.t-ok,
+.wrap section .job.t-info{ border-left-color:var(--bordo-forte); }
 .wrap section .job .pall.grigio{ background:var(--testo-3); }
 
 /* testo di aiuto sotto un campo */
@@ -3603,12 +3628,14 @@ body:has(#ti-fondatore) .side{
 }
 .num-c--vai{ cursor:pointer; }
 .num-c--vai:hover{ border-color:var(--blu); background:var(--blu-tenue); }
-.num-c--err{ border-left-color:var(--err); }
-.num-c--attesa{ border-left-color:var(--attesa); }
+/* 21 agosto 2026 — neutri: sono i riquadri in cima a Preventivi, Computi,
+   Scadenzario. Il numero grande lo si legge, non lo si guarda di sfuggita. */
+.num-c--err,
+.num-c--attesa{ border-left-color:var(--bordo-forte); }
 
 .num-d{ font-size:15px; font-weight:600; color:var(--testo-2); line-height:1.4; }
 .num-n{ font-size:27px; font-weight:800; color:var(--ink); line-height:1.25; }
-.num-c--err .num-n{ color:var(--err); }
+.num-c--err .num-n{ color:var(--ink); }
 .num-s{ font-size:15px; color:var(--testo-2); line-height:1.45;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 

@@ -11579,3 +11579,75 @@ iniettasse più niente».
 **12 verdi su 12.** `prove/sabotaggi-homepage.js` — **4 su 4 accusati**:
 il tag rimesso a mano, la chiusura del body dentro il commento, un tag script
 dentro il commento, il commento lasciato aperto.
+
+
+## ⚠️ `prove-claude/` E' IN .gitignore — non metterlo nei blocchi git
+
+Nel blocco del 21 agosto ci avevo messo `prove-claude/LAVORI-DA-FARE.md`, e git
+ha risposto «The following paths are ignored by one of your .gitignore files».
+Il push e' andato lo stesso (index.html e CLAUDE.md), ma la riga era inutile.
+
+**La lista dei lavori vive solo sul computer di Alessio, ed e' giusto cosi'.**
+Nei blocchi git ci vanno solo i file che stanno davvero nel repo.
+
+
+# 21 agosto 2026 (2) — LE STRISCE DELLE SEZIONI DIVENTANO NEUTRE
+
+Alessio, dopo avermi mandato cinque schermate (Riepilogo, Pratiche, Preventivi,
+Fatture, Computo metrico): *«questo e' il riepilogo pulito neutro»*, e poi
+*«le voglio come il riepilogo, fai tu»*.
+
+Il 20 agosto il **Riepilogo** era diventato neutro. Le **19 pagine** che si
+aprono dal menu di sinistra erano rimaste indietro: barretta arancione sulle
+Pratiche e sui Computi, **cinque barrette di quattro colori diversi in fila**
+sulle Fatture, arancione sui due riquadri dei Preventivi.
+
+## LA REGOLA — la stessa del Riepilogo
+
+⛔ **IL COLORE STA SOLO DOVE C'E' ANCHE LA PAROLA.**
+
+- **restano colorati**: la pastiglia di stato («Bozza», «Accettato», «Pagata»)
+  e il pallino che le sta accanto — li' il colore accompagna un testo, e chi
+  non distingue rosso e verde legge comunque;
+- **diventano neutri**: le barrette a sinistra e i numeri grandi.
+
+## COSA HO TOCCATO — solo `css/gestionale.css`, sei punti
+
+1. `.wrap section .card.t-*` — barretta, numero ed etichetta
+2. `.wrap section .job:has(.pall.*)` — le schede dei Lavori
+3. `#fatture .fatt-tot.t-*` — i cinque riquadri delle Fatture, barretta e numero
+4. `.wrap section .job.t-*` — le schede di preventivi, computi, fatture
+5. `.num-c--err` / `.num-c--attesa` — i riquadri di Preventivi, Computi, Scadenzario
+6. `.num-c--err .num-n` — il numero dentro
+
+⚠️ **Le classi `t-*` non si tolgono**: le usa il resto del gestionale. Qui
+semplicemente non colorano piu'. E la barretta **resta larga 5px**: e' stata
+scolorita, non cancellata — se un giorno serve un colore, il posto c'e'.
+
+⚠️ `css/gestionale.css` lo carica anche `ricarica-crediti.html`, che pero' non
+usa nessuna di queste classi: controllato, li' non cambia niente.
+
+## ⚠️ COSA HO LASCIATO FUORI, ED E' UNA SCELTA
+
+- `.ai-str--pochi` — la striscia dell'AI in cima alla home del gestionale
+- `.ctr-str--rosso` / `--arancio` — la striscia dei controlli sulla scheda:
+  ha sfondo e testo suoi, e' un avviso, non una decorazione
+- `.lav-media .lsc-r.rit` e `#fornitori .ff-r.rit` — le righe rosse «in
+  ritardo» dentro Lavori e Fornitori
+
+Non erano nelle schermate che mi ha mandato. **Se le vuole neutre anche
+quelle, e' un secondo giro** — e va detto invece di farlo di nascosto.
+
+## IL BANCO
+
+`prove/banco-strisce.js` — apre in Chromium una pagina fatta col **CSS vero**
+e **misura il colore che il browser calcola**, non legge il file.
+
+⛔ **Due domande, non una**: (1) le barrette e i numeri sono neutri? (2) il
+colore che DEVE restare — pastiglia e pallino — e' ancora li'? Un banco che
+guardasse solo la prima direbbe «verde» anche dopo aver spento tutto.
+
+**31 verdi su 31.** `prove/sabotaggi-strisce.js` — **9 su 9 accusati**: i
+sette che rimettono il colore dov'era, e i **due che spengono la pastiglia e
+il pallino** — quelli servono a dimostrare che la terza parte del banco non
+e' una formalita'.
