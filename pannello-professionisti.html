@@ -3235,6 +3235,71 @@ async function _aiIntestazioni(){
   return h;
 }
 
+/* ⛔ 21 agosto 2026 (notte) — IL PREVENTIVO NON SI ASPETTA PIU' COL FIATO SOSPESO.
+   Netlify taglia una function normale a 26 secondi; sui lavori grossi il
+   modello ci mette il doppio, ed era il 504 che si vedeva nel pannello.
+   Adesso il lavoro parte in background (fino a 15 minuti) e questa funzione
+   ripassa a ritirarlo ogni due secondi.
+   ⚠️ Il numero di pratica lo sceglie il browser, ma non serve a niente in
+      mano a un altro: la riga si legge solo se e' della tua impresa
+      (regola ai_lavori_solo_i_miei in sql/ai-lavori.sql). Chi chiama lo
+      decide il gettone della sessione, come per ai-claude.js. */
+async function _aiPreventivo(prompt, mostra){
+  const id = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+        var r = Math.random() * 16 | 0;
+        var v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+
+  var avvio;
+  try {
+    avvio = await fetch('/.netlify/functions/ai-preventivo-background', {
+      method: 'POST',
+      headers: await _aiIntestazioni(),
+      body: JSON.stringify({ id: id, prompt: prompt })
+    });
+  } catch (e) {
+    throw new Error("Non sono riuscito ad avviare la generazione: controlla la connessione e riprova.");
+  }
+  /* una function in background risponde 202 e non dice altro */
+  if (avvio.status !== 202 && !avvio.ok) {
+    throw new Error("Non sono riuscito ad avviare la generazione. Riprova.");
+  }
+
+  const inizio = Date.now();
+  const LIMITE = 5 * 60 * 1000;
+  let vista = false;
+  while (Date.now() - inizio < LIMITE) {
+    await new Promise(function(r){ setTimeout(r, 2000); });
+    const secondi = Math.round((Date.now() - inizio) / 1000);
+    if (typeof mostra === 'function') { try { mostra(secondi); } catch (e) {} }
+
+    let riga = null;
+    try {
+      const { data } = await sb.from('ai_lavori')
+        .select('stato,risposta,errore')
+        .eq('id', id)
+        .maybeSingle();
+      riga = data || null;
+    } catch (e) { riga = null; }
+
+    if (!riga) {
+      /* la riga nasce dopo un secondo o due: se dopo mezzo minuto non c'e'
+         ancora, il lavoro non e' proprio partito (sessione scaduta) */
+      if (!vista && secondi > 30) {
+        throw new Error("Non sono riuscito ad avviare la generazione: esci e rientra, poi riprova.");
+      }
+      continue;
+    }
+    vista = true;
+    if (riga.stato === 'finito') return riga.risposta || '';
+    if (riga.stato === 'errore') throw new Error(riga.errore || "Errore nella generazione.");
+  }
+  throw new Error("Ci sta mettendo piu' del solito. Riprova fra un minuto: spesso il preventivo e' gia' pronto.");
+}
+
 let impresaCorrente = null;
 /* ===== Vista FONDATORE (9 agosto 2026) =====
    Serve solo ad Alessio: prova ogni pannello col suo unico account.
@@ -4185,28 +4250,14 @@ async function generaPreventivoDash() {
   btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo...';
 
   try {
-    const res = await fetch('/.netlify/functions/ai-claude', {
-      method: 'POST',
-      headers: await _aiIntestazioni(),
-      body: JSON.stringify({
-        azione: 'preventivo',
-        impresa_id: impresaCorrente.id,
-        prompt: prompt
-      })
+    const testo = await _aiPreventivo(prompt, function(secondi){
+      btn.innerHTML = '<span class="ai-spinner-btn"></span> L\'AI sta scrivendo il preventivo... ' + secondi + 's';
     });
-    const data = await res.json().catch(() => null);
-    if (!res.ok) {
-      alert('Errore AI: ' + ((data && data.error) || res.status));
-      btn.disabled = false;
-      btn.innerHTML = '🤖 Genera preventivo';
-      return;
-    }
-    const testo = (data && typeof data.risposta === 'string') ? data.risposta : '';
     document.getElementById('ai-result-text').value = testo;
     document.getElementById('ai-result-box').classList.add('show');
     btn.innerHTML = '✅ Preventivo generato — personalizzalo!';
   } catch (err) {
-    alert('Errore nella generazione. Riprova.');
+    alert((err && err.message) ? err.message : 'Errore nella generazione. Riprova.');
     btn.disabled = false;
     btn.innerHTML = '🤖 Genera preventivo';
   }
@@ -5223,22 +5274,15 @@ async function generaVociPreventivoAI() {
       '{"voci":[{"descrizione":"...","quantita":<numero>,"unita":"...","prezzo_unitario":<numero>}],"note":"..."}'
     ].join('\n');
     const promptCompleto = testo + '\n' + istruzioni;
-    const resp = await fetch('/.netlify/functions/ai-claude', {
-      method: 'POST',
-      headers: await _aiIntestazioni(),
-      body: JSON.stringify({
-        azione: 'preventivo',
-        impresa_id: impresaCorrente.id,
-        prompt: promptCompleto
-      })
-    });
-    const data = await resp.json().catch(() => null);
-    if (!resp.ok) {
-      alert('Errore AI: ' + ((data && data.error) || resp.status));
+    let raw = '';
+    try {
+      raw = await _aiPreventivo(promptCompleto, function(secondi){
+        if (btn) btn.innerHTML = '⏳ Sto scrivendo le voci… ' + secondi + 's';
+      });
+    } catch (errAI) {
+      alert((errAI && errAI.message) ? errAI.message : 'Errore AI. Riprova.');
       return;
     }
-
-    const raw = data && typeof data.risposta === 'string' ? data.risposta : '';
     if (!raw) {
       alert('Risposta AI vuota o in formato inatteso.');
       return;
