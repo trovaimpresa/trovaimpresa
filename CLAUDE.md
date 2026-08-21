@@ -1,5 +1,21 @@
 # Memoria progetto — TrovaImpresa
 
+## ⛔ DOVE SONO I FILE — la prima cosa da fare in ogni sessione nuova
+
+**La cartella del progetto è: `C:\Users\Utente\Downloads\trovaimpresa`**
+
+- In Cowork si apre come `$HOME/mnt/trovaimpresa` (`device_list_dir`, `device_bash`,
+  `device_stage_files`). Se non risulta collegata, si chiede l'accesso **a quella
+  cartella lì**: non si va a cercare in giro per il computer di Alessio.
+- Dentro, quello che serve sempre:
+  `CLAUDE.md` (questa memoria) · `PROMPT-sessione-nuova.md` ·
+  le pagine `.html` in cima (pannelli, gestionale, pagine città) ·
+  `sql/` · `netlify/functions/` · `js/` · `css/` ·
+  `tools/controllo-push.js` (da lanciare PRIMA di ogni blocco git) ·
+  `prove-claude/` (rapporti e fogli di lavoro: **in `.gitignore`, non va online**).
+- ⛔ Da qui NON si lancia nessun comando git, nemmeno in sola lettura.
+- I banchi di prova NON stanno qui: stanno nel contenitore di Claude, in `prove/`.
+
 ## Come lavoriamo (IMPORTANTE)
 - Modalità **Cowork**: Claude modifica i file direttamente nella cartella. Non servono prompt per Claude Code.
 - **Il `git push` lo fa Alex** dal suo Git Bash. Claude NON deve tentare il push dal proprio ambiente: fallisce sempre.

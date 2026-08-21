@@ -5,6 +5,8 @@ Copia e incolla tutto quello che sta sotto la riga.
 
 Ciao. Riprendiamo il lavoro su TrovaImpresa.
 
+⛔ **La cartella del progetto è `C:\Users\Utente\Downloads\trovaimpresa`** (in Cowork si apre come `$HOME/mnt/trovaimpresa`). Se non risulta già collegata, chiedimi l'accesso **a quella cartella lì**: non startene a cercare in giro nel computer.
+
 Prima di rispondermi leggi `CLAUDE.md`, che sta nella cartella del progetto: è la memoria di tutto. In particolare la testa del file (le regole fisse) e le **tre sezioni del 21 agosto in fondo**: il controllo totale del gestionale, il resoconto della sera, e quella della tarda serata (il timeout del preventivo e i nomi dei gestionali). Dentro ci sono le lezioni che sono costate la giornata.
 
 Come si lavora con me — le regole che non si sgarrano
