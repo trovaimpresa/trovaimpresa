@@ -1581,7 +1581,25 @@
   window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(uniformaBoxHeights, 200); });
 })();
 </script>
-<script src="/js/assistente-trovaimpresa.js" defer></script>
+<!-- ⚠️ 21 agosto 2026 — QUI L'ASSISTENTE NON SI CARICA, ED È VOLUTO.
+     Fino a oggi proprio qui c'era il tag che tira dentro
+     /js/assistente-trovaimpresa.js
+     Ma quel tag lo mette GIÀ NETLIFY da solo, in fondo alla pagina, su TUTTE
+     le pagine del sito: è lo «snippet injection» del pannello, e non è scritto
+     in nessun file di questa cartella. Il sorgente vero della homepage lo
+     mostrava DUE volte: alla riga 1584 (questa) e in fondo, quella di Netlify.
+     Il file dichiara otto costanti a livello globale, quindi la seconda volta
+     il browser si fermava con:
+         Uncaught SyntaxError: Identifier 'PAGINE_REGISTRAZIONE'
+         has already been declared
+     Un errore rosso sulla pagina principale, che vedeva anche Google.
+     ⛔ NON RIMETTERE IL TAG QUI: torna l'errore, identico.
+     ⛔ E in questo commento non si scrivono tag veri (né la chiusura del
+        body né quella di uno script): Netlify infila il suo pezzo prima
+        della PRIMA chiusura del body che trova, e se la trova qui dentro
+        l'assistente sparisce dalla home. Provato al banco il 21 agosto.
+     ⚠️ Se un giorno la bolla dell'assistente sparisce da TUTTO il sito, il
+        posto da guardare è il pannello di Netlify, non questo file. -->
 <script src="/js/recensioni-sito.js" defer></script>
 <script src="/js/fb-browser-bar.js?v=2" defer></script>
 </body>

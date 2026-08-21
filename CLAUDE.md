@@ -11515,3 +11515,67 @@ stia dentro lo schermo, e che la finestrella piccola resti piccola.
 fissi» non rompe niente, perché `.ai-ov` è un flex e la finestra si stringe
 lo stesso (`flex-shrink` vale 1 di suo). Al suo posto c'è quello che rompe
 davvero: `flex-shrink:0`.
+
+
+# 21 agosto 2026 — L'ERRORE ROSSO SULLA HOMEPAGE: LO METTEVA NETLIFY
+
+Sulla console di `trovaimpresa.com`, per chiunque aprisse la pagina principale:
+
+    Uncaught SyntaxError: Identifier 'PAGINE_REGISTRAZIONE'
+    has already been declared   (assistente-trovaimpresa.js)
+
+## ⛔ PRIMA GUARDARE, POI DIRE
+
+Nella cartella il tag c'era **una volta sola**, e la costante pure. Ho aperto la
+homepage locale in Chromium: **zero errori**. Poi ho fatto la prova al
+contrario — un secondo `script` dello stesso file — ed è uscito **esattamente**
+quel messaggio. Da lì la diagnosi non era più un'ipotesi: **online quel file
+gira due volte**.
+
+Il sorgente vero (`Ctrl+U`, `Ctrl+F`, «1/2») lo ha confermato: **riga 1584**
+quello scritto a mano, **riga 1587** uno **appiccicato alla chiusura del body,
+sulla stessa riga**.
+
+## CHI LO METTEVA
+
+**Netlify.** Lo «snippet injection» del pannello, che infila un pezzo di codice
+in fondo a **tutte** le pagine — così l'assistente compare ovunque senza toccare
+237 file. Sulla home il tag c'era già scritto a mano: due volte, e la pagina si
+ferma.
+
+⚠️ **Non è in nessun file della cartella, e non è in `netlify.toml`.** Ho
+controllato anche l'edge function `geo.js`: non tocca l'HTML. Se un domani
+l'assistente sparisce da tutto il sito, il posto da guardare è il **pannello**.
+
+## LA CORREZIONE
+
+**Una riga tolta da `index.html`**, sostituita da un commento che spiega perché
+lì non c'è niente. Il file `js/assistente-trovaimpresa.js` non è stato toccato.
+
+## ⛔ LA TRAPPOLA DENTRO IL MIO STESSO COMMENTO
+
+La prima versione del commento conteneva la **chiusura del body** scritta per
+esteso, per spiegare dove Netlify infila il suo pezzo. Il banco è diventato
+rosso: Netlify (e il banco) infilano prima della **PRIMA** chiusura che
+trovano, e con quel commento la prima era **dentro il commento**. Risultato:
+l'iniezione finiva commentata e **l'assistente spariva dalla home**.
+
+⛔ **In un commento non si scrivono tag veri.** Vale per la chiusura del body e
+per quella di uno script. Adesso è una prova del banco, non solo una frase qui:
+la chiusura del body deve comparire **una volta sola** in tutta la pagina, e
+nessun commento deve contenere un tag script.
+
+⚠️ È la stessa famiglia dell'errore del 18 agosto (i backtick dentro un commento
+dentro un template CSS): **un commento non è un posto neutro.**
+
+## IL BANCO
+
+`prove/banco-homepage.js` — rifà la pagina **come la serve Netlify**, cioè con
+l'iniezione, e la apre davvero in Chromium a **1440x900** e **390x844**:
+nessun errore, lo script arriva **una volta sola**, la bolla dell'assistente
+c'è, la guardia `__assistenteTI` è accesa. Più il caso «e se Netlify non
+iniettasse più niente».
+
+**12 verdi su 12.** `prove/sabotaggi-homepage.js` — **4 su 4 accusati**:
+il tag rimesso a mano, la chiusura del body dentro il commento, un tag script
+dentro il commento, il commento lasciato aperto.
