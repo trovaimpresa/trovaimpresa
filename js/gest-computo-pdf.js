@@ -2108,9 +2108,26 @@
      .replace(), che il 21 agosto produsse «un metonnelitrolataro
      quintaleuadro». E la frase di ripiego e' identica a quella della
      schermata, cosi' il foglio e lo schermo dicono la stessa parola. */
+  /* ⚠️ 22 agosto 2026 — UN PREZZARIO VERO SCRIVE «mq» DOVE LA TENDINA SCRIVE
+     «m²». Visto da Alessio in una foto: nella stessa lista una lavorazione
+     diceva «20,46 m²» e quella sotto «174,06 mq» — la prima scelta dalla
+     tendina, la seconda arrivata da un prezzario importato.
+     AN_UNO ha le chiavi della tendina: su «mq» non trovava niente e il foglio
+     avrebbe scritto «l'analisi è per una unità di mq» e «PREZZO PER UNA UNITÀ
+     DI MQ», invece di «un metro quadro». Su un documento di gara è brutto e
+     sembra un errore.
+     Quindi: prima si prova la chiave così com'è, poi si passa da _uniPiatta —
+     la STESSA che usa l'importazione del prezzario per capire se due unità
+     sono la stessa cosa — e si torna alla chiave della tendina.
+     ⛔ Una tabella, non una fila di .replace(). */
+  const AN_PIATTA={ "m":"m", "m2":"m²", "m3":"m³", "kg":"kg", "q":"q", "t":"t",
+                    "cad":"cad", "corpo":"corpo", "ora":"ora", "giorno":"giorno", "l":"l" };
   function _anPdfUno(u){
     const uni=String(u==null?"":u).trim();
-    return AN_UNO[uni]||(uni?("una unità di "+uni):"una unità");
+    if(AN_UNO[uni])return AN_UNO[uni];
+    const chiave=AN_PIATTA[_uniPiatta(uni)];
+    if(chiave&&AN_UNO[chiave])return AN_UNO[chiave];
+    return uni?("una unità di "+uni):"una unità";
   }
 
   /* I TRE CONTROLLI. Torna "" se va tutto bene, oppure la frase da dire.

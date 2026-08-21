@@ -11243,3 +11243,34 @@ sabotato niente. Lo stesso è successo con `if(senzaCap.length)gruppi.push(…)`
 che sta sia in `_compGruppi` sia in `computoPdf` — lì il sabotaggio risultava
 «accusato» per il motivo sbagliato. Adesso `uno()` **si ferma** se l'ancora
 compare più di una volta.
+
+### ⚠️ E UN QUARTO DIFETTO, VISTO NELLA FOTO DEL 22 AGOSTO
+
+Nella lista delle lavorazioni si leggeva, una sotto l'altra:
+
+> `A.01.002` · demolizione di tramezzi in laterizio — **20,46 m²** × 18,50 €
+> `A03.01.009.a` · Demolizione di muratura… — **174,06 mq** × 20,01 €
+
+**Due modi di scrivere la stessa unità nella stessa lista.** La prima l'ha
+scelta dalla tendina, la seconda è arrivata da un prezzario importato.
+
+⛔ **Per il PDF dell'analisi era un difetto vero:** `AN_UNO` ha le chiavi
+della tendina (`m²`, `m³`, `cad`…). Su una lavorazione con unità `mq` non
+trovava niente e il foglio avrebbe scritto **«l'analisi è per una unità di
+mq»** e **«PREZZO PER UNA UNITÀ DI MQ»** invece di «un metro quadro». Su un
+documento di gara sembra un errore del programma.
+
+**Risolto in `_anPdfUno`:** prima si prova la chiave così com'è, poi si passa
+da **`_uniPiatta`** — la stessa funzione che usa l'importazione del prezzario
+per capire se due unità sono la stessa cosa — e si torna alla chiave della
+tendina (`AN_PIATTA`). Coperte: `mq · mc · ml · pz · n. · nr · pezzo`.
+⛔ **Una tabella, non una fila di `.replace()`.**
+
+⚠️ **RESTA DA FARE, ed è un difetto suo:** *a schermo* le due unità si
+leggono ancora diverse («m²» e «mq») nella stessa lista. Il foglio stampato
+adesso è coerente, la schermata no. È la regola del 21 agosto — «due modi
+diversi per la stessa cosa nella stessa schermata sono un difetto». Messo in
+lista come n. 26.
+
+**Totale del PDF dell'analisi, a fine giornata: 165 verdi · 24 sabotaggi, 24
+accusati.**
