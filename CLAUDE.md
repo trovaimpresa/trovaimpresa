@@ -13098,3 +13098,175 @@ sessione. ✅
 Il **preventivo AI in timeout (504)** sui lavori grossi è ancora lì, e questo
 push non lo tocca. ⚠️ Prima di mettere mano al codice: **il registro di
 Netlify**, come dice la lezione della sera del 21.
+
+
+# ✅ 21 agosto 2026, TARDA SERA — IL TIMEOUT DEL PREVENTIVO, E I NOMI DEI GESTIONALI
+
+## 1. IL PREVENTIVO AI NON VA PIÙ IN TIMEOUT (punto 1 della lista: CHIUSO)
+
+⛔ **Perché cadeva.** Non si era rotto niente: Netlify taglia una function
+normale a **26 secondi**, e sui lavori grossi il modello scrive ~2.300
+parole-macchina, cioè il doppio del tempo. Alle 17:20 (descrizione corta)
+riusciva, alle 19:45 («ristrutturazione chiavi in mano») no. Alessio ha contato
+i secondi a mente: «21, forse 26». Quello era il muro.
+
+⚠️ La lezione della sera («guarda il registro di Netlify») resta valida e non è
+stata aggirata: il registro non è stato aperto, ma la strada scelta **toglie di
+mezzo la domanda**, perché il tetto passa da 26 secondi a 15 minuti.
+
+**Deciso da Alessio: la strada definitiva, non la scorciatoia.** («io sono
+sempre per fare un lavoro migliore e definitivo»)
+
+- **`sql/ai-lavori.sql`** (nuovo, già eseguito): la tabella dove il preventivo
+  viene depositato mentre si scrive. Lucchetto: ognuno legge SOLO i suoi
+  (`impresa_id in (select id from imprese where user_id = auth.uid())`, lo
+  stesso schema di `rls-batch1`); dal browser non si scrive niente.
+  ⛔ **`imprese.id` è un NUMERO (bigint), non un uuid** come nelle altre
+  tabelle. Scritto uuid, il file non parte proprio: «incompatible types: uuid
+  and bigint». Preso sul database vero, dopo che il banco aveva dato verde
+  perché il suo schema di prova aveva l'id uuid — **è la trappola del 9 agosto,
+  ricomparsa identica: lo schema di prova si copia da quello vero, non si
+  immagina.** Adesso c'è un sabotaggio apposta (S6) che rifà quello sbaglio e
+  il banco si ferma subito.
+- **`netlify/functions/ai-preventivo-background.js`** (nuovo): il nome che
+  finisce per `-background.js` è quello che dice a Netlify «rispondi 202 subito
+  e lascia lavorare fino a 15 minuti». ⛔ Se qualcuno lo rinomina, il tetto
+  torna a 26 secondi e il difetto ricompare. Dentro: gli stessi controlli
+  d'accesso di `ai-claude.js` (gettone, impresa dall'accesso, Premium con
+  scadenza, tetto 30 al giorno), la riga «in_corso» creata **prima** di
+  chiamare il modello, un tempo massimo di 4 minuti sul modello
+  (AbortController), e in ogni finale la riga viene chiusa: mai lasciata
+  «in_corso». ⚠️ Nel registro di Netlify adesso resta scritto **quanti secondi
+  ci ha messo**: il numero che quella sera non aveva nessuno.
+- **I 4 pannelli**: nasce `_aiPreventivo(prompt, mostra)` accanto a
+  `_aiIntestazioni()`. Manda il lavoro, riceve 202, e **ripassa a ritirare ogni
+  due secondi** leggendo `ai_lavori` (fino a 5 minuti; se la riga non nasce
+  entro mezzo minuto avvisa che la sessione è scaduta). Sostituisce le **due**
+  chiamate per pannello: la lettera del «Preventivo AI» degli Strumenti e le
+  voci del preventivo dentro la scheda. ⚠️ Erano due, non una: la stima data ad
+  Alessio («un punto per pannello») era sbagliata ed è stata corretta subito.
+
+**Banchi:** function 22 verdi · 9 sabotaggi su 9 · SQL su PostgreSQL 16 vero 13
+verdi · 6 sabotaggi su 6 · l'attesa nel pannello (funzione estratta dal file
+vero, orologio finto per provare i 5 minuti) 12 verdi · 6 sabotaggi su 6 · le 4
+pagine aperte in Chromium a due misure, zero errori nuovi.
+
+⚠️ **Due lezioni sui banchi, di stasera:**
+1. Un sabotaggio SQL («do il permesso di scrivere a chi ha l'account») restava
+   VERDE: senza una regola permissiva il lucchetto blocca lo stesso. Riscritto
+   sul punto che il danno lo fa davvero — **la regola copiata a occhio**, che è
+   esattamente com'era nata la falla delle recensioni.
+2. Una prova che girava a vuoto restava **zitta** invece di diventare rossa.
+   Adesso una prova che non finisce entro dieci secondi è rossa.
+
+✅ Provato in produzione da Alessio: preventivo generato senza errori.
+
+## 2. I NOMI DEI GESTIONALI — decisione di Alessio
+
+**La domanda era: si può dividere il gestionale impresa da quello dei
+professionisti?** I numeri messi sul tavolo: sono **24.323 righe** (15.361 la
+pagina + 9.000 i quattro file), e quello che cambia davvero fra impresa e
+studio sono **~101 punti**, meno dell'1%. Dividere = due copie del 99% che è
+uguale, e ogni correzione pagata due volte.
+
+⛔ **Deciso: NON si divide.** Un motore solo, una faccia per mestiere — come
+era già stato fatto per lo studio tecnico.
+
+`gestionale-app.html`: nasce `_NOMI_GESTIONALE` + `nomeGestionale()` +
+`applicaNomeGestionale()`, **un punto solo** che decide il nome e lo scrive nel
+titolo grande e nella linguetta del browser:
+- impresa → **Gestionale impresa**
+- artigiano → **Gestionale artigiano**
+- professionista → **Gestionale studio** (scelto da Claude su delega: è la
+  parola che il gestionale usa già dentro — gruppo «Studio tecnico» — quindi
+  non si introduce un terzo termine)
+- chi non ha ancora scelto il tipo → **Il tuo gestionale**, come prima.
+
+⚠️ Il nome dello studio prima stava scritto **dentro** il ramo del
+professionista: spostato nell'unico punto, se no la stessa regola finiva in due
+posti. C'è un sabotaggio (S3) che diventa rosso se qualcuno la rimette lì.
+
+Nei 4 pannelli il riquadro grande dice adesso «Apri gestionale impresa /
+artigiano / studio / negozio».
+
+**Banco:** 11 verdi · 5 sabotaggi su 5 · gestionale aperto in Chromium (vecchio
+contro nuovo, due misure): zero errori nuovi, e **i quattro nomi provati dentro
+la pagina vera**.
+
+## ⛔ 3. IL GESTIONALE È CHIUSO, E LA PORTA PER ALESSIO C'ERA GIÀ
+
+Alessio ha chiesto «perché non mi apri il gestionale?»: è `MANUTENZIONE = true`
+(riga ~15272), deciso da lui il 20 agosto. Claude si è offerto di costruirgli
+un'eccezione — **e l'eccezione esisteva già**: `AMMESSI` con la sua mail, più la
+scorciatoia **`?chiave=apri`**. È la lezione n. 1 («prima di costruire, guarda
+se c'è già»), ricomparsa: trenta secondi di lettura del file l'avrebbero evitata.
+
+⚠️ **Perché la sua mail non basta:** `ammesso()` guarda l'email scritta nella
+riga `imprese` (`row.email`), non quella dell'accesso. Se nella riga c'è
+un'altra mail, il fondatore si chiude fuori da solo. Query per verificarlo (non
+ancora eseguita):
+`select i.email, u.email from public.imprese i join auth.users u on u.id=i.user_id where u.email='pintoalessio@icloud.com';`
+Se sono diverse, la correzione è far guardare tutte e due le mail.
+
+⛔ **Prima di aprirlo a tutti resta il punto vero: il cancello del Premium vive
+solo nel browser** (punto 3 della lista). Un account free si prende il
+gestionale intero.
+
+## ⛔ 4. IL PREVENTIVO AI: I PREZZI SONO IL DOPPIO DEL VERO
+
+Su un bagno da 15 mq ha scritto **14.600 € + IVA**. Alessio: «un bagno completo
+di tutto, anche lavandino, rubinetti e porta, **6/7 mila a Rieti**; a Roma in un
+quartiere di lusso, zona difficile, al decimo piano, aumenta». Il bagno di
+riferimento è di **6 mq**.
+
+Cosa è sbagliato, oltre al prezzo:
+- ⚠️ **L'IVA**: mette 10% su tutto. Sanitari e rubinetteria sono «beni
+  significativi»: il 10% vale solo fino al valore della manodopera, il resto va
+  al 22%. Su un bagno capita sempre. **Da confermare col commercialista.**
+- **Si inventa cose sull'impresa**: showroom, assicurazione RC, sopralluogo
+  gratuito, garanzie. Roba che decide Alessio, non l'AI.
+- **Nessun aggancio a Rieti**: le istruzioni di quella schermata
+  (`generaPreventivoDash`) dicono solo «un preventivo professionale con stima
+  dei costi». Quelle delle voci (`generaVociPreventivoAI`) invece nominano
+  Rieti/Lazio 2026 — ed è per questo che lì i numeri sono più sensati.
+- **I simboli**: `#`, `**` e le tabelle escono come sono, perché il riquadro è
+  una casella di testo semplice.
+
+⛔ **La regola della skill guide-prezzi vale anche qui: i prezzi sono i SUOI,
+non si inventano.** Nelle istruzioni nuove l'AI dovrà scrivere «da valutare in
+sopralluogo» quando non ha un riferimento sicuro, invece di sparare una cifra.
+
+Mancano ancora, chiesti e non ancora avuti: €/mq di una ristrutturazione
+completa a Rieti · la giornata di un operaio · quanto aggiunge Roma in
+percentuale.
+
+## LA FINESTRELLA DEL PREVENTIVO — segnalato da Alessio
+
+Nel «Preventivo AI» degli Strumenti il riquadro è alto quattro righe per un
+preventivo di due pagine, e **non si può salvare, stampare, cancellare né
+capire che si può modificare** (il testo È modificabile: è una textarea, ma non
+si vede). Proposto e non ancora fatto: riquadro alto il triplo, «Stampa / Salva
+come PDF», «Svuota e rifai», e una riga che dica che si può correggere a mano.
+⚠️ Salvare nello Storico preventivi NON è un lavoro da mezz'ora: lo storico
+vuole le voci una per una (descrizione, quantità, prezzo), questo è una lettera.
+
+## ⛔ IL PROSSIMO PERCORSO: IL GESTIONALE ARTIGIANO
+
+Aperto da Alessio: «iniziamo un nuovo percorso: gestionale artigiano», e poi
+«via gli strumenti da tutti i pannelli, non servono a niente, nessuno pagherebbe
+per averli».
+
+Il foglio per decidere è in **`prove-claude/GESTIONALE-ARTIGIANO.md`** (non va
+online). In sintesi:
+- Il tipo **artigiano c'è già** nel database (`imprese.tipo`), non va aggiunto.
+- ⛔ Oggi l'artigiano **cade nel ramo dell'impresa edile** (`adattaMenuImpresa`)
+  e si ritrova accesi **Computo metrico, Prezzario e Stati di avanzamento** —
+  roba da appalti che un idraulico non aprirà mai.
+- Le 22 voci sono divise in tre gruppi: 10 nel cuore, 8 da decidere con lui
+  (Fornitori, Mezzi, Attrezzature, Squadra, Agenda operatore, Report, Carte,
+  Mappa), 4 da togliere (le tre da appalti + Crediti formativi).
+- Le parole: per lo studio «Lavori» è già diventato «Pratiche». Per l'artigiano
+  la domanda è se «Lavori» debba diventare «Interventi».
+
+⚠️ Alessio ha detto **«aspetta a partire, devo capire»**: il foglio è suo, si
+parte quando lo dice lui.
