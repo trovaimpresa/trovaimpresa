@@ -13399,3 +13399,51 @@ Non a mano: uno script (`taglia.py`, nel contenitore) che
 
 ⛔ Una funzione si toglie **solo** se il suo nome non compare più da nessuna
 parte, nemmeno negli altri file che la pagina carica.
+
+
+## ✅ CHIUSO SUBITO DOPO — LA CODA DI `pannello-impresa.html`
+
+Alessio: *«sistemiamolo adesso»*. Fatto, ed era **più grosso di come l'avevo
+raccontato**.
+
+⛔ **Non erano «i messaggi in tempo reale»: era TUTTA la chat del pannello
+impresa.** Il file si interrompeva a
+`  msgRealtimeChannel` — senza il resto della riga, senza `}`, senza
+`</script>`, senza `</html>`. Il browser, arrivato a fine file, scarta
+**l'intero blocco** di codice: cioè le **224 righe** della chat.
+
+**Provato nel browser vero** (`prove/strumenti/prova-chat-impresa.js`), prima
+e dopo:
+- PRIMA: `sottoscriviRealtimeMessaggi` → **non esiste**, `renderMessaggioChat`
+  → **non esiste**. Cioè la sezione Messaggi del pannello impresa era morta.
+- ADESSO: esistono tutte e due.
+
+⚠️ **E in console non compariva NIENTE**: zero errori di sintassi, in tutti e
+due i casi. Un blocco `<script>` che finisce con il file viene chiuso in
+silenzio dal browser e buttato via senza un fiato. **Un difetto muto**: per
+questo nessuno se n'era accorto.
+
+**La coda non è stata inventata.** È identica, riga per riga, a quella degli
+altri tre pannelli (artigiano, professionisti, negozio): stesso canale
+`chat_messaggi_impresa_ + impresaCorrente.id`, stesso filtro, stesso
+`.subscribe()`. Confrontato tutto il blocco Messaggi: **224 righe su 224
+identiche** all'artigiano, mancava solo la coda.
+
+**Due prove nuove al banco** (adesso 16 verdi · 14 sabotaggi su 14):
+- *nessun pannello finisce a metà frase*: `<script>` aperti = chiusi, e il
+  file finisce con `</html>`;
+- *i messaggi in tempo reale sono attaccati davvero*: dentro la funzione ci
+  devono essere `sb.channel(`, `postgres_changes`, `chat_messaggi` e
+  `.subscribe()`.
+
+⚠️ **Due sabotaggi hanno insegnato qualcosa, di nuovo:**
+1. La prova «il codice non si legge peggio di prima» **confrontava vecchio
+   contro nuovo** — e siccome `pannello-impresa.html` era già rotto in coda,
+   una graffa in più nello stesso file **non la faceva diventare rossa**: uno
+   contro uno, «non peggio». ⛔ **Un difetto vecchio che resta lì fa da
+   scudo a quelli nuovi.** Ora che il file è sano la misura è assoluta: zero
+   blocchi illeggibili, punto.
+2. Il sabotaggio «tolgo `.subscribe()`» restava verde: di `.subscribe()` nel
+   pannello negozio ce ne sono **due**, e colpiva la prima, che è di un altro
+   canale e non fa danno ai messaggi. Riscritto sull'ultima, quella dentro la
+   funzione dei messaggi.

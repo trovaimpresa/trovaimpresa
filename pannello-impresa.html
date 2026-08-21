@@ -5369,4 +5369,14 @@ async function inviaMessaggioArtigiano() {
 
 function sottoscriviRealtimeMessaggi() {
   if (msgRealtimeChannel) return;
-  msgRealtimeChannel
+  msgRealtimeChannel = sb.channel('chat_messaggi_impresa_' + impresaCorrente.id)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messaggi', filter: `impresa_id=eq.${impresaCorrente.id}` }, payload => {
+      if (payload.eventType === 'INSERT' && msgConversazioneAperta && payload.new.conversation_id === msgConversazioneAperta.convId) {
+        renderMessaggioChat(payload.new);
+      }
+      caricaListaConversazioniSilenziosa();
+    })
+    .subscribe();
+}
+</script>
+</html>
