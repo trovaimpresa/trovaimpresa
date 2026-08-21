@@ -11486,3 +11486,32 @@ grigio l'abbiamo scritto noi: dentro un preventivo, a un geometra, l'AI
 suggerisce ancora «Giovedì prossimo taglio siepe da Le Betulle».
 ⛔ Non si scrive «provata» una cosa che il banco non accusa: **n. 28 in
 lista**, e va fatto in un push suo perché tocca tutto il gestionale.
+
+---
+
+## ✅ LA FINESTRA DELL'AI PIÙ GRANDE (22 agosto 2026)
+
+Da **720 px** a **1400 px**, deciso da Alessio guardandola: su un monitor da
+1920 era un francobollo in mezzo allo schermo.
+
+Cresce **una riga sola** in `js/ai-integrazione.js`, e crescono insieme tutte
+e quattro le finestre (Aiuto, Genera con AI, compila il modulo).
+⛔ `.ai-box--sm` (440 px) viene DOPO e resta piccola: è la finestrella dei
+messaggi corti, che larga non avrebbe senso.
+
+### ⚠️ E UNA COSA TROVATA MISURANDO, NON LEGGENDO IL CSS
+`max-width:1400px` **non** dava una finestra da 1400: senza
+`box-sizing:border-box` quel numero è il **contenuto**, e col bordo interno
+(28+28) la finestra usciva **1456**. La misura scritta non era quella vera.
+Aggiunto `box-sizing:border-box`.
+
+### Come è stato provato
+`prove/banco-ai-finestra.js` — **9 verdi**. Apre la finestra in Chromium e la
+**misura** a 1920×1080, 1440×900, 1000×800 e 390×844: la larghezza vera, che
+stia dentro lo schermo, e che la finestrella piccola resti piccola.
+`prove/sabotaggi-ai-finestra.js` — **5 su 5 accusati**.
+
+⚠️ **Un sabotaggio l'ho cambiato invece di dichiararlo:** «larghezza in px
+fissi» non rompe niente, perché `.ai-ov` è un flex e la finestra si stringe
+lo stesso (`flex-shrink` vale 1 di suo). Al suo posto c'è quello che rompe
+davvero: `flex-shrink:0`.

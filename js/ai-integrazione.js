@@ -696,7 +696,20 @@
   display:flex;align-items:center;justify-content:center;z-index:9500;padding:20px;
   font-family:system-ui,-apple-system,Segoe UI,sans-serif;animation:aiF .18s ease;overflow-y:auto}
 @keyframes aiF{from{opacity:0}to{opacity:1}}
-.ai-box{background:#fff;border-radius:18px;width:100%;max-width:720px;padding:30px 28px 24px;
+/* ⚠️ 22 agosto 2026 — LA FINESTRA ERA UN FRANCOBOLLO. Si fermava a 720px:
+   su un monitor da 1920 restava un riquadrino in mezzo allo schermo, con la
+   risposta dell'AI schiacciata in una colonna stretta. Alessio l'ha guardata
+   e ha detto «ingrandiamola». Adesso 1400px: quasi tutta la pagina, con un
+   bordo attorno.
+   ⛔ .ai-box--sm (440px) viene DOPO e resta piccola: e' la finestrella dei
+      messaggi corti, che larga non avrebbe senso.
+   ⚠️ Sul telefono non cambia niente: sotto i 1400px vale width:100%. */
+.ai-box{background:#fff;border-radius:18px;width:100%;max-width:1400px;padding:30px 28px 24px;
+  /* ⚠️ box-sizing:border-box, se no «max-width:1400» vuol dire 1400 di
+     CONTENUTO piu' 28+28 di bordo interno: la finestra usciva 1456 e la
+     misura scritta non era quella vera. Trovato misurandola in Chromium,
+     non leggendo il CSS. */
+  box-sizing:border-box;
   position:relative;box-shadow:0 24px 60px rgba(0,0,0,.28);animation:aiU .22s cubic-bezier(.2,.8,.3,1);
   max-height:92vh;overflow-y:auto}
 .ai-box--sm{max-width:440px;text-align:center}
