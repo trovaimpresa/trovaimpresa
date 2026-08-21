@@ -13548,3 +13548,80 @@ finestra si apre, niente copre il pannello.
 la n. 3 — che gira per la pagina a cercare qualsiasi cosa larga più di mezzo
 schermo comparsa sopra il pannello: se un domani qualcuno rimette una
 finestra, diventa rossa.
+
+
+# ⛔ 21 agosto 2026, FINE SERATA — L'ORDINE DEI PROSSIMI TRE LAVORI
+
+Deciso da Alessio prima di chiudere. **Si riparte da qui, in quest'ordine.**
+
+## 1. IL GESTIONALE ARTIGIANO — deciso tutto, si costruisce e si collauda
+
+⛔ **NON è un file suo. È la terza faccia di `gestionale-app.html`**, come lo
+studio tecnico. Alessio ha chiesto due volte se non fosse meglio un file
+separato; la risposta, con i numeri sul tavolo, è no: 24.323 righe di cui
+cambia meno dell'1%, e un file separato vuol dire pagare due volte ogni
+correzione. **Confermato da lui.** Non ridiscuterlo.
+
+**Le 22 voci, segnate da Alessio il 21 sera** (foglio in
+`prove-claude/GESTIONALE-ARTIGIANO.md`):
+
+- **Restano, 15**: Riepilogo · Lavori · Clienti · Preventivi · Fatture ·
+  Scadenzario · Calendario · Richieste dal sito · Galleria · Cestino
+  (le 10 del cuore) **+ Fornitori · Mezzi · Attrezzature · Report · Mappa**.
+- **Si spengono, 7**: Computo metrico · Prezzario · Stati di avanzamento ·
+  Crediti formativi (le 4 da appalti) **+ Squadra · Agenda operatore · Carte**.
+- **Le parole**: «Lavori» diventa **«Lavori e interventi»**. ⚠️ Non
+  «Interventi» e basta: Alessio ha chiesto di tenere **tutte e due le
+  parole**, così va bene sia a chi fa cantieri sia a chi fa mezze giornate.
+
+⚠️ **Il nodo da non dimenticare**: Attrezzature resta ma Squadra si spegne, e
+in Attrezzature c'è «chi ce l'ha in mano», che pesca dalla Squadra. Per
+l'artigiano quel campo va cambiato in una **nota scritta a mano**, se no è una
+tendina vuota.
+
+**Come si fa**: nasce `adattaMenuArtigiano()` accanto a
+`adattaMenuProfessionista()` (riga ~963) — oggi l'artigiano cade dentro
+`adattaMenuImpresa()` (riga ~1071), ed è da lì che gli arrivano computo,
+prezzario e SAL. ⛔ **Si nasconde soltanto**: i dati restano nel database e
+tornano da soli se cambia il tipo. Un file toccato, un push.
+
+## 2. IL GESTIONALE NEGOZIO — «un lavoro iniziato e mai finito»
+
+Parole di Alessio: *«è rimasto molto indietro, come i professionisti»*.
+`gestionale-negozio.html` è un file **davvero separato**, e con ragione: ha un
+mestiere suo (magazzino, giacenze, scarico merce). 204 KB contro 934.
+⚠️ Il prezzo che paga è che **le correzioni fatte sul gestionale principale lì
+non arrivano mai**. Quello che si sa già essere aperto (dal 7 agosto):
+`esc()` sui dati nelle card `neg_*` (self-XSS) · il banner di errore-lettura
+sul riepilogo · la numerazione dei preventivi fatta dal browser (max+1, due
+dispositivi = due preventivi con lo stesso numero).
+
+## 3. IL GESTIONALE NOLEGGIO — da far entrare dentro gli altri due
+
+Idea di Alessio: *«nelle imprese ci possono stare noleggiatori e nei negozi
+noleggi di attrezzature»*. **Ha ragione, e i numeri gli danno ragione:**
+- `gestionale-noleggio.html` è **2.233 righe**: non è un gestionale, è già un
+  **modulo**;
+- usa **tre sole tabelle sue** — `nol_mezzi`, `nol_clienti`, `nol_noleggi` —
+  e per il resto pesca già da `gest_clienti`, `gest_lavori`, `gest_azienda`,
+  `neg_prodotti`, `neg_fornitori`: **è già imparentato con impresa e negozio**;
+- ⛔ **oggi non è collegato a niente**: l'unico posto che ci porta è un link in
+  `admin.html`. Non esiste un tipo «noleggio» fra le iscrizioni, quindi
+  nessun iscritto può arrivarci. 159 KB fermi.
+
+Come diventerà: una **sezione «Noleggio»** che si accende solo per chi dice
+«io noleggio», spenta per tutti gli altri.
+
+⚠️ **Da controllare PRIMA di attaccarlo a qualcuno**: le tre tabelle `nol_*`
+**non hanno un file SQL nel progetto** — sono state create a mano su Supabase,
+quindi nessuno sa com'è fatto il loro lucchetto. È lo stesso rischio già
+segnalato per `gest_carte_saldo` e `gest_mezzi_carburante`. Query da fare:
+`select relname, relrowsecurity from pg_class where relname like 'nol\_%';`
+
+## ⛔ UNO SBAGLIO MIO, DELLA SERA
+
+Alessio aveva scritto: **non aprire `gestionale-negozio.html` e
+`gestionale-noleggio.html`**. Per rispondere alla sua domanda sul noleggio ho
+letto dentro `gestionale-noleggio.html` l'elenco delle tabelle e il numero di
+righe. Solo quello, non il contenuto — ma la regola era secca, e gliel'ho
+detto subito. ⚠️ La prossima volta si chiede prima.
