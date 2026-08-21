@@ -1,4 +1,4 @@
-# Prompt per la sessione nuova — dopo il 19 agosto 2026
+# Prompt per la sessione nuova — dopo il 21 agosto 2026
 
 Copia e incolla tutto quello che sta sotto la riga.
 
@@ -8,8 +8,8 @@ Ciao. Riprendiamo il lavoro su TrovaImpresa.
 
 **Prima di rispondermi leggi `CLAUDE.md`**, che sta nella cartella del
 progetto: è la memoria di tutto. In particolare la testa del file (le regole
-fisse) e **le quattro sezioni del 19 agosto** — dentro ci sono le lezioni che
-sono costate la giornata.
+fisse) e **tutte le sezioni del 21 agosto** — sono otto, e dentro ci sono le
+lezioni che sono costate la giornata.
 
 ## Come si lavora con me — le regole che non si sgarrano
 
@@ -26,6 +26,11 @@ sono costate la giornata.
   (`git push"`), che mi ha piantato Git Bash sul prompt `>`, e una col nome di
   un file storpiato. La scheda di collaudo scrivimela come testo normale,
   fuori dal riquadro.
+- ⛔ **PRIMA di darmi il blocco git, esegui `node tools/controllo-push.js`**
+  sulla mia cartella. Gira in 5 secondi e dice cosa fermerebbe la
+  pubblicazione. Il 21 agosto non l'hai fatto e il deploy è andato rosso per
+  un testo da 12 px e due file che sarebbero finiti online. La consegna è
+  quattro cose: banchi verdi · controllo verde · md5 uguale · blocco git.
 - ⚠️ **Raggruppa le modifiche in UN push solo.** Netlify: 300 crediti al mese
   sul piano gratuito e **ogni push ne costa 15** — cioè venti push al mese.
   Quello che sta in `sql/` e in `tools/` non va online (sono già 404): quella
@@ -250,5 +255,48 @@ dico io, non spostarli.**
 
 ---
 
-Partiamo dal punto 1: **leggere il contatore delle visite**. Dammi una query
-sola, poi la leggiamo insieme.
+## DA DOVE SI RIPARTE
+
+Il **21 agosto** è stata una giornata di grafica e di bugie del gestionale.
+Fatto: l'errore rosso della homepage (lo metteva Netlify, non il codice) · le
+strisce delle 19 sezioni rese neutre · la pagina iniziale · le card dei
+reparti · la finestra «Nuovo reparto» rifatta con **50 icone disegnate da noi**
+· il reparto che si cancellava e tornava · il titolo dell'avviso sui preventivi.
+
+**In lista, in ordine:**
+
+1. **I 51 segnaposto senza «Es.»** dentro il gestionale (n. 27). È lo stesso
+   difetto che per mesi ha stampato l'indirizzo monco su ogni PDF: il testo
+   grigio sembra un dato già scritto. Il peggiore è il codice fiscale del
+   cliente, `RSSMRA80A01H501U`. Tocca tutto il gestionale: **push suo**, e
+   prima fammi vedere l'elenco di cosa cambi.
+2. **Il segnaposto della casella grande non si traduce** (n. 28): `textarea`
+   sta in `_SKIP_UTENTE`, quindi un geometra si vede ancora offrire
+   «Giovedì prossimo taglio siepe da Le Betulle».
+3. **«m²» e «mq» uno accanto all'altro** nell'elenco lavorazioni (n. 26).
+   `_uniPiatta` sa già come metterli d'accordo.
+4. **Le tre strisce lasciate fuori** dalla pulizia del 21: la striscia dell'AI
+   in cima al gestionale, la striscia rossa dei controlli sulla scheda, le
+   righe rosse «in ritardo» dentro Lavori e Fornitori. **Chiedimi prima**: due
+   di quelle il colore lo usano insieme a una parola, quindi vanno bene così.
+5. **Qualche icona del reparto da rifare**: la gru, il cantiere, il piccone si
+   capiscono poco. Stanno in `ICO_REPARTO` dentro `gestionale-app.html`.
+6. **Unificare il raggruppamento per capitolo**: `_compGruppi` esiste, ma
+   `computoPdf` e `computoListaGara` hanno ancora due copie scritte a mano.
+
+**Sul sito, ancora aperti:** il contatore delle visite · la descrizione
+schiacciata a 390 px sui preventivi · il limite di misura su `cv-candidati` e
+`registrazioni` · le 95 pagine città vuote · l'email vera alle 87 imprese ·
+il grafico dell'admin.
+
+**Grandi, da non cominciare senza dirmelo:** il POS (serve un consulente
+vero), la contabilità dei lavori pubblici, i formati di scambio, il computo
+da una foto.
+
+---
+
+⛔ **Il gestionale è chiuso** (`MANUTENZIONE = true`): «prima si costruisce la
+casa poi si vende». Prezzo, clienti e incassi non sono il discorso.
+
+Dimmi cosa hai capito e da quale punto vuoi partire. **Non toccare nessun file
+prima che ti dica di sì.**

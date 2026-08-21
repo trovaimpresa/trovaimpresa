@@ -3739,13 +3739,20 @@
                                   d:"Il minimo per operare in cantiere è 15",act:"rie-azienda"});
     if(lavOggi.length)   DA.push({g:2,t:nn(lavOggi.length,"lavoro in programma oggi","lavori in programma oggi"),
                                   d:(lavOggi[0].descrizione||"Lavoro")+(lavOggi.length>1?" e altri":""),go:"lavori"});
-    if(prevFermi.length) DA.push({g:2,male:1,t:nn(prevFermi.length,"preventivo senza risposta","preventivi senza risposta"),
+    /* ⚠️ 21 agosto 2026 — IL TITOLO DICEVA UNA COSA E LA SCHEDA UN'ALTRA.
+       Qui c'era «1 preventivo senza risposta», e due centimetri sotto la
+       scheda Preventivi diceva «2 in attesa di risposta». Non sono numeri
+       sbagliati — sono due conti diversi: uno e' «fermo da piu' di una
+       settimana», l'altro «in attesa» — ma sullo stesso schermo, con le
+       stesse parole e numeri diversi, sembra un errore del gestionale.
+       ⛔ Il titolo adesso dice DA QUANTO, che e' quello che lo distingue. */
+    if(prevFermi.length) DA.push({g:2,male:1,t:nn(prevFermi.length,"preventivo fermo da più di una settimana","preventivi fermi da più di una settimana"),
                                   /* ⚠️ 21 agosto 2026 — con UNO si leggeva "Fermi ... vanno sollecitati".
                                      Il titolo il singolare ce l'aveva (nn), la riga sotto no. Visto da
                                      Alessio in una foto. Stessa famiglia di "le 1 righe rimaste uguali". */
                                   d:prevFermi.length===1
-                                      ? "Fermo da più di una settimana: forse va sollecitato"
-                                      : "Fermi da più di una settimana: forse vanno sollecitati",go:"preventivi"});
+                                      ? "Forse va sollecitato"
+                                      : "Forse vanno sollecitati",go:"preventivi"});
 
     /* dati azienda mancanti: va in cima a tutto il resto. Senza nome e partita
        IVA i PDF di preventivi e fatture escono senza intestazione, quindi è la
@@ -8725,6 +8732,43 @@ ${vecchi?`
   async function delPanel(id){
     const p=(state.panels||[]).find(x=>x.id===id);
     if(!p)return;
+
+    /* ===== ⛔ 21 agosto 2026 — «L'HO CANCELLATO E TORNA» =====
+       Alessio: «due reparti cancellati perche sono tornati?» — e poi «si sono
+       andati via ma a volte tornano».
+       La prova e' stata la DATA: i reparti «tornati» avevano nel database la
+       loro data di nascita vecchia (giardiniere 19/06, elettricista 15/08).
+       Non erano stati ricreati: NON ERANO MAI STATI CANCELLATI.
+
+       Il perche' sta qui sotto: tutta la cancellazione dal database vive
+       dentro un `if(sb && sbUid && p.mestiere_id)`. Se una delle tre manca —
+       il login scaduto, o una scheda che nel browser ha perso il collegamento
+       — quel pezzo viene SALTATO. Ma subito dopo il reparto veniva tolto
+       dall'elenco lo stesso, e il gestionale scriveva «Reparto eliminato».
+       Sparito dallo schermo, vivo nel database. Alla riapertura l'elenco si
+       rifa' dal database, e il reparto torna. Ecco il «a volte».
+
+       ⛔ LA REGOLA: SE NON SI PUO' CANCELLARE DAL DATABASE, NON SI CANCELLA
+          NEMMENO DALLO SCHERMO. Un reparto che resta con una spiegazione e'
+          meglio di uno che sparisce e ritorna: la seconda volta non sai piu'
+          di che cosa fidarti.
+       ⚠️ E' la stessa famiglia della bugia del 12 agosto («sono gia' nel
+          Cestino, vai a riprenderle» quando non c'erano). */
+    if(!sb||!sbUid){
+      alert("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
+        +"Non risulti collegato: senza collegamento posso toglierlo da questa "
+        +"schermata, ma nel database resterebbe — e ricomparirebbe alla "
+        +"prossima apertura.\n\nRientra da trovaimpresa.com e riprova.");
+      return;
+    }
+    if(!p.mestiere_id){
+      alert("Il reparto NON è stato eliminato, e non ho toccato niente.\n\n"
+        +"Questa scheda ha perso il collegamento con il database: se la "
+        +"togliessi dallo schermo tornerebbe alla prossima apertura.\n\n"
+        +"Ricarica la pagina (Ctrl+F5) e riprova. Se torna anche dopo, "
+        +"dimmelo: vuol dire che nel database c'è un reparto in più.");
+      return;
+    }
 
     /* Se il Cestino sta ancora facendo la sua prova di accensione,
        l'eliminazione verrebbe bloccata a meta' strada: meglio dirlo prima di

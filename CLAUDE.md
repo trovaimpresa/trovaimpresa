@@ -11892,3 +11892,85 @@ dopo, quando il deploy e' gia' rosso e lui sta guardando lo schermo.
 ⚠️ Il sito online **non e' mai cambiato**: il controllo si e' fermato prima di
 pubblicare, che e' esattamente il motivo per cui esiste. Nessun danno — solo
 mezz'ora persa e una schermata rossa che si poteva evitare.
+
+
+# 21 agosto 2026 (6) — «L'HO CANCELLATO E TORNA»
+
+Alessio: *«due reparti cancellati perche sono tornati?»*, e poi la frase che
+ha sbloccato tutto: *«si sono andati via ma a volte tornano»*.
+
+## ⛔ LA PRIMA IPOTESI ERA SBAGLIATA, E L'HA SMONTATA UNA DATA
+
+Avevo puntato il dito su `backfillMestieri`, che ricrea nel database i reparti
+rimasti nella memoria del browser. Ipotesi bella, e sbagliata.
+
+Una riga di SQL l'ha demolita:
+
+    giardiniere — creato 19/06   ·   pulizia — creato 21/06
+    progetto casa — creato 09/08 ·   elettricista — creato 15/08
+
+**Date vecchie.** Se fossero stati ricreati avrebbero la data di oggi. Non
+erano tornati: **non erano mai stati cancellati.**
+
+⚠️ La lezione: una diagnosi che spiega bene i sintomi non e' una diagnosi.
+`created_at` costava trenta secondi e ha risparmiato mezza giornata su una
+correzione inutile.
+
+## IL DIFETTO VERO
+
+Dentro `delPanel` **tutta** la cancellazione dal database vive in un
+`if(sb && sbUid && p.mestiere_id)`. Se una delle tre manca — login scaduto,
+o una scheda che nel browser ha perso il collegamento — quel pezzo viene
+**saltato**. Ma subito dopo il reparto veniva tolto dall'elenco lo stesso, e
+il gestionale scriveva **«Reparto eliminato»**.
+
+Sparito dallo schermo, vivo nel database. Alla riapertura l'elenco si rifa'
+dal database, e il reparto torna. **Ecco il «a volte»**: dipende da cosa e'
+rimasto in Chrome.
+
+## LA REGOLA
+
+⛔ **SE NON SI PUO' CANCELLARE DAL DATABASE, NON SI CANCELLA NEMMENO DALLO
+SCHERMO.** Un reparto che resta con una spiegazione e' meglio di uno che
+sparisce e ritorna: la seconda volta non sai piu' di che cosa fidarti.
+
+E' la stessa famiglia della bugia del 12 agosto («sono gia' nel Cestino, vai
+a riprenderle» quando non c'erano).
+
+## IL BANCO
+
+`prove/banco-delpanel.js` — `delPanel` estratta **verbatim** e fatta girare
+con un **finto Supabase che REGISTRA le chiamate**: cosi' si vede non solo
+cosa dice il gestionale, ma **cosa ha davvero chiesto al database**.
+
+**13 verdi su 13.** La prova che conta e' la terza: *«con tutto a posto deve
+cancellare davvero»*. Senza quella, avrei potuto bloccare tutto e sembrare a
+posto — una cura peggiore del male.
+
+`prove/sabotaggi-delpanel.js` — **5 su 5 accusati**.
+
+## ⛔ DUE TRAPPOLE NEI MIEI SABOTAGGI, TROVATE NELLO STESSO GIRO
+
+1. **Ancora ambigua.** Usavo `if(!sb||!sbUid){` come ancora: quella stringa
+   compare **35 volte** nel gestionale, e `replace()` colpiva la prima, in
+   tutt'altra funzione. Il sabotaggio non accusava. E' la stessa trappola del
+   22 agosto (`doc.text("Pag. "...)` che stava in due funzioni).
+   ⛔ Adesso c'e' una **guardia**: se un sabotaggio cambia piu' di sei righe,
+   il file lo rifiuta e lo dichiara «ANCORA AMBIGUA (colpa mia)».
+2. **La guardia contava male.** Confrontava riga per riga in parallelo:
+   togliere un `return;` sposta tutto quello che segue, e diceva **6510
+   differenze** per una riga in meno. Adesso conta le righe che ci sono in uno
+   e non nell'altro, da tutte e due le parti.
+
+# 21 agosto 2026 (7) — IL TITOLO CHE CONTRADDICEVA LA SCHEDA
+
+Sul Riepilogo: «**1 preventivo senza risposta**», e due centimetri sotto la
+scheda Preventivi con «**2** in attesa di risposta».
+
+Non erano numeri sbagliati: sono due conti diversi — uno e' «fermo da piu' di
+una settimana», l'altro «in attesa». Ma sullo stesso schermo, con **le stesse
+parole** e numeri diversi, sembra un errore del gestionale.
+
+⛔ **Quando due conti diversi stanno sulla stessa schermata, il titolo deve
+dire cosa li distingue.** Adesso: «1 preventivo **fermo da piu' di una
+settimana**», e la riga sotto non lo ripete piu' — dice cosa fare.
