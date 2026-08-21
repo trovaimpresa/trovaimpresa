@@ -1115,6 +1115,26 @@
     ['Scrivi il lavoro a parole','Scrivi la pratica a parole'],
     ['Come creo il mio primo lavoro?','Come creo la mia prima pratica?'],
     ['Descrivi il lavoro','Descrivi la pratica'],
+    /* ⚠️ 21 agosto 2026 — I DUE ESEMPI DENTRO LE CASELLE GRANDI.
+       Sono suggerimenti scritti da noi, non testo dell'utente: prima non
+       arrivavano nemmeno al traduttore (le textarea erano protette), e
+       adesso che ci arrivano devono avere la loro frase, se no il
+       traduttore ci passa sopra e non cambia niente.
+       ⛔ Frase INTERA, non la singola parola: «taglio siepe» dentro una
+          frase da giardiniere non si aggiusta cambiando due parole. */
+    ['Giovedì prossimo taglio siepe da Le Betulle, ci va Marco, 350 euro',
+     'Martedì prossimo rilievo per la CILA in via Verdi 12, ci va Marco, 350 euro'],
+    ['Es. sabbia e cemento per il bagno di Via Roma',
+     'Es. visure catastali per la pratica di Via Roma'],
+    /* ⚠️ e le altre quattro che il traduttore raggiungeva GIA', ma su cui
+       passava sopra senza cambiare niente perche' non erano in elenco.
+       ⛔ «Carta cantiere Nord» va qui, PRIMA della regola corta su
+          «cantiere»: con quella sola diventava «Carta pratica Nord». */
+    ['Es. Carta Mario, Carta cantiere Nord','Es. Carta Mario, Carta studio Nord'],
+    ['Cerca un nome: cliente, lavoro, preventivo, fattura',
+     'Cerca un nome: cliente, pratica, preventivo, fattura'],
+    ['Cerca cliente, indirizzo, lavoro','Cerca cliente, indirizzo, pratica'],
+    ['Apri il lavoro','Apri la pratica'],
     /* Testi nuovi 2026 (preventivi, spese/margine, report, tabelle) */
     ['Spese e materiali di questo lavoro','Spese e materiali di questa pratica'],
     ['Guadagno o perdita per lavoro','Guadagno o perdita per pratica'],
@@ -1299,6 +1319,15 @@
      chi domani disegna una schermata nuova col testo di una lavorazione
      dentro se la mette e non ci pensa piu'. */
   const _SKIP_UTENTE='option,.cm-testo,.job-cli,.job-desc,.job-done,.job-note,.job-meta,.fatt-info,.day-job,.gal-cantiere,.thop,.card h3,.card p,.c-nome,.c-cli,.c-chi,.riga-tit,.cal-lav-t,#panel-name,#panel-sub,#tb-panel-name,#rie-title,#lf-title,#gal-op-sel,#ag-op-sel,#d-ruolo,textarea';
+  /* ⛔ 21 agosto 2026 — DUE LISTE, NON UNA.
+     «textarea» sta in _SKIP_UTENTE per proteggere quello che l'utente SCRIVE
+     DENTRO la casella. Ma il suggerimento grigio (`placeholder`) e il `title`
+     li abbiamo scritti NOI: non sono roba sua, e vanno tradotti.
+     Con una lista sola, a un geometra il gestionale offriva ancora
+     «Giovedì prossimo taglio siepe da Le Betulle».
+     ⚠️ Tutto il resto della lista resta identico: «.cm-testo» e compagnia
+     proteggono anche gli attributi, e devono continuare a farlo. */
+  const _SKIP_ATTRIBUTI=_SKIP_UTENTE.split(',').filter(s=>s!=='textarea').join(',');
   let _praticheObs=null;
   function _osservaPratiche(){
     if(!_praticheObs)return;
@@ -1314,13 +1343,16 @@
      Invece di far guardare tutta la pagina all'osservatore (che si
      risveglierebbe a ogni respiro), chi crea una finestra sua chiama questa
      quando l'ha attaccata. Il conto delle parole resta in un posto solo. */
-  function _traduciDentro(root){
+  /* ⛔ 21 agosto 2026 — I SUGGERIMENTI GRIGI E I «title» IN UN POSTO SOLO.
+     Questo giro era scritto DUE VOLTE, identico, qui e in localizzaPratiche.
+     Una regola che sta in due posti si sistema a meta': la seconda copia
+     avrebbe continuato a saltare le textarea.
+     ⚠️ Nessun rischio di rimbalzo: l'osservatore guarda childList/subtree,
+     non gli attributi, quindi cambiarli non lo risveglia. */
+  function _traduciAttributi(root){
     if(!root)return;
-    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
-    const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
-    nodi.forEach(t=>{const v=t.nodeValue;if(v&&_DA_TRADURRE.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
     root.querySelectorAll('[placeholder],[title]').forEach(function(el){
-      if(el.closest(_SKIP_UTENTE))return;
+      if(el.closest(_SKIP_ATTRIBUTI))return;
       ['placeholder','title'].forEach(function(att){
         const v=el.getAttribute(att);
         if(!v||!_DA_TRADURRE.test(v))return;
@@ -1328,6 +1360,13 @@
         if(nv!==v)el.setAttribute(att,nv);
       });
     });
+  }
+  function _traduciDentro(root){
+    if(!root)return;
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(t){return t.parentElement&&t.parentElement.closest(_SKIP_UTENTE)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+    const nodi=[];let n;while(n=w.nextNode())nodi.push(n);
+    nodi.forEach(t=>{const v=t.nodeValue;if(v&&_DA_TRADURRE.test(v)){const nv=_swapPratiche(v);if(nv!==v)t.nodeValue=nv;}});
+    _traduciAttributi(root);
   }
   /* il ponte per chi sta fuori dal blocco: window.gestTraduci(elemento).
      Non fa niente se non e' uno studio tecnico. */
@@ -1347,17 +1386,9 @@
       /* 9 agosto 2026 — anche i suggerimenti grigi dentro le caselle e i
          "title". Prima restavano fuori per costruzione (il traduttore guarda
          solo i nodi di testo) e restituivano frasi da cantiere.
-         Nessun rischio di rimbalzo: l'osservatore guarda childList/subtree,
-         non gli attributi, quindi cambiarli non lo risveglia. */
-      root.querySelectorAll('[placeholder],[title]').forEach(function(el){
-        if(el.closest(_SKIP_UTENTE))return;
-        ['placeholder','title'].forEach(function(att){
-          const v=el.getAttribute(att);
-          if(!v||!_DA_TRADURRE.test(v))return;
-          const nv=_swapPratiche(v);
-          if(nv!==v)el.setAttribute(att,nv);
-        });
-      });
+         ⛔ 21 agosto 2026 — questo giro era scritto qui e dentro
+         _traduciDentro: adesso e' uno solo, e sta in _traduciAttributi. */
+      _traduciAttributi(root);
     });
     _osservaPratiche(); /* si riattacca solo a riscrittura conclusa */
   }

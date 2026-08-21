@@ -12054,3 +12054,83 @@ accorta la guardia, non Alessio.
 
 **Consegna: banchi verdi · `node tools/controllo-push.js` verde · md5 uguale ·
 un push solo.**
+
+
+# 21 agosto 2026 (9) — IL SUGGERIMENTO GRIGIO DELLA CASELLA GRANDE (n. 28, chiuso)
+
+`gestionale-app.html`, un file solo.
+
+## IL DIFETTO
+
+`textarea` stava in `_SKIP_UTENTE`, la lista che protegge **quello che
+l'utente scrive DENTRO**. Ma quella lista veniva usata anche per gli
+**attributi** — e il `placeholder` l'abbiamo scritto noi.
+
+Risultato: a un geometra il gestionale offriva ancora
+«Giovedì prossimo taglio siepe da Le Betulle, ci va Marco».
+
+## LA CORREZIONE — tre pezzi
+
+1. ⛔ **DUE LISTE, NON UNA.** `_SKIP_ATTRIBUTI` **si ricava** da
+   `_SKIP_UTENTE` togliendo solo `textarea`:
+   `_SKIP_UTENTE.split(',').filter(s=>s!=='textarea').join(',')`.
+   Non si riscrive a mano: se domani si aggiunge una classe da proteggere,
+   la protezione vale per tutte e due senza che nessuno se lo ricordi.
+2. ⛔ **IL GIRO SUI SEGNAPOSTO ERA SCRITTO DUE VOLTE**, identico, in
+   `_traduciDentro` e in `localizzaPratiche`. Adesso e' una funzione sola,
+   `_traduciAttributi(root)`. *Una regola che sta in due posti non si
+   sistema a meta'* — la seconda copia avrebbe continuato a saltare le
+   textarea.
+3. **Sei frasi nuove in `_FRASI`.**
+
+## ⛔ ARRIVARCI NON BASTA: LA FRASE DEVE ESSERE IN ELENCO
+
+E' la lezione del 22 agosto, ed e' ricomparsa identica. Aperta la strada alle
+textarea, **quattro frasi che il traduttore raggiungeva gia'** restavano com'erano
+perche' nessuno le aveva messe in `_FRASI`:
+
+- «Cerca un nome: cliente, **lavoro**, preventivo, fattura» (la ricerca in alto)
+- «Cerca cliente, indirizzo, **lavoro**»
+- «Apri il **lavoro**» (un `title`)
+- «Es. Carta Mario, Carta **cantiere** Nord»
+
+⚠️ **E l'ultima e' peggio delle altre: cambiava, ma male.** Senza la sua riga
+intera, la regola corta su «cantiere» la faceva diventare
+«Carta **pratica** Nord», che non vuol dire niente.
+⛔ **Non basta chiedersi «cambia?»: si guarda in che cosa cambia.** Il banco
+adesso confronta il risultato **esatto**, non solo «diverso da prima».
+
+Le due frasi decise con Alessio:
+- l'esempio dell'AI → «Martedì prossimo rilievo per la CILA in via Verdi 12,
+  ci va Marco, 350 euro»
+- la nota della fattura fornitore → «Es. visure catastali per la pratica di
+  Via Roma»
+
+## LASCIATE APPOSTA, E VA DETTO
+
+«Condominio Le Betulle … amministratore Rossi» e «Con amministratore: codice
+fiscale, niente partita IVA» **non si traducono**: per un geometra il
+condominio e il suo amministratore sono clienti veri. Sta gia' scritto in
+`_FRASI` dal 9 agosto, e adesso e' anche una prova del banco — con il motivo
+scritto accanto, se no fra un mese sembra una dimenticanza.
+
+## IL BANCO — sempre nei due versi
+
+`prove/banco-traduttore-attributi.js` — **40 verdi su 40**.
+
+- quello che abbiamo scritto noi (`placeholder` **e** `title`) **deve** cambiare;
+- ⛔ quello che ha scritto l'utente — il testo **dentro** la casella, i nomi,
+  le descrizioni del computo dentro `.cm-testo` — **non deve** cambiare.
+  Un banco che guardasse solo il primo verso direbbe «verde» anche dopo aver
+  spento tutte le protezioni;
+- **tutte** le frasi del gestionale che contengono una parola da tradurre
+  vengono passate a `_swapPratiche`: se una resta com'era ed e' fuori
+  dall'elenco delle «lasciate apposta», e' rosso;
+- e il giro sui segnaposto deve comparire **una volta sola** nel file.
+
+`prove/sabotaggi-traduttore-attributi.js` — **12 su 12 accusati**,
+fra cui «rimetto textarea negli attributi» (il difetto di partenza),
+«tolgo textarea dai testi» (il verso opposto: tradurrebbe la roba di Alessio),
+«rimetto il giro scritto due volte» e «tolgo la frase della carta».
+
+**Consegna: banchi verdi · controllo-push verde · md5 uguale · un push solo.**
