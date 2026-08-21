@@ -13002,7 +13002,7 @@ quello che il modello deve scrivere, o il preventivo si costruisce a pezzi
 background e il pannello ripassa a ritirare. ⚠️ L'assistente di **supporto**
 invece funziona: è haiku e scrive quattro righe.
 
-## ⛔ LA FALLA CHE È TORNATA APERTA, E VA CHIUSA
+## ✅ LA FALLA CHE ERA TORNATA APERTA — RICHIUSA la notte del 21 agosto (vedi la sezione in fondo)
 
 Con il ritorno indietro, `ai-claude.js` **si fida di nuovo dell'`impresa_id` che
 gli manda il browser**: con l'id di un altro iscritto (pubblico) si bruciano le
@@ -13025,3 +13025,76 @@ appeso.
 - La striscia arancione «Non ho trovato la risposta · Contatta assistenza» sembra
   un secondo modo di chiedere all'AI: è invece il messaggio che arriva ad Alessio.
   Meglio «Scrivi al team di TrovaImpresa».
+
+
+# ✅ 21 agosto 2026, NOTTE — LA FALLA DI `ai-claude.js` È RICHIUSA
+
+Ripresa dal punto 2 della lista («da dove si riparte»). **Un file solo**:
+`netlify/functions/ai-claude.js`. Nei quattro pannelli non è stato toccato
+niente: `_aiIntestazioni()` era già online in tutti e 12 i punti, e infatti è
+bastato il lato function.
+
+## COSA È CAMBIATO
+
+1. **L'`impresa_id` che manda il browser è IGNORATO.** L'impresa si ricava
+   dall'accesso: `auth.getUser(token)` → `imprese.user_id`. Da lì in giù esiste
+   un solo id (`impresaId`), usato **sia** per il conteggio delle 30 al giorno
+   **sia** per le righe di `ai_richieste`. Con l'id di un altro iscritto adesso
+   non si brucia più niente e non gli si scrive più niente nel pannello.
+2. **Riga non allineata**: se non c'è nessuna impresa con quel `user_id`, si
+   ripiega sull'**email dell'accesso** (`utente.email`), mai su quella del
+   messaggio — che si può scrivere a mano dalla console. Chi si era iscritto
+   prima di avere l'account continua a funzionare.
+3. ⚠️ **Tempo massimo di 4 secondi** (`conTempo()`, costante `TEMPO_ACCESSO`)
+   sui due controlli d'accesso: chi sei, e quale impresa sei. Se Supabase non
+   risponde la function **non resta appesa** fino al taglio di Netlify: chiude
+   con 401 e un messaggio da leggere («La sessione è scaduta. Rientra e
+   riprova.»). Il timer viene sempre spento (`finally`), e ha `unref()`.
+4. **La scadenza del Premium adesso si guarda** — prima no: chi aveva finito i
+   tre mesi continuava finché il controllo notturno non passava. Stessa regola
+   di `crea-checkout-crediti.js`: piano fra `premium/mensile/annuale` **e**
+   `premium_scadenza`, se c'è, non passata.
+5. Nessuna riga in `ai_richieste` viene più scritta **prima** di sapere chi
+   chiama: senza accesso valido non si scrive niente a nessuno.
+
+## IL BANCO — sempre nei due versi
+
+`prove/ai-claude/` (nel contenitore di Claude, non nella cartella di Alessio):
+`banco.js` · `sabotaggi.js` · un finto `@supabase/supabase-js` che registra
+**le query fatte** e **le righe scritte**, così le prove guardano dentro e non
+contano soltanto.
+
+**24 verdi · 8 sabotaggi su 8 accusati.**
+
+Il sabotaggio più importante è **S1: il file com'era prima**, che fa diventare
+rosse 20 prove su 24 — compresa «l'impresa_id del browser è ignorato». Gli
+altri sette rompono un punto per volta: il log sull'id del browser, il
+conteggio sull'id del browser, via la scadenza, via il tetto dei 4 secondi,
+porta aperta senza gettone, ripiego sull'email del browser, accesso non
+verificato.
+
+⚠️ **Ripescata la lezione del pomeriggio** («un sabotaggio che non può fare
+danno non prova niente»): togliere solo il controllo del gettone lasciava
+verde, perché il secondo controllo bloccava lo stesso. Per questo i sabotaggi
+sono scritti sui punti che il danno lo fanno davvero — l'id usato per contare e
+per scrivere — e non sulla porta d'ingresso.
+
+## LA PROVA IN PRODUZIONE
+
+Alessio ha aperto il pannello artigiano, sezione Assistenza, e ha chiesto «come
+si ricevono le recensioni?»: risposta arrivata regolarmente col gettone della
+sessione. ✅
+
+## COSE VISTE NELLA FOTO, ANCORA DA SISTEMARE
+
+- La **mappa dell'Europa** a sinistra c'è anche nella pagina Assistenza del
+  pannello, non solo nel Preventivo AI: quindi non è del riquadro dell'AI, è
+  più a monte.
+- La striscia gialla «Non ho trovato la risposta · Contatta assistenza» sembra
+  un secondo modo di chiedere all'AI: meglio «Scrivi al team di TrovaImpresa».
+
+## ⛔ COSA RESTA APERTO (invariato)
+
+Il **preventivo AI in timeout (504)** sui lavori grossi è ancora lì, e questo
+push non lo tocca. ⚠️ Prima di mettere mano al codice: **il registro di
+Netlify**, come dice la lezione della sera del 21.
