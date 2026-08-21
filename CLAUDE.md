@@ -12623,3 +12623,56 @@ che devono restare APERTI a Google (la home, una pagina città, una guida,
 `prove/sabotaggi-404.js` — **11 su 11 accusati**, fra cui «chiudo tutto il
 sito», «chiudo per sbaglio le pagine città» e «le tre righe in un gruppo
 nuovo» (l'errore che avevo fatto davvero).
+
+
+# ⛔ 21 agosto 2026 — I PREZZI DELLA PAGINA MURATORE: DECISIONE DI ALESSIO
+
+**I prezzi restano quelli che ci sono. Non si toccano.**
+
+## Come ci si era arrivati
+
+Su Google, →13← ricerche diverse sul muratore fanno →262← impressioni in due
+mesi con **zero clic**, in posizione 12-29. Cinque di quelle chiedono la
+tariffa **oraria**.
+
+⛔ **Ma la sezione c'era già.** La pagina ha la tariffa oraria per tutti e
+quattro i livelli e il conto di dove finiscono i soldi. **Guardare prima di
+costruire** ha risparmiato una serata — di nuovo.
+
+## Cosa è stato confrontato (e resta agli atti, non sul sito)
+
+Il prezzario Regione Lazio 2023, già dentro il gestionale
+(`sql/leggi-costo-orario.sql`, provato su PostgreSQL vero):
+
+| livello | prezzario, €/ora | la pagina dice |
+|---|---|---|
+| 1° comune | 30,35 | ~18 |
+| 2° qualificato | 33,70 | ~20 |
+| 3° specializzato | 36,28 | ~23 |
+| 4° alt. specializzato | 38,23 | ~26 |
+
+E la parte **«in tasca» della pagina è giusta**: verificata su un cedolino
+vero di giugno 2026 → →13,96← € netti l'ora, la pagina dice 13,75-14,40. ✓
+
+## ⛔ PERCHÉ NON SI È CAMBIATO NIENTE
+
+Cambiare il costo si porta dietro il prezzo al cliente (→305-390← invece di
+210-280) e quindi **il titolo della pagina**, che è quello che porta la gente
+da Google. Messo davanti alla scelta, Alessio ha risposto:
+
+> «a me mi metti in difficoltà con questi numeri non li so. lascia i prezzi
+> vecchi»
+
+⛔ **E aveva ragione lui.** I numeri della pagina sono i prezzi **di mercato**,
+quelli che conosce da 25 anni di cantiere. Il prezzario è un'altra cosa: serve
+per i **lavori pubblici**. Gliel'ho messi davanti come se fossero la stessa
+cosa, e non lo sono. **Errore mio.**
+
+⚠️ **NON RIPROPORLO.** Se un domani questo confronto torna utile, si riparte
+da qui — ma la decisione è sua e oggi è: i prezzi restano.
+
+## ⚠️ SUL CEDOLINO
+
+Della busta paga sono stati presi **solo** netto, ore e paga oraria. Codice
+fiscale, indirizzo, nome dell'azienda: non usati, non scritti da nessuna
+parte, non finiscono online. Nemmeno qui.
