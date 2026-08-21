@@ -10915,3 +10915,103 @@ riscrivesse il prezzo, che il traduttore non riscrivesse «Muratore» (**non
 controllata, e infatti il difetto è uscito**), che l'id `an-uni` non fosse già
 usato, che la classe CSS nuova non si scontrasse. **In un file solo, ogni
 modifica è una modifica a tutto.** Questo è il costo che si paga ogni volta.
+
+---
+
+## ✅ SPEZZATO `gestionale-app.html` (22 agosto 2026)
+
+**Fatto.** Da **23.328 righe / 1,34 MB** a **14.992 righe / 884 KB**.
+Fuori **8.365 righe**, il 36%, in **quattro file** dentro `js/`.
+
+| File | Righe | Cosa c'è dentro |
+|---|---|---|
+| `js/gest-fatture.js` | 1.967 | i conti della fattura, la numerazione, l'elenco, il modulo, la nota di credito, il PDF, **l'XML per lo SDI** |
+| `js/gest-computo.js` | 2.717 | computi e lavorazioni, le misure, il riepilogo, il quadro economico, `varConfronta`, **tutto il cronoprogramma**, la barra 1·2·3·4·5, il prezzario di voce, **l'analisi dei prezzi** |
+| `js/gest-sal-prezzario.js` | 1.624 | i SAL (conti, elenco, scheda, PDF, dal SAL alla fattura), la sezione Prezzario, l'importazione da file, dal computo al preventivo |
+| `js/gest-computo-pdf.js` | 2.057 | il prezzo in lettere, `computoPdf`, `computoListaGara`, `cronoPdf`, `variantePdf`, il quadro stampato, il computo che arriva in PDF, «prendi i prezzi dal prezzario», l'import delle lavorazioni |
+
+I quattro tag stanno alle righe **502-505**, **prima** del blocco inline (riga 506).
+⛔ **L'ordine conta:** l'ultima riga del blocco è `load()`, che accende il
+gestionale. Quando parte, i quattro pezzi devono essere già caricati.
+
+### ⛔ LA COSA PIÙ IMPORTANTE DA SAPERE: NON C'È PIÙ LA SCATOLA
+
+Il blocco grosso era chiuso in `(function(){ … })();`. **Un file staccato non ci
+può stare dentro**: il browser carica un file per volta, e i nomi dentro una
+scatola non escono. Quelle due righe sono state tolte.
+
+**Dentro le funzioni non è cambiato un carattere.** Ma adesso gli **860 nomi**
+(547 funzioni + 313 fra costanti e variabili) sono visibili a tutta la pagina.
+Prima di farlo sono stati contati, e tutti e sette i conti sono venuti zero:
+
+1. nomi di funzione doppi fra i 547 → **nessuno**
+2. nomi di costante/variabile doppi fra i 313 → **nessuno**
+3. nomi che si scontrano col browser (`open`, `name`, `close`, `status`, `top`, `print`, `find`…) → **nessuno**
+4. nomi che si scontrano con `cestino.js`, `foto-upload.js`, `ai-integrazione.js`, `fondatore.js`, `aiuti.js` → **nessuno** (quei cinque hanno la loro scatola)
+5. `return` a metà del blocco → **nessuno**
+6. `var` in cima → **nessuno**
+7. punti dove il codice scrive `window.qualcosa` con lo stesso nome di una funzione di dentro → **nessuno**
+
+⚠️ **DA QUI IN POI, OGNI FUNZIONE NUOVA HA UN NOME PUBBLICO.** Prima di
+aggiungerne una, controllare che il nome non esista già — non solo nel
+gestionale, ma anche negli altri `js/` caricati nella stessa pagina.
+
+⚠️ **Quello che parte da solo** sta in due posti soli, ed è rimasto tutto nel
+blocco inline: **in cima** (l'aggancio a Supabase, gli osservatori delle
+traduzioni e delle icone, `setTimeout(_iconizza,0)`, `_deepTab`) e **in fondo**
+(i clic del menù, la barra del telefono, i filtri, `load()`).
+**Nei quattro pezzi non c'è niente che parte da solo:** solo funzioni,
+costanti e tabelle già scritte. Per questo l'ordine di caricamento fra i
+quattro pezzi non conta.
+
+### COME SONO STATI PROVATI
+
+⛔ **`prove/banco-identico.js` — 14 verdi.** La prova che aveva chiesto
+Alessio, e nessun'altra al posto sua: rimette i quattro pezzi al loro posto
+dentro il blocco rimasto, ci rimette la scatola, e confronta col file di ieri
+**carattere per carattere**. `md5 8259cb3789d99e7d0ecd831a2b4d1b18` su tutti e
+due. **1.314.637 caratteri identici.**
+`prove/sabotaggi-identico.js` — **12 su 12 accusati**: una lettera cambiata,
+uno spazio in più, una riga tolta, una riga in più, l'a capo finale tolto, un
+tag `script` spostato **dopo** il blocco, un tag tolto, due pezzi scambiati,
+l'html cambiato sopra e sotto, un accento rovinato.
+
+**`prove/apri.js` — 18 verdi.** Il gestionale **vecchio** e il **nuovo**
+aperti tutti e due in Chromium, a **1440×900** e a **390×844**, e confrontati:
+zero errori JavaScript nuovi, nessun `ReferenceError`/`SyntaxError`/nome
+dichiarato due volte, **tutte le 547 funzioni e le 313 costanti rispondono
+all'appello**, nessun id doppio, stesso titolo, stesse 25 sezioni, stesse 24
+voci di menù, e **premute tutte e 24 le voci** una per una: stesse identiche
+lamentele del vecchio (2 contro 2, sono le chiamate a Supabase senza login).
+`prove/sabotaggi-apri.js` — **8 su 8 accusati**, compreso «la scatola rimessa
+attorno a un pezzo» (i nomi tornerebbero nascosti) e «un nome dichiarato due
+volte».
+
+**Totale dello spezzamento: 32 verdi · 20 sabotaggi, 20 accusati.**
+
+⚠️ **I BANCHI DI IERI NON SONO STATI RIFATTI**, e va detto invece di lasciarlo
+capire: il codice dentro i quattro pezzi è **identico byte per byte**, quindi
+ributterebbero le stesse funzioni sugli stessi numeri. Quello che l'identità
+**non** copre è la scatola tolta — ed è esattamente quello che copre
+`apri.js`. ⚠️ **Ma `estrai.js` e `estrai-pdf.js` di domani devono cercare le
+funzioni anche nei quattro file nuovi, non solo in `gestionale-app.html`:**
+`cronoPdf`, `variantePdf`, `computoPdf`, `_cgBarraPerc`, `cronoScala`,
+`varConfronta`, `renderAnalisi` **non stanno più nell'html**.
+
+### ⚠️ UNO SBAGLIO MIO, DETTO PRIMA CHE LO TROVI LUI
+
+Nel piano consegnato ad Alessio prima di tagliare c'era scritto **«582
+funzioni e 342 costanti»**. Sbagliato: quel conto contava anche le parole
+`function`, `const` e `let` scritte **dentro i commenti e dentro le stringhe**.
+I numeri veri sono **547 e 313**. Non cambia niente del taglio (i conti degli
+scontri sono stati rifatti sulla lista pulita e sono sempre zero), ma il numero
+detto era gonfio.
+⛔ **Regola: prima di contare i nomi in un file, si tolgono commenti e
+stringhe.** `prove/nomi.js` lo fa.
+
+### COSA NON È STATO FATTO, DI PROPOSITO
+
+Niente correzioni per strada. Restano da fare, in un push a parte:
+le due righe della **«Lista per la gara»** (`az.telefono` → `az.tel`,
+`az.indirizzo` → `azIndirizzo(az)`), che adesso stanno in
+`js/gest-computo-pdf.js`.
