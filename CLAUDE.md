@@ -12208,3 +12208,161 @@ browser: adesso il banco apre le 57 icone in Chromium e legge il `getBBox` —
 nessuna vuota, nessuna che sborda, nessuna grande come un francobollo.
 
 **Consegna: banchi verdi · controllo-push verde · md5 uguale · un push solo.**
+
+
+# ⛔ 21 agosto 2026 — I NUMERI VERI DELLA PUBBLICITÀ
+
+Letti per la prima volta, e cambiano i conti di prima.
+
+## 1. Il contatore delle visite (`sql/leggi-visite.sql`)
+
+Tre giorni di dati (19-21 agosto):
+
+| | |
+|---|---|
+| persone arrivate dalla pubblicità | →50← |
+| di quelle, hanno visto la pagina | →54%← |
+| la pagina si disegna in | →1,3← s |
+
+## 2. Cosa dice Meta per gli stessi tre giorni
+
+Letti dal collegamento Supermetrics (Facebook Ads, account `act_1941850939646360`):
+
+| giorno | clic sul link | «arrivi» (landing page views) | speso |
+|---|---|---|---|
+| 19/8 | 25 | 8 | 7,22 € |
+| 20/8 | 10 | 2 | 8,19 € |
+| 21/8 | 15 | 2 | 5,05 € |
+| **totale** | **→50←** | **→12←** | **20,46 €** |
+
+## ⛔ IL 62% NON ERA GENTE PERSA — ADESSO È PROVATO
+
+**→50← clic pagati, →50← persone arrivate sul sito.** Non se ne perde per
+strada praticamente nessuno.
+
+Ma Meta dichiara «arrivati» **→12←**, e il contatore ne vede **→27←** che
+hanno guardato la pagina. **Meta ne vede meno della metà**, perché il pixel
+sta dietro il banner dei cookie.
+
+⚠️ Quindi ogni numero del pannello di Meta va letto sapendo che è
+sotto-contato di circa la metà. Non è un guasto: è il consenso ai cookie, e
+non si aggira — si tiene solo il proprio contatore come metro.
+
+## ⛔ UN'IMPRESA ISCRITTA COSTA →2,97← €, NON →5,47←
+
+`sql/leggi-iscrizioni.sql`, letto sul database (`auth.users`, non `imprese`:
+è il numero vero anche se il trigger inciampa):
+
+| | |
+|---|---|
+| iscritte negli ultimi 30 giorni | →81← |
+| al giorno | →2,7← |
+| ultimi 7 giorni | →18← (→2,6← al giorno) |
+| di quelle del mese, col profilo | →80← su →81← |
+| iscritte da sempre | →89← |
+
+→240,66← € spesi ÷ →81← iscritte = **→2,97← € l'una**. Il conto vecchio
+(→5,47← €) era fatto sui →44← che vedeva Meta: era quasi il doppio del vero.
+
+⚠️ E sono quasi tutte della pubblicità: prima della campagna il sito aveva
+→8← iscritte in tutto.
+
+✅ **Il trigger `completa_profilo_extra` tiene**: 80 profili su 81.
+
+## ⚠️ QUELLO CHE ANCORA NON SI SA
+
+Se una su dieci paga, un cliente costa →30← € e rende →249-348←: si ripaga
+il primo mese. **Ma «una su dieci» è una supposizione**: finora hanno pagato
+**zero** imprese, perché il gestionale è chiuso e i tre mesi sono in regalo.
+Il primo numero vero arriverà quando scadranno i tre mesi delle imprese di
+luglio.
+
+## L'APPRENDIMENTO DI META — e una correzione mia
+
+Meta impara solo da quello che **vede lui**: ne vede ~→10← a settimana e
+gliene servono →50←. Cioè **cinque volte** il budget, ~→40← € al giorno.
+⛔ Avevo detto ad Alessio «~18 € al giorno» e **era sbagliato**: quel numero
+partiva dagli eventi VERI, non da quelli che Meta riesce a contare.
+
+Alessio ha deciso: **si tiene l'evento «Contatti»** (vuole iscritti, non
+visite) e **non si tocca niente fino al 26 agosto**.
+Conseguenza da accettare: con 8 € al giorno **l'apprendimento non si
+chiuderà**. La campagna porta iscritti lo stesso, solo meno bene.
+
+## ⚠️ UNA DECISIONE CHE RESTA DI ALESSIO
+
+L'avviso del prezzo nuovo alle imprese di luglio (il punto 4d).
+**Chiesto il 21 agosto, risposta: «è un lavoro che ancora io devo decidere».**
+Non proporlo di nuovo finché non è lui a riprenderlo.
+
+
+# 21 agosto 2026 (11) — TRE PEZZI DEL GESTIONALE
+
+`gestionale-app.html` · `css/gestionale.css` · `js/gest-computo.js`.
+
+## 1. A 390 px la descrizione del preventivo era larga →66← px
+
+Misurata in Chromium, non a occhio: quantità (80) + prezzo (118) + la × (48)
++ tre spazi si prendono →270← px dei 390, e alla colonna che conta ne
+restavano →66←. Ci stava «Demolizio».
+
+⛔ **Quattro colonne in 390 px non ci stanno.** Sotto i →560← px la riga va a
+capo: descrizione sopra su tutta la larghezza, quantità · prezzo · × sotto.
+Adesso a 390 px la descrizione è larga **→338←** px.
+
+⚠️ Fatto con `grid-template-areas`: **l'HTML non si tocca**, si sposta solo
+la posizione delle caselle che il gestionale già scrive.
+⚠️ La riga del **capitolo** ha due caselle sole: senza una regola sua
+avrebbe ereditato le aree della riga lunga e la × sarebbe finita a capo da
+sola. È un sabotaggio del banco.
+
+## 2. Il pulsante del prezzario adesso sta anche in cima
+
+Con ottanta lavorazioni bisognava scorrere tutto l'elenco per trovarlo.
+⛔ **Scritto una volta sola** (`_btnPrezzi`), messo in due posti. Due copie
+scritte a mano diventerebbero due pulsanti diversi al primo ritocco.
+⚠️ Si vede solo se c'è davvero un prezzo a zero, come prima.
+
+## 3. La riga rossa dello Scadenzario (n. 4, l'ultima delle tre strisce)
+
+Le tre lasciate fuori il 21 sono state guardate una per una:
+
+- la striscia dell'AI diventa arancione **e scrive** «— stanno finendo» → ok
+- le due strisce dei controlli sono avvisi con testo loro → ok
+- le righe rosse dei **Fornitori** dicono «scaduta 3 giorni fa» → ok
+- ⛔ ma nello **Scadenzario** la riga diventava rossa e accanto c'era scritto
+  solo «3 giorni fa». Chi non distingue il rosso non sapeva che era passata.
+
+⛔ **Il colore non si toglie: si aggiunge la parola.** Adesso dice
+«scaduta 3 giorni fa», la stessa forma dei Fornitori.
+
+### ⚠️ E UN RAMO INUTILE, TROVATO DA UN SABOTAGGIO
+
+Nella prima stesura avevo scritto anche `(rit?'q-passato':q.classe)`.
+**Non faceva niente**: `quando()` restituisce già `q-passato` per una data
+passata che non sia segnata fatta. Il sabotaggio «tolgo la pastiglia rossa»
+non veniva accusato — non perché il banco fosse cieco, ma perché non c'era
+niente da rompere. Tolto.
+
+⛔ **Un sabotaggio non accusato va capito, non aggirato**: due volte su tre
+il difetto sta nel banco, la terza sta nel codice che non serviva.
+
+## I BANCHI
+
+| banco | verdi |
+|---|---|
+| `prove/banco-riga-preventivo.js` | 62 |
+| `prove/banco-scadenza-parola.js` | 25 |
+
+`prove/sabotaggi-riga-preventivo.js` — **10 su 10** ·
+`prove/sabotaggi-scadenza-parola.js` — **7 su 7**.
+
+⚠️ Fra i sabotaggi ce ne sono due che servono a proteggere quello che **NON**
+va cambiato: «spengo la striscia dell'AI» e «spengo le righe dei Fornitori».
+Devono essere accusati anche loro.
+
+⛔ E uno di quei due all'inizio **non veniva accusato**: il banco controllava
+che la CLASSE `.ai-str--pochi` esistesse, non che ci fosse ancora il COLORE.
+Bastava togliere la riga del bordo e passava. Adesso guarda la regola intera.
+
+**Restano sul gestionale: il PDF dello stato avanzamento (SAL).**

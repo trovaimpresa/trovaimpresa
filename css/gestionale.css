@@ -3109,6 +3109,32 @@ body:has(#ti-fondatore) .sheet--grande.sh-lunga{
 @media(max-width:900px){
   .sheet .prev-riga{ grid-template-columns:1fr 80px 118px 48px; gap:8px; }
 }
+/* ⛔ 21 agosto 2026 — SUL TELEFONO LA DESCRIZIONE RESTAVA LARGA 66 px.
+   Misurata in Chromium a 390x844, non a occhio: quantità (80), prezzo (118),
+   la × (48) e tre spazi si prendono 270 px, e alla descrizione — che è la
+   colonna che conta — ne restavano 66. Ci stava «Demolizio».
+   Quattro colonne in 390 px non ci stanno: sotto i 560 px la riga va a capo.
+   Descrizione sopra, larga tutta; quantità, prezzo e × sotto.
+   ⚠️ Si sposta solo la POSIZIONE (grid-template-areas): l'HTML non si tocca,
+   e le classi sono quelle che il gestionale già scrive. */
+@media(max-width:560px){
+  .sheet .prev-riga{
+    grid-template-columns:1fr 1fr 48px;
+    grid-template-areas:"desc desc  desc"
+                        "qta  prezzo del";
+    gap:8px;
+  }
+  .sheet .prev-riga .pr-desc  { grid-area:desc; }
+  .sheet .prev-riga .pr-qta   { grid-area:qta; }
+  .sheet .prev-riga .pr-prezzo{ grid-area:prezzo; }
+  .sheet .prev-riga .rdel     { grid-area:del; }
+  /* ⛔ la riga del CAPITOLO ha due caselle sole: se ereditasse le aree qui
+     sopra il titolo finirebbe su una riga e la × su quella dopo. */
+  .sheet .prev-riga-cap{
+    grid-template-columns:1fr 48px;
+    grid-template-areas:"desc del";
+  }
+}
 
 /* ============================================================
    16 agosto 2026 (7) — LE ZONE: SOLO TITOLI GRANDI, NIENTE SCHEDE
@@ -3771,6 +3797,10 @@ body:has(#ti-fondatore) .side{
       lungo su due righe si taglierebbe.
    ============================================================ */
 .comp-azioni{ display:flex; gap:12px; flex-wrap:wrap; margin-top:16px; }
+/* ⚠️ 21 agosto 2026 — la stessa fila, ma SOPRA l'elenco delle lavorazioni:
+   il pulsante del prezzario sta in cima e in fondo, e in cima l'aria va
+   messa sotto, non sopra. Nient'altro cambia: il pulsante è identico. */
+.comp-azioni--su{ margin-top:0; margin-bottom:14px; }
 .comp-azioni .quick-add{
   margin:0; height:auto; min-height:46px; padding:11px 16px;
   font-size:16px; font-weight:700; line-height:1.25;

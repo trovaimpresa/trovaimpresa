@@ -7915,7 +7915,17 @@ ${vecchi?`
       return '<div class="lsc-r'+(rit?' rit':'')+(fatta?' fatta':'')+'">'
         +'<div class="lsc-info"><b>'+esc(x.titolo||"Scadenza")+'</b>'
         +(x.tipo_pratica?'<small>'+esc(x.tipo_pratica)+'</small>':'')+'</div>'
-        +'<span class="lsc-q '+(fatta?'':q.classe)+'">'+(fatta?'fatta':q.testo)+'</span>'
+        /* ⛔ 21 agosto 2026 — IL COLORE STA SOLO DOVE C'E' ANCHE LA PAROLA.
+           La riga diventava rossa e accanto c'era scritto solo «3 giorni
+           fa»: chi non distingue il rosso non sapeva che era in ritardo.
+           Il colore NON si toglie, si aggiunge la parola — ed e' la stessa
+           forma che usano gia' i Fornitori («scaduta 3 giorni fa»). */
+        /* ⚠️ la pastiglia era gia' rossa da sola: «quando()» restituisce
+           «q-passato» per una data passata che non sia segnata fatta.
+           Scriverlo un'altra volta qui era un ramo che non faceva niente —
+           l'ha trovato un sabotaggio che nessun banco poteva accusare. */
+        +'<span class="lsc-q '+(fatta?'':q.classe)+'">'
+        +  (fatta?'fatta':(rit?'scaduta '+q.testo:q.testo))+'</span>'
         +'</div>';
     }).join("");
     box.innerHTML='<div class="lm-conta">'+testa+'</div>'

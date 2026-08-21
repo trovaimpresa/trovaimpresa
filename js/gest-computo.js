@@ -1715,7 +1715,22 @@
       +    '<span>I capitoli servono a raggruppare le lavorazioni (Demolizioni, Murature…). Si possono mettere anche dopo.</span></div>')
       +'</div>';
 
-    box.innerHTML=(_niente ? _cassetta : (h+piede
+    /* ⚠️ 21 agosto 2026 — IL PULSANTE DEL PREZZARIO STAVA SOLO IN FONDO.
+       Con ottanta lavorazioni, per riempire i prezzi bisognava scorrere
+       tutto l'elenco fino in fondo per trovarlo.
+       ⛔ SCRITTO UNA VOLTA SOLA, MESSO IN DUE POSTI: la stessa stringa
+       in cima e in fondo. Due copie scritte a mano diventerebbero due
+       pulsanti diversi al primo ritocco. Il data-action è lo stesso, e chi
+       ascolta i clic non si accorge nemmeno che sono due.
+       ⚠️ Si vede solo se c'è davvero qualcosa a zero: se no sarebbe un
+       pulsante che non fa mai niente. */
+    const _btnPrezzi=Array.from(compVociCache).some(function(v){return !(+v.prezzo_unitario);})
+      ? '<button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
+      : '';
+
+    box.innerHTML=(_niente ? _cassetta : (
+      (_btnPrezzi?'<div class="comp-azioni comp-azioni--su">'+_btnPrezzi+'</div>':'')
+      +h+piede
       +'<div class="comp-azioni">'
       +  '<button type="button" class="btn-ghost quick-add" data-action="comp-voce-new">+ Aggiungi lavorazione</button>'
       /* ⚠️ 18 agosto 2026 — quando il computo te lo manda gia' fatto un
@@ -1738,9 +1753,7 @@
          prezzi vuoti. Questo pulsante cerca il codice nel prezzario e riempie
          SOLO le righe a zero. Si vede solo se qualcosa a zero c'è davvero: se
          no sarebbe un pulsante che non fa mai niente. */
-      +  (Array.from(compVociCache).some(function(v){return !(+v.prezzo_unitario);})
-          ? '<button type="button" class="btn-ghost quick-add" data-action="comp-prezzi">€ Prendi i prezzi dal prezzario</button>'
-          : '')
+      +  _btnPrezzi
       +  (compCapNuovo?'':'<button type="button" class="btn-ghost quick-add" data-action="comp-cap-apri">+ Aggiungi capitolo</button>')
       +'</div>'
       /* il resoconto dell'ultima passata del prezzario: sta qui sotto e non in
