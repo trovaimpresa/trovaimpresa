@@ -13286,3 +13286,116 @@ online). In sintesi:
 
 ⚠️ Alessio ha detto **«aspetta a partire, devo capire»**: il foglio è suo, si
 parte quando lo dice lui.
+
+
+# ✅ 21 agosto 2026, NOTTE FONDA — VIA IL RIQUADRO «STRUMENTI» DAI 4 PANNELLI
+
+Deciso da Alessio: *«prima cosa facciamo sparire gli strumenti, non servono
+più, compreso preventivo AI, perché poi saranno all'interno del gestionale»*.
+È il punto 2 della lista «da dove si riparte»: **CHIUSO**.
+
+## COSA È STATO TOLTO
+
+Il riquadro **🛠️ Strumenti** con le sue **7 caselle** — Calcolatrice edile ·
+Agenda · Scadenze fiscali · Promemoria · Preventivi · Storico preventivi ·
+Preventivo AI — da `pannello-impresa` · `artigiano` · `professionisti` ·
+`negozio`. Nient'altro è stato toccato.
+
+Dietro ogni casella non c'era una finestrella: c'era una **schermata intera**
+del pannello. Quindi sono andate via, in ogni file:
+- il riquadro (~38 righe);
+- le **7 schermate** `sec-calcolatrice`, `sec-agenda`, `sec-scadenze-fiscali`,
+  `sec-preventivo-ai`, `sec-promemoria`, `sec-crea-preventivo`,
+  `sec-storico-preventivi` — da 21 schermate a 14, provato nel browser vero;
+- lo `<script src="strumenti-comuni.js">` (agenda, scadenze fiscali,
+  promemoria). ⚠️ **Il file `strumenti-comuni.js` è rimasto nella cartella ma
+  non lo carica più nessuno.** Si può cancellare quando si vuole.
+- ~20 funzioni per pannello rimaste senza porta, compresa `_aiPreventivo`
+  (l'attesa del preventivo in background) e `generaVociPreventivoAI`.
+
+**Righe: impresa 6.467→5.372 · artigiano 5.714→4.620 · professionisti
+6.680→5.596 · negozio 6.226→5.133.** In tutto **~4.400 righe in meno.**
+
+⛔ **`strumenti-cantiere.js` NON è stato toccato**: sono i Cantieri, che non
+stavano negli Strumenti. Restano.
+
+## ⚠️ COSA VUOL DIRE, IN CONCRETO
+
+1. **Il Preventivo AI dei pannelli non esiste più.** Era l'unico posto dove
+   vivevano `ai-preventivo-background.js` e `sql/ai-lavori.sql` (il lavoro
+   della notte del 21). ⛔ **Quella strada adesso non la usa nessuno**: la
+   function e la tabella restano lì, pronte, ma scollegate.
+2. **Nel gestionale il Preventivo AI c'è già** — sezione Preventivi, pulsante
+   «✨ Genera con AI» (`new-prev-ai` → `prevForm(null,null,true)`), più
+   «Compila con AI» su clienti, lavori, fatture e computo. ⛔ Ma passa da
+   un'**altra strada**: la Edge Function Supabase `ai-generate`
+   (`js/ai-integrazione.js`, `AI.dati`), col sistema a **crediti** — e i
+   crediti nascono a **zero per tutti** (`ai_accounts.monthly_quota = 0`).
+   **Quindi oggi, nel gestionale, l'AI non parte per nessuno.**
+   ⚠️ Sono due mondi paralleli: Netlify+background (gratis, 15 minuti) contro
+   Supabase+crediti (tetto 26 secondi). **Prima o poi va scelta una sola
+   strada.** Non deciso: Alessio ha detto di togliere e basta.
+3. **I dati vecchi restano nel database ma senza porta**: `agenda_appuntamenti`,
+   `scadenze_fiscali`, `promemoria`, `preventivi_creati`. Nessuna pagina le
+   nomina più. Chi ci aveva scritto qualcosa non lo rivede. Le tabelle NON sono
+   state cancellate.
+
+## IL BANCO — sempre nei due versi
+
+`prove/strumenti/` (nel contenitore di Claude, non nella cartella di Alessio):
+`banco.js` · `sabotaggi.js`. Le prove **guardano dentro**: leggono il
+JavaScript con un lettore vero (acorn), non cercano scritte.
+
+**14 verdi · 12 sabotaggi su 12 accusati · le 4 pagine aperte in Chromium a
+due misure (1440×900 e 390×844), vecchio contro nuovo: zero errori nuovi.**
+
+⚠️ **Tre lezioni di stanotte, tutte già scritte qui sopra e ricomparse:**
+
+1. **Un `document.addEventListener` scritto a mano non è «chiamato da
+   nessuno»: gira da solo.** Teneva in vita tutto il Preventivo AI dopo che la
+   sua schermata era sparita. Una pulizia che guarda solo «chi mi chiama» non
+   lo vede.
+2. **Cercare una scritta nel file non è controllare** (lezione del 21
+   pomeriggio, ricomparsa identica). La prova «l'assistenza è rimasta in
+   piedi» cercava `_aiIntestazioni` nel testo — e il nome resta anche quando
+   la funzione è sparita e solo la **chiamata** è rimasta: cioè proprio quando
+   il file è rotto. Adesso guarda che sia **dichiarata**.
+3. **Un sabotaggio appeso in fondo al file non fa danno**: fuori dai tag
+   `<script>` è testo, non codice. Due sabotaggi restavano verdi per questo.
+   Riscritti **dentro** l'ultimo blocco di codice.
+
+⛔ E una regola nuova: **il codice già morto prima non si tocca.** La prima
+corsa della pulizia si stava portando via anche `mostraLogin`, `avviaMFA`,
+`caricaSessioneConDati` — roba morta da chissà quando, che non c'entrava col
+lavoro di stasera. Adesso la pulizia calcola prima cosa era già orfano e lo
+lascia dov'è; c'è un sabotaggio (S10) che diventa rosso se qualcuno riallarga
+il taglio.
+
+## ⚠️ DUE COSE TROVATE E **NON TOCCATE** (c'erano già da prima)
+
+1. ⛔ **`pannello-impresa.html` finisce a metà frase.** L'ultimo `<script>`
+   non è mai chiuso: il file si interrompe dentro
+   `sottoscriviRealtimeMessaggi()`, alla riga `msgRealtimeChannel` — senza
+   punto e virgola, senza `}`, senza `</script>`, senza `</body>`.
+   23 `<script` aperti, 22 chiusi. **Verificato: è identico nel file di prima,
+   non l'ha causato questo lavoro.** Conseguenza probabile: quel blocco non
+   parte, quindi **i messaggi in tempo reale del pannello impresa sono
+   spenti**. Da guardare, è grosso.
+2. **La mappa dell'Europa a sinistra** (vista nelle foto di Alessio): è
+   `#sidebar-map`, un Leaflet aperto a `setView([41.9, 12.5], 5)` in fondo a
+   tutti e 4 i pannelli. Non c'entra col riquadro dell'AI ed è per questo che
+   si vedeva anche nella pagina Assistenza. Zoom 5 = mezza Europa.
+
+## COME È STATA FATTA
+
+Non a mano: uno script (`taglia.py`, nel contenitore) che
+1. toglie il riquadro e le 7 schermate contando i `<div>` per trovare dove
+   finiscono;
+2. toglie gli ascoltatori che guardavano pulsanti spariti;
+3. toglie **a giro** le funzioni che non si raggiungono più partendo da fuori
+   (dall'HTML e dal codice che gira da solo) — così cadono anche quelle che si
+   chiamavano fra loro in tondo;
+4. toglie le intestazioni a commento rimaste appese sopra il vuoto.
+
+⛔ Una funzione si toglie **solo** se il suo nome non compare più da nessuna
+parte, nemmeno negli altri file che la pagina carica.
