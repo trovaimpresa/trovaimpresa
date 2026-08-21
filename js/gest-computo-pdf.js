@@ -2130,20 +2130,62 @@
     return uni?("una unità di "+uni):"una unità";
   }
 
-  /* I TRE CONTROLLI. Torna "" se va tutto bene, oppure la frase da dire.
-     Soglia: il centesimo, non lo zero esatto — due millesimi di euro si
-     stampano comunque uguali, e un foglio che si rifiuta di uscire per
-     due millesimi non lo si stampa mai. */
+  /* I CONTROLLI, PRIMA DI DISEGNARE QUALSIASI COSA.
+     Tornano "" se va tutto bene, oppure la frase da dire.
+
+     ⚠️ 22 agosto 2026 — DA QUI IN POI SI CONTROLLA CHE IL FOGLIO TORNI CON
+     LA CALCOLATRICE, non solo che i numeri lunghi siano coerenti fra loro.
+     Sul primo foglio vero stampato da Alessio si leggeva 25,79 + 3,87 +
+     2,97, che fa 32,63, e nel riquadro c'era 32,62: il conto girava a
+     quattro decimali e si stampava a due. Adesso il database chiude tutto
+     a due decimali (sql/gest-analisi-arrotondamento.sql) e qui si verifica
+     che sia davvero cosi', riga per riga:
+       importi di riga  ->  totale del gruppo
+       totali dei gruppi ->  costi diretti
+       costi + spese + utile ->  prezzo         (ESATTO, non "quasi")
+     Se un giorno la vista tornasse a lavorare a quattro decimali, il foglio
+     si rifiuta di uscire invece di stampare una colonna che non somma. */
+  /* ⚠️ 22 agosto 2026 — AN_COL STA IN js/gest-computo.js, ACCANTO AD AN_TIPI.
+     L'avevo dichiarata anche qui, e da quando il gestionale non e' piu' chiuso
+     nella sua scatola (spezzamento del 22 agosto) i nomi in cima ai file sono
+     PUBBLICI: due «const AN_COL» spengono tutto il file col messaggio
+     «Identifier 'AN_COL' has already been declared», e con lui se ne vanno
+     tutti i PDF del computo.
+     ⛔ E' la regola che avevo scritto io stamattina in CLAUDE.md e che ho
+     sbagliato io il pomeriggio: prima di aggiungere un nome nuovo si
+     controlla che non esista gia'. Trovato dal banco che apre la pagina. */
   function _anPdfControlla(v,t,righe){
     const nome=String(v.descrizione||"(senza descrizione)").slice(0,60);
     if(!t||!righe||!righe.length)
       return "«"+nome+"» risulta col prezzo costruito ma l'analisi non c'è più: riapri la lavorazione.";
-    const somma=righe.reduce((s,r)=>s+(+r.quantita||0)*(+r.prezzo_unitario||0),0);
-    if(Math.abs(somma-(+t.costi||0))>0.01)
-      return "Su «"+nome+"» le righe stampate non fanno i costi diretti. Non ti do un foglio che non dimostra il suo stesso totale.";
-    if(Math.abs((+t.costi||0)+(+t.spese||0)+(+t.utile||0)-(+t.prezzo||0))>0.01)
-      return "Su «"+nome+"» costi + spese generali + utile non fanno il prezzo. Il foglio non esce.";
-    /* ⛔ IL CONTROLLO PER CUI QUESTO FOGLIO ESISTE */
+    /* l'importo di riga lo da' il database: se manca, l'aggiornamento non e'
+       stato eseguito e qui si tornerebbe a calcolarlo a mano */
+    if(!Object.prototype.hasOwnProperty.call(righe[0],"importo"))
+      return "Per far tornare i conti al centesimo serve l'aggiornamento del database: esegui sql/gest-analisi-arrotondamento.sql su Supabase.";
+
+    /* ⛔ SI CONTROLLANO I NUMERI COME VENGONO STAMPATI, cioe' chiusi a due
+       decimali. Controllarli nella versione lunga non serve a niente: il
+       difetto del 22 agosto era proprio che la versione lunga tornava
+       (32,6244) e quella stampata no (25,79+3,87+2,97 = 32,63 contro
+       32,62). Chi legge il foglio ha in mano i numeri corti. */
+    const c2=x=>Math.round((+x||0)*100)/100;
+    /* 1. gli importi stampati fanno il totale del loro gruppo */
+    let somma=0;
+    for(const k in AN_COL){
+      const gr=righe.filter(r=>r.tipo===k);
+      if(!gr.length)continue;
+      const s1=c2(gr.reduce((s,r)=>s+c2(r.importo),0));
+      if(Math.abs(s1-c2(t[AN_COL[k]]))>0.0001)
+        return "Su «"+nome+"» le righe stampate non fanno il totale del gruppo. Non ti do un foglio che non torna con la calcolatrice.";
+      somma=c2(somma+s1);
+    }
+    /* 2. i totali dei gruppi fanno i costi diretti */
+    if(Math.abs(somma-c2(t.costi))>0.0001)
+      return "Su «"+nome+"» i totali dei gruppi non fanno i costi diretti. Il foglio non esce.";
+    /* 3. costi + spese generali + utile fanno il prezzo, ESATTAMENTE */
+    if(Math.abs(c2(c2(t.costi)+c2(t.spese)+c2(t.utile))-c2(t.prezzo))>0.0001)
+      return "Su «"+nome+"» costi + spese generali + utile non fanno il prezzo: sommati a mano danno un numero diverso da quello del riquadro. Esegui sql/gest-analisi-arrotondamento.sql su Supabase.";
+    /* 4. ⛔ IL CONTROLLO PER CUI QUESTO FOGLIO ESISTE */
     if(Math.abs((+t.prezzo||0)-(+v.prezzo_unitario||0))>0.01)
       return "Su «"+nome+"» il prezzo dell'analisi e quello del computo non coincidono. In gara non si consegnano due fogli che si contraddicono: riapri la lavorazione e risalva.";
     return "";
@@ -2194,7 +2236,7 @@
 
     const ids=inFila.map(x=>x.v.id);
     const [rr,rt]=await Promise.all([
-      sb.from("gest_analisi_righe").select("*").eq("user_id",sbUid).in("voce_id",ids).order("ordine"),
+      sb.from("gest_analisi_righe_calc").select("*").eq("user_id",sbUid).in("voce_id",ids).order("ordine"),
       sb.from("gest_analisi_totali").select("*").eq("user_id",sbUid).in("voce_id",ids)
     ]);
     /* ⚠️ 14 agosto 2026, la lezione del computo: se questa lettura fallisce
@@ -2203,7 +2245,9 @@
        dimostra, col messaggio «scaricato ✅» sotto. */
     if(rr.error||rt.error){
       const e=rr.error||rt.error;
-      toast(/gest_analisi|does not exist|schema cache|relation/i.test(String(e.message||""))
+      toast(/righe_calc/i.test(String(e.message||""))
+        ? "Per far tornare i conti al centesimo serve l'aggiornamento del database: esegui sql/gest-analisi-arrotondamento.sql su Supabase"
+        : /gest_analisi|does not exist|schema cache|relation/i.test(String(e.message||""))
         ? "Per l'analisi dei prezzi serve l'aggiornamento del database: esegui sql/gest-analisi-prezzi.sql su Supabase"
         : "Non riesco a leggere l'analisi: il foglio verrebbe fuori senza le righe che fanno il prezzo. Riprova fra un momento. ("+String(e.message||"")+")");
       return;
@@ -2383,7 +2427,11 @@
       AN_TIPI.forEach(function(tp){
         const gr=righe.filter(r=>r.tipo===tp[0]);
         if(!gr.length)return;                       /* il gruppo vuoto non si stampa */
-        const sub=gr.reduce((s,r)=>s+(+r.quantita||0)*(+r.prezzo_unitario||0),0);
+        /* ⛔ il totale del gruppo lo da' il database (gest_analisi_totali),
+           non si rifa' qui: e' la somma degli importi di riga gia' chiusi a
+           due decimali. Prima si sommavano i numeri lunghi e si stampavano
+           quelli corti, e la colonna non tornava. */
+        const sub=+t[AN_COL[tp[0]]]||0;
         spazio(6);
         doc.setFillColor(246,247,249);doc.rect(M,y,R-M,5,"F");
         doc.setFont("helvetica","bold");doc.setFontSize(7.4);
@@ -2401,7 +2449,7 @@
           doc.text(_umPdf(r.unita||""),mid(1,2),yb,{align:"center"});
           doc.text(_q3(r.quantita),X[3]-1.5,yb,{align:"right"});
           doc.text(_d2(r.prezzo_unitario),X[4]-1.5,yb,{align:"right"});
-          doc.text(_d2((+r.quantita||0)*(+r.prezzo_unitario||0)),R-1.5,yb,{align:"right"});
+          doc.text(_d2(r.importo),R-1.5,yb,{align:"right"});
           y+=H;
           doc.setDrawColor(225);doc.line(M,y,R,y);
         });

@@ -11274,3 +11274,78 @@ lista come n. 26.
 
 **Totale del PDF dell'analisi, a fine giornata: 165 verdi · 24 sabotaggi, 24
 accusati.**
+
+---
+
+## ⛔ IL CENTESIMO CHE NON TORNAVA (22 agosto 2026) — «si somma quello che si stampa»
+
+**Trovato facendo la somma a mano sul PRIMO foglio vero stampato da Alessio**,
+non nel codice. Riprodotto poi su un PostgreSQL 16 vero coi suoi tre numeri:
+
+```
+COM'ERA:   costi 25,7900   spese 3,8685   utile 2,9659   prezzo 32,6200
+stampati:  25,79 + 3,87 + 2,97 = 32,63    ma nel riquadro: 32,62
+```
+
+E non era solo lì: anche i totali dei tre gruppi (8,93 + 14,63 + 2,24 =
+25,80) non facevano i costi diretti (25,79). **Due centesimi in due punti
+diversi, sullo stesso foglio di gara.**
+
+⛔ **LA REGOLA: SI SOMMA QUELLO CHE SI STAMPA.** Ogni numero si chiude a DUE
+decimali *prima* di entrare nella somma dopo:
+`importo di riga → totale del gruppo → costi diretti → spese → utile → prezzo`,
+e il prezzo è la somma dei tre numeri stampati, **senza nessun round finale**.
+È la stessa scelta della quantità a tre decimali (19 agosto) e del prezzo a
+due (21 agosto), portata fino in fondo.
+
+✅ **`sql/gest-analisi-arrotondamento.sql`** — da eseguire su Supabase.
+Riscrive `gest_analisi_totali` (stessi nomi, stesso ordine, stessi tipi:
+`create or replace` non tocca le viste attaccate) e aggiunge
+**`gest_analisi_righe_calc`**, che espone l'importo di riga già chiuso a due
+decimali.
+
+⛔ **L'IMPORTO DI RIGA ADESSO LO DÀ IL DATABASE.** Schermata e PDF se lo
+calcolavano da soli: due copie della stessa formula, per giunta in virgola
+mobile, dove `0,35 × 8,50` vale 2,9749999999999996 e diventa **2,97** mentre
+il conto esatto fa **2,98**. Adesso lo leggono. Anche i totali dei quattro
+gruppi si leggono da `gest_analisi_totali` invece di rifarli.
+
+⚠️ **E il banco non deve rifare quella formula.** Il finto database del banco
+arrotonda **come `numeric`**, con gli interi (`importoRiga` in
+`prove/dati-veri.js`): se usasse i float non vedrebbe mai la differenza fra
+«sommo i numeri lunghi» e «sommo quelli stampati», cioè proprio il difetto.
+
+### ⚠️ E UN ERRORE MIO, TROVATO DAL BANCO POCHE ORE DOPO AVER SCRITTO LA REGOLA
+
+Avevo dichiarato **`AN_COL` in due file** (`gest-computo.js` e
+`gest-computo-pdf.js`). Da quando la scatola non c'è più i nomi in cima ai
+file sono **pubblici**: risultato `Identifier 'AN_COL' has already been
+declared`, e con lui morivano **tutti i PDF del computo**.
+L'ha visto `apri.js`. ⛔ Adesso c'è **`prove/nomi-doppi.js`**: in un secondo
+confronta gli 866 nomi dei cinque file e si fa girare **prima** di aprire il
+browser. **La regola scritta la mattina non basta: ci vuole il banco.**
+
+### COME È STATO PROVATO
+- **`banco-analisi-sql.sql` — 16 verdi su un PostgreSQL 16 vero** (installato
+  nel contenitore, schema minimo con `gest_computo_voci` e
+  `gest_analisi_righe`). Fra le prove: `0,35 × 8,50 = 2,98`, i tre numeri
+  stampati fanno il prezzo su tutte le analisi, l'utile è il 10% di
+  (costi+spese), la lavorazione senza righe non compare, le colonne restano
+  13 e l'importo è in fondo.
+  **`sabotaggi-analisi-sql.sh` — 9 su 9 accusati**, compreso «rimetti la
+  vista di ieri».
+- `banco-analisi-pdf.js` **106 verdi** (con le due prove nuove: «il foglio
+  torna con la calcolatrice» e «le righe fanno il totale del gruppo», lette
+  dal foglio stampato) · `banco-analisi-casi.js` **59** ·
+  `apri.js` **18** · `nomi-doppi.js` **2**.
+  `sabotaggi-analisi-pdf.js` **28 su 28** · `sabotaggi-apri.js` **8 su 8**.
+
+**Totale della giornata sull'analisi: 201 verdi · 45 sabotaggi, 45 accusati.**
+
+⚠️ **UN SABOTAGGIO L'HO TOLTO INVECE DI DICHIARARLO.** «Solo le spese
+generali a quattro decimali» non produce mai un foglio sbagliato: provato su
+tutti i costi da 0,01 a 4.000,00 € con le percentuali di legge, la somma dei
+numeri stampati fa sempre il prezzo. Il centesimo nasceva dall'**utile** e
+dalle **righe**, non dalle spese generali.
+⛔ Un sabotaggio che non può rompere niente non è una prova: è un numero
+gonfiato. Si toglie e si scrive perché.

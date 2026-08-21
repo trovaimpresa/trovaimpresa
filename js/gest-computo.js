@@ -2391,6 +2391,8 @@
      ============================================================ */
   let anCache=[], anTot=null, anEditId=null, anSalvo=false, anAttiva=false;
 
+  /* la colonna di gest_analisi_totali che tiene il totale di ogni gruppo */
+  const AN_COL={ materiale:"materiali", manodopera:"manodopera", nolo:"noli", altro:"altro" };
   const AN_TIPI=[["materiale","Materiali"],["manodopera","Manodopera"],
                  ["nolo","Noli e mezzi"],["altro","Altro"]];
 
@@ -2431,7 +2433,7 @@
     if(!sb||!sbUid){box.innerHTML='<div class="lm-vuoto">Non risulti collegato.</div>';return;}
 
     const [rr,rt]=await Promise.all([
-      sb.from("gest_analisi_righe").select("*").eq("user_id",sbUid).eq("voce_id",voceId).order("ordine"),
+      sb.from("gest_analisi_righe_calc").select("*").eq("user_id",sbUid).eq("voce_id",voceId).order("ordine"),
       sb.from("gest_analisi_totali").select("*").eq("user_id",sbUid).eq("voce_id",voceId).maybeSingle()
     ]);
     /* ⚠️ se l'aggiornamento del database non e' stato eseguito NON si mostra
@@ -2440,7 +2442,9 @@
     if(rr.error){
       anAttiva=false; anTot=null; anPrezzoCasella();
       box.innerHTML='<div class="lm-vuoto">'
-        +(/gest_analisi|does not exist|schema cache|relation/i.test(String(rr.error.message||""))
+        +(/righe_calc/i.test(String(rr.error.message||""))
+          ? 'Per far tornare i conti al centesimo serve l\'aggiornamento del database: esegui <b>sql/gest-analisi-arrotondamento.sql</b> su Supabase.'
+          : /gest_analisi|does not exist|schema cache|relation/i.test(String(rr.error.message||""))
           ? 'Per l\'analisi dei prezzi serve l\'aggiornamento del database: esegui <b>sql/gest-analisi-prezzi.sql</b> su Supabase.'
           : 'Non riesco a leggere l\'analisi: '+esc(rr.error.message))+'</div>';
       return;
@@ -2468,10 +2472,19 @@
       AN_TIPI.forEach(function(t){
         const righe=anCache.filter(r=>r.tipo===t[0]);
         if(!righe.length)return;
-        const sub=righe.reduce((s,r)=>s+(+r.quantita||0)*(+r.prezzo_unitario||0),0);
+        /* ⛔ 22 agosto 2026 — IL TOTALE DEL GRUPPO LO DA' IL DATABASE.
+           Qui si sommavano i numeri lunghi (quantita x prezzo, quattro
+           decimali) e si stampavano quelli corti: Materiali 8,93 +
+           Manodopera 14,63 + Noli 2,24 facevano 25,80, e i costi diretti
+           dicevano 25,79. Un centesimo, su un documento di gara.
+           Adesso il conto e' tutto nel database, chiuso a due decimali
+           riga per riga (sql/gest-analisi-arrotondamento.sql), e qui si
+           legge: schermo e foglio non possono piu' dire due cose diverse. */
+        const sub=anTot?(+anTot[AN_COL[t[0]]]||0)
+                       :righe.reduce((s,r)=>s+(+r.importo||0),0);
         h+='<div class="an-grp"><span>'+t[1]+'</span><b>'+eur2(sub)+'</b></div>';
         righe.forEach(function(r){
-          const imp=(+r.quantita||0)*(+r.prezzo_unitario||0);
+          const imp=+r.importo||0;   /* l'importo lo da' il database, gia' a due decimali */
           h+='<div class="spesa-row" data-action="an-edit" data-id="'+esc(String(r.id))+'"'
             +(String(r.id)===String(anEditId)?' style="cursor:pointer;background:var(--sfondo,#f5f6f8)"':' style="cursor:pointer"')
             /* ⛔ «cm-testo»: QUESTO L'HA SCRITTO LUI, non lo traduciamo.
