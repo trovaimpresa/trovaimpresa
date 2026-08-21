@@ -99,7 +99,13 @@
   /* le azioni del computo: le stesse nel menu "..." e sui pulsanti della scheda */
   function compVoci(c){
     return [{lab:"✏ Apri il computo",action:"edit-computo",data:{id:c.id}},
-            {lab:"📄 Scarica il PDF",action:"comp-pdf",data:{id:c.id}}]
+            /* ⚠️ 22 agosto 2026 — QUI C'ERA SCRITTO SOLO «Scarica il PDF».
+               Con l'analisi dei prezzi qui sotto sarebbero diventati due
+               pulsanti che non dicono cosa scaricano, sulla stessa fila.
+               E' l'inciampo del 21 agosto, quando ce n'erano tre tutti
+               chiamati «Scarica il PDF»: il nome di un pulsante si guarda
+               sulla schermata intera, non da solo. */
+            {lab:"📄 Scarica il computo metrico",action:"comp-pdf",data:{id:c.id}}]
            /* ⚠️ 20 agosto 2026 — LA LISTA C'E' ANCHE SUI LAVORI PRIVATI.
               Fino a ieri compariva solo sui «Lavori pubblici», con la nota che
               su un privato «non serve a niente». Non era vero, e l'ha detto
@@ -109,6 +115,12 @@
               Cambia solo il nome: in una gara si chiama cosi', fra privati no. */
            .concat([{lab:(c.tipo==="pubblico"?"🏛 Lista per la gara":"📋 Lista da far prezzare"),
                      action:"comp-gara",data:{id:c.id}}])
+           /* 22 agosto 2026 — l'analisi dei prezzi: il foglio che in una gara
+              si consegna quando una lavorazione non sta nel prezzario. Sta in
+              fila con gli altri documenti del computo perche' e' un documento
+              del computo, non di una lavorazione: l'allegato e' uno solo, con
+              dentro tutte le lavorazioni col prezzo costruito. */
+           .concat([{lab:"🧮 Scarica l'analisi dei prezzi",action:"comp-analisi",data:{id:c.id}}])
            .concat([
             /* 16 agosto 2026 — «Crea il preventivo» stava solo in fondo alla
                finestra. Adesso che le azioni del documento stanno in alto,

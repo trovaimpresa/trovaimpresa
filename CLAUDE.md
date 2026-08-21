@@ -11132,3 +11132,114 @@ accusati.**
 
 ⚠️ **E il conto vero della giornata, di nuovo: due difetti, tutti e due
 trovati da Alessio in una foto dello schermo. Zero dai banchi.**
+
+---
+
+## ✅ L'ANALISI DEI PREZZI IN PDF (22 agosto 2026)
+
+Il foglio che in una gara si consegna quando una lavorazione non sta nel
+prezzario. ⛔ **Niente SQL:** il database è a posto dal 21 agosto.
+
+**Dove si preme:** in fila con gli altri documenti del computo —
+`✏ Apri il computo · 📄 Scarica il computo metrico · 🏛 Lista per la gara ·`
+**`🧮 Scarica l'analisi dei prezzi`** `· → Crea il preventivo · ⧉ Duplica ·`
+`± Crea la variante · 🗑 Elimina`
+
+⚠️ **Il primo pulsante si chiamava «📄 Scarica il PDF» e basta.** Con
+l'analisi di fianco sarebbero diventati due pulsanti che non dicono cosa
+scaricano: è l'inciampo del 21 agosto (tre pulsanti «Scarica il PDF» sulla
+stessa schermata), evitato prima e non dopo. Adesso dice **«Scarica il computo
+metrico»**.
+
+**Che documento è.** **Uno solo per tutto il computo**, non uno per
+lavorazione: in gara l'«analisi dei nuovi prezzi» è un allegato unico. Dentro
+solo le lavorazioni col prezzo costruito, e in cima c'è scritto quante sono e
+quante no. Se non ne ha nessuna, **il PDF non esce**: esce il messaggio che
+dice perché.
+
+**Per ogni lavorazione:** numero e tariffa **gli stessi del computo metrico**,
+la descrizione, l'unità e «l'analisi è per un metro quadro»; le righe
+raggruppate Materiali · Manodopera · Noli e mezzi · Altro col totale di
+gruppo; e in fondo costi diretti → spese generali % → utile % → **prezzo per
+una unità**, col prezzo scritto in lettere. Firma dell'impresa sui privati,
+due firme (Direttore dei Lavori + impresa) sui lavori pubblici.
+
+### ⛔ LE REGOLE RISPETTATE (e perché)
+
+1. **Il foglio non rifà nessun conto.** Legge `gest_analisi_totali`, la stessa
+   vista che legge la schermata. Tre posti che guardano lo stesso numero, non
+   tre che lo calcolano.
+2. **`_compGruppi(voci,capitoli)`** mette le voci nell'ordine in cui le numera
+   `computoPdf`: chi legge il foglio deve poter tornare al computo e ritrovare
+   la riga. ⚠️ **Lo stesso raggruppamento è ancora scritto a mano dentro
+   `computoPdf` e `computoListaGara`:** NON le ho toccate — spostare un pezzo
+   di un documento che funziona nello stesso push in cui se ne aggiunge uno
+   nuovo vuol dire non sapere più quale dei due ha rotto le cose. Il banco
+   tiene le due copie **verbatim** e controlla che diano lo stesso ordine:
+   se una delle tre cambia, diventa rosso. **L'unificazione va fatta in un
+   push suo.**
+3. **`AN_UNO`**, la tabella dello schermo, per «un metro quadro» / «un'ora»:
+   mai una fila di `.replace()` (il «metonnelitrolataro» del 21 agosto).
+4. **`_umPdf`**: sul foglio si scrive «mq» e «mc». jsPDF il quadratino non lo
+   sa disegnare e **lo butta via in silenzio**.
+5. **`useGrouping:true` su OGNI aiutante di numeri**, non solo sui totali.
+6. **Le descrizioni non passano da nessuna traduzione**: «Muratore» sul foglio
+   resta «Muratore» anche per uno studio tecnico. È contenuto dell'utente.
+
+### ⛔ LA PROVA DEL NOVE — tre controlli, prima di disegnare qualsiasi cosa
+1. le righe stampate fanno i **costi diretti**;
+2. costi + spese generali + utile fanno il **prezzo**;
+3. ⚠️ **il prezzo dell'analisi è lo stesso che il computo usa per quella
+   lavorazione** (`gest_computo_voci_calc.prezzo_unitario`).
+
+Il terzo è il motivo per cui questo foglio esiste: **in gara non si consegnano
+due documenti che si contraddicono.** Se non torna, il PDF non esce. Soglia:
+il **centesimo**, non lo zero esatto.
+E se manca la colonna `prezzo_da_analisi` (SQL non eseguito) il foglio non
+mente: dice cosa eseguire. Si guarda la **colonna**, non il valore.
+
+### ⚠️ TRE DIFETTI VISTI GUARDANDO IL FOGLIO STAMPATO, NON IL CODICE
+1. **«PREZZO PER UN METRO QUADRO» usciva dal riquadro blu** e finiva sopra il
+   «diconsi euro». Su «UN PEZZO» no, perché è più corto: **il difetto si
+   vedeva solo su certe unità di misura.** Adesso si misura quanto è largo il
+   prezzo, si spezza l'etichetta in quante righe servono e **il riquadro
+   cresce** — vale anche per le unità scritte a mano, lunghe quanto vuoi.
+2. **«Costi diretti» era incollato alla tabella** e sembrava una riga della
+   tabella senza bordi. Stesso difetto della scritta grigia attaccata ai
+   pulsanti del 21 agosto.
+3. ⛔ **Una pagina cominciava con «Costi diretti … PREZZO PER UN METRO
+   QUADRO» e basta**, senza dire di quale lavorazione fosse. Adesso una
+   lavorazione **non si spezza se ci sta intera** (si misura prima quanto è
+   alto tutto il blocco), e quando è troppo lunga in cima alla pagina dopo
+   c'è **«N. 4 · Tariffa NP.02 — segue»**.
+
+### COME È STATO PROVATO
+- **`banco-analisi-pdf.js` — 93 verdi.** `analisiPdf` presa **verbatim** dal
+  file vero con `estrai.js`, fatta girare con **jsPDF 2.5.1** su un finto
+  Supabase, e il PDF **riletto con `pdftotext`**.
+  ⚠️ **Le colonne del finto database vengono dai file di `sql/`** (`colonne.js`
+  le legge dal `create view` e dal `create table`), non dalla mia memoria: è
+  la lezione del 21 agosto, quando una colonna di troppo nascose il difetto
+  più grave della giornata.
+  ⚠️ **E il banco legge i RETTANGOLI dentro il flusso del PDF**, non solo il
+  testo: una scritta che esce da un riquadro nel testo non si vede. È la
+  lezione delle barre del cronoprogramma. Attenzione al verso: jsPDF scrive
+  `x  (297-y)  w  -h re`, con l'altezza **negativa** — il bordo di sopra è
+  297 meno il numero che si legge, non 297 meno numero meno altezza.
+- **`banco-analisi-casi.js` — 47 verdi.** I dodici casi in cui il foglio NON
+  deve uscire, il singolare, i lavori pubblici, il foglio che si spezza col
+  «segue», l'unità scritta a mano lunga, e i messaggi passati dal traduttore
+  vero (`_swapPratiche` estratto dal file vero).
+- **`apri.js` — 18 verdi**, la pagina aperta in Chromium a 1440×900 e 390×844.
+- **`sabotaggi-analisi-pdf.js` — 22 su 22 accusati.**
+
+**Totale: 158 verdi · 22 sabotaggi, 22 accusati.**
+
+⛔ **UNA REGOLA NUOVA SUI SABOTAGGI: L'ANCORA DEVE ESSERE UNICA.**
+`doc.text("Pag. "+p+" di "+np,R,290,…)` è scritta identica anche dentro
+`variantePdf`: `replace()` ha cambiato **quella**, il foglio dell'analisi è
+rimasto intatto, e il sabotaggio risultava «non accusato» pur non avendo
+sabotato niente. Lo stesso è successo con `if(senzaCap.length)gruppi.push(…)`,
+che sta sia in `_compGruppi` sia in `computoPdf` — lì il sabotaggio risultava
+«accusato» per il motivo sbagliato. Adesso `uno()` **si ferma** se l'ancora
+compare più di una volta.

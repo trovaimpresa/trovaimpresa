@@ -2055,3 +2055,429 @@
       (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
     toast("Computo di variante scaricato ✅");
   }
+
+  /* ============================================================
+     22 agosto 2026 — L'ANALISI DEI PREZZI IN PDF
+     ============================================================
+     In una gara l'«analisi dei nuovi prezzi» e' un allegato: dentro ci
+     sono TUTTE le lavorazioni il cui prezzo e' stato costruito, una
+     dietro l'altra. Non un foglio per lavorazione — quello sarebbe un
+     mucchio di fogli che nessuno tiene insieme.
+
+     ⛔ IL CONTO NON SI RIFA' QUI. Lo fa il database (vista
+        gest_analisi_totali, sql/gest-analisi-prezzi.sql), lo legge la
+        schermata «Come e' fatto il prezzo» e lo legge questo foglio.
+        Tre posti che guardano lo stesso numero, non tre posti che lo
+        calcolano. E' la regola del 21 agosto.
+
+     ⛔ E CI SI FERMA SE I CONTI NON TORNANO — tre controlli, prima di
+        disegnare qualsiasi cosa (vedi _anPdfControlla). Il terzo e' il
+        motivo per cui questo foglio esiste: il prezzo scritto qui DEVE
+        essere lo stesso che il computo metrico usa per quella
+        lavorazione. Se si scollassero, in gara si consegnerebbero due
+        documenti che si contraddicono. Meglio nessun PDF.
+
+     ⚠️ IL NUMERO DELLA LAVORAZIONE E' QUELLO DEL COMPUTO METRICO, non
+        una numerazione nuova. Chi legge deve poter tornare al computo e
+        ritrovare la riga: un codice che esiste solo su questo foglio non
+        collega niente. Per questo si passa da _compGruppi, che mette le
+        voci nello stesso ordine in cui le numera computoPdf: prima i
+        capitoli in ordine, poi quelle senza capitolo.
+     ============================================================ */
+
+  /* Le voci raggruppate per capitolo, nell'ordine in cui vengono numerate
+     sui fogli: i capitoli in ordine (anche quelli vuoti), e in fondo le
+     voci senza capitolo.
+     ⚠️ Questo stesso raggruppamento e' scritto a mano dentro computoPdf e
+     dentro computoListaGara. NON le ho toccate oggi: spostare un pezzo di
+     un documento che funziona e aggiungerne uno nuovo nello stesso push
+     vuol dire non sapere piu' quale dei due ha rotto le cose. Il banco
+     (banco-analisi-pdf.js) tiene le due copie verbatim e controlla che
+     diano lo stesso ordine di questa: se un domani una delle tre cambia,
+     diventa rosso. L'unificazione va fatta in un push suo. */
+  function _compGruppi(voci,capitoli){
+    const senzaCap=(voci||[]).filter(v=>!v.capitolo_id);
+    const gruppi=(capitoli||[]).map(cap=>({cap:cap,
+      voci:(voci||[]).filter(v=>String(v.capitolo_id)===String(cap.id))}));
+    if(senzaCap.length)gruppi.push({cap:null,voci:senzaCap});
+    return gruppi;
+  }
+
+  /* «un metro quadro», «un'ora», «una tonnellata».
+     ⚠️ La tabella e' AN_UNO, la stessa dello schermo: NON una fila di
+     .replace(), che il 21 agosto produsse «un metonnelitrolataro
+     quintaleuadro». E la frase di ripiego e' identica a quella della
+     schermata, cosi' il foglio e lo schermo dicono la stessa parola. */
+  function _anPdfUno(u){
+    const uni=String(u==null?"":u).trim();
+    return AN_UNO[uni]||(uni?("una unità di "+uni):"una unità");
+  }
+
+  /* I TRE CONTROLLI. Torna "" se va tutto bene, oppure la frase da dire.
+     Soglia: il centesimo, non lo zero esatto — due millesimi di euro si
+     stampano comunque uguali, e un foglio che si rifiuta di uscire per
+     due millesimi non lo si stampa mai. */
+  function _anPdfControlla(v,t,righe){
+    const nome=String(v.descrizione||"(senza descrizione)").slice(0,60);
+    if(!t||!righe||!righe.length)
+      return "«"+nome+"» risulta col prezzo costruito ma l'analisi non c'è più: riapri la lavorazione.";
+    const somma=righe.reduce((s,r)=>s+(+r.quantita||0)*(+r.prezzo_unitario||0),0);
+    if(Math.abs(somma-(+t.costi||0))>0.01)
+      return "Su «"+nome+"» le righe stampate non fanno i costi diretti. Non ti do un foglio che non dimostra il suo stesso totale.";
+    if(Math.abs((+t.costi||0)+(+t.spese||0)+(+t.utile||0)-(+t.prezzo||0))>0.01)
+      return "Su «"+nome+"» costi + spese generali + utile non fanno il prezzo. Il foglio non esce.";
+    /* ⛔ IL CONTROLLO PER CUI QUESTO FOGLIO ESISTE */
+    if(Math.abs((+t.prezzo||0)-(+v.prezzo_unitario||0))>0.01)
+      return "Su «"+nome+"» il prezzo dell'analisi e quello del computo non coincidono. In gara non si consegnano due fogli che si contraddicono: riapri la lavorazione e risalva.";
+    return "";
+  }
+
+  async function analisiPdf(id){
+    if(!(await caricaJsPDF())){toast("Non riesco a scaricare il modulo PDF: controlla la connessione e riprova");return;}
+    if(!sb||!sbUid){toast("Devi essere collegato");return;}
+    const c=compCache.find(x=>String(x.id)===String(id));
+    if(!c){toast("Computo non trovato");return;}
+    const {data:az}=await sb.from("gest_azienda").select("*").eq("user_id",sbUid).maybeSingle();
+    if(!az||!az.nome){toast("Compila prima i Dati azienda");return aziendaForm();}
+    const cli=await cliDelDocumento(c.cliente_id,"nome,indirizzo,referente");
+
+    const [rc,rv]=await Promise.all([
+      sb.from("gest_computo_capitoli").select("*").eq("user_id",sbUid).eq("computo_id",id).order("ordine"),
+      sb.from("gest_computo_voci_calc").select("*").eq("user_id",sbUid).eq("computo_id",id).order("ordine")
+    ]);
+    if(rc.error||rv.error){toast("Non riesco a leggere il computo: "+((rc.error||rv.error).message||""));return;}
+    const capitoli=rc.data||[], voci=rv.data||[];
+    if(!voci.length){toast("Il computo è vuoto: non c'è nessun prezzo da analizzare");return;}
+
+    /* ⚠️ SE L'AGGIORNAMENTO DEL DATABASE NON C'E', NON SI MENTE.
+       Senza la colonna prezzo_da_analisi il foglio direbbe «nessuna
+       lavorazione ha l'analisi» — che e' una bugia con l'aria di essere
+       giusta. E' la lezione della variante del 21 agosto: si guarda la
+       COLONNA, non il valore (su un computo normale e' legittimamente
+       falsa su tutte le righe). */
+    if(!voci.some(v=>Object.prototype.hasOwnProperty.call(v,"prezzo_da_analisi"))){
+      toast("Per l'analisi dei prezzi serve l'aggiornamento del database: esegui sql/gest-analisi-prezzi.sql su Supabase");
+      return;
+    }
+
+    /* le voci col prezzo costruito, NELLO STESSO ORDINE E COLLO STESSO
+       NUMERO che hanno sul computo metrico */
+    const inFila=[];
+    let n=0;
+    _compGruppi(voci,capitoli).forEach(function(g){
+      g.voci.forEach(function(v){
+        n++;
+        if(v.prezzo_da_analisi===true)inFila.push({n:n,v:v,cap:g.cap});
+      });
+    });
+    if(!inFila.length){
+      toast("Nessuna lavorazione ha l'analisi dei prezzi: aprine una e costruisci il prezzo sotto «Come è fatto il prezzo».");
+      return;
+    }
+
+    const ids=inFila.map(x=>x.v.id);
+    const [rr,rt]=await Promise.all([
+      sb.from("gest_analisi_righe").select("*").eq("user_id",sbUid).in("voce_id",ids).order("ordine"),
+      sb.from("gest_analisi_totali").select("*").eq("user_id",sbUid).in("voce_id",ids)
+    ]);
+    /* ⚠️ 14 agosto 2026, la lezione del computo: se questa lettura fallisce
+       e non si guarda, il foglio esce LO STESSO — coi prezzi in fondo e
+       senza le righe che li fanno. Un documento che dice una cosa e non la
+       dimostra, col messaggio «scaricato ✅» sotto. */
+    if(rr.error||rt.error){
+      const e=rr.error||rt.error;
+      toast(/gest_analisi|does not exist|schema cache|relation/i.test(String(e.message||""))
+        ? "Per l'analisi dei prezzi serve l'aggiornamento del database: esegui sql/gest-analisi-prezzi.sql su Supabase"
+        : "Non riesco a leggere l'analisi: il foglio verrebbe fuori senza le righe che fanno il prezzo. Riprova fra un momento. ("+String(e.message||"")+")");
+      return;
+    }
+    const righeDi={};(rr.data||[]).forEach(r=>{(righeDi[r.voce_id]=righeDi[r.voce_id]||[]).push(r);});
+    const totDi={};  (rt.data||[]).forEach(t=>{ totDi[t.voce_id]=t; });
+
+    /* ⛔ LA PROVA DEL NOVE, PRIMA DI DISEGNARE QUALSIASI COSA */
+    for(let i=0;i<inFila.length;i++){
+      const guaio=_anPdfControlla(inFila[i].v,totDi[inFila[i].v.id],righeDi[inFila[i].v.id]);
+      if(guaio){toast(guaio);return;}
+    }
+
+    const {jsPDF}=window.jspdf, doc=new jsPDF({unit:"mm",format:"a4"});
+    /* Descrizione | u.m. | Quantità | Prezzo unit. | Importo */
+    const X=[10,118,132,152,174,200];
+    const M=X[0], R=X[5], FONDO=268;
+    const mid=(a,b)=>(X[a]+X[b])/2;
+
+    /* ⚠️ «useGrouping:true» SU OGNI AIUTANTE, non solo su quello dei totali.
+       Senza, Intl in italiano mette il punto delle migliaia solo dai cinque
+       numeri in su: sullo stesso foglio si legge «€ 11.001,00» e, due
+       colonne più su, «2220,00». Trovato il 19 agosto sul quadro economico
+       e di nuovo il 21 sulla variante, tutte e due le volte guardando una
+       fotografia. */
+    const _eur=n2=>"€ "+new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n2||0);
+    const _d2 =n2=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:true}).format(+n2||0);
+    const _q3 =n2=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:3,maximumFractionDigits:3,useGrouping:true}).format(+n2||0);
+    const _pc =n2=>new Intl.NumberFormat("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2}).format(+n2||0);
+
+    let y=0, tabTop=0;
+
+    function chiudiCorpo(){
+      if(!tabTop)return;
+      doc.setDrawColor(110);doc.setLineWidth(.2);
+      for(let i=1;i<=4;i++)doc.line(X[i],tabTop,X[i],y);
+      doc.line(M,tabTop,M,y);doc.line(R,tabTop,R,y);doc.line(M,y,R,y);
+    }
+    function testaTabella(){
+      const H=6.2;
+      doc.setFillColor(238,241,243);doc.rect(M,y,R-M,H,"F");
+      doc.setDrawColor(110);doc.setLineWidth(.2);doc.rect(M,y,R-M,H);
+      doc.setFont("helvetica","bold");doc.setFontSize(6.6);doc.setTextColor(0);
+      const b=y+H-2.1;
+      doc.text("Descrizione",X[0]+2,b);
+      doc.text("u.m.",mid(1,2),b,{align:"center"});
+      doc.text("Quantità",mid(2,3),b,{align:"center"});
+      doc.text("Prezzo unit.",mid(3,4),b,{align:"center"});
+      doc.text("Importo",mid(4,5),b,{align:"center"});
+      [1,2,3,4].forEach(i=>doc.line(X[i],y,X[i],y+H));
+      y+=H;tabTop=y;
+      doc.setFont("helvetica","normal");doc.setTextColor(0);
+    }
+    /* ⚠️ 22 agosto 2026 — UNA PAGINA NON COMINCIA CON UN PREZZO SENZA NOME.
+       Se un'analisi e' cosi' lunga da non stare in una pagina, la seconda
+       pagina si apriva con «Costi diretti / Spese generali / PREZZO PER UN
+       METRO QUADRO» e basta: chi la legge non sa di quale lavorazione sia.
+       Su un documento di gara e' un difetto grosso. Adesso, quando un blocco
+       continua, in cima si ripete «N. 4 · Tariffa NP.02 — segue».
+       Visto guardando il foglio stampato, non il codice. */
+    let inCorso=null;
+    function segue(){
+      if(!inCorso)return;
+      doc.setFillColor(240,242,244);doc.rect(M,y,R-M,5,"F");
+      doc.setFont("helvetica","bold");doc.setFontSize(7.6);doc.setTextColor(60);
+      doc.text("N. "+inCorso.n+(inCorso.v.codice?"   ·   Tariffa "+String(inCorso.v.codice):"")+"   —   segue",M+2,y+3.5);
+      doc.setTextColor(0);doc.setFont("helvetica","normal");
+      y+=5+2;
+    }
+    function nuovaPagina(){
+      chiudiCorpo();
+      doc.addPage();y=13;segue();testaTabella();
+    }
+    const spazio=h=>{if(y+h>FONDO)nuovaPagina();};
+    function fuoriTabella(h){
+      if(y+h>FONDO){chiudiCorpo();tabTop=0;doc.addPage();y=16;segue();}
+    }
+
+    /* ---- intestazione ---- */
+    y=14;
+    doc.setFont("helvetica","bold");doc.setFontSize(13);doc.text(az.nome,M,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    let hy=y+4.8;
+    [az.piva?"P.IVA "+az.piva:"",azIndirizzo(az),[az.tel?"Tel "+az.tel:"",az.email||""].filter(Boolean).join("   ")]
+      .filter(Boolean).forEach(t=>{doc.text(t,M,hy);hy+=3.8;});
+    doc.setTextColor(0);
+    doc.setFont("helvetica","bold");doc.setFontSize(13);
+    doc.text("ANALISI DEI PREZZI",R,y,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    doc.text((c.numero?"N. "+c.numero+"     ":"")+"del "+fdate(c.data||todayStr()),R,y+4.8,{align:"right"});
+    if(c.tipo==="pubblico")doc.text("lavori pubblici",R,y+8.6,{align:"right"});
+    doc.setTextColor(0);
+    y=Math.max(hy,y+13)+1;doc.setDrawColor(180);doc.line(M,y,R,y);y+=6;
+
+    doc.setFont("helvetica","bold");doc.setFontSize(10.5);
+    const tit=doc.splitTextToSize(c.titolo||_cm('nome'),R-M);
+    doc.text(tit,M,y);y+=tit.length*4.6+0.5;
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90);
+    if(c.oggetto){const o=doc.splitTextToSize("Oggetto: "+c.oggetto,R-M);doc.text(o,M,y);y+=o.length*3.9;}
+    if(c.luogo){doc.text("Luogo: "+c.luogo,M,y);y+=3.9;}
+    if(cli.nome){doc.text("Committente: "+cli.nome+(cli.indirizzo?" - "+cli.indirizzo:""),M,y);y+=3.9;}
+
+    /* ⚠️ quante sono e quante NO: se non si scrive, chi legge crede che
+       manchino delle lavorazioni. Il singolare va scritto, se no esce
+       «le 1 lavorazioni» — il difetto del 21 agosto. */
+    const senza=voci.length-inFila.length;
+    doc.text((inFila.length===1
+        ? "Qui sotto c'è l'unica lavorazione il cui prezzo è costruito con l'analisi"
+        : "Qui sotto ci sono le "+inFila.length+" lavorazioni il cui prezzo è costruito con l'analisi")
+      +(senza>0
+        ? ": "+(senza===1?"l'altra lavorazione viene":"le altre "+senza+" lavorazioni vengono")
+          +" dal prezzario o hanno il prezzo scritto a mano."
+        : "."),M,y,{maxWidth:R-M});y+=3.9;
+    doc.text("Ogni analisi è per UNA unità di misura: la quantità totale la mette il computo metrico con le misure.",M,y,{maxWidth:R-M});y+=3.9;
+    doc.setTextColor(0);y+=4;
+
+    /* ---- una lavorazione ---- */
+    function blocco(x){
+      const v=x.v, t=totDi[v.id], righe=(righeDi[v.id]||[]);
+      const uniPdf=_umPdf(v.unita||"");
+      const perUno=_anPdfUno(v.unita);
+
+      /* la fascia col numero, la tariffa e la descrizione: il numero e' lo
+         stesso del computo metrico */
+      const testa=(x.cap&&(x.cap.numero||x.cap.titolo))
+        ? String((x.cap.numero?x.cap.numero+" - ":"")+(x.cap.titolo||""))
+        : "";
+      /* ⛔ la descrizione arriva dal prezzario o l'ha scritta lui: si stampa
+         com'e', non passa da nessuna traduzione (regola del 20 agosto). */
+      const desc=doc.splitTextToSize(String(v.descrizione||"(senza descrizione)"),R-M-6);
+
+      /* ⚠️ 22 agosto 2026 — UNA LAVORAZIONE NON SI SPEZZA SE PUO' STARE
+         INTERA. Prima si guardava solo se ci stava l'intestazione: succedeva
+         che la tabella finisse in fondo alla pagina e il conto (costi, spese,
+         utile, prezzo) andasse da solo sulla pagina dopo, lasciando mezza
+         pagina bianca. Su un documento di gara ogni nuovo prezzo si legge
+         tutto insieme: quanto costa e come ci si arriva.
+         Quindi si misura PRIMA quanto e' alto tutto il blocco; se non ci sta
+         qui ma ci starebbe su una pagina vuota, si volta pagina subito.
+         Se e' piu' alto di una pagina intera (analisi lunghissime) si spezza
+         come prima, con l'intestazione della tabella che si ripete.
+         Visto guardando il foglio stampato. */
+      const nGruppi=AN_TIPI.filter(tp=>righe.some(r=>r.tipo===tp[0])).length;
+      const altoRighe=righe.reduce(function(s,r){
+        return s+Math.max(doc.splitTextToSize(String(r.descrizione||"(senza nome)"),X[1]-X[0]-3).length*3.4,3.4)+2.2;
+      },0);
+      const altoTotale=6+3.4+desc.length*4+1.2+4.4+6.2+nGruppi*5+altoRighe+3*4.6+10+20;   /* l'ultimo numero e' il margine di sicurezza */
+      inCorso=null;                       /* la fascia del blocco nuovo non e' un «segue» */
+      if(y+altoTotale>FONDO && altoTotale<=FONDO-16){ chiudiCorpo(); tabTop=0; doc.addPage(); y=16; }
+      else fuoriTabella(26+desc.length*4);
+      if(tabTop){chiudiCorpo();tabTop=0;y+=4;}
+      inCorso=x;                          /* da qui in poi, se si volta pagina, si ripete chi e' */
+
+      doc.setFillColor(232,238,236);doc.rect(M,y,R-M,6,"F");
+      doc.setFont("helvetica","bold");doc.setFontSize(8.4);doc.setTextColor(0);
+      doc.text("N. "+x.n+(v.codice?"   ·   Tariffa "+String(v.codice):""),M+2,y+4.1);
+      if(testa){
+        doc.setFont("helvetica","normal");doc.setFontSize(7.2);doc.setTextColor(80);
+        doc.text(testa,R-2,y+4.1,{align:"right",maxWidth:(R-M)/2});
+        doc.setTextColor(0);
+      }
+      y+=6+3.4;
+      doc.setFont("helvetica","normal");doc.setFontSize(8.4);
+      doc.text(desc,M,y);y+=desc.length*4+1.2;
+      doc.setFontSize(7.6);doc.setTextColor(90);
+      doc.text("Unità di misura: "+(uniPdf||"—")+"   ·   l'analisi è per "+perUno,M,y);
+      doc.setTextColor(0);y+=4.4;
+
+      testaTabella();
+
+      /* le righe, raggruppate: su un'analisi i gruppi vanno separati, non
+         messi in fila uno dietro l'altro.
+         ⚠️ «Manodopera» con la MAIUSCOLA: per gli studi tecnici il
+         gestionale riscrive «manodopera» in «tempo speso», e su un'analisi
+         il termine giusto e' quello di legge. Le etichette vengono da
+         AN_TIPI, che le ha gia' maiuscole. */
+      AN_TIPI.forEach(function(tp){
+        const gr=righe.filter(r=>r.tipo===tp[0]);
+        if(!gr.length)return;                       /* il gruppo vuoto non si stampa */
+        const sub=gr.reduce((s,r)=>s+(+r.quantita||0)*(+r.prezzo_unitario||0),0);
+        spazio(6);
+        doc.setFillColor(246,247,249);doc.rect(M,y,R-M,5,"F");
+        doc.setFont("helvetica","bold");doc.setFontSize(7.4);
+        doc.text(String(tp[1]).toUpperCase(),M+2,y+3.5);
+        doc.text(_d2(sub),R-1.5,y+3.5,{align:"right"});
+        y+=5;doc.setDrawColor(205);doc.line(M,y,R,y);
+        doc.setFont("helvetica","normal");
+        gr.forEach(function(r){
+          const d=doc.splitTextToSize(String(r.descrizione||"(senza nome)"),X[1]-X[0]-3);
+          const H=Math.max(d.length*3.4,3.4)+2.2;
+          spazio(H+1);
+          doc.setFontSize(7.4);
+          d.forEach((tt,i)=>doc.text(tt,X[0]+2,y+3.4+i*3.4));
+          const yb=y+3.4;
+          doc.text(_umPdf(r.unita||""),mid(1,2),yb,{align:"center"});
+          doc.text(_q3(r.quantita),X[3]-1.5,yb,{align:"right"});
+          doc.text(_d2(r.prezzo_unitario),X[4]-1.5,yb,{align:"right"});
+          doc.text(_d2((+r.quantita||0)*(+r.prezzo_unitario||0)),R-1.5,yb,{align:"right"});
+          y+=H;
+          doc.setDrawColor(225);doc.line(M,y,R,y);
+        });
+      });
+
+      chiudiCorpo();tabTop=0;
+
+      /* ---- il conto della lavorazione ---- */
+      /* ⚠️ 22 agosto 2026 — IL RIQUADRO SI MISURA PRIMA DI DISEGNARLO.
+         La prima versione scriveva «PREZZO PER UN METRO QUADRO» dentro un
+         riquadro alto 10 mm con un maxWidth stretto: la scritta andava a
+         capo, e la seconda riga («METRO QUADRO») usciva DAL riquadro e
+         finiva sopra il «diconsi euro». Sul «PREZZO PER UN PEZZO» non
+         succedeva, perche' e' piu' corto — cioe' il difetto si vedeva solo
+         su certe unita' di misura.
+         Trovato dal banco leggendo il foglio vero, non guardando il codice.
+         Adesso: si misura quanto e' largo il prezzo, si spezza l'etichetta
+         in quante righe servono, e il riquadro CRESCE. Vale anche per le
+         unita' scritte a mano («una unita' di viaggio da 20 q.li»), che
+         possono essere lunghe quanto vogliono. */
+      const rig=[
+        ["Costi diretti","",t.costi],
+        ["Spese generali",_pc(t.spese_perc)+" %",t.spese],
+        ["Utile",_pc(t.utile_perc)+" %",t.utile]
+      ];
+      const XB=X[1];                                  /* il riquadro del prezzo comincia qui */
+      doc.setFont("helvetica","bold");doc.setFontSize(9.4);
+      const prezzoTxt=_eur(t.prezzo);
+      const largEt=Math.max((R-3)-doc.getTextWidth(prezzoTxt)-(XB+3)-5,24);
+      const et=doc.splitTextToSize("PREZZO PER "+perUno.toUpperCase(),largEt);
+      const HB=Math.max(10,3.6+et.length*4.6);
+      fuoriTabella(rig.length*4.6+HB+18);
+      /* ⚠️ ARIA fra la tabella e il conto. Con 2,5 mm il «Costi diretti»
+         risultava incollato all'ultima riga della tabella e sembrava una
+         riga della tabella senza bordi. E' lo stesso difetto della scritta
+         grigia attaccata ai pulsanti, visto da Alessio il 21 agosto: qui
+         l'ho visto guardando il foglio stampato, non il codice. */
+      y+=6;
+      doc.setFont("helvetica","normal");doc.setFontSize(8.4);
+      rig.forEach(function(rg){
+        doc.text(rg[0],XB,y);
+        if(rg[1])doc.text(rg[1],X[4]-1.5,y,{align:"right"});
+        doc.text(_eur(rg[2]),R-1.5,y,{align:"right"});
+        y+=4.6;
+      });
+      doc.setDrawColor(150);doc.line(XB,y-3.1,R-1.5,y-3.1);
+      y+=0.8;
+      doc.setDrawColor(11,75,196);doc.setLineWidth(.5);doc.rect(XB-2,y,R-XB+2,HB);doc.setLineWidth(.2);
+      doc.setFont("helvetica","bold");doc.setFontSize(9.4);
+      const y0=y+(HB-et.length*4.6)/2+3.6;
+      et.forEach((s,i)=>doc.text(s,XB+1,y0+i*4.6));
+      doc.text(prezzoTxt,R-3,y+HB/2+1.6,{align:"right"});
+      y+=HB+3;
+      /* il prezzo in lettere: su un documento di gara ci va, ed e' la stessa
+         funzione del computo (ha il suo banco dal 18 agosto) */
+      doc.setFont("helvetica","normal");doc.setFontSize(7.6);doc.setTextColor(90);
+      doc.text("(diconsi euro "+euroInLettere(t.prezzo)+")",XB,y);
+      doc.setTextColor(0);y+=7;
+      inCorso=null;                       /* il blocco e' finito */
+    }
+
+    inFila.forEach(blocco);
+
+    /* ---- in fondo: la data e le firme ---- */
+    fuoriTabella(30);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(0);
+    doc.text((c.luogo?String(c.luogo).split(",").pop().trim()+", ":"")+fdate(todayStr()),M,y);
+    y+=14;
+    doc.setFont("helvetica","bold");
+    /* sui lavori pubblici l'analisi la approva il Direttore dei Lavori e
+       l'impresa l'accetta: due firme. Su un privato il foglio e' dell'impresa */
+    if(c.tipo==="pubblico"){
+      doc.text("IL DIRETTORE DEI LAVORI",M+38,y,{align:"center"});
+      doc.text("TIMBRO E FIRMA",R-38,y,{align:"center"});
+      doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
+      doc.text("____________________________",M+38,y+4.6,{align:"center"});
+      doc.text("____________________________",R-38,y+4.6,{align:"center"});
+    }else{
+      doc.text("TIMBRO E FIRMA",R-40,y,{align:"center"});
+      doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120);
+      doc.text("____________________________",R-40,y+4.6,{align:"center"});
+    }
+    doc.setTextColor(0);
+
+    const np=doc.getNumberOfPages();
+    for(let p=1;p<=np;p++){
+      doc.setPage(p);
+      doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(140);
+      doc.text("ANALISI DEI PREZZI"+(c.numero?"  ·  computo n. "+c.numero:"")+(c.titolo?"  ·  "+c.titolo:""),M,290,{maxWidth:150});
+      doc.text("Pag. "+p+" di "+np,R,290,{align:"right"});
+      doc.setTextColor(0);
+    }
+    doc.save("analisi-prezzi-"+(c.numero||"").replace(/[^a-z0-9]+/gi,"-")+"-"+
+      (c.titolo||"computo").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".pdf");
+    toast("Analisi dei prezzi scaricata ✅");
+  }
