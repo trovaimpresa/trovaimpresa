@@ -187,7 +187,14 @@ select case
   when exists (select 1 from public.gest_analisi_totali
                 where costi + spese + utile <> prezzo)
     then 'NON FATTO — c''e'' ancora un''analisi in cui i conti non tornano.'
+  -- ⚠️ 22 agosto 2026 — IL SINGOLARE. La prima versione rispondeva
+  --    «1 analisi controllate», e Alessio se l'e' visto arrivare in faccia
+  --    dopo che avevo passato la mattina a sistemare «le 1 righe rimaste
+  --    uguali». Vale anche per una riga di esito che si legge una volta sola.
   else 'FATTO — adesso il foglio torna con la calcolatrice: '
-       || (select count(*) from public.gest_analisi_totali)::text
-       || ' analisi controllate, tutte quadrate al centesimo.'
+       || case when (select count(*) from public.gest_analisi_totali) = 1
+               then '1 analisi controllata, quadrata al centesimo.'
+               else (select count(*) from public.gest_analisi_totali)::text
+                    || ' analisi controllate, tutte quadrate al centesimo.'
+          end
 end as esito;
