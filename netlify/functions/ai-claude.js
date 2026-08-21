@@ -1,3 +1,24 @@
+// =====================================================================
+// TrovaImpresa — L'AI DEI PANNELLI (preventivo con l'AI · assistente supporto)
+//
+// ⛔ 21 agosto 2026 — PRIMA SI FIDAVA DI QUELLO CHE LE SCRIVEVA IL BROWSER.
+// L'impresa arrivava come "impresa_id" dentro il messaggio, e nessuno
+// controllava chi stesse chiamando davvero. Gli id delle imprese sono
+// pubblici (la vetrina si legge senza account), quindi con l'id di un
+// altro iscritto si potevano fare due cose, tutte e due brutte:
+//   1. bruciargli le 30 chiamate al giorno che gli spettano;
+//   2. scrivere righe dentro ai_richieste a nome suo — prompt e risposta
+//      scelti da chi chiamava — che poi lui si ritrova nel suo pannello.
+//
+// ⚠️ Adesso l'impresa si ricava dall'ACCESSO di chi chiama, come fa gia'
+// netlify/functions/crea-checkout-crediti.js (che spiega il perche' nella
+// sua intestazione: "chi sta comprando si legge dal suo accesso, non
+// dall'email"). L'impresa_id che arriva nel messaggio viene IGNORATO.
+//
+// ⚠️ Chi chiama deve mandare l'intestazione Authorization: Bearer <token>.
+// Lo fanno i quattro pannelli (pannello-impresa · artigiano ·
+// professionisti · negozio), tre punti per pannello, con _aiIntestazioni().
+// =====================================================================
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async function(event) {
@@ -15,21 +36,47 @@ exports.handler = async function(event) {
     || event.headers?.['client-ip']
     || null;
 
-  let azione, impresa_id, prompt;
+  let azione, prompt;
   try {
-    ({ azione, impresa_id, prompt } = JSON.parse(event.body || '{}'));
+    ({ azione, prompt } = JSON.parse(event.body || '{}'));
   } catch {
     return { statusCode: 400, body: JSON.stringify({ error: 'Body JSON non valido.' }) };
   }
 
-  if (!azione || !impresa_id || !prompt) {
+  if (!azione || !prompt) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Parametri mancanti: azione, impresa_id, prompt sono obbligatori.' })
+      body: JSON.stringify({ error: 'Parametri mancanti: azione e prompt sono obbligatori.' })
     };
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+  // ---- CHI STA CHIAMANDO ------------------------------------------
+  const intestazione = event.headers.authorization || event.headers.Authorization || '';
+  const token = intestazione.startsWith('Bearer ') ? intestazione.slice(7).trim() : '';
+  if (!token) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Devi essere collegato per usare l\'AI.' }) };
+  }
+  const { data: chi, error: erroreChi } = await supabase.auth.getUser(token);
+  const utente = chi && chi.user;
+  if (erroreChi || !utente || !utente.id) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'La sessione è scaduta. Rientra e riprova.' }) };
+  }
+
+  // ⛔ l'impresa e' QUESTA, non quella scritta nel messaggio
+  const { data: impresa, error: impErr } = await supabase
+    .from('imprese')
+    .select('id, piano, premium_scadenza')
+    .eq('user_id', utente.id)
+    .order('id', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (impErr || !impresa) {
+    return { statusCode: 404, body: JSON.stringify({ error: 'Profilo non trovato.' }) };
+  }
+  const impresa_id = impresa.id;
 
   const logRichiesta = async (extra) => {
     try {
@@ -50,19 +97,17 @@ exports.handler = async function(event) {
   };
 
   try {
-    const { data: impresa, error: impErr } = await supabase
-      .from('imprese')
-      .select('piano')
-      .eq('id', impresa_id)
-      .single();
+    /* ⚠️ stessa regola di haPremium() nel gestionale e di crea-checkout-crediti:
+       piano 'premium' e, se c'e' una scadenza, non ancora passata. Prima qui la
+       scadenza non si guardava: chi aveva finito i tre mesi di regalo continuava
+       a usare l'AI finche' il controllo notturno non passava a declassarlo. */
+    const scad = impresa.premium_scadenza ? new Date(impresa.premium_scadenza) : null;
+    const piano = String(impresa.piano || '').trim().toLowerCase();
+    const attivo = ['premium','mensile','annuale'].includes(piano)
+      && (!scad || isNaN(scad.getTime()) || scad.getTime() > Date.now());
 
-    if (impErr || !impresa) {
-      await logRichiesta({ errore: 'Impresa non trovata' });
-      return { statusCode: 404, body: JSON.stringify({ error: 'Impresa non trovata.' }) };
-    }
-
-    if (!['premium','mensile','annuale'].includes((impresa.piano || '').toLowerCase())) {
-      await logRichiesta({ errore: 'Piano Free' });
+    if (!attivo) {
+      await logRichiesta({ errore: 'Piano non attivo' });
       return { statusCode: 403, body: JSON.stringify({ error: 'AI solo Premium' }) };
     }
 

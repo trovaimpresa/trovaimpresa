@@ -915,7 +915,12 @@
        "5% Cassa Geometri" e scriveva 150 di spese, e il riquadro "Il conto"
        restava fermo sul numero di prima. La cassa e' una tendina, quindi
        serve anche "change". */
-    ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-cassa-tipo","#fa-spese"].forEach(id=>{
+    /* ⚠️ 21 agosto 2026 — e mancava anche #fa-spese-iva, il «Rimborso spese».
+       Stesso difetto di allora, su un campo aggiunto dopo: scrivevi 200 € e
+       il riquadro restava fermo sul numero di prima; salvavi e cambiava.
+       Se domani nasce un altro campo che entra nel conto, la sua riga va
+       aggiunta QUI, se no il riquadro mente di nuovo. */
+    ["#fa-sconto","#fa-bollo","#fa-rit","#fa-cassa","#fa-cassa-tipo","#fa-spese","#fa-spese-iva"].forEach(id=>{
       const e=$(id);if(!e)return;
       e.addEventListener("input",fattTotaleLive);
       e.addEventListener("change",fattTotaleLive);
@@ -1712,8 +1717,17 @@
     const forf=(f.regime_fiscale||az.regime_fiscale)==="RF19";
     const c=fattConti(f);
 
-    const cPiva =(f.cli_piva||cli.piva||"").trim();
-    const cCf   =(f.cli_cod_fiscale||cli.cod_fiscale||"").trim();
+    /* ⚠️ 21 agosto 2026 — LA PARTITA IVA SI PULISCE ANCHE QUI, NON SOLO NEL
+       CONTROLLO. fattXmlControlla valida con "pulita" (riga 1603), quindi
+       "012.345.678.97" PASSA il controllo; poi qui dentro finiva nel file
+       cosi' com'era, e lo SDI scarta: IdCodice vuole 11 cifre e basta.
+       Il nome del file era gia' giusto (li' le cifre si estraevano a parte):
+       il file si chiamava bene e dentro era sbagliato.
+       Stessa pulizia del controllo: restano solo lettere e numeri. */
+    const xpul=v=>String(v||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase();
+
+    const cPiva = xpul(f.cli_piva||cli.piva);
+    const cCf   = xpul(f.cli_cod_fiscale||cli.cod_fiscale);
     const cSdi  =(f.cli_sdi||cli.sdi_codice||"").trim();
     const cPec  =(f.cli_pec||cli.sdi_pec||"").trim();
     const codDest = cSdi || "0000000";
@@ -1756,7 +1770,7 @@
     /* ---- INTESTAZIONE ---- */
     x+='  <FatturaElettronicaHeader>\n';
     x+='    <DatiTrasmissione>\n';
-    x+='      <IdTrasmittente>\n        <IdPaese>IT</IdPaese>\n        <IdCodice>'+xesc(az.piva)+'</IdCodice>\n      </IdTrasmittente>\n';
+    x+='      <IdTrasmittente>\n        <IdPaese>IT</IdPaese>\n        <IdCodice>'+xesc(xpul(az.piva))+'</IdCodice>\n      </IdTrasmittente>\n';
     x+='      <ProgressivoInvio>'+xesc(prog)+'</ProgressivoInvio>\n';
     x+='      <FormatoTrasmissione>FPR12</FormatoTrasmissione>\n';
     x+='      <CodiceDestinatario>'+xesc(codDest)+'</CodiceDestinatario>\n';
@@ -1766,15 +1780,15 @@
     x+='    </DatiTrasmissione>\n';
 
     x+='    <CedentePrestatore>\n      <DatiAnagrafici>\n';
-    x+='        <IdFiscaleIVA>\n          <IdPaese>IT</IdPaese>\n          <IdCodice>'+xesc(az.piva)+'</IdCodice>\n        </IdFiscaleIVA>\n';
-    if((az.cod_fiscale||"").trim()) x+='        <CodiceFiscale>'+xesc(az.cod_fiscale.trim().toUpperCase())+'</CodiceFiscale>\n';
+    x+='        <IdFiscaleIVA>\n          <IdPaese>IT</IdPaese>\n          <IdCodice>'+xesc(xpul(az.piva))+'</IdCodice>\n        </IdFiscaleIVA>\n';
+    if(xpul(az.cod_fiscale)) x+='        <CodiceFiscale>'+xesc(xpul(az.cod_fiscale))+'</CodiceFiscale>\n';
     x+='        <Anagrafica>\n          <Denominazione>'+xesc(xtaglia(az.nome,80))+'</Denominazione>\n        </Anagrafica>\n';
     x+='        <RegimeFiscale>'+xesc(az.regime_fiscale||"RF01")+'</RegimeFiscale>\n';
     x+='      </DatiAnagrafici>\n      <Sede>\n'+sede(az,"")+'      </Sede>\n    </CedentePrestatore>\n';
 
     x+='    <CessionarioCommittente>\n      <DatiAnagrafici>\n';
     if(cPiva) x+='        <IdFiscaleIVA>\n          <IdPaese>IT</IdPaese>\n          <IdCodice>'+xesc(cPiva)+'</IdCodice>\n        </IdFiscaleIVA>\n';
-    if(cCf)   x+='        <CodiceFiscale>'+xesc(cCf.toUpperCase())+'</CodiceFiscale>\n';
+    if(cCf)   x+='        <CodiceFiscale>'+xesc(cCf)+'</CodiceFiscale>\n';
     x+='        <Anagrafica>\n          <Denominazione>'+xesc(xtaglia(cliDati.nome,80))+'</Denominazione>\n        </Anagrafica>\n';
     x+='      </DatiAnagrafici>\n      <Sede>\n'+sede(cliDati,"")+'      </Sede>\n    </CessionarioCommittente>\n';
     x+='  </FatturaElettronicaHeader>\n';

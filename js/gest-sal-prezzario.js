@@ -320,8 +320,13 @@
       s=data;
     } else {
       /* il numero lo propone il gestionale: max+1 fra quelli che ci sono */
+      /* ⚠️ 21 agosto 2026 — todayStr(), non toISOString(). toISOString da'
+         l'ora di Greenwich: d'estate, fra mezzanotte e le due, uno stato di
+         avanzamento aperto OGGI nasceva con la data di IERI — ed e' un
+         documento contabile che si firma. E' la correzione dell'11 agosto:
+         questi due punti erano rimasti indietro perche' stanno in un altro file. */
       s={ numero: salCache.reduce((m,x)=>Math.max(m,+x.numero||0),0)+1,
-          data: new Date().toISOString().slice(0,10),
+          data: todayStr(),
           ritenuta_perc: (comp.tipo==="pubblico"?0.5:0),
           stato:"bozza" };
     }
@@ -495,7 +500,9 @@
       user_id:sbUid, computo_id:salComputoId,
       mestiere_id:curMestiere()||null,
       numero:numero,
-      data:($("#sal-data")&&$("#sal-data").value)||new Date().toISOString().slice(0,10),
+      /* ⚠️ vedi la nota del 21 agosto piu' su: qui era l'altro punto rimasto
+         con l'ora di Greenwich. */
+      data:($("#sal-data")&&$("#sal-data").value)||todayStr(),
       periodo_dal:dal, periodo_al:al,
       ritenuta_perc:_numDa(($("#sal-rit")&&$("#sal-rit").value)||"0"),
       stato:segVal("sal-stato")||"bozza",
