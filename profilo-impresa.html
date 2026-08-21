@@ -812,7 +812,7 @@ async function caricaProfilo(id){
     const _campiHtml=_campi.filter(c=>c[1]!=null&&String(c[1]).trim()!=='').map(c=>`<div class="info-item"><div class="k">${c[0]}</div><div class="v">${_esc(c[1])}</div></div>`).join('');
     if(_campiHtml){document.getElementById('info-campi').innerHTML=_campiHtml;document.getElementById('info-campi-wrap').style.display='';_infoHasContent=true}
     // Mestieri / Servizi (da mestieri[] + mestiere)
-    const im={'muratura':'🧱','carpentiere':'🪵','elettricista':'⚡','idraulico':'🚿','termoidraulico':'🔥','pittore':'🎨','piastrellista':'🟫','falegname':'🪚','fabbro':'🔩','giardiniere':'🌿','demolizione':'⛏️','fotovoltaico':'☀️'};
+    const im={'muratura':'🧱','carpentiere':'⚒️','elettricista':'⚡','idraulico':'🚿','termoidraulico':'🔥','pittore':'🎨','piastrellista':'🟫','falegname':'🚪','fabbro':'🔩','giardiniere':'🌿','demolizione':'⛏️','fotovoltaico':'☀️'};
     const mestieri=Array.isArray(d.mestieri)?d.mestieri.slice():(d.mestieri?[d.mestieri]:[]);
     if(d.mestiere)mestieri.unshift(d.mestiere);
     const mestieriUniq=[...new Set(mestieri.map(m=>String(m==null?'':m).trim()).filter(Boolean))];

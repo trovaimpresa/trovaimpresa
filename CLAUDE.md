@@ -12476,3 +12476,72 @@ pezzo è stato. **Deciso con Alessio di fermarsi alle città.**
 ⛔ **Un sabotaggio non accusato, e la lezione è la stessa di stamattina:**
 «tolgo una regola del 404» passava, perché il banco **contava** le righe
 `/404.html` invece di guardarle una per una. Contare non è controllare.
+
+
+# ⛔ 21 agosto 2026 (13) — I QUADRATINI BIANCHI ERANO SUL SITO PUBBLICO
+
+Trovato guardando una **fotografia dello schermo** che Alessio ha mandato per
+un'altra cosa: sotto «Falegnami», su `imprese-bologna`, c'era un quadratino
+bianco al posto dell'icona.
+
+⛔ **Le emoji non le disegniamo noi: le disegna Windows.** Quelle del blocco
+U+1FA70–U+1FAFF (2019-2021) il suo Segoe UI Emoji non le ha. Era già successo
+il 10 agosto con 🏷 e il 21 nella tendina del reparto. Questa volta erano sul
+**sito pubblico**, e le vedeva ogni visitatore.
+
+**→122← emoji su →115← pagine**, fra cui la **homepage** (sotto «Infissi») e
+`quanto-costa-ristrutturare-casa`, una delle guide che porta più gente.
+
+## ⚠️ LA TRAPPOLA: LA STESSA EMOJI VOLEVA DIRE TRE COSE
+
+`🪵` stava per **Falegnami** sulle 106 pagine città, per **Pavimento** sui
+calcolatori e per **Carpentiere** sulle offerte di lavoro.
+
+⛔ **Un cambio unico avrebbe messo la porta al posto del pavimento.** Si
+guarda l'ETICHETTA accanto, non l'emoji. È un sabotaggio del banco, ed è il
+secondo più importante di tutti.
+
+## LA TABELLA
+
+| etichetta | prima | adesso |
+|---|---|---|
+| Falegnami / Falegname | 🪵 🪚 | 🚪 |
+| Carpentiere | 🪵 | ⚒️ |
+| Pavimentista / Pavimento | 🪨 🪵 | ⬛ |
+| Infissi / finestre | 🪟 | 🖼️ |
+
+⚠️ Le quattro nuove sono state scelte **anche** perché libere: su
+`offerte-lavoro` il martello `🔨` e il quadrato marrone `🟫` erano già presi
+da «Da 3 a 5 anni» e da «Piastrellista».
+⚠️ **Provate sul suo computer prima di scriverle**: gliele ho messe in chat e
+gli ho chiesto se le vedeva tutte e quattro. Sono le sue emoji, non le mie.
+⛔ `⚒️` e `🖼️` si scrivono **col selettore di variante**: senza, Windows le
+disegna in bianco e nero.
+
+## ⛔ QUELLO CHE NON È STATO TOCCATO, E PERCHÉ
+
+`gestionale-app.html` e `gestionale-config.html`: lì l'emoji è la **chiave**
+di un disegno nostro (o della scelta salvata nel database). Cambiarla
+scollegherebbe i reparti già creati. `gestionale-negozio` e
+`gestionale-noleggio` sono vietati.
+
+## ⚠️ UNA COSA SEGNALATA E NON TOCCATA
+
+`.bak-riepiva-123811.html` sta nella cartella principale, quindi **è online**
+e chiunque può aprirlo. Non è stato toccato: **decide Alessio** se chiuderlo
+come gli altri file di scorta.
+
+## IL BANCO
+
+`prove/banco-quadratini.js` — **40 verdi** su undici pagine vere.
+Non guarda solo che il quadratino sia sparito: controlla che ogni emoji nuova
+stia **accanto alla sua etichetta**, e il verso opposto — che la porta non sia
+finita dove c'era il pavimento.
+⚠️ Sulla homepage i riquadri con l'icona grande sono **sei**: un primo banco
+guardava solo il primo che capitava, e un sabotaggio passava.
+
+`prove/sabotaggi-quadratini.js` — **8 su 8 accusati**, fra cui «il cambio
+unico» e «tolgo il selettore di variante».
+
+⚠️ E il conto della giornata, di nuovo: **il difetto più visibile di oggi
+l'ha trovato una foto dello schermo di Alessio, non un banco.**
