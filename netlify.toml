@@ -285,3 +285,667 @@
   to = "/candidature-lavoro.html"
   status = 301
   force = true
+
+
+# ======================================================================
+# 21 agosto 2026 — UNA PAGINA, UN INDIRIZZO SOLO
+# ======================================================================
+# Le pagine citta' stavano su Google in DUE indirizzi: /imprese-bologna e
+# /imprese-bologna.html. Il canonical di ogni pagina ha sempre detto quello
+# senza «.html», ma il sito stesso linkava l'altro: 216 link dentro le
+# diciotto guide «quanto costa…», che sono le pagine con piu' visite.
+# Google le ha prese per due pagine diverse e si e' diviso i voti fra le
+# due: su Bologna la «.html» stava in posizione 44 con 22 impressioni,
+# quella giusta in posizione 1 con 1 impressione.
+#
+# I 216 link sono stati sistemati nelle guide. Queste regole servono per
+# quello che Google ha GIA' in pancia: chi arriva sulla «.html» viene
+# mandato una volta per sempre su quella giusta.
+#
+# ⚠️ force = true e' obbligatorio: il file imprese-bologna.html ESISTE, e
+#    senza force Netlify servirebbe il file e salterebbe la regola. E' la
+#    stessa trappola scritta piu' su per le regole del 404.
+# ⚠️ status = 301 (non 302): a Google si dice che il trasloco e' definitivo,
+#    se no continua a tenersi il vecchio indirizzo.
+# ⚠️ Stanno DOPO le regole del 404 e prima di niente: nessuna delle due
+#    famiglie tocca gli stessi indirizzi.
+# ⚠️ Scritte una per una e non con un carattere jolly: il jolly di Netlify
+#    prende tutto fino alla fine dell'indirizzo, quindi «/imprese-*» non sa
+#    togliere il «.html» e si rimanderebbe da solo, all'infinito.
+# ======================================================================
+
+[[redirects]]
+  from = "/imprese-agrigento.html"
+  to = "/imprese-agrigento"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-alessandria.html"
+  to = "/imprese-alessandria"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-ancona.html"
+  to = "/imprese-ancona"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-aosta.html"
+  to = "/imprese-aosta"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-arezzo.html"
+  to = "/imprese-arezzo"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-ascoli-piceno.html"
+  to = "/imprese-ascoli-piceno"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-asti.html"
+  to = "/imprese-asti"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-avellino.html"
+  to = "/imprese-avellino"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-bari.html"
+  to = "/imprese-bari"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-barletta.html"
+  to = "/imprese-barletta"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-belluno.html"
+  to = "/imprese-belluno"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-benevento.html"
+  to = "/imprese-benevento"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-bergamo.html"
+  to = "/imprese-bergamo"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-biella.html"
+  to = "/imprese-biella"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-bologna.html"
+  to = "/imprese-bologna"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-bolzano.html"
+  to = "/imprese-bolzano"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-brescia.html"
+  to = "/imprese-brescia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-brindisi.html"
+  to = "/imprese-brindisi"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-cagliari.html"
+  to = "/imprese-cagliari"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-caltanissetta.html"
+  to = "/imprese-caltanissetta"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-campobasso.html"
+  to = "/imprese-campobasso"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-caserta.html"
+  to = "/imprese-caserta"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-catania.html"
+  to = "/imprese-catania"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-catanzaro.html"
+  to = "/imprese-catanzaro"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-chieti.html"
+  to = "/imprese-chieti"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-como.html"
+  to = "/imprese-como"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-cosenza.html"
+  to = "/imprese-cosenza"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-cremona.html"
+  to = "/imprese-cremona"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-crotone.html"
+  to = "/imprese-crotone"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-cuneo.html"
+  to = "/imprese-cuneo"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-enna.html"
+  to = "/imprese-enna"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-fermo.html"
+  to = "/imprese-fermo"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-ferrara.html"
+  to = "/imprese-ferrara"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-firenze.html"
+  to = "/imprese-firenze"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-foggia.html"
+  to = "/imprese-foggia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-forlì.html"
+  to = "/imprese-forlì"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-frosinone.html"
+  to = "/imprese-frosinone"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-genova.html"
+  to = "/imprese-genova"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-gorizia.html"
+  to = "/imprese-gorizia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-grosseto.html"
+  to = "/imprese-grosseto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-imperia.html"
+  to = "/imprese-imperia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-isernia.html"
+  to = "/imprese-isernia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-l-aquila.html"
+  to = "/imprese-l-aquila"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-la-spezia.html"
+  to = "/imprese-la-spezia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-latina.html"
+  to = "/imprese-latina"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-lecce.html"
+  to = "/imprese-lecce"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-lecco.html"
+  to = "/imprese-lecco"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-livorno.html"
+  to = "/imprese-livorno"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-lodi.html"
+  to = "/imprese-lodi"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-lucca.html"
+  to = "/imprese-lucca"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-macerata.html"
+  to = "/imprese-macerata"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-mantova.html"
+  to = "/imprese-mantova"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-massa.html"
+  to = "/imprese-massa"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-matera.html"
+  to = "/imprese-matera"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-messina.html"
+  to = "/imprese-messina"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-milano.html"
+  to = "/imprese-milano"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-modena.html"
+  to = "/imprese-modena"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-monza.html"
+  to = "/imprese-monza"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-napoli.html"
+  to = "/imprese-napoli"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-novara.html"
+  to = "/imprese-novara"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-nuoro.html"
+  to = "/imprese-nuoro"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-oristano.html"
+  to = "/imprese-oristano"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-padova.html"
+  to = "/imprese-padova"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-palermo.html"
+  to = "/imprese-palermo"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-parma.html"
+  to = "/imprese-parma"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-pavia.html"
+  to = "/imprese-pavia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-perugia.html"
+  to = "/imprese-perugia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-pesaro.html"
+  to = "/imprese-pesaro"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-pescara.html"
+  to = "/imprese-pescara"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-piacenza.html"
+  to = "/imprese-piacenza"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-pisa.html"
+  to = "/imprese-pisa"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-pistoia.html"
+  to = "/imprese-pistoia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-pordenone.html"
+  to = "/imprese-pordenone"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-potenza.html"
+  to = "/imprese-potenza"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-prato.html"
+  to = "/imprese-prato"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-ragusa.html"
+  to = "/imprese-ragusa"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-ravenna.html"
+  to = "/imprese-ravenna"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-reggio-calabria.html"
+  to = "/imprese-reggio-calabria"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-reggio-emilia.html"
+  to = "/imprese-reggio-emilia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-rieti.html"
+  to = "/imprese-rieti"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-rimini.html"
+  to = "/imprese-rimini"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-roma.html"
+  to = "/imprese-roma"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-rovigo.html"
+  to = "/imprese-rovigo"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-salerno.html"
+  to = "/imprese-salerno"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-sassari.html"
+  to = "/imprese-sassari"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-savona.html"
+  to = "/imprese-savona"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-siena.html"
+  to = "/imprese-siena"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-siracusa.html"
+  to = "/imprese-siracusa"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-sondrio.html"
+  to = "/imprese-sondrio"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-taranto.html"
+  to = "/imprese-taranto"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-teramo.html"
+  to = "/imprese-teramo"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-terni.html"
+  to = "/imprese-terni"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-torino.html"
+  to = "/imprese-torino"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-trapani.html"
+  to = "/imprese-trapani"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-trento.html"
+  to = "/imprese-trento"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-treviso.html"
+  to = "/imprese-treviso"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-trieste.html"
+  to = "/imprese-trieste"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-udine.html"
+  to = "/imprese-udine"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-varese.html"
+  to = "/imprese-varese"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-venezia.html"
+  to = "/imprese-venezia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-verbania.html"
+  to = "/imprese-verbania"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-vercelli.html"
+  to = "/imprese-vercelli"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-verona.html"
+  to = "/imprese-verona"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-vibo-valentia.html"
+  to = "/imprese-vibo-valentia"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-vicenza.html"
+  to = "/imprese-vicenza"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/imprese-viterbo.html"
+  to = "/imprese-viterbo"
+  status = 301
+  force = true

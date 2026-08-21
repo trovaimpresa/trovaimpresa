@@ -12366,3 +12366,113 @@ che la CLASSE `.ai-str--pochi` esistesse, non che ci fosse ancora il COLORE.
 Bastava togliere la riga del bordo e passava. Adesso guarda la regola intera.
 
 **Restano sul gestionale: il PDF dello stato avanzamento (SAL).**
+
+
+# ✅ 21 agosto 2026 — IL GESTIONALE È FINITO (la lista del 21 è chiusa)
+
+| n. | cosa | esito |
+|---|---|---|
+| 27 | i segnaposto che sembrano dati | fatto (22 caselle) |
+| 28 | il segnaposto della casella grande non si traduce | fatto |
+| 26 | «m²» e «mq» nella stessa lista | fatto |
+| 4 | le tre strisce lasciate fuori | guardate: due andavano bene, la terza sistemata |
+| 5 | la gru, il cantiere, il piccone | ridisegnati |
+| 6 | unificare `_compGruppi` | fatto |
+
+## ⛔ IL PDF DEL SAL NON MANCAVA: C'ERA GIÀ
+
+Nel prompt della sessione c'era scritto **«Manca il PDF»**, ed era la voce
+n. 2 di «da dove si riparte». **Non era vero.** Quella riga veniva dalla
+sezione della **sera** del 19 agosto; il foglio è stato costruito la **notte
+stessa** (`salPdf()`, sezione «19 agosto 2026 (6), NOTTE — IL SAL SI CHIUDE»).
+
+Il pulsante **📄 PDF** sta in tre posti: nell'elenco dei SAL dentro il
+computo, nell'elenco unico e dentro la scheda. Il foglio stampa già numero e
+data · periodo · righe con quantità eseguita e importo · maturato · già
+liquidato coi SAL precedenti · ritenuta di garanzia · netto da pagare.
+
+⛔ **PRIMA DI COSTRUIRE, SI GUARDA SE C'È GIÀ.** Trenta secondi di
+`grep salPdf` hanno risparmiato una giornata intera di lavoro doppio.
+È la stessa famiglia della regola del 15 agosto («prima di costruire,
+chiedere se serve») e della lezione del 19 («guarda il VALORE, non il nome»).
+
+⚠️ E la causa vera: **una nota vecchia lasciata in una lista**. Quando una
+cosa si chiude, va tolta dalla lista lo stesso giorno — se no il giorno dopo
+qualcuno la rifà.
+
+**Da qui in poi si lavora sul sito.** Il primo pezzo: le 95 pagine città
+vuote in Search Console.
+
+
+# 21 agosto 2026 (12) — UNA PAGINA, UN INDIRIZZO SOLO (Google)
+
+Primo pezzo di lavoro sul sito. →19← file: le →18← guide «quanto costa…»
+più `netlify.toml`.
+
+## ⛔ PRIMA DI RIEMPIRE LE 95 PAGINE CITTÀ, HO GUARDATO I NUMERI
+
+Letti da Search Console (collegamento Supermetrics), ultimi 3 mesi:
+
+| | impressioni | clic |
+|---|---|---|
+| le →6← guide «quanto costa…» | →8.100← | →57← |
+| tutte e →106← le pagine città | ~→130← | →1← |
+| il sito intero | ~→9.000← | ~→180← |
+
+⛔ **«Riempire le 95 pagine città» è tanto lavoro per niente.** Non è stato
+fatto, ed è una scelta presa sui numeri, non a sensazione.
+
+## IL DIFETTO VERO, TROVATO GUARDANDO GLI STESSI NUMERI
+
+Alcune pagine città stanno su Google **in due indirizzi**:
+`/imprese-bologna` **e** `/imprese-bologna.html`.
+
+Su Bologna la `.html` prendeva →22← impressioni in posizione →44←, quella
+giusta →1← impressione. Google le legge come due pagine diverse e si divide
+i voti. Stessa cosa su Rieti, Lecce, Parma, Vibo Valentia.
+
+**La causa:** il canonical ha sempre detto l'indirizzo senza `.html`, ma il
+sito linkava l'altro — **→216← link** dentro le →18← guide, cioè proprio le
+pagine con più visite, quelle che passano più valore.
+
+## LA CORREZIONE — due pezzi, e servono tutti e due
+
+1. i →216← link nelle guide perdono il `.html`;
+2. →106← regole `301` in `netlify.toml`, una per città, per quello che
+   Google ha **già** in pancia.
+
+⚠️ **`force = true` è obbligatorio**: il file `imprese-bologna.html` esiste
+davvero, e senza `force` Netlify serve il file e salta la regola. È la stessa
+trappola scritta nel file per le regole del 404.
+⚠️ **301, non 302**: a Google si dice che il trasloco è definitivo.
+⚠️ **Scritte una per una, non con un jolly**: il jolly di Netlify prende
+tutto fino alla fine dell'indirizzo, quindi `/imprese-*` non sa togliere il
+`.html` e si rimanderebbe da solo, all'infinito.
+⚠️ Stanno **dopo** le regole del 404: Netlify tiene buona la prima che
+combacia, e la roba privata deve restare chiusa.
+
+## ⚠️ IN TUTTO IL SITO I LINK CON `.html` SONO ANCORA →2.643←
+
+Qui sono stati sistemati solo quelli verso le città. Il resto è un lavoro
+suo: tocca ~230 file in un colpo, e se qualcosa si rompe non si sa quale
+pezzo è stato. **Deciso con Alessio di fermarsi alle città.**
+
+## IL BANCO
+
+`prove/banco-un-indirizzo.js` — **23 verdi**. Guarda nei due versi:
+- nelle guide non resta nessun link con `.html`;
+- ⛔ **ma ogni link deve portare su una pagina che ESISTE** — togliere il
+  `.html` da un link che poi va nel vuoto sarebbe peggio del difetto;
+- rimettendo il `.html` ogni guida torna **identica** al file di prima: è la
+  prova che non è cambiato nient'altro;
+- le →106← regole ci sono tutte, una sola per città, tutte 301 con `force`,
+  nessuna che rimandi a se stessa;
+- le →22← regole del 404 sono ancora tutte lì e mandano ancora al 404;
+- e `netlify.toml` viene riletto da un **lettore TOML vero** (`tomllib`),
+  non a occhio: se una virgoletta manca, è rosso.
+
+`prove/sabotaggi-un-indirizzo.js` — **11 su 11 accusati**.
+
+⛔ **Un sabotaggio non accusato, e la lezione è la stessa di stamattina:**
+«tolgo una regola del 404» passava, perché il banco **contava** le righe
+`/404.html` invece di guardarle una per una. Contare non è controllare.
