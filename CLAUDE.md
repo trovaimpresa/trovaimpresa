@@ -11693,3 +11693,29 @@ qualunque cosa si scriva.
 ⛔ **Un dato di prova tutto uguale non prova niente.** Aggiunto un lavoro
 «fatto»: adesso il giardiniere dice «3 da fare · 4 pratiche totali», i due
 numeri sono diversi, e il sabotaggio viene accusato.
+
+
+## ⚠️ 21 agosto 2026 — LA BARRETTA CHE AVEVO TOLTO SENZA ACCORGERMENE
+
+Alessio, guardando la pagina iniziale sistemata: *«pero' hai tolto il bordo
+laterale sinistro piu' scuro»*. Aveva ragione.
+
+Togliendo la riga colorata in cima alle card dei reparti, quelle card sono
+rimaste con **quattro lati uguali**, tutti grigio chiaro. Le schede del
+Riepilogo invece la barretta ce l'hanno: `.rie-card` ha
+`border-left:5px solid var(--bordo-forte)`, ed e' **grigia ma piu' scura**
+degli altri bordi.
+
+⛔ **«Neutro» non vuol dire «senza».** Il 20 agosto la barretta del Riepilogo
+e' stata **scolorita, non cancellata**: resta larga 5px e piu' scura, ed e' il
+segno che tiene insieme tutte le schede del gestionale. Sulla landing l'avevo
+fatta sparire del tutto, e la card non somigliava piu' a niente.
+
+Rimessa: `.panel-card{border-left:5px solid var(--bordo-forte)}`.
+
+Il banco adesso lo controlla su tutte e quattro le card: larghezza **5px**,
+colore **--bordo-forte**, e **piu' scura del bordo sopra**. Due sabotaggi
+nuovi — «tolgo la barretta» e «la faccio chiara come gli altri bordi» —
+**accusati tutti e due**.
+
+**banco-landing: 31 verdi su 31 · sabotaggi-landing: 7 su 7 accusati.**

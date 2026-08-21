@@ -564,6 +564,13 @@
 
   /* card reparto professionali (bianche, icona SVG in chip colorato) */
   .panel-card{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 3px rgba(16,24,32,.06);padding:18px;min-height:132px;transition:box-shadow .15s,transform .15s}
+  /* ⚠️ 21 agosto 2026 — LA BARRETTA GRIGIA A SINISTRA, come sulle schede del
+     Riepilogo. Tolta la riga colorata che stava in cima, la card era rimasta
+     con quattro lati uguali e non somigliava piu' a niente del resto del
+     gestionale. Alessio: «pero' hai tolto il bordo laterale sinistro piu'
+     scuro». Stesso spessore (5px) e stesso grigio (--bordo-forte) di
+     .rie-card: e' l'unico segno che tiene insieme le due pagine. */
+  .panel-card{border-left:5px solid var(--bordo-forte)}
   .panel-card:hover{box-shadow:0 8px 22px rgba(16,24,32,.11);transform:translateY(-1px)}
   .panel-card:active{transform:none}
   .panel-card h2{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--testo)}
