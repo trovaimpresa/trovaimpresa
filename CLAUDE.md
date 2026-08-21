@@ -13447,3 +13447,104 @@ identiche** all'artigiano, mancava solo la coda.
    pannello negozio ce ne sono **due**, e colpiva la prima, che è di un altro
    canale e non fa danno ai messaggi. Riscritto sull'ultima, quella dentro la
    funzione dei messaggi.
+
+
+## ✅ 21 agosto, NOTTE FONDA — «VAI DAL CLIENTE»: L'INDIRIZZO NELLA BARRA LATERALE
+
+Chiesto da Alessio: *«possiamo aggiungere una funzione, scrivere un indirizzo
+se vuole sapere che strada fare per arrivare a un nuovo cliente»*, e poi
+*«scriviamo la via e gli appare un pin che poi allarga l'immagine fino a
+capire dove sta»*, e *«non a tutta pagina»*.
+
+### ⛔ PRIMA: DUE MIEI SBAGLI, DETTI PER PRIMI
+
+1. **Stavo per togliere la mappa della barra laterale.** Avevo letto «è senza
+   scopo» come «toglila». Alessio: *«la mappa sta in tutti i pannelli perché
+   la devi togliere?»* e poi *«non la togliere, non ho chiesto quello»*.
+   Aveva ragione: **una cosa che sta in tutti e quattro i pannelli è una
+   scelta, non un residuo.** ⛔ La regola: quando una cosa è ripetuta ovunque,
+   prima di toglierla si chiede a cosa serviva. La rimozione era rimasta solo
+   nel contenitore di Claude: **sui file di Alessio non è mai arrivata.**
+2. L'avevo fatta **a tutta pagina**. Bocciato: *«non a tutta pagina»*. Ora è
+   un riquadro al centro, con il pannello che si vede dietro.
+
+### COSA FA
+
+Nella barra laterale, **sotto la mappa**: «📍 Devi andare da un cliente?», un
+campo per l'indirizzo e il pulsante **«Vedi dove sta»** (anche col tasto invio).
+Scritto l'indirizzo, si apre **un riquadro grande al centro** (760×560, mai
+oltre l'80% dello schermo) con la mappa allo **zoom 17** — la via con le case
+intorno — e il segnalino sul punto. Sotto, due pulsanti: **«🧭 Fammi strada»**,
+che apre il navigatore del telefono, e «Chiudi».
+
+- ⛔ **Il navigatore è quello vero, non disegnato da noi**: su iPhone Mappe di
+  Apple, altrove Google Maps. Una linea dentro un riquadro non ha voce, né
+  traffico, né «gira a destra»: a chi guida non serve.
+- Il punto di partenza **non si scrive**: lo mette il telefono, che sa dov'è.
+  Così non si chiede la posizione a nessuno.
+- Gli indirizzi si trasformano in punti con **Nominatim** (OpenStreetMap), lo
+  stesso servizio che usa già `mappa.html`: gratis, senza chiavi. Si chiede
+  solo l'Italia, una risposta sola, e ogni indirizzo si chiede **una volta**
+  (poi resta in memoria per quella sessione).
+
+### ⛔ UN FILE SOLO: `js/vai-dal-cliente.js`
+
+Nei 4 pannelli è stata aggiunta **una riga sola**:
+`<script src="/js/vai-dal-cliente.js" defer></script>`, subito dopo Leaflet.
+Tutto il resto — schermata, stile e comportamento — sta nel file nuovo, che si
+attacca da solo sotto `#sidebar-map`.
+
+⚠️ È la regola «una regola che sta in due posti non si sistema a metà»: una
+correzione qui vale per impresa, artigiano, studio e negozio. Se fosse stato
+copiato quattro volte, ogni ritocco andava pagato quattro volte.
+
+### IL BANCO — nei due versi
+
+`prove/vai-dal-cliente/` (nel contenitore di Claude): `banco.js` ·
+`sabotaggi.js`. Le prove aprono la pagina **in un browser vero**, con un
+**finto Nominatim** e un **finto Leaflet** che registrano cosa gli viene
+chiesto: quale punto, quale zoom, quanti segnalini, quale indirizzo web.
+
+**19 verdi · 19 sabotaggi su 19 accusati.**
+
+Quello che le prove guardano davvero: il riquadro **non** è a tutta pagina ·
+lo zoom è stretto sulla via · il navigatore va sulle coordinate giuste ·
+iPhone→Mappe e Android→Google Maps · si chiude con Esc, col pulsante e
+cliccando fuori ma **non** cliccando dentro · «indirizzo che non esiste» e
+«rete che non risponde» sono detti **diversi** · col servizio fermo il
+pulsante **torna cliccabile** · un nome con del codice dentro **non** diventa
+codice · sul telefono il riquadro ci sta e i pulsanti sono grandi abbastanza.
+
+⚠️ **Tre cose imparate stanotte, sui banchi:**
+1. **Il banco ha trovato un difetto vero prima di Alessio**: sul telefono il
+   pulsante «Fammi strada» era alto **39 px**. Sotto i 44 il dito lo sbaglia.
+2. **La prova era comunque troppo generosa.** Chiedeva «almeno 40», e un
+   sabotaggio che lo riduceva a 43 restava verde. ⛔ Una prova va scritta sulla
+   misura che conta davvero (44), non su una comoda.
+3. **Due sabotaggi erano scritti sul punto sbagliato.** «Rimetto il riquadro a
+   tutta pagina» cambiava solo la larghezza massima, ma restava il margine
+   attorno — quindi non era a tutta pagina e la prova aveva ragione a stare
+   verde. Riscritti dove il danno si fa davvero.
+
+### ⛔ CORREZIONE, la sera stessa: NIENTE FINESTRA
+
+Prima versione: apriva un riquadro grande al centro. Bocciata da Alessio —
+*«non capisco perché si deve aprire, lasciala così come sta, aggiungi
+solamente una via con la città e basta»*, e *«tanto lavoro che vuoi fare non
+serve»*.
+
+⛔ **La lezione: quando chiede una cosa piccola, si fa quella piccola.** Aveva
+chiesto un campo per l'indirizzo; è arrivato un campo, una finestra, un
+riquadro con l'intestazione, tre pulsanti e la chiusura con Esc. Il resto era
+roba che non aveva chiesto — e ogni pezzo in più è un pezzo da mantenere.
+
+**Come è adesso, e basta così:** sotto la mappa della barra laterale c'è un
+campo. Scrivi «Via Roma 12, Rieti», premi «Vedi dove sta» (o invio), e **la
+mappa che sta già lì** si sposta sul punto col segnalino, zoom 17. Sotto
+compare **«🧭 Fammi strada»**, che apre il navigatore del telefono. Nessuna
+finestra si apre, niente copre il pannello.
+
+**Banco rifatto: 18 verdi · 19 sabotaggi su 19.** C'è una prova apposta —
+la n. 3 — che gira per la pagina a cercare qualsiasi cosa larga più di mezzo
+schermo comparsa sopra il pannello: se un domani qualcuno rimette una
+finestra, diventa rossa.
