@@ -14919,6 +14919,8 @@ frasi-geometra 8 · aiuti-sezione 10 · porta-gestionale 16 ·
 **decreto-schermo 112** (il riquadro dentro la parcella, su due misure,
 + 11 sabotaggi) · **euro 24** (il punto delle migliaia e DOVE è stato messo,
 + 9 sabotaggi) · **pdf-parcella 16** (il PDF generato e riletto davvero) ·
+**noleggio-prezzo 54** (il conto, + 14 sabotaggi) ·
+**noleggio schermo 152** (la pagina vera in Chromium, computer e telefono) ·
 **lucchetto-piano 50** (il piano dentro il database, su Postgres vero con
 pg_safeupdate e 104 chiavi esterne, + 12 sabotaggi).
 **Tutti verdi, e ognuno col suo file dei sabotaggi.**
@@ -14989,6 +14991,58 @@ nessuno · la frase sbagliata in `gestionale-app.html` riga 15831 («i dati
 restano comunque protetti da RLS»), che adesso è vera ma andrebbe riscritta.
 
 Referto: `prove-claude/LUCCHETTO-PIANO-22-agosto.md`.
+
+## 11. IL NOLEGGIO — la sera del 22 agosto
+
+⛔ **LA REGOLA CHE ALESSIO HA DOVUTO RIPETERE QUATTRO VOLTE.**
+**Le funzioni stanno DENTRO la pagina, non fuori.** Sulla riga dell'elenco c'è
+**un pulsante solo: «Apri»**. Copia · PDF · Stampa · Elimina stanno **dentro
+la scheda**, in alto sotto il titolo. La scheda si apre **a tutta pagina**,
+con la freccia **«← Indietro»** in cima e **Annulla / Salva** in fondo.
+Se domani nasce una pagina nuova, si fa così senza chiederlo.
+
+⚠️ **E l'altra lezione della serata: GUARDA COM'È VENUTA PRIMA DI
+CONSEGNARLA.** Apri la pagina nel browser del contenitore, fai la fotografia
+e guardala. Il 22 agosto la scheda è stata consegnata quattro volte come una
+finestrella da 640 px: bastava un'occhiata per accorgersene.
+
+### Cosa c'è adesso
+
+**Il conto** — `js/noleggio-prezzo.js`, fuori dalla pagina apposta, così
+domani vale anche dentro imprese e negozi. Ore → giorni → settimane → mesi,
+prendendo la **combinazione che costa meno** (37 giorni = 1 mese + 1
+settimana; 6 giorni = una settimana, e lo dice). Più contaore, chilometri,
+materiale consumato, usura fissa e in percentuale. **I soldi si contano in
+centesimi**, non in virgola mobile. `sql/noleggio-tariffe.sql` ha aggiunto le
+colonne (già eseguito).
+
+**Il collegamento vero al mezzo** — prima il noleggio salvava il mezzo col
+NOME SCRITTO: bastava rinominarlo e il conto non si poteva più rifare. Adesso
+c'è `mezzo_id`, e i noleggi vecchi si sono collegati da soli dove il nome
+portava a un mezzo solo.
+
+**Sei sezioni con lo stesso stampo**: Mezzi · Clienti · Noleggi · Prodotti ·
+Fornitori · Movimenti.
+
+**La freccia in cima** sta dentro `openSheet()`, non su una scheda per volta:
+così ce l'hanno tutte, anche quelle che nasceranno.
+
+**La grafica** è quella del gestionale (`css/gestionale.css`), a tutta pagina,
+testata sempre blu (il colore del reparto non tinge più la testata), e si apre
+già dentro senza passare da «Scegli il reparto».
+
+**Nel menu del gestionale imprese** c'è la voce **Noleggio** (`data-vai`, che
+il gestore dei pulsanti riconosce e ci porta).
+
+### ⚠️ Cosa manca ancora
+
+`prove-claude/NOLEGGIO-cosa-manca.md` e
+`prove-claude/PROMPT-noleggio-prossima-sessione.md`. In due righe: il
+**Riepilogo che conta davvero** (oggi resta a zero), il **cestino** (caricato
+ma non usato), **un solo elenco clienti** (`nol_clienti` e `gest_clienti` sono
+due tabelle con gli stessi campi — da decidere PRIMA di costruirci sopra), e
+il **cancello** che il noleggio non ha (le tabelle `nol_*` non hanno il
+lucchetto del piano).
 
 ⚠️ `prove/porta-gestionale` e `prove/dati-che-si-perdono` sono **lenti**:
 aspettano davvero la rete che non risponde e accendono Postgres. Un giro
