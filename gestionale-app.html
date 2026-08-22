@@ -1055,6 +1055,26 @@
      dimenticarla e' esattamente il difetto trovato sul gestionale del
      geometra («sul telefono il menu resta Lavori»). */
   const LAV_ART='Lavori e interventi';
+  /* ============================================================
+     ⛔ LA PAROLA DEL LAVORO STA QUI DENTRO, E SOLO QUI
+     ============================================================
+     22 agosto, secondo giro. La prima volta l'avevo cambiata in TRE posti e
+     mi ero convinto che bastasse. Alessio ha mandato la fotografia del
+     gestionale vero: la scheda del Riepilogo diceva ancora «Lavori».
+     ⚠️ E' lo stesso identico inciampo del computo, il 20 agosto — la' erano
+     dieci posti invece di quattro. Rincorrere le parole una per una non
+     funziona: la volta dopo se ne dimentica un'altra. Adesso chi la deve
+     SCRIVERE la chiede a `_lav()`, e chi la deve RISCRIVERE nell'HTML gia'
+     stampato lo fa in adattaMenuArtigiano(). Il banco legge tutta la pagina
+     e cerca la parola sbagliata: prova 21.
+     ⚠️ Per lo studio tecnico la parola resta «Pratiche», come prima: qui
+     dentro c'e' anche il suo caso, se no la stessa regola tornava a stare in
+     due posti. */
+  function _lav(){
+    if(ruoloUtente==='artigiano')return LAV_ART;
+    if(ruoloUtente==='professionista')return 'Pratiche';
+    return 'Lavori';
+  }
   function adattaMenuArtigiano(){
     if(ruoloUtente!=='artigiano')return;
     try{
@@ -1888,7 +1908,7 @@
       cta.href = "/prezzi.html";
     }
 
-    const lavori = ruoloUtente==='professionista' ? "Pratiche" : "Lavori";
+    const lavori = _lav();   /* 22 ago: la parola la dice _lav(), non un if suo */
     const rinnovo = st.renews_at ? quando(String(st.renews_at).slice(0,10)).testo : "";
 
     const conto = (n,et,nota)=>
@@ -4004,7 +4024,7 @@
     const C=[];
 
     C.push(rieCard({
-      tab:"lavori", titolo:"Lavori", n:aperti.length, dati:L.length>0,
+      tab:"lavori", titolo:_lav(), n:aperti.length, dati:L.length>0,
       lab: ritardo.length? ritardo.length+" in ritardo":_plur(aperti.length,"lavoro aperto","lavori aperti"),
       tono: ritardo.length?"err":(aperti.length?"attesa":"ok"),
       vuoto:"Nessun lavoro aperto",
@@ -13239,7 +13259,7 @@ ${vecchi?`
         /* chi e' il "padre" di questa riga, se ce l'ha: serve al ripristino */
         const _p=CEST_PADRE[x.c.t];
         cestCache.push({tab:x.c.t, ic:x.c.ic, foglia:!!x.c.foglia,
-          tipo:(ruoloUtente!=='professionista'&&x.c.labImp)?x.c.labImp:x.c.lab,
+          tipo:(ruoloUtente!=='professionista'&&x.c.labImp)?(x.c.t==='gest_lavori'?_lav():x.c.labImp):x.c.lab,
           nome:nome.slice(0,80),
           quando:r.eliminato_il, id:r.id, path:r.storage_path||null,
           padre:(_p&&r[_p[1]])?{tab:_p[0], col:_p[1], id:r[_p[1]], lab:_p[2]}:null});
@@ -14221,7 +14241,7 @@ ${vecchi?`
        studi ci sono anche i dati della pratica: prima si salvavano nel database
        e non uscivano da nessuna parte, nemmeno qui. */
     const _pro=(ruoloUtente==='professionista');
-    add(_pro?"Pratiche":"Lavori",D.lav.map(l=>{
+    add(_lav(),D.lav.map(l=>{
       const r={Reparto:mN[l.mestiere_id]||"",Descrizione:l.descrizione||"",Dove:l.dove||"",
         Cliente:cN[l.cliente_id]||"",[_pro?"Collaboratore":"Operatore"]:oN[l.operatore_id]||"",
         Stato:statoLabel[l.stato]||l.stato||"","Data prevista":l.data_prevista||"",
@@ -14452,7 +14472,7 @@ ${vecchi?`
     let h="";
     h+=ctBlocco("Clienti", r.clienti.map(c=>
         ctRiga("cli",c.id,c.nome||"(cliente senza nome)",ctMeta(c.citta||"",c.telefono||""))));
-    h+=ctBlocco(pro?"Pratiche":"Lavori", r.lavori.map(l=>
+    h+=ctBlocco(_lav(), r.lavori.map(l=>
         ctRiga("lav",l.id,l.descrizione||(pro?"Pratica":"Lavoro"),
           ctMeta(nome(l.cliente_id),l.dove||"",l.data_prevista?fdate(l.data_prevista):"",statoLabel[l.stato]||""))));
     h+=ctBlocco("Preventivi", r.preventivi.map(p=>

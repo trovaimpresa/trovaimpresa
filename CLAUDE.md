@@ -13660,10 +13660,35 @@ sole se `imprese.tipo` cambia. Nessuna cancellazione.
   qualcuno le accende in un terzo posto, l'artigiano non se le ritrova addosso
   in silenzio.
 - La parola: **«Lavori» → «Lavori e interventi»**, tutte e due, come chiesto.
-  ⛔ Sta in **TRE posti**: la voce del menu, il titolo della sezione e la
-  **barra in basso del telefono**. Dimenticare la terza è esattamente il
-  difetto aperto sul gestionale del geometra («sul telefono il menù resta
-  Lavori»). C'è una prova apposta, la n. 6.
+
+## ⛔ E QUI HO SBAGLIATO, PER LA SECONDA VOLTA LO STESSO SBAGLIO
+
+Avevo scritto «la parola sta in TRE posti» — menu, titolo della sezione, barra
+in basso del telefono — e mi ero convinto che bastasse. **Alessio ha mandato la
+fotografia del gestionale vero, online: la scheda del Riepilogo diceva ancora
+«Lavori».**
+
+⚠️ È lo **stesso identico inciampo del computo, il 20 agosto**: lì erano dieci
+posti invece di quattro, e anche lì il quarto dimenticato era **la scheda del
+Riepilogo**. Sta scritto in questo file, e l'ho rifatto uguale un mese dopo.
+
+⛔ Ha anche chiesto se non fosse un effetto del suo pannello admin. **No**: la
+barra FONDATORE («Vedi come: Artigiano») mette `ruoloUtente='artigiano'` prima
+del bivio, quindi quello che vede lì è **esattamente** quello che vede un
+artigiano vero. Il difetto era vero.
+
+**La correzione, e stavolta fatta come si deve:** la parola non si rincorre più
+posto per posto. Chi la deve **scrivere** la chiede a **`_lav()`**, che è
+l'unico che la sa (artigiano → «Lavori e interventi», studio → «Pratiche»,
+impresa → «Lavori»); chi la deve **riscrivere** nell'HTML già stampato lo fa in
+`adattaMenuArtigiano()`. In tutto **sei** posti: menu · titolo sezione · barra
+del telefono · scheda del Riepilogo · la ricerca in alto · l'esportazione
+Excel · il Cestino · la striscia dei crediti AI.
+
+E soprattutto: **la prova 21 legge OGNI scritta della pagina dell'artigiano e
+cerca la parola sbagliata**, come il banco del computo. Se un domani nasce un
+settimo posto, diventa rossa da sola. Cercare i posti a mano non funziona:
+la volta dopo se ne dimentica un altro.
 
 ## ⛔ IL PEZZO CHE NON ERA NELLA LISTA: IL RIEPILOGO
 
@@ -13704,7 +13729,7 @@ dei computi (`gest_computi`, `gest_computo_totali`).
 Le prove aprono la pagina in un **Chromium vero**, a due misure, con un finto
 Supabase.
 
-**20 verdi · 20 sabotaggi su 20 accusati.**
+**23 verdi · 24 sabotaggi su 24 accusati.**
 
 ⚠️ **La cosa che ha fatto la differenza: i dati finti dovevano essere PIENI.**
 `rieCard()` non disegna la scheda se la sezione è vuota (`o.dati===false`). Con
