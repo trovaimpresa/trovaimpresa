@@ -14029,3 +14029,79 @@ documenti 20, ore 20 — tutti verdi.
 contava se erano **pari in tutto il file**. Due in più dentro l'istruzione
 tengono il conto pari e spezzano lo stesso la stringa. Adesso si contano
 **dentro il blocco**: devono essere esattamente due.
+
+
+# ✅ 22 agosto 2026 — LA MINA DEI DUE FILE SQL DEL COMPUTO
+
+Punto 4 della lista: **CHIUSO**. Due file toccati, tutti e due in `sql/`.
+⚠️ **Questo push non costa crediti Netlify**: sono solo `.sql` e `.md`, e un
+push senza file del sito non fa ripartire la pubblicazione.
+
+## COS'ERA
+
+`sql/gest-computo-metrico.sql` e `sql/gest-computo-quantita-3-decimali.sql`
+fanno `drop view` su **`gest_computo_voci_calc`** e la ricreano **com'era il
+giorno in cui sono stati scritti** (10 e 14 agosto).
+
+Ma da allora quella vista è cresciuta due volte:
+- **20 agosto**: le è stata aggiunta `origine_id`, che serve alla schermata
+  «Cosa è cambiato» del computo di variante;
+- **21 agosto**: le è stato aggiunto il **prezzo costruito con l'analisi**
+  (`coalesce(a.prezzo, v.prezzo_unitario)`) e la colonna `prezzo_da_analisi`.
+
+⛔ Rilanciando i vecchi, **i prezzi dell'analisi tornavano di colpo a quelli
+scritti a mano**, e la variante perdeva la sua colonna. Nessun errore, nessun
+avviso: i numeri cambiavano e basta. E il gestionale, in **quattordici**
+punti, invita a eseguire quei file.
+
+Era un fucile carico dentro la cartella.
+
+## LA GUARDIA
+
+In cima a tutti e due, **prima di qualsiasi `drop`**, un blocco che guarda se
+`gest_computo_voci_calc` ha già `origine_id` o `prezzo_da_analisi`. Se le ha,
+si ferma con `raise exception` e dice cosa fare al posto suo:
+
+> «FERMO QUI, e per il tuo bene. […] Se ti serve rifare le viste, esegui
+> `sql/gest-variante-origine-vista.sql` e poi `sql/gest-analisi-prezzi.sql`.»
+
+⚠️ **`raise exception`, non `raise notice`.** Un avviso si legge e si va
+avanti lo stesso; qui deve fermarsi davvero. (La regola «mai `raise notice`»
+resta: quella parla di quando una query deve *dirmi* qualcosa, e infatti in
+fondo a tutti e due c'è adesso una **riga di risultato**.)
+
+⚠️ **Su un database vuoto la guardia lascia passare**: la prima installazione
+deve funzionare come prima.
+
+## IL BANCO — e stavolta con un Postgres vero
+
+`prove/guardia-sql/`: `banco.sh` · `sabotaggi.sh`.
+
+⛔ **Non è stato provato a occhio, e non sul database di Alessio.** Nel
+contenitore si accende un **PostgreSQL vero**, si costruisce la vista nei due
+stati (vecchia e nuova) e si guarda cosa fa il file davvero.
+
+**16 verdi · 9 sabotaggi su 9 accusati.**
+
+Le prove: la guardia c'è · sta **prima** del primo `drop` · sulla vista
+vecchia lascia passare · su un database vuoto lascia passare · sulla vista
+nuova **ferma** · il messaggio dice anche cosa fare · basta `origine_id` da
+sola per fermarla · in fondo c'è la riga di risultato e non un `raise notice`.
+
+⚠️ **Una prova è nata rossa per colpa sua**: «la guardia sta prima del primo
+drop» cercava `drop view` con un grep, e trovava la parola **dentro il
+commento della guardia** — quindi diceva «troppo tardi» sbagliando. Cercare
+una scritta non è controllare: adesso guarda solo le righe che sono davvero
+SQL, non i commenti.
+
+⚠️ **E un sabotaggio era un doppione senza accorgersene**: «la guardia finisce
+dopo il drop» era scritto con lo stesso comando di «tolgo la guardia», quindi
+la prova sulla posizione restava senza nessun sabotaggio. Riscritto: adesso la
+guardia viene **spostata in fondo** davvero.
+
+## ⚠️ COSA RESTA APERTO SU QUESTO
+
+I **quattordici** messaggi del gestionale che invitano a eseguire
+`gest-computo-metrico.sql` non sono stati toccati: adesso sono innocui
+(il file si ferma da solo e spiega), ma chi li legge va comunque verso il file
+sbagliato. Da sistemare quando si passa di lì.

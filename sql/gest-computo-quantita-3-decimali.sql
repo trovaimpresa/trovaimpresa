@@ -1,4 +1,51 @@
 -- =====================================================================
+-- ⛔ LA GUARDIA — messa il 22 agosto 2026. NON TOGLIERLA.
+-- =====================================================================
+-- Questo file, piu' in basso, fa `drop view` su `gest_computo_voci_calc`
+-- e la ricrea com'era il giorno in cui e' stato scritto.
+--
+-- Il problema e' che da allora quella vista e' CRESCIUTA:
+--   · il 20 agosto le e' stata aggiunta `origine_id`, che serve alla
+--     schermata «Cosa e' cambiato» del computo di variante
+--     (sql/gest-variante-origine-vista.sql);
+--   · il 21 agosto le e' stato aggiunto il PREZZO COSTRUITO CON L'ANALISI
+--     e la colonna `prezzo_da_analisi` (sql/gest-analisi-prezzi.sql).
+--
+-- ⛔ Rilanciare questo file DOPO quelli riporta la vista indietro: i prezzi
+-- delle lavorazioni tornano di colpo a quelli scritti a mano, e la variante
+-- perde la colonna che le serve. Nessun messaggio, nessun errore: i numeri
+-- cambiano e basta. E il gestionale, in quattordici punti, invita a
+-- eseguire questo file.
+--
+-- Quindi da oggi il file si ferma da solo, PRIMA di toccare qualsiasi cosa,
+-- se si accorge che la vista e' gia' quella nuova.
+--
+-- ⚠️ Se ti fermi qui e ti serve davvero rifare le tabelle, esegui invece,
+-- in quest'ordine, i file che vengono dopo:
+--     sql/gest-variante-origine-vista.sql
+--     sql/gest-analisi-prezzi.sql
+-- Sono loro che tengono la vista aggiornata.
+-- =====================================================================
+do $$
+declare
+  _nuove text;
+begin
+  select string_agg(column_name, ', ' order by column_name)
+    into _nuove
+    from information_schema.columns
+   where table_schema = 'public'
+     and table_name   = 'gest_computo_voci_calc'
+     and column_name in ('origine_id', 'prezzo_da_analisi');
+
+  if _nuove is not null then
+    raise exception
+      'FERMO QUI, e per il tuo bene. La vista gest_computo_voci_calc e'' gia'' quella nuova (ha: %). Rilanciando questo file i prezzi costruiti con l''analisi tornerebbero a quelli scritti a mano, in silenzio, e la variante perderebbe origine_id. Se ti serve rifare le viste, esegui sql/gest-variante-origine-vista.sql e poi sql/gest-analisi-prezzi.sql.',
+      _nuove;
+  end if;
+end $$;
+-- =====================================================================
+
+-- =====================================================================
 -- TrovaImpresa — COMPUTO: la quantità stampata e la quantità contata
 --                devono essere LA STESSA
 -- Da salvare come  sql/gest-computo-quantita-3-decimali.sql
@@ -118,3 +165,14 @@ grant select on public.gest_computo_totali    to authenticated;
 --        round(quantita,3) * prezzo_unitario as rifatto_a_mano
 --   from public.gest_computo_voci_calc;
 -- «importo» e «rifatto_a_mano» devono essere uguali su OGNI riga.
+
+
+-- ---------------------------------------------------------------------
+-- LA RIGA DI RISULTATO — si legge a colpo d'occhio
+-- ---------------------------------------------------------------------
+select
+  'FATTO — le viste del computo sono state ricreate da questo file' as esito,
+  (select count(*) from information_schema.columns
+    where table_schema='public' and table_name='gest_computo_voci_calc')  as colonne_della_vista,
+  '⚠️ adesso esegui sql/gest-variante-origine-vista.sql e poi sql/gest-analisi-prezzi.sql, se non l''hai gia'' fatto'
+                                                                          as e_poi;
